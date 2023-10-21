@@ -1,0 +1,26 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Visual Models</h1>
+
+<table class="table-striped table-visual-model mb-3 mt-3">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th colspan="2"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @visual_models.each do |visual_model| %>
+      <tr>
+        <td width="33%"><%= link_to(visual_model.name, visual_model) %></td>
+        <td width="33%"><%= link_to 'Edit', edit_visual_model_path(visual_model) %></td>
+        <td width="33%"><%= link_to 'Destroy', visual_model, method: :delete, data: { confirm: :are_you_sure.t } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Visual Model', new_visual_model_path %>

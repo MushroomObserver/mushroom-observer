@@ -265,8 +265,8 @@ class SiteData
   #   num_images = data[:images]
   #
   def get_site_data
-    ALL_FIELDS.each_with_object({}) do |field, site_data|
-      site_data[field] = field_count(field)
+    ALL_FIELDS.index_with do |field|
+      field_count(field)
     end
   end
 

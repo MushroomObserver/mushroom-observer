@@ -59,7 +59,7 @@ class LocalizationFilesTest < UnitTestCase
     tags = known_tags
     missing_tags = []
     duplicate_function_defs = []
-    source_files("#{::Rails.root}/app", "#{::Rails.root}/test") do |file|
+    source_files(Rails.root.join("app"), Rails.root.join("test")) do |file|
       missing_tags += missing_tags_in_file(file, tags)
       duplicate_function_defs += duplicate_function_defs_in_file(file)
     end
@@ -95,8 +95,9 @@ class LocalizationFilesTest < UnitTestCase
       n += 1
       line.sub!(/(^#| # ).*/, "")
       line.gsub(/:(\w+)\.(l|t|tl|tp|tpl| |#|$)(\W|$)/) do
-        unless tags.key?(Regexp.last_match(1).downcase)
-          errors << "#{file} line #{n} [:#{Regexp.last_match(1)}]\n"
+        tag = Regexp.last_match(1)
+        unless tags.key?(tag.downcase) || tag == "never_add"
+          errors << "#{file} line #{n} [:#{tag}]\n"
         end
       end
     end
@@ -153,8 +154,8 @@ class LocalizationFilesTest < UnitTestCase
   TRANSLATION_ERRORS = %w[Error ObjectError BadParameterValue].freeze
   def test_api_error_translations
     tags = []
-    Dir.glob("#{::Rails.root}/app/classes/api2/error/*.rb").each do |file|
-      File.open(file, "r:utf-8") do |fh|
+    Rails.root.glob("app/classes/api2/error/*.rb").each do |file|
+      file.open("r:utf-8") do |fh|
         fh.each_line do |line|
           next unless line.match(/^\s*class (\w+) < /) &&
                       TRANSLATION_ERRORS.exclude?(Regexp.last_match(1))
@@ -163,8 +164,8 @@ class LocalizationFilesTest < UnitTestCase
         end
       end
     end
-    Dir.glob("#{::Rails.root}/app/classes/api2/parsers/*.rb").each do |file|
-      File.open(file, "r:utf-8") do |fh|
+    Rails.root.glob("app/classes/api2/parsers/*.rb").each do |file|
+      file.open("r:utf-8") do |fh|
         fh.each_line do |line|
           next unless line =~ /BadParameterValue.new\([^()]*, :(\w+)\)/
 

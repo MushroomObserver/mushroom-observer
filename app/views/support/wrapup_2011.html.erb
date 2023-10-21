@@ -1,11 +1,7 @@
 <%
-  @title = :wrapup_2011_title.l
+add_page_title(:wrapup_2011_title.l)
 
-  tabs = [
-    link_to(:donate_tab.t, action: :donate),
-    link_to(:donors_tab.t, action: :donors)
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(support_governance_tabs)
 %>
 
 <%= :wrapup_2011_body.tp %>

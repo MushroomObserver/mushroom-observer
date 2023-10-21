@@ -1,9 +1,0 @@
-<%= content_tag(:div, "#{:app_observations_left.t}:",
-                class: classes[:heading]) %>
-<%= link_to(:app_create_observation.t, new_observation_path,
-            { class: classes[:indent] }) %>
-<%= link_to(:app_your_observations.t,
-            observations_path(user: @user.id),
-            { class: classes[:indent] }) if @user %>
-<%= link_to(:app_sort_by_date_obs.t, observations_path,
-            { class: classes[:indent] }) %>

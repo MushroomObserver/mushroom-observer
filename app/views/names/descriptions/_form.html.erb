@@ -1,0 +1,34 @@
+<!--[form:name_description]-->
+<%= form_with(scope: :description, url: action, method: method,
+              id: "name_description_form") do |f| %>
+
+  <div class="container-text">
+    <%= submit_button(form: f, button: button.l, center: true) %>
+
+    <%= render(partial: "descriptions/fields_for_description",
+               locals: {f: f}) %>
+
+    <p><strong><%= :DESCRIPTION.t %>:</strong></p>
+    <%= render(partial: "shared/textilize_help") %>
+
+    <% rank = rank_as_lower_string(@description.parent.rank) %>
+    <% NameDescription.all_note_fields.each do |field| %>
+      <%=
+      text_area_with_label(
+        form: f, field: field, rows: 10,
+        between: help_block(:div, :"form_names_#{field}_help".l(rank: rank)),
+        label: :"form_names_#{field}".t + ":"
+      )
+      %>
+    <% end %>
+
+    <%= submit_button(form: f, button: button.l, center: true) %>
+  </div><!--.container-text-->
+
+  <% if (button == :SAVE_EDITS) && @merge %>
+    <%= hidden_field_tag(:old_desc_id, @old_desc_id) %>
+    <%= hidden_field_tag(:delete_after, @delete_after) %>
+  <% end %>
+
+<% end %>
+<!--[eoform:name_description]-->

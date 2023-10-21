@@ -21,15 +21,12 @@ class SearchControllerTest < FunctionalTestCase
         }
       )
       assert_response(:redirect)
-      if model.controller_normalized?
-        assert_match(
-          "http://test.host/#{model.to_s.downcase.pluralize}?advanced_search=1",
-          redirect_to_url
-        )
-      else
-        assert_match(%r{#{model.show_controller}/advanced_search},
-                     redirect_to_url)
-      end
+      # Account for Observations being the home page
+      route = model == Observation ? "" : model.to_s.downcase.pluralize
+      assert_match(
+        "http://test.host/#{route}?advanced_search=1",
+        redirect_to_url
+      )
     end
   end
 
@@ -54,11 +51,13 @@ class SearchControllerTest < FunctionalTestCase
         model: "observation",
         user: "rolf"
       },
-      content_filter_has_images: "",
-      content_filter_has_specimen: "yes",
-      content_filter_lichen: "no",
-      content_filter_region: "California",
-      content_filter_clade: ""
+      content_filter: {
+        has_images: "",
+        has_specimen: "yes",
+        lichen: "no",
+        region: "California",
+        clade: ""
+      }
     }
     get(:advanced, params: params)
     query = QueryRecord.last.query
@@ -73,38 +72,39 @@ class SearchControllerTest < FunctionalTestCase
     login
     params = { search: { pattern: "12", type: :observation } }
     get(:pattern, params: params)
-    assert_redirected_to(controller: :observations, action: :index,
-                         pattern: "12")
+    assert_redirected_to(observations_path(pattern: "12"))
 
     params = { search: { pattern: "34", type: :image } }
     get(:pattern, params: params)
-    assert_redirected_to(controller: :image, action: :image_search,
-                         pattern: "34")
+    assert_redirected_to(images_path(pattern: "34"))
 
     params = { search: { pattern: "56", type: :name } }
     get(:pattern, params: params)
-    assert_redirected_to(controller: :name, action: :name_search,
-                         pattern: "56")
+    assert_redirected_to(names_path(pattern: "56"))
 
     params = { search: { pattern: "78", type: :location } }
     get(:pattern, params: params)
-    assert_redirected_to(controller: :location, action: :location_search,
-                         pattern: "78")
+    assert_redirected_to(locations_path(pattern: "78"))
 
     params = { search: { pattern: "90", type: :comment } }
     get(:pattern, params: params)
-    assert_redirected_to(controller: :comment, action: :comment_search,
-                         pattern: "90")
+    assert_redirected_to(comments_path(pattern: "90"))
+
+    params = { search: { pattern: "21", type: :project } }
+    get(:pattern, params: params)
+    assert_redirected_to(projects_path(pattern: "21"))
 
     params = { search: { pattern: "12", type: :species_list } }
     get(:pattern, params: params)
-    assert_redirected_to(controller: :species_list,
-                         action: :species_list_search,
-                         pattern: "12")
+    assert_redirected_to(species_lists_path(pattern: "12"))
 
     params = { search: { pattern: "34", type: :user } }
     get(:pattern, params: params)
     assert_redirected_to(users_path(pattern: "34"))
+
+    params = { search: { pattern: "34", type: :glossary_term } }
+    get(:pattern, params: params)
+    assert_redirected_to(glossary_terms_path(pattern: "34"))
 
     stub_request(:any, /google.com/)
     pattern =  "hexiexiva"
@@ -124,7 +124,7 @@ class SearchControllerTest < FunctionalTestCase
 
     params = { search: { pattern: "", type: :observation } }
     get(:pattern, params: params)
-    assert_redirected_to(controller: :observations, action: :index)
+    assert_redirected_to(observations_path)
 
     # Make sure this redirects to the index that lists all herbaria,
     # rather than the index that lists query results.

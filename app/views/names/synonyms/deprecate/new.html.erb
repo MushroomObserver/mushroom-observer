@@ -1,0 +1,48 @@
+<%
+add_page_title(:name_deprecate_title.t(name: @name.display_name))
+
+add_tab_set(name_forms_return_tabs(name: @name))
+
+action = { controller: "/names/synonyms/deprecate", action: :create,
+            id: @name.id, approved_name: @what }
+
+feedback_locals = {
+  button_name: :SUBMIT.l,
+  what: @what,
+  valid_names: @valid_names,
+  suggest_corrections: @suggest_corrections,
+  parent_deprecated: @parent_deprecated,
+  names: @names
+}
+
+deprecate_comments_help = capture do
+  concat(:name_deprecate_comments_help.tp(name: @name.display_name.chomp(".")))
+  concat(:field_textile_link.tp)
+end
+%>
+
+<%= form_with(url: action, id: "name_deprecate_synonym_form") do |f| %>
+
+  <%= submit_button(form: f, button: :SUBMIT.l, center: true) %>
+
+  <%= render(partial: "shared/form_name_feedback",
+             locals: feedback_locals.merge({ f: f })) if @what.present? %>
+
+  <%= text_field_with_label(
+        form: f, field: :proposed_name, inline: true,
+        value: @what, placeholder: :start_typing.l,
+        label: "#{:name_deprecate_preferred.t}:", autofocus: true,
+        append: help_note(:div, :name_deprecate_preferred_help.tp),
+        data: { autocompleter: :name }
+      ) %>
+
+  <%= check_box_with_label(form: f, field: :is_misspelling,
+                           checked: @misspelling,
+                           label: :form_names_misspelling.t) %>
+
+  <%= text_area_with_label(form: f, field: :comment, inline: true,
+                           value: @comment, cols: 80, rows: 5,
+                           label: "#{:name_deprecate_comments.t}:",
+                           append: help_note(:div, deprecate_comments_help)) %>
+
+<% end %>

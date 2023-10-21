@@ -1,0 +1,23 @@
+<%= form_with(model: visual_model) do |f| %>
+  <% if visual_model.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(visual_model.errors.count, "error") %> prohibited this visual_model from being saved:</h2>
+
+      <ul>
+        <% visual_model.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="form-group field">
+    <%= f.label(:name) %>
+    <%= f.text_field(:name, class: "form-control") %>
+    <%= :VISUAL_MODEL.t %>
+  </div>
+
+  <div class="actions">
+    <%= submit_button(form: f, button: :SUBMIT.t, center: true) %>
+  </div>
+<% end %>

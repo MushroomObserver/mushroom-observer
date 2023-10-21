@@ -1,0 +1,54 @@
+<%# Appearance Settings of Account Preferences Form %>
+
+<%
+hide_authors_opts = [
+  [:prefs_hide_authors_none.l, "none"],
+  [:prefs_hide_authors_above_species.l, "above_species"]
+]
+location_formats = [
+  [:prefs_location_format_postal.l, "postal"],
+  [:prefs_location_format_scientific.l, "scientific"]
+]
+themes = [[:theme_random.l, "NULL"]] + MO.themes.map { |t| [t.to_sym.l, t] }
+locales = Language.all.map do |lang|
+            name = lang.name
+            name += " (beta)" if lang.beta
+            [name, lang.locale]
+          end
+image_sizes = options_for_select(
+                 User.image_sizes.filter_map { |key, value|
+                   if value > User.image_sizes[:small]
+                     ["image_show_#{key}".to_sym.l, key]
+                   end
+                 }, @user.image_size
+               )
+%>
+
+<%= content_tag(:div, :prefs_appearance.t,
+                class: "form-group mt-3 font-weight-bold") %>
+
+<%= select_with_label(form: f, field: :hide_authors, prefs: true,
+                      options: hide_authors_opts, inline: true) %>
+
+<%= select_with_label(form: f, field: :location_format, prefs: true,
+                      options: location_formats, inline: true) %>
+
+<%= select_with_label(form: f, field: :theme, prefs: true,
+                      options: themes, inline: true,
+                      append: link_to(:prefs_themes_about.t,
+                                      theme_color_themes_path,
+                                      class: "ml-4")) %>
+
+<%= select_with_label(form: f, field: :locale, prefs: true,
+                      options: locales, inline: true) %>
+
+<%= check_box_with_label(form: f, field: :thumbnail_maps, prefs: true) %>
+<%= check_box_with_label(form: f, field: :view_owner_id, prefs: true) %>
+
+<%= number_field_with_label(form: f, field: :layout_count, prefs: true,
+                            class: "mt-3", inline: true) %>
+
+<%= select_with_label(form: f, field: :image_size, prefs: true,
+                      options: image_sizes, inline: true) %>
+
+<%= submit_button(form: f, button: :SAVE_EDITS.l, center: true) %>

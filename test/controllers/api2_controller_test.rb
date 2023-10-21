@@ -22,7 +22,7 @@ class API2ControllerTest < FunctionalTestCase
     lines += api.errors.map do |error|
       "#{error}\n#{error.trace.join("\n")}"
     end
-    lines.reject(&:blank?).join("\n")
+    lines.compact_blank.join("\n")
   end
 
   def post_and_send_file(action, file, content_type, params)
@@ -86,8 +86,16 @@ class API2ControllerTest < FunctionalTestCase
     do_basic_get_request_for_model(Location)
   end
 
+  def test_basic_location_description_get_request
+    do_basic_get_request_for_model(LocationDescription, public: true)
+  end
+
   def test_basic_name_get_request
     do_basic_get_request_for_model(Name)
+  end
+
+  def test_basic_name_description_get_request
+    do_basic_get_request_for_model(NameDescription, public: true)
   end
 
   def test_basic_observation_get_request
@@ -110,13 +118,14 @@ class API2ControllerTest < FunctionalTestCase
     do_basic_get_request_for_model(User)
   end
 
-  def do_basic_get_request_for_model(model)
+  def do_basic_get_request_for_model(model, *args)
+    expected_object = args.empty? ? model.first : model.where(*args).first
     response_formats = [:xml, :json]
     [:none, :low, :high].each do |detail|
       response_formats.each do |format|
         get(model.table_name.to_sym, params: { detail: detail, format: format })
         assert_no_api_errors("Get #{model.name} #{detail} #{format}")
-        assert_objs_equal(model.first, @api.results.first)
+        assert_objs_equal(expected_object, @api.results.first)
       end
     end
   end
@@ -146,10 +155,12 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal(false, obs.specimen)
     assert_equal(true, obs.is_collection_location)
     assert_equal(Observation.no_notes, obs.notes)
-    assert_obj_list_equal([], obs.images)
+    assert(obs.log_updated_at.is_a?(Time),
+           "Observation should have log_updated_at time")
+    assert_obj_arrays_equal([], obs.images)
     assert_nil(obs.thumb_image)
-    assert_obj_list_equal([], obs.projects)
-    assert_obj_list_equal([], obs.species_lists)
+    assert_obj_arrays_equal([], obs.projects)
+    assert_obj_arrays_equal([], obs.species_lists)
   end
 
   def test_post_maximal_observation
@@ -188,18 +199,18 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal(true, obs.is_collection_location)
     assert_equal({ Observation.other_notes_key =>
                    "These are notes.\nThey look like this." }, obs.notes)
-    assert_obj_list_equal([images(:in_situ_image), images(:turned_over_image)],
-                          obs.images)
+    assert_obj_arrays_equal([images(:in_situ_image),
+                             images(:turned_over_image)], obs.images)
     assert_objs_equal(images(:turned_over_image), obs.thumb_image)
-    assert_obj_list_equal([projects(:eol_project)], obs.projects)
-    assert_obj_list_equal([species_lists(:another_species_list)],
-                          obs.species_lists)
+    assert_obj_arrays_equal([projects(:eol_project)], obs.projects)
+    assert_obj_arrays_equal([species_lists(:another_species_list)],
+                            obs.species_lists)
   end
 
   def test_post_minimal_image
     setup_image_dirs
     count = Image.count
-    file = "#{::Rails.root}/test/images/sticky.jpg"
+    file = Rails.root.join("test/images/sticky.jpg").to_s
     checksum = file_checksum(file)
     File.stub(:rename, false) do
       post_and_send_file(:images, file, "image/jpeg",
@@ -219,8 +230,8 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal("image/jpeg", img.content_type)
     assert_equal(407, img.width)
     assert_equal(500, img.height)
-    assert_obj_list_equal([], img.projects)
-    assert_obj_list_equal([], img.observations)
+    assert_obj_arrays_equal([], img.projects)
+    assert_obj_arrays_equal([], img.observations)
     doc = REXML::Document.new(@response.body)
     checksum_returned = doc.root.elements["results/result/md5sum"].get_text.to_s
     assert_equal(checksum, checksum_returned, "Didn't get the right checksum.")
@@ -229,7 +240,7 @@ class API2ControllerTest < FunctionalTestCase
   def test_post_minimal_image_via_multipart_form_data
     setup_image_dirs
     count = Image.count
-    file = "#{::Rails.root}/test/images/sticky.jpg"
+    file = Rails.root.join("test/images/sticky.jpg").to_s
     upload = UploadedFileWithChecksum.new(file, "image/jpeg")
     checksum = file_checksum(file)
     File.stub(:rename, false) do
@@ -252,7 +263,7 @@ class API2ControllerTest < FunctionalTestCase
   def test_post_corrupt_image
     setup_image_dirs
     count = Image.count
-    file = "#{::Rails.root}/test/images/sticky.jpg"
+    file = Rails.root.join("test/images/sticky.jpg").to_s
     upload = UploadedFileWithChecksum.new(file, "image/jpeg")
     checksum = file_checksum(file).reverse
     File.stub(:rename, false) do
@@ -274,7 +285,7 @@ class API2ControllerTest < FunctionalTestCase
     setup_image_dirs
     rolf.update(keep_filenames: "keep_and_show")
     rolf.reload
-    file = "#{::Rails.root}/test/images/Coprinus_comatus.jpg"
+    file = Rails.root.join("test/images/Coprinus_comatus.jpg").to_s
     proj = rolf.projects_member.first
     obs = rolf.observations.first
     File.stub(:rename, false) do
@@ -300,8 +311,8 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal("image/jpeg", img.content_type)
     assert_equal(2288, img.width)
     assert_equal(2168, img.height)
-    assert_obj_list_equal([proj], img.projects)
-    assert_obj_list_equal([obs], img.observations)
+    assert_obj_arrays_equal([proj], img.projects)
+    assert_obj_arrays_equal([obs], img.observations)
   end
 
   def test_post_user
@@ -343,7 +354,11 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal(CGI.escapeHTML("<p>New API2 Key</p>"), notes.to_s)
   end
 
+  # NOTE: Checking ActionMailer::Base.deliveries works here only because
+  #       QueuedEmail.queue == false.
+  #       The mail is sent via QueuedEmail but delivered immediately.
   def test_post_api_key
+    QueuedEmail.queue = false
     email_count = ActionMailer::Base.deliveries.size
 
     rolfs_key = api_keys(:rolfs_api_key)

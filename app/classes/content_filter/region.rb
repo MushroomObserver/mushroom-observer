@@ -6,6 +6,7 @@ class ContentFilter
     def initialize
       super(
         sym: :region,
+        name: :REGION.t,
         models: [Observation, Location]
       )
     end

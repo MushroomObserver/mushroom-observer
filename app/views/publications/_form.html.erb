@@ -1,25 +1,27 @@
-<div class="form-group mt-3">
-  <%= label_tag(:publication_full, :publication_full.t + ":") %>
-  <span class="help-note"><%= :publication_full_help.t %></span>
-  <%= form.text_area(:full, rows: 10, class: "form-control") %>
-</div>
+<%
+button = (action == :create) ? :CREATE.t : :SAVE.t
+%>
 
-<div class="form-group mt-3">
-  <%= label_tag(:publication_link, :publication_link.t + ":") %>
-  <%= form.text_field(:link, class: "form-control") %>
-</div>
+<%= form_with(model: @publication, action: action,
+              id: "publication_form") do |f| %>
 
-<div class="form-group mt-3 form-inline">
-  <%= form.check_box(:peer_reviewed, class: "form-control") %>
-  <%= label_tag(:publication_peer_reviewed, :publication_peer_reviewed.t) %>
-</div>
+  <%= text_area_with_label(form: f, field: :full, rows: 10,
+                           label: :publication_full.t + ":",
+                           between: help_note(:span,
+                                              :publication_full_help.t)) %>
 
-<div class="form-group mt-3">
-  <%= label_tag(:publication_how_helped, :publication_how_helped.t) %>
-  <%= form.text_area(:how_helped, rows: 10, class: "form-control") %>
-</div>
+  <%= text_field_with_label(form: f, field: :link,
+                            label: :publication_link.t + ":") %>
 
-<div class="form-group mt-3 form-inline">
-  <%= form.check_box(:mo_mentioned, class: "form-control") %>
-  <%= label_tag(:publication_mo_mentioned, :publication_mo_mentioned.t) %>
-</div>
+  <%= check_box_with_label(form: f, field: :peer_reviewed,
+                           label: :publication_peer_reviewed.t) %>
+
+  <%= text_area_with_label(form: f, field: :how_helped, rows: 10,
+                           label: :publication_how_helped.t + ":") %>
+
+  <%= check_box_with_label(form: f, field: :mo_mentioned,
+                           label: :publication_mo_mentioned.t) %>
+
+  <%= submit_button(form: f, button: button, center: true) %>
+
+<% end %>

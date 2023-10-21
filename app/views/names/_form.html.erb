@@ -1,0 +1,97 @@
+<%# name form %>
+
+<%
+ranks = Name.all_ranks.map { |r| [rank_as_string(r), r] }
+statuses = [[:ACCEPTED.t, false], [:DEPRECATED.t, true]]
+%>
+<!--[form:name]-->
+<%= form_with(model: @name, url: add_query_param(action)) do |f| %>
+
+  <%= submit_button(form: f, button: button, center: true) %>
+
+  <% if in_admin_mode? %>
+    <%= check_box_with_label(form: f, field: :locked, class: "mt-3",
+                             label: :form_names_locked.t) %>
+  <% end %>
+
+  <% if !@name.locked || in_admin_mode? %>
+    <% append = help_block(:p, :form_names_identifier_help.t) %>
+    <%= text_field_with_label(form: f, field: :icn_id,
+                              label: "#{:form_names_icn_id.t}:",
+                              size: 8, inline: true, append: append) %>
+
+    <div class="form-inline my-3">
+      <%= select_with_label(form: f, field: :rank,
+                            label: :Rank.t + ":", options: ranks) %>
+
+      <%= select_with_label(form: f, field: :deprecated,
+                            label: :Status.t + ":",
+                            options: statuses, class: "pl-3" ) %>
+    </div>
+
+    <%= text_field_with_label(
+          form: f, field: :text_name, label: :form_names_text_name.t + ":",
+          value: @name_string, data: { autofocus: true },
+          append: help_block(:p, :form_names_text_name_help.t)
+        ) %>
+
+    <%= text_area_with_label(
+          form: f, field: :author, rows: 2, label: :Authority.t + ":",
+          append: help_block(:p, :form_names_author_help.t)
+        ) %>
+
+  <% else %>
+    <div class="mt-3 mb-3">
+      <%= hidden_field_with_label(
+            form: f, field: :rank, label: :Rank.t + ":", inline: true,
+            class: "mb-0", text: :"Rank_#{@name.rank.to_s.downcase}".t
+          ) %>
+      <%= hidden_field_with_label(
+            form: f, field: :deprecated, label: :Status.t + ":", inline: true,
+            class: "mb-0", text: @name.deprecated ? :ACCEPTED.t : :DEPRECATED.t
+          ) %>
+      <%= hidden_field_with_label(
+            form: f, field: :text_name, label: :Name.t + ":", inline: true,
+            class: "mb-0", value: @name_string, text: @name.real_text_name.t
+          ) %>
+      <%= hidden_field_with_label(
+            form: f, field: :author, label: :Authority.t + ":", inline: true,
+            class: "mb-0", text: @name.author.t
+          ) %>
+      <%= help_block(:div, :show_name_locked.tp) %>
+    </div>
+  <% end %>
+
+  <% append = content_tag(:p, class: "help-block") do
+    concat(:form_names_citation_help.t)
+    concat(:form_names_citation_textilize_note.t)
+  end %>
+  <%= text_area_with_label(form: f, field: :citation, rows: 3,
+                           label: :Citation.t + ":", append: append) %>
+
+  <% if !@misspelling.nil? && (in_admin_mode? || !@name.locked) %>
+    <div class="my-4 mx-0">
+      <%= check_box_with_label(form: f, field: :misspelling,
+                               checked: @misspelling,
+                               label: :form_names_misspelling.t) %>
+      <%= text_field_with_label(
+            form: f, field: :correct_spelling,
+            value: @correct_spelling, placeholder: :start_typing.l,
+            label: :form_names_misspelling_it_should_be.t + ":",
+            append: help_block(:p, :form_names_misspelling_note.t),
+            data: { autocompleter: :name }
+          ) %>
+    </div>
+  <% end %>
+
+  <% between = content_tag(:div, :form_names_taxonomic_notes_warning.t,
+                           class: "mark") %>
+  <%= text_area_with_label(form: f, field: :notes, rows: 6,
+                           label: :form_names_taxonomic_notes.t + ":",
+                           between: between) %>
+  <%= render(partial: "shared/textilize_help") %>
+
+  <%= submit_button(form: f, button: button, center: true) %>
+
+<% end %>
+<!--[eoform:name]-->

@@ -57,8 +57,16 @@ class API2Controller < ApplicationController
     rest_query(:location)
   end
 
+  def location_descriptions
+    rest_query(:location_description)
+  end
+
   def names
     rest_query(:name)
+  end
+
+  def name_descriptions
+    rest_query(:name_description)
   end
 
   def observations

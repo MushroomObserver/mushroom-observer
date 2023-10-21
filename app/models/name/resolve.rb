@@ -33,7 +33,7 @@ module Name::Resolve
     #     Else 'what' has been approved, create it if necessary.
     #
     # INPUTS:
-    #   what           params[:name][:name]            Text field.
+    #   what           params[:naming][:name]          Text field.
     #   approved_name  params[:approved_name]          Last name user entered.
     #   chosen_name    params[:chosen_name][:name_id]  Name id from radio boxes.
     #   (User.current -- might be used by one or more things)

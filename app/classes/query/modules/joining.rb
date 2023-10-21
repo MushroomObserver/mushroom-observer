@@ -152,16 +152,16 @@ module Query
         names_versions: {
           names: :name_id
         },
+        name_trackers: {
+          names: :name,
+          users: :user_id
+        },
         naming_reasons: {
           namings: :naming_id
         },
         namings: {
           names: :name_id,
           observations: :observation_id,
-          users: :user_id
-        },
-        notifications: {
-          names: :obj,
           users: :user_id
         },
         observations: {
@@ -188,7 +188,9 @@ module Query
           users: :user_id,
           rss_logs: :rss_log_id,
           user_groups: :user_group_id,
-          "user_groups.admin_group": :admin_group_id
+          "user_groups.admin_group": :admin_group_id,
+          "user_group_users.members": [:user_group_id, :user_group_id],
+          "user_group_users.admins": [:admin_group_id, :user_group_id]
         },
         project_species_lists: {
           projects: :project_id,

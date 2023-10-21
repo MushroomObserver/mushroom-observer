@@ -1,0 +1,13 @@
+<!--FLASH NOTICES-->
+<%=
+# This can be called to display flash notices either in the page or in a modal.
+# Send it an html `id` local to be able to find the notices later
+klass = case flash_notice_level
+  when 0; "alert-success"
+  when 1; "alert-warning"
+  when 2; "alert-danger"
+end
+
+tag.div(flash_get_notices, id: id, class: "alert mt-3 #{klass}")
+%>
+<!--/FLASH NOTICES-->

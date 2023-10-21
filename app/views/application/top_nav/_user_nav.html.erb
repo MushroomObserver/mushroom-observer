@@ -1,0 +1,82 @@
+<ul class="nav navbar-nav navbar-right hidden-xs mr-0">
+  <% if @user.admin %>
+    <li>
+      <%= link_to(
+        "",
+        in_admin_mode? ?
+          admin_mode_path(turn_off: true) : admin_mode_path(turn_on: true),
+        { class: "glyphicon glyphicon-text-background",
+          id: "user_nav_admin_mode_link",
+          title: in_admin_mode? ? :app_turn_admin_off.t : :app_turn_admin_on.t,
+          data: { toggle: "tooltip", placement: "bottom" } }
+      ) %>
+    </li>
+  <% end %>
+  <li>
+    <%= link_to(
+          "", comments_path(for_user: @user.id),
+          { class: "glyphicon glyphicon-inbox",
+            id: "user_nav_inbox_link",
+            title: :app_comments_for_you.t,
+            data: { toggle: "tooltip", placement: "bottom" } }
+        ) %>
+  </li>
+  <li>
+    <%= link_to(
+          "",
+          interests_path,
+          { class: "glyphicon glyphicon-bullhorn",
+            id: "user_nav_interests_link",
+            title: :app_your_interests.t,
+            data: { toggle: "tooltip", placement: "bottom" } }
+        ) %>
+  </li>
+  <li>
+    <%= link_to(
+          "",
+          edit_account_preferences_path,
+          { class: "glyphicon glyphicon-cog",
+            id: "user_nav_preferences_link",
+            title: :app_preferences.t,
+            data: { toggle: "tooltip", placement: "bottom" } }
+        ) %>
+  </li>
+  <li id="user_drop_down" class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown"
+        role="button" aria-expanded="false">
+      <%= h(@user.login) %>
+      <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu" role="menu">
+      <li><%= link_to(:app_your_observations.t,
+                      observations_path(user: @user.id),
+                      { class: "" } ) %></li>
+      <li><%= link_to(:app_your_projects.t,
+                      projects_path(member: @user.id),
+                      { class: "", id: "user_drop_projects_link" }) %></li>
+      <li><%= link_to(:app_your_lists.t,
+                      species_lists_path(by_user: @user.id),
+                      { class: "", id: "user_drop_species_lists_link" } ) %></li>
+      <li><%= link_to(:app_your_interests.t,
+                      interests_path,
+                      { class: "", id: "user_drop_interests_link" }) %></li>
+      <li><%= link_to(:app_your_summary.t,
+                      user_path(@user.id),
+                      { class: "", id: "user_drop_profile_link" }) %></li>
+      <li><%= link_to(:app_preferences.t,
+                      edit_account_preferences_path,
+                      { class: "", id: "user_drop_preferences_link" }) %></li>
+      <li class="divider"></li>
+      <li><%= link_to(:app_logout.t,
+                      account_logout_path,
+                      { class: "", id: "user_drop_logout_link" }) %></li>
+    </ul>
+  </li>
+  <li><%= link_to("",
+                  account_logout_path,
+                  { class: "glyphicon glyphicon-log-out",
+                    id: "user_nav_logout_link",
+                    title: :app_logout.t,
+                    data: { toggle: "tooltip", placement: "bottom" } }) %>
+  </li>
+</ul>

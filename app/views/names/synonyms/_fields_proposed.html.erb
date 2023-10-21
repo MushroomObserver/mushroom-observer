@@ -1,0 +1,19 @@
+<%# proposed synonyms %>
+
+<% if @proposed_synonyms && @proposed_synonyms != [] %>
+  <%= fields_for(:proposed_synonyms) do |fps| %>
+    <div class="form-group">
+      <%= content_tag(:div, "#{:form_synonyms_proposed_synonyms.t}:",
+                      class: "font-weight-bold my-3") %>
+      <%= help_block(:p, :form_synonyms_proposed_synonyms_help.t) %>
+      <% @proposed_synonyms.each do |n| %>
+        <% unless current_synonyms.member?(n) %>
+          <%= check_box_with_label(form: fps, field: n.id,
+                                   value: "1", checked: "0",
+                                   label: link_to(n.display_name.t,
+                                                 name_path(n.id))) %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

@@ -3,13 +3,9 @@
 // --------------------------------------------------
 
 .navbar-default {
-  color: $TOP_BAR_FG_COLOR;
-  background-color: $TOP_BAR_BG_COLOR;
-  // margin-left: 10px;
-  border-color: $TOP_BAR_BORDER_COLOR;
-  border-width: $TOP_BAR_BORDER_WIDTH;
-  border-style: $TOP_BAR_BORDER_STYLE;
-  border-radius: $TOP_BAR_BORDER_RADIUS;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 0;
   border-top-right-radius: 0px;
   border-bottom-right-radius: 0px;
   border-right-width: 0px;
@@ -17,31 +13,36 @@
 
   a,
   a:visited {
-    color: $TOP_BAR_LINK_FG_COLOR;
-    background-color: $TOP_BAR_LINK_BG_COLOR;
+    color: $navbar-default-link-color;
+    background-color: $navbar-default-link-active-bg;
   }
 
   a:hover {
-    color: $TOP_BAR_LINK_HOVER_FG_COLOR;
-    background-color: $TOP_BAR_LINK_HOVER_BG_COLOR;
+    color: $navbar-default-link-hover-color;
+    background-color: $navbar-default-link-hover-bg;
   }
 
   .navbar-nav {
-    margin-top: 8px;
     margin-right: 2px;
   }
 
   .navbar-nav > li > a,
   .navbar-nav > li > a.dropdown-toggle {
-    color: $TOP_BAR_FG_COLOR !important;
-    background-color: $TOP_BAR_BG_COLOR !important;
-    margin: 0px 4px;
-    border: 0px;
-    padding: 2px 4px;
+    color: $navbar-default-color !important;
+    background-color: $navbar-default-bg !important;
+    padding-left: 8px;
+    padding-right: 8px;
 
     &:hover {
-      color: $TOP_BAR_LINK_HOVER_FG_COLOR !important;
-      background-color: $TOP_BAR_LINK_HOVER_BG_COLOR !important;
+      color: $navbar-default-link-hover-color !important;
+      background-color: $navbar-default-link-hover-bg !important;
+    }
+  }
+
+  // The button_to form, not the button, needs to display: block
+  #right_tabs {
+    .button_to {
+      display: block;
     }
   }
 }

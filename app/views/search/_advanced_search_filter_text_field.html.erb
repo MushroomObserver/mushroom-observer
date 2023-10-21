@@ -1,4 +1,14 @@
-<%= :"advanced_search_filter_#{filter.sym}".t %>.<br/>
-<%= text_field_tag(:"content_filter_#{filter.sym}",
-                   @filter_defaults[filter.sym]) %><br/>
-<br/>
+<%=
+autocompleter = case filter.sym.to_s
+                when "region"
+                  "location"
+                else
+                  filter.sym.to_s
+                end
+between = help_note(:span, :"advanced_search_filter_#{filter.sym}".t)
+text_field_with_label(
+  form: f, field: filter.sym, label: filter.name + ":",
+  between: between, value: @filter_defaults[filter.sym],
+  data: { autocompleter: autocompleter, separator: " OR " }
+)
+%>

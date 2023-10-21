@@ -1,0 +1,18 @@
+<div class="form-group mt-3">
+  <div class="help-note">
+    <%= put_button(name: :prefs_change_image_vote_anonymity.t,
+                   path: images_bulk_vote_anonymity_updater_path,
+                   class: "btn btn-link") %>
+  </div>
+  <div class="help-note">
+    <%= put_button(name: :prefs_bulk_filename_purge.t,
+                   path: images_bulk_filename_purge_path,
+                   class: "btn btn-link",
+                   data: { confirm: :prefs_bulk_filename_purge_confirm.l }) %>
+  </div>
+  <div class="help-note">
+    <%= put_button(name: :bulk_license_link.t,
+                   path: images_license_updater_path,
+                   class: "btn btn-link") %>
+  </div>
+</div>

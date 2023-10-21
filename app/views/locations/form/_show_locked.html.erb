@@ -1,0 +1,43 @@
+<%
+
+%>
+
+<div class="row">
+  <div class="col-sm-6 col-md-4 col-lg-3">
+    <%= hidden_field_with_label(form: f, field: :north, label: :WHERE.t + ":",
+                                inline: true, class: "mb-0",
+                                value: @display_name,
+                                text: @location.display_name.t) %>
+    <%= hidden_field_with_label(form: f, field: :north, label: :NORTH.t + ":",
+                                inline: true, class: "mb-0",
+                                value: "#{@location.north}°") %>
+    <%= hidden_field_with_label(form: f, field: :south, label: :SOUTH.t + ":",
+                                inline: true, class: "mb-0",
+                                value: "#{@location.south}°") %>
+    <%= hidden_field_with_label(form: f, field: :east, label: :EAST.t + ":",
+                                inline: true, class: "mb-0",
+                                value: "#{@location.east}°") %>
+    <%= hidden_field_with_label(form: f, field: :west, label: :WEST.t + ":",
+                                inline: true, class: "mb-0",
+                                value: "#{@location.west}°") %>
+
+    <% if @location.high.present? && @location.low.present? %>
+      <%= hidden_field_with_label(form: f, field: :high, class: "mb-0",
+                                  label: :show_location_highest.t + ":",
+                                  inline: true, value: "#{@location.high}m") %>
+      <%= hidden_field_with_label(form: f, field: :low, class: "mb-0",
+                                  label: :show_location_lowest.t + ":",
+                                  inline: true, value: "#{@location.low}m") %>
+    <% end %>
+
+    <%= help_block(:div, :show_location_locked.t) %>
+  </div>
+
+  <div class="col-sm-6 col-md-8 col-lg-9 mb-3 mt-3">
+    <%=
+      gmap = make_map([@location])
+      finish_map(gmap)
+      gmap.div(width: "100%", height: "500px").html_safe
+    %>
+  </div>
+</div><!--.row-->

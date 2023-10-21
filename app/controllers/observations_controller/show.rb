@@ -37,7 +37,7 @@ module ObservationsController::Show
     @canonical_url = canonical_url(@observation)
     @mappable      = check_if_query_is_mappable
     @new_sites     = external_sites_user_can_add_links_to(@observation)
-    @votes         = @user ? gather_users_votes(@observation, @user) : []
+    register_namings_for_textile_in_notes
   end
 
   def load_observation_for_show_observation_page
@@ -95,7 +95,7 @@ module ObservationsController::Show
   end
 
   # Tell search engines what the "correct" URL is for this page.
-  # Used in layouts/application
+  # Used in application/app/head
   def canonical_url(obs)
     observation_url(obs.id)
   end
@@ -117,5 +117,13 @@ module ObservationsController::Show
     else
       @user.external_sites.where.not(id: obs_site_ids)
     end
+  end
+
+  # Incurs a costly namings lookup if called in the partial outside show_obs
+  # e.g., in the lightbox caption
+  def register_namings_for_textile_in_notes
+    return unless @observation.notes?
+
+    Textile.register_name(*@observation.namings.map(&:name))
   end
 end

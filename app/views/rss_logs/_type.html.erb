@@ -1,7 +1,0 @@
-<!-- A single checkbox and tab in Activity Feed tabset -->
-<% checked = @types.include?(type) || @types == ['all'] %>
-<span class="btn btn-default btn-sm<%= " active" if @types == [type] %>"
-      data-toggle="checkbox" class="">
-  <%= check_box_tag("type[]", "#{type}", checked, class: "filter-checkbox") %>
-  <%= tab_for_type(type) %>
-</span>

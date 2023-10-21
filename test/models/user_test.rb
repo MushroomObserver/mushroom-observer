@@ -108,7 +108,7 @@ class UserTest < UnitTestCase
   def test_meta_groups
     all = User.all
     group1 = UserGroup.all_users
-    assert_user_list_equal(all, group1.users, :sort)
+    assert_user_arrays_equal(all, group1.users, :sort)
 
     user = User.create!(
       password: "blah!",
@@ -123,15 +123,15 @@ class UserTest < UnitTestCase
 
     group1.reload
     group2 = UserGroup.one_user(user)
-    assert_user_list_equal(all + [user], group1.users, :sort)
-    assert_user_list_equal([user], group2.users, :sort)
+    assert_user_arrays_equal(all + [user], group1.users, :sort)
+    assert_user_arrays_equal([user], group2.users, :sort)
 
     UserGroup.destroy_user(user)
     user.destroy
     group1.reload
     group2.reload # not destroyed, just empty
-    assert_user_list_equal(all, group1.users, :sort)
-    assert_user_list_equal([], group2.users, :sort)
+    assert_user_arrays_equal(all, group1.users, :sort)
+    assert_user_arrays_equal([], group2.users, :sort)
   end
 
   # Bug seen in the wild: myxomop created a username which was just under 80
@@ -167,32 +167,33 @@ class UserTest < UnitTestCase
     spl1 = species_lists(:first_species_list)
     spl2 = species_lists(:another_species_list)
     spl3 = species_lists(:unknown_species_list)
-    assert_obj_list_equal([spl1, spl2], rolf.species_lists, :sort)
-    assert_obj_list_equal(SpeciesList.where(user: mary), mary.species_lists)
-    assert_obj_list_equal([], dick.species_lists)
-    assert_obj_list_equal([dick], proj.user_group.users)
-    assert_obj_list_equal([spl3], proj.species_lists)
+    assert_obj_arrays_equal([spl1, spl2], rolf.species_lists, :sort)
+    assert_obj_arrays_equal(SpeciesList.where(user: mary), mary.species_lists)
+    assert_obj_arrays_equal([], dick.species_lists)
+    assert_obj_arrays_equal([dick], proj.user_group.users)
+    assert_obj_arrays_equal([spl3], proj.species_lists)
 
-    assert_obj_list_equal([spl1, spl2],
-                          rolf.all_editable_species_lists, :sort)
-    assert_obj_list_equal(SpeciesList.where(user: mary),
-                          mary.all_editable_species_lists)
-    assert_obj_list_equal([spl3], dick.all_editable_species_lists)
+    assert_obj_arrays_equal([spl1, spl2],
+                            rolf.all_editable_species_lists, :sort)
+    assert_obj_arrays_equal(SpeciesList.where(user: mary),
+                            mary.all_editable_species_lists)
+    assert_obj_arrays_equal([spl3], dick.all_editable_species_lists)
 
     proj.add_species_list(spl1)
     dick.reload
-    assert_obj_list_equal([spl1, spl3], dick.all_editable_species_lists, :sort)
+    assert_obj_arrays_equal([spl1, spl3], dick.all_editable_species_lists,
+                            :sort)
 
     proj.user_group.users.push(rolf, mary)
     proj.user_group.users.delete(dick)
     rolf.reload
     mary.reload
     dick.reload
-    assert_obj_list_equal([spl1, spl2, spl3],
-                          rolf.all_editable_species_lists, :sort)
-    assert_obj_list_equal([spl1, SpeciesList.where(user: mary).to_a].flatten,
-                          mary.all_editable_species_lists, :sort)
-    assert_obj_list_equal([], dick.all_editable_species_lists)
+    assert_obj_arrays_equal([spl1, spl2, spl3],
+                            rolf.all_editable_species_lists, :sort)
+    assert_obj_arrays_equal([spl1, SpeciesList.where(user: mary).to_a].flatten,
+                            mary.all_editable_species_lists, :sort)
+    assert_obj_arrays_equal([], dick.all_editable_species_lists)
   end
 
   def test_preferred_herbarium_name
@@ -358,11 +359,11 @@ class UserTest < UnitTestCase
     assert_equal(0, Interest.where(user: junk).count)
   end
 
-  def test_delete_notifications
-    assert_operator(0, "<", Notification.where(user: rolf).count)
+  def test_delete_name_trackers
+    assert_operator(0, "<", NameTracker.where(user: rolf).count)
 
-    rolf.delete_notifications
-    assert_equal(0, Notification.where(user: rolf).count)
+    rolf.delete_name_trackers
+    assert_equal(0, NameTracker.where(user: rolf).count)
   end
 
   def test_delete_queued_emails
@@ -391,8 +392,8 @@ class UserTest < UnitTestCase
     assert_operator(2, "<", NameDescription.where(user: rolf).count)
 
     rolf.delete_private_name_descriptions
-    assert_obj_list_equal(NameDescription.where(user: rolf).to_a,
-                          [desc1, desc2], :sort)
+    assert_obj_arrays_equal(NameDescription.where(user: rolf).to_a,
+                            [desc1, desc2], :sort)
 
     # All of Dick's should be deletable but for this one:
     # Rolf has one of the versions of this one.

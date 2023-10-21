@@ -18,8 +18,8 @@ module Report
 
     # generate CSV & meta.xml and bundle into a Zip
     def render
-      filename = "#{::Rails.root}/public/dwca/gbif_meta.xml"
-      content << ["meta.xml", File.read(filename)]
+      path = Rails.public_path.join("dwca/gbif_meta.xml")
+      content << ["meta.xml", path.read]
       content << ["observations.csv", observations.render]
       content << ["multimedia.csv", images.render]
       super

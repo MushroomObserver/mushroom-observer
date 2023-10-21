@@ -11,8 +11,9 @@
 #  3. A few helpers that encapsulate testing the flash error mechanism.
 #
 ################################################################################
-
-class FunctionalTestCase < ActionController::TestCase
+#
+# Disable cop because we currently use non-standard inheritance
+class FunctionalTestCase < ActionController::TestCase # rubocop:disable Rails/ActionControllerTestCase
   include GeneralExtensions
   include FlashExtensions
   include ControllerExtensions

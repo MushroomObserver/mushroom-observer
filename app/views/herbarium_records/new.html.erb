@@ -1,0 +1,21 @@
+<%
+@container = :full
+add_page_title(herbarium_record_form_new_title)
+add_tab_set(herbarium_record_form_new_tabs(obs: @observation))
+%>
+
+<div class="row">
+  <div class="col-xs-12 col-sm-7">
+    <span class="text-larger mb-3"><%= :Observation.t %> #<%= @observation.id %></span><!-- .text-larger -->
+    <%= render(partial: "herbarium_records/form",
+               locals: { action: :create, local: true }) %>
+  </div>
+
+  <div class="col-xs-12 col-sm-5">
+    <ul class="row list-unstyled">
+      <%= render(partial: "shared/matrix_box",
+                 locals: { object: @observation.rss_log || @observation,
+                           columns: "col-xs-12" }) %>
+    </ul>
+  </div>
+</div><!--.row-->

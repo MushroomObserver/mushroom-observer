@@ -25,7 +25,6 @@ class API2
       { votes: :user }
     ]
 
-    # rubocop:disable Metrics/AbcSize
     # rubocop:disable Metrics/MethodLength
     def query_params
       n, s, e, w = parse_bounding_box!
@@ -62,7 +61,6 @@ class API2
         region: parse(:string, :region, help: 1)
       }.merge(parse_names_parameters)
     end
-    # rubocop:enable Metrics/AbcSize
     # rubocop:enable Metrics/MethodLength
 
     def create_params
@@ -79,6 +77,8 @@ class API2
         gps_hidden: parse(:boolean, :gps_hidden, default: false,
                                                  help: 1),
         notes: @notes,
+        source: parse(:enum, :source, limit: Observation.sources.keys,
+                                      default: "mo_api"),
         thumb_image: @thumbnail,
         images: @images,
         projects: parse_array(:project, :projects, must_be_member: true) || [],
@@ -262,8 +262,7 @@ class API2
       declare_parameter(:"#{prefix}notes[$field]", :string, help: :notes_field)
       return notes if set
 
-      notes.delete_if { |_key, val| val.blank? }
-      notes
+      notes.compact_blank!
     end
 
     def look_for_note_field_parameters(prefix)

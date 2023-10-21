@@ -9,7 +9,7 @@ class GlossaryTerm < AbstractModel
 
   belongs_to(:thumb_image,
              class_name: "Image",
-             inverse_of: :best_glossary_terms)
+             inverse_of: :thumb_glossary_terms)
   belongs_to :user
   belongs_to :rss_log
 
@@ -39,7 +39,8 @@ class GlossaryTerm < AbstractModel
     "thumb_image_id",
     "created_at",
     "updated_at",
-    "rss_log_id"
+    "rss_log_id",
+    "locked"
   )
   versioned_class.before_save { |x| x.user_id = User.current_id }
 

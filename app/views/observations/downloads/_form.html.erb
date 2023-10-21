@@ -1,0 +1,63 @@
+<%
+# This form partial is also called by species_lists/downloads
+%>
+
+<%= form_with(url: observations_downloads_path(q: query_param)) do |f| %>
+
+  <h3 class="mt-5"><%= :species_list_download_header.t %>:</h3>
+
+  <p><%= :download_observations_format.t %>:</p>
+  <div class="form-group">
+    <%= radio_with_label(form: f, field: :format, value: :raw,
+                          checked: (@format == "raw") && "checked",
+                          label: :download_observations_raw.t) %>
+    <%= radio_with_label(form: f, field: :format, value: :adolf,
+                          checked: (@format == "adolf") && "checked",
+                          label: :download_observations_adolf.t) %>
+    <%= radio_with_label(form: f, field: :format, value: :dwca,
+                          checked: (@format == "dwca") && "checked",
+                          label: :download_observations_dwca.t) %>
+    (<%= link_to(:download_observations_what_is_this.t,
+                  "http://rs.tdwg.org/dwc/index.htm",
+                  target: "_new") %>)
+    <%= radio_with_label(form: f, field: :format, value: :gbif,
+                          checked: (@format == "gbif") && "checked",
+                          label: :download_observations_gbif.t) %>
+    (<%= link_to(:download_observations_what_is_this.t,
+                  "http://rs.tdwg.org/dwc/index.htm",
+                  target: "_new") %>)
+    <%= radio_with_label(form: f, field: :format, value: :eol,
+                          checked: (@format == "eol") && "checked",
+                          label: :download_observations_eol.t) %>
+    <%= radio_with_label(form: f, field: :format, value: :symbiota,
+                          checked: (@format == "symbiota") && "checked",
+                          label: :download_observations_symbiota.t) %>
+    <%= radio_with_label(form: f, field: :format, value: :fundis,
+                          checked: (@format == "fundis") && "checked",
+                          label: :download_observations_fundis.t) %>
+  </div>
+
+  <p><%= :download_observations_encoding.t %>:</p>
+  <div class="form-group">
+    <%= radio_with_label(form: f, field: :encoding, value: "ASCII",
+                          checked: (@encoding == "ASCII") && "checked",
+                          label: :download_observations_ascii.t) %>
+    <%= radio_with_label(form: f, field: :encoding, value: "WINDOWS-1252",
+                          checked: (@encoding == "WINDOWS-1252") && "checked",
+                          label: :download_observations_windows.t) %>
+    <%= radio_with_label(form: f, field: :encoding, value: "UTF-8",
+                          checked: (@encoding == "UTF-8") && "checked",
+                          label: :download_observations_utf8.t) %>
+    <%= radio_with_label(form: f, field: :encoding, value: "UTF-16",
+                          checked: (@encoding == "UTF-16") && "checked",
+                          label: :download_observations_utf16.t) %>
+  </div>
+
+  <%= submit_button(form: f, button: :DOWNLOAD.l) %>
+  <%= submit_button(form: f, button: :CANCEL.l) %>
+
+  <%= content_tag(:p, "#{:download_observations_print_labels_header.t}:",
+                  class: "mt-5") %>
+  <%= submit_button(form: f, button: :download_observations_print_labels.l) %>
+
+<% end %>

@@ -6,7 +6,7 @@ development:
       :read: "/images"
     :mycolab:
       :test: :transferred_flag
-      :read: http://images.mushroomobserver.org
+      :read: https://images.mushroomobserver.org
   keep_these_image_sizes_local: []
 
 production:
@@ -29,15 +29,14 @@ test:
       :read: "/test_images"
     :remote1:
       :test: :transferred_flag
-      :read: "/remote_images"
+      :read: file://%{root}/public/test_server1
       :write: file://%{root}/public/test_server1
     :remote2:
       :write: file://%{root}/public/test_server2
       :sizes:
-      - :thumbnail
-      - :small
-      - :medium
+        - :thumbnail
+        - :small
+        - :medium
   keep_these_image_sizes_local:
-  - :thumbnail
-  - :small
-
+    - :thumbnail
+    - :small

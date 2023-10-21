@@ -36,7 +36,6 @@ module Report
       ]
     end
 
-    # rubocop:disable Metrics/AbcSize
     def format_row(row)
       [
         row.name_text_name,
@@ -93,7 +92,12 @@ module Report
     end
 
     def clean_notes(str)
-      str.strip.t.html_to_ascii.gsub(/\s+/, " ")
+      str.strip.
+        # Compress consecutive whitespaces before (not after) Textilizing
+        # because some whitespace combinations can confuse Textile
+        # Example: `\r\n \r\n`
+        gsub(/\s+/, " ").
+        t.html_to_ascii
     end
 
     def image_urls(row)

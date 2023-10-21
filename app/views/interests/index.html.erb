@@ -1,0 +1,60 @@
+<%
+add_page_title(:list_interests_title.t)
+
+flash_error(@error) if @error && !@interests.any?(&:target)
+%>
+
+<% if @selected_type || @types.length > 1 && @pages.num_total > 1 %>
+  <div class="btn-group pb-1 hidden-xs text-nowrap mt-5">
+    <%= content_tag(:span, :rss_show.t, class: "btn btn-default btn-sm disabled") %>
+
+    <span class="btn btn-default btn-sm <%= "active" if @selected_type.blank? %>">
+      <%= label = :rss_all.t
+          url = interests_path
+          @selected_type.blank? ? label : link_with_query(label, url) %>
+    </span>
+
+    <% @types.each do |type| %>
+      <span class="btn btn-default btn-sm <%= "active" if @selected_type == type.to_s %>">
+        <%= label = type.to_s.underscore.pluralize.upcase.to_sym.t
+            url = interests_path(type: type)
+            @selected_type == type.to_s ? label : link_with_query(label, url) %>
+      </span>
+    <% end %>
+  </div>
+<% end %>
+
+<%= paginate_block(@pages) do %>
+  <% if @interests.any?(&:target) %>
+    <table class="table table-striped">
+      <% @interests.select(&:target).each do |item|
+        target = item.target %>
+        <tr>
+          <td>
+            <strong><%= item.summary.t %></strong>
+          </td>
+          <td>
+            <% if item.target_type == "NameTracker" %>
+              <%= link_to(:show_object.t(type: target.type_tag),
+                          new_name_tracker_path(target.name_id)) %> |
+            <% else %>
+              <%= link_to(:show_object.t(type: target.type_tag),
+                          target.show_link_args) %> |
+            <% end %>
+            <%= link_to(item.state ? :list_interests_turn_off.t :
+                                      :list_interests_turn_on.t,
+                        set_interest_path(type: item.target_type,
+                        id: item.target_id, state: item.state ? -1 : 1)) %> |
+            <%= link_to(:DESTROY.t,
+                        set_interest_path(type: item.target_type,
+                        id: item.target_id, state: 0)) %>
+            <% if item.target_type == "NameTracker" &&
+              target.note_template.present? && !target.approved %>
+              <br/><%= :list_name_tracker_pending_approval.t %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  <% end %>
+<% end %>

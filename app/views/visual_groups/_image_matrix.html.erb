@@ -1,0 +1,21 @@
+<%= content_tag(:div, id: "results") do %>
+  <%= paginate_block(@pages) do %>
+    <ul class="row list-unstyled mt-3">
+      <%= render(layout: "shared/matrix_table",
+               locals: {objects: @subset}) do |row| %>
+        <%= matrix_box(id: row[0]) do %>
+          <%= panel_block do %>
+            <%= interactive_image(row[0], original: true, votes: false,
+                                  context: :matrix_box) %>
+            <%= render(partial: "visual_group_status_links",
+                       locals: {
+                         visual_group: visual_group,
+                         image_id: row[0],
+                         status: row[1]
+                       }) %>
+          <% end %>
+        <% end %><!-- .matrix-box -->
+      <% end %>
+    </ul>
+  <% end %>
+<% end %>

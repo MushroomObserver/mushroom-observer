@@ -1,0 +1,15 @@
+<%= fields_for(:project) do |f_p| %>
+  <div class="form-group">
+    <%= label_tag(:project, :PROJECTS.t + ":") %>
+    <%= help_note(:div, :form_species_lists_project_help.t) %>
+    <div class="form-group">
+      <% @projects.each do |project| %>
+        <%= check_box_with_label(form: f_p, field: :"id_#{project.id}",
+                                 checked: @project_checks[project.id],
+                                 disabled: @species_list.user_id != @user.id &&
+                                   !project.is_member?(@user),
+                                 label: link_to_object(project)) %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

@@ -251,6 +251,6 @@ module API2InlineHelper
   end
 
   def strip_hash(hash)
-    hash.reject { |_key, val| val.blank? }
+    hash.compact_blank
   end
 end

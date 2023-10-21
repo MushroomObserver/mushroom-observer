@@ -1,0 +1,63 @@
+<%= form_with(model: @user, url: account_profile_path,
+              html: { multipart: true }, id: "account_profile_form") do |f| %>
+
+  <%= submit_button(form: f, button: :profile_button.l, center: true) %>
+
+  <%= text_field_with_label(form: f, field: :name,
+                            label: :profile_name.t + ":") %>
+
+  <%= text_field_with_label(form: f, field: :place_name,
+                            placeholder: :start_typing.l,
+                            label: :profile_location.t + ":", between: "(33%)",
+                            data: { autocompleter: :location }) %>
+
+  <%= text_area_with_label(form: f, field: :notes,
+                           label: :profile_notes.t + ":",
+                           rows: 10, between: "(33%)") %>
+
+  <%= file_field_with_label(
+        form: f, field: :upload_image,
+        label: (@user.image_id ? :profile_image_change.t :
+               :profile_image_create.t) + ":",
+        between: (["(33%)",
+                   link_to(:profile_image_reuse.t,
+                           account_profile_select_image_path,
+                           class: "mx-2")].safe_join)
+      ) %>
+
+  <div class="form-group mt-3">
+    <%= fields_for(:upload) do |fu| %>
+
+      <div class="row">
+        <div class="col-xs-8">
+          <%= text_field_with_label(form: fu, field: :copyright_holder,
+                                    label: :profile_copyright_holder.t + ":",
+                                    value: @copyright_holder) %>
+        </div>
+        <div class="col-xs-4">
+          <%= select_with_label(form: fu, field: :copyright_year,
+                                label: :WHEN.t + ":",
+                                start_year: 1980, end_year: Time.zone.now.year,
+                                value: @copyright_year) %>
+        </div>
+      </div>
+
+      <%= select_with_label(form: fu, field: :license_id,
+                            label: :License.t + ":", options: @licenses,
+                            select_opts: { selected: @upload_license_id },
+                            append: help_block(:div,
+                                    ["(",
+                                     :profile_copyright_warning.t,
+                                     ")"].safe_join)) %>
+
+    <% end %>
+
+  </div>
+
+  <%= text_area_with_label(form: f, field: :mailing_address,
+                           label: :profile_mailing_address.t + ":",
+                           rows: 5) %>
+
+  <%= submit_button(form: f, button: :profile_button.l, center: true) %>
+
+<% end %>

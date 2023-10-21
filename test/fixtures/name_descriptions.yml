@@ -98,6 +98,7 @@ draft_agaricus_campestris:
   public: 0
 
 # A draft of Boletus edulis owned by an admin (dick) of the Boletus Project
+# NOTE: Do not make dick an author of another description. It would break tests.
 draft_boletus_edulis:
   <<: *DEFAULTS
   name: boletus_edulis
@@ -158,6 +159,8 @@ peltigera_source_desc:
   authors: katrina
   writer_groups: katrina_only
 
+# NOTE: Do not make katrina an editor of another description.
+# It would break tests.
 coprinus_desc:
   <<: *DEFAULTS
   name: coprinus

@@ -1,0 +1,19 @@
+<%# Images (already attached) section of create_observation form %>
+<%
+good_image_ids_str = @good_images.map { |img| img.id }.join(" ")
+%>
+
+<div class="my-4" id="observation_images">
+
+  <%= content_tag(:p, "#{:IMAGES.t}:", class: "font-weight-bold") %>
+
+  <% @good_images.each do |image| %>
+
+    <%= render(partial: "observations/form/good_image",
+               locals: { f: f, image: image }) %>
+
+  <% end # @good_images.each do image %>
+
+  <%= hidden_field_tag(:good_images, good_image_ids_str) %>
+
+</div><!--#observation_images-->

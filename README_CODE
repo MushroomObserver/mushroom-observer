@@ -116,7 +116,7 @@ Donation::          Records User's financial donations to MO.
 ImageVote::         Votes on quality of Image's.
 Interest::          Registers User's interest in various objects (for email notification of activity in those objects).
 License::           Types of licenses available for Image's and Name/LocationDescription's to use.
-Notification::      Used to generate notification emails under more complex conditions, like use of Name's a User is interested in.
+NameTracker::       Used to generate notification emails under more complex conditions, like use of Name's a User is interested in.
 Query::             Saves the description of an arbitrary query of one of the major objects (above), allows prev/next/index and refining searches.
 RssLog::            Used to report changes via RSS feed.
 Synonym::           Used to group synonymized Name's.
@@ -158,14 +158,13 @@ ObservationsController::Deals with Observation's.
 AccountController::     Deals with User's.
 NameController::        Deals with Name's and NameDescription's.
 LocationController::    Deals with Location's and LocationDescription's.
-ImageController::       Deals with Image's and ImageVote's.
+ImagesController::      Deals with Image's and ImageVote's.
 CommentController::     Deals with Comment's.
 SpeciesListController:: Deals with SpeciesList's.
 ProjectController::     Deals with Project's.
-InterestController::    Deals with Interest's.
+InterestsController::   Deals with Interest's.
 SupportController::     Deals with Donation's.
 APIController::         Handles AJAX and API requests.
-PivotalController::     Handles minimal interface with Pivotal Tracker website.
 
 These controllers are all subclasses of ActionController.  Actions are just
 instance methods.  These correspond directly to the URL of the request:

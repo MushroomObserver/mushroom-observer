@@ -1,18 +1,43 @@
 <%= form_with(model: @glossary_term, html: { multipart: true }) do |f| %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:name, "#{:glossary_term_name.t}:") %>
-    <%= f.text_field(:name, class: "form-control") %>
-  </div>
+  <% if in_admin_mode? %>
+  <%= check_box_with_label(form: f, field: :locked, class: "mt-3",
+                            label: :edit_glossary_term_locked.t) %>
+  <% end %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:description, "#{:glossary_term_description.t}:") %>
-    <%= f.text_area(:description, rows: 16, class: "form-control") %>
-    <%= :field_textile_link.t %>
-  </div>
+  <%=
+    text_field_with_label(
+      form: f, field: :name,
+      label: :glossary_term_name.t + ":",
+      data: { autofocus: true },
+      append: help_block(
+        :p,
+        :form_glossary_name_help.t + " " +
+        link_to(
+          :glossary_term_index_documentation.t,
+          "https://github.com/MushroomObserver/mushroom-observer/blob/main/doc/glossary.md"
+        )
+      )
+    )
+  %>
+
+  <%=
+    text_area_with_label(
+      form: f, field: :description, rows: 16,
+      label: :glossary_term_description.t + ":",
+      append: help_block(
+        :p,
+        :form_glossary_description_help.t + " " +
+        link_to(
+          :glossary_term_index_documentation.t,
+          "https://github.com/MushroomObserver/mushroom-observer/blob/main/doc/glossary.md"
+        ) + ". " + :field_textile_link.t
+      )
+    )
+  %>
 
   <%= yield f %>
 
-  <%= f.submit(:SAVE.t, class: "btn btn-default center-block mt-3") %>
+  <%= submit_button(form: f, button: :SAVE.t, center: true) %>
 
 <% end %>

@@ -65,7 +65,7 @@ delete from t using name_description_writers as t
 
 delete from name_descriptions where public = false;
 
-# delete from notifications;
+# delete from name_trackers;
 
 delete from query_records;
 
@@ -81,6 +81,6 @@ update users set password = 'ae98587c6f1599fbdcc800e66db6874a8fa0e713';
 update votes
  inner join users on users.id = votes.user_id
  set votes.user_id = 0
- where users.votes_anonymous = 1;
+ where users.votes_anonymous > 1;
 
 commit;

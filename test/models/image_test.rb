@@ -126,13 +126,13 @@ class ImageTest < UnitTestCase
   end
 
   def test_presence_of_critical_external_scripts
-    assert_not(File.exist?("#{::Rails.root}/script/bogus_script"),
+    assert_not(Rails.root.join("script/bogus_script").exist?,
                "script/bogus_script should not exist!")
-    assert(File.exist?("#{::Rails.root}/script/process_image"),
+    assert(Rails.root.join("script/process_image").exist?,
            "Missing script/process_image!")
-    assert(File.exist?("#{::Rails.root}/script/rotate_image"),
+    assert(Rails.root.join("script/rotate_image").exist?,
            "Missing script/rotate_image!")
-    assert(File.exist?("#{::Rails.root}/script/retransfer_images"),
+    assert(Rails.root.join("script/retransfer_images").exist?,
            "Missing script/retransfer_images!")
   end
 
@@ -156,10 +156,128 @@ class ImageTest < UnitTestCase
     img2  = images(:unused_image)
     term1 = glossary_terms(:conic_glossary_term)
     term2 = glossary_terms(:unused_thumb_and_used_image_glossary_term)
-    assert_obj_list_equal([term1, term2].sort_by(&:id),
-                          img1.glossary_terms.sort_by(&:id))
-    assert_obj_list_equal([term1], img1.best_glossary_terms)
-    assert_obj_list_equal([term2], img2.glossary_terms)
-    assert_obj_list_equal([term2], img2.best_glossary_terms)
+    assert_obj_arrays_equal([term1, term2].sort_by(&:id),
+                            img1.glossary_terms.sort_by(&:id))
+    assert_obj_arrays_equal([term1], img1.thumb_glossary_terms)
+    assert_obj_arrays_equal([term2], img2.glossary_terms)
+    assert_obj_arrays_equal([term2], img2.thumb_glossary_terms)
+  end
+
+  def test_delete_thmubnail_of_glossary_term_with_no_other_images
+    term = glossary_terms(:conic_glossary_term)
+    thumb = term.thumb_image
+    other_images = term.images - [thumb]
+    assert_not_nil(thumb)
+    assert_empty(other_images)
+
+    User.current = thumb.user
+    thumb.destroy!
+
+    assert_nil(term.reload.thumb_image,
+               "Glossary term has destroyed image as thumbnail!")
+    assert_empty(term.images, "Glossary term should have no images left!")
+  end
+
+  def test_delete_thmubnail_of_glossary_term_with_multiple_images
+    term = glossary_terms(:plane_glossary_term)
+    thumb = term.thumb_image
+    other_images = term.images - [thumb]
+    assert_not_nil(thumb)
+    assert_not_empty(other_images)
+    assert_includes(thumb.glossary_terms, term)
+    assert_includes(thumb.thumb_glossary_terms, term)
+    thumb_id = thumb.id
+    other_image_ids = other_images.map(&:id)
+
+    User.current = thumb.user
+    thumb.destroy!
+
+    assert_false(term.reload.image_ids.include?(thumb_id),
+                 "Glossary term is attached to destroyed image!")
+    assert_true(other_image_ids.include?(term.thumb_image_id),
+                "Should have chosen another thumbnail for glossary term.")
+  end
+
+  def test_delete_thumbnail_of_observation_with_no_other_images
+    obs = observations(:coprinus_comatus_obs)
+    thumb = obs.thumb_image
+    other_images = obs.images - [thumb]
+    assert_not_nil(thumb)
+    assert_empty(other_images)
+
+    User.current = thumb.user
+    thumb.destroy!
+
+    assert_nil(obs.reload.thumb_image,
+               "Observation has destroyed image as thumbnail!")
+    assert_empty(obs.images, "Observation should have no images left!")
+  end
+
+  def test_delete_thumbnail_of_observation_with_multiple_images
+    obs = observations(:detailed_unknown_obs)
+    thumb = obs.thumb_image
+    other_images = obs.images - [thumb]
+    assert_not_nil(thumb)
+    assert_not_empty(other_images)
+    assert_includes(thumb.observations, obs)
+    assert_includes(thumb.thumb_observations, obs)
+    thumb_id = thumb.id
+    other_image_ids = other_images.map(&:id)
+
+    User.current = thumb.user
+    thumb.destroy!
+
+    assert_false(obs.reload.image_ids.include?(thumb_id),
+                 "Observation is attached to destroyed image!")
+    assert_true(other_image_ids.include?(obs.thumb_image_id),
+                "Should have chosen another thumbnail for observation.")
+  end
+
+  def test_delete_user_profile_image
+    assert_not_nil(rolf.image)
+
+    User.current = rolf.image.user
+    rolf.image.destroy!
+
+    assert_nil(rolf.reload.image_id,
+               "Rolf's is using a destroyed image for profile image!")
+  end
+
+  def test_delete_project_image
+    project = projects(:bolete_project)
+    image = project.images.first
+    assert_not_nil(image)
+    image_id = image.id
+
+    User.current = image.user
+    image.destroy!
+
+    assert_false(project.reload.image_ids.include?(image_id),
+                 "Project is still attached to a destroyed image!")
+  end
+
+  def test_delete_visual_group_image
+    group = visual_groups(:visual_group_one)
+    image = group.images.first
+    assert_not_nil(image)
+    image_id = image.id
+
+    User.current = image.user
+    image.destroy!
+
+    assert_false(group.reload.image_ids.include?(image_id),
+                 "VisualGroup still references a destroyed image!")
+  end
+
+  def test_delete_image_with_votes
+    image = images(:peltigera_image)
+    image_id = image.id
+    assert_not_empty(ImageVote.where(image_id: image_id))
+
+    User.current = image.user
+    image.destroy!
+
+    assert_empty(ImageVote.where(image_id: image_id),
+                 "Failed to delete ImageVotes attached to destroyed image!")
   end
 end

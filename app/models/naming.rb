@@ -65,7 +65,13 @@ class Naming < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    :observations
+    "/observations"
+  end
+
+  # Override the default show_url
+  # (this is a hack, here, to get the right URL)
+  def self.show_url
+    false
   end
 
   def self.construct(args, observation)
@@ -166,12 +172,11 @@ class Naming < AbstractModel
     taxa.push(name)
     taxa.push(Name.find_by(text_name: "Lichen")) if name.is_lichen?
     done_user = {}
-    flavor = Notification.flavors[:name]
     taxa.each do |taxon|
-      Notification.where(flavor: flavor, obj_id: taxon.id).includes(:user).
-        find_each do |n|
+      NameTracker.where(name: taxon).includes(:user).find_each do |n|
         next unless (n.user_id != user.id) && !done_user[n.user_id] &&
                     (!n.require_specimen || observation.specimen)
+        next if n.user.no_emails
 
         QueuedEmail::NameTracking.create_email(n, self)
         done_user[n.user_id] = true
@@ -206,6 +211,9 @@ class Naming < AbstractModel
         recipients.push(interest.user) if interest.state
       end
     end
+
+    # Remove users who have opted out of all emails.
+    recipients.reject!(&:no_emails)
 
     # Send to everyone (except the person who created the naming!)
     (recipients.uniq - [sender]).each do |recipient|
@@ -301,9 +309,9 @@ class Naming < AbstractModel
     observation.change_vote(self, value, user)
   end
 
-  def update_name(new_name, user, reason, was_js_on)
+  def update_name(new_name, user, reasons, was_js_on)
     clean_votes(new_name, user)
-    create_reasons(reason, was_js_on)
+    create_reasons(reasons, was_js_on)
     update_object(new_name, changed?)
   end
 
@@ -475,9 +483,9 @@ class Naming < AbstractModel
     end
 
     # Initialize Reason.
-    def initialize(reasons, num)
-      @reasons = reasons
-      @num     = num
+    def initialize(reason_structure, num)
+      @reason_structure = reason_structure
+      @num              = num
     end
 
     # Get localization string for this reason.  For example:
@@ -499,22 +507,22 @@ class Naming < AbstractModel
 
     # Is this Reason being used by the parent Naming?
     def used?
-      @reasons.key?(@num)
+      @reason_structure.key?(@num)
     end
 
     # Get notes, or +nil+ if Reason not used.
     def notes
-      @reasons[@num]
+      @reason_structure[@num]
     end
 
     # Set notes, and mark this Reason as "used".
     def notes=(val)
-      @reasons[@num] = val.to_s
+      @reason_structure[@num] = val.to_s
     end
 
     # Mark this Reason as "unused".
     def delete
-      @reasons.delete(@num)
+      @reason_structure.delete(@num)
     end
   end
 

@@ -59,7 +59,6 @@ class IpStats
       update_one_stat(hash, vals, weight, do_activity)
     end
 
-    # rubocop:disable Metrics/AbcSize
     def update_one_stat(hash, vals, weight, do_activity)
       time, ip, user, load, controller, action, api_key = *vals
       hash[:ip] = ip
@@ -70,7 +69,6 @@ class IpStats
       hash[:activity] << [time, load.to_f, controller, action] \
         if do_activity
     end
-    # rubocop:enable Metrics/AbcSize
 
     def clean_stats
       cutoff = (Time.now.utc - STATS_TIME * 60).to_s
@@ -84,7 +82,7 @@ class IpStats
 
     def blocked?(ip)
       populate_blocked_ips unless blocked_ips_current?
-      @@blocked_ips.include?(ip) && !@@okay_ips.include?(ip)
+      @@blocked_ips.include?(ip) && !@@okay_ips.include?(ip) # DO NOT FIX!
     end
 
     def blocked_ips
@@ -109,11 +107,11 @@ class IpStats
     end
 
     def remove_blocked_ips(ips)
-      rewrite_blocked_ips { |ip, _time| !ips.include?(ip) }
+      rewrite_blocked_ips { |ip, _time| !ips.include?(ip) } # DO NOT FIX!
     end
 
     def remove_okay_ips(ips)
-      rewrite_okay_ips { |ip, _time| !ips.include?(ip) }
+      rewrite_okay_ips { |ip, _time| !ips.include?(ip) } # DO NOT FIX!
     end
 
     def clear_blocked_ips
@@ -151,9 +149,9 @@ class IpStats
     # and load into average percentage of server time used.  It weights
     # recent activity more heavily than old activity.
     def calc_weight(now, time)
-      return 0.0 if now - time > 60 * STATS_TIME
+      return 0.0 if now - time > STATS_TIME * 60
 
-      (60 * STATS_TIME - (now - time)) /
+      (STATS_TIME * 60 - (now - time)) /
         STATS_TIME / STATS_TIME / 60 / 60 * 2
     end
 

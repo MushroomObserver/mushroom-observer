@@ -1,0 +1,25 @@
+<%= text_field_with_label(form: f, field: :copyright_holder,
+                          label: :form_images_copyright_holder.t + ":") %>
+
+<% unless leave_out_original_file_name %>
+  <%= text_field_with_label(form: f, field: :original_name,
+                            label: :form_images_original_name.t + ":") %>
+<% end %>
+
+<div class="form-group form-inline">
+  <%= f.label(:when_1i, :WHEN.t + ":") %>
+  <%= f.date_select(:when, date_select_opts(@image),
+                    { class: "form-control",
+                      data: { autocompleter: :year } }) %>
+  <%= help_block(:p, :form_images_when_help.t) %>
+</div>
+
+<%= select_with_label(form: f, field: :license_id, options: @licenses,
+                      label: :LICENSE.t + ":",
+                      append: help_block(:p, :form_images_license_help.t)) %>
+
+<%= text_area_with_label(form: f, field: :notes, data: { autofocus: true },
+                         label: :NOTES.t + ":",
+                         append: help_block(:p, :form_images_notes_help.t)) %>
+
+<%= render(partial: "shared/textilize_help") %>

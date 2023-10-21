@@ -192,8 +192,8 @@ class ObservationTest < UnitTestCase
   #  Test email notification heuristics.
   # --------------------------------------
   def test_email_notification_1
-    Notification.all.map(&:destroy)
-    QueuedEmail.queue_emails(true)
+    NameTracker.all.map(&:destroy)
+    QueuedEmail.queue = true
 
     obs = observations(:coprinus_comatus_obs)
 
@@ -266,12 +266,12 @@ class ObservationTest < UnitTestCase
     obs.change_vote(new_naming, 3)
     assert_equal(names(:peltigera), obs.reload.name)
     assert_equal(2, QueuedEmail.count)
-    QueuedEmail.queue_emails(false)
+    QueuedEmail.queue = false
   end
 
   def test_email_notification_2
-    Notification.all.map(&:destroy)
-    QueuedEmail.queue_emails(true)
+    NameTracker.all.map(&:destroy)
+    QueuedEmail.queue = true
 
     obs = observations(:coprinus_comatus_obs)
 
@@ -351,12 +351,12 @@ class ObservationTest < UnitTestCase
                  from: rolf,
                  to: mary,
                  comment: new_comment.id)
-    QueuedEmail.queue_emails(false)
+    QueuedEmail.queue = false
   end
 
   def test_email_notification_3
-    Notification.all.map(&:destroy)
-    QueuedEmail.queue_emails(true)
+    NameTracker.all.map(&:destroy)
+    QueuedEmail.queue = true
 
     obs = observations(:coprinus_comatus_obs)
 
@@ -461,12 +461,12 @@ class ObservationTest < UnitTestCase
                  to: dick,
                  observation: observations(:coprinus_comatus_obs).id,
                  note: "notes,location,added_image,removed_image")
-    QueuedEmail.queue_emails(false)
+    QueuedEmail.queue = false
   end
 
   def test_email_notification_4
-    Notification.all.map(&:destroy)
-    QueuedEmail.queue_emails(true)
+    NameTracker.all.map(&:destroy)
+    QueuedEmail.queue = true
 
     obs = observations(:coprinus_comatus_obs)
     marys_interest = Interest.create(
@@ -534,7 +534,7 @@ class ObservationTest < UnitTestCase
                  observation: 0,
                  note: "**__Coprinus comatus__** (O.F. Müll.) Pers. " \
                        "(#{observations(:coprinus_comatus_obs).id})")
-    QueuedEmail.queue_emails(false)
+    QueuedEmail.queue = false
   end
 
   def test_vote_favorite
@@ -709,6 +709,14 @@ class ObservationTest < UnitTestCase
     assert_false(obs.can_edit?(rolf))
     assert_true(obs.can_edit?(mary))
     assert_true(obs.can_edit?(dick))
+  end
+
+  def test_open_membership_project_ownership
+    # Part of Burbank project, but owned by Roy
+    obs = observations(:owner_accepts_general_questions)
+    assert_false(obs.can_edit?(rolf))
+    assert_true(obs.can_edit?(roy)) # Owner & project admin
+    assert_false(obs.can_edit?(katrina)) # Project member
   end
 
   def test_imageless
@@ -1082,17 +1090,38 @@ class ObservationTest < UnitTestCase
     )
   end
 
-  def test_scope_without_confident_name
-    assert_includes(Observation.without_confident_name,
-                    observations(:fungi_obs))
-    assert_not_includes(Observation.without_confident_name,
+  def test_scope_with_vote_by_user
+    obs_with_vote_by_rolf = Observation.with_vote_by_user(users(:rolf))
+    assert_includes(obs_with_vote_by_rolf,
+                    observations(:coprinus_comatus_obs))
+    assert_includes(Observation.with_vote_by_user(users(:mary)),
+                    observations(:coprinus_comatus_obs))
+    assert_not_includes(obs_with_vote_by_rolf,
                         observations(:peltigera_obs))
   end
 
-  def test_scope_needs_identification
-    assert_includes(Observation.needs_identification,
+  # There are no observation views in the fixtures
+  def test_scope_reviewed_by_user
+    ObservationView.create({ observation_id: observations(:fungi_obs).id,
+                             user_id: users(:rolf).id,
+                             reviewed: true })
+    assert_includes(Observation.reviewed_by_user(users(:rolf)),
                     observations(:fungi_obs))
-    assert_not_includes(Observation.needs_identification,
+    assert_not_includes(Observation.reviewed_by_user(users(:rolf)),
+                        observations(:peltigera_obs))
+  end
+
+  def test_scope_needs_id
+    assert_includes(Observation.needs_id,
+                    observations(:fungi_obs))
+    assert_not_includes(Observation.needs_id,
+                        observations(:peltigera_obs))
+  end
+
+  def test_scope_needs_id_for_user
+    assert_includes(Observation.needs_id_for_user(users(:rolf)),
+                    observations(:fungi_obs))
+    assert_not_includes(Observation.needs_id_for_user(users(:rolf)),
                         observations(:peltigera_obs))
   end
 
@@ -1101,6 +1130,25 @@ class ObservationTest < UnitTestCase
                     observations(:peltigera_obs))
     assert_not_includes(Observation.of_name(names(:fungi)),
                         observations(:peltigera_obs))
+  end
+
+  def test_scope_in_clade
+    assert_includes(Observation.in_clade("Agaricales"),
+                    observations(:coprinus_comatus_obs))
+    assert_not_includes(Observation.in_clade("Agaricales"),
+                        observations(:peltigera_obs))
+    # test the scope can handle a genus
+    assert_includes(Observation.in_clade("Tremella"),
+                    observations(:owner_only_favorite_ne_consensus))
+    assert_includes(Observation.in_clade("Tremella"),
+                    observations(:sortable_obs_users_first_obs))
+    assert_includes(Observation.in_clade("Tremella"),
+                    observations(:sortable_obs_users_second_obs))
+    assert_not_includes(Observation.in_clade("Tremella"),
+                        observations(:chlorophyllum_rachodes_obs))
+    # test the scope can handle a name instance
+    assert_includes(Observation.in_clade(names(:coprinus)),
+                    observations(:coprinus_comatus_obs))
   end
 
   def test_scope_by_user
@@ -1259,5 +1307,19 @@ class ObservationTest < UnitTestCase
     assert_not_includes(obss_with_hr_notes,
                         observations(:imageless_unvouchered_obs))
     assert_empty(Observation.herbarium_record_notes_include("ARBITRARY_SHA"))
+  end
+
+  def test_source_credit
+    obs = observations(:coprinus_comatus_obs)
+    assert_nil(obs.source)
+    assert_nil(obs.source_credit)
+
+    obs = observations(:detailed_unknown_obs)
+    assert_equal("mo_website", obs.source)
+    assert_equal(:source_credit_mo_website, obs.source_credit)
+
+    obs = observations(:amateur_obs)
+    assert_equal("mo_iphone_app", obs.source)
+    assert_equal(:source_credit_mo_iphone_app, obs.source_credit)
   end
 end

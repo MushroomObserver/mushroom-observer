@@ -1,13 +1,7 @@
 <%
-  @title = :edit_herbarium_title.l
+add_page_title(:edit_herbarium_title.l)
 
-  tabs = [
-    link_with_query(
-      :cancel_and_show.t(type: :herbarium), herbarium_path(@herbarium)
-    ),
-    link_with_query(:herbarium_index.t, herbaria_path(flavor: :nonpersonal))
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(herbarium_form_edit_tabs(herbarium: @herbarium))
 %>
 
-<%= render(partial: "form", locals: { button_name: :SAVE }) %>
+<%= render(partial: "herbaria/form", locals: { button_name: :SAVE }) %>

@@ -1,0 +1,42 @@
+<%
+@container = :wide
+# the no_hits_title.
+add_index_title(@query, no_hits: :list_collection_numbers_title.t)
+add_tab_set(collection_numbers_index_tabs(obs: @observation))
+add_sorter(@query, collection_numbers_index_sorts)
+
+flash_error(@error) if @error && @objects.empty?
+%>
+
+<%= paginate_block(@pages) do %>
+  <% if @objects.any? %>
+    <table class="table table-striped mt-3">
+      <% @objects.each do |collection_number| %>
+        <tr>
+          <td>
+            <%= if in_admin_mode? || collection_number.can_edit?
+              link_with_query(:EDIT.t,
+                edit_collection_number_path(id: collection_number.id,
+                                            params: { back: :index }),
+                class: "btn btn-default btn-sm")
+            end %>
+          </td>
+          <td>
+            <i><%= link_with_query(collection_number.format_name.t,
+                     collection_number_path(collection_number)) %></i>
+          </td>
+          <td>
+            <%= collection_number.observations.map do |obs|
+              link_to(obs.unique_format_name.t, observation_path(obs))
+            end.safe_join(", ") %>
+          </td>
+          <td>
+            <%= if in_admin_mode? || collection_number.can_edit?
+              destroy_button(target: collection_number)
+            end %>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  <% end %>
+<% end %>

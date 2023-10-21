@@ -418,12 +418,43 @@ class PatternSearchTest < UnitTestCase
     end
   end
 
+  def test_observation_search_name_hack
+    # "Turkey" is not a name, and no taxa modifiers present, so no reason to
+    # suspect that this is a name query.  Should leave it completely alone.
+    x = PatternSearch::Observation.new("Turkey")
+    assert_equal(:pattern_search, x.flavor)
+    assert_equal({ pattern: "Turkey" }, x.args)
+
+    # "Agaricus" is a name, so let's assume this is a name query.  Note that
+    # it will include synonyms and subtaxa by default.
+    x = PatternSearch::Observation.new("Agaricus")
+    assert_equal(:all, x.flavor)
+    assert_equal({ names: "Agaricus", include_subtaxa: true,
+                   include_synonyms: true }, x.args)
+
+    # "Turkey" is not a name, true, but user asked for synonyms to be included,
+    # so they must have expected "Turkey" to be a name.  Note that it will also
+    # include subtaxa by default, because that behavior was not specified.
+    x = PatternSearch::Observation.new("Turkey include_synonyms:yes")
+    assert_equal(:all, x.flavor)
+    assert_equal({ names: "Turkey", include_synonyms: true,
+                   include_subtaxa: true }, x.args)
+
+    # Just make sure the user is allowed to explicitly turn off synonyms and
+    # subtaxa in any names query.
+    x = PatternSearch::Observation.new("Foo bar include_synonyms:no " \
+                                       "include_subtaxa:no")
+    assert_equal(:all, x.flavor)
+    assert_equal({ names: "Foo bar", include_synonyms: false,
+                   include_subtaxa: false }, x.args)
+  end
+
   def test_observation_search
     x = PatternSearch::Observation.new("Amanita")
-    assert_obj_list_equal([], x.query.results)
+    assert_obj_arrays_equal([], x.query.results)
 
     x = PatternSearch::Observation.new("Agaricus")
-    assert_obj_list_equal(
+    assert_obj_arrays_equal(
       [observations(:agaricus_campestris_obs),
        observations(:agaricus_campestrus_obs),
        observations(:agaricus_campestras_obs),
@@ -432,7 +463,7 @@ class PatternSearchTest < UnitTestCase
     )
 
     x = PatternSearch::Observation.new("Agaricus user:dick")
-    assert_obj_list_equal([], x.query.results)
+    assert_obj_arrays_equal([], x.query.results)
     albion = locations(:albion)
     agaricus = names(:agaricus)
     o1 = Observation.create!(when: Date.parse("10/01/2012"),
@@ -446,51 +477,51 @@ class PatternSearchTest < UnitTestCase
     assert_equal(20_131_230,
                  o2.when.year * 10_000 + o2.when.month * 100 + o2.when.day)
     x = PatternSearch::Observation.new("Agaricus user:dick")
-    assert_obj_list_equal([o1, o2], x.query.results, :sort)
+    assert_obj_arrays_equal([o1, o2], x.query.results, :sort)
     x = PatternSearch::Observation.new("Agaricus user:dick specimen:yes")
-    assert_obj_list_equal([o1], x.query.results)
+    assert_obj_arrays_equal([o1], x.query.results)
     x = PatternSearch::Observation.new("Agaricus user:dick specimen:no")
-    assert_obj_list_equal([o2], x.query.results)
+    assert_obj_arrays_equal([o2], x.query.results)
     x = PatternSearch::Observation.new("Agaricus date:2013")
-    assert_obj_list_equal([o2], x.query.results)
+    assert_obj_arrays_equal([o2], x.query.results)
     x = PatternSearch::Observation.new("Agaricus date:1")
-    assert_obj_list_equal([o1], x.query.results)
+    assert_obj_arrays_equal([o1], x.query.results)
     x = PatternSearch::Observation.new("Agaricus date:12-01")
-    assert_obj_list_equal([o1, o2], x.query.results, :sort)
+    assert_obj_arrays_equal([o1, o2], x.query.results, :sort)
     x = PatternSearch::Observation.new("Agaricus burbank date:2007-03")
-    assert_obj_list_equal([observations(:agaricus_campestris_obs)],
-                          x.query.results)
+    assert_obj_arrays_equal([observations(:agaricus_campestris_obs)],
+                            x.query.results)
     x = PatternSearch::Observation.new("Agaricus albion")
-    assert_obj_list_equal([o1, o2], x.query.results, :sort)
+    assert_obj_arrays_equal([o1, o2], x.query.results, :sort)
     x = PatternSearch::Observation.new(
       "Agaricus albion user:dick date:2001-2014"
     )
-    assert_obj_list_equal([o1, o2], x.query.results, :sort)
+    assert_obj_arrays_equal([o1, o2], x.query.results, :sort)
     x = PatternSearch::Observation.new(
       "Agaricus albion user:dick date:2001-2014 specimen:true"
     )
-    assert_obj_list_equal([o1], x.query.results)
+    assert_obj_arrays_equal([o1], x.query.results)
   end
 
   def test_observation_search_date
     expect = Observation.where(Observation[:when].year == 2006)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("date:2006")
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_created
     expect = Observation.where(Observation[:created_at].year == 2010)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("created:2010")
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_modified
     expect = Observation.where(Observation[:updated_at].year == 2013)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("modified:2013")
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_name
@@ -500,21 +531,21 @@ class PatternSearchTest < UnitTestCase
     x = PatternSearch::Observation.new(
       'name:"Conocybe filaris","Boletus edulis Bull."'
     )
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_include_synonyms
     expect = Observation.where(name: names(:peltigera))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("Petigera include_synonyms:yes")
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_include_subtaxa
     expect = Observation.of_name(names(:agaricus), include_subtaxa: true)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("Agaricus include_subtaxa:yes")
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_include_all_name_proposals
@@ -524,56 +555,56 @@ class PatternSearchTest < UnitTestCase
     assert(consensus.count < expect.count)
     x = PatternSearch::Observation.new("Agaricus campestris " \
                                        "include_all_name_proposals:yes")
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_location
     expect = Observation.where(location: locations(:burbank))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('location:"USA, California, Burbank"')
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_project
     expect = Observation.for_project(projects(:bolete_project))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('project:"Bolete Project"')
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_project_lists
     expect = Observation.on_species_list_of_project(projects(:bolete_project))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('project_lists:"Bolete Project"')
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_list
     expect = Observation.on_species_list(species_lists(:unknown_species_list))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('list:"List of mysteries"')
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_notes
     expect = Observation.notes_include("somewhere else")
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('notes:"somewhere else"')
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_comments
     expect = Observation.comments_include("complicated")
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("comments:complicated")
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_confidence
     expect = Observation.where(vote_cache: 3)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("confidence:90")
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_gps
@@ -582,77 +613,77 @@ class PatternSearchTest < UnitTestCase
     x = PatternSearch::Observation.new(
       "west:-118.4 east:-118.3 north:34.2 south:34.1"
     )
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_images_no
     expect = Observation.without_image
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("images:no")
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_images_yes
     expect = Observation.with_image
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("images:yes")
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_specimens_no
     expect = Observation.without_specimen
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("specimen:no")
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_specimens_yes
     expect = Observation.with_specimen
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("specimen:yes")
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_sequence
     expect = Observation.with_sequence
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("sequence:yes")
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_names_no
     expect = Observation.without_name
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_name:no")
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_names_yes
     expect = Observation.with_name
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_name:yes")
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_notes_no
     expect = Observation.without_notes
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_notes:no")
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_notes_yes
     expect = Observation.with_notes
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_notes:yes")
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_comments_yes
     expect = Observation.with_comments
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_comments:yes")
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_herbarium
@@ -661,7 +692,7 @@ class PatternSearchTest < UnitTestCase
     x = PatternSearch::Observation.new(
       'herbarium:"The New York Botanical Garden"'
     )
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_region
@@ -670,7 +701,7 @@ class PatternSearchTest < UnitTestCase
     assert_not_nil(cal)
     assert_includes(expect, cal)
     x = PatternSearch::Observation.new('region:"USA, California"')
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_multiple_regions
@@ -680,213 +711,213 @@ class PatternSearchTest < UnitTestCase
     assert(expect.any? { |obs| obs.where.include?("New York, USA") })
     str = 'region:"USA, California","USA, New York"'
     x = PatternSearch::Observation.new(str)
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_lichen
     expect = Observation.where(name: Name.of_lichens)
     assert_not_empty(expect)
     x = PatternSearch::Observation.new("lichen:yes")
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
 
     expect = Observation.where(name: Name.not_lichens)
     assert_not_empty(expect)
     x = PatternSearch::Observation.new("lichen:false")
-    assert_obj_list_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_created
     expect = Name.with_correct_spelling.where(Name[:created_at].year == 2010)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("created:2010")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_modified
     expect = Name.with_correct_spelling.where(Name[:updated_at].year == 2007)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("modified:2007")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_rank
     expect = Name.with_correct_spelling.with_rank("Genus")
     assert_not_empty(expect)
     x = PatternSearch::Name.new("rank:genus")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
 
     expect = Name.with_correct_spelling.with_rank_above_genus
     assert_not_empty(expect)
     x = PatternSearch::Name.new("rank:family-domain")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_include_synonyms
     expect = Name.include_synonyms_of(names(:macrolepiota_rachodes))
     assert_not_empty(expect)
     x = PatternSearch::Name.new("Macrolepiota rachodes include_synonyms:yes")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_include_subtaxa
     expect = Name.include_subtaxa_of(names(:agaricus))
     assert_not_empty(expect)
     x = PatternSearch::Name.new("Agaricus include_subtaxa:yes")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_has_synonyms
     expect = Name.without_synonyms
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_synonyms:no")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
 
     expect = Name.with_synonyms.with_correct_spelling
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_synonyms:yes")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_deprecated
     expect = Name.deprecated.with_correct_spelling
     assert_not_empty(expect)
     x = PatternSearch::Name.new("deprecated:yes")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
 
     expect = Name.not_deprecated.with_correct_spelling
     assert_not_empty(expect)
     x = PatternSearch::Name.new("deprecated:no")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_include_misspellings
     expect = Name.with_incorrect_spelling
     assert_not_empty(expect)
     x = PatternSearch::Name.new("include_misspellings:yes")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
 
     expect = Name.with_correct_spelling
     assert_not_empty(expect)
     x = PatternSearch::Name.new("include_misspellings:no")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
 
     expect = Name.all
     assert_not_empty(expect)
     x = PatternSearch::Name.new("include_misspellings:both")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_lichen
     expect = Name.with_correct_spelling.of_lichens
     assert_not_empty(expect)
     x = PatternSearch::Name.new("lichen:yes")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
 
     expect = Name.with_correct_spelling.not_lichens
     assert_not_empty(expect)
     x = PatternSearch::Name.new("lichen:no")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_has_author
     expect = Name.with_correct_spelling.without_author
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_author:no")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
 
     expect = Name.with_correct_spelling.with_author
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_author:yes")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_has_citation
     expect = Name.with_correct_spelling.without_citation
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_citation:no")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
 
     expect = Name.with_correct_spelling.with_citation
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_citation:yes")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_has_classification
     expect = Name.with_correct_spelling.without_classification
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_classification:no")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
 
     expect = Name.with_correct_spelling.with_classification
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_classification:yes")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_has_notes
     expect = Name.with_correct_spelling.without_notes
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_notes:no")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
 
     expect = Name.with_correct_spelling.with_notes
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_notes:yes")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_has_comments
     expect = Name.with_correct_spelling.with_comments
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_comments:yes")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_has_description
     expect = Name.with_correct_spelling.with_description
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_description:yes")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
 
     expect = Name.with_correct_spelling.without_description
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_description:no")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_author
     expect = Name.with_correct_spelling.author_includes("Vittad")
     assert_not_empty(expect)
     x = PatternSearch::Name.new("author:vittad")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_citation
     expect = Name.with_correct_spelling.citation_includes("lichenes")
     assert_not_empty(expect)
     x = PatternSearch::Name.new("citation:lichenes")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_classification
     expect = Name.with_correct_spelling.classification_includes("ascomycota")
     assert_not_empty(expect)
     x = PatternSearch::Name.new("classification:Ascomycota")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_notes
     expect = Name.with_correct_spelling.notes_include("lichen")
     assert_not_empty(expect)
     x = PatternSearch::Name.new("notes:lichen")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_comments
     expect = [comments(:fungi_comment).target]
     assert_not_empty(expect)
     x = PatternSearch::Name.new("comments:\"do not change\"")
-    assert_name_list_equal(expect, x.query.results, :sort)
+    assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 end

@@ -1,0 +1,36 @@
+<%
+merges = description.parent.descriptions - [description]
+moves = description.parent.synonyms - [description.parent]
+moves.reject!(&:is_misspelling?)
+%>
+
+<%= form_with(url: action, id: "merge_descriptions_form") do |f| %>
+
+  <%= content_tag(:h4, "#{:merge_descriptions_merge_header.t}:") %>
+  <%= content_tag(:p, :merge_descriptions_merge_help.t, class: "help-note") %>
+
+  <div class="form-group">
+    <% merges.each do |desc| %>
+      <%= radio_with_label(form: f, field: :target, value: desc.id,
+                               label: description_title(desc),
+                               checked: merges.length == 1 &&
+                                        moves.length == 0) %>
+    <% end
+    if merges.empty? %>
+      <%= content_tag(:p, :merge_descriptions_no_others.t) %>
+    <% end %>
+  </div>
+
+  <% if merges.any? %>
+    <%= check_box_with_label(form: f, field: :delete, value: "1",
+                             checked: description.is_admin?(@user),
+                             label: :merge_descriptions_delete_after.t) %>
+  <% end %>
+
+  <% button = merges.any? ? :merge_descriptions_merge.l : nil
+  if button %>
+    <%= submit_button(form: f, button: :SUBMIT.l, center: true) %>
+  <% end %>
+
+<% end %>
+

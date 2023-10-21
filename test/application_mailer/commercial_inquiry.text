@@ -1,0 +1,22 @@
+From: news@mushroomobserver.org
+Reply-To: mary@collectivesource.com
+To: rolf@collectivesource.com
+Subject: [MO] Commercial Inquiry About Image #<%= ActiveRecord::FixtureSet.identify(:commercial_inquiry_image) %>
+
+Commercial Inquiry
+
+Mary Newbie (mary@collectivesource.com) asked the Mushroom Observer website to forward the following commercial inquiry to you about your image image #<%= ActiveRecord::FixtureSet.identify(:commercial_inquiry_image) %>:
+
+Did test_commercial_inquiry work?
+
+--------------------------------------------------
+
+It is entirely up to you whether you want to reply to Mary Newbie (mary@collectivesource.com) by replying directly to this email.
+Here are some handy links:
+
+Show this image: https://mushroomobserver.org/images/<%= ActiveRecord::FixtureSet.identify(:commercial_inquiry_image) %>
+Stop sending me email like this: https://mushroomobserver.org/account/no_email/<%= ActiveRecord::FixtureSet.identify(:rolf) %>?type=general_commercial
+Change your preferences: https://mushroomobserver.org/account/preferences/edit
+Latest changes at Mushroom Observer: https://mushroomobserver.org
+
+If you feel this user is abusing this service please forward this entire email message to: webmaster@mushroomobserver.org

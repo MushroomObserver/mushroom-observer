@@ -1,20 +1,20 @@
-<% @title = :ask_user_question_title.t(user: @target.legal_name) %>
+<%
+add_page_title(:ask_user_question_title.t(user: @target.legal_name))
 
-<%= form_tag(
-      add_query_param(action: :ask_user_question, id: @target.id)
-    ) do %>
+url = add_query_param({ action: :ask_user_question, id: @target.id })
+%>
+
+<%= form_with(url: url, scope: :email) do |f| %>
+
   <%= :ask_user_question_label.tp(user: @target.legal_name) %>
 
-  <div class="form-group">
-    <%= label_tag(:email_subject, :ask_user_question_subject.t + ":") %>
-    <%= text_field(:email, :subject, size: 70, data: { autofocus: true },
-                    class: "form-control") %>
-  </div>
+  <%= text_field_with_label(form: f, field: :subject, size: 70,
+                            label: :ask_user_question_subject.t + ":",
+                            data: { autofocus: true }) %>
 
-  <div class="form-group">
-    <%= label_tag(:email_content, :ask_user_question_message.t + ":") %>
-    <%= text_area(:email, :content, rows: 10, class: "form-control") %>
-  </div>
+  <%= text_area_with_label(form: f, field: :content, rows: 10,
+                           label: :ask_user_question_message.t + ":") %>
 
-  <%= submit_tag(:SEND.l, class: "btn btn-default center-block mt-3") %>
+  <%= submit_button(form: f, button: :SEND.l, center: true) %>
+
 <% end %>

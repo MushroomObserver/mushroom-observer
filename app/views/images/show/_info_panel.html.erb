@@ -1,0 +1,35 @@
+    <!-- INFO_PANEL -->
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <b><%= :NOTES.t %></b>:
+      </div>
+      <div class="panel-body py-5px">
+        <div><%= :WHEN.t %>: <%= @image.when.web_date %></div>
+        <div><%= :OWNER.t %>: <%= user_link(@image.user) %></div>
+        <% @image.projects.each do |proj| %>
+          <div><%= :PROJECT.t %>: <%= link_to_object(proj) %></div>
+        <% end %>
+        <% @image.observations.each do |obs| %>
+          <div>
+            <%= :OBSERVATION.t %>:
+            <%= link_with_query(obs.unique_format_name.t, obs.show_link_args) %>
+          </div>
+        <% end %>
+        <% @image.profile_users.each do |user| %>
+          <div>
+            <%= :USER.t %>:
+            <%= link_with_query(user.format_name.t, user.show_link_args) %>
+          </div>
+        <% end %>
+        <% @image.glossary_terms.each do |glossary_term| %>
+          <div>
+            <%= :GLOSSARY_TERM.t %>:
+            <%= link_with_query(glossary_term.format_name.t, glossary_term.show_link_args) %>
+          </div>
+        <% end %>
+        <% if !@image.notes.blank? %>
+          <%= (:image_show_notes.l + ": " + @image.notes.to_s.html_safe).tpl %>
+        <% end %>
+      </div>
+    </div>
+    <!-- /INFO_PANEL -->

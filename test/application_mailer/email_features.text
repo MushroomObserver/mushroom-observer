@@ -1,0 +1,19 @@
+From: news@mushroomobserver.org
+Reply-To: no-reply@mushroomobserver.org
+To: rolf@collectivesource.com
+Subject: [MO] New Mushroom Observer Features
+
+New Features
+
+The following new features have been released at the Mushroom Observer website:
+
+A feature
+
+--------------------------------------------------
+
+Here are some handy links:
+
+Stop sending me email like this: https://mushroomobserver.org/account/no_email/<%= ActiveRecord::FixtureSet.identify(:rolf) %>?type=general_feature
+Change your preferences: https://mushroomobserver.org/account/preferences/edit
+Latest changes at Mushroom Observer: https://mushroomobserver.org
+

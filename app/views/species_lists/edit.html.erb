@@ -1,0 +1,12 @@
+<%
+add_page_title(
+  :species_list_edit_title.t(name: @species_list.unique_format_name)
+)
+add_tab_set(species_list_form_edit_tabs(list: @species_list))
+@container = :text
+
+action = species_list_path(@species_list, approved_where: @place_name)
+%>
+
+<%= render(partial: "species_lists/form",
+           locals: { button: :UPDATE, action: action }) %>

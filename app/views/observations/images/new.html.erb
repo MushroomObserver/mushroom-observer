@@ -1,0 +1,31 @@
+<%
+add_page_title(:image_add_title.t(name: @observation.unique_format_name))
+
+add_tab_set(observation_images_new_tabs(obs: @observation))
+%>
+
+<%= form_with(model: @image,
+              url: add_query_param(action: :create, id: @observation.id),
+              html: { multipart: true }) do |f| %>
+
+  <%= fields_for(:observation) do |f_o| %>
+    <%= f_o.hidden_field(:id) %>
+  <% end %>
+
+  <div id="license-notice mt-3"><%= :image_add_warning.tp %></div>
+
+  <%= submit_button(form: f, button: :image_add_upload.l, center: true) %>
+
+  <%= render(partial: "observations/images/form/fields_for_upload") %>
+
+  <%= render(partial: "observations/images/form/fields_for_images",
+             locals: { f: f, leave_out_original_file_name: true }) %>
+
+  <% if @projects.any? %>
+    <%= render(partial: "observations/images/form/project",
+               collection: @projects) %>
+  <% end %>
+
+  <%= submit_button(form: f, button: :image_add_upload.l, center: true) %>
+
+<% end %>

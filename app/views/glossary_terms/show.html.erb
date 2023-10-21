@@ -1,54 +1,34 @@
 <%
-  @title = :show_glossary_term_title.t(name: @glossary_term.name)
+add_page_title(:show_glossary_term_title.t(name: @glossary_term.name))
 
-  tabs = [
-    link_to(:glossary_term_index.t, glossary_terms_path),
-    link_to(:create_glossary_term.t, new_glossary_term_path),
-    link_to(:edit_glossary_term.t, edit_glossary_term_path(@glossary_term.id))
-  ]
-  tabs << glossary_term_destroy_button(@glossary_term) if in_admin_mode?
+add_tab_set(glossary_term_show_tabs(term: @glossary_term, user: @user))
 
-  @tabsets = { right: draw_tab_set(tabs) }
-
-  @container = :wide
+@container = :wide
 %>
 
 <div class="row mt-3">
+  <div class="col-sm-8">
+    <%= @glossary_term.description.tpl %>
+    <%= tag.p(link_to(*search_tab_for(:Wikipedia, @glossary_term.name))) %>
+  </div>
   <% if @glossary_term.thumb_image %>
-    <div class="col-sm-8">
-      <%= @glossary_term.description.tpl %>
-    </div>
     <div class="col-sm-4">
-      <%= thumbnail(@glossary_term.thumb_image, votes: true, size: :medium) %>
-    </div>
-  <% else %>
-    <div class="col-sm-8">
-      <%= @glossary_term.description.tpl %>
+      <%= interactive_image(@glossary_term.thumb_image, size: :medium, votes: true) %>
     </div>
   <% end %>
-  <%# Form should have links to MycoBank thesaurus and maybe Wikipedia
-      See https://www.pivotaltracker.com/story/show/76992734 %>
 </div><!--.row-->
 
 <div class="mb-3">
   <%= link_with_query(:show_glossary_term_reuse_image.t,
-                      controller: :image,
-                      action: :reuse_image_for_glossary_term,
-                      id: @glossary_term.id) %><br/>
+                      reuse_images_for_glossary_term_path(@glossary_term.id)) %><br/>
   <%= link_with_query(:show_glossary_term_remove_image.t,
-                      controller: :image,
-                      action: :remove_images_for_glossary_term,
-                      id: @glossary_term.id) %><br/>
+                      remove_images_from_glossary_term_path(@glossary_term.id)) %><br/>
 </div>
 
 <div class="row">
   <% @other_images.each do |image|  %>
     <div class="col-sm-4">
-      <div class="panel panel-default">
-        <div class="panel-body">
-          <%= thumbnail(image, votes: true) %>
-        </div>
-      </div>
+      <%= panel_block do interactive_image(image, votes: true) end %>
     </div>
   <% end %>
 </div><!--.row-->
@@ -59,4 +39,10 @@
     <%= :footer_created_at.t(date: @glossary_term.created_at.web_time) %><br/>
     <%= :footer_last_updated_at.t(date: @glossary_term.updated_at.web_time) %>
   </p>
+
+  <div id="glossary_term_authors_editors">
+    <%= panel_block do %>
+      <%= show_authors_and_editors(obj: @glossary_term, user: @user) %>
+    <% end %>
+  </div>
 </div>

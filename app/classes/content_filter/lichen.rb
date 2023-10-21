@@ -6,6 +6,7 @@ class ContentFilter
     def initialize
       super(
         sym: :lichen,
+        name: :LICHEN.t,
         models: [Observation, Name],
         on_vals: %w[no yes],
         prefs_vals: %w[no yes],

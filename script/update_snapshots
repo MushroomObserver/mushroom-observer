@@ -5,6 +5,10 @@ source $(dirname $0)/bash_include
 
 config_file=$app_root/config/mysql-$RAILS_ENV.cnf
 public=$app_root/public
+script=$app_root/script
+
+echo "id	content_type	copyright_holder	license	ok_for_export	diagnostic" > $public/images.csv
+mysql --defaults-extra-file=$config_file -q -s -e 'select i.id, i.content_type, i.copyright_holder, l.display_name, i.ok_for_export, i.diagnostic from images i, licenses l where i.license_id = l.id' >> $public/images.csv
 
 echo "image_id	observation_id" > $public/images_observations.csv
 mysql --defaults-extra-file=$config_file -q -s -e 'select image_id, observation_id from observation_images' >> $public/images_observations.csv
@@ -12,14 +16,20 @@ mysql --defaults-extra-file=$config_file -q -s -e 'select image_id, observation_
 echo "id	name	north	south	east	west	high	low" > $public/locations.csv
 mysql --defaults-extra-file=$config_file -q -s -e 'select id, name, north, south, east, west, high, low from locations' >> $public/locations.csv
 
+echo "id	location_id	source_type	source_name	gen_desc	ecology	species	notes	refs" > $public/location_descriptions.csv
+mysql --defaults-extra-file=$config_file -q -s -e 'select id, location_id, source_type, source_name, gen_desc, ecology, species, notes, refs from location_descriptions where public is true' >> $public/location_descriptions.csv
+
 echo "id	text_name	author	deprecated	correct_spelling_id	synonym_id	rank" > $public/names.csv
 mysql --defaults-extra-file=$config_file -q -s -e 'select id, text_name, author, deprecated, correct_spelling_id, synonym_id, `rank` from names' >> $public/names.csv
-
-echo "id	name_id	when	location_id	lat	long	alt	vote_cache	is_collection_location	thumb_image_id" > $public/observations.csv
-mysql --defaults-extra-file=$config_file -q -s -e 'select id, name_id, `when`, location_id, if(gps_hidden, round(lat, 0), lat) as lat, if(gps_hidden, round(`long`, 0), `long`) as `long`, alt, vote_cache, is_collection_location, thumb_image_id from observations' >> $public/observations.csv
 
 echo "id	name_id	source_type	source_name	general_description	diagnostic_description	distribution	habitat	look_alikes	uses	notes	refs" > $public/name_descriptions.csv
 mysql --defaults-extra-file=$config_file -q -s -e 'select id, name_id, source_type, source_name, gen_desc, diag_desc, distribution, habitat, look_alikes, uses, notes, refs from name_descriptions where public is true' >> $public/name_descriptions.csv
 
-echo "id	content_type	copyright_holder	license	ok_for_export	ok_for_ml" > $public/images.csv
-mysql --defaults-extra-file=$config_file -q -s -e 'select i.id, i.content_type, i.copyright_holder, l.display_name, i.ok_for_export, i.ok_for_ml from images i, licenses l where i.license_id = l.id' >> $public/images.csv
+echo "name_id	domain	kingdom	phylum	class	order	family" > $public/name_classifications.csv
+mysql --defaults-extra-file=$config_file -q -s -e 'select id, classification from names where length(classification) > 0' | $script/parse_classification.rb >> $public/name_classifications.csv
+
+echo "id	name_id	when	location_id	lat	long	alt	vote_cache	is_collection_location	thumb_image_id" > $public/observations.csv
+mysql --defaults-extra-file=$config_file -q -s -e 'select id, name_id, `when`, location_id, if(gps_hidden, round(lat, 0), lat) as lat, if(gps_hidden, round(`long`, 0), `long`) as `long`, alt, vote_cache, is_collection_location, thumb_image_id from observations' >> $public/observations.csv
+
+echo "model_id	model_name	label	image_id" > $public/ml_images.csv
+mysql --defaults-extra-file=$config_file -q -s -e 'select vm.id, vm.name, vg.name, vgi.image_id from visual_models vm, visual_groups vg, visual_group_images vgi where vgi.visual_group_id = vg.id and vg.visual_model_id = vm.id and vgi.included = 1' >> $public/ml_images.csv

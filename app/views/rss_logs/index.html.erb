@@ -1,15 +1,11 @@
 <%
-  @title = content_tag(:span, :rss_log_title.t, class: "text-nowrap")
-  @container = :full
+add_page_title(tag.span(:rss_log_title.t, class: "text-nowrap"))
+add_tab_set(rss_logs_index_tabs(user: @user, types: @types))
+add_type_filters
 
-  if @links.any?
-    tabs = create_links(@links)
-    @tabsets = { right: draw_tab_set(tabs) }
-  end
+@container = :full
 
-  @full_width_tab_set = render(partial: "rss_log_tabset")
-
-  flash_error(@error) if @error && @objects.empty?
+flash_error(@error) if @error && @objects.empty?
 %>
 
 <%= paginate_block(@pages) do %>
@@ -21,4 +17,3 @@
     <div style="clear:left"></div>
   </ul>
 <% end %>
-

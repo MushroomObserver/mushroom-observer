@@ -1,0 +1,25 @@
+<%
+  activate_url = "#{MO.http_domain}/account/api_key/activate/#{@api_key.id}"
+  manager_url = "#{MO.http_domain}/account/api_keys"
+  intro = :email_verify_api_key_intro.tp(
+    user: @user.login,
+    app_user: @app_user.login,
+    app: @api_key.notes,
+    activate_link: "xxx",
+    manager_link: "yyy"
+  )
+  intro.gsub!(/xxx/, link_to(activate_url, activate_url))
+  intro.gsub!(/yyy/, link_to(manager_url, manager_url))
+
+if @user.email_html %>
+<html>
+<head>
+<title><%= "#{:app_title.t}: #{@title}" %></title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
+<%= intro.html_safe %>
+<br/>
+</body>
+</html>
+<% else %><%= intro.html_to_ascii %>
+<% end %>

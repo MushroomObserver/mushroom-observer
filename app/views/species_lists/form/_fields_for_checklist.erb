@@ -1,0 +1,13 @@
+<%= fields_for(:checklist_data) do |fcd| %>
+  <div class="form-group" id="checklist_data">
+    <%= label_tag(:checklist_data, :form_species_lists_species_to_add.t + ":",
+                  class: "text-nowrap") %>
+    <div class="form-group">
+      <% @checklist.sort_by(&:first).each do |name, id| %>
+        <%= check_box_with_label(form: fcd, field: id,
+                                 checked: @checklist_names[id],
+                                 label: name.t) %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

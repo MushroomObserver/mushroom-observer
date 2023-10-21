@@ -1,4 +1,6 @@
-<% @title = :search_bar_help_title .t %>
+<%
+add_page_title(:search_bar_help_title .t)
+%>
 
 <%= :pattern_search_terms_help.tp %>
 <%= content_tag(:p, "#{:OBSERVATIONS.t} #{:SEARCHES.t}", { class: "font-weight-bold" }) %>

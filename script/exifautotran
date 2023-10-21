@@ -26,11 +26,11 @@ do
   esac
 
   if test -n "$transform"; then
-    convert $transform $file tempfile.jpg
+    convert $transform "$file" /tmp/exifautotran-$$.jpg
     if test $? -ne 0; then
       echo Error while transforming $file - skipped.
     else
-      mv -f tempfile.jpg "$file"
+      mv -f /tmp/exifautotran-$$.jpg "$file"
     fi
   fi
 done

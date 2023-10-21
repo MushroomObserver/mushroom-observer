@@ -31,6 +31,10 @@ module Name::Taxonomy
     Name.all_ranks.index(rank)
   end
 
+  def rank_translated
+    Name.translate_rank(rank)
+  end
+
   def has_eol_data?
     if ok_for_export && !deprecated && MO.eol_ranks_for_export.member?(rank)
       observations.each do |o|
@@ -157,7 +161,7 @@ module Name::Taxonomy
   # matching genera, it prefers accepted ones that are not "sensu xxx".
   # Beyond that it just chooses the first one arbitrarily.
   def accepted_genus
-    @accepted_genus ||= \
+    @accepted_genus ||=
       begin
         accepted = approved_name
         if accepted.text_name.include?(" ")
@@ -444,6 +448,10 @@ module Name::Taxonomy
       all_ranks.index(rank_a) <=> all_ranks.index(rank_b)
     end
 
+    def translate_rank(rank)
+      "rank_#{rank}".downcase.to_sym.l
+    end
+
     # Handy method which searches for a plain old text name and picks the "best"
     # version available.  That is, it ignores misspellings, chooses accepted,
     # non-"sensu" names where possible, and finally picks the first one
@@ -486,13 +494,13 @@ module Name::Taxonomy
         end
 
         rank_idx = [rank_index("Genus"), rank_index(rank)].max
-        rank_str = "rank_#{rank}".downcase.to_sym.l
+        rank_str = Name.translate_rank(rank)
 
         # Check parsed output to make sure ranks are correct, names exist, etc.
         kingdom = "Fungi"
         parse_classification(text).each do |line_rank, line_name|
           real_rank = Name.guess_rank(line_name)
-          real_rank_str = "rank_#{real_rank}".downcase.to_sym.l
+          real_rank_str = Name.translate_rank(real_rank)
           expect_rank = if ranks_between_kingdom_and_genus.include?(line_rank)
                           line_rank
                         else
@@ -503,7 +511,7 @@ module Name::Taxonomy
             raise(:runtime_user_bad_rank.t(rank: line_rank.to_s))
           end
 
-          line_rank_str = "rank_#{line_rank}".downcase.to_sym.l
+          line_rank_str = Name.translate_rank(line_rank)
 
           if line_rank_idx <= rank_idx
             raise(:runtime_invalid_rank.t(line_rank: line_rank_str,
@@ -524,9 +532,9 @@ module Name::Taxonomy
         # Reformat output, writing out lines in correct order.
         if parsed_names != {}
           result = ""
-          Name.all_ranks.reverse_each do |rank|
-            if (name = parsed_names[rank])
-              result += "#{rank}: _#{name}_\r\n"
+          Name.all_ranks.reverse_each do |r|
+            if (name = parsed_names[r])
+              result += "#{r}: _#{name}_\r\n"
             end
           end
           result.strip!

@@ -1,0 +1,23 @@
+<%
+add_page_title(:create_donation_title.l)
+add_tab_set(admin_donations_form_new_tabs)
+%>
+
+<%= form_with(model: @donation, url: admin_donations_path,
+              id: "admin_new_donations_form") do |f| %>
+
+  <%= text_field_with_label(form: f, field: :amount, size: 7,
+                            label: "#{:confirm_amount.t}:", inline: true) %>
+
+  <%= text_field_with_label(form: f, field: :who, size: 50,
+                            label: "#{:WHO.t}:", inline: true) %>
+
+  <%= check_box_with_label(form: f, field: :anonymous,
+                           label: :donate_anonymous.t) %>
+
+  <%= text_field_with_label(form: f, field: :email, size: 50,
+                            label: "#{:EMAIL.t}:", inline: true) %>
+
+  <%= submit_button(form: f, button: :create_donation_add.l, center: true) %>
+
+<% end %>

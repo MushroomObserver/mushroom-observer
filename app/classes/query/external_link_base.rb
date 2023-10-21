@@ -25,7 +25,7 @@ class Query::ExternalLinkBase < Query::Base
     super
   end
 
-  def default_order
+  def self.default_order
     "url"
   end
 end

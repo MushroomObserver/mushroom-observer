@@ -26,11 +26,13 @@ MushroomObserver::Application.configure do
 
   # Enable queued email.
   config.queue_email = true
-
-  # Testing
-  config.action_mailer.delivery_method = :sendmail
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
+
+  # SMTP settings for gmail smtp-relay
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings =
+    Rails.application.credentials.gmail_smtp_settings_webmaster
 
   config.image_precedence = {
     default: [:mycolab, :local]
@@ -71,7 +73,7 @@ MushroomObserver::Application.configure do
 
   # Compress JavaScripts and CSS
   config.assets.compress = true
-  config.assets.js_compressor = :uglifier
+  config.assets.js_compressor = Uglifier.new(harmony: true)
   config.assets.css_compressor = :sass
 
   # Do not fallback to assets pipeline if a precompiled asset is missed.
@@ -112,11 +114,6 @@ MushroomObserver::Application.configure do
   # application.js, application.css, and all non-JS/CSS in app/assets
   # folder are already added.
 
-  # Ignore bad email addresses and do not raise email delivery errors.
-  # Set this to true and configure the email server for immediate delivery
-  # to raise delivery errors.
-  # config.action_mailer.raise_delivery_errors = false
-
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation can not be found)
   config.i18n.fallbacks = [I18n.default_locale]
@@ -132,14 +129,11 @@ MushroomObserver::Application.configure do
   # config.autoflush_log = false
 
   # Use default logging formatter so that PID and timestamp are not suppressed.
-  config.log_formatter = ::Logger::Formatter.new if defined?(::Logger)
+  config.log_formatter = Logger::Formatter.new if defined?(Logger)
 
   # Combine files using the "require" directives at the top of included files
   # See http://guides.rubyonrails.org/asset_pipeline.html#turning-debugging-off
   config.assets.debug = false
-
-  # Rails 5.2 credentials - add the master.key in production
-  # config.require_master_key = true
 end
 
 file = File.expand_path("../consts-site.rb", __dir__)

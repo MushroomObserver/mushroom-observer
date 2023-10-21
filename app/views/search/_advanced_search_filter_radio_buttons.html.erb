@@ -1,10 +1,15 @@
 <%= :"advanced_search_filter_#{filter.sym}".t %>.<br/>
+
 <% filter.on_vals.each do |val| %>
-  <%= checked = @filter_defaults[filter.sym].to_s == val.to_s
-      radio_button_tag(:"content_filter_#{filter.sym}", val, checked) %>
-  <%= :"advanced_search_filter_#{filter.sym}_#{val}".l %>.<br/>
+  <% checked = @filter_defaults[filter.sym].to_s == val.to_s %>
+  <%= radio_with_label(
+        form: f, field: :"#{filter.sym}", value: val, checked: checked,
+        label: :"advanced_search_filter_#{filter.sym}_#{val}".l
+      ) %>
 <% end %>
-<%= checked = @filter_defaults[filter.sym].to_s == filter.off_val.to_s
-    radio_button_tag(:"content_filter_#{filter.sym}", "", checked) %>
-<%= :"advanced_search_filter_#{filter.sym}_off".l %>.<br/>
-<br/>
+
+<% checked = @filter_defaults[filter.sym].to_s == filter.off_val.to_s %>
+<%= radio_with_label(
+      form: f, field: :"#{filter.sym}", value: "", checked: checked,
+      label: :"advanced_search_filter_#{filter.sym}_off".l
+    ) %>

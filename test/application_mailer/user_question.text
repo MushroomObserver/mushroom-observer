@@ -1,0 +1,22 @@
+From: news@mushroomobserver.org
+Reply-To: rolf@collectivesource.com
+To: mary@collectivesource.com
+Subject: [MO] Interesting idea
+
+Question from Another User
+
+Rolf Singer (rolf@collectivesource.com) asked the Mushroom Observer website to forward the following email to you:
+
+Shall we discuss it in email?
+
+--------------------------------------------------
+
+It is entirely up to you whether you want to reply to Rolf Singer (rolf@collectivesource.com) by replying directly to this email.
+Here are some handy links:
+
+Show this user: https://mushroomobserver.org/users/<%= ActiveRecord::FixtureSet.identify(:rolf) %>
+Stop sending me email like this: https://mushroomobserver.org/account/no_email/<%= ActiveRecord::FixtureSet.identify(:mary) %>?type=general_question
+Change your preferences: https://mushroomobserver.org/account/preferences/edit
+Latest changes at Mushroom Observer: https://mushroomobserver.org
+
+If you feel this user is abusing this service please forward this entire email message to: webmaster@mushroomobserver.org

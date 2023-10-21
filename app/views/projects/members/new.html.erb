@@ -1,0 +1,52 @@
+<%
+add_page_title(:add_members_title.t(title: @project.title))
+
+add_tab_set(project_members_form_new_tabs(project: @project))
+@container = :wide
+
+action = { controller: "/projects/members", action: :create,
+            project_id: @project.id, q: get_query_param }
+%>
+
+<div class="container-text mt-3 pb-2">
+
+  <%= form_with(url: action, id: "project_member_form") do |f| %>
+
+    <%= text_field_with_label(form: f, field: :candidate, size: 40,
+                              value: @candidate, placeholder: :start_typing.l,
+                              label: :LOGIN_NAME.t + ":",
+                              data: { autofocus: true,
+                                      autocompleter: :user }) %>
+
+    <%= submit_button(form: f, button: :ADD.t, class: "ml-3") %>
+
+  <% end %>
+
+</div><!--.container-text-->
+
+<table class="table table-striped table-project-members mt-3">
+  <thead>
+    <tr>
+      <th><%= :Login_name.t %></th>
+      <th><%= :Full_name.t %></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @users.sort_by(&:login).each do |user| %>
+      <tr>
+        <td>
+          <%= user_link(user, user.login) %>
+        </td>
+        <td>
+          <%= user.name %>
+        </td>
+        <td>
+          <%= post_button(name: :ADD.t,
+                          path: project_members_path(project_id: @project.id,
+                                                     candidate: user.id)) %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

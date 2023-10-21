@@ -17,8 +17,8 @@ module ExporterHelper
   end
 
   def set_ml_status_controls(obj)
-    status_controls(obj, obj.ok_for_ml,
-                    :review_ok_for_ml.t, :review_no_ml.t,
+    status_controls(obj, obj.diagnostic,
+                    :review_diagnostic.t, :review_non_diagnostic.t,
                     :set_ml_status)
   end
 
@@ -37,7 +37,7 @@ module ExporterHelper
       content_tag(:b, ok_msg, class: "text-nowrap")
     else
       link_with_query(ok_msg,
-                      { controller: :export,
+                      { controller: "/export",
                         action: action,
                         type: obj.type_tag,
                         id: obj.id, value: 1 },
@@ -45,7 +45,7 @@ module ExporterHelper
     end + " | " +
       if status
         link_with_query(not_ok_msg,
-                        { controller: :export,
+                        { controller: "/export",
                           action: action,
                           type: obj.type_tag,
                           id: obj.id, value: 0 },

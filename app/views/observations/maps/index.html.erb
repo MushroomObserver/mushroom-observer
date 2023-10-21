@@ -1,0 +1,12 @@
+<%
+@container = :wide
+add_page_title(:map_locations_title.t(locations: @query.title))
+add_tab_set(observation_maps_tabs(query: @query))
+
+objects = @observations
+objects += @locations if @locations.any?
+%>
+
+<%= render(partial: "shared/map",
+           locals: { objects: objects,
+                     query_params: query_params(@query), zoom: 2 }) %>

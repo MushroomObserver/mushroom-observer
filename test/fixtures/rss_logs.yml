@@ -6,25 +6,405 @@
 # All logged Observations should have at least one Image in case an integration
 # test clicks on the image.
 
-# Some integration tests expect this to be at the top of the RSS Log.
-# Therefore insure that other Observation entries have earlier updated_at's.
-observation_rss_log:
+DEFAULTS: &DEFAULTS
+  updated_at: 2005-05-12 17:21:00
+  created_at: 2005-05-12 17:20:00
+  notes: "20050512172000 log_observation_created user dick\n"
+
+minimal_unknown_obs_rss_log:
+  <<: *DEFAULTS
+  observation: minimal_unknown_obs
+  updated_at: 2005-05-12 17:21:00
+  created_at: 2005-05-12 17:20:00
+  notes: "20050512172000 log_observation_created user mary\n"
+
+detailed_unknown_obs_rss_log:
+  <<: *DEFAULTS
   observation: detailed_unknown_obs
   updated_at: 2006-03-02 21:14:00
   created_at: 2006-03-02 21:13:05
   notes: "20060302211400 log_image_created user mary\n20060302211305 log_observation_created user mary"
 
+coprinus_comatus_obs_rss_log:
+  <<: *DEFAULTS
+  observation: coprinus_comatus_obs
+  updated_at: 2007-02-27 20:21:04
+  created_at: 2007-02-27 20:20:00
+  notes: "20070227202104 log_observation_created user rolf\n"
+
+agaricus_campestris_obs_rss_log:
+  <<: *DEFAULTS
+  observation: agaricus_campestris_obs
+  updated_at: 2007-03-19 20:21:02
+  created_at: 2007-03-19 20:20:00
+  notes: "20070319202102 log_observation_created user rolf\n"
+
+agaricus_campestrus_obs_rss_log:
+  <<: *DEFAULTS
+  observation: agaricus_campestrus_obs
+  updated_at: 2007-06-23 20:00:01
+  created_at: 2007-06-23 20:00:00
+  notes: "20070623200001 log_observation_created user rolf\n"
+
+agaricus_campestras_obs_rss_log:
+  <<: *DEFAULTS
+  observation: agaricus_campestras_obs
+  updated_at: 2007-06-24 12:00:01
+  created_at: 2007-06-24 12:00:00
+  notes: "20070624120001 log_observation_created user rolf\n"
+
+agaricus_campestros_obs_rss_log:
+  <<: *DEFAULTS
+  observation: agaricus_campestros_obs
+  updated_at: 2007-06-24 12:00:01
+  created_at: 2007-06-24 12:00:00
+  notes: "20070624120001 log_observation_created user rolf\n"
+
+strobilurus_diminutivus_obs_rss_log:
+  <<: *DEFAULTS
+  observation: strobilurus_diminutivus_obs
+  updated_at: 2007-07-20 20:54:46
+  created_at: 2007-07-20 20:54:45
+  notes: "20070720205446 log_observation_created user rolf\n"
+
+stereum_hirsutum_1_rss_log:
+  <<: *DEFAULTS
+  observation: stereum_hirsutum_1
+  updated_at: 2017-06-23 09:02:00
+  created_at: 2017-06-23 09:01:00
+  notes: "20170623090200 log_observation_created user rolf\n"
+
+stereum_hirsutum_2_rss_log:
+  <<: *DEFAULTS
+  observation: stereum_hirsutum_2
+  updated_at: 2017-06-24 09:02:00
+  created_at: 2017-06-24 09:01:00
+  notes: "20170624090200 log_observation_created user rolf\n"
+
+tubaria_furfuracea_1_rss_log:
+  <<: *DEFAULTS
+  observation: tubaria_furfuracea_1
+  updated_at: 2017-06-23 09:22:00
+  created_at: 2017-06-23 09:21:00
+  notes: "20170623092200 log_observation_created user rolf\n"
+
+tubaria_furfuracea_2_rss_log:
+  <<: *DEFAULTS
+  observation: tubaria_furfuracea_2
+  updated_at: 2017-06-24 09:03:00
+  created_at: 2017-06-24 09:02:00
+  notes: "20170624090300 log_observation_created user rolf\n"
+
+unknown_with_no_naming_rss_log:
+  <<: *DEFAULTS
+  observation: unknown_with_no_naming
+  updated_at: 2008-09-23 09:03:00
+  created_at: 2008-09-23 09:00:00
+  notes: "20080923090300 log_observation_created user mary\n"
+
+unknown_with_lat_long_rss_log:
+  <<: *DEFAULTS
+  observation: unknown_with_lat_long
+  updated_at: 2010-07-22 09:21:00
+  created_at: 2010-07-22 09:20:00
+  notes: "20100722092100 log_observation_created user mary\n"
+
+amateur_obs_rss_log:
+  <<: *DEFAULTS
+  observation: amateur_obs
+  updated_at: 2010-12-31 06:47:00
+  created_at: 2010-12-31 06:46:00
+  notes: "20101231064700 log_observation_created user katrina\n"
+
+peltigera_obs_rss_log:
+  <<: *DEFAULTS
+  observation: peltigera_obs
+  updated_at: 2014-04-04 04:04:06
+  created_at: 2014-04-04 04:04:03
+  notes: "20140404040406 log_observation_created user rolf\n"
+
+peltigera_mary_obs_rss_log:
+  <<: *DEFAULTS
+  observation: peltigera_mary_obs
+  updated_at: 2014-05-04 05:05:05
+  created_at: 2014-05-04 05:05:05
+  notes: "20140504050505 log_observation_created user mary\n"
+
+fungi_obs_rss_log:
+  <<: *DEFAULTS
+  observation: fungi_obs
+  updated_at: 2013-09-15 04:04:05
+  created_at: 2013-09-15 04:04:04
+  notes: "20130915040405 log_observation_created user rolf\n"
+
+boletus_edulis_obs_rss_log:
+  <<: *DEFAULTS
+  observation: boletus_edulis_obs
+  updated_at: 2014-04-21 04:04:08
+  created_at: 2014-04-21 04:04:06
+  notes: "20140421040408 log_observation_created user dick\n"
+
+owner_only_favorite_eq_fungi_rss_log:
+  <<: *DEFAULTS
+  observation: owner_only_favorite_eq_fungi
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+owner_only_favorite_eq_consensus_rss_log:
+  <<: *DEFAULTS
+  observation: owner_only_favorite_eq_consensus
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+owner_only_favorite_ne_consensus_rss_log:
+  <<: *DEFAULTS
+  observation: owner_only_favorite_ne_consensus
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+owner_multiple_favorites_rss_log:
+  <<: *DEFAULTS
+  observation: owner_multiple_favorites
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+owner_uncertain_favorite_rss_log:
+  <<: *DEFAULTS
+  observation: owner_uncertain_favorite
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+owner_accepts_general_questions_rss_log:
+  <<: *DEFAULTS
+  observation: owner_accepts_general_questions
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+owner_refuses_general_questions_rss_log:
+  <<: *DEFAULTS
+  observation: owner_refuses_general_questions
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+collected_at_obs_rss_log:
+  <<: *DEFAULTS
+  observation: collected_at_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+displayed_at_obs_rss_log:
+  <<: *DEFAULTS
+  observation: displayed_at_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+two_img_obs_rss_log:
+  <<: *DEFAULTS
+  observation: two_img_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+imageless_unvouchered_obs_rss_log:
+  <<: *DEFAULTS
+  observation: imageless_unvouchered_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
 imged_unvouchered_obs_rss_log:
+  <<: *DEFAULTS
   observation: imged_unvouchered_obs
   updated_at: 2005-03-02 21:14:00
   created_at: 2005-03-01 15:25:02
   notes: "20050301152502 log_observation_created user dick\n"
 
+vouchered_obs_rss_log:
+  <<: *DEFAULTS
+  observation: vouchered_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+vouchered_imged_obs_rss_log:
+  <<: *DEFAULTS
+  observation: vouchered_imged_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+updated_2013_obs_rss_log:
+  <<: *DEFAULTS
+  observation: updated_2013_obs
+  updated_at: 2013-09-08 17:21:00
+  created_at: 2013-09-08 17:20:00
+  notes: "20130908172100 log_observation_created user \n"
+
+sortable_obs_users_first_obs_rss_log:
+  <<: *DEFAULTS
+  observation: sortable_obs_users_first_obs
+  created_at: 2016-01-10 17:20:00
+  updated_at: 2016-01-11 17:20:00
+  notes: "20160110172000 log_observation_created user sortable_obs_user\n"
+
+sortable_obs_users_second_obs_rss_log:
+  <<: *DEFAULTS
+  observation: sortable_obs_users_second_obs
+  updated_at: 2017-01-11 17:20:00
+  created_at: 2017-01-10 17:20:00
+  notes: "20170111172000 log_observation_created user sortable_obs_user\n"
+
+unlisted_rolf_obs_rss_log:
+  <<: *DEFAULTS
+  observation: unlisted_rolf_obs
+  updated_at: 2005-03-02 21:14:00
+  created_at: 2005-03-01 15:25:02
+  notes: "20050302211400 log_observation_created user rolf\n"
+
+unequal_positive_namings_obs_rss_log:
+  <<: *DEFAULTS
+  observation: unequal_positive_namings_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+all_namings_deprecated_obs_rss_log:
+  <<: *DEFAULTS
+  observation: all_namings_deprecated_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+authored_with_naming_obs_rss_log:
+  <<: *DEFAULTS
+  observation: authored_with_naming_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+other_user_owns_naming_obs_rss_log:
+  <<: *DEFAULTS
+  observation: other_user_owns_naming_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+other_user_owns_obs_rss_log:
+  <<: *DEFAULTS
+  observation: other_user_owns_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+same_user_owns_name_and_naming_obs_rss_log:
+  <<: *DEFAULTS
+  observation: same_user_owns_name_and_naming_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
 locally_sequenced_obs_rss_log:
+  <<: *DEFAULTS
   observation: locally_sequenced_obs
   updated_at: 2004-03-02 20:14:02
   created_at: 2004-03-02 20:13:05
   notes: "20040302201305 log_observation_created user dick\n"
+
+genbanked_obs_rss_log:
+  <<: *DEFAULTS
+  observation: genbanked_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+substrate_notes_obs_rss_log:
+  <<: *DEFAULTS
+  observation: substrate_notes_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+substrate_and_other_notes_obs_rss_log:
+  <<: *DEFAULTS
+  observation: substrate_and_other_notes_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+templater_noteless_obs_rss_log:
+  <<: *DEFAULTS
+  observation: templater_noteless_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+templater_other_notes_obs_rss_log:
+  <<: *DEFAULTS
+  observation: templater_other_notes_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+templater_orphaned_notes_obs_rss_log:
+  <<: *DEFAULTS
+  observation: templater_orphaned_notes_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+template_only_obs_rss_log:
+  <<: *DEFAULTS
+  observation: template_only_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+template_and_other_notes_obs_rss_log:
+  <<: *DEFAULTS
+  observation: template_and_other_notes_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+template_and_orphaned_notes_obs_rss_log:
+  <<: *DEFAULTS
+  observation: template_and_orphaned_notes_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+template_and_orphaned_notes_scrambled_obs_rss_log:
+  <<: *DEFAULTS
+  observation: template_and_orphaned_notes_scrambled_obs
+  # updated_at:
+  # created_at:
+  # notes: " log_observation_created user \n"
+
+california_obs_rss_log:
+  <<: *DEFAULTS
+  observation: california_obs
+  updated_at: 2005-03-02 21:14:00
+  created_at: 2005-03-01 15:25:02
+  notes: "20050302211400 log_observation_created user dick\n"
+
+chlorophyllum_rachodes_obs_rss_log:
+  <<: *DEFAULTS
+  observation: chlorophyllum_rachodes_obs
+
+perkatkun_obs_rss_log:
+  <<: *DEFAULTS
+  observation: perkatkun_obs
+
+
 
 species_list_rss_log:
   species_list: first_species_list

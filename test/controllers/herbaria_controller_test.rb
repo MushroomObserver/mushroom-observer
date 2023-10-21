@@ -53,7 +53,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("mary")
     get(:show, params: { id: herbarium.id })
 
-    assert_select("#title", text: herbarium.format_name, count: 1)
+    assert_displayed_title(herbarium.format_name)
     assert_select(
       "a[href^='#{new_herbaria_curator_request_path(id: herbarium)}']",
       { text: :show_herbarium_curator_request.l },
@@ -67,7 +67,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: herbarium.id })
 
-    assert_select("#title", text: herbarium.format_name)
+    assert_displayed_title(herbarium.format_name)
     assert_select("form[action^='#{herbarium_path(herbarium)}']") do
       assert_select("input[value='delete']", true,
                     "Show Herbarium page is missing a destroy herbarium button")
@@ -134,6 +134,16 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
+  def test_index_by_code
+    by = "code"
+
+    login
+    get(:index, params: { by: by })
+
+    assert_response(:success)
+    assert_displayed_title("Fungaria by Code")
+  end
+
   def test_index_all_merge_source_links_presence_rolf
     assert_true(nybg.can_edit?(rolf)) # rolf is a curator
     assert_true(fundis.can_edit?(rolf)) # herbarium has no curators
@@ -189,7 +199,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index_all_no_login
     get(:index, params: { flavor: :all })
-    assert_redirected_to(account_login_path)
+    assert_redirected_to(new_account_login_path)
     assert_select("a[href*=edit]", count: 0)
     assert_select("a[href^='herbaria_merge_path']", count: 0)
   end
@@ -238,7 +248,7 @@ class HerbariaControllerTest < FunctionalTestCase
     source = field_museum
     get(:index, params: { flavor: :all, merge: source.id })
 
-    assert_redirected_to(account_login_path)
+    assert_redirected_to(new_account_login_path)
     assert_select("a[href*=edit]", count: 0)
     assert_select("form[action *= 'herbaria_merges_path']", count: 0)
   end
@@ -247,7 +257,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login
     get(:index, params: { flavor: :nonpersonal })
 
-    assert_select("#title", text: :query_title_nonpersonal.l)
+    assert_displayed_title(:query_title_nonpersonal.l)
     Herbarium.where(personal_user_id: nil).each do |herbarium|
       assert_select(
         "a[href ^= '#{herbarium_path(herbarium)}']", true,
@@ -264,8 +274,9 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_pattern_text
+  def test_index_pattern_text
     pattern = "Personal Herbarium"
+
     login
     get(:index, params: { pattern: pattern })
 
@@ -288,7 +299,7 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_pattern_integer
+  def test_index_pattern_integer
     login
     get(:index, params: { pattern: nybg.id })
 
@@ -298,7 +309,7 @@ class HerbariaControllerTest < FunctionalTestCase
     )
   end
 
-  def test_reverse_records
+  def test_index_reverse_records
     login
     get(:index, params: { by: "reverse_records" })
 
@@ -333,12 +344,12 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_new_no_login
     get(:new)
-    assert_redirected_to(account_login_path)
+    assert_redirected_to(new_account_login_path)
   end
 
   def test_edit_no_login
     get(:edit, params: { id: nybg.id })
-    assert_redirected_to(account_login_path)
+    assert_redirected_to(new_account_login_path)
   end
 
   def test_edit_without_curators
@@ -347,7 +358,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:edit, params: { id: herbarium.id })
 
     assert_response(:success)
-    assert_select("#title", text: :edit_herbarium_title.l, count: 1)
+    assert_displayed_title(:edit_herbarium_title.l)
   end
 
   def test_edit_with_curators_by_non_curator
@@ -364,7 +375,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("rolf")
     get(:edit, params: { id: nybg.id })
     assert_response(:success)
-    assert_select("#title", text: :edit_herbarium_title.l, count: 1)
+    assert_displayed_title(:edit_herbarium_title.l)
   end
 
   def test_edit_with_curators_by_admin
@@ -373,12 +384,14 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:edit, params: { id: nybg.id })
 
     assert_response(:success)
-    assert_select("#title", text: :edit_herbarium_title.l, count: 1)
+    assert_displayed_title(:edit_herbarium_title.l)
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
   def test_create
+    QueuedEmail.queue = true
+    count_before = QueuedEmail.count
     herbarium_count = Herbarium.count
     login("katrina")
     post(:create, params: { herbarium: create_params })
@@ -394,11 +407,13 @@ class HerbariaControllerTest < FunctionalTestCase
                  herbarium.mailing_address)
     assert_equal(create_params[:description].strip, herbarium.description)
     assert_empty(herbarium.curators)
-    email = ActionMailer::Base.deliveries.last
-    assert_equal(katrina.email, email.header["reply_to"].to_s)
-    assert_match(/new herbarium/i, email.header["subject"].to_s)
-    assert_includes(email.body.to_s, "Burbank Herbarium")
-    assert_includes(email.body.to_s, herbarium.show_url)
+    assert_equal(count_before + 1, QueuedEmail.count)
+    email = QueuedEmail.last
+    assert_equal(katrina.id, email.user_id)
+    assert_equal(katrina.email, email.get_string(:sender_email))
+    assert_match(/new herbarium/i, email.get_string(:subject))
+    assert_includes(email.get_note, "Burbank Herbarium")
+    QueuedEmail.queue = false
   end
 
   def test_create_no_login
@@ -467,8 +482,9 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_equal("", herbarium.mailing_address)
     assert_equal("", herbarium.description)
     assert_empty(herbarium.curators)
-    assert_redirected_to(controller: :location, action: :create_location,
-                         where: "New Location", set_herbarium: herbarium.id)
+    assert_redirected_to(new_location_path(
+                           where: "New Location", set_herbarium: herbarium.id
+                         ))
   end
 
   def test_create_personal_herbarium
@@ -490,7 +506,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_equal("", herbarium.email)
     assert_equal("", herbarium.mailing_address)
     assert_equal("", herbarium.description)
-    assert_user_list_equal([mary], herbarium.curators)
+    assert_user_arrays_equal([mary], herbarium.curators)
   end
 
   def test_create_second_personal_herbarium
@@ -595,7 +611,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_update_no_login
     patch(:update, params: { herbarium: herbarium_params, id: nybg.id })
-    assert_redirected_to(account_login_path)
+    assert_redirected_to(new_account_login_path)
   end
 
   def test_update_with_duplicate_name_by_owner_of_some_records
@@ -607,8 +623,9 @@ class HerbariaControllerTest < FunctionalTestCase
     patch(:update, params: { herbarium: params, id: nybg.id })
 
     assert_equal(last_update, nybg.reload.updated_at)
-    assert_redirected_to(controller: :emails, action: :merge_request,
-                         type: :Herbarium, old_id: nybg.id, new_id: other.id)
+    assert_redirected_to(emails_merge_request_path(
+                           type: :Herbarium, old_id: nybg.id, new_id: other.id
+                         ))
   end
 
   def test_update_with_duplicate_name_by_owner_of_all_records
@@ -638,8 +655,8 @@ class HerbariaControllerTest < FunctionalTestCase
     patch(:update, params: { herbarium: params, id: nybg.id })
 
     assert_nil(nybg.reload.location)
-    assert_redirected_to(controller: :location, action: :create_location,
-                         where: "New Location", set_herbarium: nybg.id)
+    assert_redirected_to(new_location_path(where: "New Location",
+                                           set_herbarium: nybg.id))
   end
 
   def test_update_user_make_personal_by_owner_of_some_records
@@ -686,7 +703,7 @@ class HerbariaControllerTest < FunctionalTestCase
     patch(:update, params: { id: herbarium.id, herbarium: params })
 
     assert_users_equal(mary, herbarium.reload.personal_user)
-    assert_user_list_equal([mary], herbarium.reload.curators)
+    assert_user_arrays_equal([mary], herbarium.reload.curators)
   end
 
   def test_update_cannot_make_personal
@@ -756,7 +773,7 @@ class HerbariaControllerTest < FunctionalTestCase
     patch(:update, params: { id: herbarium.id, herbarium: params })
 
     assert_users_equal(mary, herbarium.reload.personal_user)
-    assert_user_list_equal([mary], herbarium.curators)
+    assert_user_arrays_equal([mary], herbarium.curators)
   end
 
   def test_update_change_personal_user_no_login
@@ -803,7 +820,7 @@ class HerbariaControllerTest < FunctionalTestCase
     patch(:update, params: { id: herbarium.id, herbarium: params })
 
     assert_users_equal(mary, herbarium.reload.personal_user)
-    assert_user_list_equal([mary], herbarium.curators)
+    assert_user_arrays_equal([mary], herbarium.curators)
   end
 
   def test_update_clear_personal_user_no_login

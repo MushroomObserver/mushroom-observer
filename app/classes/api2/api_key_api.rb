@@ -10,6 +10,7 @@ class API2
     self.put_page_length         = 1000
     self.delete_page_length      = 1000
 
+    # the :user may be the mobile app. the :for_user is the user the key is for
     def create_params
       @for_user = parse(:user, :for_user, help: :api_key_user) || @user
       {
@@ -42,7 +43,7 @@ class API2
     def after_create(api_key)
       return if api_key.verified
 
-      VerifyAPIKeyEmail.build(@for_user, @user, api_key).deliver_now
+      QueuedEmail::VerifyAPIKey.create_email(@for_user, @user, api_key)
     end
 
     def get

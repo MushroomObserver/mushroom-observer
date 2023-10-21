@@ -128,8 +128,8 @@ class ReportTest < UnitTestCase
       "2006",
       "2006-05-11",
       "https://mushroomobserver.org/#{obs.id}",
-      "/remote_images/orig/#{img1.id}.jpg " \
-        "/remote_images/orig/#{img2.id}.jpg",
+      "file://#{Rails.root.join("public/test_server1/orig/#{img1.id}.jpg ")}" \
+        "file://#{Rails.root.join("public/test_server1/orig/#{img2.id}.jpg")}",
       "FunDiS",
       "",
       "",
@@ -341,6 +341,52 @@ class ReportTest < UnitTestCase
       "From somewhere else",
       obs.id.to_s,
       "https://mushroomobserver.org/#{obs.id}"
+    ]
+    do_tsv_test(Report::Symbiota, obs, expect, &:id)
+  end
+
+  def test_symbiota_compress_consecutive_whitespace
+    obs = observations(:detailed_unknown_obs)
+    obs.notes = {
+      Substrate: "wood\tchips",
+      Habitat: "lawn",
+      Host: "_Agaricus_",
+      Other: "1st line.\r\n\r\n2nd line.\r\n \r\n3rd line."
+    }
+    obs.save!
+
+    img1 = images(:in_situ_image)
+    img2 = images(:turned_over_image)
+    expect = [
+      "Fungi",
+      "",
+      "Kingdom",
+      "Fungi",
+      "",
+      "",
+      "Mary Newbie",
+      "174",
+      "NY",
+      "2006-05-11",
+      "2006",
+      "5",
+      "11",
+      "USA",
+      "California",
+      "",
+      "Burbank",
+      "34.185",
+      "-118.33",
+      "148",
+      "294",
+      "#{obs.updated_at.api_time} UTC",
+      "wood chips",
+      "Agaricus",
+      "Habitat: lawn Other: 1st line. 2nd line. 3rd line.",
+      obs.id.to_s,
+      "https://mushroomobserver.org/#{obs.id}",
+      "https://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
+        "https://mushroomobserver.org/images/orig/#{img2.id}.jpg"
     ]
     do_tsv_test(Report::Symbiota, obs, expect, &:id)
   end

@@ -12,7 +12,6 @@ NameDescription.all.
   each { |x| puts "NameDescription #{x.id} #{x.source_type.inspect}" }
 Name.all.each { |x| puts "Name #{x.id} #{x.rank.inspect}" }
 Name::Version.all.each { |x| puts "Name::Version #{x.id} #{x.rank.inspect}" }
-Notification.all.each { |x| puts "Notification #{x.id} #{x.flavor.inspect}" }
 Query.all.each { |x| puts "Query #{x.id} #{x.flavor.inspect}" }
 Query.all.each { |x| puts "Query #{x.id} #{x.model_symbol.inspect}" }
 User.all.each { |x| puts "User #{x.id} #{x.thumbnail_size.inspect}" }

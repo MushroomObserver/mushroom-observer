@@ -19,11 +19,30 @@ MushroomObserver::Application.configure do
 
   # Turn off email.
   config.queue_email = false
+
+  # Tell ActionMailer not to deliver emails to the real world.
+  # The :file delivery method accumulates sent emails in the
+  # ../mail directory.  (This is a feature I added. -JPH 20080213)
+  config.action_mailer.delivery_method = :file
+
+  # Don't care if the mailer can't send
+  config.action_mailer.raise_delivery_errors = false
+
   config.action_mailer.smtp_settings = {
     address: "localhost",
     port: 25,
     domain: "localhost"
   }
+
+  # Use this to actually send some Gmail via SMTP-Relay in development,
+  # provided you have the credentials in credentials.yml.enc
+  #
+  # config.queue_email = true
+  # config.action_mailer.delivery_method = :smtp
+  # config.action_mailer.perform_deliveries = true
+  # config.action_mailer.raise_delivery_errors = true
+  # config.action_mailer.smtp_settings =
+  #   Rails.application.credentials.gmail_smtp_settings_webmaster
 
   config.image_precedence = { default: [:local, :mycolab] }
   config.image_fallback_source = :mycolab
@@ -42,14 +61,6 @@ MushroomObserver::Application.configure do
   # Show full error reports and disable caching
   config.consider_all_requests_local       = true
   config.action_controller.perform_caching = false
-
-  # Don't care if the mailer can't send
-  config.action_mailer.raise_delivery_errors = false
-
-  # Tell ActionMailer not to deliver emails to the real world.
-  # The :file delivery method accumulates sent emails in the
-  # ../mail directory.  (This is a feature I added. -JPH 20080213)
-  config.action_mailer.delivery_method = :file
 
   # Allow YAML deserializer to deserialize symbols
   # https://groups.google.com/g/rubyonrails-security/c/MmFO3LYQE8U?pli=1
@@ -78,7 +89,7 @@ MushroomObserver::Application.configure do
   config.assets.digest = false
 
   # Enable web console for MushroomObserver VM
-  config.web_console.whitelisted_ips = "10.0.2.2"
+  config.web_console.allowed_ips = "10.0.2.2"
 end
 
 file = File.expand_path("../consts-site.rb", __dir__)

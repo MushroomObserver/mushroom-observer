@@ -31,14 +31,14 @@ module Comment::Callbacks
   # the same comment.
   def oil_and_water
     user_ids = users_with_other_comments.map(&:id).sort
-    return unless (user_ids & ::MO.water_users).any?
-    return unless (user_ids & ::MO.oil_users).any?
+    return unless user_ids.intersect?(::MO.water_users)
+    return unless user_ids.intersect?(::MO.oil_users)
 
-    ::WebmasterEmail.build(
-      MO.noreply_email_address,
-      oil_and_water_content(user_ids),
-      oil_and_water_subject
-    ).deliver_now
+    QueuedEmail::Webmaster.create_email(
+      sender_email: MO.noreply_email_address,
+      subject: oil_and_water_subject,
+      content: oil_and_water_content(user_ids)
+    )
   end
 
   ##########################################################################

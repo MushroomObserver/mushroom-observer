@@ -1,0 +1,27 @@
+// Update observation view with results of update or create
+// Needs locals: identifier
+
+$('#mo_ajax_progress_caption').empty();
+$('#mo_ajax_progress').modal('hide');
+
+<% # The namings table is in another folder
+if identifier == "namings"
+  id = "namings_table"
+  partial = "observations/namings/table"
+else
+  id = "observation_#{identifier}"
+  partial = "observations/show/#{identifier}"
+end
+%>
+
+$("#<%= id %>").replaceWith('<%= j render(
+  partial: partial,
+  locals: { obs: @observation.reload },
+  layout: false
+) %>');
+
+// Update the page flash, not the modal flash
+$("#page_flash").html("<%= j flash_notices_html %>");
+
+// Remove the modal, because results on page
+$(".modal").attr('data-busy', 'false').modal('hide');

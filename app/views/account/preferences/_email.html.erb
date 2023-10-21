@@ -1,0 +1,66 @@
+<!-- Email Settings of Account Preferences Form -->
+
+<h5 class="mt-4 font-weight-bold">
+  <%= :prefs_email_prefs.t %>
+</h5>
+
+<%= check_box_with_label(form: f, field: :no_emails, prefs: true) %>
+<%= check_box_with_label(form: f, field: :email_html, prefs: true) %>
+
+<div class="mt-4">
+  <%= :prefs_email_comments.t %>:
+  <%= help_note(:span, ["(", :prefs_email_please_notify.t, ")"].safe_join) %>
+</div>
+
+<%= check_box_with_label(form: f, field: :email_comments_owner, prefs: true) %>
+<%= check_box_with_label(form: f, field: :email_comments_response,
+                         prefs: true) %>
+<%= check_box_with_label(form: f, field: :email_comments_all, prefs: true) %>
+
+<div class="mt-4">
+  <%= :prefs_email_observations.t %>:
+  <%= help_note(:span, ["(", :prefs_email_please_notify.t, ")"].safe_join) %>
+</div>
+
+<%= check_box_with_label(form: f, field: :email_observations_consensus,
+                         prefs: true) %>
+<%= check_box_with_label(form: f, field: :email_observations_naming,
+                         prefs: true) %>
+<%= check_box_with_label(form: f, field: :email_observations_all,
+                         prefs: true) %>
+
+<div class="mt-4">
+  <%= :prefs_email_names.t %>:
+  <%= help_note(:span, ["(", :prefs_email_please_notify.t, ")"].safe_join) %>
+</div>
+
+<%= check_box_with_label(form: f, field: :email_names_admin, prefs: true) %>
+<%= check_box_with_label(form: f, field: :email_names_author, prefs: true) %>
+<%= check_box_with_label(form: f, field: :email_names_editor, prefs: true) %>
+<%= check_box_with_label(form: f, field: :email_names_reviewer, prefs: true) %>
+<%= check_box_with_label(form: f, field: :email_names_all, prefs: true) %>
+
+<div class="mt-4">
+  <%= :prefs_email_locations.t %>:
+  <%= help_note(:span, ["(", :prefs_email_please_notify.t, ")"].safe_join) %>
+</div>
+
+<%= check_box_with_label(form: f, field: :email_locations_admin, prefs: true) %>
+<%= check_box_with_label(form: f, field: :email_locations_author,
+                         prefs: true) %>
+<%= check_box_with_label(form: f, field: :email_locations_editor,
+                         prefs: true) %>
+<%= check_box_with_label(form: f, field: :email_locations_all, prefs: true) %>
+
+<div class="mt-4">
+  <%= :prefs_email_general.t %>:
+  <%= help_note(:span, ["(", :prefs_email_please_notify.t, ")"].safe_join) %>
+</div>
+
+<%= check_box_with_label(form: f, field: :email_general_feature, prefs: true) %>
+<%= check_box_with_label(form: f, field: :email_general_commercial, prefs: 1) %>
+<%= check_box_with_label(form: f, field: :email_general_question, prefs: 1) %>
+
+<%= content_tag(:div, :prefs_email_note.tp, class: "help-block mt-4") %>
+
+<%= submit_button(form: f, button: :SAVE_EDITS.l, center: true) %>

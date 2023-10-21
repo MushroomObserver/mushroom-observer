@@ -1,0 +1,56 @@
+<% table = naming.calc_vote_table %>
+
+<p><%= :show_votes_descript.t %></p>
+
+<table cellpadding="0" cellspacing="5"
+       class="table-naming-votes">
+
+  <tr>
+    <th><%= :show_votes_vote.t %></th>
+    <th align="center"><%= :show_votes_score.t %></th>
+    <th align="center"><%= :show_votes_weight.t %></th>
+    <th align="center"><%= :show_votes_users.t %></th>
+    <th>&nbsp;</th>
+  </tr>
+
+  <% table.keys.sort {|x,y| table[y][:value] <=> table[x][:value]}.each do |str|
+    val = table[str][:value]
+    wgt = table[str][:wgt]
+    num = table[str][:num] %>
+    <% if val != 0 %>
+      <tr class="text-nowrap">
+        <td><%= str.t %></td>
+        <td align="center"><%= val %></td>
+        <td align="center"><%= "%.2f" % wgt %></td>
+        <td align="center"><%= num %></td>
+        <td align="left"><small><%=
+          votes = table[str][:votes].reject(&:anonymous?) \
+                                    .sort_by {|v| v.id.to_s.reverse}
+                                    # pseudorandom but deterministic order
+          if votes.length > 0
+            n = 0
+            "(".html_safe + votes.map do |vote|
+              n += 1
+              if n < 4
+                user_link(vote.user, vote.user.login)
+              else
+                "..."
+              end
+            end.safe_join(", ") + ")"
+          end
+        %></small></td>
+      </tr>
+    <% end %>
+  <% end %>
+
+  <tr>
+    <td colspan="5"><hr/></td>
+  </tr>
+
+  <tr>
+    <td align="center"><%= :show_votes_total.t %></td>
+    <td align="center"><%= "%.2f" % naming.vote_cache %></td>
+    <td colspan="2" align="center"><%= "%.2f%%" % naming.vote_percent %></td>
+    <td>&nbsp;</td>
+  </tr>
+</table>

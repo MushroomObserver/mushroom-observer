@@ -111,6 +111,16 @@ class NameDescription < Description
   has_many :editors, through: :name_description_editors,
                      source: :user
 
+  scope :for_eol_export,
+        lambda {
+          where(review_status: review_statuses.values_at(
+            "unvetted", "vetted"
+          )).
+            where(NameDescription[:gen_desc].not_blank).
+            where(ok_for_export: true).
+            where(public: true)
+        }
+
   EOL_NOTE_FIELDS = [
     :gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses
   ].freeze
@@ -144,11 +154,6 @@ class NameDescription < Description
   after_update :notify_users
   after_save :update_classification_cache
 
-  # Override the default show_controller
-  def self.show_controller
-    :name
-  end
-
   # Don't add any authors until someone has written something "useful".
   def author_worthy?
     gen_desc.present? || diag_desc.present?
@@ -159,6 +164,15 @@ class NameDescription < Description
   #  :section: Descriptions
   #
   ##############################################################################
+  def self.show_controller
+    # Not the generated default in AbstractModel, because controller namespaced.
+    "/names/descriptions"
+  end
+
+  # Eliminate when controller_normalized? goes.
+  def self.show_action
+    :show
+  end
 
   # Returns an Array of all the descriptive text fields that don't require any
   # special processing when they go to EOL.  Fields are all Symbol's.
@@ -280,6 +294,9 @@ class NameDescription < Description
           recipients.delete(interest.user)
         end
       end
+
+      # Remove users who have opted out of all emails.
+      recipients.reject!(&:no_emails)
 
       # Send notification to all except the person who triggered the change.
       (recipients.uniq - [sender]).each do |recipient|

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_09_28_163200) do
+ActiveRecord::Schema.define(version: 2023_10_01_144823) do
 
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
@@ -99,6 +99,7 @@ ActiveRecord::Schema.define(version: 2022_09_28_163200) do
     t.integer "rss_log_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.boolean "locked", default: false, null: false
   end
 
   create_table "glossary_terms_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -164,7 +165,7 @@ ActiveRecord::Schema.define(version: 2022_09_28_163200) do
     t.string "original_name", limit: 120, default: ""
     t.boolean "transferred", default: false, null: false
     t.boolean "gps_stripped", default: false, null: false
-    t.boolean "ok_for_ml", default: true, null: false
+    t.boolean "diagnostic", default: true, null: false
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -362,6 +363,15 @@ ActiveRecord::Schema.define(version: 2022_09_28_163200) do
     t.text "classification"
   end
 
+  create_table "name_trackers", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "user_id", default: 0, null: false
+    t.integer "name_id"
+    t.text "note_template"
+    t.datetime "updated_at"
+    t.boolean "require_specimen", default: false, null: false
+    t.boolean "approved", default: true, null: false
+  end
+
   create_table "names", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "version"
     t.datetime "created_at"
@@ -422,15 +432,7 @@ ActiveRecord::Schema.define(version: 2022_09_28_163200) do
     t.integer "user_id"
     t.float "vote_cache", default: 0.0
     t.text "reasons"
-  end
-
-  create_table "notifications", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "user_id", default: 0, null: false
-    t.integer "flavor"
-    t.integer "obj_id"
-    t.text "note_template"
-    t.datetime "updated_at"
-    t.boolean "require_specimen", default: false, null: false
+    t.index ["observation_id"], name: "index_namings_on_observation_id"
   end
 
   create_table "observation_collection_numbers", charset: "utf8mb3", force: :cascade do |t|
@@ -454,6 +456,7 @@ ActiveRecord::Schema.define(version: 2022_09_28_163200) do
     t.integer "observation_id"
     t.integer "user_id"
     t.datetime "last_view"
+    t.boolean "reviewed"
   end
 
   create_table "observations", id: { type: :integer, unsigned: true }, charset: "utf8mb3", force: :cascade do |t|
@@ -479,6 +482,8 @@ ActiveRecord::Schema.define(version: 2022_09_28_163200) do
     t.string "text_name", limit: 100
     t.text "classification"
     t.boolean "gps_hidden", default: false, null: false
+    t.integer "source"
+    t.datetime "log_updated_at"
   end
 
   create_table "project_images", charset: "utf8mb3", force: :cascade do |t|
@@ -505,6 +510,10 @@ ActiveRecord::Schema.define(version: 2022_09_28_163200) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer "rss_log_id"
+    t.boolean "open_membership", default: false, null: false
+    t.boolean "accepting_observations", default: true, null: false
+    t.integer "location_id"
+    t.integer "image_id"
   end
 
   create_table "publications", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -668,7 +677,7 @@ ActiveRecord::Schema.define(version: 2022_09_28_163200) do
     t.boolean "email_locations_admin", default: false
     t.boolean "email_names_admin", default: false
     t.integer "thumbnail_size", default: 1
-    t.integer "image_size", default: 3
+    t.integer "image_size", default: 5
     t.string "default_rss_type", limit: 40, default: "all"
     t.integer "votes_anonymous", default: 1
     t.integer "location_format", default: 1
@@ -684,6 +693,28 @@ ActiveRecord::Schema.define(version: 2022_09_28_163200) do
     t.string "content_filter"
     t.text "notes_template"
     t.boolean "blocked", default: false, null: false
+    t.boolean "no_emails", default: false, null: false
+  end
+
+  create_table "visual_group_images", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "image_id"
+    t.integer "visual_group_id"
+    t.boolean "included", default: true, null: false
+  end
+
+  create_table "visual_groups", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "visual_model_id"
+    t.string "name", null: false
+    t.boolean "approved", default: false, null: false
+    t.text "description"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "visual_models", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "name", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "votes", id: :integer, charset: "utf8mb3", force: :cascade do |t|

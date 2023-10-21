@@ -89,22 +89,8 @@ MushroomObserver::Application.configure do
   config.webmaster_email_address = "webmaster@#{config.domain}"
   config.donation_business = "UQ23P3G6FBYKN"
 
-  # File where the list of most commonly used names lives.
-  config.name_primer_cache_file = "#{config.root}/tmp/name_primer.#{config.env}"
-  config.user_primer_cache_file = "#{config.root}/tmp/user_primer.#{config.env}"
-
   # File where we keep name_lister data cache.
   config.name_lister_cache_file = "#{config.root}/public/name_list_data.js"
-
-  # Access data for Pivotal Tracker's API.
-  config.pivotal_enabled  = false
-  config.pivotal_url      = "www.pivotaltracker.com"
-  config.pivotal_path     = "/services/v5"
-  config.pivotal_project  = "224629"
-  config.pivotal_token    = "xxx"
-  config.pivotal_max_vote = 1
-  config.pivotal_min_vote = -1
-  config.pivotal_test_id  = 77_165_602
 
   # Configuration files for location validator.
   location_path = "#{config.root}/config/location/"

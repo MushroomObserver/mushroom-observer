@@ -223,6 +223,8 @@
   # COMMON WORDS AND PHRASES
 
   # Object titles, all nouns.
+  ACTIVITY: Activity
+  activity: activity
   API_KEY: API Key
   api_key: API key
   API_KEYS: API Keys
@@ -231,6 +233,9 @@
   article: article
   ARTICLES: Articles
   articles: articles
+  CHECKLISTS: Checklists
+  CLADE: Clade
+  clade: clade
   COLLECTION_NUMBER: Collection Number
   collection_number: collection number
   COLLECTION_NUMBERS: Collection Numbers
@@ -239,10 +244,12 @@
   comment: comment
   COMMENTS: Comments
   comments: comments
+  CONTRIBUTORS: Contributors
   DESCRIPTION: Description
   description: description
   DESCRIPTIONS: Descriptions
   descriptions: descriptions
+  DONATIONS: Donations
   DRAFT: Draft
   draft: draft
   DRAFTS: Drafts
@@ -259,8 +266,11 @@
   image: image
   IMAGES: Images
   images: images
-  ignore: ignore
   IGNORE: Ignore
+  ignore: ignore
+  INFO: Info
+  INFORMATION: Information
+  INTERESTS: Interests
   GEOLOCATION: Geolocation
   geolocation: geolocation
   GLOSSARY: Glossary
@@ -283,6 +293,10 @@
   license: license
   LICENSES: Licenses
   licenses: licenses
+  LICHEN: Lichen
+  lichen: lichen
+  LINKS: Links
+  links: links
   LOCATION: Location
   location: location
   LOCATIONS: Locations
@@ -307,6 +321,10 @@
   name_description: name description
   NAME_DESCRIPTIONS: Name Descriptions
   name_descriptions: name descriptions
+  NAME_TRACKER: Name Tracker
+  name_tracker: name tracker
+  NAME_TRACKERS: Name Trackers
+  name_trackers: name trackers
   NAMING: Proposed Name
   naming: proposed name
   NAMINGS: Proposed Names
@@ -334,6 +352,8 @@
   past_name: name change
   PAST_NAMES: Name Changes
   past_names: name changes
+  PIVOTAL: Pivotal
+  POLICY: Policy
   PROJECT: Project
   project: project
   PROJECTS: Projects
@@ -342,6 +362,8 @@
   publication: publication
   PUBLICATIONS: Publications
   publications: publications
+  REGION: Region
+  region: region
   RSS_LOG: Activity Log
   rss_log: activity log
   RSS_LOGS: Activity Logs
@@ -362,6 +384,14 @@
   specimen: specimen
   SPECIMENS: Specimens
   specimens: specimens
+  SUPPORT: Support
+  support: support
+  TEST_PAGES: Test Pages
+  THEME: Theme
+  TRANSLATION: Translation
+  translation: translation
+  TRANSLATIONS: Translations
+  translations: translations
   USER: User
   user: user
   USERS: Users
@@ -370,6 +400,14 @@
   user_group: user group
   USER_GROUPS: User Groups
   user_groups: user groups
+  VISUAL_GROUP: Visual Group
+  visual_group: visual group
+  VISUAL_GROUPS: Visual Groups
+  visual_groups: visual groups
+  VISUAL_MODEL: Visual Model
+  visual_model: visual model
+  VISUAL_MODELS: Visual Models
+  visual_models: visual models
   VOTE: Vote
   vote: vote
   VOTES: Votes
@@ -609,6 +647,9 @@
   # activate an API key
   ACTIVATE: Activate
   activate: activate
+  # apply changes
+  APPLY: Apply
+  apply: apply
   # approve a name
   APPROVE: Approve
   approve: approve
@@ -617,6 +658,9 @@
   attach: attach
   CANCEL: Cancel
   cancel: cancel
+  # clear a search form
+  CLEAR: Clear
+  clear: clear
   # close a popup window
   CLOSE: Close
   close: close
@@ -751,6 +795,7 @@
   map_all: Map All
   show_location: Show [LOCATION]
   show_location_description: Show [DESCRIPTION]
+  about_this_taxon: About this taxon
   show_name: About [NAME]
   show_name_description: Show [DESCRIPTION]
   show_object: Show [TYPE]
@@ -767,6 +812,8 @@
   EDITING: Editing
   google_images: Google Images
   MAXIMUM: Maximum
+  on_mo: On MO
+  on_the_web: On the web
   show_on_map: Show on map
   many_times: "[num] times"
   one_time: once
@@ -817,8 +864,8 @@
   review_inaccurate: Inaccurate/Incomplete
   review_no_export: Not for Export
   review_ok_for_export: Okay for Export
-  review_no_ml: Not for Machine Learning
-  review_ok_for_ml: Okay for Machine Learning
+  review_non_diagnostic: Non-Diagnostic
+  review_diagnostic: Diagnostic
 
   # Naming reasons.
   naming_reason_label_1: Recognized by sight
@@ -1207,6 +1254,11 @@
   log_object_updated: "[:log_object_updated_by_user]"
   log_object_updated_at: "[:log_object_updated_by_user]"
 
+  source_credit_mo_website: Created using the "Mushroom Observer website":https://mushroomobserver.org.
+  source_credit_mo_android_app: Created using the "Mushroom Observer Android app":https://mushroomobserver.org/articles/34.
+  source_credit_mo_iphone_app: Created using the "Mushroom Observer iPhone app":https://mushroomobserver.org/articles/34.
+  source_credit_mo_api: Created using the "Mushroom Observer API":https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md.
+
   ##############################################################################
 
   # APPLICATION LAYOUT -- this stuff appears on every single page
@@ -1216,7 +1268,7 @@
   app_title: Mushroom Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: "**MO Merch!!!  Check it out the \"MO Shop on Etsy\":https://www.etsy.com/shop/MushroomObsMerch!**<br>\nThanks to Hannah and Anne for making this happen!"
+  app_banner_box: "Check out our new \"Help Identify\":https://mushroomobserver.org/observations/identify interface!<br>\nAlso checkout the \"MushroomObsMerch Etsy store\":https://www.etsy.com/shop/MushroomObsMerch"
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
@@ -1234,6 +1286,7 @@
   app_comments: "[:COMMENTS]"
   app_observations_left: "[:OBSERVATIONS]"
   app_create_observation: "[:create_object(type=:observation)]"
+  app_help_id_obs: Help Identify
   app_sort_by_date_obs: "[:sort_by_object(type=:date)]"
   app_sort_by: "[:sort_by_object(type=order)]"
   app_species_list: "[:SPECIES_LISTS]"
@@ -1248,6 +1301,7 @@
   app_your_observations: Your Observations
   app_your_lists: Your Lists
   app_your_interests: Your Interests
+  app_your_projects: Your Projects
   app_your_summary: Your Summary
   app_preferences: Preferences
   app_life_list: Life List
@@ -1272,6 +1326,7 @@
   app_publications: Publications
   app_more: More
   app_other: Other
+  app_report_a_bug: Report a Bug
 
   # This is for the search bar at the top of every page.
   app_find: Find
@@ -1301,6 +1356,9 @@
 
   # MOST POPULAR PAGES
 
+  # autocompleters
+  start_typing: Start typing...
+
   # emails/ask_observation_question
   ask_observation_question_title: Question about [name]
   ask_observation_question_label: Enter your question below.  When you hit "[:SEND]" it will be emailed to [user].  The email will automatically include a link to this observation as well as your email address.
@@ -1315,20 +1373,20 @@
   ask_webmaster_title: Email Question or Comment
   ask_webmaster_your_email: Your email address
   ask_webmaster_question: Question or Comment
-  ask_webmaster_note: "Thanks for your interest in the Mushroom Observer website.  This website was first launched in mid-2006.  The site is owned by the non-profit \"Mushroom Observer, Inc.\":/support/governance and administered by a group of volunteer developers and maintainers.  We welcome any questions you might have about using the site or comments on how the site might be improved.  Please have a look at our \"feature tracker\":/pivotal/index or our \"account on Pivotal Tracker\":https://www.pivotaltracker.com/projects/224629 to see what we have planned.  You can vote and comment on all the various suggestions for future development there.  However, they are only rough guides, subject to bugs or others issues that may come up and, of course, the availability of our own time to work on the site.\n\nThe Mushroom Observer Team"
+  ask_webmaster_note: "Thanks for your interest in the Mushroom Observer website.  This website was first launched in mid-2006.  The site is owned by the non-profit \"Mushroom Observer, Inc.\":/support/governance and administered by a group of volunteer developers and maintainers.  We welcome any questions you might have about using the site or comments on how the site might be improved.  You can vote and comment on all the various suggestions for future development there.  However, they are only rough guides, subject to bugs or others issues that may come up and, of course, the availability of our own time to work on the site.\n\nThe Mushroom Observer Team"
 
-  # comment/add_comment
+  # comments/new
   comment_add_title: Add Comment to [name]
   comment_add_create: "[:CREATE]"
 
-  # comment/edit_comment
+  # comments/edit
   comment_edit_title: Edit Comment on [name]
 
-  # comment/list_comments (This is used to describe the object the comment is
+  # comments/index (This is used to describe the object the comment is
   # about if the object has been deleted, orphaning the comment.)
   comment_list_deleted: object deleted
 
-  # comment/show_comment
+  # comments/show
   comment_show_title: Comment on [Name]
   comment_show_created_at: "[:Created]"
   comment_show_by: "[:By]"
@@ -1342,23 +1400,31 @@
   commercial_inquiry_title: Commercial Inquiry About [name]
   commercial_inquiry_header: Enter your commercial inquiry about this image.  When you hit "[:SEND]" it will be emailed to [user].  The email will automatically include a link to this image as well as your email address.
 
-  # location/create_location_description
+  # locations/descriptions/new
   create_location_description_title: "[:create_name_description_title]"
 
-  # location/create_location
+  # locations/new
   create_location_title: "[:create_object(type=:location)]"
 
-  # name/create_name_description
+  # names/descriptions/new
   create_name_description_title: Create Description for [name]
 
-  # name/create_name
+  # names/new
   create_name_title: "[:create_object(type=:name)]"
   create_name_multiple_names_match: There are already multiple names matching "[str]".
   create_name_duplicate_identifier: is used by another Name
 
   # naming/create
+  create_naming: Propose a Name
   create_naming_title: "Propose Name for Observation #[id]"
   create_new_naming_warn: Sorry, someone else has given this a positive vote, so we had to create a new Naming to accomodate your changes."
+
+  # observations/identify
+  obs_needing_id: Observations Needing Identification
+  obs_needing_id_intro: "Here you can quickly scan unidentified observations, propose a name, or vote on a current name. Use the search bar above to filter by location, taxon or user.\n\nIf you feel you can't improve on an identification, \"[:mark_as_reviewed]\" and it won't come up again. (It will still appear for others.)\n\n*\"Lightbox\" shortcuts:*\n&lsqb;&larr;&rsqb; &lsqb;&rarr;&rsqb; move between observations, &lsqb;return&rsqb; propose a name, &lsqb;/&rsqb; mark as reviewed."
+  mark_as_reviewed: Mark as reviewed
+  marked_as_reviewed: Marked as reviewed
+  filter_by: "Filter by:"
 
   # observer/create_observation
   create_observation_title: "[:create_object(type=:observation)]"
@@ -1398,13 +1464,11 @@
   edit_name_fill_in_classification_for_genus_first: You need to fill in a classification for the genus first.
   edit_lifeform_title: Edit Lifeform of [name]
   edit_lifeform_help: Check boxes of all categories which apply to this taxon.
-  edit_lifeform_save: "[:SAVE]"
   propagate_lifeform_title: Propagate Lifeform to Subtaxa of [name]
   propagate_lifeform_add: Check boxes of categories to add to all subtaxa.
   propagate_lifeform_remove: Check boxes of categories to remove from all subtaxa.
-  propagate_lifeform_apply: Apply
 
-  # observer/edit_naming
+  # observations/edit_naming
   edit_naming_title: "Edit [:NAMING] for Observation #[id]"
 
   # observations/edit
@@ -1430,7 +1494,7 @@
   form_comments_comment: "[:Comment]"
   form_comments_summary: "[:Summary]"
 
-  # shared/_form_description
+  # shared/_fields_for_description
   form_description_source: "[:SOURCE]"
   form_description_source_public: Public [:app_title] Description
   form_description_source_foreign: From Another [:app_title] Server
@@ -1458,6 +1522,10 @@
   # observer/_form_list_feedback
   form_list_feedback_missing_names: The following names could not be found.
   form_list_feedback_missing_names_help: Click 'Save'/'Update' to create these names.  If you want to correct any you entered by hand, do so in the area below and click 'Save' to re-evaluate the list.  If the names came from an uploaded species list, create a correct file and select it for upload.
+
+  # glossary
+  form_glossary_name_help: "A mycology-specific term, all lower-case except if capitalized in ordinary use. \n Avoid (a) variations of other Terms, or (b) Names of taxa. Details:"
+  form_glossary_description_help: "A concise definition matching the part of speech of the Term, without repeating another Term's definition. (Instead link to the other Term.) Details:"
 
   # location/_form_location
   form_locations_locked: Lock this location so users cannot change the name or coordinates?
@@ -1501,7 +1569,7 @@
   form_names_citation_textilize_note: Citations can be formatted using the <a href="/info/textile_sandbox" target="_new">Textile markup system</a>.
   form_names_misspelling_note: If this name is misspelt, please check the box and enter the correct spelling. *NOTE:* Please do not use this to deprecate correctly-spelled synonyms.
   form_names_classification_help: "List the higher taxa containing this [rank], one name per rank. Do not include genus or lower ranks. Example:<br/> Domain: _Eukarya_<br/> Kingdom: _Fungi_<br/> Phylum: _Basidiomycota_<br/> Class: _Agaricomycetes_<br/> Order: _Agaricales_<br/> Family: _Agaricaceae_<br/>"
-  form_names_gen_desc_help: Describe the general appearance of this taxon.
+  form_names_gen_desc_help: "Describe the general appearance of this taxon. <br/>Please limit the [:form_names_gen_desc] to (or at least begin it with) a <b>short</b> field-guide type description. Please do not dump the protologue here."
   form_names_diag_desc_help: Describe what distinguishes this taxon from closely related taxa.
   form_names_look_alikes_help: What other taxa look similar to this one?
   form_names_habitat_help: What habitats has taxon has been found in?
@@ -1514,7 +1582,7 @@
   name_error_field_start: "[field] must not start with '[start]'."
   name_error_field_end: "[field] must not end with '[end]'."
 
-  # observer/_form_naming
+  # observations/_form_naming
   form_naming_confidence: Confidence
   form_naming_valid_synonyms: Valid synonyms are
   form_naming_deprecated: The name '[name]' is deprecated.
@@ -1528,7 +1596,7 @@
   form_naming_multiple_names_help: The number after each name is how many observations are currently using that name.
   form_naming_confidence_help: How confident are you of this identification?  Please justify how you arrived at your decision in the boxes below, as well.
 
-  # observer/_form_observations
+  # observations/_form_observations
   form_observations_specimen_available: Specimen Available
   form_observations_is_collection_location: Is this location where it was collected?
   form_observations_gps_hidden: Hide exact coordinates?
@@ -1544,6 +1612,7 @@
   form_observations_is_collection_location_help: Check when the location is where the mushroom was growing.  Uncheck when it is only where the mushroom was seen (e.g., mushroom fairs, grocery, foray id table where collection location is unknown etc.).
   form_observations_open_map: Open Interactive Map
   form_observations_clear_map: Clear Map
+  form_observations_locate_on_map: Locate on Map
   form_observations_notes_help: Please include any additional information you can think of about this observation that isn't clear from the photographs, e.g., habitat, substrate or nearby trees; distinctive texture, scent, taste, staining or bruising; results of chemical or microscopic analyses, etc.
   form_observations_remove_image_confirm: Are you sure you want to remove this image?  This will only remove this image from this observation.  If it is attached to other observations, it will remain attached to them.
   form_observations_specimen_available_help: Check when there is a preserved specimen available for further study.
@@ -1564,10 +1633,16 @@
   form_observations_upload_error: Something went wrong while uploading image. Skipping it for now. You can try uploading it again later after we've created the observation.
   form_observations_collection_number_help: Enter the collector's full name and their record identifier.  The identifier can be anything.  It's whatever you use to keep track of your specimens, and it is typically written on the specimen label.  This is most commonly a sequential number starting at 1 for your first specimen, and working up over your life time.  Another common format is a year or date along with a collection number for that date, e.g., "17-034".  But it can be anything you like, including letters and punctuation.
   form_observations_herbarium_record_help: If you've sent a specimen to a fungarium, you can enter that here, along with their accession number if you know it.  Otherwise let it default to your personal fungarium and leave the accession number blank.
+
+  form_observations_there_is_a_problem_with_projects: This observation violates the constraints of one or more selected projects. "+See message below.+":#project_messages
+  form_observations_projects_out_of_range: "The observation date ([date]) or location ([place_name]) is outside the range of these checked project(s)"
+  form_observations_projects_out_of_range_help: "Either: \n - Uncheck out-of-range projects; \n - Change the observation date or location if it is incorrect; or \n - (undesirably) Check [:form_observations_projects_ignore_project_constraints] to ignore the project constraints. \nThen click [button_name]."
+  form_observations_projects_ignore_project_constraints: Ignore Project Constraints
+
   form_observations_there_is_a_problem_with_location: There is a problem with the location. "+See message below.+":#location_messages
   form_observations_there_is_a_problem_with_name: There is a problem with the name. "+See message below.+":#name_messages
 
-  # observer/_form_species_list
+  # observations/_form_species_list
   form_species_lists_title: Title
   form_species_lists_species_to_add: Select Species to Add
   form_species_lists_write_in_species: "Write-In Species: (enter a name on each line)"
@@ -1580,7 +1655,7 @@
   form_species_lists_multiple_names_help: In each case, select the intended name.  The number after each name is how many observations are currently using that name.
   form_species_lists_project_help: Check any projects you wish to attach this species list to.  Any observations you create for this species list will also automatically be attached to these projects, too.  (But not pre-existing observations.)
 
-  # observer/_form_synonyms
+  # observations/_form_synonyms
   form_synonyms_names: Names
   form_synonyms_names_help: List the names you want to be synonymized with [name].
   form_synonyms_current_synonyms: Current Synonyms
@@ -1592,36 +1667,33 @@
   form_synonyms_missing_names: The following names could not be found.
   form_synonyms_missing_names_help: Click [:name_change_synonyms_submit] to create these names.  If you want to correct any names, do so in the area below and click [:name_change_synonyms_submit] to re-evaluate the list.
 
-  # image/add_image
+  # images/new
   image_set_default: Set as default thumbnail
   image_add_title: Add an Image for [name]
-  image_add_edit: "[:edit_object(type=:observation)]"
   image_add_default: Default thumbnail
   image_add_image: "[:Image]"
   image_add_optional: "[:optional]"
   image_add_upload: "[:UPLOAD]"
   image_add_warning: Please only upload images that you created or which you own the copyright of. By uploading images you are giving us permission to distribute this image to other users ("legalese":http://creativecommons.org/licenses/by-nc-sa/2.5/). You are also giving us permission to display this image along side advertisements or other fund-raising tools that may be used to support this site.
 
-  # image/reuse_image_for_user
+  # account/profile/images/reuse
   image_reuse_all_users: Include other users' images.
   image_reuse_just_yours: Only show your images.
 
-  # image/edit_image
+  # observations/images/edit
   image_edit_title: "Editing Image: [name]"
 
-  # image/remove_images
-  image_remove_edit: "[:edit_object(type=:observation)]"
+  # observations/images/remove
   image_remove_remove: Remove
   image_remove_title: Remove Images from [name]
 
-  # image/reuse_images
+  # observations/images/reuse
   image_reuse_title: Reuse Image for [name]
-  image_reuse_edit: "[:edit_object(type=:observation)]"
   image_reuse_id: Image ID
   image_reuse_reuse: Reuse
   image_reuse_id_help: Either click one of the images below, or if you know the image ID, just enter it here and click '[:image_reuse_reuse]'.
 
-  # image/show_image
+  # images/show
   image_show_title: "[:IMAGE]: [name]"
   image_show_inquiry: Send Commercial Inquiry
   image_show_rotate_left: Rotate Left
@@ -1650,7 +1722,10 @@
   image_show_make_default: Make this the default size
   image_show_transform_note: Image is being processed. This may take several seconds.
 
-  # observation/list_observations
+  # images/exif/show
+  exif_data_for_image: "EXIF Data for Image [image]"
+
+  # observations/list_observations
   list_observations_location_all: All Locations
   list_observations_location_define: Define This Location
   list_observations_location_merge: Merge With A Defined Location
@@ -1661,7 +1736,7 @@
   list_observations_add_to_list: Add To / Remove From Species List
   list_observations_download_as_csv: Download Observations
 
-  # location/list_place_names (list_locations)
+  # locations/list_place_names (list_locations)
   list_place_names_known: Known Locations
   list_place_names_known_order: "(by name)"
   list_place_names_map: Map Locations
@@ -1671,7 +1746,7 @@
   list_place_names_undef: Undefined Locations
   list_place_names_undef_order: "(by frequency)"
 
-  # location/list_countries
+  # locations/list_countries
   list_countries: Country List
   list_countries_known: Countries With Observations
   list_countries_title: Countries and Other Localities
@@ -1687,12 +1762,11 @@
   location_dubious_bad_term: For consistency, we prefer '[good]' instead of '[bad]'.
   location_dubious_commas: All commas should be followed by a space and another word
   location_dubious_empty: Empty location given
-  location_dubious_redundant_county: County may not be required in this name; for greatest consistency we prefer that you not include the county for towns and cities.
   location_dubious_redundant_state: Both '[state]' and '[country]' are on the list of countries and continents.  A common mistake is to include the continent in addition to the country; this is unnecessary.
   location_dubious_unknown_country: Unknown country '[country]'
   location_dubious_unknown_state: Unrecognized state or province '[state]' for '[country]'.
 
-  # account/login
+  # account/login/new
   login_please_login: Please login
   login_login: Login
   login_user: User name or Email address
@@ -1708,7 +1782,7 @@
   login_explain_login_requirement: To prevent automated programs from consuming too much of our resources, we limit website use to registered users.
   login_data_without_login_caption: Get MO Data Without Logging In
   login_images_without_login: Get "MO Images for Machine Learning":/articles/20.
-  login_data_without_login: Get "MO Data":https://github.com/MushroomObserver/mushroom-observer/blob/master/README_API.md#csv-files.
+  login_data_without_login: Get "MO Data":https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md#csv-files.
 
   # account/logout
   logout_title: Logout
@@ -1736,7 +1810,6 @@
   name_deprecate_preferred: Preferred name
   name_deprecate_comment_summary: "[:Deprecated]"
   name_deprecate_comments: "[:Comments]"
-  name_deprecate_submit: "[:SUBMIT]"
   name_deprecate_preferred_help: Enter the preferred name. Author citation is recommended but not required.
   name_deprecate_comments_help: "Please say why this Name has been deprecated (e.g, a link to Index Fungorum).\nThis will be added to the Comments for [name]."
 
@@ -1819,7 +1892,7 @@
   prefs_thumbnail_small: "[:image_show_small]"
   prefs_thumbnail_large: "[:image_show_large]"
   prefs_thumbnail_maps: View thumbnail map on Observation page?
-  prefs_image_size: Image size
+  prefs_image_size: Image size for "lightbox"
   prefs_image_size_help: Size shown when you click on an image.
   prefs_image_small: "[:image_show_small] (320 x 320)"
   prefs_image_medium: "[:image_show_medium] (640 x 640)"
@@ -1833,8 +1906,8 @@
   prefs_alt_col_colors: Alternate column colors.
   prefs_alt_row_colors: Alternate row colors.
   prefs_text_below_images: Put text below images.
-  prefs_view_owner_id: View Observer's Preferred ID?
   prefs_view_owner_id_help: View Observer's preferred ID for Observation (in addition to consensus ID)
+  prefs_view_owner_id: "[:prefs_view_owner_id_help]"
 
   prefs_content_filters: Content Filters
   prefs_content_filters_explanation: Control content visibility site-wide.
@@ -1873,7 +1946,9 @@
   prefs_email_general: General Email
   prefs_email_general_commercial: someone is interested in using an image of mine for commercial purposes.
   prefs_email_general_features: new features come out.
+  prefs_email_general_feature: "[:prefs_email_general_features]"
   prefs_email_general_questions: someone wants to send me a question about my observations, etc.
+  prefs_email_general_question: "[:prefs_email_general_questions]"
   prefs_email_comments: "[:Comment] Email"
   prefs_email_comments_all: anyone comments on anything.
   prefs_email_comments_owner: someone comments on my observations, names, etc.
@@ -1895,6 +1970,7 @@
   prefs_email_names_reviewer: someone changes a name I've reviewed.
   prefs_email_prefs: Email preferences
   prefs_email_html: It's okay to use HTML in my emails.
+  prefs_no_emails: Opt out of _all_ email from MO.
   prefs_email_digest_daily: Send me summary at the end of the day.
   prefs_email_digest_immediate: Notify me of events as they happen.
   prefs_email_digest_weekly: Send me summary at the end of the week.
@@ -1953,7 +2029,7 @@
 
   field_textile_link: This field can be formatted with <a href="/info/textile_sandbox" target="_new">Textile</a>.
 
-  # comment/_show_comments
+  # comments/_comments_for_object
   show_comments_add_comment: "[:add_object(type=:comment)]"
   show_comments_no_comments_yet: No one has commented yet.
   show_comments_and_more: And [num] more...
@@ -1967,6 +2043,7 @@
   show_description_edit: "[:EDIT]"
   show_description_clone: Clone
   show_description_merge: Merge With Another
+  show_description_move: Move This Description
   show_description_publish: Publish
   show_description_make_default: Make Default
   show_description_adjust_permissions: Adjust Permissions
@@ -1974,6 +2051,7 @@
   show_description_write_permissions: Edit
   show_description_clone_help: Create your own description based on this description.
   show_description_merge_help: Merge this description into another, then remove this one.
+  show_description_move_help: Move this description to a different [parent].
   show_description_publish_help: Publish this draft and make it the default public description.
   show_description_make_default_help: Make this the default description that is shown on the main '[:show_name(name=:name)]' page.
   show_description_adjust_permissions_help: Change the set of users who are allowed to view, modify or administrate this description.
@@ -2001,7 +2079,7 @@
   show_location_reverse: Reverse Location
   show_location_locked: This location is locked. If you want to change the location of your observation, please edit the observation instead.  Changing a location name or coordinates implicitly changes all the observations at that location, too.
 
-  # name/show_name
+  # names
   show_name_title: "[:NAME]: [name]"
   show_name_add_name: "[:add_object(type=:name)]"
   show_name_edit_name: "[:edit_object(type=:name)]"
@@ -2040,7 +2118,7 @@
   show_name_other_observations_notes: "(Someone proposed [name] for these observations, but consensus hasn't accepted it.  Confidence value is for __this__ name, not the consensus name.)"
   show_name_nomenclature: Nomenclature
   show_name_classification: Classification
-  show_name_brief_description: Brief Description
+  show_name_general_description: "[:form_names_gen_desc]"
   show_name_see_more: See More
   show_name_icn_id_missing: missing
   index_fungorum: Index Fungorum
@@ -2050,7 +2128,7 @@
   gsd_species_synonymy: GSD Species Synonymy
   sf_species_synonymy: SF Species Synonymy
 
-  # name/show_name - links to observations
+  # names - links to observations
   show_name_observations: More [:OBSERVATIONS]
   show_name_observations_of: More [:OBSERVATIONS] of [name]
   show_name_all_observations: More [:OBSERVATIONS] (all synonyms)
@@ -2075,7 +2153,7 @@
   inherit_classification_parent_lower_rank: Parent must be higher rank than [rank].
   show_name_num_notifications: "*Number of users interested in this name:* [num]"
 
-  # observer/_show_namings
+  # observations/_show_namings
   show_namings_proposed_name: "[:NAMING]"
   show_namings_proposed_names: "[:NAMINGS]"
   show_namings_no_names_yet: No names have been proposed yet.
@@ -2095,12 +2173,13 @@
   show_namings_please_login: Please login to propose your own names and vote on existing names.
   show_namings_saving: Saving
 
-  # observer/show_observation
+  # observations/show_observation
   show_observation_title: "[:OBSERVATION]: [name]"
   show_observation_header: "[:OBSERVATION]"
   show_observation_site_id: Site ID
   show_observation_owner_id: Observer Preference
   show_observation_no_clear_preference: no clear preference
+  show_observation_details: Details
   show_observation_edit_observation: "[:edit_object(type=:observation)]"
   show_observation_propose_new_name: "[:show_namings_propose_new_name]"
   show_observation_debug_consensus: Debug Consensus
@@ -2114,6 +2193,7 @@
   show_observation_gps_hidden: coordinates hidden from public
   show_observation_specimen_available: Specimen available
   show_observation_specimen_not_available: No specimen available
+  show_observation_no_images: No images
   show_observation_remove_images: "[:remove_objects(type=:image)]"
   show_observation_reuse_image: Reuse Image
   show_observation_add_images: "[:add_objects(type=:image)]"
@@ -2137,7 +2217,7 @@
   show_observation_related_taxa: Related taxa
   map_observation_title: "Map of Observation #[ID]"
 
-  # observer/suggestions
+  # observations/suggestions
   suggestions_title: Confident Suggestions
   suggestions_title_others: Wild Guesses
   suggestions_already_proposed: already proposed
@@ -2154,18 +2234,18 @@
   suggestions_processing_results: Processing results
   suggestions_error: Something went wrong, sorry!
 
-  # location/show_past_location
+  # locations/show_past_location
   show_past_location_title: "[:VERSION] [num]: [name]"
   show_past_location_other_versions: Other Versions
   show_past_location_no_version: No version specified
 
-  # location/show_past_location_description
+  # locations/show_past_location_description
   show_past_location_description_title: "[:VERSION] [num]: [name]"
 
-  # name/show_past_name
+  # names/versions/show
   show_past_name_title: "[:VERSION] [num]: [name]"
 
-  # name/show_past_name_description
+  # names/descriptions/versions/show
   show_past_name_description_title: "[:VERSION] [num]: [name]"
 
   # object/show_past_versions
@@ -2177,7 +2257,7 @@
   # info/site_stats
   show_site_stats_title: Site Statistics
 
-  # observer/_show_votes
+  # observations/_show_votes
   show_votes_title: Show Votes for [name]
   show_votes_users: "[:Users]"
   show_votes_vote: "[:Vote]"
@@ -2225,7 +2305,7 @@
   signup_preferred_theme: Preferred Theme (optional)
   signup_random: Random
   signup_button: Signup
-  signup_email_help: "A working email address is required to verify your account.  This helps us keep the spammers out.\n\nOnce you verify your account, you can change your email on your account Preferences page. We are very careful to never show your email address on a webpage that others can access.  We will never sell your email address.  We will only share your email address if you ask us to (e.g., when you send an email to another member, they will see your email).  By default your email address will be used to send you information about changes to the site as well as notifications relevant to your contributions to the site.  You can opt out of these uses by changing your Preferences.\n\nWhen you complete this page and click \"Signup\", we will send you an email with account verification information."
+  signup_email_help: "In order to sign up, you must provide a working email address. (One-time addresses will not work. Addresses that block email from mushroomobserver.org will not work.)\n\n When you complete this page and click \"Signup\", we will send you an email with account verification information. (This helps us to block spammers.)\n\n Once you verify your account, you can change your email on your account Preferences page. We are very careful to never show your email address on a webpage that others can access. We will never sell your email address. We will only share your email address if you ask us to (e.g., when you send an email to another member, they will see your email). By default your email address will be used to send you information about changes to the site as well as notifications relevant to your contributions to the site. You can opt out of these uses by changing your Preferences."
 
   # species_list/create_species_list
   species_list_create_title: "[:create_object(type=:species_list)]"
@@ -2303,13 +2383,13 @@
 
   # sequence/add_sequence
   sequence_add_title: Add [:SEQUENCE]
-  sequence_add_edit: "[:image_add_edit]"
+  sequence_add_edit: "[:edit_object(type=:observation)]"
   sequence_add_owner_id: "[:show_observation_owner_id]"
 
   # sequence/form_sequence
   form_sequence_locus_help: "Start with a short abbreviation (because the [:OBSERVATION] displays only the first [locus_width] characters). Examples:\n&nbsp;&nbsp;ITS\n&nbsp;&nbsp;multi-locus\n&nbsp;&nbsp;LSU large subunit ribosomal RNA gene, partial sequence"
   form_sequence_both_required: "[:BASES] and/or both [:ARCHIVE]/[:ACCESSION] required"
-  form_sequence_bases_format: "<a href=[help_url]>FASTA or Bare Sequence format</a>"
+  form_sequence_bases_format: FASTA or Bare Sequence format
   form_sequence_archive_help: On-line, public database with [:sequence] data for this [:OBSERVATION].
   form_sequence_accession: "[:ACCESSION] number/code"
   form_sequence_accession_help: "Examples:\n&nbsp;&nbsp;KT968655\n&nbsp;&nbsp;UDB024324"
@@ -2361,6 +2441,10 @@
   show_glossary_term_title: "Glossary Term: [name]"
   show_glossary_term_reuse_image: Add Example
   show_glossary_term_remove_image: Remove Examples
+  show_glossary_term_creator: Creator of this Glossary Term
+  show_glossary_term_editor: "[:Editors]"
+  show_glossary_term_editors: "[:Editors]"
+
 
   # glossary_term#show_past_glossary_term
   show_past_glossary_term_title: "[:VERSION] [num]: [name]"
@@ -2374,13 +2458,15 @@
   # glossary_term#index
   glossary_term_index: Glossary
   glossary_term_index_title: Glossary of Mycology Terms
-  glossary_term_index_intro: "In collaboration with the Rhode Island School of Design, students from Jean Blackburn's Scientific Illustration class to create high-quality Creative Commons licensed scientific illustrations of fungal anatomy terms. To share these works, this new glossary feature for Mushroom Observer was created.\nThis release provides the bare minimum of functionality to be able to discover and view these illustrations. New glossary terms can also be created by anyone in the community. Currently these terms are illustrated by single images, but my intent is to add support for multiple images including both scientific illustrations and example photographs. There will also be a search feature, the ability to add links to terms as part of any Mushroom Observer markup. A particular feature that needs discussion is how best to handle translations of these terms and their definitions. Discussion of these features including additional desired terms are welcome on either the Mushroom Observer mailing list (<a href=\"https://groups.google.com/forum/?fromgroups=#!forum/mo-general\">mo-general@googlegroups.com</a>) or the <a href=\"https://www.facebook.com/groups/105230049528087/\">unofficial Mushroom Observer Facebook page</a>."
+  glossary_term_index_documentation: "Glossary Documentation and Guidelines"
 
   # glossary_term#edit
   edit_glossary_term: "[:edit_object(type=:glossary_term)]"
   edit_glossary_term_title: "Editing Glossary Term: [name]"
   edit_glossary_term_save: Save
-  edit_glossary_term_not_allowed: Only admins can edit glossary terms
+  edit_glossary_term_not_allowed: This Glossary Term has been locked by the site admins
+  edit_glossary_term_locked: Lock this Glossary Term?
+
 
   # glossary_term errors
   glossary_error_name_blank: Name cannot be blank.
@@ -2593,7 +2679,53 @@
 
   # support/wrapup_2012
   wrapup_2012_title: 2012 Wrapup for the Mushroom Observer Community
-  wrapup_2012_body: "2012 was a busy year for Mushroom Observer.  Many notable new features were added.  Highlights include:\n\n* Substantial revisions to the <a href=\"/name/show_name/383\">Show Name</a> and <a href=\"/image/show_image/267480?size=medium\">Show Image</a> pages\n* Data downloads from observation searches\n* Support for <a href=\"/herbarium\">Herbarium</a> and Specimen pages\n* Interactive support for translators\n* <a href=\"/users/checklist?user_id=1093\">Life Lists</a> from user summary pages\n* Substantial increase in data shared with EOL\n* Reciprocal links with <a href=\"http://mycoportal.org/\">MyCoPortal</a>\n\nMore details available on the <a href=\"/info/news\">Features and Fixes</a> page.\n\nOne of the goals of this work has been to increase the scientific value of the site for research. The support for Herbarium and Specimen pages as well as the reciprocal links with MyCoPortal are recent steps towards this goal. This work is directly related to a new effort to digitize fungal herbaria throughout the US led by Barbara Thiers. I continue to work with Tom Bruns at UC Berkeley and Deborah McGuinness at Rensselaer Polytechnic Institute (RPI) to find funding to directly support improvements to the Mushroom Observer.  These projects continue to promise exciting developments for MO in the future.\n\nIn addition, the site has continued to grow.  We now have over 300,000 images, 100,000 observations, and over 3800 registered users.  This not only indicates the greatest number of images we've received in a year (106,000), but is a greater growth rate than the previous year (56% vs. 49%).\n\nFortunately, due to generous donations from all of you, we have continued to be able to improve the site configuration.  While we do have a few more tricks up our sleeves that we expect to implement soon, it is increasingly clear that more substantial improvements are needed.  Historically, we have run the site off a single server.  To achieve the next level of performance we would like to separate the database from the application server, and add an additional application server along with a small load balancer.  We expect this to roughly triple the monthly costs of running the site to around $200/month.\n\nI am also excited by a recent surge in the number of folks interested in contributing their time to the Mushroom Observer development effort.  We had a summer intern, Han Wang, from RPI create a prototype system for describing Fungi using semantic web technology (references at the end of the letter).  I presented on this work at the 2012 Mycological Society of America annual meeting.  Another RPI student, Katie Chastain, has recently joined the team and is interested in working on data provenance and developing a workflow for species discovery.  Alan Rockefeller has begun looking into improving site performance and Joe Cohen has started exploring upgrading our software stack.  If you want to join the party, sign up for the new <a href=\"https://groups.google.com/forum/?fromgroups=#!forum/mo-developers\">mo-developers@googlegroups.com</a> mailing list.  One of the significant enabling pieces for this is a new simpler system for setting up a development environment.  You can find out more at the <a href=\"https://github.com/MushroomObserver/developer-startup\">developer-startup GitHub Project</a>.\n\nHowever, this year has not been entirely good news. The Consortium for Digital Mycology Resources (CDMR), was organized in 2009 to support online digital mycology resources such as Mushroom Observer, and it applied for federal tax exempt status under section ==501(c)(3)== so that it could receive deductible donations from interested users.  This ruling is still pending in the IRS.  Beginning in 2012, Mushroom Observer member John Harper, a tax lawyer with Morrison & Foerster, noticed that CDMR’s exemption application had been pending with the IRS for an unusually long time, and volunteered to help CDMR on a pro-bono basis in its attempt to attempt to obtain recognition of a section ==501(c)(3)== status for CDMR.  Since then he has briefed the IRS on the issues that the IRS has raised, and had a conference with the IRS to discuss the ruling request.  CDMR’s case is currently under review in the National Office of the IRS.\n\nIn light of CDMR’s unsettled tax status, CDMR’s board decided not to solicit donations at the end of last year.  However, the CDMR board of directors is committed to creating or joining a recognized tax-exempt non-profit that can receive deductible donations to support online mycological resources such as the Mushroom Observer.  Exactly what form this will take and how soon it will happen is still up in the air.\n\nWithout financial support from CDMR, I have been personally paying to support Mushroom Observer largely out of my own pocket over the last few months. I would very much appreciate any <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">personal gifts</a> that you all would be willing to send to contribute to the cost of keeping Mushroom Observer online during this interim period. This will be especially important before we can attempt to improve the level of performance by adding more servers. Any gifts I receive will be used to cover costs directly associated with running the Mushroom Observer and such donations will continue to be recognized on the Mushroom Observer donors page. Unfortunately, you will not be able to count them as tax deductible donations.  You can make your gifts with a credit card through <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">PayPal</a>\n\n\nThanks for all your contributions to the Mushroom Observer,\n-Nathan"
+  wrapup_2012_body: "2012 was a busy year for Mushroom Observer.  Many notable new features were added.  Highlights include:\n\n* Substantial revisions to the <a href=\"/names/383\">Show Name</a> and <a href=\"/images/267480?size=medium\">Show Image</a> pages\n* Data downloads from observation searches\n* Support for <a href=\"/herbarium\">Herbarium</a> and Specimen pages\n* Interactive support for translators\n* <a href=\"/users/checklist?user_id=1093\">Life Lists</a> from user summary pages\n* Substantial increase in data shared with EOL\n* Reciprocal links with <a href=\"http://mycoportal.org/\">MyCoPortal</a>\n\nMore details available on the <a href=\"/info/news\">Features and Fixes</a> page.\n\nOne of the goals of this work has been to increase the scientific value of the site for research. The support for Herbarium and Specimen pages as well as the reciprocal links with MyCoPortal are recent steps towards this goal. This work is directly related to a new effort to digitize fungal herbaria throughout the US led by Barbara Thiers. I continue to work with Tom Bruns at UC Berkeley and Deborah McGuinness at Rensselaer Polytechnic Institute (RPI) to find funding to directly support improvements to the Mushroom Observer.  These projects continue to promise exciting developments for MO in the future.\n\nIn addition, the site has continued to grow.  We now have over 300,000 images, 100,000 observations, and over 3800 registered users.  This not only indicates the greatest number of images we've received in a year (106,000), but is a greater growth rate than the previous year (56% vs. 49%).\n\nFortunately, due to generous donations from all of you, we have continued to be able to improve the site configuration.  While we do have a few more tricks up our sleeves that we expect to implement soon, it is increasingly clear that more substantial improvements are needed.  Historically, we have run the site off a single server.  To achieve the next level of performance we would like to separate the database from the application server, and add an additional application server along with a small load balancer.  We expect this to roughly triple the monthly costs of running the site to around $200/month.\n\nI am also excited by a recent surge in the number of folks interested in contributing their time to the Mushroom Observer development effort.  We had a summer intern, Han Wang, from RPI create a prototype system for describing Fungi using semantic web technology (references at the end of the letter).  I presented on this work at the 2012 Mycological Society of America annual meeting.  Another RPI student, Katie Chastain, has recently joined the team and is interested in working on data provenance and developing a workflow for species discovery.  Alan Rockefeller has begun looking into improving site performance and Joe Cohen has started exploring upgrading our software stack.  If you want to join the party, sign up for the new <a href=\"https://groups.google.com/forum/?fromgroups=#!forum/mo-developers\">mo-developers@googlegroups.com</a> mailing list.  One of the significant enabling pieces for this is a new simpler system for setting up a development environment.  You can find out more at the <a href=\"https://github.com/MushroomObserver/developer-startup\">developer-startup GitHub Project</a>.\n\nHowever, this year has not been entirely good news. The Consortium for Digital Mycology Resources (CDMR), was organized in 2009 to support online digital mycology resources such as Mushroom Observer, and it applied for federal tax exempt status under section ==501(c)(3)== so that it could receive deductible donations from interested users.  This ruling is still pending in the IRS.  Beginning in 2012, Mushroom Observer member John Harper, a tax lawyer with Morrison & Foerster, noticed that CDMR’s exemption application had been pending with the IRS for an unusually long time, and volunteered to help CDMR on a pro-bono basis in its attempt to attempt to obtain recognition of a section ==501(c)(3)== status for CDMR.  Since then he has briefed the IRS on the issues that the IRS has raised, and had a conference with the IRS to discuss the ruling request.  CDMR’s case is currently under review in the National Office of the IRS.\n\nIn light of CDMR’s unsettled tax status, CDMR’s board decided not to solicit donations at the end of last year.  However, the CDMR board of directors is committed to creating or joining a recognized tax-exempt non-profit that can receive deductible donations to support online mycological resources such as the Mushroom Observer.  Exactly what form this will take and how soon it will happen is still up in the air.\n\nWithout financial support from CDMR, I have been personally paying to support Mushroom Observer largely out of my own pocket over the last few months. I would very much appreciate any <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">personal gifts</a> that you all would be willing to send to contribute to the cost of keeping Mushroom Observer online during this interim period. This will be especially important before we can attempt to improve the level of performance by adding more servers. Any gifts I receive will be used to cover costs directly associated with running the Mushroom Observer and such donations will continue to be recognized on the Mushroom Observer donors page. Unfortunately, you will not be able to count them as tax deductible donations.  You can make your gifts with a credit card through <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">PayPal</a>\n\n\nThanks for all your contributions to the Mushroom Observer,\n-Nathan"
+
+  cannot_be_blank: cannot be blank
+
+  cannot_include_tabs: cannot include tabs
+
+  # visual group statuses
+  visual_group_include: Include
+  visual_group_exclude: Exclude
+  visual_group_included: Included
+  visual_group_excluded: Excluded
+  visual_group_needs_review: Needs Review
+
+  visual_group_count_excluded: "[count] Excluded Images"
+  visual_group_count_included: "[count] Definitional Images"
+  visual_group_count_needs_review: "[count] Images have been reviewed"
+
+  visual_group_includes_names: Includes images from these names (at most 10 listed here)
+
+  # Links to CRUD pages
+  visual_group_index: "[:VISUAL_GROUP] Index"
+  visual_group_edit: Edit [:VISUAL_GROUP]
+  visual_group_show: Show [:VISUAL_GROUP]
+  visual_group_create: Create [:VISUAL_GROUP]
+
+  # visual_groups/show
+  definitional_images: Definitional Images
+  show_visual_group_title: "[name] [:VISUAL_GROUP]"
+
+  # visual_groups/destroy
+  destroy_visual_group_success: "[:VISUAL_GROUP] [:destroyed]"
+
+  # visual_groups/edit
+  edit_visual_group_title: "[:EDITING] [name] [:VISUAL_GROUP]"
+  edit_visual_group_filter_options: Filter Options
+  edit_visual_group_update_filter: Update Filter
+
+  # visual_groups/update
+  update_visual_group_success: "[:UPDATED] [name] [:VISUAL_GROUP]"
+
+  # visual_models/show
+  show_visual_model_title: "[name] [:VISUAL_MODEL]"
+  show_visual_model_edit: "[:EDIT] [:VISUAL_MODEL]"
+  show_visual_model_index: "[:VISUAL_MODEL] [:INDEX]"
+
+  # visual_models/destroy
+  destroy_visual_model_success: "[:VISUAL_MODEL] [:destroyed]"
 
   ##############################################################################
 
@@ -2609,7 +2741,7 @@
   account_api_keys_create_button: Create a New Key
   account_api_keys_help: "API Keys are used by third-party applications to access the Mushroom Observer database directly.  You may request as many API Keys as you like, and no restrictions are placed on these keys.\n\nEach key is attached to a single user.  When posting observations or images, for example, your application will send this API Key in lieu of logging in. Therefore you should take some care to prevent other people or malicious agents from using your API Keys.\n\nNote that no key is required if you are only interested in _reading_ data; keys are only required if you wish to post or modify data."
   account_api_keys_create_success: Sucessfully created a new API Key.
-  account_api_keys_create_failed: "Failed to create a new API Key: [msg]"
+  account_api_keys_create_failed: "Failed to create a new API Key:"
   account_api_keys_removed_some: Successfully removed [num] selected API Key(s).
   account_api_keys_removed_none: No API Keys were selected.
   account_api_keys_updated: Successfully updated API Key notes.
@@ -2665,22 +2797,23 @@
   checklist_for_user_title: Checklist for [user]
   checklist_for_project_title: Checklist for [project]
   checklist_for_species_list_title: Checklist for [list]
-  checklist_summary: "Summary: [species] species in [genera] genera"
+  checklist_summary: "Summary: [names] names including [species] species in [genera] genera"
 
   # theme/color_themes
   color_themes_text: "**General Concept:** The [:app_title] website provides a number of color themes, some based on different groups of mushrooms.  By default the simple clean \"Black on White\" theme is used.  However, a [:user] can choose to use a particular theme throughout the site by selecting the theme on the [:user] preference page.\n\nThe idea of using mushrooms for color follows in the tradition of using mushrooms to dye fabrics.  Each color in a mushroom theme was pulled from a photograph included in the site from the given group.  The colors attempt to express the characteristic colors of the group.  In a few cases, the [:images] were adjusted using an automatic color balance operation in order to get a more characteristic color.\n\nThe following links describe each of the available themes including links to the [:images] the colors were extracted from:"
   color_themes_title: Color Themes
 
   # name/email_tracking
-  email_tracking_enabled_only_for: Enabled only for [name] -- contained taxa not yet supported for [rank].
-  email_tracking_help: If you enable tracking then a note will be sent to the email address you have provided whenever this name is applied to an [:observation].  A link to this page will be given in each tracking email.  You can save your mailing address for collections in "your profile":/account/profile.
+  email_tracking_help_above_species: If enabled, this feature will notify you by email whenever someone posts an observation in this [rank].
+  email_tracking_help_below_species: If enabled, this feature will notify you by email whenever someone posts an observation of [name].
   email_tracking_no_longer_tracking: No longer tracking [name].
-  email_tracking_note: Template for notifying an observer
-  email_tracking_note_help: Provide a note template that will be sent as an email or shown to the observer when this name is applied to an [:observation].  If you leave it blank, then the observer will not be notified.
+  email_tracking_note: Send a research request to the observer?
+  email_tracking_note_help: "Check the box above if you would like us to send an email to the observer in addition to notifying you. Please fill in the template below to use in the research request email. Use the special keywords ':observer' and ':observation' as place holders for the observer's name and the observation id, respectively. Note: This feature requires administrative approval to prevent abuse by spammers."
   email_tracking_note_template: "Dear :observer,\n\nI am currently doing research related to [species_name].\n\nIf possible, please make a dried specimen of any of the mushrooms described in :observation and send them to:\n\n[mailing_address]\n\nThanks,\n\n[users_name]"
   email_tracking_now_tracking: Now tracking [name].
   email_tracking_title: Email Tracking for [name]
   email_tracking_updated_messages: Updated tracking messages.
+  email_tracking_awaiting_approval: Your request to send observers research requests has been sent to the admins for approval. Please check "[:app_your_interests]":/interests (the megaphone icon in the upper right corner of the page) in the next day or two to see if your request has been approved.
 
   # name/eol_expanded_review
   eol_expanded_review_title: EOL Name List
@@ -2714,7 +2847,7 @@
   image_vote_anonymity_made_public: Made all of your image votes public.  Please also check your vote preference below to ensure that future votes are also public.
   image_vote_anonymity_invalid_submit_button: Invalid submit button "[label]", please "contact us":/emails/ask_webmaster_question for help.
 
-  # interest-related controls in name/show_name, observation/show_observation, etc.
+  # interest-related controls in names, observations, etc.
   interest_watch: Watch
   interest_ignore: Ignore
   interest_watch_help: Click here if you want us to send you email whenever there is a change in this [object].
@@ -2723,10 +2856,11 @@
   interest_watching: You have told us to email you about changes in this [object].  Click one of the small icons below to change.
   interest_ignoring: You have told us never to email you about changes in this [object].  Click one of the small icons below to change.
 
-  # interest/list_interests
+  # interests/index
   list_interests_title: Your Notification Requests
   list_interests_turn_on: Change to Watch
   list_interests_turn_off: Change to Ignore
+  list_name_tracker_pending_approval: "(Observer notification pending approval.)"
 
   # location/list_merge_options
   list_merge_are_you_sure: Do merge?  This cannot be undone.
@@ -2842,94 +2976,22 @@
   no_session_body: "It looks like your browser is refusing cookies.  Without cookies, our site has no way of remembering who you are from one page to the next.  This means that you will not be able to create an account and login, and therefore you will not be able to create [:observations], upload [:images], make [:comments], and much more.  You will still be able to view everything that the general public has access to, but you will just be an observer, you will not be able to participate actively.\n\nAll we will do is store a big long number on your computer.  Next time you go to our site, we will look up that number and use it to keep track of who you are.  (We get multiple requests every second from around the world -- without this ID we wouldn't stand a chance of keeping everyone straight!)  This ID is encrypted and keeps no sensitive information in it.\n\nIf you would like to turn cookies on, but aren't sure how, try looking it up on google with this search: \"How do I enable cookies in my browser?\":http://www.google.com/search?hl=en&q=How+do+I+enable+cookies+on+my+browser%3F&btnG=Google+Search Note that most browsers will let you enable cookies for individual sites, allowing you to protect your privacy everywhere else.  For example, in Firefox, go into Edit -> Preferences -> Privacy Tab -> Exceptions."
   no_session_title: You Have Cookies Disabled
 
-  # pivotal/index
-  pivotal_index_title: Directions for Future Development
-  pivotal_post_comment: Post Comment
-  pivotal_index_header: Use this page to browse through the many features requested by users and developers.  Some are very specific bug fixes or requests for new capabilities.  Others are just general areas people are interested in seeing Mushroom Observer grow.  Features are organized by use of the following set of labels.  Click on a label to see a list of features with that label. Click on a feature to see more detail and discussion.  If you are logged in, you will be able to vote features up or down, and you can add your own comments to the discussion.  If you would like to request a new feature, for now we request that you "send us an email":/emails/ask_webmaster_question describing what it is you'd like to do.  Please try to be as detailed as possible; concrete examples are generally the best.
-  pivotal_vote_failed: "We were unable to process your vote.\nIf the problem persists please notify to admins.\nSorry for the inconvenience!"
-  pivotal_story_failed: "We were unable to get the story you requested.\nIf the problem persists please notify to admins.\nSorry for the inconvenience!"
-  pivotal_comment_failed: "We were unable to post your comment.\nIf the problem persists please notify to admins.\nSorry for the inconvenience!"
-  pivotal_story_loading: Loading story details...
-  pivotal_posting_comment: Posting comment...
-  pivotal_posted_by: Posted by
-  pivotal_state_unscheduled: unscheduled
-  pivotal_state_unstarted: in the queue
-  pivotal_state_started: in progress
-  pivotal_head_critical: serious bugs or mission-critical work
-  pivotal_head_bottleneck: stuff required by lots of other things
-  pivotal_head_open: areas we are actively soliciting feedback
-  pivotal_head_started: areas developers are actively working
-  pivotal_head_unstarted: scheduled for work soon
-  pivotal_head_unscheduled: for the indefinite future
-  pivotal_head_day: has comments within last day
-  pivotal_head_week: has comments within last week
-  pivotal_head_month: has comments within last month
-  pivotal_head_none: has no recent comments
-  pivotal_head_all: show everything
-  pivotal_head_other: uncategorized
-  pivotal_label_critical: critical
-  pivotal_label_bottleneck: bottleneck
-  pivotal_label_open: open
-  pivotal_label_day: day
-  pivotal_label_week: week
-  pivotal_label_month: month
-  pivotal_label_none: none
-  pivotal_label_unscheduled: "[:pivotal_state_unscheduled]"
-  pivotal_label_unstarted: "[:pivotal_state_unstarted]"
-  pivotal_label_started: "[:pivotal_state_started]"
-  pivotal_label_all: "[:all]"
-  pivotal_label_other: other
-
-  pivotal_head_api: programmatic interface
-  pivotal_head_comments: commenting on observations, names, etc.
-  pivotal_head_descriptions: species descriptions and drafts
-  pivotal_head_email: email notifications
-  pivotal_head_i18n: translating site into other languages
-  pivotal_head_images: image information, manipulation
-  pivotal_head_lists: species lists, checklists
-  pivotal_head_locations: location names, geocoding
-  pivotal_head_maps: how observations are mapped
-  pivotal_head_names: taxonomy, synonymy, etc.
-  pivotal_head_observations: observation fields and interface
-  pivotal_head_performance: site performance
-  pivotal_head_projects: working on group projects
-  pivotal_head_search: search capabilities and data mining
-  pivotal_head_specimen: how fungarium specimens are documented
-  pivotal_head_voting: voting on observation names and images
-
-  pivotal_label_api: API
-  pivotal_label_comments: "[:comments]"
-  pivotal_label_descriptions: "[:descriptions]"
-  pivotal_label_email: email
-  pivotal_label_i18n: translations
-  pivotal_label_images: "[:images]"
-  pivotal_label_lists: lists
-  pivotal_label_locations: "[:locations]"
-  pivotal_label_maps: "[:maps]"
-  pivotal_label_names: "[:names]"
-  pivotal_label_observations: "[:observations]"
-  pivotal_label_performance: performance
-  pivotal_label_projects: "[:projects]"
-  pivotal_label_search: search
-  pivotal_label_specimen: "[:specimens]"
-  pivotal_label_voting: voting
-
   # info/textile
   sandbox_enter: Enter Textile you wish to test here
   sandbox_header: This page let's you play with the textile markup language.  Click 'Test' to see what your markup looks like.  You will need to copy the results from this page to where ever you want to use it.
-  sandbox_link4: The RedCloth manual
-  sandbox_link5: The old hobix.com tutorial
-  sandbox_link6: Cheatsheet courtesy warpedivisions.org
+  sandbox_link_hobix_textile_reference: hobix Textile Reference
+  sandbox_link_hobix_textile_cheatsheet: hobix cheatsheet (Textile Quick Reference)
+  sandbox_link_textile_language_website: Textile Language website
   sandbox_look_like: This is what it will look like
   sandbox_more_help: Gotchas, more examples
   sandbox_quick_ref: Quick Reference
-  sandbox_sample: "??italics??        trademark(tm)\n**boldface**       copyright(c)\n+underline+        registered(r)\n^superscript^      1.6 &amp;&#109;icro;m  ->  1.6 &micro;m\n~subscript~        34&amp;&#100;eg;17' N  ->  34&deg;17' N\n\n\"External Link\":http://google.com or !http://random.com/image.jpg!\n\nInternal links:\n_name 371_, _Amanita ocreata_, or _A. ocreata_\n_location 382_, _location Mt. Wilson_\n_user 252_, _user jason_\n_observation 12345_\n_image 12345_, !image 12345!, or !image 640/12345!\n\nInclude footnote[[1]] references after any word[[2]].\n\nfn1. And then define the footnote at the bottom.\n\nfn2. Be sure to leave blank lines around these \"xx.\" directives.\n\nh1. Header\n\nbq. Block quote\n\n* bullet list item 1\n* bullet list item 2\n\n# numbered list item 1\n# numbered list item 2\n\nTables are useful for comparing species:\n| Species 1 | value 1.1 | value 1.2 |\n| Species 2 | value 2.1 | value 2.2 |\n| Species 3 | value 3.1 | value 3.2 |"
+  sandbox_sample: "??italics??        trademark(tm)\n**boldface**       copyright(c)\n+underline+        registered(r)\n^superscript^      1.6 &amp;&#109;icro;m  ->  1.6 &micro;m\n~subscript~        34&amp;&#100;eg;17' N  ->  34&deg;17' N\n\n\"External Link\":http://google.com or !http://random.com/image.jpg!\n\nInternal links:\n_name 371_, _Amanita ocreata_, or _A. ocreata_\n_location 382_, _location Mt. Wilson_\n_user 252_, _user jason_\n_observation 12345_\n_image 12345_, !image 12345!, or !image 640/12345!\n _glossary_term 270_, _term Bolete_, or _bolete_ (all lower-case)\n\nInclude footnote[[1]] references after any word[[2]].\n\nfn1. And then define the footnote at the bottom.\n\nfn2. Be sure to leave blank lines around these \"xx.\" directives.\n\nh1. Header\n\nbq. Block quote\n\n* bullet list item 1\n* bullet list item 2\n\n# numbered list item 1\n# numbered list item 2\n\nTables are useful for comparing species:\n| Species 1 | value 1.1 | value 1.2 |\n| Species 2 | value 2.1 | value 2.2 |\n| Species 3 | value 3.1 | value 3.2 |"
   sandbox_test: Test
   sandbox_test_codes: Show HTML
   sandbox_title: Textile Sandbox
   sandbox_web_refs: Web References
 
-  # interest/set_interest
+  # interests/set_interest
   set_interest_already_deleted: You have expressed no interest in [name].
   set_interest_already_off: You have already told us to ignore [name].
   set_interest_already_on: You have already told us to watch [name].
@@ -3034,7 +3096,7 @@
 
   # ADMIN-TYPE PAGES
 
-  # project/add_members
+  # project/<id>/members/new
   add_members_change_status: Change Status
   add_members_denied: "Permission denied: only admins for a project can add new members."
   add_members_title: Add [:users] to [title]
@@ -3048,9 +3110,13 @@
   add_members_already_removed_admin: Already removed [user] from admins.
   add_members_already_removed_member: Already removed [user] from members.
 
+  # project/<id>/members
+  index_members_title: Members of 
+
   # project/add_project
   add_project_already_exists: A project named '[title]' already exists.
   add_project_group_exists: Unable to create project because a [:user_group] named '[group]' already exists.
+  add_project_no_location: No location matching '[where]' found.
   add_project_need_title: Projects must have a title.
   add_project_success: Project was successfully created.
   add_project_title: Create New Project
@@ -3109,6 +3175,10 @@
 
   # project/_form_projects
   form_projects_title: "[:Title]"
+  form_projects_open_membership: Enable users to add themselves and disable shared editing
+  form_projects_accepting_observations: Project is accepting new observations from members
+  form_projects_where: Optional Project Location
+  form_projects_image_upload: Upload photo
 
   # project/list_projects
   list_projects_title: "[:list_objects(type=:project)]"
@@ -3143,10 +3213,15 @@
   show_project_destroy: Destroy Project
   show_project_drafts: Drafts
   show_project_edit: Edit Project
+  show_project_join: Join Project
+  show_project_location: Location
+  show_project_leave: Leave Project
   show_project_published: Reviewed Published Names
   show_project_summary: Summary
   show_project_title: "Project: [title]"
   show_project_user_group: User Group
+  show_project_violation_count: Project has [count] constraint violation(s)
+  # show_project_violation_count: Project has "+[count] constraint violation(s)+":/project_review/[id]
 
   # users/by_name
   users_by_name_title: Users by Name
@@ -3193,6 +3268,7 @@
   email_subject_naming_for_tracker: Naming Notification - [name]
   email_subject_name_change: "[name] Has Been Changed"
   email_subject_name_proposal: "[:OBSERVATION] #[id] May Be [name]"
+  email_subject_name_tracker_approval: Research Request Emails Approved for [name]
   email_subject_new_password: New Password
   email_subject_observation_change: "[:OBSERVATION] Changed, [name]"
   email_subject_observation_destroy: "[:OBSERVATION] Destroyed, [name]"
@@ -3263,6 +3339,7 @@
   email_merge_objects: "User wants to merge two [types]:\n\nuser : [user]\nthis : [this]\ninto : [that]\nshow this : [show_this_url]\nedit this : [edit_this_url]\nshow that : [show_that_url]\nedit that : [edit_that_url]\nnotes : [notes]"
   email_name_change_request: "User wants to change Name having dependents:\n\nuser : [user]\nold name : [old_name]\nnew name : [new_name]\nshow url : [show_url]\nedit url : [edit_url]\nnotes : [notes]"
   email_name_proposal_intro: "h2. *Name Proposal*\n\nA name was proposed for observation #[id]:"
+  email_name_tracker_body: "Dear [user],\n\nWe have approved your request to have MO send automated research request emails to observers whenever someone posts an observation of [name].\n\nYou can see your name-tracking notifications here: [link].\n\nPlease do not hesitate to let us know if there is any other ways MO can help support your research.\n\nBest wishes,\n-MO Admins"
   email_naming_for_observer_intro: "h2. *Research Request*\n\n[user] ([email]) asked the [:app_title] website to forward the following message to you about your [type] <u>[name]</u>:"
   email_naming_for_tracker_intro: "h2. *Tracking Alert*\n\nAn [obs] on the [:app_title] website has been given the name [name], which you are currently tracking.  You can contact either the [:observer] or the [:identifier] by going to the appropriate link below and clicking the email link near the top of the page."
   email_new_password_intro: "h2. *New Password*\n\nYour new [:app_title] password is:"
@@ -3282,7 +3359,7 @@
   email_update_registration_intro: "h2. *Hello [user]*\n\nYour registration for the [name] has been updated from\n\n[before]\n\n\nto\n\n\n[after]"
   email_user_question_intro: "h2. *Question from Another User*\n\n[user] ([email]) asked the [:app_title] website to forward the following email to you:"
   email_verify_intro: "h2. *Hello [user]*\n\nPlease click the following link to verify that you received this email and activate your [:app_title] account:\n\n[link]"
-  email_verify_api_key_intro: "h2. *Hello [user]*\n\nThe application \"[app]\" (associated with user \"[other_user]\") has requested access to your [:app_title] account.  If you recognize this application and wish to give them permission to post observations, etc. in your name, all you have to do is click on the activation link below to activate the API key they just created.  Note that you can review your list of API keys at any time by visiting the [:account_api_keys_title] from your \"[:app_preferences]\" page.\n\nActivate Key: [activate_link]\n[:account_api_keys_link]: [manager_link]\n\nTo report a suspicious access request, just respond to this email."
+  email_verify_api_key_intro: "h2. *Hello [user]*\n\nThe application \"[app]\" (associated with user \"[app_user]\") has requested access to your [:app_title] account.  If you recognize this application and wish to give them permission to post observations, etc. in your name, all you have to do is click on the activation link below to activate the API key they just created.  Note that you can review your list of API keys at any time by visiting the [:account_api_keys_title] from your \"[:app_preferences]\" page.\n\nActivate Key: [activate_link]\n[:account_api_keys_link]: [manager_link]\n\nTo report a suspicious access request, just respond to this email."
 
   ##############################################################################
 
@@ -3292,7 +3369,7 @@
   intro_title: Introduction
   intro_purpose: "*Purpose&#58;* The purpose of this site is to record observations about mushrooms, help people identify mushrooms they aren't familiar with, and expand the community around the scientific exploration of mushrooms (mycology).  Some have asked what counts as a mushroom.  This site takes a very broad view.  While the emphasis is on the large fleshy fungi, other fungi such as lichens, rust and molds as well as fungus-like organisms such as slime-molds are all welcome.  Ultimately, I hope this site will become a valuable resource for both amateur and professional mycologists.  I like to think of it as a living field guide for mushrooms or a collaborative mushroom field journal.\n\nFor those new to mycology, there is a huge amount of basic research that still needs to be done.  By some estimates less than 5% of the world's species of fungi are known to science.  While things are slightly better for the large fleshy fungi known as mushrooms, it is still a common experience to come across a mushroom that cannot be easily identified in the available books or which doesn't really fit the definition of any recognized species. This site is intended to address that gap by creating a place for us to talk about and record what we've found, as well as connect to the existing literature about mushrooms.  Please do not feel intimidated by the scientific bent of the site.  Everyone is welcome to dive in and add their own mushroom observations, upload mushroom photos and make [:comments] on other people's observations."
   intro_image_sharing: "*Image Sharing:* This site follows the principles of cooperative sharing pioneered by the \"Free Software Foundation\":http://fsf.org, further expressed by the \"Open Source software movement\":http://opensource.org, and expanded to other creative efforts by the \"Creative Commons\":http://creativecommons.org. Consequently all images are made available under one of the Creative Commons licenses or are in the public domain.  In short this means that when anyone uploads one of their images to the site, they are giving others explicit permission to use those images under certain \"conditions\":/info/how_to_use#license in perpetuity.  This type of permission is very important for basic research.  It allows future researchers to freely use these data to expand our understanding of mushrooms.  It also significantly increases the likelihood that the data will continue to be available into the distant future.\n\nIf you upload your own images, this license does not mean you are giving up your copyright or your ability to make money off your images.  Depending on which license you choose, you can still require that anyone who wishes to use any of these images for commercial purposes get in touch with the copyright holder and work out the conditions for that use.  The site includes special links on the image pages to help create those relationships."
-  intro_source_code: "*Source Code:* Source code for the site is available at: \"[repo]\":[repo] and is licensed under the \"Open Source MIT License\":http://www.opensource.org/licenses/mit-license.php.  Source code contributions are welcome (\"README\":[readme]). Here's a list of \"planned features\":[todo_list]. All suggestions and comments are welcome.  If you would like to contribute, please send mail to *webmaster @ mushroomobserver.org* so we can coordinate our efforts."
+  intro_source_code: "*Source Code:* Source code for the site is available at: \"[repo]\":[repo] and is licensed under the \"Open Source MIT License\":http://www.opensource.org/licenses/mit-license.php.  Source code contributions are welcome (\"README\":[readme]). All suggestions and comments are welcome.  If you would like to contribute, please send mail to *webmaster @ mushroomobserver.org* so we can coordinate our efforts."
   intro_governance: "*Governance:* This site is owned and operated by \"Mushroom Observer, Inc.\":/support/governance."
   intro_note: "*Note:* The administrators of this site reserve the right to remove any material they deem inappropriate or not in keeping with the purpose of this site."
 
@@ -3301,7 +3378,7 @@
   how_help_intro: This page provides a list of skills that we could really use some help with. If you're interested in helping out just "send an email":/emails/ask_webmaster_question and let us know what you want to do.
   how_help_contributors: "h4. 1. Contributors\n\np(normal).  Beyond adding pictures and descriptions of mushrooms that you've seen, you can make a big difference to the site by \"describing species\":/info/how_to_use#describing_species or \"defining locations\":/info/how_to_use#defining_locations."
   how_help_scientists: "h4. 2. Scientists\n\np(normal).  Mention Mushroom Observer in your publications and \"add references to your publications\":/publications."
-  how_help_developers: "h4. 3. Developers\n\np(normal).  We have \"lots of ideas\":[todo_list] about how to improve the site.  The framework, Ruby on Rails, is really easy to pick up and we are more than happy to mentor anyone who wants to dive in."
+  how_help_developers: "h4. 3. Developers\n\np(normal).  We have lots of ideas about how to improve the site.  The framework, Ruby on Rails, is really easy to pick up and we are more than happy to mentor anyone who wants to dive in."
   how_help_translators: "h4. 4. Translators\n\np(normal). The site is set up to support foreign languages.  All we need is someone to do the translations."
   how_help_donors: "h4. 5. Donors\n\np(normal). Help support our server costs by \"donating\":/support/donate to the Mushroom Observer."
   how_help_business_planning: "h4. 6. Business Planning\n\np(normal).  So far [:app_title] has been an entirely volunteer effort, after some time consuming false starts, we are now in the process of creating a new non-profit focused solely on Mushroom Observer. This is just getting going so let us know if you want to get involved or have any business related advice."
@@ -3320,14 +3397,14 @@
   how_adding_comments: "*Adding Comments* - When you are looking at an \"Observation\":#observation, if you would like to post or respond to a \"Comment\":#comment, select the '[:show_comments_add_comment]' link near the top of the page.  If you are not currently logged in to a \"User\":#user account, you will be asked to log in.  Once you are logged in, you will be given a form asking for a summary and your comment.  Note that you can do some simple formatting in the comment section.  This is briefly documented below the text field with a link to detailed documentation.  You can also add links within a comment using standard HTML formatting.  The HTML gets automatically cleaned to avoid security problems like script injection, so try not to get too fancy."
   how_tracking_species: "*Tracking a Particular Species or Genus Through Email* - [:app_title] allows you to request an email any time a particular \"Name\":#name is given to an \"Observation\":#observation.  If that name is a genus or species it will also send you an email whenever a species or subspecies is observed.  To turn this feature on, go to the page for a Name you are interested in (see \"Searching\":#searching) and click '[:show_name_email_tracking]'.  You can configure it so that the person who made the observation that was given that name will be sent a customized email to let them know you are interested in their observation.  If you don't provide any instructions, they will not be sent an email.  If the observer gives the name at the time the observation is created, they will be shown your message immediately through the website. You can modify or disable your request for a particular name by going back to that name and again selecting '[:show_name_email_tracking]' and clicking the '[:DISABLE]' button on the page that comes up."
   how_describing_species: "*Describing Species* - Click any \"Name\":#name link you see throughout the site.  For example, click on 'Names' under 'Indexes' on the left side of the page then click on any of the results, or search for a name in the search bar, or click the 'About &lt;&#110;ame&gt;...' link at the top of any \"Observation\":#observation page.  These all take you to a page summarizing everything we know about this taxon.  If you are familiar with this species and there is something you would like to add, click '[:show_name_edit_name]' and add your notes.  You are encouraged to cite references including field guides and scientific papers.  Short quotes from references are fine, but please don't make extensive quotes without obtaining permission from the original author."
-  how_projects: "*Projects* - Projects are a way for a group of \"Users\":#user to work together to create a set of work that they want to keep out of the public eye until they are ready to publish it.  The original purpose was to support university classes where there was a desire to keep a more controlled environment while the class was going.\n\nAnyone can create a new project by clicking on '\"[:app_list_projects]\":/project/list_projects' in the left-hand panel and then clicking on '[:list_projects_add_project]'.  The person who creates the project is always a member and an administrator for that project.  An administrator for a project can add new members by clicking the '[:show_project_add_members]' link at the top of a project's 'Show Project' page.  Administrators can also make other users administrators for the project by going to one of the '[:add_members_change_status]' links available on the 'Show Project' or 'Add Members' pages.  Any User can send requests to the admins for a project.  These requests are emailed to the admins and contain a link for changing that user's status.\n\nCurrently the primary focus of projects is writing \"Descriptions\":#description for various species.  Note, however, that anyone can now create new descriptions for a species (see \"Describing Species\":#describing_species) by clicking on '[:show_name_create_description]' at the top of the 'Show Name' page. Descriptions that are created for a project are visible only to members of that project until they are published, and editable only by the owner of the description and project administrators.  When a description is published it will become the official description if no official description exists yet."
-  how_maps: "*Working with Maps* - Currently there are three types of maps available on [:app_title]: Occurrence Maps (e.g., \"Occurrence map for **__Craterellus cornucopioides__**\":/name/map/284), Location Maps (e.g., \"Salt Point State Park\":/location/show_location/4) and the \"[:map_locations_global_map]\":/location/map_locations.\n\nTo see an occurrence map for a particular \"Name\":#name, go to the page for that name (e.g., enter the name in the search bar, select '[:NAMES]'), and click '[:app_search]', then click '[:show_name_distribution_map]' at the top of the page.\n\nUsers are encouraged to add to the occurrence map for a name.  The easiest way is to create a new \"Observation\":#observation using an already defined \"Location\":#location.  Note, however, that auto-completion for the '[:WHERE]' field will list all matching locations whether they are defined or not.\n\nYou can also explicitly choose not to have an observation show up on the occurrence map.  This allows you to record observations of mushrooms in places like mushroom fairs, old photos or other places where you may not know where the mushroom was actually collected.  When creating or editing an observation there is a checkbox labeled '[:form_observations_is_collection_location]'.  By default it is checked.  If you uncheck it, that observation will not appear in any occurrence maps."
+  how_projects: "*Projects* - Projects are a way for a group of \"Users\":#user to work together to create a set of work that they want to keep out of the public eye until they are ready to publish it.  The original purpose was to support university classes where there was a desire to keep a more controlled environment while the class was going.\n\nAnyone can create a new project by clicking on '\"[:app_list_projects]\":/projects' in the left-hand panel and then clicking on '[:list_projects_add_project]'.  The person who creates the project is always a member and an administrator for that project.  An administrator for a project can add new members by clicking the '[:show_project_add_members]' link at the top of a project's 'Show Project' page.  Administrators can also make other users administrators for the project by going to one of the '[:add_members_change_status]' links available on the 'Show Project' or 'Add Members' pages.  Any User can send requests to the admins for a project.  These requests are emailed to the admins and contain a link for changing that user's status.\n\nCurrently the primary focus of projects is writing \"Descriptions\":#description for various species.  Note, however, that anyone can now create new descriptions for a species (see \"Describing Species\":#describing_species) by clicking on '[:show_name_create_description]' at the top of the 'Show Name' page. Descriptions that are created for a project are visible only to members of that project until they are published, and editable only by the owner of the description and project administrators.  When a description is published it will become the official description if no official description exists yet."
+  how_maps: "*Working with Maps* - Currently there are three types of maps available on [:app_title]: Occurrence Maps (e.g., \"Occurrence map for **__Craterellus cornucopioides__**\":/names/284/map), Location Maps (e.g., \"Salt Point State Park\":/locations/4) and the \"[:map_locations_global_map]\":/location/map_locations.\n\nTo see an occurrence map for a particular \"Name\":#name, go to the page for that name (e.g., enter the name in the search bar, select '[:NAMES]'), and click '[:app_search]', then click '[:show_name_distribution_map]' at the top of the page.\n\nUsers are encouraged to add to the occurrence map for a name.  The easiest way is to create a new \"Observation\":#observation using an already defined \"Location\":#location.  Note, however, that auto-completion for the '[:WHERE]' field will list all matching locations whether they are defined or not.\n\nYou can also explicitly choose not to have an observation show up on the occurrence map.  This allows you to record observations of mushrooms in places like mushroom fairs, old photos or other places where you may not know where the mushroom was actually collected.  When creating or editing an observation there is a checkbox labeled '[:form_observations_is_collection_location]'.  By default it is checked.  If you uncheck it, that observation will not appear in any occurrence maps."
   how_defining_locations: "*Defining Undefined Locations* - Many \"Observations\":#observation have been reported from undefined \"Locations\":#location.  These observations will not appear in our \"occurrence maps\":#maps.  An excellent, easy way for \"Users\":#user to help out if they have a little spare time is to locate and define these undefined locations.\n\nWhen browsing through observations, defined location names will be followed by a link labeled '[:click_for_map]'.  Undefined location names will be followed by a link labeled '[:SEARCH]'.  If you click the link for an undefined location, it will show a list of observations reported for that location.  The resulting page will include two links at the top of the page: '[:list_observations_location_define]' and '[:list_observations_location_merge]'.  Clicking on '[:list_observations_location_define]' will present a form which you can use to create that location.  Clicking on 'Merge With a Defined Location' will present you with a list of similar locations which have already been defined.  Clicking on any of these locations will perform the merge.\n\nYou can also see a list of all locations in use by clicking on '\"[:app_list_locations]\":/location/list_locations' in the left-hand panel. This page lists both the defined locations (first column, sorted alphabetically) and the undefined locations (second column, sorted by the number of observations reported from that location).  In some cases the same location has been given multiple names (e.g., 'Point Reyes National Seashore' and 'Pt Reyes Park').  You can merge an undefined location with a defined location by clicking on '[:list_place_names_merge]' next to the undefined location (see above).\n\nWhen defining a new location, the first thing to do is to review its name. Mushroom Observer tries to enforce a set of \"rules\":/location/help.\n\nIn theory it is possible for the same location to be defined more than once (presumably by different users).  If this happens, you can request a merge by editing one of the two locations and changing its name to be exactly the same as the other's.  This will not have any immediate effect, but it will display a warning message, and an email will be sent to the site administrators with the details.  Merging defined locations is restricted since it can cause significant data loss."
-  how_creating_species_lists: "*Creating Species Lists* - To create a \"Species List\":#species_list, click '\"[:app_create_list]\":/species_list/create_species_list' in the left-hand panel.  Fill out the various fields.  In the 'Write-In Species' field, you should give each species a \"Name\":#name on a line by itself.  When you go to create the list, each line is checked to see if there is a match in the database.  If there is no matching name, you will be asked if you want to add the unknown names to the database.  This gives you a chance to catch and fix typos as well as giving you a simple way to add missing names.  Each name given in the 'Write-In Species' field (or loaded from a file) will be used to create a completely new \"Observation\":#observation.  The '[:form_species_lists_list_notes]' are only shown when the entire species list is shown.  Use '[:form_species_lists_member_notes]' to indicate text you would like to add to each new observation.\n\nThere are several methods of collecting a set of existing observations into a new list.  In the simplest method, first create an empty species list, then go to each of the observations you want to add and select '[:show_observation_manage_species_lists]'.  This will give you the opportunity to add that observation to any species list you own.  (Note, you can add anyone's observations to a species list you own.)\n\nIn another method, you may select '[:app_create_list]' directly from any index of observations or names.  For example, you may use the search bar at the top of the page or the '\"[:app_advanced_search]\":/search/advanced' feature to request all observations from Michigan.  When it shows you the first page of results, click '[:app_create_list]' (in the left-hand panel), and it will give you a list of all the matching names to choose from in the new species list form.\n\nLastly, when you are viewing an existing species list, you may click '[:species_list_show_clone_list]' or '[:species_list_show_set_source]' at the top of the page.  '[:species_list_show_clone_list]' will take you directly to a new species list form, with all the information of the existing list already filled in.  '[:species_list_show_set_source]' will copy that species list's names to the clipboard.  The next time you click '[:app_create_list]', the new species list form will give you this list of names to choose from (unless you show another observation or name index in the meantime)."
+  how_creating_species_lists: "*Creating Species Lists* - To create a \"Species List\":#species_list, click '\"[:app_create_list]\":/species_lists/new' in the left-hand panel.  Fill out the various fields.  In the 'Write-In Species' field, you should give each species a \"Name\":#name on a line by itself.  When you go to create the list, each line is checked to see if there is a match in the database.  If there is no matching name, you will be asked if you want to add the unknown names to the database.  This gives you a chance to catch and fix typos as well as giving you a simple way to add missing names.  Each name given in the 'Write-In Species' field (or loaded from a file) will be used to create a completely new \"Observation\":#observation.  The '[:form_species_lists_list_notes]' are only shown when the entire species list is shown.  Use '[:form_species_lists_member_notes]' to indicate text you would like to add to each new observation.\n\nThere are several methods of collecting a set of existing observations into a new list.  In the simplest method, first create an empty species list, then go to each of the observations you want to add and select '[:show_observation_manage_species_lists]'.  This will give you the opportunity to add that observation to any species list you own.  (Note, you can add anyone's observations to a species list you own.)\n\nIn another method, you may select '[:app_create_list]' directly from any index of observations or names.  For example, you may use the search bar at the top of the page or the '\"[:app_advanced_search]\":/search/advanced' feature to request all observations from Michigan.  When it shows you the first page of results, click '[:app_create_list]' (in the left-hand panel), and it will give you a list of all the matching names to choose from in the new species list form.\n\nLastly, when you are viewing an existing species list, you may click '[:species_list_show_clone_list]' or '[:species_list_show_set_source]' at the top of the page.  '[:species_list_show_clone_list]' will take you directly to a new species list form, with all the information of the existing list already filled in.  '[:species_list_show_set_source]' will copy that species list's names to the clipboard.  The next time you click '[:app_create_list]', the new species list form will give you this list of names to choose from (unless you show another observation or name index in the meantime)."
 
   # Note, glossary terms should appear in alphabetical order.
   how_glossary_body: "#(#comment)       [:how_comment]\n#(#image)         [:how_image]\n#(#license)       [:how_license]\n#(#location)      [:how_location]\n#(#name)          [:how_name]\n#(#observation)   [:how_observation]\n#(#proposed_name) [:how_proposed_name]\n#(#description)   [:how_description]\n#(#species_list)  [:how_species_list]\n#(#user)          [:how_user]\n#(#vote)          [:how_vote]"
-  how_comment: "*Comment* - Comments are the standard way to discuss an \"Observation\":#observation or its associated \"Images\":#image.  Each comment is owned by a particular \"User\":#user.  A comment may only be edited or deleted by the owner or a site administrator.  You can look up all comments that have been made about your observations by clicking on '\"[:show_user_comments_for_you]\":/comment/show_comments_for_user' in the upper right of the page (the 'inbox' icon)."
+  how_comment: "*Comment* - Comments are the standard way to discuss an \"Observation\":#observation or its associated \"Images\":#image.  Each comment is owned by a particular \"User\":#user.  A comment may only be edited or deleted by the owner or a site administrator.  You can look up all comments that have been made about your observations by clicking on '\"[:show_user_comments_for_you]\":/comments' in the upper right of the page (the 'inbox' icon)."
   how_contribution: "*Contribution* - A number or score that measures the quantity and quality of contributions a \"User\":#user has made to [:app_title].  Click '[:app_your_summary]' to see a break-down of your own contribution.  You earn points for every \"Observation\":#observation, \"Image\":#image, \"Comment\":#comment, etc. you have posted.  \"Describing Species\":#describing_species and \"Defining Locations\":defining_locations are some of the most important contributions a user can make.  (See \"How To Help\":/info/how_to_help for a list of other ways to help out.) Currently, contribution is used only in weighting your \"Votes\":#vote when voting on \"Proposed Names\":#proposed_names for observations."
   how_description: "*Species Description* - A collection of text describing a \"Name\":#name. Every name automatically gets one official description that everyone in the community is allowed to read and modify.  Additional descriptions may be created by any \"User\":#user, including project members.  The owner of a description may choose any level of read or write permissions, and can control who is given authorship credit.  Since descriptions, especially the official one, are often collaborative efforts, modifications by a user are subject to community review, and past versions are kept to facilitate this process.  The content of a description includes a set list of sections, including things like '[:form_names_gen_desc]', '[:form_names_diag_desc]', '[:form_names_look_alikes]', '[:form_names_refs]' and other notes."
   how_image: "*Image* - A photograph or illustration of one or more mushroom species. Images are associated with one or more \"Observations\":#observation.  A given Image is owned by a particular \"User\":#user who may or may not be the copyright holder.  Only the owner or a site administrator can remove an image or edit the associated information.  All images in the site are required to be released under one of the \"Creative Commons licenses\":http://creativecommons.org or in the public domain.  If you dispute the given copyright or the licensing of an image you are the copyright holder of, send mail to the \"webmaster\":/emails/ask_webmaster_question."
@@ -3490,6 +3567,8 @@
   ##############################################################################
 
   # ERROR MESSAGES
+
+  kick_out_message: "We have noticed a lot of server-intensive traffic from this IP address (#{request.remote_ip}). There may be better ways of doing what you are trying to do. Please contact the webmaster ([email]) so that we can talk about it. So that we can best help you, please:\n- include a copy of this message;\n- tell how you generally use Mushroom Observer;\n- tell us what you were doing when you received this message."
 
   unsuccessful_contributor_warning: Thanks for wanting to contribute to the Mushroom Observer. This type of contribution can only be made by users who have provided at least one observation to the system.
 
@@ -3661,7 +3740,7 @@
 
   # One-time-use messages.
   runtime_api_key_notes_cannot_be_blank: Notes field cannot be blank.
-  runtime_bad_use_of_imageless: The special name _Imageless_ was not intended for observations that were created as part of species lists or which have good documentation.  Please read the discussion under "_Imageless_":/name/show_name/31080.
+  runtime_bad_use_of_imageless: The special name _Imageless_ was not intended for observations that were created as part of species lists or which have good documentation.  Please read the discussion under "_Imageless_":/names/31080.
   runtime_dates_must_be_same_format: If you give two dates, they must be the same format.
   runtime_description_added_admin: Gave admin permission to [name].
   runtime_description_added_reader: Gave view permission to [name].
@@ -3702,9 +3781,6 @@
   runtime_object_deleted: This object has been deleted.
   runtime_object_not_in_index: "Can't find [type] #[id] in the results of the current search or index."
   runtime_object_multiple_matches: Multiple [types] match "[match]".
-  runtime_pivotal_getting_token: Couldn't get access token from Pivotal.
-  runtime_pivotal_getting_stories: Couldn't get stories from Pivotal.
-  runtime_pivotal_parsing_story: Error parsing one or more stories from Pivotal.  Ignored them.
   runtime_prefs_password_no_match: Password and confirmation did not match.
   runtime_search_has_expired: Your query has expired, please try again.
   runtime_show_observation_success: Successfully changed vote.
@@ -3804,6 +3880,9 @@
   runtime_unable_to_save_changes: "[:runtime_no_save(type=:changes)]"
   runtime_unrecognized_rank: "[:runtime_invalid(type=rank,value=rank)]"
   runtime_user_bad_rank: "Invalid rank: '[rank]'"
+  runtime_visual_group_created_at: "[:runtime_created_at(type=:visual_group)]"
+  runtime_visual_model_created_at: "[:runtime_created_at(type=:visual_model)]"
+  runtime_visual_model_updated_at: "[:runtime_updated_at(type=:visual_model)]"
 
   # Longer messages.
   runtime_ask_webmaster_antispam: To cut down on robot spam, questions from unregistered users cannot contain 'http:' or HTML markup.
@@ -4036,6 +4115,7 @@
   query_title_advanced_search: "[:app_advanced_search]"
   query_title_all: "[TYPE] Index"
   query_title_all_by: "[TYPES] by [ORDER]"
+  query_title_all_filtered: "Matching [TYPES]"
   query_title_at_location: "[TYPES] from [LOCATION]"
   query_title_at_where: "[TYPES] from '[USER_WHERE]'"
   query_title_by_author: "[TYPES] Authored by [USER]"
@@ -4044,12 +4124,14 @@
   query_title_by_user: "[TYPES] created by [USER]"
   query_title_for_observation: "[TYPES] attached to [OBSERVATION]"
   query_title_for_project: "[TYPES] attached to [PROJECT]"
+  query_title_in_lists_for_project: "[TYPES] in lists attached to [PROJECT]"
   query_title_for_target: "[TYPES] on [TARGET]"
   query_title_for_user: "[TYPES] for [USER]"
   query_title_in_herbarium: "[TYPES] in [HERBARIUM]"
   query_title_in_set: Selected [TYPES]
   query_title_in_species_list: "[TYPES] in [SPECIES_LIST]"
   query_title_inside_observation: "[TYPES] of [OBSERVATION]"
+  query_title_needs_id: "[OBSERVATIONS] needing identification for [USER]"
   query_title_nonpersonal: List of Institutional Fungaria
   query_title_of_children: Lower Taxa under [NAME]
   query_title_of_name: "[TYPES] of [NAME]"
@@ -4067,6 +4149,7 @@
   query_title_with_observations_at_location: "[TYPES] with [:query_title_at_location(type=:observation)]"
   query_title_with_observations_at_where: "[TYPES] with [:query_title_at_where(type=:observation)]"
   query_title_with_observations_by_user: "[TYPES] with [:query_title_by_user(type=:observation)]"
+  query_title_with_observations_filtered: "[TYPES] with [SUBTITLE]"
   query_title_with_observations_for_project: "[TYPES] with [:query_title_for_project(type=:observation)]"
   query_title_with_observations_in_set: "[TYPES] for [observations]"
   query_title_with_observations_in_species_list: "[TYPES] with [:query_title_in_species_list(type=:observation)]"
@@ -4175,6 +4258,8 @@
   query_help_user_pattern_search: users matching a search string
 
   # Sorting criteria.
+  sort_by_accession_number: "[:herbarium_record_accession_number]"
+  sort_by_activity: "[:ACTIVITY]"
   sort_by_code: Code
   sort_by_code_then_name: Code and Name
   sort_by_confidence: "[:CONFIDENCE_LEVEL]"
@@ -4188,6 +4273,7 @@
   sort_by_herbarium_name: Fungarium
   sort_by_id: ID
   sort_by_image_quality: Image Quality
+  sort_by_initial_det: Initial Determination
   sort_by_last_login: Last Login
   sort_by_location: "[:LOCATION]"
   sort_by_login: "[:LOGIN_NAME]"
@@ -4195,10 +4281,11 @@
   sort_by_num_views: Popularity
   sort_by_number: Number
   sort_by_observation: "[:OBSERVATION]"
+  sort_by_owners_quality: "Owner's Quality"
   sort_by_posted: Date Posted
   sort_by_records: "#Records"
   sort_by_reverse: Reverse Order
-  sort_by_rss_log: "[:sort_by_updated_at]"
+  sort_by_rss_log: Recent Activity
   sort_by_summary: "[:SUMMARY]"
   sort_by_thumbnail_quality: Thumbnail Quality
   sort_by_title: "[:TITLE]"

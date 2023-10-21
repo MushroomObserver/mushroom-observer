@@ -1,0 +1,33 @@
+<%
+# The content of the details box. This gets replaced by JS and is used elsewhere
+%>
+
+<%= observation_details_when_where_who(obs: obs) %>
+
+<%= tag.div(class: "obs-projects", id: "observation_projects") do
+  concat([tag.span("#{:PROJECTS.t}:"), tag.br].safe_join)
+  obs.projects.each do |project|
+    concat(tag.div(link_to_object(project), class: "indent"))
+  end
+end %>
+
+<%= tag.p(class: "obs-specimen", id: "observation_specimen_available") do
+  if obs.specimen
+    :show_observation_specimen_available.t
+  else
+    :show_observation_specimen_not_available.t
+  end
+end %>
+
+<% if @user %>
+  <%= render(partial: "observations/show/collection_numbers",
+             locals: { obs: obs }) %>
+
+  <%= render(partial: "observations/show/herbarium_records",
+             locals: { obs: obs }) %>
+
+  <%= render(partial: "observations/show/sequences",
+             locals: { obs: obs }) %>
+<% end %>
+
+<%= observation_details_notes(obs: obs) %>

@@ -4,16 +4,19 @@
 class SearchController < ApplicationController
   # This is the action the search bar commits to.  It just redirects to one of
   # several "foreign" search actions:
-  #   comment/image_search
-  #   image/image_search
-  #   location/location_search
-  #   name/name_search
-  #   observer/index
-  #   users/user_search
-  #   project/project_search
-  #   species_list/species_list_search
-  # rubocop:disable Metrics/MethodLength
-  # rubocop:disable Metrics/AbcSize
+  #   /comments/index (params[:pattern])
+  #   /glossary_terms/index (params[:pattern])
+  #   /herbaria/index (params[:pattern])
+  #   /herbarium_records/index (params[:pattern])
+  #   /images/index (params[:pattern])
+  #   /locations/index (params[:pattern])
+  #   /names/index (params[:pattern])
+  #   /observations/index (params[:pattern])
+  #   /projects/index (params[:pattern])
+  #   /species_lists/index (params[:pattern])
+  #   /users/index (params[:pattern])
+  #   /project/project_search
+  #   /species_lists/index
   def pattern
     pattern = param_lookup([:search, :pattern]) { |p| p.to_s.strip_squeeze }
     type = param_lookup([:search, :type], &:to_sym)
@@ -22,52 +25,13 @@ class SearchController < ApplicationController
     session[:pattern] = pattern
     session[:search_type] = type
 
-    case type
-    when :herbarium
-      redirect_to_search_or_index(
-        pattern: pattern,
-        search_path: herbaria_path(pattern: pattern),
-        index_path: herbaria_path(flavor: :all)
-      )
-      return
-    when :observation
-      redirect_to_search_or_index(
-        pattern: pattern,
-        search_path: observations_path(pattern: pattern),
-        index_path: observations_path
-      )
-      return
-    when :user
-      redirect_to_search_or_index(
-        pattern: pattern,
-        search_path: users_path(pattern: pattern),
-        index_path: users_path
-      )
-      return
-    when :comment, :image, :location, :name, :project, :species_list,
-      :herbarium_record
-      ctrlr = type
-    when :google
-      site_google_search(pattern)
-      return
-    else
-      flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
-      redirect_back_or_default("/")
-      return
-    end
+    special_params = if type == :herbarium
+                       { flavor: :all }
+                     else
+                       {}
+                     end
 
-    redirect_to_search_or_list(ctrlr, type, pattern)
-  end
-  # rubocop:enable Metrics/MethodLength
-  # rubocop:enable Metrics/AbcSize
-
-  def site_google_search(pattern)
-    if pattern.blank?
-      redirect_to("/")
-    else
-      search = URI.encode_www_form(q: "site:#{MO.domain} #{pattern}")
-      redirect_to("https://google.com/search?#{search}")
-    end
+    forward_pattern_search(type, pattern, special_params)
   end
 
   ADVANCED_SEARCHABLE_MODELS = [Image, Location, Name, Observation].freeze
@@ -91,6 +55,38 @@ class SearchController < ApplicationController
     redirect_to_model_controller(model, query)
   end
 
+  ##############################################################################
+
+  private
+
+  def site_google_search(pattern)
+    if pattern.blank?
+      redirect_to("/")
+    else
+      search = URI.encode_www_form(q: "site:#{MO.domain} #{pattern}")
+      redirect_to("https://google.com/search?#{search}")
+    end
+  end
+
+  # In the case of "needs_id", this is added to the search path params
+  def forward_pattern_search(type, pattern, special_params)
+    case type
+    when :google
+      site_google_search(pattern)
+    when :comment, :glossary_term, :herbarium, :herbarium_record, :image,
+         :location, :name, :observation, :project, :species_list, :user
+      redirect_to_search_or_index(
+        pattern: pattern,
+        search_path: send("#{type.to_s.pluralize}_path",
+                          params: { pattern: pattern }.merge(special_params)),
+        index_path: send("#{type.to_s.pluralize}_path", special_params)
+      )
+    else
+      flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
+      redirect_back_or_default("/")
+    end
+  end
+
   def add_filled_in_text_fields(query_params)
     [:content, :location, :name, :user].each do |field|
       val = params[:search][field].to_s
@@ -105,20 +101,7 @@ class SearchController < ApplicationController
 
   def add_applicable_filter_parameters(query_params, model)
     ContentFilter.by_model(model).each do |fltr|
-      query_params[fltr.sym] = params[:"content_filter_#{fltr.sym}"]
-    end
-  end
-
-  ##############################################################################
-
-  private
-
-  def redirect_to_search_or_list(ctrlr, type, pattern)
-    # If pattern is blank, this would devolve into a very expensive index.
-    if pattern.blank?
-      redirect_to(controller: ctrlr, action: "list_#{type.to_s.pluralize}")
-    else
-      redirect_to(controller: ctrlr, action: "#{type}_search", pattern: pattern)
+      query_params[fltr.sym] = params.dig(:content_filter, fltr.sym)
     end
   end
 
@@ -132,15 +115,10 @@ class SearchController < ApplicationController
   end
 
   def redirect_to_model_controller(model, query)
-    if model.controller_normalized?
-      redirect_to(add_query_param({ controller: model.show_controller,
-                                    action: :index,
-                                    advanced_search: 1 },
-                                  query))
-    else
-      redirect_to(add_query_param({ controller: model.show_controller,
-                                    action: :advanced_search },
-                                  query))
-    end
+    advanced_search_path = add_query_param({ controller: model.show_controller,
+                                             action: :index,
+                                             advanced_search: 1 },
+                                           query)
+    redirect_to(advanced_search_path)
   end
 end

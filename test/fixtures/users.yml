@@ -17,6 +17,7 @@ DEFAULTS: &DEFAULTS
   verified:       <%= Time.now.strftime("%F %T")%>
   user_groups:    all_users, $LABEL_only
   votes_anonymous: <%= User.votes_anonymous[:no] %>
+  no_emails:      false
 
 # Rolf is an experienced user
 # Also the default user for Images fixtures
@@ -57,7 +58,7 @@ katrina:
   <<: *DEFAULTS
   name: Katrina
   keep_filenames: <%= User.keep_filenames[:keep_but_hide] %>
-  user_groups: all_users, eol_users, katrina_only
+  user_groups: all_users, burbank_users, eol_users, katrina_only
 
 # Roy is a scientific user
 roy:
@@ -65,6 +66,7 @@ roy:
   name: Roy Halling
   email_general_question: true
   location_format: <%= User.location_formats[:scientific] %>
+  user_groups: all_users, burbank_admins
 
 spammer:
   <<: *DEFAULTS
@@ -154,3 +156,14 @@ unverified:
 admin:
   <<: *DEFAULTS
   admin: true
+
+# User with existing email that won't pass new validations
+flintstone:
+  <<: *DEFAULTS
+  email: "bogus"
+
+# User with existing content_filter[:region] that won't pass new validations
+nonregional:
+  <<: *DEFAULTS
+  email: "bogus"
+  content_filter: <%= { region: "Massachusetts" }.to_yaml.inspect %>

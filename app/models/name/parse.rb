@@ -91,10 +91,10 @@ module Name::Parse
                       (?:\s|$) /x
 
   UPPER_WORD = /
-                [A-Z][a-zë\-]*[a-zë] | "[A-Z][a-zë\-.]*[a-zë]"
+                [A-Z][a-zë-]*[a-zë] | "[A-Z][a-zë\-.]*[a-zë]"
   /x
   LOWER_WORD = /
-    (?!(?:sensu|van|de)\b) [a-z][a-zë\-]*[a-zë] | "[a-z][\wë\-.]*[\wë]"
+    (?!(?:sensu|van|de)\b) [a-z][a-zë-]*[a-zë] | "[a-z][\wë\-.]*[\wë]"
     /x
   BINOMIAL   = / #{UPPER_WORD} \s #{LOWER_WORD} /x
   LOWER_WORD_OR_SP_NOV = / (?! sp\s|sp$|species) #{LOWER_WORD} |
@@ -533,7 +533,7 @@ module Name::Parse
     str = format_name(name, :deprecated).
           sub(/^_+/, "").
           gsub(/_+/, " "). # put genus at the top
-          sub(/ "(sp[\-.])/, ' {\1'). # put "sp-1" at end
+          sub(/ "(sp[-.])/, ' {\1'). # put "sp-1" at end
           gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
           sub(" subg. ", " {1subg. ").
           sub(" sect. ",    " {2sect. ").
@@ -552,7 +552,7 @@ module Name::Parse
           sub(/(^\S+?)o?mycota$/,    '\1!1')
 
     # put autonyms at the top
-    1 while str.sub!(/(^| )([A-Za-z\-]+) (.*) \2( |$)/, '\1\2 \3 !\2\4')
+    1 while str.sub!(/(^| )([A-Za-z-]+) (.*) \2( |$)/, '\1\2 \3 !\2\4')
 
     if author.present?
       str += "  " + author.

@@ -32,23 +32,8 @@ module Query::Modules::HighLevelQueries
   INSTANTIATE_ARGS = [:include].freeze
 
   # Number of results the query returns.
-  def num_results(args = {})
-    @num_results ||=
-      if @result_ids
-        @result_ids.count
-      else
-        # Explicitly disable GROUP BY and ORDER clauses for the purposes of
-        # simply counting the number of results.  This is important because
-        # GROUP BY in particular will mess up the COUNT(*) spec.  Passing in
-        # empty strings for group and order will tell it to explicitly override
-        # anything in self.group and self.order.
-        rows = select_rows(args.merge(select: "COUNT(*)", group: "", order: ""))
-        begin
-          rows[0][0].to_i
-        rescue StandardError
-          0
-        end
-      end
+  def num_results(_args = {})
+    @num_results ||= result_ids&.size || 0
   end
 
   # Array of all results, just ids.
@@ -82,7 +67,7 @@ module Query::Modules::HighLevelQueries
   # better all be valid instances of +model+ -- no error checking is done!!
   def results=(list)
     @result_ids = list.map(&:id)
-    @num_results = list.count
+    @num_results = list.size
     @results = list.each_with_object({}) do |obj, map|
       map[obj.id] ||= obj
     end
@@ -93,7 +78,7 @@ module Query::Modules::HighLevelQueries
   # better all be valid Integer ids -- no error checking is done!!
   def result_ids=(list)
     @result_ids = list
-    @num_results = list.count
+    @num_results = list.size
   end
 
   # Get index of a given record / id in the results.
@@ -127,7 +112,7 @@ module Query::Modules::HighLevelQueries
         ids = ids.select { |id| @letters[id] == letter }
       end
     end
-    paginator.num_total = ids.count
+    paginator.num_total = ids.size
     ids[paginator.from..paginator.to] || []
   end
 

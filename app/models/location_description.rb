@@ -118,10 +118,14 @@ class LocationDescription < Description
   #  :section: Descriptions
   #
   ##############################################################################
-
-  # Override the default show_controller
   def self.show_controller
-    :location
+    # Not the generated default in AbstractModel, because controller namespaced.
+    "/locations/descriptions"
+  end
+
+  # Eliminate when controller_normalized? goes.
+  def self.show_action
+    :show
   end
 
   # Returns an Array of all the descriptive text fields (Symbol's).
@@ -166,6 +170,9 @@ class LocationDescription < Description
         recipients.delete(interest.user)
       end
     end
+
+    # Remove users who have opted out of all emails.
+    recipients.reject!(&:no_emails)
 
     # Send notification to all except the person who triggered the change.
     (recipients.uniq - [sender]).each do |recipient|

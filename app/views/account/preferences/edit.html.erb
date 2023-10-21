@@ -1,0 +1,16 @@
+<%
+add_page_title(:prefs_title.t)
+add_tab_set(account_preferences_edit_tabs)
+%>
+
+<%= form_with(model: @user, url: account_preferences_path,
+              id: "account_preferences_form") do |form| %>
+  <%= render(partial: "account/preferences/login", locals: { f: form })%>
+  <%= render(partial: "account/preferences/privacy", locals: { f: form })%>
+  <%= render(partial: "account/preferences/appearance", locals: { f: form })%>
+  <%= render(partial: "account/preferences/filters", locals: { f: form })%>
+  <%= render(partial: "account/preferences/notes", locals: { f: form })%>
+  <%= render(partial: "account/preferences/email", locals: { f: form })%>
+<% end %>
+
+<%= render(partial: "account/preferences/put_buttons")%>

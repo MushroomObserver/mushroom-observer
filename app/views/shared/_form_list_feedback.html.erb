@@ -1,12 +1,9 @@
 <% if !@new_names.blank? %>
   <div class="Errors" id="missing_names">
+    <%= content_tag(:div, :form_list_feedback_missing_names.t,
+                    class: "font-weight-bold") %>
+    <%= help_note(:div, :form_list_feedback_missing_names_help.t) %>
     <p>
-      <b><%= :form_list_feedback_missing_names.t %></b><br/>
-      <span class="help-note">
-        <%= :form_list_feedback_missing_names_help.t %>
-      </span>
-    </p>
-    <p class="Data">
       <% @new_names.each do |n| %>
       <br/><%= indent + h(n) %>
       <% end %>
@@ -16,21 +13,21 @@
 
 <% if !@deprecated_names.blank? %>
   <div class="Errors" id="deprecated_names">
+    <%= content_tag(:div, :form_species_lists_deprecated.t,
+                    class: "font-weight-bold") %>
+    <%= help_note(:div, :form_species_lists_deprecated_help.t) %>
     <p>
-      <b><%= :form_species_lists_deprecated.t %>:</b><br/>
-      <span class="help-note">
-        <%= :form_species_lists_deprecated_help.t %>
-      </span>
-    </p>
-    <p class="Data">
       <% @deprecated_names.each do |name|
         approved_names = name.approved_synonyms %>
         <%= name.display_name.t %><br/>
         <% if approved_names != [] %>
-          <% approved_names.each do |other_name| %>
-            <%= indent + radio_button("chosen_approved_names", name.id,
-                                      other_name.id) %>
-            <%= other_name.display_name.t %><br/>
+          <%= fields_for(:chosen_approved_names) do |f_c| %>
+            <% approved_names.each do |other_name| %>
+              <%= radio_with_label(form: f_c, field: name.id,
+                                  value: other_name.id,
+                                  label: other_name.display_name.t,
+                                  class: "ml-4") %>
+            <% end %>
           <% end %>
         <% end %>
       <% end %>
@@ -40,20 +37,20 @@
 
 <% if !@multiple_names.blank? %>
   <div class="Errors" id="ambiguous_names">
+    <%= content_tag(:div, :form_species_lists_multiple_names.t,
+                    class: "font-weight-bold") %>
+    <%= help_note(:div, :form_species_lists_multiple_names_help.t) %>
     <p>
-      <b><%= :form_species_lists_multiple_names.t %>:</b><br/>
-      <span class="help-note">
-        <%= :form_species_lists_multiple_names_help.t %>
-      </span>
-    </p>
-    <p class="Data">
       <% @multiple_names.each do |name| %>
         <%= name.display_name.t %><br/>
-        <% name.other_authors.each do |other_name| %>
-          <%= indent + radio_button("chosen_multiple_names", name.id,
-                                    other_name.id) %>
-          <%= other_name.display_name.t %>
+        <%= fields_for(:chosen_multiple_names) do |f_c| %>
+          <% name.other_authors.each do |other_name| %>
+            <%= radio_with_label(form: f_c, field: name.id,
+                                value: other_name.id,
+                                label: other_name.display_name.t,
+                                class: "ml-4") %>
             (<%= other_name.observations.count %>)<br/>
+          <% end %>
         <% end %>
       <% end %>
     </p>

@@ -1,0 +1,29 @@
+// Update page with results of update or create naming or vote
+// Has additional functionality to observations/show/section_update
+// it updates the obs title and redoes form bindings.
+
+<%= render(
+  partial: "observations/show/section_update",
+  locals: { identifier: "namings" }
+) %>
+
+<%= render(
+  partial: "observations/show/section_update",
+  locals: { identifier: "name_info" }
+) %>
+
+<%
+new_title = show_obs_title(obs: @observation)
+new_title_doc = new_title.strip_html.html_to_ascii
+new_title_tag = tag.h1(new_title, class: "h3", id: "title")
+%>
+
+// reset title of obs if necessary
+document.title = '<%= new_title_doc %>';
+$("#title").replaceWith('<%= new_title_tag %>');
+
+// Need to redo naming table bindings and hide cast vote buttons
+VoteByAjaxModule({
+  show_namings_lose_changes: '<%= j :show_namings_lose_changes.l.gsub("\n", " ") %>',
+  show_namings_saving: '<%= j :show_namings_saving.l %>'
+})

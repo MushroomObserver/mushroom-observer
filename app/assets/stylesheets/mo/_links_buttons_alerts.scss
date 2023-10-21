@@ -2,46 +2,19 @@
 // link, button, alert themed styles
 // --------------------------------------------------
 
-a {
-  background-color: $LINK_BG_COLOR;
-  font-weight: $LINK_WEIGHT;
-}
+// a:not(.btn):not(.list-group-item):not(.theater-btn):visited {
+//   color: $LINK_VISITED_FG_COLOR;
+// }
 
-a:visited {
-  color: $LINK_VISITED_FG_COLOR;
-  background-color: $LINK_VISITED_BG_COLOR;
-}
+// .navbar-default {
+//   a,
+//   a:visited {
+//     color: $LINK_FG_COLOR !important;
+//   }
+// }
 
-a:hover {
-  color: $LINK_HOVER_FG_COLOR;
-  background-color: $LINK_HOVER_BG_COLOR;
-}
-
-.btn:hover, .btn-default:hover {
-  color: $BUTTON_HOVER_FG_COLOR;
-  background-color: $BUTTON_HOVER_BG_COLOR;
-  border-color: $BUTTON_HOVER_BORDER_COLOR;
-}
-
-.btn.active {
-  color: $BUTTON_ACTIVE_FG_COLOR;
-  background-color: $BUTTON_ACTIVE_BG_COLOR;
-  box-shadow: none;
-}
-
-.btn-primary:hover {
-  color: $BUTTON_PRIMARY_HOVER_FG_COLOR;
-  background-color: $BUTTON_PRIMARY_HOVER_BG_COLOR !important;
-  border-color: $BUTTON_PRIMARY_HOVER_BORDER_COLOR;
-}
-
-.form-control {
-//   color: $BUTTON_FG_COLOR;
-//   border-width: $INPUT_BORDER_WIDTH;
-//   border-style: $INPUT_BORDER_STYLE;
-//   border-radius: $INPUT_BORDER_RADIUS;
-  border-color: $BUTTON_FG_COLOR;
-//   padding: $padding-small-vertical $padding-small-horizontal;
+.btn-link {
+  font-weight: normal !important;
 }
 
 //
@@ -50,18 +23,13 @@ a:hover {
 
 .alert {
   margin: 0.5em 0;
-  border-width: $ALERT_BORDER_WIDTH;
-  border-style: $ALERT_BORDER_STYLE;
-  border-radius: $ALERT_BORDER_RADIUS;
+  border-width: 2px;
   padding: 0.5em 1.0em;
   text-align: left;
 
   // message banner at top
   // --------------------------------------------------
   &.message-banner {
-    border-width: $BANNER_BORDER_WIDTH;
-    border-style: $BANNER_BORDER_STYLE;
-    border-radius: $BANNER_BORDER_RADIUS;
     font-size: 150%;
     text-align: center;
   }

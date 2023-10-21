@@ -70,7 +70,7 @@ module Query
       )
     end
 
-    def default_order
+    def self.default_order
       "title"
     end
   end

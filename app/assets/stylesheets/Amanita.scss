@@ -23,7 +23,8 @@ $pachycolea_dark_brown:           #60412d;
 $polyozellus_light:               #a5bffa;
 $polyozellus_dark:                #5167b2;
 
-$BUTTON_FG_COLOR:             $pachycolea_background;
+$BUTTON_FG_COLOR:             $pachycolea_foreground;
+$BUTTON_BG_COLOR:             $pachycolea_background;
 $BUTTON_ACTIVE_FG_COLOR:      $muscaria_background;
 
 $BODY_FG_COLOR:               $pachycolea_foreground;
@@ -58,7 +59,7 @@ $LIST_BORDER_COLOR:           transparent;
 $LIST_HEADER_FG_COLOR:        #777777;
 $LIST_HEADER_BG_COLOR:        #EEEEEE;
 $LIST_FG_COLOR:               $pachycolea_foreground;
-$LIST_BG_COLOR:               mix($pachycolea_background, white, 80%);
+$LIST_BG_COLOR:               mix($pachycolea_background, black, 80%);
 $LIST_EVEN_BG_COLOR:          $LIST_BG_COLOR;
 $LIST_ODD_BG_COLOR:           mix($LIST_EVEN_BG_COLOR, black, 25%);
 
@@ -99,7 +100,7 @@ $DANGER_BG_COLOR:                   #FFE0E0;
 $DANGER_BORDER_COLOR:               #F07070;
 $DANGER_FG_COLOR:                   black;
 
-$WELL_BG_COLOR:                     $pachycolea_light_stipe;
-$WELL_FG_COLOR:                     $pachycolea_dark_brown;
+$WELL_BG_COLOR:                     rgba($pachycolea_light_stipe, 0.45);
+$WELL_FG_COLOR:                     $pachycolea_foreground;
 
 @import "mushroom_observer";

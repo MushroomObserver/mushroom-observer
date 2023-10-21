@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+visual_group_one:
+  name: Visual Group One
+  approved: true
+  description: Visual Group One includes Agaricus campestris
+  images: agaricus_campestris_image
+  visual_model: visual_model_one
+
+visual_group_two:
+  name: Peltigera
+  approved: false
+  description: Visual Group Two includes Peltigera
+  images: peltigera_image
+  visual_model: visual_model_one

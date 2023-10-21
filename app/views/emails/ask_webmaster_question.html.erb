@@ -1,21 +1,29 @@
-<% @title = :ask_webmaster_title.t %>
+<%
+add_page_title(:ask_webmaster_title.t)
 
-<%= :ask_webmaster_note.tp(todo_list: "/pivotal") %>
-<%= form_tag(action: :ask_webmaster_question) do %>
+url = { action: :ask_webmaster_question }
+%>
 
-  <div class="form-group mt-3">
-    <%= label_tag(:user_email, :ask_webmaster_your_email.t + ":") %>
-    <%= text_field(:user, :email, value: @email, size: 60,
-                    class: "form-control",
-                    data: { autofocus: @email.blank? || @email_error }) %>
-  </div>
+<%= :ask_webmaster_note.tp %>
 
-  <div class="form-group mt-3">
-    <%= label_tag(:question_content, :ask_webmaster_question.t + ":") %>
-    <%= text_area(:question, :content, value: @content, rows: 10,
-                  class: "form-control",
-                  data: { autofocus: !@email.blank? && !@email_error }) %>
-  </div>
+<%= form_with(url: url) do |f| %>
 
-  <%= submit_tag(:SEND.l, class: "btn btn-default center-block mt-3") %>
+  <%= fields_for(:user) do |f_u| %>
+    <%= text_field_with_label(form: f_u, field: :email, value: @email, size: 60,
+                              label: :ask_webmaster_your_email.t + ":",
+                              data: {
+                                autofocus: @email.blank? || @email_error
+                              }) %>
+  <% end %>
+
+  <%= fields_for(:question) do |f_q| %>
+    <%= text_area_with_label(form: f_q, field: :content, value: @content,
+                             rows: 10, label: :ask_webmaster_question.t + ":",
+                             data: {
+                               autofocus: !@email.blank? && !@email_error
+                             }) %>
+  <% end %>
+
+  <%= submit_button(form: f, button: :SEND.l, center: true) %>
+
 <% end %>

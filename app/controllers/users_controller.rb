@@ -7,7 +7,6 @@ class UsersController < ApplicationController
   require "set"
 
   before_action :login_required
-  before_action :disable_link_prefetching
 
   # User index
   def index
@@ -50,37 +49,6 @@ class UsersController < ApplicationController
 
   alias show_user show
 
-  def edit
-    return unless (@user2 = find_or_goto_index(User, params[:id].to_s))
-
-    redirect_to(user_path(@user2.id)) unless in_admin_mode?
-
-    # Reformat bonuses as string for editing, one entry per line.
-    @val = if @user2.bonuses
-             vals = @user2.bonuses.map do |points, reason|
-               format("%<points>-6d %<reason>s",
-                      points: points, reason: reason.gsub(/\s+/, " "))
-             end
-             vals.join("\n")
-           else
-             ""
-           end
-  end
-
-  def update
-    return unless (@user2 = find_or_goto_index(User, params[:id].to_s))
-
-    redirect_to(user_path(@user2.id)) unless in_admin_mode?
-
-    # Parse new set of values.
-    @val = params[:val]
-    bonuses = calculate_bonuses
-    return if bonuses.nil?
-
-    update_user_contribution(bonuses)
-    redirect_to(user_path(@user2.id))
-  end
-
   #############################################################################
 
   private
@@ -88,11 +56,11 @@ class UsersController < ApplicationController
   # Display list of User's whose name, notes, etc. match a string pattern.
   def user_search
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) && (user = User.safe_find(pattern))
+    if pattern.match?(/^\d+$/) && (user = User.safe_find(pattern))
       redirect_to(user_path(user.id))
     else
       query = create_query(:User, :pattern_search, pattern: pattern)
-      show_selected_users(query, no_hits_title: :title_for_user_search.t)
+      show_selected_users(query)
     end
   end
 
@@ -105,9 +73,6 @@ class UsersController < ApplicationController
       matrix: !in_admin_mode?
     }.merge(args)
 
-    # Add some alternate sorting criteria.
-    args[:sorting_links] = args_sorting_links
-
     # Paginate by "correct" letter.
     args[:letters] = if (query.params[:by] == "login") ||
                         (query.params[:by] == "reverse_login")
@@ -117,27 +82,6 @@ class UsersController < ApplicationController
                      end
 
     show_index_of_objects(query, args)
-  end
-
-  def args_sorting_links
-    if in_admin_mode?
-      [
-        ["id",          :sort_by_id.t],
-        ["login",       :sort_by_login.t],
-        ["name",        :sort_by_name.t],
-        ["created_at",  :sort_by_created_at.t],
-        ["updated_at",  :sort_by_updated_at.t],
-        ["last_login",  :sort_by_last_login.t]
-      ]
-    else
-      [
-        ["login",         :sort_by_login.t],
-        ["name",          :sort_by_name.t],
-        ["created_at",    :sort_by_created_at.t],
-        ["location",      :sort_by_location.t],
-        ["contribution",  :sort_by_contribution.t]
-      ]
-    end
   end
 
   # set @observations whose thumbnails will display in user summary
@@ -151,36 +95,5 @@ class UsersController < ApplicationController
     @query = Query.lookup(:Observation, :by_user, user: @show_user,
                                                   by: :thumbnail_quality)
     @observations = @query.results(limit: 6, include: image_includes)
-  end
-
-  def calculate_bonuses
-    line_num = 0
-    bonuses = []
-    @val.split("\n").each do |line|
-      line_num += 1
-      if (match = line.match(/^\s*(\d+)\s*(\S.*\S)\s*$/))
-        bonuses.push([match[1].to_i, match[2].to_s])
-      else
-        flash_error("Syntax error on line #{line_num}.")
-        return nil
-      end
-    end
-    bonuses
-  end
-
-  def update_user_contribution(bonuses)
-    contrib = @user2.contribution.to_i
-    # Subtract old bonuses.
-    @user2.bonuses&.each_key do |points|
-      contrib -= points
-    end
-    # Add new bonuses
-    bonuses.each do |(points, _reason)|
-      contrib += points
-    end
-    # Update database.
-    @user2.bonuses      = bonuses
-    @user2.contribution = contrib
-    @user2.save
   end
 end

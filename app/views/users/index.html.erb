@@ -1,7 +1,10 @@
 <%
-   @title ||= :users_by_name_title.t
+@container = :full
+no_hits = in_admin_mode? ? :users_by_name_title.t : :title_for_user_search.t
+add_index_title(@query, no_hits: no_hits)
+add_sorter(@query, users_index_sorts(in_admin_mode?))
 
-   flash_error(@error) if @error && @objects.empty?
+flash_error(@error) if @error && @objects.empty?
 %>
 
 <%
@@ -17,7 +20,7 @@
     <%= paginate_block(@pages) do %>
       <table align="center" class="table table-striped permissions" cellspacing="2">
         <thead>
-          <tr class="Data">
+          <tr>
             <th><%= :users_by_name_verified.t %></th>
             <th><%= :users_by_name_groups.t %></th>
             <th><%= :users_by_name_last_login.t %></th>

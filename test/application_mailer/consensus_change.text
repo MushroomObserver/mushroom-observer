@@ -1,0 +1,23 @@
+From: news@mushroomobserver.org
+Reply-To: no-reply@mushroomobserver.org
+To: mary@collectivesource.com
+Subject: [MO] Consensus Changed from Agaricus campestris L. to Coprinus comatus (O.F. Mull.) Pers.
+
+Consensus Change
+
+Consensus has changed for observation #<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>:
+
+Old name: Agaricus campestris L.
+New name: Coprinus comatus (O.F. Müll.) Pers.
+Time: IGNORE
+By: Tricky Dick (dick)
+
+Here are some handy links:
+
+Show this observation: https://mushroomobserver.org/<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>
+Post a comment: https://mushroomobserver.org/comments/new?target=432936842&type=Observation
+I'm not interested in this observation: https://mushroomobserver.org/interests/set_interest?id=<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>&type=Observation&user=<%= ActiveRecord::FixtureSet.identify(:mary) %>&state=-1
+Stop sending me email like this: https://mushroomobserver.org/account/no_email/<%= ActiveRecord::FixtureSet.identify(:mary) %>?type=observations_consensus
+Change your preferences: https://mushroomobserver.org/account/preferences/edit
+Latest changes at Mushroom Observer: https://mushroomobserver.org
+

@@ -211,7 +211,7 @@ module Query
       add_join(:observations, :locations!)
     end
 
-    def default_order
+    def self.default_order
       "created_at"
     end
   end

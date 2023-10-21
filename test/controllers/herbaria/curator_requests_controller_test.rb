@@ -29,7 +29,7 @@ module Herbaria
     def test_new_no_login
       get(:new, params: { id: nybg.id })
       assert_redirected_to(
-        account_login_path,
+        new_account_login_path,
         "Curator request by anonymous user should redirected to account login"
       )
     end

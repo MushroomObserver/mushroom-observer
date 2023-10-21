@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
+# Combine two herbaria
 module Herbaria
-  # Combine two herbaria
   class MergesController < ApplicationController
     # filters
     before_action :login_required

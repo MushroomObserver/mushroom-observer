@@ -1,18 +1,7 @@
 <%
-  @title = :show_publication_title.l
+add_page_title(:show_publication_title.l)
 
-  tabs = [
-    link_to(:create_publication.t, new_publication_path),
-    link_to(:publication_index.t, publications_path)
-  ]
-  if in_admin_mode? || @publication.can_edit?(@user)
-    tabs += [
-      link_to(:EDIT.t, edit_publication_path(@publication)),
-      link_to(:DESTROY.t, {action: :destroy, id: @publication.id},
-                          {data: {confirm: :are_you_sure.t}})
-    ]
-  end
-  @tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(publication_show_tabs(pub: @publication, user: @user))
 %>
 
 <p>

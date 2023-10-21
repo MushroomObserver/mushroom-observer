@@ -44,7 +44,6 @@ module Report
         ].freeze
       end
 
-      # rubocop:disable Metrics/AbcSize
       def format_row(row)
         ids.append(row.obs_id)
         [
@@ -76,7 +75,6 @@ module Report
           clean_value(row.obs_notes)
         ]
       end
-      # rubocop:enable Metrics/AbcSize
 
       def clean_value(value)
         value&.tr("\t", " ")&.gsub("\n", "  ")&.gsub("\r", "  ")

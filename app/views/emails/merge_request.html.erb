@@ -1,29 +1,28 @@
 <%
-  @title = :email_merge_request_title.t(type: @model.type_tag)
+add_page_title(:email_merge_request_title.t(type: @model.type_tag))
 
-  tabs = [
-    link_to(:cancel_and_show.t(type: @model.type_tag), @old_obj.show_link_args)
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(email_merge_request_tabs(old_obj: @old_obj))
+
+url = { action: :merge_request, type: @model.name,
+        old_id: @old_obj.id, new_id: @new_obj.id }
 %>
 
 <%= :email_merge_request_help.tp(type: @model.type_tag) %>
-<%= form_tag(type: @model.name, old_id: @old_obj.id, new_id: @new_obj.id) do %>
-  <div class="form-group mt-3">
-    <%= label_tag(:old_obj, @model.type_tag.to_s.upcase.to_sym.t) %>:
-        <%= @old_obj.unique_format_name.t %>
-  </div>
 
-  <div class="form-group mt-3">
-    <%= label_tag(:new_obj, @model.type_tag.to_s.upcase.to_sym.t) %>:
-        <%= @new_obj.unique_format_name.t %>
-  </div>
+<%= form_with(url: url) do |f| %>
 
-  <div class="form-group mt-3">
-    <%= label_tag(:notes, :Notes.t + ":") %>
-    <%= text_area_tag(:notes, "", rows: 10, class: "form-control",
-                      data: { autofocus: true }) %>
-  </div>
+  <%= static_text_with_label(form: f, field: :old_obj, inline: true,
+                             label: @model.type_tag.to_s.upcase.to_sym.t + ":",
+                             value: @old_obj.unique_format_name.t) %>
 
-  <%= submit_tag(:SEND.l, class: "btn btn-default center-block mt-3") %>
+  <%= static_text_with_label(form: f, field: :new_obj, inline: true,
+                             label: @model.type_tag.to_s.upcase.to_sym.t + ":",
+                             value: @new_obj.unique_format_name.t) %>
+
+  <%= text_area_with_label(form: f, field: :notes, rows: 10,
+                           value: "", label: :Notes.t + ":",
+                           data: { autofocus: true }) %>
+
+  <%= submit_button(form: f, button: :SEND.l, center: true) %>
+
 <% end %>

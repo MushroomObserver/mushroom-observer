@@ -1,0 +1,11 @@
+
+<div class="hidden-print col-xs-12">
+  <div class="pt-3">
+    <%= content_tag(:span, :sort_by_header.t) %>
+    <div id="sorts" class="btn-group btn-group-xs" role="group">
+      <% links.each do |btn| %>
+        <%= btn %>
+      <% end %>
+    </div>
+  </div>
+</div>

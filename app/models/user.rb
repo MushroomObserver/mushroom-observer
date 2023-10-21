@@ -21,7 +21,7 @@
 #
 #  1. Anonymous User pokes around until they try to post a Comment, say.  This
 #     page requires a login (via +login_required+ filter in controller, see
-#     below).  This causes the User to be redirected to <tt>/account/login</tt>.
+#     below).  This causes the User to be redirected to /account/login/new.
 #
 #  2. If the User already has an account, they login here, and wind up
 #     redirected back to the form that triggered the login.
@@ -32,8 +32,8 @@
 #     is +nil+).
 #
 #  4. A verification email is sent to the email address given in the sign-up
-#     form.  Inside the email is a link to /account/verify.  This provides the
-#     User +id+ and +auth_code+.
+#     form.  Inside the email is a link to /account/verify.  This provides
+#     the User +id+ and +auth_code+.
 #
 #  5. When they click on that link, the User record is updated and the User is
 #     automatically logged in.
@@ -52,7 +52,7 @@
 #
 #  3. +set_timezone+: Set timezone from cookie set by client's browser.
 #
-#  4. +login_required+: (optional) Redirects to <tt>/account/login</tt> if not
+#  4. +login_required+: (optional) Redirects to /account/login/new if not
 #     logged in.
 #
 #  == Contribution Score
@@ -164,7 +164,7 @@
 #  locations::          Location's they were last to edit.
 #  names::              Name's they were last to edit.
 #  namings::            Naming's they've proposed.
-#  notifications::      Notification's they've requested.
+#  name_trackers::      NameTracker's they've requested.
 #  observations::       Observation's they've posted.
 #  projects_created::   Project's they've created.
 #  queued_emails::      QueuedEmail's they're scheduled to receive.
@@ -191,7 +191,6 @@
 #                       or that are attached to projects they're on.
 #
 #  ==== Other Stuff
-#  primer::             Primer for auto-complete.
 #  erase_user::         Erase all references to a given User (by id).
 #  remove_image::       Ensures that this user doesn't reference this image
 #
@@ -269,8 +268,8 @@ class User < AbstractModel
   has_many :location_descriptions
   has_many :names
   has_many :name_descriptions
+  has_many :name_trackers
   has_many :namings
-  has_many :notifications
   has_many :observations
   has_many :projects_created, class_name: "Project"
   has_many :publications
@@ -312,7 +311,7 @@ class User < AbstractModel
   has_many :edited_locations, through: :location_description_editors,
                               source: :location_description
 
-  belongs_to :image         # mug shot
+  belongs_to :image, inverse_of: :profile_users # mug shot
   belongs_to :license       # user's default license
   belongs_to :location      # primary location
 
@@ -352,11 +351,6 @@ class User < AbstractModel
   # Used to let User enter password confirmation when signing up or changing
   # password.
   attr_accessor :password_confirmation
-
-  # Override the default show_controller
-  def self.show_controller
-    :users
-  end
 
   # Find admin's record.
   def self.admin
@@ -573,11 +567,11 @@ class User < AbstractModel
   # (meaning the one they have used the most).
   # TODO: Make this a user preference.
   def preferred_herbarium
-    @preferred_herbarium ||= \
+    @preferred_herbarium ||=
       begin
         herbarium_id = HerbariumRecord.where(user_id: id).
                        order(created_at: :desc).limit(1).
-                       pluck(:herbarium_id).first
+                       pick(:herbarium_id)
         if herbarium_id.blank?
           personal_herbarium
         else
@@ -647,7 +641,7 @@ class User < AbstractModel
       begin
         i = Interest.where(
           user_id: id, target_type: object.class.name, target_id: object.id
-        ).pluck(:state).first
+        ).pick(:state)
         case i
         when true
           :watching
@@ -738,55 +732,7 @@ class User < AbstractModel
 
   def self.parse_notes_template(str)
     str.to_s.gsub(/[\x00-\x07\x09\x0B\x0C\x0E-\x1F\x7F]/, "").
-      split(",").map(&:squish).reject(&:blank?)
-  end
-
-  ##############################################################################
-  #
-  #  :section: Other
-  #
-  ##############################################################################
-
-  # Get list of users to prime auto-completer.  Returns a simple Array of up to
-  # 1000 (by contribution or created within the last month) login String's
-  # (with full name in parens).
-  def self.primer
-    if !File.exist?(MO.user_primer_cache_file) ||
-       File.mtime(MO.user_primer_cache_file) < 1.day.ago
-      data = primer_data
-      write_primer_file(data)
-      data
-    else
-      read_primer_file
-    end
-  end
-
-  private_class_method def self.write_primer_file(data)
-    File.open(MO.user_primer_cache_file, "w:utf-8").
-      write("#{data.join("\n")}\n")
-  end
-
-  private_class_method def self.read_primer_file
-    File.open(MO.user_primer_cache_file, "r:UTF-8").
-      readlines.map(&:chomp)
-  end
-
-  def self.primer_data
-    users = User.select(:login, :name).order(
-      orderby_last_login_if_recent.desc, User[:contribution].desc
-    ).limit(1000).pluck(:login, :name)
-
-    users.map do |login, name|
-      name.empty? ? login : "#{login} <#{name}>"
-    end.sort
-  end
-
-  private_class_method def self.orderby_last_login_if_recent
-    User[:last_login].when(
-      User[:last_login] > 1.month.ago
-    ).then(
-      User[:last_login]
-    ).else(nil)
+      split(",").map(&:squish).compact_blank
   end
 
   # Erase all references to a given user (by id).  Missing:
@@ -904,7 +850,7 @@ class User < AbstractModel
     [:location_description_editors,   :user_id],
     [:name_description_authors,       :user_id],
     [:name_description_editors,       :user_id],
-    [:notifications,                  :user_id],
+    [:name_trackers,                  :user_id],
     [:observations,                   :user_id],
     [:publications,                   :user_id],
     [:queued_emails,                  :user_id],
@@ -955,7 +901,7 @@ class User < AbstractModel
     disable_account
     delete_api_keys
     delete_interests
-    delete_notifications
+    delete_name_trackers
     delete_queued_emails
     delete_observations
     delete_private_name_descriptions
@@ -989,8 +935,8 @@ class User < AbstractModel
     interests.delete_all
   end
 
-  def delete_notifications
-    Notification.where(user: self).delete_all
+  def delete_name_trackers
+    NameTracker.where(user: self).delete_all
   end
 
   def delete_queued_emails
@@ -1086,7 +1032,7 @@ class User < AbstractModel
             images.joins(:glossary_term_images) -
             images.joins(:observation_images) -
             images.joins(:project_images) -
-            images.joins(:subjects)).
+            images.joins(:profile_users)).
           map(&:id)
     Image.where(id: ids).delete_all
   end
@@ -1120,7 +1066,7 @@ class User < AbstractModel
     NameDescriptionAuthor,
     NameDescriptionEditor,
     Naming,
-    # Notification,                  (just deleted all of these)
+    # NameTracker,                  (just deleted all of these)
     # ObservationView,               (okay if these are all that's left)
     # Observation,                   (just deleted all of these)
     Project,
@@ -1167,13 +1113,19 @@ class User < AbstractModel
 
   validate :user_requirements
   validate :check_password, on: :create
+  # `if` accounts for existing invalid entries; otherwise users cannot update
+  validate :user_email_requirements, if: proc { |c|
+    c.new_record? || c.email_changed?
+  }
   validate :notes_template_forbid_other
   validate :notes_template_forbid_duplicates
+  validate :check_content_filter_region, if: proc { |c|
+    c.new_record? || c.content_filter_changed?
+  }
 
   def user_requirements
     user_login_requirements
     user_password_requirements
-    user_email_requirements
     user_other_requirements
   end
 
@@ -1198,7 +1150,7 @@ class User < AbstractModel
   end
 
   def user_email_requirements
-    if email.to_s.blank?
+    if email.to_s.blank? || !ApplicationMailer.valid_email_address?(email.to_s)
       errors.add(:email, :validate_user_email_missing.t)
     elsif email.size > 80
       errors.add(:email, :validate_user_email_too_long.t)
@@ -1258,5 +1210,15 @@ class User < AbstractModel
 
   def notes_other_translations
     %w[andere altro altra autre autres otra otras otro otros outros]
+  end
+
+  # Check if region is provided and is in fact a valid region with locations,
+  # i.e. the end of a location name string
+  def check_content_filter_region
+    return if content_filter[:region].blank?
+    return if Location.in_region(content_filter[:region]).any?
+
+    # If we're here, there are no MO locations in that region.
+    errors.add(:region, :advanced_search_filter_region.t)
   end
 end

@@ -1,86 +1,25 @@
 <%
-  # NOTE: action was `observations_of_name`. Whether before or after refactor,
-  # this action needed a `name` param but there's none here. Reverting to index
-  name_link = { controller: :observations, action: :index }
+@container = :full
+add_page_title(checklist_show_title(user: @show_user,
+                                    project: @project,
+                                    list: @species_list))
 
-  if @show_user
-    @title = :checklist_for_user_title.t(user: @show_user.legal_name)
-    tabs = [
-      link_to(:show_object.t(type: :profile), user_path(@show_user.id)),
-      link_to(:show_objects.t(type: :observation),
-              controller: :observations, action: :index,
-              user: @show_user.id),
-      link_to(:show_user_email_to.t(name: @show_user.legal_name),
-              controller: :emails, action: :ask_user_question,
-              id: @show_user.id)
-    ]
-    @tabsets = { right: draw_tab_set(tabs) }
-    name_link[:user_id] = @show_user.id
-
-  elsif @project
-    @title = :checklist_for_project_title.t(project: @project.title)
-    tabs = [
-      link_to(:show_object.t(type: :project),
-              controller: :project, action: :show_project, id: @project.id),
-      link_to(:list_objects.t(type: :project),
-              controller: :project, action: :list_projects)
-    ]
-    @tabsets = { right: draw_tab_set(tabs) }
-    name_link[:project_id] = @project.id
-
-  elsif @species_list
-    @title = :checklist_for_species_list_title.t(list: @species_list.title)
-    tabs = [
-      link_to(:show_object.t(type: :project),
-              controller: :species_list, action: :show_species_list,
-              id: @species_list.id)
-    ]
-    if check_permission(@species_list)
-      tabs += [
-        link_to(:edit_object.t(type: :species_list),
-                controller: :species_list, action: :edit_species_list,
-                id: @species_list.id)
-      ]
-    end
-    @tabsets = { right: draw_tab_set(tabs) }
-    name_link[:species_list_id] = @species_list.id
-
-  else
-    @title = :checklist_for_site_title.t
-    tabs = [
-      link_to(:app_contributors.t, contributors_path),
-      link_to(:app_site_stats.t, info_site_stats_path)
-    ]
-    @tabsets = { right: draw_tab_set(tabs) }
-  end
+add_tab_set(checklist_show_tabs(user: @show_user,
+                                 project: @project,
+                                 list: @species_list))
+names = @data.names
 %>
 
-<div class="text-center">
-  <%= :checklist_summary.t(species: @data.num_species, genera: @data.num_genera) %>
-  <br/>
-  <br/>
+<div class="my-4">
+  <%= :checklist_summary.t(species: @data.num_species,
+                           genera: @data.num_genera,
+                           names: @data.num_names) %>
+</div>
 
-  <style>
-    table.checklist td {
-      padding: 0px 1em 0px 1em;
-    }
-  </style>
-
-  <table class="checklist">
-    <% num_cols = 5
-    names = @data.species
-    col_length = ((names.length + num_cols - 1).to_f / num_cols).truncate
-    (1..col_length).each do |row| %>
-      <tr>
-        <% (1..num_cols).each do |col| %>
-          <% i = (col-1) * col_length + row - 1
-          if i < names.length %>
-            <td><i>
-              <%= link_to(names[i], name_link.merge(name: names[i])) %>
-            </i></td>
-          <% end %>
-        <% end %>
-      </tr>
+<%= panel_block(inner_class: "checklist") do %>
+  <ul class="list-unstyled">
+    <% names.each do |name| %>
+      <li><i><%= link_to(name[0], name_path(name[1])) %></i></li>
     <% end %>
-  </table>
-</div><!--.text-center-->
+  </ul>
+<% end %>

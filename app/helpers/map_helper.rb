@@ -114,10 +114,10 @@ module MapHelper
           "#{format_latitude(obj.lat)} #{format_longitude(obj.long)}"
         end
       end
-    end.reject(&:blank?).uniq
+    end.compact_blank.uniq
   end
 
-  def mapset_info_window(set, args) # rubocop:disable Metrics/AbcSize
+  def mapset_info_window(set, args)
     lines = []
     observations = set.observations
     locations = set.underlying_locations
@@ -147,32 +147,31 @@ module MapHelper
     label.html_safe << ": " << count.to_s << " (" << show << " | " << map << ")"
   end
 
-  def mapset_submap_links(set, args, type) # rubocop:disable Metrics/AbcSize
+  def mapset_submap_links(set, args, type)
     params = args[:query_params] || {}
-    params = params.merge(
-      controller: type.to_s.sub("observation", "observations")
-    )
     params = params.merge(mapset_box_params(set))
-    if type.to_s.classify.constantize.controller_normalized?
-      [link_to(:show_all.t, params.merge(action: :index)),
-       link_to(:map_all.t, params.merge(action: :map))]
-    else
-      [link_to(:show_all.t, params.merge(action: "index_#{type}")),
-       link_to(:map_all.t, params.merge(action: "map_#{type}s"))]
+    case type.to_s
+    when "observation"
+      [link_to(:show_all.t, observations_path(params: params)),
+       link_to(:map_all.t, map_observations_path(params: params))]
+    when "location"
+      [link_to(:show_all.t, locations_path(params: params)),
+       link_to(:map_all.t, map_locations_path(params: params))]
+    when "name"
+      [link_to(:show_all.t, names_path(params: params)),
+       link_to(:map_all.t, map_names_path(params: params))]
     end
   end
 
   def mapset_observation_link(obs, args)
+    params = args[:query_params] || {}
     link_to("#{:Observation.t} ##{obs.id}",
-            controller: :observations,
-            action: :show,
-            id: obs.id,
-            params: args[:query_params] || {})
+            observation_path(id: obs.id, params: params))
   end
 
   def mapset_location_link(loc, args)
-    link_to(loc.display_name.t, controller: :location, action: :show_location,
-                                id: loc.id, params: args[:query_params] || {})
+    params = args[:query_params] || {}
+    link_to(loc.display_name.t, location_path(id: loc.id, params: params))
   end
 
   def mapset_box_params(set)
@@ -184,7 +183,7 @@ module MapHelper
     }
   end
 
-  def mapset_coords(set) # rubocop:disable Metrics/AbcSize
+  def mapset_coords(set)
     if set.is_point?
       format_latitude(set.lat) + safe_nbsp + format_longitude(set.long)
     else

@@ -1,0 +1,10 @@
+<%
+add_page_title(:merge_descriptions_title.t(object: @description.format_name))
+add_tab_set(name_description_form_permissions_tabs(description: @description))
+
+action = { controller: "/names/descriptions/merges", action: :create,
+            id: @description.id }
+%>
+
+<%= render(partial: "descriptions/form_merge",
+           locals: { action: action, description: @description }) %>

@@ -1,0 +1,59 @@
+<%
+  target = comment.target
+  user = comment.user
+%>
+
+<%= tag.div(class: "list-group-item comment", id:"comment_#{comment.id}") do %>
+  <%= tag.div(class: "row") do %>
+
+    <%= tag.div(class: "col-xs-12 col-sm-9 col-lg-10") do %>
+
+      <% if local_assigns[:show_name] && show_name %>
+        <%= tag.h4(class: "mt-0") do %>
+          <%= link_to(target.unique_format_name.t, target.show_link_args) \
+                      rescue :comment_list_deleted.t %>
+          <%= tag.span(target.class.name.to_sym.t, class: "small") \
+                       rescue :runtime_object_deleted %>
+        <% end %>
+      <% end %>
+
+      <%= tag.div(comment.summary.tl, class: "font-weight-bold") %>
+
+      <%= tag.div(class: "comment-info") do %>
+        <%= :BY.t %>: <%= user_link(user) %>
+        <% if check_permission(comment) %>
+          <%= tag.span(class: "text-nowrap") do %>
+            [<%= link_with_query(:EDIT.t, edit_comment_path(comment.id),
+                                class: "edit_comment_link_#{comment.id}",
+                                remote: true) %> |
+            <%= destroy_button(name: :comment_show_destroy.t, target: comment,
+                              remote: true) %>]
+          <% end %>
+        <% end %>
+        <%= tag.div(comment.created_at.web_time,
+                    class: "float-right text-nowrap small my-0 mx-3") %>
+      <% end %>
+
+      <% unless comment.comment.blank? %>
+        <%= tag.div(comment.comment.tpl, class: "p-2 comment-body") %>
+      <% end %>
+
+    <% end %>
+
+     <%= tag.div(class: "d-none d-sm-block col-sm-3 col-lg-2 text-center") do %>
+      <% if user.image_id %>
+        <%= tag.div(class: "user-image-sizer") do
+          image_tag(Image.url(:thumbnail, user.image_id),
+                    class: "img-fluid",
+                    data: { role: "link", url: user_path(user.id) })
+        end %>
+      <% end %>
+    <% end %>
+
+  <% end %>
+
+  <% if user.image_id %>
+    <%= tag.div("", class: "clearfix") %>
+  <% end %>
+
+<% end %>

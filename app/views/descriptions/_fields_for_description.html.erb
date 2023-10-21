@@ -1,0 +1,59 @@
+<%
+desc        = @description
+source_type = desc.source_type
+new_record  = desc.new_record?
+admin       = new_record || desc.is_admin?(@user)
+author      = new_record || desc.author?(@user)
+owner       = desc.user == @user
+root        = in_admin_mode?
+%>
+
+<% if new_record || admin || author || owner || root %>
+
+  <div class="form-group mt-3">
+    <%= f.label(:source, :form_description_source.t + ":") %>
+
+    <% need_help = false
+    if root %>
+      <%= f.select(:source_type, source_type_options_all,
+                   {}, { class: "form-control" }) %>
+    <% elsif new_record && ["public", "source", "user"].include?(source_type) %>
+      <% need_help = true %>
+      <%= f.select(:source_type, source_type_options_basic,
+                   {}, { class: "form-control" }) %>
+    <% else %>
+      <%= f.hidden_field(:source_type, value: source_type) %>
+      <%= :"form_description_source_#{source_type}".l %>
+    <% end %>
+
+    <% if !root && ["foreign", "project"].include?(source_type) %>
+      <%= f.hidden_field(:source_name) %>
+      <%= @description.source_name.t %>
+    <% else %>
+      <%= f.text_field(:source_name, class: "form-control") %>
+    <% end %>
+    <%= f.hidden_field(:project_id) %>
+
+    <% if need_help %>
+      <%= help_block(:div, :form_description_source_help.tpl) %>
+    <% end %>
+  </div>
+
+  <% disabled = ["public", "foreign"].include?(source_type) &&
+                !root && !new_record %>
+  <div class="form-group">
+    <%= content_tag(:b, "#{:form_description_permissions.t}:") %>
+    <%= check_box_with_label(form: f, field: :public_write, disabled: disabled,
+                             label: :form_description_public_writable.t) %>
+    <%= check_box_with_label(form: f, field: :public, disabled: disabled,
+                             label: :form_description_public_readable.t) %>
+    <%= help_block(:p, :form_description_permissions_help.t) %>
+  </div>
+
+  <%= select_with_label(
+        form: f, field: :license_id, label: :License.t + ":",
+        options: @licenses,
+        after: help_block(:p, :form_description_license_help.t)
+      ) %>
+
+<% end %>

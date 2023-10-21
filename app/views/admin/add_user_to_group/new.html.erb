@@ -1,0 +1,17 @@
+<%
+add_page_title(:add_user_to_group_title.t)
+%>
+
+<%= form_with(url: admin_add_user_to_group_path,
+              id: "admin_add_user_to_group_form") do |f| %>
+
+  <%= text_field_with_label(form: f, field: :user_name, value: "",
+                            label: :add_user_to_group_user.t + ":",
+                            data: { autofocus: true }) %>
+
+  <%= text_field_with_label(form: f, field: :group_name, value: "",
+                            label: :add_user_to_group_group.t + ":") %>
+
+  <%= submit_button(form: f, button: :ADD.t, center: true) %>
+
+<% end %>

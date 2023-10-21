@@ -2,35 +2,7 @@
 
 # added methods relating to js
 module JavascriptHelper
-  def can_do_ajax?
-    modern_browser?(browser) || browser.ie?(8) || Rails.env.test?
-  end
-
-  # Use this test to determine if a user can upload multiple images at a time.
-  # It checks for support of the following requirements:
-  #   Select multiple files button
-  #   XHRHttpRequest2
-  #   FileAPI
-  # CanIuse.com is the source of this information.
-  def can_do_multifile_upload?
-    modern_browser?(browser) && !browser.ie?(9)
-  end
-
-  # from https://github.com/fnando/browser/pull/435 2020-04-13
-  def modern_browser?(browser)
-    browser.chrome? && browser.version.to_i >= 65 ||
-      browser.safari? && browser.version.to_i >= 10 ||
-      browser.firefox? && browser.version.to_i >= 52 ||
-      browser.ie? && browser.version.to_i >= 11 &&
-        !browser.compatibility_view? ||
-      browser.edge? && browser.version.to_i >= 15 ||
-      browser.opera? && browser.version.to_i >= 50 ||
-      browser.facebook? &&
-        browser.safari_webapp_mode? &&
-        browser.webkit_full_version.to_i >= 602
-  end
-
-  # Schedule javascript modules for inclusion in header.  This is much safer
+  # Schedule javascript modules for inclusion in footer.  This is much safer
   # than javascript_include_tag(), since that one is ignorant of whether the
   # given module(s) have been included yet or not, and of correct order.
   #   # Example usage in view template:
@@ -48,9 +20,9 @@ module JavascriptHelper
     @javascript_files += args
   end
 
-  # This is called in the header section in the layout.  It returns the
+  # This is called in the footer section in the layout.  It returns the
   # javascript modules in correct order (see above).
-  #   # Example usage in layout header:
+  #   # Example usage in layout footer:
   #   <%= sort_javascript_includes.map {|m| javascript_include_tag(m)} %>
   def javascript_includes
     @javascript_files ||= []

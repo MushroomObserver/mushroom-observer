@@ -20,7 +20,6 @@ class API2
       :user
     ]
 
-    # rubocop:disable Metrics/AbcSize
     def query_params
       {
         where: sql_id_condition,
@@ -49,7 +48,6 @@ class API2
         ok_for_export: parse(:boolean, :ok_for_export)
       }.merge(parse_names_parameters)
     end
-    # rubocop:enable Metrics/AbcSize
 
     def create_params
       parse_create_params!

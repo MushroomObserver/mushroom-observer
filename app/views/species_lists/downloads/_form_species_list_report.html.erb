@@ -1,0 +1,23 @@
+<%= form_with(url: { action: :create, id: @list.id, q: query_param },
+              id: "species_list_download_report") do |f| %>
+
+  <%= content_tag(:h3, :species_list_report_header.t + ":") %>
+
+  <%= content_tag(:p, :download_observations_format.t + ":") %>
+
+  <div class="form-group">
+    <%= radio_with_label(form: f, field: :type, value: :txt,
+                          checked: @type == "txt",
+                          label: :species_list_show_save_as_txt.t) %>
+    <%= radio_with_label(form: f, field: :type, value: :rtf,
+                          checked: @type == "rtf",
+                          label: :species_list_show_save_as_rtf.t) %>
+    <%= radio_with_label(form: f, field: :type, value: :csv,
+                          checked: @type == "csv",
+                          label: :species_list_show_save_as_csv.t) %>
+  </div>
+
+  <%= submit_button(form: f, button: :species_list_report_button.l,
+                    center: true) %>
+
+<% end %>

@@ -38,7 +38,6 @@ module Report
       ]
     end
 
-    # rubocop:disable Metrics/AbcSize
     def format_row(row)
       [
         row.name_text_name,
@@ -112,7 +111,7 @@ module Report
       r2 = long_radius(row)
       return nil if !r1 || !r2
 
-      (r1 > r2 ? r1 : r2).to_f.round
+      [r1, r2].max.to_f.round
     end
 
     def lat_radius(row)

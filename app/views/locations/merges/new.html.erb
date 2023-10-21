@@ -1,0 +1,38 @@
+<%
+@container = :wide
+add_page_title(:list_merge_options_title.t(where: @where))
+# NOTE: the "forms" are patch buttons in the "row" partial
+# TODO: Redo partial, passing a collection?
+%>
+
+<div class="row">
+
+  <% if @matches.any? %>
+    <div class="col-md-6">
+      <div class="h4">
+        <%= :list_merge_options_near_matches.t %>
+      </div>
+      <table class="table table-striped table-location-merge-options">
+        <% @matches.each do |location| %>
+          <%= render(partial: "locations/merges/row",
+                     locals: { location: location }) %>
+        <% end %>
+      </table>
+    </div>
+  <% end %>
+
+  <% if @others.any? %>
+    <div class="col-md-6">
+      <div class="h4">
+        <%= :list_merge_options_others.t %>
+      </div>
+      <table class="table table-striped table-location-merge-options">
+        <% @others.each do |location| %>
+          <%= render(partial: "locations/merges/row",
+                     locals: { location: location }) %>
+        <% end %>
+      </table>
+    </div>
+  <% end %>
+
+</div><!--.row-->

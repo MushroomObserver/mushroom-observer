@@ -1,39 +1,30 @@
 <%
-  @title = :create_glossary_term_title.t
+add_page_title(:create_glossary_term_title.t)
 
-  tabs = [
-    # Replace this link with a "Cancel" link
-    # See https://www.pivotaltracker.com/story/show/174614188
-    link_to(:glossary_term_index.t, action: :index)
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(glossary_term_form_new_tabs)
 %>
 
 <%= render("form", button_name: :edit_glossary_term_save) do |f| %>
 
-  <div class="form-group mt-3">
-    <%= label_tag(:glossary_term_upload_image, "#{:Image.t}:") %>
-    <%= custom_file_field(:glossary_term, :upload_image) %>
-  </div>
+  <%= fields_for(:upload) do |f_u| %>
+    <%= file_field_with_label(form: f_u, field: :image,
+                              label: :Image.t + ":") %>
 
-  <div class="form-group mt-3 form-inline">
+    <%= text_field_with_label(form: f_u, field: :copyright_holder, inline: true,
+                              label: :glossary_term_copyright_holder.t + ":") %>
 
-    <%= label_tag(:copyright_holder,
-                  "#{:glossary_term_copyright_holder.t}:") %><br/>
-    <%= text_field_tag(:copyright_holder, @copyright_holder,
-                        class: "form-control") %>
+    <%= select_with_label(form: f_u, field: :copyright_year,
+                          label: :WHEN.t + ":", inline: true,
+                          start_year: 1980, end_year: Time.zone.now.year,
+                          value: @copyright_year) %>
 
-    <%= select_year(@copyright_year,
-                    { field_name: :copyright_year,
-                      start_year: 1980,
-                      end_year: Time.zone.now.year },
-                    { class: "form-control" }) %><br/>
-
-    <%= select(:upload, :license_id, @licenses,
-                selected: @upload_license_id,
-                class: "form-control") %>
-
-    <p class="help_block">(<%= :glossary_term_copyright_warning.t %>)</p>
-  </div>
+    <%= select_with_label(form: f_u, field: :license_id, inline: true,
+                          label: :License.t + ":", options: @licenses,
+                          select_opts: { selected: @upload_license_id },
+                          append: help_block(:div,
+                                  ["(",
+                                    :glossary_term_copyright_warning.t,
+                                    ")"].safe_join)) %>
+  <% end %>
 
 <% end %>

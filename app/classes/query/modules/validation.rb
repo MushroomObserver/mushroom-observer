@@ -190,13 +190,14 @@ module Query
       end
 
       def validate_name(arg, val)
-        if val.is_a?(Name)
+        case val
+        when Name
           raise("Value for :#{arg} is an unsaved Name instance.") unless val.id
 
           @params_cache ||= {}
           @params_cache[arg] = val
           val.id
-        elsif val.is_a?(String) || val.is_a?(Integer)
+        when String, Integer
           val
         else
           raise("Value for :#{arg} should be a Name, String or Integer, " \
@@ -236,9 +237,10 @@ module Query
       end
 
       def validate_query(arg, val)
-        if val.is_a?(Query::Base)
+        case val
+        when Query::Base
           val.record.id
-        elsif val.is_a?(Integer)
+        when Integer
           val
         else
           raise(

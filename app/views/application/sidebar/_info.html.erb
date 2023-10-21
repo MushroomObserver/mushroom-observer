@@ -1,0 +1,12 @@
+<%=
+[
+active_link_to(:app_intro.t, info_intro_path,
+               class: classes[:item], id: "nav_intro_link"),
+active_link_to(:app_how_to_use.t, info_how_to_use_path,
+               class: classes[:item], id: "nav_how_to_use_link"),
+active_link_to(:app_privacy_policy.t, policy_privacy_path,
+               class: classes[:item], id: "nav_privacy_link"),
+active_link_to(:app_donate.t, support_donate_path,
+               class: classes[:item], id: "nav_donate_link")
+].safe_join
+%>

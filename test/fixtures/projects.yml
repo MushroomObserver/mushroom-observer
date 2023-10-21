@@ -8,6 +8,8 @@ DEFAULTS: &DEFAULTS
   user_group: dick_only
   admin_group: dick_only
   title: $LABEL
+  open_membership: false
+  accepting_observations: true
 
 # admins: rolf (1), mary (2)
 # members: rolf (1), mary (2), katrina (5)
@@ -20,6 +22,7 @@ eol_project:
   summary: Project to make names for EOL
   created_at: 2008-09-24 21:33:30
   updated_at: 2008-09-24 21:33:30
+  image: peltigera_image
 
 # admins: dick (4)
 # members: dick (4)
@@ -37,6 +40,33 @@ bolete_project:
   images: in_situ_image, turned_over_image
   observations: detailed_unknown_obs
   species_lists: unknown_species_list
+
+# admins: roy
+# members: katrina
+# observations: 1 (owner_accepts_general_questions - owned by roy)
+open_membership_project:
+  <<: *DEFAULTS
+  user: roy
+  user_group: burbank_users
+  admin_group: burbank_admins
+  title: Burbank Project
+  summary: Project about Fungi of Burbank
+  created_at: 2008-09-25 07:00:50
+  updated_at: 2008-09-25 07:00:55
+  observations: owner_accepts_general_questions, unknown_with_lat_long
+  open_membership: true
+
+not_accepting_observations_project:
+  <<: *DEFAULTS
+  user: roy
+  user_group: burbank_users
+  admin_group: burbank_admins
+  title: Closed Burbank Project
+  summary: Closed Project about Fungi of Burbank
+  created_at: 2008-09-25 07:00:50
+  updated_at: 2008-09-25 07:00:55
+  observations: amateur_obs
+  accepting_observations: false
 
 empty_project:
   <<: *DEFAULTS
@@ -76,3 +106,11 @@ news_articles_project:
   admin_group: article_writers
   user_group:  article_writers
   summary:     Project members can create and modify News Articles.
+
+albion_project:
+  <<: *DEFAULTS
+  location: albion
+
+wrangel_island_project:
+  <<: *DEFAULTS
+  location: east_lt_west_location

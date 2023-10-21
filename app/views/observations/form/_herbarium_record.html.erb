@@ -1,0 +1,32 @@
+<%# herbarium_record section of create_observation form %>
+
+<div class="row mb-3">
+
+  <div class="col-sm-6">
+    <%= fields_for(:herbarium_record) do |fhr| %>
+
+      <%= text_field_with_label(
+            form: fhr, field: :herbarium_name,
+            value: @herbarium_name, placeholder: :start_typing.l,
+            label: :herbarium_record_herbarium_name.t + ":",
+            data: { autocompleter: :herbarium }
+          ) %>
+
+      <%= text_field_with_label(
+            form: fhr, field: :herbarium_id, value: @herbarium_id,
+            label: :herbarium_record_accession_number.t + ":"
+          ) %>
+
+      <%= text_field_with_label(form: fhr, field: :notes, value: "",
+                                label: :herbarium_record_notes.t + ":") %>
+
+    <% end # fields_for(:herbarium_record) %>
+  </div>
+
+  <div class="col-sm-6">
+    <%= help_block_with_arrow("left", id: "herbarium_record_help") do %>
+      <%= :form_observations_herbarium_record_help.t %>
+    <% end # help_block_with_arrow do %>
+  </div>
+
+</div><!--.row-->

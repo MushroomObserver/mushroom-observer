@@ -13,7 +13,7 @@ class QueryTest < UnitTestCase
     if test_ids
       assert_equal(expect.sort, actual.sort, msg)
     else
-      assert_obj_list_equal(expect.sort_by(&:id), actual.sort_by(&:id), msg)
+      assert_obj_arrays_equal(expect.sort_by(&:id), actual.sort_by(&:id), msg)
     end
     type = args[0].to_s.underscore.to_sym.t.titleize.sub(/um$/, "(um|a)")
     assert_match(/#{type}|Advanced Search|(Lower|Higher) Taxa/, query.title)
@@ -480,7 +480,7 @@ class QueryTest < UnitTestCase
     assert_equal({ "id" => Name.first.id }, query.select_one)
 
     assert_equal([Name.first], query.find_by_sql(limit: 1))
-    assert_name_list_equal(
+    assert_name_arrays_equal(
       @agaricus.children(all: true).sort_by(&:id),
       query.find_by_sql(where: 'text_name LIKE "Agaricus %"')
     )
@@ -558,7 +558,7 @@ class QueryTest < UnitTestCase
       @query.paginate_ids(@pages).map { |id| name_ids.index(id) + 1 }
     )
     assert_equal(@names.size, @pages.num_total)
-    assert_name_list_equal(@names[from_nth..to_nth], @query.paginate(@pages))
+    assert_name_arrays_equal(@names[from_nth..to_nth], @query.paginate(@pages))
   end
 
   def test_paginate_start
@@ -592,7 +592,7 @@ class QueryTest < UnitTestCase
     assert(@ells.length >= 9)
     assert_equal(@ells[3..5].map(&:id), @query.paginate_ids(@pages))
     assert_equal(@letters, @pages.used_letters.sort)
-    assert_name_list_equal(@ells[3..5], @query.paginate(@pages))
+    assert_name_arrays_equal(@ells[3..5], @query.paginate(@pages))
   end
 
   def test_eager_instantiator
@@ -914,22 +914,23 @@ class QueryTest < UnitTestCase
                                   observations(:agaricus_campestris_obs).id,
                                   observations(:agaricus_campestras_obs).id
                                 ])
-    q6a = Query.lookup_and_save(:Observation, :pattern_search,
-                                pattern: '"somewhere else"')
+    # removed q6a which searched for "somewhere else" in the notes
+    # q6a = Query.lookup_and_save(:Observation, :pattern_search,
+    #                             pattern: '"somewhere else"')
     q7a = Query.lookup_and_save(:Observation, :advanced_search,
                                 location: "glendale")
     q8a = Query.lookup_and_save(:Observation, :at_location,
                                 location: locations(:burbank))
     q9a = Query.lookup_and_save(:Observation, :at_where,
                                 location: "california")
-    assert_equal(8, QueryRecord.count)
+    assert_equal(7, QueryRecord.count)
 
     # Try coercing them all.
     assert(q1b = q1a.coerce(:Image))
     assert(q2b = q2a.coerce(:Image))
     assert(q3b = q3a.coerce(:Image))
     assert(q5b = q5a.coerce(:Image))
-    assert(q6b = q6a.coerce(:Image))
+    # assert(q6b = q6a.coerce(:Image))
     assert(q7b = q7a.coerce(:Image))
     assert(q8b = q8a.coerce(:Image))
     assert(q9b = q9a.coerce(:Image))
@@ -943,8 +944,8 @@ class QueryTest < UnitTestCase
     assert_save(q3b)
     assert(q5b.record.new_record?)
     assert_save(q5b)
-    assert(q6b.record.new_record?)
-    assert_save(q6b)
+    # assert(q6b.record.new_record?)
+    # assert_save(q6b)
     assert(q7b.record.new_record?)
     assert_save(q7b)
     assert(q8b.record.new_record?)
@@ -957,7 +958,7 @@ class QueryTest < UnitTestCase
     assert_equal("Image", q2b.model.to_s)
     assert_equal("Image", q3b.model.to_s)
     assert_equal("Image", q5b.model.to_s)
-    assert_equal("Image", q6b.model.to_s)
+    # assert_equal("Image", q6b.model.to_s)
     assert_equal("Image", q7b.model.to_s)
     assert_equal("Image", q8b.model.to_s)
     assert_equal("Image", q9b.model.to_s)
@@ -966,7 +967,7 @@ class QueryTest < UnitTestCase
     assert_equal(:with_observations_by_user, q2b.flavor)
     assert_equal(:with_observations_in_species_list, q3b.flavor)
     assert_equal(:with_observations_in_set, q5b.flavor)
-    assert_equal(:with_observations_in_set, q6b.flavor)
+    # assert_equal(:with_observations_in_set, q6b.flavor)
     assert_equal(:with_observations_in_set, q7b.flavor)
     assert_equal(:with_observations_at_location, q8b.flavor)
     assert_equal(:with_observations_at_where, q9b.flavor)
@@ -976,7 +977,7 @@ class QueryTest < UnitTestCase
     assert(q2c = q2b.coerce(:Observation))
     assert(q3c = q3b.coerce(:Observation))
     assert(q5c = q5b.coerce(:Observation))
-    assert(q6c = q6b.coerce(:Observation))
+    # assert(q6c = q6b.coerce(:Observation))
     assert(q7c = q7b.coerce(:Observation))
     assert(q8c = q8b.coerce(:Observation))
     assert(q9c = q9b.coerce(:Observation))
@@ -990,8 +991,8 @@ class QueryTest < UnitTestCase
     assert_equal(q3a, q3c)
     assert_not(q5c.record.new_record?)
     assert_equal(q5a, q5c)
-    assert(q6c.record.new_record?)  # (converted to in_set)
-    assert(q7c.record.new_record?)  # (converted to in_set)
+    # assert(q6c.record.new_record?)  # (converted to in_set)
+    assert(q7c.record.new_record?) # (converted to in_set)
     assert_not(q8c.record.new_record?)
     assert_equal(q8a, q8c)
     assert_not(q9c.record.new_record?)
@@ -1012,22 +1013,22 @@ class QueryTest < UnitTestCase
                                   [observations(:detailed_unknown_obs).id,
                                    observations(:agaricus_campestris_obs).id,
                                    observations(:agaricus_campestras_obs).id])
-    q6a = Query.lookup_and_save(:Observation, :pattern_search,
-                                pattern: '"somewhere else"')
+    # q6a = Query.lookup_and_save(:Observation, :pattern_search,
+    #                             pattern: '"somewhere else"')
     q7a = Query.lookup_and_save(:Observation, :advanced_search,
                                 location: "glendale")
     q8a = Query.lookup_and_save(:Observation, :at_location,
                                 location: locations(:burbank))
     q9a = Query.lookup_and_save(:Observation, :at_where,
                                 location: "california")
-    assert_equal(8, QueryRecord.count)
+    assert_equal(7, QueryRecord.count)
 
     # Try coercing them all.
     assert(q1b = q1a.coerce(:Location))
     assert(q2b = q2a.coerce(:Location))
     assert(q3b = q3a.coerce(:Location))
     assert(q5b = q5a.coerce(:Location))
-    assert(q6b = q6a.coerce(:Location))
+    # assert(q6b = q6a.coerce(:Location))
     assert(q7b = q7a.coerce(:Location))
     assert(q8b = q8a.coerce(:Location))
     assert_nil(q9a.coerce(:Location))
@@ -1041,8 +1042,8 @@ class QueryTest < UnitTestCase
     assert_save(q3b)
     assert(q5b.record.new_record?)
     assert_save(q5b)
-    assert(q6b.record.new_record?)
-    assert_save(q6b)
+    # assert(q6b.record.new_record?)
+    # assert_save(q6b)
     assert(q7b.record.new_record?)
     assert_save(q7b)
     assert(q8b.record.new_record?)
@@ -1053,7 +1054,7 @@ class QueryTest < UnitTestCase
     assert_equal("Location", q2b.model.to_s)
     assert_equal("Location", q3b.model.to_s)
     assert_equal("Location", q5b.model.to_s)
-    assert_equal("Location", q6b.model.to_s)
+    # assert_equal("Location", q6b.model.to_s)
     assert_equal("Location", q7b.model.to_s)
     assert_equal("Location", q8b.model.to_s)
 
@@ -1061,7 +1062,7 @@ class QueryTest < UnitTestCase
     assert_equal(:with_observations_by_user, q2b.flavor)
     assert_equal(:with_observations_in_species_list, q3b.flavor)
     assert_equal(:with_observations_in_set, q5b.flavor)
-    assert_equal(:with_observations_in_set, q6b.flavor)
+    # assert_equal(:with_observations_in_set, q6b.flavor)
     assert_equal(:with_observations_in_set, q7b.flavor)
     assert_equal(:in_set, q8b.flavor)
 
@@ -1075,18 +1076,18 @@ class QueryTest < UnitTestCase
                   observations(:agaricus_campestris_obs).id,
                   observations(:agaricus_campestras_obs).id],
                  q5b.params[:ids])
-    assert_equal([observations(:strobilurus_diminutivus_obs).id,
-                  observations(:agaricus_campestros_obs).id,
-                  observations(:agaricus_campestras_obs).id,
-                  observations(:agaricus_campestrus_obs).id],
-                 q6b.params[:ids])
+    # assert_equal([observations(:strobilurus_diminutivus_obs).id,
+    #               observations(:agaricus_campestros_obs).id,
+    #               observations(:agaricus_campestras_obs).id,
+    #               observations(:agaricus_campestrus_obs).id],
+    #              q6b.params[:ids])
     assert_equal([observations(:coprinus_comatus_obs).id], q7b.params[:ids])
-    assert_match(/Observations.*Matching.*somewhere.*else/,
-                 q6b.params[:old_title])
+    # assert_match(/Observations.*Matching.*somewhere.*else/,
+    #              q6b.params[:old_title])
     assert_match(/Advanced.*Search/,
                  q7b.params[:old_title])
     assert_equal(1, q5b.params.keys.length)
-    assert_equal(2, q6b.params.keys.length)
+    # assert_equal(2, q6b.params.keys.length)
     assert_equal(2, q7b.params.keys.length)
 
     # Now try to coerce them back to Observation.
@@ -1094,7 +1095,7 @@ class QueryTest < UnitTestCase
     assert(q2c = q2b.coerce(:Observation))
     assert(q3c = q3b.coerce(:Observation))
     assert(q5c = q5b.coerce(:Observation))
-    assert(q6c = q6b.coerce(:Observation))
+    # assert(q6c = q6b.coerce(:Observation))
     assert(q7c = q7b.coerce(:Observation))
     assert_nil(q8b.coerce(:Observation))
 
@@ -1107,8 +1108,8 @@ class QueryTest < UnitTestCase
     assert_equal(q3a, q3c)
     assert_not(q5c.record.new_record?)
     assert_equal(q5a, q5c)
-    assert(q6c.record.new_record?)  # (converted to in_set)
-    assert(q7c.record.new_record?)  # (converted to in_set)
+    # assert(q6c.record.new_record?)  # (converted to in_set)
+    assert(q7c.record.new_record?) # (converted to in_set)
   end
 
   def test_observation_name_coercion
@@ -1125,22 +1126,22 @@ class QueryTest < UnitTestCase
                                   observations(:agaricus_campestris_obs).id,
                                   observations(:agaricus_campestras_obs).id
                                 ])
-    q6a = Query.lookup_and_save(:Observation, :pattern_search,
-                                pattern: '"somewhere else"')
+    # q6a = Query.lookup_and_save(:Observation, :pattern_search,
+    #                             pattern: '"somewhere else"')
     q7a = Query.lookup_and_save(:Observation, :advanced_search,
                                 location: "glendale")
     q8a = Query.lookup_and_save(:Observation, :at_location,
                                 location: locations(:burbank))
     q9a = Query.lookup_and_save(:Observation, :at_where,
                                 location: "california")
-    assert_equal(8, QueryRecord.count)
+    assert_equal(7, QueryRecord.count)
 
     # Try coercing them all.
     assert(q1b = q1a.coerce(:Name))
     assert(q2b = q2a.coerce(:Name))
     assert(q3b = q3a.coerce(:Name))
     assert(q5b = q5a.coerce(:Name))
-    assert(q6b = q6a.coerce(:Name))
+    # assert(q6b = q6a.coerce(:Name))
     assert(q7b = q7a.coerce(:Name))
     assert(q8b = q8a.coerce(:Name))
     assert(q9b = q9a.coerce(:Name))
@@ -1154,8 +1155,8 @@ class QueryTest < UnitTestCase
     assert_save(q3b)
     assert(q5b.record.new_record?)
     assert_save(q5b)
-    assert(q6b.record.new_record?)
-    assert_save(q6b)
+    # assert(q6b.record.new_record?)
+    # assert_save(q6b)
     assert(q7b.record.new_record?)
     assert_save(q7b)
     assert(q8b.record.new_record?)
@@ -1168,7 +1169,7 @@ class QueryTest < UnitTestCase
     assert_equal("Name", q2b.model.to_s)
     assert_equal("Name", q3b.model.to_s)
     assert_equal("Name", q5b.model.to_s)
-    assert_equal("Name", q6b.model.to_s)
+    # assert_equal("Name", q6b.model.to_s)
     assert_equal("Name", q7b.model.to_s)
     assert_equal("Name", q8b.model.to_s)
     assert_equal("Name", q9b.model.to_s)
@@ -1177,7 +1178,7 @@ class QueryTest < UnitTestCase
     assert_equal(:with_observations_by_user, q2b.flavor)
     assert_equal(:with_observations_in_species_list, q3b.flavor)
     assert_equal(:with_observations_in_set, q5b.flavor)
-    assert_equal(:with_observations_in_set, q6b.flavor)
+    # assert_equal(:with_observations_in_set, q6b.flavor)
     assert_equal(:with_observations_in_set, q7b.flavor)
     assert_equal(:with_observations_at_location, q8b.flavor)
     assert_equal(:with_observations_at_where, q9b.flavor)
@@ -1187,7 +1188,7 @@ class QueryTest < UnitTestCase
     assert(q2c = q2b.coerce(:Observation))
     assert(q3c = q3b.coerce(:Observation))
     assert(q5c = q5b.coerce(:Observation))
-    assert(q6c = q6b.coerce(:Observation))
+    # assert(q6c = q6b.coerce(:Observation))
     assert(q7c = q7b.coerce(:Observation))
     assert(q8c = q8b.coerce(:Observation))
     assert(q9c = q9b.coerce(:Observation))
@@ -1201,8 +1202,8 @@ class QueryTest < UnitTestCase
     assert_equal(q3a, q3c)
     assert_not(q5c.record.new_record?)
     assert_equal(q5a, q5c)
-    assert(q6c.record.new_record?)  # (converted to in_set)
-    assert(q7c.record.new_record?)  # (converted to in_set)
+    # assert(q6c.record.new_record?)  # (converted to in_set)
+    assert(q7c.record.new_record?) # (converted to in_set)
     assert_not(q8c.record.new_record?)
     assert_equal(q8a, q8c)
     assert_not(q9c.record.new_record?)
@@ -1336,26 +1337,6 @@ class QueryTest < UnitTestCase
     assert_query([], :Article, :in_set, ids: [])
   end
 
-  def test_article_pattern_search
-    assert_query([],
-                 :Article, :pattern_search, pattern: "no article has this")
-    # title
-    assert_query(Article.where(Article[:title].matches("%premier_article%").
-                               or(Article[:body].matches("%premier_article%"))),
-                 :Article, :pattern_search, pattern: "premier_article")
-    # body
-    expect = Article.where(Article[:title].matches("%Body%")).
-             where(Article[:title].matches("%of%")).
-             where(Article[:title].matches("%Article%")).
-             or(Article.where(Article[:body].matches("%Body%")).
-                        where(Article[:body].matches("%of%")).
-                        where(Article[:body].matches("%Article%")))
-    assert_query(expect,
-                 :Article, :pattern_search, pattern: "Body of Article")
-    assert_query(Article.all,
-                 :Article, :pattern_search, pattern: "")
-  end
-
   def test_collection_number_all
     expect = CollectionNumber.all.sort_by(&:format_name)
     assert_query(expect, :CollectionNumber, :all)
@@ -1439,6 +1420,37 @@ class QueryTest < UnitTestCase
                  :ExternalLink, :all, external_sites: site)
     assert_query(site.external_links.sort_by(&:url),
                  :ExternalLink, :all, url: "iNaturalist")
+  end
+
+  def test_glossary_term_all
+    expect = GlossaryTerm.all.sort_by(&:name)
+    assert_query(expect, :GlossaryTerm, :all)
+  end
+
+  def test_glossary_term_pattern_search
+    assert_query([], :GlossaryTerm, :pattern_search,
+                 pattern: "no glossary term has this")
+    # name
+    assert_query(
+      GlossaryTerm.
+        where(GlossaryTerm[:name].matches("%conic_glossary_term%").
+        or(GlossaryTerm[:description].matches("%conic_glossary_term%"))),
+      :GlossaryTerm, :pattern_search, pattern: "conic_glossary_term"
+    )
+    # description
+    expect =
+      GlossaryTerm.where(GlossaryTerm[:name].matches("%Description%")).
+      where(GlossaryTerm[:name].matches("%of%")).
+      where(GlossaryTerm[:name].matches("%Term%")).
+      or(
+        GlossaryTerm.where(GlossaryTerm[:description].matches("%Description%")).
+        where(GlossaryTerm[:description].matches("%of%")).
+        where(GlossaryTerm[:description].matches("%Term%"))
+      )
+    assert_query(expect,
+                 :GlossaryTerm, :pattern_search, pattern: "Description of Term")
+    assert_query(GlossaryTerm.all,
+                 :GlossaryTerm, :pattern_search, pattern: "")
   end
 
   def test_herbarium_all
@@ -2198,8 +2210,19 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_description_all
-    all = LocationDescription.all.to_a
-    assert_query(all, :LocationDescription, :all, by: :id)
+    gualala = locations(:gualala)
+    all_descs = LocationDescription.all.to_a
+    all_gualala_descs = LocationDescription.where(location: gualala).to_a
+    public_gualala_descs = LocationDescription.where(location: gualala,
+                                                     public: true).to_a
+    assert(all_gualala_descs.length < all_descs.length)
+    assert(public_gualala_descs.length < all_gualala_descs.length)
+
+    assert_query(all_descs, :LocationDescription, :all, by: :id)
+    assert_query(all_gualala_descs, :LocationDescription, :all,
+                 by: :id, locations: gualala)
+    assert_query(public_gualala_descs, :LocationDescription, :all,
+                 by: :id, locations: gualala, public: "yes")
   end
 
   def test_location_description_by_user
@@ -2606,8 +2629,17 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_description_all
-    all = NameDescription.all.to_a
-    assert_query(all, :NameDescription, :all, by: :id)
+    pelt = names(:peltigera)
+    all_descs = NameDescription.all.to_a
+    all_pelt_descs = NameDescription.where(name: pelt).to_a
+    public_pelt_descs = NameDescription.where(name: pelt, public: true).to_a
+    assert(all_pelt_descs.length < all_descs.length)
+    assert(public_pelt_descs.length < all_pelt_descs.length)
+
+    assert_query(all_descs, :NameDescription, :all, by: :id)
+    assert_query(all_pelt_descs, :NameDescription, :all, by: :id, names: pelt)
+    assert_query(public_pelt_descs, :NameDescription, :all,
+                 by: :id, names: pelt, public: "yes")
   end
 
   def test_name_description_by_user
@@ -2862,11 +2894,11 @@ class QueryTest < UnitTestCase
 
   def test_observation_pattern_search
     # notes
-    assert_query([observations(:agaricus_campestras_obs).id,
-                  observations(:agaricus_campestros_obs).id,
-                  observations(:agaricus_campestrus_obs).id,
-                  observations(:strobilurus_diminutivus_obs).id],
-                 :Observation, :pattern_search, pattern: '"somewhere else"')
+    # assert_query([observations(:agaricus_campestras_obs).id,
+    #               observations(:agaricus_campestros_obs).id,
+    #               observations(:agaricus_campestrus_obs).id,
+    #               observations(:strobilurus_diminutivus_obs).id],
+    #              :Observation, :pattern_search, pattern: '"somewhere else"')
     # where
     assert_query([observations(:strobilurus_diminutivus_obs).id],
                  :Observation, :pattern_search, pattern: "pipi valley")
@@ -2919,6 +2951,11 @@ class QueryTest < UnitTestCase
   def test_rss_log_all
     ids = RssLog.all.map(&:id)
     assert_query(ids, :RssLog, :all)
+  end
+
+  def test_rss_log_type
+    ids = [rss_logs(:species_list_rss_log).id]
+    assert_query(ids, :RssLog, :all, type: :species_list)
   end
 
   def test_rss_log_in_set
@@ -3349,6 +3386,6 @@ class QueryTest < UnitTestCase
     actual = query.lookup_names_by_name(args)
     expect = expect.sort_by(&:text_name)
     actual = actual.map { |id| Name.find(id) }.sort_by(&:text_name)
-    assert_name_list_equal(expect, actual)
+    assert_name_arrays_equal(expect, actual)
   end
 end

@@ -39,8 +39,8 @@ require(File.expand_path("../config/environment.rb", __dir__))
 
 require("json")
 
-JSON_FILE = "#{Rails.root}/public/mushroom_mapper.json".freeze
-RAW_FILE  = "#{Rails.root}/public/taxonomy.csv".freeze
+JSON_FILE = Rails.public_path.join("mushroom_mapper.json").freeze
+RAW_FILE  = Rails.public_path.join("public/taxonomy.csv").freeze
 
 # synonyms:         map from synonym_id to at least one accepted name_id
 # aliases:          map from name_id to accepted name_id
@@ -185,10 +185,10 @@ family_to_genus.keys.sort.each do |family|
   end
   data["families"] << family_data
 end
-File.write(JSON_FILE, JSON.generate(data))
+JSON_FILE.write(generate(data))
 
 # Write raw data file.
-File.open(RAW_FILE, "w") do |fh|
+RAW_FILE.open("w") do |fh|
   fh.puts(%w[id kingdom class order family genus num_obs].join("\t"))
   classifications.keys.sort.each do |genus|
     fh.puts(classifications[genus].join("\t"))

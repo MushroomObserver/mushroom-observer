@@ -2,7 +2,7 @@
 
 # display information about user contributions to the site
 class ContributorsController < ApplicationController
-  before_action :disable_link_prefetching
+  before_action :login_required
 
   # Contributors index
   def index

@@ -1,0 +1,11 @@
+<%
+add_page_title(:species_list_create_title.t)
+
+add_tab_set(species_list_form_new_tabs)
+@container = :text
+
+action = species_lists_path(approved_where: @place_name)
+%>
+
+<%= render(partial: "species_lists/form",
+           locals: { button: :CREATE, action: action }) %>

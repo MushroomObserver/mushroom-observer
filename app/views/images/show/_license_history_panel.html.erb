@@ -1,0 +1,44 @@
+<!-- LICENSE_HISTORY -->
+<% chgs = @image.copyright_changes.sort_by(&:id)
+if chgs.any? %>
+  <%= panel_block do %>
+    <table class="table table-responsive table-striped small">
+      <thead>
+        <tr>
+          <th><%= :DATES.t %></th>
+          <th><%= :LICENSE.t %></th>
+          <th><%= :COPYRIGHT_HOLDER.t %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% (0..chgs.length-1).each do |i| %>
+          <tr>
+            <td>
+              <%= i > 0 ? chgs[i-1].updated_at.web_date : @image.created_at.web_date %> &rarr;
+              <%= chgs[i].updated_at.web_date %>
+            </td>
+            <td>
+              <%= link_to(chgs[i].license.display_name.t, chgs[i].license.url) %>
+            </td>
+            <td>
+              <%= chgs[i].license.copyright_text(chgs[i].year, chgs[i].name) %>
+            </td>
+          </tr>
+        <% end %>
+        <tr>
+          <td>
+            <%= chgs[-1].updated_at.web_date %> &rarr;
+            <%= Time.zone.now.web_date %>
+          </td>
+          <td>
+            <%= link_to(@image.license.display_name.t, @image.license.url) %>
+          </td>
+          <td>
+            <%= image_copyright(@image) %>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  <% end %>
+<% end %>
+<!-- /LICENSE_HISTORY -->

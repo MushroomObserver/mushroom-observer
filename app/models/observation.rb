@@ -53,6 +53,7 @@
 #  notes::                  Arbitrary text supplied by User and serialized.
 #  num_views::              Number of times it has been viewed.
 #  last_view::              Last time it was viewed.
+#  log_updated_at::         Cache of RssLogs.updated_at, for speedier index
 #
 #  ==== "Fake" attributes
 #  place_name::             Wrapper on top of +where+ and +location+.
@@ -62,6 +63,7 @@
 #
 #  refresh_vote_cache::     Refresh cache for all Observation's.
 #  define_a_location::      Update any observations using the old "where" name.
+#  touch_when_logging::     Override of AbstractModel's hook when updating log
 #  ---
 #  no_notes::               value of observation.notes if there are no notes
 #  no_notes_persisted::     no_notes persisted in the db
@@ -69,7 +71,6 @@
 #  other_notes_part::       other_notes_key as a String
 #  notes_part_id::          id of textarea for a Notes heading
 #  notes_area_id_prefix     prefix for id of textarea for a Notes heading
-#  notes_part_name::        name of textarea for a Notes heading
 #  export_formatted::       notes (or any hash) to string with marked up
 #                           captions (keys)
 #  show_formatted::         notes (or any hash) to string with plain
@@ -130,9 +131,9 @@
 #  other_notes_key::        key used for general Observation notes
 #  other_notes_part::       other_notes_key as a String
 #  notes_part_id::          id of textarea for a Notes heading
-#  notes_part_name::        name of textarea for a Notes heading
 #  notes_part_value::       value for textarea for a Notes heading
 #  form_notes_parts::       note parts to display in create & edit form
+#  notes_normalized_key::   key (of the notes parts array)
 #  notes_export_formatted:: notes to string with marked up captions (keys)
 #  notes_show_formatted::   notes to string with plain captions (keys)
 #
@@ -183,7 +184,8 @@
 #  announce_consensus_change::  After consensus changes: send email.
 #
 class Observation < AbstractModel
-  belongs_to :thumb_image, class_name: "Image"
+  belongs_to :thumb_image, class_name: "Image",
+                           inverse_of: :thumb_glossary_terms
   belongs_to :name # (used to cache consensus name)
   belongs_to :location
   belongs_to :rss_log
@@ -258,12 +260,49 @@ class Observation < AbstractModel
         -> { where.not(name: Name.unknown) }
   scope :without_name,
         -> { where(name: Name.unknown) }
-  scope :without_confident_name, lambda {
-    without_name.or(where(vote_cache: ..0))
+  scope :with_name_above_genus,
+        -> { where(name_id: Name.with_rank_above_genus.map(&:id)) }
+  scope :without_confident_name,
+        -> { where(vote_cache: ..0) }
+  scope :needs_id, lambda {
+    with_name_above_genus.or(without_confident_name)
   }
-  scope :needs_identification, lambda {
-    without_confident_name.order(created_at: :desc)
+
+  scope :with_vote_by_user, lambda { |user|
+    user_id = user.is_a?(Integer) ? user : user&.id
+    joins(:votes).where(votes: { user_id: user_id })
   }
+  scope :without_vote_by_user, lambda { |user|
+    user_id = user.is_a?(Integer) ? user : user&.id
+    where.not(id: Vote.where(user_id: user_id).map(&:observation_id).uniq)
+  }
+  scope :reviewed_by_user, lambda { |user|
+    user_id = user.is_a?(Integer) ? user : user&.id
+    joins(:observation_views).
+      where(observation_views: { user_id: user_id, reviewed: 1 })
+  }
+  scope :not_reviewed_by_user, lambda { |user|
+    user_id = user.is_a?(Integer) ? user : user&.id
+    where.not(id: ObservationView.where(user_id: user_id, reviewed: 1).
+              map(&:observation_id).uniq)
+  }
+  scope :needs_id_for_user, lambda { |user|
+    needs_id.without_vote_by_user(user).not_reviewed_by_user(user).distinct
+  }
+  # Higher taxa: returns narrowed-down group of id'd obs,
+  # in higher taxa under the given taxon
+  # scope :needs_id_by_taxon, lambda { |user, name|
+  #   name_plus_subtaxa = Name.include_subtaxa_of(name)
+  #   subtaxa_above_genus = name_plus_subtaxa.with_rank_above_genus.map(&:id)
+  #   lower_subtaxa = name_plus_subtaxa.with_rank_at_or_below_genus.map(&:id)
+
+  #   where(name_id: subtaxa_above_genus).or(
+  #     Observation.where(name_id: lower_subtaxa).and(
+  #       Observation.where(vote_cache: ..0)
+  #     )
+  #   ).without_vote_by_user(user).not_reviewed_by_user(user).distinct
+  # }
+
   # scope :of_name(name, **args)
   #
   # Accepts either a Name instance, a string, or an id as the first argument.
@@ -310,10 +349,40 @@ class Observation < AbstractModel
       where(name_id: name_ids)
     end
   }
+
   scope :of_name_like,
         ->(name) { where(name: Name.text_name_includes(name)) }
+
+  scope :in_clade, lambda { |val|
+    if val.is_a?(Name)
+      name = val
+      text_name = name.text_name
+      rank = name.rank
+    elsif val.is_a?(String) && (name = Name.best_match(val))
+      text_name = name.text_name
+      rank = name.rank
+    else
+      text_name = val
+      rank = "Genus"
+    end
+
+    if Name.ranks_above_genus.include?(rank)
+      where(text_name: text_name).or(
+        where(Observation[:classification].matches("%#{rank}: _#{text_name}_%"))
+      )
+    else
+      where(text_name: text_name).or(
+        where(Observation[:text_name].matches("#{text_name} %"))
+      )
+    end
+  }
+
   scope :by_user,
         ->(user) { where(user: user) }
+  scope :mappable,
+        -> { where.not(location: nil).or(where.not(lat: nil)) }
+  scope :unmappable,
+        -> { where(location: nil).and(where(lat: nil)) }
   scope :with_location,
         -> { where.not(location: nil) }
   scope :without_location,
@@ -321,7 +390,15 @@ class Observation < AbstractModel
   scope :at_location,
         ->(location) { where(location: location) }
   scope :in_region,
-        ->(where) { where(Observation[:where].matches("%#{where}")) }
+        lambda { |region|
+          region = Location.reverse_name_if_necessary(region)
+          if Location.understood_continent?(region)
+            countries = Location.countries_in_continent(region).join("|")
+            where(Observation[:where].matches(", (#{countries})$"))
+          else
+            where(Observation[:where].matches("%#{region}"))
+          end
+        }
   scope :in_box, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
           box = Box.new(
@@ -420,6 +497,10 @@ class Observation < AbstractModel
     Project.can_edit?(self, user)
   end
 
+  def project_admin?(user = User.current)
+    Project.admin_power?(self, user)
+  end
+
   # There is no value to keeping a collection number record after all its
   # observations are destroyed or removed from it.
   def destroy_orphaned_collection_numbers
@@ -495,7 +576,7 @@ class Observation < AbstractModel
 
     @old_last_viewed_by ||= {}
     @old_last_viewed_by[User.current_id] = last_viewed_by(User.current)
-    ObservationView.update_view_stats(self, User.current)
+    ObservationView.update_view_stats(id, User.current_id)
   end
 
   def last_viewed_by(user)
@@ -504,6 +585,13 @@ class Observation < AbstractModel
 
   def old_last_viewed_by(user)
     @old_last_viewed_by && @old_last_viewed_by[user&.id]
+  end
+
+  # This allows Observation to override AR `touch` in this context only,
+  # to cache a log_updated_at value
+  def touch_when_logging
+    self.log_updated_at = Time.zone.now
+    save
   end
 
   ##############################################################################
@@ -608,6 +696,10 @@ class Observation < AbstractModel
 
   def public_long
     gps_hidden && user_id != User.current_id ? nil : long
+  end
+
+  def reveal_location?
+    !gps_hidden || can_edit? || project_admin?
   end
 
   def display_lat_long
@@ -724,7 +816,7 @@ class Observation < AbstractModel
     notes[other_notes_key] = val
   end
 
-  # id of view textarea for a Notes heading
+  # id of view textarea for a Notes heading. Used in tests
   def self.notes_part_id(part)
     "#{notes_area_id_prefix}#{part.tr(" ", "_")}"
   end
@@ -736,15 +828,6 @@ class Observation < AbstractModel
   # prefix for id of textarea
   def self.notes_area_id_prefix
     "observation_notes_"
-  end
-
-  # name of view textarea for a Notes heading
-  def self.notes_part_name(part)
-    "observation[notes][#{part.tr(" ", "_")}]"
-  end
-
-  def notes_part_name(part)
-    Observation.notes_part_name(part)
   end
 
   # value of notes part
@@ -888,6 +971,7 @@ class Observation < AbstractModel
   end
 
   # Has anyone proposed a given Name yet for this observation?
+  # Count is ok here because we have eager-loaded the namings.
   def name_been_proposed?(name)
     namings.count { |n| n.name == name }.positive?
   end
@@ -1139,7 +1223,7 @@ class Observation < AbstractModel
 
   def owner_uniq_favorite_vote
     votes = owner_favorite_votes
-    return votes.first if votes.count == 1
+    votes.first if votes.count == 1
   end
 
   def owner_favorite_votes
@@ -1172,12 +1256,10 @@ class Observation < AbstractModel
   # thumbnail to next available Image.  Saves change to thumbnail, might save
   # change to Image.  Returns Image.
   def remove_image(img)
-    if images.include?(img)
+    if images.include?(img) || thumb_image_id == img.id
       images.delete(img)
-      if thumb_image_id == img.id
-        self.thumb_image = images.empty? ? nil : images.first
-        save
-      end
+      update(thumb_image: images.empty? ? nil : images.first) \
+        if thumb_image_id == img.id
       notify_users(:removed_image)
     end
     img
@@ -1212,6 +1294,33 @@ class Observation < AbstractModel
     return user.legal_name if collection_numbers.empty?
 
     collection_numbers.first.format_name
+  end
+
+  ##############################################################################
+  #
+  #  :section: Sources
+  #
+  ##############################################################################
+
+  # Which agent created this observation?
+  enum source:
+        {
+          mo_website: 1,
+          mo_android_app: 2,
+          mo_iphone_app: 3,
+          mo_api: 4
+        }
+
+  # Message to use to credit the agent which created this observation.
+  # Intended to be used with .tpl to render as HTML:
+  #   <%= observation.source_credit.tpl %>
+  def source_credit
+    :"source_credit_#{source}" if source.present?
+  end
+
+  # Do we want to prominantly advertise the source of this observation?
+  def source_noteworthy?
+    source.present? && source != "mo_website"
   end
 
   ##############################################################################
@@ -1301,7 +1410,7 @@ class Observation < AbstractModel
 
     # Send notification to all except the person who triggered the change.
     recipients.uniq.each do |recipient|
-      next if !recipient || recipient == sender
+      next if !recipient || recipient == sender || recipient.no_emails
 
       case action
       when :destroy
@@ -1344,6 +1453,9 @@ class Observation < AbstractModel
       end
     end
 
+    # Remove users who have opted out of all emails.
+    recipients.reject!(&:no_emails)
+
     # Send notification to all except the person who triggered the change.
     (recipients.uniq - [sender]).each do |recipient|
       QueuedEmail::ConsensusChange.create_email(sender, recipient, self,
@@ -1375,7 +1487,7 @@ class Observation < AbstractModel
 
   protected
 
-  include Validations
+  include Validations # currently only `validate_when`
 
   validate :check_requirements, :check_when
 

@@ -71,7 +71,7 @@ module Herbaria
     def test_merge_no_login
       marys = mary.create_personal_herbarium
       post(:create, params: { src: fundis.id, dest: marys.id })
-      assert_redirected_to(account_login_path)
+      assert_redirected_to(new_account_login_path)
     end
 
     def test_merge_by_record_nonowner

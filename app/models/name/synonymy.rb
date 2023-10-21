@@ -136,7 +136,7 @@ module Name::Synonymy
   #
   # rubocop:disable Style/RedundantSelf
   # I think these methods read much better with self explicitly included. -JPH
-  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+  # rubocop:disable Metrics/AbcSize
   # This is the best I can do. I think splitting it up will make it worse. -JPH
   def merge_synonyms(name)
     if !self.synonym && !name.synonym
@@ -161,7 +161,7 @@ module Name::Synonymy
       end
     end
   end
-  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+  # rubocop:enable Metrics/AbcSize
 
   # Add Name to this Name's Synonym, but don't transfer that Name's synonyms.
   # Delete the other Name's old Synonym if there aren't any Name's in it
@@ -197,7 +197,7 @@ module Name::Synonymy
 
   # (if no namings, returns created_at)
   def time_of_last_naming
-    @time_of_last_naming ||= \
+    @time_of_last_naming ||=
       Naming.where(name_id: id).maximum(:created_at) ||
       created_at
   end

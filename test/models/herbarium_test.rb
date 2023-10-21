@@ -60,6 +60,6 @@ class HerbariumTest < UnitTestCase
     # created in the glue table.  This can and has happened with other tables.
     curator_ids = HerbariumCurator.where(herbarium_id: ny.id).pluck(:user_id)
     assert_equal(curators.map(&:id).sort, curator_ids.sort)
-    assert_obj_list_equal(herbarium_records, result.herbarium_records)
+    assert_obj_arrays_equal(herbarium_records, result.herbarium_records)
   end
 end

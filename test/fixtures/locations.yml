@@ -8,6 +8,12 @@ DEFAULTS:
   locked: false
   user: rolf
   version: 1
+  name: $LABEL
+  scientific_name: $LABEL
+  north: 1
+  west: -1
+  east: 1
+  south: -1
 
 # no observations, 1 descsription and 2 versions all by rolf
 albion:
@@ -148,16 +154,10 @@ nybg_location:
   east: -73.878
   south: 40.866
 
-  # Do not use this location for any object
-  <<: *DEFAULTS
+# Do not use this location for any object
 unused_location:
+  <<: *DEFAULTS
   user_id: 0
-  name: $LABEL
-  scientific_name: $LABEL
-  north: 90
-  west: -180
-  east: 180
-  south: -90
 
 no_mushrooms_location:
   <<: *DEFAULTS
@@ -236,3 +236,23 @@ east_lt_west_location:
   west: 178.648
   east: -177.433
   south: 70.759
+
+perkatkun:
+  <<: *DEFAULTS
+  name: Perkatkun, Wrangel Island, Russia
+  north: 71.154802
+  west: -179.809370
+  south: 71.104900
+  east: -179.613214
+
+loc_edited_by_katrina:
+  <<: *DEFAULTS
+  user: roy
+
+loc_1_edited_by_roy:
+  <<: *DEFAULTS
+  user: katrina
+
+loc_2_edited_by_roy:
+  <<: *DEFAULTS
+  user: katrina

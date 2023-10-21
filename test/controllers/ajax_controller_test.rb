@@ -29,10 +29,8 @@ class AjaxControllerTest < FunctionalTestCase
     url = "/ajax/#{action}"
     url += "/#{params[:type]}" if params[:type]
     url += "/#{params[:id]}"   if params[:id]
-    args = params.each_with_object([]) do |var, val, memo|
-      memo << "#{var}=#{val}" if var != :type && var != :id
-    end
-    url += "?#{args.join("&")}" if args.any?
+    args = params.except(:type, :id)
+    url += "?#{URI.encode_www_form(args)}" if args.any?
     url
   end
 
@@ -124,27 +122,50 @@ class AjaxControllerTest < FunctionalTestCase
 
   def test_auto_complete_location
     # names of Locations whose names have words starting with "m"
-    m_loc_names = Location.where("name REGEXP ?", "\\bM").
+    m_loc_names = Location.where(Location[:name].matches_regexp("\\bM")).
                   map(&:name)
     # wheres of Observations whose wheres have words starting with "m"
     # need extra "observation" to avoid confusing sql with bare "where".
-    m_obs_wheres = Observation.where("observations.where REGEXP ?", "\\bM").
-                   map(&:where)
+    m_obs_wheres = Observation.where(Observation[:where].
+                   matches_regexp("\\bM")).map(&:where)
     m = m_loc_names + m_obs_wheres
 
     expect = m.sort.uniq
     expect.unshift("M")
     good_ajax_request(:auto_complete, type: :location, id: "Modesto")
-    assert_equal(expect, @response.body.split("\n"))
+    assert_equal(expect, JSON.parse(@response.body))
 
+    login("roy") # prefers location_format: :scientific
     expect = m.map { |x| Location.reverse_name(x) }.sort.uniq
     expect.unshift("M")
-    good_ajax_request(:auto_complete,
-                      type: :location, id: "Modesto", format: "scientific")
-    assert_equal(expect, @response.body.split("\n"))
+    good_ajax_request(:auto_complete, type: :location, id: "Modesto")
+    assert_equal(expect, JSON.parse(@response.body))
 
+    login("mary") # prefers location_format: :postal
     good_ajax_request(:auto_complete, type: :location, id: "Xystus")
-    assert_equal(["X"], @response.body.split("\n"))
+    assert_equal(["X"], JSON.parse(@response.body))
+  end
+
+  def test_auto_complete_herbarium
+    # names of Herbariums whose names have words starting with "m"
+    m = Herbarium.where(Herbarium[:name].matches_regexp("\\bD")).
+        map(&:name)
+
+    expect = m.sort.uniq
+    expect.unshift("D")
+    good_ajax_request(:auto_complete, type: :herbarium, id: "Dick")
+    assert_equal(expect, JSON.parse(@response.body))
+  end
+
+  def test_auto_complete_empty
+    good_ajax_request(:auto_complete, type: :name, id: "")
+    assert_equal([], JSON.parse(@response.body))
+  end
+
+  def test_auto_complete_name_above_genus
+    expect = %w[F Fungi]
+    good_ajax_request(:auto_complete, type: :clade, id: "Fung")
+    assert_equal(expect, JSON.parse(@response.body))
   end
 
   def test_auto_complete_name
@@ -154,24 +175,26 @@ class AjaxControllerTest < FunctionalTestCase
     expect_species = expect.select { |n| n.include?(" ") }
     expect = ["A"] + expect_genera + expect_species
     good_ajax_request(:auto_complete, type: :name, id: "Agaricus")
-    assert_equal(expect, @response.body.split("\n"))
+    assert_equal(expect, JSON.parse(@response.body))
 
     good_ajax_request(:auto_complete, type: :name, id: "Umbilicaria")
-    assert_equal(["U"], @response.body.split("\n"))
+    assert_equal(["U"], JSON.parse(@response.body))
   end
 
   def test_auto_complete_project
     # titles of Projects whose titles have words starting with "p"
-    b_titles = Project.where("title REGEXP ?", "\\bb").map(&:title).uniq
+    b_titles = Project.where(Project[:title].matches_regexp("\\bB")).
+               map(&:title).uniq
     good_ajax_request(:auto_complete, type: :project, id: "Babushka")
-    assert_equal((["B"] + b_titles).sort, @response.body.split("\n").sort)
+    assert_equal((["B"] + b_titles).sort, JSON.parse(@response.body).sort)
 
-    p_titles = Project.where("title REGEXP ?", "\\bp").map(&:title).uniq
+    p_titles = Project.where(Project[:title].matches_regexp("\\bP")).
+               map(&:title).uniq
     good_ajax_request(:auto_complete, type: :project, id: "Perfidy")
-    assert_equal((["P"] + p_titles).sort, @response.body.split("\n").sort)
+    assert_equal((["P"] + p_titles).sort, JSON.parse(@response.body).sort)
 
     good_ajax_request(:auto_complete, type: :project, id: "Xystus")
-    assert_equal(["X"], @response.body.split("\n"))
+    assert_equal(["X"], JSON.parse(@response.body))
   end
 
   def test_auto_complete_species_list
@@ -182,13 +205,13 @@ class AjaxControllerTest < FunctionalTestCase
     assert_equal("List of mysteries", list3)
 
     good_ajax_request(:auto_complete, type: :species_list, id: "List")
-    assert_equal(["L", list1, list2, list3], @response.body.split("\n"))
+    assert_equal(["L", list1, list2, list3], JSON.parse(@response.body))
 
     good_ajax_request(:auto_complete, type: :species_list, id: "Mojo")
-    assert_equal(["M", list3], @response.body.split("\n"))
+    assert_equal(["M", list3], JSON.parse(@response.body))
 
     good_ajax_request(:auto_complete, type: :species_list, id: "Xystus")
-    assert_equal(["X"], @response.body.split("\n"))
+    assert_equal(["X"], JSON.parse(@response.body))
   end
 
   def test_auto_complete_user
@@ -196,18 +219,18 @@ class AjaxControllerTest < FunctionalTestCase
     assert_equal(
       ["R", "rolf <Rolf Singer>", "roy <Roy Halling>",
        "second_roy <Roy Rogers>"],
-      @response.body.split("\n")
+      JSON.parse(@response.body)
     )
 
     good_ajax_request(:auto_complete, type: :user, id: "Dodo")
-    assert_equal(["D", "dick <Tricky Dick>"], @response.body.split("\n"))
+    assert_equal(["D", "dick <Tricky Dick>"], JSON.parse(@response.body))
 
     good_ajax_request(:auto_complete, type: :user, id: "Komodo")
     assert_equal(["K", "#{katrina.login} <#{katrina.name}>"],
-                 @response.body.split("\n"))
+                 JSON.parse(@response.body))
 
     good_ajax_request(:auto_complete, type: :user, id: "Xystus")
-    assert_equal(["X"], @response.body.split("\n"))
+    assert_equal(["X"], JSON.parse(@response.body))
   end
 
   def test_auto_complete_bogus
@@ -232,106 +255,6 @@ class AjaxControllerTest < FunctionalTestCase
     bad_ajax_request(:export, type: :user, id: 1, value: "1")
   end
 
-  def test_get_pivotal_story
-    return unless MO.pivotal_enabled
-
-    good_ajax_request(:pivotal, type: "story", id: MO.pivotal_test_id)
-    assert_match(/This is a test story/, @response.body)
-    assert_match(/Posted by.*rolf/, @response.body)
-    assert_match(/This is a test comment/, @response.body)
-    assert_match(/By:.*mary/, @response.body)
-    assert_match(/Post Comment/, @response.body)
-  end
-
-  def test_naming_vote
-    naming = namings(:minimal_unknown_naming)
-    assert_nil(naming.users_vote(dick))
-    bad_ajax_request(:vote, type: :naming, id: naming.id, value: 3)
-
-    login("dick")
-    good_ajax_request(:vote, type: :naming, id: naming.id, value: 3)
-    assert_equal(3, naming.reload.users_vote(dick).value)
-
-    good_ajax_request(:vote, type: :naming, id: naming.id, value: 0)
-    assert_nil(naming.reload.users_vote(dick))
-
-    bad_ajax_request(:vote, type: :naming, id: naming.id, value: 99)
-    bad_ajax_request(:vote, type: :naming, id: 99, value: 0)
-    bad_ajax_request(:vote, type: :phooey, id: naming.id, value: 0)
-  end
-
-  def test_image_vote
-    image = images(:in_situ_image)
-    assert_nil(image.users_vote(dick))
-    bad_ajax_request(:vote,
-                     type: :image, id: images(:in_situ_image).id, value: 3)
-
-    login("dick")
-    assert_nil(image.users_vote(dick))
-    good_ajax_request(:vote,
-                      type: :image, id: images(:in_situ_image).id, value: 3)
-    assert_equal(3, image.reload.users_vote(dick))
-
-    good_ajax_request(:vote,
-                      type: :image, id: images(:in_situ_image).id, value: 0)
-    assert_nil(image.reload.users_vote(dick))
-
-    bad_ajax_request(:vote,
-                     type: :image, id: images(:in_situ_image).id, value: 99)
-    bad_ajax_request(:vote,
-                     type: :image, id: 99, value: 0)
-  end
-
-  def test_image_vote_renders_partial
-    # #Arrange
-    login("dick")
-
-    # Act
-    good_ajax_request(:vote, type: :image, id: images(:in_situ_image).id,
-                             value: 3)
-
-    # Assert
-    assert_template(layout: nil)
-    assert_template(layout: false)
-    assert_template(partial: "image/_image_vote_links")
-  end
-
-  def test_image_vote_renders_correct_links
-    # #Arrange
-    login("dick")
-
-    # Act
-    good_ajax_request(:vote,
-                      type: :image, id: images(:in_situ_image).id, value: 3)
-
-    assert_select(
-      "a[href='/image/show_image/#{images(:in_situ_image).id}?vote=0']"
-    )
-    assert_select(
-      "a[href='/image/show_image/#{images(:in_situ_image).id}?vote=1']"
-    )
-    assert_select(
-      "a[href='/image/show_image/#{images(:in_situ_image).id}?vote=2']"
-    )
-    assert_select(
-      "a[href='/image/show_image/#{images(:in_situ_image).id}?vote=4']"
-    )
-  end
-
-  def test_image_vote_renders_correct_data_attributes
-    # #Arrange
-    login("dick")
-
-    # Act
-    good_ajax_request(:vote, type:
-                      :image, id: images(:in_situ_image).id, value: 3)
-
-    # should show four vote links as dick already voted
-    assert_select("[data-role='image_vote']", 4)
-    # should show four vote links as dick already voted
-    assert_select("[data-val]", 4)
-  end
-
   def test_old_translation
     str = TranslationString::Version.find(1)
     bad_ajax_request(:old_translation, id: 0)
@@ -344,7 +267,7 @@ class AjaxControllerTest < FunctionalTestCase
     setup_image_dirs
     login("dick")
     file = Rack::Test::UploadedFile.new(
-      "#{::Rails.root}/test/images/Coprinus_comatus.jpg", "image/jpeg"
+      Rails.root.join("test/images/Coprinus_comatus.jpg").to_s, "image/jpeg"
     )
     copyright_holder = "Douglas Smith"
     notes = "Some notes."
@@ -503,37 +426,6 @@ class AjaxControllerTest < FunctionalTestCase
     end
   end
 
-  def test_exif_gps_hidden
-    image = images(:in_situ_image)
-    image.update_attribute(:transferred, false)
-
-    fixture = "#{MO.root}/test/images/geotagged.jpg"
-    file = image.local_file_name("orig")
-    path = file.sub(%r{/[^/]*$}, "")
-    FileUtils.mkdir_p(path) unless File.directory?(path)
-    FileUtils.cp(fixture, file)
-
-    get(:exif, params: { id: image.id })
-    assert_match(/latitude|longitude/i, @response.body)
-
-    image.observations.first.update_attribute(:gps_hidden, true)
-    get(:exif, params: { id: image.id })
-    assert_no_match(/latitude|longitude/i, @response.body)
-  end
-
-  def test_exif_parser
-    fixture = "#{MO.root}/test/images/geotagged.jpg"
-    result, _status = Open3.capture2e("exiftool", fixture)
-    unstripped = @controller.test_parse_exif_data(result, false)
-    assert_not_empty(unstripped.select do |key, _val|
-                       key.match(/latitude|longitude|gps/i)
-                     end)
-    stripped = @controller.test_parse_exif_data(result, true)
-    assert_empty(stripped.select do |key, _val|
-                   key.match(/latitude|longitude|gps/i)
-                 end)
-  end
-
   def test_name_primer
     # This name is not deprecated and is used by an observation or two.
     name1 = names(:boletus_edulis)
@@ -579,5 +471,37 @@ class AjaxControllerTest < FunctionalTestCase
     get(:location_primer)
     assert(@response.body.include?(item),
            "Expected #{@response.body} to include #{item}.")
+  end
+
+  def test_visual_group_flip_status
+    login
+    visual_group = visual_groups(:visual_group_one)
+    image = images(:agaricus_campestris_image)
+    vgi = visual_group.visual_group_images.find_by(image_id: image.id)
+    new_status = !vgi.included
+    get(:visual_group_status,
+        params: { id: visual_group.id, imgid: image.id, value: new_status })
+    vgi.reload
+    assert_equal(new_status, vgi.included)
+  end
+
+  def test_visual_group_delete_relationship
+    login
+    visual_group = visual_groups(:visual_group_one)
+    image = images(:agaricus_campestris_image)
+    count = VisualGroupImage.count
+    get(:visual_group_status,
+        params: { id: visual_group.id, imgid: image.id, value: "" })
+    assert_equal(count - 1, VisualGroupImage.count)
+  end
+
+  def test_visual_group_add_relationship
+    login
+    visual_group = visual_groups(:visual_group_one)
+    image = images(:peltigera_image)
+    count = VisualGroupImage.count
+    get(:visual_group_status,
+        params: { id: visual_group.id, imgid: image.id, value: "true" })
+    assert_equal(count + 1, VisualGroupImage.count)
   end
 end

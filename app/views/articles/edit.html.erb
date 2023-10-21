@@ -1,6 +1,6 @@
-<% @title = edit_title(@article)
-   tabs = [link_to(:index_article.t, articles_path)]
-   @tabsets = { right: draw_tab_set(tabs) }
+<%
+add_page_title(article_edit_title(@article))
+add_tab_set(article_form_edit_tabs(article: @article))
 %>
 
-<%= render(partial: "form") %>
+<%= render(partial: "articles/form") %>

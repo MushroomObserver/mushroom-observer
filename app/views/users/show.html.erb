@@ -1,102 +1,15 @@
 <%
-  id = @show_user.id
-  name = @show_user.unique_text_name
-  @title = :show_user_title.t(user: name)
-  @container = :full
+id = @show_user.id
+name = @show_user.unique_text_name
+add_page_title(:show_user_title.t(user: name))
+add_pager_for(@show_user)
+add_tab_set(user_show_tabs(show_user: @show_user, user: @user))
 
-  # NOTE: refactored links will need params
-  links = {}
-  [
-    [ :comments, :comment, :show_comments_by_user, {} ],
-    [ :comments_for, :comment, :show_comments_for_user, {} ],
-    [ :images, :image, :images_by_user, {} ],
-    [ :location_description_authors, :location,
-      :location_descriptions_by_author, {} ],
-    [ :location_description_editors, :location,
-      :location_descriptions_by_editor, {} ],
-    [ :locations, :location, :locations_by_user, {} ],
-    [ :locations_versions, :location, :locations_by_editor, {} ],
-    [ :name_description_authors, :name, :name_descriptions_by_author, {} ],
-    [ :name_description_editors, :name, :name_descriptions_by_editor, {} ],
-    [ :names, :name, :names_by_user, {} ],
-    [ :names_versions, :name, :names_by_editor, {} ],
-    [ :observations, :observations, :index, { user: @show_user.id } ],
-    [ :species_lists, :species_list, :species_lists_by_user, {} ],
-    [ :life_list, :checklists, :show, {} ]
-  ].each do |key, controller, action, params|
-    links[key] = url_for(controller: controller, action: action,
-                         params: params.merge({ id: id }))
-  end
+@container = :full
 
-  tabs = [
-    link_to(:show_user_contributors.t, contributors_path)
-  ]
-  if @show_user == @user
-    tabs += [
-      link_to(:show_user_your_observations.t, links[:observations]),
-      link_to(:show_user_comments_for_you.t, links[:comments_for]),
-      link_to(:show_user_your_notifications.t, interest_list_interests_path),
-      link_to(:show_user_edit_profile.t, account_profile_path),
-      link_to(:app_preferences.t, account_prefs_path),
-      link_to(:app_life_list.t, links[:life_list])
-    ]
-  else
-    tabs += [
-      link_to(:show_user_observations_by.t(name: name), links[:observations]),
-      link_to(:show_user_comments_for.t(name: name), links[:comments_for]),
-      link_to(:show_user_email_to.t(name: name),
-              emails_ask_user_question_path(id: id))
-    ]
-  end
-  if in_admin_mode?
-    tabs += [
-      link_to(:change_user_bonuses.t, edit_user_path(@show_user.id)),
-      link_to(:DESTROY.t, account_destroy_user_path(id: @show_user.id),
-              data: {confirm: :are_you_sure.l})
-    ]
-  end
-  @tabsets = {
-    pager_for: @show_user,
-    right: draw_tab_set(tabs)
-  }
-
-  # These are roughly in decreasing order of importance.
-  rows = []
-  (SiteData::ALL_FIELDS -
-   SiteData::SITE_WIDE_FIELDS -
-   # omit sequence stuff because it has no weight
-   [:sequences, :sequenced_observations]).
-  each do |field|
-    rows << {
-      field: field,
-      label: "user_stats_#{field}".to_sym.t,
-      count: (count = @user_data[field].to_i),
-      weight: (weight = SiteData::FIELD_WEIGHTS[field]),
-      points: count * weight
-    }
-  end
-
-  # Add bonuses for translations.
-  if @user_data[:languages_itemized]
-    @user_data[:languages_itemized].each do |lang, score|
-      rows << {
-        label: :show_user_language_contribution.t(name: lang.name),
-        points: score.to_i
-      }
-    end
-  end
-
-  # Add bonuses at the bottom.
-  if @show_user.bonuses
-    @show_user.bonuses.each do |points, reason|
-      rows << {
-        label: reason.to_s.t,
-        points: points.to_i
-      }
-    end
-  end
-
-  total = 0
+rows = user_stats_rows(@show_user, @user_data)
+paths = user_stats_link_paths(@show_user)
+total = 0
 %>
 
 <div class="row">
@@ -127,7 +40,9 @@
 
   <div class="col-xs-5">
     <p class="mt-3">
-      <%= thumbnail(@show_user.image_id, {votes: false}) if @show_user.image_id %>
+      <%= if @show_user.image_id
+        interactive_image(Image.find(@show_user.image_id), votes: false)
+      end %>
       <strong><%= :show_user_joined.t %>:</strong> <%= @show_user.verified %>
     </p>
   </div>
@@ -137,13 +52,14 @@
   <div class="col-sm-3">
     <% if @observations %>
       <% @observations.values_at(0, 2, 4).reject(&:nil?).each do |obs| %>
-        <%= thumbnail(obs.thumb_image,
-                      link: {controller: obs.show_controller,
-                              action: obs.show_action, id: obs.id},
-                      votes: true) %>
+        <div class="my-3">
+          <%= interactive_image(obs.thumb_image,
+                        image_link: observation_path(id: obs.id),
+                        votes: true) %>
+        </div><!--.my-3-->
       <% end %>
     <% end %>
-  </div>
+  </div><!--.col-->
 
   <div class="col-sm-6">
     <div class="text-center">
@@ -154,7 +70,7 @@
           count = row[:count]
           weight = row[:weight]
           points = row[:points]
-          url = links[field]
+          url = paths[field]
           link = url ? link_to(label, url) : label
           total += points
           if !count %>
@@ -188,7 +104,8 @@
       </table>
       <%= if @life_list.num_species > 0
         :show_user_life_list.t(genera: @life_list.num_genera,
-                                species: @life_list.num_species, url: links[:life_list])
+                               species: @life_list.num_species,
+                               url: paths[:life_list])
       end %>
     </div><!-- .text-center -->
   </div>
@@ -196,11 +113,12 @@
   <div class="col-sm-3">
     <% if @observations %>
       <% @observations.values_at(1, 3, 5).reject(&:nil?).each do |obs| %>
-        <%= thumbnail(obs.thumb_image,
-                      link: {controller: obs.show_controller,
-                              action: obs.show_action, id: obs.id},
-                      votes: true) %>
+        <div class="my-3">
+          <%= interactive_image(obs.thumb_image,
+                        image_link: observation_path(id: obs.id),
+                        votes: true) %>
+        </div><!--.my-3-->
       <% end %>
     <% end %>
-  </div>
+  </div><!--.col-->
 </div><!--.row-->

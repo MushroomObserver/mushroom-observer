@@ -1,0 +1,19 @@
+<%
+# REMOVE IMAGES FROM OBSERVATION
+# NOTE: Move template to observations/images/edit
+#       Observations::ImagesController#edit
+# Move partial to shared/remove_images, send target_class as local
+# Note totally general title and tabs based on @object target_class
+add_page_title(:image_remove_title.t(name: @object.unique_format_name))
+
+add_tab_set(observation_images_remove_tabs(obj: @object))
+
+@container = :full
+form_action = { controller: "/observations/images",
+                action: :detach,
+                id: @object.id,
+                q: get_query_param }
+%>
+
+<%= render(partial: "shared/images_to_remove",
+           locals: { form_action: form_action }) %>

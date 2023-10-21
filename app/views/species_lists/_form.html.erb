@@ -1,0 +1,65 @@
+<%= form_with(model: @species_list, url: action,
+              id: "species_list_form") do |f| %>
+
+  <%= submit_button(form: f, button: button.l, center: true) %>
+
+  <%= if !(partial = render(partial: "shared/form_list_feedback",
+                            locals: { f: f })).blank?
+    content_tag(:div, partial)
+  end %>
+
+  <%= if @checklist&.any?
+    render(partial: "species_lists/form/fields_for_checklist", locals: { f: f })
+  end %>
+
+  <%= if !@new_names.blank?
+    hidden_field_tag(:approved_names, @new_names.join("\n"))
+  end %>
+
+  <%= if !@deprecated_names.blank?
+    hidden_field_tag(:approved_deprecated_names,
+                     @deprecated_names.map(&:id).join(" "))
+  end %>
+
+  <div class="form-group mt-3">
+    <%= fields_for(:list) do |f_l|
+      text_area_with_label(form: f_l, field: :members, rows: 8,
+                           label: :form_species_lists_write_in_species.t + ":",
+                           value: @list_members, placeholder: :start_typing.l,
+                           data: { autocompleter: :name,
+                                   autocomplete_separator: "\n" })
+    end %>
+  </div>
+
+  <%= text_field_with_label(form: f, field: :title, between: :required,
+                            label: :form_species_lists_title.t + ":") %>
+
+  <%= text_area_with_label(form: f, field: :notes, rows: 12,
+                           label: :form_species_lists_list_notes.t + ":") %>
+  <%= render(partial: "shared/textilize_help") %>
+
+  <div class="form-group form-inline">
+    <%= f.label(:when, :WHEN.t + ":") %>
+    <%= f.date_select(:when, date_select_opts(@species_list),
+                      { class: "form-control",
+                        data: { autocompleter: :year } }) %>
+  </div>
+
+  <%= render(partial: "shared/form_location_feedback",
+             locals: { button: button } ) %>
+
+  <%= text_field_with_label(form: f, field: :place_name, between: :required,
+                            placeholder: :start_typing.l, label: :WHERE.t + ":",
+                            data: { autocompleter: :location }) %>
+
+  <%= render(partial: "species_lists/form/fields_for_member",
+             locals: { f: f }) %>
+
+  <% if @projects.any? %>
+    <%= render(partial: "species_lists/form/fields_for_project",
+               locals: { f: f }) %>
+  <% end %>
+
+  <%= submit_button(form: f, button: button.l, center: true) %>
+
+<% end %>

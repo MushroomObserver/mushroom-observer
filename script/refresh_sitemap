@@ -39,43 +39,43 @@ DOMAIN      = "https://mushroomobserver.org"
 SITEMAP_URL = "#{DOMAIN}/sitemap/NAME.xml".freeze
 INDEX_URL   = "#{DOMAIN}/sitemap/NAME.html".freeze
 
-ROBOTS_FILE     = "#{::Rails.root}/public/robots.txt".freeze
-SITEMAP_FILE    = "#{::Rails.root}/public/sitemap/NAME.xml".freeze
-INDEX_FILE      = "#{::Rails.root}/public/sitemap/NAME.html".freeze
-CONTROLLER_FILE = "#{::Rails.root}/app/controllers/NAME_controller.rb".freeze
+# rubocop:disable Rails/FilePath
+# These will be manipulated as strings, not PathName's
+ROBOTS_FILE     = "#{Rails.root}/public/robots.txt".freeze
+SITEMAP_FILE    = "#{Rails.root}/public/sitemap/NAME.xml".freeze
+INDEX_FILE      = "#{Rails.root}/public/sitemap/NAME.html".freeze
+CONTROLLER_FILE = "#{Rails.root}/app/controllers/NAME_controller.rb".freeze
+# rubocop:enable Rails/FilePath
 
 # Values: [ table_name, comments.target_type, show_URL ]
 OBJECT_TYPES = [
   ["observations",
    "Observation",
-   "observations/ID",
-   "observations/show/ID"],
+   "observations/ID"],
   ["names",
    "Name",
-   "name/show_name/ID"],
+   "names/ID"],
   ["locations",
    "Location",
-   "location/show_location/ID"],
+   "locations/ID"],
   ["species_lists",
    "SpeciesList",
-   "species_list/show_species_list/ID"],
+   "species_lists/ID"],
   ["projects",
    "Project",
-   "project/show_project/ID"],
+   "projects/ID"],
   ["glossary_terms",
    "GlossaryTerm",
-   "glossary_terms/ID",
-   "glossary_terms/show/ID"],
+   "glossary_terms/ID"],
   ["herbaria",
    "Herbarium",
-   "herbaria/ID",
-   "herbaria/show/ID"],
+   "herbaria/ID"],
   ["name_descriptions",
    "NameDescription",
-   "name/show_name_description/ID"],
+   "names/descriptions/ID"],
   ["location_descriptions",
    "LocationDescription",
-   "location/show_location_description/ID"]
+   "locations/descriptions/ID"]
 ].freeze
 
 # Values: [ title, URL, update_frequency ]
@@ -114,7 +114,7 @@ ROBOTS_HEADER = <<~"TXT".freeze
 
   Sitemap: #{SITEMAP_URL.sub("NAME", "index")}
 
-  # Block non-whitelisted crawlers
+  # Block non-allowed crawlers
   # Google AdBot crawlers must be named explicitly
   # https://developers.google.com/search/docs/advanced/robots/create-robots-txt
   User-agent: AdsBot-Google
@@ -124,10 +124,10 @@ ROBOTS_HEADER = <<~"TXT".freeze
   # https://developers.facebook.com/docs/sharing/bot/
   User-agent: FacebookBot
   User-agent: Facebot # Unofficial Facebook bots (subset of facebookexternalhit)
-  User-agent: * # Block everything else not whitelisted below
+  User-agent: * # Block everything else not allowed below
   Disallow: /
 
-  # Whitelisted crawlers
+  # Allowed crawlers
   # All are assumed to use wildcards in their robots.txt parser
   User-agent: bingbot
   User-agent: CCBot
@@ -143,34 +143,34 @@ ROBOTS_HEADER = <<~"TXT".freeze
   Disallow: */index*user_locale=*
   Disallow: */lookup*user_locale=*
   Disallow: /*?*q= # block urls having the q parameter
-  Disallow: /name/show_name
+  Disallow: /names
 
 TXT
 # The rest of #write_robots_file must follow immediately
-# after the rules for whitelisted crawlers/user agents.
-ROBOTS_FOOTER = <<"TXT"
+# after the rules for allowed crawlers/user agents.
+ROBOTS_FOOTER = <<TXT
 TXT
 
-SITEMAP_ROOT_HEADER = <<~"XML"
+SITEMAP_ROOT_HEADER = <<~XML
   <?xml version="1.0" encoding="UTF-8"?>
   <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 XML
-SITEMAP_ROOT_FOOTER = <<~"XML"
+SITEMAP_ROOT_FOOTER = <<~XML
   </sitemapindex>
 XML
 
-SITEMAP_LEAF_HEADER = <<~"XML"
+SITEMAP_LEAF_HEADER = <<~XML
   <?xml version="1.0" encoding="UTF-8"?>
   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 XML
-SITEMAP_LEAF_FOOTER = <<~"XML"
+SITEMAP_LEAF_FOOTER = <<~XML
   </urlset>
 XML
 
-INDEX_HEADER = <<~"HTML"
+INDEX_HEADER = <<~HTML
   <html><head></head><body>
 HTML
-INDEX_FOOTER = <<~"HTML"
+INDEX_FOOTER = <<~HTML
   </body></html>
 HTML
 

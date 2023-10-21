@@ -43,7 +43,7 @@
   text-align: center;
   padding: 10px 0;
   top: 1px;
-  color: mix($INPUT_FG_COLOR, $INPUT_BG_COLOR);
+  color: $input-bg-disabled;
 }
 
 .icon-addon.addon-lg .form-control {
@@ -85,9 +85,31 @@
 .icon-addon:hover .glyphicon,
 .icon-addon .form-control:focus + .fa,
 .icon-addon:hover .fa {
-  color: $INPUT_FG_COLOR;
+  color: $input-color;
 }
 
 .input-group .icon-addon .form-control {
   border-radius: 0;
+}
+
+.lang-flag {
+  width: 27px;
+  height: 18px;
+}
+
+.spinner-right {
+  @extend .glyphicon, .glyphicon-repeat;
+
+  line-height: 1.1 !important;
+  animation: spin-r 1s infinite linear;
+}
+
+@keyframes spin-r {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(359deg);
+  }
 }

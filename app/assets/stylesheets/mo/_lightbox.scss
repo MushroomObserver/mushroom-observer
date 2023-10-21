@@ -1,5 +1,5 @@
 //
-// jquery lightbox
+// jquery lightbox (Lokesh Dhakar)
 // --------------------------------------------------
 
 
@@ -13,7 +13,7 @@ body:after {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 9999;
+  z-index: 1020;
   background-color: black;
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
   opacity: 0.8;
@@ -24,12 +24,13 @@ body:after {
   position: absolute;
   left: 0;
   width: 100%;
-  z-index: 10000;
+  z-index: 1030;
   text-align: center;
   line-height: 0;
   font-weight: normal;
 
-  a.lightbox_link {
+  a.lightbox_link,
+  button.btn-link.lightbox_link {
     color: white;
     text-decoration: underline;
   }
@@ -53,7 +54,7 @@ body:after {
 .lb-outerContainer {
   position: relative;
   background-color: transparent;
-  *zoom: 1;
+  // *zoom: 1;
   width: 250px;
   height: 250px;
   margin: 0 auto;
@@ -156,7 +157,7 @@ body:after {
 .lb-dataContainer {
   margin: 0 auto;
   padding-top: 5px;
-  *zoom: 1;
+  // *zoom: 1;
   width: 100%;
   -moz-border-radius-bottomleft: 4px;
   -webkit-border-bottom-left-radius: 4px;
@@ -184,9 +185,12 @@ body:after {
   }
 
   .lb-caption {
-    font-size: 13px;
-    font-weight: bold;
-    line-height: 1em;
+    color: white;
+
+    a,
+    a:visited {
+      color: white;
+    }
   }
 
   .lb-number {
@@ -219,3 +223,9 @@ body:after {
     }
   }
 }
+
+// Bootstrap 3, nonstandard prop. Revert to default. Does not work
+// .media,
+// .media-body {
+//   zoom: auto;
+// }

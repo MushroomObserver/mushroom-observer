@@ -1,13 +1,7 @@
 <%
-  @title = :theme_black_on_white.tl
+add_page_title(:theme_black_on_white.tl)
 
-  tabs = [
-    link_to(:theme_list.t,
-            controller: :theme, action: :color_themes),
-    link_to(:app_preferences.t,
-            controller: :account, action: :prefs)
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
+tabs = add_tab_set(theme_show_tabs)
 %>
 
 <%= :theme_black_on_white_description.tp(link: "XXX").sub("XXX", link_to("**__Amanita__**".t, action: :Amanita)).html_safe %>

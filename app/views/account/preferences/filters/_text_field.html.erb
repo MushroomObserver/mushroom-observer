@@ -1,0 +1,9 @@
+<%# Render a text_field and label for a content filter %>
+<%
+between = content_tag(:div, :"prefs_filters_#{filter.sym}_help".t)
+%>
+
+<%= text_field_with_label(form: f, field: filter.sym,
+                          label: :"prefs_filters_#{filter.sym}".t + ":",
+                          value: @user.content_filter[filter.sym],
+                          between: between) %>

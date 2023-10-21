@@ -1,17 +1,13 @@
 <%
-  @title = :users_by_contribution_title.t
-
-  tabs = [
-    link_with_query(:app_site_stats.t, info_site_stats_path)
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :wide
+@container = :wide
+add_page_title(:users_by_contribution_title.t)
+add_tab_set(contributors_index_tabs)
 %>
 
 <div class="row">
   <div class="col-md-6">
     <div class="list-group">
-      <%= render(partial: "contributor",
+      <%= render(partial: "contributors/contributor",
                   collection: @users, as: :user) %>
     </div>
   </div>

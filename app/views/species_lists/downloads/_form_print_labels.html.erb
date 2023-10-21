@@ -1,0 +1,8 @@
+<%= form_with(url: print_labels_for_observations_path(q: query_param),
+              id: "species_list_download_print_labels") do |f| %>
+
+  <%= content_tag(:h3, "#{:species_list_labels_header.t}:", class: "mt-5") %>
+
+  <%= submit_button(form: f, button: :species_list_labels_button.l, center: true) %>
+
+<% end %>

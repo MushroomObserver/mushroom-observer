@@ -22,8 +22,7 @@ require:
 # ------------------------------------------------------------------------------
 
 # RuboCop configuration
-# Uses Rubcop's default configuration, except as specified below
-# For more info, see https://docs.rubocop.org/rubocop/configuration.html
+# https://docs.rubocop.org/rubocop/configuration.html
 
 AllCops:
   NewCops: enable
@@ -64,8 +63,7 @@ Layout/DotPosition:
 Layout/HashAlignment:
   # Repeat the Rubocop default because Codeclimate ignores it as of 2019-07-09
   EnforcedColonStyle: key
-Layout/LineEndStringConcatenationIndentation: # new in 1.18
-  # Rubocop default: true
+Layout/LineEndStringConcatenationIndentation:
   # We most consistently align the start of the continued line
   # with the start of the string on the previous line.
   # This does not correspond to any available EnforcedStyle.
@@ -74,28 +72,21 @@ Layout/LineLength:
   # RuboCop default: 120
   # Use 80 instead because some developers have smaller screens
   Max: 80
-Layout/MultilineMethodParameterLineBreaks: # new in 1.32
+Layout/MultilineMethodParameterLineBreaks:
   # Makes Each param in a multi-line method definition start on a separate line.
   # RuboCop default: true
   # Cop seems like overkill; MO has many relevant methods with >1 param per line
   Enabled: false
 
-Lint/AmbiguousOperatorPrecedence: # new in 1.21
-  # RuboCop default: true
+Lint/AmbiguousOperatorPrecedence:
   # We do this only in rare cases; Always doing it would add uneeded clutter
   Enabled: false
-Lint/NonAtomicFileOperation: # new in 1.31
+Lint/NonAtomicFileOperation:
   # Disable until I understand the cop's implications - jdc 2022-07-14
   # https://docs.rubocop.org/rubocop/1.31/cops_lint.html#lintnonatomicfileoperation
   Enabled: false
 
 Metrics/AbcSize:
-  # Rubocop default: 15
-  # Even short simple methods sometimes exceed 15.
-  # Simplifying them further just forces us to make tons of tiny
-  # trivial methods with really cumbersome names, without actually making
-  # the code any better.
-  Max: 20
   # This Cop makes less sense in tests, we regularly ignore it.
   Exclude:
     - "test//**/*"
@@ -105,7 +96,7 @@ Metrics/BlockLength:
     - "test//**/*"
 Metrics/ClassLength:
   # Rubocop default: 100
-  # Relaxed metric based on Codeclimate's default .rubocop.yml
+  # Relaxed metric based on actual practice
   Max: 250
   Exclude:
     # This Cop makes less sense in tests, we regularly ignore it.
@@ -133,45 +124,58 @@ Metrics/PerceivedComplexity:
   Exclude:
     - "test//**/*"
 
+Naming/BlockForwarding:
+  # In Ruby 3.1, anonymous block forwarding has been added.
+  # This cop identifies places where `do_something(&block)`
+  # can be replaced by `do_something(&)`.
+  # Default is `anonymous`
+  # Keeping it `explicit` until we're ready to switch.
+  EnforcedStyle: explicit
+
 Performance/Casecmp:
-  # Rubocop default: true
-  # Disable because it does not work with Unicode in Ruby 2.4
+  # This cop does not work with Unicode in Ruby 2.4
   Enabled: false
 Performance/RegexpMatch:
   # Autocorrect changes "something.match(regexp)" to "something.match?(regexp)".
-  # The latter throws an error when something == nil:
-  #   undefined method `match?' for nil:NilClass
+  # The latter throws an error when something is not a Regexp, String or Symbol
+  #   Example: undefined method `match?' for nil:NilClass
   # So manually correct to: regexp.match?(something)
   AutoCorrect: false
 Performance/StringInclude:
-  # Rubocop default: true
   # "This cop’s offenses are not safe to auto-correct if a receiver is nil."
   Enabled: false
 
+Rails/ActionOrder:
+  # Allow `edit` after `create`
+  # See https://github.com/MushroomObserver/mushroom-observer/pull/1241#issuecomment-1364636450
+  ExpectedOrder:
+    - index
+    - show
+    - new
+    # - edit
+    - create
+    - update
+    - destroy
 Rails/DynamicFindBy:
   # Make autocorrect saf(er) by whitelisting our find_by methods
   AllowedMethods: find_by_sql, find_by_code_with_wildcards, find_by_name_with_wildcards, find_by_name_or_reverse_name, find_by_scientific_name_with_wildcards, find_by_title_with_wildcards, find_by_title_with_wildcards
   AutoCorrect: true
 Rails/RedundantPresenceValidationOnBelongsTo: # new in 2.13
-  # Rubocop default: true
   # Cop gives false positives
   # Perhaps because we don't load Rails defaults in config, and also don't have
   # config.active_record.belongs_to_required_by_default
   # See also https://github.com/MushroomObserver/mushroom-observer/issues/1072
   Enabled: false
-Rails/RenderInline: # new in 2.7
+Rails/RenderInline:
   # https://github.com/MushroomObserver/mushroom-observer/pull/1079#discussion_r917332451
   Exclude:
     - "app/controllers/ajax_controller/**/*"
 Rails/WhereExists:
-  # Rubocop default: true
   # Can be unsafe depending on eager_load vs pre_load
   # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railswhereexists
   Enabled: false
 
 Style/AccessorGrouping:
-  # Rubocop default: true
-  # Disabled. See discussion at
   # https://github.com/MushroomObserver/mushroom-observer/pull/988
   Enabled: false
   # The followin Exclude in case we re-enable the cop
@@ -186,31 +190,44 @@ Style/AccessorGrouping:
     - "app/classes/gmaps.rb"
     - "app/classes/mo_paginator.rb"
 Style/AsciiComments:
-  # Rubocop default: true
   # Allow non-ascii characters in comments; we need to use accented chars
+  Enabled: false
+Style/ClassAndModuleChildren:
+  # Allow nested or compact module declaration
   Enabled: false
 Style/DateTime:
   # Repeat the RuboCop default because CodeClimate silently overrides it
   # Is this still true? JDC 2020-08-17
   Enabled: false
+Style/Documentation:
+  # We often ignore this and bare-bones comments add nothing useful.
+  # And see Martin, Clean Code, ch. 4
+  #   (Redundant Comments and Mandated Comments are Bad Comments)
+  Enabled: false
 Style/DoubleNegation:
   # Rubocop default: true
   # Allow double bang. In the rare places we do this, its use is justified.
   Enabled: false
-Style/EmptyHeredoc: # new in 1.32
+Style/EmptyHeredoc:
   # Empty Heredoc is usedful as a placeholder in script/refresh_sitemap
   Exclude:
     - script/refresh_sitemap
 Style/FormatStringToken:
-  # Rubocop default: true
   # It doesn't seem like we gain much by doing this.
   Enabled: false
   # The commented-out lines below are in case we re-enable the cop
   # # This doesn't work for redirect in config/routes.rb.
   # AllowedMethods:
-    # - "redirect"
+  # - "redirect"
+Style/HashSyntax:
+  # Ruby 3.1 supports a new JS-like shorthand hash key/val assignment
+  # as long as key names and value variable names are the same.
+  # e.g. { foo: } is evaluated like { foo: foo }
+  # https://dev.to/baweaver/ruby-3-1-shorthand-hash-syntax-first-impressions-19op
+  # This setting allows for a transition while we get used to the new style.
+  # AN 2022-10-09
+  EnforcedShorthandSyntax: either
 Style/MethodCallWithArgsParentheses:
-  # Rubocop default: false
   # MO uses parentheses (except for some macro-style methods)
   Enabled: true
 Style/PercentLiteralDelimiters:
@@ -239,5 +256,5 @@ Style/SymbolArray:
   EnforcedStyle: brackets
 
 Rails/SkipsModelValidations:
-  # We skip validations all the time.  I'm tired of disabling this cop.
+  # We skip validations all the time. I'm tired of disabling this cop.
   Enabled: false

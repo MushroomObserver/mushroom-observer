@@ -1,0 +1,44 @@
+<%
+add_page_title(:image_edit_title.t(name: @image.unique_format_name))
+
+add_tab_set(observation_images_edit_tabs(image: @image))
+@container = :wide
+form_action = { controller: "/observations/images",
+                action: :update,
+                id: @image.id,
+                q: get_query_param }
+%>
+
+<div class="row">
+  <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
+    <%= form_with(model: @image, url: form_action, method: :put) do |f| %>
+
+      <%= submit_button(form: f, button: :SAVE_EDITS.l, center: true) %>
+
+      <%= render(partial: "observations/images/form/fields_for_images",
+                locals: { f: f, leave_out_original_file_name: false }) %>
+
+      <% if @projects.any? %>
+        <div class="form-group form-inline">
+          <%= content_tag(:p, :PROJECTS.t + ":", class: "font-weight-bold") %>
+          <%= help_block(:p, :form_images_project_help.t) %>
+          <%= render(partial: "observations/images/form/project",
+                    collection: @projects) %>
+        </div>
+      <% end %>
+
+      <div class="text-center mt-3 mb-5">
+        <%= submit_button(form: f, button: :SAVE_EDITS.l) %>
+        <%= link_with_query(:cancel_and_show.t(type: :image),
+                            image_path(@image.id),
+                            class: "btn btn-default") %>
+      </div>
+
+    <% end %>
+  </div><!--.col-->
+
+  <div class="col-xs-12 col-sm-4 col-md-6 col-lg-8">
+    <%= interactive_image(@image, size: :medium, votes: true) %>
+  </div><!--.col-->
+
+</div><!--.row-->

@@ -4,22 +4,22 @@
 # to declare tasks before the MO environment has been loaded.
 def all_locales
   locales = []
-  Dir.glob("#{::Rails.root}/config/locales/*.yml").each do |file|
-    match = /(\w+).yml$/.match(file)
+  Rails.root.glob("config/locales/*.yml").each do |file|
+    match = /(\w+).yml$/.match(file.to_s)
     locales << match[1] if match
   end
   locales
 end
 
 def define_tasks(action, verbose, verbose_method, description)
-  desc(description.gsub(/XXX/, "official").gsub(/\(S\)/, ""))
+  desc(description.gsub("XXX", "official").gsub("(S)", ""))
   task(official: :setup) do
     lang = Language.official
     lang.verbose(verbose + " " + lang.send(verbose_method))
     lang.send(action)
   end
 
-  desc(description.gsub(/XXX/, "unofficial").gsub(/\(S\)/, "s"))
+  desc(description.gsub("XXX", "unofficial").gsub("(S)", "s"))
   task(unofficial: :setup) do
     Language.unofficial.each do |lang|
       lang.verbose(verbose + " " + lang.send(verbose_method))
@@ -27,7 +27,7 @@ def define_tasks(action, verbose, verbose_method, description)
     end
   end
 
-  desc(description.gsub(/XXX/, "all").gsub(/\(S\)/, "s"))
+  desc(description.gsub("XXX", "all").gsub("(S)", "s"))
   task(all: :setup) do
     Language.all.each do |lang|
       lang.verbose(verbose + " " + lang.send(verbose_method))
@@ -36,7 +36,7 @@ def define_tasks(action, verbose, verbose_method, description)
   end
 
   all_locales.each do |locale|
-    desc(description.gsub(/XXX/, locale).gsub(/\(S\)/, ""))
+    desc(description.gsub("XXX", locale).gsub("(S)", ""))
     task(locale => :setup) do |task|
       lang = Language.find_by(locale: task.name.sub(/.*:/, ""))
       lang.verbose(verbose + " " + lang.send(verbose_method))

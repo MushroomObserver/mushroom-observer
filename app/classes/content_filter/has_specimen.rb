@@ -5,6 +5,7 @@ class ContentFilter
     def initialize
       super(
         sym: :has_specimen,
+        name: :SPECIMEN.t,
         models: [Observation],
         on_vals: %w[yes no],
         prefs_vals: ["yes"],

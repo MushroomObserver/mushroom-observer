@@ -1,0 +1,63 @@
+<!-- IMAGE_PANEL -->
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <div class="text-center small image-controls">
+      <% if check_permission(@image) %>
+        <%= put_button(name: :image_show_rotate_left.t,
+                       path: transform_image_path(id: @image.id,
+                                                  op: :rotate_left,
+                                                  q: get_query_param,
+                                                  size: @size)) %> |
+        <%= put_button(name: :image_show_rotate_right.t,
+                       path: transform_image_path(id: @image.id,
+                                                  op: :rotate_right,
+                                                  q: get_query_param,
+                                                  size: @size)) %> |
+        <%= put_button(name: :image_show_mirror.t,
+                       path: transform_image_path(id: @image.id,
+                                                  op: :mirror,
+                                                  q: get_query_param,
+                                                  size: @size)) %> |
+      <% end %>
+      <%= original_image_link(@image, "") %> |
+      <%= image_exif_link(@image.id, "") %>
+
+    </div><!--.text-center-->
+  </div><!--.panel-heading-->
+  <div class="panel-body">
+
+    <%= interactive_image(@image,
+                  size: :medium,
+                  image_link: {},
+                  img_class: "huge-image",
+                  theater_on_click: true,
+                  votes: false) %>
+
+    <% # Insert huge-size image via js only when necessary to prevent
+    # some browsers from eager-loading it even when invisible.
+    inject_javascript_at_end %(
+      var huge_loaded = false;
+      function load_huge() {
+        if (!huge_loaded && jQuery(window).width() >= 1200) {
+          huge_loaded = true;
+          jQuery("img.huge-image").attr("src", "#{j @image.url(:huge)}");
+        }
+      }
+      jQuery(window).resize(load_huge);
+      jQuery(document).ready(load_huge);
+    ) %>
+
+    <div class="mt-3 text-center">
+      <% if User.current %>
+        <%= image_vote_links(@image) %>
+      <% end %>
+      <% if !@image.original_name.blank? &&
+            (check_permission(@image) ||
+              @image.user && @image.user.keep_filenames == "keep_and_show") %>
+        <%= @image.original_name %>
+      <% end %>
+    </div>
+
+  </div><!--.panel-body-->
+</div><!--.panel-->
+<!-- /IMAGE_PANEL -->

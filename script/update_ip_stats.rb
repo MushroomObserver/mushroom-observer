@@ -37,11 +37,11 @@ require("#{app_root}/app/classes/ip_stats.rb")
 require("fileutils")
 require("time")
 
-abort(<<"HELP") if ARGV.any? { |arg| HELP_ARGS.include?(arg) }
+abort(<<HELP) if ARGV.any? { |arg| HELP_ARGS.include?(arg) }
 
   USAGE::
 
-    script/update_ip_stats.rb
+    script/update_ip_stats.rb [<ips>...]
 
   DESCRIPTION::
 
@@ -51,6 +51,7 @@ abort(<<"HELP") if ARGV.any? { |arg| HELP_ARGS.include?(arg) }
   PARAMETERS::
 
     --help     Print this message.
+    <ip>       Report the stats for this IP address.
 
 HELP
 
@@ -79,6 +80,7 @@ def report_user(stats)
   puts("  request rate: 1 every #{(1.0 / stats[:rate]).round(2)} seconds")
   puts("  server load:  #{(stats[:load] * 100).round(2)}% of one worker")
   puts
+  system("grep ,#{stats[:ip]}, #{MO.ip_stats_file}")
 end
 
 def report_nonuser(stats)
@@ -87,14 +89,40 @@ def report_nonuser(stats)
   puts("  request rate: 1 every #{(1.0 / stats[:rate]).round(2)} seconds")
   puts("  server load:  #{(stats[:load] * 100).round(2)}% of one worker")
   puts
+  system("grep ,#{stats[:ip]}, #{MO.ip_stats_file}")
 end
 
-IpStats.clean_stats
-data = IpStats.read_stats
-bad_ips = data.keys.select { |ip| bad_ip?(data[ip]) }
-# Removing then re-adding has effect of updating the time stamp on each bad IP.
-IpStats.remove_blocked_ips(bad_ips)
-IpStats.add_blocked_ips(bad_ips)
-# IpStats.clean_blocked_ips # remove old blocked ips after a day
+def clean_and_update_ip_stats_file
+  IpStats.clean_stats
+  data = IpStats.read_stats
+  bad_ips = data.keys.select { |ip| bad_ip?(data[ip]) }
+  # Removing then re-adding has effect of updating time stamp on each bad IP.
+  IpStats.remove_blocked_ips(bad_ips)
+  IpStats.add_blocked_ips(bad_ips)
+  # IpStats.clean_blocked_ips # remove old blocked ips after a day
+end
+
+def show_one_stat(stats)
+  puts(format("%-15s %8.4f %8.4f %8d  %s", stats[:ip], stats[:rate],
+              stats[:load], stats[:user], stats[:api_key]))
+end
+
+def show_ip_stats(ips)
+  data = IpStats.read_stats
+  puts("ip              rate/sec   load %     user  api_key")
+  ips.each do |ip|
+    if data[ip]
+      show_one_stat(data[ip])
+    else
+      puts(format("%-15s no activity", ip))
+    end
+  end
+end
+
+if ARGV.empty?
+  clean_and_update_ip_stats_file
+else
+  show_ip_stats(ARGV)
+end
 
 exit(0)

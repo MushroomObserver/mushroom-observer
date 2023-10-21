@@ -2,22 +2,20 @@
 
 # create and edit Glossary terms
 class GlossaryTermsController < ApplicationController
-  before_action :login_required # except: [:index, :show, :show_past]
+  before_action :login_required, except: [:index, :show]
   before_action :store_location, except: [:create, :update, :destroy]
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
   def index
-    # Index should be paged with alpha and number tabs
-    # See https://www.pivotaltracker.com/story/show/167657202
-    # Glossary should be query-able
-    # See https://www.pivotaltracker.com/story/show/167809123
-    includes = @user ? { thumb_image: :image_votes } : :thumb_image
-    @glossary_terms = GlossaryTerm.includes(includes).order(:name)
+    return patterned_index if params[:pattern].present?
+
+    index_full
   end
 
   def show
-    @glossary_term = GlossaryTerm.find(params[:id].to_s)
+    return unless find_glossary_term!
+
     @canonical_url = glossary_term_url
     @layout = calc_layout_params
     @other_images = @glossary_term.other_images.order(vote_cache: :desc)
@@ -31,7 +29,11 @@ class GlossaryTermsController < ApplicationController
   end
 
   def edit
-    @glossary_term = GlossaryTerm.find(params[:id].to_s)
+    return unless find_glossary_term!
+    return unless @glossary_term.locked? && !in_admin_mode? # happy path
+
+    flash_error(:edit_glossary_term_not_allowed.t)
+    redirect_to(glossary_term_path(@glossary_term))
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
@@ -48,10 +50,11 @@ class GlossaryTermsController < ApplicationController
   end
 
   def update
-    @glossary_term = GlossaryTerm.find(params[:id].to_s)
+    return unless find_glossary_term!
+
     @glossary_term.attributes = params[:glossary_term].
                                 permit(:name, :description)
-    @glossary_term.user = @user
+    @glossary_term.locked = params[:glossary_term][:locked] if in_admin_mode?
 
     return reload_form("edit") unless @glossary_term.save
 
@@ -59,7 +62,7 @@ class GlossaryTermsController < ApplicationController
   end
 
   def destroy
-    @glossary_term = GlossaryTerm.find(params[:id])
+    return unless find_glossary_term!
     return if redirect_non_admins!
 
     old_images = @glossary_term.images.to_a
@@ -72,6 +75,51 @@ class GlossaryTermsController < ApplicationController
     else
       redirect_to(glossary_term_path(@glossary_term.id))
     end
+  end
+
+  ##############################################################################
+
+  private
+
+  # --------- index private methods
+
+  def patterned_index
+    pattern = params[:pattern].to_s
+    # If it matches the term ID
+    if pattern.match?(/^\d+$/) &&
+       (glossary_term = GlossaryTerm.safe_find(pattern))
+      render(:show, params: { id: glossary_term.id },
+                    location: glossary_term_path(glossary_term.id)) and return
+    else
+      show_selected_glossary_terms(
+        create_query(:GlossaryTerm, :pattern_search, pattern: pattern)
+      )
+    end
+  end
+
+  def index_full
+    query = create_query(:GlossaryTerm, :all, by: :name)
+    show_selected_glossary_terms(query)
+  end
+
+  # Show selected list of glossary_terms.
+  def show_selected_glossary_terms(query, args = {})
+    includes = @user ? { thumb_image: :image_votes } : :thumb_image
+    args = {
+      action: :index,
+      letters: "glossary_terms.name",
+      num_per_page: 50,
+      include: includes
+    }.merge(args)
+
+    show_index_of_objects(query, args)
+  end
+
+  # --------- show, create, edit private methods
+
+  def find_glossary_term!
+    @glossary_term = find_or_goto_index(GlossaryTerm,
+                                        params[:id].to_s)
   end
 
   def redirect_non_admins!
@@ -88,31 +136,9 @@ class GlossaryTermsController < ApplicationController
     end
   end
 
-  # ---------- Non-standard REST Actions ---------------------------------------
-
-  # Show past version of GlossaryTerm.
-  # Accessible only from show_glossary_term page.
-  def show_past
-    unless (@glossary_term = find_or_goto_index(GlossaryTerm, params[:id].to_s))
-      return
-    end
-
-    @glossary_term.revert_to(params[:version].to_i)
-  end
-
-  # ---------- Public methods (unrouted) ---------------------------------------
-
-  ##############################################################################
-
-  private
-
-  # --------- Filters
-
-  # --------- Other private methods
-
   def assign_image_form_ivars
-    @copyright_holder = params[:copyright_holder] || @user.name
-    @copyright_year = params.dig(:date, :copyright_year)&.to_i ||
+    @copyright_holder = params.dig(:upload, :copyright_holder) || @user.name
+    @copyright_year = params.dig(:upload, :copyright_year)&.to_i ||
                       Time.now.utc.year
     @licenses = License.current_names_and_ids(@user.license)
     @upload_license_id = params.dig(:upload, :license_id) || @user.license_id
@@ -140,10 +166,10 @@ class GlossaryTermsController < ApplicationController
     return @glossary_term.save unless upload_specified?
 
     # return false if image processing fails
-    return unless (saved_image = process_upload(image_args))
+    return false unless (saved_image = process_upload(image_args))
 
     @glossary_term.add_image(saved_image)
-    return if @glossary_term.save # happy path
+    return false if @glossary_term.save # happy path
 
     # term failed, so clean up the orphaned (unassociated) image
     # and its flash notice ("Successfully uploaded image ...")
@@ -153,7 +179,7 @@ class GlossaryTermsController < ApplicationController
   end
 
   def upload_specified?
-    params[:glossary_term][:upload_image]
+    params[:upload][:image]
   end
 
   def process_upload(args)
@@ -194,11 +220,11 @@ class GlossaryTermsController < ApplicationController
 
   def strong_upload_image_param
     {
-      copyright_holder: params[:copyright_holder],
-      when: Time.local(params[:date][:copyright_year]).utc,
+      copyright_holder: params[:upload][:copyright_holder],
+      when: Time.local(params[:upload][:copyright_year]).utc,
       license: License.safe_find(params[:upload][:license_id]),
       user: @user,
-      image: params[:glossary_term][:upload_image]
+      image: params[:upload][:image]
     }
   end
 
@@ -206,7 +232,7 @@ class GlossaryTermsController < ApplicationController
   # Do this only in test environment
   def permit_upload_image_param
     args = strong_upload_image_param
-    args[:image] = params[:glossary_term][:upload_image][:image]
+    args[:image] = params[:upload][:image]
     args
   end
 end

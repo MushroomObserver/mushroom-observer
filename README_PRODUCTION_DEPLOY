@@ -1,0 +1,6 @@
+To deploy to production:
+
+ssh mushroomobserver.org
+sudo su mo
+cd /var/web/mo
+script/deploy.sh

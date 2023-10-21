@@ -13,33 +13,55 @@
 #    update_good_images(...)
 #    attach_good_images(...)
 
-# see observations_controller.rb
 module ObservationsController::FormHelpers
-  # Roughly create observation object.  Will validate and save later
-  # once we're sure everything is correct.
-  # INPUT: params[:observation] (and @user) (and various notes params)
-  # OUTPUT: new observation
-  # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
-  def create_observation_object(args) # rubocop:disable Metrics/AbcSize
-    now = Time.zone.now
-    observation = if args
-                    Observation.new(args.permit(whitelisted_observation_args))
-                  else
-                    Observation.new
-                  end
-    observation.created_at = now
-    observation.updated_at = now
-    observation.user       = @user
-    observation.name       = Name.unknown
-    if Location.is_unknown?(observation.place_name) ||
-       (observation.lat && observation.long && observation.place_name.blank?)
-      observation.location = Location.unknown
-      observation.where = nil
-    end
-    observation
+  private
+
+  # NOTE: potential gotcha... Any nested attributes must come last.
+  def permitted_observation_args
+    [:place_name, :where, :lat, :long, :alt, :when, "when(1i)", "when(2i)",
+     "when(3i)", :notes, :specimen, :thumb_image_id, :is_collection_location,
+     :gps_hidden]
   end
 
-  def init_specimen_vars_for_create
+  def update_permitted_observation_attributes
+    @observation.attributes = permitted_observation_params || {}
+  end
+
+  # NOTE: call `to_h` on the permitted params if problems with nested params.
+  # As of rails 5, params are an ActionController::Parameters object,
+  # not a hash.
+  def permitted_observation_params
+    return unless params[:observation]
+
+    params[:observation].permit(permitted_observation_args).to_h
+  end
+
+  # Symbolize keys; delete key/value pair if value blank
+  # Also avoids param permitting issues
+  def notes_to_sym_and_compact
+    return Observation.no_notes unless notes_param_present?
+
+    symbolized = params[:observation][:notes].to_unsafe_h.symbolize_keys
+    symbolized.compact_blank!
+  end
+
+  def notes_param_present?
+    params.dig(:observation, :notes).present?
+  end
+
+  def init_license_var
+    @licenses = License.current_names_and_ids(@user.license)
+  end
+
+  # Initialize image for the dynamic image form at the bottom.
+  def init_new_image_var(default_date)
+    @new_image = Image.new
+    @new_image.when             = default_date
+    @new_image.license          = @user.license
+    @new_image.copyright_holder = @user.legal_name
+  end
+
+  def init_specimen_vars
     @collectors_name   = @user.legal_name
     @collectors_number = ""
     @herbarium_name    = @user.preferred_herbarium_name
@@ -47,7 +69,7 @@ module ObservationsController::FormHelpers
   end
 
   def init_specimen_vars_for_reload
-    init_specimen_vars_for_create
+    init_specimen_vars
     if params[:collection_number]
       @collectors_name   = params[:collection_number][:name]
       @collectors_number = params[:collection_number][:number]
@@ -59,19 +81,12 @@ module ObservationsController::FormHelpers
   end
 
   def init_project_vars
-    @projects = User.current.projects_member(order: :title)
+    @projects = User.current.projects_member(order: :title,
+                                             include: :user_group)
     @project_checks = {}
-  end
-
-  def init_project_vars_for_create
-    init_project_vars
-  end
-
-  def init_project_vars_for_edit(obs)
-    init_project_vars
-    obs.projects.each do |proj|
-      @projects << proj unless @projects.include?(proj)
-      @project_checks[proj.id] = true
+    @projects.each do |proj|
+      @project_checks[proj.id] = (proj.open_membership &&
+                                  proj.accepting_observations)
     end
   end
 
@@ -91,18 +106,6 @@ module ObservationsController::FormHelpers
     @list_checks = {}
   end
 
-  def init_list_vars_for_create
-    init_list_vars
-  end
-
-  def init_list_vars_for_edit(obs)
-    init_list_vars
-    obs.species_lists.each do |list|
-      @lists << list unless @lists.include?(list)
-      @list_checks[list.id] = true
-    end
-  end
-
   def init_list_vars_for_reload(obs)
     init_list_vars
     obs.species_lists.each do |list|
@@ -113,44 +116,7 @@ module ObservationsController::FormHelpers
     end
   end
 
-  def update_projects(obs, checks)
-    return unless checks
-
-    User.current.projects_member(include: :observations).each do |project|
-      before = obs.projects.include?(project)
-      after = checks["id_#{project.id}"] == "1"
-      next unless before != after
-
-      if after
-        project.add_observation(obs)
-        flash_notice(:attached_to_project.t(object: :observation,
-                                            project: project.title))
-      else
-        project.remove_observation(obs)
-        flash_notice(:removed_from_project.t(object: :observation,
-                                             project: project.title))
-      end
-    end
-  end
-
-  def update_species_lists(obs, checks)
-    return unless checks
-
-    User.current.all_editable_species_lists.includes(:observations).
-      each do |list|
-      before = obs.species_lists.include?(list)
-      after = checks["id_#{list.id}"] == "1"
-      next unless before != after
-
-      if after
-        list.add_observation(obs)
-        flash_notice(:added_to_list.t(list: list.title))
-      else
-        list.remove_observation(obs)
-        flash_notice(:removed_from_list.t(list: list.title))
-      end
-    end
-  end
+  ##############################################################################
 
   # Save observation now that everything is created successfully.
   def save_observation(observation)
@@ -172,8 +138,8 @@ module ObservationsController::FormHelpers
   # OUTPUT: list of images we couldn't create
   #
   # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
+
   # rubocop:disable Metrics/MethodLength
-  # rubocop:disable Metrics/AbcSize
   def create_image_objects(args, observation, good_images)
     bad_images = []
     if args
@@ -184,7 +150,7 @@ module ObservationsController::FormHelpers
             name = upload.original_filename.force_encoding("utf-8")
           end
           # image = Image.new(args2) # Rails 3.2
-          image = Image.new(args2.permit(whitelisted_image_args))
+          image = Image.new(args2.permit(permitted_image_args))
           # image = Image.new(args2.permit(:all))
           image.created_at = Time.zone.now
           image.updated_at = image.created_at
@@ -219,13 +185,13 @@ module ObservationsController::FormHelpers
     bad_images
   end
   # rubocop:enable Metrics/MethodLength
-  # rubocop:enable Metrics/AbcSize
 
   # List of images that we've successfully downloaded, but which
   # haven't been attached to the observation yet.  Also supports some
   # mininal editing.  INPUT: params[:good_images] (also looks at
   # params[:image_<id>_notes]) OUTPUT: list of images
-  def update_good_images(arg) # rubocop:disable Metrics/AbcSize
+
+  def update_good_images(arg)
     # Get list of images first.
     images = (arg || "").split.filter_map do |id|
       Image.safe_find(id.to_i)
@@ -238,7 +204,7 @@ module ObservationsController::FormHelpers
       args = param_lookup([:good_image, image.id.to_s])
       next unless args
 
-      image.attributes = args.permit(whitelisted_image_args)
+      image.attributes = args.permit(permitted_image_args)
       next unless image.when_changed? ||
                   image.notes_changed? ||
                   image.copyright_holder_changed? ||
@@ -269,30 +235,10 @@ module ObservationsController::FormHelpers
     end
   end
 
-  # Initialize image for the dynamic image form at the bottom.
-  def init_image(default_date)
-    image = Image.new
-    image.when             = default_date
-    image.license          = @user.license
-    image.copyright_holder = @user.legal_name
-    image
-  end
-
   def strip_images!
     @observation.images.each do |img|
       error = img.strip_gps!
       flash_error(:runtime_failed_to_strip_gps.t(msg: error)) if error
     end
-  end
-
-  ##############################################################################
-
-  private
-
-  # can be in helpers
-  def whitelisted_observation_args
-    [:place_name, :where, :lat, :long, :alt, :when, "when(1i)", "when(2i)",
-     "when(3i)", :notes, :specimen, :thumb_image_id, :is_collection_location,
-     :gps_hidden]
   end
 end

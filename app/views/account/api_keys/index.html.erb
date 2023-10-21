@@ -1,0 +1,20 @@
+<%
+add_page_title(:account_api_keys_title.t)
+add_tab_set(account_api_tabs)
+@container = :full
+
+javascript_include("account_api_keys")
+inject_javascript_at_end("APIKeyModule()")
+%>
+
+<div class="container-text">
+  <%= :account_api_keys_help.tp %>
+</div><!--.container-text-->
+
+<% if @user.api_keys.any? %>
+  <%= render(partial: "account/api_keys/existing_keys_form") %>
+<% end %>
+
+<div class="container-text mt-3">
+  <%= render(partial: "account/api_keys/new_key_form") %>
+</div>

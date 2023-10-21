@@ -1,70 +1,51 @@
 <%
-  @title = :donate_title.l
+add_page_title(:donate_title.l)
 
-  tabs = [
-    link_to(:donors_tab.t, action: :donors)
-  ]
-  if in_admin_mode?
-    tabs += [
-            link_to(:create_donation_tab.t, action: :create_donation),
-            link_to(:review_donations_tab.t, action: :review_donations)
-    ]
-  end
-  @tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(support_donate_tabs)
 
-  javascript_include "donate"
+amounts = [25.00, 50.00, 100.00, 200.00].freeze
+
+url = { controller: "/support", action: :confirm }
+
+javascript_include "donate"
 %>
 
 <%= :donate_thanks.tp %>
 <%= :donate_explanation.tp %>
 
-<div id="main_container" class="container-fluid">
-  <%= form_tag(action: :confirm) do %>
-    <div class="row">
-      <% [25.00, 50.00, 100.00, 200.00].each do |a| %>
-        <div class="col-xs-3">
-          <div class="radio">
-            <label>
-              <%= radio_button(:donation, :amount, a) %>
-              $<%= a.to_i %>
-            </label>
-          </div>
-        </div>
-      <% end %>
-    </div>
-    <div class="form-inline">
-      <div class="radio">
-        <label>
-          <%= radio_button(:donation, :amount, "other") %>
-          <%= :donate_other.t %>:
-        </label>
+<%= form_with(model: @donation, url: url) do |f| %>
+
+  <div class="row">
+    <% amounts.each do |a| %>
+      <div class="col-xs-3">
+        <%= radio_with_label(form: f, field: :amount, value: a,
+                             label: "$#{a.to_i}") %>
       </div>
-      $<%= text_field(:donation, :other_amount, size: 7, class: "form-control") %>
-    </div>
-    <div class="checkbox">
-      <label>
-        <%= check_box(:donation, :recurring) %>
-        <%= :donate_recurring.t %>
-      </label>
-    </div>
-    <div class="form-inline">
-      <%= :donate_who.t %>:
-      <%= text_field(:donation, :who, size: 30, class: "form-control") %>
-    </div>
-    <div class="checkbox">
-      <label>
-        <%= check_box(:donation, :anonymous) %>
-        <%= :donate_anonymous.t %>
-      </label>
-    </div>
-    <div class="form-inline">
-      <%= :donate_email.t %>:
-      <%= text_field(:donation, :email, size: 30, class: "form-control") %>
-    </div>
-    <div class="my-3">
-      <%= submit_tag(:donate_confirm.t, class: "btn btn-default center-block") %>
-    </div>
-  <% end %>
-</div>
+    <% end %>
+  </div>
+
+  <%= radio_with_label(form: f, field: :amount, value: "other",
+                       label: "#{:donate_other.t}: ",
+                       class: "d-inline-block") %>
+  <%= text_field_with_label(form: f, field: :other_amount, size: 7,
+                            label: "$ ", class: "d-inline-block ml-4",
+                            inline: true) %>
+
+  <%= check_box_with_label(form: f, field: :recurring,
+                           label: :donate_recurring.t) %>
+
+  <%= text_field_with_label(form: f, field: :who, size: 30,
+                            label: :donate_who.t, inline: true) %>
+
+  <%= check_box_with_label(form: f, field: :anonymous,
+                           label: :donate_anonymous.t) %>
+
+  <%= text_field_with_label(form: f, field: :email, size: 30,
+                            label: :donate_email.t, inline: true) %>
+
+  <%= submit_button(form: f, button: :donate_confirm.t, center: true) %>
+
+<% end %>
+
 <%= :donate_snail_mail.tp %>
 <%= :donate_fine_print.tp %>

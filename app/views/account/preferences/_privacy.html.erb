@@ -1,0 +1,37 @@
+<%
+anon_values = [
+  [:prefs_votes_anonymous_no.l, :no],
+  [:prefs_votes_anonymous_yes.l, :yes],
+]
+# Let old users grandfather old anonymous votes,
+# but choose to go public from here forward.
+if @user.created_at && @user.created_at < Time.zone.parse(MO.vote_cutoff)
+  anon_values << [:prefs_votes_anonymous_old.l(cutoff: MO.vote_cutoff), :old]
+end
+
+filename_values = [
+  [:prefs_keep_image_filenames_toss.l, "toss"],
+  [:prefs_keep_image_filenames_keep_but_hide.l, "keep_but_hide"],
+  [:prefs_keep_image_filenames_keep_and_show.l, "keep_and_show"],
+]
+%>
+
+<!-- Privacy Settings of Account Preferences Form -->
+<div class="form-group mt-3 font-weight-bold">
+  <%= :prefs_privacy.t %>
+</div>
+
+<%= select_with_label(form: f, field: :votes_anonymous, prefs: true,
+                      options: anon_values, width: :auto) %>
+
+<%= select_with_label(form: f, field: :keep_filenames,
+                      label: :prefs_keep_image_filenames.t,
+                      options: filename_values, width: :auto) %>
+
+<%= select_with_label(form: f, field: :license_id,
+                      label: :License.t + ":", options: @licenses,
+                      between: help_note(:span,
+                        ["(", :prefs_license_note.t, ")"].safe_join),
+                      width: :auto) %>
+
+<%= submit_button(form: f, button: :SAVE_EDITS.l, center: true) %>

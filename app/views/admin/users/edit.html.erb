@@ -1,0 +1,14 @@
+<%
+add_page_title(:change_user_bonuses_title.t(user: @user2.legal_name))
+%>
+
+<%= form_with(url: admin_users_path, method: :patch) do |f| %>
+
+  <%= help_note(:div, :change_user_bonuses_help.tp) %>
+
+  <%= f.text_area(:val, value: h(@val), rows: 5,
+                  class: "form-control mt-3") %>
+
+  <%= submit_button(form: f, button: :SAVE_EDITS.l, center: true) %>
+
+<% end %>

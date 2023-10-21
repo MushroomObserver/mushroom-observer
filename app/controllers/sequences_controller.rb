@@ -70,16 +70,25 @@ class SequencesController < ApplicationController
     # Observation.id is passed as a query param (rather than route :id param)
     # in order to give :id param a consistent meaning (the sequence id)
     # in this controller and in order to avoid an extra, non-standard route
-    return if params[:obs_id].blank?
+    return if params[:observation_id].blank?
 
-    @observation = find_or_goto_index(Observation, params[:obs_id].to_s)
+    @observation = find_or_goto_index(Observation, params[:observation_id].to_s)
     return unless @observation
 
     @sequence = Sequence.new
+
+    respond_to do |format|
+      format.html
+      format.js do
+        render_modal_sequence_form(
+          title: helpers.sequence_form_new_title
+        )
+      end
+    end
   end
 
   def create
-    @observation = find_or_goto_index(Observation, params[:obs_id].to_s)
+    @observation = find_or_goto_index(Observation, params[:observation_id].to_s)
     return unless @observation
 
     build_sequence
@@ -90,10 +99,16 @@ class SequencesController < ApplicationController
     return unless @sequence
 
     figure_out_where_to_go_back_to
-    return if check_permission(@sequence)
+    return unless make_sure_can_edit!(@sequence)
 
-    flash_warning(:permission_denied.t)
-    redirect_with_query(@sequence.observation.show_link_args)
+    respond_to do |format|
+      format.html
+      format.js do
+        render_modal_sequence_form(
+          title: helpers.sequence_form_edit_title(seq: @sequence)
+        )
+      end
+    end
   end
 
   def update
@@ -101,12 +116,9 @@ class SequencesController < ApplicationController
     return unless @sequence
 
     figure_out_where_to_go_back_to
-    if check_permission(@sequence)
-      save_edits
-    else
-      flash_warning(:permission_denied.t)
-      redirect_with_query(@sequence.observation.show_link_args)
-    end
+    return unless make_sure_can_edit!(@sequence)
+
+    save_edits
   end
 
   def destroy
@@ -114,17 +126,13 @@ class SequencesController < ApplicationController
     return unless @sequence
 
     figure_out_where_to_go_back_to
-    if check_permission(@sequence)
-      @sequence.destroy
-      flash_notice(:runtime_destroyed_id.t(type: :sequence, value: params[:id]))
-    else
-      flash_warning(:permission_denied.t)
-    end
-    if @back == "index"
-      redirect_with_query(action: :index)
-    else
-      redirect_with_query(@back_object.show_link_args)
-    end
+    return unless make_sure_can_delete!(@sequence)
+
+    @observation = @sequence.observation # needed for js to update obs page
+
+    @sequence.destroy
+    flash_notice(:runtime_destroyed_id.t(type: :sequence, value: params[:id]))
+    show_flash_and_send_to_back_object
   end
 
   ##############################################################################
@@ -134,6 +142,22 @@ class SequencesController < ApplicationController
   def figure_out_where_to_go_back_to
     @back = params[:back]
     @back_object = @back == "show" ? @sequence : @sequence.observation
+  end
+
+  def render_modal_sequence_form(title:)
+    render(partial: "shared/modal_form_show",
+           locals: { title: title, identifier: "sequence" }) and return
+  end
+
+  def render_sequences_section_update
+    render(
+      partial: "observations/show/section_update",
+      locals: { identifier: "sequences" }
+    ) and return
+  end
+
+  def render_modal_flash_update
+    render(partial: "shared/modal_flash_update") and return
   end
 
   # ---------- Index -----------------------------------------------------------
@@ -148,43 +172,112 @@ class SequencesController < ApplicationController
     args = { include: [{ observation: :name }, :user],
              letters: "sequences.locus",
              num_per_page: 50 }.merge(args)
-    @links ||= []
-    args[:sorting_links] = sequence_index_sorts
     show_index_of_objects(query, args)
-  end
-
-  def sequence_index_sorts
-    [
-      ["created_at",  :sort_by_created_at.t],
-      ["updated_at",  :sort_by_updated_at.t],
-      ["user",        :USER.t],
-      ["observation", :OBSERVATION.t]
-    ].freeze
   end
 
   # ---------- Create, Edit ----------------------------------------------------
 
+  def make_sure_can_edit!(obj)
+    return true if check_permission(obj)
+
+    flash_warning(:permission_denied.t)
+    show_flash_and_send_back
+    false
+  end
+
+  def make_sure_can_delete!(sequence)
+    return true if check_permission(sequence)
+
+    flash_error(:permission_denied.t)
+    show_flash_and_send_to_back_object
+    false
+  end
+
+  # create
   def build_sequence
     @sequence = @observation.sequences.new
     @sequence.attributes = sequence_params
     @sequence.user = @user
     if @sequence.save
       flash_notice(:runtime_sequence_success.t(id: @sequence.id))
-      redirect_with_query(@observation.show_link_args)
+      respond_to_successful_form_submit
     else
       flash_object_errors(@sequence)
-      render("new")
+      respond_to_form_errors
     end
   end
 
+  # update
   def save_edits
     @sequence.attributes = sequence_params
     if @sequence.save
       flash_notice(:runtime_sequence_update_success.t(id: @sequence.id))
-      redirect_with_query(@back_object.show_link_args)
+      @observation = @sequence.observation # needed for js to update obs page
+      respond_to_successful_form_submit
     else
       flash_object_errors(@sequence)
-      render("edit")
+      respond_to_form_errors
+    end
+  end
+
+  def respond_to_successful_form_submit
+    redirect_to = case action_name
+                  when "create"
+                    @observation.show_link_args
+                  when "update"
+                    @back_object.show_link_args
+                  end
+
+    respond_to do |format|
+      format.html do
+        redirect_with_query(redirect_to)
+      end
+      format.js do
+        render_sequences_section_update
+      end
+    end
+  end
+
+  def respond_to_form_errors
+    redo_action = case action_name
+                  when "create"
+                    :new
+                  when "update"
+                    :edit
+                  end
+    respond_to do |format|
+      format.html { render(action: redo_action) and return }
+      format.js do
+        render_modal_flash_update
+      end
+    end
+  end
+
+  def show_flash_and_send_back
+    respond_to do |format|
+      format.html do
+        redirect_with_query(@sequence.observation.show_link_args) and
+          return
+      end
+      format.js do
+        render_modal_flash_update
+      end
+    end
+  end
+
+  def show_flash_and_send_to_back_object
+    respond_to do |format|
+      format.html do
+        if @back == "index"
+          redirect_with_query(action: :index)
+        else
+          redirect_with_query(@back_object.show_link_args)
+        end
+      end
+      format.js do
+        # renders the flash in the obs page via js
+        render_sequences_section_update
+      end
     end
   end
 

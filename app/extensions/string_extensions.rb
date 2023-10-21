@@ -20,6 +20,11 @@
 #  strip_html::         Remove HTML tags (not entities) from string.
 #  truncate_html::      Truncate an HTML string to N display characters.
 #  html_to_ascii::      Convert HTML into plain text.
+#  gsub_html_special_chars:: auxiliary to html_to_ascii
+#  unescape_html::
+#  as_displayed::
+#  break_name::
+#  small_author::
 #  nowrap::             Surround HTML string inside '<nowrap>' span.
 #  strip_squeeze::      Strip and squeeze spaces.
 #  rand_char::          Pick a single random character from the string.
@@ -37,11 +42,13 @@ class String
   require "digest/md5"
 
   # :stopdoc:
-  # Disable cop in order to make code more readable
-  # rubocop:disable Layout/HashAlignment
   unless defined? UTF_TO_ASCII
     # This should cover most everything we'll see, at least all the European
     # characters and accents -- it covers HTML codes &#1 to &#400.
+    # Disable alignment cop to make code more readable
+    # rubocop:disable Layout/HashAlignment
+    # Disable CollectionLiteralLength because constant is most convenient method
+    # rubocop:disable Metrics/CollectionLiteralLength
     UTF8_TO_ASCII = {
       "\x00"         => " ",
       "\x01"         => " ",
@@ -336,6 +343,7 @@ class String
       "\xC6\x90"     => "E"     # Ɛ
     }.freeze
   end
+  # rubocop:enable Metrics/CollectionLiteralLength
 
   # Plain-text alternatives to the HTML special characters RedCloth uses.
   unless defined? HTML_SPECIAL_CHAR_EQUIVALENTS
@@ -377,30 +385,36 @@ class String
   ### Textile-related methods ###
 
   def t(sanitize = true)
-    Textile.textilize_without_paragraph_safe(self, false, sanitize)
+    Textile.textilize_without_paragraph_safe(self, do_object_links: false,
+                                                   sanitize: sanitize)
   end
 
   def tl(sanitize = true)
-    Textile.textilize_without_paragraph_safe(self, true, sanitize)
+    Textile.textilize_without_paragraph_safe(self, do_object_links: true,
+                                                   sanitize: sanitize)
   end
 
   # Textilize string, wrapped in a <div>, making it all safe for output
   def tp(sanitize = true)
-    Textile.textile_div_safe { Textile.textilize(self, false, sanitize) }
+    Textile.textile_div_safe do
+      Textile.textilize(self, do_object_links: false, sanitize: sanitize)
+    end
   end
 
   # Textilize string (with links), wrapped in a <div>,
   # making it all safe for output
   def tpl(sanitize = true)
-    Textile.textile_div_safe { Textile.textilize(self, true, sanitize) }
+    Textile.textile_div_safe do
+      Textile.textilize(self, do_object_links: true, sanitize: sanitize)
+    end
   end
 
   def tp_nodiv(sanitize = true)
-    Textile.textilize_safe(self, false, sanitize)
+    Textile.textilize_safe(self, do_object_links: false, sanitize: sanitize)
   end
 
   def tpl_nodiv(sanitize = true)
-    Textile.textilize_safe(self, true, sanitize)
+    Textile.textilize_safe(self, do_object_links: true, sanitize: sanitize)
   end
 
   ### String transformations ###
@@ -416,11 +430,26 @@ class String
     encode(charset, fallback: ->(c) { UTF8_TO_ASCII[c] || "?" })
   end
 
+  # This fixes a string which is supposed to be UTF-8 but which nevertheless
+  # might have invalid byte sequences and there's nothing we can do to fix it
+  # "correctly".  This just ignores the invalid sequences so we get at least
+  # *something* out of the string, and don't just dying and do nothing.
+  #
+  # Found this solution here:
+  # https://stackoverflow.com/questions/2982677/ruby-1-9-invalid-byte-sequence-in-utf-8
+  def fix_utf8
+    str = force_encoding("UTF-8")
+    return str if str.valid_encoding?
+
+    str.encode("UTF-8", "binary",
+               invalid: :replace, undef: :replace, replace: "")
+  end
+
   # Escape a string to be safe to place in double-quotes inside javascript.
   # TODO: Use the rails method "j" for this
   def escape_js_string
     gsub(/(["\\])/, '\\\1').
-      gsub(/\n/, '\\n')
+      gsub("\n", '\\n')
   end
 
   # Remove HTML tags (not entities) from string.  Used to make sure title is
@@ -470,7 +499,7 @@ class String
         break
       end
     end
-    result += opens.reverse.map { |x| "<\/#{x}>" }.join
+    result += opens.reverse.map { |x| "</#{x}>" }.join
     # Disable cop; we need `html_safe` to prevent Rails from adding escaping
     result.html_safe # rubocop:disable Rails/OutputSafety
   end
@@ -502,6 +531,50 @@ class String
       html_safe # rubocop:disable Rails/OutputSafety
   end
 
+  # Render special encoded characters as regular characters in HTML
+  def unescape_html
+    CGI.unescapeHTML(self)
+  end
+
+  # For integration test comparisons: no tags and no special char encodings
+  # i.e., the whole string as a human would encounter it in the browser
+  def as_displayed
+    strip_html.unescape_html.strip_squeeze
+  end
+
+  # Insert a line break between the scientific name and the author
+  # (for styling taxonomic names legibly)
+  def break_name
+    possibles = ["</i></b>", "</i>"]
+    tag = possibles.each do |x|
+      break x if include?(x)
+    end
+    return self unless tag.is_a?(String)
+
+    offset = tag.length + 1
+    ind = rindex(tag)
+    return self if !ind || !offset || (length <= (ind + offset))
+
+    insert((ind + offset), "<br/>".html_safe)
+  end
+
+  # Wrap the author name in <small> HTML tag, with or without break
+  # (for styling taxonomic names legibly)
+  def small_author
+    possibles = ["<br/>", "</i></b>", "</i>"]
+    tag = possibles.each do |x|
+      break x if include?(x)
+    end
+    return self unless tag.is_a?(String)
+
+    offset = tag.length
+    ind = rindex(tag)
+    return self if !ind || !offset || (length <= (ind + offset))
+
+    insert(length, "</small>".html_safe)
+    insert((ind + offset), "<small>".html_safe)
+  end
+
   # Strip leading and trailing spaces, and squeeze embedded spaces.
   # Differs from Rails "squish" which works on all whitespace
   #
@@ -513,6 +586,10 @@ class String
   # Why?  Because it lets us do this:
   #
   #   names = text.split(/\n/).map(&:strip_squeeze)
+  #
+  # Example: string = "This  type of string. "
+  #
+  #   string.strip_squeeze == "This type of string."
   #
   def strip_squeeze
     strip.squeeze(" ")
@@ -605,10 +682,10 @@ class String
     d = (0..m).to_a
     x = nil
 
-    str1.each_char.each_with_index do |char1, i|
+    str1.each_char.with_index do |char1, i|
       e = i + 1
 
-      str2.each_char.each_with_index do |char2, j|
+      str2.each_char.with_index do |char2, j|
         cost = (char1 == char2 ? 0 : 1)
         x = [
           d[j + 1] + 1, # insertion

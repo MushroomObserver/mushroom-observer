@@ -1,0 +1,23 @@
+From: news@mushroomobserver.org
+Reply-To: no-reply@mushroomobserver.org
+To: mary@collectivesource.com
+Subject: [MO] Petigera Has Been Changed
+
+Name was Created
+
+The name Petigera (<%= ActiveRecord::FixtureSet.identify(:peltigera) %>) was created.
+
+Time: IGNORE
+By: Tricky Dick (dick)
+
+
+
+You received this email because you are an author of a description of the changed name.
+Here are some handy links:
+
+Show this name: https://mushroomobserver.org/names/<%= ActiveRecord::FixtureSet.identify(:peltigera) %>
+I'm not interested in this name: https://mushroomobserver.org/interests/set_interest?id=<%= ActiveRecord::FixtureSet.identify(:peltigera) %>&type=Name&user=<%= ActiveRecord::FixtureSet.identify(:mary) %>&state=-1
+Stop sending me email like this: https://mushroomobserver.org/account/no_email/<%= ActiveRecord::FixtureSet.identify(:mary) %>?type=names_author
+Change your preferences: https://mushroomobserver.org/account/preferences/edit
+Latest changes at Mushroom Observer: https://mushroomobserver.org
+

@@ -1,0 +1,40 @@
+
+<%= form_with(model: @location, url: action, id: "location_form") do |f| %>
+
+  <% if !@location.locked || in_admin_mode? %>
+
+    <%= render(partial: "shared/form_location_feedback",
+               locals: { button: button.l} ) %>
+
+    <div class="row">
+      <div class="col-md-8 col-lg-6">
+
+        <%= submit_button(form: f, button: button.l, center: true) %>
+
+        <%= render(partial: "locations/form/admin_locked_field",
+                   locals: { f: f }) %>
+
+        <%= render(partial: "locations/form/display_name_field",
+                   locals: { f: f }) %>
+
+        <%= render(partial: "locations/form/lat_long_alt_fields",
+                   locals: { f: f }) %>
+
+      </div><!--.col-->
+
+      <div class="col-md-4 col-lg-6 mb-3 mt-3">
+
+        <%= render(partial: "locations/form/gmap") %>
+
+      </div><!--.col-md-4 col-lg-6-->
+    </div><!--.row-->
+
+  <% else %>
+
+    <%= render(partial: "locations/form/show_locked", locals: { f: f }) %>
+
+  <% end %>
+
+  <%= render(partial: "locations/form/notes_field", locals: { f: f }) %>
+
+<% end %>

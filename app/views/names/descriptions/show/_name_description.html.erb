@@ -1,0 +1,58 @@
+<%
+  desc = name_description
+  Textile.register_name(desc.name)
+%>
+
+<% if review %>
+  <% if reviewer? %>
+    <%= set_export_status_controls(desc) %><br/>
+  <% end %>
+
+  <%= :show_name_content_status.t %>: <%= review_as_string(desc.review_status) %><br/>
+  <% if desc.reviewer %>
+    <span class="help-note">
+      <%= indent + "(" + :show_name_latest_review.t(
+        date: desc.last_review ? desc.last_review.web_time : :UNKNOWN.t,
+        user: user_link(desc.reviewer, desc.reviewer.login)
+      ) + ")" %>
+    </span><br/>
+  <% end %>
+
+  <% if reviewer? %>
+    <div class="ml-3 mb-5">
+      <%= put_button(name: :review_unvetted.t,
+          path: name_description_review_status_path(desc.id,
+            value: "unvetted", q: get_query_param)
+          ) %><br/>
+      <%= put_button(name: :review_vetted.t,
+          path: name_description_review_status_path(desc.id,
+            value: "vetted", q: get_query_param)
+          ) %><br/>
+      <%= put_button(name: :review_inaccurate.t,
+          path: name_description_review_status_path(desc.id,
+            value: "inaccurate", q: get_query_param)
+          ) %>
+    </div>
+  <% end %>
+<% end %>
+
+<%
+any = false
+notes = desc.all_notes
+NameDescription.all_note_fields.each do |field|
+  value = notes[field].to_s
+  if value.match(/\S/)
+    any = true %>
+    <%= "form_names_#{field}".to_sym.t %>:
+    <%= notes_panel(value.tpl) %>
+    <br/>
+  <% end %>
+<% end %>
+<%= :show_description_empty.tpl if !any %>
+
+<div class="text-center">
+  <%= show_authors_and_editors(obj: desc, user: @user) %>
+  <% if desc.license %>
+    <%= render(partial: "shared/form_#{desc.license.form_name}") %>
+  <% end %>
+</div><!-- .text-center -->

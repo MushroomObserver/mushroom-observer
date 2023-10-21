@@ -1,14 +1,14 @@
 <%
-  @title ||= :ARTICLES.t
-  tabs = index_tabs_for_user(@user) + create_links(@links)
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :wide
+@container = :wide
+add_index_title(@query, no_hits: :ARTICLES.t)
+add_tab_set(articles_index_tabs(user: @user))
+add_sorter(@query, articles_index_sorts)
 
-  flash_error(@error) if @error && @objects.empty?
+flash_error(@error) if @error && @objects.empty?
 %>
 
 <%= paginate_block(@pages) do %>
   <div class="list-group">
-    <%= render(partial: "object", collection: @objects) %>
+    <%= render(partial: "articles/object", collection: @objects) %>
   </div>
 <% end %>

@@ -1,0 +1,7 @@
+<html><head></head><body>
+  <% Dir.glob(::Rails.root.to_s + '/public/html/*.html').sort.each do |file|
+    name = file.gsub(/.*\//, '')
+    url  = "#{MO.http_domain}/html/" + name %>
+    <a href="http://validator.w3.org/check?uri=<%= url %>"><%= h(name) %></a><br/>
+  <% end %>
+</body></html>

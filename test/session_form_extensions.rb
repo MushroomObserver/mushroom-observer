@@ -163,14 +163,14 @@ module SessionExtensions
           when "select"
             val = nil
             field.options = opts = []
-            context.assert_select(elem, "option") do |elems|
-              elems.each do |elem|
+            context.assert_select(elem, "option") do |elements|
+              elements.each do |e|
                 opt = Field::Option.new
-                opt.value = CGI.unescapeHTML(elem["value"])
-                opt.label = CGI.unescapeHTML(elem.children.map(&:to_s).join)
+                opt.value = CGI.unescapeHTML(e["value"])
+                opt.label = CGI.unescapeHTML(e.children.map(&:to_s).join)
                 opts << opt
                 val = opt.value \
-                  if elem["selected"] == "selected"
+                  if e["selected"] == "selected"
               end
             end
             val ||= opts.first.value
@@ -393,16 +393,17 @@ module SessionExtensions
     end
 
     # Allow user to make further HTML assertions on the form.
-    def assert_select(*args, &block)
-      context.assert_select(form, *args, &block)
+    def assert_select(...)
+      context.assert_select(form, ...)
     end
 
     # Change the value of the given input field.  Matches field whose ID _ends_
     # in the given String.
     def change(id, val)
-      if val == true
+      case val
+      when true
         assert_enabled(id).node["checked"] = "checked"
-      elsif val == false
+      when false
         assert_enabled(id).node.remove_attribute("checked")
       else
         assert_enabled(id).value = val
@@ -489,12 +490,13 @@ module SessionExtensions
       found = false
       hash = {}
       inputs.each do |field|
-        if field.type == :checkbox
+        case field.type
+        when :checkbox
           hash[field.name] =
             field.node["checked"] == "checked" ? field.on_value : "0"
-        elsif field.type == :radio
+        when :radio
           hash[field.name] = field.on_value if field.value
-        elsif field.type == :file
+        when :file
           if field.value
             file = field.value.filename
             type = field.value.content_type

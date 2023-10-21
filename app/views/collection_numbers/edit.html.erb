@@ -1,0 +1,25 @@
+<%
+@container = :full
+add_page_title(collection_number_form_edit_title(c_n: @collection_number))
+add_tab_set(
+  collection_number_form_edit_tabs(back: @back, c_n: @collection_number,
+                                    obj: @back_object)
+)
+%>
+
+<div class="row">
+  <div class="col-xs-12 col-sm-7">
+    <%= render(partial: "collection_numbers/form",
+               locals: { action: :update, local: true }) %>
+  </div>
+
+  <div class="col-xs-12 col-sm-5">
+    <ul class="row list-unstyled">
+      <% @collection_number.observations.each do |obs| %>
+        <%= render(partial: "shared/matrix_box",
+                   locals: { object: obs.rss_log || obs,
+                             columns: "col-xs-12" }) %>
+      <% end %>
+    </ul>
+  </div>
+</div><!--.row-->

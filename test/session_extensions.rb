@@ -56,7 +56,7 @@ module SessionExtensions
   def login(login = users(:zero_user).login, password = "testpassword",
             remember_me = true)
     login = login.login if login.is_a?(User)
-    get("/account/login")
+    get("/account/login/new")
     open_form do |form|
       form.change("login", login)
       form.change("password", password)
@@ -90,7 +90,7 @@ module SessionExtensions
 
   # Save response from last request so you can look at it in a browser.
   def save_page(file = nil)
-    file ||= "#{::Rails.root}/public/test.html"
+    file ||= Rails.public_path.join("test.html")
     File.write(file, response.body)
   end
 
@@ -195,7 +195,7 @@ module SessionExtensions
   # Get an Array of URLs for the given links.
   #
   #   # This gets all the name links in the results of the last page.
-  #   urls = get_links('div.results a[href^=/name/show_name]')
+  #   urls = get_links('div.results a[href^=/names]')
   #
   def get_links(*args)
     results = []
@@ -211,12 +211,13 @@ module SessionExtensions
   #
   ##############################################################################
 
-  def assert_form_has_correct_values(expected_values)
-    open_form do |form|
+  def assert_form_has_correct_values(expected_values, args = [])
+    open_form(*args) do |form|
       expected_values.each do |key, value|
-        if value == true
+        case value
+        when true
           form.assert_checked(key)
-        elsif value == false
+        when false
           form.assert_checked(key, false)
         else
           form.assert_value(key, value)
@@ -225,18 +226,19 @@ module SessionExtensions
     end
   end
 
-  def submit_form_with_changes(changes)
-    open_form do |form|
+  def submit_form_with_changes(changes, button = nil, args = [])
+    open_form(*args) do |form|
       changes.each do |key, value|
-        if value == true
+        case value
+        when true
           form.check(key)
-        elsif value == false
+        when false
           form.uncheck(key)
         else
           form.change(key, value)
         end
       end
-      form.submit
+      form.submit(button)
     end
   end
 
@@ -307,7 +309,7 @@ module SessionExtensions
   # in::    Link contained in a given element type(s).
   # Sample use:
   #   click_mo_link(label: "Show Observation")
-  #   click_mo_link(href: /show_name/)
+  #   click_mo_link(href: /names/)
   #   click_mo_link(label: "User", in: :sort_tabs)
   def click_mo_link(args = {})
     return true if try_finding_matching_anchor(args)

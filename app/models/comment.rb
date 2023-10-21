@@ -11,6 +11,7 @@
 #  * Name
 #  * Observation
 #  * Project
+#  * SpeciesList
 #
 #  == Adding Comments to Model
 #
@@ -26,14 +27,14 @@
 #
 #  3. Add interest "eyes" to the header section of the show_object view:
 #
-#       draw_interest_icons(@target)
+#       add_interest_icons(@user, @target)
 #
-#  4. Add show_comments partial at the bottom of the show_object view:
+#  4. Add comments_for_object partial at the bottom of the show_object view:
 #
-#       <%= render(:partial => 'comment/show_comments', :locals =>
+#       <%= render(:partial => 'comments/comments_for_object', :locals =>
 #             { :target => @target, :controls => true, :limit => nil }) %>
 #
-#  5. Tell comment/_object shared view how to display the object (used to
+#  5. Tell comments/_object shared view how to display the object (used to
 #     embed info about object while user is posting/editing a comment):
 #
 #       when 'YourModel'
@@ -56,6 +57,20 @@
 #  target::       Object it is attached to.
 #  summary::      Summary line (100 chars).
 #  comment::      Full text (any length).
+#
+#  ==== Scopes
+#
+#  created_on("yyyymmdd")
+#  created_after("yyyymmdd")
+#  created_before("yyyymmdd")
+#  created_between(start, end)
+#  updated_on("yyyymmdd")
+#  updated_after("yyyymmdd")
+#  updated_before("yyyymmdd")
+#  updated_between(start, end)
+#  by_user(user)
+#  for_user(user)
+#  for_target(target)
 #
 #  == Instance Methods
 #
@@ -97,6 +112,39 @@ class Comment < AbstractModel
 
   after_create :notify_users
   after_create :oil_and_water
+
+  scope :by_user,
+        ->(user) { where(user: user) }
+
+  # This scope starts with a `where`, and chains subsequent `where` clauses
+  # with `or`. So, rather than separately assembling `target_ids`, that would
+  # execute multiple db queries:
+  #
+  #   target_ids = []
+  #   all_types.each do |model|
+  #     target_ids |= model.where(user: user).pluck(:id)
+  #   end
+  #   where(target_id: target_ids)
+  #
+  # ...this `inject` iteration only generates one very complex sql statement,
+  # with inner selects, and it's faster because AR can figure out that all the
+  # chained selects constitute one giant SELECT, and SQL is faster than Ruby.
+  #
+  # Basically it's iterating over all the types doing this:
+  #   where(target_type: :location,
+  #        target_id: Location.where(user: user)).
+  #   or(where(target_type: :name,
+  #            target_id: Name.where(user: user))) etc.
+  scope :for_user,
+        lambda { |user|
+          all_types.inject(nil) do |scope, model|
+            scope2 = where(target_type: model.name.underscore.to_sym,
+                           target_id: model.where(user: user))
+            scope ? scope.or(scope2) : scope2
+          end
+        }
+  scope :for_target,
+        ->(target) { where(target: target) }
 
   # Returns Array of all models (Classes) which take comments.
   def self.all_types

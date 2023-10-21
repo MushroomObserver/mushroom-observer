@@ -1,0 +1,10 @@
+<%
+add_page_title(:email_welcome.t(user: @unverified_user.legal_name))
+%>
+
+<%= :reverify_note.tp(user: @unverified_user.login) + :email_spam_notice.tp %>
+
+<%= post_button(name: :reverify_link.t,
+                path: account_resend_verification_email_path(
+                        id: @unverified_user.id),
+                class: "btn btn-primary", id: "account_reverify_link") %>

@@ -1,0 +1,58 @@
+<%
+@container = :wide
+add_index_title(@query, no_hits: :list_herbarium_records_title.t)
+add_tab_set(herbarium_records_index_tabs(obs: @observation))
+add_sorter(@query, herbarium_records_index_sorts)
+
+flash_error(@error) if @error && @objects.empty?
+%>
+
+<%= paginate_block(@pages) do %>
+  <% if @objects.any? %>
+    <table class="table table-striped">
+      <% @objects.each do |rec|
+        herbarium = rec.herbarium %>
+        <tr>
+          <td>
+            <%= if in_admin_mode? || rec.can_edit?
+                  link_to(
+                    :EDIT.t,
+                    edit_herbarium_record_path(
+                      id: rec.id, back: :index, q: get_query_param
+                    ),
+                    class: "btn btn-default btn-sm",
+                    id: "edit_herbarium_record_link_#{rec.id}"
+                  )
+                end %>
+          </td>
+          <td>
+            <%= herbarium ?
+                  link_to(herbarium.name.t, herbarium_path(herbarium.id)) :
+                  :UNKNOWN.t %>
+          </td>
+          <td>
+            <%= link_to(rec.herbarium_label.t,
+                        herbarium_record_path(id: rec.id,
+                                              q: get_query_param),
+                        id: "show_herbarium_record_link_#{rec.id}") %>
+          </td>
+          <td>
+            <%= rec.observations.map do |obs|
+                  link_to(obs.unique_format_name.t, observation_path(obs.id))
+                end.safe_join(", ") %>
+          </td>
+          <td>
+            <%= if in_admin_mode? || rec.can_edit?
+                  destroy_button(
+                    name: :destroy_object.t(type: :herbarium_record),
+                    target: herbarium_record_path(rec.id),
+                    class: "btn btn-default btn-sm",
+                    id: "destroy_herbarium_record_link_#{rec.id}"
+                  )
+                end %>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  <% end %>
+<% end %>

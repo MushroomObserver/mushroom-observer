@@ -1,0 +1,20 @@
+<%
+add_index_title(@query)
+add_tab_set(location_description_index_tabs(query: @query))
+add_sorter(@query, descriptions_index_sorts)
+@container = :wide
+
+flash_error(@error) if @error && @objects.empty?
+%>
+
+<%= paginate_block(@pages) do %>
+  <% if @objects.any? %>
+    <div class="list-group">
+      <% @objects.each do |desc| %>
+        <div class="list-group-item">
+          <%= link_with_query(desc.format_name.t, desc.show_link_args) %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

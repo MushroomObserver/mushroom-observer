@@ -1,0 +1,13 @@
+<%
+add_page_title(:change_banner_title.t)
+%>
+
+<%= form_with(url: admin_banner_path, method: :put,
+              id: "admin_banner_form") do |f| %>
+
+  <%= f.text_area(:val, value: @val, rows: 5, id: "val",
+                  class: "form-control") %>
+
+  <%= submit_button(form: f, button: :SUBMIT.l, center: true) %>
+
+<% end %>

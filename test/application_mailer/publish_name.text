@@ -1,0 +1,18 @@
+From: news@mushroomobserver.org
+Reply-To: no-reply@mushroomobserver.org
+To: rolf@collectivesource.com
+Subject: [MO] Name Published
+
+Draft of Name Has Been Published
+
+A description of a name has been published on the Mushroom Observer website. You are receiving this email since you are listed as either an author for this taxon or as a reviewer on the site.
+
+Name: Agaricus campestris L.
+Published by: Mary Newbie (mary)
+
+Here are some handy links:
+
+Show this name: https://mushroomobserver.org/names/<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris) %>
+Send email to the publisher: https://mushroomobserver.org/users/<%= ActiveRecord::FixtureSet.identify(:mary) %>
+Latest changes at Mushroom Observer: https://mushroomobserver.org
+

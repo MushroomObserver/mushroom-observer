@@ -15,7 +15,6 @@ class API2
       { synonym: :names }
     ]
 
-    # rubocop:disable Metrics/AbcSize
     def query_params
       {
         where: sql_id_condition,
@@ -44,7 +43,6 @@ class API2
         ok_for_export: parse(:boolean, :ok_for_export)
       }.merge(parse_names_parameters)
     end
-    # rubocop:enable Metrics/AbcSize
 
     def create_params
       {
@@ -137,7 +135,7 @@ class API2
     def validate_classification!(params)
       return unless @classification
 
-      params[:classification] = \
+      params[:classification] =
         Name.validate_classification("Genus", @classification)
     rescue RuntimeError
       raise(BadClassification.new)

@@ -53,14 +53,30 @@ class Interest < AbstractModel
   belongs_to :target, polymorphic: true
   belongs_to :user
 
+  scope :for_user,
+        ->(user) { where(user: user) }
+
+  ALL_INTEREST_TYPES = %w[
+    Location
+    Name
+    NameTracker
+    Observation
+    Project
+    SpeciesList
+  ].freeze
+
+  validates :target_type, inclusion: { in: ALL_INTEREST_TYPES }
+
   # Returns Array of all models (Classes) which take interests.
   def self.all_types
-    [Location, Name, Observation, Project, SpeciesList]
+    types = ALL_INTEREST_TYPES.dup
+    types.map(&:constantize)
   end
 
   # Returns Array of all valid +target_type+ values (Symbol's).
   def self.all_type_tags
-    [:location, :name, :observation, :project, :species_list]
+    types = ALL_INTEREST_TYPES.dup
+    types.map { |t| t.underscore.to_sym }
   end
 
   # Find all Interests associated with a given object.  This should really be
@@ -74,12 +90,14 @@ class Interest < AbstractModel
     where(target_type: obj.class.to_s, target_id: obj.id)
   end
 
-  # To be compatible with Notification need to have summary string:
+  # To be compatible with NameTracker need to have summary string:
   #
   #   "Watching Observation: Amanita virosa"
   #   "Ignoring Location: Albion, California, USA"
   #
   def summary
+    return target.summary if target && (target_type == "NameTracker")
+
     (state ? :WATCHING.l : :IGNORING.l) + " " +
       target_type.underscore.to_sym.l + ": " +
       (target ? target.unique_format_name : "--")

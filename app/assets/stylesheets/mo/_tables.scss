@@ -3,18 +3,8 @@
 // --------------------------------------------------
 
 thead tr {
-  color: $LIST_HEADER_FG_COLOR;
-  background-color: $LIST_HEADER_BG_COLOR;
-}
-
-.table-striped {
-  tbody > tr:nth-child(odd) {
-    background-color: $LIST_ODD_BG_COLOR;
-  }
-
-  tbody > tr:nth-child(even) {
-    background-color: $LIST_EVEN_BG_COLOR;
-  }
+  color: $list-group-disabled-color; // like navbar-inverse
+  background-color: $list-group-disabled-bg;
 }
 
 .table-curators,
@@ -25,10 +15,24 @@ thead tr {
 .table-manage-species-lists,
 .table-project-members,
 .table-review-donations,
-.table-upload-report {
+.table-upload-report,
+.table-visual-model {
   th, td {
     padding-left: 0.5em;
     padding-right: 0.5em;
+  }
+}
+
+.table-naming-votes {
+  background: none;
+  width: 100%;
+
+  th:not(:first-child) {
+    text-align: center;
+  }
+
+  td:nth-child(3) {
+    text-align: center;
   }
 }
 
@@ -74,7 +78,7 @@ thead tr {
   }
 
   tr {
-    border-top: 1px solid $LIST_BORDER_COLOR;
+    border-top: 1px solid $list-group-border;
   }
 
   tr:first-child {
@@ -88,7 +92,7 @@ thead tr {
   }
 
   td {
-    border-top: 1px solid $LIST_BORDER_COLOR;
+    border-top: 1px solid $list-group-border;
   }
 
   th:first-child,
@@ -120,7 +124,7 @@ thead tr {
 
 .table-review-donations {
   th, td {
-    border-right: 1px solid $LIST_BORDER_COLOR;
+    border-right: 1px solid $list-group-border;
   }
 
   th:last-child,
@@ -129,7 +133,7 @@ thead tr {
   }
 }
 
-.table-observation-form {
+.table-observation-images {
   background: none;
   width: 100%;
 
@@ -142,77 +146,10 @@ thead tr {
   }
 }
 
-table.table-namings {
-  width: 100%;
-
-  tbody {
-    border: 1px solid $LIST_BORDER_COLOR;
-    border-radius: $INPUT_BORDER_RADIUS !important;
-  }
-
-  th {
-    color: $BODY_FG_COLOR;
-    background: $BODY_BG_COLOR;
-    font-weight: normal;
-    vertical-align: bottom;
-  }
-
-  th, td {
-    padding: 5px;
-    word-wrap: break-word;
-    -webkit-hyphens: auto; /* iOS 4.2+ */
-    -moz-hyphens: auto; /* Firefox 5+ */
-    -ms-hyphens: auto; /* IE 10+ */
-    hyphens: auto;
-  }
-
-  th:first-child {
-    padding-left: 0;
-  }
-
-  td:first-child {
-    padding-left: 1em;
-    max-width: 175px;
-  }
-
-  td:nth-child(2) {
-    max-width: 100px;
-  }
-
-  td:nth-child(3) {
-    max-width: 75px;
-  }
-
-  td:nth-child(4) {
-    max-width: 125px;
-  }
-
-  td:nth-child(5) {
-    max-width: 65px;
-  }
-
-  td:last-child {
-    padding-right: 1em;
-  }
-}
-
 .table-lifeform {
   tr td {
     padding: .1em 1em;
   }
-
-  tr:nth-child(odd) {
-    background-color: $LIST_ODD_BG_COLOR;
-  }
-
-  tr:nth-child(even) {
-    background-color: $LIST_EVEN_BG_COLOR;
-  }
-}
-
-table.table-compact tr td {
-  padding-top: 3px !important;
-  padding-bottom: 3px !important;
 }
 
 table.ips tr td,

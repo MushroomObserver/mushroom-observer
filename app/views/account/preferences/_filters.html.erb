@@ -1,0 +1,24 @@
+<!-- Filters Settings of Account Preferences Form -->
+<div class="form-group mt-3">
+  <span class="font-weight-bold"><%= :prefs_content_filters.t %></span>
+  <p><%= :prefs_content_filters_explanation.t %><p>
+</div>
+
+<% ContentFilter.all.each do |filter| %>
+
+  <% if filter.type == :boolean && filter.prefs_vals.one? %>
+    <%= render(partial: "account/preferences/filters/checkbox",
+               locals: { filter: filter, f: f }) %>
+  <% elsif filter.type == :boolean && filter.prefs_vals.size > 1 %>
+    <%= render(partial: "account/preferences/filters/select",
+               locals: { filter: filter, f: f }) %>
+  <% elsif filter.type == [:string] %>
+    <%= render(partial: "account/preferences/filters/text_field",
+               locals: { filter: filter, f: f }) %>
+  <% else %>
+    <% raise "unrecognized content filter type #{filter.type.inspect}" %>
+  <% end %>
+
+<% end %>
+
+<%= submit_button(form: f, button: :SAVE_EDITS.l, center: true) %>

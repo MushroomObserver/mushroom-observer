@@ -1,0 +1,45 @@
+<%= fields_for(:member) do |f_m| %>
+
+  <%= select_with_label(form: f_m, field: :value,
+                        label: :form_species_lists_confidence.t + ":",
+                        options: Vote.confidence_menu, inline: true) %>
+
+  <div class="form-group">
+    <%= f_m.label(:notes, :form_species_lists_member_notes.t + ":") %>
+      (<%= :general_textile_link.t %>)
+    <%= f_m.fields_for(:notes) do |f_n| %>
+      <% @species_list.form_notes_parts(@user).each do |part| %>
+        <%= f_n.label(@species_list.notes_normalized_key(part),
+                      "#{strip_tags(part.tl)}: ") %>
+        <%= f_n.text_area(@species_list.notes_normalized_key(part),
+                          value: @member_notes[part.to_sym],
+                          rows: 1, class: "form-control mb-3") %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div class="form-group form-inline">
+    <%= text_field_with_label(form: f_m, field: :lat, size: 8,
+                              value: @member_lat, inline: true,
+                              label: :LATITUDE.t + ":") %>
+    <%= text_field_with_label(form: f_m, field: :long, size: 8,
+                              value: @member_long, inline: true,
+                              label: :LONGITUDE.t + ":") %>
+    <%= text_field_with_label(form: f_m, field: :alt, size: 6,
+                              value: @member_alt, inline: true,
+                              label: :ALTITUDE.t + ":") %>
+  </div>
+  <%= help_note(:div, :form_observations_lat_long_help.t) %>
+
+  <%= check_box_with_label(form: f_m, field: :is_collection_location,
+                           checked: @member_is_collection_location,
+                           label: :form_observations_is_collection_location.t)
+                           %>
+  <%= help_note(:div, :form_observations_is_collection_location_help.t) %>
+
+  <%= check_box_with_label(form: f_m, field: :specimen,
+                           checked: @member_specimen,
+                           label: :form_observations_specimen_available.t) %>
+  <%= help_note(:div, :form_observations_specimen_available_help.t) %>
+
+<% end %>

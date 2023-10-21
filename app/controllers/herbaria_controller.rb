@@ -171,16 +171,10 @@ class HerbariaController < ApplicationController
   def show_selected_herbaria(query, args = {})
     args = show_index_args(args)
 
-    # Clean up display by removing user-related stuff from nonpersonal index.
-    if query.flavor == :nonpersonal
-      args[:sorting_links].reject! { |x| x[0] == "user" }
-      @no_user_column = true
-    end
-
     # If user clicks "merge" on an herbarium, it reloads the page and asks
     # them to click on the destination herbarium to merge it with.
     @merge = Herbarium.safe_find(params[:merge])
-    @links = right_tab_links(query, @links)
+
     show_index_of_objects(query, args)
   end
 
@@ -189,28 +183,7 @@ class HerbariaController < ApplicationController
       letters: "herbaria.name",
       num_per_page: 100,
       include: [:curators, :herbarium_records, :personal_user]
-    }.merge(args,
-            template: "/herbaria/index", # render with this template
-            # Add some alternate sorting criteria.
-            sorting_links: [["records",     :sort_by_records.t],
-                            ["user",        :sort_by_user.t],
-                            ["code",        :sort_by_code.t],
-                            ["name",        :sort_by_name.t],
-                            ["created_at",  :sort_by_created_at.t],
-                            ["updated_at",  :sort_by_updated_at.t]])
-  end
-
-  def right_tab_links(query, links)
-    links ||= []
-    unless query.flavor == :all
-      links << [:herbarium_index_list_all_herbaria.l,
-                herbaria_path(flavor: :all)]
-    end
-    unless query.flavor == :nonpersonal
-      links << [:herbarium_index_nonpersonal_herbaria.l,
-                herbaria_path(flavor: :nonpersonal)]
-    end
-    links << [:create_herbarium.l, new_herbarium_path]
+    }.merge(args)
   end
 
   def make_sure_can_edit!
@@ -336,12 +309,14 @@ class HerbariaController < ApplicationController
   end
 
   def notify_admins_of_new_herbarium
-    subject = "New Herbarium"
-    content = "User created a new herbarium:\n" \
-              "Name: #{@herbarium.name} (#{@herbarium.code})\n" \
-              "User: #{@user.id}, #{@user.login}, #{@user.name}\n" \
-              "Obj: #{@herbarium.show_url}\n"
-    WebmasterEmail.build(@user.email, content, subject).deliver_now
+    QueuedEmail::Webmaster.create_email(
+      sender_email: @user.email,
+      subject: "New Herbarium",
+      content: "User created a new herbarium:\n" \
+               "Name: #{@herbarium.name} (#{@herbarium.code})\n" \
+               "User: #{@user.id}, #{@user.login}, #{@user.name}\n" \
+               "Obj: #{@herbarium.show_url}\n"
+    )
   end
 
   def user_can_destroy_herbarium?
@@ -358,8 +333,9 @@ class HerbariaController < ApplicationController
     return if @herbarium.location || @herbarium.place_name.blank?
 
     flash_notice(:create_herbarium_must_define_location.t)
-    redirect_to(controller: :location, action: :create_location, back: @back,
-                where: @herbarium.place_name, set_herbarium: @herbarium.id)
+    redirect_to(new_location_path(back: @back,
+                                  where: @herbarium.place_name,
+                                  set_herbarium: @herbarium.id))
     true
   end
 

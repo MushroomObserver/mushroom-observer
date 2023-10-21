@@ -1,0 +1,53 @@
+<%# Projects section of create_observation form %>
+  <% if @suspect_checked_projects.any? %>
+    <% flash_warning(:form_observations_there_is_a_problem_with_projects.t) %>
+
+    <div class="alert alert-warning"
+         id="project_messages">
+      <%= tag.p(
+        "#{:form_observations_projects_out_of_range.t(
+           date: @observation.when,
+           place_name: @observation.place_name
+        )}:"
+      ) %>
+      <ul>
+        <% @suspect_checked_projects.each do |proj| %>
+          <%= tag.li("#{proj.title} (#{proj.constraints})") %>
+        <% end %>
+      </ul>
+      <%= tag.p(
+        :form_observations_projects_out_of_range_help.
+          t(button_name: button_name)
+      )%>
+    </div>
+  <% end %>
+
+<div class="mt-3 row" id="observation_projects">
+  <div class="col-xs-12 col-sm-6 col-sm-push-6">
+    <%= help_block_with_arrow("left", id: "project_help") do %>
+      <%= :form_observations_project_help.t %>
+    <% end %>
+  </div><!--.col-->
+
+  <div class="col-xs-12 col-sm-6 col-sm-pull-6">
+    <strong><%= :PROJECTS.t %>:</strong>
+
+    <%= fields_for(:project) do |f_p| %>
+      <% if @suspect_checked_projects.any? %>
+        <%= check_box_with_label(
+          form: f_p, field: :ignore_proj_conflicts,
+          label: :form_observations_projects_ignore_project_constraints.t,
+          class: "alert alert-warning"
+        ) %>
+      <% end %>
+
+      <% @projects.each do |project| %>
+        <%= check_box_with_label(form: f_p, field: :"id_#{project.id}",
+                                 checked: @project_checks[project.id],
+                                 disabled: !project.user_can_add_observation?(@observation, @user),
+                                 label: project.title) %>
+      <% end %>
+    <% end %>
+
+  </div><!--.col-->
+</div><!--.row-->

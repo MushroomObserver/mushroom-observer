@@ -66,8 +66,8 @@ module Name::PropagateGenericClassifications
     public
 
     def hash_of_names_with_observations
-      Observation.distinct.pluck(:text_name).to_h do |text_name|
-        [text_name, true]
+      Observation.distinct.pluck(:text_name).index_with do
+        true
       end
     end
 

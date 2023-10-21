@@ -99,25 +99,34 @@ module Name::Format
   def merge_info
     num_obs     = observations.count
     num_namings = namings.count
-    num_notify  = interests_plus_notifications
+    num_notify  = interests.count # includes name_trackers
     "#{:NAME.l} ##{id}: #{real_search_name} [#obs: #{num_obs}, " \
       "#namings: #{num_namings}, #users_with_interest: #{num_notify}]"
-  end
-
-  def interests_plus_notifications
-    interests.count +
-      Notification.where(flavor: Notification.flavors[:name], obj_id: id).count
   end
 
   #############################################################################
 
   private
 
+  PROV                       = /[a-z]+\.? prov\.?|ined\.?|ad ?int\.?/
+  INVAL                      = /[a-z]+\.? (inval|illeg(it)?)\.?/
+  ANY_ENDING_AFTER_COMMA     = /^(.*)(, [a-z. ]+)$/
+  SOME_ENDINGS_WITHOUT_COMMA = /^(.*)( (#{PROV}|#{INVAL}))$/
+  ENDINGS_WORTH_KEEPING      = / (#{PROV}|#{INVAL})$/
+
   # author(s) string shortened per ICN Recommendation 46C.2
   # Relies on name.author having a comma only if there are > 2 authors
   def brief_author
-    author.sub(/(\(*.),.*\)/, "\\1 et al.)"). # shorten > 2 authors in parens
-      sub(/,.*/, " et al.") # then shorten any remaining > 2 authors
+    str = author
+    # pull of any qualifiers at the end, like "ined.", "nom. prov.", etc.
+    if (match = author.match(ANY_ENDING_AFTER_COMMA) ||
+                author.match(SOME_ENDINGS_WITHOUT_COMMA))
+      str, ending = match[1, 2]
+      ending = "" unless ending.match(ENDINGS_WORTH_KEEPING)
+    end
+    str.sub(/,.*\)/, " et al.)"). # shorten > 2 authors in parens
+      sub(/,.*/, " et al.") +     # then shorten any remaining > 2 authors
+      ending.to_s                 # tack qualifiers back onto end
   end
 
   module ClassMethods

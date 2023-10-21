@@ -32,9 +32,9 @@ class ExternalSiteTest < UnitTestCase
 
   def test_user_external_sites
     marys_sites = ExternalSite.all.sort_by(&:id)
-    assert_obj_list_equal([], rolf.external_sites)
-    assert_obj_list_equal([], dick.external_sites)
-    assert_obj_list_equal(marys_sites, mary.external_sites.sort_by(&:id))
+    assert_obj_arrays_equal([], rolf.external_sites)
+    assert_obj_arrays_equal([], dick.external_sites)
+    assert_obj_arrays_equal(marys_sites, mary.external_sites.sort_by(&:id))
   end
 
   def test_member

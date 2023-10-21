@@ -1,0 +1,22 @@
+<%
+action = { controller: "/species_lists/observations", action: :update,
+           q: get_query_param }
+%>
+
+<%= form_with(url: action, method: :put,
+              id: "species_list_observations_form") do |f| %>
+
+  <%= content_tag(:p,
+                  :species_list_add_remove_body.tp(num: @query.num_results)) %>
+
+  <%= text_field_with_label(form: f, field: :species_list,
+                            value: @id, placeholder: :start_typing.l,
+                            label: :species_list_add_remove_label.t + ":",
+                            data: { autocompleter: :species_list }) %>
+
+  <div class="form-group center-block">
+    <%= submit_button(form: f, button: :ADD.l) %>
+    <%= submit_button(form: f, button: :REMOVE.l) %>
+  </div>
+
+<% end %>

@@ -1,0 +1,27 @@
+// This must be rendered before the standard bindings in
+// shared/modal_form_bindings because that shows the modal already.
+// Attaches all the bindings on shown
+
+$('#modal_naming').on('shown.bs.modal', function() {
+  var naming_input = document.getElementById("naming_name");
+  var naming_form = $("#naming_form");
+  var namings_table = $("#namings_table");
+  var observation_namings = $("#observation_namings");
+  var this_modal = $(this);
+
+  naming_input.focus();
+
+  // Success now handled in create.js.erb or modal_form_reload.js.erb
+  naming_form.on("ajax:success", (event) => {
+    // const [_data, _status, xhr] = event.detail;
+    // namings_table.remove();
+    // observation_namings.prepend(xhr.responseText);
+    // Don't hide it here, you or it will disappear when form has flash errors
+  });
+
+  // Form errors are still ajax success, handled in flash.js.erb
+  // This is for an ajax error, should not happen.
+  naming_form.on("ajax:error", () => {
+    naming_form.append($("<h4>Error</h4>"));
+  });
+});

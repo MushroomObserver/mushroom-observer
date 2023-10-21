@@ -9,8 +9,10 @@
 #
 #  num_genera::      Number of genera seen.
 #  num_species::     Number of species seen.
+#  num_names::       Number of distinct names.
 #  genera::          List of genera (text_name) seen.
 #  species::         List of species (text_name) seen.
+#  names::           List of names seen.
 #
 #  == Usage
 #
@@ -76,7 +78,7 @@ class Checklist
   ##############################################################################
 
   def initialize
-    @genera = @species = nil
+    @genera = @species = @names = nil
   end
 
   def num_genera
@@ -89,6 +91,11 @@ class Checklist
     @species.length
   end
 
+  def num_names
+    calc_checklist unless @names
+    @names.length
+  end
+
   def genera
     calc_checklist unless @genera
     @genera.values.sort
@@ -99,9 +106,15 @@ class Checklist
     @species.values.sort
   end
 
+  def names
+    calc_checklist unless @names
+    @names.values.sort
+  end
+
   private
 
   def calc_checklist
+    @names = {}
     @genera = {}
     @species = {}
     synonyms = count_nonsynonyms_and_gather_synonyms
@@ -110,39 +123,43 @@ class Checklist
 
   def count_nonsynonyms_and_gather_synonyms
     synonyms = {}
-    Name.connection.select_rows(query).each do |text_name, syn_id, deprecated|
+    Name.connection.select_rows(query).each do
+      |id, name, syn_id, deprecated, rank|
       if syn_id && deprecated == 1
         # wait until we find an accepted synonym
         synonyms[syn_id] ||= nil
       elsif syn_id
         # use the first accepted synonym we encounter
-        synonyms[syn_id] ||= text_name
+        synonyms[syn_id] ||= [name, id, rank]
       else
         # count non-synonyms immediately
-        count_species(text_name)
+        count_species([name, id, rank])
       end
     end
     synonyms
   end
 
   def count_synonyms(synonyms)
-    synonyms.each do |syn_id, text_name|
-      text_name ||= Name.where(synonym_id: syn_id, rank: ranks_to_consider).
-                    order(deprecated: :asc).pluck(:text_name).first
-      count_species(text_name)
+    synonyms.each do |syn_id, text_info|
+      unless text_info
+        text_info = Name.where(synonym_id: syn_id).
+                    order(deprecated: :asc).pick(:text_name, :id, :rank)
+        text_info[2] = Name.ranks[text_info[2]]
+      end
+      count_species(text_info)
     end
   end
 
-  def count_species(text_name)
-    return if text_name.blank?
+  def count_species(text_info)
+    return if text_info.blank?
+
+    text_name, id, rank = text_info
+    @names[text_name] = [text_name, id]
+    return unless rank < Name.ranks[:Genus]
 
     g, s = text_name.split(" ", 3)
     @genera[g] = g
-    @species[[g, s]] = "#{g} #{s}"
-  end
-
-  def ranks_to_consider
-    Name.ranks.values_at("Species", "Subspecies", "Variety", "Form").join(", ")
+    @species[[g, s]] = ["#{g} #{s}", id] # Can't be hash since it gets sorted
   end
 
   def query(args = {})
@@ -151,13 +168,12 @@ class Checklist
       "observations o"
     ]
     conditions = [
-      "n.id = o.name_id",
-      "n.`rank` IN (#{ranks_to_consider})"
+      "n.id = o.name_id"
     ]
     tables += args[:tables] || []
     conditions += args[:conditions] || []
     %(
-      SELECT n.text_name, n.synonym_id, n.deprecated
+      SELECT n.id, n.text_name, n.synonym_id, n.deprecated, n.rank
       FROM #{tables.join(", ")}
       WHERE (#{conditions.join(") AND (")})
     )

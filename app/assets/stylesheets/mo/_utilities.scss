@@ -4,6 +4,22 @@
 // These are not meant as overrides, just to facilitate update.
 // --------------------------------------------------
 
+.d-none {
+  display: none;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.align-items-center {
+  align-items: center !important;
+}
+
 .w-auto {
   width: auto !important;
 }
@@ -16,8 +32,28 @@
   width: 50% !important;
 }
 
+.min-w-100 {
+  min-width: 100% !important;
+}
+
+.max-w-100 {
+  max-width: 100% !important;
+}
+
+.h-auto {
+  height: auto !important;
+}
+
 .h-100 {
   height: 100% !important;
+}
+
+.min-h-100 {
+  min-height: 100% !important;
+}
+
+.max-h-100 {
+  max-height: 100% !important;
 }
 
 .position-relative {
@@ -72,6 +108,16 @@
   vertical-align: text-top !important;
 }
 
+.object-fit-cover {
+  @extend .w-100, .h-100;
+  object-fit: cover;
+}
+
+.object-fit-contain {
+  @extend .w-100, .h-100;
+  object-fit: contain;
+}
+
 .text-larger {
   font-size: larger !important;
 }
@@ -114,13 +160,13 @@
 }
 
 .mx-1 {
-  margin-left: 0.25em !important;
-  margin-right: 0.25em !important;
+  margin-left: 0.25rem !important;
+  margin-right: 0.25rem !important;
 }
 
 .mx-2 {
-  margin-left: 0.5em !important;
-  margin-right: 0.5em !important;
+  margin-left: 0.5rem !important;
+  margin-right: 0.5rem !important;
 }
 
 .m-10px {
@@ -128,27 +174,42 @@
 }
 
 .m-3 {
-  margin: 1em !important;
+  margin: 1rem !important;
 }
 
 .my-1 {
-  margin-top: 0.25em !important;
-  margin-bottom: 0.25em !important;
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
 }
 
 .my-2 {
-  margin-top: 0.5em !important;
-  margin-bottom: 0.5em !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
 }
 
 .my-3 {
-  margin-top: 1em !important;
-  margin-bottom: 1em !important;
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
 }
 
 .my-4 {
-  margin-top: 1.5em !important;
-  margin-bottom: 1.5em !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.my-5 {
+  margin-top: 3rem !important;
+  margin-bottom: 3rem !important;
+}
+
+.my-0 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.my-4 {
+  margin-top: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
 }
 
 .my-5px {
@@ -160,24 +221,28 @@
   margin-top: 0 !important;
 }
 
+.mt-1 {
+  margin-top: 0.25rem !important;
+}
+
 .mt-2 {
-  margin-top: 0.5em !important;
+  margin-top: 0.5rem !important;
 }
 
 .mt-3 {
-  margin-top: 1em !important;
+  margin-top: 1rem !important;
 }
 
 .mt-4 {
-  margin-top: 1.5em !important;
+  margin-top: 1.5rem !important;
 }
 
 .mt-5 {
-  margin-top: 2em !important;
+  margin-top: 2rem !important;
 }
 
 .mt-n2 {
-  margin-top: -0.5em !important;
+  margin-top: -0.5rem !important;
 }
 
 .mb-0 {
@@ -185,23 +250,23 @@
 }
 
 .mb-1 {
-  margin-bottom: 0.25em !important;
+  margin-bottom: 0.25rem !important;
 }
 
 .mb-2 {
-  margin-bottom: 0.5em !important;
+  margin-bottom: 0.5rem !important;
 }
 
 .mb-3 {
-  margin-bottom: 1em !important;
+  margin-bottom: 1rem !important;
 }
 
 .mb-n3 {
-  margin-bottom: -1em !important;
+  margin-bottom: -1rem !important;
 }
 
 .mb-5 {
-  margin-bottom: 2em !important;
+  margin-bottom: 2rem !important;
 }
 
 .mx-auto {
@@ -214,9 +279,14 @@
   margin-left: 0 !important;
 }
 
+.mx-10px {
+  margin-right: 10px !important;
+  margin-left: 10px !important;
+}
+
 .mx-3 {
-  margin-right: 1em !important;
-  margin-left: 1em !important;
+  margin-right: 1rem !important;
+  margin-left: 1rem !important;
 }
 
 .mr-0 {
@@ -224,15 +294,23 @@
 }
 
 .mr-2 {
-  margin-right: 0.5em !important;
+  margin-right: 0.5rem !important;
+}
+
+.mr-10px {
+  margin-right: 10px !important;
 }
 
 .mr-3 {
-  margin-right: 1em !important;
+  margin-right: 1rem !important;
 }
 
 .mr-4 {
-  margin-right: 1.5em !important;
+  margin-right: 1.5rem !important;
+}
+
+.mr-5 {
+  margin-right: 3rem !important;
 }
 
 .ml-0 {
@@ -244,19 +322,31 @@
 }
 
 .ml-3 {
-  margin-left: 1em !important;
+  margin-left: 1rem !important;
 }
 
 .ml-4 {
-  margin-left: 1.5em !important;
+  margin-left: 1.5rem !important;
+}
+
+.ml-5 {
+  margin-left: 3rem !important;
 }
 
 .p-0 {
   padding: 0 !important;
 }
 
+.p-1 {
+  padding: 0.25rem !important;
+}
+
+.p-2 {
+  padding: 0.5rem !important;
+}
+
 .p-3 {
-  padding: 1em !important;
+  padding: 1rem !important;
 }
 
 .p-5px {
@@ -278,9 +368,14 @@
   padding-bottom: 10px !important;
 }
 
+.py-2 {
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+}
+
 .py-3 {
-  padding-top: 1em !important;
-  padding-bottom: 1em !important;
+  padding-top: 1rem !important;
+  padding-bottom: 1rem !important;
 }
 
 .pt-0 {
@@ -291,24 +386,32 @@
   padding-top: 10px !important;
 }
 
+.pt-2 {
+  padding-top: 0.5rem !important;
+}
+
 .pt-3 {
-  padding-top: 1em !important;
+  padding-top: 1rem !important;
 }
 
 .pb-1 {
-  padding-bottom: .25em !important;
+  padding-bottom: .25rem !important;
 }
 
 .pb-2 {
-  padding-bottom: 0.5em !important;
+  padding-bottom: 0.5rem !important;
 }
 
 .pb-3 {
-  padding-bottom: 1em !important;
+  padding-bottom: 1rem !important;
+}
+
+.pb-5 {
+  padding-bottom: 2rem !important;
 }
 
 .indent {
-  padding-left: 1em !important;
+  padding-left: 1rem !important;
 }
 
 .px-0 {
@@ -316,8 +419,13 @@
   padding-right: 0 !important;
 }
 
+.px-3 {
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
 .pl-3 {
-  padding-left: 1em !important;
+  padding-left: 1rem !important;
 }
 
 .pr-10px {
@@ -359,12 +467,141 @@
   border: 5px dashed;
 }
 
+.dotted-border {
+  border: 1px dotted;
+}
+
+.img-fluid {
+  max-width: 100%;
+  height: auto;
+}
+
+// Stretched link from Bootstrap 4 (delete after upgrade)
+.stretched-link {
+  &::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    // Just in case `pointer-events: none` is set on a parent
+    pointer-events: auto;
+    content: "";
+    // IE10 bugfix, see https://stackoverflow.com/questions/16947967/ie10-hover-pseudo-class-doesnt-work-without-background-color
+    background-color: rgba(0, 0, 0, 0);
+  }
+}
+
+// Actually we can't use that for form.button_to inputs, though.
+.ab-fab {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.top-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: auto;
+  left: auto;
+}
+
+.top-left {
+  position: absolute;
+  top: 0;
+  right: auto;
+  bottom: auto;
+  left: 0;
+}
+
+.bottom-right {
+  position: absolute;
+  top: auto;
+  right: 0;
+  bottom: 0;
+  left: auto;
+}
+
+.bottom-left {
+  position: absolute;
+  top: auto;
+  right: auto;
+  bottom: 0;
+  left: 0;
+}
+
+.ab-bottom {
+  position: absolute;
+  top: auto;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.ab-top {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: auto;
+  left: 0;
+}
+
+.ab-left {
+  position: absolute;
+  top: 0;
+  right: auto;
+  bottom: 0;
+  left: 0;
+}
+
+.ab-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: auto;
+}
+
+.click-container {
+  a.ab-fab {
+
+    &:hover,
+    &:active,
+    &:focus {
+      background-color: transparent;
+    }
+  }
+}
+
+.list-group-flush {
+  border-radius: 0;
+}
+
+.bg-visible {
+  background: rgba($black, 0.3);
+}
+
+.bg-legible {
+  background: rgba($black, 0.6);
+}
 
 //
 // larger devices
 // --------------------------------------------------
 
 @media screen and (min-width: 767px) {
+  .d-sm-block {
+    display: block;
+  }
+
+  .d-sm-flex {
+    display: flex;
+  }
+
   .float-sm-left {
     float: left !important;
   }
@@ -376,5 +613,9 @@
   .mt-sm-3 {
     margin-top: 1em !important;
   }
-}
 
+  .px-sm-0 {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}

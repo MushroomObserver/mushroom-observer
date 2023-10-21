@@ -1,0 +1,44 @@
+<%
+add_page_title(:login_please_login.t)
+%>
+
+<%= form_with(scope: :user, url: account_login_path,
+              id: "account_login_form") do |f| %>
+
+  <%= text_field_with_label(form: f, field: :login, value: @login,
+                            label: :login_user.t + ":", class: "mt-3",
+                            data: { autofocus: @login.blank? }) %>
+
+  <%= password_field_with_label(form: f, field: :password, value: "",
+                                label: :login_password.t + ":", class: "mt-3",
+                                data: { autofocus: !@login.blank? }) %>
+
+  <%= check_box_with_label(form: f, field: :remember_me, checked: @remember,
+                           class: "mt-3", label: :login_remember_me.t) %>
+
+  <%= submit_button(form: f, button: :login_login.l, center: true) %>
+
+  <div class="form-group mt-3">
+    <%= :login_forgot_password.tp %>
+    <%= :login_having_problems.tp %>
+  </div>
+
+<% end %>
+
+<div>
+  <div class="h3">
+    <%= :login_create_account_caption.tp %>
+  </div>
+  <%= :login_no_account.tp %>
+  (<%= :login_explain_login_requirement.t %>)
+</div>
+
+<div>
+  <div class="h3">
+    <%= :login_data_without_login_caption.tp %>
+  </div>
+  <div>
+    <%= :login_images_without_login.tp %>
+    <%= :login_data_without_login.tp %>
+  </div>
+</div>

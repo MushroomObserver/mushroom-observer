@@ -102,18 +102,18 @@ class CollapsibleMapTest < UnitTestCase
   def test_mapset_with_one_observation
     obs = observations(:unknown_with_lat_long)
     mapset = MapSet.new(obs)
-    assert_obj_list_equal([obs], mapset.observations)
-    assert_obj_list_equal([], mapset.locations)
-    assert_obj_list_equal([obs.location], mapset.underlying_locations)
+    assert_obj_arrays_equal([obs], mapset.observations)
+    assert_obj_arrays_equal([], mapset.locations)
+    assert_obj_arrays_equal([obs.location], mapset.underlying_locations)
     assert_mapset_is_point(mapset, obs.lat, obs.long)
   end
 
   def test_mapset_with_one_location
     loc = locations(:albion)
     mapset = MapSet.new(loc)
-    assert_obj_list_equal([], mapset.observations)
-    assert_obj_list_equal([loc], mapset.locations)
-    assert_obj_list_equal([loc], mapset.underlying_locations)
+    assert_obj_arrays_equal([], mapset.observations)
+    assert_obj_arrays_equal([loc], mapset.locations)
+    assert_obj_arrays_equal([loc], mapset.underlying_locations)
     assert_mapset_is_box(mapset, *loc.edges)
   end
 
@@ -367,9 +367,9 @@ class CollapsibleMapTest < UnitTestCase
     mapset = coll.mapsets.first
     assert_mapset_is_point(mapset, obs.lat, obs.long)
     assert_extents(coll.extents, obs.lat, obs.lat, obs.long, obs.long)
-    assert_obj_list_equal([obs], mapset.observations)
-    assert_obj_list_equal([], mapset.locations)
-    assert_obj_list_equal([], mapset.underlying_locations)
+    assert_obj_arrays_equal([obs], mapset.observations)
+    assert_obj_arrays_equal([], mapset.locations)
+    assert_obj_arrays_equal([], mapset.underlying_locations)
   end
 
   def test_mapping_one_observation_with_location
@@ -380,9 +380,9 @@ class CollapsibleMapTest < UnitTestCase
     mapset = coll.mapsets.first
     assert_mapset_is_box(mapset, *obs.location.edges)
     assert_extents(coll.extents, *obs.location.edges)
-    assert_obj_list_equal([obs], mapset.observations)
-    assert_obj_list_equal([], mapset.locations)
-    assert_obj_list_equal([obs.location], mapset.underlying_locations)
+    assert_obj_arrays_equal([obs], mapset.observations)
+    assert_obj_arrays_equal([], mapset.locations)
+    assert_obj_arrays_equal([obs.location], mapset.underlying_locations)
   end
 
   def test_mapping_one_location
@@ -392,9 +392,9 @@ class CollapsibleMapTest < UnitTestCase
     mapset = coll.mapsets.first
     assert_mapset_is_box(mapset, *loc.edges)
     assert_extents(coll.extents, *loc.edges)
-    assert_obj_list_equal([], mapset.observations)
-    assert_obj_list_equal([loc], mapset.locations)
-    assert_obj_list_equal([loc], mapset.underlying_locations)
+    assert_obj_arrays_equal([], mapset.observations)
+    assert_obj_arrays_equal([loc], mapset.locations)
+    assert_obj_arrays_equal([loc], mapset.underlying_locations)
   end
 
   def test_mapping_a_bunch_of_points

@@ -228,7 +228,7 @@ module Query
       add_search_condition(fields, params[:desc_content])
     end
 
-    def default_order
+    def self.default_order
       "name"
     end
 

@@ -1,17 +1,21 @@
 // Patch to make matrix boxes in a row the same height
-// TODO: Completely remove this script and layouts/app/media_query_tests partial
+// TODO: Completely remove this script and application/app/media_query_tests partial
 // if moving to Bootstrap 4+
 
 $(window).on('load', function () {
-  var boxes = jQuery('.matrix-box .panel-body');
+  var boxes = jQuery('.matrix-box .panel-sizing');
+  var footers = jQuery('.matrix-box .log-footer');
 
   //if there are matrix boxes
-  if (boxes) {
+  if (boxes) { arrangeResizing(boxes) }
+  if (footers) { arrangeResizing(footers) }
+
+  function arrangeResizing(elems) {
     //get the current bootstrap media query size
     var dataBootstrapSize = jQuery("[data-bootstrap-size]:visible").data('bootstrap-size');
     if (dataBootstrapSize != "xs") {
       //xs size doesn't need anything
-      var arrayedObjects = boxes.toArray().map(function (el) {
+      var arrayedObjects = elems.toArray().map(function (el) {
         return jQuery(el);
       });
       switch (dataBootstrapSize) {
@@ -21,8 +25,10 @@ $(window).on('load', function () {
           adjustHeightForEveryNth(arrayedObjects, 2);
           break;
         case "md":
-        case "lg":
           adjustHeightForEveryNth(arrayedObjects, 3);
+          break;
+        case "lg":
+          adjustHeightForEveryNth(arrayedObjects, 4);
           break;
         default:
           //no op

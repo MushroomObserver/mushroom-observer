@@ -1,28 +1,11 @@
 <%
-  @title = @herbarium.format_name.t
+add_page_title(@herbarium.format_name.t)
 
-  tabs = []
-  if @herbarium.curators.empty? || @herbarium.curator?(@user) || in_admin_mode?
-    tabs += [
-      link_with_query(:edit_herbarium.t, edit_herbarium_path(@herbarium.id)),
-      destroy_button(
-        name: :destroy_object.t(type: :herbarium),
-        target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
-      )
-    ]
-  end
-  tabs += [
-    link_with_query(:create_herbarium.t, new_herbarium_path),
-    link_with_query(:herbarium_index.t, herbaria_path(flavor: :nonpersonal))
-  ]
+add_pager_for(@herbarium)
+add_tab_set(herbarium_show_tabs(herbarium: @herbarium, user: @user))
 
-  @tabsets = {
-    pager_for: @herbarium,
-    right: draw_tab_set(tabs)
-  }
-
-  map = @herbarium.location ? true : false
-  @container = :wide
+map = @herbarium.location ? true : false
+@container = :wide
 %>
 
 <div class="row">
@@ -31,31 +14,39 @@
       <%= link_to(:show_herbarium_herbarium_record_count.t(
                     count: @herbarium.herbarium_records.length
                   ),
-                  controller: :herbarium_record,
-                  action: :herbarium_index,
-                  id: @herbarium.id) %>
+                  herbarium_records_path(herbarium_id: @herbarium.id),
+                  id: "herbarium_records_for_herbarium_link") %>
     </div>
 
     <div class="mt-3">
-      <%= render(partial: "curator_table", locals: { herbarium: @herbarium }) %>
+
+      <%= render(partial: "herbaria/curator_table",
+                 locals: { herbarium: @herbarium }) %>
+
       <% if @herbarium.curator?(@user) || in_admin_mode? %>
-        <%= form_with(
-              url: add_query_param(herbaria_curators_path(id: @herbarium))
-            ) do |f| %>
+
+        <%= form_with(url: herbaria_curators_path(id: @herbarium,
+                                                  q: get_query_param),
+                      id: "herbarium_curators_form")do |f| %>
           <div class="form-inline mt-3">
-            <%# workaround for auto completer; creates id="add_curator" %>
-            <%= text_field("", :add_curator, class: "form-control") %>
-            <% turn_into_user_auto_completer(:add_curator) %>
+            <%= f.text_field(:add_curator, class: "form-control",
+                             placeholder: :start_typing.l,
+                             data: { autocompleter: :user }) %>
             <label for="add_curator">
-              <%= f.submit(:show_herbarium_add_curator.t, class: "btn btn-default") %>
+              <%= submit_button(form: f,
+                                button: :show_herbarium_add_curator.t) %>
             </label>
           </div>
         <% end %>
+
       <% else %>
+
         <%= link_with_query(
               :show_herbarium_curator_request.t,
-              new_herbaria_curator_request_path(id: @herbarium.id)
+              new_herbaria_curator_request_path(id: @herbarium.id),
+              id: "new_herbaria_curator_request_link"
             ) %>
+
       <% end %>
     </div>
 

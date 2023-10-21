@@ -32,7 +32,7 @@ class TranslationController < ApplicationController
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
     get_record_maps(@lang, @edit_tags)
-    render(partial: "form")
+    render(partial: "translation/form")
   rescue StandardError => e
     msg = error_message(e).join("\n")
     render(plain: msg, status: :internal_server_error)
@@ -46,10 +46,10 @@ class TranslationController < ApplicationController
     @edit_tags = tags_to_edit(@tag, @strings)
     get_record_maps(@lang, @edit_tags)
     update_translations(@edit_tags)
-    render(partial: "ajax_post")
+    render(partial: "translation/ajax_post")
   rescue StandardError => e
     @error = error_message(e).join("\n")
-    render(partial: "ajax_error")
+    render(partial: "translation/ajax_error")
   end
 
   # -------------------------------
@@ -157,7 +157,7 @@ class TranslationController < ApplicationController
 
   def preview_string(str, limit = 250)
     str = @lang.clean_string(str)
-    str = str.gsub(/\n/, " / ")
+    str = str.gsub("\n", " / ")
     str = str[0..limit] + "..." if str.length > limit
     str
   end

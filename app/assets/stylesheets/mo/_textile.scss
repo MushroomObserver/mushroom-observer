@@ -14,9 +14,9 @@
 }
 
 .sandbox {
-  border-width: $INPUT_BORDER_WIDTH;
-  border-style: $INPUT_BORDER_STYLE;
-  border-radius: $INPUT_BORDER_RADIUS;
-  border-color: $INPUT_BORDER_COLOR;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: $border-radius-base;
+  border-color: $input-border;
   padding: 2px 5px 0px 5px;
 }

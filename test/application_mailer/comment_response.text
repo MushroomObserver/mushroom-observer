@@ -1,0 +1,32 @@
+From: news@mushroomobserver.org
+Reply-To: no-reply@mushroomobserver.org
+To: rolf@collectivesource.com
+Subject: [MO] Comment About Fungi (<%= ActiveRecord::FixtureSet.identify(:minimal_unknown_obs) %>)
+
+Comment Response
+
+The following comment was posted on the Mushroom Observer website in response to your comment regarding the observation Fungi (<%= ActiveRecord::FixtureSet.identify(:minimal_unknown_obs) %>):
+
+Created: 2006-03-02 16:16:00 EST (-0500)
+By: Tricky Dick (dick)
+Summary: Let's try a more "complicated" comment.
+Comment:
+
+With Agaricus campestris links and boldface and
+4x4 other weird(tm) !image 2! stuff.
+
+Just to test html_to_ascii...  -A&P
+
+--------------------------------------------------
+
+Please do not reply to this email! Use the link below to respond via your own public comment.
+Here are some handy links:
+
+Show this observation: https://mushroomobserver.org/observations/<%= ActiveRecord::FixtureSet.identify(:minimal_unknown_obs) %>
+Post a comment: https://mushroomobserver.org/comments/new?target=<%= ActiveRecord::FixtureSet.identify(:minimal_unknown_obs) %>&type=Observation
+I'm not interested in this observation: https://mushroomobserver.org/interests/set_interest?id=<%= ActiveRecord::FixtureSet.identify(:minimal_unknown_obs) %>&type=Observation&user=<%= ActiveRecord::FixtureSet.identify(:rolf) %>&state=-1
+Stop sending me email like this: https://mushroomobserver.org/account/no_email/<%= ActiveRecord::FixtureSet.identify(:rolf) %>?type=comments_response
+Change your preferences: https://mushroomobserver.org/account/preferences/edit
+Latest changes at Mushroom Observer: https://mushroomobserver.org
+
+If you feel this user is abusing this service please forward this entire email message to: webmaster@mushroomobserver.org

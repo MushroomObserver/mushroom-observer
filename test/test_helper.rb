@@ -33,7 +33,7 @@ SimpleCov.start("rails")
 # Allow test results to be reported back to runner IDEs.
 # Enable progress bar output during the test running.
 require("minitest/reporters")
-MiniTest::Reporters.use!
+Minitest::Reporters.use!
 
 require("minitest/autorun")
 
@@ -41,8 +41,15 @@ require("minitest/autorun")
 #  disabling of internet requests.
 require("webmock/minitest")
 
-# Disable external requests while allowing localhost
-WebMock.disable_net_connect!(allow_localhost: true)
+# Disable external requests while allowing localhost.
+WebMock.disable_net_connect!(
+  allow_localhost: true,
+  allow: [
+    "chromedriver.storage.googleapis.com", # in case we install Chrome
+    "github.com", # for Firefox
+    "objects.githubusercontent.com" # for Firefox
+  ]
+)
 
 ENV["RAILS_ENV"] ||= "test"
 require(File.expand_path("../config/environment", __dir__))
@@ -58,6 +65,7 @@ require("mocha/minitest")
   flash_extensions
   controller_extensions
   capybara_session_extensions
+  capybara_macros
   language_extensions
   session_extensions
   session_form_extensions

@@ -1,0 +1,16 @@
+<%
+  add_page_title(:species_list_upload_title.t)
+
+  action = { controller: "/species_lists/uploads", action: :create,
+             id: @species_list.id }
+%>
+
+<%= form_with(url: action, scope: :species_list, multipart: true) do |f| %>
+
+  <%= file_field_with_label(form: f, field: :file,
+                            label: :species_list_upload_label.t + ":") %>
+  <%= help_block(:div, :species_list_upload_help.tp) %>
+
+  <%= submit_button(form: f, button: :UPLOAD.l, center: true) %>
+
+<% end %>

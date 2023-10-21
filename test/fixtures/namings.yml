@@ -46,7 +46,7 @@ strobilurus_diminutivus_naming:
   observation: strobilurus_diminutivus_obs
   vote_cache: 0
 
-# dates are hard-coded expects in AccountMailerTest test_name_proposal_email
+# dates are hard-coded expects in ApplicationMailerTest test_name_proposal_email
 coprinus_comatus_other_naming:
   created_at: 2007-02-28 20:20:00
   updated_at: 2007-02-28 20:21:00
@@ -96,10 +96,10 @@ unequal_positive_namings_2nd_naming:
   observation: unequal_positive_namings_obs
 
 all_namings_deprecated_winning_naming:
-  user:        dick
+  user: dick
   observation: all_namings_deprecated_obs
-  name:        namings_deprecated_1
-  vote_cache:  <%= Vote.maximum_vote %>
+  name: namings_deprecated_1
+  vote_cache: <%= Vote.maximum_vote %>
 
 all_namings_deprecated_other_naming:
   # Manually set id low in order to improve test coverage of consensus_naming.
@@ -107,42 +107,41 @@ all_namings_deprecated_other_naming:
   # Coverage is improved when this Naming appears before the winning one
   # when select'ing Namings. That, in turn, makes consensus_id loop through
   # both Namings.
-  id:          1
-  user:        rolf
+  id: 1
+  user: rolf
   observation: all_namings_deprecated_obs
-  name:        namings_deprecated_2
-  vote_cache:  <%= Vote.next_best_vote %>
+  name: namings_deprecated_2
+  vote_cache: <%= Vote.next_best_vote %>
 
 authored_with_naming_obs_authored_naming:
-  user:        rolf
+  user: rolf
   observation: authored_with_naming_obs
-  name:        authored_with_naming
-  vote_cache:  <%= Vote.maximum_vote %>
+  name: authored_with_naming
+  vote_cache: <%= Vote.maximum_vote %>
 
 authored_with_naming_obs_unauthored_naming:
-  user:        dick
+  user: dick
   observation: authored_with_naming_obs
-  name:        unauthored_with_naming
-  vote_cache:  <%= Vote.next_best_vote %>
+  name: unauthored_with_naming
+  vote_cache: <%= Vote.next_best_vote %>
 
 # dick owns the Name and Observation, but mary owns a Naming
 other_user_owns_naming:
-  user:        mary
+  user: mary
   observation: other_user_owns_naming_obs
-  name:        other_user_owns_naming_name
-  vote_cache:  <%= Vote.next_best_vote %>
+  name: other_user_owns_naming_name
+  vote_cache: <%= Vote.next_best_vote %>
 
 # dick owns the Name and Naming, but mary owns an Observation
 other_user_owns_obs_naming:
-  user:        dick
+  user: dick
   observation: other_user_owns_obs
-  name:        other_user_owns_observation
-  vote_cache:  <%= Vote.next_best_vote %>
+  name: other_user_owns_observation
+  vote_cache: <%= Vote.next_best_vote %>
 
 # dick owns the Name and the only Observation and Naming
 same_user_owns_name_and_observation:
-  user:        dick
+  user: dick
   observation: same_user_owns_name_and_naming_obs
-  name:        same_user_owns_naming_and_observation
-  vote_cache:  <%= Vote.next_best_vote %>
-
+  name: same_user_owns_naming_and_observation
+  vote_cache: <%= Vote.next_best_vote %>

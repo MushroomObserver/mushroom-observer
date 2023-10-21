@@ -32,7 +32,6 @@
 #
 #  == Class methods
 #
-#  primer::             List of User's latest Locations to prime auto-completer.
 #  clean_name::         Clean a name before doing searches on it.
 #
 #  == Scopes
@@ -67,6 +66,7 @@
 #  parse_latitude::     Validate and parse latitude from a string.
 #  parse_longitude::    Validate and parse longitude from a string.
 #  parse_altitude::     Validate and parse altitude from a string.
+#  found_here?::        Was the given obs found here?
 #
 #  ==== Name methods
 #  display_name::       +name+ reformated based on user's preference.
@@ -270,6 +270,26 @@ class Location < AbstractModel
     self.west = center_lon - 0.0001
   end
 
+  def found_here?(obs)
+    return true if obs.location == self
+    return contains?(obs.lat, obs.long) if obs.lat && obs.long
+
+    loc = obs.location
+    return false unless loc
+
+    contains?(loc.north, loc.west) && contains?(loc.south, loc.east)
+  end
+
+  def contains?(lat, long)
+    (lat <= north) && (lat >= south) && contains_longitude(long)
+  end
+
+  def contains_longitude(long)
+    return (long >= west) && (long <= east) if west <= east
+
+    (long >= west) || (long <= east)
+  end
+
   ##############################################################################
   #
   #  :section: Name Stuff
@@ -309,6 +329,12 @@ class Location < AbstractModel
       return true if name == unknown_name.downcase
     end
     false
+  end
+
+  # Abbreviated description of the location for shorter query titles.
+  # Just the location without locality, region, country
+  def title_display_name
+    name.split(", ").first
   end
 
   def display_name
@@ -370,35 +396,6 @@ class Location < AbstractModel
       str.gsub!(/\W+/, " ")
     end
     str.strip_squeeze.downcase
-  end
-
-  # Look at the most recent Observation's the current User has posted.  Return
-  # a list of the last 100 place names used in those Observation's (either
-  # Location names or "where" strings).  This list is used to prime Location
-  # auto-completers.
-  #
-  def self.primer
-    # Temporarily disable. It rarely takes autocomplete long even on my horrible
-    # internet connection. And the primer can -- at least briefly -- have names
-    # that have been merged or changed.  That may be confusing some users. Let's
-    # try it without for a while to see if anyone complains.
-    # where = ""
-    # where = "WHERE observations.user_id = #{User.current_id}" if User.current
-    # result = connection.select_values(%(
-    #   SELECT DISTINCT IF(observations.location_id > 0,
-    #                      locations.name,
-    #                      observations.where) AS x
-    #   FROM observations
-    #   LEFT OUTER JOIN locations ON locations.id = observations.location_id
-    #   #{where}
-    #   ORDER BY observations.updated_at DESC
-    #   LIMIT 100
-    # )).sort
-    # if User.current_location_format == "scientific"
-    #   result.map! { |n| Location.reverse_name(n) }
-    # end
-    # result
-    []
   end
 
   # Takes a location string splits on commas, reverses the order,
@@ -531,7 +528,6 @@ class Location < AbstractModel
     unless check_db && location_exists(name)
       reasons += check_for_empty_name(name)
       reasons += check_for_dubious_commas(name)
-      reasons += check_for_dubious_county(name)
       reasons += check_for_bad_country_or_state(name)
       reasons += check_for_bad_terms(name)
       reasons += check_for_bad_chars(name)
@@ -549,14 +545,6 @@ class Location < AbstractModel
     return [] unless comma_test(name)
 
     [:location_dubious_commas.l]
-  end
-
-  def self.check_for_dubious_county(name)
-    return [] if name.blank?
-    return [] if /Forest,|Park,|near /.match?(name)
-    return [] unless has_dubious_county?(name)
-
-    [:location_dubious_redundant_county.l]
   end
 
   def self.check_for_bad_country_or_state(name)
@@ -648,16 +636,6 @@ class Location < AbstractModel
 
   def self.dubious_country?(name)
     !understood_country?(country(name))
-  end
-
-  def self.has_dubious_county?(name)
-    tokens = name.split(", ")
-    return if tokens.length < 2
-
-    alt = [tokens[0]]
-    tokens[1..].each { |t| alt.push(t) if t[-4..] != " Co." }
-    result = alt.join(", ")
-    result == name ? nil : result
   end
 
   def self.fix_country(name)
@@ -810,6 +788,9 @@ class Location < AbstractModel
         recipients.delete(interest.user)
       end
     end
+
+    # Remove users who have opted out of all emails.
+    recipients.reject!(&:no_emails)
 
     # Send notification to all except the person who triggered the change.
     (recipients.uniq - [sender]).each do |recipient|

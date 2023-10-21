@@ -42,9 +42,12 @@ of unnecessary traffic, and probably save you a lot of work!
 
 * https://mushroomobserver.org/observations.csv
 * https://mushroomobserver.org/images_observations.csv
+* https://mushroomobserver.org/images.csv
 * https://mushroomobserver.org/names.csv
-* https://mushroomobserver.org/locations.csv
+* https://mushroomobserver.org/name_classifications.csv
 * https://mushroomobserver.org/name_descriptions.csv
+* https://mushroomobserver.org/locations.csv
+* https://mushroomobserver.org/location_descriptions.csv
 
 Overview
 --------
@@ -209,8 +212,8 @@ ORDER BY observations.id ASC
 ```
 See also the database diagram here:
 
-* <https://github.com/MushroomObserver/mushroom-observer/blob/master/DATA_STRUCTURE.gif>
+* [DATA_STRUCTURE.gif](DATA_STRUCTURE.gif)
 
 and the database schema here:
 
-* <https://github.com/MushroomObserver/mushroom-observer/blob/master/db/schema.rb>
+* [db/schema.rb](db/schema.rb)

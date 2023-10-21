@@ -1,44 +1,4 @@
 //
-// content
-// --------------------------------------------------
-
-#content {
-  // margin-left: 2em; // NO! This pushes content off screen
-  padding-bottom: 5em;
-}
-
-// Most browsers allow you to zoom in or out: let the user decide what
-// an optimal width for a line of text should be.  There is no way for us
-// to decide for them intelligently, since browsers differ so much in how
-// they deal with print views.
-@media screen {
-  .container-text {
-    max-width: 600px;
-  }
-
-  // .max-width-text-plus-padding {
-  //   max-width: 650px;
-  // }
-
-  .container-text-image {
-    max-width: 850px; // 600px text column + 160pm max thumbnail
-  }
-
-  .container-wide {
-    max-width: 1200px;
-  }
-}
-//
-// specialized stuff for print view
-// --------------------------------------------------
-
-@media print {
-  #right_side {
-    width: 100% !important;
-  }
-}
-
-//
 // interest eyes
 // --------------------------------------------------
 
@@ -54,8 +14,9 @@
 
 @media (min-width: $screen-sm-min) {
   .interest-eyes {
-    position: absolute !important;
-    top: 0 !important;
+    position: absolute;
+    // bottom: $padding-base-horizontal;
+    left: $padding-base-horizontal;
   }
 }
 
@@ -81,4 +42,15 @@ ul.tight-list {
   list-style: none;
   margin-bottom: 0.5em;
   padding-left: 1em;
+}
+
+div.textile img {
+  max-width: 100%;
+  max-height: auto;
+}
+
+.panel {
+  .table-responsive {
+    border-color: transparent;
+  }
 }

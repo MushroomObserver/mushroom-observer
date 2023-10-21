@@ -1,34 +1,33 @@
 // The theme files import mushroom_observer.scss
 
-// This map sets Bootstrap's variables with those theme color variables.
-@import "mo/map_theme_vars_to_bootstrap_vars";
-
 // Now set up Bootstrap with these variables.
 @import "bootstrap-sprockets";
+// This map sets Bootstrap's variables with those theme color variables.
+@import "mo/map_theme_vars_to_bootstrap_vars"; // Overwrite bootstrap variables
 @import "bootstrap";
 
 // Now, set custom styles for MO elements.
 @import "mo/elements";
 @import "mo/utilities";
+@import "mo/layout";
 @import "mo/form_elements";
 @import "mo/links_buttons_alerts";
 @import "mo/logo";
 @import "mo/left_nav";
 @import "mo/top_nav";
-@import "mo/content";
 @import "mo/help_tooltips";
-@import "mo/rss_log";
+@import "mo/matrix_box";
 @import "mo/pagination";
 @import "mo/lightbox";
-@import "mo/theater";
-@import "mo/image_vote_meter";
+@import "mo/images";
+@import "mo/carousel";
 @import "mo/autocomplete";
 @import "mo/popups";
 @import "mo/name_lister";
-@import "mo/species_list_bulk_editor";
 @import "mo/translations";
-@import "mo/thumbnail_map";
-@import "mo/pivotal";
+@import "mo/maps";
 @import "mo/textile";
 @import "mo/tables";
+@import "mo/namings";
 @import "mo/icons";
+@import "mo/content";

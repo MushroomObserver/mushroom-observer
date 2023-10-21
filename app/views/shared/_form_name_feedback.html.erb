@@ -19,44 +19,43 @@ if valid_names
   flash_warning(:form_observations_there_is_a_problem_with_name.t) %>
 
   <div class="alert alert-warning" id="name_messages">
-    <span class="Data"><%=
-    if suggest_corrections || names.blank?
-      :form_naming_not_recognized.t(name: what)
-    elsif parent_deprecated
-      :form_naming_parent_deprecated.t(
-        parent: parent_deprecated.display_name,
-        rank: :"rank_#{parent_deprecated.rank.to_s.downcase}"
-      )
-    elsif names.present?
-      :form_naming_deprecated.t(name: what)
-    end %>
-    </span><br/><%
+    <div><%=
+      if suggest_corrections || names.blank?
+        :form_naming_not_recognized.t(name: what)
+      elsif parent_deprecated
+        :form_naming_parent_deprecated.t(
+          parent: parent_deprecated.display_name,
+          rank: :"rank_#{parent_deprecated.rank.to_s.downcase}"
+        )
+      elsif names.present?
+        :form_naming_deprecated.t(name: what)
+      end %>
+    </div><%
     if valid_names.length > 0
       if suggest_corrections %>
-        <span class="help-note">
-          <%= :form_naming_correct_help.t(button: button_name,
-                                          name: what) %>
-        </span><br/><%
-      else %>
-        <span class="help-note">
-          <%= :form_naming_deprecated_help.t(button: button_name,
-                                             name: what) %>
-        </span><br/><%
-      end %>
-      <span class="Data"><%
-      if !suggest_corrections && !parent_deprecated %>
-        <%= :form_naming_valid_synonyms.t %>:<br/><%
-      end %><%
-      valid_names.each do |n| %>
-          <%= indent + radio_button(:chosen_name, :name_id, n.id) %>
-          <%= n.display_name.t %><br/><%
-      end %>
+        <%= help_note(:div, :form_naming_correct_help.t(button: button_name,
+                                                        name: what)) %>
+      <% else %>
+        <%= help_note(:div, :form_naming_deprecated_help.t(button: button_name,
+                                                           name: what)) %>
+      <% end %>
+      <span><%
+        if !suggest_corrections && !parent_deprecated %>
+          <%= :form_naming_valid_synonyms.t %>:<br/><%
+        end %>
+        <%= fields_for(:chosen_name) do |f_c| %>
+          <% valid_names.each do |n| %>
+            <%= radio_with_label(form: f_c, field: :name_id,
+                                value: n.id,
+                                label: n.display_name.t,
+                                class: "ml-4") %>
+          <% end %>
+        <% end %>
       </span><%
     else %>
-      <span class="help-note">
-      <%= :form_naming_not_recognized_help.t(button: button_name) %>
-      </span><br/><%
-    end %>
+      <%= help_note(:div,
+                    :form_naming_not_recognized_help.t(button: button_name)) %>
+    <% end %>
   </div><!--.alert--><%
 
 ##### Errors #####
@@ -65,12 +64,9 @@ elsif names&.length == 0
   flash_error(:form_observations_there_is_a_problem_with_name.t) %>
 
   <div class="alert alert-danger" id="name_messages">
-    <span class="Data">
-      <%= :form_naming_not_recognized.t(name: what) %>
-    </span><br/>
-    <span class="help-note">
-      <%= :form_naming_not_recognized_help.t(button: button_name) %>
-    </span><br/>
+    <%= content_tag(:div, :form_naming_not_recognized.t(name: what)) %>
+    <%= help_note(:div,
+                  :form_naming_not_recognized_help.t(button: button_name)) %>
   </div><!--.alert--><%
 
 elsif names&.length &.> 1
@@ -78,16 +74,17 @@ elsif names&.length &.> 1
   flash_error(:form_observations_there_is_a_problem_with_name.t) %>
 
   <div class="alert alert-danger" id="name_messages">
-    <span class="Data">
-      <%= :form_naming_multiple_names.t(name: what) %>:<br/><%
-      names.each do |n| %>
-        <%= indent + radio_button(:chosen_name, :name_id, n.id) %>
-        <%= n.display_name.t %> (<%= n.observations.size %>)<br/><%
-      end %>
-    </span>
-    <span class="help-note">
-      <%= :form_naming_multiple_names_help.t %>
-    </span><br/>
+    <%= :form_naming_multiple_names.t(name: what) %>:<br/>
+    <%= fields_for(:chosen_name) do |f_c| %>
+      <% names.each do |n| %>
+        <%= radio_with_label(form: f_c, field: :name_id,
+                             value: n.id,
+                             label: n.display_name.t,
+                             class: "ml-4") %>
+        (<%= n.observations.size %>)<br/>
+      <% end %>
+    <% end %>
+    <%= help_note(:div, :form_naming_multiple_names_help.t) %>
   </div><!--.alert--><%
 
 end %>

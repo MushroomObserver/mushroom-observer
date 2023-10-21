@@ -1,0 +1,101 @@
+<%
+add_page_title(
+  :species_list_show_title.t(name: @species_list.unique_format_name)
+)
+add_pager_for(@species_list)
+add_interest_icons(@user, @species_list)
+add_tab_set(species_list_show_tabs(list: @species_list))
+@container = :text_image
+%>
+
+<div class="container-text">
+  <%= panel_block do %>
+    <div><b><%= :WHEN.t %>:</b> <%= @species_list.when.web_date %></div>
+    <div><b><%= :OBSERVATIONS.t %>:</b> <%= @query.num_results %></div>
+    <div><b><%= :WHERE.t %>:</b>
+      <%= location_link(@species_list.place_name, @species_list.location, nil, true) rescue :UNKNOWN.t %>
+    </div>
+    <div><b><%= :WHO.t %>:</b> <%= user_link(@species_list.user) %></div>
+    <% if @species_list.projects.any? %>
+      <div><b><%= :PROJECTS.t %>:</b>
+        <%= @species_list.projects.map {|p| link_to_object(p)}.safe_join(" | ") %>
+      </div>
+    <% end %>
+    <% if @species_list.notes.present? %>
+      <div><%= ("*" + :NOTES.t + ":* " + @species_list.notes.to_s).tpl %></div>
+    <% end %>
+  <% end %>
+</div>
+
+<% if @pages.any?
+  query_params_set(@query) %>
+
+  <%= paginate_block(@pages) do %>
+    <div class="list-group">
+
+      <div class="list-group-item default">
+        <%= :species_list_show_members.t %>:
+        <%= link_to(:species_list_show_regular_index.t,
+                    observations_path(q: get_query_param(@query)),
+                    { help: :species_list_show_regular_index_help.t }) %> |
+        <%= link_to_coerced_query(@query, Location) %> |
+        <%= link_to_coerced_query(@query, Name) %> |
+        <%= link_to_coerced_query(@query, Image) %> |
+        <%= link_to(:app_checklist.t,
+                    checklist_path(species_list_id: @species_list.id)) %> |
+        <%= link_to(:show_object.t(type: :map),
+                    map_observations_path(q: get_query_param(@query))) %>
+      </div>
+
+      <% if @objects.any? %>
+        <% @objects.each do |observation| %>
+          <div class="list-group-item">
+            <div class="row">
+              <div class="col-sm-4 col-md-3">
+                <%= if observation.thumb_image_id
+                  interactive_image(observation.thumb_image,
+                            image_link: observation_path(id: observation.id),
+                            votes: true)
+                end %>
+              </div>
+              <div class="col-sm-8 col-md-9">
+                <p class="font-weight-bold mb-0">
+                  <%= link_to(observation.unique_format_name.t,
+                              observation_path(id: observation.id,
+                                               q: get_query_param(@query))) %>
+                </p>
+                <p>
+                  <b><%= location_link(observation.place_name,
+                                       observation.location) %></b><br/>
+                  <span><%= user_link(observation.user) %></span>:
+                  <span><%= observation.when.web_date %></span>
+                </p>
+                <% if check_permission(@species_list) %>
+                  <%= put_button(name: :REMOVE.t,
+                                 path: observation_species_list_path(
+                                   id: observation.id,
+                                   species_list_id: @species_list.id,
+                                   commit: "remove"
+                                 ),
+                                 class: "btn btn-default",
+                                 data: { confirm: :are_you_sure.l }) %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+
+    </div>
+  <% end %>
+
+<% else %>
+  <div class="container-text">
+    <%= :species_list_show_no_members.tp %>
+  </div>
+<% end %>
+
+<%= render(partial: "comments/comments_for_object",
+           locals: { object: @species_list, controls: true, limit: nil }) %>
+
+<%= show_object_footer(@species_list) %>

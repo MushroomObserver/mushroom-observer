@@ -1,0 +1,33 @@
+<%
+add_page_title(:change_member_status_title.t(
+  name: @candidate.legal_name,
+  title: @project.title
+))
+add_tab_set(project_member_form_edit_tabs(project: @project))
+
+action = { controller: "/projects/members", action: :update,
+            project_id: @project.id, candidate: @candidate.id,
+            q: get_query_param }
+%>
+
+<%= form_with(url: action, method: :patch, id: "project_member_form") do |f| %>
+  <div class="form-group mt-3">
+    <%= submit_button(form: f, button: :change_member_status_make_member.l,
+                      center: true) %>
+    <%= :change_member_status_make_member_help.t %>
+  </div>
+
+  <div class="form-group mt-3">
+    <%= submit_button(form: f, button: :change_member_status_remove_member.l,
+                      center: true) %>
+    <%= :change_member_status_remove_member_help.t %>
+  </div>
+
+  <div class="form-group mt-3">
+    <%= submit_button(form: f, button: :change_member_status_make_admin.l,
+                      center: true) %>
+    <%= :change_member_status_make_admin_help.t %>
+  </div>
+<% end %>
+
+<%= render(partial: "projects/groups", locals: { project: @project }) %>

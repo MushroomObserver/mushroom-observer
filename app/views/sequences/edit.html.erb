@@ -1,25 +1,31 @@
 <%
-  @title = :sequence_edit_title.t(name: @sequence.unique_format_name)
+@container = :wide
+add_page_title(sequence_form_edit_title(seq: @sequence))
+add_tab_set(sequence_form_tabs(obj: @back_object))
 
-  tabs = [
-    link_with_query(:cancel_and_show.t(type: @back_object.type_tag),
-                    @back_object.show_link_args)
-  ]
-
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :wide
+obs = @sequence.observation
 %>
 
-<%= render(partial: "observation_title",
-           locals: { observation: @sequence.observation }) %>
+<div class="row">
+  <div class="col-xs-12 col-sm-7">
+    <%= render(partial: "sequences/observation_title",
+               locals: { observation: obs }) %>
+    <%= render(partial: "sequences/form",
+               locals: { action: :update, local: true }) %>
 
-<%= render(partial: "form",
-           method: :patch,
-           locals: { url: add_query_param(action: :update, back: @back) } ) %>
+    <div class="small">
+      <span class="font-weight-bold"><%= :CREATED_BY.t %>:</span>
+      <%= user_link(@sequence.user) %>
+    </div>
 
-<div class="small">
-  <span class="font-weight-bold"><%= :CREATED_BY.t %>:</span>
-  <%= user_link(@sequence.user) %>
-</div>
+    <%= show_object_footer(@sequence) %>
+  </div>
 
-<%= show_object_footer(@sequence) %>
+  <div class="col-xs-12 col-sm-5">
+    <ul class="row list-unstyled">
+      <%= render(partial: "shared/matrix_box",
+                 locals: { object: obs.rss_log || obs,
+                           columns: "col-xs-12" }) %>
+    </ul>
+  </div>
+</div><!--.row-->

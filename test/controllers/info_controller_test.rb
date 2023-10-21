@@ -33,7 +33,7 @@ class InfoControllerTest < FunctionalTestCase
     assert_equal(200, @response.status)
   end
 
-  def test_whitelisted_robot_permissions
+  def test_allowed_robot_permissions
     @request.user_agent =
       "Mozilla/5.0 (compatible; Googlebot/2.1; " \
       "+http://www.google.com/bot.html)"

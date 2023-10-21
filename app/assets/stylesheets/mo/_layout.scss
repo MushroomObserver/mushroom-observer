@@ -1,0 +1,124 @@
+// root: smooth scrolling for on-page links
+.scroll-behavior-smooth {
+  scroll-behavior: smooth;
+}
+
+// layout: sidebar offcanvas and right_side
+// --------------------------------------------------
+$sidebar-max-width: 18rem;
+
+.sidebar-offcanvas {
+  max-width: $sidebar-max-width;
+}
+
+// https://stackoverflow.com/questions/17982111/sass-variable-in-css-calc-function
+@media screen and (min-width: 768px) {
+  .sidebar-offcanvas {
+    width: $sidebar-max-width !important;
+  }
+
+  #right_side {
+    width: calc(100% - #{$sidebar-max-width}) !important;
+  }
+}
+
+//
+// specialized stuff for print view
+// --------------------------------------------------
+
+@media print {
+  #right_side {
+    width: 100% !important;
+  }
+}
+
+//
+// small devices, tablets
+// --------------------------------------------------
+
+@media screen and (max-width: 767px) {
+
+  .row-offcanvas {
+    position: relative;
+    -webkit-transition: all .25s ease-out;
+    -o-transition: all .25s ease-out;
+    transition: all .25s ease-out;
+    -webkit-transform: translate3d(0,0,0);
+  }
+
+  .row-offcanvas-right {
+    right: 0;
+  }
+
+  .row-offcanvas-left {
+    left: 0;
+  }
+
+  .row-offcanvas-right
+  .sidebar-offcanvas {
+    right: -$sidebar-max-width;
+  }
+
+  .row-offcanvas-left
+  .sidebar-offcanvas {
+    left: -$sidebar-max-width;
+  }
+
+  .row-offcanvas-right.active {
+    right: $sidebar-max-width;
+  }
+
+  .row-offcanvas-left.active {
+    left: $sidebar-max-width;
+  }
+
+  .sidebar-offcanvas {
+    position: absolute;
+    top: 0;
+    width: $sidebar-max-width;
+  }
+
+  .hidden-overflow-x {
+    overflow-x: hidden !important;
+  }
+
+  .navbar-default {
+    margin: 0;
+  }
+
+  .navbar-form {
+    margin: 0;
+    border: 0;
+  }
+}
+
+//
+// content
+// --------------------------------------------------
+
+#content {
+  // margin-left: 2em; // NO! This pushes content off screen
+  padding-bottom: 5em;
+}
+
+// Most browsers allow you to zoom in or out: let the user decide what
+// an optimal width for a line of text should be.  There is no way for us
+// to decide for them intelligently, since browsers differ so much in how
+// they deal with print views.
+@media screen {
+  .container-text {
+    max-width: 600px;
+  }
+
+  // .max-width-text-plus-padding {
+  //   max-width: 650px;
+  // }
+
+  .container-text-image {
+    max-width: 850px; // 600px text column + 160pm max thumbnail
+  }
+
+  .container-wide {
+    max-width: 1200px;
+  }
+}

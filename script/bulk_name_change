@@ -52,6 +52,8 @@ def parse_options
       { |o| old_name_id = o }
     opt.on("-n", "--new NAME", "ID, text_name or search_name of new name.") \
       { |o| new_name_id = o }
+    # rubocop disable:Style/RedundantLineContinuation
+    # Explicit Continuation is needed for the lines ending with ")"
     opt.on("-c", "--comment SUMMARY/BODY", "Text of comment to add to each " \
            "observation that we propose the new name for.") \
       { |o| @comment = o }
@@ -59,6 +61,7 @@ def parse_options
            "name proposal made.") \
       { |o| @refs = o }
   end.parse!
+  # rubocop enable:Style/RedundantLineContinuation
 
   @user     = if user_id.to_s.match?(/\D/)
                 User.where(login: user_id).first
@@ -74,11 +77,11 @@ def parse_options
 
   if @old_name.is_a?(Array) && @old_name.count > 1
     raise("Multiple matches for #{old_name_id.inspect}: " \
-          "#{@old_name.map(&:search_name).map(&:inspect).join(", ")}.\n")
+          "#{@old_name.map { |name| name.search_name.inspect }.join(", ")}.\n")
   end
   if @new_name.is_a?(Array) && @new_name.count > 1
     raise("Multiple matches for #{new_name_id.inspect}: " \
-          "#{@new_name.map(&:search_name).map(&:inspect).join(", ")}.\n")
+          "#{@new_name.map { |name| name.search_name.inspect }.join(", ")}.\n")
   end
 
   @old_name = @old_name.first if @old_name.is_a?(Array)

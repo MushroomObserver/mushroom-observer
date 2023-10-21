@@ -1,0 +1,65 @@
+<!--[form:observation]-->
+<%= form_with(model: @observation,
+              url: add_query_param(action: action, id: @observation,
+                                   approved_name: @what,
+                                   approved_where: @place_name),
+              method: method,
+              multipart: true,
+              id: "observation_form") do |f| %>
+
+  <%= submit_button(form: f, button: button_name, center: true) %>
+
+  <%= render(partial: "observations/form/when", locals: { f: f }) %>
+  <%= render(partial: "observations/form/where",
+             locals: { f: f, button_name: button_name }) %>
+
+  <% if include_naming
+    # note this is not a separate form! just fields
+    naming_locals = {
+      f:            f,
+      action:       action,
+      button_name:  button_name,
+      show_reasons: false,
+      unfocused:    true
+    } %>
+    <%= render(partial: "observations/namings/fields", locals: naming_locals) %>
+
+  <% end # if include_naming %>
+
+  <%= render(partial: "observations/form/specimen_info",
+             locals: { f: f, button_name: button_name }) %>
+
+  <%= render(partial: "observations/form/notes", locals: { f: f }) %>
+
+  <% ########################### Image Forms ############################## %>
+
+  <% if include_images %>
+
+    <%= render(partial: "observations/form/images", locals: { f: f }) %>
+    <%= render(partial: "observations/form/images_upload", locals: { f: f }) %>
+
+  <% end # if include_images %>
+
+  <% ##########################################################################     %>
+
+  <% if @projects.any? || @lists.any? %>
+    <%= submit_button(form: f, button: button_name, center: true) %>
+  <% end %>
+
+  <% if @projects.any? %>
+    <%= render(partial: "observations/form/projects",
+               locals: { f: f, button_name: button_name }) %>
+  <% end %>
+
+  <% if @lists.any? %>
+    <%= render(partial: "observations/form/species_lists", locals: { f: f }) %>
+  <% end %>
+
+  <%= submit_button(form: f, button: button_name, center: true) %>
+
+  <% if logging_optional %>
+    <%= check_box_with_label(form: f, field: :log_change, checked: "checked",
+                             label: :form_observations_log_change.t) %>
+  <% end %>
+
+<% end %><!--[/form:observation]-->

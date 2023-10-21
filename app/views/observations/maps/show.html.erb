@@ -1,0 +1,9 @@
+<%
+@container = :wide
+add_page_title(:map_observation_title.t(id: @observation.id))
+add_tab_set(observation_maps_tabs(query: @query))
+%>
+
+<%= render(partial: "shared/map",
+           locals: { objects: @observations,
+                     query_params: query_params(@query), zoom: 2 }) %>

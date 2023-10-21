@@ -53,13 +53,39 @@ class ArticlesControllerTest < FunctionalTestCase
     get(:show, params: { id: article.id })
     assert_select("a", text: :create_article_title.l)
     assert_select("a", text: :EDIT.l)
-    assert_select("form input[value='Destroy']", true,
+    assert_select(".destroy_article_link_#{article.id}", true,
                   "Page is missing Destroy button")
 
     # Prove that trying to show non-existent article provokes error & redirect
     get(:show, params: { id: 0 })
     assert_flash_error
     assert_response(:redirect)
+  end
+
+  # Partly duplicates the title_and_tabset_helper_test `test_create_links_to`.
+  # But we want to test a `destroy_button` tab too.
+  # That method calls `add_query_param` and others unavailable to helper tests
+  def test_create_links_to_helper
+    article = Article.last
+    links = [[:create_article_title.t, new_article_path,
+              { class: "new_article_link" }],
+             [:EDIT.t, edit_article_path(article.id),
+              { class: "edit_article_link" }],
+             [nil, article, { button: :destroy }]]
+
+    tabs = @controller.helpers.create_links_to(links)
+
+    tab1 = @controller.helpers.link_to(
+      :create_article_title.t, new_article_path, { class: "new_article_link" }
+    )
+    tab2 = @controller.helpers.link_to(
+      :EDIT.t, edit_article_path(article.id), { class: "edit_article_link" }
+    )
+    tab3 = @controller.helpers.destroy_button(target: article)
+
+    assert_includes(tabs, tab1)
+    assert_includes(tabs, tab2)
+    assert_includes(tabs, tab3)
   end
 
   ############ test Actions that Display forms -- (new, edit, etc.)

@@ -47,7 +47,7 @@ class CacheTest < UnitTestCase
     assert_not_empty(name.observations)
     name_updated_at = name.updated_at
     first_updated_at = name.observations.first.updated_at
-    new_str = desc.classification.sub(/Ascomycota/, "Basidiomycota")
+    new_str = desc.classification.sub("Ascomycota", "Basidiomycota")
     desc.update(classification: new_str)
     assert_equal(new_str, name.reload.classification)
     assert(name.observations.all? { |o| o.classification == new_str })

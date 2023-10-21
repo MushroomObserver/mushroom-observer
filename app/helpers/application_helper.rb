@@ -5,59 +5,37 @@
 #
 #  Methods available to all templates in the application:
 #
-#  safe_br                      # <br/>,html_safe
-#  safe_empty
-#  safe_nbsp
-#  escape_html                  # Return escaped HTML
-#
-#  --- links and buttons ----
-#
-#  link_to_coerced_query        # link to query coerced into different model
-#  link_with_query              # link_to with query params
-#  link_next                    # link to next object
-#  link_prev                    # link to prev object
-#  destroy_button               # button to destroy object
-#  post_button                  # button to post to a path
-#  create_link                  # convert links into list of tabs
+#  css_theme
+#  container_class
 #
 #  --------------------------
 #
 #  indent                       # in-lined white-space element of n pixels
-#  content_tag_if
-#  content_tag_unless
-#  add content_help             # help text viewable on mouse-over
 #  add_header                   # add to html header from within view
-#  make_table                   # make table from list of arrays
 #  reload_with_args             # add args to url that got us to this page
 #  add_args_to_url              # change params of arbitrary url
 #  url_after_delete             # url to return to after deleting object
 #  get_next_id
-#  textilize_without_paragraph  # override Rails method of same name
-#  textilize                    # override Rails method of same name
-#  custom_file_field            # stylable file input field with
-#                               # client-side size validation
-#  date_select_opts
-#  title_tag_contents           # text to put in html header <title>
 #
 module ApplicationHelper
   # All helpers are autoloaded under Zeitwerk
-  def safe_empty
-    "".html_safe
-  end
 
-  def safe_br
-    "<br/>".html_safe
-  end
-
-  def safe_nbsp
-    "&nbsp;".html_safe
-  end
-
-  # Return escaped HTML.
-  #
-  #   "<i>X</i>"  -->  "&lt;i&gt;X&lt;/i&gt;"
-  def escape_html(html)
-    h(html.to_str)
+  def css_theme
+    if in_admin_mode?
+      "Admin"
+    elsif session[:real_user_id].present?
+      "Sudo"
+    elsif browser.bot? || !@user
+      MO.default_theme
+    elsif MO.themes.member?(controller.action_name)
+      # when looking at a theme's info page render it in that theme
+      controller.action_name
+    elsif @user && @user&.theme.present? &&
+          MO.themes.member?(@user.theme)
+      @user.theme
+    elsif @user
+      MO.themes.sample
+    end
   end
 
   # Return a width class for the layout content container.
@@ -78,143 +56,22 @@ module ApplicationHelper
     end
   end
 
-  # --------- links and buttons ------------------------------------------------
+  # This can be called to display flash notices either in the page or a modal.
+  # Send it an html `id` to be able to find the notices via JS later.
+  def flash_notices_html
+    return "" unless flash_notices?
 
-  # Call link_to with query params added.
-  def link_with_query(name = nil, options = nil, html_options = nil)
-    link_to(name, add_query_param(options), html_options)
-  end
+    klass = case flash_notice_level
+            when 0 then "alert-success"
+            when 1 then "alert-warning"
+            when 2 then "alert-danger"
+            end
 
-  # Take a query which can be coerced into a different model, and create a link
-  # to the results of that coerced query.  Return +nil+ if not coercable.
-  def link_to_coerced_query(query, model)
-    link = coerced_query_link(query, model)
-    return nil unless link
-
-    link_to(*link)
-  end
-
-  # link to next object in query results
-  def link_next(object)
-    path = if object.class.controller_normalized?
-             if object.type_tag == :rss_log
-               send(:activity_log_path, object.id, flow: "next")
-             else
-               send("#{object.type_tag}_path", object.id, flow: "next")
-             end
-           else
-             { controller: object.show_controller,
-               action: object.next_action, id: object.id }
-           end
-    link_with_query("#{:FORWARD.t} »", path)
-  end
-
-  # link to previous object in query results
-  def link_prev(object)
-    path = if object.class.controller_normalized?
-             if object.type_tag == :rss_log
-               send(:activity_log_path, object.id, flow: "prev")
-             else
-               send("#{object.type_tag}_path", object.id, flow: "prev")
-             end
-           else
-             { controller: object.show_controller,
-               action: object.prev_action, id: object.id }
-           end
-    link_with_query("« #{:BACK.t}", path)
-  end
-
-  # button to destroy object
-  # Used instead of link_to because method: :delete requires jquery_ujs library
-  # Sample usage:
-  #   destroy_button(object: article)
-  #   destroy_button(object: term, :destroy_object.t(type: :glossary_term)
-  #   destroy_button(
-  #     name: :destroy_object.t(type: :herbarium),
-  #     target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
-  #   )
-  def destroy_button(target:, name: :DESTROY.t)
-    path = if target.is_a?(String)
-             target
-           else
-             add_query_param(send("#{target.type_tag}_path", target.id))
-           end
-    id = target.is_a?(String) ? nil : "destroy_#{target.type_tag}"
-
-    button_to(
-      name, path, method: :delete, class: "text-danger", id: id,
-                  data: { confirm: :are_you_sure.t }
-    )
-  end
-
-  # POST to a path; used instead of a link because POST link requires js
-  # post_button(name: herbarium.name.t,
-  #             path: herbaria_merges_path(that: @merge.id,this: herbarium.id),
-  #             confirm: :are_you_sure.t)
-  def post_button(name:, path:, confirm: nil)
-    data = confirm ? { confirm: confirm } : nil
-    button_to(name, path, method: :post, class: "text-info", data: data)
-  end
-
-  # PUT to a path; used instead of a link because PUT link requires js
-  # put_button(name: herbarium.name.t,
-  #            path: herbarium_path(id: @herbarium.id),
-  #            confirm: :are_you_sure.t)
-  def put_button(name:, path:, confirm: nil)
-    data = confirm ? { confirm: confirm } : nil
-    button_to(name, path, method: :put, class: "text-info", data: data)
-  end
-
-  # PATCH to a path; used instead of a link because PATCH link requires js
-  # patch_button(name: herbarium.name.t,
-  #              path: herbarium_path(id: @herbarium.id),
-  #              confirm: :are_you_sure.t)
-  def patch_button(name:, path:, confirm: nil)
-    data = confirm ? { confirm: confirm } : nil
-    button_to(name, path, method: :patch, class: "text-info", data: data)
-  end
-
-  # Convert @links in index views into a list of tabs for RHS tab set.
-  def create_links(links)
-    return [] unless links
-
-    links.compact.map { |str, url| link_to(str, url) }
-  end
-
-  # Short-hand to render shared tab_set partial for a given set of links.
-  def draw_tab_set(links)
-    render(partial: "layouts/content/tab_set", locals: { links: links })
+    tag.div(flash_get_notices, id: "flash_notices",
+                               class: class_names("alert mt-3", klass))
   end
 
   # ----------------------------------------------------------------------------
-
-  # Create an in-line white-space element approximately the given width in
-  # pixels.  It should be non-line-breakable, too.
-  def indent
-    "<span class='ml-10px'>&nbsp;</span>".html_safe
-  end
-
-  def content_tag_if(condition, name, content_or_options_with_block = nil,
-                     options = nil, escape = true, &block)
-    return unless condition
-
-    content_tag(name, content_or_options_with_block, options, escape, &block)
-  end
-
-  def content_tag_unless(condition, name, content_or_options_with_block = nil,
-                         options = nil, escape = true, &block)
-    content_tag_if(!condition, name, content_or_options_with_block,
-                   options, escape, &block)
-  end
-
-  # Wrap an html object in '<span title="blah">' tag.  This has the effect of
-  # giving it context help (mouse-over popup) in most modern browsers.
-  #
-  #   <%= add_context_help(link, "Click here to do something.") %>
-  #
-  def add_context_help(object, help)
-    content_tag(:span, object, title: help, data: { toggle: "tooltip" })
-  end
 
   # Add something to the header from within view.  This can be called as many
   # times as necessary -- the application layout will mash them all together
@@ -229,58 +86,6 @@ module ApplicationHelper
   def add_header(str)
     @header ||= safe_empty
     @header += str
-  end
-
-  # Create a table out of a list of Arrays.
-  #
-  #   make_table([[1,2],[3,4]])
-  #
-  # Produces:
-  #
-  #   <table>
-  #     <tr>
-  #       <td>1</td>
-  #       <td>2</td>
-  #     </tr>
-  #     <tr>
-  #       <td>3</td>
-  #       <td>4</td>
-  #     </tr>
-  #   </table>
-  #
-  def make_table(rows, table_opts = {}, tr_opts = {}, td_opts = {})
-    content_tag(:table, table_opts) do
-      rows.map do |row|
-        make_row(row, tr_opts, td_opts) + make_line(row, td_opts)
-      end.safe_join
-    end
-  end
-
-  def make_row(row, tr_opts = {}, td_opts = {})
-    content_tag(:tr, tr_opts) do
-      if row.is_a?(Array)
-        row.map do |cell|
-          make_cell(cell, td_opts)
-        end.safe_join
-      else
-        row
-      end
-    end
-  end
-
-  def make_cell(cell, td_opts = {})
-    content_tag(:td, cell.to_s, td_opts)
-  end
-
-  def make_line(_row, td_opts)
-    colspan = td_opts[:colspan]
-    if colspan
-      content_tag(:tr, class: "MatrixLine") do
-        content_tag(:td, tag(:hr), class: "MatrixLine", colspan: colspan)
-      end
-    else
-      safe_empty
-    end
   end
 
   # Take URL that got us to this page and add one or more parameters to it.
@@ -371,54 +176,5 @@ module ApplicationHelper
     return nil unless idx
 
     query.result_ids[idx + 1] || query.result_ids[idx - 1]
-  end
-
-  # Override Rails method of the same name.  Just calls our
-  # Textile#textilize_without_paragraph method on the given string.
-  def textilize_without_paragraph(str, do_object_links = false)
-    Textile.textilize_without_paragraph(str, do_object_links)
-  end
-
-  # Override Rails method of the same name.  Just calls our Textile#textilize
-  # method on the given string.
-  def textilize(str, do_object_links = false)
-    Textile.textilize(str, do_object_links)
-  end
-
-  # Create stylable file input field with client-side size validation.
-  def custom_file_field(obj, attr, opts = {})
-    max_size = MO.image_upload_max_size
-    max_size_in_mb = (max_size.to_f / 1024 / 1024).round
-    file_field = file_field(
-      obj,
-      attr,
-      opts.merge(
-        max_upload_msg: :validate_image_file_too_big.l(max: max_size_in_mb),
-        max_upload_size: max_size
-      )
-    )
-    content_tag(:span, :select_file.t + file_field,
-                class: "file-field btn btn-default") +
-      content_tag(:span, :no_file_selected.t)
-  end
-
-  def date_select_opts(obj = nil)
-    start_year = 20.years.ago.year
-    init_value = obj.try(&:when).try(&:year)
-    start_year = init_value if init_value && init_value < start_year
-    { start_year: start_year,
-      end_year: Time.zone.now.year,
-      order: [:day, :month, :year] }
-  end
-
-  # contents of the <title> in html header
-  def title_tag_contents(action_name)
-    if @title.present?
-      @title.strip_html.html_safe
-    elsif TranslationString.where(tag: "title_for_#{action_name}").present?
-      :"title_for_#{action_name}".t
-    else
-      action_name.tr("_", " ").titleize
-    end
   end
 end

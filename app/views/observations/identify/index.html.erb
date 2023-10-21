@@ -1,0 +1,33 @@
+<%
+@container = :full
+add_page_title(:obs_needing_id.t)
+
+flash_error(@error) if @error && @objects.empty?
+%>
+
+<div class="container-text">
+  <%= content_tag(:p, :obs_needing_id_intro.tp) %>
+  <%# render(partial: "observations/identify/form_identify_filter") %>
+</div>
+
+<% # initializes module with translations for js messages
+inject_javascript_at_end %(
+  VoteByAjaxModule({
+    show_namings_lose_changes: '#{j :show_namings_lose_changes.l.gsub("\n", " ")}',
+    show_namings_saving: '#{j :show_namings_saving.l}'
+  })
+) %>
+
+<%= paginate_block(@pages) do %>
+  <ul class="row list-unstyled mt-3">
+    <%= render(partial: "shared/matrix_box",
+               locals: { link_method: :get, identify: true },
+               layout: "shared/matrix_table",
+               collection: @objects,
+               as: :object) %>
+    <div style="clear:left"></div>
+  </ul>
+<% end %>
+
+<!--AJAX SAVING VOTE MESSAGE-->
+<%= render(partial: "shared/modal_ajax_progress") %>

@@ -1,6 +1,6 @@
 <%
-  @title = :show_rss_log_title.t(title: @rss_log.unique_format_name)
-  @tabsets = {pager_for: @rss_log}
+add_page_title(:show_rss_log_title.t(title: @rss_log.unique_format_name))
+add_pager_for(@rss_log)
 %>
 
 <% if @rss_log.notes %>
@@ -21,6 +21,5 @@
 
 <%= if target = @rss_log.target
   link_with_query(:show_object.t(type: target.type_tag),
-                  controller: target.show_controller,
-                  action: target.show_action, id: target.id)
+                  target.show_link_args)
 end %>

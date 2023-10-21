@@ -1,16 +1,14 @@
 <%
-  @title = show_title(@article)
-  @tabsets = { right: draw_tab_set(show_tabs_for_user(@article, @user)) }
-  @container = :wide
+@container = :wide
+add_page_title(article_show_title(@article))
+add_tab_set(article_show_tabs(article: @article, user: @user))
 %>
 
 <div>
   <%= :BY.t %> <%= user_link(@article.user) %>,
-  <%= content_tag(:small, @article.created_at.fancy_time) %>
+  <%= content_tag(:small, @article.created_at.display_time) %>
 </div>
-<div class="mt-3 panel panel-default">
-  <div class="panel-body">
-    <%= @article.body.tpl %>
-  </div>
-</div>
+
+<%= panel_block(class: "mt-3") do @article.body.tpl end %>
+
 <%= show_object_footer(@article) %>

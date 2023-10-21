@@ -1,0 +1,76 @@
+<%
+  add_page_title(:edit_visual_group_title.t(name: @visual_group.name))
+  @container = :full
+  javascript_include("visual_group_status")
+%>
+
+<div class="container-text">
+  <p id="notice"><%= notice %></p>
+
+  <p>
+    <%= link_to(:visual_group_show.t, @visual_group) %> |
+    <%= link_to(:visual_group_index.t,
+                visual_model_visual_groups_path(@visual_group.visual_model)) %>
+  </p>
+
+  <%= render('form', visual_group: @visual_group )%>
+
+  <span id="filter_options">
+    <hr>
+  </span>
+
+  <p>
+    <strong><%= :visual_group_includes_names.t %>:</strong><br>
+    <% @visual_group.distinct_names.each do |name| %>
+    <%= link_to(name[0],
+                edit_visual_group_path(@visual_group, filter: name[0], anchor: "filter_options"))%><br>
+    <% end %>
+  </p>
+
+  <hr>
+
+  <%= form_with(url: edit_visual_group_path(@visual_group), method: :get,
+                id: "visual_group_filters_form") do |f| %>
+
+    <%= f.label(:filter, :edit_visual_group_filter_options.t) %>
+    <div class="form-group form-inline">
+      <%= f.text_field(:filter, value: @filter, size: 60,
+                       class: "form-control", id: "filter") %>
+      <%= submit_button(form: f, button: :edit_visual_group_update_filter.t) %>
+    </div>
+
+  <% end %>
+
+  <p>
+    <% if @status != "included" %>
+      <%= link_to(:visual_group_included.t,
+          edit_visual_group_path(@visual_group, status: "included",
+                                                anchor: "filter_options")) %> |
+    <% end %>
+    <% if @status != "excluded" %>
+      <%= link_to(:visual_group_excluded.t,
+          edit_visual_group_path(@visual_group, status: "excluded",
+                                                anchor: "filter_options")) %> |
+    <% end %>
+    <% if @status != "needs_review" %>
+      <%= link_to(:visual_group_needs_review.t,
+          edit_visual_group_path(@visual_group, status: "needs_review",
+                                                anchor: "filter_options")) %>
+    <% else %>
+      <a href="javascript:window.location.reload(true)"><%= :RELOAD.t %></a>
+    <% end %>
+  </p>
+
+  <p>
+    <%= :"visual_group_count_#{@status}".t(count: @visual_group.image_count(@status)) %>
+  </p>
+</div><!--.container-text -->
+
+<%= render(partial: "visual_groups/image_matrix",
+           locals: { visual_group: @visual_group, status: @status }) %>
+
+<p>
+  <%= link_to(:visual_group_show.t, @visual_group) %> |
+  <%= link_to(:visual_group_index.t,
+              visual_model_visual_groups_path(@visual_group.visual_model)) %>
+</p>

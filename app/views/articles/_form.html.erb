@@ -1,20 +1,17 @@
-<%= form_with model: @article do |f| %>
+<%= form_with(model: @article) do |f| %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:article_title, "#{:article_title.t}:") %>
-    <%= f.text_field(:title, class: "form-control") %>
-    <div class="help-block">
-      <%= :form_article_title_help.t %>
-      <%= :field_textile_link.t %>
-    </div>
-  </div>
+  <% append = help_block(:div, :form_article_title_help.t +
+                               :field_textile_link.t) %>
+  <%= text_field_with_label(form: f, field: :title,
+                            label: :article_title.t + ":",
+                            data: { autofocus: true },
+                            append: append) %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:article_body, "#{:article_body.t}:") %>
-    <%= f.text_area(:body, rows: 10, class: "form-control") %>
-    <p class="help-block"><%= :field_textile_link.t %></p>
-  </div>
+  <% append = help_block(:p, :field_textile_link.t) %>
+  <%= text_area_with_label(form: f, field: :body, rows: 10,
+                           label: :article_body.t + ":",
+                           append: append) %>
 
-  <%= f.submit(:SUBMIT.t, class: "btn btn-default center-block mt-3") %>
+  <%= submit_button(form: f, button: :SUBMIT.t, center: true) %>
 
 <% end %>

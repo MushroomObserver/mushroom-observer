@@ -1,23 +1,15 @@
 <%# Display form for a new request to be a herbarium curator %>
 <%
-  @title = :show_herbarium_curator_request.t
+add_page_title(:show_herbarium_curator_request.t)
 
-  tabs = [
-    link_with_query(
-      :cancel_and_show.t(type: :herbarium), herbarium_path(@herbarium)
-    ),
-    link_with_query(:herbarium_index.t, herbaria_path(flavor: :nonpersonal))
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(herbaria_curator_request_tabs(herbarium: @herbarium))
 %>
 
 <%= :show_herbarium_curator_help.tp %>
 
-<%= form_with(
-      url: add_query_param(
-              herbaria_curator_requests_path(id: @herbarium, back: @back)
-      )
-    ) do |f| %>
+<%= form_with(url: herbaria_curator_requests_path(id: @herbarium, back: @back,
+                                                  q: get_query_param),
+              id: "herbarium_curator_request_form") do |f| %>
 
   <div class="form-group mt-3">
     <%= f.label(:name, :HERBARIUM.t) %>: <%= @herbarium.name.t %>
@@ -28,6 +20,6 @@
                     data: { autofocus: true }) %>
   </div>
 
-  <%= f.submit(:SEND.l, class: "btn btn-default center-block mt-3") %>
+  <%= submit_button(form: f, button: :SEND.l, center: true) %>
 
 <% end %>

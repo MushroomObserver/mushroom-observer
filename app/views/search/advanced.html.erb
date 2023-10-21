@@ -1,62 +1,56 @@
 <%
-  @title = :app_advanced_search.t
+  add_page_title(:app_advanced_search.t)
+  models = [
+    [:OBSERVATIONS.l, :observation],
+    # temporarily disabled for performance
+    # 2021-09-12 JDC
+    # [:IMAGES.l, :image],
+    [:LOCATIONS.l, :location],
+    [:NAMES.l, :name],
+  ]
 %>
 
-<p class="help-block"><%= :advanced_search_caveat.t %></p>
+<%= help_block(:p, :advanced_search_caveat.t) %>
 
-<%= form_tag(action: :advanced, method: :get) do %>
-  <p>
-    <%= submit_tag(:advanced_search_submit.l,
-                    class: "btn btn-default center-block") %>
-  </p>
+<%= form_with(scope: :search, url: { action: :advanced },
+              method: :get, id: "advanced_search_form",
+              class: "pb-5 mb-5") do |f| %>
 
-  <div class="form-group">
-    <%= label_tag(:search_model, :advanced_search_result_type.t + ":") %>
-    <span class="help"><%= :advanced_search_result_type_help.t %></span><br/>
-    <%= select(:search, :model, [
-                                  [:OBSERVATIONS.l, :observation],
-                                  # temporarily disabled for performance
-                                  # 2021-09-12 JDC
-                                  # [:IMAGES.l, :image],
-                                  [:LOCATIONS.l, :location],
-                                  [:NAMES.l, :name],
-                                ]) %>
-  </div>
+  <%= submit_button(form: f, button: :advanced_search_submit.l, center: true) %>
 
-  <div class="form-group">
-    <%= label_tag(:search_name, :NAME.t + ":") %>
-    <span class="help"><%= :advanced_search_name_help.t %></span>
-    <%= text_field(:search, :name, class: "form-control") %>
-    <% turn_into_name_auto_completer(:search_name, primer: Name.primer,
-                                      token: " OR ") %>
-  </div>
+  <% mod_betw = help_note(:span, :advanced_search_result_type_help.t) %>
+  <%= select_with_label(form: f, field: :model,
+                        label: :advanced_search_result_type.t + ":",
+                        options: models, select_opts: {},
+                        between: mod_betw) %>
 
-  <div class="form-group">
-    <%= label_tag(:search_user, :OBSERVER.t + ":") %>
-    <span class="help"><%= :advanced_search_observer_help.t %></span>
-    <%= text_field(:search, :user, class: "form-control") %>
-    <% turn_into_user_auto_completer(:search_user, primer: User.primer,
-                                      token: " OR ") %>
-  </div>
+  <% nam_betw = help_note(:span, :advanced_search_name_help.t) %>
+  <%= text_field_with_label(form: f, field: :name, placeholder: :start_typing.l,
+                            label: :NAME.t + ":", between: nam_betw,
+                            data: { autocompleter: :name,
+                                    autocomplete_separator: " OR " }) %>
 
-  <div class="form-group">
-    <%= label_tag(:search_location, :LOCATION.t + ":") %>
-    <span class="help"><%= :advanced_search_location_help.t %></span>
-    <%= text_field(:search, :location, class: "form-control") %>
-    <% turn_into_location_auto_completer(:search_location,
-                                          primer: Location.primer,
-                                          token: " OR ") %>
-  </div>
+  <% usr_betw = help_note(:span, :advanced_search_observer_help.t) %>
+  <%= text_field_with_label(form: f, field: :user, placeholder: :start_typing.l,
+                            label: :OBSERVER.t + ":", between: usr_betw,
+                            data: { autocompleter: :user,
+                                    autocomplete_separator: " OR " }) %>
 
-  <div class="form-group">
-    <%= label_tag(:search_content, :advanced_search_content.t + ":") %>
-    <span class="help"><%= :advanced_search_content_help.t %></span>
-    <%= text_field(:search, :content, class: "form-control") %>
-    <p class="help-block"><%= :advanced_search_content_notes.t %></p>
-  </div>
+  <% loc_betw = help_note(:span, :advanced_search_location_help.t) %>
+  <%= text_field_with_label(form: f, field: :location,
+                            placeholder: :start_typing.l,
+                            label: :LOCATION.t + ":", between: loc_betw,
+                            data: { autocompleter: :location,
+                                    autocomplete_separator: " OR " }) %>
 
-  <%= render partial: "advanced_search_filters" %>
+  <% cnt_betw = help_note(:span, :advanced_search_content_help.t) %>
+  <% cnt_appd = help_block(:p, :advanced_search_content_notes.t) %>
+  <%= text_field_with_label(form: f, field: :content,
+                            label: :advanced_search_content.t + ":",
+                            between: cnt_betw, append: cnt_appd) %>
 
-  <%= submit_tag(:advanced_search_submit.l,
-                 class: "btn btn-default center-block") %>
+  <%= render(partial: "search/advanced_search_filters", locals: { f: f }) %>
+
+  <%= submit_button(form: f, button: :advanced_search_submit.l, center: true) %>
+
 <% end %>

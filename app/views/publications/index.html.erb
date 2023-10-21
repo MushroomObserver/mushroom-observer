@@ -1,11 +1,7 @@
 <%
-  @title = :publication_index_title.l
-
-  tabs = [
-    link_to(:create_publication.t, new_publication_path)
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :wide
+add_page_title(:publication_index_title.l)
+add_tab_set(publications_index_tabs)
+@container = :wide
 %>
 
 <div class="container-text">

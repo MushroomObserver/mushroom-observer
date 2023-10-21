@@ -1,0 +1,22 @@
+<%# species_list section of create_observation form %>
+
+<div class="row mt-3" id="observation_species_lists">
+  <div class="col-xs-12 col-sm-6 col-sm-push-6">
+    <%= help_block_with_arrow("left", id: "species_lists_help") do %>
+      <%= :form_observations_list_help.t %>
+    <% end %>
+  </div>
+  <div class="col-xs-12 col-sm-6 col-sm-pull-6">
+    <strong><%= :SPECIES_LISTS.t %>:</strong>
+
+    <%= fields_for(:list) do |f_l| %>
+      <% @lists.each do |list| %>
+        <%= check_box_with_label(form: f_l, field: :"id_#{list.id}",
+                                 checked: @list_checks[list.id],
+                                 disabled: !check_permission(list),
+                                 label: list.title) %>
+      <% end %>
+    <% end %>
+
+  </div><!--.col-->
+</div><!--.row-->

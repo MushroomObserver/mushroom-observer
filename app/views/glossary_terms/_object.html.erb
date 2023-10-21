@@ -1,0 +1,14 @@
+<div class="list-group-item">
+  <div class="row">
+    <div class="col-xs-12 col-sm-9">
+      <h4><%= link_to(object.name, glossary_term_path(object.id)) %>:</h4>
+      <%= object.description.tpl %>
+    </div><!--.col-->
+    <div class="col-xs-12 col-sm-3">
+      <%= glossary_term_destroy_button(object) if in_admin_mode? %>
+      <%= if object&.thumb_image_id&.nonzero?
+        interactive_image(object.thumb_image, votes: true)
+      end %>
+    </div><!--.col-->
+  </div><!--.row-->
+</div><!--.list-group-item-->

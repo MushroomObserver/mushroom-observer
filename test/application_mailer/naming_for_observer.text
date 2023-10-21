@@ -1,0 +1,22 @@
+From: news@mushroomobserver.org
+Reply-To: mary@collectivesource.com
+To: rolf@collectivesource.com
+Subject: [MO] Research Request
+
+Research Request
+
+Mary Newbie (mary@collectivesource.com) asked the Mushroom Observer website to forward the following message to you about your observation Agaricus campestris L. (<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris_obs) %>):
+
+A note about https://mushroomobserver.org/<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris_obs) %> for rolf. Please send to 123 Some Pl., Pasadena, CA 91106.
+
+--------------------------------------------------
+
+It is entirely up to you whether you want to reply to Mary Newbie (mary@collectivesource.com) by replying directly to this email.
+Here are some handy links:
+
+Show this observation: https://mushroomobserver.org/<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris_obs) %>
+Latest changes at Mushroom Observer: https://mushroomobserver.org
+
+WARNING: We've heard that some people have mis-used this notification feature in the past, claiming it's for research but not using specimens for that purpose. You may want to take a moment to look at their user profile on MO and perhaps google them to verify that they are actually active mycologists before going to the effort of packaging and sending them any specimens.
+
+If you feel this user is abusing this service please forward this entire email message to: webmaster@mushroomobserver.org

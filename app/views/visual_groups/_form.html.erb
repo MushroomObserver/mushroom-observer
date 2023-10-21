@@ -1,0 +1,37 @@
+<%= form_with(model: [@visual_model, @visual_group], local: true,
+              id: "visual_group_form") do |f| %>
+
+  <% if visual_group.errors.any? %>
+    <div id="error_explanation">
+      <h2>
+	<%= pluralize(visual_group.errors.count, "error") %>
+	prohibited this visual_group from being saved:
+      </h2>
+
+      <ul>
+        <% visual_group.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <div class="form-group">
+      <%= f.label(:name) %>
+      <div class="form-inline">
+        <%= f.text_field(:name, size: 40, class: "form-control") %>
+        <%= content_tag(:span, :VISUAL_GROUP.t, class: "ml-3") %>
+      </div>
+    </div>
+
+    <%= text_area_with_label(form: f, field: :description, cols: 60, rows: 10,
+                             label: :DESCRIPTION.t) %>
+
+    <%= check_box_with_label(form: f, field: :approved, label: :APPROVED.t) %>
+  </div>
+
+  <div class="actions">
+    <%= submit_button(form: f, button: :SUBMIT.t, center: true) %>
+  </div>
+<% end %>

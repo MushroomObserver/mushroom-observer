@@ -1,5 +1,5 @@
 <%
-  @title = :edit_translations_title.t
+  add_page_title(:edit_translations_title.t)
   javascript_include("translations")
 %>
 
@@ -63,7 +63,7 @@
       <div id="right_translation_container">
         <%= form_tag({action: :edit_translations, page: @page}, {id: "post_form"}) %>
           <div id="form_div">
-            <%= render(partial: "form") if @edit_tags.any? %>
+            <%= render(partial: "translation/form") if @edit_tags.any? %>
           </div>
         </form>
       </div>

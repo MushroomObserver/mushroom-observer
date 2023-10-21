@@ -6,6 +6,7 @@ class ContentFilter
     def initialize
       super(
         sym: :clade,
+        name: :CLADE.t,
         models: [Observation, Name]
       )
     end

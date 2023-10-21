@@ -2,13 +2,6 @@
 
 # helpers for creating links in views
 module ObjectLinkHelper
-  # Dictionary of urls for searches on external sites
-  LOCATION_SEARCH_URLS = {
-    Google_Maps: "https://maps.google.com/maps?q=",
-    Google_Search: "https://www.google.com/search?q=",
-    Wikipedia: "https://en.wikipedia.org/w/index.php?search="
-  }.freeze
-
   # Wrap location name in span: "<span>where (count)</span>"
   #
   #   Where: <%= where_string(obs.place_name) %>
@@ -16,7 +9,7 @@ module ObjectLinkHelper
   def where_string(where, count = nil)
     result = where.t
     result += " (#{count})" if count
-    content_tag(:span, result, class: "Data")
+    content_tag(:span, result)
   end
 
   # Wrap location name in link to show_location / observations/index.
@@ -28,26 +21,28 @@ module ObjectLinkHelper
       location = Location.find(location) unless location.is_a?(AbstractModel)
       link_string = where_string(location.display_name, count)
       link_string += " [#{:click_for_map.t}]" if click
-      link_to(link_string, location.show_link_args)
+      link_to(link_string, location_path(id: location.id),
+              { id: "show_location_link_#{location.id}" })
     else
       link_string = where_string(where, count)
       link_string += " [#{:SEARCH.t}]" if click
-      link_to(link_string, controller: :observations,
-                           action: :index, where: where)
+      link_to(link_string, observations_path(where: where),
+              { id: "index_observations_at_where_link" })
     end
   end
 
-  # Wrap name in link to show_name.
+  # Wrap name in link to show_name. Takes id or object
   #
   #   Parent: <%= name_link(name.parent) %>
   #
   def name_link(name, str = nil)
     if name.is_a?(Integer)
       str ||= "#{:NAME.t} ##{name}"
-      link_to(str, Name.show_link_args(name))
+      link_to(str, name_path(name), { id: "show_name_link_#{name}" })
     else
       str ||= name.display_name_brief_authors.t
-      link_to(str, name.show_link_args)
+      link_to(str, name_path(name.id),
+              { id: "show_name_link_#{name.id}" })
     end
   end
 
@@ -112,13 +107,15 @@ module ObjectLinkHelper
   #   # If you don't have a full User instance handy:
   #   Modified by: <%= user_link(login, user_id) %>
   #
-  def user_link(user, name = nil)
+  def user_link(user, name = nil, args = {})
     if user.is_a?(Integer)
       name ||= "#{:USER.t} ##{user}"
-      link_to(name, user_path(user))
+      link_to(name, user_path(user),
+              args.merge({ id: "show_user_link_#{user}" }))
     elsif user
       name ||= user.unique_text_name
-      link_to(name, user_path(user.id))
+      link_to(name, user_path(user.id),
+              args.merge({ id: "show_user_link_#{user.id}" }))
     else
       "?"
     end
@@ -136,13 +133,11 @@ module ObjectLinkHelper
   def user_list(title, users = [])
     return safe_empty unless users&.any?
 
-    title = users.count > 1 ? title.to_s.pluralize.to_sym.t : title.t
+    title = users.size > 1 ? title.to_s.pluralize.to_sym.t : title.t
     links = users.map { |u| user_link(u, u.legal_name) }
     # interpolating would require inefficient #sanitize
     # or dangerous #html_safe
-    # rubocop:disable Style/StringConcatenation
     title + ": " + links.safe_join(", ")
-    # rubocop:enable Style/StringConcatenation
   end
 
   # Wrap object's name in link to the object, return nil if no object
@@ -151,7 +146,8 @@ module ObjectLinkHelper
   def link_to_object(object, name = nil)
     return nil unless object
 
-    link_to(name || object.title.t, object.show_link_args)
+    link_to(name || object.title.t, object.show_link_args,
+            { id: "show_#{object.type_tag}_link_#{object.id}" })
   end
 
   # Wrap description title in link to show_description.
@@ -162,32 +158,17 @@ module ObjectLinkHelper
     result = description_title(desc)
     return result if result.match?("(#{:private.t})$")
 
-    link_with_query(result, desc.show_link_args)
-  end
-
-  # Array of links to searches on external sites;
-  # Shown on create/edit location pages
-  def location_search_links(name)
-    search_string = name.gsub(" Co.", " County").gsub(", USA", "").
-                    tr(" ", "+").gsub(",", "%2C")
-    LOCATION_SEARCH_URLS.each_with_object([]) do |site, link_array|
-      link_array << search_link_to(site.first, search_string)
-    end
-  end
-
-  def search_link_to(site_symbol, search_string)
-    return unless (url = LOCATION_SEARCH_URLS[site_symbol])
-
-    link_to(site_symbol.to_s.titlecase, "#{url}#{search_string}")
+    link_with_query(result, desc.show_link_args,
+                    id: "show_description_link_#{desc.id}")
   end
 
   def observation_herbarium_record_link(obs)
-    count = obs.herbarium_records.count
+    count = obs.herbarium_records.size
     if count.positive?
 
       link_to((count == 1 ? :herbarium_record.t : :herbarium_records.t),
-              controller: :herbarium_record, action: :observation_index,
-              id: obs.id)
+              herbarium_records_path(observation_id: obs.id),
+              { id: "herbarium_records_for_observation_link" })
     else
       return :show_observation_specimen_available.t if obs.specimen
 

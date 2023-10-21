@@ -1,14 +1,7 @@
 <%
-  @title = :edit_publication_title.l
+add_page_title(:edit_publication_title.l)
 
-  tabs = [
-    link_to(:cancel_and_show.t(type: :publication), @publication),
-    link_to(:publication_index.t, publications_path)
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(publication_form_edit_tabs(pub: @publication))
 %>
 
-<%= form_for(@publication, action: :update) do |form| %>
-  <%= render(partial: "form", locals: {form: form}) %>
-  <%= form.submit(:SAVE.t, class: "btn btn-default center-block mt-3") %>
-<% end %>
+<%= render(partial: "publications/form", locals: { action: :update }) %>

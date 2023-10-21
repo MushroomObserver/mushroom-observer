@@ -17,7 +17,6 @@ class LocationTest < UnitTestCase
     bad_location("USA, North America")
     bad_location("San Francisco, USA")
     bad_location("San Francisco, CA, USA")
-    bad_location("San Francisco, San Francisco Co., California, USA")
     # bad_location("Tilden Park, California, USA") - can't detect
     # bad_location("Tilden Park, Kensington, California, USA") - can't detect
     bad_location("Albis Mountain Range, Zurich area, Switzerland")
@@ -38,6 +37,7 @@ class LocationTest < UnitTestCase
     good_location("Earth")
     good_location("North America")
     good_location("San Francisco, California, USA")
+    good_location("San Francisco, San Francisco Co., California, USA")
     good_location("Tilden Park, Contra Costa Co., California, USA")
     good_location("Albis Mountain Range, near Zurich, Switzerland")
     good_location("Southern California, USA")
@@ -116,7 +116,7 @@ class LocationTest < UnitTestCase
     loc  = locations(:albion)
     desc = location_descriptions(:albion_desc)
 
-    QueuedEmail.queue_emails(true)
+    QueuedEmail.queue = true
     QueuedEmail.all.map(&:destroy)
     location_version = loc.version
     description_version = desc.version
@@ -274,7 +274,7 @@ class LocationTest < UnitTestCase
     assert_equal(1, desc.authors.length)
     assert_equal(2, desc.editors.length)
     assert_equal(mary, desc.authors.first)
-    assert_user_list_equal([rolf, dick], desc.editors)
+    assert_user_arrays_equal([rolf, dick], desc.editors)
     assert_equal(3, QueuedEmail.count)
     assert_email(2,
                  flavor: "QueuedEmail::LocationChange",
@@ -307,7 +307,7 @@ class LocationTest < UnitTestCase
     assert_equal(1, desc.authors.length)
     assert_equal(2, desc.editors.length)
     assert_equal(mary, desc.authors.first)
-    assert_user_list_equal([rolf, dick], desc.editors)
+    assert_user_arrays_equal([rolf, dick], desc.editors)
     assert_email(3,
                  flavor: "QueuedEmail::LocationChange",
                  from: dick,
@@ -319,7 +319,7 @@ class LocationTest < UnitTestCase
                  old_description_version: desc.version,
                  new_description_version: desc.version)
     assert_equal(4, QueuedEmail.count)
-    QueuedEmail.queue_emails(false)
+    QueuedEmail.queue = false
   end
 
   def test_parse_latitude
@@ -512,7 +512,7 @@ class LocationTest < UnitTestCase
 
   def test_scope_in_region
     assert_includes(
-      Location.in_region("New York\, USA"),
+      Location.in_region("New York, USA"),
       locations(:nybg_location)
     )
     assert_not_includes(

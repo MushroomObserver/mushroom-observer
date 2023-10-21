@@ -1,0 +1,68 @@
+From: news@mushroomobserver.org
+Reply-To: no-reply@mushroomobserver.org
+To: mary@collectivesource.com
+Subject: [MO] Petigera Has Been Changed
+
+Name was Changed
+
+There were change(s) made to the name Petigera (<%= ActiveRecord::FixtureSet.identify(:peltigera) %>):
+
+Time: IGNORE
+By: Tricky Dick (dick)
+
+Name changed to: Peltigera
+Author changed to: (Old) New Auth.
+Citation changed to: Ye Auld Manual of Lichenes, 1800.
+Rank changed to: Genus
+License changed to: Creative Commons Non-commercial v3.0
+Reviewed changed to: Approved
+Status changed to: Accepted
+
+Taxonomic Classification changed to:
+--------------------------------------------------
+Kingdom: Fungi
+Phylum: Ascomycota
+Class: Ascomycetes
+Order: Lecanorales
+Family: Peltigeraceae
+--------------------------------------------------
+
+General Description changed to:
+--------------------------------------------------
+Broad leafy lichens with soft, felty undersurface, generally with conspicuous veins and rhizines.
+--------------------------------------------------
+
+Diagnostic Description changed to:
+--------------------------------------------------
+Large foliose lichens with either green algae or cyanobacterial photopartners; apothecia on the upper surface of the lobes; soredia, isidia, and/or lobules often present; undersurface ecorticate, often with raised veins and rhizines; upper surface smooth to often tomentose.
+--------------------------------------------------
+
+Distribution changed to:
+--------------------------------------------------
+Cosmopolitan.
+--------------------------------------------------
+
+Habitat changed to:
+--------------------------------------------------
+Mostly found growing with or over mosses, on soil, base of tree trunks, logs and rocks, rarely on trees or limbs.
+--------------------------------------------------
+
+Look Alikes changed to:
+--------------------------------------------------
+Other felt lichens such as Lobaria, Pseudocyphellaria, Sticta and Nephroma look superficially similar but never have well-developed veins or rhizines underneath.
+--------------------------------------------------
+
+Uses changed to:
+--------------------------------------------------
+Good for making birds nests... if you're a bird.
+--------------------------------------------------
+
+You received this email because you are an author of a description of the changed name.
+Here are some handy links:
+
+Show this name: https://mushroomobserver.org/names/<%= ActiveRecord::FixtureSet.identify(:peltigera) %>
+I'm not interested in this name: https://mushroomobserver.org/interests/set_interest?id=<%= ActiveRecord::FixtureSet.identify(:peltigera) %>&type=Name&user=<%= ActiveRecord::FixtureSet.identify(:mary) %>&state=-1
+Stop sending me email like this: https://mushroomobserver.org/account/no_email/<%= ActiveRecord::FixtureSet.identify(:mary) %>?type=names_author
+Change your preferences: https://mushroomobserver.org/account/preferences/edit
+Latest changes at Mushroom Observer: https://mushroomobserver.org
+

@@ -1,0 +1,13 @@
+<!-- Login Settings for Account Preferences Form -->
+
+<%= text_field_with_label(form: f, field: :login, prefs: true) %>
+
+<%= text_field_with_label(form: f, field: :email, prefs: true) %>
+
+<%= password_field_with_label(form: f, field: :password,
+                              label: :prefs_password_new.t + ":") %>
+
+<%= password_field_with_label(form: f, field: :password_confirmation,
+                              label: :prefs_password_confirm.t + ":") %>
+
+<%= submit_button(form: f, button: :SAVE_EDITS.l, center: true) %>

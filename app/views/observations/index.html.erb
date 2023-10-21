@@ -1,18 +1,18 @@
 <%
-  if @links.any? && @objects.any?
-    tabs = create_links(@links)
-    @tabsets = { right: draw_tab_set(tabs) }
-  end
-  @container = :full
+no_hits = params[:pattern].present? ? :title_for_observation_search.l : ""
+add_index_title(@query, no_hits: no_hits) # note default above is non-nil
+add_tab_set(observations_index_tabs(query: @query)) if @objects.any?
+add_sorter(@query, observations_index_sorts)
+@container = :full
 
-  flash_error(@error) if @error && @objects.empty?
+flash_error(@error) if @error && @objects.empty?
 %>
 
 <% if @suggest_alternate_spellings && @objects.empty?
   names = Name.suggest_alternate_spellings(@suggest_alternate_spellings)
   if names.any? %>
     <div class="alert-warning">
-      <div><%= :list_observations_suggestions.t %>:</div>
+      <%= content_tag(:p, "#{:list_observations_suggestions.t}:") %>
       <% names.sort_by(&:sort_name).each do |name| %>
         <div class="pl-3"><%=
           search = PatternSearch::Observation.new(name.text_name)
@@ -26,8 +26,7 @@
           else
             :list_observation_observations.t + " " +
             link_to(
-              name.display_name.t, controller: :observations,
-              action: :index, pattern: name.text_name
+              name.display_name.t, observations_path(pattern: name.text_name)
             ) + " (#{count})"
           end %>
         </div>

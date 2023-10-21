@@ -1,0 +1,13 @@
+<% if @first_four&.length&.positive? %>
+  <%= panel_with_outer_heading(
+    heading: "#{:show_name_most_confident.t}:",
+    h_tag: :strong,
+    id: "name_confident_observations"
+  ) do %>
+    <% @first_four.each do |obs| %>
+      <%= content_tag(:div, class: "text-center my-4") do
+        show_best_image(obs)
+      end %>
+    <% end %>
+  <% end %>
+<% end %>

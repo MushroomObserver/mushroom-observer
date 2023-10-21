@@ -19,7 +19,7 @@
 #
 #  The specific email classes know which data are required for themselves: how
 #  to store it, how to retrieve it, and how to deliver the actual mail (via
-#  an AccountMailer subclass).
+#  an ApplicationMailer subclass).
 #
 #  == Typical execution flow
 #
@@ -50,11 +50,11 @@
 #
 #  7. QueuedEmail::Blah grabs all the attached data it needs (often done in the
 #     constructor, actually), and calls the build method of the appropriate
-#     AccountMailer subclass:
+#     ApplicationMailer subclass:
 #
-#       CommentEmail.build(from, to, observation, comment)
+#       CommentMailer.build(from, to, observation, comment)
 #
-#  8. AccountMailer subclass renders the email message and dispatches it
+#  8. ApplicationMailer subclass renders the email message and dispatches it
 #     to postfix or whichever mailserver is responsible for delivering email.
 #
 #  == Basic properties
@@ -129,18 +129,6 @@ class QueuedEmail < AbstractModel
   self.inheritance_column = "flavor"
   self.store_full_sti_class = true
 
-  # Ensure that all the subclasses get loaded.  Problem is some subclasses have
-  # the same name as toplevel classes, e.g., QueuedEmail::Comment.  Thus the
-  # constant QueuedEmail::Comment will already be "defined" if Comment is
-  # loaded, so it won't know to try to load the one in QueuedEmail.  This way,
-  # soon as QueuedEmail is defined, we know that all subclasses are also
-  # properly defined, and we no longer have to rely on autoloading.
-  #
-  Dir["#{::Rails.root}/app/models/queued_email/*.rb"].each do |file|
-    match = /(\w+)\.rb$/.match(file)
-    require("queued_email/#{match[1]}") if match
-  end
-
   # ----------------------------
   # :section: General methods.
   # ----------------------------
@@ -154,7 +142,7 @@ class QueuedEmail < AbstractModel
   def self.all_flavors
     unless defined? @@all_flavors
       @@all_flavors = []
-      Dir["#{::Rails.root}/app/models/queued_email/*.rb"].each do |file|
+      Dir[Rails.root.join("app/models/queued_email/*.rb").to_s].each do |file|
         if /(\w+).rb/.match?(file)
           @@all_flavors << "QueuedEmail::#{Regexp.last_match(1).camelize}"
         end
@@ -163,17 +151,14 @@ class QueuedEmail < AbstractModel
     @@all_flavors
   end
 
-  @@queue = false
   # This lets me turn queuing on in unit tests.
   #
   #   # Turn on queuing.
-  #   QueuedEmail.queue_emails(true)
+  #   QueuedEmail.queue = true
   #
   #   # Turn off queuing.
-  #   QueuedEmail.queue_emails(false)
-  def self.queue_emails(state)
-    @@queue = state
-  end
+  #   QueuedEmail.queue = false
+  cattr_accessor(:queue, default: false)
 
   # Create new email and save it.
   #
@@ -225,7 +210,7 @@ class QueuedEmail < AbstractModel
          queued_email_integers.map { |x| "#{x.key}=#{x.value}" }.join(" ") +
          queued_email_strings.map { |x| "#{x.key}=\"#{x.value}\"" }.join(" "))
     current_locale = I18n.locale
-    unless MO.queue_email || @@queue
+    unless MO.queue_email || QueuedEmail.queue
       deliver_email if RunLevel.is_normal?
       destroy
     end
@@ -238,24 +223,18 @@ class QueuedEmail < AbstractModel
     return true unless RunLevel.is_normal?
 
     log_msg = "SEND #{flavor} " \
-      "from=#{begin
-                user.login
-              rescue StandardError
-                "nil"
-              end} " \
-      "to=#{begin
-              to_user.login
-            rescue StandardError
-              "nil"
-            end} " +
-              queued_email_integers.map { |x| "#{x.key}=#{x.value}" }.
-              join(" ") +
-              queued_email_strings.map { |x| "#{x.key}=\"#{x.value}\"" }.
-              join(" ")
+      "from=#{user&.login || "nil"} " \
+      "to=#{to_user&.login || "nil"} " +
+              queued_email_integers.map { |x|
+                "#{x.key}=#{x.value}"
+              }.join(" ") +
+              queued_email_strings.map do |x|
+                "#{x.key}=\"#{x.value}\""
+              end.join(" ")
     self.class.debug_log(log_msg)
     current_locale = I18n.locale
     result = false
-    if user == to_user
+    if user.present? && user == to_user
       unless Rails.env.test?
         raise("Skipping email with same sender and recipient: #{user.email}\n")
       end
@@ -267,7 +246,7 @@ class QueuedEmail < AbstractModel
   rescue StandardError => e
     warn("ERROR CREATING EMAIL")
     warn(log_msg)
-    warn(e.to_s)
+    warn(e)
     warn(e.backtrace)
     I18n.locale = current_locale
     false
@@ -292,7 +271,7 @@ class QueuedEmail < AbstractModel
   def dump
     result = ""
     result += "#{id}: from => #{user&.login}, "
-    result += "to => #{to_user.login}, flavor => #{flavor}, "
+    result += "to => #{to_user&.login}, flavor => #{flavor}, "
     result += "queued => #{queued}\n"
     queued_email_integers.each { |i| result += "\t#{i.key} => #{i.value}\n" }
     queued_email_strings.each { |i| result += "\t#{i.key} => #{i.value}\n" }
@@ -303,7 +282,7 @@ class QueuedEmail < AbstractModel
   # Add line to log to help keep track of what/when/why emails are being queued
   # and when they are actually sent.
   def self.debug_log(msg)
-    File.open("#{::Rails.root}/log/email-debug.log", "a:utf-8") do |fh|
+    Rails.root.join("log/email-debug.log").open("a:utf-8") do |fh|
       fh.puts("#{Time.zone.now} #{msg}")
     end
   end

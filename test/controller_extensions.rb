@@ -96,10 +96,13 @@ module ControllerExtensions
     user
   end
 
+  # FIXME: Give these actions named kwargs, down to `either_requires_either`.
+  # Debugging positional args is WAY TOO CONFUSING. (What arg are you passing?)
+  #
   # Send GET request to a page that should require login.
   #
   #   # Make sure only logged-in users get to see this page.
-  #   requires_login(:edit_name, id: 1)
+  #   requires_login(:edit, id: 1)
   #
   def requires_login(page, *args)
     either_requires_either(:get, page, nil, *args)
@@ -108,7 +111,7 @@ module ControllerExtensions
   # Send POST request to a page that should require login.
   #
   #   # Make sure only logged-in users get to post this page.
-  #   post_requires_login(:edit_name, id: 1)
+  #   put_requires_login(:update, id: 1)
   #
   def post_requires_login(page, *args)
     either_requires_either(:post, page, nil, *args)
@@ -125,9 +128,9 @@ module ControllerExtensions
   # Send GET request to a page that should require a specific user.
   #
   #   # Make sure only reviewers can see this page (non-reviewers get
-  #   # redirected to "show_location").
-  #   requires_user(:review_authors, :show_location, id: 1)
-  #   requires_user(:review_authors, [:location, :show_location], id: 1)
+  #   # redirected to "show").
+  #   requires_user(:review_authors, :show, id: 1)
+  #   requires_user(:review_authors, [:location, :show], id: 1)
   #
   def requires_user(*args)
     either_requires_either(:get, *args)
@@ -153,12 +156,17 @@ module ControllerExtensions
     either_requires_either(:patch, *args)
   end
 
+  def delete_requires_user(*args)
+    either_requires_either(:delete, *args)
+  end
+
   # Helper used by the blah_requires_blah methods.
   # method::        [Request method: "GET" or "POST".
   #                 - Supplied automatically by all four "public" methods.]
   # page::          Name of action.
   # altpage::       [Name of page redirected to if user wrong.
-  #                 - Only include in +requires_user+ and +post_requires_user+.]
+  #                 - Only include in +requires_user+ and +{_}_requires_user+,]
+  #                 If not a simple action MUST be a ctrlr/action/param hash!
   # params::        Hash of parameters for action.
   # stay_on_page::  Does it render template of same name as action if succeeds?
   # username::      Which user should be logged in (default is "rolf").
@@ -167,26 +175,26 @@ module ControllerExtensions
   #
   #   # Make sure only logged-in users get to see this page, and that it
   #   # renders the template of the same name when it succeeds.
-  #   requires_login(:edit_name, id: 1)
+  #   requires_login(:edit, id: 1)
   #
   #   # Make sure only logged-in users get to post this page, but that it
   #   # renders the template of a different name (or redirects) on success.
-  #   post_requires_login(:edit_name, id: 1, false)
+  #   put_requires_login(:update, id: 1, false)
   #
   #   # Make sure only reviewers can see this page (non-reviewers get
-  #   # redirected to "show_location"), and that it renders
+  #   # redirected to "show"), and that it renders
   #   # the template of the same name when it succeeds.
-  #   requires_user(:review_authors, {id: 1}, :show_location)
+  #   requires_user(:new, { id: 1 }, :show)
   #
   #   # Make sure only owner can edit observation (non-owners get
   #   # redirected to "observations/show"), and that it redirects to
   #   # "observations/show" when it succeeds (last argument).
-  #   post_requires_user(:update, {notes: 'new notes'},
+  #   put_requires_user(:update, { notes: 'new notes' },
   #     :show, [:show])
   #
   #   # Even more general case where second case renders a template:
   #   post_requires_user(:action, params,
-  #     {controller: controller1, action: :access_denied, ...},
+  #     { controller: controller1, action: :access_denied, ... },
   #     :success_template)
   #
   #   # Even more general case where both cases redirect:
@@ -267,15 +275,19 @@ module ControllerExtensions
 
   # Assert the existence of a given link in the response body, and check
   # that it points to the right place.
-  def assert_link_in_html(label, url_opts, _msg = nil)
-    revised_opts = raise_params(url_opts)
-    url = url_for(revised_opts)
+  def assert_link_in_html(label, url, _msg = nil)
+    unless url.is_a?(String)
+      revised_opts = raise_params(url)
+      url = url_for(revised_opts)
+    end
     assert_select("a[href='#{url}']", text: label)
   end
 
-  def assert_image_link_in_html(img_src, url_opts, _msg = nil)
-    revised_opts = raise_params(url_opts)
-    url = url_for(revised_opts)
+  def assert_image_link_in_html(img_src, url, _msg = nil)
+    unless url.is_a?(String)
+      revised_opts = raise_params(url)
+      url = url_for(revised_opts)
+    end
     assert_select("a[href = '#{url}']>img") do
       assert_select(":match('src', ?)", img_src)
     end
@@ -365,19 +377,19 @@ module ControllerExtensions
   # require_user::  Check result if wrong user logged in.
   # result::        Expected result if everything is correct.
   #
-  #   # POST the edit_name form: requires standard login; redirect to
+  #   # PUT the edit form: requires standard login; redirect to
   #   # show_name if it succeeds.
   #   assert_request(
-  #     method: "POST",
-  #     action: "edit_name",
+  #     method: "PUT",
+  #     action: :update,
   #     params: params,
   #     require_login: :login,
-  #     result: ["show_name"]
+  #     result: ["show"]
   #   )
   #
   #   # Make sure only logged-in users get to post this page, and that it
   #   # render the template of the same name when it succeeds.
-  #   post_requires_login(:edit_name, id: 1)
+  #   put_requires_login(:update, id: 1)
   #
   def assert_request(args)
     method       = args[:method] || :get
@@ -420,11 +432,11 @@ module ControllerExtensions
   #   assert_response("template")
   #
   #   # Expect a redirect to particular observation
-  #   assert_response({ controller: :observations, action: :show, id: 1 })
+  #   assert_response({ controller: "/observations", action: :show, id: 1 })
   #   assert_response({ action: :show, id: 1 })
   #
   #   # Expect a redirection to site index.
-  #   assert_response(controller: :rss_logs, action: :index)
+  #   assert_response(controller: "/rss_logs", action: :index)
   #
   #   # These also expect a redirection to site index.
   #   assert_response(["index"])
@@ -432,7 +444,7 @@ module ControllerExtensions
   #
   #   # Short-hand for common redirects:
   #   assert_response(:index)   => /rss_logs
-  #   assert_response(:login)   => /account/login
+  #   assert_response(:login)   => /account/login/new
   #   assert_response(:welcome) => /account/welcome
   #
   #   # Lastly, expect redirect to full explicit URL.
@@ -497,11 +509,11 @@ module ControllerExtensions
         msg += "Expected redirect to <root>#{got}"
         assert_redirected_to("/", msg)
       elsif arg == :login
-        msg += "Expected redirect to <account/login>#{got}"
-        assert_redirected_to({ controller: "account", action: "login" }, msg)
+        msg += "Expected redirect to <account/login/new>#{got}"
+        assert_redirected_to(new_account_login_path, msg)
       elsif arg == :welcome
         msg += "Expected redirect to <account/welcome>#{got}"
-        assert_redirected_to({ controller: "account", action: "login" }, msg)
+        assert_redirected_to(new_account_login_path, msg)
       else
         raise("Invalid response type expected: [#{arg.class}: #{arg}]\n")
       end

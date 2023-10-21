@@ -29,7 +29,7 @@ class Query::CollectionNumberBase < Query::Base
     super
   end
 
-  def default_order
+  def self.default_order
     "name_and_number"
   end
 end

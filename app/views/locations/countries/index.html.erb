@@ -1,0 +1,32 @@
+<%
+add_page_title(:list_countries_title.t)
+
+add_tab_set(location_countries_tabs)
+@container = :wide
+%>
+
+<div class="row">
+  <div class="col-xs-4">
+    <%= content_tag(:h4, :list_countries_known.t +
+                         " (#{@cc.known_by_count.length})") %>
+    <% @cc.known_by_count.each do |country, count| %>
+      <%= country_link(country, count) %><br/>
+    <% end %>
+  </div>
+
+  <div class="col-xs-4">
+    <%= content_tag(:h4, :list_countries_missing.t +
+                         " (#{@cc.missing.length})") %>
+    <% @cc.missing.each do |country, _count| %>
+      <%= country %><br/>
+    <% end %>
+  </div>
+
+  <div class="col-xs-4">
+    <%= content_tag(:h4, :list_countries_unknown.t +
+                         " (#{@cc.unknown_by_count.length})") %>
+    <% @cc.unknown_by_count.each do |country, count| %>
+      <%= country_link(country, count) %><br/>
+    <% end %>
+  </div>
+</div><!--.row-->

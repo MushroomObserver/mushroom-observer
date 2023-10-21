@@ -31,7 +31,7 @@ class RssLogTest < UnitTestCase
   def test_detail_for_complexly_created_observation
     # Observation is created then an image is immediately uploaded.
     # We want it to return "observation created" not "image added".
-    log = rss_logs(:observation_rss_log)
+    log = rss_logs(:detailed_unknown_obs_rss_log)
     detail = log.detail
     assert_equal(:rss_created_at.t(type: :observation), detail)
   end
@@ -59,6 +59,20 @@ class RssLogTest < UnitTestCase
     assert_true(log.orphan?)
     assert_equal(:log_location_merged.t(that: loc2.display_name, user: "mary"),
                  log.detail)
+  end
+
+  def test_really_long_notes
+    max = RssLog::MAX_LENGTH
+    log = RssLog.first
+    log.notes = "test test " * (max / 10 - 1)
+    log.save
+    assert_operator(max, ">", log.notes.length)
+    assert_operator(max, "<", log.notes.length + 20)
+    log.add_with_date(:log_object_created_by_user,
+                      user: "make sure this is nice and long!",
+                      type: :OBSERVATION)
+    log.reload
+    assert_operator(max, ">", log.notes.length)
   end
 
   # ---------- helpers ---------------------------------------------------------

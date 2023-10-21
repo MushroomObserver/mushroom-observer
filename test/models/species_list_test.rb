@@ -22,30 +22,30 @@ class SpeciesListTest < UnitTestCase
     spl = species_lists(:first_species_list)
     minimal_unknown_obs = observations(:minimal_unknown_obs)
     detailed_unknown_obs = observations(:detailed_unknown_obs)
-    assert_obj_list_equal([], spl.observations)
+    assert_obj_arrays_equal([], spl.observations)
 
     spl.add_observation(minimal_unknown_obs)
-    assert_obj_list_equal([minimal_unknown_obs], spl.observations)
+    assert_obj_arrays_equal([minimal_unknown_obs], spl.observations)
 
     spl.add_observation(minimal_unknown_obs)
-    assert_obj_list_equal([minimal_unknown_obs], spl.observations)
+    assert_obj_arrays_equal([minimal_unknown_obs], spl.observations)
 
     spl.add_observation(detailed_unknown_obs)
-    assert_obj_list_equal([minimal_unknown_obs,
-                           detailed_unknown_obs].sort_by(&:id),
-                          spl.observations.sort_by(&:id))
+    assert_obj_arrays_equal([minimal_unknown_obs,
+                             detailed_unknown_obs].sort_by(&:id),
+                            spl.observations.sort_by(&:id))
 
     spl.remove_observation(minimal_unknown_obs)
-    assert_obj_list_equal([detailed_unknown_obs], spl.observations)
+    assert_obj_arrays_equal([detailed_unknown_obs], spl.observations)
 
     spl.remove_observation(minimal_unknown_obs)
-    assert_obj_list_equal([detailed_unknown_obs], spl.observations)
+    assert_obj_arrays_equal([detailed_unknown_obs], spl.observations)
 
     spl.remove_observation(detailed_unknown_obs)
-    assert_obj_list_equal([], spl.observations)
+    assert_obj_arrays_equal([], spl.observations)
 
     spl.remove_observation(detailed_unknown_obs)
-    assert_obj_list_equal([], spl.observations)
+    assert_obj_arrays_equal([], spl.observations)
   end
 
   def test_construct_observation
@@ -53,7 +53,7 @@ class SpeciesListTest < UnitTestCase
     assert_users_equal(rolf, spl.user)
     proj = projects(:bolete_project)
     proj.add_species_list(spl)
-    assert_obj_list_equal([dick], proj.user_group.users)
+    assert_obj_arrays_equal([dick], proj.user_group.users)
     User.current = dick
     name = Name.first
 
@@ -67,7 +67,7 @@ class SpeciesListTest < UnitTestCase
     assert(o.created_at >= 1.minute.ago)
     assert(o.updated_at >= 1.minute.ago)
     assert_users_equal(dick, o.user)
-    assert_obj_list_equal([proj], o.projects)
+    assert_obj_arrays_equal([proj], o.projects)
     assert_equal(spl.when, o.when)
     assert_equal(spl.where, o.where)
     assert_equal(spl.location, o.location)
@@ -78,12 +78,12 @@ class SpeciesListTest < UnitTestCase
     assert_true(o.is_collection_location)
     assert_false(o.specimen)
     assert_names_equal(name, o.name)
-    assert_obj_list_equal([n], o.namings)
+    assert_obj_arrays_equal([n], o.namings)
     assert(n.created_at <= now + 1.second)
     assert(n.updated_at <= now + 1.second)
     assert_users_equal(dick, n.user)
     assert_names_equal(name, n.name)
-    assert_obj_list_equal([v], n.votes)
+    assert_obj_arrays_equal([v], n.votes)
     assert(v.created_at <= now + 1.second)
     assert(v.updated_at <= now + 1.second)
     assert_users_equal(dick, v.user)
@@ -109,7 +109,7 @@ class SpeciesListTest < UnitTestCase
     v = Vote.last
     assert_objs_equal(o, spl.observations.last)
     assert_users_equal(mary, o.user)
-    assert_obj_list_equal([], o.projects)
+    assert_obj_arrays_equal([], o.projects)
     assert_equal("2012-01-13", o.when.web_date)
     assert_equal("Undefined Location", o.where)
     assert_nil(o.location)
@@ -120,10 +120,10 @@ class SpeciesListTest < UnitTestCase
     assert_false(o.is_collection_location)
     assert_true(o.specimen)
     assert_names_equal(name, o.name)
-    assert_obj_list_equal([n], o.namings)
+    assert_obj_arrays_equal([n], o.namings)
     assert_users_equal(mary, n.user)
     assert_names_equal(name, n.name)
-    assert_obj_list_equal([v], n.votes)
+    assert_obj_arrays_equal([v], n.votes)
     assert_users_equal(mary, v.user)
     assert_equal(Vote.next_best_vote, v.value)
   end

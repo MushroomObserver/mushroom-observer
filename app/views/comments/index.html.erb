@@ -1,0 +1,18 @@
+<%
+# NOTE: this is the searchable comments index for the whole site. The list of
+# comments for a particular object is in the partial "comments_for_object"
+@container = :text_image
+add_index_title(@query)
+add_sorter(@query, comments_index_sorts)
+
+flash_error(@error) if @error && @objects.empty?
+%>
+
+<%= paginate_block(@pages) do %>
+  <% if @objects.any? %>
+    <% @objects.each do |comment| %>
+      <%= render(partial: "comments/comment", object: comment,
+                 locals: { show_name: true }) %>
+    <% end %>
+  <% end %>
+<% end %>

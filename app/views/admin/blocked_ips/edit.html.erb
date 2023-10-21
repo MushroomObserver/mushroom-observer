@@ -1,0 +1,87 @@
+<%
+add_page_title("")
+@container = :full
+%>
+
+<div class="row">
+  <div class="col-md-6">
+    <p><%= link_to("Refresh Stats", edit_admin_blocked_ips_path) %></p>
+
+    <%# ----- Okay IPs ----- %>
+    <section class="m-3 p-3" style="background:#f7f">
+      <%= form_with(url: admin_blocked_ips_path, method: "patch",
+                    class: "d-inline-block",
+                    id: "admin_okay_ips_form") do |f| %>
+        <div class="form-group form-inline d-inline-block">
+          <span class="text-larger">Okay IPs:</span><!-- .text-larger --> &nbsp;&nbsp;
+          <%= f.text_field(:add_okay,
+                           { value: "", size: 20,
+                             data: { autofocus: true },
+                             class: "form-control" }) %>
+          <%= submit_button(form: f, button: :ADD.l, class: "ml-3") %>
+        </div>
+      <% end %>
+
+      <%= patch_button(name: "Clear List",
+                       path: admin_blocked_ips_path(clear_okay: 1),
+                       class: "btn btn-default",
+                       form_class: "d-inline-block float-right",
+                       id: "clear_okay_ips_list",
+                       data: { confirm: :are_you_sure.t }
+                      ) %>
+
+      <table id="okay_ips" class="ips my-3 table table-striped">
+        <% @okay_ips.each do |ip| %>
+          <tr>
+            <td><%= ip.t %></td>
+            <td>[<%= patch_button(name: :REMOVE.l,
+                       path: admin_blocked_ips_path(remove_okay: ip),
+                       id: "remove_okay_ip_#{ip}",) %>]</td>
+        <% end %>
+      </table>
+    </section><!--#okay_ips-->
+
+    <%# ----- Blocked IPs ----- %>
+    <section class="m-3 p-3" style="background:#f7f">
+
+      <%= form_with(url: admin_blocked_ips_path, class: "d-inline-block",
+                    id: "admin_blocked_ips_form", method: :patch) do |f| %>
+        <div class="form-group form-inline d-inline-block">
+          <span class="text-larger">Blocked IPs:</span><!-- .text-larger --> &nbsp;&nbsp;
+          <%= f.text_field(:add_bad,
+                           { value: "", size: 20,
+                             data: { autofocus: true },
+                             class: "form-control" }) %>
+          <%= submit_button(form: f, button: :ADD.l, class: "ml-3") %>
+        </div>
+      <% end %>
+
+      <%= patch_button(name: "Clear List",
+                       path: admin_blocked_ips_path(clear_bad: 1),
+                       class: "btn btn-default",
+                       form_class: "d-inline-block float-right",
+                       id: "clear_blocked_ips_list",
+                       data: { confirm: :are_you_sure.t }
+                      ) %>
+
+      <table id="blocked_ips" class="ips my-3 table table-striped">
+        <% @blocked_ips.each do |ip| %>
+          <tr>
+            <td><%= ip.t %></td>
+            <td>[<%= patch_button(name: :REMOVE.l,
+                     path: admin_blocked_ips_path(remove_bad: ip),
+                     id: "remove_blocked_ip_#{ip}") %>]</td>
+          </tr>
+      <% end %>
+      </table>
+    </section><!--#blocked_ips-->
+  </div>
+
+  <%# ----- Stats / Most Active Users ----- %>
+  <div class="col-md-6">
+    <% if @ip.present? %>
+      <%= render partial: "ip_stats" %>
+    <% end %>
+    <%= render partial: "ip_summary" %>
+  </div>
+</div>

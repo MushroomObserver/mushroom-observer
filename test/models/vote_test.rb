@@ -68,4 +68,12 @@ class VoteTest < UnitTestCase
     votes(:coprinus_comatus_other_vote).destroy
     assert_raise(ActiveRecord::RecordNotFound) { Vote.find(id) }
   end
+
+  def test_scope_by_user
+    votes_by_rolf = Vote.by_user(users(:rolf))
+    assert_includes(votes_by_rolf, votes(:coprinus_comatus_owner_vote))
+    assert_includes(votes_by_rolf,
+                    votes(:coprinus_comatus_other_naming_rolf_vote))
+    assert_not_includes(votes_by_rolf, votes(:amateur_vote))
+  end
 end

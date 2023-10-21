@@ -9,7 +9,6 @@ class Query::ObservationPatternSearch < Query::ObservationBase
 
   def initialize_flavor
     add_search_condition(search_fields, params[:pattern])
-    add_join(:locations!)
     add_join(:names)
     super
   end
@@ -17,7 +16,6 @@ class Query::ObservationPatternSearch < Query::ObservationBase
   def search_fields
     "CONCAT(" \
       "names.search_name," \
-      "COALESCE(observations.notes,'')," \
       "observations.where" \
       ")"
   end

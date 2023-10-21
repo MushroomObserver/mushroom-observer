@@ -55,7 +55,7 @@ class API2Test < UnitTestCase
   def assert_api_results(expect)
     msg = "API2 results wrong.\nQuery args: #{@api.query.params.inspect}\n" \
           "Query sql: #{@api.query.query}"
-    assert_obj_list_equal(expect, @api.results, :sort, msg)
+    assert_obj_arrays_equal(expect, @api.results, :sort, msg)
   end
 
   def assert_parse(*args)
@@ -123,7 +123,7 @@ class API2Test < UnitTestCase
     assert_users_equal(@user, num.user)
     assert_in_delta(Time.zone.now, num.created_at, 1.minute)
     assert_in_delta(Time.zone.now, num.updated_at, 1.minute)
-    assert_obj_list_equal([@obs], num.observations)
+    assert_obj_arrays_equal([@obs], num.observations)
     assert_equal(@name.strip, num.name)
     assert_equal(@number.strip, num.number)
   end
@@ -143,7 +143,7 @@ class API2Test < UnitTestCase
     assert_users_equal(@user, rec.user)
     assert_in_delta(Time.zone.now, rec.created_at, 1.minute)
     assert_in_delta(Time.zone.now, rec.updated_at, 1.minute)
-    assert_obj_list_equal([@obs], rec.observations)
+    assert_obj_arrays_equal([@obs], rec.observations)
     assert_objs_equal(@herbarium, rec.herbarium)
     assert_equal(@initial_det.strip, rec.initial_det)
     assert_equal(@accession_number.strip, rec.accession_number)
@@ -168,8 +168,8 @@ class API2Test < UnitTestCase
     assert_equal(true, img.ok_for_export)
     assert_equal_even_if_nil(@orig, img.original_name)
     assert_equal(false, img.transferred)
-    assert_obj_list_equal([@proj].compact, img.projects)
-    assert_obj_list_equal([@obs].compact, img.observations)
+    assert_obj_arrays_equal([@proj].compact, img.projects)
+    assert_obj_arrays_equal([@obs].compact, img.observations)
     assert_equal_even_if_nil(@vote, img.users_vote(@user))
   end
 
@@ -240,7 +240,7 @@ class API2Test < UnitTestCase
     assert_equal(@specimen, obs.specimen)
     assert_equal(@notes, obs.notes)
     assert_objs_equal(@img2, obs.thumb_image)
-    assert_obj_list_equal([@img1, @img2].compact, obs.images)
+    assert_obj_arrays_equal([@img1, @img2].compact, obs.images)
     assert_equal(@loc.name, obs.where)
     assert_objs_equal(@loc, obs.location)
     assert_equal(@loc.name, obs.place_name)
@@ -251,8 +251,8 @@ class API2Test < UnitTestCase
     assert(@lat == obs.lat)
     assert(@long == obs.long)
     assert(@alt == obs.alt)
-    assert_obj_list_equal([@proj].compact, obs.projects)
-    assert_obj_list_equal([@spl].compact, obs.species_lists)
+    assert_obj_arrays_equal([@proj].compact, obs.projects)
+    assert_obj_arrays_equal([@spl].compact, obs.species_lists)
     assert_names_equal(@name, obs.name)
     assert_in_delta(@vote, obs.vote_cache, 1) # vote_cache is weird
     if @name
@@ -273,8 +273,8 @@ class API2Test < UnitTestCase
     assert_users_equal(@user, proj.user)
     assert_equal(@title, proj.title)
     assert_equal(@summary, proj.summary)
-    assert_user_list_equal(@admins, proj.admin_group.users)
-    assert_user_list_equal(@members, proj.user_group.users)
+    assert_user_arrays_equal(@admins, proj.admin_group.users)
+    assert_user_arrays_equal(@members, proj.user_group.users)
   end
 
   def assert_last_sequence_correct(seq = Sequence.last)
@@ -384,8 +384,16 @@ class API2Test < UnitTestCase
     do_basic_get_test(Location)
   end
 
+  def test_basic_location_description_get
+    do_basic_get_test(LocationDescription, public: true)
+  end
+
   def test_basic_name_get
     do_basic_get_test(Name)
+  end
+
+  def test_basic_name_description_get
+    do_basic_get_test(NameDescription, public: true)
   end
 
   def test_basic_observation_get
@@ -408,16 +416,16 @@ class API2Test < UnitTestCase
     do_basic_get_test(User)
   end
 
-  def do_basic_get_test(model)
-    expected_object = model.first
+  def do_basic_get_test(model, *args)
+    expected_object = args.empty? ? model.first : model.where(*args).first
     api = API2.execute(
       method: :get,
       action: model.type_tag,
       id: expected_object.id
     )
     assert_no_errors(api, "Errors while getting first #{model}")
-    assert_obj_list_equal([expected_object], api.results,
-                          "Failed to get first #{model}")
+    assert_obj_arrays_equal([expected_object], api.results,
+                            "Failed to get first #{model}")
   end
 
   # ----------------------------
@@ -448,7 +456,7 @@ class API2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting api key")
-    assert_obj_list_equal([APIKey.last], api.results)
+    assert_obj_arrays_equal([APIKey.last], api.results)
     assert_last_api_key_correct
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.except(:app))
@@ -469,7 +477,7 @@ class API2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting api key")
-    assert_obj_list_equal([APIKey.last], api.results)
+    assert_obj_arrays_equal([APIKey.last], api.results)
     assert_last_api_key_correct
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.except(:app))
@@ -493,7 +501,7 @@ class API2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting api key")
-    assert_obj_list_equal([APIKey.last], api.results)
+    assert_obj_arrays_equal([APIKey.last], api.results)
     assert_last_api_key_correct
     assert_api_fail(params.merge(password: "bogus"))
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
@@ -515,7 +523,7 @@ class API2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting api key")
-    assert_obj_list_equal([api_key], api.results)
+    assert_obj_arrays_equal([api_key], api.results)
     assert_api_fail(params.merge(password: "bogus"))
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
 
@@ -625,8 +633,8 @@ class API2Test < UnitTestCase
     rolfs_other_obs = observations(:stereum_hirsutum_1)
     assert_api_pass(params.merge(observation: rolfs_other_obs.id))
     assert_equal(collection_number_count, CollectionNumber.count)
-    assert_obj_list_equal([rolfs_obs, rolfs_other_obs],
-                          CollectionNumber.last.observations, :sort)
+    assert_obj_arrays_equal([rolfs_obs, rolfs_other_obs],
+                            CollectionNumber.last.observations, :sort)
   end
 
   def test_patching_collection_numbers
@@ -660,10 +668,10 @@ class API2Test < UnitTestCase
     }
     assert_api_fail(params.merge(add_observation: marys_obs.id))
     assert_api_pass(params.merge(add_observation: rolfs_obs.id))
-    assert_obj_list_equal([old_obs, rolfs_obs], rolfs_num.reload.observations,
-                          :sort)
+    assert_obj_arrays_equal([old_obs, rolfs_obs], rolfs_num.reload.observations,
+                            :sort)
     assert_api_pass(params.merge(remove_observation: old_obs.id))
-    assert_obj_list_equal([rolfs_obs], rolfs_num.reload.observations)
+    assert_obj_arrays_equal([rolfs_obs], rolfs_num.reload.observations)
     assert_api_pass(params.merge(remove_observation: rolfs_obs.id))
     assert_nil(CollectionNumber.safe_find(rolfs_num.id))
   end
@@ -681,8 +689,8 @@ class API2Test < UnitTestCase
       set_number: num2.number
     }
     assert_api_pass(params)
-    assert_obj_list_equal(obs1.reload.collection_numbers,
-                          obs2.reload.collection_numbers)
+    assert_obj_arrays_equal(obs1.reload.collection_numbers,
+                            obs2.reload.collection_numbers)
     assert_equal(1, obs1.collection_numbers.count)
   end
 
@@ -1086,8 +1094,8 @@ class API2Test < UnitTestCase
     rolfs_other_obs = observations(:stereum_hirsutum_1)
     assert_api_pass(params.merge(observation: rolfs_other_obs.id))
     assert_equal(herbarium_record_count, HerbariumRecord.count)
-    assert_obj_list_equal([rolfs_obs, rolfs_other_obs],
-                          HerbariumRecord.last.observations, :sort)
+    assert_obj_arrays_equal([rolfs_obs, rolfs_other_obs],
+                            HerbariumRecord.last.observations, :sort)
 
     # Make sure it gives correct default for initial_det.
     assert_api_pass(params.except(:initial_det).merge(accession_number: "2"))
@@ -1162,10 +1170,10 @@ class API2Test < UnitTestCase
     }
     assert_api_fail(params.merge(add_observation: marys_obs.id))
     assert_api_pass(params.merge(add_observation: rolfs_obs.id))
-    assert_obj_list_equal([old_obs, rolfs_obs], rolfs_rec.reload.observations,
-                          :sort)
+    assert_obj_arrays_equal([old_obs, rolfs_obs], rolfs_rec.reload.observations,
+                            :sort)
     assert_api_pass(params.merge(remove_observation: old_obs.id))
-    assert_obj_list_equal([rolfs_obs], rolfs_rec.reload.observations)
+    assert_obj_arrays_equal([rolfs_obs], rolfs_rec.reload.observations)
     assert_api_pass(params.merge(remove_observation: rolfs_obs.id))
     assert_nil(HerbariumRecord.safe_find(rolfs_rec.id))
   end
@@ -1379,7 +1387,7 @@ class API2Test < UnitTestCase
       method: :post,
       action: :image,
       api_key: @api_key.key,
-      upload_file: "#{::Rails.root}/test/images/sticky.jpg",
+      upload_file: Rails.root.join("test/images/sticky.jpg"),
       original_name: "strip_this"
     }
     assert_equal("toss", @user.keep_filenames)
@@ -1387,7 +1395,7 @@ class API2Test < UnitTestCase
       File.stub(:chmod, true) do
         api = API2.execute(params)
         assert_no_errors(api, "Errors while posting image")
-        assert_obj_list_equal([Image.last], api.results)
+        assert_obj_arrays_equal([Image.last], api.results)
       end
     end
     assert_last_image_correct
@@ -1418,14 +1426,14 @@ class API2Test < UnitTestCase
       vote: "3",
       observations: @obs.id,
       projects: @proj.id,
-      upload_file: "#{::Rails.root}/test/images/sticky.jpg",
+      upload_file: Rails.root.join("test/images/sticky.jpg"),
       original_name: @orig
     }
     File.stub(:rename, true) do
       File.stub(:chmod, true) do
         api = API2.execute(params)
         assert_no_errors(api, "Errors while posting image")
-        assert_obj_list_equal([Image.last], api.results)
+        assert_obj_arrays_equal([Image.last], api.results)
       end
     end
     assert_last_image_correct
@@ -1444,7 +1452,7 @@ class API2Test < UnitTestCase
     setup_image_dirs
     url = "https://mushroomobserver.org/images/thumb/459340.jpg"
     stub_request(:any, url).
-      to_return(File.read("#{::Rails.root}/test/images/test_image.curl"))
+      to_return(Rails.root.join("test/images/test_image.curl").read)
     params = {
       method: :post,
       action: :image,
@@ -1455,9 +1463,9 @@ class API2Test < UnitTestCase
       api = API2.execute(params)
       assert_no_errors(api, "Errors while posting image")
       img = Image.last
-      assert_obj_list_equal([img], api.results)
+      assert_obj_arrays_equal([img], api.results)
       actual = File.read(img.local_file_name(:full_size))
-      expect = File.read("#{::Rails.root}/test/images/test_image.jpg")
+      expect = Rails.root.join("test/images/test_image.jpg").read
       assert_equal(expect, actual, "Uploaded image differs from original!")
     end
   end
@@ -2089,12 +2097,12 @@ class API2Test < UnitTestCase
     assert(syns.count > 2)
     assert(syns.include?(name2))
     assert_api_pass(params.merge(id: name1.id, clear_synonyms: "yes"))
-    assert_obj_list_equal([name1], Name.find(name1.id).synonyms)
-    assert_obj_list_equal((syns - [name1]).sort_by(&:id),
-                          Name.find(name2.id).synonyms.sort_by(&:id))
+    assert_obj_arrays_equal([name1], Name.find(name1.id).synonyms)
+    assert_obj_arrays_equal((syns - [name1]).sort_by(&:id),
+                            Name.find(name2.id).synonyms.sort_by(&:id))
     assert_api_fail(params.merge(id: name2.id, synonymize_with: name1.id))
     assert_api_pass(params.merge(id: name1.id, synonymize_with: name2.id))
-    assert_obj_list_equal(syns, Name.find(name1.id).synonyms)
+    assert_obj_arrays_equal(syns, Name.find(name1.id).synonyms)
     assert_api_fail(params.merge(id: name1.id, synonymize_with: name3.id))
   end
 
@@ -2112,8 +2120,8 @@ class API2Test < UnitTestCase
     misspelt = Name.find(misspelt.id) # reload might not be enough
     assert_true(misspelt.deprecated)
     assert_names_equal(correct, misspelt.correct_spelling)
-    assert_obj_list_equal([correct, misspelt].sort_by(&:id),
-                          misspelt.synonyms.sort_by(&:id))
+    assert_obj_arrays_equal([correct, misspelt].sort_by(&:id),
+                            misspelt.synonyms.sort_by(&:id))
   end
 
   def test_deleting_names
@@ -2350,8 +2358,9 @@ class API2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting observation")
-    assert_obj_list_equal([Observation.last], api.results)
+    assert_obj_arrays_equal([Observation.last], api.results)
     assert_last_observation_correct
+    assert_equal("mo_api", Observation.last.source)
     assert_api_fail(params.except(:location))
   end
 
@@ -2405,12 +2414,14 @@ class API2Test < UnitTestCase
       projects: @proj.id,
       species_lists: @spl.id,
       thumbnail: @img2.id,
-      images: "#{@img1.id},#{@img2.id}"
+      images: "#{@img1.id},#{@img2.id}",
+      source: "mo_iphone_app"
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting observation")
-    assert_obj_list_equal([Observation.last], api.results)
+    assert_obj_arrays_equal([Observation.last], api.results)
     assert_last_observation_correct
+    assert_equal("mo_iphone_app", Observation.last.source)
     assert_last_naming_correct
     assert_last_vote_correct
     assert_api_fail(params.except(:api_key))
@@ -2517,7 +2528,7 @@ class API2Test < UnitTestCase
     spec = HerbariumRecord.last
     assert_objs_equal(rolf.personal_herbarium, spec.herbarium)
     assert_equal("Peltigera: MO #{obs.id}", spec.herbarium_label)
-    assert_obj_list_equal([obs], spec.observations)
+    assert_obj_arrays_equal([obs], spec.observations)
 
     nybg = herbaria(:nybg_herbarium)
     assert_api_pass(params.merge(has_specimen: "yes", herbarium: nybg.code,
@@ -2527,7 +2538,7 @@ class API2Test < UnitTestCase
     spec = HerbariumRecord.last
     assert_objs_equal(nybg, spec.herbarium)
     assert_equal("Peltigera: Rolf Singer 12345", spec.herbarium_label)
-    assert_obj_list_equal([obs], spec.observations)
+    assert_obj_arrays_equal([obs], spec.observations)
   end
 
   def test_patching_observations
@@ -2598,22 +2609,22 @@ class API2Test < UnitTestCase
     rolfs_obs.reload
     assert_objs_equal(rolfs_img, rolfs_obs.thumb_image)
     assert(rolfs_obs.images.include?(rolfs_img))
-    imgs = rolf.images.map(&:id).map(&:to_s).join(",")
+    imgs = rolf.images.map { |img| img.id.to_s }.join(",")
     assert_api_fail(params.merge(add_images: marys_img.id))
     assert_api_pass(params.merge(add_images: imgs))
     rolfs_obs.reload
     assert_objs_equal(rolfs_img, rolfs_obs.thumb_image)
-    assert_obj_list_equal(rolf.images, rolfs_obs.images, :sort)
+    assert_obj_arrays_equal(rolf.images, rolfs_obs.images, :sort)
     assert_api_pass(params.merge(remove_images: rolfs_img.id))
     rolfs_obs.reload
     assert(rolfs_obs.thumb_image != rolfs_img)
     assert_objs_equal(rolfs_obs.images.first, rolfs_obs.thumb_image)
-    imgs = rolf.images[2..6].map(&:id).map(&:to_s).join(",")
+    imgs = rolf.images[2..6].map { |img| img.id.to_s }.join(",")
     imgs += ",#{marys_img.id}"
     assert_api_pass(params.merge(remove_images: imgs))
     rolfs_obs.reload
-    assert_obj_list_equal(rolf.images - rolf.images[2..6] - [rolfs_img],
-                          rolfs_obs.images, :sort)
+    assert_obj_arrays_equal(rolf.images - rolf.images[2..6] - [rolfs_img],
+                            rolfs_obs.images, :sort)
 
     proj = projects(:bolete_project)
     proj.user_group.users << rolf
@@ -2775,8 +2786,8 @@ class API2Test < UnitTestCase
 
   def test_patching_projects
     proj = projects(:eol_project)
-    assert_user_list_equal([rolf, mary], proj.admin_group.users)
-    assert_user_list_equal([rolf, mary, katrina], proj.user_group.users)
+    assert_user_arrays_equal([rolf, mary], proj.admin_group.users)
+    assert_user_arrays_equal([rolf, mary, katrina], proj.user_group.users)
     assert_empty(proj.images)
     assert_empty(proj.observations)
     assert_empty(proj.species_lists)
@@ -2799,48 +2810,48 @@ class API2Test < UnitTestCase
     assert_equal("new summary", proj.reload.summary)
 
     assert_api_pass(params.merge(add_admins: "dick, roy"))
-    assert_user_list_equal([rolf, mary, dick, roy],
-                           proj.reload.admin_group.users)
-    assert_user_list_equal([rolf, mary, katrina],
-                           proj.reload.user_group.users)
+    assert_user_arrays_equal([rolf, mary, dick, roy],
+                             proj.reload.admin_group.users)
+    assert_user_arrays_equal([rolf, mary, katrina],
+                             proj.reload.user_group.users)
     assert_api_pass(params.merge(remove_admins: "dick, roy"))
-    assert_user_list_equal([rolf, mary],
-                           proj.reload.admin_group.users)
-    assert_user_list_equal([rolf, mary, katrina],
-                           proj.reload.user_group.users)
+    assert_user_arrays_equal([rolf, mary],
+                             proj.reload.admin_group.users)
+    assert_user_arrays_equal([rolf, mary, katrina],
+                             proj.reload.user_group.users)
 
     assert_api_pass(params.merge(add_members: "dick, roy"))
-    assert_user_list_equal([rolf, mary],
-                           proj.reload.admin_group.users)
-    assert_user_list_equal([rolf, mary, katrina, dick, roy],
-                           proj.reload.user_group.users)
+    assert_user_arrays_equal([rolf, mary],
+                             proj.reload.admin_group.users)
+    assert_user_arrays_equal([rolf, mary, katrina, dick, roy],
+                             proj.reload.user_group.users)
     assert_api_pass(params.merge(remove_members: "dick, roy"))
-    assert_user_list_equal([rolf, mary],
-                           proj.reload.admin_group.users)
-    assert_user_list_equal([rolf, mary, katrina],
-                           proj.reload.user_group.users)
+    assert_user_arrays_equal([rolf, mary],
+                             proj.reload.admin_group.users)
+    assert_user_arrays_equal([rolf, mary, katrina],
+                             proj.reload.user_group.users)
 
     imgs = mary.images.first.id
     assert_api_fail(params.merge(add_images: imgs))
-    imgs = rolf.images[0..1].map(&:id).map(&:to_s).join(",")
+    imgs = rolf.images[0..1].map { |img| img.id.to_s }.join(",")
     assert_api_pass(params.merge(add_images: imgs))
-    assert_obj_list_equal(rolf.images[0..1], proj.reload.images)
+    assert_obj_arrays_equal(rolf.images[0..1], proj.reload.images)
     assert_api_pass(params.merge(remove_images: imgs))
     assert_empty(proj.reload.images)
 
     obses = mary.observations.first.id
     assert_api_fail(params.merge(add_observations: obses))
-    obses = rolf.observations[0..1].map(&:id).map(&:to_s).join(",")
+    obses = rolf.observations[0..1].map { |o| o.id.to_s }.join(",")
     assert_api_pass(params.merge(add_observations: obses))
-    assert_obj_list_equal(rolf.observations[0..1], proj.reload.observations)
+    assert_obj_arrays_equal(rolf.observations[0..1], proj.reload.observations)
     assert_api_pass(params.merge(remove_observations: obses))
     assert_empty(proj.reload.observations)
 
     spls = mary.species_lists.first.id
     assert_api_fail(params.merge(add_species_lists: spls))
-    spls = rolf.species_lists[0..1].map(&:id).map(&:to_s).join(",")
+    spls = rolf.species_lists[0..1].map { |list| list.id.to_s }.join(",")
     assert_api_pass(params.merge(add_species_lists: spls))
-    assert_obj_list_equal(rolf.species_lists[0..1], proj.reload.species_lists)
+    assert_obj_arrays_equal(rolf.species_lists[0..1], proj.reload.species_lists)
     assert_api_pass(params.merge(remove_species_lists: spls))
     assert_empty(proj.reload.species_lists)
   end
@@ -3441,7 +3452,7 @@ class API2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting user")
-    assert_obj_list_equal([User.last], api.results)
+    assert_obj_arrays_equal([User.last], api.results)
     assert_last_user_correct
     assert_api_fail(params)
     params[:login] = "miles"
@@ -3482,7 +3493,7 @@ class API2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting user")
-    assert_obj_list_equal([User.last], api.results)
+    assert_obj_arrays_equal([User.last], api.results)
     assert_last_user_correct
     params[:login] = "miles"
     assert_api_fail(params.merge(name: "x" * 1000))
@@ -3826,7 +3837,7 @@ class API2Test < UnitTestCase
     assert_parse(:altitude, 123, "123")
     assert_parse(:altitude, 123, "123 m")
     assert_parse(:altitude, 123, "403 ft")
-    assert_parse(:altitude, 123, "403\'")
+    assert_parse(:altitude, 123, "403'")
     assert_parse(:altitude, API2::BadParameterValue, "sealevel")
     assert_parse(:altitude, API2::BadParameterValue, "123 FT")
     assert_parse_a(:altitude, nil, nil)

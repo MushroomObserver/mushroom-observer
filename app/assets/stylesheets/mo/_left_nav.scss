@@ -1,147 +1,71 @@
 //
-// sidebar
-// --------------------------------------------------
-$sidebar-max-width: 15em;
-
-.sidebar-offcanvas {
-  max-width: $sidebar-max-width;
-}
-
-//
-// small devices, tablets
+// left nav bar styles. layout is in layout.scss
 // --------------------------------------------------
 
-@media screen and (max-width: 767px) {
-
-  .row-offcanvas {
-    position: relative;
-    -webkit-transition: all .25s ease-out;
-    -o-transition: all .25s ease-out;
-    transition: all .25s ease-out;
-    -webkit-transform: translate3d(0,0,0);
-  }
-
-  .row-offcanvas-right {
-    right: 0;
-  }
-
-  .row-offcanvas-left {
-    left: 0;
-  }
-
-  .row-offcanvas-right
-  .sidebar-offcanvas {
-    right: -$sidebar-max-width;
-  }
-
-  .row-offcanvas-left
-  .sidebar-offcanvas {
-    left: -$sidebar-max-width;
-  }
-
-  .row-offcanvas-right.active {
-    right: $sidebar-max-width;
-  }
-
-  .row-offcanvas-left.active {
-    left: $sidebar-max-width;
-  }
-
-  .sidebar-offcanvas {
-    position: absolute;
-    top: 0;
-    width: $sidebar-max-width;
-  }
-
-  .hidden-overflow-x {
-    overflow-x: hidden !important;
-  }
-
-  .navbar-default {
-    margin: 0;
-  }
-
-  .navbar-form {
-    margin: 0;
-    border: 0;
-  }
-}
-
-//
-// left nav bar
-// --------------------------------------------------
-
-.navigation-themed {
-  background-color: $LEFT_BAR_BG_COLOR;
-  border-color: $LEFT_BAR_BORDER_COLOR;
-  border-width: $LEFT_BAR_BORDER_WIDTH;
-  border-style: $LEFT_BAR_BORDER_STYLE;
-  border-top-left-radius: $LOGO_BORDER_RADIUS;
-  border-top-right-radius: $LOGO_BORDER_RADIUS;
-  border-bottom-left-radius: $LEFT_BAR_BORDER_RADIUS;
-  border-bottom-right-radius: $LEFT_BAR_BORDER_RADIUS;
+.sidebar-nav {
+  border-width: 1px;
+  border-style: solid;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
   padding-left: 0px;
   padding-right: 0px;
-  margin-bottom: 10em;
+  margin-bottom: 2px;
 
   a {
     font-weight: normal;
   }
 
-  &.list-group {
-    @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0px {
-      margin-bottom: 15px;
-    } @else {
-      margin-bottom: 2px;
-    }
-
-    &.list-group-compact .list-group-item {
-      padding: 4px;
-    }
-  }
-
   .list-group-item {
     margin-top: 0px;
-    // border-color: $LEFT_BAR_BORDER_COLOR;
     border-width: 0px;
-    // border-style: $LEFT_BAR_BORDER_STYLE;
-    // border-radius: 0px;
-    // @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0px {
-    //   padding: 1px 5px;
-    // }
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    padding: 4px;
 
-    // &:last-child {
-    //   border-bottom-width: 0px;
-    // }
-
+    &.active,
     &:hover,
     &:focus,
     &:hover a.dropdown-toggle,
     &:focus a.dropdown-toggle,
     a.dropdown-toggle:hover {
-      color: $LEFT_BAR_HOVER_FG_COLOR;
-      background-color: $LEFT_BAR_HOVER_BG_COLOR;
+      color: $navbar-inverse-link-hover-color;
+      background-color: $navbar-inverse-link-hover-bg;
     }
 
+    // These are the headers
     &.disabled,
     &.disabled:hover,
     &.disabled:focus {
-      color: $LEFT_BAR_HEADER_FG_COLOR;
-      background-color: $LEFT_BAR_HEADER_BG_COLOR;
+      color: $navbar-inverse-link-disabled-color;
+      background-color: $navbar-inverse-link-disabled-bg;
       cursor: default;
-      @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0px {
-        margin-top: 10px;
-      }
       padding-left: 5px;
+    }
+
+    &#nav_bug_report_link {
+      color: $navbar-inverse-link-disabled-color;
+      &:hover,
+      &:focus {
+        color: $navbar-inverse-link-color;
+      }
     }
   }
 
   .list-group-item,
   a.dropdown-toggle {
-    color: $LEFT_BAR_FG_COLOR;
-    background-color: $LEFT_BAR_BG_COLOR;
+    color: $navbar-inverse-link-color;
+    background-color: $navbar-inverse-bg;
+  }
+}
+
+
+.theme-black-on-white {
+  .sidebar-nav {
+    .list-group-item#nav_bug_report_link {
+      @extend .text-danger;
+    }
   }
 }

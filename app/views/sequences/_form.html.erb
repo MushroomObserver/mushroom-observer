@@ -1,82 +1,67 @@
-<%= form_with(model: @sequence, url: url) do |form| %>
+<%
+case action_name
+when "new", "create"
+  url_params = add_query_param(
+    { action: :create, observation_id: @observation.id }
+  )
+  button = :ADD.t
+when "edit", "update"
+  url_params = add_query_param({ action: :update })
+  url_params = url_params.merge({ back: @back }) if @back.present?
+  button = :UPDATE.t
+end
+%>
+
+<%= form_with(model: @sequence, url: url_params, local: local,
+              id: "sequence_form") do |f| %>
+
   <%# locus %>
-  <div class="row mt-3">
-    <div class="form-group col-xs-12 col-md-6">
-      <%= form.label(:locus, "#{:LOCUS.t}:") %>
-      <span class="help-note">(<%= :required.t %>)</span>
-        <%# style stops area from changing size on reload %>
-        <%= form.text_area(:locus, rows: 1, class:"form-control", style:"width: 100%;" ) %>
-    </div>
-    <div class="col-xs-12 col-sm-6">
-      <div class="well well-sm help-block position-relative">
-        <div class="arrow-left hidden-xs"></div>
-        <%= :form_sequence_locus_help.t(locus_width: Sequence.locus_width) %>
-      </div>
-    </div>
-  </div><!--.row-->
+  <%= text_area_with_label(form: f, field: :locus, rows: 1,
+                           label: :LOCUS.t + ":", class: "w-100",
+                           between: :required) %>
+  <%= help_block_with_arrow("up", id: "sequence_locus_help",
+                            class: "mt-3") do
+    :form_sequence_locus_help.t(locus_width: Sequence.locus_width)
+  end %>
 
   <%# bases %>
-  <div class="row mt-3">
-    <div class="form-group">
-      <span class="col-md-6">
-        <%= form.label(:sequence_bases, "#{:BASES.t}:") %>
-        <span class="help-note">
-        (<%= :form_sequence_bases_or_deposit_required.t %>)
-        </span>
-      </span>
-      <span class="col-md-6">
-        <%= url = WebSequenceArchive.blast_format_help
-            :form_sequence_bases_format.t(help_url: url) %>
-      </span>
-      <div class="col-md-9 text-monospace">
-        <%= form.text_area(:bases, size: "80x3", class:"form-control") %>
-      </div>
-      <div class="col-md-3">
-      </div>
-    </div>
-  </div><!--.row-->
+  <% between =
+      help_note(:span,
+                "(#{:form_sequence_bases_or_deposit_required.t})") +
+      link_to("(#{:form_sequence_bases_format.t})",
+                WebSequenceArchive.blast_format_help,
+                class: "d-inline-block float-right",
+                target: "_blank") %>
+  <%= text_area_with_label(form: f, field: :bases, cols: 80, rows: 5,
+                           label: :BASES.t + ":", monospace: true,
+                           between: between) %>
 
   <%# deposit info %>
-  <div class="row mt-3 form-group">
-    <div class="col-xs-12">
-      <%= form.label(:sequence_nothing, "#{:DEPOSIT.t}:") %>
-      <span class="help-note">(<%= :form_sequence_valid_deposit.t %>)</span>
-    </div>
-    <div class="col-xs-1">
-    </div>
-    <div class="col-xs-5 col-md-2">
-      <%= form.label(:sequence_archive, :ARCHIVE.t) %>
-      <%= form.select(:archive, archive_dropdown,
-                      { include_blank: true }, { class: "form-control" }) %>
-    </div>
-    <div class="col-xs-6 col-md-3">
-      <span class="font-weight-bold"><%= :form_sequence_accession.t %></span>
-      <%= form.text_field(:accession, class: "form-control") %>
-    </div>
-    <div class="col-xs-12 col-md-6">
-      <div class="well well-sm help-block position-relative">
-        <div class="arrow-left hidden-xs"></div>
-        <%= :form_sequence_accession_help.t %>
-      </div>
-    </div>
-  </div><!--.row-->
+  <%= static_text_with_label(
+        form: f, field: :deposit, inline: true, label: :DEPOSIT.t + ":",
+        value: help_note(:span, "(#{:form_sequence_valid_deposit.t})")
+      ) %>
+
+  <%= select_with_label(form: f, field: :archive, label: :ARCHIVE.t + ":",
+                        options: sequence_archive_options,
+                        select_opts: { include_blank: true },
+                        inline: true, class: "ml-5") %>
+
+  <%= text_field_with_label(form: f, field: :accession,
+                            inline: true, class: "ml-5",
+                            label: :form_sequence_accession.t + ":") %>
+  <%= help_block_with_arrow("up", id: "sequence_accession_help",
+                            class: "mt-3") do
+    :form_sequence_accession_help.t
+  end %>
 
   <%# notes %>
-  <div class="row mt-3">
-    <div class="form-group col-xs-12 col-md-6">
-      <%= form.label(:sequence_notes, "#{:NOTES.t}:") %>
-      <span class="help-note">(<%= :optional.t %>)</span>
-      <%= form.text_area(:notes, rows: 3, class: "form-control") %>
-    </div>
-    <div class="col-xs-12 col-md-6">
-      <div class="well well-sm help-block position-relative mt-4">
-        <div class="arrow-left hidden-xs"></div>
-        <%= :field_textile_link.t %>
-      </div>
-    </div>
-  </div><!--.row-->
+  <%= text_area_with_label(form: f, field: :notes, rows: 3,
+                           label: :NOTES.t + ":", between: :optional) %>
+  <%= help_block_with_arrow("up", id: "textile_help", class: "mt-3") do %>
+    <%= :field_textile_link.t %>
+  <% end %>
 
-  <div class="form-group row">
-    <%= form.submit(:SUBMIT.t, class: "btn btn-default center-block mt-3") %>
-  </div><!--.row-->
+  <%= submit_button(form: f, button: button, center: true) %>
+
 <% end %>

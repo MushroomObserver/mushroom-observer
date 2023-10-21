@@ -1,0 +1,15 @@
+<%
+# Note totally general title and tabs based on @object target_class
+add_page_title(:image_remove_title.t(name: @object.unique_format_name))
+
+add_tab_set(glossary_term_image_form_tabs(term: @object))
+
+@container = :full
+form_action = { controller: "/glossary_terms/images",
+                action: :detach,
+                id: @object.id,
+                q: get_query_param }
+%>
+
+<%= render(partial: "shared/images_to_remove",
+           locals: { form_action: form_action }) %>

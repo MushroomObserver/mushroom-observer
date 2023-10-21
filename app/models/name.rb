@@ -226,7 +226,6 @@
 #  parse_form::               Parse "Xxx yyy f. zzz".
 #
 #  ==== Other
-#  primer::                  List of names used for priming auto-completer.
 #  format_name::             Add itallics and/or boldness to string.
 #  clean_incoming_string::   Preprocess string from user before parsing.
 #  standardize_name::        Standardize abbreviations in parsed name string.
@@ -333,7 +332,6 @@ class Name < AbstractModel
   include Synonymy
   include Resolve
   include PropagateGenericClassifications
-  include Primer
   include Notify
   include Spelling
   include Merge
@@ -383,6 +381,7 @@ class Name < AbstractModel
            inverse_of: :name
   has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
+  has_many :name_trackers
   has_many :namings
   has_many :observations
 
@@ -434,10 +433,12 @@ class Name < AbstractModel
 
   # Notify webmaster that a new name was created.
   after_create do |name|
-    user    = User.current || User.admin
-    subject = "#{user.login} created #{name.real_text_name}"
-    content = "#{MO.http_domain}/name/show_name/#{name.id}"
-    WebmasterEmail.build(user.email, content, subject)
+    user = User.current || User.admin
+    QueuedEmail::Webmaster.create_email(
+      sender_email: user.email,
+      subject: "#{user.login} created #{name.real_text_name}",
+      content: "#{MO.http_domain}/names/#{name.id}"
+    )
   end
 
   # Used by name/_form_name.rhtml
@@ -568,11 +569,15 @@ class Name < AbstractModel
         lambda { |name|
           where(id: name.synonyms.map(&:id)).with_correct_spelling
         }
+  # alias of `include_subtaxa_of`
+  scope :in_clade, ->(name) { include_subtaxa_of(name) }
   scope :include_subtaxa_of,
         lambda { |name|
           names = [name] + subtaxa_of(name)
           where(id: names.map(&:id)).with_correct_spelling
         }
+  scope :include_subtaxa_above_genus,
+        ->(name) { include_subtaxa_of(name).with_rank_above_genus }
   scope :text_name_includes,
         ->(text_name) { where(Name[:text_name].matches("%#{text_name}%")) }
   scope :with_classification,
@@ -671,6 +676,15 @@ class Name < AbstractModel
   def self.count_observations(names)
     Hash[*Observation.group(:name_id).where(name: names).
          pluck(:name_id, Arel.star.count).to_a.flatten]
+  end
+
+  # For NameController#needed_descriptions
+  # Returns a list of the most popular 100 names that don't have descriptions.
+  def self.descriptions_needed
+    names = description_needed.limit(100).map(&:id)
+
+    ::Query.lookup(:Name, :in_set, ids: names,
+                                   title: :needed_descriptions_title.l)
   end
 
   ##############################################################################

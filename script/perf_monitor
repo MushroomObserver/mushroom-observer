@@ -67,9 +67,9 @@ end.new
 count = 0
 NUMBER.times do
   curl.run("/")
-  curl.run("image/show_image", id: IMAGES.sample)
-  curl.run("name/show_name", id: NAMES.sample)
-  curl.run("observations/show_observation", id: OBSERVATIONS.sample)
+  curl.run("images", id: IMAGES.sample)
+  curl.run("names", id: NAMES.sample)
+  curl.run("observations", id: OBSERVATIONS.sample)
   if count % 100 == 0
     curl.run("image/test_upload_speed", image_file: IMAGE_FILE)
   end

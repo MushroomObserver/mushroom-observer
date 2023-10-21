@@ -1,0 +1,115 @@
+<%= form_with(url: action, method: :put,
+              id: "description_permissions_form") do |f| %>
+
+  <%= submit_button(form: f, button: :SUBMIT.l, center: true) %>
+
+  <table class="w-100 table-striped table-description-permissions">
+    <thead>
+      <tr>
+        <th style="mr-4"><%= :adjust_permissions_user_header.t %></th>
+        <th width="50"><%= :adjust_permissions_reader_header.t %></th>
+        <th width="50"><%= :adjust_permissions_writer_header.t %></th>
+        <th width="50"><%= :adjust_permissions_admin_header.t %></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% groups.each do |group| %>
+        <%
+          if (group.name == "all users") and
+            (description.source_type == :public) and
+            !in_admin_mode?
+            r_args = ["1", true,  { disabled: "disabled" }]
+            w_args = ["1", true,  { disabled: "disabled" }]
+            a_args = ["1", false, { disabled: "disabled" }]
+          elsif (group.name == "reviewers") and
+            (description.source_type == :public) and
+            !in_admin_mode?
+            r_args = ["1", false, { disabled: "disabled" }]
+            w_args = ["1", false, { disabled: "disabled" }]
+            a_args = ["1", true,  { disabled: "disabled" }]
+          else
+            r_args = ["1", description.reader_groups.include?(group), {}]
+            w_args = ["1", description.writer_groups.include?(group), {}]
+            a_args = ["1", description.admin_groups.include?(group),  {}]
+          end
+          # r_args.last[:id] = "group_reader_#{group.id}"
+          # w_args.last[:id] = "group_writer_#{group.id}"
+          # a_args.last[:id] = "group_admin_#{group.id}"
+          r_args.last[:class] = "form-control"
+          w_args.last[:class] = "form-control"
+          a_args.last[:class] = "form-control"
+        %>
+        <tr>
+          <td>
+            <% if !group.name.match(/^user \d+$/) %>
+              <%= if group.name == "all users"
+                :adjust_permissions_all_users.t
+              elsif group.name == "reviewers"
+                :REVIEWERS.t
+              else
+                group.name
+              end %>
+            <% else %>
+              <% user = group.users.first %>
+              <%= user_link(user) %>
+              <%=
+                words = []
+                groups.each do |g|
+                  if (g.name != "all users") and
+                    (g.name != "reviewers") and
+                    !g.name.match(/^user \d+$/) and
+                    g.users.include?(user)
+                    words << g.name
+                  end
+                end
+                words << :author.t if description.author?(user)
+                words << :editor.t if description.editor?(user)
+                words << :owner.t if description.user == user
+                words << :adjust_permissions_site_admin.t if user.admin
+                words << :reviewer.t if user.in_group?("reviewers")
+                " (".html_safe + words.safe_join(", ") + ")" if words.any?
+              %>
+            <% end %>
+          </td>
+          <td>
+            <%= check_box_tag("group_reader[#{group.id}]", *r_args) %>
+          </td>
+          <td>
+            <%= check_box_tag("group_writer[#{group.id}]", *w_args) %>
+          </td>
+          <td>
+            <%= check_box_tag("group_admin[#{group.id}]", *a_args) %>
+          </td>
+        </tr>
+      <% end %>
+
+      <% (1..6).each do |n| %>
+        <% datum = data[n] || {} rescue {} %>
+        <tr>
+          <td>
+            <%= text_field_tag("writein_name[#{n}]", datum[:name],
+                              class: "form-control",
+                              placeholder: :start_typing.l,
+                              data: { autocompleter: :user }) %>
+          </td>
+          <td>
+            <%= check_box_tag("writein_reader[#{n}]", "1", datum[:reader],
+                              class: "form-control") %>
+          </td>
+          <td>
+            <%= check_box_tag("writein_writer[#{n}]", "1", datum[:writer],
+                              class: "form-control") %>
+          </td>
+          <td>
+            <%= check_box_tag("writein_admin[#{n}]", "1", datum[:admin],
+                              class: "form-control") %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <%= submit_button(form: f, button: :SUBMIT.l, center: true) %>
+
+<% end %>
