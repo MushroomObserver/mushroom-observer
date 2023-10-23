@@ -1,3 +1,6 @@
+// on shown, hide edit form
+// disable the return key submit
+
 function APIKeyModule() {
   jQuery(document).ready(function () {
 

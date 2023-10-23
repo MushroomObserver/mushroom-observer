@@ -43,13 +43,17 @@ Could instead be separate edit forms, with a remove button on each line. %>
             <%= f.button(:SAVE.l, type: :submit, class: "btn btn-default") %>
             <%= button_tag(:CANCEL.l, type: :button,
                            class: "btn btn-default",
+                           aria: { expanded: "false",
+                                   controls: "view_key_notes_container" },
                            data: { toggle: "collapse",
                                    parent: "key_notes_#{key.id}" }) %>
           <% end %>
         </div>
-        <div class="view_key_notes_container collapse show">
+        <div class="view_key_notes_container collapse in">
           <%= tag.span(key.notes.t, class: "current_notes") %>
           <%= button_tag(:EDIT.t, class: "btn btn-default",
+                         aria: { expanded: "false",
+                                 controls: "edit_key_notes_container" },
                          data: { toggle: "collapse",
                                  parent: "key_notes_#{key.id}" }) %>
         </div>
