@@ -37,7 +37,7 @@ module TableHelper
     table_opts = default_table_opts(args[:table_opts])
 
     tag.table(**table_opts) do
-      concat(make_col_headers(args)) if args[:header].present?
+      concat(make_col_headers(args)) if args[:headers].present?
 
       if args[:rows].present?
         concat(args[:rows].map do |row|
@@ -56,7 +56,7 @@ module TableHelper
   # table_opts defaults added above
   def default_table_args(args)
     {
-      header: [],
+      headers: [],
       rows: [],
       table_opts: {},
       header_opts: {},
@@ -66,17 +66,18 @@ module TableHelper
     }.merge(args)
   end
 
-  def make_col_headers(headers, args)
+  # note: th are like cells, not rows
+  def make_col_headers(args)
     tag.tr(**args[:row_opts]) do
-      if headers.is_a?(Array)
-        th_args = args
+      if args[:headers].is_a?(Array)
+        th_args = args.deep_dup
         th_args[:cell_opts] = th_args[:cell_opts].merge({ scope: "col" })
 
-        headers.map do |header|
+        args[:headers].map do |header|
           make_header(header, th_args)
         end.safe_join
       else
-        header
+        args[:headers] # if a precomposed string, print as is (?)
       end
     end
   end
@@ -90,7 +91,8 @@ module TableHelper
   def make_row(row, args)
     tag.tr(**args[:row_opts]) do
       if row.is_a?(Array)
-        th_args = args # don't overwrite args, keep assignment out of loop
+        # don't overwrite args, keep assignment out of loop
+        th_args = args.deep_dup
         th_args[:cell_opts] = th_args[:cell_opts].merge({ scope: "row" })
 
         row.map.with_index do |cell, index|
