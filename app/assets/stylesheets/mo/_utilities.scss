@@ -589,6 +589,13 @@
   background: rgba($black, 0.6);
 }
 
+.no-transition.collapsing {
+  // -webkit-transition: none;
+  // transition: none;
+  transition-duration: 100;
+  // display: none;
+}
+
 //
 // larger devices
 // --------------------------------------------------
@@ -617,5 +624,9 @@
   .px-sm-0 {
     padding-left: 0 !important;
     padding-right: 0 !important;
+  }
+
+  .table {
+    overflow-x: scroll
   }
 }
