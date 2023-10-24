@@ -23,8 +23,8 @@ module TableHelper
   # args: header, rows, table_opts, header_opts, row_opts, cell_opts
 
   def make_table(**args)
-    table_opts = default_table_opts(args[:table_opts])
     args = default_table_args(args)
+    table_opts = default_table_opts(args[:table_opts])
 
     tag.table(**table_opts) do
       if args[:header].present?
@@ -52,6 +52,7 @@ module TableHelper
     {
       header: [],
       rows: [],
+      table_opts: {},
       header_opts: {},
       row_opts: {},
       cell_opts: {}
