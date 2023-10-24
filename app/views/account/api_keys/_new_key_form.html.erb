@@ -1,4 +1,4 @@
-<%= form_with(model: :api_key, url: account_api_keys_path, method: :post,
+<%= form_with(model: @key, url: account_api_keys_path, method: :post,
               remote: true, id: "account_new_api_key_form") do |f| %>
 
   <%= text_field_with_label(form: f, field: :notes,

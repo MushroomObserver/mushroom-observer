@@ -3,63 +3,74 @@ the edit links un-collapse the edit key notes field with a save button,
 and the checkboxes are for the remove button at the bottom.
 
 Could instead be separate edit forms, with a remove button on each line. %>
+<%
+headers = [
+  :ACTIVE.l,
+  :CREATED.t,
+  :account_api_keys_last_used_column_label.t,
+  :account_api_keys_num_uses_column_label.t,
+  :API_KEY.t,
+  :NOTES.t,
+  ''
+]
 
-<table class="table table-striped py-5px">
-  <tr>
-    <th></th>
-    <th><%= :CREATED.t %></th>
-    <th><%= :account_api_keys_last_used_column_label.t %></th>
-    <th><%= :account_api_keys_num_uses_column_label.t %></th>
-    <th><%= :API_KEY.t %></th>
-    <th><%= :NOTES.t %></th>
-  </tr>
-
-  <% @user.api_keys.sort_by do |key|
+rows = []
+@user.api_keys.sort_by do |key|
     last_use = Time.zone.now - key.last_used rescue 0
     [-key.num_uses, last_use, key.id]
-  end.each do |key| %>
+  end.each do |key|
 
-    <tr>
-      <td>
-        <%= destroy_button(name: :UPDATE.l, target: key, icon: :remove) %>
-      </td>
-      <td><%= key.created_at.web_date %></td>
-      <td id="key_time_<%= key.id %>">
-        <%= key.last_used ? key.last_used.web_date : '--' %>
-      </td>
-      <td id="key_num_uses_<%= key.id %>">
-        <%= key.num_uses > 0 ? key.num_uses : '--' %>
-      </td>
-      <td><%= h(key.key) %></td>
-      <td id="key_notes_<%= key.id %>">
-        <div class="edit_key_notes_container collapse">
-          <%= form_with(model: :api_key, url: account_api_key_path,
-                        method: :patch, remote: true,
-                        id: "account_api_key_form") do |f| %>
-                        <%# account_api_keys_form %>
-            <%= f.hidden_field(:id, key.id) %>
-            <%= f.text_field(:notes, # "key_notes_input_#{key.id}"
-                             value: key.notes) %>
-            <%= f.button(:SAVE.l, type: :submit, class: "btn btn-default") %>
-            <%= button_tag(:CANCEL.l, type: :button,
-                           class: "btn btn-default",
-                           aria: { expanded: "false",
-                                   controls: "view_key_notes_container" },
-                           data: { toggle: "collapse",
-                                   parent: "key_notes_#{key.id}" }) %>
-          <% end %>
-        </div>
-        <div class="view_key_notes_container collapse in">
-          <%= tag.span(key.notes.t, class: "current_notes") %>
-          <%= button_tag(:EDIT.t, class: "btn btn-default",
-                         aria: { expanded: "false",
-                                 controls: "edit_key_notes_container" },
-                         data: { toggle: "collapse",
-                                 parent: "key_notes_#{key.id}" }) %>
-        </div>
-      </td>
-    </tr>
-  <% end %>
+  # These are the fields in each row
+  verified = if key.verified
+               tag.span(:verified.l, class: "small text-muted")
+             else
+               patch_button(name: :ACTIVATE.l,
+                            path: account_api_key_path(key.id))
+             end
+  last_used = key.last_used ? key.last_used.web_date : '--'
+  num_uses = key.num_uses > 0 ? key.num_uses : '--'
+  edit_section = tag.div(id: "key_notes_#{key.id}") do
+    [
+      tag.div(class: "edit_key_notes_container collapse") do
+        form_with(model: key, url: account_api_key_path(key.id),
+                  method: :patch, remote: true,
+                  id: "account_api_key_form") do |f|
+          # concat(f.hidden_field(:id, key.id))
+          concat(f.text_field(:notes, # "key_notes_input_#{key.id}"
+                              value: key.notes))
+          concat(f.button(:SAVE.l, type: :submit, class: "btn btn-default"))
+          concat(button_tag(:CANCEL.l, type: :button,
+                            class: "btn btn-default",
+                            aria: { expanded: "false",
+                                    controls: "view_key_notes_container" },
+                            data: { toggle: "collapse",
+                                    parent: "key_notes_#{key.id}" }))
+        end
+      end,
+      tag.div(class: "view_key_notes_container collapse in") do
+        concat(tag.span(key.notes.t, class: "current_notes mr-4"))
+        concat(button_tag(:EDIT.t, class: "btn btn-default",
+                          aria: { expanded: "false",
+                                  controls: "edit_key_notes_container" },
+                          data: { toggle: "collapse",
+                                  parent: "key_notes_#{key.id}" }))
+      end
+    ].safe_join
+  end
+  remove_button = destroy_button(name: :REMOVE.l, icon: :remove,
+                                 target: account_api_key_path(key.id))
 
-</table>
+  rows << [
+    verified,
+    key.created_at.web_date,
+    last_used,
+    num_uses,
+    h(key.key),
+    edit_section,
+    remove_button
+  ]
+end
+%>
 
+<%= make_table(headers: headers, rows: rows,
+               table_opts: { class: "table-striped"}) %>
