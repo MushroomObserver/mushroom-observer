@@ -16,7 +16,7 @@ class TableHelperTest < ActionView::TestCase
   def test_make_table_with_colspan
     expect = "<table class=\"table\"><tr colspan=\"2\"><td>5</td><td>6</td>" \
              "</tr></table>"
-    table = make_table(rows:[[5, 6]], row_opts: { colspan: 2 })
+    table = make_table(rows: [[5, 6]], row_opts: { colspan: 2 })
     assert_equal(expect, table)
   end
 
