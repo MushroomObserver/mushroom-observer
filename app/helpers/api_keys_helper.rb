@@ -110,7 +110,7 @@ module APIKeysHelper
             end
           )
           concat(f.text_field(:notes, value: key.notes,
-                                      class: "form-control"))
+                                      class: "form-control border-none"))
           concat(tag.span(class: "input-group-btn") do
             f.button(:SAVE.l, type: :submit, class: "btn btn-default")
           end)
