@@ -1,5 +1,5 @@
-// on shown, hide edit form
-// disable the return key submit
+// update js should hide the edit form after updating the notes
+// keep binding for disabling the return key submit
 
 function APIKeyModule() {
   jQuery(document).ready(function () {
@@ -17,6 +17,7 @@ function APIKeyModule() {
       activateKey(keyId);
     });
 
+    // keep these
     jQuery('[data-role="key_notes_input"]').keypress(function (e) {
       var keyId = $(this).data().id;
       if (e.keyCode == 27) { // escape key
