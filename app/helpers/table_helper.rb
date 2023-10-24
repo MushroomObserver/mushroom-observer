@@ -66,7 +66,7 @@ module TableHelper
     }.merge(args)
   end
 
-  # note: th are like cells, not rows
+  # <th> are cells analogous to <td>, not <tr>
   def make_col_headers(args)
     tag.tr(**args[:row_opts]) do
       if args[:headers].is_a?(Array)
@@ -74,7 +74,7 @@ module TableHelper
         th_args[:cell_opts] = th_args[:cell_opts].merge({ scope: "col" })
 
         args[:headers].map do |header|
-          make_header(header, th_args)
+          make_th(header, th_args)
         end.safe_join
       else
         args[:headers] # if a precomposed string, print as is (?)
@@ -82,7 +82,7 @@ module TableHelper
     end
   end
 
-  def make_header(header, args)
+  def make_th(header, args)
     tag.th(**args[:cell_opts]) { header.to_s }
   end
 
@@ -97,9 +97,9 @@ module TableHelper
 
         row.map.with_index do |cell, index|
           if index.zero? && args[:row_headers] == true
-            make_header(cell, th_args)
+            make_th(cell, th_args)
           else
-            make_cell(cell, args)
+            make_td(cell, args)
           end
         end.safe_join
       else
@@ -108,7 +108,7 @@ module TableHelper
     end
   end
 
-  def make_cell(cell, args)
+  def make_td(cell, args)
     tag.td(**args[:cell_opts]) { cell.to_s }
   end
 
