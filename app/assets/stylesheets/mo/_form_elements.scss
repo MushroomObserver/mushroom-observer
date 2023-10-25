@@ -101,3 +101,7 @@ a.filter-only {
   max-width: 21rem;
   display: inline-block;
 }
+
+.btn.text-danger {
+  color: $brand-danger !important;
+}

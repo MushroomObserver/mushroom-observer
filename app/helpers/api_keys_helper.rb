@@ -3,7 +3,7 @@
 module APIKeysHelper
   def api_keys_edit_form_headers
     [
-      :ACTIVE.l,
+      :account_api_keys_active_column_label.t,
       :CREATED.t,
       :account_api_keys_last_used_column_label.t,
       :account_api_keys_num_uses_column_label.t,
@@ -13,14 +13,11 @@ module APIKeysHelper
     ]
   end
 
+  # make this index_rows, and then the row is an edit form.
   def api_keys_edit_form_rows(user)
     rows = []
-    keys = user.api_keys.sort_by do |key|
-      last_use = Time.zone.now - key.last_used rescue 0
-      [-key.num_uses, last_use, key.id]
-    end
 
-    keys.each do |key|
+    api_keys_sorted(user).each do |key|
       # These are the fields in each row
       verified = if key.verified
                    api_keys_dummy_verified_check_box
@@ -32,6 +29,7 @@ module APIKeysHelper
       num_uses = key.num_uses.positive? ? key.num_uses : "--"
       edit_section = api_keys_notes_section(key)
       remove_button = destroy_button(name: :REMOVE.l, icon: :remove,
+                                     class: "btn btn-link text-danger",
                                      target: account_api_key_path(key.id))
       rows << [
         verified,
@@ -46,11 +44,18 @@ module APIKeysHelper
     rows
   end
 
+  def api_keys_sorted(user)
+    user.api_keys.sort_by do |key|
+      last_use = (Time.zone.now - key.last_used) rescue 0
+      [-key.num_uses, last_use, key.id]
+    end
+  end
+
   def api_keys_dummy_verified_check_box
     tag.div(class: "checkbox my-0") do
       tag.label(:verified) do
         concat(check_box_tag(:verified, "verified", true, disabled: true))
-        concat(:verified.l)
+        # concat(:verified.l)
       end
     end
   end
@@ -93,7 +98,7 @@ module APIKeysHelper
             id: "edit_notes_container") do
       form_with(model: key, url: account_api_key_path(key.id),
                 method: :patch, remote: true,
-                id: "account_api_key_form") do |f|
+                id: "edit_api_key_form") do |f|
         # concat(f.hidden_field(:id, key.id))
             # "key_notes_input_#{key.id}"
         tag.div(class: "input-group") do

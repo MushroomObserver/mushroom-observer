@@ -502,7 +502,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     visit(account_api_keys_path)
 
     assert_selector("body.api_keys__index")
-    within("#account_api_keys_form") do
+    within("#account_api_keys_index") do
       assert_field("key_#{marys_api_key.id}")
       # needs `as_displayed` because single quote gets converted to "smart"
       # apostrophe and encoded by `t`. Otherwise Capybara will not find the
@@ -511,7 +511,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
                       text: marys_api_key.notes.t.as_displayed)
     end
     # Add a new api key
-    within("#account_new_api_key_form") do
+    within("#new_api_key_form") do
       fill_in("key_notes", with: "New key idea")
       click_commit
     end
@@ -519,7 +519,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     # Should re-render the index
     assert_selector("body.api_keys__index")
     new_api_key = APIKey.last
-    within("#account_api_keys_form") do
+    within("#account_api_keys_index") do
       assert_field("key_#{new_api_key.id}")
       assert_selector("#key_notes_#{new_api_key.id} span.current_notes",
                       text: "New key idea")
@@ -530,7 +530,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
     # We're just testing the no-js version of the edit form, here
     assert_selector("body.api_keys__edit")
-    within("#account_edit_api_key_form") do
+    within("#edit_api_key_form") do
       # Change the notes
       fill_in("key_notes", with: "Reconsidered key idea")
       click_commit
@@ -538,7 +538,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
     # Should re-render the index
     assert_selector("body.api_keys__index")
-    within("#account_api_keys_form") do
+    within("#account_api_keys_index") do
       assert_field("key_#{new_api_key.id}")
       assert_selector("#key_notes_#{new_api_key.id} span.current_notes",
                       text: "Reconsidered key idea")
@@ -551,7 +551,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
     # Should re-render the index
     assert_selector("body.api_keys__index")
-    within("#account_api_keys_form") do
+    within("#account_api_keys_index") do
       refute_field("key_#{marys_api_key.id}")
     end
   end

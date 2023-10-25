@@ -4,6 +4,8 @@ and the checkboxes are for the remove button at the bottom.
 
 Could instead be separate edit forms, with a remove button on each line. %>
 
-<%= make_table(headers: api_keys_edit_form_headers,
-               rows: api_keys_edit_form_rows(@user),
-               table_opts: { class: "table-striped"}) %>
+<%=
+make_table(headers: api_keys_edit_form_headers,
+           rows: api_keys_edit_form_rows(@user),
+           table_opts: { class: "table-striped", id: "account_api_keys_index" })
+%>
