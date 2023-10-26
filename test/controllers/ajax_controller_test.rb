@@ -255,13 +255,6 @@ class AjaxControllerTest < FunctionalTestCase
     bad_ajax_request(:export, type: :user, id: 1, value: "1")
   end
 
-  def test_old_translation
-    str = TranslationString::Version.find(1)
-    bad_ajax_request(:old_translation, id: 0)
-    good_ajax_request(:old_translation, id: 1)
-    assert_equal(str.text, @response.body)
-  end
-
   def test_upload_image
     # Arrange
     setup_image_dirs
@@ -426,6 +419,7 @@ class AjaxControllerTest < FunctionalTestCase
     end
   end
 
+  # Primers used by the mobile app
   def test_name_primer
     # This name is not deprecated and is used by an observation or two.
     name1 = names(:boletus_edulis)
