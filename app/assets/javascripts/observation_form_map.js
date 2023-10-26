@@ -1,16 +1,39 @@
 // Observation Form Map - Lat/Long/Alt Helper
-/* globals $, google */
-
-// This key is configured in Google Cloud Platform.
-// It is a public key that accepts requests only from mushroomobserver.org/*
-var GMAPS_API_SCRIPT = "https://maps.googleapis.com/maps/api/js?key=" +
-  "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA";
+/* globals: google */
+$(document).ready(function () {
+  observationFormMapper();
+});
 
 // ./observations/new
-$(document).ready(function () {
+function observationFormMapper() {
+  // This key is configured in Google Cloud Platform.
+  // It is a public key that accepts requests only from mushroomobserver.org/*
+  const GMAPS_API_SCRIPT = "https://maps.googleapis.com/maps/api/js?key=" +
+    "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA";
+
   let opened = false;
   // NOTE: for gmap, map_div can't be a jQuery object. only use vanilla JS w/ it
   const map_div = document.getElementById('observation_form_map');
+
+  const getScript = url => new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = url;
+    script.async = true;
+
+    script.onerror = reject;
+
+    script.onload = script.onreadystatechange = function () {
+      const loadState = this.readyState;
+
+      if (loadState && loadState !== 'loaded' && loadState !== 'complete') return;
+
+      script.onload = script.onreadystatechange = null;
+
+      resolve();
+    }
+
+    document.head.appendChild(script);
+  });
 
   const open_map = function (focus_immediately) {
     opened = true;
@@ -21,7 +44,7 @@ $(document).ready(function () {
     document.querySelector('.map-clear').classList.remove("hidden");
     document.querySelector('.map-open').style.display = "none";
 
-    $.getScript(GMAPS_API_SCRIPT, function () {
+    getScript(GMAPS_API_SCRIPT).then(() => {
       const searchInput = document.getElementById('observation_place_name'),
         latInput = document.getElementById('observation_lat'),
         lngInput = document.getElementById('observation_long'),
@@ -150,6 +173,8 @@ $(document).ready(function () {
       if (focus_immediately) {
         focusMap();
       }
+    }).catch(() => {
+      console.error('Could not load script')
     });
   };
 
@@ -160,4 +185,4 @@ $(document).ready(function () {
   document.querySelector('.map-locate').onclick = () => {
     if (!opened) open_map("focus_immediately");
   };
-});
+};
