@@ -8,85 +8,85 @@ var GMAPS_API_SCRIPT = "https://maps.googleapis.com/maps/api/js?key=" +
 
 // ./observations/new
 $(document).ready(function () {
-  var opened = false;
+  let opened = false;
   // NOTE: for gmap, map_div can't be a jQuery object. only use vanilla JS w/ it
-  var map_div = document.getElementById('observation_form_map');
+  const map_div = document.getElementById('observation_form_map');
 
-  var open_map = function (focus_immediately) {
+  const open_map = function (focus_immediately) {
     opened = true;
-    var indicator_url = map_div.dataset.indicatorUrl //("indicator-url");
+    let indicator_url = map_div.dataset.indicatorUrl //("indicator-url");
 
     map_div.classList.remove("hidden");
     map_div.style.backgroundImage = "url(" + indicator_url + ")";
-    $('.map-clear').removeClass("hidden");
-    $('.map-open').hide();
+    document.querySelector('.map-clear').classList.remove("hidden");
+    document.querySelector('.map-open').style.display = "none";
 
     $.getScript(GMAPS_API_SCRIPT, function () {
-      var searchInput = $('#observation_place_name'),
-        latInput = $('#observation_lat'),
-        lngInput = $('#observation_long'),
-        elvInput = $('#observation_alt'),
-        marker;
+      const searchInput = document.getElementById('observation_place_name'),
+        latInput = document.getElementById('observation_lat'),
+        lngInput = document.getElementById('observation_long'),
+        elvInput = document.getElementById('observation_alt');
+      let marker;
 
       // init map
-      var map = new google.maps.Map(map_div, {
+      const map = new google.maps.Map(map_div, {
         center: { lat: -7, lng: -47 },
         zoom: 1
       });
 
       // init elevation service
-      var elevation = new google.maps.ElevationService();
+      const elevation = new google.maps.ElevationService();
 
       addGmapsListener(map, 'click');
 
       // adjust marker on field input
-      $([latInput, lngInput]).each(function () {
-        var location;
-        $(this).keyup(function () {
+      [latInput, lngInput].forEach((element) => {
+        let location;
+        element.onkeyup = () => {
           location = {
-            lat: parseFloat($(latInput).val()),
-            lng: parseFloat($(lngInput).val())
+            lat: parseFloat(latInput.value),
+            lng: parseFloat(lngInput.value)
           };
           placeMarker(location);
-        });
+        };
       });
 
       // check if `Lat` & `Lng` fields are populated on load if so, drop a
       // pin on that location and center otherwise, check if a `Where` field
       // has been prepopulated and use that to focus map
-      if ($(latInput) !== '' && $(lngInput).val() !== '') {
-        var location = {
-          lat: parseFloat($(latInput).val()),
-          lng: parseFloat($(lngInput).val())
+      if (latInput.value !== '' && lngInput.value !== '') {
+        const location = {
+          lat: parseFloat(latInput.value),
+          lng: parseFloat(lngInput.value)
         };
         placeMarker(location);
         map.setCenter(location);
         map.setZoom(8);
-      } else if ($(searchInput).val() !== '') {
+      } else if (searchInput.value !== '') {
         focusMap();
       }
 
       // set bounds on map
-      $('.map-locate').on('click', function () {
+      document.querySelector('.map-locate').onclick = () => {
         focusMap();
-      });
+      };
 
       // clear map button
-      $('.map-clear').on('click', function () {
+      document.querySelector('.map-clear').onclick = () => {
         clearMap();
-      });
+      };
 
       // use the geocoder to focus on a specific region on the map
       function focusMap() {
-        var geocoder = new google.maps.Geocoder();
+        const geocoder = new google.maps.Geocoder();
 
         // even a single letter will return a result
-        if ($(searchInput).val().length <= 0) {
+        if (searchInput.value.length <= 0) {
           return false;
         }
 
         geocoder.geocode({
-          'address': $(searchInput).val()
+          'address': searchInput.value
         }, function (results, status) {
           if (status === google.maps.GeocoderStatus.OK && results.length > 0) {
             if (results[0].geometry.viewport) {
@@ -118,25 +118,25 @@ $(document).ready(function () {
           'locations': [marker.getPosition()]
         };
 
-        $(latInput).val(marker.position.lat());
-        $(lngInput).val(marker.position.lng());
+        latInput.value = marker.position.lat();
+        lngInput.value = marker.position.lng();
 
         elevation.getElevationForLocations(requestElevation,
           function (results, status) {
             if (status === google.maps.ElevationStatus.OK) {
               if (results[0]) {
-                $(elvInput).val(parseFloat(results[0].elevation));
+                elvInput.value = parseFloat(results[0].elevation);
               } else {
-                $(elvInput).val('');
+                elvInput.value = '';
               }
             }
           });
       }
 
       function clearMap() {
-        $(latInput).val('');
-        $(lngInput).val('');
-        $(elvInput).val('');
+        latInput.value = '';
+        lngInput.value = '';
+        elvInput.value = '';
         marker.setVisible(false);
       }
 
@@ -153,11 +153,11 @@ $(document).ready(function () {
     });
   };
 
-  $('.map-open').on('click', function () {
+  document.querySelector('.map-open').onclick = () => {
     if (!opened) open_map();
-  });
+  };
 
-  $('.map-locate').on('click', function () {
+  document.querySelector('.map-locate').onclick = () => {
     if (!opened) open_map("focus_immediately");
-  });
+  };
 });
