@@ -76,11 +76,16 @@ module LinkHelper
   def link_icon(type, title: "")
     return "" unless (glyph = link_icon_index[type])
 
+    text = ""
     opts = { class: "glyphicon glyphicon-#{glyph} px-2" }
-    tooltip_opts = { data: { toggle: "tooltip", title: title } }
-    opts = opts.merge(tooltip_opts) if title.present?
 
-    tag.span("", **opts)
+    if title.present?
+      tooltip_opts = { data: { toggle: "tooltip", title: title } }
+      opts = opts.merge(tooltip_opts)
+      text = tag.span(title, class: "sr-only")
+    end
+
+    tag.span(text, **opts)
   end
 
   def link_icon_index
