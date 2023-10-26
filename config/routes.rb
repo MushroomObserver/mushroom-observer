@@ -18,7 +18,6 @@
 #
 ACTIONS = {
   ajax: {
-    api_key: {},
     auto_complete: {},
     create_image_object: {},
     export: {},

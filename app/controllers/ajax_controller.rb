@@ -36,7 +36,6 @@ class AjaxController < ApplicationController
   include ExternalLink
   include Export
   include AutoComplete
-  include APIKey
 
   disable_filters
   around_action :catch_ajax_errors
