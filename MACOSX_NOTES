@@ -61,10 +61,22 @@ fi
 
 # There are various tools for this (rvm, chruby, rbenv).
 # MO has generally used rvm, but I used chruby most recently
-# because it was already installed.
+# because it was already installed. (rvm has also caused havoc on the vm - an)
 # For chruby you need to run:
 #    ruby-build $RUBY_VERSION ~/.rubies/ruby-$RUBY_VERSION
 #    chruby $RUBY_VERSION
+#
+# For rbenv run: (installing ruby-build maybe also needed above)
+#    brew install rbenv ruby-build
+# Add rbenv to zsh/bash so that it loads every time you open a terminal
+#    echo 'if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi' >> ~/.zshrc
+#    source ~/.zshrc
+#    rbenv install $RUBY_VERSION
+#    rbenv global $RUBY_VERSION
+#
+# Then check your ruby version:
+#    ruby -v
+#
 # Then open a new shell
 
 gem install bundler
