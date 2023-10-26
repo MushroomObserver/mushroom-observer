@@ -9,7 +9,7 @@ module Account
     # action, but it has links for edits to existing_keys that are handled by
     # account_api_keys.js. They are updated via the api and AJAX, not :update.
     def index
-      @key = APIKey.new
+      # @key = APIKey.new
     end
 
     # this form is on the index
@@ -91,7 +91,8 @@ module Account
       @key = APIKey.new(params.require(:api_key).permit(:user_id, :notes))
       @key.verified = Time.zone.now
       @key.save!
-      @key = APIKey.new # blank out form for if they want to create another key
+      # @key = APIKey.new
+      # render update blanks out form for if they want to create another key
       flash_notice(:account_api_keys_create_success.t)
     rescue StandardError => e
       flash_error(:account_api_keys_create_failed.t + e.to_s)
