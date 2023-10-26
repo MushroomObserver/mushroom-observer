@@ -320,8 +320,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                                       as: "resend_verification_email")
 
     resources :api_keys, only: [:index, :create, :edit, :update, :destroy]
-    post("api_keys/:id/activate", to: "api_keys#activate",
-                                  as: "activate_api_key")
+    patch("api_keys/:id/activate", to: "api_keys#activate",
+                                   as: "activate_api_key")
   end
 
   # ----- Admin: resources and actions ------------------------------------
