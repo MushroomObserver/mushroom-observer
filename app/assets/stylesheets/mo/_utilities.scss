@@ -589,11 +589,11 @@
   background: rgba($black, 0.6);
 }
 
+// Bootstrap 3 - collapse "fade" instead of "slide"
 .no-transition.collapsing {
-  // -webkit-transition: none;
-  // transition: none;
-  transition-duration: 100;
-  // display: none;
+  // transition-duration: 0.3s;
+  transition: height 0s, opacity 0.3s;
+  opacity: 0;
 }
 
 //

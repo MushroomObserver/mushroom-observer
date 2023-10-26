@@ -13,14 +13,13 @@ module APIKeysHelper
     ]
   end
 
-  # make this index_rows, and then the row is an edit form.
   def api_keys_edit_form_rows(user)
     rows = []
 
     api_keys_sorted(user).each do |key|
       # These are the fields in each row
       verified = if key.verified
-                   api_keys_dummy_verified_check_box
+                   api_keys_dummy_verified_check_box(key)
                  else
                    patch_button(name: :ACTIVATE.l,
                                 path: account_api_key_path(key.id))
@@ -29,6 +28,7 @@ module APIKeysHelper
       num_uses = key.num_uses.positive? ? key.num_uses : "--"
       edit_section = api_keys_notes_section(key)
       remove_button = destroy_button(name: :REMOVE.l, icon: :remove,
+                                     remote: true,
                                      class: "btn btn-link text-danger",
                                      target: account_api_key_path(key.id))
       rows << [
@@ -41,6 +41,7 @@ module APIKeysHelper
         remove_button
       ]
     end
+    rows << api_keys_new_form_row
     rows
   end
 
@@ -51,10 +52,10 @@ module APIKeysHelper
     end
   end
 
-  def api_keys_dummy_verified_check_box
-    tag.div(class: "checkbox my-0") do
+  def api_keys_dummy_verified_check_box(key)
+    tag.div(class: "checkbox my-0", id: "api_key_#{key.id}") do
       tag.label(:verified) do
-        concat(check_box_tag(:verified, "verified", true, disabled: true))
+        check_box_tag(:verified, "verified", true, disabled: true)
         # concat(:verified.l)
       end
     end
@@ -80,37 +81,35 @@ module APIKeysHelper
   # CSS class "in" means this is the one that shows by default, in Bootstrap 3
   def api_keys_view_notes_container(key)
     tag.div(class: "panel-collapse collapse in no-transition",
-            id: "view_notes_container") do
+            id: "view_notes_#{key.id}_container") do
       concat(tag.span(key.notes.t, class: "current_notes mr-4"))
-      concat(button_tag(:EDIT.t,
+      concat(button_tag(link_icon(:edit, title: :EDIT.l),
                         type: :button,
                         class: "btn btn-default collapsed",
                         aria: { expanded: "false",
-                                controls: "edit_notes_container" },
+                                controls: "edit_notes_#{key.id}_container" },
                         data: { toggle: "collapse",
-                                target: "#edit_notes_container",
+                                target: "#edit_notes_#{key.id}_container",
                                 parent: "#key_notes_#{key.id}" }))
     end
   end
 
   def api_keys_edit_notes_container(key)
     tag.div(class: "panel-collapse collapse no-transition",
-            id: "edit_notes_container") do
+            id: "edit_notes_#{key.id}_container") do
       form_with(model: key, url: account_api_key_path(key.id),
-                method: :patch, remote: true,
-                id: "edit_api_key_form") do |f|
-        # concat(f.hidden_field(:id, key.id))
-            # "key_notes_input_#{key.id}"
+                method: :patch, local: false,
+                id: "edit_api_key_#{key.id}_form") do |f|
         tag.div(class: "input-group") do
           concat(
             tag.span(class: "input-group-btn") do
-              button_tag(:CANCEL.l,
+              tag.button(link_icon(:cancel, title: :CANCEL.l),
                          type: :button,
                          class: "btn btn-default",
                          aria: { expanded: "true",
-                                 controls: "view_notes_container" },
+                                 controls: "view_notes_#{key.id}_container" },
                          data: { toggle: "collapse",
-                                 target: "#view_notes_container",
+                                 target: "#view_notes_#{key.id}_container",
                                  parent: "#key_notes_#{key.id}" })
             end
           )
@@ -120,6 +119,67 @@ module APIKeysHelper
             f.button(:SAVE.l, type: :submit, class: "btn btn-default")
           end)
         end
+      end
+    end
+  end
+
+  def api_keys_new_form_row
+    tag.td(colspan: 7) do
+      tag.div(class: "panel-group border-none mb-0", id: "new_key_row") do
+        tag.div(class: "panel border-none") do
+          [
+            api_keys_new_button_container,
+            api_keys_new_form_container
+          ].safe_join
+        end
+      end
+    end
+  end
+
+  def api_keys_new_button_container
+    button_text = [
+      link_icon(:add), :account_api_keys_create_button.l
+    ].safe_join(" ")
+
+    tag.div(class: "panel-collapse collapse in no-transition",
+            id: "new_key_button_container") do
+      button_tag(button_text,
+                 type: :button,
+                 class: "btn btn-default collapsed",
+                 aria: { expanded: "false",
+                         controls: "new_key_form_container" },
+                 data: { toggle: "collapse",
+                         target: "#new_key_form_container",
+                         parent: "#new_key_row" })
+    end
+  end
+
+  def api_keys_new_form_container
+    tag.div(class: "panel-collapse collapse no-transition",
+            id: "new_key_form_container") do
+      form_with(model: APIKey.new, url: account_api_keys_path,
+                method: :post, local: false,
+                id: "new_api_key_form") do |f|
+        concat(f.label(:notes, :account_api_keys_notes_label.t))
+        concat(tag.div(class: "input-group") do
+          concat(
+            tag.span(class: "input-group-btn") do
+              tag.button(link_icon(:cancel, title: :CANCEL.l),
+                         type: :button,
+                         class: "btn btn-default",
+                         aria: { expanded: "true",
+                                 controls: "new_key_button_container" },
+                         data: { toggle: "collapse",
+                                 target: "#new_key_button_container",
+                                 parent: "#new_key_row" })
+            end
+          )
+          concat(f.text_field(:notes, size: 40,
+                                      class: "form-control border-none"))
+          concat(tag.span(class: "input-group-btn") do
+            f.button(:CREATE.l, type: :submit, class: "btn btn-default")
+          end)
+        end)
       end
     end
   end

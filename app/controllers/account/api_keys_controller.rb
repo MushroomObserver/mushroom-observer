@@ -20,8 +20,11 @@ module Account
       @key = APIKey.new
 
       create_api_key
-      # redirect_to(account_api_keys_path)
-      # render a js template to update the index
+
+      respond_to do |format|
+        format.html { redirect_to(account_api_keys_path) }
+        format.js { render(partial: "account/api_keys/update_table_and_flash") }
+      end
     end
 
     # This form is in the index
@@ -44,7 +47,10 @@ module Account
       return unless verify_user_owns_key
 
       update_api_key
-      # render a js template to update flash
+      respond_to do |format|
+        format.html { redirect_to(account_api_keys_path) }
+        format.js { render(partial: "account/api_keys/update_table_and_flash") }
+      end
     end
 
     # remove this method
@@ -58,7 +64,12 @@ module Account
 
       @user.api_keys.delete(@key)
       flash_notice(:account_api_keys_removed_some.t(num: 1))
-      # render js to update flash
+      # binding.break
+
+      respond_to do |format|
+        format.html { redirect_to(account_api_keys_path) }
+        format.js { render(partial: "account/api_keys/update_table_and_flash") }
+      end
     end
 
     # no `find_or_goto_index` cause it's a js request
@@ -66,6 +77,12 @@ module Account
       return unless verify_user_owns_key
 
       @key.verify!
+      flash_notice(:account_api_keys_activated.t(notes: @key.notes))
+
+      respond_to do |format|
+        format.html { redirect_to(account_api_keys_path) }
+        format.js { render(partial: "account/api_keys/update_table_and_flash") }
+      end
     end
 
     private

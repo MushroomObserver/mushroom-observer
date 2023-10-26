@@ -502,7 +502,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     visit(account_api_keys_path)
 
     assert_selector("body.api_keys__index")
-    within("#account_api_keys_index") do
+    within("#account_api_keys_table") do
       assert_field("key_#{marys_api_key.id}")
       # needs `as_displayed` because single quote gets converted to "smart"
       # apostrophe and encoded by `t`. Otherwise Capybara will not find the
@@ -519,7 +519,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     # Should re-render the index
     assert_selector("body.api_keys__index")
     new_api_key = APIKey.last
-    within("#account_api_keys_index") do
+    within("#account_api_keys_table") do
       assert_field("key_#{new_api_key.id}")
       assert_selector("#key_notes_#{new_api_key.id} span.current_notes",
                       text: "New key idea")
@@ -538,7 +538,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
     # Should re-render the index
     assert_selector("body.api_keys__index")
-    within("#account_api_keys_index") do
+    within("#account_api_keys_table") do
       assert_field("key_#{new_api_key.id}")
       assert_selector("#key_notes_#{new_api_key.id} span.current_notes",
                       text: "Reconsidered key idea")
@@ -551,7 +551,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
     # Should re-render the index
     assert_selector("body.api_keys__index")
-    within("#account_api_keys_index") do
+    within("#account_api_keys_table") do
       refute_field("key_#{marys_api_key.id}")
     end
   end
