@@ -72,10 +72,15 @@ module LinkHelper
     icon_link_to(add_query_param(link), **opts) { content }
   end
 
-  def link_icon(type)
+  # pass title if it's a plain button (say for collapse) but you want a tooltip
+  def link_icon(type, title: "")
     return "" unless (glyph = link_icon_index[type])
 
-    tag.span("", class: "glyphicon glyphicon-#{glyph} px-2")
+    opts = { class: "glyphicon glyphicon-#{glyph} px-2" }
+    tooltip_opts = { data: { toggle: "tooltip", title: title } }
+    opts = opts.merge(tooltip_opts) if title.present?
+
+    tag.span("", **opts)
   end
 
   def link_icon_index
@@ -86,7 +91,8 @@ module LinkHelper
       back: "step-backward",
       hide: "eye-close",
       reuse: "share",
-      remove: "minus-sign"
+      remove: "minus-sign",
+      cancel: "remove"
     }.freeze
   end
 
