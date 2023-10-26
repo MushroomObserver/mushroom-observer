@@ -1,7 +1,6 @@
 //= link_tree ../images
 
 //= link advanced_search.js
-//= link account_api_keys.js
 //= link application.js
 //= link donate.js
 //= link edit_location.js
