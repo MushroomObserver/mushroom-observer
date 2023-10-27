@@ -36,7 +36,7 @@ body_class = class_names(whos_calling, theme_class)
 
       <%# need to print a `#page_flash` div no matter what, so js can add %>
       <div class="container-full hidden-print" id="page_flash">
-        <%= flash_notices_html %>
+        <%= flash_notices_html %><%# calls flash_clear %>
       </div><!--.container-text-->
 
       <header id="header">
@@ -52,7 +52,7 @@ body_class = class_names(whos_calling, theme_class)
         <%= yield %>
         <!--/MAIN_PAGE_CONTENT-->
 
-        <%= render(partial: "application/content/translator_credit") %>
+        <%= render(partial: "application/content/translators_credit") %>
       </main><!-- #content -->
 
     </div><!-- #right_side -->

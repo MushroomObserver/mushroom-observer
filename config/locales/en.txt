@@ -2734,10 +2734,10 @@
   # account/api_keys
   account_api_keys_link: API Key Manager
   account_api_keys_title: API Key Manager
+  account_api_keys_active_column_label: Active
   account_api_keys_last_used_column_label: Last Used
   account_api_keys_num_uses_column_label: Uses
   account_api_keys_notes_label: "Enter the name or a brief description of the application that will use this key:"
-  account_api_keys_remove_button: Remove the Selected Keys
   account_api_keys_create_button: Create a New Key
   account_api_keys_help: "API Keys are used by third-party applications to access the Mushroom Observer database directly.  You may request as many API Keys as you like, and no restrictions are placed on these keys.\n\nEach key is attached to a single user.  When posting observations or images, for example, your application will send this API Key in lieu of logging in. Therefore you should take some care to prevent other people or malicious agents from using your API Keys.\n\nNote that no key is required if you are only interested in _reading_ data; keys are only required if you wish to post or modify data."
   account_api_keys_create_success: Sucessfully created a new API Key.
@@ -3111,7 +3111,7 @@
   add_members_already_removed_member: Already removed [user] from members.
 
   # project/<id>/members
-  index_members_title: Members of 
+  index_members_title: Members of
 
   # project/add_project
   add_project_already_exists: A project named '[title]' already exists.

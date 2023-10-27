@@ -18,7 +18,6 @@
 #
 ACTIONS = {
   ajax: {
-    api_key: {},
     auto_complete: {},
     create_image_object: {},
     export: {},
@@ -28,7 +27,6 @@ ACTIONS = {
     location_primer: {},
     name_primer: {},
     multi_image_template: {},
-    old_translation: {},
     test: {},
     visual_group_status: {}
   },
@@ -84,11 +82,6 @@ ACTIONS = {
   },
   theme: {
     color_themes: {}
-  },
-  translation: {
-    edit_translations: {},
-    edit_translations_ajax_get: {},
-    edit_translations_ajax_post: {}
   }
 }.freeze
 
@@ -319,11 +312,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     post("verify/resend_email(/:id)", to: "verifications#resend_email",
                                       as: "resend_verification_email")
 
-    resources :api_keys, only: [:index, :create, :edit, :update]
-    post("api_keys/:id/activate", to: "api_keys#activate",
-                                  as: "activate_api_key")
-    post("api_keys/remove", to: "api_keys#remove",
-                            as: "remove_api_key")
+    resources :api_keys, only: [:index, :create, :edit, :update, :destroy]
+    patch("api_keys/:id/activate", to: "api_keys#activate",
+                                   as: "activate_api_key")
   end
 
   # ----- Admin: resources and actions ------------------------------------
@@ -814,6 +805,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   namespace :test_pages do
     resource :flash_redirection, only: [:show], controller: "flash_redirection"
   end
+
+  # ----- Translations: standard actions  -------------------------------------
+  resources :translations, only: [:index, :edit, :update]
+  get("translations/:id/versions", to: "translations/versions#show",
+                                   as: "translation_versions")
 
   # ----- Users: standard actions -------------------------------------------
   resources :users, id: /\d+/, only: [:index, :show]

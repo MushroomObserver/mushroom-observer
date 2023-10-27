@@ -57,8 +57,10 @@ module SpeciesLists
         params: {
           id: list.id,
           objects_list: "1",
-          "projects_#{proj1.id}" => "",
-          "projects_#{proj2.id}" => "",
+          objects_obs: "0",
+          objects_img: "0",
+          "projects_#{proj1.id}" => "0",
+          "projects_#{proj2.id}" => "0",
           commit: "bogus"
         }
       )
@@ -70,8 +72,10 @@ module SpeciesLists
         params: {
           id: list.id,
           objects_list: "1",
-          "projects_#{proj1.id}" => "",
-          "projects_#{proj2.id}" => "",
+          objects_obs: "0",
+          objects_img: "0",
+          "projects_#{proj1.id}" => "0",
+          "projects_#{proj2.id}" => "0",
           commit: :ATTACH.l
         }
       )
@@ -83,7 +87,9 @@ module SpeciesLists
         params: {
           id: list.id,
           objects_list: "1",
-          "projects_#{proj1.id}" => "",
+          objects_obs: "0",
+          objects_img: "0",
+          "projects_#{proj1.id}" => "0",
           "projects_#{proj2.id}" => "1",
           commit: :ATTACH.l
         }
@@ -96,8 +102,10 @@ module SpeciesLists
         params: {
           id: list.id,
           objects_list: "1",
+          objects_obs: "0",
+          objects_img: "0",
           "projects_#{proj1.id}" => "1",
-          "projects_#{proj2.id}" => "",
+          "projects_#{proj2.id}" => "0",
           commit: :ATTACH.l
         }
       )
@@ -109,8 +117,10 @@ module SpeciesLists
         params: {
           id: list.id,
           objects_list: "1",
+          objects_obs: "0",
+          objects_img: "0",
           "projects_#{proj1.id}" => "1",
-          "projects_#{proj2.id}" => "",
+          "projects_#{proj2.id}" => "0",
           commit: :ATTACH.l
         }
       )
@@ -122,8 +132,10 @@ module SpeciesLists
         params: {
           id: list.id,
           objects_list: "1",
-          "projects_#{proj1.id}" => "",
-          "projects_#{proj2.id}" => "",
+          objects_obs: "0",
+          objects_img: "0",
+          "projects_#{proj1.id}" => "0",
+          "projects_#{proj2.id}" => "0",
           commit: :REMOVE.l
         }
       )
@@ -135,7 +147,9 @@ module SpeciesLists
         params: {
           id: list.id,
           objects_list: "1",
-          "projects_#{proj1.id}" => "",
+          objects_obs: "0",
+          objects_img: "0",
+          "projects_#{proj1.id}" => "0",
           "projects_#{proj2.id}" => "1",
           commit: :REMOVE.l
         }
@@ -148,7 +162,9 @@ module SpeciesLists
         params: {
           id: list.id,
           objects_list: "1",
-          "projects_#{proj1.id}" => "",
+          objects_obs: "0",
+          objects_img: "0",
+          "projects_#{proj1.id}" => "0",
           "projects_#{proj2.id}" => "1",
           commit: :REMOVE.l
         }
@@ -161,8 +177,10 @@ module SpeciesLists
         params: {
           id: list.id,
           objects_list: "1",
+          objects_obs: "0",
+          objects_img: "0",
           "projects_#{proj1.id}" => "1",
-          "projects_#{proj2.id}" => "",
+          "projects_#{proj2.id}" => "0",
           commit: :REMOVE.l
         }
       )
@@ -184,10 +202,11 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
+          objects_list: "0",
           objects_obs: "1",
           objects_img: "1",
-          "projects_#{proj1.id}" => "",
-          "projects_#{proj2.id}" => "",
+          "projects_#{proj1.id}" => "0",
+          "projects_#{proj2.id}" => "0",
           commit: :ATTACH.l
         }
       )
@@ -197,10 +216,11 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
+          objects_list: "0",
           objects_obs: "1",
           objects_img: "1",
-          "projects_#{proj1.id}" => "",
-          "projects_#{proj2.id}" => "",
+          "projects_#{proj1.id}" => "0",
+          "projects_#{proj2.id}" => "0",
           commit: :REMOVE.l
         }
       )
@@ -210,9 +230,10 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
+          objects_list: "0",
           objects_obs: "1",
           objects_img: "1",
-          "projects_#{proj1.id}" => "",
+          "projects_#{proj1.id}" => "0",
           "projects_#{proj2.id}" => "1",
           commit: :ATTACH.l
         }
@@ -224,9 +245,10 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
+          objects_list: "0",
           objects_obs: "1",
           objects_img: "1",
-          "projects_#{proj1.id}" => "",
+          "projects_#{proj1.id}" => "0",
           "projects_#{proj2.id}" => "1",
           commit: :ATTACH.l
         }
@@ -238,6 +260,7 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
+          objects_list: "0",
           objects_obs: "1",
           objects_img: "1",
           "projects_#{proj1.id}" => "1",
@@ -254,9 +277,10 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
+          objects_list: "0",
           objects_obs: "1",
           objects_img: "1",
-          "projects_#{proj1.id}" => "",
+          "projects_#{proj1.id}" => "0",
           "projects_#{proj2.id}" => "1",
           commit: :REMOVE.l
         }
@@ -271,9 +295,10 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
+          objects_list: "0",
           objects_obs: "1",
           objects_img: "1",
-          "projects_#{proj1.id}" => "",
+          "projects_#{proj1.id}" => "0",
           "projects_#{proj2.id}" => "1",
           commit: :REMOVE.l
         }

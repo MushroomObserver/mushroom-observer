@@ -32,11 +32,9 @@ class AjaxController < ApplicationController
   include VisualGroupStatus
   include UploadImage
   include Primers
-  include OldTranslation
   include ExternalLink
   include Export
   include AutoComplete
-  include APIKey
 
   disable_filters
   skip_before_action :kick_out_robots # FIXME: remove after testing
