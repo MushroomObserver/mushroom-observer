@@ -1,23 +1,17 @@
 # frozen_string_literal: true
 
-class TranslationController < ApplicationController
+# rubocop:disable Metrics/ClassLength
+class TranslationsController < ApplicationController
   before_action :login_required
 
-  # ----------------------------
-  #  :section: Edit Actions
-  # ----------------------------
-
-  def edit_translations
-    @lang = get_language_and_authorize_user
-    @ajax = false
-    @page = params[:page]
-    @tag = params[:commit] == :CANCEL.l ? nil : params[:tag]
+  def index
+    @lang = set_language_and_authorize_user
+    @for_page = params[:for_page]
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
-    @show_tags = tags_to_show(@page, @strings)
-    get_record_maps(@lang, @show_tags.keys + @edit_tags)
-    update_translations(@edit_tags) if params[:commit] == :SAVE.l
-    @form = build_form(@lang, @show_tags)
+    @show_tags = tags_to_show(@for_page, @strings)
+    build_record_maps(@lang)
+    @index = build_index(@lang, @show_tags)
   rescue StandardError => e
     raise(e) if Rails.env.test? && @lang
 
@@ -25,31 +19,36 @@ class TranslationController < ApplicationController
     redirect_back_or_default("/")
   end
 
-  def edit_translations_ajax_get
-    @lang = get_language_and_authorize_user
-    @ajax = true
-    @tag = params[:tag]
+  # ----------------------------
+  #  :section: Edit Actions
+  # ----------------------------
+
+  # Form is only loaded by ajax from the index; only responds to js
+  def edit
+    @lang = set_language_and_authorize_user
+    @tag = params[:id]
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
-    get_record_maps(@lang, @edit_tags)
-    render(partial: "translation/form")
+    build_record_maps(@lang)
   rescue StandardError => e
-    msg = error_message(e).join("\n")
-    render(plain: msg, status: :internal_server_error)
+    @msg = error_message(e).join("\n")
   end
 
-  def edit_translations_ajax_post
-    @lang = get_language_and_authorize_user
-    @ajax = true
-    @tag = params[:tag]
+  # Only accessed by ajax from the index; only responds to js
+  def update
+    @lang = set_language_and_authorize_user
+    @tag = params[:id]
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
-    get_record_maps(@lang, @edit_tags)
+    build_record_maps(@lang)
     update_translations(@edit_tags)
-    render(partial: "translation/ajax_post")
+
+    @locale = @lang.locale
+    @new_str = preview_string(@translated_records[@tag].text)
+    render(partial: "translations/update")
   rescue StandardError => e
-    @error = error_message(e).join("\n")
-    render(partial: "translation/ajax_error")
+    @msg = error_message(e).join("\n")
+    render(:edit)
   end
 
   # -------------------------------
@@ -68,7 +67,7 @@ class TranslationController < ApplicationController
     msg
   end
 
-  def get_language_and_authorize_user
+  def set_language_and_authorize_user
     locale = params[:locale] || I18n.locale
     lang = Language.find_by(locale: locale)
     validate_language_and_user(locale, lang)
@@ -83,16 +82,16 @@ class TranslationController < ApplicationController
     raise(:edit_translations_reviewer_required.t) if lang.official && !reviewer?
   end
 
-  def get_record_maps(lang, tags)
-    @translated_records = build_record_map(lang, tags)
+  def build_record_maps(lang)
+    @translated_records = build_record_map(lang)
     @official_records = if lang.official
                           @translated_records
                         else
-                          build_record_map(Language.official, tags)
+                          build_record_map(Language.official)
                         end
   end
 
-  def build_record_map(lang, _tags)
+  def build_record_map(lang)
     result = {}
     # (If we just get the strings for the given tags, then it doesn't update
     # lang.translation_strings's cache correctly, and we have it end up loading
@@ -105,18 +104,18 @@ class TranslationController < ApplicationController
 
   def update_translations(tags)
     any_changes = false
-    tags.each do |tag|
-      old_val = @strings[tag].to_s
+    tags.each do |ttag|
+      old_val = @strings[ttag].to_s
       new_val = begin
-                  params["tag_#{tag}"].to_s
+                  params["tag_#{ttag}"].to_s
                 rescue StandardError
                   ""
                 end
       old_val = @lang.clean_string(old_val)
       new_val = @lang.clean_string(new_val)
-      str = @translated_records[tag]
+      str = @translated_records[ttag]
       if !str
-        create_translation(tag, new_val)
+        create_translation(ttag, new_val)
         any_changes = true
       elsif old_val != new_val
         change_translation(str, new_val)
@@ -124,31 +123,23 @@ class TranslationController < ApplicationController
       else
         touch_translation(str)
       end
-      @strings[tag] = new_val
+      @strings[ttag] = new_val
     end
-    if any_changes
-      @lang.update_localization_file
-      @lang.update_export_file
-    else
-      flash_warning(:edit_translations_no_changes.t) unless @ajax
-    end
+    return unless any_changes
+
+    @lang.update_localization_file
+    @lang.update_export_file
   end
 
-  def create_translation(tag, val)
-    str = @lang.translation_strings.create(tag: tag, text: val)
-    @translated_records[tag] = str
+  def create_translation(ttag, val)
+    str = @lang.translation_strings.create(tag: ttag, text: val)
+    @translated_records[ttag] = str
     str.update_localization
-    return if @ajax
-
-    flash_notice(:edit_translations_created_at.t(tag: tag, str: val))
   end
 
   def change_translation(str, val)
     str.update!(text: val)
     str.update_localization
-    return if @ajax
-
-    flash_notice(:edit_translations_changed.t(tag: str.tag, str: val))
   end
 
   def touch_translation(str)
@@ -158,42 +149,42 @@ class TranslationController < ApplicationController
   def preview_string(str, limit = 250)
     str = @lang.clean_string(str)
     str = str.gsub("\n", " / ")
-    str = str[0..limit] + "..." if str.length > limit
+    str = "#{str[0..limit]}..." if str.length > limit
     str
   end
   helper_method :preview_string
 
-  def tags_to_edit(tag, strings)
+  def tags_to_edit(ttag, strings)
     tag_list = []
-    if tag.present?
-      [tag, tag + "s", tag.upcase, (tag + "s").upcase].each do |t|
-        tag_list << t if strings.key?(t)
+    if ttag.present?
+      [ttag, "#{ttag}s", ttag.upcase, "#{ttag}s".upcase].each do |tt|
+        tag_list << tt if strings.key?(tt)
       end
-      tag_list = [tag] if tag_list.empty?
+      tag_list = [ttag] if tag_list.empty?
     end
     tag_list
   end
 
-  def tags_used_on_page(page)
+  def tags_used_on_page(for_page)
     tag_list = nil
-    if page.present?
-      tag_list = Language.load_tags(page)
+    if for_page.present?
+      tag_list = Language.load_tags(for_page)
       flash_error(:edit_translations_page_expired.t) unless tag_list
     end
     tag_list
   end
 
-  def tags_to_show(page, strings)
+  def tags_to_show(for_page, strings)
     hash = {}
-    (tags_used_on_page(page) || strings.keys).each do |tag|
-      primary = primary_tag(tag, strings)
+    (tags_used_on_page(for_page) || strings.keys).each do |ttag|
+      primary = primary_tag(ttag, strings)
       hash[primary] = true
     end
     hash
   end
 
   def primary_tag(tag3, strings)
-    tag2 = tag3 + "s"
+    tag2 = "#{tag3}s"
     tag1 = tag3.sub(/s$/i, "")
     [
       tag1.downcase,
@@ -204,18 +195,19 @@ class TranslationController < ApplicationController
       tag3.upcase,
       tag1,
       tag2
-    ].each do |tag|
-      return tag if strings[tag]
+    ].each do |ttag|
+      return ttag if strings[ttag]
     end
     tag3
   end
 
   # ----------------------------
-  #  :section: Edit Form
+  #  :section: Translation index
+  #  Giant helper method
   # ----------------------------
 
-  def build_form(lang, tags, file_handle = nil)
-    @form = []
+  def build_index(lang, tags, file_handle = nil)
+    @index = []
     @tags = tags
     @tags_used = {}
     file_handle ||= File.open(lang.export_file, "r:utf-8")
@@ -227,19 +219,19 @@ class TranslationController < ApplicationController
     process_blank_line
     include_unlisted_tags
     file_handle.close if file_handle.respond_to?(:close)
-    @form
+    @index
   end
 
   def include_unlisted_tags
     unlisted_tags = @tags.keys - @tags_used.keys
     return if unlisted_tags.none?
 
-    @form << TranslationFormMajorHeader.new("UNLISTED STRINGS")
-    @form << TranslationFormMinorHeader.new(
+    @index << TranslationsUIMajorHeader.new("UNLISTED STRINGS")
+    @index << TranslationsUIMinorHeader.new(
       "These tags are missing from the export files."
     )
-    unlisted_tags.sort.each do |tag|
-      @form << TranslationFormTagField.new(tag)
+    unlisted_tags.sort.each do |ttag|
+      @index << TranslationsUITagField.new(ttag)
     end
   end
 
@@ -256,9 +248,9 @@ class TranslationController < ApplicationController
 
   def process_template_line(line)
     if line =~ /^\s*['"]?(\w+)['"]?:\s*/
-      tag = Regexp.last_match(1)
+      ttag = Regexp.last_match(1)
       str = Regexp.last_match.post_match
-      process_tag_line(tag)
+      process_tag_line(ttag)
       @in_tag = true if str.start_with?(">")
     elsif @in_tag
       @in_tag = false unless /\S/.match?(line)
@@ -269,37 +261,37 @@ class TranslationController < ApplicationController
     end
   end
 
-  def process_tag_line(tag)
+  def process_tag_line(ttag)
     @expecting_minor_head = false
-    if @tags[tag]
+    if @tags[ttag]
       if @on_pages
         @do_section = true
       else
         add_headers
-        @form << TranslationFormComment.new(*@comments) if @comments.any?
-        @form << TranslationFormTagField.new(tag)
+        @index << TranslationsUIComment.new(*@comments) if @comments.any?
+        @index << TranslationsUITagField.new(ttag)
       end
     end
     if @on_pages
-      @section << TranslationFormComment.new(*@comments) if @comments.any?
-      if @comments.any? || !secondary_tag?(tag)
-        @section << TranslationFormTagField.new(tag)
+      @section << TranslationsUIComment.new(*@comments) if @comments.any?
+      if @comments.any? || !secondary_tag?(ttag)
+        @section << TranslationsUITagField.new(ttag)
       end
     end
-    @tags_used[tag] = true
+    @tags_used[ttag] = true
     @comments.clear
   end
 
-  def secondary_tag?(tag)
-    @tags_used[tag.sub(/s$/i, "")] ||
-      @tags_used[tag.downcase]
+  def secondary_tag?(ttag)
+    @tags_used[ttag.sub(/s$/i, "")] ||
+      @tags_used[ttag.downcase]
   end
 
   def process_blank_line
     if @on_pages
       if @do_section
         add_headers
-        @form += @section
+        @index += @section
       end
       @section.clear
       @do_section = false
@@ -322,13 +314,13 @@ class TranslationController < ApplicationController
   end
 
   def add_headers
-    @form << TranslationFormMajorHeader.new(*@major_head) if @major_head.any?
-    @form << TranslationFormMinorHeader.new(*@minor_head) if @minor_head.any?
+    @index << TranslationsUIMajorHeader.new(*@major_head) if @major_head.any?
+    @index << TranslationsUIMinorHeader.new(*@minor_head) if @minor_head.any?
     @major_head.clear
     @minor_head.clear
   end
 
-  class TranslationFormString
+  class TranslationsUIString
     attr_accessor :string
 
     def initialize(*strs)
@@ -337,16 +329,17 @@ class TranslationController < ApplicationController
     alias to_s string
   end
 
-  class TranslationFormMajorHeader < TranslationFormString
+  class TranslationsUIMajorHeader < TranslationsUIString
   end
 
-  class TranslationFormMinorHeader < TranslationFormString
+  class TranslationsUIMinorHeader < TranslationsUIString
   end
 
-  class TranslationFormComment < TranslationFormString
+  class TranslationsUIComment < TranslationsUIString
   end
 
-  class TranslationFormTagField < TranslationFormString
-    alias tag string
+  class TranslationsUITagField < TranslationsUIString
+    alias ttag string
   end
 end
+# rubocop:enable Metrics/ClassLength

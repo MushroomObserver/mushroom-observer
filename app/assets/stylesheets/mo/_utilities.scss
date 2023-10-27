@@ -197,3 +197,10 @@
 .row-justified {
   @extend .d-flex, .flex-row, .align-items-center, .justify-content-between;
 }
+
+// Bootstrap 3 - collapse "fade" instead of "slide"
+.no-transition.collapsing {
+  // transition-duration: 0.3s;
+  transition: height 0s, opacity 0.3s;
+  opacity: 0;
+}
