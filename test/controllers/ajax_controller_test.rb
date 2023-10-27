@@ -71,55 +71,6 @@ class AjaxControllerTest < FunctionalTestCase
     assert_equal(:en, I18n.locale)
   end
 
-  def test_activate_api_key
-    key = APIKey.new
-    key.provide_defaults
-    key.verified = nil
-    key.user = katrina
-    key.notes = "testing"
-    key.save!
-    assert_nil(key.reload.verified)
-
-    bad_ajax_request(:api_key, type: :activate, id: key.id)
-    assert_nil(key.reload.verified)
-
-    login("dick")
-    bad_ajax_request(:api_key, type: :activate, id: key.id)
-    assert_nil(key.reload.verified)
-
-    login("katrina")
-    bad_ajax_request(:api_key, type: :activate)
-    bad_ajax_request(:api_key, type: :activate, id: 12_345)
-    good_ajax_request(:api_key, type: :activate, id: key.id)
-    assert_equal("", @response.body)
-    assert_not_nil(key.reload.verified)
-  end
-
-  def test_edit_api_key
-    key = APIKey.new
-    key.provide_defaults
-    key.verified = Time.zone.now
-    key.user = katrina
-    key.notes = "testing"
-    key.save!
-    assert_equal("testing", key.notes)
-
-    bad_ajax_request(:api_key, type: :edit, id: key.id, value: "new notes")
-    assert_equal("testing", key.reload.notes)
-
-    login("dick")
-    bad_ajax_request(:api_key, type: :edit, id: key.id, value: "new notes")
-    assert_equal("testing", key.reload.notes)
-
-    login("katrina")
-    bad_ajax_request(:api_key, type: :edit)
-    bad_ajax_request(:api_key, type: :edit, id: 12_345)
-    bad_ajax_request(:api_key, type: :edit, id: key.id)
-    assert_equal("testing", key.reload.notes)
-    good_ajax_request(:api_key, type: :edit, id: key.id, value: " new notes ")
-    assert_equal("new notes", key.reload.notes)
-  end
-
   def test_auto_complete_location
     # names of Locations whose names have words starting with "m"
     m_loc_names = Location.where(Location[:name].matches_regexp("\\bM")).

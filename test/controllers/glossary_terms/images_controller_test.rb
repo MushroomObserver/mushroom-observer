@@ -90,8 +90,7 @@ module GlossaryTerms
       assert_equal(glossary_term.user_id, users(:rolf).id)
 
       put(:detach, params: { id: glossary_term.id.to_s, selected: "" })
-      assert_select("#flash_notices.alert",
-                    text: :runtime_no_save.t(:glossary_term))
+      assert_flash_error(:runtime_no_save.t(:glossary_term))
 
       selected = {}
       selected[glossary_term.thumb_image_id.to_s] = "yes"
