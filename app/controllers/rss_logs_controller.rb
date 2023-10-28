@@ -80,22 +80,10 @@ class RssLogsController < ApplicationController
     store_query_in_session(query)
     query_params_set(query)
 
-    includes = {
-      article: :user,
-      glossary_term: :user,
-      location: :user,
-      name: :user,
-      observation: [:location, :name, :user,
-                    { images: [:image_votes, :license, :user] },
-                    @user ? { thumb_image: :image_votes } : :thumb_image],
-      project: :user,
-      species_list: [:location, :user]
-    }
-
     args = {
       action: :index,
       matrix: true,
-      include: includes
+      include: rss_log_includes
     }.merge(args)
 
     @types = query.params[:type].to_s.split.sort
@@ -107,5 +95,20 @@ class RssLogsController < ApplicationController
     end
 
     show_index_of_objects(query, args)
+  end
+
+  def rss_log_includes
+    {
+      article: :user,
+      glossary_term: :user,
+      location: :user,
+      name: :user,
+      observation: [:location, :name, :user,
+                    # for matrix_box_carousels:
+                    # { images: [:image_votes, :license, :user] },
+                    @user ? { thumb_image: :image_votes } : :thumb_image],
+      project: :user,
+      species_list: [:location, :user]
+    }
   end
 end

@@ -65,12 +65,15 @@ module Observations
     # or better yet `respond_to do |format|` and write index.js.erb templates
     # to just render the #results div.
     def show_selected_results(query)
-      args = { matrix: true,
-               include: [:location, :user, :rss_log,
-                         { name: :synonym },
-                         { namings: :name },
-                         { images: [:image_votes, :license, :projects, :user] },
-                         { thumb_image: :image_votes }] }
+      args = {
+        matrix: true,
+        include: [:location, :user, :rss_log,
+                  { name: :synonym },
+                  { namings: :name },
+                  # for matrix_box_carousels:
+                  # { images: [:image_votes, :license, :projects, :user] },
+                  { thumb_image: :image_votes }]
+      }
 
       show_index_of_objects(query, args)
     end

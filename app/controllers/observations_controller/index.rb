@@ -196,9 +196,7 @@ class ObservationsController
       args = { controller: "/observations",
                action: :index,
                matrix: true,
-               include: [:name, :location, :projects, :user, :rss_log,
-                         { images: [:image_votes, :license, :projects,
-                                    :user] }] }.merge(args)
+               include: observation_includes }.merge(args)
 
       # Paginate by letter if sorting by user.
       case query.params[:by]
@@ -209,6 +207,14 @@ class ObservationsController
         args[:letters] = "names.sort_name"
       end
       args
+    end
+
+    def observation_includes
+      [
+        :name, :location, :projects, :user, :rss_log
+        # for matrix_box_carousels:
+        # { images: [:image_votes, :license, :projects, :user] }
+      ]
     end
   end
 end
