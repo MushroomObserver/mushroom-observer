@@ -74,9 +74,7 @@ class MatrixBoxPresenter < BasePresenter
     self.name = image.unique_format_name.t
     self.what = image
     self.image_data = {
-      image: image,
-      # for matrix_box_carousels:
-      # images: [image],
+      images: [image],
       image_link: image.show_link_args,
       context: :matrix_box
     }
@@ -98,16 +96,13 @@ class MatrixBoxPresenter < BasePresenter
     end
     return unless observation.thumb_image_id
 
-    # for matrix_box_carousels:
     # observation.images is eager-loaded, observation.thumb_image is not.
-    # thumb_image = observation.images.
-    #               find { |i| i.id == observation.thumb_image_id }
+    thumb_image = observation.images.
+                  find { |i| i.id == observation.thumb_image_id }
 
     self.image_data = {
-      image: observation.thumb_image,
-      # for matrix_box_carousels:
-      # images: observation.images,
-      # thumb_image: thumb_image,
+      images: observation.images,
+      thumb_image: thumb_image,
       image_link: observation.show_link_args, # false for thumb thru images
       obs_data: obs_data_hash(observation),
       context: :matrix_box
@@ -133,9 +128,7 @@ class MatrixBoxPresenter < BasePresenter
 
     # Not user.images because that's every image they've uploaded
     self.image_data = {
-      image: user.image_id,
-      # for matrix_box_carousels:
-      # images: [user.image_id],
+      images: [user.image_id],
       image_link: user.show_link_args,
       votes: false,
       context: :matrix_box
@@ -144,23 +137,16 @@ class MatrixBoxPresenter < BasePresenter
 
   # The target may not have images or a thumb_image
   def figure_out_rss_log_target_images(target)
-    return unless target.respond_to?(:thumb_image) && target&.thumb_image
-
-    # for matrix_box_carousels replace the above line with:
-    # images = if target.respond_to?(:images) &&
-    #            target&.images&.length&.positive?
-    #            target.images
-    #          elsif target.respond_to?(:thumb_image) && target&.thumb_image
-    #            [target.thumb_image]
-    #          end
-    # return unless images
+    images = if target.respond_to?(:images) && target&.images&.length&.positive?
+               target.images
+             elsif target.respond_to?(:thumb_image) && target&.thumb_image
+               [target.thumb_image]
+             end
+    return unless images
 
     self.image_data = {
-      image: target.thumb_image,
+      images: images,
       image_link: target.show_link_args,
-      # for matrix_box_carousels:
-      # images: images,
-      # image_link: target.show_link_args,
       obs_data: obs_data_hash(target),
       context: :matrix_box
     }

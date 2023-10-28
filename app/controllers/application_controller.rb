@@ -1705,9 +1705,7 @@ class ApplicationController < ActionController::Base
   ##############################################################################
 
   def observation_matrix_box_image_includes
-    { thumb_image: [:image_votes, :license, :projects, :user] }.freeze
-    # for matrix_box_carousels:
-    # { images: [:image_votes, :license, :projects, :user] }.freeze
+    { images: [:image_votes, :license, :projects, :user] }.freeze
   end
 
   # Tell an object that someone has looked at it (unless a robot made the

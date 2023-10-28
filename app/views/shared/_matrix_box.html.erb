@@ -36,10 +36,8 @@ if presenter
           # must use concat because conditionals
           if presenter.image_data
             concat(tag.div(class: "thumbnail-container") do
-              interactive_image(image, **image_args)
-              # for matrix_box_carousels:
-              # carousel_html(object: object, images: images, top_img: top_img,
-              #               thumbnails: false, **image_args)
+              carousel_html(object: object, images: images, top_img: top_img,
+                            thumbnails: false, **image_args)
             end)
           end
           concat(tag.div(class: "panel-body rss-box-details") do
