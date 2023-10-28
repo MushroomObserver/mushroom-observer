@@ -144,9 +144,9 @@ class SequencesController < ApplicationController
   end
 
   def observation_includes
-    [:user]
+    [:user, { thumb_image: [:image_votes, :license, :projects, :user] }]
     # for matrix_box_carousels:
-    # [:user, { images: [:image_votes, :license, :user] }]
+    # [:user, { images: [:image_votes, :license, :projects, :user] }]
   end
 
   def find_sequence!
@@ -157,9 +157,10 @@ class SequencesController < ApplicationController
   end
 
   def sequence_includes
-    [:observation]
+    [{ observation:
+       { thumb_image: [:image_votes, :license, :projects, :user] } }]
     # for matrix_box_carousels:
-    # [{ observation: { images: [:image_votes, :license, :user] } }]
+    # [{ observation: { images: [:image_votes, :license, :projects, :user] } }]
   end
 
   def figure_out_where_to_go_back_to

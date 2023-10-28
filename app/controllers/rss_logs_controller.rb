@@ -97,16 +97,19 @@ class RssLogsController < ApplicationController
     show_index_of_objects(query, args)
   end
 
+  # rss_logs now requires a logged in user
   def rss_log_includes
     {
       article: :user,
       glossary_term: :user,
       location: :user,
       name: :user,
-      observation: [:location, :name, :user,
-                    # for matrix_box_carousels:
-                    # { images: [:image_votes, :license, :user] },
-                    @user ? { thumb_image: :image_votes } : :thumb_image],
+      observation: [
+        :location, :name, :user,
+        # for matrix_box_carousels:
+        # { images: [:image_votes, :license, :projects, :user] }
+        { thumb_image: [:image_votes, :license, :projects, :user] }
+      ],
       project: :user,
       species_list: [:location, :user]
     }

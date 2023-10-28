@@ -98,12 +98,13 @@ class MatrixBoxPresenter < BasePresenter
     end
     return unless observation.thumb_image_id
 
+    # for matrix_box_carousels:
     # observation.images is eager-loaded, observation.thumb_image is not.
-    thumb_image = observation.images.
-                  find { |i| i.id == observation.thumb_image_id }
+    # thumb_image = observation.images.
+    #               find { |i| i.id == observation.thumb_image_id }
 
     self.image_data = {
-      image: thumb_image,
+      image: observation.thumb_image,
       # for matrix_box_carousels:
       # images: observation.images,
       # thumb_image: thumb_image,

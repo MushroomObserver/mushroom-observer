@@ -211,7 +211,8 @@ class ObservationsController
 
     def observation_includes
       [
-        :name, :location, :projects, :user, :rss_log
+        :name, :location, :projects, :user, :rss_log,
+        { thumb_image: [:image_votes, :license, :projects, :user] }
         # for matrix_box_carousels:
         # { images: [:image_votes, :license, :projects, :user] }
       ]

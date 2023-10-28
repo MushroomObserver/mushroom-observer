@@ -72,7 +72,7 @@ module Observations
                   { namings: :name },
                   # for matrix_box_carousels:
                   # { images: [:image_votes, :license, :projects, :user] },
-                  { thumb_image: :image_votes }]
+                  { thumb_image: [:image_votes, :license, :projects, :user] }]
       }
 
       show_index_of_objects(query, args)
