@@ -134,11 +134,7 @@ class HerbariumRecordsController < ApplicationController
 
   def herbarium_record_includes
     [:user,
-     { observations:
-       [:user,
-        # for matrix_box_carousel:
-        # { images: [:image_votes, :license, :projects, :user] }
-        { thumb_image: [:image_votes, :license, :projects, :user] }] }]
+     { observations: [:user, observation_matrix_box_image_includes] }]
   end
 
   def render_modal_herbarium_record_form(title:)

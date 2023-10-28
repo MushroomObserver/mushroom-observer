@@ -157,10 +157,7 @@ class SequencesController < ApplicationController
   end
 
   def sequence_includes
-    [{ observation:
-       { thumb_image: [:image_votes, :license, :projects, :user] } }]
-    # for matrix_box_carousels:
-    # [{ observation: { images: [:image_votes, :license, :projects, :user] } }]
+    [{ observation: observation_matrix_box_image_includes }]
   end
 
   def figure_out_where_to_go_back_to

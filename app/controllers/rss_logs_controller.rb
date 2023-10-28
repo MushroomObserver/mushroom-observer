@@ -105,10 +105,7 @@ class RssLogsController < ApplicationController
       location: :user,
       name: :user,
       observation: [
-        :location, :name, :user,
-        # for matrix_box_carousels:
-        # { images: [:image_votes, :license, :projects, :user] }
-        { thumb_image: [:image_votes, :license, :projects, :user] }
+        :location, :name, :user, observation_matrix_box_image_includes
       ],
       project: :user,
       species_list: [:location, :user]

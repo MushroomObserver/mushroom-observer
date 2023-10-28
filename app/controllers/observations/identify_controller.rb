@@ -67,12 +67,8 @@ module Observations
     def show_selected_results(query)
       args = {
         matrix: true,
-        include: [:location, :user, :rss_log,
-                  { name: :synonym },
-                  { namings: :name },
-                  # for matrix_box_carousels:
-                  # { images: [:image_votes, :license, :projects, :user] },
-                  { thumb_image: [:image_votes, :license, :projects, :user] }]
+        include: [:location, :user, :rss_log, { name: :synonym },
+                  { namings: :name }, observation_matrix_box_image_includes]
       }
 
       show_index_of_objects(query, args)
