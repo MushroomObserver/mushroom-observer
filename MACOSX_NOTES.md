@@ -1,8 +1,8 @@
 The following is the beginning of a native MacOSX setup script.
-It is based on the notes @nimmolo took while getting his local Apple M1
+It is based on @mo-nathan's notes while getting his local Apple M1
 working under the Monterey (12.4) version of MacOS.
-It also includes some notes later added by @JoeCohen when getting his
-local Apple Intel working under MacOS Ventura 13.6
+It also includes some notes later added by @nimmmolo, and by
+@JoeCohen when getting his local Apple Intel working under MacOS Ventura 13.6
 
 ### Install bash
 You will need to get Xcode (free download from the App Store) and
@@ -127,8 +127,9 @@ fi
 ```
 
 There are various tools for this (rvm, chruby, rbenv).
-In the past MO used rvm, but recently switched to rbenv.
-@nimmolo used chruby most recently
+In the past MO used rvm, but it caused havoc on the vm.
+We recently switched to rbenv on the vm.
+@mo-nathan used chruby most recently
 because it was already installed.
 For chruby you need to run:
 ```sh
@@ -136,13 +137,17 @@ ruby-build $RUBY_VERSION ~/.rubies/ruby-$RUBY_VERSION
    chruby $RUBY_VERSION
 ```
 
-@JoeCohen used rbenv. He had to modify the shell configuration to
-give priority to rbenv, by adding the following to both `.bashrc`
-(and just for safety, to `.zshrc`).
+@mimmolo and @JoeCohen used rbenv.
+For rbenv run: (installing ruby-build maybe also needed above)
 ```sh
-if which rbenv > /dev/null; then
-  eval "$(rbenv init -)"
-fi
+   brew install rbenv ruby-build
+```
+Add rbenv to zsh/bash so that it loads every time you open a terminal
+```sh
+   echo 'if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi' >> ~/.zshrc
+   source ~/.zshrc
+   rbenv install $RUBY_VERSION
+   rbenv global $RUBY_VERSION
 ```
 
 ### Install an MO database snapshot.
@@ -212,7 +217,7 @@ else
 fi
 ```
 ### Install mysql2
-@nimmolo needed to run the following to get the `mysql2`` gem to install.
+@mo-nathan needed to run the following to get the `mysql2`` gem to install.
 Your mileage may vary...
 ```sh
 gem install mysql2 -v '0.5.3' -- --with-opt-dir=$(brew --prefix openssl) --with-ldflags=-L/opt/homebrew/opt/zstd/lib
@@ -246,7 +251,7 @@ EDITOR='echo "test_secret: magic" >> ' rails credentials:edit
 ```
 
 Hopefully this is not necessary on a fresh clean system,
-but @nimmolo had to run
+but @mo-nathan had to run
 ```sh
 gem pristine --all
 ```
