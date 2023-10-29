@@ -83,6 +83,7 @@
 #  extra_gc::               (filter: calls <tt>ObjectSpace.garbage_collect</tt>)
 #
 #  ==== Other stuff
+#  observation_matrix_box_image_includes:: Hash of includes for eager-loading
 #  default_thumbnail_size::      Default thumbnail size: :thumbnail or :small.
 #  default_thumbnail_size_set::  Change default thumbnail size for current user.
 #  rubric::                      Label for what the controller deals with
@@ -1702,6 +1703,12 @@ class ApplicationController < ActionController::Base
   #  :section: Other stuff
   #
   ##############################################################################
+
+  def observation_matrix_box_image_includes
+    { thumb_image: [:image_votes, :license, :projects, :user] }.freeze
+    # for matrix_box_carousels:
+    # { images: [:image_votes, :license, :projects, :user] }.freeze
+  end
 
   # Tell an object that someone has looked at it (unless a robot made the
   # request).

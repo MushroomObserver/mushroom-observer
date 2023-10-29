@@ -12,63 +12,68 @@ if presenter
   # presenter.image_data includes context: :matrix_box where appropriate
   if presenter.image_data
     image = presenter.image_data[:image]
+    # for matrix_box_carousels:
+    # images = presenter.image_data[:images]
+    # This is a lotta arg passing. Check if any view is actually sending these
+    # image_arg extra locals! AN 2023
     image_args = local_assigns.
                  except(:columns, :object, :object_counter, :object_iteration).
                  merge(presenter.image_data.except(:image) || {})
+                 # for matrix_box_carousels:
+                 # merge(presenter.image_data.except(:images) || {})
+    # for matrix_box_carousels:
+    # top_img = presenter.image_data[:thumb_image] || images.first
   end
   h_element = presenter.image_data ? :h5 : :h3 # bigger heading if no image
-  link_heading = content_tag(:small, "(#{presenter.id})",
-                              class: "rss-id float-right") +
-                 content_tag(:span, presenter.name, class: "rss-name",
-                             id: "box_title_#{object_id}")
+  link_heading = tag.small("(#{presenter.id})", class: "rss-id float-right") +
+                 tag.span(presenter.name, class: "rss-name",
+                          id: "box_title_#{object_id}")
   %>
 
-  <%= matrix_box(columns: columns, id: object_id) do %>
-    <div class="panel panel-default">
-
-      <div class="panel-sizing">
-        <%= if presenter.image_data
-          tag.div(class: "thumbnail-container") do
-            interactive_image(image, **image_args)
+  <%= matrix_box(columns: columns, id: object_id) do
+    tag.div(class: "panel panel-default") do
+      [
+        tag.div(class: "panel-sizing") do
+          # must use concat because conditionals
+          if presenter.image_data
+            concat(tag.div(class: "thumbnail-container") do
+              interactive_image(image, **image_args)
+              # for matrix_box_carousels:
+              # carousel_html(object: object, images: images, top_img: top_img,
+              #               thumbnails: false, **image_args)
+            end)
           end
-        end %>
-
-        <div class="panel-body rss-box-details">
-
-          <div class="rss-what">
-            <%= content_tag(h_element, class: "mt-0 rss-heading") do
+          concat(tag.div(class: "panel-body rss-box-details") do
+            # must use concat because conditionals
+            concat(tag.div(class: "rss-what") do
+              [
+                content_tag(h_element, class: "mt-0 rss-heading") do
                   link_with_query(link_heading, presenter.what.show_link_args)
-                end %>
-            <%= matrix_box_vote_or_propose_ui(identify, object) %>
-          </div><!-- .rss-what -->
-
-          <% if presenter.place_name %>
-            <div class="rss-where">
-              <%= content_tag(:small) do
-                location_link(presenter.place_name, presenter.where)
-              end %>
-            </div><!-- .rss-where -->
-          <% end %>
-
-          <% unless presenter.when.blank? %>
-            <div class="rss-what">
-              <%= content_tag(:small, class: "nowrap-ellipsis") do
-                concat(content_tag(:span, presenter.when, class: "rss-when"))
-                concat(": ")
-                concat(user_link(presenter.who, nil, class: "rss-who"))
-              end %>
-            </div><!-- .rss-when -->
-          <% end %>
-
-
-        </div><!-- .panel-body -->
-
-      </div><!-- .panel-sizing -->
-
-      <%= matrix_box_log_footer(presenter) %>
-
-      <%= matrix_box_identify_footer(identify, presenter.id) %>
-
-    </div><!-- .panel -->
-  <% end %><!-- .matrix-box -->
+                end,
+                matrix_box_vote_or_propose_ui(identify, object)
+              ].safe_join
+            end)
+            if presenter.place_name
+              concat(tag.div(class: "rss-where") do
+                tag.small do
+                  location_link(presenter.place_name, presenter.where)
+                end
+              end)
+            end
+            unless presenter.when.blank?
+              concat(tag.div(class: "rss-what") do
+                tag.small(class: "nowrap-ellipsis") do
+                  concat(tag.span(presenter.when, class: "rss-when"))
+                  concat(": ")
+                  concat(user_link(presenter.who, nil, class: "rss-who"))
+                end
+              end)
+            end
+          end)
+        end,
+        matrix_box_log_footer(presenter),
+        matrix_box_identify_footer(identify, presenter.id)
+      ].safe_join
+    end
+  end %><!-- .matrix-box -->
 <% end %>

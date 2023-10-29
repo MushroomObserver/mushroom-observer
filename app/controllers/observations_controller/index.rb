@@ -189,12 +189,14 @@ class ObservationsController
       show_index_of_objects(query, args)
     end
 
+    # The { images: } hash is necessary for the index carousels.
+    # :projects required by Bullet because it's needed to compute
+    # `can_edit?` for an image.
     def define_index_args(query, args)
       args = { controller: "/observations",
                action: :index,
                matrix: true,
-               include: [:name, :location, :user, :rss_log,
-                         { thumb_image: :image_votes }] }.merge(args)
+               include: observation_includes }.merge(args)
 
       # Paginate by letter if sorting by user.
       case query.params[:by]
@@ -205,6 +207,13 @@ class ObservationsController
         args[:letters] = "names.sort_name"
       end
       args
+    end
+
+    def observation_includes
+      [
+        :name, :location, :projects, :user, :rss_log,
+        observation_matrix_box_image_includes
+      ]
     end
   end
 end
