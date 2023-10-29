@@ -9,24 +9,8 @@ if presenter
   identify ||= false
   columns ||= "col" # maybe passed as a local
   object_id = object&.id.present? ? object.id : "no_ID"
-  # presenter.image_data includes context: :matrix_box where appropriate
-  if presenter.image_data
-    image = presenter.image_data[:image]
-    # for matrix_box_carousels:
-    # images = presenter.image_data[:images]
-    # This is a lotta arg passing. Check if any view is actually sending these
-    # image_arg extra locals! AN 2023
-    image_args = local_assigns.
-                 except(:columns, :object, :object_counter, :object_iteration).
-                 merge(presenter.image_data.except(:image) || {})
-                 # for matrix_box_carousels:
-                 # merge(presenter.image_data.except(:images) || {})
-    # for matrix_box_carousels:
-    # top_img = presenter.image_data[:thumb_image] || images.first
-  end
-  h_element = presenter.image_data ? :h5 : :h3 # bigger heading if no image
-  link_heading = tag.small("(#{presenter.id})", class: "log-id float-right") +
-                 tag.span(presenter.name, class: "log-name")
+  passed_args = local_assigns.
+                except(:columns, :object, :object_counter, :object_iteration)
   %>
 
   <%= matrix_box(columns: columns, id: object_id) do
@@ -40,45 +24,4 @@ if presenter
     end
   end %><!-- .matrix-box -->
 
-  <%= matrix_box(columns: columns, id: object_id) do
-    tag.div(class: "card log-item h-100") do
-      if presenter.image_data
-        concat(tag.div(class: "thumbnail-container card-img-top") do
-          interactive_image(image, **image_args)
-        end)
-      end
-
-      concat(tag.div(class: "card-body log-details") do
-        concat(
-          link_to(presenter.what.show_link_args.merge({ q: get_query_param }),
-                  class: "log-link") do
-            content_tag(h_element, class: "card-title log-what d-flex flex-row justify-content-between align-items-start") do
-              concat(tag.span(presenter.name, class: "log-name"))
-              concat(tag.span(presenter.id, class: "log-id"))
-            end
-          end
-        )
-        concat(matrix_box_vote_or_propose_ui(identify, object))
-        if presenter.place_name
-          concat(tag.p(class: "card-text mb-1") do
-            tag.span(class: "log-where") do
-              location_link(presenter.place_name, presenter.where)
-            end
-          end)
-        end
-        unless presenter.when.blank?
-          concat(tag.p(class: "card-text text-truncate mb-0")
-            tag.span(class: "") do
-              concat(tag.span(presenter.when, class: "log-when"))
-              concat(": ")
-              concat(user_link(presenter.who, nil, class: "log-who"))
-            end
-          end)
-        end
-      end)
-
-      concat(matrix_box_log_footer(presenter))
-      concat(matrix_box_identify_footer(identify, presenter.id))
-    end
-  end %>
 <% end %>

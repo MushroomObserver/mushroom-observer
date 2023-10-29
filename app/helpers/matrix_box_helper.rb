@@ -15,6 +15,63 @@ module MatrixBoxHelper
     end
   end
 
+  def matrix_box_image(presenter, passed_args)
+    return unless presenter.image_data
+
+    image = presenter.image_data[:image]
+    # for matrix_box_carousels: change to image_data.except(:images)
+    image_args = passed_args.merge(presenter.image_data.except(:image) || {})
+
+    tag.div(class: "thumbnail-container card-img-top") do
+      interactive_image(image, **image_args)
+    end
+  end
+
+  # for matrix_box_carousels:
+  # def matrix_box_images(presenter)
+  #   presenter.image_data includes context: :matrix_box where appropriate
+  #   images = presenter.image_data[:images]
+  #   image_args = local_assigns.
+  #                except(:columns, :object, :object_counter,
+  #                       :object_iteration).
+  #                merge(presenter.image_data.except(:images) || {})
+  #   top_img = presenter.image_data[:thumb_image] || images.first
+  #
+  #   tag.div(class: "thumbnail-container card-img-top") do
+  #     carousel_html(object: object, images: images, top_img: top_img,
+  #                   thumbnails: false, **image_args)
+  #   end
+  # end
+
+  def matrix_box_details(presenter, object, object_id, identify)
+    tag.div(class: "card-body log-details") do
+      [
+        matrix_box_what(presenter, object, object_id, identify),
+        matrix_box_where(presenter),
+        matrix_box_when_who(presenter)
+      ].safe_join
+    end
+  end
+
+  def matrix_box_what(presenter, object, object_id, identify)
+    # bigger heading if no image
+    h_element = presenter.image_data ? :h5 : :h3
+    h_classes = %w[card-title log-what d-flex flex-row justify-content-between
+                   align-items-start]
+    what_link = presenter.what.show_link_args.merge({ q: get_query_param })
+
+    [
+      link_to(what_link, class: "log-link") do
+        content_tag(h_element, class: h_classes) do
+          concat(tag.span(presenter.name, class: "log-name",
+                                          id: "box_title_#{object_id}"))
+          concat(tag.span(presenter.id, class: "log-id"))
+        end
+      end,
+      matrix_box_vote_or_propose_ui(identify, object)
+    ].safe_join
+  end
+
   # Obs with uncertain name: vote on naming, or propose (if it's "Fungi")
   # used if matrix_box local_assigns identify == true
   def matrix_box_vote_or_propose_ui(identify, object)
@@ -29,6 +86,28 @@ module MatrixBoxHelper
       propose_naming_link(object.id,
                           btn_class: "btn-sm btn-outline-secondary mb-3",
                           context: "matrix_box")
+    end
+  end
+
+  def matrix_box_where(presenter)
+    return unless presenter.place_name
+
+    tag.p(class: "card-text mb-1") do
+      tag.span(class: "log-where") do
+        location_link(presenter.place_name, presenter.where)
+      end
+    end
+  end
+
+  def matrix_box_when_who(presenter)
+    return if presenter.when.blank?
+
+    tag.p(class: "card-text text-truncate mb-0") do
+      tag.span(class: "") do
+        concat(tag.span(presenter.when, class: "log-when"))
+        concat(": ")
+        concat(user_link(presenter.who, nil, class: "log-who"))
+      end
     end
   end
 
