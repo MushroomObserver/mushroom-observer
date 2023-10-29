@@ -494,8 +494,8 @@ ActiveRecord::Schema.define(version: 2023_10_19_202655) do
   create_table "project_members", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "project_id"
     t.integer "user_id"
-    t.boolean "admin"
-    t.boolean "share_gps"
+    t.boolean "admin", default: false, null: false
+    t.boolean "trusted", default: false, null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end

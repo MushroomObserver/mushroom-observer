@@ -4,16 +4,16 @@ eol_member_rolf:
   project: eol_project
   user: rolf
   admin: true
-  share_gps: false
+  trusted: false
 
 eol_member_mary:
   project: eol_project
   user: mary
   admin: true
-  share_gps: false
+  trusted: false
 
 eol_member_katrina:
   project: eol_project
   user: katrina
   admin: false
-  share_gps: false
+  trusted: false
