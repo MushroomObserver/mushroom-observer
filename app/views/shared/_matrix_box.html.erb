@@ -11,18 +11,13 @@ if presenter
   object_id = object&.id.present? ? object.id : "no_ID"
   # presenter.image_data includes context: :matrix_box where appropriate
   if presenter.image_data
-    image = presenter.image_data[:image]
-    # for matrix_box_carousels:
-    # images = presenter.image_data[:images]
+    images = presenter.image_data[:images]
     # This is a lotta arg passing. Check if any view is actually sending these
     # image_arg extra locals! AN 2023
     image_args = local_assigns.
                  except(:columns, :object, :object_counter, :object_iteration).
-                 merge(presenter.image_data.except(:image) || {})
-                 # for matrix_box_carousels:
-                 # merge(presenter.image_data.except(:images) || {})
-    # for matrix_box_carousels:
-    # top_img = presenter.image_data[:thumb_image] || images.first
+                 merge(presenter.image_data.except(:images) || {})
+    top_img = presenter.image_data[:thumb_image] || images.first
   end
   h_element = presenter.image_data ? :h5 : :h3 # bigger heading if no image
   link_heading = tag.small("(#{presenter.id})", class: "rss-id float-right") +
