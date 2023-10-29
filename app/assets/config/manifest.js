@@ -7,6 +7,7 @@
 //= link mo_autocompleter.js
 //= link mo_images_uploader.js
 //= link mo_translations.js
+//= link mo_observation_mapper.js
 //= link name_lister.js
 //= link rss_log_type_filter_helper.js
 //= link suggestions.js

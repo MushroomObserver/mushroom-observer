@@ -2,8 +2,15 @@
     including location autocomplete, map, lat/long/alt %>
 
 <!-- WHERE_REASONS -->
-<%= render(partial: "shared/form_location_feedback",
-           locals: { button: button_name } ) %>
+<%=
+render(partial: "shared/form_location_feedback",
+       locals: { button: button_name } )
+%>
+
+<%
+javascript_include("mo_observation_mapper")
+inject_javascript_at_end("new MOObservationMapper();")
+%>
 <!-- /WHERE_REASONS -->
 
 <!-- WHERE -->
