@@ -1,7 +1,9 @@
+<%# bs4 %>
+
 <section class="my-3" id="ip_summary">
   <h5 class="text-larger">Most active users: (top 50)</h5>
 
-  <table class="ips ips-lined table table-striped">
+  <table class="table table-striped ips ips-lined">
     <tr>
       <th>ip</th>
       <th>block</th>
@@ -15,7 +17,7 @@
         <td><% unless IpStats.blocked?(ip) %>
               <%= patch_button(name: "Block",
                                path: admin_blocked_ips_path(add_bad: ip),
-                               class: "btn btn-default") %>
+                               class: "btn btn-outline-secondary") %>
             <% end %>
         </td>
         <td>

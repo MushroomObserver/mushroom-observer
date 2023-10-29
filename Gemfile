@@ -32,10 +32,11 @@ group :rails do
   gem("activesupport", "~> 6.1")
   gem("bundler")
   gem("railties", "~> 6.1")
-  gem("sprockets-rails")
-  # gem irb now depends on psych, but version 5 will not bundle currently
-  gem("psych", "~> 4")
 end
+
+gem("sprockets-rails")
+# gem irb now depends on psych, but version 5 will not bundle currently
+gem("psych", "~> 4")
 
 # Security fix updates via Dependabot
 # CVE-2021-41817 regex denial of service vulnerability
@@ -61,7 +62,8 @@ gem("arel-helpers")
 gem("arel_extensions")
 
 # Use bootstrap style generator
-gem("bootstrap-sass")
+gem("bootstrap", "~> 4.6", ">= 4.6.2")
+gem("font-awesome-sass", "~> 6.4.0")
 
 # Use SCSS for stylesheets
 gem("sassc-rails")

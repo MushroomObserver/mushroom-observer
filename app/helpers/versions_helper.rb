@@ -34,10 +34,10 @@ module VersionsHelper
   #
   def show_past_versions(obj, args = {})
     table = make_table(rows: build_version_table(obj, args),
-                       table_opts: { class: "mb-0" })
-    panel = tag.div(table, class: "panel-body")
+                       table_opts: { class: "table-sm mb-0" })
+    body = content_tag(:div, table, class: "card-body")
     tag.strong("#{:VERSIONS.t}:") +
-      tag.div(panel, class: "panel panel-default")
+      content_tag(:div, body, class: "card bg-light")
   end
 
   private

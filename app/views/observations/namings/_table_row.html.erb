@@ -13,18 +13,18 @@ row = observation_naming_row(obs, naming, @vote, logged_in)
   <%= tag.div(class: "row align-items-center naming-row",
               id: "observation_naming_#{naming.id}") do
     [
-      tag.div(class: "col col-sm-11") do
+      tag.div(class: "col-12 col-md-11") do
         [
           tag.div(class: "row align-items-center") do
-            concat(tag.div(row[:name], class: "col col-sm-4"))
-            concat(tag.div(row[:proposer], class: "col col-sm-3"))
-            concat(tag.div(row[:consensus_vote], class: "col col-sm-2"))
-            concat(tag.div(row[:your_vote], class: "col col-sm-3"))
+            concat(tag.div(row[:name], class: "col-12 col-md-4"))
+            concat(tag.div(row[:proposer], class: "col-12 col-md-3"))
+            concat(tag.div(row[:consensus_vote], class: "col-12 col-md-2"))
+            concat(tag.div(row[:your_vote], class: "col-12 col-md-3"))
           end,
           tag.div(row[:reasons], class: "naming-reasons small mt-1")
         ].safe_join
       end,
-      tag.div(row[:eyes], class: "col-sm-1 d-none d-sm-block px-sm-0")
+      tag.div(row[:eyes], class: "col-md-1 d-none d-md-block px-md-0")
     ].safe_join
   end %>
 <% end %>

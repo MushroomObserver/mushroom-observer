@@ -1,28 +1,17 @@
 // Namings is not a <table>, but has table-like layout properties
 .namings-table {
   .row {
-    border-radius: $panel-border-radius;
+    border-radius: $card-border-radius;
   }
 
-  .panel-heading .row {
-    .col {
-      // padding: $panel-body-padding;
-      vertical-align: bottom;
-      // padding-bottom: 0.25rem;
-
-      // &:first-child {
-      //   padding-bottom: 0.5rem;
-      // }
-    }
-  }
-
-  .list-group-item {
-    background-color: $panel-bg;
+  div.row {
+    // background-color: $card-bg;
 
     .col {
-      // padding: $panel-body-padding;
+      padding: $card-spacer-x;
       vertical-align: middle;
 
+      // xs-sm only
       &.naming-reasons {
         padding-top: 0;
       }

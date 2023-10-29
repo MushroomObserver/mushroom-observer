@@ -24,8 +24,7 @@ obs = @sequence.observation
   <div class="col-xs-12 col-sm-5">
     <ul class="row list-unstyled">
       <%= render(partial: "shared/matrix_box",
-                 locals: { object: obs.rss_log || obs,
-                           columns: "col-xs-12" }) %>
+                 locals: { object: obs.rss_log || obs }) %>
     </ul>
   </div>
 </div><!--.row-->

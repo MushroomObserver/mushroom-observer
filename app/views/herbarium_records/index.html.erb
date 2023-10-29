@@ -1,4 +1,5 @@
 <%
+#bs4
 @container = :wide
 add_index_title(@query, no_hits: :list_herbarium_records_title.t)
 add_tab_set(herbarium_records_index_tabs(obs: @observation))
@@ -20,7 +21,7 @@ flash_error(@error) if @error && @objects.empty?
                     edit_herbarium_record_path(
                       id: rec.id, back: :index, q: get_query_param
                     ),
-                    class: "btn btn-default btn-sm",
+                    class: "btn btn-outline-secondary btn-sm",
                     id: "edit_herbarium_record_link_#{rec.id}"
                   )
                 end %>
@@ -46,7 +47,7 @@ flash_error(@error) if @error && @objects.empty?
                   destroy_button(
                     name: :destroy_object.t(type: :herbarium_record),
                     target: herbarium_record_path(rec.id),
-                    class: "btn btn-default btn-sm",
+                    class: "btn btn-outline-secondary btn-sm",
                     id: "destroy_herbarium_record_link_#{rec.id}"
                   )
                 end %>

@@ -1,0 +1,15 @@
+<%# card for a candidate for image reuse %>
+
+<%= matrix_box(class: "", id: image.id) do
+  tag.div(class: "card log-item h-100") do
+    [
+      interactive_image(image,
+                            image_link: form_action.merge(img_id: image.id),
+                            link_method: :post,
+                            votes: false,
+                            extra_classes: "card-img-top image-to-reuse",
+                            original: true),
+      tag.div("", class: "card-body")
+    ].safe_join
+  end
+end %>

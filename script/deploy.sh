@@ -15,8 +15,9 @@ if [ "$RAILS_ENV" != "production" ]; then
     exit 1
 fi
 
-if [ "$(git branch | grep '^\*')" != "* main" ]; then
-    echo Please switch to main branch.
+# Change this back to `main` branch before merging with `main`
+if [ "$(git branch | grep '^\*')" != "* nimmo-bootstrap-4-reboot" ]; then
+    echo Please switch to bootstrap-4 branch.
     exit 1
 fi
 

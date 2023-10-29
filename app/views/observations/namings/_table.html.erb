@@ -1,4 +1,4 @@
-<%
+<% #bs4
 # called from observations/show/namings
 # Just the "table" of current namings, with headers
 logged_in = @user&.verified
@@ -7,7 +7,7 @@ any_names = obs.namings&.length&.positive?
 votes = gather_users_votes(obs, @user)
 %>
 
-<%= tag.div(class: "namings-table panel panel-default mb-4",
+<%= tag.div(class: "namings-table card bg-light mb-4",
             id: "namings_table") do %>
 
   <%= render(partial: "observations/namings/table_header",

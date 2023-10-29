@@ -1,4 +1,4 @@
-<%# filter for identify observations index %>
+<%# bs4 filter for identify observations index %>
 <%# Replaces the usual pattern_search form in the top nav %>
 
 <%# TODO: make the form input have selects with autocomplete that send the ID %>
@@ -9,36 +9,46 @@
 filter_type = params.dig(:filter, :type) || false
 selected = filter_type ? filter_type.to_sym : :clade
 value = filter_type ? params.dig(:filter, :term) : ""
-options = [
+filter_types = [
   [:CLADE.l, :clade],
   [:REGION.l, :region],
   # [:USER.l, :user],
 ]
+# TODO: make helpers for these
+search_icon = tag.i(class: "fa-solid fa-magnifying-glass") do
+                content_tag(:span, :SEARCH.l, class: "sr-only")
+              end
+clear_icon = tag.i(class: "fa-solid fa-delete-left") do
+               content_tag(:span, :CLEAR.l, class: "sr-only")
+             end
 %>
 
 <%= form_with(url: identify_observations_path, method: :get,
-              class: "navbar-form navbar-left", scope: :filter,
+              class: "form-inline", scope: :filter,
               id: "identify_filter") do |f| %>
 
-  <div class="form-group has-feedback has-search">
-    <%= content_tag(:span, "", class: "glyphicon glyphicon-search " \
-                                      "form-control-feedback") %>
-    <%# f.label(:term, "Filter by:") %>
-    <%= f.text_field(:term,
-                      # turn off browser autocomplete
-                      autocomplete: "off", value: value,
-                      placeholder: :filter_by.l,
-                      class: "form-control", size: 42,
-                      data: { autofocus: true,
-                              autocompleter: :clade }) %>
-  </div><!--.form-group-->
-
-  <%= f.select(:type, options, { selected: selected },
-               { class: "form-control",
-                 onchange: "MOEvents.swapFilterAutoComplete(this.value);" }) %>
-
-  <%= f.submit(:SEARCH.l, class: "btn btn-default") %>
-
-  <%= f.submit(:CLEAR.l, class: "btn btn-default") %>
+  <%= tag.div(class: "input-group") do
+    [f.text_field(:term,
+                  # turn off browser autocomplete
+                  autocomplete: "off", value: value,
+                  placeholder: :filter_by.l,
+                  style: "flex-grow: 2;",
+                  class: "form-control", size: 42,
+                  data: { autofocus: true,
+                          autocompleter: :clade }),
+     f.select(:type, filter_types, { selected: selected },
+              { class: "form-control",
+                onchange: "MOEvents.swapFilterAutoComplete(this.value);" }),
+     tag.div(class: "input-group-append") do
+       [button_tag(type: :submit, value: :SEARCH.l,
+                   class: "btn btn-outline-secondary") do
+          search_icon
+        end,
+        button_tag(type: :submit, value: :CLEAR.l,
+                   class: "btn btn-outline-secondary") do
+          clear_icon
+        end].safe_join
+     end].safe_join
+  end %>
 
 <% end %>

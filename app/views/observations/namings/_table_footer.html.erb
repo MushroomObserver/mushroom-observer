@@ -10,23 +10,23 @@ help_text = logged_in ? :show_namings_consensus_help.t :
 help = content_tag(:div, help_text, class: "card-text small")
 %>
 
-<%= tag.div(class: "panel-footer") do
+<%= tag.div(class: "card-footer") do
   tag.div(class: "row") do
-    tag.div(class: "col-sm-11") do
+    tag.div(class: "col-12 col-md-11") do
       tag.div(class: "row") do
-        concat(tag.div(buttons, class: "col-xs-6 col-md-4"))
-        concat(tag.div(help, class: "col-xs-6 col-md-8"))
+        concat(tag.div(buttons, class: "col-6 col-lg-4"))
+        concat(tag.div(help, class: "col-6 col-lg-8"))
       end
     end
   end
 end %>
 
-<%= tag.div(class: "panel-footer d-none d-sm-block py-2") do
+<%= tag.div(class: "card-footer d-none d-md-block py-2") do
   tag.div(class: "row") do
-    tag.div(class: "col-sm-11") do
+    tag.div(class: "col-12 col-md-11") do
       tag.div(class: "row") do
-        concat(tag.div(vote_legend_yours, class: "col-xs-4 col-xs-offset-4"))
-        concat(tag.div(vote_legend_consensus, class: "col-xs-4"))
+        concat(tag.div(vote_legend_yours, class: "col-4 offset-4"))
+        concat(tag.div(vote_legend_consensus, class: "col-4"))
       end
     end
   end

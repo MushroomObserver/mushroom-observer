@@ -1,4 +1,4 @@
-<%
+<% # bs4
 # This view consists of multiple <form>s: the form at the top with text input,
 # plus each thumbnail. The image is clickable: an overlaid form with method: :post
 
@@ -21,35 +21,21 @@ query = query_images_to_reuse(@all_users, @user)
     </div>
 
     <%= content_tag(:div, :image_reuse_id_help.tp,
-                    class: "help-block form-group") %>
+                    class: "form-text form-group") %>
 
     <div class="form-group mt-3">
       <%= link_with_query((@all_users ? :image_reuse_just_yours.t :
                             :image_reuse_all_users.t),
                           form_action.merge(action: :reuse,
                                             all_users: @all_users ? 0 : 1),
-                          class: "btn btn-default") %>
+                          class: "btn btn-outline-secondary") %>
     </div>
   </div><!--.container-text-->
 <% end %>
 
 <% # Note this uses a specialized matrix box here, not the matrix_box partial. %>
 <%= paginate_block(@pages) do %>
-  <ul class="row list-unstyled mt-3">
-
-    <%= render(layout: "shared/matrix_table",
-               locals: { objects: @objects }) do |image| %>
-      <%= matrix_box(class: "text-center", id: image.id) do %>
-        <%= panel_block do %>
-          <%= interactive_image(image,
-                        image_link: form_action.merge(img_id: image.id),
-                        link_method: :post,
-                        votes: false,
-                        extra_classes: "image-to-reuse",
-                        original: true) %>
-        <% end %>
-      <% end %>
-    <% end %>
-
-  </ul>
+  <%= render(partial: "shared/matrix_grid",
+             locals: { objects: @objects, as: :image, form_action: form_action,
+                       partial: "shared/matrix_box_image_reuse" }) %>
 <% end %>

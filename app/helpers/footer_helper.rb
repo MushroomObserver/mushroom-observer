@@ -122,8 +122,22 @@ module FooterHelper
            end
 
     html.concat(link_to_rss_log(obj))
-    html = html.safe_join(safe_br)
-    tag.p(html, class: "small footer-view-stats mt-3")
+
+    # header_els = []
+    # header_els << tag.span(:RSS_LOG.t, class: "font-weight-bold")
+    # # Show RSS log for all of the above.
+    # if obj.respond_to?(:rss_log_id) && obj.rss_log_id
+    #   header_els << link_to(activity_log_path(obj.rss_log_id),
+    #                         class: "btn btn-sm btn-link") do
+    #     concat(tag.span(:show_object.t(type: :log), class: "mr-1"))
+    #     concat(icon("fa-regular", "list-ul", class: "fa-sm"))
+    #   end
+    # end
+    # tags = []
+    # tags << tag.div(class: "row-justified") { header_els.safe_join }
+    # tags << tag.p(class: "small my-0") { html.safe_join(safe_br) }
+
+    tag.div(class: "footer-view-stats small my-0") { html.safe_join(safe_br) }
   end
 
   ###############################################################
@@ -140,7 +154,18 @@ module FooterHelper
 
   def link_to_rss_log(obj)
     if obj.respond_to?(:rss_log_id) && obj.rss_log_id
-      [link_to(:show_object.t(type: :log), activity_log_path(obj.rss_log_id))]
+      [tag.div(class: "d-flex text-right") do
+        link_to(
+          activity_log_path(obj.rss_log_id),
+          class: "small",
+          aria: { label: :show_object.t(type: :log) },
+          data: { toggle: "tooltip", placement: "top",
+                  title: :show_object.t(type: :log) }
+        ) do
+          concat(tag.span(:show_object.t(type: :log), class: "sr-only"))
+          concat(icon("fa-regular", "list-ul", class: "fa-lg"))
+        end
+      end]
     else
       []
     end

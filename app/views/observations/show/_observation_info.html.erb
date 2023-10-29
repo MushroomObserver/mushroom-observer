@@ -1,13 +1,35 @@
 <%
-# The basic info box for the observation
-caption ||= false
+# The whole card for observation info: header, details, footer
 %>
 
-<%= panel_block(id: "observation_details",
-                heading: :show_observation_details.l,
-                class: "name-section") do
-
-  render(partial: "observations/show/observation_details",
-         locals: { obs: obs, caption: caption })
-
-end %>
+<%= tag.div(class: "h-100 d-flex flex-column") do %>
+  <% tags = [
+    tag.div(class:"card-header row-justified py-1 pr-#{bp}-1") do
+      [
+        tag.h6(:show_observation_details.t, class: "mb-0"),
+        obs_changes
+      ].safe_join
+    end,
+    tag.div(class:"card-body list-indented pr-#{bp}-4",
+            id: "observation_details") do
+      render(partial: "observations/show/observation_details",
+             locals: { obs: obs })
+    end
+  ]
+  tags << tag.div(class:"card-footer pr-#{bp}-4") do
+            show_object_footer(obs)
+          end
+  if check_permission(obs)
+    tags << tag.div(class: "card-footer row-justified py-1 pr-#{bp}-1") do
+              [
+                tag.strong(:IMAGES.l),
+                tag.div(class: "btn-group btn-group-sm") do
+                  observation_image_edit_links(obs: obs).
+                  safe_join
+                end
+              ].safe_join
+            end
+  end
+  %>
+  <%= tags.safe_join %>
+<% end %>

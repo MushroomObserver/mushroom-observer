@@ -7,7 +7,7 @@ url = add_query_param({ action: :commercial_inquiry, id: @image.id })
 
 <%= form_with(url: url) do |f| %>
 
-  <%= content_tag(:div, interactive_image(@image, size: :medium, votes: false)) %>
+  <%= tag.div(interactive_image(@image, size: :medium, votes: false)) %>
 
   <% label = :commercial_inquiry_header.tp(user: @image.user.legal_name) %>
   <%= text_area_with_label(form: f, field: :content,

@@ -1,3 +1,4 @@
+<%# bs4 %>
 
 <%= form_with(model: @location, url: action, id: "location_form") do |f| %>
 
@@ -7,7 +8,7 @@
                locals: { button: button.l} ) %>
 
     <div class="row">
-      <div class="col-md-8 col-lg-6">
+      <div class="col-12 col-md-8 col-xl-6">
 
         <%= submit_button(form: f, button: button.l, center: true) %>
 
@@ -22,11 +23,11 @@
 
       </div><!--.col-->
 
-      <div class="col-md-4 col-lg-6 mb-3 mt-3">
+      <div class="col-12 col-md-4 col-xl-6 mb-3 mt-3">
 
         <%= render(partial: "locations/form/gmap") %>
 
-      </div><!--.col-md-4 col-lg-6-->
+      </div><!--.col-->
     </div><!--.row-->
 
   <% else %>

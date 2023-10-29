@@ -11,17 +11,17 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
     visit("/activity_logs")
     rss_log = RssLog.where.not(observation_id: nil).order(:updated_at).last
-    assert_selector("#box_#{rss_log.id} .rss-id",
+    assert_selector("#box_#{rss_log.id} .log-id",
                     text: rss_log.observation_id)
 
-    # Click on first obs immediately after one that has images.
+    # Click on first obs **immediately after one that has images**.
     # NOTE: BS3 matrix-box are a bit harder to find siblings
     # because the layout clearfix boxes interrupt the matrix boxes.
     # This selects next matching peer, but you can do adjacent in bs4
     # (do + instead of ~)
     first(".image-link").ancestor(".matrix-box~.matrix-box").
-      first(".rss-detail", text: "Observation Created").
-      ancestor(".panel").first(".rss-box-details").first("a").click
+      first(".log-entry", text: "Observation Created").
+      ancestor(".card").first(".log-details").first("a").click
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
 
     # Click on next (catches a bug seen in the wild).
@@ -163,7 +163,9 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
     # Check out images
     # Observation has at least 2 images
-    image_count = all("#content .carousel img.carousel-thumbnail").count
+    image_count = all(
+      "#observation_carousel .carousel-inner img:not(.img-noscript)"
+    ).count
     assert(image_count == 2,
            "expected 2 Images in Observation, got #{image_count}")
   end
@@ -225,7 +227,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     select("Region", from: "filter_type")
     click_button("Search")
     assert_match(/#{:obs_needing_id.t}/, page.title, "Wrong page")
-    where_ats = find_all(".rss-where").map(&:text)
+    where_ats = find_all(".log-where").map(&:text)
     assert(where_ats.all? { |wa| wa.match(place) },
            "Expected only obs from #{place}" \
            "Found these: #{where_ats.inspect}")

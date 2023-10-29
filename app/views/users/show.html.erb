@@ -54,8 +54,8 @@ total = 0
       <% @observations.values_at(0, 2, 4).reject(&:nil?).each do |obs| %>
         <div class="my-3">
           <%= interactive_image(obs.thumb_image,
-                        image_link: observation_path(id: obs.id),
-                        votes: true) %>
+                                image_link: observation_path(id: obs.id),
+                                votes: true) %>
         </div><!--.my-3-->
       <% end %>
     <% end %>
@@ -115,8 +115,8 @@ total = 0
       <% @observations.values_at(1, 3, 5).reject(&:nil?).each do |obs| %>
         <div class="my-3">
           <%= interactive_image(obs.thumb_image,
-                        image_link: observation_path(id: obs.id),
-                        votes: true) %>
+                                image_link: observation_path(id: obs.id),
+                                votes: true) %>
         </div><!--.my-3-->
       <% end %>
     <% end %>

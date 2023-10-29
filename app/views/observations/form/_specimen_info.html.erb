@@ -2,10 +2,11 @@
 # Specimen section of create_observation form,
 # for collection_number and herbarium_record.
 # Fields hidden unless box checked.
+# TODO: Make bootstrap collapse
 %>
 
 <div class="mt-3 row">
-  <div class="col-xs-12 col-sm-6">
+  <div class="col-12 col-md-6">
     <%= check_box_with_label(form: f, field: :specimen,
                              label: :form_observations_specimen_available.t) %>
     <%= help_block_with_arrow("up") do %>
@@ -25,7 +26,7 @@
 
 <% if button_name == :CREATE.l %>
   <!-- specimen_info -->
-  <div id="specimen_info" class="<%= "hidden" if !@observation.specimen %>">
+  <div id="specimen_info" class="<%= "d-none" if !@observation.specimen %>">
 
     <%= render(partial: "observations/form/collection_number",
                locals: { f: f } ) %>
@@ -41,7 +42,7 @@
         specimen_checkbox = jQuery("#observation_specimen");
         hide_show_specimen_fields = function () {
           if (specimen_checkbox.is(":checked"))
-            jQuery("#specimen_info").removeClass("hidden").show();
+            jQuery("#specimen_info").removeClass("d-none").show();
           else
             jQuery("#specimen_info").hide();
         };

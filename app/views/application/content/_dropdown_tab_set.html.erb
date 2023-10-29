@@ -1,0 +1,48 @@
+<%# The new one.
+Called from application_helper#dropdown_tab_set
+
+Requires two locals: `title` and `tabs`
+
+The difference between the `tabs` required here and the `links` required in
+`draw_tab_set` is the latter takes a simple array of rails `link_to` links:
+  [link, link, link]
+while this takes an array of hashes with specific attributes, formatted like:
+  [{name:, link:, class:}, {name:, list:, class:}]
+Now takes preformatted array of items from create_dropdown_tabs
+It creates additional options from any extra attributes sent in the object.
+
+In one sense, this means writing more verbose tabs, but it avoids a lot of
+repetition by adding all dropdown classes and ARIA attributes here, rather than
+in every tab helper for every view (and there are >100 of those)
+
+If there's only one tab, it prints a button, not a dropdown.
+%>
+
+<%
+title ||= "Links"
+links ||= []
+
+if links&.count == 1 %>
+
+  <%= links[0] %>
+
+<% elsif links %>
+
+  <%= tag.div(class: "dropdown") do %>
+    <%= tag.button(
+      class: "btn btn-outline-secondary font-weight-bold dropdown-toggle",
+      type: "button", id: "dropdown_label",
+      data: { toggle: "dropdown" },
+      aria: { expanded: "false", haspopup: "true", controls: "dropdown_tabs" }
+    ) { title } %>
+    <%= tag.div(class: "dropdown-menu dropdown-menu-right",
+                role: "menu", id: "dropdown_tabs",
+                aria: { labelledby: "dropdown_tabs_label" }) do %>
+      <%# Changed to accept create_dropdown_tabs array. %>
+      <% links.each do |link| %>
+        <%= link %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+<% end %>

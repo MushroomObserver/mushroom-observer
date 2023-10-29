@@ -1,3 +1,4 @@
+<%# bs4 %>
 <!-- MULTIFILE_UPLOAD_FORM -->
 <%
 # javascript_include("multi_image_upload")
@@ -8,14 +9,14 @@ legible_max_size = (max_size.to_f/1024/1024).round
 <%= hidden_field(:observation, :thumb_image_id) %>
 
 <div class="row">
-  <div class="col-sm-6 mt-3">
-    <label class="btn btn-default file-field">
+  <div class="col-12 col-md-6 mt-3">
+    <label class="btn btn-outline-secondary file-field">
       <input type="file" multiple id="multiple_images_button"
              accept="image/*"/>
       <%= :select_file.t %>
     </label>
   </div><!--.col-->
-  <div class="col-sm-6">
+  <div class="col-12 col-md-6">
     <%= help_block_with_arrow("left", id: "upload_multi_help") do
       tag.p(:form_observations_upload_help_multi_select.t)
     end %>
@@ -25,10 +26,10 @@ legible_max_size = (max_size.to_f/1024/1024).round
 
 <!-- Container to show messages relating to the selected images -->
 <div id="image_messages" class="fade" style="display: none;">
-  <div class="well well-sm">
+  <div class="card">
     <div class="row">
 
-      <div class="col-sm-7">
+      <div class="col-12 col-md-7">
         <div class="inconsistent_date_options">
           <%= tag.div(:form_observations_set_observation_date_to.t + ":",
                       class: "font-weight-bold") %>
@@ -45,7 +46,7 @@ legible_max_size = (max_size.to_f/1024/1024).round
         </div>
       </div><!--.col-->
 
-      <div class="col-sm-4">
+      <div class="col-12 col-md-4">
         <%= tag.span(:form_observations_date_warning.t) %>
       </div><!--.col-->
 
@@ -54,10 +55,10 @@ legible_max_size = (max_size.to_f/1024/1024).round
 </div><!--#image_messages-->
 
 <div id="geocode_messages" class="fade" style="display: none;">
-  <div class="well well-sm">
+  <div class="card">
     <div class="row">
 
-      <div class="col-sm-7">
+      <div class="col-12 col-md-7">
         <%= tag.div("Set observation Latitude/Longitude to:",
                     class: "font-weight-bold") %>
         <%= tag.div("", id: "geocode_radio_container", class: "mb-3") %>
@@ -67,7 +68,7 @@ legible_max_size = (max_size.to_f/1024/1024).round
                       id: "ignore_geocode") %>
       </div>
 
-      <div class="col-sm-4">
+      <div class="col-12 col-md-4">
         <%= tag.span(:form_observations_gps_info.t) %>
         <%= tag.div("", id: "geocode_map", class: "w-100") %>
       </div>

@@ -1,6 +1,8 @@
+<%# uses fontawesome icon helper %>
+
 <%= tag.div("", class: classes[:mobile_only]) do
   [
-    tag.i("", class: "glyphicon glyphicon-user"),
+    icon("fa-solid", "user", class: "fa-lg"),
     tag.span(h(@user.login)),
     tag.span(class: "pull-right") do
       link_to(:app_logout.t, account_logout_path,

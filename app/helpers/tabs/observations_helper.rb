@@ -8,8 +8,8 @@ module Tabs
     def show_observation_tabs(obs:, user:)
       [
         send_observer_question_tab(obs, user),
-        observation_manage_lists_tab(obs, user),
-        *obs_change_tabs(obs)&.reject(&:empty?)
+        observation_manage_lists_tab(obs, user)
+        # *obs_change_tabs(obs)&.reject(&:empty?)
       ]
     end
 
@@ -37,7 +37,8 @@ module Tabs
        { class: tab_id(__method__.to_s) }]
     end
 
-    # Name panel -- generates HTML
+    ########################################################################
+    # Name section -- generates HTML
 
     # uses create_links_to with extra_args { class: "d-block" }
     # the hiccup here is that list_descriptions is already HTML, an inline list

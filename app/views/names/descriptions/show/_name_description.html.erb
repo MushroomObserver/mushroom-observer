@@ -43,9 +43,10 @@ NameDescription.all_note_fields.each do |field|
   value = notes[field].to_s
   if value.match(/\S/)
     any = true %>
-    <%= "form_names_#{field}".to_sym.t %>:
-    <%= notes_panel(value.tpl) %>
-    <br/>
+    <%=
+    card_block(header: tag.h6("form_names_#{field}".to_sym.t + ":")) do
+      value.tpl
+    end %>
   <% end %>
 <% end %>
 <%= :show_description_empty.tpl if !any %>

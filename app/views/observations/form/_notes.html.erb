@@ -11,12 +11,12 @@
     <%= f.fields_for(:notes) do |f_n| %>
 
       <div class="row">
-        <div class="col-xs-12 col-sm-6">
+        <div class="col-12 col-md-6">
           <%= f_n.text_area(@observation.notes_normalized_key(part),
                             value: @observation.notes_part_value(part),
                             rows: 10, class: "form-control mb-3") %>
         </div>
-        <div class="col-xs-12 col-sm-6">
+        <div class="col-12 col-md-6">
           <%= help_block_with_arrow("left", id: "notes_help") do %>
             <%= content_tag(:p, :form_observations_notes_help.t,
                             class: "pt-0 mt-0") %>
@@ -35,7 +35,7 @@
       <%= f.fields_for(:notes) do |f_n| %>
 
         <div class="row">
-          <div class="col-xs-12 col-sm-6">
+          <div class="col-12 col-md-6">
             <%= text_area_with_label(
                   form: f_n, rows: 1, label: strip_tags(part.tl) + ": ",
                   field: @observation.notes_normalized_key(part),

@@ -238,7 +238,7 @@ module ImageHelper
   def image_vote_link(image, vote)
     current_vote = image.users_vote(User.current)
     vote_text = if vote.zero?
-                  "(x)"
+                  image_vote_none.html_safe
                 else
                   image_vote_as_short_string(vote)
                 end
@@ -253,6 +253,10 @@ module ImageHelper
                path: image_vote_path(image_id: image.id, value: vote),
                title: image_vote_as_help_string(vote),
                data: { role: "image_vote", image_id: image.id, value: vote })
+  end
+
+  def image_vote_none
+    icon("fa-solid", "circle-xmark", class: "fa-sm")
   end
 
   # image vote lookup used in show_image

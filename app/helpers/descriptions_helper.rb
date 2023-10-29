@@ -30,7 +30,7 @@ module DescriptionsHelper
 
   def description_mod_links(desc)
     links = []
-    links << link_to(*edit_description_tab(desc)) if writer?(desc)
+    links << edit_button(target: desc) if writer?(desc)
     links << destroy_button(target: desc) if is_admin?(desc)
     links
   end
@@ -136,25 +136,6 @@ module DescriptionsHelper
     html2 = list.safe_join(safe_br)
     html += tag.p(html2)
     html
-  end
-
-  # Create a div for notes in Description subclasses.
-  #
-  #   <%= notes_panel(html) %>
-  #
-  #   <% notes_panel() do %>
-  #     Render stuff in here.  Note lack of "=" in line above.
-  #   <% end %>
-  #
-  def notes_panel(msg = nil, &block)
-    msg = capture(&block) if block
-    result = tag.div(msg, class: "panel-body")
-    wrapper = tag.div(result, class: "panel panel-default dotted-border")
-    if block
-      concat(wrapper)
-    else
-      wrapper
-    end
   end
 
   # Create a descriptive title for a Description.  Indicates the source and

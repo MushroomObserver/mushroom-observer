@@ -9,9 +9,10 @@ LocationDescription.all_note_fields.each do |f|
   value = desc.send(f).to_s
   if value != ""
     any = true %>
-    <%= "form_locations_#{f}".to_sym.t %>:
-    <%= notes_panel(value.tpl) %>
-    <br/>
+    <%=
+    card_block(header: tag.h6("form_locations_#{f}".to_sym.t + ":")) do
+      value.tpl
+    end %>
   <% end %>
 <% end %>
 <%= :show_description_empty.tpl if !any %>

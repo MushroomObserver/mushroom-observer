@@ -1,9 +1,9 @@
     <!-- INFO_PANEL -->
-    <div class="panel panel-default">
-      <div class="panel-heading">
+    <div class="card bg-light">
+      <div class="card-header">
         <b><%= :NOTES.t %></b>:
-      </div>
-      <div class="panel-body py-5px">
+      </div><!--.card-header -->
+      <div class="card-body py-2">
         <div><%= :WHEN.t %>: <%= @image.when.web_date %></div>
         <div><%= :OWNER.t %>: <%= user_link(@image.user) %></div>
         <% @image.projects.each do |proj| %>
@@ -30,6 +30,6 @@
         <% if !@image.notes.blank? %>
           <%= (:image_show_notes.l + ": " + @image.notes.to_s.html_safe).tpl %>
         <% end %>
-      </div>
-    </div>
+      </div><!--.card-body -->
+    </div><!--.card -->
     <!-- /INFO_PANEL -->

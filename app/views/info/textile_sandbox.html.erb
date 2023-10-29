@@ -20,10 +20,10 @@ add_page_title(:sandbox_title.t)
 <%= form_with(url: { action: :textile_sandbox }) do |f| %>
 
   <% if !@code.nil? %>
-    <div class="sandbox-up-ptr center-block mt-3 mb-3">
+    <div class="sandbox-up-ptr mx-auto mt-3 mb-3">
       <%= image_tag("up_arrow.png") %>
-      <%= f.submit(:sandbox_test.l, class: "btn btn-default") %>
-      <%= f.submit(:sandbox_test_codes.l, class: "btn btn-default") %>
+      <%= f.submit(:sandbox_test.l, class: "btn btn-outline-secondary") %>
+      <%= f.submit(:sandbox_test_codes.l, class: "btn btn-outline-secondary") %>
       <%= image_tag("up_arrow.png") %>
     </div>
   <% end %>

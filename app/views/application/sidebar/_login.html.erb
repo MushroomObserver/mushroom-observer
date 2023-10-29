@@ -1,7 +1,7 @@
 <%= tag.div("", class: classes[:heading]) do
   [
-    tag.i("", class: "glyphicon glyphicon-user"),
-    tag.span("#{:app_account.t}:")
+    icon("fa-solid", "user", class: "fa-lg"),
+    tag.span(:app_account.t + ":")
   ].safe_join
 end %>
 <%= active_link_to(:app_login.t, new_account_login_path,

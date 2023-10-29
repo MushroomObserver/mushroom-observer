@@ -10,16 +10,16 @@ add_tab_set(checklist_show_tabs(user: @show_user,
 names = @data.names
 %>
 
-<div class="my-4">
-  <%= :checklist_summary.t(species: @data.num_species,
-                           genera: @data.num_genera,
-                           names: @data.num_names) %>
-</div>
+<%= tag.div(class:"my-4") do
+  :checklist_summary.t(species: @data.num_species,
+                       genera: @data.num_genera,
+                       names: @data.num_names)
+end %>
 
-<%= panel_block(inner_class: "checklist") do %>
-  <ul class="list-unstyled">
+<%= card_block(inner_class: "checklist") do
+  tag.ul(class: "list-unstyled") do %>
     <% names.each do |name| %>
-      <li><i><%= link_to(name[0], name_path(name[1])) %></i></li>
+      <%= tag.li { tag.i(link_to(name[0], name_path(name[1]))) } %>
     <% end %>
-  </ul>
-<% end %>
+  <% end
+end %>

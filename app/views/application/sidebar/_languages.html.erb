@@ -6,11 +6,10 @@
          data-toggle="dropdown" role="button" aria-expanded="false">
         <%= image_tag("/flags/flag-#{I18n.locale.downcase}.png",
                       class: "lang-flag") %>
-        <span class="caret"></span>
       </a>
       <ul id="language_dropdown_menu" class="dropdown-menu" role="menu">
         <% Language.where.not(beta: true).order(:order).each do |lang| %>
-          <li><%= link_to(
+          <li class="dropdown-item"><%= link_to(
             image_tag("/flags/flag-#{lang.locale}.png", class: "lang-flag") +
                       "&nbsp;".html_safe + h(lang.name),
             reload_with_args(user_locale: lang.locale),

@@ -83,7 +83,7 @@ module TitleAndTabsetHelper
     return unless naming
 
     content_for(:owner_naming) do
-      tag.h5(naming, id: "owner_naming")
+      tag.p(naming, id: "owner_naming")
     end
   end
 
@@ -241,9 +241,8 @@ module TitleAndTabsetHelper
   def add_sorter(query, sorts, link_all: false)
     return unless sorts && (query&.num_results&.> 1)
 
+    links = create_sorting_links(query, sorts, link_all)
     content_for(:sorter) do
-      links = create_sorting_links(query, sorts, link_all)
-
       render(partial: "application/content/sorter", locals: { links: links })
     end
   end
@@ -259,9 +258,10 @@ module TitleAndTabsetHelper
     sort_links = assemble_sort_links(query, sorts, link_all)
 
     sort_links.map do |title, path, identifier, active|
-      classes = "btn btn-default"
+      classes = "dropdown-item"
       classes += " active" if active
-      args = { class: class_names(classes, identifier) }
+      args = { class: class_names(classes, identifier),
+               role: "menuitem" }
       args = args.merge(disabled: true) if active
 
       link_with_query(title, path, **args)

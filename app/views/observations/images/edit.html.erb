@@ -1,8 +1,7 @@
 <%
-add_page_title(:image_edit_title.t(name: @image.unique_format_name))
-
-add_tab_set(observation_images_edit_tabs(image: @image))
 @container = :wide
+add_page_title(:image_edit_title.t(name: @image.unique_format_name))
+add_tab_set(observation_images_edit_tabs(image: @image))
 form_action = { controller: "/observations/images",
                 action: :update,
                 id: @image.id,
@@ -10,7 +9,7 @@ form_action = { controller: "/observations/images",
 %>
 
 <div class="row">
-  <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
+  <div class="col-12 col-md-8 col-lg-6 col-xl-4">
     <%= form_with(model: @image, url: form_action, method: :put) do |f| %>
 
       <%= submit_button(form: f, button: :SAVE_EDITS.l, center: true) %>
@@ -31,13 +30,13 @@ form_action = { controller: "/observations/images",
         <%= submit_button(form: f, button: :SAVE_EDITS.l) %>
         <%= link_with_query(:cancel_and_show.t(type: :image),
                             image_path(@image.id),
-                            class: "btn btn-default") %>
+                            class: "btn btn-outline-secondary") %>
       </div>
 
     <% end %>
   </div><!--.col-->
 
-  <div class="col-xs-12 col-sm-4 col-md-6 col-lg-8">
+  <div class="col-12 col-md-4 col-lg-6 col-xl-8">
     <%= interactive_image(@image, size: :medium, votes: true) %>
   </div><!--.col-->
 

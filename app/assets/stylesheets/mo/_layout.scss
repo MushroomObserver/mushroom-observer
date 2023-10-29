@@ -5,21 +5,28 @@
 
 // layout: sidebar offcanvas and right_side
 // --------------------------------------------------
-$sidebar-max-width: 18rem;
+$sidebar-max-width: 12rem;
 
 .sidebar-offcanvas {
   max-width: $sidebar-max-width;
 }
 
 // https://stackoverflow.com/questions/17982111/sass-variable-in-css-calc-function
-@media screen and (min-width: 768px) {
+@include media-breakpoint-up(xl) {
   .sidebar-offcanvas {
-    width: $sidebar-max-width !important;
+    width: $sidebar-max-width;
   }
 
   #right_side {
-    width: calc(100% - #{$sidebar-max-width}) !important;
+    flex: 0 0 calc(100% - #{$sidebar-max-width});
+    max-width: calc(100% - #{$sidebar-max-width});
   }
+}
+
+.form-max-width {
+  max-width: map-get($container-max-widths, md);
+  margin-left: auto;
+  margin-right: auto;
 }
 
 //
@@ -36,14 +43,12 @@ $sidebar-max-width: 18rem;
 // small devices, tablets
 // --------------------------------------------------
 
-@media screen and (max-width: 767px) {
+@include media-breakpoint-down(lg) {
 
   .row-offcanvas {
     position: relative;
-    -webkit-transition: all .25s ease-out;
-    -o-transition: all .25s ease-out;
     transition: all .25s ease-out;
-    -webkit-transform: translate3d(0,0,0);
+    transform: translate3d(0,0,0);
   }
 
   .row-offcanvas-right {
@@ -78,17 +83,8 @@ $sidebar-max-width: 18rem;
     width: $sidebar-max-width;
   }
 
-  .hidden-overflow-x {
+  .overflow-x-hidden {
     overflow-x: hidden !important;
-  }
-
-  .navbar-default {
-    margin: 0;
-  }
-
-  .navbar-form {
-    margin: 0;
-    border: 0;
   }
 }
 

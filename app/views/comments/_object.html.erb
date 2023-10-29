@@ -8,12 +8,13 @@
 
   when "Name"
     str = render(partial: "names/show/nomenclature",
-          locals: { name: object, synonyms: true })
+                 locals: { name: object, synonyms: true })
     if object.has_notes?
-      str += tag.p("#{:show_name_notes.t}:")
-      str += notes_panel(object.notes.tpl)
+      str += card_block(header: tag.h6("#{:show_name_notes.t}:")) do
+               object.notes.tpl
+             end
     end
-    content_tag(:div, str, class: "name-section m-3")
+    content_tag(:div, str, class: "m-3")
 
   when "NameDescription"
     render(partial: "names/descriptions/show/name_description", object: object, locals: { review: false })

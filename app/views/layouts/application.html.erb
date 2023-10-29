@@ -1,4 +1,4 @@
-<%
+<% #bs4
 @css_theme = css_theme
 
 html_class = (Rails.env == "test") ? "" : "scroll-behavior-smooth"
@@ -23,11 +23,11 @@ body_class = class_names(whos_calling, theme_class)
 
   <div class="row row-offcanvas row-offcanvas-left">
 
-    <nav id="sidebar" class="sidebar-offcanvas col-xs-8 col-sm-2 hidden-print">
+    <nav id="sidebar" class="sidebar-offcanvas col-8 col-sm-4 col-md-2 d-print-none">
       <%= render(partial: "application/sidebar") %>
     </nav><!-- #sidebar -->
 
-    <div id="right_side" class="col-xs-12 col-sm-10">
+    <div id="right_side" class="col-12 col-xl-10">
 
       <%= render(partial: "application/app/hamburger") %>
 
@@ -60,8 +60,6 @@ body_class = class_names(whos_calling, theme_class)
 
 <!--AJAX PROGRESS WHIRLY -->
 <%= render(partial: "shared/modal_ajax_progress") %>
-
-<%= render(partial: "application/app/media_query_tests") %>
 
 <%= render(partial: "application/app/javascript_footer") %>
 

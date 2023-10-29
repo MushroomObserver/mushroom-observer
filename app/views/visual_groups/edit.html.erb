@@ -22,8 +22,8 @@
   <p>
     <strong><%= :visual_group_includes_names.t %>:</strong><br>
     <% @visual_group.distinct_names.each do |name| %>
-    <%= link_to(name[0],
-                edit_visual_group_path(@visual_group, filter: name[0], anchor: "filter_options"))%><br>
+      <%= link_to(name[0],
+                  edit_visual_group_path(@visual_group, filter: name[0], anchor: "filter_options"))%><br>
     <% end %>
   </p>
 

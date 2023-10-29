@@ -19,51 +19,47 @@ adv_search = link_to(
   content_tag(:span, :app_advanced_search.l, class: "text-nowrap"),
   search_advanced_path
 )
-identify_page = controller.controller_name == "identify"
+search_types = options_for_select(options, session[:search_type] ||
+                                           :observation)
 
 # Fields have attributes nested under search via fields_for, eg search[:type]
 %>
 
-<%= form_with(url: search_pattern_path, method: :get,
-              class: "navbar-form navbar-left px-0",
-              id: "pattern_search_form") do |f| %>
+<%= form_with(url: search_pattern_path, method: :get, scope: :search,
+              class: "form-inline px-0",
+              id: "pattern_search_form") do |f|
 
-  <%= fields_for(:search) do |f_s| %>
-    <div class="form-group has-feedback has-search">
-      <%= content_tag(:span, "", class: "glyphicon glyphicon-search " \
-                                        "form-control-feedback") %>
-      <%= f_s.text_field(:pattern, { value: session[:pattern],
-                                     class: "form-control",
-                                     placeholder: :app_find.t }) %>
-    </div><!--.form-group-->
+  content_tag(:div, class: "input-group") do
+    concat(f.text_field(:pattern, { value: session[:pattern],
+                                    class: "form-control",
+                                    style: "flex-grow: 2;",
+                                    placeholder: :app_find.t }))
+    concat(f.select(:type, search_types, { },
+                    { class: "custom-select" }))
+    concat(content_tag(:div, class: "input-group-append") do
+             button_tag(type: :submit, value: :app_search.l,
+                        class: "btn btn-outline-secondary",
+                        aria: { label: :app_search.l }) do
+               icon("fa-solid", "magnifying-glass")
+             end
+           end)
+  end
+end %>
 
-    <div class="form-group text-nowrap">
-      <%= f_s.select(
-            :type,
-            options_for_select(options, session[:search_type] || :observation),
-            { }, { class: "form-control w-auto" }
-          ) %>
-    </div><!--.form-group-->
-  <% end %>
+<%= content_tag(:div, class: "navbar-text mx-2 text-nowrap") do
+  link_to(content_tag(:span, :search_bar_help.t),
+          info_search_bar_help_path)
+end %>
 
-  <%= hidden_field_tag(:needs_id, true) if identify_page %>
-
-  <div class="form-group text-nowrap">
-    <%= submit_button(form: f, button: :app_search.l, class: "mr-2") %>
-  </div><!--.form-group-->
-
+<% if @timer_start %>
+  <%= content_tag(:div, class: "navbar-text mx-2 d-none d-md-block smaller") do
+    [adv_search].safe_join
+  end %>
+<% else %>
+  <%= content_tag(:div, adv_search,
+                  class: "navbar-text mx-2 d-none d-md-block") %>
 <% end %>
 
-<p class="navbar-text mx-2 text-nowrap">
-  <%= link_to(content_tag(:span, :search_bar_help.t),
-              info_search_bar_help_path) %>
-  <span class=""> |</span>
-</p>
-
-<p class="navbar-text mx-2 hidden-xs">
-  <%= adv_search %>
-</p>
-
-<div class="visible-xs">
-  <%= adv_search %>
-</div>
+<%= content_tag(:div, class: "d-block d-md-none") do
+  concat(adv_search)
+end %>

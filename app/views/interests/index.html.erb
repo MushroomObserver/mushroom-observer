@@ -2,23 +2,26 @@
 add_page_title(:list_interests_title.t)
 
 flash_error(@error) if @error && !@interests.any?(&:target)
+first_active = @selected_type.blank? ? " active" : ""
 %>
 
 <% if @selected_type || @types.length > 1 && @pages.num_total > 1 %>
-  <div class="btn-group pb-1 hidden-xs text-nowrap mt-5">
-    <%= content_tag(:span, :rss_show.t, class: "btn btn-default btn-sm disabled") %>
+  <div class="btn-group d-none d-md-block pb-1 mt-5 text-nowrap">
+    <%= content_tag(:span, :rss_show.t,
+                    class: "btn btn-outline-secondary btn-sm disabled") %>
 
-    <span class="btn btn-default btn-sm <%= "active" if @selected_type.blank? %>">
+    <span class="btn btn-outline-secondary btn-sm<%= first_active %>">
       <%= label = :rss_all.t
           url = interests_path
-          @selected_type.blank? ? label : link_with_query(label, url) %>
+          first_active.present? ? label : link_with_query(label, url) %>
     </span>
 
-    <% @types.each do |type| %>
-      <span class="btn btn-default btn-sm <%= "active" if @selected_type == type.to_s %>">
+    <% @types.each do |type|
+         second_active = @selected_type == type.to_s ? " active" : "" %>
+      <span class="btn btn-outline-secondary btn-sm<%= second_active %>">
         <%= label = type.to_s.underscore.pluralize.upcase.to_sym.t
             url = interests_path(type: type)
-            @selected_type == type.to_s ? label : link_with_query(label, url) %>
+            second_active.present? ? label : link_with_query(label, url) %>
       </span>
     <% end %>
   </div>

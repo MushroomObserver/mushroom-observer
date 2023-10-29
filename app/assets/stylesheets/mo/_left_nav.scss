@@ -1,17 +1,19 @@
 //
-// left nav bar styles. layout is in layout.scss
+// left nav bar styles. uses navbar-dark.
+// layout is in layout.scss
 // --------------------------------------------------
 
 .sidebar-nav {
-  border-width: 1px;
-  border-style: solid;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
+  // border-width: 1px;
+  // border-style: solid;
+  // border-top-left-radius: 0;
+  // border-top-right-radius: 0;
+  // border-bottom-left-radius: 5px;
+  // border-bottom-right-radius: 5px;
   padding-left: 0px;
   padding-right: 0px;
   margin-bottom: 2px;
+  align-items: normal;
 
   a {
     font-weight: normal;
@@ -31,34 +33,36 @@
     &:hover a.dropdown-toggle,
     &:focus a.dropdown-toggle,
     a.dropdown-toggle:hover {
-      color: $navbar-inverse-link-hover-color;
-      background-color: $navbar-inverse-link-hover-bg;
+      color: $navbar-dark-hover-color;
+      // background-color: $navbar-dark-hover-bg;
     }
 
     // These are the headers
     &.disabled,
     &.disabled:hover,
     &.disabled:focus {
-      color: $navbar-inverse-link-disabled-color;
-      background-color: $navbar-inverse-link-disabled-bg;
+      color: $secondary;
+      text-align: left;
+      // background-color: $secondary;
       cursor: default;
       padding-left: 5px;
     }
 
     &#nav_bug_report_link {
-      color: $navbar-inverse-link-disabled-color;
+      color: $navbar-dark-disabled-color;
+
       &:hover,
       &:focus {
-        color: $navbar-inverse-link-color;
+        color: $navbar-dark-color;
       }
     }
   }
 
-  .list-group-item,
-  a.dropdown-toggle {
-    color: $navbar-inverse-link-color;
-    background-color: $navbar-inverse-bg;
-  }
+  // .list-group-item,
+  // a.dropdown-toggle {
+  // color: $navbar-dark-color;
+  // background-color: $navbar-inverse-bg;
+  // }
 }
 
 

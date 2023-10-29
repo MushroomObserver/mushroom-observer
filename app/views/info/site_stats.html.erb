@@ -1,26 +1,23 @@
 <%
-add_page_title(:show_site_stats_title.t)
-
-add_tab_set(info_site_stats_tabs)
 @container = :full
+add_page_title(:show_site_stats_title.t)
+add_tab_set(info_site_stats_tabs)
 %>
 
 <div class="row mt-3">
-  <div class="hidden-xs col-md-3">
+  <div class="d-none d-lg-block col-lg-3">
     <% obs_length = @observations ? @observations.length : 0
     if obs_length > 0 %>
       <% @observations[0,3].each do |obs| %>
-        <div class="pb-1">
-          <%= interactive_image(obs.thumb_image,
-                        image_link: observation_path(obs.id),
-                        votes: true) %><br/><br/>
-
-        </div>
+        <%= tag.div(class: "mb-4") do
+          interactive_image(obs.thumb_image,
+                            image_link: observation_path(obs.id), votes: true)
+        end %>
       <% end %>
     <% end %>
   </div><!--.row-->
 
-  <div class="col-md-6 center-block">
+  <div class="col-lg-6 mx-auto">
     <table class="table">
       <% fields = [
         :images,
@@ -55,12 +52,13 @@ add_tab_set(info_site_stats_tabs)
     </table>
   </div>
 
-  <div class="hidden-xs col-md-3">
+  <div class="d-none d-lg-block col-lg-3">
     <% if obs_length > 3 %>
       <% @observations[3,3].each do |obs| %>
-        <%= interactive_image(obs.thumb_image,
-                      image_link: observation_path(obs.id),
-                      votes: true) %><br/><br/>
+        <%= tag.div(class: "mb-4") do
+          interactive_image(obs.thumb_image,
+                            image_link: observation_path(obs.id), votes: true)
+        end %>
       <% end %>
     <% end %>
   </div>

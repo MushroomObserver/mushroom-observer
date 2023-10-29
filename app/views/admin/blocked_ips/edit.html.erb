@@ -4,11 +4,11 @@ add_page_title("")
 %>
 
 <div class="row">
-  <div class="col-md-6">
+  <div class="col-12 col-lg-6">
     <p><%= link_to("Refresh Stats", edit_admin_blocked_ips_path) %></p>
 
     <%# ----- Okay IPs ----- %>
-    <section class="m-3 p-3" style="background:#f7f">
+    <section class="m-3 p-3 bg-secondary">
       <%= form_with(url: admin_blocked_ips_path, method: "patch",
                     class: "d-inline-block",
                     id: "admin_okay_ips_form") do |f| %>
@@ -24,13 +24,13 @@ add_page_title("")
 
       <%= patch_button(name: "Clear List",
                        path: admin_blocked_ips_path(clear_okay: 1),
-                       class: "btn btn-default",
+                       class: "btn btn-outline-secondary",
                        form_class: "d-inline-block float-right",
                        id: "clear_okay_ips_list",
                        data: { confirm: :are_you_sure.t }
                       ) %>
 
-      <table id="okay_ips" class="ips my-3 table table-striped">
+      <table id="okay_ips" class="table table-striped ips my-3">
         <% @okay_ips.each do |ip| %>
           <tr>
             <td><%= ip.t %></td>
@@ -42,7 +42,7 @@ add_page_title("")
     </section><!--#okay_ips-->
 
     <%# ----- Blocked IPs ----- %>
-    <section class="m-3 p-3" style="background:#f7f">
+    <section class="m-3 p-3 bg-secondary">
 
       <%= form_with(url: admin_blocked_ips_path, class: "d-inline-block",
                     id: "admin_blocked_ips_form", method: :patch) do |f| %>
@@ -58,13 +58,13 @@ add_page_title("")
 
       <%= patch_button(name: "Clear List",
                        path: admin_blocked_ips_path(clear_bad: 1),
-                       class: "btn btn-default",
+                       class: "btn btn-outline-secondary",
                        form_class: "d-inline-block float-right",
                        id: "clear_blocked_ips_list",
                        data: { confirm: :are_you_sure.t }
                       ) %>
 
-      <table id="blocked_ips" class="ips my-3 table table-striped">
+      <table id="blocked_ips" class="table table-striped ips my-3">
         <% @blocked_ips.each do |ip| %>
           <tr>
             <td><%= ip.t %></td>
@@ -78,7 +78,7 @@ add_page_title("")
   </div>
 
   <%# ----- Stats / Most Active Users ----- %>
-  <div class="col-md-6">
+  <div class="col-12 col-lg-6">
     <% if @ip.present? %>
       <%= render partial: "ip_stats" %>
     <% end %>

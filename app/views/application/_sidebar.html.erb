@@ -1,19 +1,19 @@
 <!--SIDEBAR LOGO AND NAVIGATION-->
-<%
+<% #bs4. Note this is currently a list-group, not a nav flex-column
 classes = {
-  wrapper: "navbar navbar-inverse sidebar-nav list-group",
+  wrapper: "navbar navbar-light navbar-expand-xs bg-light sidebar-nav list-group",
   heading: "list-group-item disabled font-weight-bold",
-  item: "list-group-item",
-  admin: "list-group-item list-group-item-danger indent",
-  indent: "list-group-item indent",
-  mobile_only: "list-group-item visible-xs"
+  item: "list-group-item-action",
+  admin: "list-group-item-action list-group-item-danger indent",
+  indent: "list-group-item-action indent",
+  mobile_only: "list-group-item-action d-block d-md-none"
 }
 %>
 
 <div id="navigation">
 
   <a id="logo_link" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>">
-    <img class="logo-trim img-responsive py-10px" alt="Mushroom Observer Logo"
+    <img class="logo-trim img-responsive py-2" alt="Mushroom Observer Logo"
          src="/logo-trim.png"/>
   </a><!-- #logo_link -->
 

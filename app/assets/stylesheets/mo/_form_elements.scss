@@ -1,16 +1,18 @@
 // form elements and inputs
 
-.checkbox,
-.radio {
+// .checkbox and .radio are now .form-check
+.form-group,
+.form-check {
   label {
-    font-weight: $btn-font-weight;
+    font-weight: $font-weight-bold;
   }
 }
 
-input.has-error,
-textarea.has-error,
-select.has-error {
-  border-color: $alert-danger-border !important;
+// bs4 no longer uses .has-error, use CSS pseudo :valid
+input:invalid,
+textarea:invalid,
+select:invalid {
+  border-color: theme-color("danger") !important;
 }
 
 // got this trick from:
@@ -54,7 +56,7 @@ form.button_to {
   button[type=submit]:not(.btn) {
     margin: 0;
     padding: 0;
-    // -webkit-appearance: caret;
+    appearance: caret;
     background: none;
     border: none;
     font-size: inherit;
@@ -72,6 +74,7 @@ form.button_to {
     }
   }
 
+  button[type=submit]:hover,
   input[type=submit]:hover {
     text-decoration: underline;
   }
@@ -90,7 +93,7 @@ a.filter-only {
   @extend .py-3;
   border-width: 1px 0 0 0;
   border-style: solid;
-  border-color: $btn-default-border;
+  border-color: theme-color("secondary");
 
   &:last-child {
     border-width: 1px 0;
@@ -100,6 +103,11 @@ a.filter-only {
 .vote-select-container {
   max-width: 21rem;
   display: inline-block;
+}
+
+// Should be $card-color
+.vote-number-text {
+  color: $body-color;
 }
 
 .btn.text-danger {

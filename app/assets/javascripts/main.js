@@ -18,8 +18,7 @@ jQuery(document).ready(function () {
   jQuery('[data-toggle="offcanvas"]').on('click', function () {
     jQuery(document).scrollTop(0);
     jQuery('.row-offcanvas').toggleClass('active');
-    jQuery('#main_container').toggleClass('hidden-overflow-x');
-
+    jQuery('#main_container').toggleClass('overflow-x-hidden');
   });
 
   // SEARCH BAR FINDER
@@ -27,7 +26,7 @@ jQuery(document).ready(function () {
     jQuery(document).scrollTop(0);
     var target = jQuery(this).data().target;
     // jQuery(target).css('margin-top', '32px');
-    jQuery(target).toggleClass('hidden-xs');
+    jQuery(target).toggleClass('d-none d-md-block');
   });
 
   jQuery('[data-dismiss="alert"]').on('click', function () {

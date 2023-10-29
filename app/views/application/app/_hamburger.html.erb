@@ -1,23 +1,25 @@
+<%# bs4 %>
 <!--HAMBURGER_BUTTONS-->
-<div id="hamburger" class="row visible-xs hidden-print">
-  <div class="col-xs-6 px-0">
-    <button
-      type="button"
-      class="btn btn-default btn-lg hamburger rounded-0"
-      style="z-index: 1000"
-      data-toggle="offcanvas">
-      <span class="glyphicon glyphicon-align-justify"></span>
-    </button>
+<div id="hamburger" class="row d-flex d-xl-none d-print-none">
+  <div class="col-6 px-0">
+    <%=
+    button_tag(
+      type: :button, style: "z-index: 1000",
+      class: "btn btn-outline-secondary hamburger rounded-0",
+      data: { toggle: "offcanvas" }
+    ) do
+      icon("fa-solid", "bars", class: "")
+    end %>
   </div>
-  <div class="col-xs-6 px-0 text-right">
-    <button
-      type="button"
-      class="btn btn-default btn-lg hamburger rounded-0"
-      style="z-index: 1001"
-      data-toggle="search"
-      data-target="#top_nav">
-      <span class="glyphicon glyphicon-search"></span>
-    </button>
+  <div class="col-6 px-0 text-right">
+    <%=
+    button_tag(
+      type: :button, style: "z-index: 1000",
+      class: "btn btn-outline-secondary hamburger rounded-0",
+      data: { toggle: "search", target: "#top_nav" }
+    ) do
+      icon("fa-solid", "magnifying-glass", class: "")
+    end %>
   </div>
 </div>
 <!--/HAMBURGER_BUTTONS-->

@@ -103,7 +103,7 @@ module Tabs
     end
 
     # Add some alternate sorting criteria.
-    def location_index_sorts(query:)
+    def locations_index_sorts(query:)
       [
         ["name", :sort_by_name.t],
         ["created_at", :sort_by_created_at.t],

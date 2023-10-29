@@ -1,16 +1,17 @@
-<%# bs3
+<%#
+bs4
 the label is an <a> tag that filters for a single type
 %>
 
+<!-- A single checkbox and tab in Activity Feed tabset -->
 <%=
 tag.span(
-  class: class_names("btn btn-default btn-sm", { active: @types == [type] }),
+  class: class_names("btn btn-light btn-sm", { active: @types == [type] }),
   data: { toggle: "checkbox" }
 ) do
-  check_box_with_label(form: f, field: type,
+  check_box_with_label(form: f, field: type, # type,
                        checked: @types.include?(type) || @types == ['all'],
                        label: filter_for_type(@types, type),
                        checked_value: type,
-                       id: "type_#{type}", class: "filter-checkbox my-0")
-end
-%>
+                       id: "type_#{type}", class: "filter-checkbox")
+end %>

@@ -6,11 +6,11 @@ add_tab_set(show_description_tabs(description: @description))
 %>
 
 <div class="row">
-  <div class="col-md-6">
+  <div class="col-12 col-lg-6">
     <%= render(partial: "shared/show_description",
               locals: {description: @description}) %>
   </div>
-  <div class="col-md-6">
+  <div class="col-12 col-lg-6">
     <%= show_alt_descriptions(object: @location, projects: @projects) %>
   </div>
 </div><!--.row-->

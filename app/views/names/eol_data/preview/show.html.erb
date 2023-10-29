@@ -7,7 +7,7 @@ add_page_title(:eol_preview_title.t)
 <% odd_or_even = 0
 @names.select(&:ok_for_export).each do |name|
   odd_or_even = 1 - odd_or_even %>
-  <div class="ListLine<%= odd_or_even %> py-10px">
+  <div class="ListLine<%= odd_or_even %> py-2">
       <%= name.display_name.t %>
   </div>
 <% end %>

@@ -1393,8 +1393,8 @@
   comment_show_summary: "[:Summary]"
   comment_show_comment: "[:Comment]"
   comment_show_show: "[:show_object]"
-  comment_show_edit: "[:EDIT]"
-  comment_show_destroy: "[:DESTROY]"
+  comment_show_edit: Edit comment
+  comment_show_destroy: Delete comment
 
   # emails/commercial_inquiry
   commercial_inquiry_title: Commercial Inquiry About [name]
@@ -2054,14 +2054,17 @@
   show_description_make_default_help: Make this the default description that is shown on the main '[:show_name(name=:name)]' page.
   show_description_adjust_permissions_help: Change the set of users who are allowed to view, modify or administrate this description.
 
-  # observer/_show_images
+  # observations/show/_name_info
+  about_taxon: About this taxon
+
+  # observations/show/_images
   show_images_small_thumbs: "(small thumbnails)"
   show_images_large_thumbs: "(large thumbnails)"
 
-  # observer/_show_lists
+  # observations/show/_species_lists
   show_lists_header: "[:SPECIES_LISTS]"
 
-  # location/show_location
+  # locations/show_location
   show_location_title: "[:LOCATION]: [name]"
   show_location_create: "[:create_object(type=:location)]"
   show_location_edit: "[:edit_object(type=:location)]"
@@ -2171,7 +2174,7 @@
   show_namings_please_login: Please login to propose your own names and vote on existing names.
   show_namings_saving: Saving
 
-  # observations/show_observation
+  # observations/show
   show_observation_title: "[:OBSERVATION]: [name]"
   show_observation_header: "[:OBSERVATION]"
   show_observation_site_id: Site ID
@@ -2179,6 +2182,7 @@
   show_observation_no_clear_preference: no clear preference
   show_observation_details: Details
   show_observation_edit_observation: "[:edit_object(type=:observation)]"
+  show_observation_destroy_observation: "[:destroy_object(type=:observation)]"
   show_observation_propose_new_name: "[:show_namings_propose_new_name]"
   show_observation_debug_consensus: Debug Consensus
   show_observation_alternative_names: Alternative Name(s)

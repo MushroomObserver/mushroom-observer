@@ -1,15 +1,10 @@
 <%
+#bs4
 @container = :wide
 add_index_title(@query, no_hits: "")
 add_tab_set(locations_index_tabs(query: @query))
-all_links = if (params[:id].present? ||
-                params[:by].present? ||
-                params[:by_user].present?)
-              false
-            else
-              true
-            end
-add_sorter(@query, location_index_sorts(query: @query), link_all: all_links)
+add_sorter(@query, locations_index_sorts(query: @query))
+
 @known_pages = @pages
 @known_data  = @objects
 
@@ -23,7 +18,7 @@ flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
 </div>
 
 <div class="row mt-3">
-  <div class="col-md-7">
+  <div class="col-12 col-lg-7">
     <% if @known_pages.any? && @known_data.any? %>
       <div class="h4">
         <%= :list_place_names_known.t %>
@@ -43,7 +38,7 @@ flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
     <% end %>
   </div>
 
-  <div class="col-md-5">
+  <div class="col-12 col-lg-5">
     <% if @undef_pages.any? && @undef_data.any? %>
       <div class="h4">
         <%= :list_place_names_undef.t %>

@@ -6,13 +6,13 @@ add_tab_set(show_image_tabs(image: @image))
 %>
 
 <div class="row">
-  <div class="col-md-6 col-lg-8">
+  <div class="col-12 col-md-6 col-xl-8">
 
     <%= render(partial: "images/show/image_panel") %>
     <%= render(partial: "images/show/license_history_panel") %>
 
-  </div><!--.col-lg-8-->
-  <div class="col-md-6 col-lg-4">
+  </div><!--.col-->
+  <div class="col-12 col-md-6 col-xl-4">
 
     <%= render(partial: "images/show/info_panel") %>
 
@@ -29,23 +29,23 @@ add_tab_set(show_image_tabs(image: @image))
       <%= render(partial: "images/show/vote_panel") %>
     </div><!-- #image_votes_container -->
 
-  </div><!--.col-lg-4-->
+  </div><!--.col-->
 </div><!--.row-->
 
 <!-- LICENSE_AND_FOOTER -->
 <div class="row">
-  <div class="col-sm-6">
+  <div class="col-12 col-md-6">
     <div class="small text-center">
       <div>
         <%= image_copyright(@image) %>
       </div>
-      <div class="py-5px mb-3">
+      <div class="py-2 mb-3">
         <%= render(partial: "shared/form_#{@image.license.form_name}") %>
       </div>
     </div>
   </div><!--.col-->
-  <div class="col-sm-6">
+  <div class="col-12 col-md-6">
     <%= show_object_footer(@image) %>
-  </div><!--.col-sm-6-->
+  </div><!--.col-->
 </div><!--.row-->
 <!-- /LICENSE_AND_FOOTER -->

@@ -9,7 +9,7 @@
 
 svg.placeholder {
   rect {
-    fill: rgba($LIST_BG_COLOR, 0.3) !important;
+    fill: rgba($card-bg, 0.3) !important;
   }
 }
 
@@ -33,12 +33,16 @@ svg.placeholder {
 
 .vote-section,
 .theater-btn {
-  z-index: 2;
+  @extend .bg-legible;
+  z-index: 4;
   opacity: 0;
-  background: rgba(0,0,0, 0.8);
   // border-radius: $border-radius-sm;
   color: white;
   transition: opacity 0.3s ease-out;
+
+  form.button_to input {
+    color: white;
+  }
 }
 
 .theater-btn {
@@ -46,42 +50,57 @@ svg.placeholder {
   padding: 0.125em;
 
   &:hover {
-    color: rgba(white, 0.75);
+    color: $link-color;
   }
 
   i {
-    height: 2.4rem;
-    width: 2.4rem;
-    font-size: 2.1rem;
+    height: 1.65rem;
+    width: 1.65rem;
+    font-size: 1.5rem;
     vertical-align: bottom;
   }
 }
 
 .vote-section {
-  @extend .ab-bottom, .text-center;
-  padding: 0.5em 0.25em;
-
-  a,
-  button[type=submit]:not(.btn) {
-    color: white !important;
-    transition: color 0.3s ease;
+  a {
+    color: white;
 
     &:hover,
     &:focus {
-      color: lighten($link-color, 21%) !important;
+      color: $link-color;
       text-decoration: none;
     }
   }
 }
 
-.matrix-box {
-  .vote-buttons {
-    font-size: 0.875em;
+.image-sizer {
+  .vote-section {
+    @extend .ab-bottom, .text-center;
+    padding: 0.5em 0.25em;
+  }
+}
+
+.image-vote,
+.image-vote-link {
+  color: white;
+  background-color: transparent !important;
+  padding: 0.125rem 0.25rem !important;
+  border-radius: 0;
+}
+
+.image-vote-link {
+  &:hover,
+  &:focus {
+    color: white;
+    background-color: $link-color !important;
+    text-decoration: none !important;
   }
 }
 
 .image-sizer:hover,
-.image-sizer:focus {
+.image-sizer:focus,
+.carousel-item:hover,
+.carousel-item:focus {
   .vote-section,
   .theater-btn {
     opacity: 1;

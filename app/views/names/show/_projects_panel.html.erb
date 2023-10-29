@@ -1,15 +1,12 @@
-<div id="name_projects">
-  <div>
-    <strong><%= :show_name_create_draft.t %>:</strong>
-  </div>
-  <%= panel_block do %>
-    <% @projects.each do |project| %>
-      <%= link_with_query(project.title,
-                          new_name_description_path(
-                            @name.id,
-                            project: project.id,
-                            source: :project
-                          )) %><br>
-    <% end %>
+<%= card_block(id: "name_projects",
+               header: tag.h6(:show_name_create_draft.t)) do %>
+  <% @projects.each do |project| %>
+    <%= link_to(project.title,
+                add_query_param(new_name_description_path(
+                  @name.id,
+                  project: project.id,
+                  source: :project
+                )),
+                class: "d-block") %>
   <% end %>
-</div><!--#name_projects-->
+<% end %>

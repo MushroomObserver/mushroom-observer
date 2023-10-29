@@ -2,24 +2,25 @@
 // top nav bar
 // --------------------------------------------------
 
-.navbar-default {
+#top_nav {
   border-width: 1px;
   border-style: solid;
   border-radius: 0;
   border-top-right-radius: 0px;
   border-bottom-right-radius: 0px;
-  border-right-width: 0px;
+  border-right-width: 0;
+  border-left-width: 0;
   padding: 0px;
 
   a,
   a:visited {
-    color: $navbar-default-link-color;
-    background-color: $navbar-default-link-active-bg;
+    color: $navbar-light-color;
+    // background-color: $navbar-light-link-active-bg;
   }
 
   a:hover {
-    color: $navbar-default-link-hover-color;
-    background-color: $navbar-default-link-hover-bg;
+    color: $navbar-light-hover-color;
+    // background-color: $navbar-light-link-hover-bg;
   }
 
   .navbar-nav {
@@ -28,14 +29,14 @@
 
   .navbar-nav > li > a,
   .navbar-nav > li > a.dropdown-toggle {
-    color: $navbar-default-color !important;
-    background-color: $navbar-default-bg !important;
+    color: $navbar-light-color !important;
+    // background-color: $navbar-light-bg !important;
     padding-left: 8px;
     padding-right: 8px;
 
     &:hover {
-      color: $navbar-default-link-hover-color !important;
-      background-color: $navbar-default-link-hover-bg !important;
+      color: $navbar-light-hover-color !important;
+      // background-color: $navbar-light-link-hover-bg !important;
     }
   }
 

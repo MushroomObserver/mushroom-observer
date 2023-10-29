@@ -76,33 +76,30 @@ module LinkHelper
   def link_icon(type, title: "")
     return "" unless (glyph = link_icon_index[type])
 
-    text = ""
-    opts = { class: "glyphicon glyphicon-#{glyph} px-2" }
+    icon = icon("fa-regular", glyph, class: "fa-lg")
 
-    if title.present?
-      tooltip_opts = { data: { toggle: "tooltip", title: title } }
-      opts = opts.merge(tooltip_opts)
-      text = tag.span(title, class: "sr-only")
-    end
+    return icon unless title.present?
 
-    tag.span(text, **opts)
+    text = tag.span(title, class: "sr-only")
+    tag.span([icon, text].safe_join, data: { toggle: "tooltip", title: title })
   end
 
   def link_icon_index
     {
-      edit: "edit",
-      destroy: "remove-circle",
-      add: "plus",
-      back: "step-backward",
+      edit: "pen-to-square",
+      destroy: "trash",
+      add: "square-plus",
+      back: "arrow-left",
       hide: "eye-close",
-      reuse: "share",
-      remove: "minus-sign",
+      reuse: "clone",
+      remove: "trash",
       cancel: "remove"
     }.freeze
   end
 
-  # button to destroy object
-  # Used instead of link_to because method: :delete requires jquery_ujs library
+  # Buttons to change a target object
+  # Destroy uses button_to instead of link_to because method: :delete requires
+  # Rails to create a whole form around the button, using the jquery_ujs library
   # Sample usage:
   #   destroy_button(target: article)
   #   destroy_button(name: :destroy_object.t(type: :glossary_term),
@@ -111,6 +108,7 @@ module LinkHelper
   #     name: :destroy_object.t(type: :herbarium),
   #     target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
   #   )
+  # NOTE: button_to with block generates a button, not an input
   #
   def destroy_button(target:, name: :DESTROY.t, **args)
     # necessary if nil/empty string passed
@@ -194,41 +192,35 @@ module LinkHelper
   end
 
   # POST to a path; used instead of a link because POST link requires js
-  # post_button(name: herbarium.name.t,
-  #             path: herbaria_merges_path(that: @merge.id,this: herbarium.id),
-  #             data: { confirm: :are_you_sure.t })
-  def post_button(name:, path:, **args)
-    html_options = {
-      method: :post,
-      class: ""
-    }.merge(args)
-
-    button_to(path, html_options) { name }
+  def post_button(name:, path:, **args, &block)
+    any_method_button(method: :post, name:, path:, **args, &block)
   end
 
   # PUT to a path; used instead of a link because PUT link requires js
-  # put_button(name: herbarium.name.t,
-  #            path: herbarium_path(id: @herbarium.id),
-  #            data: { confirm: :are_you_sure.t })
-  def put_button(name:, path:, **args)
-    html_options = {
-      method: :put,
-      class: ""
-    }.merge(args)
-
-    button_to(path, html_options) { name }
+  def put_button(name:, path:, **args, &block)
+    any_method_button(method: :put, name:, path:, **args, &block)
   end
 
   # PATCH to a path; used instead of a link because PATCH link requires js
-  # patch_button(name: herbarium.name.t,
-  #              path: herbarium_path(id: @herbarium.id),
-  #              data: { confirm: :are_you_sure.t })
-  def patch_button(name:, path:, **args)
-    html_options = {
-      method: :patch,
-      class: ""
-    }.merge(args)
+  def patch_button(name:, path:, **args, &block)
+    any_method_button(method: :patch, name:, path:, **args, &block)
+  end
 
-    button_to(path, html_options) { name }
+  # any_method_button(method: :patch,
+  #                   name: herbarium.name.t,
+  #                   path: herbarium_path(id: @herbarium.id),
+  #                   data: { confirm: :are_you_sure.t })
+  # Pass a block and a name if you want an icon with tooltip
+  # NOTE: button_to with block generates a button, not an input #quirksmode
+  def any_method_button(name:, path:, method: :post, **args, &block)
+    content = block ? capture(&block) : name
+    tip = content ? { toggle: "tooltip", placement: "top", title: name } : ""
+    html_options = {
+      method: method,
+      class: "",
+      data: tip
+    }.merge(args) # currently don't have to merge class arg upstream
+
+    button_to(path, html_options) { content }
   end
 end

@@ -5,22 +5,22 @@ header = observation_naming_header_row(logged_in)
 behavior = "flex-column justify-content-end"
 %>
 
-<%= tag.div(class: "panel-heading namings-table-header") do
+<%= tag.div(class: "card-header namings-table-header") do
   tag.div(class: "row") do
     concat(
-      tag.div(class: "col col-sm-11") do
+      tag.div(class: "col-12 col-md-11") do
         tag.div(class: "row") do
           concat(tag.div(header[:heading],
-                        class: "col col-sm-4 d-block #{behavior}"))
+                        class: "col-md-4 d-flex #{behavior}"))
           concat(tag.div(header[:user_name],
-                        class: "col col-sm-3 d-none d-sm-block #{behavior}"))
+                        class: "col-md-3 d-none d-md-flex #{behavior}"))
           concat(tag.div(header[:consensus_vote],
-                        class: "col col-sm-2 d-none d-sm-block #{behavior}"))
+                        class: "col-md-2 d-none d-md-flex #{behavior}"))
           concat(tag.div(header[:your_vote],
-                        class: "col col-sm-3 d-none d-sm-block #{behavior}"))
+                        class: "col-md-3 d-none d-md-flex #{behavior}"))
         end
       end
     )
-    concat(tag.div("", class: "col col-sm-1 d-none d-sm-block #{behavior}"))
+    concat(tag.div("", class: "col-md-1 d-none d-md-flex #{behavior}"))
   end
 end %>

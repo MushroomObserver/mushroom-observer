@@ -33,7 +33,7 @@ module CarouselHelper
   end
 
   def carousel_basic_html(**args)
-    tag.div(class: "carousel slide", id: args[:html_id],
+    tag.div(class: "carousel slide card-img", id: args[:html_id],
             data: { ride: "false", interval: "false" }) do
       concat(tag.div(class: "carousel-inner bg-light", role: "listbox") do
         args[:images].each do |image|
@@ -87,18 +87,18 @@ module CarouselHelper
 
   def carousel_controls(html_id)
     [
-      link_to("##{html_id}", class: "left carousel-control",
+      link_to("##{html_id}", class: "carousel-control-prev",
                              role: "button", data: { slide: "prev" }) do
         tag.div(class: "btn") do
-          concat(tag.span(class: "glyphicon glyphicon-chevron-left",
+          concat(tag.span(class: "fas fa-chevron-left fa-2x text-white",
                           aria: { hidden: "true" }))
           concat(tag.span(:PREV.l, class: "sr-only"))
         end
       end,
-      link_to("##{html_id}", class: "right carousel-control",
+      link_to("##{html_id}", class: "carousel-control-next",
                              role: "button", data: { slide: "next" }) do
         tag.div(class: "btn") do
-          concat(tag.span(class: "glyphicon glyphicon-chevron-right",
+          concat(tag.span(class: "fas fa-chevron-right fa-2x text-white",
                           aria: { hidden: "true" }))
           concat(tag.span(:NEXT.l, class: "sr-only"))
         end
@@ -138,6 +138,7 @@ module CarouselHelper
 
   def carousel_no_images_message
     tag.div(:show_observation_no_images.l,
-            class: "p-4 w-100 h-100 text-center h3 text-muted")
+            class: class_names(%w[d-flex flex-column justify-content-center
+                                  w-100 h-100 text-center h3 text-muted]))
   end
 end

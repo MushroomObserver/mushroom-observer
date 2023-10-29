@@ -73,19 +73,19 @@ function nl_watching(event) {
   if (c.match(/[a-zA-Z \-]/) && !event.ctrlKey)
     return true;
   switch (event.keyCode) {
-  case EVENT_KEY_BACKSPACE:
-  case EVENT_KEY_DELETE:
-  case EVENT_KEY_RETURN:
-  case EVENT_KEY_TAB:
-  case EVENT_KEY_UP:
-  case EVENT_KEY_DOWN:
-  case EVENT_KEY_RIGHT:
-  case EVENT_KEY_LEFT:
-  case EVENT_KEY_HOME:
-  case EVENT_KEY_END:
-  case EVENT_KEY_PAGEUP:
-  case EVENT_KEY_PAGEDOWN:
-    return true;
+    case EVENT_KEY_BACKSPACE:
+    case EVENT_KEY_DELETE:
+    case EVENT_KEY_RETURN:
+    case EVENT_KEY_TAB:
+    case EVENT_KEY_UP:
+    case EVENT_KEY_DOWN:
+    case EVENT_KEY_RIGHT:
+    case EVENT_KEY_LEFT:
+    case EVENT_KEY_HOME:
+    case EVENT_KEY_END:
+    case EVENT_KEY_PAGEUP:
+    case EVENT_KEY_PAGEDOWN:
+      return true;
   }
   return false;
 }
@@ -122,7 +122,7 @@ function nl_keydown(event) {
 
   // Schedule first repeat event.
   NL_REPEAT_CALLBACK =
-    window.setTimeout(function() {nl_keyrepeat(NL_KEY)}, NL_FIRST_KEY_DELAY);
+    window.setTimeout(function () { nl_keyrepeat(NL_KEY) }, NL_FIRST_KEY_DELAY);
 
   // Stop browser from doing anything with key presses when focused.
   event.stopPropagation();
@@ -134,7 +134,7 @@ function nl_keyrepeat(event) {
   if (NL_FOCUS && NL_KEY) {
     nl_process_key(NL_KEY);
     NL_REPEAT_CALLBACK =
-      window.setTimeout(function() {nl_keyrepeat(NL_KEY)}, NL_NEXT_KEY_DELAY);
+      window.setTimeout(function () { nl_keyrepeat(NL_KEY) }, NL_NEXT_KEY_DELAY);
   } else {
     NL_KEY = null;
   }
@@ -147,7 +147,7 @@ function nl_process_key(event) {
   // Normal letters.
   var c = String.fromCharCode(event.keyCode || event.which).toLowerCase();
   if (c.match(/[a-zA-Z \-]/) && !event.ctrlKey ||
-      event.keyCode == EVENT_KEY_BACKSPACE) {
+    event.keyCode == EVENT_KEY_BACKSPACE) {
 
     // Update word with new letter or backspace.
     if (event.keyCode != EVENT_KEY_BACKSPACE) {
@@ -160,7 +160,7 @@ function nl_process_key(event) {
 
     // Search for partial word.
     var list = NL_FOCUS == 'g' ? NL_GENERA :
-               NL_FOCUS == 's' ? NL_SPECIES_CUR : NL_NAMES;
+      NL_FOCUS == 's' ? NL_SPECIES_CUR : NL_NAMES;
     var word = NL_WORD;
     if (NL_FOCUS == 's')
       word = NL_SPECIES_CUR[0].replace(/\*$|\|.*/, '') + ' ' + NL_WORD;
@@ -175,7 +175,7 @@ function nl_process_key(event) {
 
   // Other strokes.
   var i = NL_CURSOR[NL_FOCUS];
-  switch(event.keyCode) {
+  switch (event.keyCode) {
 
     // Move cursor up and down.
     case EVENT_KEY_UP:
@@ -291,7 +291,7 @@ function nl_draw_cursors() {
 function nl_draw_cursor(s, list) {
   var i = NL_CURSOR[s];
   if (list.length > 0 && i != null) {
-    if (i < 0)            NL_CURSOR[s] = i = 0;
+    if (i < 0) NL_CURSOR[s] = i = 0;
     if (i >= list.length) NL_CURSOR[s] = i = list.length - 1;
     jQuery("#" + s + i).removeClass("hot warm").addClass(NL_FOCUS == s ? "warm" : "hot");
   } else {
@@ -313,7 +313,7 @@ function nl_warp(s) {
     var eh = e.outerHeight();
     var sy = section.scrollTop();
     var sh = 450 - scroll_bar_width;
-    var ny = ey+eh > sy+sh ? ey+eh - sh : sy;
+    var ny = ey + eh > sy + sh ? ey + eh - sh : sy;
     ny = ey < ny ? ey : ny;
     if (sy != ny)
       section.scrollTop(ny);
@@ -321,28 +321,28 @@ function nl_warp(s) {
 }
 
 var IEFIX = (navigator.appVersion.indexOf('MSIE') > 0 &&
-             navigator.userAgent.indexOf('Opera') < 0);
+  navigator.userAgent.indexOf('Opera') < 0);
 
 // Draw contents of one of the three columns.  Section is 'genera', 'species'
 // or 'names'; list is GENERA, SPECIES or NAMES.
 function nl_draw(s, list) {
   var section = NL_DIVS[s];
   var html = '';
-  for (var i=0; i<list.length; i++) {
+  for (var i = 0; i < list.length; i++) {
     var name = list[i];
     var author = '';
     var star = false;
-    if (name.charAt(name.length-1) == '*') {
-      name = name.substr(0,name.length-1);
+    if (name.charAt(name.length - 1) == '*') {
+      name = name.substr(0, name.length - 1);
       star = true;
     }
     var x = name.indexOf('|');
     if (x > 0) {
-      author = ' <span class="normal">' + name.substr(x+1).escapeHTML() + '</span>';
-      name = name.substr(0,x);
+      author = ' <span class="normal">' + name.substr(x + 1).escapeHTML() + '</span>';
+      name = name.substr(0, x);
     }
     if (name.charAt(0) == '=') {
-      name = '<span class="ml-10px">&nbsp;</span>= <b>' +
+      name = '<span class="ml-2">&nbsp;</span>= <b>' +
         name.substr(2).escapeHTML() + '</b>';
     } else if (star) {
       name = '<b>' + name.escapeHTML() + '</b>';
@@ -351,17 +351,17 @@ function nl_draw(s, list) {
     }
     html += '<li' +
       ' id="' + s + i + '"' +
-      ' onmouseover="na(\''+s+'\','+i+')"' +
-      ' onmouseout="nb(\''+ s+'\','+i+')"' +
-      ' onclick="nc(\''+    s+'\','+i+')"' +
-      ' ondblclick="nd(\''+ s+'\','+i+')"' +
+      ' onmouseover="na(\'' + s + '\',' + i + ')"' +
+      ' onmouseout="nb(\'' + s + '\',' + i + ')"' +
+      ' onclick="nc(\'' + s + '\',' + i + ')"' +
+      ' ondblclick="nd(\'' + s + '\',' + i + ')"' +
       '><nobr>' + name + author + '</nobr></li>';
   }
   html = '<ul>' + html + '</ul>';
   if (IEFIX) {
     document.getElementById(section).outerHTML =
       "<div id=\"" + section + "\" class=\"scroller\"" +
-      " onclick=\"nl_focus('" + s + "')\">" + html +"</div>";
+      " onclick=\"nl_focus('" + s + "')\">" + html + "</div>";
   } else {
     jQuery("#" + section).html(html);
   }
@@ -374,12 +374,12 @@ function nl_select_genus(name) {
   var list = [name];
   var last = false;
   nl_move_cursor('s', null);
-  if (name.charAt(name.length-1) == '*')
-    name = name.substr(0,name.length-1);
+  if (name.charAt(name.length - 1) == '*')
+    name = name.substr(0, name.length - 1);
   name += ' ';
-  for (var i=0; i<NL_SPECIES.length; i++) {
+  for (var i = 0; i < NL_SPECIES.length; i++) {
     var species = NL_SPECIES[i];
-    if (species.substr(0,name.length) == name ||
+    if (species.substr(0, name.length) == name ||
       species.charAt(0) == '=' && last) {
       list.push(species);
       last = true;
@@ -397,8 +397,8 @@ function nl_select_genus(name) {
 function nl_search(list, word) {
   var word_len = word.length;
   word = word.toLowerCase();
-  for (var i=0; i<list.length; i++) {
-    if (list[i].substr(0,word_len).toLowerCase() == word) {
+  for (var i = 0; i < list.length; i++) {
+    if (list[i].substr(0, word_len).toLowerCase() == word) {
       nl_move_cursor(NL_FOCUS, i);
       break;
     }
@@ -412,7 +412,7 @@ function nl_insert_name(name) {
     name = name.substr(2) + '*';
   var name2 = name.replace('*', '');
   var done = false;
-  for (var i=0; i<NL_NAMES.length; i++) {
+  for (var i = 0; i < NL_NAMES.length; i++) {
     var str = NL_NAMES[i];
     if (!done && str.replace('*', '') >= name2) {
       if (str != name)
@@ -437,7 +437,7 @@ function nl_insert_name(name) {
 // Remove a name.
 function nl_remove_name(name) {
   var new_list = [];
-  for (var i=0; i<NL_NAMES.length; i++)
+  for (var i = 0; i < NL_NAMES.length; i++)
     if (NL_NAMES[i] == name)
       NL_CURSOR['n'] = i;
     else
@@ -452,7 +452,7 @@ function nl_remove_name(name) {
 // Concat names in NL_NAMES and store in hidden 'results' field.
 function nl_set_results() {
   var val = '';
-  for (var i=0; i<NL_NAMES.length; i++)
+  for (var i = 0; i < NL_NAMES.length; i++)
     val += NL_NAMES[i] + "\n";
   jQuery("#results").val(val);
 }
@@ -466,6 +466,6 @@ function nl_initialize_names() {
   while ((x = str.indexOf("\n")) >= 0) {
     if (x > 0)
       NL_NAMES.push(str.substr(0, x));
-    str = str.substr(x+1);
+    str = str.substr(x + 1);
   }
 }

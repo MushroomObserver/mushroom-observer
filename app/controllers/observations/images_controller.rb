@@ -320,7 +320,7 @@ module Observations
 
     ############################################################################
 
-    # REMOVE IMAGES: Uses shared partial "shared/images_to_remove"
+    # REMOVE IMAGES: Uses shared partial "shared/images/images_to_remove"
     # Form used to remove one or more images from an observation (not destroy!)
     # Linked from: observations/show
     # Inputs:

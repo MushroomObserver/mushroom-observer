@@ -4,7 +4,7 @@
 module LightboxHelper
   # this link needs to contain all the data for the lightbox image
   def lightbox_link(lightbox_data)
-    icon = tag.i("", class: "glyphicon glyphicon-fullscreen")
+    icon = icon("fa-solid", "expand")
     caption = lightbox_caption_html(lightbox_data)
 
     link_to(icon, lightbox_data[:url],
@@ -31,7 +31,7 @@ module LightboxHelper
     if identify
       html << propose_naming_link(obs_data[:id], context: "lightbox")
       html << content_tag(:span, "&nbsp;".html_safe, class: "mx-2")
-      html << mark_as_reviewed_toggle(obs_data[:id])
+      html << mark_as_reviewed_toggle(obs_data[:id], "btn-primary")
     end
     html << caption_obs_title(obs_data)
     html << observation_details_when_where_who(obs: obs_data[:obs])

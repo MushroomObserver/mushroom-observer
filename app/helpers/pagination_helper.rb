@@ -45,7 +45,8 @@ module PaginationHelper
       if pages.used_letters.include?(letter)
         pagination_link(letter, letter, pages.letter_arg, args)
       else
-        content_tag(:li, content_tag(:span, letter), class: "disabled")
+        content_tag(:li, content_tag(:span, letter),
+                    class: "page-item disabled")
       end
     end.safe_join(" ")
     content_tag(:div, str, class: "pagination pagination-sm")
@@ -96,17 +97,20 @@ module PaginationHelper
       result << pagination_link(pstr, this - 1, arg, args) if this > 1
       result << pagination_link(1, 1, arg, args) if from > 1
       if from > 2
-        result << content_tag(:li, content_tag(:span, "..."), class: "disabled")
+        result << content_tag(:li, content_tag(:span, "..."),
+                              class: "page-link disabled")
       end
       (from..to).each do |n|
         if n == this
-          result << content_tag(:li, content_tag(:span, n), class: "active")
+          result << content_tag(:li, content_tag(:span, n),
+                                class: "page-link active")
         elsif n.positive? && n <= num
           result << pagination_link(n, n, arg, args)
         end
       end
       if to < num - 1
-        result << content_tag(:li, content_tag(:span, "..."), class: "disabled")
+        result << content_tag(:li, content_tag(:span, "..."),
+                              class: "page-link disabled")
       end
       result << pagination_link(num, num, arg, args) if to < num
       result << pagination_link(nstr, this + 1, arg, args) if this < num
@@ -127,6 +131,6 @@ module PaginationHelper
       url.sub!(/#.*/, "")
       url += "##{args[:anchor]}"
     end
-    content_tag(:li, link_to(label, url))
+    content_tag(:li, link_to(label, url), class: "page-link")
   end
 end

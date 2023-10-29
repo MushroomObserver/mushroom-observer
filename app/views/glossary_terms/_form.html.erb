@@ -1,8 +1,8 @@
 <%= form_with(model: @glossary_term, html: { multipart: true }) do |f| %>
 
   <% if in_admin_mode? %>
-  <%= check_box_with_label(form: f, field: :locked, class: "mt-3",
-                            label: :edit_glossary_term_locked.t) %>
+    <%= check_box_with_label(form: f, field: :locked, class: "mt-3",
+                             label: :edit_glossary_term_locked.t) %>
   <% end %>
 
   <%=

@@ -5,6 +5,10 @@
 #  date_select_opts
 
 # helpers for form tags
+#  custom_file_field            # stylable file input field with
+#                               # client-side size validation
+#  date_select_opts
+
 module FormsHelper
   # Bootstrap submit button
   # <%= submit_button(form: f, button: button.t, center: true) %>
@@ -14,8 +18,8 @@ module FormsHelper
     end
 
     opts = args.except(:form, :button, :class, :center)
-    opts[:class] = "btn btn-default"
-    opts[:class] += " center-block my-3" if args[:center] == true
+    opts[:class] = "btn btn-primary"
+    opts[:class] += " mx-auto my-3" if args[:center] == true
     opts[:class] += " #{args[:class]}" if args[:class].present?
 
     args[:form].submit(args[:button], opts)
@@ -24,8 +28,8 @@ module FormsHelper
   # form-agnostic button, type=button
   def js_button(**args)
     opts = args.except(:form, :button, :class, :center)
-    opts[:class] = "btn btn-default"
-    opts[:class] += " center-block my-3" if args[:center] == true
+    opts[:class] = "btn btn-primary"
+    opts[:class] += " mx-auto my-3" if args[:center] == true
     opts[:class] += " #{args[:class]}" if args[:class].present?
 
     button_tag(args[:button], type: :button, **opts)
@@ -72,13 +76,19 @@ module FormsHelper
   def check_box_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
     opts = separate_field_options_from_args(args)
+    opts[:class] = "form-check-input"
+    args[:checked_value] ||= "1"
+    args[:unchecked_value] ||= "0"
 
-    wrap_class = form_group_wrap_class(args, "checkbox")
+    wrap_class = form_group_wrap_class(args, "form-check")
 
     content_tag(:div, class: wrap_class) do
-      args[:form].label(args[:field]) do
-        concat(args[:form].check_box(args[:field], opts))
-        concat(args[:label])
+      args[:form].label(args[:field], class: "form-check-label") do
+        [
+          args[:form].check_box(args[:field], opts,
+                                args[:checked_value], args[:unchecked_value]),
+          args[:label]
+        ].safe_join
       end
     end
   end
@@ -87,11 +97,13 @@ module FormsHelper
   def radio_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
     opts = separate_field_options_from_args(args, [:value])
+    opts[:class] = "form-check-input"
 
-    wrap_class = form_group_wrap_class(args, "radio")
+    wrap_class = form_group_wrap_class(args, "form-check")
 
     content_tag(:div, class: wrap_class) do
-      args[:form].label("#{args[:field]}_#{args[:value]}") do
+      args[:form].label("#{args[:field]}_#{args[:value]}",
+                        class: "form-check-label") do
         concat(args[:form].radio_button(args[:field], args[:value], opts))
         concat(args[:label])
       end
@@ -230,7 +242,7 @@ module FormsHelper
 
     content_tag(:div, class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
-      concat(content_tag(:p, text, class: "form-control-static"))
+      concat(content_tag(:p, text, class: "form-control-plaintext"))
       concat(args[:form].hidden_field(args[:field], opts))
     end
   end
@@ -238,7 +250,7 @@ module FormsHelper
   # Bootstrap allows you to style static text like this:
   def static_text_with_label(**args)
     opts = separate_field_options_from_args(args)
-    opts[:class] = "form-control-static"
+    opts[:class] = "form-control-plaintext"
     text = opts[:text] || opts[:value] || ""
     opts.delete(:value)
 
@@ -267,7 +279,7 @@ module FormsHelper
   # Bootstrap file input field with client-side size validation.
   def file_field_with_label(**args)
     opts = separate_field_options_from_args(args)
-    input_span_class = "file-field btn btn-default"
+    input_span_class = "file-field btn btn-primary"
     max_size = MO.image_upload_max_size
     max_size_in_mb = (max_size.to_f / 1024 / 1024).round
     opts = opts.merge(
@@ -305,7 +317,7 @@ module FormsHelper
       )
     )
     content_tag(:span, :select_file.t + file_field,
-                class: "file-field btn btn-default") +
+                class: "file-field btn btn-primary") +
       content_tag(:span, :no_file_selected.t)
   end
 
@@ -385,7 +397,7 @@ module FormsHelper
   def separate_field_options_from_args(args, extras = [])
     exceptions = [
       :form, :field, :label, :class, :width, :inline, :between, :append,
-      :optional, :required, :monospace, :type
+      :optional, :required, :monospace, :checked_value, :unchecked_value, :type
     ] + extras
 
     args.clone.except(*exceptions)

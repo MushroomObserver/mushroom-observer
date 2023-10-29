@@ -12,33 +12,19 @@ add_tab_set(name_show_tabs(name: @name, user: @user))
 <div class="row">
 
   <!--LEFT COLUMN-->
-  <div class="col-sm-5">
-
-    <%= render(partial: "names/show/confident_observations_panel") %>
-
-    <div id="name_previous_export" class="mb-4">
-      <%= show_previous_version(@name) %>
-      <%= set_export_status_controls(@name) %>
-    </div>
-
-    <div id="name_authors_editors">
-      <%= panel_block do %>
-        <%= show_authors_and_editors(obj: @name, user: @user) %>
-      <% end %>
-    </div>
-
-  </div><!--LEFT COLUMN-->
-
-  <!--RIGHT COLUMN-->
-  <div class="col-sm-7">
+  <div class="col-md-7">
 
     <%= render(partial: "names/show/observations_menu") %>
     <%= render(partial: "names/show/nomenclature",
-              locals: { name: @name, synonyms: true }) %>
+               locals: { name: @name, synonyms: true }) %>
 
     <div class="row">
-      <%= render(partial: "names/show/classification_panel") %>
-      <%= render(partial: "names/show/lifeform_panel") %>
+      <div class="col-md-6">
+        <%= render(partial: "names/show/classification_panel") %>
+      </div>
+      <div class="col-md-6">
+        <%= render(partial: "names/show/lifeform_panel") %>
+      </div>
     </div>
 
     <% inject_javascript_at_end %(
@@ -64,7 +50,24 @@ add_tab_set(name_show_tabs(name: @name, user: @user))
       <%= render(partial: "names/show/projects_panel") %>
     <% end %>
 
+  </div><!--LEFT COLUMN-->
+
+  <!--RIGHT COLUMN-->
+  <div class="col-md-5">
+
+    <%= render(partial: "names/show/confident_observations_panel") %>
+
+    <div id="name_previous_export" class="mb-4">
+      <%= show_previous_version(@name) %>
+      <%= set_export_status_controls(@name) %>
+    </div>
+
+    <%= card_block(id: "name_authors_editors") do %>
+      <%= show_authors_and_editors(obj: @name, user: @user) %>
+    <% end %>
+
   </div><!--RIGHT COLUMN-->
+
 </div><!--.row-->
 
 <%# ----------------------------------------

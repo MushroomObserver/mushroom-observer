@@ -8,12 +8,12 @@ obs_id = obs.id
 query = Query.lookup(:HerbariumRecord, :all, observations: obs.id)
 %>
 
-<div class="obs-herbarium" id="observation_herbarium_records">
+<div class="obs-herbarium card-text" id="observation_herbarium_records">
 <% unless @user.try(&:hide_specimen_stuff?) ||
           obs.user.try(&:hide_specimen_stuff?) %>
   <% if records.any? && can_add %>
     <div>
-      <%= :Herbarium_records.t %>: [<%=
+      <%= tag.b(:Herbarium_records.t + ":") %> [<%=
         link_to(
           :create_herbarium_record.t,
           new_herbarium_record_path(observation_id: obs_id,

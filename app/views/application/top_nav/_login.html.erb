@@ -1,5 +1,8 @@
-<div class="nav navbar-nav navbar-form navbar-right hidden-xs m-0">
-  <p class="form-control-static">
+
+<%# bs4 %>
+
+<div class="nav navbar-nav form-inline d-none d-md-block m-0">
+  <div class="form-control">
     <%= link_to(
           :app_login.t, new_account_login_path,
           { class: "btn btn-primary", id: "user_nav_login_link" }
@@ -8,5 +11,5 @@
           :app_create_account.t, account_signup_path,
           { class: "btn btn-primary", id: "user_nav_signup_link" }
         ) %>
-  </p>
+  </div>
 </div>

@@ -1,20 +1,30 @@
+<%# bs4 %>
 <!--top_nav-->
-<nav id="top_nav" class="navbar navbar-default hidden-xs hidden-print">
+<%
+top_nav_classes = %w[navbar navbar-light bg-light border-light
+                     navbar-expand-lg mb-4 d-print-none].join(" ")
+%>
 
-  <div class="container-fluid px-0">
-    <%= tag.span(rubric, class: "hidden") %>
-    <% if controller.controller_name == "identify" %>
-      <%= render(partial: "observations/identify/form_identify_filter") %>
-    <% else ##user is logged in %>
-      <%= render(partial: "application/top_nav/search_form") %>
-    <% end %>
+<%= content_tag(:nav, id: "top_nav", class: top_nav_classes) do %>
 
-    <% if @user.nil? %>
-      <%= render(partial: "application/top_nav/login") %>
-    <% else ##user is logged in %>
-      <%= render(partial: "application/top_nav/user_nav") %>
-    <% end %>
+  <div class="container-fluid px-0 justify-content-between">
+    <div class="top-bar-left d-flex flex-row">
+      <%= tag.span(rubric, class: "d-none") %>
+      <% if controller.controller_name == "identify" %>
+        <%= render(partial: "observations/identify/form_identify_filter") %>
+      <% else ##future filters %>
+        <%= render(partial: "application/top_nav/search_form") %>
+      <% end %>
+    </div>
+
+    <div class="top-bar-right d-flex flex-row">
+      <% if @user.nil? %>
+        <%= render(partial: "application/top_nav/login") %>
+      <% else ##user is logged in %>
+        <%= render(partial: "application/top_nav/user_nav") %>
+      <% end %>
+    </div>
   </div>
 
-</nav>
-<!--/top_nav-->
+<% end %>
+<!--/SEARCH_BAR-->

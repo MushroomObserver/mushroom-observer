@@ -4,11 +4,20 @@ add_page_title(article_show_title(@article))
 add_tab_set(article_show_tabs(article: @article, user: @user))
 %>
 
-<div>
-  <%= :BY.t %> <%= user_link(@article.user) %>,
-  <%= content_tag(:small, @article.created_at.display_time) %>
-</div>
+<% card_title = tag.div(class: "card-title") do
+  [
+    "#{:BY.t} ",
+    user_link(@article.user),
+    ", ",
+    tag.small(@article.created_at.display_time)
+  ].safe_join
+end %>
 
-<%= panel_block(class: "mt-3") do @article.body.tpl end %>
-
-<%= show_object_footer(@article) %>
+<%=
+card_block(footer: show_object_footer(@article)) do
+  [
+    card_title,
+    @article.body.tpl
+  ].safe_join
+end
+%>

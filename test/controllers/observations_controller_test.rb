@@ -146,7 +146,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:show, params: { id: obs.id })
     assert_equal(1, ObservationView.where(observation: obs).count)
-    assert_select("p.footer-view-stats") do |p|
+    assert_select(".footer-view-stats") do |p|
       assert_includes(p.to_s, :footer_viewed.t(date: :footer_never.l,
                                                times: :many_times.l(num: 0)))
     end
@@ -157,7 +157,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_equal(2, ObservationView.where(observation: obs).count)
     assert_operator(obs.last_viewed_by(dick), :>=, 2.seconds.ago)
-    assert_select("p.footer-view-stats") do |p|
+    assert_select(".footer-view-stats") do |p|
       assert_includes(p.to_s, :footer_viewed.t(date: last_view.web_time,
                                                times: :one_time.l))
       assert_includes(p.to_s, :footer_last_you_viewed.t(date: :footer_never.l))
@@ -169,7 +169,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_equal(2, ObservationView.where(observation: obs).count)
     assert_operator(obs.last_viewed_by(dick), :>=, 2.seconds.ago)
-    assert_select("p.footer-view-stats") do |p|
+    assert_select(".footer-view-stats") do |p|
       assert_includes(p.to_s, :footer_viewed.t(date: last_view.web_time,
                                                times: :many_times.l(num: 2)))
       assert_includes(p.to_s,
@@ -231,7 +231,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_template("shared/_matrix_box")
     assert_displayed_title("Observation Index")
     assert_select(
-      "#results .rss-heading a[href ^= '/#{obs.id}'] .rss-name",
+      "#results a.log-link[href ^= '/#{obs.id}'] .log-name",
       { text: obs.format_name.t.strip_html },
       "Index should open at the page that includes #{obs.format_name}"
     )
@@ -277,7 +277,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_displayed_title("Advanced Search")
     assert_select(
-      "#results .rss-what a:match('href', ?)", %r{^/\d},
+      "#results a.log-link:match('href', ?)", %r{^/\d},
       { count: expected_hits },
       "Wrong number of results"
     )

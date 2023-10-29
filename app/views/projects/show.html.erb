@@ -5,7 +5,7 @@ add_project_banner(@project)
 
 <br/>
 
-<%= panel_block do %>
+<%= card_block do %>
   <%= ("*" + :show_project_summary.l + ":* " + @project.summary.to_s.html_safe).tpl %>
 
   <% if @project.species_lists.any? %>

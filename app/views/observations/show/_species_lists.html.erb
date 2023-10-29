@@ -1,6 +1,6 @@
-<%= panel_block(heading: :show_lists_header.t,
-                            id: "observation_species_lists",
-                            inner_class: "p-2") do %>
+<%= card_block(header: tag.h6(:show_lists_header.t),
+               id: "observation_species_lists",
+               inner_class: "p-2") do %>
 
   <table class="table table-responsive mx-0 mb-0">
     <% obs.species_lists.each do |spl| %>

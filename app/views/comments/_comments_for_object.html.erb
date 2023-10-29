@@ -6,10 +6,10 @@
   end
 %>
 
-<%= tag.div(class: "panel panel-default", id: "comments_for_object") do %>
+<%= tag.div(class: "card", id: "comments_for_object") do %>
 
-  <%= tag.div(class: "panel-heading") do
-    tag.h4(:COMMENTS.t, class: "panel-title")
+  <%= tag.div(class: "card-header") do
+    tag.h6(:COMMENTS.t)
   end %>
 
   <%= tag.div(class: "list-group list-group-flush comments") do %>
@@ -23,17 +23,16 @@
     <% end %>
   <% end %>
 
-  <%= tag.div(class: "panel-footer") do %>
+  <%= tag.div(class: "card-footer d-flex justify-content-between") do %>
     <%= link_with_query(:show_comments_add_comment.t,
                         new_comment_path(target: object.id,
                                         type: object.class.name),
-                        class: "btn btn-default btn-sm",
+                        class: "btn btn-primary btn-sm",
                         remote: true) if controls %>
 
     <%= if limit && and_more > 0
       link_to(:show_comments_and_more.t(num: and_more),
-              comments_path(target: object.id, type: object.class.name),
-              class: "float-right")
+              comments_path(target: object.id, type: object.class.name))
     end %>
   <% end %>
 

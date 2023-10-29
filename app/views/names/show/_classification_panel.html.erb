@@ -1,13 +1,19 @@
-<div class="col-sm-6">
-  <div id="name_classification">
-    <strong><%= :show_name_classification.t %>:</strong>
-    <% if @user %>
-      [<%= link_with_query(:EDIT.t,
-                            edit_name_classification_path(@name.id)) %>]
-    <% end %>
-    <%= panel_block(inner_class: "name-section",
-                    id: "classification_section") do
-      render(partial: "names/show/classification")
-    end %>
-  </div><!--#name_classification-->
-</div>
+<%
+header = [tag.h6(:show_name_classification.t)]
+if @user
+  header << tag.div do
+              edit_button(
+                name: :EDIT.t,
+                target: add_query_param(edit_name_classification_path(@name.id))
+              )
+            end
+end
+header = header.safe_join
+%>
+
+<%= tag.div(id: "name_classification") do
+  card_block(id: "classification_section",
+             header: header, inner_class: "list-indented") do
+    render(partial: "names/show/classification")
+  end
+end %>

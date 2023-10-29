@@ -757,7 +757,7 @@ class ApplicationController < ActionController::Base
   helper_method :flash_notice_level
 
   # Clear error/warning messages. *NOTE*: This is done automatically by the
-  # application layout (app/views/layouts/application.rhtml) every time it
+  # application layout (app/views/layouts/application.html.erb) every time it
   # renders the latest error messages.
   def flash_clear
     @last_notice = session[:notice] if Rails.env.test?

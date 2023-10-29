@@ -10,8 +10,8 @@ add_tab_set(collection_number_show_tabs(c_n: @collection_number))
   <%= :collection_number_user.t %>: <%= user_link(@collection_number.user) %><br/>
 </p>
 
-<ul class="row list-unstyled mt-3">
-  <%= render(partial: "shared/matrix_box", locals: { columns: "col-xs-12" },
+<ul class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 list-unstyled mt-3">
+  <%= render(partial: "shared/matrix_box", locals: { columns: "" },
               collection: @collection_number.observations, as: :object) %>
 </ul>
 

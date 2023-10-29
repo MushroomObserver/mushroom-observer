@@ -29,12 +29,12 @@ tag.div(
       [
         tag.div(class: "modal-header") do
           [
+            tag.h4(title, class: "modal-title",
+                   id: "modal_header_#{identifier}"),
             tag.button(
               type: :button, class: "close", data: { dismiss: "modal" },
               aria: { label: :CLOSE.l }
-            ) { tag.span(aria: { hidden: "true" }) { "&times;".html_safe } },
-            tag.h4(title, class: "modal-title",
-                   id: "modal_header_#{identifier}")
+            ) { tag.span(aria: { hidden: "true" }) { "&times;".html_safe } }
           ].safe_join
         end,
         tag.div(class: "modal-body", id: "modal_body_#{identifier}") do

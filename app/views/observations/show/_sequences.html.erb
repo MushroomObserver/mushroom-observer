@@ -7,12 +7,12 @@ can_edit  = in_admin_mode? || obs.can_edit?
 query = Query.lookup(:Sequence, :all, observations: obs.id)
 %>
 
-<div class="obs-sequence" id="observation_sequences">
+<div class="obs-sequence card-text" id="observation_sequences">
 <% unless @user.try(&:hide_specimen_stuff?) ||
           obs.user.try(&:hide_specimen_stuff?) %>
   <% if @user || sequences.any? %>
     <div>
-      <%= sequences.any? ? :Sequences.t + ":".html_safe : :show_observation_no_sequences.t %>
+      <%= sequences.any? ? tag.b(:Sequences.t + ":") : :show_observation_no_sequences.t %>
       <%=
           add_sequence_link = link_with_query(
             :show_observation_add_sequence.t,

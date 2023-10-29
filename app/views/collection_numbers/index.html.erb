@@ -1,4 +1,5 @@
 <%
+#bs4
 @container = :wide
 # the no_hits_title.
 add_index_title(@query, no_hits: :list_collection_numbers_title.t)
@@ -18,7 +19,7 @@ flash_error(@error) if @error && @objects.empty?
               link_with_query(:EDIT.t,
                 edit_collection_number_path(id: collection_number.id,
                                             params: { back: :index }),
-                class: "btn btn-default btn-sm")
+                class: "btn btn-outline-secondary btn-sm")
             end %>
           </td>
           <td>

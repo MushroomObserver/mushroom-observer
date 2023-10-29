@@ -1,0 +1,16 @@
+<%
+# Note this uses a specialized matrix box here, not using the general partial.
+%>
+
+<%= form_with(url: form_action, method: :put) do |f| %>
+
+  <%= submit_button(form: f, button: :image_remove_remove.l, center: true) %>
+
+  <%= render(partial: "shared/matrix_grid",
+             locals: { objects: @object.images, as: :image,
+                       partial: "shared/matrix_box_image_remove" }) %>
+
+  <%= submit_button(form: f, button: :image_remove_remove.l, center: true) %>
+
+<% end %>
+

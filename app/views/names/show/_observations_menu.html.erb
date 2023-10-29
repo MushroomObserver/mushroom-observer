@@ -2,9 +2,10 @@
 #  This is just a two-column panel
 %>
 
-<%= panel_block(id: "name_observations_menu") do %>
+<%= card_block(id: "name_observations_menu",
+               inner_class: "list-indented") do %>
   <div class="row">
-    <div class="col-sm-7 name-section">
+    <div class="col-sm-7">
       <%= tag.p(:show_observations_of.t) %>
       <div class="pl-3">
         <%= # Observations of this name
@@ -23,7 +24,7 @@
                               @has_subtaxa, @subtaxa_query) %>
       </div>
     </div>
-    <div class="col-sm-5 name-section">
+    <div class="col-sm-5">
       <% if @name.searchable_in_registry? %>
         <%= tag.p(link_to(
               "MyCoPortal", mycoportal_url(@name), target: :_blank

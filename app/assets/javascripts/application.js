@@ -1,10 +1,10 @@
 //= require jquery3
 //= require jquery_extensions
 //= require rails-ujs
+//= require popper
 //= require bootstrap-sprockets
 //= require jstz
 //= require mo_autocompleter
-//= require box_resizer
 //= require lazyload_verlok
 //= require csrf_token
 //= require external_link

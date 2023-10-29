@@ -222,9 +222,10 @@ class NamesController < ApplicationController
             flash_error_and_goto_index(Name, params[:id])
   end
 
+  # This is because of the "most confident observations" image copyright
   def show_name_includes
     [
-      { observations: :user }
+      { observations: [:user] }
     ]
   end
 

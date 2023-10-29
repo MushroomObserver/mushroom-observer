@@ -4,15 +4,15 @@ add_tab_set(show_description_tabs(description: @description))
 @container = :wide
 %>
 
-<%= panel_block do %>
+<%= card_block do %>
   <div class="row">
 
-    <div class="col-xs-12 col-md-6">
+    <div class="col-12 col-lg-6">
       <%= render( partial: "shared/show_description",
                   locals: { description: @description }) %>
     </div><!-- .col -->
 
-    <div class="col-xs-12 col-md-6">
+    <div class="col-12 col-lg-6">
       <%= show_alt_descriptions(object: @name, projects: @projects) %>
     </div><!-- .col -->
 

@@ -1,0 +1,125 @@
+.matrix-box {
+  @extend .mb-4;
+}
+
+.card-header {
+  h6, .h6 {
+    font-weight: $font-weight-bold;
+    margin-bottom: 0;
+  }
+}
+
+// On combination cards for carousels, give a border to the card part
+.no-gutters {
+  .card-combination-left {
+    border-top: 1px solid $card-border-color;
+
+    @include media-breakpoint-up(lg){
+      border-top: 0;
+      border-right: 1px solid $card-border-color;
+    }
+  }
+  .card-combination-right {
+    border-top: 1px solid $card-border-color;
+
+    @include media-breakpoint-up(lg){
+      border-top: 0;
+      border-left: 1px solid $card-border-color;
+    }
+  }
+}
+
+.card-text {
+  font-size: $small-font-size;
+}
+
+//
+// matrix_box
+// --------------------------------------------------
+
+.card.log-item {
+  background-color: $gray-100;
+  transition: background-color 0.3s ease-out;
+
+  &:hover {
+    background-color: $gray-200;
+  }
+
+  .thumbnail-container {
+    min-height: 30px;
+  }
+
+  // To make way for floating ID
+  .card-title {
+
+    // Standardize the size of the ID
+    .log-id {
+      @extend .micro, .badge, .badge-outline, .py-1, .mt-1, .ml-2, .text-monospace;
+      font-weight: $font-weight-normal;
+    }
+  }
+
+  h5.card-title {
+    font-size: $font-size-base;
+  }
+
+  .card-footer {
+    line-height: 1.3;
+  }
+
+  // for when the whole panel section is a link, or has a stretched link
+  // rule necessary when the "link" is a checkbox <label>, not an <a>.
+  // e.g. "Mark as reviewed"
+  .card-active {
+    &:hover,
+    &:focus,
+    .stretched-link:hover,
+    .stretched-link:focus {
+      cursor: pointer;
+      background-color: darken($card-bg, 6.5%)
+    }
+  }
+
+  .vote-buttons {
+    font-size: 0.875em;
+  }
+}
+
+.log-details {
+
+  a:not(.btn) {
+    color: inherit !important;
+
+    &:hover,
+    &:active,
+    &:focus {
+      color: $link-color !important;
+    }
+  }
+}
+
+a.log-link {
+  &:hover {
+    color: $link-color;
+
+    .log-id {
+      background: $link-color;
+      color: $light !important;
+      text-decoration: none;
+    }
+  }
+}
+
+// .log-where,
+// .log-what,
+// .log-when,
+// .log-fancy-time {
+  // @extend .smaller;
+// }
+
+.log-what,
+.log-when,
+.log-fancy-time {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

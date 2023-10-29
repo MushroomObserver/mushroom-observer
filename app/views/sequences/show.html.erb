@@ -13,8 +13,8 @@ add_tab_set(sequence_show_tabs(seq: @sequence))
 <table class="table-namings">
   <thead>
     <tr>
-      <th class="col-md-1"></th>
-      <th class="col-md-11"></th>
+      <th class="col-12 col-lg-1"></th>
+      <th class="col-12 col-lg-11"></th>
     </tr>
   </thead>
   <tbody>
@@ -43,7 +43,7 @@ add_tab_set(sequence_show_tabs(seq: @sequence))
     <% end %>
     <tr align="center">
       <td colspan="2">
-        <button type="button" class="btn btn-default">
+        <button type="button" class="btn btn-outline-secondary">
           <%= link_to(:show_observation_blast_link.t,
                       @sequence.blast_url, target: "_blank") %>
         </button>

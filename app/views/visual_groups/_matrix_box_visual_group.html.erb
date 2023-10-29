@@ -1,0 +1,16 @@
+<%# card for a candidate for a visual group %>
+
+<%= matrix_box(id: row[0]) do
+  card_block(class: "log-item") do
+    [
+      interactive_image(row[0], original: true, votes: false,
+                          context: :matrix_box),
+      render(partial: "visual_group_status_links",
+                  locals: {
+                    visual_group: @visual_group,
+                    image_id: row[0],
+                    status: row[1]
+                  })
+    ].safe_join
+  end
+end %><!-- .matrix-box -->

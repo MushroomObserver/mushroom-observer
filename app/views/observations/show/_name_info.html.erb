@@ -3,21 +3,18 @@
 %>
 
 <%=
-panel_block(
-  id: "observation_name_info",
-  heading: :about_this_taxon.l,
-  inner_class: "name-section small"
-) do %>
-
-  <%= tag.div(class: "row") do %>
-    <%= tag.div(class: "col-xs-6") do
+card_block(header: tag.h6(:about_this_taxon.t),
+           id: "observation_name_info",
+           inner_class: "list-indented small") do
+  tag.div(class: "row") do %>
+    <%= tag.div(class: "col-6") do
       concat(tag.div("#{:on_mo.l}:", class: "font-weight-bold"))
       concat(name_links_on_mo(name: obs.name).safe_join)
     end %>
-    <%= tag.div(class: "col-xs-6") do
+    <%= tag.div(class: "col-6") do
       concat(tag.div("#{:on_the_web.l}:", class: "font-weight-bold"))
       concat(name_links_web(name: obs.name).safe_join)
     end %>
-  <% end %>
-
-<% end %>
+  <% end
+end
+%>

@@ -1,3 +1,43 @@
+// text
+
+.lh-1-2 {
+  line-height: 1.2;
+}
+
+.smaller {
+  font-size: 81%;
+  line-height: 1;
+}
+
+// For the log-item id
+.micro {
+  font-size: 0.78rem;
+  line-height: 0.7;
+}
+
+.square-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%;
+
+  > img {
+    position: absolute;
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.small-caps {
+  font-size: 66%;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+}
+
+.badge-outline {
+  border: 1px solid $gray-500;
+}
+
 //
 // interest eyes
 // --------------------------------------------------
@@ -12,11 +52,11 @@
   width: 23px;
 }
 
-@media (min-width: $screen-sm-min) {
+@include media-breakpoint-up(md) {
   .interest-eyes {
     position: absolute;
-    // bottom: $padding-base-horizontal;
-    left: $padding-base-horizontal;
+    // bottom: calc($grid-gutter-width * .5);
+    left: calc($grid-gutter-width * .5);
   }
 }
 
@@ -24,17 +64,25 @@
 // style tweaks
 // --------------------------------------------------
 
-.name-section p {
-  margin: 0;
-  padding-left: 1em;
-  text-indent: -1em;
+.form-text, .help-note {
+  font-size: $small-font-size;
+
+  p:last-of-type {
+    margin: 0;
+  }
 }
 
-.obs-notes {
-  .textile p {
+.list-indented {
+  p {
     margin: 0;
     padding-left: 1em;
     text-indent: -1em;
+  }
+}
+
+.obs-notes {
+  .textile {
+    @extend .list-indented;
   }
 }
 
@@ -49,7 +97,7 @@ div.textile img {
   max-height: auto;
 }
 
-.panel {
+.card-body {
   .table-responsive {
     border-color: transparent;
   }

@@ -9,7 +9,7 @@ add_tab_set(species_list_show_tabs(list: @species_list))
 %>
 
 <div class="container-text">
-  <%= panel_block do %>
+  <%= card_block do %>
     <div><b><%= :WHEN.t %>:</b> <%= @species_list.when.web_date %></div>
     <div><b><%= :OBSERVATIONS.t %>:</b> <%= @query.num_results %></div>
     <div><b><%= :WHERE.t %>:</b>
@@ -51,14 +51,14 @@ add_tab_set(species_list_show_tabs(list: @species_list))
         <% @objects.each do |observation| %>
           <div class="list-group-item">
             <div class="row">
-              <div class="col-sm-4 col-md-3">
+              <div class="col-12 col-md-4 col-lg-3">
                 <%= if observation.thumb_image_id
                   interactive_image(observation.thumb_image,
-                            image_link: observation_path(id: observation.id),
-                            votes: true)
+                                    image_link: observation_path(id: observation.id),
+                                    votes: true)
                 end %>
               </div>
-              <div class="col-sm-8 col-md-9">
+              <div class="col-12 col-md-8 col-lg-9">
                 <p class="font-weight-bold mb-0">
                   <%= link_to(observation.unique_format_name.t,
                               observation_path(id: observation.id,
@@ -77,7 +77,7 @@ add_tab_set(species_list_show_tabs(list: @species_list))
                                    species_list_id: @species_list.id,
                                    commit: "remove"
                                  ),
-                                 class: "btn btn-default",
+                                 class: "btn btn-outline-secondary",
                                  data: { confirm: :are_you_sure.l }) %>
                 <% end %>
               </div>

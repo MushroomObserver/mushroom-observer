@@ -1,9 +1,12 @@
 <%
+@container = :full
 no_hits = params[:pattern].present? ? :title_for_observation_search.l : ""
 add_index_title(@query, no_hits: no_hits) # note default above is non-nil
-add_tab_set(observations_index_tabs(query: @query)) if @objects.any?
-add_sorter(@query, observations_index_sorts)
-@container = :full
+if @objects.any?
+  add_dropdown_tab_set(title: "Show As:", # TODO: make new translation string
+                       tabs: observations_index_tabs(query: @query))
+  add_sorter(@query, observations_index_sorts)
+end
 
 flash_error(@error) if @error && @objects.empty?
 %>
@@ -36,11 +39,6 @@ flash_error(@error) if @error && @objects.empty?
 <% end %>
 
 <%= paginate_block(@pages) do %>
-  <ul class="row list-unstyled mt-3">
-    <%= render(partial: "shared/matrix_box",
-               layout: "shared/matrix_table",
-               collection: @objects,
-               as: :object) %>
-    <div style="clear:left"></div>
-  </ul>
+  <%= render(partial: "shared/matrix_grid",
+             locals: { objects: @objects }) %>
 <% end %>
