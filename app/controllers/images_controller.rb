@@ -141,8 +141,8 @@ class ImagesController < ApplicationController
     args = {
       action: "index",
       matrix: true,
-      include: [:user, { observations: :name }, :profile_users,
-                :thumb_glossary_terms, :glossary_terms, :image_votes]
+      include: [:user, { observations: :name }, :license, :profile_users,
+                :projects, :thumb_glossary_terms, :glossary_terms, :image_votes]
     }.merge(args)
 
     # Paginate by letter if sorting by user.
