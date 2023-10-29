@@ -17,7 +17,7 @@ module LightboxHelper
     obs_data = lightbox_data[:obs_data]
     html = []
     if obs_data[:id].present?
-      html = lightbox_obs_caption(html, obs_data, lightbox_data[:identify])
+      html += lightbox_obs_caption(obs_data, lightbox_data[:identify])
     end
     html << caption_image_links(lightbox_data[:image] ||
                                 lightbox_data[:image_id])
@@ -26,7 +26,8 @@ module LightboxHelper
 
   # observation part of the caption. returns an array of html strings (to join)
   # template local assign "caption" skips the obs relations (projects, etc)
-  def lightbox_obs_caption(html, obs_data, identify)
+  def lightbox_obs_caption(obs_data, identify)
+    html = []
     if identify
       html << propose_naming_link(obs_data[:id], context: "lightbox")
       html << content_tag(:span, "&nbsp;".html_safe, class: "mx-2")
@@ -35,6 +36,7 @@ module LightboxHelper
     html << caption_obs_title(obs_data)
     html << observation_details_when_where_who(obs: obs_data[:obs])
     html << observation_details_notes(obs: obs_data[:obs])
+    html
   end
 
   # This is different from show_obs_title, it's more like the matrix_box title

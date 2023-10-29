@@ -44,7 +44,7 @@ class ImagePresenter < BasePresenter
       extra_classes: "",
       obs_data: {}, # used in lightbox caption
       identify: false,
-      image_link: Rails.application.routes.url_helpers.image_path(image_id),
+      image_link: Rails.application.routes.url_helpers.image_path(id: image_id),
       link_method: :get,
       votes: true,
       original: false,
