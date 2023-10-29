@@ -31,6 +31,17 @@ if presenter
 
   <%= matrix_box(columns: columns, id: object_id) do
     tag.div(class: "card log-item h-100") do
+      [
+        matrix_box_image(presenter, passed_args),
+        matrix_box_details(presenter, object, object_id, identify),
+        matrix_box_log_footer(presenter),
+        matrix_box_identify_footer(identify, presenter.id)
+      ].safe_join
+    end
+  end %><!-- .matrix-box -->
+
+  <%= matrix_box(columns: columns, id: object_id) do
+    tag.div(class: "card log-item h-100") do
       if presenter.image_data
         concat(tag.div(class: "thumbnail-container card-img-top") do
           interactive_image(image, **image_args)
