@@ -1,6 +1,6 @@
 // Observation Form Map - Lat/Long/Alt Helper
 /* globals: google */
-$(document).ready(function () {
+document.addEventListener("DOMContentLoaded", () => {
   observationFormMapper();
 });
 
@@ -28,7 +28,6 @@ function observationFormMapper() {
       if (loadState && loadState !== 'loaded' && loadState !== 'complete') return;
 
       script.onload = script.onreadystatechange = null;
-
       resolve();
     }
 
