@@ -416,6 +416,10 @@ module ControllerExtensions
       assert_response(result, "Wrong user (#{alt_user}): ")
     end
 
+    # Clear flash messages incurred from any of those login attempts
+    @controller.instance_variable_set(:@last_notice, nil)
+    session[:notice] = nil
+
     # Finally, login correct user and let it do its thing.
     login(user, password)
     send(method, action, params: params)

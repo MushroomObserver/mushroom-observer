@@ -72,8 +72,7 @@ class SequencesController < ApplicationController
     # in this controller and in order to avoid an extra, non-standard route
     return if params[:observation_id].blank?
 
-    @observation = find_or_goto_index(Observation, params[:observation_id].to_s)
-    return unless @observation
+    return unless find_observation!
 
     @sequence = Sequence.new
 
@@ -88,15 +87,13 @@ class SequencesController < ApplicationController
   end
 
   def create
-    @observation = find_or_goto_index(Observation, params[:observation_id].to_s)
-    return unless @observation
+    return unless find_observation!
 
     build_sequence
   end
 
   def edit
-    @sequence = find_or_goto_index(Sequence, params[:id].to_s)
-    return unless @sequence
+    return unless find_sequence!
 
     figure_out_where_to_go_back_to
     return unless make_sure_can_edit!(@sequence)
@@ -112,8 +109,7 @@ class SequencesController < ApplicationController
   end
 
   def update
-    @sequence = find_or_goto_index(Sequence, params[:id].to_s)
-    return unless @sequence
+    return unless find_sequence!
 
     figure_out_where_to_go_back_to
     return unless make_sure_can_edit!(@sequence)
@@ -138,6 +134,31 @@ class SequencesController < ApplicationController
   ##############################################################################
 
   private
+
+  def find_observation!
+    @observation = Observation.includes(observation_includes).
+                   find_by(id: params[:observation_id]) ||
+                   flash_error_and_goto_index(
+                     Observation, params[:observation_id]
+                   )
+  end
+
+  def observation_includes
+    [:user, { thumb_image: [:image_votes, :license, :projects, :user] }]
+    # for matrix_box_carousels:
+    # [:user, { images: [:image_votes, :license, :projects, :user] }]
+  end
+
+  def find_sequence!
+    @sequence = Sequence.includes(sequence_includes).find_by(id: params[:id]) ||
+                flash_error_and_goto_index(
+                  Sequence, params[:id]
+                )
+  end
+
+  def sequence_includes
+    [{ observation: observation_matrix_box_image_includes }]
+  end
 
   def figure_out_where_to_go_back_to
     @back = params[:back]

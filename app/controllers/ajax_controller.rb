@@ -32,11 +32,9 @@ class AjaxController < ApplicationController
   include VisualGroupStatus
   include UploadImage
   include Primers
-  include OldTranslation
   include ExternalLink
   include Export
   include AutoComplete
-  include APIKey
 
   disable_filters
   around_action :catch_ajax_errors
