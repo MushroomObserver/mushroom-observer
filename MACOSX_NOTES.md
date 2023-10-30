@@ -4,8 +4,9 @@ working under the Monterey (12.4) version of MacOS.
 It also includes some notes later added by @nimmmolo, and by
 @JoeCohen when getting his local Apple Intel working under MacOS Ventura 13.6
 
-### Install bash
-You will need to get Xcode (free download from the App Store) and
+### Install Xcode
+Get Xcode (free download from the [App Store](https://www.apple.com/app-store/))
+### Install Xcode Command Line Tools
 install the command line tools with:
 ```sh
 xcode-select --install
@@ -16,7 +17,7 @@ You will also need `homebrew` from https://brew.sh/:
 ```sh
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
-If you already have `homebrew` install you may want to do:
+If you already have `homebrew` installed you may want to do:
 ```sh
 brew outdated
 brew upgrade
@@ -26,13 +27,14 @@ Install a bunch of useful stuff from `Homebrew`
 ```sh
 brew install git mysql exiftool libjpeg shared-mime-info openssl imagemagick findutils
 ```
+
 ### Install bash
-If you haven't done so already, install a more recent version of `bash` and set
-it as the default. You can find your installed version like this:
+If you haven't done so already, install a recent version of `bash` and set
+it as the default shell. You can find your installed version like this:
 ```sh
 bash --version
 ```
-Apple only includes `Bash` 3.2 from 2007 in all versions of Mac OS X even now,
+Apple includes only `Bash` 3.2 from 2007 in all versions of Mac OS X even now,
 because `Bash` > 4.0 uses GPLv3, and they don't want to support that license.
 MO's scripts use syntax that requires `Bash` >= 4.0.
 Description of the script error that occurs if you aren't running newer `Bash`:
@@ -53,14 +55,11 @@ You should get something like this
 ```
 Check those versions
 ```sh
-/usr/local/bin/bash --version
 /bin/bash --version
-```
-now check
-```sh
 /usr/local/bin/bash --version
 ```
-should be the new one.
+
+`/usr/local/bin/bash` should be the new one.
 
 ### Configure MySQL
 Set the root password
@@ -98,7 +97,8 @@ FLUSH PRIVILEGES;
 exit;
 ```
 6. Stop Safe Mode MySQL Server:
-In the original terminal window where you started the MySQL server in safe mode, press Ctrl C to stop the server.
+In the original terminal window where you started MySQL in safe mode,
+press Ctrl C to stop the server.
 7. Restart MySQL
 ```sh
 brew services start mysql
@@ -110,12 +110,20 @@ mysql -u root -p
 When prompted, enter the new root password.
 You should be able to access MySQL with the new password.
 
-### Clone the MO repo and switch to it.
-Make sure you have an update to checkout of this repo in a local directory.
+### Clone the MO repo.
+Make sure you have an up-to-date checkout of this repo in a local directory.
 Since you're reading this you may have already done that.
-In case you haven't run:
+In case you haven't, run:
 ```sh
 git clone git@github.com:MushroomObserver/mushroom-observer.git
+```
+@JoeCohen had to instead run
+```sh
+https://github.com/MushroomObserver/mushroom-observer
+```
+
+### Switch to the cloned repo
+```sh
 cd mushroom-observer
 ```
 
@@ -128,10 +136,10 @@ fi
 
 There are various tools for this (rvm, chruby, rbenv).
 In the past MO used rvm, but it caused havoc on the vm.
-We recently switched to rbenv on the vm.
+We recently switched to rbenv.
 @mo-nathan used chruby most recently
 because it was already installed.
-For chruby you need to run:
+For chruby, run:
 ```sh
 ruby-build $RUBY_VERSION ~/.rubies/ruby-$RUBY_VERSION
    chruby $RUBY_VERSION
@@ -150,16 +158,17 @@ Add rbenv to zsh/bash so that it loads every time you open a terminal
    rbenv global $RUBY_VERSION
 ```
 
-### Install an MO database snapshot.
+### Load an MO database snapshot.
 - download the snapshot from http://images.mushroomobserver.org/checkpoint_stripped.gz
-- copy (or move) the downloaded .gz file to the mushroom-observer directory
-Then
+- copy (or move) the downloaded .gz file to the mushroom-observer directory.
+Then:
 ```sh
 rake db:drop
 mysql -u root -p < db/initialize.sql
-Enter password:
 ```
-Enter `root` return
+When prompted to `Enter password:`<br>
+Enter `root`, return.
+Then:
 ```sh
 gunzip -c checkpoint_stripped.gz | mysql -u mo -pmo mo_development
 rails lang:update
@@ -170,7 +179,8 @@ Then delete `checkpoint_stripped.gz` from the mushroom-observer directory
 ### Run the rest of the mo-dev script
 (See https://github.com/MushroomObserver/developer-startup/blob/main/mo-dev)
 (Both @nimmolo and @JoeCohen did this in pieces.)
-Open a new shell and run
+- Open a new shell
+- run:
 ```sh
 gem install bundler
 
@@ -256,3 +266,27 @@ but @mo-nathan had to run
 gem pristine --all
 ```
 for each version of Ruby in chruby
+
+### Prevent commits directly to the main branch
+Create a file `.git/hooks/pre-commit` with the following content:
+```sh
+#!/bin/sh
+branch=$(git rev-parse --abbrev-ref HEAD)
+if [ "$branch" = "main" ]
+then
+    echo "Do not commit directly to the $branch branch"
+    exit 1
+fi
+```
+Ensure that the file is executable:
+```sh
+chmod +x .git/hooks/pre-commit
+```
+
+### Other
+@JoeCohen had to generate a new developmemt master key.
+In the mushroom-observer directory, create the file
+`/config/master.key` with the following content:
+```txt
+5f343cfc11a623c470d23e25221972b5
+```
