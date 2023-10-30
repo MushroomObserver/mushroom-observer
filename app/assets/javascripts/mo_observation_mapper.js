@@ -7,43 +7,18 @@ class MOObservationMapper {
   constructor() {
     // this.GMAPS_API_SCRIPT = "https://maps.googleapis.com/maps/api/js?key=" +
     // "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA";
-    this.GMAPS_API_KEY = "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA";
+    // this.GMAPS_API_KEY = "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA";
     this.opened = false;
     this.map_div = null;
     this.map_open = null;
     this.map_locate = null;
     this.map_clear = null;
 
-    this.loadGMapsAPI();
+    // this.loadGMapsAPI();
     this.addObservationMapBindings();
-  }
-
-  // https://developers.google.com/maps/documentation/javascript/load-maps-js-api
-  loadGMapsAPI() {
-    (g => {
-      var h, a, k, p = "The Google Maps JavaScript API",
-        c = "google", l = "importLibrary", q = "__ib__", m = document,
-        b = window; b = b[c] || (b[c] = {});
-      var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams,
-        u = () => h || (h = new Promise(async (f, n) => {
-          await (a = m.createElement("script"));
-          e.set("libraries", [...r] + "");
-          for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]);
-          e.set("callback", c + ".maps." + q);
-          a.src = `https://maps.${c}apis.com/maps/api/js?` + e;
-          d[q] = f;
-          a.onerror = () => h = n(Error(p + " could not load."));
-          a.nonce = m.querySelector("script[nonce]")?.nonce || "";
-          m.head.append(a)
-        }));
-      d[l] ? console.warn(p + " only loads once. Ignoring:", g) :
-        d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n))
-    })({
-      key: this.GMAPS_API_KEY,
-      v: "weekly",
-      // Use the 'v' parameter to indicate the version to use (weekly, beta, alpha, etc.).
-      // Add other bootstrap parameters as needed, using camel case.
-    });
+    if (typeof (google) != "undefined") {
+      this.initializeMap()
+    }
   }
 
   addObservationMapBindings() {
@@ -62,30 +37,52 @@ class MOObservationMapper {
     });
   }
 
-  // getScript(url) {
-  //   return new Promise((resolve, reject) => {
-  //     const script = document.createElement('script');
-  //     script.src = url;
-  //     script.async = true;
+  async initializeMap() {
+    // https://developers.google.com/maps/documentation/javascript/load-maps-js-api#migrate-to-dynamic
+    const { Map } = await google.maps.importLibrary("maps");
 
-  //     script.onerror = reject;
+    if (this.map == undefined) {
+      this.map = new Map(this.map_div, {
+        center: { lat: -7, lng: -47 },
+        zoom: 1,
+      });
+    }
+    return this.map
+  }
 
-  //     script.onload = script.onreadystatechange = function () {
-  //       const loadState = this.readyState;
+  async initializeGeocoder() {
+    const { Geocoder } = await google.maps.importLibrary("geocoding");
 
-  //       if (loadState && loadState !== 'loaded' && loadState !== 'complete') return;
+    if (this.geocoder == undefined) {
+      this.geocoder = new Geocoder();
+    }
+    return this.geocoder
+  }
 
-  //       script.onload = script.onreadystatechange = null;
-  //       resolve();
-  //     }
+  async initializeMarker(map) {
+    const { Marker } = await google.maps.importLibrary("marker");
 
-  //     document.head.appendChild(script);
-  //   })
-  // }
+    if (this.marker == undefined) {
+      this.marker = new Marker(map);
+    }
+    return this.marker
+  }
+
+  async initializeElevationService() {
+    const { ElevationService } = await google.maps.importLibrary("elevation");
+
+    if (this.elevation == undefined) {
+      this.elevation = new ElevationService();
+    }
+
+    return this.elevation
+  }
 
   openMap(focus_immediately) {
+    debugger;
+
     this.opened = true;
-    let indicator_url = this.map_div.dataset.indicatorUrl //("indicator-url");
+    let indicator_url = this.map_div.dataset.indicatorUrl; //("indicator-url");
 
     this.map_div.classList.remove("hidden");
     this.map_div.style.backgroundImage = "url(" + indicator_url + ")";
@@ -96,25 +93,6 @@ class MOObservationMapper {
     this.map_clear.classList.remove("hidden");
     this.map_open.style.display = "none";
 
-    // const getScript = (url) => new Promise((resolve, reject) => {
-    //   const script = document.createElement('script');
-    //   script.src = url;
-    //   script.async = true;
-
-    //   script.onerror = reject;
-
-    //   script.onload = script.onreadystatechange = function () {
-    //     const loadState = this.readyState;
-
-    //     if (loadState && loadState !== 'loaded' && loadState !== 'complete') return;
-
-    //     script.onload = script.onreadystatechange = null;
-    //     resolve();
-    //   }
-
-    //   document.head.appendChild(script);
-    // });
-
     // Functions defined within this block because they depend on google.maps
     // getScript(this.GMAPS_API_SCRIPT).then(() => {
     const searchInput = document.getElementById('observation_place_name'),
@@ -123,27 +101,10 @@ class MOObservationMapper {
       elvInput = document.getElementById('observation_alt');
     let marker;
 
-    // init map
-    // const map = new google.maps.Map(this.map_div, {
-    //   center: { lat: -7, lng: -47 },
-    //   zoom: 1
-    // });
-    let map;
-
-    // https://developers.google.com/maps/documentation/javascript/load-maps-js-api#migrate-to-dynamic
-    async function initMap() {
-      const { Map } = await google.maps.importLibrary("maps");
-
-      map = new Map(this.map_div, {
-        center: { lat: -7, lng: -47 },
-        zoom: 1,
-      });
-    }
-
-    initMap();
+    const map = this.initializeMap();
 
     // init elevation service
-    const elevation = new google.maps.ElevationService();
+    const elevation = this.initializeElevationService();
 
     addGmapsListener(map, 'click');
 
@@ -186,16 +147,19 @@ class MOObservationMapper {
 
     // use the geocoder to focus on a specific region on the map
     function focusMap() {
-      const geocoder = new google.maps.Geocoder();
+      // const geocoder = new google.maps.Geocoder();
+      // const { Geocoder } = await google.maps.importLibrary("geocoding");
 
       // even a single letter will return a result
       if (searchInput.value.length <= 0) {
         return false;
       }
 
+      const geocoder = this.initializeGeocoder();
+
       geocoder.geocode({
         'address': searchInput.value
-      }, function (results, status) {
+      }, (results, status) => {
         if (status === google.maps.GeocoderStatus.OK && results.length > 0) {
           if (results[0].geometry.viewport) {
             map.fitBounds(results[0].geometry.viewport);
@@ -210,7 +174,7 @@ class MOObservationMapper {
         marker.setPosition(location);
         marker.setVisible(true);
       } else {
-        marker = new google.maps.Marker({
+        marker = this.initializeMarker({
           draggable: true,
           map: map,
           position: location,
@@ -258,8 +222,5 @@ class MOObservationMapper {
     if (focus_immediately) {
       focusMap();
     }
-    // }).catch(() => {
-    //   console.error('Could not load script')
-    // });
   }
 }

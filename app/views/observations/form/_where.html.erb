@@ -8,6 +8,7 @@ render(partial: "shared/form_location_feedback",
 %>
 
 <%
+javascript_include("google_maps_api")
 javascript_include("mo_observation_mapper")
 inject_javascript_at_end("new MOObservationMapper();")
 %>
