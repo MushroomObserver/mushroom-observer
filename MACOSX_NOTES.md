@@ -117,9 +117,9 @@ In case you haven't, run:
 ```sh
 git clone git@github.com:MushroomObserver/mushroom-observer.git
 ```
-@JoeCohen had to instead run
+@JoeCohen had to instead initially run
 ```sh
-https://github.com/MushroomObserver/mushroom-observer
+git clone https://github.com/MushroomObserver/mushroom-observer
 ```
 
 ### Switch to the cloned repo
@@ -174,6 +174,21 @@ gunzip -c checkpoint_stripped.gz | mysql -u mo -pmo mo_development
 rails lang:update
 rails db:migrate
 ```
+When @JoeCohen first installed the app (MacBook Pro, Intel, OSX 13.6),
+`rails` was not recognized. He had to use `bin/rails` instead.
+The next time he installed the app (same hw/sw) ir recognized `rails`,
+but gave this error:
+```sh
+% rails lang:update
+rails aborted!
+Cannot load database configuration:
+Could not load database configuration. No such file - ["config/database.yml"]
+```
+which was fixed by running
+```sh
+cp db/macos/database.yml config
+```
+
 Then delete `checkpoint_stripped.gz` from the mushroom-observer directory
 
 ### Run the rest of the mo-dev script
