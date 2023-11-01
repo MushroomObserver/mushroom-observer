@@ -10,6 +10,7 @@ patch_button(
   class: class_names(
     "remove_collection_number_link_#{@collection_number.id}",
     "btn btn-default"
-  )
+  ),
+  data: { turbo: true }
 )
 %>

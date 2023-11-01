@@ -8,10 +8,17 @@ when "edit", "update"
   button = :SAVE_EDITS.l
   url = comment_path(id: @comment.id, q: get_query_param)
 end
+
+form_args = { model: @comment, url: url, id: "comment_form" }
+if local_assigns[:local] == true
+  form_args = form_args.merge({ local: true })
+else
+  form_args = form_args.deep_merge({ data: { turbo: true } })
+end
+
 %>
 <!--[form:comment]-->
-<%= form_with(model: @comment, url: url, id: "comment_form",
-              local: local) do |f| %>
+<%= form_with(**form_args) do |f| %>
 
   <%= text_field_with_label(form: f, field: :summary, size: 80,
                             label: :form_comments_summary.t + ":",
