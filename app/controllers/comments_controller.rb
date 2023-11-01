@@ -207,7 +207,7 @@ class CommentsController < ApplicationController
 
     respond_to do |format|
       format.html
-      format.js do
+      format.turbo_stream do
         render_modal_comment_form(
           title: helpers.comment_form_new_title(target: @target)
         )
@@ -245,7 +245,7 @@ class CommentsController < ApplicationController
 
     respond_to do |format|
       format.html
-      format.js do
+      format.turbo_stream do
         render_modal_comment_form(
           title: helpers.comment_form_edit_title(target: @target)
         )
@@ -264,13 +264,13 @@ class CommentsController < ApplicationController
 
     unless comment_updated?
       respond_to do |format|
-        format.js { render_modal_form_reload }
+        format.turbo_stream { render_modal_form_reload }
         format.html { render(:edit) and return }
       end
     end
 
     respond_to do |format|
-      format.js { render_update_comments_for_object }
+      format.turbo_stream { render_update_comments_for_object }
       format.html do
         redirect_with_query(controller: @target.show_controller,
                             action: @target.show_action, id: @target.id)
@@ -296,7 +296,7 @@ class CommentsController < ApplicationController
       flash_notice(:runtime_form_comments_destroy_success.t(id: params[:id]))
     end
     respond_to do |format|
-      format.js { render_update_comments_for_object }
+      format.turbo_stream { render_update_comments_for_object }
       format.html do
         redirect_with_query(controller: @target.show_controller,
                             action: @target.show_action, id: @target.id)
@@ -329,8 +329,8 @@ class CommentsController < ApplicationController
     unless @comment.save
       flash_object_errors(@comment)
       respond_to do |format|
+        format.turbo_stream { render_modal_form_reload }
         format.html { render(:new) and return }
-        format.js { render_modal_form_reload }
       end
     end
 
@@ -338,11 +338,11 @@ class CommentsController < ApplicationController
     flash_notice(:runtime_form_comments_create_success.t(id: @comment.id))
 
     respond_to do |format|
+      format.turbo_stream { render_update_comments_for_object }
       format.html do
         redirect_with_query(controller: @target.show_controller,
                             action: @target.show_action, id: @target.id)
       end
-      format.js { render_update_comments_for_object }
     end
   end
 
