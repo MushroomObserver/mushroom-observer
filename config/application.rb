@@ -78,6 +78,11 @@ module MushroomObserver
     # generated form input IDs in 6.1, as they were in `form_for`.
     config.action_view.form_with_generates_ids = true
 
+    # Turbo supersedes the functionality offered by Rails UJS to turn links and
+    # form submissions into XMLHttpRequests, so if you're making a complete
+    # switch from Rails UJS to Turbo, you should ensure that you have this:
+    config.action_view.form_with_generates_remote_forms = false
+
     # Rails 6.1 can auto-generate HTML comments with the template filename
     # Unfortunately this is also added to email templates!
     # config.action_view.annotate_rendered_view_with_filenames = true
