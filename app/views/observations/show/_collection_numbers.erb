@@ -1,0 +1,71 @@
+<%
+numbers  = obs.collection_numbers
+can_edit = in_admin_mode? || obs.can_edit?
+obs_id = obs.id
+# This is passed in to show_collection_number, allowing users to do prev,
+# next and index from there to navigate through all the rest for this obs.
+# cn_query = Query.lookup(:CollectionNumber, :all, observations: obs.id)
+%>
+
+<%=
+unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
+
+  tag.turbo_frame(
+    id: "observation_collection_numbers",
+    class: "obs-collection",
+    data: { controller: "section-update",
+            updated_by: "modal_collection_number" }
+  ) do
+
+    if numbers.any? && can_edit
+      [
+        tag.div do
+          [
+            "#{:Collection_numbers.t}:",
+            [ # any html helper has to be safe_joined separately
+              "[",
+              modal_link_to("collection_number",
+                            *new_collection_number_for_obs_tab(obs)),
+              "]"
+            ].safe_join
+          ].safe_join(" ")
+        end,
+        tag.ul(class: "tight-list") do
+          numbers.map do |number|
+            tag.li(id: "collection_number_#{number.id}") do
+              [
+                link_to(*show_collection_number_tab(number, obs)),
+                "[",
+                modal_link_to("collection_number",
+                              *edit_collection_number_tab(number, obs)),
+                "|",
+                modal_link_to("collection_number_observation",
+                              *remove_collection_number_tab(number, obs)),
+                "]"
+              ].safe_join(" ")
+            end
+          end.safe_join
+        end
+      ].safe_join
+
+    elsif numbers.any? && !can_edit
+      [
+        numbers.length > 1 ? "#{:Collection_numbers.t}:" :
+                             "#{:Collection_number.t}:",
+        numbers.map do |number|
+          link_to(*show_collection_number_tab(number, obs))
+        end.safe_join(", ")
+      ].safe_join(" ")
+
+    elsif numbers.none? && can_edit
+      [
+        :show_observation_no_collection_numbers.t,
+        "[",
+        modal_link_to("collection_number",
+                      *new_collection_number_for_obs_tab(obs)),
+        "]"
+      ].safe_join(" ")
+    end
+  end
+end
+%>
