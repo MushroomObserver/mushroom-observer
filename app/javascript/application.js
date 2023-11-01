@@ -6,8 +6,8 @@
 import "bootstrap"
 // import "@rails/request.js"
 // import "@hotwired/turbo-rails"
-// import "@hotwired/stimulus"
-// import "@hotwired/stimulus-loading"
+import "@hotwired/stimulus"
+import "@hotwired/stimulus-loading"
 import Rails from "@rails/ujs" // for 7.0.8?
 Rails.start();
-// import "controllers"
+import "controllers"

@@ -34,10 +34,15 @@ group :rails do
   gem("railties", "~> 6.1")
 end
 
-gem("importmap-rails")
 # gem irb now depends on psych, but version 5 will not bundle currently
 gem("psych", "~> 4")
+# importmap for js module handling
+gem("importmap-rails")
+# sprockets for asset compilation and versioning
 gem("sprockets-rails")
+# stimulus for simpler, more maintainable js
+gem("stimulus-rails")
+# gem("turbo-rails")
 # Compile SCSS for stylesheets
 gem("sassc-rails")
 # Use jQuery as a JavaScript library
