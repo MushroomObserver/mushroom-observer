@@ -10,10 +10,13 @@ when "edit", "update"
   url_params = url_params.merge({ back: @back }) if @back.present?
   button = :SAVE.t
 end
+form_args = {
+  model: @herbarium_record, url: url_params, id: "herbarium_record_form"
+}
+form_args = form_args.merge({ local: true }) if local_assigns[:local] == true
 %>
 
-<%= form_with(model: @herbarium_record, url: url_params,
-              local: local, id: "herbarium_record_form") do |f| %>
+<%= form_with(**form_args) do |f| %>
 
   <% if @herbarium_record.observations.size > 1 %>
     <%= alert_block(
