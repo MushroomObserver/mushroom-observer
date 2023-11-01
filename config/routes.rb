@@ -350,7 +350,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Collection Numbers: standard actions --------------------------------
   resources :collection_numbers do
-    resource :remove_observation, only: [:update], module: :collection_numbers
+    resource :remove_observation, only: [:edit, :update],
+                                  module: :collection_numbers
   end
 
   # ----- Comments: standard actions --------------------------------------
@@ -414,7 +415,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Herbarium Records: standard actions --------------------------------
   resources :herbarium_records do
-    resource :remove_observation, only: [:update], module: :herbarium_records
+    resource :remove_observation, only: [:edit, :update],
+                                  module: :herbarium_records
   end
 
   # ----- Images: Namespace differences are for memorable path names
@@ -679,7 +681,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   end
 
   resources :observations do
-    resources :namings, only: [:new, :create, :edit, :update, :destroy],
+    resources :namings, only: [:show, :new, :create, :edit, :update, :destroy],
                         shallow: true, controller: "observations/namings" do
       resources :votes, only: [:update, :show], as: "naming_vote",
                         param: :naming_id,
