@@ -1,0 +1,13 @@
+<%
+# What to do if a form submit doesn't succeed
+# Takes locals: { identifier:, form:, form_locals: }
+form_locals ||= {}
+%>
+
+<%= turbo_stream.update("modal_flash_#{identifier}") do
+  flash_notices_html
+end %>
+
+<%= turbo_stream.replace("#{identifier}_form") do
+  render(partial: form, locals: { format: :turbo_stream }.merge(form_locals))
+end %>
