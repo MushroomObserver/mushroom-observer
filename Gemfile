@@ -42,7 +42,8 @@ gem("importmap-rails")
 gem("sprockets-rails")
 # stimulus for simpler, more maintainable js
 gem("stimulus-rails")
-# gem("turbo-rails")
+# turbo for partial page updates
+gem("turbo-rails")
 # Compile SCSS for stylesheets
 gem("sassc-rails")
 # Use jQuery as a JavaScript library
