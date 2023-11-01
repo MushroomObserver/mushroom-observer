@@ -48,7 +48,7 @@ class CollectionNumbersController < ApplicationController
 
     respond_to do |format|
       format.html
-      format.js do
+      format.turbo_stream do
         render_modal_collection_number_form(
           title: helpers.collection_number_form_new_title
         )
@@ -75,7 +75,7 @@ class CollectionNumbersController < ApplicationController
 
     respond_to do |format|
       format.html
-      format.js do
+      format.turbo_stream do
         render_modal_collection_number_form(
           title: helpers.collection_number_form_edit_title(
             c_n: @collection_number
@@ -105,7 +105,7 @@ class CollectionNumbersController < ApplicationController
       format.html do
         redirect_with_query(action: :index)
       end
-      format.js do
+      format.turbo_stream do
         render_collection_numbers_section_update
       end
     end
@@ -114,18 +114,6 @@ class CollectionNumbersController < ApplicationController
   ##############################################################################
 
   private
-
-  def render_modal_collection_number_form(title:)
-    render(partial: "shared/modal_form_show",
-           locals: { title: title, identifier: "collection_number" }) and return
-  end
-
-  def render_collection_numbers_section_update
-    render(
-      partial: "observations/show/section_update",
-      locals: { identifier: "collection_numbers" }
-    ) and return
-  end
 
   def default_index_subaction
     list_all
@@ -220,10 +208,8 @@ class CollectionNumbersController < ApplicationController
         format.html do
           redirect_to(redirect_params) and return true
         end
-        format.js do
-          render(partial: "shared/modal_form_reload",
-                 locals: { identifier: "collection_number",
-                           form: "collection_numbers/form" }) and return true
+        format.turbo_stream do
+          reload_collection_number_modal_form_and_flash
         end
       end
     end
@@ -241,7 +227,7 @@ class CollectionNumbersController < ApplicationController
       format.html do
         redirect_to_back_object_or_object(@back_object, @collection_number)
       end
-      format.js do
+      format.turbo_stream do
         render_collection_numbers_section_update
       end
     end
@@ -280,8 +266,10 @@ class CollectionNumbersController < ApplicationController
       format.html do
         redirect_to_back_object_or_object(@back_object, @collection_number)
       end
-      @observation = @back_object # if we're here, we're on an obs page
-      format.js do
+      format.turbo_stream do
+        # if we're here, we're on an obs page.
+        # back_object should be the obs, sent via :back param from the link
+        @observation = @back_object
         render_collection_numbers_section_update
       end
     end
@@ -364,10 +352,37 @@ class CollectionNumbersController < ApplicationController
         redirect_to_back_object_or_object(@back_object, @collection_number) and
           return
       end
-      format.js do
-        # renders the flash in the modal via js
-        render(partial: "shared/modal_flash_update") and return
+      # renders the flash in the modal, but not sure it's necessary
+      # to have a response here. are they getting sent back?
+      format.turbo_stream do
+        render(partial: "shared/modal_flash_update",
+               locals: { identifier: "collection_number" }) and return
       end
     end
+  end
+
+  def render_modal_collection_number_form(title:)
+    render(
+      partial: "shared/modal_form",
+      locals: { title: title, identifier: "collection_number",
+                form: "collection_numbers/form" }
+    ) and return
+  end
+
+  # ivar @observation used in the partial
+  def render_collection_numbers_section_update
+    render(
+      partial: "observations/show/section_update",
+      locals: { identifier: "collection_numbers" }
+    ) and return
+  end
+
+  # this updates both the form and the flash
+  def reload_collection_number_modal_form_and_flash
+    render(
+      partial: "shared/modal_form_reload",
+      locals: { identifier: "collection_number",
+                form: "collection_numbers/form" }
+    ) and return true
   end
 end
