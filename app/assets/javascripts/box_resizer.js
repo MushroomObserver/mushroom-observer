@@ -2,7 +2,7 @@
 // TODO: Completely remove this script and application/app/media_query_tests partial
 // if moving to Bootstrap 4+
 
-$(window).on('load', function () {
+$(document).on("ready turbo:load", function () {
   var boxes = jQuery('.matrix-box .panel-sizing');
   var footers = jQuery('.matrix-box .log-footer');
 

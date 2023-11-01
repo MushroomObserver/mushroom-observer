@@ -2,7 +2,7 @@
  * This should be included on every page.
  */
 
-jQuery(document).ready(function () {
+$(document).on("ready turbo:load", function () {
 
   // This works better than straight autofocus attribute in firefox.
   // Normal autofocus causes it to scroll window hiding title etc.

@@ -4,7 +4,7 @@
  * checkboxes on rss_logs/_type_filters
  */
 
-jQuery(document).ready(function () {
+$(document).on("ready turbo:load", function () {
   jQuery("[data-toggle='checkbox']").on('click', function () {
     var $checkbox = $(this).find('input[type="checkbox"]');
     $checkbox.prop('checked', !$checkbox.prop('checked'));

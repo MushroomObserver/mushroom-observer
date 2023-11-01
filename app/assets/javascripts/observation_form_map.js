@@ -7,7 +7,7 @@ var GMAPS_API_SCRIPT = "https://maps.googleapis.com/maps/api/js?key=" +
   "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA";
 
 // ./observations/new
-$(document).ready(function () {
+$(document).on("ready turbo:load", function () {
   var opened = false;
   // NOTE: for gmap, map_div can't be a jQuery object. only use vanilla JS w/ it
   var map_div = document.getElementById('observation_form_map');

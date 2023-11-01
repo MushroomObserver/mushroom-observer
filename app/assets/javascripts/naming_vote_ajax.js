@@ -2,7 +2,7 @@
 // while waiting for an AJAX response.
 
 function VoteByAjaxModule(translations) {
-  $(document).ready(function () {
+  $(document).on("ready turbo:load", function () {
 
     var save_vote_buttons = function () {
       return $("[data-role='save_vote']");
