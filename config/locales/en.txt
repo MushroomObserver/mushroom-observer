@@ -2205,7 +2205,9 @@
   show_observation_edit_link_dialog: "[:show_observation_add_link_dialog]"
   show_observation_remove_link_dialog: Are you sure you want to remove this link?
   show_observation_no_collection_numbers: No [:collection_numbers]
+  show_observation_remove_collection_number: Remove collection number from this observation
   show_observation_no_herbarium_records: No [:herbarium_records]
+  show_observation_remove_herbarium_record: Remove fungarium record from this observation
   show_observation_add_sequence: Add [:SEQUENCE]
   show_observation_no_sequences: No [:sequences]
   show_observation_archive_link: Show Archive Record
