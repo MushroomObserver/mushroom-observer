@@ -132,17 +132,20 @@ module NamingsHelper
 
     form_with(url: naming_vote_path(naming_id: naming.id), method: :patch,
               local: false, id: "naming_vote_#{naming.id}",
-              class: "naming-vote-form") do |f|
+              class: "naming-vote-form",
+              data: { controller: "naming-vote" }) do |f|
       [
         fields_for(:vote) do |fv|
           fv.select(:value, menu, {},
                     { class: "form-control w-100",
-                      onchange: "Rails.fire(this.closest('form'), 'submit')",
-                      data: { role: "change_vote", id: naming.id } })
+                      data: { role: "change_vote", id: naming.id,
+                              action: "change->naming-vote#sendVote" } })
         end,
         hidden_field_tag(:context, context),
-        submit_button(form: f, button: :show_namings_cast.l, class: "w-100",
-                      data: { role: "save_vote" })
+        tag.noscript do
+          submit_button(form: f, button: :show_namings_cast.l, class: "w-100",
+                        data: { role: "save_vote" })
+        end
       ].safe_join
     end
   end
@@ -193,5 +196,41 @@ module NamingsHelper
     end
 
     reasons.map { |reason| content_tag(:div, reason) }.safe_join
+  end
+
+  def naming_form_reasons_fields(f_r, reasons)
+    reasons.values.sort_by(&:order).each do |r|
+      collapse = r.used? ? "" : "collapse"
+      concat(
+        [
+          tag.div(class: "checkbox") do
+            f_r.label("#{r.num}_check",
+                      { data: {
+                          toggle: "collapse",
+                          target: "#reasons_#{r.num}_notes"
+                        },
+                        aria: {
+                          expanded: "false",
+                          controls: "reasons_#{r.num}_notes"
+                        } }) do
+              [
+                f_r.check_box(:check,
+                              { index: r.num,
+                                checked: r.used?,
+                                class: "" },
+                              "1"),
+                r.label.t
+              ].safe_join
+            end
+          end,
+          tag.div(id: "reasons_#{r.num}_notes",
+                  class: class_names("form-group mb-3", collapse)) do
+            f_r.text_area(:notes,
+                          index: r.num, rows: 3, value: r.notes,
+                          class: "form-control")
+          end
+        ].safe_join
+      )
+    end
   end
 end
