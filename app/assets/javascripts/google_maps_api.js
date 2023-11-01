@@ -1,3 +1,5 @@
+// This is the new "bootstrapper". Currently unused, until we can get this to
+// work with Stimulus
 // https://developers.google.com/maps/documentation/javascript/load-maps-js-api
 (g => {
   var h, a, k, p = "The Google Maps JavaScript API",

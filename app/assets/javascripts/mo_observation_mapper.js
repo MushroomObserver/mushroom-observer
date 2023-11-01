@@ -5,81 +5,86 @@
 class MOObservationMapper {
 
   constructor() {
-    // this.GMAPS_API_SCRIPT = "https://maps.googleapis.com/maps/api/js?key=" +
-    // "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA";
-    // this.GMAPS_API_KEY = "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA";
     this.opened = false;
-    this.map_div = null;
-    this.map_open = null;
-    this.map_locate = null;
-    this.map_clear = null;
+    // this.map_div = null;
+    // this.map_open = null;
+    // this.map_locate = null;
+    // this.map_clear = null;
 
-    // this.loadGMapsAPI();
-    this.addObservationMapBindings();
-    if (typeof (google) != "undefined") {
-      this.initializeMap()
-    }
+    this.addMapOpenerBindings();
   }
 
-  addObservationMapBindings() {
-    document.addEventListener("DOMContentLoaded", () => {
-      this.map_div = document.getElementById('observation_form_map'),
-        this.map_open = document.querySelector('.map-open'),
-        this.map_locate = document.querySelector('.map-locate');
+  addMapOpenerBindings() {
+    console.log("mapbindings bruh")
+    this.map_div = document.getElementById('observation_form_map');
+    this.map_open = document.querySelector('.map-open');
+    this.map_locate = document.querySelector('.map-locate');
 
-      this.map_open.onclick = () => {
-        if (!this.opened) this.openMap();
-      };
+    this.map_open.onclick = () => {
+      if (!this.opened) this.openMap();
+    };
 
-      this.map_locate.onclick = () => {
-        if (!this.opened) this.openMap("focus_immediately");
-      };
-    });
+    this.map_locate.onclick = () => {
+      if (!this.opened) this.openMap("focus_immediately");
+    };
   }
 
-  async initializeMap() {
+  initializeMap() {
+    this.map()
+  }
+
+  map() {
     // https://developers.google.com/maps/documentation/javascript/load-maps-js-api#migrate-to-dynamic
-    const { Map } = await google.maps.importLibrary("maps");
+    // const { Map } = await google.maps.importLibrary("maps");
 
-    if (this.map == undefined) {
-      this.map = new Map(this.map_div, {
+    if (this._map == undefined) {
+      this._map = new google.maps.Map(this.map_div, {
         center: { lat: -7, lng: -47 },
         zoom: 1,
       });
     }
-    return this.map
+    return this._map
   }
 
-  async initializeGeocoder() {
-    const { Geocoder } = await google.maps.importLibrary("geocoding");
+  geocoder() {
+    // const { Geocoder } = await google.maps.importLibrary("geocoding");
 
-    if (this.geocoder == undefined) {
-      this.geocoder = new Geocoder();
+    if (this._geocoder == undefined) {
+      this._geocoder = new google.maps.Geocoder();
     }
-    return this.geocoder
+    return this._geocoder
   }
 
-  async initializeMarker(map) {
-    const { Marker } = await google.maps.importLibrary("marker");
+  // marker(location) {
+  //   // const { Marker } = await google.maps.importLibrary("marker");
+  //   // debugger
+  //   if (this._marker == undefined) {
+  //     this._marker = new google.maps.Marker({
+  //       draggable: true,
+  //       map: this.map(),
+  //       position: location,
+  //       visible: true
+  //     });
+  //   } else {
+  //     this._marker.setPosition(location);
+  //     this._marker.setVisible(true);
+  //   }
+  //   // this.addGmapsListener(this.marker(), 'drag');
+  //   return this._marker
+  // }
 
-    if (this.marker == undefined) {
-      this.marker = new Marker(map);
+  elevation() {
+    // const { ElevationService } = await google.maps.importLibrary("elevation");
+
+    if (this._elevation == undefined) {
+      this._elevation = new google.maps.ElevationService();
     }
-    return this.marker
-  }
 
-  async initializeElevationService() {
-    const { ElevationService } = await google.maps.importLibrary("elevation");
-
-    if (this.elevation == undefined) {
-      this.elevation = new ElevationService();
-    }
-
-    return this.elevation
+    return this._elevation
   }
 
   openMap(focus_immediately) {
-    debugger;
+    // debugger;
 
     this.opened = true;
     let indicator_url = this.map_div.dataset.indicatorUrl; //("indicator-url");
@@ -93,134 +98,132 @@ class MOObservationMapper {
     this.map_clear.classList.remove("hidden");
     this.map_open.style.display = "none";
 
-    // Functions defined within this block because they depend on google.maps
-    // getScript(this.GMAPS_API_SCRIPT).then(() => {
-    const searchInput = document.getElementById('observation_place_name'),
-      latInput = document.getElementById('observation_lat'),
-      lngInput = document.getElementById('observation_long'),
-      elvInput = document.getElementById('observation_alt');
-    let marker;
+    // Functions defined within this block because they depend on map being open
+    this.searchInput = document.getElementById('observation_place_name')
+    this.latInput = document.getElementById('observation_lat')
+    this.lngInput = document.getElementById('observation_long')
+    this.elvInput = document.getElementById('observation_alt')
 
-    const map = this.initializeMap();
+    this.initializeMap();
+    this.addGmapsListener(this.map(), 'click');
+    this.addLatLngInputBindings();
+    this.centerIfLatLngPresent();
+    this.addMapButtonBindings();
 
-    // init elevation service
-    const elevation = this.initializeElevationService();
+    if (focus_immediately) {
+      this.initializeMap();
+      this.focusMap();
+    }
+  }
 
-    addGmapsListener(map, 'click');
-
-    // adjust marker on field input
-    [latInput, lngInput].forEach((element) => {
+  // adjust marker on direct lat/lng field input keyup
+  addLatLngInputBindings() {
+    [this.latInput, this.lngInput].forEach((element) => {
       let location;
       element.onkeyup = () => {
         location = {
-          lat: parseFloat(latInput.value),
-          lng: parseFloat(lngInput.value)
+          lat: parseFloat(this.latInput.value),
+          lng: parseFloat(this.lngInput.value)
         };
-        placeMarker(location);
+        this.placeMarker(location);
       };
     });
+  }
 
-    // check if `Lat` & `Lng` fields are populated on load if so, drop a
-    // pin on that location and center otherwise, check if a `Where` field
-    // has been prepopulated and use that to focus map
-    if (latInput.value !== '' && lngInput.value !== '') {
+  // check if `Lat` & `Lng` fields already populated on load if so, drop a
+  // pin on that location and center. otherwise, check if a `Where` field
+  // has been prepopulated and use that to focus map
+  centerIfLatLngPresent() {
+    if (this.latInput.value !== '' && this.lngInput.value !== '') {
       const location = {
-        lat: parseFloat(latInput.value),
-        lng: parseFloat(lngInput.value)
+        lat: parseFloat(this.latInput.value),
+        lng: parseFloat(this.lngInput.value)
       };
-      placeMarker(location);
-      map.setCenter(location);
-      map.setZoom(8);
-    } else if (searchInput.value !== '') {
-      focusMap();
+      this.placeMarker(location);
+      this.map().setCenter(location);
+      this.map().setZoom(8);
+    } else if (this.searchInput.value !== '') {
+      this.focusMap();
     }
+  }
 
+  addMapButtonBindings() {
     // set bounds on map
     this.map_locate.onclick = () => {
-      focusMap();
+      console.log("locate on map clicked")
+      this.focusMap();
     };
 
     // clear map button
     this.map_clear.onclick = () => {
-      clearMap();
+      this.clearMap();
+    };
+  }
+
+  focusMap() {
+    // even a single letter will return a result
+    if (this.searchInput.value.length <= 0) {
+      return false;
+    }
+
+    this.geocoder().geocode({
+      'address': this.searchInput.value
+    }, (results, status) => {
+      if (status === google.maps.GeocoderStatus.OK && results.length > 0) {
+        if (results[0].geometry.viewport) {
+          this.map().fitBounds(results[0].geometry.viewport);
+        }
+      }
+    });
+  }
+
+  placeMarker(location) {
+    if (this.marker != undefined) {
+      this.marker.setPosition(location);
+      this.marker.setVisible(true);
+    } else {
+      this.marker = new google.maps.Marker({
+        draggable: true,
+        map: this.map(),
+        position: location,
+        visible: true
+      });
+    }
+
+    this.addGmapsListener(this.marker, 'drag');
+  }
+
+  updateFields() {
+    const requestElevation = {
+      'locations': [this.marker.getPosition()]
     };
 
-    // use the geocoder to focus on a specific region on the map
-    function focusMap() {
-      // const geocoder = new google.maps.Geocoder();
-      // const { Geocoder } = await google.maps.importLibrary("geocoding");
+    this.latInput.value = this.marker.position.lat();
+    this.lngInput.value = this.marker.position.lng();
 
-      // even a single letter will return a result
-      if (searchInput.value.length <= 0) {
-        return false;
-      }
-
-      const geocoder = this.initializeGeocoder();
-
-      geocoder.geocode({
-        'address': searchInput.value
-      }, (results, status) => {
-        if (status === google.maps.GeocoderStatus.OK && results.length > 0) {
-          if (results[0].geometry.viewport) {
-            map.fitBounds(results[0].geometry.viewport);
+    this.elevation().getElevationForLocations(requestElevation,
+      (results, status) => {
+        if (status === google.maps.ElevationStatus.OK) {
+          if (results[0]) {
+            this.elvInput.value = parseFloat(results[0].elevation);
+          } else {
+            this.elvInput.value = '';
           }
         }
       });
-    }
+  }
 
-    // updates or creates a marker at a specific location
-    function placeMarker(location) {
-      if (marker) {
-        marker.setPosition(location);
-        marker.setVisible(true);
-      } else {
-        marker = this.initializeMarker({
-          draggable: true,
-          map: map,
-          position: location,
-          visible: true
-        });
-        addGmapsListener(marker, 'drag');
-      }
-    }
+  clearMap() {
+    this.latInput.value = '';
+    this.lngInput.value = '';
+    this.elvInput.value = '';
+    this.marker.setVisible(false);
+  }
 
-    // updates lat & lng + elevaton fields
-    function updateFields() {
-      const requestElevation = {
-        'locations': [marker.getPosition()]
-      };
-
-      latInput.value = marker.position.lat();
-      lngInput.value = marker.position.lng();
-
-      elevation.getElevationForLocations(requestElevation,
-        (results, status) => {
-          if (status === google.maps.ElevationStatus.OK) {
-            if (results[0]) {
-              elvInput.value = parseFloat(results[0].elevation);
-            } else {
-              elvInput.value = '';
-            }
-          }
-        });
-    }
-
-    function clearMap() {
-      latInput.value = '';
-      lngInput.value = '';
-      elvInput.value = '';
-      marker.setVisible(false);
-    }
-
-    function addGmapsListener(el, eventType) {
-      google.maps.event.addListener(el, eventType, (e) => {
-        placeMarker(e.latLng);
-        updateFields();
-      });
-    }
-
-    if (focus_immediately) {
-      focusMap();
-    }
+  addGmapsListener(el, eventType) {
+    google.maps.event.addListener(el, eventType, (e) => {
+      this.placeMarker(e.latLng);
+      this.updateFields();
+    });
   }
 }
