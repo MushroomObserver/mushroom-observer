@@ -32,10 +32,16 @@ group :rails do
   gem("activesupport", "~> 6.1")
   gem("bundler")
   gem("railties", "~> 6.1")
-  gem("sprockets-rails")
-  # gem irb now depends on psych, but version 5 will not bundle currently
-  gem("psych", "~> 4")
 end
+
+gem("importmap-rails")
+# gem irb now depends on psych, but version 5 will not bundle currently
+gem("psych", "~> 4")
+gem("sprockets-rails")
+# Compile SCSS for stylesheets
+gem("sassc-rails")
+# Use jQuery as a JavaScript library
+gem("jquery-rails")
 
 # Security fix updates via Dependabot
 # CVE-2021-41817 regex denial of service vulnerability
@@ -62,12 +68,6 @@ gem("arel_extensions")
 
 # Use bootstrap style generator
 gem("bootstrap-sass")
-
-# Use SCSS for stylesheets
-gem("sassc-rails")
-
-# Use jquery as the JavaScript library
-gem("jquery-rails")
 
 # Use mini_racer as a substitute for therubyracer
 # If having trouble installing this gem in Vagrant:

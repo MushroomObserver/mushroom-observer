@@ -1,7 +1,11 @@
 //= link_tree ../images
+//= link_tree ../javascripts .js
+//= link_tree ../../javascript .js
+//= link_tree ../../../vendor/javascript .js
+
+//= link mo_application.js
 
 //= link advanced_search.js
-//= link application.js
 //= link donate.js
 //= link edit_location.js
 //= link mo_autocompleter.js

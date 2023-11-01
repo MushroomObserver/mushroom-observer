@@ -10,6 +10,7 @@ body_class = class_names(whos_calling, theme_class)
 <html class="<%= html_class %>">
 <head>
   <%= render(partial: "application/app/head") %>
+  <%= javascript_importmap_tags %>
 </head>
 
 <body class="<%= body_class %>">
