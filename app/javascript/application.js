@@ -2,7 +2,7 @@
 // Read more: https://github.com/rails/importmap-rails
 // If string literal error, it means the importmap is not functioning
 
-import "jquery3"
+// import "jquery3"
 import "bootstrap"
 // import "@rails/request.js"
 // import "@hotwired/turbo-rails"

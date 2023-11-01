@@ -350,6 +350,7 @@ DEPENDENCIES
   simplecov
   simplecov-lcov
   sorted_set
+  sprockets (~> 4.2.1)
   sprockets-rails
   uglifier
   unicorn

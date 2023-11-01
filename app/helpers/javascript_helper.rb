@@ -26,7 +26,7 @@ module JavascriptHelper
   #   <%= sort_javascript_includes.map {|m| javascript_include_tag(m)} %>
   def javascript_includes
     @javascript_files ||= []
-    @javascript_files.unshift("application")
+    @javascript_files.unshift("mo_application")
     @javascript_files.uniq
   end
 

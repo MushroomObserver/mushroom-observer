@@ -1,3 +1,5 @@
+//= require jquery3
+//= require jquery_extensions
 //= require jstz
 //= require mo_autocompleter
 //= require box_resizer
