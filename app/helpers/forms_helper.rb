@@ -117,6 +117,7 @@ module FormsHelper
   end
 
   def text_field_with_autocompleter(**args)
+    # args[:data_controller] = "autocompleter"
     args[:data_autocompleter_type] = args[:type]
 
     text_field_with_label(**args)
