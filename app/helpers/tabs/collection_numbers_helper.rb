@@ -53,25 +53,52 @@ module Tabs
        { class: tab_id(__method__.to_s) }]
     end
 
+    def show_collection_number_tab(c_n, obs)
+      cn_query = Query.lookup(:CollectionNumber, :all, observations: obs.id)
+
+      [tag.i(c_n.format_name.t),
+       collection_number_path(id: c_n.id, q: cn_query),
+       { class: "#{tab_id(__method__.to_s)}_#{c_n.id}" }]
+    end
+
     def collection_number_mod_tabs(c_n)
       [edit_collection_number_tab(c_n),
        destroy_collection_number_tab(c_n)]
     end
 
+    # These should just be ADD, EDIT, and DELETE.
     def new_collection_number_for_obs_tab(obs)
       [:create_collection_number.l,
-       add_query_param(new_collection_number_path(obs)),
-       { class: tab_id(__method__.to_s) }]
+       add_query_param(new_collection_number_path(observation_id: obs.id)),
+       { class: "#{tab_id(__method__.to_s)}_#{obs.id}", icon: :add }]
     end
 
-    def edit_collection_number_tab(c_n)
+    def edit_collection_number_tab(c_n, obs = nil)
+      back = obs&.id || :show
       [:edit_collection_number.t,
-       add_query_param(edit_collection_number_path(id: c_n.id, back: :show)),
-       { class: tab_id(__method__.to_s) }]
+       add_query_param(edit_collection_number_path(id: c_n.id, back: back)),
+       { class: "#{tab_id(__method__.to_s)}_#{c_n.id}", icon: :edit }]
     end
 
     def destroy_collection_number_tab(c_n)
-      [:delete_collection_number.t, c_n, { button: :destroy }]
+      [:delete_collection_number.t, c_n, { button: :destroy, icon: :delete }]
+    end
+
+    # def collection_number_remove_obs_tab(c_n, obs)
+    #   [:REMOVE.t,
+    #    add_query_param(collection_number_remove_observation_path(
+    #                      collection_number_id: c_n.id, observation_id: obs.id
+    #                    )),
+    #    { class: "#{tab_id(__method__.to_s)}_#{c_n.id}", icon: :remove,
+    #      method: :patch, data: { confirm: :are_you_sure.t } }]
+    # end
+
+    def remove_collection_number_tab(c_n, obs)
+      [:REMOVE.t,
+       add_query_param(edit_collection_number_remove_observation_path(
+                         collection_number_id: c_n.id, observation_id: obs.id
+                       )),
+       { class: "#{tab_id(__method__.to_s)}_#{c_n.id}", icon: :remove }]
     end
   end
 end

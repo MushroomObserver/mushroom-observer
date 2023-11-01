@@ -67,26 +67,42 @@ module Tabs
       links << nonpersonal_herbaria_index_tab
     end
 
-    def new_herbarium_record_tab
-      [:create_herbarium_record.l,
-       new_herbarium_record_path(id: params[:id]),
-       { class: tab_id(__method__.to_s) }]
+    def show_herbarium_record_tab(h_r)
+      [h_r.accession_at_herbarium.t,
+       herbarium_record_path(id: h_r.id, q: get_query_param),
+       { class: "#{tab_id(__method__.to_s)}_#{h_r.id}" }]
     end
 
-    def edit_herbarium_record_tab(h_r)
+    def new_herbarium_record_tab
+      [:create_herbarium_record.l,
+       new_herbarium_record_path(observation_id: params[:id]),
+       { class: tab_id(__method__.to_s), icon: :add }]
+    end
+
+    def edit_herbarium_record_tab(h_r, obs = nil)
+      back = obs&.id || :show
       [:edit_herbarium_record.t,
-       add_query_param(edit_herbarium_record_path(h_r.id, back: :show)),
-       { class: tab_id(__method__.to_s) }]
+       add_query_param(edit_herbarium_record_path(h_r.id, back: back)),
+       { class: tab_id(__method__.to_s), icon: :edit }]
     end
 
     def destroy_herbarium_record_tab(h_r)
-      [:destroy_object.t(type: :herbarium_record), h_r, { button: :destroy }]
+      [:destroy_object.t(type: :herbarium_record), h_r,
+       { button: :destroy, icon: :delete }]
     end
 
     def herbarium_records_index_return_tab
       [:edit_herbarium_record_back_to_index.t,
        herbarium_records_path(q: get_query_param),
        { class: tab_id(__method__.to_s) }]
+    end
+
+    def remove_herbarium_record_tab(h_r, obs)
+      [:REMOVE.t,
+       add_query_param(edit_herbarium_record_remove_observation_path(
+                         herbarium_record_id: h_r.id, observation_id: obs.id
+                       )),
+       { class: "#{tab_id(__method__.to_s)}_#{h_r.id}", icon: :remove }]
     end
   end
 end
