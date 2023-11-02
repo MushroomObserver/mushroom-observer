@@ -2,8 +2,24 @@
     including location autocomplete, map, lat/long/alt %>
 
 <!-- WHERE_REASONS -->
-<%= render(partial: "shared/form_location_feedback",
-           locals: { button: button_name } ) %>
+<%=
+render(partial: "shared/form_location_feedback",
+       locals: { button: button_name } )
+%>
+
+
+<%=
+javascript_include_tag(
+  "https://maps.googleapis.com/maps/api/js?key=" +
+  "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA" +
+  "&libraries=maps,geocoding,marker,elevation" +
+  "&callback=dispatchMapsEvent",
+  async: true, defer: true, # "data-turbolinks-eval": false
+) %>
+<%
+javascript_include("mo_observation_mapper")
+# inject_javascript_at_end("new MOObservationMapper();")
+%>
 <!-- /WHERE_REASONS -->
 
 <!-- WHERE -->
