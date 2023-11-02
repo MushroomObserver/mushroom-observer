@@ -3,13 +3,16 @@
 document.addEventListener("DOMContentLoaded", () => {
   observationFormMapper();
 });
+window.gMapsLoaded = () => {
+  // google.maps script tag loader warns w/o a callback, so here it is.
+}
 
 // ./observations/new
 function observationFormMapper() {
   // This key is configured in Google Cloud Platform.
   // It is a public key that accepts requests only from mushroomobserver.org/*
   const GMAPS_API_SCRIPT = "https://maps.googleapis.com/maps/api/js?key=" +
-    "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA";
+    "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA&callback=gMapsLoaded";
 
   let opened = false;
   // NOTE: for gmap, map_div can't be a jQuery object. only use vanilla JS w/ it
