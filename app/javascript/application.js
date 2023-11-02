@@ -12,8 +12,8 @@ import "@hotwired/turbo-rails"
 Turbo.setFormMode("optin")
 
 import Rails from "@rails/ujs"
-Rails.start();
+import "@rails/request.js"
 
 import "@hotwired/stimulus"
 import "@hotwired/stimulus-loading"
-import "controllers"
+Rails.start(); import "controllers"

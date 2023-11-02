@@ -42,8 +42,12 @@ gem("importmap-rails")
 gem("sprockets-rails")
 # stimulus for simpler, more maintainable js
 gem("stimulus-rails")
+# requestjs for simpler js requests from stimulus
+gem("requestjs-rails")
 # turbo for partial page updates
 gem("turbo-rails")
+# redis for combining actioncable broadcasts with turbo_stream
+# gem("redis", "~> 4.0")
 # Compile SCSS for stylesheets
 gem("sassc-rails")
 # Use jQuery as a JavaScript library
