@@ -15,6 +15,61 @@ module MatrixBoxHelper
     end
   end
 
+  def matrix_box_image(presenter, passed_args)
+    return unless presenter.image_data
+
+    image = presenter.image_data[:image]
+    # for matrix_box_carousels: change to image_data.except(:images)
+    image_args = passed_args.merge(presenter.image_data.except(:image) || {})
+
+    tag.div(class: "thumbnail-container") do
+      interactive_image(image, **image_args)
+    end
+  end
+
+  # for matrix_box_carousels:
+  # def matrix_box_images(presenter)
+  #   presenter.image_data includes context: :matrix_box where appropriate
+  #   images = presenter.image_data[:images]
+  #   image_args = local_assigns.
+  #                except(:columns, :object, :object_counter,
+  #                       :object_iteration).
+  #                merge(presenter.image_data.except(:images) || {})
+  #   top_img = presenter.image_data[:thumb_image] || images.first
+  #
+  #   tag.div(class: "thumbnail-container") do
+  #     carousel_html(object: object, images: images, top_img: top_img,
+  #                   thumbnails: false, **image_args)
+  #   end
+  # end
+
+  def matrix_box_details(presenter, object, object_id, identify)
+    tag.div(class: "panel-body rss-box-details") do
+      [
+        matrix_box_what(presenter, object, object_id, identify),
+        matrix_box_where(presenter),
+        matrix_box_when_who(presenter)
+      ].safe_join
+    end
+  end
+
+  def matrix_box_what(presenter, object, object_id, identify)
+    # bigger heading if no image
+    h_element = presenter.image_data ? :h5 : :h3
+    link_heading = tag.small("(#{presenter.id})", class: "rss-id float-right") +
+                   tag.span(presenter.name, class: "rss-name",
+                                            id: "box_title_#{object_id}")
+
+    tag.div(class: "rss-what") do
+      [
+        content_tag(h_element, class: "mt-0 rss-heading") do
+          link_with_query(link_heading, presenter.what.show_link_args)
+        end,
+        matrix_box_vote_or_propose_ui(identify, object)
+      ].safe_join
+    end
+  end
+
   # Obs with uncertain name: vote on naming, or propose (if it's "Fungi")
   # used if matrix_box local_assigns identify == true
   def matrix_box_vote_or_propose_ui(identify, object)
@@ -28,6 +83,28 @@ module MatrixBoxHelper
     else
       propose_naming_link(object.id, btn_class: "btn-default mb-3",
                                      context: "matrix_box")
+    end
+  end
+
+  def matrix_box_where(presenter)
+    return unless presenter.place_name
+
+    tag.div(class: "rss-where") do
+      tag.small do
+        location_link(presenter.place_name, presenter.where)
+      end
+    end
+  end
+
+  def matrix_box_when_who(presenter)
+    return if presenter.when.blank?
+
+    tag.div(class: "rss-what") do
+      tag.small(class: "nowrap-ellipsis") do
+        concat(tag.span(presenter.when, class: "rss-when"))
+        concat(": ")
+        concat(user_link(presenter.who, nil, class: "rss-who"))
+      end
     end
   end
 
