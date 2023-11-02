@@ -15,7 +15,7 @@ class MOObservationMapper {
   }
 
   addMapOpenerBindings() {
-    console.log("mapbindings bruh")
+    // console.log("mapbindings bruh")
     this.map_div = document.getElementById('observation_form_map');
     this.map_open = document.querySelector('.map-open');
     this.map_locate = document.querySelector('.map-locate');
@@ -150,7 +150,7 @@ class MOObservationMapper {
   addMapButtonBindings() {
     // set bounds on map
     this.map_locate.onclick = () => {
-      console.log("locate on map clicked")
+      // console.log("locate on map clicked")
       this.focusMap();
     };
 
