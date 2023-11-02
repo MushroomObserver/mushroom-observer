@@ -77,27 +77,8 @@ jQuery(document).ready(function () {
   lazyLoadInstance.update();
 });
 
-// window.onload = (event) => {
-//   const autocompleters = document.querySelectorAll('[data-autocompleter]');
-//   // console.log(autocompleters);
-//   autocompleters.forEach(element => {
-//     // element will have "data-ajax-url" if initialized
-//     if (!element.hasAttribute("data-ajax-url") && element.hasAttribute("id")) {
-//       const input_id = element.getAttribute("id");
-//       const type = element.dataset.autocompleter;
-
-//       // Only initialize the `year` sub-field in Rails date_selects (1i, 2i, 3i)
-//       if (type != "year" || type == "year" && input_id.indexOf("_1i") > 0) {
-//         new MOAutocompleter({
-//           input_id: input_id,
-//           token: element.dataset.autocomplete_separator
-//         });
-//       }
-//     }
-//   });
-// }
-
-// This observer is a stopgap that handles what Stimulus would handle.
+// This observer is a stopgap that handles what Stimulus would handle:
+// observes page changes and whether they should fire js.
 const moObserveContent = function () {
   // Select the node that will be observed for mutations
   const contentNode = document.body;
@@ -173,14 +154,10 @@ moObserveContent();
 // or a potential Stimulus controller doing the same thing. The mapper needs to
 // know when the script is loaded, because its methods will not work otherwise.
 window.dispatchMapsEvent = function (...args) {
-  const event = new CustomEvent("google-maps-loaded", {
+  const gmaps_loaded = new CustomEvent("google-maps-loaded", {
     bubbles: true,
     detail: args
   })
   console.log("maps is loaded")
-  window.dispatchEvent(event)
+  window.dispatchEvent(gmaps_loaded)
 }
-
-// window.addEventListener("google-maps-loaded", () => {
-// window.observationMapper = new MOObservationMapper()
-// })
