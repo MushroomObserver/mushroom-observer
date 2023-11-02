@@ -242,7 +242,7 @@ which was fixed by running
 cp db/macos/database.yml config
 ```
 
-Delete `checkpoint_stripped.gz` from the mushroom-observer directory
+Optionally delete `checkpoint_stripped.gz` from the mushroom-observer directory
 
 ### Run the rest of the mo-dev script
 
