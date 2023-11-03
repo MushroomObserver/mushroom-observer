@@ -11,7 +11,6 @@
 //= require main
 //= require mo_events
 //= require mo_images_uploader
-//= require observation_form_map
 //= require suggestions
 //= require thumbnail_map
 //= require naming_vote_ajax
