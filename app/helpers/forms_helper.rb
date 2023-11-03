@@ -116,12 +116,21 @@ module FormsHelper
     end
   end
 
-  # this should allow incoming data to deep_merge with the below
-  def text_field_with_autocompleter(**args)
-    autocompleter_args = args.except(:type).deep_merge(
-      { data: { controller: :autocompleter,
-                autocomplete: args[:type] } }
-    )
+  # For the moment "year autocompleters" have to use data attributes,
+  # but TODO: eliminate all of them, in favor of a new stimulus controller
+  # that will just turn them into text fields.
+  # Jason agrees that nobody needs a year autocompleter, and they complicate
+  # the autocompleter js too. - AN 20231103
+  #
+  # This allows incoming data attributes to deep_merge with autocompleter's data
+  def autocompleter_field(**args)
+    autocompleter_args = {
+      placeholder: :start_typing.l,
+      data: { controller: :autocompleter, autocomplete: args[:autocomplete],
+              separator: args[:separator] }
+    }
+    autocompleter_args = args.except(:autocomplete, :separator).
+                         deep_merge(autocompleter_args)
 
     text_field_with_label(**autocompleter_args)
   end

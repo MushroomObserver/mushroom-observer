@@ -35,7 +35,8 @@ const defaultOpts = {
   page_size: 10,
   // max length of string to send via AJAX
   max_request_length: 50,
-  // allowed separators (e.g. " OR ") - restarts autocomplete afterwards
+  // Very fancy: starts finding new matches for the string after the separator
+  // allowed separators (e.g. " OR ")
   separator: null,
   // show error messages returned via AJAX?
   show_errors: false,
@@ -135,14 +136,16 @@ export default class extends Controller {
 
     // Check the type of autocompleter set on the input element
     // maybe should not happen on connect, or we could be resetting type
+    // Or maybe it should, and the filter swapper should just change this? no.
     this.type = this.element.dataset.autocomplete;
     if (!autocompleterTypes.hasOwnProperty(this.type))
       alert("MOAutocompleter: Invalid type: \"" + this.type + "\"");
 
+    // Only use OEM parts:
     Object.assign(this, autocompleterTypes[this.type]);
     Object.assign(this, internalOpts);
 
-    // not sure how else to make this available here
+    // not sure how else to make this available to the `swap` method
     // this.autocompleterTypes = autocompleterTypes;
 
     // Create a unique ID for this instance.
@@ -171,13 +174,13 @@ export default class extends Controller {
 
   // To swap out autocompleter properties, send a type
   swap(type, opts) {
-    if (!this.autocompleterTypes.hasOwnProperty(type)) {
+    if (!autocompleterTypes.hasOwnProperty(type)) {
       alert("MOAutocompleter: Invalid type: \"" + this.type + "\"");
     } else {
       this.type = type;
       this.element.setAttribute("data-autocompleter", type)
       // add dependent properties and allow overrides
-      Object.assign(this, this.autocompleterTypes[this.type]);
+      Object.assign(this, autocompleterTypes[this.type]);
       Object.assign(this, opts);
       this.prepare_input_element(this);
     }
@@ -197,7 +200,7 @@ export default class extends Controller {
     elem.setAttribute("data-ajax-url", this.ajax_url);
   }
 
-  // This turns the Rails date selects into text inputs.
+  // TODO: just turn the Rails date selects into text inputs with another ctrlr
   prepare_year_input_element(old_elem) {
     const id = old_elem.getAttribute("id"),
       name = old_elem.getAttribute("name"),

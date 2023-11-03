@@ -6,7 +6,7 @@
   <div class="form-group form-inline">
     <%= f.date_select(:when, date_select_opts(@observation),
         { class: "form-control mb-2",
-          data: { autocompleter: :year } }) %>
+          data: { controller: :autocompleter, autocomplete: :year } }) %>
   </div>
 </div><!--.container-text-->
 <!-- /WHEN -->
