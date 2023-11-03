@@ -731,7 +731,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: { project: project.id })
 
     assert_response(:success)
-    assert_displayed_title("Observations attached to #{project.title}")
+    assert_displayed_title("Observations for #{project.title}")
   end
 
   def test_index_project_without_observations
