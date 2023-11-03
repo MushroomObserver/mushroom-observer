@@ -8,7 +8,6 @@
 //= link advanced_search.js
 //= link donate.js
 //= link edit_location.js
-//= link mo_autocompleter.js
 //= link mo_images_uploader.js
 //= link mo_translations.js
 //= link mo_observation_mapper.js

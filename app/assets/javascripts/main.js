@@ -119,29 +119,6 @@ const moObserveContent = function () {
   // Start observing the target node for configured mutations
   observer.observe(contentNode, config);
 
-  // Initialize autocompleters that are not already initialized
-  // const initializeAutocompleters = function () {
-  //   const autocompleters = document.querySelectorAll(
-  //     '[data-autocompleter]:not([data-ajax-url])'
-  //   );
-  //   // console.log(autocompleters);
-  //   autocompleters.forEach(element => {
-  //     // element will have "data-ajax-url" if initialized
-  //     if (element.hasAttribute("id")) {
-  //       const input_id = element.getAttribute("id");
-  //       const type = element.dataset.autocompleter;
-  //       // console.log("Adding autocompleter for " + type)
-  //       // Only initialize the `year` sub-field in Rails date_selects (1i, 2i, 3i)
-  //       if (type != "year" || type == "year" && input_id.indexOf("_1i") > 0) {
-  //         opts = { input_id: input_id }
-  //         if ("separator" in element.dataset)
-  //           opts.separator = element.dataset.separator
-  //         new MOAutocompleter(opts);
-  //       }
-  //     }
-  //   });
-  // }
-
   // Don't do anything unless there's a form and class has not been initialized
   // Plus, because this class is not yet a Stimulus controller, it should not
   // initialize until google maps api is loaded. The observer will keep checkin'
@@ -154,10 +131,6 @@ const moObserveContent = function () {
       window.observationMapper = new MOObservationMapper();
     }
   }
-
-  // window.onload = (event) => {
-  //   initializeAutocompleters();
-  // }
 }
 
 moObserveContent();
