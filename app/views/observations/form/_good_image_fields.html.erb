@@ -45,7 +45,7 @@
               date_select_opts(image).merge(index: image.id),
               { class: "form-control form-control-sm",
                 onchange: "CHANGED_DATES[#{image.id}] = true",
-                data: { controller: :autocompleter, autocomplete: :year } }) %>
+                data: { controller: :year_input } }) %>
       </div>
     </td>
   </tr>

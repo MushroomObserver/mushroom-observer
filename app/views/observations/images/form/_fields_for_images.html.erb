@@ -10,8 +10,7 @@
   <%= f.label(:when_1i, :WHEN.t + ":") %>
   <%= f.date_select(:when, date_select_opts(@image),
                     { class: "form-control",
-                      data: { controller: :autocompleter,
-                              autocomplete: :year } }) %>
+                      data: { controller: :year_input } }) %>
   <%= help_block(:p, :form_images_when_help.t) %>
 </div>
 

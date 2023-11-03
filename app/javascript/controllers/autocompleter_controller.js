@@ -73,11 +73,6 @@ const autocompleterTypes = {
   user: {
     ajax_url: "/ajax/auto_complete/user/@",
     unordered: true
-  },
-  year: {
-    // adapt date_select.js replace_date_select_with_text_field
-    pulldown_size: length,
-    act_like_select: true
   }
 }
 
@@ -165,11 +160,7 @@ export default class extends Controller {
     this.create_pulldown();
 
     // Attach events, etc. to input element.
-    if (this.type == "year") {
-      this.prepare_year_input_element(this.element)
-    } else {
-      this.prepare_input_element(this.element);
-    }
+    this.prepare_input_element(this.element);
   }
 
   // To swap out autocompleter properties, send a type
@@ -200,46 +191,10 @@ export default class extends Controller {
     elem.setAttribute("data-ajax-url", this.ajax_url);
   }
 
-  // TODO: just turn the Rails date selects into text inputs with another ctrlr
-  prepare_year_input_element(old_elem) {
-    const id = old_elem.getAttribute("id"),
-      name = old_elem.getAttribute("name"),
-      classList = old_elem.classList,
-      style = old_elem.getAttribute("style"),
-      value = old_elem.value,
-      opts = old_elem.options,
-      primer = [],
-      new_elem = document.createElement("input");
-    new_elem.type = "text";
-    const length = opts.length > 20 ? 20 : opts.length;
-
-    for (let i = 0; i < opts.length; i++)
-      primer.push(opts.item(i).text);
-
-    new_elem.classList = classList;
-    new_elem.style = style;
-    new_elem.value = value;
-    new_elem.setAttribute("size", 4);
-
-    // Not sure if this works yet...
-    if (old_elem[0].onchange)
-      new_elem.onchange = old_elem[0].onchange;
-
-    old_elem.replaceWith(new_elem);
-    new_elem.setAttribute("id", id);
-    new_elem.setAttribute("name", name);
-
-    this.element = new_elem,
-      this.primer = primer,
-      this.pulldown_size = length,
-      this.act_like_select = true
-
-    this.add_event_listeners(new_elem);
-  }
-
   // NOTE: `this` within an event listener function refers to the element
   // (the eventTarget) -- unless you pass an arrow function as the listener.
-  // But writing a specially named function handleEvent() allows this:
+  // But writing a specially named function handleEvent() allows delegating
+  // the class as the handler:
   add_event_listeners(elem) {
     // Stimulus - data-actions on the input can route events to actions here
     elem.addEventListener("focus", this);
