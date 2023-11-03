@@ -4,7 +4,6 @@
 //= link application.js
 //= link donate.js
 //= link edit_location.js
-//= link google_maps_api.js
 //= link mo_autocompleter.js
 //= link mo_images_uploader.js
 //= link mo_translations.js
