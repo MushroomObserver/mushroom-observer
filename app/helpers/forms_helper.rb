@@ -116,11 +116,14 @@ module FormsHelper
     end
   end
 
+  # this should allow incoming data to deep_merge with the below
   def text_field_with_autocompleter(**args)
-    # args[:data_controller] = "autocompleter"
-    args[:data_autocompleter_type] = args[:type]
+    autocompleter_args = args.except(:type).deep_merge(
+      { data: { controller: :autocompleter,
+                autocomplete: args[:type] } }
+    )
 
-    text_field_with_label(**args)
+    text_field_with_label(**autocompleter_args)
   end
 
   # Bootstrap text_area

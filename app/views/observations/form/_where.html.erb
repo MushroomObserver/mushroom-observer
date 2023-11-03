@@ -33,11 +33,10 @@ javascript_include("mo_observation_mapper")
 <!-- WHERE -->
 <div class="row">
   <div class="col-xs-12 col-sm-6">
-    <%= text_field_with_label(form: f, field: :place_name,
-                              placeholder: :start_typing.l,
-                              label: :WHERE.t + ":",
-                              between: :required,
-                              data: { autocompleter: :location }) %>
+    <%= text_field_with_autocompleter(
+      form: f, field: :place_name, placeholder: :start_typing.l,
+      label: :WHERE.t + ":", between: :required, type: :location
+    ) %>
   </div>
   <div class="col-xs-12 col-sm-6">
     <%= help_block_with_arrow("left", id: "where_help") do %>

@@ -77,6 +77,20 @@ $(document).on("ready turbo:load", function () {
   lazyLoadInstance.update();
 });
 
+// This is the callback for when the google maps api script is loaded (async,
+// from Google) on the Create Obs form, and potentially elsewhere.
+// It dispatches a global event that can be picked up by MOObservationMapper,
+// or a potential Stimulus controller doing the same thing. The mapper needs to
+// know when the script is loaded, because its methods will not work otherwise.
+window.dispatchMapsEvent = function (...args) {
+  const gmaps_loaded = new CustomEvent("google-maps-loaded", {
+    bubbles: true,
+    detail: args
+  })
+  console.log("maps is loaded")
+  window.dispatchEvent(gmaps_loaded)
+}
+
 // This observer is a stopgap that handles what Stimulus would handle:
 // observes page changes and whether they should fire js.
 const moObserveContent = function () {
@@ -91,7 +105,7 @@ const moObserveContent = function () {
     for (const mutation of mutationList) {
       if (mutation.type === "childList") {
         // console.log("A child node has been added or removed.");
-        initializeAutocompleters();
+        // initializeAutocompleters();
         initializeObservationMapper();
       } else if (mutation.type === "attributes") {
         // console.log(`The ${mutation.attributeName} attribute was modified.`);
@@ -106,27 +120,27 @@ const moObserveContent = function () {
   observer.observe(contentNode, config);
 
   // Initialize autocompleters that are not already initialized
-  const initializeAutocompleters = function () {
-    const autocompleters = document.querySelectorAll(
-      '[data-autocompleter]:not([data-ajax-url])'
-    );
-    // console.log(autocompleters);
-    autocompleters.forEach(element => {
-      // element will have "data-ajax-url" if initialized
-      if (element.hasAttribute("id")) {
-        const input_id = element.getAttribute("id");
-        const type = element.dataset.autocompleter;
-        // console.log("Adding autocompleter for " + type)
-        // Only initialize the `year` sub-field in Rails date_selects (1i, 2i, 3i)
-        if (type != "year" || type == "year" && input_id.indexOf("_1i") > 0) {
-          opts = { input_id: input_id }
-          if ("separator" in element.dataset)
-            opts.separator = element.dataset.separator
-          new MOAutocompleter(opts);
-        }
-      }
-    });
-  }
+  // const initializeAutocompleters = function () {
+  //   const autocompleters = document.querySelectorAll(
+  //     '[data-autocompleter]:not([data-ajax-url])'
+  //   );
+  //   // console.log(autocompleters);
+  //   autocompleters.forEach(element => {
+  //     // element will have "data-ajax-url" if initialized
+  //     if (element.hasAttribute("id")) {
+  //       const input_id = element.getAttribute("id");
+  //       const type = element.dataset.autocompleter;
+  //       // console.log("Adding autocompleter for " + type)
+  //       // Only initialize the `year` sub-field in Rails date_selects (1i, 2i, 3i)
+  //       if (type != "year" || type == "year" && input_id.indexOf("_1i") > 0) {
+  //         opts = { input_id: input_id }
+  //         if ("separator" in element.dataset)
+  //           opts.separator = element.dataset.separator
+  //         new MOAutocompleter(opts);
+  //       }
+  //     }
+  //   });
+  // }
 
   // Don't do anything unless there's a form and class has not been initialized
   // Plus, because this class is not yet a Stimulus controller, it should not
@@ -141,23 +155,9 @@ const moObserveContent = function () {
     }
   }
 
-  window.onload = (event) => {
-    initializeAutocompleters();
-  }
+  // window.onload = (event) => {
+  //   initializeAutocompleters();
+  // }
 }
 
 moObserveContent();
-
-// This is the callback for when the google maps api script is loaded (async,
-// from Google) on the Create Obs form, and potentially elsewhere.
-// It dispatches a global event that can be picked up by MOObservationMapper,
-// or a potential Stimulus controller doing the same thing. The mapper needs to
-// know when the script is loaded, because its methods will not work otherwise.
-window.dispatchMapsEvent = function (...args) {
-  const gmaps_loaded = new CustomEvent("google-maps-loaded", {
-    bubbles: true,
-    detail: args
-  })
-  console.log("maps is loaded")
-  window.dispatchEvent(gmaps_loaded)
-}
