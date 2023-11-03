@@ -190,6 +190,10 @@ group :test do
   gem("minitest")
   gem("minitest-reporters")
 
+  # allow stubbing all instances
+  # NOTE: avoid mocha if possible; it's not thread-safe @JoeCohen 2023-11-02
+  gem("mocha")
+
   # restore `assigns` and `assert_template` to tests
   gem("rails-controller-testing")
 
