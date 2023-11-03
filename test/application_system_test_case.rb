@@ -25,8 +25,8 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     # needed for cuprite
     Capybara.server = :webrick
     # Capybara.current_driver = :cuprite
-    # Capybara.server_host = "localhost"
-    # Capybara.server_port = 3000
+    Capybara.server_host = "localhost"
+    Capybara.server_port = 3000
     # Normalize whitespaces when using `has_text?` and similar matchers,
     # i.e., ignore newlines, trailing spaces, etc.
     # That makes tests less dependent on slight UI changes.
