@@ -1,0 +1,24 @@
+<%
+# called from observations/show/namings
+# Bootstrap modal for "saving vote" and "suggestions", blank modal for message.
+message ||= ""
+%>
+
+<%=
+tag.div(
+  class: "modal", id: "mo_ajax_progress", role: "dialog",
+  aria: { labelledby: "mo_ajax_progress_caption" },
+  data: { controller: "modal-spinner" }
+) do
+  tag.div(class: "modal-dialog modal-sm", role: "document") do
+    tag.div(class: "modal-content") do
+      tag.div(class: "modal-body", id: "modal_body_ajax_progress") do
+        [
+          tag.span("", id: "mo_ajax_progress_caption"),
+          safe_spinner(message)
+        ].safe_join
+      end
+    end
+  end
+end
+%>
