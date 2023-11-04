@@ -111,22 +111,22 @@ module Projects
 
     # Redirects back to show_project.
     def update_member_status(project, candidate)
-      admin = member = :remove
+      member = :remove
       case params[:commit]
       when :change_member_status_make_admin.l
         unless project.is_admin?(@user)
           return must_be_project_admin!(project.id)
         end
 
-        admin = member = :add
+        member = :add
       when :change_member_status_make_member.l
         member = :add
       end
       if project.is_admin?(@user)
         set_status(project, :admin, candidate,
-                   admin)
+                   params[:commit] == :change_member_status_make_admin.l)
       end
-      set_status(project, :member, candidate, member)
+      set_status(project, :member, candidate, member == :add)
       return_to_caller(project, params[:target])
     end
 
@@ -137,17 +137,20 @@ module Projects
 
     # Add/remove a given User to/from a given UserGroup.
     # Changes should get logged
-    def set_status(project, type, user, mode)
-      update_project_membership(project, type, user, mode)
+    def set_status(project, type, user, add)
+      update_project_membership(project, type, user, add)
       group = project.send(type == :member ? :user_group : :admin_group)
-      set_status_add(project, type, user, group) if mode == :add
-      set_status_remove(project, type, user, group) if mode == :remove
+      if add
+        set_status_add(project, type, user, group)
+      else
+        set_status_remove(project, type, user, group)
+      end
     end
 
-    def update_project_membership(project, type, user, mode)
+    def update_project_membership(project, type, user, add)
       project_member = ProjectMember.find_or_create_by(project:, user:)
       return unless project_member
-      return unless type != :admin && mode == :remove
+      return if type == :admin || add
 
       project_member.destroy
     end
