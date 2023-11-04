@@ -687,6 +687,7 @@
   merge: merge
   OKAY: Okay
   okay: okay
+  OPEN: Open
   # reload a form
   RELOAD: Reload
   reload: reload
