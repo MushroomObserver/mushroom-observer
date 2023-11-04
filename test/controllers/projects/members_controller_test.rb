@@ -148,6 +148,32 @@ module Projects
                                   false, true, false, true)
     end
 
+    # untrusting member trusting
+    def test_member_trust
+      target_user = project_members(:eol_member_katrina).user
+      project = projects(:eol_project)
+      params = {
+        project_id: project.id,
+        candidate: target_user.id,
+        commit: :change_member_status_trust.l
+      }
+      put_requires_login(:update, params, target_user.login)
+      assert(project.project_members.find_by(user: target_user).trusted)
+    end
+
+    # trusting member revoking trust
+    def test_member_revoke_trust
+      target_user = project_members(:eol_member_mary).user
+      project = projects(:eol_project)
+      params = {
+        project_id: project.id,
+        candidate: target_user.id,
+        commit: :change_member_status_revoke_trust.l
+      }
+      put_requires_login(:update, params, target_user.login)
+      assert(!project.project_members.find_by(user: target_user).trusted)
+    end
+
     # There are many other combinations that shouldn't work
     # for change_member_status, but I think the above covers the key cases
 
