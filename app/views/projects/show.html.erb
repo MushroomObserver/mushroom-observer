@@ -53,7 +53,7 @@ add_project_banner(@project)
                                              candidate: @user.id,
                                              target: :project_index)) %>
 <% else %>
-  <% if @project.trusts?(@user) %>
+  <% if @project.trusted_by?(@user) %>
     <%= put_button(name: :change_member_status_revoke_trust.l,
                    class: "btn btn-default btn-sm",
                    path: project_member_path(project_id: @project.id,

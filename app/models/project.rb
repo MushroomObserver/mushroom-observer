@@ -100,7 +100,7 @@ class Project < AbstractModel
     user && (admin_group.users.member?(user) || user.admin)
   end
 
-  def trusts?(user)
+  def trusted_by?(user)
     member = project_members.find_by(user: user)
     member&.trusted
   end
