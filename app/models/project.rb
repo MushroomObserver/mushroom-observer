@@ -105,7 +105,7 @@ class Project < AbstractModel
   end
 
   def can_leave?(user)
-    is_member?(user) && user.id != user_id
+    user && user_group.users.member?(user) && user.id != user_id
   end
 
   def member_status(user)
