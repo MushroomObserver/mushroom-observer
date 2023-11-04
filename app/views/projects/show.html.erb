@@ -29,7 +29,6 @@ add_project_banner(@project)
   <% end %>
 
   <p><b><%= :show_project_created_at.t %>:</b> <%= @project.created_at.web_date %></p>
-
 <% end %>
 
 <p>
@@ -53,12 +52,29 @@ add_project_banner(@project)
                   path: project_members_path(project_id: @project.id,
                                              candidate: @user.id,
                                              target: :project_index)) %>
-<% elsif @project.can_leave?(@user) %>
-  <%= put_button(name: :show_project_leave.t,
-                 class: "btn btn-default btn-sm",
-                 path: project_member_path(project_id: @project.id,
-                                           candidate: @user.id,
-                                           target: :project_index)) %>
+<% else %>
+  <% if @project.trusts?(@user) %>
+    <%= put_button(name: :change_member_status_revoke_trust.l,
+                   class: "btn btn-default btn-sm",
+                   path: project_member_path(project_id: @project.id,
+                                             candidate: @user.id,
+                                             commit: :change_member_status_revoke_trust.l,
+                                             target: :project_index)) %>
+  <% else %>
+    <%= put_button(name: :change_member_status_trust.l,
+                   class: "btn btn-default btn-sm",
+                   path: project_member_path(project_id: @project.id,
+                                             candidate: @user.id,
+                                             commit: :change_member_status_trust.l,
+                                             target: :project_index)) %>
+  <% end %>
+  <% if @project.can_leave?(@user) %>
+    <%= put_button(name: :show_project_leave.t,
+                   class: "btn btn-default btn-sm",
+                   path: project_member_path(project_id: @project.id,
+                                             candidate: @user.id,
+                                             target: :project_index)) %>
+  <% end %>
 <% end %>
 
 <% if check_permission(@project) %>

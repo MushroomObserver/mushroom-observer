@@ -71,7 +71,7 @@ module Projects
         return must_be_project_admin!(@project.id)
       end
 
-      update_member_status(@project, @candidate)
+      update_membership(@project, @candidate)
     end
 
     private
@@ -109,25 +109,49 @@ module Projects
       User.find_by(login: str.to_s.sub(/ <.*>$/, ""))
     end
 
-    # Redirects back to show_project.
-    def update_member_status(project, candidate)
-      member = :remove
-      case params[:commit]
-      when :change_member_status_make_admin.l
-        unless project.is_admin?(@user)
+    def update_membership(project, candidate)
+      unless update_trust_status(project, candidate)
+        unless update_admin_status(project, candidate)
           return must_be_project_admin!(project.id)
         end
 
-        member = :add
-      when :change_member_status_make_member.l
-        member = :add
+        update_member_status(project, candidate)
       end
-      if project.is_admin?(@user)
-        set_status(project, :admin, candidate,
-                   params[:commit] == :change_member_status_make_admin.l)
-      end
-      set_status(project, :member, candidate, member == :add)
       return_to_caller(project, params[:target])
+    end
+
+    def update_trust_status(project, candidate)
+      if params[:commit] == :change_member_status_revoke_trust.l
+        set_trust(project, candidate, false)
+      elsif params[:commit] == :change_member_status_trust.l
+        set_trust(project, candidate, true)
+      else
+        return false
+      end
+      true
+    end
+
+    def set_trust(project, user, trusted)
+      member = project.project_members.find_by(user:)
+      member.update(trusted:)
+    end
+
+    def update_admin_status(project, candidate)
+      make_admin = (params[:commit] == :change_member_status_make_admin.l)
+      if project.is_admin?(@user)
+        set_status(project, :admin, candidate, make_admin)
+      elsif make_admin
+        return false
+      end
+      true
+    end
+
+    def update_member_status(project, candidate)
+      make_member = [
+        :change_member_status_make_admin.l,
+        :change_member_status_make_member.l
+      ].member?(params[:commit])
+      set_status(project, :member, candidate, make_member)
     end
 
     def must_be_project_admin!(id)
