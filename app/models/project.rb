@@ -171,9 +171,11 @@ class Project < AbstractModel
     return false unless user
     return false if observation.projects.empty?
 
-    group_ids = user.user_group_ids
     observation.projects.each do |project|
-      return true if group_ids.member?(project.admin_group_id)
+      if project.is_admin?(user)
+        member = project.project_members.find_by(user: observation.user)
+        return member&.trusted
+      end
     end
     false
   end

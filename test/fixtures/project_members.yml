@@ -14,3 +14,8 @@ eol_member_katrina:
   project: eol_project
   user: katrina
   trusted: false
+
+open_member_mary:
+  project: open_membership_project
+  user: mary
+  trusted: true
