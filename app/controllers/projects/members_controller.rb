@@ -147,12 +147,9 @@ module Projects
     def update_project_membership(project, type, user, mode)
       project_member = ProjectMember.find_or_create_by(project:, user:)
       return unless project_member
+      return unless type != :admin && mode == :remove
 
-      if type == :admin
-        project_member.update!(admin: mode == :add)
-      elsif mode == :remove
-        project_member.destroy
-      end
+      project_member.destroy
     end
 
     def set_status_add(project, type, user, group)

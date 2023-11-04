@@ -12,7 +12,7 @@ module Projects
                    target_user.in_group?(project.admin_group.name))
       assert_equal(user_before,
                    target_user.in_group?(project.user_group.name))
-      check_project_membership(project, target_user, admin_before, user_before)
+      check_project_membership(project, target_user, user_before)
       params = {
         project_id: project.id,
         candidate: target_user.id,
@@ -26,14 +26,13 @@ module Projects
                    target_user.in_group?(project.admin_group.name))
       assert_equal(user_after,
                    target_user.in_group?(project.user_group.name))
-      check_project_membership(project, target_user, admin_after, user_after)
+      check_project_membership(project, target_user, user_after)
     end
 
-    def check_project_membership(project, user, admin, member)
+    def check_project_membership(project, user, member)
       membership = ProjectMember.find_by(project:, user:)
       if member
         assert_not_nil(membership)
-        assert_equal(membership.admin, admin)
       else
         assert_nil(membership)
       end
