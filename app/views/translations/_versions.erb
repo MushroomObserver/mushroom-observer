@@ -44,8 +44,9 @@
                     concat(
                       link_to("[#{:edit_translations_full_text.t}]",
                               translation_versions_path(id: version.id),
-                              remote: true,
-                              data: { role: "show_versions", id: version.id })
+                              data: { turbo: true,
+                                      action: "translation#showVersions",
+                                      translation_id_param: version.id })
                     )
                   end
                 end

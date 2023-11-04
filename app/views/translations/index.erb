@@ -42,7 +42,7 @@ end %>
           label = tag.span(h(ttag) + ":", class: "tag")
           link = link_to(label,
             edit_translation_path(id: ttag, locale: @lang.locale),
-            remote: true, data: { tag: ttag, role: "show_tag" })
+            data: { turbo: true, tag: ttag, role: "show_tag" })
           concat(tag.p(link + " " + str, class: "tag_field"))
         else
           raise "Unexpected form item type: #{line.class.name}"

@@ -11,7 +11,9 @@ module Translations
 
       @versions = str.text
       # render(plain: str.text)
-      # should render js
+      # alternatives:
+      # A, do a turbo response generating a modal with the versions. nicer.
+      # B, send html to a stimulus controller/action that will print the alert
     end
   end
 end
