@@ -3159,7 +3159,9 @@
   change_member_status_denied: Only the admins for a project can change member permissions.
   change_member_status_title: Changing [:user] Status of [name] for [title]
   change_member_status_trust: Trust Project
+  change_member_status_trust_flash: You now trust admins of this project with hidden GPS data for associated observations
   change_member_status_revoke_trust: Revoke Trust
+  change_member_status_revoke_trust_flash: You no longer trust admins of this project with hidden GPS data for associated observations
 
   # users/bonuses
   change_user_bonuses_title: Contribution Bonuses for [user]
