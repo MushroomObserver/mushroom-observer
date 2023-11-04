@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # Controls viewing and modifying collection numbers.
+# rubocop:disable Metrics/ClassLength
 class CollectionNumbersController < ApplicationController
   before_action :login_required
   before_action :pass_query_params, only: [
@@ -386,3 +387,4 @@ class CollectionNumbersController < ApplicationController
     ) and return true
   end
 end
+# rubocop:enable Metrics/ClassLength
