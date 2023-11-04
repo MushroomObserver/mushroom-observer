@@ -1,10 +1,19 @@
 <%# "Official" text at top. Here so that it gets loaded with every tag %>
 <% unless @lang.official
   render(partial: "translations/official")
-end %>
+end
+
+data_attr_hash = {
+  turbo: true, controller: :translation_form, locale: @lang.locale
+  # confirm_string: :edit_translations_will_lose_changes.l,
+  # loading_string: :edit_translations_loading.l,
+  # saving_string: :edit_translations_saving.l
+}
+%>
 
 <%= form_with(url: { action: :update, for_page: @for_page },
-              id: "translation_form", method: :patch, local: false) do |f| %>
+              id: "translation_form", method: :patch,
+              data: data_attr_hash) do |f| %>
 
   <%= f.hidden_field(:tag, value: @tag) %>
 

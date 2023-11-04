@@ -6,7 +6,7 @@ export default class extends Controller {
     this.id = this.element.getAttribute("id");
 
     if (this.id.indexOf("_1i") > 0) {
-      turnIntoTextField();
+      this.turnIntoTextField();
     }
   }
 
