@@ -21,13 +21,4 @@ export default class extends Controller {
     // this.element.setAttribute("data-stimulus", "sending")
     this.element.requestSubmit()
   }
-
-  // Target form could have action turbo:submit-end->modal-form#maybeRemove nope
-  // that will fire the next event if response is ok.
-  // formTargetConnected(element) {
-  // console.log("connecting target")
-  // console.log(element)
-  // element.setAttribute("data-stimulus", "target-connected")
-  // }
-
 }

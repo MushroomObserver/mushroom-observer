@@ -1,0 +1,48 @@
+<%#
+Entire template for a Bootstrap modal.
+Locals:
+  identifier - modals are separate and may be multiple, so they need an ID
+  title - for the modal header.
+  subtitle - for fancy titles
+  body - full path (after '/views/') of the partial template for the body
+%>
+
+<%
+title_block = capture do
+  if local_assigns[:subtitle].present?
+    tag.div(id: "modal_header_#{identifier}") do
+      concat(tag.h4(title, class: "modal-title"))
+      concat(tag.small(subtitle, class: "modal-subtitle"))
+    end
+  else
+    tag.h4(title, class: "modal-title", id: "modal_header_#{identifier}")
+  end
+end
+partial_locals = local_assigns.except(:identifier, :title, :body)
+%>
+
+<%=
+tag.div(
+  class: "modal", id: "modal_#{identifier}", role: "dialog",
+  aria: { labelledby: "modal_header_#{identifier}" }
+) do
+  tag.div(class: "modal-dialog modal-lg", role: "document") do
+    tag.div(class: "modal-content") do
+      [
+        tag.div(class: "modal-header") do
+          [
+            tag.button(
+              type: :button, class: "close", data: { dismiss: "modal" },
+              aria: { label: :CLOSE.l },
+            ) { tag.span(aria: { hidden: "true" }) { "&times;".html_safe } },
+            title_block
+          ].safe_join
+        end,
+        tag.div(class: "modal-body", id: "modal_body_#{identifier}") do
+          render(partial: body, locals: partial_locals) # turbo
+        end
+      ].safe_join
+    end
+  end
+end
+%>
