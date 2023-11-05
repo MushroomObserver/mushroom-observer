@@ -19,6 +19,15 @@ title_block = capture do
   end
 end
 partial_locals = local_assigns.except(:identifier, :title, :body)
+
+# print a fallback the caller may send, if external data didn't load:
+modal_body = capture do
+  if local_assigns[:fallback].present?
+    render(plain: fallback, status: :internal_server_error)
+  else
+    render(partial: body, locals: partial_locals)
+  end
+end
 %>
 
 <%=
@@ -39,7 +48,7 @@ tag.div(
           ].safe_join
         end,
         tag.div(class: "modal-body", id: "modal_body_#{identifier}") do
-          render(partial: body, locals: partial_locals) # turbo
+          modal_body
         end
       ].safe_join
     end
