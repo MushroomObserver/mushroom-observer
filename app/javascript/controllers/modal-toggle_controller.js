@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import { get } from "@rails/request.js"
 
+// The controller for the link to the modal - not the modal itself.
 // MO doesn't print a pre-existing "dormant" Bootstrap modal form in the page
 // because we want to let people have several modals in progress on same page.
 // For example, you can start entering a collection number, close the modal,
@@ -16,7 +17,7 @@ export default class extends Controller {
   // a Stimulus shortcut that calls event.preventDefault()
   showModal() {
     // check if modal exists in DOM. by ID of modal with identifier
-    const modalSelector = this.element.getAttribute("data-turbo-frame")
+    const modalSelector = this.element.getAttribute("data-modal")
     // console.log(modalSelector)
     const destination = this.element.getAttribute("href")
 

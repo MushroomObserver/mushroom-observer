@@ -73,16 +73,20 @@ module LinkHelper
   end
 
   # Link should be to a controller action that renders the form in the modal.
-  # Stimulus modal-form-show controller fetches the form from the link as a .
+  # Stimulus modal-toggle controller fetches the form from the link as a .
   # turbo-stream response. It also checks if it needs to generate a modal, or
   # just show the one in progress.
   # NOTE: Needs a modal `identifier`, in case of multiple form modals
   # NOTE: Args from an MO "tab" will be a hash.
+  # TODO: Maybe change data-turbo-frame to data-modal.
+  # Links with data-turbo-frame do a direct page update, and if turbo doesn't
+  # find the frame already on the page it's appended after body! That may be
+  # why it's appended to the page and not returned to the stimulus caller
   def modal_link_to(identifier, name, path, args)
     args = args.deep_merge({ data: {
-                             turbo_frame: "modal_#{identifier}",
-                             controller: "modal-form-show",
-                             action: "modal-form-show#showModal:prevent"
+                             modal: "modal_#{identifier}",
+                             controller: "modal-toggle",
+                             action: "modal-toggle#showModal:prevent"
                            } })
 
     if args[:icon].present?

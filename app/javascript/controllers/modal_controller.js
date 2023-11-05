@@ -6,7 +6,7 @@ export default class extends Controller {
   // static targets = ["form"] // unused rn
 
   connect() {
-    console.log("Hello Modal " + this.element.id);
+    // console.log("Hello Modal " + this.element.id);
     this.element.setAttribute("data-stimulus", "connected")
   }
 
@@ -19,13 +19,4 @@ export default class extends Controller {
     $(this.element).modal('hide')
     this.element.remove()
   }
-
-  // Target form could have action turbo:submit-end->modal-form#maybeRemove nope
-  // that will fire the next event if response is ok.
-  // formTargetConnected(element) {
-  // console.log("connecting target")
-  // console.log(element)
-  // element.setAttribute("data-stimulus", "target-connected")
-  // }
-
 }
