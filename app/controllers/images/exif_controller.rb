@@ -29,7 +29,14 @@ module Images
       @data = @status.success? ? parse_exif_data(@result, hide_gps) : nil
       respond_to do |format|
         format.html
-        format.turbo_stream
+        format.turbo_stream do
+          identifier = "image_exif_#{@image.id}"
+          title = :exif_data_for_image.t(image: @image.id)
+          fallback = @status ? nil : @result
+          render(partial: "shared/modal",
+                 identifier: identifier, title: title,
+                 body: "images/exif/data", fallback: fallback)
+        end
       end
     end
 
