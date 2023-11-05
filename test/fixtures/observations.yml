@@ -232,6 +232,36 @@ unknown_with_lat_long:
   notes:
     :Other: 'unknown_with_lat_long'
 
+trusted_hidden:
+  <<: *DEFAULTS
+  created_at: 2023-11-05 09:20:00
+  updated_at: 2023-11-05 09:21:00
+  when: 2023-11-05
+  location: burbank
+  where: Burbank, California, USA
+  user: mary
+  name: fungi
+  text_name: Fungi
+  gps_hidden: true
+  lat: 34.1622
+  long: -118.3521
+  alt: 123
+
+untrusted_hidden:
+  <<: *DEFAULTS
+  created_at: 2023-11-05 09:20:00
+  updated_at: 2023-11-05 09:21:00
+  when: 2023-11-05
+  location: burbank
+  where: Burbank, California, USA
+  user: katrina
+  name: fungi
+  text_name: Fungi
+  gps_hidden: true
+  lat: 34.1655
+  long: -118.3555
+  alt: 123
+
 amateur_obs:
   <<: *DEFAULTS
   created_at: 2010-12-31 06:46:00

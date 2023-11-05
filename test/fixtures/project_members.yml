@@ -19,3 +19,8 @@ open_member_mary:
   project: open_membership_project
   user: mary
   trusted: true
+
+open_member_katrina:
+  project: open_membership_project
+  user: katrina
+  trusted: false
