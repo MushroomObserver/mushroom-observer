@@ -12,30 +12,31 @@ query = query_images_to_reuse(@all_users, @user)
 %>
 <%= form_with(url: form_action, method: :post) do |f| %>
 
-  <div class="container-text">
-    <div class="form-group form-inline">
+  <%= tag.div(class: "container-text") do %>
+    <%= tag.div(class: "form-group form-inline") do %>
       <%= text_field_with_label(form: f, field: :img_id,
                                 size: 8, data: { autofocus: true },
                                 label: :image_reuse_id.t + ":") %>
       <%= submit_button(form: f, button: :image_reuse_reuse.l, class: "ml-3") %>
-    </div>
+    <% end %>
 
     <%= content_tag(:div, :image_reuse_id_help.tp,
                     class: "help-block form-group") %>
 
-    <div class="form-group mt-3">
+    <%= tag.div(class: "form-group mt-3") do %>
       <%= link_with_query((@all_users ? :image_reuse_just_yours.t :
                             :image_reuse_all_users.t),
                           form_action.merge(action: :reuse,
                                             all_users: @all_users ? 0 : 1),
                           class: "btn btn-default") %>
-    </div>
-  </div><!--.container-text-->
+    <% end %>
+  <% end %>
+
 <% end %>
 
 <% # Note this uses a specialized matrix box here, not the matrix_box partial. %>
 <%= paginate_block(@pages) do %>
-  <ul class="row list-unstyled mt-3">
+  <%= tag.ul(class: "row list-unstyled mt-3") do %>
 
     <%= render(layout: "shared/matrix_table",
                locals: { objects: @objects }) do |image| %>
@@ -51,5 +52,5 @@ query = query_images_to_reuse(@all_users, @user)
       <% end %>
     <% end %>
 
-  </ul>
+  <% end %>
 <% end %>

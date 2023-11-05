@@ -18,10 +18,12 @@
   end
 %>
 
-<p>
-  <%= :TITLE.t %>: <%= description_title(description) %><br/>
-  <%= type.to_s.upcase.to_sym.t %>: <%= description.parent.format_name.t %><br/>
-  <%= :show_description_read_permissions.t %>: <%= read %><br/>
-  <%= :show_description_write_permissions.t %>: <%= write %><br/>
-  <%= show_previous_version(description) %>
-</p>
+<%= tag.p do
+  [
+    "#{:TITLE.t}: #{description_title(description)}",
+    "#{type.to_s.upcase.to_sym.t}: #{description.parent.format_name.t}",
+    "#{:show_description_read_permissions.t}: #{read}",
+    "#{:show_description_write_permissions.t}: #{write}",
+    show_previous_version(description)
+  ].safe_join(safe_br)
+end %>

@@ -6,30 +6,30 @@
 
   <%= submit_button(form: f, button: :image_remove_remove.l, center: true) %>
 
-  <ul class="row list-unstyled mt-3">
+  <%= tag.ul(class: "row list-unstyled mt-3") do %>
 
     <%= render(layout: "shared/matrix_table",
                locals: {objects: @object.images}) do |image| %>
 
       <%= matrix_box(id: image.id) do %>
-        <div class="py-3 text-center">
+        <%= tag.div(class: "py-3 text-center") do %>
           <% # no special link-or-button param here, there's a checkbox below %>
           <%= interactive_image(image,
                         original: true,
                         extra_classes: "image-to-remove",
                         votes: false) %>
-        </div>
-        <div class="pb-3 text-center">
+        <% end %>
+        <%= tag.div(class: "pb-3 text-center") do %>
           <%= fields_for(:selected) do |f_s| %>
             <%= f_s.check_box(image.id, {}, "yes", "no") %>
             <%= f_s.label(image.id, "#{:image.t} ##{image.id}") %>
           <% end %>
-        </div>
+        <% end %>
       <% end %><!-- .matrix-box -->
 
     <% end %>
 
-  </ul>
+  <% end %>
 
   <%= submit_button(form: f, button: :image_remove_remove.l, center: true) %>
 

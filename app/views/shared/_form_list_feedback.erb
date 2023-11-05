@@ -1,0 +1,60 @@
+<%=
+if !@new_names.blank?
+  concat(tag.div(class: "Errors" id: "missing_names") do
+    concat(tag.div(:form_list_feedback_missing_names.t,
+                   class: "font-weight-bold"))
+    concat(help_note(:div, :form_list_feedback_missing_names_help.t))
+    concat(tag.p do
+      @new_names.each do |n|
+        concat(safe_br + indent + h(n))
+      end
+    )
+  end)
+end
+
+if !@deprecated_names.blank?
+  concat(tag.div(class: "Errors" id: "deprecated_names") do
+    concat(tag.div(:form_species_lists_deprecated.t,
+                   class: "font-weight-bold"))
+    concat(help_note(:div, :form_species_lists_deprecated_help.t))
+    concat(tag.p do
+      @deprecated_names.each do |name|
+        approved_names = name.approved_synonyms
+        concat(name.display_name.t + safe_br)
+        if approved_names != []
+          fields_for(:chosen_approved_names) do |f_c|
+            approved_names.each do |other_name|
+              concat(radio_with_label(form: f_c, field: name.id,
+                                      value: other_name.id,
+                                      label: other_name.display_name.t,
+                                      class: "ml-4"))
+            end
+          end
+        end
+      end
+    end)
+  end)
+end
+
+if !@multiple_names.blank?
+  concat(tag.div(class: "Errors" id: "ambiguous_names") do
+    concat(tag.div(:form_species_lists_multiple_names.t,
+                   class: "font-weight-bold"))
+    concat(help_note(:div, :form_species_lists_multiple_names_help.t))
+    concat(tag.p do
+      @multiple_names.each do |name|
+        concat(name.display_name.t + safe_br)
+        fields_for(:chosen_multiple_names) do |f_c|
+          name.other_authors.each do |other_name|
+            concat(radio_with_label(form: f_c, field: name.id,
+                                    value: other_name.id,
+                                    label: other_name.display_name.t,
+                                    class: "ml-4"))
+            concat("(#{other_name.observations.count})" + safe_br)
+          end
+        end
+      end
+    end)
+  end)
+end
+%>

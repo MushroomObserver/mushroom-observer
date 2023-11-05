@@ -1,0 +1,7 @@
+<%= tag.div(id: "textilize_note" class:"help-block") do
+  link = link_to(:shared_textile_link.t,
+    info_textile_sandbox_path,
+    {target: "_new"})
+  str = :shared_textile_help.l % link
+  str.html_safe
+end %>
