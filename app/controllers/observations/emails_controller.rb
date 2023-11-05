@@ -13,9 +13,10 @@ module Observations
 
       respond_to do |format|
         format.html
-        format.js do
-          render(partial: "shared/modal_form_show",
-                 locals: { identifier: "observation_email" }) and return
+        format.turbo_stream do
+          render(partial: "shared/modal_form",
+                 locals: { identifier: "observation_email",
+                           form: "observations/emails/form" }) and return
         end
       end
     end

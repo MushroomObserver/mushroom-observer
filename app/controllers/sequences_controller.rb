@@ -78,7 +78,7 @@ class SequencesController < ApplicationController
 
     respond_to do |format|
       format.html
-      format.js do
+      format.turbo_stream do
         render_modal_sequence_form(
           title: helpers.sequence_form_new_title
         )
@@ -100,7 +100,7 @@ class SequencesController < ApplicationController
 
     respond_to do |format|
       format.html
-      format.js do
+      format.turbo_stream do
         render_modal_sequence_form(
           title: helpers.sequence_form_edit_title(seq: @sequence)
         )
@@ -166,8 +166,9 @@ class SequencesController < ApplicationController
   end
 
   def render_modal_sequence_form(title:)
-    render(partial: "shared/modal_form_show",
-           locals: { title: title, identifier: "sequence" }) and return
+    render(partial: "shared/modal_form",
+           locals: { title: title, identifier: "sequence",
+                     form: "sequences/form" }) and return
   end
 
   def render_sequences_section_update

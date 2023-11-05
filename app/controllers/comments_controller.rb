@@ -307,8 +307,9 @@ class CommentsController < ApplicationController
   private
 
   def render_modal_comment_form(title:)
-    render(partial: "shared/modal_form_show",
-           locals: { title: title, identifier: "comment" }) and return
+    render(partial: "shared/modal_form",
+           locals: { title: title, identifier: "comment",
+                     form: "comments/form" }) and return
   end
 
   def render_modal_form_reload
