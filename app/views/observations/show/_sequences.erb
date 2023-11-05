@@ -64,7 +64,7 @@ query = Query.lookup(:Sequence, :all, observations: obs.id)
             links << link_to(:show_observation_blast_link.t,
                             sequence.blast_url, target: "_blank")
           end
-          concat("[#{links.safe_join(' | ')}]".html_safe) if links.any?
+          concat(" [#{links.safe_join(' | ')}]".html_safe) if links.any?
         end)
       end
     end) if sequences.any?
