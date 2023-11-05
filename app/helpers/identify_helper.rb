@@ -25,22 +25,23 @@ module IdentifyHelper
   # state on show, and cost an extra db lookup. Not worth it, IMO.
   # - Nimmo 20230215
   def mark_as_reviewed_toggle(id, selector = "caption_reviewed",
-                              label_class = "")
-
-    form_with(url: observation_view_path(id: id),
-              class: "d-inline-block",
-              method: :put, local: false) do |f|
-      content_tag(:div, class: "d-inline form-group form-inline") do
-        f.label("#{selector}_#{id}",
-                class: "caption-reviewed-link #{label_class}") do
-          concat(:mark_as_reviewed.t)
-          concat(
-            f.check_box(
-              :reviewed,
-              { checked: "1", class: "mx-3", id: "#{selector}_#{id}",
-                onchange: "Rails.fire(this.closest('form'), 'submit')" }
+                              label_class = "", reviewed = 0)
+    turbo_frame_tag("#{selector}_toggle_#{id}") do
+      form_with(url: observation_view_path(id: id),
+                class: "d-inline-block", method: :put,
+                data: { turbo: true }) do |f|
+        tag.div(class: "d-inline form-group form-inline") do
+          f.label("#{selector}_#{id}",
+                  class: "caption-reviewed-link #{label_class}") do
+            concat(reviewed ? :marked_as_reviewed.t : :mark_as_reviewed.t)
+            concat(
+              f.check_box(
+                :reviewed,
+                { checked: "1", class: "mx-3", id: "#{selector}_#{id}",
+                  onchange: "Rails.fire(this.closest('form'), 'submit')" }
+              )
             )
-          )
+          end
         end
       end
     end
