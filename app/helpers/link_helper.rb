@@ -72,16 +72,17 @@ module LinkHelper
     icon_link_to(add_query_param(link), **opts) { content }
   end
 
-  # TODO: Accept icon arg
-  # maybe need a modal identifier, in case of multiple form modals
-  # Stimulus modal-form-show controller checks if it needs to generate the modal
-  # or just show the one already created
-  # Args from a *tab will be a hash.
+  # Link should be to a controller action that renders the form in the modal.
+  # Stimulus modal-form-show controller fetches the form from the link as a .
+  # turbo-stream response. It also checks if it needs to generate a modal, or
+  # just show the one in progress.
+  # NOTE: Needs a modal `identifier`, in case of multiple form modals
+  # NOTE: Args from an MO "tab" will be a hash.
   def modal_link_to(identifier, name, path, args)
     args = args.deep_merge({ data: {
                              turbo_frame: "modal_#{identifier}",
                              controller: "modal-form-show",
-                             action: "click->modal-form-show#showModal:prevent"
+                             action: "modal-form-show#showModal:prevent"
                            } })
 
     if args[:icon].present?
