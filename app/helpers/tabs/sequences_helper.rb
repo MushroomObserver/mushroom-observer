@@ -36,6 +36,18 @@ module Tabs
        { class: tab_id(__method__.to_s) }]
     end
 
+    def obs_edit_sequence_tab(seq, obs)
+      [:EDIT.t,
+       edit_sequence_path(id: seq.id, back: obs.id, q: get_query_param),
+       { class: "edit_sequence_link_#{seq.id}", icon: :edit }]
+    end
+
+    def obs_new_sequence_tab(obs)
+      [:show_observation_add_sequence.t,
+       new_sequence_path(observation_id: obs.id, q: get_query_param),
+       { class: "new_sequence_link_#{obs.id}", icon: :add }]
+    end
+
     def destroy_sequence_tab(seq)
       [:destroy_object.t(type: :sequence), seq,
        { button: :destroy, back: url_after_delete(seq) }]

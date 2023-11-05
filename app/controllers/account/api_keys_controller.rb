@@ -18,7 +18,9 @@ module Account
 
       respond_to do |format|
         format.html { redirect_to(account_api_keys_path) }
-        format.js { render(partial: "account/api_keys/update_table_and_flash") }
+        format.turbo_stream do
+          render(partial: "account/api_keys/update_table_and_flash")
+        end
       end
     end
 
@@ -28,7 +30,9 @@ module Account
       update_api_key
       respond_to do |format|
         format.html { redirect_to(account_api_keys_path) }
-        format.js { render(partial: "account/api_keys/update_table_and_flash") }
+        format.turbo_stream do
+          render(partial: "account/api_keys/update_table_and_flash")
+        end
       end
     end
 
@@ -40,7 +44,9 @@ module Account
 
       respond_to do |format|
         format.html { redirect_to(account_api_keys_path) }
-        format.js { render(partial: "account/api_keys/update_table_and_flash") }
+        format.turbo_stream do
+          render(partial: "account/api_keys/update_table_and_flash")
+        end
       end
     end
 
@@ -53,7 +59,9 @@ module Account
 
       respond_to do |format|
         format.html { redirect_to(account_api_keys_path) }
-        format.js { render(partial: "account/api_keys/update_table_and_flash") }
+        format.turbo_stream do
+          render(partial: "account/api_keys/update_table_and_flash")
+        end
       end
     end
 

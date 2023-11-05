@@ -254,7 +254,7 @@ class SequencesController < ApplicationController
       format.html do
         redirect_with_query(redirect_to)
       end
-      format.js do
+      format.turbo_stream do
         render_sequences_section_update
       end
     end
@@ -269,7 +269,7 @@ class SequencesController < ApplicationController
                   end
     respond_to do |format|
       format.html { render(action: redo_action) and return }
-      format.js do
+      format.turbo_stream do
         render_modal_flash_update
       end
     end
@@ -281,7 +281,7 @@ class SequencesController < ApplicationController
         redirect_with_query(@sequence.observation.show_link_args) and
           return
       end
-      format.js do
+      format.turbo_stream do
         render_modal_flash_update
       end
     end
@@ -296,7 +296,7 @@ class SequencesController < ApplicationController
           redirect_with_query(@back_object.show_link_args)
         end
       end
-      format.js do
+      format.turbo_stream do
         # renders the flash in the obs page via js
         render_sequences_section_update
       end

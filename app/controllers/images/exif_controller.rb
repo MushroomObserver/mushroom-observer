@@ -29,7 +29,7 @@ module Images
       @data = @status.success? ? parse_exif_data(@result, hide_gps) : nil
       respond_to do |format|
         format.html
-        format.js
+        format.turbo_stream
       end
     end
 

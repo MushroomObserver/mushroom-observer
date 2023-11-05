@@ -10,10 +10,17 @@ when "edit", "update"
   url_params = url_params.merge({ back: @back }) if @back.present?
   button = :UPDATE.t
 end
+form_args = {
+  model: @sequence, url: url_params, id: "sequence_form"
+}
+if local_assigns[:local] == true
+  form_args = form_args.merge({ local: true })
+else
+  form_args = form_args.deep_merge({ data: { turbo: true } })
+end
 %>
 
-<%= form_with(model: @sequence, url: url_params, local: local,
-              id: "sequence_form") do |f| %>
+<%= form_with(**form_args) do |f| %>
 
   <%# locus %>
   <%= text_area_with_label(form: f, field: :locus, rows: 1,

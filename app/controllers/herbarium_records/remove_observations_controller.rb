@@ -45,7 +45,7 @@ module HerbariumRecords
         format.html do
           redirect_with_query(observation_path(@observation.id))
         end
-        format.js do
+        format.turbo_stream do
           render(
             partial: "observations/show/section_update",
             locals: { identifier: "herbarium_records" }

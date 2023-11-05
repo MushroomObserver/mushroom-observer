@@ -158,7 +158,9 @@ module Observations
       respond_to do |format|
         format.html { render(action: redo_action) and return }
         format.turbo_stream do
-          render(partial: "observations/namings/form_reload") and return
+          render(partial: "shared/modal_form_reload",
+                 locals: { identifier: "naming",
+                           form: "observations/namings/form" }) and return true
         end
       end
     end

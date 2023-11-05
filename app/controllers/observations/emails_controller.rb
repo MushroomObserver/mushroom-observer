@@ -39,7 +39,7 @@ module Observations
         format.html do
           redirect_with_query(observation_path(@observation.id)) and return
         end
-        format.js do
+        format.turbo_stream do
           render(partial: "shared/modal_flash_update") and return
         end
       end

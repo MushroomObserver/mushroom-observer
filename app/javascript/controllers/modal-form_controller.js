@@ -6,7 +6,7 @@ export default class extends Controller {
   // static targets = ["form"] // unused rn
 
   connect() {
-    // console.log("Hello Modal");
+    console.log("Hello Modal " + this.element.id);
     this.element.setAttribute("data-stimulus", "connected")
   }
 

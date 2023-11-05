@@ -7,76 +7,67 @@ can_edit  = in_admin_mode? || obs.can_edit?
 query = Query.lookup(:Sequence, :all, observations: obs.id)
 %>
 
-<%=
-tag.div(class: "obs-sequence", id: "observation_sequences") do
-  unless @user.try(&:hide_specimen_stuff?) ||
-         obs.user.try(&:hide_specimen_stuff?)
-    if @user || sequences.any?
-      concat(tag.div do
-        concat(sequences.any? ? :Sequences.t + ":".html_safe :
-               :show_observation_no_sequences.t)
-        concat(
-          [
-            "[",
-            modal_link_to(
-              :show_observation_add_sequence.t,
-              new_sequence_path(observation_id: obs.id, q: get_query_param),
-              class: "create_sequence_link_#{obs.id}"
-            ),
-            "]"
-          ].safe_join
-        ) if @user
-      end)
-    end
+<% unless @user.try(&:hide_specimen_stuff?) ||
+          obs.user.try(&:hide_specimen_stuff?) %>
+  <%=
+  tag.turbo_frame(
+    class: "obs-sequence", id: "observation_sequences",
+    data: { controller: "section-update", updated_by: "modal_sequence" }
+  ) do
 
-    if sequences.any?
-      concat(tag.ul(class:"tight-list") do
-        sequences.each do |sequence|
-          concat(tag.li(id: "sequence_#{sequence.id}") do
-            locus = sequence.locus.truncate(sequence.locus_width)
-            if sequence.deposit?
-              concat(link_to(
-                "#{locus} - #{sequence.archive} ##{sequence.accession}".t,
-                add_query_param(sequence.show_link_args, query),
-                class: "show_sequence_link_#{sequence.id}"
-              ))
-            else
-              concat(link_to(
-                "#{locus} - MO ##{sequence.id}".t,
-                add_query_param(sequence.show_link_args, query),
-                class: "show_sequence_link_#{sequence.id}"
-              ))
-            end
+    concat(tag.div do
+      concat(sequences.any? ? "#{:Sequences.t}: " :
+             "#{:show_observation_no_sequences.t} ")
+      concat(
+        ["[",
+         modal_link_to("sequence", *obs_new_sequence_tab(obs)),
+         "]"].safe_join
+      ) if @user
+    end) if @user || sequences.any?
 
-            links = []
-            if sequence.deposit?
-              links << link_to(:show_observation_archive_link.t,
-                               sequence.accession_url, target: "_blank")
-            end
-            if in_admin_mode? || sequence.can_edit?(@user)
-              links << modal_link_to(
-                :EDIT.t,
-                edit_sequence_path(id: sequence.id, back: obs.id,
-                                   q: get_query_param),
-                class: "edit_sequence_link_#{sequence.id}"
-              )
-              links << destroy_button(
-                name: :destroy_object.t(type: :sequence),
-                target: sequence_path(id: sequence.id,
-                                      back: url_after_delete(sequence)),
-                data: { turbo: true },
-                class: "destroy_sequence_link_#{sequence.id}"
-              )
-            end
-            if sequence.blastable?
-              links << link_to(:show_observation_blast_link.t,
-                               sequence.blast_url, target: "_blank")
-            end
-            concat("[#{links.safe_join(' | ')}]".html_safe if links.any?)
-          end)
-        end
-      end)
-    end
-  end
-end
-%>
+    concat(tag.ul(class:"tight-list") do
+      sequences.each do |sequence|
+        concat(tag.li(id: "sequence_#{sequence.id}") do
+          locus = sequence.locus.truncate(sequence.locus_width)
+          if sequence.deposit?
+            concat(link_to(
+              "#{locus} - #{sequence.archive} ##{sequence.accession}".t,
+              add_query_param(sequence.show_link_args, query),
+              class: "show_sequence_link_#{sequence.id}"
+            ))
+          else
+            concat(link_to(
+              "#{locus} - MO ##{sequence.id}".t,
+              add_query_param(sequence.show_link_args, query),
+              class: "show_sequence_link_#{sequence.id}"
+            ))
+          end
+
+          links = []
+          if sequence.deposit?
+            links << link_to(:show_observation_archive_link.t,
+                             sequence.accession_url, target: "_blank")
+          end
+          if in_admin_mode? || sequence.can_edit?(@user)
+            links << modal_link_to(
+              "sequence", *obs_edit_sequence_tab(sequence, obs)
+            )
+            links << destroy_button(
+              name: :destroy_object.t(type: :sequence),
+              target: sequence_path(id: sequence.id,
+                                    back: url_after_delete(sequence)),
+              data: { turbo: true }, icon: :remove,
+              class: "destroy_sequence_link_#{sequence.id}"
+            )
+          end
+          if sequence.blastable?
+            links << link_to(:show_observation_blast_link.t,
+                            sequence.blast_url, target: "_blank")
+          end
+          concat("[#{links.safe_join(' | ')}]".html_safe) if links.any?
+        end)
+      end
+    end) if sequences.any?
+
+  end %>
+<% end %>

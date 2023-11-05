@@ -15,7 +15,7 @@ module Observations::Namings
       @naming = find_or_goto_index(Naming, params[:naming_id].to_s)
       respond_to do |format|
         format.html
-        format.js
+        format.turbo_stream
       end
     end
 
@@ -53,7 +53,7 @@ module Observations::Namings
         format.html do
           redirect_with_query(observation_path(id: @observation.id))
         end
-        format.js do
+        format.turbo_stream do
           case params[:context]
           when "matrix_box"
             render(partial: "observations/namings/update_lightbox")

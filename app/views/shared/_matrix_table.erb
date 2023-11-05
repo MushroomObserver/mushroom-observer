@@ -10,7 +10,7 @@ but not always possible if we want to render a block %>
                        style: "clear:left")) if idx % 3 == 0
     concat(tag.div("", class: "hidden visible-lg-block",
                        style: "clear:left")) if idx % 4 == 0
-    concat(yield(object))
+    yield(object)
   end
 else
   concat(tag.div("", class: "hidden visible-sm-block",
@@ -19,5 +19,5 @@ else
                      style: "clear:left")) if object_counter % 3 == 0
   concat(tag.div("", class: "hidden visible-lg-block",
                      style: "clear:left")) if object_counter % 4 == 0
-  concat(yield(object))
+  yield(object)
 end %>

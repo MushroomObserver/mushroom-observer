@@ -25,7 +25,7 @@ module Images
             redirect_with_query(image_path(id: @id))
           end
         end
-        format.js do
+        format.turbo_stream do
           render(layout: false)
         end
       end

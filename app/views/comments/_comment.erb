@@ -1,6 +1,11 @@
 <%
-  target = comment.target
-  user = comment.user
+target = comment.target
+user = comment.user
+
+target_name_link = link_to(target.unique_format_name.t, target.show_link_args) \
+                   rescue :comment_list_deleted.t
+target_type = tag.span(target.class.name.to_sym.t, class: "small") \
+                       rescue :runtime_object_deleted
 %>
 
 <%= tag.div(class: "list-group-item comment", id:"comment_#{comment.id}") do
@@ -9,24 +14,24 @@
       tag.div(class: "col-xs-12 col-sm-9 col-lg-10") do
         if local_assigns[:show_name] && show_name
           concat(tag.h4(class: "mt-0") do
-            concat(link_to(target.unique_format_name.t, target.show_link_args)
-                   rescue :comment_list_deleted.t)
-            concat(tag.span(target.class.name.to_sym.t, class: "small") \
-                   rescue :runtime_object_deleted)
+            concat(target_name_link)
+            concat(target_type)
           end)
         end
         concat(tag.div(comment.summary.tl, class: "font-weight-bold"))
         concat(tag.div(class: "comment-info") do
-          concat("#{:BY.t}: #{user_link(user)}")
+          concat(tag.span(class: "comment-author text-nowrap") do
+            ["#{:BY.t}: ", user_link(user), " "].safe_join
+          end)
           concat(tag.span(class: "text-nowrap") do
             [
               "[",
-              link_with_query(:EDIT.t, edit_comment_path(comment.id),
-                                class: "edit_comment_link_#{comment.id}",
-                                remote: true),
+              modal_link_to("comment", :EDIT.t, edit_comment_path(comment.id),
+                            class: "edit_comment_link_#{comment.id}",
+                            icon: :edit),
               " | ",
               destroy_button(name: :comment_show_destroy.t, target: comment,
-                              remote: true),
+                             icon: :delete, data: { turbo: true }),
               "]",
             ].safe_join
           end) if check_permission(comment)
