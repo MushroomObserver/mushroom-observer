@@ -794,10 +794,10 @@ class NamesControllerTest < FunctionalTestCase
     # No interest in this name yet.
     get(:show, params: { id: peltigera.id })
     assert_response(:success)
-    assert_image_link_in_html(/watch\d*.png/,
+    assert_image_link_in_html(/watch.*\.png/,
                               set_interest_path(type: "Name",
                                                 id: peltigera.id, state: 1))
-    assert_image_link_in_html(/ignore\d*.png/,
+    assert_image_link_in_html(/ignore.*\.png/,
                               set_interest_path(type: "Name",
                                                 id: peltigera.id, state: -1))
 
@@ -805,10 +805,10 @@ class NamesControllerTest < FunctionalTestCase
     Interest.create(target: peltigera, user: rolf, state: true)
     get(:show, params: { id: peltigera.id })
     assert_response(:success)
-    assert_image_link_in_html(/halfopen\d*.png/,
+    assert_image_link_in_html(/halfopen.*\.png/,
                               set_interest_path(type: "Name",
                                                 id: peltigera.id, state: 0))
-    assert_image_link_in_html(/ignore\d*.png/,
+    assert_image_link_in_html(/ignore.*\.png/,
                               set_interest_path(type: "Name",
                                                 id: peltigera.id, state: -1))
 
@@ -817,10 +817,10 @@ class NamesControllerTest < FunctionalTestCase
     Interest.create(target: peltigera, user: rolf, state: false)
     get(:show, params: { id: peltigera.id })
     assert_response(:success)
-    assert_image_link_in_html(/halfopen\d*.png/,
+    assert_image_link_in_html(/halfopen.*\.png/,
                               set_interest_path(type: "Name",
                                                 id: peltigera.id, state: 0))
-    assert_image_link_in_html(/watch\d*.png/,
+    assert_image_link_in_html(/watch.*\.png/,
                               set_interest_path(type: "Name",
                                                 id: peltigera.id, state: 1))
   end

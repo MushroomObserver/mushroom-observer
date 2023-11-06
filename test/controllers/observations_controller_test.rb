@@ -3161,15 +3161,15 @@ class ObservationsControllerTest < FunctionalTestCase
 
     # No interest in this observation yet.
     #
-    # <img[^>]+watch\d*.png[^>]+>[\w\s]*
+    # <img[^>]+watch.*\.png[^>]+>[\w\s]*
     get(:show, params: { id: minimal_unknown.id })
     assert_response(:success)
     assert_image_link_in_html(
-      /watch\d*.png/,
+      /watch.*\.png/,
       set_interest_path(type: "Observation", id: minimal_unknown.id, state: 1)
     )
     assert_image_link_in_html(
-      /ignore\d*.png/,
+      /ignore.*\.png/,
       set_interest_path(type: "Observation", id: minimal_unknown.id, state: -1)
     )
 
@@ -3178,11 +3178,11 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: minimal_unknown.id })
     assert_response(:success)
     assert_image_link_in_html(
-      /halfopen\d*.png/,
+      /halfopen.*\.png/,
       set_interest_path(type: "Observation", id: minimal_unknown.id, state: 0)
     )
     assert_image_link_in_html(
-      /ignore\d*.png/,
+      /ignore.*\.png/,
       set_interest_path(type: "Observation", id: minimal_unknown.id, state: -1)
     )
 
@@ -3192,11 +3192,11 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: minimal_unknown.id })
     assert_response(:success)
     assert_image_link_in_html(
-      /halfopen\d*.png/,
+      /halfopen.*\.png/,
       set_interest_path(type: "Observation", id: minimal_unknown.id, state: 0)
     )
     assert_image_link_in_html(
-      /watch\d*.png/,
+      /watch.*\.png/,
       set_interest_path(type: "Observation", id: minimal_unknown.id, state: 1)
     )
   end
