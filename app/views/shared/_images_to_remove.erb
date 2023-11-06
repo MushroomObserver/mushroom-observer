@@ -9,15 +9,13 @@
   <%= tag.ul(class: "row list-unstyled mt-3") do %>
 
     <%= render(layout: "shared/matrix_table",
-               locals: {objects: @object.images}) do |image| %>
+               locals: { objects: @object.images }) do |image| %>
 
       <%= matrix_box(id: image.id) do %>
         <%= tag.div(class: "py-3 text-center") do %>
           <% # no special link-or-button param here, there's a checkbox below %>
-          <%= interactive_image(image,
-                        original: true,
-                        extra_classes: "image-to-remove",
-                        votes: false) %>
+          <%= interactive_image(image, original: true, votes: false,
+                                extra_classes: "image-to-remove") %>
         <% end %>
         <%= tag.div(class: "pb-3 text-center") do %>
           <%= fields_for(:selected) do |f_s| %>

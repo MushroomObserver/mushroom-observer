@@ -59,8 +59,7 @@ context ||= "blank"
           [
             f_n.fields_for(:vote) do |f_v|
               select_with_label(form: f_v, field: :value,
-                                options: confidences,
-                                select_opts: select_opts,
+                                options: confidences, select_opts: select_opts,
                                 label: :form_naming_confidence.t + ":",
                                 autofocus: focus_on_vote)
             end,
