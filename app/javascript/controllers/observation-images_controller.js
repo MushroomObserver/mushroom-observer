@@ -459,13 +459,18 @@ export default class extends Controller {
   getExifData(item) {
     const _image = item.dom_element.querySelector('.img-responsive');
 
-    _image.onload = () => {
+    _image.onload = async () => {
 
-      EXIF.getData(_image, () => {
-        item.exif_data = _image.exifdata;
-        // apply the data to the DOM
-        this.applyExifData(item);
-      });
+      item.exif_data = await ExifReader.load(_image.src);
+      this.applyExifData(item);
+
+      // EXIF.getData(_image, () => {
+      //   item.exif_data = _image.exifdata;
+      //   // apply the data to the DOM
+      //   this.applyExifData(item);
+      // });
+      // const tags = ExifReader.load(fileBuffer);
+      // const tags = await ExifReader.load(_image);
     };
   }
 
@@ -496,7 +501,8 @@ export default class extends Controller {
       // we found the date taken, let's parse it down.
       // returns an array of [YYYY,MM,DD]
       const _date_taken_array =
-        _exif.DateTimeOriginal.substring(' ', 10).split(':').reverse(),
+        _exif.DateTimeOriginal.description.substring(' ', 10).
+          split(':').reverse(),
         _exifSimpleDate = this.SimpleDate(..._date_taken_array);
 
       this.imageDate(item, _exifSimpleDate);
@@ -909,19 +915,19 @@ export default class extends Controller {
   }
 
   getLatLongEXIF(exifObject) {
-    let lat = exifObject.GPSLatitude[0]
-      + (exifObject.GPSLatitude[1] / 60.0)
-      + (exifObject.GPSLatitude[2] / 3600.0);
-    let long = exifObject.GPSLongitude[0]
-      + (exifObject.GPSLongitude[1] / 60.0)
-      + (exifObject.GPSLongitude[2] / 3600.0);
+    let lat = exifObject.GPSLatitude.value[0][0]
+      + (exifObject.GPSLatitude.value[1][0] / 60.0)
+      + (exifObject.GPSLatitude.value[2][0] / 3600.0);
+    let long = exifObject.GPSLongitude.value[0][0]
+      + (exifObject.GPSLongitude.value[1][0] / 60.0)
+      + (exifObject.GPSLongitude.value[2][0] / 3600.0);
 
-    const alt = exifObject.GPSAltitude ? (exifObject.GPSAltitude.numerator
-      / exifObject.GPSAltitude.denominator).toFixed(0) + " m" : "";
+    const alt = exifObject.GPSAltitude ? (exifObject.GPSAltitude.value[0]
+      / exifObject.GPSAltitude.value[1]).toFixed(0) + " m" : "";
 
     // make sure you don't end up on the wrong side of the world
-    long = exifObject.GPSLongitudeRef == "W" ? long * -1 : long;
-    lat = exifObject.GPSLatitudeRef == "S" ? lat * -1 : lat;
+    long = exifObject.GPSLongitudeRef.value[0] == "W" ? long * -1 : long;
+    lat = exifObject.GPSLatitudeRef.value[0] == "S" ? lat * -1 : lat;
 
     return {
       latitude: lat,
