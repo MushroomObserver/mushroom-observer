@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Finds all observations that the current logged in user
+# can see due to their being a project admin for a project
+# that another user trusts.
 class ProjectLatLongs
   attr_accessor :query
 

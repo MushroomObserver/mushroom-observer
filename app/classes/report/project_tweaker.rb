@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 module Report
+  # Inserts the lat/long for hidden GPS coordinates
+  # that the current user is allowed to see if
+  # they are an admin for a project that another user trusts
   class ProjectTweaker
     def initialize
       @vals = {}
