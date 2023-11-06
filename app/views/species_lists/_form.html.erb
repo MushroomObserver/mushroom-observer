@@ -42,7 +42,7 @@
     <%= f.label(:when, :WHEN.t + ":") %>
     <%= f.date_select(:when, date_select_opts(@species_list),
                       { class: "form-control",
-                        data: { controller: :year_input } }) %>
+                        data: { controller: "year-input" } }) %>
   </div>
 
   <%= render(partial: "shared/form_location_feedback",
