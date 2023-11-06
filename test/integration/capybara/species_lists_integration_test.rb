@@ -70,6 +70,7 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#ambiguous_names", text: /Suillus.*White/)
 
     # Fix the ambiguous names: should be good now.
+    # list_members is an autocompleter!
     within("#species_list_form") do
       assert_equal(list.split("\r\n").sort,
                    find("#list_members").text.split("\r ").sort)
