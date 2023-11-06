@@ -23,7 +23,8 @@ class TranslationsController < ApplicationController
   #  :section: Edit Actions
   # ----------------------------
 
-  # Form is only loaded by ajax from the index; only responds to js
+  # Form is only loaded by turbo_stream request from the index;
+  # only responds to turbo_stream
   def edit
     @lang = set_language_and_authorize_user
     @tag = params[:id]
@@ -34,7 +35,7 @@ class TranslationsController < ApplicationController
     @msg = error_message(e).join("\n")
   end
 
-  # Only accessed by ajax from the index; only responds to js
+  # Only accessed by turbo_stream from the index
   def update
     @lang = set_language_and_authorize_user
     @tag = params[:id]
