@@ -1,5 +1,7 @@
-<% # Observation title for add/edit/show_sequence pages %>
+<%# Observation title for add/edit/show_sequence pages %>
+
 <%= tag.div(class: "mt-3") do
-  concat(tag.span("#{:OBSERVATION.t}:", class: "font-weight-bold"))
-  concat("#{observation.name.display_name.t} (#{observation.id})")
+  [tag.strong("#{:OBSERVATION.t}:"),
+   observation.name.display_name.t,
+   "(#{observation.id})"].safe_join(" ")
 end %>
