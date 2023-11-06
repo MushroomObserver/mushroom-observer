@@ -808,8 +808,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Translations: standard actions  -------------------------------------
   resources :translations, only: [:index, :edit, :update]
-  get("translations/:id/versions", to: "translations/versions#show",
-                                   as: "translation_versions")
 
   # ----- Users: standard actions -------------------------------------------
   resources :users, id: /\d+/, only: [:index, :show]
