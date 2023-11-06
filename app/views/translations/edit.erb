@@ -1,4 +1,4 @@
-<%= turbo_stream.replace("translation_ui") do
-  render(partial: "translations/form")
-  render(partial: "translations/versions")
+<%= turbo_stream.update("translation_ui") do
+  concat(render(partial: "translations/form"))
+  concat(render(partial: "translations/versions"))
 end %>
