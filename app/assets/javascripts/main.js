@@ -93,7 +93,7 @@ window.dispatchMapsEvent = function (...args) {
 
 // This observer is a stopgap that handles what Stimulus would handle:
 // observes page changes and whether they should fire js.
-const moObserveContent = function () {
+function moObserveContent() {
   // Select the node that will be observed for mutations
   const contentNode = document.body;
 

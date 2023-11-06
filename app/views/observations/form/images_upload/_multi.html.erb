@@ -1,8 +1,8 @@
 <!-- MULTIFILE_UPLOAD_FORM -->
 <%
 # javascript_include("multi_image_upload")
-max_size = MO.image_upload_max_size
-legible_max_size = (max_size.to_f/1024/1024).round
+# max_size = MO.image_upload_max_size
+# legible_max_size = (max_size.to_f/1024/1024).round
 %>
 
 <%= hidden_field(:observation, :thumb_image_id) %>
@@ -78,11 +78,10 @@ legible_max_size = (max_size.to_f/1024/1024).round
 
 <!--Container for appending images-->
 <div class="images_container">
-  <%= tag.div("", id: "added_images_container",
-              data: { upload_max_size: max_size }) %>
+  <%= tag.div("", id: "added_images_container") %>
 </div>
 
-<% inject_javascript_at_end %(
+<%# inject_javascript_at_end %(
 document.addEventListener("DOMContentLoaded", function () {
   new MOImagesUploader({
     uploading_text: "#{j :form_observations_uploading_images.t }",

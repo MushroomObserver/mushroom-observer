@@ -8,8 +8,6 @@
 //= require image_export
 //= require validate_file_input_fields
 //= require main
-//= require mo_events
-//= require mo_images_uploader
 //= require suggestions
 //= require thumbnail_map
 //= require naming_vote_ajax
