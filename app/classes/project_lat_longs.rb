@@ -1,23 +1,6 @@
 # frozen_string_literal: true
 
 class ProjectLatLongs
-  QUERY = "SELECT DISTINCT obs.id, obs.lat, obs.long
-FROM observations obs,
-project_observations pobs,
-project_members  pms,
-projects ps,
-user_group_users ugu
-WHERE obs.id = pobs.observation_id
-AND pms.user_id = obs.user_id
-AND ps.id = pobs.project_id
-AND ugu.user_group_id = ps.admin_group_id
-
-AND ps.id = pms.project_id
-AND ugu.user_id = 1
-AND pms.trusted = '1'
-AND obs.gps_hidden = '1'
-AND ugu.user_id != pms.user_id"
-
   attr_accessor :query
 
   def initialize
@@ -39,7 +22,7 @@ AND ugu.user_id != pms.user_id"
       project_observations: ProjectObservation.arel_table,
       project_members: ProjectMember.arel_table,
       projects: Project.arel_table,
-      user_group_users: UserGroupUser.arel_table,
+      user_group_users: UserGroupUser.arel_table
     }
   end
 
@@ -71,10 +54,13 @@ AND ugu.user_id != pms.user_id"
   end
 
   def add_conditions
-    query.where(attribute(:project_members, :project_id).eq(attribute(:projects, :id)))
-    query.where(attribute(:user_group_users, :user_id).not_eq(attribute(:projects, :id)))
+    query.where(attribute(:project_members,
+                          :project_id).eq(attribute(:projects, :id)))
+    query.where(attribute(:user_group_users,
+                          :user_id).not_eq(attribute(:project_members,
+                                                     :user_id)))
     query.where(attribute(:project_members, :trusted).eq(1))
     query.where(attribute(:observations, :gps_hidden).eq(1))
-    query.where(attribute(:observations, :user_id).eq(User.current_id))
+    query.where(attribute(:user_group_users, :user_id).eq(User.current_id))
   end
 end

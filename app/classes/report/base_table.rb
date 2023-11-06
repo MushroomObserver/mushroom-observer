@@ -27,7 +27,6 @@ module Report
     end
 
     def formatted_rows
-      debugger
       tweaker = ProjectTweaker.new
       rows = all_rows.map { |row| Row.new(tweaker.tweak(row)) }
       rows = sort_before(rows)
