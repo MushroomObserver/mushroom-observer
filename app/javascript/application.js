@@ -8,7 +8,8 @@ import "bootstrap"
 import "@hotwired/turbo-rails"
 // Turbo.setFormMode("optin"), or all forms will need to provide turbo response!
 // https://stackoverflow.com/questions/70921317/how-can-i-disable-hotwire-turbo-the-turbolinks-replacement-for-all-forms-in
-// use data-turbo="true" to opt in a form or button like delete/patch
+// form, or button like delete/patch: set data-turbo="true" to opt in
+// link_to with GET: set data-turbo-stream="true" to opt in
 Turbo.setFormMode("optin")
 
 import "@rails/request.js"

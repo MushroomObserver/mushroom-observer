@@ -130,7 +130,7 @@ module APIKeysHelper
   end
 
   def api_keys_remove_button(key)
-    destroy_button(name: :REMOVE.l, icon: :remove, remote: true,
+    destroy_button(name: :REMOVE.l, icon: :remove, turbo: true,
                    id: "remove_api_key_#{key.id}",
                    class: "btn btn-link text-danger",
                    target: account_api_key_path(key.id))

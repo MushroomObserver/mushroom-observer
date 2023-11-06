@@ -149,7 +149,7 @@ module LinkHelper
     html_options = {
       method: :delete, title: name,
       class: class_names(identifier, args[:class], "text-danger"),
-      data: { confirm: :are_you_sure.t,
+      data: { confirm: :are_you_sure.t, turbo: true,
               toggle: "tooltip", placement: "top", title: name }
     }.deep_merge(args.except(:class, :back))
 
@@ -249,11 +249,11 @@ module LinkHelper
   # NOTE: button_to with block generates a button, not an input #quirksmode
   def any_method_button(name:, path:, method: :post, **args, &block)
     content = block ? capture(&block) : name
-    tip = content ? { toggle: "tooltip", placement: "top", title: name } : ""
+    tip = content ? { toggle: "tooltip", placement: "top", title: name } : {}
     html_options = {
       method: method,
       class: "",
-      data: tip
+      data: { turbo: true }.merge(tip)
     }.merge(args) # currently don't have to merge class arg upstream
 
     button_to(path, html_options) { content }
