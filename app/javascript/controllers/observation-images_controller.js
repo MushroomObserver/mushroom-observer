@@ -813,6 +813,10 @@ export default class extends Controller {
     // set the obs date, if passed a simpleDate
     if (simpleDate && simpleDate.day && simpleDate.month &&
       simpleDate.year) {
+      // hack - reset this because the year controller may fire after connect
+      // TODO: dispatch an event when year updated in that controller,
+      // and on that event update the input in this controller.
+      this.obs_year = document.getElementById('observation_when_1i');
       this.obs_day.value = simpleDate.day;
       this.obs_month.value = simpleDate.month;
       this.obs_year.value = simpleDate.year;
