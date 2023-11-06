@@ -11,9 +11,12 @@ import "@hotwired/turbo-rails"
 // use data-turbo="true" to opt in a form or button like delete/patch
 Turbo.setFormMode("optin")
 
-import Rails from "@rails/ujs"
 import "@rails/request.js"
 
 import "@hotwired/stimulus"
 import "@hotwired/stimulus-loading"
+
+import 'exifreader';
+
+import Rails from "@rails/ujs"
 Rails.start(); import "controllers"

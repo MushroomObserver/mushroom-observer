@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import ExifReader from 'exifreader';
 
 const internalConfig = {
   // Make some of these targets for the controller
