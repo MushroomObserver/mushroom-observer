@@ -243,7 +243,7 @@ module FormsHelper
 
     tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
-      concat(content_tag(:p, text, class: "form-control-static"))
+      concat(tag.p(text, class: "form-control-static"))
       concat(args[:form].hidden_field(args[:field], opts))
     end
   end
