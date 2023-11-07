@@ -1,25 +1,35 @@
 import { Controller } from "@hotwired/stimulus"
 
+// TRANSLATION EDIT FORM is this.element
 // Connects to data-controller="translate"
 export default class extends Controller {
   static targets = [
-    "textarea", "save_button", "cancel_button", "reload_button", "locale_select"
+    "textarea", "saveButton", "cancelButton", "reloadButton", "localeSelect"
   ]
 
   connect() {
-    // TRANSLATION EDIT FORM. now this.element
-    // this.$translation_ui = document.getElementById('translation_ui');
     this.LOCALE = this.element.dataset.locale;
-    // this.CONFIRM_STRING = this.element.dataset.confirm_string;
-    // this.LOADING_STRING = this.element.dataset.loading_string;
-    // this.SAVING_STRING = this.element.dataset.saving_string;
+    this.CONFIRM_STRING = this.element.dataset.confirmString;
+    this.LOADING_STRING = this.element.dataset.loadingString;
+    this.SAVING_STRING = this.element.dataset.savingString;
     this.LOADED = false;
     this.CHANGED = false;
 
-    // this.formObserver();
+    this.reloadButtonTarget.setAttribute("data-turbo-submits-with",
+      this.LOADING_STRING)
+    this.saveButtonTarget.setAttribute("data-turbo-submits-with",
+      this.SAVING_STRING)
   }
 
-  // these are targets for the ui controller
+  indexBindings() {
+    window.addEventListener("beforeunload", confirmLosingWork)
+    window.addEventListener("turbo:before-render", confirmLosingWork)
+
+    function confirmLosingWork() {
+      if (this.CHANGED)
+        return this.CONFIRM_STRING;
+    };
+  }
 
   // clear the form
   clearForm() {
@@ -28,20 +38,20 @@ export default class extends Controller {
     this.CHANGED = false;
   }
 
-  // change the locale of the reload button and fire it
-  changeLocale() {
-    this.changeReloadLocale(e);
+  // change the locale in the url of the reload button and click it
+  changeLocale(event) {
+    this.changeReloadLocale(event);
     this.reloadButtonTarget.click();
   }
 
   // give the reload button the url of the edit action with new locale
-  changeReloadLocale(e) {
+  changeReloadLocale(event) {
     const _href = this.reloadButtonTarget.href,
       _locale_query = "?locale=",
       _path_components = _href.split(_locale_query),
       _path = _path_components[0],
       // _old_locale = _path_components[1],
-      _new_locale = e.target.value,
+      _new_locale = event.target.value,
       _new_href = _path + _locale_query + _new_locale;
 
     this.reloadButtonTarget.setAttribute("href", _new_href);

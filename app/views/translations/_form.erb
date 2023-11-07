@@ -4,10 +4,10 @@
 end
 
 form_dataset = {
-  turbo: true, controller: :translation, locale: @lang.locale
-  # confirm_string: :edit_translations_will_lose_changes.l,
-  # loading_string: :edit_translations_loading.l,
-  # saving_string: :edit_translations_saving.l
+  turbo: true, controller: :translation, locale: @lang.locale,
+  confirm_string: :edit_translations_will_lose_changes.l,
+  loading_string: :edit_translations_loading.l,
+  saving_string: :edit_translations_saving.l
 }
 %>
 
@@ -79,9 +79,8 @@ form_dataset = {
               id: "reload_button", # type: :button,
               class: "btn btn-default",
               data: {
-                turbo: true, tag: @tag,
-                translation_target: "reloadButton",
-                action: "translation#reload"
+                tag: @tag, translation_target: "reloadButton",
+                turbo_stream: true
               })
     ].safe_join(" ")
   end %>
