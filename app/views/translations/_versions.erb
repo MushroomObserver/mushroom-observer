@@ -25,7 +25,7 @@
           done_header = true
         end
 
-        concat(tag.h5("#{h(ttag)}:", class: "underline"))
+        concat(tag.h5("#{h(ttag)}:", class: "underline mb-1"))
         concat(tag.table(class: "table table-striped old_versions") do
           versions_to_show.each do |version|
             concat(tag.tr do
