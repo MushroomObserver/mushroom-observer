@@ -331,14 +331,14 @@ module FormsHelper
   #   args[:inline] = true
   #   wrap_class = form_group_wrap_class(args)
 
-  #   content_tag(:div, class: wrap_class) do
+  #   tag.div(class: wrap_class) do
   #     concat(args[:form].label(args[:field], args[:label],
   #                              class: "mr-3 sr-only"))
   #     concat(
-  #       content_tag(:div, class: "input-group") do
+  #       tag.div(class: "input-group") do
   #         concat(args[:form].text_field(args[:field], opts))
   #         concat(
-  #           content_tag(:span, class: "input-group-btn") do
+  #           tag.span(class: "input-group-btn") do
   #             submit_button(form: args[:form], button: :SEARCH.l)
   #           end
   #         )
