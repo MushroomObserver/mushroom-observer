@@ -40,7 +40,7 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     # First attempt at creating a list.
     login!(dick)
     visit("/species_lists/new")
-    assert_selector("body.observations__new")
+    assert_selector("body.species_lists__new")
 
     member_notes = "Member notes."
     within("#species_list_form") do
