@@ -21,14 +21,13 @@ if !@deprecated_names.blank?
     concat(tag.p do
       @deprecated_names.each do |name|
         approved_names = name.approved_synonyms
-        concat(name.display_name.t + safe_br)
+        concat(tag.div(name.display_name.t))
         if approved_names != []
           concat(fields_for(:chosen_approved_names) do |f_c|
             approved_names.each do |other_name|
               concat(radio_with_label(form: f_c, field: name.id,
-                                      value: other_name.id,
-                                      label: other_name.display_name.t,
-                                      class: "ml-4"))
+                                      value: other_name.id, class: "ml-4",
+                                      label: other_name.display_name.t))
             end
           end)
         end
@@ -46,14 +45,14 @@ if !@multiple_names.blank?
     concat(help_note(:div, :form_species_lists_multiple_names_help.t))
     concat(tag.p do
       @multiple_names.each do |name|
-        concat(name.display_name.t + safe_br)
+        concat(tag.div(name.display_name.t))
         concat(fields_for(:chosen_multiple_names) do |f_c|
           name.other_authors.each do |other_name|
             concat(radio_with_label(form: f_c, field: name.id,
-                                    value: other_name.id,
-                                    label: other_name.display_name.t,
-                                    class: "ml-4"))
-            concat("(#{other_name.observations.count})" + safe_br)
+                                    value: other_name.id, class: "ml-4",
+                                    label: other_name.display_name.t))
+            concat("(#{other_name.observations.count})")
+            concat(safe_br)
           end
         end)
       end

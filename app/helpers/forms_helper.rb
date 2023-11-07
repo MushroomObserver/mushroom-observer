@@ -75,7 +75,7 @@ module FormsHelper
 
     wrap_class = form_group_wrap_class(args, "checkbox")
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       args[:form].label(args[:field]) do
         concat(args[:form].check_box(args[:field], opts))
         concat(args[:label])
@@ -90,7 +90,7 @@ module FormsHelper
 
     wrap_class = form_group_wrap_class(args, "radio")
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       args[:form].label("#{args[:field]}_#{args[:value]}") do
         concat(args[:form].radio_button(args[:field], args[:value], opts))
         concat(args[:label])
@@ -108,7 +108,7 @@ module FormsHelper
     wrap_class = form_group_wrap_class(args)
     label_opts = field_label_opts(args)
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
       concat(args[:form].text_field(args[:field], opts))
@@ -146,7 +146,7 @@ module FormsHelper
     wrap_class = form_group_wrap_class(args)
     label_opts = field_label_opts(args)
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
       concat(args[:form].text_area(args[:field], opts))
@@ -171,7 +171,7 @@ module FormsHelper
     label_opts = field_label_opts(args)
 
     # debugger
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
       concat(args[:form].select(args[:field], args[:options],
@@ -199,7 +199,7 @@ module FormsHelper
 
     wrap_class = form_group_wrap_class(args)
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
       concat(args[:form].number_field(args[:field], opts))
     end
@@ -213,7 +213,7 @@ module FormsHelper
 
     wrap_class = form_group_wrap_class(args)
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
       concat(args[:form].password_field(args[:field], opts))
     end
@@ -227,7 +227,7 @@ module FormsHelper
 
   #   wrap_class = form_group_wrap_class(args)
 
-  #   content_tag(:div, class: wrap_class) do
+  #   tag.div(class: wrap_class) do
   #     concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
   #     concat(args[:form].email_field(args[:field], opts))
   #   end
@@ -241,7 +241,7 @@ module FormsHelper
 
     wrap_class = form_group_wrap_class(args)
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
       concat(content_tag(:p, text, class: "form-control-static"))
       concat(args[:form].hidden_field(args[:field], opts))
@@ -257,9 +257,9 @@ module FormsHelper
 
     wrap_class = form_group_wrap_class(args)
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
-      concat(content_tag(:p, text, opts))
+      concat(tag.p(text, opts))
     end
   end
 
@@ -271,7 +271,7 @@ module FormsHelper
 
     wrap_class = form_group_wrap_class(args)
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
       concat(args[:form].url_field(args[:field], opts))
     end
@@ -291,16 +291,16 @@ module FormsHelper
     wrap_class = form_group_wrap_class(args)
 
     # append is always :no_file_selected.t
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
       concat(args[:between]) if args[:between].present?
       concat(
-        content_tag(:span, class: input_span_class) do
+        tag.span(class: input_span_class) do
           concat(:select_file.t)
           concat(args[:form].file_field(args[:field], opts))
         end
       )
-      concat(content_tag(:span, :no_file_selected.t))
+      concat(tag.span(:no_file_selected.t))
     end
   end
 
@@ -317,9 +317,8 @@ module FormsHelper
         max_upload_size: max_size
       )
     )
-    content_tag(:span, :select_file.t + file_field,
-                class: "file-field btn btn-default") +
-      content_tag(:span, :no_file_selected.t)
+    tag.span(:select_file.t + file_field, class: "file-field btn btn-default") +
+      tag.span(:no_file_selected.t)
   end
 
   # Unused
