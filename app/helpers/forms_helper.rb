@@ -259,7 +259,7 @@ module FormsHelper
 
     tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
-      concat(tag.p(text, opts))
+      concat(tag.p(text, **opts))
     end
   end
 
