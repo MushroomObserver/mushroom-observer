@@ -64,6 +64,7 @@ class TranslationsSystemTest < ApplicationSystemTestCase
           assert_field("tag_one", type: :textarea, with: old_one)
           fill_in("tag_one", with: "uno")
           within("#translation_form") { click_commit }
+          assert_selector("#str_one.translation-updated", text: "uno")
 
           within("#translations_index") { assert_text("uno") }
           assert_equal("uno", :one.l)

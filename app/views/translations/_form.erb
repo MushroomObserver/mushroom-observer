@@ -66,7 +66,7 @@ form_dataset = {
                  id: "save_button", class: "btn btn-default",
                  data: {
                    translation_target: "saveButton",
-                   action: "translation#save"
+                   action: "turbo:submit-start->translation#saving"
                  }),
       button_tag(:CANCEL.l, type: :button, name: :commit, value: :cancel,
                  id: "cancel_button", class: "btn btn-default",
@@ -76,8 +76,7 @@ form_dataset = {
                  }),
       link_to(:RELOAD.l,
               edit_translation_path(id: @tag, locale: @lang.locale),
-              id: "reload_button", # type: :button,
-              class: "btn btn-default",
+              id: "reload_button", class: "btn btn-default",
               data: {
                 tag: @tag, translation_target: "reloadButton",
                 turbo_stream: true

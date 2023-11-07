@@ -1522,7 +1522,7 @@
   form_list_feedback_missing_names_help: Click 'Save'/'Update' to create these names.  If you want to correct any you entered by hand, do so in the area below and click 'Save' to re-evaluate the list.  If the names came from an uploaded species list, create a correct file and select it for upload.
 
   # glossary
-  form_glossary_name_help: "A mycology-specific term, all lower-case except if capitalized in ordinary use. \n Avoid (a) variations of other Terms, or (b) Names of taxa. Details:"
+  form_glossary_name_help: "A mycology-specific term, all lower-case except if capitalized in ordinary use.\nAvoid (a) variations of other Terms, or (b) Names of taxa. Details:"
   form_glossary_description_help: "A concise definition matching the part of speech of the Term, without repeating another Term's definition. (Instead link to the other Term.) Details:"
 
   # location/_form_location
@@ -1567,7 +1567,7 @@
   form_names_citation_textilize_note: Citations can be formatted using the <a href="/info/textile_sandbox" target="_new">Textile markup system</a>.
   form_names_misspelling_note: If this name is misspelt, please check the box and enter the correct spelling. *NOTE:* Please do not use this to deprecate correctly-spelled synonyms.
   form_names_classification_help: "List the higher taxa containing this [rank], one name per rank. Do not include genus or lower ranks. Example:<br/> Domain: _Eukarya_<br/> Kingdom: _Fungi_<br/> Phylum: _Basidiomycota_<br/> Class: _Agaricomycetes_<br/> Order: _Agaricales_<br/> Family: _Agaricaceae_<br/>"
-  form_names_gen_desc_help: "Describe the general appearance of this taxon. <br/>Please limit the [:form_names_gen_desc] to (or at least begin it with) a <b>short</b> field-guide type description. Please do not dump the protologue here."
+  form_names_gen_desc_help: Describe the general appearance of this taxon. <br/>Please limit the [:form_names_gen_desc] to (or at least begin it with) a <b>short</b> field-guide type description. Please do not dump the protologue here.
   form_names_diag_desc_help: Describe what distinguishes this taxon from closely related taxa.
   form_names_look_alikes_help: What other taxa look similar to this one?
   form_names_habitat_help: What habitats has taxon has been found in?
@@ -1633,8 +1633,8 @@
   form_observations_herbarium_record_help: If you've sent a specimen to a fungarium, you can enter that here, along with their accession number if you know it.  Otherwise let it default to your personal fungarium and leave the accession number blank.
 
   form_observations_there_is_a_problem_with_projects: This observation violates the constraints of one or more selected projects. "+See message below.+":#project_messages
-  form_observations_projects_out_of_range: "The observation date ([date]) or location ([place_name]) is outside the range of these checked project(s)"
-  form_observations_projects_out_of_range_help: "Either: \n - Uncheck out-of-range projects; \n - Change the observation date or location if it is incorrect; or \n - (undesirably) Check [:form_observations_projects_ignore_project_constraints] to ignore the project constraints. \nThen click [button_name]."
+  form_observations_projects_out_of_range: The observation date ([date]) or location ([place_name]) is outside the range of these checked project(s)
+  form_observations_projects_out_of_range_help: "Either:\n- Uncheck out-of-range projects;\n- Change the observation date or location if it is incorrect; or\n- (undesirably) Check [:form_observations_projects_ignore_project_constraints] to ignore the project constraints.\nThen click [button_name]."
   form_observations_projects_ignore_project_constraints: Ignore Project Constraints
 
   form_observations_there_is_a_problem_with_location: There is a problem with the location. "+See message below.+":#location_messages
@@ -1721,7 +1721,7 @@
   image_show_transform_note: Image is being processed. This may take several seconds.
 
   # images/exif/show
-  exif_data_for_image: "EXIF Data for Image [image]"
+  exif_data_for_image: EXIF Data for Image [image]
 
   # observations/list_observations
   list_observations_location_all: All Locations
@@ -2305,7 +2305,7 @@
   signup_preferred_theme: Preferred Theme (optional)
   signup_random: Random
   signup_button: Signup
-  signup_email_help: "In order to sign up, you must provide a working email address. (One-time addresses will not work. Addresses that block email from mushroomobserver.org will not work.)\n\n When you complete this page and click \"Signup\", we will send you an email with account verification information. (This helps us to block spammers.)\n\n Once you verify your account, you can change your email on your account Preferences page. We are very careful to never show your email address on a webpage that others can access. We will never sell your email address. We will only share your email address if you ask us to (e.g., when you send an email to another member, they will see your email). By default your email address will be used to send you information about changes to the site as well as notifications relevant to your contributions to the site. You can opt out of these uses by changing your Preferences."
+  signup_email_help: "In order to sign up, you must provide a working email address. (One-time addresses will not work. Addresses that block email from mushroomobserver.org will not work.)\n\nWhen you complete this page and click \"Signup\", we will send you an email with account verification information. (This helps us to block spammers.)\n\nOnce you verify your account, you can change your email on your account Preferences page. We are very careful to never show your email address on a webpage that others can access. We will never sell your email address. We will only share your email address if you ask us to (e.g., when you send an email to another member, they will see your email). By default your email address will be used to send you information about changes to the site as well as notifications relevant to your contributions to the site. You can opt out of these uses by changing your Preferences."
 
   # species_list/create_species_list
   species_list_create_title: "[:create_object(type=:species_list)]"
@@ -2458,7 +2458,7 @@
   # glossary_term#index
   glossary_term_index: Glossary
   glossary_term_index_title: Glossary of Mycology Terms
-  glossary_term_index_documentation: "Glossary Documentation and Guidelines"
+  glossary_term_index_documentation: Glossary Documentation and Guidelines
 
   # glossary_term#edit
   edit_glossary_term: "[:edit_object(type=:glossary_term)]"
@@ -2985,7 +2985,7 @@
   sandbox_look_like: This is what it will look like
   sandbox_more_help: Gotchas, more examples
   sandbox_quick_ref: Quick Reference
-  sandbox_sample: "??italics??        trademark(tm)\n**boldface**       copyright(c)\n+underline+        registered(r)\n^superscript^      1.6 &amp;&#109;icro;m  ->  1.6 &micro;m\n~subscript~        34&amp;&#100;eg;17' N  ->  34&deg;17' N\n\n\"External Link\":http://google.com or !http://random.com/image.jpg!\n\nInternal links:\n_name 371_, _Amanita ocreata_, or _A. ocreata_\n_location 382_, _location Mt. Wilson_\n_user 252_, _user jason_\n_observation 12345_\n_image 12345_, !image 12345!, or !image 640/12345!\n _glossary_term 270_, _term Bolete_, or _bolete_ (all lower-case)\n\nInclude footnote[[1]] references after any word[[2]].\n\nfn1. And then define the footnote at the bottom.\n\nfn2. Be sure to leave blank lines around these \"xx.\" directives.\n\nh1. Header\n\nbq. Block quote\n\n* bullet list item 1\n* bullet list item 2\n\n# numbered list item 1\n# numbered list item 2\n\nTables are useful for comparing species:\n| Species 1 | value 1.1 | value 1.2 |\n| Species 2 | value 2.1 | value 2.2 |\n| Species 3 | value 3.1 | value 3.2 |"
+  sandbox_sample: "??italics??        trademark(tm)\n**boldface**       copyright(c)\n+underline+        registered(r)\n^superscript^      1.6 &amp;&#109;icro;m  ->  1.6 &micro;m\n~subscript~        34&amp;&#100;eg;17' N  ->  34&deg;17' N\n\n\"External Link\":http://google.com or !http://random.com/image.jpg!\n\nInternal links:\n_name 371_, _Amanita ocreata_, or _A. ocreata_\n_location 382_, _location Mt. Wilson_\n_user 252_, _user jason_\n_observation 12345_\n_image 12345_, !image 12345!, or !image 640/12345!\n_glossary_term 270_, _term Bolete_, or _bolete_ (all lower-case)\n\nInclude footnote[[1]] references after any word[[2]].\n\nfn1. And then define the footnote at the bottom.\n\nfn2. Be sure to leave blank lines around these \"xx.\" directives.\n\nh1. Header\n\nbq. Block quote\n\n* bullet list item 1\n* bullet list item 2\n\n# numbered list item 1\n# numbered list item 2\n\nTables are useful for comparing species:\n| Species 1 | value 1.1 | value 1.2 |\n| Species 2 | value 2.1 | value 2.2 |\n| Species 3 | value 3.1 | value 3.2 |"
   sandbox_test: Test
   sandbox_test_codes: Show HTML
   sandbox_title: Textile Sandbox
@@ -3221,7 +3221,7 @@
   show_project_title: "Project: [title]"
   show_project_user_group: User Group
   show_project_violation_count: Project has [count] constraint violation(s)
-  # show_project_violation_count: Project has "+[count] constraint violation(s)+":/project_review/[id]
+  # show_project_violation_count: Project has [count] constraint violation(s)
 
   # users/by_name
   users_by_name_title: Users by Name
@@ -4115,7 +4115,7 @@
   query_title_advanced_search: "[:app_advanced_search]"
   query_title_all: "[TYPE] Index"
   query_title_all_by: "[TYPES] by [ORDER]"
-  query_title_all_filtered: "Matching [TYPES]"
+  query_title_all_filtered: Matching [TYPES]
   query_title_at_location: "[TYPES] from [LOCATION]"
   query_title_at_where: "[TYPES] from '[USER_WHERE]'"
   query_title_by_author: "[TYPES] Authored by [USER]"
@@ -4281,7 +4281,7 @@
   sort_by_num_views: Popularity
   sort_by_number: Number
   sort_by_observation: "[:OBSERVATION]"
-  sort_by_owners_quality: "Owner's Quality"
+  sort_by_owners_quality: Owner's Quality
   sort_by_posted: Date Posted
   sort_by_records: "#Records"
   sort_by_reverse: Reverse Order

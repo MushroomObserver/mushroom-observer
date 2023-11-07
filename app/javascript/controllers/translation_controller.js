@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 
-// TRANSLATION EDIT FORM is this.element
+// connects to a TRANSLATION EDIT FORM == this.element
 // Connects to data-controller="translate"
 export default class extends Controller {
   static targets = [
@@ -15,8 +15,6 @@ export default class extends Controller {
     this.LOADED = false;
     this.CHANGED = false;
 
-    this.reloadButtonTarget.setAttribute("data-turbo-submits-with",
-      this.LOADING_STRING)
     this.saveButtonTarget.setAttribute("data-turbo-submits-with",
       this.SAVING_STRING)
   }
@@ -38,13 +36,13 @@ export default class extends Controller {
     this.CHANGED = false;
   }
 
-  // change the locale in the url of the reload button and click it
+  // change the locale (in the url of the reload button) and click it
   changeLocale(event) {
     this.changeReloadLocale(event);
     this.reloadButtonTarget.click();
   }
 
-  // give the reload button the url of the edit action with new locale
+  // Change the reload button href to edit_translation_path with new locale
   changeReloadLocale(event) {
     const _href = this.reloadButtonTarget.href,
       _locale_query = "?locale=",
@@ -57,12 +55,18 @@ export default class extends Controller {
     this.reloadButtonTarget.setAttribute("href", _new_href);
   }
 
-  // I think this is fired AFTER ujs submits the form. Anyway unpredictable
-  // fired by the save button
-  save() {
+  // Fired on turbo:submit-start by the save button
+  saving() {
+    // console.log("saving");
+    // console.log(event);
     this.CHANGED = false;
     this.disableCommitButtons(true);
   }
+
+  // Submits so fast the button is gone
+  // reloading() {
+  //   this.reloadButtonTarget.innerHTML(this.LOADING_STRING)
+  // }
 
   formChanged() {
     // console.log("formChanged")
