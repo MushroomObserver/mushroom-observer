@@ -1,6 +1,6 @@
 <%=
 if !@new_names.blank?
-  tag.div(class: "alert alert-danger", id: "missing_names") do
+  concat(tag.div(class: "alert alert-danger", id: "missing_names") do
     concat(tag.div(:form_list_feedback_missing_names.t,
                    class: "font-weight-bold"))
     concat(help_note(:div, :form_list_feedback_missing_names_help.t))
@@ -9,13 +9,13 @@ if !@new_names.blank?
         concat(safe_br + indent + h(n))
       end
     end)
-  end
+  end)
 end
 %>
 
 <%=
 if !@deprecated_names.blank?
-  tag.div(class: "alert alert-warning", id: "deprecated_names") do
+  concat(tag.div(class: "alert alert-warning", id: "deprecated_names") do
     concat(tag.div(:form_species_lists_deprecated.t, class: "font-weight-bold"))
     concat(help_note(:div, :form_species_lists_deprecated_help.t))
     concat(tag.p do
@@ -33,13 +33,13 @@ if !@deprecated_names.blank?
         end
       end
     end)
-  end
+  end)
 end
 %>
 
 <%=
 if !@multiple_names.blank?
-  tag.div(class: "alert alert-warning", id: "ambiguous_names") do
+  concat(tag.div(class: "alert alert-warning", id: "ambiguous_names") do
     concat(tag.div(:form_species_lists_multiple_names.t,
                    class: "font-weight-bold"))
     concat(help_note(:div, :form_species_lists_multiple_names_help.t))
@@ -57,6 +57,6 @@ if !@multiple_names.blank?
         end)
       end
     end)
-  end
+  end)
 end
 %>
