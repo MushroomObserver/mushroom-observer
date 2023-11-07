@@ -129,10 +129,14 @@ module FormsHelper
       data: { controller: :autocompleter, autocomplete: args[:autocomplete],
               separator: args[:separator] }
     }
-    autocompleter_args = args.except(:autocomplete, :separator).
+    autocompleter_args = args.except(:autocomplete, :separator, :textarea).
                          deep_merge(autocompleter_args)
 
-    text_field_with_label(**autocompleter_args)
+    if args[:textarea] == true
+      text_area_with_label(**autocompleter_args)
+    else
+      text_field_with_label(**autocompleter_args)
+    end
   end
 
   # Bootstrap text_area
