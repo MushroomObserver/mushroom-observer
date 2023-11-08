@@ -18,7 +18,6 @@ export default class extends Controller {
     this.classList = this.element.classList || "";
     this.style = this.element.getAttribute("style") || "";
     this.value = this.element.value;
-    this.dataset = this.element.dataset;
 
     this.new_elem = document.createElement("input");
     this.new_elem.type = "text";
@@ -27,13 +26,11 @@ export default class extends Controller {
     this.new_elem.value = this.value;
     this.new_elem.setAttribute("size", 4);
     // dataset must be set one at the time
-    const _dataset = this.dataset;
-    for (const prop in _dataset) {
-      this.new_elem.setAttribute('data-${prop}', _dataset[prop]);
+    if (this.element.dataset != undefined) {
+      for (const prop in this.element.dataset) {
+        this.new_elem.setAttribute('data' + prop, this.element.dataset[prop]);
+      }
     }
-
-    if (this.element[0].onchange)
-      this.new_elem.onchange = this.element[0].onchange;
 
     this.element.replaceWith(this.new_elem);
     this.new_elem.setAttribute("id", this.id);

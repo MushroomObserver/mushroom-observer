@@ -68,7 +68,7 @@
                         data: { observation_images_target: "gpsRadios" }) %>
         <%= js_button(button: :UPDATE.t, name: "set_gps",
                       id: "set_gps",
-                      data: { observation_images_target: "setGps" }) %>
+                      data: { action: "observation-images#setGps" }) %>
         <%= js_button(button: :IGNORE.t, name: "ignore_gps", id: "ignore_gps",
                       data: { action: "observation-images#ignoreGps" }) %>
       </div>

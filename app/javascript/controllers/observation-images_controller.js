@@ -6,6 +6,10 @@ const internalConfig = {
   form: document.forms.namedItem("observation_form"),
   block_form_submission: true,
   content: document.getElementById('content'),
+  // These aren't targets because outside scope of this controller (obs images)
+  obs_day: document.getElementById('observation_when_3i'),
+  obs_month: document.getElementById('observation_when_2i'),
+  obs_year: document.getElementById('observation_when_1i'),
   get_template_uri: "/ajax/multi_image_template",
   upload_image_uri: "/ajax/create_image_object",
   // progress_uri: "/ajax/upload_progress",
@@ -23,10 +27,10 @@ const internalConfig = {
 // This needs to be on the whole "observation_images" section of the form.
 // Connects to data-controller="observation-images"
 export default class extends Controller {
-  static targets = ["imageMessages", "imgDateRadios", "obsDateRadios",
+  static targets = ["imgMessages", "imgDateRadios", "obsDateRadios",
     "gpsMessages", "gpsRadios", "setLatLngAlt", "ignoreGps", "imageGpsMap",
     "addedImages", "goodImages", "thumbImageId", "setThumbImg", "isThumbImg",
-    "thumbImgRadio"]
+    "thumbImgRadio", "removeImg"]
 
   initialize() {
   }
@@ -126,7 +130,7 @@ export default class extends Controller {
 
   ignoreGps() { this.hide(this.gpsMessagesTarget); }
 
-  setObsThumbnail({ event }) {
+  setObsThumbnail(event) {
     // event.target is the button clicked to make whichever the default image
     const elem = event.target;
 
@@ -159,11 +163,11 @@ export default class extends Controller {
   }
 
   // this just sets the hidden field value. do this directly or trigger click
-  setHiddenThumbField({ event }) {
+  setHiddenThumbField(event) {
     this.thumbImageIdTarget.setAttribute('value', event.target.value);
   }
 
-  addSelectedFiles({ event }) {
+  addSelectedFiles(event) {
     // Get the files from the browser
     const files = event.target.files;
     this.addFiles(files);
@@ -204,7 +208,6 @@ export default class extends Controller {
       if (!this.areAllItemsProcessed()) {
         this.checkStoreStatus();
       } else {
-        this.setItemBindings();
         this.refreshImageMessages();
         this.refreshGeocodeMessages();
       }
@@ -257,7 +260,7 @@ export default class extends Controller {
       (element) => { element.setAttribute('disabled', 'true') }
     );
     // Note that remove image links are not present at initialization
-    document.querySelectorAll(".remove_image_link").forEach((elem) => {
+    this.removeImgTargets.forEach((elem) => {
       this.hide(elem);
     });
 
@@ -371,7 +374,8 @@ export default class extends Controller {
       behavior: 'smooth',
     });
 
-    // bind the removeItem function
+    // bind the removeItem function.
+    // can't be called from outside because it's about the FileStore item
     item.dom_element.querySelector('.remove_image_link')
       .onclick = () => {
         this.removeItem(item);
@@ -379,7 +383,14 @@ export default class extends Controller {
         this.refreshGeocodeMessages();
       };
 
+    // Has to be, because the select has a different controller
     item.dom_element.querySelector('select')
+      .onchange = () => {
+        this.refreshImageMessages();
+      };
+
+    // Need to also bind to year input
+    item.dom_element.querySelector("[id$=_1i]")
       .onchange = () => {
         this.refreshImageMessages();
       };
@@ -762,13 +773,13 @@ export default class extends Controller {
 
   // gets or sets current obs date, simpledate object updates date
   observationDate(simpleDate) {
+    // hack - reset obs_year because the year-input controller may fire after
+    // this connects, and obs_year (the select) will be an obsolete element.
+    this.obs_year = document.getElementById('observation_when_1i');
+
     // set the obs date, if passed a simpleDate
     if (simpleDate && simpleDate.day && simpleDate.month &&
       simpleDate.year) {
-      // hack - reset this because the year controller may fire after connect
-      // TODO: dispatch an event when year updated in that controller,
-      // and on that event update the input in this controller.
-      this.obs_year = document.getElementById('observation_when_1i');
       this.obs_day.value = simpleDate.day;
       this.obs_month.value = simpleDate.month;
       this.obs_year.value = simpleDate.year;
