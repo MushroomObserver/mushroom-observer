@@ -3,7 +3,7 @@
 <div class="row">
   <div class="col-sm-6 mt-3">
     <label class="btn btn-default file-field">
-      <input type="file" multiple id="multiple_images_button"
+      <input type="file" multiple id="select_images_button"
              data-action="change->observation-images#addSelectedFiles"
              accept="image/*"/>
       <%= :select_file.t %>
@@ -18,7 +18,7 @@
 
 
 <!-- Container to show messages relating to the selected images -->
-<div id="image_messages" class="fade" style="display: none;"
+<div id="img_messages" class="fade" style="display: none;"
      data-observation-images-target="imgMessages">
   <div class="well well-sm">
     <div class="row">
@@ -28,12 +28,12 @@
           <%= tag.div(:form_observations_set_observation_date_to.t + ":",
                       class: "font-weight-bold") %>
           <%= tag.div("",
-                      id: "image_date_radio_container",
+                      id: "img_date_radios",
                       data: { observation_images_target: "imgDateRadios" }) %>
           <%= tag.div(:form_observations_set_image_dates_to.t + ":",
                       class: "font-weight-bold") %>
           <%= tag.div("",
-                      id: "observation_date_radio_container",
+                      id: "obs_date_radios",
                       data: { observation_images_target: "obsDateRadios" }) %>
         </div>
         <div class="mt-3">
@@ -64,7 +64,7 @@
       <div class="col-sm-7">
         <%= tag.div("Set observation Latitude/Longitude to:",
                     class: "font-weight-bold") %>
-        <%= tag.div("", id: "geocode_radio_container", class: "mb-3",
+        <%= tag.div("", id: "gps_radios", class: "mb-3",
                         data: { observation_images_target: "gpsRadios" }) %>
         <%= js_button(button: :UPDATE.t, name: "set_gps",
                       id: "set_gps",

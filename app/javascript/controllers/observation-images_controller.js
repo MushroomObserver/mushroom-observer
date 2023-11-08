@@ -455,6 +455,7 @@ export default class extends Controller {
     // check if there is geodata on the image
     if (_exif.GPSLatitude && _exif.GPSLongitude) {
       const latLngAlt = this.getLatLongEXIF(_exif);
+      debugger;
       // Set item's data-geocode attribute so we can have a record
       item.dom_element.dataset.geocode = JSON.stringify(latLngAlt)
     }
@@ -886,12 +887,8 @@ export default class extends Controller {
   }
 
   getLatLongEXIF(exifObject) {
-    let lat = exifObject.GPSLatitude.value[0][0]
-      + (exifObject.GPSLatitude.value[1][0] / 60.0)
-      + (exifObject.GPSLatitude.value[2][0] / 3600.0);
-    let long = exifObject.GPSLongitude.value[0][0]
-      + (exifObject.GPSLongitude.value[1][0] / 60.0)
-      + (exifObject.GPSLongitude.value[2][0] / 3600.0);
+    let lat = exifObject.GPSLatitude.description;
+    let long = exifObject.GPSLongitude.description;
 
     const alt = exifObject.GPSAltitude ? (exifObject.GPSAltitude.value[0]
       / exifObject.GPSAltitude.value[1]).toFixed(0) + " m" : "";

@@ -50,12 +50,12 @@ $(document).on("ready turbo:load", function () {
   });
 
   // Not a great solution, but ok for now.
-  // jQuery('form :input').on('change', function () {
-  //   var disabled_buttons = $('[data-disable-with]');
-  //   $(disabled_buttons).each(function () {
-  //     $.rails.enableElement(this);
-  //   })
-  // });
+  jQuery('form :input').on('change', function () {
+    var disabled_buttons = $('[data-disable-with]');
+    $(disabled_buttons).each(function () {
+      $.rails.enableElement(this);
+    })
+  });
 
   // very precise binding for dynamically generated lightbox links
   // they are not there on page load, only when lightbox activated
