@@ -1,9 +1,13 @@
 <%
 n, s, e, w, lat, long, x, y = observation_map_coordinates(obs: obs)
 map_url = map_observation_path(id: obs.id, q: get_query_param)
+coordinates = { x: x, y: y }.to_json
 %>
 
-<%= tag.div(class: "panel panel-default", id: "observation_thumbnail_map") do %>
+<%= tag.div(class: "panel panel-default", id: "observation_thumbnail_map",
+            data: { controller: "thumbnail-map",
+                    coordinates: coordinates,
+                    map_url: map_url }) do %>
 
   <%= tag.div(class: "panel-heading") do
     tag.h4(class: "panel-title") do
@@ -19,14 +23,20 @@ map_url = map_observation_path(id: obs.id, q: get_query_param)
     end
   end %>
 
-  <%= tag.div(class: "thumbnail-map-container") do %>
+  <%= tag.div(class: "thumbnail-map-container",
+              data: { thumbnail_map_target: "mapContainer" }) do %>
 
     <%= tag.div(class: "thumbnail-buttons") do
-      concat(tag.div("", class: "plus-button"))
-      concat(tag.div("", class: "minus-button"))
+      concat(tag.div("", class: "plus-button",
+                         data: { action: "thumbnail-map#zoomTo:stop",
+                                 thumbnail_map_zoom_dir_param: "1" }))
+      concat(tag.div("", class: "minus-button",
+                         data: { action: "thumbnail-map#zoomTo:stop",
+                                 thumbnail_map_zoom_dir_param: "-1" }))
     end %>
 
-    <%= tag.div(class: "thumbnail-map") do %>
+    <%= tag.div(class: "thumbnail-map",
+                data: { thumbnail_map_target: "map" }) do %>
 
       <%= if obs.location
         if w < e && s > n
@@ -54,7 +64,8 @@ map_url = map_observation_path(id: obs.id, q: get_query_param)
 
       <%= image_tag(
         "globe.jpg", class: "w-100", id: "globe_image",
-        data: { globe_large_url: "#{image_url("globe_large.jpg")}" }
+        data: { globe_large_url: "#{image_url("globe_large.jpg")}"
+                thumbnail_map_target: "globe" }
       ) %>
 
     <% end %>
