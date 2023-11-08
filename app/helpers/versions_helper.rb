@@ -33,11 +33,11 @@ module VersionsHelper
   #   </p>
   #
   def show_past_versions(obj, args = {})
-    table = make_table(build_version_table(obj, args),
-                       class: "table table-condensed")
-    panel = content_tag(:div, table, class: "panel-body")
+    table = make_table(rows: build_version_table(obj, args),
+                       table_opts: { class: "mb-0" })
+    panel = tag.div(table, class: "panel-body")
     tag.strong("#{:VERSIONS.t}:") +
-      content_tag(:div, panel, class: "panel panel-default")
+      tag.div(panel, class: "panel panel-default")
   end
 
   private
@@ -59,9 +59,9 @@ module VersionsHelper
 
   def build_version_table(obj, args)
     obj.versions.reverse.map do |ver|
-      [find_version_date(ver), indent,
-       find_version_user(ver), indent,
-       link_to_version(initial_version_link_text(ver, args), ver, obj), indent]
+      [find_version_date(ver),
+       find_version_user(ver),
+       link_to_version(initial_version_link_text(ver, args), ver, obj)]
     end
   end
 
@@ -92,7 +92,7 @@ module VersionsHelper
 
   def initial_version_link_text(ver, args)
     text = "#{:VERSION.t} #{ver.version}"
-    text = content_tag(:strong, text) if args[:bold]&.call(ver)
+    text = tag.strong(text) if args[:bold]&.call(ver)
     return text unless ver.respond_to?(:display_name)
 
     # keep this out of the above `strong` tag, because it has its own tags

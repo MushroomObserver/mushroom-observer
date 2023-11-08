@@ -1,0 +1,28 @@
+// mo_translations is the current instance of MO_Translations
+
+function loadEditForm() {
+  const $translation_ui = document.getElementById('translation_ui'),
+    msg = '<%= @msg %>';
+
+  // if (!mo_translations.CHANGED || confirm(mo_translations.CONFIRM_STRING)) {
+  //   mo_translations.show_whirly(mo_translations.LOADING_STRING);
+  // }
+
+  // console.log("msg: " + msg);
+
+  if( msg == '' ) {
+    // mo_translations.hide_whirly();
+    let _form_and_versions = '<%= j render(partial: "translations/form") %>';
+    _form_and_versions += '<%= j render(partial: "translations/versions") %>';
+
+    $translation_ui.innerHTML = _form_and_versions;
+    mo_translations.CHANGED = false;
+    mo_translations.LOADED = true;
+  } else {
+    // mo_translations.hide_whirly();
+    alert(msg);
+    // console.log(`got a ${response.status}`);
+  }
+}
+
+loadEditForm();

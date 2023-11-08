@@ -1,5 +1,6 @@
 .thumbnail-container {
-  background-color: rgba(0,0,0, 0.33)
+  background-color: rgba(0,0,0, 0.33);
+  // background-color: rgba(0,0,0, 0.12); // for matrix_box_carousels
 }
 
 //
@@ -120,8 +121,8 @@ svg.placeholder {
 }
 
 .image-title-text {
-  background: $BODY_BG_COLOR;
-  color: $BODY_FG_COLOR;
+  background: $body_bg;
+  color: $text_color;
   padding: 0.5em;
   margin-left: 18px;
 }
