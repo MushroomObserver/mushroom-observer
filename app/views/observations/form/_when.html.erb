@@ -4,9 +4,13 @@
 <div class="container-text">
   <%= f.label(:when, :WHEN.t + ":") %>
   <div class="form-group form-inline">
-    <%= f.date_select(:when, date_select_opts(@observation),
-        { class: "form-control mb-2",
-          data: { controller: "year-input" } }) %>
+    <%=
+    f.date_select(
+      :when, date_select_opts(@observation),
+      { class: "form-control mb-2",
+        data: { controller: "year-input",
+                action: "observation-images#updateObservationDateRadio" } }
+    ) %>
   </div>
 </div><!--.container-text-->
 <!-- /WHEN -->

@@ -1,23 +1,9 @@
 <%# Images upload section of create_observation form %>
 
-<%
-max_size = MO.image_upload_max_size
-legible_max_size = (max_size.to_f/1024/1024).round
+<%= tag.div(class: "my-4", id: "observation_images_upload") do %>
 
-image_upload_localization = {
-  uploading_text: :form_observations_uploading_images.t,
-  image_too_big_text: :form_observations_image_too_big.t(max: legible_max_size),
-  creating_observation_text: :form_observations_creating_observation.t,
-  months: :all_months.t,
-  show_on_map: :show_on_map.t,
-  something_went_wrong: :form_observations_upload_error.t
-}.to_json
-%>
-
-<%= tag.div(class: "my-4", id: "observation_images_upload",
-            data: { controller: "observation-images",
-                    localization: image_upload_localization,
-                    upload_max_size: max_size }) do %>
+  <%= hidden_field(:observation, :thumb_image_id,
+                   data: { observation_images_target: "thumbImageId" }) %>
 
   <%= tag.p(:form_observations_upload_images.t + ":",
             class: "font-weight-bold") %>

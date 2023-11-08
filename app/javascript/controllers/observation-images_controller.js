@@ -5,31 +5,11 @@ const internalConfig = {
   // Make some of these targets for the controller
   form: document.forms.namedItem("observation_form"),
   block_form_submission: true,
-  select_files_button: document.getElementById('multiple_images_button'),
-  obs_thumb_input: document.getElementById('observation_thumb_image_id'),
-  // for edit form only. hidden radios in the create form added dynamically
-  obs_thumb_image_radios:
-    document.querySelectorAll('input[name="observation[thumb_image_id]"]'),
   content: document.getElementById('content'),
-  // container to insert images into
-  add_img_container: document.getElementById("added_images_container"),
   get_template_uri: "/ajax/multi_image_template",
   upload_image_uri: "/ajax/create_image_object",
   // progress_uri: "/ajax/upload_progress",
   dots: [".", "..", "..."],
-  good_images: document.getElementById('good_images'),
-  obs_day: document.getElementById('observation_when_3i'),
-  obs_month: document.getElementById('observation_when_2i'),
-  obs_year: document.getElementById('observation_when_1i'),
-  img_radio_container: document.getElementById('image_date_radio_container'),
-  obs_radio_container: document.getElementById('observation_date_radio_container'),
-  fix_dates: document.getElementById('fix_dates'),
-  ignore_dates: document.getElementById('ignore_dates'),
-  img_messages: document.getElementById("image_messages"),
-  geocode_radio_container: document.getElementById('geocode_radio_container'),
-  set_geocode_btn: document.getElementById('set_geocode'),
-  ignore_geocode_btn: document.getElementById('ignore_geocode'),
-  geocode_messages: document.getElementById('geocode_messages'),
   localized_text: {
     uploading_text: "Uploading",
     image_too_big_text: "This image is too large. Image files must be less than 20Mb.",
@@ -40,8 +20,14 @@ const internalConfig = {
   }
 }
 
+// This needs to be on the whole "observation_images" section of the form.
 // Connects to data-controller="observation-images"
 export default class extends Controller {
+  static targets = ["imageMessages", "imgDateRadios", "obsDateRadios",
+    "gpsMessages", "gpsRadios", "setLatLngAlt", "ignoreGps", "imageGpsMap",
+    "addedImages", "goodImages", "thumbImageId", "setThumbImg", "isThumbImg",
+    "thumbImgRadio", "selectImages"]
+
   initialize() {
   }
 
@@ -62,43 +48,6 @@ export default class extends Controller {
     this.submit_buttons.forEach((element) => {
       element.setAttribute('disabled', false);
     });
-
-    // GEOCODE_MESSAGES - hidden but present in document
-    // Obs gps: set to whichever radio [name=fix_geocode] is selected, or ignore
-    this.set_geocode_btn.onclick = () => {
-      const _selectedItem =
-        document.querySelector('input[name=fix_geocode]:checked');
-
-      if (_selectedItem && _selectedItem.hasAttribute('data-geocode')) {
-        const _gps = JSON.parse(_selectedItem.dataset.geocode);
-
-        document.getElementById('observation_lat').value = _gps.latitude;
-        document.getElementById('observation_long').value = _gps.longitude;
-        document.getElementById('observation_alt').value = _gps.altitude;
-        this.hide(this.geocode_messages);
-      }
-    };
-    this.ignore_geocode_btn.onclick = () => {
-      this.hide(this.geocode_messages);
-    };
-
-    // IMG_MESSAGES - hidden but present in document
-    // image dates don't match obs date: fix or ignore
-    this.fix_dates.onclick = () => {
-      const _selectedItem =
-        document.querySelector('input[name=fix_date]:checked');
-
-      if (_selectedItem && _selectedItem.hasAttribute('data-date')) {
-        const _itemData = _selectedItem.dataset;
-
-        this.fixDates(JSON.parse(_itemData.date), _itemData.target);
-      }
-    };
-    this.ignore_dates.onclick = () => { this.hide(this.img_messages); };
-
-    this.obs_year.onchange = () => { this.updateObservationDateRadio() };
-    this.obs_month.onchange = () => { this.updateObservationDateRadio() };
-    this.obs_day.onchange = () => { this.updateObservationDateRadio() };
 
     // Drag and Drop bindings on the window
     this.content.addEventListener('dragover', function (e) {
@@ -125,11 +74,11 @@ export default class extends Controller {
 
     // EDIT OBS - Update the "observation_thumb_image_id" form field,
     // when the hidden "set_as_thumb_image" for an image is changed.
-    this.obs_thumb_image_radios.forEach((elem) => {
-      elem.onchange = (event) => {
-        this.obs_thumb_input.setAttribute('value', event.target.value);
-      }
-    });
+    // this.obs_thumb_image_radios.forEach((elem) => {
+    //   elem.onchange = (event) => {
+    //     this.thumbImageIdTarget.setAttribute('value', event.target.value);
+    //   }
+    // });
 
     // ADDING FILES
     this.content.ondrop = (e) => {
@@ -146,14 +95,6 @@ export default class extends Controller {
       //   fileStore.addUrl(dataTransfer.getData('Text'));
     };
 
-    // Detect when files are added from browser
-    this.select_files_button.onchange = (event) => {
-      // Get the files from the browser
-      const files = event.target.files;
-      this.addFiles(files);
-      event.target.value = "";
-    };
-
     // Detect when a user submits observation; includes upload logic
     this.form.onsubmit = (event) => {
       if (this.block_form_submission) {
@@ -164,58 +105,77 @@ export default class extends Controller {
     };
   }
 
-  setItemBindings() {
-    const _images = document.getElementById("added_images_container"),
-      _show_on_map_links = _images
-        .querySelectorAll('[data-role="show_on_map"]'),
-      _set_thumb_image_btns = _images.querySelectorAll('.set_thumb_image'),
-      _obs_thumb_image_radios = _images
-        .querySelectorAll('input[name="observation[thumb_image_id]"]'),
-      _is_thumb_image_labels = _images.querySelectorAll('.is_thumb_image');
+  fixDates() {
+    const _selectedItem =
+      document.querySelector('input[name=fix_date]:checked');
 
-    // show the item's gps on a map.
-    // there's one link for each different gps coord, NOT present at load
+    if (_selectedItem && _selectedItem.hasAttribute('data-date')) {
+      const _itemData = _selectedItem.dataset;
 
-    _show_on_map_links.forEach((elem) => {
-      elem.onclick = () => {
-        this.showGeocodeonMap(JSON.parse(this.dataset.geocode));
-      }
+      this.reconcileDates(JSON.parse(_itemData.date), _itemData.target);
+    }
+  }
+
+  ignoreDates() { this.hide(this.imageMessagesTarget); }
+
+  setGps() {
+    const _selectedItem =
+      document.querySelector('input[name=fix_geocode]:checked');
+
+    if (_selectedItem && _selectedItem.hasAttribute('data-geocode')) {
+      const _gps = JSON.parse(_selectedItem.dataset.geocode);
+
+      document.getElementById('observation_lat').value = _gps.latitude;
+      document.getElementById('observation_long').value = _gps.longitude;
+      document.getElementById('observation_alt').value = _gps.altitude;
+      this.hide(this.gpsMessagesTarget);
+    }
+  }
+
+  ignoreGps() { this.hide(this.gpsMessagesTarget); }
+
+  setObsThumbnail({ event }) {
+    // event.target is the button clicked to make whichever the default image
+    const elem = event.target;
+
+    // reset selections
+    // remove hidden from the links
+    this.setThumbImgTargets.forEach((elem) => {
+      elem.classList.remove('hidden');
+    });
+    // add hidden to the default thumbnail text
+    this.isThumbImgTargets.forEach((elem) => {
+      elem.classList.add('hidden');
+    });
+    // reset the checked default thumbnail
+    this.thumbImgRadioTargets.forEach((elem) => {
+      elem.setAttribute('checked', false);
     });
 
-    // Logic for setting the default thumbnail.
-    // Needs binding after filestore item created.
-    // _set_thumb_image_btns.forEach((elem) => {
-    _set_thumb_image_btns.forEach((elem) => {
-      elem.onclick = (event) => {
-        // `this` is the link clicked to make default image
-        event.preventDefault();
-        // reset selections
-        // remove hidden from the links
-        _set_thumb_image_btns.forEach((elem) => {
-          elem.classList.remove('hidden');
-        });
-        // add hidden to the default thumbnail text
-        _is_thumb_image_labels.forEach((elem) => {
-          elem.classList.add('hidden');
-        });
-        // reset the checked default thumbnail
-        _obs_thumb_image_radios.forEach((elem) => {
-          elem.setAttribute('checked', false);
-        });
+    // set sibling selections... don't know how to use targets here
+    // add hidden to the link clicked
+    elem.classList.add('hidden');
+    // show that the image is default
+    elem.parentNode.querySelector(
+      '.is_thumb_image'
+    ).classList.remove('hidden');
+    // adjust hidden radio button to select obs thumbnail
+    elem.parentNode.querySelector(
+      'input[type="radio"][name="observation[thumb_image_id]"]'
+      // ).setAttribute('checked', true);
+    ).trigger("click") // to trigger setHiidenThumbField below.
+  }
 
-        // set sibling selections
-        // add hidden to the link clicked
-        elem.classList.add('hidden');
-        // show that the image is default
-        elem.parentNode.querySelector(
-          '.is_thumb_image'
-        ).classList.remove('hidden');
-        // adjust hidden radio button to select obs thumbnail
-        elem.parentNode.querySelector(
-          'input[type="radio"][name="observation[thumb_image_id]"]'
-        ).setAttribute('checked', true);
-      }
-    });
+  // this just sets the hidden field value. do this directly or trigger click
+  setHiddenThumbField({ event }) {
+    this.thumbImageIdTarget.setAttribute('value', event.target.value);
+  }
+
+  addSelectedFiles({ event }) {
+    // Get the files from the browser
+    const files = event.target.files;
+    this.addFiles(files);
+    event.target.value = "";
   }
 
   /*********************/
@@ -412,10 +372,10 @@ export default class extends Controller {
         this.localized_text.image_too_big_text;
 
     // add it to the page
-    this.add_img_container.append(item.dom_element);
+    this.addedImagesTarget.append(item.dom_element);
     // scroll to it
     window.scrollTo({
-      top: this.add_img_container.offsetTop,
+      top: this.addedImagesTarget.offsetTop,
       behavior: 'smooth',
     });
 
@@ -528,9 +488,9 @@ export default class extends Controller {
 
   // Maybe add a radio button option to set obs gps to this item's gps.
   // Or, if there are no more images with that location, remove the option.
-  // Or, remove the whole geocode_messages box.
+  // Or, remove the whole gps_messages box.
   refreshGeocodeMessages() {
-    const _geoOptions = this.geocode_radio_container;
+    const _geoOptions = this.gpsRadiosTarget;
     let _currentOptions = _geoOptions.querySelectorAll('input[type="radio"]');
 
     if (this.fileStore.items.length > 0) {
@@ -560,7 +520,7 @@ export default class extends Controller {
 
           if (_addGeoRadio) {
             const _radioBtnToInsert = this.makeGeocodeRadioBtn(itemGeocode);
-            this.geocode_radio_container.appendChild(_radioBtnToInsert);
+            this.gpsRadiosTarget.appendChild(_radioBtnToInsert);
           }
         }
       })
@@ -575,9 +535,9 @@ export default class extends Controller {
       _currentOptions = _geoOptions.querySelectorAll('input[type="radio"]');
 
       if (_currentOptions.length > 0) {
-        this.show(this.geocode_messages);
+        this.show(this.gpsMessagesTarget);
       } else {
-        this.hide(this.geocode_messages);
+        this.hide(this.gpsMessagesTarget);
       }
     }
   }
@@ -693,18 +653,18 @@ export default class extends Controller {
   // add the image to `good_images` and maybe set the thumb_image_id
   updateObsImages(item, image) {
     // #good_images is a hidden field
-    const _good_image_vals = this.good_images.value || "";
+    const _good_image_vals = this.goodImagesTarget.value || "";
     const _radio = item.dom_element.querySelector(
       'input[name="observation[thumb_image_id]"]'
     )
 
     // add id to the good images form field.
-    this.good_images.value = [_good_image_vals, image.id].join(' ').trim();
+    this.goodImagesTarget.value = [_good_image_vals, image.id].join(' ').trim();
 
     // set the hidden thumb_image_id field if the item's radio is checked
     if (_radio.checked) {
       _radio.value = image.id; // it's grabbing the val from the radio
-      this.obs_thumb_input.value = image.id; // does not matter!
+      this.thumbImageIdTarget.value = image.id; // does not matter!
     }
   }
 
@@ -746,8 +706,8 @@ export default class extends Controller {
     const _distinctImgDates = this.getDistinctImageDates(),
       _obsDate = this.observationDate();
 
-    this.img_radio_container.innerHTML = '';
-    this.obs_radio_container.innerHTML = '';
+    this.imgDateRadiosTarget.innerHTML = '';
+    this.obsDateRadiosTarget.innerHTML = '';
     this.makeObservationDateRadio(_obsDate);
 
     _distinctImgDates.forEach((simpleDate) => {
@@ -756,18 +716,18 @@ export default class extends Controller {
     });
 
     if (this.areDatesInconsistent()) {
-      this.show(this.img_messages);
+      this.show(this.imgMessagesTarget);
     } else {
-      this.hide(this.img_messages);
+      this.hide(this.imgMessagesTarget);
     }
   }
 
-  fixDates(simpleDate, target) {
+  reconcileDates(simpleDate, target) {
     if (target == "image")
       this.updateImageDates(simpleDate);
     if (target == "observation")
       this.observationDate(simpleDate);
-    this.hide(this.img_messages);
+    this.hide(this.imgMessagesTarget);
   }
 
   makeImageDateRadio(simpleDate) {
@@ -778,7 +738,7 @@ export default class extends Controller {
     _html.classList.add("radio");
     _html.innerHTML = "<label><input type='radio' data-target='observation' data-date='" + _date + "' name='fix_date'/>" + _date_string + "</label>"
 
-    this.img_radio_container.appendChild(_html);
+    this.imgDateRadiosTarget.appendChild(_html);
   }
 
   makeObservationDateRadio(simpleDate) {
@@ -789,23 +749,23 @@ export default class extends Controller {
     _html.classList.add("radio");
     _html.innerHTML = "<label><input type='radio' data-target='image' data-date='" + _date + "' name='fix_date'/><span>" + _date_string + "</span></label>";
 
-    this.obs_radio_container.appendChild(_html);
+    this.obsDateRadiosTarget.appendChild(_html);
   }
 
   updateObservationDateRadio() {
     // _currentObsDate is an instance of this.SimpleDate(values)
     const _currentObsDate = this.observationDate();
 
-    this.obs_radio_container.querySelectorAll('input')
+    this.obsDateRadiosTarget.querySelectorAll('input')
       .forEach((elem) => { elem.dataset.date = _currentObsDate; })
 
-    this.obs_radio_container.querySelectorAll('span')
+    this.obsDateRadiosTarget.querySelectorAll('span')
       .forEach((elem) => {
         elem.innerText = this.simpleDateAsString(_currentObsDate);
       })
 
     if (this.areDatesInconsistent())
-      this.show(this.img_messages);
+      this.show(this.imgMessagesTarget);
   }
 
   // gets or sets current obs date, simpledate object updates date
@@ -905,9 +865,13 @@ export default class extends Controller {
     _label.appendChild(_input);
     _label.insertAdjacentText('beforeend', _geocode_string)
 
+    // dataset is read-only. attributes must be assigned singly
     _a.href = '#geocode_map';
     _a.dataset.role = 'show_on_map';
     _a.dataset.geocode = JSON.stringify(latLngAlt);
+    _a.dataset.observationImagesTarget = 'showOnMap';
+    _a.dataset.action = 'observation-images#showGeocodeonMap';
+    _a.dataset.observationImagesLatLngAltParam = JSON.stringify(latLngAlt)
     _a.classList.add('ml-3');
     _a.textContent = this.localized_text.show_on_map;
 
@@ -940,23 +904,23 @@ export default class extends Controller {
     }
   }
 
-  showGeocodeonMap(latLngAlt) {
-    // Create a map object and specify the DOM element for display.
-    const _latLng = {
-      lat: latLngAlt.latitude, lng: latLngAlt.longitude
-    },
+  // Create a map object and specify the DOM element for display.
+  showGeocodeonMap({ params: { latLngAlt } }) {
+    const _latLng = { lat: latLngAlt.latitude, lng: latLngAlt.longitude },
       _map_container = document.getElementById('geocode_map');
 
     _map_container.setAttribute('height', '250');
 
-    const map = new google.maps.Map(_map_container, {
+    // Issue: there should not be two google maps on the page.
+    const _map = new google.maps.Map(_map_container, {
       center: _latLng,
       zoom: 12
     });
 
-    const marker = new google.maps.Marker({
-      map: map,
-      position: obsLatLongFormat
+    new google.maps.Marker({
+      map: _map,
+      position: _latLng
     });
+    debugger
   }
 }

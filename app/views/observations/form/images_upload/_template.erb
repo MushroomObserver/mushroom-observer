@@ -17,11 +17,16 @@
     <div class="added_image_image_container col-xs-4">
 
       <div class="form-group mb-2">
-        <a href="#"
-           class="set_thumb_image btn btn-sm btn-default"><%= :image_set_default.t %></a>
-        <label class="hidden is_thumb_image"><%= :image_add_default.t %></label>
+        <button type="button"
+           class="set_thumb_image btn btn-sm btn-default"
+           data-observation-images-target="setThumbImg"
+           data-action="observation-images#setObsThumbnail:prevent"><%= :image_set_default.t %></button>
+        <label class="hidden is_thumb_image"
+               data-observation-images-target="isThumbImg"><%= :image_add_default.t %></label>
         <input type="radio" name="observation[thumb_image_id]" value="true"
-               style="display: none;">
+               data-observation-images-target="thumbImgRadio"
+               data-action="click->observation-images#setHiddenThumbField"
+               style="display: none;" >
       </div>
 
       <div class="form-group">
