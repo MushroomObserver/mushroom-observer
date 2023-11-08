@@ -6,7 +6,6 @@
 //= require image_export
 //= require validate_file_input_fields
 //= require main
-//= require thumbnail_map
 //= require lightbox
 
 lightbox.option({
