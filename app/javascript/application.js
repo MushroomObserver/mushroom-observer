@@ -19,5 +19,13 @@ import "@hotwired/stimulus-loading"
 
 import 'exifreader';
 
+import LazyLoad from "vanilla-lazyload";
+if (!window.lazyLoadInstance) {
+  window.lazyLoadInstance = new LazyLoad({
+    elements_selector: ".lazy"
+    // ... more custom settings?
+  });
+}
+
 import Rails from "@rails/ujs"
 Rails.start(); import "controllers"
