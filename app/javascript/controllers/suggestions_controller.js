@@ -25,9 +25,9 @@ export default class extends Controller {
     $(this.progressModal).modal("show");
     this.results = [];
     this.any_worked = false;
-    debugger
 
-    this.predict(0)
+    if (this.image_ids.length)
+      this.predict(0)
   }
 
   predict(i) {
@@ -74,6 +74,7 @@ export default class extends Controller {
         } else {
           this.fetch_request = null;
           console.log(`got a ${response.status}`);
+          this.resetModal();
         }
       }
     }).catch((error) => {
