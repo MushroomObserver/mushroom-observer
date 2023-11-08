@@ -2,7 +2,7 @@
 // Read more: https://github.com/rails/importmap-rails
 // If string literal error, it means the importmap is not functioning
 
-// import "jquery3"
+import "jquery3"
 import "bootstrap"
 
 import "@hotwired/turbo-rails"
@@ -29,3 +29,6 @@ if (!window.lazyLoadInstance) {
 
 import Rails from "@rails/ujs"
 Rails.start(); import "controllers"
+
+// Define a variable to check in inlined HTML script
+window.importmapScriptsLoaded = true;

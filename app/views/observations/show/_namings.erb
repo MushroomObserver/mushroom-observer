@@ -1,36 +1,29 @@
 <%
-# js needs to prepend observation_namings with fresh namings_table on update
+@query ||= nil
 %>
 
 <!--TABLE OF NAMES / REFRESHED BY TURBO -->
 <%= turbo_frame_tag("observation_namings",
                     src: naming_path(id: obs.id),
                     loading: "lazy") do
-  render(partial: "observations/namings/table", locals: { obs: obs })
+  render(partial: "observations/namings/table",
+         locals: { obs: obs, query: @query })
 end %>
 <!--/TABLE OF NAMES -->
 
-<% # initializes module with translations for js messages
-inject_javascript_at_end %(
-  VoteByAjaxModule({
-    show_namings_lose_changes: '#{j :show_namings_lose_changes.l.gsub("\n", " ")}',
-    show_namings_saving: '#{j :show_namings_saving.l}'
-  })
-) %>
-<!--/VOTE POPUPS-->
-
 <!--SUGGESTIONS-->
 <%
-@query ||= nil
-url = naming_suggestions_for_observation_path(id: obs.id,
-        names: :xxx, q: get_query_param(@query))
 
-inject_javascript_at_end %(
-  SuggestionModule(#{obs.image_ids}, "#{url}", {
-    suggestions_processing_images:  "#{j :suggestions_processing_images.t}",
-    suggestions_processing_image:   "#{j :suggestions_processing_image.t}",
-    suggestions_processing_results: "#{j :suggestions_processing_results.t}",
-    suggestions_error:              "#{j :suggestions_error.t}"
-  });
-) %>
+# url = naming_suggestions_for_observation_path(id: obs.id,
+#         names: :xxx, q: get_query_param(@query))
+
+# inject_javascript_at_end %(
+#   SuggestionModule(#{obs.image_ids}, "#{url}", {
+#     suggestions_processing_images:  "#{j :suggestions_processing_images.t}",
+#     suggestions_processing_image:   "#{j :suggestions_processing_image.t}",
+#     suggestions_processing_results: "#{j :suggestions_processing_results.t}",
+#     suggestions_error:              "#{j :suggestions_error.t}"
+#   });
+# )
+%>
 <!--/SUGGESTIONS-->

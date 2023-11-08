@@ -2,7 +2,7 @@
 # If string literal error, it means the importmap is not functioning
 # check it with bin/importmap json
 
-# pin "jquery3", to: "jquery.min.js", preload: true
+pin "jquery3", to: "jquery.min.js", preload: true
 # pin "jquery3", to: "https://ga.jspm.io/npm:jquery@3.7.0/dist/jquery.js",
 #                preload: true
 # pin "jquery" # @3.7.1

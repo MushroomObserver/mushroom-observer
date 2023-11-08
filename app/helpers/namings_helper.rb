@@ -38,9 +38,23 @@ module NamingsHelper
                                    btn_class: "btn-default btn-sm",
                                    context: "namings_table")
     if do_suggestions
-      buttons << link_to(:show_namings_suggest_names.l, "#",
-                         { data: { role: "suggest_names" },
-                           class: "btn btn-default btn-sm mt-2" })
+      localizations = {
+        processing_images: :suggestions_processing_images.t,
+        processing_image: :suggestions_processing_image.t,
+        processing_results: :suggestions_processing_results.t,
+        error: :suggestions_error.t
+      }.to_json
+      results_url = add_query_param(
+        naming_suggestions_for_observation_path(id: observation.id, names: :xxx)
+      )
+      buttons << button_tag(:show_namings_suggest_names.l,
+                            type: :button, class: "btn btn-default btn-sm mt-2",
+                            data: { role: "suggest_names",
+                                    results_url: results_url,
+                                    localization: localizations,
+                                    image_ids: observation.image_ids.to_json,
+                                    controller: "suggestions",
+                                    action: "suggestions#suggestTaxa" })
     end
     buttons.safe_join(tag.br)
   end
@@ -122,29 +136,34 @@ module NamingsHelper
   # Naming Vote Form:
   # a tiny form within a naming row for voting on this naming only
   # also called by matrix_box_vote_or_propose_ui
-  # fires the special rails-ujs submit event for remote submit
-  # requires a native js (not jQuery) element, form is parent of select
-  # Turbo: check how this should submit
+  # Submits via Turbo
   def naming_vote_form(naming, vote, context: "blank")
     menu = Vote.confidence_menu
     can_vote = check_permission(naming)
     menu = [Vote.no_opinion] + menu if !can_vote || !vote || vote&.value&.zero?
+    localizations = {
+      lose_changes: :show_namings_lose_changes.l.tr("\n", " "),
+      saving: :show_namings_saving.l
+    }.to_json
 
     form_with(url: naming_vote_path(naming_id: naming.id), method: :patch,
-              local: false, id: "naming_vote_#{naming.id}",
+              turbo: true, id: "naming_vote_#{naming.id}",
               class: "naming-vote-form",
-              data: { controller: "naming-vote" }) do |f|
+              data: { controller: "naming-vote",
+                      localization: localizations }) do |f|
       [
         fields_for(:vote) do |fv|
           fv.select(:value, menu, {},
                     { class: "form-control w-100",
                       data: { role: "change_vote", id: naming.id,
-                              action: "change->naming-vote#sendVote" } })
+                              naming_vote_target: "select",
+                              action: "naming-vote#sendVote" } })
         end,
         hidden_field_tag(:context, context),
         tag.noscript do
           submit_button(form: f, button: :show_namings_cast.l, class: "w-100",
-                        data: { role: "save_vote" })
+                        data: { role: "save_vote",
+                                naming_vote_target: "submit" })
         end
       ].safe_join
     end

@@ -44,7 +44,7 @@ module Observations::Namings
     # JS requests: depends on params[:context]
     # when namings_table (show_observation)
     #   Updates namings_table (+ maybe obs title) via update_observation.js.erb
-    #   and naming_vote_ajax.js, which handles <select> bindings
+    #   and stimulus naming-vote_controller, which handles <select> bindings
     # when matrix_box (help_identify)
     #   updates the lightbox and matrix_box
 
@@ -58,9 +58,6 @@ module Observations::Namings
 
       @observation.change_vote(@naming, value)
       respond_to do |format|
-        format.html do
-          redirect_with_query(observation_path(id: @observation.id))
-        end
         format.turbo_stream do
           case params[:context]
           when "matrix_box"
@@ -69,6 +66,9 @@ module Observations::Namings
             render(partial: "observations/namings/update_observation")
           end
           return
+        end
+        format.html do
+          redirect_with_query(observation_path(id: @observation.id))
         end
       end
     end
