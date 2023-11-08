@@ -17,9 +17,9 @@ import "@rails/request.js"
 import "@hotwired/stimulus"
 import "@hotwired/stimulus-loading"
 
-import 'exifreader';
+import 'exifreader'
 
-import LazyLoad from "vanilla-lazyload";
+import LazyLoad from "vanilla-lazyload"
 if (!window.lazyLoadInstance) {
   window.lazyLoadInstance = new LazyLoad({
     elements_selector: ".lazy"
@@ -31,4 +31,4 @@ import Rails from "@rails/ujs"
 Rails.start(); import "controllers"
 
 // Define a variable to check in inlined HTML script
-window.importmapScriptsLoaded = true;
+window.importmapScriptsLoaded = true

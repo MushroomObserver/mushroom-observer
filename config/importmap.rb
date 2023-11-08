@@ -18,3 +18,5 @@ pin "@hotwired/stimulus-loading", to: "stimulus-loading.js", preload: true
 pin_all_from "app/javascript/controllers", under: "controllers"
 pin "exifreader" # @4.16.0
 pin "vanilla-lazyload" # @17.8.5
+pin "lightgallery" # @2.7.2
+pin "lightgallery/plugins/zoom", to: "lightgallery--plugins--zoom.js" # @2.7.2

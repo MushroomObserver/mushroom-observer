@@ -9,7 +9,8 @@ module LightboxHelper
 
     link_to(icon, lightbox_data[:url],
             class: "theater-btn",
-            data: { lightbox: lightbox_data[:id], title: caption })
+            data: { # lightbox: lightbox_data[:id],
+                    sub_html: caption })
   end
 
   # everything in the caption

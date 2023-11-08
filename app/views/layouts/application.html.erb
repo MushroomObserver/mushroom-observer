@@ -43,7 +43,9 @@ body_class = class_names(whos_calling, theme_class)
         <%= render(partial: "application/content/title_and_tab_sets") %>
       </header>
 
-      <main id="content" class="<%= container_class %>">
+      <main id="content" class="<%= container_class %>"
+            data-controller="lightbox">
+
         <% unless @user&.verified? %>
           <%= render(partial: "application/content/login_layout") %>
         <% end %>
