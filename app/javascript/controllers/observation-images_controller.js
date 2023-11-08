@@ -26,7 +26,7 @@ export default class extends Controller {
   static targets = ["imageMessages", "imgDateRadios", "obsDateRadios",
     "gpsMessages", "gpsRadios", "setLatLngAlt", "ignoreGps", "imageGpsMap",
     "addedImages", "goodImages", "thumbImageId", "setThumbImg", "isThumbImg",
-    "thumbImgRadio", "selectImages"]
+    "thumbImgRadio"]
 
   initialize() {
   }
@@ -71,14 +71,6 @@ export default class extends Controller {
     function removeDashedBorder() {
       document.getElementById('right_side').classList.remove('dashed-border');
     }
-
-    // EDIT OBS - Update the "observation_thumb_image_id" form field,
-    // when the hidden "set_as_thumb_image" for an image is changed.
-    // this.obs_thumb_image_radios.forEach((elem) => {
-    //   elem.onchange = (event) => {
-    //     this.thumbImageIdTarget.setAttribute('value', event.target.value);
-    //   }
-    // });
 
     // ADDING FILES
     this.content.ondrop = (e) => {
