@@ -16,4 +16,5 @@ pin "@hotwired/stimulus", to: "stimulus.min.js", preload: true
 # pin "@hotwired/stimulus", to: "https://ga.jspm.io/npm:@hotwired/stimulus@3.2.2/dist/stimulus.js"
 pin "@hotwired/stimulus-loading", to: "stimulus-loading.js", preload: true
 pin_all_from "app/javascript/controllers", under: "controllers"
-pin "exifreader", to: "https://ga.jspm.io/npm:exifreader@4.16.0/src/exif-reader.js"
+pin "exifreader" # @4.16.0
+pin "vanilla-lazyload" # @17.8.5
