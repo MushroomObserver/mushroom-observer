@@ -15,7 +15,7 @@ javascript_include_tag(
   "https://maps.googleapis.com/maps/api/js?key=" +
   "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA" +
   "&libraries=maps,geocoding,marker,elevation" +
-  "&callback=dispatchMapsEvent",
+  "&callback=window.dispatchMapsEvent",
   async: true, defer: true, # "data-turbo-eval": false
 ) %>
 <%
