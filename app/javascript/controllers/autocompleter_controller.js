@@ -154,7 +154,7 @@ export default class extends Controller {
 
   connect() {
     // Figure out a few browser-dependent dimensions.
-    this.scrollbar_width = this.getScrollBarWidth();
+    this.getScrollBarWidth();
 
     // Create pulldown.
     this.create_pulldown();
@@ -1162,8 +1162,8 @@ export default class extends Controller {
     let inner, outer, w1, w2;
     const body = document.body || document.getElementsByTagName("body")[0];
 
-    if (scroll_bar_width != null)
-      return scroll_bar_width;
+    if (this.scrollbar_width != null)
+      return this.scrollbar_width;
 
     inner = document.createElement('p');
     inner.style.width = "100%";
@@ -1186,7 +1186,7 @@ export default class extends Controller {
     if (w1 == w2) w2 = outer.clientWidth;
     body.removeChild(outer);
 
-    scroll_bar_width = w1 - w2;
-    return scroll_bar_width;
+    this.scrollbar_width = w1 - w2;
+    // return scroll_bar_width;
   }
 }
