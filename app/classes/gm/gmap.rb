@@ -55,53 +55,51 @@ module GM
     end
 
     def self.header(args)
-      # url = GMAPS_API_URL
-      # key = GMAPS_API_KEYS[::Rails.env][args[:host]]
-      # "<script type='text/javascript' src='#{url}?key=#{key}'>" \
-      # "</script>" \
-      "<script type='text/javascript'>
-        document.addEventListener('google-maps-loaded', () => {
-          var G = google.maps;
-          // in case jQuery is not loaded for this page
-          function E(id) {
-            return document.getElementById(id);
+      url = GMAPS_API_URL
+      key = GMAPS_API_KEYS[::Rails.env][args[:host]]
+      "<script type='text/javascript' src='#{url}?key=#{key}&sensor=false'>" \
+      "</script>
+      <script type='text/javascript'>
+        var G = google.maps;
+        // in case jQuery is not loaded for this page
+        function E(id) {
+          return document.getElementById(id);
+        }
+        // handy to reduce space required for long lists of latilongs
+        function L(lat, long) {
+          return new G.LatLng(lat, long);
+        }
+        // callback to close currently opened info window
+        var current_info_window = null;
+        var has_info_window_closer = {};
+        function close_current_info_window() {
+          if (current_info_window) {
+            current_info_window.close();
+            current_info_window = null;
           }
-          // handy to reduce space required for long lists of latilongs
-          function L(lat, long) {
-            return new G.LatLng(lat, long);
+        }
+        // handy to create fully-functional marker pin with popup info-window
+        function P(map, lat, long, draggable, title, popup_content) {
+          var marker;
+          var info_window;
+          var args = {
+            map:      map,
+            position: L(lat, long)
+          };
+          if (title != 0)     args['title'] = title;
+          if (draggable != 0) args['draggable'] = true;
+          marker = new G.Marker(args);
+          if (popup_content != 0) {
+            info_window = new G.InfoWindow({content: popup_content});
+            G.event.addListener(marker, 'click', function() {
+              info_window.open(map, marker);
+              current_info_window = info_window;
+            });
+            if (!has_info_window_closer[map]++)
+              G.event.addListener(map, 'click', close_current_info_window);
           }
-          // callback to close currently opened info window
-          var current_info_window = null;
-          var has_info_window_closer = {};
-          function close_current_info_window() {
-            if (current_info_window) {
-              current_info_window.close();
-              current_info_window = null;
-            }
-          }
-          // handy to create fully-functional marker pin with popup info-window
-          function P(map, lat, long, draggable, title, popup_content) {
-            var marker;
-            var info_window;
-            var args = {
-              map:      map,
-              position: L(lat, long)
-            };
-            if (title != 0)     args['title'] = title;
-            if (draggable != 0) args['draggable'] = true;
-            marker = new G.Marker(args);
-            if (popup_content != 0) {
-              info_window = new G.InfoWindow({content: popup_content});
-              G.event.addListener(marker, 'click', function() {
-                info_window.open(map, marker);
-                current_info_window = info_window;
-              });
-              if (!has_info_window_closer[map]++)
-                G.event.addListener(map, 'click', close_current_info_window);
-            }
-            return marker;
-          }
-        })
+          return marker;
+        }
       </script>".html_safe
     end
 
@@ -199,7 +197,7 @@ module GM
 
     def to_html(_args)
       "#{global_declarations_code}\n" \
-      "window.addEventListener('google-maps-loaded', function() {\n" \
+      "G.event.addDomListener(window, 'load', function() {\n" \
         "var M = #{name} = new G.Map(E('#{name}'), " \
         "{ #{map_options_code.join(", ")} });\n" \
         "#{center_map_code}\n" \
