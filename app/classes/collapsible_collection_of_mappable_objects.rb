@@ -11,6 +11,33 @@
 #  Note: Uses the global +MO.max_map_objects+ to limit the number of
 #  objects.
 #
+#  Uses the following other classes:
+#   MapSet
+#   MinimalMapObservation or MinimalMapLocation
+#   Location (or other ActiveRecord object)
+#
+#  Object has this shape:
+# <CollapsibleCollectionOfMappableObjects{
+#   max_objects: 100,
+#   sets: {
+#     [x, y, w, h] => <MapSet{
+#       east:
+#       north:
+#       south:
+#       west:
+#       objects: [
+#         <MinimalMapObservation{
+#           id:
+#           lat:
+#           lng:
+#           location_id:
+#           location: (ActiveRecord)
+#         }>
+#       ]
+#     }>
+#   }
+# }
+#
 #  == Typical Usage
 #
 #    collection = CollapsibleCollectionOfMappableObjects.new(query.results)

@@ -40,7 +40,7 @@ module MapHelper
   end
 
   def finish_map(gmap)
-    ensure_global_header_is_added
+    # ensure_global_header_is_added
     html = gmap.to_html(no_script_tag: 1)
     js = javascript_tag(html)
     add_header(js)
@@ -226,5 +226,24 @@ module MapHelper
       marker = GM::GMarker.new(point, draggable: true)
       map_control_init(gmap, marker, args, type)
     end
+  end
+
+  # As of mid-2023, Google is calling this their "legacy script loading tag".
+  # https://developers.google.com/maps/documentation/javascript/load-maps-js-api#use-legacy-tag
+  # But it's the only one with clear examples of integration with Stimulus.
+  # We use a callback (dispatchMapsEvent, defined in assets/javascripts/main.js)
+  # to fire a custom window JS Event that the class/controller picks up,
+  # signifiying that the google.maps object is loaded and defined.
+  # We can switch to their Dynamic Library Import if we get a new example.
+  # I tried writing async functions in the class that wait for google.maps
+  # to be defined, and i couldn't get em working. - AN 20231102
+  def load_google_maps_api_script
+    javascript_include_tag(
+      "https://maps.googleapis.com/maps/api/js?key=" \
+      "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA" \
+      "&libraries=maps,geocoding,marker,elevation" \
+      "&callback=window.dispatchMapsEvent",
+      async: true, defer: true, data: { turbo_eval: false }
+    )
   end
 end
