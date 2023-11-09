@@ -2,22 +2,6 @@
  * This should be included on every page.
  */
 
-// This is the callback for when the google maps api script is loaded (async,
-// from Google) on the Create Obs form, and potentially elsewhere.
-// It dispatches a global event that can be picked up by MOObservationMapper,
-// or a potential Stimulus controller doing the same thing. The mapper needs to
-// know when the script is loaded, because its methods will not work otherwise.
-window.dispatchMapsEvent = function (...args) {
-  const gmaps_loaded = new CustomEvent("google-maps-loaded", {
-    bubbles: true,
-    detail: args
-  })
-  console.log("maps is loaded")
-  window.dispatchEvent(gmaps_loaded)
-}
-
-
-
 // This observer is a stopgap that handles what Stimulus would handle:
 // observes page changes and whether they should fire js.
 function moObserveContent() {

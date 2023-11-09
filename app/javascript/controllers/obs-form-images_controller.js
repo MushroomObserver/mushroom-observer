@@ -25,7 +25,7 @@ const internalConfig = {
 }
 
 // This needs to be on the whole "observation_images" section of the form.
-// Connects to data-controller="observation-images"
+// Connects to data-controller="obs-form-images"
 export default class extends Controller {
   static targets = ["imgMessages", "imgDateRadios", "obsDateRadios",
     "gpsMessages", "gpsRadios", "setLatLngAlt", "ignoreGps", "imageGpsMap",
@@ -874,7 +874,7 @@ export default class extends Controller {
     _a.dataset.role = 'show_on_map';
     _a.dataset.geocode = JSON.stringify(latLngAlt);
     _a.dataset.observationImagesTarget = 'showOnMap';
-    _a.dataset.action = 'observation-images#showGeocodeonMap';
+    _a.dataset.action = 'obs-form-images#showGeocodeonMap';
     _a.dataset.observationImagesLatLngAltParam = JSON.stringify(latLngAlt)
     _a.classList.add('ml-3');
     _a.textContent = this.localized_text.show_on_map;

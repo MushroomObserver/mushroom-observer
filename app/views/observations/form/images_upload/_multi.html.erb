@@ -4,7 +4,7 @@
   <div class="col-sm-6 mt-3">
     <label class="btn btn-default file-field">
       <input type="file" multiple id="select_images_button"
-             data-action="change->observation-images#addSelectedFiles"
+             data-action="change->obs-form-images#addSelectedFiles"
              accept="image/*"/>
       <%= :select_file.t %>
     </label>
@@ -19,7 +19,7 @@
 
 <!-- Container to show messages relating to the selected images -->
 <div id="img_messages" class="fade" style="display: none;"
-     data-observation-images-target="imgMessages">
+     data-obs-form-images-target="imgMessages">
   <div class="well well-sm">
     <div class="row">
 
@@ -40,11 +40,11 @@
           <%= js_button(
                 button: :form_observations_use_date.t,
                 name: "fix_dates", id: "fix_dates",
-                data: { action: "observation-images#fixDates" }) %>
+                data: { action: "obs-form-images#fixDates" }) %>
           <%= js_button(
                 button: :IGNORE.t,
                 name: "ignore_dates", id: "ignore_dates",
-                data: { action: "observation-images#ignoreDates" }) %>
+                data: { action: "obs-form-images#ignoreDates" }) %>
         </div>
       </div><!--.col-->
 
@@ -57,7 +57,7 @@
 </div><!--#image_messages-->
 
 <div id="gps_messages" class="fade" style="display: none;"
-     data-observation-images-target="gpsMessages">
+     data-obs-form-images-target="gpsMessages">
   <div class="well well-sm">
     <div class="row">
 
@@ -68,9 +68,9 @@
                         data: { observation_images_target: "gpsRadios" }) %>
         <%= js_button(button: :UPDATE.t, name: "set_gps",
                       id: "set_gps",
-                      data: { action: "observation-images#setGps" }) %>
+                      data: { action: "obs-form-images#setGps" }) %>
         <%= js_button(button: :IGNORE.t, name: "ignore_gps", id: "ignore_gps",
-                      data: { action: "observation-images#ignoreGps" }) %>
+                      data: { action: "obs-form-images#ignoreGps" }) %>
       </div>
 
       <div class="col-sm-4">
