@@ -40,7 +40,7 @@ module MapHelper
   end
 
   def finish_map(gmap)
-    # ensure_global_header_is_added
+    ensure_global_header_is_added
     html = gmap.to_html(no_script_tag: 1)
     js = javascript_tag(html)
     add_header(js)
