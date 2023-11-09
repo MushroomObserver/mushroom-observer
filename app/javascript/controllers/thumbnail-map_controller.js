@@ -2,14 +2,15 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="thumbnail-map"
 export default class extends Controller {
-  targets = ["mapContainer", "map", "globe"]
+  static targets = ["mapContainer", "map", "globe"]
 
   connect() {
-    this.map_url = this.element.dataset.mapUrl;
+    this.map_url = this.element.dataset.mapUrl
     this.coords = JSON.parse(this.element.dataset.coordinates)
     this.zoom = 1.0
     this.max_zoom = 50.0
     this.expanded = false
+    this.large_url = this.globeTarget.dataset.globeLargeUrl
 
     window.addEventListener("resize", this.resetMap())
 
@@ -29,11 +30,11 @@ export default class extends Controller {
     this.mapContainerTarget.setAttribute("width", "")
     this.mapContainerTarget.setAttribute("height", "")
     this.mapContainerTarget.setAttribute("overflow", "")
-    this.map.setAttribute("top", "")
-    this.map.setAttribute("left", "")
-    this.map.setAttribute("width", "")
-    this.map.setAttribute("height", "")
-    this.zoom = 1.0;
+    this.mapTarget.setAttribute("top", "")
+    this.mapTarget.setAttribute("left", "")
+    this.mapTarget.setAttribute("width", "")
+    this.mapTarget.setAttribute("height", "")
+    this.zoom = 1.0
   }
 
   zoomTo({ params: { dir } }) {
@@ -59,20 +60,19 @@ export default class extends Controller {
     this.mapContainerTarget.setAttribute("width", cw + "px")
     this.mapContainerTarget.setAttribute("height", ch + "px")
     this.mapContainerTarget.setAttribute("overflow", "hidden")
-    this.map.setAttribute("top", -y + "px")
-    this.map.setAttribute("left", -x + "px")
-    this.map.setAttribute("width", mw + "px")
-    this.map.setAttribute("height", mh + "px")
+    this.mapTarget.setAttribute("top", -y + "px")
+    this.mapTarget.setAttribute("left", -x + "px")
+    this.mapTarget.setAttribute("width", mw + "px")
+    this.mapTarget.setAttribute("height", mh + "px")
   }
 
   loadLargerMap() {
     if (this.expanded) return
-    const large = document.createElement('img');
-    const large_url = this.globeTarget.datasaet.globeLargeUrl
+    const _large = document.createElement('img');
 
-    large.setAttribute("src", large_url)
-    large.addEventListener('load', () => {
-      this.map.querySelector("img").setAttribute("src", large_url);
+    _large.setAttribute("src", this.large_url)
+    _large.addEventListener('load', () => {
+      this.map.querySelector("img").setAttribute("src", this.large_url);
     });
     this.expanded = true;
   }

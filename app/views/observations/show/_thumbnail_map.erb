@@ -64,7 +64,7 @@ coordinates = { x: x, y: y }.to_json
 
       <%= image_tag(
         "globe.jpg", class: "w-100", id: "globe_image",
-        data: { globe_large_url: "#{image_url("globe_large.jpg")}"
+        data: { globe_large_url: "#{image_url("globe_large.jpg")}",
                 thumbnail_map_target: "globe" }
       ) %>
 
@@ -72,12 +72,3 @@ coordinates = { x: x, y: y }.to_json
   <% end %>
 
 <% end %>
-
-<%= if lat && long
-  javascript_tag %{
-    var THUMBNAIL_MAP_ON   = true;
-    var THUMBNAIL_MAP_X    = #{x};
-    var THUMBNAIL_MAP_Y    = #{y};
-    var THUMBNAIL_MAP_LINK = "#{map_url}";
-  }
-end %>
