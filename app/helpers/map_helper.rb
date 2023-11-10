@@ -8,7 +8,6 @@ module MapHelper
                             info_window: true)
     collection = Mappable::CollapsibleCollectionOfObjects.new(objects)
     gmap = init_map(args)
-    binding.break
     if args[:zoom]
       gmap.center_zoom_init(collection.extents.center, args[:zoom])
     else
