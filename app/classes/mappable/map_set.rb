@@ -11,14 +11,14 @@
 #    mapset = Mappable::MapSet.new(observations_at_one_location)
 #    num_obs = mapset.observations.length
 #    num_loc = mapset.locations.length
-#    if mapset.is_point?
+#    if mapset.is_point
 #      draw_marker(mapset.center)
 #    else
 #      draw_box(mapset.north_west, mapset.north_east, ..., mapset.north_west)
 #    end
 #
 #  AN 20231109
-#  To avoid duplicating instance methods like `south_east`, `is_box?` that will
+#  To avoid duplicating instance methods like `south_east`, `is_box` that will
 #  be used in the stimulus controller that composes markers, i'm storing all
 #  the derived values on the object too. They're called the same way in Ruby,
 #  but when the object is sent `to_json` it will have all the values encoded.
@@ -35,15 +35,16 @@ module Mappable
     def initialize(objects = [])
       @objects = objects.is_a?(Array) ? objects : [objects]
       @north = @south = @east = @west = nil
+      @north_south_distance = @east_west_distance = nil
+      @lat = @long = 0
       init_objects_and_derive_extents
-      init_derived_attributes
     end
 
     def init_objects_and_derive_extents
       @objects.each do |obj|
-        if obj.is_location?
+        if obj.location?
           update_extents_with_box(obj)
-        elsif obj.is_observation?
+        elsif obj.observation?
           if obj.lat && !obj.lat_long_dubious?
             update_extents_with_point(obj)
           elsif (loc = obj.location)
@@ -61,45 +62,21 @@ module Mappable
     end
 
     def observations
-      @objects.select(&:is_observation?)
+      @objects.select(&:observation?)
     end
 
     def locations
-      @objects.select(&:is_location?)
+      @objects.select(&:location?)
     end
 
     def underlying_locations
       @objects.filter_map do |obj|
-        if obj.is_location?
+        if obj.location?
           obj
-        elsif obj.is_observation? && obj.location
+        elsif obj.observation? && obj.location
           obj.location
         end
       end.uniq
-    end
-
-    def init_derived_attributes
-      @is_point = is_point?
-      @is_box = is_box?
-      @north_west = [north, west]
-      @north_east = [north, east]
-      @south_west = [south, west]
-      @south_east = [south, east]
-      @lat = ((north + south) / 2.0).round(4)
-      @long = ((east + west) / 2.0).round(4)
-      @long += 180 if @west > @east
-      @center = [lat, long]
-      @edges = [north, south, east, west]
-      @north_south_distance = north - south
-      @east_west_distance = west > east ? east - west + 360 : east - west
-    end
-
-    def is_point?
-      (north - south) < 0.0001
-    end
-
-    def is_box?
-      (north - south) >= 0.0001
     end
 
     def update_extents_with_point(loc)
@@ -121,6 +98,7 @@ module Mappable
         @north = @south = lat
         @east = @west = long
       end
+      update_derived_attributes
     end
 
     def long_outside_existing_extents?(long)
@@ -140,35 +118,37 @@ module Mappable
         @north = n if n > @north
         @south = s if s < @south
         if new_box_not_contained_by_old_box?(e, w)
-          # overlap, neither or both straddle dateline
-          if (@east >= @west && e >= w && w <= @east && e >= @west) ||
-            (@east < @west && e < w)
-            @east = e if e > @east
-            @west = w if w < @west
-          # overlap, old straddles dateline
-          elsif @east < @west && e >= w && (w <= @east || e >= @west)
-            @east = e if e > @east && w < @east
-            @west = w if w < @west && e > @west
-          # overlap, new straddles dateline
-          elsif @east >= @west && e < w && (w <= @east || e >= @west)
-            @east = e if e > @east || w < @east
-            @west = w if w < @west || e > @west
-          # no overlap
-          else
-            east_dist = w > @east ? w - @east : w - @east + 360
-            west_dist = e < @west ? @west - e : @west - e + 360
-            if east_dist < west_dist
-              @east = e
-            else
-              @west = w
-            end
-          end
+          update_east_west_extents([e, w])
         end
       else
         @north = n
         @south = s
         @east = e
         @west = w
+      end
+      update_derived_attributes
+    end
+
+    # deals with overlap, neither or both straddle dateline
+    def update_east_west_extents(e_w)
+      (e, w) = e_w
+      if (@east >= @west && e >= w && w <= @east && e >= @west) ||
+         (@east < @west && e < w)
+        @east = e if e > @east
+        @west = w if w < @west
+      # overlap, old straddles dateline
+      elsif @east < @west && e >= w && (w <= @east || e >= @west)
+        @east = e if e > @east && w < @east
+        @west = w if w < @west && e > @west
+      # overlap, new straddles dateline
+      elsif @east >= @west && e < w && (w <= @east || e >= @west)
+        @east = e if e > @east || w < @east
+        @west = w if w < @west || e > @west
+      # no overlap
+      else
+        east_dist = w > @east ? w - @east : w - @east + 360
+        west_dist = e < @west ? @west - e : @west - e + 360
+        east_dist < west_dist ? @east = e : @west = w
       end
     end
 
@@ -178,6 +158,30 @@ module Mappable
       else
         east >= west || west < @west || east > @east
       end
+    end
+
+    def update_derived_attributes
+      @north_west = [@north, @west]
+      @north_east = [@north, @east]
+      @south_west = [@south, @west]
+      @south_east = [@south, @east]
+      @edges = [@north, @south, @east, @west]
+      if @north && @south
+        @is_point = @north ? (@north - @south) < 0.0001 : false
+        @is_box = @north ? (@north - @south) >= 0.0001 : false
+        @lat = ((@north + @south) / 2.0).round(4)
+        @north_south_distance = @north ? @north - @south : nil
+      end
+      if @east && @west
+        @long = ((@east + @west) / 2.0).round(4)
+        @long += 180 if @west > @east
+        @east_west_distance = if @west > @east
+                                @east - @west + 360
+                              else
+                                @east - @west
+                              end
+      end
+      @center = [@lat, @long]
     end
   end
 end

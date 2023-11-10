@@ -31,11 +31,11 @@ module Mappable
       end
     end
 
-    def is_location?
+    def location?
       false
     end
 
-    def is_observation?
+    def observation?
       true
     end
 

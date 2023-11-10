@@ -2,9 +2,6 @@
 
 require("test_helper")
 
-# require("mappable/collapsible_collection_of_objects")
-# require("mappable/map_set")
-
 class BigDecimal
   # Make this class dump out easier-to-read diagnostics when tests fail.
   def inspect
@@ -16,16 +13,16 @@ end
 
 class CollapsibleMapTest < UnitTestCase
   def assert_mapset_is_point(mapset, lat, long)
-    assert_true(mapset.is_point?)
-    assert_false(mapset.is_box?)
+    assert_true(mapset.is_point)
+    assert_false(mapset.is_box)
     assert_mapset(mapset, lat, long, lat, lat, long, long, 0, 0)
   end
 
   def assert_mapset_is_box(mapset, north, south, east, west)
     lat = (north + south) / 2.0
     long = (east + west) / 2.0
-    assert_false(mapset.is_point?)
-    assert_true(mapset.is_box?)
+    assert_false(mapset.is_point)
+    assert_true(mapset.is_box)
     if east >= west
       assert_mapset(mapset, lat, long,
                     north, south, east, west, north - south, east - west)
@@ -415,7 +412,7 @@ class CollapsibleMapTest < UnitTestCase
     end
 
     coll = Mappable::CollapsibleCollectionOfObjects.new(observations,
-                                                      observations.length)
+                                                        observations.length)
     assert_list_of_mapsets(coll, data)
 
     data[0] = [10.1, 10.0, 10.1, 10.0]
@@ -463,7 +460,7 @@ class CollapsibleMapTest < UnitTestCase
     end
 
     coll = Mappable::CollapsibleCollectionOfObjects.new(observations,
-                                                      observations.length)
+                                                        observations.length)
     assert_list_of_mapsets(coll, data)
 
     data[0] = [10.1, 10.0, -175.0, -175.1]

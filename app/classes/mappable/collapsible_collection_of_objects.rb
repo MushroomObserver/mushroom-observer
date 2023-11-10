@@ -112,9 +112,9 @@ module Mappable
 
       @sets = {}
       objects.each do |obj|
-        if obj.is_location?
+        if obj.location?
           add_box_set(obj, [obj], MAX_PRECISION)
-        elsif obj.is_observation?
+        elsif obj.observation?
           if obj.lat && !obj.lat_long_dubious?
             add_point_set(obj, [obj], MAX_PRECISION)
           elsif (loc = obj.location)
