@@ -2,8 +2,8 @@
 
 require("test_helper")
 
-require("collapsible_collection_of_mappable_objects")
-require("map_set")
+# require("mappable/collapsible_collection_of_objects")
+# require("mappable/map_set")
 
 class BigDecimal
   # Make this class dump out easier-to-read diagnostics when tests fail.
