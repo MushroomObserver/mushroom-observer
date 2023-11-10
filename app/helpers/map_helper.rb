@@ -61,11 +61,11 @@ module MapHelper
     marker.info_window = mapset_info_window(set, args) if args[:info_window]
     if args[:editable]
       map_control_init(gmap, marker, args)
-      map_box_control_init(gmap, set, args) if set.is_box?
+      map_box_control_init(gmap, set, args) if set.is_box
     else
       gmap.overlay_init(marker)
     end
-    draw_box_on_gmap(gmap, set, args) if set.is_box?
+    draw_box_on_gmap(gmap, set, args) if set.is_box
   end
 
   def draw_box_on_gmap(gmap, set, args)
@@ -184,7 +184,7 @@ module MapHelper
   end
 
   def mapset_coords(set)
-    if set.is_point?
+    if set.is_point
       format_latitude(set.lat) + safe_nbsp + format_longitude(set.long)
     else
       content_tag(:center,

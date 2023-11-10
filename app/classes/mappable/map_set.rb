@@ -11,14 +11,14 @@
 #    mapset = Mappable::MapSet.new(observations_at_one_location)
 #    num_obs = mapset.observations.length
 #    num_loc = mapset.locations.length
-#    if mapset.is_point?
+#    if mapset.is_point
 #      draw_marker(mapset.center)
 #    else
 #      draw_box(mapset.north_west, mapset.north_east, ..., mapset.north_west)
 #    end
 #
 #  AN 20231109
-#  To avoid duplicating instance methods like `south_east`, `is_box?` that will
+#  To avoid duplicating instance methods like `south_east`, `is_box` that will
 #  be used in the stimulus controller that composes markers, i'm storing all
 #  the derived values on the object too. They're called the same way in Ruby,
 #  but when the object is sent `to_json` it will have all the values encoded.
@@ -92,14 +92,6 @@ module Mappable
       @edges = [@north, @south, @east, @west]
       @north_south_distance = @north - @south
       @east_west_distance = @west > @east ? @east - @west + 360 : @east - @west
-    end
-
-    def is_point?
-      @is_point
-    end
-
-    def is_box?
-      @is_box
     end
 
     def update_extents_with_point(loc)
