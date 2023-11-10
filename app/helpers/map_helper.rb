@@ -1,18 +1,39 @@
 # frozen_string_literal: true
 
 module MapHelper
+  # args could include query_param.
+  # returns an array of mapsets, each suitable for a marker or box
+  def prepare_mappable_collection(objects, args = {})
+    # Organize the objects into Mappable::MapSets (collapsed in the class)
+    collection = Mappable::CollapsibleCollectionOfObjects.new(objects)
+    # Modify mapset data for mapping UI
+    mappable_mapsets(collection, args)
+  end
+
+  # adds title and caption, and removes the objects from the mapset
+  # (MO objects not needed for google.maps API)
+  def mappable_mapsets(collection, args)
+    collection.mapsets.map do |mapset|
+      mapset.title = mapset_marker_title(mapset)
+      mapset.caption = mapset_info_window(mapset, args)
+      mapset.objects = nil
+    end
+  end
+
   def make_map(objects, args = {})
     args = provide_defaults(args,
                             map_div: "map_div",
                             controls: [:large_map, :map_type],
                             info_window: true)
-    collection = CollapsibleCollectionOfMappableObjects.new(objects)
+    collection = Mappable::CollapsibleCollectionOfObjects.new(objects)
     gmap = init_map(args)
     if args[:zoom]
       gmap.center_zoom_init(collection.extents.center, args[:zoom])
     else
       gmap.center_zoom_on_points_init(*collection.representative_points)
     end
+    # stimulus controller should draw the mapset.
+    # This should just add html to each mapset
     collection.mapsets.each { |mapset| draw_mapset(gmap, mapset, args) }
     gmap
   end
@@ -32,6 +53,8 @@ module MapHelper
   def provide_defaults(args, default_args)
     default_args.merge(args)
   end
+
+  # TODO: Need a helper to add the mapset info box html to the mapset hash
 
   def init_map(args = {})
     gmap = GM::GMap.new(args[:map_div])
@@ -55,19 +78,23 @@ module MapHelper
 
   def draw_mapset(gmap, set, args = {})
     title = mapset_marker_title(set)
+    # set.center needs to go into Stimulus.
     marker = GM::GMarker.new(set.center,
                              draggable: args[:editable],
                              title: title)
     marker.info_window = mapset_info_window(set, args) if args[:info_window]
+    # logic for stimulus
     if args[:editable]
       map_control_init(gmap, marker, args)
       map_box_control_init(gmap, set, args) if set.is_box?
     else
-      gmap.overlay_init(marker)
+      gmap.overlay_init(marker) # draws a marker for the mapset
     end
+    # set.is_box? logic needs to go into Stimulus, via the mapset object
     draw_box_on_gmap(gmap, set, args) if set.is_box?
   end
 
+  # Maybe: change Polyline to Polygon
   def draw_box_on_gmap(gmap, set, args)
     box = GM::GPolyline.new([
                               set.north_west,
@@ -174,6 +201,7 @@ module MapHelper
     link_to(loc.display_name.t, location_path(id: loc.id, params: params))
   end
 
+  # These are query params for the links back to MO indexes!
   def mapset_box_params(set)
     {
       north: set.north,
@@ -183,6 +211,7 @@ module MapHelper
     }
   end
 
+  # These are coords printed in text
   def mapset_coords(set)
     if set.is_point?
       format_latitude(set.lat) + safe_nbsp + format_longitude(set.long)
@@ -208,6 +237,7 @@ module MapHelper
     "#{deg}°#{val.negative? ? dir2 : dir1}".html_safe
   end
 
+  # I think this just makes a dragable marker.
   def map_control_init(gmap, marker, args, type = "ct")
     name = args[:marker_name] || "mo_marker"
     gmap.overlay_global_init(marker, name + "_" + type)
@@ -216,6 +246,7 @@ module MapHelper
     }")
   end
 
+  # I think this just makes four dragable markers for a mapset (box)
   def map_box_control_init(gmap, set, args)
     [
       [set.north_west, "nw"],

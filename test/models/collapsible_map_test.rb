@@ -101,7 +101,7 @@ class CollapsibleMapTest < UnitTestCase
 
   def test_mapset_with_one_observation
     obs = observations(:unknown_with_lat_long)
-    mapset = MapSet.new(obs)
+    mapset = Mappable::MapSet.new(obs)
     assert_obj_arrays_equal([obs], mapset.observations)
     assert_obj_arrays_equal([], mapset.locations)
     assert_obj_arrays_equal([obs.location], mapset.underlying_locations)
@@ -110,7 +110,7 @@ class CollapsibleMapTest < UnitTestCase
 
   def test_mapset_with_one_location
     loc = locations(:albion)
-    mapset = MapSet.new(loc)
+    mapset = Mappable::MapSet.new(loc)
     assert_obj_arrays_equal([], mapset.observations)
     assert_obj_arrays_equal([loc], mapset.locations)
     assert_obj_arrays_equal([loc], mapset.underlying_locations)
@@ -121,7 +121,7 @@ class CollapsibleMapTest < UnitTestCase
     obs = observations(:unknown_with_lat_long)
     n = s = obs.lat
     e = w = obs.long
-    mapset = MapSet.new(obs)
+    mapset = Mappable::MapSet.new(obs)
 
     # Make sure this doesn't change anything first.
     mapset.update_extents_with_point(obs)
@@ -158,7 +158,7 @@ class CollapsibleMapTest < UnitTestCase
     obs = observations(:amateur_obs)
     loc = locations(:burbank)
     n, s, e, w = *loc.edges
-    mapset = MapSet.new(obs)
+    mapset = Mappable::MapSet.new(obs)
     assert_mapset_is_point(mapset, obs.lat, obs.long)
 
     # Observation is contained inside Burbank.
@@ -286,7 +286,7 @@ class CollapsibleMapTest < UnitTestCase
     obs = Observation.new
     n = s = obs.lat = 45
     e = w = obs.long = -170
-    mapset = MapSet.new(obs)
+    mapset = Mappable::MapSet.new(obs)
     assert_mapset_is_point(mapset, n, w)
 
     n = obs.lat = 50
@@ -352,7 +352,7 @@ class CollapsibleMapTest < UnitTestCase
     loc.south = 40
     loc.east = east1
     loc.west = west1
-    mapset = MapSet.new(loc)
+    mapset = Mappable::MapSet.new(loc)
     loc.east = east2
     loc.west = west2
     mapset.update_extents_with_box(loc)
@@ -362,7 +362,7 @@ class CollapsibleMapTest < UnitTestCase
   def test_mapping_one_observation_with_gps
     obs = observations(:amateur_obs)
     assert(obs.lat && obs.long && !obs.location)
-    coll = CollapsibleCollectionOfMappableObjects.new(obs)
+    coll = Mappable::CollapsibleCollectionOfObjects.new(obs)
     assert_equal(1, coll.mapsets.length)
     mapset = coll.mapsets.first
     assert_mapset_is_point(mapset, obs.lat, obs.long)
@@ -375,7 +375,7 @@ class CollapsibleMapTest < UnitTestCase
   def test_mapping_one_observation_with_location
     obs = observations(:minimal_unknown_obs)
     assert(!obs.lat && !obs.long && obs.location)
-    coll = CollapsibleCollectionOfMappableObjects.new(obs)
+    coll = Mappable::CollapsibleCollectionOfObjects.new(obs)
     assert_equal(1, coll.mapsets.length)
     mapset = coll.mapsets.first
     assert_mapset_is_box(mapset, *obs.location.edges)
@@ -387,7 +387,7 @@ class CollapsibleMapTest < UnitTestCase
 
   def test_mapping_one_location
     loc = locations(:albion)
-    coll = CollapsibleCollectionOfMappableObjects.new(loc)
+    coll = Mappable::CollapsibleCollectionOfObjects.new(loc)
     assert_equal(1, coll.mapsets.length)
     mapset = coll.mapsets.first
     assert_mapset_is_box(mapset, *loc.edges)
@@ -414,33 +414,33 @@ class CollapsibleMapTest < UnitTestCase
       Observation.new(lat: lat, long: long)
     end
 
-    coll = CollapsibleCollectionOfMappableObjects.new(observations,
+    coll = Mappable::CollapsibleCollectionOfObjects.new(observations,
                                                       observations.length)
     assert_list_of_mapsets(coll, data)
 
     data[0] = [10.1, 10.0, 10.1, 10.0]
     data[1] = nil
-    coll = CollapsibleCollectionOfMappableObjects.new(observations, 9)
+    coll = Mappable::CollapsibleCollectionOfObjects.new(observations, 9)
     assert_list_of_mapsets(coll, data)
 
     data[3] = [22, 20, 22, 20]
     data[6] = [-10, -12, 12, 10]
     data[4] = data[7] = nil
-    coll = CollapsibleCollectionOfMappableObjects.new(observations, 8)
+    coll = Mappable::CollapsibleCollectionOfObjects.new(observations, 8)
     assert_list_of_mapsets(coll, data)
-    coll = CollapsibleCollectionOfMappableObjects.new(observations, 7)
+    coll = Mappable::CollapsibleCollectionOfObjects.new(observations, 7)
     assert_list_of_mapsets(coll, data)
 
     data[0] = [22, 10, 22, 10]
     data[2] = data[3] = nil
-    coll = CollapsibleCollectionOfMappableObjects.new(observations, 6)
+    coll = Mappable::CollapsibleCollectionOfObjects.new(observations, 6)
     assert_list_of_mapsets(coll, data)
-    coll = CollapsibleCollectionOfMappableObjects.new(observations, 5)
+    coll = Mappable::CollapsibleCollectionOfObjects.new(observations, 5)
     assert_list_of_mapsets(coll, data)
 
     data[0] = [22, -12, 22, 0]
     data[5] = data[6] = nil
-    coll = CollapsibleCollectionOfMappableObjects.new(observations, 4)
+    coll = Mappable::CollapsibleCollectionOfObjects.new(observations, 4)
     assert_list_of_mapsets(coll, data)
   end
 
@@ -462,37 +462,37 @@ class CollapsibleMapTest < UnitTestCase
       Observation.new(lat: lat, long: long)
     end
 
-    coll = CollapsibleCollectionOfMappableObjects.new(observations,
+    coll = Mappable::CollapsibleCollectionOfObjects.new(observations,
                                                       observations.length)
     assert_list_of_mapsets(coll, data)
 
     data[0] = [10.1, 10.0, -175.0, -175.1]
     data[1] = nil
-    coll = CollapsibleCollectionOfMappableObjects.new(observations, 9)
+    coll = Mappable::CollapsibleCollectionOfObjects.new(observations, 9)
     assert_list_of_mapsets(coll, data)
 
     data[3] = [-10, -12, -175, -177]
     data[5] = [22, 20, -165, -167]
     data[4] = data[6] = nil
-    coll = CollapsibleCollectionOfMappableObjects.new(observations, 8)
+    coll = Mappable::CollapsibleCollectionOfObjects.new(observations, 8)
     assert_list_of_mapsets(coll, data)
-    coll = CollapsibleCollectionOfMappableObjects.new(observations, 7)
+    coll = Mappable::CollapsibleCollectionOfObjects.new(observations, 7)
     assert_list_of_mapsets(coll, data)
 
     data[0] = [20, 10, -175, -175.1]
     data[2] = nil
-    coll = CollapsibleCollectionOfMappableObjects.new(observations, 6)
+    coll = Mappable::CollapsibleCollectionOfObjects.new(observations, 6)
     assert_list_of_mapsets(coll, data)
 
     data[0] = [20, -12, -175, -177]
     data[3] = nil
-    coll = CollapsibleCollectionOfMappableObjects.new(observations, 5)
+    coll = Mappable::CollapsibleCollectionOfObjects.new(observations, 5)
     assert_list_of_mapsets(coll, data)
 
     # This is the tricky one: will it combine 175°E with 175°W?
     data[0] = [22, -12, -165, 175]
     data[5] = data[7] = nil
-    coll = CollapsibleCollectionOfMappableObjects.new(observations, 4)
+    coll = Mappable::CollapsibleCollectionOfObjects.new(observations, 4)
     assert_list_of_mapsets(coll, data)
   end
 end
