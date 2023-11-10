@@ -412,7 +412,7 @@ class CollapsibleMapTest < UnitTestCase
     end
 
     coll = Mappable::CollapsibleCollectionOfObjects.new(observations,
-                                                      observations.length)
+                                                        observations.length)
     assert_list_of_mapsets(coll, data)
 
     data[0] = [10.1, 10.0, 10.1, 10.0]
@@ -460,7 +460,7 @@ class CollapsibleMapTest < UnitTestCase
     end
 
     coll = Mappable::CollapsibleCollectionOfObjects.new(observations,
-                                                      observations.length)
+                                                        observations.length)
     assert_list_of_mapsets(coll, data)
 
     data[0] = [10.1, 10.0, -175.0, -175.1]

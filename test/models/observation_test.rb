@@ -168,8 +168,8 @@ class ObservationTest < UnitTestCase
     assert_objs_equal(locations(:burbank), min_map.location)
     assert_equal(locations(:burbank).id, min_map.location_id)
 
-    assert(min_map.is_observation?)
-    assert_not(min_map.is_location?)
+    assert(min_map.observation?)
+    assert_not(min_map.location?)
     assert_not(min_map.lat_long_dubious?)
 
     min_map.location = locations(:albion)

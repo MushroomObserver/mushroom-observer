@@ -105,9 +105,9 @@ module MapHelper
 
   def map_location_strings(objects)
     objects.map do |obj|
-      if obj.is_location?
+      if obj.location?
         obj.display_name
-      elsif obj.is_observation?
+      elsif obj.observation?
         if obj.location
           obj.location.display_name
         elsif obj.lat

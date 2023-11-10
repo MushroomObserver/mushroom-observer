@@ -2,11 +2,11 @@
 
 module Mappable
   module BoxMethods
-    def is_location?
+    def location?
       true
     end
 
-    def is_observation?
+    def observation?
       false
     end
 

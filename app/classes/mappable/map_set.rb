@@ -42,9 +42,9 @@ module Mappable
 
     def init_objects_and_derive_extents
       @objects.each do |obj|
-        if obj.is_location?
+        if obj.location?
           update_extents_with_box(obj)
-        elsif obj.is_observation?
+        elsif obj.observation?
           if obj.lat && !obj.lat_long_dubious?
             update_extents_with_point(obj)
           elsif (loc = obj.location)
@@ -62,18 +62,18 @@ module Mappable
     end
 
     def observations
-      @objects.select(&:is_observation?)
+      @objects.select(&:observation?)
     end
 
     def locations
-      @objects.select(&:is_location?)
+      @objects.select(&:location?)
     end
 
     def underlying_locations
       @objects.filter_map do |obj|
-        if obj.is_location?
+        if obj.location?
           obj
-        elsif obj.is_observation? && obj.location
+        elsif obj.observation? && obj.location
           obj.location
         end
       end.uniq
