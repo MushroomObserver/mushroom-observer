@@ -159,12 +159,12 @@ class ObservationTest < UnitTestCase
     obs = observations(:minimal_unknown_obs)
 
     min_map = Mappable::MinimalObservation.new(obs.id, obs.lat, obs.long,
-                                        obs.location.id)
+                                               obs.location.id)
     assert_objs_equal(locations(:burbank), min_map.location)
     assert_equal(locations(:burbank).id, min_map.location_id)
 
     min_map = Mappable::MinimalObservation.new(obs.id, obs.lat, obs.long,
-                                        obs.location)
+                                               obs.location)
     assert_objs_equal(locations(:burbank), min_map.location)
     assert_equal(locations(:burbank).id, min_map.location_id)
 
