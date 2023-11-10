@@ -79,27 +79,27 @@ module Mappable
     end
 
     def init_derived_attributes
-      @is_point = is_point?
-      @is_box = is_box?
-      @north_west = [north, west]
-      @north_east = [north, east]
-      @south_west = [south, west]
-      @south_east = [south, east]
-      @lat = ((north + south) / 2.0).round(4)
-      @long = ((east + west) / 2.0).round(4)
+      @is_point = (@north - @south) < 0.0001
+      @is_box = (@north - @south) >= 0.0001
+      @north_west = [@north, @west]
+      @north_east = [@north, @east]
+      @south_west = [@south, @west]
+      @south_east = [@south, @east]
+      @lat = ((@north + @south) / 2.0).round(4)
+      @long = ((@east + @west) / 2.0).round(4)
       @long += 180 if @west > @east
-      @center = [lat, long]
-      @edges = [north, south, east, west]
-      @north_south_distance = north - south
-      @east_west_distance = west > east ? east - west + 360 : east - west
+      @center = [@lat, @long]
+      @edges = [@north, @south, @east, @west]
+      @north_south_distance = @north - @south
+      @east_west_distance = @west > @east ? @east - @west + 360 : @east - @west
     end
 
     def is_point?
-      (north - south) < 0.0001
+      @is_point
     end
 
     def is_box?
-      (north - south) >= 0.0001
+      @is_box
     end
 
     def update_extents_with_point(loc)
