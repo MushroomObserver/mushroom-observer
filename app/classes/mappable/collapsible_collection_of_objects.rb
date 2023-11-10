@@ -13,20 +13,20 @@
 #
 #  Uses the following other classes:
 #   MapSet
-#   MinimalMapObservation or Mappable::MinimalLocation
+#   Mappable::MinimalObservation or Mappable::MinimalLocation
 #   Location (or other ActiveRecord object)
 #
 #  Object has this shape:
 # <Mappable::CollapsibleCollectionOfObjects{
 #   max_objects: 100,
 #   sets: {
-#     [x, y, w, h] => <MapSet{
+#     [x, y, w, h] => <Mappable::MapSet{
 #       east:
 #       north:
 #       south:
 #       west:
 #       objects: [
-#         <MinimalMapObservation{
+#         <Mappable::MinimalObservation{
 #           id:
 #           lat:
 #           lng:
