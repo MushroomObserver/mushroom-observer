@@ -53,7 +53,7 @@ module Observations
 
     def eager_load_corresponding_locations(locations)
       @locations = Location.where(id: locations.keys).map do |loc|
-        locations[loc.id] = MinimalMapLocation.new(
+        locations[loc.id] = Mappable::MinimalLocation.new(
           loc.id, loc.name, loc.north, loc.south, loc.east, loc.west
         )
       end

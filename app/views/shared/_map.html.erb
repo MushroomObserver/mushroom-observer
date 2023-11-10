@@ -1,15 +1,44 @@
 <%
 # Map for observations, names, locations - any objects
-# Takes locals listed here:
+# Takes locals: objects, query_params, zoom, nothing_to_map
+# map_args that so far never change from defaults are
+#   { zoom: 2, controls: [:large_map, :map_type], info_window: !editable }
+# so map_args pretty much boils down to query_params
+# query_params are used in a marker's info_window, but needs:
+#   localizations, path helpers, a whole info_window HTML per mapset.
+#   Need a helper to add the mapset info box html to the mapset hash
+# TODO: Remove `zoom` from callers, add `editable`
+#       and set `info_window` if !editable
 map_args = local_assigns.except(:objects, :nothing_to_map)
+collection = prepare_mappable_collection(local_assigns[:objects], **map_args)
+map_localizations = {
+  nothing_to_map: nothing_to_map,
+  observations: :Observations.t,
+  locations: :Locations.t,
+  show_all: :show_all.t,
+  map_all: :map_all.t
+}
+
 nothing_to_map = local_assigns[:nothing_to_map] || :runtime_map_nothing_to_map.t
 %>
 
-<%= tag.div(class: "text-center") do
+<%=
+tag.div(class: "w-100 position-relative",
+        style: "padding-bottom: 50%;") do
   if objects.any?
-    gmap = make_map(local_assigns[:objects], **map_args)
-    finish_map(gmap)
-    gmap.div(width: 800, height: 550).html_safe
+    # gmap = make_map(local_assigns[:objects], **map_args)
+    # finish_map(gmap) # puts js in header
+    # gmap.div(width: 800, height: 550).html_safe
+    tag.div("",
+      id: "map_div",
+      class: "position-absolute w-100 h-100",
+      data: { controller: "map", map_target: "mapDiv",
+              collection: collection.to_json,
+              # query_params: local_assigns[:query_params].to_json,
+              editable: local_assigns[:editable],
+              location_format: User.current_location_format, # has a default
+              localization: map_localizations.to_json }
+    )
   else
     nothing_to_map
   end
