@@ -79,30 +79,6 @@ module Mappable
       end.uniq
     end
 
-    def update_derived_attributes
-      @north_west = [@north, @west]
-      @north_east = [@north, @east]
-      @south_west = [@south, @west]
-      @south_east = [@south, @east]
-      @edges = [@north, @south, @east, @west]
-      if @north && @south
-        @is_point = @north ? (@north - @south) < 0.0001 : false
-        @is_box = @north ? (@north - @south) >= 0.0001 : false
-        @lat = ((@north + @south) / 2.0).round(4)
-        @north_south_distance = @north ? @north - @south : nil
-      end
-      if @east && @west
-        @long = ((@east + @west) / 2.0).round(4)
-        @long += 180 if @west > @east
-        @east_west_distance = if @west > @east
-                                @east - @west + 360
-                              else
-                                @east - @west
-                              end
-      end
-      @center = [@lat, @long]
-    end
-
     def update_extents_with_point(loc)
       lat = loc.lat.to_f.round(4)
       long = loc.long.to_f.round(4)
@@ -182,6 +158,30 @@ module Mappable
       else
         east >= west || west < @west || east > @east
       end
+    end
+
+    def update_derived_attributes
+      @north_west = [@north, @west]
+      @north_east = [@north, @east]
+      @south_west = [@south, @west]
+      @south_east = [@south, @east]
+      @edges = [@north, @south, @east, @west]
+      if @north && @south
+        @is_point = @north ? (@north - @south) < 0.0001 : false
+        @is_box = @north ? (@north - @south) >= 0.0001 : false
+        @lat = ((@north + @south) / 2.0).round(4)
+        @north_south_distance = @north ? @north - @south : nil
+      end
+      if @east && @west
+        @long = ((@east + @west) / 2.0).round(4)
+        @long += 180 if @west > @east
+        @east_west_distance = if @west > @east
+                                @east - @west + 360
+                              else
+                                @east - @west
+                              end
+      end
+      @center = [@lat, @long]
     end
   end
 end
