@@ -2,9 +2,6 @@
 
 require("test_helper")
 
-# require("mappable/collapsible_collection_of_objects")
-# require("mappable/map_set")
-
 class BigDecimal
   # Make this class dump out easier-to-read diagnostics when tests fail.
   def inspect
