@@ -82,8 +82,8 @@ module MushroomObserver
     # form submissions into XMLHttpRequests, so if you're making a complete
     # switch from Rails UJS to Turbo, you should ensure that you have this:
     config.action_view.form_with_generates_remote_forms = false
-    # This is a UJS config that must be explicitly set until we move to Rails 7
-    config.action_view.automatically_disable_submit_tag = false
+    # This is a UJS config that can be explicitly set
+    # config.action_view.automatically_disable_submit_tag = false
 
     # Rails 6.1 can auto-generate HTML comments with the template filename
     # Unfortunately this is also added to email templates!
