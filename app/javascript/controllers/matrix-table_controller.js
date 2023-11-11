@@ -3,8 +3,12 @@ import { Controller } from "@hotwired/stimulus"
 // Connects to data-controller="matrix-table"
 export default class extends Controller {
   connect() {
-    this.boxes = document.querySelectorAll('.matrix-box .panel-sizing');
-    this.footers = document.querySelectorAll('.matrix-box .log-footer');
+    this.boxes = document.querySelectorAll('.matrix-box .panel-sizing')
+    this.footers = document.querySelectorAll('.matrix-box .log-footer')
+    this.rearrange()
+  }
+
+  rearrange() {
     this.breakpoint =
       Array.from(document.querySelectorAll('[data-breakpoint]')).filter(s =>
         window.getComputedStyle(s).getPropertyValue('display') != 'none'
