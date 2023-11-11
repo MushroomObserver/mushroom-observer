@@ -401,7 +401,7 @@ class Observation < AbstractModel
         }
   scope :in_box, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
-          box = Box.new(
+          box = Mappable::Box.new(
             north: args[:n], south: args[:s], east: args[:e], west: args[:w]
           )
           return none unless box.valid?
@@ -485,11 +485,11 @@ class Observation < AbstractModel
       where(ProjectSpeciesList[:project_id] == project.id).distinct
   }
 
-  def is_location?
+  def location?
     false
   end
 
-  def is_observation?
+  def observation?
     true
   end
 

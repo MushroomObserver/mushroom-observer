@@ -20,13 +20,13 @@ class MOObservationMapper {
     this.map_open = document.querySelector('.map-open');
     this.map_locate = document.querySelector('.map-locate');
 
-    this.map_open.onclick = () => {
+    this.map_open.addEventListener("click", () => {
       if (!this.opened) this.openMap();
-    };
+    });
 
-    this.map_locate.onclick = () => {
+    this.map_locate.addEventListener("click", () => {
       if (!this.opened) this.openMap("focus_immediately");
-    };
+    });
   }
 
   initializeMap() {

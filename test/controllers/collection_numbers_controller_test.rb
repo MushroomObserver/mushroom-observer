@@ -49,7 +49,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     assert_no_flash
     assert_displayed_title(
-      "Collection Numbers attached to #{obs.unique_format_name.t}".
+      "Collection Numbers for #{obs.unique_format_name.t}".
       strip_html
     )
   end
@@ -63,7 +63,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     assert_no_flash
     assert_displayed_title(
-      "Collection Numbers attached to #{obs.unique_format_name.t}".strip_html
+      "Collection Numbers for #{obs.unique_format_name.t}".strip_html
     )
   end
 
