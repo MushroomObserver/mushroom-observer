@@ -513,9 +513,9 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
     t.boolean "open_membership", default: false, null: false
     t.boolean "accepting_observations", default: true, null: false
     t.integer "location_id"
+    t.integer "image_id"
     t.date "start_date"
     t.date "end_date"
-    t.integer "image_id"
   end
 
   create_table "publications", id: :integer, charset: "utf8mb3", force: :cascade do |t|
