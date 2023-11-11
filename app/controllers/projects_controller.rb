@@ -67,6 +67,7 @@ class ProjectsController < ApplicationController
 
     @start_date_fixed = @project.start_date.present?
     @end_date_fixed = @project.end_date.present?
+    @project_dates_any = !@start_date_fixed && !@end_date_fixed
     return if check_permission!(@project)
 
     redirect_to(project_path(@project.id, q: get_query_param))

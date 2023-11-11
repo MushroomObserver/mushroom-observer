@@ -308,6 +308,19 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_form_action(action: :update, id: project.id.to_s)
   end
 
+  def test_edit_project_any_date
+    project = projects(:bolete_project)
+    assert_true(project.start_date.nil? && project.end_date.nil?,
+                "Test needs Project with nil start and end dates")
+    params = { id: project.id.to_s }
+
+    login(project.user.login)
+    post(:edit, params: params)
+
+    assert_select("#project_dates_any_true[checked]", true,
+                  "'Any' radio button should be selected")
+  end
+
   def test_update_project
     title = "EOL Project"
     summary = "This has become the Entoloma On Line project"
@@ -343,6 +356,7 @@ class ProjectsControllerTest < FunctionalTestCase
     edit_project_helper(projects(:bolete_project).title,
                         projects(:eol_project))
   end
+
 
   def test_update_project_end_before_start
     proj = projects(:pinned_date_range_project)
