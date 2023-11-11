@@ -48,4 +48,21 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     assert_nil(project.start_date, "Project Start Date should be nil")
     assert_nil(project.end_date, "Project Start Date should be nil")
   end
+
+  def test_project_change_to_any_dates
+    project = projects(:pinned_date_range_project)
+    login(project.user.login)
+
+    visit(project_path(project))
+    click_on(:show_project_edit.l)
+    choose("project_dates_any_true")
+    assert_selector(
+      "input[type='radio'][id='project_dates_any_true'][checked='checked']"
+    )
+    click_on(:SAVE_EDITS.l)
+
+    project = Project.find_by_title(project.title)
+    assert_nil(project.start_date, "Project Start Date should be nil")
+    assert_nil(project.end_date, "Project Start Date should be nil")
+  end
 end

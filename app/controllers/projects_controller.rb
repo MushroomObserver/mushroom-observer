@@ -108,8 +108,7 @@ class ProjectsController < ApplicationController
     @summary = params[:project][:summary]
     if valid_title && valid_where && valid_dates
       if @project.update(project_create_params)
-        @project.start_date = nil if params.dig(:start_date, :fixed) == "false"
-        @project.end_date = nil if params.dig(:end_date, :fixed) == "false"
+        override_fixed_dates
         @project.save
         @project.log_update
         flash_notice(:runtime_edit_project_success.t(id: @project.id))
@@ -349,5 +348,12 @@ class ProjectsController < ApplicationController
     @project = Project.new
     image_ivars
     render(:new, location: new_project_path(q: get_query_param))
+  end
+
+  def override_fixed_dates
+    @project.start_date = nil if params[:project][:dates_any] == "true" ||
+                                 params.dig(:start_date, :fixed) == "false"
+    @project.end_date = nil if params[:project][:dates_any] == "true" ||
+                               params.dig(:end_date, :fixed) == "false"
   end
 end
