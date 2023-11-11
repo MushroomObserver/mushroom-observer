@@ -3016,6 +3016,7 @@ class ObservationsControllerTest < FunctionalTestCase
         project: { "id_#{project.id}" => "1" }
       }
     )
+    assert_flash_warning
     assert_project_checks(project.id => :checked)
     put(
       :update,
@@ -3028,8 +3029,28 @@ class ObservationsControllerTest < FunctionalTestCase
         }
       }
     )
+    assert_flash_success
     assert_response(:redirect)
     assert_obj_arrays_equal([project], obs.reload.projects)
+  end
+
+  def test_no_warning_for_associated_projects
+    project = projects(:albion_project)
+    obs = observations(:california_obs)
+    obs.projects << project
+    obs.save!
+
+    login("dick")
+    put(
+      :update,
+      params: {
+        id: obs.id,
+        observation: { place_name: obs.place_name },
+        project: { "id_#{project.id}" => "1" }
+      }
+    )
+    assert_no_flash
+    assert_response(:redirect)
   end
 
   def test_project_observation_good_location
