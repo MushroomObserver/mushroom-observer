@@ -22,10 +22,10 @@ module Observations
       return unless @observation
 
       @observations = [
-        MinimalMapObservation.new(@observation.id,
-                                  @observation.public_lat,
-                                  @observation.public_long,
-                                  @observation.location)
+        Mappable::MinimalObservation.new(@observation.id,
+                                         @observation.public_lat,
+                                         @observation.public_long,
+                                         @observation.location)
       ]
     end
 
@@ -45,7 +45,7 @@ module Observations
         @query.select_rows(args).map do |id, lat, long, gps_hidden, loc_id|
           locations[loc_id.to_i] = nil if loc_id.present?
           lat = long = nil if gps_hidden == 1
-          MinimalMapObservation.new(id, lat, long, loc_id)
+          Mappable::MinimalObservation.new(id, lat, long, loc_id)
         end
 
       eager_load_corresponding_locations(locations) unless locations.empty?
@@ -53,7 +53,7 @@ module Observations
 
     def eager_load_corresponding_locations(locations)
       @locations = Location.where(id: locations.keys).map do |loc|
-        locations[loc.id] = MinimalMapLocation.new(
+        locations[loc.id] = Mappable::MinimalLocation.new(
           loc.id, loc.name, loc.north, loc.south, loc.east, loc.west
         )
       end
