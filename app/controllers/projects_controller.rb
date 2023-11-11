@@ -2,16 +2,10 @@
 
 class ProjectsController < ApplicationController
   before_action :login_required
-  # disable cop because index is defined in ApplicationController
-  before_action :pass_query_params, except: [:index] # rubocop:disable Rails/LexicallyScopedActionFilter
-
+  # disable cop because index is defined in ApplicationController  before_action :pass_query_params, except: [:index] # rubocop:disable Rails/LexicallyScopedActionFilter
   # index::
   # ApplicationController uses this to dispatch #index to a private method
-  @index_subaction_param_keys = [
-    :pattern,
-    :by,
-    :member
-  ].freeze
+  @index_subaction_param_keys = [:pattern, :by, :member].freeze
 
   @index_subaction_dispatch_table = {
     by: :index_query_results
