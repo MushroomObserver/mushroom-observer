@@ -61,14 +61,17 @@ module ApplicationHelper
   def flash_notices_html
     return "" unless flash_notices?
 
-    klass = case flash_notice_level
-            when 0 then "alert-success"
-            when 1 then "alert-warning"
-            when 2 then "alert-danger"
-            end
+    alert_class = case flash_notice_level
+                  when 0 then "alert-success"
+                  when 1 then "alert-warning"
+                  when 2 then "alert-danger"
+                  end
 
-    tag.div(flash_get_notices, id: "flash_notices",
-                               class: class_names("alert mt-3", klass))
+    notices = flash_get_notices
+    flash_clear
+
+    tag.div(notices, id: "flash_notices",
+                     class: class_names("alert mt-3", alert_class))
   end
 
   # ----------------------------------------------------------------------------

@@ -4,70 +4,28 @@
 presenter = MatrixBoxPresenter.new(object)
 
 if presenter
-
-  link_method ||= :get
   identify ||= false
   columns ||= "col-xs-12 col-sm-6 col-md-4 col-lg-3" # maybe passed as a local
   object_id = object&.id.present? ? object.id : "no_ID"
-  # presenter.image_data includes context: :matrix_box where appropriate
-  if presenter.image_data
-    image = presenter.image_data[:image]
-    image_args = local_assigns.
-                 except(:columns, :object, :object_counter, :object_iteration).
-                 merge(presenter.image_data.except(:image) || {})
-  end
-  h_element = presenter.image_data ? :h5 : :h3 # bigger heading if no image
-  link_heading = content_tag(:small, "(#{presenter.id})",
-                              class: "rss-id float-right") +
-                content_tag(:span, presenter.name, class: "rss-name")
+  # There is a lotta arg passing. TODO: Check if any view is actually sending
+  # any extra image_arg locals to this matrix_box partial. AN 2023
+  passed_args = local_assigns.
+                except(:columns, :object, :object_counter, :object_iteration)
+
   %>
 
-  <%= matrix_box(columns: columns, id: object_id) do %>
-    <div class="panel panel-default">
-
-      <div class="panel-sizing">
-        <%= if presenter.image_data
-          tag.div(class: "thumbnail-container") do
-            interactive_image(image, **image_args)
-          end
-        end %>
-
-        <div class="panel-body rss-box-details">
-
-          <div class="rss-what">
-            <%= content_tag(h_element, class: "mt-0 rss-heading") do
-                  link_with_query(link_heading, presenter.what.show_link_args)
-                end %>
-            <%= matrix_box_vote_or_propose_ui(identify, object) %>
-          </div><!-- .rss-what -->
-
-          <% if presenter.place_name %>
-            <div class="rss-where">
-              <%= content_tag(:small) do
-                location_link(presenter.place_name, presenter.where)
-              end %>
-            </div><!-- .rss-where -->
-          <% end %>
-
-          <% unless presenter.when.blank? %>
-            <div class="rss-what">
-              <%= content_tag(:small, class: "nowrap-ellipsis") do
-                concat(content_tag(:span, presenter.when, class: "rss-when"))
-                concat(": ")
-                concat(user_link(presenter.who, nil, class: "rss-who"))
-              end %>
-            </div><!-- .rss-when -->
-          <% end %>
-
-
-        </div><!-- .panel-body -->
-
-      </div><!-- .panel-sizing -->
-
-      <%= matrix_box_log_footer(presenter) %>
-
-      <%= matrix_box_identify_footer(identify, presenter.id) %>
-
-    </div><!-- .panel -->
-  <% end %><!-- .matrix-box -->
+  <%= matrix_box(columns: columns, id: object_id) do
+    tag.div(class: "panel panel-default") do
+      [
+        tag.div(class: "panel-sizing") do
+          [
+            matrix_box_image(presenter, passed_args),
+            matrix_box_details(presenter, object, object_id, identify),
+          ].safe_join
+        end,
+        matrix_box_log_footer(presenter),
+        matrix_box_identify_footer(identify, presenter.id)
+      ].safe_join
+    end
+  end %><!-- .matrix-box -->
 <% end %>

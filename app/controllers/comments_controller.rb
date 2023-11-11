@@ -264,17 +264,13 @@ class CommentsController < ApplicationController
 
     unless comment_updated?
       respond_to do |format|
-        format.js do
-          render_modal_form_reload
-        end
+        format.js { render_modal_form_reload }
         format.html { render(:edit) and return }
       end
     end
 
     respond_to do |format|
-      format.js do
-        render_update_comments_for_object
-      end
+      format.js { render_update_comments_for_object }
       format.html do
         redirect_with_query(controller: @target.show_controller,
                             action: @target.show_action, id: @target.id)
@@ -300,9 +296,7 @@ class CommentsController < ApplicationController
       flash_notice(:runtime_form_comments_destroy_success.t(id: params[:id]))
     end
     respond_to do |format|
-      format.js do
-        render_update_comments_for_object
-      end
+      format.js { render_update_comments_for_object }
       format.html do
         redirect_with_query(controller: @target.show_controller,
                             action: @target.show_action, id: @target.id)
@@ -336,9 +330,7 @@ class CommentsController < ApplicationController
       flash_object_errors(@comment)
       respond_to do |format|
         format.html { render(:new) and return }
-        format.js do
-          render_modal_form_reload
-        end
+        format.js { render_modal_form_reload }
       end
     end
 
@@ -350,9 +342,7 @@ class CommentsController < ApplicationController
         redirect_with_query(controller: @target.show_controller,
                             action: @target.show_action, id: @target.id)
       end
-      format.js do
-        render_update_comments_for_object
-      end
+      format.js { render_update_comments_for_object }
     end
   end
 
