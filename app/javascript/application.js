@@ -18,6 +18,7 @@ import "@hotwired/stimulus"
 import "@hotwired/stimulus-loading"
 
 import 'exifreader'
+import 'jstz'
 
 import LazyLoad from "vanilla-lazyload"
 if (!window.lazyLoadInstance) {

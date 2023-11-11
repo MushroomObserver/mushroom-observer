@@ -1,5 +1,4 @@
 //= require jquery_extensions
-//= require jstz
 //= require box_resizer
 //= require csrf_token
 //= require external_link

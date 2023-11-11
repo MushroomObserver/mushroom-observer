@@ -21,3 +21,4 @@ pin "vanilla-lazyload" # @17.8.5
 pin "lightgallery" # @2.7.2
 pin "lightgallery/plugins/zoom", to: "lightgallery--plugins--zoom.js" # @2.7.2
 pin "@googlemaps/js-api-loader", to: "https://ga.jspm.io/npm:@googlemaps/js-api-loader@1.16.2/dist/index.esm.js"
+pin "jstz" # @2.1.1
