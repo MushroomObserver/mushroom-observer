@@ -28,7 +28,10 @@ export default class extends Controller {
         console.log("error loading gmaps")
       })
 
-    this.opened = false
-    this.indicatorUrl = this.mapDivTarget.dataset.indicatorUrl
+    this.collection = JSON.parse(this.element.dataset.collection)
+    this.editable = this.element.dataset.editable
+    this.location_format = this.element.dataset.locationFormat
+    this.localized_text = JSON.parse(this.element.dataset.localization)
+    debugger
   }
 }
