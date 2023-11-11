@@ -36,7 +36,8 @@ query = query_images_to_reuse(@all_users, @user)
 
 <% # Note this uses a specialized matrix box here, not the matrix_box partial. %>
 <%= paginate_block(@pages) do %>
-  <%= tag.ul(class: "row list-unstyled mt-3") do %>
+  <%= tag.ul(class: "row list-unstyled mt-3",
+             data: { controller: "matrix-table" }) do %>
 
     <%= render(layout: "shared/matrix_table",
                locals: { objects: @objects }) do |image| %>

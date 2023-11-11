@@ -1,8 +1,9 @@
-<%= content_tag(:div, id: "results") do %>
+<%= tag.div(id: "results") do %>
   <%= paginate_block(@pages) do %>
-    <ul class="row list-unstyled mt-3">
+    <%= tag.ul(class: "row list-unstyled mt-3",
+               data: { controller: "matrix-table" }) do %>
       <%= render(layout: "shared/matrix_table",
-               locals: {objects: @subset}) do |row| %>
+                 locals: {objects: @subset}) do |row| %>
         <%= matrix_box(id: row[0]) do %>
           <%= panel_block do %>
             <%= interactive_image(row[0], original: true, votes: false,
@@ -16,6 +17,6 @@
           <% end %>
         <% end %><!-- .matrix-box -->
       <% end %>
-    </ul>
+    <% end %>
   <% end %>
 <% end %>

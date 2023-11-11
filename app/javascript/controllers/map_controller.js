@@ -34,9 +34,9 @@ export default class extends Controller {
     this.localized_text = JSON.parse(this.element.dataset.localization)
 
     if (this.editable) {
-      buildEditableMap()
+      this.buildEditableMap()
     } else {
-      buildMap()
+      this.buildMap()
     }
   }
 

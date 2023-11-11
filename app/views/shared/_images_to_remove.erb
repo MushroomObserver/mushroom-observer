@@ -6,7 +6,8 @@
 
   <%= submit_button(form: f, button: :image_remove_remove.l, center: true) %>
 
-  <%= tag.ul(class: "row list-unstyled mt-3") do %>
+  <%= tag.ul(class: "row list-unstyled mt-3",
+             data: { controller: "matrix-table" }) do %>
 
     <%= render(layout: "shared/matrix_table",
                locals: { objects: @object.images }) do |image| %>
