@@ -2,6 +2,23 @@
 
   <%= submit_button(form: f, button: button, center: true) %>
 
+  <%= check_box_with_label(form: f, field: :open_membership,
+                           label: :form_projects_open_membership.t) %>
+
+  <%= text_field_with_label(form: f, field: :title,
+                            label: :form_projects_title.t + ":",
+                            data: { autofocus: true }) %>
+
+  <%= text_area_with_label(form: f, field: :summary, rows: 5,
+                           label: :SUMMARY.t + ":") %>
+
+  <%= render(partial: "shared/textilize_help") %>
+
+  <%= text_field_with_label(form: f, field: :place_name,
+                            placeholder: :start_typing.l,
+                            label: :WHERE.t + ":",
+                            data: { autocompleter: :location }) %>
+
   <%= tag.div(
     tag.p("*#{:form_projects_date_range.t}*".t) +
     tag.p(:form_projects_dates_explain.t)
@@ -33,23 +50,6 @@
 
     </div>
   </div>
-
-  <%= check_box_with_label(form: f, field: :open_membership,
-                           label: :form_projects_open_membership.t) %>
-
-  <%= text_field_with_label(form: f, field: :title,
-                            label: :form_projects_title.t + ":",
-                            data: { autofocus: true }) %>
-
-  <%= text_area_with_label(form: f, field: :summary, rows: 5,
-                           label: :SUMMARY.t + ":") %>
-
-  <%= render(partial: "shared/textilize_help") %>
-
-  <%= text_field_with_label(form: f, field: :place_name,
-                            placeholder: :start_typing.l,
-                            label: :WHERE.t + ":",
-                            data: { autocompleter: :location }) %>
 
   <%= file_field_with_label(
         form: f, field: :upload_image,
