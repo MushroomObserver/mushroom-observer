@@ -86,12 +86,12 @@ module MapHelper
     # logic for stimulus
     if args[:editable]
       map_control_init(gmap, marker, args)
-      map_box_control_init(gmap, set, args) if set.is_box?
+      map_box_control_init(gmap, set, args) if set.is_box
     else
       gmap.overlay_init(marker) # draws a marker for the mapset
     end
-    # set.is_box? logic needs to go into Stimulus, via the mapset object
-    draw_box_on_gmap(gmap, set, args) if set.is_box?
+    # set.is_box logic needs to go into Stimulus, via the mapset object
+    draw_box_on_gmap(gmap, set, args) if set.is_box
   end
 
   # Maybe: change Polyline to Polygon
@@ -132,9 +132,9 @@ module MapHelper
 
   def map_location_strings(objects)
     objects.map do |obj|
-      if obj.is_location?
+      if obj.location?
         obj.display_name
-      elsif obj.is_observation?
+      elsif obj.observation?
         if obj.location
           obj.location.display_name
         elsif obj.lat
@@ -213,7 +213,7 @@ module MapHelper
 
   # These are coords printed in text
   def mapset_coords(set)
-    if set.is_point?
+    if set.is_point
       format_latitude(set.lat) + safe_nbsp + format_longitude(set.long)
     else
       content_tag(:center,
