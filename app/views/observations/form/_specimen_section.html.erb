@@ -20,22 +20,22 @@
         <%= :form_observations_specimen_available_help.t %>
       <% end  # help_block_with_arrow do %>
 
-      <!-- no_specimen_info -->
+      <!-- no_specimen_fields -->
       <% if button_name == :SAVE_EDITS.l %>
         <%= help_block_with_arrow(nil) do
           :form_observations_edit_specimens_help.t
         end %>
       <% end # if button_name %>
-      <!-- /no_specimen_info -->
+      <!-- /no_specimen_fields -->
 
     </div><!--.col-->
   </div><!--.row-->
 
   <% if button_name == :CREATE.l %>
-    <!-- specimen_info -->
-    <%= tag.div(id: "specimen_info",
+    <!-- specimen_fields -->
+    <%= tag.div(id: "specimen_fields",
                 class: ("hidden" if !@observation.specimen),
-                data: { specimen_target: "info" }) do %>
+                data: { specimen_target: "fields" }) do %>
 
       <%= render(partial: "observations/form/collection_number",
                  locals: { f: f } ) %>
@@ -43,7 +43,7 @@
                  locals: { f: f } ) %>
 
     <% end %>
-    <!-- /specimen_info -->
+    <!-- /specimen_fields -->
   <% end %>
 
 <% end %>

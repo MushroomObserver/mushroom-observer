@@ -2,22 +2,22 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="specimen"
 export default class extends Controller {
-  static targets = ["info", "checkbox"]
+  static targets = ["checkbox", "fields"]
 
   connect() {
     this.showPref = this.element.dataset.userPref
-    this.hideShowFields()
+    if (this.hasFieldsTarget && this.showPref) {
+      this.hideShowFields()
+    }
   }
 
   // Only show if user prefers
   hideShowFields() {
-    if (this.showPref) {
-      if (this.checkboxTarget.checked) {
-        this.infoTarget.classList.remove("hidden")
-        $(this.infoTarget).show()
-      } else {
-        $(this.infoTarget).hide()
-      }
+    if (this.checkboxTarget.checked) {
+      this.fieldsTarget.classList.remove("hidden")
+      $(this.fieldsTarget).show()
+    } else {
+      $(this.fieldsTarget).hide()
     }
   }
 
