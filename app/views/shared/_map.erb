@@ -11,6 +11,7 @@
 #       and set `info_window` if !editable
 map_args = local_assigns.except(:objects, :nothing_to_map)
 collection = prepare_mappable_collection(local_assigns[:objects], **map_args)
+nothing_to_map = local_assigns[:nothing_to_map] || :runtime_map_nothing_to_map.t
 map_localizations = {
   nothing_to_map: nothing_to_map,
   observations: :Observations.t,
@@ -18,8 +19,6 @@ map_localizations = {
   show_all: :show_all.t,
   map_all: :map_all.t
 }
-
-nothing_to_map = local_assigns[:nothing_to_map] || :runtime_map_nothing_to_map.t
 %>
 
 <%=
