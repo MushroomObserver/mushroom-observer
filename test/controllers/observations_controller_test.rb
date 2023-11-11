@@ -2324,6 +2324,14 @@ class ObservationsControllerTest < FunctionalTestCase
                   count: 1)
   end
 
+  def test_edit_observation_form_no_open
+    obs = observations(:amateur_obs)
+    project = projects(:open_membership_project)
+    login("katrina")
+    get(:edit, params: { id: obs.id })
+    assert_project_checks(project.id => :unchecked)
+  end
+
   def test_update_observation
     obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at

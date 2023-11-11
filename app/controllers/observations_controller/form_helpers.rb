@@ -84,6 +84,10 @@ module ObservationsController::FormHelpers
     @projects = User.current.projects_member(order: :title,
                                              include: :user_group)
     @project_checks = {}
+  end
+
+  def init_project_vars_for_create
+    init_project_vars
     @projects.each do |proj|
       @project_checks[proj.id] = (proj.open_membership &&
                                   proj.accepting_observations)
@@ -91,7 +95,6 @@ module ObservationsController::FormHelpers
   end
 
   def init_project_vars_for_reload(obs)
-    init_project_vars
     obs.projects.each do |proj|
       @projects << proj unless @projects.include?(proj)
     end
