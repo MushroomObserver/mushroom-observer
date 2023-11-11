@@ -6,18 +6,21 @@ module MapHelper
   def prepare_mappable_collection(objects, args = {})
     # Organize the objects into Mappable::MapSets (collapsed in the class)
     collection = Mappable::CollapsibleCollectionOfObjects.new(objects)
-    # Modify mapset data for mapping UI
+    # Just take the mapsets, and modify mapset data for google's API
     mappable_mapsets(collection, args)
   end
 
-  # adds title and caption, and removes the objects from the mapset
-  # (MO objects not needed for google.maps API)
+  # Extracts mapsets from the CollapsibleCollection, each of which will become
+  # a Marker. Adds title and caption, and removes the objects from the mapset
+  # (MO objects in the mapset needed for caption, but not for google.maps API)
   def mappable_mapsets(collection, args)
-    collection.mapsets.map do |mapset|
+    mapsets = collection.mapsets
+    mapsets.map do |mapset|
       mapset.title = mapset_marker_title(mapset)
       mapset.caption = mapset_info_window(mapset, args)
-      mapset.objects = nil
+      mapset.objects = nil # can't delete, it's part of the object
     end
+    mapsets
   end
 
   def make_map(objects, args = {})

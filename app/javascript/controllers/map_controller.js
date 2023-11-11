@@ -32,6 +32,19 @@ export default class extends Controller {
     this.editable = this.element.dataset.editable
     this.location_format = this.element.dataset.locationFormat
     this.localized_text = JSON.parse(this.element.dataset.localization)
-    debugger
+
+    if (this.editable) {
+      buildEditableMap()
+    } else {
+      buildMap()
+    }
+  }
+
+  buildEditableMap() {
+
+  }
+
+  buildMap() {
+
   }
 }
