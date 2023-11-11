@@ -321,6 +321,15 @@ class ProjectsControllerTest < FunctionalTestCase
                   "'Any' radio button should be selected")
   end
 
+  def test_edit_project_empty_name
+    edit_project_helper("", projects(:eol_project))
+  end
+
+  def test_edit_project_existing
+    edit_project_helper(projects(:bolete_project).title,
+                        projects(:eol_project))
+  end
+
   def test_update_project
     title = "EOL Project"
     summary = "This has become the Entoloma On Line project"
@@ -347,16 +356,6 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_equal(start_date, project.start_date)
     assert_equal(end_date, project.end_date)
   end
-
-  def test_edit_project_empty_name
-    edit_project_helper("", projects(:eol_project))
-  end
-
-  def test_edit_project_existing
-    edit_project_helper(projects(:bolete_project).title,
-                        projects(:eol_project))
-  end
-
 
   def test_update_project_end_before_start
     proj = projects(:pinned_date_range_project)
