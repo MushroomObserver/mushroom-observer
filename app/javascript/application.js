@@ -27,8 +27,9 @@ if (!window.lazyLoadInstance) {
   });
 }
 
-import Rails from "@rails/ujs"
-Rails.start(); import "controllers"
+// import Rails from "@rails/ujs"
+// Rails.start();
+import "controllers"
 
 // Define a variable to check in inlined HTML script
 window.importmapScriptsLoaded = true

@@ -50,7 +50,7 @@ export default class extends Controller {
   set_bindings() {
     // make sure submit buttons are enabled when the dom is loaded
     this.submit_buttons.forEach((element) => {
-      element.setAttribute('disabled', false);
+      element.disabled = false;
     });
 
     // Drag and Drop bindings on the window
@@ -257,7 +257,7 @@ export default class extends Controller {
   uploadAll() {
     // disable submit and remove image buttons during upload process.
     this.submit_buttons.forEach(
-      (element) => { element.setAttribute('disabled', 'true') }
+      (element) => { element.disabled = true }
     );
     // Note that remove image links are not present at initialization
     this.removeImgTargets.forEach((elem) => {
