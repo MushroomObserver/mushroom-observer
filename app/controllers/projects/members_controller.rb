@@ -124,13 +124,14 @@ module Projects
       if params[:commit] == :change_member_status_revoke_trust.l
         flash_notice(:change_member_status_revoke_trust_flash.l)
         set_trust(project, candidate, false)
+        true
       elsif params[:commit] == :change_member_status_trust.l
         flash_notice(:change_member_status_trust_flash.l)
         set_trust(project, candidate, true)
+        true
       else
-        return false
+        false
       end
-      true
     end
 
     def set_trust(project, user, trusted)
