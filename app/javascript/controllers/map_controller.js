@@ -12,6 +12,12 @@ export default class extends Controller {
       libraries: ["maps", "marker", "elevation"]
     })
 
+    this.collection = JSON.parse(this.element.dataset.collection)
+    this.editable = this.element.dataset.editable
+    this.location_format = this.element.dataset.locationFormat
+    this.localized_text = JSON.parse(this.element.dataset.localization)
+
+    // use center and zoom here
     const mapOptions = {
       center: { lat: -7, lng: -47 },
       zoom: 1,
@@ -28,23 +34,18 @@ export default class extends Controller {
         console.log("error loading gmaps")
       })
 
-    this.collection = JSON.parse(this.element.dataset.collection)
-    this.editable = this.element.dataset.editable
-    this.location_format = this.element.dataset.locationFormat
-    this.localized_text = JSON.parse(this.element.dataset.localization)
-
-    if (this.editable) {
-      this.buildEditableMap()
+    if (this.editable && this.collection.sets.length) {
+      this.buildEditableMarkers()
     } else {
-      this.buildMap()
+      this.buildMarkers()
     }
   }
 
-  buildEditableMap() {
+  buildEditableMarkers() {
 
   }
 
-  buildMap() {
-
+  buildMarkers() {
+    // center_zoom_init or center_zoom_on_points_init
   }
 }

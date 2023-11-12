@@ -3,43 +3,79 @@
 module MapHelper
   # args could include query_param.
   # returns an array of mapsets, each suitable for a marker or box
-  def prepare_mappable_collection(objects, args = {})
-    # Organize the objects into Mappable::MapSets (collapsed in the class)
-    collection = Mappable::CollapsibleCollectionOfObjects.new(objects)
-    # Just take the mapsets, and modify mapset data for google's API
-    mappable_mapsets(collection, args)
+  def make_map(objects, local_assigns = {})
+    default_args = {
+      map_div: "map_div",
+      editable: false,
+      controls: [:large_map, :map_type],
+      zoom: 2,
+      info_window: true,
+      nothing_to_map: :runtime_map_nothing_to_map.t
+    }
+    map_args = local_assigns.except(:objects, :nothing_to_map)
+    map_args = provide_defaults(map_args, **default_args)
+
+    collection = mappable_collection(objects, map_args)
+    map_localizations = {
+      nothing_to_map: map_args[:nothing_to_map],
+      observations: :Observations.t,
+      locations: :Locations.t,
+      show_all: :show_all.t,
+      map_all: :map_all.t
+    }
+
+    tag.div(
+      "",
+      id: map_args[:map_div],
+      class: "position-absolute w-100 h-100",
+      data: { controller: "map", map_target: "mapDiv",
+              collection: collection.to_json,
+              editable: map_args[:editable], info_window: true,
+              controls: map_args[:controls], zoom: map_args[:zoom],
+              location_format: User.current_location_format, # has a default
+              localization: map_localizations.to_json }
+    )
   end
 
-  # Extracts mapsets from the CollapsibleCollection, each of which will become
-  # a Marker. Adds title and caption, and removes the objects from the mapset
-  # (MO objects in the mapset needed for caption, but not for google.maps API)
-  def mappable_mapsets(collection, args)
-    mapsets = collection.mapsets
-    mapsets.map do |mapset|
+  # Returns a CollapsibleCollection of mapsets, containing all data necessary
+  # for the JS map_controller to draw them on map.
+  # Collection attributes are sets, extents, and representative_points.
+  # Each collection.set either `is_marker` or `is_box`.
+  #
+  # Uses Mappable::CollapsibleCollection to aggregate the mappable objects
+  # until they are down to a manageable max_number. Then, iterates over the
+  # collection.sets array, each of which will become a Marker or Box.
+  # Adds title and caption attributes to each, and removes objects. (The AR
+  # objects in the mapset are needed for caption, but not for google.maps API.)
+  #
+  def mappable_collection(objects, args)
+    collection = Mappable::CollapsibleCollectionOfObjects.new(objects)
+    collection.sets.map do |_key, mapset|
       mapset.title = mapset_marker_title(mapset)
       mapset.caption = mapset_info_window(mapset, args)
-      mapset.objects = nil # can't delete, it's part of the object
+      mapset.objects = nil # can't delete, it's part of the MapSet object
     end
-    mapsets
+
+    collection
   end
 
-  def make_map(objects, args = {})
-    args = provide_defaults(args,
-                            map_div: "map_div",
-                            controls: [:large_map, :map_type],
-                            info_window: true)
-    collection = Mappable::CollapsibleCollectionOfObjects.new(objects)
-    gmap = init_map(args)
-    if args[:zoom]
-      gmap.center_zoom_init(collection.extents.center, args[:zoom])
-    else
-      gmap.center_zoom_on_points_init(*collection.representative_points)
-    end
-    # stimulus controller should draw the mapset.
-    # This should just add html to each mapset
-    collection.mapsets.each { |mapset| draw_mapset(gmap, mapset, args) }
-    gmap
-  end
+  # def make_map(objects, args = {})
+  #   args = provide_defaults(args,
+  #                           map_div: "map_div",
+  #                           controls: [:large_map, :map_type],
+  #                           info_window: true)
+  #   collection = Mappable::CollapsibleCollectionOfObjects.new(objects)
+  #   gmap = init_map(args)
+  #   if args[:zoom]
+  #     gmap.center_zoom_init(collection.extents.center, args[:zoom])
+  #   else
+  #     gmap.center_zoom_on_points_init(*collection.representative_points)
+  #   end
+  #   # stimulus controller should draw the mapset.
+  #   # This should just add html to each mapset
+  #   collection.mapsets.each { |mapset| draw_mapset(gmap, mapset, args) }
+  #   gmap
+  # end
 
   def make_editable_map(object, args = {})
     args = provide_defaults(args,
@@ -56,8 +92,6 @@ module MapHelper
   def provide_defaults(args, default_args)
     default_args.merge(args)
   end
-
-  # TODO: Need a helper to add the mapset info box html to the mapset hash
 
   def init_map(args = {})
     gmap = GM::GMap.new(args[:map_div])

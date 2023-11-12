@@ -9,17 +9,6 @@
 #   Need a helper to add the mapset info box html to the mapset hash
 # TODO: Remove `zoom` from callers, add `editable`
 #       and set `info_window` if !editable
-map_args = local_assigns.except(:objects, :nothing_to_map)
-collection = prepare_mappable_collection(local_assigns[:objects], **map_args)
-nothing_to_map = local_assigns[:nothing_to_map] || :runtime_map_nothing_to_map.t
-editable = local_assigns[:editable] || false
-map_localizations = {
-  nothing_to_map: nothing_to_map,
-  observations: :Observations.t,
-  locations: :Locations.t,
-  show_all: :show_all.t,
-  map_all: :map_all.t
-}
 %>
 
 <%=
@@ -29,14 +18,7 @@ tag.div(class: "w-100 position-relative",
     # gmap = make_map(local_assigns[:objects], **map_args)
     # finish_map(gmap) # puts js in header
     # gmap.div(width: 800, height: 550).html_safe
-    tag.div("",
-      id: "map_div",
-      class: "position-absolute w-100 h-100",
-      data: { controller: "map", map_target: "mapDiv",
-              collection: collection.to_json, editable: editable,
-              location_format: User.current_location_format, # has a default
-              localization: map_localizations.to_json }
-    )
+    make_map(objects, **local_assigns)
   else
     nothing_to_map
   end

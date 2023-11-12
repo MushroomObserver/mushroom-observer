@@ -50,22 +50,23 @@
 
 module Mappable
   class CollapsibleCollectionOfObjects
+    attr_accessor :sets, :extents, :representative_points
+
     def initialize(objects, max_objects = MO.max_map_objects)
       @max_objects = max_objects
       init_sets(objects)
       group_objects_into_sets
+      init_derived_attributes
     end
 
     def mapsets
       @sets.values
     end
 
-    def extents
-      @extents ||= calc_extents
-    end
-
-    def representative_points
-      [extents.north_west, extents.center, extents.south_east]
+    def init_derived_attributes
+      @extents = calc_extents
+      @representative_points =
+        [@extents.north_west, @extents.center, @extents.south_east]
     end
 
     private
