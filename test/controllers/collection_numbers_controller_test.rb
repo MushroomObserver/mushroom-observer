@@ -49,7 +49,8 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     assert_no_flash
     assert_displayed_title(
-      "Collection Numbers for #{obs.unique_format_name.t}".
+      :query_title_for_observation.t(type: :collection_number,
+                                     observation: obs.unique_format_name.t).
       strip_html
     )
   end
@@ -63,7 +64,9 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     assert_no_flash
     assert_displayed_title(
-      "Collection Numbers for #{obs.unique_format_name.t}".strip_html
+      :query_title_for_observation.t(type: :collection_number,
+                                     observation: obs.unique_format_name.t).
+      strip_html
     )
   end
 
