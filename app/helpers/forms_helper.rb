@@ -83,6 +83,18 @@ module FormsHelper
     end
   end
 
+  def check_button_with_label(**args)
+    args = auto_label_if_form_is_account_prefs(args)
+    opts = separate_field_options_from_args(args)
+
+    wrap_class = form_group_wrap_class(args, "btn btn-default btn-sm")
+
+    args[:form].label(args[:field], class: wrap_class) do
+      [args[:form].check_box(args[:field], opts.merge(class: "mt-0 mr-2")),
+       args[:label]].safe_join
+    end
+  end
+
   # Bootstrap radio: form, field, value, label, class, checked
   def radio_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
@@ -95,6 +107,18 @@ module FormsHelper
         concat(args[:form].radio_button(args[:field], args[:value], opts))
         concat(args[:label])
       end
+    end
+  end
+
+  def radio_button_with_label(**args)
+    args = auto_label_if_form_is_account_prefs(args)
+    opts = separate_field_options_from_args(args)
+
+    wrap_class = form_group_wrap_class(args, "btn btn-default btn-sm")
+
+    args[:form].label(args[:field], class: wrap_class) do
+      concat(args[:form].radio_button(args[:field], args[:value], opts))
+      concat(args[:label])
     end
   end
 
