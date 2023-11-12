@@ -37,21 +37,21 @@ Install a bunch of useful stuff from `Homebrew`
 brew install git mysql exiftool libjpeg shared-mime-info openssl imagemagick findutils
 ```
 
-### Install bash
+### Install Bash
 
-If you haven't done so already, install a recent version of `bash` and set
+If you haven't done so already, install a recent version of [Bash](https://www.gnu.org/software/bash/) and set
 it as the default shell. You can find your installed version like this:
 
 ```sh
 bash --version
 ```
 
-Apple includes only `Bash` 3.2 from 2007 in all versions of Mac OS X even now,
-because `Bash` > 4.0 uses GPLv3, and they don't want to support that license.
-MO's scripts use syntax that requires `Bash` >= 4.0.
-Description of the script error that occurs if you aren't running newer `Bash`:
+Apple includes only Bash 3.2 from 2007 in all versions of Mac OS X even now,
+because Bash > 4.0 uses GPLv3, and they don't want to support that license.
+MO's scripts use syntax that requires Bash >= 4.0.
+Description of the script error that occurs if you aren't running newer Bash:
 <https://stackoverflow.com/questions/6047648/associative-arrays-error-declare-a-invalid-option>
-To install the newest `Bash` alongside older versions:
+To install the newest Bash alongside older versions:
 
 ```sh
 brew install bash
@@ -118,7 +118,7 @@ mysqld_safe --skip-grant-tables
 mysql -u root
 ```
 
-5. Inside the MySQL prompt, update the root password:
+5. Inside the MySQL prompt (in the new terminal window), update the root password:
 
 ```sql
 USE mysql;
@@ -206,7 +206,7 @@ Add rbenv to zsh/bash so that it loads every time you open a terminal
 ### Load an MO database snapshot.
 
 - download the snapshot from <http://images.mushroomobserver.org/checkpoint_stripped.gz>
-- copy (or move) the downloaded .gz file to the mushroom-observer directory.
+- copy (or move) the downloaded .gz file to the `mushroom-observer` directory.
 Then:
 
 ```sh
@@ -226,7 +226,7 @@ rails db:migrate
 
 When @JoeCohen first installed the app (MacBook Pro, Intel, OSX 13.6),
 `rails` was not recognized. He had to use `bin/rails` instead.
-The next time he installed the app (same hw/sw) ir recognized `rails`,
+The next time he installed the app (same hw/sw) it recognized `rails`,
 but gave this error:
 
 ```sh
