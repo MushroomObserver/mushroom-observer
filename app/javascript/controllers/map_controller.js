@@ -51,49 +51,36 @@ export default class extends Controller {
       })
   }
 
-  // Every MapSet should have these properties
-  boundsOfMapSet(set) {
-    const bounds = {
-      north: set.north,
-      south: set.south,
-      east: set.east,
-      west: set.west
-    }
-    return bounds
-  }
-
-  cornersOfMapSet(set) {
-    const corners = {
-      ne: set.north_east,
-      se: set.south_east,
-      sw: set.south_west,
-      nw: set.north_west
-    }
-    return corners
-  }
-
+  // In a collection, each set represents a Marker (is_point or is_box).
+  // set.center is an array [lat, lng]
+  // the `key` of each set is an array [x,y,w,h]
   buildMarkers() {
-    // in a collection, each set represents a Marker (point or box).
-    // the `key` of each set is an array [x,y,w,h]
     for (const [_xywh, set] of Object.entries(this.collection.sets)) {
       if (set.is_point) {
-        this.drawMarker(set)
+        this.drawMarker(set.center)
       } else if (set.is_box) {
         this.drawRectangle(set)
       }
     }
   }
 
-  drawMarker(set) {
-    const marker = new google.maps.Marker({
-      position: { lat: set.lat, lng: set.long },
+  drawMarker(coords, type = 'ct') {
+    const marker_opts = {
+      position: { lat: coords[0], lng: coords[1] },
       map: this.map,
-      title: set.title,
-    })
+    }
+
+    // Only put a title on a center marker, in the case of boxes
+    if (!this.editable && type == 'ct') {
+      marker_opts.title = set.title
+    }
+
+    const marker = new google.maps.Marker(marker_opts)
 
     if (this.editable) {
+      this.makeMarkerDraggable(marker, type)
+    } else {
       this.drawAndBindInfoWindow(set)
-      this.makeMarkerDraggable(marker)
     }
   }
 
@@ -107,43 +94,55 @@ export default class extends Controller {
     })
   }
 
-  makeMarkerDraggable(marker, type = 'ct') {
+  makeMarkerDraggable(marker, type) {
     google.maps.event.addListener(marker, "dragend", (e) => {
       dragEndLatLng(e.latLng, type)
     })
   }
 
   drawRectangle(set) {
-    this.drawMarker(set)
+    this.drawMarker(set.center)
     new google.maps.Rectangle({
       strokeColor: "#00ff88",
       strokeOpacity: 1,
       strokeWeight: 3,
       map: this.map,
-      bounds: this.boundsOfMapSet(set)
+      bounds: this.boundsOf(set)
     })
 
     if (this.editable) {
-      this.drawAndBindInfoWindow(set)
       this.makeCornersDraggable(set)
+    } else {
+      this.drawAndBindInfoWindow(set)
     }
   }
 
   makeCornersDraggable(set) {
-    const corners = this.cornersOfMapSet(set)
+    const corners = this.cornersOf(set)
     for (const [type, coords] of Object.entries(corners)) {
-      drawCornerMarker(coords, type)
+      drawMarker(coords, type)
     }
   }
 
-  drawCornerMarker(coords, type) {
-    const marker = new google.maps.Marker({
-      position: { lat: coords[0], lng: set.long },
-      map: this.map,
-    })
-
-    if (this.editable) {
-      this.makeMarkerDraggable(marker, type)
+  // Every MapSet should have properties for bounds and corners
+  boundsOf(set) {
+    const bounds = {
+      north: set.north,
+      south: set.south,
+      east: set.east,
+      west: set.west
     }
+    return bounds
+  }
+
+  // Each corner (e.g. north_east) is an array [lat, lng]
+  cornersOf(set) {
+    const corners = {
+      ne: set.north_east,
+      se: set.south_east,
+      sw: set.south_west,
+      nw: set.north_west
+    }
+    return corners
   }
 }
