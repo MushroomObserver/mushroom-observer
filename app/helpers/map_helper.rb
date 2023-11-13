@@ -149,6 +149,30 @@ module MapHelper
     end
   end
 
+  # I think this just makes a dragable marker.
+  def map_control_init(gmap, marker, args, type = "ct")
+    name = args[:marker_name] || "mo_marker"
+    gmap.overlay_global_init(marker, name + "_" + type)
+    gmap.event_init(marker, "dragend", "function(e) {
+      dragEndLatLng(e.latLng, '#{type}')
+    }")
+  end
+
+  # I think this just makes four dragable markers for a mapset (box)
+  def map_box_control_init(gmap, set, args)
+    [
+      [set.north_west, "nw"],
+      [set.north_east, "ne"],
+      [set.south_west, "sw"],
+      [set.south_east, "se"]
+    ].each do |point, type|
+      marker = GM::GMarker.new(point, draggable: true)
+      map_control_init(gmap, marker, args, type)
+    end
+  end
+
+  # TEXT for title and info_window
+
   def mapset_marker_title(set)
     strings = map_location_strings(set.objects)
     result = if strings.length > 1
@@ -273,27 +297,5 @@ module MapHelper
   def format_lxxxitude(val, dir1, dir2)
     deg = val.abs.round(4)
     "#{deg}°#{val.negative? ? dir2 : dir1}".html_safe
-  end
-
-  # I think this just makes a dragable marker.
-  def map_control_init(gmap, marker, args, type = "ct")
-    name = args[:marker_name] || "mo_marker"
-    gmap.overlay_global_init(marker, name + "_" + type)
-    gmap.event_init(marker, "dragend", "function(e) {
-      dragEndLatLng(e.latLng, '#{type}')
-    }")
-  end
-
-  # I think this just makes four dragable markers for a mapset (box)
-  def map_box_control_init(gmap, set, args)
-    [
-      [set.north_west, "nw"],
-      [set.north_east, "ne"],
-      [set.south_west, "sw"],
-      [set.south_east, "se"]
-    ].each do |point, type|
-      marker = GM::GMarker.new(point, draggable: true)
-      map_control_init(gmap, marker, args, type)
-    end
   end
 end

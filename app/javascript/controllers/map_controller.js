@@ -42,9 +42,7 @@ export default class extends Controller {
         this.elevation = new google.maps.ElevationService()
         this.geocoder = new google.maps.Geocoder()
 
-        if (this.editable && this.collection.sets.length) {
-          this.buildEditableMarkers()
-        } else {
+        if (this.collection.sets.length) {
           this.buildMarkers()
         }
       })
@@ -64,12 +62,19 @@ export default class extends Controller {
     return bounds
   }
 
-  buildEditableMarkers() {
-    // nothing yet
+  cornersOfMapSet(set) {
+    const corners = {
+      ne: set.north_east,
+      se: set.south_east,
+      sw: set.south_west,
+      nw: set.north_west
+    }
+    return corners
   }
 
   buildMarkers() {
-    // center_zoom_init or center_zoom_on_points_init
+    // in a collection, each set represents a Marker (point or box).
+    // the `key` of each set is an array [x,y,w,h]
     for (const [_xywh, set] of Object.entries(this.collection.sets)) {
       if (set.is_point) {
         this.drawMarker(set)
@@ -86,13 +91,21 @@ export default class extends Controller {
       title: set.title,
     })
 
-    const info_window = new google.maps.InfoWindow({
-      content: set.caption
+    if (this.editable) {
+      this.drawAndBindInfoWindow(set)
+      this.makeMarkerDraggable(marker)
+    }
+  }
+
+  drawCornerMarker(coords, type) {
+    const marker = new google.maps.Marker({
+      position: { lat: coords[0], lng: set.long },
+      map: this.map,
     })
 
-    google.maps.event.addListener(marker, "click", () => {
-      info_window.open(this.map, marker)
-    })
+    if (this.editable) {
+      this.makeMarkerDraggable(marker, type)
+    }
   }
 
   drawRectangle(set) {
@@ -104,5 +117,33 @@ export default class extends Controller {
       map: this.map,
       bounds: this.boundsOfMapSet(set)
     })
+
+    if (this.editable) {
+      this.drawAndBindInfoWindow(set)
+      this.makeCornersDraggable(set)
+    }
+  }
+
+  drawAndBindInfoWindow(set) {
+    const info_window = new google.maps.InfoWindow({
+      content: set.caption
+    })
+
+    google.maps.event.addListener(marker, "click", () => {
+      info_window.open(this.map, marker)
+    })
+  }
+
+  makeMarkerDraggable(marker, type = 'ct') {
+    google.maps.event.addListener(marker, "dragend", (e) => {
+      dragEndLatLng(e.latLng, type)
+    })
+  }
+
+  makeCornersDraggable(set) {
+    const corners = this.cornersOfMapSet(set)
+    for (const [type, coords] of Object.entries(corners)) {
+      drawCornerMarker(coords, type)
+    }
   }
 }
