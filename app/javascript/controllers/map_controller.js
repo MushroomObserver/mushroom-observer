@@ -17,7 +17,7 @@ export default class extends Controller {
     // map.fitBounds(bounds);
     // https://developers.google.com/maps/documentation/javascript/reference/map#Map-Methods
     this.collection = JSON.parse(this.element.dataset.collection)
-    this.editable = this.element.dataset.editable
+    this.editable = (this.element.dataset.editable === "true")
     this.location_format = this.element.dataset.locationFormat
     this.localized_text = JSON.parse(this.element.dataset.localization)
 
@@ -31,7 +31,7 @@ export default class extends Controller {
     }
 
     // collection.extents is also a MapSet
-    const mapBounds = this.boundsOfMapSet(this.collection.extents)
+    const mapBounds = this.boundsOf(this.collection.extents)
     // const latLngBounds = new google.maps.LatLngBoundsLiteral(mapBounds)
 
     loader
@@ -42,7 +42,7 @@ export default class extends Controller {
         this.elevation = new google.maps.ElevationService()
         this.geocoder = new google.maps.Geocoder()
 
-        if (this.collection.sets.length) {
+        if (Object.keys(this.collection.sets).length) {
           this.buildMarkers()
         }
       })
@@ -56,35 +56,72 @@ export default class extends Controller {
   // the `key` of each set is an array [x,y,w,h]
   buildMarkers() {
     for (const [_xywh, set] of Object.entries(this.collection.sets)) {
-      if (set.is_point) {
-        this.drawMarker(set.center)
-      } else if (set.is_box) {
+      this.drawMarker(set)
+      // if (set.is_point) {
+      // this.drawMarker(set.center)
+      // } else
+      if (set.is_box) {
+        // this.drawMarker(set.center)
         this.drawRectangle(set)
       }
     }
   }
 
-  drawMarker(coords, type = 'ct') {
-    const marker_opts = {
-      position: { lat: coords[0], lng: coords[1] },
+  drawMarker(set) { // , type = 'ct'
+    const markerOptions = {
+      position: { lat: set.lat, lng: set.long },
       map: this.map,
+      draggable: this.editable
     }
 
+    // debugger
     // Only put a title on a center marker, in the case of boxes
-    if (!this.editable && type == 'ct') {
-      marker_opts.title = set.title
+    if (!this.editable) { //  && type == 'ct'
+      markerOptions.title = set.title
     }
+    const marker = new google.maps.Marker(markerOptions)
 
-    const marker = new google.maps.Marker(marker_opts)
-
-    if (this.editable) {
-      this.makeMarkerDraggable(marker, type)
-    } else {
-      this.drawAndBindInfoWindow(set)
+    if (!this.editable && set != null) {
+      //   this.makeMarkerDraggable(marker, type)
+      // } else {
+      this.drawAndBindInfoWindow(set, marker)
     }
   }
 
-  drawAndBindInfoWindow(set) {
+  drawRectangle(set) {
+    const rectangleOptions = {
+      strokeColor: "#00ff88",
+      strokeOpacity: 1,
+      strokeWeight: 3,
+      map: this.map,
+      bounds: this.boundsOf(set),
+      editable: this.editable,
+      draggable: this.editable
+    }
+
+    new google.maps.Rectangle(rectangleOptions)
+
+    // if (this.editable) {
+    //   this.makeCornersDraggable(set)
+    // } else {
+    // this.drawAndBindInfoWindow(set)
+    // }
+  }
+
+  // makeMarkerDraggable(marker, type) {
+  //   google.maps.event.addListener(marker, "dragend", (e) => {
+  //     dragEndLatLng(e.latLng, type)
+  //   })
+  // }
+
+  // makeCornersDraggable(set) {
+  //   const corners = this.cornersOf(set)
+  //   for (const [type, coords] of Object.entries(corners)) {
+  //     drawMarker(coords, type)
+  //   }
+  // }
+
+  drawAndBindInfoWindow(set, marker) {
     const info_window = new google.maps.InfoWindow({
       content: set.caption
     })
@@ -92,36 +129,6 @@ export default class extends Controller {
     google.maps.event.addListener(marker, "click", () => {
       info_window.open(this.map, marker)
     })
-  }
-
-  makeMarkerDraggable(marker, type) {
-    google.maps.event.addListener(marker, "dragend", (e) => {
-      dragEndLatLng(e.latLng, type)
-    })
-  }
-
-  drawRectangle(set) {
-    this.drawMarker(set.center)
-    new google.maps.Rectangle({
-      strokeColor: "#00ff88",
-      strokeOpacity: 1,
-      strokeWeight: 3,
-      map: this.map,
-      bounds: this.boundsOf(set)
-    })
-
-    if (this.editable) {
-      this.makeCornersDraggable(set)
-    } else {
-      this.drawAndBindInfoWindow(set)
-    }
-  }
-
-  makeCornersDraggable(set) {
-    const corners = this.cornersOf(set)
-    for (const [type, coords] of Object.entries(corners)) {
-      drawMarker(coords, type)
-    }
   }
 
   // Every MapSet should have properties for bounds and corners
