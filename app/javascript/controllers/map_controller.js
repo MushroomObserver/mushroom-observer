@@ -9,7 +9,7 @@ export default class extends Controller {
     const loader = new Loader({
       apiKey: "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA",
       version: "quarterly",
-      libraries: ["maps", "marker", "elevation"]
+      libraries: ["core", "maps", "marker", "elevation"]
     })
 
     // https://stackoverflow.com/questions/15719951/auto-center-map-with-multiple-markers-in-google-maps-api-v3
@@ -23,11 +23,15 @@ export default class extends Controller {
 
     // use center and zoom here
     const mapOptions = {
-      center: { lat: this.collection.lat, lng: this.collection.long },
+      center: {
+        lat: this.collection.extents.lat,
+        lng: this.collection.extents.long
+      },
       zoom: 1,
     }
 
-    const mapBounds = this.boundsForMapSet(this.collection.extents)
+    // collection.extents is also a MapSet
+    const mapBounds = this.boundsOfMapSet(this.collection.extents)
     // const latLngBounds = new google.maps.LatLngBoundsLiteral(mapBounds)
 
     loader
@@ -37,20 +41,20 @@ export default class extends Controller {
         this.map.fitBounds(mapBounds)
         this.elevation = new google.maps.ElevationService()
         this.geocoder = new google.maps.Geocoder()
+
+        if (this.editable && this.collection.sets.length) {
+          this.buildEditableMarkers()
+        } else {
+          this.buildMarkers()
+        }
       })
       .catch((e) => {
         console.log("error loading gmaps")
       })
-
-    if (this.editable && this.collection.sets.length) {
-      this.buildEditableMarkers()
-    } else {
-      this.buildMarkers()
-    }
   }
 
   // Every MapSet should have these properties
-  boundsForMapSet(set) {
+  boundsOfMapSet(set) {
     const bounds = {
       north: set.north,
       south: set.south,
@@ -66,13 +70,13 @@ export default class extends Controller {
 
   buildMarkers() {
     // center_zoom_init or center_zoom_on_points_init
-    this.collection.sets.forEach((set) => {
+    for (const [_xywh, set] of Object.entries(this.collection.sets)) {
       if (set.is_point) {
         this.drawMarker(set)
       } else if (set.is_box) {
         this.drawRectangle(set)
       }
-    })
+    }
   }
 
   drawMarker(set) {
@@ -87,18 +91,18 @@ export default class extends Controller {
     })
 
     google.maps.event.addListener(marker, "click", () => {
-      info_window.open(map, marker)
+      info_window.open(this.map, marker)
     })
   }
 
   drawRectangle(set) {
-    drawMarker(set)
+    this.drawMarker(set)
     new google.maps.Rectangle({
-      strokeColor: "00ff88",
+      strokeColor: "#00ff88",
       strokeOpacity: 1,
       strokeWeight: 3,
       map: this.map,
-      bounds: this.boundsForMapSet(set)
+      bounds: this.boundsOfMapSet(set)
     })
   }
 }
