@@ -16,6 +16,7 @@ module MapHelper
     map_args = provide_defaults(map_args, **default_args)
 
     collection = mappable_collection(objects, map_args)
+
     map_localizations = {
       nothing_to_map: map_args[:nothing_to_map],
       observations: :Observations.t,
@@ -131,7 +132,7 @@ module MapHelper
     draw_box_on_gmap(gmap, set, args) if set.is_box
   end
 
-  # Maybe: change Polyline to Polygon
+  # Maybe: change Polyline to Rectangle
   def draw_box_on_gmap(gmap, set, args)
     box = GM::GPolyline.new([
                               set.north_west,
