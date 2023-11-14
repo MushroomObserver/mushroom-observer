@@ -9,13 +9,15 @@
     <%= render(partial: "shared/form_location_feedback",
                locals: { button: button.l} ) %>
 
-    <div class="row">
-      <div class="col-md-8 col-lg-6">
+    <%= tag.div(class: "row", data: { controller: "map" }) do %>
+      <%= tag.div(class: "col-md-8 col-lg-6") do %>
 
         <%= submit_button(form: f, button: button.l, center: true) %>
 
-        <%= render(partial: "locations/form/admin_locked_field",
-                   locals: { f: f }) %>
+        <%= if in_admin_mode?
+          check_box_with_label(form: f, field: :locked, class: "mt-3",
+                               label: :form_locations_locked.t)
+        end %>
 
         <%= render(partial: "locations/form/display_name_field",
                    locals: { f: f }) %>
@@ -23,14 +25,22 @@
         <%= render(partial: "locations/form/lat_long_alt_fields",
                    locals: { f: f }) %>
 
-      </div><!--.col-->
+        <%= tag.div(class: "position-relative") do
+          tag.div(class: "ab-right") do
+            tag.button(
+              :form_locations_find_on_map.t,
+              type: "button", class: "btn btn-default",
+              data: { map_target: "findOnMap", action: "map#findOnMap"}
+            )
+          end
+        end %>
 
-      <div class="col-md-4 col-lg-6 mb-3 mt-3">
+      <% end %>
 
-        <%= make_map([@location], **map_args) %>
-
-      </div><!--.col-md-4 col-lg-6-->
-    </div><!--.row-->
+      <%= tag.div(class: "col-md-4 col-lg-6 mb-3 mt-3") do
+        make_map([@location], **map_args.merge({ controller: nil }))
+      end %><!--.col-md-4 col-lg-6-->
+    <% end %><!--.row-->
 
   <% else %>
 

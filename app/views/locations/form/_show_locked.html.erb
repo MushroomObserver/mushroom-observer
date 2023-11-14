@@ -34,7 +34,7 @@
   </div>
 
   <div class="col-sm-6 col-md-8 col-lg-9 mb-3 mt-3">
-    <% map_args = local_assigns.except(:location).merge({ editable: true }) %>
+    <% map_args = local_assigns.except(:location) # not editable %>
     <%= make_map([@location], **map_args) %>
   </div>
 </div><!--.row-->

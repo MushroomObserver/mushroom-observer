@@ -153,6 +153,7 @@ module MapHelper
   end
 
   # I think this just makes a dragable marker.
+  # Nope, it also syncs with the edit form inputs for n,s,e,w
   def map_control_init(gmap, marker, args, type = "ct")
     name = args[:marker_name] || "mo_marker"
     gmap.overlay_global_init(marker, name + "_" + type)
@@ -162,6 +163,7 @@ module MapHelper
   end
 
   # I think this just makes four dragable markers for a mapset (box)
+  # Same as above but syncs the corners.
   def map_box_control_init(gmap, set, args)
     [
       [set.north_west, "nw"],

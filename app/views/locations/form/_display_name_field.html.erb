@@ -2,9 +2,4 @@
   <%= text_field_with_label(form: f, field: :display_name, value: @display_name,
                             append: help_block(:div, :form_locations_help.t),
                             label: :WHERE.t + ":", data: { autofocus: true }) %>
-  <div class="pull-right">
-    <span id="find_on_map" onclick="findOnMap()" class="btn btn-default">
-      <%= :form_locations_find_on_map.t %>
-    </span>
-  </div>
 </div>

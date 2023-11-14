@@ -3,6 +3,10 @@ import { Loader } from "@googlemaps/js-api-loader"
 
 // Connects to data-controller="map"
 export default class extends Controller {
+  // need targets and actions for location form inputs
+  // reconsider the scope of the controller
+  // the mapDiv should be considered the source of the data.
+  // it may or may not be the root element of the controller.
   static targets = ["mapDiv"]
 
   connect() {
@@ -16,11 +20,11 @@ export default class extends Controller {
     // bounds = new google.maps.LatLngBounds
     // map.fitBounds(bounds);
     // https://developers.google.com/maps/documentation/javascript/reference/map#Map-Methods
-    this.collection = JSON.parse(this.element.dataset.collection)
-    this.editable = (this.element.dataset.editable === "true")
-    this.location_format = this.element.dataset.locationFormat
-    this.localized_text = JSON.parse(this.element.dataset.localization)
-    this.controls = JSON.parse(this.element.dataset.controls)
+    this.collection = JSON.parse(this.mapDivTarget.dataset.collection)
+    this.editable = (this.mapDivTarget.dataset.editable === "true")
+    this.location_format = this.mapDivTarget.dataset.locationFormat
+    this.localized_text = JSON.parse(this.mapDivTarget.dataset.localization)
+    this.controls = JSON.parse(this.mapDivTarget.dataset.controls)
 
     // use center and zoom here
     const mapOptions = {
@@ -85,9 +89,9 @@ export default class extends Controller {
     const marker = new google.maps.Marker(markerOptions)
 
     if (!this.editable && set != null) {
-      //   this.makeMarkerDraggable(marker, type)
-      // } else {
       this.drawAndBindInfoWindow(set, marker)
+    } else {
+      this.bindMarkerToFormInputs(marker)
     }
   }
 
@@ -123,6 +127,9 @@ export default class extends Controller {
   //     drawMarker(coords, type)
   //   }
   // }
+  bindMarkerToFormInputs() {
+
+  }
 
   drawAndBindInfoWindow(set, marker) {
     const info_window = new google.maps.InfoWindow({
