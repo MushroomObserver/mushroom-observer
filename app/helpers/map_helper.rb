@@ -6,36 +6,38 @@ module MapHelper
   def make_map(objects, local_assigns = {})
     default_args = {
       map_div: "map_div",
+      controller: "map",
+      map_target: "mapDiv",
       editable: false,
-      controls: [:large_map, :map_type],
-      zoom: 2,
-      info_window: true,
-      nothing_to_map: :runtime_map_nothing_to_map.t
+      controls: [:large_map, :map_type].to_json,
+      location_format: User.current_location_format, # has a default
     }
-    map_args = local_assigns.except(:objects, :nothing_to_map)
+    map_args = local_assigns.except(:objects, :nothing_to_map,
+                                    :location, :observation)
     map_args = provide_defaults(map_args, **default_args)
-
-    collection = mappable_collection(objects, map_args)
-
-    map_localizations = {
-      nothing_to_map: map_args[:nothing_to_map],
+    map_args[:collection] = mappable_collection(objects, map_args).to_json
+    map_args[:localization] = {
+      nothing_to_map: local_assigns[:nothing_to_map] ||
+                      :runtime_map_nothing_to_map.t,
       observations: :Observations.t,
       locations: :Locations.t,
       show_all: :show_all.t,
       map_all: :map_all.t
-    }
+    }.to_json
 
-    tag.div(
-      "",
-      id: map_args[:map_div],
-      class: "position-absolute w-100 h-100",
-      data: { controller: "map", map_target: "mapDiv",
-              collection: collection.to_json,
-              editable: map_args[:editable], info_window: true,
-              controls: map_args[:controls], zoom: map_args[:zoom],
-              location_format: User.current_location_format, # has a default
-              localization: map_localizations.to_json }
-    )
+    map_html(map_args)
+  end
+
+  def map_html(map_args)
+    tag.div(class: "w-100 position-relative",
+            style: "padding-bottom: 66%;") do
+      tag.div(
+        "",
+        id: map_args[:map_div],
+        class: "position-absolute w-100 h-100",
+        data: map_args.except(:map_div)
+      )
+    end
   end
 
   # Returns a CollapsibleCollection of mapsets, containing all data necessary

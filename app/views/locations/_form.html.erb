@@ -1,3 +1,4 @@
+<% @location.force_valid_lat_longs! %>
 
 <%= form_with(model: @location, url: action, id: "location_form") do |f| %>
 
@@ -24,7 +25,7 @@
 
       <div class="col-md-4 col-lg-6 mb-3 mt-3">
 
-        <%= render(partial: "locations/form/gmap") %>
+        <%= make_map([@location], **local_assigns.merge({ editable: true })) %>
 
       </div><!--.col-md-4 col-lg-6-->
     </div><!--.row-->

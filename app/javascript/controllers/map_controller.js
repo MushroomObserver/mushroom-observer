@@ -20,6 +20,7 @@ export default class extends Controller {
     this.editable = (this.element.dataset.editable === "true")
     this.location_format = this.element.dataset.locationFormat
     this.localized_text = JSON.parse(this.element.dataset.localization)
+    this.controls = JSON.parse(this.element.dataset.controls)
 
     // use center and zoom here
     const mapOptions = {
@@ -28,6 +29,8 @@ export default class extends Controller {
         lng: this.collection.extents.long
       },
       zoom: 1,
+      mapTypeId: 'terrain',
+      mapTypeControl: 'true'
     }
 
     // collection.extents is also a MapSet
