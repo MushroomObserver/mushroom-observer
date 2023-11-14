@@ -1,4 +1,6 @@
 <% @location.force_valid_lat_longs! %>
+<% map_args = local_assigns.except(:location, :action, :button).
+              merge({ editable: true })%>
 
 <%= form_with(model: @location, url: action, id: "location_form") do |f| %>
 
@@ -25,7 +27,7 @@
 
       <div class="col-md-4 col-lg-6 mb-3 mt-3">
 
-        <%= make_map([@location], **local_assigns.merge({ editable: true })) %>
+        <%= make_map([@location], **map_args) %>
 
       </div><!--.col-md-4 col-lg-6-->
     </div><!--.row-->

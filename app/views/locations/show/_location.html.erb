@@ -1,6 +1,6 @@
 <div class="row">
   <div class="col-sm-8">
-    <%= make_map([location], **local_assigns) %>
+    <%= make_map([location], **local_assigns.except(:location, :user)) %>
     <div class="text-center">
       <%= show_authors_and_editors(obj: location, user: @user) %>
     </div><!-- .text-center -->

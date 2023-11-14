@@ -12,14 +12,12 @@
 %>
 
 <%=
-tag.div(class: "w-100 position-relative",
-        style: "padding-bottom: 66%;") do
-  if objects.any?
-    # gmap = make_map(local_assigns[:objects], **map_args)
-    # finish_map(gmap) # puts js in header
-    # gmap.div(width: 800, height: 550).html_safe
-    make_map(objects, **local_assigns)
-  else
-    nothing_to_map
-  end
-end %>
+if objects.any?
+  # gmap = make_map(local_assigns[:objects], **map_args)
+  # finish_map(gmap) # puts js in header
+  # gmap.div(width: 800, height: 550).html_safe
+  make_map(objects, **local_assigns)
+else
+  nothing_to_map
+end
+%>

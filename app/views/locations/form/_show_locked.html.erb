@@ -34,10 +34,7 @@
   </div>
 
   <div class="col-sm-6 col-md-8 col-lg-9 mb-3 mt-3">
-    <%=
-      gmap = make_map([@location])
-      finish_map(gmap)
-      gmap.div(width: "100%", height: "500px").html_safe
-    %>
+    <% map_args = local_assigns.except(:location).merge({ editable: true }) %>
+    <%= make_map([@location], **map_args) %>
   </div>
 </div><!--.row-->

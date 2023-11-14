@@ -3,6 +3,7 @@
 module MapHelper
   # args could include query_param.
   # returns an array of mapsets, each suitable for a marker or box
+  # TODO: remove local_assigns here and figure out what the legit map_args are
   def make_map(objects, local_assigns = {})
     default_args = {
       map_div: "map_div",
@@ -13,7 +14,7 @@ module MapHelper
       location_format: User.current_location_format, # has a default
     }
     map_args = local_assigns.except(:objects, :nothing_to_map,
-                                    :location, :observation)
+                                    :location, :observation, :herbarium)
     map_args = provide_defaults(map_args, **default_args)
     map_args[:collection] = mappable_collection(objects, map_args).to_json
     map_args[:localization] = {
