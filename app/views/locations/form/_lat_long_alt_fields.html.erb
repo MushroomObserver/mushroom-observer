@@ -28,7 +28,7 @@
         <div class="text-center">
           <%= text_field_with_label(
             form: f, field: :east, label: :EAST.t + ":",
-            data: { map_target: "northInput", action: "map#startKeyPressTimer" }
+            data: { map_target: "eastInput", action: "map#startKeyPressTimer" }
           ) %>
         </div><!-- .text-center -->
       </div>
@@ -38,7 +38,7 @@
         <div class="text-center">
           <%= text_field_with_label(
             form: f, field: :south, label: :SOUTH.t + ":",
-            data: { map_target: "northInput", action: "map#startKeyPressTimer" }
+            data: { map_target: "southInput", action: "map#startKeyPressTimer" }
           ) %>
         </div><!-- .text-center -->
       </div>
@@ -46,11 +46,13 @@
   </div>
   <div class="col-sm-4">
     <div class="text-center">
-      <%= text_field_with_label(form: f, field: :high,
-                                label: :show_location_highest.t + ":") %>
-      <%= text_field_with_label(form: f, field: :low,
-                                label: :show_location_lowest.t + ":",
-                                append: "(#{:units_meters.t})") %>
+      <%= text_field_with_label(
+        form: f, field: :high, label: :show_location_highest.t + ":",
+        data: { map_target: "highInput" }
+      ) %>
+      <%= text_field_with_label(
+        form: f, field: :low, label: :show_location_lowest.t + ":",
+        append: "(#{:units_meters.t})", data: { map_target: "lowInput" }) %>
     </div><!-- .text-center -->
   </div>
 </div><!--.row-->

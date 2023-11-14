@@ -7,12 +7,13 @@ export default class extends Controller {
   // reconsider the scope of the controller
   // the mapDiv should be considered the source of the data.
   // it may or may not be the root element of the controller.
-  static targets = ["mapDiv"]
+  static targets = ["mapDiv", "southInput", "westInput", "northInput",
+    "eastInput", "highInput", "lowInput"]
 
   connect() {
     const loader = new Loader({
       apiKey: "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA",
-      version: "quarterly",
+      version: "weekly",
       libraries: ["core", "maps", "marker", "elevation"]
     })
 
@@ -50,7 +51,7 @@ export default class extends Controller {
         this.geocoder = new google.maps.Geocoder()
 
         if (Object.keys(this.collection.sets).length) {
-          this.buildMarkers()
+          this.buildOverlays()
         }
       })
       .catch((e) => {
@@ -58,16 +59,15 @@ export default class extends Controller {
       })
   }
 
-  // In a collection, each set represents a Marker (is_point or is_box).
+  // In a collection, each set represents an overlay (is_point or is_box).
   // set.center is an array [lat, lng]
   // the `key` of each set is an array [x,y,w,h]
-  buildMarkers() {
+  buildOverlays() {
     for (const [_xywh, set] of Object.entries(this.collection.sets)) {
-      this.drawMarker(set)
-      // if (set.is_point) {
-      // this.drawMarker(set.center)
-      // } else
-      if (set.is_box) {
+      // this.drawMarker(set)
+      if (set.is_point) {
+        this.drawMarker(set)
+      } else if (set.is_box) {
         // this.drawMarker(set.center)
         this.drawRectangle(set)
       }
@@ -75,6 +75,7 @@ export default class extends Controller {
   }
 
   drawMarker(set) { // , type = 'ct'
+    // debugger
     const markerOptions = {
       position: { lat: set.lat, lng: set.long },
       map: this.map,
@@ -91,7 +92,9 @@ export default class extends Controller {
     if (!this.editable && set != null) {
       this.drawAndBindInfoWindow(set, marker)
     } else {
-      this.bindMarkerToFormInputs(marker)
+      // this.bindMarkerToFormInputs(marker)
+      marker.addListener("position_changed",
+        marker.updateFormInputs(marker.getPosition()?.toJSON()))
     }
   }
 
@@ -106,13 +109,16 @@ export default class extends Controller {
       draggable: this.editable
     }
 
-    new google.maps.Rectangle(rectangleOptions)
+    const rectangle = new google.maps.Rectangle(rectangleOptions)
 
-    // if (this.editable) {
-    //   this.makeCornersDraggable(set)
-    // } else {
-    // this.drawAndBindInfoWindow(set)
-    // }
+    if (this.editable) { // "dragstart", "drag",
+      ["bounds_changed", "dragend"].forEach((eventName) => {
+        rectangle.addListener(eventName, () => {
+          this.updateFormInputs(rectangle.getBounds()?.toJSON())
+          this.updateElevations(this.sampleElevationPointsOf(set))
+        });
+      });
+    }
   }
 
   // makeMarkerDraggable(marker, type) {
@@ -127,8 +133,20 @@ export default class extends Controller {
   //     drawMarker(coords, type)
   //   }
   // }
-  bindMarkerToFormInputs() {
 
+  updateFormInputs(bounds) {
+    // debugger
+    // console.log({ bounds });
+    if (this.hasNorthInputTarget) {
+      this.southInputTarget.value = bounds?.south
+      this.westInputTarget.value = bounds?.west
+      this.northInputTarget.value = bounds?.north
+      this.eastInputTarget.value = bounds?.east
+    }
+  }
+
+  updateElevations(points) {
+    console.log({ points })
   }
 
   drawAndBindInfoWindow(set, marker) {
@@ -161,5 +179,18 @@ export default class extends Controller {
       nw: set.north_west
     }
     return corners
+  }
+
+  cornersAndCenterOf(set) {
+    return [set.center, set.south_west, set.north_west,
+    set.north_east, set.south_east]
+  }
+
+  sampleElevationPointsOf(set) {
+    const points = []
+    this.cornersAndCenterOf(set).forEach((latLngArray) => {
+      points.push({ lat: latLngArray[0], lng: latLngArray[1] })
+    })
+    return points
   }
 }
