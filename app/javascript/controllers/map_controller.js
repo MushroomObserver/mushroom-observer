@@ -64,37 +64,36 @@ export default class extends Controller {
   // the `key` of each set is an array [x,y,w,h]
   buildOverlays() {
     for (const [_xywh, set] of Object.entries(this.collection.sets)) {
-      // this.drawMarker(set)
       if (set.is_point) {
         this.drawMarker(set)
       } else if (set.is_box) {
-        // this.drawMarker(set.center)
         this.drawRectangle(set)
       }
     }
   }
 
-  drawMarker(set) { // , type = 'ct'
-    // debugger
+  drawMarker(set) {
     const markerOptions = {
       position: { lat: set.lat, lng: set.long },
       map: this.map,
       draggable: this.editable
     }
 
-    // debugger
-    // Only put a title on a center marker, in the case of boxes
-    if (!this.editable) { //  && type == 'ct'
+    if (!this.editable) {
       markerOptions.title = set.title
     }
     const marker = new google.maps.Marker(markerOptions)
 
     if (!this.editable && set != null) {
-      this.drawAndBindInfoWindow(set, marker)
+      this.drawInfoWindowForMarker(set, marker)
     } else {
-      // this.bindMarkerToFormInputs(marker)
-      marker.addListener("position_changed",
-        marker.updateFormInputs(marker.getPosition()?.toJSON()))
+      ["position_changed", "dragend"].forEach((eventName) => {
+        marker.addListener(eventName, () => {
+          const newPosition = marker.getPosition()?.toJSON() // latlng object
+          this.updateFormInputs(newPosition)
+          this.updateElevationInputs(this.sampleElevationCenterOf(newPosition))
+        })
+      })
     }
   }
 
@@ -114,29 +113,16 @@ export default class extends Controller {
     if (this.editable) { // "dragstart", "drag",
       ["bounds_changed", "dragend"].forEach((eventName) => {
         rectangle.addListener(eventName, () => {
-          this.updateFormInputs(rectangle.getBounds()?.toJSON())
-          this.updateElevations(this.sampleElevationPointsOf(set))
-        });
-      });
+          const newBounds = rectangle.getBounds()?.toJSON() // nsew object
+          this.updateFormInputs(newBounds)
+          this.updateElevationInputs(this.sampleElevationPointsOf(newBounds))
+        })
+      })
     }
   }
 
-  // makeMarkerDraggable(marker, type) {
-  //   google.maps.event.addListener(marker, "dragend", (e) => {
-  //     dragEndLatLng(e.latLng, type)
-  //   })
-  // }
-
-  // makeCornersDraggable(set) {
-  //   const corners = this.cornersOf(set)
-  //   for (const [type, coords] of Object.entries(corners)) {
-  //     drawMarker(coords, type)
-  //   }
-  // }
-
+  // takes a LatLngBoundsLiteral object {south:, west:, north:, east:}
   updateFormInputs(bounds) {
-    // debugger
-    // console.log({ bounds });
     if (this.hasNorthInputTarget) {
       this.southInputTarget.value = bounds?.south
       this.westInputTarget.value = bounds?.west
@@ -145,11 +131,30 @@ export default class extends Controller {
     }
   }
 
-  updateElevations(points) {
-    console.log({ points })
+  // takes an array of points of the form {lat:, lng:}
+  updateElevationInputs(points) {
+    const elevationService = new google.maps.ElevationService
+    const locationElevationRequest = { 'locations': points }
+
+    elevationService.getElevationForLocations(locationElevationRequest,
+      (results, status) => {
+        if (status === google.maps.ElevationStatus.OK) {
+          if (results[0]) {
+            // compute the high and low of these results using bounds and center
+            const hiLo = this.highAndLowOf(results)
+            // console.log({ hiLo, status })
+            this.lowInputTarget.value = parseFloat(hiLo.low)
+            this.highInputTarget.value = parseFloat(hiLo.high)
+          } else {
+            console.log({ status })
+            // this.altInputTarget.value = ''
+          }
+        }
+      })
   }
 
-  drawAndBindInfoWindow(set, marker) {
+  // For point markers: make a clickable
+  drawInfoWindowForMarker(set, marker) {
     const info_window = new google.maps.InfoWindow({
       content: set.caption
     })
@@ -181,16 +186,40 @@ export default class extends Controller {
     return corners
   }
 
-  cornersAndCenterOf(set) {
-    return [set.center, set.south_west, set.north_west,
-    set.north_east, set.south_east]
+  // Computes the center of a Google Maps Rectangle's LatLngBoundsLiteral object
+  centerFromBounds(bounds) {
+    let lat = (bounds?.north + bounds?.south) / 2.0
+    let lng = (bounds?.east + bounds?.west) / 2.0
+    if (bounds?.west > bounds?.east) { lng += 180 }
+
+    return { lat: lat, lng: lng }
   }
 
-  sampleElevationPointsOf(set) {
-    const points = []
-    this.cornersAndCenterOf(set).forEach((latLngArray) => {
-      points.push({ lat: latLngArray[0], lng: latLngArray[1] })
-    })
-    return points
+  // Computes an array of arrays of [lat, lng] from a set of bounds on the fly
+  // Returns array of Google Map points {lat:, lng:}
+  sampleElevationPointsOf(bounds) {
+    return [
+      { lat: bounds?.south, lng: bounds?.west },
+      { lat: bounds?.north, lng: bounds?.west },
+      { lat: bounds?.north, lng: bounds?.east },
+      { lat: bounds?.south, lng: bounds?.east },
+      this.centerFromBounds(bounds)
+    ]
+  }
+
+  // Also returns an array, from a Google Maps Marker's LatLngLiteral object
+  sampleElevationCenterOf(position) {
+    return [{ lat: position.lat, lng: position.long }]
+  }
+
+  // Sorts the LocationElevationResponse.results.elevation values
+  highAndLowOf(results) {
+    let altitudesArray = results.map((result) => {
+      return result.elevation
+    }).sort((a, b) => { return a - b })
+
+    const last = altitudesArray.length - 1
+
+    return { high: altitudesArray[last], low: altitudesArray[0] }
   }
 }
