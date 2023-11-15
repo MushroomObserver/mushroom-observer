@@ -2,13 +2,13 @@ import { Controller } from "@hotwired/stimulus"
 import { Loader } from "@googlemaps/js-api-loader"
 
 // Connects to data-controller="map"
+// The connected element can be a map, or in the case of a form with a map UI,
+// the whole section of the form including the inputs that should alter the map.
+// Either way, the mapDivTarget should have the dataset.
 export default class extends Controller {
-  // need targets and actions for location form inputs
-  // reconsider the scope of the controller
-  // the mapDiv should be considered the source of the data.
   // it may or may not be the root element of the controller.
   static targets = ["mapDiv", "southInput", "westInput", "northInput",
-    "eastInput", "highInput", "lowInput"]
+    "eastInput", "highInput", "lowInput", "locationName", "findOnMap"]
 
   connect() {
     const loader = new Loader({
@@ -17,15 +17,19 @@ export default class extends Controller {
       libraries: ["core", "maps", "marker", "elevation"]
     })
 
-    // https://stackoverflow.com/questions/15719951/auto-center-map-with-multiple-markers-in-google-maps-api-v3
-    // bounds = new google.maps.LatLngBounds
-    // map.fitBounds(bounds);
-    // https://developers.google.com/maps/documentation/javascript/reference/map#Map-Methods
     this.collection = JSON.parse(this.mapDivTarget.dataset.collection)
     this.editable = (this.mapDivTarget.dataset.editable === "true")
     this.location_format = this.mapDivTarget.dataset.locationFormat
     this.localized_text = JSON.parse(this.mapDivTarget.dataset.localization)
     this.controls = JSON.parse(this.mapDivTarget.dataset.controls)
+    this.marker = null // Only gets set if we're in edit mode
+    this.rectangle = null // Only gets set if we're in edit mode
+
+    // These are for keeping track of user inputs to a form
+    // that should update the form after a timeout.
+    this.old_location = null
+    this.keypress_id = 0
+    this.timeout_id = 0
 
     // use center and zoom here
     const mapOptions = {
@@ -40,7 +44,6 @@ export default class extends Controller {
 
     // collection.extents is also a MapSet
     const mapBounds = this.boundsOf(this.collection.extents)
-    // const latLngBounds = new google.maps.LatLngBoundsLiteral(mapBounds)
 
     loader
       .load()
@@ -64,12 +67,18 @@ export default class extends Controller {
   // the `key` of each set is an array [x,y,w,h]
   buildOverlays() {
     for (const [_xywh, set] of Object.entries(this.collection.sets)) {
-      if (set.is_point) {
+      // console.log({ set })
+      // NOTE: according to the MapSet class, location sets are always is_box!!!
+      if (isPoint(set)) {
         this.drawMarker(set)
-      } else if (set.is_box) {
+      } else {
         this.drawRectangle(set)
       }
     }
+  }
+
+  isPoint(set) {
+    set.north === set.south && set.east === set.west
   }
 
   drawMarker(set) {
@@ -87,6 +96,7 @@ export default class extends Controller {
     if (!this.editable && set != null) {
       this.drawInfoWindowForMarker(set, marker)
     } else {
+      this.marker = marker
       ["position_changed", "dragend"].forEach((eventName) => {
         marker.addListener(eventName, () => {
           const newPosition = marker.getPosition()?.toJSON() // latlng object
@@ -111,6 +121,7 @@ export default class extends Controller {
     const rectangle = new google.maps.Rectangle(rectangleOptions)
 
     if (this.editable) { // "dragstart", "drag",
+      this.rectangle = rectangle
       ["bounds_changed", "dragend"].forEach((eventName) => {
         rectangle.addListener(eventName, () => {
           const newBounds = rectangle.getBounds()?.toJSON() // nsew object
@@ -165,6 +176,7 @@ export default class extends Controller {
   }
 
   // Every MapSet should have properties for bounds and corners
+  // Alternatively, just send a simple object with those props
   boundsOf(set) {
     const bounds = {
       north: set.north,
@@ -221,5 +233,63 @@ export default class extends Controller {
     const last = altitudesArray.length - 1
 
     return { high: altitudesArray[last], low: altitudesArray[0] }
+  }
+
+  //
+  // FORM INPUTS : Functions for altering the map from form inputs
+  //
+
+  startKeyPressTimer() {
+    this.keypress_id = setTimeout(this.textToMap(), 500)
+  }
+
+  textToMap() {
+    const north = parseFloat(this.northInputTarget.value)
+    const south = parseFloat(this.southInputTarget.value)
+    const east = parseFloat(this.eastInputTarget.value)
+    const west = parseFloat(this.westInputTarget.value)
+
+    if (!(isNaN(north) || isNaN(south) || isNaN(east) || isNaN(west))) {
+      const set = { north: north, south: south, east: east, west: west }
+      if (this.rectangle) {
+        this.rectangle.setBounds(this.boundsOf(set))
+      }
+      this.map.fitBounds(this.boundsOf(set))
+    }
+  }
+
+  findOnMap() {
+    this.findOnMapTarget.disabled = true
+    let address = this.locationNameTarget.value
+    const geocoder = new google.maps.Geocoder()
+
+    if (this.location_format == "scientific") {
+      address = address.split(/, */).reverse().join(", ")
+    }
+
+    geocoder
+      .geocode({ address: address })
+      .then((results) => {
+        const bounds = results[0].geometry.viewport
+        const center = results[0].geometry.location
+        if (bounds) {
+          if (this.rectangle) {
+            this.rectangle.setBounds(bounds)
+            this.updateElevationInputs(this.sampleElevationPointsOf(bounds))
+          }
+          this.map.fitBounds(bounds)
+        }
+        if (center) {
+          if (this.marker) {
+            this.marker.setPosition(center)
+            this.updateElevationInputs(this.sampleElevationCenterOf(center))
+          }
+          this.map.setCenter(center)
+        }
+        this.findOnMapTarget.disabled = false
+      })
+      .catch((e) => {
+        alert("Geocode was not successful for the following reason: " + e)
+      });
   }
 }
