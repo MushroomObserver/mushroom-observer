@@ -11,10 +11,11 @@ export default class extends Controller {
     "eastInput", "highInput", "lowInput", "locationName", "findOnMap"]
 
   connect() {
+    debugger
     const loader = new Loader({
       apiKey: "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA",
-      version: "weekly",
-      libraries: ["core", "maps", "marker", "elevation"]
+      version: "quarterly",
+      libraries: ["maps", "marker", "elevation", "geocoding"]
     })
 
     this.collection = JSON.parse(this.mapDivTarget.dataset.collection)
