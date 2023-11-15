@@ -249,35 +249,35 @@ export default class extends Controller {
     this.focused = true;
     if (this.menu_up) {
       switch (key) {
-        case EVENT_KEY_ESC:
+        case 27: // EVENT_KEY_ESC
           this.schedule_hide();
           this.menu_up = false;
           break;
-        case EVENT_KEY_RETURN:
-        case EVENT_KEY_TAB:
+        case 13: // EVENT_KEY_RETURN
+        case 9: // EVENT_KEY_TAB
           event.preventDefault();
           if (this.current_row >= 0)
             this.select_row(this.current_row - this.scroll_offset);
           break;
-        case EVENT_KEY_HOME:
+        case 36: // EVENT_KEY_HOME
           this.go_home();
           break;
-        case EVENT_KEY_END:
+        case 35: // EVENT_KEY_END
           this.go_end();
           break;
-        case EVENT_KEY_PAGEUP:
+        case 33: // EVENT_KEY_PAGEUP
           this.page_up();
           this.schedule_key(this.page_up);
           break;
-        case EVENT_KEY_UP:
+        case 38: // EVENT_KEY_UP
           this.arrow_up();
           this.schedule_key(this.arrow_up);
           break;
-        case EVENT_KEY_DOWN:
+        case 40: // EVENT_KEY_DOWN
           this.arrow_down();
           this.schedule_key(this.arrow_down);
           break;
-        case EVENT_KEY_PAGEDOWN:
+        case 34: // EVENT_KEY_PAGEDOWN
           this.page_down();
           this.schedule_key(this.page_down);
           break;
@@ -287,7 +287,7 @@ export default class extends Controller {
       }
     }
     if (this.menu_up && this.is_hot_key(key) &&
-      !(key == EVENT_KEY_TAB || this.current_row < 0))
+      !(key == 9 || this.current_row < 0))
       return false;
     return true;
   }
@@ -297,7 +297,7 @@ export default class extends Controller {
     const key = event.which == 0 ? event.keyCode : event.which;
     // this.debug("keypress(key=" + key + ", menu_up=" + this.menu_up + ", hot=" + this.is_hot_key(key) + ")");
     if (this.menu_up && this.is_hot_key(key) &&
-      !(key == EVENT_KEY_TAB || this.current_row < 0))
+      !(key == 9 || this.current_row < 0))
       return false;
     return true;
   }
@@ -357,15 +357,15 @@ export default class extends Controller {
   // Prevent these keys from propagating to the input field.
   is_hot_key(key) {
     switch (key) {
-      case EVENT_KEY_ESC:
-      case EVENT_KEY_RETURN:
-      case EVENT_KEY_TAB:
-      case EVENT_KEY_UP:
-      case EVENT_KEY_DOWN:
-      case EVENT_KEY_PAGEUP:
-      case EVENT_KEY_PAGEDOWN:
-      case EVENT_KEY_HOME:
-      case EVENT_KEY_END:
+      case 27: // EVENT_KEY_ESC
+      case 13: // EVENT_KEY_RETURN
+      case 9: // EVENT_KEY_TAB
+      case 38: // EVENT_KEY_UP
+      case 40: // EVENT_KEY_DOWN
+      case 33: // EVENT_KEY_PAGEUP
+      case 34: // EVENT_KEY_PAGEDOWN
+      case 36: // EVENT_KEY_HOME
+      case 35: // EVENT_KEY_END
         return true;
     }
     return false;
