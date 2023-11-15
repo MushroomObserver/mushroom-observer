@@ -11,7 +11,6 @@ export default class extends Controller {
     "eastInput", "highInput", "lowInput", "locationName", "findOnMap"]
 
   connect() {
-    debugger
     const loader = new Loader({
       apiKey: "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA",
       version: "quarterly",
