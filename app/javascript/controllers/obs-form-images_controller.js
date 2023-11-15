@@ -3,7 +3,6 @@ import ExifReader from 'exifreader';
 
 const internalConfig = {
   // Make some of these targets for the controller
-  form: document.forms.namedItem("observation_form"),
   block_form_submission: true,
   content: document.getElementById('content'),
   // These aren't targets because outside scope of this controller (obs images)
@@ -39,7 +38,11 @@ export default class extends Controller {
     Object.assign(this, internalConfig);
     Object.assign(this.localized_text,
       JSON.parse(this.element.dataset.localization));
-    this.submit_buttons = this.form.querySelectorAll('input[type="submit"]');
+
+    // Doesn't seem reliably available from internalConfig.
+    this.form = document.forms.observation_form;
+    this.submit_buttons =
+      document.forms.observation_form.querySelectorAll('input[type="submit"]');
     this.max_image_size = this.element.dataset.upload_max_size;
 
     this.fileStore = { items: [], index: {} }
