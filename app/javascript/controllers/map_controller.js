@@ -14,7 +14,7 @@ export default class extends Controller {
     const loader = new Loader({
       apiKey: "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA",
       version: "quarterly",
-      libraries: ["maps", "marker", "elevation", "geocoding"]
+      libraries: ["maps", "geocoding", "marker", "elevation"]
     })
 
     this.collection = JSON.parse(this.mapDivTarget.dataset.collection)
@@ -54,6 +54,7 @@ export default class extends Controller {
         this.geocoder = new google.maps.Geocoder()
 
         if (Object.keys(this.collection.sets).length) {
+          debugger
           this.buildOverlays()
         }
       })

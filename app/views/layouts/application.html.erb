@@ -13,7 +13,7 @@ body_class = class_names(whos_calling, theme_class)
   <%= javascript_importmap_tags %>
 </head>
 
-<body class="<%= body_class %>">
+<body class="<%= body_class %>" data-controller="lazyload">
   <% if Rails.env == "production" %>
     <%= render(partial: "application/app/gtm_iframe") %>
   <% end %>
