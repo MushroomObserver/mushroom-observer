@@ -159,6 +159,7 @@ class Project < AbstractModel
     group_ids = user.user_group_ids
     obj.projects.each do |project|
       next if project.open_membership
+      next unless project.trusted_by?(obj.user)
       return true if group_ids.member?(project.user_group_id) ||
                      group_ids.member?(project.admin_group_id)
     end

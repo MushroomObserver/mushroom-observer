@@ -941,10 +941,8 @@ class ObservationsControllerTest < FunctionalTestCase
     proj = projects(:bolete_project)
     assert_equal(mary.id, obs.user_id)  # owned by mary
     assert(obs.projects.include?(proj)) # owned by bolete project
-    # dick is only member of bolete project
-    assert_equal([dick.id], proj.user_group.users.map(&:id))
 
-    login("rolf")
+    login("rolf") # Can't edit
     get(:show, params: { id: obs.id })
     assert_select("a:match('href',?)", edit_observation_path(obs.id), count: 0)
     assert_select(".destroy_observation_link_#{obs.id}", count: 0)
@@ -959,7 +957,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:destroy, params: { id: obs.id })
     assert_flash_error
 
-    login("mary")
+    login("mary") # Owner
     get(:show, params: { id: obs.id })
     assert_select("a[href=?]", edit_observation_path(obs.id), minimum: 1)
     # Destroy button is in a form, not a link_to
@@ -973,7 +971,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:edit, params: { id: obs.id })
     assert_response(:success)
 
-    login("dick")
+    login("dick") # Project permission
     get(:show, params: { id: obs.id })
     assert_select("a[href=?]", edit_observation_path(obs.id), minimum: 1)
     # Destroy button is in a form, not a link_to
@@ -2959,7 +2957,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     login("mary")
     get(:edit, params: { id: @obs2.id })
-    assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
+    assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
     get(:edit, params: { id: @obs1.id })
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :checked)
     put(

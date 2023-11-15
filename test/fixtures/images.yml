@@ -128,3 +128,11 @@ locally_sequenced_obs_image:
 
 unused_image: # actually used by a glossary term!
   <<: *DEFAULTS
+
+lone_wolf_image:
+  <<: *DEFAULTS
+  user: lone_wolf
+
+lone_wolf_image2:
+  <<: *DEFAULTS
+  user: lone_wolf

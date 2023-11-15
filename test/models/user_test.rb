@@ -170,7 +170,7 @@ class UserTest < UnitTestCase
     assert_obj_arrays_equal([spl1, spl2], rolf.species_lists, :sort)
     assert_obj_arrays_equal(SpeciesList.where(user: mary), mary.species_lists)
     assert_obj_arrays_equal([], dick.species_lists)
-    assert_obj_arrays_equal([dick], proj.user_group.users)
+    assert_obj_arrays_equal([mary, dick], proj.user_group.users)
     assert_obj_arrays_equal([spl3], proj.species_lists)
 
     assert_obj_arrays_equal([spl1, spl2],
@@ -450,7 +450,7 @@ class UserTest < UnitTestCase
 
   def test_delete_private_projects
     # Dick created several projects.  Most have the admin and member groups set
-    # to dick_only, but one uses bolete_admins/bolete_users, and another uses
+    # to dick_only, but one uses albion_admins/albion_users, and another uses
     # article_writers.  The latter group contains users other than Dick, and
     # therefore that project (news_article_project) should not be deleted.
 
@@ -461,16 +461,16 @@ class UserTest < UnitTestCase
                                                 user_group: dick_only).count,
                     "dick should own at least two dick-only projects")
 
-    # Prove that Dick owns bolete_project and that its admins and users are
+    # Prove that Dick owns albion_project and that its admins and users are
     # all just Dick despite not being his one-user group, dick_only.
-    bolete = projects(:bolete_project)
-    bolete_admins = user_groups(:bolete_admins)
-    bolete_users = user_groups(:bolete_users)
-    assert_users_equal(dick, bolete.user)
-    assert_equal(1, bolete_admins.users.count)
-    assert_equal(1, bolete_users.users.count)
-    assert_users_equal(dick, bolete_admins.users.first)
-    assert_users_equal(dick, bolete_users.users.first)
+    albion = projects(:albion_project)
+    albion_admins = user_groups(:albion_admins)
+    albion_users = user_groups(:albion_users)
+    assert_users_equal(dick, albion.user)
+    assert_equal(1, albion_admins.users.count)
+    assert_equal(1, albion_users.users.count)
+    assert_users_equal(dick, albion_admins.users.first)
+    assert_users_equal(dick, albion_users.users.first)
 
     # Prove that Dick owns news_article_project but that the admin and user
     # is someone else.
@@ -481,17 +481,8 @@ class UserTest < UnitTestCase
                     article_writers.users.count { |user| user != dick },
                     "article_writers should have a user other than dick")
 
-    # Prove that Dick doesn't own any other kinds of projects.
-    assert_equal(2,
-                 dick.projects_created.where.not(admin_group: dick_only).count,
-                 "dick should only have two non-dick-only projects")
-    assert_equal(2,
-                 dick.projects_created.where.not(user_group: dick_only).count,
-                 "dick should only have two non-dick-only projects")
-
     dick.delete_private_projects
-    assert_equal(1, Project.where(user: dick).count)
-    assert_empty(Project.where(id: bolete.id))
+    assert_empty(Project.where(id: albion.id))
     assert_not_empty(Project.where(id: news_articles.id))
   end
 

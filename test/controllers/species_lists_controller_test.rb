@@ -82,7 +82,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_obj_arrays_equal([], @spl1.projects)
     assert_obj_arrays_equal([@proj2], @spl2.projects)
     assert_obj_arrays_equal([rolf, mary, katrina], @proj1.user_group.users)
-    assert_obj_arrays_equal([dick], @proj2.user_group.users)
+    assert_obj_arrays_equal([mary, dick], @proj2.user_group.users)
   end
 
   def obs_params(obs, vote)
@@ -340,7 +340,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     proj = projects(:bolete_project)
     assert_equal(mary.id, spl.user_id)            # owned by mary
     assert(spl.projects.include?(proj))           # owned by bolete project
-    assert_equal([dick.id],
+    assert_equal([mary.id, dick.id],
                  proj.user_group.users.map(&:id)) # dick is only project member
 
     login("rolf")
@@ -1240,7 +1240,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     login("mary")
     get(:new)
-    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
+    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :unchecked)
 
     login("dick")
     get(:new)

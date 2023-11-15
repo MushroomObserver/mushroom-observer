@@ -1258,3 +1258,13 @@ sect_agaricus:
   display_name: "**__Agaricus__** sect. **__Agaricus__**"
   sort_name:    "Agaricus  {2sect.  !Agaricus"
   classification: "Domain: _Eukarya_\r\nKingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
+
+lycoperdon_perlatum:
+  <<: *DEFAULTS
+  text_name: Lycoperdon perlatum
+  display_name: '**__Lycoperdon perlatum__**'
+  search_name: Lycoperdon perlatum
+  sort_name: Lycoperdon perlatum
+  created_at: 2023-11-14 20:00:00
+  updated_at: 2023-11-14 20:00:00
+  rank: <%= Name.ranks[:Species] %>

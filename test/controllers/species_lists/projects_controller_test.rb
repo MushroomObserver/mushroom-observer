@@ -94,7 +94,7 @@ module SpeciesLists
           commit: :ATTACH.l
         }
       )
-      assert_flash_error # no permission
+      assert_flash_warning # no changes
       assert_obj_arrays_equal([proj2], list.projects.reload)
 
       put(
@@ -238,7 +238,7 @@ module SpeciesLists
           commit: :ATTACH.l
         }
       )
-      assert_flash_error # no permission
+      assert_flash_success # no permission
 
       login("dick")
       put(

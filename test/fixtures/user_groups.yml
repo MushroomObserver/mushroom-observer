@@ -18,6 +18,18 @@ bolete_users:
 bolete_admins:
   name: Bolete Project.admin
 
+albion_users:
+  name: Albion Project
+
+albion_admins:
+  name: Albion Project.admin
+
+lone_wolf_users:
+  name: Lone Wolf Project
+
+lone_wolf_admins:
+  name: Lone Wolf Project.admin
+
 burbank_users:
   name: Burbank Project
 
