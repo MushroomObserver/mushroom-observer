@@ -27,7 +27,7 @@ image_upload_localization = {
   <% end # @good_images.each do image %>
 
   <%= hidden_field_tag(:good_images, good_image_ids_str,
-                       data: { observation_images_target: "goodImages" }) %>
+                       data: { obs_form_images_target: "goodImages" }) %>
 
   <%= render(partial: "observations/form/images_upload", locals: { f: f }) %>
 
