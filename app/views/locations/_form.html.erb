@@ -1,6 +1,5 @@
 <% @location.force_valid_lat_longs! %>
-<% map_args = local_assigns.except(:location, :action, :button).
-              merge({ editable: true })%>
+<% map_args = { editable: true } %>
 
 <%= form_with(model: @location, url: action, id: "location_form") do |f| %>
 

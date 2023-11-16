@@ -71,7 +71,7 @@ module Projects
         return must_be_project_admin!(@project.id)
       end
 
-      update_member_status(@project, @candidate)
+      update_membership(@project, @candidate)
     end
 
     private
@@ -96,7 +96,6 @@ module Projects
     end
 
     def return_to_caller(project, target)
-      # debugger
       if target == "project_index"
         redirect_to(project_path(project.id, q: get_query_param))
       else
@@ -110,25 +109,52 @@ module Projects
       User.find_by(login: str.to_s.sub(/ <.*>$/, ""))
     end
 
-    # Redirects back to show_project.
-    def update_member_status(project, candidate)
-      admin = member = :remove
-      case params[:commit]
-      when :change_member_status_make_admin.l
-        unless project.is_admin?(@user)
+    def update_membership(project, candidate)
+      unless update_trust_status(project, candidate)
+        unless update_admin_status(project, candidate)
           return must_be_project_admin!(project.id)
         end
 
-        admin = member = :add
-      when :change_member_status_make_member.l
-        member = :add
+        update_member_status(project, candidate)
       end
-      if project.is_admin?(@user)
-        set_status(project, :admin, candidate,
-                   admin)
-      end
-      set_status(project, :member, candidate, member)
       return_to_caller(project, params[:target])
+    end
+
+    def update_trust_status(project, candidate)
+      if params[:commit] == :change_member_status_revoke_trust.l
+        flash_notice(:change_member_status_revoke_trust_flash.l)
+        set_trust(project, candidate, false)
+        true
+      elsif params[:commit] == :change_member_status_trust.l
+        flash_notice(:change_member_status_trust_flash.l)
+        set_trust(project, candidate, true)
+        true
+      else
+        false
+      end
+    end
+
+    def set_trust(project, user, trusted)
+      member = project.project_members.find_by(user:)
+      member.update(trusted:)
+    end
+
+    def update_admin_status(project, candidate)
+      make_admin = (params[:commit] == :change_member_status_make_admin.l)
+      if project.is_admin?(@user)
+        set_status(project, :admin, candidate, make_admin)
+      elsif make_admin
+        return false
+      end
+      true
+    end
+
+    def update_member_status(project, candidate)
+      make_member = [
+        :change_member_status_make_admin.l,
+        :change_member_status_make_member.l
+      ].member?(params[:commit])
+      set_status(project, :member, candidate, make_member)
     end
 
     def must_be_project_admin!(id)
@@ -138,10 +164,22 @@ module Projects
 
     # Add/remove a given User to/from a given UserGroup.
     # Changes should get logged
-    def set_status(project, type, user, mode)
+    def set_status(project, type, user, add)
+      update_project_membership(project, type, user, add)
       group = project.send(type == :member ? :user_group : :admin_group)
-      set_status_add(project, type, user, group) if mode == :add
-      set_status_remove(project, type, user, group) if mode == :remove
+      if add
+        set_status_add(project, type, user, group)
+      else
+        set_status_remove(project, type, user, group)
+      end
+    end
+
+    def update_project_membership(project, type, user, add)
+      project_member = ProjectMember.find_or_create_by(project:, user:)
+      return unless project_member
+      return if type == :admin || add
+
+      project_member.destroy
     end
 
     def set_status_add(project, type, user, group)

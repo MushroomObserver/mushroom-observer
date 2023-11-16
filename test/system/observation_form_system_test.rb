@@ -302,10 +302,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("location_high", with: "")
     assert_field("location_low", with: "")
     assert_field("location_notes", with: "")
-    assert_field("location_north", with: PASADENA_EXTENTS[:north])
-    assert_field("location_south", with: PASADENA_EXTENTS[:south])
-    assert_field("location_east", with: PASADENA_EXTENTS[:east])
-    assert_field("location_west", with: PASADENA_EXTENTS[:west])
+    assert_field("location_north", with: PASADENA_EXTENTS[:north].round(4))
+    assert_field("location_south", with: PASADENA_EXTENTS[:south].round(4))
+    assert_field("location_east", with: PASADENA_EXTENTS[:east].round(4))
+    assert_field("location_west", with: PASADENA_EXTENTS[:west].round(4))
 
     # submit_location_form_with_errors
     fill_in("location_display_name",
