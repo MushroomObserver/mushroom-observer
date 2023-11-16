@@ -21,7 +21,7 @@ ACTIONS = {
     auto_complete: {},
     create_image_object: {},
     export: {},
-    external_link: {},
+    # external_link: {},
     geocode: {},
     image: {},
     location_primer: {},
@@ -387,6 +387,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/export/set_ml_status(/:id)",
       to: "export#set_ml_status",
       id: /\d+/, as: "export_set_ml_status")
+
+  # ----- Contributors: standard actions --------------------------------------
+  resources :external_links, only: [:create, :update, :destroy]
 
   # ----- Glossary Terms: standard actions ------------------------------------
   resources :glossary_terms, id: /\d+/ do

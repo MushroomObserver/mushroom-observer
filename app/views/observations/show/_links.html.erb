@@ -1,50 +1,64 @@
-<%= panel_block(heading: :EXTERNAL_LINKS.t,
-                id: "observation_links",
-                inner_class: "p-2") do %>
+<%= tag.div(class: "panel panel-default"
+            id: "observation_links_panel") do
 
-  <table class="table table-responsive mx-0 mb-0">
-    <% obs.external_links.
-                    sort_by(&:site_name).each do |link| %>
-      <tr>
-        <td style="border-top:0">
-          <%= content_tag(:a, link.external_site.name, href: link.url,
-              data: { role: "link", url: link.url, link: link.id,
-                      site: link.external_site.id, obs: obs.id }) %>
-          <% if link.can_edit?(@user) || in_admin_mode? %>
-            <span data-role="link-controls" class="hidden-links">[<%=
-              content_tag(:a, :EDIT.t, href: "#",
-                                data: { role: "edit-link" })
-            %>|<%=
-              content_tag(:a, :REMOVE.t, href: "#",
-                              data: { role: "remove-link" })
-            %>]</span>
-          <% end %>
-        </td>
-      </tr>
-    <% end %>
-    <% @new_sites.sort_by(&:name).each do |site| %>
-      <tr class="hidden-links">
-        <td style="border-top:0">
-          <%= content_tag(:span, site.name,
-              data: { role: "link", obs: obs.id, site: site.id }) %>
-          <span data-role="link-controls">[<%=
-            content_tag(:a, :ADD.t, href: "#",
-                        data: { role: "add-link" })
-          %>]</span>
-        </td>
-      </tr>
-    <% end %>
-  </table>
+  [
+    tag.div(class: "panel-heading") do
+      tag.h4(:EXTERNAL_LINKS.t, class: "panel-title")
+    end,
 
-<% end %>
+    tag.turbo_frame(
+      id: "observation_external_links", class: "panel-body",
+      data: { controller: "section-update",
+              updated_by: "modal_external_link" }
+    ) do
 
-<%= javascript_tag %(
-  var ADD_LINK_DIALOG    = "#{j :show_observation_add_link_dialog.l}";
-  var EDIT_LINK_DIALOG   = "#{j :show_observation_edit_link_dialog.l}";
-  var REMOVE_LINK_DIALOG = "#{j :show_observation_remove_link_dialog.l}";
-  var OKAY_BUTTON        = "#{j :OKAY.l}";
-  var CANCEL_BUTTON      = "#{j :CANCEL.l}";
-  var ADD_BUTTON         = "#{j :ADD.l}";
-  var EDIT_BUTTON        = "#{j :EDIT.l}";
-  var REMOVE_BUTTON      = "#{j :REMOVE.l}";
-) %>
+      if obs.external_links.any?
+        [
+          tag.ul(class: "tight-list") do
+            obs.external_links.sort_by(&:site_name).each do |link|
+              tag.li(id: "external_link_#{link.id}") do
+                concat(link_to(link.external_site.name, link.url))
+                if link.can_edit? || in_admin_mode?
+                  concat(
+                    [
+                      " [",
+                      modal_link_to("external_link",
+                                    *edit_external_link_tab(link: link)),
+                      "|",
+                      destroy_button(
+                        name: :destroy_object.t(type: :external_link),
+                        target: external_link_path(id: link.id),
+                        data: {
+                          turbo: true,
+                          confirm: :show_observation_remove_link_dialog.l
+                        }, icon: :remove,
+                        class: "destroy_external_link_link_#{link.id}"
+                      )
+                      "]"
+                    ].safe_join(" ")
+                  )
+                end
+              end
+            end.safe_join
+          end
+        ].safe_join
+      end
+    end,
+
+    tag.div(class: "panel-footer") do
+      concat(@new_sites.sort_by(&:name).each do |site|
+        [
+          tag.span(site.name),
+          [ # any html helper has to be safe_joined separately
+            "[",
+            modal_link_to("external_link",
+                          *new_external_link_tab(obs: obs.id, site: site.id)),
+            "]"
+          ].safe_join
+        ].safe_join(" ")
+      end)
+    end
+
+  ].safe_join
+
+end %>

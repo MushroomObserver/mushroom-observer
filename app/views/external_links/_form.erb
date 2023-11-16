@@ -1,0 +1,26 @@
+<%
+case action_name
+when "new", "create"
+  url_params = { action: :create, id: @observation.id,
+                 external_site_id: @site.id }
+  button = :ADD.t
+  dialog = :show_observation_add_link_dialog.l
+when "edit", "update"
+  url_params = { action: :update, id: @link.id }
+  button = :UPDATE.t
+  dialog = :show_observation_edit_link_dialog.l
+end
+form_args = {
+  model: @link, url: url_params, id: "external_link_form",
+  data: { turbo: true }
+}
+%>
+
+<%= form_with(**form_args) do |f| %>
+
+  <%= text_area_with_label(form: f, field: :url, rows: 1, size: 40,
+                           label: :URL.l + ":", class: "w-100",
+                           between: :required) %>
+  <%= help_block(:div, dialog, id: "external_link_help", class: "mt-3")  %>
+
+<% end %>

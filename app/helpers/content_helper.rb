@@ -132,8 +132,7 @@ module ContentHelper
                 ""
               end
 
-    content_tag(
-      :div,
+    tag.div(
       class: "panel panel-default #{args[:class]}",
       id: args[:id]
     ) do
