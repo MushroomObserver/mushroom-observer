@@ -535,7 +535,7 @@ class QueryTest < UnitTestCase
   end
 
   def paginate_test_setup(number, num_per_page)
-    @names = Name.all.order(:id)
+    @names = Name.order(:id)
     @pages = MOPaginator.new(number: number,
                              num_per_page: num_per_page)
     @query = Query.lookup(:Name, :all, misspellings: :either, by: :id)
@@ -688,7 +688,7 @@ class QueryTest < UnitTestCase
       { obs: observations(:wolf_fart).id,
         # wolf_fart issue.  Switch comments for next 2 lines
         imgs: [images(:lone_wolf_image).id] },
-        # imgs: [images(:lone_wolf_image2).id, images(:lone_wolf_image).id] },
+      # imgs: [images(:lone_wolf_image2).id, images(:lone_wolf_image).id] },
       { obs: observations(:detailed_unknown_obs).id,
         imgs: [images(:in_situ_image).id, images(:turned_over_image).id] },
       { obs: observations(:coprinus_comatus_obs).id,
@@ -2323,7 +2323,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_all
-    expect = Name.all.order(:sort_name).to_a
+    expect = Name.order(:sort_name).to_a
     # SQL does not sort 'Kuhner' and 'Kühner'
     do_test_name_all(expect) if sql_collates_accents?
 
@@ -2717,7 +2717,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_all
-    expect = Observation.all.order(when: :desc, id: :desc).to_a
+    expect = Observation.order(when: :desc, id: :desc).to_a
     assert_query(expect, :Observation, :all)
     project = projects(:bolete_project)
     expect = project.species_lists.map(&:observations).flatten.to_a
@@ -2982,7 +2982,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_sequence_all
-    expect = Sequence.all.order(:created_at).to_a
+    expect = Sequence.order(:created_at).to_a
     assert_query(expect, :Sequence, :all)
     assert_query(Sequence.where(Sequence[:locus].matches("ITS%")),
                  :Sequence, :all, locus_has: "ITS")
@@ -3048,7 +3048,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_species_list_all
-    expect = SpeciesList.all.order(:title).to_a
+    expect = SpeciesList.order(:title).to_a
     assert_query(expect, :SpeciesList, :all)
   end
 
@@ -3144,9 +3144,9 @@ class QueryTest < UnitTestCase
   end
 
   def test_user_all
-    expect = User.all.order(:name).to_a
+    expect = User.order(:name).to_a
     assert_query(expect, :User, :all)
-    expect = User.all.order(:login).to_a
+    expect = User.order(:login).to_a
     assert_query(expect, :User, :all, by: :login)
   end
 
