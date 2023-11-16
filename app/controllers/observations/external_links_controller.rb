@@ -8,6 +8,13 @@ module Observations
     def new
       set_ivars_for_new
       check_link_permission!(@obs, @site)
+      respond_to do |format|
+        format.turbo_stream do
+          render_modal_external_link_form(
+            title: :create_object.t(type: :external_link)
+          )
+        end
+      end
     end
 
     def create
@@ -21,6 +28,13 @@ module Observations
     def edit
       set_ivars_for_edit
       check_link_permission!(@link)
+      respond_to do |format|
+        format.turbo_stream do
+          render_modal_external_link_form(
+            title: :edit_object.t(type: :external_link)
+          )
+        end
+      end
     end
 
     def update
