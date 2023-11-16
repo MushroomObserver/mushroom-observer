@@ -12,11 +12,9 @@ module VisualGroups
 
       status = update_visual_group_image(visual_group, image_id)
 
-      # This can do a turbo_stream
-      render(partial: "visual_groups/visual_group_status_links",
-             locals: { visual_group: visual_group,
-                       image_id: image_id,
-                       status: status })
+      render(partial: "visual_groups/images/update",
+             locals: { status: status, image_id: image_id,
+                       visual_group: visual_group })
     end
 
     def update_visual_group_image(visual_group, image_id)

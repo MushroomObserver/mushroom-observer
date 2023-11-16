@@ -1,22 +1,19 @@
 <%
-links = [
-          visual_group_status_link(visual_group, image_id, status, nil),
-          visual_group_status_link(visual_group, image_id, status, true),
-          visual_group_status_link(visual_group, image_id, status, false)
-        ].safe_join("|")
-# TODO: check status_buttons unique? no, every matrix box.
+tag.div(
+  class: "status_buttons mt-3 text-center small",
+  id: "visual_group_status_links_#{image_id}"
+) do
+  [
+    [
+      visual_group_status_link(visual_group, image_id, status, nil),
+      visual_group_status_link(visual_group, image_id, status, true),
+      visual_group_status_link(visual_group, image_id, status, false)
+    ].safe_join("|"),
+    [
+      "#{:image_reuse_id.t}:",
+      link_to(image_id, image_path(id: image_id))
+    ].safe_join(" "),
+    tag.span("", class: "hidden data_container", data: { id: image_id })
+  ].safe_join(safe_br)
+end
 %>
-
-<div class="status_buttons">
-  <div class="visual_group_status_links_container mt-3"
-       id="visual_group_status_links_<%= image_id %>">
-    <div class="text-center">
-      <small>
-        <%= links %><br>
-        <%= :image_reuse_id.t + ": " + link_to(image_id,
-                                               image_path(id: image_id)) %>
-      </small>
-    </div><!-- .text-center -->
-    <span class="hidden data_container" data-id="<%= image_id %>"></span>
-  </div>
-</div>
