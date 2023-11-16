@@ -53,8 +53,9 @@ export default class extends Controller {
         this.elevation = new google.maps.ElevationService()
         this.geocoder = new google.maps.Geocoder()
 
+        // NOTE: any bug in the `then` block will throw the generic error
+        // pull code out of the `loader` block to debug
         if (Object.keys(this.collection.sets).length) {
-          debugger
           this.buildOverlays()
         }
       })
@@ -70,7 +71,7 @@ export default class extends Controller {
     for (const [_xywh, set] of Object.entries(this.collection.sets)) {
       // console.log({ set })
       // NOTE: according to the MapSet class, location sets are always is_box!!!
-      if (isPoint(set)) {
+      if (this.isPoint(set)) {
         this.drawMarker(set)
       } else {
         this.drawRectangle(set)
