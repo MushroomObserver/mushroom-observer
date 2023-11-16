@@ -2204,8 +2204,6 @@
   show_observation_hide_map: Hide thumbnail map.
   show_observation_thumbnail_map_hidden: Thumbnail map hidden.  To re-enable this feature, go to your "[:app_preferences]":/account/prefs page.
   show_observation_add_link_dialog: "Enter full URL, including \"http://\":"
-  show_observation_edit_link_dialog: "[:show_observation_add_link_dialog]"
-  show_observation_remove_link_dialog: Are you sure you want to remove this link?
   show_observation_no_collection_numbers: No [:collection_numbers]
   show_observation_remove_collection_number: Remove collection number from this observation
   show_observation_no_herbarium_records: No [:herbarium_records]

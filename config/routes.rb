@@ -388,9 +388,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       to: "export#set_ml_status",
       id: /\d+/, as: "export_set_ml_status")
 
-  # ----- Contributors: standard actions --------------------------------------
-  resources :external_links, only: [:create, :update, :destroy]
-
   # ----- Glossary Terms: standard actions ------------------------------------
   resources :glossary_terms, id: /\d+/ do
     member do
@@ -692,6 +689,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     end
 
     member do
+      resources :external_links,
+                only: [:new, :create, :edit, :update, :destroy],
+                shallow: true, controller: "observations/external_links"
+
       get("map", to: "observations/maps#show")
       get("suggestions", to: "observations/namings/suggestions#show",
                          as: "naming_suggestions_for")
