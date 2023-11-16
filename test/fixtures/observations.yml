@@ -232,6 +232,36 @@ unknown_with_lat_long:
   notes:
     :Other: 'unknown_with_lat_long'
 
+trusted_hidden:
+  <<: *DEFAULTS
+  created_at: 2023-11-05 09:20:00
+  updated_at: 2023-11-05 09:21:00
+  when: 2023-11-05
+  location: falmouth
+  where: Falmouth, Massachusetts, USA
+  user: mary
+  name: fungi
+  text_name: Fungi
+  gps_hidden: true
+  lat: 41.6022
+  long: -70.5021
+  alt: 123
+
+untrusted_hidden:
+  <<: *DEFAULTS
+  created_at: 2023-11-05 09:20:00
+  updated_at: 2023-11-05 09:21:00
+  when: 2023-11-05
+  location: falmouth
+  where: Falmouth, Massachusetts, USA
+  user: katrina
+  name: fungi
+  text_name: Fungi
+  gps_hidden: true
+  lat: 41.6055
+  long: -70.5055
+  alt: 123
+
 amateur_obs:
   <<: *DEFAULTS
   created_at: 2010-12-31 06:46:00

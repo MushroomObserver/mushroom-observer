@@ -687,6 +687,7 @@
   merge: merge
   OKAY: Okay
   okay: okay
+  OPEN: Open
   # reload a form
   RELOAD: Reload
   reload: reload
@@ -3157,6 +3158,10 @@
   change_member_status_remove_member_help: Remove Member - Removes all member and admin privileges for a project.  [:user] will no longer be able view or create draft names for this project.  They will not be able to perform any admin functions.
   change_member_status_denied: Only the admins for a project can change member permissions.
   change_member_status_title: Changing [:user] Status of [name] for [title]
+  change_member_status_trust: Trust Project
+  change_member_status_trust_flash: You now trust admins of this project with hidden GPS data for associated observations
+  change_member_status_revoke_trust: Revoke Trust
+  change_member_status_revoke_trust_flash: You no longer trust admins of this project with hidden GPS data for associated observations
 
   # users/bonuses
   change_user_bonuses_title: Contribution Bonuses for [user]
@@ -4120,9 +4125,9 @@
   query_title_by_editor: "[TYPES] Edited by [USER]"
   query_title_by_rss_log: "[TYPES] in Activity Log"
   query_title_by_user: "[TYPES] created by [USER]"
-  query_title_for_observation: "[TYPES] attached to [OBSERVATION]"
-  query_title_for_project: "[TYPES] attached to [PROJECT]"
-  query_title_in_lists_for_project: "[TYPES] in lists attached to [PROJECT]"
+  query_title_for_observation: "[TYPES] for [OBSERVATION]"
+  query_title_for_project: "[TYPES] for [PROJECT]"
+  query_title_in_lists_for_project: "[TYPES] in lists for [PROJECT]"
   query_title_for_target: "[TYPES] on [TARGET]"
   query_title_for_user: "[TYPES] for [USER]"
   query_title_in_herbarium: "[TYPES] in [HERBARIUM]"
@@ -4164,7 +4169,7 @@
   query_help_comment_for_user: comments sent to a given user
   query_help_comment_pattern_search: comments matching a search string
   query_help_herbarium_record_in_herbarium: records in a given fungarium
-  query_help_herbarium_record_for_observation: records attached to a given observation
+  query_help_herbarium_record_for_observation: records for a given observation
   query_help_image_advanced_search: images of observations matching advanced search criteria
   query_help_image_all: all images
   query_help_image_by_user: images created by a given user

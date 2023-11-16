@@ -109,6 +109,20 @@ unknown_with_lat_long_rss_log:
   created_at: 2010-07-22 09:20:00
   notes: "20100722092100 log_observation_created user mary\n"
 
+trusted_hidden_rss_log:
+  <<: *DEFAULTS
+  observation: trusted_hidden
+  updated_at: 2023-11-05 09:20:00
+  created_at: 2023-11-05 09:20:00
+  notes: "20231105092100 log_observation_created user mary\n"
+
+untrusted_hidden_rss_log:
+  <<: *DEFAULTS
+  observation: untrusted_hidden
+  updated_at: 2023-11-05 09:22:00
+  created_at: 2023-11-05 09:22:00
+  notes: "20231105092300 log_observation_created user katrina\n"
+
 amateur_obs_rss_log:
   <<: *DEFAULTS
   observation: amateur_obs
