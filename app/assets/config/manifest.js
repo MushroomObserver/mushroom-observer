@@ -8,7 +8,6 @@
 
 //= link advanced_search.js
 //= link donate.js
-//= link edit_location.js
 //= link name_lister.js
 //= link visual_group_status.js
 

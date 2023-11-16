@@ -1534,7 +1534,8 @@
   form_locations_refs: "[:form_names_refs]"
   form_locations_refs_help: "[:form_names_refs_help]"
   form_locations_help: "<a href=\"/location/help\" target=\"_new\">Help</a>"
-  form_locations_find_on_map: Find on Map =>
+  form_locations_find_on_map: Find on Map >
+  form_locations_get_elevation: Get Elevation
   form_locations_lat_long_help: All values should be in decimal degrees.
   form_locations_license_help: Select "license":/info/how_to_use#license you want to give for the above text.
   form_locations_gen_desc_help: Describe the geographical location of this location.

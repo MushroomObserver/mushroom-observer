@@ -8,7 +8,8 @@ import { Loader } from "@googlemaps/js-api-loader"
 export default class extends Controller {
   // it may or may not be the root element of the controller.
   static targets = ["mapDiv", "southInput", "westInput", "northInput",
-    "eastInput", "highInput", "lowInput", "locationName", "findOnMap"]
+    "eastInput", "highInput", "lowInput", "locationName", "findOnMap",
+    "getElevation"]
 
   connect() {
     const loader = new Loader({
@@ -80,7 +81,7 @@ export default class extends Controller {
   }
 
   isPoint(set) {
-    set.north === set.south && set.east === set.west
+    return (set.north === set.south) && (set.east === set.west)
   }
 
   drawMarker(set) {
@@ -98,7 +99,6 @@ export default class extends Controller {
     if (!this.editable && set != null) {
       this.drawInfoWindowForMarker(set, marker)
     } else {
-      this.marker = marker
       ["position_changed", "dragend"].forEach((eventName) => {
         marker.addListener(eventName, () => {
           const newPosition = marker.getPosition()?.toJSON() // latlng object
@@ -106,6 +106,7 @@ export default class extends Controller {
           this.updateElevationInputs(this.sampleElevationCenterOf(newPosition))
         })
       })
+      this.marker = marker
     }
   }
 
@@ -123,14 +124,15 @@ export default class extends Controller {
     const rectangle = new google.maps.Rectangle(rectangleOptions)
 
     if (this.editable) { // "dragstart", "drag",
-      this.rectangle = rectangle
       ["bounds_changed", "dragend"].forEach((eventName) => {
         rectangle.addListener(eventName, () => {
           const newBounds = rectangle.getBounds()?.toJSON() // nsew object
+          // console.log({ newBounds })
           this.updateFormInputs(newBounds)
           this.updateElevationInputs(this.sampleElevationPointsOf(newBounds))
         })
       })
+      this.rectangle = rectangle
     }
   }
 
@@ -271,9 +273,10 @@ export default class extends Controller {
 
     geocoder
       .geocode({ address: address })
-      .then((results) => {
-        const bounds = results[0].geometry.viewport
-        const center = results[0].geometry.location
+      .then((result) => {
+        const { results } = result // destructure, results is part of the result
+        const bounds = results[0].geometry.viewport.toJSON()
+        const center = results[0].geometry.location.toJSON()
         if (bounds) {
           if (this.rectangle) {
             this.rectangle.setBounds(bounds)
@@ -293,5 +296,17 @@ export default class extends Controller {
       .catch((e) => {
         alert("Geocode was not successful for the following reason: " + e)
       });
+  }
+
+  getElevation() {
+    if (this.marker) {
+      const position = this.marker.getPosition().toJSON()
+      this.updateElevationInputs(this.sampleElevationCenterOf(position))
+      this.getElevationTarget.disabled = true
+    } else if (this.rectangle) {
+      const bounds = this.rectangle.getBounds().toJSON()
+      this.updateElevationInputs(this.sampleElevationPointsOf(bounds))
+      this.getElevationTarget.disabled = true
+    }
   }
 }

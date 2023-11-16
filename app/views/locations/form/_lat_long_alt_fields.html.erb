@@ -52,7 +52,13 @@
       ) %>
       <%= text_field_with_label(
         form: f, field: :low, label: :show_location_lowest.t + ":",
-        append: "(#{:units_meters.t})", data: { map_target: "lowInput" }) %>
+        append: "(#{:units_meters.t})", data: { map_target: "lowInput" }
+      ) %>
+      <%= tag.button(
+        :form_locations_get_elevation.l,
+        type: :button, class: "btn btn-default",
+        data: { map_target: "getElevation", action: "map#getElevation" }
+      ) %>
     </div><!-- .text-center -->
   </div>
 </div><!--.row-->

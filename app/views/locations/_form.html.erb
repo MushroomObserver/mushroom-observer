@@ -12,29 +12,37 @@
     <%= tag.div(class: "row", data: { controller: "map" }) do %>
       <%= tag.div(class: "col-md-8 col-lg-6") do %>
 
-        <%= submit_button(form: f, button: button.l, center: true) %>
-
         <%= if in_admin_mode?
           check_box_with_label(form: f, field: :locked, class: "mt-3",
                                label: :form_locations_locked.t)
         end %>
 
-        <%= render(partial: "locations/form/display_name_field",
-                   locals: { f: f }) %>
+        <%= tag.div do
+          f.label(:display_name, :WHERE.t + ":")
+        end %>
 
-        <%= render(partial: "locations/form/lat_long_alt_fields",
-                   locals: { f: f }) %>
+        <%= tag.div(class: "input-group") do %>
+          <%= f.text_field(:display_name, value: @display_name,
+            class: "form-control",
+            data: { autofocus: true, map_target: "locationName" }
+          ) %>
 
-        <%= tag.div(class: "position-relative") do
-          tag.div(class: "ab-right") do
+          <%= tag.span(class: "input-group-btn") do
             tag.button(
               :form_locations_find_on_map.t,
               type: "button", class: "btn btn-default",
               data: { map_target: "findOnMap", action: "map#findOnMap"}
             )
-          end
-        end %>
+          end %>
+        <% end %>
 
+        <%= help_block(:div, :form_locations_help.t) %>
+
+        <%= render(partial: "locations/form/lat_long_alt_fields",
+                   locals: { f: f }) %>
+
+        <%= submit_button(form: f, button: button.l, class: "mt-4",
+                          center: false) %>
       <% end %>
 
       <%= tag.div(class: "col-md-4 col-lg-6 mb-3 mt-3") do
@@ -48,6 +56,12 @@
 
   <% end %>
 
-  <%= render(partial: "locations/form/notes_field", locals: { f: f }) %>
+  <%= tag.div(class: "container-text mt-3") do %>
+    <%= text_area_with_label(
+          form: f, field: :notes, label: :NOTES.t + ":",
+          between: help_block(:div, :form_locations_notes_help.t)
+        ) %>
+    <%= render(partial: "shared/textilize_help") %>
+  <% end %>
 
 <% end %>
