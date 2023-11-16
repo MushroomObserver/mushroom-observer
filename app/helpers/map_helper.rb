@@ -215,10 +215,10 @@ module MapHelper
     locations = set.underlying_locations
     lines << mapset_observation_header(set, args) if observations.length > 1
     lines << mapset_location_header(set, args) if locations.length > 1
-    if observations.length == 1
+    if observations.length == 1 && observations.first&.id
       lines << mapset_observation_link(observations.first, args)
     end
-    if locations.length == 1
+    if locations.length == 1 && locations.first&.id # obj maybe not saved yet
       lines << mapset_location_link(locations.first, args)
     end
     lines << mapset_coords(set)
