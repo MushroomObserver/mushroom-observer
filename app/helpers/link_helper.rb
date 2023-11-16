@@ -149,8 +149,8 @@ module LinkHelper
     html_options = {
       method: :delete, title: name,
       class: class_names(identifier, args[:class], "text-danger"),
-      data: { confirm: :are_you_sure.t, turbo: true,
-              toggle: "tooltip", placement: "top", title: name }
+      form: { data: { turbo: true, turbo_confirm: :are_you_sure.t } },
+      data: { toggle: "tooltip", placement: "top", title: name }
     }.deep_merge(args.except(:class, :back))
 
     button_to(path, html_options) do
@@ -253,7 +253,8 @@ module LinkHelper
     html_options = {
       method: method,
       class: "",
-      data: { turbo: true }.merge(tip)
+      form: { data: { turbo: true } },
+      data: tip
     }.merge(args) # currently don't have to merge class arg upstream
 
     button_to(path, html_options) { content }
