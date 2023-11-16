@@ -161,11 +161,8 @@ module ImageHelper
                path: visual_group_image_path(
                  id: image_id, visual_group_id: visual_group.id, status: link
                ),
-               title: link_text)
-              #  data: { role: "visual_group_status",
-              #          imgid: image_id,
-              #          vgid: visual_group.id,
-              #          status: link })
+               title: link_text,
+               data: { turbo: true })
   end
 
   # This is now a helper to avoid nested partials in loops - AN 2023

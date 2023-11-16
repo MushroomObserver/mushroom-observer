@@ -17,18 +17,14 @@
 #
 #  == Actions
 #
-#  api_key::          Activate and edit APIKey's.
 #  auto_complete::    Return list of strings matching a given string.
 #  create_image_object::  Uploads image without observation yet.
-#  exif::             Get EXIF header info of an image.
 #  export::           Change export status.
 #  multi_image_template:: HTML template for uploaded image.
 #  old_translation::  Return an old TranslationString by version id.
-#  visual_group_status:: Change image status wrt some visual group.
 #  vote::             Change vote on proposed name or image.
 #
 class AjaxController < ApplicationController
-  include VisualGroupStatus
   include UploadImage
   include Primers
   include Export
