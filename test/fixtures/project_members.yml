@@ -1,0 +1,26 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+eol_member_rolf:
+  project: eol_project
+  user: rolf
+  trusted: true
+
+eol_member_mary:
+  project: eol_project
+  user: mary
+  trusted: true
+
+eol_member_katrina:
+  project: eol_project
+  user: katrina
+  trusted: false
+
+open_member_mary:
+  project: open_membership_project
+  user: mary
+  trusted: true
+
+open_member_katrina:
+  project: open_membership_project
+  user: katrina
+  trusted: false

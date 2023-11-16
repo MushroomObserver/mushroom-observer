@@ -250,9 +250,9 @@ class UserTest < UnitTestCase
     num_comments = Comment.count
     num_publications = Publication.count
 
-    # Find Katrina's one observation.
-    assert_equal(1, user.observations.length)
-    observation = user.observations.first
+    # Find one of Katrina's observations.
+    assert_equal(2, user.observations.length)
+    observation = user.observations.find_by(gps_hidden: false)
     observation_id = observation.id
 
     # Attach her image to the observation.
@@ -285,7 +285,7 @@ class UserTest < UnitTestCase
     User.erase_user(user.id)
 
     # Should have deleted one of each type of object.
-    assert_equal(num_observations - 1, Observation.count)
+    assert_equal(num_observations - 2, Observation.count)
     assert_equal(num_namings - 1, Naming.count)
     assert_equal(num_votes - 1, Vote.count)
     assert_equal(num_images - 1, Image.count)
