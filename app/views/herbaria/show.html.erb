@@ -66,12 +66,7 @@ map = @herbarium.location ? true : false
 
   <% if map %>
     <div class="col-xs-12 col-sm-4 mt-3" style="max-width:320px">
-      <%= make_map([herbarium.location]) %>
-      <%#
-        gmap = make_map([@herbarium.location])
-        finish_map(gmap)
-        gmap.div(width: "100%", height: "230px").html_safe
-      %>
+      <%= make_map([@herbarium.location]) %>
     </div>
   <% end %>
 </div><!--.row-->
