@@ -6,7 +6,6 @@
 
 //= link mo_application.js
 
-//= link advanced_search.js
 //= link donate.js
 //= link name_lister.js
 //= link visual_group_status.js

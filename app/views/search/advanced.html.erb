@@ -14,15 +14,18 @@
 
 <%= form_with(scope: :search, url: { action: :advanced },
               method: :get, id: "advanced_search_form",
-              class: "pb-5 mb-5") do |f| %>
+              class: "pb-5 mb-5",
+              data: { controller: "advanced-search" }) do |f| %>
 
   <%= submit_button(form: f, button: :advanced_search_submit.l, center: true) %>
 
   <% mod_betw = help_note(:span, :advanced_search_result_type_help.t) %>
-  <%= select_with_label(form: f, field: :model,
-                        label: :advanced_search_result_type.t + ":",
-                        options: models, select_opts: {},
-                        between: mod_betw) %>
+  <%= select_with_label(
+    form: f, field: :model, label: :advanced_search_result_type.t + ":",
+    options: models, select_opts: {}, between: mod_betw,
+    data: { advanced_search_target: "searchModel",
+            action: "advanced-search#disableUnusedFilters" }
+  ) %>
 
   <% nam_betw = help_note(:span, :advanced_search_name_help.t) %>
   <%= autocompleter_field(form: f, field: :name,
