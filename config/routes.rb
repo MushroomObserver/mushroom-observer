@@ -21,7 +21,7 @@ ACTIONS = {
     auto_complete: {},
     create_image_object: {},
     export: {},
-    external_link: {},
+    # external_link: {},
     geocode: {},
     image: {},
     location_primer: {},
@@ -689,6 +689,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     end
 
     member do
+      resources :external_links,
+                only: [:new, :create, :edit, :update, :destroy],
+                shallow: true, controller: "observations/external_links"
+
       get("map", to: "observations/maps#show")
       get("suggestions", to: "observations/namings/suggestions#show",
                          as: "naming_suggestions_for")
@@ -815,6 +819,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- VisualModels: standard actions ------------------------------------
   resources :visual_models, id: /\d+/ do
     resources :visual_groups, id: /\d+/, shallow: true
+  end
+
+  namespace :visual_groups do
+    resources :images, only: [:update]
   end
 
   # Short-hand notation for AJAX methods.

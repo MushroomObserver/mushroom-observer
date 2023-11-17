@@ -11,37 +11,36 @@ export default class extends Controller {
 
   connect() {
     this.element.setAttribute("data-stimulus", "connected")
+    this.modalSelector = this.element.getAttribute("data-modal")
+    this.destination = this.element.getAttribute("href")
   }
 
   // NOTE: the button must pass :prevent with the action,
   // a Stimulus shortcut that calls event.preventDefault()
   showModal() {
-    // check if modal exists in DOM. by ID of modal with identifier
-    const modalSelector = this.element.getAttribute("data-modal")
-    // console.log(modalSelector)
-    const destination = this.element.getAttribute("href")
-
-    if (document.getElementById(modalSelector)) {
+    // check if modal already exists in DOM (eg if user has closed it)
+    if (document.getElementById(this.modalSelector)) {
       // if so, show.
-      $(document.getElementById(modalSelector)).modal('show')
+      $(document.getElementById(this.modalSelector)).modal('show')
     } else {
       // if not, fetch the content.
-      this.fetchModalAndAppendToBody(modalSelector, destination)
+      this.fetchModalAndAppendToBody()
     }
   }
 
   // https://discuss.hotwired.dev/t/is-this-correct-a-stimulus-controller-to-use-turbo-stream-get-requests-to-avoid-updating-browser-history/4146
   // NOTE: Above example presumes a pre-existing modal.
-  async fetchModalAndAppendToBody(modalSelector, destination) {
+  async fetchModalAndAppendToBody() {
     // console.log(destination)
 
-    const response = await get(destination, { responseKind: "turbo-stream" })
+    const response = await get(this.destination,
+      { responseKind: "turbo-stream" })
 
     if (response.ok) {
       // console.log(response)
       // turbo-stream prints the modal in the page already,
       // so we just have to move it.
-      const _modal = document.getElementById(modalSelector)
+      const _modal = document.getElementById(this.modalSelector)
       document.body.appendChild(_modal)
       $(_modal).modal('show')
     }
