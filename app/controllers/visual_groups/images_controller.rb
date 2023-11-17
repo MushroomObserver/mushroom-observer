@@ -2,8 +2,10 @@
 
 module VisualGroups
   class ImagesController < ApplicationController
+    before_action :login_required
+
     def update
-      @user = session_user!
+      @user = User.current
       image_id = params[:id]
       @status = params[:status]
       @status = "" unless Image.find_by(id: image_id)
@@ -12,6 +14,7 @@ module VisualGroups
 
       status = update_visual_group_image(visual_group, image_id)
 
+      # this is a turbo response
       render(partial: "visual_groups/images/update",
              locals: { status: status, image_id: image_id,
                        visual_group: visual_group })
@@ -33,6 +36,5 @@ module VisualGroups
       end
       included
     end
-
   end
 end
