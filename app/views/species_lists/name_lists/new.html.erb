@@ -15,7 +15,8 @@
 </noscript>
 
 <table cols="3" width="100%" class="scroller mt-3"
-       data-controller="name-list">
+       data-controller="name-list"
+       data-action="keypress->name-list#nl_keypress keydown->name-list#nl_keydown keyup->name-list#nl_keyup click->name-list#nl_unfocus">
   <thead>
     <tr>
       <th width="20%"><%= :name_lister_genera.t %></th>
@@ -27,15 +28,15 @@
   <tbody>
     <tr>
       <td align="left">
-        <div id="genera" class="scroller"
+        <div id="genera" class="scroller" data-name-list-target="genera"
              data-action="click->name-list#nl_focus"></div>
       </td>
       <td align="left">
-        <div id="species" class="scroller"
+        <div id="species" class="scroller" data-name-list-target="species"
              data-action="click->name-list#nl_focus"></div>
       </td>
       <td align="left">
-        <div id="names" class="scroller"
+        <div id="names" class="scroller" data-name-list-target="names"
              data-action="click->name-list#nl_focus"></div>
       </td>
     </tr>

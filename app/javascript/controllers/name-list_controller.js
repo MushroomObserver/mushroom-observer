@@ -3,6 +3,7 @@ import { escapeHTML, getScrollBarWidth } from "src/mo_utilities"
 
 // Connects to data-controller="name-list"
 export default class extends Controller {
+  static targets = ["generaTarget", "speciesTarget", "namesTarget"]
   initialize() {
     // Which column key strokes will go to.
     this.NL_FOCUS = null;
@@ -20,15 +21,15 @@ export default class extends Controller {
     this.NL_WORD = "";
     // Cursor position in each column.
     this.NL_CURSOR = {
-      g: null,
-      s: null,
-      n: null
+      genera: null,
+      species: null,
+      names: null
     };
     // These are the ids of the divs for each column.
     this.NL_DIVS = {
-      g: 'genera',
-      s: 'species',
-      n: 'names'
+      genera: 'genera',
+      species: 'species',
+      names: 'names'
     };
     // Current subset of SPECIES that is being dsplayed.
     this.NL_SPECIES_CUR = [];
@@ -55,60 +56,61 @@ export default class extends Controller {
   }
 
   connect() {
+    this.element.setAttribute("data-stimulus", "connected")
     this.nl_initialize_names();
-    this.nl_draw("g", this.NL_GENERA);
-    this.nl_draw("n", this.NL_NAMES);
-    document.addEventListener("keypress", this.nl_keypress);
-    document.addEventListener("keydown", this.nl_keydown);
-    document.addEventListener("keyup", this.nl_keyup);
-    document.addEventListener("click", this.nl_unfocus);
-    this.nc("g", 0); // click on first genus
+    this.nl_draw("genera", this.NL_GENERA);
+    this.nl_draw("names", this.NL_NAMES);
+    // this.element.addEventListener("keypress", this.nl_keypress);
+    // this.element.addEventListener("keydown", this.nl_keydown);
+    // this.element.addEventListener("keyup", this.nl_keyup);
+    // this.element.addEventListener("click", this.nl_unfocus);
+    this.nc("genera", 0); // click on first genus
   }
 
   // -------------------------------  Events  ---------------------------------
 
   // The controller itself prints the <li> with this dataset, below.
   getDataFromEventTarget(event) {
-    const s = event.target?.dataset.s
+    const section = event.target?.dataset.section
     const i = event.target?.dataset.i
-    return [s, i]
+    return [section, i]
   }
 
   // Mouse moves over an item.
   na(event) {
-    const [s, i] = this.getDataFromEventTarget(event)
+    const [section, i] = this.getDataFromEventTarget(event)
 
-    if (this.NL_CURSOR[s] != i)
-      document.getElementById(s + i).classList.add("hot");
+    if (this.NL_CURSOR[section] != i)
+      document.getElementById(section + i).classList.add("hot");
   }
 
   // Mouse moves off of an item.
   nb(event) {
-    const [s, i] = this.getDataFromEventTarget(event)
+    const [section, i] = this.getDataFromEventTarget(event)
 
-    if (this.NL_CURSOR[s] != i)
-      document.getElementById(s + i).classList.remove("hot", "warm");
+    if (this.NL_CURSOR[section] != i)
+      document.getElementById(section + i).classList.remove("hot", "warm");
   }
 
   // Click on item.
   nc(event) {
-    const [s, i] = this.getDataFromEventTarget(event)
+    const [section, i] = this.getDataFromEventTarget(event)
 
     this.nl_clear_word();
-    this.nl_focus(s);
-    this.nl_move_cursor(s, i);
-    if (s == 'g')
+    this.nl_focus(section);
+    this.nl_move_cursor(section, i);
+    if (section == 'genera')
       this.nl_select_genus(this.NL_GENERA[i]);
     this.NL_IGNORE_UNFOCUS = true;
   }
 
   // Double-click on item.
   nd(event) {
-    const [s, i] = this.getDataFromEventTarget(event)
+    const [section, i] = this.getDataFromEventTarget(event)
 
-    if (s == 's')
+    if (section == 'species')
       this.nl_insert_name(this.NL_SPECIES_CUR[i]);
-    if (s == 'n')
+    if (section == 'names')
       this.nl_remove_name(this.NL_NAMES[i]);
   }
 
@@ -155,7 +157,7 @@ export default class extends Controller {
   }
 
   // Called when user presses a key.  We keep track of where user is typing by
-  // updating NL_FOCUS (value is 'g', 's' or 'n').
+  // updating this.NL_FOCUS (value is 'g', 's' or 'n').
   nl_keydown(event) {
 
     // Cursors, etc. must be explicitly focused to work.  (Otherwise you can't
@@ -168,7 +170,7 @@ export default class extends Controller {
     // Schedule first repeat event.
     this.NL_REPEAT_CALLBACK =
       window.setTimeout(
-        () => { this.nl_keyrepeat(NL_KEY) }, this.NL_FIRST_KEY_DELAY
+        () => { this.nl_keyrepeat(this.NL_KEY) }, this.NL_FIRST_KEY_DELAY
       );
 
     // Stop browser from doing anything with key presses when focused.
@@ -182,7 +184,7 @@ export default class extends Controller {
       this.nl_process_key(this.NL_KEY);
       this.NL_REPEAT_CALLBACK =
         window.setTimeout(
-          () => { this.nl_keyrepeat(NL_KEY) }, this.NL_NEXT_KEY_DELAY
+          () => { this.nl_keyrepeat(this.NL_KEY) }, this.NL_NEXT_KEY_DELAY
         );
     } else {
       this.NL_KEY = null;
@@ -224,7 +226,7 @@ export default class extends Controller {
     this.nl_clear_word();
 
     // Other strokes.
-    let i = this.NL_CURSOR[NL_FOCUS];
+    let i = this.NL_CURSOR[this.NL_FOCUS];
     switch (event.keyCode) {
 
       // Move cursor up and down.
@@ -300,8 +302,8 @@ export default class extends Controller {
 
   // Change focus from one column to another.
   nl_focus(event) {
-    const s = event.target.id[0]
-    this.NL_FOCUS = s;
+    const section = event.target.id
+    this.NL_FOCUS = section;
     this.nl_draw_cursors();
   }
 
@@ -327,13 +329,14 @@ export default class extends Controller {
   }
 
   // Move cursor.
-  nl_move_cursor(s, new_pos) {
-    const old_pos = this.NL_CURSOR[s];
-    this.NL_CURSOR[s] = new_pos;
+  nl_move_cursor(section, new_pos) {
+    const old_pos = this.NL_CURSOR[section];
+    this.NL_CURSOR[section] = new_pos;
     if (old_pos != null)
-      document.getElementById(s + old_pos).classList.remove("hot", "warm");
+      document.getElementById(section + old_pos)
+        .classList.remove("hot", "warm");
     this.nl_draw_cursors();
-    this.nl_warp(s);
+    this.nl_warp(section);
   }
 
   // Redraw all the cursors.
@@ -341,35 +344,35 @@ export default class extends Controller {
     // Make sure there *is* a cursor in the focused section.
     if (this.NL_FOCUS && this.NL_CURSOR[this.NL_FOCUS] == null)
       this.NL_CURSOR[this.NL_FOCUS] = 0;
-    this.nl_draw_cursor('g', this.NL_GENERA);
-    this.nl_draw_cursor('s', this.NL_SPECIES_CUR);
-    this.nl_draw_cursor('n', this.NL_NAMES);
+    this.nl_draw_cursor('genera', this.NL_GENERA);
+    this.nl_draw_cursor('species', this.NL_SPECIES_CUR);
+    this.nl_draw_cursor('names', this.NL_NAMES);
   }
 
   // Draw a single cursor, making sure div is scrolled so we can see it.
-  nl_draw_cursor(s, list = []) {
-    let i = this.NL_CURSOR[s];
+  nl_draw_cursor(section, list = []) {
+    let i = this.NL_CURSOR[section];
     if (list.length > 0 && i != null) {
-      if (i < 0) this.NL_CURSOR[s] = i = 0;
-      if (i >= list.length) this.NL_CURSOR[s] = i = list.length - 1;
-      document.getElementById(s + i)
+      if (i < 0) this.NL_CURSOR[section] = i = 0;
+      if (i >= list.length) this.NL_CURSOR[section] = i = list.length - 1;
+      document.getElementById(section + i)
         .classList.remove("hot", "warm")
-        .add(this.NL_FOCUS == s ? "warm" : "hot");
+        .add(this.NL_FOCUS == section ? "warm" : "hot");
     } else {
-      this.NL_CURSOR[s] = null;
+      this.NL_CURSOR[section] = null;
     }
   }
 
   // Make sure cursor is visible in a given column.
-  nl_warp(s) {
-    if (s == undefined)
+  nl_warp(section) {
+    if (section == undefined)
       return
-    let i = this.NL_CURSOR[s] || 0;
-    let e = document.getElementById(s + i);
+    let i = this.NL_CURSOR[section] || 0;
+    let e = document.getElementById(section + i);
     if (!this.scroll_bar_width)
       this.scroll_bar_width = e.getScrollBarWidth();
     if (e && e.offsetTop) {
-      const section = document.getElementById(this.NL_DIVS[s]);
+      const section = document.getElementById(this.NL_DIVS[section]);
       const ey = e.offsetTop - e.parentElement.offsetTop;
       const eh = e.offsetHeight;
       const sy = section.scrollTop;
@@ -383,8 +386,8 @@ export default class extends Controller {
 
   // Draw contents of one of the three columns.  Section is 'genera', 'species'
   // or 'names'; list is GENERA, SPECIES or NAMES.
-  nl_draw(s, list = []) {
-    const section = this.NL_DIVS[s];
+  nl_draw(section, list = []) {
+    const section = this.NL_DIVS[section];
     let html = '';
     for (let i = 0; i < list.length; i++) {
       let name = list[i];
@@ -410,8 +413,8 @@ export default class extends Controller {
         name = name.escapeHTML();
       }
       html += '<li' +
-        ' id="' + s + i + '"' +
-        ' data-s="' + s + '"' +
+        ' id="' + section + i + '"' +
+        ' data-section="' + section + '"' +
         ' data-i="' + i + '"' +
         ' data-action="' +
         ' mouseover->name-list#na' +
@@ -431,12 +434,12 @@ export default class extends Controller {
   nl_select_genus(name) {
     let list = [name];
     let last = false;
-    this.nl_move_cursor('s', null);
+    this.nl_move_cursor('species', null);
     if (name.charAt(name.length - 1) == '*')
       name = name.substr(0, name.length - 1);
     name += ' ';
-    for (let i = 0; i < NL_SPECIES.length; i++) {
-      const species = NL_SPECIES[i];
+    for (let i = 0; i < this.NL_SPECIES.length; i++) {
+      const species = this.NL_SPECIES[i];
       if (species.substr(0, name.length) == name ||
         species.charAt(0) == '=' && last) {
         list.push(species);
@@ -445,10 +448,10 @@ export default class extends Controller {
         last = false;
       }
     }
-    this.NL_CURSOR['s'] = null;
+    this.NL_CURSOR['species'] = null;
     this.NL_SPECIES_CUR = list;
-    this.nl_draw('s', list);
-    this.nl_warp('s');
+    this.nl_draw('species', list);
+    this.nl_warp('species');
   }
 
   // Search in list for word and move cursor there.
@@ -457,7 +460,7 @@ export default class extends Controller {
     word = word.toLowerCase();
     for (let i = 0; i < list.length; i++) {
       if (list[i].substr(0, word_len).toLowerCase() == word) {
-        this.nl_move_cursor(NL_FOCUS, i);
+        this.nl_move_cursor(this.NL_FOCUS, i);
         break;
       }
     }
@@ -471,12 +474,12 @@ export default class extends Controller {
       name = name.substr(2) + '*';
     const name2 = name.replace('*', '');
     let done = false;
-    for (let i = 0; i < NL_NAMES.length; i++) {
-      const str = NL_NAMES[i];
+    for (let i = 0; i < this.NL_NAMES.length; i++) {
+      const str = this.NL_NAMES[i];
       if (!done && str.replace('*', '') >= name2) {
         if (str != name)
           new_list.push(name);
-        this.NL_CURSOR['n'] = i;
+        this.NL_CURSOR['names'] = i;
         done = true;
       }
       new_list.push(str);
@@ -484,12 +487,12 @@ export default class extends Controller {
     }
     if (!done) {
       new_list.push(name);
-      this.NL_CURSOR['n'] = new_list.length - 1;
+      this.NL_CURSOR['names'] = new_list.length - 1;
     }
     this.NL_NAMES = new_list;
-    this.nl_draw('n', this.NL_NAMES);
+    this.nl_draw('names', this.NL_NAMES);
     this.nl_draw_cursors();
-    this.nl_warp('n');
+    this.nl_warp('names');
     this.nl_set_results();
   }
 
@@ -498,17 +501,17 @@ export default class extends Controller {
     let new_list = [];
     for (let i = 0; i < this.NL_NAMES.length; i++)
       if (this.NL_NAMES[i] == name)
-        this.NL_CURSOR['n'] = i;
+        this.NL_CURSOR['names'] = i;
       else
         new_list.push(this.NL_NAMES[i]);
     this.NL_NAMES = new_list;
-    this.nl_draw('n', this.NL_NAMES);
+    this.nl_draw('names', this.NL_NAMES);
     this.nl_draw_cursors();
-    this.nl_warp('n');
+    this.nl_warp('names');
     this.nl_set_results();
   }
 
-  // Concat names in NL_NAMES and store in hidden 'results' field.
+  // Concat names in this.NL_NAMES and store in hidden 'results' field.
   nl_set_results() {
     let val = '';
     for (let i = 0; i < this.NL_NAMES.length; i++)
@@ -516,7 +519,7 @@ export default class extends Controller {
     document.getElementById("results").value = val;
   }
 
-  // Reverse of above: parse hidden 'results' field, and populate NL_NAMES.
+  // Reverse of above: parse hidden 'results' field, and populate this.NL_NAMES.
   nl_initialize_names() {
     let str = document.getElementById("results").value || '';
     str += "\n";
