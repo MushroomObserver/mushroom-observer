@@ -7,7 +7,6 @@
 //= link mo_application.js
 
 //= link name_lister.js
-//= link visual_group_status.js
 
 //= link Admin.css
 //= link Agaricus.css

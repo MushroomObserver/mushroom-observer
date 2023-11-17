@@ -426,17 +426,8 @@ export default class extends Controller {
     const _image = item.dom_element.querySelector('.img-responsive');
 
     _image.onload = async () => {
-
       item.exif_data = await ExifReader.load(_image.src);
       this.applyExifData(item);
-
-      // EXIF.getData(_image, () => {
-      //   item.exif_data = _image.exifdata;
-      //   // apply the data to the DOM
-      //   this.applyExifData(item);
-      // });
-      // const tags = ExifReader.load(fileBuffer);
-      // const tags = await ExifReader.load(_image);
     };
   }
 
