@@ -36,7 +36,7 @@ module ObservationsController::Show
     update_view_stats(@observation)
     @canonical_url = canonical_url(@observation)
     @mappable      = check_if_query_is_mappable
-    @other_sites   = @observation.external_sites_user_can_add_links_to
+    @other_sites   = helpers.external_sites_user_can_add_links_to(@observation)
     register_namings_for_textile_in_notes
   end
 

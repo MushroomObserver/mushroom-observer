@@ -3229,7 +3229,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
   def do_external_sites_test(expect, user, obs)
     @controller.instance_variable_set(:@user, user)
-    actual = obs.external_sites_user_can_add_links_to
+    actual = @controller.helpers.external_sites_user_can_add_links_to(obs)
     assert_equal(expect.map(&:name), actual.map(&:name))
   end
 

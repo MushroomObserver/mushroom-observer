@@ -115,7 +115,7 @@ module Observations
 
     def render_external_links_section_update
       # need to reset this in case they can now add sites
-      @other_sites = @observation.external_sites_user_can_add_links_to
+      @other_sites = helpers.external_sites_user_can_add_links_to(@observation)
       render(
         partial: "observations/show/section_update",
         locals: { identifier: "external_links" }

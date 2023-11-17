@@ -9,9 +9,8 @@ tag.div(
       tag.h4(:EXTERNAL_LINKS.t, class: "panel-title")
     end,
 
-    tag.div(class: "panel-body") do
-
-      if obs.external_links.any?
+    if obs.external_links.any?
+      tag.div(class: "panel-body") do
         tag.ul(class: "list-unstyled mb-0") do
           obs.external_links.sort_by(&:site_name).map do |link|
             tag.li(id: "external_link_#{link.id}") do
@@ -35,7 +34,6 @@ tag.div(
           end.safe_join
         end
       end
-
     end
 
   ].safe_join)
