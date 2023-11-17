@@ -25,12 +25,6 @@ export default class extends Controller {
       species: null,
       names: null
     };
-    // These are the ids of the divs for each column.
-    this.NL_DIVS = {
-      genera: 'genera',
-      species: 'species',
-      names: 'names'
-    };
     // Current subset of SPECIES that is being dsplayed.
     this.NL_SPECIES_CUR = [];
 
@@ -65,6 +59,13 @@ export default class extends Controller {
     // this.element.addEventListener("keyup", this.nl_keyup);
     // this.element.addEventListener("click", this.nl_unfocus);
     this.nc("genera", 0); // click on first genus
+
+    // These are the ids of the divs for each column.
+    this.NL_DIVS = {
+      genera: this.generaTarget,
+      species: this.speciesTarget,
+      names: this.namesTarget
+    };
   }
 
   // -------------------------------  Events  ---------------------------------
@@ -372,7 +373,7 @@ export default class extends Controller {
     if (!this.scroll_bar_width)
       this.scroll_bar_width = e.getScrollBarWidth();
     if (e && e.offsetTop) {
-      const section = document.getElementById(this.NL_DIVS[section]);
+      const section = this.NL_DIVS[section];
       const ey = e.offsetTop - e.parentElement.offsetTop;
       const eh = e.offsetHeight;
       const sy = section.scrollTop;
@@ -387,7 +388,7 @@ export default class extends Controller {
   // Draw contents of one of the three columns.  Section is 'genera', 'species'
   // or 'names'; list is GENERA, SPECIES or NAMES.
   nl_draw(section, list = []) {
-    const section = this.NL_DIVS[section];
+    // const section = this.NL_DIVS[section];
     let html = '';
     for (let i = 0; i < list.length; i++) {
       let name = list[i];
@@ -425,7 +426,7 @@ export default class extends Controller {
     }
     html = '<ul>' + html + '</ul>';
 
-    document.getElementById(section).innerHTML = html;
+    this.NL_DIVS[section].innerHTML = html;
   }
 
   // ------------------------------  Actions  ---------------------------------
