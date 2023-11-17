@@ -17,7 +17,7 @@ module ObservationsController::Show
   #   @observation
   #   @canonical_url
   #   @mappable
-  #   @new_sites
+  #   @other_sites
   #   @votes
   def show
     pass_query_params
@@ -36,7 +36,7 @@ module ObservationsController::Show
     update_view_stats(@observation)
     @canonical_url = canonical_url(@observation)
     @mappable      = check_if_query_is_mappable
-    @new_sites     = external_sites_user_can_add_links_to(@observation)
+    @other_sites   = @observation.external_sites_user_can_add_links_to
     register_namings_for_textile_in_notes
   end
 
@@ -104,19 +104,6 @@ module ObservationsController::Show
   def check_if_query_is_mappable
     query = find_query(:Observation)
     query&.coercable?(:Location)
-  end
-
-  # Get a list of external_sites which the user has permission to add
-  # external_links to (and which no external_link to exists yet).
-  def external_sites_user_can_add_links_to(obs)
-    return [] unless @user
-
-    obs_site_ids = obs.external_links.map(&:external_site_id)
-    if @user == obs.user || in_admin_mode?
-      ExternalSite.where.not(id: obs_site_ids)
-    else
-      @user.external_sites.where.not(id: obs_site_ids)
-    end
   end
 
   # Incurs a costly namings lookup if called in the partial outside show_obs

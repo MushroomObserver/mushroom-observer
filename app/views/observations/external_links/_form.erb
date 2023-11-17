@@ -16,10 +16,11 @@ form_args = {
 
 <%= form_with(**form_args) do |f| %>
 
-  <%= text_area_with_label(form: f, field: :url, rows: 1, size: 40,
-                           label: :URL.l + ":", class: "w-100",
-                           between: :required) %>
-  <%= help_block(:div, :show_observation_add_link_dialog.l,
-                 id: "external_link_help", class: "mt-3")  %>
+  <%= text_field_with_label(
+    form: f, field: :url, size: 40, label: :URL.l, class: "w-100",
+    between: :required, append: :show_observation_add_link_dialog.l
+  ) %>
+
+  <%= submit_button(form: f, button: button, center: true) %>
 
 <% end %>

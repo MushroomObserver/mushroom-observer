@@ -7,38 +7,30 @@ module Observations
 
     def new
       set_ivars_for_new
-      check_link_permission!(@obs, @site)
-      respond_to do |format|
-        format.turbo_stream do
-          render_modal_external_link_form(
-            title: :create_object.t(type: :external_link)
-          )
-        end
-      end
+      check_link_permission!(@observation, @site)
+      render_modal_external_link_form(
+        title: :create_object.t(type: :external_link)
+      )
     end
 
     def create
       url = params[:url].to_s
 
       set_ivars_for_new
-      check_link_permission!(@obs, @site)
-      create_link(@obs, @site, url)
+      check_link_permission!(@observation, @site)
+      create_link(@observation, @site, url)
     end
 
     def edit
       set_ivars_for_edit
       check_link_permission!(@link)
-      respond_to do |format|
-        format.turbo_stream do
-          render_modal_external_link_form(
-            title: :edit_object.t(type: :external_link)
-          )
-        end
-      end
+      render_modal_external_link_form(
+        title: :edit_object.t(type: :external_link)
+      )
     end
 
     def update
-      url = params[:url].to_s
+      url = params.dig(:external_link, :url).to_s
 
       set_ivars_for_edit
       check_link_permission!(@link)
@@ -54,12 +46,13 @@ module Observations
     private
 
     def set_ivars_for_new
-      @obs = Observation.find(params[:id].to_s)
+      @observation = Observation.find(params[:id].to_s)
       @site = ExternalSite.find(params[:external_site_id].to_s)
     end
 
     def set_ivars_for_edit
       @link = ExternalLink.find(params[:id].to_s)
+      @observation = Observation.find(@link.observation_id)
     end
 
     def check_link_permission!(obs, site = nil)
@@ -121,6 +114,8 @@ module Observations
     end
 
     def render_external_links_section_update
+      # need to reset this in case they can now add sites
+      @other_sites = @observation.external_sites_user_can_add_links_to
       render(
         partial: "observations/show/section_update",
         locals: { identifier: "external_links" }

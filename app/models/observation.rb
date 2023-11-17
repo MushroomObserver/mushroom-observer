@@ -1325,6 +1325,25 @@ class Observation < AbstractModel
 
   ##############################################################################
   #
+  #  :section: External Links
+  #
+  ##############################################################################
+
+  # Get a list of external_sites which the user has permission to add
+  # external_links to (and which no external_link to exists yet).
+  def external_sites_user_can_add_links_to
+    return [] unless current_user = User.current
+
+    obs_site_ids = external_links.map(&:external_site_id)
+    if (current_user == user) || in_admin_mode?
+      ExternalSite.where.not(id: obs_site_ids)
+    else
+      @user.external_sites.where.not(id: obs_site_ids)
+    end
+  end
+
+  ##############################################################################
+  #
   #  :section: Callbacks
   #
   ##############################################################################

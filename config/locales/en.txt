@@ -392,6 +392,7 @@
   translation: translation
   TRANSLATIONS: Translations
   translations: translations
+  URL: URL
   USER: User
   user: user
   USERS: Users
@@ -815,6 +816,7 @@
   MAXIMUM: Maximum
   on_mo: On MO
   on_the_web: On the web
+  on_site: On [site]
   show_on_map: Show on map
   many_times: "[num] times"
   one_time: once
@@ -2203,7 +2205,7 @@
   show_observation_view_notifications: View Notifications
   show_observation_hide_map: Hide thumbnail map.
   show_observation_thumbnail_map_hidden: Thumbnail map hidden.  To re-enable this feature, go to your "[:app_preferences]":/account/prefs page.
-  show_observation_add_link_dialog: "Enter full URL, including \"http://\":"
+  show_observation_add_link_dialog: "Enter a link here to another site where you have posted the same observation. Use the full URL, including \"https://\":"
   show_observation_no_collection_numbers: No [:collection_numbers]
   show_observation_remove_collection_number: Remove collection number from this observation
   show_observation_no_herbarium_records: No [:herbarium_records]

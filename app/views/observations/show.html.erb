@@ -10,7 +10,7 @@ add_tab_set(show_observation_tabs(obs: @observation, user: @user))
 
 show_map   = @user ? @user.thumbnail_maps : !session[:hide_thumbnail_maps]
 show_lists = @user && @observation.species_lists.any?
-show_links = @user && (@observation.external_links.any? || @new_sites.any?)
+show_links = @user && (@observation.external_links.any? || @other_sites.any?)
 
 obs_locals = { obs: @observation }
 carousel_locals = {
@@ -39,7 +39,8 @@ carousel_locals = {
       <% end %>
 
       <% if show_links %>
-        <%= render(partial: "observations/show/links", locals: obs_locals) %>
+        <%= render(partial: "observations/show/external_links",
+                   locals: obs_locals) %>
       <% end %>
     <% end %>
   </div>
