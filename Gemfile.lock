@@ -5,13 +5,6 @@ GIT
     mo_acts_as_versioned (0.6.6)
       activerecord (>= 3.0.9)
 
-GIT
-  remote: https://github.com/nimmolo/requestjs-rails
-  revision: 4d1d6f9cd3f58749f3c10dde28efd76b7009ba59
-  specs:
-    requestjs-rails (0.0.11)
-      railties (>= 6.1.0)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -211,6 +204,8 @@ GEM
     regexp_parser (2.8.1)
     reline (0.3.8)
       io-console (~> 0.5)
+    requestjs-rails (0.0.11)
+      railties (>= 6.1.0)
     rexml (3.2.6)
     rtf (0.3.3)
     rubocop (1.56.4)
@@ -354,7 +349,7 @@ DEPENDENCIES
   rails-controller-testing
   rails-html-sanitizer (>= 1.4.4)
   railties (~> 6.1)
-  requestjs-rails (~> 0.0.11)!
+  requestjs-rails
   rtf
   rubocop
   rubocop-performance

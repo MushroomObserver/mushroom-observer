@@ -43,8 +43,7 @@ gem("sprockets-rails")
 # stimulus for simpler, more maintainable js
 gem("stimulus-rails")
 # requestjs for simpler js requests from stimulus
-gem("requestjs-rails", # (temporary until v0.0.11 released)
-    "~> 0.0.11", git: "https://github.com/nimmolo/requestjs-rails")
+gem("requestjs-rails")
 # turbo for partial page updates
 gem("turbo-rails")
 # redis for combining actioncable broadcasts with turbo_stream
