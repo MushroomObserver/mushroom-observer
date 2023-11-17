@@ -16,9 +16,12 @@ pin "@hotwired/stimulus", to: "stimulus.min.js", preload: true
 # pin "@hotwired/stimulus", to: "https://ga.jspm.io/npm:@hotwired/stimulus@3.2.2/dist/stimulus.js"
 pin "@hotwired/stimulus-loading", to: "stimulus-loading.js", preload: true
 pin_all_from "app/javascript/controllers", under: "controllers"
+
 pin "exifreader" # @4.16.0
 pin "vanilla-lazyload" # @17.8.5
 pin "lightgallery" # @2.7.2
 pin "lightgallery/plugins/zoom", to: "lightgallery--plugins--zoom.js" # @2.7.2
 pin "@googlemaps/js-api-loader", to: "https://ga.jspm.io/npm:@googlemaps/js-api-loader@1.16.2/dist/index.esm.js"
 pin "jstz" # @2.1.1
+
+pin_all_from "app/javascript/src", under: "src", to: "src"

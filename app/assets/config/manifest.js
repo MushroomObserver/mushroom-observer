@@ -6,8 +6,6 @@
 
 //= link mo_application.js
 
-//= link name_lister.js
-
 //= link Admin.css
 //= link Agaricus.css
 //= link Amanita.css
