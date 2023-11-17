@@ -8,7 +8,6 @@ module SpeciesLists
     #  :section: Manage Projects
     # ----------------------------
 
-    # def manage_projects
     def edit
       return unless (@list = find_species_list!)
 
@@ -48,16 +47,16 @@ module SpeciesLists
 
     def manage_object_states
       {
-        list: params[:objects_list].present?,
-        obs: params[:objects_obs].present?,
-        img: params[:objects_img].present?
+        list: params[:objects_list] == "1",
+        obs: params[:objects_obs] == "1",
+        img: params[:objects_img] == "1"
       }
     end
 
     def manage_project_states
       states = {}
       @projects.each do |proj|
-        states[proj.id] = params["projects_#{proj.id}"].present?
+        states[proj.id] = params["projects_#{proj.id}"] == "1"
       end
       states
     end

@@ -3,6 +3,9 @@
 require("test_helper")
 
 class ReportTest < UnitTestCase
+  LAT_INDEX = 17
+  LONG_INDEX = 18
+
   def test_adolf
     obs = observations(:agaricus_campestris_obs)
     expect = [
@@ -514,6 +517,25 @@ class ReportTest < UnitTestCase
     report.encoding = "UTF-16"
     body = report.body
     assert_not_empty(body)
+  end
+
+  def test_project_tweaker_report
+    obs = observations(:trusted_hidden)
+    query = Query.lookup(:Observation, :all)
+    report_type = Report::Raw
+    body = report_body(report_type, query)
+    table = CSV.parse(body, col_sep: report_type.separator)
+    idx = query.results.sort_by(&:id).index(obs)
+    assert_nil(table[idx + 1][LAT_INDEX])
+    assert_nil(table[idx + 1][LONG_INDEX])
+
+    # User.current must be project admin for query to work.
+    User.current = users(:roy)
+    body = report_body(report_type, query)
+    table = CSV.parse(body, col_sep: report_type.separator)
+    idx = query.results.sort_by(&:id).index(obs)
+    assert_equal(obs.lat.to_s, table[idx + 1][LAT_INDEX])
+    assert_equal(obs.long.to_s, table[idx + 1][LONG_INDEX])
   end
 
   private

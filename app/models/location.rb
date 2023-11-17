@@ -156,7 +156,7 @@ class Location < AbstractModel
         ->(place_name) { where(Location[:name].matches("%#{place_name}")) }
   scope :in_box, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
-          box = Box.new(
+          box = Mappable::Box.new(
             north: args[:n], south: args[:s], east: args[:e], west: args[:w]
           )
           return none unless box.valid?
@@ -198,7 +198,7 @@ class Location < AbstractModel
   #
   ##############################################################################
 
-  include BoxMethods
+  include Mappable::BoxMethods
 
   LXXXITUDE_REGEX = /^\s*
        (-?\d+(?:\.\d+)?) \s* (?:°|°|o|d|deg|,\s)? \s*

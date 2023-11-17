@@ -77,26 +77,8 @@ jQuery(document).ready(function () {
   lazyLoadInstance.update();
 });
 
-// window.onload = (event) => {
-//   const autocompleters = document.querySelectorAll('[data-autocompleter]');
-//   // console.log(autocompleters);
-//   autocompleters.forEach(element => {
-//     // element will have "data-ajax-url" if initialized
-//     if (!element.hasAttribute("data-ajax-url") && element.hasAttribute("id")) {
-//       const input_id = element.getAttribute("id");
-//       const type = element.dataset.autocompleter;
-
-//       // Only initialize the `year` sub-field in Rails date_selects (1i, 2i, 3i)
-//       if (type != "year" || type == "year" && input_id.indexOf("_1i") > 0) {
-//         new MOAutocompleter({
-//           input_id: input_id,
-//           token: element.dataset.autocomplete_separator
-//         });
-//       }
-//     }
-//   });
-// }
-
+// This observer is a stopgap that handles what Stimulus would handle:
+// observes page changes and whether they should fire js.
 const moObserveContent = function () {
   // Select the node that will be observed for mutations
   const contentNode = document.body;
@@ -110,6 +92,7 @@ const moObserveContent = function () {
       if (mutation.type === "childList") {
         // console.log("A child node has been added or removed.");
         initializeAutocompleters();
+        initializeObservationMapper();
       } else if (mutation.type === "attributes") {
         // console.log(`The ${mutation.attributeName} attribute was modified.`);
       }
@@ -145,9 +128,36 @@ const moObserveContent = function () {
     });
   }
 
+  // Don't do anything unless there's a form and class has not been initialized
+  // Plus, because this class is not yet a Stimulus controller, it should not
+  // initialize until google maps api is loaded. The observer will keep checkin'
+  const initializeObservationMapper = function () {
+    if (document.getElementById("observation_form") &&
+      (typeof window.observationMapper == 'undefined') &&
+      (typeof MOObservationMapper != 'undefined') &&
+      (typeof (google) != "undefined")) {
+      // there's only going to be one in the window
+      window.observationMapper = new MOObservationMapper();
+    }
+  }
+
   window.onload = (event) => {
     initializeAutocompleters();
   }
 }
 
 moObserveContent();
+
+// This is the callback for when the google maps api script is loaded (async,
+// from Google) on the Create Obs form, and potentially elsewhere.
+// It dispatches a global event that can be picked up by MOObservationMapper,
+// or a potential Stimulus controller doing the same thing. The mapper needs to
+// know when the script is loaded, because its methods will not work otherwise.
+window.dispatchMapsEvent = function (...args) {
+  const gmaps_loaded = new CustomEvent("google-maps-loaded", {
+    bubbles: true,
+    detail: args
+  })
+  console.log("maps is loaded")
+  window.dispatchEvent(gmaps_loaded)
+}

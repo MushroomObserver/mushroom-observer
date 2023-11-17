@@ -203,6 +203,7 @@ module ObservationsHelper
     gps_hidden_msg = tag.i("(#{:show_observation_gps_hidden.t})")
 
     tag.p(class: "obs-where-gps", id: "observation_where_gps") do
+      # XXX Consider dropping this from indexes.
       concat(gps_display_link) if obs.reveal_location?
       concat(gps_hidden_msg) if obs.gps_hidden
     end

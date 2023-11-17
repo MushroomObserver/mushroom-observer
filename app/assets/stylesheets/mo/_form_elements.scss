@@ -7,6 +7,13 @@
   }
 }
 
+// rss-log filter buttons with checkboxes
+.filter-form {
+  input[type=checkbox] {
+    vertical-align: text-top;
+  }
+}
+
 input.has-error,
 textarea.has-error,
 select.has-error {
@@ -54,7 +61,7 @@ form.button_to {
   button[type=submit]:not(.btn) {
     margin: 0;
     padding: 0;
-    -webkit-appearance: caret;
+    // -webkit-appearance: caret;
     background: none;
     border: none;
     font-size: inherit;
@@ -100,4 +107,8 @@ a.filter-only {
 .vote-select-container {
   max-width: 21rem;
   display: inline-block;
+}
+
+.btn.text-danger {
+  color: $brand-danger !important;
 }

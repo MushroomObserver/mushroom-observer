@@ -175,6 +175,17 @@ module Observations
       assert_equal(query.num_results, @response.body.scan("\\pard").size)
     end
 
+    def test_project_labels
+      login("roy")
+      query = Query.lookup_and_save(:Observation, :for_project,
+                                    project: projects(:open_membership_project))
+      get(:print_labels, params: { q: query.id.alphabetize })
+      trusted_hidden = observations(:trusted_hidden)
+      untrusted_hidden = observations(:untrusted_hidden)
+      assert_match(/#{trusted_hidden.lat}/, @response.body)
+      assert_no_match(/#{untrusted_hidden.lat}/, @response.body)
+    end
+
     # Print labels for all observations just to be sure all cases (more or less)
     # are tested and at least not crashing.
     def test_print_labels_all

@@ -687,6 +687,7 @@
   merge: merge
   OKAY: Okay
   okay: okay
+  OPEN: Open
   # reload a form
   RELOAD: Reload
   reload: reload
@@ -2732,10 +2733,10 @@
   # account/api_keys
   account_api_keys_link: API Key Manager
   account_api_keys_title: API Key Manager
+  account_api_keys_active_column_label: Active
   account_api_keys_last_used_column_label: Last Used
   account_api_keys_num_uses_column_label: Uses
   account_api_keys_notes_label: "Enter the name or a brief description of the application that will use this key:"
-  account_api_keys_remove_button: Remove the Selected Keys
   account_api_keys_create_button: Create a New Key
   account_api_keys_help: "API Keys are used by third-party applications to access the Mushroom Observer database directly.  You may request as many API Keys as you like, and no restrictions are placed on these keys.\n\nEach key is attached to a single user.  When posting observations or images, for example, your application will send this API Key in lieu of logging in. Therefore you should take some care to prevent other people or malicious agents from using your API Keys.\n\nNote that no key is required if you are only interested in _reading_ data; keys are only required if you wish to post or modify data."
   account_api_keys_create_success: Sucessfully created a new API Key.
@@ -3109,7 +3110,7 @@
   add_members_already_removed_member: Already removed [user] from members.
 
   # project/<id>/members
-  index_members_title: Members of 
+  index_members_title: Members of
 
   # project/add_project
   add_project_already_exists: A project named '[title]' already exists.
@@ -3157,6 +3158,10 @@
   change_member_status_remove_member_help: Remove Member - Removes all member and admin privileges for a project.  [:user] will no longer be able view or create draft names for this project.  They will not be able to perform any admin functions.
   change_member_status_denied: Only the admins for a project can change member permissions.
   change_member_status_title: Changing [:user] Status of [name] for [title]
+  change_member_status_trust: Trust Project
+  change_member_status_trust_flash: You now trust admins of this project with hidden GPS data for associated observations
+  change_member_status_revoke_trust: Revoke Trust
+  change_member_status_revoke_trust_flash: You no longer trust admins of this project with hidden GPS data for associated observations
 
   # users/bonuses
   change_user_bonuses_title: Contribution Bonuses for [user]
@@ -4120,9 +4125,9 @@
   query_title_by_editor: "[TYPES] Edited by [USER]"
   query_title_by_rss_log: "[TYPES] in Activity Log"
   query_title_by_user: "[TYPES] created by [USER]"
-  query_title_for_observation: "[TYPES] attached to [OBSERVATION]"
-  query_title_for_project: "[TYPES] attached to [PROJECT]"
-  query_title_in_lists_for_project: "[TYPES] in lists attached to [PROJECT]"
+  query_title_for_observation: "[TYPES] for [OBSERVATION]"
+  query_title_for_project: "[TYPES] for [PROJECT]"
+  query_title_in_lists_for_project: "[TYPES] in lists for [PROJECT]"
   query_title_for_target: "[TYPES] on [TARGET]"
   query_title_for_user: "[TYPES] for [USER]"
   query_title_in_herbarium: "[TYPES] in [HERBARIUM]"
@@ -4164,7 +4169,7 @@
   query_help_comment_for_user: comments sent to a given user
   query_help_comment_pattern_search: comments matching a search string
   query_help_herbarium_record_in_herbarium: records in a given fungarium
-  query_help_herbarium_record_for_observation: records attached to a given observation
+  query_help_herbarium_record_for_observation: records for a given observation
   query_help_image_advanced_search: images of observations matching advanced search criteria
   query_help_image_all: all images
   query_help_image_by_user: images created by a given user
