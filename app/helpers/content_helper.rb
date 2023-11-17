@@ -95,8 +95,13 @@ module ContentHelper
   end
 
   # make a help-block styled element, like a div, p
-  def help_block(element = :div, string = "")
-    content_tag(element, string, class: "help-block")
+  def help_block(element = :div, string = "", **args, &block)
+    content = block ? capture(&block) : string
+    html_options = {
+      class: class_names("help-block", args[:class])
+    }.deep_merge(args.except(:class))
+
+    content_tag(element, html_options) { content }
   end
 
   # draw a help block with an arrow
