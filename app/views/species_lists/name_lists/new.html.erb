@@ -28,16 +28,25 @@
   <tbody>
     <tr>
       <td align="left">
-        <div id="genera" class="scroller" data-name-list-target="genera"
-             data-action="click->name-list#nl_focus"></div>
+        <%= tag.div(
+          "", id: "genera", class: "scroller",
+          data: { name_list_target: "genera",
+                  action: "click->name-list#nl_focus" }
+        ) %>
       </td>
       <td align="left">
-        <div id="species" class="scroller" data-name-list-target="species"
-             data-action="click->name-list#nl_focus"></div>
+        <%= tag.div(
+          "", id: "species", class: "scroller",
+          data: { name_list_target: "species",
+                  action: "click->name-list#nl_focus" }
+        ) %>
       </td>
       <td align="left">
-        <div id="names" class="scroller" data-name-list-target="names"
-             data-action="click->name-list#nl_focus"></div>
+        <%= tag.div(
+          "", id: "names", class: "scroller",
+          data: { name_list_target: "names",
+                  action: "click->name-list#nl_focus" }
+        ) %>
       </td>
     </tr>
 

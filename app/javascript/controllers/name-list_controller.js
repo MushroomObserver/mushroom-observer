@@ -3,7 +3,8 @@ import { escapeHTML, getScrollBarWidth } from "src/mo_utilities"
 
 // Connects to data-controller="name-list"
 export default class extends Controller {
-  static targets = ["generaTarget", "speciesTarget", "namesTarget"]
+  static targets = ["genera", "species", "names"]
+
   initialize() {
     // Which column key strokes will go to.
     this.NL_FOCUS = null;
@@ -50,6 +51,13 @@ export default class extends Controller {
   }
 
   connect() {
+    // These are the ids of the divs for each column.
+    this.NL_DIVS = {
+      genera: this.generaTarget,
+      species: this.speciesTarget,
+      names: this.namesTarget
+    };
+
     this.element.setAttribute("data-stimulus", "connected")
     this.nl_initialize_names();
     this.nl_draw("genera", this.NL_GENERA);
@@ -59,13 +67,6 @@ export default class extends Controller {
     // this.element.addEventListener("keyup", this.nl_keyup);
     // this.element.addEventListener("click", this.nl_unfocus);
     this.nc("genera", 0); // click on first genus
-
-    // These are the ids of the divs for each column.
-    this.NL_DIVS = {
-      genera: this.generaTarget,
-      species: this.speciesTarget,
-      names: this.namesTarget
-    };
   }
 
   // -------------------------------  Events  ---------------------------------
@@ -98,7 +99,7 @@ export default class extends Controller {
     const [section, i] = this.getDataFromEventTarget(event)
 
     this.nl_clear_word();
-    this.nl_focus(section);
+    this.nl_do_focus(section); //
     this.nl_move_cursor(section, i);
     if (section == 'genera')
       this.nl_select_genus(this.NL_GENERA[i]);
@@ -303,7 +304,11 @@ export default class extends Controller {
 
   // Change focus from one column to another.
   nl_focus(event) {
-    const section = event.target.id
+    const section = event.target.id;
+    this.nl_do_focus(section);
+  }
+
+  nl_do_focus(section) {
     this.NL_FOCUS = section;
     this.nl_draw_cursors();
   }
@@ -389,44 +394,58 @@ export default class extends Controller {
   // or 'names'; list is GENERA, SPECIES or NAMES.
   nl_draw(section, list = []) {
     // const section = this.NL_DIVS[section];
-    let html = '';
+    const ul = document.createElement("ul");
+
     for (let i = 0; i < list.length; i++) {
       let name = list[i];
+      let author_span = '';
       let author = '';
       let star = false;
+
       if (name.charAt(name.length - 1) == '*') {
         name = name.substr(0, name.length - 1);
         star = true;
       }
+
       const x = name.indexOf('|');
       if (x > 0) {
-        author = ' <span class="normal">'
-          + name.substr(x + 1).escapeHTML()
-          + '</span>';
+        author = document.createElement("span");
+        author.classList.add("normal");
+        author.innerHTML = name.substr(x + 1).escapeHTML()
         name = name.substr(0, x);
       }
+
       if (name.charAt(0) == '=') {
-        name = '<span class="ml-2">&nbsp;</span>= <b>' +
-          name.substr(2).escapeHTML() + '</b>';
+        name = document.createElement("span");
+        name.classList.add("ml-2");
+        name.innerHTML = "= ";
+        name_inner = document.createElement("strong");
+        name_inner.innerHTML = name.substr(2).escapeHTML();
+        name.append(name_inner);
       } else if (star) {
-        name = '<b>' + name.escapeHTML() + '</b>';
+        name = document.createElement("strong");
+        name.innerHTML = name.escapeHTML();
       } else {
         name = name.escapeHTML();
       }
-      html += '<li' +
-        ' id="' + section + i + '"' +
-        ' data-section="' + section + '"' +
-        ' data-i="' + i + '"' +
-        ' data-action="' +
-        ' mouseover->name-list#na' +
-        ' mouseout->name-list#nb' +
-        ' click->name-list#nc' +
-        ' dblclick->name-list#nd"' +
-        '><nobr>' + name + author + '</nobr></li>';
-    }
-    html = '<ul>' + html + '</ul>';
 
-    this.NL_DIVS[section].innerHTML = html;
+      const li = document.createElement("li");
+      li.id = section + i;
+      li.classList.add("text-nowrap");
+      li.setAttribute("data-section", section);
+      li.setAttribute("data-i", i);
+      const actions = [
+        "mouseover->name-list#na",
+        "mouseout->name-list#nb",
+        "click->name-list#nc",
+        "dblclick->name-list#nd"
+      ].join(" ");
+      li.setAttribute("data-action", actions);
+      li.innerHTML = name + author;
+      ul.append(li);
+    }
+
+    this.NL_DIVS[section].innerHTML = ul;
   }
 
   // ------------------------------  Actions  ---------------------------------
