@@ -398,7 +398,7 @@ export default class extends Controller {
 
     for (let i = 0; i < list.length; i++) {
       let name = list[i];
-      let author_span = '';
+      let name_inner = '';
       let author = '';
       let star = false;
 
@@ -442,7 +442,7 @@ export default class extends Controller {
       ].join(" ");
       li.setAttribute("data-action", actions);
       li.innerHTML = name + author;
-      ul.append(li);
+      ul.appendChild(li);
     }
 
     this.NL_DIVS[section].innerHTML = ul;
