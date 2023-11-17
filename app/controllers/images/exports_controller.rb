@@ -15,6 +15,7 @@ module Images
     def update
       @user  = User.current
       @image = Image.find(params[:id])
+      @value = params[:value]
       raise("Permission denied.") unless @user.in_group?("reviewers")
       raise("Bad value.") if @value != "0" && @value != "1"
 
