@@ -2873,17 +2873,15 @@ class ObservationsControllerTest < FunctionalTestCase
       end
     end
 
-    # Prove that an image was created, but is unattached, is in the
-    # @bad_images array, and has not been kept in the @good_images array
-    # for attachment later.
-
     # img = Image.find_by(copyright_holder: "zuul")
     img = Image.order(updated_at: :asc).last
 
-    assert(img)
-    assert_equal([], img.observations)
-    assert_includes(@controller.instance_variable_get(:@bad_images), img)
-    assert_empty(@controller.instance_variable_get(:@good_images))
+    assert(img, "Failed to create image")
+    assert_equal([], img.observations, "Image should be unattached")
+    assert_includes(@controller.instance_variable_get(:@bad_images), img,
+                    "Failed to include image in @bad_images")
+    assert_empty(@controller.instance_variable_get(:@good_images),
+                 "Incorrectly included image in @good_images")
   end
 
   def test_project_checkboxes_in_create_observation
