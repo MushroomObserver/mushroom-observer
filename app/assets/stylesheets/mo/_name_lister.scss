@@ -2,9 +2,8 @@
 // name_lister
 // --------------------------------------------------
 
-table.scroller th {
-  font-size: 120%;
-  padding-bottom: 5px;
+table.name-lister th {
+  font-size: $font-size-large;
 }
 
 div.scroller {
@@ -26,6 +25,7 @@ div.scroller {
 
   li {
     padding: 0px 5px 0px 5px;
+    cursor: pointer;
   }
 
   span.normal {
