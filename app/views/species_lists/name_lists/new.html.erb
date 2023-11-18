@@ -4,8 +4,8 @@
   add_tab_set(species_list_form_name_list_tabs)
   @container = :wide
 
-  javascript_include "name_lister"
-  javascript_include "/name_list_data.js"  # leading slash should take it out of asset pipeline
+  # javascript_include "name_lister"
+  # javascript_include "/name_list_data.js"  # leading slash should take it out of asset pipeline
 %>
 
 <noscript>
@@ -14,7 +14,9 @@
   </div>
 </noscript>
 
-<table cols="3" width="100%" class="scroller mt-3">
+<table cols="3" width="100%" class="scroller mt-3"
+       data-controller="name-list"
+       data-action="keypress->name-list#nl_keypress keydown->name-list#nl_keydown keyup->name-list#nl_keyup click->name-list#nl_unfocus">
   <thead>
     <tr>
       <th width="20%"><%= :name_lister_genera.t %></th>
@@ -26,13 +28,25 @@
   <tbody>
     <tr>
       <td align="left">
-        <div id="genera" class="scroller" onclick="nl_focus('g')"></div>
+        <%= tag.div(
+          "", id: "genera", class: "scroller",
+          data: { name_list_target: "genera",
+                  action: "click->name-list#nl_focus" }
+        ) %>
       </td>
       <td align="left">
-        <div id="species" class="scroller" onclick="nl_focus('s')"></div>
+        <%= tag.div(
+          "", id: "species", class: "scroller",
+          data: { name_list_target: "species",
+                  action: "click->name-list#nl_focus" }
+        ) %>
       </td>
       <td align="left">
-        <div id="names" class="scroller" onclick="nl_focus('n')"></div>
+        <%= tag.div(
+          "", id: "names", class: "scroller",
+          data: { name_list_target: "names",
+                  action: "click->name-list#nl_focus" }
+        ) %>
       </td>
     </tr>
 
@@ -47,7 +61,7 @@
 
 <div id="log mt-3"></div>
 
-<% inject_javascript_at_end %(
+<%# inject_javascript_at_end %(
   nl_initialize_names();
   nl_draw("g", NL_GENERA);
   nl_draw("n", NL_NAMES);

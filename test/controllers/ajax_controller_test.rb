@@ -188,24 +188,6 @@ class AjaxControllerTest < FunctionalTestCase
     bad_ajax_request(:auto_complete, type: :bogus, id: "bogus")
   end
 
-  def test_export_image
-    img = images(:in_situ_image)
-    assert_true(img.ok_for_export) # (default)
-
-    bad_ajax_request(:export, type: :image, id: img.id, value: "0")
-
-    login("rolf")
-    good_ajax_request(:export, type: :image, id: img.id, value: "0")
-    assert_false(img.reload.ok_for_export)
-
-    good_ajax_request(:export, type: :image, id: img.id, value: "1")
-    assert_true(img.reload.ok_for_export)
-
-    bad_ajax_request(:export, type: :image, id: 999, value: "1")
-    bad_ajax_request(:export, type: :image, id: img.id, value: "2")
-    bad_ajax_request(:export, type: :user, id: 1, value: "1")
-  end
-
   def test_upload_image
     # Arrange
     setup_image_dirs

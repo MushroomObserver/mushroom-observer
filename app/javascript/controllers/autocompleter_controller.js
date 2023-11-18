@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { escapeHTML, getScrollBarWidth } from "src/mo_utilities"
 
 const defaultOpts = {
   // id of text field (after initialization becomes a unique identifier)
@@ -150,6 +151,10 @@ export default class extends Controller {
 
     // Keep catalog of autocompleter objects so we can reuse them as needed.
     // AUTOCOMPLETERS[this.uuid] = this;
+
+    // Shared MO utilities imported
+    this.escapeHTML = escapeHTML
+    this.getScrollBarWidth = getScrollBarWidth
   }
 
   connect() {
@@ -1141,52 +1146,52 @@ export default class extends Controller {
 
   // ------------------------------- UTILITIES ------------------------------
 
-  // These methods are also used in name_lister.js
+  // These methods are also used in name-list_controller
   // Stimulus: May want to make a shared module
-  escapeHTML(str) {
-    const HTML_ENTITY_MAP = {
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': '&quot;',
-      "'": '&#39;',
-      "/": '&#x2F;'
-    };
+  // escapeHTML(str) {
+  //   const HTML_ENTITY_MAP = {
+  //     "&": "&amp;",
+  //     "<": "&lt;",
+  //     ">": "&gt;",
+  //     '"': '&quot;',
+  //     "'": '&#39;',
+  //     "/": '&#x2F;'
+  //   };
 
-    return str.replace(/[&<>"'\/]/g, function (s) {
-      return HTML_ENTITY_MAP[s];
-    });
-  }
+  //   return str.replace(/[&<>"'\/]/g, function (s) {
+  //     return HTML_ENTITY_MAP[s];
+  //   });
+  // }
 
-  getScrollBarWidth() {
-    let inner, outer, w1, w2;
-    const body = document.body || document.getElementsByTagName("body")[0];
+  // getScrollBarWidth() {
+  //   let inner, outer, w1, w2;
+  //   const body = document.body || document.getElementsByTagName("body")[0];
 
-    if (this.scrollbar_width != null)
-      return this.scrollbar_width;
+  //   if (this.scrollbar_width != null)
+  //     return this.scrollbar_width;
 
-    inner = document.createElement('p');
-    inner.style.width = "100%";
-    inner.style.height = "200px";
+  //   inner = document.createElement('p');
+  //   inner.style.width = "100%";
+  //   inner.style.height = "200px";
 
-    outer = document.createElement('div');
-    outer.style.position = "absolute";
-    outer.style.top = "0px";
-    outer.style.left = "0px";
-    outer.style.visibility = "hidden";
-    outer.style.width = "200px";
-    outer.style.height = "150px";
-    outer.style.overflow = "hidden";
-    outer.appendChild(inner);
+  //   outer = document.createElement('div');
+  //   outer.style.position = "absolute";
+  //   outer.style.top = "0px";
+  //   outer.style.left = "0px";
+  //   outer.style.visibility = "hidden";
+  //   outer.style.width = "200px";
+  //   outer.style.height = "150px";
+  //   outer.style.overflow = "hidden";
+  //   outer.appendChild(inner);
 
-    body.appendChild(outer);
-    w1 = inner.offsetWidth;
-    outer.style.overflow = 'scroll';
-    w2 = inner.offsetWidth;
-    if (w1 == w2) w2 = outer.clientWidth;
-    body.removeChild(outer);
+  //   body.appendChild(outer);
+  //   w1 = inner.offsetWidth;
+  //   outer.style.overflow = 'scroll';
+  //   w2 = inner.offsetWidth;
+  //   if (w1 == w2) w2 = outer.clientWidth;
+  //   body.removeChild(outer);
 
-    this.scrollbar_width = w1 - w2;
-    // return scroll_bar_width;
-  }
+  //   this.scrollbar_width = w1 - w2;
+  //   // return scroll_bar_width;
+  // }
 }

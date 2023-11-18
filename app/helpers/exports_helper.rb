@@ -1,18 +1,20 @@
 # frozen_string_literal: true
 
-module ExporterHelper
+module ExportsHelper
   # Create button? to export an Image.
   def image_exporter(image_id, exported)
     link = export_link(image_id, exported)
-    content_tag(:div, link, id: "image_export_#{image_id}")
+    tag.div(link, id: "image_export_#{image_id}")
   end
 
   # TODO: Fix the javascript.
   def export_link(image_id, exported)
     if exported
-      link_to("", {}, onclick: "image_export(#{image_id},0)")
+      put_button(name: "Don't export",
+                 path: export_image_path(id: image_id, value: 0))
     else
-      link_to("", {}, onclick: "image_export(#{image_id},1)")
+      put_button(name: "Export",
+                 path: export_image_path(id: image_id, value: 1))
     end
   end
 

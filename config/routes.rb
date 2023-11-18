@@ -20,7 +20,7 @@ ACTIONS = {
   ajax: {
     auto_complete: {},
     create_image_object: {},
-    export: {},
+    # export: {},
     # external_link: {},
     geocode: {},
     image: {},
@@ -28,7 +28,7 @@ ACTIONS = {
     name_primer: {},
     multi_image_template: {},
     test: {},
-    visual_group_status: {}
+    # visual_group_status: {}
   },
   api: {
     api_keys: {},
@@ -436,6 +436,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     member do
       put("transform", to: "images/transformations#update", as: "transform")
       get("exif", to: "images/exif#show", as: "exif")
+      put("export", to: "images/exports#update", as: "export")
     end
     put("/vote", to: "images/votes#update", as: "vote")
   end

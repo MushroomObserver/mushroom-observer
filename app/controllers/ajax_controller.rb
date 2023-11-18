@@ -27,7 +27,6 @@
 class AjaxController < ApplicationController
   include UploadImage
   include Primers
-  include Export
   include AutoComplete
 
   disable_filters
