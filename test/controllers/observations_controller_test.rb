@@ -2859,11 +2859,13 @@ class ObservationsControllerTest < FunctionalTestCase
                          copyright_holder: "zuul",
                          when: Time.current,
                          notes: "stubbed in test")
-    params = { observation: { place_name: "USA",
-                              when: Time.current },
-               image: { "0" => { image: file,
-                                 copyright_holder: "zuul",
-                                 when: Time.current } } }
+    params = {
+      observation: { place_name: "USA",
+                     when: Time.current },
+      "0" => { image: file,
+               copyright_holder: "zuul",
+               when: Time.current }
+    }
     login("rolf")
 
     # Simulate process_image failure.
