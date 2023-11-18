@@ -2873,8 +2873,7 @@ class ObservationsControllerTest < FunctionalTestCase
       end
     end
 
-    # img = Image.find_by(copyright_holder: "zuul")
-    img = Image.order(updated_at: :asc).last
+    img = Image.find_by(copyright_holder: "zuul")
 
     assert(img, "Failed to create image")
     assert_equal([], img.observations, "Image should be unattached")
