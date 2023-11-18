@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { escapeHTML, getScrollBarWidth } from "src/mo_utilities"
+import { NL_GENERA, NL_SPECIES, NL_NAMES } from "src/name_list_data"
 
 // Connects to data-controller="name-list"
 export default class extends Controller {
@@ -48,6 +49,10 @@ export default class extends Controller {
     // Shared MO utilities imported
     Object.assign(this, escapeHTML)
     Object.assign(this, getScrollBarWidth)
+    // name_list_data.js imported
+    Object.assign(this, NL_GENERA)
+    Object.assign(this, NL_SPECIES)
+    Object.assign(this, NL_NAMES)
   }
 
   connect() {

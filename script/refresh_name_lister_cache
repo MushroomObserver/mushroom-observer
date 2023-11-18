@@ -103,9 +103,9 @@ end
 # Cop does not know how to handle this
 File.open(MO.name_lister_cache_file, "w") do |fh| # rubocop:disable Style/FileWrite
   fh.write(<<-END.unindent)
-    var NL_GENERA  = [#{genera.map  { |n| "'#{escape(n)}'" }.join(",")}];
-    var NL_SPECIES = [#{species.map { |n| "'#{escape(n)}'" }.join(",")}];
-    var NL_NAMES   = [];
+    export const NL_GENERA = [#{genera.map { |n| "'#{escape(n)}'" }.join(",")}];
+    export const NL_SPECIES = [#{species.map { |n| "'#{escape(n)}'" }.join(",")}];
+    export const NL_NAMES = [];
   END
 end
 
