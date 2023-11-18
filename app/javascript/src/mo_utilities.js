@@ -44,3 +44,19 @@ export function getScrollBarWidth() {
   this.scrollbar_width = w1 - w2;
   // return scroll_bar_width;
 }
+
+export const EVENT_KEYS = {
+  tab: 9,
+  return: 13,
+  esc: 27,
+  backspace: 8,
+  delete: 46,
+  up: 38,
+  down: 40,
+  left: 37,
+  right: 39,
+  pageup: 33,
+  pagedown: 34,
+  home: 36,
+  end: 35
+}
