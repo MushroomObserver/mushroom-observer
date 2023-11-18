@@ -153,8 +153,8 @@ export default class extends Controller {
     // AUTOCOMPLETERS[this.uuid] = this;
 
     // Shared MO utilities imported
-    Object.assign(this, escapeHTML)
-    Object.assign(this, getScrollBarWidth)
+    this.escapeHTML = escapeHTML
+    this.getScrollBarWidth = getScrollBarWidth
   }
 
   connect() {

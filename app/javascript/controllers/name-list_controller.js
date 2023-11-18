@@ -46,13 +46,14 @@ export default class extends Controller {
     this.EVENT_KEY_HOME = 36;
     this.EVENT_KEY_END = 35;
 
-    // Shared MO utilities imported
-    Object.assign(this, escapeHTML)
-    Object.assign(this, getScrollBarWidth)
     // name_list_data.js imported
-    Object.assign(this, NL_GENERA)
-    Object.assign(this, NL_SPECIES)
-    Object.assign(this, NL_NAMES)
+    this.NL_GENERA = NL_GENERA
+    this.NL_SPECIES = NL_SPECIES
+    this.NL_NAMES = NL_NAMES
+
+    // Shared MO utilities imported
+    this.escapeHTML = escapeHTML
+    this.getScrollBarWidth = getScrollBarWidth
   }
 
   connect() {
@@ -201,7 +202,6 @@ export default class extends Controller {
   // Process a key stroke.  This happens when the user first presses a key, and
   // periodically after if they keep the key down.
   nl_process_key(event) {
-
     // Normal letters.
     const c = String.fromCharCode(event.keyCode || event.which).toLowerCase();
     if (c.match(/[a-zA-Z \-]/) && !event.ctrlKey ||
@@ -366,30 +366,31 @@ export default class extends Controller {
     if (list.length > 0 && i != null) {
       if (i < 0) this.NL_CURSOR[section] = i = 0;
       if (i >= list.length) this.NL_CURSOR[section] = i = list.length - 1;
-      document.getElementById(section + i)
-        .classList.remove("hot", "warm")
-        .add(this.NL_FOCUS == section ? "warm" : "hot");
+      let li_el = document.getElementById(section + i);
+      li_el.classList.remove("hot", "warm");
+      let heat = (this.NL_FOCUS == section) ? "warm" : "hot";
+      li_el.classList.add(heat);
     } else {
       this.NL_CURSOR[section] = null;
     }
   }
 
   // Make sure cursor is visible in a given column.
-  nl_warp(section) {
-    if (section == undefined)
-      return
-    let i = this.NL_CURSOR[section] || 0;
-    let e = document.getElementById(section + i);
+  nl_warp(s) {
+    // if (s == undefined)
+    //   return
+    let i = this.NL_CURSOR[s] || 0;
+    let e = document.getElementById(s + i);
     if (!this.scroll_bar_width)
-      this.scroll_bar_width = e.getScrollBarWidth();
+      this.scroll_bar_width = this.getScrollBarWidth(e);
     if (e && e.offsetTop) {
-      const section = this.NL_DIVS[section];
+      const section = this.NL_DIVS[s];
       const ey = e.offsetTop - e.parentElement.offsetTop;
       const eh = e.offsetHeight;
       const sy = section.scrollTop;
-      const sh = 450 - scroll_bar_width;
-      const ny = ey + eh > sy + sh ? ey + eh - sh : sy;
-      ny = ey < ny ? ey : ny;
+      const sh = 450 - this.scroll_bar_width;
+      let ny = ey + eh > sy + sh ? ey + eh - sh : sy;
+      ny = (ey < ny) ? ey : ny;
       if (sy != ny)
         section.scrollTop = ny;
     }
@@ -398,42 +399,42 @@ export default class extends Controller {
   // Draw contents of one of the three columns.  Section is 'genera', 'species'
   // or 'names'; list is GENERA, SPECIES or NAMES.
   nl_draw(section, list = []) {
-    // const section = this.NL_DIVS[section];
     const ul = document.createElement("ul");
 
     for (let i = 0; i < list.length; i++) {
       let name = list[i];
-      let name_inner = '';
-      let author = '';
-      let star = false;
+      const x = name.indexOf('|');
+      let name_el, name_inner, star;
+      let author_el = document.createElement("span");
 
-      if (name.charAt(name.length - 1) == '*') {
+      // the last one:
+      if (star = (name.charAt(name.length - 1) == '*')) {
         name = name.substr(0, name.length - 1);
-        star = true;
       }
 
-      const x = name.indexOf('|');
       if (x > 0) {
-        author = document.createElement("span");
-        author.classList.add("normal");
-        author.innerHTML = name.substr(x + 1).escapeHTML()
+        author_el.classList.add("normal");
+        author_el.innerHTML = this.escapeHTML(name.substr(x + 1))
         name = name.substr(0, x);
       }
 
+      // synonyms
       if (name.charAt(0) == '=') {
-        name = document.createElement("span");
-        name.classList.add("ml-2");
-        name.innerHTML = "= ";
+        name_el = document.createElement("span");
+        name_el.classList.add("ml-2");
+        name_el.innerHTML = "= ";
         name_inner = document.createElement("strong");
-        name_inner.innerHTML = name.substr(2).escapeHTML();
-        name.append(name_inner);
+        name_inner.innerHTML = this.escapeHTML(name.substr(2));
+        name_el.appendChild(name_inner);
       } else if (star) {
-        name = document.createElement("strong");
-        name.innerHTML = name.escapeHTML();
+        name_el = document.createElement("strong");
+        name_el.innerHTML = this.escapeHTML(name);
       } else {
-        name = name.escapeHTML();
+        name_el = document.createElement("span");
+        name_el.innerHTML = this.escapeHTML(name);
       }
 
+      // build the list item
       const li = document.createElement("li");
       li.id = section + i;
       li.classList.add("text-nowrap");
@@ -446,11 +447,12 @@ export default class extends Controller {
         "dblclick->name-list#nd"
       ].join(" ");
       li.setAttribute("data-action", actions);
-      li.innerHTML = name + author;
+
+      li.appendChild(name_el).appendChild(author_el);
       ul.appendChild(li);
     }
 
-    this.NL_DIVS[section].innerHTML = ul;
+    this.NL_DIVS[section].appendChild(ul);
   }
 
   // ------------------------------  Actions  ---------------------------------
