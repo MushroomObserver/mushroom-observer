@@ -31,6 +31,25 @@ module SpeciesLists
       assert_response(:success)
     end
 
+    def test_unowned_list
+      proj = projects(:eol_project)
+      list = species_lists(:lone_wolf_list)
+
+      login("mary")
+      put(
+        :update,
+        params: {
+          id: list.id,
+          objects_list: "1",
+          objects_obs: "0",
+          objects_img: "0",
+          "projects_#{proj.id}" => "1",
+          commit: :ATTACH.l
+        }
+      )
+      assert_response(:redirect)
+    end
+
     def test_manage_projects_list
       proj1 = projects(:eol_project)
       proj2 = projects(:bolete_project)
