@@ -1241,6 +1241,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login("mary")
     get(:new)
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :unchecked)
+    post(:create,
+         params: { project: { "id_#{@proj1.id}" => "1" } })
+    assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
 
     login("dick")
     get(:new)
@@ -1248,19 +1251,16 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:new)
-    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
-    post(:create,
-         params: { project: { "id_#{@proj1.id}" => "1" } })
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
+    post(:create,
+         params: { project: { "id_#{@proj1.id}" => "0" } })
+    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
 
     # should have different default if recently create list attached to project
     obs = Observation.create!
     @proj1.add_observation(obs)
     get(:new)
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
-    post(:create,
-         params: { project: { "id_#{@proj1.id}" => "0" } })
-    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
   end
 
   def test_project_checkboxes_in_edit_species_list_form
