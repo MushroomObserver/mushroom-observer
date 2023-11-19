@@ -657,3 +657,9 @@ wolf_fart:
   # wolf_fart issue.  Switch comments for next 2 lines
   images: lone_wolf_image
   # images: lone_wolf_image, lone_wolf_image2
+
+reused_observation:
+  <<: *DEFAULTS
+  user: rolf
+  when: 2023-11-19
+  species_lists: reused_list

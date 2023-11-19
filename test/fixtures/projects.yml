@@ -24,6 +24,7 @@ eol_project:
   updated_at: 2008-09-24 21:33:30
   image: peltigera_image
   species_lists: reused_list
+  observations: reused_observation
 
 # admins: dick
 # members: dick, mary
@@ -75,6 +76,7 @@ open_membership_project:
   observations: owner_accepts_general_questions, unknown_with_lat_long, trusted_hidden, untrusted_hidden
   open_membership: true
   species_lists: reused_list
+  observations: reused_observation
 
 not_accepting_observations_project:
   <<: *DEFAULTS
