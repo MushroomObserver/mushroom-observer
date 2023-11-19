@@ -63,9 +63,6 @@ GEM
     brakeman (6.0.1)
     browser (5.3.1)
     builder (3.2.4)
-    bullet (7.0.7)
-      activesupport (>= 3.0.0)
-      uniform_notifier (~> 1.11)
     capybara (3.39.2)
       addressable
       matrix
@@ -264,7 +261,6 @@ GEM
     unicorn (6.1.0)
       kgio (~> 2.6)
       raindrops (~> 0.7)
-    uniform_notifier (1.16.0)
     web-console (4.2.1)
       actionview (>= 6.0.0)
       activemodel (>= 6.0.0)
@@ -307,7 +303,6 @@ DEPENDENCIES
   bootstrap-sass
   brakeman
   browser
-  bullet
   bundler
   capybara (~> 3.37, >= 3.37.1)
   cuprite

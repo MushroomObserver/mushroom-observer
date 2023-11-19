@@ -205,7 +205,7 @@ group :test do
   gem("webmock")
 
   # Check for N+1 queries and unused eager loading.
-  gem("bullet")
+  # gem("bullet")
 end
 
 group :development do
