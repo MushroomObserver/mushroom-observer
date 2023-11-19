@@ -56,7 +56,7 @@ module Account
 
       # First make sure it can serve the form to start with.
       requires_login("edit")
-      Language.all.each do |lang|
+      Language.find_each do |lang|
         assert_select("option[value=#{lang.locale}]", { count: 1 },
                       "#{lang.locale} language option missing")
       end

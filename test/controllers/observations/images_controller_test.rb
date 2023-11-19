@@ -473,7 +473,7 @@ module Observations
       assert_nil(obs.thumb_image_id)
     end
 
-    def test_remove_images_2
+    def test_remove_images2
       obs = observations(:detailed_unknown_obs)
       images = obs.images
       assert(images.size > 1,
