@@ -8,34 +8,34 @@ export default class extends Controller {
 
   initialize() {
     // Which column key strokes will go to.
-    this.NL_FOCUS = null
+    this.FOCUS_COLUMN = null
     // Kludge to tell it to ignore click event on outer div after processing
     // click event within one of the three columns.
-    this.NL_IGNORE_UNFOCUS = false
+    this.IGNORE_UNFOCUS = false
     // Keycode of key that's currently pressed if any (and if focused).
-    this.NL_KEY = null
+    this.KEY = null
     // Callback used to simulate key repeats.
-    this.NL_REPEAT_CALLBACK = null
+    this.REPEAT_CALLBACK = null
     // Timing of key repeat.
-    this.NL_FIRST_KEY_DELAY = 250
-    this.NL_NEXT_KEY_DELAY = 25
+    this.FIRST_KEY_DELAY = 250
+    this.NEXT_KEY_DELAY = 25
     // Accumulator for typed letters, used to search in columns.
-    this.NL_WORD = ""
+    this.WORD = ""
     // Cursor position in each column.
-    this.NL_CURSOR = {
+    this.CURSOR = {
       genera: null,
       species: null,
       names: null
     }
     // Current subset of SPECIES that is being displayed.
-    this.NL_SPECIES_CUR = []
+    this.CURRENT_SPECIES = []
 
-    this.scroll_bar_width = null
+    this.SCROLLBAR_WIDTH = null
 
     // primers imported from name_list_data.js
-    this.NL_GENERA = NL_GENERA
-    this.NL_SPECIES = NL_SPECIES
-    this.NL_NAMES = NL_NAMES
+    this.GENERA = NL_GENERA
+    this.SPECIES = NL_SPECIES
+    this.NAMES = NL_NAMES
 
     // Shared MO utilities imported from mo_utilities.js
     this.escapeHTML = escapeHTML
@@ -45,69 +45,69 @@ export default class extends Controller {
 
   connect() {
     // These are the div elements for each column.
-    this.NL_DIVS = {
+    this.DIVS = {
       genera: this.generaTarget,
       species: this.speciesTarget,
       names: this.namesTarget
     }
 
     this.element.setAttribute("data-stimulus", "connected")
-    this.nl_initialize_names()
-    this.nl_draw("genera", this.NL_GENERA)
-    this.nl_draw("names", this.NL_NAMES)
-    this.nc("genera", 0) // click on first genus
+    this.initializeNames()
+    this.drawColumn("genera", this.GENERA)
+    this.drawColumn("names", this.NAMES)
+    this.doClick("genera", 0) // click on first genus
   }
 
   // -------------------------------  Events  ---------------------------------
 
   // Mouse moves over an item.
-  na(event) {
-    const [section, i] = this.getDataFromEventTarget(event)
+  doMouseover(event) {
+    const [column, i] = this.getDataFromEventTarget(event)
 
-    if (this.NL_CURSOR[section] != i)
-      document.getElementById(section + i).classList.add("hot")
+    if (this.CURSOR[column] != i)
+      document.getElementById(column + i).classList.add("hot")
   }
 
   // Mouse moves off of an item.
-  nb(event) {
-    const [section, i] = this.getDataFromEventTarget(event)
+  doMouseout(event) {
+    const [column, i] = this.getDataFromEventTarget(event)
 
-    if (this.NL_CURSOR[section] != i)
-      document.getElementById(section + i).classList.remove("hot", "warm")
+    if (this.CURSOR[column] != i)
+      document.getElementById(column + i).classList.remove("hot", "warm")
   }
 
   // Click on item.
-  nc(event) {
-    const [section, i] = this.getDataFromEventTarget(event)
+  doClick(event) {
+    const [column, i] = this.getDataFromEventTarget(event)
 
-    this.nl_clear_word()
-    this.nl_do_focus(section)
-    this.nl_move_cursor(section, i)
-    if (section == 'genera')
-      this.nl_select_genus(this.NL_GENERA[i])
-    this.NL_IGNORE_UNFOCUS = true
+    this.WORD = ''
+    this.focusSection(column)
+    this.moveCursorIn(column, i)
+    if (column == 'genera')
+      this.selectGenus(this.GENERA[i])
+    this.IGNORE_UNFOCUS = true
   }
 
   // Double-click on item.
-  nd(event) {
-    const [section, i] = this.getDataFromEventTarget(event)
+  doDoubleClick(event) {
+    const [column, i] = this.getDataFromEventTarget(event)
 
-    if (section == 'species')
-      this.nl_insert_name(this.NL_SPECIES_CUR[i])
-    if (section == 'names')
-      this.nl_remove_name(this.NL_NAMES[i])
+    if (column == 'species')
+      this.insertName(this.CURRENT_SPECIES[i])
+    if (column == 'names')
+      this.removeName(this.NAMES[i])
   }
 
   // Utility to get relevant dataset from event target
   // NOTE: The controller itself prints the <li> with this dataset, below.
   getDataFromEventTarget(event) {
-    const section = event.target?.dataset.section
+    const column = event.target?.dataset.column
     const i = event.target?.dataset.i
-    return [section, i]
+    return [column, i]
   }
 
   // Are we watching this key event?
-  nl_watching(event) {
+  isWatching(event) {
     const c = String.fromCharCode(event.keyCode || event.which).toLowerCase()
     if (c.match(/[a-zA-Z \-]/) && !event.ctrlKey)
       return true
@@ -130,8 +130,8 @@ export default class extends Controller {
   }
 
   // Also called when user presses a key.  Disable this if focused.
-  nl_keypress(event) {
-    if (this.NL_FOCUS && this.nl_watching(event)) {
+  doKeypress(event) {
+    if (this.FOCUS_COLUMN && this.isWatching(event)) {
       event.stopPropagation()
       return false
     } else {
@@ -140,29 +140,28 @@ export default class extends Controller {
   }
 
   // Called when user un-presses a key.  Need to know so we can stop repeat.
-  nl_keyup(event) {
-    this.NL_KEY = null
-    if (this.NL_REPEAT_CALLBACK) {
-      clearTimeout(this.NL_REPEAT_CALLBACK)
-      this.NL_REPEAT_CALLBACK = null
+  doKeyup(event) {
+    this.KEY = null
+    if (this.REPEAT_CALLBACK) {
+      clearTimeout(this.REPEAT_CALLBACK)
+      this.REPEAT_CALLBACK = null
     }
   }
 
   // Called when user presses a key.  We keep track of where user is typing by
-  // updating this.NL_FOCUS (value is 'genera', 'species' or 'names').
-  nl_keydown(event) {
+  // updating this.FOCUS_COLUMN (value is 'genera', 'species' or 'names').
+  doKeydown(event) {
+    // Cursors, etc. must be explicitly focused to work.
+    // (Otherwise you can't use them to navigate through the page as a whole.)
+    if (!this.FOCUS_COLUMN || !this.isWatching(event)) return true
 
-    // Cursors, etc. must be explicitly focused to work.  (Otherwise you can't
-    // use them to navigate through the page as a whole.)
-    if (!this.NL_FOCUS || !this.nl_watching(event)) return true
-
-    this.NL_KEY = event
-    this.nl_process_key(event)
+    this.KEY = event
+    this.processKeystroke(event)
 
     // Schedule first repeat event.
-    this.NL_REPEAT_CALLBACK =
+    this.REPEAT_CALLBACK =
       window.setTimeout(
-        () => { this.nl_keyrepeat(this.NL_KEY) }, this.NL_FIRST_KEY_DELAY
+        () => { this.doKeyrepeat(this.KEY) }, this.FIRST_KEY_DELAY
       )
 
     // Stop browser from doing anything with key presses when focused.
@@ -171,21 +170,21 @@ export default class extends Controller {
   }
 
   // Called when a key repeats.
-  nl_keyrepeat(event) {
-    if (this.NL_FOCUS && this.NL_KEY) {
-      this.nl_process_key(this.NL_KEY)
-      this.NL_REPEAT_CALLBACK =
+  doKeyrepeat(event) {
+    if (this.FOCUS_COLUMN && this.KEY) {
+      this.processKeystroke(this.KEY)
+      this.REPEAT_CALLBACK =
         window.setTimeout(
-          () => { this.nl_keyrepeat(this.NL_KEY) }, this.NL_NEXT_KEY_DELAY
+          () => { this.doKeyrepeat(this.KEY) }, this.NEXT_KEY_DELAY
         )
     } else {
-      this.NL_KEY = null
+      this.KEY = null
     }
   }
 
   // Process a key stroke.  This happens when the user first presses a key, and
   // periodically after if they keep the key down.
-  nl_process_key(event) {
+  processKeystroke(event) {
     // Normal letters.
     const c = String.fromCharCode(event.keyCode || event.which).toLowerCase()
     if (c.match(/[a-zA-Z \-]/) && !event.ctrlKey ||
@@ -193,98 +192,96 @@ export default class extends Controller {
 
       // Update word with new letter or backspace.
       if (event.keyCode != this.EVENT_KEYS.backspace) {
-        this.NL_WORD += c
+        this.WORD += c
         // If start typing with no focus, assume they mean genus.
-        if (!this.NL_FOCUS) this.NL_FOCUS = 'g'
-      } else if (this.NL_WORD != '') {
-        this.NL_WORD = this.NL_WORD.substr(0, this.NL_WORD.length - 1)
+        if (!this.FOCUS_COLUMN) this.FOCUS_COLUMN = 'genera'
+      } else if (this.WORD != '') {
+        this.WORD = this.WORD.substr(0, this.WORD.length - 1)
       }
 
       // Search for partial word.
-      const list = this.NL_FOCUS == 'g' ? this.NL_GENERA :
-        this.NL_FOCUS == 's' ? this.NL_SPECIES_CUR : this.NL_NAMES
-      let word = this.NL_WORD
-      if (this.NL_FOCUS == 's')
-        word =
-          this.NL_SPECIES_CUR[0].replace(/\*$|\|.*/, '') + ' ' + this.NL_WORD
-      this.nl_search(list, word)
-      this.nl_update_word(word)
+      const list = this.FOCUS_COLUMN == 'genera' ? this.GENERA :
+        (this.FOCUS_COLUMN == 'species') ? this.CURRENT_SPECIES : this.NAMES
+      let word = this.WORD
+      if (this.FOCUS_COLUMN == 'species')
+        word = this.CURRENT_SPECIES[0].replace(/\*$|\|.*/, '') + ' ' + this.WORD
+      this.searchListForWord(list, word)
       return
     }
 
     // Clear word if user does *anything* else.
-    // const old_word = this.NL_WORD
-    this.nl_clear_word()
+    // const old_word = this.WORD
+    this.WORD = ''
 
     // Other strokes.
-    let i = this.NL_CURSOR[this.NL_FOCUS]
+    let i = this.CURSOR[this.FOCUS_COLUMN]
     switch (event.keyCode) {
 
       // Move cursor up and down.
       case this.EVENT_KEYS.up:
-        if (i != null) this.nl_move_cursor(
-          this.NL_FOCUS, i - (event.ctrlKey ? 10 : 1)
+        if (i != null) this.moveCursorIn(
+          this.FOCUS_COLUMN, i - (event.ctrlKey ? 10 : 1)
         )
         break
       case this.EVENT_KEYS.down:
-        this.nl_move_cursor(
-          this.NL_FOCUS, i == null ? 0 : i + (event.ctrlKey ? 10 : 1)
+        this.moveCursorIn(
+          this.FOCUS_COLUMN, i == null ? 0 : i + (event.ctrlKey ? 10 : 1)
         )
         break
       case this.EVENT_KEYS.pageup:
-        if (i != null) this.nl_move_cursor(this.NL_FOCUS, i - 20)
+        if (i != null) this.moveCursorIn(this.FOCUS_COLUMN, i - 20)
         break
       case this.EVENT_KEYS.pagedown:
-        this.nl_move_cursor(this.NL_FOCUS, i == null ? 20 : i + 20)
+        this.moveCursorIn(this.FOCUS_COLUMN, i == null ? 20 : i + 20)
         break
       case this.EVENT_KEYS.home:
-        if (i != null) this.nl_move_cursor(this.NL_FOCUS, 0)
+        if (i != null) this.moveCursorIn(this.FOCUS_COLUMN, 0)
         break
       case this.EVENT_KEYS.end:
-        this.nl_move_cursor(this.NL_FOCUS, 10000000)
+        this.moveCursorIn(this.FOCUS_COLUMN, 10000000)
         break
 
       // Switch columns.
       case this.EVENT_KEYS.left:
-        this.NL_FOCUS = (this.NL_FOCUS == 'g') ? 'n'
-          : (this.NL_FOCUS == 's') ? 'g' : 's'
-        this.nl_draw_cursors()
+        this.FOCUS_COLUMN = (this.FOCUS_COLUMN == 'genera') ? 'names'
+          : (this.FOCUS_COLUMN == 'species') ? 'genera' : 'species'
+        this.highlightCursors()
         break
       case this.EVENT_KEYS.right:
-        this.NL_FOCUS = (this.NL_FOCUS == 'g') ? 's'
-          : (this.NL_FOCUS == 's') ? 'n' : 'g'
-        this.nl_draw_cursors()
+        this.FOCUS_COLUMN = (this.FOCUS_COLUMN == 'genera') ? 'species'
+          : (this.FOCUS_COLUMN == 'species') ? 'names' : 'genera'
+        this.highlightCursors()
         break
       case this.EVENT_KEYS.tab:
         if (event.shiftKey) {
-          this.NL_FOCUS = (this.NL_FOCUS == 'g') ? 'n'
-            : (this.NL_FOCUS == 's') ? 'g' : 's'
-        } else if (this.NL_FOCUS == 'g') {
+          this.FOCUS_COLUMN = (this.FOCUS_COLUMN == 'genera') ? 'names'
+            : (this.FOCUS_COLUMN == 'species') ? 'genera' : 'species'
+        } else if (this.FOCUS_COLUMN == 'genera') {
           // Select current genus AND move to species column
           // if press tab in genus column.
-          this.nl_select_genus(this.NL_GENERA[i])
-          this.NL_FOCUS = 's'
+          this.selectGenus(this.GENERA[i])
+          this.FOCUS_COLUMN = 'species'
         } else {
-          this.NL_FOCUS = (this.NL_FOCUS == 's') ? 'n' : 'g'
+          this.FOCUS_COLUMN = (this.FOCUS_COLUMN == 'species') ? 'names' : 'genera'
         }
-        this.nl_draw_cursors()
+        this.highlightCursors()
         break
 
       // Select an item.
       case this.EVENT_KEYS.return:
-        if (this.NL_FOCUS == 'g' && i != null) {
-          this.nl_select_genus(this.NL_GENERA[i])
-          this.NL_FOCUS = 's'
-          this.nl_draw_cursors()
-        } else if (this.NL_FOCUS == 's' && i != null) {
-          this.nl_insert_name(this.NL_SPECIES_CUR[i])
+        if (this.FOCUS_COLUMN == 'genera' && i != null) {
+          this.selectGenus(this.GENERA[i])
+          this.FOCUS_COLUMN = 'species'
+          this.highlightCursors()
+        } else if (this.FOCUS_COLUMN == 'species' && i != null) {
+          this.insertName(this.CURRENT_SPECIES[i])
         }
         break
 
       // Delete item under cursor.
       case this.EVENT_KEYS.delete:
-        if (this.NL_FOCUS == 'n' && i != null)
-          this.nl_remove_name(this.NL_NAMES[i])
+        if (this.FOCUS_COLUMN == 'names' && i != null)
+          this.removeName(this.NAMES[i])
         break
     }
   }
@@ -292,94 +289,83 @@ export default class extends Controller {
   // --------------------------------  HTML  ----------------------------------
 
   // Change focus from one column to another.
-  nl_focus(event) {
-    const section = event.target.id
-    this.nl_do_focus(section)
+  doFocus(event) {
+    const column = event.target.id
+    this.focusSection(column)
   }
 
-  nl_do_focus(section) {
-    this.NL_FOCUS = section
-    this.nl_draw_cursors()
+  focusSection(column) {
+    this.FOCUS_COLUMN = column
+    this.highlightCursors()
   }
 
   // Unfocus to let user scroll the page with keyboard.
-  nl_unfocus() {
-    if (!this.NL_IGNORE_UNFOCUS) {
-      this.NL_FOCUS = null
-      this.nl_draw_cursors()
+  doUnfocus() {
+    if (!this.IGNORE_UNFOCUS) {
+      this.FOCUS_COLUMN = null
+      this.highlightCursors()
     } else {
-      this.NL_IGNORE_UNFOCUS = false
+      this.IGNORE_UNFOCUS = false
     }
   }
 
-  // Update partial word accumulated from typing normal letters.
-  nl_update_word(val) {
-    document.getElementById("word").innerHTML = (val == '' ? '&nbsp;' : val)
-  }
-
-  // Clear partial word (after mving cursor, clicking on something, etc.)
-  nl_clear_word() {
-    if (this.NL_WORD != '')
-      this.nl_update_word(this.NL_WORD = '')
-  }
-
   // Move cursor.
-  nl_move_cursor(section, new_pos) {
-    const old_pos = this.NL_CURSOR[section]
-    this.NL_CURSOR[section] = new_pos
+  moveCursorIn(column, new_pos) {
+    const old_pos = this.CURSOR[column]
+    this.CURSOR[column] = new_pos
     if (old_pos != null)
-      document.getElementById(section + old_pos).classList.remove("hot", "warm")
-    this.nl_draw_cursors()
-    this.nl_warp(section)
+      document.getElementById(column + old_pos).classList.remove("hot", "warm")
+    this.highlightCursors()
+    this.scrollToCursorIn(column)
   }
 
   // Redraw all the cursors.
-  nl_draw_cursors() {
-    // Make sure there *is* a cursor in the focused section.
-    if (this.NL_FOCUS && this.NL_CURSOR[this.NL_FOCUS] == null)
-      this.NL_CURSOR[this.NL_FOCUS] = 0
-    this.nl_draw_cursor('genera', this.NL_GENERA)
-    this.nl_draw_cursor('species', this.NL_SPECIES_CUR)
-    this.nl_draw_cursor('names', this.NL_NAMES)
+  highlightCursors() {
+    // Make sure there *is* a cursor in the focused column.
+    if (this.FOCUS_COLUMN && this.CURSOR[this.FOCUS_COLUMN] == null)
+      this.CURSOR[this.FOCUS_COLUMN] = 0
+    this.highlightCursor('genera', this.GENERA)
+    this.highlightCursor('species', this.CURRENT_SPECIES)
+    this.highlightCursor('names', this.NAMES)
   }
 
   // Draw a single cursor, making sure div is scrolled so we can see it.
-  nl_draw_cursor(section, list = []) {
-    let i = this.NL_CURSOR[section]
+  highlightCursor(column, list = []) {
+    let i = this.CURSOR[column]
     if (list.length > 0 && i != null) {
-      if (i < 0) this.NL_CURSOR[section] = i = 0
-      if (i >= list.length) this.NL_CURSOR[section] = i = list.length - 1
-      let li_el = document.getElementById(section + i)
+      if (i < 0) this.CURSOR[column] = i = 0
+      if (i >= list.length) this.CURSOR[column] = i = list.length - 1
+      let li_el = document.getElementById(column + i)
       li_el.classList.remove("hot", "warm")
-      let heat = (this.NL_FOCUS == section) ? "warm" : "hot"
+      let heat = (this.FOCUS_COLUMN == column) ? "warm" : "hot"
       li_el.classList.add(heat)
     } else {
-      this.NL_CURSOR[section] = null
+      this.CURSOR[column] = null
     }
   }
 
   // Make sure cursor is visible in a given column.
-  nl_warp(s) {
-    let i = this.NL_CURSOR[s] || 0
-    let e = document.getElementById(s + i)
-    if (!this.scroll_bar_width)
-      this.scroll_bar_width = this.getScrollBarWidth(e)
+  scrollToCursorIn(column) {
+    let i = this.CURSOR[column] || 0
+    let e = document.getElementById(column + i)
+    if (!this.SCROLLBAR_WIDTH)
+      this.SCROLLBAR_WIDTH = this.getScrollBarWidth(e)
     if (e && e.offsetTop) {
-      const section = this.NL_DIVS[s]
+      const column_el = this.DIVS[column]
       const ey = e.offsetTop - e.parentElement.offsetTop
       const eh = e.offsetHeight
-      const sy = section.scrollTop
-      const sh = 450 - this.scroll_bar_width
+      const sy = column_el.scrollTop
+      const sh = 450 - this.SCROLLBAR_WIDTH
       let ny = ey + eh > sy + sh ? ey + eh - sh : sy
       ny = (ey < ny) ? ey : ny
       if (sy != ny)
-        section.scrollTop = ny
+        column_el.scrollTop = ny
     }
   }
 
   // Draw contents of one of the three columns.
   // Sections: 'genera', 'species', 'names'; lists: GENERA, SPECIES, NAMES.
-  nl_draw(section, list = []) {
+  drawColumn(column, list = []) {
     const ul = document.createElement("ul")
 
     for (let i = 0; i < list.length; i++) {
@@ -417,37 +403,37 @@ export default class extends Controller {
 
       // build the list item
       const li = document.createElement("li")
-      li.id = section + i
+      li.id = column + i
       li.classList.add("text-nowrap", "name-list-item")
-      li.setAttribute("data-section", section)
+      li.setAttribute("data-column", column)
       li.setAttribute("data-i", i)
-      const actions = [
-        "mouseover->name-list#na",
-        "mouseout->name-list#nb",
-        "click->name-list#nc",
-        "dblclick->name-list#nd"
+      const stimulus_actions = [
+        "mouseover->name-list#doMouseover",
+        "mouseout->name-list#doMouseout",
+        "click->name-list#doClick",
+        "dblclick->name-list#doDblClick"
       ].join(" ")
-      li.setAttribute("data-action", actions)
+      li.setAttribute("data-action", stimulus_actions)
 
       li.appendChild(name_el).appendChild(author_el)
       ul.appendChild(li)
     }
 
-    this.NL_DIVS[section].appendChild(ul)
+    this.DIVS[column].appendChild(ul)
   }
 
   // ------------------------------  Actions  ---------------------------------
 
   // Select a genus.
-  nl_select_genus(name) {
+  selectGenus(name) {
     let list = [name]
     let last = false
-    this.nl_move_cursor('species', null)
+    this.moveCursorIn('species', null)
     if (name.charAt(name.length - 1) == '*')
       name = name.substr(0, name.length - 1)
     name += ' '
-    for (let i = 0; i < this.NL_SPECIES.length; i++) {
-      const species = this.NL_SPECIES[i]
+    for (let i = 0; i < this.SPECIES.length; i++) {
+      const species = this.SPECIES[i]
       if (species.substr(0, name.length) == name ||
         species.charAt(0) == '=' && last) {
         list.push(species)
@@ -456,38 +442,38 @@ export default class extends Controller {
         last = false
       }
     }
-    this.NL_CURSOR['species'] = null
-    this.NL_SPECIES_CUR = list
-    this.nl_draw('species', list)
-    this.nl_warp('species')
+    this.CURSOR['species'] = null
+    this.CURRENT_SPECIES = list
+    this.drawColumn('species', list)
+    this.scrollToCursorIn('species')
   }
 
   // Search in list for word and move cursor there.
-  nl_search(list = [], word) {
+  searchListForWord(list = [], word) {
     const word_len = word.length
     word = word.toLowerCase()
     for (let i = 0; i < list.length; i++) {
       if (list[i].substr(0, word_len).toLowerCase() == word) {
-        this.nl_move_cursor(this.NL_FOCUS, i)
+        this.moveCursorIn(this.FOCUS_COLUMN, i)
         break
       }
     }
   }
 
   // Insert a name.
-  nl_insert_name(name) {
+  insertName(name) {
     let new_list = []
     let last
     if (name.charAt(0) == '=')
       name = name.substr(2) + '*'
     const name2 = name.replace('*', '')
     let done = false
-    for (let i = 0; i < this.NL_NAMES.length; i++) {
-      const str = this.NL_NAMES[i]
+    for (let i = 0; i < this.NAMES.length; i++) {
+      const str = this.NAMES[i]
       if (!done && str.replace('*', '') >= name2) {
         if (str != name)
           new_list.push(name)
-        this.NL_CURSOR['names'] = i
+        this.CURSOR['names'] = i
         done = true
       }
       new_list.push(str)
@@ -495,48 +481,47 @@ export default class extends Controller {
     }
     if (!done) {
       new_list.push(name)
-      this.NL_CURSOR['names'] = new_list.length - 1
+      this.CURSOR['names'] = new_list.length - 1
     }
-    this.NL_NAMES = new_list
-    this.nl_draw('names', this.NL_NAMES)
-    this.nl_draw_cursors()
-    this.nl_warp('names')
-    this.nl_set_results()
+    this.NAMES = new_list
+    this.drawColumn('names', this.NAMES)
+    this.highlightCursors()
+    this.scrollToCursorIn('names')
+    this.setResults()
   }
 
   // Remove a name.
-  nl_remove_name(name) {
+  removeName(name) {
     let new_list = []
-    for (let i = 0; i < this.NL_NAMES.length; i++)
-      if (this.NL_NAMES[i] == name)
-        this.NL_CURSOR['names'] = i
+    for (let i = 0; i < this.NAMES.length; i++)
+      if (this.NAMES[i] == name)
+        this.CURSOR['names'] = i
       else
-        new_list.push(this.NL_NAMES[i])
-    this.NL_NAMES = new_list
-    this.nl_draw('names', this.NL_NAMES)
-    this.nl_draw_cursors()
-    this.nl_warp('names')
-    this.nl_set_results()
+        new_list.push(this.NAMES[i])
+    this.NAMES = new_list
+    this.drawColumn('names', this.NAMES)
+    this.highlightCursors()
+    this.scrollToCursorIn('names')
+    this.setResults()
   }
 
-  // Concat names in this.NL_NAMES and store in hidden 'results' field.
-  nl_set_results() {
+  // Concat names in this.NAMES and store in hidden 'results' field.
+  setResults() {
     let val = ''
-    for (let i = 0; i < this.NL_NAMES.length; i++)
-      val += this.NL_NAMES[i] + "\n"
+    for (let i = 0; i < this.NAMES.length; i++)
+      val += this.NAMES[i] + "\n"
     document.getElementById("results").value = val
   }
 
-  // Reverse of above: parse hidden 'results' field, and populate this.NL_NAMES.
-  nl_initialize_names() {
-    debugger
+  // Reverse of above: parse hidden 'results' field, and populate this.NAMES.
+  initializeNames() {
     let str = document.getElementById("results").value || ''
     str += "\n"
     let x
-    this.NL_NAMES = []
+    this.NAMES = []
     while ((x = str.indexOf("\n")) >= 0) {
       if (x > 0)
-        this.NL_NAMES.push(str.substr(0, x))
+        this.NAMES.push(str.substr(0, x))
       str = str.substr(x + 1)
     }
   }
