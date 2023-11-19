@@ -12,8 +12,8 @@ add_tab_set(species_list_form_name_list_tabs)
 </noscript>
 
 <table
-  cols="3" width="100%" class="name-lister mt-3" data-controller="name-list"
-  data-action="keypress->name-list#doKeypress keydown->name-list#doKeydown keyup->name-list#doKeyup click->name-list#doUnfocus">
+  cols="3" class="name-lister mt-3 w-100" data-controller="name-list"
+  data-action="keypress->name-list#ourKeypress keydown->name-list#ourKeydown keyup->name-list#ourKeyup click->name-list#ourUnfocus">
 
   <thead>
     <tr>
@@ -25,20 +25,20 @@ add_tab_set(species_list_form_name_list_tabs)
 
   <tbody>
     <tr>
-      <td align="left">
+      <td>
         <%= tag.div("", id: "genera", class: "scroller",
                         data: { name_list_target: "genera",
-                                action: "click->name-list#doFocus" }) %>
+                                action: "click->name-list#ourFocus" }) %>
       </td>
-      <td align="left">
+      <td>
         <%= tag.div("", id: "species", class: "scroller",
                         data: { name_list_target: "species",
-                                action: "click->name-list#doFocus" }) %>
+                                action: "click->name-list#ourFocus" }) %>
       </td>
-      <td align="left">
+      <td>
         <%= tag.div("", id: "names", class: "scroller",
                         data: { name_list_target: "names",
-                                action: "click->name-list#doFocus" }) %>
+                                action: "click->name-list#ourFocus" }) %>
       </td>
     </tr>
 

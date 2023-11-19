@@ -5,7 +5,7 @@ charsets = ["ISO-8859-1", "WINDOWS-1252", "UTF-8"]
 <%= form_with(url: { action: :create },
               id: "name_lister_form") do |f| %>
 
-  <%= tag.div(class: "text-center mb-5") do %>
+  <%= tag.div(class: "text-center my-5") do %>
     <%= submit_button(form: f, button: :name_lister_submit_spl.l,
                       class: "mx-3", disabled: !@user) %>
     <%= submit_button(form: f, button: :name_lister_submit_txt.l,

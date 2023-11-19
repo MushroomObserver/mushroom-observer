@@ -55,30 +55,30 @@ export default class extends Controller {
     this.initializeNames()
     this.drawColumn("genera", this.GENERA)
     this.drawColumn("names", this.NAMES)
-    this.doClick("genera", 0) // click on first genus
+    this.ourClick("genera", 0) // click on first genus
   }
 
   // -------------------------------  Events  ---------------------------------
 
   // Mouse moves over an item.
-  doMouseover(event) {
-    const [column, i] = this.getDataFromEventTarget(event)
+  ourMouseenter(event) {
+    const [column, i] = this.getDataFromLi(event)
 
     if (this.CURSOR[column] != i)
       document.getElementById(column + i).classList.add("hot")
   }
 
   // Mouse moves off of an item.
-  doMouseout(event) {
-    const [column, i] = this.getDataFromEventTarget(event)
+  ourMouseleave(event) {
+    const [column, i] = this.getDataFromLi(event)
 
     if (this.CURSOR[column] != i)
       document.getElementById(column + i).classList.remove("hot", "warm")
   }
 
   // Click on item.
-  doClick(event) {
-    const [column, i] = this.getDataFromEventTarget(event)
+  ourClick(event) {
+    const [column, i] = this.getDataFromLi(event)
 
     this.WORD = ''
     this.focusSection(column)
@@ -89,8 +89,8 @@ export default class extends Controller {
   }
 
   // Double-click on item.
-  doDoubleClick(event) {
-    const [column, i] = this.getDataFromEventTarget(event)
+  ourDblClick(event) {
+    const [column, i] = this.getDataFromLi(event)
 
     if (column == 'species')
       this.insertName(this.CURRENT_SPECIES[i])
@@ -100,9 +100,10 @@ export default class extends Controller {
 
   // Utility to get relevant dataset from event target
   // NOTE: The controller itself prints the <li> with this dataset, below.
-  getDataFromEventTarget(event) {
-    const column = event.target?.dataset.column
-    const i = event.target?.dataset.i
+  // Must be currentTarget in case user clicks on nested <li><span>
+  getDataFromLi(event) {
+    const column = event.currentTarget?.dataset.column
+    const i = event.currentTarget?.dataset.i
     return [column, i]
   }
 
@@ -130,7 +131,7 @@ export default class extends Controller {
   }
 
   // Also called when user presses a key.  Disable this if focused.
-  doKeypress(event) {
+  ourKeypress(event) {
     if (this.FOCUS_COLUMN && this.isWatching(event)) {
       event.stopPropagation()
       return false
@@ -140,7 +141,7 @@ export default class extends Controller {
   }
 
   // Called when user un-presses a key.  Need to know so we can stop repeat.
-  doKeyup(event) {
+  ourKeyup(event) {
     this.KEY = null
     if (this.REPEAT_CALLBACK) {
       clearTimeout(this.REPEAT_CALLBACK)
@@ -150,7 +151,7 @@ export default class extends Controller {
 
   // Called when user presses a key.  We keep track of where user is typing by
   // updating this.FOCUS_COLUMN (value is 'genera', 'species' or 'names').
-  doKeydown(event) {
+  ourKeydown(event) {
     // Cursors, etc. must be explicitly focused to work.
     // (Otherwise you can't use them to navigate through the page as a whole.)
     if (!this.FOCUS_COLUMN || !this.isWatching(event)) return true
@@ -161,7 +162,7 @@ export default class extends Controller {
     // Schedule first repeat event.
     this.REPEAT_CALLBACK =
       window.setTimeout(
-        () => { this.doKeyrepeat(this.KEY) }, this.FIRST_KEY_DELAY
+        () => { this.ourKeyrepeat(this.KEY) }, this.FIRST_KEY_DELAY
       )
 
     // Stop browser from doing anything with key presses when focused.
@@ -170,12 +171,12 @@ export default class extends Controller {
   }
 
   // Called when a key repeats.
-  doKeyrepeat(event) {
+  ourKeyrepeat(event) {
     if (this.FOCUS_COLUMN && this.KEY) {
       this.processKeystroke(this.KEY)
       this.REPEAT_CALLBACK =
         window.setTimeout(
-          () => { this.doKeyrepeat(this.KEY) }, this.NEXT_KEY_DELAY
+          () => { this.ourKeyrepeat(this.KEY) }, this.NEXT_KEY_DELAY
         )
     } else {
       this.KEY = null
@@ -289,7 +290,7 @@ export default class extends Controller {
   // --------------------------------  HTML  ----------------------------------
 
   // Change focus from one column to another.
-  doFocus(event) {
+  ourFocus(event) {
     const column = event.target.id
     this.focusSection(column)
   }
@@ -300,7 +301,7 @@ export default class extends Controller {
   }
 
   // Unfocus to let user scroll the page with keyboard.
-  doUnfocus() {
+  ourUnfocus() {
     if (!this.IGNORE_UNFOCUS) {
       this.FOCUS_COLUMN = null
       this.highlightCursors()
@@ -408,10 +409,10 @@ export default class extends Controller {
       li.setAttribute("data-column", column)
       li.setAttribute("data-i", i)
       const stimulus_actions = [
-        "mouseover->name-list#doMouseover",
-        "mouseout->name-list#doMouseout",
-        "click->name-list#doClick",
-        "dblclick->name-list#doDblClick"
+        "mouseenter->name-list#ourMouseenter",
+        "mouseleave->name-list#ourMouseleave",
+        "click->name-list#ourClick",
+        "dblclick->name-list#ourDblClick"
       ].join(" ")
       li.setAttribute("data-action", stimulus_actions)
 
