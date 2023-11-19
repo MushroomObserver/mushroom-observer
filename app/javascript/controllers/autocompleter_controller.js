@@ -1,91 +1,91 @@
 import { Controller } from "@hotwired/stimulus"
 import { escapeHTML, getScrollBarWidth } from "src/mo_utilities"
 
-const defaultOpts = {
+const DEFAULT_OPTS = {
   // id of text field (after initialization becomes a unique identifier)
   // input_id: null,
   // JS element of text field
   // input_elem: null,
   // what type of autocompleter, subclass of AutoComplete
-  type: null,
-  // class of pulldown div
-  pulldown_class: 'auto_complete',
-  // class of <li> when highlighted
-  hot_class: 'selected',
-  // ignore order of words when matching
+  TYPE: null,
+  // Whether to ignore order of words when matching, set by type
   // (collapse must be 0 if this is true!)
-  unordered: false,
+  UNORDERED: false,
   // 0 = normal mode
   // 1 = autocomplete first word, then the rest
   // 2 = autocomplete first word, then second word, then the rest
   // N = etc.
-  collapse: 0,
+  COLLAPSE: 0,
   // where to request primer from
-  ajax_url: null,
+  AJAX_URL: null,
   // how long to wait before sending AJAX request (seconds)
-  refresh_delay: 0.10,
+  REFRESH_DELAY: 0.10,
   // how long to wait before hiding pulldown (seconds)
-  hide_delay: 0.25,
+  HIDE_DELAY: 0.25,
   // initial key repeat delay (seconds)
-  key_delay1: 0.50,
+  KEY_DELAY_1: 0.50,
   // subsequent key repeat delay (seconds)
-  key_delay2: 0.03,
+  KEY_DELAY_2: 0.03,
   // maximum number of options shown at a time
-  pulldown_size: 10,
+  PULLDOWN_SIZE: 10,
   // amount to move cursor on page up and down
-  page_size: 10,
+  PAGE_SIZE: 10,
   // max length of string to send via AJAX
-  max_request_length: 50,
+  MAX_REQUEST_LINK: 50,
   // Very fancy: starts finding new matches for the string after the separator
   // allowed separators (e.g. " OR ")
-  separator: null,
+  SEPARATOR: null,
   // show error messages returned via AJAX?
-  show_errors: false,
+  SHOW_ERRORS: false,
   // include pulldown-icon on right, and always show all options
-  act_like_select: false
+  ACT_LIKE_SELECT: false,
+  // class of pulldown div, selected by system tests
+  PULLDOWN_CLASS: 'auto_complete',
+  // class of <li> when highlighted
+  HOT_CLASS: 'selected'
 }
 
-// Allowed types of autocompleter
-// The type will govern the ajax_url and possibly other params
-const autocompleterTypes = {
+// Allowed types of autocompleter. Sets some DEFAULT_OPTS from type
+const AUTOCOMPLETER_TYPES = {
   clade: {
-    ajax_url: "/ajax/auto_complete/clade/@",
+    AJAX_URL: "/ajax/auto_complete/clade/@",
   },
   herbarium: { // params[:user_id] handled in controller
-    ajax_url: "/ajax/auto_complete/herbarium/@",
-    unordered: true
+    AJAX_URL: "/ajax/auto_complete/herbarium/@",
+    UNORDERED: true
   },
   location: { // params[:format] handled in controller
-    ajax_url: "/ajax/auto_complete/location/@",
-    unordered: true
+    AJAX_URL: "/ajax/auto_complete/location/@",
+    UNORDERED: true
   },
   name: {
-    ajax_url: "/ajax/auto_complete/name/@",
-    collapse: 1
+    AJAX_URL: "/ajax/auto_complete/name/@",
+    COLLAPSE: 1
   },
   project: {
-    ajax_url: "/ajax/auto_complete/project/@",
-    unordered: true
+    AJAX_URL: "/ajax/auto_complete/project/@",
+    UNORDERED: true
   },
   species_list: {
-    ajax_url: "/ajax/auto_complete/species_list/@",
-    unordered: true
+    AJAX_URL: "/ajax/auto_complete/species_list/@",
+    UNORDERED: true
   },
   user: {
-    ajax_url: "/ajax/auto_complete/user/@",
-    unordered: true
+    AJAX_URL: "/ajax/auto_complete/user/@",
+    UNORDERED: true
   }
 }
 
 // These are internal state variables the user should leave alone.
-const internalOpts = {
-  // uuid: null,            // unique id for this object
-  pulldown_elem: null,   // DOM element of pulldown div
-  list_elem: null,       // DOM element of pulldown ul
+const INTERNAL_OPTS = {
+  PULLDOWN_ELEM: null,   // DOM element of pulldown div
+  LIST_ELEM: null,       // DOM element of pulldown ul
+  ROW_HEIGHT: null,      // height of a ul li row in pixels (determined below)
+  SCROLLBAR_WIDTH: null, // width of scrollbar in browser (determined below)
   focused: false,        // is user in text field?
   menu_up: false,        // is pulldown visible?
   old_value: {},         // previous value of input field
-  primer: [],            // initial server-supplied list of many options
+  primer: [],            // a server-supplied list of many options
   matches: [],           // list of options currently showing
   current_row: -1,       // index of option currently highlighted (0 = none)
   current_value: null,   // value currently highlighted (null = none)
@@ -97,60 +97,24 @@ const internalOpts = {
   fetch_request: null,    // ajax request while underway
   refresh_timer: null,   // timer used to delay update after typing
   hide_timer: null,      // timer used to delay hiding of pulldown
-  key_timer: null,       // timer used to emulate key repeat
-  row_height: null,      // height of a row in pixels (determined below)
-  scrollbar_width: null  // width of scrollbar (determined below)
+  key_timer: null       // timer used to emulate key repeat
 }
 
 // Connects to data-controller="autocomplete"
 export default class extends Controller {
   initialize() {
-    // Instead of passing opts, get these from the element and its dataset.
-    // opt { type } is already inferred from dataset, below
-    // The only opts ever passed are: { input_id | separator }
-    // { input_id } can be inferred from the element, but it's passed to this
-    // class in order to build a global array of existing AUTOCOMPLETERS, to keep
-    // track of which is which. Probably not necessary with stimulus because
-    // controllers are instantiated per element and keep track of themsleves.
-    // The only time AUTOCOMPLETERS is called (except within the class) is to
-    // `swap` the controller's type when changing a select filter in the identify
-    // interface. That filter seems like it should be a separate controller,
-    // emitting an event and detail that would be picked up by this controller,
-    // to fire the `swap` action.
-    // These are potentially useful parameters the user might want to tweak.
-
-    Object.assign(this, defaultOpts);
-    // Assign ajax_url and a couple other options based on type.
-    // Let passed options override defaults and autocompleterTypes defaults
-    // Object.assign(this, opts);
-
-    // Get the DOM element of the input field. In a controller, it's `this.element`
-    // if (!this.element)
-    //   this.element = document.getElementById(this.input_id);
-    // if (!this.element)
-    //   alert("MOAutocompleter: Invalid input id: \"" + this.input_id + "\"");
+    Object.assign(this, DEFAULT_OPTS);
 
     // Check the type of autocompleter set on the input element
     // maybe should not happen on connect, or we could be resetting type
     // Or maybe it should, and the filter swapper should just change this? no.
-    this.type = this.element.dataset.autocomplete;
-    if (!autocompleterTypes.hasOwnProperty(this.type))
-      alert("MOAutocompleter: Invalid type: \"" + this.type + "\"");
+    this.TYPE = this.element.dataset.autocomplete;
+    if (!AUTOCOMPLETER_TYPES.hasOwnProperty(this.TYPE))
+      alert("MOAutocompleter: Invalid type: \"" + this.TYPE + "\"");
 
     // Only use OEM parts:
-    Object.assign(this, autocompleterTypes[this.type]);
-    Object.assign(this, internalOpts);
-
-    // not sure how else to make this available to the `swap` method
-    // this.autocompleterTypes = autocompleterTypes;
-
-    // Create a unique ID for this instance.
-    // this.uuid = Object.keys(AUTOCOMPLETERS).length;
-    // this.element.setAttribute("data-uuid", this.uuid);
-
-
-    // Keep catalog of autocompleter objects so we can reuse them as needed.
-    // AUTOCOMPLETERS[this.uuid] = this;
+    Object.assign(this, AUTOCOMPLETER_TYPES[this.TYPE]);
+    Object.assign(this, INTERNAL_OPTS);
 
     // Shared MO utilities imported
     this.escapeHTML = escapeHTML
@@ -170,13 +134,13 @@ export default class extends Controller {
 
   // To swap out autocompleter properties, send a type
   swap(type, opts) {
-    if (!autocompleterTypes.hasOwnProperty(type)) {
-      alert("MOAutocompleter: Invalid type: \"" + this.type + "\"");
+    if (!AUTOCOMPLETER_TYPES.hasOwnProperty(type)) {
+      alert("MOAutocompleter: Invalid type: \"" + this.TYPE + "\"");
     } else {
-      this.type = type;
+      this.TYPE = type;
       this.element.setAttribute("data-autocompleter", type)
       // add dependent properties and allow overrides
-      Object.assign(this, autocompleterTypes[this.type]);
+      Object.assign(this, AUTOCOMPLETER_TYPES[this.TYPE]);
       Object.assign(this, opts);
       this.prepare_input_element(this);
     }
@@ -193,7 +157,7 @@ export default class extends Controller {
     this.add_event_listeners(elem);
 
     // sanity check to show which autocompleter is currently on the element
-    elem.setAttribute("data-ajax-url", this.ajax_url);
+    elem.setAttribute("data-ajax-url", this.AJAX_URL);
   }
 
   // NOTE: `this` within an event listener function refers to the element
@@ -329,7 +293,7 @@ export default class extends Controller {
 
   // User clicked into text field.
   our_click(event) {
-    if (this.act_like_select)
+    if (this.ACT_LIKE_SELECT)
       this.schedule_refresh();
     return false;
   }
@@ -337,7 +301,7 @@ export default class extends Controller {
   // User entered text field.
   our_focus(event) {
     // this.debug("our_focus()");
-    if (!this.row_height)
+    if (!this.ROW_HEIGHT)
       this.get_row_height();
     this.focused = true;
   }
@@ -386,17 +350,17 @@ export default class extends Controller {
       this.verbose("doing_refresh()");
       // this.debug("refresh_timer(" + this.element.value + ")");
       this.old_value[this.uuid] = this.element.value;
-      if (this.ajax_url)
+      if (this.AJAX_URL)
         this.refresh_primer();
       this.update_matches();
       this.draw_pulldown();
-    }), this.refresh_delay * 1000);
+    }), this.REFRESH_DELAY * 1000);
   }
 
   // Schedule pulldown to be hidden if nothing happens in the meantime.
   schedule_hide() {
     this.clear_hide();
-    this.hide_timer = setTimeout(this.hide_pulldown.bind(this), this.hide_delay * 1000);
+    this.hide_timer = setTimeout(this.hide_pulldown.bind(this), this.HIDE_DELAY * 1000);
   }
 
   // Schedule a method to be called after key stays pressed for some time.
@@ -405,14 +369,14 @@ export default class extends Controller {
     this.key_timer = setTimeout((function () {
       action.call(this);
       this.schedule_key2(action);
-    }).bind(this), this.key_delay1 * 1000);
+    }).bind(this), this.KEY_DELAY_1 * 1000);
   }
   schedule_key2(action) {
     this.clear_key();
     this.key_timer = setTimeout((function () {
       action.call(this);
       this.schedule_key2(action);
-    }).bind(this), this.key_delay2 * 1000);
+    }).bind(this), this.KEY_DELAY_2 * 1000);
   }
 
   // Clear refresh timer.
@@ -442,8 +406,8 @@ export default class extends Controller {
   // ------------------------------ Cursor ------------------------------
 
   // Move cursor up or down some number of rows.
-  page_up() { this.move_cursor(-this.page_size); }
-  page_down() { this.move_cursor(this.page_size); }
+  page_up() { this.move_cursor(-this.PAGE_SIZE); }
+  page_down() { this.move_cursor(this.PAGE_SIZE); }
   arrow_up() { this.move_cursor(-1); }
   arrow_down() { this.move_cursor(1); }
   go_home() { this.move_cursor(-this.matches.length) }
@@ -468,8 +432,8 @@ export default class extends Controller {
       new_scr = new_row;
     if (new_scr < 0)
       new_scr = 0;
-    if (new_row >= new_scr + this.pulldown_size)
-      new_scr = new_row - this.pulldown_size + 1;
+    if (new_row >= new_scr + this.PULLDOWN_SIZE)
+      new_scr = new_row - this.PULLDOWN_SIZE + 1;
 
     // Update if something changed.
     if (new_row != old_row || new_scr != old_scr) {
@@ -481,7 +445,7 @@ export default class extends Controller {
   // Mouse has moved over a menu item.
   highlight_row(new_hl) {
     this.verbose("highlight_row()");
-    const rows = this.list_elem.children,
+    const rows = this.LIST_ELEM.children,
       old_hl = this.current_highlight;
 
     this.current_highlight = new_hl;
@@ -489,9 +453,9 @@ export default class extends Controller {
 
     if (old_hl != new_hl) {
       if (old_hl >= 0)
-        rows[old_hl].classList.remove(this.hot_class);
+        rows[old_hl].classList.remove(this.HOT_CLASS);
       if (new_hl >= 0)
-        rows[new_hl].classList.add(this.hot_class);
+        rows[new_hl].classList.add(this.HOT_CLASS);
     }
     this.element.focus();
     this.update_width();
@@ -501,14 +465,14 @@ export default class extends Controller {
   our_scroll() {
     this.verbose("our_scroll()");
     const old_scr = this.scroll_offset,
-      new_scr = Math.round(this.pulldown_elem.scrollTop / this.row_height),
+      new_scr = Math.round(this.PULLDOWN_ELEM.scrollTop / this.ROW_HEIGHT),
       old_row = this.current_row;
     let new_row = this.current_row;
 
     if (new_row < new_scr)
       new_row = new_scr;
-    if (new_row >= new_scr + this.pulldown_size)
-      new_row = new_scr + this.pulldown_size - 1;
+    if (new_row >= new_scr + this.PULLDOWN_SIZE)
+      new_row = new_scr + this.PULLDOWN_SIZE - 1;
     if (new_row != old_row || new_scr != old_scr) {
       this.current_row = new_row;
       this.scroll_offset = new_scr;
@@ -523,8 +487,8 @@ export default class extends Controller {
     let new_val = this.matches[this.scroll_offset + row];
     // Close pulldown unless the value the user selected uncollapses into a set
     // of new options.  In that case schedule a refresh and leave it up.
-    if (this.collapse > 0 &&
-      (new_val.match(/ /g) || []).length < this.collapse) {
+    if (this.COLLAPSE > 0 &&
+      (new_val.match(/ /g) || []).length < this.COLLAPSE) {
       new_val += ' ';
       this.schedule_refresh();
     } else {
@@ -539,15 +503,14 @@ export default class extends Controller {
 
   // ------------------------------ Pulldown ------------------------------
 
-  // Stimulus: maybe put empty list in template instead of adding it here
-  // Create div for pulldown.
+  // Create div for pulldown. Presence of this is checked in system tests.
   create_pulldown() {
     const div = document.createElement("div");
-    div.classList.add(this.pulldown_class);
+    div.classList.add(this.PULLDOWN_CLASS);
 
     const list = document.createElement('ul');
     let i, row;
-    for (i = 0; i < this.pulldown_size; i++) {
+    for (i = 0; i < this.PULLDOWN_SIZE; i++) {
       row = document.createElement("li");
       row.style.display = 'none';
       this.attach_row_events(row, i);
@@ -557,8 +520,8 @@ export default class extends Controller {
 
     div.addEventListener("scroll", this.our_scroll.bind(this));
     this.element.insertAdjacentElement("afterend", div);
-    this.pulldown_elem = div;
-    this.list_elem = list;
+    this.PULLDOWN_ELEM = div;
+    this.LIST_ELEM = list;
   }
 
   // Add "click" and "mouseover" events to a row of the pulldown menu.
@@ -582,7 +545,7 @@ export default class extends Controller {
       ul = document.createElement('ul'),
       li = document.createElement('li');
 
-    div.className = this.pulldown_class;
+    div.className = this.PULLDOWN_CLASS;
     div.style.display = 'block';
     div.style.border = div.style.margin = div.style.padding = '0px';
     li.innerHTML = 'test';
@@ -595,8 +558,8 @@ export default class extends Controller {
   }
   set_row_height() {
     if (this.temp_row) {
-      this.row_height = this.temp_row.offsetHeight;
-      if (!this.row_height) {
+      this.ROW_HEIGHT = this.temp_row.offsetHeight;
+      if (!this.ROW_HEIGHT) {
         // window.setTimeout(this.set_row_height(), 100);
         this.set_row_height();
       } else {
@@ -609,9 +572,9 @@ export default class extends Controller {
   // Redraw the pulldown options.
   draw_pulldown() {
     this.verbose("draw_pulldown()");
-    const list = this.list_elem,
+    const list = this.LIST_ELEM,
       rows = list.children,
-      size = this.pulldown_size,
+      size = this.PULLDOWN_SIZE,
       scroll = this.scroll_offset,
       cur = this.current_row,
       matches = this.matches;
@@ -666,15 +629,15 @@ export default class extends Controller {
     this.current_highlight = new_hl;
     if (new_hl != old_hl) {
       if (old_hl >= 0)
-        rows[old_hl].classList.remove(this.hot_class);
+        rows[old_hl].classList.remove(this.HOT_CLASS);
       if (new_hl >= 0)
-        rows[new_hl].classList.add(this.hot_class);
+        rows[new_hl].classList.add(this.HOT_CLASS);
     }
   }
 
   // Make menu visible if nonempty.
   make_menu_visible(matches, size, scroll) {
-    const menu = this.pulldown_elem,
+    const menu = this.PULLDOWN_ELEM,
       inner = menu.children[0];
 
     if (matches.length > 0) {
@@ -688,10 +651,10 @@ export default class extends Controller {
 
       // Set height of menu.
       menu.style.overflowY = matches.length > size ? "scroll" : "hidden";
-      menu.style.height = this.row_height * (size < matches.length - scroll ? size : matches.length - scroll) + "px";
-      inner.style.marginTop = this.row_height * scroll + "px";
-      inner.style.height = this.row_height * (matches.length - scroll) + "px";
-      menu.scrollTo({ top: this.row_height * scroll });
+      menu.style.height = this.ROW_HEIGHT * (size < matches.length - scroll ? size : matches.length - scroll) + "px";
+      inner.style.marginTop = this.ROW_HEIGHT * scroll + "px";
+      inner.style.height = this.ROW_HEIGHT * (matches.length - scroll) + "px";
+      menu.scrollTo({ top: this.ROW_HEIGHT * scroll });
       // }
 
       // Set width of menu.
@@ -720,16 +683,16 @@ export default class extends Controller {
   // Hide pulldown options.
   hide_pulldown() {
     this.verbose("hide_pulldown()");
-    this.pulldown_elem.style.display = 'none';
+    this.PULLDOWN_ELEM.style.display = 'none';
     this.menu_up = false;
   }
 
   // Update width of pulldown.
   update_width() {
     this.verbose("update_width()");
-    let w = this.list_elem.offsetWidth;
-    if (this.matches.length > this.pulldown_size)
-      w += this.scrollbar_width;
+    let w = this.LIST_ELEM.offsetWidth;
+    if (this.matches.length > this.PULLDOWN_SIZE)
+      w += this.SCROLLBAR_WIDTH;
     if (this.current_width < w) {
       this.current_width = w;
       this.set_width();
@@ -741,9 +704,9 @@ export default class extends Controller {
     this.verbose("set_width()");
     const w1 = this.current_width;
     let w2 = w1;
-    if (this.matches.length > this.pulldown_size)
-      w2 -= this.scrollbar_width;
-    this.list_elem.style.minWidth = w2 + 'px';
+    if (this.matches.length > this.PULLDOWN_SIZE)
+      w2 -= this.SCROLLBAR_WIDTH;
+    this.LIST_ELEM.style.minWidth = w2 + 'px';
   }
 
   // ------------------------------ Matches ------------------------------
@@ -756,11 +719,11 @@ export default class extends Controller {
     const last = this.current_row < 0 ? null : this.matches[this.current_row];
 
     // Update list of options appropriately.
-    if (this.act_like_select)
+    if (this.ACT_LIKE_SELECT)
       this.update_select();
-    else if (this.collapse > 0)
+    else if (this.COLLAPSE > 0)
       this.update_collapsed();
-    else if (this.unordered)
+    else if (this.UNORDERED)
       this.update_unordered();
     else
       this.update_normal();
@@ -837,7 +800,7 @@ export default class extends Controller {
       matches = [];
 
     if (val != '' && primer.length > 1) {
-      let the_rest = (val.match(/ /g) || []).length >= this.collapse;
+      let the_rest = (val.match(/ /g) || []).length >= this.COLLAPSE;
 
       for (let i = this.get_primer_index_of_substr(primer_lc, val);
         i < primer_lc.length; i++) {
@@ -909,7 +872,7 @@ export default class extends Controller {
   update_current_row(val) {
     this.verbose("update_current_row()");
     const matches = this.matches,
-      size = this.pulldown_size;
+      size = this.PULLDOWN_SIZE;
     let exact = -1,
       part = -1;
 
@@ -955,7 +918,7 @@ export default class extends Controller {
   get_search_token() {
     const val = this.element.value;
     let token = val;
-    if (this.separator) {
+    if (this.SEPARATOR) {
       const s_ext = this.search_token_extents();
       token = val.substring(s_ext.start, s_ext.end);
     }
@@ -965,7 +928,7 @@ export default class extends Controller {
   // Change the token under or immediately in front of the cursor.
   set_search_token(new_val) {
     const old_str = this.element.value;
-    if (this.separator) {
+    if (this.SEPARATOR) {
       let new_str = "";
       const s_ext = this.search_token_extents();
 
@@ -991,13 +954,13 @@ export default class extends Controller {
   // Get index of first character and character after last of current token.
   search_token_extents() {
     const val = this.element.value;
-    let start = val.lastIndexOf(this.separator),
+    let start = val.lastIndexOf(this.SEPARATOR),
       end = val.length;
 
     if (start < 0)
       start = 0;
     else
-      start += this.separator.length;
+      start += this.SEPARATOR.length;
 
     return { start: start, end: end };
   }
@@ -1041,8 +1004,8 @@ export default class extends Controller {
   // Send AJAX request for more matching strings.
   send_fetch_request(val) {
     this.verbose("send_fetch_request()");
-    if (val.length > this.max_request_length)
-      val = val.substr(0, this.max_request_length);
+    if (val.length > this.MAX_REQUEST_LINK)
+      val = val.substr(0, this.MAX_REQUEST_LINK);
 
     if (this.log) {
       this.debug("Sending AJAX request: " + val);
@@ -1050,7 +1013,7 @@ export default class extends Controller {
 
     // Need to doubly-encode this to prevent router from interpreting slashes,
     // dots, etc.
-    const url = this.ajax_url.replace(
+    const url = this.AJAX_URL.replace(
       '@', encodeURIComponent(encodeURIComponent(val.replace(/\./g, '%2e')))
     );
 
@@ -1143,55 +1106,4 @@ export default class extends Controller {
     // console.log(str);
     // document.getElementById("log").insertAdjacentText("beforeend", str + "<br/>");
   }
-
-  // ------------------------------- UTILITIES ------------------------------
-
-  // These methods are also used in name-list_controller
-  // Stimulus: May want to make a shared module
-  // escapeHTML(str) {
-  //   const HTML_ENTITY_MAP = {
-  //     "&": "&amp;",
-  //     "<": "&lt;",
-  //     ">": "&gt;",
-  //     '"': '&quot;',
-  //     "'": '&#39;',
-  //     "/": '&#x2F;'
-  //   };
-
-  //   return str.replace(/[&<>"'\/]/g, function (s) {
-  //     return HTML_ENTITY_MAP[s];
-  //   });
-  // }
-
-  // getScrollBarWidth() {
-  //   let inner, outer, w1, w2;
-  //   const body = document.body || document.getElementsByTagName("body")[0];
-
-  //   if (this.scrollbar_width != null)
-  //     return this.scrollbar_width;
-
-  //   inner = document.createElement('p');
-  //   inner.style.width = "100%";
-  //   inner.style.height = "200px";
-
-  //   outer = document.createElement('div');
-  //   outer.style.position = "absolute";
-  //   outer.style.top = "0px";
-  //   outer.style.left = "0px";
-  //   outer.style.visibility = "hidden";
-  //   outer.style.width = "200px";
-  //   outer.style.height = "150px";
-  //   outer.style.overflow = "hidden";
-  //   outer.appendChild(inner);
-
-  //   body.appendChild(outer);
-  //   w1 = inner.offsetWidth;
-  //   outer.style.overflow = 'scroll';
-  //   w2 = inner.offsetWidth;
-  //   if (w1 == w2) w2 = outer.clientWidth;
-  //   body.removeChild(outer);
-
-  //   this.scrollbar_width = w1 - w2;
-  //   // return scroll_bar_width;
-  // }
 }
