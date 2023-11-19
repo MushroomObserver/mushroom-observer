@@ -2,8 +2,20 @@
 // name_lister
 // --------------------------------------------------
 
-table.name-lister th {
-  font-size: $font-size-large;
+table.name-lister {
+  background-color: transparent;
+
+  thead {
+    tr {
+      background-color: transparent;
+    }
+  }
+
+  th {
+    font-size: $font-size-h4;
+    font-weight: normal;
+    padding: $padding-base-vertical $padding-base-horizontal;
+  }
 }
 
 div.scroller {
@@ -24,7 +36,7 @@ div.scroller {
   }
 
   li {
-    padding: 0px 5px 0px 5px;
+    padding: calc(#{$padding-small-vertical} / 2) $padding-base-horizontal;
     cursor: pointer;
   }
 
