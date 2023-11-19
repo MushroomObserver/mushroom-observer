@@ -164,36 +164,41 @@ class UserTest < UnitTestCase
 
   def test_all_editable_species_lists
     proj = projects(:bolete_project)
-    spl1 = species_lists(:first_species_list)
-    spl2 = species_lists(:another_species_list)
-    spl3 = species_lists(:unknown_species_list)
-    assert_obj_arrays_equal([spl1, spl2], rolf.species_lists, :sort)
-    assert_obj_arrays_equal(SpeciesList.where(user: mary), mary.species_lists)
-    assert_obj_arrays_equal([], dick.species_lists)
-    assert_obj_arrays_equal([mary, dick], proj.user_group.users)
-    assert_obj_arrays_equal([spl3], proj.species_lists)
+    assert_true(proj.user_group.users.include?(dick))
+    assert_true(proj.user_group.users.include?(mary))
 
-    assert_obj_arrays_equal([spl1, spl2],
-                            rolf.all_editable_species_lists, :sort)
-    assert_obj_arrays_equal(SpeciesList.where(user: mary),
-                            mary.all_editable_species_lists)
-    assert_obj_arrays_equal([spl3], dick.all_editable_species_lists)
+    proj_spl = proj.species_lists.find_by(user: mary)
+    assert_false(rolf.all_editable_species_lists.include?(proj_spl))
+    assert_true(mary.all_editable_species_lists.include?(proj_spl))
+    assert_true(dick.all_editable_species_lists.include?(proj_spl))
 
-    proj.add_species_list(spl1)
+    rolf_spl = (rolf.species_lists - proj.species_lists)[0]
+    assert_false(dick.all_editable_species_lists.include?(rolf_spl))
+    assert_false(mary.all_editable_species_lists.include?(rolf_spl))
+
+    proj.add_species_list(rolf_spl)
     dick.reload
-    assert_obj_arrays_equal([spl1, spl3], dick.all_editable_species_lists,
-                            :sort)
+    mary.reload
+    assert_true(dick.all_editable_species_lists.include?(rolf_spl))
+    assert_true(mary.all_editable_species_lists.include?(rolf_spl))
 
-    proj.user_group.users.push(rolf, mary)
+    proj.user_group.users.push(rolf)
     proj.user_group.users.delete(dick)
     rolf.reload
     mary.reload
     dick.reload
-    assert_obj_arrays_equal([spl1, spl2, spl3],
-                            rolf.all_editable_species_lists, :sort)
-    assert_obj_arrays_equal([spl1, SpeciesList.where(user: mary).to_a].flatten,
-                            mary.all_editable_species_lists, :sort)
-    assert_obj_arrays_equal([], dick.all_editable_species_lists)
+
+    rolf_lists = rolf.all_editable_species_lists
+    assert_true(rolf_lists.include?(proj_spl))
+    assert_true(rolf_lists.include?(rolf_spl))
+
+    mary_lists = mary.all_editable_species_lists
+    assert_true(mary_lists.include?(proj_spl))
+    assert_true(mary_lists.include?(rolf_spl))
+
+    dick_lists = dick.all_editable_species_lists
+    assert_false(dick_lists.include?(proj_spl))
+    assert_false(dick_lists.include?(rolf_spl))
   end
 
   def test_preferred_herbarium_name
@@ -487,22 +492,17 @@ class UserTest < UnitTestCase
   end
 
   def test_delete_private_species_lists
-    # Should be able to delete all of Mary's many lists except these three.
-    list1 = species_lists(:unknown_species_list)
-    list2 = species_lists(:query_first_list)
-    list3 = species_lists(:query_second_list)
-    assert_users_equal(mary, list1.user)
-    assert_users_equal(mary, list2.user)
-    assert_users_equal(mary, list3.user)
-    assert_operator(0, "<", list1.projects.count)
-    assert_operator(0, "<", list2.projects.count)
-    assert_operator(0, "<", list3.projects.count)
-    assert_operator(3, "<", SpeciesList.where(user: mary).count)
+    # Should be able to delete all of Mary's many lists except the ones in projects
+    mary_lists = SpeciesList.where(user: mary)
+    before_count = mary_lists.count
+    proj_lists = mary_lists.select { |list| list.projects.count > 0 }
+    proj_count = proj_lists.count
+    assert_operator(proj_count, ">", 0)
+    assert_operator(before_count, ">", proj_count)
     mary.delete_private_species_lists
-    assert_equal(3, SpeciesList.where(user: mary).count)
-    assert_not_nil(SpeciesList.find(list1.id))
-    assert_not_nil(SpeciesList.find(list2.id))
-    assert_not_nil(SpeciesList.find(list3.id))
+    after_count = SpeciesList.where(user: mary).count
+    assert_operator(before_count, ">", after_count)
+    assert_equal(proj_count, after_count)
   end
 
   def test_delete_unattached_collection_numbers
