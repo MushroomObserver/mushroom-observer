@@ -5,6 +5,7 @@
 #  date_select_opts
 
 # helpers for form tags
+# rubocop:disable Metrics/ModuleLength
 module FormsHelper
   # Bootstrap submit button
   # <%= submit_button(form: f, button: button.t, center: true) %>
@@ -140,21 +141,15 @@ module FormsHelper
     end
   end
 
-  # For the moment "year autocompleters" have to use data attributes,
-  # but TODO: eliminate all of them, in favor of a new stimulus controller
-  # that will just turn them into text fields.
-  # Jason agrees that nobody needs a year autocompleter, and they complicate
-  # the autocompleter js too. - AN 20231103
-  #
   # This allows incoming data attributes to deep_merge with autocompleter's data
+  # 2023 hack to defeat unhelpful browser autocompletes that get in the way of
+  # our autocompleter: use the browser standard autocomplete att "one-time-code"
   def autocompleter_field(**args)
     autocompleter_args = {
-      placeholder: :start_typing.l,
-      data: { controller: :autocompleter, autocomplete: args[:autocomplete],
-              separator: args[:separator] }
-    }
-    autocompleter_args = args.except(:autocomplete, :separator, :textarea).
-                         deep_merge(autocompleter_args)
+      placeholder: :start_typing.l, autocomplete: "one-time-code",
+      data: { controller: :autocompleter, autocompleter_target: "input",
+              autocomplete: args[:autocomplete], separator: args[:separator] }
+    }.deep_merge(args.except(:autocomplete, :separator, :textarea))
 
     if args[:textarea] == true
       text_area_with_label(**autocompleter_args)
@@ -441,3 +436,4 @@ module FormsHelper
       order: [:day, :month, :year] }
   end
 end
+# rubocop:enable Metrics/ModuleLength

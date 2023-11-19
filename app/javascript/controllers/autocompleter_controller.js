@@ -66,6 +66,10 @@ const AUTOCOMPLETER_TYPES = {
     AJAX_URL: "/ajax/auto_complete/project/@",
     UNORDERED: true
   },
+  region: {
+    AJAX_URL: "/ajax/auto_complete/location/@",
+    UNORDERED: true
+  },
   species_list: {
     AJAX_URL: "/ajax/auto_complete/species_list/@",
     UNORDERED: true
@@ -102,13 +106,15 @@ const INTERNAL_OPTS = {
 
 // Connects to data-controller="autocomplete"
 export default class extends Controller {
+  static targets = ["input", "select"]
+
   initialize() {
     Object.assign(this, DEFAULT_OPTS);
 
     // Check the type of autocompleter set on the input element
     // maybe should not happen on connect, or we could be resetting type
     // Or maybe it should, and the filter swapper should just change this? no.
-    this.TYPE = this.element.dataset.autocomplete;
+    this.TYPE = this.inputTarget.dataset.autocomplete;
     if (!AUTOCOMPLETER_TYPES.hasOwnProperty(this.TYPE))
       alert("MOAutocompleter: Invalid type: \"" + this.TYPE + "\"");
 
@@ -123,56 +129,62 @@ export default class extends Controller {
 
   connect() {
     // Figure out a few browser-dependent dimensions.
-    this.getScrollBarWidth();
+    this.getScrollBarWidth;
 
     // Create pulldown.
     this.create_pulldown();
 
     // Attach events, etc. to input element.
-    this.prepare_input_element(this.element);
+    this.prepare_input_element();
   }
 
-  // To swap out autocompleter properties, send a type
-  swap(type, opts) {
+  // Swaps out autocompleter properties (use event? no // { detail: { type } })
+  // Action called from a <select> with `data-action: "autocompleter-swap"`
+  swap(opts = {}) {
+    if (!this.hasSelectTarget)
+      return;
+
+    const type = this.selectTarget.value
+
     if (!AUTOCOMPLETER_TYPES.hasOwnProperty(type)) {
       alert("MOAutocompleter: Invalid type: \"" + this.TYPE + "\"");
     } else {
       this.TYPE = type;
-      this.element.setAttribute("data-autocompleter", type)
+      this.inputTarget.setAttribute("data-autocompleter", type)
       // add dependent properties and allow overrides
       Object.assign(this, AUTOCOMPLETER_TYPES[this.TYPE]);
       Object.assign(this, opts);
-      this.prepare_input_element(this);
+      this.prepare_input_element();
     }
   }
 
   // Prepare input element: attach elements, set properties.
-  prepare_input_element(elem) {
+  prepare_input_element() {
     // console.log(elem)
-    const id = elem.getAttribute("id");
+    // const id = this.inputTarget.getAttribute("id");
 
-    this.old_value[id] = null;
+    // this.old_value[id] = null;
 
     // Attach events
-    this.add_event_listeners(elem);
+    this.add_event_listeners();
 
     // sanity check to show which autocompleter is currently on the element
-    elem.setAttribute("data-ajax-url", this.AJAX_URL);
+    this.inputTarget.setAttribute("data-ajax-url", this.AJAX_URL);
   }
 
   // NOTE: `this` within an event listener function refers to the element
   // (the eventTarget) -- unless you pass an arrow function as the listener.
   // But writing a specially named function handleEvent() allows delegating
   // the class as the handler:
-  add_event_listeners(elem) {
+  add_event_listeners() {
     // Stimulus - data-actions on the input can route events to actions here
-    elem.addEventListener("focus", this);
-    elem.addEventListener("click", this);
-    elem.addEventListener("blur", this);
-    elem.addEventListener("keydown", this);
-    elem.addEventListener("keyup", this);
-    elem.addEventListener("keypress", this);
-    elem.addEventListener("change", this);
+    this.inputTarget.addEventListener("focus", this);
+    this.inputTarget.addEventListener("click", this);
+    this.inputTarget.addEventListener("blur", this);
+    this.inputTarget.addEventListener("keydown", this);
+    this.inputTarget.addEventListener("keyup", this);
+    this.inputTarget.addEventListener("keypress", this);
+    this.inputTarget.addEventListener("change", this);
     // Turbo: check this. May need to be turbo.before_render or before_visit
     window.addEventListener("beforeunload", this);
   }
@@ -281,14 +293,14 @@ export default class extends Controller {
 
   // Input field has changed.
   our_change(do_refresh) {
-    const old_val = this.old_value[this.uuid];
-    const new_val = this.element.value;
-    // this.debug("our_change(" + this.element.value + ")");
-    if (new_val != old_val) {
-      this.old_value[this.uuid] = new_val;
-      if (do_refresh)
-        this.schedule_refresh();
-    }
+    // const old_val = this.old_value[this.uuid];
+    // const new_val = this.inputTarget.value;
+    // this.debug("our_change(" + this.inputTarget.value + ")");
+    // if (new_val != old_val) {
+    // this.old_value[this.uuid] = new_val;
+    if (do_refresh)
+      this.schedule_refresh();
+    // }
   }
 
   // User clicked into text field.
@@ -319,7 +331,7 @@ export default class extends Controller {
     // and firefox will not remember the value of fields when you go back.
     // This hack re-enables native autocomplete before leaving the page.
     // [This only works for firefox; should work for chrome but doesn't.]
-    this.element.setAttribute("autocomplete", "on");
+    this.inputTarget.setAttribute("autocomplete", "on");
     return false;
   }
 
@@ -348,8 +360,8 @@ export default class extends Controller {
     this.clear_refresh();
     this.refresh_timer = window.setTimeout((() => {
       this.verbose("doing_refresh()");
-      // this.debug("refresh_timer(" + this.element.value + ")");
-      this.old_value[this.uuid] = this.element.value;
+      // this.debug("refresh_timer(" + this.inputTarget.value + ")");
+      // this.old_value[this.uuid] = this.inputTarget.value;
       if (this.AJAX_URL)
         this.refresh_primer();
       this.update_matches();
@@ -457,7 +469,7 @@ export default class extends Controller {
       if (new_hl >= 0)
         rows[new_hl].classList.add(this.HOT_CLASS);
     }
-    this.element.focus();
+    this.inputTarget.focus();
     this.update_width();
   }
 
@@ -483,7 +495,7 @@ export default class extends Controller {
   // User has selected a value, either pressing tab/return or clicking on an option.
   select_row(row) {
     this.verbose("select_row()");
-    // const old_val = this.element.value;
+    // const old_val = this.inputTarget.value;
     let new_val = this.matches[this.scroll_offset + row];
     // Close pulldown unless the value the user selected uncollapses into a set
     // of new options.  In that case schedule a refresh and leave it up.
@@ -494,9 +506,9 @@ export default class extends Controller {
     } else {
       this.schedule_hide();
     }
-    this.element.focus();
+    this.inputTarget.focus();
     this.focused = true;
-    // this.element.value = new_val;
+    // this.inputTarget.value = new_val;
     this.set_search_token(new_val);
     this.our_change(false);
   }
@@ -519,7 +531,7 @@ export default class extends Controller {
     div.appendChild(list)
 
     div.addEventListener("scroll", this.our_scroll.bind(this));
-    this.element.insertAdjacentElement("afterend", div);
+    this.inputTarget.insertAdjacentElement("afterend", div);
     this.PULLDOWN_ELEM = div;
     this.LIST_ELEM = list;
   }
@@ -594,7 +606,7 @@ export default class extends Controller {
     }
 
     // Make sure input focus stays on text field!
-    this.element.focus();
+    this.inputTarget.focus();
   }
 
   // Update menu text first.
@@ -642,10 +654,10 @@ export default class extends Controller {
 
     if (matches.length > 0) {
       // console.log("Matches:" + matches)
-      const top = this.element.offsetTop,
-        left = this.element.offsetLeft,
-        hgt = this.element.offsetHeight,
-        scr = this.element.scrollTop;
+      const top = this.inputTarget.offsetTop,
+        left = this.inputTarget.offsetLeft,
+        hgt = this.inputTarget.offsetHeight,
+        scr = this.inputTarget.scrollTop;
       menu.style.top = (top + hgt + scr) + "px";
       menu.style.left = left + "px";
 
@@ -663,7 +675,7 @@ export default class extends Controller {
 
       // Only show menu if it is nontrivial, i.e., show an option other than
       // the value that's already in the text field.
-      if (matches.length > 1 || this.element.value != matches[0]) {
+      if (matches.length > 1 || this.inputTarget.value != matches[0]) {
         this.clear_hide();
         menu.style.display = 'block';
         this.menu_up = true;
@@ -733,7 +745,7 @@ export default class extends Controller {
     // Try to find old highlighted row in new set of options.
     this.update_current_row(last);
     // Reset width each time we change the options.
-    this.current_width = this.element.offsetWidth;
+    this.current_width = this.inputTarget.offsetWidth;
   }
 
   // When "acting like a select" make it display all options in the
@@ -916,7 +928,7 @@ export default class extends Controller {
 
   // Get search token under or immediately in front of cursor.
   get_search_token() {
-    const val = this.element.value;
+    const val = this.inputTarget.value;
     let token = val;
     if (this.SEPARATOR) {
       const s_ext = this.search_token_extents();
@@ -927,7 +939,7 @@ export default class extends Controller {
 
   // Change the token under or immediately in front of the cursor.
   set_search_token(new_val) {
-    const old_str = this.element.value;
+    const old_str = this.inputTarget.value;
     if (this.SEPARATOR) {
       let new_str = "";
       const s_ext = this.search_token_extents();
@@ -939,21 +951,21 @@ export default class extends Controller {
       if (s_ext.end < old_str.length)
         new_str += old_str.substring(s_ext.end);
       if (old_str != new_str) {
-        var old_scroll = this.element.offsetTop;
-        this.element.value = new_str;
-        this.setCursorPosition(this.element[0],
+        var old_scroll = this.inputTarget.offsetTop;
+        this.inputTarget.value = new_str;
+        this.setCursorPosition(this.inputTarget[0],
           s_ext.start + new_val.length);
-        this.element.offsetTop = old_scroll;
+        this.inputTarget.offsetTop = old_scroll;
       }
     } else {
       if (old_str != new_val)
-        this.element.value = new_val;
+        this.inputTarget.value = new_val;
     }
   }
 
   // Get index of first character and character after last of current token.
   search_token_extents() {
-    const val = this.element.value;
+    const val = this.inputTarget.value;
     let start = val.lastIndexOf(this.SEPARATOR),
       end = val.length;
 
@@ -970,7 +982,7 @@ export default class extends Controller {
   // Send request for updated primer.
   refresh_primer() {
     this.verbose("refresh_primer()");
-    // let val = this.element.value.toLowerCase();
+    // let val = this.inputTarget.value.toLowerCase();
     let val = this.get_search_token().toLowerCase();
 
     // Don't make request on empty string!
