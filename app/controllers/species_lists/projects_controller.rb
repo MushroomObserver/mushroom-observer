@@ -86,9 +86,14 @@ module SpeciesLists
       @any_changes = false
       @projects.each do |proj|
         if @project_states[proj.id]
-          attach_species_list_to_project(proj) if @object_states[:list]
-          attach_observations_to_project(proj) if @object_states[:obs]
-          attach_images_to_project(proj)       if @object_states[:img]
+         if @user.projects_member.exclude?(proj)
+           flash_error(:species_list_projects_no_add_to_project.
+                          t(proj: proj.title))
+         else
+           attach_species_list_to_project(proj) if @object_states[:list]
+           attach_observations_to_project(proj) if @object_states[:obs]
+           attach_images_to_project(proj)       if @object_states[:img]
+         end
         end
       end
       @any_changes

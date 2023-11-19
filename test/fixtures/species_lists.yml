@@ -96,3 +96,8 @@ lone_wolf_list:
   <<: *DEFAULTS
   user: lone_wolf
   when: 2023-11-14
+
+reused_list:
+  <<: *DEFAULTS
+  user: mary
+  when: 2023-11-19

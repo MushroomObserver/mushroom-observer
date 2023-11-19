@@ -31,6 +31,25 @@ module SpeciesLists
       assert_response(:success)
     end
 
+    def test_reused_list
+      list = species_lists(:reused_list)
+      proj = projects(:open_membership_project)
+
+      login("mary")
+      put(
+        :update,
+        params: {
+          id: list.id,
+          objects_list: "1",
+          objects_obs: "0",
+          objects_img: "0",
+          "projects_#{proj.id}" => "1",
+          commit: :ATTACH.l
+        }
+      )
+      assert_flash_error
+    end
+
     def test_unowned_list
       proj = projects(:eol_project)
       list = species_lists(:lone_wolf_list)
