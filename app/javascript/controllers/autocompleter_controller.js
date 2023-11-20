@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { escapeHTML, getScrollBarWidth } from "src/mo_utilities"
+import { escapeHTML, getScrollBarWidth, EVENT_KEYS } from "src/mo_utilities"
 
 const DEFAULT_OPTS = {
   // id of text field (after initialization becomes a unique identifier)
@@ -88,7 +88,7 @@ const INTERNAL_OPTS = {
   SCROLLBAR_WIDTH: null, // width of scrollbar in browser (determined below)
   focused: false,        // is user in text field?
   menu_up: false,        // is pulldown visible?
-  old_value: {},         // previous value of input field
+  old_value: null,         // previous value of input field
   primer: [],            // a server-supplied list of many options
   matches: [],           // list of options currently showing
   current_row: -1,       // index of option currently highlighted (0 = none)
@@ -123,6 +123,7 @@ export default class extends Controller {
     Object.assign(this, INTERNAL_OPTS);
 
     // Shared MO utilities imported
+    this.EVENT_KEYS = EVENT_KEYS
     this.escapeHTML = escapeHTML
     this.getScrollBarWidth = getScrollBarWidth
   }
@@ -161,9 +162,9 @@ export default class extends Controller {
   // Prepare input element: attach elements, set properties.
   prepare_input_element() {
     // console.log(elem)
-    // const id = this.inputTarget.getAttribute("id");
+    // const id = this.inputTarget.id;
 
-    // this.old_value[id] = null;
+    this.old_value = null;
 
     // Attach events
     this.add_event_listeners();
@@ -230,35 +231,35 @@ export default class extends Controller {
     this.focused = true;
     if (this.menu_up) {
       switch (key) {
-        case 27: // EVENT_KEY_ESC
+        case this.EVENT_KEYS.esc:
           this.schedule_hide();
           this.menu_up = false;
           break;
-        case 13: // EVENT_KEY_RETURN
-        case 9: // EVENT_KEY_TAB
+        case this.EVENT_KEYS.tab:
+        case this.EVENT_KEYS.return:
           event.preventDefault();
           if (this.current_row >= 0)
             this.select_row(this.current_row - this.scroll_offset);
           break;
-        case 36: // EVENT_KEY_HOME
+        case this.EVENT_KEYS.home:
           this.go_home();
           break;
-        case 35: // EVENT_KEY_END
+        case this.EVENT_KEYS.end:
           this.go_end();
           break;
-        case 33: // EVENT_KEY_PAGEUP
+        case this.EVENT_KEYS.pageup:
           this.page_up();
           this.schedule_key(this.page_up);
           break;
-        case 38: // EVENT_KEY_UP
+        case this.EVENT_KEYS.up:
           this.arrow_up();
           this.schedule_key(this.arrow_up);
           break;
-        case 40: // EVENT_KEY_DOWN
+        case this.EVENT_KEYS.down:
           this.arrow_down();
           this.schedule_key(this.arrow_down);
           break;
-        case 34: // EVENT_KEY_PAGEDOWN
+        case this.EVENT_KEYS.pagedown:
           this.page_down();
           this.schedule_key(this.page_down);
           break;
@@ -293,14 +294,14 @@ export default class extends Controller {
 
   // Input field has changed.
   our_change(do_refresh) {
-    // const old_val = this.old_value[this.uuid];
-    // const new_val = this.inputTarget.value;
+    const old_val = this.old_value;
+    const new_val = this.inputTarget.value;
     // this.debug("our_change(" + this.inputTarget.value + ")");
-    // if (new_val != old_val) {
-    // this.old_value[this.uuid] = new_val;
-    if (do_refresh)
-      this.schedule_refresh();
-    // }
+    if (new_val != old_val) {
+      this.old_value = new_val;
+      if (do_refresh)
+        this.schedule_refresh();
+    }
   }
 
   // User clicked into text field.
@@ -338,15 +339,15 @@ export default class extends Controller {
   // Prevent these keys from propagating to the input field.
   is_hot_key(key) {
     switch (key) {
-      case 27: // EVENT_KEY_ESC
-      case 13: // EVENT_KEY_RETURN
-      case 9: // EVENT_KEY_TAB
-      case 38: // EVENT_KEY_UP
-      case 40: // EVENT_KEY_DOWN
-      case 33: // EVENT_KEY_PAGEUP
-      case 34: // EVENT_KEY_PAGEDOWN
-      case 36: // EVENT_KEY_HOME
-      case 35: // EVENT_KEY_END
+      case this.EVENT_KEYS.esc:
+      case this.EVENT_KEYS.return:
+      case this.EVENT_KEYS.tab:
+      case this.EVENT_KEYS.up:
+      case this.EVENT_KEYS.down:
+      case this.EVENT_KEYS.pageup:
+      case this.EVENT_KEYS.pagedown:
+      case this.EVENT_KEYS.home:
+      case this.EVENT_KEYS.end:
         return true;
     }
     return false;
@@ -361,7 +362,7 @@ export default class extends Controller {
     this.refresh_timer = window.setTimeout((() => {
       this.verbose("doing_refresh()");
       // this.debug("refresh_timer(" + this.inputTarget.value + ")");
-      // this.old_value[this.uuid] = this.inputTarget.value;
+      this.old_value = this.inputTarget.value;
       if (this.AJAX_URL)
         this.refresh_primer();
       this.update_matches();
@@ -508,7 +509,7 @@ export default class extends Controller {
     }
     this.inputTarget.focus();
     this.focused = true;
-    // this.inputTarget.value = new_val;
+    this.inputTarget.value = new_val;
     this.set_search_token(new_val);
     this.our_change(false);
   }

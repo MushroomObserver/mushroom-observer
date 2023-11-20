@@ -34,7 +34,6 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     browser.keyboard.type(:delete, :delete)
     assert_selector(".auto_complete ul li", text: "Agaricus campestrus")
     browser.keyboard.type(:down, :down, :down, :down, :tab)
-    sleep(1)
     assert_field("search_name", with: "Agaricus campestrus")
 
     # User

@@ -5,16 +5,16 @@ export default class extends Controller {
   static targets = ["searchModel", "filter"]
 
   connect() {
-    disableUnusedFilters()
+    this.disableUnusedFilters();
   }
 
   disableUnusedFilters() {
-    const model = " " + this.searchModelTarget.value + " ";
+    const model = this.searchModelTarget.value;
 
     this.filterTargets.forEach((filter) => {
       const models = filter.dataset.models
 
-      if (models.indexOf(model) > 0) {
+      if (models.indexOf(model) >= 0) {
         filter.classList.remove('disabled')
         filter.querySelector('input').disabled = false
       } else {
