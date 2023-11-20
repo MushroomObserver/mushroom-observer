@@ -4,8 +4,6 @@
 //= link_tree ../../../vendor/javascript .js
 //= link jquery.min.js
 
-//= link mo_application.js
-
 //= link Admin.css
 //= link Agaricus.css
 //= link Amanita.css

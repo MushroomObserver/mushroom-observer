@@ -36,6 +36,7 @@ function apply_file_input_field_validation(id) {
 // Add validation to all field input fields once page is loaded.
 $(document).on("ready turbo:load", function () {
   jQuery("input[type=file][multiple!=multiple]").each(function () {
+    this.setAttribute("data-thing", "thoff");
     apply_file_input_field_validation(this.id);
   });
 });

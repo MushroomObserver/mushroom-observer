@@ -306,15 +306,18 @@ module FormsHelper
     input_span_class = "file-field btn btn-default"
     max_size = MO.image_upload_max_size
     max_size_in_mb = (max_size.to_f / 1024 / 1024).round
+    max_upload_msg = :validate_image_file_too_big.l(max: max_size_in_mb)
     opts = opts.merge(
-      max_upload_msg: :validate_image_file_too_big.l(max: max_size_in_mb),
-      max_upload_size: max_size
+      data: {
+        action: "change->file-input#validate", file_input_target: "input",
+        max_upload_size: max_size, max_upload_msg: max_upload_msg
+      }
     )
 
     wrap_class = form_group_wrap_class(args)
 
     # append is always :no_file_selected.t
-    tag.div(class: wrap_class) do
+    tag.div(class: wrap_class, data: { controller: "file-input" }) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
       concat(args[:between]) if args[:between].present?
       concat(
@@ -323,7 +326,7 @@ module FormsHelper
           concat(args[:form].file_field(args[:field], opts))
         end
       )
-      concat(tag.span(:no_file_selected.t))
+      concat(tag.span(:no_file_selected.t, data: { file_input_target: "name" }))
     end
   end
 
