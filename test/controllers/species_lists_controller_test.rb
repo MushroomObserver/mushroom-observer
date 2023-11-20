@@ -247,7 +247,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { for_project: project.id })
 
-    assert_displayed_title("Species Lists attached to #{project.title}")
+    assert_displayed_title("Species Lists for #{project.title}")
   end
 
   def test_index_for_project_with_no_lists

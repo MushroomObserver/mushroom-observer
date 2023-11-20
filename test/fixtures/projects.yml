@@ -55,7 +55,7 @@ open_membership_project:
   summary: Project about Fungi of Burbank
   created_at: 2008-09-25 07:00:50
   updated_at: 2008-09-25 07:00:55
-  observations: owner_accepts_general_questions, unknown_with_lat_long
+  observations: owner_accepts_general_questions, unknown_with_lat_long, trusted_hidden, untrusted_hidden
   open_membership: true
 
 empty_project:

@@ -272,6 +272,8 @@ class User < AbstractModel
   has_many :namings
   has_many :observations
   has_many :projects_created, class_name: "Project"
+  has_many :project_members, dependent: :destroy
+  has_many :projects, through: :project_members, source: :projects
   has_many :publications
   has_many :queued_emails
   has_many :sequences

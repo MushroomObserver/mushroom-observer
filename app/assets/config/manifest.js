@@ -9,7 +9,6 @@
 //= link mo_translations.js
 //= link mo_observation_mapper.js
 //= link name_lister.js
-//= link rss_log_type_filter_helper.js
 //= link suggestions.js
 //= link thumbnail_map.js
 //= link visual_group_status.js

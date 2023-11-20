@@ -417,13 +417,15 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_error
-    ObservationsController.any_instance.stubs(:show_selected_observations).
-      raises(RuntimeError)
     query = Query.lookup_and_save(:Observation, :advanced_search, name: "Fungi")
 
     login
-    get(:index,
-        params: @controller.query_params(query).merge({ advanced_search: "1" }))
+    @controller.stub(:show_selected_observations, -> { raise(RuntimeError) }) do
+      get(:index,
+          params: @controller.query_params(query).merge(
+            { advanced_search: "1" }
+          ))
+    end
 
     assert_redirected_to(
       search_advanced_path,
@@ -731,7 +733,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: { project: project.id })
 
     assert_response(:success)
-    assert_displayed_title("Observations attached to #{project.title}")
+    assert_displayed_title("Observations for #{project.title}")
   end
 
   def test_index_project_without_observations
@@ -2850,40 +2852,41 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def test_image_upload_when_process_image_fails
-    login("rolf")
-
     setup_image_dirs
     file = Rails.root.join("test/images/Coprinus_comatus.jpg")
     file = Rack::Test::UploadedFile.new(file, "image/jpeg")
-
-    # Simulate process_image failure.
-    Image.any_instance.stubs(:process_image).returns(false)
-
-    post(
-      :create,
-      params: {
-        observation: {
-          place_name: "USA",
+    image = Image.create(user: users(:rolf),
+                         copyright_holder: "zuul",
+                         when: Time.current,
+                         notes: "stubbed in test")
+    params = {
+      observation: { place_name: "USA",
+                     when: Time.current },
+      image: {
+        "0" => {
+          image: file,
+          copyright_holder: "zuul",
           when: Time.current
-        },
-        image: {
-          "0" => {
-            image: file,
-            copyright_holder: "zuul",
-            when: Time.current
-          }
         }
       }
-    )
+    }
+    login("rolf")
 
-    # Prove that an image was created, but that it is unattached, is in the
-    # @bad_images array, and has not been kept in the @good_images array
-    # for attachment later.
+    # Simulate process_image failure.
+    Image.stub(:new, image) do
+      image.stub(:process_image, false) do
+        post(:create, params: params)
+      end
+    end
+
     img = Image.find_by(copyright_holder: "zuul")
-    assert(img)
-    assert_equal([], img.observations)
-    assert_includes(@controller.instance_variable_get(:@bad_images), img)
-    assert_empty(@controller.instance_variable_get(:@good_images))
+
+    assert(img, "Failed to create image")
+    assert_equal([], img.observations, "Image should be unattached")
+    assert_includes(@controller.instance_variable_get(:@bad_images), img,
+                    "Failed to include image in @bad_images")
+    assert_empty(@controller.instance_variable_get(:@good_images),
+                 "Incorrectly included image in @good_images")
   end
 
   def test_inital_project_checkboxes

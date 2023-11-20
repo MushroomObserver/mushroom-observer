@@ -55,10 +55,8 @@ module ObservationsController::FormHelpers
 
   # Initialize image for the dynamic image form at the bottom.
   def init_new_image_var(default_date)
-    @new_image = Image.new
-    @new_image.when             = default_date
-    @new_image.license          = @user.license
-    @new_image.copyright_holder = @user.legal_name
+    @new_image = Image.new(when: default_date, license: @user.license,
+                           copyright_holder: @user.legal_name)
   end
 
   def init_specimen_vars

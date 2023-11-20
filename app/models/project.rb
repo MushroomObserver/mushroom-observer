@@ -58,6 +58,8 @@ class Project < AbstractModel
 
   has_many :admin_group_users, through: :admin_group, source: :users
   has_many :member_group_users, through: :user_group, source: :users
+  has_many :project_members, dependent: :destroy
+  has_many :members, through: :project_members, source: :users
 
   has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
@@ -101,12 +103,17 @@ class Project < AbstractModel
     user && (admin_group.users.member?(user) || user.admin)
   end
 
+  def trusted_by?(user)
+    member = project_members.find_by(user: user)
+    member&.trusted
+  end
+
   def can_join?(user)
     open_membership && !is_member?(user)
   end
 
   def can_leave?(user)
-    is_member?(user) && user.id != user_id
+    user && user_group.users.member?(user) && user.id != user_id
   end
 
   def member_status(user)
@@ -158,9 +165,11 @@ class Project < AbstractModel
     return false unless user
     return false if observation.projects.empty?
 
-    group_ids = user.user_group_ids
     observation.projects.each do |project|
-      return true if group_ids.member?(project.admin_group_id)
+      if project.is_admin?(user)
+        member = project.project_members.find_by(user: observation.user)
+        return member&.trusted
+      end
     end
     false
   end
