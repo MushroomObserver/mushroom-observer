@@ -4,7 +4,7 @@ require("test_helper")
 
 # Discover potential n+1 issues by running some requests with bullet gem
 class NPlusOneIntegrationTest < IntegrationTestCase
-  # include BulletHelper
+  include BulletHelper
 
   def test_api2
     get("/api2/observations?detail=high&format=xml")
