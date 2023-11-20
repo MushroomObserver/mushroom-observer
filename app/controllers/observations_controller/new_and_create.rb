@@ -70,7 +70,7 @@ module ObservationsController::NewAndCreate
     last_observation.projects.each do |project|
       @project_checks[project.id] = true unless project.open_membership
     end
-    last_observation.species_lists.includes([:projects]).each do |list|
+    last_observation.species_lists.each do |list|
       if check_permission(list)
         @lists << list unless @lists.include?(list)
         @list_checks[list.id] = true
