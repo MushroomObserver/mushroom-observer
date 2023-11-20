@@ -17,6 +17,7 @@ require("geocoder")
 #  :destroy
 
 # Locations controller.
+# rubocop:disable Metrics/ClassLength
 class LocationsController < ApplicationController
   # disable cop because index is defined in ApplicationController
   # rubocop:disable Rails/LexicallyScopedActionFilter
@@ -571,3 +572,4 @@ class LocationsController < ApplicationController
       permit(:display_name, :north, :west, :east, :south, :high, :low, :notes)
   end
 end
+# rubocop:enable Metrics/ClassLength
