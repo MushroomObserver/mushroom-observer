@@ -263,7 +263,8 @@ module NamingsHelper
       f_r.text_area(
         :notes, index: rsn.num, rows: 3, value: rsn.notes,
                 class: "form-control",
-                data: { naming_reason_target: "input" })
+                data: { naming_reason_target: "input" }
+      )
     end
   end
 end

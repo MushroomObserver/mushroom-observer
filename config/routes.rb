@@ -20,15 +20,12 @@ ACTIONS = {
   ajax: {
     auto_complete: {},
     create_image_object: {},
-    # export: {},
-    # external_link: {},
     geocode: {},
     image: {},
     location_primer: {},
     name_primer: {},
     multi_image_template: {},
-    test: {},
-    # visual_group_status: {}
+    test: {}
   },
   api: {
     api_keys: {},

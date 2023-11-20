@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Pin npm packages by running ./bin/importmap
 # If string literal error, it means the importmap is not functioning
 # check it with bin/importmap json

@@ -10,7 +10,7 @@ module MapHelper
       map_target: "mapDiv",
       editable: false,
       controls: [:large_map, :map_type].to_json,
-      location_format: User.current_location_format, # has a default
+      location_format: User.current_location_format # method has a default
     }
     map_args = args.except(:objects, :nothing_to_map)
     map_args = provide_defaults(map_args, **default_args)
