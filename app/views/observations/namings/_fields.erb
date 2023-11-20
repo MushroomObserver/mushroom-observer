@@ -74,11 +74,3 @@ context ||= "blank"
   hidden_field_tag(:context, context)
 ].safe_join
 %>
-
-<% inject_javascript_at_end %(
-  jQuery(document).ready(function() {
-    jQuery(document).on('shown.bs.collapse', '.collapse', function () {
-      $(this).first('textarea').focus();
-    });
-  });
-) %>

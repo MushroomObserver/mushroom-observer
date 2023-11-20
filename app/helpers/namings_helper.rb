@@ -218,38 +218,52 @@ module NamingsHelper
   end
 
   def naming_form_reasons_fields(f_r, reasons)
-    reasons.values.sort_by(&:order).each do |r|
-      collapse = r.used? ? "" : "collapse"
-      concat(
+    reasons.values.sort_by(&:order).map do |rsn|
+      tag.div(data: {
+                controller: "naming-reason",
+                action: "shown.bs.collapse->naming-reason#focusInput"
+              }) do
         [
-          tag.div(class: "checkbox") do
-            f_r.label("#{r.num}_check",
-                      { data: {
-                          toggle: "collapse",
-                          target: "#reasons_#{r.num}_notes"
-                        },
-                        aria: {
-                          expanded: "false",
-                          controls: "reasons_#{r.num}_notes"
-                        } }) do
-              [
-                f_r.check_box(:check,
-                              { index: r.num,
-                                checked: r.used?,
-                                class: "" },
-                              "1"),
-                r.label.t
-              ].safe_join
-            end
-          end,
-          tag.div(id: "reasons_#{r.num}_notes",
-                  class: class_names("form-group mb-3", collapse)) do
-            f_r.text_area(:notes,
-                          index: r.num, rows: 3, value: r.notes,
-                          class: "form-control")
-          end
+          naming_form_reasons_checkbox(f_r, rsn),
+          naming_form_reasons_textarea(f_r, rsn)
         ].safe_join
-      )
+      end
+    end.safe_join
+  end
+
+  def naming_form_reasons_checkbox(f_r, rsn)
+    tag.div(class: "checkbox") do
+      f_r.label("#{rsn.num}_check",
+                { data: {
+                    toggle: "collapse",
+                    target: "#reasons_#{rsn.num}_notes"
+                  },
+                  aria: {
+                    expanded: "false",
+                    controls: "reasons_#{rsn.num}_notes"
+                  } }) do
+        [
+          f_r.check_box(:check,
+                        { index: rsn.num,
+                          checked: rsn.used?,
+                          class: "" },
+                        "1"),
+          rsn.label.t
+        ].safe_join
+      end
+    end
+  end
+
+  def naming_form_reasons_textarea(f_r, rsn)
+    collapse = rsn.used? ? "" : "collapse"
+
+    tag.div(id: "reasons_#{rsn.num}_notes",
+            class: class_names("form-group mb-3", collapse),
+            data: { naming_reason_target: "collapse" }) do
+      f_r.text_area(
+        :notes, index: rsn.num, rows: 3, value: rsn.notes,
+                class: "form-control",
+                data: { naming_reason_target: "input" })
     end
   end
 end
