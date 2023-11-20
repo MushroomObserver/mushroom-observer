@@ -100,6 +100,8 @@ MushroomObserver::Application.configure do
 
   config.active_support.test_order = :random
 
+  config.bot_enabled = true
+
   # ----------------------------
   #  Bullet configuration.
   # ----------------------------
