@@ -3,7 +3,6 @@
 module MapHelper
   # args could include query_param.
   # returns an array of mapsets, each suitable for a marker or box
-  # TODO: remove local_assigns here and figure out what the legit map_args are
   def make_map(objects, args = {})
     default_args = {
       map_div: "map_div",
@@ -25,18 +24,6 @@ module MapHelper
     }.to_json
 
     map_html(map_args)
-  end
-
-  def map_html(map_args)
-    tag.div(class: "w-100 position-relative",
-            style: "padding-bottom: 66%;") do
-      tag.div(
-        "",
-        id: map_args[:map_div],
-        class: "position-absolute w-100 h-100",
-        data: map_args.except(:map_div)
-      )
-    end
   end
 
   # Returns a CollapsibleCollection of mapsets, containing all data necessary
@@ -61,116 +48,19 @@ module MapHelper
     collection
   end
 
-  # def make_map(objects, args = {})
-  #   args = provide_defaults(args,
-  #                           map_div: "map_div",
-  #                           controls: [:large_map, :map_type],
-  #                           info_window: true)
-  #   collection = Mappable::CollapsibleCollectionOfObjects.new(objects)
-  #   gmap = init_map(args)
-  #   if args[:zoom]
-  #     gmap.center_zoom_init(collection.extents.center, args[:zoom])
-  #   else
-  #     gmap.center_zoom_on_points_init(*collection.representative_points)
-  #   end
-  #   # stimulus controller should draw the mapset.
-  #   # This should just add html to each mapset
-  #   collection.mapsets.each { |mapset| draw_mapset(gmap, mapset, args) }
-  #   gmap
-  # end
-
-  def make_editable_map(object, args = {})
-    args = provide_defaults(args,
-                            editable: true,
-                            info_window: false)
-    gmap = make_map(object, args)
-    gmap.event_init(gmap, "click", "function(e) { clickLatLng(e.latLng) }")
-    gmap.event_init(
-      gmap, "dblclick", "function(e) { dblClickLatLng(e.latLng) }"
-    )
-    gmap
-  end
-
   def provide_defaults(args, default_args)
     default_args.merge(args)
   end
 
-  def init_map(args = {})
-    gmap = GM::GMap.new(args[:map_div])
-    gmap.control_init(args[:controls].to_boolean_hash)
-    gmap
-  end
-
-  def finish_map(gmap)
-    ensure_global_header_is_added
-    html = gmap.to_html(no_script_tag: 1)
-    js = javascript_tag(html)
-    add_header(js)
-  end
-
-  def ensure_global_header_is_added
-    return if @done_gmap_header_yet
-
-    add_header(GM::GMap.header(host: MO.domain))
-    @done_gmap_header_yet = true
-  end
-
-  def draw_mapset(gmap, set, args = {})
-    title = mapset_marker_title(set)
-    # set.center needs to go into Stimulus.
-    marker = GM::GMarker.new(set.center,
-                             draggable: args[:editable],
-                             title: title)
-    marker.info_window = mapset_info_window(set, args) if args[:info_window]
-    # logic for stimulus
-    if args[:editable]
-      map_control_init(gmap, marker, args)
-      map_box_control_init(gmap, set, args) if set.is_box
-    else
-      gmap.overlay_init(marker) # draws a marker for the mapset
-    end
-    # set.is_box logic needs to go into Stimulus, via the mapset object
-    draw_box_on_gmap(gmap, set, args) if set.is_box
-  end
-
-  # Maybe: change Polyline to Rectangle
-  def draw_box_on_gmap(gmap, set, args)
-    box = GM::GPolyline.new([
-                              set.north_west,
-                              set.north_east,
-                              set.south_east,
-                              set.south_west,
-                              set.north_west
-                            ], "#00ff88", 3, 1.0)
-    if args[:editable]
-      box_name = args[:box_name] || "mo_box"
-      gmap.overlay_global_init(box, box_name)
-    else
-      gmap.overlay_init(box)
-    end
-  end
-
-  # I think this just makes a dragable marker.
-  # Nope, it also syncs with the edit form inputs for n,s,e,w
-  def map_control_init(gmap, marker, args, type = "ct")
-    name = args[:marker_name] || "mo_marker"
-    gmap.overlay_global_init(marker, name + "_" + type)
-    gmap.event_init(marker, "dragend", "function(e) {
-      dragEndLatLng(e.latLng, '#{type}')
-    }")
-  end
-
-  # I think this just makes four dragable markers for a mapset (box)
-  # Same as above but syncs the corners.
-  def map_box_control_init(gmap, set, args)
-    [
-      [set.north_west, "nw"],
-      [set.north_east, "ne"],
-      [set.south_west, "sw"],
-      [set.south_east, "se"]
-    ].each do |point, type|
-      marker = GM::GMarker.new(point, draggable: true)
-      map_control_init(gmap, marker, args, type)
+  def map_html(map_args)
+    tag.div(class: "w-100 position-relative",
+            style: "padding-bottom: 66%;") do
+      tag.div(
+        "",
+        id: map_args[:map_div],
+        class: "position-absolute w-100 h-100",
+        data: map_args.except(:map_div)
+      )
     end
   end
 

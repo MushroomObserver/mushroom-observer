@@ -41,10 +41,6 @@
 #  == Typical Usage
 #
 #    collection = Mappable::CollapsibleCollectionOfObjects.new(query.results)
-#    gmap.center_on_points(*collection.representative_points)
-#    for mapset in collection.mapsets
-#      draw_mapset(gmap, mapset)
-#    end
 #
 ###############################################################################
 
