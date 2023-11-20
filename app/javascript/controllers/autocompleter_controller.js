@@ -88,7 +88,7 @@ const INTERNAL_OPTS = {
   SCROLLBAR_WIDTH: null, // width of scrollbar in browser (determined below)
   focused: false,        // is user in text field?
   menu_up: false,        // is pulldown visible?
-  old_value: null,         // previous value of input field
+  old_value: null,       // previous value of input field
   primer: [],            // a server-supplied list of many options
   matches: [],           // list of options currently showing
   current_row: -1,       // index of option currently highlighted (0 = none)
@@ -139,7 +139,7 @@ export default class extends Controller {
     this.prepare_input_element();
   }
 
-  // Swaps out autocompleter properties (use event? no // { detail: { type } })
+  // Swaps out autocompleter properties
   // Action called from a <select> with `data-action: "autocompleter-swap"`
   swap(opts = {}) {
     if (!this.hasSelectTarget)
@@ -162,8 +162,6 @@ export default class extends Controller {
   // Prepare input element: attach elements, set properties.
   prepare_input_element() {
     // console.log(elem)
-    // const id = this.inputTarget.id;
-
     this.old_value = null;
 
     // Attach events
@@ -493,7 +491,7 @@ export default class extends Controller {
     }
   }
 
-  // User has selected a value, either pressing tab/return or clicking on an option.
+  // User selects a value, either pressing tab/return or clicking on an option.
   select_row(row) {
     this.verbose("select_row()");
     // const old_val = this.inputTarget.value;
