@@ -332,8 +332,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_parse_date_range_english
-    today = Time.zone.parse("2020-09-03")
-    ActiveSupport::TimeZone.any_instance.stubs(:today).returns(today)
+    travel_to(Time.zone.parse("2020-09-03"))
     x = PatternSearch::Term.new(:xxx)
     x.vals = ["today"]
     assert_equal(%w[2020-09-03 2020-09-03], x.parse_date_range)

@@ -205,9 +205,6 @@ group :test do
   gem("minitest")
   gem("minitest-reporters")
 
-  # Mocking and stubbing in Ruby
-  gem("mocha")
-
   # restore `assigns` and `assert_template` to tests
   gem("rails-controller-testing")
 
