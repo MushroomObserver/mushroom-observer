@@ -28,7 +28,7 @@ export default class extends Controller {
     // dataset must be set one at the time
     if (this.element.dataset != undefined) {
       for (const prop in this.element.dataset) {
-        this.new_elem.setAttribute('data' + prop, this.element.dataset[prop]);
+        this.new_elem.setAttribute('data-' + prop, this.element.dataset[prop]);
       }
     }
 
