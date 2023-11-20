@@ -67,7 +67,6 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     # If it's a bot, controllers often do not serve the expected content.
     # The requester looks like a bot to the `browser` gem because the User Agent
     # in the request is blank. I don't see an easy way to change that. -JDC
-    # Browser::Bot.any_instance.stubs(:bot?).returns(false)
     MO.bot_enabled = false
   end
 
