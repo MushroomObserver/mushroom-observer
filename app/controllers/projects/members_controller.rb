@@ -175,7 +175,11 @@ module Projects
     end
 
     def update_project_membership(project, type, user, add)
-      project_member = ProjectMember.find_or_create_by(project:, user:)
+      project_member = ProjectMember.find_by(project:, user:)
+      unless project_member
+        trusted = !project.open_membership
+        project_member = ProjectMember.create(project:, user:, trusted:)
+      end
       return unless project_member
       return if type == :admin || add
 

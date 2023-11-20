@@ -943,10 +943,8 @@ class ObservationsControllerTest < FunctionalTestCase
     proj = projects(:bolete_project)
     assert_equal(mary.id, obs.user_id)  # owned by mary
     assert(obs.projects.include?(proj)) # owned by bolete project
-    # dick is only member of bolete project
-    assert_equal([dick.id], proj.user_group.users.map(&:id))
 
-    login("rolf")
+    login("rolf") # Can't edit
     get(:show, params: { id: obs.id })
     assert_select("a:match('href',?)", edit_observation_path(obs.id), count: 0)
     assert_select(".destroy_observation_link_#{obs.id}", count: 0)
@@ -961,7 +959,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:destroy, params: { id: obs.id })
     assert_flash_error
 
-    login("mary")
+    login("mary") # Owner
     get(:show, params: { id: obs.id })
     assert_select("a[href=?]", edit_observation_path(obs.id), minimum: 1)
     # Destroy button is in a form, not a link_to
@@ -975,7 +973,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:edit, params: { id: obs.id })
     assert_response(:success)
 
-    login("dick")
+    login("dick") # Project permission
     get(:show, params: { id: obs.id })
     assert_select("a[href=?]", edit_observation_path(obs.id), minimum: 1)
     # Destroy button is in a form, not a link_to
@@ -2326,6 +2324,14 @@ class ObservationsControllerTest < FunctionalTestCase
                   count: 1)
   end
 
+  def test_edit_observation_form_no_open
+    obs = observations(:amateur_obs)
+    project = projects(:open_membership_project)
+    login("katrina")
+    get(:edit, params: { id: obs.id })
+    assert_project_checks(project.id => :unchecked)
+  end
+
   def test_update_observation
     obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at
@@ -2892,10 +2898,6 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_project_checkboxes_in_create_observation
     init_for_project_checkbox_tests
 
-    login("rolf")
-    get(:new)
-    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
-
     login("dick")
     get(:new)
     assert_project_checks(@proj1.id => :no_field, @proj2.id => :unchecked)
@@ -2954,7 +2956,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     login("mary")
     get(:edit, params: { id: @obs2.id })
-    assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
+    assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
     get(:edit, params: { id: @obs1.id })
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :checked)
     put(
@@ -3019,6 +3021,7 @@ class ObservationsControllerTest < FunctionalTestCase
         project: { "id_#{project.id}" => "1" }
       }
     )
+    assert_flash_warning
     assert_project_checks(project.id => :checked)
     put(
       :update,
@@ -3031,8 +3034,28 @@ class ObservationsControllerTest < FunctionalTestCase
         }
       }
     )
+    assert_flash_success
     assert_response(:redirect)
     assert_obj_arrays_equal([project], obs.reload.projects)
+  end
+
+  def test_no_warning_for_associated_projects
+    project = projects(:albion_project)
+    obs = observations(:california_obs)
+    obs.projects << project
+    obs.save!
+
+    login("dick")
+    put(
+      :update,
+      params: {
+        id: obs.id,
+        observation: { place_name: obs.place_name },
+        project: { "id_#{project.id}" => "1" }
+      }
+    )
+    assert_no_flash
+    assert_response(:redirect)
   end
 
   def test_project_observation_good_location

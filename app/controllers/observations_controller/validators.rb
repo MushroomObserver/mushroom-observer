@@ -48,7 +48,8 @@ module ObservationsController::Validators
     return true if params[:project].empty? ||
                    params[:project][:ignore_proj_conflicts]
 
-    @suspect_checked_projects = checked_project_conflicts
+    @suspect_checked_projects = checked_project_conflicts -
+                                @observation.projects
     @suspect_checked_projects.empty?
   end
 
