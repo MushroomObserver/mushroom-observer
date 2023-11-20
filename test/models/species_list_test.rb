@@ -51,10 +51,10 @@ class SpeciesListTest < UnitTestCase
   def test_construct_observation
     spl = species_lists(:first_species_list)
     assert_users_equal(rolf, spl.user)
-    proj = projects(:bolete_project)
+    proj = projects(:lone_wolf_project)
     proj.add_species_list(spl)
-    assert_obj_arrays_equal([dick], proj.user_group.users)
-    User.current = dick
+    assert_obj_arrays_equal([lone_wolf], proj.user_group.users)
+    User.current = lone_wolf
     name = Name.first
 
     # Test defaults first.
@@ -66,7 +66,7 @@ class SpeciesListTest < UnitTestCase
     assert_objs_equal(o, spl.observations.last)
     assert(o.created_at >= 1.minute.ago)
     assert(o.updated_at >= 1.minute.ago)
-    assert_users_equal(dick, o.user)
+    assert_users_equal(lone_wolf, o.user)
     assert_obj_arrays_equal([proj], o.projects)
     assert_equal(spl.when, o.when)
     assert_equal(spl.where, o.where)
@@ -81,12 +81,12 @@ class SpeciesListTest < UnitTestCase
     assert_obj_arrays_equal([n], o.namings)
     assert(n.created_at <= now + 1.second)
     assert(n.updated_at <= now + 1.second)
-    assert_users_equal(dick, n.user)
+    assert_users_equal(lone_wolf, n.user)
     assert_names_equal(name, n.name)
     assert_obj_arrays_equal([v], n.votes)
     assert(v.created_at <= now + 1.second)
     assert(v.updated_at <= now + 1.second)
-    assert_users_equal(dick, v.user)
+    assert_users_equal(lone_wolf, v.user)
     assert_equal(Vote.maximum_vote, v.value)
 
     # Now override everything.

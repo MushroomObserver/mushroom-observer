@@ -149,14 +149,15 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def test_auto_complete_species_list
-    list1, list2, list3 = SpeciesList.all.order(:title).map(&:title)
+    list1, list2, list3, list4 = SpeciesList.all.order(:title).map(&:title)
 
     assert_equal("A Species List", list1)
     assert_equal("Another Species List", list2)
     assert_equal("List of mysteries", list3)
+    assert_equal("lone_wolf_list", list4)
 
     good_ajax_request(:auto_complete, type: :species_list, id: "List")
-    assert_equal(["L", list1, list2, list3], JSON.parse(@response.body))
+    assert_equal(["L", list1, list2, list3, list4], JSON.parse(@response.body))
 
     good_ajax_request(:auto_complete, type: :species_list, id: "Mojo")
     assert_equal(["M", list3], JSON.parse(@response.body))

@@ -36,7 +36,7 @@ mary:
   <<: *DEFAULTS
   name: Mary Newbie
   keep_filenames: <%= User.keep_filenames[:keep_and_show] %>
-  user_groups: all_users, eol_users, eol_admins, mary_only
+  user_groups: all_users, eol_users, eol_admins, mary_only, bolete_users
   mailing_address: 123 Some Pl., Pasadena, CA 91106
 
 # Junk gets denied
@@ -51,7 +51,12 @@ dick:
   name: Tricky Dick
   email_general_question: false
   verified: 2006-03-02 21:14:00
-  user_groups: all_users, bolete_users, bolete_admins, dick_only
+  user_groups: all_users, bolete_users, bolete_admins, albion_users, albion_admins, dick_only
+
+lone_wolf:
+  <<: *DEFAULTS
+  name: Lone Wolf
+  user_groups: all_users, lone_wolf_admins, lone_wolf_users
 
 # Need fourth for testing votes
 katrina:

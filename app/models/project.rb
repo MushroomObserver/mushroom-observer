@@ -159,6 +159,7 @@ class Project < AbstractModel
     group_ids = user.user_group_ids
     obj.projects.each do |project|
       next if project.open_membership
+      next unless project.trusted_by?(obj.user)
       return true if group_ids.member?(project.user_group_id) ||
                      group_ids.member?(project.admin_group_id)
     end
@@ -188,20 +189,20 @@ class Project < AbstractModel
     imgs.each { |x| remove_image(x) }
   end
 
-  def add_observations(imgs)
-    imgs.each { |x| add_observation(x) }
+  def add_observations(obs)
+    obs.each { |x| add_observation(x) }
   end
 
-  def remove_observations(imgs)
-    imgs.each { |x| remove_observation(x) }
+  def remove_observations(obs)
+    obs.each { |x| remove_observation(x) }
   end
 
-  def add_species_lists(imgs)
-    imgs.each { |x| add_species_list(x) }
+  def add_species_lists(lists)
+    lists.each { |x| add_species_list(x) }
   end
 
-  def remove_species_lists(imgs)
-    imgs.each { |x| remove_species_list(x) }
+  def remove_species_lists(lists)
+    lists.each { |x| remove_species_list(x) }
   end
 
   # Add image this project if not already done so.  Saves it.

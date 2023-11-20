@@ -20,7 +20,7 @@ class ImagesIntegrationTest < CapybaraIntegrationTestCase
     assert_equal(mary.id, img.user_id) # owned by mary
     assert(img.projects.include?(proj)) # owned by bolete project
     # dick is only member of project
-    assert_equal([dick.id], proj.user_group.users.map(&:id))
+    assert_equal([mary.id, dick.id], proj.user_group.users.map(&:id))
 
     login!("rolf")
     visit(image_path(img.id))
