@@ -78,7 +78,6 @@ module LinkHelper
   # just show the one in progress.
   # NOTE: Needs a modal `identifier`, in case of multiple form modals
   # NOTE: Args from an MO "tab" will be a hash.
-  # TODO: Maybe change data-turbo-frame to data-modal.
   # Links with data-turbo-frame do a direct page update, and if turbo doesn't
   # find the frame already on the page it's appended after body! That may be
   # why it's appended to the page and not returned to the stimulus caller

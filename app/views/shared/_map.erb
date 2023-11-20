@@ -1,14 +1,6 @@
 <%
 # Map for observations, names, locations - any objects
-# Takes locals: objects, query_params, zoom, nothing_to_map
-# map_args that so far never change from defaults are
-#   { zoom: 2, controls: [:large_map, :map_type], info_window: !editable }
-# so map_args pretty much boils down to query_params
-# query_params are used in a marker's info_window, but needs:
-#   localizations, path helpers, a whole info_window HTML per mapset.
-#   Need a helper to add the mapset info box html to the mapset hash
-# TODO: Remove `zoom` from callers, add `editable`
-#       and set `info_window` if !editable
+# Takes locals: objects, query_params, nothing_to_map
 %>
 
 <%=

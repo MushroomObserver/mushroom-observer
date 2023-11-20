@@ -82,8 +82,7 @@ export default class extends Controller {
     });
   }
 
-  // FIXME
-  // This doesn't work. You can't realistically type in lat/lng, google rejects
+  // type in lat/lng, map marker should update
   calculateMarker() {
     let location
     if (location = this.validateLocation()) {
