@@ -86,7 +86,7 @@ class Project < AbstractModel
 
   # Same as +text_name+ but with id tacked on to make unique.
   def unique_text_name
-    text_name + " (#{id || "?"})"
+    "#{text_name} (#{id || "?"})"
   end
 
   # Need these to be compatible with Comment.
@@ -117,13 +117,9 @@ class Project < AbstractModel
   end
 
   def member_status(user)
-    if user == self.user
-      :OWNER.t
-    elsif is_admin?(user)
-      :ADMIN.t
-    else
-      :MEMBER.t
-    end
+    return :OWNER.t if user == self.user
+
+    is_admin?(user) ? :ADMIN.t : :MEMBER.t
   end
 
   def user_can_add_observation?(obs, user)
@@ -314,14 +310,9 @@ class Project < AbstractModel
   end
 
   def do_log(tag, touch, user = nil)
-    args = {}
-    args[:name]  = user.login if user
-    args[:touch] = touch
-    if tag == :log_project_destroyed
-      orphan_log(tag, args)
-    else
-      log(tag, args)
-    end
+    args = { touch: touch }
+    args[:name] = user.login if user
+    tag == :log_project_destroyed ? orphan_log(tag, args) : log(tag, args)
   end
 
   ##############################################################################
@@ -354,11 +345,7 @@ class Project < AbstractModel
   end
 
   def place_name
-    if location
-      location.display_name
-    else
-      ""
-    end
+    location ? location.display_name : ""
   end
 
   def place_name=(place_name)
