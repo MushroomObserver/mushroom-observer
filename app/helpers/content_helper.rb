@@ -139,7 +139,7 @@ module ContentHelper
 
     tag.div(
       class: "panel panel-default #{args[:class]}",
-      id: args[:id]
+      **args.except(:class, :inner_class, :heading)
     ) do
       concat(heading)
       concat(tag.div(class: "panel-body #{args[:inner_class]}") do
