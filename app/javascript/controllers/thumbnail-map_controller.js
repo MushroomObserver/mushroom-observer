@@ -5,6 +5,8 @@ export default class extends Controller {
   static targets = ["mapContainer", "map", "globe"]
 
   connect() {
+    this.element.dataset.stimulus = "connected";
+
     this.map_url = this.element.dataset.mapUrl
     this.coords = JSON.parse(this.element.dataset.coordinates)
     this.zoom = 1.0

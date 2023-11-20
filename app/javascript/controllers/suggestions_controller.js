@@ -10,6 +10,8 @@ export default class extends Controller {
   }
 
   connect() {
+    this.element.dataset.stimulus = "connected";
+
     this.progressModal = document.getElementById("mo_ajax_progress")
     this.progressCaption = document.getElementById("mo_ajax_progress_caption")
     Object.assign(this.localized_text,

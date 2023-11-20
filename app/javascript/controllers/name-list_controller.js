@@ -44,6 +44,8 @@ export default class extends Controller {
   }
 
   connect() {
+    this.element.dataset.stimulus = "connected";
+
     // These are the div elements for each column.
     this.DIVS = {
       genera: this.generaTarget,
@@ -51,7 +53,6 @@ export default class extends Controller {
       names: this.namesTarget
     }
 
-    this.element.setAttribute("data-stimulus", "connected")
     this.initializeNames()
     this.drawColumn("genera", this.GENERA)
     this.drawColumn("names", this.NAMES)

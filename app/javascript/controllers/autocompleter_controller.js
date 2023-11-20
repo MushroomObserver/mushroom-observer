@@ -129,6 +129,8 @@ export default class extends Controller {
   }
 
   connect() {
+    this.element.dataset.stimulus = "connected";
+
     // Figure out a few browser-dependent dimensions.
     this.getScrollBarWidth;
 

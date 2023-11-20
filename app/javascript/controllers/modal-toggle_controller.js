@@ -10,8 +10,8 @@ import { get } from "@rails/request.js"
 export default class extends Controller {
 
   connect() {
-    this.element.setAttribute("data-stimulus", "connected")
-    this.modalSelector = this.element.getAttribute("data-modal")
+    this.element.dataset.stimulus = "connected";
+    this.modalSelector = this.element.dataset.modal
     this.destination = this.element.getAttribute("href")
   }
 

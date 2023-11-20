@@ -5,6 +5,8 @@ export default class extends Controller {
   static targets = ["checkbox", "fields"]
 
   connect() {
+    this.element.dataset.stimulus = "connected";
+
     this.showPref = this.element.dataset.userPref
     if (this.hasFieldsTarget && this.showPref) {
       this.hideShowFields()

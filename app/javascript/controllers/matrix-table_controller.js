@@ -3,6 +3,8 @@ import { Controller } from "@hotwired/stimulus"
 // Connects to data-controller="matrix-table"
 export default class extends Controller {
   connect() {
+    this.element.dataset.stimulus = "connected";
+
     this.boxes = document.querySelectorAll('.matrix-box .panel-sizing')
     this.footers = document.querySelectorAll('.matrix-box .log-footer')
     this.rearrange()

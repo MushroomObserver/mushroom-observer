@@ -5,6 +5,8 @@ import lgZoom from 'lightgallery/plugins/zoom'
 // Connects to data-controller="lightbox", currently "#content"
 export default class extends Controller {
   connect() {
+    this.element.dataset.stimulus = "connected";
+
     lightGallery(this.element, {
       selector: '.theater-btn',
       plugins: [lgZoom],

@@ -7,7 +7,7 @@ export default class extends Controller {
   static targets = ['classification', 'lifeform']
 
   connect() {
-    this.element.setAttribute("data-stimulus", "connected")
+    this.element.dataset.stimulus = "connected";
     this.equalizePanelHeights()
   }
 

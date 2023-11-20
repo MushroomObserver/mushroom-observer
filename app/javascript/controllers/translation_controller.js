@@ -8,6 +8,8 @@ export default class extends Controller {
   ]
 
   connect() {
+    this.element.dataset.stimulus = "connected";
+
     this.LOCALE = this.element.dataset.locale;
     this.CONFIRM_STRING = this.element.dataset.confirmString;
     this.LOADING_STRING = this.element.dataset.loadingString;

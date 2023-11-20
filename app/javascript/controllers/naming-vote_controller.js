@@ -11,7 +11,7 @@ export default class extends Controller {
 
   connect() {
     // console.log("Hello Modal");
-    this.element.setAttribute("data-stimulus", "connected")
+    this.element.dataset.stimulus = "connected";
     // The localized text is for the modal progress. Maybe not needed here.
     Object.assign(this.localized_text,
       JSON.parse(this.element.dataset.localization));

@@ -5,7 +5,7 @@ export default class extends Controller {
   static targets = ['collapse', 'input']
 
   connect() {
-    this.element.setAttribute("data-stimulus", "connected")
+    this.element.dataset.stimulus = "connected";
   }
 
   focusInput() {

@@ -7,7 +7,7 @@ export default class extends Controller {
 
   connect() {
     // console.log("Hello Modal " + this.element.id);
-    this.element.setAttribute("data-stimulus", "connected")
+    this.element.dataset.stimulus = "connected";
   }
 
   // Form is only removed in the event that the page section updates.

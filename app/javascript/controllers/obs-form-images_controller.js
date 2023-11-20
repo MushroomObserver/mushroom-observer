@@ -35,6 +35,8 @@ export default class extends Controller {
   }
 
   connect() {
+    this.element.dataset.stimulus = "connected";
+
     Object.assign(this, internalConfig);
     Object.assign(this.localized_text,
       JSON.parse(this.element.dataset.localization));
