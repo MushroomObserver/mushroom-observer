@@ -13,7 +13,7 @@ module Tabs
 
       [
         object_return_tab(obs),
-        new_collection_number_for_obs_tab(obs)
+        new_collection_number_tab(obs)
       ]
     end
 
@@ -67,10 +67,10 @@ module Tabs
     end
 
     # These should just be ADD, EDIT, and DELETE.
-    def new_collection_number_for_obs_tab(obs)
+    def new_collection_number_tab(obs)
       [:create_collection_number.l,
        add_query_param(new_collection_number_path(observation_id: obs.id)),
-       { class: "#{tab_id(__method__.to_s)}_#{obs.id}", icon: :add }]
+       { class: tab_id(__method__.to_s), icon: :add }]
     end
 
     def edit_collection_number_tab(c_n, obs = nil)

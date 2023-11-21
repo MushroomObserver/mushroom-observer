@@ -20,7 +20,7 @@ query = Query.lookup(:Sequence, :all, observations: obs.id)
              "#{:show_observation_no_sequences.t} ")
       concat(
         ["[",
-         modal_link_to("sequence", *obs_new_sequence_tab(obs)),
+         modal_link_to("sequence", *new_sequence_tab(obs)),
          "]"].safe_join
       ) if @user
     end) if @user || sequences.any?
@@ -50,7 +50,7 @@ query = Query.lookup(:Sequence, :all, observations: obs.id)
           end
           if in_admin_mode? || sequence.can_edit?(@user)
             links << modal_link_to(
-              "sequence", *obs_edit_sequence_tab(sequence, obs)
+              "sequence", *edit_sequence_tab(sequence, obs)
             )
             links << destroy_button(
               name: :destroy_object.t(type: :sequence),

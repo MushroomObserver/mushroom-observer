@@ -3,6 +3,7 @@
 require("application_system_test_case")
 
 class ObservationShowSystemTest < ApplicationSystemTestCase
+  # regularize link class names
   def test_add_and_edit_collection_number
   end
 

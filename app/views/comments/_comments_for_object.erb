@@ -29,7 +29,7 @@ tag.turbo_frame(
         modal_link_to("comment", :show_comments_add_comment.t,
                       new_comment_path(q: get_query_param, target: object.id,
                                        type: object.class.name),
-                      class: "btn btn-default btn-sm")
+                      class: "btn btn-default btn-sm new_comment_link")
       ) if controls
       concat(
         link_to(:show_comments_and_more.t(num: and_more),

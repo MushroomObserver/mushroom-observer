@@ -11,7 +11,6 @@ module IdentifyHelper
         observation_id: id, q: get_query_param, context: context
       ),
       { class: "btn #{btn_class} d-inline-block propose-naming-button",
-        # remote: true, onclick: "MOEvents.whirly();",
         id: "propose_naming_button_#{id}" }
     )
   end
