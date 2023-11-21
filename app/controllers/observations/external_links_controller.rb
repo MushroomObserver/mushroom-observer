@@ -14,7 +14,7 @@ module Observations
     end
 
     def create
-      url = params[:url].to_s
+      url = params.dig(:external_link, :url).to_s
 
       set_ivars_for_new
       check_link_permission!(@observation, @site)
@@ -53,6 +53,7 @@ module Observations
     def set_ivars_for_edit
       @external_link = ExternalLink.find(params[:id].to_s)
       @observation = Observation.find(@external_link.observation_id)
+      @site = ExternalSite.find(@external_link.external_site_id)
     end
 
     def check_link_permission!(obs, site = nil)
