@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ImageHelper
+module ImagesHelper
   # Draw an image with all the fixin's. Takes either an Image instance or an id.
   #
   # Note: this is NOT rendering a partial because nested partials have been
@@ -123,8 +123,8 @@ module ImageHelper
                else
                  image_or_image_id
                end
-    link_to(:image_show_exif.t, exif_image_path(image_id),
-            { class: classes, remote: true, onclick: "MOEvents.whirly();" })
+    modal_link_to("image_exif_#{image_id}", :image_show_exif.t,
+                  exif_image_path(image_id), { class: classes })
   end
 
   # NOTE: `stretched_link` might be a link to #show_obs or #show_image,
@@ -143,8 +143,6 @@ module ImageHelper
       patch_button(name: "", path: path, class: stretched_link_classes)
     when :delete
       destroy_button(name: "", target: path, class: stretched_link_classes)
-    when :remote
-      link_with_query("", path, class: stretched_link_classes, remote: true)
     end
   end
 
@@ -247,7 +245,7 @@ module ImageHelper
                       class: "image-vote")
     end
 
-    put_button(name: vote_text, remote: true,
+    put_button(name: vote_text, # form data-turbo: true already there
                class: "image-vote-link",
                path: image_vote_path(image_id: image.id, value: vote),
                title: image_vote_as_help_string(vote),

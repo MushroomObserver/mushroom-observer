@@ -26,7 +26,7 @@ module Images
           end
         end
         format.turbo_stream do
-          render(layout: false)
+          render(partial: "images/votes/update")
         end
       end
     end

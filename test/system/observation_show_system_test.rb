@@ -3,8 +3,9 @@
 require("application_system_test_case")
 
 class ObservationShowSystemTest < ApplicationSystemTestCase
-  # regularize link class names
   def test_add_and_edit_collection_number
+    obs = observations(:peltigera_obs)
+
     # browser = page.driver.browser
     rolf = users("rolf")
     login!(rolf)
@@ -74,11 +75,11 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       assert_link(text: /6234234/)
     end
 
+    # new sequence
     assert_link(:show_observation_add_sequence.l)
     find(:css, ".new_sequence_link").trigger("click")
 
     assert_selector("#modal_sequence")
-
     within("#modal_sequence") do
       assert_field("sequence_locus")
       assert_field("sequence_bases")
@@ -103,11 +104,10 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       fill_in("sequence_bases", with: bfs.bases)
       click_commit
     end
-
     assert_no_selector("#modal_sequence")
 
+    # edit sequence
     seq = Sequence.last
-
     within("#observation_sequences") do
       assert_link(text: /LSU/)
       assert_link(:EDIT.t)
@@ -118,37 +118,87 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       fill_in("sequence_notes", with: "Oh yea.")
       click_commit
     end
-
     assert_equal(seq.reload.notes, "Oh yea.")
 
-    sit = external_sites(:mycoportal)
-
+    # new external link
+    site = external_sites(:mycoportal)
     within("#observation_external_links") do
       assert_link(text: :ADD.l)
-      find(:css, ".new_external_link_link_#{sit.id}").trigger("click")
+      find(:css, ".new_external_link_link_#{site.id}").trigger("click")
     end
 
     assert_selector("#modal_external_link")
-
     within("#modal_external_link") do
-      assert_field("url")
-      fill_in("url", with: "https://wedont.validatethese.urls/yet")
+      assert_field("external_link_url")
+      fill_in("external_link_url", with: "https://wedont.validatethese.urls")
       click_commit
     end
     assert_no_selector("#modal_external_link")
 
+    # edit external link
+    link = ExternalLink.last
     within("#observation_external_links") do
       assert_link(text: /MycoPortal/)
+      assert_link(text: :EDIT.l)
+      find(:css, ".edit_external_link_link_#{link.id}").trigger("click")
     end
 
-    # script = <<-JS
-    # var button = document.getElementById("button_toggle_answered_1")
-    # button.click();
-    # JS
-    # page.execute_script(script)
+    within("#modal_external_link") do
+      assert_field("external_link_url")
+      fill_in("external_link_url",
+              with: "https://wedont.validatethese.urls/yet")
+      click_commit
+    end
+    assert_no_selector("#modal_external_link")
+    assert_equal(link.reload.url, "https://wedont.validatethese.urls/yet")
+
+    # add destroys
   end
 
   def test_add_and_edit_naming
+    obs = observations(:peltigera_obs)
+
+    browser = page.driver.browser
+    rolf = users("rolf")
+    login!(rolf)
+
+    assert_link("Your Observations")
+    click_on("Your Observations")
+    # obs = observations(:peltigera_obs)
+
+    assert_selector("body.observations__index")
+    assert_link(text: /Peltigera/)
+    click_link(text: /Peltigera/)
+    assert_selector("body.observations__show")
+    assert_selector("#observation_namings")
+
+    # new naming
+    within("#observation_namings") do
+      assert_link(text: /Propose/)
+      find(:css, ".new_naming_link_#{obs.id}").trigger("click")
+    end
+
+    n_d = names(:namings_deprecated)
+    nd1 = names(:namings_deprecated_1)
+
+    assert_selector("#modal_naming")
+    within("#modal_naming") do
+      assert_field("naming_name")
+      fill_in("naming_name", with: nd1.text_name)
+      click_commit
+    end
+    assert_selector("#modal_naming_flash", text: /Missing/)
+    assert_selector("#name_messages", text: /deprecated/)
+
+    within("#modal_naming") do
+      fill_in("naming_name", with: n_d.text_name)
+      assert_selector(".auto_complete")
+      browser.keyboard.type(:down, :tab)
+      assert_no_selector(".auto_complete")
+      click_commit
+    end
+    debugger
+    assert_no_selector("#modal_naming")
   end
 
   def test_add_and_edit_naming_vote

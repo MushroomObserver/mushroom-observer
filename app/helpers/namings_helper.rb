@@ -74,9 +74,8 @@ module NamingsHelper
     Textile.register_name(naming.name)
 
     if check_permission(naming)
-      edit_link = edit_button(name: :EDIT.t, target: naming,
-                              remote: true, onclick: "MOEvents.whirly();")
-      delete_link = destroy_button(target: naming, remote: true)
+      edit_link = modal_link_to("naming", *edit_naming_tab(naming))
+      delete_link = destroy_button(target: naming, icon: :remove)
       proposer_links = tag.span(class: "small text-nowrap") do
         ["[", edit_link, " | ", delete_link, "]"].safe_join
       end
@@ -106,7 +105,7 @@ module NamingsHelper
   def consensus_vote_html(naming)
     consensus_votes =
       (if naming.votes&.length&.positive?
-         "#{pct_html(naming)} (#{num_votes_html(naming)})"
+         "#{naming_votes_link(naming)} (#{num_votes_html(naming)})"
        else
          "(#{:show_namings_no_votes.t})"
        end).html_safe # has links
@@ -119,14 +118,12 @@ module NamingsHelper
 
   # Makes a link to naming_vote_path for no-js.
   # The controller will render a modal if js request
-  def pct_html(naming)
+  def naming_votes_link(naming)
     percent = "#{naming.vote_percent.round}%"
 
-    link_with_query(h(percent),
-                    naming_vote_path(naming_id: naming.id),
-                    class: "vote-percent btn btn-link px-0",
-                    onclick: "MOEvents.whirly();",
-                    remote: true)
+    modal_link_to("naming_#{naming.id}", h(percent),
+                  add_query_param(naming_vote_path(naming_id: naming.id)),
+                  class: "vote-percent btn btn-link px-0")
   end
 
   def num_votes_html(naming)

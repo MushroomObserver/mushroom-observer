@@ -16,18 +16,20 @@ module Observations::Namings
       respond_to do |format|
         format.html
         format.turbo_stream do
-          Textile.register_name(naming.name)
+          Textile.register_name(@naming.name)
           identifier = "naming_#{@naming.id}"
           title = "#{:show_namings_consensus.t} "
-          subtitle = naming.display_name_brief_authors.t.small_author
+          subtitle = @naming.display_name_brief_authors.t.small_author
           render(partial: "shared/modal",
-                 identifier: identifier, title: title, subtitle: subtitle,
-                 body: "observations/namings/votes/table", naming: @naming)
+                 locals: {
+                   identifier: identifier, title: title, subtitle: subtitle,
+                   body: "observations/namings/votes/table", naming: @naming
+                 })
         end
       end
     end
 
-    # NOTE: AJAX VOTES NOW HIT THIS CONTROLLER, not the AjaxController.
+    # NOTE: TURBO VOTES NOW HIT THIS CONTROLLER, not the AjaxController.
     # Changes in the state of the Vote selects handled by naming_vote_ajax.js
     # and send a js request to this action, which changes naming votes directly.
 

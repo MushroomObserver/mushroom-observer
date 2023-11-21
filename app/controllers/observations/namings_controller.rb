@@ -4,14 +4,13 @@
 module Observations
   class NamingsController < ApplicationController
     before_action :login_required
+    before_action :pass_query_params
 
     def show
-      pass_query_params
       @observation = find_or_goto_index(Observation, params[:id])
     end
 
     def new
-      pass_query_params
       @params = NamingParams.new(params[:naming])
       @params.observation =
         load_for_show_observation_or_goto_index(params[:observation_id])
@@ -32,7 +31,6 @@ module Observations
     end
 
     def create
-      pass_query_params
       @params = NamingParams.new(params[:naming])
       @params.observation =
         load_for_show_observation_or_goto_index(params[:observation_id])
@@ -46,7 +44,6 @@ module Observations
     end
 
     def edit
-      pass_query_params
       @params = NamingParams.new
       naming = @params.naming = Naming.from_params(params)
       @params.observation =
@@ -72,7 +69,6 @@ module Observations
     end
 
     def update
-      pass_query_params
       @params = NamingParams.new
       naming = @params.naming = Naming.from_params(params)
       @params.observation =
@@ -89,7 +85,6 @@ module Observations
     end
 
     def destroy
-      pass_query_params
       naming = Naming.find(params[:id].to_s)
       if destroy_if_we_can(naming)
         flash_notice(:runtime_destroy_naming_success.t(id: params[:id].to_s))
@@ -233,7 +228,7 @@ module Observations
       respond_to do |format|
         format.html { default_redirect(@params.observation) }
         format.turbo_stream do
-          render(partial: "update_observation") and return
+          render(partial: "observations/namings/update_observation") and return
         end
       end
     end

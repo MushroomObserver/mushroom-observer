@@ -24,8 +24,7 @@ module Tabs
 
       [:show_observation_send_question.t,
        add_query_param(new_question_for_observation_path(obs.id)),
-       { remote: true, onclick: "MOEvents.whirly();",
-         class: tab_id(__method__.to_s) }]
+       { data: { turbo_stream: true }, class: tab_id(__method__.to_s) }]
     end
 
     # Used in the lists panel
