@@ -77,7 +77,7 @@ module NamingsHelper
       edit_link = modal_link_to("naming", *edit_naming_tab(naming))
       delete_link = destroy_button(target: naming, icon: :remove)
       proposer_links = tag.span(class: "small text-nowrap") do
-        ["[", edit_link, " | ", delete_link, "]"].safe_join
+        ["[", edit_link, "|", delete_link, "]"].safe_join(" ")
       end
     else
       proposer_links = ""
@@ -117,7 +117,7 @@ module NamingsHelper
   end
 
   # Makes a link to naming_vote_path for no-js.
-  # The controller will render a modal if js request
+  # The controller will render a modal if turbo request
   def naming_votes_link(naming)
     percent = "#{naming.vote_percent.round}%"
 
