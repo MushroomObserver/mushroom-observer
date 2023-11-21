@@ -5,11 +5,11 @@ when "new", "create"
                  external_site_id: @site.id }
   button = :ADD.t
 when "edit", "update"
-  url_params = { action: :update, id: @link.id }
+  url_params = { action: :update, id: @external_link.id }
   button = :UPDATE.t
 end
 form_args = {
-  model: @link, url: url_params, id: "external_link_form",
+  model: @external_link, url: url_params, id: "external_link_form",
   data: { turbo: true }
 }
 %>
@@ -18,7 +18,8 @@ form_args = {
 
   <%= text_field_with_label(
     form: f, field: :url, size: 40, label: :URL.l, class: "w-100",
-    between: :required, append: :show_observation_add_link_dialog.l
+    between: :required,
+    append: :show_observation_add_link_dialog.t(site: @site.name)
   ) %>
 
   <%= submit_button(form: f, button: button, center: true) %>

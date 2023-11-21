@@ -10,12 +10,12 @@ Locals:
 <%
 title_block = capture do
   if local_assigns[:subtitle].present?
-    tag.div(id: "modal_header_#{identifier}") do
+    tag.div(id: "modal_#{identifier}_header") do
       concat(tag.h4(title, class: "modal-title"))
       concat(tag.small(subtitle, class: "modal-subtitle"))
     end
   else
-    tag.h4(title, class: "modal-title", id: "modal_header_#{identifier}")
+    tag.h4(title, class: "modal-title", id: "modal_#{identifier}_header")
   end
 end
 partial_locals = local_assigns.except(:identifier, :title, :body)
@@ -33,7 +33,7 @@ end
 <%=
 tag.div(
   class: "modal", id: "modal_#{identifier}", role: "dialog",
-  aria: { labelledby: "modal_header_#{identifier}" }
+  aria: { labelledby: "modal_#{identifier}_header" }
 ) do
   tag.div(class: "modal-dialog modal-lg", role: "document") do
     tag.div(class: "modal-content") do
@@ -47,7 +47,7 @@ tag.div(
             title_block
           ].safe_join
         end,
-        tag.div(class: "modal-body", id: "modal_body_#{identifier}") do
+        tag.div(class: "modal-body", id: "modal_#{identifier}_body") do
           modal_body
         end
       ].safe_join

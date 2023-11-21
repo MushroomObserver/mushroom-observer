@@ -9,7 +9,7 @@ module Observations
       set_ivars_for_new
       check_link_permission!(@observation, @site)
       render_modal_external_link_form(
-        title: :create_object.t(type: :external_link)
+        title: :show_observation_add_link.t(site: "MycoPortal")
       )
     end
 
@@ -23,7 +23,7 @@ module Observations
 
     def edit
       set_ivars_for_edit
-      check_link_permission!(@link)
+      check_link_permission!(@external_link)
       render_modal_external_link_form(
         title: :edit_object.t(type: :external_link)
       )
@@ -33,14 +33,14 @@ module Observations
       url = params.dig(:external_link, :url).to_s
 
       set_ivars_for_edit
-      check_link_permission!(@link)
-      update_link(@link, url)
+      check_link_permission!(@external_link)
+      update_link(@external_link, url)
     end
 
     def destroy
       set_ivars_for_edit
-      check_link_permission!(@link)
-      remove_link(@link)
+      check_link_permission!(@external_link)
+      remove_link(@external_link)
     end
 
     private
@@ -51,8 +51,8 @@ module Observations
     end
 
     def set_ivars_for_edit
-      @link = ExternalLink.find(params[:id].to_s)
-      @observation = Observation.find(@link.observation_id)
+      @external_link = ExternalLink.find(params[:id].to_s)
+      @observation = Observation.find(@external_link.observation_id)
     end
 
     def check_link_permission!(obs, site = nil)

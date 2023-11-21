@@ -179,7 +179,8 @@ class SequencesController < ApplicationController
   end
 
   def render_modal_flash_update
-    render(partial: "shared/modal_flash_update") and return
+    render(partial: "shared/modal_flash_update",
+           locals: { identifier: "sequence" }) and return
   end
 
   # ---------- Index -----------------------------------------------------------

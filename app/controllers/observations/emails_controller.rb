@@ -40,7 +40,8 @@ module Observations
           redirect_with_query(observation_path(@observation.id)) and return
         end
         format.turbo_stream do
-          render(partial: "shared/modal_flash_update") and return
+          render(partial: "shared/modal_flash_update",
+                 locals: { identifier: "observation_email" }) and return
         end
       end
     end

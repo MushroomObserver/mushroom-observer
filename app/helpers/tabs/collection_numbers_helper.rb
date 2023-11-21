@@ -75,7 +75,7 @@ module Tabs
 
     def edit_collection_number_tab(c_n, obs = nil)
       back = obs&.id || :show
-      [:edit_collection_number.t,
+      [:edit_collection_number.l,
        add_query_param(edit_collection_number_path(id: c_n.id, back: back)),
        { class: "#{tab_id(__method__.to_s)}_#{c_n.id}", icon: :edit }]
     end

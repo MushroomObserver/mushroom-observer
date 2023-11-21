@@ -45,7 +45,7 @@ tag.div(
           "#{site.name}: ",
           "[",
           modal_link_to("external_link",
-                        *new_external_link_tab(obs: obs.id, site: site.id)),
+                        *new_external_link_tab(obs: obs, site: site)),
           "] "
         ].safe_join("")
       end.safe_join
