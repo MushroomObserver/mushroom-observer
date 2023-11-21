@@ -30,7 +30,6 @@ module NamingsHelper
     }
   end
 
-  # the "propose-naming-button" is remote: true to send js request
   def observation_naming_buttons(observation, do_suggestions)
     buttons = []
     buttons << propose_naming_link(observation.id,
@@ -57,6 +56,14 @@ module NamingsHelper
                                     action: "suggestions#suggestTaxa" })
     end
     buttons.safe_join(tag.br)
+  end
+
+  def propose_naming_link(id, text: :create_naming.t, context: "namings_table",
+                          btn_class: "btn-primary my-3")
+    modal_link_to(
+      "naming",
+      *new_naming_tab(id, text: text, btn_class: btn_class, context: context)
+    )
   end
 
   private
