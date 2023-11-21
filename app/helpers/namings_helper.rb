@@ -58,11 +58,13 @@ module NamingsHelper
     buttons.safe_join(tag.br)
   end
 
-  def propose_naming_link(id, text: :create_naming.t, context: "namings_table",
+  def propose_naming_link(obs_id, text: :create_naming.t,
+                          context: "namings_table",
                           btn_class: "btn-primary my-3")
     modal_link_to(
       "naming",
-      *new_naming_tab(id, text: text, btn_class: btn_class, context: context)
+      *new_naming_tab(obs_id,
+                      text: text, btn_class: btn_class, context: context)
     )
   end
 
