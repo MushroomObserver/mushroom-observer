@@ -38,6 +38,15 @@ module Tabs
       ]
     end
 
+    def new_comment_tab(object)
+      [:show_comments_add_comment.t,
+       add_query_param(
+         new_comment_path(target: object.id, type: object.class.name)
+       ),
+       { class: class_names("#{tab_id(__method__.to_s)}_#{object.id}",
+                            %w[btn btn-default btn-sm]) }]
+    end
+
     def edit_comment_tab(comment)
       [:comment_show_edit.t,
        add_query_param(edit_comment_path(comment.id)),
