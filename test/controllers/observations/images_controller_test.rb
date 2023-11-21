@@ -267,7 +267,7 @@ module Observations
       assert_obj_arrays_equal([proj2], img1.projects)
       assert_obj_arrays_equal([],      img2.projects)
       assert_obj_arrays_equal([rolf, mary, katrina], proj1.user_group.users)
-      assert_obj_arrays_equal([dick], proj2.user_group.users)
+      assert_obj_arrays_equal([mary, dick], proj2.user_group.users)
 
       # NOTE: It is impossible, apparently, to get edit_image to fail,
       # so there is no way to test init_project_vars_for_reload().
@@ -284,7 +284,7 @@ module Observations
 
       login("mary")
       get(:new, params: { id: obs1.id })
-      assert_project_checks(proj1.id => :unchecked, proj2.id => :no_field)
+      assert_project_checks(proj1.id => :unchecked, proj2.id => :unchecked)
       get(:new, params: { id: obs2.id })
       assert_project_checks(proj1.id => :unchecked, proj2.id => :checked)
       get(:edit, params: { id: img1.id })

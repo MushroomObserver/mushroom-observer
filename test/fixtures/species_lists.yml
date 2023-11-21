@@ -91,3 +91,13 @@ no_location_list:
   when: 2022-05-09
   where: Undefined 'where', Oregon, USA
   location: nil
+
+lone_wolf_list:
+  <<: *DEFAULTS
+  user: lone_wolf
+  when: 2023-11-14
+
+reused_list:
+  <<: *DEFAULTS
+  user: mary
+  when: 2023-11-19
