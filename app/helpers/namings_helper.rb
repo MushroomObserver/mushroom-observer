@@ -153,7 +153,7 @@ module NamingsHelper
     }.to_json
 
     form_with(url: naming_vote_path(naming_id: naming.id), method: :patch,
-              turbo: true, id: "naming_vote_#{naming.id}",
+              turbo: true, id: "naming_vote_form_#{naming.id}",
               class: "naming-vote-form",
               data: { controller: "naming-vote",
                       localization: localizations }) do |f|
@@ -161,6 +161,7 @@ module NamingsHelper
         fields_for(:vote) do |fv|
           fv.select(:value, menu, {},
                     { class: "form-control w-100",
+                      id: "vote_value_#{naming.id}",
                       data: { role: "change_vote", id: naming.id,
                               naming_vote_target: "select",
                               action: "naming-vote#sendVote" } })

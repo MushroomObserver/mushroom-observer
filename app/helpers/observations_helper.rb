@@ -102,7 +102,8 @@ module ObservationsHelper
   def gather_users_votes(obs, user = nil)
     return [] unless user
 
-    obs.namings.each_with_object({}) do |naming, votes|
+    obs.namings.includes([:votes, :user, :name]).each_with_object({}) do
+      |naming, votes|
       votes[naming.id] =
         naming.votes.find { |vote| vote.user_id == user.id } ||
         Vote.new(value: 0)

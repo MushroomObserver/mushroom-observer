@@ -58,7 +58,7 @@ module Observations::Namings
       value = Vote.validate_value(value_str)
       raise("Bad value.") unless value
 
-      @observation.change_vote(@naming, value)
+      @observation.change_vote(@naming, value, @user)
       respond_to do |format|
         format.turbo_stream do
           case params[:context]

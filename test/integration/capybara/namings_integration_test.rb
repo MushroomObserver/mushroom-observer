@@ -141,7 +141,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     # Most users will have their vote sent via AJAX from naming_vote_ajax.js
     # voter_session.vote_on_name(obs, naming)
     voter_session.visit("/#{obs.id}")
-    voter_session.within("#naming_vote_#{naming.id}") do |form|
+    voter_session.within("#naming_vote_form_#{naming.id}") do |form|
       assert_true(form.has_select?("vote_value", selected: nil))
       form.select("I'd Call It That", from: "vote_value")
       assert_true(form.has_select?("vote_value",
@@ -158,7 +158,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
 
     # voter_session.change_mind(obs, naming)
     voter_session.visit("/#{obs.id}")
-    voter_session.within("#naming_vote_#{naming.id}") do |form|
+    voter_session.within("#naming_vote_form_#{naming.id}") do |form|
       form.select("As If!", from: "vote_value")
       assert_true(form.has_select?("vote_value", selected: "As If!"))
       form.first("input[type='submit']").click

@@ -11,6 +11,10 @@ import "@hotwired/turbo-rails"
 // form, or button like delete/patch: set data-turbo="true" to opt in
 // link_to with GET: set data-turbo-stream="true" to opt in
 Turbo.setFormMode("optin")
+// https://stackoverflow.com/questions/77421369/turbo-response-to-render-javascript-alert/77434363#77434363
+Turbo.StreamActions.close_modal = function () {
+  $("#" + this.templateContent.textContent).modal('hide')
+};
 
 import "@rails/request.js"
 

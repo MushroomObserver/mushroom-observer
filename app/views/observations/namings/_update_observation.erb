@@ -24,4 +24,5 @@ end %>
   show_obs_title(obs: @observation)
 end %>
 
+<%= turbo_stream.close_modal("modal_naming") %>
 <%= turbo_stream.remove("modal_naming") %>

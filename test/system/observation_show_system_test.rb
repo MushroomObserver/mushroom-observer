@@ -156,7 +156,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
   end
 
   def test_add_and_edit_naming
-    obs = observations(:peltigera_obs)
+    obs = observations(:coprinus_comatus_obs)
 
     browser = page.driver.browser
     rolf = users("rolf")
@@ -167,8 +167,8 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     # obs = observations(:peltigera_obs)
 
     assert_selector("body.observations__index")
-    assert_link(text: /Peltigera/)
-    click_link(text: /Peltigera/)
+    assert_link(text: /#{obs.text_name}/)
+    click_link(text: /#{obs.text_name}/)
     assert_selector("body.observations__show")
     assert_selector("#observation_namings")
 
@@ -197,13 +197,35 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       assert_no_selector(".auto_complete")
       click_commit
     end
-    debugger
     assert_no_selector("#modal_naming")
+
+    nam = Naming.last
+    assert_equal(n_d.text_name, nam.text_name)
+    within("#observation_namings") do
+      assert_link(text: /#{n_d.text_name}/)
+      assert_selector("form#naming_vote_form_#{nam.id}")
+      select("Could Be", from: "vote_value_#{nam.id}")
+    end
+    assert_selector("#title", text: /#{obs.text_name}/)
+
+    within("#observation_namings") do
+      assert_link(text: /#{n_d.text_name}/)
+      assert_selector("form#naming_vote_form_#{nam.id}")
+      select("I'd Call It That", from: "vote_value_#{nam.id}")
+    end
+    assert_selector("#title", text: /#{nam.text_name}/)
+
+    # delete the alternate
+    scroll_to("#observation_namings")
+
+    within("#observation_namings") do
+      assert_link(text: /#{n_d.text_name}/)
+      assert_selector(".destroy_naming_link_#{nam.id}")
+      find(:css, ".destroy_naming_link_#{nam.id}").trigger("click")
+      assert_no_link(text: /#{n_d.text_name}/)
+    end
+    assert_selector("#title", text: /#{obs.text_name}/)
   end
 
-  def test_add_and_edit_naming_vote
-  end
-
-  def test_add_and_edit_comment
-  end
+  def test_add_and_edit_comment; end
 end
