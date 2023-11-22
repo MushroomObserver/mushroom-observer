@@ -142,9 +142,9 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     # voter_session.vote_on_name(obs, naming)
     voter_session.visit("/#{obs.id}")
     voter_session.within("#naming_vote_form_#{naming.id}") do |form|
-      assert_true(form.has_select?("vote_value", selected: nil))
-      form.select("I'd Call It That", from: "vote_value")
-      assert_true(form.has_select?("vote_value",
+      assert_true(form.has_select?("vote_value_#{naming.id}", selected: nil))
+      form.select("I'd Call It That", from: "vote_value_#{naming.id}")
+      assert_true(form.has_select?("vote_value_#{naming.id}",
                                    selected: "I'd Call It That"))
       form.first("input[type='submit']").click
     end
@@ -159,8 +159,9 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     # voter_session.change_mind(obs, naming)
     voter_session.visit("/#{obs.id}")
     voter_session.within("#naming_vote_form_#{naming.id}") do |form|
-      form.select("As If!", from: "vote_value")
-      assert_true(form.has_select?("vote_value", selected: "As If!"))
+      form.select("As If!", from: "vote_value_#{naming.id}")
+      assert_true(form.has_select?("vote_value_#{naming.id}",
+                                   selected: "As If!"))
       form.first("input[type='submit']").click
     end
 

@@ -3269,9 +3269,11 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_response(:success)
     assert_template("show")
-    assert_select("form#naming_vote_form_#{naming1.id} select#vote_value>" \
+    assert_select("form#naming_vote_form_#{naming1.id} " \
+                  "select#vote_value_#{naming1.id}>" \
                   "option[selected=selected][value='#{vote1.value}']")
-    assert_select("form#naming_vote_form_#{naming2.id} select#vote_value>" \
+    assert_select("form#naming_vote_form_#{naming2.id} " \
+                  "select#vote_value_#{naming2.id}>" \
                   "option[selected=selected][value='#{vote2.value}']")
   end
 end

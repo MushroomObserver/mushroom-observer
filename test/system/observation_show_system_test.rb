@@ -266,7 +266,9 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)
       assert_selector(".destroy_naming_link_#{nam.id}")
-      find(:css, ".destroy_naming_link_#{nam.id}").trigger("click")
+      accept_prompt do
+        find(:css, ".destroy_naming_link_#{nam.id}").trigger("click")
+      end
       assert_no_link(text: /#{n_d.text_name}/)
     end
     assert_selector("#title", text: /#{obs.text_name}/)
