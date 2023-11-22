@@ -35,7 +35,8 @@ module LightboxHelper
     end
     html << caption_obs_title(obs_data)
     html << observation_details_when_where_who(obs: obs_data[:obs])
-    html << observation_details_notes(obs: obs_data[:obs])
+    html << observation_details_notes(obs: obs_data[:obs]).
+            truncate(150, separator: " ")
     html
   end
 
