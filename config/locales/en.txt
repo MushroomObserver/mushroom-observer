@@ -3190,7 +3190,6 @@
   form_projects_start_date: Project Start Date
   form_projects_title: "[:Title]"
   form_projects_open_membership: Enable users to add themselves and disable shared editing
-  form_projects_accepting_observations: Project is accepting new observations from members
   form_projects_where: Optional Project Location
   form_projects_image_upload: Upload photo
   form_projects_ignore_date_range: Ignore above dates

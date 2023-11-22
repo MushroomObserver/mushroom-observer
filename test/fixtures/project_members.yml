@@ -35,16 +35,6 @@ open_member_katrina:
   user: katrina
   trusted: false
 
-burbank_roy:
-  project: not_accepting_observations_project
-  user: roy
-  trusted: true
-
-burbank_katrina:
-  project: not_accepting_observations_project
-  user: katrina
-  trusted: true
-
 empty_mary:
   project: empty_project
   user: mary
