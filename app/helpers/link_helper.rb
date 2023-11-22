@@ -125,7 +125,9 @@ module LinkHelper
       ban: "ban-circle",
       minus: "minus-sign",
       trash: "trash",
-      cancel: "remove"
+      cancel: "remove",
+      email: "envelope",
+      question: "question-sign"
     }.freeze
   end
 

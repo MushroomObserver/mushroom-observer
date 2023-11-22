@@ -68,7 +68,7 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
     elsif records.none? && can_add
       [
         :show_observation_no_herbarium_records.t,
-        "[",
+        " [",
         modal_link_to("herbarium_record", *new_herbarium_record_tab),
         "]"
       ].safe_join

@@ -7,11 +7,16 @@ module Tabs
     # actually a list of links and the interest icons
     def show_observation_tabs(obs:, user:)
       [
-        modal_link_to("observation_email",
-                      *send_observer_question_tab(obs, user)),
         observation_manage_lists_tab(obs, user),
         *obs_change_tabs(obs)&.reject(&:empty?)
       ]
+    end
+
+    def ask_observer_question_modal_link(obs, user)
+      return if obs.user.no_emails
+      return unless obs.user.email_general_question && obs.user != user
+
+      modal_link_to("observation_email", *send_observer_question_tab(obs))
     end
 
     ########################################################################
@@ -19,13 +24,10 @@ module Tabs
     #
     # Used in the observation panel
 
-    def send_observer_question_tab(obs, user)
-      return if obs.user.no_emails
-      return unless obs.user.email_general_question && obs.user != user
-
+    def send_observer_question_tab(obs)
       [:show_observation_send_question.t,
        add_query_param(new_question_for_observation_path(obs.id)),
-       { data: { turbo_stream: true }, class: tab_id(__method__.to_s) }]
+       { class: tab_id(__method__.to_s), icon: :email }]
     end
 
     # Used in the lists panel

@@ -212,7 +212,14 @@ module ObservationsHelper
 
   def observation_details_who(obs:)
     tag.p(class: "obs-who", id: "observation_who") do
-      ["#{:WHO.t}:", user_link(obs.user)].safe_join(" ")
+      [
+        "#{:WHO.t}:",
+        user_link(obs.user),
+        " [ ",
+        safe_nbsp,
+        ask_observer_question_modal_link(obs, User.current),
+        "]"
+      ].safe_join(" ")
     end
   end
 
