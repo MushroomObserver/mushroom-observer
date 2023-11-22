@@ -39,7 +39,7 @@ module Tabs
     end
 
     def new_comment_tab(object)
-      [:show_comments_add_comment.t,
+      [:show_comments_add_comment.l,
        add_query_param(
          new_comment_path(target: object.id, type: object.class.name)
        ),

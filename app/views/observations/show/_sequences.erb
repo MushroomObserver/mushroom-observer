@@ -56,7 +56,7 @@ query = Query.lookup(:Sequence, :all, observations: obs.id)
               name: :destroy_object.t(type: :sequence),
               target: sequence_path(id: sequence.id,
                                     back: url_after_delete(sequence)),
-              data: { turbo: true }, icon: :remove,
+              icon: :remove,
               class: "destroy_sequence_link_#{sequence.id}"
             )
           end

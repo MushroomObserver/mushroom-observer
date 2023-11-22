@@ -3,7 +3,7 @@
 require("application_system_test_case")
 
 class ObservationShowSystemTest < ApplicationSystemTestCase
-  def test_add_and_edit_collection_number
+  def test_add_and_edit_associated_records
     obs = observations(:peltigera_obs)
 
     # browser = page.driver.browser
@@ -15,8 +15,8 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     # obs = observations(:peltigera_obs)
 
     assert_selector("body.observations__index")
-    assert_link(text: /Peltigera/)
-    click_link(text: /Peltigera/)
+    assert_link(text: /#{obs.text_name}/)
+    click_link(text: /#{obs.text_name}/)
     assert_selector("body.observations__show")
 
     assert_link(:create_collection_number.l)
@@ -54,7 +54,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     assert_equal(c_n.reload.number, "021345")
 
-    # Has a fungarium record: :field_museum_record
+    # Has a fungarium record: :field_museum_record. Try edit
     fmr = herbarium_records(:field_museum_record)
     within("#observation_herbarium_records") do
       assert_link(text: /#{fmr.accession_number}/)
@@ -152,10 +152,55 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_no_selector("#modal_external_link")
     assert_equal(link.reload.url, "https://wedont.validatethese.urls/yet")
 
-    # add destroys
+    # try remove links
+    # collection_number
+    within("#observation_collection_numbers") do
+      assert_link(:REMOVE.l)
+      find(:css, ".remove_collection_number_link_#{c_n.id}").trigger("click")
+    end
+    # confirm is in modal
+    assert_selector("#modal_collection_number_observation")
+    within("#modal_collection_number_observation") do
+      assert_button(:REMOVE.l)
+      find(:css, ".remove_collection_number_link_#{c_n.id}").trigger("click")
+    end
+    assert_no_selector("#modal_collection_number_observation")
+    assert_no_link(text: /021345/)
+
+    # herbarium_record
+    within("#observation_herbarium_records") do
+      assert_link(:REMOVE.l)
+      find(:css, ".remove_herbarium_record_link_#{fmr.id}").trigger("click")
+    end
+    # confirm is in modal
+    assert_selector("#modal_herbarium_record_observation")
+    within("#modal_herbarium_record_observation") do
+      assert_button(:REMOVE.l)
+      find(:css, ".remove_herbarium_record_link_#{fmr.id}").trigger("click")
+    end
+    assert_no_selector("#modal_herbarium_record_observation")
+    assert_no_link(text: /6234234/)
+
+    # sequence
+    within("#observation_sequences") do
+      assert_button(:destroy_object.t(type: :sequence))
+      accept_confirm do
+        find(:css, ".destroy_sequence_link_#{seq.id}").trigger("click")
+      end
+      assert_no_link(text: /LSU/)
+    end
+
+    # external_link
+    within("#observation_external_links") do
+      assert_button(text: :destroy_object.t(type: :external_link))
+      accept_confirm do
+        find(:css, ".destroy_external_link_link_#{link.id}").trigger("click")
+      end
+      assert_no_link(text: /MycoPortal/)
+    end
   end
 
-  def test_add_and_edit_naming
+  def test_add_and_edit_naming_and_comment
     obs = observations(:coprinus_comatus_obs)
 
     browser = page.driver.browser
@@ -225,7 +270,49 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       assert_no_link(text: /#{n_d.text_name}/)
     end
     assert_selector("#title", text: /#{obs.text_name}/)
-  end
 
-  def test_add_and_edit_comment; end
+    assert_selector("#comments_for_object")
+    within("#comments_for_object") do
+      assert_link(:show_comments_add_comment.l)
+      find(:css, ".new_comment_link_#{obs.id}").trigger("click")
+    end
+
+    assert_selector("#modal_comment")
+    within("#modal_comment") do
+      assert_selector("#comment_summary")
+      fill_in("comment_summary", with: "A load of bollocks")
+      fill_in("comment_comment", with: "What do you mean, Coprinus?")
+      click_commit
+    end
+    assert_no_selector("#modal_comment")
+
+    com = Comment.last
+    within("#comments_for_object") do
+      assert_text("A load of bollocks")
+      assert_selector(".show_user_link_#{rolf.id}")
+      assert_selector(".edit_comment_link_#{com.id}")
+      assert_selector(".destroy_comment_link_#{com.id}")
+      find(:css, ".edit_comment_link_#{com.id}").trigger("click")
+    end
+
+    assert_selector("#modal_comment")
+    within("#modal_comment") do
+      fill_in("comment_summary", with: "Exciting discovery")
+      fill_in("comment_comment", with: "What I meant was, Coprinus!")
+      click_commit
+    end
+    assert_no_selector("#modal_comment")
+
+    within("#comments_for_object") do
+      assert_no_text("A load of bollocks")
+      assert_text("Exciting discovery")
+      assert_selector(".destroy_comment_link_#{com.id}")
+      accept_confirm do
+        find(:css, ".destroy_comment_link_#{com.id}").trigger("click")
+      end
+
+      assert_no_text("Exciting discovery")
+      assert_no_selector(".destroy_comment_link_#{com.id}")
+    end
+  end
 end
