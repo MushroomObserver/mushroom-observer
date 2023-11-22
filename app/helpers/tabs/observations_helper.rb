@@ -7,7 +7,8 @@ module Tabs
     # actually a list of links and the interest icons
     def show_observation_tabs(obs:, user:)
       [
-        send_observer_question_tab(obs, user),
+        modal_link_to("observation_email",
+                      *send_observer_question_tab(obs, user)),
         observation_manage_lists_tab(obs, user),
         *obs_change_tabs(obs)&.reject(&:empty?)
       ]

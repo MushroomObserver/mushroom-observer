@@ -51,6 +51,8 @@ module LightboxHelper
     end
   end
 
+  # Doing this here because truncating the output of observation_details_notes
+  # produces unsafe html warning. Allows getting rid of line break after NOTES.
   def caption_truncated_notes(obs:)
     return "" unless obs.notes?
 

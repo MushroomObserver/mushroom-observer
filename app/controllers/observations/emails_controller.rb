@@ -16,6 +16,9 @@ module Observations
         format.turbo_stream do
           render(partial: "shared/modal_form",
                  locals: { identifier: "observation_email",
+                           title: :ask_observation_question_title.t(
+                             name: @observation.unique_format_name
+                           ),
                            form: "observations/emails/form" }) and return
         end
       end

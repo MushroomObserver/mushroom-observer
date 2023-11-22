@@ -10,8 +10,7 @@ export default class extends Controller {
     lightGallery(this.element, {
       selector: '.theater-btn',
       plugins: [lgZoom],
-      licenseKey: '3B4BAB91-98EF-411A-975E-3334D00D1A8C',
-      allowMediaOverlap: true
+      licenseKey: '3B4BAB91-98EF-411A-975E-3334D00D1A8C'
     });
   }
 }
