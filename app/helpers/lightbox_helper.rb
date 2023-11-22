@@ -59,7 +59,7 @@ module LightboxHelper
     links << original_image_link(image_or_image_id, "lightbox_link")
     links << " | "
     links << image_exif_link(image_or_image_id, "lightbox_link")
-    tag.div(class: "caption-image-links my-3") do
+    tag.p(class: "caption-image-links my-3") do
       safe_join(links)
     end
   end
