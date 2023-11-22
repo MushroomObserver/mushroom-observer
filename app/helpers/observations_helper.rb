@@ -222,7 +222,7 @@ module ObservationsHelper
     tag.div(class: "obs-notes", id: "observation_notes") do
       Textile.clear_textile_cache
       Textile.register_name(obs.name)
-      tag.div(obs.notes_show_formatted.sub(/^\A/, "#{:NOTES.t}: ").tpl)
+      tag.div(obs.notes_show_formatted.sub(/^\A/, "#{:NOTES.t}:\n").tpl)
     end
   end
 end

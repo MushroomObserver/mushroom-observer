@@ -35,8 +35,7 @@ module LightboxHelper
     end
     html << caption_obs_title(obs_data)
     html << observation_details_when_where_who(obs: obs_data[:obs])
-    html << observation_details_notes(obs: obs_data[:obs]).
-            truncate(150, separator: " ")
+    html << caption_truncated_notes(obs: obs_data[:obs])
     html
   end
 
@@ -49,6 +48,17 @@ module LightboxHelper
                 id: "caption_obs_link_#{obs_data[:id]}"),
         obs_data[:obs].format_name.t.small_author
       ].safe_join(" ")
+    end
+  end
+
+  def caption_truncated_notes(obs:)
+    return "" unless obs.notes?
+
+    tag.div(class: "obs-notes", id: "observation_#{obs.id}_notes") do
+      Textile.clear_textile_cache
+      Textile.register_name(obs.name)
+      tag.div(obs.notes_show_formatted.truncate(150, separator: " ").
+                  sub(/^\A/, "#{:NOTES.t}: ").tpl)
     end
   end
 
