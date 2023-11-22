@@ -71,7 +71,7 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
         "[",
         modal_link_to("herbarium_record", *new_herbarium_record_tab),
         "]"
-      ].safe_join(" ")
+      ].safe_join
     end
   end
 end

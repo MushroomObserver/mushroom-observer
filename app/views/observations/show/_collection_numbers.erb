@@ -64,7 +64,7 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
         modal_link_to("collection_number",
                       *new_collection_number_tab(obs)),
         "]"
-      ].safe_join(" ")
+      ].safe_join
     end
   end
 end
