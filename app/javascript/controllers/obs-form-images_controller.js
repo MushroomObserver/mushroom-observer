@@ -9,8 +9,8 @@ const internalConfig = {
   obs_day: document.getElementById('observation_when_3i'),
   obs_month: document.getElementById('observation_when_2i'),
   obs_year: document.getElementById('observation_when_1i'),
-  get_template_uri: "/ajax/multi_image_template",
-  upload_image_uri: "/ajax/create_image_object",
+  get_template_uri: "/observations/images/uploads/new",
+  upload_image_uri: "/observations/images/uploads",
   // progress_uri: "/ajax/upload_progress",
   dots: [".", "..", "..."],
   localized_text: {
