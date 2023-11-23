@@ -38,7 +38,7 @@ export default class extends Controller {
 
     if (response.ok) {
       // console.log(response)
-      // turbo-stream prints the modal in the page already,
+      // turbo-stream prints the modal in the page already, but outside body
       // so we just have to move it.
       const _modal = document.getElementById(this.modalSelector)
       document.body.appendChild(_modal)
