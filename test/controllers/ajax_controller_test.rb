@@ -189,45 +189,6 @@ class AjaxControllerTest < FunctionalTestCase
     bad_ajax_request(:auto_complete, type: :bogus, id: "bogus")
   end
 
-  def test_upload_image
-    # Arrange
-    setup_image_dirs
-    login("dick")
-    file = Rack::Test::UploadedFile.new(
-      Rails.root.join("test/images/Coprinus_comatus.jpg").to_s, "image/jpeg"
-    )
-    copyright_holder = "Douglas Smith"
-    notes = "Some notes."
-
-    params = {
-      image: {
-        when: { "3i" => "27", "2i" => "11", "1i" => "2014" },
-        copyright_holder: copyright_holder,
-        notes: notes,
-        upload: file
-      }
-    }
-
-    # Act
-    File.stub(:rename, false) do
-      post(:create_image_object, params: params)
-    end
-    @json_response = JSON.parse(@response.body)
-
-    # Assert
-    assert_response(:success)
-    assert_not_equal(0, @json_response["id"])
-    assert_equal(copyright_holder, @json_response["copyright_holder"])
-    assert_equal(notes, @json_response["notes"])
-    assert_equal("2014-11-27", @json_response["when"])
-  end
-
-  def test_multi_image_template
-    bad_ajax_request(:multi_image_template)
-    login("dick")
-    good_ajax_request(:multi_image_template)
-  end
-
   # Primers used by the mobile app
   def test_name_primer
     # This name is not deprecated and is used by an observation or two.

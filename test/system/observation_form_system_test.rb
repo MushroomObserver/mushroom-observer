@@ -286,7 +286,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_selector(".is_thumb_image")
       assert_no_selector(".set_thumb_image")
     end
-    debugger
 
     within("#observation_form") { click_commit }
 

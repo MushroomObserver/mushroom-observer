@@ -4,6 +4,15 @@ module Observations::Images
   class UploadsController < ApplicationController
     before_action :login_required # except: [:show]
 
+    # I am not sure why this is necessary, but it was used in the original
+    # AJAX controller. Otherwise you get an "invalid authenticity token".
+    # It could be because the `new` template is not rendered as an HTML page,
+    # it is also printed by JS, causing the token to be stale on the action (?)
+    # Note that requestjs-rails, used by the controller, does send a valid
+    # X-CSRF-Token (not the same thing).
+    # https://stackoverflow.com/questions/3364492/actioncontrollerinvalidauthenticitytoken
+    disable_filters
+
     # Uploading images for an observation is a multi-stage thing.
     # First, each selected image with its EXIF data is read and displayed in
     # the create obs form, where the user can reconcile dates and locations
@@ -12,7 +21,7 @@ module Observations::Images
     # obs-form-images_controller that's added to the page when uploading
     # multiple images on create observation
     def new # multi_image_template
-      # @user = session_user # || raise("Must be logged in.")
+      @user = session_user # || raise("Must be logged in.")
       @licenses = License.current_names_and_ids(@user.license)
       @image = Image.new(user: @user, when: Time.zone.now)
       render(partial: "observations/form/images_upload/template",
@@ -22,7 +31,7 @@ module Observations::Images
     # Uploads an image object without an observation.
     # Returns image as JSON object.
     def create # create_image_object
-      # @user = session_user
+      @user = session_user
       args = params[:image]
       image = create_and_upload_image(args)
       render_image(image, args)

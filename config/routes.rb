@@ -19,12 +19,10 @@
 ACTIONS = {
   ajax: {
     auto_complete: {},
-    # create_image_object: {},
     geocode: {},
     image: {},
     location_primer: {},
     name_primer: {},
-    # multi_image_template: {},
     test: {}
   },
   api: {

@@ -25,7 +25,6 @@
 #  vote::             Change vote on proposed name or image.
 #
 class AjaxController < ApplicationController
-  include UploadImage
   include Primers
   include AutoComplete
 
