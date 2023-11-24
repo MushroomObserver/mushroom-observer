@@ -26,7 +26,6 @@
 #
 class AjaxController < ApplicationController
   include Primers
-  include AutoComplete
 
   disable_filters
   around_action :catch_ajax_errors

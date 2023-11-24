@@ -18,8 +18,8 @@
 #
 ACTIONS = {
   ajax: {
-    geocode: {},
-    image: {},
+    # geocode: {},
+    # image: {},
     location_primer: {},
     name_primer: {},
     test: {}
