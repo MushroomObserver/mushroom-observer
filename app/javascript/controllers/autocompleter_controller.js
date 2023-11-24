@@ -2,10 +2,6 @@ import { Controller } from "@hotwired/stimulus"
 import { escapeHTML, getScrollBarWidth, EVENT_KEYS } from "src/mo_utilities"
 
 const DEFAULT_OPTS = {
-  // id of text field (after initialization becomes a unique identifier)
-  // input_id: null,
-  // JS element of text field
-  // input_elem: null,
   // what type of autocompleter, subclass of AutoComplete
   TYPE: null,
   // Whether to ignore order of words when matching, set by type
@@ -32,7 +28,7 @@ const DEFAULT_OPTS = {
   PAGE_SIZE: 10,
   // max length of string to send via AJAX
   MAX_REQUEST_LINK: 50,
-  // Very fancy: starts finding new matches for the string after the separator
+  // Sub-match: starts finding new matches for the string *after the separator*
   // allowed separators (e.g. " OR ")
   SEPARATOR: null,
   // show error messages returned via AJAX?
@@ -48,34 +44,34 @@ const DEFAULT_OPTS = {
 // Allowed types of autocompleter. Sets some DEFAULT_OPTS from type
 const AUTOCOMPLETER_TYPES = {
   clade: {
-    AJAX_URL: "/ajax/auto_complete/clade/@",
+    AJAX_URL: "/autocompleters/new/clade/@",
   },
   herbarium: { // params[:user_id] handled in controller
-    AJAX_URL: "/ajax/auto_complete/herbarium/@",
+    AJAX_URL: "/autocompleters/new/herbarium/@",
     UNORDERED: true
   },
   location: { // params[:format] handled in controller
-    AJAX_URL: "/ajax/auto_complete/location/@",
+    AJAX_URL: "/autocompleters/new/location/@",
     UNORDERED: true
   },
   name: {
-    AJAX_URL: "/ajax/auto_complete/name/@",
+    AJAX_URL: "/autocompleters/new/name/@",
     COLLAPSE: 1
   },
   project: {
-    AJAX_URL: "/ajax/auto_complete/project/@",
+    AJAX_URL: "/autocompleters/new/project/@",
     UNORDERED: true
   },
   region: {
-    AJAX_URL: "/ajax/auto_complete/location/@",
+    AJAX_URL: "/autocompleters/new/location/@",
     UNORDERED: true
   },
   species_list: {
-    AJAX_URL: "/ajax/auto_complete/species_list/@",
+    AJAX_URL: "/autocompleters/new/species_list/@",
     UNORDERED: true
   },
   user: {
-    AJAX_URL: "/ajax/auto_complete/user/@",
+    AJAX_URL: "/autocompleters/new/user/@",
     UNORDERED: true
   }
 }
@@ -98,10 +94,10 @@ const INTERNAL_OPTS = {
   scroll_offset: 0,      // scroll offset
   last_fetch_request: null, // last fetch request we got results for
   last_fetch_incomplete: true, // did we get all the results we requested?
-  fetch_request: null,    // ajax request while underway
+  fetch_request: null,   // ajax request while underway
   refresh_timer: null,   // timer used to delay update after typing
   hide_timer: null,      // timer used to delay hiding of pulldown
-  key_timer: null       // timer used to emulate key repeat
+  key_timer: null        // timer used to emulate key repeat
 }
 
 // Connects to data-controller="autocomplete"
@@ -118,14 +114,14 @@ export default class extends Controller {
     if (!AUTOCOMPLETER_TYPES.hasOwnProperty(this.TYPE))
       alert("MOAutocompleter: Invalid type: \"" + this.TYPE + "\"");
 
-    // Only use OEM parts:
+    // Only allow types we can handle:
     Object.assign(this, AUTOCOMPLETER_TYPES[this.TYPE]);
     Object.assign(this, INTERNAL_OPTS);
 
-    // Shared MO utilities imported
-    this.EVENT_KEYS = EVENT_KEYS
-    this.escapeHTML = escapeHTML
-    this.getScrollBarWidth = getScrollBarWidth
+    // Shared MO utilities, imported at the top:
+    this.EVENT_KEYS = EVENT_KEYS;
+    this.escapeHTML = escapeHTML;
+    this.getScrollBarWidth = getScrollBarWidth;
   }
 
   connect() {
@@ -141,13 +137,13 @@ export default class extends Controller {
     this.prepare_input_element();
   }
 
-  // Swaps out autocompleter properties
+  // Swap out autocompleter type (and properties)
   // Action called from a <select> with `data-action: "autocompleter-swap"`
   swap(opts = {}) {
     if (!this.hasSelectTarget)
       return;
 
-    const type = this.selectTarget.value
+    const type = this.selectTarget.value;
 
     if (!AUTOCOMPLETER_TYPES.hasOwnProperty(type)) {
       alert("MOAutocompleter: Invalid type: \"" + this.TYPE + "\"");
@@ -176,7 +172,7 @@ export default class extends Controller {
   // NOTE: `this` within an event listener function refers to the element
   // (the eventTarget) -- unless you pass an arrow function as the listener.
   // But writing a specially named function handleEvent() allows delegating
-  // the class as the handler:
+  // the class as the handler. more info below:
   add_event_listeners() {
     // Stimulus - data-actions on the input can route events to actions here
     this.inputTarget.addEventListener("focus", this);

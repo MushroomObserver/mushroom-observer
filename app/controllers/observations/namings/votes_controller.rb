@@ -30,7 +30,7 @@ module Observations::Namings
     end
 
     # NOTE: TURBO VOTES NOW HIT THIS CONTROLLER, not the AjaxController.
-    # Changes in the state of the Vote selects handled by naming_vote_ajax.js
+    # Changes in the state of the Vote selects handled by naming-vote_controller
     # and send a js request to this action, which changes naming votes directly.
 
     # This action is linked from the show_obs naming table.

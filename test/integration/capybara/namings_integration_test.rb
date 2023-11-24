@@ -138,7 +138,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     assert_not_equal(namer_session.driver.request.cookies["mo_user"],
                      voter_session.driver.request.cookies["mo_user"])
     # Note that this only tests non-JS vote submission.
-    # Most users will have their vote sent via AJAX from naming_vote_ajax.js
+    # Most users will have their vote sent Turbo from naming-vote_controller.js
     # voter_session.vote_on_name(obs, naming)
     voter_session.visit("/#{obs.id}")
     voter_session.within("#naming_vote_form_#{naming.id}") do |form|

@@ -3,7 +3,7 @@
 require("application_system_test_case")
 
 class TranslationsSystemTest < ApplicationSystemTestCase
-  def test_edit_translation_ajax_form
+  def test_edit_translation_turbo_form
     # browser = page.driver.browser
     rolf = users("rolf")
     login!(rolf)

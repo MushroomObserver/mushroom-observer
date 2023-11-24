@@ -17,16 +17,6 @@
 # Note that the hash of attributes is not yet actually used.
 #
 ACTIONS = {
-  ajax: {
-    auto_complete: {},
-    create_image_object: {},
-    geocode: {},
-    image: {},
-    location_primer: {},
-    name_primer: {},
-    multi_image_template: {},
-    test: {}
-  },
   api: {
     api_keys: {},
     collection_numbers: {},
@@ -341,6 +331,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resource :review, only: [:show, :create, :destroy], id: /\d+/
     resource :email_requests, only: [:new, :create]
   end
+
+  # ----- Autocompleters: fetch get ------------------------------------
+  get "/autocompleters/new/:type/:id", to: "autocompleters#new"
 
   # ----- Checklist: just the show --------------------------------------
   get "/checklist", to: "checklists#show"
@@ -676,6 +669,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Observations: standard actions  ----------------------------
   namespace :observations do
     resources :downloads, only: [:new, :create]
+
+    # Not under resources :observations because the obs doesn't have an id yet
+    get("images/uploads/new", to: "images/uploads#new",
+                              as: "new_image_upload_for")
+    post("images/uploads", to: "images/uploads#create",
+                           as: "upload_image_for")
   end
 
   resources :observations do
@@ -701,7 +700,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       get("images/new", to: "observations/images#new",
                         as: "new_image_for")
       post("images", to: "observations/images#create",
-                     as: "upload_image_for")
+                     as: "create_image_for")
       get("images/reuse", to: "observations/images#reuse",
                           as: "reuse_images_for")
       post("images/attach", to: "observations/images#attach",
@@ -821,13 +820,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   namespace :visual_groups do
     resources :images, only: [:update]
-  end
-
-  # Short-hand notation for AJAX methods.
-  # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
-  ACTIONS[:ajax].each_key do |action|
-    get("ajax/#{action}/:type/:id",
-        controller: "ajax", action: action, id: /\S.*/)
   end
 
   ##############################################################################
