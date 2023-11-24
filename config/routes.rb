@@ -18,7 +18,6 @@
 #
 ACTIONS = {
   ajax: {
-    auto_complete: {},
     geocode: {},
     image: {},
     location_primer: {},
@@ -339,6 +338,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resource :review, only: [:show, :create, :destroy], id: /\d+/
     resource :email_requests, only: [:new, :create]
   end
+
+  # ----- Autocompleters: fetch get ------------------------------------
+  get "/autocompleters/new/:type/:id", to: "autocompleters#new"
 
   # ----- Checklist: just the show --------------------------------------
   get "/checklist", to: "checklists#show"

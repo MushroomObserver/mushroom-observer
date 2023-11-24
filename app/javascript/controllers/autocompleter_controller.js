@@ -48,34 +48,34 @@ const DEFAULT_OPTS = {
 // Allowed types of autocompleter. Sets some DEFAULT_OPTS from type
 const AUTOCOMPLETER_TYPES = {
   clade: {
-    AJAX_URL: "/ajax/auto_complete/clade/@",
+    AJAX_URL: "/autocompleters/new/clade/@",
   },
   herbarium: { // params[:user_id] handled in controller
-    AJAX_URL: "/ajax/auto_complete/herbarium/@",
+    AJAX_URL: "/autocompleters/new/herbarium/@",
     UNORDERED: true
   },
   location: { // params[:format] handled in controller
-    AJAX_URL: "/ajax/auto_complete/location/@",
+    AJAX_URL: "/autocompleters/new/location/@",
     UNORDERED: true
   },
   name: {
-    AJAX_URL: "/ajax/auto_complete/name/@",
+    AJAX_URL: "/autocompleters/new/name/@",
     COLLAPSE: 1
   },
   project: {
-    AJAX_URL: "/ajax/auto_complete/project/@",
+    AJAX_URL: "/autocompleters/new/project/@",
     UNORDERED: true
   },
   region: {
-    AJAX_URL: "/ajax/auto_complete/location/@",
+    AJAX_URL: "/autocompleters/new/location/@",
     UNORDERED: true
   },
   species_list: {
-    AJAX_URL: "/ajax/auto_complete/species_list/@",
+    AJAX_URL: "/autocompleters/new/species_list/@",
     UNORDERED: true
   },
   user: {
-    AJAX_URL: "/ajax/auto_complete/user/@",
+    AJAX_URL: "/autocompleters/new/user/@",
     UNORDERED: true
   }
 }
