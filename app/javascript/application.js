@@ -2,11 +2,14 @@
 // Read more: https://github.com/rails/importmap-rails
 // If string literal error, it means the importmap is not functioning
 
-import "jquery3"
+// import "jquery3"
+// https://stackoverflow.com/questions/72288802/how-can-i-install-jquery-in-rails-7-with-importmap
+import "jquery" // this import first, then your other imports that use `$`
+
 import "bootstrap"
 
 import "@hotwired/turbo-rails"
-// Turbo.setFormMode("optin"), or all forms will need to provide turbo response!
+// Must setFormMode("optin") or all forms will need to provide a turbo response.
 // https://stackoverflow.com/questions/70921317/how-can-i-disable-hotwire-turbo-the-turbolinks-replacement-for-all-forms-in
 // form, or button like delete/patch: set data-turbo="true" to opt in
 // link_to with GET: set data-turbo-stream="true" to opt in

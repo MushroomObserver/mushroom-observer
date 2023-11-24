@@ -226,9 +226,10 @@ module NamingsHelper
 
   def naming_form_reasons_fields(f_r, reasons)
     reasons.values.sort_by(&:order).map do |rsn|
-      tag.div(data: {
-                controller: "naming-reason",
-                action: "shown.bs.collapse->naming-reason#focusInput"
+      tag.div(class: "naming-reason-container",
+              data: {
+                controller: "naming-reason", # stimulus cntrlr explains event
+                action: "$shown.bs.collapse->naming-reason#focusInput"
               }) do
         [
           naming_form_reasons_checkbox(f_r, rsn),
