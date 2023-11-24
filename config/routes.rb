@@ -17,13 +17,6 @@
 # Note that the hash of attributes is not yet actually used.
 #
 ACTIONS = {
-  ajax: {
-    # geocode: {},
-    # image: {},
-    location_primer: {},
-    name_primer: {},
-    test: {}
-  },
   api: {
     api_keys: {},
     collection_numbers: {},
@@ -827,13 +820,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   namespace :visual_groups do
     resources :images, only: [:update]
-  end
-
-  # Short-hand notation for AJAX methods.
-  # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
-  ACTIONS[:ajax].each_key do |action|
-    get("ajax/#{action}/:type/:id",
-        controller: "ajax", action: action, id: /\S.*/)
   end
 
   ##############################################################################
