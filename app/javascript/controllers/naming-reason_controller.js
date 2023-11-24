@@ -8,8 +8,8 @@ export default class extends Controller {
     this.element.dataset.stimulus = "connected";
   }
 
-  focusInput() {
-    alert("whao")
+  focusInput(event) {
+    console.log('Event fired on #' + event.currentTarget.id);
     this.inputTarget.focus()
   }
 }
