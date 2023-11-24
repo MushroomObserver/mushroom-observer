@@ -3,14 +3,6 @@
 class AutocompletersController < ApplicationController
   require "cgi"
 
-  # I am not sure why disable_filters is necessary, but it was used in the
-  # original AJAX controller. Otherwise you get an "invalid authenticity token".
-  # It could be because the `new` template is not rendered as an HTML page,
-  # it is also printed by JS, causing the token to be stale on the action (?)
-  # Note that requestjs-rails, used by the controller, does send a valid
-  # X-CSRF-Token (not the same thing).
-  # https://stackoverflow.com/questions/3364492/actioncontrollerinvalidauthenticitytoken
-  disable_filters
   before_action :login_required
   around_action :catch_ajax_errors
 
