@@ -221,23 +221,14 @@ class ProjectsControllerTest < FunctionalTestCase
 
   def test_create_project_with_any_dates
     title = "Project without start or end"
-    start_date = Time.zone.today
-    end_date = start_date
+    start = Time.zone.today
 
-    params = {
-      project: {
-        title: title,
-        place_name: "",
-        "start_date(1i)" => start_date.year,
-        "start_date(2i)" => start_date.month,
-        "start_date(3i)" => start_date.day,
-        "end_date(1i)" => end_date.year,
-        "end_date(2i)" => end_date.month,
-        "end_date(3i)" => end_date.day,
-        dates_any: true
-      }
-    }
-    post_requires_login(:create, params)
+    post_requires_login(
+      :create,
+      build_params(
+        title, "", start_date: start, end_date: start, dates_any: true
+      )
+    )
 
     project = Project.find_by(title: title)
     assert_redirected_to(project_path(project.id))
