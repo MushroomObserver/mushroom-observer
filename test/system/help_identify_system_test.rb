@@ -27,11 +27,11 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
     within(".lg-sub-html") do
       click_on("Propose a Name")
     end
-    assert_selector("#modal_naming")
+    assert_selector("#modal_naming_#{obs.id}")
 
     ncc = names(:coprinus_comatus)
 
-    within("#modal_naming") do
+    within("#modal_naming_#{obs.id}") do
       fill_in("naming_name", with: ncc.text_name)
       browser.keyboard.type(:tab)
       sleep(1)
@@ -39,7 +39,15 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
       select("Promising", from: "naming_vote_value")
       click_commit
     end
-    assert_no_selector("#modal_naming")
-    debugger
+    assert_no_selector("#modal_naming_#{obs.id}")
+    assert_no_selector("#observation_identify_#{obs.id}")
+    # lightgallery specific:
+    assert_selector(".lg-container")
+    within(".lg-container") do
+      first(".lg-close").trigger("click")
+    end
+    assert_no_selector(".lg-container")
+
+    assert_selector("#box_title_#{obs.id}", text: /#{ncc.text_name}/)
   end
 end

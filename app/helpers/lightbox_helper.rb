@@ -16,7 +16,7 @@ module LightboxHelper
   def lightbox_caption_html(lightbox_data)
     obs = lightbox_data[:obs]
     html = []
-    if obs.id.present?
+    if obs.is_a?(Observation)
       html += lightbox_obs_caption(obs, lightbox_data[:identify])
     end
     html << caption_image_links(lightbox_data[:image] ||
@@ -28,15 +28,23 @@ module LightboxHelper
   # template local assign "caption" skips the obs relations (projects, etc)
   def lightbox_obs_caption(obs, identify)
     html = []
-    if identify
-      html << propose_naming_link(obs.id, context: "lightbox")
-      html << content_tag(:span, "&nbsp;".html_safe, class: "mx-2")
-      html << mark_as_reviewed_toggle(obs.id)
-    end
+
+    html << caption_identify_ui(obs: obs) if identify
     html << caption_obs_title(obs: obs)
     html << observation_details_when_where_who(obs: obs)
     html << caption_truncated_notes(obs: obs)
     html
+  end
+
+  # This gets removed on successful propose
+  def caption_identify_ui(obs:)
+    tag.div(class: "obs-identify", id: "observation_identify_#{obs.id}") do
+      [
+        propose_naming_link(obs.id, context: "lightbox"),
+        tag.span("&nbsp;".html_safe, class: "mx-2"),
+        mark_as_reviewed_toggle(obs.id)
+      ].safe_join
+    end
   end
 
   # This is different from show_obs_title, it's more like the matrix_box title

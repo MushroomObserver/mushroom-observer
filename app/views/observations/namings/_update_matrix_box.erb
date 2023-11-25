@@ -10,3 +10,4 @@ end %>
 
 <%= turbo_stream.close_modal("modal_naming_#{@observation.id}") %>
 <%= turbo_stream.remove("modal_naming_#{@observation.id}") %>
+<%= turbo_stream.remove("observation_identify_#{@observation.id}") %>
