@@ -1,9 +1,0 @@
-
-<%= turbo_stream.update("observation_what_#{@observation.id}") do
-  show_obs_title(obs: @observation)
-end %>
-
-<%# need to add this id to the matrix box %>
-<%= turbo_stream.update("box_title_#{@observation.id}") do
-  matrix_box_obs_title(@observation)
-end %>

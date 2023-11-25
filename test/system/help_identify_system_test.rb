@@ -36,10 +36,10 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
       browser.keyboard.type(:tab)
       sleep(1)
       assert_no_selector(".auto_complete")
-      select("Could Be", from: "naming_vote_value")
+      select("Promising", from: "naming_vote_value")
       click_commit
     end
     assert_no_selector("#modal_naming")
-
+    debugger
   end
 end

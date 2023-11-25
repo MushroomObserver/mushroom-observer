@@ -5,8 +5,8 @@ when "new", "create"
   button_name = :CREATE.l
   method = :post
   url = observation_namings_path(observation_id: @observation.id,
-                                  approved_name: @params.what,
-                                  q: get_query_param)
+                                 approved_name: @params.what,
+                                 q: get_query_param)
 when "edit", "update"
   button_name = :SAVE_EDITS.l
   method = :patch
@@ -15,12 +15,6 @@ when "edit", "update"
                     q: get_query_param)
 end
 
-# the form needs these two locals.
-# Note: i can't find where show_reasons is ever false - AN 20230801
-show_reasons ||= true
-# if modal, context provided by propose_naming_button
-context ||= "page"
-
 form_args = { model: @naming, url: url, method: method, id: "naming_form" }
 if local_assigns[:local] == true
   form_args = form_args.merge({ local: true })
@@ -28,6 +22,9 @@ else
   form_args = form_args.deep_merge({ data: { turbo: true } })
 end
 
+# Note: the form needs local_assigns[:form_locals].
+# I can't find where show_reasons is ever false - AN 20230801
+form_locals = local_assigns[:form_locals] || {}
 %>
 
 <%= form_with(**form_args) do |f| %>
@@ -35,7 +32,6 @@ end
   <%= submit_button(form: f, button: button_name, center: true) %>
 
   <%= render(partial: "observations/namings/fields",
-             locals: { f: f, button_name: button_name,
-                       show_reasons: show_reasons, context: context }) %>
+             locals: { f: f, button_name: button_name }.merge(form_locals)) %>
 
 <% end # form %>

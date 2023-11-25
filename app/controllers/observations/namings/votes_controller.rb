@@ -14,10 +14,9 @@ module Observations::Namings
       pass_query_params
       @naming = find_or_goto_index(Naming, params[:naming_id].to_s)
       respond_to do |format|
-        format.html
         format.turbo_stream do
           Textile.register_name(@naming.name)
-          identifier = "naming_#{@naming.id}"
+          identifier = "naming_votes_#{@naming.id}"
           title = "#{:show_namings_consensus.t} "
           subtitle = @naming.display_name_brief_authors.t.small_author
           render(partial: "shared/modal",
@@ -26,6 +25,7 @@ module Observations::Namings
                    body: "observations/namings/votes/table", naming: @naming
                  })
         end
+        format.html
       end
     end
 

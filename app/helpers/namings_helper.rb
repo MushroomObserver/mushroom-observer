@@ -62,7 +62,7 @@ module NamingsHelper
                           context: "namings_table",
                           btn_class: "btn-primary my-3")
     modal_link_to(
-      "naming",
+      "naming_#{obs_id}",
       *new_naming_tab(obs_id,
                       text: text, btn_class: btn_class, context: context)
     )
@@ -74,7 +74,8 @@ module NamingsHelper
     Textile.register_name(naming.name)
 
     if check_permission(naming)
-      edit_link = modal_link_to("naming", *edit_naming_tab(naming))
+      edit_link = modal_link_to("naming_#{naming.observation.id}",
+                                *edit_naming_tab(naming))
       delete_link = destroy_button(target: naming, icon: :remove)
       proposer_links = tag.span(class: "small text-nowrap") do
         ["[", edit_link, "|", delete_link, "]"].safe_join(" ")
@@ -121,7 +122,7 @@ module NamingsHelper
   def naming_votes_link(naming)
     percent = "#{naming.vote_percent.round}%"
 
-    modal_link_to("naming_#{naming.id}", h(percent),
+    modal_link_to("naming_votes_#{naming.id}", h(percent),
                   add_query_param(naming_vote_path(naming_id: naming.id)),
                   class: "vote-percent btn btn-link px-0")
   end

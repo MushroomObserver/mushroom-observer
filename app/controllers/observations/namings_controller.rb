@@ -104,9 +104,8 @@ module Observations
       render(partial: "shared/modal_form",
              locals: {
                title: title, local: false,
-               identifier: "naming",
+               identifier: "naming_#{@observation.id}",
                form: "observations/namings/form",
-               # form_bindings: "observations/namings/form_bindings",
                form_locals: { show_reasons: true,
                               context: params[:context] }
              }) and return
@@ -130,16 +129,16 @@ module Observations
 
     def respond_to_successful_create
       respond_to do |format|
-        format.html { default_redirect(@params.observation, :show) }
         format.turbo_stream do
           case params[:context]
           when "lightbox", "matrix_box"
-            render(partial: "observations/namings/update_lightbox")
+            render(partial: "observations/namings/update_matrix_box")
           else
             render(partial: "observations/namings/update_observation")
           end
           return
         end
+        format.html { default_redirect(@params.observation, :show) }
       end
     end
 
@@ -154,8 +153,11 @@ module Observations
         format.html { render(action: redo_action) and return }
         format.turbo_stream do
           render(partial: "shared/modal_form_reload",
-                 locals: { identifier: "naming",
-                           form: "observations/namings/form" }) and return true
+                 locals: { identifier: "naming_#{@observation.id}",
+                           form: "observations/namings/form",
+                           form_locals: { show_reasons: true,
+                                          context: params[:context] }
+                         }) and return true
         end
       end
     end
