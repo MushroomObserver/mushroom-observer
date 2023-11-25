@@ -97,11 +97,8 @@ module ObservationsController::FormHelpers
       @projects << proj unless @projects.include?(proj)
     end
     @projects.each do |proj|
-      @project_checks[proj.id] = if params[:project].nil?
-                                   false
-                                 else
-                                   params[:project]["id_#{proj.id}"] == "1"
-                                 end
+      p = params[:project]
+      @project_checks[proj.id] = p.nil? ? false : p["id_#{proj.id}"] == "1"
     end
   end
 
