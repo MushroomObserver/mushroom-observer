@@ -214,6 +214,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_selector("body.observations__index")
     assert_link(text: /#{obs.text_name}/)
     click_link(text: /#{obs.text_name}/)
+
     assert_selector("body.observations__show")
     assert_selector("#observation_namings")
 
@@ -260,6 +261,9 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     end
     assert_selector("#title", text: /#{nam.text_name}/)
 
+    # vote updates take a long time because emails
+    sleep(3)
+
     # check the vote tally
     within("#observation_namings") do
       assert_link(href: "/votes/#{nam.id}")
@@ -271,9 +275,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       assert_text(nam.text_name)
       find(:css, ".close").click
     end
-
-    # delete the alternate
-    scroll_to("#observation_namings")
+    assert_no_selector("#modal_naming_votes_#{nam.id}")
 
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)

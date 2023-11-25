@@ -39,7 +39,6 @@ module Observations
 
       @observation = @params.observation
       @reasons = @params.reasons
-
       create_post
     end
 

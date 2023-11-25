@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
 # helpers for namings view
-# TODO: some of this should be in a presenter
+# TODO: some of this should be in a presenter or ViewComponents
+# NOTE: We don't even print this table unless @user is logged in.
 module NamingsHelper
   ##### Observation Naming "table" content #########
-  def observation_naming_header_row(logged_in)
+  def observation_naming_header_row
     heading_html = content_tag(:h4, :show_namings_proposed_names.t,
                                class: "panel-title")
     user_heading_html = content_tag(:small, :show_namings_user.t)
@@ -15,16 +16,16 @@ module NamingsHelper
       heading: heading_html,
       user_name: user_heading_html,
       consensus_vote: consensus_heading_html,
-      your_vote: logged_in ? your_heading_html : ""
+      your_vote: your_heading_html
     }
   end
 
-  def observation_naming_row(observation, naming, vote, logged_in)
+  def observation_naming_row(observation, naming, vote)
     {
       name: naming_name_html(naming),
       proposer: naming_proposer_html(naming),
       consensus_vote: consensus_vote_html(naming),
-      your_vote: logged_in ? your_vote_html(naming, vote) : "",
+      your_vote: your_vote_html(naming, vote),
       eyes: vote_icons_html(observation, naming),
       reasons: reasons_html(naming)
     }
@@ -72,7 +73,6 @@ module NamingsHelper
 
   def naming_name_html(naming)
     Textile.register_name(naming.name)
-
     if check_permission(naming)
       edit_link = modal_link_to("naming_#{naming.observation.id}",
                                 *edit_naming_tab(naming))

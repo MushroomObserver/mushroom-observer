@@ -63,7 +63,7 @@ module Observations::Namings
         format.turbo_stream do
           case params[:context]
           when "matrix_box"
-            render(partial: "observations/namings/update_lightbox")
+            render(partial: "observations/namings/update_matrix_box")
           else
             render(partial: "observations/namings/update_observation")
           end
@@ -74,32 +74,6 @@ module Observations::Namings
         end
       end
     end
-
-    # This was a new POST method for show_observation that updated all votes
-    # (from the selects) for all namings for the observation, at once. It was
-    # only available to non-JS users. It's incompatible with the CRUDified
-    # NamingsControllerbecause it assumes the whole namings table is one form.
-    # However, the new CRUD destroy buttons are themselves small forms.
-    # This also requires the <select> to have the html option index: naming.id
-    # def cast_votes
-    #   pass_query_params
-    #   observation = find_or_goto_index(Observation, params[:id].to_s)
-    #   return unless observation
-
-    #   if params[:vote]
-    #     flashed = false
-    #     observation.namings.each do |naming|
-    #       value = param_lookup([:vote, naming.id.to_s, :value], &:to_i)
-    #       next unless value &&
-    #                   observation.change_vote(naming, value) &&
-    #                   !flashed
-
-    #       flash_notice(:runtime_show_observation_success.t)
-    #       flashed = true
-    #     end
-    #   end
-    #   redirect_with_query(observation_path(id: observation.id))
-    # end
 
     # This is very expensive, and not called anywhere. Putting it in storage
     # Refresh vote cache for all observations in the database.
