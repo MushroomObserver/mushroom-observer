@@ -37,7 +37,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     # (Make sure there is a tab to go back to observations/show.)
     assert_true(namer_session.has_link?(href: "/#{obs.id}"))
 
-    namer_session.within("#naming_form") do |form|
+    namer_session.within("#naming_#{obs.id}_form") do |form|
       assert_true(form.has_field?("naming_name", text: ""))
       assert_true(form.has_field?("naming_vote_value", text: ""))
       assert_true(form.has_unchecked_field?("naming_reasons_1_check"))
@@ -50,7 +50,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     # (I don't care so long as it says something.)
     assert_flash_text(/\S/, session: namer_session)
 
-    namer_session.within("#naming_form") do |form|
+    namer_session.within("#naming_#{obs.id}_form") do |form|
       form.fill_in("naming_name", with: text_name)
       form.first("input[type='submit']").click
     end
@@ -60,7 +60,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
                   text: /MO does not recognize the name.*#{text_name}/
                 ))
 
-    namer_session.within("#naming_form") do |form|
+    namer_session.within("#naming_#{obs.id}_form") do |form|
       assert_true(form.has_field?("naming_name", with: text_name))
       assert_true(form.has_unchecked_field?("naming_reasons_1_check"))
       assert_true(form.has_unchecked_field?("naming_reasons_2_check"))
@@ -94,7 +94,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     reason = "Test reason."
     namer_session.click_link(class: /edit_naming_link_#{naming.id}/)
     namer_session.assert_selector("body.namings__edit")
-    namer_session.within("#naming_form") do |form|
+    namer_session.within("#naming_#{obs.id}_form") do |form|
       assert_true(form.has_field?("naming_name", with: text_name))
       assert_true(form.has_checked_field?("naming_reasons_1_check"))
       form.uncheck("naming_reasons_1_check")
@@ -121,7 +121,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
 
     namer_session.click_link(class: /edit_naming_link_#{naming.id}/)
     namer_session.assert_selector("body.namings__edit")
-    namer_session.within("#naming_form") do |form|
+    namer_session.within("#naming_#{obs.id}_form") do |form|
       assert_true(
         form.has_field?("naming_name", with: "#{text_name} #{author}")
       )

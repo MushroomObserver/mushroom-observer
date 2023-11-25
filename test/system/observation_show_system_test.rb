@@ -226,36 +226,36 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     n_d = names(:namings_deprecated)
     nd1 = names(:namings_deprecated_1)
 
-    assert_selector("#modal_naming")
-    within("#modal_naming") do
+    assert_selector("#modal_naming_#{obs.id}")
+    within("#modal_naming_#{obs.id}") do
       assert_field("naming_name")
       fill_in("naming_name", with: nd1.text_name)
       click_commit
     end
-    assert_selector("#modal_naming_flash", text: /Missing/)
+    assert_selector("#modal_naming_#{obs.id}_flash", text: /Missing/)
     assert_selector("#name_messages", text: /deprecated/)
 
-    within("#modal_naming") do
+    within("#modal_naming_#{obs.id}") do
       fill_in("naming_name", with: n_d.text_name)
       assert_selector(".auto_complete")
       browser.keyboard.type(:down, :tab)
       assert_no_selector(".auto_complete")
       click_commit
     end
-    assert_no_selector("#modal_naming")
+    assert_no_selector("#modal_naming_#{obs.id}")
 
     nam = Naming.last
     assert_equal(n_d.text_name, nam.text_name)
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)
-      assert_selector("form#naming_vote_form_#{nam.id}")
+      assert_selector("#naming_vote_form_#{nam.id}")
       select("Could Be", from: "vote_value_#{nam.id}")
     end
     assert_selector("#title", text: /#{obs.text_name}/)
 
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)
-      assert_selector("form#naming_vote_form_#{nam.id}")
+      assert_selector("#naming_vote_form_#{nam.id}")
       select("I'd Call It That", from: "vote_value_#{nam.id}")
     end
     assert_selector("#title", text: /#{nam.text_name}/)
@@ -265,9 +265,9 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       assert_link(href: "/votes/#{nam.id}")
       click_link(href: "/votes/#{nam.id}")
     end
-    assert_selector("#modal_naming_#{nam.id}")
+    assert_selector("#modal_naming_votes_#{nam.id}")
 
-    within("#modal_naming_#{nam.id}") do
+    within("#modal_naming_votes_#{nam.id}") do
       assert_text(nam.text_name)
       find(:css, ".close").click
     end

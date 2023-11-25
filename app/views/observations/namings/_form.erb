@@ -15,7 +15,8 @@ when "edit", "update"
                     q: get_query_param)
 end
 
-form_args = { model: @naming, url: url, method: method, id: "naming_form" }
+form_args = { model: @naming, url: url, method: method,
+              id: "naming_#{@observation.id}_form" }
 if local_assigns[:local] == true
   form_args = form_args.merge({ local: true })
 else
