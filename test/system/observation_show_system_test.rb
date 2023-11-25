@@ -260,6 +260,18 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     end
     assert_selector("#title", text: /#{nam.text_name}/)
 
+    # check the vote tally
+    within("#observation_namings") do
+      assert_link(href: "/votes/#{nam.id}")
+      click_link(href: "/votes/#{nam.id}")
+    end
+    assert_selector("#modal_naming_#{nam.id}")
+
+    within("#modal_naming_#{nam.id}") do
+      assert_text(nam.text_name)
+      find(:css, ".close").click
+    end
+
     # delete the alternate
     scroll_to("#observation_namings")
 
