@@ -238,28 +238,17 @@ class ProjectsControllerTest < FunctionalTestCase
 
   def test_create_project_end_before_start
     title = "Backward in Time"
-    summary = "Ends before it starts"
     start_date = Time.zone.today
-    end_date = start_date - 1.day
-    params = {
-      project: {
-        title: title,
-        summary: summary,
-        place_name: "",
-        "start_date(1i)" => start_date.year,
-        "start_date(2i)" => start_date.month,
-        "start_date(3i)" => start_date.day,
-        "end_date(1i)" => end_date.year,
-        "end_date(2i)" => end_date.month,
-        "end_date(3i)" => end_date.day
-      },
-      start_date: { fixed: true },
-      end_date: { fixed: true }
-    }
 
-    assert_no_difference("Project.count",
-                         "Created Project that ends before start") do
-      post_requires_login(:create, params)
+    assert_no_difference("Project.count", "Project ends before start") do
+      post_requires_login(
+        :create,
+        build_params(
+          title, "Ends before it starts",
+          start_date: start_date, end_date: start_date - 1.day, dates_any: false
+        ).
+        merge(start_date: { fixed: true }, end_date: { fixed: true })
+      )
     end
 
     assert_flash_error("Missing flash error when Project ends before it starts")
