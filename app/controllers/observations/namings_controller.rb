@@ -152,11 +152,12 @@ module Observations
         format.html { render(action: redo_action) and return }
         format.turbo_stream do
           render(partial: "shared/modal_form_reload",
-                 locals: { identifier: "naming_#{@observation.id}",
-                           form: "observations/namings/form",
-                           form_locals: { show_reasons: true,
-                                          context: params[:context] }
-                         }) and return true
+                 locals: {
+                   identifier: "naming_#{@observation.id}",
+                   form: "observations/namings/form",
+                   form_locals: { show_reasons: true,
+                                  context: params[:context] }
+                 }) and return true
         end
       end
     end

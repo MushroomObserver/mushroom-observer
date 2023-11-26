@@ -20,7 +20,8 @@ module Observations::Images
     # This action returns formatted HTML (upload image template) to the Stimulus
     # obs-form-images_controller that's added to the page when uploading
     # multiple images on create observation
-    def new # multi_image_template
+    # was multi_image_template
+    def new
       @user = session_user # || raise("Must be logged in.")
       @licenses = License.current_names_and_ids(@user.license)
       @image = Image.new(user: @user, when: Time.zone.now)
@@ -30,7 +31,8 @@ module Observations::Images
 
     # Uploads an image object without an observation.
     # Returns image as JSON object.
-    def create # create_image_object
+    # was create_image_object
+    def create
       @user = session_user
       args = params[:image]
       image = create_and_upload_image(args)
@@ -97,6 +99,5 @@ module Observations::Images
                hash["2i"].to_i,
                hash["3i"].to_i)
     end
-
   end
 end
