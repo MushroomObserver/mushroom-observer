@@ -8,6 +8,7 @@
     <%= render(partial: "shared/form_location_feedback",
                locals: { button: button.l} ) %>
 
+    <%# NOTE: All other Stimulus data is on the map div %>
     <%= tag.div(class: "row", data: { controller: "map" }) do %>
       <%= tag.div(class: "col-md-8 col-lg-6") do %>
 

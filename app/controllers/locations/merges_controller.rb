@@ -20,7 +20,7 @@ module Locations
 
     def new
       store_location
-      @where = Location.user_name(@user, params[:where].to_s)
+      @where = Location.user_format(@user, params[:where].to_s)
       @matches = Location.name_includes(@where)
       @others = []
 

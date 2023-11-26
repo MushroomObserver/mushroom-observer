@@ -2,7 +2,6 @@
 // Read more: https://github.com/rails/importmap-rails
 // If string literal error, it means the importmap is not functioning
 
-// import "jquery3"
 // https://stackoverflow.com/questions/72288802/how-can-i-install-jquery-in-rails-7-with-importmap
 import "jquery" // this import first, then your other imports that use `$`
 

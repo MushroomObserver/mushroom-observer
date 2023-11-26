@@ -57,8 +57,10 @@ export default class extends Controller {
         this.geocoder = new google.maps.Geocoder()
 
         // NOTE: any bug in the `then` block will throw the generic error
-        // pull code out of the `loader` block to debug
-        if (Object.keys(this.collection.sets).length) {
+        // use the `helpDebug` method to debug
+        if (this.hasLocationNameTarget && this.locationNameTarget.value) {
+          this.findOnMap()
+        } else if (Object.keys(this.collection.sets).length) {
           this.buildOverlays()
         }
       })
@@ -67,6 +69,9 @@ export default class extends Controller {
       })
   }
 
+  helpDebug() {
+    debugger
+  }
   // In a collection, each set represents an overlay (is_point or is_box).
   // set.center is an array [lat, lng]
   // the `key` of each set is an array [x,y,w,h]
@@ -101,15 +106,19 @@ export default class extends Controller {
     if (!this.editable && set != null) {
       this.drawInfoWindowForMarker(set, marker)
     } else {
-      ["position_changed", "dragend"].forEach((eventName) => {
-        marker.addListener(eventName, () => {
-          const newPosition = marker.getPosition()?.toJSON() // latlng object
-          this.updateFormInputs(newPosition)
-          this.updateElevationInputs(this.sampleElevationCenterOf(newPosition))
-        })
-      })
-      this.marker = marker
+      this.setupEditableMarker(marker)
     }
+  }
+
+  setupEditableMarker(marker) {
+    ["position_changed", "dragend"].forEach((eventName) => {
+      marker.addListener(eventName, () => {
+        const newPosition = marker.getPosition()?.toJSON() // latlng object
+        this.updateFormInputs(newPosition)
+        this.updateElevationInputs(this.sampleElevationCenterOf(newPosition))
+      })
+    })
+    this.marker = marker
   }
 
   drawRectangle(set) {
@@ -287,10 +296,11 @@ export default class extends Controller {
           this.map.fitBounds(bounds)
         }
         if (center) {
-          if (this.marker) {
-            this.marker.setPosition(center)
-            this.updateElevationInputs(this.sampleElevationCenterOf(center))
+          if (!this.marker) {
+            this.setupGeocodedMarker()
           }
+          this.marker.setPosition(center)
+          this.updateElevationInputs(this.sampleElevationCenterOf(center))
           this.map.setCenter(center)
         }
         this.findOnMapTarget.disabled = false
@@ -298,6 +308,16 @@ export default class extends Controller {
       .catch((e) => {
         alert("Geocode was not successful for the following reason: " + e)
       });
+  }
+
+  setupGeocodedMarker() {
+    const markerOptions = {
+      position: { lat: 90, lng: 90 },
+      map: this.map,
+      draggable: true
+    }
+    const marker = new google.maps.Marker(markerOptions)
+    this.setupEditableMarker(marker)
   }
 
   getElevation() {

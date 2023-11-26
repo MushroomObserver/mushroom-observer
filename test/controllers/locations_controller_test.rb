@@ -592,7 +592,7 @@ class LocationsControllerTest < FunctionalTestCase
     old_params = update_params_from_loc(loc)
     params = barton_flats_params
     params[:location][:display_name] =
-      Location.user_name(rolf, params[:location][:display_name])
+      Location.user_format(rolf, params[:location][:display_name])
     params[:id] = loc.id
     put_requires_login(:update, params)
     assert_redirected_to(location_path(loc.id))
