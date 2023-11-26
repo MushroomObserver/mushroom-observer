@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import { get } from "@rails/request.js"
 
-// The controller for the link to the modal - not the modal itself.
+// The controller goes on the button_to the modal - not the modal itself.
 // MO doesn't print a pre-existing "dormant" Bootstrap modal form in the page
 // because we want to let people have several modals in progress on same page.
 // For example, you can start entering a collection number, close the modal,
@@ -29,7 +29,8 @@ export default class extends Controller {
   }
 
   // https://discuss.hotwired.dev/t/is-this-correct-a-stimulus-controller-to-use-turbo-stream-get-requests-to-avoid-updating-browser-history/4146
-  // NOTE: Above example presumes a pre-existing modal.
+  // NOTE: Above example presumes a pre-existing modal, but the idea is similar.
+  // We use requestjs to streamline the fetch syntax
   async fetchModalAndAppendToBody() {
     // console.log(destination)
 

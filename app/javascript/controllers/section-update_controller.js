@@ -7,13 +7,14 @@ export default class extends Controller {
   connect() {
     this.element.dataset.stimulus = "connected";
 
+    // Note: this is simpler than adding an action on every frame.
     // add event listener turbo:frame-render, call hide modal
     this.element.addEventListener("turbo:frame-render", this.updated())
   }
 
   updated() {
     // broadcast change
-    // console.log("Section updated");
+    console.log("Section updated");
     this.dispatch("updated")
   }
 

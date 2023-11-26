@@ -3,9 +3,11 @@
 %>
 
 <!--TABLE OF NAMES / REFRESHED BY TURBO -->
-<%= turbo_frame_tag("observation_namings",
-                    src: naming_path(id: obs.id),
-                    loading: "lazy") do
+<%= turbo_frame_tag(
+  "observation_namings",
+  src: naming_path(id: obs.id), # Lazy loading is not working yet?
+  loading: "lazy"
+) do
   render(partial: "observations/namings/table",
          locals: { obs: obs, query: @query })
 end %>

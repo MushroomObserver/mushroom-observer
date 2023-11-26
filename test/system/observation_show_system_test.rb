@@ -262,7 +262,9 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_selector("#title", text: /#{nam.text_name}/)
 
     # vote updates take a long time because emails
-    sleep(5)
+    # this is where test problems occur
+    sleep(9)
+    # debugger
 
     # check the vote tally
     within("#observation_namings") do
