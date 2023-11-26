@@ -44,7 +44,7 @@ body_class = class_names(whos_calling, theme_class)
       </header>
 
       <main id="content" class="<%= container_class %>"
-            data-controller="lightbox">
+            data-controller="lightgallery">
 
         <% unless @user&.verified? %>
           <%= render(partial: "application/content/login_layout") %>

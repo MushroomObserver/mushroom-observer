@@ -130,7 +130,7 @@ module Observations
       respond_to do |format|
         format.turbo_stream do
           case params[:context]
-          when "lightbox", "matrix_box"
+          when "lightgallery", "matrix_box"
             render(partial: "observations/namings/update_matrix_box")
           else
             render(partial: "observations/namings/update_observation")

@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import lightGallery from 'lightgallery'
 import lgZoom from 'lightgallery/plugins/zoom'
 
-// Connects to data-controller="lightbox", currently "#content"
+// Connects to data-controller="lightgallery", currently "#content"
 export default class extends Controller {
   connect() {
     this.element.dataset.stimulus = "connected";
