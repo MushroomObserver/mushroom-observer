@@ -212,7 +212,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     check(proj_checkbox)
     first(:button, "Create").click
 
-    # Porve that Project is re-checked for the next Observation
+    # Prove that Project is re-checked for the next Observation
     visit(new_observation_path)
     assert(
       has_checked_field?(proj_checkbox),
