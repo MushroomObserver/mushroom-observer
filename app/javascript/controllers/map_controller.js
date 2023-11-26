@@ -134,17 +134,24 @@ export default class extends Controller {
 
     const rectangle = new google.maps.Rectangle(rectangleOptions)
 
-    if (this.editable) { // "dragstart", "drag",
-      ["bounds_changed", "dragend"].forEach((eventName) => {
-        rectangle.addListener(eventName, () => {
-          const newBounds = rectangle.getBounds()?.toJSON() // nsew object
-          // console.log({ newBounds })
-          this.updateFormInputs(newBounds)
-          this.updateElevationInputs(this.sampleElevationPointsOf(newBounds))
-        })
-      })
-      this.rectangle = rectangle
+    if (this.editable) {
+      this.setupEditableRectangle(rectangle)
+    } else {
+      this.drawInfoWindowForRectangle(set, rectangle)
     }
+  }
+
+  // "dragstart", "drag",
+  setupEditableRectangle(rectangle) {
+    ["bounds_changed", "dragend"].forEach((eventName) => {
+      rectangle.addListener(eventName, () => {
+        const newBounds = rectangle.getBounds()?.toJSON() // nsew object
+        // console.log({ newBounds })
+        this.updateFormInputs(newBounds)
+        this.updateElevationInputs(this.sampleElevationPointsOf(newBounds))
+      })
+    })
+    this.rectangle = rectangle
   }
 
   // takes a LatLngBoundsLiteral object {south:, west:, north:, east:}
@@ -187,6 +194,20 @@ export default class extends Controller {
 
     google.maps.event.addListener(marker, "click", () => {
       info_window.open(this.map, marker)
+    })
+  }
+
+  // For rectangles: make a clickable info window
+  // https://stackoverflow.com/questions/26171285/googlemaps-api-rectangle-and-infowindow-coupling-issue
+  drawInfoWindowForRectangle(set, rectangle) {
+    const center = rectangle.getBounds().getCenter()
+    const info_window = new google.maps.InfoWindow({
+      content: set.caption,
+      position: center
+    })
+
+    google.maps.event.addListener(rectangle, "click", () => {
+      info_window.open(this.map, rectangle)
     })
   }
 
