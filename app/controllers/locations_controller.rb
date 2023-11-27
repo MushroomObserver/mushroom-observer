@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require("geocoder")
-
 #  :index
 #   params:
 #   advanced_search:
