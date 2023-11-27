@@ -340,26 +340,10 @@ class ProjectsControllerTest < FunctionalTestCase
   def test_update_project_end_before_start
     proj = projects(:pinned_date_range_project)
     start_date = Time.zone.today
-    end_date = Time.zone.yesterday
-    params = {
-      id: proj.id,
-      project: {
-        title: proj.title,
-        summary: proj.summary,
-        place_name: "",
-        user: proj.user,
-        user_group: proj.user_group,
-        admin_group: proj.admin_group,
-        "start_date(1i)" => start_date.year,
-        "start_date(2i)" => start_date.month,
-        "start_date(3i)" => start_date.day,
-        "end_date(1i)" => end_date.year,
-        "end_date(2i)" => end_date.month,
-        "end_date(3i)" => end_date.day
-      },
-      start_date: { fixed: true },
-      end_date: { fixed: true }
-    }
+    params = build_params(
+      proj.title, proj.summary,
+      start_date: start_date, end_date: start_date - 1.day, dates_any: false
+    ).merge(start_date: { fixed: true }, end_date: { fixed: true }, id: proj.id)
 
     login(proj.user.login)
     patch(:update, params: params)
