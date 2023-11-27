@@ -60,6 +60,7 @@ export default class extends Controller {
         // use the `helpDebug` method to debug
         if (this.hasLocationNameTarget && this.locationNameTarget.value) {
           this.findOnMap()
+          // this.helpDebug()
         } else if (Object.keys(this.collection.sets).length) {
           this.buildOverlays()
         }
@@ -114,7 +115,8 @@ export default class extends Controller {
     ["position_changed", "dragend"].forEach((eventName) => {
       marker.addListener(eventName, () => {
         const newPosition = marker.getPosition()?.toJSON() // latlng object
-        this.updateFormInputs(newPosition)
+        const bounds = this.boundsOfPoint(newPosition)
+        this.updateFormInputs(bounds)
         this.updateElevationInputs(this.sampleElevationCenterOf(newPosition))
       })
     })
@@ -223,6 +225,29 @@ export default class extends Controller {
     return bounds
   }
 
+  // findOnMap may fill the extents of a rectangle or a point in the inputs.
+  extentsForInput(extents, center) {
+    let bounds
+
+    if (extents) {
+      bounds = this.boundsOf(extents)
+    } else if (center) {
+      bounds = this.boundsOfPoint(center)
+    }
+    return bounds
+  }
+
+  // When you need to turn a point into some "bounds", e.g. to fill inputs
+  boundsOfPoint(center) {
+    const bounds = {
+      north: center.lat,
+      south: center.lat,
+      east: center.lng,
+      west: center.lng
+    }
+    return bounds
+  }
+
   // Each corner (e.g. north_east) is an array [lat, lng]
   cornersOf(set) {
     const corners = {
@@ -257,7 +282,7 @@ export default class extends Controller {
 
   // Also returns an array, from a Google Maps Marker's LatLngLiteral object
   sampleElevationCenterOf(position) {
-    return [{ lat: position.lat, lng: position.long }]
+    return [{ lat: position.lat, lng: position.lng }]
   }
 
   // Sorts the LocationElevationResponse.results.elevation values
@@ -302,28 +327,14 @@ export default class extends Controller {
     if (this.location_format == "scientific") {
       address = address.split(/, */).reverse().join(", ")
     }
-
     geocoder
       .geocode({ address: address })
       .then((result) => {
         const { results } = result // destructure, results is part of the result
-        const bounds = results[0].geometry.viewport.toJSON()
+        const viewport = results[0].geometry.viewport.toJSON()
+        const extents = results[0].geometry.bounds?.toJSON() // may not exist
         const center = results[0].geometry.location.toJSON()
-        if (bounds) {
-          if (this.rectangle) {
-            this.rectangle.setBounds(bounds)
-            this.updateElevationInputs(this.sampleElevationPointsOf(bounds))
-          }
-          this.map.fitBounds(bounds)
-        }
-        if (center) {
-          if (!this.marker) {
-            this.setupGeocodedMarker()
-          }
-          this.marker.setPosition(center)
-          this.updateElevationInputs(this.sampleElevationCenterOf(center))
-          this.map.setCenter(center)
-        }
+        this.positionMapMarkerAndInputs(viewport, extents, center)
         this.findOnMapTarget.disabled = false
       })
       .catch((e) => {
@@ -331,14 +342,56 @@ export default class extends Controller {
       });
   }
 
-  setupGeocodedMarker() {
+  positionMapMarkerAndInputs(viewport, extents, center) {
+    if (viewport) {
+      this.map.fitBounds(viewport)
+    }
+    if (extents) {
+      if (!this.rectangle) {
+        this.setupGeocodedRectangle(extents)
+      } else {
+        this.rectangle.setBounds(extents)
+      }
+      this.map.fitBounds(extents) // overwrite (may zoom in a bit)
+    } else if (center) {
+      if (!this.marker) {
+        this.setupGeocodedMarker(center)
+      } else {
+        this.marker.setPosition(center)
+      }
+      this.map.setCenter(center)
+    }
+    this.updateFormInputs(this.extentsForInput(extents, center))
+
+    if (extents) {
+      this.updateElevationInputs(this.sampleElevationPointsOf(extents))
+    } else {
+      this.updateElevationInputs(this.sampleElevationCenterOf(center))
+    }
+  }
+
+  setupGeocodedMarker(center) {
     const markerOptions = {
-      position: { lat: 90, lng: 90 },
+      position: { lat: center.lat, lng: center.lng },
       map: this.map,
       draggable: true
     }
     const marker = new google.maps.Marker(markerOptions)
     this.setupEditableMarker(marker)
+  }
+
+  setupGeocodedRectangle(extents) {
+    const rectangleOptions = {
+      strokeColor: "#00ff88",
+      strokeOpacity: 1,
+      strokeWeight: 3,
+      map: this.map,
+      bounds: extents,
+      editable: true,
+      draggable: true
+    }
+    const rectangle = new google.maps.Rectangle(rectangleOptions)
+    this.setupEditableRectangle(rectangle)
   }
 
   getElevation() {

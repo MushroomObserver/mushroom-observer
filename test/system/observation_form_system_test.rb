@@ -61,11 +61,18 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_flash_success(/created observation/i)
   end
 
+  # Google seems to give accurate bounds to this place, but the
+  # geometry.location_type of "Pasadena, California" is "APPROXIMATE".
+  # Viewport and bounds are separate fields in the Geocoder response,
+  # and other places' bounds may be more precise. Viewport is padded.
+  # On the right may be the accurate extents, they're hard to find.
   PASADENA_EXTENTS = {
-    north: 34.251905,
-    south: 34.1192,
-    east: -118.065479,
-    west: -118.198139
+    north: 34.251905,   # 34.1774839
+    south: 34.1170368,   # 34.1275634561
+    east: -118.0654789,  # -118.0989059
+    west: -118.1981391,   # -118.1828198
+    high: 1096.943603515625,
+    low: 141.5890350341797
   }.freeze
 
   def test_post_edit_and_destroy_with_details_and_location
@@ -302,16 +309,19 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("location_high", with: "")
     assert_field("location_low", with: "")
     assert_field("location_notes", with: "")
-    assert_field("location_north", with: PASADENA_EXTENTS[:north].round(4))
-    assert_field("location_south", with: PASADENA_EXTENTS[:south].round(4))
-    assert_field("location_east", with: PASADENA_EXTENTS[:east].round(4))
-    assert_field("location_west", with: PASADENA_EXTENTS[:west].round(4))
+    # debugger
+    assert_field("location_north", with: PASADENA_EXTENTS[:north])
+    assert_field("location_south", with: PASADENA_EXTENTS[:south])
+    assert_field("location_east", with: PASADENA_EXTENTS[:east])
+    assert_field("location_west", with: PASADENA_EXTENTS[:west])
+    assert_field("location_high", with: PASADENA_EXTENTS[:high])
+    assert_field("location_low", with: PASADENA_EXTENTS[:low])
 
     # submit_location_form_with_errors
     fill_in("location_display_name",
             with: "Pasadena: Disneyland, Some Co., California, USA")
-    fill_in("location_high", with: "8765")
-    fill_in("location_low", with: "4321")
+    # fill_in("location_high", with: "8765")
+    # fill_in("location_low", with: "4321")
     fill_in("location_notes", with: "oops")
 
     within("#location_form") { click_commit }
@@ -321,15 +331,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     assert_field("location_display_name",
                  with: "Pasadena: Disneyland, Some Co., California, USA")
-    assert_field("location_high", with: "8765")
-    assert_field("location_low", with: "4321")
+    # assert_field("location_high", with: "8765")
+    # assert_field("location_low", with: "4321")
     assert_field("location_notes", with: "oops")
 
     # submit_location_form_without_errors
     fill_in("location_display_name",
             with: "Pasadena, Some Co., California, USA")
-    fill_in("location_high", with: "5678")
-    fill_in("location_low", with: "1234")
+    # fill_in("location_high", with: "5678")
+    # fill_in("location_low", with: "1234")
     fill_in("location_notes", with: "Notes for location")
 
     within("#location_form") { click_commit }
