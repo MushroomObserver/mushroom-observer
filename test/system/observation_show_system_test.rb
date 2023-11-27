@@ -261,9 +261,8 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     end
     assert_selector("#title", text: /#{nam.text_name}/)
 
-    # vote updates take a long time because emails
-    # this is where test problems occur
-    sleep(9)
+    # vote updates take a long time because emails?
+    sleep(3)
     # debugger
 
     # check the vote tally
@@ -278,6 +277,12 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       find(:css, ".close").click
     end
     assert_no_selector("#modal_naming_votes_#{nam.id}")
+
+    # this is where test problems occur - ah, the session is getting lost?
+    # login!(rolf)
+    # visit("/#{obs.id}")
+    # debugger
+    sleep(3)
 
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)
