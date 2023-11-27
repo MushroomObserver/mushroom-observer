@@ -262,7 +262,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_selector("#title", text: /#{nam.text_name}/)
 
     # vote updates take a long time because emails?
-    sleep(3)
+    sleep(6)
     # debugger
 
     # check the vote tally
@@ -283,7 +283,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     # login!(rolf)
     # visit("/#{obs.id}")
     # debugger
-    sleep(3)
+    sleep(6)
 
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)
