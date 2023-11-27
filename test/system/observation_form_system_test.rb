@@ -67,9 +67,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   # and other places' bounds may be more precise. Viewport is padded.
   # On the right may be the accurate extents, they're hard to find.
   PASADENA_EXTENTS = {
-    north: 34.251905,   # 34.1774839
-    south: 34.1170368,   # 34.1275634561
-    east: -118.0654789,  # -118.0989059
+    north: 34.251905,     # 34.1774839
+    south: 34.1170368,    # 34.1275634561
+    east: -118.0654789,   # -118.0989059
     west: -118.1981391,   # -118.1828198
     high: 1096.943603515625,
     low: 141.5890350341797
@@ -303,25 +303,25 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Check the db values
     assert_new_observation_is_correct(expected_values_after_create)
 
-    # scroll_to("#location_low", align: :center)
     # check default values of location form
     assert_field("location_display_name", with: "Pasadena, California, USA")
-    assert_field("location_high", with: "")
-    assert_field("location_low", with: "")
-    assert_field("location_notes", with: "")
-    # debugger
-    assert_field("location_north", with: PASADENA_EXTENTS[:north])
-    assert_field("location_south", with: PASADENA_EXTENTS[:south])
-    assert_field("location_east", with: PASADENA_EXTENTS[:east])
-    assert_field("location_west", with: PASADENA_EXTENTS[:west])
-    assert_field("location_high", with: PASADENA_EXTENTS[:high])
-    assert_field("location_low", with: PASADENA_EXTENTS[:low])
+    assert_equal(PASADENA_EXTENTS[:north].round(4),
+                 find("#location_north").value.to_f.round(4))
+    assert_equal(PASADENA_EXTENTS[:south].round(4),
+                 find("#location_south").value.to_f.round(4))
+    assert_equal(PASADENA_EXTENTS[:east].round(4),
+                 find("#location_east").value.to_f.round(4))
+    assert_equal(PASADENA_EXTENTS[:west].round(4),
+                 find("#location_west").value.to_f.round(4))
+    sleep(1) # wait for elevation service
+    assert_equal(PASADENA_EXTENTS[:high].round(4),
+                 find("#location_high").value.to_f.round(4))
+    assert_equal(PASADENA_EXTENTS[:low].round(4),
+                 find("#location_low").value.to_f.round(4))
 
     # submit_location_form_with_errors
     fill_in("location_display_name",
             with: "Pasadena: Disneyland, Some Co., California, USA")
-    # fill_in("location_high", with: "8765")
-    # fill_in("location_low", with: "4321")
     fill_in("location_notes", with: "oops")
 
     within("#location_form") { click_commit }
@@ -331,15 +331,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     assert_field("location_display_name",
                  with: "Pasadena: Disneyland, Some Co., California, USA")
-    # assert_field("location_high", with: "8765")
-    # assert_field("location_low", with: "4321")
     assert_field("location_notes", with: "oops")
 
     # submit_location_form_without_errors
     fill_in("location_display_name",
             with: "Pasadena, Some Co., California, USA")
-    # fill_in("location_high", with: "5678")
-    # fill_in("location_low", with: "1234")
     fill_in("location_notes", with: "Notes for location")
 
     within("#location_form") { click_commit }
