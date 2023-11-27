@@ -1872,7 +1872,7 @@
   # shared/_observation_list
   observation_made_confidence: Community confidence
 
-  # account/prefs
+  # account/preferences/edit
   prefs_title: Change Preferences
   prefs_link: Edit Preferences
   prefs_login: Login
