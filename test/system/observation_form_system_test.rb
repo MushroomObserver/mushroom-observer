@@ -305,6 +305,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # check default values of location form
     assert_field("location_display_name", with: "Pasadena, California, USA")
+    sleep(1)
     assert_equal(PASADENA_EXTENTS[:north].round(4),
                  find("#location_north").value.to_f.round(4))
     assert_equal(PASADENA_EXTENTS[:south].round(4),
