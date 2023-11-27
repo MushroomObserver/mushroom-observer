@@ -12,13 +12,6 @@ module Tabs
       ]
     end
 
-    def ask_observer_question_modal_link(obs, user)
-      return if obs.user.no_emails
-      return unless obs.user.email_general_question && obs.user != user
-
-      modal_link_to("observation_email", *send_observer_question_tab(obs))
-    end
-
     ########################################################################
     # LINKS FOR PANELS
     #

@@ -211,25 +211,35 @@ module ObservationsHelper
   end
 
   def observation_details_who(obs:)
-    tag.p(class: "obs-who", id: "observation_who") do
-      [
-        "#{:WHO.t}:",
-        user_link(obs.user),
-        " [ ",
-        safe_nbsp,
-        ask_observer_question_modal_link(obs, User.current),
+    obs_user = obs.user
+    html = [
+      "#{:WHO.t}:",
+      user_link(obs_user),
+    ]
+    if obs_user != User.current && !obs_user.no_emails &&
+       obs_user.email_general_question
+
+      html += [
+        "[",
+        modal_link_to("observation_email", *send_observer_question_tab(obs)),
         "]"
-      ].safe_join(" ")
+      ]
+    end
+
+    tag.p(class: "obs-who", id: "observation_who") do
+      html.safe_join(" ")
     end
   end
 
   def observation_details_notes(obs:)
     return "" unless obs.notes?
 
+    notes = obs.notes_show_formatted.sub(/^\A/, "#{:NOTES.t}:\n").tpl
+
     tag.div(class: "obs-notes", id: "observation_notes") do
       Textile.clear_textile_cache
       Textile.register_name(obs.name)
-      tag.div(obs.notes_show_formatted.sub(/^\A/, "#{:NOTES.t}:\n").tpl)
+      tag.div(notes.strip_tags)
     end
   end
 end
