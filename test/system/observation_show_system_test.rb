@@ -259,11 +259,10 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       assert_selector("#naming_vote_form_#{nam.id}")
       select("I'd Call It That", from: "vote_value_#{nam.id}")
     end
-    assert_selector("#title", text: /#{nam.text_name}/)
-
     # vote updates take a long time because emails?
     sleep(6)
     # debugger
+    assert_selector("#title", text: /#{nam.text_name}/)
 
     # check the vote tally
     within("#observation_namings") do
