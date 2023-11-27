@@ -279,6 +279,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_no_selector("#modal_naming_votes_#{nam.id}")
 
     # this is where test problems occur - ah, the session is getting lost?
+    # there's no "delete" button, but only on this naming. Weird.
     # login!(rolf)
     # visit("/#{obs.id}")
     # debugger

@@ -4,7 +4,7 @@ import { Loader } from "@googlemaps/js-api-loader"
 // Connects to data-controller="map"
 // The connected element can be a map, or in the case of a form with a map UI,
 // the whole section of the form including the inputs that should alter the map.
-// Either way, the mapDivTarget should have the dataset.
+// Either way, mapDivTarget should have the dataset, not the connected element.
 export default class extends Controller {
   // it may or may not be the root element of the controller.
   static targets = ["mapDiv", "southInput", "westInput", "northInput",
