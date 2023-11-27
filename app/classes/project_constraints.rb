@@ -9,6 +9,8 @@ class ProjectConstraints
   end
 
   def ends_before_start?
+    return false if allow_any_dates?
+
     start_date = parse_date(:start_date)
     end_date = parse_date(:end_date)
 
@@ -16,7 +18,9 @@ class ProjectConstraints
   end
 
   def allow_any_dates?
-    params.dig(:project, :dates_any) == "true"
+    params[:project][:dates_any] == "true" ||
+      params[:project]["start_date(1i)"].blank? &&
+        params[:project]["end_date(1i)"].blank?
   end
 
   ##########
@@ -24,8 +28,6 @@ class ProjectConstraints
   private
 
   def parse_date(date_key)
-    return unless params.dig(date_key, :fixed) == "true"
-
     year = params[:project]["#{date_key}(1i)"].to_i
     month = params[:project]["#{date_key}(2i)"].to_i
     day = params[:project]["#{date_key}(3i)"].to_i

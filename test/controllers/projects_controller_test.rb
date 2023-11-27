@@ -239,16 +239,13 @@ class ProjectsControllerTest < FunctionalTestCase
   def test_create_project_end_before_start
     title = "Backward in Time"
     start_date = Time.zone.today
+    params = build_params(
+      title, "Ends before it starts",
+      start_date: start_date, end_date: start_date - 1.day, dates_any: false
+    )
 
     assert_no_difference("Project.count", "Project ends before start") do
-      post_requires_login(
-        :create,
-        build_params(
-          title, "Ends before it starts",
-          start_date: start_date, end_date: start_date - 1.day, dates_any: false
-        ).
-        merge(start_date: { fixed: true }, end_date: { fixed: true })
-      )
+      post_requires_login(:create, params)
     end
 
     assert_flash_error("Missing flash error when Project ends before it starts")
@@ -343,7 +340,7 @@ class ProjectsControllerTest < FunctionalTestCase
     params = build_params(
       proj.title, proj.summary,
       start_date: start_date, end_date: start_date - 1.day, dates_any: false
-    ).merge(start_date: { fixed: true }, end_date: { fixed: true }, id: proj.id)
+    ).merge(id: proj.id)
 
     login(proj.user.login)
     patch(:update, params: params)
