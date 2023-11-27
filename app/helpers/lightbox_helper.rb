@@ -64,11 +64,13 @@ module LightboxHelper
   def caption_truncated_notes(obs:)
     return "" unless obs.notes?
 
+    notes = obs.notes_show_formatted.truncate(150, separator: " ").
+            sub(/^\A/, "#{:NOTES.t}: ").wring_out_textile.tpl
+
     tag.div(class: "obs-notes", id: "observation_#{obs.id}_notes") do
       Textile.clear_textile_cache
       Textile.register_name(obs.name)
-      tag.div(obs.notes_show_formatted.truncate(150, separator: " ").
-                  sub(/^\A/, "#{:NOTES.t}: ").tpl)
+      tag.div(notes)
     end
   end
 
