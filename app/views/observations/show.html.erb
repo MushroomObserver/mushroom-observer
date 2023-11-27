@@ -28,7 +28,7 @@ carousel_locals = {
   </div>
 
   <div class="col-xs-12 col-md-4 col-lg-5 float-sm-right">
-    <%= render(partial: "observations/show/observation_info",
+    <%= render(partial: "observations/show/observation_details",
                locals: obs_locals) %>
     <% if @user %>
       <%= render(partial: "observations/show/name_info", locals: obs_locals) %>

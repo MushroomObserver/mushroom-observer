@@ -1,33 +1,39 @@
 <%
-# The content of the details box. This gets replaced by JS and is used elsewhere
+# The basic info of the observation. Sections get updated by JS
 %>
 
-<%= observation_details_when_where_who(obs: obs) %>
+<%= panel_block(id: "observation_details",
+                heading: :show_observation_details.l,
+                class: "name-section") do %>
 
-<%= tag.div(class: "obs-projects", id: "observation_projects") do
-  concat([tag.span("#{:PROJECTS.t}:"), tag.br].safe_join)
-  obs.projects.each do |project|
-    concat(tag.div(link_to_object(project), class: "indent"))
-  end
-end %>
+  <%= observation_details_when_where_who(obs: obs) %>
 
-<%= tag.p(class: "obs-specimen", id: "observation_specimen_available") do
-  if obs.specimen
-    :show_observation_specimen_available.t
-  else
-    :show_observation_specimen_not_available.t
-  end
-end %>
+  <%= tag.div(class: "obs-projects", id: "observation_projects") do
+    concat([tag.span("#{:PROJECTS.t}:"), tag.br].safe_join)
+    obs.projects.each do |project|
+      concat(tag.div(link_to_object(project), class: "indent"))
+    end
+  end %>
 
-<% if @user %>
-  <%= render(partial: "observations/show/collection_numbers",
-             locals: { obs: obs }) %>
+  <%= tag.p(class: "obs-specimen", id: "observation_specimen_available") do
+    if obs.specimen
+      :show_observation_specimen_available.t
+    else
+      :show_observation_specimen_not_available.t
+    end
+  end %>
 
-  <%= render(partial: "observations/show/herbarium_records",
-             locals: { obs: obs }) %>
+  <% if @user %>
+    <%= render(partial: "observations/show/collection_numbers",
+              locals: { obs: obs }) %>
 
-  <%= render(partial: "observations/show/sequences",
-             locals: { obs: obs }) %>
+    <%= render(partial: "observations/show/herbarium_records",
+              locals: { obs: obs }) %>
+
+    <%= render(partial: "observations/show/sequences",
+              locals: { obs: obs }) %>
+  <% end %>
+
+  <%= observation_details_notes(obs: obs) %>
+
 <% end %>
-
-<%= observation_details_notes(obs: obs) %>
