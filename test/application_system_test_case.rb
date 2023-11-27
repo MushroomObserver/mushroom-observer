@@ -33,8 +33,8 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     Capybara.default_normalize_ws = true
     # Usually, especially when using Selenium, developers tend to increase the
     # max wait time. With Cuprite, there is no need for that.
-    # We use a Capybara default value here explicitly.
-    Capybara.default_max_wait_time = 2
+    # you can use a Capybara default value 2 here explicitly, but fails on CI.
+    Capybara.default_max_wait_time = 3
     # Capybara.always_include_port = true
     # Capybara.raise_server_errors = true
     # default in test_helper = true. some SO threads suggest false
