@@ -73,6 +73,7 @@ export default class extends Controller {
   helpDebug() {
     debugger
   }
+
   // In a collection, each set represents an overlay (is_point or is_box).
   // set.center is an array [lat, lng]
   // the `key` of each set is an array [x,y,w,h]
@@ -91,6 +92,10 @@ export default class extends Controller {
   isPoint(set) {
     return (set.north === set.south) && (set.east === set.west)
   }
+
+  //
+  // MARKERS
+  //
 
   drawMarker(set) {
     const markerOptions = {
@@ -143,6 +148,10 @@ export default class extends Controller {
     this.map.setCenter(center)
   }
 
+  //
+  // RECTANGLES
+  //
+
   drawRectangle(set) {
     const rectangleOptions = {
       strokeColor: "#00ff88",
@@ -163,7 +172,7 @@ export default class extends Controller {
     }
   }
 
-  // "dragstart", "drag",
+  // possibly also listen to "dragstart", "drag" ? not necessary.
   makeRectangleEditable(rectangle) {
     ["bounds_changed", "dragend"].forEach((eventName) => {
       rectangle.addListener(eventName, () => {
@@ -331,6 +340,7 @@ export default class extends Controller {
     if (this.location_format == "scientific") {
       address = address.split(/, */).reverse().join(", ")
     }
+
     geocoder
       .geocode({ address: address })
       .then((result) => {
@@ -407,7 +417,8 @@ export default class extends Controller {
       // console.log({ hiLo })
       this.lowInputTarget.value = parseFloat(hiLo.low)
       this.highInputTarget.value = parseFloat(hiLo.high)
-    } // else if (this.hasAltInputTarget) {
+    } // else if (this.hasAltInputTarget) { // should be just one result
+    //    this.altInputTarget.value = parseFloat(results[0].elevation)
     // }
     if (this.hasGetElevationTarget)
       this.getElevationTarget.disabled = true
