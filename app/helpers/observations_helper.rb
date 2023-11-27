@@ -239,7 +239,7 @@ module ObservationsHelper
     tag.div(class: "obs-notes", id: "observation_notes") do
       Textile.clear_textile_cache
       Textile.register_name(obs.name)
-      tag.div(notes.strip_tags)
+      tag.div(notes)
     end
   end
 end
