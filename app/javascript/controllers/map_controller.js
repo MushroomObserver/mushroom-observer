@@ -105,22 +105,42 @@ export default class extends Controller {
     const marker = new google.maps.Marker(markerOptions)
 
     if (!this.editable && set != null) {
-      this.drawInfoWindowForMarker(set, marker)
+      this.giveMarkerInfoWindow(set, marker)
     } else {
-      this.setupEditableMarker(marker)
+      this.makeMarkerEditable(marker)
     }
   }
 
-  setupEditableMarker(marker) {
+  makeMarkerEditable(marker) {
     ["position_changed", "dragend"].forEach((eventName) => {
       marker.addListener(eventName, () => {
         const newPosition = marker.getPosition()?.toJSON() // latlng object
         const bounds = this.boundsOfPoint(newPosition)
-        this.updateFormInputs(bounds)
+        this.updateBoundsInputs(bounds)
         this.updateElevationInputs(this.sampleElevationCenterOf(newPosition))
       })
     })
     this.marker = marker
+  }
+
+  // For point markers: make a clickable
+  giveMarkerInfoWindow(set, marker) {
+    const info_window = new google.maps.InfoWindow({
+      content: set.caption
+    })
+
+    google.maps.event.addListener(marker, "click", () => {
+      info_window.open(this.map, marker)
+    })
+  }
+
+  drawOrMoveMarker(center) {
+    if (!this.marker) {
+      this.drawMarker(center)
+    } else {
+      this.marker.setPosition(center)
+    }
+    this.map.setCenter(center)
   }
 
   drawRectangle(set) {
@@ -137,39 +157,28 @@ export default class extends Controller {
     const rectangle = new google.maps.Rectangle(rectangleOptions)
 
     if (this.editable) {
-      this.setupEditableRectangle(rectangle)
+      this.makeRectangleEditable(rectangle)
     } else {
-      this.drawInfoWindowForRectangle(set, rectangle)
+      this.giveRectangleInfoWindow(set, rectangle)
     }
   }
 
   // "dragstart", "drag",
-  setupEditableRectangle(rectangle) {
+  makeRectangleEditable(rectangle) {
     ["bounds_changed", "dragend"].forEach((eventName) => {
       rectangle.addListener(eventName, () => {
         const newBounds = rectangle.getBounds()?.toJSON() // nsew object
         // console.log({ newBounds })
-        this.updateFormInputs(newBounds)
+        this.updateBoundsInputs(newBounds)
         this.updateElevationInputs(this.sampleElevationPointsOf(newBounds))
       })
     })
     this.rectangle = rectangle
   }
 
-  // For point markers: make a clickable
-  drawInfoWindowForMarker(set, marker) {
-    const info_window = new google.maps.InfoWindow({
-      content: set.caption
-    })
-
-    google.maps.event.addListener(marker, "click", () => {
-      info_window.open(this.map, marker)
-    })
-  }
-
   // For rectangles: make a clickable info window
   // https://stackoverflow.com/questions/26171285/googlemaps-api-rectangle-and-infowindow-coupling-issue
-  drawInfoWindowForRectangle(set, rectangle) {
+  giveRectangleInfoWindow(set, rectangle) {
     const center = rectangle.getBounds().getCenter()
     const info_window = new google.maps.InfoWindow({
       content: set.caption,
@@ -180,6 +189,19 @@ export default class extends Controller {
       info_window.open(this.map, rectangle)
     })
   }
+
+  drawOrMoveRectangle(extents) {
+    if (!this.rectangle) {
+      this.drawRectangle(extents)
+    } else {
+      this.rectangle.setBounds(extents)
+    }
+    this.map.fitBounds(extents) // overwrite viewport (may zoom in a bit?)
+  }
+
+  //
+  // COORDINATES
+  //
 
   // Every MapSet should have properties north, south, east, west (plus corners)
   // Alternatively, just send a simple object (e.g. `extents`) with `nsew` props
@@ -236,6 +258,19 @@ export default class extends Controller {
     return { lat: lat, lng: lng }
   }
 
+  sampleElevationPoints() {
+    let points
+    if (this.marker) {
+      const position = this.marker.getPosition().toJSON()
+      points = this.sampleElevationCenterOf(position)
+    } else if (this.rectangle) {
+      const bounds = this.rectangle.getBounds().toJSON()
+      points = this.sampleElevationPointsOf(bounds)
+    }
+    debugger
+    return points
+  }
+
   // Computes an array of arrays of [lat, lng] from a set of bounds on the fly
   // Returns array of Google Map points {lat:, lng:} LatLngLiteral objects
   sampleElevationPointsOf(bounds) {
@@ -253,7 +288,8 @@ export default class extends Controller {
     return [{ lat: position.lat, lng: position.lng }]
   }
 
-  // Sorts the LocationElevationResponse.results.elevation values
+  // Sorts the LocationElevationResponse.results.elevation values and
+  // computes the high and low of these results using bounds and center
   highAndLowOf(results) {
     let altitudesArray = results.map((result) => {
       return result.elevation
@@ -302,7 +338,7 @@ export default class extends Controller {
         const viewport = results[0].geometry.viewport.toJSON()
         const extents = results[0].geometry.bounds?.toJSON() // may not exist
         const center = results[0].geometry.location.toJSON()
-        this.positionMarkerAndFillInputs(viewport, extents, center)
+        this.positionMapAndFillExtentInputs(viewport, extents, center)
         this.findOnMapTarget.disabled = false
       })
       .catch((e) => {
@@ -310,56 +346,45 @@ export default class extends Controller {
       });
   }
 
-  positionMarkerAndFillInputs(viewport, extents, center) {
+  positionMapAndFillExtentInputs(viewport, extents, center) {
     if (viewport) {
       this.map.fitBounds(viewport)
     }
     if (extents) {
-      if (!this.rectangle) {
-        this.drawRectangle(extents)
-      } else {
-        this.rectangle.setBounds(extents)
-      }
-      this.map.fitBounds(extents) // overwrite viewport (may zoom in a bit?)
+      this.drawOrMoveRectangle(extents)
     } else if (center) {
-      if (!this.marker) {
-        this.drawMarker(center)
-      } else {
-        this.marker.setPosition(center)
-      }
-      this.map.setCenter(center)
+      this.drawOrMoveMarker(center)
     }
-    this.updateFormInputs(this.extentsForInput(extents, center))
+    if (this.hasNorthInputTarget)
+      this.updateBoundsInputs(this.extentsForInput(extents, center))
+    // else if (this.hasLatInputTarget)
+    //   this.updateLatLngInputs(center)
 
     const points = extents ? this.sampleElevationPointsOf(extents) :
       this.sampleElevationCenterOf(center)
 
-    this.updateElevationInputs(points)
-  }
-
-  // callback for the "Get Elevation" button on a form
-  getElevation() {
-    if (this.marker) {
-      const position = this.marker.getPosition().toJSON()
-      this.updateElevationInputs(this.sampleElevationCenterOf(position))
-    } else if (this.rectangle) {
-      const bounds = this.rectangle.getBounds().toJSON()
-      this.updateElevationInputs(this.sampleElevationPointsOf(bounds))
-    }
+    this.getElevation(points) // updates inputs
   }
 
   // takes a LatLngBoundsLiteral object {south:, west:, north:, east:}
-  updateFormInputs(bounds) {
-    if (this.hasNorthInputTarget) {
-      this.southInputTarget.value = bounds?.south
-      this.westInputTarget.value = bounds?.west
-      this.northInputTarget.value = bounds?.north
-      this.eastInputTarget.value = bounds?.east
-    }
+  updateBoundsInputs(bounds) {
+    this.southInputTarget.value = bounds?.south
+    this.westInputTarget.value = bounds?.west
+    this.northInputTarget.value = bounds?.north
+    this.eastInputTarget.value = bounds?.east
   }
 
-  // takes an array of points of the form {lat:, lng:}
-  updateElevationInputs(points) {
+  // For possible consolidation with obs-form-map
+  // updateLatLngInputs(center) {
+  //   this.latInputTarget.value = center.lat
+  //   this.lngInputTarget.value = center.lng
+  // }
+
+  getElevation(points = null) {
+    if (!points) {
+      // action for the "Get Elevation" button on a form sends no points
+      points = this.sampleElevationPoints()
+    }
     const elevationService = new google.maps.ElevationService
     const locationElevationRequest = { 'locations': points }
 
@@ -367,18 +392,24 @@ export default class extends Controller {
       (results, status) => {
         if (status === google.maps.ElevationStatus.OK) {
           if (results[0]) {
-            // compute the high and low of these results using bounds and center
-            const hiLo = this.highAndLowOf(results)
-            // console.log({ hiLo, status })
-            this.lowInputTarget.value = parseFloat(hiLo.low)
-            this.highInputTarget.value = parseFloat(hiLo.high)
-            if (this.hasGetElevationTarget)
-              this.getElevationTarget.disabled = true
+            this.updateElevationInputs(results)
           } else {
             console.log({ status })
-            // this.altInputTarget.value = ''
           }
         }
       })
+  }
+
+  // takes an array of points of the form {lat:, lng:}
+  updateElevationInputs(results) {
+    if (this.hasLowInputTarget) {
+      const hiLo = this.highAndLowOf(results)
+      // console.log({ hiLo })
+      this.lowInputTarget.value = parseFloat(hiLo.low)
+      this.highInputTarget.value = parseFloat(hiLo.high)
+    } // else if (this.hasAltInputTarget) {
+    // }
+    if (this.hasGetElevationTarget)
+      this.getElevationTarget.disabled = true
   }
 }
