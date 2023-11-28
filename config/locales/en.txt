@@ -711,8 +711,10 @@
   # submit a form
   SUBMIT: Submit
   submit: submit
+  SUBMITTING: Submitting
   UPDATE: Update
   update: update
+  UPDATING: Updating
   # upload an image or checklist
   UPLOAD: Upload
   upload: upload

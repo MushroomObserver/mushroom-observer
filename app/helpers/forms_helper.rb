@@ -14,12 +14,24 @@ module FormsHelper
       return args[:button]
     end
 
-    opts = args.except(:form, :button, :class, :center)
+    submits_with = args[:submits_with] || submits_default_text(args[:button])
+    data = args[:data] || {}
+
+    opts = args.except(:form, :button, :class, :center, :data, :submits_with)
     opts[:class] = "btn btn-default"
     opts[:class] += " center-block my-3" if args[:center] == true
     opts[:class] += " #{args[:class]}" if args[:class].present?
+    opts[:data] = { turbo_submits_with: submits_with }.deep_merge(data)
 
     args[:form].submit(args[:button], opts)
+  end
+
+  def submits_default_text(button_text)
+    if button_text == :UPDATE.l
+      :UPDATING.l
+    else
+      :SUBMITTING.l
+    end
   end
 
   # form-agnostic button, type=button
