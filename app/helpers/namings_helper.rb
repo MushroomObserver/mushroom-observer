@@ -165,6 +165,7 @@ module NamingsHelper
                       id: "vote_value_#{naming.id}",
                       data: { role: "change_vote", id: naming.id,
                               naming_vote_target: "select",
+                              localization: localizations,
                               action: "naming-vote#sendVote" } })
         end,
         hidden_field_tag(:context, context),

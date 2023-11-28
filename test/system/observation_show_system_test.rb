@@ -259,9 +259,11 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       assert_selector("#naming_vote_form_#{nam.id}")
       select("I'd Call It That", from: "vote_value_#{nam.id}")
     end
-    # vote updates take a long time because emails?
+    # assert_selector("#mo_ajax_progress")
+    # assert_selector("#mo_ajax_progress_caption",
+    #                 text: /#{:show_namings_saving.l}/)
     sleep(6)
-    # debugger
+    assert_no_selector("#mo_ajax_progress")
     assert_selector("#title", text: /#{nam.text_name}/)
 
     # check the vote tally
@@ -277,12 +279,9 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     end
     assert_no_selector("#modal_naming_votes_#{nam.id}")
 
-    # this is where test problems occur - ah, the session is getting lost?
-    # there's no "delete" button, but only on this naming. Weird.
-    # login!(rolf)
-    # visit("/#{obs.id}")
-    # debugger
-    sleep(6)
+    # this is where test problems occurred:
+    # naming row was getting displayed before naming had saved
+    # so it was printed with no edit/destroy buttons.
 
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)

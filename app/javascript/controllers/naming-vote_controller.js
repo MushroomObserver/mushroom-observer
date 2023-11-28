@@ -22,10 +22,11 @@ export default class extends Controller {
   sendVote() {
     // console.log("Sending Vote")
     // console.log("Pausing UI")
-    // $('#mo_ajax_progress_caption').html(
-    //   this.localized_text.saving + "... "
-    // );
-    // $("#mo_ajax_progress").modal({ backdrop: 'static', keyboard: false });
+    document.getElementById('mo_ajax_progress_caption').innerHTML =
+      this.localized_text.saving + "... ";
+
+    // Must be in jQuery for Bootstrap 3 and 4
+    $("#mo_ajax_progress").modal('show');
     // this.element.setAttribute("data-stimulus", "sending")
     this.element.requestSubmit()
   }
