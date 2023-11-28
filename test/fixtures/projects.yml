@@ -140,7 +140,7 @@ past_project:
   updated_at: 2008-09-25 07:00:55
   observations: owner_accepts_general_questions, unknown_with_lat_long
   open_membership: true
-  start_date: nil
+  start_date: <%= Time.zone.today - 1.year %>
   end_date: <%= Time.zone.today - 1.month %>
 
 future_project:
@@ -153,7 +153,7 @@ future_project:
   observations: owner_accepts_general_questions, unknown_with_lat_long
   open_membership: true
   start_date: <%= Time.zone.tomorrow %>
-  end_date: nil
+  end_date: <%= Time.zone.tomorrow %>
 
 current_project:
   <<: *DEFAULTS
@@ -164,7 +164,7 @@ current_project:
   updated_at: 2008-09-25 07:00:55
   observations: owner_accepts_general_questions, unknown_with_lat_long
   open_membership: true
-  start_date: nil
+  start_date: 2010-07-22 # date of earliest Observation
   end_date: <%= Time.zone.tomorrow %>
 
 current_closed_project:
@@ -173,6 +173,7 @@ current_closed_project:
   user_group: burbank_users
   admin_group: burbank_admins
   open_membership: false
+  start_date: <%= Time.zone.today %>
   end_date: <%= Time.zone.tomorrow %>
 
 unlimited_project:

@@ -114,15 +114,12 @@ class ProjectTest < UnitTestCase
   end
 
   def test_date_strings
-    nama2023 = projects(:pinned_date_range_project)
-    assert_equal("2023-08-24", nama2023.start_date_str)
-    assert_equal("2023-08-27", nama2023.end_date_str)
-    assert_equal("Thu Aug 24 2023", nama2023.start_date_str("%a %b %d %Y"))
+    proj = projects(:pinned_date_range_project)
+    assert_equal("#{proj.start_date} - #{proj.end_date}",
+                 proj.date_range, "Wrong date range string")
 
-    assert_equal(:INDEFINITE.l,
-                 projects(:past_project).start_date_str)
-    assert_equal(:INDEFINITE.l,
-                 projects(:future_project).end_date_str)
+    assert_equal(:form_projects_any.l, projects(:unlimited_project).date_range,
+                 "Wrong date range string")
   end
 
   def test_out_of_range_observations

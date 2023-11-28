@@ -5,17 +5,11 @@ module Project::Date
     !future? && !past?
   end
 
-  # convenience methods for date range display
+  # convenience method for date range display
   def date_range(format = "%Y-%m-%d")
-    "#{start_date_str(format)} - #{end_date_str(format)}"
-  end
+    return :form_projects_any.l unless start_date.present? && end_date.present?
 
-  def start_date_str(format = "%Y-%m-%d")
-    start_date.nil? ? :INDEFINITE.t : start_date.strftime(format)
-  end
-
-  def end_date_str(format = "%Y-%m-%d")
-    end_date.nil? ? :INDEFINITE.t : end_date.strftime(format)
+    "#{start_date.strftime(format)} - #{end_date.strftime(format)}"
   end
 
   ####################################################################
