@@ -189,3 +189,15 @@ pinned_date_range_project:
   end_date: 2023-08-27
   # Tests need observations that are outside Project date range
   observations: peltigera_obs, agaricus_campestris_obs, boletus_edulis_obs
+
+# For testing if Obs violates Proj constraints
+location_constraints_project:
+  <<: *DEFAULTS
+  # burbank: N 34.22, S 34.15, E -118.29, W -118.37
+  location: burbank
+  # unknown_with_lat_long: lat/lon within burbank
+  # tubaria_furfuracea_2: no lat/lon, location = burbank
+  # amateur_obs: lat/lon in pasadena
+  # reused_observation: no lat/lon, location: MO Inc., 68 Bay Rd. ...
+  observations: unknown_with_lat_long, tubaria_furfuracea_2, amateur_obs, reused_observation
+  open_membership: true
