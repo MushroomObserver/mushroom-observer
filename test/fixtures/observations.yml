@@ -188,8 +188,6 @@ tubaria_furfuracea_1:
   created_at: 2017-06-24 17:20:00
   updated_at: 2017-06-24 17:21:00
   when: 2017-06-24
-  lat: NULL
-  long: NULL
   location: burbank
   where: Burbank, California, USA
   user: rolf
@@ -664,8 +662,5 @@ reused_observation:
   <<: *DEFAULTS
   user: rolf
   when: 2023-11-19
-  location: obs_default_location
-  lat: NULL
-  long: NULL
   species_lists: reused_list
   rss_log:
