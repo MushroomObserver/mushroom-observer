@@ -99,7 +99,8 @@
 #  without_location
 #  at_location(location)
 #  in_region(where)
-#  in_box(n,s,e,w)
+#  in_box(n,s,e,w) geoloc is in the box
+#  outside(n,s,e,w) geoloc is outside the box
 #  is_collection_location
 #  not_collection_location
 #  with_image
@@ -183,7 +184,7 @@
 #  notify_users::               After save/destroy/image: send email.
 #  announce_consensus_change::  After consensus changes: send email.
 #
-class Observation < AbstractModel
+class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   belongs_to :thumb_image, class_name: "Image",
                            inverse_of: :thumb_glossary_terms
   belongs_to :name # (used to cache consensus name)
@@ -406,27 +407,54 @@ class Observation < AbstractModel
           )
           return none unless box.valid?
 
-          # expand box by epsilon to create leeway for Float rounding
+          # resize box by epsilon to create leeway for Float rounding
           # Fixes a bug where Califoria fixture was not in a box
           # defined by the fixture's north, south, east, west
-          expanded_box = box.expand(0.00001)
+          resized_box = box.expand(0.00001)
 
           if box.straddles_180_deg?
             where(
-              (Observation[:lat] >= expanded_box.south).
-              and(Observation[:lat] <= expanded_box.north).
-              and(Observation[:long] >= expanded_box.west).
-              or(Observation[:long] <= expanded_box.east)
+              (Observation[:lat] >= resized_box.south).
+              and(Observation[:lat] <= resized_box.north).
+              and(Observation[:long] >= resized_box.west).
+              or(Observation[:long] <= resized_box.east)
             )
           else
             where(
-              (Observation[:lat] >= expanded_box.south).
-              and(Observation[:lat] <= expanded_box.north).
-              and(Observation[:long] >= expanded_box.west).
-              and(Observation[:long] <= expanded_box.east)
+              (Observation[:lat] >= resized_box.south).
+              and(Observation[:lat] <= resized_box.north).
+              and(Observation[:long] >= resized_box.west).
+              and(Observation[:long] <= resized_box.east)
             )
           end
         }
+  scope :outside_box, # Use named parameters (n, s, e, w), any order
+        lambda { |**args|
+          box = Mappable::Box.new(
+            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
+          )
+          return none unless box.valid?
+
+          # resize box by epsilon to create leeway for Float rounding
+          resized_box = box.expand(-0.00001)
+
+          if box.straddles_180_deg?
+            where(
+              (Observation[:lat] < resized_box.south).
+               or.where(Observation[:lat] > resized_box.north).
+               or.where(Observation[:long] < resized_box.west).
+               or.where(Observation[:long] > resized_box.east)
+            )
+          else
+            where(
+              (Observation[:lat] < resized_box.south).
+              or(Observation[:lat] > resized_box.north).
+              or(Observation[:long] < resized_box.west).
+              or(Observation[:long] > resized_box.east)
+            )
+          end
+        }
+
   scope :is_collection_location,
         -> { where(is_collection_location: true) }
   scope :not_collection_location,
