@@ -170,4 +170,46 @@ class ProjectTest < UnitTestCase
     assert_equal(proj.location, loc)
     User.current_location_format = "postal"
   end
+
+  def test_location_violations
+    proj = Project.create(
+      location: locations(:burbank),
+      title: "With Location Violations",
+      open_membership: true
+    )
+    geoloc_in_bubank = observations(:unknown_with_lat_long)
+    geoloc_outside_burbank =
+      observations(:trusted_hidden) # lat/lon in Falmouth
+    geoloc_nil_burbank_contains_loc =
+      observations(:minimal_unknown_obs)
+    geoloc_nil_outside_burbank = observations(:reused_observation)
+
+    proj.observations = [
+      geoloc_in_bubank,
+      geoloc_nil_burbank_contains_loc,
+      geoloc_outside_burbank,
+      geoloc_nil_outside_burbank
+    ]
+
+    location_violations = proj.out_of_area_observations
+
+    assert_includes(
+      location_violations, geoloc_outside_burbank,
+      "Noncompliant Obss missing Obs with geoloc outside Proj location"
+    )
+    assert_includes(
+      location_violations, geoloc_nil_outside_burbank,
+      "Noncompliant Obss missing Obs w/o geoloc " \
+      "whose Loc is not contained in Proj location"
+    )
+    assert_not_includes(
+      location_violations, geoloc_in_bubank,
+      "Noncompliant Obss wrongly includes Obs with geoloc inside Proj location"
+    )
+    assert_not_includes(
+      location_violations, geoloc_nil_burbank_contains_loc,
+      "Noncompliant Obss wrongly includes Obs w/o geoloc " \
+      "whose Loc is contained in Proj location"
+    )
+  end
 end

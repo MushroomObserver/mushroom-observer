@@ -46,7 +46,7 @@
 #  orphan_drafts::     Orphan draft descriptions whe destroyed.
 #
 ###############################################################################
-class Project < AbstractModel
+class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   include Date
 
   belongs_to :admin_group, class_name: "UserGroup"
@@ -129,11 +129,7 @@ class Project < AbstractModel
   def count_violations
     return out_of_range_observations.count unless location
 
-    count =
-      out_of_range_observations.or(observations.where.not(lat: nil)).count
-    count - in_range_observations.
-            in_box(n: location.north, s: location.south,
-                   e: location.east, w: location.west).count
+    out_of_range_observations.to_a.union(out_of_area_observations).size
   end
 
   def constraints
@@ -395,6 +391,34 @@ class Project < AbstractModel
     else
       observations.where(Observation[:when] <= end_date).
         and(observations.where(Observation[:when] >= start_date))
+    end
+  end
+
+  # Obs lat/lon is outside Project.location exor
+  # Obs location is not a subset of Project.location
+  def out_of_area_observations
+    obs_geoloc_outside_project_location.to_a.union(
+      obs_location_not_contained_in_location
+    )
+  end
+
+  private ###############################
+
+  def obs_geoloc_outside_project_location
+    observations.
+      where.not(observations: { lat: nil }).
+      outside_box(n: location.north, s: location.south,
+                  e: location.east, w: location.west)
+  end
+
+  # TODO: make this method all AR/Arel
+  def obs_location_not_contained_in_location
+    observations.where(lat: nil).each_with_object([]) do |obs, ary|
+      loc = obs.location
+      unless location.contains?(loc.north, loc.west) &&
+             location.contains?(loc.south, loc.east)
+        ary << obs
+      end
     end
   end
 end
