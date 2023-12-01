@@ -318,6 +318,14 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_equal(project.location.name, where)
   end
 
+  def test_add_project_member
+    title = "Great Project"
+    params = build_params(title, title)
+    post_requires_login(:create, params)
+    project = Project.find_by(title: title)
+    assert_equal(1, project.project_members.count)
+  end
+
   def test_bad_location
     where = "This is a bad place"
     title = "#{where} Project"
