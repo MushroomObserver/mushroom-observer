@@ -398,7 +398,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # Obs location is not a subset of Project.location
   def out_of_area_observations
     obs_geoloc_outside_project_location.to_a.union(
-      obs_location_not_contained_in_location
+      obs_without_geoloc_location_not_contained_in_location
     )
   end
 
@@ -411,14 +411,10 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
                   e: location.east, w: location.west)
   end
 
-  # TODO: make this method all AR/Arel
-  def obs_location_not_contained_in_location
-    observations.where(lat: nil).each_with_object([]) do |obs, ary|
-      loc = obs.location
-      unless location.contains?(loc.north, loc.west) &&
-             location.contains?(loc.south, loc.east)
-        ary << obs
-      end
-    end
+  def obs_without_geoloc_location_not_contained_in_location
+    observations.where(lat: nil).joins(:location).merge(
+      Location.uncontained_in(n: location.north, s: location.south,
+                              e: location.east, w: location.west)
+    )
   end
 end
