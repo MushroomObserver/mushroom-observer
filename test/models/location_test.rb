@@ -554,4 +554,37 @@ class LocationTest < UnitTestCase
       "`scope: in_box` should be empty if N < S"
     )
   end
+
+  def test_scope_uncontained_in
+    cal = locations(:california)
+    locs_uncontained_in_cal_box = Location.uncontained_in(
+      n: cal.north, s: cal.south, e: cal.east, w: cal.west
+    )
+    assert_includes(locs_uncontained_in_cal_box, locations(:falmouth))
+    assert_not_includes(locs_uncontained_in_cal_box, locations(:albion))
+    assert_not_includes(locs_uncontained_in_cal_box, cal)
+
+    wrangel = locations(:east_lt_west_location)
+    locs_uncontained_in_wrangel_box = Location.uncontained_in(
+      n: wrangel.north, s: wrangel.south, e: wrangel.east, w: wrangel.west
+    )
+    assert_not_includes(locs_uncontained_in_wrangel_box, locations(:perkatkun))
+    assert_not_includes(locs_uncontained_in_wrangel_box, wrangel)
+    assert_includes(locs_uncontained_in_wrangel_box, cal)
+
+    assert_empty(
+      Location.uncontained_in(n: cal.north, s: cal.south, e: cal.east),
+      "`scope: uncontained_in` should be empty if an argument is missing"
+    )
+    assert_empty(
+      Location.uncontained_in(n: 91, s: cal.south, e: cal.east, w: cal.west),
+      "`scope: uncontained_in` should be empty if an argument is out of bounds"
+    )
+    assert_empty(
+      Location.uncontained_in(
+        n: cal.south - 10, s: cal.south, e: cal.east, w: cal.west
+      ),
+      "`scope: uncontained_in` should be empty if N < S"
+    )
+  end
 end
