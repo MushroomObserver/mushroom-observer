@@ -133,7 +133,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def constraints
-    "#{:LOCATION.t}: #{place_name}; #{:DATES.t}: #{date_range}"
+    "#{:DATES.t}: #{date_range}; #{:LOCATION.t}: #{place_name}"
   end
 
   # Check if user has permission to edit a given object.
