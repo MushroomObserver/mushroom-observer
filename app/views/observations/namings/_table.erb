@@ -6,12 +6,12 @@ any_names = obs.namings&.length&.positive?
 votes = gather_users_votes(obs, @user)
 %>
 
-<%= tag.turbo_frame(class: "namings-table panel panel-default mb-4",
-                    id: "namings_table",
-                    data: {
-                      controller: "section-update",
-                      updated_by: "modal_naming_#{obs.id}"
-                    }) do %>
+<%= tag.div(class: "namings-table panel panel-default mb-4",
+            id: "namings_table",
+            data: {
+              controller: "section-update",
+              updated_by: "modal_naming_#{obs.id}"
+            }) do %>
 
   <%= render(partial: "observations/namings/table_header",
                 locals: { obs: obs }) %>
