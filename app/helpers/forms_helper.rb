@@ -114,9 +114,7 @@ module FormsHelper
     args = auto_label_if_form_is_account_prefs(args)
     opts = separate_field_options_from_args(args)
 
-    wrap_class = form_group_wrap_class(args, "btn btn-default btn-sm")
-
-    args[:form].label(args[:field], class: wrap_class) do
+    args[:form].label("#{args[:field]}_#{args[:value]}") do
       concat(args[:form].radio_button(args[:field], args[:value], opts))
       concat(args[:label])
     end
