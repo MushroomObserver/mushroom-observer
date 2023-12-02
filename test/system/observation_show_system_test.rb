@@ -39,14 +39,14 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       find(:css, ".edit_collection_number_link_#{c_n.id}").trigger("click")
     end
 
-    assert_selector("#modal_collection_number")
+    assert_selector("#modal_collection_number_#{c_n.id}")
 
-    within("#modal_collection_number") do
+    within("#modal_collection_number_#{c_n.id}") do
       assert_field("collection_number_number")
       fill_in("collection_number_number", with: "021345")
       click_commit
     end
-    assert_no_selector("#modal_collection_number")
+    assert_no_selector("#modal_collection_number_#{c_n.id}")
 
     within("#observation_collection_numbers") do
       assert_link(text: /021345/)
@@ -62,14 +62,14 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       find(:css, ".edit_herbarium_record_link_#{fmr.id}").trigger("click")
     end
 
-    assert_selector("#modal_herbarium_record")
+    assert_selector("#modal_herbarium_record_#{fmr.id}")
 
-    within("#modal_herbarium_record") do
+    within("#modal_herbarium_record_#{fmr.id}") do
       assert_field("herbarium_record_accession_number")
       fill_in("herbarium_record_accession_number", with: "6234234")
       click_commit
     end
-    assert_no_selector("#modal_herbarium_record")
+    assert_no_selector("#modal_herbarium_record_#{fmr.id}")
 
     within("#observation_herbarium_records") do
       assert_link(text: /6234234/)
@@ -114,11 +114,12 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       find(:css, ".edit_sequence_link_#{seq.id}").trigger("click")
     end
 
-    within("#modal_sequence") do
+    within("#modal_sequence_#{seq.id}") do
       fill_in("sequence_notes", with: "Oh yea.")
       click_commit
     end
     assert_equal(seq.reload.notes, "Oh yea.")
+    assert_no_selector("#modal_sequence_#{seq.id}")
 
     # new external link
     site = external_sites(:mycoportal)
@@ -143,13 +144,13 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       find(:css, ".edit_external_link_link_#{link.id}").trigger("click")
     end
 
-    within("#modal_external_link") do
+    within("#modal_external_link_#{link.id}") do
       assert_field("external_link_url")
       fill_in("external_link_url",
               with: "https://wedont.validatethese.urls/yet")
       click_commit
     end
-    assert_no_selector("#modal_external_link")
+    assert_no_selector("#modal_external_link_#{link.id}")
     assert_equal(link.reload.url, "https://wedont.validatethese.urls/yet")
 
     # try remove links
@@ -301,9 +302,15 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     assert_selector("#modal_comment")
     within("#modal_comment") do
-      assert_selector("#comment_summary")
-      fill_in("comment_summary", with: "A load of bollocks")
+      assert_selector("#comment_comment")
       fill_in("comment_comment", with: "What do you mean, Coprinus?")
+      click_commit
+    end
+    # Cannot submit comment without summary
+    assert_selector("#modal_comment_flash", text: /Missing/)
+    within("#modal_comment") do
+      assert_selector("#comment_comment", text: "What do you mean, Coprinus?")
+      fill_in("comment_summary", with: "A load of bollocks")
       click_commit
     end
     assert_no_selector("#modal_comment")
@@ -317,13 +324,13 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       find(:css, ".edit_comment_link_#{com.id}").trigger("click")
     end
 
-    assert_selector("#modal_comment")
-    within("#modal_comment") do
+    assert_selector("#modal_comment_#{com.id}")
+    within("#modal_comment_#{com.id}") do
       fill_in("comment_summary", with: "Exciting discovery")
       fill_in("comment_comment", with: "What I meant was, Coprinus!")
       click_commit
     end
-    assert_no_selector("#modal_comment")
+    assert_no_selector("#modal_comment_#{com.id}")
 
     within("#comments_for_object") do
       assert_no_text("A load of bollocks")

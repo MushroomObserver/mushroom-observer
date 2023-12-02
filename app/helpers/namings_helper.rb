@@ -47,14 +47,16 @@ module NamingsHelper
       results_url = add_query_param(
         naming_suggestions_for_observation_path(id: observation.id, names: :xxx)
       )
-      buttons << button_tag(:show_namings_suggest_names.l,
-                            type: :button, class: "btn btn-default btn-sm mt-2",
-                            data: { role: "suggest_names",
-                                    results_url: results_url,
-                                    localization: localizations,
-                                    image_ids: observation.image_ids.to_json,
-                                    controller: "suggestions",
-                                    action: "suggestions#suggestTaxa" })
+      buttons << button_tag(
+        :show_namings_suggest_names.l,
+        type: :button, class: "btn btn-default btn-sm mt-2",
+        data: { role: "suggest_names",
+                results_url: results_url,
+                localization: localizations,
+                image_ids: observation.image_ids.to_json,
+                controller: "suggestions", # Stimulus controller
+                action: "suggestions#suggestTaxa" }
+      )
     end
     buttons.safe_join(tag.br)
   end
@@ -74,7 +76,7 @@ module NamingsHelper
   def naming_name_html(naming)
     Textile.register_name(naming.name)
     if check_permission(naming)
-      edit_link = modal_link_to("naming_#{naming.observation.id}",
+      edit_link = modal_link_to("naming_#{naming.id}_#{naming.observation.id}",
                                 *edit_naming_tab(naming))
       delete_link = destroy_button(target: naming, icon: :remove)
       proposer_links = tag.span(class: "small text-nowrap") do

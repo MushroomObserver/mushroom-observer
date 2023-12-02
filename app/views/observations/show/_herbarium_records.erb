@@ -38,7 +38,7 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
                 concat(
                   [
                     " [",
-                    modal_link_to("herbarium_record",
+                    modal_link_to("herbarium_record_#{record.id}",
                                   *edit_herbarium_record_tab(record, obs)),
                     "|",
                     modal_link_to("herbarium_record_observation",

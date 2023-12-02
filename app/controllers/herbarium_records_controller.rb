@@ -47,12 +47,8 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record = default_herbarium_record
 
     respond_to do |format|
+      format.turbo_stream { render_modal_herbarium_record_form }
       format.html
-      format.turbo_stream do
-        render_modal_herbarium_record_form(
-          title: helpers.herbarium_record_form_new_title
-        )
-      end
     end
   end
 
@@ -72,14 +68,8 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record.herbarium_name = @herbarium_record.herbarium.try(&:name)
 
     respond_to do |format|
+      format.turbo_stream { render_modal_herbarium_record_form }
       format.html
-      format.turbo_stream do
-        render_modal_herbarium_record_form(
-          title: helpers.herbarium_record_form_edit_title(
-            h_r: @herbarium_record
-          )
-        )
-      end
     end
   end
 
@@ -101,12 +91,8 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record.destroy
 
     respond_to do |format|
-      format.html do
-        redirect_with_query(action: :index)
-      end
-      format.turbo_stream do
-        render_herbarium_records_section_update
-      end
+      format.turbo_stream { render_herbarium_records_section_update }
+      format.html { redirect_with_query(action: :index) }
     end
   end
 
@@ -425,15 +411,33 @@ class HerbariumRecordsController < ApplicationController
       format.turbo_stream do
         # renders the flash in the modal via js
         render(partial: "shared/modal_flash_update",
-               locals: { identifier: "herbarium_record" }) and return
+               locals: { identifier: modal_identifier }) and return
       end
     end
   end
 
-  def render_modal_herbarium_record_form(title:)
+  def render_modal_herbarium_record_form
     render(partial: "shared/modal_form",
-           locals: { title: title, identifier: "herbarium_record",
+           locals: { title: modal_title, identifier: modal_identifier,
                      form: "herbarium_records/form" }) and return
+  end
+
+  def modal_identifier
+    case action_name
+    when "new", "create"
+      "herbarium_record"
+    when "edit", "update"
+      "herbarium_record_#{@herbarium_record.id}"
+    end
+  end
+
+  def modal_title
+    case action_name
+    when "new", "create"
+      helpers.herbarium_record_form_new_title
+    when "edit", "update"
+      helpers.herbarium_record_form_edit_title(h_r: @herbarium_record)
+    end
   end
 
   def render_herbarium_records_section_update

@@ -10,7 +10,7 @@ query = Query.lookup(:Sequence, :all, observations: obs.id)
 <% unless @user.try(&:hide_specimen_stuff?) ||
           obs.user.try(&:hide_specimen_stuff?) %>
   <%=
-  tag.turbo_frame(
+  tag.div(
     class: "obs-sequence", id: "observation_sequences",
     data: { controller: "section-update", updated_by: "modal_sequence" }
   ) do
@@ -50,7 +50,7 @@ query = Query.lookup(:Sequence, :all, observations: obs.id)
           end
           if in_admin_mode? || sequence.can_edit?(@user)
             links << modal_link_to(
-              "sequence", *edit_sequence_tab(sequence, obs)
+              "sequence_#{sequence.id}", *edit_sequence_tab(sequence, obs)
             )
             links << destroy_button(
               name: :destroy_object.t(type: :sequence),

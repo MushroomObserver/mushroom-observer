@@ -48,12 +48,8 @@ class CollectionNumbersController < ApplicationController
     @collection_number = CollectionNumber.new(name: @user.legal_name)
 
     respond_to do |format|
+      format.turbo_stream { render_modal_collection_number_form }
       format.html
-      format.turbo_stream do
-        render_modal_collection_number_form(
-          title: helpers.collection_number_form_new_title
-        )
-      end
     end
   end
 
@@ -75,14 +71,8 @@ class CollectionNumbersController < ApplicationController
     return unless make_sure_can_edit!(@collection_number)
 
     respond_to do |format|
+      format.turbo_stream { render_modal_collection_number_form }
       format.html
-      format.turbo_stream do
-        render_modal_collection_number_form(
-          title: helpers.collection_number_form_edit_title(
-            c_n: @collection_number
-          )
-        )
-      end
     end
   end
 
@@ -103,12 +93,8 @@ class CollectionNumbersController < ApplicationController
 
     @collection_number.destroy
     respond_to do |format|
-      format.html do
-        redirect_with_query(action: :index)
-      end
-      format.turbo_stream do
-        render_collection_numbers_section_update
-      end
+      format.turbo_stream { render_collection_numbers_section_update }
+      format.html { redirect_with_query(action: :index) }
     end
   end
 
@@ -357,17 +343,35 @@ class CollectionNumbersController < ApplicationController
       # to have a response here. are they getting sent back?
       format.turbo_stream do
         render(partial: "shared/modal_flash_update",
-               locals: { identifier: "collection_number" }) and return
+               locals: { identifier: modal_identifier }) and return
       end
     end
   end
 
-  def render_modal_collection_number_form(title:)
+  def render_modal_collection_number_form
     render(
       partial: "shared/modal_form",
-      locals: { title: title, identifier: "collection_number",
+      locals: { title: modal_title, identifier: modal_identifier,
                 form: "collection_numbers/form" }
     ) and return
+  end
+
+  def modal_identifier
+    case action_name
+    when "new", "create"
+      "collection_number"
+    when "edit", "update"
+      "collection_number_#{@collection_number.id}"
+    end
+  end
+
+  def modal_title
+    case action_name
+    when "new", "create"
+      helpers.collection_number_form_new_title
+    when "edit", "update"
+      helpers.collection_number_form_edit_title(c_n: @collection_number)
+    end
   end
 
   # ivar @observation used in the partial
@@ -382,7 +386,7 @@ class CollectionNumbersController < ApplicationController
   def reload_collection_number_modal_form_and_flash
     render(
       partial: "shared/modal_form_reload",
-      locals: { identifier: "collection_number",
+      locals: { identifier: modal_identifier,
                 form: "collection_numbers/form" }
     ) and return true
   end

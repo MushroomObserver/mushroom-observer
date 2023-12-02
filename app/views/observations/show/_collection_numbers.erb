@@ -36,7 +36,7 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
               [
                 link_to(*show_collection_number_tab(number, obs)),
                 "[",
-                modal_link_to("collection_number",
+                modal_link_to("collection_number_#{number.id}",
                               *edit_collection_number_tab(number, obs)),
                 "|",
                 modal_link_to("collection_number_observation",

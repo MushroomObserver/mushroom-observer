@@ -8,9 +8,7 @@ module Observations
     def new
       set_ivars_for_new
       check_link_permission!(@observation, @site)
-      render_modal_external_link_form(
-        title: :show_observation_add_link.t(site: "MycoPortal")
-      )
+      render_modal_external_link_form
     end
 
     def create
@@ -24,9 +22,7 @@ module Observations
     def edit
       set_ivars_for_edit
       check_link_permission!(@external_link)
-      render_modal_external_link_form(
-        title: :edit_object.t(type: :external_link)
-      )
+      render_modal_external_link_form
     end
 
     def update
@@ -106,12 +102,30 @@ module Observations
       render_external_links_section_update
     end
 
-    def render_modal_external_link_form(title:)
+    def render_modal_external_link_form
       render(
         partial: "shared/modal_form",
-        locals: { title: title, identifier: "external_link",
+        locals: { title: modal_title, identifier: modal_identifier,
                   form: "observations/external_links/form" }
       ) and return
+    end
+
+    def modal_identifier
+      case action_name
+      when "new", "create"
+        "external_link"
+      when "edit", "update"
+        "external_link_#{@external_link.id}"
+      end
+    end
+
+    def modal_title
+      case action_name
+      when "new", "create"
+        :show_observation_add_link.t(site: "MycoPortal")
+      when "edit", "update"
+        :edit_object.t(type: :external_link)
+      end
     end
 
     def render_external_links_section_update
@@ -127,7 +141,7 @@ module Observations
     def reload_external_link_modal_form_and_flash
       render(
         partial: "shared/modal_form_reload",
-        locals: { identifier: "external_link",
+        locals: { identifier: modal_identifier,
                   form: "observations/external_links/form" }
       ) and return true
     end
