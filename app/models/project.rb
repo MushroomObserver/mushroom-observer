@@ -402,6 +402,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     )
   end
 
+  def violates_constraints?(observation)
+    violates_location?(observation) ||
+      violates_date_range?(observation)
+  end
+
   private ###############################
 
   def obs_geoloc_outside_project_location
@@ -416,5 +421,32 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
       Location.uncontained_in(n: location.north, s: location.south,
                               e: location.east, w: location.west)
     )
+  end
+
+  def violates_location?(observation)
+    return false if location.blank?
+
+    !location.found_here?(observation)
+  end
+
+  def violates_date_range?(observation)
+    excluded_from_date_range?(observation)
+  end
+
+  def excluded_from_date_range?(observation)
+    !included_in_date_range?(observation)
+  end
+
+  def included_in_date_range?(observation)
+    starts_no_later_than?(observation) &&
+      ends_no_earlier_than?(observation)
+  end
+
+  def starts_no_later_than?(observation)
+    !start_date&.after?(observation.when)
+  end
+
+  def ends_no_earlier_than?(observation)
+    !end_date&.before?(observation.when)
   end
 end
