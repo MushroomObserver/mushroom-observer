@@ -114,36 +114,6 @@ class ProjectsController < ApplicationController
     render(:edit, location: edit_project_path(@project.id, q: get_query_param))
   end
 
-  def valid_title
-    @title = params[:project][:title].to_s
-    if @title.blank?
-      flash_error(:add_project_need_title.t)
-      false
-    elsif (project2 = Project.find_by_title(@title)) &&
-          (project2 != @project)
-      flash_error(:add_project_already_exists.t(title: @title))
-      false
-    else
-      true
-    end
-  end
-
-  def valid_where
-    where = params[:project][:place_name]
-    location = find_location(where)
-    return false if !location && where != ""
-
-    @project.location = location
-    @project.save
-  end
-
-  def valid_dates
-    return true unless ProjectConstraints.new(params).ends_before_start?
-
-    flash_error(:add_project_ends_before_start.t)
-    false
-  end
-
   # Callback to destroy a project.
   # Linked from: show_project, observations/show
   # Redirects to observations/show.
@@ -348,5 +318,35 @@ class ProjectsController < ApplicationController
                                  params.dig(:start_date, :fixed) == "false"
     @project.end_date = nil if params[:project][:dates_any] == "true" ||
                                params.dig(:end_date, :fixed) == "false"
+  end
+
+  def valid_title
+    @title = params[:project][:title].to_s
+    if @title.blank?
+      flash_error(:add_project_need_title.t)
+      false
+    elsif (project2 = Project.find_by_title(@title)) &&
+          (project2 != @project)
+      flash_error(:add_project_already_exists.t(title: @title))
+      false
+    else
+      true
+    end
+  end
+
+  def valid_where
+    where = params[:project][:place_name]
+    location = find_location(where)
+    return false if !location && where != ""
+
+    @project.location = location
+    @project.save
+  end
+
+  def valid_dates
+    return true unless ProjectConstraints.new(params).ends_before_start?
+
+    flash_error(:add_project_ends_before_start.t)
+    false
   end
 end
