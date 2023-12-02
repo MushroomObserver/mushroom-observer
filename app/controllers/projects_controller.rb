@@ -299,6 +299,7 @@ class ProjectsController < ApplicationController
 
       upload_image_if_present
       if @project.save
+        ProjectMember.create!(project: @project, user: @user, trusted: true)
         @project.log_create
         flash_notice(:add_project_success.t)
         return redirect_to(project_path(@project.id, q: get_query_param))
