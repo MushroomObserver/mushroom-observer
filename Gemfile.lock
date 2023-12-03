@@ -146,10 +146,6 @@ GEM
     jbuilder (2.11.5)
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
-    jquery-rails (4.6.0)
-      rails-dom-testing (>= 1, < 3)
-      railties (>= 4.2.0)
-      thor (>= 0.14, < 2.0)
     json (2.6.3)
     kgio (2.11.4)
     language_server-protocol (3.17.0.3)
@@ -179,8 +175,6 @@ GEM
       builder
       minitest (>= 5.0)
       ruby-progressbar
-    mocha (2.1.0)
-      ruby2_keywords (>= 0.0.5)
     mysql2 (0.5.5)
     net-imap (0.3.7)
       date
@@ -248,7 +242,6 @@ GEM
     rbtree (0.4.6)
     rdoc (6.5.0)
       psych (>= 4.0.0)
-    redis (4.8.1)
     regexp_parser (2.8.1)
     reline (0.3.8)
       io-console (~> 0.5)
@@ -278,7 +271,6 @@ GEM
       rack (>= 1.1)
       rubocop (>= 1.33.0, < 2.0)
     ruby-progressbar (1.13.0)
-    ruby2_keywords (0.0.5)
     rubyzip (2.3.2)
     sassc (2.4.0)
       ffi (~> 1.9)
@@ -335,7 +327,6 @@ GEM
       crack (>= 0.3.2)
       hashdiff (>= 0.4.0, < 2.0.0)
     webrick (1.8.1)
-    websocket (1.2.10)
     websocket-driver (0.7.6)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
@@ -380,7 +371,6 @@ DEPENDENCIES
   i18n
   importmap-rails
   jbuilder
-  jquery-rails
   loofah (>= 2.19.1)
   mail
   mimemagic
@@ -388,7 +378,6 @@ DEPENDENCIES
   minitest
   minitest-reporters
   mo_acts_as_versioned (>= 0.6.6)!
-  mocha
   mysql2
   net-imap
   net-pop
@@ -399,7 +388,6 @@ DEPENDENCIES
   rails-controller-testing
   rails-html-sanitizer (>= 1.4.4)
   railties (~> 7.0)
-  redis (~> 4.0)
   requestjs-rails
   rtf
   rubocop
