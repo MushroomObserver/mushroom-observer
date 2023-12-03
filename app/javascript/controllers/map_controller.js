@@ -122,7 +122,7 @@ export default class extends Controller {
         const newPosition = marker.getPosition()?.toJSON() // latlng object
         const bounds = this.boundsOfPoint(newPosition)
         this.updateBoundsInputs(bounds)
-        this.updateElevationInputs(this.sampleElevationCenterOf(newPosition))
+        this.getElevations(this.sampleElevationCenterOf(newPosition))
       })
     })
     this.marker = marker
@@ -179,7 +179,7 @@ export default class extends Controller {
         const newBounds = rectangle.getBounds()?.toJSON() // nsew object
         // console.log({ newBounds })
         this.updateBoundsInputs(newBounds)
-        this.updateElevationInputs(this.sampleElevationPointsOf(newBounds))
+        this.getElevations(this.sampleElevationPointsOf(newBounds))
       })
     })
     this.rectangle = rectangle
@@ -297,7 +297,7 @@ export default class extends Controller {
     return [{ lat: position.lat, lng: position.lng }]
   }
 
-  // Sorts the LocationElevationResponse.results.elevation values and
+  // Sorts the LocationElevationResponse.results.elevation objects and
   // computes the high and low of these results using bounds and center
   highAndLowOf(results) {
     let altitudesArray = results.map((result) => {
@@ -373,7 +373,7 @@ export default class extends Controller {
     const points = extents ? this.sampleElevationPointsOf(extents) :
       this.sampleElevationCenterOf(center)
 
-    this.getElevation(points) // updates inputs
+    this.getElevations(points) // updates inputs
   }
 
   // takes a LatLngBoundsLiteral object {south:, west:, north:, east:}
@@ -390,7 +390,7 @@ export default class extends Controller {
   //   this.lngInputTarget.value = center.lng
   // }
 
-  getElevation(points = null) {
+  getElevations(points = null) {
     if (!points) {
       // action for the "Get Elevation" button on a form sends no points
       points = this.sampleElevationPoints()
@@ -410,7 +410,8 @@ export default class extends Controller {
       })
   }
 
-  // takes an array of points of the form {lat:, lng:}
+  // requires an array of results from this.getElevations(points) above
+  //   result objects have the form {elevation:, location:, resolution:}
   updateElevationInputs(results) {
     if (this.hasLowInputTarget) {
       const hiLo = this.highAndLowOf(results)
