@@ -110,16 +110,6 @@ module FormsHelper
     end
   end
 
-  def radio_button_with_label(**args)
-    args = auto_label_if_form_is_account_prefs(args)
-    opts = separate_field_options_from_args(args)
-
-    args[:form].label("#{args[:field]}_#{args[:value]}") do
-      concat(args[:form].radio_button(args[:field], args[:value], opts))
-      concat(args[:label])
-    end
-  end
-
   # Bootstrap text_field
   def text_field_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)

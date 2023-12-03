@@ -40,11 +40,11 @@
     </div>
     <div>
       <p>
-        <%= radio_button_with_label(
+        <%= radio_with_label(
               form: f, field: "dates_any", value: false, checked: !@project_dates_any,
               label: " #{:form_projects_range.t} (#{:form_projects_use_date_range.t})"
-            ) %><br/>
-        <%= radio_button_with_label(
+            ) %>
+        <%= radio_with_label(
               form: f, field: "dates_any", value: true, checked: @project_dates_any,
               label: " #{:form_projects_any.t} (#{:form_projects_ignore_date_range.t})"
             ) %>
