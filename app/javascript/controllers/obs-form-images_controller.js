@@ -23,10 +23,11 @@ const internalConfig = {
   }
 }
 
-// This needs to be on the whole "observation_images" section of the form.
+// This controller needs to be on the whole form, to enable the large drop area.
+// (formerly "observation_images" section of the form)
 // Connects to data-controller="obs-form-images"
 export default class extends Controller {
-  static targets = ["imgMessages", "imgDateRadios", "obsDateRadios",
+  static targets = ["form", "imgMessages", "imgDateRadios", "obsDateRadios",
     "gpsMessages", "gpsRadios", "setLatLngAlt", "ignoreGps", "imageGpsMap",
     "addedImages", "goodImages", "thumbImageId", "setThumbImg", "isThumbImg",
     "thumbImgRadio", "removeImg"]
@@ -42,9 +43,9 @@ export default class extends Controller {
       JSON.parse(this.element.dataset.localization));
 
     // Doesn't seem reliably available from internalConfig.
-    this.form = document.forms.observation_form;
-    this.submit_buttons =
-      document.forms.observation_form.querySelectorAll('input[type="submit"]');
+    // this.form = document.forms.observation_form;
+    this.form = this.element
+    this.submit_buttons = this.element.querySelectorAll('input[type="submit"]');
     this.max_image_size = this.element.dataset.upload_max_size;
 
     this.fileStore = { items: [], index: {} }
@@ -52,58 +53,65 @@ export default class extends Controller {
     this.set_bindings();
   }
 
+  // Doing this rather than stimulus actions on the form element, because there
+  // are so many, and this gives finer-grain control (e.g. dragenter, below)
   set_bindings() {
     // make sure submit buttons are enabled when the dom is loaded
     this.submit_buttons.forEach((element) => {
       element.disabled = false;
     });
 
-    // Drag and Drop bindings on the window
-    this.content.addEventListener('dragover', function (e) {
+    // this.formTarget.dataset.targetStimulus = "connected";
+
+    // Drag and Drop bindings on the form
+    this.formTarget.addEventListener('dragover', (e) => {
       e.preventDefault();
-      addDashedBorder();
+      this.addDashedBorder();
       return false;
     });
-    this.content.addEventListener('dragenter', function (e) {
+    this.formTarget.addEventListener('dragenter', (e) => {
       e.preventDefault();
-      addDashedBorder();
+      e.stopPropagation();
+      this.addDashedBorder();
       return false;
     });
-    this.content.addEventListener('dragend', removeDashedBorder());
-    this.content.addEventListener('dragleave', removeDashedBorder());
-    this.content.addEventListener('dragexit', removeDashedBorder());
-
-    function addDashedBorder() {
-      document.getElementById('right_side').classList.add('dashed-border');
-    }
-
-    function removeDashedBorder() {
-      document.getElementById('right_side').classList.remove('dashed-border');
-    }
+    this.formTarget.addEventListener('dragleave', this.removeDashedBorder());
 
     // ADDING FILES
-    this.content.ondrop = (e) => {
-      // stops the browser from leaving page
-      if (e.preventDefault) { e.preventDefault(); }
-      removeDashedBorder();
-
-      const dataTransfer = e.dataTransfer;
-      if (dataTransfer.files.length > 0)
-        this.addFiles(dataTransfer.files);
-      // There are issues to work out concerning dragging and dropping
-      // images from other websites into the observation form.
-      // else
-      //   fileStore.addUrl(dataTransfer.getData('Text'));
-    };
+    this.formTarget.addEventListener('drop', (e) => {
+      this.dropFiles(e);
+    });
 
     // Detect when a user submits observation; includes upload logic
     this.form.onsubmit = (event) => {
-      if (this.block_form_submission) {
-        this.uploadAll();
-        return false;
-      }
-      return true;
+      this.uploadBeforeSubmit();
     };
+  }
+
+  addDashedBorder() {
+    // console.log("addDashedBorder")
+    this.formTarget.classList.add('dashed-border');
+  }
+
+  removeDashedBorder() {
+    // console.log("removeDashedBorder")
+    this.formTarget.classList.remove('dashed-border');
+  }
+
+  dropFiles(e) {
+    if (e.preventDefault) { e.preventDefault(); }
+    this.removeDashedBorder();
+    const dataTransfer = e.dataTransfer;
+    if (dataTransfer.files.length > 0)
+      this.addFiles(dataTransfer.files);
+  }
+
+  uploadBeforeSubmit() {
+    if (this.block_form_submission) {
+      this.uploadAll();
+      return false;
+    }
+    return true;
   }
 
   fixDates() {
