@@ -134,13 +134,12 @@ class ApplicationController < ActionController::Base
   #   around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [ ... ]
   def skip_bullet
     # puts("skip_bullet: OFF\n")
-    config.bullet_depth = config.bullet_depth ? config.bullet_depth + 1 : 1
+    old_value = Bullet.n_plus_one_query_enable?
     Bullet.n_plus_one_query_enable = false
     yield
   ensure
     # puts("skip_bullet: ON\n")
-    config.bullet_depth = config.bullet_depth ? config.bullet_depth - 1 : 0
-    Bullet.n_plus_one_query_enable = true unless config.bullet_depth
+    Bullet.n_plus_one_query_enable = old_value
   end
 
   # @view can be used by classes to access view specific features like render
