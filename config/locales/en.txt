@@ -1419,7 +1419,7 @@
   create_name_multiple_names_match: There are already multiple names matching "[str]".
   create_name_duplicate_identifier: is used by another Name
 
-  # naming/create
+  # namings/create
   create_naming: Propose a Name
   create_naming_title: "Propose Name for Observation #[id]"
   create_new_naming_warn: Sorry, someone else has given this a positive vote, so we had to create a new Naming to accomodate your changes."
@@ -1431,10 +1431,10 @@
   marked_as_reviewed: Marked as reviewed
   filter_by: "Filter by:"
 
-  # observer/create_observation
+  # observations/create_observation
   create_observation_title: "[:create_object(type=:observation)]"
 
-  # observation/download_observations
+  # observations/download_observations
   download_observations_title: Download Observations
   download_observations_back: Cancel (Back to Index)
   download_observations_format: Choose format
@@ -1493,7 +1493,7 @@
   new_name: New Name
   email_change_name_request_success: Your request has been sent. Thank you!
 
-  # observer/_form_comments
+  # comments/_form_comments
   form_comments_comment: "[:Comment]"
   form_comments_summary: "[:Summary]"
 
@@ -1549,7 +1549,7 @@
   form_locations_notes_help: Enter notes that are specific to this particular location.  For example, whether it is private or public, whether permits are required, driving directions, etc.
   form_locations_dubious_help: Submit again to use this location name or edit the text below to correct any typo.
 
-  # observer/_form_name
+  # names/_form_name
   form_names_locked: Lock this name so users cannot change name, author or rank?
   form_names_text_name: Scientific Name
   form_names_icn_id: "ICN Identifier #"
@@ -1603,6 +1603,7 @@
   # observations/_form_observations
   form_observations_specimen_available: Specimen Available
   form_observations_is_collection_location: Is this location where it was collected?
+  form_observations_click_on_map: Click on map for geolocation.
   form_observations_gps_hidden: Hide exact coordinates?
   form_observations_original_name: Original File Name
   form_observations_upload_images: Upload Images
