@@ -789,7 +789,6 @@ export default class extends Controller {
 
       return simpleDate;
     } else { // or get it
-      debugger
       return this.SimpleDate(
         this.obs_day.value, this.obs_month.value, this.obs_year.value
       )
