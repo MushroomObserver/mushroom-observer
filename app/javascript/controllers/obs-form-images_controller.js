@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { get, post } from '@rails/request.js'
 import ExifReader from 'exifreader';
 
 const internalConfig = {
@@ -332,31 +333,25 @@ export default class extends Controller {
     return item;
   }
 
-  // Do a fetch request to get the template, populate it with the item data,
-  // then get EXIF data, and read the file with FileReader.
-  loadAndDisplayItem(item) {
-    const url = this.get_template_uri + "?img_number=" + item.uuid;
+  // Use requestjs-rails to a fetch request to get the template, populate it
+  // with the item data, then get EXIF data, and read the file with FileReader.
+  async loadAndDisplayItem(item) {
+    const response = await get(this.get_template_uri,
+      { contentType: "text/html", query: { imgNumber: item.uuid } });
 
-    fetch(url).then((response) => {
-      if (response.ok) {
-        if (200 <= response.status && response.status <= 299) {
-          response.text().then((html) => {
-            // the text returned is the raw HTML template
-            this.addTemplateToPage(item, html)
-            // extract the EXIF data (async) and then load it
-            this.getExifData(item);
-            // uses FileReader to load image as base64 async
-            this.fileReadImage(item);
-          }).catch((error) => {
-            console.error("no_content:", error);
-          });
-        } else {
-          console.log(`got a ${response.status}`);
-        }
+    if (response.ok) {
+      const html = await response.text
+      if (html) {
+        // the text returned is the raw HTML template
+        this.addTemplateToPage(item, html)
+        // extract the EXIF data (async) and then load it
+        this.getExifData(item);
+        // uses FileReader to load image as base64 async
+        this.fileReadImage(item);
       }
-    }).catch((error) => {
-      console.error("Server Error:", error);
-    });
+    } else {
+      console.log(`got a ${response.status}`);
+    }
   }
 
   addTemplateToPage(item, html) {
@@ -611,34 +606,24 @@ export default class extends Controller {
   // https://stackoverflow.com/questions/35711724/upload-progress-indicators-for-fetch
   // https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
   // https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
-  uploadItem(item) {
+  async uploadItem(item) {
     this.submit_buttons.forEach((element) => {
       element.value = this.localized_text.uploading_text + '...';
     });
 
-    // const csrfToken = document.querySelector("[name='csrf-token']").content;
     const _formData = this.asformData(item);
-    fetch(this.upload_image_uri, {
-      method: 'POST', body: _formData
-    }).then((response) => {
-      if (response.ok) {
-        if (200 <= response.status && response.status <= 299) {
-          response.json().then((image) => {
-            this.updateObsImages(item, image);
-            this.hide(item.dom_element);
-            this.onUploadedCallback();
-          }).catch((error) => {
-            console.error("no_image:", error);
-          });
-        } else {
-          console.log(`got a ${response.status}`);
-        }
+
+    const response = await post(this.upload_image_uri, { body: _formData });
+    if (response.ok) {
+      const image = await response.json
+      if (image) {
+        this.updateObsImages(item, image);
+        this.hide(item.dom_element);
+        this.onUploadedCallback();
+      } else {
+        console.log(`got a ${response.status}`);
       }
-    }).catch((error) => {
-      // console.error("Server Error:", error);
-      alert(this.localized_text.something_went_wrong);
-      this.onUploadedCallback();
-    });
+    }
   }
 
   // async uploadItemAsync(item) {
@@ -795,10 +780,12 @@ export default class extends Controller {
         .setAttribute('selected', 'true');
 
       return simpleDate;
-    } else { // or get it
-      return this.SimpleDate(
-        this.obs_day.value, this.obs_month.value, this.obs_year.value
-      )
+    } else {
+      // or get it. Have to check these values first, cannot send to function
+      const day = this.obs_day.value
+      const month = this.obs_month.value
+      const year = this.obs_year.value
+      return this.SimpleDate(day, month, year)
     }
   }
 
