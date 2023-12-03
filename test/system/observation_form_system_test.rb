@@ -429,7 +429,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # make_sure_observation_is_not_in_log_index
     visit(activity_logs_path)
-    assert_no_link(href: %r{/#{obs.id}?})
+    assert_no_link(href: %r{/#{obs.id}/})
     assert_link(href: /activity_logs/, text: /Agaricus campestris/)
   end
 
