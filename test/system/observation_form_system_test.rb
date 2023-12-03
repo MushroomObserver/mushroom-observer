@@ -152,16 +152,19 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     browser.keyboard.type(:down, :down, :tab) # down to second match + select
     assert_field("naming_name", with: "Agaricus campestris")
     select(Vote.confidence(Vote.next_best_vote), from: "naming_vote_value")
+    assert_select("naming_vote_value",
+                  selected: Vote.confidence(Vote.next_best_vote))
 
     # Add the images separately, so we can be sure of the order. Otherwise,
     # images appear in the order each upload finishes, which is unpredictable.
     attach_file(Rails.root.join("test/images/Coprinus_comatus.jpg")) do
       click_file_field(".file-field")
     end
-
-    assert_selector(".added_image_wrapper")
-    assert_selector("#img_messages")
-
+    # debugger
+    assert_selector(".added_image_wrapper", text: /Coprinus_comatus/)
+    assert_selector("#img_messages",
+                    text: /#{:form_observations_set_observation_date_to.l}/)
+    # debugger # << the session is lost by here
     first_image_wrapper = first(".added_image_wrapper")
 
     # Coprinus_comatus.jpg has a created_at date of November 20, 2006

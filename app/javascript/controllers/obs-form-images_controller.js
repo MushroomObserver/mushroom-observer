@@ -459,9 +459,8 @@ export default class extends Controller {
     // check if there is geodata on the image
     if (_exif.GPSLatitude && _exif.GPSLongitude) {
       const latLngAlt = this.getLatLongEXIF(_exif);
-      debugger;
       // Set item's data-geocode attribute so we can have a record
-      item.dom_element.dataset.geocode = JSON.stringify(latLngAlt)
+      item.dom_element.dataset.geocode = JSON.stringify(latLngAlt);
     }
 
     // Image Date Logic
@@ -925,6 +924,5 @@ export default class extends Controller {
       map: _map,
       position: _latLng
     });
-    debugger
   }
 }
