@@ -79,7 +79,7 @@ module NamingsHelper
       edit_link = modal_link_to("naming_#{naming.id}_#{naming.observation.id}",
                                 *edit_naming_tab(naming))
       delete_link = destroy_button(target: naming, icon: :remove)
-      proposer_links = tag.span(class: "small text-nowrap") do
+      proposer_links = tag.div(class: "text-nowrap") do
         ["[", edit_link, "|", delete_link, "]"].safe_join(" ")
       end
     else
