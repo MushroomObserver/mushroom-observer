@@ -9,9 +9,10 @@ module Observations::Images
     # It could be because the `new` template is not rendered as an HTML page,
     # it is also printed by JS, causing the token to be stale on the action (?)
     # Note that requestjs-rails, used by the controller, does send a valid
-    # X-CSRF-Token (not the same thing).
+    # X-CSRF-Token (not the same thing?).
     # https://stackoverflow.com/questions/3364492/actioncontrollerinvalidauthenticitytoken
-    disable_filters
+    # disable_filters
+    skip_before_action(:verify_authenticity_token)
 
     # Uploading images for an observation is a multi-stage thing.
     # First, each selected image with its EXIF data is read and displayed in
