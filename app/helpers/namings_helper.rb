@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
 # helpers for namings view
-# TODO: some of this should be in a presenter
+# TODO: some of this should be in a presenter or ViewComponents
+# NOTE: We don't even print this table unless @user is logged in.
 module NamingsHelper
   ##### Observation Naming "table" content #########
-  def observation_naming_header_row(logged_in)
+  def observation_naming_header_row
     heading_html = content_tag(:h4, :show_namings_proposed_names.t,
                                class: "panel-title")
     user_heading_html = content_tag(:small, :show_namings_user.t)
@@ -15,22 +16,21 @@ module NamingsHelper
       heading: heading_html,
       user_name: user_heading_html,
       consensus_vote: consensus_heading_html,
-      your_vote: logged_in ? your_heading_html : ""
+      your_vote: your_heading_html
     }
   end
 
-  def observation_naming_row(observation, naming, vote, logged_in)
+  def observation_naming_row(observation, naming, vote)
     {
       name: naming_name_html(naming),
       proposer: naming_proposer_html(naming),
       consensus_vote: consensus_vote_html(naming),
-      your_vote: logged_in ? your_vote_html(naming, vote) : "",
+      your_vote: your_vote_html(naming, vote),
       eyes: vote_icons_html(observation, naming),
       reasons: reasons_html(naming)
     }
   end
 
-  # the "propose-naming-button" is remote: true to send js request
   def observation_naming_buttons(observation, do_suggestions)
     buttons = []
     buttons << propose_naming_link(observation.id,
@@ -38,24 +38,49 @@ module NamingsHelper
                                    btn_class: "btn-default btn-sm",
                                    context: "namings_table")
     if do_suggestions
-      buttons << link_to(:show_namings_suggest_names.l, "#",
-                         { data: { role: "suggest_names" },
-                           class: "btn btn-default btn-sm mt-2" })
+      localizations = {
+        processing_images: :suggestions_processing_images.t,
+        processing_image: :suggestions_processing_image.t,
+        processing_results: :suggestions_processing_results.t,
+        error: :suggestions_error.t
+      }.to_json
+      results_url = add_query_param(
+        naming_suggestions_for_observation_path(id: observation.id, names: :xxx)
+      )
+      buttons << button_tag(
+        :show_namings_suggest_names.l,
+        type: :button, class: "btn btn-default btn-sm mt-2",
+        data: { role: "suggest_names",
+                results_url: results_url,
+                localization: localizations,
+                image_ids: observation.image_ids.to_json,
+                controller: "suggestions", # Stimulus controller
+                action: "suggestions#suggestTaxa" }
+      )
     end
     buttons.safe_join(tag.br)
+  end
+
+  def propose_naming_link(obs_id, text: :create_naming.t,
+                          context: "namings_table",
+                          btn_class: "btn-primary my-3")
+    modal_link_to(
+      "naming_#{obs_id}",
+      *new_naming_tab(obs_id,
+                      text: text, btn_class: btn_class, context: context)
+    )
   end
 
   private
 
   def naming_name_html(naming)
     Textile.register_name(naming.name)
-
     if check_permission(naming)
-      edit_link = edit_button(name: :EDIT.t, target: naming,
-                              remote: true, onclick: "MOEvents.whirly();")
-      delete_link = destroy_button(target: naming, remote: true)
-      proposer_links = tag.span(class: "small text-nowrap") do
-        ["[", edit_link, " | ", delete_link, "]"].safe_join
+      edit_link = modal_link_to("naming_#{naming.id}_#{naming.observation.id}",
+                                *edit_naming_tab(naming))
+      delete_link = destroy_button(target: naming, icon: :remove)
+      proposer_links = tag.div(class: "text-nowrap") do
+        ["[", edit_link, "|", delete_link, "]"].safe_join(" ")
       end
     else
       proposer_links = ""
@@ -83,7 +108,7 @@ module NamingsHelper
   def consensus_vote_html(naming)
     consensus_votes =
       (if naming.votes&.length&.positive?
-         "#{pct_html(naming)} (#{num_votes_html(naming)})"
+         "#{naming_votes_link(naming)} (#{num_votes_html(naming)})"
        else
          "(#{:show_namings_no_votes.t})"
        end).html_safe # has links
@@ -95,15 +120,13 @@ module NamingsHelper
   end
 
   # Makes a link to naming_vote_path for no-js.
-  # The controller will render a modal if js request
-  def pct_html(naming)
+  # The controller will render a modal if turbo request
+  def naming_votes_link(naming)
     percent = "#{naming.vote_percent.round}%"
 
-    link_with_query(h(percent),
-                    naming_vote_path(naming_id: naming.id),
-                    class: "vote-percent btn btn-link px-0",
-                    onclick: "MOEvents.whirly();",
-                    remote: true)
+    modal_link_to("naming_votes_#{naming.id}", h(percent),
+                  add_query_param(naming_vote_path(naming_id: naming.id)),
+                  class: "vote-percent btn btn-link px-0")
   end
 
   def num_votes_html(naming)
@@ -122,29 +145,36 @@ module NamingsHelper
   # Naming Vote Form:
   # a tiny form within a naming row for voting on this naming only
   # also called by matrix_box_vote_or_propose_ui
-  # fires the special rails-ujs submit event for remote submit
-  # requires a native js (not jQuery) element, form is parent of select
-  # Turbo: check how this should submit
+  # Submits via Turbo
   def naming_vote_form(naming, vote, context: "blank")
     menu = Vote.confidence_menu
     can_vote = check_permission(naming)
     menu = [Vote.no_opinion] + menu if !can_vote || !vote || vote&.value&.zero?
+    localizations = {
+      lose_changes: :show_namings_lose_changes.l.tr("\n", " "),
+      saving: :show_namings_saving.l
+    }.to_json
 
     form_with(url: naming_vote_path(naming_id: naming.id), method: :patch,
-              local: false, id: "naming_vote_#{naming.id}",
+              turbo: true, id: "naming_vote_form_#{naming.id}",
               class: "naming-vote-form",
-              data: { controller: "naming-vote" }) do |f|
+              data: { controller: "naming-vote",
+                      localization: localizations }) do |f|
       [
         fields_for(:vote) do |fv|
           fv.select(:value, menu, {},
                     { class: "form-control w-100",
+                      id: "vote_value_#{naming.id}",
                       data: { role: "change_vote", id: naming.id,
-                              action: "change->naming-vote#sendVote" } })
+                              naming_vote_target: "select",
+                              localization: localizations,
+                              action: "naming-vote#sendVote" } })
         end,
         hidden_field_tag(:context, context),
         tag.noscript do
           submit_button(form: f, button: :show_namings_cast.l, class: "w-100",
-                        data: { role: "save_vote" })
+                        data: { role: "save_vote",
+                                naming_vote_target: "submit" })
         end
       ].safe_join
     end
@@ -199,37 +229,53 @@ module NamingsHelper
   end
 
   def naming_form_reasons_fields(f_r, reasons)
-    reasons.values.sort_by(&:order).each do |r|
-      collapse = r.used? ? "" : "collapse"
-      concat(
+    reasons.values.sort_by(&:order).map do |rsn|
+      tag.div(class: "naming-reason-container",
+              data: {
+                controller: "naming-reason", # stimulus cntrlr explains event
+                action: "$shown.bs.collapse->naming-reason#focusInput"
+              }) do
         [
-          tag.div(class: "checkbox") do
-            f_r.label("#{r.num}_check",
-                      { data: {
-                          toggle: "collapse",
-                          target: "#reasons_#{r.num}_notes"
-                        },
-                        aria: {
-                          expanded: "false",
-                          controls: "reasons_#{r.num}_notes"
-                        } }) do
-              [
-                f_r.check_box(:check,
-                              { index: r.num,
-                                checked: r.used?,
-                                class: "" },
-                              "1"),
-                r.label.t
-              ].safe_join
-            end
-          end,
-          tag.div(id: "reasons_#{r.num}_notes",
-                  class: class_names("form-group mb-3", collapse)) do
-            f_r.text_area(:notes,
-                          index: r.num, rows: 3, value: r.notes,
-                          class: "form-control")
-          end
+          naming_form_reasons_checkbox(f_r, rsn),
+          naming_form_reasons_textarea(f_r, rsn)
         ].safe_join
+      end
+    end.safe_join
+  end
+
+  def naming_form_reasons_checkbox(f_r, rsn)
+    tag.div(class: "checkbox") do
+      f_r.label("#{rsn.num}_check",
+                { data: {
+                    toggle: "collapse",
+                    target: "#reasons_#{rsn.num}_notes"
+                  },
+                  aria: {
+                    expanded: "false",
+                    controls: "reasons_#{rsn.num}_notes"
+                  } }) do
+        [
+          f_r.check_box(:check,
+                        { index: rsn.num,
+                          checked: rsn.used?,
+                          class: "" },
+                        "1"),
+          rsn.label.t
+        ].safe_join
+      end
+    end
+  end
+
+  def naming_form_reasons_textarea(f_r, rsn)
+    collapse = rsn.used? ? "" : "collapse"
+
+    tag.div(id: "reasons_#{rsn.num}_notes",
+            class: class_names("form-group mb-3", collapse),
+            data: { naming_reason_target: "collapse" }) do
+      f_r.text_area(
+        :notes, index: rsn.num, rows: 3, value: rsn.notes,
+                class: "form-control",
+                data: { naming_reason_target: "input" }
       )
     end
   end

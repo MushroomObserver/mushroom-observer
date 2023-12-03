@@ -1,0 +1,12 @@
+<%
+# Map for observations, names, locations - any objects
+# Takes locals: objects, query_params, nothing_to_map
+%>
+
+<%=
+if objects.any?
+  make_map(objects)
+else
+  nothing_to_map
+end
+%>

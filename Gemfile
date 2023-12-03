@@ -35,17 +35,21 @@ group :rails do
 end
 
 # gem irb now depends on psych, but version 5 will not bundle currently
-gem("importmap-rails")
 gem("psych", "~> 4")
-gem("redis", "~> 4.0")
-gem("requestjs-rails")
+# importmap for js module handling
+gem("importmap-rails")
+# sprockets for asset compilation and versioning
 gem("sprockets-rails")
+# stimulus for simpler, more maintainable js
 gem("stimulus-rails")
+# requestjs for simpler js requests from stimulus
+gem("requestjs-rails")
+# turbo for partial page updates
 gem("turbo-rails")
-# Use SCSS for stylesheets
+# redis for combining actioncable broadcasts with turbo_stream
+# gem("redis", "~> 4.0")
+# Compile SCSS for stylesheets
 gem("sassc-rails")
-# Use jquery as the JavaScript library
-gem("jquery-rails")
 
 # Fix a version problem betw stimulus and sprockets. (not sprockets-rails)
 # Delete this dependency declaration if the issue gets resolved:
@@ -198,9 +202,6 @@ group :test do
   # allows test results to be reported back to test runner IDE's
   gem("minitest")
   gem("minitest-reporters")
-
-  # Mocking and stubbing in Ruby
-  gem("mocha")
 
   # restore `assigns` and `assert_template` to tests
   gem("rails-controller-testing")

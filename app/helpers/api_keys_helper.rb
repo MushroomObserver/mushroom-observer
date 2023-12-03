@@ -103,7 +103,7 @@ module APIKeysHelper
     tag.div(class: "panel-collapse collapse no-transition",
             id: "edit_notes_#{key.id}_container") do
       form_with(model: key, url: account_api_key_path(key.id),
-                method: :patch, local: false,
+                method: :patch, turbo: true,
                 id: "edit_api_key_#{key.id}_form") do |f|
         tag.div(class: "input-group") do
           concat(
@@ -122,7 +122,8 @@ module APIKeysHelper
                                       id: "api_key_#{key.id}_notes",
                                       class: "form-control border-none"))
           concat(tag.span(class: "input-group-btn") do
-            f.button(:SAVE.l, type: :submit, class: "btn btn-default")
+            f.button(:SAVE.l, type: :submit, class: "btn btn-default",
+                              turbo_submits_with: :show_namings_saving.l)
           end)
         end
       end
@@ -130,7 +131,7 @@ module APIKeysHelper
   end
 
   def api_keys_remove_button(key)
-    destroy_button(name: :REMOVE.l, icon: :remove, remote: true,
+    destroy_button(name: :REMOVE.l, icon: :remove,
                    id: "remove_api_key_#{key.id}",
                    class: "btn btn-link text-danger",
                    target: account_api_key_path(key.id))
@@ -171,7 +172,7 @@ module APIKeysHelper
     tag.div(class: "panel-collapse collapse no-transition",
             id: "new_key_form_container") do
       form_with(model: APIKey.new, url: account_api_keys_path,
-                method: :post, local: false,
+                method: :post, turbo: true,
                 id: "new_api_key_form") do |f|
         concat(f.label(:notes, :account_api_keys_notes_label.t))
         concat(tag.div(class: "input-group") do
@@ -190,7 +191,8 @@ module APIKeysHelper
           concat(f.text_field(:notes, size: 40, id: "new_api_key_notes",
                                       class: "form-control border-none"))
           concat(tag.span(class: "input-group-btn") do
-            f.button(:CREATE.l, type: :submit, class: "btn btn-default")
+            f.button(:CREATE.l, type: :submit, class: "btn btn-default",
+                                turbo_submits_with: :show_namings_saving.l)
           end)
         end)
       end

@@ -55,9 +55,6 @@ ENV["RAILS_ENV"] ||= "test"
 require(File.expand_path("../config/environment", __dir__))
 require("rails/test_help")
 
-# Enable mocking and stubbing in Ruby (must be required after rails/test_help).
-require("mocha/minitest")
-
 %w[
   bullet_helper
 

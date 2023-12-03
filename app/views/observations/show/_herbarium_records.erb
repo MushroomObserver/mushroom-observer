@@ -37,8 +37,8 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
               if record.can_edit? || in_admin_mode?
                 concat(
                   [
-                    "[",
-                    modal_link_to("herbarium_record",
+                    " [",
+                    modal_link_to("herbarium_record_#{record.id}",
                                   *edit_herbarium_record_tab(record, obs)),
                     "|",
                     modal_link_to("herbarium_record_observation",
@@ -68,10 +68,10 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
     elsif records.none? && can_add
       [
         :show_observation_no_herbarium_records.t,
-        "[",
+        " [",
         modal_link_to("herbarium_record", *new_herbarium_record_tab),
         "]"
-      ].safe_join(" ")
+      ].safe_join
     end
   end
 end

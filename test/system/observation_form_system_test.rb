@@ -38,6 +38,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       :form_observations_there_is_a_problem_with_name.t.html_to_ascii
     )
     assert_selector("#observation_form")
+
+    # hard to test the internals of map, but this will pick up map load errors
+    click_button("locate_on_map")
+    assert_selector("#observation_form_map > div > div > iframe")
+
     within("#observation_form") do
       fill_in("naming_name", with: "Coprinus com")
       browser.keyboard.type(:tab)
@@ -56,11 +61,18 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_flash_success(/created observation/i)
   end
 
+  # Google seems to give accurate bounds to this place, but the
+  # geometry.location_type of "Pasadena, California" is "APPROXIMATE".
+  # Viewport and bounds are separate fields in the Geocoder response,
+  # and other places' bounds may be more precise. Viewport is padded.
+  # On the right may be the accurate extents, they're hard to find.
   PASADENA_EXTENTS = {
-    north: 34.251905,
-    south: 34.1192,
-    east: -118.065479,
-    west: -118.198139
+    north: 34.251905,     # 34.1774839
+    south: 34.1170368,    # 34.1275634561
+    east: -118.0654789,   # -118.0989059
+    west: -118.1981391,   # -118.1828198
+    high: 1096.943603515625,
+    low: 141.5890350341797
   }.freeze
 
   def test_post_edit_and_destroy_with_details_and_location
@@ -102,7 +114,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("#collection_number_number")
     fill_in("collection_number_number", with: "17-034a")
     fill_in(other_notes_id, with: "Notes for observation")
-
     within("#observation_form") { click_commit }
 
     # rejected
@@ -149,7 +160,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     assert_selector(".added_image_wrapper")
-    assert_selector("#image_messages")
+    assert_selector("#img_messages")
 
     first_image_wrapper = first(".added_image_wrapper")
 
@@ -164,11 +175,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     # "fix_date" radios: check that the first image date is available
-    within("#image_date_radio_container") do
+    within("#img_date_radios") do
       assert_unchecked_field("20-November-2006")
     end
     # check that the chosen obs date is available
-    within("#observation_date_radio_container") do
+    within("#obs_date_radios") do
       assert_unchecked_field("14-March-2010")
       # this would be today's date in the format:
       # assert_unchecked_field(local_now.strftime("%d-%B-%Y"))
@@ -180,7 +191,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     # We should now get the option to set obs GPS
-    assert_selector("#geocode_messages", wait: 6)
+    assert_selector("#gps_messages", wait: 6)
 
     # Be sure we have two image wrappers
     image_wrappers = all(".added_image_wrapper")
@@ -199,7 +210,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     within(second_image_wrapper) { find(".remove_image_link").click }
 
     # We should now get no option to set obs GPS
-    assert_no_selector("#geocode_messages")
+    assert_no_selector("#gps_messages")
 
     # Be sure we have only one image wrapper now
     image_wrappers = all(".added_image_wrapper")
@@ -212,8 +223,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     # We should now get the option to set obs GPS again
-    assert_selector("#geocode_messages")
-    assert_selector("#geocode_radio_container")
+    assert_selector("#gps_messages")
+    assert_selector("#gps_radios")
 
     # Be sure we have two image wrappers
     image_wrappers = all(".added_image_wrapper")
@@ -227,11 +238,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     # "fix_date" radios: check that the second image date is available
-    within("#image_date_radio_container") do
+    within("#img_date_radios") do
       assert_unchecked_field("31-December-2018")
     end
-    # "fix_geocode" radios: check that the gps is available
-    within("#geocode_radio_container") do
+    # "fix_gps" radios: check that the gps of "geotagged.jpg" is available
+    within("#gps_radios") do
       assert_unchecked_field("25.75820, -80.37313")
     end
 
@@ -244,24 +255,24 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     # Fix divergent dates: use the obs date
-    scroll_to("#image_messages", align: :center)
-    within("#image_messages") do
-      within("#observation_date_radio_container") do
+    scroll_to("#img_messages", align: :center)
+    within("#img_messages") do
+      within("#obs_date_radios") do
         choose("14-March-2010", allow_label_click: true)
         assert_checked_field("14-March-2010")
       end
       click_button("fix_dates")
     end
     sleep(1) # wait for css hide transition
-    assert_no_selector("image_messages")
+    assert_no_selector("img_messages")
 
     # Ignore divergent GPS - maybe we took the second photo in the lab?
-    scroll_to("#geocode_messages", align: :center)
-    within("#geocode_messages") do
-      click_button("ignore_geocode")
+    scroll_to("#gps_messages", align: :center)
+    within("#gps_messages") do
+      click_button("ignore_gps")
     end
     sleep(1) # wait for css hide transition
-    assert_no_selector("geocode_messages")
+    assert_no_selector("gps_messages")
 
     sleep(1) # wait for css hide transition
     # Be sure the dates are applied
@@ -292,22 +303,26 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Check the db values
     assert_new_observation_is_correct(expected_values_after_create)
 
-    # scroll_to("#location_low", align: :center)
     # check default values of location form
     assert_field("location_display_name", with: "Pasadena, California, USA")
-    assert_field("location_high", with: "")
-    assert_field("location_low", with: "")
-    assert_field("location_notes", with: "")
-    assert_field("location_north", with: PASADENA_EXTENTS[:north])
-    assert_field("location_south", with: PASADENA_EXTENTS[:south])
-    assert_field("location_east", with: PASADENA_EXTENTS[:east])
-    assert_field("location_west", with: PASADENA_EXTENTS[:west])
+    sleep(1)
+    assert_equal(PASADENA_EXTENTS[:north].round(4),
+                 find("#location_north").value.to_f.round(4))
+    assert_equal(PASADENA_EXTENTS[:south].round(4),
+                 find("#location_south").value.to_f.round(4))
+    assert_equal(PASADENA_EXTENTS[:east].round(4),
+                 find("#location_east").value.to_f.round(4))
+    assert_equal(PASADENA_EXTENTS[:west].round(4),
+                 find("#location_west").value.to_f.round(4))
+    sleep(1) # wait for elevation service
+    assert_equal(PASADENA_EXTENTS[:high].round(4),
+                 find("#location_high").value.to_f.round(4))
+    assert_equal(PASADENA_EXTENTS[:low].round(4),
+                 find("#location_low").value.to_f.round(4))
 
     # submit_location_form_with_errors
     fill_in("location_display_name",
             with: "Pasadena: Disneyland, Some Co., California, USA")
-    fill_in("location_high", with: "8765")
-    fill_in("location_low", with: "4321")
     fill_in("location_notes", with: "oops")
 
     within("#location_form") { click_commit }
@@ -317,15 +332,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     assert_field("location_display_name",
                  with: "Pasadena: Disneyland, Some Co., California, USA")
-    assert_field("location_high", with: "8765")
-    assert_field("location_low", with: "4321")
     assert_field("location_notes", with: "oops")
 
     # submit_location_form_without_errors
     fill_in("location_display_name",
             with: "Pasadena, Some Co., California, USA")
-    fill_in("location_high", with: "5678")
-    fill_in("location_low", with: "1234")
     fill_in("location_notes", with: "Notes for location")
 
     within("#location_form") { click_commit }

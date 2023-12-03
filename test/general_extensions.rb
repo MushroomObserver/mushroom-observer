@@ -86,6 +86,10 @@ module GeneralExtensions
     users(:roy)
   end
 
+  def lone_wolf
+    users(:lone_wolf)
+  end
+
   def use_test_locales(&block)
     Language.alt_locales_path("config/test_locales", &block)
     FileUtils.remove_dir(Rails.root.join("config/test_locales"), force: true)

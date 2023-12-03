@@ -42,7 +42,7 @@ class ImagePresenter < BasePresenter
       data_sizes: {},
       fit: :cover,
       extra_classes: "",
-      obs_data: {}, # used in lightbox caption
+      obs: {}, # used in lightbox caption
       identify: false,
       image_link: Rails.application.routes.url_helpers.image_path(id: image_id),
       link_method: :get,
@@ -132,7 +132,7 @@ class ImagePresenter < BasePresenter
       id: args[:is_set] ? "observation-set" : SecureRandom.uuid,
       image: image,
       image_id: image_id,
-      obs_data: args[:obs_data],
+      obs: args[:obs],
       identify: args[:identify]
     }
   end

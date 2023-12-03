@@ -37,7 +37,7 @@ module ObservationsController::Validators
     @place_name = @observation.place_name
     @dubious_where_reasons = []
     if @place_name != params[:approved_where] && @observation.location.nil?
-      db_name = Location.user_name(@user, @place_name)
+      db_name = Location.user_format(@user, @place_name)
       @dubious_where_reasons = Location.dubious_name?(db_name, true)
       success = false if @dubious_where_reasons != []
     end
@@ -48,7 +48,8 @@ module ObservationsController::Validators
     return true if params[:project].empty? ||
                    params[:project][:ignore_proj_conflicts]
 
-    @suspect_checked_projects = checked_project_conflicts
+    @suspect_checked_projects = checked_project_conflicts -
+                                @observation.projects
     @suspect_checked_projects.empty?
   end
 

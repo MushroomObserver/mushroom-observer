@@ -72,16 +72,20 @@ module LinkHelper
     icon_link_to(add_query_param(link), **opts) { content }
   end
 
-  # TODO: Accept icon arg
-  # maybe need a modal identifier, in case of multiple form modals
-  # Stimulus modal-form-show controller checks if it needs to generate the modal
-  # or just show the one already created
-  # Args from a *tab will be a hash.
+  # Link should be to a controller action that renders the form in the modal.
+  # Stimulus modal-toggle controller fetches the form from the link as a .
+  # turbo-stream response. It also checks if it needs to generate a modal, or
+  # just show the one in progress.
+  # NOTE: Needs a modal `identifier`, in case of multiple form modals
+  # NOTE: Args from an MO "tab" will be a hash.
+  # Links with data-turbo-frame do a direct page update, and if turbo doesn't
+  # find the frame already on the page it's appended after body! That may be
+  # why it's appended to the page and not returned to the stimulus caller
   def modal_link_to(identifier, name, path, args)
     args = args.deep_merge({ data: {
-                             turbo_frame: "modal_#{identifier}",
-                             controller: "modal-form-show",
-                             action: "click->modal-form-show#showModal:prevent"
+                             modal: "modal_#{identifier}",
+                             controller: "modal-toggle",
+                             action: "modal-toggle#showModal:prevent"
                            } })
 
     if args[:icon].present?
@@ -121,7 +125,9 @@ module LinkHelper
       ban: "ban-circle",
       minus: "minus-sign",
       trash: "trash",
-      cancel: "remove"
+      cancel: "remove",
+      email: "envelope",
+      question: "question-sign"
     }.freeze
   end
 
@@ -144,8 +150,8 @@ module LinkHelper
     html_options = {
       method: :delete, title: name,
       class: class_names(identifier, args[:class], "text-danger"),
-      data: { confirm: :are_you_sure.t,
-              toggle: "tooltip", placement: "top", title: name }
+      form: { data: { turbo: true, turbo_confirm: :are_you_sure.t } },
+      data: { toggle: "tooltip", placement: "top", title: name }
     }.deep_merge(args.except(:class, :back))
 
     button_to(path, html_options) do
@@ -244,10 +250,11 @@ module LinkHelper
   # NOTE: button_to with block generates a button, not an input #quirksmode
   def any_method_button(name:, path:, method: :post, **args, &block)
     content = block ? capture(&block) : name
-    tip = content ? { toggle: "tooltip", placement: "top", title: name } : ""
+    tip = content ? { toggle: "tooltip", placement: "top", title: name } : {}
     html_options = {
       method: method,
       class: "",
+      form: { data: { turbo: true } },
       data: tip
     }.merge(args) # currently don't have to merge class arg upstream
 

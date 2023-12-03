@@ -47,7 +47,7 @@ module ObservationsController::NewAndCreate
     @images      = []
     @good_images = []
     init_specimen_vars
-    init_project_vars
+    init_project_vars_for_create
     init_list_vars
     defaults_from_last_observation_created
   end
@@ -304,6 +304,7 @@ module ObservationsController::NewAndCreate
     @images          = @bad_images
     @new_image.when  = @observation.when
     init_specimen_vars_for_reload
+    init_project_vars_for_create
     init_project_vars_for_reload(@observation)
     init_list_vars_for_reload(@observation)
     render(action: :new, location: new_observation_path(q: get_query_param))

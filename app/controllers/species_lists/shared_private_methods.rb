@@ -94,7 +94,7 @@ module SpeciesLists
         return
       end
 
-      db_name = Location.user_name(@user, @place_name)
+      db_name = Location.user_format(@user, @place_name)
       @dubious_where_reasons = Location.dubious_name?(db_name, true)
     end
 

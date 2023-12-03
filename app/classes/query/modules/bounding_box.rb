@@ -26,7 +26,7 @@ module Query::Modules::BoundingBox
 
   def lat_long_plausible
     # Condition which returns true if the observation's lat/long is plausible.
-    # (should be identical to BoxMethods.lat_long_close?)
+    # (should be identical to Mappable::BoxMethods.lat_long_close?)
     %(
       observations.lat >= locations.south*1.2 - locations.north*0.2 AND
       observations.lat <= locations.north*1.2 - locations.south*0.2 AND

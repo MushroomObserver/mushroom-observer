@@ -13,7 +13,11 @@ end
 form_args = {
   model: @herbarium_record, url: url_params, id: "herbarium_record_form"
 }
-form_args = form_args.merge({ local: true }) if local_assigns[:local] == true
+if local_assigns[:local] == true
+  form_args = form_args.merge({ local: true })
+else
+  form_args = form_args.deep_merge({ data: { turbo: true } })
+end
 %>
 
 <%= form_with(**form_args) do |f| %>
@@ -24,10 +28,9 @@ form_args = form_args.merge({ local: true }) if local_assigns[:local] == true
     ) %>
   <% end %>
 
-  <%= text_field_with_label(form: f, field: :herbarium_name,
-                            placeholder: :start_typing.l,
-                            label: :NAME.t + ":", between: :required,
-                            data: { autocompleter: :herbarium }) %>
+  <%= autocompleter_field(form: f, field: :herbarium_name,
+                          label: :NAME.t + ":", between: :required,
+                          autocomplete: :herbarium) %>
 
   <%= text_field_with_label(form: f, field: :initial_det,
                             label: :herbarium_record_initial_det.t + ":",

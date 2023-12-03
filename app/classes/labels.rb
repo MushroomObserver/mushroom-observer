@@ -188,7 +188,9 @@ class Labels
   end
 
   def coordinates_visible?
-    @obs.user_id == User.current_id || !@obs.gps_hidden
+    @obs.user_id == User.current_id ||
+      !@obs.gps_hidden ||
+      Project.admin_power?(@obs, User.current)
   end
 
   # --------------------

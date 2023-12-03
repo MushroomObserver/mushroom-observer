@@ -3,18 +3,20 @@
     <div class="row vcenter">
       <div class="col-xs-4 col-xs-offset-4">
         <div class="text-center">
-          <%= text_field_with_label(form: f, field: :north,
-                                    label: :NORTH.t + ":") %>
-          <% inject_javascript_at_end("jQuery('#location_north').keypress(startKeyPressTimer);") %>
+          <%= text_field_with_label(
+            form: f, field: :north, label: :NORTH.t + ":",
+            data: { map_target: "northInput", action: "map#startKeyPressTimer" }
+          ) %>
         </div><!-- .text-center -->
       </div>
     </div>
     <div class="row mt-3 vcenter">
       <div class="col-xs-4">
         <div class="text-center">
-          <%= text_field_with_label(form: f, field: :west,
-                                    label: :WEST.t + ":") %>
-          <% inject_javascript_at_end("jQuery('#location_west').keypress(startKeyPressTimer);") %>
+          <%= text_field_with_label(
+            form: f, field: :west, label: :WEST.t + ":",
+            data: { map_target: "westInput", action: "map#startKeyPressTimer" }
+          ) %>
         </div><!-- .text-center -->
       </div>
       <div class="col-xs-4 small p-0">
@@ -24,29 +26,39 @@
       </div>
       <div class="col-xs-4">
         <div class="text-center">
-          <%= text_field_with_label(form: f, field: :east,
-                                    label: :EAST.t + ":") %>
-          <% inject_javascript_at_end("jQuery('#location_east').keypress(startKeyPressTimer);") %>
+          <%= text_field_with_label(
+            form: f, field: :east, label: :EAST.t + ":",
+            data: { map_target: "eastInput", action: "map#startKeyPressTimer" }
+          ) %>
         </div><!-- .text-center -->
       </div>
     </div>
     <div class="row mt-3 vcenter">
       <div class="col-xs-4 col-xs-offset-4">
         <div class="text-center">
-          <%= text_field_with_label(form: f, field: :south,
-                                    label: :SOUTH.t + ":") %>
-          <% inject_javascript_at_end("jQuery('#location_south').keypress(startKeyPressTimer);") %>
+          <%= text_field_with_label(
+            form: f, field: :south, label: :SOUTH.t + ":",
+            data: { map_target: "southInput", action: "map#startKeyPressTimer" }
+          ) %>
         </div><!-- .text-center -->
       </div>
     </div>
   </div>
   <div class="col-sm-4">
     <div class="text-center">
-      <%= text_field_with_label(form: f, field: :high,
-                                label: :show_location_highest.t + ":") %>
-      <%= text_field_with_label(form: f, field: :low,
-                                label: :show_location_lowest.t + ":",
-                                append: "(#{:units_meters.t})") %>
+      <%= text_field_with_label(
+        form: f, field: :high, label: :show_location_highest.t + ":",
+        data: { map_target: "highInput" }
+      ) %>
+      <%= text_field_with_label(
+        form: f, field: :low, label: :show_location_lowest.t + ":",
+        append: "(#{:units_meters.t})", data: { map_target: "lowInput" }
+      ) %>
+      <%= tag.button(
+        :form_locations_get_elevation.l,
+        type: :button, class: "btn btn-default",
+        data: { map_target: "getElevation", action: "map#getElevation" }
+      ) %>
     </div><!-- .text-center -->
   </div>
 </div><!--.row-->

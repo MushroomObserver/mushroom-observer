@@ -25,8 +25,8 @@ module Images
             redirect_with_query(image_path(id: @id))
           end
         end
-        format.js do
-          render(layout: false)
+        format.turbo_stream do
+          render(partial: "images/votes/update")
         end
       end
     end

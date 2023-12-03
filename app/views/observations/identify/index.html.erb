@@ -10,23 +10,17 @@ flash_error(@error) if @error && @objects.empty?
   <%# render(partial: "observations/identify/form_identify_filter") %>
 </div>
 
-<% # initializes module with translations for js messages
-inject_javascript_at_end %(
-  VoteByAjaxModule({
-    show_namings_lose_changes: '#{j :show_namings_lose_changes.l.gsub("\n", " ")}',
-    show_namings_saving: '#{j :show_namings_saving.l}'
-  })
-) %>
-
 <%= paginate_block(@pages) do %>
-  <ul class="row list-unstyled mt-3">
+  <%= tag.ul(class: "row list-unstyled mt-3",
+             data: { controller: "matrix-table",
+                     action: "resize@window->matrix-table#rearrange" }) do %>
     <%= render(partial: "shared/matrix_box",
                locals: { link_method: :get, identify: true },
                layout: "shared/matrix_table",
                collection: @objects,
                as: :object) %>
     <div style="clear:left"></div>
-  </ul>
+  <% end %>
 <% end %>
 
 <!--AJAX SAVING VOTE MESSAGE-->

@@ -417,13 +417,15 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_error
-    ObservationsController.any_instance.stubs(:show_selected_observations).
-      raises(RuntimeError)
     query = Query.lookup_and_save(:Observation, :advanced_search, name: "Fungi")
 
     login
-    get(:index,
-        params: @controller.query_params(query).merge({ advanced_search: "1" }))
+    @controller.stub(:show_selected_observations, -> { raise(RuntimeError) }) do
+      get(:index,
+          params: @controller.query_params(query).merge(
+            { advanced_search: "1" }
+          ))
+    end
 
     assert_redirected_to(
       search_advanced_path,
@@ -731,7 +733,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: { project: project.id })
 
     assert_response(:success)
-    assert_displayed_title("Observations attached to #{project.title}")
+    assert_displayed_title("Observations for #{project.title}")
   end
 
   def test_index_project_without_observations
@@ -810,7 +812,7 @@ class ObservationsControllerTest < FunctionalTestCase
   def assert_show_observation
     assert_template("observations/show")
     assert_template("observations/show/_name_info")
-    assert_template("observations/show/_observation_info")
+    assert_template("observations/show/_observation_details")
     assert_template("observations/show/_namings")
     assert_template("comments/_comments_for_object")
     assert_template("observations/show/_thumbnail_map")
@@ -941,10 +943,8 @@ class ObservationsControllerTest < FunctionalTestCase
     proj = projects(:bolete_project)
     assert_equal(mary.id, obs.user_id)  # owned by mary
     assert(obs.projects.include?(proj)) # owned by bolete project
-    # dick is only member of bolete project
-    assert_equal([dick.id], proj.user_group.users.map(&:id))
 
-    login("rolf")
+    login("rolf") # Can't edit
     get(:show, params: { id: obs.id })
     assert_select("a:match('href',?)", edit_observation_path(obs.id), count: 0)
     assert_select(".destroy_observation_link_#{obs.id}", count: 0)
@@ -959,7 +959,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:destroy, params: { id: obs.id })
     assert_flash_error
 
-    login("mary")
+    login("mary") # Owner
     get(:show, params: { id: obs.id })
     assert_select("a[href=?]", edit_observation_path(obs.id), minimum: 1)
     # Destroy button is in a form, not a link_to
@@ -973,7 +973,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:edit, params: { id: obs.id })
     assert_response(:success)
 
-    login("dick")
+    login("dick") # Project permission
     get(:show, params: { id: obs.id })
     assert_select("a[href=?]", edit_observation_path(obs.id), minimum: 1)
     # Destroy button is in a form, not a link_to
@@ -2324,6 +2324,14 @@ class ObservationsControllerTest < FunctionalTestCase
                   count: 1)
   end
 
+  def test_edit_observation_form_no_open
+    obs = observations(:amateur_obs)
+    project = projects(:open_membership_project)
+    login("katrina")
+    get(:edit, params: { id: obs.id })
+    assert_project_checks(project.id => :unchecked)
+  end
+
   def test_update_observation
     obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at
@@ -2850,48 +2858,45 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def test_image_upload_when_process_image_fails
-    login("rolf")
-
     setup_image_dirs
     file = Rails.root.join("test/images/Coprinus_comatus.jpg")
     file = Rack::Test::UploadedFile.new(file, "image/jpeg")
-
-    # Simulate process_image failure.
-    Image.any_instance.stubs(:process_image).returns(false)
-
-    post(
-      :create,
-      params: {
-        observation: {
-          place_name: "USA",
+    image = Image.create(user: users(:rolf),
+                         copyright_holder: "zuul",
+                         when: Time.current,
+                         notes: "stubbed in test")
+    params = {
+      observation: { place_name: "USA",
+                     when: Time.current },
+      image: {
+        "0" => {
+          image: file,
+          copyright_holder: "zuul",
           when: Time.current
-        },
-        image: {
-          "0" => {
-            image: file,
-            copyright_holder: "zuul",
-            when: Time.current
-          }
         }
       }
-    )
+    }
+    login("rolf")
 
-    # Prove that an image was created, but that it is unattached, is in the
-    # @bad_images array, and has not been kept in the @good_images array
-    # for attachment later.
+    # Simulate process_image failure.
+    Image.stub(:new, image) do
+      image.stub(:process_image, false) do
+        post(:create, params: params)
+      end
+    end
+
     img = Image.find_by(copyright_holder: "zuul")
-    assert(img)
-    assert_equal([], img.observations)
-    assert_includes(@controller.instance_variable_get(:@bad_images), img)
-    assert_empty(@controller.instance_variable_get(:@good_images))
+
+    assert(img, "Failed to create image")
+    assert_equal([], img.observations, "Image should be unattached")
+    assert_includes(@controller.instance_variable_get(:@bad_images), img,
+                    "Failed to include image in @bad_images")
+    assert_empty(@controller.instance_variable_get(:@good_images),
+                 "Incorrectly included image in @good_images")
   end
 
   def test_project_checkboxes_in_create_observation
     init_for_project_checkbox_tests
-
-    login("rolf")
-    get(:new)
-    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
 
     login("dick")
     get(:new)
@@ -2951,7 +2956,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     login("mary")
     get(:edit, params: { id: @obs2.id })
-    assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
+    assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
     get(:edit, params: { id: @obs1.id })
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :checked)
     put(
@@ -3016,6 +3021,7 @@ class ObservationsControllerTest < FunctionalTestCase
         project: { "id_#{project.id}" => "1" }
       }
     )
+    assert_flash_warning
     assert_project_checks(project.id => :checked)
     put(
       :update,
@@ -3028,8 +3034,28 @@ class ObservationsControllerTest < FunctionalTestCase
         }
       }
     )
+    assert_flash_success
     assert_response(:redirect)
     assert_obj_arrays_equal([project], obs.reload.projects)
+  end
+
+  def test_no_warning_for_associated_projects
+    project = projects(:albion_project)
+    obs = observations(:california_obs)
+    obs.projects << project
+    obs.save!
+
+    login("dick")
+    put(
+      :update,
+      params: {
+        id: obs.id,
+        observation: { place_name: obs.place_name },
+        project: { "id_#{project.id}" => "1" }
+      }
+    )
+    assert_no_flash
+    assert_response(:redirect)
   end
 
   def test_project_observation_good_location
@@ -3161,15 +3187,15 @@ class ObservationsControllerTest < FunctionalTestCase
 
     # No interest in this observation yet.
     #
-    # <img[^>]+watch\d*.png[^>]+>[\w\s]*
+    # <img[^>]+watch.*\.png[^>]+>[\w\s]*
     get(:show, params: { id: minimal_unknown.id })
     assert_response(:success)
     assert_image_link_in_html(
-      /watch\d*.png/,
+      /watch.*\.png/,
       set_interest_path(type: "Observation", id: minimal_unknown.id, state: 1)
     )
     assert_image_link_in_html(
-      /ignore\d*.png/,
+      /ignore.*\.png/,
       set_interest_path(type: "Observation", id: minimal_unknown.id, state: -1)
     )
 
@@ -3178,11 +3204,11 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: minimal_unknown.id })
     assert_response(:success)
     assert_image_link_in_html(
-      /halfopen\d*.png/,
+      /halfopen.*\.png/,
       set_interest_path(type: "Observation", id: minimal_unknown.id, state: 0)
     )
     assert_image_link_in_html(
-      /ignore\d*.png/,
+      /ignore.*\.png/,
       set_interest_path(type: "Observation", id: minimal_unknown.id, state: -1)
     )
 
@@ -3192,11 +3218,11 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: minimal_unknown.id })
     assert_response(:success)
     assert_image_link_in_html(
-      /halfopen\d*.png/,
+      /halfopen.*\.png/,
       set_interest_path(type: "Observation", id: minimal_unknown.id, state: 0)
     )
     assert_image_link_in_html(
-      /watch\d*.png/,
+      /watch.*\.png/,
       set_interest_path(type: "Observation", id: minimal_unknown.id, state: 1)
     )
   end
@@ -3228,8 +3254,8 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def do_external_sites_test(expect, user, obs)
-    @controller.instance_variable_set(:@user, user)
-    actual = @controller.external_sites_user_can_add_links_to(obs)
+    User.current = user
+    actual = @controller.helpers.external_sites_user_can_add_links_to(obs)
     assert_equal(expect.map(&:name), actual.map(&:name))
   end
 
@@ -3243,9 +3269,11 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_response(:success)
     assert_template("show")
-    assert_select("form#naming_vote_#{naming1.id} select#vote_value>" \
+    assert_select("form#naming_vote_form_#{naming1.id} " \
+                  "select#vote_value_#{naming1.id}>" \
                   "option[selected=selected][value='#{vote1.value}']")
-    assert_select("form#naming_vote_#{naming2.id} select#vote_value>" \
+    assert_select("form#naming_vote_form_#{naming2.id} " \
+                  "select#vote_value_#{naming2.id}>" \
                   "option[selected=selected][value='#{vote2.value}']")
   end
 end

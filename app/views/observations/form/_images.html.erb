@@ -3,17 +3,18 @@
 good_image_ids_str = @good_images.map { |img| img.id }.join(" ")
 %>
 
-<div class="my-4" id="observation_images">
+<%= tag.div(class: "my-4", id: "observation_images") do %>
 
-  <%= content_tag(:p, "#{:IMAGES.t}:", class: "font-weight-bold") %>
+  <%= tag.p { tag.strong("#{:IMAGES.t}:") } %>
 
   <% @good_images.each do |image| %>
-
     <%= render(partial: "observations/form/good_image",
                locals: { f: f, image: image }) %>
-
   <% end # @good_images.each do image %>
 
-  <%= hidden_field_tag(:good_images, good_image_ids_str) %>
+  <%= hidden_field_tag(:good_images, good_image_ids_str,
+                       data: { obs_form_images_target: "goodImages" }) %>
 
-</div><!--#observation_images-->
+  <%= render(partial: "observations/form/images_upload", locals: { f: f }) %>
+
+<% end %><!--#observation_images-->

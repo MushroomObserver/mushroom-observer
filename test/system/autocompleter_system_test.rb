@@ -34,7 +34,6 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     browser.keyboard.type(:delete, :delete)
     assert_selector(".auto_complete ul li", text: "Agaricus campestrus")
     browser.keyboard.type(:down, :down, :down, :down, :tab)
-    sleep(1)
     assert_field("search_name", with: "Agaricus campestrus")
 
     # User
@@ -92,18 +91,19 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     rolf = users("rolf")
     login!(rolf)
 
-    visit(observation_path(Observation.last.id))
+    obs = Observation.last
+    visit(observation_path(obs.id))
 
     click_on("Propose")
-    assert_selector("#modal_naming")
-    assert_selector("#naming_form")
+    assert_selector("#modal_naming_#{obs.id}")
+    assert_selector("#naming_#{obs.id}_form")
     find_field("naming_name").click
     browser.keyboard.type("Peltige")
     assert_selector(".auto_complete") # wait
     assert_selector(".auto_complete ul li")
     browser.keyboard.type(:down, :down, :tab)
     assert_field("naming_name", with: "Peltigeraceae ")
-    within("#naming_form") { click_commit }
+    within("#naming_#{obs.id}_form") { click_commit }
     within("#namings_table") { assert_text("Peltigeraceae") }
   end
 end

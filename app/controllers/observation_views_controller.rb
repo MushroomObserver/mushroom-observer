@@ -17,7 +17,7 @@ class ObservationViewsController < ApplicationController
     # now we can update it
     ov.update(reviewed: @reviewed)
     respond_to do |format|
-      format.js
+      format.turbo_stream
       format.html do
         return redirect_to(identify_observations_path)
       end

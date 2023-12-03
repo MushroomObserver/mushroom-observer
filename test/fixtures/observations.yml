@@ -232,6 +232,36 @@ unknown_with_lat_long:
   notes:
     :Other: 'unknown_with_lat_long'
 
+trusted_hidden:
+  <<: *DEFAULTS
+  created_at: 2023-11-05 09:20:00
+  updated_at: 2023-11-05 09:21:00
+  when: 2023-11-05
+  location: falmouth
+  where: Falmouth, Massachusetts, USA
+  user: mary
+  name: fungi
+  text_name: Fungi
+  gps_hidden: true
+  lat: 41.6022
+  long: -70.5021
+  alt: 123
+
+untrusted_hidden:
+  <<: *DEFAULTS
+  created_at: 2023-11-05 09:20:00
+  updated_at: 2023-11-05 09:21:00
+  when: 2023-11-05
+  location: falmouth
+  where: Falmouth, Massachusetts, USA
+  user: katrina
+  name: fungi
+  text_name: Fungi
+  gps_hidden: true
+  lat: 41.6055
+  long: -70.5055
+  alt: 123
+
 amateur_obs:
   <<: *DEFAULTS
   created_at: 2010-12-31 06:46:00
@@ -614,3 +644,23 @@ chlorophyllum_rachodes_obs:
   when: 2023-02-04
   name: chlorophyllum_rachodes
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
+
+wolf_fart:
+  <<: *DEFAULTS
+  created_at: 2023-11-01 04:06:04
+  when: 2023-11-01
+  user: lone_wolf
+  name: lycoperdon_perlatum
+  text_name: Lycoperdon perlatum
+  species_lists: lone_wolf_list
+  thumb_image: lone_wolf_image
+  # wolf_fart issue.  Switch comments for next 2 lines
+  images: lone_wolf_image
+  # images: lone_wolf_image, lone_wolf_image2
+
+reused_observation:
+  <<: *DEFAULTS
+  user: rolf
+  when: 2023-11-19
+  species_lists: reused_list
+  rss_log:

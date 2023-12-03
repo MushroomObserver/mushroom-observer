@@ -1,0 +1,23 @@
+<%#
+// Re-render the whole comments_for_object block and hide the modal.
+// comments_for_object needs locals: object, controls, limit
+// create or update should provide.
+%>
+
+<%= turbo_stream.replace("comments_for_object") do
+  render(
+    partial: "comments/comments_for_object",
+    locals: { object: @target, controls: true, limit: nil },
+    layout: false
+  )
+end %>
+
+<%#
+Need a controller to close the modal here?
+section_update handles it for any other section, but not this one.
+// Finally, remove the modal if present (not in delete)
+var modal = $("#modal_comment")
+if(modal.length) {
+  $(".modal").attr('data-busy', 'false').modal('hide');
+}
+%>

@@ -29,7 +29,7 @@
 
   intro = :email_object_change_intro.l(
     type: :location,
-    name: "#{Location.user_name(@user, old_loc.name)} (#{new_loc.id})"
+    name: "#{Location.user_format(@user, old_loc.name)} (#{new_loc.id})"
   )
 
   fields = ""

@@ -10,6 +10,7 @@ patch_button(
   class: class_names(
     "remove_herbarium_record_link_#{@herbarium_record.id}",
     "btn btn-default"
-  )
+  ),
+  data: { turbo: true }
 )
 %>

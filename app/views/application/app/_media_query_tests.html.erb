@@ -1,11 +1,12 @@
 <%
   # The divs below are used by box-resizer.js to make helpers to determine
-  # current bootstrap size (screen width).  For example:
-  #   jQuery('[data-bootstrap-size]:visible').data('bootstrap-size')
+  # current bootstrap breakpoint (screen width).  For example:
+  #   document.querySelector('[data-breakpoint]:visible').dataset.breakpoint
+  # Remove this file if upgrading to Bootstrap 4 or 5
 %>
 <div id="media_query_tests">
-  <div data-bootstrap-size="xs" class="visible-xs"></div>
-  <div data-bootstrap-size="sm" class="visible-sm"></div>
-  <div data-bootstrap-size="md" class="visible-md"></div>
-  <div data-bootstrap-size="lg" class="visible-lg"></div>
+  <div data-breakpoint="xs" class="visible-xs"></div>
+  <div data-breakpoint="sm" class="visible-sm"></div>
+  <div data-breakpoint="md" class="visible-md"></div>
+  <div data-breakpoint="lg" class="visible-lg"></div>
 </div>

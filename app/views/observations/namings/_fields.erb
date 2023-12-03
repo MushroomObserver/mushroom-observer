@@ -42,9 +42,10 @@ context ||= "blank"
       tag.div(class: "row mt-3") do
         [
           tag.div(class: "col-xs-12 col-sm-6") do
-            text_field_with_label(form: f_n, field: :name, label: :WHAT.t + ":",
-                                  value: what, autofocus: focus_on_name,
-                                  data: { autocompleter: :name })
+            autocompleter_field(
+              form: f_n, field: :name, label: :WHAT.t + ":", value: what,
+              autofocus: focus_on_name, autocomplete: :name
+            )
           end,
           tag.div(class: "col-xs-12 col-sm-6") do
             help_block_with_arrow("left", id: "naming_name_help") do
@@ -58,8 +59,7 @@ context ||= "blank"
           [
             f_n.fields_for(:vote) do |f_v|
               select_with_label(form: f_v, field: :value,
-                                options: confidences,
-                                select_opts: select_opts,
+                                options: confidences, select_opts: select_opts,
                                 label: :form_naming_confidence.t + ":",
                                 autofocus: focus_on_vote)
             end,
@@ -74,11 +74,3 @@ context ||= "blank"
   hidden_field_tag(:context, context)
 ].safe_join
 %>
-
-<% inject_javascript_at_end %(
-  jQuery(document).ready(function() {
-    jQuery(document).on('shown.bs.collapse', '.collapse', function () {
-      $(this).first('textarea').focus();
-    });
-  });
-) %>

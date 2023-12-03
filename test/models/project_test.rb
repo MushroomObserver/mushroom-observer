@@ -15,39 +15,41 @@ class ProjectTest < UnitTestCase
     minimal_unknown_obs = observations(:minimal_unknown_obs)
     detailed_unknown_obs = observations(:detailed_unknown_obs)
     imgs = detailed_unknown_obs.images.sort_by(&:id)
-    assert_obj_arrays_equal([], proj.observations)
     assert_obj_arrays_equal([], proj.images)
     assert_obj_arrays_equal([], minimal_unknown_obs.images)
     assert(imgs.any?)
 
     proj.add_observation(minimal_unknown_obs)
-    assert_obj_arrays_equal([minimal_unknown_obs], proj.observations)
+    assert_true(proj.observations.include?(minimal_unknown_obs))
+    assert_false(proj.observations.include?(detailed_unknown_obs))
     assert_obj_arrays_equal([], proj.images)
 
     proj.add_observation(detailed_unknown_obs)
-    assert_obj_arrays_equal([minimal_unknown_obs, detailed_unknown_obs],
-                            proj.observations.sort_by(&:id))
+    assert_true(proj.observations.include?(minimal_unknown_obs))
+    assert_true(proj.observations.include?(detailed_unknown_obs))
     assert_obj_arrays_equal(imgs, proj.images.sort_by(&:id))
 
     proj.add_observation(detailed_unknown_obs)
-    assert_obj_arrays_equal([minimal_unknown_obs, detailed_unknown_obs],
-                            proj.observations.sort_by(&:id))
+    assert_true(proj.observations.include?(minimal_unknown_obs))
+    assert_true(proj.observations.include?(detailed_unknown_obs))
     assert_obj_arrays_equal(imgs, proj.images.sort_by(&:id))
 
     minimal_unknown_obs.images << imgs.first
     proj.remove_observation(detailed_unknown_obs)
-    assert_obj_arrays_equal([minimal_unknown_obs], proj.observations)
-    # should keep first img because it is reused
+    assert_true(proj.observations.include?(minimal_unknown_obs))
+    assert_false(proj.observations.include?(detailed_unknown_obs))
     # by another observation still attached to project
     assert_obj_arrays_equal([imgs.first], proj.images)
 
     proj.remove_observation(minimal_unknown_obs)
-    assert_obj_arrays_equal([], proj.observations)
+    assert_false(proj.observations.include?(minimal_unknown_obs))
+    assert_false(proj.observations.include?(detailed_unknown_obs))
     # should lose it now because no observations left which use it
     assert_obj_arrays_equal([], proj.images)
 
     proj.remove_observation(minimal_unknown_obs)
-    assert_obj_arrays_equal([], proj.observations)
+    assert_false(proj.observations.include?(minimal_unknown_obs))
+    assert_false(proj.observations.include?(detailed_unknown_obs))
     assert_obj_arrays_equal([], proj.images)
   end
 

@@ -23,7 +23,10 @@ class ObservationsController < ApplicationController
   around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [
     # Bullet wants us to eager load species_list.observations when removing
     # an observation from a species_list, but I can't figure out how.
-    :edit
+    :edit,
+    # Bullet wants us to eager load species_list.projecs when adding
+    # the observation to a species_list, but I can't figure out how.
+    :create
   ]
 
   # NOTE: Must be an ivar of ObservationController

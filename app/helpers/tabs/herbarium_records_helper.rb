@@ -83,7 +83,7 @@ module Tabs
       back = obs&.id || :show
       [:edit_herbarium_record.t,
        add_query_param(edit_herbarium_record_path(h_r.id, back: back)),
-       { class: tab_id(__method__.to_s), icon: :edit }]
+       { class: "#{tab_id(__method__.to_s)}_#{h_r.id}", icon: :edit }]
     end
 
     def destroy_herbarium_record_tab(h_r)

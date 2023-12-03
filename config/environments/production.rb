@@ -134,6 +134,8 @@ MushroomObserver::Application.configure do
   # Combine files using the "require" directives at the top of included files
   # See http://guides.rubyonrails.org/asset_pipeline.html#turning-debugging-off
   config.assets.debug = false
+
+  config.bot_enabled = true
 end
 
 file = File.expand_path("../consts-site.rb", __dir__)

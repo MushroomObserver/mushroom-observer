@@ -4,14 +4,13 @@
 module Observations
   class NamingsController < ApplicationController
     before_action :login_required
+    before_action :pass_query_params
 
     def show
-      pass_query_params
       @observation = find_or_goto_index(Observation, params[:id])
     end
 
     def new
-      pass_query_params
       @params = NamingParams.new(params[:naming])
       @params.observation =
         load_for_show_observation_or_goto_index(params[:observation_id])
@@ -22,17 +21,12 @@ module Observations
       @reasons = @params.reasons
 
       respond_to do |format|
+        format.turbo_stream { render_modal_naming_form }
         format.html
-        format.turbo_stream do
-          render_modal_naming_form(
-            title: helpers.naming_form_new_title(obs: @observation)
-          )
-        end
       end
     end
 
     def create
-      pass_query_params
       @params = NamingParams.new(params[:naming])
       @params.observation =
         load_for_show_observation_or_goto_index(params[:observation_id])
@@ -41,12 +35,10 @@ module Observations
 
       @observation = @params.observation
       @reasons = @params.reasons
-
       create_post
     end
 
     def edit
-      pass_query_params
       @params = NamingParams.new
       naming = @params.naming = Naming.from_params(params)
       @params.observation =
@@ -62,17 +54,12 @@ module Observations
       @reasons = @params.reasons
 
       respond_to do |format|
+        format.turbo_stream { render_modal_naming_form }
         format.html
-        format.turbo_stream do
-          render_modal_naming_form(
-            title: helpers.naming_form_edit_title(obs: @observation)
-          )
-        end
       end
     end
 
     def update
-      pass_query_params
       @params = NamingParams.new
       naming = @params.naming = Naming.from_params(params)
       @params.observation =
@@ -89,32 +76,48 @@ module Observations
     end
 
     def destroy
-      pass_query_params
       naming = Naming.find(params[:id].to_s)
       if destroy_if_we_can(naming)
         flash_notice(:runtime_destroy_naming_success.t(id: params[:id].to_s))
       end
       respond_to do |format|
-        format.html { default_redirect(naming.observation) }
         format.turbo_stream do
           @observation = naming.observation
           render(partial: "update_observation") and return
         end
+        format.html { default_redirect(naming.observation) }
       end
     end
 
     private
 
-    def render_modal_naming_form(title:)
+    def render_modal_naming_form
       render(partial: "shared/modal_form",
              locals: {
-               title: title, local: false,
-               identifier: "naming",
+               title: modal_title, local: false,
+               identifier: modal_identifier,
                form: "observations/namings/form",
-               # form_bindings: "observations/namings/form_bindings",
                form_locals: { show_reasons: true,
                               context: params[:context] }
              }) and return
+    end
+
+    def modal_identifier
+      case action_name
+      when "new", "create"
+        "naming_#{@observation.id}"
+      when "edit", "update"
+        "naming_#{@naming.id}_#{@observation.id}"
+      end
+    end
+
+    def modal_title
+      case action_name
+      when "new", "create"
+        helpers.naming_form_new_title(obs: @observation)
+      when "edit", "update"
+        helpers.naming_form_edit_title(obs: @observation)
+      end
     end
 
     def default_redirect(obs, action = :show)
@@ -135,16 +138,16 @@ module Observations
 
     def respond_to_successful_create
       respond_to do |format|
-        format.html { default_redirect(@params.observation, :show) }
         format.turbo_stream do
           case params[:context]
-          when "lightbox", "matrix_box"
-            render(partial: "observations/namings/update_lightbox")
+          when "lightgallery", "matrix_box"
+            render(partial: "observations/namings/update_matrix_box")
           else
             render(partial: "observations/namings/update_observation")
           end
           return
         end
+        format.html { default_redirect(@params.observation, :show) }
       end
     end
 
@@ -158,7 +161,13 @@ module Observations
       respond_to do |format|
         format.html { render(action: redo_action) and return }
         format.turbo_stream do
-          render(partial: "observations/namings/form_reload") and return
+          render(partial: "shared/modal_form_reload",
+                 locals: {
+                   identifier: modal_identifier,
+                   form: "observations/namings/form",
+                   form_locals: { show_reasons: true,
+                                  context: params[:context] }
+                 }) and return true
         end
       end
     end
@@ -231,7 +240,7 @@ module Observations
       respond_to do |format|
         format.html { default_redirect(@params.observation) }
         format.turbo_stream do
-          render(partial: "update_observation") and return
+          render(partial: "observations/namings/update_observation") and return
         end
       end
     end

@@ -17,8 +17,10 @@ module Account
       create_api_key
 
       respond_to do |format|
+        format.turbo_stream do
+          render(partial: "account/api_keys/update_table_and_flash")
+        end
         format.html { redirect_to(account_api_keys_path) }
-        format.js { render(partial: "account/api_keys/update_table_and_flash") }
       end
     end
 
@@ -27,8 +29,10 @@ module Account
 
       update_api_key
       respond_to do |format|
+        format.turbo_stream do
+          render(partial: "account/api_keys/update_table_and_flash")
+        end
         format.html { redirect_to(account_api_keys_path) }
-        format.js { render(partial: "account/api_keys/update_table_and_flash") }
       end
     end
 
@@ -39,8 +43,10 @@ module Account
       flash_notice(:account_api_keys_removed_some.t(num: 1))
 
       respond_to do |format|
+        format.turbo_stream do
+          render(partial: "account/api_keys/update_table_and_flash")
+        end
         format.html { redirect_to(account_api_keys_path) }
-        format.js { render(partial: "account/api_keys/update_table_and_flash") }
       end
     end
 
@@ -52,8 +58,10 @@ module Account
       flash_notice(:account_api_keys_activated.t(notes: @key.notes))
 
       respond_to do |format|
+        format.turbo_stream do
+          render(partial: "account/api_keys/update_table_and_flash")
+        end
         format.html { redirect_to(account_api_keys_path) }
-        format.js { render(partial: "account/api_keys/update_table_and_flash") }
       end
     end
 

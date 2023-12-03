@@ -81,11 +81,11 @@ MushroomObserver::Application.configure do
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
 
-  # Compile and combine assets, but don't compress or add digests to names.
+  # Compile and combine assets, and add digests to names, but don't compress
   config.assets.compile = true
+  config.assets.digest = true
   config.assets.compress = false
   config.assets.debug = false
-  config.assets.digest = false
 
   # To control the debugger turing testing
   config.activate_debugger = false
@@ -100,18 +100,22 @@ MushroomObserver::Application.configure do
 
   config.active_support.test_order = :random
 
+  config.bot_enabled = true
+
   # ----------------------------
   #  Bullet configuration.
   # ----------------------------
 
-  config.after_initialize do
-    Bullet.enable = true
-    Bullet.raise = true # Show message by raising errors.
-    Bullet.stacktrace_includes = []
-    Bullet.stacktrace_excludes = []
-    Bullet.unused_eager_loading_enable = false
-    # Bullet.add_safelist(type: :n_plus_one_query, class_name: "Post",
-    #                     association: :comments)
+  if defined?(Bullet)
+    config.after_initialize do
+      Bullet.enable = true
+      Bullet.raise = true # Show message by raising errors.
+      Bullet.stacktrace_includes = []
+      Bullet.stacktrace_excludes = []
+      Bullet.unused_eager_loading_enable = false
+      # Bullet.add_safelist(type: :n_plus_one_query, class_name: "Post",
+      #                     association: :comments)
+    end
   end
 end
 

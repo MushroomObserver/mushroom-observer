@@ -62,7 +62,7 @@ statuses = [[:ACCEPTED.t, false], [:DEPRECATED.t, true]]
     </div>
   <% end %>
 
-  <% append = content_tag(:p, class: "help-block") do
+  <% append = tag.p(class: "help-block") do
     concat(:form_names_citation_help.t)
     concat(:form_names_citation_textilize_note.t)
   end %>
@@ -74,18 +74,16 @@ statuses = [[:ACCEPTED.t, false], [:DEPRECATED.t, true]]
       <%= check_box_with_label(form: f, field: :misspelling,
                                checked: @misspelling,
                                label: :form_names_misspelling.t) %>
-      <%= text_field_with_label(
-            form: f, field: :correct_spelling,
-            value: @correct_spelling, placeholder: :start_typing.l,
-            label: :form_names_misspelling_it_should_be.t + ":",
-            append: help_block(:p, :form_names_misspelling_note.t),
-            data: { autocompleter: :name }
-          ) %>
+      <%= autocompleter_field(
+        form: f, field: :correct_spelling, value: @correct_spelling,
+        label: :form_names_misspelling_it_should_be.t + ":",
+        append: help_block(:p, :form_names_misspelling_note.t),
+        autocomplete: :name
+      ) %>
     </div>
   <% end %>
 
-  <% between = content_tag(:div, :form_names_taxonomic_notes_warning.t,
-                           class: "mark") %>
+  <% between = tag.div(:form_names_taxonomic_notes_warning.t, class: "mark") %>
   <%= text_area_with_label(form: f, field: :notes, rows: 6,
                            label: :form_names_taxonomic_notes.t + ":",
                            between: between) %>

@@ -1,0 +1,56 @@
+<%
+# This view consists of multiple <form>s: the form at the top with text input,
+# plus each thumbnail. The image is clickable: an overlaid form with method: :post
+
+@all_users = (params[:all_users] == "1") ? true : false
+# application_controller.rb
+query = query_images_to_reuse(@all_users, @user)
+@layout = calc_layout_params
+@pages = paginate_numbers(:page, @layout["count"])
+@objects = query.paginate(@pages, include: [:user, { observations: :name }])
+
+%>
+<%= form_with(url: form_action, method: :post) do |f| %>
+
+  <%= tag.div(class: "container-text") do %>
+    <%= tag.div(class: "form-group form-inline") do %>
+      <%= text_field_with_label(form: f, field: :img_id,
+                                size: 8, data: { autofocus: true },
+                                label: :image_reuse_id.t + ":") %>
+      <%= submit_button(form: f, button: :image_reuse_reuse.l, class: "ml-3") %>
+    <% end %>
+
+    <%= content_tag(:div, :image_reuse_id_help.tp,
+                    class: "help-block form-group") %>
+
+    <%= tag.div(class: "form-group mt-3") do %>
+      <%= link_with_query((@all_users ? :image_reuse_just_yours.t :
+                            :image_reuse_all_users.t),
+                          form_action.merge(action: :reuse,
+                                            all_users: @all_users ? 0 : 1),
+                          class: "btn btn-default") %>
+    <% end %>
+  <% end %>
+
+<% end %>
+
+<% # Note this uses a specialized matrix box here, not the matrix_box partial. %>
+<%= paginate_block(@pages) do %>
+  <%= tag.ul(class: "row list-unstyled mt-3",
+             data: { controller: "matrix-table",
+                     action: "resize@window->matrix-table#rearrange" }) do %>
+
+    <%= render(layout: "shared/matrix_table",
+               locals: { objects: @objects }) do |image| %>
+      <%= matrix_box(class: "text-center", id: image.id) do %>
+        <%= panel_block do %>
+          <%= interactive_image(image, votes: false, original: true,
+                                image_link: form_action.merge(img_id: image.id),
+                                link_method: :post,
+                                extra_classes: "image-to-reuse") %>
+        <% end %>
+      <% end %>
+    <% end %>
+
+  <% end %>
+<% end %>

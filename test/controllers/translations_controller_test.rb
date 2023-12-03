@@ -37,7 +37,7 @@ class TranslationsControllerTest < FunctionalTestCase
       "\n",
       "index_prefs: Your Account\n",
       "\n",
-      "# account/prefs\n",
+      "# account/preferences/edit\n",
       "prefs_title: Your Account\n",
       "\n"
     ].join

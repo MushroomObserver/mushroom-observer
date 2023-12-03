@@ -25,7 +25,7 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
             [ # any html helper has to be safe_joined separately
               "[",
               modal_link_to("collection_number",
-                            *new_collection_number_for_obs_tab(obs)),
+                            *new_collection_number_tab(obs)),
               "]"
             ].safe_join
           ].safe_join(" ")
@@ -36,7 +36,7 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
               [
                 link_to(*show_collection_number_tab(number, obs)),
                 "[",
-                modal_link_to("collection_number",
+                modal_link_to("collection_number_#{number.id}",
                               *edit_collection_number_tab(number, obs)),
                 "|",
                 modal_link_to("collection_number_observation",
@@ -62,9 +62,9 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
         :show_observation_no_collection_numbers.t,
         "[",
         modal_link_to("collection_number",
-                      *new_collection_number_for_obs_tab(obs)),
+                      *new_collection_number_tab(obs)),
         "]"
-      ].safe_join(" ")
+      ].safe_join
     end
   end
 end
