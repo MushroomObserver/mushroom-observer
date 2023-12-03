@@ -157,14 +157,12 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Add the images separately, so we can be sure of the order. Otherwise,
     # images appear in the order each upload finishes, which is unpredictable.
-    attach_file(Rails.root.join("test/images/Coprinus_comatus.jpg")) do
+    attach_file(Rails.root.join("test/images/Coprinus_comatus.jpg"), wait: 1) do
       click_file_field(".file-field")
     end
-    # debugger
     assert_selector(".added_image_wrapper", text: /Coprinus_comatus/)
     assert_selector("#img_messages",
                     text: /#{:form_observations_set_observation_date_to.l}/)
-    # debugger # << the session is lost by here
     first_image_wrapper = first(".added_image_wrapper")
 
     # Coprinus_comatus.jpg has a created_at date of November 20, 2006
@@ -298,6 +296,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     within("#observation_form") { click_commit }
+
+    #
+    # This is where the error occurs
+    #   Observation doesn't have naming with ID=
 
     # It should take us to create a new location
     assert_selector("body.locations__new")
