@@ -164,7 +164,7 @@ export default class extends Controller {
     elem.parentNode.querySelector(
       'input[type="radio"][name="observation[thumb_image_id]"]'
       // ).setAttribute('checked', true);
-    ).trigger("click") // to trigger setHiidenThumbField below.
+    ).click() // to trigger setHiidenThumbField below.
   }
 
   // this just sets the hidden field value. do this directly or trigger click
@@ -789,6 +789,7 @@ export default class extends Controller {
 
       return simpleDate;
     } else { // or get it
+      debugger
       return this.SimpleDate(
         this.obs_day.value, this.obs_month.value, this.obs_year.value
       )
