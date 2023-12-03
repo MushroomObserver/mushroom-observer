@@ -602,45 +602,36 @@ export default class extends Controller {
     return _fd;
   }
 
-  // upload with readable stream not implemented yet for fetch
-  // https://stackoverflow.com/questions/35711724/upload-progress-indicators-for-fetch
-  // https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
-  // https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
   async uploadItem(item) {
+    // It would be nice to do a progress bar, but as of now, upload with
+    // readable stream is not implemented yet for fetch in the browser spec.
+    // https://stackoverflow.com/questions/35711724/upload-progress-indicators-for-fetch
+    // https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
+    // https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
     this.submit_buttons.forEach((element) => {
       element.value = this.localized_text.uploading_text + '...';
     });
 
     const _formData = this.asformData(item);
+    const response = await post(this.upload_image_uri,
+      { body: _formData, responseKind: "json" });
 
-    const response = await post(this.upload_image_uri, { body: _formData });
+    // Note: It never hits any of the below, even with multiple images (!)
+    // The controller action at upload_image_uri is uploading the images, and
+    // it's already submitting the form and leaving the page.
+    // Maybe because this is async? Anyway, it seems to work.
+    // updateObsImages is never called, nor onUploadedCallback.
     if (response.ok) {
       const image = await response.json
       if (image) {
         this.updateObsImages(item, image);
         this.hide(item.dom_element);
         this.onUploadedCallback();
-      } else {
-        console.log(`got a ${response.status}`);
       }
+    } else {
+      console.log(`got a ${response.status}`);
     }
   }
-
-  // async uploadItemAsync(item) {
-  //   this.submit_buttons.forEach((element) => {
-  //     element.value = this.localized_text.uploading_text + '...';
-  //   });
-
-  //   const _formData = this.asformData(item);
-  //   let response = await fetch(this.upload_image_uri, {
-  //     method: 'POST', body: _formData
-  //   })
-  //   let image = await response.json();
-
-  //   this.updateObsImages(item, image);
-  //   this.hide(item.dom_element);
-  //   this.onUploadedCallback();
-  // }
 
   // add the image to `good_images` and maybe set the thumb_image_id
   updateObsImages(item, image) {
