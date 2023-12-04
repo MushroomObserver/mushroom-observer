@@ -85,7 +85,11 @@ export default class extends Controller {
 
     // Detect when a user submits observation; includes upload logic
     this.form.onsubmit = (event) => {
-      this.uploadBeforeSubmit();
+      if (this.block_form_submission) {
+        this.uploadAll();
+        return false;
+      }
+      return true;
     };
   }
 
@@ -105,14 +109,6 @@ export default class extends Controller {
     const dataTransfer = e.dataTransfer;
     if (dataTransfer.files.length > 0)
       this.addFiles(dataTransfer.files);
-  }
-
-  uploadBeforeSubmit() {
-    if (this.block_form_submission) {
-      this.uploadAll();
-      return false;
-    }
-    return true;
   }
 
   fixDates() {
@@ -581,7 +577,7 @@ export default class extends Controller {
     };
   }
 
-  asformData(item) {
+  asFormData(item) {
     const _info = this.getUserEnteredInfo(item),
       _fd = new FormData();
 
@@ -612,7 +608,7 @@ export default class extends Controller {
       element.value = this.localized_text.uploading_text + '...';
     });
 
-    const _formData = this.asformData(item);
+    const _formData = this.asFormData(item);
     const response = await post(this.upload_image_uri,
       { body: _formData, responseKind: "json" });
 
