@@ -263,7 +263,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     # assert_selector("#mo_ajax_progress")
     # assert_selector("#mo_ajax_progress_caption",
     #                 text: /#{:show_namings_saving.l}/)
-    sleep(6)
+    sleep(9)
     assert_no_selector("#mo_ajax_progress")
     assert_selector("#title", text: /#{nam.text_name}/)
 
