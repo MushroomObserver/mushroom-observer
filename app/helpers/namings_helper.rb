@@ -142,10 +142,10 @@ module NamingsHelper
 
   public
 
-  # Naming Vote Form:
+  # Naming Vote Form: a select that submits on change with Stimulus
   # a tiny form within a naming row for voting on this naming only
   # also called by matrix_box_vote_or_propose_ui
-  # Submits via Turbo
+  # Stimulus just calls "requestSubmit", submits via Turbo
   def naming_vote_form(naming, vote, context: "blank")
     menu = Vote.confidence_menu
     can_vote = check_permission(naming)
@@ -156,9 +156,8 @@ module NamingsHelper
     }.to_json
 
     form_with(url: naming_vote_path(naming_id: naming.id), method: :patch,
-              turbo: true, id: "naming_vote_form_#{naming.id}",
-              class: "naming-vote-form",
-              data: { controller: "naming-vote",
+              id: "naming_vote_form_#{naming.id}", class: "naming-vote-form",
+              data: { turbo: true, controller: "naming-vote",
                       localization: localizations }) do |f|
       [
         fields_for(:vote) do |fv|

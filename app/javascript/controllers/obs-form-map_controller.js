@@ -36,7 +36,6 @@ export default class extends Controller {
   }
 
   openMap() {
-    // debugger;
     if (this.opened) return false
 
     this.opened = true

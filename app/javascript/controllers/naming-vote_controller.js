@@ -12,13 +12,13 @@ export default class extends Controller {
   connect() {
     // console.log("Hello Modal");
     this.element.dataset.stimulus = "connected";
-    // The localized text is for the modal progress. Maybe not needed here.
+    // The localized text is for the modal progress caption.
     Object.assign(this.localized_text,
       JSON.parse(this.element.dataset.localization));
   }
 
-  // Pause the UI on change and show the progress modal. Maybe no need?
-  // Send the vote submit
+  // Send the vote submit on change (action on select calls this)
+  // Pauses the UI and shows the progress modal, because it takes time.
   sendVote() {
     // console.log("Sending Vote")
     // console.log("Pausing UI")
@@ -28,6 +28,6 @@ export default class extends Controller {
     // Must be in jQuery for Bootstrap 3 and 4
     $("#mo_ajax_progress").modal('show');
     // this.element.setAttribute("data-stimulus", "sending")
-    this.element.requestSubmit()
+    this.element.requestSubmit();
   }
 }

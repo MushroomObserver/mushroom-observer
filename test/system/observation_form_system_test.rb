@@ -152,16 +152,17 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     browser.keyboard.type(:down, :down, :tab) # down to second match + select
     assert_field("naming_name", with: "Agaricus campestris")
     select(Vote.confidence(Vote.next_best_vote), from: "naming_vote_value")
+    assert_select("naming_vote_value",
+                  selected: Vote.confidence(Vote.next_best_vote))
 
     # Add the images separately, so we can be sure of the order. Otherwise,
     # images appear in the order each upload finishes, which is unpredictable.
-    attach_file(Rails.root.join("test/images/Coprinus_comatus.jpg")) do
+    attach_file(Rails.root.join("test/images/Coprinus_comatus.jpg"), wait: 1) do
       click_file_field(".file-field")
     end
-
-    assert_selector(".added_image_wrapper")
-    assert_selector("#img_messages")
-
+    assert_selector(".added_image_wrapper", text: /Coprinus_comatus/)
+    assert_selector("#img_messages",
+                    text: /#{:form_observations_set_observation_date_to.l}/)
     first_image_wrapper = first(".added_image_wrapper")
 
     # Coprinus_comatus.jpg has a created_at date of November 20, 2006
@@ -293,8 +294,16 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_selector(".is_thumb_image")
       assert_no_selector(".set_thumb_image")
     end
+    sleep(3)
+    # debugger
 
     within("#observation_form") { click_commit }
+
+    #
+    #   This is where the error occurs.
+    #   User.current is getting dropped during the save, and message is
+    #     `Observation doesn't have naming with ID=`
+    #
 
     # It should take us to create a new location
     assert_selector("body.locations__new")
@@ -424,7 +433,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # make_sure_observation_is_not_in_log_index
     visit(activity_logs_path)
-    assert_no_link(href: %r{/#{obs.id}?})
+    assert_no_link(href: %r{/#{obs.id}/})
     assert_link(href: /activity_logs/, text: /Agaricus campestris/)
   end
 

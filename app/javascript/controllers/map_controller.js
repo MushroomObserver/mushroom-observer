@@ -276,7 +276,6 @@ export default class extends Controller {
       const bounds = this.rectangle.getBounds().toJSON()
       points = this.sampleElevationPointsOf(bounds)
     }
-    debugger
     return points
   }
 

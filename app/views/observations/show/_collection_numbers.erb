@@ -60,7 +60,7 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
     elsif numbers.none? && can_edit
       [
         :show_observation_no_collection_numbers.t,
-        "[",
+        " [",
         modal_link_to("collection_number",
                       *new_collection_number_tab(obs)),
         "]"

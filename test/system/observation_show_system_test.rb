@@ -225,7 +225,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       find(:css, ".new_naming_link_#{obs.id}").trigger("click")
     end
 
-    n_d = names(:namings_deprecated)
+    n_d = names(:namings_deprecated) # Xa current
     nd1 = names(:namings_deprecated_1)
 
     assert_selector("#modal_naming_#{obs.id}")
@@ -260,10 +260,11 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       assert_selector("#naming_vote_form_#{nam.id}")
       select("I'd Call It That", from: "vote_value_#{nam.id}")
     end
-    # assert_selector("#mo_ajax_progress")
+    # assert_selector("#mo_ajax_progress", wait: 4)
     # assert_selector("#mo_ajax_progress_caption",
     #                 text: /#{:show_namings_saving.l}/)
     sleep(6)
+
     assert_no_selector("#mo_ajax_progress")
     assert_selector("#title", text: /#{nam.text_name}/)
 
