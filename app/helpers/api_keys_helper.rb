@@ -103,7 +103,7 @@ module APIKeysHelper
     tag.div(class: "panel-collapse collapse no-transition",
             id: "edit_notes_#{key.id}_container") do
       form_with(model: key, url: account_api_key_path(key.id),
-                method: :patch, turbo: true,
+                method: :patch, data: { turbo: true },
                 id: "edit_api_key_#{key.id}_form") do |f|
         tag.div(class: "input-group") do
           concat(
@@ -172,7 +172,7 @@ module APIKeysHelper
     tag.div(class: "panel-collapse collapse no-transition",
             id: "new_key_form_container") do
       form_with(model: APIKey.new, url: account_api_keys_path,
-                method: :post, turbo: true,
+                method: :post, data: { turbo: true },
                 id: "new_api_key_form") do |f|
         concat(f.label(:notes, :account_api_keys_notes_label.t))
         concat(tag.div(class: "input-group") do

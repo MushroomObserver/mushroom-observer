@@ -156,9 +156,9 @@ module NamingsHelper
     }.to_json
 
     form_with(url: naming_vote_path(naming_id: naming.id), method: :patch,
-              turbo: true, id: "naming_vote_form_#{naming.id}",
+              id: "naming_vote_form_#{naming.id}",
               class: "naming-vote-form",
-              data: { controller: "naming-vote",
+              data: { turbo: true, controller: "naming-vote",
                       localization: localizations }) do |f|
       [
         fields_for(:vote) do |fv|
