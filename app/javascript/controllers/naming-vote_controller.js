@@ -17,8 +17,8 @@ export default class extends Controller {
       JSON.parse(this.element.dataset.localization));
   }
 
-  // Pause the UI on change and show the progress modal. Maybe no need?
-  // Send the vote submit
+  // Send the vote submit on change (action on select calls this)
+  // Pauses the UI and shows the progress modal, because it takes time.
   sendVote() {
     // console.log("Sending Vote")
     // console.log("Pausing UI")
