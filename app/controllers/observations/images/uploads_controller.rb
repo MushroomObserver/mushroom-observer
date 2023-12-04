@@ -2,7 +2,9 @@
 
 module Observations::Images
   class UploadsController < ApplicationController
-    before_action :login_required # except: [:show]
+    before_action :login_required
+
+    layout false
 
     # Uploading images for an observation is a multi-stage thing.
     # First, each selected image with its EXIF data is read and displayed in
