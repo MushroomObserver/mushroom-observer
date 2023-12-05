@@ -43,7 +43,7 @@
         button: :form_observations_locate_on_map.t,
         name: "locate_on_map", class: "map-locate my-3",
         data: { obs_form_map_target: "mapLocate",
-                action: "obs-form-map#openMap obs-form-map#focusMap" }
+                action: "obs-form-map#openMap obs-form-map#findOnMap" }
       ) %>
       <%= help_block_with_arrow("up", id: "locate_on_map_help") do %>
         <%= :form_observations_locate_on_map_help.t %>
@@ -73,7 +73,9 @@
       <%= tag.div("", id: "observation_form_map",
                       class: "observation-form-map hidden",
                       data: { indicator_url: asset_path('indicator.gif'),
-                              obs_form_map_target: "mapDiv" } ) %>
+                              location_format: User.current_location_format,
+                              obs_form_map_target: "mapDiv",
+                              map_type: "observation" } ) %>
       <div>
         <%= js_button(button: :form_observations_open_map.t,
                       name: "map-open", class: "map-open",

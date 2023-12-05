@@ -13,13 +13,8 @@ export default class extends Controller {
 
   connect() {
     this.element.dataset.stimulus = "connected";
-
-    const loader = new Loader({
-      apiKey: "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA",
-      version: "quarterly",
-      libraries: ["maps", "geocoding", "marker", "elevation"]
-    })
-
+    // map_types: info (collection), location (rectangle), observation (marker)
+    this.map_type = this.mapDivTarget.dataset.mapType
     this.collection = JSON.parse(this.mapDivTarget.dataset.collection)
     this.editable = (this.mapDivTarget.dataset.editable === "true")
     this.location_format = this.mapDivTarget.dataset.locationFormat
@@ -33,6 +28,12 @@ export default class extends Controller {
     this.old_location = null
     this.keypress_id = 0
     this.timeout_id = 0
+
+    const loader = new Loader({
+      apiKey: "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA",
+      version: "quarterly",
+      libraries: ["maps", "geocoding", "marker", "elevation"]
+    })
 
     // use center and zoom here
     const mapOptions = {
@@ -53,7 +54,7 @@ export default class extends Controller {
       .then((google) => {
         this.map = new google.maps.Map(this.mapDivTarget, mapOptions)
         this.map.fitBounds(mapBounds)
-        this.elevation = new google.maps.ElevationService()
+        this.elevationService = new google.maps.ElevationService()
         this.geocoder = new google.maps.Geocoder()
 
         // NOTE: any bug in the `then` block will throw the generic error
@@ -139,26 +140,27 @@ export default class extends Controller {
     })
   }
 
-  drawOrMoveMarker(center) {
+  placeMarker(location) {
     if (!this.marker) {
-      this.drawMarker(center)
+      this.drawMarker(location)
     } else {
-      this.marker.setPosition(center)
+      this.marker.setPosition(location)
     }
-    this.map.setCenter(center)
+    this.map.panTo(location)
   }
 
   //
-  // RECTANGLES
+  // RECTANGLES may have info windows, so they need the whole set
   //
 
   drawRectangle(set) {
+    const bounds = this.boundsOf(set)
     const rectangleOptions = {
       strokeColor: "#00ff88",
       strokeOpacity: 1,
       strokeWeight: 3,
       map: this.map,
-      bounds: this.boundsOf(set),
+      bounds: bounds,
       editable: this.editable,
       draggable: this.editable
     }
@@ -170,6 +172,7 @@ export default class extends Controller {
     } else {
       this.giveRectangleInfoWindow(set, rectangle)
     }
+    this.map.fitBounds(bounds)
   }
 
   // possibly also listen to "dragstart", "drag" ? not necessary.
@@ -199,7 +202,7 @@ export default class extends Controller {
     })
   }
 
-  drawOrMoveRectangle(extents) {
+  placeRectangle(extents) {
     if (!this.rectangle) {
       this.drawRectangle(extents)
     } else {
@@ -227,7 +230,6 @@ export default class extends Controller {
   // findOnMap may fill the extents of a rectangle or a point in the inputs.
   extentsForInput(extents, center) {
     let bounds
-
     if (extents) {
       bounds = this.boundsOf(extents)
     } else if (center) {
@@ -263,7 +265,6 @@ export default class extends Controller {
     let lat = (bounds?.north + bounds?.south) / 2.0
     let lng = (bounds?.east + bounds?.west) / 2.0
     if (bounds?.west > bounds?.east) { lng += 180 }
-
     return { lat: lat, lng: lng }
   }
 
@@ -302,9 +303,7 @@ export default class extends Controller {
     let altitudesArray = results.map((result) => {
       return result.elevation
     }).sort((a, b) => { return a - b })
-
     const last = altitudesArray.length - 1
-
     return { high: altitudesArray[last], low: altitudesArray[0] }
   }
 
@@ -334,20 +333,21 @@ export default class extends Controller {
   findOnMap() {
     this.findOnMapTarget.disabled = true
     let address = this.locationNameTarget.value
-    const geocoder = new google.maps.Geocoder()
 
     if (this.location_format == "scientific") {
       address = address.split(/, */).reverse().join(", ")
     }
 
-    geocoder
+    this.geocoder
       .geocode({ address: address })
       .then((result) => {
         const { results } = result // destructure, results is part of the result
         const viewport = results[0].geometry.viewport.toJSON()
         const extents = results[0].geometry.bounds?.toJSON() // may not exist
         const center = results[0].geometry.location.toJSON()
-        this.positionMapAndFillExtentInputs(viewport, extents, center)
+        this.positionMap(viewport)
+        this.placeRectangleOrMarker(extents, center)
+        this.updateFields(extents, center)
         this.findOnMapTarget.disabled = false
       })
       .catch((e) => {
@@ -355,24 +355,37 @@ export default class extends Controller {
       });
   }
 
-  positionMapAndFillExtentInputs(viewport, extents, center) {
+  positionMap(viewport) {
     if (viewport) {
       this.map.fitBounds(viewport)
     }
+  }
+
+  // If we're sure we don't want a marker here, move logic to placeRectangle
+  placeRectangleOrMarker(extents, center) {
     if (extents) {
-      this.drawOrMoveRectangle(extents)
+      this.placeRectangle(extents)
     } else if (center) {
-      this.drawOrMoveMarker(center)
+      // this.placeMarker(center) // if marker is ok for this map
+      this.placeRectangle(this.boundsOfPoint(center))
     }
-    if (this.hasNorthInputTarget)
-      this.updateBoundsInputs(this.extentsForInput(extents, center))
+  }
+
+  updateFields(extents, center) {
+    let points = [] // for elevation
+    if (this.hasNorthInputTarget) {
+      if (extents) {
+        this.updateBoundsInputs(this.extentsForInput(extents, center))
+        points = this.sampleElevationPointsOf(extents)
+      } else if (center) {
+        this.updateBoundsInputs(this.boundsOfPoint(center))
+        points = this.sampleElevationCenterOf(center)
+      }
+    }
     // else if (this.hasLatInputTarget)
     //   this.updateLatLngInputs(center)
-
-    const points = extents ? this.sampleElevationPointsOf(extents) :
-      this.sampleElevationCenterOf(center)
-
-    this.getElevations(points) // updates inputs
+    if (points)
+      this.getElevations(points) // updates inputs
   }
 
   // takes a LatLngBoundsLiteral object {south:, west:, north:, east:}
@@ -390,14 +403,14 @@ export default class extends Controller {
   // }
 
   getElevations(points = null) {
-    if (!points) {
-      // action for the "Get Elevation" button on a form sends no points
-      points = this.sampleElevationPoints()
-    }
-    const elevationService = new google.maps.ElevationService
-    const locationElevationRequest = { 'locations': points }
+    // action for the "Get Elevation" button on a form sends no points
+    if (!points)
+      points = this.sampleElevationPoints() // returns an array
 
-    elevationService.getElevationForLocations(locationElevationRequest,
+    // const elevationService = new google.maps.ElevationService
+    const locationElevationRequest = { locations: points }
+
+    this.elevationService.getElevationForLocations(locationElevationRequest,
       (results, status) => {
         if (status === google.maps.ElevationStatus.OK) {
           if (results[0]) {

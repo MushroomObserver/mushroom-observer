@@ -8,6 +8,7 @@ module MapHelper
       map_div: "map_div",
       controller: "map",
       map_target: "mapDiv",
+      map_type: "info",
       editable: false,
       controls: [:large_map, :map_type].to_json,
       location_format: User.current_location_format # method has a default
