@@ -346,8 +346,8 @@ export default class extends Controller {
         const extents = results[0].geometry.bounds?.toJSON() // may not exist
         const center = results[0].geometry.location.toJSON()
         this.positionMap(viewport)
-        this.placeRectangleOrMarker(extents, center)
-        this.updateFields(extents, center)
+        this.calculateRectangle(viewport, extents, center)
+        this.updateFields(viewport, extents, center)
         this.findOnMapTarget.disabled = false
       })
       .catch((e) => {
@@ -362,25 +362,34 @@ export default class extends Controller {
   }
 
   // If we're sure we don't want a marker here, move logic to placeRectangle
-  placeRectangleOrMarker(extents, center) {
+  calculateRectangle(viewport, extents, center) {
     if (extents) {
       this.placeRectangle(extents)
-    } else if (center) {
-      // this.placeMarker(center) // if marker is ok for this map
-      this.placeRectangle(this.boundsOfPoint(center))
+    } else if (viewport) {
+      this.placeRectangle(viewport)
     }
+    // else if (center) {
+    // this.placeMarker(center) // if marker is ok for this map
+    // this.placeRectangle(this.boundsOfPoint(center))
+    // }
   }
 
-  updateFields(extents, center) {
+  // Maybe remove extentsForInput if we're not going to do point extents?
+  // Extents not needed on obs form
+  updateFields(viewport, extents, center) {
     let points = [] // for elevation
     if (this.hasNorthInputTarget) {
       if (extents) {
         this.updateBoundsInputs(this.extentsForInput(extents, center))
         points = this.sampleElevationPointsOf(extents)
-      } else if (center) {
-        this.updateBoundsInputs(this.boundsOfPoint(center))
-        points = this.sampleElevationCenterOf(center)
+      } else if (viewport) {
+        this.updateBoundsInputs(this.extentsForInput(viewport, center))
+        points = this.sampleElevationPointsOf(viewport)
       }
+      // else if (center) {
+      //   this.updateBoundsInputs(this.boundsOfPoint(center))
+      //   points = this.sampleElevationCenterOf(center)
+      // }
     }
     // else if (this.hasLatInputTarget)
     //   this.updateLatLngInputs(center)
@@ -402,6 +411,7 @@ export default class extends Controller {
   //   this.lngInputTarget.value = center.lng
   // }
 
+  // change action on the "Get Elevation" button to updateElevationInputs?
   getElevations(points = null) {
     // action for the "Get Elevation" button on a form sends no points
     if (!points)
