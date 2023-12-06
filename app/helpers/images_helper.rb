@@ -168,12 +168,12 @@ module ImagesHelper
   def image_vote_section_html(image, votes)
     return "" unless votes && image && User.current
 
-    tag.div(class: "vote-section") do
+    tag.div(class: "vote-section", id: "image_vote_#{image.id}") do
       image_vote_meter_and_links(image)
     end
   end
 
-  # called in votes update.js.erb
+  # called in votes update.erb
   def image_vote_meter_and_links(image)
     vote_pct = if image.vote_cache
                  ((image.vote_cache / Image.all_votes.length) * 100).floor

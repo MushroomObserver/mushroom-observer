@@ -1,0 +1,5 @@
+<%=
+turbo_stream.update("image_vote_#{@image.id}") do
+  image_vote_meter_and_links(@image)
+end
+%>
