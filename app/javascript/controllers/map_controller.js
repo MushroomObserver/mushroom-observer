@@ -54,21 +54,21 @@ export default class extends Controller {
     }
 
     // collection.extents is also a MapSet
-    const mapBounds = this.boundsOf(this.collection.extents)
+    let mapBounds
+    if (this.collection)
+      mapBounds = this.boundsOf(this.collection.extents)
 
     loader
       .load()
       .then((google) => {
         this.map = new google.maps.Map(this.mapDivTarget, mapOptions)
-        this.map.fitBounds(mapBounds)
+        if (mapBounds)
+          this.map.fitBounds(mapBounds)
         this.elevationService = new google.maps.ElevationService()
         this.geocoder = new google.maps.Geocoder()
 
-        // NOTE: any bug in the `then` block will throw the generic error
-        // use the `helpDebug` method to debug
         if (this.hasPlaceInputTarget && this.placeInputTarget.value) {
           this.findOnMap()
-          // this.helpDebug()
         } else if (Object.keys(this.collection.sets).length) {
           this.buildOverlays()
         }
@@ -143,8 +143,12 @@ export default class extends Controller {
     ["position_changed", "dragend"].forEach((eventName) => {
       marker.addListener(eventName, () => {
         const newPosition = marker.getPosition()?.toJSON() // latlng object
-        const bounds = this.boundsOfPoint(newPosition)
-        this.updateBoundsInputs(bounds)
+        if (this.hasNorthInputTarget) {
+          const bounds = this.boundsOfPoint(newPosition)
+          this.updateBoundsInputs(bounds)
+        } else if (this.hasLatInputTarget) {
+          this.updateLatLngInputs(newPosition)
+        }
         this.getElevations(this.sampleElevationCenterOf(newPosition))
         this.map.panTo(newPosition)
       })

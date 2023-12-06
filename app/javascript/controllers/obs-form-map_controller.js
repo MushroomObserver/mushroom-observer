@@ -51,7 +51,7 @@ export default class extends Controller {
     this.mapClearTarget.classList.remove("hidden")
     this.mapOpenTarget.style.display = "none"
 
-    this.addGmapsListener(this.map, 'click')
+    this.placeMarkerListener(this.map, 'click')
     this.mapPointInputs();
   }
 
@@ -104,7 +104,7 @@ export default class extends Controller {
     }
     this.map.panTo(location)
 
-    this.addGmapsListener(this.marker, 'drag')
+    this.placeMarkerListener(this.marker, 'drag')
   }
 
   drawMarker(location) {
@@ -201,7 +201,7 @@ export default class extends Controller {
     this.marker.setVisible(false)
   }
 
-  addGmapsListener(el, eventType) {
+  placeMarkerListener(el, eventType) {
     google.maps.event.addListener(el, eventType, (e) => {
       const location = e.latLng.toJSON()
       this.placeMarker(location)
