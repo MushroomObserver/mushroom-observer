@@ -8,8 +8,8 @@ import { Loader } from "@googlemaps/js-api-loader"
 export default class extends Controller {
   // it may or may not be the root element of the controller.
   static targets = ["mapDiv", "southInput", "westInput", "northInput",
-    "eastInput", "highInput", "lowInput", "locationName", "findOnMap",
-    "getElevation"]
+    "eastInput", "highInput", "lowInput", "placeInput", "findOnMap",
+    "getElevation", "mapOpen", "mapClear", "latInput", "lngInput", "altInput"]
 
   connect() {
     this.element.dataset.stimulus = "connected";
@@ -35,12 +35,19 @@ export default class extends Controller {
       libraries: ["maps", "geocoding", "marker", "elevation"]
     })
 
-    // use center and zoom here
-    const mapOptions = {
-      center: {
+    let mapCenter
+    if (this.collection) {
+      mapCenter = {
         lat: this.collection.extents.lat,
         lng: this.collection.extents.long
-      },
+      }
+    } else {
+      mapCenter = { lat: -7, lng: -47 }
+    }
+
+    // use center and zoom here
+    const mapOptions = {
+      center: mapCenter,
       zoom: 1,
       mapTypeId: 'terrain',
       mapTypeControl: 'true'
@@ -59,7 +66,7 @@ export default class extends Controller {
 
         // NOTE: any bug in the `then` block will throw the generic error
         // use the `helpDebug` method to debug
-        if (this.hasLocationNameTarget && this.locationNameTarget.value) {
+        if (this.hasPlaceInputTarget && this.placeInputTarget.value) {
           this.findOnMap()
           // this.helpDebug()
         } else if (Object.keys(this.collection.sets).length) {
@@ -75,13 +82,17 @@ export default class extends Controller {
     debugger
   }
 
+  //
+  //  COLLECTIONS: mapType "info" - Map of collapsible collection
+  //
+
   // In a collection, each set represents an overlay (is_point or is_box).
   // set.center is an array [lat, lng]
   // the `key` of each set is an array [x,y,w,h]
   buildOverlays() {
     for (const [_xywh, set] of Object.entries(this.collection.sets)) {
       // console.log({ set })
-      // NOTE: according to the MapSet class, location sets are always is_box!!!
+      // NOTE: according to the MapSet class, location sets are always is_box.
       if (this.isPoint(set)) {
         this.drawMarker(set)
       } else {
@@ -95,7 +106,8 @@ export default class extends Controller {
   }
 
   //
-  // MARKERS
+  //  MARKERS - used in info mapType (for certain sets)
+  //            and in observation mapType (can just pass latLng)
   //
 
   drawMarker(set) {
@@ -115,29 +127,7 @@ export default class extends Controller {
     } else {
       this.makeMarkerEditable(marker)
     }
-  }
-
-  makeMarkerEditable(marker) {
-    ["position_changed", "dragend"].forEach((eventName) => {
-      marker.addListener(eventName, () => {
-        const newPosition = marker.getPosition()?.toJSON() // latlng object
-        const bounds = this.boundsOfPoint(newPosition)
-        this.updateBoundsInputs(bounds)
-        this.getElevations(this.sampleElevationCenterOf(newPosition))
-      })
-    })
-    this.marker = marker
-  }
-
-  // For point markers: make a clickable
-  giveMarkerInfoWindow(set, marker) {
-    const info_window = new google.maps.InfoWindow({
-      content: set.caption
-    })
-
-    google.maps.event.addListener(marker, "click", () => {
-      info_window.open(this.map, marker)
-    })
+    this.map.panTo(marker.getPosition()?.toJSON())
   }
 
   placeMarker(location) {
@@ -149,8 +139,33 @@ export default class extends Controller {
     this.map.panTo(location)
   }
 
+  makeMarkerEditable(marker) {
+    ["position_changed", "dragend"].forEach((eventName) => {
+      marker.addListener(eventName, () => {
+        const newPosition = marker.getPosition()?.toJSON() // latlng object
+        const bounds = this.boundsOfPoint(newPosition)
+        this.updateBoundsInputs(bounds)
+        this.getElevations(this.sampleElevationCenterOf(newPosition))
+        this.map.panTo(newPosition)
+      })
+    })
+    this.marker = marker
+  }
+
+  // For point markers: make a clickable InfoWindow
+  giveMarkerInfoWindow(set, marker) {
+    const info_window = new google.maps.InfoWindow({
+      content: set.caption
+    })
+
+    google.maps.event.addListener(marker, "click", () => {
+      info_window.open(this.map, marker)
+    })
+  }
+
   //
-  // RECTANGLES may have info windows, so they need the whole set
+  //  RECTANGLES For info mapType, need to pass the whole set.
+  //             For location mapType, the set can just be bounds.
   //
 
   drawRectangle(set) {
@@ -175,6 +190,15 @@ export default class extends Controller {
     this.map.fitBounds(bounds)
   }
 
+  placeRectangle(extents) {
+    if (!this.rectangle) {
+      this.drawRectangle(extents)
+    } else {
+      this.rectangle.setBounds(extents)
+    }
+    this.map.fitBounds(extents) // overwrite viewport (may zoom in a bit?)
+  }
+
   // possibly also listen to "dragstart", "drag" ? not necessary.
   makeRectangleEditable(rectangle) {
     ["bounds_changed", "dragend"].forEach((eventName) => {
@@ -183,6 +207,7 @@ export default class extends Controller {
         // console.log({ newBounds })
         this.updateBoundsInputs(newBounds)
         this.getElevations(this.sampleElevationPointsOf(newBounds))
+        this.map.fitBounds(newBounds)
       })
     })
     this.rectangle = rectangle
@@ -202,17 +227,8 @@ export default class extends Controller {
     })
   }
 
-  placeRectangle(extents) {
-    if (!this.rectangle) {
-      this.drawRectangle(extents)
-    } else {
-      this.rectangle.setBounds(extents)
-    }
-    this.map.fitBounds(extents) // overwrite viewport (may zoom in a bit?)
-  }
-
   //
-  // COORDINATES
+  //  COORDINATES
   //
 
   // Every MapSet should have properties north, south, east, west (plus corners)
@@ -268,6 +284,10 @@ export default class extends Controller {
     return { lat: lat, lng: lng }
   }
 
+  //
+  //  COORDINATES - ELEVATION
+  //
+
   sampleElevationPoints() {
     let points
     if (this.marker) {
@@ -308,14 +328,16 @@ export default class extends Controller {
   }
 
   //
-  // FORM INPUTS : Functions for altering the map from form inputs
+  //  FORM INPUTS : Functions for altering the map from form inputs
   //
 
+  // Action called from the location form ns_ew_hi_lo inputs onChange
   startKeyPressTimer() {
-    this.keypress_id = setTimeout(this.textToMap(), 500)
+    this.keypress_id = setTimeout(this.mapExtentInputs(), 500)
   }
 
-  textToMap() {
+  // Buffered by the above
+  mapExtentInputs() {
     const north = parseFloat(this.northInputTarget.value)
     const south = parseFloat(this.southInputTarget.value)
     const east = parseFloat(this.eastInputTarget.value)
@@ -332,7 +354,7 @@ export default class extends Controller {
 
   findOnMap() {
     this.findOnMapTarget.disabled = true
-    let address = this.locationNameTarget.value
+    let address = this.placeInputTarget.value
 
     if (this.location_format == "scientific") {
       address = address.split(/, */).reverse().join(", ")
@@ -374,8 +396,8 @@ export default class extends Controller {
     // }
   }
 
-  // Maybe remove extentsForInput if we're not going to do point extents?
-  // Extents not needed on obs form
+  // TODO: remove extentsForInput and boundsOfPoint if we're not going to allow
+  // Google API points to be locations. Extents not needed on obs form
   updateFields(viewport, extents, center) {
     let points = [] // for elevation
     if (this.hasNorthInputTarget) {
@@ -390,9 +412,10 @@ export default class extends Controller {
       //   this.updateBoundsInputs(this.boundsOfPoint(center))
       //   points = this.sampleElevationCenterOf(center)
       // }
+    } else if (this.hasLatInputTarget) {
+      this.updateLatLngInputs(center)
+      points = this.sampleElevationCenterOf(center)
     }
-    // else if (this.hasLatInputTarget)
-    //   this.updateLatLngInputs(center)
     if (points)
       this.getElevations(points) // updates inputs
   }
@@ -405,19 +428,18 @@ export default class extends Controller {
     this.eastInputTarget.value = bounds?.east
   }
 
-  // For possible consolidation with obs-form-map
-  // updateLatLngInputs(center) {
-  //   this.latInputTarget.value = center.lat
-  //   this.lngInputTarget.value = center.lng
-  // }
+  // For consolidation with obs-form-map
+  updateLatLngInputs(center) {
+    this.latInputTarget.value = center.lat
+    this.lngInputTarget.value = center.lng
+  }
 
   // change action on the "Get Elevation" button to updateElevationInputs?
   getElevations(points = null) {
-    // action for the "Get Elevation" button on a form sends no points
+    // "Get Elevation" button on a form sends no points
     if (!points)
       points = this.sampleElevationPoints() // returns an array
 
-    // const elevationService = new google.maps.ElevationService
     const locationElevationRequest = { locations: points }
 
     this.elevationService.getElevationForLocations(locationElevationRequest,
@@ -440,9 +462,10 @@ export default class extends Controller {
       // console.log({ hiLo })
       this.lowInputTarget.value = parseFloat(hiLo.low)
       this.highInputTarget.value = parseFloat(hiLo.high)
-    } // else if (this.hasAltInputTarget) { // should be just one result
-    //    this.altInputTarget.value = parseFloat(results[0].elevation)
-    // }
+    } else if (this.hasAltInputTarget) {
+      // should just need one result
+      this.altInputTarget.value = parseFloat(results[0].elevation)
+    }
     if (this.hasGetElevationTarget)
       this.getElevationTarget.disabled = true
   }

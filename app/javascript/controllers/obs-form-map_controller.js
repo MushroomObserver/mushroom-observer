@@ -3,12 +3,14 @@ import { Loader } from "@googlemaps/js-api-loader"
 
 // Connects to data-controller="observation-map"
 export default class extends Controller {
-  static targets = ["mapDiv", "mapOpen", "mapClear", "mapLocate",
+  static targets = ["mapDiv", "mapOpen", "mapClear", "findOnMap",
     "placeInput", "latInput", "lngInput", "altInput"]
 
   connect() {
     this.element.dataset.stimulus = "connected";
 
+    this.map_type = this.mapDivTarget.dataset.mapType
+    this.editable = (this.mapDivTarget.dataset.editable === "true")
     this.location_format = this.mapDivTarget.dataset.locationFormat
     this.opened = false
     this.indicatorUrl = this.mapDivTarget.dataset.indicatorUrl
@@ -50,13 +52,13 @@ export default class extends Controller {
     this.mapOpenTarget.style.display = "none"
 
     this.addGmapsListener(this.map, 'click')
-    this.centerIfLatLngPresent();
+    this.mapPointInputs();
   }
 
   // check if `Lat` & `Lng` fields already populated on load if so, drop a
   // pin on that location and center. otherwise, check if a `Where` field
-  // has been prepopulated and use that to focus map
-  centerIfLatLngPresent() {
+  // has been prepopulated and use that to focus map and drop a marker.
+  mapPointInputs() {
     if (this.latInputTarget.value !== '' && this.lngInputTarget.value !== '') {
       this.calculateMarker()
       this.map.setCenter(location)
