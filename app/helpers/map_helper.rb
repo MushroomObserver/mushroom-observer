@@ -93,8 +93,8 @@ module MapHelper
       elsif obj.observation?
         if obj.location
           obj.location.display_name
-        elsif obj.lat # Observations have the attr. long, not lng
-          "#{format_latitude(obj.lat)} #{format_longitude(obj.long)}"
+        elsif obj.lat # Observations have the attr. `long`, not `lng`
+          "#{format_latitude(obj.lat)} #{format_longitude(obj.lng)}"
         end
       end
     end.compact_blank.uniq

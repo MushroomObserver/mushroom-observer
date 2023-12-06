@@ -154,7 +154,7 @@ module Mappable
       set.update_extents_with_box(loc)
     end
 
-    # loc may be an observation (with long) or a set (with lng)
+    # loc may be an observation, MinimalObservation or a set (with lng)
     def round_lat_lng_to_precision(loc, prec)
       if prec > MIN_PRECISION
         return [round_number(loc.lat, prec), round_number(loc.lng, prec)]

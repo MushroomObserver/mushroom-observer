@@ -676,6 +676,13 @@ class Observation < AbstractModel
     lat && location && !location.lat_long_close?(lat, long)
   end
 
+  # Alias for access by Mappable::CollapsibleCollectionOfObjects
+  # which must provide `lng` for Google Maps from an obs OR a MapSet
+  # Makes related methods so much simpler: parallel data types.
+  def lng
+    long
+  end
+
   def place_name_and_coordinates
     if lat.present? && long.present?
       lat_string = format_coordinate(lat, "N", "S")
