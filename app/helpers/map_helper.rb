@@ -93,7 +93,7 @@ module MapHelper
       elsif obj.observation?
         if obj.location
           obj.location.display_name
-        elsif obj.lat
+        elsif obj.lat # Observations have the attr. long, not lng
           "#{format_latitude(obj.lat)} #{format_longitude(obj.long)}"
         end
       end
@@ -170,7 +170,7 @@ module MapHelper
   # These are coords printed in text
   def mapset_coords(set)
     if set.is_point
-      format_latitude(set.lat) + safe_nbsp + format_longitude(set.long)
+      format_latitude(set.lat) + safe_nbsp + format_longitude(set.lng)
     else
       content_tag(:center,
                   format_latitude(set.north) + safe_br +

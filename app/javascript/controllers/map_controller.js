@@ -39,7 +39,7 @@ export default class extends Controller {
     if (this.collection) {
       mapCenter = {
         lat: this.collection.extents.lat,
-        lng: this.collection.extents.long
+        lng: this.collection.extents.lng
       }
     } else {
       mapCenter = { lat: -7, lng: -47 }
@@ -126,8 +126,8 @@ export default class extends Controller {
       this.giveMarkerInfoWindow(set, marker)
     } else {
       this.makeMarkerEditable(marker)
+      this.map.panTo(marker.getPosition()?.toJSON()) // Only pan if obs map
     }
-    this.map.panTo(marker.getPosition()?.toJSON())
   }
 
   placeMarker(location) {
@@ -182,12 +182,12 @@ export default class extends Controller {
 
     const rectangle = new google.maps.Rectangle(rectangleOptions)
 
-    if (this.editable) {
-      this.makeRectangleEditable(rectangle)
-    } else {
+    if (!this.editable) {
       this.giveRectangleInfoWindow(set, rectangle)
+    } else {
+      this.makeRectangleEditable(rectangle)
+      this.map.fitBounds(bounds) // Only fit bounds if it's a location map
     }
-    this.map.fitBounds(bounds)
   }
 
   placeRectangle(extents) {

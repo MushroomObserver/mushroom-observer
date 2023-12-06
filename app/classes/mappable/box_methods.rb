@@ -46,6 +46,11 @@ module Mappable
       nil
     end
 
+    # Needed for MapSet. (Google Maps takes lng, not long)
+    def lng
+      long
+    end
+
     # Return center as [lat, long].
     def center
       [lat, long]
