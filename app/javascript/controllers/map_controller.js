@@ -76,9 +76,8 @@ export default class extends Controller {
         this.elevationService = new google.maps.ElevationService()
         this.geocoder = new google.maps.Geocoder()
 
-        if (this.map_type === "observation" &&
-          this.hasPlaceInputTarget && this.placeInputTarget.value) {
-          this.findOnMap()
+        if (this.map_type === "observation") {
+          this.findOnMap() // checks input
         } else if (Object.keys(this.collection.sets).length) {
           this.buildOverlays()
         }
@@ -353,7 +352,11 @@ export default class extends Controller {
     }
   }
 
+  // action can be called directly from a button, so check for input
   findOnMap() {
+    if (!this.hasPlaceInputTarget || !this.placeInputTarget.value)
+      return false
+
     this.findOnMapTarget.disabled = true
     let address = this.placeInputTarget.value
 
@@ -413,9 +416,9 @@ export default class extends Controller {
   }
 
   // Action attached to the "Get Elevation" button. (points is then the event)
-  getElevations(points = []) {
+  getElevations(points) {
     // "Get Elevation" button on a form sends this param
-    if (points?.params.points === "input")
+    if (points.hasOwnProperty('params') && points.params?.points === "input")
       points = this.sampleElevationPoints() // from marker or rectangle
 
     const locationElevationRequest = { locations: points }
@@ -547,7 +550,11 @@ export default class extends Controller {
     google.maps.event.addListener(this.map, 'click', (e) => {
       const location = e.latLng.toJSON()
       this.placeMarker(location)
-      this.updateFields(location)
+      this.map.setCenter(location)
+      const zoom = this.map.zoom
+      if (zoom < 20)
+        this.map.setZoom(zoom + 2)
+      this.updateFields(null, null, location)
     });
   }
 
