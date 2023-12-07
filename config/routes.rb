@@ -818,9 +818,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resources :visual_groups, id: /\d+/, shallow: true
   end
 
-  namespace :visual_groups do
-    resources :images, only: [:update]
-  end
+  match("/visual_groups/:visual_group_id/images/:id",
+        to: "visual_groups/images#update",
+        via: [:put, :patch],
+        as: "visual_group_image")
 
   ##############################################################################
   ###

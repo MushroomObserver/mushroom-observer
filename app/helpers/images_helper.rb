@@ -156,7 +156,7 @@ module ImagesHelper
     return tag.b(link_text) if link_text == state_text
 
     put_button(name: link_text,
-               path: visual_groups_image_path(
+               path: visual_group_image_path(
                  id: image_id, visual_group_id: visual_group.id, status: link
                ),
                title: link_text,
