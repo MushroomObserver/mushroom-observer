@@ -1,8 +1,7 @@
 <%=
 turbo_stream.replace("visual_group_status_links_#{image_id}") do
-  render(partial: "visual_groups/visual_group_status_links",
-         locals: { visual_group: visual_group,
-                   image_id: image_id,
-                   status: status })
+  visual_group_status_links(
+    visual_group: visual_group, image_id: image_id, status: status
+  )
 end
 %>

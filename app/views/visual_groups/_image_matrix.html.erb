@@ -12,12 +12,9 @@
                                   context: :matrix_box)
             end %>
             <%= tag.div(class: "panel-body") do
-              render(partial: "visual_groups/visual_group_status_links",
-                     locals: {
-                       visual_group: visual_group,
-                       image_id: row[0],
-                       status: row[1]
-                     })
+              visual_group_status_links(
+                visual_group: visual_group, image_id: row[0], status: row[1]
+              )
             end %>
           <% end %>
         <% end %><!-- .matrix-box -->
