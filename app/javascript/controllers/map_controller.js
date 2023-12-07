@@ -76,14 +76,14 @@ export default class extends Controller {
         this.elevationService = new google.maps.ElevationService()
         this.geocoder = new google.maps.Geocoder()
 
-        if (this.map_type === "observation") {
+        if (this.map_type === "location") {
           this.findOnMap() // checks input
         } else if (Object.keys(this.collection.sets).length) {
           this.buildOverlays()
         }
       })
       .catch((e) => {
-        console.log("error loading gmaps")
+        console.error("error loading gmaps: " + e)
       })
   }
 
@@ -370,7 +370,8 @@ export default class extends Controller {
         this.respondToGeocode(results)
       })
       .catch((e) => {
-        alert("Geocode was not successful for the following reason: " + e)
+        console.error("Geocode was not successful: " + e)
+        // alert("Geocode was not successful for the following reason: " + e)
       });
   }
 

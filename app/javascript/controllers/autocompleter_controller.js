@@ -1017,7 +1017,7 @@ export default class extends Controller {
       val = val.substr(0, this.MAX_REQUEST_LINK);
 
     if (this.log) {
-      this.debug("Sending AJAX request: " + val);
+      this.debug("Sending fetch request: " + val);
     }
 
     // Need to doubly-encode this to prevent router from interpreting slashes,
@@ -1048,7 +1048,8 @@ export default class extends Controller {
         }
       }
     }).catch((error) => {
-      // console.error("Server Error:", error);
+      // alert("Server Error:", error);
+      console.error("Server Error:", error);
     });
   }
 

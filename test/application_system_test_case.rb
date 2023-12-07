@@ -23,7 +23,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     ApplicationController.allow_forgery_protection = true
 
     # experimental, does it fix pending logins?
-    Capybara.reset_sessions!
+    # Capybara.reset_sessions!
     # below is needed for cuprite
     Capybara.server = :webrick
     # Capybara.current_driver = :cuprite
