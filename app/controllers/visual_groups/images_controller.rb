@@ -13,7 +13,6 @@ module VisualGroups
       return unless visual_group
 
       included = update_visual_group_image(visual_group, image_id, status)
-      debugger
 
       # this is a turbo response
       render(partial: "visual_groups/images/update",
