@@ -8,8 +8,8 @@ module VisualGroupsHelper
       id: "visual_group_status_links_#{image_id}"
     ) do
       [
-        [nil, true, false].map do |state|
-          visual_group_status_link(visual_group, image_id, status, state)
+        [nil, true, false].map do |link|
+          visual_group_status_link(visual_group, image_id, status, link)
         end.safe_join("|"),
         [
           "#{:image_reuse_id.t}:",
@@ -25,12 +25,12 @@ module VisualGroupsHelper
     state_text = visual_group_status_text(state)
     return tag.b(link_text) if link_text == state_text
 
-    put_button(name: link_text,
-               path: visual_group_image_path(
-                 id: image_id, visual_group_id: visual_group.id, status: link
-               ),
-               title: link_text,
-               data: { turbo: true })
+    patch_button(name: link_text,
+                 path: visual_group_image_path(
+                   id: image_id, visual_group_id: visual_group.id, status: link
+                 ),
+                 title: link_text,
+                 data: { turbo: true })
   end
 
   # Determine the right string for visual group status from booleans
