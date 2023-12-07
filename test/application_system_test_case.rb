@@ -22,7 +22,9 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     # Be sure your test sets up/waits on authenticated requests correctly!
     ApplicationController.allow_forgery_protection = true
 
-    # needed for cuprite
+    # experimental, does it fix pending logins?
+    Capybara.reset_sessions!
+    # below is needed for cuprite
     Capybara.server = :webrick
     # Capybara.current_driver = :cuprite
     Capybara.server_host = "localhost"
@@ -33,7 +35,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     Capybara.default_normalize_ws = true
     # Usually, especially when using Selenium, developers tend to increase the
     # max wait time. With Cuprite, there is no need for that - except on GitHub.
-    # you can use a Capybara default value 2 here explicitly, but fails on CI.
+    # you can set the Capybara default value 2 here explicitly, but fails on CI.
     Capybara.default_max_wait_time = 3
     # Capybara.always_include_port = true
     # Capybara.raise_server_errors = true

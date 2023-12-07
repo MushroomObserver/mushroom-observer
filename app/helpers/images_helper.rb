@@ -150,30 +150,17 @@ module ImagesHelper
     "image-link ab-fab stretched-link"
   end
 
-  def visual_group_status_link(visual_group, image_id, state, link)
-    link_text = visual_group_status_text(link)
-    state_text = visual_group_status_text(state)
-    return tag.b(link_text) if link_text == state_text
-
-    put_button(name: link_text,
-               path: visual_groups_image_path(
-                 id: image_id, visual_group_id: visual_group.id, status: link
-               ),
-               title: link_text,
-               data: { turbo: true })
-  end
-
   # This is now a helper to avoid nested partials in loops - AN 2023
   # called in interactive_image above
   def image_vote_section_html(image, votes)
     return "" unless votes && image && User.current
 
-    tag.div(class: "vote-section") do
+    tag.div(class: "vote-section", id: "image_vote_#{image.id}") do
       image_vote_meter_and_links(image)
     end
   end
 
-  # called in votes update.js.erb
+  # called in votes update.erb
   def image_vote_meter_and_links(image)
     vote_pct = if image.vote_cache
                  ((image.vote_cache / Image.all_votes.length) * 100).floor

@@ -1,5 +1,5 @@
 <% @location.force_valid_lat_longs! %>
-<% map_args = { editable: true } %>
+<% map_args = { editable: true, map_type: "location" } %>
 
 <%= form_with(model: @location, url: action, id: "location_form") do |f| %>
 
@@ -24,7 +24,7 @@
         <%= tag.div(class: "input-group") do %>
           <%= f.text_field(:display_name, value: @display_name,
             class: "form-control",
-            data: { autofocus: true, map_target: "locationName" }
+            data: { autofocus: true, map_target: "placeInput" }
           ) %>
 
           <%= tag.span(class: "input-group-btn") do

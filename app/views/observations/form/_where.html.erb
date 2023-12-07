@@ -3,11 +3,7 @@
 
 <%# load_google_maps_api_script %>
 
-<%= tag.div(
-  id: "observation_where",
-  data: { controller: "obs-form-map" } #,
-          # action: "gmaps-loaded@window->obs-form-map#initializeMap" }
-) do %>
+<%= tag.div(id: "observation_where", data: { controller: "map" }) do %>
 
   <!-- WHERE_REASONS -->
   <%= render(partial: "shared/form_location_feedback",
@@ -19,7 +15,7 @@
     <div class="col-xs-12 col-sm-6">
       <%= autocompleter_field(
         form: f, field: :place_name, label: :WHERE.t + ":", between: :required,
-        autocomplete: :location, data: { obs_form_map_target: "placeInput" }
+        autocomplete: :location, data: { map_target: "placeInput" }
       ) %>
     </div>
     <div class="col-xs-12 col-sm-6">
@@ -42,8 +38,7 @@
       <%= js_button(
         button: :form_observations_locate_on_map.t,
         name: "locate_on_map", class: "map-locate my-3",
-        data: { obs_form_map_target: "mapLocate",
-                action: "obs-form-map#openMap obs-form-map#focusMap" }
+        data: { map_target: "findOnMap", action: "map#openMap map#findOnMap" }
       ) %>
       <%= help_block_with_arrow("up", id: "locate_on_map_help") do %>
         <%= :form_observations_locate_on_map_help.t %>
@@ -73,16 +68,17 @@
       <%= tag.div("", id: "observation_form_map",
                       class: "observation-form-map hidden",
                       data: { indicator_url: asset_path('indicator.gif'),
-                              obs_form_map_target: "mapDiv" } ) %>
+                              location_format: User.current_location_format,
+                              map_target: "mapDiv", editable: true,
+                              map_type: "observation" } ) %>
       <div>
         <%= js_button(button: :form_observations_open_map.t,
                       name: "map-open", class: "map-open",
-                      data: { obs_form_map_target: "mapOpen",
-                              action: "obs-form-map#openMap" }) %>
+                      data: { map_target: "mapOpen", action: "map#openMap" }) %>
         <%= js_button(button: :form_observations_clear_map.t,
                       name: "map-clear", class: "map-clear",
-                      data: { obs_form_map_target: "mapClear",
-                              action: "obs-form-map#clearMap" }) %>
+                      data: { map_target: "mapClear",
+                              action: "map#clearMap" }) %>
       </div>
     </div>
     <div class="col-sm-6">
@@ -98,22 +94,20 @@
         <div class="col-xs-12 col-sm-4">
           <%= text_field_with_label(
             form: f, field: :lat, label: :LATITUDE.t + ":",
-            data: { obs_form_map_target: "latInput",
-                    action: "obs-form-map#calculateMarker" }
+            data: { map_target: "latInput", action: "map#bufferInputs" }
           ) %>
         </div>
         <div class="col-xs-12 col-sm-4">
           <%= text_field_with_label(
             form: f, field: :long, label: :LONGITUDE.t + ":",
-            data: { obs_form_map_target: "lngInput",
-                    action: "obs-form-map#calculateMarker" }
+            data: { map_target: "lngInput", action: "map#bufferInputs" }
           ) %>
         </div>
         <div class="col-xs-12 col-sm-4">
           <%= text_field_with_label(
             form: f, field: :alt, label: :ALTITUDE.t + ":",
             append: "(#{:units_meters.t})",
-            data: { obs_form_map_target: "altInput" }
+            data: { map_target: "altInput" }
           ) %>
         </div>
         <div class="col-xs-12 col-sm-12">

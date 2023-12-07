@@ -8,6 +8,7 @@ module MapHelper
       map_div: "map_div",
       controller: "map",
       map_target: "mapDiv",
+      map_type: "info",
       editable: false,
       controls: [:large_map, :map_type].to_json,
       location_format: User.current_location_format # method has a default
@@ -92,8 +93,8 @@ module MapHelper
       elsif obj.observation?
         if obj.location
           obj.location.display_name
-        elsif obj.lat
-          "#{format_latitude(obj.lat)} #{format_longitude(obj.long)}"
+        elsif obj.lat # Observations have the attr. `long`, not `lng`
+          "#{format_latitude(obj.lat)} #{format_longitude(obj.lng)}"
         end
       end
     end.compact_blank.uniq
@@ -169,7 +170,7 @@ module MapHelper
   # These are coords printed in text
   def mapset_coords(set)
     if set.is_point
-      format_latitude(set.lat) + safe_nbsp + format_longitude(set.long)
+      format_latitude(set.lat) + safe_nbsp + format_longitude(set.lng)
     else
       content_tag(:center,
                   format_latitude(set.north) + safe_br +

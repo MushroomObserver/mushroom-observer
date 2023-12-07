@@ -5,7 +5,7 @@
         <div class="text-center">
           <%= text_field_with_label(
             form: f, field: :north, label: :NORTH.t + ":",
-            data: { map_target: "northInput", action: "map#startKeyPressTimer" }
+            data: { map_target: "northInput", action: "map#bufferInputs" }
           ) %>
         </div><!-- .text-center -->
       </div>
@@ -15,7 +15,7 @@
         <div class="text-center">
           <%= text_field_with_label(
             form: f, field: :west, label: :WEST.t + ":",
-            data: { map_target: "westInput", action: "map#startKeyPressTimer" }
+            data: { map_target: "westInput", action: "map#bufferInputs" }
           ) %>
         </div><!-- .text-center -->
       </div>
@@ -28,7 +28,7 @@
         <div class="text-center">
           <%= text_field_with_label(
             form: f, field: :east, label: :EAST.t + ":",
-            data: { map_target: "eastInput", action: "map#startKeyPressTimer" }
+            data: { map_target: "eastInput", action: "map#bufferInputs" }
           ) %>
         </div><!-- .text-center -->
       </div>
@@ -38,7 +38,7 @@
         <div class="text-center">
           <%= text_field_with_label(
             form: f, field: :south, label: :SOUTH.t + ":",
-            data: { map_target: "southInput", action: "map#startKeyPressTimer" }
+            data: { map_target: "southInput", action: "map#bufferInputs" }
           ) %>
         </div><!-- .text-center -->
       </div>
@@ -57,7 +57,8 @@
       <%= tag.button(
         :form_locations_get_elevation.l,
         type: :button, class: "btn btn-default",
-        data: { map_target: "getElevation", action: "map#getElevation" }
+        data: { map_target: "getElevation", action: "map#getElevations",
+                map_points_param: "input" }
       ) %>
     </div><!-- .text-center -->
   </div>
