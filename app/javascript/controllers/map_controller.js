@@ -352,7 +352,8 @@ export default class extends Controller {
     }
   }
 
-  // action can be called directly from a button, so check for input
+  // Action to geocode a location from a place name or address.
+  // Can be called directly from a button, so check for input value
   findOnMap() {
     if (!this.hasPlaceInputTarget || !this.placeInputTarget.value)
       return false
@@ -547,14 +548,22 @@ export default class extends Controller {
     this.calculateMarker()
   }
 
+  // Idk what's up with this. Does not seem to have any effect.
+  // The map as initiated seems to be already clickable (!) to place a marker
   makeMapClickable() {
-    google.maps.event.addListener(this.map, 'click', (e) => {
+    // this.map.clearListeners('click')
+    // google.maps.event.clearListeners(this.map, 'click')
+    // google.maps.event.addListener(this.map, 'click', (e) => {
+    this.map.addListener('click', (e) => {
       const location = e.latLng.toJSON()
       this.placeMarker(location)
+      this.marker.setVisible(true)
       this.map.setCenter(location)
-      const zoom = this.map.zoom
-      if (zoom < 20)
-        this.map.setZoom(zoom + 2)
+      // let zoom = this.map.getZoom()
+      // if (zoom < 15) {
+      //   console.log(zoom)
+      //   this.map.setZoom(zoom + 2)
+      // }
       this.updateFields(null, null, location)
     });
   }
