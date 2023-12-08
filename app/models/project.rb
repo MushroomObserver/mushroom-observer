@@ -102,7 +102,7 @@ class Project < AbstractModel
 
   def trusted_by?(user)
     member = project_members.find_by(user: user)
-    member&.trusted
+    member&.trust_level != "no_trust"
   end
 
   def can_join?(user)
@@ -173,7 +173,7 @@ class Project < AbstractModel
     observation.projects.each do |project|
       if project.is_admin?(user)
         member = project.project_members.find_by(user: observation.user)
-        return member&.trusted
+        return member&.trust_level != "no_trust"
       end
     end
     false

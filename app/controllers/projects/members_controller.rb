@@ -136,7 +136,7 @@ module Projects
 
     def set_trust(project, user, trusted)
       member = project.project_members.find_by(user:)
-      member.update(trusted:)
+      member.update(trust_level: trusted ? "hidden_gps" : "no_trust")
     end
 
     def update_admin_status(project, candidate)
@@ -177,8 +177,8 @@ module Projects
     def update_project_membership(project, type, user, add)
       project_member = ProjectMember.find_by(project:, user:)
       unless project_member
-        trusted = !project.open_membership
-        project_member = ProjectMember.create(project:, user:, trusted:)
+        trust_level = project.open_membership ? "no_trust" : "hidden_gps"
+        project_member = ProjectMember.create(project:, user:, trust_level:)
       end
       return unless project_member
       return if type == :admin || add

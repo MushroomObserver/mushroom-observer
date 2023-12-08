@@ -158,7 +158,7 @@ module Projects
         commit: :change_member_status_trust.l
       }
       put_requires_login(:update, params, target_user.login)
-      assert(project.project_members.find_by(user: target_user).trusted)
+      assert_equal(project.project_members.find_by(user: target_user).trust_level, "hidden_gps")
     end
 
     # trusting member revoking trust
@@ -171,7 +171,7 @@ module Projects
         commit: :change_member_status_revoke_trust.l
       }
       put_requires_login(:update, params, target_user.login)
-      assert_not(project.project_members.find_by(user: target_user).trusted)
+      assert_equal(project.project_members.find_by(user: target_user).trust_level, "no_trust")
     end
 
     # There are many other combinations that shouldn't work

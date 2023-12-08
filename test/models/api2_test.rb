@@ -2627,9 +2627,10 @@ class API2Test < UnitTestCase
                             rolfs_obs.images, :sort)
 
     proj = projects(:bolete_project)
+    proj.admin_group.users << rolf
     proj.user_group.users << rolf
     rolf.reload
-    assert_not(proj.observations.include?(rolfs_obs))
+     assert_not(proj.observations.include?(rolfs_obs))
     assert(proj.observations.include?(marys_obs))
     assert(rolfs_obs.can_edit?(rolf))
     assert(marys_obs.can_edit?(rolf))
