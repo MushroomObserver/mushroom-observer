@@ -43,42 +43,42 @@ export default class extends Controller {
       libraries: ["maps", "geocoding", "marker", "elevation"]
     })
 
-    let mapCenter
     if (this.collection) {
-      mapCenter = {
+      this.mapCenter = {
         lat: this.collection.extents.lat,
         lng: this.collection.extents.lng
       }
     } else {
-      mapCenter = { lat: -7, lng: -47 }
+      this.mapCenter = { lat: -7, lng: -47 }
     }
 
     // use center and zoom here
-    const mapOptions = {
-      center: mapCenter,
+    this.mapOptions = {
+      center: this.mapCenter,
       zoom: 1,
       mapTypeId: 'terrain',
       mapTypeControl: 'true'
     }
 
     // collection.extents is also a MapSet
-    let mapBounds
+    this.mapBounds = false
     if (this.collection) {
-      mapBounds = this.boundsOf(this.collection.extents)
+      this.mapBounds = this.boundsOf(this.collection.extents)
     }
 
     loader
       .load()
       .then((google) => {
-        this.map = new google.maps.Map(this.mapDivTarget, mapOptions)
-        if (mapBounds)
-          this.map.fitBounds(mapBounds)
         this.elevationService = new google.maps.ElevationService()
         this.geocoder = new google.maps.Geocoder()
 
+        if (this.map_type !== "observation")
+          this.drawMap()
+
         if (this.map_type === "location") {
           this.findOnMap() // checks input
-        } else if (Object.keys(this.collection.sets).length) {
+          // } else if (Object.keys(this.collection.sets).length) {
+        } else if (this.map_type === "info") {
           this.buildOverlays()
         }
       })
@@ -89,6 +89,13 @@ export default class extends Controller {
 
   helpDebug() {
     debugger
+  }
+
+  // We don't draw the map for the create obs form on load, to save on API
+  drawMap() {
+    this.map = new google.maps.Map(this.mapDivTarget, this.mapOptions)
+    if (this.mapBounds)
+      this.map.fitBounds(this.mapBounds)
   }
 
   //
@@ -544,12 +551,11 @@ export default class extends Controller {
     this.mapClearTarget.classList.remove("hidden")
     this.mapOpenTarget.style.display = "none"
 
+    this.drawMap()
     this.makeMapClickable()
     this.calculateMarker()
   }
 
-  // Idk what's up with this. Does not seem to have any effect.
-  // The map as initiated seems to be already clickable (!) to place a marker
   makeMapClickable() {
     // this.map.clearListeners('click')
     // google.maps.event.clearListeners(this.map, 'click')
@@ -559,11 +565,11 @@ export default class extends Controller {
       this.placeMarker(location)
       this.marker.setVisible(true)
       this.map.setCenter(location)
-      // let zoom = this.map.getZoom()
-      // if (zoom < 15) {
-      //   console.log(zoom)
-      //   this.map.setZoom(zoom + 2)
-      // }
+      let zoom = this.map.getZoom()
+      if (zoom < 15) {
+        // console.log(zoom)
+        this.map.setZoom(zoom + 2)
+      }
       this.updateFields(null, null, location)
     });
   }

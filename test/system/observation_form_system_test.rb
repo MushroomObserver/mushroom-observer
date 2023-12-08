@@ -132,12 +132,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_lat", with: "")
     assert_field("observation_long", with: "")
     assert_field("observation_alt", with: "")
-    # assert_field("observation_lat",
-    #              with: /#{PASADENA_EXTENTS[:lat].round(4)}/)
-    # assert_field("observation_long",
-    #              with: /#{PASADENA_EXTENTS[:lng].round(4)}/)
-    # assert_field("observation_alt",
-    #              with: /#{PASADENA_EXTENTS[:alt].round(4)}/)
 
     assert_field("naming_name", with: "")
     assert_no_checked_field("observation_is_collection_location")
@@ -152,8 +146,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     browser.keyboard.type(:down, :tab) # cursor down to first match + select row
     assert_field("observation_place_name", with: "Pasadena, California, USA")
     fill_in("observation_lat", with: " 12deg 34.56min N ")
-    fill_in("observation_long", with: " 123 45 6.78 W ")
+    fill_in("observation_long", with: " 123° 45 6.78 W ")
     fill_in("observation_alt", with: " 56 ft. ")
+    # capybara may randomly drop spaces from the above
 
     fill_in("naming_name", with: "Agaricus campe")
     assert_selector(".auto_complete")
@@ -304,7 +299,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_no_selector(".set_thumb_image")
     end
     sleep(3)
-    # debugger
 
     within("#observation_form") { click_commit }
 
@@ -313,6 +307,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     #   User.current is getting dropped during the save, and message is
     #     `Observation doesn't have naming with ID=`
     #
+    # debugger
 
     # It should take us to create a new location
     assert_selector("body.locations__new")
