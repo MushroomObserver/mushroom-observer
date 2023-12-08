@@ -3150,7 +3150,7 @@
   change_member_status_change_status: Change Status
   change_member_status_edit: Edit Project
   change_member_status_make_admin: Make Admin
-  change_member_status_make_admin_help: Make Admin - Allows [:user] to perform admin functions.  They will be able to add or remove members, change the ability for other members to perform admin functions, and edit any draft names for this project.  [:user] is also made a member of the project if they are not already.
+  change_member_status_make_admin_help: Make Admin - Allows [:user] to perform admin functions.  They will be able to add or remove members, change the ability for other members to perform admin functions, and edit any content associated with this project from users who trust admins for editing.  This [:user] is also made a member of the project if they are not already.
   change_member_status_make_member: Make Regular Member
   change_member_status_make_member_help: Make Regular Member - Ensures that [:user] is a member of the project, but not in the admin group. Afterwords the [:user] will be able to view and create draft names for this project.  They will be the only non-admin members able to edit their drafts.
   change_member_status_members: Current Project Members
