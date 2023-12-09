@@ -28,3 +28,4 @@ pin "jstz" # @2.1.1
 
 pin_all_from "app/javascript/src", under: "src", to: "src"
 pin "jquery-events-to-dom-events" # @1.1.0
+pin "geo-coordinates-parser" # @1.6.3

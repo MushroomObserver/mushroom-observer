@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { Loader } from "@googlemaps/js-api-loader"
+import { convert } from "geo-coordinates-parser"
 
 // Connects to data-controller="map"
 // The connected element can be a map, or in the case of a form with a map UI,
@@ -16,6 +17,7 @@ export default class extends Controller {
     // map_types: info (collection), location (rectangle), observation (marker)
     this.map_type = this.mapDivTarget.dataset.mapType
     this.editable = (this.mapDivTarget.dataset.editable === "true")
+    this.opened = this.map_type !== "observation"
     this.marker = null // Only gets set if we're in edit mode
     this.rectangle = null // Only gets set if we're in edit mode
     this.location_format = this.mapDivTarget.dataset.locationFormat
@@ -249,112 +251,18 @@ export default class extends Controller {
     })
   }
 
-  //
-  //  COORDINATES
-  //
-
-  // Every MapSet should have properties north, south, east, west (plus corners)
-  // Alternatively, just send a simple object (e.g. `extents`) with `nsew` props
-  boundsOf(set) {
-    let bounds = {}
-    if (set?.north) {
-      bounds = {
-        north: set.north, south: set.south, east: set.east, west: set.west
-      }
-    }
-    return bounds
-  }
-
-  // findOnMap may fill the extents of a rectangle or a point in the inputs.
-  // extentsForInput(extents, center) {
-  //   let bounds
-  //   if (extents) {
-  //     bounds = this.boundsOf(extents)
-  //   } else if (center) {
-  //     bounds = this.boundsOfPoint(center)
-  //   }
-  //   return bounds
-  // }
-
-  // When you need to turn a point into some "bounds", e.g. to fill inputs
-  // boundsOfPoint(center) {
-  //   const bounds = {
-  //     north: center.lat,
-  //     south: center.lat,
-  //     east: center.lng,
-  //     west: center.lng
-  //   }
-  //   return bounds
-  // }
-
-  // Each corner (e.g. north_east) is an array [lat, lng]
-  cornersOf(set) {
-    const corners = {
-      ne: set.north_east,
-      se: set.south_east,
-      sw: set.south_west,
-      nw: set.north_west
-    }
-    return corners
-  }
-
-  // Computes the center of a Google Maps Rectangle's LatLngBoundsLiteral object
-  centerFromBounds(bounds) {
-    let lat = (bounds?.north + bounds?.south) / 2.0
-    let lng = (bounds?.east + bounds?.west) / 2.0
-    if (bounds?.west > bounds?.east) { lng += 180 }
-    return { lat: lat, lng: lng }
-  }
-
-  //
-  //  COORDINATES - ELEVATION
-  //
-
-  sampleElevationPoints() {
-    let points
-    if (this.marker) {
-      const position = this.marker.getPosition().toJSON()
-      points = [position] // this.sampleElevationCenterOf(position)
-    } else if (this.rectangle) {
-      const bounds = this.rectangle.getBounds().toJSON()
-      points = this.sampleElevationPointsOf(bounds)
-    }
-    return points
-  }
-
-  // Computes an array of arrays of [lat, lng] from a set of bounds on the fly
-  // Returns array of Google Map points {lat:, lng:} LatLngLiteral objects
-  sampleElevationPointsOf(bounds) {
-    return [
-      { lat: bounds?.south, lng: bounds?.west },
-      { lat: bounds?.north, lng: bounds?.west },
-      { lat: bounds?.north, lng: bounds?.east },
-      { lat: bounds?.south, lng: bounds?.east },
-      this.centerFromBounds(bounds)
-    ]
-  }
-
-  // Sorts the LocationElevationResponse.results.elevation objects and
-  // computes the high and low of these results using bounds and center
-  highAndLowOf(results) {
-    let altitudesArray = results.map((result) => {
-      return result.elevation
-    }).sort((a, b) => { return a - b })
-    const last = altitudesArray.length - 1
-    return { high: altitudesArray[last], low: altitudesArray[0] }
-  }
-
 
   //
   //  FORM INPUTS : Functions for altering the map from form inputs
   //
 
-  // Action called from the location form ns_ew_hi_lo inputs onChange
-  // and from observation form lat lng inputs (debounces inputs)
+  // Action called from the location form n_s_e_w_hi_lo inputs onChange
+  // and from observation form lat_lng inputs (debounces inputs)
   bufferInputs() {
     if (this.map_type === "location") {
       this.keypress_id = setTimeout(this.calculateRectangle(), 500)
-    } else if (this.map_type === "observation") {
+    }
+    else if (this.map_type === "observation" && this.opened) {
       this.keypress_id = setTimeout(this.calculateMarker(), 500)
     }
   }
@@ -450,11 +358,12 @@ export default class extends Controller {
     if (this.hasLowInputTarget) {
       const hiLo = this.highAndLowOf(results)
       // console.log({ hiLo })
-      this.lowInputTarget.value = parseFloat(hiLo.low)
-      this.highInputTarget.value = parseFloat(hiLo.high)
+      this.lowInputTarget.value = this.roundOff(parseFloat(hiLo.low))
+      this.highInputTarget.value = this.roundOff(parseFloat(hiLo.high))
     } else if (this.hasAltInputTarget) {
       // should just need one result
-      this.altInputTarget.value = parseFloat(results[0].elevation)
+      this.altInputTarget.value =
+        this.roundOff(parseFloat(results[0].elevation))
     }
     if (this.hasGetElevationTarget)
       this.getElevationTarget.disabled = true
@@ -495,10 +404,10 @@ export default class extends Controller {
 
   // takes a LatLngBoundsLiteral object {south:, west:, north:, east:}
   updateBoundsInputs(bounds) {
-    this.southInputTarget.value = bounds?.south
-    this.westInputTarget.value = bounds?.west
-    this.northInputTarget.value = bounds?.north
-    this.eastInputTarget.value = bounds?.east
+    this.southInputTarget.value = this.roundOff(bounds?.south)
+    this.westInputTarget.value = this.roundOff(bounds?.west)
+    this.northInputTarget.value = this.roundOff(bounds?.north)
+    this.eastInputTarget.value = this.roundOff(bounds?.east)
   }
 
   //
@@ -520,9 +429,20 @@ export default class extends Controller {
     }
   }
 
+  // Convert from human readable and do a rough check if they make sense
   validateLatLngInputs() {
-    let lat = parseFloat(this.latInputTarget.value),
+    const origLat = this.latInputTarget.value,
+      origLng = this.lngInputTarget.value
+    let lat, lng
+    try {
+      let coords = convert(origLat + " " + origLng)
+      lat = coords.decimalLatitude,
+        lng = coords.decimalLongitude
+    }
+    catch {
+      lat = parseFloat(this.latInputTarget.value)
       lng = parseFloat(this.lngInputTarget.value)
+    }
 
     if (!lat || !lng)
       return false
@@ -530,13 +450,15 @@ export default class extends Controller {
       return false
     const location = { lat: lat, lng: lng }
 
+    this.updateLatLngInputs(location)
     return location
   }
 
-  // For consolidation with obs-form-map
+  // Update inputs with a point's location from map UI
   updateLatLngInputs(center) {
-    this.latInputTarget.value = center.lat
-    this.lngInputTarget.value = center.lng
+    // This is like toFixed(5), but faster and returns a number
+    this.latInputTarget.value = this.roundOff(center.lat)
+    this.lngInputTarget.value = this.roundOff(center.lng)
   }
 
   // Action called by the "Open Map" button only
@@ -559,8 +481,8 @@ export default class extends Controller {
   makeMapClickable() {
     // this.map.clearListeners('click')
     // google.maps.event.clearListeners(this.map, 'click')
-    // google.maps.event.addListener(this.map, 'click', (e) => {
-    this.map.addListener('click', (e) => {
+    google.maps.event.addListener(this.map, 'click', (e) => {
+      // this.map.addListener('click', (e) => {
       const location = e.latLng.toJSON()
       this.placeMarker(location)
       this.marker.setVisible(true)
@@ -574,6 +496,7 @@ export default class extends Controller {
     });
   }
 
+  // Action called from the "Clear Map" button
   clearMap() {
     const inputTargets = [
       this.latInputTarget, this.lngInputTarget, this.altInputTarget
@@ -582,5 +505,105 @@ export default class extends Controller {
       element.value = ''
     })
     this.marker.setVisible(false)
+  }
+
+  //
+  //  COORDINATES
+  //
+
+  // Every MapSet should have properties north, south, east, west (plus corners)
+  // Alternatively, just send a simple object (e.g. `extents`) with `nsew` props
+  boundsOf(set) {
+    let bounds = {}
+    if (set?.north) {
+      bounds = {
+        north: set.north, south: set.south, east: set.east, west: set.west
+      }
+    }
+    return bounds
+  }
+
+  // findOnMap may fill the extents of a rectangle or a point in the inputs.
+  // extentsForInput(extents, center) {
+  //   let bounds
+  //   if (extents) {
+  //     bounds = this.boundsOf(extents)
+  //   } else if (center) {
+  //     bounds = this.boundsOfPoint(center)
+  //   }
+  //   return bounds
+  // }
+
+  // When you need to turn a point into some "bounds", e.g. to fill inputs
+  // boundsOfPoint(center) {
+  //   const bounds = {
+  //     north: center.lat,
+  //     south: center.lat,
+  //     east: center.lng,
+  //     west: center.lng
+  //   }
+  //   return bounds
+  // }
+
+  // Each corner (e.g. north_east) is an array [lat, lng]
+  cornersOf(set) {
+    const corners = {
+      ne: set.north_east,
+      se: set.south_east,
+      sw: set.south_west,
+      nw: set.north_west
+    }
+    return corners
+  }
+
+  // Computes the center of a Google Maps Rectangle's LatLngBoundsLiteral object
+  centerFromBounds(bounds) {
+    let lat = (bounds?.north + bounds?.south) / 2.0
+    let lng = (bounds?.east + bounds?.west) / 2.0
+    if (bounds?.west > bounds?.east) { lng += 180 }
+    return { lat: lat, lng: lng }
+  }
+
+  //
+  //  COORDINATES - ELEVATION
+  //
+
+  sampleElevationPoints() {
+    let points
+    if (this.marker) {
+      const position = this.marker.getPosition().toJSON()
+      points = [position] // this.sampleElevationCenterOf(position)
+    } else if (this.rectangle) {
+      const bounds = this.rectangle.getBounds().toJSON()
+      points = this.sampleElevationPointsOf(bounds)
+    }
+    return points
+  }
+
+  // Computes an array of arrays of [lat, lng] from a set of bounds on the fly
+  // Returns array of Google Map points {lat:, lng:} LatLngLiteral objects
+  sampleElevationPointsOf(bounds) {
+    return [
+      { lat: bounds?.south, lng: bounds?.west },
+      { lat: bounds?.north, lng: bounds?.west },
+      { lat: bounds?.north, lng: bounds?.east },
+      { lat: bounds?.south, lng: bounds?.east },
+      this.centerFromBounds(bounds)
+    ]
+  }
+
+  // Sorts the LocationElevationResponse.results.elevation objects and
+  // computes the high and low of these results using bounds and center
+  highAndLowOf(results) {
+    let altitudesArray = results.map((result) => {
+      return result.elevation
+    }).sort((a, b) => { return a - b })
+    const last = altitudesArray.length - 1
+    return { high: altitudesArray[last], low: altitudesArray[0] }
+  }
+
+  roundOff(number) {
+    const rounded = Math.round(number * 100000) / 100000
+    return rounded
   }
 }

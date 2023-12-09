@@ -145,10 +145,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector(".auto_complete")
     browser.keyboard.type(:down, :tab) # cursor down to first match + select row
     assert_field("observation_place_name", with: "Pasadena, California, USA")
-    fill_in("observation_lat", with: " 12deg 34.56min N ")
-    fill_in("observation_long", with: " 123° 45 6.78 W ")
+    # the validator will reject internally-inconsistent notation.
+    fill_in("observation_lat", with: " 12deg 35.56min N ")
+    fill_in("observation_long", with: " 121deg 33.15min E ")
     fill_in("observation_alt", with: " 56 ft. ")
-    # capybara may randomly drop spaces from the above
 
     fill_in("naming_name", with: "Agaricus campe")
     assert_selector(".auto_complete")
