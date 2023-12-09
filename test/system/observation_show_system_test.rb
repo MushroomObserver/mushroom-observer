@@ -242,6 +242,11 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       assert_selector(".auto_complete")
       browser.keyboard.type(:down, :tab)
       assert_no_selector(".auto_complete")
+      assert_selector("#naming_vote_value")
+      select("Doubtful", from: "naming_vote_value")
+      # this is where test problems occurred:
+      # Observations::NamingsController#create was losing User.current somehow
+      # so the fresh naming_table sometimes printed with no edit/destroy buttons
       click_commit
     end
     assert_no_selector("#modal_naming_#{obs.id}")
@@ -250,6 +255,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_equal(n_d.text_name, nam.text_name)
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)
+      assert_selector(".destroy_naming_link_#{nam.id}")
       assert_selector("#naming_vote_form_#{nam.id}")
       select("Could Be", from: "vote_value_#{nam.id}")
     end
@@ -263,7 +269,6 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     # assert_selector("#mo_ajax_progress", wait: 4)
     # assert_selector("#mo_ajax_progress_caption",
     #                 text: /#{:show_namings_saving.l}/)
-    sleep(6)
 
     assert_no_selector("#mo_ajax_progress")
     assert_selector("#title", text: /#{nam.text_name}/)
@@ -280,10 +285,6 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       find(:css, ".close").click
     end
     assert_no_selector("#modal_naming_votes_#{nam.id}")
-
-    # this is where test problems occurred:
-    # naming row was getting displayed before naming had saved
-    # so it was printed with no edit/destroy buttons.
 
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)

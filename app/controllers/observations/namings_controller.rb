@@ -27,6 +27,7 @@ module Observations
     end
 
     def create
+      @user = User.current = session_user # idk why, create was losing this
       @params = NamingParams.new(params[:naming])
       @params.observation =
         load_for_show_observation_or_goto_index(params[:observation_id])
