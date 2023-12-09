@@ -123,20 +123,24 @@ module Projects
     def update_trust_status(project, candidate)
       if params[:commit] == :change_member_status_revoke_trust.l
         flash_notice(:change_member_status_revoke_trust_flash.l)
-        set_trust(project, candidate, false)
+        set_trust(project, candidate, "no_trust")
         true
-      elsif params[:commit] == :change_member_status_trust.l
-        flash_notice(:change_member_status_trust_flash.l)
-        set_trust(project, candidate, true)
+      elsif params[:commit] == :change_member_hidden_gps_trust.l
+        flash_notice(:change_member_hidden_gps_trust_flash.l)
+        set_trust(project, candidate, "hidden_gps")
+        true
+      elsif params[:commit] == :change_member_editing_trust.l
+        flash_notice(:change_member_editing_trust_flash.l)
+        set_trust(project, candidate, "editing")
         true
       else
         false
       end
     end
 
-    def set_trust(project, user, trusted)
+    def set_trust(project, user, trust_level)
       member = project.project_members.find_by(user:)
-      member.update(trust_level: trusted ? "hidden_gps" : "no_trust")
+      member.update(trust_level:)
     end
 
     def update_admin_status(project, candidate)

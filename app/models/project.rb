@@ -105,6 +105,11 @@ class Project < AbstractModel
     member&.trust_level != "no_trust"
   end
 
+  def can_edit_content?(user)
+    member = project_members.find_by(user: user)
+    member&.trust_level == "editing"
+  end
+
   def can_join?(user)
     open_membership && !is_member?(user)
   end
