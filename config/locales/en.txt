@@ -3096,6 +3096,7 @@
   # ADMIN-TYPE PAGES
 
   # project/<id>/members/new
+  add_members_with_gps_trust: Hidden GPS data may be shared with project admins.
   add_members_change_status: Change Status
   add_members_denied: "Permission denied: only admins for a project can add new members."
   add_members_title: Add [:users] to [title]

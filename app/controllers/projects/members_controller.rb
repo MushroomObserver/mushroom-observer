@@ -181,8 +181,9 @@ module Projects
     def update_project_membership(project, type, user, add)
       project_member = ProjectMember.find_by(project:, user:)
       unless project_member
-        trust_level = project.open_membership ? "no_trust" : "hidden_gps"
-        project_member = ProjectMember.create(project:, user:, trust_level:)
+        project_member = ProjectMember.create(project:, user:,
+                                              trust_level: "hidden_gps")
+        flash_notice(:add_members_with_gps_trust.l)
       end
       return unless project_member
       return if type == :admin || add
