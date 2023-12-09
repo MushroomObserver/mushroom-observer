@@ -3,12 +3,12 @@
 eol_member_rolf:
   project: eol_project
   user: rolf
-  trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>
+  trust_level: <%= ProjectMember.trust_levels[:editing] %>
 
 eol_member_mary:
   project: eol_project
   user: mary
-  trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>
+  trust_level: <%= ProjectMember.trust_levels[:editing] %>
 
 eol_member_katrina:
   project: eol_project
@@ -18,12 +18,12 @@ eol_member_katrina:
 bolete_dick:
   project: bolete_project
   user: dick
-  trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>
+  trust_level: <%= ProjectMember.trust_levels[:editing] %>
 
 bolete_mary:
   project: bolete_project
   user: mary
-  trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>
+  trust_level: <%= ProjectMember.trust_levels[:editing] %>
 
 open_member_mary:
   project: open_membership_project

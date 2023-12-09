@@ -163,7 +163,7 @@ class Project < AbstractModel
 
     group_ids = user.user_group_ids
     obj.projects.each do |project|
-      next unless project.trusted_by?(obj.user)
+      next unless project.can_edit_content?(obj.user)
       return true if group_ids.member?(project.admin_group_id)
     end
     false
