@@ -145,9 +145,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector(".auto_complete")
     browser.keyboard.type(:down, :tab) # cursor down to first match + select row
     assert_field("observation_place_name", with: "Pasadena, California, USA")
-    # the validator will reject internally-inconsistent notation.
-    fill_in("observation_lat", with: " 12deg 35.56min N ")
-    fill_in("observation_long", with: " 121deg 33.15min E ")
+    # geo-coordinates-parser will reject internally-inconsistent notation.
+    fill_in("observation_lat", with: " 12deg 36.75min N ") # == 12.6125
+    fill_in("observation_long", with: " 121deg 33.14min E ") # == 121.5523
     fill_in("observation_alt", with: " 56 ft. ")
 
     fill_in("naming_name", with: "Agaricus campe")
@@ -379,8 +379,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_select("observation_when_3i", text: "14")
     assert_field("observation_place_name",
                  with: "Pasadena, Some Co., California, USA")
-    assert_field("observation_lat", with: "12.576")
-    assert_field("observation_long", with: "-123.7519")
+    assert_field("observation_lat", with: "12.6125") # was 12.5927
+    assert_field("observation_long", with: "121.5523") # was -121.5525
     assert_field("observation_alt", with: "17")
     assert_unchecked_field("observation_is_collection_location")
     assert_checked_field("observation_specimen")
@@ -489,9 +489,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_equal(expected_values[:location], new_obs.where)
       assert_equal(expected_values[:location], new_obs.location.display_name)
     end
-    assert_gps_equal(expected_values[:lat], new_obs.lat)
-    assert_gps_equal(expected_values[:long], new_obs.long)
-    assert_gps_equal(expected_values[:alt], new_obs.alt)
+    assert_gps_equal(expected_values[:lat], new_obs.lat.to_f)
+    assert_gps_equal(expected_values[:long], new_obs.long.to_f)
+    assert_gps_equal(expected_values[:alt], new_obs.alt.to_f)
   end
 
   def assert_observation_has_correct_name(expected_values)
@@ -580,8 +580,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       when: Date.parse("2010-03-14"),
       where: "Pasadena, California, USA",
       location: nil,
-      lat: 12.5760,
-      long: -123.7519,
+      lat: 12.6125, # was 12.5760 values tweaked to move it to land
+      long: 121.5523, # was -123.7519 was in the ocean
       alt: 17,
       name: names(:agaricus_campestris),
       vote: Vote.next_best_vote,

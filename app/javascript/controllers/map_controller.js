@@ -434,11 +434,13 @@ export default class extends Controller {
     const origLat = this.latInputTarget.value,
       origLng = this.lngInputTarget.value
     let lat, lng
+
     try {
       let coords = convert(origLat + " " + origLng)
       lat = coords.decimalLatitude,
         lng = coords.decimalLongitude
     }
+    // Toss any degree-minute-second notation and just take the first number
     catch {
       lat = parseFloat(this.latInputTarget.value)
       lng = parseFloat(this.lngInputTarget.value)
@@ -453,6 +455,13 @@ export default class extends Controller {
     this.updateLatLngInputs(location)
     return location
   }
+
+  // For reference:
+  // This is the regex used on the Ruby side to convert degree-minute-second
+  // geocoordinates to decimal degrees when saving raw values to db:
+  // lxxxitudeRegex() {
+  //   /^\s*(-?\d+(?:\.\d+)?)\s*(?:°|°|o|d|deg|,\s)?\s*(?:(?<![\d.])(\d+(?:\.\d+)?)\s*(?:'|‘|’|′|′|m|min)?\s*)?(?:(?<![\d.])(\d+(?:\.\d+)?)\s*(?:"|“|”|″|″|s|sec)?\s*)?([NSEW]?)\s*$/i
+  // }
 
   // Update inputs with a point's location from map UI
   updateLatLngInputs(center) {
@@ -479,8 +488,6 @@ export default class extends Controller {
   }
 
   makeMapClickable() {
-    // this.map.clearListeners('click')
-    // google.maps.event.clearListeners(this.map, 'click')
     google.maps.event.addListener(this.map, 'click', (e) => {
       // this.map.addListener('click', (e) => {
       const location = e.latLng.toJSON()
@@ -602,8 +609,9 @@ export default class extends Controller {
     return { high: altitudesArray[last], low: altitudesArray[0] }
   }
 
+  // Round to 4 decimal places
   roundOff(number) {
-    const rounded = Math.round(number * 100000) / 100000
+    const rounded = Math.round(number * 10000) / 10000
     return rounded
   }
 }
