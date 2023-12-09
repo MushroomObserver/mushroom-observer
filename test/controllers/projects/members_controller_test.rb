@@ -158,7 +158,10 @@ module Projects
         commit: :change_member_hidden_gps_trust.l
       }
       put_requires_login(:update, params, target_user.login)
-      assert_equal(project.project_members.find_by(user: target_user).trust_level, "hidden_gps")
+      assert_equal(
+        project.project_members.find_by(user: target_user).trust_level,
+        "hidden_gps"
+      )
     end
 
     # trusting member revoking trust
@@ -171,7 +174,10 @@ module Projects
         commit: :change_member_status_revoke_trust.l
       }
       put_requires_login(:update, params, target_user.login)
-      assert_equal(project.project_members.find_by(user: target_user).trust_level, "no_trust")
+      assert_equal(
+        project.project_members.find_by(user: target_user).trust_level,
+        "no_trust"
+      )
     end
 
     # member allows editing
@@ -184,7 +190,10 @@ module Projects
         commit: :change_member_editing_trust.l
       }
       put_requires_login(:update, params, target_user.login)
-      assert_equal(project.project_members.find_by(user: target_user).trust_level, "editing")
+      assert_equal(
+        project.project_members.find_by(user: target_user).trust_level,
+        "editing"
+      )
     end
 
     # There are many other combinations that shouldn't work

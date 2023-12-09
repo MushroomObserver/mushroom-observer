@@ -2630,7 +2630,7 @@ class API2Test < UnitTestCase
     proj.admin_group.users << rolf
     proj.user_group.users << rolf
     rolf.reload
-     assert_not(proj.observations.include?(rolfs_obs))
+    assert_not(proj.observations.include?(rolfs_obs))
     assert(proj.observations.include?(marys_obs))
     assert(rolfs_obs.can_edit?(rolf))
     assert(marys_obs.can_edit?(rolf))
@@ -2933,7 +2933,7 @@ class API2Test < UnitTestCase
     assert_api_results(seqs)
 
     # Make sure all observations have at least one sequence for the rest.
-    Observation.all.each do |obs2|
+    Observation.find_each do |obs2|
       next if obs2.sequences.any?
 
       Sequence.create!(observation: obs2, user: obs2.user, locus: "ITS1F",
