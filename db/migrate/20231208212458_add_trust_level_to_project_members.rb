@@ -5,7 +5,10 @@ class AddTrustLevelToProjectMembers < ActiveRecord::Migration[6.1]
     add_column(:project_members, :trust_level, :integer, default: 1,
                                                          null: false)
     ProjectMember.find_each do |pm|
-      pm.update!(trust_level: "hidden_gps") if pm.trusted
+      if pm.trusted
+        trust_level = pm.project.open_membership ? "hidden_gps" : "editing"
+        pm.update!(trust_level:)
+      end
     end
     remove_column(:project_members, :trusted, :boolean, default: false,
                                                         null: false)
