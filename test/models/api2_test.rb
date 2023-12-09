@@ -3411,8 +3411,8 @@ class API2Test < UnitTestCase
   end
 
   def test_deleting_species_lists
-    rolfs_spl = rolf.species_lists.sample
-    marys_spl = mary.species_lists.sample
+    rolfs_spl = species_lists(:first_species_list)
+    marys_spl = species_lists(:unknown_species_list)
     params = {
       method: :delete,
       action: :species_list,
