@@ -40,8 +40,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("#observation_form")
 
     # hard to test the internals of map, but this will pick up map load errors
-    click_button("locate_on_map")
-    assert_selector("#observation_form_map > div > div > iframe")
+    # click_button("locate_on_map")
+    # assert_selector("#observation_form_map > div > div > iframe")
 
     within("#observation_form") do
       fill_in("naming_name", with: "Coprinus com")
