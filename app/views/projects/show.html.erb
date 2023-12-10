@@ -52,7 +52,7 @@ add_project_banner(@project)
                   path: project_members_path(project_id: @project.id,
                                              candidate: @user.id,
                                              target: :project_index)) %>
-<% else %>
+<% elsif @project.is_member?(@user) %>
   <% if @project.trusted_by?(@user) %>
     <%= put_button(name: :change_member_status_revoke_trust.l,
                    class: "btn btn-default btn-sm",
@@ -61,11 +61,19 @@ add_project_banner(@project)
                                              commit: :change_member_status_revoke_trust.l,
                                              target: :project_index)) %>
   <% else %>
-    <%= put_button(name: :change_member_status_trust.l,
+    <%= put_button(name: :change_member_hidden_gps_trust.l,
                    class: "btn btn-default btn-sm",
                    path: project_member_path(project_id: @project.id,
                                              candidate: @user.id,
-                                             commit: :change_member_status_trust.l,
+                                             commit: :change_member_hidden_gps_trust.l,
+                                             target: :project_index)) %>
+  <% end %>
+  <% unless @project.can_edit_content?(@user) %>
+    <%= put_button(name: :change_member_editing_trust.l,
+                   class: "btn btn-default btn-sm",
+                   path: project_member_path(project_id: @project.id,
+                                             candidate: @user.id,
+                                             commit: :change_member_editing_trust.l,
                                              target: :project_index)) %>
   <% end %>
   <% if @project.can_leave?(@user) %>
