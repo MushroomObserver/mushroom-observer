@@ -53,12 +53,13 @@ module Observations::Namings
     def update
       pass_query_params
       @naming = Naming.find(params[:naming_id].to_s)
-      @observation = @naming.observation
+      observation = @naming.observation
       value_str = param_lookup([:vote, :value])
       value = Vote.validate_value(value_str)
       raise("Bad value.") unless value
 
-      @observation.change_vote(@naming, value, @user)
+      observation.change_vote(@naming, value, @user)
+      @observation = observation.reload
       respond_to do |format|
         format.turbo_stream do
           case params[:context]

@@ -234,6 +234,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       fill_in("naming_name", with: nd1.text_name)
       click_commit
     end
+
     assert_selector("#modal_naming_#{obs.id}_flash", text: /Missing/)
     assert_selector("#name_messages", text: /deprecated/)
 
@@ -244,12 +245,15 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       assert_no_selector(".auto_complete")
       assert_selector("#naming_vote_value")
       select("Doubtful", from: "naming_vote_value")
-      # this is where test problems occurred:
-      # Observations::NamingsController#create was losing User.current somehow
-      # so the fresh naming_table sometimes printed with no edit/destroy buttons
       click_commit
     end
     assert_no_selector("#modal_naming_#{obs.id}")
+    # Test problems have occurred here:
+    # Observations::Namings::VotesController#update may execute before the
+    # previous action can rewrite the cookie, so we lose the session_user.
+    # When this happens, naming_table is refreshed with no edit/destroy buttons.
+    # Capybara author suggests trying sleep(5) after a CRUD action
+    sleep(6)
 
     nam = Naming.last
     assert_equal(n_d.text_name, nam.text_name)
@@ -259,7 +263,9 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       assert_selector("#naming_vote_form_#{nam.id}")
       select("Could Be", from: "vote_value_#{nam.id}")
     end
+    assert_no_selector("#mo_ajax_progress")
     assert_selector("#title", text: /#{obs.text_name}/)
+    sleep(3)
 
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)
@@ -272,8 +278,9 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     assert_no_selector("#mo_ajax_progress")
     assert_selector("#title", text: /#{nam.text_name}/)
+    sleep(3)
 
-    # check the vote tally
+    # check that there is a vote tally with this naming
     within("#observation_namings") do
       assert_link(href: "/votes/#{nam.id}")
       click_link(href: "/votes/#{nam.id}")

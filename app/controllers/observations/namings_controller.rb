@@ -27,7 +27,6 @@ module Observations
     end
 
     def create
-      @user = User.current = session_user # idk why, create was losing this
       @params = NamingParams.new(params[:naming])
       @params.observation =
         load_for_show_observation_or_goto_index(params[:observation_id])
@@ -84,7 +83,7 @@ module Observations
       respond_to do |format|
         format.turbo_stream do
           @observation = naming.observation
-          render(partial: "update_observation") and return
+          render(partial: "observations/namings/update_observation") and return
         end
         format.html { default_redirect(naming.observation) }
       end
