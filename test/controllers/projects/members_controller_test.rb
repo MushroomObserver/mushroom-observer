@@ -155,10 +155,13 @@ module Projects
       params = {
         project_id: project.id,
         candidate: target_user.id,
-        commit: :change_member_status_trust.l
+        commit: :change_member_hidden_gps_trust.l
       }
       put_requires_login(:update, params, target_user.login)
-      assert(project.project_members.find_by(user: target_user).trusted)
+      assert_equal(
+        project.project_members.find_by(user: target_user).trust_level,
+        "hidden_gps"
+      )
     end
 
     # trusting member revoking trust
@@ -171,7 +174,26 @@ module Projects
         commit: :change_member_status_revoke_trust.l
       }
       put_requires_login(:update, params, target_user.login)
-      assert_not(project.project_members.find_by(user: target_user).trusted)
+      assert_equal(
+        project.project_members.find_by(user: target_user).trust_level,
+        "no_trust"
+      )
+    end
+
+    # member allows editing
+    def test_member_allow_editing
+      target_user = project_members(:eol_member_mary).user
+      project = projects(:eol_project)
+      params = {
+        project_id: project.id,
+        candidate: target_user.id,
+        commit: :change_member_editing_trust.l
+      }
+      put_requires_login(:update, params, target_user.login)
+      assert_equal(
+        project.project_members.find_by(user: target_user).trust_level,
+        "editing"
+      )
     end
 
     # There are many other combinations that shouldn't work

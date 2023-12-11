@@ -105,7 +105,12 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def trusted_by?(user)
     member = project_members.find_by(user: user)
-    member&.trusted
+    member&.trust_level != "no_trust"
+  end
+
+  def can_edit_content?(user)
+    member = project_members.find_by(user: user)
+    member&.trust_level == "editing"
   end
 
   def can_join?(user)
@@ -144,10 +149,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
     group_ids = user.user_group_ids
     obj.projects.each do |project|
-      next if project.open_membership
-      next unless project.trusted_by?(obj.user)
-      return true if group_ids.member?(project.user_group_id) ||
-                     group_ids.member?(project.admin_group_id)
+      next unless project.can_edit_content?(obj.user)
+      return true if group_ids.member?(project.admin_group_id)
     end
     false
   end
@@ -161,7 +164,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     observation.projects.each do |project|
       if project.is_admin?(user)
         member = project.project_members.find_by(user: observation.user)
-        return member&.trusted
+        return member&.trust_level != "no_trust"
       end
     end
     false
