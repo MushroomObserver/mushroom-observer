@@ -220,16 +220,16 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_selector("#observation_namings")
 
     # new naming
+    n_d = names(:namings_deprecated) # Xa current
+    nd1 = names(:namings_deprecated_1)
+
     scroll_to(find("#observation_namings"), align: :center)
     within("#observation_namings") do
       assert_link(text: /Propose/)
       find(:css, ".new_naming_link_#{obs.id}").trigger("click")
     end
 
-    n_d = names(:namings_deprecated) # Xa current
-    nd1 = names(:namings_deprecated_1)
-
-    assert_selector("#modal_naming_#{obs.id}")
+    assert_selector("#modal_naming_#{obs.id}", wait: 6)
     within("#modal_naming_#{obs.id}") do
       assert_field("naming_name")
       fill_in("naming_name", with: nd1.text_name)

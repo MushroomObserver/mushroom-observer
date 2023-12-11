@@ -138,15 +138,17 @@ module Observations
     end
 
     def respond_to_successful_create
+      obs = @observation.reload
+
       respond_to do |format|
         format.turbo_stream do
           case params[:context]
           when "lightgallery", "matrix_box"
             render(partial: "observations/namings/update_matrix_box",
-                   locals: { obs: @observation })
+                   locals: { obs: obs })
           else
             render(partial: "observations/namings/update_observation",
-                   locals: { obs: @observation })
+                   locals: { obs: obs })
           end
           return
         end
@@ -240,11 +242,13 @@ module Observations
     end
 
     def respond_to_successful_update
+      obs = @observation.reload
+
       respond_to do |format|
         format.html { default_redirect(@params.observation) }
         format.turbo_stream do
           render(partial: "observations/namings/update_observation",
-                 locals: { obs: @observation }) and return
+                 locals: { obs: obs }) and return
         end
       end
     end

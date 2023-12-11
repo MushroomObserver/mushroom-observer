@@ -94,16 +94,20 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     obs = Observation.last
     visit(observation_path(obs.id))
 
+    scroll_to(find("#observation_namings"), align: :center)
     click_on("Propose")
-    assert_selector("#modal_naming_#{obs.id}", wait: 4)
+    assert_selector("#modal_naming_#{obs.id}", wait: 6)
     assert_selector("#naming_#{obs.id}_form")
     find_field("naming_name").click
     browser.keyboard.type("Peltige")
-    assert_selector(".auto_complete") # wait
+    assert_selector(".auto_complete", wait: 3) # wait
     assert_selector(".auto_complete ul li")
     browser.keyboard.type(:down, :down, :tab)
     assert_field("naming_name", with: "Peltigeraceae ")
+    browser.keyboard.type(:tab)
+    assert_no_selector(".auto_complete")
     within("#naming_#{obs.id}_form") { click_commit }
-    within("#namings_table") { assert_text("Peltigeraceae") }
+    assert_no_selector("#modal_naming_#{obs.id}")
+    within("#namings_table") { assert_text("Peltigeraceae", wait: 6) }
   end
 end
