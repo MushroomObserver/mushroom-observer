@@ -220,6 +220,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_selector("#observation_namings")
 
     # new naming
+    scroll_to(find("#observation_namings"), align: :center)
     within("#observation_namings") do
       assert_link(text: /Propose/)
       find(:css, ".new_naming_link_#{obs.id}").trigger("click")
@@ -237,6 +238,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     assert_selector("#modal_naming_#{obs.id}_flash", text: /Missing/)
     assert_selector("#name_messages", text: /deprecated/)
+    # sleep(3)
 
     within("#modal_naming_#{obs.id}") do
       fill_in("naming_name", with: n_d.text_name)
@@ -248,12 +250,14 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       click_commit
     end
     assert_no_selector("#modal_naming_#{obs.id}")
-    # Test problems have occurred here:
-    # Observations::Namings::VotesController#update may execute before the
+
+    # Test problems have occurred here: Something in
+    # Observations::NamingsController#create seems to execute before the
     # previous action can rewrite the cookie, so we lose the session_user.
     # When this happens, naming_table is refreshed with no edit/destroy buttons.
     # Capybara author suggests trying sleep(5) after a CRUD action
-    sleep(6)
+    scroll_to(find("#observation_namings"), align: :center)
+    # sleep(3)
 
     nam = Naming.last
     assert_equal(n_d.text_name, nam.text_name)
@@ -263,9 +267,10 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       assert_selector("#naming_vote_form_#{nam.id}")
       select("Could Be", from: "vote_value_#{nam.id}")
     end
+
     assert_no_selector("#mo_ajax_progress")
     assert_selector("#title", text: /#{obs.text_name}/)
-    sleep(3)
+    # sleep(3)
 
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)
@@ -278,7 +283,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     assert_no_selector("#mo_ajax_progress")
     assert_selector("#title", text: /#{nam.text_name}/)
-    sleep(3)
+    # sleep(3)
 
     # check that there is a vote tally with this naming
     within("#observation_namings") do

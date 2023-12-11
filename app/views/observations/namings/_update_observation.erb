@@ -4,13 +4,13 @@ Has additional functionality to observations/show/section_update
 it updates the obs title and name_info.
 %>
 <%
-# debugger
+raise "WtF" unless User.current
 %>
 
 <%= turbo_stream.replace("namings_table") do
   render(
     partial: "observations/namings/table",
-    locals: { obs: @observation },
+    locals: { obs: obs },
     layout: false
   )
 end %>
@@ -18,11 +18,11 @@ end %>
 <%= turbo_stream.replace("observation_name_info") do
   render(
     partial: "observations/show/name_info",
-    locals: { obs: @observation },
+    locals: { obs: obs },
     layout: false
   )
 end %>
 
 <%= turbo_stream.update("title") do
-  show_obs_title(obs: @observation)
+  show_obs_title(obs: obs)
 end %>

@@ -1,13 +1,13 @@
 
-<%= turbo_stream.update("observation_what_#{@observation.id}") do
-  caption_obs_title(obs: @observation)
+<%= turbo_stream.update("observation_what_#{obs.id}") do
+  caption_obs_title(obs: obs)
 end %>
 
-<%= turbo_stream.update("box_title_#{@observation.id}") do
-  matrix_box_title(name: @observation.format_name.t.break_name.small_author,
-                   id: @observation.id)
+<%= turbo_stream.update("box_title_#{obs.id}") do
+  matrix_box_title(name: obs.format_name.t.break_name.small_author,
+                   id: obs.id)
 end %>
 
-<%= turbo_stream.close_modal("modal_naming_#{@observation.id}") %>
-<%= turbo_stream.remove("modal_naming_#{@observation.id}") %>
-<%= turbo_stream.remove("observation_identify_#{@observation.id}") %>
+<%= turbo_stream.close_modal("modal_naming_#{obs.id}") %>
+<%= turbo_stream.remove("modal_naming_#{obs.id}") %>
+<%= turbo_stream.remove("observation_identify_#{obs.id}") %>

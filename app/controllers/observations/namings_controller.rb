@@ -83,7 +83,8 @@ module Observations
       respond_to do |format|
         format.turbo_stream do
           @observation = naming.observation
-          render(partial: "observations/namings/update_observation") and return
+          render(partial: "observations/namings/update_observation",
+                 locals: { obs: @observation }) and return
         end
         format.html { default_redirect(naming.observation) }
       end
@@ -141,9 +142,11 @@ module Observations
         format.turbo_stream do
           case params[:context]
           when "lightgallery", "matrix_box"
-            render(partial: "observations/namings/update_matrix_box")
+            render(partial: "observations/namings/update_matrix_box",
+                   locals: { obs: @observation })
           else
-            render(partial: "observations/namings/update_observation")
+            render(partial: "observations/namings/update_observation",
+                   locals: { obs: @observation })
           end
           return
         end
@@ -240,7 +243,8 @@ module Observations
       respond_to do |format|
         format.html { default_redirect(@params.observation) }
         format.turbo_stream do
-          render(partial: "observations/namings/update_observation") and return
+          render(partial: "observations/namings/update_observation",
+                 locals: { obs: @observation }) and return
         end
       end
     end

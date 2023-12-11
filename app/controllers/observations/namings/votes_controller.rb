@@ -43,7 +43,7 @@ module Observations::Namings
     # Linked from: (show_observation and help_identify)
     # Inputs: params[]
     # HTML requests: Redirects to show_observation.
-    # JS requests: depends on params[:context]
+    # Turbo requests: depends on params[:context]
     # when namings_table (show_observation)
     #   Updates namings_table (+ maybe obs title) via update_observation.js.erb
     #   and stimulus naming-vote_controller, which handles <select> bindings
@@ -64,9 +64,11 @@ module Observations::Namings
         format.turbo_stream do
           case params[:context]
           when "matrix_box"
-            render(partial: "observations/namings/update_matrix_box")
+            render(partial: "observations/namings/update_matrix_box",
+                   locals: { obs: @observation })
           else
-            render(partial: "observations/namings/update_observation")
+            render(partial: "observations/namings/update_observation",
+                   locals: { obs: @observation })
           end
           return
         end

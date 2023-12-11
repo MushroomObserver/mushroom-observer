@@ -260,7 +260,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     # Fix divergent dates: use the obs date
-    scroll_to("#img_messages", align: :center)
+    scroll_to(find("#img_messages"), align: :center)
     within("#img_messages") do
       within("#obs_date_radios") do
         choose("14-March-2010", allow_label_click: true)
@@ -272,7 +272,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_no_selector("img_messages")
 
     # Ignore divergent GPS - maybe we took the second photo in the lab?
-    scroll_to("#gps_messages", align: :center)
+    scroll_to(find("#gps_messages"), align: :center)
     within("#gps_messages") do
       click_button("ignore_gps")
     end

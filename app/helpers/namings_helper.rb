@@ -74,7 +74,6 @@ module NamingsHelper
   private
 
   def naming_name_html(naming)
-    Textile.register_name(naming.name)
     if check_permission(naming)
       edit_link = modal_link_to("naming_#{naming.id}_#{naming.observation.id}",
                                 *edit_naming_tab(naming))
@@ -90,6 +89,7 @@ module NamingsHelper
   end
 
   def naming_name_link(naming)
+    Textile.register_name(naming.name)
     link_with_query(
       naming.display_name_brief_authors.t.break_name.small_author,
       name_path(id: naming.name)
