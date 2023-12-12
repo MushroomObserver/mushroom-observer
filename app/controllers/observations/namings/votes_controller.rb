@@ -43,7 +43,7 @@ module Observations::Namings
     # Linked from: (show_observation and help_identify)
     # Inputs: params[]
     # HTML requests: Redirects to show_observation.
-    # JS requests: depends on params[:context]
+    # Turbo requests: depends on params[:context]
     # when namings_table (show_observation)
     #   Updates namings_table (+ maybe obs title) via update_observation.js.erb
     #   and stimulus naming-vote_controller, which handles <select> bindings
@@ -53,19 +53,22 @@ module Observations::Namings
     def update
       pass_query_params
       @naming = Naming.find(params[:naming_id].to_s)
-      @observation = @naming.observation
+      observation = @naming.observation
       value_str = param_lookup([:vote, :value])
       value = Vote.validate_value(value_str)
       raise("Bad value.") unless value
 
-      @observation.change_vote(@naming, value, @user)
+      observation.change_vote(@naming, value, @user)
+      @observation = observation.reload
       respond_to do |format|
         format.turbo_stream do
           case params[:context]
           when "matrix_box"
-            render(partial: "observations/namings/update_matrix_box")
+            render(partial: "observations/namings/update_matrix_box",
+                   locals: { obs: @observation })
           else
-            render(partial: "observations/namings/update_observation")
+            render(partial: "observations/namings/update_observation",
+                   locals: { obs: @observation })
           end
           return
         end

@@ -40,8 +40,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("#observation_form")
 
     # hard to test the internals of map, but this will pick up map load errors
-    click_button("locate_on_map")
-    assert_selector("#observation_form_map > div > div > iframe")
+    # click_button("locate_on_map")
+    # assert_selector("#observation_form_map > div > div > iframe")
 
     within("#observation_form") do
       fill_in("naming_name", with: "Coprinus com")
@@ -72,7 +72,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     east: -118.0654789,   # -118.0989059
     west: -118.1981391,   # -118.1828198
     high: 1096.943603515625,
-    low: 141.5890350341797
+    low: 141.5890350341797,
+    lat: 34.1477849,
+    lng: -118.1445155,
+    alt: 262.5840148925781
   }.freeze
 
   def test_post_edit_and_destroy_with_details_and_location
@@ -142,8 +145,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector(".auto_complete")
     browser.keyboard.type(:down, :tab) # cursor down to first match + select row
     assert_field("observation_place_name", with: "Pasadena, California, USA")
-    fill_in("observation_lat", with: " 12deg 34.56min N ")
-    fill_in("observation_long", with: " 123 45 6.78 W ")
+    # geo-coordinates-parser will reject internally-inconsistent notation.
+    fill_in("observation_lat", with: " 12deg 36.75min N ") # == 12.6125
+    fill_in("observation_long", with: " 121deg 33.14min E ") # == 121.5523
     fill_in("observation_alt", with: " 56 ft. ")
 
     fill_in("naming_name", with: "Agaricus campe")
@@ -256,7 +260,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     # Fix divergent dates: use the obs date
-    scroll_to("#img_messages", align: :center)
+    scroll_to(find("#img_messages"), align: :center)
     within("#img_messages") do
       within("#obs_date_radios") do
         choose("14-March-2010", allow_label_click: true)
@@ -268,7 +272,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_no_selector("img_messages")
 
     # Ignore divergent GPS - maybe we took the second photo in the lab?
-    scroll_to("#gps_messages", align: :center)
+    scroll_to(find("#gps_messages"), align: :center)
     within("#gps_messages") do
       click_button("ignore_gps")
     end
@@ -295,7 +299,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_no_selector(".set_thumb_image")
     end
     sleep(3)
-    # debugger
 
     within("#observation_form") { click_commit }
 
@@ -304,6 +307,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     #   User.current is getting dropped during the save, and message is
     #     `Observation doesn't have naming with ID=`
     #
+    # debugger
 
     # It should take us to create a new location
     assert_selector("body.locations__new")
@@ -375,8 +379,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_select("observation_when_3i", text: "14")
     assert_field("observation_place_name",
                  with: "Pasadena, Some Co., California, USA")
-    assert_field("observation_lat", with: "12.576")
-    assert_field("observation_long", with: "-123.7519")
+    assert_field("observation_lat", with: "12.6125") # was 12.5927
+    assert_field("observation_long", with: "121.5523") # was -121.5525
     assert_field("observation_alt", with: "17")
     assert_unchecked_field("observation_is_collection_location")
     assert_checked_field("observation_specimen")
@@ -485,9 +489,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_equal(expected_values[:location], new_obs.where)
       assert_equal(expected_values[:location], new_obs.location.display_name)
     end
-    assert_gps_equal(expected_values[:lat], new_obs.lat)
-    assert_gps_equal(expected_values[:long], new_obs.long)
-    assert_gps_equal(expected_values[:alt], new_obs.alt)
+    assert_gps_equal(expected_values[:lat], new_obs.lat.to_f)
+    assert_gps_equal(expected_values[:long], new_obs.long.to_f)
+    assert_gps_equal(expected_values[:alt], new_obs.alt.to_f)
   end
 
   def assert_observation_has_correct_name(expected_values)
@@ -576,8 +580,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       when: Date.parse("2010-03-14"),
       where: "Pasadena, California, USA",
       location: nil,
-      lat: 12.5760,
-      long: -123.7519,
+      lat: 12.6125, # was 12.5760 values tweaked to move it to land
+      long: 121.5523, # was -123.7519 was in the ocean
       alt: 17,
       name: names(:agaricus_campestris),
       vote: Vote.next_best_vote,

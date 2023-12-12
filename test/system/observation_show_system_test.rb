@@ -220,40 +220,58 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_selector("#observation_namings")
 
     # new naming
+    n_d = names(:namings_deprecated) # Xa current
+    nd1 = names(:namings_deprecated_1)
+
+    scroll_to(find("#observation_namings"), align: :center)
     within("#observation_namings") do
       assert_link(text: /Propose/)
       find(:css, ".new_naming_link_#{obs.id}").trigger("click")
     end
 
-    n_d = names(:namings_deprecated) # Xa current
-    nd1 = names(:namings_deprecated_1)
-
-    assert_selector("#modal_naming_#{obs.id}")
+    assert_selector("#modal_naming_#{obs.id}", wait: 9)
     within("#modal_naming_#{obs.id}") do
-      assert_field("naming_name")
+      assert_field("naming_name", wait: 4)
       fill_in("naming_name", with: nd1.text_name)
       click_commit
     end
+
     assert_selector("#modal_naming_#{obs.id}_flash", text: /Missing/)
     assert_selector("#name_messages", text: /deprecated/)
+    # sleep(3)
 
     within("#modal_naming_#{obs.id}") do
       fill_in("naming_name", with: n_d.text_name)
       assert_selector(".auto_complete")
       browser.keyboard.type(:down, :tab)
       assert_no_selector(".auto_complete")
+      assert_selector("#naming_vote_value")
+      select("Doubtful", from: "naming_vote_value")
       click_commit
     end
     assert_no_selector("#modal_naming_#{obs.id}")
+
+    # Test problems have occurred here: Something in
+    # Observations::NamingsController#create seems to execute before the
+    # previous action can rewrite the cookie, so we lose the session_user.
+    # When this happens, naming_table is refreshed with no edit/destroy buttons.
+    # Capybara author suggests trying sleep(5) after a CRUD action
+    # Ah. Maybe it was just missing the scroll_to
+    scroll_to(find("#observation_namings"), align: :center)
+    # sleep(3)
 
     nam = Naming.last
     assert_equal(n_d.text_name, nam.text_name)
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)
+      assert_selector(".destroy_naming_link_#{nam.id}")
       assert_selector("#naming_vote_form_#{nam.id}")
       select("Could Be", from: "vote_value_#{nam.id}")
     end
+
+    assert_no_selector("#mo_ajax_progress")
     assert_selector("#title", text: /#{obs.text_name}/)
+    # sleep(3)
 
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)
@@ -263,12 +281,12 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     # assert_selector("#mo_ajax_progress", wait: 4)
     # assert_selector("#mo_ajax_progress_caption",
     #                 text: /#{:show_namings_saving.l}/)
-    sleep(6)
 
     assert_no_selector("#mo_ajax_progress")
     assert_selector("#title", text: /#{nam.text_name}/)
+    # sleep(3)
 
-    # check the vote tally
+    # check that there is a vote tally with this naming
     within("#observation_namings") do
       assert_link(href: "/votes/#{nam.id}")
       click_link(href: "/votes/#{nam.id}")
@@ -280,10 +298,6 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       find(:css, ".close").click
     end
     assert_no_selector("#modal_naming_votes_#{nam.id}")
-
-    # this is where test problems occurred:
-    # naming row was getting displayed before naming had saved
-    # so it was printed with no edit/destroy buttons.
 
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)

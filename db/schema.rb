@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_11_25_195134) do
+ActiveRecord::Schema[7.0].define(version: 2023_12_08_212458) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -493,9 +493,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_11_25_195134) do
   create_table "project_members", charset: "utf8mb3", force: :cascade do |t|
     t.integer "project_id"
     t.integer "user_id"
-    t.boolean "trusted", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "trust_level", default: 1, null: false
   end
 
   create_table "project_observations", charset: "utf8mb3", force: :cascade do |t|

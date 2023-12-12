@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { Loader } from "@googlemaps/js-api-loader"
+import { convert } from "geo-coordinates-parser"
 
 // Connects to data-controller="map"
 // The connected element can be a map, or in the case of a form with a map UI,
@@ -16,6 +17,7 @@ export default class extends Controller {
     // map_types: info (collection), location (rectangle), observation (marker)
     this.map_type = this.mapDivTarget.dataset.mapType
     this.editable = (this.mapDivTarget.dataset.editable === "true")
+    this.opened = this.map_type !== "observation"
     this.marker = null // Only gets set if we're in edit mode
     this.rectangle = null // Only gets set if we're in edit mode
     this.location_format = this.mapDivTarget.dataset.locationFormat
@@ -43,53 +45,59 @@ export default class extends Controller {
       libraries: ["maps", "geocoding", "marker", "elevation"]
     })
 
-    let mapCenter
     if (this.collection) {
-      mapCenter = {
+      this.mapCenter = {
         lat: this.collection.extents.lat,
         lng: this.collection.extents.lng
       }
     } else {
-      mapCenter = { lat: -7, lng: -47 }
+      this.mapCenter = { lat: -7, lng: -47 }
     }
 
     // use center and zoom here
-    const mapOptions = {
-      center: mapCenter,
+    this.mapOptions = {
+      center: this.mapCenter,
       zoom: 1,
       mapTypeId: 'terrain',
       mapTypeControl: 'true'
     }
 
     // collection.extents is also a MapSet
-    let mapBounds
+    this.mapBounds = false
     if (this.collection) {
-      mapBounds = this.boundsOf(this.collection.extents)
+      this.mapBounds = this.boundsOf(this.collection.extents)
     }
 
     loader
       .load()
       .then((google) => {
-        this.map = new google.maps.Map(this.mapDivTarget, mapOptions)
-        if (mapBounds)
-          this.map.fitBounds(mapBounds)
         this.elevationService = new google.maps.ElevationService()
         this.geocoder = new google.maps.Geocoder()
 
-        if (this.map_type === "observation" &&
-          this.hasPlaceInputTarget && this.placeInputTarget.value) {
-          this.findOnMap()
-        } else if (Object.keys(this.collection.sets).length) {
+        if (this.map_type !== "observation")
+          this.drawMap()
+
+        if (this.map_type === "location") {
+          this.findOnMap() // checks input
+          // } else if (Object.keys(this.collection.sets).length) {
+        } else if (this.map_type === "info") {
           this.buildOverlays()
         }
       })
       .catch((e) => {
-        console.log("error loading gmaps")
+        console.error("error loading gmaps: " + e)
       })
   }
 
   helpDebug() {
     debugger
+  }
+
+  // We don't draw the map for the create obs form on load, to save on API
+  drawMap() {
+    this.map = new google.maps.Map(this.mapDivTarget, this.mapOptions)
+    if (this.mapBounds)
+      this.map.fitBounds(this.mapBounds)
   }
 
   //
@@ -243,6 +251,269 @@ export default class extends Controller {
     })
   }
 
+
+  //
+  //  FORM INPUTS : Functions for altering the map from form inputs
+  //
+
+  // Action called from the location form n_s_e_w_hi_lo inputs onChange
+  // and from observation form lat_lng inputs (debounces inputs)
+  bufferInputs() {
+    if (this.map_type === "location") {
+      this.keypress_id = setTimeout(this.calculateRectangle(), 500)
+    }
+    else if (this.map_type === "observation" && this.opened) {
+      this.keypress_id = setTimeout(this.calculateMarker(), 500)
+    }
+  }
+
+  // Action to geocode a location from a place name or address.
+  // Can be called directly from a button, so check for input value
+  findOnMap() {
+    if (!this.hasPlaceInputTarget || !this.placeInputTarget.value)
+      return false
+
+    this.findOnMapTarget.disabled = true
+    let address = this.placeInputTarget.value
+
+    if (this.location_format == "scientific") {
+      address = address.split(/, */).reverse().join(", ")
+    }
+    this.geocoder
+      .geocode({ address: address })
+      .then((result) => {
+        const { results } = result // destructure, results is part of the result
+        this.respondToGeocode(results)
+      })
+      .catch((e) => {
+        console.error("Geocode was not successful: " + e)
+        // alert("Geocode was not successful for the following reason: " + e)
+      });
+  }
+
+  respondToGeocode(results) {
+    const viewport = results[0].geometry.viewport.toJSON()
+    const extents = results[0].geometry.bounds?.toJSON() // may not exist
+    const center = results[0].geometry.location.toJSON()
+
+    if (viewport)
+      this.map.fitBounds(viewport)
+    if (this.map_type === "observation") {
+      this.placeMarker(center)
+    } else if (this.map_type === "location") {
+      this.placeClosestRectangle(viewport, extents)
+    }
+    this.updateFields(viewport, extents, center)
+    this.findOnMapTarget.disabled = false
+  }
+
+  // NOTE: Currently we're not going to allow Google API geocoded places that
+  // are returned as points to be locations. We're forcing them to be rectangles
+  updateFields(viewport, extents, center) {
+    let points = [] // for elevation
+    if (this.hasNorthInputTarget) {
+      // Prefer extents for rectangle, fallback to viewport
+      let bounds = extents || viewport
+      if (bounds != undefined && bounds?.north) {
+        this.updateBoundsInputs(bounds)
+        points = this.sampleElevationPointsOf(bounds)
+      }
+      // else if (center) {
+      //   this.updateBoundsInputs(this.boundsOfPoint(center))
+      //   points = [center] // this.sampleElevationCenterOf(center)
+      // }
+    } else if (this.hasLatInputTarget) {
+      if (center != undefined && center?.lat) {
+        this.updateLatLngInputs(center)
+        points = [center] // this.sampleElevationCenterOf(center)
+      }
+    }
+    if (points)
+      this.getElevations(points) // updates inputs
+  }
+
+  // Action attached to the "Get Elevation" button. (points is then the event)
+  getElevations(points) {
+    // "Get Elevation" button on a form sends this param
+    if (points.hasOwnProperty('params') && points.params?.points === "input")
+      points = this.sampleElevationPoints() // from marker or rectangle
+
+    const locationElevationRequest = { locations: points }
+
+    this.elevationService.getElevationForLocations(locationElevationRequest,
+      (results, status) => {
+        if (status === google.maps.ElevationStatus.OK) {
+          if (results[0]) {
+            this.updateElevationInputs(results)
+          } else {
+            console.log({ status })
+          }
+        }
+      })
+  }
+
+  // requires an array of results from this.getElevations(points) above
+  //   result objects have the form {elevation:, location:, resolution:}
+  updateElevationInputs(results) {
+    if (this.hasLowInputTarget) {
+      const hiLo = this.highAndLowOf(results)
+      // console.log({ hiLo })
+      this.lowInputTarget.value = this.roundOff(parseFloat(hiLo.low))
+      this.highInputTarget.value = this.roundOff(parseFloat(hiLo.high))
+    } else if (this.hasAltInputTarget) {
+      // should just need one result
+      this.altInputTarget.value =
+        this.roundOff(parseFloat(results[0].elevation))
+    }
+    if (this.hasGetElevationTarget)
+      this.getElevationTarget.disabled = true
+  }
+
+  //
+  //  LOCATION FORM
+  //
+
+  // Sends user-entered NSEW to the rectangle. Buffered by the above
+  calculateRectangle() {
+    const north = parseFloat(this.northInputTarget.value)
+    const south = parseFloat(this.southInputTarget.value)
+    const east = parseFloat(this.eastInputTarget.value)
+    const west = parseFloat(this.westInputTarget.value)
+
+    if (!(isNaN(north) || isNaN(south) || isNaN(east) || isNaN(west))) {
+      const bounds = { north: north, south: south, east: east, west: west }
+      if (this.rectangle) {
+        this.rectangle.setBounds(bounds)
+      }
+      this.map.fitBounds(bounds)
+    }
+  }
+
+  // Infers a rectangle from the google place, if found. (could be point/bounds)
+  placeClosestRectangle(viewport, extents) {
+    // Prefer extents for rectangle, fallback to viewport
+    let bounds = extents || viewport
+    if (bounds != undefined && bounds?.north) {
+      this.placeRectangle(bounds)
+    }
+    // else if (center) {
+    // this.placeMarker(center) // if marker is ok for this map
+    // this.placeRectangle(this.boundsOfPoint(center))
+    // }
+  }
+
+  // takes a LatLngBoundsLiteral object {south:, west:, north:, east:}
+  updateBoundsInputs(bounds) {
+    this.southInputTarget.value = this.roundOff(bounds?.south)
+    this.westInputTarget.value = this.roundOff(bounds?.west)
+    this.northInputTarget.value = this.roundOff(bounds?.north)
+    this.eastInputTarget.value = this.roundOff(bounds?.east)
+  }
+
+  //
+  //  OBSERVATION FORM
+  //
+
+  // Action called after bufferInputs from lat/lng inputs, to update map marker.
+  // Also via openMap, checks if `Lat` & `Lng` fields already populated on load
+  // if so, drops a pin on that location and center. otherwise, checks if place
+  // input has been prepopulated and uses that to focus map and drop a marker.
+  calculateMarker() {
+    let location
+    if (location = this.validateLatLngInputs()) {
+      this.placeMarker(location)
+      this.map.setCenter(location)
+      this.map.setZoom(8)
+    } else if (this.placeInputTarget.value !== '') {
+      this.findOnMap()
+    }
+  }
+
+  // Convert from human readable and do a rough check if they make sense
+  validateLatLngInputs() {
+    const origLat = this.latInputTarget.value,
+      origLng = this.lngInputTarget.value
+    let lat, lng
+
+    try {
+      let coords = convert(origLat + " " + origLng)
+      lat = coords.decimalLatitude,
+        lng = coords.decimalLongitude
+    }
+    // Toss any degree-minute-second notation and just take the first number
+    catch {
+      lat = parseFloat(this.latInputTarget.value)
+      lng = parseFloat(this.lngInputTarget.value)
+    }
+
+    if (!lat || !lng)
+      return false
+    if (lat > 90 || lat < -90 || lng > 180 || lng < -180)
+      return false
+    const location = { lat: lat, lng: lng }
+
+    this.updateLatLngInputs(location)
+    return location
+  }
+
+  // For reference:
+  // This is the regex used on the Ruby side to convert degree-minute-second
+  // geocoordinates to decimal degrees when saving raw values to db:
+  // lxxxitudeRegex() {
+  //   /^\s*(-?\d+(?:\.\d+)?)\s*(?:°|°|o|d|deg|,\s)?\s*(?:(?<![\d.])(\d+(?:\.\d+)?)\s*(?:'|‘|’|′|′|m|min)?\s*)?(?:(?<![\d.])(\d+(?:\.\d+)?)\s*(?:"|“|”|″|″|s|sec)?\s*)?([NSEW]?)\s*$/i
+  // }
+
+  // Update inputs with a point's location from map UI
+  updateLatLngInputs(center) {
+    // This is like toFixed(5), but faster and returns a number
+    this.latInputTarget.value = this.roundOff(center.lat)
+    this.lngInputTarget.value = this.roundOff(center.lng)
+  }
+
+  // Action called by the "Open Map" button only
+  openMap() {
+    if (this.opened) return false
+
+    this.opened = true
+
+    this.mapDivTarget.classList.remove("hidden")
+    this.mapDivTarget.style.backgroundImage = "url(" + this.indicatorUrl + ")"
+
+    this.mapClearTarget.classList.remove("hidden")
+    this.mapOpenTarget.style.display = "none"
+
+    this.drawMap()
+    this.makeMapClickable()
+    this.calculateMarker()
+  }
+
+  makeMapClickable() {
+    google.maps.event.addListener(this.map, 'click', (e) => {
+      // this.map.addListener('click', (e) => {
+      const location = e.latLng.toJSON()
+      this.placeMarker(location)
+      this.marker.setVisible(true)
+      this.map.setCenter(location)
+      let zoom = this.map.getZoom()
+      if (zoom < 15) {
+        // console.log(zoom)
+        this.map.setZoom(zoom + 2)
+      }
+      this.updateFields(null, null, location)
+    });
+  }
+
+  // Action called from the "Clear Map" button
+  clearMap() {
+    const inputTargets = [
+      this.latInputTarget, this.lngInputTarget, this.altInputTarget
+    ]
+    inputTargets.forEach((element) => {
+      element.value = ''
+    })
+    this.marker.setVisible(false)
+  }
+
   //
   //  COORDINATES
   //
@@ -338,226 +609,9 @@ export default class extends Controller {
     return { high: altitudesArray[last], low: altitudesArray[0] }
   }
 
-
-  //
-  //  FORM INPUTS : Functions for altering the map from form inputs
-  //
-
-  // Action called from the location form ns_ew_hi_lo inputs onChange
-  // and from observation form lat lng inputs (debounces inputs)
-  bufferInputs() {
-    if (this.map_type === "location") {
-      this.keypress_id = setTimeout(this.calculateRectangle(), 500)
-    } else if (this.map_type === "observation") {
-      this.keypress_id = setTimeout(this.calculateMarker(), 500)
-    }
-  }
-
-  findOnMap() {
-    this.findOnMapTarget.disabled = true
-    let address = this.placeInputTarget.value
-
-    if (this.location_format == "scientific") {
-      address = address.split(/, */).reverse().join(", ")
-    }
-    this.geocoder
-      .geocode({ address: address })
-      .then((result) => {
-        const { results } = result // destructure, results is part of the result
-        this.respondToGeocode(results)
-      })
-      .catch((e) => {
-        alert("Geocode was not successful for the following reason: " + e)
-      });
-  }
-
-  respondToGeocode(results) {
-    const viewport = results[0].geometry.viewport.toJSON()
-    const extents = results[0].geometry.bounds?.toJSON() // may not exist
-    const center = results[0].geometry.location.toJSON()
-
-    if (viewport)
-      this.map.fitBounds(viewport)
-    if (this.map_type === "observation") {
-      this.placeMarker(center)
-    } else if (this.map_type === "location") {
-      this.placeClosestRectangle(viewport, extents)
-    }
-    this.updateFields(viewport, extents, center)
-    this.findOnMapTarget.disabled = false
-  }
-
-  // NOTE: Currently we're not going to allow Google API geocoded places that
-  // are returned as points to be locations. We're forcing them to be rectangles
-  updateFields(viewport, extents, center) {
-    let points = [] // for elevation
-    if (this.hasNorthInputTarget) {
-      // Prefer extents for rectangle, fallback to viewport
-      let bounds = extents || viewport
-      if (bounds != undefined && bounds?.north) {
-        this.updateBoundsInputs(bounds)
-        points = this.sampleElevationPointsOf(bounds)
-      }
-      // else if (center) {
-      //   this.updateBoundsInputs(this.boundsOfPoint(center))
-      //   points = [center] // this.sampleElevationCenterOf(center)
-      // }
-    } else if (this.hasLatInputTarget) {
-      if (center != undefined && center?.lat) {
-        this.updateLatLngInputs(center)
-        points = [center] // this.sampleElevationCenterOf(center)
-      }
-    }
-    if (points)
-      this.getElevations(points) // updates inputs
-  }
-
-  // Action attached to the "Get Elevation" button. (points is then the event)
-  getElevations(points = []) {
-    // "Get Elevation" button on a form sends this param
-    if (points?.params.points === "input")
-      points = this.sampleElevationPoints() // from marker or rectangle
-
-    const locationElevationRequest = { locations: points }
-
-    this.elevationService.getElevationForLocations(locationElevationRequest,
-      (results, status) => {
-        if (status === google.maps.ElevationStatus.OK) {
-          if (results[0]) {
-            this.updateElevationInputs(results)
-          } else {
-            console.log({ status })
-          }
-        }
-      })
-  }
-
-  // requires an array of results from this.getElevations(points) above
-  //   result objects have the form {elevation:, location:, resolution:}
-  updateElevationInputs(results) {
-    if (this.hasLowInputTarget) {
-      const hiLo = this.highAndLowOf(results)
-      // console.log({ hiLo })
-      this.lowInputTarget.value = parseFloat(hiLo.low)
-      this.highInputTarget.value = parseFloat(hiLo.high)
-    } else if (this.hasAltInputTarget) {
-      // should just need one result
-      this.altInputTarget.value = parseFloat(results[0].elevation)
-    }
-    if (this.hasGetElevationTarget)
-      this.getElevationTarget.disabled = true
-  }
-
-  //
-  //  LOCATION FORM
-  //
-
-  // Sends user-entered NSEW to the rectangle. Buffered by the above
-  calculateRectangle() {
-    const north = parseFloat(this.northInputTarget.value)
-    const south = parseFloat(this.southInputTarget.value)
-    const east = parseFloat(this.eastInputTarget.value)
-    const west = parseFloat(this.westInputTarget.value)
-
-    if (!(isNaN(north) || isNaN(south) || isNaN(east) || isNaN(west))) {
-      const bounds = { north: north, south: south, east: east, west: west }
-      if (this.rectangle) {
-        this.rectangle.setBounds(bounds)
-      }
-      this.map.fitBounds(bounds)
-    }
-  }
-
-  // Infers a rectangle from the google place, if found. (could be point/bounds)
-  placeClosestRectangle(viewport, extents) {
-    // Prefer extents for rectangle, fallback to viewport
-    let bounds = extents || viewport
-    if (bounds != undefined && bounds?.north) {
-      this.placeRectangle(bounds)
-    }
-    // else if (center) {
-    // this.placeMarker(center) // if marker is ok for this map
-    // this.placeRectangle(this.boundsOfPoint(center))
-    // }
-  }
-
-  // takes a LatLngBoundsLiteral object {south:, west:, north:, east:}
-  updateBoundsInputs(bounds) {
-    this.southInputTarget.value = bounds?.south
-    this.westInputTarget.value = bounds?.west
-    this.northInputTarget.value = bounds?.north
-    this.eastInputTarget.value = bounds?.east
-  }
-
-  //
-  //  OBSERVATION FORM
-  //
-
-  // Action called after bufferInputs from lat/lng inputs, to update map marker.
-  // Also via openMap, checks if `Lat` & `Lng` fields already populated on load
-  // if so, drops a pin on that location and center. otherwise, checks if place
-  // input has been prepopulated and uses that to focus map and drop a marker.
-  calculateMarker() {
-    let location
-    if (location = this.validateLatLngInputs()) {
-      this.placeMarker(location)
-      this.map.setCenter(location)
-      this.map.setZoom(8)
-    } else if (this.placeInputTarget.value !== '') {
-      this.findOnMap()
-    }
-  }
-
-  validateLatLngInputs() {
-    let lat = parseFloat(this.latInputTarget.value),
-      lng = parseFloat(this.lngInputTarget.value)
-
-    if (!lat || !lng)
-      return false
-    if (lat > 90 || lat < -90 || lng > 180 || lng < -180)
-      return false
-    const location = { lat: lat, lng: lng }
-
-    return location
-  }
-
-  // For consolidation with obs-form-map
-  updateLatLngInputs(center) {
-    this.latInputTarget.value = center.lat
-    this.lngInputTarget.value = center.lng
-  }
-
-  // Action called by the "Open Map" button only
-  openMap() {
-    if (this.opened) return false
-
-    this.opened = true
-
-    this.mapDivTarget.classList.remove("hidden")
-    this.mapDivTarget.style.backgroundImage = "url(" + this.indicatorUrl + ")"
-
-    this.mapClearTarget.classList.remove("hidden")
-    this.mapOpenTarget.style.display = "none"
-
-    this.makeMapClickable()
-    this.calculateMarker()
-  }
-
-  makeMapClickable() {
-    google.maps.event.addListener(this.map, 'click', (e) => {
-      const location = e.latLng.toJSON()
-      this.placeMarker(location)
-      this.updateFields(location)
-    });
-  }
-
-  clearMap() {
-    const inputTargets = [
-      this.latInputTarget, this.lngInputTarget, this.altInputTarget
-    ]
-    inputTargets.forEach((element) => {
-      element.value = ''
-    })
-    this.marker.setVisible(false)
+  // Round to 4 decimal places
+  roundOff(number) {
+    const rounded = Math.round(number * 10000) / 10000
+    return rounded
   }
 }

@@ -2627,6 +2627,7 @@ class API2Test < UnitTestCase
                             rolfs_obs.images, :sort)
 
     proj = projects(:bolete_project)
+    proj.admin_group.users << rolf
     proj.user_group.users << rolf
     rolf.reload
     assert_not(proj.observations.include?(rolfs_obs))
@@ -2932,7 +2933,7 @@ class API2Test < UnitTestCase
     assert_api_results(seqs)
 
     # Make sure all observations have at least one sequence for the rest.
-    Observation.all.each do |obs2|
+    Observation.find_each do |obs2|
       next if obs2.sequences.any?
 
       Sequence.create!(observation: obs2, user: obs2.user, locus: "ITS1F",
@@ -3410,8 +3411,8 @@ class API2Test < UnitTestCase
   end
 
   def test_deleting_species_lists
-    rolfs_spl = rolf.species_lists.sample
-    marys_spl = mary.species_lists.sample
+    rolfs_spl = species_lists(:first_species_list)
+    marys_spl = species_lists(:unknown_species_list)
     params = {
       method: :delete,
       action: :species_list,

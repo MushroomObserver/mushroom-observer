@@ -14,7 +14,7 @@ votes = gather_users_votes(obs, @user)
             }) do %>
 
   <%= render(partial: "observations/namings/table_header",
-                locals: { obs: obs }) %>
+             locals: { obs: obs }) %>
 
   <%= tag.div(class: "list-group list-group-flush") do %>
     <% if any_names

@@ -62,7 +62,7 @@ class ProjectLatLongs
     query.where(attribute(:user_group_users,
                           :user_id).not_eq(attribute(:project_members,
                                                      :user_id)))
-    query.where(attribute(:project_members, :trusted).eq(1))
+    query.where(attribute(:project_members, :trust_level).not_eq(1))
     query.where(attribute(:observations, :gps_hidden).eq(1))
     query.where(attribute(:user_group_users, :user_id).eq(User.current_id))
   end
