@@ -980,27 +980,26 @@ export default class extends Controller {
   refresh_primer() {
     this.verbose("refresh_primer()");
     // let val = this.inputTarget.value.toLowerCase();
-    let val = this.get_search_token().toLowerCase();
+    const val = this.get_search_token().toLowerCase(),
+      last_request = this.last_fetch_request;
 
     // Don't make request on empty string!
     if (!val || val.length < 1)
       return;
 
     // Don't repeat last request accidentally!
-    if (this.last_fetch_request == val)
+    if (last_request == val)
       return;
 
     // Memoize this condition, used twice.
     // is the new search token an extension of the previous search string?
     const new_val_refines_last_request =
-      (this.last_fetch_request.length < val.length) &&
-      (this.last_fetch_request ==
-        val.substr(0, this.last_fetch_request.length))
+      (last_request.length < val.length) &&
+      (last_request == val.substr(0, last_request.length));
 
     // No need to make more constrained request if we got all results last time.
     if (!this.last_fetch_incomplete &&
-      this.last_fetch_request &&
-      (this.last_fetch_request.length > 0) &&
+      last_request && (last_request.length > 0) &&
       new_val_refines_last_request)
       return;
 
