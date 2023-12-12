@@ -229,9 +229,9 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       find(:css, ".new_naming_link_#{obs.id}").trigger("click")
     end
 
-    assert_selector("#modal_naming_#{obs.id}", wait: 6)
+    assert_selector("#modal_naming_#{obs.id}", wait: 9)
     within("#modal_naming_#{obs.id}") do
-      assert_field("naming_name")
+      assert_field("naming_name", wait: 4)
       fill_in("naming_name", with: nd1.text_name)
       click_commit
     end
@@ -256,6 +256,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     # previous action can rewrite the cookie, so we lose the session_user.
     # When this happens, naming_table is refreshed with no edit/destroy buttons.
     # Capybara author suggests trying sleep(5) after a CRUD action
+    # Ah. Maybe it was just missing the scroll_to
     scroll_to(find("#observation_namings"), align: :center)
     # sleep(3)
 
