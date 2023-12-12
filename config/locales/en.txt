@@ -3103,6 +3103,7 @@
   # ADMIN-TYPE PAGES
 
   # project/<id>/members/new
+  add_members_with_gps_trust: Hidden GPS data may be shared with project admins.
   add_members_change_status: Change Status
   add_members_denied: "Permission denied: only admins for a project can add new members."
   add_members_title: Add [:users] to [title]
@@ -3157,7 +3158,7 @@
   change_member_status_change_status: Change Status
   change_member_status_edit: Edit Project
   change_member_status_make_admin: Make Admin
-  change_member_status_make_admin_help: Make Admin - Allows [:user] to perform admin functions.  They will be able to add or remove members, change the ability for other members to perform admin functions, and edit any draft names for this project.  [:user] is also made a member of the project if they are not already.
+  change_member_status_make_admin_help: Make Admin - Allows [:user] to perform admin functions.  They will be able to add or remove members, change the ability for other members to perform admin functions, and edit any content associated with this project from users who trust admins for editing.  This [:user] is also made a member of the project if they are not already.
   change_member_status_make_member: Make Regular Member
   change_member_status_make_member_help: Make Regular Member - Ensures that [:user] is a member of the project, but not in the admin group. Afterwords the [:user] will be able to view and create draft names for this project.  They will be the only non-admin members able to edit their drafts.
   change_member_status_members: Current Project Members
@@ -3165,10 +3166,12 @@
   change_member_status_remove_member_help: Remove Member - Removes all member and admin privileges for a project.  [:user] will no longer be able view or create draft names for this project.  They will not be able to perform any admin functions.
   change_member_status_denied: Only the admins for a project can change member permissions.
   change_member_status_title: Changing [:user] Status of [name] for [title]
-  change_member_status_trust: Trust Project
-  change_member_status_trust_flash: You now trust admins of this project with hidden GPS data for associated observations
+  change_member_hidden_gps_trust: Share Hidden GPS
+  change_member_hidden_gps_trust_flash: You now trust admins of this project with hidden GPS data for associated observations
+  change_member_editing_trust: Allow Editing
+  change_member_editing_trust_flash: You now trust admins of this project to edit your associated content
   change_member_status_revoke_trust: Revoke Trust
-  change_member_status_revoke_trust_flash: You no longer trust admins of this project with hidden GPS data for associated observations
+  change_member_status_revoke_trust_flash: You no longer trust admins of this project with hidden GPS data or editing your associated content
 
   # users/bonuses
   change_user_bonuses_title: Contribution Bonuses for [user]

@@ -8,7 +8,7 @@
                                  checked: @project_checks[project.id],
                                  disabled: @species_list.user_id != @user.id &&
                                    !project.is_member?(@user),
-                                 label: link_to_object(project)) %>
+                                 label: project.title) %>
       <% end %>
     </div>
   </div>

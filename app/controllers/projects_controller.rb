@@ -316,7 +316,8 @@ class ProjectsController < ApplicationController
       @project.location = location
       upload_image_if_present
       if @project.save
-        ProjectMember.create!(project: @project, user: @user, trusted: true)
+        ProjectMember.create!(project: @project, user: @user,
+                              trust_level: "hidden_gps")
         @project.log_create
         flash_notice(:add_project_success.t)
         redirect_to(project_path(@project.id, q: get_query_param))
