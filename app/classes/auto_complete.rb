@@ -32,8 +32,8 @@ class AutoComplete
     clean_matches
     minimal_string = refine_matches
     truncate_matches
-    # [minimal_string] + matches
-    [[minimal_string, nil]] + matches
+    [minimal_string] + matches
+    # [[minimal_string, nil]] + matches
   end
 
   private
@@ -42,18 +42,18 @@ class AutoComplete
     return unless matches.length > limit
 
     matches.slice!(limit..-1)
-    # matches.push("...")
-    matches.push(["...", nil])
+    matches.push("...")
+    # matches.push(["...", nil])
   end
 
   def clean_matches
-    # matches.map! do |str|
-    #   str.sub(/\s*[\r\n]\s*.*/m, "").sub(/\A\s+/, "").sub(/\s+\Z/, "")
-    # end
-    matches.map! do |str, id|
-      clean = str.sub(/\s*[\r\n]\s*.*/m, "").sub(/\A\s+/, "").sub(/\s+\Z/, "")
-      [clean, id]
+    matches.map! do |str|
+      str.sub(/\s*[\r\n]\s*.*/m, "").sub(/\A\s+/, "").sub(/\s+\Z/, "")
     end
+    # matches.map! do |str, id|
+    #   clean = str.sub(/\s*[\r\n]\s*.*/m, "").sub(/\A\s+/, "").sub(/\s+\Z/, "")
+    #   [clean, id]
+    # end
     matches.uniq!
   end
 end
