@@ -990,20 +990,24 @@ export default class extends Controller {
     if (this.last_fetch_request == val)
       return;
 
+    // Memoize this condition, used twice.
+    // is the new search token an extension of the previous search string?
+    const new_val_refines_last_request =
+      (this.last_fetch_request.length < val.length) &&
+      (this.last_fetch_request ==
+        val.substr(0, this.last_fetch_request.length))
+
     // No need to make more constrained request if we got all results last time.
-    if (this.last_fetch_request &&
-      this.last_fetch_request.length > 0 &&
-      !this.last_fetch_incomplete &&
-      this.last_fetch_request.length < val.length &&
-      this.last_fetch_request == val.substr(0, this.last_fetch_request.length))
+    if (!this.last_fetch_incomplete &&
+      this.last_fetch_request &&
+      (this.last_fetch_request.length > 0) &&
+      new_val_refines_last_request)
       return;
 
     // If a less constrained request is pending, wait for it to return before
     // refining the request, just in case it returns complete results
     // (rendering the more refined request unnecessary).
-    if (this.fetch_request &&
-      this.last_fetch_request.length < val.length &&
-      this.last_fetch_request == val.substr(0, this.last_fetch_request.length))
+    if (this.fetch_request && new_val_refines_last_request)
       return;
 
     // Make request.
