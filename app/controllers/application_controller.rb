@@ -92,6 +92,7 @@
 #  catch_errors_and_log_request_stats::
 #                                (filter: catches errors for integration tests)
 #
+# rubocop:disable Metrics/ClassLength
 class ApplicationController < ActionController::Base
   require "extensions"
   require "login_system"
@@ -1839,3 +1840,4 @@ class ApplicationController < ActionController::Base
     nil
   end
 end
+# rubocop:enable Metrics/ClassLength

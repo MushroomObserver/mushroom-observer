@@ -183,10 +183,11 @@
 #  notify_users::               After save/destroy/image: send email.
 #  announce_consensus_change::  After consensus changes: send email.
 #
+# rubocop:disable Metrics/ClassLength
 class Observation < AbstractModel
   belongs_to :thumb_image, class_name: "Image",
                            inverse_of: :thumb_glossary_terms
-  belongs_to :name # (used to cache consensus name)
+  belongs_to :name, counter_cache: true # (used to cache consensus name)
   belongs_to :location
   belongs_to :rss_log
   belongs_to :user
@@ -1568,3 +1569,4 @@ class Observation < AbstractModel
     validate_when(self.when, errors)
   end
 end
+# rubocop:enable Metrics/ClassLength
