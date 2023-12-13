@@ -226,7 +226,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     scroll_to(find("#observation_namings"), align: :center)
     within("#observation_namings") do
       assert_link(text: /Propose/)
-      find(:css, ".new_naming_link_#{obs.id}").trigger("click")
+      click_link(text: /Propose/)
     end
 
     assert_selector("#modal_naming_#{obs.id}", wait: 9)
