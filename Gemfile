@@ -88,8 +88,8 @@ gem("bootstrap-sass")
 # bundler update
 gem("mini_racer")
 
-# Use Uglifier as compressor for JavaScript assets
-gem("uglifier")
+# Use Terser as compressor for JavaScript assets
+gem("terser")
 
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem("jbuilder")
