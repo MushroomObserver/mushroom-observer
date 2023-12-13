@@ -912,20 +912,21 @@ class MOAutocompleter {
     if (val != '' && primer.length > 1) {
       let the_rest = (val.match(/ /g) || []).length >= this.collapse;
 
-      for (let i = this.get_primer_index_of_substr(primer_lc, val);
-        i < primer_lc.length; i++) {
-        let s = primer[i];
+      for (let i = 1; i < primer_lc.length; i++) {
+        if (primer_lc[i].indexOf(val) > -1) {
+          let s = primer[i];
 
-        if (s.length > 0) {
-          if (the_rest || s.indexOf(' ', val.length) < val.length) {
-            matches.push(s);
-          } else if (matches.length > 1) {
-            break;
-          } else {
-            if (matches[0] == val)
-              matches.pop();
-            matches.push(s);
-            the_rest = true;
+          if (s.length > 0) {
+            if (the_rest || s.indexOf(' ', val.length) < val.length) {
+              matches.push(s);
+            } else if (matches.length > 1) {
+              break;
+            } else {
+              if (matches[0] == val)
+                matches.pop();
+              matches.push(s);
+              the_rest = true;
+            }
           }
         }
       }
@@ -935,17 +936,6 @@ class MOAutocompleter {
         matches.pop();
     }
     this.matches = matches;
-  }
-
-  // index of substr within the primer values
-  get_primer_index_of_substr(primer, val) {
-    for (let i = 0; i < primer.length; i++) {
-      // For multidimensional this would be primer[i][0], the text
-      const index = primer[i].indexOf(val);
-      if (index > -1) {
-        return i;
-      }
-    }
   }
 
   /**
