@@ -226,30 +226,41 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     scroll_to(find("#observation_namings"), align: :center)
     within("#observation_namings") do
       assert_link(text: /Propose/)
-      find(:css, ".new_naming_link_#{obs.id}").trigger("click")
+      click_link(text: /Propose/)
     end
 
     assert_selector("#modal_naming_#{obs.id}", wait: 9)
-    within("#modal_naming_#{obs.id}") do
+    within("#naming_#{obs.id}_form") do
       assert_field("naming_name", wait: 4)
-      fill_in("naming_name", with: nd1.text_name)
+      # fill_in("naming_name", with: nd1.text_name)
+      # Using autocomplete to slow things down here, otherwise button blocked.
+      find_field("naming_name").click
+      nam = nd1.text_name[0..-2]
+      browser.keyboard.type(nam)
+      assert_selector(".auto_complete", wait: 4)
+      browser.keyboard.type(:down, :tab)
+      assert_no_selector(".auto_complete")
       click_commit
     end
 
     assert_selector("#modal_naming_#{obs.id}_flash", text: /Missing/)
     assert_selector("#name_messages", text: /deprecated/)
-    # sleep(3)
 
-    within("#modal_naming_#{obs.id}") do
-      fill_in("naming_name", with: n_d.text_name)
-      assert_selector(".auto_complete")
+    within("#naming_#{obs.id}_form") do
+      fill_in("naming_name", with: "")
+      # fill_in("naming_name", with: n_d.text_name)
+      # Using autocomplete to slow things down here, otherwise session lost.
+      find_field("naming_name").click
+      nam = n_d.text_name[0..-2]
+      browser.keyboard.type(nam)
+      assert_selector(".auto_complete", wait: 4)
       browser.keyboard.type(:down, :tab)
       assert_no_selector(".auto_complete")
       assert_selector("#naming_vote_value")
       select("Doubtful", from: "naming_vote_value")
       click_commit
     end
-    assert_no_selector("#modal_naming_#{obs.id}")
+    assert_no_selector("#modal_naming_#{obs.id}", wait: 6)
 
     # Test problems have occurred here: Something in
     # Observations::NamingsController#create seems to execute before the
@@ -258,7 +269,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     # Capybara author suggests trying sleep(5) after a CRUD action
     # Ah. Maybe it was just missing the scroll_to
     scroll_to(find("#observation_namings"), align: :center)
-    # sleep(3)
+    sleep(2)
 
     nam = Naming.last
     assert_equal(n_d.text_name, nam.text_name)

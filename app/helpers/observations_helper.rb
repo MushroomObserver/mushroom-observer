@@ -214,7 +214,7 @@ module ObservationsHelper
     obs_user = obs.user
     html = [
       "#{:WHO.t}:",
-      user_link(obs_user),
+      user_link(obs_user)
     ]
     if obs_user != User.current && !obs_user.no_emails &&
        obs_user.email_general_question

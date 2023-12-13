@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { escapeHTML, getScrollBarWidth, EVENT_KEYS } from "src/mo_utilities"
+import { get } from "@rails/request.js"
 
 const DEFAULT_OPTS = {
   // what type of autocompleter, subclass of AutoComplete
@@ -92,7 +93,7 @@ const INTERNAL_OPTS = {
   current_highlight: -1, // row of view highlighted (-1 = none)
   current_width: 0,      // current width of menu
   scroll_offset: 0,      // scroll offset
-  last_fetch_request: null, // last fetch request we got results for
+  last_fetch_request: '', // last fetch request we got results for
   last_fetch_incomplete: true, // did we get all the results we requested?
   fetch_request: null,   // ajax request while underway
   refresh_timer: null,   // timer used to delay update after typing
@@ -811,20 +812,20 @@ export default class extends Controller {
     if (val != '' && primer.length > 1) {
       let the_rest = (val.match(/ /g) || []).length >= this.COLLAPSE;
 
-      for (let i = this.get_primer_index_of_substr(primer_lc, val);
-        i < primer_lc.length; i++) {
-        let s = primer[i];
-
-        if (s.length > 0) {
-          if (the_rest || s.indexOf(' ', val.length) < val.length) {
-            matches.push(s);
-          } else if (matches.length > 1) {
-            break;
-          } else {
-            if (matches[0] == val)
-              matches.pop();
-            matches.push(s);
-            the_rest = true;
+      for (let i = 1; i < primer_lc.length; i++) {
+        if (primer_lc[i].indexOf(val) > -1) {
+          let s = primer[i];
+          if (s.length > 0) {
+            if (the_rest || s.indexOf(' ', val.length) < val.length) {
+              matches.push(s);
+            } else if (matches.length > 1) {
+              break;
+            } else {
+              if (matches[0] == val)
+                matches.pop();
+              matches.push(s);
+              the_rest = true;
+            }
           }
         }
       }
@@ -834,17 +835,6 @@ export default class extends Controller {
         matches.pop();
     }
     this.matches = matches;
-  }
-
-  // index of substr within the primer values
-  get_primer_index_of_substr(primer, val) {
-    for (let i = 0; i < primer.length; i++) {
-      // For multidimensional this would be primer[i][0], the text
-      const index = primer[i].indexOf(val);
-      if (index > -1) {
-        return i;
-      }
-    }
   }
 
   /**
@@ -980,30 +970,33 @@ export default class extends Controller {
   refresh_primer() {
     this.verbose("refresh_primer()");
     // let val = this.inputTarget.value.toLowerCase();
-    let val = this.get_search_token().toLowerCase();
+    const val = this.get_search_token().toLowerCase(),
+      last_request = this.last_fetch_request;
 
     // Don't make request on empty string!
     if (!val || val.length < 1)
       return;
 
     // Don't repeat last request accidentally!
-    if (this.last_fetch_request == val)
+    if (last_request == val)
       return;
 
+    // Memoize this condition, used twice.
+    // is the new search token an extension of the previous search string?
+    const new_val_refines_last_request =
+      (last_request.length < val.length) &&
+      (last_request == val.substr(0, last_request.length));
+
     // No need to make more constrained request if we got all results last time.
-    if (this.last_fetch_request &&
-      this.last_fetch_request.length > 0 &&
-      !this.last_fetch_incomplete &&
-      this.last_fetch_request.length < val.length &&
-      this.last_fetch_request == val.substr(0, this.last_fetch_request.length))
+    if (!this.last_fetch_incomplete &&
+      last_request && (last_request.length > 0) &&
+      new_val_refines_last_request)
       return;
 
     // If a less constrained request is pending, wait for it to return before
     // refining the request, just in case it returns complete results
     // (rendering the more refined request unnecessary).
-    if (this.fetch_request &&
-      this.last_fetch_request.length < val.length &&
-      this.last_fetch_request == val.substr(0, this.last_fetch_request.length))
+    if (this.fetch_request && new_val_refines_last_request)
       return;
 
     // Make request.
@@ -1011,7 +1004,7 @@ export default class extends Controller {
   }
 
   // Send AJAX request for more matching strings.
-  send_fetch_request(val) {
+  async send_fetch_request(val) {
     this.verbose("send_fetch_request()");
     if (val.length > this.MAX_REQUEST_LINK)
       val = val.substr(0, this.MAX_REQUEST_LINK);
@@ -1034,23 +1027,18 @@ export default class extends Controller {
     if (this.fetch_request)
       controller.abort();
 
-    this.fetch_request = fetch(url, { signal }).then((response) => {
-      if (response.ok) {
-        if (200 <= response.status && response.status <= 299) {
-          response.json().then((json) => {
-            this.process_fetch_response(json)
-          }).catch((error) => {
-            console.error("no_content:", error);
-          });
-        } else {
-          this.fetch_request = null;
-          console.log(`got a ${response.status}`);
-        }
+    const response = await get(url, { signal });
+    if (response.ok) {
+      const json = await response.json
+      if (json) {
+        this.fetch_request = response
+        this.process_fetch_response(json)
       }
-    }).catch((error) => {
-      // alert("Server Error:", error);
-      console.error("Server Error:", error);
-    });
+    } else {
+      this.fetch_request = null;
+      console.log(`got a ${response.status}`);
+    }
+
   }
 
   // Process response from server:
