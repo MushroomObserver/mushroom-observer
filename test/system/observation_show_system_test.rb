@@ -232,7 +232,14 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_selector("#modal_naming_#{obs.id}", wait: 9)
     within("#naming_#{obs.id}_form") do
       assert_field("naming_name", wait: 4)
-      fill_in("naming_name", with: nd1.text_name)
+      # fill_in("naming_name", with: nd1.text_name)
+      # Using autocomplete to slow things down here, otherwise button blocked.
+      find_field("naming_name").click
+      nam = nd1.text_name[0..-2]
+      browser.keyboard.type(nam)
+      assert_selector(".auto_complete", wait: 4)
+      browser.keyboard.type(:down, :tab)
+      assert_no_selector(".auto_complete")
       click_commit
     end
 
