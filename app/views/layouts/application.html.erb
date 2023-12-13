@@ -46,9 +46,9 @@ body_class = class_names(whos_calling, theme_class)
       <main id="content" class="<%= container_class %>"
             data-controller="lightgallery">
 
-        <% unless @user&.verified? %>
-          <%= render(partial: "application/content/login_layout") %>
-        <% end %>
+        <%# unless @user&.verified? %>
+          <%# render(partial: "application/content/login_layout") %>
+        <%# end %>
 
         <!--MAIN_PAGE_CONTENT-->
         <%= yield %>
