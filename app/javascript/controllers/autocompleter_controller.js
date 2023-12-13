@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { escapeHTML, getScrollBarWidth, EVENT_KEYS } from "src/mo_utilities"
+import { get } from "@rails/request.js"
 
 const DEFAULT_OPTS = {
   // what type of autocompleter, subclass of AutoComplete
@@ -1003,7 +1004,7 @@ export default class extends Controller {
   }
 
   // Send AJAX request for more matching strings.
-  send_fetch_request(val) {
+  async send_fetch_request(val) {
     this.verbose("send_fetch_request()");
     if (val.length > this.MAX_REQUEST_LINK)
       val = val.substr(0, this.MAX_REQUEST_LINK);
@@ -1026,23 +1027,18 @@ export default class extends Controller {
     if (this.fetch_request)
       controller.abort();
 
-    this.fetch_request = fetch(url, { signal }).then((response) => {
-      if (response.ok) {
-        if (200 <= response.status && response.status <= 299) {
-          response.json().then((json) => {
-            this.process_fetch_response(json)
-          }).catch((error) => {
-            console.error("no_content:", error);
-          });
-        } else {
-          this.fetch_request = null;
-          console.log(`got a ${response.status}`);
-        }
+    const response = await get(url, { signal });
+    if (response.ok) {
+      const json = await response.json
+      if (json) {
+        this.fetch_request = response
+        this.process_fetch_response(json)
       }
-    }).catch((error) => {
-      // alert("Server Error:", error);
-      console.error("Server Error:", error);
-    });
+    } else {
+      this.fetch_request = null;
+      console.log(`got a ${response.status}`);
+    }
+
   }
 
   // Process response from server:
