@@ -115,6 +115,8 @@ MushroomObserver::Application.configure do
       Bullet.unused_eager_loading_enable = false
       # Bullet.add_safelist(type: :n_plus_one_query, class_name: "Post",
       #                     association: :comments)
+      Bullet.add_safelist(type: :counter_cache, class_name: "Name",
+                          association: :observations)
     end
   end
 end
