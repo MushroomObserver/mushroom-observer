@@ -20,7 +20,7 @@ add_tab_set(location_show_tabs(location: @location))
 <%= render(partial: "locations/show/location", object: @location) %>
 
 <%= render(partial: "comments/comments_for_object",
-           locals: { object: @location, controls: true, limit: 2 }) %>
+           locals: { object: @location, controls: @user, limit: 2 }) %>
 
 <div class="container-text">
   <% if @description&.notes? %>
@@ -29,7 +29,7 @@ add_tab_set(location_show_tabs(location: @location))
     <%= render(partial: "locations/descriptions/show/location_description",
                object: @description) %>
     <%= render(partial: "comments/comments_for_object",
-               locals: { object: @description, controls: true, limit: 2 }) %>
+               locals: { object: @description, controls: @user, limit: 2 }) %>
     <hr/>
   <% end %>
 

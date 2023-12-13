@@ -76,9 +76,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     find("#content_filter_region").click
     browser.keyboard.type("USA, Calif")
     assert_selector(".auto_complete") # wait
-    # assert_selector(".auto_complete ul li", count: 10)
     browser.keyboard.type(:down, :tab)
-    # sleep(1)
     assert_field("content_filter_region", with: "USA, California")
 
     # Autocompleter's OR separator not working yet.
@@ -95,9 +93,10 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     visit(observation_path(obs.id))
 
     scroll_to(find("#observation_namings"), align: :center)
-    click_on("Propose")
-    assert_selector("#modal_naming_#{obs.id}", wait: 6)
-    assert_selector("#naming_#{obs.id}_form")
+    assert_link(text: /Propose/)
+    click_link(text: /Propose/)
+    assert_selector("#modal_naming_#{obs.id}", wait: 9)
+    assert_selector("#naming_#{obs.id}_form", wait: 9)
     find_field("naming_name").click
     browser.keyboard.type("Peltige")
     assert_selector(".auto_complete", wait: 3) # wait

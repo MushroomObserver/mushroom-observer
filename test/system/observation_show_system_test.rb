@@ -230,6 +230,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     end
 
     assert_selector("#modal_naming_#{obs.id}", wait: 9)
+    assert_selector("#naming_#{obs.id}_form", wait: 9)
     within("#naming_#{obs.id}_form") do
       assert_field("naming_name", wait: 4)
       # fill_in("naming_name", with: nd1.text_name)

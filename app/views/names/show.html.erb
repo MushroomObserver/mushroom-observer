@@ -63,6 +63,6 @@ add_tab_set(name_show_tabs(name: @name, user: @user))
   # ----------------------------------------
 %>
 <%= render(partial: "comments/comments_for_object",
-           locals: {object: @name, controls: true, limit: nil}) %>
+           locals: {object: @name, controls: @user, limit: nil}) %>
 <%= :show_name_num_notifications.t(num: @name.interests) %>
 <%= show_object_footer(@name) %>

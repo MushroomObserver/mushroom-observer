@@ -11,7 +11,7 @@ tag.div(
   class: "panel panel-default", id: "comments_for_object",
   data: { controller: "section-update", updated_by: "modal_comment" }
 ) do
-  [
+  concat([
     tag.div(class: "panel-heading") do
       tag.h4(:COMMENTS.t, class: "panel-title")
     end,
@@ -23,16 +23,18 @@ tag.div(
           concat(render(partial: "comments/comment", object: comment))
         end
       end
-    end,
+    end
+  ].safe_join)
+  concat(
     tag.div(class: "panel-footer") do
       concat(
         modal_link_to("comment", *new_comment_tab(object))
-      ) if controls
+      )
       concat(
         link_to(:show_comments_and_more.t(num: and_more),
                 comments_path(target: object.id, type: object.class.name),
                 class: "float-right")
       ) if limit && and_more > 0
     end
-  ].safe_join
+  ) if controls
 end %>
