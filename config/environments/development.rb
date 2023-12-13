@@ -81,12 +81,16 @@ MushroomObserver::Application.configure do
   # Compile asset files, but don't combine, compress, or add digests to names.
   config.assets.compile = true
 
+  # Recommended by Rails team to keep assets digest true in dev mode.
+  # As of 2023-09-06, Stimulus-loading.js will 404 if false.
+  # https://github.com/hotwired/stimulus-rails/issues/108#issuecomment-1680804528
+  config.assets.digest = true
+
   # Debug mode disables concatenation and preprocessing of assets.
   # This option may cause significant delays in view rendering with a large
   # number of complex assets.
   config.assets.debug = false
   config.assets.logger = false
-  config.assets.digest = false
 
   # Enable web console for MushroomObserver VM
   config.web_console.allowed_ips = "10.0.2.2"

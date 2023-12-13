@@ -4,7 +4,7 @@
 # used mostly (exclusively?) by model scopes
 module Mappable
   class Box
-    attr :north, :south, :east, :west
+    attr_reader :north, :south, :east, :west
 
     def initialize(north: nil, south: nil, east: nil, west: nil)
       @north = north

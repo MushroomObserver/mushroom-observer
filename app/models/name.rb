@@ -322,6 +322,7 @@
 #  notify_users::            After save: notify interested User's of changes.
 #
 ###############################################################################
+# rubocop:disable Metrics/ClassLength
 class Name < AbstractModel
   require "acts_as_versioned"
   require "fileutils"
@@ -739,3 +740,4 @@ class Name < AbstractModel
                :name_error_field_start.t(field: :CITATION.t, start: start))
   end
 end
+# rubocop:enable Metrics/ClassLength

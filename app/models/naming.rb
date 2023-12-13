@@ -370,7 +370,7 @@ class Naming < AbstractModel
     # Gather votes, doing a weighted sum in the process.
     tot_sum = 0
     tot_wgt = 0
-    votes.each do |v|
+    votes.includes([:user]).find_each do |v|
       str = Vote.confidence(v.value)
       wgt = v.user_weight
       table[str][:num] += 1

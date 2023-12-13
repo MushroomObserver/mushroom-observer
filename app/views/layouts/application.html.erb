@@ -10,9 +10,10 @@ body_class = class_names(whos_calling, theme_class)
 <html class="<%= html_class %>">
 <head>
   <%= render(partial: "application/app/head") %>
+  <%= javascript_importmap_tags %>
 </head>
 
-<body class="<%= body_class %>">
+<body class="<%= body_class %>" data-controller="lazyload">
   <% if Rails.env == "production" %>
     <%= render(partial: "application/app/gtm_iframe") %>
   <% end %>
@@ -42,7 +43,9 @@ body_class = class_names(whos_calling, theme_class)
         <%= render(partial: "application/content/title_and_tab_sets") %>
       </header>
 
-      <main id="content" class="<%= container_class %>">
+      <main id="content" class="<%= container_class %>"
+            data-controller="lightgallery">
+
         <% unless @user&.verified? %>
           <%= render(partial: "application/content/login_layout") %>
         <% end %>

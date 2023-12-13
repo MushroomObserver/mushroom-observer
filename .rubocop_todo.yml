@@ -9,42 +9,41 @@
 # Offense count: 7
 Lint/DuplicateMethods:
   Exclude:
-    - 'app/classes/pivotal/comment.rb'
-    - 'app/classes/query/modules/active_record.rb'
-    - 'app/classes/query/modules/high_level_queries.rb'
-    - 'app/models/image.rb'
+    - "app/classes/pivotal/comment.rb"
+    - "app/classes/query/modules/active_record.rb"
+    - "app/classes/query/modules/high_level_queries.rb"
+    - "app/models/image.rb"
 
 # Offense count: 1
 Lint/IneffectiveAccessModifier:
   Exclude:
-    - 'app/models/vote.rb'
+    - "app/models/vote.rb"
 
 # Offense count: 4
 Lint/LiteralAsCondition:
   Exclude:
-    - 'app/models/vote.rb'
-    - 'test/models/pivotal_test.rb'
-    - 'test/test_helper.rb'
+    - "app/models/vote.rb"
+    - "test/models/pivotal_test.rb"
+    - "test/test_helper.rb"
 
 # Offense count: 5
 # Configuration parameters: AllowedParentClasses.
 Lint/MissingSuper:
   Exclude:
-    - 'app/classes/checklist.rb'
-    - 'app/classes/geocoder.rb'
-    - 'test/uploaded_string.rb'
+    - "app/classes/checklist.rb"
+    - "test/uploaded_string.rb"
 
 # Offense count: 1
 Lint/NonLocalExitFromIterator:
   Exclude:
-    - 'test/general_extensions.rb'
+    - "test/general_extensions.rb"
 
 # Offense count: 2
 # This cop supports safe autocorrection (--autocorrect).
 Lint/RedundantCopDisableDirective:
   Exclude:
-    - 'app/classes/ip_stats.rb'
-    - 'app/models/translation_string.rb'
+    - "app/classes/ip_stats.rb"
+    - "app/models/translation_string.rb"
 
 # Offense count: 6
 # This cop supports unsafe autocorrection (--autocorrect-all).
@@ -52,44 +51,44 @@ Lint/RedundantCopDisableDirective:
 # AllowedMethods: instance_of?, kind_of?, is_a?, eql?, respond_to?, equal?, presence, present?
 Lint/RedundantSafeNavigation:
   Exclude:
-    - 'app/models/comment.rb'
-    - 'app/presenters/matrix_box_presenter.rb'
+    - "app/models/comment.rb"
+    - "app/presenters/matrix_box_presenter.rb"
 
 # Offense count: 1
 Lint/RescueException:
   Exclude:
-    - 'script/make_eol_xml'
+    - "script/make_eol_xml"
 
 # Offense count: 3
 Lint/ReturnInVoidContext:
   Exclude:
-    - 'app/classes/checklist.rb'
+    - "app/classes/checklist.rb"
 
 # Offense count: 3
 # Configuration parameters: AllowComments, AllowNil.
 Lint/SuppressedException:
   Exclude:
-    - 'app/models/observation.rb'
-    - 'script/make_eol_xml'
-    - 'test/controllers/species_lists_controller_test.rb'
+    - "app/models/observation.rb"
+    - "script/make_eol_xml"
+    - "test/controllers/species_lists_controller_test.rb"
 
 # Offense count: 5
 # This cop supports unsafe autocorrection (--autocorrect-all).
 Lint/UselessMethodDefinition:
   Exclude:
-    - 'app/classes/query/location_by_editor.rb'
-    - 'test/models/auto_complete_test.rb'
+    - "app/classes/query/location_by_editor.rb"
+    - "test/models/auto_complete_test.rb"
 
 # Offense count: 8
 # This cop supports safe autocorrection (--autocorrect).
 # Configuration parameters: CheckForMethodsWithNoSideEffects.
 Lint/Void:
   Exclude:
-    - 'app/classes/mo_paginator.rb'
-    - 'app/classes/query/modules/high_level_queries.rb'
-    - 'app/classes/query/modules/nested_queries.rb'
-    - 'app/classes/query/modules/sequence_operators.rb'
-    - 'app/models/observation.rb'
+    - "app/classes/mo_paginator.rb"
+    - "app/classes/query/modules/high_level_queries.rb"
+    - "app/classes/query/modules/nested_queries.rb"
+    - "app/classes/query/modules/sequence_operators.rb"
+    - "app/models/observation.rb"
 
 # Offense count: 291
 # Configuration parameters: AllowedMethods, AllowedPatterns, CountRepeatedAttributes.
@@ -106,11 +105,11 @@ Metrics/BlockLength:
 # Configuration parameters: CountBlocks, Max.
 Metrics/BlockNesting:
   Exclude:
-    - 'app/classes/map_set.rb'
-    - 'app/classes/tree.rb'
-    - 'app/controllers/observations_controller/form_helpers.rb'
-    - 'lib/tasks/email.rake'
-    - 'test/controller_extensions.rb'
+    - "app/classes/map_set.rb"
+    - "app/classes/tree.rb"
+    - "app/controllers/observations_controller/form_helpers.rb"
+    - "lib/tasks/email.rake"
+    - "test/controller_extensions.rb"
 
 # Offense count: 17
 # Configuration parameters: CountComments, CountAsOne.
@@ -131,22 +130,22 @@ Metrics/MethodLength:
 # Configuration parameters: CountComments, Max, CountAsOne.
 Metrics/ModuleLength:
   Exclude:
-    - 'app/classes/query/modules/joining.rb'
-    - 'app/controllers/concerns/descriptions.rb'
-    - 'app/controllers/species_lists/shared_private_methods.rb'
-    - 'app/models/language_exporter.rb'
-    - 'app/models/name/parse.rb'
+    - "app/classes/query/modules/joining.rb"
+    - "app/controllers/concerns/descriptions.rb"
+    - "app/controllers/species_lists/shared_private_methods.rb"
+    - "app/models/language_exporter.rb"
+    - "app/models/name/parse.rb"
 
 # Offense count: 8
 # Configuration parameters: Max, CountKeywordArgs, MaxOptionalParameters.
 Metrics/ParameterLists:
   Exclude:
-    - 'app/classes/minimal_map_location.rb'
-    - 'app/models/queued_email/name_change.rb'
-    - 'script/mushroom_mapper.rb'
-    - 'test/controller_extensions.rb'
-    - 'test/controllers/projects/members_controller_test.rb'
-    - 'test/models/collapsible_map_test.rb'
+    - "app/classes/minimal_map_location.rb"
+    - "app/models/queued_email/name_change.rb"
+    - "script/mushroom_mapper.rb"
+    - "test/controller_extensions.rb"
+    - "test/controllers/projects/members_controller_test.rb"
+    - "test/models/collapsible_map_test.rb"
 
 # Offense count: 84
 # Configuration parameters: AllowedMethods, AllowedPatterns.
@@ -156,23 +155,22 @@ Metrics/PerceivedComplexity:
 # Offense count: 17
 Naming/AccessorMethodName:
   Exclude:
-    - 'app/classes/eol_data.rb'
-    - 'app/classes/geocoder.rb'
-    - 'app/classes/query/modules/nested_queries.rb'
-    - 'app/classes/site_data.rb'
-    - 'app/controllers/translation_controller.rb'
-    - 'app/helpers/exporter_helper.rb'
-    - 'app/models/queued_email.rb'
-    - 'script/make_eol_xml'
-    - 'test/flash_extensions.rb'
-    - 'test/language_extensions.rb'
+    - "app/classes/eol_data.rb"
+    - "app/classes/query/modules/nested_queries.rb"
+    - "app/classes/site_data.rb"
+    - "app/controllers/translation_controller.rb"
+    - "app/helpers/exporter_helper.rb"
+    - "app/models/queued_email.rb"
+    - "script/make_eol_xml"
+    - "test/flash_extensions.rb"
+    - "test/language_extensions.rb"
 
 # Offense count: 1
 # Configuration parameters: ForbiddenDelimiters.
 # ForbiddenDelimiters: (?i-mx:(^|\s)(EO[A-Z]{1}|END)(\s|$))
 Naming/HeredocDelimiterNaming:
   Exclude:
-    - 'script/refresh_name_lister_cache'
+    - "script/refresh_name_lister_cache"
 
 # Offense count: 35
 # Configuration parameters: NamePrefix, ForbiddenPrefixes, AllowedMethods, MethodDefinitionMacros.
@@ -182,29 +180,29 @@ Naming/HeredocDelimiterNaming:
 # MethodDefinitionMacros: define_method, define_singleton_method
 Naming/PredicateName:
   Exclude:
-    - 'app/classes/box_methods.rb'
-    - 'app/classes/eol_data.rb'
-    - 'app/classes/map_set.rb'
-    - 'app/classes/minimal_map_observation.rb'
-    - 'app/classes/pattern_search/observation.rb'
-    - 'app/classes/run_level.rb'
-    - 'app/classes/tree.rb'
-    - 'app/controllers/api2_controller.rb'
-    - 'app/controllers/application_controller.rb'
-    - 'app/extensions/array_extensions.rb'
-    - 'app/extensions/hash_extensions.rb'
-    - 'app/extensions/string_extensions.rb'
-    - 'app/extensions/symbol_extensions.rb'
-    - 'app/helpers/descriptions_helper.rb'
-    - 'app/models/abstract_model.rb'
-    - 'app/models/description.rb'
-    - 'app/models/location.rb'
-    - 'app/models/name/lifeform.rb'
-    - 'app/models/name/spelling.rb'
-    - 'app/models/name/taxonomy.rb'
-    - 'app/models/name_parse.rb'
-    - 'app/models/observation.rb'
-    - 'app/models/project.rb'
+    - "app/classes/box_methods.rb"
+    - "app/classes/eol_data.rb"
+    - "app/classes/map_set.rb"
+    - "app/classes/minimal_map_observation.rb"
+    - "app/classes/pattern_search/observation.rb"
+    - "app/classes/run_level.rb"
+    - "app/classes/tree.rb"
+    - "app/controllers/api2_controller.rb"
+    - "app/controllers/application_controller.rb"
+    - "app/extensions/array_extensions.rb"
+    - "app/extensions/hash_extensions.rb"
+    - "app/extensions/string_extensions.rb"
+    - "app/extensions/symbol_extensions.rb"
+    - "app/helpers/descriptions_helper.rb"
+    - "app/models/abstract_model.rb"
+    - "app/models/description.rb"
+    - "app/models/location.rb"
+    - "app/models/name/lifeform.rb"
+    - "app/models/name/spelling.rb"
+    - "app/models/name/taxonomy.rb"
+    - "app/models/name_parse.rb"
+    - "app/models/observation.rb"
+    - "app/models/project.rb"
 
 # Offense count: 125
 # Configuration parameters: EnforcedStyle, CheckMethodNames, CheckSymbols, AllowedIdentifiers, AllowedPatterns.
@@ -212,29 +210,29 @@ Naming/PredicateName:
 # AllowedIdentifiers: capture3, iso8601, rfc1123_date, rfc822, rfc2822, rfc3339, x86_64
 Naming/VariableNumber:
   Exclude:
-    - 'app/controllers/info_controller.rb'
-    - 'app/controllers/support_controller.rb'
-    - 'app/models/naming.rb'
-    - 'app/models/vote.rb'
-    - 'test/controllers/comments_controller_test.rb'
-    - 'test/controllers/lookups_controller_test.rb'
-    - 'test/controllers/names/synonyms_controller_test.rb'
-    - 'test/controllers/observations/images_controller_test.rb'
-    - 'test/controllers/support_controller_test.rb'
-    - 'test/mailers/application_mailer_test.rb'
-    - 'test/mailers/queued_email_test.rb'
-    - 'test/models/api2_test.rb'
-    - 'test/models/name_sorter_test.rb'
-    - 'test/models/name_test.rb'
-    - 'test/models/observation_test.rb'
-    - 'test/models/query_test.rb'
+    - "app/controllers/info_controller.rb"
+    - "app/controllers/support_controller.rb"
+    - "app/models/naming.rb"
+    - "app/models/vote.rb"
+    - "test/controllers/comments_controller_test.rb"
+    - "test/controllers/lookups_controller_test.rb"
+    - "test/controllers/names/synonyms_controller_test.rb"
+    - "test/controllers/observations/images_controller_test.rb"
+    - "test/controllers/support_controller_test.rb"
+    - "test/mailers/application_mailer_test.rb"
+    - "test/mailers/queued_email_test.rb"
+    - "test/models/api2_test.rb"
+    - "test/models/name_sorter_test.rb"
+    - "test/models/name_test.rb"
+    - "test/models/observation_test.rb"
+    - "test/models/query_test.rb"
 
 # Offense count: 1
 # This cop supports unsafe autocorrection (--autocorrect-all).
 # Configuration parameters: NilOrEmpty, NotPresent, UnlessPresent.
 Rails/Blank:
   Exclude:
-    - 'app/controllers/application_controller.rb'
+    - "app/controllers/application_controller.rb"
 
 # Offense count: 3
 # This cop supports safe autocorrection (--autocorrect).
@@ -242,34 +240,32 @@ Rails/Blank:
 # SupportedStyles: slashes, arguments
 Rails/FilePath:
   Exclude:
-    - 'app/classes/geocoder.rb'
-    - 'app/classes/gm/gmap.rb'
-    - 'app/models/language_exporter.rb'
+    - "app/models/language_exporter.rb"
 
 # Offense count: 46
 # Configuration parameters: Include.
 # Include: app/models/**/*.rb
 Rails/HasManyOrHasOneDependent:
   Exclude:
-    - 'app/models/external_site.rb'
-    - 'app/models/image.rb'
-    - 'app/models/license.rb'
-    - 'app/models/location.rb'
-    - 'app/models/name.rb'
-    - 'app/models/observation.rb'
-    - 'app/models/user.rb'
-    - 'app/models/user_group.rb'
+    - "app/models/external_site.rb"
+    - "app/models/image.rb"
+    - "app/models/license.rb"
+    - "app/models/location.rb"
+    - "app/models/name.rb"
+    - "app/models/observation.rb"
+    - "app/models/user.rb"
+    - "app/models/user_group.rb"
 
 # Offense count: 24
 # Configuration parameters: Include.
 # Include: app/helpers/**/*.rb
 Rails/HelperInstanceVariable:
   Exclude:
-    - 'app/helpers/application_helper.rb'
-    - 'app/helpers/autocomplete_helper.rb'
-    - 'app/helpers/javascript_helper.rb'
-    - 'app/helpers/map_helper.rb'
-    - 'app/helpers/pivotal_helper.rb'
+    - "app/helpers/application_helper.rb"
+    - "app/helpers/autocomplete_helper.rb"
+    - "app/helpers/javascript_helper.rb"
+    - "app/helpers/map_helper.rb"
+    - "app/helpers/pivotal_helper.rb"
 
 # Offense count: 2
 # This cop supports unsafe autocorrection (--autocorrect-all).
@@ -277,18 +273,17 @@ Rails/HelperInstanceVariable:
 # Include: app/**/*.rb, config/**/*.rb, db/**/*.rb, lib/**/*.rb
 Rails/Output:
   Exclude:
-    - 'app/extensions/string_extensions.rb'
-    - 'app/models/language_exporter.rb'
+    - "app/extensions/string_extensions.rb"
+    - "app/models/language_exporter.rb"
 
 # Offense count: 8
 Rails/OutputSafety:
   Exclude:
-    - 'app/classes/gm/gmap.rb'
-    - 'app/extensions/array_extensions.rb'
-    - 'app/extensions/symbol_extensions.rb'
-    - 'app/helpers/map_helper.rb'
-    - 'app/helpers/namings_helper.rb'
-    - 'config/application.rb'
+    - "app/extensions/array_extensions.rb"
+    - "app/extensions/symbol_extensions.rb"
+    - "app/helpers/map_helper.rb"
+    - "app/helpers/namings_helper.rb"
+    - "config/application.rb"
 
 # Offense count: 4
 # This cop supports unsafe autocorrection (--autocorrect-all).
@@ -296,7 +291,7 @@ Rails/OutputSafety:
 # Include: **/Rakefile, **/*.rake
 Rails/RakeEnvironment:
   Exclude:
-    - 'lib/tasks/lang.rake'
+    - "lib/tasks/lang.rake"
 
 # Offense count: 4
 # This cop supports unsafe autocorrection (--autocorrect-all).
@@ -304,94 +299,94 @@ Rails/RakeEnvironment:
 # Include: spec/controllers/**/*.rb, spec/requests/**/*.rb, test/controllers/**/*.rb, test/integration/**/*.rb
 Rails/ResponseParsedBody:
   Exclude:
-    - 'test/controllers/api2_controller_test.rb'
+    - "test/controllers/api2_controller_test.rb"
 
 # Offense count: 2
 # Configuration parameters: Include.
 # Include: app/models/**/*.rb
 Rails/UniqueValidationWithoutIndex:
   Exclude:
-    - 'app/models/external_link.rb'
-    - 'app/models/external_site.rb'
+    - "app/models/external_link.rb"
+    - "app/models/external_site.rb"
 
 # Offense count: 1
 Security/Eval:
   Exclude:
-    - 'script/config.rb'
+    - "script/config.rb"
 
 # Offense count: 1
 # This cop supports safe autocorrection (--autocorrect).
 Style/Attr:
   Exclude:
-    - 'app/classes/box.rb'
+    - "app/classes/box.rb"
 
 # Offense count: 70
 Style/ClassVars:
   Exclude:
-    - 'app/classes/content_filter.rb'
-    - 'app/classes/ip_stats.rb'
-    - 'app/classes/run_level.rb'
-    - 'app/classes/textile.rb'
-    - 'app/extensions/symbol_extensions.rb'
-    - 'app/models/language.rb'
-    - 'app/models/language_tracking.rb'
-    - 'app/models/location.rb'
-    - 'app/models/queued_email.rb'
-    - 'app/models/user.rb'
-    - 'app/models/user_group.rb'
-    - 'test/controllers/locations_controller_test.rb'
-    - 'test/controllers/names_controller_test.rb'
-    - 'test/general_extensions.rb'
-    - 'test/language_extensions.rb'
-    - 'test/test_helper.rb'
+    - "app/classes/content_filter.rb"
+    - "app/classes/ip_stats.rb"
+    - "app/classes/run_level.rb"
+    - "app/classes/textile.rb"
+    - "app/extensions/symbol_extensions.rb"
+    - "app/models/language.rb"
+    - "app/models/language_tracking.rb"
+    - "app/models/location.rb"
+    - "app/models/queued_email.rb"
+    - "app/models/user.rb"
+    - "app/models/user_group.rb"
+    - "test/controllers/locations_controller_test.rb"
+    - "test/controllers/names_controller_test.rb"
+    - "test/general_extensions.rb"
+    - "test/language_extensions.rb"
+    - "test/test_helper.rb"
 
 # Offense count: 8
 # This cop supports unsafe autocorrection (--autocorrect-all).
 Style/CombinableLoops:
   Exclude:
-    - 'script/check_enum_values'
-    - 'script/mushroom_mapper.rb'
+    - "script/check_enum_values"
+    - "script/mushroom_mapper.rb"
 
 # Offense count: 1
 # This cop supports safe autocorrection (--autocorrect).
 # Configuration parameters: AllowedMethods, AllowedPatterns.
 Style/MethodCallWithoutArgsParentheses:
   Exclude:
-    - 'lib/tasks/email.rake'
+    - "lib/tasks/email.rake"
 
 # Offense count: 2
 Style/MissingRespondToMissing:
   Exclude:
-    - 'script/update_googlebots.rb'
-    - 'script/update_ip_stats.rb'
+    - "script/update_googlebots.rb"
+    - "script/update_ip_stats.rb"
 
 # Offense count: 50
 # Configuration parameters: AllowedMethods.
 # AllowedMethods: respond_to_missing?
 Style/OptionalBooleanParameter:
   Exclude:
-    - 'app/classes/pattern_search/term.rb'
-    - 'app/classes/pivotal.rb'
-    - 'app/classes/query/modules/sequence_operators.rb'
-    - 'app/classes/query/modules/sql.rb'
-    - 'app/controllers/application_controller.rb'
-    - 'app/extensions/string_extensions.rb'
-    - 'app/extensions/symbol_extensions.rb'
-    - 'app/helpers/content_helper.rb'
-    - 'app/helpers/object_link_helper.rb'
-    - 'app/models/location.rb'
-    - 'app/models/name/change.rb'
-    - 'app/models/name/parse.rb'
-    - 'app/models/queued_email.rb'
-    - 'app/models/queued_email/name_change.rb'
-    - 'app/models/visual_group.rb'
-    - 'app/models/visual_model.rb'
-    - 'script/download_symbiota.rb'
-    - 'test/capybara_session_extensions.rb'
-    - 'test/check_for_unsafe_html.rb'
-    - 'test/controllers/donations_controller_test_helpers.rb'
-    - 'test/session_extensions.rb'
-    - 'test/session_form_extensions.rb'
+    - "app/classes/pattern_search/term.rb"
+    - "app/classes/pivotal.rb"
+    - "app/classes/query/modules/sequence_operators.rb"
+    - "app/classes/query/modules/sql.rb"
+    - "app/controllers/application_controller.rb"
+    - "app/extensions/string_extensions.rb"
+    - "app/extensions/symbol_extensions.rb"
+    - "app/helpers/content_helper.rb"
+    - "app/helpers/object_link_helper.rb"
+    - "app/models/location.rb"
+    - "app/models/name/change.rb"
+    - "app/models/name/parse.rb"
+    - "app/models/queued_email.rb"
+    - "app/models/queued_email/name_change.rb"
+    - "app/models/visual_group.rb"
+    - "app/models/visual_model.rb"
+    - "script/download_symbiota.rb"
+    - "test/capybara_session_extensions.rb"
+    - "test/check_for_unsafe_html.rb"
+    - "test/controllers/donations_controller_test_helpers.rb"
+    - "test/session_extensions.rb"
+    - "test/session_form_extensions.rb"
 
 # Offense count: 4
 # This cop supports unsafe autocorrection (--autocorrect-all).
@@ -399,49 +394,49 @@ Style/OptionalBooleanParameter:
 # AllowedMethods: present?, blank?, presence, try, try!
 Style/SafeNavigation:
   Exclude:
-    - 'app/classes/api2/comment_api.rb'
-    - 'app/controllers/account/profile_controller.rb'
-    - 'app/controllers/names/eol_data_controller.rb'
+    - "app/classes/api2/comment_api.rb"
+    - "app/controllers/account/profile_controller.rb"
+    - "app/controllers/names/eol_data_controller.rb"
 
 # Offense count: 8
 # This cop supports unsafe autocorrection (--autocorrect-all).
 Style/SlicingWithRange:
   Exclude:
-    - 'app/classes/pattern_search/term.rb'
-    - 'app/classes/query/base.rb'
-    - 'app/models/location.rb'
-    - 'app/models/name/spelling.rb'
-    - 'app/models/name_parse.rb'
-    - 'test/models/comment_test.rb'
-    - 'test/models/image_script_test.rb'
+    - "app/classes/pattern_search/term.rb"
+    - "app/classes/query/base.rb"
+    - "app/models/location.rb"
+    - "app/models/name/spelling.rb"
+    - "app/models/name_parse.rb"
+    - "test/models/comment_test.rb"
+    - "test/models/image_script_test.rb"
 
 # Offense count: 49
 # This cop supports unsafe autocorrection (--autocorrect-all).
 # Configuration parameters: Mode.
 Style/StringConcatenation:
   Exclude:
-    - 'app/classes/labels.rb'
-    - 'app/controllers/ajax_controller.rb'
-    - 'app/controllers/ajax_controller/auto_complete.rb'
-    - 'app/controllers/translation_controller.rb'
-    - 'app/extensions/string_extensions.rb'
-    - 'app/helpers/application_helper.rb'
-    - 'app/helpers/descriptions_helper.rb'
-    - 'app/helpers/exporter_helper.rb'
-    - 'app/helpers/map_helper.rb'
-    - 'app/helpers/object_link_helper.rb'
-    - 'app/helpers/observations_helper.rb'
-    - 'app/helpers/pivotal_helper.rb'
-    - 'app/helpers/suggestions_helper.rb'
-    - 'app/helpers/versions_helper.rb'
-    - 'app/models/comment/callbacks.rb'
-    - 'app/models/interest.rb'
-    - 'app/models/language_exporter.rb'
-    - 'app/models/license.rb'
-    - 'app/models/name/parse.rb'
-    - 'app/models/name/primer.rb'
-    - 'app/models/rss_log.rb'
-    - 'config/unicorn.rb'
-    - 'config/unicorn_dev.rb'
-    - 'lib/tasks/lang.rake'
-    - 'script/refresh_name_lister_cache'
+    - "app/classes/labels.rb"
+    - "app/controllers/ajax_controller.rb"
+    - "app/controllers/ajax_controller/auto_complete.rb"
+    - "app/controllers/translation_controller.rb"
+    - "app/extensions/string_extensions.rb"
+    - "app/helpers/application_helper.rb"
+    - "app/helpers/descriptions_helper.rb"
+    - "app/helpers/exporter_helper.rb"
+    - "app/helpers/map_helper.rb"
+    - "app/helpers/object_link_helper.rb"
+    - "app/helpers/observations_helper.rb"
+    - "app/helpers/pivotal_helper.rb"
+    - "app/helpers/suggestions_helper.rb"
+    - "app/helpers/versions_helper.rb"
+    - "app/models/comment/callbacks.rb"
+    - "app/models/interest.rb"
+    - "app/models/language_exporter.rb"
+    - "app/models/license.rb"
+    - "app/models/name/parse.rb"
+    - "app/models/name/primer.rb"
+    - "app/models/rss_log.rb"
+    - "config/unicorn.rb"
+    - "config/unicorn_dev.rb"
+    - "lib/tasks/lang.rake"
+    - "script/refresh_name_lister_cache"

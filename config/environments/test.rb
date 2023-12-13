@@ -81,11 +81,11 @@ MushroomObserver::Application.configure do
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
 
-  # Compile and combine assets, but don't compress or add digests to names.
+  # Compile and combine assets, and add digests to names, but don't compress
   config.assets.compile = true
+  config.assets.digest = true
   config.assets.compress = false
   config.assets.debug = false
-  config.assets.digest = false
 
   # To control the debugger turing testing
   config.activate_debugger = false

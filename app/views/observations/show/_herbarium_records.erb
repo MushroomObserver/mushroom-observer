@@ -1,0 +1,79 @@
+<%
+records = obs.herbarium_records
+can_add = in_admin_mode? || obs.can_edit? ||
+          @user && @user.curated_herbaria.any?
+obs_id = obs.id
+# This is passed in to show_herbarium_record, allowing users to do prev,
+# next and index from there to navigate through all the rest for this obs.
+query = Query.lookup(:HerbariumRecord, :all, observations: obs.id)
+%>
+
+<%=
+unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
+
+  tag.turbo_frame(
+    id: "observation_herbarium_records",
+    class: "obs-herbarium",
+    data: { controller: "section-update",
+            updated_by: "modal_herbarium_record" }
+  ) do
+
+    if records.any? && can_add
+      [
+        tag.div do
+          [
+            "#{:Herbarium_records.t}:",
+            [ # any html helper has to be safe_joined separately
+              "[",
+              modal_link_to("herbarium_record", *new_herbarium_record_tab),
+              "]"
+            ].safe_join
+          ].safe_join(" ")
+        end,
+        tag.ul(class: "tight-list") do
+          records.map do |record|
+            tag.li(id: "herbarium_record_#{record.id}") do
+              concat(link_to(*show_herbarium_record_tab(record)))
+              if record.can_edit? || in_admin_mode?
+                concat(
+                  [
+                    " [",
+                    modal_link_to("herbarium_record_#{record.id}",
+                                  *edit_herbarium_record_tab(record, obs)),
+                    "|",
+                    modal_link_to("herbarium_record_observation",
+                                  *remove_herbarium_record_tab(record, obs)),
+                    "]"
+                  ].safe_join(" ")
+                )
+              end
+            end
+          end.safe_join
+        end
+      ].safe_join
+
+    elsif records.any? && !can_add
+      [
+        tag.div do
+          records.length > 1 ? "#{:Herbarium_records.t}:" :
+                               "#{:Herbarium_record.t}:"
+        end,
+        tag.ul(class: "tight-list") do
+          records.map do |record|
+            tag.li { link_to(*show_herbarium_record_tab(record)) }
+          end.safe_join
+        end
+      ].safe_join(" ")
+
+    elsif records.none? && can_add
+      [
+        :show_observation_no_herbarium_records.t,
+        " [",
+        modal_link_to("herbarium_record", *new_herbarium_record_tab),
+        "]"
+      ].safe_join
+    end
+  end
+end
+%>
+

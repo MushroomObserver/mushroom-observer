@@ -77,12 +77,8 @@ class SequencesController < ApplicationController
     @sequence = Sequence.new
 
     respond_to do |format|
+      format.turbo_stream { render_modal_sequence_form }
       format.html
-      format.js do
-        render_modal_sequence_form(
-          title: helpers.sequence_form_new_title
-        )
-      end
     end
   end
 
@@ -99,12 +95,8 @@ class SequencesController < ApplicationController
     return unless make_sure_can_edit!(@sequence)
 
     respond_to do |format|
+      format.turbo_stream { render_modal_sequence_form }
       format.html
-      format.js do
-        render_modal_sequence_form(
-          title: helpers.sequence_form_edit_title(seq: @sequence)
-        )
-      end
     end
   end
 
@@ -163,22 +155,6 @@ class SequencesController < ApplicationController
   def figure_out_where_to_go_back_to
     @back = params[:back]
     @back_object = @back == "show" ? @sequence : @sequence.observation
-  end
-
-  def render_modal_sequence_form(title:)
-    render(partial: "shared/modal_form_show",
-           locals: { title: title, identifier: "sequence" }) and return
-  end
-
-  def render_sequences_section_update
-    render(
-      partial: "observations/show/section_update",
-      locals: { identifier: "sequences" }
-    ) and return
-  end
-
-  def render_modal_flash_update
-    render(partial: "shared/modal_flash_update") and return
   end
 
   # ---------- Index -----------------------------------------------------------
@@ -250,12 +226,8 @@ class SequencesController < ApplicationController
                   end
 
     respond_to do |format|
-      format.html do
-        redirect_with_query(redirect_to)
-      end
-      format.js do
-        render_sequences_section_update
-      end
+      format.turbo_stream { render_sequences_section_update }
+      format.html { redirect_with_query(redirect_to) }
     end
   end
 
@@ -267,27 +239,24 @@ class SequencesController < ApplicationController
                     :edit
                   end
     respond_to do |format|
+      format.turbo_stream { render_modal_flash_update }
       format.html { render(action: redo_action) and return }
-      format.js do
-        render_modal_flash_update
-      end
     end
   end
 
   def show_flash_and_send_back
     respond_to do |format|
+      format.turbo_stream { render_modal_flash_update }
       format.html do
         redirect_with_query(@sequence.observation.show_link_args) and
           return
-      end
-      format.js do
-        render_modal_flash_update
       end
     end
   end
 
   def show_flash_and_send_to_back_object
     respond_to do |format|
+      format.turbo_stream { render_sequences_section_update }
       format.html do
         if @back == "index"
           redirect_with_query(action: :index)
@@ -295,11 +264,43 @@ class SequencesController < ApplicationController
           redirect_with_query(@back_object.show_link_args)
         end
       end
-      format.js do
-        # renders the flash in the obs page via js
-        render_sequences_section_update
-      end
     end
+  end
+
+  def render_modal_sequence_form
+    render(partial: "shared/modal_form",
+           locals: { title: modal_title, identifier: modal_identifier,
+                     form: "sequences/form" }) and return
+  end
+
+  def modal_identifier
+    case action_name
+    when "new", "create"
+      "sequence"
+    when "edit", "update"
+      "sequence_#{@sequence.id}"
+    end
+  end
+
+  def modal_title
+    case action_name
+    when "new", "create"
+      helpers.sequence_form_new_title
+    when "edit", "update"
+      helpers.sequence_form_edit_title(seq: @sequence)
+    end
+  end
+
+  def render_sequences_section_update
+    render(
+      partial: "observations/show/section_update",
+      locals: { identifier: "sequences" }
+    ) and return
+  end
+
+  def render_modal_flash_update
+    render(partial: "shared/modal_flash_update",
+           locals: { identifier: modal_identifier }) and return
   end
 
   # ---------- Strong Parameters -----------------------------------------------

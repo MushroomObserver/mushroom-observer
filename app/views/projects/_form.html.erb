@@ -17,17 +17,11 @@
 
   <%= render(partial: "shared/textilize_help") %>
 
-  <%= text_field_with_label(form: f, field: :place_name,
-                            placeholder: :start_typing.l,
-                            label: :WHERE.t + ":",
-                            between: :required,
-                            data: { autocompleter: :location }) %>
+  <%= autocompleter_field(form: f, field: :place_name, label: :WHERE.t + ":",
+                          between: :required, autocomplete: :location) %>
 
-
-  <%= file_field_with_label(
-        form: f, field: :upload_image,
-        label: :form_projects_image_upload.t + ":",
-      ) %>
+  <%= file_field_with_label(form: f, field: :upload_image,
+                            label: :form_projects_image_upload.t + ":") %>
 
   <div class="form-group mt-3">
     <%= fields_for(:upload) do |fu| %>

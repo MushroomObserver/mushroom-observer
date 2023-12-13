@@ -18,10 +18,10 @@ add_tab_set(show_image_tabs(image: @image))
 
     <% if reviewer? %>
       <div class="mb-3 text-center">
-        <%= set_export_status_controls(@image) %>
+        <%= export_status_controls(@image) %>
       </div>
       <div class="mb-3 text-center">
-        <%= set_ml_status_controls(@image) %>
+        <%= export_status_ml_controls(@image) %>
       </div>
     <% end %>
 

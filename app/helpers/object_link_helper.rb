@@ -108,17 +108,22 @@ module ObjectLinkHelper
   #   Modified by: <%= user_link(login, user_id) %>
   #
   def user_link(user, name = nil, args = {})
-    if user.is_a?(Integer)
+    if !user
+      return "?"
+    elsif user.is_a?(Integer)
       name ||= "#{:USER.t} ##{user}"
-      link_to(name, user_path(user),
-              args.merge({ id: "show_user_link_#{user}" }))
+      user_id = user
     elsif user
       name ||= user.unique_text_name
-      link_to(name, user_path(user.id),
-              args.merge({ id: "show_user_link_#{user.id}" }))
-    else
-      "?"
+      user_id = user.id
     end
+
+    link_to(
+      name, user_path(user_id),
+      args.merge(
+        { class: class_names("show_user_link_#{user_id}", args[:class]) }
+      )
+    )
   end
 
   # Render a list of users on one line.  (Renders nothing if user list empty.)
@@ -146,8 +151,9 @@ module ObjectLinkHelper
   def link_to_object(object, name = nil)
     return nil unless object
 
+    unique_class = "show_#{object.type_tag}_link_#{object.id}"
     link_to(name || object.title.t, object.show_link_args,
-            { id: "show_#{object.type_tag}_link_#{object.id}" })
+            { id: unique_class })
   end
 
   # Wrap description title in link to show_description.

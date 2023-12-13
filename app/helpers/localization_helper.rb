@@ -64,14 +64,4 @@ module LocalizationHelper
   def review_as_string(val)
     :"review_#{val}".l
   end
-
-  # Determine the right string for visual group status from booleans
-  # indicating if the image needs review (no VisualGroupImage exists),
-  # is marked as included or not.
-  def visual_group_status_text(status)
-    return :visual_group_needs_review.t if status.nil?
-    return :visual_group_include.t if status && (status != 0)
-
-    :visual_group_exclude.t
-  end
 end

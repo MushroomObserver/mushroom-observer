@@ -32,10 +32,29 @@ group :rails do
   gem("activesupport", "~> 6.1")
   gem("bundler")
   gem("railties", "~> 6.1")
-  gem("sprockets-rails")
-  # gem irb now depends on psych, but version 5 will not bundle currently
-  gem("psych", "~> 4")
 end
+
+# gem irb now depends on psych, but version 5 will not bundle currently
+gem("psych", "~> 4")
+# importmap for js module handling
+gem("importmap-rails")
+# sprockets for asset compilation and versioning
+gem("sprockets-rails")
+# stimulus for simpler, more maintainable js
+gem("stimulus-rails")
+# requestjs for simpler js requests from stimulus
+gem("requestjs-rails")
+# turbo for partial page updates
+gem("turbo-rails")
+# redis for combining actioncable broadcasts with turbo_stream
+# gem("redis", "~> 4.0")
+# Compile SCSS for stylesheets
+gem("sassc-rails")
+
+# Fix a version problem betw stimulus and sprockets. (not sprockets-rails)
+# Delete this dependency declaration if the issue gets resolved:
+# https://github.com/hotwired/stimulus-rails/issues/108
+gem("sprockets", "~>4.2.1")
 
 # Security fix updates via Dependabot
 # CVE-2021-41817 regex denial of service vulnerability
@@ -62,12 +81,6 @@ gem("arel_extensions")
 
 # Use bootstrap style generator
 gem("bootstrap-sass")
-
-# Use SCSS for stylesheets
-gem("sassc-rails")
-
-# Use jquery as the JavaScript library
-gem("jquery-rails")
 
 # Use mini_racer as a substitute for therubyracer
 # If having trouble installing this gem in Vagrant:

@@ -1,9 +1,5 @@
 <!--JAVASCRIPT-->
-<%= javascript_includes.map { |f| javascript_include_tag(f) }.safe_join %>
-<%= javascript_tag('try { document.cookie = "tz=" + jstz.determine().name() + ";samesite=lax" } catch(err) {}') %>
-<% injected_javascripts.each do |script| %>
-  <%= javascript_tag(script) %>
-<% end %>
+<%= javascript_tag('try { document.cookie = "tz=" + jstz.determine().name() + ";samesite=lax" } catch(err) {}', { type: :module }) %>
 
 <%= render(partial: "application/app/gtm_footer") %>
 <!--/JAVASCRIPT-->

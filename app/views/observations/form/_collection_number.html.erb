@@ -1,4 +1,4 @@
-<%# collection_number section of create_observation form %>
+<%# specimen/collection_number section of create_observation form %>
 
 <div class="row mb-3">
 
@@ -7,9 +7,10 @@
       <%= text_field_with_label(form: fcn, field: :name,
                                 value: @collectors_name,
                                 label: :collection_number_name.t + ":") %>
-      <%= text_field_with_label(form: fcn, field: :number,
-                                value: @collectors_number,
-                                label: :collection_number_number.t + ":") %>
+      <%= text_field_with_label(
+        form: fcn, field: :number, value: @collectors_number,
+        label: :collection_number_number.t + ":",
+        data: { action: "specimen#checkCheckbox" }) %>
     <% end # fields_for %>
   </div>
 

@@ -37,7 +37,7 @@ class CollapsibleMapTest < UnitTestCase
     assert_extents(mapset, north, south, east, west)
     assert_in_delta(lat, mapset.lat, 0.0001,
                     "expect <#{lat.round(4)}>, actual <#{mapset.lat.round(4)}>")
-    assert_in_delta(long, mapset.long, 0.0001)
+    assert_in_delta(long, mapset.lng, 0.0001)
     assert_in_delta(lat, mapset.center[0], 0.0001)
     assert_in_delta(long, mapset.center[1], 0.0001)
     assert_in_delta(north, mapset.north_west[0], 0.0001)

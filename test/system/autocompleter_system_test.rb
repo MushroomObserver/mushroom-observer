@@ -34,7 +34,6 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     browser.keyboard.type(:delete, :delete)
     assert_selector(".auto_complete ul li", text: "Agaricus campestrus")
     browser.keyboard.type(:down, :down, :down, :down, :tab)
-    sleep(1)
     assert_field("search_name", with: "Agaricus campestrus")
 
     # User
@@ -82,7 +81,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     # sleep(1)
     assert_field("content_filter_region", with: "USA, California")
 
-    # OR separator not working yet.
+    # Autocompleter's OR separator not working yet.
     # browser.keyboard.type(:right, :space, "OR", :space, "USA, Mas")
     # assert_selector(".auto_complete ul li", count: 10)
   end
@@ -92,18 +91,23 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     rolf = users("rolf")
     login!(rolf)
 
-    visit(observation_path(Observation.last.id))
+    obs = Observation.last
+    visit(observation_path(obs.id))
 
+    scroll_to(find("#observation_namings"), align: :center)
     click_on("Propose")
-    assert_selector("#modal_naming")
-    assert_selector("#naming_form")
+    assert_selector("#modal_naming_#{obs.id}", wait: 6)
+    assert_selector("#naming_#{obs.id}_form")
     find_field("naming_name").click
     browser.keyboard.type("Peltige")
-    assert_selector(".auto_complete") # wait
+    assert_selector(".auto_complete", wait: 3) # wait
     assert_selector(".auto_complete ul li")
     browser.keyboard.type(:down, :down, :tab)
     assert_field("naming_name", with: "Peltigeraceae ")
-    within("#naming_form") { click_commit }
-    within("#namings_table") { assert_text("Peltigeraceae") }
+    browser.keyboard.type(:tab)
+    assert_no_selector(".auto_complete")
+    within("#naming_#{obs.id}_form") { click_commit }
+    assert_no_selector("#modal_naming_#{obs.id}")
+    within("#namings_table") { assert_text("Peltigeraceae", wait: 6) }
   end
 end

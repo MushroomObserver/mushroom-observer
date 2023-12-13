@@ -90,7 +90,8 @@ MushroomObserver::Application.configure do
   config.donation_business = "UQ23P3G6FBYKN"
 
   # File where we keep name_lister data cache.
-  config.name_lister_cache_file = "#{config.root}/public/name_list_data.js"
+  config.name_lister_cache_file =
+    "#{config.root}/app/javascript/src/name_list_data.js"
 
   # Configuration files for location validator.
   location_path = "#{config.root}/config/location/"

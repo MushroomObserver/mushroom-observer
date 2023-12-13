@@ -138,10 +138,10 @@ class LocationsControllerTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: albion.id })
     assert_show_location
-    assert_image_link_in_html(/watch\d*.png/,
+    assert_image_link_in_html(/watch.*\.png/,
                               set_interest_path(type: "Location",
                                                 id: albion.id, state: 1))
-    assert_image_link_in_html(/ignore\d*.png/,
+    assert_image_link_in_html(/ignore.*\.png/,
                               set_interest_path(type: "Location",
                                                 id: albion.id, state: -1))
 
@@ -149,10 +149,10 @@ class LocationsControllerTest < FunctionalTestCase
     Interest.new(target: albion, user: rolf, state: true).save
     get(:show, params: { id: albion.id })
     assert_show_location
-    assert_image_link_in_html(/halfopen\d*.png/,
+    assert_image_link_in_html(/halfopen.*\.png/,
                               set_interest_path(type: "Location",
                                                 id: albion.id, state: 0))
-    assert_image_link_in_html(/ignore\d*.png/,
+    assert_image_link_in_html(/ignore.*\.png/,
                               set_interest_path(type: "Location",
                                                 id: albion.id, state: -1))
 
@@ -161,10 +161,10 @@ class LocationsControllerTest < FunctionalTestCase
     Interest.new(target: albion, user: rolf, state: false).save
     get(:show, params: { id: albion.id })
     assert_show_location
-    assert_image_link_in_html(/halfopen\d*.png/,
+    assert_image_link_in_html(/halfopen.*\.png/,
                               set_interest_path(type: "Location",
                                                 id: albion.id, state: 0))
-    assert_image_link_in_html(/watch\d*.png/,
+    assert_image_link_in_html(/watch.*\.png/,
                               set_interest_path(type: "Location",
                                                 id: albion.id, state: 1))
   end
@@ -592,7 +592,7 @@ class LocationsControllerTest < FunctionalTestCase
     old_params = update_params_from_loc(loc)
     params = barton_flats_params
     params[:location][:display_name] =
-      Location.user_name(rolf, params[:location][:display_name])
+      Location.user_format(rolf, params[:location][:display_name])
     params[:id] = loc.id
     put_requires_login(:update, params)
     assert_redirected_to(location_path(loc.id))

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # private methods shared by SpeciesListsController and subcontrollers
+# rubocop:disable Metrics/ModuleLength
 module SpeciesLists
   module SharedPrivateMethods
     ############################################################################
@@ -27,6 +28,8 @@ module SpeciesLists
     #   params[:checklist_data][...]          Radios: hash from name id to "1".
     #   params[:checklist_names][name_id]     (Used by view to give a name to
     #                                         each id in checklist_data hash.)
+    # Bullet:
+    # https://blog.appsignal.com/2018/06/19/activerecords-counter-cache.html
     def process_species_list(create_or_update)
       redirected = false
 
@@ -94,7 +97,7 @@ module SpeciesLists
         return
       end
 
-      db_name = Location.user_name(@user, @place_name)
+      db_name = Location.user_format(@user, @place_name)
       @dubious_where_reasons = Location.dubious_name?(db_name, true)
     end
 
@@ -532,3 +535,4 @@ module SpeciesLists
     end
   end
 end
+# rubocop:enable Metrics/ModuleLength
