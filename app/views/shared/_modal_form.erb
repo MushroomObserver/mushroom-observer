@@ -1,0 +1,63 @@
+<%#
+Entire template for a Bootstrap modal with a form.
+Called in turbo_stream responses from `new` and `edit` form actions.
+If form needs work, any flash rendered by `create` and `update` will udpate
+`#modal_#{identifier}_flash` via turbo-stream, and re-render the form.
+
+Requires these locals:
+  identifier, used to build html ids for parts of the modal
+  title, the text in the modal-header h4
+  form, full path (after /views/) of the partial building the form
+  (locals) anything else you want to send to the body partial.
+     { turbo: true } gets merged so that form sends via js
+
+In order to keep form progress if the modal is closed and opened again,
+it's not destroyed when closed. Successful submit updates the page.
+When page section with data-controller: section_update is updated,
+that controller dispatches the updated event, and this line below:
+  data-action: "section-update:updated@window->modal#remove"
+calls the action `remove` in the modal controller.
+
+Sounds circuitous, but we don't want the modal getting removed on submit,
+in case there are form problems. The consequence of form success is the page
+being updated. Note that all actions are called by data tags on html elements.
+
+note: MUST REMOVE **.html**.erb file extension from form partials!
+%>
+
+<%
+form_locals = local_assigns.except(:identifier, :title, :form)
+%>
+
+<%=
+tag.div(
+  class: "modal", id: "modal_#{identifier}", role: "dialog",
+  aria: { labelledby: "modal_#{identifier}_header" },
+  data: { controller: "modal",
+          action: "section-update:updated@window->modal#remove",
+          identifier: identifier } # not sure
+) do
+  tag.div(class: "modal-dialog modal-lg", role: "document") do
+    tag.div(class: "modal-content") do
+      [
+        tag.div(class: "modal-header") do
+          [
+            tag.button(
+              type: :button, class: "close", data: { dismiss: "modal" },
+              aria: { label: :CLOSE.l },
+            ) { tag.span(aria: { hidden: "true" }) { "&times;".html_safe } },
+            tag.h4(title, class: "modal-title",
+                   id: "modal_#{identifier}_header") # turbo
+          ].safe_join
+        end,
+        tag.div(class: "modal-body", id: "modal_#{identifier}_body") do
+          [
+            tag.turbo_frame("", id: "modal_#{identifier}_flash"), # turbo
+            render(partial: form, locals: form_locals) # turbo
+          ].safe_join
+        end
+      ].safe_join
+    end
+  end
+end
+%>

@@ -1,0 +1,31 @@
+<%
+charsets = ["ISO-8859-1", "WINDOWS-1252", "UTF-8"]
+%>
+
+<%= form_with(url: { action: :create },
+              id: "name_lister_form") do |f| %>
+
+  <%= tag.div(class: "text-center my-5") do %>
+    <%= submit_button(form: f, button: :name_lister_submit_spl.l,
+                      class: "mx-3", disabled: !@user) %>
+    <%= submit_button(form: f, button: :name_lister_submit_txt.l,
+                      class: "mx-3") %>
+    <%= submit_button(form: f, button: :name_lister_submit_rtf.l,
+                      class: "mx-3") %>
+    <%= submit_button(form: f, button: :name_lister_submit_csv.l,
+                      class: "mx-3") %>
+  <% end %>
+
+  <%= hidden_field_tag(:results, @name_strings.join("\n")) %>
+
+  <% if false %>
+    <%= select_with_label(
+          form: f, field: :charset, label: :name_lister_charset.t + ":",
+          options: charsets, select_opts: { selected: @charset }, inline: true,
+          append: help_note(:span, :name_lister_charset_help.t)
+        ) %>
+  <% end %>
+
+  <%= help_note(:div, :name_lister_help.tp) %>
+
+<% end %>

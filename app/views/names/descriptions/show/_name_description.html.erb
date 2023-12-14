@@ -5,7 +5,7 @@
 
 <% if review %>
   <% if reviewer? %>
-    <%= set_export_status_controls(desc) %><br/>
+    <%= export_status_controls(desc) %><br/>
   <% end %>
 
   <%= :show_name_content_status.t %>: <%= review_as_string(desc.review_status) %><br/>

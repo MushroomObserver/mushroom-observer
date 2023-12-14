@@ -6,10 +6,10 @@
   <%= text_field_with_label(form: f, field: :name,
                             label: :profile_name.t + ":") %>
 
-  <%= text_field_with_label(form: f, field: :place_name,
-                            placeholder: :start_typing.l,
-                            label: :profile_location.t + ":", between: "(33%)",
-                            data: { autocompleter: :location }) %>
+  <%= autocompleter_field(
+    form: f, field: :place_name, autocomplete: :location,
+    label: :profile_location.t + ":", between: "(33%)"
+  ) %>
 
   <%= text_area_with_label(form: f, field: :notes,
                            label: :profile_notes.t + ":",

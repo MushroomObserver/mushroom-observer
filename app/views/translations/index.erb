@@ -1,0 +1,59 @@
+<%
+@container = :wide
+add_page_title(:edit_translations_title.t)
+%>
+
+<%= tag.div(class: "container-text") do
+  tag.p(:edit_translations_help.t, class: "help-block")
+end %>
+
+<%= tag.div(class: "row") do %>
+  <%= tag.div(class: "col-xs-6 translation_container") do
+    tag.div(id: "translations_index") do
+      @index.each do |item|
+        case item.class.name
+        when /MajorHeader/
+          concat(tag.p(h(item.string).gsub('\n', '<br/>').html_safe,
+                       class: "major_header"))
+        when /MinorHeader/
+          concat(tag.p(h(item.string).gsub('\n', '<br/>').html_safe,
+                class: "minor_header"))
+        when /Comment/
+          concat(tag.p(h(item.string).gsub('\n', '<br/>').html_safe,
+                class: "comment"))
+        when /TagField/
+          ttag = item.ttag
+          str = preview_string(@strings[ttag])
+          official_record = @official_records[ttag]
+          translated_record = @translated_records[ttag]
+          up_to_date = translated_record &&
+            translated_record.updated_at >=
+            official_record.updated_at - 1.second
+          if !up_to_date &&
+              official_record &&
+              official_record.text.match(/\A\[:?\w[^\[\]\'\"]*\]\Z/)
+            # Mark as translated if there is nothing to actually translate!
+            up_to_date = true
+          end
+          span_class = up_to_date ?
+            "translated text-muted" : "font-weight-bold"
+          str = tag.span(h(str), class: span_class, id: "str_#{ttag}")
+          label = tag.span(h(ttag) + ":", class: "tag")
+          link = link_to(label,
+            edit_translation_path(id: ttag, locale: @lang.locale),
+            data: { tag: ttag, role: "show_tag", turbo_stream: true })
+          concat(tag.p(link + " " + str, class: "tag_field"))
+        else
+          raise "Unexpected form item type: #{line.class.name}"
+        end
+      end
+    end
+  end %>
+
+  <%= tag.div(class: "col-xs-6 translation_container") do
+    tag.div(id: "translation_ui") do
+      concat(render(partial: "translations/form")) if @edit_tags.any?
+      concat(render(partial: "translations/versions"))
+    end
+  end %>
+<% end %>

@@ -98,6 +98,6 @@ add_project_banner(@project)
 </p>
 
 <%= render(partial: "comments/comments_for_object",
-           locals: { object: @project, controls: true, limit: nil }) %>
+           locals: { object: @project, controls: @user, limit: nil }) %>
 
 <%= show_object_footer(@project) %>

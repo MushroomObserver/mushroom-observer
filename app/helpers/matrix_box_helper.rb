@@ -43,6 +43,7 @@ module MatrixBoxHelper
   #   end
   # end
 
+  # NOTE: object_id may be "no_ID" for logs of deleted records
   def matrix_box_details(presenter, object, object_id, identify)
     tag.div(class: "panel-body rss-box-details") do
       [
@@ -54,20 +55,35 @@ module MatrixBoxHelper
   end
 
   def matrix_box_what(presenter, object, object_id, identify)
-    # bigger heading if no image
-    h_element = presenter.image_data ? :h5 : :h3
-    link_heading = tag.small("(#{presenter.id})", class: "rss-id float-right") +
-                   tag.span(presenter.name, class: "rss-name",
-                                            id: "box_title_#{object_id}")
+    # heading style: bigger if no image.
+    # TODO: make box layouts specific to object type
+    h_style = presenter.image_data ? "h5" : "h3"
+    what = presenter.what
+    identify_ui = matrix_box_vote_or_propose_ui(identify, object)
 
     tag.div(class: "rss-what") do
       [
-        content_tag(h_element, class: "mt-0 rss-heading") do
-          link_with_query(link_heading, presenter.what.show_link_args)
+        tag.h5(class: class_names(%w[mt-0 rss-heading], h_style)) do
+          link_with_query(what.show_link_args) do
+            [
+              matrix_box_id_tag(id: presenter.id),
+              matrix_box_title(name: presenter.name, id: object_id)
+            ].safe_join
+          end
         end,
-        matrix_box_vote_or_propose_ui(identify, object)
+        identify_ui
       ].safe_join
     end
+  end
+
+  def matrix_box_id_tag(id:)
+    tag.small("(#{id})", class: "rss-id float-right")
+  end
+
+  # NOTE: This is what gets Turbo updates with the identify UI
+  #       (does not require presenter, only obs)
+  def matrix_box_title(name:, id:)
+    tag.span(name, class: "rss-name", id: "box_title_#{id}")
   end
 
   # Obs with uncertain name: vote on naming, or propose (if it's "Fungi")

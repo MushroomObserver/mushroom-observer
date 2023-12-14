@@ -812,7 +812,7 @@ class ObservationsControllerTest < FunctionalTestCase
   def assert_show_observation
     assert_template("observations/show")
     assert_template("observations/show/_name_info")
-    assert_template("observations/show/_observation_info")
+    assert_template("observations/show/_observation_details")
     assert_template("observations/show/_namings")
     assert_template("comments/_comments_for_object")
     assert_template("observations/show/_thumbnail_map")
@@ -3187,15 +3187,15 @@ class ObservationsControllerTest < FunctionalTestCase
 
     # No interest in this observation yet.
     #
-    # <img[^>]+watch\d*.png[^>]+>[\w\s]*
+    # <img[^>]+watch.*\.png[^>]+>[\w\s]*
     get(:show, params: { id: minimal_unknown.id })
     assert_response(:success)
     assert_image_link_in_html(
-      /watch\d*.png/,
+      /watch.*\.png/,
       set_interest_path(type: "Observation", id: minimal_unknown.id, state: 1)
     )
     assert_image_link_in_html(
-      /ignore\d*.png/,
+      /ignore.*\.png/,
       set_interest_path(type: "Observation", id: minimal_unknown.id, state: -1)
     )
 
@@ -3204,11 +3204,11 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: minimal_unknown.id })
     assert_response(:success)
     assert_image_link_in_html(
-      /halfopen\d*.png/,
+      /halfopen.*\.png/,
       set_interest_path(type: "Observation", id: minimal_unknown.id, state: 0)
     )
     assert_image_link_in_html(
-      /ignore\d*.png/,
+      /ignore.*\.png/,
       set_interest_path(type: "Observation", id: minimal_unknown.id, state: -1)
     )
 
@@ -3218,11 +3218,11 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: minimal_unknown.id })
     assert_response(:success)
     assert_image_link_in_html(
-      /halfopen\d*.png/,
+      /halfopen.*\.png/,
       set_interest_path(type: "Observation", id: minimal_unknown.id, state: 0)
     )
     assert_image_link_in_html(
-      /watch\d*.png/,
+      /watch.*\.png/,
       set_interest_path(type: "Observation", id: minimal_unknown.id, state: 1)
     )
   end
@@ -3254,8 +3254,8 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def do_external_sites_test(expect, user, obs)
-    @controller.instance_variable_set(:@user, user)
-    actual = @controller.external_sites_user_can_add_links_to(obs)
+    User.current = user
+    actual = @controller.helpers.external_sites_user_can_add_links_to(obs)
     assert_equal(expect.map(&:name), actual.map(&:name))
   end
 
@@ -3269,9 +3269,11 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_response(:success)
     assert_template("show")
-    assert_select("form#naming_vote_#{naming1.id} select#vote_value>" \
+    assert_select("form#naming_vote_form_#{naming1.id} " \
+                  "select#vote_value_#{naming1.id}>" \
                   "option[selected=selected][value='#{vote1.value}']")
-    assert_select("form#naming_vote_#{naming2.id} select#vote_value>" \
+    assert_select("form#naming_vote_form_#{naming2.id} " \
+                  "select#vote_value_#{naming2.id}>" \
                   "option[selected=selected][value='#{vote2.value}']")
   end
 end

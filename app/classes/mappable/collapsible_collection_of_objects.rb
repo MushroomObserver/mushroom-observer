@@ -41,12 +41,11 @@
 #  == Typical Usage
 #
 #    collection = Mappable::CollapsibleCollectionOfObjects.new(query.results)
-#    gmap.center_on_points(*collection.representative_points)
-#    for mapset in collection.mapsets
-#      draw_mapset(gmap, mapset)
-#    end
 #
 ###############################################################################
+#
+#  GOTCHA: Observations have .long, Google map points need .lng
+#
 
 module Mappable
   class CollapsibleCollectionOfObjects
@@ -140,14 +139,14 @@ module Mappable
     end
 
     def add_point_set(loc, objs, prec)
-      x, y = round_lat_long_to_precision(loc, prec)
+      x, y = round_lat_lng_to_precision(loc, prec)
       set = @sets[[x, y, 0, 0]] ||= Mappable::MapSet.new
       set.add_objects(objs)
       set.update_extents_with_point(loc)
     end
 
     def add_box_set(loc, objs, prec)
-      x, y = round_lat_long_to_precision(loc, prec)
+      x, y = round_lat_lng_to_precision(loc, prec)
       h = round_number(loc.north_south_distance, prec)
       w = round_number(loc.east_west_distance, prec)
       set = @sets[[x, y, w, h]] ||= Mappable::MapSet.new
@@ -155,9 +154,10 @@ module Mappable
       set.update_extents_with_box(loc)
     end
 
-    def round_lat_long_to_precision(loc, prec)
+    # loc may be an observation, MinimalObservation or a set (with lng)
+    def round_lat_lng_to_precision(loc, prec)
       if prec > MIN_PRECISION
-        return [round_number(loc.lat, prec), round_number(loc.long, prec)]
+        return [round_number(loc.lat, prec), round_number(loc.lng, prec)]
       end
 
       [if loc.lat >= 45
@@ -165,7 +165,7 @@ module Mappable
        else
          loc.lat <= -45 ? -90 : 0
        end,
-       loc.long >= 150 || loc.long <= -150 ? 180 : round_number(loc.long, prec)]
+       loc.lng >= 150 || loc.lng <= -150 ? 180 : round_number(loc.lng, prec)]
     end
 
     def calc_extents

@@ -1,0 +1,49 @@
+<%
+# Specimen section of create_observation form,
+# for collection_number and herbarium_record.
+# Fields hidden unless box checked.
+%>
+
+<%= tag.div(id: "observation_specimen_section",
+            data: { controller: "specimen",
+                    user_pref: (!@user.try(&:hide_specimen_stuff?)) }) do %>
+
+  <div class="mt-3 row">
+    <div class="col-xs-12 col-sm-6">
+      <%= check_box_with_label(
+        form: f, field: :specimen,
+        label: :form_observations_specimen_available.t,
+        data: { specimen_target: "checkbox",
+                action: "change->specimen#hideShowFields" }
+      ) %>
+      <%= help_block_with_arrow("up") do %>
+        <%= :form_observations_specimen_available_help.t %>
+      <% end  # help_block_with_arrow do %>
+
+      <!-- no_specimen_fields -->
+      <% if button_name == :SAVE_EDITS.l %>
+        <%= help_block_with_arrow(nil) do
+          :form_observations_edit_specimens_help.t
+        end %>
+      <% end # if button_name %>
+      <!-- /no_specimen_fields -->
+
+    </div><!--.col-->
+  </div><!--.row-->
+
+  <% if button_name == :CREATE.l %>
+    <!-- specimen_fields -->
+    <%= tag.div(id: "specimen_fields",
+                class: ("hidden" if !@observation.specimen),
+                data: { specimen_target: "fields" }) do %>
+
+      <%= render(partial: "observations/form/collection_number",
+                 locals: { f: f } ) %>
+      <%= render(partial: "observations/form/herbarium_record",
+                 locals: { f: f } ) %>
+
+    <% end %>
+    <!-- /specimen_fields -->
+  <% end %>
+
+<% end %>

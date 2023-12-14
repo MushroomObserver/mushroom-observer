@@ -183,6 +183,7 @@
 #  notify_users::               After save/destroy/image: send email.
 #  announce_consensus_change::  After consensus changes: send email.
 #
+# rubocop:disable Metrics/ClassLength
 class Observation < AbstractModel
   belongs_to :thumb_image, class_name: "Image",
                            inverse_of: :thumb_glossary_terms
@@ -674,6 +675,13 @@ class Observation < AbstractModel
   # Is lat/long more than 10% outside of location extents?
   def lat_long_dubious?
     lat && location && !location.lat_long_close?(lat, long)
+  end
+
+  # Alias for access by Mappable::CollapsibleCollectionOfObjects
+  # which must provide `lng` for Google Maps from an obs OR a MapSet
+  # Makes related methods so much simpler: parallel data types.
+  def lng
+    long
   end
 
   def place_name_and_coordinates
@@ -1561,3 +1569,4 @@ class Observation < AbstractModel
     validate_when(self.when, errors)
   end
 end
+# rubocop:enable Metrics/ClassLength

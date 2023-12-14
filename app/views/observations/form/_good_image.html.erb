@@ -14,7 +14,7 @@
   <div class="col-xs-12 col-sm-8">
     <% if check_permission(image) %>
       <%= render(partial: "observations/form/good_image_fields",
-               locals: { f: f, image: image })
+                 locals: { f: f, image: image })
       %>
     <% end # if check_permission %>
   </div><!--.col-->

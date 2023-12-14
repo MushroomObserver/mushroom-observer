@@ -17,19 +17,6 @@
 # Note that the hash of attributes is not yet actually used.
 #
 ACTIONS = {
-  ajax: {
-    auto_complete: {},
-    create_image_object: {},
-    export: {},
-    external_link: {},
-    geocode: {},
-    image: {},
-    location_primer: {},
-    name_primer: {},
-    multi_image_template: {},
-    test: {},
-    visual_group_status: {}
-  },
   api: {
     api_keys: {},
     collection_numbers: {},
@@ -345,12 +332,16 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resource :email_requests, only: [:new, :create]
   end
 
+  # ----- Autocompleters: fetch get ------------------------------------
+  get "/autocompleters/new/:type/:id", to: "autocompleters#new"
+
   # ----- Checklist: just the show --------------------------------------
   get "/checklist", to: "checklists#show"
 
   # ----- Collection Numbers: standard actions --------------------------------
   resources :collection_numbers do
-    resource :remove_observation, only: [:update], module: :collection_numbers
+    resource :remove_observation, only: [:edit, :update],
+                                  module: :collection_numbers
   end
 
   # ----- Comments: standard actions --------------------------------------
@@ -414,7 +405,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Herbarium Records: standard actions --------------------------------
   resources :herbarium_records do
-    resource :remove_observation, only: [:update], module: :herbarium_records
+    resource :remove_observation, only: [:edit, :update],
+                                  module: :herbarium_records
   end
 
   # ----- Images: Namespace differences are for memorable path names
@@ -434,6 +426,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     member do
       put("transform", to: "images/transformations#update", as: "transform")
       get("exif", to: "images/exif#show", as: "exif")
+      put("export", to: "images/exports#update", as: "export")
     end
     put("/vote", to: "images/votes#update", as: "vote")
   end
@@ -676,10 +669,16 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Observations: standard actions  ----------------------------
   namespace :observations do
     resources :downloads, only: [:new, :create]
+
+    # Not under resources :observations because the obs doesn't have an id yet
+    get("images/uploads/new", to: "images/uploads#new",
+                              as: "new_image_upload_for")
+    post("images/uploads", to: "images/uploads#create",
+                           as: "upload_image_for")
   end
 
   resources :observations do
-    resources :namings, only: [:new, :create, :edit, :update, :destroy],
+    resources :namings, only: [:show, :new, :create, :edit, :update, :destroy],
                         shallow: true, controller: "observations/namings" do
       resources :votes, only: [:update, :show], as: "naming_vote",
                         param: :naming_id,
@@ -687,6 +686,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     end
 
     member do
+      resources :external_links,
+                only: [:new, :create, :edit, :update, :destroy],
+                shallow: true, controller: "observations/external_links"
+
       get("map", to: "observations/maps#show")
       get("suggestions", to: "observations/namings/suggestions#show",
                          as: "naming_suggestions_for")
@@ -697,7 +700,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       get("images/new", to: "observations/images#new",
                         as: "new_image_for")
       post("images", to: "observations/images#create",
-                     as: "upload_image_for")
+                     as: "create_image_for")
       get("images/reuse", to: "observations/images#reuse",
                           as: "reuse_images_for")
       post("images/attach", to: "observations/images#attach",
@@ -806,8 +809,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Translations: standard actions  -------------------------------------
   resources :translations, only: [:index, :edit, :update]
-  get("translations/:id/versions", to: "translations/versions#show",
-                                   as: "translation_versions")
 
   # ----- Users: standard actions -------------------------------------------
   resources :users, id: /\d+/, only: [:index, :show]
@@ -817,12 +818,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resources :visual_groups, id: /\d+/, shallow: true
   end
 
-  # Short-hand notation for AJAX methods.
-  # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
-  ACTIONS[:ajax].each_key do |action|
-    get("ajax/#{action}/:type/:id",
-        controller: "ajax", action: action, id: /\S.*/)
-  end
+  match("/visual_groups/:visual_group_id/images/:id",
+        to: "visual_groups/images#update",
+        via: [:put, :patch],
+        as: "visual_group_image")
 
   ##############################################################################
   ###

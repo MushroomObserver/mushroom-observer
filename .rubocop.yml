@@ -187,7 +187,6 @@ Style/AccessorGrouping:
   # See https://github.com/rubocop/rubocop/issues/10693
   Exclude:
     - "app/classes/country_counter.rb"
-    - "app/classes/gmaps.rb"
     - "app/classes/mo_paginator.rb"
 Style/AsciiComments:
   # Allow non-ascii characters in comments; we need to use accented chars
