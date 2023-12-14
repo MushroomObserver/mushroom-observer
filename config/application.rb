@@ -17,7 +17,7 @@ require("action_mailer/railtie")
 # require("action_mailbox/engine")
 # require("action_text/engine")
 require("action_view/railtie")
-# require("action_cable/engine")
+require("action_cable/engine")
 require("sprockets/railtie")
 require("rails/test_unit/railtie")
 
@@ -41,7 +41,9 @@ module MushroomObserver
       #{config.root}/app/extensions
     ]
 
-    config.load_defaults = 7.0
+    # Uncomment this after migrating to all recommended default configs for 7.1
+    # config/initializers/new_framework_defaults_7_1.rb
+    # config.load_defaults = 7.1
 
     # Set Time.zone default to the specified zone and
     # make Active Record auto-convert to this zone.
@@ -89,9 +91,6 @@ module MushroomObserver
     # Rails 6.1 can auto-generate HTML comments with the template filename
     # Unfortunately this is also added to email templates!
     # config.action_view.annotate_rendered_view_with_filenames = true
-
-    # Rails 6.1+
-    config.active_record.legacy_connection_handling = false
   end
 end
 

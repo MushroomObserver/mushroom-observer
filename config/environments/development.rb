@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
 MushroomObserver::Application.configure do
-  # Settings specified here take precedence over those in config/application.rb
+  # Settings specified here will take precedence over those in config/application.rb.
 
   # ----------------------------
   #  MO configuration.
   # ----------------------------
-
   config.domain      = "localhost"
   config.http_domain = "http://localhost:3000"
 
@@ -25,8 +24,9 @@ MushroomObserver::Application.configure do
   # ../mail directory.  (This is a feature I added. -JPH 20080213)
   config.action_mailer.delivery_method = :file
 
-  # Don't care if the mailer can't send
+  # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false
+  # config.action_mailer.perform_caching = false
 
   config.action_mailer.smtp_settings = {
     address: "localhost",
@@ -52,28 +52,54 @@ MushroomObserver::Application.configure do
   # ----------------------------
   #  Rails configuration.
   # ----------------------------
+  # In the development environment your application's code is reloaded any time
+  # it changes. This slows down response time but is perfect for development
+  # since you don't have to restart the web server when you make code changes.
+  # Replaces config.cache_classes = false
+  config.enable_reloading = true
 
-  # In the development environment your application's code is reloaded on
-  # every request.  This slows down response time but is perfect for development
-  # since you don't have to restart the webserver when you make code changes.
-  config.cache_classes = false
+  # Do not eager load code on boot.
+  config.eager_load = false
 
-  # Show full error reports and disable caching
-  config.consider_all_requests_local       = true
-  config.action_controller.perform_caching = false
+  # Show full error reports.
+  config.consider_all_requests_local = true
 
-  # Allow YAML deserializer to deserialize symbols
+  # Enable server timing.
+  config.server_timing = true
+
+  # Enable/disable caching. By default caching is disabled.
+  # Run rails dev:cache to toggle caching.
+  if Rails.root.join("tmp/caching-dev.txt").exist?
+    config.action_controller.perform_caching = true
+    config.action_controller.enable_fragment_cache_logging = true
+
+    config.cache_store = :memory_store
+    config.public_file_server.headers = {
+      "Cache-Control" => "public, max-age=#{2.days.to_i}"
+    }
+  else
+    config.action_controller.perform_caching = false
+  end
+
+  # Print deprecation notices to the Rails logger.
+  config.active_support.deprecation = :log
+  # Raise exceptions for disallowed deprecations.
+  config.active_support.disallowed_deprecation = :raise
+  # Tell Active Support which deprecation messages to disallow.
+  config.active_support.disallowed_deprecation_warnings = []
+
+  # Raise an error on page load if there are pending migrations.
+  config.active_record.migration_error = :page_load
+
+  # Allow YAML deserializer to deserialize symbols.
   # https://groups.google.com/g/rubyonrails-security/c/MmFO3LYQE8U?pli=1
   config.active_record.yaml_column_permitted_classes = [Symbol]
 
-  # Print deprecation notices to the Rails logger
-  config.active_support.deprecation = :log
+  # Highlight code that triggered database queries in logs.
+  config.active_record.verbose_query_logs = true
 
-  # Speed up Rails server boot time in development environment
-  config.eager_load = false
-
-  # Raise an error on page load if there are pending migrations
-  config.active_record.migration_error = :page_load
+  # Highlight code that enqueued background job in logs.
+  config.active_job.verbose_enqueue_logs = true
 
   # Serve assets in rails.
   config.public_file_server.enabled = true
@@ -91,6 +117,16 @@ MushroomObserver::Application.configure do
   # number of complex assets.
   config.assets.debug = false
   config.assets.logger = false
+
+  # Suppress logger output for asset requests.
+  config.assets.quiet = true
+
+  # Raises error for missing translations.
+  # config.i18n.raise_on_missing_translations = true
+
+  # Raise error when a before_action's only/except options reference
+  # missing actions.
+  config.action_controller.raise_on_missing_callback_actions = true
 
   # Enable web console for MushroomObserver VM
   config.web_console.allowed_ips = "10.0.2.2"
