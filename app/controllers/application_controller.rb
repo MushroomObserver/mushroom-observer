@@ -420,8 +420,8 @@ class ApplicationController < ActionController::Base
 
   # Track when user last requested a page, but update at most once an hour.
   def track_last_time_user_made_a_request
-    last_activity = @user&.last_activity&.to_s("%Y%m%d%H")
-    now = Time.current.to_s("%Y%m%d%H")
+    last_activity = @user&.last_activity&.to_fs("%Y%m%d%H")
+    now = Time.current.to_fs("%Y%m%d%H")
     return if !@user || last_activity && last_activity >= now
 
     @user.last_activity = Time.current

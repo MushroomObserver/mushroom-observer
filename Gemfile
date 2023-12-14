@@ -9,7 +9,7 @@ gem("sorted_set")
 source("https://rubygems.org")
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
-# gem("rails", "~> 6.1")
+# gem("rails", "~> 7.0")
 
 # To skip loading parts of Rails, bundle the constituent gems separately.
 # NOTE: Remember to require the classes also, in config/application.rb
@@ -19,19 +19,19 @@ source("https://rubygems.org")
 # Convenience group for updating rails constituents with one command
 # Usage: bundle update --group==rails
 group :rails do
-  # gem("actioncable", "~> 6.1")
-  # gem("actionmailbox", "~> 6.1")
-  gem("actionmailer", "~> 6.1")
-  gem("actionpack", "~> 6.1")
-  # gem("actiontext", "~> 6.1")
-  gem("actionview", "~> 6.1")
-  gem("activejob", "~> 6.1")
-  gem("activemodel", "~> 6.1")
-  gem("activerecord", "~> 6.1")
-  # gem("activestorage", "~> 6.1")
-  gem("activesupport", "~> 6.1")
+  gem("actioncable", "~> 7.0.8")
+  # gem("actionmailbox", "~> 7.0.8")
+  gem("actionmailer", "~> 7.0.8")
+  gem("actionpack", "~> 7.0.8")
+  # gem("actiontext", "~> 7.0.8")
+  gem("actionview", "~> 7.0.8")
+  gem("activejob", "~> 7.0.8")
+  gem("activemodel", "~> 7.0.8")
+  gem("activerecord", "~> 7.0.8")
+  # gem("activestorage", "~> 7.0.8")
+  gem("activesupport", "~> 7.0.8")
   gem("bundler")
-  gem("railties", "~> 6.1")
+  gem("railties", "~> 7.0.8")
 end
 
 # gem irb now depends on psych, but version 5 will not bundle currently
