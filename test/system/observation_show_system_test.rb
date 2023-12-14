@@ -23,7 +23,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_link(:create_collection_number.l)
     assert_selector(".new_collection_number_link")
     # click_link(:create_collection_number.l) # it's too small to click
-    find(:css, ".new_collection_number_link").trigger("click")
+    first(:css, ".new_collection_number_link").trigger("click")
 
     assert_selector("#modal_collection_number", wait: 6)
 
