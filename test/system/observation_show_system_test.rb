@@ -21,6 +21,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     scroll_to(find("#observation_collection_numbers"), align: :center)
     assert_link(:create_collection_number.l)
+    assert_selector(".new_collection_number_link")
     # click_link(:create_collection_number.l) # it's too small to click
     find(:css, ".new_collection_number_link").trigger("click")
 
