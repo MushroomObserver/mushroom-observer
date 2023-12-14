@@ -53,7 +53,12 @@ module Observations::Namings
     def update
       pass_query_params
       @naming = Naming.find(params[:naming_id].to_s)
-      observation = @naming.observation
+      # TODO: pass obs_id as a param, if it saves anything.
+      # Can rework routes: observations/observation_id/namings/naming_id/votes
+      # Also, consider a partly stripped-down method just for this,
+      # `Observation.load_for_namings_table(id)`
+      observation =
+        load_for_show_observation_or_goto_index(@naming.observation_id)
       value_str = param_lookup([:vote, :value])
       value = Vote.validate_value(value_str)
       raise("Bad value.") unless value
