@@ -87,6 +87,7 @@ class VisualGroupsControllerTest < FunctionalTestCase
     login
     get(:edit, params: { id: @visual_group.id })
     assert_response :success
+    assert_match(image_path(observations(:peltigera_mary_obs).thumb_image.id), response.body)
   end
 
   test "should get edit page with excluded images" do
