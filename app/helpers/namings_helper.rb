@@ -53,6 +53,8 @@ module NamingsHelper
         data: { role: "suggest_names",
                 results_url: results_url,
                 localization: localizations,
+                # N+1: Move the calculation of image_ids to suggestions#show
+                # or query obs includes images
                 image_ids: observation.image_ids.to_json,
                 controller: "suggestions", # Stimulus controller
                 action: "suggestions#suggestTaxa" }
@@ -73,6 +75,7 @@ module NamingsHelper
 
   private
 
+  # N+1: should not be checking permission here
   def naming_name_html(naming)
     if check_permission(naming)
       edit_link = modal_link_to("naming_#{naming.id}_#{naming.observation.id}",
@@ -88,6 +91,7 @@ module NamingsHelper
     [naming_name_link(naming), " ", proposer_links].safe_join
   end
 
+  # N+1: naming includes name
   def naming_name_link(naming)
     Textile.register_name(naming.name)
     link_with_query(
@@ -96,6 +100,7 @@ module NamingsHelper
     )
   end
 
+  # N+1: naming includes user
   def naming_proposer_html(naming)
     user_link = user_link(naming.user, naming.user.login,
                           { class: "btn btn-link px-0" })
@@ -105,6 +110,7 @@ module NamingsHelper
      user_link].safe_join
   end
 
+  # N+1: naming includes votes
   def consensus_vote_html(naming)
     consensus_votes =
       (if naming.votes&.length&.positive?
@@ -121,6 +127,7 @@ module NamingsHelper
 
   # Makes a link to naming_vote_path for no-js.
   # The controller will render a modal if turbo request
+  # N+1: naming vote percent
   def naming_votes_link(naming)
     percent = "#{naming.vote_percent.round}%"
 
@@ -129,6 +136,7 @@ module NamingsHelper
                   class: "vote-percent btn btn-link px-0")
   end
 
+  # N+1: naming includes votes
   def num_votes_html(naming)
     tag.span(naming.votes&.length,
              class: "vote-number", data: { id: naming.id })
@@ -146,6 +154,8 @@ module NamingsHelper
   # a tiny form within a naming row for voting on this naming only
   # also called by matrix_box_vote_or_propose_ui
   # Stimulus just calls "requestSubmit", submits via Turbo
+  # N+1: should not be checking permission here
+  # N+1: vote is coming from NamingsController#show @vote
   def naming_vote_form(naming, vote, context: "blank")
     menu = Vote.confidence_menu
     can_vote = check_permission(naming)
@@ -180,6 +190,7 @@ module NamingsHelper
   end
 
   # May show both user and consensus icons
+  # N+1: observation.consensus_naming and observation.owners_favorite?
   def vote_icons_html(observation, naming)
     consensus = observation.consensus_naming
 
