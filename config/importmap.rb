@@ -29,3 +29,8 @@ pin "jstz" # @2.1.1
 pin_all_from "app/javascript/src", under: "src", to: "src"
 pin "jquery-events-to-dom-events" # @1.1.0
 pin "geo-coordinates-parser" # @1.6.3
+
+pin "@googlemaps/markerclusterer", to: "https://ga.jspm.io/npm:@googlemaps/markerclusterer@2.5.2/dist/index.esm.js"
+pin "fast-deep-equal", to: "https://ga.jspm.io/npm:fast-deep-equal@3.1.3/index.js"
+pin "kdbush", to: "https://ga.jspm.io/npm:kdbush@4.0.2/index.js"
+pin "supercluster", to: "https://ga.jspm.io/npm:supercluster@8.0.1/index.js"

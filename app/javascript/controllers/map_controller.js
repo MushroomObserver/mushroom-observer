@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import { Loader } from "@googlemaps/js-api-loader"
 import { convert } from "geo-coordinates-parser"
+import { MarkerClusterer } from "@googlemaps/markerclusterer"
 
 // Connects to data-controller="map"
 // The connected element can be a map, or in the case of a form with a map UI,
@@ -117,6 +118,31 @@ export default class extends Controller {
         this.drawRectangle(set)
       }
     }
+
+    // https://developers.google.com/maps/documentation/javascript/marker-clustering
+    // Add some markers to the map.
+    // const markers = locations.map((position, i) => {
+    //   const label = labels[i % labels.length];
+    //   const pinGlyph = new google.maps.marker.PinElement({
+    //     glyph: label,
+    //     glyphColor: "white",
+    //   })
+    //   const marker = new google.maps.marker.AdvancedMarkerElement({
+    //     position,
+    //     content: pinGlyph.element,
+    //   });
+
+    //   // markers only keyboard focusable when they have click listeners
+    //   // open info window when marker is clicked
+    //   marker.addListener("click", () => {
+    //     infoWindow.setContent(position.lat + ", " + position.lng);
+    //     infoWindow.open(map, marker);
+    //   });
+    //   return marker;
+    // });
+
+    // // Add a marker clusterer to manage the markers.
+    // new MarkerClusterer({ markers, map });
   }
 
   isPoint(set) {
