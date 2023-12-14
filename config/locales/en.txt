@@ -1273,7 +1273,7 @@
   app_title: Mushroom Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: "Check out our new \"Help Identify\":https://mushroomobserver.org/observations/identify interface!<br>\nAlso checkout the \"MushroomObsMerch Etsy store\":https://www.etsy.com/shop/MushroomObsMerch"
+  app_banner_box: "We're working on MO! Please \"report a bug\":https://mushroomobserver.org/emails/ask_webmaster_question if you find one.<br>\nAlso check out the \"MushroomObsMerch Etsy store\":https://www.etsy.com/shop/MushroomObsMerch"
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
