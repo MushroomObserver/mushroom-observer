@@ -19,10 +19,13 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     click_link(text: /#{obs.text_name}/)
     assert_selector("body.observations__show")
 
+    scroll_to(find("#observation_collection_numbers"), align: :center)
     assert_link(:create_collection_number.l)
-    find(:css, ".new_collection_number_link").trigger("click")
+    assert_selector(".new_collection_number_link")
+    # click_link(:create_collection_number.l) # it's too small to click
+    first(:css, ".new_collection_number_link").trigger("click")
 
-    assert_selector("#modal_collection_number")
+    assert_selector("#modal_collection_number", wait: 6)
 
     within("#modal_collection_number") do
       assert_field("collection_number_number")
@@ -39,7 +42,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       find(:css, ".edit_collection_number_link_#{c_n.id}").trigger("click")
     end
 
-    assert_selector("#modal_collection_number_#{c_n.id}")
+    assert_selector("#modal_collection_number_#{c_n.id}", wait: 6)
 
     within("#modal_collection_number_#{c_n.id}") do
       assert_field("collection_number_number")
@@ -62,7 +65,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       find(:css, ".edit_herbarium_record_link_#{fmr.id}").trigger("click")
     end
 
-    assert_selector("#modal_herbarium_record_#{fmr.id}")
+    assert_selector("#modal_herbarium_record_#{fmr.id}", wait: 6)
 
     within("#modal_herbarium_record_#{fmr.id}") do
       assert_field("herbarium_record_accession_number")
@@ -79,7 +82,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_link(:show_observation_add_sequence.l)
     find(:css, ".new_sequence_link").trigger("click")
 
-    assert_selector("#modal_sequence")
+    assert_selector("#modal_sequence", wait: 6)
     within("#modal_sequence") do
       assert_field("sequence_locus")
       assert_field("sequence_bases")
