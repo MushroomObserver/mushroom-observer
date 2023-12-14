@@ -772,8 +772,8 @@ class ApplicationController < ActionController::Base
 
   # Report a warning message that will be displayed (in yellow) at the top of
   # the next page the User sees.
-  def flash_warning(*strs)
-    flash_notice(*strs)
+  def flash_warning(*)
+    flash_notice(*)
     session[:notice][0, 1] = "1" if session[:notice][0, 1] == "0"
     false
   end
@@ -781,8 +781,8 @@ class ApplicationController < ActionController::Base
 
   # Report an error message that will be displayed (in red) at the top of the
   # next page the User sees.
-  def flash_error(*strs)
-    flash_notice(*strs)
+  def flash_error(*)
+    flash_notice(*)
     session[:notice][0, 1] = "2" if session[:notice][0, 1] != "2"
     false
   end
@@ -1783,14 +1783,17 @@ class ApplicationController < ActionController::Base
   end
 
   def load_for_show_observation_or_goto_index(id)
-    Observation.includes(
+    Observation.strict_loading.includes(
       :collection_numbers,
       { comments: :user },
       { herbarium_records: [{ herbarium: :curators }, :user] },
       { images: [:image_votes, :license, :projects, :user] },
-      { namings: :name },
+      :name,
+      { namings: [:name, :user, { votes: :user }] },
       :projects,
-      :sequences
+      :sequences,
+      :species_lists,
+      :user
     ).find_by(id: id) ||
       flash_error_and_goto_index(Observation, id)
   end
