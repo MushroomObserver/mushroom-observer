@@ -1762,7 +1762,7 @@ class ApplicationController < ActionController::Base
   helper_method :calc_layout_params
 
   def permission?(obj, error_message)
-    result = (in_admin_mode? || obj.can_edit?(@user))
+    result = in_admin_mode? || obj.can_edit?(@user)
     flash_error(error_message) unless result
     result
   end
@@ -1783,18 +1783,7 @@ class ApplicationController < ActionController::Base
   end
 
   def load_for_show_observation_or_goto_index(id)
-    Observation.strict_loading.includes(
-      :collection_numbers,
-      { comments: :user },
-      { herbarium_records: [{ herbarium: :curators }, :user] },
-      { images: [:image_votes, :license, :projects, :user] },
-      :name,
-      { namings: [:name, :user, { votes: :user }] },
-      :projects,
-      :sequences,
-      :species_lists,
-      :user
-    ).find_by(id: id) ||
+    Observation.show_includes.find_by(id: id) ||
       flash_error_and_goto_index(Observation, id)
   end
 

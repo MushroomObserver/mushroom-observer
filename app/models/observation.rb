@@ -485,6 +485,28 @@ class Observation < AbstractModel
     joins(species_lists: :project_species_lists).
       where(ProjectSpeciesList[:project_id] == project.id).distinct
   }
+  scope :show_includes, lambda {
+    strict_loading.includes(
+      :collection_numbers,
+      { comments: :user },
+      { herbarium_records: [{ herbarium: :curators }, :user] },
+      { images: [:image_votes, :license, :projects, :user] },
+      :location,
+      :name,
+      { namings: [:name, :user, { votes: :user }] },
+      :projects,
+      :sequences,
+      :species_lists,
+      :user
+    )
+  }
+  scope :naming_includes, lambda {
+    strict_loading.includes(
+      :name,
+      { namings: [:name, :user, { votes: :user }] },
+      :user
+    )
+  }
 
   def location?
     false

@@ -175,9 +175,9 @@ module NamingsHelper
      naming_vote_form(naming, vote, context: "namings_table")].safe_join
   end
 
-  def naming_vote_form_commit_url(naming)
+  def naming_vote_form_commit_url(naming, vote)
     observation_naming_vote_path(
-      observation_id: naming.observation_id, naming_id: naming.id
+      observation_id: naming.observation_id, naming_id: naming.id, id: vote.id
     )
   end
 
@@ -200,7 +200,7 @@ module NamingsHelper
     }.to_json
 
     form_with(
-      url: naming_vote_form_commit_url(naming), method: :patch,
+      url: naming_vote_form_commit_url(naming, vote), method: :patch,
       id: "naming_vote_form_#{naming.id}", class: "naming-vote-form",
       data: { turbo: true, controller: "naming-vote",
               localization: localizations }
