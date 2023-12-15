@@ -276,7 +276,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_equal(n_d.text_name, nam.text_name)
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)
-      assert_selector(".destroy_naming_link_#{nam.id}")
+      assert_selector(".destroy_observation_naming_link_#{nam.id}")
       assert_selector("#naming_vote_form_#{nam.id}")
       select("Could Be", from: "vote_value_#{nam.id}")
     end
@@ -313,9 +313,10 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)
-      assert_selector(".destroy_naming_link_#{nam.id}")
+      assert_selector(".destroy_observation_naming_link_#{nam.id}")
       accept_prompt do
-        find(:css, ".destroy_naming_link_#{nam.id}").trigger("click")
+        find(:css,
+             ".destroy_observation_naming_link_#{nam.id}").trigger("click")
       end
       assert_no_link(text: /#{n_d.text_name}/)
     end

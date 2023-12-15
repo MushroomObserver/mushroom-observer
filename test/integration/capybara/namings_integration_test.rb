@@ -24,8 +24,8 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     namer_session.visit("/#{obs.id}")
     namer_session.assert_selector("body.observations__show")
     login(namer, session: namer_session)
-    assert_false(namer_session.has_link?(class: /edit_naming/))
-    assert_false(namer_session.has_selector?(class: /destroy_naming_link_/))
+    assert_false(namer_session.has_link?(class: /edit_observation_naming/))
+    assert_false(namer_session.has_selector?(class: /destroy_observation_nam/))
     namer_session.click_link(class: "propose-naming-link")
 
     # naming = namer_session.create_name(obs, text_name)
@@ -85,14 +85,16 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     # (Make sure there is an edit and destroy control for the new naming.)
     # (Now one: same for wide-screen as for mobile.)
     assert_true(namer_session.has_link?(
-                  class: /edit_naming_link_#{naming.id}/
+                  class: /edit_observation_naming_link_#{naming.id}/
                 ))
-    namer_session.assert_selector(".destroy_naming_link_#{naming.id}")
+    namer_session.assert_selector(
+      ".destroy_observation_naming_link_#{naming.id}"
+    )
 
     # Try changing it.
     author = "(Pers.) Grev."
     reason = "Test reason."
-    namer_session.click_link(class: /edit_naming_link_#{naming.id}/)
+    namer_session.click_link(class: /edit_observation_naming_link_#{naming.id}/)
     namer_session.assert_selector("body.namings__edit")
     namer_session.within("#naming_#{obs.id}_form") do |form|
       assert_true(form.has_field?("naming_name", with: text_name))
@@ -119,7 +121,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     # (Make sure reason shows up, too.)
     assert_true(namer_session.has_text?(reason))
 
-    namer_session.click_link(class: /edit_naming_link_#{naming.id}/)
+    namer_session.click_link(class: /edit_observation_naming_link_#{naming.id}/)
     namer_session.assert_selector("body.namings__edit")
     namer_session.within("#naming_#{obs.id}_form") do |form|
       assert_true(
@@ -153,7 +155,9 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
 
     # namer tries to delete
     # namer_session.failed_delete(obs)
-    namer_session.click_button(class: "destroy_naming_link_#{naming.id}")
+    namer_session.click_button(
+      class: "destroy_observation_naming_link_#{naming.id}"
+    )
     assert_flash_text("Sorry", session: namer_session)
 
     # voter_session.change_mind(obs, naming)
@@ -166,7 +170,9 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     end
 
     # namer_session.successful_delete(obs, naming, text_name, orignal_name)
-    namer_session.click_button(class: "destroy_naming_link_#{naming.id}")
+    namer_session.click_button(
+      class: "destroy_observation_naming_link_#{naming.id}"
+    )
     namer_session.assert_selector("body.observations__show")
     assert_true(namer_session.has_text?("Observation #{obs.id}"))
     assert_flash_success(session: namer_session)

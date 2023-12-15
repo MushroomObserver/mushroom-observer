@@ -10,9 +10,9 @@ when "new", "create"
 when "edit", "update"
   button_name = :SAVE_EDITS.l
   method = :patch
-  url = naming_path(id: @params.naming.id,
-                    approved_name: @params.what,
-                    q: get_query_param)
+  url = observation_naming_path(id: @params.naming.id,
+                                approved_name: @params.what,
+                                q: get_query_param)
 end
 
 form_args = { model: @naming, url: url, method: method,

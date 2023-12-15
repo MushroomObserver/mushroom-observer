@@ -3,6 +3,7 @@
 # helpers for namings view
 # TODO: some of this should be in a presenter or ViewComponents
 # NOTE: We don't even print this table unless @user is logged in.
+# rubocop:disable Metrics/ModuleLength
 module NamingsHelper
   ##### Observation Naming "table" content #########
   def observation_naming_header_row
@@ -78,9 +79,9 @@ module NamingsHelper
   # N+1: should not be checking permission here
   def naming_name_html(naming)
     if check_permission(naming)
-      edit_link = modal_link_to("naming_#{naming.id}_#{naming.observation.id}",
+      edit_link = modal_link_to("naming_#{naming.id}_#{naming.observation_id}",
                                 *edit_naming_tab(naming))
-      delete_link = destroy_button(target: naming, icon: :remove)
+      delete_link = naming_destroy_button(naming)
       proposer_links = tag.div(class: "text-nowrap") do
         ["[", edit_link, "|", delete_link, "]"].safe_join(" ")
       end
@@ -89,6 +90,27 @@ module NamingsHelper
     end
 
     [naming_name_link(naming), " ", proposer_links].safe_join
+  end
+
+  # see link_helper.rb destroy_button
+  # Different from regular destroy button because of necessarily nested route
+  def naming_destroy_button(naming)
+    name = :DESTROY.t
+    path = observation_naming_path(naming.id)
+    identifier = "destroy_observation_naming_link_#{naming.id}"
+    icon = link_icon(:remove)
+    content = tag.span(name, class: "sr-only")
+
+    html_options = {
+      method: :delete, title: name,
+      class: class_names(identifier, args[:class], "text-danger"),
+      form: { data: { turbo: true, turbo_confirm: :are_you_sure.t } },
+      data: { toggle: "tooltip", placement: "top", title: name }
+    }.deep_merge(args.except(:class, :back))
+
+    button_to(path, html_options) do
+      [content, icon].safe_join
+    end
   end
 
   # N+1: naming includes name
@@ -125,14 +147,19 @@ module NamingsHelper
      tag.span(consensus_votes)].safe_join
   end
 
-  # Makes a link to naming_vote_path for no-js.
+  # Makes a link to observation_naming_vote_path for no-js.
   # The controller will render a modal if turbo request
   # N+1: naming vote percent
   def naming_votes_link(naming)
     percent = "#{naming.vote_percent.round}%"
 
     modal_link_to("naming_votes_#{naming.id}", h(percent),
-                  add_query_param(naming_vote_path(naming_id: naming.id)),
+                  add_query_param(
+                    observation_naming_votes_path(
+                      observation_id: naming.observation_id,
+                      naming_id: naming.id
+                    )
+                  ),
                   class: "vote-percent btn btn-link px-0")
   end
 
@@ -148,6 +175,12 @@ module NamingsHelper
      naming_vote_form(naming, vote, context: "namings_table")].safe_join
   end
 
+  def naming_vote_form_commit_url(naming)
+    observation_naming_vote_path(
+      observation_id: naming.observation_id, naming_id: naming.id
+    )
+  end
+
   public
 
   # Naming Vote Form: a select that submits on change with Stimulus
@@ -156,6 +189,7 @@ module NamingsHelper
   # Stimulus just calls "requestSubmit", submits via Turbo
   # N+1: should not be checking permission here
   # N+1: vote is coming from NamingsController#show @vote
+  # rubocop:disable Metrics/MethodLength
   def naming_vote_form(naming, vote, context: "blank")
     menu = Vote.confidence_menu
     can_vote = check_permission(naming)
@@ -165,10 +199,12 @@ module NamingsHelper
       saving: :show_namings_saving.l
     }.to_json
 
-    form_with(url: naming_vote_path(naming_id: naming.id), method: :patch,
-              id: "naming_vote_form_#{naming.id}", class: "naming-vote-form",
-              data: { turbo: true, controller: "naming-vote",
-                      localization: localizations }) do |f|
+    form_with(
+      url: naming_vote_form_commit_url(naming), method: :patch,
+      id: "naming_vote_form_#{naming.id}", class: "naming-vote-form",
+      data: { turbo: true, controller: "naming-vote",
+              localization: localizations }
+    ) do |f|
       [
         fields_for(:vote) do |fv|
           fv.select(:value, menu, {},
@@ -188,6 +224,7 @@ module NamingsHelper
       ].safe_join
     end
   end
+  # rubocop:enable Metrics/MethodLength
 
   # May show both user and consensus icons
   # N+1: observation.consensus_naming and observation.owners_favorite?
@@ -290,3 +327,4 @@ module NamingsHelper
     end
   end
 end
+# rubocop:enable Metrics/ModuleLength
