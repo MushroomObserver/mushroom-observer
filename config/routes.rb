@@ -680,7 +680,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :observations do
     resources :namings, only: [:index, :new, :create, :edit, :update, :destroy],
                         controller: "observations/namings" do
-      resources :votes, only: [:update, :index],
+      resources :votes, only: [:create, :update, :index],
                         controller: "observations/namings/votes"
     end
 

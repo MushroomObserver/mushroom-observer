@@ -175,10 +175,17 @@ module NamingsHelper
      naming_vote_form(naming, vote, context: "namings_table")].safe_join
   end
 
+  # form can commit to update or create
   def naming_vote_form_commit_url(naming, vote)
-    observation_naming_vote_path(
-      observation_id: naming.observation_id, naming_id: naming.id, id: vote.id
-    )
+    if vote&.id
+      observation_naming_vote_path(
+        observation_id: naming.observation_id, naming_id: naming.id, id: vote.id
+      )
+    else
+      observation_naming_votes_path(
+        observation_id: naming.observation_id, naming_id: naming.id
+      )
+    end
   end
 
   public
@@ -188,9 +195,11 @@ module NamingsHelper
   # also called by matrix_box_vote_or_propose_ui
   # Stimulus just calls "requestSubmit", submits via Turbo
   # N+1: should not be checking permission here
-  # N+1: vote is coming from NamingsController#show @vote
+  # N+1: vote is coming from NamingsController#index iteration over namings
+  # This should really be a form with model: vote so it can has an id.
   # rubocop:disable Metrics/MethodLength
   def naming_vote_form(naming, vote, context: "blank")
+    method = vote&.id ? :patch : :post
     menu = Vote.confidence_menu
     can_vote = check_permission(naming)
     menu = [Vote.no_opinion] + menu if !can_vote || !vote || vote&.value&.zero?
@@ -200,21 +209,21 @@ module NamingsHelper
     }.to_json
 
     form_with(
-      url: naming_vote_form_commit_url(naming, vote), method: :patch,
+      model: vote,
+      url: naming_vote_form_commit_url(naming, vote), method: method,
       id: "naming_vote_form_#{naming.id}", class: "naming-vote-form",
       data: { turbo: true, controller: "naming-vote",
               localization: localizations }
-    ) do |f|
+    ) do |fv|
       [
-        fields_for(:vote) do |fv|
-          fv.select(:value, menu, {},
-                    { class: "form-control w-100",
-                      id: "vote_value_#{naming.id}",
-                      data: { role: "change_vote", id: naming.id,
-                              naming_vote_target: "select",
-                              localization: localizations,
-                              action: "naming-vote#sendVote" } })
-        end,
+        fv.hidden_field(:id, vote&.id),
+        fv.select(:value, menu, {},
+                  { class: "form-control w-100",
+                    id: "vote_value_#{naming.id}",
+                    data: { role: "change_vote", id: naming.id,
+                            naming_vote_target: "select",
+                            localization: localizations,
+                            action: "naming-vote#sendVote" } }),
         hidden_field_tag(:context, context),
         tag.noscript do
           submit_button(form: f, button: :show_namings_cast.l, class: "w-100",

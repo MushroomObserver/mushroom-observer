@@ -99,16 +99,17 @@ module ObservationsHelper
   end
 
   # gathers the user's @votes indexed by naming
-  def gather_users_votes(obs, user = nil)
-    return [] unless user
+  # N+1 - this has gotta go. We have each naming's votes already
+  # def gather_users_votes(obs, user = nil)
+  #   return [] unless user
 
-    obs.namings.includes([:votes, :user, :name]).each_with_object({}) do
-      |naming, votes|
-      votes[naming.id] =
-        naming.votes.find { |vote| vote.user_id == user.id } ||
-        Vote.new(value: 0)
-    end
-  end
+  #   obs.namings.includes([:votes, :user, :name]).each_with_object({}) do
+  #     |naming, votes|
+  #     votes[naming.id] =
+  #       naming.votes.find { |vote| vote.user_id == user.id } ||
+  #       Vote.new(value: 0)
+  #   end
+  # end
 
   def link_to_display_name_brief_authors(name, **args)
     link_to(name.display_name_brief_authors.t,

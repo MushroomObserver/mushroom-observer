@@ -10,7 +10,7 @@ module Observations::Namings
     # Has its own route for non-js.
     # Inputs: params[:id] (naming)
     # Outputs: @naming
-    def show
+    def index
       pass_query_params
       @naming = find_or_goto_index(Naming, params[:naming_id].to_s)
       respond_to do |format|
@@ -50,24 +50,45 @@ module Observations::Namings
     # when matrix_box (help_identify)
     #   updates the lightbox and matrix_box
 
-    def update
+    # Split this into create and update, because the caller should know
+    # if this user has cast a vote on this naming already or not. Adjust tests!
+    def create
       pass_query_params
-      # @naming = Naming.find(params[:naming_id].to_s)
-      # TODO: pass in obs_id as a param to this action, if it saves anything.
-      # Can rework routes: observations/:observation_id/namings/:naming_id/votes
-      # Or at least: observations/namings/:naming_id/votes
-      # Also, consider a slightly slimmer includes method just for this,
-      # `Observation.load_for_namings_table(id)`
-      observation = Observation.naming_includes.find(params[:observation_id])
+      observation = load_observation_plus
       @naming = observation.namings.find(params[:naming_id])
       value_str = param_lookup([:vote, :value])
       value = Vote.validate_value(value_str)
       raise("Bad value.") unless value
+      # TODO: Take the whole vote object and send it to change vote!
 
       # how about naming.change_vote and
       # observation.calc_consensus returning obs.reload
       observation.change_vote(@naming, value, @user)
       @observation = observation.reload
+      respond_to_new_votes
+    end
+
+    def update
+      pass_query_params
+      observation = load_observation_plus
+      @naming = observation.namings.find(params[:naming_id])
+      value_str = param_lookup([:vote, :value])
+      value = Vote.validate_value(value_str)
+      raise("Bad value.") unless value
+      # TODO: Take the whole vote object and send it to change vote!
+
+      # how about naming.change_vote and
+      # observation.calc_consensus returning obs.reload
+      observation.change_vote(@naming, value, @user)
+      @observation = observation.reload
+      respond_to_new_votes
+    end
+
+    def load_observation_plus
+      Observation.naming_includes.find(params[:observation_id])
+    end
+
+    def respond_to_new_votes
       respond_to do |format|
         format.turbo_stream do
           case params[:context]
@@ -85,7 +106,6 @@ module Observations::Namings
         end
       end
     end
-
     # This is very expensive, and not called anywhere. Putting it in storage
     # Refresh vote cache for all observations in the database.
     # def refresh_vote_cache
