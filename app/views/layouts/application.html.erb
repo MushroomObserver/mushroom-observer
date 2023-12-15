@@ -18,11 +18,13 @@ body_class = class_names(whos_calling, theme_class)
     <%= render(partial: "application/app/gtm_iframe") %>
   <% end %>
 
-<div id="main_container" class="container-fluid">
+<div id="main_container" class="container-fluid"
+     data-controller="nav" data-nav-target="container">
 
   <%= render(partial: "application/app/banners") %>
 
-  <div class="row row-offcanvas row-offcanvas-left">
+  <div class="row row-offcanvas row-offcanvas-left"
+       data-nav-target="offcanvas">
 
     <nav id="sidebar" class="sidebar-offcanvas col-xs-8 col-sm-2 hidden-print">
       <%= render(partial: "application/sidebar") %>

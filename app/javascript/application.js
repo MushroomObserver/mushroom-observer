@@ -24,7 +24,13 @@ import "@hotwired/stimulus"
 import "@hotwired/stimulus-loading"
 
 import 'exifreader'
-import 'jstz'
+import jstz from 'jstz'
+try {
+  document.cookie = "tz=" + jstz.determine().name() + ";samesite=lax"
+}
+catch (err) {
+  // console.error(err)
+}
 
 import LazyLoad from "vanilla-lazyload"
 if (!window.lazyLoadInstance) {
