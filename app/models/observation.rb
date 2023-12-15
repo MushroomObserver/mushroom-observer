@@ -491,10 +491,12 @@ class Observation < AbstractModel
       { comments: :user },
       { herbarium_records: [{ herbarium: :curators }, :user] },
       { images: [:image_votes, :license, :projects, :user] },
+      :interests,
       :location,
       :name,
       { namings: [:name, :user, { votes: :user }] },
       :projects,
+      :rss_logs,
       :sequences,
       :species_lists,
       :user
@@ -1060,9 +1062,15 @@ class Observation < AbstractModel
   # Change User's Vote for this naming.  Automatically recalculates the
   # consensus for the Observation in question if anything is changed.  Returns
   # true if something was changed.
+  # N+1: Pass vote id along! Or even object. The caller knows if user has voted.
+  # Nope, can't do object because value sent by API. Maybe pass id on side.
+  # TODO: Maybe use kwargs.
+  # lookup_naming is why the bulk of this should be moved to Naming.
+  # DO NOT lookup_naming. We have the naming.
   def change_vote(naming, value, user = User.current)
     result = false
-    naming = lookup_naming(naming)
+    # naming = lookup_naming(naming)
+    # This does return a Vote instance, hopefully without reload
     vote = naming.users_vote(user)
     value = value.to_f
 
@@ -1106,9 +1114,10 @@ class Observation < AbstractModel
     best_naming
   end
 
+  # N+1: reload is a reload. Let the caller reload with includes.
   def calc_consensus
-    reload
-    calculator = Observation::ConsensusCalculator.new(namings)
+    # reload
+    calculator = Observation::ConsensusCalculator.new(self)
     best, best_val = calculator.calc
     old = name
     if name != best || vote_cache != best_val
@@ -1121,7 +1130,7 @@ class Observation < AbstractModel
 
   # Admin tool that refreshes the vote cache for all observations with a vote.
   def self.refresh_vote_cache
-    Observation.all.find_each(&:calc_consensus)
+    Observation.find_each(&:calc_consensus)
   end
 
   ##############################################################################

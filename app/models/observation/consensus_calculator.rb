@@ -2,8 +2,11 @@
 
 class Observation
   class ConsensusCalculator
-    def initialize(namings)
-      @namings     = namings.includes(:name, votes: [:observation, :user])
+    # N+1 - this should be initialized with the eager loaded observation
+    # and derive everything else from that.
+    def initialize(observation)
+      # @namings     = namings.includes(:name, votes: [:observation, :user])
+      @namings     = observation.namings
       @name_votes  = {}  # Strongest vote for a given name for a user.
       @taxon_votes = {}  # Strongest vote for any names in a group of
       #                    synonyms for a given user.
