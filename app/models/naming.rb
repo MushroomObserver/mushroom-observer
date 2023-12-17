@@ -263,14 +263,6 @@ class Naming < AbstractModel
     result
   end
 
-  # It is rare, but a single user can end up with multiple votes, for example,
-  # if two names are merged and a user had voted for both names.
-  def owners_vote
-    # N+1: .where is a guaranteed new query.
-    # Vote.where(naming_id: id, user_id: user_id).order("value desc").first
-    votes.select { |vote| vote.user_id == @user.id }.order(value: :desc).first
-  end
-
   ##############################################################################
   #
   #  :section: Voting
@@ -308,6 +300,14 @@ class Naming < AbstractModel
   # Is this Naming the given User's favorite Naming for this Observation?
   def users_favorite?(user)
     votes.any? { |v| v.user_id == user.id && v.favorite }
+  end
+
+  # It is rare, but a single user can end up with multiple votes, for example,
+  # if two names are merged and a user had voted for both names.
+  def owners_vote
+    # N+1: .where is a guaranteed new query.
+    # Vote.where(naming_id: id, user_id: user_id).order("value desc").first
+    votes.select { |vote| vote.user_id == user_id }.order(value: :desc).first
   end
 
   # Change User's Vote on this Naming.  (Uses Observation#change_vote.)
