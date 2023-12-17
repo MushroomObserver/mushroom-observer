@@ -494,9 +494,9 @@ class Observation < AbstractModel
       :interests,
       :location,
       :name,
-      { namings: [:name, :user, { votes: :user }] },
+      { namings: [:name, :user, { votes: [:observation, :user] }] },
       :projects,
-      :rss_logs,
+      :rss_log,
       :sequences,
       :species_lists,
       :user
@@ -504,8 +504,9 @@ class Observation < AbstractModel
   }
   scope :naming_includes, lambda {
     strict_loading.includes(
+      :location, # ugh. worth it because of cache_content_filter_data
       :name,
-      { namings: [:name, :user, { votes: :user }] },
+      { namings: [:name, :user, { votes: [:observation, :user] }] },
       :user
     )
   }
