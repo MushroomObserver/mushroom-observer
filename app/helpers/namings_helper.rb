@@ -195,11 +195,13 @@ module NamingsHelper
   # also called by matrix_box_vote_or_propose_ui
   # Stimulus just calls "requestSubmit", submits via Turbo
   # N+1: should not be checking permission here
-  # N+1: vote is coming from NamingsController#index iteration over namings
-  # This should really be a form with model: vote so it can has an id.
+  # N+1: vote is naming.users_vote, so should be an instance of Vote.
+  # NamingsController#index iteration over namings in table_row
+  # This should be a form with model: vote so it can has an id, sent in url
   # rubocop:disable Metrics/MethodLength
   def naming_vote_form(naming, vote, context: "blank")
-    method = vote&.id ? :patch : :post
+    vote_id = vote&.id
+    method = vote_id ? :patch : :post
     menu = Vote.confidence_menu
     can_vote = check_permission(naming)
     menu = [Vote.no_opinion] + menu if !can_vote || !vote || vote&.value&.zero?
@@ -216,7 +218,6 @@ module NamingsHelper
               localization: localizations }
     ) do |fv|
       [
-        fv.hidden_field(:id, vote&.id),
         fv.select(:value, menu, {},
                   { class: "form-control w-100",
                     id: "vote_value_#{naming.id}",
@@ -226,7 +227,7 @@ module NamingsHelper
                             action: "naming-vote#sendVote" } }),
         hidden_field_tag(:context, context),
         tag.noscript do
-          submit_button(form: f, button: :show_namings_cast.l, class: "w-100",
+          submit_button(form: fv, button: :show_namings_cast.l, class: "w-100",
                         data: { role: "save_vote",
                                 naming_vote_target: "submit" })
         end
