@@ -10,7 +10,7 @@ require("test_helpers/system/cuprite_setup")
 require("test_helpers/system/cuprite_helpers")
 
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
-  driven_by :cuprite, using: :chromium
+  driven_by :mo_cuprite, using: :chromium
   # Include MO's helpers
   include GeneralExtensions
   include FlashExtensions
@@ -26,7 +26,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     Capybara.reset_sessions!
     # below is needed for cuprite
     Capybara.server = :webrick
-    # Capybara.current_driver = :cuprite
+    # Capybara.current_driver = :mo_cuprite
     Capybara.server_host = "localhost"
     Capybara.server_port = 3000
     # Normalize whitespaces when using `has_text?` and similar matchers,
