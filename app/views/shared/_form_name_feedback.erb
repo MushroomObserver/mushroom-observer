@@ -47,12 +47,12 @@ if valid_names
         if !suggest_corrections && !parent_deprecated
           concat(tag.div("#{:form_naming_valid_synonyms.t}:"))
         end
-        fields_for(:chosen_name) do |f_c|
+        concat(fields_for(:chosen_name) do |f_c|
           valid_names.each do |n|
             concat(radio_with_label(form: f_c, field: :name_id, value: n.id,
                                     label: n.display_name.t, class: "ml-4"))
           end
-        end
+        end)
       end)
     else
       concat(help_note(
@@ -79,13 +79,13 @@ elsif names&.length &.> 1
 
   tag.div(class: "alert alert-danger", id: "name_messages") do
     concat(tag.div([:form_naming_multiple_names.t(name: what), ":"].safe_join))
-    fields_for(:chosen_name) do |f_c|
+    concat(fields_for(:chosen_name) do |f_c|
       names.each do |n|
         concat(radio_with_label(form: f_c, field: :name_id, value: n.id,
                                 label: n.display_name.t, class: "ml-4"))
         concat(tag.div("(#{n.observations.size})"))
       end
-    end
+    end)
     concat(help_note(:div, :form_naming_multiple_names_help.t))
   end
 
