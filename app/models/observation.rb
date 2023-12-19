@@ -489,16 +489,30 @@ class Observation < AbstractModel
     strict_loading.includes(
       :collection_numbers,
       { comments: :user },
+      { external_links: { external_site: :project } },
       { herbarium_records: [{ herbarium: :curators }, :user] },
       { images: [:image_votes, :license, :projects, :user] },
-      :interests,
+      { interests: :user },
       :location,
       :name,
       { namings: [:name, :user, { votes: [:observation, :user] }] },
       :projects,
       :rss_log,
       :sequences,
-      :species_lists,
+      { species_lists: [:projects, :user] },
+      :thumb_image,
+      :user
+    )
+  }
+  scope :not_logged_in_show_includes, lambda {
+    strict_loading.includes(
+      { comments: :user },
+      { images: [:license, :user] },
+      :location,
+      :name,
+      { namings: :name },
+      :projects,
+      :thumb_image,
       :user
     )
   }

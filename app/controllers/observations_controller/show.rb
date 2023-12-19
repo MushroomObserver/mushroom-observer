@@ -41,38 +41,39 @@ module ObservationsController::Show
   end
 
   def load_observation_for_show_observation_page
-    includes = @user ? show_obs_heavy_includes : show_obs_light_includes
-    @observation = Observation.includes(includes).find_by(id: params[:id]) ||
+    # includes = @user ? show_obs_heavy_includes : show_obs_light_includes
+    includes = @user ? "show_includes" : "not_logged_in_show_includes"  # scopes
+    @observation = Observation.send(includes).find_by(id: params[:id]) ||
                    flash_error_and_goto_index(Observation, params[:id])
   end
 
-  def show_obs_light_includes
-    [
-      { comments: :user },
-      { images: [:license, :user] },
-      :location,
-      :name,
-      { namings: :name },
-      :user
-    ]
-  end
+  # def show_obs_light_includes
+  #   [
+  #     { comments: :user },
+  #     { images: [:license, :user] },
+  #     :location,
+  #     :name,
+  #     { namings: :name },
+  #     :user
+  #   ]
+  # end
 
-  def show_obs_heavy_includes
-    [
-      :collection_numbers,
-      { comments: :user },
-      { external_links: { external_site: :project } },
-      { herbarium_records: [{ herbarium: :curators }, :user] },
-      { images: [:image_votes, :license, :projects, :user] },
-      :location,
-      :name,
-      { namings: [:name, :user, { votes: [:observation, :user] }] },
-      :projects,
-      :sequences,
-      { species_lists: :projects },
-      :user
-    ]
-  end
+  # def show_obs_heavy_includes
+  #   [
+  #     :collection_numbers,
+  #     { comments: :user },
+  #     { external_links: { external_site: :project } },
+  #     { herbarium_records: [{ herbarium: :curators }, :user] },
+  #     { images: [:image_votes, :license, :projects, :user] },
+  #     :location,
+  #     :name,
+  #     { namings: [:name, :user, { votes: [:observation, :user] }] },
+  #     :projects,
+  #     :sequences,
+  #     { species_lists: :projects },
+  #     :user
+  #   ]
+  # end
 
   # Make it really easy for users to elect to go public with their votes.
   def check_if_user_wants_to_make_their_votes_public
