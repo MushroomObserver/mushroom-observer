@@ -25,6 +25,15 @@ carousel_locals = {
     <%= tag.div(class: "panel panel-default") do
       carousel_html(**carousel_locals)
     end %>
+
+    <% if @user %>
+      <%= render(partial: "observations/show/namings", locals: obs_locals) %>
+    <% end %>
+
+    <%= render(partial: "comments/comments_for_object",
+               locals: { object: @observation, controls: @user, limit: nil }) %>
+
+    <%= @observation.source_credit.tpl if @observation.source_noteworthy? %>
   </div>
 
   <div class="col-xs-12 col-md-4 col-lg-5 float-sm-right">
@@ -43,22 +52,7 @@ carousel_locals = {
                    locals: obs_locals) %>
       <% end %>
     <% end %>
-  </div>
-</div><!--.row-->
 
-<div class="row">
-  <div class="col-xs-12 col-md-8 col-lg-7 float-sm-left">
-    <% if @user %>
-      <%= render(partial: "observations/show/namings", locals: obs_locals) %>
-    <% end %>
-
-    <%= render(partial: "comments/comments_for_object",
-               locals: { object: @observation, controls: @user, limit: nil }) %>
-
-    <%= @observation.source_credit.tpl if @observation.source_noteworthy? %>
-  </div>
-
-  <div class="col-xs-12 col-md-4 col-lg-5 float-sm-right">
     <% if show_map %>
       <%= render(partial: "observations/show/thumbnail_map",
                  locals: obs_locals) %>
