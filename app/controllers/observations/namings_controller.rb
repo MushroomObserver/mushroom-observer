@@ -21,8 +21,11 @@ module Observations
 
     def new
       @params = NamingParams.new(params[:naming])
+      # FIXME: All CRUD actions: Query scope depends on the format of response.
+      # The turbo response only needs the naming includes, but the html
+      # response needs the whole `show_includes` shebang.
       @observation = @params.observation =
-        Observation.naming_includes.find(params[:observation_id])
+        Observation.show_includes.find(params[:observation_id])
       fill_in_reference_for_suggestions(@params) if params[:naming].present?
       return unless @params.observation
 
@@ -36,7 +39,7 @@ module Observations
     def create
       @params = NamingParams.new(params[:naming])
       @observation = @params.observation =
-        Observation.naming_includes.find(params[:observation_id])
+        Observation.show_includes.find(params[:observation_id])
       fill_in_reference_for_suggestions(@params) if params[:naming].present?
       return unless @params.observation
 
@@ -47,7 +50,7 @@ module Observations
     def edit
       @params = NamingParams.new
       @observation = @params.observation =
-        Observation.naming_includes.find(params[:observation_id])
+        Observation.show_includes.find(params[:observation_id])
       naming = @params.naming = naming_from_params
       # N+1: What is this doing? Watch out for check_permission!
       return default_redirect(@observation) unless check_permission!(naming)
@@ -66,7 +69,7 @@ module Observations
     def update
       @params = NamingParams.new
       @observation = @params.observation =
-        Observation.naming_includes.find(params[:observation_id])
+        Observation.show_includes.find(params[:observation_id])
       naming = @params.naming = naming_from_params
       # N+1: What is this doing? Watch out for check_permission!
       return default_redirect(@observation) unless check_permission!(naming)
@@ -84,7 +87,7 @@ module Observations
         flash_notice(:runtime_destroy_naming_success.t(id: params[:id].to_s))
       end
       # Now, eager-load the obs without the deleted naming
-      @observation = Observation.naming_includes.find(params[:observation_id])
+      @observation = Observation.show_includes.find(params[:observation_id])
 
       respond_to do |format|
         format.turbo_stream do
