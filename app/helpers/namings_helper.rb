@@ -103,10 +103,10 @@ module NamingsHelper
 
     html_options = {
       method: :delete, title: name,
-      class: class_names(identifier, args[:class], "text-danger"),
+      class: class_names(identifier, "text-danger"),
       form: { data: { turbo: true, turbo_confirm: :are_you_sure.t } },
       data: { toggle: "tooltip", placement: "top", title: name }
-    }.deep_merge(args.except(:class, :back))
+    }
 
     button_to(path, html_options) do
       [content, icon].safe_join
