@@ -1,7 +1,7 @@
 The following is the beginning of a native MacOSX setup script.
 It is based on @mo-nathan's notes while getting his local Apple M1
 working under the Monterey (12.4) version of MacOS.
-It also includes some notes later added by @nimmmolo, and by
+It also includes some notes later added by @nimmolo, and by
 @JoeCohen when getting his local Apple Intel working under MacOS Ventura 13.6
 
 ### Install Xcode
