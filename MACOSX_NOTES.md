@@ -123,6 +123,8 @@ mysql -u root
 ```sql
 USE mysql;
 UPDATE user SET authentication_string=PASSWORD('root') WHERE User='root';
+# nimmo used this syntax, it is different in mysql 8:
+UPDATE USER SET AUTHENTICATION_STRING='root' WHERE user='root';
 FLUSH PRIVILEGES;
 exit;
 ```
