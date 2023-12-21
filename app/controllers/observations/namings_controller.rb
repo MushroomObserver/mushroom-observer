@@ -40,14 +40,14 @@ module Observations
 
     def edit
       @params = NamingParams.new
-      @naming = @params.naming = Naming.from_params(params)
+      naming = @params.naming = Naming.from_params(params)
       @params.observation =
-        load_for_show_observation_or_goto_index(@naming.observation_id)
-      unless check_permission!(@naming)
-        return default_redirect(@naming.observation)
+        load_for_show_observation_or_goto_index(naming.observation_id)
+      unless check_permission!(naming)
+        return default_redirect(naming.observation)
       end
 
-      @params.vote = @naming.owners_vote
+      @params.vote = naming.owners_vote
       @params.edit_init
 
       @observation = @params.observation
@@ -61,14 +61,14 @@ module Observations
 
     def update
       @params = NamingParams.new
-      @naming = @params.naming = Naming.from_params(params)
+      naming = @params.naming = Naming.from_params(params)
       @params.observation =
-        load_for_show_observation_or_goto_index(@naming.observation_id)
-      unless check_permission!(@naming)
-        return default_redirect(@naming.observation)
+        load_for_show_observation_or_goto_index(naming.observation_id)
+      unless check_permission!(naming)
+        return default_redirect(naming.observation)
       end
 
-      @params.vote = @naming.owners_vote
+      @params.vote = naming.owners_vote
 
       @observation = @params.observation
       @reasons = @params.reasons
@@ -108,7 +108,7 @@ module Observations
       when "new", "create"
         "naming_#{@observation.id}"
       when "edit", "update"
-        "naming_#{@observation.id}_#{@naming.id}"
+        "naming_#{@naming.id}_#{@observation.id}"
       end
     end
 
