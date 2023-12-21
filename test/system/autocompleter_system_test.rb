@@ -95,8 +95,8 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     scroll_to(find("#observation_namings"), align: :center)
     assert_link(text: /Propose/)
     click_link(text: /Propose/)
-    assert_selector("#modal_naming_#{obs.id}", wait: 9)
-    assert_selector("#naming_#{obs.id}_form", wait: 9)
+    assert_selector("#modal_obs_#{obs.id}_naming", wait: 9)
+    assert_selector("#obs_#{obs.id}_naming_form", wait: 9)
     find_field("naming_name").click
     browser.keyboard.type("Peltige")
     assert_selector(".auto_complete", wait: 3) # wait
@@ -105,8 +105,8 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_field("naming_name", with: "Peltigeraceae ")
     browser.keyboard.type(:tab)
     assert_no_selector(".auto_complete")
-    within("#naming_#{obs.id}_form") { click_commit }
-    assert_no_selector("#modal_naming_#{obs.id}")
+    within("#obs_#{obs.id}_naming_form") { click_commit }
+    assert_no_selector("#modal_obs_#{obs.id}_naming")
     within("#namings_table") { assert_text("Peltigeraceae", wait: 6) }
   end
 end
