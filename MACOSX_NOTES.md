@@ -123,10 +123,15 @@ mysql -u root
 ```sql
 USE mysql;
 UPDATE user SET authentication_string=PASSWORD('root') WHERE User='root';
-# nimmo used this syntax, it is different in mysql 8:
-UPDATE USER SET AUTHENTICATION_STRING='root' WHERE user='root';
 FLUSH PRIVILEGES;
 exit;
+# nimmo used this syntax, it is different in mysql 8; the above did not work:
+UPDATE USER SET AUTHENTICATION_STRING='null' WHERE user='root';
+FLUSH PRIVILEGES;
+exit;
+# Setting it to null above seems necessary. Then:
+mysql -u root
+ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY 'root';
 ```
 
 6. Stop Safe Mode MySQL Server:
@@ -218,6 +223,18 @@ or for bash:
 
 - download the snapshot from <http://images.mushroomobserver.org/checkpoint_stripped.gz>
 - copy (or move) the downloaded .gz file to the `mushroom-observer` directory.
+Then:
+
+Mac users have to uncomment/comment the relevant/irrelevant lines in `config/database.yml`:
+```yml
+shared:
+  adapter: mysql2
+  # Default (works for MacOS X), uncomment this line
+  socket: /tmp/mysql.sock 
+  # For Ubuntu/Debian, comment out this line
+  # socket: /var/run/mysqld/mysqld.sock
+```
+
 Then:
 
 ```sh
