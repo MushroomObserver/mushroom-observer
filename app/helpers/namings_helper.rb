@@ -75,7 +75,7 @@ module NamingsHelper
 
   def naming_name_html(naming)
     if check_permission(naming)
-      edit_link = modal_link_to("naming_#{naming.id}_#{naming.observation.id}",
+      edit_link = modal_link_to("naming_#{naming.observation.id}_#{naming.id}",
                                 *edit_naming_tab(naming))
       delete_link = destroy_button(target: naming, icon: :remove)
       proposer_links = tag.div(class: "text-nowrap") do

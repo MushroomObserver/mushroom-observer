@@ -314,6 +314,19 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     end
     assert_no_selector("#modal_naming_votes_#{nam.id}")
 
+    # Test the edit naming form link. 
+    within("#observation_namings") do
+      assert_link(text: /#{n_d.text_name}/)
+      assert_selector(".edit_naming_link_#{nam.id}")
+      find(:css, ".edit_naming_link_#{nam.id}").trigger("click")
+    end
+    assert_selector("#modal_naming_#{obs.id}_#{nam.id}", wait: 9)
+    assert_selector("#naming_#{obs.id}_form", wait: 9)
+    within("#modal_naming_#{obs.id}_#{nam.id}") do
+      find(:css, ".close").click
+    end
+    assert_no_selector("#modal_naming_#{obs.id}_#{nam.id}")
+
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)
       assert_selector(".destroy_naming_link_#{nam.id}")
