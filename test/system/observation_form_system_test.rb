@@ -64,7 +64,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   # Google seems to give accurate bounds to this place, but the
   # geometry.location_type of "Pasadena, California" is "APPROXIMATE".
   # Viewport and bounds are separate fields in the Geocoder response,
-  # and other places' bounds may be more precise. Viewport is padded.
+  # and other places' bounds may be more precise. Viewport may be padded.
   # On the right may be the accurate extents, they're hard to find.
   PASADENA_EXTENTS = {
     north: 34.251905,     # 34.1774839
@@ -318,6 +318,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # check default values of location form
     assert_field("location_display_name", with: "Pasadena, California, USA")
+    assert_button(text: :form_locations_find_on_map.t.as_displayed)
+    click_button(:form_locations_find_on_map.t.as_displayed)
     sleep(1)
     assert_equal(PASADENA_EXTENTS[:north].round(4),
                  find("#location_north").value.to_f.round(4))

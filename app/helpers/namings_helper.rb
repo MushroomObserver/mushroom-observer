@@ -79,7 +79,7 @@ module NamingsHelper
   # N+1: should not be checking permission here
   def naming_name_html(naming)
     if check_permission(naming)
-      edit_link = modal_link_to("naming_#{naming.id}_#{naming.observation_id}",
+      edit_link = modal_link_to("naming_#{naming.observation.id}_#{naming.id}",
                                 *edit_naming_tab(naming))
       delete_link = naming_destroy_button(naming)
       proposer_links = tag.div(class: "text-nowrap") do

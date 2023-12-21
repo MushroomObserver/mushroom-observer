@@ -51,12 +51,12 @@ module Observations
       @params = NamingParams.new
       @observation = @params.observation =
         Observation.show_includes.find(params[:observation_id])
-      naming = @params.naming = naming_from_params
+      @naming = @params.naming = naming_from_params
       # N+1: What is this doing? Watch out for check_permission!
-      return default_redirect(@observation) unless check_permission!(naming)
+      return default_redirect(@observation) unless check_permission!(@naming)
 
       # N+1: Does this look up votes again? It did
-      @params.vote = naming.owners_vote
+      @params.vote = @naming.owners_vote
       @params.edit_init
       @reasons = @params.reasons
 
@@ -70,12 +70,12 @@ module Observations
       @params = NamingParams.new
       @observation = @params.observation =
         Observation.show_includes.find(params[:observation_id])
-      naming = @params.naming = naming_from_params
+      @naming = @params.naming = naming_from_params
       # N+1: What is this doing? Watch out for check_permission!
-      return default_redirect(@observation) unless check_permission!(naming)
+      return default_redirect(@observation) unless check_permission!(@naming)
 
       # N+1: Does this look up votes again? It did
-      @params.vote = naming.owners_vote
+      @params.vote = @naming.owners_vote
       @reasons = @params.reasons
 
       update_post
@@ -125,7 +125,7 @@ module Observations
       when "new", "create"
         "naming_#{@observation.id}"
       when "edit", "update"
-        "naming_#{@naming.id}_#{@observation.id}"
+        "naming_#{@observation.id}_#{@naming.id}"
       end
     end
 
