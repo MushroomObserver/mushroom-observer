@@ -361,6 +361,10 @@ else
 fi
 
 rails lang:update
+# nimmo says: don't run the next two lines.
+#   The encrypted credentials.yml.enc file in the GitHub repo is correct
+#   and necessary. Rails credentials require a copy of the master.key
+#   in order to use it, available via email from any MO developer.
 rm config/credentials.yml.enc
 EDITOR='echo "test_secret: magic" >> ' rails credentials:edit
 ```
