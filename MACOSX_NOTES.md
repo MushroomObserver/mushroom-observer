@@ -203,6 +203,15 @@ Add rbenv to zsh/bash so that it loads every time you open a terminal
    rbenv global $RUBY_VERSION
 ```
 
+or for bash:
+
+```sh
+   echo 'if which rbenv > /dev/null; then eval "$(rbenv init - bash)"; fi' >> ~/.bash_profile
+   source ~/.bash_profile
+   rbenv install $RUBY_VERSION
+   rbenv global $RUBY_VERSION
+```
+
 ### Load an MO database snapshot.
 
 - download the snapshot from <http://images.mushroomobserver.org/checkpoint_stripped.gz>
