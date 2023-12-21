@@ -187,7 +187,7 @@ ruby-build $RUBY_VERSION ~/.rubies/ruby-$RUBY_VERSION
    chruby $RUBY_VERSION
 ```
 
-@mimmolo and @JoeCohen used rbenv.
+@nimmolo and @JoeCohen used rbenv.
 For rbenv run: (installing ruby-build maybe also needed above)
 
 ```sh
