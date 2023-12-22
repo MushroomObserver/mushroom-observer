@@ -678,10 +678,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   end
 
   resources :observations do
-    resources :namings, only: [:show, :new, :create, :edit, :update, :destroy],
-                        shallow: true, controller: "observations/namings" do
-      resources :votes, only: [:update, :show], as: "naming_vote",
-                        param: :naming_id,
+    resources :namings, only: [:index, :new, :create, :edit, :update, :destroy],
+                        controller: "observations/namings" do
+      resources :votes, only: [:create, :update, :index],
                         controller: "observations/namings/votes"
     end
 

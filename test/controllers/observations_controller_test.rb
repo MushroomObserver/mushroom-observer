@@ -826,24 +826,16 @@ class ObservationsControllerTest < FunctionalTestCase
     obs = observations(:unknown_with_no_naming)
     get(:show, params: { id: obs.id })
     assert_show_observation
-    # As of now, the vote form doesn't print unless there are namings - 11/22
-    # assert_form_action(controller: "/observations/namings/votes",
-    #                    action: :update, naming_id: obs.namings.first.id)
 
-    # Test it on obs with two namings (Rolf's and Mary's), but no one logged in.
+    # You must be logged in to get the show_obs naming table now.
+    # Test it on obs with two namings (Rolf's and Mary's), with owner logged in.
     obs = observations(:coprinus_comatus_obs)
+    rolf_nmg = obs.namings.first
     get(:show, params: { id: obs.id })
     assert_show_observation
     assert_form_action(controller: "observations/namings/votes",
-                       action: :update, naming_id: obs.namings.first.id)
-
-    # Test it on obs with two namings, with owner logged in.
-    login("rolf")
-    obs = observations(:coprinus_comatus_obs)
-    get(:show, params: { id: obs.id })
-    assert_show_observation
-    assert_form_action(controller: "observations/namings/votes",
-                       action: :update, naming_id: obs.namings.first.id)
+                       action: :update, naming_id: rolf_nmg.id,
+                       observation_id: obs.id, id: rolf_nmg.users_vote(rolf))
 
     # Test it on obs with two namings, with non-owner logged in.
     login("mary")
@@ -851,7 +843,8 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_show_observation
     assert_form_action(controller: "observations/namings/votes",
-                       action: :update, naming_id: obs.namings.first.id)
+                       action: :update, naming_id: rolf_nmg.id,
+                       observation_id: obs.id, id: rolf_nmg.users_vote(mary))
 
     # Test a naming owned by the observer but the observer has 'No Opinion'.
     # Ensure that rolf owns @obs_with_no_opinion.

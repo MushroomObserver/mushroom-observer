@@ -486,7 +486,7 @@ class Observation < AbstractModel
       where(ProjectSpeciesList[:project_id] == project.id).distinct
   }
   scope :show_includes, lambda {
-    strict_loading.includes(
+    includes(
       :collection_numbers,
       { comments: :user },
       { external_links: { external_site: { project: :user_group } } },
@@ -513,6 +513,16 @@ class Observation < AbstractModel
       { namings: :name },
       :projects,
       :thumb_image,
+      :user
+    )
+  }
+  scope :naming_includes, lambda {
+    includes(
+      :location, # ugh. worth it because of cache_content_filter_data
+      :name,
+      # Observation#find_matches complains synonym is not eager-loaded. TBD
+      { namings: [{ name: { synonym: :names } }, :user,
+                  { votes: [:observation, :user] }] },
       :user
     )
   }
@@ -982,6 +992,7 @@ class Observation < AbstractModel
   # Look up the corresponding instance in our namings association.  If we are
   # careful to keep all the operations within the tree of assocations of the
   # observations, we should never need to reload anything.
+  # `find` here does not hit the db
   def lookup_naming(naming)
     # Disable cop; test suite chokes when the following "raise"
     # is re-written in "exploded" style (the Rubocop default)
@@ -1130,7 +1141,7 @@ class Observation < AbstractModel
 
   # Admin tool that refreshes the vote cache for all observations with a vote.
   def self.refresh_vote_cache
-    Observation.all.find_each(&:calc_consensus)
+    Observation.find_each(&:calc_consensus)
   end
 
   ##############################################################################

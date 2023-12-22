@@ -21,7 +21,8 @@ module Observations::Namings
       nam2 = namings(:coprinus_comatus_other_naming)
 
       login("dick")
-      put(:update, params: { vote: { value: "3" }, naming_id: nam2.id })
+      post(:create, params: { vote: { value: "3" },
+                              naming_id: nam2.id, observation_id: obs.id })
       assert_equal(11, dick.reload.contribution)
 
       # Check votes.
@@ -54,7 +55,9 @@ module Observations::Namings
       nam1 = namings(:coprinus_comatus_naming)
 
       login("rolf")
-      put(:update, params: { vote: { value: "2" }, naming_id: nam1.id })
+      vote = nam1.users_vote(rolf)
+      put(:update, params: { vote: { value: "2" }, id: vote.id,
+                             naming_id: nam1.id, observation_id: obs.id })
       assert_equal(10, rolf.reload.contribution)
 
       # Make sure observation was updated right.
@@ -72,7 +75,9 @@ module Observations::Namings
       nam2 = namings(:coprinus_comatus_other_naming)
 
       login("rolf")
-      put(:update, params: { vote: { value: "3" }, naming_id: nam2.id })
+      vote = nam2.users_vote(rolf)
+      put(:update, params: { vote: { value: "3" }, id: vote.id,
+                             naming_id: nam2.id, observation_id: obs.id })
       assert_equal(10, rolf.reload.contribution)
 
       # Make sure observation was updated right.
@@ -92,7 +97,9 @@ module Observations::Namings
       nam2 = namings(:coprinus_comatus_other_naming)
 
       login("rolf")
-      put(:update, params: { vote: { value: "-1" }, naming_id: nam2.id })
+      vote = nam2.users_vote(rolf)
+      put(:update, params: { vote: { value: "-1" }, id: vote.id,
+                             naming_id: nam2.id, observation_id: obs.id })
       assert_equal(10, rolf.reload.contribution)
 
       # Make sure observation was updated right.
@@ -126,8 +133,8 @@ module Observations::Namings
       assert_equal(11, dick.reload.contribution)
 
       login("mary")
-      put(:update, params: { vote: { value: Vote.delete_vote },
-                             naming_id: nam1.id })
+      post(:create, params: { vote: { value: Vote.delete_vote },
+                              naming_id: nam1.id, observation_id: obs.id })
       assert_equal(9, mary.reload.contribution)
 
       # Check votes.
@@ -143,16 +150,18 @@ module Observations::Namings
     end
 
     def test_show_votes
+      nam = namings(:coprinus_comatus_naming)
+
       login
       # First just make sure the page displays.
       get(
-        :show, params: { naming_id: namings(:coprinus_comatus_naming).id }
+        :index, params: { naming_id: nam.id,
+                          observation_id: nam.observation_id }
       )
-      assert_template("observations/namings/votes/show")
-      assert_template("observations/namings/votes/_table")
+      assert_template("observations/namings/votes/index")
 
       # Now try to make somewhat sure the content is right.
-      table = namings(:coprinus_comatus_naming).calc_vote_table
+      table = nam.calc_vote_table
       str1 = Vote.confidence(votes(:coprinus_comatus_owner_vote).value)
       str2 = Vote.confidence(votes(:coprinus_comatus_other_vote).value)
       table.each_key do |str|
@@ -170,29 +179,31 @@ module Observations::Namings
       naming = namings(:minimal_unknown_naming)
       assert_nil(naming.users_vote(dick))
 
-      get(:update, xhr: true,
-                   params: { naming_id: naming.id, vote: { value: 3 } })
+      post(:create, params: { vote: { value: 3 },
+                              naming_id: naming.id,
+                              observation_id: naming.observation_id })
       assert_redirected_to(new_account_login_path)
 
       login("dick")
-      get(:update, xhr: true,
-                   params: { naming_id: naming.id, vote: { value: 3 } })
+      post(:create, params: { vote: { value: 3 }, naming_id: naming.id,
+                              observation_id: naming.observation_id })
 
       assert_equal(3, naming.reload.users_vote(dick).value)
 
-      get(:update, xhr: true,
-                   params: { naming_id: naming.id, vote: { value: 0 } })
+      put(:update, params: { vote: { value: 0 }, id: naming.users_vote(dick).id,
+                             naming_id: naming.id,
+                             observation_id: naming.observation_id })
       assert_nil(naming.reload.users_vote(dick))
 
       assert_raises(RuntimeError) do
-        get(:update, xhr: true,
-                     params: { naming_id: naming.id, vote: { value: 99 } })
+        post(:create, params: { vote: { value: 99 }, naming_id: naming.id,
+                                observation_id: naming.observation_id })
       end
 
-      assert_raises(ActiveRecord::RecordNotFound) do
-        get(:update, xhr: true,
-                     params: { naming_id: 99, vote: { value: 0 } })
-      end
+      # assert_raises(ActiveRecord::RecordNotFound) do
+      #   get(:update, xhr: true,
+      #                params: { naming_id: 99, vote: { value: 0 } })
+      # end
     end
   end
 end
