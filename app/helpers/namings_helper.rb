@@ -65,7 +65,7 @@ module NamingsHelper
                           context: "namings_table",
                           btn_class: "btn-primary my-3")
     modal_link_to(
-      "naming_#{obs_id}",
+      "obs_#{obs_id}_naming",
       *new_naming_tab(obs_id,
                       text: text, btn_class: btn_class, context: context)
     )
@@ -75,8 +75,10 @@ module NamingsHelper
 
   def naming_name_html(naming)
     if check_permission(naming)
-      edit_link = modal_link_to("naming_#{naming.observation.id}_#{naming.id}",
-                                *edit_naming_tab(naming))
+      edit_link = modal_link_to(
+        "obs_#{naming.observation_id}_naming_#{naming.id}",
+        *edit_naming_tab(naming)
+      )
       delete_link = destroy_button(target: naming, icon: :remove)
       proposer_links = tag.div(class: "text-nowrap") do
         ["[", edit_link, "|", delete_link, "]"].safe_join(" ")

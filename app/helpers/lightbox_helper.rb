@@ -59,7 +59,8 @@ module LightboxHelper
 
   # This is different from show_obs_title, it's more like the matrix_box title
   def caption_obs_title(obs:)
-    tag.h4(class: "obs-what", id: "observation_what_#{obs.id}") do
+    tag.h4(class: "obs-what", id: "observation_what_#{obs.id}",
+           data: { controller: "section-update" }) do
       [
         link_to(obs.id, add_query_param(obs.show_link_args),
                 class: "btn btn-primary mr-3",

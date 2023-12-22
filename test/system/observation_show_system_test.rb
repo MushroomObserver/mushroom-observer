@@ -232,9 +232,9 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       click_link(text: /Propose/)
     end
 
-    assert_selector("#modal_naming_#{obs.id}", wait: 9)
-    assert_selector("#naming_#{obs.id}_form", wait: 9)
-    within("#naming_#{obs.id}_form") do
+    assert_selector("#modal_obs_#{obs.id}_naming", wait: 9)
+    assert_selector("#obs_#{obs.id}_naming_form", wait: 9)
+    within("#obs_#{obs.id}_naming_form") do
       assert_field("naming_name", wait: 4)
       # fill_in("naming_name", with: nd1.text_name)
       # Using autocomplete to slow things down here, otherwise button blocked.
@@ -247,10 +247,10 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       click_commit
     end
 
-    assert_selector("#modal_naming_#{obs.id}_flash", text: /Missing/)
+    assert_selector("#modal_obs_#{obs.id}_naming_flash", text: /Missing/)
     assert_selector("#name_messages", text: /deprecated/)
 
-    within("#naming_#{obs.id}_form") do
+    within("#obs_#{obs.id}_naming_form") do
       fill_in("naming_name", with: "")
       # fill_in("naming_name", with: n_d.text_name)
       # Using autocomplete to slow things down here, otherwise session lost.
@@ -264,7 +264,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       select("Doubtful", from: "naming_vote_value")
       click_commit
     end
-    assert_no_selector("#modal_naming_#{obs.id}", wait: 6)
+    assert_no_selector("#modal_obs_#{obs.id}_naming", wait: 6)
 
     # Test problems have occurred here: Something in
     # Observations::NamingsController#create seems to execute before the
@@ -320,12 +320,12 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       assert_selector(".edit_naming_link_#{nam.id}")
       find(:css, ".edit_naming_link_#{nam.id}").trigger("click")
     end
-    assert_selector("#modal_naming_#{obs.id}_#{nam.id}", wait: 9)
-    assert_selector("#naming_#{obs.id}_form", wait: 9)
-    within("#modal_naming_#{obs.id}_#{nam.id}") do
+    assert_selector("#modal_obs_#{obs.id}_naming_#{nam.id}", wait: 9)
+    assert_selector("#obs_#{obs.id}_naming_#{nam.id}_form", wait: 9)
+    within("#modal_obs_#{obs.id}_naming_#{nam.id}") do
       find(:css, ".close").click
     end
-    assert_no_selector("#modal_naming_#{obs.id}_#{nam.id}")
+    assert_no_selector("#modal_obs_#{obs.id}_naming_#{nam.id}")
 
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)

@@ -106,9 +106,9 @@ module Observations
     def modal_identifier
       case action_name
       when "new", "create"
-        "naming_#{@observation.id}"
+        "obs_#{@observation.id}_naming"
       when "edit", "update"
-        "naming_#{@observation.id}_#{@naming.id}"
+        "obs_#{@observation.id}_naming_#{@naming.id}"
       end
     end
 
