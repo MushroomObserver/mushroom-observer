@@ -13,12 +13,15 @@ module Observations
 
     def new
       @params = NamingParams.new(params[:naming])
-      # FIXME: All CRUD actions: Query scope depends on the format of response.
-      # The turbo response only needs the naming includes, but the html
-      # response needs the whole `show_includes` shebang.
+      fill_in_reference_for_suggestions(@params) if params[:naming].present?
+      # N+1: All CRUD actions:
+      # The proper `includes` scope here may depend on the response format.
+      # The turbo response only needs `naming_includes`, but the html response
+      # for the form may need the whole `show_includes` shebang. (Check!)
+      # Both need to have the @observation ivar.
+      # 
       @observation = @params.observation =
         Observation.show_includes.find(params[:observation_id])
-      fill_in_reference_for_suggestions(@params) if params[:naming].present?
       return unless @params.observation
 
       @reasons = @params.reasons
@@ -28,11 +31,14 @@ module Observations
       end
     end
 
+    # Note that the `respond_to_successful_` actions do reload the associations
+    # after the save/update. Maybe naming_includes are enough here?
+    #
     def create
       @params = NamingParams.new(params[:naming])
+      fill_in_reference_for_suggestions(@params) if params[:naming].present?
       @observation = @params.observation =
         Observation.show_includes.find(params[:observation_id])
-      fill_in_reference_for_suggestions(@params) if params[:naming].present?
       return unless @params.observation
 
       @reasons = @params.reasons
@@ -149,6 +155,7 @@ module Observations
 
     def respond_to_successful_create
       # @observation.reload doesn't do the includes
+      # This is a reload of all the naming table associations, after save
       obs = Observation.naming_includes.find(@observation.id)
 
       respond_to do |format|
@@ -254,6 +261,7 @@ module Observations
 
     def respond_to_successful_update
       # @observation.reload doesn't do the includes
+      # This is a reload of all the naming table associations, after update
       obs = Observation.naming_includes.find(@observation.id)
 
       respond_to do |format|
