@@ -992,6 +992,7 @@ class Observation < AbstractModel
   # Look up the corresponding instance in our namings association.  If we are
   # careful to keep all the operations within the tree of assocations of the
   # observations, we should never need to reload anything.
+  # `find` here does not hit the db
   def lookup_naming(naming)
     # Disable cop; test suite chokes when the following "raise"
     # is re-written in "exploded" style (the Rubocop default)

@@ -566,8 +566,7 @@ module Observations
 
       login("rolf")
       get(:destroy,
-          params: { observation_id: nam1.observation_id, id: nam1.id }
-      )
+          params: { observation_id: nam1.observation_id, id: nam1.id })
 
       # Make sure naming and associated vote and reason were actually destroyed.
       assert_raises(ActiveRecord::RecordNotFound) do
@@ -606,8 +605,7 @@ module Observations
       # Have Rolf try to destroy it.
       login("rolf")
       get(:destroy,
-          params: { observation_id: nam1.observation_id, id: nam1.id }
-      )
+          params: { observation_id: nam1.observation_id, id: nam1.id })
 
       # Make sure naming and associated vote and reason are still there.
       assert(Naming.find(old_naming_id))

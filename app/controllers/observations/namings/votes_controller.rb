@@ -51,38 +51,27 @@ module Observations::Namings
     #   updates the lightbox and matrix_box
 
     # Split this into create and update, because the caller should know
-    # if this user has cast a vote on this naming already or not. Adjust tests!
+    # if this user has cast a vote on this naming already or not. Adjust tests.
     def create
-      pass_query_params
-      observation = load_observation_naming_includes
-      @naming = observation.namings.find(params[:naming_id])
-      value_str = param_lookup([:vote, :value])
-      value = Vote.validate_value(value_str)
-      raise("Bad value.") unless value
-
-      # TODO: Take the whole vote object and send it to change vote!
-
-      # FIXME: how about naming.change_vote and
-      # observation.calc_consensus returning obs.reload
-      observation.change_vote(@naming, value, @user) # 2nd time
-      @observation = load_observation_naming_includes # 3rd time
-      respond_to_new_votes
+      create_or_update_vote
     end
 
     def update
+      create_or_update_vote
+    end
+
+    def create_or_update_vote
       pass_query_params
-      observation = load_observation_naming_includes
+      observation = load_observation_naming_includes # 1st load
       @naming = observation.namings.find(params[:naming_id])
       value_str = param_lookup([:vote, :value])
       value = Vote.validate_value(value_str)
       raise("Bad value.") unless value
 
-      # TODO: Take the whole vote object and send it to change vote!
-
-      # FIXME: how about naming.change_vote and
-      # observation.calc_consensus returning obs.reload
-      observation.change_vote(@naming, value, @user) # 2nd time
-      @observation = load_observation_naming_includes # 3rd time
+      # N+1: Take the whole vote object and send it to change vote?
+      # Or how about returning obs.reload from observation.change_vote
+      observation.change_vote(@naming, value, @user) # 2nd load (obs.reload)
+      @observation = load_observation_naming_includes # 3rd load
       respond_to_new_votes
     end
 

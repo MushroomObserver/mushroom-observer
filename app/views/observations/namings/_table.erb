@@ -1,6 +1,6 @@
 <%
-# TODO: Put this in the index to reduce partials
-# called from observations/show/namings
+# Maybe put this in the index to reduce partials?
+# But it's also called from observations/show/namings
 # Just the "table" of current namings, with headers
 namings = obs.namings.sort_by(&:created_at)
 any_names = obs.namings&.length&.positive?
