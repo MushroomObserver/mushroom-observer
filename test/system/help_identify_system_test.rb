@@ -27,7 +27,7 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
     within(".lg-sub-html") do
       click_on("Propose a Name")
     end
-    assert_selector("#modal_obs_#{obs.id}_naming")
+    assert_selector("#modal_obs_#{obs.id}_naming", wait: 9)
     assert_selector("#obs_#{obs.id}_naming_form")
 
     ncc = names(:coprinus_comatus)
