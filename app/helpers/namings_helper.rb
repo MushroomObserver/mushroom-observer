@@ -99,7 +99,7 @@ module NamingsHelper
   def naming_destroy_button(naming)
     name = :DESTROY.t
     path = observation_naming_path(naming.id)
-    identifier = "destroy_observation_naming_link_#{naming.id}"
+    identifier = "destroy_naming_link_#{naming.id}"
     icon = link_icon(:remove)
     content = tag.span(name, class: "sr-only")
 
