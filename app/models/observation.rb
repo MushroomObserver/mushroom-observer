@@ -1082,7 +1082,7 @@ class Observation < AbstractModel
   # true if something was changed.
   def change_vote(naming, value, user = User.current)
     result = false
-    # naming = lookup_naming(naming)
+    naming = lookup_naming(naming)
     vote = naming.users_vote(user)
     value = value.to_f
 
