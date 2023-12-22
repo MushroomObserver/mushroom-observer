@@ -2,8 +2,8 @@
 
 class Observation
   class ConsensusCalculator
-    def initialize(namings)
-      @namings     = namings.includes(:name, votes: [:observation, :user])
+    def initialize(observation)
+      @namings     = observation.namings
       @name_votes  = {}  # Strongest vote for a given name for a user.
       @taxon_votes = {}  # Strongest vote for any names in a group of
       #                    synonyms for a given user.

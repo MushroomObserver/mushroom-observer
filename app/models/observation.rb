@@ -1071,7 +1071,7 @@ class Observation < AbstractModel
   # true if something was changed.
   def change_vote(naming, value, user = User.current)
     result = false
-    naming = lookup_naming(naming)
+    # naming = lookup_naming(naming)
     vote = naming.users_vote(user)
     value = value.to_f
 
@@ -1117,7 +1117,7 @@ class Observation < AbstractModel
 
   def calc_consensus
     reload
-    calculator = Observation::ConsensusCalculator.new(namings)
+    calculator = Observation::ConsensusCalculator.new(self)
     best, best_val = calculator.calc
     old = name
     if name != best || vote_cache != best_val
@@ -1130,7 +1130,7 @@ class Observation < AbstractModel
 
   # Admin tool that refreshes the vote cache for all observations with a vote.
   def self.refresh_vote_cache
-    Observation.all.find_each(&:calc_consensus)
+    Observation.find_each(&:calc_consensus)
   end
 
   ##############################################################################
