@@ -290,8 +290,8 @@ class Naming < AbstractModel
   end
 
   # Retrieve a given User's vote for this naming.
+  # N+1: find_each. Also, we should already have the include here.
   def users_vote(user)
-    # N+1: find_each. Also, we should already have the include here.
     # votes.includes(:user).find_each { |v| return v if v.user_id == user.id }
     votes.select { |v| return v if v.user_id == user.id }
     nil
@@ -304,8 +304,8 @@ class Naming < AbstractModel
 
   # It is rare, but a single user can end up with multiple votes, for example,
   # if two names are merged and a user had voted for both names.
+  # N+1: Calling Vote.where is a guaranteed new query. Use the votes we have
   def owners_vote
-    # N+1: Vote.where is a guaranteed new query.
     # Vote.where(naming_id: id, user_id: user_id).order("value desc").first
     votes.select { |v| v.user_id == user_id }.sort_by! { |v| v[:value] }.last
   end
@@ -361,6 +361,7 @@ class Naming < AbstractModel
   #     votes  = record[:votes]  # List of actual votes.
   #   end
   #
+  # n+1: ? it's a Vote table lookup, but only executed on VotesController#index
   def calc_vote_table
     # Initialize table.
     table = {}
