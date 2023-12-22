@@ -50,6 +50,7 @@
 #  enforce_default_reasons:: Make sure default reasons are set in if none given.
 #
 ################################################################################
+# rubocop:disable Metrics/ClassLength
 class Naming < AbstractModel
   belongs_to :observation
   belongs_to :name
@@ -84,14 +85,15 @@ class Naming < AbstractModel
     naming
   end
 
-  def self.from_params(params)
-    if params[:id].blank?
-      observation = Observation.find(params[:observation_id])
-      observation.consensus_naming
-    else
-      find(params[:id].to_s)
-    end
-  end
+  # N+1: This method does unnecessary lookups. Delete
+  # def self.from_params(params)
+  #   if params[:id].blank?
+  #     observation = Observation.find(params[:observation_id])
+  #     observation.consensus_naming
+  #   else
+  #     find(params[:id].to_s)
+  #   end
+  # end
 
   # Update naming and log changes.
   def update_object(new_name, log)
@@ -261,12 +263,6 @@ class Naming < AbstractModel
     result
   end
 
-  # It is rare, but a single user can end up with multiple votes, for example,
-  # if two names are merged and a user had voted for both names.
-  def owners_vote
-    Vote.where(naming_id: id, user_id: user_id).order("value desc").first
-  end
-
   ##############################################################################
   #
   #  :section: Voting
@@ -295,13 +291,23 @@ class Naming < AbstractModel
 
   # Retrieve a given User's vote for this naming.
   def users_vote(user)
-    votes.includes(:user).find_each { |v| return v if v.user_id == user.id }
+    # N+1: find_each. Also, we should already have the include here.
+    # votes.includes(:user).find_each { |v| return v if v.user_id == user.id }
+    votes.select { |v| return v if v.user_id == user.id }
     nil
   end
 
   # Is this Naming the given User's favorite Naming for this Observation?
   def users_favorite?(user)
     votes.any? { |v| v.user_id == user.id && v.favorite }
+  end
+
+  # It is rare, but a single user can end up with multiple votes, for example,
+  # if two names are merged and a user had voted for both names.
+  def owners_vote
+    # N+1: .where is a guaranteed new query.
+    # Vote.where(naming_id: id, user_id: user_id).order("value desc").first
+    votes.select { |vote| vote.user_id == user_id }.order(value: :desc).first
   end
 
   # Change User's Vote on this Naming.  (Uses Observation#change_vote.)
@@ -540,3 +546,4 @@ class Naming < AbstractModel
                                                           !User.current
   end
 end
+# rubocop:enable Metrics/ClassLength
