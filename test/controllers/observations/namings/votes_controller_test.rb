@@ -75,7 +75,9 @@ module Observations::Namings
       nam2 = namings(:coprinus_comatus_other_naming)
 
       login("rolf")
-      put(:update, params: { vote: { value: "3" }, naming_id: nam2.id })
+      vote = nam2.users_vote(rolf)
+      put(:update, params: { vote: { value: "3" }, id: vote.id,
+                             naming_id: nam2.id, observation_id: obs.id })
       assert_equal(10, rolf.reload.contribution)
 
       # Make sure observation was updated right.
