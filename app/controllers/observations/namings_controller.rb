@@ -72,7 +72,7 @@ module Observations
 
       @observation = @params.observation
       @reasons = @params.reasons
-      edit_post
+      update_post
     end
 
     def destroy
@@ -138,7 +138,7 @@ module Observations
     end
 
     def respond_to_successful_create
-      obs = @observation.reload
+      obs = Observation.naming_includes.find(@observation.id)
 
       respond_to do |format|
         format.turbo_stream do
@@ -228,7 +228,7 @@ module Observations
       @params.resolve_name(given_name, params[:approved_name], chosen_name)
     end
 
-    def edit_post
+    def update_post
       if validate_name &&
          (@params.name_not_changing? ||
           unproposed_name(:runtime_edit_naming_someone_else) &&
@@ -242,7 +242,7 @@ module Observations
     end
 
     def respond_to_successful_update
-      obs = @observation.reload
+      obs = Observation.naming_includes.find(@observation.id)
 
       respond_to do |format|
         format.html { default_redirect(@params.observation) }

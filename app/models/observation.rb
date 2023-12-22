@@ -516,6 +516,16 @@ class Observation < AbstractModel
       :user
     )
   }
+  scope :naming_includes, lambda {
+    includes(
+      :location, # ugh. worth it because of cache_content_filter_data
+      :name,
+      # Observation#find_matches complains synonym is not eager-loaded. TBD
+      { namings: [{ name: { synonym: :names } }, :user,
+                  { votes: [:observation, :user] }] },
+      :user
+    )
+  }
 
   def location?
     false
@@ -1116,11 +1126,12 @@ class Observation < AbstractModel
   end
 
   def calc_consensus
-    reload
-    calculator = Observation::ConsensusCalculator.new(self)
+    # reload # no we need all the includes here
+    obs_reloaded = Observation.naming_includes.find_by(id: id)
+    calculator = Observation::ConsensusCalculator.new(obs_reloaded)
     best, best_val = calculator.calc
-    old = name
-    if name != best || vote_cache != best_val
+    old = obs_reloaded.name
+    if obs_reloaded.name != best || vote_cache != best_val
       self.name = best
       self.vote_cache = best_val
       save
