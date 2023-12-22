@@ -6,7 +6,7 @@ module Observations
     before_action :login_required
     before_action :pass_query_params
 
-    def show
+    def index
       @observation = find_or_goto_index(Observation, params[:id])
     end
 

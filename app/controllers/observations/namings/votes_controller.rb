@@ -4,13 +4,13 @@ module Observations::Namings
   class VotesController < ApplicationController
     before_action :login_required # except: [:show]
 
-    # Show breakdown of votes for a given naming.
+    # Index breakdown of votes for a given naming.
     # Linked from: observations/show
     # Displayed on show obs via popup for JS users.
     # Has its own route for non-js.
     # Inputs: params[:id] (naming)
     # Outputs: @naming
-    def show
+    def index
       pass_query_params
       @naming = find_or_goto_index(Naming, params[:naming_id].to_s)
       respond_to do |format|
