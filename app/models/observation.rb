@@ -486,7 +486,7 @@ class Observation < AbstractModel
       where(ProjectSpeciesList[:project_id] == project.id).distinct
   }
   scope :show_includes, lambda {
-    strict_loading.includes(
+    includes(
       :collection_numbers,
       { comments: :user },
       { external_links: { external_site: { project: :user_group } } },
@@ -1140,7 +1140,7 @@ class Observation < AbstractModel
 
   # Admin tool that refreshes the vote cache for all observations with a vote.
   def self.refresh_vote_cache
-    Observation.all.find_each(&:calc_consensus)
+    Observation.find_each(&:calc_consensus)
   end
 
   ##############################################################################
