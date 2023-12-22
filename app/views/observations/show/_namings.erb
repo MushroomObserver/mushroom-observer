@@ -2,11 +2,12 @@
 @query ||= nil
 %>
 
-<!--OBSERVATION_NAMINGS / TABLE LAZY LOADED AND REFRESHED BY TURBO -->
+<!--OBSERVATION_NAMINGS / TABLE REFRESHED BY TURBO -->
 <%= tag.turbo_frame(
   id: "observation_namings",
-  src: observation_namings_path(observation_id: obs.id),
-  loading: "lazy"
+  # src: observation_namings_path(observation_id: obs.id),
+  # loading: "lazy"
+  # for lazy loading, don't put anything in the block.
 ) do
 
   render(partial: "observations/namings/table",
