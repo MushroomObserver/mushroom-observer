@@ -516,6 +516,16 @@ class Observation < AbstractModel
       :user
     )
   }
+  scope :naming_includes, lambda {
+    includes(
+      :location, # ugh. worth it because of cache_content_filter_data
+      :name,
+      # Observation#find_matches complains synonym is not eager-loaded. TBD
+      { namings: [{ name: { synonym: :names } }, :user,
+                  { votes: [:observation, :user] }] },
+      :user
+    )
+  }
 
   def location?
     false
