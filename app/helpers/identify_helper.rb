@@ -11,15 +11,17 @@ module IdentifyHelper
   # state on show, and cost an extra db lookup. Not worth it, IMO.
   # - Nimmo 20230215
   def mark_as_reviewed_toggle(id, selector = "caption_reviewed",
-                              label_class = "", reviewed = 0)
-    turbo_frame_tag("#{selector}_toggle_#{id}") do
+                              label_class = "", reviewed = nil)
+    reviewed_text = reviewed ? :marked_as_reviewed.l : :mark_as_reviewed.l
+
+    tag.div(class: "d-inline", id: "#{selector}_toggle_#{id}") do
       form_with(url: observation_view_path(id: id),
                 class: "d-inline-block", method: :put,
                 data: { turbo: true }) do |f|
         tag.div(class: "d-inline form-group form-inline") do
           f.label("#{selector}_#{id}",
                   class: "caption-reviewed-link #{label_class}") do
-            concat(reviewed ? :marked_as_reviewed.t : :mark_as_reviewed.t)
+            concat(reviewed_text)
             concat(
               f.check_box(
                 :reviewed,

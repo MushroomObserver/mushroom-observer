@@ -1,22 +1,25 @@
 <%
 # Fields must be separate because they're included in the obs form too.
+# HTML ID's may seem overly precise, but there may be more than one of
+# these forms open on a page if modal. IDs must be unique. 
 case action_name
 when "new", "create"
   button_name = :CREATE.l
   method = :post
+  id = "obs_#{@observation.id}_naming_form"
   url = observation_namings_path(observation_id: @observation.id,
                                  approved_name: @params.what,
                                  q: get_query_param)
 when "edit", "update"
   button_name = :SAVE_EDITS.l
   method = :patch
-  url = observation_naming_path(id: @params.naming.id,
+  id = "obs_#{@observation.id}_naming_#{@naming.id}_form"
+  url = observation_naming_path(id: @naming.id,
                                 approved_name: @params.what,
                                 q: get_query_param)
 end
 
-form_args = { model: @naming, url: url, method: method,
-              id: "naming_#{@observation.id}_form" }
+form_args = { model: @naming, url: url, method: method, id: id }
 if local_assigns[:local] == true
   form_args = form_args.merge({ local: true })
 else
