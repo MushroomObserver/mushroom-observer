@@ -1762,7 +1762,7 @@ class ApplicationController < ActionController::Base
   helper_method :calc_layout_params
 
   def permission?(obj, error_message)
-    result = (in_admin_mode? || obj.can_edit?(@user))
+    result = in_admin_mode? || obj.can_edit?(@user)
     flash_error(error_message) unless result
     result
   end
