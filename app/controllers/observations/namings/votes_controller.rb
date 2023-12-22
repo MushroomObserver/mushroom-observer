@@ -50,16 +50,47 @@ module Observations::Namings
     # when matrix_box (help_identify)
     #   updates the lightbox and matrix_box
 
-    def update
+    # Split this into create and update, because the caller should know
+    # if this user has cast a vote on this naming already or not. Adjust tests!
+    def create
       pass_query_params
-      @naming = Naming.find(params[:naming_id].to_s)
-      observation = @naming.observation
+      observation = load_observation_naming_includes
+      @naming = observation.namings.find(params[:naming_id])
       value_str = param_lookup([:vote, :value])
       value = Vote.validate_value(value_str)
       raise("Bad value.") unless value
 
-      observation.change_vote(@naming, value, @user)
-      @observation = observation.reload
+      # TODO: Take the whole vote object and send it to change vote!
+
+      # FIXME: how about naming.change_vote and
+      # observation.calc_consensus returning obs.reload
+      observation.change_vote(@naming, value, @user) # 2nd time
+      @observation = load_observation_naming_includes # 3rd time
+      respond_to_new_votes
+    end
+
+    def update
+      pass_query_params
+      observation = load_observation_naming_includes
+      @naming = observation.namings.find(params[:naming_id])
+      value_str = param_lookup([:vote, :value])
+      value = Vote.validate_value(value_str)
+      raise("Bad value.") unless value
+
+      # TODO: Take the whole vote object and send it to change vote!
+
+      # FIXME: how about naming.change_vote and
+      # observation.calc_consensus returning obs.reload
+      observation.change_vote(@naming, value, @user) # 2nd time
+      @observation = load_observation_naming_includes # 3rd time
+      respond_to_new_votes
+    end
+
+    def load_observation_naming_includes
+      Observation.naming_includes.find(params[:observation_id])
+    end
+
+    def respond_to_new_votes
       respond_to do |format|
         format.turbo_stream do
           case params[:context]
@@ -77,16 +108,5 @@ module Observations::Namings
         end
       end
     end
-
-    # This is very expensive, and not called anywhere. Putting it in storage
-    # Refresh vote cache for all observations in the database.
-    # def refresh_vote_cache
-    #   return unless in_admin_mode?
-
-    #   # Naming.refresh_vote_cache
-    #   Observation.refresh_vote_cache
-    #   flash_notice(:refresh_vote_cache.t)
-    #   redirect_with_query(rss_logs_path(observation.id))
-    # end
   end
 end

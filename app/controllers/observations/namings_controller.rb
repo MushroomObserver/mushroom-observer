@@ -6,20 +6,22 @@ module Observations
     before_action :login_required
     before_action :pass_query_params
 
+    # The route for the namings table, an index of this obs' namings
     def index
       @observation = find_or_goto_index(Observation, params[:id])
     end
 
     def new
       @params = NamingParams.new(params[:naming])
-      @params.observation =
-        load_for_show_observation_or_goto_index(params[:observation_id])
+      # FIXME: All CRUD actions: Query scope depends on the format of response.
+      # The turbo response only needs the naming includes, but the html
+      # response needs the whole `show_includes` shebang.
+      @observation = @params.observation =
+        Observation.show_includes.find(params[:observation_id])
       fill_in_reference_for_suggestions(@params) if params[:naming].present?
       return unless @params.observation
 
-      @observation = @params.observation
       @reasons = @params.reasons
-
       respond_to do |format|
         format.turbo_stream { render_modal_naming_form }
         format.html
@@ -28,29 +30,27 @@ module Observations
 
     def create
       @params = NamingParams.new(params[:naming])
-      @params.observation =
-        load_for_show_observation_or_goto_index(params[:observation_id])
+      @observation = @params.observation =
+        Observation.show_includes.find(params[:observation_id])
       fill_in_reference_for_suggestions(@params) if params[:naming].present?
       return unless @params.observation
 
-      @observation = @params.observation
       @reasons = @params.reasons
       create_post
     end
 
     def edit
       @params = NamingParams.new
-      @naming = @params.naming = Naming.from_params(params)
-      @params.observation =
-        load_for_show_observation_or_goto_index(@naming.observation_id)
-      unless check_permission!(@naming)
-        return default_redirect(@naming.observation)
-      end
+      @observation = @params.observation =
+        Observation.show_includes.find(params[:observation_id])
+      @naming = @params.naming = naming_from_params
+      # N+1: What is this doing? Watch out for check_permission!
+      return default_redirect(@observation) unless check_permission!(@naming)
 
+      # N+1: Does this look up votes again? It did
       @params.vote = @naming.owners_vote
       @params.edit_init
 
-      @observation = @params.observation
       @reasons = @params.reasons
 
       respond_to do |format|
@@ -61,18 +61,17 @@ module Observations
 
     def update
       @params = NamingParams.new
-      @naming = @params.naming = Naming.from_params(params)
-      @params.observation =
-        load_for_show_observation_or_goto_index(@naming.observation_id)
-      unless check_permission!(@naming)
-        return default_redirect(@naming.observation)
-      end
+      @observation = @params.observation =
+        Observation.show_includes.find(params[:observation_id])
+      @naming = @params.naming = naming_from_params
+      # N+1: What is this doing? Watch out for check_permission!
+      return default_redirect(@observation) unless check_permission!(@naming)
 
+      # N+1: Does this look up votes again? It did
       @params.vote = @naming.owners_vote
 
-      @observation = @params.observation
       @reasons = @params.reasons
-      edit_post
+      update_post
     end
 
     def destroy
@@ -80,17 +79,28 @@ module Observations
       if destroy_if_we_can(naming)
         flash_notice(:runtime_destroy_naming_success.t(id: params[:id].to_s))
       end
+      # Now, eager-load the obs without the deleted naming
+      @observation = Observation.show_includes.find(params[:observation_id])
+
       respond_to do |format|
         format.turbo_stream do
-          @observation = naming.observation
           render(partial: "observations/namings/update_observation",
                  locals: { obs: @observation }) and return
         end
-        format.html { default_redirect(naming.observation) }
+        format.html { default_redirect(@observation) }
       end
     end
 
     private
+
+    # There seems to be a chance the id will be blank, although i believe not.
+    def naming_from_params
+      if params[:id].blank?
+        @observation.consensus_naming
+      else
+        @observation.namings.find(params[:id])
+      end
+    end
 
     def render_modal_naming_form
       render(partial: "shared/modal_form",
@@ -138,7 +148,8 @@ module Observations
     end
 
     def respond_to_successful_create
-      obs = @observation.reload
+      # @observation.reload doesn't do the includes
+      obs = Observation.naming_includes.find(@observation.id)
 
       respond_to do |format|
         format.turbo_stream do
@@ -228,7 +239,7 @@ module Observations
       @params.resolve_name(given_name, params[:approved_name], chosen_name)
     end
 
-    def edit_post
+    def update_post
       if validate_name &&
          (@params.name_not_changing? ||
           unproposed_name(:runtime_edit_naming_someone_else) &&
@@ -242,14 +253,15 @@ module Observations
     end
 
     def respond_to_successful_update
-      obs = @observation.reload
+      # @observation.reload doesn't do the includes
+      obs = Observation.naming_includes.find(@observation.id)
 
       respond_to do |format|
-        format.html { default_redirect(@params.observation) }
         format.turbo_stream do
           render(partial: "observations/namings/update_observation",
                  locals: { obs: obs }) and return
         end
+        format.html { default_redirect(@params.observation) }
       end
     end
 
