@@ -14,7 +14,8 @@ when "edit", "update"
   button_name = :SAVE_EDITS.l
   method = :patch
   id = "obs_#{@observation.id}_naming_#{@naming.id}_form"
-  url = observation_naming_path(id: @naming.id,
+  url = observation_naming_path(observation_id: @observation.id,
+                                id: @naming.id,
                                 approved_name: @params.what,
                                 q: get_query_param)
 end
