@@ -14,7 +14,11 @@ module Tabs
 
     def edit_naming_tab(naming)
       [:EDIT.l,
-       add_query_param(edit_naming_path(id: naming.id)),
+       add_query_param(
+         edit_observation_naming_path(
+           observation_id: naming.observation_id, id: naming.id
+         )
+       ),
        { class: "#{tab_id(__method__.to_s)}_#{naming.id}", icon: :edit }]
     end
   end

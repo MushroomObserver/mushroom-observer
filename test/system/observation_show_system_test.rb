@@ -303,8 +303,8 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     # check that there is a vote tally with this naming
     within("#observation_namings") do
-      assert_link(href: "/votes/#{nam.id}")
-      click_link(href: "/votes/#{nam.id}")
+      assert_link(href: "/observations/#{obs.id}/namings/#{nam.id}/votes")
+      click_link(href: "/observations/#{obs.id}/namings/#{nam.id}/votes")
     end
     assert_selector("#modal_naming_votes_#{nam.id}")
 
