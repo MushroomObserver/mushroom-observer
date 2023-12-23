@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ProjectsController < ApplicationController
+  include Validators
+
   before_action :login_required
   # disable cop because index is defined in ApplicationController
   before_action :pass_query_params, except: [:index] # rubocop:disable Rails/LexicallyScopedActionFilter
@@ -159,7 +161,7 @@ class ProjectsController < ApplicationController
                     @project.admin_group_id).
               includes(:name, :user)
     count = @project.count_violations
-    return unless count.positive?
+    return if count.zero? || !@is_admin
 
     flash_warning(:show_project_violation_count.t(count: count,
                                                   id: @project.id))
@@ -320,35 +322,5 @@ class ProjectsController < ApplicationController
                                  params.dig(:start_date, :fixed) == "false"
     @project.end_date = nil if params[:project][:dates_any] == "true" ||
                                params.dig(:end_date, :fixed) == "false"
-  end
-
-  def valid_title
-    @title = params[:project][:title].to_s
-    if @title.blank?
-      flash_error(:add_project_need_title.t)
-      false
-    elsif (project2 = Project.find_by_title(@title)) &&
-          (project2 != @project)
-      flash_error(:add_project_already_exists.t(title: @title))
-      false
-    else
-      true
-    end
-  end
-
-  def valid_where
-    where = params[:project][:place_name]
-    location = find_location(where)
-    return false if !location && where != ""
-
-    @project.location = location
-    @project.save
-  end
-
-  def valid_dates
-    return true unless ProjectConstraints.new(params).ends_before_start?
-
-    flash_error(:add_project_ends_before_start.t)
-    false
   end
 end
