@@ -2,9 +2,6 @@
 
 <%= tag.div(class: "my-4", id: "observation_images_upload") do %>
 
-  <%= hidden_field(:observation, :thumb_image_id,
-                   data: { obs_form_images_target: "thumbImageId" }) %>
-
   <%= tag.p(:form_observations_upload_images.t + ":",
             class: "font-weight-bold") %>
 
