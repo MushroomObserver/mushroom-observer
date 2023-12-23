@@ -301,7 +301,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_selector("#title", text: /#{nam.text_name}/)
     # sleep(3)
 
-    # check that there is a vote tally with this naming
+    # check that there is a vote "index" tally with this naming
     within("#observation_namings") do
       assert_link(href: "/observations/#{obs.id}/namings/#{nam.id}/votes")
       click_link(href: "/observations/#{obs.id}/namings/#{nam.id}/votes")
@@ -313,6 +313,23 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       find(:css, ".close").click
     end
     assert_no_selector("#modal_naming_votes_#{nam.id}")
+
+    # Test the link to the naming name and user
+    within("#observation_namings") do
+      assert_link(text: /#{n_d.text_name}/)
+      click_link(text: /#{n_d.text_name}/)
+    end
+    assert_selector("body.names__show", wait: 15)
+    page.go_back
+
+    # Test the link to the naming user... whoa, this takes too long!
+    # Re-add this test when the user page is sped up.
+    # within("#observation_namings") do
+    #   assert_link(text: /#{rolf.login}/)
+    #   click(text: /#{rolf.login}/)
+    # end
+    # assert_selector("body.users__show", wait: 30)
+    # page.go_back
 
     # Test the edit naming form link. 
     within("#observation_namings") do
