@@ -14,10 +14,8 @@
 
   <%= render(partial: "shared/textilize_help") %>
 
-  <%= text_field_with_label(form: f, field: :place_name,
-                            placeholder: :start_typing.l,
-                            label: :WHERE.t + ":",
-                            data: { autocompleter: :location }) %>
+  <%= autocompleter_field(form: f, field: :place_name, label: :WHERE.t + ":",
+                          between: :required, autocomplete: :location) %>
 
   <%= tag.div(
     tag.p("*#{:form_projects_date_range.t}*".t) +

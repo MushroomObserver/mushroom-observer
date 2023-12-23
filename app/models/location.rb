@@ -464,7 +464,7 @@ class Location < AbstractModel
     Location.where(name: name).or(Location.where(scientific_name: name)).first
   end
 
-  def self.user_name(user, name)
+  def self.user_format(user, name)
     if user && (user.location_format == "scientific")
       Location.reverse_name(name)
     else

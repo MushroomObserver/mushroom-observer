@@ -376,9 +376,11 @@ module TitleAndTabsetHelper
 
   # Create link to change interest state.
   def interest_link(label, object, state) # :nodoc:
-    link_with_query(label, set_interest_path(id: object.id,
-                                             type: object.class.name,
-                                             state: state))
+    link_with_query(
+      label,
+      set_interest_path(id: object.id, type: object.class.name, state: state),
+      data: { turbo_stream: true }
+    )
   end
 
   # Create large icon image.

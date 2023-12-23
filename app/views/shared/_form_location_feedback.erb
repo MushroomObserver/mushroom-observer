@@ -1,0 +1,9 @@
+<%# feedback about @dubious_where_reasons %>
+
+<%= if @dubious_where_reasons&.any?
+  tag.div(class: "alert alert-warning my-3", id: "dubious_location_messages") do
+    concat(tag.div(@dubious_where_reasons.safe_join(safe_br)))
+    concat(tag.span(:form_observations_dubious_help.t(button: button),
+                    class: "help-note"))
+  end
+end %>

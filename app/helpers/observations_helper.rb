@@ -98,16 +98,17 @@ module ObservationsHelper
     end
   end
 
-  # gathers the user's @votes indexed by naming
-  def gather_users_votes(obs, user = nil)
-    return [] unless user
+  # N+1 - this has gotta go. We have each naming's votes already
+  # def gather_users_votes(obs, user = nil)
+  #   return [] unless user
 
-    obs.namings.each_with_object({}) do |naming, votes|
-      votes[naming.id] =
-        naming.votes.find { |vote| vote.user_id == user.id } ||
-        Vote.new(value: 0)
-    end
-  end
+  #   obs.namings.includes([:votes, :user, :name]).each_with_object({}) do
+  #     |naming, votes|
+  #     votes[naming.id] =
+  #       naming.votes.find { |vote| vote.user_id == user.id } ||
+  #       Vote.new(value: 0)
+  #   end
+  # end
 
   def link_to_display_name_brief_authors(name, **args)
     link_to(name.display_name_brief_authors.t,
@@ -210,18 +211,35 @@ module ObservationsHelper
   end
 
   def observation_details_who(obs:)
+    obs_user = obs.user
+    html = [
+      "#{:WHO.t}:",
+      user_link(obs_user)
+    ]
+    if obs_user != User.current && !obs_user.no_emails &&
+       obs_user.email_general_question
+
+      html += [
+        "[",
+        modal_link_to("observation_email", *send_observer_question_tab(obs)),
+        "]"
+      ]
+    end
+
     tag.p(class: "obs-who", id: "observation_who") do
-      ["#{:WHO.t}:", user_link(obs.user)].safe_join(" ")
+      html.safe_join(" ")
     end
   end
 
   def observation_details_notes(obs:)
     return "" unless obs.notes?
 
+    notes = obs.notes_show_formatted.sub(/^\A/, "#{:NOTES.t}:\n").tpl
+
     tag.div(class: "obs-notes", id: "observation_notes") do
       Textile.clear_textile_cache
       Textile.register_name(obs.name)
-      tag.div(obs.notes_show_formatted.sub(/^\A/, "#{:NOTES.t}:\n").tpl)
+      tag.div(notes)
     end
   end
 end

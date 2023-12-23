@@ -4,7 +4,7 @@
 #  = Map Set Class
 #
 #  This class is used to hold a set of mappable objects, and provide the
-#  information needed to map these as a single point or box.
+#  information needed to map these as a single point or box in Google Maps.
 #
 #  == Typical Usage
 #
@@ -25,10 +25,13 @@
 #  The title and caption are accessors, so they can be set in the map helper.
 #  The objects are an accessor, because they get stripped before sending to JS.
 #
+#  GOTCHA: Observations have .long, Google Map points need .lng.
+#          MapSet must provide .lng to be interoperable with other points.
+#
 module Mappable
   class MapSet
     attr_reader :north, :south, :east, :west, :is_point, :is_box,
-                :north_east, :south_east, :south_west, :north_west, :lat, :long,
+                :north_east, :south_east, :south_west, :north_west, :lat, :lng,
                 :north_south_distance, :east_west_distance, :center, :edges
     attr_accessor :objects, :title, :caption
 
@@ -36,7 +39,7 @@ module Mappable
       @objects = objects.is_a?(Array) ? objects : [objects]
       @north = @south = @east = @west = nil
       @north_south_distance = @east_west_distance = nil
-      @lat = @long = 0
+      @lat = @lng = 0
       init_objects_and_derive_extents
     end
 
@@ -81,31 +84,31 @@ module Mappable
 
     def update_extents_with_point(loc)
       lat = loc.lat.to_f.round(4)
-      long = loc.long.to_f.round(4)
+      lng = loc.lng.to_f.round(4)
       if @north
         @north = lat if lat > @north
         @south = lat if lat < @south
-        if long_outside_existing_extents?(long)
-          east_dist = long > @east ? long - @east : long - @east + 360
-          west_dist = long < @west ? @west - long : @west - long + 360
+        if lng_outside_existing_extents?(lng)
+          east_dist = lng > @east ? lng - @east : lng - @east + 360
+          west_dist = lng < @west ? @west - lng : @west - lng + 360
           if east_dist <= west_dist
-            @east = long
+            @east = lng
           else
-            @west = long
+            @west = lng
           end
         end
       else
         @north = @south = lat
-        @east = @west = long
+        @east = @west = lng
       end
       update_derived_attributes
     end
 
-    def long_outside_existing_extents?(long)
+    def lng_outside_existing_extents?(lng)
       if @east >= @west
-        long > @east || long < @west
+        lng > @east || lng < @west
       else
-        long > @east && long < @west
+        lng > @east && lng < @west
       end
     end
 
@@ -173,15 +176,15 @@ module Mappable
         @north_south_distance = @north ? @north - @south : nil
       end
       if @east && @west
-        @long = ((@east + @west) / 2.0).round(4)
-        @long += 180 if @west > @east
+        @lng = ((@east + @west) / 2.0).round(4)
+        @lng += 180 if @west > @east
         @east_west_distance = if @west > @east
                                 @east - @west + 360
                               else
                                 @east - @west
                               end
       end
-      @center = [@lat, @long]
+      @center = [@lat, @lng]
     end
   end
 end

@@ -23,11 +23,11 @@
 
   <div class="form-group mt-3">
     <%= fields_for(:list) do |f_l|
-      text_area_with_label(form: f_l, field: :members, rows: 8,
-                           label: :form_species_lists_write_in_species.t + ":",
-                           value: @list_members, placeholder: :start_typing.l,
-                           data: { autocompleter: :name,
-                                   autocomplete_separator: "\n" })
+      autocompleter_field(
+        form: f_l, field: :members, rows: 8, value: @list_members,
+        label: :form_species_lists_write_in_species.t + ":",
+        autocomplete: :name, separator: "\n", textarea: true
+      )
     end %>
   </div>
 
@@ -42,15 +42,14 @@
     <%= f.label(:when, :WHEN.t + ":") %>
     <%= f.date_select(:when, date_select_opts(@species_list),
                       { class: "form-control",
-                        data: { autocompleter: :year } }) %>
+                        data: { controller: "year-input" } }) %>
   </div>
 
   <%= render(partial: "shared/form_location_feedback",
              locals: { button: button } ) %>
 
-  <%= text_field_with_label(form: f, field: :place_name, between: :required,
-                            placeholder: :start_typing.l, label: :WHERE.t + ":",
-                            data: { autocompleter: :location }) %>
+  <%= autocompleter_field(form: f, field: :place_name, between: :required,
+                          label: :WHERE.t + ":", autocomplete: :location) %>
 
   <%= render(partial: "species_lists/form/fields_for_member",
              locals: { f: f }) %>

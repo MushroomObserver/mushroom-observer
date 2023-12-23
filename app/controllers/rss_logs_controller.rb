@@ -107,7 +107,7 @@ class RssLogsController < ApplicationController
       observation: [
         :location, :name, :user, observation_matrix_box_image_includes
       ],
-      project: :user,
+      project: [:location, :user],
       species_list: [:location, :user]
     }
   end

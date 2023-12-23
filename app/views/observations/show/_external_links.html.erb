@@ -1,0 +1,55 @@
+<%=
+tag.div(
+  class: "panel panel-default", id: "observation_external_links",
+  data: { controller: "section-update", updated_by: "modal_external_link" }
+) do
+
+  concat([
+    tag.div(class: "panel-heading") do
+      tag.h4(:EXTERNAL_LINKS.t, class: "panel-title")
+    end,
+
+    if obs.external_links.any?
+      tag.div(class: "panel-body") do
+        tag.ul(class: "list-unstyled mb-0") do
+          obs.external_links.sort_by(&:site_name).map do |link|
+            tag.li(id: "external_link_#{link.id}") do
+              concat(link_to(:on_site.t(site: link.external_site.name),
+                             link.url))
+              concat(
+                [
+                  " [",
+                  modal_link_to("external_link_#{link.id}",
+                                *edit_external_link_tab(link: link)),
+                  "|",
+                  destroy_button(
+                    name: :destroy_object.t(type: :external_link),
+                    target: external_link_path(id: link.id), icon: :remove,
+                    class: "destroy_external_link_link_#{link.id}"
+                  ),
+                  "]"
+                ].safe_join(" ")
+              ) if link.can_edit? || in_admin_mode?
+            end
+          end.safe_join
+        end
+      end
+    end
+
+  ].safe_join)
+
+  concat(
+    tag.div(class: "panel-footer") do
+      @other_sites.sort_by(&:name).map do |site|
+        [ # any html helper has to be safe_joined separately
+          "#{site.name}: ",
+          "[",
+          modal_link_to("external_link",
+                        *new_external_link_tab(obs: obs, site: site)),
+          "] "
+        ].safe_join("")
+      end.safe_join
+    end
+  ) if @other_sites.any?
+
+end %>

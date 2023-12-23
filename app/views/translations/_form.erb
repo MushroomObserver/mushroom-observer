@@ -1,0 +1,94 @@
+<%# "Official" text at top. Here so that it gets loaded with every tag %>
+<% unless @lang.official
+  render(partial: "translations/official")
+end
+
+form_dataset = {
+  turbo: true, controller: :translation, locale: @lang.locale,
+  confirm_string: :edit_translations_will_lose_changes.l,
+  loading_string: :edit_translations_loading.l,
+  saving_string: :edit_translations_saving.l
+}
+%>
+
+<%= form_with(url: { action: :update, for_page: @for_page },
+              id: "translation_form", method: :patch,
+              data: form_dataset) do |f| %>
+
+  <%= f.hidden_field(:tag, value: @tag) %>
+
+  <%# Form for this language's translations %>
+  <%= tag.h4("#{@lang.name}:", class:"font-weight-bold mt-3") %>
+
+  <%# textarea for each tag %>
+  <% @edit_tags.each do |ttag|
+
+    # Estimate number of rows needed for text area.
+    str = @strings[ttag].to_s.gsub(/\\n/, "\n")
+    rows = 1
+    str.each_line.each do |line|
+      rows += (line.length / 80).truncate + 1
+    end
+    rows = @edit_tags.length > 1 ? 2 : 5 if rows < 2
+
+    # Add help notes for plurals and uppercase entries.
+    notes = []
+    if ttag.match(/s$/i) && @edit_tags.include?(ttag.sub(/.$/,""))
+      notes << :edit_translations_plural.t
+    elsif (@edit_tags & [ttag+"s", ttag+"S"]).any? # like multi-include?
+      notes << :edit_translations_singular.t
+    end
+    if ttag == ttag.upcase && @edit_tags.include?(ttag.downcase)
+      notes << :edit_translations_uppercase.t
+    elsif ttag == ttag.downcase && @edit_tags.include?(ttag.upcase)
+      notes << :edit_translations_lowercase.t
+    end
+
+    between = notes.any? ? tag.span("(#{notes.safe_join(", ")})") : ""
+
+    concat(
+      text_area_with_label(
+        form: f, field: "tag_#{ttag}", label: ttag,
+        between: between, value: str, rows: rows,
+        data: {
+          translation_target: "textarea",
+          action: "translation#formChanged"
+        }
+      )
+    )
+
+  end %>
+
+  <%# save/cancel/reload buttons %>
+  <%= tag.div(class: "form-group") do
+    [
+      button_tag(:SAVE.l, type: :submit, name: :commit, value: :submit,
+                 id: "save_button", class: "btn btn-default",
+                 data: {
+                   translation_target: "saveButton",
+                   action: "turbo:submit-start->translation#saving"
+                 }),
+      button_tag(:CANCEL.l, type: :button, name: :commit, value: :cancel,
+                 id: "cancel_button", class: "btn btn-default",
+                 data: {
+                   translation_target: "cancelButton",
+                   action: "translation#clearForm"
+                 }),
+      link_to(:RELOAD.l,
+              edit_translation_path(id: @tag, locale: @lang.locale),
+              id: "reload_button", class: "btn btn-default",
+              data: {
+                tag: @tag, translation_target: "reloadButton",
+                turbo_stream: true
+              })
+    ].safe_join(" ")
+  end %>
+
+  <%# locale select. JS changes the reload link above, based on selected %>
+  <%= select_tag(:locale,
+                 options_for_select(Language.menu_options, @lang.locale),
+                 class: "form-control",
+                 data: { tag: @tag, translation_target: "localeSelect",
+                         action: "translation#changeLocale" }) %>
+
+<% end %>

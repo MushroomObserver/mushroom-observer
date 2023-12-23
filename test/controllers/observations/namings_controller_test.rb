@@ -14,7 +14,7 @@ module Observations
 
     def test_edit_form
       nam = namings(:coprinus_comatus_naming)
-      params = { id: nam.id.to_s }
+      params = { observation_id: nam.observation_id, id: nam.id.to_s }
       requires_user(:edit, { controller: "/observations", action: :show,
                              id: nam.observation_id }, params)
       assert_form_action(action: "update", approved_name: nam.text_name,
@@ -32,7 +32,7 @@ module Observations
       nam = namings(:minimal_unknown_naming)
       assert_empty(nam.votes)
       login(nam.user.login)
-      get(:edit, params: { id: nam.id })
+      get(:edit, params: { observation_id: nam.observation_id, id: nam.id })
     end
 
     def test_update_observation_new_name
@@ -40,7 +40,11 @@ module Observations
       nam = namings(:coprinus_comatus_naming)
       old_name = nam.text_name
       new_name = "Easter bunny"
-      params = { id: nam.id.to_s, naming: { name: new_name } }
+      params = {
+        observation_id: nam.observation_id,
+        id: nam.id.to_s,
+        naming: { name: new_name }
+      }
       put(:update, params: params)
       assert_edit
       assert_equal(10, rolf.reload.contribution)
@@ -57,6 +61,7 @@ module Observations
       old_name = nam.text_name
       new_name = "Easter bunny"
       params = {
+        observation_id: nam.observation_id,
         id: nam.id.to_s,
         naming: {
           name: new_name,
@@ -85,6 +90,7 @@ module Observations
       old_name = nam.text_name
       new_name = "Amanita baccata"
       params = {
+        observation_id: nam.observation_id,
         id: nam.id.to_s,
         naming: { name: new_name }
       }
@@ -104,6 +110,7 @@ module Observations
       old_name = nmg.text_name
       new_name = "Amanita baccata"
       params = {
+        observation_id: nmg.observation_id,
         id: nmg.id.to_s,
         naming: {
           name: new_name,
@@ -128,6 +135,7 @@ module Observations
       old_name = nam.text_name
       new_name = "Lactarius subalpinus"
       params = {
+        observation_id: nam.observation_id,
         id: nam.id.to_s,
         naming: { name: new_name }
       }
@@ -148,6 +156,7 @@ module Observations
       new_name = "Lactarius subalpinus"
       chosen_name = names(:lactarius_alpinus)
       params = {
+        observation_id: nmg.observation_id,
         id: nmg.id.to_s,
         naming: {
           name: new_name,
@@ -172,6 +181,7 @@ module Observations
       start_name = nmg.name
       new_text_name = names(:lactarius_subalpinus).text_name
       params = {
+        observation_id: nmg.observation_id,
         id: nmg.id.to_s,
         naming: {
           name: new_text_name,
@@ -204,6 +214,7 @@ module Observations
       # Rolf makes superficial changes to his naming.
       login("rolf")
       params = {
+        observation_id: nam1.observation_id,
         id: nam1.id,
         naming: {
           name: names(:coprinus_comatus).search_name,
@@ -259,6 +270,7 @@ module Observations
       login("rolf")
       assert_equal(10, rolf.contribution)
       params = {
+        observation_id: nam1.observation_id,
         id: nam1.id,
         naming: {
           name: "Conocybe filaris",
@@ -553,7 +565,8 @@ module Observations
                      end
 
       login("rolf")
-      get(:destroy, params: { id: nam1.id })
+      get(:destroy,
+          params: { observation_id: nam1.observation_id, id: nam1.id })
 
       # Make sure naming and associated vote and reason were actually destroyed.
       assert_raises(ActiveRecord::RecordNotFound) do
@@ -591,7 +604,8 @@ module Observations
 
       # Have Rolf try to destroy it.
       login("rolf")
-      get(:destroy, params: { id: nam1.id })
+      get(:destroy,
+          params: { observation_id: nam1.observation_id, id: nam1.id })
 
       # Make sure naming and associated vote and reason are still there.
       assert(Naming.find(old_naming_id))

@@ -47,12 +47,8 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record = default_herbarium_record
 
     respond_to do |format|
+      format.turbo_stream { render_modal_herbarium_record_form }
       format.html
-      format.js do
-        render_modal_herbarium_record_form(
-          title: helpers.herbarium_record_form_new_title
-        )
-      end
     end
   end
 
@@ -72,14 +68,8 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record.herbarium_name = @herbarium_record.herbarium.try(&:name)
 
     respond_to do |format|
+      format.turbo_stream { render_modal_herbarium_record_form }
       format.html
-      format.js do
-        render_modal_herbarium_record_form(
-          title: helpers.herbarium_record_form_edit_title(
-            h_r: @herbarium_record
-          )
-        )
-      end
     end
   end
 
@@ -101,12 +91,8 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record.destroy
 
     respond_to do |format|
-      format.html do
-        redirect_with_query(action: :index)
-      end
-      format.js do
-        render_herbarium_records_section_update
-      end
+      format.turbo_stream { render_herbarium_records_section_update }
+      format.html { redirect_with_query(action: :index) }
     end
   end
 
@@ -135,18 +121,6 @@ class HerbariumRecordsController < ApplicationController
   def herbarium_record_includes
     [:user,
      { observations: [:user, observation_matrix_box_image_includes] }]
-  end
-
-  def render_modal_herbarium_record_form(title:)
-    render(partial: "shared/modal_form_show",
-           locals: { title: title, identifier: "herbarium_record" }) and return
-  end
-
-  def render_herbarium_records_section_update
-    render(
-      partial: "observations/show/section_update",
-      locals: { identifier: "herbarium_records" }
-    ) and return
   end
 
   def default_index_subaction
@@ -259,7 +233,7 @@ class HerbariumRecordsController < ApplicationController
       format.html do
         redirect_to_back_object_or_object(@back_object, @herbarium_record)
       end
-      format.js do
+      format.turbo_stream do
         render_herbarium_records_section_update
       end
     end
@@ -305,7 +279,7 @@ class HerbariumRecordsController < ApplicationController
         redirect_to_back_object_or_object(@back_object, @herbarium_record)
       end
       @observation = @back_object # if we're here, we're on an obs page
-      format.js do
+      format.turbo_stream do
         render_herbarium_records_section_update
       end
     end
@@ -326,10 +300,8 @@ class HerbariumRecordsController < ApplicationController
         format.html do
           redirect_to(redirect_params) and return true
         end
-        format.js do
-          render(partial: "shared/modal_form_reload",
-                 locals: { identifier: "collection_number",
-                           form: "collection_numbers/form" }) and return true
+        format.turbo_stream do
+          reload_herbarium_record_modal_form_and_flash
         end
       end
     end
@@ -436,11 +408,52 @@ class HerbariumRecordsController < ApplicationController
         redirect_to_back_object_or_object(@back_object, @herbarium_record) and
           return
       end
-      format.js do
+      format.turbo_stream do
         # renders the flash in the modal via js
-        render(partial: "shared/modal_flash_update") and return
+        render(partial: "shared/modal_flash_update",
+               locals: { identifier: modal_identifier }) and return
       end
     end
+  end
+
+  def render_modal_herbarium_record_form
+    render(partial: "shared/modal_form",
+           locals: { title: modal_title, identifier: modal_identifier,
+                     form: "herbarium_records/form" }) and return
+  end
+
+  def modal_identifier
+    case action_name
+    when "new", "create"
+      "herbarium_record"
+    when "edit", "update"
+      "herbarium_record_#{@herbarium_record.id}"
+    end
+  end
+
+  def modal_title
+    case action_name
+    when "new", "create"
+      helpers.herbarium_record_form_new_title
+    when "edit", "update"
+      helpers.herbarium_record_form_edit_title(h_r: @herbarium_record)
+    end
+  end
+
+  def render_herbarium_records_section_update
+    render(
+      partial: "observations/show/section_update",
+      locals: { identifier: "herbarium_records" }
+    ) and return
+  end
+
+  # this updates both the form and the flash
+  def reload_herbarium_record_modal_form_and_flash
+    render(
+      partial: "shared/modal_form_reload",
+      locals: { identifier: "herbarium_record",
+                form: "herbarium_records/form" }
+    ) and return true
   end
 end
 # rubocop:enable Metrics/ClassLength

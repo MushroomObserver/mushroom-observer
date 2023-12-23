@@ -1,5 +1,4 @@
 <!-- Filters Settings of Advanced Search Form -->
-<% javascript_include "advanced_search" %>
 
 <%= fields_for(:content_filter) do |fcf| %>
   <div id="advanced_search_filters">
@@ -10,22 +9,25 @@
     </div>
 
     <% ContentFilter.all.each do |filter| %>
-      <% models = filter.models.map {|m| m.name.underscore}.join(" ") %>
+      <% models = filter.models.map { |m| m.name.underscore }.join(" ") %>
 
-      <div class="form-group"
-            data-role="filter" data-models="<%= j models %>">
+      <%= tag.div(
+        class: "form-group",
+        data: { role: "filter", models: models,
+                advanced_search_target: "filter" }
+      ) do %>
 
         <% if filter.type == :boolean %>
           <%= render partial: "advanced_search_filter_radio_buttons",
-                    locals: { f: fcf, filter: filter } %>
+                     locals: { f: fcf, filter: filter } %>
         <% elsif filter.type == [:string] %>
           <%= render partial: "advanced_search_filter_text_field",
-                    locals: { f: fcf, filter: filter } %>
+                     locals: { f: fcf, filter: filter } %>
         <% else %>
           <% raise "Unexpected filter type #{filter.type.inspect}" %>
         <% end %>
 
-      </div>
+      <% end %>
 
     <% end %>
 

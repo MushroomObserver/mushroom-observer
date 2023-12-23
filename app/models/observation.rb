@@ -512,6 +512,47 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     joins(species_lists: :project_species_lists).
       where(ProjectSpeciesList[:project_id] == project.id).distinct
   }
+  scope :show_includes, lambda {
+    includes(
+      :collection_numbers,
+      { comments: :user },
+      { external_links: { external_site: { project: :user_group } } },
+      { herbarium_records: [{ herbarium: :curators }, :user] },
+      { images: [:image_votes, :license, :projects, :user] },
+      { interests: :user },
+      :location,
+      :name,
+      { namings: [:name, :user, { votes: [:observation, :user] }] },
+      { projects: :admin_group },
+      :rss_log,
+      :sequences,
+      { species_lists: [:projects, :user] },
+      :thumb_image,
+      :user
+    )
+  }
+  scope :not_logged_in_show_includes, lambda {
+    strict_loading.includes(
+      { comments: :user },
+      { images: [:license, :user] },
+      :location,
+      :name,
+      { namings: :name },
+      :projects,
+      :thumb_image,
+      :user
+    )
+  }
+  scope :naming_includes, lambda {
+    includes(
+      :location, # ugh. worth it because of cache_content_filter_data
+      :name,
+      # Observation#find_matches complains synonym is not eager-loaded. TBD
+      { namings: [{ name: { synonym: :names } }, :user,
+                  { votes: [:observation, :user] }] },
+      :user
+    )
+  }
 
   def location?
     false
@@ -702,6 +743,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Is lat/long more than 10% outside of location extents?
   def lat_long_dubious?
     lat && location && !location.lat_long_close?(lat, long)
+  end
+
+  # Alias for access by Mappable::CollapsibleCollectionOfObjects
+  # which must provide `lng` for Google Maps from an obs OR a MapSet
+  # Makes related methods so much simpler: parallel data types.
+  def lng
+    long
   end
 
   def place_name_and_coordinates
@@ -971,6 +1019,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Look up the corresponding instance in our namings association.  If we are
   # careful to keep all the operations within the tree of assocations of the
   # observations, we should never need to reload anything.
+  # `find` here does not hit the db
   def lookup_naming(naming)
     # Disable cop; test suite chokes when the following "raise"
     # is re-written in "exploded" style (the Rubocop default)
@@ -1119,7 +1168,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Admin tool that refreshes the vote cache for all observations with a vote.
   def self.refresh_vote_cache
-    Observation.all.find_each(&:calc_consensus)
+    Observation.find_each(&:calc_consensus)
   end
 
   ##############################################################################

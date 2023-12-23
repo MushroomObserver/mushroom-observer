@@ -28,13 +28,11 @@ end
   <%= render(partial: "shared/form_name_feedback",
              locals: feedback_locals.merge({ f: f })) if @what.present? %>
 
-  <%= text_field_with_label(
-        form: f, field: :proposed_name, inline: true,
-        value: @what, placeholder: :start_typing.l,
-        label: "#{:name_deprecate_preferred.t}:", autofocus: true,
-        append: help_note(:div, :name_deprecate_preferred_help.tp),
-        data: { autocompleter: :name }
-      ) %>
+  <%= autocompleter_field(
+    form: f, field: :proposed_name, inline: true, autocomplete: :name,
+    value: @what, label: "#{:name_deprecate_preferred.t}:", autofocus: true,
+    append: help_note(:div, :name_deprecate_preferred_help.tp)
+  ) %>
 
   <%= check_box_with_label(form: f, field: :is_misspelling,
                            checked: @misspelling,
