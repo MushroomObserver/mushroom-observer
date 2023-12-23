@@ -1132,7 +1132,7 @@ class Observation < AbstractModel
     calculator = Observation::ConsensusCalculator.new(obs_reloaded.namings)
     best, best_val = calculator.calc
     old = obs_reloaded.name
-    if obs_reloaded.name != best || vote_cache != best_val
+    if old != best || obs_reloaded.vote_cache != best_val
       self.name = best
       self.vote_cache = best_val
       save
