@@ -188,38 +188,6 @@ class Location < AbstractModel
           end
         }
 
-  # Location not contained in (not a subset of) box defined by parameters
-  scope :uncontained_in, # Use named parameters (n, s, e, w), any order
-        lambda { |**args|
-          box = Mappable::Box.new(
-            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
-          )
-          return none unless box.valid?
-
-          # revise box by epsilon to create leeway for Float rounding
-          revised_box = box.expand(0.00001)
-
-          if box.straddles_180_deg?
-            where(
-              (Location[:south] < revised_box.south).
-            or(Location[:north] > revised_box.north).
-            # Location[:west] between w & 180 OR between 180 and e
-            or((Location[:west] < revised_box.west).
-              and(Location[:west] > revised_box.east)).
-            or((Location[:east] < revised_box.west).
-              and(Location[:east] > revised_box.east))
-            )
-          else
-            where(
-              (Location[:south] < revised_box.south).
-            or(Location[:north] > revised_box.north).
-            or(Location[:west] > Location[:east]). # Location straddles 180
-            or(Location[:west] < revised_box.west).
-            or(Location[:east] > revised_box.east)
-            )
-          end
-        }
-
   # Let attached observations update their cache if these fields changed.
   def update_observation_cache
     Observation.update_cache("location", "where", id, name) if name_changed?
