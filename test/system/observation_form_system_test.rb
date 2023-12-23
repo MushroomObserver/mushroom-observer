@@ -388,7 +388,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_checked_field("observation_specimen")
     assert_field(other_notes_id, with: "Notes for observation")
 
-    img_ids = Image.last(2).map(&:id)
+    imgs = Image.last(2)
+    cci = imgs.find { |img| img[:original_name] == "Coprinus_comatus.jpg" }
+    geo = imgs.find { |img| img[:original_name] == "geotagged.jpg" }
+    img_ids = imgs.map(&:id)
     img_ids.each do |img_id|
       assert_field("good_image_#{img_id}_when_1i", with: "2010")
       assert_select("good_image_#{img_id}_when_2i", text: "March")
@@ -397,6 +400,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                    with: katrina.legal_name)
       assert_field("good_image_#{img_id}_notes", with: "Notes for image")
     end
+    assert_checked_field("observation_thumb_image_id_#{cci.id}")
+    assert_unchecked_field("observation_thumb_image_id_#{geo.id}")
 
     # submit_observation_form_with_changes
     fill_in("observation_when_1i", with: "2011")
@@ -407,14 +412,17 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("observation_alt", with: "987m")
     check("observation_is_collection_location")
     fill_in(other_notes_id, with: "New notes for observation")
-
     img_ids.each do |img_id|
       fill_in("good_image_#{img_id}_when_1i", with: "2011")
       select("April", from: "good_image_#{img_id}_when_2i")
       select("15", from: "good_image_#{img_id}_when_3i")
       fill_in("good_image_#{img_id}_notes", with: "New notes for image")
     end
+    obs_images = find("#observation_images")
+    scroll_to(obs_images, align: :top)
+    check("observation_thumb_image_id_#{geo.id}")
     sleep(1)
+    debugger
     within("#observation_form") { click_commit }
 
     assert_selector("body.observations__show")
