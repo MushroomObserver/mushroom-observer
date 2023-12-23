@@ -1,4 +1,12 @@
-<%# Images (already attached) section of create_observation form %>
+<%# Images section of create_observation form
+Gotcha: thumb_image_id
+Although there can be radio buttons for selecting observation[thumb_image_id] 
+in both the good_images and the images_upload partials, they currently *do
+not* set the observation thumb_image_id: their value is transferred by JS to  
+the hidden_field below with the same name, which takes precedence.
+I believe this is because in images_upload/_template.erb, the radio buttons
+do not yet have an image.id value, the image has not yet been uploaded.
+%>
 <%
 good_image_ids_str = @good_images.map { |img| img.id }.join(" ")
 %>
@@ -14,6 +22,9 @@ good_image_ids_str = @good_images.map { |img| img.id }.join(" ")
 
   <%= hidden_field_tag(:good_images, good_image_ids_str,
                        data: { obs_form_images_target: "goodImages" }) %>
+
+  <%= hidden_field(:observation, :thumb_image_id,
+                   data: { obs_form_images_target: "thumbImageId" }) %>
 
   <%= render(partial: "observations/form/images_upload", locals: { f: f }) %>
 
