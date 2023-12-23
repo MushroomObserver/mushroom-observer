@@ -4,7 +4,10 @@
 
   <!-- GOOD_IMAGE -->
   <div class="col-xs-1" style="max-width:30px">
-    <%= f.radio_button(:thumb_image_id, image.id) %>
+    <%= f.radio_button(
+      :thumb_image_id, image.id,
+      { data: { action: "click->obs-form-images#setHiddenThumbField" } }
+    ) %>
   </div><!--.col-->
 
   <div class="col-xs-11 col-sm-3">
