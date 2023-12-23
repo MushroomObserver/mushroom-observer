@@ -47,7 +47,6 @@
 #  name_includes(place_name)
 #  in_region(place_name)
 #  in_box(n,s,e,w)
-#  uncontained_in(n,s,e,w)
 #
 #  == Instance methods
 #
