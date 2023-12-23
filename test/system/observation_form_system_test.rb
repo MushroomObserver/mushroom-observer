@@ -420,9 +420,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
     obs_images = find("#observation_images")
     scroll_to(obs_images, align: :top)
-    check("observation_thumb_image_id_#{geo.id}")
+    choose("observation_thumb_image_id_#{geo.id}")
     sleep(1)
-    debugger
     within("#observation_form") { click_commit }
 
     assert_selector("body.observations__show")
@@ -626,7 +625,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       is_collection_location: true,
       specimen: false,
       notes: "New notes for observation", # displayed in observations/show
-      image_notes: "New notes for image"
+      image_notes: "New notes for image",
+      thumb_image_id: Image.find_by(original_name: "geotagged.jpg").id
     )
   end
 end
