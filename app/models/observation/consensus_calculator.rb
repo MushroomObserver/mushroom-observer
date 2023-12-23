@@ -2,12 +2,10 @@
 
 class Observation
   class ConsensusCalculator
-    def initialize(observation)
+    def initialize(namings)
       # There's usually just been a new vote. To recalculate the consensus,
-      # we need to eager-load all the naming/vote associations.
-      # find(id) will raise exception if not found. maybe preferable?
-      # @observation = Observation.naming_includes.find_by(id: observation.id)
-      @namings     = observation.namings
+      # the caller needs to eager-load all the naming/vote associations.
+      @namings     = namings # must include eager-loaded associations!
       @name_votes  = {}  # Strongest vote for a given name for a user.
       @taxon_votes = {}  # Strongest vote for any names in a group of
       #                    synonyms for a given user.

@@ -1129,7 +1129,7 @@ class Observation < AbstractModel
   def calc_consensus
     # reload # no we need all the includes here
     obs_reloaded = Observation.naming_includes.find_by(id: id)
-    calculator = Observation::ConsensusCalculator.new(obs_reloaded)
+    calculator = Observation::ConsensusCalculator.new(obs_reloaded.namings)
     best, best_val = calculator.calc
     old = obs_reloaded.name
     if obs_reloaded.name != best || vote_cache != best_val
