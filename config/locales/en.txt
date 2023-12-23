@@ -3244,7 +3244,6 @@
   show_project_title: "Project: [title]"
   show_project_user_group: User Group
   show_project_violation_count: Project has [count] constraint violation(s)
-  # show_project_violation_count: Project has [count] constraint violation(s)
 
   # users/by_name
   users_by_name_title: Users by Name

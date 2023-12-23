@@ -22,6 +22,7 @@ class ProjectsController < ApplicationController
     return unless (@project = find_or_goto_index(Project, params[:id].to_s))
 
     set_ivars_for_show
+    check_constraint_violations
   end
 
   ##############################################################################
@@ -160,11 +161,6 @@ class ProjectsController < ApplicationController
               where("name_description_admins.user_group_id":
                     @project.admin_group_id).
               includes(:name, :user)
-    count = @project.count_violations
-    return if count.zero? || !@is_admin
-
-    flash_warning(:show_project_violation_count.t(count: count,
-                                                  id: @project.id))
   end
 
   def upload_image_if_present
@@ -207,6 +203,7 @@ class ProjectsController < ApplicationController
     if pattern.match(/^\d+$/) &&
        (@project = Project.safe_find(pattern))
       set_ivars_for_show
+      check_constraint_violations
       render("show", location: project_path(@project.id))
     else
       query = create_query(:Project, :pattern_search, pattern: pattern)

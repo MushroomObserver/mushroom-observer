@@ -32,4 +32,12 @@ module ProjectsController::Validators
     flash_error(:add_project_ends_before_start.t)
     false
   end
+
+  def check_constraint_violations
+    count = @project.count_violations
+    return unless count.positive? && @is_admin
+
+    flash_warning(:show_project_violation_count.t(count: count,
+                                                  id: @project.id))
+  end
 end
