@@ -42,7 +42,7 @@ class ProjectsController < ApplicationController
   def new
     image_ivars
     @project = Project.new
-    @project_dates_any = false
+    @project_dates_any = true
   end
 
   # Form to edit a project

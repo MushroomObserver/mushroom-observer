@@ -178,11 +178,17 @@ class ProjectsControllerTest < FunctionalTestCase
 
     assert_select(
       "input[type=radio][id=project_dates_any_true]", { count: 1 },
-      "Missing radio button to make project dates a range"
+      "Missing radio button to make project dates any dates"
     )
     assert_select(
       "input[type=radio][id=project_dates_any_false]", { count: 1 },
-      "Missing radio button to make project dates any dates"
+      "Missing radio button to make project dates a range"
+    )
+
+    assert_select(
+      "input[type=radio][id=project_dates_any_true][checked=checked]",
+      { count: 1 },
+      "'Any' dates radio button should be checked by default"
     )
   end
 
