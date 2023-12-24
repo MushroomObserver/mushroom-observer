@@ -1127,7 +1127,8 @@ class Observation < AbstractModel
   end
 
   def calc_consensus
-    # reload # no we need all the includes here
+    # reload 
+    # no, try loading associations, ConsensusCalculator needs all the includes
     obs_reloaded = Observation.naming_includes.find_by(id: id)
     calculator = Observation::ConsensusCalculator.new(obs_reloaded.namings)
     best, best_val = calculator.calc
