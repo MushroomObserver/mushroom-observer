@@ -400,7 +400,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_template("names/index")
     name_links = css_select(".table a")
     assert_equal(10, name_links.length)
-    expected = Name.all.order("sort_name, author").limit(10).to_a
+    expected = Name.order("sort_name, author").limit(10).to_a
     assert_equal(expected.map(&:id), ids_from_links(name_links))
     # assert_equal(@controller.url_with_query(action: "show",
     #  id: expected.first.id, only_path: true), name_links.first.url)
@@ -426,7 +426,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_template("names/index")
     name_links = css_select(".table a")
     assert_equal(10, name_links.length)
-    expected = Name.all.order("sort_name").limit(10).offset(10).to_a
+    expected = Name.order("sort_name").limit(10).offset(10).to_a
     assert_equal(expected.map(&:id), ids_from_links(name_links))
     url = @controller.url_with_query(controller: "/names", action: :show,
                                      id: expected.first.id, only_path: true)
@@ -825,7 +825,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_next_and_prev
-    names = Name.all.order("text_name, author").to_a
+    names = Name.order("text_name, author").to_a
     name12 = names[12]
     name13 = names[13]
     name14 = names[14]

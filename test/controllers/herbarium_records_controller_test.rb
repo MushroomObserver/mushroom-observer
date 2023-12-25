@@ -204,7 +204,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     post(:create, params: params)
     mary = User.find(mary.id) # Reload user
     assert_equal(herbarium_count + 1, mary.curated_herbaria.count)
-    herbarium = Herbarium.all.order(created_at: :desc)[0]
+    herbarium = Herbarium.order(created_at: :desc)[0]
     assert(herbarium.curators.member?(mary))
   end
 

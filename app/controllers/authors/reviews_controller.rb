@@ -10,7 +10,7 @@ module Authors
     def show
       set_object_and_authors
       if @authors.member?(@user) || @user.in_group?("reviewers")
-        @users = User.all.order("login, name").to_a
+        @users = User.order("login, name").to_a
       else
         parent = @object.parent
         flash_error(:review_authors_denied.t)
