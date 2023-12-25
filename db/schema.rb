@@ -521,6 +521,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_12_08_212458) do
     t.boolean "accepting_observations", default: true, null: false
     t.integer "location_id"
     t.integer "image_id"
+    t.date "start_date"
+    t.date "end_date"
   end
 
   create_table "publications", id: :integer, charset: "utf8mb3", force: :cascade do |t|

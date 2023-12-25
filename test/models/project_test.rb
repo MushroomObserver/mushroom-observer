@@ -3,13 +3,6 @@
 require("test_helper")
 
 class ProjectTest < UnitTestCase
-  def test_not_accepting_observations
-    proj = projects(:not_accepting_observations_project)
-    minimal_unknown_obs = observations(:minimal_unknown_obs)
-    proj.add_observation(minimal_unknown_obs)
-    assert_not(proj.observations.include?(minimal_unknown_obs))
-  end
-
   def test_add_and_remove_observations
     proj = projects(:eol_project)
     minimal_unknown_obs = observations(:minimal_unknown_obs)
@@ -114,6 +107,54 @@ class ProjectTest < UnitTestCase
     assert_nil(log.reload.target_id)
   end
 
+  def test_dates_current
+    assert(projects(:current_project).current?)
+    assert_not(projects(:past_project).current?)
+    assert_not(projects(:future_project).current?)
+  end
+
+  def test_date_strings
+    proj = projects(:pinned_date_range_project)
+    assert_equal("#{proj.start_date} - #{proj.end_date}",
+                 proj.date_range, "Wrong date range string")
+
+    assert_equal(:form_projects_any.l, projects(:unlimited_project).date_range,
+                 "Wrong date range string")
+  end
+
+  def test_out_of_range_observations
+    assert_out_of_range_observations(projects(:current_project), expect: 0)
+    assert_out_of_range_observations(projects(:unlimited_project), expect: 0)
+    assert_out_of_range_observations(projects(:future_project))
+    assert_out_of_range_observations(projects(:pinned_date_range_project))
+  end
+
+  def test_in_range_observations
+    assert_in_range_observations(projects(:current_project))
+    assert_in_range_observations(projects(:unlimited_project))
+    assert_in_range_observations(projects(:future_project), expect: 0)
+    assert_in_range_observations(projects(:pinned_date_range_project),
+                                 expect: 0)
+  end
+
+  def assert_out_of_range_observations(project,
+                                       expect: project.observations.count)
+    assert(
+      project.observations.count.positive?,
+      "Test needs fixture with some Observations; #{project.title} has none"
+    )
+    assert_equal(expect, project.out_of_range_observations.count)
+  end
+
+  def assert_in_range_observations(project,
+                                   expect: project.observations.count)
+    assert(
+      project.observations.count.positive?,
+      "Test needs fixture with some Observations; #{project.title} has none"
+    )
+    assert_equal(expect, project.in_range_observations.count)
+  end
+
   def test_place_name
     proj = projects(:eol_project)
     loc = locations(:albion)
@@ -128,5 +169,47 @@ class ProjectTest < UnitTestCase
     proj.place_name = loc.display_name
     assert_equal(proj.location, loc)
     User.current_location_format = "postal"
+  end
+
+  def test_location_violations
+    proj = Project.create(
+      location: locations(:burbank),
+      title: "With Location Violations",
+      open_membership: true
+    )
+    geoloc_in_bubank = observations(:unknown_with_lat_long)
+    geoloc_outside_burbank =
+      observations(:trusted_hidden) # lat/lon in Falmouth
+    geoloc_nil_burbank_contains_loc =
+      observations(:minimal_unknown_obs)
+    geoloc_nil_outside_burbank = observations(:reused_observation)
+
+    proj.observations = [
+      geoloc_in_bubank,
+      geoloc_nil_burbank_contains_loc,
+      geoloc_outside_burbank,
+      geoloc_nil_outside_burbank
+    ]
+
+    location_violations = proj.out_of_area_observations
+
+    assert_includes(
+      location_violations, geoloc_outside_burbank,
+      "Noncompliant Obss missing Obs with geoloc outside Proj location"
+    )
+    assert_includes(
+      location_violations, geoloc_nil_outside_burbank,
+      "Noncompliant Obss missing Obs w/o geoloc " \
+      "whose Loc is not contained in Proj location"
+    )
+    assert_not_includes(
+      location_violations, geoloc_in_bubank,
+      "Noncompliant Obss wrongly includes Obs with geoloc inside Proj location"
+    )
+    assert_not_includes(
+      location_violations, geoloc_nil_burbank_contains_loc,
+      "Noncompliant Obss wrongly includes Obs w/o geoloc " \
+      "whose Loc is contained in Proj location"
+    )
   end
 end

@@ -2888,6 +2888,20 @@ class ObservationsControllerTest < FunctionalTestCase
                  "Incorrectly included image in @good_images")
   end
 
+  def test_inital_project_checkboxes
+    login("katrina")
+    get(:new)
+
+    assert_project_checks(
+      # open membership, meets date constrains
+      projects(:current_project).id => :checked,
+      # open-membership, doesn't meet date constraints
+      projects(:past_project).id => :unchecked,
+      # meets date constraints, but membership closed
+      projects(:eol_project).id => :unchecked
+    )
+  end
+
   def test_project_checkboxes_in_create_observation
     init_for_project_checkbox_tests
 
@@ -2909,14 +2923,6 @@ class ObservationsControllerTest < FunctionalTestCase
            project: { "id_#{@proj1.id}" => "0" }
          })
     assert_project_checks(@proj1.id => :no_field, @proj2.id => :unchecked)
-  end
-
-  def test_open_membership_project_checkboxes_in_create_observation
-    project = projects(:open_membership_project)
-
-    login("katrina")
-    get(:new)
-    assert_project_checks(project.id => :checked)
   end
 
   def test_project_checkboxes_in_update_observation
