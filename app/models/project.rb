@@ -424,7 +424,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
       merge(
         Location.in_box(n: location.north, s: location.south,
                         e: location.east, w: location.west).
-                 # This is safe (doesn't invert observatios.where(lat: nil))
+                 # This is safe (doesn't invert observations.where(lat: nil))
                  invert_where
       )
   end
