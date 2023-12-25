@@ -88,7 +88,7 @@ module ObservationsController::FormHelpers
     init_project_vars
     @projects.each do |proj|
       @project_checks[proj.id] = (proj.open_membership &&
-                                  proj.accepting_observations)
+                                  proj.current?)
     end
   end
 
@@ -109,9 +109,7 @@ module ObservationsController::FormHelpers
 
   def init_list_vars_for_reload(obs)
     init_list_vars
-    obs.species_lists.each do |list|
-      @lists << list unless @lists.include?(list)
-    end
+    @lists = @lists.union(obs.species_lists)
     @lists.each do |list|
       @list_checks[list.id] = param_lookup([:list, "id_#{list.id}"]) == "1"
     end
