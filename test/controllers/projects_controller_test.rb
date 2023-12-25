@@ -90,6 +90,16 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select("a[href*=?]", location_path(project.location.id))
   end
 
+  # exposes bug found ruing development
+  def test_show_project_with_location_stradding_date_line
+    project = projects(:wrangel_island_project)
+    login
+
+    get(:show, params: { id: project.id })
+
+    assert_template("show")
+  end
+
   def test_show_project_with_date_range
     project = projects(:pinned_date_range_project)
     login
