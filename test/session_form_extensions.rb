@@ -94,7 +94,7 @@ module SessionExtensions
       attr_accessor :disabled
 
       def initialize(args = {})
-        args.each { |k, v| send("#{k}=", v) }
+        args.each { |k, v| send(:"#{k}=", v) }
       end
 
       # Tiny class used to represent option in select field.

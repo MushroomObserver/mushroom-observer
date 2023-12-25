@@ -182,7 +182,7 @@ module LinkHelper
     else
       prefix = action == :destroy ? "" : "#{action}_"
       path_args = args.slice(:back) # adds back arg, or empty hash if blank
-      path = add_query_param(send("#{prefix}#{target.type_tag}_path", target.id,
+      path = add_query_param(send(:"#{prefix}#{target.type_tag}_path", target.id,
                                   **path_args))
       identifier = "#{action}_#{target.type_tag}_link_#{target.id}"
     end

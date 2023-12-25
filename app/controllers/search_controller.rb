@@ -77,9 +77,9 @@ class SearchController < ApplicationController
          :location, :name, :observation, :project, :species_list, :user
       redirect_to_search_or_index(
         pattern: pattern,
-        search_path: send("#{type.to_s.pluralize}_path",
+        search_path: send(:"#{type.to_s.pluralize}_path",
                           params: { pattern: pattern }.merge(special_params)),
-        index_path: send("#{type.to_s.pluralize}_path", special_params)
+        index_path: send(:"#{type.to_s.pluralize}_path", special_params)
       )
     else
       flash_error(:runtime_invalid.t(type: :search, value: type.inspect))

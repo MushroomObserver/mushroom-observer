@@ -304,7 +304,7 @@ class CollectionNumbersController < ApplicationController
   def normalize_parameters
     [:name, :number].each do |arg|
       val = @collection_number.send(arg).to_s.strip_html.strip_squeeze
-      @collection_number.send("#{arg}=", val)
+      @collection_number.send(:"#{arg}=", val)
     end
   end
 

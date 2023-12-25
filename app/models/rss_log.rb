@@ -196,7 +196,7 @@ class RssLog < AbstractModel
   # Clear association with target.
   def clear_target_id
     RssLog.all_types.each do |type|
-      send("#{type}_id=", nil)
+      send(:"#{type}_id=", nil)
     end
   end
 

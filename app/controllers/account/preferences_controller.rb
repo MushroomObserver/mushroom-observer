@@ -94,7 +94,7 @@ module Account
     end
 
     def update_pref(pref, val)
-      @user.send("#{pref}=", val) if @user.send(pref) != val
+      @user.send(:"#{pref}=", val) if @user.send(pref) != val
     end
 
     def update_content_filter(pref, val)

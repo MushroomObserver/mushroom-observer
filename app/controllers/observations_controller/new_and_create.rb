@@ -65,7 +65,7 @@ module ObservationsController::NewAndCreate
     return unless last_observation && last_observation.created_at > 1.hour.ago
 
     %w[when where location is_collection_location gps_hidden].each do |attr|
-      @observation.send("#{attr}=", last_observation.send(attr))
+      @observation.send(:"#{attr}=", last_observation.send(attr))
     end
 
     last_observation.projects.where(open_membership: false).

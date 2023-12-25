@@ -92,15 +92,15 @@ class Description < AbstractModel
   end
 
   def parent_id
-    send("#{parent_type}_id")
+    send(:"#{parent_type}_id")
   end
 
   def parent=(val)
-    send("#{parent_type}=", val)
+    send(:"#{parent_type}=", val)
   end
 
   def parent_id=(val)
-    send("#{parent_type}_id=", val)
+    send(:"#{parent_type}_id=", val)
   end
 
   # Return parent's class name in lowercase, e.g. 'name' or 'location'.
@@ -207,7 +207,7 @@ class Description < AbstractModel
   #
   def all_notes=(notes)
     self.class.all_note_fields.each do |field|
-      send("#{field}=", notes[field])
+      send(:"#{field}=", notes[field])
     end
   end
 
