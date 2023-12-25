@@ -47,7 +47,7 @@ xml.response(
             xml.agent(@data.authors(desc.id), role: "author")
             xml.dcterms(:modified,
                         desc.updated_at.utc.strftime("%Y-%m-%dT%H:%M:%SZ"))
-            xml.dc(:title, "form_names_#{f}".to_sym.l, "xml:lang" => lang)
+            xml.dc(:title, :"form_names_#{f}".l, "xml:lang" => lang)
             xml.dc(:language, lang)
             xml.license(@data.license_url(desc.license_id))
             xml.dcterms(:rightsHolder, @data.authors(desc.id))
@@ -55,7 +55,7 @@ xml.response(
             # The following mapping assumes that this is being read in English
             xml.subject(
               "http://rs.tdwg.org/ontology/voc/SPMInfoItems#" \
-              "#{"form_names_#{f}".to_sym.l.delete(" ")}"
+              "#{:"form_names_#{f}".l.delete(" ")}"
             )
 
             xml.dc(:description, desc.send(f).tp, "xml:lang" => lang)

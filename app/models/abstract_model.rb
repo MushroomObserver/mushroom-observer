@@ -703,14 +703,14 @@ class AbstractModel < ApplicationRecord
 
     if autolog_events.include?(event)
       touch = false
-    elsif autolog_events.include?("#{event}!".to_sym)
+    elsif autolog_events.include?(:"#{event}!")
       touch = true
     else
       return
     end
 
     type = type_tag
-    msg = "log_#{type}_#{event}".to_sym
+    msg = :"log_#{type}_#{event}"
     orphan ? orphan_log(msg, touch: touch) : log(msg, touch: touch)
   end
 

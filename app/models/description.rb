@@ -288,7 +288,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep admin groups.
   def self.admins_join_table
-    "#{table_name.singularize}_admins".to_sym
+    :"#{table_name.singularize}_admins"
   end
 
   # Wrapper around class method of same name
@@ -298,7 +298,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep writer groups.
   def self.writers_join_table
-    "#{table_name.singularize}_writers".to_sym
+    :"#{table_name.singularize}_writers"
   end
 
   # Wrapper around class method of same name
@@ -308,7 +308,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep reader groups.
   def self.readers_join_table
-    "#{table_name.singularize}_readers".to_sym
+    :"#{table_name.singularize}_readers"
   end
 
   # Wrapper around class method of same name
@@ -446,7 +446,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep authors.
   def self.authors_join_table
-    "#{table_name.singularize}_authors".to_sym
+    :"#{table_name.singularize}_authors"
   end
 
   # Wrapper around class method of same name
@@ -456,7 +456,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep editors.
   def self.editors_join_table
-    "#{table_name.singularize}_editors".to_sym
+    :"#{table_name.singularize}_editors"
   end
 
   # Wrapper around class method of same name

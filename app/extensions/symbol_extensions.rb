@@ -198,7 +198,7 @@ class Symbol
       elsif (y = x.sub(/s$/i, "")) &&
             args.key?(arg = y.to_sym)
         val = args[arg]
-        val.is_a?(Symbol) ? "#{val}s".to_sym.l : val.to_s.strip_html
+        val.is_a?(Symbol) ? :"#{val}s".l : val.to_s.strip_html
 
       # Want :TYPE, given :type.
       elsif args.key?(arg = x.downcase.to_sym) &&
@@ -215,7 +215,7 @@ class Symbol
             (y == y.upcase)
         val = args[arg]
         if val.is_a?(Symbol)
-          "#{val.to_s.upcase}S".to_sym.l
+          :"#{val.to_s.upcase}S".l
         else
           val.to_s.strip_html.upcase_first
         end
@@ -233,7 +233,7 @@ class Symbol
       elsif args.key?(arg = y.downcase.to_sym)
         val = args[arg]
         if val.is_a?(Symbol)
-          "#{val}s".to_sym.l.upcase_first
+          :"#{val}s".l.upcase_first
         else
           val.to_s.strip_html.upcase_first
         end

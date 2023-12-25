@@ -185,11 +185,11 @@ module Account
     end
 
     def success
-      "#{email_msg_prefix}_success".to_sym
+      :"#{email_msg_prefix}_success"
     end
 
     def email_note
-      "#{email_msg_prefix}_note".to_sym
+      :"#{email_msg_prefix}_note"
     end
 
     def email_type

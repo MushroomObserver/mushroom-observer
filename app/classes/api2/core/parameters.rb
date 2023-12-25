@@ -47,7 +47,7 @@ module API2::Parameters
       key = key.to_s.tr("_", " ")
       if key == "help"
         val = @key if val == 1
-        tag = "api_help_#{val}".to_sym
+        tag = :"api_help_#{val}"
         tag.l
       elsif key != "limit" && val == true
         key

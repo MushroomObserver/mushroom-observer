@@ -116,7 +116,7 @@ module DescriptionsHelper
     list = list_descriptions(object: object).map { |link| indent + link }
     any = list.any?
     list.unshift(head)
-    list << indent + "show_#{type}_no_descriptions".to_sym.t unless any
+    list << indent + :"show_#{type}_no_descriptions".t unless any
     html = list.safe_join(safe_br)
     html = tag.div(html)
 
