@@ -415,8 +415,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   def obs_geoloc_outside_project_location
     observations.
       where.not(observations: { lat: nil }).
-      outside_box(n: location.north, s: location.south,
-                  e: location.east, w: location.west)
+      not_in_box(n: location.north, s: location.south,
+                 e: location.east, w: location.west)
   end
 
   def obs_without_geoloc_location_not_contained_in_location
@@ -424,7 +424,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
       merge(
         Location.in_box(n: location.north, s: location.south,
                         e: location.east, w: location.west).
-                 invert_where # NOTE: this is safe (doesn't invert lat: nil)
+                 # This is safe (doesn't invert observatios.where(lat: nil))
+                 invert_where
       )
   end
 

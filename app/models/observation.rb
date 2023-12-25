@@ -428,26 +428,29 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
             )
           end
         }
-  scope :outside_box, # Use named parameters (n, s, e, w), any order
+  scope :not_in_box, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
           box = Mappable::Box.new(
             north: args[:n], south: args[:s], east: args[:e], west: args[:w]
           )
-          return none unless box.valid?
+
+          return Observation.all unless box.valid?
 
           # resize box by epsilon to create leeway for Float rounding
           resized_box = box.expand(-0.00001)
 
           if box.straddles_180_deg?
             where(
-              (Observation[:lat] < resized_box.south).
-               or.where(Observation[:lat] > resized_box.north).
-               or.where(Observation[:long] < resized_box.west).
-               or.where(Observation[:long] > resized_box.east)
+              Observation[:lat].eq(nil).or(Observation[:long].eq(nil)).
+              or(Observation[:lat] < resized_box.south).
+              or(Observation[:lat] > resized_box.north).
+              or((Observation[:long] < resized_box.west).
+                 and(Observation[:long] > resized_box.east))
             )
           else
             where(
-              (Observation[:lat] < resized_box.south).
+              Observation[:lat].eq(nil).or(Observation[:long].eq(nil)).
+              or(Observation[:lat] < resized_box.south).
               or(Observation[:lat] > resized_box.north).
               or(Observation[:long] < resized_box.west).
               or(Observation[:long] > resized_box.east)
