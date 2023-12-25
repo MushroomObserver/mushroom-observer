@@ -331,7 +331,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     # assert_selector("body.users__show", wait: 30)
     # page.go_back
 
-    # Test the edit naming form link. 
+    # Test the edit naming form link.
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)
       assert_selector(".edit_naming_link_#{nam.id}")
