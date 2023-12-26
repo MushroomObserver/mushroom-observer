@@ -1934,7 +1934,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_pattern_search
-    expect = Location.all.select { |l| l.display_name =~ /california/i }
+    expect = Location.select { |l| l.display_name =~ /california/i }
     assert_query(expect,
                  :Location, :pattern_search, pattern: "California", by: :id)
     assert_query([locations(:elgin_co).id],

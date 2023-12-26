@@ -1279,7 +1279,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(species_list: spl.title))
     assert_api_results([img1, img2])
 
-    attached   = Image.all.select { |i| i.observations.count.positive? }
+    attached   = Image.select { |i| i.observations.count.positive? }
     unattached = Image.all - attached
     assert_not_empty(attached)
     assert_not_empty(unattached)
@@ -2707,23 +2707,23 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(user: "dick"))
     assert_api_results(projs)
 
-    projs = Project.all.select { |p| p.images.any? }
+    projs = Project.select { |p| p.images.any? }
     assert_not_empty(projs)
     assert_api_pass(params.merge(has_images: "yes"))
     assert_api_results(projs)
 
-    projs = Project.all.select { |p| p.observations.any? }
+    projs = Project.select { |p| p.observations.any? }
     assert_not_empty(projs)
     assert_api_pass(params.merge(has_observations: "yes"))
     assert_api_results(projs)
 
-    projs = Project.all.select { |p| p.species_lists.any? }
+    projs = Project.select { |p| p.species_lists.any? }
     assert_not_empty(projs)
     assert_api_pass(params.merge(has_species_lists: "yes"))
     assert_api_results(projs)
 
     Comment.create!(user: katrina, target: proj, summary: "blah")
-    projs = Project.all.select { |p| p.comments.any? }
+    projs = Project.select { |p| p.comments.any? }
     assert_not_empty(projs)
     assert_api_pass(params.merge(has_comments: "yes"))
     assert_api_results(projs)
