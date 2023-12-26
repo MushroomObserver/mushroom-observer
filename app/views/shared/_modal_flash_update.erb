@@ -1,0 +1,9 @@
+<%#
+Update the modal_#{identifier}_flash div. Needs an local_assigns[:identifier]
+Actions in modals may give flash warnings that don't interrupt flow.
+This shows the message in the modal to maintain attention on the msg, if any
+%>
+
+<%= turbo_stream.update("modal_#{identifier}_flash") do
+  flash_notices_html
+end %>

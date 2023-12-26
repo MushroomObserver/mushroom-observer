@@ -6,14 +6,13 @@ add_tab_set(support_donate_tabs)
 amounts = [25.00, 50.00, 100.00, 200.00].freeze
 
 url = { controller: "/support", action: :confirm }
-
-javascript_include "donate"
 %>
 
 <%= :donate_thanks.tp %>
 <%= :donate_explanation.tp %>
 
-<%= form_with(model: @donation, url: url) do |f| %>
+<%= form_with(model: @donation, url: url,
+              data: { controller: "donate" }) do |f| %>
 
   <div class="row">
     <% amounts.each do |a| %>
@@ -26,10 +25,15 @@ javascript_include "donate"
 
   <%= radio_with_label(form: f, field: :amount, value: "other",
                        label: "#{:donate_other.t}: ",
-                       class: "d-inline-block") %>
-  <%= text_field_with_label(form: f, field: :other_amount, size: 7,
-                            label: "$ ", class: "d-inline-block ml-4",
-                            inline: true) %>
+                       class: "d-inline-block",
+                       data: { donate_target: "otherCheck" }) %>
+
+  <%= text_field_with_label(
+    form: f, field: :other_amount, size: 7, label: "$ ",
+    class: "d-inline-block ml-4", inline: true,
+    data: { donate_target: "otherAmount",
+            action: "click->donate#checkOther keyup->donate#convert" }
+  ) %>
 
   <%= check_box_with_label(form: f, field: :recurring,
                            label: :donate_recurring.t) %>

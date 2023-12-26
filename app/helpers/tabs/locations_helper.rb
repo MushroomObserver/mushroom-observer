@@ -116,7 +116,7 @@ module Tabs
     # link attribute arrays
     def location_form_new_tabs(location:)
       tabs = [locations_index_tab]
-      tabs += location_search_tabs(location.name)
+      tabs += location_search_tabs(location.name) if location&.name
       tabs
     end
 
@@ -125,7 +125,7 @@ module Tabs
         locations_index_tab,
         object_return_tab(location)
       ]
-      tabs += location_search_tabs(location.name)
+      tabs += location_search_tabs(location.name) if location&.name
       tabs
     end
 

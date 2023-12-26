@@ -3,7 +3,7 @@
 require("application_system_test_case")
 
 class TranslationsSystemTest < ApplicationSystemTestCase
-  def test_edit_translation_ajax_form
+  def test_edit_translation_turbo_form
     # browser = page.driver.browser
     rolf = users("rolf")
     login!(rolf)
@@ -64,6 +64,7 @@ class TranslationsSystemTest < ApplicationSystemTestCase
           assert_field("tag_one", type: :textarea, with: old_one)
           fill_in("tag_one", with: "uno")
           within("#translation_form") { click_commit }
+          assert_selector("#str_one.translation-updated", text: "uno")
 
           within("#translations_index") { assert_text("uno") }
           assert_equal("uno", :one.l)

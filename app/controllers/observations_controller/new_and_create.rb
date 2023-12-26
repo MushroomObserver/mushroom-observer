@@ -47,7 +47,7 @@ module ObservationsController::NewAndCreate
     @images      = []
     @good_images = []
     init_specimen_vars
-    init_project_vars
+    init_project_vars_for_create
     init_list_vars
     defaults_from_last_observation_created
   end
@@ -67,9 +67,14 @@ module ObservationsController::NewAndCreate
     %w[when where location is_collection_location gps_hidden].each do |attr|
       @observation.send("#{attr}=", last_observation.send(attr))
     end
-    last_observation.projects.each do |project|
-      @project_checks[project.id] = true unless project.open_membership
-    end
+
+    last_observation.projects.where(open_membership: false).
+      find_each do |project|
+        next unless project.current?
+
+        @project_checks[project.id] = true
+      end
+
     last_observation.species_lists.each do |list|
       if check_permission(list)
         @lists << list unless @lists.include?(list)
@@ -92,6 +97,7 @@ module ObservationsController::NewAndCreate
     success = true
     success = false unless validate_params(params)
     success = false unless validate_object(@observation)
+    success = false unless validate_projects(params)
     success = false if @name && !validate_object(@naming)
     success = false if @name && !@vote.value.nil? && !validate_object(@vote)
     success = false if @bad_images != []
@@ -304,6 +310,7 @@ module ObservationsController::NewAndCreate
     @images          = @bad_images
     @new_image.when  = @observation.when
     init_specimen_vars_for_reload
+    init_project_vars_for_create
     init_project_vars_for_reload(@observation)
     init_list_vars_for_reload(@observation)
     render(action: :new, location: new_observation_path(q: get_query_param))

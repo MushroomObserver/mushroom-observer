@@ -29,22 +29,22 @@ add_project_banner(@project)
   <% end %>
 
   <p><b><%= :show_project_created_at.t %>:</b> <%= @project.created_at.web_date %></p>
-
+  <p>
+    <% if @project.observations.any? %>
+      <b><%= link_to("#{@project.observations.length} #{:OBSERVATIONS.t}",
+                    observations_path(project: @project.id),
+                    { class: "btn btn-default btn-lg" }) %></b>
+      <b><%= link_to("#{@project.name_count} #{:NAMES.t}",
+                    checklist_path(project_id: @project.id),
+                    { class: "btn btn-default btn-lg" }) %></b>
+    <% end %>
+    <b><%= link_to("#{@project.user_group.users.count} #{:MEMBERS.t}",
+                  project_members_path(project_id: @project.id),
+                  { class: "btn btn-default btn-lg" }) %></b>
+  </p>
 <% end %>
 
-<p>
-  <% if @project.observations.any? %>
-    <b><%= link_to("#{@project.observations.length} #{:OBSERVATIONS.t}",
-                   observations_path(project: @project.id),
-                   { class: "btn btn-default btn-lg" }) %></b>
-    <b><%= link_to("#{@project.name_count} #{:NAMES.t}",
-                   checklist_path(project_id: @project.id),
-                   { class: "btn btn-default btn-lg" }) %></b>
-  <% end %>
-  <b><%= link_to("#{@project.user_group.users.count} #{:MEMBERS.t}",
-                 project_members_path(project_id: @project.id),
-                 { class: "btn btn-default btn-lg" }) %></b>
-</p>
+
 <br/>
 <p>
 <% if @project.can_join?(@user) %>
@@ -53,12 +53,37 @@ add_project_banner(@project)
                   path: project_members_path(project_id: @project.id,
                                              candidate: @user.id,
                                              target: :project_index)) %>
-<% elsif @project.can_leave?(@user) %>
-  <%= put_button(name: :show_project_leave.t,
-                 class: "btn btn-default btn-sm",
-                 path: project_member_path(project_id: @project.id,
-                                           candidate: @user.id,
-                                           target: :project_index)) %>
+<% elsif @project.is_member?(@user) %>
+  <% if @project.trusted_by?(@user) %>
+    <%= put_button(name: :change_member_status_revoke_trust.l,
+                   class: "btn btn-default btn-sm",
+                   path: project_member_path(project_id: @project.id,
+                                             candidate: @user.id,
+                                             commit: :change_member_status_revoke_trust.l,
+                                             target: :project_index)) %>
+  <% else %>
+    <%= put_button(name: :change_member_hidden_gps_trust.l,
+                   class: "btn btn-default btn-sm",
+                   path: project_member_path(project_id: @project.id,
+                                             candidate: @user.id,
+                                             commit: :change_member_hidden_gps_trust.l,
+                                             target: :project_index)) %>
+  <% end %>
+  <% unless @project.can_edit_content?(@user) %>
+    <%= put_button(name: :change_member_editing_trust.l,
+                   class: "btn btn-default btn-sm",
+                   path: project_member_path(project_id: @project.id,
+                                             candidate: @user.id,
+                                             commit: :change_member_editing_trust.l,
+                                             target: :project_index)) %>
+  <% end %>
+  <% if @project.can_leave?(@user) %>
+    <%= put_button(name: :show_project_leave.t,
+                   class: "btn btn-default btn-sm",
+                   path: project_member_path(project_id: @project.id,
+                                             candidate: @user.id,
+                                             target: :project_index)) %>
+  <% end %>
 <% end %>
 
 <% if check_permission(@project) %>
@@ -74,6 +99,6 @@ add_project_banner(@project)
 </p>
 
 <%= render(partial: "comments/comments_for_object",
-           locals: { object: @project, controls: true, limit: nil }) %>
+           locals: { object: @project, controls: @user, limit: nil }) %>
 
 <%= show_object_footer(@project) %>

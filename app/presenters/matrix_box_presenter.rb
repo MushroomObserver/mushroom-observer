@@ -104,7 +104,7 @@ class MatrixBoxPresenter < BasePresenter
       images: observation.images,
       thumb_image: thumb_image,
       image_link: observation.show_link_args, # false for thumb thru images
-      obs_data: obs_data_hash(observation),
+      obs: observation,
       context: :matrix_box
     }
   end
@@ -161,9 +161,10 @@ class MatrixBoxPresenter < BasePresenter
     observation.show_link_args
   end
 
-  def obs_data_hash(observation)
+  # 20231125 Switched from a hash of { id:, obs: } to just obs
+  def obs_data(observation)
     return {} unless observation&.respond_to?(:is_collection_location)
 
-    { id: observation.id, obs: observation }
+    observation
   end
 end

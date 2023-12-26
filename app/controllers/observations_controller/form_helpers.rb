@@ -55,10 +55,8 @@ module ObservationsController::FormHelpers
 
   # Initialize image for the dynamic image form at the bottom.
   def init_new_image_var(default_date)
-    @new_image = Image.new
-    @new_image.when             = default_date
-    @new_image.license          = @user.license
-    @new_image.copyright_holder = @user.legal_name
+    @new_image = Image.new(when: default_date, license: @user.license,
+                           copyright_holder: @user.legal_name)
   end
 
   def init_specimen_vars
@@ -84,14 +82,17 @@ module ObservationsController::FormHelpers
     @projects = User.current.projects_member(order: :title,
                                              include: :user_group)
     @project_checks = {}
+  end
+
+  def init_project_vars_for_create
+    init_project_vars
     @projects.each do |proj|
       @project_checks[proj.id] = (proj.open_membership &&
-                                  proj.accepting_observations)
+                                  proj.current?)
     end
   end
 
   def init_project_vars_for_reload(obs)
-    init_project_vars
     obs.projects.each do |proj|
       @projects << proj unless @projects.include?(proj)
     end
@@ -108,9 +109,7 @@ module ObservationsController::FormHelpers
 
   def init_list_vars_for_reload(obs)
     init_list_vars
-    obs.species_lists.each do |list|
-      @lists << list unless @lists.include?(list)
-    end
+    @lists = @lists.union(obs.species_lists)
     @lists.each do |list|
       @list_checks[list.id] = param_lookup([:list, "id_#{list.id}"]) == "1"
     end

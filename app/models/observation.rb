@@ -99,7 +99,8 @@
 #  without_location
 #  at_location(location)
 #  in_region(where)
-#  in_box(n,s,e,w)
+#  in_box(n,s,e,w) geoloc is in the box
+#  outside(n,s,e,w) geoloc is outside the box
 #  is_collection_location
 #  not_collection_location
 #  with_image
@@ -183,7 +184,7 @@
 #  notify_users::               After save/destroy/image: send email.
 #  announce_consensus_change::  After consensus changes: send email.
 #
-class Observation < AbstractModel
+class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   belongs_to :thumb_image, class_name: "Image",
                            inverse_of: :thumb_glossary_terms
   belongs_to :name # (used to cache consensus name)
@@ -401,32 +402,62 @@ class Observation < AbstractModel
         }
   scope :in_box, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
-          box = Box.new(
+          box = Mappable::Box.new(
             north: args[:n], south: args[:s], east: args[:e], west: args[:w]
           )
           return none unless box.valid?
 
-          # expand box by epsilon to create leeway for Float rounding
+          # resize box by epsilon to create leeway for Float rounding
           # Fixes a bug where Califoria fixture was not in a box
           # defined by the fixture's north, south, east, west
-          expanded_box = box.expand(0.00001)
+          resized_box = box.expand(0.00001)
 
           if box.straddles_180_deg?
             where(
-              (Observation[:lat] >= expanded_box.south).
-              and(Observation[:lat] <= expanded_box.north).
-              and(Observation[:long] >= expanded_box.west).
-              or(Observation[:long] <= expanded_box.east)
+              (Observation[:lat] >= resized_box.south).
+              and(Observation[:lat] <= resized_box.north).
+              and(Observation[:long] >= resized_box.west).
+              or(Observation[:long] <= resized_box.east)
             )
           else
             where(
-              (Observation[:lat] >= expanded_box.south).
-              and(Observation[:lat] <= expanded_box.north).
-              and(Observation[:long] >= expanded_box.west).
-              and(Observation[:long] <= expanded_box.east)
+              (Observation[:lat] >= resized_box.south).
+              and(Observation[:lat] <= resized_box.north).
+              and(Observation[:long] >= resized_box.west).
+              and(Observation[:long] <= resized_box.east)
             )
           end
         }
+  scope :not_in_box, # Use named parameters (n, s, e, w), any order
+        lambda { |**args|
+          box = Mappable::Box.new(
+            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
+          )
+
+          return Observation.all unless box.valid?
+
+          # resize box by epsilon to create leeway for Float rounding
+          resized_box = box.expand(-0.00001)
+
+          if box.straddles_180_deg?
+            where(
+              Observation[:lat].eq(nil).or(Observation[:long].eq(nil)).
+              or(Observation[:lat] < resized_box.south).
+              or(Observation[:lat] > resized_box.north).
+              or((Observation[:long] < resized_box.west).
+                 and(Observation[:long] > resized_box.east))
+            )
+          else
+            where(
+              Observation[:lat].eq(nil).or(Observation[:long].eq(nil)).
+              or(Observation[:lat] < resized_box.south).
+              or(Observation[:lat] > resized_box.north).
+              or(Observation[:long] < resized_box.west).
+              or(Observation[:long] > resized_box.east)
+            )
+          end
+        }
+
   scope :is_collection_location,
         -> { where(is_collection_location: true) }
   scope :not_collection_location,
@@ -484,12 +515,53 @@ class Observation < AbstractModel
     joins(species_lists: :project_species_lists).
       where(ProjectSpeciesList[:project_id] == project.id).distinct
   }
+  scope :show_includes, lambda {
+    includes(
+      :collection_numbers,
+      { comments: :user },
+      { external_links: { external_site: { project: :user_group } } },
+      { herbarium_records: [{ herbarium: :curators }, :user] },
+      { images: [:image_votes, :license, :projects, :user] },
+      { interests: :user },
+      :location,
+      :name,
+      { namings: [:name, :user, { votes: [:observation, :user] }] },
+      { projects: :admin_group },
+      :rss_log,
+      :sequences,
+      { species_lists: [:projects, :user] },
+      :thumb_image,
+      :user
+    )
+  }
+  scope :not_logged_in_show_includes, lambda {
+    strict_loading.includes(
+      { comments: :user },
+      { images: [:license, :user] },
+      :location,
+      :name,
+      { namings: :name },
+      :projects,
+      :thumb_image,
+      :user
+    )
+  }
+  scope :naming_includes, lambda {
+    includes(
+      :location, # ugh. worth it because of cache_content_filter_data
+      :name,
+      # Observation#find_matches complains synonym is not eager-loaded. TBD
+      { namings: [{ name: { synonym: :names } }, :user,
+                  { votes: [:observation, :user] }] },
+      :user
+    )
+  }
 
-  def is_location?
+  def location?
     false
   end
 
-  def is_observation?
+  def observation?
     true
   end
 
@@ -674,6 +746,13 @@ class Observation < AbstractModel
   # Is lat/long more than 10% outside of location extents?
   def lat_long_dubious?
     lat && location && !location.lat_long_close?(lat, long)
+  end
+
+  # Alias for access by Mappable::CollapsibleCollectionOfObjects
+  # which must provide `lng` for Google Maps from an obs OR a MapSet
+  # Makes related methods so much simpler: parallel data types.
+  def lng
+    long
   end
 
   def place_name_and_coordinates
@@ -943,6 +1022,7 @@ class Observation < AbstractModel
   # Look up the corresponding instance in our namings association.  If we are
   # careful to keep all the operations within the tree of assocations of the
   # observations, we should never need to reload anything.
+  # `find` here does not hit the db
   def lookup_naming(naming)
     # Disable cop; test suite chokes when the following "raise"
     # is re-written in "exploded" style (the Rubocop default)
@@ -1091,7 +1171,7 @@ class Observation < AbstractModel
 
   # Admin tool that refreshes the vote cache for all observations with a vote.
   def self.refresh_vote_cache
-    Observation.all.find_each(&:calc_consensus)
+    Observation.find_each(&:calc_consensus)
   end
 
   ##############################################################################

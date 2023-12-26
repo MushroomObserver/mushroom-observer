@@ -7,6 +7,13 @@
   }
 }
 
+// rss-log filter buttons with checkboxes
+.filter-form {
+  input[type=checkbox] {
+    vertical-align: text-top;
+  }
+}
+
 input.has-error,
 textarea.has-error,
 select.has-error {

@@ -18,7 +18,7 @@ add_tab_set(name_show_tabs(name: @name, user: @user))
 
     <div id="name_previous_export" class="mb-4">
       <%= show_previous_version(@name) %>
-      <%= set_export_status_controls(@name) %>
+      <%= export_status_controls(@name) %>
     </div>
 
     <div id="name_authors_editors">
@@ -36,19 +36,10 @@ add_tab_set(name_show_tabs(name: @name, user: @user))
     <%= render(partial: "names/show/nomenclature",
               locals: { name: @name, synonyms: true }) %>
 
-    <div class="row">
+    <%= tag.div(class: "row", data: { controller: "name-panels" }) do %>
       <%= render(partial: "names/show/classification_panel") %>
       <%= render(partial: "names/show/lifeform_panel") %>
-    </div>
-
-    <% inject_javascript_at_end %(
-      var d1 = jQuery("#classification_section");
-      var d2 = jQuery("#lifeform_section");
-      var h1 = d1.height();
-      var h2 = d2.height();
-      if (h1 > h2) d2.height(h1);
-      if (h1 < h2) d1.height(h2);
-    ) %>
+    <% end %>
 
     <% if @name.has_notes? %>
       <%= render(partial: "names/show/notes_panel") %>
@@ -72,6 +63,6 @@ add_tab_set(name_show_tabs(name: @name, user: @user))
   # ----------------------------------------
 %>
 <%= render(partial: "comments/comments_for_object",
-           locals: {object: @name, controls: true, limit: nil}) %>
+           locals: {object: @name, controls: @user, limit: nil}) %>
 <%= :show_name_num_notifications.t(num: @name.interests) %>
 <%= show_object_footer(@name) %>

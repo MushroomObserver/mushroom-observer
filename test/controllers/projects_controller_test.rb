@@ -3,13 +3,23 @@
 require("test_helper")
 
 class ProjectsControllerTest < FunctionalTestCase
-  def build_params(title, summary)
+  def build_params(
+    title, summary, start_date: nil, end_date: nil,
+    dates_any: "false"
+  )
     {
       project: {
         title: title,
         summary: summary,
         place_name: "",
-        open_membership: false
+        open_membership: false,
+        "start_date(1i)" => start_date&.year,
+        "start_date(2i)" => start_date&.month,
+        "start_date(3i)" => start_date&.day,
+        "end_date(1i)" => end_date&.year,
+        "end_date(2i)" => end_date&.month,
+        "end_date(3i)" => end_date&.day,
+        dates_any: dates_any
       },
       upload: {
         license_id: licenses(:ccnc25).id,
@@ -52,6 +62,7 @@ class ProjectsControllerTest < FunctionalTestCase
     login("zero") # Not the owner of eol_project
     p_id = projects(:eol_project).id
     get(:show, params: { id: p_id })
+
     assert_template("show")
     assert_select(
       "a[href*=?]", new_project_admin_request_path(project_id: p_id)
@@ -77,6 +88,25 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:show, params: { id: project.id })
 
     assert_select("a[href*=?]", location_path(project.location.id))
+  end
+
+  # exposes bug found ruing development
+  def test_show_project_with_location_stradding_date_line
+    project = projects(:wrangel_island_project)
+    login
+
+    get(:show, params: { id: project.id })
+
+    assert_template("show")
+  end
+
+  def test_show_project_with_date_range
+    project = projects(:pinned_date_range_project)
+    login
+    get(:show, params: { id: project.id })
+
+    assert_select("#header", { text: /#{project.date_range}/ },
+                  "Date range missing from Project header")
   end
 
   def test_index
@@ -145,10 +175,34 @@ class ProjectsControllerTest < FunctionalTestCase
 
   def test_add_project
     requires_login(:new)
+
     assert_form_action(action: :create)
+    assert_select(
+      'select[id ^= "project_start_date"]', { count: 3 },
+      "Form should have fields to select starting month, day, year"
+    )
+    assert_select(
+      'select[id ^= "project_end_date"]', { count: 3 },
+      "Form should have fields to select ending month, day, year"
+    )
+
+    assert_select(
+      "input[type=radio][id=project_dates_any_true]", { count: 1 },
+      "Missing radio button to make project dates any dates"
+    )
+    assert_select(
+      "input[type=radio][id=project_dates_any_false]", { count: 1 },
+      "Missing radio button to make project dates a range"
+    )
+
+    assert_select(
+      "input[type=radio][id=project_dates_any_true][checked=checked]",
+      { count: 1 },
+      "'Any' dates radio button should be checked by default"
+    )
   end
 
-  def test_create_project
+  def test_create_project_with_date_range
     title = "Amanita Research"
     summary = "The Amanita Research Project"
     project = Project.find_by(title: title)
@@ -157,12 +211,21 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_nil(user_group)
     admin_group = UserGroup.find_by(name: "#{title}.admin")
     assert_nil(admin_group)
-    post_requires_login(:create, build_params(title, summary))
+    start_date = Date.tomorrow
+    end_date = start_date + 3.days
+
+    post_requires_login(
+      :create, build_params(title, summary,
+                            start_date: start_date, end_date: end_date)
+    )
+
     project = Project.find_by(title: title)
     assert_redirected_to(project_path(project.id))
     assert(project)
     assert_equal(title, project.title)
     assert_equal(summary, project.summary)
+    assert_equal(start_date, project.start_date)
+    assert_equal(end_date, project.end_date)
     assert_equal(rolf, project.user)
     user_group = UserGroup.find_by(name: title)
     assert(user_group)
@@ -170,6 +233,47 @@ class ProjectsControllerTest < FunctionalTestCase
     admin_group = UserGroup.find_by(name: "#{title}.admin")
     assert(admin_group)
     assert_equal([rolf], admin_group.users)
+  end
+
+  def test_create_project_with_any_dates
+    title = "Project without start or end"
+    start = Time.zone.today
+
+    post_requires_login(
+      :create,
+      build_params(
+        title, "", start_date: start, end_date: start, dates_any: true
+      )
+    )
+
+    project = Project.find_by(title: title)
+    assert_redirected_to(project_path(project.id))
+    assert_nil(project.start_date)
+    assert_nil(project.end_date)
+  end
+
+  def test_create_project_end_before_start
+    title = "Backward in Time"
+    start_date = Time.zone.today
+    params = build_params(
+      title, "Ends before it starts",
+      start_date: start_date, end_date: start_date - 1.day, dates_any: false
+    )
+
+    assert_no_difference("Project.count", "Project ends before start") do
+      post_requires_login(:create, params)
+    end
+
+    assert_flash_error("Missing flash error when Project ends before it starts")
+    assert_nil(
+      Project.find_by(title: title),
+      "It chould not create a Project which ends before ti starts"
+    )
+
+    assert_form_action(
+      { action: :create, id: nil },
+      "Failed to return to form when Project ended before it started"
+    )
   end
 
   def test_add_project_existing
@@ -197,22 +301,17 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_form_action(action: :update, id: project.id.to_s)
   end
 
-  def test_update_project
-    title = "EOL Project"
-    summary = "This has become the Entoloma On Line project"
-    project = Project.find_by(title: title)
-    assert(project)
-    assert_not_equal(summary, project.summary)
-    assert_not(project.open_membership)
-    params = build_params(title, summary)
-    params[:project][:open_membership] = true
-    params[:id] = project.id
-    put_requires_user(:update, { action: :show }, params)
-    project = Project.find_by(title: title)
-    assert_redirected_to(project_path(project.id))
-    assert(project)
-    assert_equal(summary, project.summary)
-    assert(project.open_membership)
+  def test_edit_project_any_date
+    project = projects(:bolete_project)
+    assert_true(project.start_date.nil? && project.end_date.nil?,
+                "Test needs Project with nil start and end dates")
+    params = { id: project.id.to_s }
+
+    login(project.user.login)
+    post(:edit, params: params)
+
+    assert_select("#project_dates_any_true[checked]", true,
+                  "'Any' radio button should be selected")
   end
 
   def test_edit_project_empty_name
@@ -222,6 +321,49 @@ class ProjectsControllerTest < FunctionalTestCase
   def test_edit_project_existing
     edit_project_helper(projects(:bolete_project).title,
                         projects(:eol_project))
+  end
+
+  def test_update_project
+    title = "EOL Project"
+    summary = "This has become the Entoloma On Line project"
+    project = Project.find_by(title: title)
+    assert(project)
+    assert_not_equal(summary, project.summary)
+    assert_not(project.open_membership)
+    start_date = Time.zone.today
+    end_date = start_date + 4.days
+    params =
+      build_params(title, summary,
+                   start_date: start_date, end_date: end_date)
+
+    params[:project][:open_membership] = true
+    params[:id] = project.id
+
+    put_requires_user(:update, { action: :show }, params)
+
+    project = Project.find_by(title: title)
+    assert_redirected_to(project_path(project.id))
+    assert(project)
+    assert_equal(summary, project.summary)
+    assert(project.open_membership)
+    assert_equal(start_date, project.start_date)
+    assert_equal(end_date, project.end_date)
+  end
+
+  def test_update_project_end_before_start
+    proj = projects(:pinned_date_range_project)
+    start_date = Time.zone.today
+    params = build_params(
+      proj.title, proj.summary,
+      start_date: start_date, end_date: start_date - 1.day, dates_any: false
+    ).merge(id: proj.id)
+
+    login(proj.user.login)
+    patch(:update, params: params)
+
+    assert_flash_error("Missing flash error when Project ends before it starts")
+    assert_select("#title", { text: /Edit Project/ },
+                  "It should return to form if Project ends before it starts")
   end
 
   def test_destroy_project
@@ -290,7 +432,9 @@ class ProjectsControllerTest < FunctionalTestCase
     login("rolf")
     params = build_params("New Project", "New Summary")
     params[:id] = projects(:eol_project).id
+
     put(:update, params: params)
+
     assert_flash_success
     proj = proj.reload
     assert_equal("New Project", proj.title)
@@ -316,6 +460,14 @@ class ProjectsControllerTest < FunctionalTestCase
     post_requires_login(:create, params)
     project = Project.find_by(title: title)
     assert_equal(project.location.name, where)
+  end
+
+  def test_add_project_member
+    title = "Great Project"
+    params = build_params(title, title)
+    post_requires_login(:create, params)
+    project = Project.find_by(title: title)
+    assert_equal(1, project.project_members.count)
   end
 
   def test_bad_location

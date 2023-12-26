@@ -93,7 +93,7 @@ class ObservationsController
       params[:location] = where
       query = create_query(:Observation, :at_where,
                            user_where: where,
-                           location: Location.user_name(@user, where))
+                           location: Location.user_format(@user, where))
       show_selected_observations(query, always_index: 1)
     end
 

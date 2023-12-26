@@ -2,17 +2,20 @@
   add_page_title(:show_visual_model_title.t(name: @visual_model.name))
 %>
 
-<p id="notice"><%= notice %></p>
+<%= tag.p(notice, id: "notice") %>
 
-<p>
-  <%= link_to(:visual_group_create.t, new_visual_model_visual_group_path(@visual_model)) %> |
-  <%= link_to(:show_visual_model_edit.t, edit_visual_model_path(@visual_model)) %> |
-  <%= link_to(:show_visual_model_index.t, visual_models_path) %>
-</p>
+<%= tag.p do
+  [
+    link_to(:visual_group_create.t,
+            new_visual_model_visual_group_path(@visual_model)),
+    link_to(:show_visual_model_edit.t, edit_visual_model_path(@visual_model)),
+    link_to(:show_visual_model_index.t, visual_models_path)
+  ].safe_join(" | ")
+end %>
 
-<h3>Visual Groups</h3>
+<%= tag.h3("Visual Groups") %>
 
-<table class="table-striped table-visual-model mb-3 mt-3">
+<%= tag.table(class: "table-striped table-visual-model mb-3 mt-3") do %>
   <thead>
     <tr>
       <th><%= :NAME.t %></th>
@@ -36,4 +39,4 @@
       </tr>
     <% end %>
   </tbody>
-</table>
+<% end %>

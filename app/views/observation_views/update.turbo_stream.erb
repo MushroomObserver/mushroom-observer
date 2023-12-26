@@ -1,0 +1,10 @@
+<%# this is just replacing the whole toggle in both places %>
+<%= turbo_stream.replace("caption_reviewed_toggle_#{@obs_id}") do
+  mark_as_reviewed_toggle(id, selector = "caption_reviewed",
+                          label_class = "", reviewed = @reviewed)
+end %>
+
+<%= turbo_stream.replace("box_reviewed_toggle_#{@obs_id}") do
+  mark_as_reviewed_toggle(id, selector = "box_reviewed",
+                          label_class = "stretched-link", reviewed = @reviewed)
+end %>

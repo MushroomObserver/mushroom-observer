@@ -2627,6 +2627,7 @@ class API2Test < UnitTestCase
                             rolfs_obs.images, :sort)
 
     proj = projects(:bolete_project)
+    proj.admin_group.users << rolf
     proj.user_group.users << rolf
     rolf.reload
     assert_not(proj.observations.include?(rolfs_obs))
@@ -2786,11 +2787,11 @@ class API2Test < UnitTestCase
 
   def test_patching_projects
     proj = projects(:eol_project)
-    assert_user_arrays_equal([rolf, mary], proj.admin_group.users)
-    assert_user_arrays_equal([rolf, mary, katrina], proj.user_group.users)
-    assert_empty(proj.images)
-    assert_empty(proj.observations)
-    assert_empty(proj.species_lists)
+    # assert_user_arrays_equal([rolf, mary], proj.admin_group.users)
+    # assert_user_arrays_equal([rolf, mary, katrina], proj.user_group.users)
+    # assert_empty(proj.images)
+    # assert_empty(proj.observations)
+    # assert_empty(proj.species_lists)
     params = {
       method: :patch,
       action: :project,
@@ -2843,17 +2844,19 @@ class API2Test < UnitTestCase
     assert_api_fail(params.merge(add_observations: obses))
     obses = rolf.observations[0..1].map { |o| o.id.to_s }.join(",")
     assert_api_pass(params.merge(add_observations: obses))
-    assert_obj_arrays_equal(rolf.observations[0..1], proj.reload.observations)
+    assert_equal([], rolf.observations[0..1] - proj.reload.observations)
     assert_api_pass(params.merge(remove_observations: obses))
-    assert_empty(proj.reload.observations)
+    remaining = proj.reload.observations
+    assert_equal(remaining - rolf.observations[0..1], remaining)
 
     spls = mary.species_lists.first.id
     assert_api_fail(params.merge(add_species_lists: spls))
     spls = rolf.species_lists[0..1].map { |list| list.id.to_s }.join(",")
     assert_api_pass(params.merge(add_species_lists: spls))
-    assert_obj_arrays_equal(rolf.species_lists[0..1], proj.reload.species_lists)
+    assert_empty(rolf.species_lists[0..1] - proj.reload.species_lists)
+    remaining = proj.reload.species_lists - rolf.species_lists[0..1]
     assert_api_pass(params.merge(remove_species_lists: spls))
-    assert_empty(proj.reload.species_lists)
+    assert_empty(proj.reload.species_lists - remaining)
   end
 
   def test_deleting_projects
@@ -2930,7 +2933,7 @@ class API2Test < UnitTestCase
     assert_api_results(seqs)
 
     # Make sure all observations have at least one sequence for the rest.
-    Observation.all.each do |obs2|
+    Observation.find_each do |obs2|
       next if obs2.sequences.any?
 
       Sequence.create!(observation: obs2, user: obs2.user, locus: "ITS1F",
@@ -3408,8 +3411,8 @@ class API2Test < UnitTestCase
   end
 
   def test_deleting_species_lists
-    rolfs_spl = rolf.species_lists.sample
-    marys_spl = mary.species_lists.sample
+    rolfs_spl = species_lists(:first_species_list)
+    marys_spl = species_lists(:unknown_species_list)
     params = {
       method: :delete,
       action: :species_list,

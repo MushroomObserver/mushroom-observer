@@ -1,21 +1,24 @@
-<%= content_tag(:div, id: "results") do %>
+<%= tag.div(id: "results") do %>
   <%= paginate_block(@pages) do %>
-    <ul class="row list-unstyled mt-3">
+    <%= tag.ul(class: "row list-unstyled mt-3",
+               data: { controller: "matrix-table",
+                       action: "resize@window->matrix-table#rearrange" }) do %>
       <%= render(layout: "shared/matrix_table",
-               locals: {objects: @subset}) do |row| %>
+                 locals: { objects: @subset }) do |row| %>
         <%= matrix_box(id: row[0]) do %>
-          <%= panel_block do %>
-            <%= interactive_image(row[0], original: true, votes: false,
-                                  context: :matrix_box) %>
-            <%= render(partial: "visual_group_status_links",
-                       locals: {
-                         visual_group: visual_group,
-                         image_id: row[0],
-                         status: row[1]
-                       }) %>
+          <%= tag.div(class: "panel panel-default") do %>
+            <%= tag.div(class: "thumbnail-container") do
+              interactive_image(row[0], original: true, votes: false,
+                                  context: :matrix_box)
+            end %>
+            <%= tag.div(class: "panel-body") do
+              visual_group_status_links(
+                visual_group: visual_group, image_id: row[0], status: row[1]
+              )
+            end %>
           <% end %>
         <% end %><!-- .matrix-box -->
       <% end %>
-    </ul>
+    <% end %>
   <% end %>
 <% end %>

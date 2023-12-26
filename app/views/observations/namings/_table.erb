@@ -1,0 +1,37 @@
+<%
+# Maybe put this in the index to reduce partials?
+# But it's also called from observations/show/namings
+# Just the "table" of current namings, with headers
+namings = obs.namings.sort_by(&:created_at)
+any_names = obs.namings&.length&.positive?
+# N+1 - this has gotta go. We have each naming's votes already
+# votes = gather_users_votes(obs, @user)
+%>
+
+<%= tag.div(class: "namings-table panel panel-default mb-4",
+            id: "namings_table",
+            data: {
+              controller: "section-update",
+              updated_by: "modal_naming_#{obs.id}"
+            }) do %>
+
+  <%= render(partial: "observations/namings/table_header",
+             locals: { obs: obs }) %>
+
+  <%= tag.div(class: "list-group list-group-flush") do %>
+    <% if any_names
+      namings.each do |naming|
+        # n+1 should be ok
+        vote = naming.users_vote(@user) || Vote.new(value: 0) %>
+        <%= render(partial: "observations/namings/table_row",
+                   locals: { obs: obs, naming: naming, vote: vote }) %>
+      <% end
+    else %>
+      <%= tag.div(:show_namings_no_names_yet.t, class: "list-group-item") %>
+    <% end
+  end %>
+
+  <%= render(partial: "observations/namings/table_footer",
+             locals: { obs: obs }) %>
+
+<% end %>

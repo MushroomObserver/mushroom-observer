@@ -28,8 +28,11 @@ jobs:
       - name: Install additional tools
         run: sudo apt-get install exiftool
 
-      - name: Install Firefox
-        run: sudo apt-get install firefox
+      # - name: Install Firefox
+      #   run: sudo apt-get install firefox
+
+      - name: Install Chrome/Chromium
+        run: sudo apt-get install chromium-browser
 
       # MySQL is installed but does not run by default
       # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md#mysql

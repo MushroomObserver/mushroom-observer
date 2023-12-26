@@ -106,19 +106,24 @@ module Observations
       setup_image_dirs
       fixture = "#{MO.root}/test/images/geotagged.jpg"
       fixture = Rack::Test::UploadedFile.new(fixture, "image/jpeg")
-      Image.any_instance.stubs(:process_image).returns(false)
+      params =  { id: obs.id,
+                  image: { "when(1i)" => "2007",
+                           "when(2i)" => "3",
+                           "when(3i)" => "29",
+                           copyright_holder: "Douglas Smith",
+                           notes: "Some notes." },
+                  upload: { image1: fixture,
+                            image2: "",
+                            image3: "",
+                            image4: "" } }
+      image = images(:in_situ_image)
 
-      post(:create,
-           params: { id: obs.id,
-                     image: { "when(1i)" => "2007",
-                              "when(2i)" => "3",
-                              "when(3i)" => "29",
-                              copyright_holder: "Douglas Smith",
-                              notes: "Some notes." },
-                     upload: { image1: fixture,
-                               image2: "",
-                               image3: "",
-                               image4: "" } })
+      # simulate process_image failure
+      image.stub(:process_image, false) do
+        Image.stub(:new, image) do
+          post(:create, params: params)
+        end
+      end
 
       assert_flash_error("image.process_image failure should cause flash error")
       assert_redirected_to(permanent_observation_path(obs.id))
@@ -233,8 +238,12 @@ module Observations
       }
 
       login(image.user.login)
-      Image.any_instance.stubs(:save).returns(false)
-      put(:update, params: params)
+      # simulate image save failure
+      image.stub(:save, false) do
+        Image.stub(:safe_find, image) do
+          put(:update, params: params)
+        end
+      end
 
       assert(assert_select("#title").text.start_with?("Editing Image"),
              "It should return to form if image save fails")
@@ -258,7 +267,7 @@ module Observations
       assert_obj_arrays_equal([proj2], img1.projects)
       assert_obj_arrays_equal([],      img2.projects)
       assert_obj_arrays_equal([rolf, mary, katrina], proj1.user_group.users)
-      assert_obj_arrays_equal([dick], proj2.user_group.users)
+      assert_obj_arrays_equal([mary, dick], proj2.user_group.users)
 
       # NOTE: It is impossible, apparently, to get edit_image to fail,
       # so there is no way to test init_project_vars_for_reload().
@@ -275,7 +284,7 @@ module Observations
 
       login("mary")
       get(:new, params: { id: obs1.id })
-      assert_project_checks(proj1.id => :unchecked, proj2.id => :no_field)
+      assert_project_checks(proj1.id => :unchecked, proj2.id => :unchecked)
       get(:new, params: { id: obs2.id })
       assert_project_checks(proj1.id => :unchecked, proj2.id => :checked)
       get(:edit, params: { id: img1.id })
@@ -464,7 +473,7 @@ module Observations
       assert_nil(obs.thumb_image_id)
     end
 
-    def test_remove_images_2
+    def test_remove_images2
       obs = observations(:detailed_unknown_obs)
       images = obs.images
       assert(images.size > 1,

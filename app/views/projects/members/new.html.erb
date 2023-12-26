@@ -12,11 +12,11 @@ action = { controller: "/projects/members", action: :create,
 
   <%= form_with(url: action, id: "project_member_form") do |f| %>
 
-    <%= text_field_with_label(form: f, field: :candidate, size: 40,
-                              value: @candidate, placeholder: :start_typing.l,
-                              label: :LOGIN_NAME.t + ":",
-                              data: { autofocus: true,
-                                      autocompleter: :user }) %>
+    <%= autocompleter_field(
+      form: f, field: :candidate, value: @candidate,
+      label: :LOGIN_NAME.t + ":", size: 42, autofocus: true,
+      data: { autocomplete: :user }
+    ) %>
 
     <%= submit_button(form: f, button: :ADD.t, class: "ml-3") %>
 

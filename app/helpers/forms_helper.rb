@@ -5,6 +5,7 @@
 #  date_select_opts
 
 # helpers for form tags
+# rubocop:disable Metrics/ModuleLength
 module FormsHelper
   # Bootstrap submit button
   # <%= submit_button(form: f, button: button.t, center: true) %>
@@ -13,12 +14,24 @@ module FormsHelper
       return args[:button]
     end
 
-    opts = args.except(:form, :button, :class, :center)
+    submits_with = args[:submits_with] || submits_default_text(args[:button])
+    data = args[:data] || {}
+
+    opts = args.except(:form, :button, :class, :center, :data, :submits_with)
     opts[:class] = "btn btn-default"
     opts[:class] += " center-block my-3" if args[:center] == true
     opts[:class] += " #{args[:class]}" if args[:class].present?
+    opts[:data] = { turbo_submits_with: submits_with }.deep_merge(data)
 
     args[:form].submit(args[:button], opts)
+  end
+
+  def submits_default_text(button_text)
+    if button_text == :UPDATE.l
+      :UPDATING.l
+    else
+      :SUBMITTING.l
+    end
   end
 
   # form-agnostic button, type=button
@@ -75,11 +88,23 @@ module FormsHelper
 
     wrap_class = form_group_wrap_class(args, "checkbox")
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       args[:form].label(args[:field]) do
         concat(args[:form].check_box(args[:field], opts))
         concat(args[:label])
       end
+    end
+  end
+
+  def check_button_with_label(**args)
+    args = auto_label_if_form_is_account_prefs(args)
+    opts = separate_field_options_from_args(args)
+
+    wrap_class = form_group_wrap_class(args, "btn btn-default btn-sm")
+
+    args[:form].label(args[:field], class: wrap_class) do
+      [args[:form].check_box(args[:field], opts.merge(class: "mt-0 mr-2")),
+       args[:label]].safe_join
     end
   end
 
@@ -90,7 +115,7 @@ module FormsHelper
 
     wrap_class = form_group_wrap_class(args, "radio")
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       args[:form].label("#{args[:field]}_#{args[:value]}") do
         concat(args[:form].radio_button(args[:field], args[:value], opts))
         concat(args[:label])
@@ -108,7 +133,7 @@ module FormsHelper
     wrap_class = form_group_wrap_class(args)
     label_opts = field_label_opts(args)
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
       concat(args[:form].text_field(args[:field], opts))
@@ -116,10 +141,21 @@ module FormsHelper
     end
   end
 
-  def text_field_with_autocompleter(**args)
-    args[:data_autocompleter_type] = args[:type]
+  # This allows incoming data attributes to deep_merge with autocompleter's data
+  # 2023 hack to defeat unhelpful browser autocompletes that get in the way of
+  # our autocompleter: use the browser standard autocomplete att "one-time-code"
+  def autocompleter_field(**args)
+    autocompleter_args = {
+      placeholder: :start_typing.l, autocomplete: "one-time-code",
+      data: { controller: :autocompleter, autocompleter_target: "input",
+              autocomplete: args[:autocomplete], separator: args[:separator] }
+    }.deep_merge(args.except(:autocomplete, :separator, :textarea))
 
-    text_field_with_label(**args)
+    if args[:textarea] == true
+      text_area_with_label(**autocompleter_args)
+    else
+      text_field_with_label(**autocompleter_args)
+    end
   end
 
   # Bootstrap text_area
@@ -133,7 +169,7 @@ module FormsHelper
     wrap_class = form_group_wrap_class(args)
     label_opts = field_label_opts(args)
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
       concat(args[:form].text_area(args[:field], opts))
@@ -157,8 +193,7 @@ module FormsHelper
     wrap_class = form_group_wrap_class(args)
     label_opts = field_label_opts(args)
 
-    # debugger
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
       concat(args[:form].select(args[:field], args[:options],
@@ -186,7 +221,7 @@ module FormsHelper
 
     wrap_class = form_group_wrap_class(args)
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
       concat(args[:form].number_field(args[:field], opts))
     end
@@ -200,7 +235,7 @@ module FormsHelper
 
     wrap_class = form_group_wrap_class(args)
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
       concat(args[:form].password_field(args[:field], opts))
     end
@@ -214,7 +249,7 @@ module FormsHelper
 
   #   wrap_class = form_group_wrap_class(args)
 
-  #   content_tag(:div, class: wrap_class) do
+  #   tag.div(class: wrap_class) do
   #     concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
   #     concat(args[:form].email_field(args[:field], opts))
   #   end
@@ -228,9 +263,9 @@ module FormsHelper
 
     wrap_class = form_group_wrap_class(args)
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
-      concat(content_tag(:p, text, class: "form-control-static"))
+      concat(tag.p(text, class: "form-control-static"))
       concat(args[:form].hidden_field(args[:field], opts))
     end
   end
@@ -244,9 +279,9 @@ module FormsHelper
 
     wrap_class = form_group_wrap_class(args)
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
-      concat(content_tag(:p, text, opts))
+      concat(tag.p(text, **opts))
     end
   end
 
@@ -258,7 +293,7 @@ module FormsHelper
 
     wrap_class = form_group_wrap_class(args)
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
       concat(args[:form].url_field(args[:field], opts))
     end
@@ -270,24 +305,27 @@ module FormsHelper
     input_span_class = "file-field btn btn-default"
     max_size = MO.image_upload_max_size
     max_size_in_mb = (max_size.to_f / 1024 / 1024).round
+    max_upload_msg = :validate_image_file_too_big.l(max: max_size_in_mb)
     opts = opts.merge(
-      max_upload_msg: :validate_image_file_too_big.l(max: max_size_in_mb),
-      max_upload_size: max_size
+      data: {
+        action: "change->file-input#validate", file_input_target: "input",
+        max_upload_size: max_size, max_upload_msg: max_upload_msg
+      }
     )
 
     wrap_class = form_group_wrap_class(args)
 
     # append is always :no_file_selected.t
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class, data: { controller: "file-input" }) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
       concat(args[:between]) if args[:between].present?
       concat(
-        content_tag(:span, class: input_span_class) do
+        tag.span(class: input_span_class) do
           concat(:select_file.t)
           concat(args[:form].file_field(args[:field], opts))
         end
       )
-      concat(content_tag(:span, :no_file_selected.t))
+      concat(tag.span(:no_file_selected.t, data: { file_input_target: "name" }))
     end
   end
 
@@ -304,9 +342,8 @@ module FormsHelper
         max_upload_size: max_size
       )
     )
-    content_tag(:span, :select_file.t + file_field,
-                class: "file-field btn btn-default") +
-      content_tag(:span, :no_file_selected.t)
+    tag.span(:select_file.t + file_field, class: "file-field btn btn-default") +
+      tag.span(:no_file_selected.t)
   end
 
   # Unused
@@ -319,14 +356,14 @@ module FormsHelper
   #   args[:inline] = true
   #   wrap_class = form_group_wrap_class(args)
 
-  #   content_tag(:div, class: wrap_class) do
+  #   tag.div(class: wrap_class) do
   #     concat(args[:form].label(args[:field], args[:label],
   #                              class: "mr-3 sr-only"))
   #     concat(
-  #       content_tag(:div, class: "input-group") do
+  #       tag.div(class: "input-group") do
   #         concat(args[:form].text_field(args[:field], opts))
   #         concat(
-  #           content_tag(:span, class: "input-group-btn") do
+  #           tag.span(class: "input-group-btn") do
   #             submit_button(form: args[:form], button: :SEARCH.l)
   #           end
   #         )
@@ -401,3 +438,4 @@ module FormsHelper
       order: [:day, :month, :year] }
   end
 end
+# rubocop:enable Metrics/ModuleLength

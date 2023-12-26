@@ -7,24 +7,35 @@ module Projects
     ##### Helpers (which also assert) ##########################################
     def change_member_status_helper(changer, target_user, commit, admin_before,
                                     user_before, admin_after, user_after)
-      eol_project = projects(:eol_project)
+      project = projects(:eol_project)
       assert_equal(admin_before,
-                   target_user.in_group?(eol_project.admin_group.name))
+                   target_user.in_group?(project.admin_group.name))
       assert_equal(user_before,
-                   target_user.in_group?(eol_project.user_group.name))
+                   target_user.in_group?(project.user_group.name))
+      check_project_membership(project, target_user, user_before)
       params = {
-        project_id: eol_project.id,
+        project_id: project.id,
         candidate: target_user.id,
         commit: commit.l
       }
 
       put_requires_login(:update, params, changer.login)
-      assert_redirected_to(project_members_path(eol_project.id))
+      assert_redirected_to(project_members_path(project.id))
       target_user = User.find(target_user.id)
       assert_equal(admin_after,
-                   target_user.in_group?(eol_project.admin_group.name))
+                   target_user.in_group?(project.admin_group.name))
       assert_equal(user_after,
-                   target_user.in_group?(eol_project.user_group.name))
+                   target_user.in_group?(project.user_group.name))
+      check_project_membership(project, target_user, user_after)
+    end
+
+    def check_project_membership(project, user, member)
+      membership = ProjectMember.find_by(project:, user:)
+      if member
+        assert_not_nil(membership)
+      else
+        assert_nil(membership)
+      end
     end
 
     # Huh? If it requires login, there ain't gonna be a form
@@ -135,6 +146,54 @@ module Projects
       change_member_status_helper(katrina, katrina,
                                   :change_member_status_make_admin,
                                   false, true, false, true)
+    end
+
+    # untrusting member trusting
+    def test_member_trust
+      target_user = project_members(:eol_member_katrina).user
+      project = projects(:eol_project)
+      params = {
+        project_id: project.id,
+        candidate: target_user.id,
+        commit: :change_member_hidden_gps_trust.l
+      }
+      put_requires_login(:update, params, target_user.login)
+      assert_equal(
+        project.project_members.find_by(user: target_user).trust_level,
+        "hidden_gps"
+      )
+    end
+
+    # trusting member revoking trust
+    def test_member_revoke_trust
+      target_user = project_members(:eol_member_mary).user
+      project = projects(:eol_project)
+      params = {
+        project_id: project.id,
+        candidate: target_user.id,
+        commit: :change_member_status_revoke_trust.l
+      }
+      put_requires_login(:update, params, target_user.login)
+      assert_equal(
+        project.project_members.find_by(user: target_user).trust_level,
+        "no_trust"
+      )
+    end
+
+    # member allows editing
+    def test_member_allow_editing
+      target_user = project_members(:eol_member_mary).user
+      project = projects(:eol_project)
+      params = {
+        project_id: project.id,
+        candidate: target_user.id,
+        commit: :change_member_editing_trust.l
+      }
+      put_requires_login(:update, params, target_user.login)
+      assert_equal(
+        project.project_members.find_by(user: target_user).trust_level,
+        "editing"
+      )
     end
 
     # There are many other combinations that shouldn't work

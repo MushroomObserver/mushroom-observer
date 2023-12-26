@@ -1,0 +1,31 @@
+<%
+# Requires local variable object: RssLog, Observation, Image, etc. instance.
+# NOTE panel-sizing div shd be deleted in bs4. thumbnail goes in card-img-top
+presenter = MatrixBoxPresenter.new(object)
+
+if presenter
+  identify ||= false
+  columns ||= "col-xs-12 col-sm-6 col-md-4 col-lg-3" # maybe passed as a local
+  object_id = object&.id.present? ? object.id : "no_ID"
+  # There is a lotta arg passing. TODO: Check if any view is actually sending
+  # any extra image_arg locals to this matrix_box partial. AN 2023
+  passed_args = local_assigns.
+                except(:columns, :object, :object_counter, :object_iteration)
+
+  %>
+
+  <%= matrix_box(columns: columns, id: object_id) do
+    tag.div(class: "panel panel-default") do
+      [
+        tag.div(class: "panel-sizing") do
+          [
+            matrix_box_image(presenter, passed_args),
+            matrix_box_details(presenter, object, object_id, identify),
+          ].safe_join
+        end,
+        matrix_box_log_footer(presenter),
+        matrix_box_identify_footer(identify, presenter.id)
+      ].safe_join
+    end
+  end %><!-- .matrix-box -->
+<% end %>

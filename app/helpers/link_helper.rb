@@ -57,7 +57,7 @@ module LinkHelper
     return link_to(link, opts) { content } if icon_type.blank?
 
     opts = { title: content,
-             data: { toggle: "tooltip" } }.merge(opts.except(:icon))
+             data: { toggle: "tooltip" } }.deep_merge(opts.except(:icon))
 
     link_to(link, opts) do
       concat(tag.span(content, class: "sr-only"))
@@ -70,6 +70,29 @@ module LinkHelper
     content = block ? capture(&block) : text
 
     icon_link_to(add_query_param(link), **opts) { content }
+  end
+
+  # Link should be to a controller action that renders the form in the modal.
+  # Stimulus modal-toggle controller fetches the form from the link as a .
+  # turbo-stream response. It also checks if it needs to generate a modal, or
+  # just show the one in progress.
+  # NOTE: Needs a modal `identifier`, in case of multiple form modals
+  # NOTE: Args from an MO "tab" will be a hash.
+  # Links with data-turbo-frame do a direct page update, and if turbo doesn't
+  # find the frame already on the page it's appended after body! That may be
+  # why it's appended to the page and not returned to the stimulus caller
+  def modal_link_to(identifier, name, path, args)
+    args = args.deep_merge({ data: {
+                             modal: "modal_#{identifier}",
+                             controller: "modal-toggle",
+                             action: "modal-toggle#showModal:prevent"
+                           } })
+
+    if args[:icon].present?
+      icon_link_to(name, path, **args)
+    else
+      link_to(name, path, **args)
+    end
   end
 
   # pass title if it's a plain button (say for collapse) but you want a tooltip
@@ -91,13 +114,20 @@ module LinkHelper
   def link_icon_index
     {
       edit: "edit",
-      destroy: "remove-circle",
+      delete: "remove-circle",
       add: "plus",
       back: "step-backward",
       hide: "eye-close",
       reuse: "share",
-      remove: "minus-sign",
-      cancel: "remove"
+      x: "remove",
+      remove: "remove-circle",
+      send: "send",
+      ban: "ban-circle",
+      minus: "minus-sign",
+      trash: "trash",
+      cancel: "remove",
+      email: "envelope",
+      question: "question-sign"
     }.freeze
   end
 
@@ -120,9 +150,9 @@ module LinkHelper
     html_options = {
       method: :delete, title: name,
       class: class_names(identifier, args[:class], "text-danger"),
-      data: { confirm: :are_you_sure.t,
-              toggle: "tooltip", placement: "top", title: name }
-    }.merge(args.except(:class, :back))
+      form: { data: { turbo: true, turbo_confirm: :are_you_sure.t } },
+      data: { toggle: "tooltip", placement: "top", title: name }
+    }.deep_merge(args.except(:class, :back))
 
     button_to(path, html_options) do
       [content, icon].safe_join
@@ -138,7 +168,7 @@ module LinkHelper
     html_options = {
       class: class_names(identifier, args[:class]), # usually also btn
       title: name, data: { toggle: "tooltip", placement: "top", title: name }
-    }.merge(args.except(:class, :back))
+    }.deep_merge(args.except(:class, :back))
 
     link_to(path, html_options) do
       [content, icon].safe_join
@@ -166,19 +196,21 @@ module LinkHelper
     [path, identifier, icon, content]
   end
 
+  # Refactor to accept a tab array
   # Note `link_to` - not a <button> element, but an <a> because it's a GET
   def add_button(path:, name: :ADD.t, **args, &block)
     content = block ? capture(&block) : ""
     html_options = {
       class: "", # usually also btn
       data: { toggle: "tooltip", placement: "top", title: name }
-    }.merge(args)
+    }.deep_merge(args)
 
     link_to(path, html_options) do
       [content, link_icon(:add)].safe_join
     end
   end
 
+  # Refactor to accept a tab array
   # TODO: Change translations BACK to PREV, or make a BACK TO translation
   # Note `link_to` - not a <button> element, but an <a> because it's a GET
   def back_button(path:, name: :BACK.t, **args, &block)
@@ -186,49 +218,46 @@ module LinkHelper
     html_options = {
       class: "", # usually also btn
       data: { toggle: "tooltip", placement: "top", title: name }
-    }.merge(args)
+    }.deep_merge(args)
 
     link_to(path, html_options) do
       [content, link_icon(:back)].safe_join
     end
   end
 
-  # POST to a path; used instead of a link because POST link requires js
-  # post_button(name: herbarium.name.t,
-  #             path: herbaria_merges_path(that: @merge.id,this: herbarium.id),
-  #             data: { confirm: :are_you_sure.t })
-  def post_button(name:, path:, **args)
-    html_options = {
-      method: :post,
-      class: ""
-    }.merge(args)
+  # Refactor to accept a tab array
 
-    button_to(path, html_options) { name }
+  # POST to a path; used instead of a link because POST link requires js
+  def post_button(name:, path:, **args, &block)
+    any_method_button(method: :post, name:, path:, **args, &block)
   end
 
   # PUT to a path; used instead of a link because PUT link requires js
-  # put_button(name: herbarium.name.t,
-  #            path: herbarium_path(id: @herbarium.id),
-  #            data: { confirm: :are_you_sure.t })
-  def put_button(name:, path:, **args)
-    html_options = {
-      method: :put,
-      class: ""
-    }.merge(args)
-
-    button_to(path, html_options) { name }
+  def put_button(name:, path:, **args, &block)
+    any_method_button(method: :put, name:, path:, **args, &block)
   end
 
   # PATCH to a path; used instead of a link because PATCH link requires js
-  # patch_button(name: herbarium.name.t,
-  #              path: herbarium_path(id: @herbarium.id),
-  #              data: { confirm: :are_you_sure.t })
-  def patch_button(name:, path:, **args)
-    html_options = {
-      method: :patch,
-      class: ""
-    }.merge(args)
+  def patch_button(name:, path:, **args, &block)
+    any_method_button(method: :patch, name:, path:, **args, &block)
+  end
 
-    button_to(path, html_options) { name }
+  # any_method_button(method: :patch,
+  #                   name: herbarium.name.t,
+  #                   path: herbarium_path(id: @herbarium.id),
+  #                   data: { confirm: :are_you_sure.t })
+  # Pass a block and a name if you want an icon with tooltip
+  # NOTE: button_to with block generates a button, not an input #quirksmode
+  def any_method_button(name:, path:, method: :post, **args, &block)
+    content = block ? capture(&block) : name
+    tip = content ? { toggle: "tooltip", placement: "top", title: name } : {}
+    html_options = {
+      method: method,
+      class: "",
+      form: { data: { turbo: true } },
+      data: tip
+    }.merge(args) # currently don't have to merge class arg upstream
+
+    button_to(path, html_options) { content }
   end
 end

@@ -82,7 +82,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_obj_arrays_equal([], @spl1.projects)
     assert_obj_arrays_equal([@proj2], @spl2.projects)
     assert_obj_arrays_equal([rolf, mary, katrina], @proj1.user_group.users)
-    assert_obj_arrays_equal([dick], @proj2.user_group.users)
+    assert_obj_arrays_equal([mary, dick], @proj2.user_group.users)
   end
 
   def obs_params(obs, vote)
@@ -247,7 +247,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { for_project: project.id })
 
-    assert_displayed_title("Species Lists attached to #{project.title}")
+    assert_displayed_title("Species Lists for #{project.title}")
   end
 
   def test_index_for_project_with_no_lists
@@ -340,7 +340,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     proj = projects(:bolete_project)
     assert_equal(mary.id, spl.user_id)            # owned by mary
     assert(spl.projects.include?(proj))           # owned by bolete project
-    assert_equal([dick.id],
+    assert_equal([mary.id, dick.id],
                  proj.user_group.users.map(&:id)) # dick is only project member
 
     login("rolf")
@@ -1240,7 +1240,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     login("mary")
     get(:new)
-    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
+    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :unchecked)
+    post(:create,
+         params: { project: { "id_#{@proj1.id}" => "1" } })
+    assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
 
     login("dick")
     get(:new)
@@ -1248,19 +1251,16 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:new)
-    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
-    post(:create,
-         params: { project: { "id_#{@proj1.id}" => "1" } })
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
+    post(:create,
+         params: { project: { "id_#{@proj1.id}" => "0" } })
+    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
 
     # should have different default if recently create list attached to project
     obs = Observation.create!
     @proj1.add_observation(obs)
     get(:new)
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
-    post(:create,
-         params: { project: { "id_#{@proj1.id}" => "0" } })
-    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
   end
 
   def test_project_checkboxes_in_edit_species_list_form

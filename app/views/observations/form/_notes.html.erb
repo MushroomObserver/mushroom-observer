@@ -54,27 +54,3 @@
 
 </div><!--#observation_notes-->
 <!-- /NOTES -->
-
-<% inject_javascript_at_end %(
-jQuery(document).ready(function() {
-    //hides the help field when the notes textarea is expanded
-
-    var $notesText = jQuery('#observation_notes');
-
-    $notesText.data('x', $notesText.outerWidth());
-    $notesText.data('y', $notesText.outerHeight());
-
-    $notesText.mouseup(function () {
-
-        var $this = jQuery(this);
-
-        if ($this.outerWidth() != $this.data('x') || $this.outerHeight() != $this.data('y')) {
-            jQuery('#notes_help').hide();
-        }
-        else {
-           jQuery('#notes_help').show();
-        }
-
-    });
-});
-) %>

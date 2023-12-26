@@ -76,21 +76,6 @@ module ApplicationHelper
 
   # ----------------------------------------------------------------------------
 
-  # Add something to the header from within view.  This can be called as many
-  # times as necessary -- the application layout will mash them all together
-  # and stick them at the end of the <tt>&gt;head&lt;/tt> section.
-  #
-  #   <%
-  #     add_header(GMap.header)       # adds GMap general header
-  #     gmap = make_map(@locations)
-  #     add_header(finish_map(gmap))  # adds map-specific header
-  #   %>
-  #
-  def add_header(str)
-    @header ||= safe_empty
-    @header += str
-  end
-
   # Take URL that got us to this page and add one or more parameters to it.
   # Returns new URL.
   #

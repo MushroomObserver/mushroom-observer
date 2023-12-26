@@ -92,6 +92,7 @@
 #  catch_errors_and_log_request_stats::
 #                                (filter: catches errors for integration tests)
 #
+# rubocop:disable Metrics/ClassLength
 class ApplicationController < ActionController::Base
   require "extensions"
   require "login_system"
@@ -115,19 +116,11 @@ class ApplicationController < ActionController::Base
   # before_action :extra_gc
   # after_action  :extra_gc
 
-  # This discards MO "flash" messages immediately after regular controller
-  # AJAX requests, since the browser page is not reloaded and they'd
-  # confusingly reappear on the next page load, otherwise.
-  # It's intended for ajax form submissions that may need to display messages
-  # after the call, when reloading a form for example.
-  # (It doesn't apply to the AjaxController methods, including autocomplete.)
-  after_action :flash_clear_after_ajax_call
-
   # Make show_name_helper available to nested partials
   helper :show_name
 
   # Disable all filters except set_locale.
-  # (Used to streamline API and Ajax controllers.)
+  # (Used to streamline API controller.)
   def self.disable_filters
     # skip_before_action(:create_view_instance_variable)
     skip_before_action(:verify_authenticity_token)
@@ -141,10 +134,13 @@ class ApplicationController < ActionController::Base
   # Disables Bullet tester for one action. Use this in your controller:
   #   around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [ ... ]
   def skip_bullet
+    # puts("skip_bullet: OFF\n")
+    old_value = Bullet.n_plus_one_query_enable?
     Bullet.n_plus_one_query_enable = false
     yield
   ensure
-    Bullet.n_plus_one_query_enable = true
+    # puts("skip_bullet: ON\n")
+    Bullet.n_plus_one_query_enable = old_value
   end
 
   # @view can be used by classes to access view specific features like render
@@ -424,8 +420,8 @@ class ApplicationController < ActionController::Base
 
   # Track when user last requested a page, but update at most once an hour.
   def track_last_time_user_made_a_request
-    last_activity = @user&.last_activity&.to_s("%Y%m%d%H")
-    now = Time.current.to_s("%Y%m%d%H")
+    last_activity = @user&.last_activity&.to_fs("%Y%m%d%H")
+    now = Time.current.to_fs("%Y%m%d%H")
     return if !@user || last_activity && last_activity >= now
 
     @user.last_activity = Time.current
@@ -815,15 +811,6 @@ class ApplicationController < ActionController::Base
     result = obj.valid?
     flash_object_errors(obj) unless result
     result
-  end
-
-  # For AJAX requests to regular controllers:
-  # https://stackoverflow.com/a/18678966/3357635
-  def flash_clear_after_ajax_call
-    return unless !request.path.starts_with?("/ajax") && request.xhr?
-
-    # don't want the flash to appear when you reload page
-    flash_clear
   end
 
   ##############################################################################
@@ -1794,15 +1781,7 @@ class ApplicationController < ActionController::Base
   end
 
   def load_for_show_observation_or_goto_index(id)
-    Observation.includes(
-      :collection_numbers,
-      { comments: :user },
-      { herbarium_records: [{ herbarium: :curators }, :user] },
-      { images: [:image_votes, :license, :projects, :user] },
-      { namings: :name },
-      :projects,
-      :sequences
-    ).find_by(id: id) ||
+    Observation.show_includes.find_by(id: id) ||
       flash_error_and_goto_index(Observation, id)
   end
 
@@ -1851,3 +1830,4 @@ class ApplicationController < ActionController::Base
     nil
   end
 end
+# rubocop:enable Metrics/ClassLength
