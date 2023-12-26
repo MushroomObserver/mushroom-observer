@@ -1033,7 +1033,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     # rubocop:enable Style/RaiseArgs
   end
 
-  # Dump out the sitatuation as the observation sees it.  Useful for debugging
+  # Dump out the situation as the observation sees it.  Useful for debugging
   # problems with reloading requirements.
   def dump_votes
     namings.map do |n|

@@ -7,11 +7,11 @@
 module NamingsHelper
   ##### Observation Naming "table" content #########
   def observation_naming_header_row
-    heading_html = content_tag(:h4, :show_namings_proposed_names.t,
-                               class: "panel-title")
-    user_heading_html = content_tag(:small, :show_namings_user.t)
-    consensus_heading_html = content_tag(:small, :show_namings_consensus.t)
-    your_heading_html = content_tag(:small, :show_namings_your_vote.t)
+    heading_html = tag.h4(:show_namings_proposed_names.t,
+                          class: "panel-title")
+    user_heading_html = tag.small(:show_namings_user.t)
+    consensus_heading_html = tag.small(:show_namings_consensus.t)
+    your_heading_html = tag.small(:show_namings_your_vote.t)
 
     {
       heading: heading_html,
