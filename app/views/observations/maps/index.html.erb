@@ -7,6 +7,5 @@ objects = @observations
 objects += @locations if @locations.any?
 %>
 
-<%= render(partial: "shared/map",
-           locals: { objects: objects,
-                     query_params: query_params(@query), zoom: 2 }) %>
+<%= make_map(objects: objects, # CollapsibleCollection
+             query_params: query_params(@query), zoom: 2, map_type: "info") %>

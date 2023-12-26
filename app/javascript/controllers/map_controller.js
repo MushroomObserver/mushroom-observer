@@ -6,6 +6,7 @@ import { convert } from "geo-coordinates-parser"
 // The connected element can be a map, or in the case of a form with a map UI,
 // the whole section of the form including the inputs that should alter the map.
 // Either way, mapDivTarget should have the dataset, not the connected element.
+// map_types: info (collection), location (rectangle), observation (marker)
 export default class extends Controller {
   // it may or may not be the root element of the controller.
   static targets = ["mapDiv", "southInput", "westInput", "northInput",
@@ -14,7 +15,6 @@ export default class extends Controller {
 
   connect() {
     this.element.dataset.stimulus = "connected";
-    // map_types: info (collection), location (rectangle), observation (marker)
     this.map_type = this.mapDivTarget.dataset.mapType
     this.editable = (this.mapDivTarget.dataset.editable === "true")
     this.opened = this.map_type !== "observation"
@@ -73,8 +73,8 @@ export default class extends Controller {
       .then((google) => {
         this.elevationService = new google.maps.ElevationService()
         this.geocoder = new google.maps.Geocoder()
-
-        if (this.map_type !== "observation") {
+        // Everything except the obs form map: draw the map.
+        if (!(this.map_type === "observation" && this.editable)) {
           this.drawMap()
           this.buildOverlays()
         }

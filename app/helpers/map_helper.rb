@@ -3,7 +3,10 @@
 module MapHelper
   # args could include query_param.
   # returns an array of mapsets, each suitable for a marker or box
-  def make_map(objects, args = {})
+  def make_map(objects: [], **args)
+    nothing_to_map = args[:nothing_to_map] || :runtime_map_nothing_to_map.t
+    return nothing_to_map unless objects.any?
+
     default_args = {
       map_div: "map_div",
       controller: "map",
@@ -13,11 +16,10 @@ module MapHelper
       controls: [:large_map, :map_type].to_json,
       location_format: User.current_location_format # method has a default
     }
-    map_args = args.except(:objects, :nothing_to_map)
-    map_args = provide_defaults(map_args, **default_args)
+    map_args = default_args.merge(args.except(:objects, :nothing_to_map))
     map_args[:collection] = mappable_collection(objects, map_args).to_json
     map_args[:localization] = {
-      nothing_to_map: args[:nothing_to_map] || :runtime_map_nothing_to_map.t,
+      nothing_to_map: nothing_to_map,
       observations: :Observations.t,
       locations: :Locations.t,
       show_all: :show_all.t,
@@ -47,10 +49,6 @@ module MapHelper
     end
 
     collection
-  end
-
-  def provide_defaults(args, default_args)
-    default_args.merge(args)
   end
 
   def map_html(map_args)
