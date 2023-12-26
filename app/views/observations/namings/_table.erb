@@ -22,6 +22,7 @@ any_names = obs.namings&.length&.positive?
     <% if any_names
       namings.each do |naming|
         # n+1 should be ok
+        # also need: obs.consensus_naming and obs.users_favorite?
         vote = naming.users_vote(@user) || Vote.new(value: 0) %>
         <%= render(partial: "observations/namings/table_row",
                    locals: { obs: obs, naming: naming, vote: vote }) %>
