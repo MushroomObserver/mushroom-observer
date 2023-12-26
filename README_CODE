@@ -6,9 +6,6 @@ The following is an overview of the code for the Mushroom Observer website for
 prospective developers.  See https://mushroomobserver.org/info/intro for an
 introduction to the website itself.
 
-
-
-
 == Ruby on Rails
 
 MO is written using Ruby on Rails, or simply Rails.  This is just a set of
