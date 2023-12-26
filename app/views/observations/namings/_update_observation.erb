@@ -9,11 +9,6 @@ it updates the obs title and name_info.
 
 <%= turbo_stream.replace("namings_table") do
   observation_namings_table(obs)
-  # render(
-  #   partial: "observations/namings/table",
-  #   locals: { obs: obs },
-  #   layout: false
-  # )
 end %>
 
 <%= turbo_stream.replace("observation_name_info") do
@@ -26,4 +21,8 @@ end %>
 
 <%= turbo_stream.update("title") do
   show_obs_title(obs: obs)
+end %>
+
+<%= turbo_stream.update("page_flash") do
+  flash_notices_html
 end %>
