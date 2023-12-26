@@ -188,7 +188,7 @@ class AbstractModel < ApplicationRecord
   #   Project.find_by_title_with_wildcards("FunDiS *")
   #
   def self.find_using_wildcards(col, str)
-    return send("find_by_#{col}", str) unless str.include?("*")
+    return send(:"find_by_#{col}", str) unless str.include?("*")
 
     safe_col = connection.quote_column_name(col)
     matches = where("#{safe_col} LIKE ?", str.tr("*", "%"))
@@ -677,9 +677,9 @@ class AbstractModel < ApplicationRecord
   #   # Log destruction of an Observation (can be destroyed already I think).
   #   orphan_log(:log_observation_destroyed)
   #
-  def orphan_log(*args)
+  def orphan_log(*)
     rss_log = init_rss_log(orphan: true)
-    rss_log.orphan(format_name, *args)
+    rss_log.orphan(format_name, *)
   end
 
   # Callback that logs creation.
@@ -703,14 +703,14 @@ class AbstractModel < ApplicationRecord
 
     if autolog_events.include?(event)
       touch = false
-    elsif autolog_events.include?("#{event}!".to_sym)
+    elsif autolog_events.include?(:"#{event}!")
       touch = true
     else
       return
     end
 
     type = type_tag
-    msg = "log_#{type}_#{event}".to_sym
+    msg = :"log_#{type}_#{event}"
     orphan ? orphan_log(msg, touch: touch) : log(msg, touch: touch)
   end
 
@@ -722,7 +722,7 @@ class AbstractModel < ApplicationRecord
 
     rss_log = RssLog.new
     rss_log.created_at = created_at unless new_record?
-    rss_log.send("#{type_tag}_id=", id) if id && !orphan
+    rss_log.send(:"#{type_tag}_id=", id) if id && !orphan
     rss_log.save
     attach_rss_log_first_step(rss_log) unless orphan
     rss_log
@@ -739,9 +739,9 @@ class AbstractModel < ApplicationRecord
 
   # Fill in reverse-lookup id in RssLog after creating new record.
   def attach_rss_log_final_step
-    return unless rss_log && (rss_log.send("#{type_tag}_id") != id)
+    return unless rss_log && (rss_log.send(:"#{type_tag}_id") != id)
 
-    rss_log.send("#{type_tag}_id=", id)
+    rss_log.send(:"#{type_tag}_id=", id)
     rss_log.save
   end
 

@@ -80,8 +80,8 @@ module Query
       #   add_join(:names, :descriptions)
       #     => join << {:observations => {:names => :descriptions}}
       #
-      def add_join(*args)
-        @join.add_leaf(*args)
+      def add_join(*)
+        @join.add_leaf(*)
       end
 
       # Same as add_join but can provide chain of more than two tables.

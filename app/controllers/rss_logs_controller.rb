@@ -3,7 +3,6 @@
 class RssLogsController < ApplicationController
   # Uncertain these are necessary, can delete if not.
   require "find"
-  require "set"
 
   before_action :login_required, except: [
     # :index,

@@ -121,7 +121,7 @@ class AutocompletersControllerTest < FunctionalTestCase
 
   def test_auto_complete_species_list
     login("rolf")
-    list1, list2, list3, list4 = SpeciesList.all.order(:title).map(&:title)
+    list1, list2, list3, list4 = SpeciesList.order(:title).map(&:title)
 
     assert_equal("A Species List", list1)
     assert_equal("Another Species List", list2)

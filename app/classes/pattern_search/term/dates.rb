@@ -80,9 +80,9 @@ module PatternSearch
           first = word.sub!(/-$/, "")
           last  = word.sub!(/^-/, "")
           num2  = num == "N" ? word.to_i : num
-          date  = Date.current - num2.send("#{unit}s")
-          left  = format_date(date.send("beginning_of_#{unit}")) unless last
-          right = format_date(date.send("end_of_#{unit}")) unless first
+          date  = Date.current - num2.send(:"#{unit}s")
+          left  = format_date(date.send(:"beginning_of_#{unit}")) unless last
+          right = format_date(date.send(:"end_of_#{unit}")) unless first
           [left, right].map(&:to_s).join("-")
         end
       end

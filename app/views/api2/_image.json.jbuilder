@@ -22,7 +22,7 @@ json.original_url(object.original_url)
 if detail
   json.owner(json_user(object.user))
   json.files((Image.all_sizes + [:original]).map do |size|
-    object.send("#{size}_url")
+    object.send(:"#{size}_url")
   end)
   json.observation_ids(object.observation_ids)
 else
