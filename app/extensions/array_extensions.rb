@@ -22,11 +22,11 @@ class Array
     map { |i| ERB::Util.html_escape(i) }.join(sep).html_safe
   end
 
-  def add_leaf(*args)
-    Tree.add_leaf(self, *args)
+  def add_leaf(*)
+    Tree.add_leaf(self, *)
   end
 
-  def has_node?(*args)
-    Tree.has_node?(self, *args)
+  def has_node?(*)
+    Tree.has_node?(self, *)
   end
 end

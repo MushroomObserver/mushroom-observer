@@ -677,9 +677,9 @@ class AbstractModel < ApplicationRecord
   #   # Log destruction of an Observation (can be destroyed already I think).
   #   orphan_log(:log_observation_destroyed)
   #
-  def orphan_log(*args)
+  def orphan_log(*)
     rss_log = init_rss_log(orphan: true)
-    rss_log.orphan(format_name, *args)
+    rss_log.orphan(format_name, *)
   end
 
   # Callback that logs creation.

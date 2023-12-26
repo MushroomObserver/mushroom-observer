@@ -21,8 +21,8 @@ class API2Test < UnitTestCase
   #  :section: Helpers
   # --------------------
 
-  def aor(*args)
-    API2::OrderedRange.new(*args)
+  def aor(*)
+    API2::OrderedRange.new(*)
   end
 
   def date(str)
@@ -58,27 +58,27 @@ class API2Test < UnitTestCase
     assert_obj_arrays_equal(expect, @api.results, :sort, msg)
   end
 
-  def assert_parse(*args)
-    assert_parse_general(:parse, *args)
+  def assert_parse(*)
+    assert_parse_general(:parse, *)
   end
 
-  def assert_parse_a(*args)
-    assert_parse_general(:parse_array, *args)
+  def assert_parse_a(*)
+    assert_parse_general(:parse_array, *)
   end
 
-  def assert_parse_r(*args)
-    assert_parse_general(:parse_range, *args)
+  def assert_parse_r(*)
+    assert_parse_general(:parse_range, *)
   end
 
-  def assert_parse_rs(*args)
-    assert_parse_general(:parse_ranges, *args)
+  def assert_parse_rs(*)
+    assert_parse_general(:parse_ranges, *)
   end
 
-  def assert_parse_general(method, type, expect, val, *args)
+  def assert_parse_general(method, type, expect, val, *)
     @api ||= API2.new
     val = val.to_s if val
     begin
-      actual = @api.send(method, type, val, *args)
+      actual = @api.send(method, type, val, *)
     rescue API2::Error => e
       actual = e
     end

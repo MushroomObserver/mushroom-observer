@@ -78,20 +78,20 @@ module API2::Parameters
     end
   end
 
-  def parse(*args, &block)
-    parser(*args).parse_scalar(&block)
+  def parse(*, &block)
+    parser(*).parse_scalar(&block)
   end
 
-  def parse_range(*args, &block)
-    parser(*args).parse_range(&block)
+  def parse_range(*, &block)
+    parser(*).parse_range(&block)
   end
 
-  def parse_ranges(*args, &block)
-    parser(*args).parse_array(:parse_range, &block)
+  def parse_ranges(*, &block)
+    parser(*).parse_array(:parse_range, &block)
   end
 
-  def parse_array(*args, &block)
-    parser(*args).parse_array(:parse_scalar, &block)
+  def parse_array(*, &block)
+    parser(*).parse_array(:parse_scalar, &block)
   end
 
   # Simplified "parser" for getting the HTTP request -- this is passed in

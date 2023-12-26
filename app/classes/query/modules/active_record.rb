@@ -28,14 +28,14 @@ module Query
           query
         end
 
-        def lookup_and_save(*args)
-          query = lookup(*args)
+        def lookup_and_save(*)
+          query = lookup(*)
           query.record.save!
           query
         end
 
-        def lookup(*args)
-          query = Query.new(*args)
+        def lookup(*)
+          query = Query.new(*)
           record = get_record(query)
           record.query = query
           query.record = record

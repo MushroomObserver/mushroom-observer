@@ -32,12 +32,12 @@ class Symbol
     to_s.upcase_first.to_sym
   end
 
-  def add_leaf(*args)
-    Tree.add_leaf(self, *args)
+  def add_leaf(*)
+    Tree.add_leaf(self, *)
   end
 
-  def has_node?(*args)
-    Tree.has_node?(self, *args)
+  def has_node?(*)
+    Tree.has_node?(self, *)
   end
 
   # Return a list of missing tags we've encountered.
@@ -285,23 +285,23 @@ class Symbol
 
   alias l localize
 
-  def t(*args)
-    localize(*args).t(false)
+  def t(*)
+    localize(*).t(false)
   end
 
-  def tl(*args)
-    localize(*args).tl(false)
+  def tl(*)
+    localize(*).tl(false)
   end
 
-  def tp(*args)
-    localize(*args).tp(false)
+  def tp(*)
+    localize(*).tp(false)
   end
 
-  def tpl(*args)
-    localize(*args).tpl(false)
+  def tpl(*)
+    localize(*).tpl(false)
   end
 
-  def strip_html(*args)
-    localize(*args).strip_html
+  def strip_html(*)
+    localize(*).strip_html
   end
 end

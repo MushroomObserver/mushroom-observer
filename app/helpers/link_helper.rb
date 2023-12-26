@@ -34,11 +34,11 @@ module LinkHelper
   end
 
   # mixes in "active" class
-  def active_link_with_query(text = nil, path = nil, **opts, &block)
+  def active_link_with_query(text = nil, path = nil, **, &block)
     link = block ? text : path # because positional
     content = block ? capture(&block) : text
 
-    active_link_to(add_query_param(link), **opts) { content }
+    active_link_to(add_query_param(link), **) { content }
   end
 
   # Take a query which can be coerced into a different model, and create a link
@@ -65,11 +65,11 @@ module LinkHelper
     end
   end
 
-  def icon_link_with_query(text = nil, path = nil, **opts, &block)
+  def icon_link_with_query(text = nil, path = nil, **, &block)
     link = block ? text : path # because positional
     content = block ? capture(&block) : text
 
-    icon_link_to(add_query_param(link), **opts) { content }
+    icon_link_to(add_query_param(link), **) { content }
   end
 
   # Link should be to a controller action that renders the form in the modal.

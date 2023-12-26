@@ -35,8 +35,8 @@ class Language
     @@verbose_messages << msg
   end
 
-  def send_private(*args)
-    send(*args)
+  def send_private(*)
+    send(*)
   end
 
   def init_check_export_line(pass, in_tag)

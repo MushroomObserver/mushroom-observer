@@ -66,8 +66,8 @@ module SessionExtensions
   end
 
   # Login the given user, testing to make sure it was successful.
-  def login!(user, *args)
-    login(user, *args)
+  def login!(user, *)
+    login(user, *)
     assert_flash(/success/i)
     user = User.find_by(login: user) if user.is_a?(String)
     assert_users_equal(user, assigns(:user), "Wrong user ended up logged in!")
@@ -96,10 +96,10 @@ module SessionExtensions
 
   # Call follow_redirect!, checking for 500 errors and missing language
   # tags.  Saves body of all successful responses for debugging, too.
-  def process_with_error_checking(method, url, *args, **kwargs)
+  def process_with_error_checking(method, url, *, **)
     @doing_with_error_checking = true
     Symbol.missing_tags = []
-    send(method.downcase.to_s, url, *args, **kwargs)
+    send(method.downcase.to_s, url, *, **)
     follow_redirect! while response.redirect?
     if status == 500
       msg = if (error = controller.instance_variable_get(:@error))
@@ -197,9 +197,9 @@ module SessionExtensions
   #   # This gets all the name links in the results of the last page.
   #   urls = get_links('div.results a[href^=/names]')
   #
-  def get_links(*args)
+  def get_links(*)
     results = []
-    assert_select(*args) do |links|
+    assert_select(*) do |links|
       results = links.map { |l| l.attributes["href"] }
     end
     results
@@ -354,13 +354,13 @@ module SessionExtensions
   end
 
   # Filter anchor links based on URL.
-  def anchor_url_select_spec(*args)
-    url_select_spec("a", "href", *args)
+  def anchor_url_select_spec(*)
+    url_select_spec("a", "href", *)
   end
 
   # Filter button links based on URL.
-  def button_url_select_spec(*args)
-    url_select_spec("form", "action", *args)
+  def button_url_select_spec(*)
+    url_select_spec("form", "action", *)
   end
 
   def url_select_spec(elem, attr, arg, select_args)

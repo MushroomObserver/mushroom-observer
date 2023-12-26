@@ -31,11 +31,11 @@ class Hash
     delete_if { |_k, v| v.nil? }
   end
 
-  def add_leaf(*args)
-    Tree.add_leaf(self, *args)
+  def add_leaf(*)
+    Tree.add_leaf(self, *)
   end
 
-  def has_node?(*args)
-    Tree.has_node?(self, *args)
+  def has_node?(*)
+    Tree.has_node?(self, *)
   end
 end
