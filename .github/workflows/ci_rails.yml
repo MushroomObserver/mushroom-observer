@@ -12,12 +12,12 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-20.04 # focal, includes MySQL 5.8
+    runs-on: ubuntu-22.04
     steps:
       # check-out repo under $GITHUB_WORKSPACE, so that workflow can access it.
       # https://github.com/actions/checkout
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # https://github.com/ruby/setup-ruby
       - name: Set up Ruby
