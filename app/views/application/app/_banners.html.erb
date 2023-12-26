@@ -17,12 +17,14 @@
   dismissed   = cookie_time.match(/^\d{14}$/) &&
                 cookie_time.to_d > banner_time.to_d - 10000
   if banner_text.to_s.length > 1 && !dismissed %>
-    <div id="message_banner" class="alert alert-success message-banner">
-      <%= javascript_tag("var BANNER_TIME = '#{banner_time}'") %>
+    <div id="message_banner" class="alert alert-success message-banner"
+         data-controller="banner">
       <button
         type="button"
         class="close"
         data-dismiss="alert"
+        data-action="banner#setCookie"
+        data-banner-time-param="<%= banner_time %>"
         aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>

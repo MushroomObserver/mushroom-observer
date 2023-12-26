@@ -1273,7 +1273,7 @@
   app_title: Mushroom Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: "Check out our new \"Help Identify\":https://mushroomobserver.org/observations/identify interface!<br>\nAlso checkout the \"MushroomObsMerch Etsy store\":https://www.etsy.com/shop/MushroomObsMerch"
+  app_banner_box: "Check out the \"Mushroom Observer Etsy store\":https://www.etsy.com/shop/MushroomObsMerch — T-shirts, bags and swag! <br>\nWe're working on MO. If you have trouble posting, try logging out and logging back in again.<br>\nPlease \"report a bug\":https://mushroomobserver.org/emails/ask_webmaster_question if you find one."
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
@@ -3122,6 +3122,7 @@
 
   # project/add_project
   add_project_already_exists: A project named '[title]' already exists.
+  add_project_ends_before_start: Project ends before it starts.
   add_project_group_exists: Unable to create project because a [:user_group] named '[group]' already exists.
   add_project_no_location: No location matching '[where]' found.
   add_project_need_title: Projects must have a title.
@@ -3187,11 +3188,20 @@
   edit_project_title: "[:edit_object(type=:project)]: [title]"
 
   # project/_form_projects
+  form_projects_any: Any
+  form_projects_date_range: Date Range
+  form_projects_date_fixed: Use above date
+  form_projects_dates_explain: "Default earliest and latest dates for [:OBSERVATIONS]. Users will be warned if trying to add an Observation outside of this range, but they can override the warning."
+  form_projects_end_date: Project End Date
+  form_projects_range: Range
+  form_projects_start_date: Project Start Date
   form_projects_title: "[:Title]"
   form_projects_open_membership: Enable users to add themselves and disable shared editing
-  form_projects_accepting_observations: Project is accepting new observations from members
   form_projects_where: Optional Project Location
   form_projects_image_upload: Upload photo
+  form_projects_ignore_date_range: Ignore above dates
+  form_projects_use_date_range: Use above dates
+
 
   # project/list_projects
   list_projects_title: "[:list_objects(type=:project)]"
@@ -3234,7 +3244,6 @@
   show_project_title: "Project: [title]"
   show_project_user_group: User Group
   show_project_violation_count: Project has [count] constraint violation(s)
-  # show_project_violation_count: Project has [count] constraint violation(s)
 
   # users/by_name
   users_by_name_title: Users by Name
@@ -3654,6 +3663,7 @@
   validate_observation_when_missing: "[:validate_missing(field=:date)]"
   validate_observation_where_too_long: "[:validate_too_long(field=:location,max=1024)]"
   validate_project_admin_group_missing: "[:validate_missing(field=:admin_group)]"
+  validate_project_ends_before_start: "End date is before the start date"
   validate_project_title_missing: "[:validate_missing(field=:title)]"
   validate_project_title_too_long: "[:validate_too_long(field=:title,max=100)]"
   validate_project_user_group_missing: "[:validate_missing(field=:user_group)]"

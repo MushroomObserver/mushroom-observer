@@ -65,11 +65,19 @@ module Tabs
 
     def add_project_banner(project)
       add_page_title(project.title)
+
       if project.location
         content_for(:location) do
           tag.b(link_to(project.place_name, location_path(project.location.id)))
         end
       end
+
+      if project.start_date && project.end_date
+        content_for(:date_range) do
+          tag.b(project.date_range)
+        end
+      end
+
       add_background_image(project.image)
     end
 

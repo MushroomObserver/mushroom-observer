@@ -18,6 +18,8 @@ module LightboxHelper
     html = []
     if obs.is_a?(Observation)
       html += lightbox_obs_caption(obs, lightbox_data[:identify])
+    elsif lightbox_data[:image]&.notes.present?
+      html << lightbox_image_caption(lightbox_data[:image])
     end
     html << caption_image_links(lightbox_data[:image] ||
                                 lightbox_data[:image_id])
@@ -36,6 +38,14 @@ module LightboxHelper
     html
   end
 
+  # This is the same caption that goes after the copyright info,
+  # but we are skipping that here because it is slow as hell
+  # (requires extra joins all over the place, as far afield as projects,
+  # on every page where an image appears!)
+  def lightbox_image_caption(image)
+    tag.div(image.notes.tl.truncate_html(300), class: "image-notes")
+  end
+
   # This gets removed on successful propose
   def caption_identify_ui(obs:)
     tag.div(class: "obs-identify", id: "observation_identify_#{obs.id}") do
@@ -49,7 +59,8 @@ module LightboxHelper
 
   # This is different from show_obs_title, it's more like the matrix_box title
   def caption_obs_title(obs:)
-    tag.h4(class: "obs-what", id: "observation_what_#{obs.id}") do
+    tag.h4(class: "obs-what", id: "observation_what_#{obs.id}",
+           data: { controller: "section-update" }) do
       [
         link_to(obs.id, add_query_param(obs.show_link_args),
                 class: "btn btn-primary mr-3",

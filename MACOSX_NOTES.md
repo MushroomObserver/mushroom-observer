@@ -1,7 +1,7 @@
 The following is the beginning of a native MacOSX setup script.
 It is based on @mo-nathan's notes while getting his local Apple M1
 working under the Monterey (12.4) version of MacOS.
-It also includes some notes later added by @nimmmolo, and by
+It also includes some notes later added by @nimmolo, and by
 @JoeCohen when getting his local Apple Intel working under MacOS Ventura 13.6
 
 ### Install Xcode
@@ -125,6 +125,13 @@ USE mysql;
 UPDATE user SET authentication_string=PASSWORD('root') WHERE User='root';
 FLUSH PRIVILEGES;
 exit;
+# nimmo used this syntax, it is different in mysql 8; the above did not work:
+UPDATE USER SET AUTHENTICATION_STRING='null' WHERE user='root';
+FLUSH PRIVILEGES;
+exit;
+# Setting it to null above seems necessary. Then:
+mysql -u root
+ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY 'root';
 ```
 
 6. Stop Safe Mode MySQL Server:
@@ -187,7 +194,7 @@ ruby-build $RUBY_VERSION ~/.rubies/ruby-$RUBY_VERSION
    chruby $RUBY_VERSION
 ```
 
-@mimmolo and @JoeCohen used rbenv.
+@nimmolo and @JoeCohen used rbenv.
 For rbenv run: (installing ruby-build maybe also needed above)
 
 ```sh
@@ -203,10 +210,31 @@ Add rbenv to zsh/bash so that it loads every time you open a terminal
    rbenv global $RUBY_VERSION
 ```
 
+or for bash:
+
+```sh
+   echo 'if which rbenv > /dev/null; then eval "$(rbenv init - bash)"; fi' >> ~/.bash_profile
+   source ~/.bash_profile
+   rbenv install $RUBY_VERSION
+   rbenv global $RUBY_VERSION
+```
+
 ### Load an MO database snapshot.
 
 - download the snapshot from <http://images.mushroomobserver.org/checkpoint_stripped.gz>
 - copy (or move) the downloaded .gz file to the `mushroom-observer` directory.
+Then:
+
+Mac users have to uncomment/comment the relevant/irrelevant lines in `config/database.yml`:
+```yml
+shared:
+  adapter: mysql2
+  # Default (works for MacOS X), uncomment this line
+  socket: /tmp/mysql.sock 
+  # For Ubuntu/Debian, comment out this line
+  # socket: /var/run/mysqld/mysqld.sock
+```
+
 Then:
 
 ```sh
@@ -333,6 +361,10 @@ else
 fi
 
 rails lang:update
+# nimmo says: don't run the next two lines.
+#   The encrypted credentials.yml.enc file in the GitHub repo is correct
+#   and necessary. Rails credentials require a copy of the master.key
+#   in order to use it, available via email from any MO developer.
 rm config/credentials.yml.enc
 EDITOR='echo "test_secret: magic" >> ' rails credentials:edit
 ```

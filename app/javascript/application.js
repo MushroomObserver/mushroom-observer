@@ -14,6 +14,7 @@ import "@hotwired/turbo-rails"
 // link_to with GET: set data-turbo-stream="true" to opt in
 Turbo.setFormMode("optin")
 // https://stackoverflow.com/questions/77421369/turbo-response-to-render-javascript-alert/77434363#77434363
+// use: <%= turbo_stream.close_modal("modal_#{obs.id}_naming") %>
 Turbo.StreamActions.close_modal = function () {
   $("#" + this.templateContent.textContent).modal('hide')
 };
@@ -24,7 +25,13 @@ import "@hotwired/stimulus"
 import "@hotwired/stimulus-loading"
 
 import 'exifreader'
-import 'jstz'
+import jstz from 'jstz'
+try {
+  document.cookie = "tz=" + jstz.determine().name() + ";samesite=lax"
+}
+catch (err) {
+  // console.error(err)
+}
 
 import LazyLoad from "vanilla-lazyload"
 if (!window.lazyLoadInstance) {

@@ -19,10 +19,13 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     click_link(text: /#{obs.text_name}/)
     assert_selector("body.observations__show")
 
+    scroll_to(find("#observation_collection_numbers"), align: :center)
     assert_link(:create_collection_number.l)
-    find(:css, ".new_collection_number_link").trigger("click")
+    assert_selector(".new_collection_number_link")
+    # click_link(:create_collection_number.l) # it's too small to click
+    first(:css, ".new_collection_number_link").trigger("click")
 
-    assert_selector("#modal_collection_number")
+    assert_selector("#modal_collection_number", wait: 6)
 
     within("#modal_collection_number") do
       assert_field("collection_number_number")
@@ -39,7 +42,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       find(:css, ".edit_collection_number_link_#{c_n.id}").trigger("click")
     end
 
-    assert_selector("#modal_collection_number_#{c_n.id}")
+    assert_selector("#modal_collection_number_#{c_n.id}", wait: 6)
 
     within("#modal_collection_number_#{c_n.id}") do
       assert_field("collection_number_number")
@@ -62,7 +65,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       find(:css, ".edit_herbarium_record_link_#{fmr.id}").trigger("click")
     end
 
-    assert_selector("#modal_herbarium_record_#{fmr.id}")
+    assert_selector("#modal_herbarium_record_#{fmr.id}", wait: 6)
 
     within("#modal_herbarium_record_#{fmr.id}") do
       assert_field("herbarium_record_accession_number")
@@ -79,7 +82,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_link(:show_observation_add_sequence.l)
     find(:css, ".new_sequence_link").trigger("click")
 
-    assert_selector("#modal_sequence")
+    assert_selector("#modal_sequence", wait: 6)
     within("#modal_sequence") do
       assert_field("sequence_locus")
       assert_field("sequence_bases")
@@ -229,9 +232,9 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       click_link(text: /Propose/)
     end
 
-    assert_selector("#modal_naming_#{obs.id}", wait: 9)
-    assert_selector("#naming_#{obs.id}_form", wait: 9)
-    within("#naming_#{obs.id}_form") do
+    assert_selector("#modal_obs_#{obs.id}_naming", wait: 9)
+    assert_selector("#obs_#{obs.id}_naming_form", wait: 9)
+    within("#obs_#{obs.id}_naming_form") do
       assert_field("naming_name", wait: 4)
       # fill_in("naming_name", with: nd1.text_name)
       # Using autocomplete to slow things down here, otherwise button blocked.
@@ -244,10 +247,10 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       click_commit
     end
 
-    assert_selector("#modal_naming_#{obs.id}_flash", text: /Missing/)
+    assert_selector("#modal_obs_#{obs.id}_naming_flash", text: /Missing/)
     assert_selector("#name_messages", text: /deprecated/)
 
-    within("#naming_#{obs.id}_form") do
+    within("#obs_#{obs.id}_naming_form") do
       fill_in("naming_name", with: "")
       # fill_in("naming_name", with: n_d.text_name)
       # Using autocomplete to slow things down here, otherwise session lost.
@@ -261,7 +264,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       select("Doubtful", from: "naming_vote_value")
       click_commit
     end
-    assert_no_selector("#modal_naming_#{obs.id}", wait: 6)
+    assert_no_selector("#modal_obs_#{obs.id}_naming", wait: 6)
 
     # Test problems have occurred here: Something in
     # Observations::NamingsController#create seems to execute before the
@@ -298,10 +301,10 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_selector("#title", text: /#{nam.text_name}/)
     # sleep(3)
 
-    # check that there is a vote tally with this naming
+    # check that there is a vote "index" tally with this naming
     within("#observation_namings") do
-      assert_link(href: "/votes/#{nam.id}")
-      click_link(href: "/votes/#{nam.id}")
+      assert_link(href: "/observations/#{obs.id}/namings/#{nam.id}/votes")
+      click_link(href: "/observations/#{obs.id}/namings/#{nam.id}/votes")
     end
     assert_selector("#modal_naming_votes_#{nam.id}")
 
@@ -310,6 +313,36 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       find(:css, ".close").click
     end
     assert_no_selector("#modal_naming_votes_#{nam.id}")
+
+    # Test the link to the naming name and user
+    within("#observation_namings") do
+      assert_link(text: /#{n_d.text_name}/)
+      click_link(text: /#{n_d.text_name}/)
+    end
+    assert_selector("body.names__show", wait: 15)
+    page.go_back
+
+    # Test the link to the naming user... whoa, this takes too long!
+    # Re-add this test when the user page is sped up.
+    # within("#observation_namings") do
+    #   assert_link(text: /#{rolf.login}/)
+    #   click(text: /#{rolf.login}/)
+    # end
+    # assert_selector("body.users__show", wait: 30)
+    # page.go_back
+
+    # Test the edit naming form link. 
+    within("#observation_namings") do
+      assert_link(text: /#{n_d.text_name}/)
+      assert_selector(".edit_naming_link_#{nam.id}")
+      find(:css, ".edit_naming_link_#{nam.id}").trigger("click")
+    end
+    assert_selector("#modal_obs_#{obs.id}_naming_#{nam.id}", wait: 9)
+    assert_selector("#obs_#{obs.id}_naming_#{nam.id}_form", wait: 9)
+    within("#modal_obs_#{obs.id}_naming_#{nam.id}") do
+      find(:css, ".close").click
+    end
+    assert_no_selector("#modal_obs_#{obs.id}_naming_#{nam.id}")
 
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)

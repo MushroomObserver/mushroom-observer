@@ -6,10 +6,6 @@ const internalConfig = {
   // Make some of these targets for the controller
   block_form_submission: true,
   content: document.getElementById('content'),
-  // These aren't targets because outside scope of this controller (obs images)
-  obs_day: document.getElementById('observation_when_3i'),
-  obs_month: document.getElementById('observation_when_2i'),
-  obs_year: document.getElementById('observation_when_1i'),
   get_template_uri: "/observations/images/uploads/new",
   upload_image_uri: "/observations/images/uploads",
   // progress_uri: "/ajax/upload_progress",
@@ -749,9 +745,14 @@ export default class extends Controller {
 
   // gets or sets current obs date, simpledate object updates date
   observationDate(simpleDate) {
-    // hack - reset obs_year because the year-input controller may fire after
-    // this connects, and obs_year (the select) will be an obsolete element.
-    this.obs_year = document.getElementById('observation_when_1i');
+    // These aren't targets because they are created on the fly by Rails
+    // date_select, and because our year-input_controller may fire after
+    // this connects, making obs_year (the select) an obsolete element.
+    if (!this.obs_day || !this.obs_month || !this.obs_year) {
+      this.obs_day = document.getElementById('observation_when_3i');
+      this.obs_month = document.getElementById('observation_when_2i');
+      this.obs_year = document.getElementById('observation_when_1i');
+    }
 
     // set the obs date, if passed a simpleDate
     if (simpleDate && simpleDate.day && simpleDate.month &&
@@ -769,9 +770,9 @@ export default class extends Controller {
       return simpleDate;
     } else {
       // or get it. Have to check these values first, cannot send to function
-      const day = this.obs_day.value
-      const month = this.obs_month.value
-      const year = this.obs_year.value
+      const day = this.obs_day?.value
+      const month = this.obs_month?.value
+      const year = this.obs_year?.value
       return this.SimpleDate(day, month, year)
     }
   }

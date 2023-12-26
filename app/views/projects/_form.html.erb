@@ -2,9 +2,6 @@
 
   <%= submit_button(form: f, button: button, center: true) %>
 
-  <%= check_box_with_label(form: f, field: :accepting_observations,
-                           label: :form_projects_accepting_observations.t) %>
-
   <%= check_box_with_label(form: f, field: :open_membership,
                            label: :form_projects_open_membership.t) %>
 
@@ -20,8 +17,44 @@
   <%= autocompleter_field(form: f, field: :place_name, label: :WHERE.t + ":",
                           between: :required, autocomplete: :location) %>
 
-  <%= file_field_with_label(form: f, field: :upload_image,
-                            label: :form_projects_image_upload.t + ":") %>
+  <%= tag.div(
+    tag.p("*#{:form_projects_date_range.t}*".t) +
+    tag.p(:form_projects_dates_explain.t)
+  ) %>
+  <div class="container-text ml-4">
+    <div>
+      <%= f.label(:start_date, "#{:form_projects_start_date.t}: ") %>
+      <%= f.date_select(:start_date,
+                        { class: "form-control mb-2",
+                          start_year: Date.today.year - 10,
+                          end_year: Date.today.year + 10 }) %>
+    </div>
+    <div>
+      <%= f.label(:end_date, "#{:form_projects_end_date.t}: ") %>
+      <%= f.date_select(:end_date,
+                        { class: "form-control mb-2",
+                          start_year: Date.today.year - 10,
+                          end_year: Date.today.year + 10 }) %>
+    </div>
+    <div>
+      <p>
+        <%= radio_with_label(
+              form: f, field: "dates_any", value: false, checked: !@project_dates_any,
+              label: " #{:form_projects_range.t} (#{:form_projects_use_date_range.t})"
+            ) %>
+        <%= radio_with_label(
+              form: f, field: "dates_any", value: true, checked: @project_dates_any,
+              label: " #{:form_projects_any.t} (#{:form_projects_ignore_date_range.t})"
+            ) %>
+      </p>
+
+    </div>
+  </div>
+
+  <%= file_field_with_label(
+        form: f, field: :upload_image,
+        label: :form_projects_image_upload.t + ":",
+      ) %>
 
   <div class="form-group mt-3">
     <%= fields_for(:upload) do |fu| %>

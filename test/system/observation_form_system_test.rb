@@ -64,7 +64,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   # Google seems to give accurate bounds to this place, but the
   # geometry.location_type of "Pasadena, California" is "APPROXIMATE".
   # Viewport and bounds are separate fields in the Geocoder response,
-  # and other places' bounds may be more precise. Viewport is padded.
+  # and other places' bounds may be more precise. Viewport may be padded.
   # On the right may be the accurate extents, they're hard to find.
   PASADENA_EXTENTS = {
     north: 34.251905,     # 34.1774839
@@ -318,6 +318,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # check default values of location form
     assert_field("location_display_name", with: "Pasadena, California, USA")
+    assert_button(text: :form_locations_find_on_map.t.as_displayed)
+    click_button(:form_locations_find_on_map.t.as_displayed)
     sleep(1)
     assert_equal(PASADENA_EXTENTS[:north].round(4),
                  find("#location_north").value.to_f.round(4))
@@ -386,7 +388,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_checked_field("observation_specimen")
     assert_field(other_notes_id, with: "Notes for observation")
 
-    img_ids = Image.last(2).map(&:id)
+    imgs = Image.last(2)
+    cci = imgs.find { |img| img[:original_name] == "Coprinus_comatus.jpg" }
+    geo = imgs.find { |img| img[:original_name] == "geotagged.jpg" }
+    img_ids = imgs.map(&:id)
     img_ids.each do |img_id|
       assert_field("good_image_#{img_id}_when_1i", with: "2010")
       assert_select("good_image_#{img_id}_when_2i", text: "March")
@@ -395,6 +400,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                    with: katrina.legal_name)
       assert_field("good_image_#{img_id}_notes", with: "Notes for image")
     end
+    assert_checked_field("observation_thumb_image_id_#{cci.id}")
+    assert_unchecked_field("observation_thumb_image_id_#{geo.id}")
 
     # submit_observation_form_with_changes
     fill_in("observation_when_1i", with: "2011")
@@ -405,13 +412,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("observation_alt", with: "987m")
     check("observation_is_collection_location")
     fill_in(other_notes_id, with: "New notes for observation")
-
     img_ids.each do |img_id|
       fill_in("good_image_#{img_id}_when_1i", with: "2011")
       select("April", from: "good_image_#{img_id}_when_2i")
       select("15", from: "good_image_#{img_id}_when_3i")
       fill_in("good_image_#{img_id}_notes", with: "New notes for image")
     end
+    obs_images = find("#observation_images")
+    scroll_to(obs_images, align: :top)
+    choose("observation_thumb_image_id_#{geo.id}")
     sleep(1)
     within("#observation_form") { click_commit }
 
@@ -616,7 +625,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       is_collection_location: true,
       specimen: false,
       notes: "New notes for observation", # displayed in observations/show
-      image_notes: "New notes for image"
+      image_notes: "New notes for image",
+      thumb_image_id: Image.find_by(original_name: "geotagged.jpg").id
     )
   end
 end

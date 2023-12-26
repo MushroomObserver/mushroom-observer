@@ -18,6 +18,7 @@
 #  user_group::     UserGroup of members.
 #  title::          Title string.
 #  summary::        Summary of purpose.
+#  open_membership  Enable users to add themselves, disable shared editing
 #
 #  == Methods
 #
@@ -25,6 +26,7 @@
 #  is_admin?::      Is a given User an admin for this Project?
 #  can_join?::      Can the current user join this Project?
 #  can_leave?::     Can the current user leave this Project?
+#  current?::       Project (based on dates) has started and hasn't ended
 #  user_can_add_observation?:: Can user add observation to this Project
 #  violates_constraints?:: Does a given obs violate the Project constraints
 #  text_name::      Alias for +title+ for debugging.
@@ -43,9 +45,10 @@
 #  ==== Callbacks
 #  orphan_drafts::     Orphan draft descriptions whe destroyed.
 #
-################################################################################
-#
-class Project < AbstractModel
+###############################################################################
+class Project < AbstractModel # rubocop:disable Metrics/ClassLength
+  include Date
+
   belongs_to :admin_group, class_name: "UserGroup"
   belongs_to :location
   belongs_to :image
@@ -83,7 +86,7 @@ class Project < AbstractModel
 
   # Same as +text_name+ but with id tacked on to make unique.
   def unique_text_name
-    text_name + " (#{id || "?"})"
+    "#{text_name} (#{id || "?"})"
   end
 
   # Need these to be compatible with Comment.
@@ -119,40 +122,23 @@ class Project < AbstractModel
   end
 
   def member_status(user)
-    if user == self.user
-      :OWNER.t
-    elsif is_admin?(user)
-      :ADMIN.t
-    else
-      :MEMBER.t
-    end
+    return :OWNER.t if user == self.user
+
+    is_admin?(user) ? :ADMIN.t : :MEMBER.t
   end
 
   def user_can_add_observation?(obs, user)
-    accepting_observations && (obs.user == user ||
-                               is_member?(user))
-  end
-
-  def violates_constraints?(obs)
-    violates_location?(obs) # || violates_date?(obs)
-  end
-
-  def violates_location?(obs)
-    return false if location.blank?
-
-    !location.found_here?(obs)
+    obs.user == user || is_member?(user)
   end
 
   def count_violations
-    return 0 unless location
+    return out_of_range_observations.count unless location
 
-    count = observations.where.not(lat: nil).count
-    count - observations.in_box(n: location.north, s: location.south,
-                                e: location.east, w: location.west).count
+    out_of_range_observations.to_a.union(out_of_area_observations).size
   end
 
   def constraints
-    "Location: #{place_name}"
+    "#{:DATES.t}: #{date_range}; #{:LOCATION.t}: #{place_name}"
   end
 
   # Check if user has permission to edit a given object.
@@ -225,7 +211,7 @@ class Project < AbstractModel
   # Add observation (and its images) to this project if not already done so.
   # Saves it.
   def add_observation(obs)
-    return if observations.include?(obs) || !accepting_observations
+    return if observations.include?(obs)
 
     imgs = obs.images.select { |img| img.user_id == obs.user_id }
     observations.push(obs)
@@ -324,14 +310,9 @@ class Project < AbstractModel
   end
 
   def do_log(tag, touch, user = nil)
-    args = {}
-    args[:name]  = user.login if user
-    args[:touch] = touch
-    if tag == :log_project_destroyed
-      orphan_log(tag, args)
-    else
-      log(tag, args)
-    end
+    args = { touch: touch }
+    args[:name] = user.login if user
+    tag == :log_project_destroyed ? orphan_log(tag, args) : log(tag, args)
   end
 
   ##############################################################################
@@ -364,11 +345,7 @@ class Project < AbstractModel
   end
 
   def place_name
-    if location
-      location.display_name
-    else
-      ""
-    end
+    location ? location.display_name : ""
   end
 
   def place_name=(place_name)
@@ -384,5 +361,98 @@ class Project < AbstractModel
 
   def name_count
     Checklist::ForProject.new(self).num_names
+  end
+
+  ##############################################################################
+  #
+  #  :section: queries re related Observations
+  #
+  ##############################################################################
+
+  def out_of_range_observations
+    if start_date.nil? && end_date.nil?
+      # performant query that returns empty ActiveRecord_Relation
+      # (gps_hidden column has null: false)
+      observations.where(gps_hidden: nil)
+    elsif start_date.nil?
+      observations.where(Observation[:when] > end_date)
+    elsif end_date.nil?
+      observations.where(Observation[:when] < start_date)
+    else
+      observations.where(Observation[:when] > end_date).
+        or(observations.where(Observation[:when] < start_date))
+    end
+  end
+
+  def in_range_observations
+    if start_date.nil? && end_date.nil?
+      observations
+    elsif start_date.nil?
+      observations.where(Observation[:when] <= end_date)
+    elsif end_date.nil?
+      observations.where(Observation[:when] >= start_date)
+    else
+      observations.where(Observation[:when] <= end_date).
+        and(observations.where(Observation[:when] >= start_date))
+    end
+  end
+
+  # Obs lat/lon is outside Project.location exor
+  # Obs location is not a subset of Project.location
+  def out_of_area_observations
+    obs_geoloc_outside_project_location.to_a.union(
+      obs_without_geoloc_location_not_contained_in_location
+    )
+  end
+
+  def violates_constraints?(observation)
+    violates_location?(observation) ||
+      violates_date_range?(observation)
+  end
+
+  private ###############################
+
+  def obs_geoloc_outside_project_location
+    observations.
+      where.not(observations: { lat: nil }).
+      not_in_box(n: location.north, s: location.south,
+                 e: location.east, w: location.west)
+  end
+
+  def obs_without_geoloc_location_not_contained_in_location
+    observations.where(lat: nil).joins(:location).
+      merge(
+        Location.in_box(n: location.north, s: location.south,
+                        e: location.east, w: location.west).
+                 # This is safe (doesn't invert observations.where(lat: nil))
+                 invert_where
+      )
+  end
+
+  def violates_location?(observation)
+    return false if location.blank?
+
+    !location.found_here?(observation)
+  end
+
+  def violates_date_range?(observation)
+    excluded_from_date_range?(observation)
+  end
+
+  def excluded_from_date_range?(observation)
+    !included_in_date_range?(observation)
+  end
+
+  def included_in_date_range?(observation)
+    starts_no_later_than?(observation) &&
+      ends_no_earlier_than?(observation)
+  end
+
+  def starts_no_later_than?(observation)
+    !start_date&.after?(observation.when)
+  end
+
+  def ends_no_earlier_than?(observation)
+    !end_date&.before?(observation.when)
   end
 end

@@ -74,13 +74,8 @@ export default class extends Controller {
         this.elevationService = new google.maps.ElevationService()
         this.geocoder = new google.maps.Geocoder()
 
-        if (this.map_type !== "observation")
+        if (this.map_type !== "observation") {
           this.drawMap()
-
-        if (this.map_type === "location") {
-          this.findOnMap() // checks input
-          // } else if (Object.keys(this.collection.sets).length) {
-        } else if (this.map_type === "info") {
           this.buildOverlays()
         }
       })
