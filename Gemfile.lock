@@ -99,6 +99,7 @@ GEM
       irb (~> 1.10)
       reline (>= 0.3.8)
     docile (1.4.0)
+    dry-initializer (3.1.1)
     erubi (1.12.0)
     execjs (2.9.1)
     fastimage (2.3.0)
@@ -234,6 +235,7 @@ GEM
       rack (>= 1.1)
       rubocop (>= 1.33.0, < 2.0)
       rubocop-ast (>= 1.30.0, < 2.0)
+    ruby-next-core (1.0.0)
     ruby-progressbar (1.13.0)
     rubyzip (2.3.2)
     sassc (2.4.0)
@@ -281,6 +283,13 @@ GEM
       kgio (~> 2.6)
       raindrops (~> 0.7)
     uniform_notifier (1.16.0)
+    view_component (3.8.0)
+      activesupport (>= 5.2.0, < 8.0)
+      concurrent-ruby (~> 1.0)
+      method_source (~> 1.0)
+    view_component-contrib (0.2.2)
+      ruby-next-core (>= 0.15.0)
+      view_component
     web-console (4.2.1)
       actionview (>= 6.0.0)
       activemodel (>= 6.0.0)
@@ -333,6 +342,7 @@ DEPENDENCIES
   database_cleaner-active_record
   date (>= 3.2.1)
   debug (>= 1.0.0)
+  dry-initializer (~> 3.1)
   fastimage
   i18n
   importmap-rails
@@ -370,6 +380,8 @@ DEPENDENCIES
   terser
   turbo-rails
   unicorn
+  view_component
+  view_component-contrib
   web-console
   webmock
   xmlrpc

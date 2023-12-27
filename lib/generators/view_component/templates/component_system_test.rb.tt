@@ -1,0 +1,13 @@
+# frozen_string_literal: true
+
+require "application_system_test_case"
+
+class <%= class_name %>::ComponentSystemTest < ApplicationSystemTestCase
+  def test_default_preview
+    visit("/rails/view_components<%= File.join(class_path, file_name) %>/default")
+
+    # assert_text "Hello!"
+    # click_on("Click me!")
+    # assert_text "Good-bye!"
+  end
+end
