@@ -101,12 +101,12 @@ class LanguageExporterTest < UnitTestCase
     assert_check_pass(1, 0, "\n")
   end
 
-  def assert_check_pass(*args)
-    assert_check_pass_or_fail(true, "pass", *args)
+  def assert_check_pass(*)
+    assert_check_pass_or_fail(true, "pass", *)
   end
 
-  def assert_check_fail(*args)
-    assert_check_pass_or_fail(false, "fail", *args)
+  def assert_check_fail(*)
+    assert_check_pass_or_fail(false, "fail", *)
   end
 
   def assert_check_pass_or_fail(expected_val, expected_str,

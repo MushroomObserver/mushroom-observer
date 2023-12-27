@@ -45,7 +45,7 @@ class MatrixBoxPresenter < BasePresenter
                   rss_log.format_name.t.break_name.small_author
                 end
     self.what = target || rss_log
-    if target&.respond_to?(:location)
+    if target.respond_to?(:location)
       self.place_name = target.place_name
       self.where = target.location
     end
@@ -177,7 +177,7 @@ class MatrixBoxPresenter < BasePresenter
 
   # 20231125 Switched from a hash of { id:, obs: } to just obs
   def obs_data(observation)
-    return {} unless observation&.respond_to?(:is_collection_location)
+    return {} unless observation.respond_to?(:is_collection_location)
 
     observation
   end

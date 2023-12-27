@@ -111,7 +111,7 @@ class MOPaginator
   # Create and initialize new instance.
   def initialize(args = {})
     args.each do |key, val|
-      send("#{key}=", val)
+      send(:"#{key}=", val)
     end
     @number ||= 1
     @num_per_page ||= 100

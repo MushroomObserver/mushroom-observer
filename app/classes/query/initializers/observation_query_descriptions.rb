@@ -25,7 +25,7 @@ module Query
                 :project_lists, :species_lists,
                 :user, :users].reject { |arg| params[arg].to_s.empty? }
         if args.length == 1
-          send("title_for_#{args.first}")
+          send(:"title_for_#{args.first}")
         else
           :query_title_all_filtered.t(type: :observation)
         end

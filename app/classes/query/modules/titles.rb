@@ -7,7 +7,7 @@ module Query
       attr_accessor :title_tag, :title_args
 
       def initialize_title
-        @title_tag = "query_title_#{flavor}".to_sym
+        @title_tag = :"query_title_#{flavor}"
         @title_args = { type: model.to_s.underscore.to_sym }
       end
 

@@ -196,7 +196,7 @@ module Projects
         flash_notice(:"add_members_already_added_#{type}".t(user: user.login))
       else
         group.users << user unless group.users.member?(user)
-        project.send("log_add_#{type}", user)
+        project.send(:"log_add_#{type}", user)
         flash_notice(:"add_members_added_#{type}".t(user: user.login))
       end
     end
@@ -204,7 +204,7 @@ module Projects
     def set_status_remove(project, type, user, group)
       if group.users.include?(user)
         group.users.delete(user)
-        project.send("log_remove_#{type}", user)
+        project.send(:"log_remove_#{type}", user)
         flash_notice(:"add_members_removed_#{type}".t(user: user.login))
       else
         flash_notice(:"add_members_already_removed_#{type}".t(user: user.login))

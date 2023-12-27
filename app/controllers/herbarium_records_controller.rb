@@ -342,7 +342,7 @@ class HerbariumRecordsController < ApplicationController
   def normalize_parameters
     [:herbarium_name, :initial_det, :accession_number].each do |arg|
       val = @herbarium_record.send(arg).to_s.strip_html.strip_squeeze
-      @herbarium_record.send("#{arg}=", val)
+      @herbarium_record.send(:"#{arg}=", val)
     end
     @herbarium_record.notes = @herbarium_record.notes.to_s.strip
   end

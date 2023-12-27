@@ -19,7 +19,7 @@ module Observations
       # The turbo response only needs `naming_includes`, but the html response
       # for the form may need the whole `show_includes` shebang. (Check!)
       # Both need to have the @observation ivar.
-      # 
+      #
       @observation = @params.observation =
         Observation.show_includes.find(params[:observation_id])
       return unless @params.observation

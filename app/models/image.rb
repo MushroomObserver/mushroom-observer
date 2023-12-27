@@ -1047,7 +1047,7 @@ class Image < AbstractModel
     display_names = {}
     current_names_and_ids = {}
 
-    License.all.find_each do |license|
+    License.find_each do |license|
       display_names[license.id] = license.display_name
       current_names_and_ids[license.id] = License.current_names_and_ids(license)
     end

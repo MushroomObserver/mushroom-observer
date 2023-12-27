@@ -36,7 +36,7 @@ class ContentFilter
 
   def initialize(opts)
     opts.each do |key, val|
-      send("#{key}=", val)
+      send(:"#{key}=", val)
     end
   end
 
