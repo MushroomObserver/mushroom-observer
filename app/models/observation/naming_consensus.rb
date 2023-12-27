@@ -5,29 +5,29 @@ class Observation
     attr_accessor :obs
     attr_accessor :namings
     attr_accessor :votes
-   
+
     def initialize(obs)
       @obs = obs
       @namings = obs.namings
       @votes = @namings.map(&:votes).flatten
     end
-  
+
     def users_vote(naming_id, user_id)
       votes.find { |v| v.naming_id == naming_id && v.user_id == user_id }
     end
-  
+
     def users_favorite_vote(user_id)
       # whatever the best way to iterate over all votes and 
       # pick the one with the highest value
       votes.find { |v| v.user_id == user_id }.max 
     end
-  
+
     def naming_of_vote(vote)
       namings.find { |n| n.id == vote.naming_id }
     end
-  
+
     # and so on, basically provide methods for all of the accessors you need
-  
+
     def change_users_vote_for_naming(naming_id, user_id, value)
       # various logic for demoting 100% votes etc. all using these three basal methods,
       # which are the only ones that actually use AR to change the database
@@ -37,20 +37,20 @@ class Observation
       # then at the end, recalculate the consensus, no reloading required
       calc_consensus
     end
-  
+
     def create_vote(naming_id, user_id, value)
       votes << Vote.create(naming_id: naming_id, user_id: user_id, value: value)
     end
-  
+
     def change_vote(vote, new_value)
       vote.update_attribute(value: new_value)
     end
-  
+
     def delete_vote(vote)
       vote.destroy!
       votes.delete(vote)
     end
-  
+
     def calculate_consensus
       # Uses local arrays of namings and votes, all guaranteed to be up to date 
       # because the three methods above keep things up to date... 
@@ -64,7 +64,7 @@ class Observation
       #   vote_cache: new_vote_cache
       # )
     end
-  
+
     def reload_namings_and_votes!
       @namings = obs.namings.include(:votes)
       @votes = @namings.map(&:votes).flatten
