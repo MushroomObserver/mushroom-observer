@@ -11,29 +11,39 @@ class ViewComponentGenerator < Rails::Generators::NamedBase
   argument :attributes, type: :array, default: [], banner: "attribute"
 
   def create_component_file
-    template "component.rb", File.join("app/views/components", class_path, file_name, "component.rb")
+    template("component.rb",
+             File.join("app/views/components", class_path, file_name,
+                       "component.rb"))
   end
 
   def create_template_file
-    template "component.html.erb", File.join("app/views/components", class_path, file_name, "component.html.erb")
+    template("component.html.erb",
+             File.join("app/views/components", class_path, file_name,
+                       "component.html.erb"))
   end
 
   def create_test_file
     return if options[:skip_test]
 
-    template "component_test.rb", File.join("test/views/components", class_path, "#{file_name}_test.rb")
+    template("component_test.rb",
+             File.join("test/views/components", class_path,
+                       "#{file_name}_test.rb"))
   end
 
   def create_system_test_file
     return if options[:skip_system_test]
 
-    template "component_system_test.rb", File.join("test/system/views/components", class_path, "#{file_name}_test.rb")
+    template("component_system_test.rb",
+             File.join("test/system/views/components", class_path,
+                       "#{file_name}_test.rb"))
   end
 
   def create_preview_file
     return if options[:skip_preview]
 
-    template "preview.rb", File.join("app/views/components", class_path, file_name, "preview.rb")
+    template("preview.rb",
+             File.join("app/views/components", class_path, file_name,
+                       "preview.rb"))
   end
 
   private
@@ -51,5 +61,4 @@ class ViewComponentGenerator < Rails::Generators::NamedBase
 
     attributes.map { |attr| "option :#{attr.name}" }.join("\n  ")
   end
-
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 ActiveSupport.on_load(:view_component) do
   # Extend your preview controller to support authentication and other
   # application-specific stuff
@@ -10,7 +12,7 @@ ActiveSupport.on_load(:view_component) do
   #
   # Make it possible to store previews in sidecar folders
   # See https://github.com/palkan/view_component-contrib#organizing-components-or-sidecar-pattern-extended
-  ViewComponent::Preview.extend ViewComponentContrib::Preview::Sidecarable
+  ViewComponent::Preview.extend(ViewComponentContrib::Preview::Sidecarable)
   # Enable `self.abstract_class = true` to exclude previews from the list
-  ViewComponent::Preview.extend ViewComponentContrib::Preview::Abstract
+  ViewComponent::Preview.extend(ViewComponentContrib::Preview::Abstract)
 end

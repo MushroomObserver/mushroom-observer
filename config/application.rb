@@ -27,8 +27,8 @@ Bundler.require(*Rails.groups)
 
 module MushroomObserver
   class Application < Rails::Application
-    config.autoload_paths << Rails.root.join("app", "views", "components")
-    config.view_component.preview_paths << Rails.root.join("app", "views", "components")
+    config.autoload_paths << Rails.root.join("app/views/components")
+    config.view_component.preview_paths << Rails.root.join("app/views/components")
     # Settings in config/environments/* take precedence over those
     # specified here.
     # Application configuration should go into files in config/initializers
