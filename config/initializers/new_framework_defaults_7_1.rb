@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Be sure to restart your server when you modify this file.
 #
 # This file eases your Rails 7.1 framework defaults upgrade.
@@ -10,17 +12,19 @@
 # https://guides.rubyonrails.org/upgrading_ruby_on_rails.html
 
 ###
-# No longer add autoloaded paths into `$LOAD_PATH`. This means that you won't be able
-# to manually require files that are managed by the autoloader, which you shouldn't do anyway.
+# No longer add autoloaded paths into `$LOAD_PATH`. This means that you won't be
+# able to manually require files that are managed by the autoloader, which you
+# shouldn't do anyway.
 #
-# This will reduce the size of the load path, making `require` faster if you don't use bootsnap, or reduce the size
-# of the bootsnap cache if you use it.
+# This will reduce the size of the load path, making `require` faster if you
+# don't use bootsnap, or reduce the size of the bootsnap cache if you use it.
 #++
 Rails.application.config.add_autoload_paths_to_load_path = false
 
 ###
-# Remove the default X-Download-Options headers since it is used only by Internet Explorer.
-# If you need to support Internet Explorer, add back `"X-Download-Options" => "noopen"`.
+# Remove the default X-Download-Options headers since it is used only by
+# Internet Explorer. If you need to support Internet Explorer, add back
+# `"X-Download-Options" => "noopen"`.
 #++
 Rails.application.config.action_dispatch.default_headers = {
   "X-Frame-Options" => "SAMEORIGIN",
@@ -39,23 +43,26 @@ Rails.application.config.action_controller.
 
 ###
 # Active Record Encryption now uses SHA-256 as its hash digest algorithm.
-# 
+#
 # There are 3 scenarios to consider.
 #
 # 1. If you have data encrypted with previous Rails versions, and you have
-# +config.active_support.key_generator_hash_digest_class+ configured as SHA1 (the default
-# before Rails 7.0), you need to configure SHA-1 for Active Record Encryption too:
+# +config.active_support.key_generator_hash_digest_class+ configured as SHA1
+# (the default before Rails 7.0), you need to configure SHA-1 for Active Record
+# Encryption too:
 #++
-Rails.application.config.active_record.encryption.hash_digest_class = 
+Rails.application.config.active_record.encryption.hash_digest_class =
   OpenSSL::Digest::SHA1
 #
-# 2. If you have +config.active_support.key_generator_hash_digest_class+ configured as SHA256 (the new default
-# in 7.0), then you need to configure SHA-256 for Active Record Encryption:
+# 2. If you have +config.active_support.key_generator_hash_digest_class+
+# configured as SHA256 (the new default in 7.0), then you need to configure
+# SHA-256 for Active Record Encryption:
 #++
-# Rails.application.config.active_record.encryption.hash_digest_class = OpenSSL::Digest::SHA256
+# Rails.application.config.active_record.
+#   encryption.hash_digest_class = OpenSSL::Digest::SHA256
 #
-# 3. If you don't currently have data encrypted with Active Record encryption, you can disable this setting to
-# configure the default behavior starting 7.1+:
+# 3. If you don't currently have data encrypted with Active Record encryption,
+# you can disable this setting to configure the default behavior starting 7.1+:
 #++
 # Rails.application.config.active_record.encryption.
 #   support_sha1_for_non_deterministic_encryption = false
@@ -71,13 +78,16 @@ Rails.application.config.active_record.
   run_commit_callbacks_on_first_saved_instances_in_transaction = false
 
 ###
-# Configures SQLite with a strict strings mode, which disables double-quoted string literals.
+# Configures SQLite with a strict strings mode, which disables double-quoted
+# string literals.
 #
 # SQLite has some quirks around double-quoted string literals.
-# It first tries to consider double-quoted strings as identifier names, but if they don't exist
-# it then considers them as string literals. Because of this, typos can silently go unnoticed.
+# It first tries to consider double-quoted strings as identifier names, but if
+# they don't exist it then considers them as string literals. Because of this,
+# typos can silently go unnoticed.
 # For example, it is possible to create an index for a non existing column.
-# See https://www.sqlite.org/quirks.html#double_quoted_string_literals_are_accepted for more details.
+# See https://www.sqlite.org/quirks.html#double_quoted_string_literals_are_accepted
+# for more details.
 #++
 Rails.application.config.active_record.
   sqlite3_adapter_strict_strings_by_default = true
@@ -111,14 +121,14 @@ Rails.application.config.active_support.
 
 ###
 # Specify whether Query Logs will format tags using the SQLCommenter format
-# (https://open-telemetry.github.io/opentelemetry-sqlcommenter/), or using the legacy format.
-# Options are `:legacy` and `:sqlcommenter`.
+# (https://open-telemetry.github.io/opentelemetry-sqlcommenter/), or using the
+# legacy format. Options are `:legacy` and `:sqlcommenter`.
 #++
 Rails.application.config.active_record.query_log_tags_format = :sqlcommenter
 
 ###
-# Specify the default serializer used by `MessageEncryptor` and `MessageVerifier`
-# instances.
+# Specify the default serializer used by `MessageEncryptor` and
+# `MessageVerifier`instances.
 #
 # The legacy default is `:marshal`, which is a potential vector for
 # deserialization attacks in cases where a message signing secret has been
@@ -131,10 +141,12 @@ Rails.application.config.active_record.query_log_tags_format = :sqlcommenter
 # In Rails 7.2, the default will become `:json` which serializes and
 # deserializes with `ActiveSupport::JSON` only.
 #
-# Alternatively, you can choose `:message_pack` or `:message_pack_allow_marshal`,
-# which serialize with `ActiveSupport::MessagePack`. `ActiveSupport::MessagePack`
-# can roundtrip some Ruby types that are not supported by JSON, and may provide
-# improved performance, but it requires the `msgpack` gem.
+# Alternatively, you can choose `:message_pack` or
+# `:message_pack_allow_marshal`, which serialize with
+# `ActiveSupport::MessagePack`.
+# `ActiveSupport::MessagePack` can roundtrip some Ruby types that are not
+# supported by JSON, and may provide improved performance, but it requires the
+# `msgpack` gem.
 #
 # For more information, see
 # https://guides.rubyonrails.org/v7.1/configuring.html#config-active-support-message-serializer
@@ -158,7 +170,8 @@ Rails.application.config.active_support.
 # leave this optimization off on the first deploy, then enable it on a
 # subsequent deploy.
 #++
-# Rails.application.config.active_support.use_message_serializer_for_metadata = true
+# Rails.application.config.active_support.
+#   use_message_serializer_for_metadata = true
 
 ###
 # Set the maximum size for Rails log files.
@@ -166,7 +179,7 @@ Rails.application.config.active_support.
 # `config.load_defaults 7.1` does not set this value for environments other than
 # development and test.
 #++
-if Rails.env.local?
+if Rails.env.development?
   Rails.application.config.log_file_size = 100 * 1024 * 1024
 end
 
@@ -178,9 +191,10 @@ end
 Rails.application.config.active_record.raise_on_assign_to_attr_readonly = true
 
 ###
-# Enable validating only parent-related columns for presence when the parent is mandatory.
-# The previous behavior was to validate the presence of the parent record, which performed an extra query
-# to get the parent every time the child record was updated, even when parent has not changed.
+# Enable validating only parent-related columns for presence when the parent is
+# mandatory. The previous behavior was to validate the presence of the parent
+# record, which performed an extra query to get the parent every time the child
+# record was updated, even when parent has not changed.
 #++
 Rails.application.config.active_record.
   belongs_to_required_validates_foreign_key = false
@@ -193,8 +207,9 @@ Rails.application.config.precompile_filter_parameters = true
 
 ###
 # Enable before_committed! callbacks on all enrolled records in a transaction.
-# The previous behavior was to only run the callbacks on the first copy of a record
-# if there were multiple copies of the same record enrolled in the transaction.
+# The previous behavior was to only run the callbacks on the first copy of a
+# record if there were multiple copies of the same record enrolled in the
+# transaction.
 #++
 Rails.application.config.active_record.before_committed_on_all_records = true
 
@@ -218,15 +233,16 @@ Rails.application.config.active_record.before_committed_on_all_records = true
 # Rails.application.config.active_record.marshalling_format_version = 7.1
 
 ###
-# Run `after_commit` and `after_*_commit` callbacks in the order they are defined in a model.
-# This matches the behaviour of all other callbacks.
+# Run `after_commit` and `after_*_commit` callbacks in the order they are
+# defined in a model. This matches the behaviour of all other callbacks.
 # In previous versions of Rails, they ran in the inverse order.
 #++
 Rails.application.config.active_record.
   run_after_transaction_callbacks_in_order_defined = true
 
 ###
-# Whether a `transaction` block is committed or rolled back when exited via `return`, `break` or `throw`.
+# Whether a `transaction` block is committed or rolled back when exited via
+# `return`, `break` or `throw`.
 #++
 Rails.application.config.active_record.
   commit_transaction_on_non_local_return = true
@@ -251,32 +267,33 @@ Rails.application.config.active_record.generate_secure_token_on = :initialize
 # this file):
 #   config.active_support.cache_format_version = 7.1
 
-
 ###
-# Configure Action View to use HTML5 standards-compliant sanitizers when they are supported on your
-# platform.
+# Configure Action View to use HTML5 standards-compliant sanitizers when they
+# are supported on your platform.
 #
-# `Rails::HTML::Sanitizer.best_supported_vendor` will cause Action View to use HTML5-compliant
-# sanitizers if they are supported, else fall back to HTML4 sanitizers.
+# `Rails::HTML::Sanitizer.best_supported_vendor` will cause Action View to use
+# HTML5-compliant sanitizers if they are supported, else fall back to HTML4
+# sanitizers.
 #
-# In previous versions of Rails, Action View always used `Rails::HTML4::Sanitizer` as its vendor.
+# In previous versions of Rails, Action View always used
+# `Rails::HTML4::Sanitizer` as its vendor.
 #++
-Rails.application.config.action_view.sanitizer_vendor = 
+Rails.application.config.action_view.sanitizer_vendor =
   Rails::HTML::Sanitizer.best_supported_vendor
 
-
 ###
-# Configure Action Text to use an HTML5 standards-compliant sanitizer when it is supported on your
-# platform.
+# Configure Action Text to use an HTML5 standards-compliant sanitizer when it is
+# supported on your platform.
 #
-# `Rails::HTML::Sanitizer.best_supported_vendor` will cause Action Text to use HTML5-compliant
-# sanitizers if they are supported, else fall back to HTML4 sanitizers.
+# `Rails::HTML::Sanitizer.best_supported_vendor` will cause Action Text to use
+# HTML5-compliantsanitizers if they are supported, else fall back to HTML4
+# sanitizers.
 #
-# In previous versions of Rails, Action Text always used `Rails::HTML4::Sanitizer` as its vendor.
+# In previous versions of Rails, Action Text always used
+# `Rails::HTML4::Sanitizer` as its vendor.
 #++
-# Rails.application.config.action_text.sanitizer_vendor = 
+# Rails.application.config.action_text.sanitizer_vendor =
 #   Rails::HTML::Sanitizer.best_supported_vendor
-
 
 ###
 # Configure the log level used by the DebugExceptions middleware when logging
@@ -284,12 +301,12 @@ Rails.application.config.action_view.sanitizer_vendor =
 #++
 Rails.application.config.action_dispatch.debug_exception_log_level = :error
 
-
 ###
-# Configure the test helpers in Action View, Action Dispatch, and rails-dom-testing to use HTML5
-# parsers.
+# Configure the test helpers in Action View, Action Dispatch, and
+# rails-dom-testing to use HTML5parsers.
 #
-# Nokogiri::HTML5 isn't supported on JRuby, so JRuby applications must set this to :html4.
+# Nokogiri::HTML5 isn't supported on JRuby, so JRuby applications must set this
+# to :html4.
 #
 # In previous versions of Rails, these test helpers always used an HTML4 parser.
 #++
