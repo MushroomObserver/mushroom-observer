@@ -101,7 +101,7 @@ module TitleAndTabsetHelper
     path = if object.type_tag == :rss_log
              send(:activity_log_path, object.id, flow: "next")
            else
-             send("#{object.type_tag}_path", object.id, flow: "next")
+             send(:"#{object.type_tag}_path", object.id, flow: "next")
            end
     link_with_query("#{:FORWARD.t} »", path)
   end
@@ -111,7 +111,7 @@ module TitleAndTabsetHelper
     path = if object.type_tag == :rss_log
              send(:activity_log_path, object.id, flow: "prev")
            else
-             send("#{object.type_tag}_path", object.id, flow: "prev")
+             send(:"#{object.type_tag}_path", object.id, flow: "prev")
            end
     link_with_query("« #{:BACK.t}", path)
   end

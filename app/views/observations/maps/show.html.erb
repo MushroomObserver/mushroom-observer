@@ -4,6 +4,6 @@ add_page_title(:map_observation_title.t(id: @observation.id))
 add_tab_set(observation_maps_tabs(query: @query))
 %>
 
-<%= render(partial: "shared/map",
-           locals: { objects: @observations,
-                     query_params: query_params(@query), zoom: 2 }) %>
+<%= make_map(objects: @observations, # it's an array, just one MinimalMapObs
+             query_params: query_params(@query), zoom: 2, 
+             map_type: "observation") %>

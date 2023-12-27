@@ -1,10 +1,9 @@
 <%
-@query ||= nil
+@query ||= nil # tbd what this was ever used for in the table
 %>
 
 <!--OBSERVATION_NAMINGS / TABLE REFRESHED BY TURBO -->
 <%= tag.div(id: "observation_namings") do
-  render(partial: "observations/namings/table",
-         locals: { obs: obs, query: @query })
+  observation_namings_table(obs)
 end %>
 <!--/OBSERVATION_NAMINGS -->

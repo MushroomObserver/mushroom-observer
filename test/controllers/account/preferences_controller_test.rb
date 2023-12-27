@@ -288,7 +288,7 @@ module Account
           require_user: :index,
           result: "no_email"
         )
-        assert_not(rolf.reload.send("email_#{type}"))
+        assert_not(rolf.reload.send(:"email_#{type}"))
       end
     end
 

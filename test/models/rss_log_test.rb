@@ -92,7 +92,7 @@ class RssLogTest < UnitTestCase
     # Target must have id; use an existing object to avoid hitting db
     target = model(type).first
     rss_log = RssLog.new
-    rss_log["#{type}_id".to_sym] = target.id
+    rss_log[:"#{type}_id"] = target.id
     rss_log.updated_at = Time.zone.now
     rss_log
   end

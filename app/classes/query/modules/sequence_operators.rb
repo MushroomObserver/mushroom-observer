@@ -18,8 +18,8 @@ module Query
       end
 
       # Current place in results, instantiated.  (Returns nil if not set yet.)
-      def current(*args)
-        @current_id ? instantiate([@current_id], *args).first : nil
+      def current(*)
+        @current_id ? instantiate([@current_id], *).first : nil
       end
 
       # Set current place in results; takes instance or id (String or Integer).

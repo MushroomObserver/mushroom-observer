@@ -118,7 +118,7 @@ module API2Helper
   end
 
   def xml_image_file(xml, image, size)
-    url = image.send("#{size}_url")
+    url = image.send(:"#{size}_url")
     w, h = image.size(size)
     xml.file(
       url: url,
@@ -140,7 +140,7 @@ module API2Helper
 
     type = object.type_tag.to_s
     xml.tag!(tag, id: object.id, type: type) do |inner_xml|
-      send("xml_#{type}", inner_xml, object)
+      send(:"xml_#{type}", inner_xml, object)
     end
   end
 

@@ -120,7 +120,7 @@ class ImageTest < UnitTestCase
   end
 
   def assert_truncated_right(img, var, set, get)
-    img.send("#{var}=", set)
+    img.send(:"#{var}=", set)
     img.valid?
     assert_equal(get, img.send(var))
   end

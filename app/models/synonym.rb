@@ -35,7 +35,7 @@ class Synonym < AbstractModel
   def self.make_sure_all_referenced_synonyms_exist
     references = Name.select(:synonym_id).where.not(synonym: nil).distinct.
                  order(:synonym_id).pluck(:synonym_id)
-    records = Synonym.all.order(id: :asc).pluck(:id)
+    records = Synonym.order(id: :asc).pluck(:id)
     unused  = records - references
     missing = references - records
 

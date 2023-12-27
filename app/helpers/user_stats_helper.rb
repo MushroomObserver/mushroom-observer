@@ -11,7 +11,7 @@ module UserStatsHelper
     [:sequences, :sequenced_observations]).each do |field|
       rows << {
         field: field,
-        label: "user_stats_#{field}".to_sym.t,
+        label: :"user_stats_#{field}".t,
         count: (count = user_data[field].to_i),
         weight: (weight = SiteData::FIELD_WEIGHTS[field]),
         points: count * weight
