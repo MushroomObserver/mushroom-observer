@@ -8,15 +8,11 @@ module NamingsHelper
   ##### Observation Naming "table" content #########
   def observation_namings_table(obs)
     tag.div(class: "namings-table panel panel-default mb-4",
-            id: "namings_table",
-            data: {
-              controller: "section-update",
-              updated_by: "modal_naming_#{obs.id}"
-            }) do
+            id: "namings_table") do
       [
-        namings_table_header,
-        namings_table_rows(obs),
-        namings_table_footer(obs)
+        observation_namings_table_header,
+        observation_namings_table_rows(obs), # only rows get updated
+        observation_namings_table_footer(obs)
       ].safe_join
     end
   end
@@ -24,7 +20,7 @@ module NamingsHelper
   private
 
   # nested rows/columns parallel those in the row
-  def namings_table_header
+  def observation_namings_table_header
     header = naming_header_row_content
     behavior = "flex-column justify-content-end"
 
@@ -68,11 +64,16 @@ module NamingsHelper
 
   # n+1 should be ok
   # but need: obs.consensus_naming and obs.users_favorite?
-  def namings_table_rows(obs)
+  def observation_namings_table_rows(obs)
     namings = obs.namings.sort_by(&:created_at)
     any_names = obs.namings&.length&.positive?
 
-    tag.div(class: "list-group list-group-flush") do
+    tag.div(class: "list-group list-group-flush",
+            id: "namings_table_rows",
+            data: {
+              controller: "section-update",
+              updated_by: "modal_naming_#{obs.id}"
+            }) do
       if any_names
         namings.each do |naming|
           row = naming_row_content(obs, naming)
@@ -266,8 +267,7 @@ module NamingsHelper
         fv.select(:value, menu, {},
                   { class: "form-control w-100",
                     id: "vote_value_#{naming.id}",
-                    data: { role: "change_vote", id: naming.id,
-                            naming_vote_target: "select",
+                    data: { naming_vote_target: "select",
                             localization: localizations,
                             action: "naming-vote#sendVote" } }),
         hidden_field_tag(:context, context),
@@ -331,7 +331,7 @@ module NamingsHelper
   end
 
   # nested rows/columns parallel those in the row partial
-  def namings_table_footer(obs)
+  def observation_namings_table_footer(obs)
     suggest = obs.thumb_image_id.present? &&
               (User.current.admin ||
                MO.image_model_beta_testers.include?(User.current_id))
@@ -387,8 +387,8 @@ module NamingsHelper
     )
   end
 
-  # N+1: Move the calculation of observation.image_ids to suggestions#show
-  # or query obs includes images
+  # N+1: can't move the calculation of observation.image_ids
+  # must query obs includes images, don't update table-footer
   def suggest_namings_link(obs)
     localizations = {
       processing_images: :suggestions_processing_images.t,
@@ -396,6 +396,7 @@ module NamingsHelper
       processing_results: :suggestions_processing_results.t,
       error: :suggestions_error.t
     }.to_json
+    # NOTE: it does not actually commit to this path.
     results_url = add_query_param(
       naming_suggestions_for_observation_path(id: obs.id, names: :xxx)
     )
@@ -403,8 +404,7 @@ module NamingsHelper
     button_tag(
       :show_namings_suggest_names.l,
       type: :button, class: "btn btn-default btn-sm mt-2",
-      data: { role: "suggest_names",
-              results_url: results_url,
+      data: { results_url: results_url,
               localization: localizations,
               image_ids: obs.image_ids.to_json,
               controller: "suggestions", # Stimulus controller
@@ -412,7 +412,7 @@ module NamingsHelper
     )
   end
 
-  private 
+  private
 
   def vote_legend_yours
     tag.div(class: "d-flex flex-row align-items-center small") do

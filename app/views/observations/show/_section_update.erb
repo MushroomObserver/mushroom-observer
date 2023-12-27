@@ -4,9 +4,9 @@
 # The namings table is a helper
 # N+1 - @observation.reload ?!
 if identifier == "namings"
-  id = "namings_table"
+  id = "namings_table_rows"
   turbo_stream.replace(id) do
-    observation_namings_table(@observation)
+    observation_namings_table_rows(@observation)
   end
 else
   id = "observation_#{identifier}"

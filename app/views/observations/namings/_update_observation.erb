@@ -7,8 +7,8 @@ it updates the obs title and name_info.
 # debugger
 %>
 
-<%= turbo_stream.replace("namings_table") do
-  observation_namings_table(obs)
+<%= turbo_stream.replace("namings_table_rows") do
+  observation_namings_table_rows(obs)
 end %>
 
 <%= turbo_stream.replace("observation_name_info") do
