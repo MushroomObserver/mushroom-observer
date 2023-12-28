@@ -1,5 +1,5 @@
 <%
-@owner_naming = owner_naming_line(@observation) # must before show_obs_title
+@owner_naming = owner_naming_line(@owner_name) # must before show_obs_title
 add_page_title(show_obs_title(obs: @observation, owner_naming: @owner_naming))
 num_images = @observation.images.length
 

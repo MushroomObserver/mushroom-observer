@@ -874,9 +874,11 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_show_owner_naming
     login(user_with_view_owner_id_true)
     obs = observations(:owner_only_favorite_ne_consensus)
+    consensus = Observation::NamingConsensus.new(obs)
+
     get(:show, params: { id: obs.id })
     assert_select("#owner_naming",
-                  { text: /#{obs.owner_preference.text_name}/,
+                  { text: /#{consensus.owner_preference.text_name}/,
                     count: 1 },
                   "Observation should show owner's preferred naming")
 
