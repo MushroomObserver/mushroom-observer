@@ -130,11 +130,12 @@ class Symbol
   def localize(args = {}, level = [])
     result = nil
     Language.note_usage_of_tag(self)
+
     if (val = I18n.t("#{MO.locale_namespace}.#{self}", default: "")) != ""
       result = localize_postprocessing(val, args, level)
     elsif (val = I18n.t("#{MO.locale_namespace}.#{downcase}",
                         default: "")) != ""
-      result = localize_postprocessing(val, args, level, :captialize)
+      result = localize_postprocessing(val, args, level, :capitalize)
     else
       @@missing_tags << self if defined?(@@missing_tags)
       if args.any?
@@ -155,15 +156,15 @@ class Symbol
   end
 
   # Run +localize+ in test mode.
-  def self.test_localize(val, args = {}, level = [])
-    :test.localize_postprocessing(val, args, level)
+  def self.test_localize(val, args = {}, level = [], capitalize_result = false)
+    :test.localize_postprocessing(val, args, level, capitalize_result)
   end
 
   def localize_postprocessing(val, args, level, capitalize_result = false)
     result = val
     if result.is_a?(String)
       result = result.gsub(/ *\\n */, "\n")
-      if args.is_a?(Hash)
+      if args.is_a?(Hash) && args.present?
         result = localize_expand_arguments(result, args, level)
       end
       if level.length < 8
@@ -181,6 +182,7 @@ class Symbol
     result
   end
 
+  # rubocop:disable Metrics/MethodLength
   def localize_expand_arguments(val, args, _level) # :nodoc:
     val.gsub(/\[(\[?\w+?)\]/) do
       orig = x = y = Regexp.last_match(1)
@@ -282,6 +284,7 @@ class Symbol
       tag.l(hash, level + [self])
     end
   end
+  # rubocop:enable Metrics/MethodLength
 
   alias l localize
 
