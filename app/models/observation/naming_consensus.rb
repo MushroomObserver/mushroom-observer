@@ -12,6 +12,46 @@ class Observation
       @votes = @namings.map(&:votes).flatten
     end
 
+    ############################################################################
+    #
+    #  :section: Preferred Naming
+    #
+    ############################################################################
+
+    # Observation.user's unique preferred positive Name for this observation
+    # Returns falsy if there's no unique preferred positive id
+    # Used in show obs subtitle: owner_naming_line
+    def owner_preference
+      owner_uniq_favorite_name if owner_preference?
+    end
+
+    private
+
+    # Does observation.user have a single preferred id for this observation?
+    def owner_preference?
+      owner_uniq_favorite_vote&.value&.>= Vote.owner_id_min_confidence
+    end
+
+    def owner_uniq_favorite_name
+      favs = owner_favorite_votes
+      favs[0].naming.name if favs.count == 1
+    end
+
+    def owner_uniq_favorite_vote
+      votes = owner_favorite_votes
+      votes.first if votes.count == 1
+    end
+
+    def owner_favorite_votes
+      @votes.select { |v| v.user_id == @obs.user_id && v.favorite == true }
+    end
+
+    ############################################################################
+    #
+    #  :section: Voting
+    #
+    ############################################################################
+
     def users_vote(naming_id, user_id)
       votes.find { |v| v.naming_id == naming_id && v.user_id == user_id }
     end
@@ -68,40 +108,6 @@ class Observation
     def reload_namings_and_votes!
       @namings = @obs.namings.include(:votes)
       @votes = @namings.map(&:votes).flatten
-    end
-
-    ############################################################################
-    #
-    #  :section: Preferred Naming
-    #
-    ############################################################################
-
-    # Observation.user's unique preferred positive Name for this observation
-    # Returns falsy if there's no unique preferred positive id
-    # Used in show obs subtitle: owner_naming_line
-    def owner_preference
-      owner_uniq_favorite_name if owner_preference?
-    end
-
-    private
-
-    # Does observation.user have a single preferred id for this observation?
-    def owner_preference?
-      owner_uniq_favorite_vote&.value&.>= Vote.owner_id_min_confidence
-    end
-
-    def owner_uniq_favorite_name
-      favs = owner_favorite_votes
-      favs[0].naming.name if favs.count == 1
-    end
-
-    def owner_uniq_favorite_vote
-      votes = owner_favorite_votes
-      votes.first if votes.count == 1
-    end
-
-    def owner_favorite_votes
-      @votes.select { |v| v.user_id == @obs.user_id && v.favorite == true }
     end
   end
 end
