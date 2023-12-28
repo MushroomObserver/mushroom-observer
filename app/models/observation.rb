@@ -1288,44 +1288,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   ##############################################################################
   #
-  #  :section: Preferred Naming
-  #
-  ##############################################################################
-
-  # Observation.user's unique preferred positive Name for this observation
-  # Returns falsy if there's no unique preferred positive id
-  # Used on show_observation page
-  # N+1: Bad news - this does several reloads of eager loaded votes.
-  # Move this to the Election object.
-  # def owner_preference
-  #   owner_uniq_favorite_name if owner_preference?
-  # end
-
-  # private
-
-  # # Does observation.user have a single preferred id for this observation?
-  # def owner_preference?
-  #   owner_uniq_favorite_vote&.value&.>= Vote.owner_id_min_confidence
-  # end
-
-  # def owner_uniq_favorite_name
-  #   favs = owner_favorite_votes
-  #   favs[0].naming.name if favs.count == 1
-  # end
-
-  # def owner_uniq_favorite_vote
-  #   votes = owner_favorite_votes
-  #   votes.first if votes.count == 1
-  # end
-
-  # def owner_favorite_votes
-  #   votes.where(user_id: user_id, favorite: true)
-  # end
-
-  # public
-
-  ##############################################################################
-  #
   #  :section: Images
   #
   ##############################################################################

@@ -103,9 +103,11 @@ class ObservationTest < UnitTestCase
     consensus = Observation::NamingConsensus.new(obs)
     assert_equal(names(:boletus_edulis), consensus.owner_preference)
 
+    # fixture bug: this obs does not have a naming.
+    nam = namings(:detailed_unknown_naming)
     obs = observations(:owner_only_favorite_eq_fungi)
-    consensus = Observation::NamingConsensus.new(obs)
-    debugger
+    nam.update(observation_id: obs.id)
+    consensus = Observation::NamingConsensus.new(obs.reload)
     assert_equal(names(:fungi), consensus.owner_preference)
 
     # obs Site ID is Fungi, but owner did not propose a Name
