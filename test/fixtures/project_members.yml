@@ -35,16 +35,6 @@ open_member_katrina:
   user: katrina
   trust_level: <%= ProjectMember.trust_levels[:no_trust] %>
 
-burbank_roy:
-  project: not_accepting_observations_project
-  user: roy
-  trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>
-
-burbank_katrina:
-  project: not_accepting_observations_project
-  user: katrina
-  trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>
-
 empty_mary:
   project: empty_project
   user: mary

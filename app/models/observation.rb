@@ -540,7 +540,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       { images: [:license, :user] },
       :location,
       :name,
-      { namings: :name },
+      { namings: [:name, :user, { votes: [:observation, :user] }] },
       :projects,
       :thumb_image,
       :user
@@ -998,7 +998,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   ##############################################################################
   #
-  #  :section: Namings and Votes
+  #  :section: Name Formats
   #
   ##############################################################################
 
@@ -1018,6 +1018,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   rescue StandardError
     ""
   end
+
+  ##############################################################################
+  #
+  #  :section: Namings and Votes
+  #
+  ##############################################################################
 
   # Look up the corresponding instance in our namings association.  If we are
   # careful to keep all the operations within the tree of assocations of the
@@ -1174,19 +1180,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     Observation.find_each(&:calc_consensus)
   end
 
-  ##############################################################################
-  #
-  #  :section: Preferred ID
-  #
-  ##############################################################################
-
-  # Observation.user's unique preferred positive Name for this observation
-  # Returns falsy if there's no unique preferred positive id
-  # Used on show_observation page
-  def owner_preference
-    owner_uniq_favorite_name if owner_preference?
-  end
-
   private
 
   def find_matches
@@ -1289,25 +1282,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def other_votes(vote, user)
     user_votes(user) - [vote]
-  end
-
-  # Does observation.user have a single preferred id for this observation?
-  def owner_preference?
-    owner_uniq_favorite_vote&.value&.>= Vote.owner_id_min_confidence
-  end
-
-  def owner_uniq_favorite_name
-    favs = owner_favorite_votes
-    favs[0].naming.name if favs.count == 1
-  end
-
-  def owner_uniq_favorite_vote
-    votes = owner_favorite_votes
-    votes.first if votes.count == 1
-  end
-
-  def owner_favorite_votes
-    votes.where(user_id: user_id, favorite: true)
   end
 
   public

@@ -15,6 +15,9 @@ ActionMailer::Base.raise_delivery_errors = false
 
 #  Base class for mailers for each type of email
 class ApplicationMailer < ActionMailer::Base
+  # Allow folder organization in the app/views folder
+  append_view_path Rails.root.join("app/views/mailers")
+
   # Use native Ruby URI::MailTo class
   def self.valid_email_address?(address)
     address.to_s.match?(URI::MailTo::EMAIL_REGEXP)

@@ -79,19 +79,19 @@ module ObservationsHelper
   ##### Portion of page title that includes user's naming preference #########
 
   # Observer Preference: Hydnum repandum
-  def owner_naming_line(obs)
+  def owner_naming_line(owner_name)
     return unless User.current&.view_owner_id
 
     [
       "#{:show_observation_owner_id.t}:",
-      owner_favorite_or_explanation(obs).t
+      owner_favorite_or_explanation(owner_name).t
     ].safe_join(" ")
   end
 
-  def owner_favorite_or_explanation(obs)
-    if (name = obs.owner_preference)
+  def owner_favorite_or_explanation(owner_name)
+    if owner_name
       link_to_display_name_brief_authors(
-        name, class: "obs_owner_naming_link_#{name.id}"
+        owner_name, class: "obs_owner_naming_link_#{owner_name.id}"
       )
     else
       :show_observation_no_clear_preference
