@@ -1,0 +1,40 @@
+<%
+case action_name
+when "new", "create"
+  url_params = add_query_param(
+    { action: :create, observation_id: @observation.id }
+  )
+  button = :ADD.t
+when "edit", "update"
+  url_params = add_query_param({ action: :update })
+  url_params = url_params.merge({ back: @back }) if @back.present?
+  button = :SAVE.t
+end
+form_args = {
+  model: @collection_number, url: url_params, id: "collection_number_form"
+}
+if local_assigns[:local] == true
+  form_args = form_args.merge({ local: true })
+else
+  form_args = form_args.deep_merge({ data: { turbo: true } })
+end
+%>
+
+<%= form_with(**form_args) do |f| %>
+
+  <% if @collection_number.observations.size > 1 %>
+    <%= alert_block(
+      :warning, :edit_affects_multiple_observations.t(type: :collection_number)
+    ) %>
+  <% end %>
+
+  <%= text_field_with_label(form: f, field: :name, between: :required,
+                            label: :collection_number_name.t + ":",
+                            data: { autofocus: true }) %>
+
+  <%= text_field_with_label(form: f, field: :number, between: :required,
+                            label: :collection_number_number.t + ":") %>
+
+  <%= submit_button(form: f, button: button, center: true) %>
+
+<% end %>

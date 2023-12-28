@@ -56,7 +56,7 @@ module Account
 
       # First make sure it can serve the form to start with.
       requires_login("edit")
-      Language.all.each do |lang|
+      Language.find_each do |lang|
         assert_select("option[value=#{lang.locale}]", { count: 1 },
                       "#{lang.locale} language option missing")
       end
@@ -288,17 +288,21 @@ module Account
           require_user: :index,
           result: "no_email"
         )
-        assert_not(rolf.reload.send("email_#{type}"))
+        assert_not(rolf.reload.send(:"email_#{type}"))
       end
     end
 
     def test_no_email_failed_save
       login("rolf")
-      User.any_instance.stubs(:save).returns(false)
-      get(:no_email, params: { id: rolf.id, type: :comments_owner })
+      user = users(:rolf)
+      user.stub(:save, false) do
+        User.stub(:safe_find, user) do
+          get(:no_email, params: { id: rolf.id, type: :comments_owner })
 
-      assert_true(rolf.email_comments_owner,
-                  "Preferences should be unchanged when user.save fails")
+          assert_true(rolf.reload.email_comments_owner,
+                      "Preferences should be unchanged when user.save fails")
+        end
+      end
     end
   end
 end

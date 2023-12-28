@@ -12,12 +12,12 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-20.04 # focal, includes MySQL 5.8
+    runs-on: ubuntu-22.04
     steps:
       # check-out repo under $GITHUB_WORKSPACE, so that workflow can access it.
       # https://github.com/actions/checkout
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # https://github.com/ruby/setup-ruby
       - name: Set up Ruby
@@ -28,8 +28,11 @@ jobs:
       - name: Install additional tools
         run: sudo apt-get install exiftool
 
-      - name: Install Firefox
-        run: sudo apt-get install firefox
+      # - name: Install Firefox
+      #   run: sudo apt-get install firefox
+
+      - name: Install Chrome/Chromium
+        run: sudo apt-get install chromium-browser
 
       # MySQL is installed but does not run by default
       # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md#mysql

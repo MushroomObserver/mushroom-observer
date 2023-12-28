@@ -1,0 +1,92 @@
+<%#
+Handling deprecated, new & multiple Names
+Used by Name and Naming create and edit pages
+Does three things:
+  Flashes - Warning or Error
+  Describes the issue - Deprecated, Parent Deprecated, or Not Recognized
+  Adds Help how to proceed - depends on issue and the button
+
+locals:
+what - text typed by user
+names - Name(s) corresponding to what
+valid_names - Name(s) that are valid synonyms
+suggest_corections - t/f whether to suggest correction(s)
+parent_deprecated - t/f
+button_name - text: button to complete the action, e.g. Submit, Create
+%>
+
+<%=
+if valid_names
+  ##### Warnings #####
+  concat(flash_warning(:form_observations_there_is_a_problem_with_name.t))
+
+  concat(tag.div(class: "alert alert-warning", id: "name_messages") do
+    concat(tag.div do
+      if suggest_corrections || names.blank?
+        :form_naming_not_recognized.t(name: what)
+      elsif parent_deprecated
+        :form_naming_parent_deprecated.t(
+          parent: parent_deprecated.display_name,
+          rank: :"rank_#{parent_deprecated.rank.to_s.downcase}"
+        )
+      elsif names.present?
+        :form_naming_deprecated.t(name: what)
+      end
+    end)
+    if valid_names.length > 0
+      if suggest_corrections
+        concat(help_note(
+          :div, :form_naming_correct_help.t(button: button_name, name: what)
+        ))
+      else
+        concat(help_note(
+          :div, :form_naming_deprecated_help.t(button: button_name, name: what)
+        ))
+      end
+      concat(tag.div do
+        if !suggest_corrections && !parent_deprecated
+          concat(tag.div("#{:form_naming_valid_synonyms.t}:"))
+        end
+        concat(fields_for(:chosen_name) do |f_c|
+          valid_names.each do |n|
+            concat(radio_with_label(form: f_c, field: :name_id, value: n.id,
+                                    label: n.display_name.t, class: "ml-4"))
+          end
+        end)
+      end)
+    else
+      concat(help_note(
+        :div, :form_naming_not_recognized_help.t(button: button_name)
+      ))
+    end
+  end)
+
+##### Errors #####
+elsif names&.length == 0
+
+  concat(flash_error(:form_observations_there_is_a_problem_with_name.t))
+
+  concat(tag.div(class: "alert alert-danger", id: "name_messages") do
+    concat(tag.div(:form_naming_not_recognized.t(name: what)))
+    concat(help_note(
+      :div, :form_naming_not_recognized_help.t(button: button_name)
+    ))
+  end)
+
+elsif names&.length &.> 1
+
+  concat(flash_error(:form_observations_there_is_a_problem_with_name.t))
+
+  concat(tag.div(class: "alert alert-danger", id: "name_messages") do
+    concat(tag.div([:form_naming_multiple_names.t(name: what), ":"].safe_join))
+    concat(fields_for(:chosen_name) do |f_c|
+      names.each do |n|
+        concat(radio_with_label(form: f_c, field: :name_id, value: n.id,
+                                label: n.display_name.t, class: "ml-4"))
+        concat(tag.div("(#{n.observations.size})"))
+      end
+    end)
+    concat(help_note(:div, :form_naming_multiple_names_help.t))
+  end)
+
+end %>

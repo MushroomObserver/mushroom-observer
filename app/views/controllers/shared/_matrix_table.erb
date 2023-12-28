@@ -1,0 +1,20 @@
+<% #passing in the objects as a collection with a partial is much faster, but not always possible if we ant to render a block %>
+<% unless defined? object_counter %>
+  <% objects.each_with_index do |object, idx| %>
+    <%= tag.div("", class: "hidden visible-sm-block",
+                    style: "clear:left") if idx % 2 == 0 %>
+    <%= tag.div("", class: "hidden visible-md-block",
+                    style: "clear:left") if idx % 3 == 0 %>
+    <%= tag.div("", class: "hidden visible-lg-block",
+                    style: "clear:left") if idx % 4 == 0 %>
+    <%= yield(object) %>
+  <% end %>
+<% else %>
+  <%= tag.div("", class: "hidden visible-sm-block",
+                  style: "clear:left") if object_counter % 2 == 0 %>
+  <%= tag.div("", class: "hidden visible-md-block",
+                  style: "clear:left") if object_counter % 3 == 0 %>
+  <%= tag.div("", class: "hidden visible-lg-block",
+                  style: "clear:left") if object_counter % 4 == 0 %>
+  <%= yield(object) %>
+<% end %>

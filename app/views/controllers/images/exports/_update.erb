@@ -1,0 +1,8 @@
+<%#
+This just updates the button link for an image export UI so that
+you can toggle the export on or off, depending on how it currently is
+set in the db. Currently unused?!
+%>
+<%= turbo_stream.update("image_export_#{@image.id}") do
+  image_exporter(@image.id, @image.ok_for_export)
+end %>

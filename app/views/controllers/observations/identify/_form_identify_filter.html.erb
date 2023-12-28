@@ -1,0 +1,51 @@
+<%# filter for identify observations index %>
+<%# Replaces the usual pattern_search form in the top nav %>
+
+<%# TODO: make the form input have selects with autocomplete that send the ID %>
+<%# Otherwise the records have to be looked up (several times) %>
+
+<%
+# Show the incoming `needs_id` query in the search bar if there has been one
+filter_type = params.dig(:filter, :type) || false
+selected = filter_type ? filter_type.to_sym : :clade
+value = filter_type ? params.dig(:filter, :term) : ""
+options = [
+  [:CLADE.l, :clade],
+  [:REGION.l, :region],
+  # [:USER.l, :user],
+]
+%>
+
+<%= form_with(url: identify_observations_path, method: :get,
+              class: "navbar-form navbar-left", scope: :filter,
+              id: "identify_filter",
+              data: { controller: :autocompleter }) do |f| %>
+
+  <div class="form-group has-feedback has-search">
+    <%= content_tag(:span, "", class: "glyphicon glyphicon-search " \
+                                      "form-control-feedback") %>
+    <%# f.label(:term, "Filter by:") %>
+    <%= f.text_field(
+      :term, value: value, placeholder: :filter_by.l,
+      class: "form-control", size: 42, autocomplete: "one-time-code",
+      data: { controller: nil, autocompleter_target: "input",
+              autocomplete: :clade }
+    ) %>
+    <%# autocompleter_field(
+      form: f, field: :term, value: value,
+      placeholder: :filter_by.l, size: 42, autofocus: true,
+      data: { controller: nil, autocompleter: :clade,
+              action: "autocompleter-swap:swap->autocompleter#swap" }) %>
+
+  </div><!--.form-group-->
+
+  <%= f.select(:type, options, { selected: selected },
+               { class: "form-control",
+                 data: { autocompleter_target: "select",
+                         action: "autocompleter#swap" } }) %>
+
+  <%= f.submit(:SEARCH.l, class: "btn btn-default") %>
+
+  <%= f.submit(:CLEAR.l, class: "btn btn-default") %>
+
+<% end %>

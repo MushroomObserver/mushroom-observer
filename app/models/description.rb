@@ -92,15 +92,15 @@ class Description < AbstractModel
   end
 
   def parent_id
-    send("#{parent_type}_id")
+    send(:"#{parent_type}_id")
   end
 
   def parent=(val)
-    send("#{parent_type}=", val)
+    send(:"#{parent_type}=", val)
   end
 
   def parent_id=(val)
-    send("#{parent_type}_id=", val)
+    send(:"#{parent_type}_id=", val)
   end
 
   # Return parent's class name in lowercase, e.g. 'name' or 'location'.
@@ -207,7 +207,7 @@ class Description < AbstractModel
   #
   def all_notes=(notes)
     self.class.all_note_fields.each do |field|
-      send("#{field}=", notes[field])
+      send(:"#{field}=", notes[field])
     end
   end
 
@@ -288,7 +288,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep admin groups.
   def self.admins_join_table
-    "#{table_name.singularize}_admins".to_sym
+    :"#{table_name.singularize}_admins"
   end
 
   # Wrapper around class method of same name
@@ -298,7 +298,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep writer groups.
   def self.writers_join_table
-    "#{table_name.singularize}_writers".to_sym
+    :"#{table_name.singularize}_writers"
   end
 
   # Wrapper around class method of same name
@@ -308,7 +308,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep reader groups.
   def self.readers_join_table
-    "#{table_name.singularize}_readers".to_sym
+    :"#{table_name.singularize}_readers"
   end
 
   # Wrapper around class method of same name
@@ -446,7 +446,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep authors.
   def self.authors_join_table
-    "#{table_name.singularize}_authors".to_sym
+    :"#{table_name.singularize}_authors"
   end
 
   # Wrapper around class method of same name
@@ -456,7 +456,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep editors.
   def self.editors_join_table
-    "#{table_name.singularize}_editors".to_sym
+    :"#{table_name.singularize}_editors"
   end
 
   # Wrapper around class method of same name

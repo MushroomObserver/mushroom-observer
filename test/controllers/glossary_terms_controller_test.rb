@@ -281,17 +281,25 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def test_create_image_save_failure
     login
     # Simulate image.save failure.
-    Image.any_instance.stubs(:save).returns(false)
-    post(:create, params: term_with_image_params)
-
+    image = images(:disconnected_coprinus_comatus_image)
+    image.stub(:save, false) do
+      Image.stub(:new, image) do
+        post(:create, params: term_with_image_params)
+      end
+    end
     assert_empty(GlossaryTerm.last.images)
   end
 
   def test_create_process_image_failure
     login
+    image = images(:disconnected_coprinus_comatus_image)
+
     # Simulate process_image failure.
-    Image.any_instance.stubs(:process_image).returns(false)
-    post(:create, params: term_with_image_params)
+    image.stub(:process_image, false) do
+      Image.stub(:new, image) do
+        post(:create, params: term_with_image_params)
+      end
+    end
 
     assert_flash_error
   end
@@ -433,16 +441,18 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   def test_destroy_fails
     term = glossary_terms(:no_images_glossary_term)
-    GlossaryTerm.any_instance.stubs(:destroy).returns(false)
 
     login
     make_admin
-    delete(:destroy, params: { id: term.id })
+    term.stub(:destroy, false) do
+      GlossaryTerm.stub(:safe_find, term) do
+        delete(:destroy, params: { id: term.id })
+      end
+    end
 
     assert_redirected_to(glossary_term_path(term.id),
                          "It should redisplay a Term it fails to destroy")
   end
-
   # ---------- helpers ---------------------------------------------------------
 
   def create_term_params

@@ -32,12 +32,12 @@ class Symbol
     to_s.upcase_first.to_sym
   end
 
-  def add_leaf(*args)
-    Tree.add_leaf(self, *args)
+  def add_leaf(*)
+    Tree.add_leaf(self, *)
   end
 
-  def has_node?(*args)
-    Tree.has_node?(self, *args)
+  def has_node?(*)
+    Tree.has_node?(self, *)
   end
 
   # Return a list of missing tags we've encountered.
@@ -200,7 +200,7 @@ class Symbol
       elsif (y = x.sub(/s$/i, "")) &&
             args.key?(arg = y.to_sym)
         val = args[arg]
-        val.is_a?(Symbol) ? "#{val}s".to_sym.l : val.to_s.strip_html
+        val.is_a?(Symbol) ? :"#{val}s".l : val.to_s.strip_html
 
       # Want :TYPE, given :type.
       elsif args.key?(arg = x.downcase.to_sym) &&
@@ -217,7 +217,7 @@ class Symbol
             (y == y.upcase)
         val = args[arg]
         if val.is_a?(Symbol)
-          "#{val.to_s.upcase}S".to_sym.l
+          :"#{val.to_s.upcase}S".l
         else
           val.to_s.strip_html.upcase_first
         end
@@ -235,7 +235,7 @@ class Symbol
       elsif args.key?(arg = y.downcase.to_sym)
         val = args[arg]
         if val.is_a?(Symbol)
-          "#{val}s".to_sym.l.upcase_first
+          :"#{val}s".l.upcase_first
         else
           val.to_s.strip_html.upcase_first
         end
@@ -288,23 +288,23 @@ class Symbol
 
   alias l localize
 
-  def t(*args)
-    localize(*args).t(false)
+  def t(*)
+    localize(*).t(false)
   end
 
-  def tl(*args)
-    localize(*args).tl(false)
+  def tl(*)
+    localize(*).tl(false)
   end
 
-  def tp(*args)
-    localize(*args).tp(false)
+  def tp(*)
+    localize(*).tp(false)
   end
 
-  def tpl(*args)
-    localize(*args).tpl(false)
+  def tpl(*)
+    localize(*).tpl(false)
   end
 
-  def strip_html(*args)
-    localize(*args).strip_html
+  def strip_html(*)
+    localize(*).strip_html
   end
 end

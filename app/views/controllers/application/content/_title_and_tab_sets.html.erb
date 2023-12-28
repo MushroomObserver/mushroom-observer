@@ -1,0 +1,71 @@
+<%#
+The header for page content (below the application top nav)
+May include:
+prev_next_pager
+title
+context_help
+owner_naming
+interest_icons
+tab_set
+type_filters
+sorts
+%>
+<%
+add_filter_help(@any_content_filters_applied)
+add_right_tabs = (content_for?(:tab_set) || content_for?(:interest_icons))
+left_cols = add_right_tabs ? "col-xs-8 col-lg-7" : "col-xs-12"
+%>
+
+<%= tag.div(class: "row") do %>
+  <!-- Push down pager, title on small, xs screens so buttons do not block -->
+  <%= tag.div(safe_nbsp, class: "hidden-print visible-xs visible-sm mt-4") %>
+
+  <%= tag.div(class: left_cols, id: "title_bar") do %>
+    <!-- Pager -->
+    <%= content_tag_if(content_for?(:prev_next_object), :div,
+                       class: "hidden-print") do
+          yield(:prev_next_object)
+        end -%>
+
+    <!-- Title -->
+    <!-- e.g. "Observation 5"; Can be multiple lines, e.g., with Observer ID -->
+    <% if content_for?(:background_image) %>
+      <%= yield(:background_image) %>
+      <%= tag.div(class: "bottom-left ml-3 mb-3 p-2") do %>
+          <%= tag.h1(yield(:title), class: "h3 image-title-text", id: "title") -%>
+          <% if content_for?(:location) %>
+              <%= tag.div(yield(:location), class: "image-title-text") %>
+          <% end %>
+          <% if content_for?(:date_range) %>
+              <%= tag.div(yield(:date_range), class: "image-title-text") %>
+          <% end %>
+      <% end %>
+    <% else %>
+      <%= tag.h1(yield(:title), class: "h3", id: "title") -%>
+      <% if content_for?(:location) %>
+          <%= tag.div(yield(:location), class: "image-title-text") %>
+      <% end %>
+      <% if content_for?(:date_range) %>
+          <%= tag.div(yield(:date_range), class: "image-title-text") %>
+      <% end %>
+    <% end %>
+    <%= yield(:filter_help) -%>
+    <%= yield(:owner_naming) %>
+  <% end %>
+
+  <!-- Tabsets and interest icons, within "#right_tabs" -->
+  <%= content_tag_if(add_right_tabs, :div, id: "right_tabs",
+                    class: "hidden-print text-right col-sm-4 col-lg-5 mb-3") do
+        concat(yield(:interest_icons))
+        concat(yield(:tab_set))
+      end %>
+
+  <%= content_tag_if(content_for?(:type_filters), :div,
+                     class: "hidden-print col-xs-12") do
+        yield(:type_filters)
+      end %>
+
+  <!-- Sorter. conditionally renders the partial -->
+  <%= yield(:sorter) %>
+
+<% end %>

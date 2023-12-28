@@ -94,7 +94,7 @@ module Account
     end
 
     def update_pref(pref, val)
-      @user.send("#{pref}=", val) if @user.send(pref) != val
+      @user.send(:"#{pref}=", val) if @user.send(pref) != val
     end
 
     def update_content_filter(pref, val)
@@ -185,11 +185,11 @@ module Account
     end
 
     def success
-      "#{email_msg_prefix}_success".to_sym
+      :"#{email_msg_prefix}_success"
     end
 
     def email_note
-      "#{email_msg_prefix}_note".to_sym
+      :"#{email_msg_prefix}_note"
     end
 
     def email_type

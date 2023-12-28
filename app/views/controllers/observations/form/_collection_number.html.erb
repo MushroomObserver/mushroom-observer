@@ -1,0 +1,23 @@
+<%# specimen/collection_number section of create_observation form %>
+
+<div class="row mb-3">
+
+  <div class="col-sm-6">
+    <%= fields_for(:collection_number) do |fcn| %>
+      <%= text_field_with_label(form: fcn, field: :name,
+                                value: @collectors_name,
+                                label: :collection_number_name.t + ":") %>
+      <%= text_field_with_label(
+        form: fcn, field: :number, value: @collectors_number,
+        label: :collection_number_number.t + ":",
+        data: { action: "specimen#checkCheckbox" }) %>
+    <% end # fields_for %>
+  </div>
+
+  <div class="col-sm-6">
+    <%= help_block_with_arrow("left", id: "collection_number_help") do %>
+      <%= :form_observations_collection_number_help.t %>
+    <% end  # help_block_with_arrow do %>
+  </div>
+
+</div><!--.row-->

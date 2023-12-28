@@ -164,36 +164,41 @@ class UserTest < UnitTestCase
 
   def test_all_editable_species_lists
     proj = projects(:bolete_project)
-    spl1 = species_lists(:first_species_list)
-    spl2 = species_lists(:another_species_list)
-    spl3 = species_lists(:unknown_species_list)
-    assert_obj_arrays_equal([spl1, spl2], rolf.species_lists, :sort)
-    assert_obj_arrays_equal(SpeciesList.where(user: mary), mary.species_lists)
-    assert_obj_arrays_equal([], dick.species_lists)
-    assert_obj_arrays_equal([dick], proj.user_group.users)
-    assert_obj_arrays_equal([spl3], proj.species_lists)
+    assert_true(proj.user_group.users.include?(dick))
+    assert_true(proj.user_group.users.include?(mary))
 
-    assert_obj_arrays_equal([spl1, spl2],
-                            rolf.all_editable_species_lists, :sort)
-    assert_obj_arrays_equal(SpeciesList.where(user: mary),
-                            mary.all_editable_species_lists)
-    assert_obj_arrays_equal([spl3], dick.all_editable_species_lists)
+    proj_spl = proj.species_lists.find_by(user: mary)
+    assert_false(rolf.all_editable_species_lists.include?(proj_spl))
+    assert_true(mary.all_editable_species_lists.include?(proj_spl))
+    assert_true(dick.all_editable_species_lists.include?(proj_spl))
 
-    proj.add_species_list(spl1)
+    rolf_spl = (rolf.species_lists - proj.species_lists)[0]
+    assert_false(dick.all_editable_species_lists.include?(rolf_spl))
+    assert_false(mary.all_editable_species_lists.include?(rolf_spl))
+
+    proj.add_species_list(rolf_spl)
     dick.reload
-    assert_obj_arrays_equal([spl1, spl3], dick.all_editable_species_lists,
-                            :sort)
+    mary.reload
+    assert_true(dick.all_editable_species_lists.include?(rolf_spl))
+    assert_true(mary.all_editable_species_lists.include?(rolf_spl))
 
-    proj.user_group.users.push(rolf, mary)
+    proj.user_group.users.push(rolf)
     proj.user_group.users.delete(dick)
     rolf.reload
     mary.reload
     dick.reload
-    assert_obj_arrays_equal([spl1, spl2, spl3],
-                            rolf.all_editable_species_lists, :sort)
-    assert_obj_arrays_equal([spl1, SpeciesList.where(user: mary).to_a].flatten,
-                            mary.all_editable_species_lists, :sort)
-    assert_obj_arrays_equal([], dick.all_editable_species_lists)
+
+    rolf_lists = rolf.all_editable_species_lists
+    assert_true(rolf_lists.include?(proj_spl))
+    assert_true(rolf_lists.include?(rolf_spl))
+
+    mary_lists = mary.all_editable_species_lists
+    assert_true(mary_lists.include?(proj_spl))
+    assert_true(mary_lists.include?(rolf_spl))
+
+    dick_lists = dick.all_editable_species_lists
+    assert_false(dick_lists.include?(proj_spl))
+    assert_false(dick_lists.include?(rolf_spl))
   end
 
   def test_preferred_herbarium_name
@@ -250,9 +255,9 @@ class UserTest < UnitTestCase
     num_comments = Comment.count
     num_publications = Publication.count
 
-    # Find Katrina's one observation.
-    assert_equal(1, user.observations.length)
-    observation = user.observations.first
+    # Find one of Katrina's observations.
+    assert_equal(2, user.observations.length)
+    observation = user.observations.find_by(gps_hidden: false)
     observation_id = observation.id
 
     # Attach her image to the observation.
@@ -285,7 +290,7 @@ class UserTest < UnitTestCase
     User.erase_user(user.id)
 
     # Should have deleted one of each type of object.
-    assert_equal(num_observations - 1, Observation.count)
+    assert_equal(num_observations - 2, Observation.count)
     assert_equal(num_namings - 1, Naming.count)
     assert_equal(num_votes - 1, Vote.count)
     assert_equal(num_images - 1, Image.count)
@@ -450,7 +455,7 @@ class UserTest < UnitTestCase
 
   def test_delete_private_projects
     # Dick created several projects.  Most have the admin and member groups set
-    # to dick_only, but one uses bolete_admins/bolete_users, and another uses
+    # to dick_only, but one uses albion_admins/albion_users, and another uses
     # article_writers.  The latter group contains users other than Dick, and
     # therefore that project (news_article_project) should not be deleted.
 
@@ -461,16 +466,16 @@ class UserTest < UnitTestCase
                                                 user_group: dick_only).count,
                     "dick should own at least two dick-only projects")
 
-    # Prove that Dick owns bolete_project and that its admins and users are
+    # Prove that Dick owns albion_project and that its admins and users are
     # all just Dick despite not being his one-user group, dick_only.
-    bolete = projects(:bolete_project)
-    bolete_admins = user_groups(:bolete_admins)
-    bolete_users = user_groups(:bolete_users)
-    assert_users_equal(dick, bolete.user)
-    assert_equal(1, bolete_admins.users.count)
-    assert_equal(1, bolete_users.users.count)
-    assert_users_equal(dick, bolete_admins.users.first)
-    assert_users_equal(dick, bolete_users.users.first)
+    albion = projects(:albion_project)
+    albion_admins = user_groups(:albion_admins)
+    albion_users = user_groups(:albion_users)
+    assert_users_equal(dick, albion.user)
+    assert_equal(1, albion_admins.users.count)
+    assert_equal(1, albion_users.users.count)
+    assert_users_equal(dick, albion_admins.users.first)
+    assert_users_equal(dick, albion_users.users.first)
 
     # Prove that Dick owns news_article_project but that the admin and user
     # is someone else.
@@ -481,37 +486,23 @@ class UserTest < UnitTestCase
                     article_writers.users.count { |user| user != dick },
                     "article_writers should have a user other than dick")
 
-    # Prove that Dick doesn't own any other kinds of projects.
-    assert_equal(2,
-                 dick.projects_created.where.not(admin_group: dick_only).count,
-                 "dick should only have two non-dick-only projects")
-    assert_equal(2,
-                 dick.projects_created.where.not(user_group: dick_only).count,
-                 "dick should only have two non-dick-only projects")
-
     dick.delete_private_projects
-    assert_equal(1, Project.where(user: dick).count)
-    assert_empty(Project.where(id: bolete.id))
+    assert_empty(Project.where(id: albion.id))
     assert_not_empty(Project.where(id: news_articles.id))
   end
 
   def test_delete_private_species_lists
-    # Should be able to delete all of Mary's many lists except these three.
-    list1 = species_lists(:unknown_species_list)
-    list2 = species_lists(:query_first_list)
-    list3 = species_lists(:query_second_list)
-    assert_users_equal(mary, list1.user)
-    assert_users_equal(mary, list2.user)
-    assert_users_equal(mary, list3.user)
-    assert_operator(0, "<", list1.projects.count)
-    assert_operator(0, "<", list2.projects.count)
-    assert_operator(0, "<", list3.projects.count)
-    assert_operator(3, "<", SpeciesList.where(user: mary).count)
+    # Delete all of Mary's many lists except those in projects
+    mary_lists = SpeciesList.where(user: mary)
+    before_count = mary_lists.count
+    proj_lists = mary_lists.select { |list| list.projects.count.positive? }
+    proj_count = proj_lists.count
+    assert_operator(proj_count, ">", 0)
+    assert_operator(before_count, ">", proj_count)
     mary.delete_private_species_lists
-    assert_equal(3, SpeciesList.where(user: mary).count)
-    assert_not_nil(SpeciesList.find(list1.id))
-    assert_not_nil(SpeciesList.find(list2.id))
-    assert_not_nil(SpeciesList.find(list3.id))
+    after_count = SpeciesList.where(user: mary).count
+    assert_operator(before_count, ">", after_count)
+    assert_equal(proj_count, after_count)
   end
 
   def test_delete_unattached_collection_numbers

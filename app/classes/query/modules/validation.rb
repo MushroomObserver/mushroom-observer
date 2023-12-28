@@ -84,7 +84,7 @@ module Query
 
       def scalar_validate(arg, val, arg_type)
         if arg_type.is_a?(Symbol)
-          send("validate_#{arg_type}", arg, val)
+          send(:"validate_#{arg_type}", arg, val)
         elsif arg_type.is_a?(Class) &&
               arg_type.respond_to?(:descends_from_active_record?)
           validate_id(arg, val, arg_type)

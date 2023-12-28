@@ -287,24 +287,24 @@ module Query
 
   # Delegate all these to Query::Base class.
 
-  def self.deserialize(*args)
-    Query::Base.deserialize(*args)
+  def self.deserialize(*)
+    Query::Base.deserialize(*)
   end
 
-  def self.safe_find(*args)
-    Query::Base.safe_find(*args)
+  def self.safe_find(*)
+    Query::Base.safe_find(*)
   end
 
-  def self.find(*args)
-    Query::Base.find(*args)
+  def self.find(*)
+    Query::Base.find(*)
   end
 
-  def self.lookup_and_save(*args)
-    Query::Base.lookup_and_save(*args)
+  def self.lookup_and_save(*)
+    Query::Base.lookup_and_save(*)
   end
 
-  def self.lookup(*args)
-    Query::Base.lookup(*args)
+  def self.lookup(*)
+    Query::Base.lookup(*)
   end
 
   def default_order

@@ -86,6 +86,10 @@ module GeneralExtensions
     users(:roy)
   end
 
+  def lone_wolf
+    users(:lone_wolf)
+  end
+
   def use_test_locales(&block)
     Language.alt_locales_path("config/test_locales", &block)
     FileUtils.remove_dir(Rails.root.join("config/test_locales"), force: true)
@@ -192,24 +196,24 @@ module GeneralExtensions
   #
   #   assert_obj_arrays_equal([img1,img2], obs.images)
   #
-  def assert_obj_arrays_equal(expect, got, *args)
-    assert_arrays_equal(expect, got, *args) { |o| fixture_label(o) }
+  def assert_obj_arrays_equal(expect, got, *)
+    assert_arrays_equal(expect, got, *) { |o| fixture_label(o) }
   end
 
   # Compare two arrays of User's by comparing their logins.
   #
   #   assert_user_arrays_equal([rolf,mary], name.authors)
   #
-  def assert_user_arrays_equal(expect, got, *args)
-    assert_arrays_equal(expect, got, *args, &:login)
+  def assert_user_arrays_equal(expect, got, *)
+    assert_arrays_equal(expect, got, *, &:login)
   end
 
   # Compare two arrays of Name's by comparing their search_names.
   #
   #   assert_name_arrays_equal([old_name,new_name], old_name.synonyms)
   #
-  def assert_name_arrays_equal(expect, got, *args)
-    assert_arrays_equal(expect, got, *args, &:search_name)
+  def assert_name_arrays_equal(expect, got, *)
+    assert_arrays_equal(expect, got, *, &:search_name)
   end
 
   GPS_CLOSE_ENOUGH = 0.001

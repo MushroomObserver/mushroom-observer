@@ -54,11 +54,10 @@ class InterestsController < ApplicationController
   def eager_load_targets(interests)
     # Props to this blog for teaching how to eager-load polymorphic relations!
     # https://thepaulo.medium.com/eager-loading-polymorphic-associations-in-ruby-on-rails-155a356c39d7
-    preloader = ActiveRecord::Associations::Preloader.new
     %w[NameTracker Observation].each do |type|
-      preloader.preload(
-        interests.select { |i| i.target_type == type },
-        target: [:name]
+      ActiveRecord::Associations::Preloader.new(
+        records: interests.select { |i| i.target_type == type },
+        associations: { target: [:name] }
       )
     end
   end

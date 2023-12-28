@@ -102,7 +102,7 @@ module Descriptions::Merges
 
         # Copy over all non-blank descriptive fields.
         src_notes.each do |f, val|
-          @dest.send("#{f}=", val) if val.present?
+          @dest.send(:"#{f}=", val) if val.present?
         end
 
         # Save changes to destination.

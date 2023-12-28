@@ -1,0 +1,26 @@
+<%=
+# Update observation view with results of update or create
+# Needs locals: identifier
+# The namings table is a helper
+# N+1 - @observation.reload ?!
+if identifier == "namings"
+  id = "namings_table_rows"
+  turbo_stream.replace(id) do
+    observation_namings_table_rows(@observation)
+  end
+else
+  id = "observation_#{identifier}"
+  partial = "observations/show/#{identifier}"
+  turbo_stream.replace(id) do
+    render(
+      partial: partial,
+      locals: { obs: @observation },
+      layout: false
+    )
+  end
+end
+%>
+
+<%= turbo_stream.update("page_flash") do
+  flash_notices_html
+end %>

@@ -1,0 +1,9 @@
+<%
+@container = :full
+add_page_title(location_map_title(query: @query))
+add_tab_set(location_map_tabs(query: @query))
+%>
+
+<%= make_map(objects: @locations, # it's an array, but just one MinimalMapLocation
+             query_params: query_params(@query), zoom: 2, map_type: "location") %>
+

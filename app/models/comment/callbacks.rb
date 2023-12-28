@@ -62,7 +62,7 @@ module Comment::Callbacks
   def add_users_with_namings!(users)
     return unless target_type == "Observation"
 
-    users.concat(target.namings.map(&:user).uniq.
+    users.concat(target.namings.includes([:user]).map(&:user).uniq.
                  select(&:email_comments_response))
   end
 

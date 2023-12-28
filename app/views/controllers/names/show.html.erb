@@ -1,0 +1,68 @@
+<%
+add_page_title(:show_name_title.t(name: @name.display_name))
+
+Textile.register_name(@name)
+add_pager_for(@name)
+add_interest_icons(@user, @name)
+add_tab_set(name_show_tabs(name: @name, user: @user))
+
+@container = :wide
+%>
+
+<div class="row">
+
+  <!--LEFT COLUMN-->
+  <div class="col-sm-5">
+
+    <%= render(partial: "names/show/confident_observations_panel") %>
+
+    <div id="name_previous_export" class="mb-4">
+      <%= show_previous_version(@name) %>
+      <%= export_status_controls(@name) %>
+    </div>
+
+    <div id="name_authors_editors">
+      <%= panel_block do %>
+        <%= show_authors_and_editors(obj: @name, user: @user) %>
+      <% end %>
+    </div>
+
+  </div><!--LEFT COLUMN-->
+
+  <!--RIGHT COLUMN-->
+  <div class="col-sm-7">
+
+    <%= render(partial: "names/show/observations_menu") %>
+    <%= render(partial: "names/show/nomenclature",
+              locals: { name: @name, synonyms: true }) %>
+
+    <%= tag.div(class: "row", data: { controller: "name-panels" }) do %>
+      <%= render(partial: "names/show/classification_panel") %>
+      <%= render(partial: "names/show/lifeform_panel") %>
+    <% end %>
+
+    <% if @name.has_notes? %>
+      <%= render(partial: "names/show/notes_panel") %>
+    <% end %>
+
+    <% if !@best_description.blank? %>
+      <%= render(partial: "names/show/best_description_panel") %>
+    <% end %>
+
+    <%= render(partial: "names/show/descriptions_panel") %>
+
+    <% if @projects && @projects.length > 0 %>
+      <%= render(partial: "names/show/projects_panel") %>
+    <% end %>
+
+  </div><!--RIGHT COLUMN-->
+</div><!--.row-->
+
+<%# ----------------------------------------
+  #  Show comments
+  # ----------------------------------------
+%>
+<%= render(partial: "comments/comments_for_object",
+           locals: {object: @name, controls: @user, limit: nil}) %>
+<%= :show_name_num_notifications.t(num: @name.interests) %>
+<%= show_object_footer(@name) %>

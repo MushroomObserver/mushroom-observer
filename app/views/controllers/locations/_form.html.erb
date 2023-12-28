@@ -1,0 +1,67 @@
+<% @location.force_valid_lat_longs! %>
+<% map_args = { editable: true, map_type: "location" } %>
+
+<%= form_with(model: @location, url: action, id: "location_form") do |f| %>
+
+  <% if !@location.locked || in_admin_mode? %>
+
+    <%= render(partial: "shared/form_location_feedback",
+               locals: { button: button.l} ) %>
+
+    <%# NOTE: All other Stimulus data is on the map div %>
+    <%= tag.div(class: "row", data: { controller: "map" }) do %>
+      <%= tag.div(class: "col-md-8 col-lg-6") do %>
+
+        <%= if in_admin_mode?
+          check_box_with_label(form: f, field: :locked, class: "mt-3",
+                               label: :form_locations_locked.t)
+        end %>
+
+        <%= tag.div do
+          f.label(:display_name, :WHERE.t + ":")
+        end %>
+
+        <%= tag.div(class: "input-group") do %>
+          <%= f.text_field(:display_name, value: @display_name,
+            class: "form-control",
+            data: { autofocus: true, map_target: "placeInput" }
+          ) %>
+
+          <%= tag.span(class: "input-group-btn") do
+            tag.button(
+              :form_locations_find_on_map.t,
+              type: "button", class: "btn btn-default",
+              data: { map_target: "findOnMap", action: "map#findOnMap"}
+            )
+          end %>
+        <% end %>
+
+        <%= help_block(:div, :form_locations_help.t) %>
+
+        <%= render(partial: "locations/form/lat_long_alt_fields",
+                   locals: { f: f }) %>
+
+        <%= submit_button(form: f, button: button.l, class: "mt-4",
+                          center: false) %>
+      <% end %>
+
+      <%= tag.div(class: "col-md-4 col-lg-6 mb-3 mt-3") do
+        make_map(objects: [@location], **map_args.merge({ controller: nil }))
+      end %><!--.col-md-4 col-lg-6-->
+    <% end %><!--.row-->
+
+  <% else %>
+
+    <%= render(partial: "locations/form/show_locked", locals: { f: f }) %>
+
+  <% end %>
+
+  <%= tag.div(class: "container-text mt-3") do %>
+    <%= text_area_with_label(
+          form: f, field: :notes, label: :NOTES.t + ":",
+          between: help_block(:div, :form_locations_notes_help.t)
+        ) %>
+    <%= render(partial: "shared/textilize_help") %>
+  <% end %>
+
+<% end %>

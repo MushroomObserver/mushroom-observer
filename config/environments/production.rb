@@ -73,7 +73,7 @@ MushroomObserver::Application.configure do
 
   # Compress JavaScripts and CSS
   config.assets.compress = true
-  config.assets.js_compressor = Uglifier.new(harmony: true)
+  config.assets.js_compressor = :terser
   config.assets.css_compressor = :sass
 
   # Do not fallback to assets pipeline if a precompiled asset is missed.
@@ -134,6 +134,8 @@ MushroomObserver::Application.configure do
   # Combine files using the "require" directives at the top of included files
   # See http://guides.rubyonrails.org/asset_pipeline.html#turning-debugging-off
   config.assets.debug = false
+
+  config.bot_enabled = true
 end
 
 file = File.expand_path("../consts-site.rb", __dir__)

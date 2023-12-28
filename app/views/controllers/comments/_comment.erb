@@ -1,0 +1,58 @@
+<%
+target = comment.target
+user = comment.user
+
+target_name_link = link_to(target.unique_format_name.t, target.show_link_args) \
+                   rescue :comment_list_deleted.t
+target_type = tag.span(target.class.name.to_sym.t, class: "small") \
+                       rescue :runtime_object_deleted
+%>
+
+<%= tag.div(class: "list-group-item comment", id:"comment_#{comment.id}") do
+  concat(tag.div(class: "row") do
+    [
+      tag.div(class: "col-xs-12 col-sm-9 col-lg-10") do
+        if local_assigns[:show_name] && show_name
+          concat(tag.h4(class: "mt-0") do
+            concat(target_name_link)
+            concat(target_type)
+          end)
+        end
+        concat(tag.div(comment.summary.tl, class: "font-weight-bold"))
+        concat(tag.div(class: "comment-info") do
+          concat(tag.span(class: "comment-author text-nowrap") do
+            ["#{:BY.t}: ", user_link(user), " "].safe_join
+          end)
+          concat(tag.span(class: "text-nowrap") do
+            [
+              "[",
+              modal_link_to("comment_#{comment.id}", :EDIT.t,
+                            edit_comment_path(comment.id),
+                            class: "edit_comment_link_#{comment.id}",
+                            icon: :edit),
+              "|",
+              destroy_button(name: :comment_show_destroy.t, target: comment,
+                             icon: :delete, data: { turbo: true }),
+              "]",
+            ].safe_join(" ")
+          end) if check_permission(comment)
+          concat(tag.div(comment.created_at.web_time,
+                         class: "float-right text-nowrap small my-0 mx-3"))
+        end)
+        unless comment.comment.blank?
+          concat(tag.div(comment.comment.tpl, class: "p-2 comment-body"))
+        end
+      end,
+      tag.div(class: "d-none d-sm-block col-sm-3 col-lg-2 text-center") do
+        if user.image_id
+          tag.div(class: "user-image-sizer") do
+            image_tag(Image.url(:thumbnail, user.image_id),
+                      class: "img-fluid",
+                      data: { role: "link", url: user_path(user.id) })
+          end
+        end
+      end
+    ].safe_join
+  end)
+  concat(tag.div("", class: "clearfix")) if user.image_id
+end %>

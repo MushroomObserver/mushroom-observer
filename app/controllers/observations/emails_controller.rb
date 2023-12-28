@@ -13,9 +13,13 @@ module Observations
 
       respond_to do |format|
         format.html
-        format.js do
-          render(partial: "shared/modal_form_show",
-                 locals: { identifier: "observation_email" }) and return
+        format.turbo_stream do
+          render(partial: "shared/modal_form",
+                 locals: { identifier: "observation_email",
+                           title: :ask_observation_question_title.t(
+                             name: @observation.unique_format_name
+                           ),
+                           form: "observations/emails/form" }) and return
         end
       end
     end
@@ -38,8 +42,9 @@ module Observations
         format.html do
           redirect_with_query(observation_path(@observation.id)) and return
         end
-        format.js do
-          render(partial: "shared/modal_flash_update") and return
+        format.turbo_stream do
+          render(partial: "shared/modal_flash_update",
+                 locals: { identifier: "observation_email" }) and return
         end
       end
     end

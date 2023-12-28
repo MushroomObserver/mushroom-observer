@@ -1,0 +1,20 @@
+<%
+@container = :full
+add_index_title(@query)
+add_tab_set(images_index_tabs(query: @query))
+add_sorter(@query, images_index_sorts)
+
+flash_error(@error) if @error && @objects.empty?
+%>
+
+<%= paginate_block(@pages) do %>
+  <%= tag.ul(class: "row list-unstyled mt-3",
+             data: { controller: "matrix-table",
+                     action: "resize@window->matrix-table#rearrange" }) do %>
+    <%= render(partial: "shared/matrix_box",
+                layout: "shared/matrix_table",
+                collection: @objects,
+                as: :object) %>
+    <div style="clear:left"></div>
+  <% end %>
+<% end %>

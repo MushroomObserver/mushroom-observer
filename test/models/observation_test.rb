@@ -158,18 +158,18 @@ class ObservationTest < UnitTestCase
   def test_minimal_map_observation
     obs = observations(:minimal_unknown_obs)
 
-    min_map = MinimalMapObservation.new(obs.id, obs.lat, obs.long,
-                                        obs.location.id)
+    min_map = Mappable::MinimalObservation.new(obs.id, obs.lat, obs.long,
+                                               obs.location.id)
     assert_objs_equal(locations(:burbank), min_map.location)
     assert_equal(locations(:burbank).id, min_map.location_id)
 
-    min_map = MinimalMapObservation.new(obs.id, obs.lat, obs.long,
-                                        obs.location)
+    min_map = Mappable::MinimalObservation.new(obs.id, obs.lat, obs.long,
+                                               obs.location)
     assert_objs_equal(locations(:burbank), min_map.location)
     assert_equal(locations(:burbank).id, min_map.location_id)
 
-    assert(min_map.is_observation?)
-    assert_not(min_map.is_location?)
+    assert(min_map.observation?)
+    assert_not(min_map.location?)
     assert_not(min_map.lat_long_dubious?)
 
     min_map.location = locations(:albion)
@@ -1249,6 +1249,78 @@ class ObservationTest < UnitTestCase
       Observation.in_box(n: cal.south - 10,
                          s: cal.south, e: cal.east, w: cal.west),
       "`Observation.in_box` should be empty if N < S"
+    )
+  end
+
+  def test_scope_not_in_box
+    cal = locations(:california)
+    obss_not_in_cal_box = Observation.not_in_box(
+      n: cal.north, s: cal.south, e: cal.east, w: cal.west
+    )
+    obs_with_burbank_geoloc = observations(:unknown_with_lat_long)
+
+    nybg = locations(:nybg_location)
+    obss_not_in_nybg_box = Observation.not_in_box(
+      n: nybg.north, s: nybg.south, e: nybg.east, w: nybg.west
+    )
+
+    obss_not_in_ecuador_box = Observation.not_in_box(
+      n: 1.49397, s: -5.06906, e: -75.1904, w: -92.6038
+    )
+    quito_obs =
+      Observation.create!(
+        user: users(:rolf),
+        lat: -0.1865944,
+        long: -78.4305382,
+        where: "Quito, Ecuador"
+      )
+
+    wrangel = locations(:east_lt_west_location)
+    wrangel_obs =
+      Observation.create!(
+        user: users(:rolf),
+        lat: (wrangel.north + wrangel.south) / 2,
+        long: (wrangel.east + wrangel.west) / 2 + wrangel.west
+      )
+    obss_not_in_wrangel_box = Observation.not_in_box(
+      n: wrangel.north, s: wrangel.south, e: wrangel.east, w: wrangel.west
+    )
+
+    # boxes not straddling 180 deg
+    assert_not_includes(obss_not_in_cal_box, obs_with_burbank_geoloc)
+    assert_not_includes(obss_not_in_ecuador_box, quito_obs)
+    assert_includes(obss_not_in_nybg_box, obs_with_burbank_geoloc)
+    assert_includes(obss_not_in_cal_box, observations(:minimal_unknown_obs),
+                    "Observation without lat/lon should not be in box")
+
+    # box straddling 180 deg
+    assert_not_includes(obss_not_in_wrangel_box, wrangel_obs)
+    assert_includes(obss_not_in_wrangel_box, obs_with_burbank_geoloc)
+
+    assert_equal(
+      Observation.count,
+      Observation.not_in_box(n: 0.0001, s: 0.0001, e: 0.0001, w: 0).count,
+      "All Observations should be excluded from a tiny box in middle of nowhere"
+    )
+
+    # invalid arguments
+    all_observations_count = Observation.count
+    assert_equal(
+      all_observations_count,
+      Observation.not_in_box(n: cal.north, s: cal.south, e: cal.east).count,
+      "All Observations should be excluded from a box with missing boundary"
+    )
+    assert_equal(
+      all_observations_count,
+      Observation.not_in_box(n: 91, s: cal.south,
+                             e: cal.east, w: cal.west).count,
+      "All Observations should be excluded from a box with an out-of-bounds arg"
+    )
+    assert_equal(
+      all_observations_count,
+      Observation.not_in_box(n: cal.south - 10, s: cal.south,
+                             e: cal.east, w: cal.west).count,
+      "All Observations should be excluded from box whose N < S"
     )
   end
 

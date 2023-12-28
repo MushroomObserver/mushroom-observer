@@ -28,14 +28,14 @@ module Query
           query
         end
 
-        def lookup_and_save(*args)
-          query = lookup(*args)
+        def lookup_and_save(*)
+          query = lookup(*)
           query.record.save!
           query
         end
 
-        def lookup(*args)
-          query = Query.new(*args)
+        def lookup(*)
+          query = Query.new(*)
           record = get_record(query)
           record.query = query
           query.record = record
@@ -56,6 +56,14 @@ module Query
       end
 
       def record
+        # This errors out if @record is not set since it
+        # cannot find Query.get_record.  If you copy the
+        # above definition of get_record into the same scope
+        # as this method and get rid of "Query." it works,
+        # but that is not a great solution.
+        # You can trigger the issue which is
+        # triggered if the :wolf_fart observation has
+        # second image.  See query_test.rb for more.
         @record ||= Query.get_record(self)
       end
 

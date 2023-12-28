@@ -9,7 +9,8 @@ DEFAULTS: &DEFAULTS
   admin_group: dick_only
   title: $LABEL
   open_membership: false
-  accepting_observations: true
+  start_date: nil
+  end_date: nil
 
 # admins: rolf (1), mary (2)
 # members: rolf (1), mary (2), katrina (5)
@@ -22,13 +23,16 @@ eol_project:
   summary: Project to make names for EOL
   created_at: 2008-09-24 21:33:30
   updated_at: 2008-09-24 21:33:30
+  open_membership: false
   image: peltigera_image
+  species_lists: reused_list
+  observations: reused_observation
 
-# admins: dick (4)
-# members: dick (4)
-# observations: 2 (detailed_unknown_obs - owned by mary)
-# images: 1 and 2 (detailed_unknown_obs's images - owned by mary)
-# species_lists: 3 (unknown_species_list - owned by mary)
+# admins: dick
+# members: dick, mary
+# observations: detailed_unknown_obs - owned by mary
+# images: detailed_unknown_obs's images - owned by mary
+# species_lists: unknown_species_list - owned by mary
 bolete_project:
   <<: *DEFAULTS
   user_group: bolete_users
@@ -40,6 +44,24 @@ bolete_project:
   images: in_situ_image, turned_over_image
   observations: detailed_unknown_obs
   species_lists: unknown_species_list
+
+# admins: lone_wolf
+# members: lone_wolf
+# observations: wolf_fart
+# images: 1 image
+lone_wolf_project:
+  <<: *DEFAULTS
+  user_group: lone_wolf_users
+  admin_group: lone_wolf_admins
+  title: Lone Wolf Project
+  summary: Project with just one member
+  created_at: 2023-11-14 07:00:50
+  updated_at: 2023-11-14 07:00:55
+  observations: wolf_fart
+  species_lists: lone_wolf_list
+  # wolf_fart issue.  Switch comments for next 2 lines
+  images: lone_wolf_image
+  # images: lone_wolf_image, lone_wolf_image2
 
 # admins: roy
 # members: katrina
@@ -53,20 +75,9 @@ open_membership_project:
   summary: Project about Fungi of Burbank
   created_at: 2008-09-25 07:00:50
   updated_at: 2008-09-25 07:00:55
-  observations: owner_accepts_general_questions, unknown_with_lat_long
+  observations: owner_accepts_general_questions, unknown_with_lat_long, trusted_hidden, untrusted_hidden, reused_observation
   open_membership: true
-
-not_accepting_observations_project:
-  <<: *DEFAULTS
-  user: roy
-  user_group: burbank_users
-  admin_group: burbank_admins
-  title: Closed Burbank Project
-  summary: Closed Project about Fungi of Burbank
-  created_at: 2008-09-25 07:00:50
-  updated_at: 2008-09-25 07:00:55
-  observations: amateur_obs
-  accepting_observations: false
+  species_lists: reused_list
 
 empty_project:
   <<: *DEFAULTS
@@ -110,7 +121,71 @@ news_articles_project:
 albion_project:
   <<: *DEFAULTS
   location: albion
+  admin_group: albion_admins
+  user_group: albion_users
 
 wrangel_island_project:
   <<: *DEFAULTS
   location: east_lt_west_location
+
+# admins: roy
+# members: katrina
+past_project:
+  <<: *DEFAULTS
+  location: albion
+  user: roy
+  user_group: burbank_users
+  admin_group: burbank_admins
+  created_at: 2008-09-25 07:00:50
+  updated_at: 2008-09-25 07:00:55
+  observations: owner_accepts_general_questions, unknown_with_lat_long
+  open_membership: true
+  start_date: <%= Time.zone.today - 1.year %>
+  end_date: <%= Time.zone.today - 1.month %>
+
+future_project:
+  <<: *DEFAULTS
+  user: roy
+  user_group: burbank_users
+  admin_group: burbank_admins
+  created_at: 2008-09-25 07:00:50
+  updated_at: 2008-09-25 07:00:55
+  observations: owner_accepts_general_questions, unknown_with_lat_long
+  open_membership: true
+  start_date: <%= Time.zone.tomorrow %>
+  end_date: <%= Time.zone.tomorrow %>
+
+current_project:
+  <<: *DEFAULTS
+  user: roy
+  user_group: burbank_users
+  admin_group: burbank_admins
+  created_at: 2008-09-25 07:00:50
+  updated_at: 2008-09-25 07:00:55
+  observations: owner_accepts_general_questions, unknown_with_lat_long
+  open_membership: true
+  start_date: 2010-07-22 # date of earliest Observation
+  end_date: <%= Time.zone.tomorrow %>
+
+current_closed_project:
+  <<: *DEFAULTS
+  user: roy
+  user_group: burbank_users
+  admin_group: burbank_admins
+  open_membership: false
+  start_date: <%= Time.zone.today %>
+  end_date: <%= Time.zone.tomorrow %>
+
+unlimited_project:
+  <<: *DEFAULTS
+  start_date: nil
+  end_date: nil
+  observations: peltigera_obs, agaricus_campestris_obs, boletus_edulis_obs
+
+pinned_date_range_project:
+  <<: *DEFAULTS
+  title: Appalachia NAMA 2023
+  start_date: 2023-08-24
+  end_date: 2023-08-27
+  # Tests need observations that are outside Project date range
+  observations: peltigera_obs, agaricus_campestris_obs, boletus_edulis_obs
