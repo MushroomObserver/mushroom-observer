@@ -30,8 +30,7 @@ the multiple local_assigns for this partial should be set upstream.
 <%=
 if valid_names
   ##### Warnings #####
-  flash_warning(:form_observations_there_is_a_problem_with_name.l)
-
+  
   tag.div(class: "alert alert-warning", id: "name_messages") do
     concat(tag.div do
       if suggest_corrections || names.blank?
@@ -76,8 +75,6 @@ if valid_names
 ##### Errors #####
 elsif names&.length == 0
 
-  flash_error(:form_observations_there_is_a_problem_with_name.l)
-
   tag.div(class: "alert alert-danger", id: "name_messages") do
     concat(tag.div(:form_naming_not_recognized.t(name: what)))
     concat(help_note(
@@ -86,8 +83,6 @@ elsif names&.length == 0
   end
 
 elsif names&.length &.> 1
-
-  flash_error(:form_observations_there_is_a_problem_with_name.l)
 
   tag.div(class: "alert alert-danger", id: "name_messages") do
     concat(tag.div([:form_naming_multiple_names.t(name: what), ":"].safe_join))
