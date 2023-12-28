@@ -34,12 +34,12 @@ class Observation
 
     def owner_uniq_favorite_name
       favs = owner_favorite_votes
-      favs[0].naming.name if favs.count == 1
+      favs[0].naming.name if favs.one?
     end
 
     def owner_uniq_favorite_vote
       votes = owner_favorite_votes
-      votes.first if votes.count == 1
+      votes.first if votes.one?
     end
 
     def owner_favorite_votes
