@@ -20,7 +20,7 @@ when there is no longer any "problem_with_name".
 
 TODO:
 Remove `flash_warning`/`flash_error` here and add them upstream, maybe in 
-NamingParams or Name::Resolve. 
+NamingParams. 
 Differentiate warning (valid_names) from error (!valid_names)
 A conditional to watch is `if @params[:what].present?`.
 Also, views/observations/namings/fields is doing too much work, 
@@ -30,7 +30,7 @@ the multiple local_assigns for this partial should be set upstream.
 <%=
 if valid_names
   ##### Warnings #####
-  flash_warning(:form_observations_there_is_a_problem_with_name.t)
+  flash_warning(:form_observations_there_is_a_problem_with_name.l)
 
   tag.div(class: "alert alert-warning", id: "name_messages") do
     concat(tag.div do
@@ -76,7 +76,7 @@ if valid_names
 ##### Errors #####
 elsif names&.length == 0
 
-  flash_error(:form_observations_there_is_a_problem_with_name.t)
+  flash_error(:form_observations_there_is_a_problem_with_name.l)
 
   tag.div(class: "alert alert-danger", id: "name_messages") do
     concat(tag.div(:form_naming_not_recognized.t(name: what)))
@@ -87,7 +87,7 @@ elsif names&.length == 0
 
 elsif names&.length &.> 1
 
-  flash_error(:form_observations_there_is_a_problem_with_name.t)
+  flash_error(:form_observations_there_is_a_problem_with_name.l)
 
   tag.div(class: "alert alert-danger", id: "name_messages") do
     concat(tag.div([:form_naming_multiple_names.t(name: what), ":"].safe_join))
