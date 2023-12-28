@@ -99,6 +99,9 @@ class ApplicationController < ActionController::Base
   require "csv"
   include LoginSystem
 
+  # Allow folder organization in the app/views folder
+  append_view_path Rails.root.join("app/views/controllers")
+
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
