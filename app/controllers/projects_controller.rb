@@ -155,7 +155,7 @@ class ProjectsController < ApplicationController
   def set_ivars_for_show
     @where = @project&.place_name || ""
     @canonical_url = "#{MO.http_domain}/projects/#{@project.id}"
-    @is_member = @project.is_member?(@user)
+    @is_member = @project.member?(@user)
     @is_admin = @project.is_admin?(@user)
     @drafts = NameDescription.joins(:admin_groups).
               where("name_description_admins.user_group_id":

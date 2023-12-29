@@ -51,7 +51,7 @@ class ExternalLink < AbstractModel
     return false unless user
 
     user.id == observation.user_id ||
-      external_site.project.is_member?(user)
+      external_site.project.member?(user)
   end
 
   def self.show_controller; end

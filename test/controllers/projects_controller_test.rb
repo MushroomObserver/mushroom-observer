@@ -453,7 +453,7 @@ class ProjectsControllerTest < FunctionalTestCase
     project = projects(:rolf_project)
     member = users(:katrina)
     assert(
-      project.is_member?(member) && project.user != member &&
+      project.member?(member) && project.user != member &&
       !project.admin?(member) &&
       NameDescription.where(source_name: project.title).any?,
       "Bad fixtures: member must be project member, but not owner or admin " \
