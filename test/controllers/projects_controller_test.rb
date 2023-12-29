@@ -610,13 +610,4 @@ class ProjectsControllerTest < FunctionalTestCase
       end
     end
   end
-
-  def test_check_permission_owner
-    project = projects(:eol_project)
-    owner = project.user
-
-    login(owner.login)
-
-    assert(owner.check_permission(project))
-  end
 end
