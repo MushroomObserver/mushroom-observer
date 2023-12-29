@@ -47,7 +47,9 @@ class ProjectsControllerTest < FunctionalTestCase
     drafts = NameDescription.where(source_name: project.title)
     assert_not(drafts.empty?)
     params = { id: project.id.to_s }
+
     requires_user(:destroy, { action: :show }, params, changer.login)
+
     assert_redirected_to(project_path(project.id))
     assert(Project.find(project.id))
     assert(UserGroup.find(project.user_group.id))
@@ -340,12 +342,12 @@ class ProjectsControllerTest < FunctionalTestCase
   end
 
   def test_edit_project_empty_name
-    edit_project_helper("", projects(:eol_project))
+    edit_project_helper("", projects(:rolf_project))
   end
 
   def test_edit_project_existing
     edit_project_helper(projects(:bolete_project).title,
-                        projects(:eol_project))
+                        projects(:rolf_project))
   end
 
   def test_update_project
@@ -446,10 +448,19 @@ class ProjectsControllerTest < FunctionalTestCase
     destroy_project_helper(projects(:bolete_project), rolf)
   end
 
+  # prove that mere member cannot destroy project
   def test_destroy_project_member
-    eol_project = projects(:eol_project)
-    assert(eol_project.is_member?(katrina))
-    destroy_project_helper(eol_project, katrina)
+    project = projects(:rolf_project)
+    member = users(:katrina)
+    assert(
+      project.is_member?(member) && project.user != member &&
+      !project.admin?(member) &&
+      NameDescription.where(source_name: project.title).any?,
+      "Bad fixtures: member must be project member, but not owner or admin " \
+      "and project must be the source of a NameDescription"
+    )
+
+    destroy_project_helper(project, katrina)
   end
 
   def test_changing_project_name
