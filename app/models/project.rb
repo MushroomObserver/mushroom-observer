@@ -102,10 +102,15 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   def is_admin?(user)
     user && (admin_group.users.member?(user) || user.admin)
   end
+  alias admin? is_admin?
 
   def trusted_by?(user)
     member = project_members.find_by(user: user)
     member&.trust_level != "no_trust"
+  end
+
+  def can_edit?(user = User.current)
+    admin?(user)
   end
 
   def can_edit_content?(user)
