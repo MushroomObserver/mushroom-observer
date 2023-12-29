@@ -34,7 +34,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     assert_selector("#name_messages", text: "MO does not recognize the name")
-    assert_flash_warning(
+    assert_flash_error(
       :form_observations_there_is_a_problem_with_name.t.html_to_ascii
     )
     assert_selector("#observation_form")

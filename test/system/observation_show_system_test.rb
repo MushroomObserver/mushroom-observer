@@ -247,7 +247,10 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       click_commit
     end
 
-    assert_selector("#modal_obs_#{obs.id}_naming_flash", text: /Missing/)
+    assert_selector(
+      "#modal_obs_#{obs.id}_naming_flash",
+      text: :form_observations_there_is_a_problem_with_name.t.html_to_ascii
+    )
     assert_selector("#name_messages", text: /deprecated/)
 
     within("#obs_#{obs.id}_naming_form") do
