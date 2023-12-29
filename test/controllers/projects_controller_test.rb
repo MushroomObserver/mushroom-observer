@@ -311,9 +311,18 @@ class ProjectsControllerTest < FunctionalTestCase
   end
 
   def test_edit_project
-    project = projects(:eol_project)
-    params = { id: project.id.to_s }
-    requires_user(:edit, { action: :show }, params)
+    project = projects(:two_list_project)
+    # requires_user calls either_requires_either which calls
+    # assert_request which requires that
+    # the request pass with the supplied user, and
+    # fail with an unsupplied user, who is eith rolf or mary
+    assert(project.user == mary && !project.admin?(rolf),
+           "Test needs different fixtures")
+    project_id = project.id.to_s
+    params = { id: project_id }
+
+    requires_user(:edit, { action: :show }, params, "mary")
+
     assert_form_action(action: :update, id: project.id.to_s)
   end
 
