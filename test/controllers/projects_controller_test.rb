@@ -67,19 +67,35 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select(
       "a[href*=?]", new_project_admin_request_path(project_id: p_id)
     )
-    assert_select("a[href*=?]", edit_project_path(p_id), count: 0)
+    assert_select("a[href*=?]", edit_project_path(p_id), false,
+                  "Non-admin should not see link to edit project")
     assert_select(
       "a[href*=?]", new_project_member_path(project_id: p_id), count: 0
     )
     assert_select("form[action=?]", project_path(p_id), count: 0)
   end
 
-  def test_show_project_logged_in
-    p_id = projects(:eol_project).id
-    requires_login(:new)
-    get(:show, params: { id: p_id })
+  def test_show_project_logged_in_owner
+    project = projects(:eol_project)
+
+    login(project.user.login)
+    get(:show, params: { id: project.id })
+
     assert_template("show")
-    assert_select("a[href*=?]", edit_project_path(p_id))
+    assert_select("a[href*=?]", edit_project_path(project), true,
+                  "Project owner should see link to edit project")
+  end
+
+  def test_show_project_logged_in_admin
+    project = projects(:eol_project)
+    assert(project.admin?(mary))
+
+    login(mary.login)
+    get(:show, params: { id: project.id })
+
+    assert_template("show")
+    assert_select("a[href*=?]", edit_project_path(project), true,
+                  "Project admmin should see link to edit project")
   end
 
   def test_show_project_with_location
@@ -584,5 +600,14 @@ class ProjectsControllerTest < FunctionalTestCase
         put(:update, params: params)
       end
     end
+  end
+
+  def test_check_permission_owner
+    project = projects(:eol_project)
+    owner = project.user
+
+    login(owner.login)
+
+    assert(owner.check_permission(project))
   end
 end
