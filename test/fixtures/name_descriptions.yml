@@ -224,7 +224,7 @@ tubaria_furfuracea_desc:
   project: rolf_project
   public: 0
   source_type: <%= NameDescription.source_types[:project] %>
-  source_name: <%= Project.find(ActiveRecord::FixtureSet.identify(:rolf_project)).title %>
+  source_name: rolf_project
   admin_groups: rolf_only, katrina_only
   authors: katrina
   reader_groups: rolf_only, katrina_only
