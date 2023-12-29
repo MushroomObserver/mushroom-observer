@@ -312,12 +312,14 @@ class ProjectsControllerTest < FunctionalTestCase
     add_project_helper("The Test Coverage Project", "")
   end
 
-  def test_edit_project
+  def test_edit_project_by_owner
     project = projects(:two_list_project)
-    # requires_user calls either_requires_either which calls
-    # assert_request which requires that
+    # `requires_user` calls `either_requires_either` which calls
+    # `assert_request` which requires that
     # the request pass with the supplied user, and
-    # fail with an unsupplied user, who is eith rolf or mary
+    # fail with an unsupplied user, who is either
+    #   mary if the suppled user was rolf, or
+    #   rolf if the supplied user was other than mary or rolf
     assert(project.user == mary && !project.admin?(rolf),
            "Test needs different fixtures")
     project_id = project.id.to_s
