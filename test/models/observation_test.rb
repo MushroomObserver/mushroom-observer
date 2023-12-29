@@ -93,26 +93,37 @@ class ObservationTest < UnitTestCase
   #  Test owner id, favorites, consensus
   # --------------------------------------
 
+  def obs_consensus(fixture_name)
+    Observation::NamingConsensus.new(observations(fixture_name))
+  end
+
   # Test Observer's Prefered ID
   def test_observer_preferred_id
-    obs = observations(:owner_only_favorite_ne_consensus)
-    assert_equal(names(:tremella_mesenterica), obs.owner_preference)
+    # obs = observations(:owner_only_favorite_ne_consensus)
+    # consensus = Observation::NamingConsensus.new(obs)
+    consensus = obs_consensus(:owner_only_favorite_ne_consensus)
+    assert_equal(names(:tremella_mesenterica), consensus.owner_preference)
 
-    obs = observations(:owner_only_favorite_eq_consensus)
-    assert_equal(names(:boletus_edulis), obs.owner_preference)
+    consensus = obs_consensus(:owner_only_favorite_eq_consensus)
+    assert_equal(names(:boletus_edulis), consensus.owner_preference)
 
+    # previously untested bug: this obs does not have a naming.
     obs = observations(:owner_only_favorite_eq_fungi)
-    assert_equal(names(:fungi), obs.owner_preference)
+    # fix: give it a "fungi" naming from another fixture.
+    nam = namings(:detailed_unknown_naming)
+    nam.update(observation_id: obs.id)
+    consensus = Observation::NamingConsensus.new(obs.reload)
+    assert_equal(names(:fungi), consensus.owner_preference)
 
     # obs Site ID is Fungi, but owner did not propose a Name
-    obs = observations(:minimal_unknown_obs)
-    assert_not(obs.owner_preference)
+    consensus = obs_consensus(:minimal_unknown_obs)
+    assert_not(consensus.owner_preference)
 
-    obs = observations(:owner_multiple_favorites)
-    assert_not(obs.owner_preference)
+    consensus = obs_consensus(:owner_multiple_favorites)
+    assert_not(consensus.owner_preference)
 
-    obs = observations(:owner_uncertain_favorite)
-    assert_not(obs.owner_preference)
+    consensus = obs_consensus(:owner_uncertain_favorite)
+    assert_not(consensus.owner_preference)
   end
 
   def test_change_vote_weakened_favorite
