@@ -316,22 +316,20 @@ class Textile < String # rubocop:disable Metrics/ClassLength
       sub(/ sp\.$/, "")
   end
 
-  # rubocop:disable Style/RegexpLiteral
-  # cop gives false positive
-  OTHER_LINK_PATTERN = /
-    (?<prefix> ^|\W)
-    (?: _+)
-    (?<marked_type>
-      [a-zA-Z]+ # model name or abbr
-      (?: _[a-zA-Z]+)? # optionally including underscores
-    )
-    \s+
-    (?<id> [^_\s](?:[^_\n]+[^_\s])?) # id -- integer or string
-    (?: _+)
+  OTHER_LINK_PATTERN =
+    %r{
+      (?<prefix> ^|\W)
+      (?: _+)
+      (?<marked_type>
+        [a-zA-Z]+ # model name or abbr
+        (?: _[a-zA-Z]+)? # optionally including underscores
+      )
+      \s+
+      (?<id> [^_\s](?:[^_\n]+[^_\s])?) # id -- integer or string
+      (?: _+)
 
-    (?! (?: \w|<\/[a-z]+>)) # discard if followed by word char or html close tag
-  /x
-  # rubocop:enable Style/RegexpLiteral
+      (?! (?: \w|</[a-z]+>)) # discard if trailed by word char or html close tag
+    }x
 
   MARKED_TYPE_TO_TAGGED_TYPE = {
     comment: "COMMENT",
