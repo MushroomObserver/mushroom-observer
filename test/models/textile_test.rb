@@ -11,6 +11,7 @@ end
 
 class TextileTest < UnitTestCase
   EXPLICIT_OBJECT_MARKUP = [
+    "_Term gill_", # non-lowercase explicit tag
     "_Amanita_",
     "_observation 123_",
     "_term bar code_"
