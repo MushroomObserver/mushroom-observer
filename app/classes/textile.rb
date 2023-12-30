@@ -29,7 +29,7 @@ require("redcloth")
 #  textilize_without_paragraph:: Parse the first paragraph of the given string.
 #
 # TODO: un-disable Metrics/ClassLength
-class Textile < String # rubocop:disable Metrics/ClassLength
+class Textile < String
   @@name_lookup     = {}
   @@last_species    = nil
   @@last_subspecies = nil
@@ -211,10 +211,33 @@ class Textile < String # rubocop:disable Metrics/ClassLength
     convert_implicit_terms_to_tagged_glossary_terms!
   end
 
+  MARKUP_TO_TAG = {
+    comment: "COMMENT",
+    glossary_term: "GLOSSARY_TERM",
+    image: "IMAGE",
+    img: "IMAGE",
+    location: "LOCATION",
+    loc: "LOCATION",
+    name: "NAME",
+    term: "GLOSSARY_TERM",
+    ob: "OBSERVATION",
+    obs: "OBSERVATION",
+    observation: "OBSERVATION",
+    project: "PROJECT",
+    species_list: "SPECIES_LIST",
+    spl: "SPECIES_LIST",
+    user: "USER"
+  }.freeze
+
+  # case-insenstive match any of the non-Name markup tags
+  NON_NAME_LINK_PATTERN =
+    /#{(MARKUP_TO_TAG.keys - [:name]).map(&:to_s).join("|")}/i
+
   NAME_LINK_PATTERN =
     %r{
       (?<prefix> ^|\W) # capture start of string or non-word character
       (?: \**_+) # any asterisks then at least one underscore
+      (?! #{NON_NAME_LINK_PATTERN}\ ) # not a link to a non-Name object
       (?<formatted_label> [^_]+) # capture all non-underscores
       (?: _+\**) # at least one underscore then any asterisks
       (?= # not followed by
@@ -229,8 +252,9 @@ class Textile < String # rubocop:disable Metrics/ClassLength
   def convert_name_links_to_tagged_objects!
     @@name_lookup ||= {}
 
-    # Look for __Name__ turn into "Name":name_id.  Look for "Name":name and
-    # fill in id.  Look for "Name":name_id and make sure id matches name just
+    # Look for __Name__ turn into "Name":name_id.
+    # Look for "Name":name and fill in id.
+    # Look for "Name":name_id and make sure id matches name just
     # in case the user changed the name without updating the id.
     gsub!(NAME_LINK_PATTERN) do |orig_str|
       prefix = $LAST_MATCH_INFO[:prefix]
@@ -240,7 +264,7 @@ class Textile < String # rubocop:disable Metrics/ClassLength
           expand_genus_abbreviation(label)
         )
       )
-      # name = strip_out_sp_cfr_and_sensu(name)
+
       if (parse = Name.parse_name(name)) &&
          # Allowing arbitrary authors on Genera and higher makes it impossible
          # to distinguish between publication titles and taxa, e.g.,
@@ -331,24 +355,6 @@ class Textile < String # rubocop:disable Metrics/ClassLength
       (?! (?: \w|</[a-z]+>)) # discard if trailed by word char or html close tag
     }x
 
-  MARKED_TYPE_TO_TAGGED_TYPE = {
-    comment: "COMMENT",
-    glossary_term: "GLOSSARY_TERM",
-    image: "IMAGE",
-    img: "IMAGE",
-    location: "LOCATION",
-    loc: "LOCATION",
-    name: "NAME",
-    term: "GLOSSARY_TERM",
-    ob: "OBSERVATION",
-    obs: "OBSERVATION",
-    observation: "OBSERVATION",
-    project: "PROJECT",
-    species_list: "SPECIES_LIST",
-    spl: "SPECIES_LIST",
-    user: "USER"
-  }.freeze
-
   # Convert _object name_ and _object id_ to a textile string.
   def convert_other_links_to_tagged_objects!
     gsub!(OTHER_LINK_PATTERN) do |orig|
@@ -356,7 +362,7 @@ class Textile < String # rubocop:disable Metrics/ClassLength
       marked_type = $LAST_MATCH_INFO[:marked_type]
       id = $LAST_MATCH_INFO[:id]
 
-      tagged_type = MARKED_TYPE_TO_TAGGED_TYPE[marked_type.downcase.to_sym]
+      tagged_type = MARKUP_TO_TAG[marked_type.downcase.to_sym]
       next(orig) unless tagged_type
 
       label = tagged_object_label(marked_type, id)
@@ -408,7 +414,7 @@ class Textile < String # rubocop:disable Metrics/ClassLength
   # rubocop:disable Style/RegexpLiteral
   # cop gives false positive
   IMPLICIT_TERM_PATTERN = /
-    (?<! x{NAME) # discard match if preceded by an MO object tag
+    (?<! x{NAME) # discard match if it follows MO internal object tag
     (?<! x{GLOSSARY_TERM)
     (?<! x{OBSERVATION)
     (?<! x{LOCATION)
