@@ -28,7 +28,8 @@ require("redcloth")
 #  textilize::                   Parse the given string.
 #  textilize_without_paragraph:: Parse the first paragraph of the given string.
 #
-class Textile < String
+# TODO: un-disable Metrics/ClassLength
+class Textile < String # rubocop:disable Metrics/ClassLength
   @@name_lookup     = {}
   @@last_species    = nil
   @@last_subspecies = nil
