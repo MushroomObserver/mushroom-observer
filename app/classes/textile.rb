@@ -210,19 +210,19 @@ class Textile < String
     convert_implicit_terms_to_tagged_glossary_terms!
   end
 
-  # rubocop:disable Style/RegexpLiteral
-  # cop gives false positive
-  NAME_LINK_PATTERN = /
-    (?<prefix> ^|\W)
-    (?: \**_+)
-    (?<formatted_label> [^_]+)
-    (?: _+\**)
-    (?= (?: s|ish|like)?
-    (?: \W|\Z) )
+  NAME_LINK_PATTERN =
+    %r{
+      (?<prefix> ^|\W) # capture start of string or non-word character
+      (?: \**_+) # any asterisks then at least one underscore
+      (?<formatted_label> [^_]+) # capture all non-underscores
+      (?: _+\**) # at least one underscore then any asterisks
+      (?= # not followed by
+        (?: s|ish|like)? # optional ns, ish, or like, then
+        (?: \W|\Z) # non-word char or end of string
+      )
 
-    (?! (?: <\/[a-z]+>)) # discard match if followed by html closing tag
-  /x
-  # rubocop:enable Style/RegexpLiteral
+      (?! (?: </[a-z]+>)) # discard match if followed by html closing tag
+    }x
 
   # Convert __Names__ to links in a textile string.
   def convert_name_links_to_tagged_objects!
