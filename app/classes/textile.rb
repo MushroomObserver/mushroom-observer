@@ -333,18 +333,6 @@ class Textile < String # rubocop:disable Metrics/ClassLength
   /x
   # rubocop:enable Style/RegexpLiteral
 
-  OTHER_LINK_TYPES = [
-    ["comment"],
-    %w[glossary_term term],
-    %w[image img],
-    %w[location loc],
-    ["name"],
-    %w[observation obs ob],
-    %w[project proj],
-    %w[species_list spl],
-    ["user"]
-  ].freeze
-
   MARKED_TYPE_TO_TAGGED_TYPE = {
     comment: "COMMENT",
     glossary_term: "GLOSSARY_TERM",
