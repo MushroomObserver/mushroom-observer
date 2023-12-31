@@ -70,7 +70,8 @@ module Observations::Namings
 
       # N+1: Take the whole vote object and send it to change vote?
       # Or how about returning obs.reload from observation.change_vote
-      observation.change_vote(@naming, value, @user) # 2nd load (obs.reload)
+      @consensus = ::Observation::NamingConsensus.new(observation)
+      @consensus.change_vote(@naming, value, @user) # 2nd load (namings.reload)
       @observation = load_observation_naming_includes # 3rd load
       respond_to_new_votes
     end

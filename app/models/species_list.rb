@@ -327,6 +327,7 @@ class SpeciesList < AbstractModel
   #     :specimen               => false
   #   )
   #
+  # rubocop:disable Metrics/MethodLength
   def construct_observation(name, args = {})
     raise("missing or invalid name: #{name.inspect}") unless name.is_a?(Name)
 
@@ -366,11 +367,13 @@ class SpeciesList < AbstractModel
     )
 
     if args[:vote] && (args[:vote].to_i != 0)
-      obs.change_vote(naming, args[:vote], args[:user])
+      consensus = ::Observation::NamingConsensus.new(obs)
+      consensus.change_vote(naming, args[:vote], args[:user])
     end
 
     observations << obs
   end
+  # rubocop:enable Metrics/MethodLength
 
   ##############################################################################
   #

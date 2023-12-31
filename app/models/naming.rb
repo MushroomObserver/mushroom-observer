@@ -311,9 +311,9 @@ class Naming < AbstractModel
   end
 
   # Change User's Vote on this Naming.  (Uses Observation#change_vote.)
-  def change_vote(value, user = User.current)
-    observation.change_vote(self, value, user)
-  end
+  # def change_vote(value, user = User.current)
+  #   observation.change_vote(self, value, user)
+  # end
 
   def update_name(new_name, user, reasons, was_js_on)
     clean_votes(new_name, user)

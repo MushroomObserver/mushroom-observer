@@ -553,7 +553,8 @@ module Observations
 
       # First delete Mary's vote for it.
       login("mary")
-      obs.change_vote(nam1, Vote.delete_vote, mary)
+      consensus = ::Observation::NamingConsensus.new(obs)
+      consensus.change_vote(nam1, Vote.delete_vote, mary)
       assert_equal(9, mary.reload.contribution)
 
       old_naming_id = nam1.id
@@ -599,7 +600,8 @@ module Observations
 
       # Make Dick prefer it.
       login("dick")
-      obs.change_vote(nam1, 3, dick)
+      consensus = ::Observation::NamingConsensus.new(obs)
+      consensus.change_vote(nam1, 3, dick)
       assert_equal(11, dick.reload.contribution)
 
       # Have Rolf try to destroy it.

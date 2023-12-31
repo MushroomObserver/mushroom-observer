@@ -92,7 +92,8 @@ module Observations
         break i if no_conf.namings&.first&.id
       end
       vote_on_obs = not_confident[with_naming]
-      vote_on_obs.change_vote(vote_on_obs.namings.first, 1)
+      consensus = ::Observation::NamingConsensus.new(vote_on_obs)
+      consensus.change_vote(vote_on_obs.namings.first, 1)
 
       # get(:index, params: { q: QueryRecord.last.id.alphabetize })
       get(:index,

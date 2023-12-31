@@ -97,6 +97,11 @@ class ObservationTest < UnitTestCase
     Observation::NamingConsensus.new(observations(fixture_name))
   end
 
+  def change_vote(obs, naming, vote, user = User.current)
+    consensus = ::Observation::NamingConsensus.new(obs)
+    consensus.change_vote(naming, vote, user)
+  end
+
   # Test Observer's Prefered ID
   def test_observer_preferred_id
     # obs = observations(:owner_only_favorite_ne_consensus)
@@ -128,7 +133,7 @@ class ObservationTest < UnitTestCase
 
   def test_change_vote_weakened_favorite
     vote = votes(:owner_only_favorite_ne_consensus)
-    vote.observation.change_vote(vote.naming, Vote.min_pos_vote, vote.user)
+    change_vote(vote.observation, vote.naming, Vote.min_pos_vote, vote.user)
     vote.reload
 
     assert_equal(true, vote.favorite,
@@ -143,7 +148,7 @@ class ObservationTest < UnitTestCase
     user = naming_top.user
     old_2nd_choice = votes(:unequal_positive_namings_obs_2nd_vote)
 
-    obs.change_vote(naming_top, Vote.delete_vote, user)
+    change_vote(obs, naming_top, Vote.delete_vote, user)
     old_2nd_choice.reload
 
     assert_equal(true, old_2nd_choice.favorite)
@@ -240,7 +245,7 @@ class ObservationTest < UnitTestCase
 
     # Observation owner is not notified if consensus changed by themselves.
     User.current = rolf
-    obs.change_vote(new_naming, 3)
+    change_vote(obs, new_naming, 3)
     assert_equal(names(:agaricus_campestris), obs.reload.name)
     assert_equal(1, QueuedEmail.count)
 
@@ -274,7 +279,7 @@ class ObservationTest < UnitTestCase
     assert_save(dick)
 
     User.current = dick
-    obs.change_vote(new_naming, 3)
+    change_vote(obs, new_naming, 3)
     assert_equal(names(:peltigera), obs.reload.name)
     assert_equal(2, QueuedEmail.count)
     QueuedEmail.queue = false
@@ -336,7 +341,7 @@ class ObservationTest < UnitTestCase
     # (Actually, Mary already gave this her highest possible vote,
     # so think of this as Mary changing Rolf's vote. :)
     User.current = mary
-    obs.change_vote(namings(:coprinus_comatus_other_naming), 3, rolf)
+    change_vote(obs, namings(:coprinus_comatus_other_naming), 3, rolf)
     assert_equal(3,
                  votes(:coprinus_comatus_other_naming_rolf_vote).reload.value)
     assert_equal(3, QueuedEmail.count)
@@ -433,7 +438,7 @@ class ObservationTest < UnitTestCase
     # (Actually, Mary already gave this her highest possible vote,
     # so think of this as Mary changing Rolf's vote. :)
     User.current = mary
-    obs.change_vote(namings(:coprinus_comatus_other_naming), 3, rolf)
+    change_vote(obs, namings(:coprinus_comatus_other_naming), 3, rolf)
     assert_equal(3,
                  votes(:coprinus_comatus_other_naming_rolf_vote).reload.value)
     assert_save(votes(:coprinus_comatus_other_naming_rolf_vote))
@@ -603,7 +608,7 @@ class ObservationTest < UnitTestCase
     assert_equal(namg1, obs.consensus_naming)
 
     # Play with Rolf's vote for his naming (first naming).
-    obs.change_vote(namg1, 2, rolf)
+    change_vote(obs, namg1, 2, rolf)
     namg1.reload
     assert(obs.owner_voted?(namg1))
     assert(obs.user_voted?(namg1, rolf))
@@ -616,13 +621,13 @@ class ObservationTest < UnitTestCase
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, obs.consensus_naming)
 
-    obs.change_vote(namg1, 0.01, rolf)
+    change_vote(obs, namg1, 0.01, rolf)
     namg1.reload
     assert(obs.owners_favorite?(namg1))
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, obs.consensus_naming)
 
-    obs.change_vote(namg1, -0.01, rolf)
+    change_vote(obs, namg1, -0.01, rolf)
     namg1.reload
     assert_not(obs.owners_favorite?(namg1))
     assert_not(namg1.users_favorite?(rolf))
@@ -631,7 +636,7 @@ class ObservationTest < UnitTestCase
 
     # Play with Rolf's vote for other namings.
     # Make votes namg1: -0.01, namg2: 1, namg3: 0
-    obs.change_vote(namg2, 1, rolf)
+    change_vote(obs, namg2, 1, rolf)
     namings.each(&:reload)
     namg2.reload
     assert_not(obs.owners_favorite?(namg1))
@@ -641,7 +646,7 @@ class ObservationTest < UnitTestCase
     assert_equal(namg2, obs.consensus_naming)
 
     # Make votes namg1: -0.01, namg2: 1, namg3: 2
-    obs.change_vote(namg3, 2, rolf)
+    change_vote(obs, namg3, 2, rolf)
     namings.each(&:reload)
     assert_not(obs.owners_favorite?(namg1))
     assert_not(obs.owners_favorite?(namg2))
@@ -650,7 +655,7 @@ class ObservationTest < UnitTestCase
     assert_equal(namg3, obs.consensus_naming)
 
     # Make votes namg1: 3, namg2: 1, namg3: 2
-    obs.change_vote(namg1, 3, rolf)
+    change_vote(obs, namg1, 3, rolf)
     namings.each(&:reload)
     assert(obs.owners_favorite?(namg1))
     assert_not(obs.owners_favorite?(namg2))
@@ -659,7 +664,7 @@ class ObservationTest < UnitTestCase
     assert_equal(namg1, obs.consensus_naming)
 
     # Make votes namg1: 1, namg2: 1, namg3: 2
-    obs.change_vote(namg1, 1, rolf)
+    change_vote(obs, namg1, 1, rolf)
     namings.each(&:reload)
     assert_not(obs.owners_favorite?(namg1))
     assert_not(obs.owners_favorite?(namg2))
@@ -671,9 +676,9 @@ class ObservationTest < UnitTestCase
     # namg1 Agaricus campestris L.: rolf=1.0, mary=1.0
     # namg2 Coprinus comatus (O.F. Müll.) Pers.: rolf=1.0, mary=2.0(*)
     # namg3 Conocybe filaris: rolf=2.0(*), mary=-1.0
-    obs.change_vote(namg1, 1, mary)
-    obs.change_vote(namg2, 2, mary)
-    obs.change_vote(namg3, -1, mary)
+    change_vote(obs, namg1, 1, mary)
+    change_vote(obs, namg2, 2, mary)
+    change_vote(obs, namg3, -1, mary)
     namings.each(&:reload)
     assert_not(namg1.users_favorite?(mary))
     assert(namg2.users_favorite?(mary))
@@ -684,7 +689,7 @@ class ObservationTest < UnitTestCase
     # namg1 Agaricus campestris L.: rolf=1.0, mary=1.0(*)
     # namg2 Coprinus comatus (O.F. Müll.) Pers.: rolf=1.0, mary=0.01
     # namg3 Conocybe filaris: rolf=2.0(*), mary=-1.0
-    obs.change_vote(namg2, 0.01, mary)
+    change_vote(obs, namg2, 0.01, mary)
     namings.each(&:reload)
     assert(namg1.users_favorite?(mary))
     assert_not(namg2.users_favorite?(mary))
@@ -692,7 +697,7 @@ class ObservationTest < UnitTestCase
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, obs.consensus_naming)
 
-    obs.change_vote(namg1, -0.01, mary)
+    change_vote(obs, namg1, -0.01, mary)
     namings.each(&:reload)
     assert_not(namg1.users_favorite?(mary))
     assert(namg2.users_favorite?(mary))

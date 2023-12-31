@@ -37,7 +37,8 @@ module Observations::Namings
       # If Dick votes on the other as well, then his first vote should
       # get demoted and his preference should change.
       # Summing, 3 gets 2+1+3/4=1.5, 9 gets -3+3+2/4=.5, so 3 keeps it.
-      obs.change_vote(nam1, 3, dick)
+      consensus = ::Observation::NamingConsensus.new(obs)
+      consensus.change_vote(nam1, 3, dick)
       assert_equal(12, dick.reload.contribution)
       assert_equal(3, nam1.reload.users_vote(dick).value)
       assert_equal(6, nam1.vote_sum)
@@ -128,7 +129,8 @@ module Observations::Namings
       nam2 = namings(:coprinus_comatus_other_naming)
 
       login("dick")
-      obs.change_vote(nam2, 3, dick)
+      consensus = ::Observation::NamingConsensus.new(obs)
+      consensus.change_vote(nam2, 3, dick)
       assert_equal(names(:coprinus_comatus).id, obs.reload.name_id)
       assert_equal(11, dick.reload.contribution)
 

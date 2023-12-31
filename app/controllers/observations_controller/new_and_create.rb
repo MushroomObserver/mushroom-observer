@@ -180,8 +180,8 @@ module ObservationsController::NewAndCreate
 
     @naming.create_reasons(reason, params[:was_js_on] == "yes")
     save_with_log(@naming)
-    @observation.reload
-    @observation.change_vote(@naming, @vote.value) unless @vote.value.nil?
+    consensus = ::Observation::NamingConsensus.new(@observation.reload)
+    consensus.change_vote(@naming, @vote.value) unless @vote.value.nil?
   end
 
   def save_collection_number(obs, params)

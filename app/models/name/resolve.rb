@@ -44,6 +44,7 @@ module Name::Resolve
     #   names         List of choices if name matched multiple objects.
     #   valid_names   List of choices if name is deprecated.
     #
+    # rubocop:disable Metrics/MethodLength
     def resolve_name(what, approved_name, chosen_name)
       success = true
       name = nil
@@ -135,6 +136,7 @@ module Name::Resolve
       [success, what, name, names, valid_names, parent_deprecated,
        suggest_corrections]
     end
+    # rubocop:enable Metrics/MethodLength
 
     def create_needed_names(input_what, output_what = nil)
       names = []

@@ -4,8 +4,8 @@
 # FIXME: call this Naming::Draft
 class NamingParams
   attr_accessor :observation, :naming, :vote, :consensus
-  attr_reader :what, :name, :names, :valid_names, :reasons,
-              :parent_deprecated, :suggest_corrections
+  attr_reader :what, :name, :names, :valid_names, :reasons, :parent_deprecated,
+              :suggest_corrections
 
   def initialize(what = "")
     @naming = Naming.new
