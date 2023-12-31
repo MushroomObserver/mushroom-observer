@@ -1059,7 +1059,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Has anyone proposed a given Name yet for this observation?
   # Count is ok here because we have eager-loaded the namings.
   def name_been_proposed?(name)
-    namings.count { |n| n.name == name }.positive?
+    namings.any? { |n| n.name == name }
   end
 
   # Has the owner voted on a given Naming?
@@ -1137,7 +1137,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     result
   end
 
-  def logged_change_vote(naming, vote)
+  def change_vote_with_log(naming, vote)
     reload
     change_vote(naming, vote.value, naming.user)
     log(:log_naming_created, name: naming.format_name)

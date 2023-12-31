@@ -61,13 +61,13 @@ class NamingParams
     @reasons = @naming.init_reasons(reasons)
   end
 
-  def name_been_proposed?
-    @observation.name_been_proposed?(@name)
-  end
+  # def name_been_proposed?
+  #   @observation.name_been_proposed?(@name)
+  # end
 
-  def logged_change_vote
-    @observation.logged_change_vote(@naming, @vote)
-  end
+  # def change_vote_with_log
+  #   @observation.change_vote_with_log(@naming, @vote)
+  # end
 
   def update_name(user, reasons, was_js_on)
     @naming.update_name(@name, user, reasons, was_js_on)

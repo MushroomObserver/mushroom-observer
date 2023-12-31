@@ -153,6 +153,55 @@ module Observations
       end
     end
 
+    def rough_draft
+      @params.rough_draft(
+        {},
+        param_lookup([:naming, :vote]),
+        param_lookup([:naming, :name]),
+        params[:approved_name],
+        param_lookup([:chosen_name, :name_id], "").to_s
+      )
+    end
+
+    def can_save?
+      unproposed_name(:runtime_create_naming_already_proposed) &&
+        valid_use_of_imageless(@params.name, @params.observation) &&
+        validate_object(@params.naming) &&
+        (@params.vote.value.nil? || validate_object(@params.vote))
+    end
+
+    def unproposed_name(warning)
+      if @observation.name_been_proposed?(@params.name)
+        flash_warning(warning.t)
+      else
+        true
+      end
+    end
+
+    def valid_use_of_imageless(name, obs)
+      return true unless name.imageless? && obs.has_backup_data?
+
+      flash_warning(:runtime_bad_use_of_imageless.t)
+    end
+
+    def validate_name
+      success = resolve_name(param_lookup([:naming, :name], "").to_s,
+                             param_lookup([:chosen_name, :name_id], "").to_s)
+      flash_object_errors(@params.naming) if @params.name_missing?
+      success
+    end
+
+    def resolve_name(given_name, chosen_name)
+      @params.resolve_name(given_name, params[:approved_name], chosen_name)
+    end
+
+    def save_changes
+      @params.update_naming(param_lookup([:naming, :reasons]),
+                            params[:was_js_on] == "yes")
+      save_with_log(@params.naming)
+      @params.save_vote unless @params.vote.value.nil?
+    end
+
     def respond_to_successful_create
       # @observation.reload doesn't do the includes
       # This is a reload of all the naming table associations, after save
@@ -201,62 +250,21 @@ module Observations
       end
     end
 
-    def rough_draft
-      @params.rough_draft(
-        {},
-        param_lookup([:naming, :vote]),
-        param_lookup([:naming, :name]),
-        params[:approved_name],
-        param_lookup([:chosen_name, :name_id], "").to_s
-      )
-    end
-
-    def can_save?
-      unproposed_name(:runtime_create_naming_already_proposed) &&
-        valid_use_of_imageless(@params.name, @params.observation) &&
-        validate_object(@params.naming) &&
-        (@params.vote.value.nil? || validate_object(@params.vote))
-    end
-
-    def save_changes
-      @params.update_naming(param_lookup([:naming, :reasons]),
-                            params[:was_js_on] == "yes")
-      save_with_log(@params.naming)
-      @params.save_vote unless @params.vote.value.nil?
-    end
-
-    def unproposed_name(warning)
-      @params.name_been_proposed? ? flash_warning(warning.t) : true
-    end
-
-    def valid_use_of_imageless(name, obs)
-      return true unless name.imageless? && obs.has_backup_data?
-
-      flash_warning(:runtime_bad_use_of_imageless.t)
-    end
-
-    def validate_name
-      success = resolve_name(param_lookup([:naming, :name], "").to_s,
-                             param_lookup([:chosen_name, :name_id], "").to_s)
-      flash_object_errors(@params.naming) if @params.name_missing?
-      success
-    end
-
-    def resolve_name(given_name, chosen_name)
-      @params.resolve_name(given_name, params[:approved_name], chosen_name)
-    end
-
     def update_post
-      if validate_name &&
-         (@params.name_not_changing? ||
-          unproposed_name(:runtime_edit_naming_someone_else) &&
-          valid_use_of_imageless(@params.name, @params.observation))
+      if can_update?
         @params.need_new_naming? ? create_new_naming : change_naming
         respond_to_successful_update
       else
         @params.add_reasons(param_lookup([:naming, :reasons]))
         respond_to_form_errors
       end
+    end
+
+    def can_update?
+      validate_name &&
+        (@params.name_not_changing? ||
+         unproposed_name(:runtime_edit_naming_someone_else) &&
+         valid_use_of_imageless(@params.name, @params.observation))
     end
 
     def respond_to_successful_update
@@ -281,7 +289,7 @@ module Observations
       naming.create_reasons(param_lookup([:naming, :reasons]),
                             params[:was_js_on] == "yes")
       save_with_log(naming)
-      @params.logged_change_vote
+      @observation.change_vote_with_log(naming, @params.vote)
       flash_warning(:create_new_naming_warn.l)
     end
 
