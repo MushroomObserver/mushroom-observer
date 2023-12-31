@@ -43,7 +43,9 @@ class Observation
     end
 
     def owner_favorite_votes
-      @votes.select { |v| v.user_id == @obs.user_id && v.favorite == true }
+      @votes.select do |v|
+        v.user_id == @observation.user_id && v.favorite == true
+      end
     end
 
     ############################################################################
@@ -82,6 +84,8 @@ class Observation
     #     str
     #   end.join("\n")
     # end
+
+    public
 
     # CHECK: Don't need this in consensus?
     # Has anyone proposed a given Name yet for this observation?
@@ -165,18 +169,18 @@ class Observation
       result
     end
 
-    def change_vote_with_log(naming, vote)
+    def change_vote_with_log(naming, value)
       reload_namings_and_votes!
-      change_vote(naming, vote.value, naming.user)
-      log(:log_naming_created, name: naming.format_name)
+      change_vote(naming, value, naming.user)
+      @observation.log(:log_naming_created, name: naming.format_name)
     end
 
     def calc_consensus
       reload_namings_and_votes!
-      calculator = Observation::ConsensusCalculator.new(namings)
+      calculator = ::Observation::ConsensusCalculator.new(@namings)
       best, best_val = calculator.calc
-      old = name
-      if name != best || vote_cache != best_val
+      old = @observation.name
+      if old != best || @observation.vote_cache != best_val
         # maybe use update here
         @observation.name = best
         @observation.vote_cache = best_val
@@ -208,6 +212,8 @@ class Observation
       end
       best_naming
     end
+
+    private
 
     def find_matches
       matches = @namings.select { |n| n.name_id == name_id }
@@ -260,7 +266,7 @@ class Observation
       else
         naming.votes.create!(
           user: user,
-          observation: self,
+          observation: @observation,
           value: value,
           favorite: favorite
         )
@@ -371,7 +377,9 @@ class Observation
     # end
 
     def reload_namings_and_votes!
-      @namings = @obs.namings.include(:votes)
+      # @namings = @observation.namings.include(:votes)
+      obs = ::Observation.naming_includes.find(@observation.id)
+      @namings = obs.namings
       @votes = @namings.map(&:votes).flatten
     end
   end

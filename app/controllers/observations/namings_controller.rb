@@ -38,8 +38,7 @@ module Observations
       @observation = Observation.naming_includes.find(params[:observation_id])
       return unless @observation
 
-      @consensus = @params.consensus =
-        Observation::NamingConsensus.new(@observation)
+      @params.consensus = Observation::NamingConsensus.new(@observation)
       @reasons = @params.reasons
       create_post
     end
@@ -72,8 +71,7 @@ module Observations
 
       # N+1: Does this look up votes again? It did
       @params.vote = @naming.owners_vote
-      @consensus = @params.consensus =
-        Observation::NamingConsensus.new(@observation)
+      @params.consensus = Observation::NamingConsensus.new(@observation)
 
       @reasons = @params.reasons
       update_post
@@ -147,18 +145,19 @@ module Observations
         respond_to_successful_create
       else # If anything failed reload the form.
         flash_object_errors(@params.naming) if @params.name_missing?
-        @params.add_reasons(param_lookup([:naming, :reasons]))
+        @params.add_reasons(params.dig(:naming, :reasons))
         respond_to_form_errors
       end
     end
 
     def rough_draft
+      @params.observation = @observation
       @params.rough_draft(
         {},
-        param_lookup([:naming, :vote]),
-        param_lookup([:naming, :name]),
+        params.dig(:naming, :vote),
+        params.dig(:naming, :name),
         params[:approved_name],
-        param_lookup([:chosen_name, :name_id], "").to_s
+        params.dig(:chosen_name, :name_id).to_s
       )
     end
 
@@ -170,7 +169,7 @@ module Observations
     end
 
     def unproposed_name(warning)
-      if @consensus.name_been_proposed?(@params.name)
+      if @params.name_been_proposed?
         flash_warning(warning.t)
       else
         true
@@ -187,8 +186,8 @@ module Observations
     end
 
     def validate_name
-      success = resolve_name(param_lookup([:naming, :name], "").to_s,
-                             param_lookup([:chosen_name, :name_id], "").to_s)
+      success = resolve_name(params.dig(:naming, :name).to_s,
+                             params.dig(:chosen_name, :name_id).to_s)
       flash_object_errors(@params.naming) if @params.name_missing?
       success
     end
@@ -198,7 +197,7 @@ module Observations
     end
 
     def save_changes
-      @params.update_naming(param_lookup([:naming, :reasons]),
+      @params.update_naming(params.dig(:naming, :reasons),
                             params[:was_js_on] == "yes")
       save_with_log(@params.naming)
       # maybe params should instantiate the consensus? no. pass consensus!
@@ -258,7 +257,7 @@ module Observations
         @params.need_new_naming? ? create_new_naming : change_naming
         respond_to_successful_update
       else
-        @params.add_reasons(param_lookup([:naming, :reasons]))
+        @params.add_reasons(params.dig(:naming, :reasons))
         respond_to_form_errors
       end
     end
@@ -289,33 +288,35 @@ module Observations
     # because that would bring the other people's votes along with it.
     # We make a new one, reusing the user's previously stated vote and reasons.
     def create_new_naming
-      @params.rough_draft({}, param_lookup([:naming, :vote]))
-      naming = @params.naming
-      return unless validate_object(naming) && validate_object(@params.vote)
+      @params.observation = @observation
+      @params.rough_draft({}, params.dig(:naming, :vote))
+      unless validate_object(@params.naming) && validate_object(@params.vote)
+        return
+      end
 
       # `@params.rough_draft` above seems to reset the @params, so I don't get
       # why this splits `naming` away from the @params. Instead we could do:
-      #   @params.update_naming(params.dig(:naming, :reasons),
-      #                         params[:was_js_on] == "yes")
-      #   save_with_log(@params.naming)
-      #   @params.change_vote_with_log
-      # Ah. `@params.save_vote` currently assumes a change of vote between
-      # two existing namings.
-      # This needs to save the naming before we can move this user's vote.
-      naming.create_reasons(param_lookup([:naming, :reasons]),
+      @params.update_naming(params.dig(:naming, :reasons),
                             params[:was_js_on] == "yes")
-      save_with_log(naming)
-      @consensus.change_vote_with_log(naming, @params.vote)
+      save_with_log(@params.naming)
+      @params.change_vote_with_log
+      # Ah.
+      # This needs to save the naming before we can move this user's vote.
+      # was:
+      # naming.create_reasons(param_lookup([:naming, :reasons]),
+      #                       params[:was_js_on] == "yes")
+      # save_with_log(naming)
+      # @consensus.change_vote_with_log(naming, @params.vote)
       flash_warning(:create_new_naming_warn.l)
     end
 
     def change_naming
       return unless @params.update_name(@user,
-                                        param_lookup([:naming, :reasons]),
+                                        params.dig(:naming, :reasons),
                                         params[:was_js_on] == "yes")
 
       flash_notice(:runtime_naming_updated_at.t)
-      @params.change_vote(param_lookup([:naming, :vote, :value], &:to_i))
+      @params.change_vote(params.dig(:naming, :vote, :value).to_i)
     end
 
     def destroy_if_we_can(naming)

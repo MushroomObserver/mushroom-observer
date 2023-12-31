@@ -548,7 +548,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   }
   scope :naming_includes, lambda {
     includes(
-      :herbarium_records, # in case naming is "Imageless"
+      { herbarium_records: [:herbarium] }, # in case naming is "Imageless"
       :location, # ugh. worth it because of cache_content_filter_data
       :name,
       # Observation#find_matches complains synonym is not eager-loaded. TBD

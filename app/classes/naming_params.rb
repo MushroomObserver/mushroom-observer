@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
 # Encapsulates parameters needed for NamingController pages
+# FIXME: call this Naming::Draft
 class NamingParams
-  attr_accessor :naming, :vote, :consensus
-  attr_reader :what, :name, :names, :valid_names, :reasons, :parent_deprecated,
-              :suggest_corrections
+  attr_accessor :observation, :naming, :vote, :consensus
+  attr_reader :what, :name, :names, :valid_names, :reasons,
+              :parent_deprecated, :suggest_corrections
 
   def initialize(what = "")
     @naming = Naming.new
@@ -21,7 +22,8 @@ class NamingParams
     success && @name
   end
 
-  # FIXME: use kwargs!
+  # FIXME: use kwargs!, and call this `reset`
+  # construct requires a parent (observation) instance
   def rough_draft(naming_args, vote_args,
                   name_str = nil, approved_name = nil, chosen_name = nil)
     @naming = Naming.construct(naming_args, @observation)
@@ -63,9 +65,9 @@ class NamingParams
     @reasons = @naming.init_reasons(reasons)
   end
 
-  # def name_been_proposed?
-  #   @consensus.name_been_proposed?(@name)
-  # end
+  def name_been_proposed?
+    @consensus.name_been_proposed?(@name)
+  end
 
   def change_vote_with_log
     @consensus.change_vote_with_log(@naming, @vote)
