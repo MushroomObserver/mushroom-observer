@@ -70,7 +70,7 @@ class NamingParams
   end
 
   def change_vote_with_log
-    @consensus.change_vote_with_log(@naming, @vote)
+    @consensus.change_vote_with_log(@naming, @vote.value)
   end
 
   def update_name(user, reasons, was_js_on)
