@@ -548,11 +548,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   }
   scope :naming_includes, lambda {
     includes(
+      :herbarium_records, # in case naming is "Imageless"
       :location, # ugh. worth it because of cache_content_filter_data
       :name,
       # Observation#find_matches complains synonym is not eager-loaded. TBD
       { namings: [{ name: { synonym: :names } }, :user,
                   { votes: [:observation, :user] }] },
+      :species_lists, # in case naming is "Imageless"
       :user
     )
   }
@@ -1319,6 +1321,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     img
   end
 
+  # Determines if an obs can have the Naming "_Imageless_"
+  # N+1: maybe move method to NamingConsensus and
+  # Add species_lists and herbarium_records to naming_includes
   def has_backup_data?
     !thumb_image_id.nil? ||
       species_lists.count.positive? ||

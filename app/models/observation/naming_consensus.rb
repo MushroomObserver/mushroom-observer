@@ -2,13 +2,13 @@
 
 class Observation
   class NamingConsensus
-    attr_accessor :obs
+    attr_accessor :observation
     attr_accessor :namings
     attr_accessor :votes
 
-    def initialize(obs)
-      @obs = obs
-      @namings = obs.namings
+    def initialize(observation)
+      @observation = observation
+      @namings = observation.namings
       @votes = @namings.map(&:votes).flatten
     end
 
@@ -135,7 +135,7 @@ class Observation
 
     # All of a given User's votes on all Namings for this Observation
     def user_votes(user)
-      namings.each_with_object([]) do |n, votes|
+      @namings.each_with_object([]) do |n, votes|
         v = n.users_vote(user)
         votes << v if v
       end
@@ -177,11 +177,12 @@ class Observation
       best, best_val = calculator.calc
       old = name
       if name != best || vote_cache != best_val
-        self.name = best
-        self.vote_cache = best_val
-        save
+        # maybe use update here
+        @observation.name = best
+        @observation.vote_cache = best_val
+        @observation.save
       end
-      announce_consensus_change(old, best) if best != old
+      @observation.announce_consensus_change(old, best) if best != old
     end
 
     # Admin tool that refreshes the vote cache for all observations with a vote.
@@ -209,10 +210,10 @@ class Observation
     end
 
     def find_matches
-      matches = namings.select { |n| n.name_id == name_id }
+      matches = @namings.select { |n| n.name_id == name_id }
       return matches unless matches == [] && name && name.synonym_id
 
-      namings.select { |n| name.synonyms.include?(n.name) }
+      @namings.select { |n| name.synonyms.include?(n.name) }
     end
 
     def format_coordinate(value, positive_point, negative_point)

@@ -2,7 +2,7 @@
 
 # Encapsulates parameters needed for NamingController pages
 class NamingParams
-  attr_accessor :naming, :observation, :vote
+  attr_accessor :naming, :vote, :consensus
   attr_reader :what, :name, :names, :valid_names, :reasons, :parent_deprecated,
               :suggest_corrections
 
@@ -13,6 +13,7 @@ class NamingParams
     @reasons = @naming.init_reasons
   end
 
+  # FIXME: Maybe move Name.resolve_name into this object?
   def resolve_name(given_name, approved_name, chosen_name)
     (success, @what, @name, @names, @valid_names,
      @parent_deprecated, @suggest_corrections) =
@@ -20,6 +21,7 @@ class NamingParams
     success && @name
   end
 
+  # FIXME: use kwargs!
   def rough_draft(naming_args, vote_args,
                   name_str = nil, approved_name = nil, chosen_name = nil)
     @naming = Naming.construct(naming_args, @observation)
@@ -62,12 +64,12 @@ class NamingParams
   end
 
   # def name_been_proposed?
-  #   @observation.name_been_proposed?(@name)
+  #   @consensus.name_been_proposed?(@name)
   # end
 
-  # def change_vote_with_log
-  #   @observation.change_vote_with_log(@naming, @vote)
-  # end
+  def change_vote_with_log
+    @consensus.change_vote_with_log(@naming, @vote)
+  end
 
   def update_name(user, reasons, was_js_on)
     @naming.update_name(@name, user, reasons, was_js_on)
@@ -75,17 +77,18 @@ class NamingParams
 
   def change_vote(new_val)
     if new_val && (!@vote || @vote.value != new_val)
-      @observation.change_vote(@naming, new_val)
+      @consensus.change_vote(@naming, new_val)
     else
-      @observation.reload
-      @observation.calc_consensus
+      @consensus.reload_namings_and_votes!
+      @consensus.calc_consensus
     end
   end
 
   def save_vote
-    @observation.reload
-    @observation.change_vote(@naming, @vote.value)
-    @observation.log(:log_naming_created, name: @naming.format_name)
+    # @observation.reload
+    # @observation.change_vote(@naming, @vote.value)
+    # @observation.log(:log_naming_created, name: @naming.format_name)
+    @consensus.change_vote_with_log(@naming, @vote.value)
   end
 
   def update_naming(reasons, was_js_on)

@@ -15,14 +15,12 @@ module Observations
       @params = NamingParams.new(params[:naming])
       fill_in_reference_for_suggestions(@params) if params[:naming].present?
       # N+1: All CRUD actions:
-      # The proper `includes` scope here may depend on the response format.
-      # The turbo response only needs `naming_includes`, but the html response
-      # for the form may need the whole `show_includes` shebang. (Check!)
+      # Nah, they only need the obs. It's create/edit that needs the includes
       # Both need to have the @observation ivar.
+      # Does not need @params.observation.
       #
-      @observation = @params.observation =
-        Observation.show_includes.find(params[:observation_id])
-      return unless @params.observation
+      @observation = Observation.find(params[:observation_id])
+      return unless @observation
 
       @reasons = @params.reasons
       respond_to do |format|
@@ -37,18 +35,18 @@ module Observations
     def create
       @params = NamingParams.new(params[:naming])
       fill_in_reference_for_suggestions(@params) if params[:naming].present?
-      @observation = @params.observation =
-        Observation.show_includes.find(params[:observation_id])
-      return unless @params.observation
+      @observation = Observation.naming_includes.find(params[:observation_id])
+      return unless @observation
 
+      @consensus = @params.consensus =
+        Observation::NamingConsensus.new(@observation)
       @reasons = @params.reasons
       create_post
     end
 
     def edit
       @params = NamingParams.new
-      @observation = @params.observation =
-        Observation.show_includes.find(params[:observation_id])
+      @observation = Observation.find(params[:observation_id])
       @naming = @params.naming = naming_from_params
       # N+1: What is this doing? Watch out for check_permission!
       return default_redirect(@observation) unless check_permission!(@naming)
@@ -67,14 +65,15 @@ module Observations
 
     def update
       @params = NamingParams.new
-      @observation = @params.observation =
-        Observation.show_includes.find(params[:observation_id])
+      @observation = Observation.naming_includes.find(params[:observation_id])
       @naming = @params.naming = naming_from_params
       # N+1: What is this doing? Watch out for check_permission!
       return default_redirect(@observation) unless check_permission!(@naming)
 
       # N+1: Does this look up votes again? It did
       @params.vote = @naming.owners_vote
+      @consensus = @params.consensus =
+        Observation::NamingConsensus.new(@observation)
 
       @reasons = @params.reasons
       update_post
@@ -86,7 +85,7 @@ module Observations
         flash_notice(:runtime_destroy_naming_success.t(id: params[:id].to_s))
       end
       # Now, eager-load the obs without the deleted naming
-      @observation = Observation.show_includes.find(params[:observation_id])
+      @observation = Observation.naming_includes.find(params[:observation_id])
 
       respond_to do |format|
         format.turbo_stream do
@@ -165,19 +164,22 @@ module Observations
 
     def can_save?
       unproposed_name(:runtime_create_naming_already_proposed) &&
-        valid_use_of_imageless(@params.name, @params.observation) &&
+        valid_use_of_imageless(@params.name, @observation) &&
         validate_object(@params.naming) &&
         (@params.vote.value.nil? || validate_object(@params.vote))
     end
 
     def unproposed_name(warning)
-      if @observation.name_been_proposed?(@params.name)
+      if @consensus.name_been_proposed?(@params.name)
         flash_warning(warning.t)
       else
         true
       end
     end
 
+    # Restricts use of "Imageless" as a naming
+    # Note that obs.has_backup_data? requires eager loading
+    # species_lists and herbarium_records...
     def valid_use_of_imageless(name, obs)
       return true unless name.imageless? && obs.has_backup_data?
 
@@ -199,6 +201,7 @@ module Observations
       @params.update_naming(param_lookup([:naming, :reasons]),
                             params[:was_js_on] == "yes")
       save_with_log(@params.naming)
+      # maybe params should instantiate the consensus? no. pass consensus!
       @params.save_vote unless @params.vote.value.nil?
     end
 
@@ -219,7 +222,7 @@ module Observations
           end
           return
         end
-        format.html { default_redirect(@params.observation, :show) }
+        format.html { default_redirect(@observation, :show) }
       end
     end
 
@@ -264,7 +267,7 @@ module Observations
       validate_name &&
         (@params.name_not_changing? ||
          unproposed_name(:runtime_edit_naming_someone_else) &&
-         valid_use_of_imageless(@params.name, @params.observation))
+         valid_use_of_imageless(@params.name, @observation))
     end
 
     def respond_to_successful_update
@@ -277,19 +280,29 @@ module Observations
           render(partial: "observations/namings/update_observation",
                  locals: { obs: obs }) and return
         end
-        format.html { default_redirect(@params.observation) }
+        format.html { default_redirect(@observation) }
       end
     end
 
+    # Use case: user changes their mind on a name they've proposed, but it's
+    # already been upvoted by others. We don't let them change this naming,
+    # because that would bring the other people's votes along with it.
+    # We make a new one, reusing the user's previously stated vote and reasons.
     def create_new_naming
       @params.rough_draft({}, param_lookup([:naming, :vote]))
       naming = @params.naming
       return unless validate_object(naming) && validate_object(@params.vote)
 
+      # `@params.rough_draft` above seems to reset the @params, so I don't get
+      # why this splits `naming` away from the @params. Instead we could do:
+      #   @params.update_naming(params.dig(:naming, :reasons),
+      #                         params[:was_js_on] == "yes")
+      #   @params.save_vote
+      #   @params.change_vote_with_log
       naming.create_reasons(param_lookup([:naming, :reasons]),
                             params[:was_js_on] == "yes")
       save_with_log(naming)
-      @observation.change_vote_with_log(naming, @params.vote)
+      @consensus.change_vote_with_log(naming, @params.vote)
       flash_warning(:create_new_naming_warn.l)
     end
 
