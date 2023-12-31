@@ -299,6 +299,9 @@ module Observations
       #                         params[:was_js_on] == "yes")
       #   @params.save_vote
       #   @params.change_vote_with_log
+      # Ah. `@params.save_vote` currently assumes a change of vote between
+      # two existing namings.
+      # This needs to save the naming before we can move this user's vote.
       naming.create_reasons(param_lookup([:naming, :reasons]),
                             params[:was_js_on] == "yes")
       save_with_log(naming)
