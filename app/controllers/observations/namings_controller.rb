@@ -297,7 +297,7 @@ module Observations
       # why this splits `naming` away from the @params. Instead we could do:
       #   @params.update_naming(params.dig(:naming, :reasons),
       #                         params[:was_js_on] == "yes")
-      #   @params.save_vote
+      #   save_with_log(@params.naming)
       #   @params.change_vote_with_log
       # Ah. `@params.save_vote` currently assumes a change of vote between
       # two existing namings.
