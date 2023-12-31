@@ -19,7 +19,7 @@ module Observations
       # Both need to have the @observation ivar.
       # Does not need @params.observation.
       #
-      @observation = Observation.find(params[:observation_id])
+      @observation = Observation.show_includes.find(params[:observation_id])
       return unless @observation
 
       @reasons = @params.reasons
@@ -35,7 +35,7 @@ module Observations
     def create
       @params = NamingParams.new(params[:naming])
       fill_in_reference_for_suggestions(@params) if params[:naming].present?
-      @observation = Observation.naming_includes.find(params[:observation_id])
+      @observation = Observation.show_includes.find(params[:observation_id])
       return unless @observation
 
       @params.consensus = Observation::NamingConsensus.new(@observation)
@@ -45,7 +45,7 @@ module Observations
 
     def edit
       @params = NamingParams.new
-      @observation = Observation.find(params[:observation_id])
+      @observation = Observation.show_includes.find(params[:observation_id])
       @naming = @params.naming = naming_from_params
       # N+1: What is this doing? Watch out for check_permission!
       return default_redirect(@observation) unless check_permission!(@naming)
@@ -64,7 +64,7 @@ module Observations
 
     def update
       @params = NamingParams.new
-      @observation = Observation.naming_includes.find(params[:observation_id])
+      @observation = Observation.show_includes.find(params[:observation_id])
       @naming = @params.naming = naming_from_params
       # N+1: What is this doing? Watch out for check_permission!
       return default_redirect(@observation) unless check_permission!(@naming)

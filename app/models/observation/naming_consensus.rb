@@ -376,6 +376,8 @@ class Observation
     #   # )
     # end
 
+    public
+
     def reload_namings_and_votes!
       # @namings = @observation.namings.include(:votes)
       obs = ::Observation.naming_includes.find(@observation.id)
