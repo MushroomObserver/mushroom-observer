@@ -26,40 +26,40 @@ statuses = [[:ACCEPTED.l, false], [:DEPRECATED.l, true]]
 
     <div class="form-inline my-3">
       <%= select_with_label(form: f, field: :rank,
-                            label: :Rank.l + ":", options: ranks) %>
+                            label: "#{:Rank.l}:", options: ranks) %>
 
       <%= select_with_label(form: f, field: :deprecated,
-                            label: :Status.l + ":",
+                            label: "#{:Status.l}:",
                             options: statuses, class: "pl-3" ) %>
     </div>
 
     <%= text_field_with_label(
-          form: f, field: :text_name, label: :form_names_text_name.l + ":",
+          form: f, field: :text_name, label: "#{:form_names_text_name}:",
           value: @name_string, data: { autofocus: true },
           append: help_block(:p, :form_names_text_name_help.t)
         ) %>
 
     <%= text_area_with_label(
-          form: f, field: :author, rows: 2, label: :Authority.l + ":",
+          form: f, field: :author, rows: 2, label: "#{:Authority.l}:",
           append: help_block(:p, :form_names_author_help.t)
         ) %>
 
   <% else %>
     <div class="mt-3 mb-3">
       <%= hidden_field_with_label(
-            form: f, field: :rank, label: :Rank.l + ":", inline: true,
+            form: f, field: :rank, label: "#{:Rank.l}:", inline: true,
             class: "mb-0", text: :"Rank_#{@name.rank.to_s.downcase}".l
           ) %>
       <%= hidden_field_with_label(
-            form: f, field: :deprecated, label: :Status.l + ":", inline: true,
+            form: f, field: :deprecated, label: "#{:Status.l}:", inline: true,
             class: "mb-0", text: @name.deprecated ? :ACCEPTED.l : :DEPRECATED.l
           ) %>
       <%= hidden_field_with_label(
-            form: f, field: :text_name, label: :Name.l + ":", inline: true,
+            form: f, field: :text_name, label: "#{:Name.l}:", inline: true,
             class: "mb-0", value: @name_string, text: @name.real_text_name.l
           ) %>
       <%= hidden_field_with_label(
-            form: f, field: :author, label: :Authority.l + ":", inline: true,
+            form: f, field: :author, label: "#{:Authority.l}:", inline: true,
             class: "mb-0", text: @name.author.l
           ) %>
       <%= help_block(:div, :show_name_locked.tp) %>
@@ -71,7 +71,7 @@ statuses = [[:ACCEPTED.l, false], [:DEPRECATED.l, true]]
     concat(:form_names_citation_textilize_note.l)
   end %>
   <%= text_area_with_label(form: f, field: :citation, rows: 3,
-                           label: :Citation.l + ":", append: append) %>
+                           label: "#{:Citation.l}:", append: append) %>
 
   <% if !@misspelling.nil? && (in_admin_mode? || !@name.locked) %>
     <div class="my-4 mx-0">
@@ -80,7 +80,7 @@ statuses = [[:ACCEPTED.l, false], [:DEPRECATED.l, true]]
                                label: :form_names_misspelling.l) %>
       <%= autocompleter_field(
         form: f, field: :correct_spelling, value: @correct_spelling,
-        label: :form_names_misspelling_it_should_be.l + ":",
+        label: "#{:form_names_misspelling_it_should_be.l}:",
         append: help_block(:p, :form_names_misspelling_note.l),
         autocomplete: :name
       ) %>
@@ -89,7 +89,7 @@ statuses = [[:ACCEPTED.l, false], [:DEPRECATED.l, true]]
 
   <% between = tag.div(:form_names_taxonomic_notes_warning.t, class: "mark") %>
   <%= text_area_with_label(form: f, field: :notes, rows: 6,
-                           label: :form_names_taxonomic_notes.l + ":",
+                           label: "#{:form_names_taxonomic_notes.l}:",
                            between: between) %>
   <%= render(partial: "shared/textilize_help") %>
 
