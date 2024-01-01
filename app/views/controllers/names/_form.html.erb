@@ -60,7 +60,7 @@ statuses = [[:ACCEPTED.l, false], [:DEPRECATED.l, true]]
           ) %>
       <%= hidden_field_with_label(
             form: f, field: :author, label: "#{:Authority.l}:", inline: true,
-            class: "mb-0", text: @name.author.l
+            class: "mb-0", text: @name.author.t
           ) %>
       <%= help_block(:div, :show_name_locked.tp) %>
     </div>
