@@ -186,7 +186,7 @@ class Observation
         @observation.vote_cache = best_val
         @observation.save
       end
-      @observation.announce_consensus_change(old, best) if best != old
+      @observation.reload.announce_consensus_change(old, best) if best != old
     end
 
     # Admin tool that refreshes the vote cache for all observations with a vote.
