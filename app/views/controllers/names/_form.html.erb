@@ -56,7 +56,7 @@ statuses = [[:ACCEPTED.l, false], [:DEPRECATED.l, true]]
           ) %>
       <%= hidden_field_with_label(
             form: f, field: :text_name, label: "#{:Name.l}:", inline: true,
-            class: "mb-0", value: @name_string, text: @name.real_text_name.l
+            class: "mb-0", value: @name_string, text: @name.real_text_name.t
           ) %>
       <%= hidden_field_with_label(
             form: f, field: :author, label: "#{:Authority.l}:", inline: true,
