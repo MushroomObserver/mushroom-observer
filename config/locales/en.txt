@@ -1551,6 +1551,7 @@
 
   # names/_form_name
   form_names_locked: Lock this name so users cannot change name, author or rank?
+  form_names_detailed_help: "For detailed help see <a href=\"https://docs.google.com/document/d/1xOEIAGzb2NoGfeC1QMvVmwtWK-gYyZqKkt7yKv61WY0\" target=\"_new\">Names in Mushroom Observer</a>."
   form_names_text_name: Scientific Name
   form_names_icn_id: "ICN Identifier #"
   form_names_identifier_help: Index Fungorum or MycoBank registration number, if known.
