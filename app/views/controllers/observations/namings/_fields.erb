@@ -32,7 +32,7 @@ context ||= "blank"
 <%=
 [
   tag.div(class: "row") do
-    tag.div(class: "col-xs-12 col-sm-6") do
+    tag.div(class: "col-xs-12") do
       render(partial: "shared/form_name_feedback",
              locals: feedback_locals) if what.present?
     end

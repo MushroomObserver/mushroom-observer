@@ -210,26 +210,50 @@ class Textile < String
     convert_implicit_terms_to_tagged_glossary_terms!
   end
 
-  # rubocop:disable Style/RegexpLiteral
-  # cop gives false positive
-  NAME_LINK_PATTERN = /
-    (?<prefix> ^|\W)
-    (?: \**_+)
-    (?<formatted_label> [^_]+)
-    (?: _+\**)
-    (?= (?: s|ish|like)?
-    (?: \W|\Z) )
+  MARKUP_TO_TAG = {
+    comment: "COMMENT",
+    glossary_term: "GLOSSARY_TERM",
+    image: "IMAGE",
+    img: "IMAGE",
+    location: "LOCATION",
+    loc: "LOCATION",
+    name: "NAME",
+    term: "GLOSSARY_TERM",
+    ob: "OBSERVATION",
+    obs: "OBSERVATION",
+    observation: "OBSERVATION",
+    project: "PROJECT",
+    species_list: "SPECIES_LIST",
+    spl: "SPECIES_LIST",
+    user: "USER"
+  }.freeze
 
-    (?! (?: <\/[a-z]+>)) # discard match if followed by html closing tag
-  /x
-  # rubocop:enable Style/RegexpLiteral
+  # case-insenstive match any of the non-Name markup tags
+  NON_NAME_LINK_PATTERN =
+    /#{(MARKUP_TO_TAG.keys - [:name]).map(&:to_s).join("|")}/i
+
+  NAME_LINK_PATTERN =
+    %r{
+      (?<prefix> ^|\W) # capture start of string or non-word character
+      (?: \**_+) # any asterisks then at least one underscore
+      (?! #{NON_NAME_LINK_PATTERN}\ ) # not a link to a non-Name object
+      (?<formatted_label> [^_]+) # capture all non-underscores
+      (?: _+\**) # at least one underscore then any asterisks
+      (?= # not followed by
+        (?: s|ish|like)? # optional ns, ish, or like, then
+        (?: \W|\Z) # non-word char or end of string
+      )
+
+      (?! (?: </[a-z]+>)) # discard match if followed by html closing tag
+    }x
 
   # Convert __Names__ to links in a textile string.
   def convert_name_links_to_tagged_objects!
     @@name_lookup ||= {}
 
-    # Look for __Name__ turn into "Name":name_id.  Look for "Name":name and
-    # fill in id.  Look for "Name":name_id and make sure id matches name just
+    # Look for __Name__ turn into "Name":name_id.
+    # Look for "Name":name and fill in id.
+    # Look for "Name":name_id and make sure id matches name just
     # in case the user changed the name without updating the id.
     gsub!(NAME_LINK_PATTERN) do |orig_str|
       prefix = $LAST_MATCH_INFO[:prefix]
@@ -239,7 +263,7 @@ class Textile < String
           expand_genus_abbreviation(label)
         )
       )
-      # name = strip_out_sp_cfr_and_sensu(name)
+
       if (parse = Name.parse_name(name)) &&
          # Allowing arbitrary authors on Genera and higher makes it impossible
          # to distinguish between publication titles and taxa, e.g.,
@@ -315,52 +339,20 @@ class Textile < String
       sub(/ sp\.$/, "")
   end
 
-  # rubocop:disable Style/RegexpLiteral
-  # cop gives false positive
-  OTHER_LINK_PATTERN = /
-    (?<prefix> ^|\W)
-    (?: _+)
-    (?<marked_type>
-      [a-zA-Z]+ # model name or abbr
-      (?: _[a-zA-Z]+)? # optionally including underscores
-    )
-    \s+
-    (?<id> [^_\s](?:[^_\n]+[^_\s])?) # id -- integer or string
-    (?: _+)
+  OTHER_LINK_PATTERN =
+    %r{
+      (?<prefix> ^|\W)
+      (?: _+)
+      (?<marked_type>
+        [a-zA-Z]+ # model name or abbr
+        (?: _[a-zA-Z]+)? # optionally including underscores
+      )
+      \s+
+      (?<id> [^_\s](?:[^_\n]+[^_\s])?) # id -- integer or string
+      (?: _+)
 
-    (?! (?: \w|<\/[a-z]+>)) # discard if followed by word char or html close tag
-  /x
-  # rubocop:enable Style/RegexpLiteral
-
-  OTHER_LINK_TYPES = [
-    ["comment"],
-    %w[glossary_term term],
-    %w[image img],
-    %w[location loc],
-    ["name"],
-    %w[observation obs ob],
-    %w[project proj],
-    %w[species_list spl],
-    ["user"]
-  ].freeze
-
-  MARKED_TYPE_TO_TAGGED_TYPE = {
-    comment: "COMMENT",
-    glossary_term: "GLOSSARY_TERM",
-    image: "IMAGE",
-    img: "IMAGE",
-    location: "LOCATION",
-    loc: "LOCATION",
-    name: "NAME",
-    term: "GLOSSARY_TERM",
-    ob: "OBSERVATION",
-    obs: "OBSERVATION",
-    observation: "OBSERVATION",
-    project: "PROJECT",
-    species_list: "SPECIES_LIST",
-    spl: "SPECIES_LIST",
-    user: "USER"
-  }.freeze
+      (?! (?: \w|</[a-z]+>)) # discard if trailed by word char or html close tag
+    }x
 
   # Convert _object name_ and _object id_ to a textile string.
   def convert_other_links_to_tagged_objects!
@@ -369,7 +361,7 @@ class Textile < String
       marked_type = $LAST_MATCH_INFO[:marked_type]
       id = $LAST_MATCH_INFO[:id]
 
-      tagged_type = MARKED_TYPE_TO_TAGGED_TYPE[marked_type.downcase.to_sym]
+      tagged_type = MARKUP_TO_TAG[marked_type.downcase.to_sym]
       next(orig) unless tagged_type
 
       label = tagged_object_label(marked_type, id)
@@ -421,7 +413,7 @@ class Textile < String
   # rubocop:disable Style/RegexpLiteral
   # cop gives false positive
   IMPLICIT_TERM_PATTERN = /
-    (?<! x{NAME) # discard match if preceded by an MO object tag
+    (?<! x{NAME) # discard match if it follows MO internal object tag
     (?<! x{GLOSSARY_TERM)
     (?<! x{OBSERVATION)
     (?<! x{LOCATION)
