@@ -5,8 +5,8 @@ require("application_system_test_case")
 class ObservationFormSystemTest < ApplicationSystemTestCase
   def test_create_minimal_observation
     browser = page.driver.browser
-    rolf = users("rolf")
-    login!(rolf)
+    user = users(:zero_user)
+    login!(user)
 
     assert_link("Create Observation")
     click_on("Create Observation")
