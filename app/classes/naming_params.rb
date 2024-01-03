@@ -48,7 +48,8 @@ class NamingParams
     if @name && @what.match(/\S/)
       false
     else
-      @naming.errors.add(:name, :validate_naming_name_missing.t)
+      @naming.errors.add(:name,
+                         :form_observations_there_is_a_problem_with_name.t)
       true
     end
   end

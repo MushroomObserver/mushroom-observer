@@ -1551,13 +1551,14 @@
 
   # names/_form_name
   form_names_locked: Lock this name so users cannot change name, author or rank?
+  form_names_detailed_help: "For detailed help see <a href=\"https://docs.google.com/document/d/1xOEIAGzb2NoGfeC1QMvVmwtWK-gYyZqKkt7yKv61WY0\" target=\"_new\">Names in Mushroom Observer</a>."
   form_names_text_name: Scientific Name
-  form_names_icn_id: "ICN Identifier #"
-  form_names_identifier_help: Index Fungorum or MycoBank registration number, if known.
+  form_names_icn_id: "Identifier"
+  form_names_identifier_help: "Preferably include the <a href=\"https://www.indexfungorum.org/\">Index Fungorum</a> Registration Identifier or <a href=\"https://www.mycobank.org/\">MycoBank</a> #."
   form_names_misspelling: This name is misspelt.
   form_names_misspelling_it_should_be: It should be
   form_names_taxonomic_notes: Notes on Taxonomy
-  form_names_taxonomic_notes_warning: Please avoid duplicating information from <a href=\"https://www.indexfungorum.org/\">Index Fungorum</a> (IF) or  <a href=\"https://www.mycobank.org/\">MycoBank</a> (MB) in the [:form_names_taxonomic_notes]. Instead, enter the Index Fungorum Registration Identifier or the MycoBank number in the [:form_names_icn_id] field above. This will automatically create links to both IF and MB.
+  form_names_taxonomic_notes_warning: "Please avoid duplicating information from <a href=\"https://www.indexfungorum.org/\">Index Fungorum</a> (IF) or  <a href=\"https://www.mycobank.org/\">MycoBank</a> (MB) in the [:form_names_taxonomic_notes]. Instead, complete the <b>[:form_names_icn_id]</b> field above. This will automatically create links to both IF and MB."
   form_names_classification: Taxonomic Classification
   form_names_gen_desc: General Description
   form_names_diag_desc: Diagnostic Description
@@ -1568,8 +1569,8 @@
   form_names_notes: Notes
   form_names_refs: References
   form_names_text_name_help: "Unformatted taxon name <i>without</i> author info or status info. E.g.: <br>&nbsp;&nbsp; Amanita muscaria var. flavivolvata <br>For a <b>group or clade</b>, select <b>[:RANK]</b> “[:RANK_GROUP]” above, and add either “group” or “clade” at the end of <b>[:form_names_text_name]</b>. E.g.: <br>&nbsp;&nbsp; Amanita muscaria group <br>&nbsp;&nbsp; Morchella elata clade"
-  form_names_author_help: "Include the author using <a href=\"https://www.iapt-taxon.org/nomen/main.php?page=art46\" target=\"_new\">ICN</a> format. <b>[:Authority]</b> may also include “sensu” and/or status information. E.g.: <br>&nbsp;&nbsp; (Singer) Jenkins <br>&nbsp;&nbsp; sensu Ginns <br>&nbsp;&nbsp; N. Siegel & C.F. Schwarz nom. prov."
-  form_names_citation_help: Citation for the publication of this name.
+  form_names_author_help: "Include the author using <a href=\"https://www.iapt-taxon.org/nomen/main.php?page=art46\" target=\"_new\">ICN</a> format. <b>[:Authority]</b> may also include “sensu” and/or -- for a name that is not a <a href=\"https://mushroomobserver.org/lookups/lookup_glossary_term/legitimate+name\">legitimate name</a> -- status information. E.g.: <br/>&nbsp;&nbsp; (Singer) Jenkins <br>&nbsp;&nbsp; sensu Ginns <br/>&nbsp;&nbsp; N. Siegel & C.F. Schwarz nom. prov."
+  form_names_citation_help: Citation for the <a href=\"https://mushroomobserver.org/lookups/lookup_glossary_term/protologue\">protologue</a> of this name. Please omit the author(s) of the <a href=\"https://mushroomobserver.org/lookups/lookup_glossary_term/protologue\">protologue</a>.&nbsp;
   form_names_citation_textilize_note: Citations can be formatted using the <a href="/info/textile_sandbox" target="_new">Textile markup system</a>.
   form_names_misspelling_note: If this name is misspelt, please check the box and enter the correct spelling. *NOTE:* Please do not use this to deprecate correctly-spelled synonyms.
   form_names_classification_help: "List the higher taxa containing this [rank], one name per rank. Do not include genus or lower ranks. Example:<br/> Domain: _Eukarya_<br/> Kingdom: _Fungi_<br/> Phylum: _Basidiomycota_<br/> Class: _Agaricomycetes_<br/> Order: _Agaricales_<br/> Family: _Agaricaceae_<br/>"
