@@ -326,22 +326,27 @@ module Observations
       n_count = Name.count
       v_count = Vote.count
 
+      nam = names(:coprinus_comatus)
+      obs = observations(:coprinus_comatus_obs)
+      nmg1 = namings(:coprinus_comatus_naming)
+      nmg2 = namings(:coprinus_comatus_other_naming)
+      consensus = Observation::NamingConsensus.new(obs)
+
       # Make a few assertions up front to make sure fixtures are as expected.
-      assert_equal(names(:coprinus_comatus).id,
-                   observations(:coprinus_comatus_obs).name_id)
-      assert(namings(:coprinus_comatus_naming).user_voted?(rolf))
-      assert(namings(:coprinus_comatus_naming).user_voted?(mary))
-      assert_not(namings(:coprinus_comatus_naming).user_voted?(dick))
-      assert(namings(:coprinus_comatus_other_naming).user_voted?(rolf))
-      assert(namings(:coprinus_comatus_other_naming).user_voted?(mary))
-      assert_not(namings(:coprinus_comatus_other_naming).user_voted?(dick))
+      assert_equal(nam.id, obs.name_id)
+      assert(consensus.user_voted?(nmg1, rolf))
+      assert(consensus.user_voted?(nmg1, mary))
+      assert_not(consensus.user_voted?(nmg1, dick))
+      assert(consensus.user_voted?(nmg2, rolf))
+      assert(consensus.user_voted?(nmg2, mary))
+      assert_not(consensus.user_voted?(nmg2, dick))
 
       # Rolf, the owner of observations(:coprinus_comatus_obs),
       # already has a naming, which he's 80% sure of.
       # Create a new one (the genus Agaricus) that he's 100%
       # sure of.  (Mary also has a naming with two votes.)
       params = {
-        observation_id: observations(:coprinus_comatus_obs).id,
+        observation_id: obs.id,
         naming: {
           name: "Agaricus",
           vote: { value: "3" },
@@ -367,19 +372,18 @@ module Observations
       assert_equal(12, rolf.reload.contribution)
 
       # Make sure everything I need is reloaded.
-      observations(:coprinus_comatus_obs).reload
+      obs.reload
 
       # Get new objects.
       naming = Naming.last
       vote = Vote.last
 
       # Make sure observation was updated and referenced correctly.
-      assert_equal(3, observations(:coprinus_comatus_obs).namings.length)
-      assert_equal(names(:agaricus).id,
-                   observations(:coprinus_comatus_obs).name_id)
+      assert_equal(3, obs.namings.length)
+      assert_equal(names(:agaricus).id, obs.name_id)
 
       # Make sure naming was created correctly and referenced.
-      assert_equal(observations(:coprinus_comatus_obs), naming.observation)
+      assert_equal(obs, naming.observation)
       assert_equal(names(:agaricus).id, naming.name_id)
       assert_equal(rolf, naming.user)
       assert_equal(3, naming.reasons_array.count(&:used?))
@@ -407,9 +411,9 @@ module Observations
 
       # Make sure a few random methods work right, too.
       assert_equal(3, naming.vote_sum)
-      assert_equal(vote, naming.users_vote(rolf))
-      assert(naming.user_voted?(rolf))
-      assert_not(naming.user_voted?(mary))
+      assert_equal(vote, consensus.users_vote(naming, rolf))
+      assert(consensus.user_voted?(naming, rolf))
+      assert_not(consensus.user_voted?(naming, mary))
     end
 
     # Now see what happens when rolf's new naming is less confident than old.

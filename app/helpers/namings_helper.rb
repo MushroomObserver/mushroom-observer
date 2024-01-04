@@ -6,12 +6,12 @@
 # rubocop:disable Metrics/ModuleLength
 module NamingsHelper
   ##### Observation Naming "table" content #########
-  def observation_namings_table(obs)
+  def observation_namings_table(obs, consensus)
     tag.div(class: "namings-table panel panel-default mb-4",
             id: "namings_table") do
       [
         observation_namings_table_header,
-        observation_namings_table_rows(obs), # only rows get updated
+        observation_namings_table_rows(consensus), # only rows get updated
         observation_namings_table_footer(obs)
       ].safe_join
     end
@@ -62,21 +62,22 @@ module NamingsHelper
     }
   end
 
+  # NEW - needs a current consensus object
   # n+1 should be ok
   # but need: obs.consensus_naming and obs.users_favorite?
-  def observation_namings_table_rows(obs)
-    namings = obs.namings.sort_by(&:created_at)
-    any_names = obs.namings&.length&.positive?
+  def observation_namings_table_rows(consensus)
+    namings = consensus.namings.sort_by(&:created_at)
+    any_names = consensus.namings&.length&.positive?
 
     tag.div(class: "list-group list-group-flush",
             id: "namings_table_rows",
             data: {
               controller: "section-update",
-              updated_by: "modal_naming_#{obs.id}"
+              updated_by: "modal_naming_#{consensus.observation.id}"
             }) do
       if any_names
         namings.each do |naming|
-          row = naming_row_content(obs, naming)
+          row = naming_row_content(consensus, naming)
           concat(namings_table_row(row))
         end
       else
@@ -85,11 +86,12 @@ module NamingsHelper
     end
   end
 
+  # NEW - needs a current consensus object
   # N+1: obs.consensus_naming and observation.owners_favorite?
-  def naming_row_content(obs, naming)
+  def naming_row_content(consensus, naming)
     vote = naming.users_vote(User.current) || Vote.new(value: 0)
-    consensus = obs.consensus_naming
-    favorite = obs.owners_favorite?(naming)
+    consensus_favorite = consensus.consensus_naming
+    favorite = consensus.owners_favorite?(naming)
 
     {
       id: naming.id,
@@ -97,7 +99,7 @@ module NamingsHelper
       proposer: naming_proposer_html(naming),
       vote_tally: vote_tally_html(naming),
       your_vote: your_vote_html(naming, vote),
-      eyes: vote_icons_html(naming, consensus, favorite),
+      eyes: vote_icons_html(naming, consensus_favorite, favorite),
       reasons: reasons_html(naming)
     }
   end

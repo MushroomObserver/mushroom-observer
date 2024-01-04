@@ -9,20 +9,20 @@
 #  a single Naming or not.  Vote is responsible for very little except holding
 #  the value.
 #
-#  Observation#change_vote::         Change a User's Vote for a given Naming.
-#  Observation#calc_consensus::  Decide which Name is winner for an Observation.
-#  Observation#owners_favorite?::    Is a given Naming the Observation owner's
+#  NC#change_vote::         Change a User's Vote for a given Naming.
+#  NC#calc_consensus::  Decide which Name is winner for an Observation.
+#  NC#owners_favorite?::    Is a given Naming the Observation owner's
 #                                    favorite?
-#  Observation#users_favorite?::     Is a given Naming the given User's
+#  NC#users_favorite?::     Is a given Naming the given User's
 #                                    favorite?
-#  Observation#refresh_vote_cache::  Refresh vote cache for all Observation's.
+#  NC#refresh_vote_cache::  Refresh vote cache for all Observation's.
 #
 #  Naming#vote_sum::     Straight sum of Vote's for this Naming (used in tests).
-#  Naming#user_voted?::         Has a given User voted for this Naming?
-#  Naming#users_vote::          Get a given User's Vote for this Naming.
-#  Naming#vote_percent::        Convert score for this Naming into a percentage.
-#  Naming#users_favorite?::     Is this Naming the given User's favorite?
-#  Naming#calc_vote_table::     Gather Vote info for this Naming.
+#  NC#user_voted?:: Has a given User voted for this Naming?
+#  NC#users_vote::           Get a given User's Vote for this Naming.
+#  NC#vote_percent::        Convert score for this Naming into a percentage.
+#  NC#users_favorite?::     Is this Naming the given User's favorite?
+#  NC#calc_vote_table::     Gather Vote info for this Naming.
 #
 #  == Attributes
 #

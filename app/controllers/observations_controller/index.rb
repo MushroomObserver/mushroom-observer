@@ -211,7 +211,9 @@ class ObservationsController
 
     def observation_includes
       [
-        :name, :location, :projects, :user, :rss_log,
+        :name,
+        { namings: :votes },
+        :location, :projects, :user, :rss_log,
         observation_matrix_box_image_includes
       ]
     end

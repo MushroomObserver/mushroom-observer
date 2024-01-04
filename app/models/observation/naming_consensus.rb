@@ -216,7 +216,9 @@ class Observation
     private
 
     def find_matches
-      matches = @namings.select { |n| n.name_id == name_id }
+      matches = @namings.select { |n| n.name_id == @observation.name_id }
+      # n+1 - be sure observation name is eager loaded
+      name = @observation.name
       return matches unless matches == [] && name && name.synonym_id
 
       @namings.select { |n| name.synonyms.include?(n.name) }

@@ -767,6 +767,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
+  def format_coordinate(value, positive_point, negative_point)
+    return "#{-value.round(4)}°#{negative_point}" if value.negative?
+
+    "#{value.round(4)}°#{positive_point}"
+  end
+
   # Returns latitude if public or if the current user owns the observation.
   # The user should also be able to see hidden latitudes if they are an admin
   # or they are members of a project that the observation belongs to, but
@@ -1031,15 +1037,15 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # careful to keep all the operations within the tree of assocations of the
   # observations, we should never need to reload anything.
   # `find` here does not hit the db
-  def lookup_naming(naming)
-    # Disable cop; test suite chokes when the following "raise"
-    # is re-written in "exploded" style (the Rubocop default)
-    # rubocop:disable Style/RaiseArgs
-    namings.find { |n| n == naming } ||
-      raise(ActiveRecord::RecordNotFound,
-            "Observation doesn't have naming with ID=#{naming.id}")
-    # rubocop:enable Style/RaiseArgs
-  end
+  # def lookup_naming(naming)
+  #   # Disable cop; test suite chokes when the following "raise"
+  #   # is re-written in "exploded" style (the Rubocop default)
+  #   # rubocop:disable Style/RaiseArgs
+  #   namings.find { |n| n == naming } ||
+  #     raise(ActiveRecord::RecordNotFound,
+  #           "Observation doesn't have naming with ID=#{naming.id}")
+  #   # rubocop:enable Style/RaiseArgs
+  # end
 
   # Dump out the situation as the observation sees it.  Useful for debugging
   # problems with reloading requirements.
@@ -1060,29 +1066,29 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Has anyone proposed a given Name yet for this observation?
   # Count is ok here because we have eager-loaded the namings.
-  def name_been_proposed?(name)
-    namings.any? { |n| n.name == name }
-  end
+  # def name_been_proposed?(name)
+  #   namings.any? { |n| n.name == name }
+  # end
 
   # Has the owner voted on a given Naming?
-  def owner_voted?(naming)
-    !lookup_naming(naming).users_vote(user).nil?
-  end
+  # def owner_voted?(naming)
+  #   !lookup_naming(naming).users_vote(user).nil?
+  # end
 
   # Has a given User owner voted on a given Naming?
-  def user_voted?(naming, user)
-    !lookup_naming(naming).users_vote(user).nil?
-  end
+  # def user_voted?(naming, user)
+  #   !lookup_naming(naming).users_vote(user).nil?
+  # end
 
   # Get the owner's Vote on a given Naming.
-  def owners_vote(naming)
-    lookup_naming(naming).users_vote(user)
-  end
+  # def owners_vote(naming)
+  #   lookup_naming(naming).users_vote(user)
+  # end
 
   # Get a given User's Vote on a given Naming.
-  def users_vote(naming, user)
-    lookup_naming(naming).users_vote(user)
-  end
+  # def users_vote(naming, user)
+  #   lookup_naming(naming).users_vote(user)
+  # end
 
   # Disable method name cops to avoid breaking 3rd parties' use of API
 
@@ -1090,19 +1096,19 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # votes from the owner of this observation.
   # Note: multiple namings can return true for a given observation.
   # This is used to display eyes next to Proposed Name on Observation page
-  def owners_favorite?(naming)
-    lookup_naming(naming).users_favorite?(user)
-  end
+  # def owners_favorite?(naming)
+  #   lookup_naming(naming).users_favorite?(user)
+  # end
 
   # Returns true if a given Naming has received one of the highest positive
   # votes from the given user (among namings for this observation).
   # Note: multiple namings can return true for a given user and observation.
-  def users_favorite?(naming, user)
-    lookup_naming(naming).users_favorite?(user)
-  end
+  # def users_favorite?(naming, user)
+  #   lookup_naming(naming).users_favorite?(user)
+  # end
 
   # All of observation.user's votes on all Namings for this Observation
-  # Used in Observation and in tests
+  # Used in tests
   def owners_votes
     user_votes(user)
   end
@@ -1118,173 +1124,167 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Change User's Vote for this naming.  Automatically recalculates the
   # consensus for the Observation in question if anything is changed.  Returns
   # true if something was changed.
-  def change_vote(naming, value, user = User.current)
-    result = false
-    naming = lookup_naming(naming)
-    vote = naming.users_vote(user)
-    value = value.to_f
+  # def change_vote(naming, value, user = User.current)
+  #   result = false
+  #   naming = lookup_naming(naming)
+  #   vote = naming.users_vote(user)
+  #   value = value.to_f
 
-    if value == Vote.delete_vote
-      result = delete_vote(naming, vote, user)
+  #   if value == Vote.delete_vote
+  #     result = delete_vote(naming, vote, user)
 
-    # If no existing vote, or if changing value.
-    elsif !vote || (vote.value != value)
-      result = true
-      process_real_vote(naming, vote, value, user)
-    end
+  #   # If no existing vote, or if changing value.
+  #   elsif !vote || (vote.value != value)
+  #     result = true
+  #     process_real_vote(naming, vote, value, user)
+  #   end
 
-    # Update consensus if anything changed.
-    calc_consensus if result
+  #   # Update consensus if anything changed.
+  #   calc_consensus if result
 
-    result
-  end
+  #   result
+  # end
 
-  def change_vote_with_log(naming, vote)
-    reload
-    change_vote(naming, vote.value, naming.user)
-    log(:log_naming_created, name: naming.format_name)
-  end
+  # def change_vote_with_log(naming, vote)
+  #   reload
+  #   change_vote(naming, vote.value, naming.user)
+  #   log(:log_naming_created, name: naming.format_name)
+  # end
 
   # Try to guess which Naming is responsible for the consensus.  This will
   # always return a Naming, no matter how ambiguous, unless there are no
   # namings.
-  def consensus_naming
-    matches = find_matches
-    return nil if matches.empty?
-    return matches.first if matches.length == 1
+  # def consensus_naming
+  #   matches = find_matches
+  #   return nil if matches.empty?
+  #   return matches.first if matches.length == 1
 
-    best_naming = matches.first
-    best_value = matches.first.vote_cache
-    matches.each do |naming|
-      next unless naming.vote_cache > best_value
+  #   best_naming = matches.first
+  #   best_value = matches.first.vote_cache
+  #   matches.each do |naming|
+  #     next unless naming.vote_cache > best_value
 
-      best_naming = naming
-      best_value = naming.vote_cache
-    end
-    best_naming
-  end
+  #     best_naming = naming
+  #     best_value = naming.vote_cache
+  #   end
+  #   best_naming
+  # end
 
-  def calc_consensus
-    reload
-    calculator = Observation::ConsensusCalculator.new(namings)
-    best, best_val = calculator.calc
-    old = name
-    if name != best || vote_cache != best_val
-      self.name = best
-      self.vote_cache = best_val
-      save
-    end
-    announce_consensus_change(old, best) if best != old
-  end
+  # def calc_consensus
+  #   reload
+  #   calculator = Observation::ConsensusCalculator.new(namings)
+  #   best, best_val = calculator.calc
+  #   old = name
+  #   if name != best || vote_cache != best_val
+  #     self.name = best
+  #     self.vote_cache = best_val
+  #     save
+  #   end
+  #   announce_consensus_change(old, best) if best != old
+  # end
 
-  # Admin tool that refreshes the vote cache for all observations with a vote.
-  def self.refresh_vote_cache
-    Observation.find_each(&:calc_consensus)
-  end
+  # # Admin tool that refreshes the vote cache for all observations with a vote.
+  # def self.refresh_vote_cache
+  #   Observation.find_each(&:calc_consensus)
+  # end
 
-  private
+  # private
 
-  def find_matches
-    matches = namings.select { |n| n.name_id == name_id }
-    return matches unless matches == [] && name && name.synonym_id
+  # def find_matches
+  #   matches = namings.select { |n| n.name_id == name_id }
+  #   return matches unless matches == [] && name && name.synonym_id
 
-    namings.select { |n| name.synonyms.include?(n.name) }
-  end
+  #   namings.select { |n| name.synonyms.include?(n.name) }
+  # end
 
-  def format_coordinate(value, positive_point, negative_point)
-    return "#{-value.round(4)}°#{negative_point}" if value.negative?
+  # def delete_vote(naming, vote, user)
+  #   return false unless vote
 
-    "#{value.round(4)}°#{positive_point}"
-  end
+  #   naming.votes.delete(vote)
+  #   find_new_favorite(user) if vote.favorite
+  #   true
+  # end
 
-  def delete_vote(naming, vote, user)
-    return false unless vote
+  # def find_new_favorite(user)
+  #   max = max_positive_vote(user)
+  #   return unless max.positive?
 
-    naming.votes.delete(vote)
-    find_new_favorite(user) if vote.favorite
-    true
-  end
+  #   user_votes(user).each do |v|
+  #     next if v.value != max || v.favorite
 
-  def find_new_favorite(user)
-    max = max_positive_vote(user)
-    return unless max.positive?
+  #     v.favorite = true
+  #     v.save
+  #   end
+  # end
 
-    user_votes(user).each do |v|
-      next if v.value != max || v.favorite
+  # def max_positive_vote(user)
+  #   max = 0
+  #   user_votes(user).each do |v|
+  #     max = v.value if v.value > max
+  #   end
+  #   max
+  # end
 
-      v.favorite = true
-      v.save
-    end
-  end
+  # def process_real_vote(naming, vote, value, user)
+  #   downgrade_totally_confident_votes(value, user)
+  #   favorite = adjust_other_favorites(value, other_votes(vote, user))
+  #   if vote
+  #     vote.value = value
+  #     vote.favorite = favorite
+  #     vote.save
+  #   else
+  #     naming.votes.create!(
+  #       user: user,
+  #       observation: self,
+  #       value: value,
+  #       favorite: favorite
+  #     )
+  #   end
+  # end
 
-  def max_positive_vote(user)
-    max = 0
-    user_votes(user).each do |v|
-      max = v.value if v.value > max
-    end
-    max
-  end
+  # def downgrade_totally_confident_votes(value, user)
+  #   # First downgrade any existing 100% votes (if casting a 100% vote).
+  #   v80 = Vote.next_best_vote
+  #   return if value <= v80
 
-  def process_real_vote(naming, vote, value, user)
-    downgrade_totally_confident_votes(value, user)
-    favorite = adjust_other_favorites(value, other_votes(vote, user))
-    if vote
-      vote.value = value
-      vote.favorite = favorite
-      vote.save
-    else
-      naming.votes.create!(
-        user: user,
-        observation: self,
-        value: value,
-        favorite: favorite
-      )
-    end
-  end
+  #   user_votes(user).each do |v|
+  #     next unless v.value > v80
 
-  def downgrade_totally_confident_votes(value, user)
-    # First downgrade any existing 100% votes (if casting a 100% vote).
-    v80 = Vote.next_best_vote
-    return if value <= v80
+  #     v.value = v80
+  #     v.save
+  #   end
+  # end
 
-    user_votes(user).each do |v|
-      next unless v.value > v80
+  # def adjust_other_favorites(value, other_votes)
+  #   favorite = false
+  #   if value.positive?
+  #     favorite = true
+  #     other_votes.each do |v|
+  #       if v.value > value
+  #         favorite = false
+  #         break
+  #       end
+  #       if (v.value < value) && v.favorite
+  #         v.favorite = false
+  #         v.save
+  #       end
+  #     end
+  #   end
 
-      v.value = v80
-      v.save
-    end
-  end
+  #   # Will any other vote become a favorite?
+  #   max_positive_value = (other_votes.map(&:value) + [value, 0]).max
+  #   other_votes.each do |v|
+  #     if (v.value >= max_positive_value) && !v.favorite
+  #       v.favorite = true
+  #       v.save
+  #     end
+  #   end
+  #   favorite
+  # end
 
-  def adjust_other_favorites(value, other_votes)
-    favorite = false
-    if value.positive?
-      favorite = true
-      other_votes.each do |v|
-        if v.value > value
-          favorite = false
-          break
-        end
-        if (v.value < value) && v.favorite
-          v.favorite = false
-          v.save
-        end
-      end
-    end
-
-    # Will any other vote become a favorite?
-    max_positive_value = (other_votes.map(&:value) + [value, 0]).max
-    other_votes.each do |v|
-      if (v.value >= max_positive_value) && !v.favorite
-        v.favorite = true
-        v.save
-      end
-    end
-    favorite
-  end
-
-  def other_votes(vote, user)
-    user_votes(user) - [vote]
-  end
+  # def other_votes(vote, user)
+  #   user_votes(user) - [vote]
+  # end
 
   public
 

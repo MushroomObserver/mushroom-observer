@@ -23,7 +23,8 @@ namespace :cache do
     print "Refreshing observation.vote_cache...\n"
     Observation.all.each do |o|
       print "##{o.id}\r"
-      o.calc_consensus
+      consensus = Observation::NamingConsensus.new(o)
+      consensus.calc_consensus
     end
     print "Done.    \n"
   end
