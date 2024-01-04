@@ -22,6 +22,7 @@ Thumbs.db
 tmp/
 log/
 checkpoints/
+checkpoint_stripped.gz
 production-logs
 .tm_properties
 **/*.swp
@@ -36,6 +37,7 @@ coverage
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
-
 /config/credentials/production.key
-checkpoint_stripped.gz
+
+# Ignore name_list_data primer
+/app/javascript/src/name_list_data.js
