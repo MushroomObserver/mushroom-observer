@@ -9,7 +9,7 @@ module Observations
 
     # The route for the namings table, an index of this obs' namings
     def index
-      @observation = find_or_goto_index(Observation, params[:id])
+      @observation = find_or_goto_index(Observation, params[:observation_id])
       @consensus = Observation::NamingConsensus.new(@observation)
     end
 

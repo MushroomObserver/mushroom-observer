@@ -4,6 +4,17 @@ require("test_helper")
 
 module Observations
   class NamingsControllerTest < FunctionalTestCase
+    def test_index
+      obs = observations(:coprinus_comatus_obs)
+      params = { observation_id: obs.id }
+      login(obs.user.login)
+
+      get(:index, params: params)
+      assert_no_flash(
+        "User should be able to access the no-js namings table for their obs"
+      )
+    end
+
     def test_new_form
       obs = observations(:coprinus_comatus_obs)
       params = { observation_id: obs.id.to_s }
