@@ -189,11 +189,6 @@ class Observation
       @observation.reload.announce_consensus_change(old, best) if best != old
     end
 
-    # Admin tool that refreshes the vote cache for all observations with a vote.
-    # def self.refresh_vote_cache
-    #   Observation.find_each(&:calc_consensus)
-    # end
-
     # Try to guess which Naming is responsible for the consensus.  This will
     # always return a Naming, no matter how ambiguous, unless there are no
     # namings.
