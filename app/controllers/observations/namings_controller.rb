@@ -80,19 +80,21 @@ module Observations
     end
 
     def destroy
-      naming = Naming.find(params[:id].to_s)
+      naming = Naming.includes([:votes]).find(params[:id].to_s)
       if destroy_if_we_can(naming)
         flash_notice(:runtime_destroy_naming_success.t(id: params[:id].to_s))
       end
       # Now, eager-load the obs without the deleted naming
-      @observation = Observation.naming_includes.find(params[:observation_id])
+      obs = Observation.naming_includes.find(params[:observation_id])
 
       respond_to do |format|
         format.turbo_stream do
+          (obs, consensus, owner_name) = locals_for_update_observation(obs)
           render(partial: "observations/namings/update_observation",
-                 locals: { obs: @observation }) and return
+                 locals: { obs: obs, consensus: consensus,
+                           owner_name: owner_name }) and return
         end
-        format.html { default_redirect(@observation) }
+        format.html { default_redirect(obs) }
       end
     end
 
@@ -229,19 +231,17 @@ module Observations
     end
 
     def respond_to_successful_create
-      # @observation.reload doesn't do the includes
-      # This is a reload of all the naming table associations, after save
-      obs = Observation.naming_includes.find(@observation.id)
-
       respond_to do |format|
         format.turbo_stream do
+          (obs, consensus, owner_name) = locals_for_update_observation
           case params[:context]
           when "lightgallery", "matrix_box"
             render(partial: "observations/namings/update_matrix_box",
                    locals: { obs: obs })
           else
             render(partial: "observations/namings/update_observation",
-                   locals: { obs: obs })
+                   locals: { obs: obs, consensus: consensus,
+                             owner_name: owner_name })
           end
           return
         end
@@ -321,17 +321,27 @@ module Observations
     end
 
     def respond_to_successful_update
-      # @observation.reload doesn't do the includes
-      # This is a reload of all the naming table associations, after update
-      obs = Observation.naming_includes.find(@observation.id)
-
       respond_to do |format|
         format.turbo_stream do
+          (obs, consensus, owner_name) = locals_for_update_observation
           render(partial: "observations/namings/update_observation",
-                 locals: { obs: obs }) and return
+                 locals: { obs: obs, consensus: consensus,
+                           owner_name: owner_name }) and return
         end
         format.html { default_redirect(@observation) }
       end
+    end
+
+    # Define local_assigns for the update_observation partial
+    # @observation.reload doesn't do the includes
+    # This is a reload of all the naming table associations, after update
+    # The destroy action already preloads the obs, however.
+    def locals_for_update_observation(preloaded_obs = nil)
+      obs = preloaded_obs || Observation.naming_includes.find(@observation.id)
+      consensus = Observation::NamingConsensus.new(obs)
+      owner_name = consensus.owner_preference
+
+      [obs, consensus, owner_name]
     end
 
     # Use case: user changes their mind on a name they've proposed, but it's

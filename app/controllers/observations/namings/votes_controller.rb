@@ -88,8 +88,12 @@ module Observations::Namings
             render(partial: "observations/namings/update_matrix_box",
                    locals: { obs: @observation })
           else
+            obs = Observation.naming_includes.find(@observation.id)
+            owner_name = @consensus.owner_preference
+
             render(partial: "observations/namings/update_observation",
-                   locals: { obs: @observation })
+                   locals: { obs: obs, consensus: @consensus,
+                             owner_name: owner_name })
           end
           return
         end
