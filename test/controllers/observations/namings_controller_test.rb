@@ -409,7 +409,8 @@ module Observations
       assert(nr3.used?)
       assert_not(nr4.used?)
 
-      # Make sure a few random methods work right, too.
+      # Make sure a few random methods work right, too. Must re-calc_consensus
+      consensus.calc_consensus
       assert_equal(3, naming.vote_sum)
       assert_equal(vote, consensus.users_vote(naming, rolf))
       assert(consensus.user_voted?(naming, rolf))
