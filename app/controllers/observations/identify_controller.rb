@@ -61,17 +61,21 @@ module Observations
     #   show_selected_results(query)
     # end
 
-    # TODO: Allow show_index_of_objects to `render` rather than `redirect`,
-    # or better yet `respond_to do |format|` and write index.js.erb templates
-    # to just render the #results div.
     def show_selected_results(query)
       args = {
         matrix: true,
-        include: [:location, :user, :rss_log, { name: :synonym },
-                  { namings: :name }, observation_matrix_box_image_includes]
+        include: observation_identify_index_includes
       }
 
       show_index_of_objects(query, args)
+    end
+
+    def observation_identify_index_includes
+      [observation_matrix_box_image_includes,
+       :location,
+       { name: :synonym },
+       { namings: [:name, :votes] },
+       :rss_log, :user]
     end
   end
 end
