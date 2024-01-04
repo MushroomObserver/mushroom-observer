@@ -1589,14 +1589,14 @@
 
   # observations/_form_naming
   form_naming_confidence: Confidence
-  form_naming_valid_synonyms: Valid synonyms are
+  form_naming_valid_synonyms: Preferred synonyms are
   form_naming_deprecated: The name '[name]' is deprecated.
   form_naming_not_recognized: MO does not recognize the name '[name]'.
   form_naming_parent_deprecated: The [rank] [parent] is deprecated.
   form_naming_name_help: The **scientific name** (without author) that identifies this Observation. **Leave this field blank if you don't know the scientific name.**
-  form_naming_deprecated_help: Select a valid name or click '[button]' to use '[name]'.
+  form_naming_deprecated_help: Select a Prefered synonym, enter another Name, or click '[button]' to use '[name]'.
   form_naming_correct_help: Did you mean one of the following names? [:form_naming_deprecated_help]
-  form_naming_not_recognized_help: "To proceed: Edit the name to be a valid, correctly spelled, scientific name\n(or -- if you are creating an Observation -- erase the name).\nThen click '[button]'."
+  form_naming_not_recognized_help: "To proceed: Edit the name to be a correctly spelled scientific name\n(or -- if you are creating an Observation -- erase the name).\nThen click '[button]'."
   form_naming_multiple_names: Multiple names match '[name]'.  Select the one you intended.
   form_naming_multiple_names_help: The number after each name is how many observations are currently using that name.
   form_naming_confidence_help: How confident are you of this identification?  Please justify how you arrived at your decision in the boxes below, as well.
@@ -2898,7 +2898,7 @@
   merge_descriptions_move_help: This will move the source description into a synonym.  It will just copy it if you elect not to delete the old description.  If you wish to merge with an existing description in the other name, you must first move your description into that name, then select [:show_description_merge] again from there.
 
   # name/bulk_name_edit
-  name_bulk_help: "Each line indicates a set of changes.\n\np(bulk_text). To ensure a name is in the database, just list the name.  E.g.,\n\np(bulk_pre). Agaricus bisporus\n\np(bulk_text). To ensure a name exists with a particular author, give the name followed by the author.  E.g.,\n\np(bulk_pre). Agaricus bisporus (J.E. Lange) Pilát\n\np(bulk_text). To add a taxon above the species level, give the rank followed by the name.  E.g.,\n\np(bulk_pre). Order Agaricales\n\np(bulk_text). To make a name a deprecated synonym of another name, follow the valid name with the deprecated synonym.  E.g.,\n\np(bulk_pre). Agaricus bisporus (J.E. Lange) Pilát = Agaricus hortensis (Cke.) Imai\n\nThe changes are cumulative, so the last example by itself would ensure that the names **__@Agaricus bisporus@__** @(J.E. Lange) Pilát@ and __@Agaricus hortensis@__ @(Cke.) Imai@ exist, as well as making __@A. hortensis@__ a deprecated synononym of **__@A. bisporus@__**.  If a name exists with no author and you provide an author, then the existing name is updated. Otherwise, if the author is given and it does not match the current author, a new name is created.\n\np(bulk_text). You may include an optional one-line comment by inserting it after either the accepted or deprecated name, enclosed in square brackets. This will be saved in the notes when the name is created.\n\np(bulk_pre). Herpothallon Tobler [[citation:Aptroot, A, G Thor, ...]]"
+  name_bulk_help: "Each line indicates a set of changes.\n\np(bulk_text). To ensure a name is in the database, just list the name.  E.g.,\n\np(bulk_pre). Agaricus bisporus\n\np(bulk_text). To ensure a name exists with a particular author, give the name followed by the author.  E.g.,\n\np(bulk_pre). Agaricus bisporus (J.E. Lange) Pilát\n\np(bulk_text). To add a taxon above the species level, give the rank followed by the name.  E.g.,\n\np(bulk_pre). Order Agaricales\n\np(bulk_text). To make a name a deprecated synonym of another name, follow the [:PREFERRED_NAME] with the deprecated synonym.  E.g.,\n\np(bulk_pre). Agaricus bisporus (J.E. Lange) Pilát = Agaricus hortensis (Cke.) Imai\n\nThe changes are cumulative, so the last example by itself would ensure that the names **__@Agaricus bisporus@__** @(J.E. Lange) Pilát@ and __@Agaricus hortensis@__ @(Cke.) Imai@ exist, as well as making __@A. hortensis@__ a deprecated synononym of **__@A. bisporus@__**.  If a name exists with no author and you provide an author, then the existing name is updated. Otherwise, if the author is given and it does not match the current author, a new name is created.\n\np(bulk_text). You may include an optional one-line comment by inserting it after either the accepted or deprecated name, enclosed in square brackets. This will be saved in the notes when the name is created.\n\np(bulk_pre). Herpothallon Tobler [[citation:Aptroot, A, G Thor, ...]]"
   name_bulk_label: Name Edits
   name_bulk_success: All names are now in the database.
   name_bulk_title: Bulk Name Edit
