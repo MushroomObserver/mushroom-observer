@@ -96,7 +96,7 @@ class Observation
 
     # Has the owner voted on a given Naming?
     def owner_voted?(naming)
-      !lookup_naming(naming).users_vote(user).nil?
+      !lookup_naming(naming).users_vote(@observation.user).nil?
     end
 
     # Has a given User owner voted on a given Naming?
@@ -106,7 +106,7 @@ class Observation
 
     # Get the owner's Vote on a given Naming.
     def owners_vote(naming)
-      lookup_naming(naming).users_vote(user)
+      lookup_naming(naming).users_vote(@observation.user)
     end
 
     # Get a given User's Vote on a given Naming.
@@ -121,7 +121,7 @@ class Observation
     # Note: multiple namings can return true for a given observation.
     # This is used to display eyes next to Proposed Name on Observation page
     def owners_favorite?(naming)
-      lookup_naming(naming).users_favorite?(user)
+      lookup_naming(naming).users_favorite?(@observation.user)
     end
 
     # Returns true if a given Naming has received one of the highest positive
@@ -134,7 +134,7 @@ class Observation
     # All of observation.user's votes on all Namings for this Observation
     # Used in Observation and in tests
     def owners_votes
-      user_votes(user)
+      user_votes(@observation.user)
     end
 
     # All of a given User's votes on all Namings for this Observation

@@ -1,14 +1,14 @@
 <%
 # Fields must be separate because they're included in the obs form too.
 # HTML ID's may seem overly precise, but there may be more than one of
-# these forms open on a page if modal. IDs must be unique. 
+# these forms open on a page if modal. IDs must be unique.
 case action_name
 when "new", "create"
   button_name = :CREATE.l
   method = :post
   id = "obs_#{@observation.id}_naming_form"
   url = observation_namings_path(observation_id: @observation.id,
-                                 approved_name: @params.what,
+                                 approved_name: @what,
                                  q: get_query_param)
 when "edit", "update"
   button_name = :SAVE_EDITS.l
@@ -16,7 +16,7 @@ when "edit", "update"
   id = "obs_#{@observation.id}_naming_#{@naming.id}_form"
   url = observation_naming_path(observation_id: @observation.id,
                                 id: @naming.id,
-                                approved_name: @params.what,
+                                approved_name: @what,
                                 q: get_query_param)
 end
 

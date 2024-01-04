@@ -48,8 +48,7 @@ module Observations
       put(:update, params: params)
       assert_edit
       assert_equal(10, rolf.reload.contribution)
-      params = assigns(:params)
-      nam = params.naming
+      nam = assigns(:naming)
       assert_not_equal(new_name, nam.text_name)
       assert_equal(old_name, nam.text_name)
       assert_select("option[selected]", count: 2)
@@ -73,8 +72,7 @@ module Observations
 
       # Clones naming, creates Easter sp and E. bunny, but no votes.
       put(:update, params: params)
-      params = assigns(:params)
-      nam = params.naming
+      nam = assigns(:naming)
 
       assert_redirected_to(permanent_observation_path(nam.observation_id))
       assert_equal(new_name, nam.text_name)
@@ -97,8 +95,7 @@ module Observations
       put(:update, params: params)
       assert_edit
       assert_equal(10, rolf.reload.contribution)
-      params = assigns(:params)
-      nam = params.naming
+      nam = assigns(:naming)
       assert_not_equal(new_name, nam.text_name)
       assert_equal(old_name, nam.text_name)
       assert_select("option[selected]", count: 2)
@@ -122,8 +119,7 @@ module Observations
       assert_redirected_to(permanent_observation_path(nmg.observation.id))
       # Must be cloning naming with no vote.
       assert_equal(12, rolf.reload.contribution)
-      params = assigns(:params)
-      nam = params.naming
+      nam = assigns(:naming)
       assert_equal(new_name, nam.name.text_name)
       assert_equal("#{new_name} sensu Arora", nam.text_name)
       assert_not_equal(old_name, nam.text_name)
@@ -142,8 +138,7 @@ module Observations
       put(:update, params: params)
       assert_edit
       assert_equal(10, rolf.reload.contribution)
-      params = assigns(:params)
-      nam = params.naming
+      nam = assigns(:naming)
       assert_not_equal(new_name, nam.text_name)
       assert_equal(old_name, nam.text_name)
       assert_select("option[selected]", count: 2)
@@ -169,8 +164,7 @@ module Observations
       assert_redirected_to(permanent_observation_path(nmg.observation.id))
       # Must be cloning naming, with no vote.
       assert_equal(12, rolf.reload.contribution)
-      params = assigns(:params)
-      nam = params.naming
+      nam = assigns(:naming)
       assert_not_equal(start_name.id, nam.name_id)
       assert_equal(chosen_name.id, nam.name_id)
     end
@@ -194,8 +188,7 @@ module Observations
       assert_redirected_to(permanent_observation_path(nmg.observation.id))
       # Must be cloning the naming, but no votes?
       assert_equal(12, rolf.reload.contribution)
-      params = assigns(:params)
-      nam = params.naming
+      nam = assigns(:naming)
       assert_not_equal(start_name.id, nam.name_id)
       assert_equal(new_text_name, nam.name.text_name)
     end
@@ -524,8 +517,8 @@ module Observations
       login("dick")
       post(:create, params: params)
       assert_response(:success) # really means failed
-      params = @controller.instance_variable_get(:@params)
-      assert_equal("Agaricus campestris L.", params.what)
+      what = @controller.instance_variable_get(:@what)
+      assert_equal("Agaricus campestris L.", what)
     end
 
     # Test a bug in name resolution: was failing to recognize that
