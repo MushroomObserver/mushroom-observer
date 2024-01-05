@@ -208,7 +208,7 @@ module Observations
     end
 
     def unproposed_name(warning)
-      if name_been_proposed?
+      if @consensus.name_been_proposed?(@name)
         flash_warning(warning.t)
       else
         true
@@ -314,10 +314,6 @@ module Observations
 
     def add_reasons(reasons)
       @reasons = @naming.init_reasons(reasons)
-    end
-
-    def name_been_proposed?
-      @consensus.name_been_proposed?(@name)
     end
 
     def respond_to_successful_update
