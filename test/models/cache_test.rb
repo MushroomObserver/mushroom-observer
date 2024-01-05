@@ -63,10 +63,11 @@ class CacheTest < UnitTestCase
     old_name = obs.name
     naming   = obs.namings.find { |n| n.name != old_name }
     new_name = naming.name
+    consensus = ::Observation::NamingConsensus.new(obs)
     assert_not_equal("", new_name.lifeform.to_s)
     assert_not_equal("", new_name.classification.to_s)
     naming.votes.each do |vote|
-      obs.change_vote(naming, Vote.maximum_vote, vote.user)
+      consensus.change_vote(naming, Vote.maximum_vote, vote.user)
     end
     assert_names_equal(new_name, obs.reload.name)
     assert_equal(new_name.lifeform, obs.lifeform)

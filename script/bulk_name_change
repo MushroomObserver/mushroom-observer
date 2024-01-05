@@ -110,12 +110,13 @@ def process_observation(obs)
   # rubocop:disable Lint/FloatComparison
   vote_against_old_name unless @old_vote == -3.0
   # rubocop:enable Lint/FloatComparison
-  obs.calc_consensus    if @any_changes
+  @consensus.calc_consensus    if @any_changes
   print_result
 end
 
 def get_initial_state(obs)
   @observation = obs
+  @consensus   = Observation::NamingConsensus.new(obs)
   @cur_name    = obs.name
   @old_naming  = obs.namings.find { |n| n.name == @old_name }
   @new_naming  = obs.namings.find { |n| n.name == @new_name }
@@ -123,9 +124,9 @@ def get_initial_state(obs)
   @old_score   = average_votes(@old_naming)
   @new_score   = average_votes(@new_naming)
   @cur_score   = obs.vote_cache
-  @old_vote    = users_vote(@old_naming)
-  @new_vote    = users_vote(@new_naming)
-  @cur_vote    = users_vote(@cur_naming)
+  @old_vote    = @consensus.users_vote(@old_naming, @user)
+  @new_vote    = @consensus.users_vote(@new_naming, @user)
+  @cur_vote    = @consensus.users_vote(@cur_naming, @user)
 end
 
 def print_observation(obs)
@@ -183,7 +184,7 @@ def vote_on_new_name
 
   vote = @old_vote || @old_score.try(&:ceil) || 1
   puts("  > voting #{vote} on new name...")
-  @observation.change_vote(@new_naming, vote, @user)
+  @consensus.change_vote(@new_naming, vote, @user)
   @any_changes = true
 end
 
@@ -191,7 +192,8 @@ def vote_against_old_name
   return unless @old_naming
 
   puts("  > voting -3 on old name...")
-  @observation.change_vote(@old_naming, -3, @user)
+  consensus = Observation::NamingConsensus.new(@observation)
+  consensus.change_vote(@old_naming, -3, @user)
   @any_changes = true
 end
 
@@ -218,14 +220,14 @@ def average_votes(naming)
   num.positive? ? sum / num : nil
 end
 
-def users_vote(naming)
-  return nil unless naming
+# def users_vote(naming)
+#   return nil unless naming
 
-  naming.votes.each do |vote|
-    return vote.value if vote.user == @user
-  end
-  nil
-end
+#   naming.votes.each do |vote|
+#     return vote.value if vote.user == @user
+#   end
+#   nil
+# end
 
 parse_options
 $stdout.sync = true

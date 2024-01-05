@@ -28,7 +28,13 @@ module ObservationsController::Validators
     (success, @what, @name, @names, @valid_names, @parent_deprecated,
      @suggest_corrections) =
       Name.resolve_name(given_name, params[:approved_name], chosen_name)
-    @naming.name = @name if @name
+    if @name
+      @naming.name = @name
+    else
+      @naming.errors.add(:name,
+                         :form_observations_there_is_a_problem_with_name.t)
+      flash_object_errors(@naming)
+    end
     success
   end
 

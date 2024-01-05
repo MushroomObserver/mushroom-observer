@@ -37,12 +37,13 @@ module Observations::Namings
       # If Dick votes on the other as well, then his first vote should
       # get demoted and his preference should change.
       # Summing, 3 gets 2+1+3/4=1.5, 9 gets -3+3+2/4=.5, so 3 keeps it.
-      obs.change_vote(nam1, 3, dick)
+      consensus = ::Observation::NamingConsensus.new(obs)
+      consensus.change_vote(nam1, 3, dick)
       assert_equal(12, dick.reload.contribution)
-      assert_equal(3, nam1.reload.users_vote(dick).value)
+      assert_equal(3, consensus.users_vote(nam1.reload, dick).value)
       assert_equal(6, nam1.vote_sum)
       assert_equal(3, nam1.votes.length)
-      assert_equal(2, nam2.reload.users_vote(dick).value)
+      assert_equal(2, consensus.users_vote(nam2.reload, dick).value)
       assert_equal(2, nam2.vote_sum)
       assert_equal(3, nam2.votes.length)
       assert_equal(names(:coprinus_comatus).id, obs.reload.name_id)
@@ -55,7 +56,8 @@ module Observations::Namings
       nam1 = namings(:coprinus_comatus_naming)
 
       login("rolf")
-      vote = nam1.users_vote(rolf)
+      consensus = ::Observation::NamingConsensus.new(obs)
+      vote = consensus.users_vote(nam1, rolf)
       put(:update, params: { vote: { value: "2" }, id: vote.id,
                              naming_id: nam1.id, observation_id: obs.id })
       assert_equal(10, rolf.reload.contribution)
@@ -75,7 +77,8 @@ module Observations::Namings
       nam2 = namings(:coprinus_comatus_other_naming)
 
       login("rolf")
-      vote = nam2.users_vote(rolf)
+      consensus = ::Observation::NamingConsensus.new(obs)
+      vote = consensus.users_vote(nam2, rolf)
       put(:update, params: { vote: { value: "3" }, id: vote.id,
                              naming_id: nam2.id, observation_id: obs.id })
       assert_equal(10, rolf.reload.contribution)
@@ -97,7 +100,8 @@ module Observations::Namings
       nam2 = namings(:coprinus_comatus_other_naming)
 
       login("rolf")
-      vote = nam2.users_vote(rolf)
+      consensus = ::Observation::NamingConsensus.new(obs)
+      vote = consensus.users_vote(nam2, rolf)
       put(:update, params: { vote: { value: "-1" }, id: vote.id,
                              naming_id: nam2.id, observation_id: obs.id })
       assert_equal(10, rolf.reload.contribution)
@@ -128,7 +132,8 @@ module Observations::Namings
       nam2 = namings(:coprinus_comatus_other_naming)
 
       login("dick")
-      obs.change_vote(nam2, 3, dick)
+      consensus = ::Observation::NamingConsensus.new(obs)
+      consensus.change_vote(nam2, 3, dick)
       assert_equal(names(:coprinus_comatus).id, obs.reload.name_id)
       assert_equal(11, dick.reload.contribution)
 
@@ -161,7 +166,9 @@ module Observations::Namings
       assert_template("observations/namings/votes/index")
 
       # Now try to make somewhat sure the content is right.
-      table = nam.calc_vote_table
+      obs = Observation.naming_includes.find(nam.observation_id)
+      consensus = ::Observation::NamingConsensus.new(obs)
+      table = consensus.calc_vote_table(nam)
       str1 = Vote.confidence(votes(:coprinus_comatus_owner_vote).value)
       str2 = Vote.confidence(votes(:coprinus_comatus_other_vote).value)
       table.each_key do |str|
@@ -177,7 +184,8 @@ module Observations::Namings
 
     def test_ajax_vote
       naming = namings(:minimal_unknown_naming)
-      assert_nil(naming.users_vote(dick))
+      consensus = ::Observation::NamingConsensus.new(naming.observation)
+      assert_nil(consensus.users_vote(naming, dick))
 
       post(:create, params: { vote: { value: 3 },
                               naming_id: naming.id,
@@ -187,13 +195,17 @@ module Observations::Namings
       login("dick")
       post(:create, params: { vote: { value: 3 }, naming_id: naming.id,
                               observation_id: naming.observation_id })
+      naming.reload
+      consensus.reload_namings_and_votes!
+      assert_equal(3, consensus.users_vote(naming, dick).value)
 
-      assert_equal(3, naming.reload.users_vote(dick).value)
-
-      put(:update, params: { vote: { value: 0 }, id: naming.users_vote(dick).id,
+      put(:update, params: { vote: { value: 0 },
+                             id: consensus.users_vote(naming, dick).id,
                              naming_id: naming.id,
                              observation_id: naming.observation_id })
-      assert_nil(naming.reload.users_vote(dick))
+      naming.reload
+      consensus.reload_namings_and_votes!
+      assert_nil(consensus.users_vote(naming, dick))
 
       assert_raises(RuntimeError) do
         post(:create, params: { vote: { value: 99 }, naming_id: naming.id,
