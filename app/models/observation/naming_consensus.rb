@@ -1,10 +1,30 @@
 # frozen_string_literal: true
 
+# This PORO isolates the code that handles naming and voting on observations,
+# as well as code that determines the current state of naming/voting on an obs.
+# The goal is to safeguard against any unintentional db loads whenever the
+# observation's current "consensus" naming is calculated, which needs to
+# happen whenever namings or votes change, or whenever the show_obs
+# "namings_table" is recalculated.
+#
+# Instantiate a NamingConsensus to get a snapshot of the current state, or to
+# perform changes to that state via proposing or voting on namings.
+#
+# NOTE: Instantiate this object with an observation that you've eager-loaded
+# namings and votes on. The PORO guarantees that for the duration of the
+# calculation, no further db lookups will be initiated. The object itself also
+# contains everything needed to draw the Namings "table" - the views now
+# can only access attributes and methods of the NamingConsensus object, because
+# all the Naming and Vote methods that caused lookups have been moved here.
+#
+# At the time this was written, vote form updates performed something like
+# 3N+2 db loads of naming votes per vote update (N in this case being the
+# number of proposed namings per obs, so 3 namings meant 11 vote lookups).
+# The vote table is the slowest table in the db, so it was extremely slow.
+#
 class Observation
   class NamingConsensus
-    attr_accessor :observation
-    attr_accessor :namings
-    attr_accessor :votes
+    attr_accessor :observation, :namings, :votes
 
     def initialize(observation)
       @observation = observation
