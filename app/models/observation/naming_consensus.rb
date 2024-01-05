@@ -17,6 +17,26 @@
 # can only access attributes and methods of the NamingConsensus object, because
 # all the Naming and Vote methods that caused lookups have been moved here.
 #
+#  name_been_proposed?::    Has someone proposed this Name already?
+#  owner_voted?::           Has the owner voted on a given Naming?
+#  user_voted?::            Has a given User voted on a given Naming?
+#  owners_vote::            Owner's Vote on a given Naming.
+#  users_vote::             A given User's Vote on a given Naming
+#  owners_votes::           Get all of the onwer's Vote's for this Observation.
+#  owners_favorite?::       Is a given Naming one of the owner's favorite(s)
+#                           for this Observation?
+#  users_favorite?::        Is a given Naming one of the given user's
+#                           favorites for this Observation?
+#  owner_preference         owners's unique prefered Name (if any) for this Obs
+#  change_vote::            Change a given User's Vote for a given Naming.
+#  consensus_naming::       Guess which Naming is responsible for consensus.
+#  calc_consensus::         Calculate and cache the consensus naming/name.
+#  review_status::          Decide what the review status is for this Obs.
+#  lookup_naming::          Return corresponding Naming instance from this
+#                           Observation's namings association.
+#  dump_votes::             Dump all the Naming and Vote info as known by this
+#                           Observation and its associations.
+#
 # At the time this was written, vote form updates performed something like
 # 3N+2 db loads of naming votes per vote update (N in this case being the
 # number of proposed namings per obs, so 3 namings meant 11 vote lookups).
