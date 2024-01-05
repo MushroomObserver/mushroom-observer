@@ -192,7 +192,6 @@ module Observations
       result
     end
 
-    # FIXME: Maybe move Name.resolve_name into an object?
     def resolve_name(given_name, approved_name, chosen_name)
       (success, @what, @name, @names, @valid_names,
        @parent_deprecated, @suggest_corrections) =
