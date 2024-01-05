@@ -7,9 +7,9 @@ module Observations::Namings
     # Index breakdown of votes for a given naming.
     # Linked from: observations/show
     # Displayed on show obs via popup for JS users.
-    # Has its own route for non-js.
-    # Inputs: params[:naming_id] (naming)
-    # Outputs: @naming
+    # Has its own route for non-js access and testing.
+    # Inputs: params[:naming_id], [:observation_id]
+    # Outputs: @naming, @consensus
     def index
       pass_query_params
       @naming = find_or_goto_index(Naming, params[:naming_id].to_s)
@@ -72,8 +72,6 @@ module Observations::Namings
       value = Vote.validate_value(value_str)
       raise("Bad value.") unless value
 
-      # N+1: Take the whole vote object and send it to change vote?
-      # Or how about returning obs.reload from observation.change_vote
       @consensus = ::Observation::NamingConsensus.new(observation)
       @consensus.change_vote(@naming, value, @user) # 2nd load (namings.reload)
       @observation = load_observation_naming_includes # 3rd load
