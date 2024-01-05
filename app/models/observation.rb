@@ -143,8 +143,6 @@
 #  unique_format_name::     Textilized, with id added to make unique.
 #
 #  ==== Namings and Votes
-#  owner_votes::            Get all of the owner's Vote's for this Observation.
-#  user_votes::             Get all of a given User's Votes for this Observation
 #  dump_votes::             Dump all the Naming and Vote info as known by this
 #                           Observation and its associations.
 #
@@ -1031,22 +1029,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       str
     end.join("\n")
   end
-
-  # All of observation.user's votes on all Namings for this Observation
-  # Used in tests
-  def owners_votes
-    user_votes(user)
-  end
-
-  # All of a given User's votes on all Namings for this Observation
-  def user_votes(user)
-    namings.each_with_object([]) do |n, votes|
-      v = n.users_vote(user)
-      votes << v if v
-    end
-  end
-
-  public
 
   ##############################################################################
   #

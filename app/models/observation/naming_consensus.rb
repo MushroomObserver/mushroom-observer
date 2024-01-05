@@ -12,6 +12,12 @@ class Observation
       @votes = @namings.map(&:votes).flatten
     end
 
+    def reload_namings_and_votes!
+      obs = ::Observation.naming_includes.find(@observation.id)
+      @namings = obs.namings
+      @votes = @namings.map(&:votes).flatten
+    end
+
     ############################################################################
     #
     #  :section: Preferred Naming
@@ -48,25 +54,13 @@ class Observation
       end
     end
 
+    public
+
     ############################################################################
     #
-    #  :section: Namings and Votes
+    #  :section: Methods Used for Voting
     #
     ############################################################################
-
-    # Look up the corresponding instance in our namings association.  If we are
-    # careful to keep all the operations within the tree of assocations of the
-    # observations, we should never need to reload anything.
-    # `find` here does not hit the db
-    def lookup_naming(naming)
-      # Disable cop; test suite chokes when the following "raise"
-      # is re-written in "exploded" style (the Rubocop default)
-
-      namings.find { |n| n == naming } ||
-        raise(ActiveRecord::RecordNotFound.new(
-                "Observation doesn't have naming with ID=#{naming.id}"
-              ))
-    end
 
     # # Dump out the situation as the observation sees it.  Useful for debugging
     # # problems with reloading requirements.
@@ -85,9 +79,6 @@ class Observation
     #   end.join("\n")
     # end
 
-    public
-
-    # CHECK: Don't need this in consensus?
     # Has anyone proposed a given Name yet for this observation?
     # Count is ok here because we have eager-loaded the namings.
     def name_been_proposed?(name)
@@ -96,39 +87,64 @@ class Observation
 
     # Has the owner voted on a given Naming?
     def owner_voted?(naming)
-      !lookup_naming(naming).users_vote(@observation.user).nil?
+      !users_vote(naming, @observation.user).nil?
     end
 
     # Has a given User owner voted on a given Naming?
     def user_voted?(naming, user)
-      !lookup_naming(naming).users_vote(user).nil?
+      !users_vote(naming, user).nil?
     end
 
     # Get the owner's Vote on a given Naming.
     def owners_vote(naming)
-      lookup_naming(naming).users_vote(@observation.user)
+      users_vote(naming, @observation.user)
     end
 
     # Get a given User's Vote on a given Naming.
     def users_vote(naming, user)
-      lookup_naming(naming).users_vote(user)
+      votes.select { |v|
+        return v if v.user_id == user.id && v.naming_id == naming.id
+      }
+      nil
     end
 
-    # Disable method name cops to avoid breaking 3rd parties' use of API
+    # Has anyone voted (positively) on this?  We don't want people changing
+    # the name for namings that the community has voted on.
+    # Returns true if no one has.
+    def editable?(naming)
+      naming.votes.each do |v|
+        return false if v.user_id != naming.user_id && v.value.positive?
+      end
+      true
+    end
+
+    # Has anyone given this their strongest (positive) vote?
+    # We don't want people destroying namings that someone else likes best.
+    # Returns true if no one has.
+    def deletable?(naming)
+      naming.votes.each do |v|
+        if v.user_id != naming.user_id && v.value.positive? && v.favorite
+          return false
+        end
+      end
+      true
+    end
 
     # Returns true if a given Naming has received one of the highest positive
     # votes from the owner of this observation.
     # Note: multiple namings can return true for a given observation.
     # This is used to display eyes next to Proposed Name on Observation page
     def owners_favorite?(naming)
-      lookup_naming(naming).users_favorite?(@observation.user)
+      users_favorite?(naming, @observation.user)
     end
 
     # Returns true if a given Naming has received one of the highest positive
     # votes from the given user (among namings for this observation).
     # Note: multiple namings can return true for a given user and observation.
     def users_favorite?(naming, user)
-      lookup_naming(naming).users_favorite?(user)
+      votes.any? { |v|
+        v.user_id == user.id && v.naming_id == naming.id && v.favorite
+      }
     end
 
     # All of observation.user's votes on all Namings for this Observation
@@ -140,18 +156,72 @@ class Observation
     # All of a given User's votes on all Namings for this Observation
     def user_votes(user)
       @namings.each_with_object([]) do |n, votes|
-        v = n.users_vote(user)
+        v = users_vote(n, user)
         votes << v if v
       end
+    end
+
+    # Used by NamingsController#update
+    def clean_votes(naming, new_name, user)
+      return unless new_name != naming.name
+
+      naming.votes.each do |vote|
+        vote.destroy if vote.user_id != user.id
+      end
+    end
+
+    # Generate a table the number of User's who cast each level of Vote for a
+    # single Naming. (This refreshes the naming.vote_cache while it's at it.)
+    #
+    #   table = consensus.calc_vote_table(naming)
+    #   for key, record in table
+    #     str    = key.l
+    #     num    = record[:num]    # Number of users who voted near this level.
+    #     weight = record[:wgt]    # Sum of users' weights.
+    #     value  = record[:value]  # Value of this vote level (arbitrary scale)
+    #     votes  = record[:votes]  # List of actual votes.
+    #   end
+    #
+    # only executed on VotesController#index
+    def calc_vote_table(naming)
+      # Initialize table.
+      table = {}
+      Vote.opinion_menu.each do |str, val|
+        table[str] = {
+          num: 0,
+          wgt: 0.0,
+          value: val,
+          votes: []
+        }
+      end
+
+      # Gather votes, doing a weighted sum in the process.
+      tot_sum = 0
+      tot_wgt = 0
+      naming.votes.each do |v|
+        str = Vote.confidence(v.value)
+        wgt = v.user_weight
+        table[str][:num] += 1
+        table[str][:wgt] += wgt
+        table[str][:votes] << v
+        tot_sum += v.value * wgt
+        tot_wgt += wgt
+      end
+      val = tot_sum.to_f / (tot_wgt + 1.0)
+
+      # Update vote_cache if it's wrong.
+      naming.update!(vote_cache: val) if (naming.vote_cache - val).abs > 1e-4
+
+      table
     end
 
     # Change User's Vote for this naming.  Automatically recalculates the
     # consensus for the Observation in question if anything is changed.
     # Returns true if something was changed.
+    # Called from outside.
     def change_vote(naming, value, user = User.current)
       result = false
-      naming = lookup_naming(naming)
-      vote = naming.users_vote(user)
+      vote = users_vote(naming, user)
       value = value.to_f
 
       if value == Vote.delete_vote
@@ -175,23 +245,22 @@ class Observation
       @observation.log(:log_naming_created, name: naming.format_name)
     end
 
+    # Recalculates consensus_naming and saves the observation accordingly.
+    # Also initiates the email blast to interested parties
     def calc_consensus
       reload_namings_and_votes!
       calculator = ::Observation::ConsensusCalculator.new(@namings)
       best, best_val = calculator.calc
       old = @observation.name
       if old != best || @observation.vote_cache != best_val
-        # maybe use update here
-        @observation.name = best
-        @observation.vote_cache = best_val
-        @observation.save
+        @observation.update(name: best, vote_cache: best_val)
       end
       @observation.reload.announce_consensus_change(old, best) if best != old
     end
 
-    # Try to guess which Naming is responsible for the consensus.  This will
-    # always return a Naming, no matter how ambiguous, unless there are no
-    # namings.
+    # Try to guess which Naming is responsible for the consensus.
+    # This will always return a Naming, no matter how ambiguous,
+    # unless there are no namings.
     def consensus_naming
       matches = find_matches
       return nil if matches.empty?
@@ -219,16 +288,11 @@ class Observation
       @namings.select { |n| name.synonyms.include?(n.name) }
     end
 
-    def format_coordinate(value, positive_point, negative_point)
-      return "#{-value.round(4)}°#{negative_point}" if value.negative?
-
-      "#{value.round(4)}°#{positive_point}"
-    end
-
     def delete_vote(naming, vote, user)
       return false unless vote
 
       naming.votes.delete(vote)
+      reload_namings_and_votes!
       find_new_favorite(user) if vote.favorite
       true
     end
@@ -240,8 +304,7 @@ class Observation
       user_votes(user).each do |v|
         next if v.value != max || v.favorite
 
-        v.favorite = true
-        v.save
+        v.update(favorite: true)
       end
     end
 
@@ -312,74 +375,6 @@ class Observation
 
     def other_votes(vote, user)
       user_votes(user) - [vote]
-    end
-
-    ############################################################################
-    #
-    #  :section: Jason's Sketch
-    #
-    ############################################################################
-
-    # def users_vote(naming_id, user_id)
-    #   votes.find { |v| v.naming_id == naming_id && v.user_id == user_id }
-    # end
-
-    # def users_favorite_vote(user_id)
-    #   # whatever the best way to iterate over all votes and
-    #   # pick the one with the highest value
-    #   votes.find { |v| v.user_id == user_id }.max
-    # end
-
-    # def naming_of_vote(vote)
-    #   namings.find { |n| n.id == vote.naming_id }
-    # end
-
-    # # and so on, basically provide methods for all of the accessors you need
-
-    # def change_users_vote_for_naming(naming_id, user_id, value)
-    #   # various logic for demoting 100% votes etc. all using these three basal methods,
-    #   # which are the only ones that actually use AR to change the database
-    #   create_vote(naming_id, user_id, value)
-    #   change_vote(vote, new_value)
-    #   delete_vote(vote)
-    #   # then at the end, recalculate the consensus, no reloading required
-    #   calc_consensus
-    # end
-
-    # def create_vote(naming_id, user_id, value)
-    #   votes << Vote.create(naming_id: naming_id, user_id: user_id, value: value)
-    # end
-
-    # def change_vote(vote, new_value)
-    #   vote.update_attribute(value: new_value)
-    # end
-
-    # def delete_vote(vote)
-    #   vote.destroy!
-    #   votes.delete(vote)
-    # end
-
-    # def calculate_consensus
-    #   # Uses local arrays of namings and votes, all guaranteed to be up to date
-    #   # because the three methods above keep things up to date...
-    #   # or if you really want, you can reload those arrays
-    #   # now to see if anyone has voted in the meantime.
-    #   reload_namings_and_votes!
-    #   # do magic stuff
-    #   # The update the observation.
-    #   # obs.change_attributes(
-    #   #   name_id: new_consensus_name_id,
-    #   #   vote_cache: new_vote_cache
-    #   # )
-    # end
-
-    public
-
-    def reload_namings_and_votes!
-      # @namings = @observation.namings.include(:votes)
-      obs = ::Observation.naming_includes.find(@observation.id)
-      @namings = obs.namings
-      @votes = @namings.map(&:votes).flatten
     end
   end
 end

@@ -81,20 +81,21 @@ module Observations
 
     def destroy
       naming = Naming.includes([:votes]).find(params[:id].to_s)
-      if destroy_if_we_can(naming)
+      @observation = Observation.naming_includes.find(params[:observation_id])
+      @consensus = Observation::NamingConsensus.new(@observation)
+      if destroy_if_we_can(naming) # needs to know consensus before deleting
         flash_notice(:runtime_destroy_naming_success.t(id: params[:id].to_s))
       end
-      # Now, eager-load the obs without the deleted naming
-      obs = Observation.naming_includes.find(params[:observation_id])
 
       respond_to do |format|
         format.turbo_stream do
-          (obs, consensus, owner_name) = locals_for_update_observation(obs)
+          # Reload after delete
+          (obs, consensus, owner_name) = locals_for_update_observation
           render(partial: "observations/namings/update_observation",
                  locals: { obs: obs, consensus: consensus,
                            owner_name: owner_name }) and return
         end
-        format.html { default_redirect(obs) }
+        format.html { default_redirect(@observation) }
       end
     end
 
@@ -309,7 +310,7 @@ module Observations
     end
 
     def need_new_naming?
-      !(@naming.editable? || name_not_changing?)
+      !(@consensus.editable?(@naming) || name_not_changing?)
     end
 
     def add_reasons(reasons)
@@ -363,10 +364,6 @@ module Observations
       @consensus.change_vote_with_log(@naming, @vote.value)
     end
 
-    def update_name(user, reasons, was_js_on)
-      @naming.update_name(@name, user, reasons, was_js_on)
-    end
-
     def change_vote(new_val)
       if new_val && (!@vote || @vote.value != new_val)
         @consensus.change_vote(@naming, new_val)
@@ -382,18 +379,23 @@ module Observations
     end
 
     def change_naming
-      return unless update_name(@user,
-                                params.dig(:naming, :reasons),
+      return unless update_name(params.dig(:naming, :reasons),
                                 params[:was_js_on] == "yes")
 
       flash_notice(:runtime_naming_updated_at.t)
       change_vote(params.dig(:naming, :vote, :value).to_i)
     end
 
+    def update_name(reasons, was_js_on)
+      @consensus.clean_votes(@naming, @name, @user)
+      @naming.create_reasons(reasons, was_js_on)
+      @naming.update_object(@name, @naming.changed?)
+    end
+
     def destroy_if_we_can(naming)
       if !check_permission!(naming)
         flash_error(:runtime_destroy_naming_denied.t(id: naming.id))
-      elsif !in_admin_mode? && !naming.deletable?
+      elsif !in_admin_mode? && !@consensus.deletable?(naming)
         flash_warning(:runtime_destroy_naming_someone_else.t)
       elsif !naming.destroy
         flash_error(:runtime_destroy_naming_failed.t(id: naming.id))

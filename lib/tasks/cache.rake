@@ -18,10 +18,11 @@ namespace :cache do
     print "Refreshing naming.vote_cache...\n"
     Naming.all.each do |n|
       print "##{n.id}\r"
-      n.calc_vote_table
+      o = Observation.naming_includes.find(n.observation_id)
+      Observation::NamingConsensus.new(o).calc_vote_table
     end
     print "Refreshing observation.vote_cache...\n"
-    Observation.all.each do |o|
+    Observation.all.naming_includes.each do |o|
       print "##{o.id}\r"
       Observation::NamingConsensus.new(o).calc_consensus
     end

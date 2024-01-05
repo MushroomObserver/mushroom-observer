@@ -11,7 +11,9 @@ module SpeciesLists
     ############################################################################
 
     def find_species_list!
-      find_or_goto_index(SpeciesList, params[:id].to_s)
+      # find_or_goto_index(SpeciesList, params[:id].to_s)
+      SpeciesList.show_includes.safe_find(params[:id].to_s) ||
+        flash_error_and_goto_index(SpeciesList, params[:id].to_s)
     end
 
     # Validate list of names, and if successful, create observations.
@@ -401,11 +403,13 @@ module SpeciesLists
       return unless (obs = spl_obss.last)
 
       # Not sure how to check vote efficiently...
-      @member_vote = begin
-                       obs.namings.first.users_vote(@user).value
-                     rescue StandardError
-                       Vote.maximum_vote
-                     end
+      consensus = Observation::NamingConsensus.new(obs)
+      @member_vote =
+        begin
+          consensus.users_vote(consensus.namings.first, @user).value
+        rescue StandardError
+          Vote.maximum_vote
+        end
       init_member_notes_for_edit(spl_obss)
       if all_obs_same_lat_lon_alt?(spl_obss)
         @member_lat  = obs.lat

@@ -64,7 +64,6 @@ module NamingsHelper
 
   # NEW - needs a current consensus object
   # n+1 should be ok
-  # but need: obs.consensus_naming and obs.users_favorite?
   def observation_namings_table_rows(consensus)
     namings = consensus.namings.sort_by(&:created_at)
     any_names = consensus.namings&.length&.positive?
@@ -89,7 +88,7 @@ module NamingsHelper
   # NEW - needs a current consensus object
   # N+1: obs.consensus_naming and observation.owners_favorite?
   def naming_row_content(consensus, naming)
-    vote = naming.users_vote(User.current) || Vote.new(value: 0)
+    vote = consensus.users_vote(naming, User.current) || Vote.new(value: 0)
     consensus_favorite = consensus.consensus_naming
     favorite = consensus.owners_favorite?(naming)
 

@@ -8,11 +8,14 @@ module Observations::Namings
     # Linked from: observations/show
     # Displayed on show obs via popup for JS users.
     # Has its own route for non-js.
-    # Inputs: params[:id] (naming)
+    # Inputs: params[:naming_id] (naming)
     # Outputs: @naming
     def index
       pass_query_params
       @naming = find_or_goto_index(Naming, params[:naming_id].to_s)
+      obs = Observation.naming_includes.find(params[:observation_id])
+      @consensus = Observation::NamingConsensus.new(obs)
+
       respond_to do |format|
         format.turbo_stream do
           Textile.register_name(@naming.name)
@@ -22,7 +25,8 @@ module Observations::Namings
           render(partial: "shared/modal",
                  locals: {
                    identifier: identifier, title: title, subtitle: subtitle,
-                   body: "observations/namings/votes/table", naming: @naming
+                   body: "observations/namings/votes/table", naming: @naming,
+                   consensus: @consensus
                  })
         end
         format.html

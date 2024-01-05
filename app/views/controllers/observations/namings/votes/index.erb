@@ -3,4 +3,4 @@ add_page_title(:show_votes_title.t(name: @naming.unique_format_name))
 %>
 
 <%= render(partial: "observations/namings/votes/table",
-           locals: { naming: @naming }) %>
+           locals: { naming: @naming, consensus: @consensus }) %>

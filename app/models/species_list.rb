@@ -99,6 +99,26 @@ class SpeciesList < AbstractModel
 
   attr_accessor :data
 
+  scope :show_includes, lambda {
+    includes(
+      # :collection_numbers,
+      { observations: :namings },
+      # { external_links: { external_site: { project: :user_group } } },
+      # { herbarium_records: [{ herbarium: :curators }, :user] },
+      # { images: [:image_votes, :license, :projects, :user] },
+      # { interests: :user },
+      # :location,
+      # :name,
+      # { namings: [:name, :user, { votes: [:observation, :user] }] },
+      # { projects: :admin_group },
+      # :rss_log,
+      # :sequences,
+      # { species_lists: [:projects, :user] },
+      # :thumb_image,
+      # :user
+    )
+  }
+
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 

@@ -97,7 +97,6 @@ class ObservationTest < UnitTestCase
   # Test Observer's Prefered ID
   def test_observer_preferred_id
     # obs = observations(:owner_only_favorite_ne_consensus)
-    # consensus = Observation::NamingConsensus.new(obs)
     consensus = obs_consensus(:owner_only_favorite_ne_consensus)
     assert_equal(names(:tremella_mesenterica), consensus.owner_preference)
 
@@ -610,10 +609,8 @@ class ObservationTest < UnitTestCase
     assert(consensus.user_voted?(namg1, rolf))
     assert(vote = consensus.owners_vote(namg1))
     assert_equal(vote, consensus.users_vote(namg1, rolf))
-    # assert_equal(vote, namg1.users_vote(rolf))
     assert(consensus.owners_favorite?(namg1))
     assert(consensus.users_favorite?(namg1, rolf))
-    # assert(namg1.users_favorite?(rolf))
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, consensus.consensus_naming)
 

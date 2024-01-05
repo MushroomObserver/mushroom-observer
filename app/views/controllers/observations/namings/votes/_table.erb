@@ -1,6 +1,6 @@
 <%# Maybe put this in the index to avoid partials? %>
 <%# But it's called by index and modal. %>
-<% table = naming.calc_vote_table %>
+<% table = consensus.calc_vote_table(naming) %>
 
 <p><%= :show_votes_descript.t %></p>
 
