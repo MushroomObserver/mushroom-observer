@@ -59,7 +59,8 @@ module MatrixBoxHelper
     # TODO: make box layouts specific to object type
     h_style = presenter.image_data ? "h5" : "h3"
     what = presenter.what
-    identify_ui = matrix_box_vote_or_propose_ui(identify, object)
+    consensus = presenter.consensus || nil
+    identify_ui = matrix_box_vote_or_propose_ui(identify, object, consensus)
 
     tag.div(class: "rss-what") do
       [
@@ -88,10 +89,10 @@ module MatrixBoxHelper
 
   # Obs with uncertain name: vote on naming, or propose (if it's "Fungi")
   # used if matrix_box local_assigns identify == true
-  def matrix_box_vote_or_propose_ui(identify, object)
+  def matrix_box_vote_or_propose_ui(identify, object, consensus)
     return unless identify
 
-    if (object.name_id != 1) && (naming = object.consensus_naming)
+    if (object.name_id != 1) && (naming = consensus.consensus_naming)
       tag.div(class: "vote-select-container mb-3",
               data: { vote_cache: object.vote_cache }) do
         naming_vote_form(naming, nil, context: "matrix_box")

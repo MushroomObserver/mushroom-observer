@@ -160,7 +160,7 @@ module ObservationsController::NewAndCreate
   def rough_cut(params)
     @observation.notes = notes_to_sym_and_compact
     @naming = Naming.construct({}, @observation)
-    @vote = Vote.construct(param_lookup([:naming, :vote]), @naming)
+    @vote = Vote.construct(params.dig(:naming, :vote), @naming)
     @good_images = update_good_images(params[:good_images])
     @bad_images  = create_image_objects(params[:image],
                                         @observation, @good_images)
@@ -180,8 +180,8 @@ module ObservationsController::NewAndCreate
 
     @naming.create_reasons(reason, params[:was_js_on] == "yes")
     save_with_log(@naming)
-    @observation.reload
-    @observation.change_vote(@naming, @vote.value) unless @vote.value.nil?
+    consensus = ::Observation::NamingConsensus.new(@observation.reload)
+    consensus.change_vote(@naming, @vote.value) unless @vote.value.nil?
   end
 
   def save_collection_number(obs, params)

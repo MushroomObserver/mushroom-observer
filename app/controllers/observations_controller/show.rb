@@ -37,8 +37,8 @@ module ObservationsController::Show
     @canonical_url = canonical_url(@observation)
     @mappable      = check_if_query_is_mappable
     @other_sites   = helpers.external_sites_user_can_add_links_to(@observation)
-    consensus      = Observation::NamingConsensus.new(@observation)
-    @owner_name    = consensus.owner_preference
+    @consensus     = Observation::NamingConsensus.new(@observation)
+    @owner_name    = @consensus.owner_preference
     register_namings_for_textile_in_notes
   end
 
