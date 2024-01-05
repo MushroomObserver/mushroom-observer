@@ -102,9 +102,9 @@ class Observation
 
     # Get a given User's Vote on a given Naming.
     def users_vote(naming, user)
-      votes.select { |v|
+      votes.select do |v|
         return v if v.user_id == user.id && v.naming_id == naming.id
-      }
+      end
       nil
     end
 
@@ -142,9 +142,9 @@ class Observation
     # votes from the given user (among namings for this observation).
     # Note: multiple namings can return true for a given user and observation.
     def users_favorite?(naming, user)
-      votes.any? { |v|
+      votes.any? do |v|
         v.user_id == user.id && v.naming_id == naming.id && v.favorite
-      }
+      end
     end
 
     # All of observation.user's votes on all Namings for this Observation
