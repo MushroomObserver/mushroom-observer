@@ -11,7 +11,6 @@ module SpeciesLists
     ############################################################################
 
     def find_species_list!
-      # find_or_goto_index(SpeciesList, params[:id].to_s)
       SpeciesList.show_includes.safe_find(params[:id].to_s) ||
         flash_error_and_goto_index(SpeciesList, params[:id].to_s)
     end

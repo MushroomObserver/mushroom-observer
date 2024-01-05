@@ -1,10 +1,61 @@
 # frozen_string_literal: true
 
+# Observation::NamingConsensus
+#
+# This PORO isolates the code that determines the current state of naming/
+# voting on an obs, and handles naming and voting changes on observations.
+#
+# Instantiate a NamingConsensus to get a snapshot of the current state, or to
+# perform changes to that state via proposing or voting on namings.
+#
+# The goal is to safeguard against any unintentional db loads whenever the
+# observation's current "consensus" naming is calculated, which needs to
+# happen whenever an observation is shown, or whenever namings or votes change,
+# and the show_obs "namings_table" is redrawn.
+#
+# Instantiate this object with an observation that you've eager-loaded the
+# namings and votes on. The PORO will use the eager-loaded associations, and
+# only saves to the db when a naming or vote is changed/created. At this point,
+# you need to call @consensus.reload_namings_and_votes! to update the object.
+#
+# The object itself contains everything needed to draw the Namings "table" -
+# the views and controllers now should only access attributes and methods of a
+# NamingConsensus object, because all the Naming and Vote methods that caused
+# db lookups have been moved here.
+#
+#  name_been_proposed?::    Has someone proposed this Name already?
+#  owners_votes::           Get all of the onwer's Vote's for this Observation.
+#  owner_preference::       owners's unique prefered Name (if any) for this Obs
+#  consensus_naming::       Guess which Naming is responsible for consensus.
+#  calc_consensus::         Calculate and cache the consensus naming/name.
+#  dump_votes::             Dump all the Naming and Vote info as known by this
+#                           Observation and its associations.
+#
+# Methods that require passing a naming, called in views or controllers:
+#  user_voted?::            Has a given User voted on this Naming?
+#  owner_voted?::           Has the owner voted on a given Naming?
+#  users_vote::             Get a given User's Vote on this Naming.
+#  owners_vote::            Owner's Vote on a given Naming.
+#  users_favorite?::        Is this Naming the given User's favorite?
+#  owners_favorite?::       Is a given Naming one of the owner's favorite(s)?
+#  change_vote::            Change a given User's Vote for a given Naming.
+#  change_vote_with_log::   Also log the change (on the Obs)
+#  editable?::              Can owner change this Naming's Name?
+#  deletable?::             Can owner delete this Naming?
+#  calc_vote_table::        Who voted on this naming (via VotesController#index)
+#                           Note that many votes are anonymous, so...
+#  clean_votes::            Delete unused votes (via NamingsController#update)
+#  editable?::              Naming is editable?
+#  deletable?::             Naming is deletable?
+#
+# At the time this was written, vote form updates performed something like
+# 3N+2 db loads of naming votes per vote update (N in this case being the
+# number of proposed namings per obs, so 3 namings meant 11 vote lookups).
+# The vote table is the slowest table in the db, so it was extremely slow.
+#
 class Observation
   class NamingConsensus
-    attr_accessor :observation
-    attr_accessor :namings
-    attr_accessor :votes
+    attr_accessor :observation, :namings, :votes
 
     def initialize(observation)
       @observation = observation

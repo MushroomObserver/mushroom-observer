@@ -86,7 +86,6 @@ module NamingsHelper
   end
 
   # NEW - needs a current consensus object
-  # N+1: obs.consensus_naming and observation.owners_favorite?
   def naming_row_content(consensus, naming)
     vote = consensus.users_vote(naming, User.current) || Vote.new(value: 0)
     consensus_favorite = consensus.consensus_naming
@@ -389,7 +388,7 @@ module NamingsHelper
   end
 
   # N+1: can't move the calculation of observation.image_ids
-  # must query obs includes images, don't update table-footer
+  # must query obs includes images, so don't update table-footer
   def suggest_namings_link(obs)
     localizations = {
       processing_images: :suggestions_processing_images.t,
@@ -397,7 +396,7 @@ module NamingsHelper
       processing_results: :suggestions_processing_results.t,
       error: :suggestions_error.t
     }.to_json
-    # NOTE: it does not actually commit to this path.
+    # NOTE: suggestions does not actually commit to this path, it's a js request
     results_url = add_query_param(
       naming_suggestions_for_observation_path(id: obs.id, names: :xxx)
     )
