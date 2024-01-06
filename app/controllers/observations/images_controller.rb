@@ -267,7 +267,7 @@ module Observations
       end
       @projects.each do |proj|
         @project_checks[proj.id] =
-          param_lookup([:project, "id_#{proj.id}"]) == "1"
+          params.dig(:project, "id_#{proj.id}") == "1"
       end
     end
 

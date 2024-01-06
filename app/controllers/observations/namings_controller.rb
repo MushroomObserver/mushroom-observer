@@ -192,10 +192,18 @@ module Observations
       result
     end
 
+    # Set the ivars for the form, and potentially form_name_feedback
+    # in the case the name is not resolved unambiguously
     def resolve_name(given_name, approved_name, chosen_name)
+      @resolver = Naming::NameResolver.new(
+        given_name, approved_name, chosen_name
+      )
+      # NOTE: views could be refactored to access properties of the @resolver,
+      # e.g. `@resolver.valid_names`, instead of these ivars.
+      # All but success, @what, @name are only used by form_name_feedback.
       (success, @what, @name, @names, @valid_names,
        @parent_deprecated, @suggest_corrections) =
-        Name.resolve_name(given_name, approved_name, chosen_name)
+        @resolver.ivar_array
       success && @name
     end
 

@@ -152,20 +152,6 @@ class ApplicationController < ActionController::Base
   #   @view = view_context
   # end
 
-  # Utility for extracting nested params where any level might be nil
-  def param_lookup(path, default = nil)
-    result = params
-    path.each do |arg|
-      result = result[arg]
-      break if result.nil?
-    end
-    if result.nil?
-      default
-    else
-      block_given? ? yield(result) : result
-    end
-  end
-
   # Kick out agents responsible for excessive traffic.
   def kick_out_excessive_traffic
     return true if is_cool?
