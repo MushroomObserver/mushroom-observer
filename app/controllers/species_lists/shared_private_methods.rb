@@ -39,8 +39,9 @@ module SpeciesLists
       # Validate place name.
       validate_place_name
 
+      list = list_without_underscores
+
       # Make sure all the names (that have been approved) exist.
-      list = check_names_on_list
       construct_approved_names(list, params[:approved_names])
 
       # Initialize NameSorter and give it all the information.
@@ -101,12 +102,8 @@ module SpeciesLists
       @dubious_where_reasons = Location.dubious_name?(db_name, true)
     end
 
-    def check_names_on_list
-      if params[:list]
-        params[:list][:members].to_s.tr("_", " ").strip_squeeze
-      else
-        ""
-      end
+    def list_without_underscores
+      params.dig(:list, :members).to_s.tr("_", " ").strip_squeeze
     end
 
     def init_name_sorter(list)
