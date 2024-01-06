@@ -5,8 +5,8 @@ require("application_system_test_case")
 class ObservationFormSystemTest < ApplicationSystemTestCase
   def test_create_minimal_observation
     browser = page.driver.browser
-    rolf = users("rolf")
-    login!(rolf)
+    user = users(:zero_user)
+    login!(user)
 
     assert_link("Create Observation")
     click_on("Create Observation")
@@ -34,7 +34,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     assert_selector("#name_messages", text: "MO does not recognize the name")
-    assert_flash_warning(
+    assert_flash_error(
       :form_observations_there_is_a_problem_with_name.t.html_to_ascii
     )
     assert_selector("#observation_form")
@@ -505,8 +505,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
   def assert_observation_has_correct_name(expected_values)
     new_obs = Observation.last
+    consensus = Observation::NamingConsensus.new(new_obs)
     assert_names_equal(expected_values[:name], new_obs.name)
-    assert_equal(expected_values[:vote], new_obs.owners_votes.first.value)
+    assert_equal(expected_values[:vote], consensus.owners_votes.first.value)
   end
 
   def assert_observation_has_correct_image(expected_values)

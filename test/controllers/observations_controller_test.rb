@@ -831,11 +831,13 @@ class ObservationsControllerTest < FunctionalTestCase
     # Test it on obs with two namings (Rolf's and Mary's), with owner logged in.
     obs = observations(:coprinus_comatus_obs)
     rolf_nmg = obs.namings.first
+    consensus = Observation::NamingConsensus.new(obs)
     get(:show, params: { id: obs.id })
     assert_show_observation
     assert_form_action(controller: "observations/namings/votes",
                        action: :update, naming_id: rolf_nmg.id,
-                       observation_id: obs.id, id: rolf_nmg.users_vote(rolf))
+                       observation_id: obs.id,
+                       id: consensus.users_vote(rolf_nmg, rolf))
 
     # Test it on obs with two namings, with non-owner logged in.
     login("mary")
@@ -844,7 +846,8 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_show_observation
     assert_form_action(controller: "observations/namings/votes",
                        action: :update, naming_id: rolf_nmg.id,
-                       observation_id: obs.id, id: rolf_nmg.users_vote(mary))
+                       observation_id: obs.id,
+                       id: consensus.users_vote(rolf_nmg, mary))
 
     # Test a naming owned by the observer but the observer has 'No Opinion'.
     # Ensure that rolf owns @obs_with_no_opinion.
@@ -874,9 +877,11 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_show_owner_naming
     login(user_with_view_owner_id_true)
     obs = observations(:owner_only_favorite_ne_consensus)
+    consensus = Observation::NamingConsensus.new(obs)
+
     get(:show, params: { id: obs.id })
     assert_select("#owner_naming",
-                  { text: /#{obs.owner_preference.text_name}/,
+                  { text: /#{consensus.owner_preference.text_name}/,
                     count: 1 },
                   "Observation should show owner's preferred naming")
 

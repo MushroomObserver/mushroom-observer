@@ -13,14 +13,25 @@ valid_names - Name(s) that are valid synonyms
 suggest_corections - t/f whether to suggest correction(s)
 parent_deprecated - t/f
 button_name - text: button to complete the action, e.g. Submit, Create
+
+FIXME: The flash being added here is too late to be available for  
+Turbo updates to modal_flash and gets displayed on the next page, 
+when there is no longer any "problem_with_name".
+
+TODO:
+Remove `flash_warning`/`flash_error` here and add them upstream, maybe in 
+NamingParams. 
+Differentiate warning (valid_names) from error (!valid_names)
+A conditional to watch is `if @params[:what].present?`.
+Also, views/observations/namings/fields is doing too much work, 
+the multiple local_assigns for this partial should be set upstream.
 %>
 
 <%=
 if valid_names
   ##### Warnings #####
-  concat(flash_warning(:form_observations_there_is_a_problem_with_name.t))
-
-  concat(tag.div(class: "alert alert-warning", id: "name_messages") do
+  
+  tag.div(class: "alert alert-warning", id: "name_messages") do
     concat(tag.div do
       if suggest_corrections || names.blank?
         :form_naming_not_recognized.t(name: what)
@@ -59,34 +70,30 @@ if valid_names
         :div, :form_naming_not_recognized_help.t(button: button_name)
       ))
     end
-  end)
+  end
 
 ##### Errors #####
 elsif names&.length == 0
 
-  concat(flash_error(:form_observations_there_is_a_problem_with_name.t))
-
-  concat(tag.div(class: "alert alert-danger", id: "name_messages") do
+  tag.div(class: "alert alert-danger", id: "name_messages") do
     concat(tag.div(:form_naming_not_recognized.t(name: what)))
     concat(help_note(
       :div, :form_naming_not_recognized_help.t(button: button_name)
     ))
-  end)
+  end
 
 elsif names&.length &.> 1
 
-  concat(flash_error(:form_observations_there_is_a_problem_with_name.t))
-
-  concat(tag.div(class: "alert alert-danger", id: "name_messages") do
+  tag.div(class: "alert alert-danger", id: "name_messages") do
     concat(tag.div([:form_naming_multiple_names.t(name: what), ":"].safe_join))
     concat(fields_for(:chosen_name) do |f_c|
       names.each do |n|
         concat(radio_with_label(form: f_c, field: :name_id, value: n.id,
-                                label: n.display_name.t, class: "ml-4"))
-        concat(tag.div("(#{n.observations.size})"))
+                                label: n.display_name.t, class: "ml-4 name-radio",
+                                append: tag.span(" (#{n.observations.size})")))
       end
     end)
     concat(help_note(:div, :form_naming_multiple_names_help.t))
-  end)
+  end
 
 end %>

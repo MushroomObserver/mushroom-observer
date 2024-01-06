@@ -119,6 +119,7 @@ module FormsHelper
       args[:form].label("#{args[:field]}_#{args[:value]}") do
         concat(args[:form].radio_button(args[:field], args[:value], opts))
         concat(args[:label])
+        concat(args[:append]) if args[:append].present?
       end
     end
   end
