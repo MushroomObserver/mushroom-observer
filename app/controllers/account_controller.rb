@@ -60,7 +60,7 @@ class AccountController < ApplicationController
       return render(action: :new) unless validate_and_save_new_user!
 
       UserGroup.create_user(@new_user)
-      flash_notice("#{:runtime_signup_success.tp}#:{email_spam_notice.tp}")
+      flash_notice("#{:runtime_signup_success.tp}: #{email_spam_notice.tp}")
       QueuedEmail::VerifyAccount.create_email(@new_user)
     end
 
