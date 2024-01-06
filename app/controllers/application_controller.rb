@@ -355,15 +355,15 @@ class ApplicationController < ActionController::Base
   end
 
   def try_user_autologin(user_from_session)
-    if user_verified_and_allowed?(user = user_from_session)
+    if Rails.env.production? && request.remote_ip == "127.0.0.1"
+      # Request from the server itself, MRTG needs to log in to test page loads.
+      login_valid_user(User.find_by(login: "mrtg"))
+    elsif user_verified_and_allowed?(user = user_from_session)
       # User was already logged in.
       refresh_logged_in_user_instance(user)
     elsif user_verified_and_allowed?(user = validate_user_in_autologin_cookie)
       # User had "remember me" cookie set.
       login_valid_user(user)
-    elsif request.remote_ip == "127.0.0.1"
-      # Request from the server itself, MRTG needs to log in to test page loads.
-      login_valid_user(User.find_by(login: "mrtg"))
     else
       delete_invalid_cookies
     end
