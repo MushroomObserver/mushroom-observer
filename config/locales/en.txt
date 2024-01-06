@@ -3935,7 +3935,7 @@
   runtime_show_description_denied: You have not been given permission to see this description.
   runtime_show_draft_denied: "Permission denied: only project members can view drafts in progress."
   runtime_signup_success: Signup successful.  Verification email sent.
-  runtime_species_list_need_to_use_bulk: Synonyms can only be created from the [:name_bulk_title] page.
+  runtime_species_list_create_synonym: To create a Synonym please edit the Name.
 
   # Pattern search error messages.
   pattern_search_syntax_error: Syntax error in pattern at [string].

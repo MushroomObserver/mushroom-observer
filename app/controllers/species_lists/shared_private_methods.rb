@@ -125,7 +125,7 @@ module SpeciesLists
 
       # Does list have "Name one = Name two" type lines?
       if sorter.has_new_synonyms
-        flash_error(:runtime_species_list_need_to_use_bulk.t)
+        flash_error(:runtime_species_list_create_synonym.t)
         sorter.reset_new_names
         failed = true
       end
