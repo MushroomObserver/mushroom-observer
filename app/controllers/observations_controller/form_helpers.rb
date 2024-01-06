@@ -111,7 +111,7 @@ module ObservationsController::FormHelpers
     init_list_vars
     @lists = @lists.union(obs.species_lists)
     @lists.each do |list|
-      @list_checks[list.id] = param_lookup([:list, "id_#{list.id}"]) == "1"
+      @list_checks[list.id] = params.dig(:list, "id_#{list.id}") == "1"
     end
   end
 
@@ -200,7 +200,7 @@ module ObservationsController::FormHelpers
     images.each do |image|
       next unless check_permission(image)
 
-      args = param_lookup([:good_image, image.id.to_s])
+      args = params.dig(:good_image, image.id.to_s)
       next unless args
 
       image.attributes = args.permit(permitted_image_args)

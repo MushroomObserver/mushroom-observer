@@ -71,9 +71,9 @@ module Account
     private
 
     def normalize_login_params
-      @login = param_lookup([:user, :login]).to_s.strip
-      @password = param_lookup([:user, :password]).to_s.strip
-      @remember = param_lookup([:user, :remember_me]) == "1"
+      @login = params.dig(:user, :login).to_s.strip
+      @password = params.dig(:user, :password).to_s.strip
+      @remember = params.dig(:user, :remember_me) == "1"
     end
 
     def login_success(user)
