@@ -1,12 +1,12 @@
 <% if !@name.lifeform.blank? %>
-  <div class="mb-2">
-    <% @name.lifeform.strip.split(" ").each do |word| %>
-      <p><%= :"lifeform_#{word}".t %></p>
-    <% end %>
-  </div>
+  <%= tag.div(class: "mb-2") do
+    @name.lifeform.strip.split(" ").each do |word|
+      concat(tag.p(:"lifeform_#{word}".t))
+    end
+  end %>
 <% end %>
 
 <% if @first_child %>
-  <p><%= link_with_query(:show_name_propagate_lifeform.t,
-                         propagate_name_lifeform_form_path(@name.id)) %></p>
+  <%= tag.p(link_with_query(:show_name_propagate_lifeform.t,
+                            propagate_name_lifeform_form_path(@name.id))) %>
 <% end %>

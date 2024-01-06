@@ -1,7 +1,8 @@
 <%# Nomenclature partial; used by:
     show_name, show_past_name, and add_comment (via _object) %>
-<strong><%= :show_name_nomenclature.t %>:</strong>
-<%= panel_block(inner_class: "name-section",
+
+<%= panel_block(heading: :show_name_nomenclature.l,
+                inner_class: "name-section",
                 id: "nomenclature") do %>
 
   <div class="row">

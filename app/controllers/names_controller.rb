@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/ClassLength
 class NamesController < ApplicationController
   # disable cop because index is defined in ApplicationController
   # rubocop:disable Rails/LexicallyScopedActionFilter
@@ -246,20 +247,22 @@ class NamesController < ApplicationController
     @consensus_query = create_query(:Observation, :all,
                                     names: @name.id, by: :confidence)
 
-    @obs_with_images_query = create_query(:Observation, :all,
-                                          names: @name.id,
-                                          has_images: true,
-                                          by: :confidence)
+    # @obs_with_images_query = create_query(:Observation, :all,
+    #                                       names: @name.id,
+    #                                       has_images: true,
+    #                                       by: :confidence)
 
     # Determine which queries actually have results and instantiate the ones
     # we'll use.
     @best_description = @name.best_brief_description
-    @first_four       = @obs_with_images_query.results(
-      limit: 4,
-      include: {
-        thumb_image: [:image_votes, :license, :user]
-      }
-    )
+    # @first_four       = @obs_with_images_query.results(
+    #   limit: 4,
+    #   include: {
+    #     thumb_image: [:image_votes, :license, :user]
+    #   }
+    # )
+    @best_images = Observation.of_name(@name.id).with_image.
+                   order(vote_cache: :desc).take(6).map(&:thumb_image)
     @first_child      = @children_query.results(limit: 1).first
     @first_consensus  = @consensus_query.results(limit: 1).first
     @has_subtaxa      = @subtaxa_query.select_count if @subtaxa_query
@@ -670,3 +673,4 @@ class NamesController < ApplicationController
     params.permit(name: [:author, :citation, :icn_id, :locked, :notes, :rank])
   end
 end
+# rubocop:enable Metrics/ClassLength

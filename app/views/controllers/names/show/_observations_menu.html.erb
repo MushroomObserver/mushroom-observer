@@ -2,7 +2,8 @@
 #  This is just a two-column panel
 %>
 
-<%= panel_block(id: "name_observations_menu") do %>
+<%= panel_block(id: "name_observations_menu",
+                heading: :about_this_taxon.l,) do %>
   <div class="row">
     <div class="col-sm-7 name-section">
       <%= tag.p(:show_observations_of.t) %>

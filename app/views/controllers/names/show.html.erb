@@ -6,35 +6,36 @@ add_pager_for(@name)
 add_interest_icons(@user, @name)
 add_tab_set(name_show_tabs(name: @name, user: @user))
 
-@container = :wide
+@container = :full
 %>
 
 <div class="row">
 
   <!--LEFT COLUMN-->
-  <div class="col-sm-5">
+  <div class="col-xs-12 col-md-7">
 
     <%= render(partial: "names/show/confident_observations_panel") %>
 
-    <div id="name_previous_export" class="mb-4">
-      <%= show_previous_version(@name) %>
-      <%= export_status_controls(@name) %>
-    </div>
+    <%= render(partial: "names/show/observations_menu") %>
 
-    <div id="name_authors_editors">
-      <%= panel_block do %>
+    <%= panel_block do %>
+      <div id="name_previous_export" class="mb-4">
+        <%= show_previous_version(@name) %>
+        <%= export_status_controls(@name) %>
+      </div>
+
+      <div id="name_authors_editors">
         <%= show_authors_and_editors(obj: @name, user: @user) %>
-      <% end %>
-    </div>
+      </div>
+    <% end %>
 
   </div><!--LEFT COLUMN-->
 
   <!--RIGHT COLUMN-->
-  <div class="col-sm-7">
+  <div class="col-xs-12 col-md-5">
 
-    <%= render(partial: "names/show/observations_menu") %>
     <%= render(partial: "names/show/nomenclature",
-              locals: { name: @name, synonyms: true }) %>
+               locals: { name: @name, synonyms: true }) %>
 
     <%= tag.div(class: "row", data: { controller: "name-panels" }) do %>
       <%= render(partial: "names/show/classification_panel") %>
@@ -55,14 +56,11 @@ add_tab_set(name_show_tabs(name: @name, user: @user))
       <%= render(partial: "names/show/projects_panel") %>
     <% end %>
 
+    <%= render(partial: "comments/comments_for_object",
+               locals: {object: @name, controls: @user, limit: nil}) %>
+
   </div><!--RIGHT COLUMN-->
 </div><!--.row-->
 
-<%# ----------------------------------------
-  #  Show comments
-  # ----------------------------------------
-%>
-<%= render(partial: "comments/comments_for_object",
-           locals: {object: @name, controls: @user, limit: nil}) %>
 <%= :show_name_num_notifications.t(num: @name.interests) %>
 <%= show_object_footer(@name) %>

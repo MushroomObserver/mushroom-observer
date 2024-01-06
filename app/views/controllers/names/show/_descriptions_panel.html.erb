@@ -1,15 +1,16 @@
 <%
 description_links = list_descriptions(object: @name) || []
+heading = :show_name_descriptions.l
+if @user
+  link = link_with_query(:show_name_create_description.l,
+                         new_name_description_path(@name.id))
+  heading += " [#{link}]".html_safe
+end
 %>
 
-<div id="name_descriptions">
-  <strong><%= :show_name_descriptions.t %>:</strong>
-    [<%= link_with_query(:show_name_create_description.t,
-                          new_name_description_path(@name.id)) %>]
-  <%= panel_block do %>
-    <% description_links.each do |desc| %>
-    <div><%= desc %></div>
-    <% end %>
-    <%= :show_name_no_descriptions.t if description_links.empty? %>
-  <% end %>
-</div><!--#name_descriptions-->
+<%= panel_block(id: "name_descriptions", heading: heading) do
+  description_links.each do |desc|
+    concat(tag.div(desc))
+  end
+  concat(:show_name_no_descriptions.t) if description_links.empty?
+end %>

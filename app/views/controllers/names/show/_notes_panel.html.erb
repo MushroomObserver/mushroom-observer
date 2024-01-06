@@ -1,5 +1,10 @@
-<div id="name_notes">
-  <strong><%= :show_name_notes.t %>:</strong>
-    [<%= link_with_query(:EDIT.t, edit_name_path(@name.id)) %>]
-  <%= panel_block do @name.notes.tpl end %>
-</div><!--#name_notes-->
+<%
+heading = [
+  :show_name_notes.l,
+  " [",
+  link_with_query(:EDIT.t, edit_name_path(@name.id)),
+  "]"
+].safe_join
+%>
+
+<%= panel_block(id: "name_notes", heading: heading) do @name.notes.tpl end %>
