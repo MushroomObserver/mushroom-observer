@@ -107,14 +107,14 @@ module ObservationsController::NewAndCreate
     if success
       @observation.log(:log_observation_created)
       # should always succeed
-      save_everything_else(param_lookup([:naming, :reasons]))
+      save_everything_else(params.dig(:naming, :reasons))
       strip_images! if @observation.gps_hidden
       flash_notice(:runtime_observation_success.t(id: @observation.id))
       redirect_to_next_page
 
     # If anything failed reload the form.
     else
-      reload_new_form(param_lookup([:naming, :reasons]))
+      reload_new_form(params.dig(:naming, :reasons))
     end
   end
 

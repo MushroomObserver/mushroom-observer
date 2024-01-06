@@ -68,7 +68,7 @@ module Observations::Namings
       pass_query_params
       observation = load_observation_naming_includes # 1st load
       @naming = observation.namings.find(params[:naming_id])
-      value_str = param_lookup([:vote, :value])
+      value_str = params.dig(:vote, :value).to_s
       value = Vote.validate_value(value_str)
       raise("Bad value.") unless value
 

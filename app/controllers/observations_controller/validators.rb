@@ -23,8 +23,8 @@ module ObservationsController::Validators
   end
 
   def validate_name(params)
-    given_name = param_lookup([:naming, :name], "").to_s
-    chosen_name = param_lookup([:chosen_name, :name_id], "").to_s
+    given_name = params.dig(:naming, :name).to_s
+    chosen_name = params.dig(:chosen_name, :name_id).to_s
     @resolver = Naming::NameResolver.new(
       given_name, params[:approved_name], chosen_name
     )
