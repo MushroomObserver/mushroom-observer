@@ -225,7 +225,7 @@ class NamesController < ApplicationController
 
   def show_name_includes
     [
-      { observations: :user }
+      { observations: [:user, :thumb_image] }
     ]
   end
 
