@@ -9,23 +9,12 @@
     concat(tag.div(class: "col-sm-7 name-section") do
       concat(tag.p(:show_observations_of.t))
       concat(tag.div(class: "pl-3") do
-        concat([
-          # Observations of this name
-          tag.p(obss_of_name(@name) || "#{:obss_of_this_name.t} (0)"),
-          # Observations of taxon under other names
-          tag.p(taxon_obss_other_names(@name) ||
-                "#{:taxon_obss_other_names.t} (0)"),
-          # Observations of taxon under any name
-          tag.p(taxon_observations(@name) || "#{:obss_of_taxon.t} (0)"),
-          # Observations of other taxa where this taxon was proposed
-          tag.p(taxon_proposed(@name) || "#{:obss_taxon_proposed.t} (0)"),
-          # Observations where this Nae was proposed
-          tag.p(name_proposed(@name) || "#{:obss_name_proposed.t} (0)"),
-        ].safe_join)
+        concat(name_related_taxa_observation_links(@name, @obss))
         # Observations of this name's subtaxa, if any
         concat(tag.p do
-          link_to(:show_subtaxa_obss.t,
-                  add_query_param(observations_path, @subtaxa_query))
+          [link_to(:show_subtaxa_obss.l,
+                   add_query_param(observations_path, @subtaxa_query)),
+           " (#{@has_subtaxa})"].safe_join
         end) if @has_subtaxa
       end)
     end)
