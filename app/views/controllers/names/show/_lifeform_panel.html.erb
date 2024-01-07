@@ -1,14 +1,15 @@
 <%
 heading = :show_name_lifeform.l
-if @user
-  link = link_with_query(:EDIT.l, edit_name_lifeform_path(@name.id))
-  heading += " [#{link}]".html_safe
-end
+link = icon_link_with_query(
+  :EDIT.l, edit_name_lifeform_path(@name.id), icon: :edit
+)
+heading_links = @user ? link.html_safe : ""
 %>
 
 <%= tag.div(class: "col-sm-6") do
-  panel_block(heading: heading, inner_class: "name-section",
-              id: "name_lifeform", data: { name_panels_target: "lifeform" }) do
+  panel_block(heading: heading, heading_links: heading_links,
+              inner_class: "name-section", id: "name_lifeform",
+              data: { name_panels_target: "lifeform" }) do
     render(partial: "names/show/lifeform")
   end
 end %>

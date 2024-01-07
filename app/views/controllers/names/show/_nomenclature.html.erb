@@ -5,99 +5,110 @@
                 inner_class: "name-section",
                 id: "nomenclature") do %>
 
-  <div class="row">
+  <%= tag.div(class: "row") do %>
 
-    <div class="col-sm-7 name-section">
-      <p><%= :RANK.t %>:
-          <%= name.rank ? rank_as_string(name.rank) : :unknown.t %></p>
-      <p><%= :STATUS.t %>: <%= name.status %>
-        <% if name.is_misspelling? %>
-          (<%= :MISSPELLED.t %>)
-        <% end %></p>
-      <p><%= :NAME.t %>: <%= h(name.real_text_name) %></p>
-    </div><!--.col-->
+    <%= tag.div(class: "col-sm-7 name-section") do %>
+      <%= tag.p do
+        "#{:RANK.l}: #{name.rank ? rank_as_string(name.rank) : :unknown.l}"
+      end %>
+      <%= tag.p do
+        concat("#{:STATUS.l}: ")
+        concat(name.status)
+        concat("(#{:MISSPELLED.l})") if name.is_misspelling?
+      end %>
+      <%= tag.p do
+        "#{:NAME.l}: #{h(name.real_text_name)}"
+      end %>
+    <% end %>
 
-    <div class="col-sm-5 name-section">
+    <%= tag.div(class: "col-sm-5 name-section") do %>
       <% if name.icn_id? %>
-        <p><%= link_to("[##{name.icn_id}]",
-                        index_fungorum_record_url(name.icn_id)) %>
-            Index Fungorum</p>
-        <p><%= link_to("[##{name.icn_id}]",
-                        mycobank_record_url(name.icn_id)) %>
-            MycoBank</p>
-        <p>
-          <% if name.at_or_below_species? %>
-            <%= link_to(:gsd_species_synonymy.t,
-                        species_fungorum_gsd_synonymy(name.icn_id)) %>
-          <% elsif ["Genus", "Family"].include?(name.rank) %>
-            <%= link_to(:sf_species_synonymy.t,
-                        species_fungorum_sf_synonymy(name.icn_id)) %>
-          <% end %>
-        </p>
+        <%= tag.p do
+          "#{link_to(*index_fungorum_record_tab(name))} Index Fungorum"
+        end %>
+        <%= tag.p { "#{link_to(*mycobank_record_tab(name))} MycoBank" } %>
+        <%= tag.p do
+          if name.at_or_below_species?
+            link_to(*fungorum_gsd_synonymy_tab(name))
+            link_to(:gsd_species_synonymy.t,
+                         species_fungorum_gsd_synonymy(name.icn_id))
+          elsif ["Genus", "Family"].include?(name.rank)
+            link_to(*fungorum_sf_synonymy_tab(name))
+            link_to(:sf_species_synonymy.t,
+                         species_fungorum_sf_synonymy(name.icn_id))
+          end
+        end %>
       <% elsif name.registrable? %>
-        <p><%= :ICN_ID.t %>: <em><%= :show_name_icn_id_missing.t %></em></p>
-        <p><%= link_to(:index_fungorum_search.t,
-                        index_fungorum_basic_search_url) %></p>
-        <p><%= link_to(:mycobank_search.t,
-                        mycobank_name_search_url(name)) %></p>
+        <%= tag.p do
+          concat("#{:ICN_ID.l}: ")
+          concat(tag.em(:show_name_icn_id_missing.l))
+        end %>
+        <%= tag.p { link_to(*index_fungorum_basic_search_tab) } %>
+        <%= tag.p { link_to(*mycobank_name_search_tab(name)) } %>
       <% elsif name.searchable_in_registry? %>
-        <p><%= link_to(:index_fungorum_search.t,
-                        index_fungorum_basic_search_url) %></p>
-        <p><%= link_to(:mycobank_search.t, mycobank_basic_search_url) %></p>
+        <%= tag.p { link_to(*index_fungorum_basic_search_tab) } %>
+        <%= tag.p { link_to(*mycobank_basic_search_tab) } %>
       <% end %>
-    </div><!--.col-->
+    <% end %>
 
-  </div><!--.row-->
+  <% end %>
 
-  <p><%= :AUTHORITY.t %>: <%= name.author.to_s.t %></p>
-  <p><%= :CITATION.t %>: <%= name.citation.to_s.tl %></p>
-  <%
-  if name.is_misspelling? %>
-    <p><%= :show_name_misspelling_correct.t %>:
-    <%=
-    if name.correct_spelling
-      link_with_query(name.correct_spelling.display_name.t,
-                      name_path(name.correct_spelling_id))
-    else
-      # This can apparently happen for past_names.
-      name.correct_spelling_id
-    end %>
-    </p>
-  <%
+  <%= tag.p { "#{:AUTHORITY.l}: #{name.author.to_s.t}" } %>
+  <%= tag.p { ["#{:CITATION.l}: ", name.citation.to_s.tl].safe_join } %>
+
+  <%= if name.is_misspelling?
+    tag.p do
+      concat("#{:show_name_misspelling_correct.l}: ")
+      if name.correct_spelling
+        concat(link_with_query(name.correct_spelling.display_name.t,
+                               name_path(name.correct_spelling_id)))
+      else
+        # This can apparently happen for past_names.
+        concat(name.correct_spelling_id)
+      end
+    end
   end %>
 
-  <%
-  if synonyms
+  <% if synonyms
     approved_synonyms, deprecated_synonyms = name.sort_synonyms
     misspellings = deprecated_synonyms.select(&:correct_spelling_id)
-    deprecated_synonyms.reject!(&:correct_spelling_id)
-    if approved_synonyms.try(&:any?)
-      links = approved_synonyms.map do |n|
-        link_with_query(n.display_name.t, name_path(n.id))
-      end %>
-      <p><%=
-      name.deprecated ? :show_name_preferred_synonyms.t : :show_name_synonyms.t
-      %>: <%=
-      links.safe_join(", ")
-      %></p>
-    <%
-    end
-    if deprecated_synonyms.try(&:any?)
-      links = deprecated_synonyms.map do |n|
-        link_with_query(n.display_name.t, name_path(n.id))
-      end %>
-      <p><%= :show_name_deprecated_synonyms.t %>:
-        <%= links.safe_join(", ") %></p>
-    <%
-    end
-    if misspellings.try(&:any?)
-      links = misspellings.map do |n|
-        link_with_query(n.display_name.t, name_path(n.id))
-      end %>
-      <p><%= :show_name_misspelled_synonyms.t %>:
-        <%= links.safe_join(", ") %></p>
-    <%
-    end
-  end %>
+    deprecated_synonyms.reject!(&:correct_spelling_id) %>
+
+    <%= if approved_synonyms.try(&:any?)
+      synonym_label = name.deprecated ?
+        :show_name_preferred_synonyms.l : :show_name_synonyms.l
+      tag.p do
+        concat("#{synonym_label}: ")
+        concat(
+          approved_synonyms.map do |n|
+            link_with_query(n.display_name.t, name_path(n.id))
+          end.safe_join(", ")
+        )
+      end
+    end %>
+
+    <%= if deprecated_synonyms.try(&:any?)
+      tag.p do
+        concat("#{:show_name_deprecated_synonyms.l}: ")
+        concat(
+          deprecated_synonyms.map do |n|
+            link_with_query(n.display_name.t, name_path(n.id))
+          end.safe_join(", ")
+        )
+      end
+    end %>
+
+    <%= if misspellings.try(&:any?)
+      tag.p do
+        concat("#{:show_name_misspelled_synonyms.l}: ")
+        concat(
+          misspellings.map do |n|
+            link_with_query(n.display_name.t, name_path(n.id))
+          end.safe_join(", ")
+        )
+      end
+    end %>
+
+  <% end %>
 
 <% end %>

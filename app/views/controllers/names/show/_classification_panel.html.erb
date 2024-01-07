@@ -1,13 +1,14 @@
 <%
 heading = :show_name_classification.l
-if @user
-  link = link_with_query(:EDIT.l, edit_name_classification_path(@name.id))
-  heading += " [#{link}]".html_safe
-end
+link = icon_link_with_query(
+  :EDIT.l, edit_name_classification_path(@name.id), icon: :edit
+)
+heading_links = @user ? link.html_safe : ""
 %>
 
 <%= tag.div(class: "col-sm-6") do
-  panel_block(heading: heading, inner_class: "name-section",
+  panel_block(heading: heading, heading_links: heading_links,
+              inner_class: "name-section",
               id: "name_classification",
               data: { name_panels_target: "classification" }) do
     render(partial: "names/show/classification")

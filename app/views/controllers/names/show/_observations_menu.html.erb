@@ -26,21 +26,11 @@
     </div>
     <div class="col-sm-5 name-section">
       <% if @name.searchable_in_registry? %>
-        <%= tag.p(link_to(
-              "MyCoPortal", mycoportal_url(@name), target: :_blank
-            )) %>
+        <%= tag.p(link_to(*mycoportal_name_tab(@name))) %>
       <% end %>
-      <%= tag.p(link_to(
-            "EOL", @name.eol_url, target: :_blank
-          )) if @name.eol_url %>
-      <%= tag.p(link_to(
-            :google_images.t,
-            "https://images.google.com/images?q=#{@name.real_text_name}",
-            target: :_blank
-          )) %>
-      <%= tag.p(link_with_query(
-            :show_name_distribution_map.t, map_name_path(@name.id)
-          )) %>
+      <%= tag.p(link_to(*eol_name_tab(@name))) if @name.eol_url %>
+      <%= tag.p(link_to(*google_images_for_name_tab(@name))) %>
+      <%= tag.p(link_to(*occurrence_map_for_name_tab(@name))) %>
     </div>
   </div>
 <% end %>

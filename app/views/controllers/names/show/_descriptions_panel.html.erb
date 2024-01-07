@@ -1,14 +1,15 @@
 <%
-description_links = list_descriptions(object: @name) || []
+description_links = list_descriptions(object: @name, type: :name) || []
 heading = :show_name_descriptions.l
-if @user
-  link = link_with_query(:show_name_create_description.l,
-                         new_name_description_path(@name.id))
-  heading += " [#{link}]".html_safe
-end
+link = icon_link_with_query(
+  :show_name_create_description.l,
+  new_name_description_path(@name.id), icon: :add
+)
+heading_links = @user ? link.html_safe : ""
 %>
 
-<%= panel_block(id: "name_descriptions", heading: heading) do
+<%= panel_block(id: "name_descriptions",
+                heading: heading, heading_links: heading_links) do
   description_links.each do |desc|
     concat(tag.div(desc))
   end
