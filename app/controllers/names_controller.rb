@@ -295,7 +295,7 @@ class NamesController < ApplicationController
                                     by: :confidence)
     end
     # Determine if relevant and count the results of running the query if so.
-    @has_subtaxa = @subtaxa_query.select_count if @subtaxa_query
+    @has_subtaxa = @first_child ? @subtaxa_query.select_count : 0
     # NOTE: `_observation_menu` makes many select_count queries like this!
     # That is where most of the heavy loading is. Check helpers/show_name_helper
     #
