@@ -50,6 +50,9 @@ module LinkHelper
     link_to(*tab)
   end
 
+  # NOTE: if passing an MO tab, you have to splat the array and args separately
+  # (text, path, args) = *edit_description_tab(desc, type)
+  # icon_link_to(text, path, **args)
   def icon_link_to(text = nil, path = nil, **opts, &block)
     link = block ? text : path # because positional
     content = block ? capture(&block) : text
@@ -59,12 +62,13 @@ module LinkHelper
     opts = { title: content,
              data: { toggle: "tooltip" } }.deep_merge(opts.except(:icon))
 
-    link_to(link, opts) do
+    link_to(link, **opts) do
       concat(tag.span(content, class: "sr-only"))
       concat(link_icon(icon_type))
     end
   end
 
+  # NOTE: above re: MO tabs
   def icon_link_with_query(text = nil, path = nil, **, &block)
     link = block ? text : path # because positional
     content = block ? capture(&block) : text
@@ -117,6 +121,7 @@ module LinkHelper
       delete: "remove-circle",
       add: "plus",
       back: "step-backward",
+      show: "eye-open",
       hide: "eye-close",
       reuse: "share",
       x: "remove",
@@ -127,7 +132,14 @@ module LinkHelper
       trash: "trash",
       cancel: "remove",
       email: "envelope",
-      question: "question-sign"
+      question: "question-sign",
+      list: "list",
+      clone: "duplicate",
+      merge: "transfer",
+      move: "random",
+      adjust: "resize-vertical",
+      make_default: "star",
+      publish: "upload"
     }.freeze
   end
 
