@@ -16,12 +16,12 @@ module Tabs
     end
 
     def edit_name_tab(name)
-      [:show_name_edit_name.t, add_query_param(edit_name_path(name.id)),
+      [:show_name_edit_name.l, add_query_param(edit_name_path(name.id)),
        { class: tab_id(__method__.to_s) }]
     end
 
     def new_name_tab
-      [:show_name_add_name.t, add_query_param(new_name_path),
+      [:show_name_add_name.l, add_query_param(new_name_path),
        { class: tab_id(__method__.to_s) }]
     end
 
@@ -44,20 +44,100 @@ module Tabs
     end
 
     def edit_name_synonym_tab(name)
-      [:show_name_change_synonyms.t,
+      [:show_name_change_synonyms.l,
        add_query_param(edit_name_synonyms_path(name.id)),
        { class: tab_id(__method__.to_s) }]
     end
 
     def deprecate_name_tab(name)
-      [:DEPRECATE.t, add_query_param(deprecate_name_synonym_form_path(name.id)),
+      [:DEPRECATE.l, add_query_param(deprecate_name_synonym_form_path(name.id)),
        { class: tab_id(__method__.to_s) }]
     end
 
     def approve_name_synonym_tab(name)
-      [:APPROVE.t, add_query_param(approve_name_synonym_form_path(name.id)),
+      [:APPROVE.l, add_query_param(approve_name_synonym_form_path(name.id)),
        { class: tab_id(__method__.to_s) }]
     end
+
+    # Show name panels:
+    # Nomenclature tabs
+    def index_fungorum_record_tab(name)
+      ["[##{name.icn_id}]", index_fungorum_record_url(name.icn_id),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def mycobank_record_tab(name)
+      ["[##{name.icn_id}]", mycobank_record_url(name.icn_id),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def fungorum_gsd_synonymy_tab(name)
+      [:gsd_species_synonymy.l, species_fungorum_gsd_synonymy(name.icn_id),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def fungorum_sf_synonymy_tab(name)
+      [:sf_species_synonymy.l, species_fungorum_sf_synonymy(name.icn_id),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def index_fungorum_basic_search_tab
+      [:index_fungorum_search.l, index_fungorum_basic_search_url,
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def mycobank_name_search_tab(name)
+      [:mycobank_search.l, mycobank_name_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def mycobank_basic_search_tab
+      [:mycobank_search.l, mycobank_basic_search_url,
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def name_correct_spelling_tab(name)
+      [name.correct_spelling.display_name.l,
+       add_query_param(name_path(name.correct_spelling_id)),
+       { class: tab_id(__method__.to_s) }]
+    end
+
+    def show_name_tab(name)
+      [name.display_name.l, add_query_param(name_path(name.id)),
+       { class: tab_id(__method__.to_s) }]
+    end
+
+    # lifeform tab:
+    def propagate_lifeform_form_tab(name)
+      [:show_name_propagate_lifeform.t,
+       add_query_param(propagate_name_lifeform_form_path(name.id)),
+       { class: tab_id(__method__.to_s) }]
+    end
+    #
+
+    # Also on Obs show, name section
+    def mycoportal_name_tab(name)
+      ["MyCoPortal", mycoportal_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def eol_name_tab(name)
+      ["EOL", name.eol_url,
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def google_images_for_name_tab(name)
+      [:google_images.t,
+       format("https://images.google.com/images?q=%s", name.real_text_name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def occurrence_map_for_name_tab(name)
+      [:show_name_distribution_map.t,
+       add_query_param(map_name_path(id: name.id)),
+       { class: tab_id(__method__.to_s) }]
+    end
+    #
 
     def name_tracker_form_tab(name, user)
       existing_name_tracker = NameTracker.find_by(name_id: name.id,

@@ -74,7 +74,7 @@ module Tabs
 
     # from descriptions_helper
     def obs_name_description_tabs(name)
-      list_descriptions(object: name)&.map do |link|
+      list_descriptions(object: name, type: :name)&.map do |link|
         tag.div(link)
       end
     end
@@ -100,28 +100,6 @@ module Tabs
       ]
     end
 
-    def mycoportal_name_tab(name)
-      ["MyCoPortal", mycoportal_url(name),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
-    end
-
-    def mycobank_name_search_tab(name)
-      ["Mycobank", mycobank_name_search_url(name),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
-    end
-
-    def google_images_for_name_tab(obs_name)
-      [:google_images.t,
-       format("https://images.google.com/images?q=%s",
-              obs_name.real_text_name),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
-    end
-
-    def occurrence_map_for_name_tab(obs_name)
-      [:show_name_distribution_map.t,
-       add_query_param(map_name_path(id: obs_name.id)),
-       { class: tab_id(__method__.to_s) }]
-    end
 
     ############################################
     # INDEX
