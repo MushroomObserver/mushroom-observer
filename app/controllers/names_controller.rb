@@ -221,20 +221,73 @@ class NamesController < ApplicationController
   def find_name!
     @name = Name.includes(show_name_includes).find_by(id: params[:id]) ||
             flash_error_and_goto_index(Name, params[:id])
+    names = Name.includes(show_name_includes).include_immediate_subtaxa
   end
 
+  # This seems incomplete. Synonyms, descriptions?
   def show_name_includes
     [
       { observations: [:user, :thumb_image] }
     ]
   end
 
+  # Possible sources of extra db lookups in partials
+
+  # carousel:
+  #   @best_images
+  # best_description:
+  #   @best_description
+  # comments:
+  #   comments_for_object
+  # observations_menu:
+  #   @has_subtaxa
+  #   @subtaxa_query
+  # nomenclature:
+  #   approved_synonyms, deprecated_synonyms = name.sort_synonyms
+  # classification:
+  #   approved_name = @name.approved_name
+  #   parents = approved_name.all_parents
+  #   @first_child
+  #   @children_query
+  #   The entire name::synonymy module may be a candidate for a PORO
+  # lifeform:
+  #   @first_child
+  # notes:
+  # descriptions:
+  #   description_links = list_descriptions(object: @name, type: :name)
+  # projects:
+  #   @projects
+
   def init_related_query_ivars
-    # Create query for immediate children.
+    # Query for names of subtaxa, used in special query link
+    # Note this is only creating a schematic of a query, used in the link.
     @children_query = create_query(:Name, :all,
                                    names: @name.id,
                                    include_immediate_subtaxa: true,
                                    exclude_original_names: true)
+    # @first_child runs @children_query to check for immediate children.
+    # Used in classification and lifeform.
+    # Potentially refactor to reduce duplicate queries:
+
+    # First query: Names including immediate subtaxa.
+    # Instead of running @children_query here, consider altering the original
+    # show query to include_immediate_subtaxa (would need to write a complicated
+    # scope, but it's outlined in app/classes/query/modules/lookup_names.rb).
+    # Could select @name from those results using the original name.id, then
+    # select@first_child from the rest.
+    @first_child = @children_query.results(limit: 1).first
+
+    # Second query: Synonyms of name. Incompatible with first query.
+    # Can use to find approved_synonyms, deprecated_synonyms, misspellings.
+    # These are currently queried from _nomenclature, causing N+1s
+
+    # Third query: Observations of name including (all) subtaxa.
+    # This is only used for the link to "observations of this name's subtaxa".
+    # We also query for obs (with images) below, so we could maybe refactor to
+    # get Observation.of_name(name.id).include_subtaxa.order(:vote_cache).
+    # Then, select those of original name with thumb_image_id for @best_images,
+    # and select_count all (excluding obs of original name) to get @has_subtaxa.
+    # Would need to write include_subtaxa scope, as above.
     if @name.at_or_below_genus?
       @subtaxa_query = create_query(:Observation, :all,
                                     names: @name.id,
@@ -242,30 +295,16 @@ class NamesController < ApplicationController
                                     exclude_original_names: true,
                                     by: :confidence)
     end
-
-    # Create search queries for observation lists.
-    @consensus_query = create_query(:Observation, :all,
-                                    names: @name.id, by: :confidence)
-
-    # @obs_with_images_query = create_query(:Observation, :all,
-    #                                       names: @name.id,
-    #                                       has_images: true,
-    #                                       by: :confidence)
-
-    # Determine which queries actually have results and instantiate the ones
-    # we'll use.
-    @best_description = @name.best_brief_description
-    # @first_four       = @obs_with_images_query.results(
-    #   limit: 4,
-    #   include: {
-    #     thumb_image: [:image_votes, :license, :user]
-    #   }
-    # )
+    # Determine if relevant and count the results of running the query if so.
+    @has_subtaxa = @subtaxa_query.select_count if @subtaxa_query
+    # Fourth query (maybe combine with third)
     @best_images = Observation.of_name(@name.id).with_image.
                    order(vote_cache: :desc).take(6).map(&:thumb_image)
-    @first_child      = @children_query.results(limit: 1).first
-    @first_consensus  = @consensus_query.results(limit: 1).first
-    @has_subtaxa      = @subtaxa_query.select_count if @subtaxa_query
+
+    # This seems like it queries the NameDescription table.
+    # Would be better to eager load descriptions and derive @best_description
+    # from them. Can also derive @projects from this.
+    @best_description = @name.best_brief_description
   end
 
   def init_projects_ivar
