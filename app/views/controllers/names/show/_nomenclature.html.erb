@@ -24,9 +24,12 @@
     <%= tag.div(class: "col-sm-5 name-section") do %>
       <% if name.icn_id? %>
         <%= tag.p do
-          "#{link_to(*index_fungorum_record_tab(name))} Index Fungorum"
+          [link_to(*index_fungorum_record_tab(name)),
+           "Index Fungorum"].safe_join(" ")
         end %>
-        <%= tag.p { "#{link_to(*mycobank_record_tab(name))} MycoBank" } %>
+        <%= tag.p do
+          [link_to(*mycobank_record_tab(name)), "MycoBank"].safe_join(" ")
+        end %>
         <%= tag.p do
           if name.at_or_below_species?
             link_to(*fungorum_gsd_synonymy_tab(name))
