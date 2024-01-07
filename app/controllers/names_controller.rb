@@ -221,7 +221,6 @@ class NamesController < ApplicationController
   def find_name!
     @name = Name.includes(show_name_includes).find_by(id: params[:id]) ||
             flash_error_and_goto_index(Name, params[:id])
-    names = Name.includes(show_name_includes).include_immediate_subtaxa
   end
 
   # This seems incomplete. Synonyms, descriptions?
