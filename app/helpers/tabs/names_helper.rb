@@ -113,9 +113,8 @@ module Tabs
        add_query_param(propagate_name_lifeform_form_path(name.id)),
        { class: tab_id(__method__.to_s) }]
     end
-    #
 
-    # Also on Obs show, name section
+    # Show name, obs menu. Also on Obs show, name section
     def mycoportal_name_tab(name)
       ["MyCoPortal", mycoportal_url(name),
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
@@ -137,8 +136,8 @@ module Tabs
        add_query_param(map_name_path(id: name.id)),
        { class: tab_id(__method__.to_s) }]
     end
-    #
 
+    # Others
     def name_tracker_form_tab(name, user)
       existing_name_tracker = NameTracker.find_by(name_id: name.id,
                                                   user_id: user.id)
