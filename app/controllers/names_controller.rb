@@ -258,6 +258,7 @@ class NamesController < ApplicationController
   #   @projects
 
   def init_related_query_ivars
+    @has_subtaxa = 0
     # Query for names of subtaxa, used in special query link
     # Note this is only creating a schematic of a query, used in the link.
     @children_query = create_query(:Name, :all,
@@ -293,9 +294,10 @@ class NamesController < ApplicationController
                                     include_subtaxa: true,
                                     exclude_original_names: true,
                                     by: :confidence)
+      # Determine if relevant and count the results of running the query if so.
+      # Don't run if there aren't any children.
+      @has_subtaxa = @first_child ? @subtaxa_query.select_count : 0
     end
-    # Determine if relevant and count the results of running the query if so.
-    @has_subtaxa = @first_child ? @subtaxa_query.select_count : 0
     # NOTE: `_observation_menu` makes many select_count queries like this!
     # That is where most of the heavy loading is. Check helpers/show_name_helper
     #
