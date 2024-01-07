@@ -2,35 +2,39 @@
 #  This is just a two-column panel
 %>
 
-<%= panel_block(id: "name_observations_menu",
-                heading: :about_this_taxon.l,) do %>
-  <div class="row">
-    <div class="col-sm-7 name-section">
-      <%= tag.p(:show_observations_of.t) %>
-      <div class="pl-3">
-        <%= # Observations of this name
-          tag.p(obss_of_name(@name) || "#{:obss_of_this_name.t} (0)")  %>
-        <%= # Observations of taxon under other names
+<%= panel_block(id: "name_observations_menu", heading: :about_this_taxon.l,) do
+
+  tag.div(class: "row") do
+
+    concat(tag.div(class: "col-sm-7 name-section") do
+      concat(tag.p(:show_observations_of.t))
+      concat(tag.div(class: "pl-3") do
+        [
+          # Observations of this name
+          tag.p(obss_of_name(@name) || "#{:obss_of_this_name.t} (0)"),
+          # Observations of taxon under other names
           tag.p(taxon_obss_other_names(@name) ||
-                "#{:taxon_obss_other_names.t} (0)") %>
-        <%= # Observations of taxon under any name
-          tag.p(taxon_observations(@name) || "#{:obss_of_taxon.t} (0)") %>
-        <%= # Observations of other taxa where this taxon was proposed
-          tag.p(taxon_proposed(@name) || "#{:obss_taxon_proposed.t} (0)") %>
-        <%= # Observations where this Nae was proposed
-          tag.p(name_proposed(@name) ||
-                "#{:obss_name_proposed.t} (0)") %>
-        <%= name_section_link(:show_subtaxa_obss.t,
-                              @has_subtaxa, @subtaxa_query) %>
-      </div>
-    </div>
-    <div class="col-sm-5 name-section">
-      <% if @name.searchable_in_registry? %>
-        <%= tag.p(link_to(*mycoportal_name_tab(@name))) %>
-      <% end %>
-      <%= tag.p(link_to(*eol_name_tab(@name))) if @name.eol_url %>
-      <%= tag.p(link_to(*google_images_for_name_tab(@name))) %>
-      <%= tag.p(link_to(*occurrence_map_for_name_tab(@name))) %>
-    </div>
-  </div>
-<% end %>
+                "#{:taxon_obss_other_names.t} (0)"),
+          # Observations of taxon under any name
+          tag.p(taxon_observations(@name) || "#{:obss_of_taxon.t} (0)"),
+          # Observations of other taxa where this taxon was proposed
+          tag.p(taxon_proposed(@name) || "#{:obss_taxon_proposed.t} (0)"),
+          # Observations where this Nae was proposed
+          tag.p(name_proposed(@name) || "#{:obss_name_proposed.t} (0)"),
+          name_section_link(:show_subtaxa_obss.t, @has_subtaxa, @subtaxa_query)
+        ].safe_join
+      end)
+    end)
+
+    concat(tag.div(class: "col-sm-5 name-section") do
+      if @name.searchable_in_registry?
+        concat(tag.p(link_to(*mycoportal_name_tab(@name))))
+      end
+      concat(tag.p(link_to(*eol_name_tab(@name)))) if @name.eol_url
+      concat(tag.p(link_to(*google_images_for_name_tab(@name))))
+      concat(tag.p(link_to(*occurrence_map_for_name_tab(@name))))
+    end)
+
+  end
+
+end %>

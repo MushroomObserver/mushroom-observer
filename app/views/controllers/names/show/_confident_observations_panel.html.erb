@@ -5,9 +5,9 @@ carousel_locals = {
 }
 %>
 
-<% if @best_images&.length&.positive? %>
-  <%= tag.div(class: "panel panel-default",
-              id: "name_confident_observations") do
+<%= if @best_images&.length&.positive?
+  tag.div(class: "panel panel-default",
+          id: "name_confident_observations") do
     carousel_html(**carousel_locals)
-  end %>
-<% end %>
+  end
+end %>

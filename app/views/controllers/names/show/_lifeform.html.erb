@@ -6,7 +6,7 @@
   end %>
 <% end %>
 
-<% if @first_child %>
-  <%= tag.p(link_with_query(:show_name_propagate_lifeform.t,
-                            propagate_name_lifeform_form_path(@name.id))) %>
-<% end %>
+<%= if @first_child
+  tag.p(link_with_query(:show_name_propagate_lifeform.t,
+                        propagate_name_lifeform_form_path(@name.id)))
+end %>
