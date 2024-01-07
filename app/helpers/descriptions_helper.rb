@@ -180,13 +180,6 @@ module DescriptionsHelper
     t(result)
   end
 
-  def name_section_link(title, data, query)
-    return unless data && data != 0
-
-    url = add_query_param(observations_path, query)
-    tag.p(link_to(title, url))
-  end
-
   # Helpers for description forms
 
   # Source type options for description forms.

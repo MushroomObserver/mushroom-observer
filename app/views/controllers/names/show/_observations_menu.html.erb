@@ -9,7 +9,7 @@
     concat(tag.div(class: "col-sm-7 name-section") do
       concat(tag.p(:show_observations_of.t))
       concat(tag.div(class: "pl-3") do
-        [
+        concat([
           # Observations of this name
           tag.p(obss_of_name(@name) || "#{:obss_of_this_name.t} (0)"),
           # Observations of taxon under other names
@@ -21,8 +21,12 @@
           tag.p(taxon_proposed(@name) || "#{:obss_taxon_proposed.t} (0)"),
           # Observations where this Nae was proposed
           tag.p(name_proposed(@name) || "#{:obss_name_proposed.t} (0)"),
-          name_section_link(:show_subtaxa_obss.t, @has_subtaxa, @subtaxa_query)
-        ].safe_join
+        ].safe_join)
+        # Observations of this name's subtaxa, if any
+        concat(tag.p do
+          link_to(:show_subtaxa_obss.t,
+                  add_query_param(observations_path, @subtaxa_query))
+        end) if @has_subtaxa
       end)
     end)
 
