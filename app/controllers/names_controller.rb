@@ -229,6 +229,7 @@ class NamesController < ApplicationController
   end
 
   def init_related_query_ivars
+    @versions = @name.versions
     # Create query for immediate children.
     @children_query = create_query(:Name, :all,
                                    names: @name.id,

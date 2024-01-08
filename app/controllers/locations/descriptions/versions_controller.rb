@@ -15,6 +15,7 @@ module Locations::Descriptions
 
       @location = @description.location
       @description.revert_to(params[:version].to_i)
+      @versions = @description.versions
     end
   end
 end

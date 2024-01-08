@@ -14,6 +14,7 @@ module Locations
 
       if params[:version]
         @location.revert_to(params[:version].to_i)
+        @versions = @location.versions
       else
         flash_error(:show_past_location_no_version.t)
         redirect_to(location_path(@location.id))

@@ -13,6 +13,7 @@ module Names
       return unless @name
 
       @name.revert_to(params[:version].to_i)
+      @versions = @name.versions
       @correct_spelling = ""
       return unless @name.is_misspelling?
 

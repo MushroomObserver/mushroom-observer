@@ -15,6 +15,7 @@ module Names::Descriptions
 
       @name = @description.name
       @description.revert_to(params[:version].to_i)
+      @versions = @description.versions
     end
   end
 end

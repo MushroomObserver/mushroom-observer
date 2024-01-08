@@ -12,6 +12,7 @@ module GlossaryTerms
       return unless find_glossary_term!
 
       @glossary_term.revert_to(params[:version].to_i)
+      @versions = @glossary_term.versions
     end
 
     private

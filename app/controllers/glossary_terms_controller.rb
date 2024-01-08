@@ -19,6 +19,7 @@ class GlossaryTermsController < ApplicationController
     @canonical_url = glossary_term_url
     @layout = calc_layout_params
     @other_images = @glossary_term.other_images.order(vote_cache: :desc)
+    @versions = @glossary_term.versions
   end
 
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------

@@ -274,6 +274,7 @@ class LocationsController < ApplicationController
     update_view_stats(@location)
     update_view_stats(@description) if @description
 
+    @versions = @location.versions
     init_projects_ivar
   end
 
