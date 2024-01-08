@@ -231,7 +231,7 @@ class NamesController < ApplicationController # rubocop:disable Metrics/ClassLen
      { interests: :user },
      :misspellings,
      { namings: [:user] },
-     { observations: [:location, :user] },
+     { observations: [:location, :thumb_image, :user] },
      :rss_log,
      { synonym: :names },
      :user,
