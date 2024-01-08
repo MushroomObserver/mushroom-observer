@@ -29,10 +29,9 @@ module Names
     end
 
     def show_includes
-      [
-        { observations: :user },
-        :versions
-      ]
+      [:correct_spelling,
+       { observations: :user },
+       :user, :versions]
     end
   end
 end

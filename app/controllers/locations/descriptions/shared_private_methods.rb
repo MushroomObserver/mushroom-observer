@@ -13,7 +13,13 @@ module Locations::Descriptions
     end
 
     def show_includes
-      [{ location: :descriptions }, :versions]
+      [:authors,
+       :editors,
+       :interests,
+       { location: [:descriptions, :interests, :rss_log] },
+       :project,
+       :user,
+       :versions]
     end
   end
 end

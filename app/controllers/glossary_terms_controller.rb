@@ -126,7 +126,10 @@ class GlossaryTermsController < ApplicationController
 
   def show_includes
     [
-      :images, { thumb_image: :image_votes }, :user, :versions
+      :glossary_term_images,
+      { images: [:glossary_terms, :observations, :profile_users] },
+      { thumb_image: :image_votes },
+      :rss_log, :user, :versions
     ]
   end
 

@@ -27,7 +27,7 @@ module Locations
     end
 
     def show_includes
-      [:versions]
+      [:user, :versions]
     end
   end
 end

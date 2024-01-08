@@ -13,9 +13,28 @@ module Names::Descriptions
     end
 
     def show_includes
-      [:authors, :editors,
-       { name: [:descriptions, :interests, :rss_log] },
-       :project, :user, :versions]
+      [{ admin_groups: { users: :user_groups } },
+       :authors,
+       :comments,
+       :editors,
+       :interests,
+       :license,
+       { name: [{ description: :reviewer },
+                { descriptions: :reviewer },
+                :interests,
+                :rss_log,
+                { synonym: :names }] },
+       { name_description_admins: :user_group },
+       :name_description_authors,
+       :name_description_editors,
+       { name_description_readers: :user_group },
+       { name_description_writers: :user_group },
+       :project,
+       { reader_groups: { users: :user_groups } },
+       :reviewer,
+       { user: :user_groups },
+       :versions,
+       { writer_groups: { users: :user_groups } }]
     end
   end
 end

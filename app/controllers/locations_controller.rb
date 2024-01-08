@@ -367,7 +367,10 @@ class LocationsController < ApplicationController
   end
 
   def show_includes
-    [:descriptions, :versions]
+    [:comments,
+     :description,
+     { descriptions: [:authors, :editors] },
+     :interests, :observations, :rss_log, :versions]
   end
 
   def render_new

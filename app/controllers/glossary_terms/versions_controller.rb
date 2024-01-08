@@ -27,7 +27,7 @@ module GlossaryTerms
       [
         :images,
         { thumb_image: :image_votes },
-        :versions
+        :user, :versions
       ]
     end
   end
