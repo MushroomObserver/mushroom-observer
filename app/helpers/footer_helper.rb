@@ -166,10 +166,11 @@ module FooterHelper
 
   def html_for_latest_version(obj, versions)
     # This is yet another db lookup of users - NO!
+    # Maybe eager load versions.includes(:user)
     # latest_user = User.safe_find(versions.latest.user_id)
     html = html_created_by(obj)
 
-    if latest_user && obj.updated_at
+    if versions.latest.user_id && obj.updated_at
       html << :footer_last_updated_by.t(
         user: user_link(versions.latest.user_id),
         date: obj.updated_at.web_time
