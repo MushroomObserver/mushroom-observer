@@ -2146,7 +2146,7 @@
   taxon_obss_other_names: this taxon, other names
   obss_name_proposed: any taxon, this name proposed
   obss_taxon_proposed: other taxa, this taxon proposed
-  show_subtaxa_obss: Subtaxa
+  show_subtaxa_obss: subtaxa
   show_name_locked: This name is locked. If you want to change the name of your observation, please propose a new name for your observation and vote on it, instead.  If you change a name record on MO, it implicitly changes all the observations of that name.
   show_name_inherit_classification: Copy from parent.
   edit_classification_title: Edit Classification of [name]
