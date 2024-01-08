@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/ClassLength
 class NamesController < ApplicationController
   # disable cop because index is defined in ApplicationController
   # rubocop:disable Rails/LexicallyScopedActionFilter
@@ -225,8 +226,7 @@ class NamesController < ApplicationController
 
   def show_includes
     [:description, :descriptions, { observations: :user },
-     { synonym: :names }, :user, :versions
-    ]
+     { synonym: :names }, :user, :versions]
   end
 
   def init_related_query_ivars
@@ -672,3 +672,4 @@ class NamesController < ApplicationController
     params.permit(name: [:author, :citation, :icn_id, :locked, :notes, :rank])
   end
 end
+# rubocop:enable Metrics/ClassLength
