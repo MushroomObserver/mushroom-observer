@@ -219,15 +219,14 @@ class NamesController < ApplicationController
   private
 
   def find_name!
-    @name = Name.includes(show_name_includes).find_by(id: params[:id]) ||
+    @name = Name.includes(show_includes).strict_loading.
+            find_by(id: params[:id]) ||
             flash_error_and_goto_index(Name, params[:id])
   end
 
-  # This seems incomplete. Synonyms, descriptions?
-  def show_name_includes
-    [
-      { observations: [:user, :thumb_image] }
-    ]
+  def show_includes
+    [:description, :descriptions, { observations: :user },
+     { synonym: :names }, :user, :versions]
   end
 
   # Possible sources of extra db lookups in partials
