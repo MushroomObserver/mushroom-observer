@@ -16,7 +16,7 @@ add_tab_set(name_show_tabs(name: @name, user: @user))
 
     <%= render(partial: "names/show/confident_observations_panel") %>
 
-    <% if !@best_description.blank? %>
+    <% if @best_description.present? %>
       <%= render(partial: "names/show/best_description_panel") %>
     <% end %>
 
