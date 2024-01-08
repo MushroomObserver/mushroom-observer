@@ -225,11 +225,18 @@ class NamesController < ApplicationController
   end
 
   def show_includes
-    [:comments, :correct_spelling, { description: [:authors, :reviewer] },
+    [:comments,
+     :correct_spelling,
+     { description: [:authors, :reviewer] },
      { descriptions: [:authors, :editors, :reviewer, :writer_groups] },
      { interests: :user },
-     :misspellings, { namings: [:user] }, { observations: [:location, :user] },
-     :rss_log, { synonym: :names }, :user, :versions]
+     :misspellings,
+     { namings: [:user] },
+     { observations: [:location, :user] },
+     :rss_log,
+     { synonym: :names },
+     :user,
+     :versions]
   end
 
   def init_related_query_ivars
