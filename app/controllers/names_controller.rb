@@ -218,16 +218,14 @@ class NamesController < ApplicationController
   private
 
   def find_name!
-    @name = Name.includes(show_includes).
+    @name = Name.includes(show_includes).strict_loading.
             find_by(id: params[:id]) ||
             flash_error_and_goto_index(Name, params[:id])
   end
 
   def show_includes
-    [
-      :descriptions,
-      { observations: :user },
-      :versions
+    [:description, :descriptions, { observations: :user },
+     { synonym: :names }, :user, :versions
     ]
   end
 
