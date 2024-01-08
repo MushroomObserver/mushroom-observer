@@ -444,6 +444,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
     login
     make_admin
+    # FIXME: stub does not prevent the term from being destroyed.
     term.stub(:destroy, false) do
       GlossaryTerm.stub(:safe_find, term) do
         delete(:destroy, params: { id: term.id })
