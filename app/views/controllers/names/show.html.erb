@@ -17,14 +17,14 @@ add_tab_set(name_show_tabs(name: @name, user: @user))
     <%= render(partial: "names/show/confident_observations_panel") %>
 
     <div id="name_previous_export" class="mb-4">
-      <%= show_previous_version(@name) %>
+      <%= show_previous_version(@name, @versions) %>
       <%= export_status_controls(@name) %>
     </div>
 
     <div id="name_authors_editors">
-      <%= panel_block do %>
-        <%= show_authors_and_editors(obj: @name, user: @user) %>
-      <% end %>
+      <%= panel_block do
+        show_authors_and_editors(obj: @name, versions: @versions, user: @user)
+      end %>
     </div>
 
   </div><!--LEFT COLUMN-->
@@ -65,4 +65,4 @@ add_tab_set(name_show_tabs(name: @name, user: @user))
 <%= render(partial: "comments/comments_for_object",
            locals: {object: @name, controls: @user, limit: nil}) %>
 <%= :show_name_num_notifications.t(num: @name.interests) %>
-<%= show_object_footer(@name) %>
+<%= show_object_footer(@name, @versions) %>

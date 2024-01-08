@@ -12,9 +12,9 @@ add_tab_set(name_description_version_tabs(description: @description,
 Textile.register_name(@name)
 %>
 
-<%= show_past_versions(@description) %>
+<%= show_past_versions(@description, @versions) %>
 
 <%= render(partial: "names/descriptions/show/name_description",
            object: @description, locals: { review: false }) %>
 
-<%= show_object_footer(@description) %>
+<%= show_object_footer(@description, @versions) %>
