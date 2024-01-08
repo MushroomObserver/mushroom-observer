@@ -165,8 +165,7 @@ module FooterHelper
   end
 
   def html_for_latest_version(obj, versions)
-    # This is yet another db lookup of users - NO!
-    # Maybe eager load versions.includes(:user)
+    # This is yet another db lookup of users - let's try skipping it.
     # latest_user = User.safe_find(versions.latest.user_id)
     html = html_created_by(obj)
 

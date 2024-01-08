@@ -119,8 +119,15 @@ class GlossaryTermsController < ApplicationController
   # --------- show, create, edit private methods
 
   def find_glossary_term!
-    @glossary_term = find_or_goto_index(GlossaryTerm,
-                                        params[:id].to_s)
+    @glossary_term = GlossaryTerm.includes(show_includes).strict_loading.
+                     find_by(id: params[:id]) ||
+                     flash_error_and_goto_index(GlossaryTerm, params[:id])
+  end
+
+  def show_includes
+    [
+      :images, { thumb_image: :image_votes }, :user, :versions
+    ]
   end
 
   def redirect_non_admins!
