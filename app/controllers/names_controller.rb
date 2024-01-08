@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/ClassLength
-class NamesController < ApplicationController
+class NamesController < ApplicationController # rubocop:disable Metrics/ClassLength
   # disable cop because index is defined in ApplicationController
   # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :store_location, except: [:index]
@@ -711,4 +710,3 @@ class NamesController < ApplicationController
     params.permit(name: [:author, :citation, :icn_id, :locked, :notes, :rank])
   end
 end
-# rubocop:enable Metrics/ClassLength
