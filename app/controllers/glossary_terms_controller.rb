@@ -119,17 +119,18 @@ class GlossaryTermsController < ApplicationController
   # --------- show, create, edit private methods
 
   def find_glossary_term!
-    @glossary_term = find_or_goto_index(GlossaryTerm,
-                                        params[:id].to_s)
-    # @glossary_term = GlossaryTerm.includes(show_includes).strict_loading.
-    #                  find_by(id: params[:id]) ||
-    #                  flash_error_and_goto_index(GlossaryTerm, params[:id])
+    @glossary_term = GlossaryTerm.includes(show_includes).strict_loading.
+                     find_by(id: params[:id]) ||
+                     flash_error_and_goto_index(GlossaryTerm, params[:id])
   end
 
   def show_includes
     [
       :glossary_term_images,
-      { images: [:glossary_terms, :observations, :profile_users] },
+      { images: [:copyright_changes, :glossary_terms, :image_votes,
+                 :observations, :profile_users, :project_images,
+                 :thumb_glossary_terms, :thumb_observations,
+                 :visual_group_images] },
       { thumb_image: :image_votes },
       :rss_log, :user, :versions
     ]
@@ -145,7 +146,7 @@ class GlossaryTermsController < ApplicationController
 
   def destroy_unused_images(images)
     images.each do |image|
-      image.destroy if image&.all_subjects&.empty?
+      image.destroy if image.reload&.all_subjects&.empty?
     end
   end
 
