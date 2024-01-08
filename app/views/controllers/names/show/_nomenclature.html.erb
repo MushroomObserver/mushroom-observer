@@ -59,7 +59,7 @@
 
   end)
 
-  concat(tag.p("#{:AUTHORITY.l}: #{name.author.to_s.t}"))
+  concat(tag.p(["#{:AUTHORITY.l}: ", name.author.to_s.t].safe_join))
   concat(tag.p(["#{:CITATION.l}: ", name.citation.to_s.tl].safe_join))
 
   if name.is_misspelling?
