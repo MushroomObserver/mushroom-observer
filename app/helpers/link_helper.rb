@@ -50,8 +50,7 @@ module LinkHelper
     link_to(*tab)
   end
 
-  # NOTE: if passing an MO tab, you have to splat the array and args separately
-  # (text, path, args) = *edit_description_tab(desc, type)
+  # NOTE: Takes same args as link_to, e.g. *edit_description_tab(desc, type)
   # icon_link_to(text, path, **args)
   def icon_link_to(text = nil, path = nil, options = {}, &block)
     return unless text
