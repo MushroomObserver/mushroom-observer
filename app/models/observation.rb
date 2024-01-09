@@ -519,7 +519,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       { comments: :user },
       { images: [:license, :user] },
       :location,
-      :name,
+      { name: { synonym: :names } },
       { namings: [:name, :user, { votes: [:observation, :user] }] },
       :projects,
       :thumb_image,
