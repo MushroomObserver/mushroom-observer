@@ -4,7 +4,7 @@
 module Tabs
   module NamesHelper
     # assemble links for "tabset" for show_name
-    def name_show_tabs(name:) # user:
+    def name_show_tabs(name:)
       [
         edit_name_tab(name),
         new_name_tab
@@ -31,8 +31,10 @@ module Tabs
       edit_name_synonym_tab(name)
     end
 
+    # Can't approve a misspelling
     def approve_synonym_form_tab(name)
-      return unless name.deprecated && (in_admin_mode? || !name.locked)
+      return unless name.deprecated && name&.correct_spelling_id.nil? &&
+                    (in_admin_mode? || !name.locked)
 
       approve_name_synonym_tab(name)
     end
