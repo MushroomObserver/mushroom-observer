@@ -145,3 +145,10 @@ same_user_owns_name_and_observation:
   observation: same_user_owns_name_and_naming_obs
   name: same_user_owns_naming_and_observation
   vote_cache: <%= Vote.next_best_vote %>
+
+# Just need an obs of deprecated name, trying to keep this out of queries
+deprecated_name_obs_naming:
+  user: vouchered_only_user
+  observation: deprecated_name_obs
+  name: petigera
+  vote_cache: <%= Vote.next_best_vote %>
