@@ -361,16 +361,8 @@ class LocationsController < ApplicationController
   private
 
   def find_location!
-    @location = Location.includes(show_includes).strict_loading.
-                find_by(id: params[:id]) ||
+    @location = Location.show_includes.find_by(id: params[:id]) ||
                 flash_error_and_goto_index(Location, params[:id])
-  end
-
-  def show_includes
-    [:comments,
-     :description,
-     { descriptions: [:authors, :editors] },
-     :interests, :observations, :rss_log, :versions]
   end
 
   def render_new

@@ -664,6 +664,22 @@ class Name < AbstractModel
         where(author: [parsed_name.author, ""])
     end
   }
+  scope :show_includes, lambda {
+    strict_loading.includes(
+      :comments,
+      :correct_spelling,
+      { description: [:authors, :reviewer] },
+      { descriptions: [:authors, :editors, :reviewer, :writer_groups] },
+      { interests: :user },
+      :misspellings,
+      { namings: [:user] },
+      { observations: [:location, :thumb_image, :user] },
+      :rss_log,
+      { synonym: :names },
+      :user,
+      :versions
+    )
+  }
 
   def <=>(other)
     sort_name <=> other.sort_name

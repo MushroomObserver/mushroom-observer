@@ -219,24 +219,8 @@ class NamesController < ApplicationController
   private
 
   def find_name!
-    @name = Name.includes(show_includes).strict_loading.
-            find_by(id: params[:id]) ||
+    @name = Name.show_includes.find_by(id: params[:id]) ||
             flash_error_and_goto_index(Name, params[:id])
-  end
-
-  def show_includes
-    [:comments,
-     :correct_spelling,
-     { description: [:authors, :reviewer] },
-     { descriptions: [:authors, :editors, :reviewer, :writer_groups] },
-     { interests: :user },
-     :misspellings,
-     { namings: [:user] },
-     { observations: [:location, :thumb_image, :user] },
-     :rss_log,
-     { synonym: :names },
-     :user,
-     :versions]
   end
 
   def init_related_query_ivars

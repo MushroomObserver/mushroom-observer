@@ -121,21 +121,8 @@ class GlossaryTermsController < ApplicationController
   def find_glossary_term!
     # @glossary_term = find_or_goto_index(GlossaryTerm,
     #                                     params[:id].to_s)
-    @glossary_term = GlossaryTerm.includes(show_includes).strict_loading.
-                     find_by(id: params[:id]) ||
+    @glossary_term = GlossaryTerm.show_includes.find_by(id: params[:id]) ||
                      flash_error_and_goto_index(GlossaryTerm, params[:id])
-  end
-
-  def show_includes
-    [
-      :glossary_term_images,
-      { images: [:copyright_changes, :glossary_terms, :image_votes,
-                 :observations, :profile_users, :project_images,
-                 :thumb_glossary_terms, :thumb_observations,
-                 :visual_group_images] },
-      { thumb_image: :image_votes },
-      :rss_log, :user, :versions
-    ]
   end
 
   def redirect_non_admins!
