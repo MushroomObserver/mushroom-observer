@@ -1,13 +1,8 @@
 <%
 heading = :show_name_general_description.l
-link1 = icon_link_with_query(
-  :show_name_see_more.l, name_description_path(@name.description.id),
-  icon: :list
-)
-link2 = icon_link_with_query(
-  :EDIT.l, edit_name_description_path(@name.description.id), icon: :edit
-)
-heading_links = @user ? [link1, link2].safe_join(" | ") : ""
+link1 = icon_link_with_query(*name_show_description_tab(@name))
+link2 = icon_link_with_query(*name_edit_description_tab(@name))
+heading_links = @user ? [link1, link2].reject(&:nil?).safe_join(" | ") : ""
 %>
 
 <%= panel_block(id: "name_general_description",

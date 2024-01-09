@@ -2,12 +2,7 @@
 n, s, e, w, lat, long, x, y = observation_map_coordinates(obs: obs)
 map_url = map_observation_path(id: obs.id, q: get_query_param)
 coordinates = { x: x, y: y }.to_json
-heading_links =
-  icon_link_with_query(
-    :show_observation_hide_map.t,
-    javascript_hide_thumbnail_map_path(id: obs.id),
-    icon: :hide
-  )
+heading_links = icon_link_with_query(*observation_hide_thumbnail_map_tab(obs))
 %>
 
 <%= panel_block(id: "observation_thumbnail_map",
@@ -16,20 +11,6 @@ heading_links =
                 data: { controller: "thumbnail-map",
                         coordinates: coordinates,
                         map_url: map_url }) do %>
-
-  <%# tag.div(class: "panel-heading") do
-    tag.h4(class: "panel-title") do
-      concat(:MAP.t)
-      concat(
-        tag.span(class: "float-right") do
-          icon_link_with_query(
-            :show_observation_hide_map.t,
-            javascript_hide_thumbnail_map_path(id: obs.id), icon: :hide
-          )
-        end
-      )
-    end
-  end %>
 
   <%= tag.div(class: "thumbnail-map-container",
               data: { thumbnail_map_target: "mapContainer" }) do %>

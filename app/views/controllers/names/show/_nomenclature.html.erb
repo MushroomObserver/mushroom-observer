@@ -1,7 +1,16 @@
 <%# Nomenclature partial; used by:
     show_name, show_past_name, and add_comment (via _object) %>
+<%
+approve = icon_link_with_query(*approve_synonym_form_tab(name))
+deprecate = icon_link_with_query(*deprecate_synonym_form_tab(name))
+synonyms = icon_link_with_query(*edit_synonym_form_tab(name))
+edit = icon_link_with_query(*edit_name_tab(name))
+heading_links = [approve, deprecate, synonyms, edit].
+                reject(&:nil?).safe_join(" | ")
+%>
 
 <%= panel_block(heading: :show_name_nomenclature.l,
+                heading_links: heading_links,
                 inner_class: "name-section",
                 id: "nomenclature") do
 

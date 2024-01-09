@@ -1,8 +1,11 @@
+<%#  This is just a two-column panel %>
 <%
-#  This is just a two-column panel
+heading_link = icon_link_with_query(*name_tracker_form_tab(@name, @user))
 %>
 
-<%= panel_block(id: "name_observations_menu", heading: :about_this_taxon.l,) do
+<%= panel_block(heading: :about_this_taxon.l,
+                heading_links: heading_link,
+                id: "name_observations_menu",) do
 
   tag.div(class: "row") do
 

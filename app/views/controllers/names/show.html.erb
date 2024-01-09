@@ -4,7 +4,7 @@ add_page_title(:show_name_title.t(name: @name.display_name))
 Textile.register_name(@name)
 add_pager_for(@name)
 add_interest_icons(@user, @name)
-add_tab_set(name_show_tabs(name: @name, user: @user))
+add_tab_set(name_show_tabs(name: @name))
 
 @container = :full
 %>
@@ -49,13 +49,13 @@ add_tab_set(name_show_tabs(name: @name, user: @user))
     <% end %>
 
     <% footer = tag.div(id: "name_previous_export") do
-      concat(show_previous_version(@name))
+      concat(show_previous_version(@name, @versions))
       concat(export_status_controls(@name))
     end %>
 
     <%= panel_block(id: "name_footer", footer: footer) do
       concat(tag.div(id: "name_authors_editors") do
-        show_authors_and_editors(obj: @name, user: @user)
+        show_authors_and_editors(obj: @name, versions: @versions, user: @user)
       end)
       concat(:show_name_num_notifications.t(num: @name.interests))
     end %>
@@ -63,4 +63,4 @@ add_tab_set(name_show_tabs(name: @name, user: @user))
   </div><!--RIGHT COLUMN-->
 </div><!--.row-->
 
-<%= show_object_footer(@name) %>
+<%= show_object_footer(@name, @versions) %>

@@ -134,21 +134,10 @@ module ObservationsHelper
     return "" unless check_permission(obs)
 
     [
-      icon_link_with_query(
-        :show_observation_add_images.t,
-        new_image_for_observation_path(obs.id), icon: :add
-      ),
-      " | ",
-      icon_link_with_query(
-        :show_observation_reuse_image.t,
-        reuse_images_for_observation_path(obs.id), icon: :reuse
-      ),
-      " | ",
-      icon_link_with_query(
-        :show_observation_remove_images.t,
-        remove_images_from_observation_path(obs.id), icon: :remove
-      )
-    ].safe_join
+      icon_link_with_query(*new_image_for_observation_tab(obs)),
+      icon_link_with_query(*reuse_images_for_observation_tab(obs)),
+      icon_link_with_query(*remove_images_from_observation_tab(obs))
+    ].safe_join(" | ")
   end
 
   # The following sections of the observation_details partial are also needed as

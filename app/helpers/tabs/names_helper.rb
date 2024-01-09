@@ -4,25 +4,25 @@
 module Tabs
   module NamesHelper
     # assemble links for "tabset" for show_name
-    def name_show_tabs(name:, user:)
+    def name_show_tabs(name:) # user:
       [
         edit_name_tab(name),
-        new_name_tab,
-        edit_synonym_form_tab(name),
-        approve_synonym_form_tab(name),
-        deprecate_synonym_form_tab(name),
-        name_tracker_form_tab(name, user)
+        new_name_tab
+        # edit_synonym_form_tab(name),
+        # approve_synonym_form_tab(name),
+        # deprecate_synonym_form_tab(name),
+        # name_tracker_form_tab(name, user)
       ].reject(&:empty?)
     end
 
     def edit_name_tab(name)
       [:show_name_edit_name.l, add_query_param(edit_name_path(name.id)),
-       { class: tab_id(__method__.to_s) }]
+       { class: tab_id(__method__.to_s), icon: :edit }]
     end
 
     def new_name_tab
       [:show_name_add_name.l, add_query_param(new_name_path),
-       { class: tab_id(__method__.to_s) }]
+       { class: tab_id(__method__.to_s), icon: :add }]
     end
 
     def edit_synonym_form_tab(name)
@@ -46,17 +46,20 @@ module Tabs
     def edit_name_synonym_tab(name)
       [:show_name_change_synonyms.l,
        add_query_param(edit_name_synonyms_path(name.id)),
-       { class: tab_id(__method__.to_s) }]
+       { class: tab_id(__method__.to_s), icon: :synonyms }]
     end
 
+    # Note that the "deprecate" icon appears on approved names, so it's a
+    # "check" to indicate at a glance that they're approved.
     def deprecate_name_tab(name)
       [:DEPRECATE.l, add_query_param(deprecate_name_synonym_form_path(name.id)),
-       { class: tab_id(__method__.to_s) }]
+       { class: tab_id(__method__.to_s), icon: :deprecate }]
     end
 
+    # Likewise, the "approve" icon appears on deprecated names, so it's a "!"
     def approve_name_synonym_tab(name)
       [:APPROVE.l, add_query_param(approve_name_synonym_form_path(name.id)),
-       { class: tab_id(__method__.to_s) }]
+       { class: tab_id(__method__.to_s), icon: :approve }]
     end
 
     # Show name panels:
@@ -107,11 +110,44 @@ module Tabs
        { class: tab_id(__method__.to_s) }]
     end
 
-    # lifeform tab:
+    # lifeform tabs:
     def propagate_lifeform_form_tab(name)
       [:show_name_propagate_lifeform.t,
        add_query_param(propagate_name_lifeform_form_path(name.id)),
        { class: tab_id(__method__.to_s) }]
+    end
+
+    def edit_name_lifeform_tab(name)
+      [:EDIT.l, add_query_param(edit_name_lifeform_path(name.id)),
+       { class: tab_id(__method__.to_s), icon: :edit }]
+    end
+
+    # description tabs:
+    def name_show_description_tab(name)
+      return unless name&.description
+
+      [:show_name_see_more.l,
+       add_query_param(name_description_path(name.description.id)),
+       { class: tab_id(__method__.to_s), icon: :list }]
+    end
+
+    def name_edit_description_tab(name)
+      return unless name&.description
+
+      [:EDIT.l, edit_name_description_path(name.description.id),
+       { class: tab_id(__method__.to_s), icon: :edit }]
+    end
+
+    def name_new_description_tab(name)
+      [:show_name_create_description.l,
+       new_name_description_path(name.id),
+       { class: tab_id(__method__.to_s), icon: :add }]
+    end
+
+    # classification tabs:
+    def name_edit_classification_tab(name)
+      [:EDIT.l, edit_name_classification_path(name.id),
+       { class: tab_id(__method__.to_s), icon: :edit }]
     end
 
     # Show name, obs menu. Also on Obs show, name section
@@ -159,13 +195,13 @@ module Tabs
     def edit_name_tracker_tab(name)
       [:show_name_email_tracking.t,
        add_query_param(edit_name_tracker_path(name.id)),
-       { class: tab_id(__method__.to_s) }]
+       { class: tab_id(__method__.to_s), icon: :tracking }]
     end
 
     def new_name_tracker_tab(name)
       [:show_name_email_tracking.t,
        add_query_param(new_name_tracker_path(name.id)),
-       { class: tab_id(__method__.to_s) }]
+       { class: tab_id(__method__.to_s), icon: :tracking }]
     end
 
     ##########################################################################
