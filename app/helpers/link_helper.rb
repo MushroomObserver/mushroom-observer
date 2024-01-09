@@ -53,9 +53,12 @@ module LinkHelper
   # NOTE: if passing an MO tab, you have to splat the array and args separately
   # (text, path, args) = *edit_description_tab(desc, type)
   # icon_link_to(text, path, **args)
-  def icon_link_to(text = nil, path = nil, **opts, &block)
+  def icon_link_to(text = nil, path = nil, options = {}, &block)
+    return unless text
+
     link = block ? text : path # because positional
     content = block ? capture(&block) : text
+    opts = block ? path : options
     icon_type = opts[:icon]
     return link_to(link, opts) { content } if icon_type.blank?
 
@@ -69,11 +72,14 @@ module LinkHelper
   end
 
   # NOTE: above re: MO tabs
-  def icon_link_with_query(text = nil, path = nil, **, &block)
+  def icon_link_with_query(text = nil, path = nil, options = {}, &block)
+    return unless text
+
     link = block ? text : path # because positional
     content = block ? capture(&block) : text
+    opts = block ? path : options
 
-    icon_link_to(add_query_param(link), **) { content }
+    icon_link_to(add_query_param(link), opts) { content }
   end
 
   # Link should be to a controller action that renders the form in the modal.
@@ -139,7 +145,11 @@ module LinkHelper
       move: "random",
       adjust: "resize-vertical",
       make_default: "star",
-      publish: "upload"
+      publish: "upload",
+      deprecate: "ok-circle", # approved name needs to look "approved"
+      approve: "exclamation-sign", # deprecated name needs to look "deprecated"
+      synonyms: "random",
+      tracking: "bullhorn"
     }.freeze
   end
 

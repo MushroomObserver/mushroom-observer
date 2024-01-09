@@ -1,11 +1,8 @@
 <%
 description_links = list_descriptions(object: @name, type: :name) || []
 heading = :show_name_descriptions.l
-link = icon_link_with_query(
-  :show_name_create_description.l,
-  new_name_description_path(@name.id), icon: :add
-)
-heading_links = @user ? link.html_safe : ""
+link = icon_link_with_query(*name_edit_description_tab(@name))
+heading_links = @user ? link&.html_safe : ""
 %>
 
 <%= panel_block(id: "name_descriptions",
