@@ -1,13 +1,13 @@
-<% if @first_four&.length&.positive? %>
-  <%= panel_with_outer_heading(
-    heading: "#{:show_name_most_confident.t}:",
-    h_tag: :strong,
-    id: "name_confident_observations"
-  ) do %>
-    <% @first_four.each do |obs| %>
-      <%= content_tag(:div, class: "text-center my-4") do
-        show_best_image(obs)
-      end %>
-    <% end %>
-  <% end %>
-<% end %>
+<%
+carousel_locals = {
+  object: @name, images: @best_images, top_img: nil,
+  title: :show_name_most_confident.l, links: false
+}
+%>
+
+<%= if @best_images&.length&.positive?
+  tag.div(class: "panel panel-default",
+          id: "name_confident_observations") do
+    carousel_html(**carousel_locals)
+  end
+end %>
