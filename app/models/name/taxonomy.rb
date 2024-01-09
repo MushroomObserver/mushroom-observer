@@ -190,6 +190,7 @@ module Name::Taxonomy
   #    Letharia (First) Author
   #    Letharia (Another) One
   #
+  # rubocop:disable Metrics/MethodLength
   def parents(all: false)
     parents = []
 
@@ -209,10 +210,24 @@ module Name::Taxonomy
 
     # Next grab the names out of the classification string.
     lines = try(&:parse_classification) || []
-    lines.reverse_each do |(_line_rank, line_name)|
-      parent = Name.best_match(line_name)
-      parents << parent if parent
-      return [parent] if !all && !parent.deprecated
+    # lines.reverse_each do |(_line_rank, line_name)|
+    #   parent = Name.best_match(line_name)
+    #   parents << parent if parent
+    #   return [parent] if !all && !parent.deprecated
+    # end
+
+    if all
+      # reverse_lines = []
+      reverse_lines = lines.reverse.map do |(_line_rank, line_name)|
+        line_name
+      end
+      parents = Name.best_matches_from_array(reverse_lines)
+    else
+      lines.reverse_each do |(_line_rank, line_name)|
+        parent = Name.best_match(line_name)
+        parents << parent if parent
+        return [parent] unless parent.deprecated
+      end
     end
 
     # Get rid of deprecated names unless all the results are deprecated.
@@ -224,6 +239,7 @@ module Name::Taxonomy
 
     [parents.first]
   end
+  # rubocop:enable Metrics/MethodLength
 
   # Returns an Array of Name's directly under this one.  Ignores misspellings,
   # but includes deprecated Name's.
@@ -453,16 +469,36 @@ module Name::Taxonomy
     # non-"sensu" names where possible, and finally picks the first one
     # arbitrarily where there is still ambiguity.  Useful if you just need a
     # name and it's not so critical that it be the exactly correct one.
+    # Refactored to do a single db lookup, rather than two.
     def best_match(name)
-      matches = Name.with_correct_spelling.where(search_name: name)
+      all = Name.with_correct_spelling.where(search_name: name).
+            or(where(text_name: name))
+
+      matches = all.select { |match| match.search_name == name }
       return matches.first if matches.any?
 
-      matches  = Name.with_correct_spelling.where(text_name: name)
+      matches = all.select { |match| match.text_name == name }
       accepted = matches.reject(&:deprecated)
       matches  = accepted if accepted.any?
       nonsensu = matches.reject { |match| match.author.start_with?("sensu ") }
       matches  = nonsensu if nonsensu.any?
       matches.first
+    end
+
+    # take a list (like parents) and do a single batch lookup,
+    # then loop over them and return the matches
+    def best_matches_from_array(names)
+      all = Name.with_correct_spelling.where(text_name: names)
+      match_array = []
+      names.each do |name|
+        matches = all.select { |match| match.text_name == name }
+        accepted = matches.reject(&:deprecated)
+        matches  = accepted if accepted.any?
+        nonsensu = matches.reject { |match| match.author.start_with?("sensu ") }
+        matches  = nonsensu if nonsensu.any?
+        match_array << matches.first
+      end
+      match_array
     end
 
     # Parse the given +classification+ String, validate it, and reformat it so
