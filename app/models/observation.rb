@@ -248,6 +248,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :needs_id, lambda {
     with_name_above_genus.or(without_confident_name)
   }
+  scope :with_name_correctly_spelled,
+        -> { joins({ namings: :name }).where(names: { correct_spelling: nil }) }
 
   scope :with_vote_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
@@ -496,7 +498,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       where(ProjectSpeciesList[:project_id] == project.id).distinct
   }
   scope :show_includes, lambda {
-    includes(
+    strict_loading.includes(
       :collection_numbers,
       { comments: :user },
       { external_links: { external_site: { project: :user_group } } },
@@ -504,7 +506,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       { images: [:image_votes, :license, :projects, :user] },
       { interests: :user },
       :location,
-      :name,
+      { name: { synonym: :names } },
       { namings: [:name, :user, { votes: [:observation, :user] }] },
       { projects: :admin_group },
       :rss_log,
@@ -519,7 +521,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       { comments: :user },
       { images: [:license, :user] },
       :location,
-      :name,
+      { name: { synonym: :names } },
       { namings: [:name, :user, { votes: [:observation, :user] }] },
       :projects,
       :thumb_image,

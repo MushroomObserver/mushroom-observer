@@ -267,7 +267,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
       # need length; count & size return a hash; description_needed is grouped
-      { count: Name.description_needed.length },
+      { count: Name.with_correct_spelling.description_needed.length },
       "Wrong number of (correctly spelled) Names"
     )
   end
