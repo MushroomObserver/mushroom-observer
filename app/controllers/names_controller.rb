@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-class NamesController < ApplicationController # rubocop:disable Metrics/ClassLength
+# rubocop:disable Metrics/ClassLength
+class NamesController < ApplicationController
   # disable cop because index is defined in ApplicationController
   # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :store_location, except: [:index]
@@ -218,15 +219,8 @@ class NamesController < ApplicationController # rubocop:disable Metrics/ClassLen
   private
 
   def find_name!
-    @name = Name.includes(show_name_includes).find_by(id: params[:id]) ||
+    @name = Name.show_includes.safe_find(params[:id]) ||
             flash_error_and_goto_index(Name, params[:id])
-  end
-
-  # This seems incomplete. Synonyms, descriptions?
-  def show_name_includes
-    [
-      { observations: [:user, :thumb_image] }
-    ]
   end
 
   # Possible sources of extra db lookups in partials
@@ -257,8 +251,8 @@ class NamesController < ApplicationController # rubocop:disable Metrics/ClassLen
   #   @projects
 
   def init_related_query_ivars
-    # Query for names of subtaxa, used in special query link
-    # Note this is only creating a schematic of a query, used in the link.
+    @versions = @name.versions
+    # Create query for immediate children.
     @children_query = create_query(:Name, :all,
                                    names: @name.id,
                                    include_immediate_subtaxa: true,
@@ -710,3 +704,4 @@ class NamesController < ApplicationController # rubocop:disable Metrics/ClassLen
     params.permit(name: [:author, :citation, :icn_id, :locked, :notes, :rank])
   end
 end
+# rubocop:enable Metrics/ClassLength

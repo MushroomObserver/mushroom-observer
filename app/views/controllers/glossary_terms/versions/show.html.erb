@@ -15,8 +15,8 @@ add_tab_set(glossary_term_version_tabs(term: @glossary_term))
                locals: { synonyms: false }) %>
   </div>
   <div class="col-md-6">
-    <%= show_past_versions(@glossary_term) %>
+    <%= show_past_versions(@glossary_term, @versions) %>
   </div>
 </div><!--.row-->
 
-<%= show_object_footer(@glossary_term) %>
+<%= show_object_footer(@glossary_term, @versions) %>
