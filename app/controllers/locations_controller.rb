@@ -274,6 +274,7 @@ class LocationsController < ApplicationController
     update_view_stats(@location)
     update_view_stats(@description) if @description
 
+    @versions = @location.versions
     init_projects_ivar
   end
 
@@ -360,7 +361,8 @@ class LocationsController < ApplicationController
   private
 
   def find_location!
-    @location = find_or_goto_index(Location, params[:id].to_s)
+    @location = Location.show_includes.safe_find(params[:id]) ||
+                flash_error_and_goto_index(Location, params[:id])
   end
 
   def render_new

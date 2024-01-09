@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-class NamesController < ApplicationController # rubocop:disable Metrics/ClassLength
+# rubocop:disable Metrics/ClassLength
+class NamesController < ApplicationController
   # disable cop because index is defined in ApplicationController
   # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :store_location, except: [:index]
@@ -218,24 +219,8 @@ class NamesController < ApplicationController # rubocop:disable Metrics/ClassLen
   private
 
   def find_name!
-    @name = Name.includes(show_includes).strict_loading.
-            find_by(id: params[:id]) ||
+    @name = Name.show_includes.safe_find(params[:id]) ||
             flash_error_and_goto_index(Name, params[:id])
-  end
-
-  def show_includes
-    [:comments,
-     :correct_spelling,
-     { description: [:authors, :reviewer] },
-     { descriptions: [:authors, :editors, :reviewer, :writer_groups] },
-     { interests: :user },
-     :misspellings,
-     { namings: [:user] },
-     { observations: [:location, :thumb_image, :user] },
-     :rss_log,
-     { synonym: :names },
-     :user,
-     :versions]
   end
 
   # Possible sources of extra db lookups in partials
@@ -266,9 +251,11 @@ class NamesController < ApplicationController # rubocop:disable Metrics/ClassLen
   #   @projects
 
   def init_related_query_ivars
+    @versions = @name.versions
     @has_subtaxa = 0
     # Query for names of subtaxa, used in special query link
     # Note this is only creating a schematic of a query, used in the link.
+    # Create query for immediate children.
     @children_query = create_query(:Name, :all,
                                    names: @name.id,
                                    include_immediate_subtaxa: true,
@@ -724,3 +711,4 @@ class NamesController < ApplicationController # rubocop:disable Metrics/ClassLen
     params.permit(name: [:author, :citation, :icn_id, :locked, :notes, :rank])
   end
 end
+# rubocop:enable Metrics/ClassLength

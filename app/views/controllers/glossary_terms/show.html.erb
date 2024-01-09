@@ -34,15 +34,15 @@ add_tab_set(glossary_term_show_tabs(term: @glossary_term, user: @user))
 </div><!--.row-->
 
 <div class="mt-3">
-  <%= show_previous_version(@glossary_term) %>
+  <%= show_previous_version(@glossary_term, @versions) %>
   <p class="Date">
     <%= :footer_created_at.t(date: @glossary_term.created_at.web_time) %><br/>
     <%= :footer_last_updated_at.t(date: @glossary_term.updated_at.web_time) %>
   </p>
 
-  <div id="glossary_term_authors_editors">
-    <%= panel_block do %>
-      <%= show_authors_and_editors(obj: @glossary_term, user: @user) %>
-    <% end %>
-  </div>
+  <%= panel_block(id: "glossary_term_authors_editors") do
+    show_authors_and_editors(
+      obj: @glossary_term, versions: @versions, user: @user
+    )
+  end %>
 </div>

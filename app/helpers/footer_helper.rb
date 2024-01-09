@@ -12,13 +12,15 @@ module FooterHelper
   #     Editors: <user>, <user>, ..., <user>
   #   </p>
   #
-  def show_authors_and_editors(obj:, user:)
+  # New: Must pass in @versions to avoid these and other helpers doing
+  # duplicate version lookups, which are slow.
+  def show_authors_and_editors(obj:, versions:, user:)
     type = obj.type_tag
 
     authors, editors = if /description/.match?(type.to_s)
                          html_description_authors_and_editors(obj, user)
                        else
-                         html_undescribed_obj_authors_and_editors(obj)
+                         html_undescribed_obj_authors_and_editors(obj, versions)
                        end
 
     tag.p(authors + safe_br + editors)
@@ -64,10 +66,10 @@ module FooterHelper
     authors
   end
 
-  def html_undescribed_obj_authors_and_editors(obj)
+  def html_undescribed_obj_authors_and_editors(obj, versions)
     type = obj.type_tag
 
-    editors = obj.versions.map(&:user_id).uniq - [obj.user_id]
+    editors = versions.map(&:user_id).uniq - [obj.user_id]
     editors = User.where(id: editors).to_a
     authors = user_list(:"show_#{type}_creator", [obj.user])
     editors = user_list(:"show_#{type}_editor", editors)
@@ -112,13 +114,13 @@ module FooterHelper
   #     </span>
   #   </p>
   #
-  def show_object_footer(obj)
-    num_versions = obj.respond_to?(:version) ? obj.versions.length : 0
+  def show_object_footer(obj, versions = [])
+    num_versions = versions.length
 
     html = if num_versions.positive? && obj.version < num_versions
              html_for_old_version_of_versioned_object(obj, num_versions)
            else
-             html_for_latest_version_or_non_versioned_object(obj, num_versions)
+             html_for_latest_version_or_non_versioned_object(obj, versions)
            end
 
     html.concat(link_to_rss_log(obj))
@@ -134,7 +136,7 @@ module FooterHelper
     html = [:footer_version_out_of.t(num: obj.version, total: num_versions)]
     return html unless obj.updated_at
 
-    html << :footer_updated_by.t(user: user_link(obj.user),
+    html << :footer_updated_by.t(user: user_link(obj.user_id),
                                  date: obj.updated_at.web_time)
   end
 
@@ -146,9 +148,9 @@ module FooterHelper
     end
   end
 
-  def html_for_latest_version_or_non_versioned_object(obj, num_versions)
-    html = if num_versions.positive?
-             html_for_latest_version(obj)
+  def html_for_latest_version_or_non_versioned_object(obj, versions)
+    html = if versions.length.positive?
+             html_for_latest_version(obj, versions)
            else
              html_for_non_versioned_object(obj)
            end
@@ -162,13 +164,16 @@ module FooterHelper
     html
   end
 
-  def html_for_latest_version(obj)
-    latest_user = User.safe_find(obj.versions.latest.user_id)
+  def html_for_latest_version(obj, versions)
+    # This is yet another db lookup of users - let's try skipping it.
+    # latest_user = User.safe_find(versions.latest.user_id)
     html = html_created_by(obj)
 
-    if latest_user && obj.updated_at
-      html << :footer_last_updated_by.t(user: user_link(latest_user),
-                                        date: obj.updated_at.web_time)
+    if versions.latest.user_id && obj.updated_at
+      html << :footer_last_updated_by.t(
+        user: user_link(versions.latest.user_id),
+        date: obj.updated_at.web_time
+      )
     elsif obj.updated_at
       html << :footer_last_updated_at.t(date: obj.updated_at.web_time)
     end
@@ -178,7 +183,7 @@ module FooterHelper
 
   def html_created_by(obj)
     if obj.created_at
-      [:footer_created_by.t(user: user_link(obj.user),
+      [:footer_created_by.t(user: user_link(obj.user_id),
                             date: obj.created_at.web_time)]
     else
       []
@@ -207,6 +212,7 @@ module FooterHelper
     :footer_viewed.t(date: date, times: times)
   end
 
+  # only for obs
   def html_last_viewed_by(obj)
     time = obj.old_last_viewed_by(User.current)&.web_time || :footer_never.l
     :footer_last_you_viewed.t(date: time)
