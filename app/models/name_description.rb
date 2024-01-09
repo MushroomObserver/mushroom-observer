@@ -120,6 +120,32 @@ class NameDescription < Description
             where(ok_for_export: true).
             where(public: true)
         }
+  scope :show_includes, lambda {
+    strict_loading.includes(
+      { admin_groups: { users: :user_groups } },
+      :authors,
+      :comments,
+      :editors,
+      :interests,
+      :license,
+      { name: [{ description: :reviewer },
+               { descriptions: :reviewer },
+               :interests,
+               :rss_log,
+               { synonym: :names }] },
+      { name_description_admins: :user_group },
+      { name_description_authors: :user },
+      { name_description_editors: :user },
+      { name_description_readers: :user_group },
+      { name_description_writers: :user_group },
+      :project,
+      { reader_groups: { users: :user_groups } },
+      :reviewer,
+      { user: :user_groups },
+      :versions,
+      { writer_groups: { users: :user_groups } }
+    )
+  }
 
   EOL_NOTE_FIELDS = [
     :gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses
@@ -252,10 +278,10 @@ class NameDescription < Description
 
   # This is called after saving potential changes to a Name.  It will determine
   # if the changes are important enough to notify the authors, and do so.
+  # rubocop:disable Metrics/MethodLength
   def notify_users
-    # Even though
-    # changing review_status doesn't cause a new version to be created, I want
-    # to notify authors of that change.
+    # Even though changing review_status doesn't cause a new version to be
+    # created, I want to notify authors of that change.
     # (saved_change_to_<attribute>? is a Rails automagical method)
     if saved_version_changes? || saved_change_to_review_status?
       sender = User.current || User.admin
@@ -277,7 +303,7 @@ class NameDescription < Description
       end
 
       # Tell reviewer of the change.
-      reviewer = self.reviewer || @old_reviewer
+      reviewer ||= @old_reviewer
       recipients.push(reviewer) if reviewer&.email_names_reviewer
 
       # Tell masochists who want to know about all name changes.
@@ -308,6 +334,7 @@ class NameDescription < Description
     # No longer need this.
     @old_reviewer = nil
   end
+  # rubocop:enable Metrics/MethodLength
 
   ##############################################################################
 

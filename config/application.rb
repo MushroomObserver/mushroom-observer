@@ -94,6 +94,9 @@ module MushroomObserver
 
     # Not sure we're even using Rails caching yet, but this gets us current
     config.active_support.cache_format_version = 7.1
+
+    # Strict loading - just log, don't error out the page!
+    config.active_record.action_on_strict_loading_violation = :log
   end
 end
 

@@ -1,13 +1,13 @@
-<div class="col-sm-6">
-  <div id="name_lifeform">
-    <strong><%= :show_name_lifeform.t %>:</strong>
-    <% if @user %>
-      [<%= link_with_query(:EDIT.t,
-                            edit_name_lifeform_path(@name.id)) %>]
-    <% end %>
-    <%= panel_block(inner_class: "name-section", id: "lifeform_section",
-                    data: { name_panels_target: "lifeform" }) do
-      render(partial: "names/show/lifeform")
-    end %>
-  </div>
-</div><!--#name_lifeform-->
+<%
+heading = :show_name_lifeform.l
+link = icon_link_with_query(*edit_name_lifeform_tab(@name))
+heading_links = @user ? link.html_safe : ""
+%>
+
+<%= tag.div(class: "col-sm-6") do
+  panel_block(heading: heading, heading_links: heading_links,
+              inner_class: "name-section", id: "name_lifeform",
+              data: { name_panels_target: "lifeform" }) do
+    render(partial: "names/show/lifeform")
+  end
+end %>

@@ -22,21 +22,22 @@ module DescriptionsHelper
   #   # Renders something like this:
   #   <p>EOL Project Draft: Show | Edit | Destroy</p>
   #
-  def show_embedded_description_title(desc)
+  def show_embedded_description_title(desc, type)
     title = description_title(desc)
-    links = description_mod_links(desc)
+    links = description_mod_links(desc, type)
     tag.p(tag.span(title, class: "text-lg") + links.safe_join(" | "))
   end
 
-  def description_mod_links(desc)
+  def description_mod_links(desc, type)
     links = []
-    links << link_to(*edit_description_tab(desc)) if writer?(desc)
-    links << destroy_button(target: desc) if is_admin?(desc)
+    (text, path, args) = *edit_description_tab(desc, type)
+    links << icon_link_to(text, path, **args) if writer?(desc)
+    links << destroy_button(target: desc, icon: :delete) if is_admin?(desc)
     links
   end
 
   # Show list of name/location descriptions.
-  def list_descriptions(object:, fake_default: false)
+  def list_descriptions(object:, type:, fake_default: false)
     user = User.current
     # Filter out empty descriptions (unless it's public or one you own).
     list = object.descriptions.includes(:user).select do |desc|
@@ -46,7 +47,7 @@ module DescriptionsHelper
 
     list = sort_description_list(object, list)
 
-    make_list_links(list, fake_default)
+    make_list_links(list, type, fake_default)
   end
 
   # Sort, putting the default one on top, followed by public ones, followed
@@ -68,11 +69,11 @@ module DescriptionsHelper
   end
 
   # Turn each into a link to show_description, and add optional controls.
-  def make_list_links(list, fake_default)
+  def make_list_links(list, type, fake_default)
     list.map! do |desc|
       item = description_link(desc)
-      links = description_mod_links(desc)
-      item += indent + "[" + links.safe_join(" | ") + "]" if links.any?
+      links = description_mod_links(desc, type)
+      item += indent + "[ " + links.safe_join(" | ") + " ]" if links.any?
       item
     end
 
@@ -80,7 +81,7 @@ module DescriptionsHelper
     if fake_default && obj.descriptions.none? { |d| d.source_type == :public }
       str = :description_part_title_public.t
       link = link_to(*create_description_tab(obj))
-      str += indent + "[" + link + "]"
+      str += indent + "[ " + link + " ]"
       list.unshift(str)
     end
 
@@ -110,27 +111,29 @@ module DescriptionsHelper
 
     # Show existing drafts, with link to create new one.
     head = tag.b(:show_name_descriptions.t) + ": "
-    head += link_to(*create_description_tab(object))
+    head += link_to(*create_description_tab(object, type))
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
-    list = list_descriptions(object: object).map { |link| indent + link }
+    list = list_descriptions(object: object, type: type).map do |link|
+      indent + link
+    end
     any = list.any?
     list.unshift(head)
     list << indent + :"show_#{type}_no_descriptions".t unless any
     html = list.safe_join(safe_br)
     html = tag.div(html)
 
-    add_list_of_projects(object, html, projects) if projects.present?
+    add_list_of_projects(object, type, html, projects) if projects.present?
     html
   end
 
   # Show list of projects user is a member of.
-  def add_list_of_projects(object, html, projects)
+  def add_list_of_projects(object, type, html, projects)
     return if projects.blank?
 
     head2 = :show_name_create_draft.t + ": "
     list = [head2] + projects.map do |project|
-      item = link_to(*new_description_for_project_tab(object, project))
+      item = link_to(*new_description_for_project_tab(object, type, project))
       indent + item
     end
     html2 = list.safe_join(safe_br)
@@ -175,13 +178,6 @@ module DescriptionsHelper
     result += " (#{permit})" unless /(^| )#{permit}( |$)/i.match?(result)
 
     t(result)
-  end
-
-  def name_section_link(title, data, query)
-    return unless data && data != 0
-
-    url = add_query_param(observations_path, query)
-    tag.p(link_to(title, url))
   end
 
   # Helpers for description forms

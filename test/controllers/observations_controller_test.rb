@@ -89,6 +89,12 @@ class ObservationsControllerTest < FunctionalTestCase
   #  General tests.
   # ----------------------------
 
+  # Test load a deprecated name obs, no strict_loading error
+  def test_show_observation_deprecated_name
+    obs = observations(:deprecated_name_obs)
+    get(:show, params: { id: obs.id })
+  end
+
   def test_show_observation_noteless_image
     obs = observations(:peltigera_mary_obs)
     img = images(:rolf_profile_image)

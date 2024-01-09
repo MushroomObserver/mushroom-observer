@@ -1,15 +1,9 @@
-<div id="name_projects">
-  <div>
-    <strong><%= :show_name_create_draft.t %>:</strong>
-  </div>
-  <%= panel_block do %>
-    <% @projects.each do |project| %>
-      <%= link_with_query(project.title,
-                          new_name_description_path(
-                            @name.id,
-                            project: project.id,
-                            source: :project
-                          )) %><br>
-    <% end %>
-  <% end %>
-</div><!--#name_projects-->
+<%= panel_block(id: "name_projects", heading: :show_name_create_draft.t) do
+  @projects.map do |project|
+    concat(link_with_query(
+      project.title,
+      new_name_description_path(@name.id, project: project.id, source: :project)
+    ))
+    concat(safe_br)
+  end
+end %>

@@ -355,7 +355,10 @@ class ApplicationController < ActionController::Base
   end
 
   def try_user_autologin(user_from_session)
-    if user_verified_and_allowed?(user = user_from_session)
+    if Rails.env.production? && request.remote_ip == "127.0.0.1"
+      # Request from the server itself, MRTG needs to log in to test page loads.
+      login_valid_user(User.find_by(login: "mrtg"))
+    elsif user_verified_and_allowed?(user = user_from_session)
       # User was already logged in.
       refresh_logged_in_user_instance(user)
     elsif user_verified_and_allowed?(user = validate_user_in_autologin_cookie)
@@ -811,7 +814,7 @@ class ApplicationController < ActionController::Base
   # Goes through list of names entered by user and creates (and saves) any that
   # are not in the database (but only if user has approved them).
   #
-  # Used by: bulk_name_editor, change_synonyms, create/edit_species_list
+  # Used by: change_synonyms, create/edit_species_list
   #
   # Inputs:
   #
@@ -827,7 +830,6 @@ class ApplicationController < ActionController::Base
   #   Xxx yyy sensu Blah
   #   Valid name Author = Deprecated name Author
   #   blah blah [comment]
-  #   (this is described better in views/observer/bulk_name_edit.rhtml)
   #
   def construct_approved_names(name_list, approved_names, deprecate = false)
     return unless approved_names
@@ -866,35 +868,12 @@ class ApplicationController < ActionController::Base
     # if above parse was successful
     if (name = names.last)
       name.rank = name_parse.rank if name_parse.rank
-
-      process_given_name_comments_for_bulk_editor(name_parse, name)
-
-      # Only bulk name editor allows the synonym syntax now.  Tell it to
-      # approve the left-hand name.
-      deprecate2 = (name_parse.has_synonym ? false : deprecate)
-
-      save_approved_given_names(names, deprecate2)
+      save_approved_given_names(names, deprecate)
 
     # Parse must have failed.
     else
       flash_error(:runtime_no_create_name.t(type: :name,
                                             value: name_parse.name))
-    end
-  end
-
-  def process_given_name_comments_for_bulk_editor(name_parse, name)
-    return unless (comment = name_parse.comment)
-
-    # Okay to add citation to any record without an existing citation.
-    if comment =~ /^citation: *(.*)/
-      citation = Regexp.last_match(1)
-      name.citation = citation if name.citation.blank?
-    # Only save comment if name didn't exist
-    elsif name.new_record?
-      name.notes = comment
-    else
-      flash_warning("Didn't save comment for #{name.real_search_name}, " \
-                    "name already exists. (comment = \"#{comment}\")")
     end
   end
 
@@ -909,7 +888,6 @@ class ApplicationController < ActionController::Base
     # Parse was successful
     if (synonym = synonyms.last)
       synonym.rank = name_parse.synonym_rank if name_parse.synonym_rank
-      process_synonym_comments_for_bulk_editor(name_parse, synonym)
       save_synonyms(synonym, synonyms)
 
     # Parse must have failed.
@@ -921,18 +899,6 @@ class ApplicationController < ActionController::Base
 
   def create_synonym(name_parse)
     Name.find_or_create_name_and_parents(name_parse.synonym_search_name)
-  end
-
-  def process_synonym_comments_for_bulk_editor(name_parse, synonym)
-    return unless (comment = name_parse.synonym_comment)
-
-    # Only save comment if name didn't exist
-    if synonym.new_record?
-      synonym.notes = comment
-    else
-      flash_warning("Didn't save comment for #{synonym.real_search_name}, " \
-                    "name already exists. (comment = \"#{comment}\")")
-    end
   end
 
   # Deprecate and save.
