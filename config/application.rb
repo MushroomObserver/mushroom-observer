@@ -92,6 +92,9 @@ module MushroomObserver
 
     # Rails 6.1+
     config.active_record.legacy_connection_handling = false
+
+    # Strict loading - just log, don't error out the page!
+    config.active_record.action_on_strict_loading_violation = :log
   end
 end
 
