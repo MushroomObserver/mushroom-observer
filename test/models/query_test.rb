@@ -2464,7 +2464,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_with_observations
-    expect = Observation.select(:name).distinct.pluck(:name_id).sort
+    expect = Name.with_correct_spelling.joins(:observations).
+             select(:name).distinct.pluck(:name_id).sort
     assert_query(expect, :Name, :with_observations, by: :id)
 
     # Prove that :with_observations flavor of Name Query works with each
@@ -2477,7 +2478,7 @@ class QueryTest < UnitTestCase
     # created_at
     created_at = observations(:california_obs).created_at
     assert_query(
-      Name.joins(:observations).
+      Name.with_correct_spelling.joins(:observations).
            where(Observation[:created_at] >= created_at).uniq,
       :Name, :with_observations, created_at: created_at
     )
@@ -2485,7 +2486,7 @@ class QueryTest < UnitTestCase
     # updated_at
     updated_at = observations(:california_obs).updated_at
     assert_query(
-      Name.joins(:observations).
+      Name.with_correct_spelling.joins(:observations).
            where(Observation[:updated_at] >= updated_at).uniq,
       :Name, :with_observations, updated_at: updated_at
     )
@@ -2493,7 +2494,8 @@ class QueryTest < UnitTestCase
     # date
     date = observations(:california_obs).when
     assert_query(
-      Name.joins(:observations).where(Observation[:when] >= date).uniq,
+      Name.with_correct_spelling.joins(:observations).
+           where(Observation[:when] >= date).uniq,
       :Name, :with_observations, date: date
     )
 
@@ -2501,7 +2503,7 @@ class QueryTest < UnitTestCase
 
     # has_notes_fields
     assert_query(
-      Name.joins(:observations).
+      Name.with_correct_spelling.joins(:observations).
            where(Observation[:notes].matches("%:substrate:%")).uniq,
       :Name, :with_observations, has_notes_fields: "substrate"
     )
@@ -2509,7 +2511,8 @@ class QueryTest < UnitTestCase
     # herbaria
     name = "The New York Botanical Garden"
     assert_query(
-      Name.joins(observations: { herbarium_records: :herbarium }).
+      Name.with_correct_spelling.
+           joins(observations: { herbarium_records: :herbarium }).
            where(herbaria: { name: name }).uniq,
       :Name, :with_observations, herbaria: name
     )
@@ -2523,15 +2526,16 @@ class QueryTest < UnitTestCase
 
     # users
     assert_query(
-      Name.joins(:observations).where(observations: { user: dick }).uniq,
+      Name.with_correct_spelling.joins(:observations).
+           where(observations: { user: dick }).uniq,
       :Name, :with_observations, users: dick
     )
 
     ##### numeric parameters #####
 
     # confidence
-    expect =
-      Name.joins(:observations).where(observations: { vote_cache: 1..3 }).uniq
+    expect = Name.with_correct_spelling.joins(:observations).
+             where(observations: { vote_cache: 1..3 }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Name, :with_observations, confidence: [1, 3])
 
@@ -2540,7 +2544,7 @@ class QueryTest < UnitTestCase
     lat = obs.lat
     long = obs.long
     assert_query(
-      Name.joins(:observations).
+      Name.with_correct_spelling.joins(:observations).
            where(observations: { lat: lat }).
            where(observations: { long: long }).uniq,
       :Name, :with_observations,
@@ -2551,40 +2555,40 @@ class QueryTest < UnitTestCase
 
     # :has_comments
     assert_query(
-      Name.joins(observations: :comments).uniq,
+      Name.with_correct_spelling.joins(observations: :comments).uniq,
       :Name, :with_observations, has_comments: true
     )
 
     # has_location
     assert_query(
-      Name.joins(:observations).
+      Name.with_correct_spelling.joins(:observations).
            where.not(observations: { location_id: false }).uniq,
       :Name, :with_observations, has_location: true
     )
 
     # has_name
     assert_query(
-      Name.joins(:observations).
+      Name.with_correct_spelling.joins(:observations).
            where(observations: { name_id: Name.unknown }).uniq,
       :Name, :with_observations, has_name: false
     )
 
     # :has_notes
     assert_query(
-      Name.joins(:observations).
+      Name.with_correct_spelling.joins(:observations).
            where.not(observations: { notes: Observation.no_notes }).uniq,
       :Name, :with_observations, has_notes: true
     )
 
     # has_sequences
     assert_query(
-      Name.joins(observations: :sequences).uniq,
+      Name.with_correct_spelling.joins(observations: :sequences).uniq,
       Name, :with_observations, has_sequences: true
     )
 
     # is_collection_location
     assert_query(
-      Name.joins(:observations).
+      Name.with_correct_spelling.joins(:observations).
            where(observations: { is_collection_location: true }).uniq,
       :Name, :with_observations, is_collection_location: true
     )
@@ -2592,7 +2596,7 @@ class QueryTest < UnitTestCase
 
   def test_name_with_observations_at_location
     assert_query(
-      Name.joins(:observations).
+      Name.with_correct_spelling.joins(:observations).
            where(observations: { location: locations(:burbank) }).distinct,
       :Name, :with_observations_at_location, location: locations(:burbank)
     )
@@ -2605,10 +2609,10 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_with_observations_by_user
-    assert_query(Name.joins(:observations).
+    assert_query(Name.with_correct_spelling.joins(:observations).
                       where(observations: { user: rolf }).distinct,
                  :Name, :with_observations_by_user, user: rolf)
-    assert_query(Name.joins(:observations).
+    assert_query(Name.with_correct_spelling.joins(:observations).
                       where(observations: { user: mary }).distinct,
                  :Name, :with_observations_by_user, user: mary)
     assert_query([], :Name, :with_observations_by_user, user: users(:zero_user))
