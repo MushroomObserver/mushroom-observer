@@ -230,7 +230,7 @@ unknown_with_lat_long:
   long: -118.3521
   alt: 123
   notes:
-    :Other: 'unknown_with_lat_long'
+    :Other: "unknown_with_lat_long"
 
 trusted_hidden:
   <<: *DEFAULTS
@@ -268,13 +268,13 @@ amateur_obs:
   when: 2010-12-30
   user: katrina
   location:
-  where: 'Pasadena, California, USA'
+  where: "Pasadena, California, USA"
   is_collection_location: 0
   name: conocybe_filaris
   text_name: Conocybe filaris
   specimen: 1
   notes:
-    :Other: 'A friend showed me this.'
+    :Other: "A friend showed me this."
   lat: 34.1622
   long: -118.3521
   source: <%= Observation.sources[:mo_iphone_app] %>
@@ -286,13 +286,13 @@ peltigera_obs:
   when: 2012-06-07
   user: rolf
   location:
-  where: 'Briceland, California, USA'
+  where: "Briceland, California, USA"
   name: peltigera
   text_name: Peltigera
   classification: "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_\r\nClass: _Ascomycetes_\r\nOrder: _Lecanorales_\r\nFamily: _Peltigeraceae_"
   specimen: 1
   notes:
-    :Other: 'Growing on a hardwood'
+    :Other: "Growing on a hardwood"
   vote_cache: 3
   thumb_image: peltigera_image
   images: peltigera_image
@@ -307,13 +307,13 @@ peltigera_mary_obs:
   when: 2013-09-08
   user: mary
   location:
-  where: 'Briceland, California, USA'
+  where: "Briceland, California, USA"
   name: peltigera
   text_name: Peltigera
   classification: "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_\r\nClass: _Ascomycetes_\r\nOrder: _Lecanorales_\r\nFamily: _Peltigeraceae_"
   specimen: 1
   notes:
-    :Other: 'Growing on a hardwood'
+    :Other: "Growing on a hardwood"
   vote_cache: 3
   thumb_image: rolf_profile_image
   images: rolf_profile_image
@@ -326,12 +326,12 @@ fungi_obs:
   when: 2013-09-15
   user: rolf
   location:
-  where: 'Briceland, California, USA'
+  where: "Briceland, California, USA"
   is_collection_location: 0
   name: fungi
   text_name: Fungi
   notes:
-    :Other: 'Observation for plane pileus'
+    :Other: "Observation for plane pileus"
   vote_cache: 3
   thumb_image: conic_image
   images: conic_image, plane_image_example
@@ -342,12 +342,12 @@ boletus_edulis_obs:
   updated_at: 2014-04-21 04:04:07
   when: 2014-04-21
   location:
-  where: 'New York, New York, USA'
+  where: "New York, New York, USA"
   name: boletus_edulis
   text_name: Boletus edulis
   is_collection_location: 0
   notes:
-    :Other: 'A tasty bolete!'
+    :Other: "A tasty bolete!"
   vote_cache: 3
   species_lists: one_genus_three_species_list
 
@@ -383,13 +383,13 @@ owner_accepts_general_questions:
   <<: *DEFAULTS
   created_at: 2020-07-08 04:06:04
   when: 2020-07-08
-  user: roy                      # roy has email_general_questions == true
+  user: roy # roy has email_general_questions == true
 
 owner_refuses_general_questions:
   <<: *DEFAULTS
   created_at: 2020-05-05 04:06:04
   when: 2020-05-05
-  user: dick                     # dick has email_general_questions == false
+  user: dick # dick has email_general_questions == false
 
 collected_at_obs:
   <<: *DEFAULTS
@@ -664,3 +664,15 @@ reused_observation:
   when: 2023-11-19
   species_lists: reused_list
   rss_log:
+
+deprecated_name_obs:
+  <<: *DEFAULTS
+  created_at: 2014-04-04 04:05:03
+  updated_at: 2014-04-04 04:05:03
+  when: 2012-06-07
+  user: rolf
+  location:
+  where: "Briceland, California, USA"
+  name: petigera
+  text_name: Petigera
+  lifeform: " lichen "
