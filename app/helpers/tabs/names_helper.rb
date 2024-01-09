@@ -138,6 +138,12 @@ module Tabs
        { class: tab_id(__method__.to_s), icon: :edit }]
     end
 
+    def name_new_description_tab(name)
+      [:show_name_create_description.l,
+       new_name_description_path(name.id),
+       { class: tab_id(__method__.to_s), icon: :add }]
+    end
+
     # classification tabs:
     def name_edit_classification_tab(name)
       [:EDIT.l, edit_name_classification_path(name.id),
