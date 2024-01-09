@@ -55,7 +55,7 @@ add_tab_set(name_show_tabs(name: @name, user: @user))
 
     <%= panel_block(id: "name_footer", footer: footer) do
       concat(tag.div(id: "name_authors_editors") do
-        show_authors_and_editors(obj: @name, user: @user)
+        show_authors_and_editors(obj: @name, versions: @versions, user: @user)
       end)
       concat(:show_name_num_notifications.t(num: @name.interests))
     end %>
