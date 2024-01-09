@@ -19,6 +19,7 @@ class GlossaryTermsController < ApplicationController
     @canonical_url = glossary_term_url
     @layout = calc_layout_params
     @other_images = @glossary_term.other_images.order(vote_cache: :desc)
+    @versions = @glossary_term.versions
   end
 
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
@@ -118,8 +119,10 @@ class GlossaryTermsController < ApplicationController
   # --------- show, create, edit private methods
 
   def find_glossary_term!
-    @glossary_term = find_or_goto_index(GlossaryTerm,
-                                        params[:id].to_s)
+    # @glossary_term = find_or_goto_index(GlossaryTerm,
+    #                                     params[:id].to_s)
+    @glossary_term = GlossaryTerm.show_includes.safe_find(params[:id]) ||
+                     flash_error_and_goto_index(GlossaryTerm, params[:id])
   end
 
   def redirect_non_admins!
@@ -132,7 +135,7 @@ class GlossaryTermsController < ApplicationController
 
   def destroy_unused_images(images)
     images.each do |image|
-      image.destroy if image&.all_subjects&.empty?
+      image.destroy if image.reload&.all_subjects&.empty?
     end
   end
 

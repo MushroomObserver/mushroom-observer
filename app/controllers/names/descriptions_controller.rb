@@ -130,6 +130,7 @@ module Names
       update_view_stats(@description)
       @canonical_url = description_canonical_url(@description)
       @projects = users_projects_which_dont_have_desc_of_this(@name)
+      @versions = @description.versions
     end
 
     ############################################################################
