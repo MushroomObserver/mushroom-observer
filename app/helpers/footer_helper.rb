@@ -169,9 +169,9 @@ module FooterHelper
     # latest_user = User.safe_find(versions.latest.user_id)
     html = html_created_by(obj)
 
-    if versions.latest.user_id && obj.updated_at
+    if versions.last.user_id && obj.updated_at
       html << :footer_last_updated_by.t(
-        user: user_link(versions.latest.user_id),
+        user: user_link(versions.last.user_id),
         date: obj.updated_at.web_time
       )
     elsif obj.updated_at

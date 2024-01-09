@@ -55,14 +55,27 @@ add_tab_set(name_show_tabs(name: @name, user: @user))
       <%= render(partial: "names/show/projects_panel") %>
     <% end %>
 
+    <% footer = tag.div(id: "name_previous_export") do
+      puts("show_previous_version")
+      concat(show_previous_version(@name, @versions))
+      puts("show_previous_version")
+      concat(export_status_controls(@name))
+    end %>
+
+    <%= panel_block(id: "name_footer", footer: footer) do
+      concat(tag.div(id: "name_authors_editors") do
+        puts("show_authors_and_editors")
+        show_authors_and_editors(obj: @name, versions: @versions, user: @user)
+        puts("show_authors_and_editors")
+      end)
+      concat(:show_name_num_notifications.t(num: @name.interests))
+    end %>
+
   </div><!--RIGHT COLUMN-->
 </div><!--.row-->
 
-<%# ----------------------------------------
-  #  Show comments
-  # ----------------------------------------
+<%=
+puts("show_object_footer")
+show_object_footer(@name, @versions)
+puts("show_object_footer")
 %>
-<%= render(partial: "comments/comments_for_object",
-           locals: {object: @name, controls: @user, limit: nil}) %>
-<%= :show_name_num_notifications.t(num: @name.interests) %>
-<%= show_object_footer(@name, @versions) %>
