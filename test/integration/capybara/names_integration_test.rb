@@ -47,7 +47,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     visit("/names/#{bad_name.id}")
 
     # First deprecate bad_name.
-    within("#right_tabs") { click_link(text: "Deprecate") }
+    within("#nomenclature") { click_link(text: "Deprecate") }
     fill_in("proposed_name", with: good_name.text_name)
     fill_in("comment", with: "bad name")
     click_on("Submit")
@@ -61,7 +61,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     assert_equal("bad name", comment.comment)
 
     # Then undo it and approve it.
-    within("#right_tabs") { click_link(text: "Approve") }
+    within("#nomenclature") { click_link(text: "Approve") }
     page.uncheck("deprecate_others")
     fill_in("comment", with: "my bad")
     click_on("Approve")
@@ -75,7 +75,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     assert_equal("my bad", comment.comment)
 
     # But still need to undo the synonymy.
-    within("#right_tabs") { click_link(text: "Change Synonyms") }
+    within("#nomenclature") { click_link(text: "Change Synonyms") }
     click_on("Submit Changes")
 
     assert_not(bad_name.reload.deprecated)
