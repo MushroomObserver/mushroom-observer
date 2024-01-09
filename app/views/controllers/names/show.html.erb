@@ -4,37 +4,34 @@ add_page_title(:show_name_title.t(name: @name.display_name))
 Textile.register_name(@name)
 add_pager_for(@name)
 add_interest_icons(@user, @name)
-add_tab_set(name_show_tabs(name: @name, user: @user))
+add_tab_set(name_show_tabs(name: @name))
 
-@container = :wide
+@container = :full
 %>
 
 <div class="row">
 
   <!--LEFT COLUMN-->
-  <div class="col-sm-5">
+  <div class="col-xs-12 col-md-7">
 
     <%= render(partial: "names/show/confident_observations_panel") %>
 
-    <div id="name_previous_export" class="mb-4">
-      <%= show_previous_version(@name, @versions) %>
-      <%= export_status_controls(@name) %>
-    </div>
+    <% if @best_description.present? %>
+      <%= render(partial: "names/show/best_description_panel") %>
+    <% end %>
 
-    <div id="name_authors_editors">
-      <%= panel_block do
-        show_authors_and_editors(obj: @name, versions: @versions, user: @user)
-      end %>
-    </div>
+    <%= render(partial: "comments/comments_for_object",
+               locals: {object: @name, controls: @user, limit: nil}) %>
 
   </div><!--LEFT COLUMN-->
 
   <!--RIGHT COLUMN-->
-  <div class="col-sm-7">
+  <div class="col-xs-12 col-md-5">
 
     <%= render(partial: "names/show/observations_menu") %>
+
     <%= render(partial: "names/show/nomenclature",
-              locals: { name: @name, synonyms: true }) %>
+               locals: { name: @name, synonyms: true }) %>
 
     <%= tag.div(class: "row", data: { controller: "name-panels" }) do %>
       <%= render(partial: "names/show/classification_panel") %>
@@ -43,10 +40,6 @@ add_tab_set(name_show_tabs(name: @name, user: @user))
 
     <% if @name.has_notes? %>
       <%= render(partial: "names/show/notes_panel") %>
-    <% end %>
-
-    <% if !@best_description.blank? %>
-      <%= render(partial: "names/show/best_description_panel") %>
     <% end %>
 
     <%= render(partial: "names/show/descriptions_panel") %>

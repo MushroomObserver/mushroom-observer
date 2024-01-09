@@ -23,7 +23,7 @@ module FooterHelper
                          html_undescribed_obj_authors_and_editors(obj, versions)
                        end
 
-    content_tag(:p, authors + safe_br + editors)
+    tag.p(authors + safe_br + editors)
   end
 
   ###############################################################
