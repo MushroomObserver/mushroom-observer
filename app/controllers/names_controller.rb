@@ -252,6 +252,9 @@ class NamesController < ApplicationController
 
   def init_related_query_ivars
     @versions = @name.versions
+    @has_subtaxa = 0
+    # Query for names of subtaxa, used in special query link
+    # Note this is only creating a schematic of a query, used in the link.
     # Create query for immediate children.
     @children_query = create_query(:Name, :all,
                                    names: @name.id,
@@ -269,11 +272,11 @@ class NamesController < ApplicationController
     # select@first_child from the rest.
     @first_child = @children_query.results(limit: 1).first
 
-    # Second query: Synonyms of name. Incompatible with first query.
-    # Can use to find approved_synonyms, deprecated_synonyms, misspellings.
-    # These are currently queried from _nomenclature, causing N+1s
+    # Possible query: Synonyms of name? Incompatible with first query.
+    # Maybe use to find approved_synonyms, deprecated_synonyms, misspellings.
+    # — Nope. Hardly causes any load time.
 
-    # Third query: Observations of name including (all) subtaxa.
+    # Second query: Observations of name including (all) subtaxa.
     # This is only used for the link to "observations of this name's subtaxa".
     # We also query for obs (with images) below, so we could maybe refactor to
     # get Observation.of_name(name.id).include_subtaxa.order(:vote_cache).
@@ -286,12 +289,16 @@ class NamesController < ApplicationController
                                     include_subtaxa: true,
                                     exclude_original_names: true,
                                     by: :confidence)
+      # Determine if relevant and count the results of running the query if so.
+      # Don't run if there aren't any children.
+      @has_subtaxa = @first_child ? @subtaxa_query.select_count : 0
     end
-    # Determine if relevant and count the results of running the query if so.
-    @has_subtaxa = @subtaxa_query.select_count if @subtaxa_query
-    # Fourth query (maybe combine with third)
-    @best_images = Observation.of_name(@name.id).with_image.
-                   order(vote_cache: :desc).take(6).map(&:thumb_image)
+    # NOTE: `_observation_menu` makes many select_count queries like this!
+    # That is where most of the heavy loading is. Check helpers/show_name_helper
+    #
+    # Third query (maybe combine with second)
+    @obss = Name::Observations.new(@name)
+    @best_images = @obss.with_images.take(6).map(&:thumb_image)
 
     # This seems like it queries the NameDescription table.
     # Would be better to eager load descriptions and derive @best_description
