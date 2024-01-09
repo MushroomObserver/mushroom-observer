@@ -216,17 +216,19 @@ module Name::Taxonomy
     #   return [parent] if !all && !parent.deprecated
     # end
 
+    reverse_names = lines.reverse.map do |(_line_rank, line_name)|
+      line_name
+    end
+
     if all
-      # reverse_lines = []
-      reverse_lines = lines.reverse.map do |(_line_rank, line_name)|
-        line_name
-      end
-      parents = Name.best_matches_from_array(reverse_lines)
+      # do the batch lookup
+      parents = Name.best_matches_from_array(reverse_names)
     else
-      lines.reverse_each do |(_line_rank, line_name)|
-        parent = Name.best_match(line_name)
-        parents << parent if parent
-        return [parent] unless parent.deprecated
+      # try to find the next parent only
+      reverse_names.each do |text_name|
+        parent = Name.best_match(text_name)
+        # parents << parent if parent
+        return [parent] unless parent&.deprecated
       end
     end
 
@@ -489,16 +491,20 @@ module Name::Taxonomy
     # then loop over them and return the matches
     def best_matches_from_array(names)
       all = Name.with_correct_spelling.where(text_name: names)
-      match_array = []
-      names.each do |name|
+      names.map do |name|
+        matches = all.select { |match| match.search_name == name }
+        if matches.any?
+          matches.first
+          next
+        end
+
         matches = all.select { |match| match.text_name == name }
         accepted = matches.reject(&:deprecated)
         matches  = accepted if accepted.any?
         nonsensu = matches.reject { |match| match.author.start_with?("sensu ") }
         matches  = nonsensu if nonsensu.any?
-        match_array << matches.first
+        matches.first
       end
-      match_array
     end
 
     # Parse the given +classification+ String, validate it, and reformat it so
