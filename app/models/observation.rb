@@ -248,6 +248,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :needs_id, lambda {
     with_name_above_genus.or(without_confident_name)
   }
+  scope :with_name_correctly_spelled,
+        -> { joins({ namings: :name }).where(names: { correct_spelling: nil }) }
 
   scope :with_vote_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id

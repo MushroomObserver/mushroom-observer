@@ -670,9 +670,10 @@ deprecated_name_obs:
   created_at: 2014-04-04 04:05:03
   updated_at: 2014-04-04 04:05:03
   when: 2012-06-07
-  user: rolf
+  user: vouchered_only_user
   location:
   where: "Briceland, California, USA"
   name: petigera
   text_name: Petigera
   lifeform: " lichen "
+  rss_log:
