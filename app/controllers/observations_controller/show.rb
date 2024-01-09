@@ -44,7 +44,7 @@ module ObservationsController::Show
 
   def load_observation_for_show_observation_page
     includes = @user ? "show_includes" : "not_logged_in_show_includes" # scopes
-    @observation = Observation.send(includes).find_by(id: params[:id]) ||
+    @observation = Observation.send(includes).safe_find(params[:id]) ||
                    flash_error_and_goto_index(Observation, params[:id])
   end
 

@@ -23,8 +23,7 @@ module Names
     end
 
     def find_name!
-      @name = Name.includes(show_includes).strict_loading.
-              find_by(id: params[:id]) ||
+      @name = Name.show_includes.safe_find(params[:id]) ||
               flash_error_and_goto_index(Name, params[:id])
     end
 

@@ -361,7 +361,7 @@ class LocationsController < ApplicationController
   private
 
   def find_location!
-    @location = Location.show_includes.find_by(id: params[:id]) ||
+    @location = Location.show_includes.safe_find(params[:id]) ||
                 flash_error_and_goto_index(Location, params[:id])
   end
 

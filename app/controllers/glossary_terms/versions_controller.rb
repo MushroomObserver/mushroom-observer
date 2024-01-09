@@ -18,8 +18,7 @@ module GlossaryTerms
     private
 
     def find_glossary_term!
-      @glossary_term = GlossaryTerm.includes(show_includes).strict_loading.
-                       find_by(id: params[:id]) ||
+      @glossary_term = GlossaryTerm.show_includes.safe_find(params[:id]) ||
                        flash_error_and_goto_index(GlossaryTerm, params[:id])
     end
 
