@@ -3,10 +3,8 @@
 # helpers for ShowName view and ShowNameInfo section of ShowObservation
 module ShowNameHelper
   ######## links to queries of observations of name... or related taxa.
-  # These are expensive and slow down the show name page a LOT.
-  # They would be nearly cost free if they didn't pre-count the results;
-  # counting means each query runs separately.
-  # One idea could be to lazy-load the counts?
+  # Counting these slows down the names#show page a LOT if done separately.
+  # Counts now derived from `obss`, an instantiation of Name::Observations
   def name_related_taxa_observation_links(name, obss)
     [
       # Observations of this name
@@ -18,8 +16,8 @@ module ShowNameHelper
       tag.p(taxon_obss_any_name(name, obss) || "#{:obss_of_taxon.t} (0)"),
       # Observations of other taxa where this taxon was proposed
       tag.p(taxon_proposed(name, obss) || "#{:obss_taxon_proposed.t} (0)"),
-      # Observations where this Nae was proposed
-      tag.p(name_proposed(name, obss) || "#{:obss_name_proposed.t} (0)"),
+      # Observations where this Name was proposed
+      tag.p(name_proposed(name, obss) || "#{:obss_name_proposed.t} (0)")
     ].safe_join
   end
 
