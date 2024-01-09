@@ -44,6 +44,25 @@ class GlossaryTerm < AbstractModel
   )
   versioned_class.before_save { |x| x.user_id = User.current_id }
 
+  scope :show_includes, lambda {
+    strict_loading.includes(
+      :glossary_term_images,
+      { images: [:copyright_changes,
+                 :glossary_terms,
+                 :image_votes,
+                 :observations,
+                 :profile_users,
+                 :project_images,
+                 :thumb_glossary_terms,
+                 :thumb_observations,
+                 :visual_group_images] },
+      { thumb_image: :image_votes },
+      :rss_log,
+      :user,
+      :versions
+    )
+  }
+
   # Automatically log standard events.
   self.autolog_events = [:created!, :updated!, :destroyed!]
 

@@ -6,7 +6,7 @@ add_page_title(:email_tracking_title.t(name: @name.display_name))
 add_tab_set(name_forms_return_tabs(name: @name))
 
 action = { controller: "/names/trackers", action: :update, id: @name.id,
-            q: get_query_param }
+           q: get_query_param }
 %>
 
 <div class="mt-5 mb-5">
@@ -19,4 +19,5 @@ action = { controller: "/names/trackers", action: :update, id: @name.id,
   end %>
 </div>
 
-<%= render(partial: "names/trackers/form", locals: { action: action }) %>
+<%= render(partial: "names/trackers/form", locals: { action: action,
+                                                     method: :put }) %>

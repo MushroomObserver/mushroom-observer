@@ -18,8 +18,8 @@ class SearchController < ApplicationController
   #   /project/project_search
   #   /species_lists/index
   def pattern
-    pattern = param_lookup([:search, :pattern]) { |p| p.to_s.strip_squeeze }
-    type = param_lookup([:search, :type], &:to_sym)
+    pattern = params.dig(:search, :pattern) { |p| p.to_s.strip_squeeze }
+    type = params.dig(:search, :type)&.to_sym
 
     # Save it so that we can keep it in the search bar in subsequent pages.
     session[:pattern] = pattern

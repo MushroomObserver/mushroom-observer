@@ -8,7 +8,7 @@ add_tab_set(location_show_tabs(location: @location))
 
 <div class="row">
   <div class="col-sm-4 mb-3">
-    <%= show_previous_version(@location) %>
+    <%= show_previous_version(@location, @versions) %>
     <%= export_status_controls(@location) %>
   </div>
 
@@ -25,7 +25,7 @@ add_tab_set(location_show_tabs(location: @location))
 <div class="container-text">
   <% if @description&.notes? %>
     <hr/>
-    <%= show_embedded_description_title(@description) %>
+    <%= show_embedded_description_title(@description, :location) %>
     <%= render(partial: "locations/descriptions/show/location_description",
                object: @description) %>
     <%= render(partial: "comments/comments_for_object",
@@ -34,6 +34,6 @@ add_tab_set(location_show_tabs(location: @location))
   <% end %>
 
   <div class="mt-3">
-    <%= show_object_footer(@location) %>
+    <%= show_object_footer(@location, @versions) %>
   </div>
 </div><!--.container-text-->

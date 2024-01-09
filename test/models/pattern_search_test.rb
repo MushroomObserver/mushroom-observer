@@ -534,7 +534,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_include_synonyms
-    expect = Observation.where(name: names(:peltigera))
+    expect = Observation.where(name: [names(:peltigera), names(:petigera)])
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("Petigera include_synonyms:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)

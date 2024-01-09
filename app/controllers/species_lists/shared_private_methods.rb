@@ -11,7 +11,8 @@ module SpeciesLists
     ############################################################################
 
     def find_species_list!
-      find_or_goto_index(SpeciesList, params[:id].to_s)
+      SpeciesList.show_includes.safe_find(params[:id].to_s) ||
+        flash_error_and_goto_index(SpeciesList, params[:id].to_s)
     end
 
     # Validate list of names, and if successful, create observations.
@@ -39,8 +40,9 @@ module SpeciesLists
       # Validate place name.
       validate_place_name
 
+      list = list_without_underscores
+
       # Make sure all the names (that have been approved) exist.
-      list = check_names_on_list
       construct_approved_names(list, params[:approved_names])
 
       # Initialize NameSorter and give it all the information.
@@ -101,12 +103,8 @@ module SpeciesLists
       @dubious_where_reasons = Location.dubious_name?(db_name, true)
     end
 
-    def check_names_on_list
-      if params[:list]
-        params[:list][:members].to_s.tr("_", " ").strip_squeeze
-      else
-        ""
-      end
+    def list_without_underscores
+      params.dig(:list, :members).to_s.tr("_", " ").strip_squeeze
     end
 
     def init_name_sorter(list)
@@ -125,7 +123,7 @@ module SpeciesLists
 
       # Does list have "Name one = Name two" type lines?
       if sorter.has_new_synonyms
-        flash_error(:runtime_species_list_need_to_use_bulk.t)
+        flash_error(:runtime_species_list_create_synonym.t)
         sorter.reset_new_names
         failed = true
       end
@@ -401,11 +399,13 @@ module SpeciesLists
       return unless (obs = spl_obss.last)
 
       # Not sure how to check vote efficiently...
-      @member_vote = begin
-                       obs.namings.first.users_vote(@user).value
-                     rescue StandardError
-                       Vote.maximum_vote
-                     end
+      consensus = Observation::NamingConsensus.new(obs)
+      @member_vote =
+        begin
+          consensus.users_vote(consensus.namings.first, @user).value
+        rescue StandardError
+          Vote.maximum_vote
+        end
       init_member_notes_for_edit(spl_obss)
       if all_obs_same_lat_lon_alt?(spl_obss)
         @member_lat  = obs.lat

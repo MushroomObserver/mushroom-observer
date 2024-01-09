@@ -267,7 +267,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
       # need length; count & size return a hash; description_needed is grouped
-      { count: Name.description_needed.length },
+      { count: Name.with_correct_spelling.description_needed.length },
       "Wrong number of (correctly spelled) Names"
     )
   end
@@ -545,18 +545,18 @@ class NamesControllerTest < FunctionalTestCase
     get(:show, params: { id: names(:coprinus_comatus).id })
     assert_template("show")
     # Creates three for children and all four observations sections,
-    # but one never used.
-    assert_equal(3, QueryRecord.count)
+    # but one never used. (? Now 4 - AN 20240107)
+    assert_equal(4, QueryRecord.count)
 
     get(:show, params: { id: names(:coprinus_comatus).id })
     assert_template("show")
     # Should re-use all the old queries.
-    assert_equal(3, QueryRecord.count)
+    assert_equal(4, QueryRecord.count)
 
     get(:show, params: { id: names(:agaricus_campestris).id })
     assert_template("show")
-    # Needs new queries this time.
-    assert_equal(7, QueryRecord.count)
+    # Needs new queries this time. (? Up from 7 - AN 20240107)
+    assert_equal(9, QueryRecord.count)
 
     # Agarcius: has children taxa.
     get(:show, params: { id: names(:agaricus).id })

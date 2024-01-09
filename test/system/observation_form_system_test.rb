@@ -505,8 +505,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
   def assert_observation_has_correct_name(expected_values)
     new_obs = Observation.last
+    consensus = Observation::NamingConsensus.new(new_obs)
     assert_names_equal(expected_values[:name], new_obs.name)
-    assert_equal(expected_values[:vote], new_obs.owners_votes.first.value)
+    assert_equal(expected_values[:vote], consensus.owners_votes.first.value)
   end
 
   def assert_observation_has_correct_image(expected_values)

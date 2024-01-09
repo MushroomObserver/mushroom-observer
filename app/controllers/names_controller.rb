@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/ClassLength
 class NamesController < ApplicationController
   # disable cop because index is defined in ApplicationController
   # rubocop:disable Rails/LexicallyScopedActionFilter
@@ -218,51 +219,91 @@ class NamesController < ApplicationController
   private
 
   def find_name!
-    @name = Name.includes(show_name_includes).find_by(id: params[:id]) ||
+    @name = Name.show_includes.safe_find(params[:id]) ||
             flash_error_and_goto_index(Name, params[:id])
   end
 
-  def show_name_includes
-    [
-      { observations: :user }
-    ]
-  end
+  # Possible sources of extra db lookups in partials
+
+  # carousel:
+  #   @best_images
+  # best_description:
+  #   @best_description
+  # comments:
+  #   comments_for_object
+  # observations_menu:
+  #   @has_subtaxa
+  #   @subtaxa_query
+  # nomenclature:
+  #   approved_synonyms, deprecated_synonyms = name.sort_synonyms
+  # classification:
+  #   approved_name = @name.approved_name
+  #   parents = approved_name.all_parents
+  #   @first_child
+  #   @children_query
+  #   The entire name::synonymy module may be a candidate for a PORO
+  # lifeform:
+  #   @first_child
+  # notes:
+  # descriptions:
+  #   description_links = list_descriptions(object: @name, type: :name)
+  # projects:
+  #   @projects
 
   def init_related_query_ivars
+    @versions = @name.versions
+    @has_subtaxa = 0
+    # Query for names of subtaxa, used in special query link
+    # Note this is only creating a schematic of a query, used in the link.
     # Create query for immediate children.
     @children_query = create_query(:Name, :all,
                                    names: @name.id,
                                    include_immediate_subtaxa: true,
                                    exclude_original_names: true)
+    # @first_child runs @children_query to check for immediate children.
+    # Used in classification and lifeform.
+    # Potentially refactor to reduce duplicate queries:
+
+    # First query: Names including immediate subtaxa.
+    # Instead of running @children_query here, consider altering the original
+    # show query to include_immediate_subtaxa (would need to write a complicated
+    # scope, but it's outlined in app/classes/query/modules/lookup_names.rb).
+    # Could select @name from those results using the original name.id, then
+    # select@first_child from the rest.
+    @first_child = @children_query.results(limit: 1).first
+
+    # Possible query: Synonyms of name? Incompatible with first query.
+    # Maybe use to find approved_synonyms, deprecated_synonyms, misspellings.
+    # — Nope. Hardly causes any load time.
+
+    # Second query: Observations of name including (all) subtaxa.
+    # This is only used for the link to "observations of this name's subtaxa".
+    # We also query for obs (with images) below, so we could maybe refactor to
+    # get Observation.of_name(name.id).include_subtaxa.order(:vote_cache).
+    # Then, select those of original name with thumb_image_id for @best_images,
+    # and select_count all (excluding obs of original name) to get @has_subtaxa.
+    # Would need to write include_subtaxa scope, as above.
     if @name.at_or_below_genus?
       @subtaxa_query = create_query(:Observation, :all,
                                     names: @name.id,
                                     include_subtaxa: true,
                                     exclude_original_names: true,
                                     by: :confidence)
+      # Determine if relevant and count the results of running the query if so.
+      # Don't run if there aren't any children.
+      @has_subtaxa = @first_child ? @subtaxa_query.select_count : 0
     end
+    # NOTE: `_observation_menu` makes many select_count queries like this!
+    # That is where most of the heavy loading is. Check helpers/show_name_helper
+    #
+    # Third query (maybe combine with second)
+    @obss = Name::Observations.new(@name)
+    @best_images = @obss.with_images.take(6).map(&:thumb_image)
 
-    # Create search queries for observation lists.
-    @consensus_query = create_query(:Observation, :all,
-                                    names: @name.id, by: :confidence)
-
-    @obs_with_images_query = create_query(:Observation, :all,
-                                          names: @name.id,
-                                          has_images: true,
-                                          by: :confidence)
-
-    # Determine which queries actually have results and instantiate the ones
-    # we'll use.
+    # This seems like it queries the NameDescription table.
+    # Would be better to eager load descriptions and derive @best_description
+    # from them. Can also derive @projects from this.
     @best_description = @name.best_brief_description
-    @first_four       = @obs_with_images_query.results(
-      limit: 4,
-      include: {
-        thumb_image: [:image_votes, :license, :user]
-      }
-    )
-    @first_child      = @children_query.results(limit: 1).first
-    @first_consensus  = @consensus_query.results(limit: 1).first
-    @has_subtaxa      = @subtaxa_query.select_count if @subtaxa_query
   end
 
   def init_projects_ivar
@@ -670,3 +711,4 @@ class NamesController < ApplicationController
     params.permit(name: [:author, :citation, :icn_id, :locked, :notes, :rank])
   end
 end
+# rubocop:enable Metrics/ClassLength

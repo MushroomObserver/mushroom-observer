@@ -50,26 +50,35 @@ module LinkHelper
     link_to(*tab)
   end
 
-  def icon_link_to(text = nil, path = nil, **opts, &block)
+  # NOTE: Takes same args as link_to, e.g. *edit_description_tab(desc, type)
+  # icon_link_to(text, path, **args)
+  def icon_link_to(text = nil, path = nil, options = {}, &block)
+    return unless text
+
     link = block ? text : path # because positional
     content = block ? capture(&block) : text
+    opts = block ? path : options
     icon_type = opts[:icon]
     return link_to(link, opts) { content } if icon_type.blank?
 
     opts = { title: content,
              data: { toggle: "tooltip" } }.deep_merge(opts.except(:icon))
 
-    link_to(link, opts) do
+    link_to(link, **opts) do
       concat(tag.span(content, class: "sr-only"))
       concat(link_icon(icon_type))
     end
   end
 
-  def icon_link_with_query(text = nil, path = nil, **, &block)
+  # NOTE: above re: MO tabs
+  def icon_link_with_query(text = nil, path = nil, options = {}, &block)
+    return unless text
+
     link = block ? text : path # because positional
     content = block ? capture(&block) : text
+    opts = block ? path : options
 
-    icon_link_to(add_query_param(link), **) { content }
+    icon_link_to(add_query_param(link), opts) { content }
   end
 
   # Link should be to a controller action that renders the form in the modal.
@@ -117,6 +126,7 @@ module LinkHelper
       delete: "remove-circle",
       add: "plus",
       back: "step-backward",
+      show: "eye-open",
       hide: "eye-close",
       reuse: "share",
       x: "remove",
@@ -127,7 +137,18 @@ module LinkHelper
       trash: "trash",
       cancel: "remove",
       email: "envelope",
-      question: "question-sign"
+      question: "question-sign",
+      list: "list",
+      clone: "duplicate",
+      merge: "transfer",
+      move: "random",
+      adjust: "resize-vertical",
+      make_default: "star",
+      publish: "upload",
+      deprecate: "ok-circle", # approved name needs to look "approved"
+      approve: "exclamation-sign", # deprecated name needs to look "deprecated"
+      synonyms: "random",
+      tracking: "bullhorn"
     }.freeze
   end
 

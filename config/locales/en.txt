@@ -1821,7 +1821,6 @@
 
   # name/name_index (and other actions using same view)
   name_index_add_name: Add Name
-  name_index_bulk_edit: "[:name_bulk_title]"
 
   # name/map
   name_map_title: Occurrence Map for [name]
@@ -2089,7 +2088,6 @@
   show_name_title: "[:NAME]: [name]"
   show_name_add_name: "[:add_object(type=:name)]"
   show_name_edit_name: "[:edit_object(type=:name)]"
-  show_name_bulk_name_edit: "[:name_bulk_title]"
   show_name_distribution_map: Occurrence Map
   show_name_change_synonyms: Change Synonyms
   show_name_email_tracking: Email Tracking
@@ -2146,7 +2144,7 @@
   taxon_obss_other_names: this taxon, other names
   obss_name_proposed: any taxon, this name proposed
   obss_taxon_proposed: other taxa, this taxon proposed
-  show_subtaxa_obss: Subtaxa
+  show_subtaxa_obss: subtaxa
   show_name_locked: This name is locked. If you want to change the name of your observation, please propose a new name for your observation and vote on it, instead.  If you change a name record on MO, it implicitly changes all the observations of that name.
   show_name_inherit_classification: Copy from parent.
   edit_classification_title: Edit Classification of [name]
@@ -2896,12 +2894,6 @@
   merge_descriptions_delete_after: Delete old description after merge?
   merge_descriptions_merge_help: This will copy any non-blank sections from the source description into the description you select below.  If the target description already has text in any of those fields, you will be given an editing form with the text from both descriptions.  This will allow you to reconcile any conflicts by hand before saving the form and making the merger official.
   merge_descriptions_move_help: This will move the source description into a synonym.  It will just copy it if you elect not to delete the old description.  If you wish to merge with an existing description in the other name, you must first move your description into that name, then select [:show_description_merge] again from there.
-
-  # name/bulk_name_edit
-  name_bulk_help: "Each line indicates a set of changes.\n\np(bulk_text). To ensure a name is in the database, just list the name.  E.g.,\n\np(bulk_pre). Agaricus bisporus\n\np(bulk_text). To ensure a name exists with a particular author, give the name followed by the author.  E.g.,\n\np(bulk_pre). Agaricus bisporus (J.E. Lange) Pilát\n\np(bulk_text). To add a taxon above the species level, give the rank followed by the name.  E.g.,\n\np(bulk_pre). Order Agaricales\n\np(bulk_text). To make a name a deprecated synonym of another name, follow the [:PREFERRED_NAME] with the deprecated synonym.  E.g.,\n\np(bulk_pre). Agaricus bisporus (J.E. Lange) Pilát = Agaricus hortensis (Cke.) Imai\n\nThe changes are cumulative, so the last example by itself would ensure that the names **__@Agaricus bisporus@__** @(J.E. Lange) Pilát@ and __@Agaricus hortensis@__ @(Cke.) Imai@ exist, as well as making __@A. hortensis@__ a deprecated synononym of **__@A. bisporus@__**.  If a name exists with no author and you provide an author, then the existing name is updated. Otherwise, if the author is given and it does not match the current author, a new name is created.\n\np(bulk_text). You may include an optional one-line comment by inserting it after either the accepted or deprecated name, enclosed in square brackets. This will be saved in the notes when the name is created.\n\np(bulk_pre). Herpothallon Tobler [[citation:Aptroot, A, G Thor, ...]]"
-  name_bulk_label: Name Edits
-  name_bulk_success: All names are now in the database.
-  name_bulk_title: Bulk Name Edit
 
   # species_list/name_lister
   name_lister_bad_browser: This page will not work on your browser, sorry!
@@ -3943,7 +3935,7 @@
   runtime_show_description_denied: You have not been given permission to see this description.
   runtime_show_draft_denied: "Permission denied: only project members can view drafts in progress."
   runtime_signup_success: Signup successful.  Verification email sent.
-  runtime_species_list_need_to_use_bulk: Synonyms can only be created from the [:name_bulk_title] page.
+  runtime_species_list_create_synonym: To create a Synonym please edit the Name.
 
   # Pattern search error messages.
   pattern_search_syntax_error: Syntax error in pattern at [string].

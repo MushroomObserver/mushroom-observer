@@ -24,8 +24,8 @@ module Authors
     private
 
     def send_author_emails
-      subject = param_lookup([:email, :subject], "")
-      content = param_lookup([:email, :content], "")
+      subject = params.dig(:email, :subject).to_s
+      content = params.dig(:email, :content).to_s
 
       (@object.authors + UserGroup.reviewers.users).uniq.each do |receiver|
         QueuedEmail::AuthorRequest.create_email(@user, receiver, @object,

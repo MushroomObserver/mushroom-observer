@@ -7,12 +7,15 @@ module Observations::Namings
     # Index breakdown of votes for a given naming.
     # Linked from: observations/show
     # Displayed on show obs via popup for JS users.
-    # Has its own route for non-js.
-    # Inputs: params[:id] (naming)
-    # Outputs: @naming
+    # Has its own route for non-js access and testing.
+    # Inputs: params[:naming_id], [:observation_id]
+    # Outputs: @naming, @consensus
     def index
       pass_query_params
       @naming = find_or_goto_index(Naming, params[:naming_id].to_s)
+      obs = Observation.naming_includes.find(params[:observation_id])
+      @consensus = Observation::NamingConsensus.new(obs)
+
       respond_to do |format|
         format.turbo_stream do
           Textile.register_name(@naming.name)
@@ -22,7 +25,8 @@ module Observations::Namings
           render(partial: "shared/modal",
                  locals: {
                    identifier: identifier, title: title, subtitle: subtitle,
-                   body: "observations/namings/votes/table", naming: @naming
+                   body: "observations/namings/votes/table", naming: @naming,
+                   consensus: @consensus
                  })
         end
         format.html
@@ -64,13 +68,12 @@ module Observations::Namings
       pass_query_params
       observation = load_observation_naming_includes # 1st load
       @naming = observation.namings.find(params[:naming_id])
-      value_str = param_lookup([:vote, :value])
+      value_str = params.dig(:vote, :value).to_s
       value = Vote.validate_value(value_str)
       raise("Bad value.") unless value
 
-      # N+1: Take the whole vote object and send it to change vote?
-      # Or how about returning obs.reload from observation.change_vote
-      observation.change_vote(@naming, value, @user) # 2nd load (obs.reload)
+      @consensus = ::Observation::NamingConsensus.new(observation)
+      @consensus.change_vote(@naming, value, @user) # 2nd load (namings.reload)
       @observation = load_observation_naming_includes # 3rd load
       respond_to_new_votes
     end
@@ -87,8 +90,12 @@ module Observations::Namings
             render(partial: "observations/namings/update_matrix_box",
                    locals: { obs: @observation })
           else
+            obs = Observation.naming_includes.find(@observation.id)
+            owner_name = @consensus.owner_preference
+
             render(partial: "observations/namings/update_observation",
-                   locals: { obs: @observation })
+                   locals: { obs: obs, consensus: @consensus,
+                             owner_name: owner_name })
           end
           return
         end

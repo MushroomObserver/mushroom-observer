@@ -34,7 +34,7 @@ statuses = [[:ACCEPTED.l, false], [:DEPRECATED.l, true]]
     </div>
 
     <%= text_field_with_label(
-          form: f, field: :text_name, label: "#{:form_names_text_name}:",
+          form: f, field: :text_name, label: "#{:form_names_text_name.l}:",
           value: @name_string, data: { autofocus: true },
           append: help_block(:p, :form_names_text_name_help.t)
         ) %>
