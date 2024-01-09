@@ -49,7 +49,7 @@ add_tab_set(name_show_tabs(name: @name, user: @user))
     <% end %>
 
     <% footer = tag.div(id: "name_previous_export") do
-      concat(show_previous_version(@name))
+      concat(show_previous_version(@name, @versions))
       concat(export_status_controls(@name))
     end %>
 
@@ -63,4 +63,4 @@ add_tab_set(name_show_tabs(name: @name, user: @user))
   </div><!--RIGHT COLUMN-->
 </div><!--.row-->
 
-<%= show_object_footer(@name) %>
+<%= show_object_footer(@name, @versions) %>
