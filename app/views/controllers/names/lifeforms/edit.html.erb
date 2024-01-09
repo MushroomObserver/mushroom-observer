@@ -8,7 +8,8 @@ action = { controller: "/names/lifeforms", action: :update,
            id: @name.id, q: get_query_param }
 %>
 
-<%= form_with(url: action, scope: :lifeform, id: "name_lifeform_form") do |f| %>
+<%= form_with(url: action, method: :put, scope: :lifeform,
+              id: "name_lifeform_form") do |f| %>
 
   <p><%= :edit_lifeform_help.t %></p>
 
