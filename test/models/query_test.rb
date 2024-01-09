@@ -2534,9 +2534,8 @@ class QueryTest < UnitTestCase
     ##### numeric parameters #####
 
     # confidence
-    expect =
-      Name.with_correct_spelling.joins(:observations).
-           where(observations: { vote_cache: 1..3 }).uniq
+    expect = Name.with_correct_spelling.joins(:observations).
+             where(observations: { vote_cache: 1..3 }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Name, :with_observations, confidence: [1, 3])
 
