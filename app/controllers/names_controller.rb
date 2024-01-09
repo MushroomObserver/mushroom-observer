@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/ClassLength
 class NamesController < ApplicationController
   # disable cop because index is defined in ApplicationController
   # rubocop:disable Rails/LexicallyScopedActionFilter
@@ -218,17 +219,12 @@ class NamesController < ApplicationController
   private
 
   def find_name!
-    @name = Name.includes(show_name_includes).find_by(id: params[:id]) ||
+    @name = Name.show_includes.safe_find(params[:id]) ||
             flash_error_and_goto_index(Name, params[:id])
   end
 
-  def show_name_includes
-    [
-      { observations: :user }
-    ]
-  end
-
   def init_related_query_ivars
+    @versions = @name.versions
     # Create query for immediate children.
     @children_query = create_query(:Name, :all,
                                    names: @name.id,
@@ -670,3 +666,4 @@ class NamesController < ApplicationController
     params.permit(name: [:author, :citation, :icn_id, :locked, :notes, :rank])
   end
 end
+# rubocop:enable Metrics/ClassLength
