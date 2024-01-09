@@ -115,10 +115,10 @@ module FooterHelper
   #   </p>
   #
   def show_object_footer(obj, versions = [])
-    # num_versions = versions.length
+    num_versions = versions.length
 
-    html = if versions.length.positive? && obj.version < versions.length
-             html_for_old_version_of_versioned_object(obj, versions)
+    html = if num_versions.positive? && obj.version < num_versions
+             html_for_old_version_of_versioned_object(obj, num_versions)
            else
              html_for_latest_version_or_non_versioned_object(obj, versions)
            end
@@ -132,8 +132,8 @@ module FooterHelper
 
   private
 
-  def html_for_old_version_of_versioned_object(obj, versions)
-    html = [:footer_version_out_of.t(num: obj.version, total: versions.length)]
+  def html_for_old_version_of_versioned_object(obj, num_versions)
+    html = [:footer_version_out_of.t(num: obj.version, total: num_versions)]
     return html unless obj.updated_at
 
     html << :footer_updated_by.t(user: user_link(obj.user_id),
