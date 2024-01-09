@@ -496,7 +496,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       where(ProjectSpeciesList[:project_id] == project.id).distinct
   }
   scope :show_includes, lambda {
-    includes(
+    strict_loading.includes(
       :collection_numbers,
       { comments: :user },
       { external_links: { external_site: { project: :user_group } } },
