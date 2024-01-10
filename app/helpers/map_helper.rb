@@ -7,7 +7,7 @@ module MapHelper
     nothing_to_map = args[:nothing_to_map] || :runtime_map_nothing_to_map.t
     # There's nothing to map if the location is unknown.
     objects = objects.reject do |obj|
-      name = obj.respond_to?(:name) ? obj.name : obj.location.name
+      name = obj.respond_to?(:location) ? obj.location&.name : obj.name
       Location.is_unknown?(name)
     end
     return tag.div(nothing_to_map, class: "w-100") unless objects.any?
