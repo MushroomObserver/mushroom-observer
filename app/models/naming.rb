@@ -30,17 +30,10 @@
 #  unique_text_name::       Same as above, with id added to make unique.
 #  unique_format_name::     Same as above, with id added to make unique.
 #
-#  ==== Voting
+#  ==== Votes
 #  votes::                  List of Vote's attached to this Naming.
 #  vote_sum::               Straight sum of Vote's for this Naming.
 #  vote_percent::           Convert cached Vote score to a percentage.
-#  user_voted?::            Has a given User voted on this Naming?
-#  users_vote::             Get a given User's Vote on this Naming.
-#  users_favorite?::        Is this Naming the given User's favorite?
-#  change_vote::            Call Observation#change_vote.
-#  editable?::              Can owner change this Naming's Name?
-#  deletable?::             Can owner delete this Naming?
-#  calc_vote_table::        (Used by show_votes.rhtml.)
 #
 #  == Callbacks
 #
@@ -50,7 +43,6 @@
 #  enforce_default_reasons:: Make sure default reasons are set in if none given.
 #
 ################################################################################
-# rubocop:disable Metrics/ClassLength
 class Naming < AbstractModel
   belongs_to :observation
   belongs_to :name
@@ -84,16 +76,6 @@ class Naming < AbstractModel
     naming.observation = observation
     naming
   end
-
-  # N+1: This method does unnecessary lookups. Delete
-  # def self.from_params(params)
-  #   if params[:id].blank?
-  #     observation = Observation.find(params[:observation_id])
-  #     observation.consensus_naming
-  #   else
-  #     find(params[:id].to_s)
-  #   end
-  # end
 
   # Update naming and log changes.
   def update_object(new_name, log)
@@ -231,41 +213,15 @@ class Naming < AbstractModel
     if User.current &&
        (obs = observation)
       obs.log(:log_naming_destroyed, name: format_name)
-      obs.calc_consensus
+      obs = Observation.naming_includes.find(obs.id) # get a fresh eager-load
+      consensus = Observation::NamingConsensus.new(obs)
+      consensus.calc_consensus
     end
-  end
-
-  def init_reasons(args = nil)
-    result = {}
-    reasons_array.each do |reason|
-      num = reason.num
-
-      # Use naming's reasons by default.
-      result[num] = reason
-
-      # Override with values in params.
-      next unless args
-
-      if (x = args[num.to_s])
-        check = x[:check]
-        notes = x[:notes]
-        # Reason is "used" if checked or notes non-empty.
-        if (check == "1") ||
-           notes.present?
-          reason.notes = notes
-        else
-          reason.delete
-        end
-      else
-        reason.delete
-      end
-    end
-    result
   end
 
   ##############################################################################
   #
-  #  :section: Voting
+  #  :section: Votes
   #
   ##############################################################################
 
@@ -282,116 +238,6 @@ class Naming < AbstractModel
   # Convert vote_cache to a percentage.
   def vote_percent
     Vote.percent(vote_cache)
-  end
-
-  # Has a given User voted for this naming?
-  def user_voted?(user)
-    !!users_vote(user)
-  end
-
-  # Retrieve a given User's vote for this naming.
-  # N+1: find_each. Also, we should already have the include here.
-  def users_vote(user)
-    # votes.includes(:user).find_each { |v| return v if v.user_id == user.id }
-    votes.select { |v| return v if v.user_id == user.id }
-    nil
-  end
-
-  # Is this Naming the given User's favorite Naming for this Observation?
-  def users_favorite?(user)
-    votes.any? { |v| v.user_id == user.id && v.favorite }
-  end
-
-  # It is rare, but a single user can end up with multiple votes, for example,
-  # if two names are merged and a user had voted for both names.
-  # N+1: Calling Vote.where is a guaranteed new query. Use the votes we have
-  def owners_vote
-    # Vote.where(naming_id: id, user_id: user_id).order("value desc").first
-    votes.select { |v| v.user_id == user_id }.sort_by! { |v| v[:value] }.last
-  end
-
-  # Change User's Vote on this Naming.  (Uses Observation#change_vote.)
-  def change_vote(value, user = User.current)
-    observation.change_vote(self, value, user)
-  end
-
-  def update_name(new_name, user, reasons, was_js_on)
-    clean_votes(new_name, user)
-    create_reasons(reasons, was_js_on)
-    update_object(new_name, changed?)
-  end
-
-  def clean_votes(new_name, user)
-    return unless new_name != name
-
-    votes.each do |vote|
-      vote.destroy if vote.user_id != user.id
-    end
-  end
-
-  # Has anyone voted (positively) on this?  We don't want people changing
-  # the name for namings that the community has voted on.  Returns true if no
-  # one has.
-  def editable?
-    votes.each do |v|
-      return false if (v.user_id != user_id) && v.value.positive?
-    end
-    true
-  end
-
-  # Has anyone given this their strongest (positive) vote?  We don't want
-  # people destroying namings that someone else likes best.  Returns true if no
-  # one has.
-  def deletable?
-    votes.each do |v|
-      return false if (v.user_id != user_id) && v.value.positive? && v.favorite
-    end
-    true
-  end
-
-  # Create a table the number of User's who cast each level of Vote.
-  # (This refreshes the vote_cache while it's at it.)
-  #
-  #   table = naming.calc_vote_table
-  #   for key, record in table
-  #     str    = key.l
-  #     num    = record[:num]    # Number of users who voted near this level.
-  #     weight = record[:wgt]    # Sum of users' weights.
-  #     value  = record[:value]  # Value of this level of vote (arbitrary scale)
-  #     votes  = record[:votes]  # List of actual votes.
-  #   end
-  #
-  # n+1: ? it's a Vote table lookup, but only executed on VotesController#index
-  def calc_vote_table
-    # Initialize table.
-    table = {}
-    Vote.opinion_menu.each do |str, val|
-      table[str] = {
-        num: 0,
-        wgt: 0.0,
-        value: val,
-        votes: []
-      }
-    end
-
-    # Gather votes, doing a weighted sum in the process.
-    tot_sum = 0
-    tot_wgt = 0
-    votes.includes([:user]).find_each do |v|
-      str = Vote.confidence(v.value)
-      wgt = v.user_weight
-      table[str][:num] += 1
-      table[str][:wgt] += wgt
-      table[str][:votes] << v
-      tot_sum += v.value * wgt
-      tot_wgt += wgt
-    end
-    val = tot_sum.to_f / (tot_wgt + 1.0)
-
-    # Update vote_cache if it's wrong.
-    update!(vote_cache: val) if (vote_cache - val).abs > 1e-4
-
-    table
   end
 
   ##############################################################################
@@ -429,6 +275,34 @@ class Naming < AbstractModel
     result = {}
     reasons_array.each do |reason|
       result[reason.num] = reason
+    end
+    result
+  end
+
+  def init_reasons(args = nil)
+    result = {}
+    reasons_array.each do |reason|
+      num = reason.num
+
+      # Use naming's reasons by default.
+      result[num] = reason
+
+      # Override with values in params.
+      next unless args
+
+      if (x = args[num.to_s])
+        check = x[:check]
+        notes = x[:notes]
+        # Reason is "used" if checked or notes non-empty.
+        if (check == "1") ||
+           notes.present?
+          reason.notes = notes
+        else
+          reason.delete
+        end
+      else
+        reason.delete
+      end
     end
     result
   end
@@ -547,4 +421,3 @@ class Naming < AbstractModel
                                                           !User.current
   end
 end
-# rubocop:enable Metrics/ClassLength

@@ -47,7 +47,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     visit("/names/#{bad_name.id}")
 
     # First deprecate bad_name.
-    within("#right_tabs") { click_link(text: "Deprecate") }
+    within("#nomenclature") { click_link(text: "Deprecate") }
     fill_in("proposed_name", with: good_name.text_name)
     fill_in("comment", with: "bad name")
     click_on("Submit")
@@ -61,7 +61,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     assert_equal("bad name", comment.comment)
 
     # Then undo it and approve it.
-    within("#right_tabs") { click_link(text: "Approve") }
+    within("#nomenclature") { click_link(text: "Approve") }
     page.uncheck("deprecate_others")
     fill_in("comment", with: "my bad")
     click_on("Approve")
@@ -75,7 +75,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     assert_equal("my bad", comment.comment)
 
     # But still need to undo the synonymy.
-    within("#right_tabs") { click_link(text: "Change Synonyms") }
+    within("#nomenclature") { click_link(text: "Change Synonyms") }
     click_on("Submit Changes")
 
     assert_not(bad_name.reload.deprecated)
@@ -104,5 +104,45 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
 
     assert_no_selector("#content div.alert-warning")
     assert_selector("#title", text: "Names Matching ‘#{corrected_pattern}’")
+  end
+
+  def test_lifeform_edit
+    name = names(:tremella_celata)
+
+    # make sure fixtures will work for this test
+    assert(name.lifeform.blank?,
+           "Test needs fixture without a lifeform")
+
+    login
+    visit(edit_name_lifeform_path(name))
+
+    check("lifeform_lichenicolous")
+    click_on(:SAVE.l)
+
+    assert_equal(" lichenicolous ", name.reload.lifeform,
+                 "Failed to update lifeform")
+  end
+
+  def test_lifeform_propagate
+    genus = names(:tremella)
+    species = names(:tremella_celata)
+
+    # make sure fixtures will work for this test
+    assert(genus.children.include?(species))
+    assert(genus.lifeform.present? && species.lifeform.blank?,
+           "Test needs fixtures where genus has lifeform but species does not")
+    assert_match(/#{:lifeform_lichenicolous.l}/i, genus.lifeform)
+
+    login
+    visit(name_path(genus))
+    within("#name_lifeform") do
+      click_on(:show_name_propagate_lifeform.l)
+    end
+
+    check("add_lichenicolous")
+    click_on(:APPLY.l)
+
+    assert_equal(genus.lifeform, species.reload.lifeform,
+                 "Failed to propogate lifeform to subtaxon")
   end
 end

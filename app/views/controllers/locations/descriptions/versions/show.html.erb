@@ -4,12 +4,12 @@ add_page_title(:show_past_location_description_title.t(
   num: @description.version, name: desc_title
 ))
 add_tab_set(location_description_version_tabs(description: @description,
-                                               desc_title: desc_title))
+                                              desc_title: desc_title))
 %>
 
-<%= show_past_versions(@description) %>
+<%= show_past_versions(@description, @versions) %>
 
 <%= render(partial: "locations/descriptions/show/location_description",
            object: @description) %>
 
-<%= show_object_footer(@description) %>
+<%= show_object_footer(@description, @versions) %>

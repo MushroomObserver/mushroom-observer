@@ -25,6 +25,6 @@
      description.parent.format_name.t].safe_join(" "),
     "#{:show_description_read_permissions.t}: #{read}",
     "#{:show_description_write_permissions.t}: #{write}",
-    show_previous_version(description)
+    show_previous_version(description, @versions)
   ].safe_join(safe_br)
 end %>

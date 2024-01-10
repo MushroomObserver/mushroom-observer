@@ -120,22 +120,9 @@ module ContentHelper
     end
   end
 
-  def panel_with_outer_heading(**args, &block)
-    html = []
-    h_tag = (args[:h_tag].presence || :h4)
-    html << content_tag(h_tag, args[:heading]) if args[:heading]
-    html << panel_block(**args.except(:heading, :h_tag), &block)
-    safe_join(html)
-  end
-
   def panel_block(**args, &block)
-    heading = if args[:heading]
-                tag.div(class: "panel-heading") do
-                  tag.h4(args[:heading], class: "panel-title")
-                end
-              else
-                ""
-              end
+    heading = panel_block_heading(args)
+    footer = panel_block_footer(args)
 
     tag.div(
       class: "panel panel-default #{args[:class]}",
@@ -145,6 +132,33 @@ module ContentHelper
       concat(tag.div(class: "panel-body #{args[:inner_class]}") do
         concat(capture(&block).to_s)
       end)
+      concat(footer)
+    end
+  end
+
+  def panel_block_heading(args)
+    if args[:heading]
+      tag.div(class: "panel-heading") do
+        tag.h4(class: "panel-title") do
+          els = [args[:heading]]
+          if args[:heading_links].present?
+            els << tag.span(args[:heading_links], class: "float-right")
+          end
+          els.safe_join
+        end
+      end
+    else
+      ""
+    end
+  end
+
+  def panel_block_footer(args)
+    if args[:footer]
+      tag.div(class: "panel-footer") do
+        args[:footer]
+      end
+    else
+      ""
     end
   end
 

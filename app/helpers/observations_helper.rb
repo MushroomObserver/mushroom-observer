@@ -98,18 +98,6 @@ module ObservationsHelper
     end
   end
 
-  # N+1 - this has gotta go. We have each naming's votes already
-  # def gather_users_votes(obs, user = nil)
-  #   return [] unless user
-
-  #   obs.namings.includes([:votes, :user, :name]).each_with_object({}) do
-  #     |naming, votes|
-  #     votes[naming.id] =
-  #       naming.votes.find { |vote| vote.user_id == user.id } ||
-  #       Vote.new(value: 0)
-  #   end
-  # end
-
   def link_to_display_name_brief_authors(name, **args)
     link_to(name.display_name_brief_authors.t,
             name_path(id: name.id), **args)
@@ -146,21 +134,10 @@ module ObservationsHelper
     return "" unless check_permission(obs)
 
     [
-      icon_link_with_query(
-        :show_observation_add_images.t,
-        new_image_for_observation_path(obs.id), icon: :add
-      ),
-      " | ",
-      icon_link_with_query(
-        :show_observation_reuse_image.t,
-        reuse_images_for_observation_path(obs.id), icon: :reuse
-      ),
-      " | ",
-      icon_link_with_query(
-        :show_observation_remove_images.t,
-        remove_images_from_observation_path(obs.id), icon: :remove
-      )
-    ].safe_join
+      icon_link_with_query(*new_image_for_observation_tab(obs)),
+      icon_link_with_query(*reuse_images_for_observation_tab(obs)),
+      icon_link_with_query(*remove_images_from_observation_tab(obs))
+    ].safe_join(" | ")
   end
 
   # The following sections of the observation_details partial are also needed as

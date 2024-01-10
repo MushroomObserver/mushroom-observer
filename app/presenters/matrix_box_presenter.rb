@@ -10,6 +10,7 @@ class MatrixBoxPresenter < BasePresenter
     :who,        # owner of object or target
     :name,       # name of object or target
     :what,       # link to object or target
+    :consensus,  # object for determining the current favorite name of an obs
     :place_name, # place name of location
     :where,      # location (object) of object or target
     :detail,     # string with extra details
@@ -92,6 +93,7 @@ class MatrixBoxPresenter < BasePresenter
     self.what       = observation
     self.place_name = observation.place_name
     self.where      = observation.location
+    self.consensus  = Observation::NamingConsensus.new(observation)
     if observation.rss_log
       self.detail = observation.rss_log.detail
       self.time = observation.rss_log.updated_at

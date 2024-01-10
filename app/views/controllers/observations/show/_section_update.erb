@@ -6,7 +6,7 @@
 if identifier == "namings"
   id = "namings_table_rows"
   turbo_stream.replace(id) do
-    observation_namings_table_rows(@observation)
+    observation_namings_table_rows(@consensus)
   end
 else
   id = "observation_#{identifier}"
