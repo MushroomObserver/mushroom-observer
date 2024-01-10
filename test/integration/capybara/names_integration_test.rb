@@ -118,7 +118,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
 
     login
     visit(name_path(genus))
-    within("#lifeform_section") do
+    within("#name_lifeform") do
       click_on(:show_name_propagate_lifeform.l)
     end
 
