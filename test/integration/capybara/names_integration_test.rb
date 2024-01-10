@@ -106,6 +106,23 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#title", text: "Names Matching ‘#{corrected_pattern}’")
   end
 
+  def test_lifeform_edit
+    name = names(:tremella_celata)
+
+    # make sure fixtures will work for this test
+    assert(name.lifeform.blank?,
+           "Test needs fixture without a lifeform")
+
+    login
+    visit(edit_name_lifeform_path(name))
+
+    check("lifeform_lichenicolous")
+    click_on(:SAVE.l)
+
+    assert_equal(" lichenicolous ", name.reload.lifeform,
+                 "Failed to update lifeform")
+  end
+
   def test_lifeform_propagate
     genus = names(:tremella)
     species = names(:tremella_celata)
