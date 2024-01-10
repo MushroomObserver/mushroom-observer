@@ -787,6 +787,7 @@ tremella_mesenterica:
   sort_name: Tremella mesenterica  Retz.
   created_at: 2010-10-12 21:30:01
   updated_at: 2010-10-12 21:30:01
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Tremellomycetes_\r\nOrder: _Tremellales_\r\nFamily: _Tremellaceae_\r\nFamily: _Tremella_"
   lifeform: " lichenicolous "
 
 tremella_justpublished:
@@ -800,6 +801,7 @@ tremella_justpublished:
   notes: A Tremella not known to be a lichen
   created_at: 2010-12-18 21:30:01
   updated_at: 2010-12-18 21:30:01
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Tremellomycetes_\r\nOrder: _Tremellales_\r\nFamily: _Tremellaceae_\r\nFamily: _Tremella_"
   lifeform: " lichenicolous "
 
 tremella_celata:
