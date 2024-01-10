@@ -25,7 +25,10 @@ module DescriptionsHelper
   def show_embedded_description_title(desc, type)
     title = description_title(desc)
     links = description_mod_links(desc, type)
-    tag.p(tag.span(title, class: "text-lg") + links.safe_join(" | "))
+    tag.div do
+      [tag.span(title, class: "text-lg"),
+       links.safe_join(" | ")].safe_join(safe_nbsp)
+    end
   end
 
   def description_mod_links(desc, type)

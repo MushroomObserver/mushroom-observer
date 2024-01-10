@@ -5,7 +5,7 @@ module Locations
   class MapsController < ApplicationController
     before_action :login_required
 
-    # Map results of a search or index.
+    # Map results of a search or index of Locations.
     def show
       @query = find_or_create_query(:Location)
 
