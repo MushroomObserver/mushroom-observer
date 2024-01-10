@@ -7,7 +7,7 @@ action = { controller: "/names/lifeforms/propagate", action: :update,
            id: @name.id, q: get_query_param }
 %>
 
-<%= form_with(url: action, id: "propagate_name_lifeform_form") do |f| %>
+<%= form_with(url: action, method: :put, id: "propagate_name_lifeform_form") do |f| %>
 
   <p><b><%= :ADD.t %>:</b> <%= :propagate_lifeform_add.t %></p>
   <table class="table table-lifeform table-striped">
