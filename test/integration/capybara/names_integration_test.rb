@@ -106,7 +106,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#title", text: "Names Matching ‘#{corrected_pattern}’")
   end
 
-  def test_lifeform
+  def test_lifeform_propagate
     genus = names(:tremella)
     species = names(:tremella_celata)
 
@@ -125,6 +125,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     check("add_lichenicolous")
     click_on(:APPLY.l)
 
-    assert_equal(genus.lifeform, species.lifeform)
+    assert_equal(genus.lifeform, species.reload.lifeform,
+                 "Failed to propogate lifeform to subtaxon")
   end
 end
