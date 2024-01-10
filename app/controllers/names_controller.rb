@@ -255,6 +255,7 @@ class NamesController < ApplicationController
     @has_subtaxa = 0
     # Query for names of subtaxa, used in special query link
     # Note this is only creating a schematic of a query, used in the link.
+
     # Create query for immediate children.
     @children_query = create_query(:Name, :all,
                                    names: @name.id,
@@ -293,12 +294,14 @@ class NamesController < ApplicationController
       # Don't run if there aren't any children.
       @has_subtaxa = @first_child ? @subtaxa_query.select_count : 0
     end
+
     # NOTE: `_observation_menu` makes many select_count queries like this!
     # That is where most of the heavy loading is. Check helpers/show_name_helper
     #
     # Third query (maybe combine with second)
     @obss = Name::Observations.new(@name)
-    @best_images = @obss.with_images.take(6).map(&:thumb_image)
+    # This initiates a query for the images of only the most confident obs
+    @best_images = @obss.best_images
 
     # This seems like it queries the NameDescription table.
     # Would be better to eager load descriptions and derive @best_description
