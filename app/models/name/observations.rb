@@ -36,5 +36,11 @@ class Name
     def with_images
       of_taxon_this_name.reject { |obs| obs&.thumb_image_id.nil? }
     end
+
+    def best_images
+      image_ids = with_images.take(6).map(&:thumb_image_id)
+      # One new lookup for the images. Order these by image votes
+      Image.interactive_includes.where(id: image_ids).order(vote_cache: :desc)
+    end
   end
 end

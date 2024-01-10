@@ -14,7 +14,7 @@ module VersionsHelper
   #   Previous Version: N-1<br/>
   #
   def show_previous_version(obj, versions)
-    previous_version = versions.latest&.previous
+    previous_version = versions&.last(2)&.first
     if previous_version
       previous_version_link(previous_version, obj)
     else

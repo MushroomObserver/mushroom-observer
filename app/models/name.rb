@@ -667,14 +667,14 @@ class Name < AbstractModel
   }
   scope :show_includes, lambda {
     strict_loading.includes(
-      :comments,
+      # :comments,
       :correct_spelling,
       { description: [:authors, :reviewer] },
       { descriptions: [:authors, :editors, :reviewer, :writer_groups] },
       { interests: :user },
       :misspellings,
-      { namings: [:user] },
-      { observations: [:location, :thumb_image, :user] },
+      # { namings: [:user] },
+      # { observations: [:location, :thumb_image, :user] },
       :rss_log,
       { synonym: :names },
       :user,
