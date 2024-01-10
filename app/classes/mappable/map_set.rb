@@ -45,13 +45,13 @@ module Mappable
 
     def init_objects_and_derive_extents
       @objects.each do |obj|
-        if obj.location? && !Location.is_unknown?(obj.text_name)
+        if obj.location? && !Location.is_unknown?(obj.name)
           update_extents_with_box(obj)
         elsif obj.observation?
           if obj.lat && !obj.lat_long_dubious?
             update_extents_with_point(obj)
           elsif (loc = obj.location) &&
-                !Location.is_unknown?(loc.text_name)
+                !Location.is_unknown?(loc.name)
             update_extents_with_box(loc)
           end
         else
