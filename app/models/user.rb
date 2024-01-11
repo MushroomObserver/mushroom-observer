@@ -317,7 +317,7 @@ class User < AbstractModel
   belongs_to :license       # user's default license
   belongs_to :location      # primary location
 
-  serialize :content_filter, Hash
+  serialize :content_filter, type: Hash
 
   ##############################################################################
   #
