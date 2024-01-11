@@ -2,14 +2,14 @@
 
 ruby(File.read(".ruby-version").strip)
 
-# In Ruby, 3.0, the SortedSet class has been extracted from the set library.
+# As of Ruby 3.0, the SortedSet class has been extracted from the set library.
 # You must use the sorted_set gem or other alternatives
 gem("sorted_set")
 
 source("https://rubygems.org")
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
-# gem("rails", "~> 7.0")
+# gem("rails", "~> 7.1.2")
 
 # To skip loading parts of Rails, bundle the constituent gems separately.
 # NOTE: Remember to require the classes also, in config/application.rb
@@ -19,19 +19,19 @@ source("https://rubygems.org")
 # Convenience group for updating rails constituents with one command
 # Usage: bundle update --group==rails
 group :rails do
-  gem("actioncable", "~> 7.0.8")
-  # gem("actionmailbox", "~> 7.0.8")
-  gem("actionmailer", "~> 7.0.8")
-  gem("actionpack", "~> 7.0.8")
-  # gem("actiontext", "~> 7.0.8")
-  gem("actionview", "~> 7.0.8")
-  gem("activejob", "~> 7.0.8")
-  gem("activemodel", "~> 7.0.8")
-  gem("activerecord", "~> 7.0.8")
-  # gem("activestorage", "~> 7.0.8")
-  gem("activesupport", "~> 7.0.8")
+  gem("actioncable", "~> 7.1.2")
+  # gem("actionmailbox", "~> 7.1.2")
+  gem("actionmailer", "~> 7.1.2")
+  gem("actionpack", "~> 7.1.2")
+  # gem("actiontext", "~> 7.1.2")
+  gem("actionview", "~> 7.1.2")
+  gem("activejob", "~> 7.1.2")
+  gem("activemodel", "~> 7.1.2")
+  gem("activerecord", "~> 7.1.2")
+  # gem("activestorage", "~> 7.1.2")
+  gem("activesupport", "~> 7.1.2")
   gem("bundler")
-  gem("railties", "~> 7.0.8")
+  gem("railties", "~> 7.1.2")
 end
 
 # gem irb now depends on psych, but version 5 will not bundle currently
