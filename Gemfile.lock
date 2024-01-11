@@ -9,46 +9,56 @@ GEM
   remote: https://rubygems.org/
   specs:
     RedCloth (4.3.3)
-    actioncable (7.0.8)
-      actionpack (= 7.0.8)
-      activesupport (= 7.0.8)
+    actioncable (7.1.2)
+      actionpack (= 7.1.2)
+      activesupport (= 7.1.2)
       nio4r (~> 2.0)
       websocket-driver (>= 0.6.1)
-    actionmailer (7.0.8)
-      actionpack (= 7.0.8)
-      actionview (= 7.0.8)
-      activejob (= 7.0.8)
-      activesupport (= 7.0.8)
+      zeitwerk (~> 2.6)
+    actionmailer (7.1.2)
+      actionpack (= 7.1.2)
+      actionview (= 7.1.2)
+      activejob (= 7.1.2)
+      activesupport (= 7.1.2)
       mail (~> 2.5, >= 2.5.4)
       net-imap
       net-pop
       net-smtp
-      rails-dom-testing (~> 2.0)
-    actionpack (7.0.8)
-      actionview (= 7.0.8)
-      activesupport (= 7.0.8)
-      rack (~> 2.0, >= 2.2.4)
+      rails-dom-testing (~> 2.2)
+    actionpack (7.1.2)
+      actionview (= 7.1.2)
+      activesupport (= 7.1.2)
+      nokogiri (>= 1.8.5)
+      racc
+      rack (>= 2.2.4)
+      rack-session (>= 1.0.1)
       rack-test (>= 0.6.3)
-      rails-dom-testing (~> 2.0)
-      rails-html-sanitizer (~> 1.0, >= 1.2.0)
-    actionview (7.0.8)
-      activesupport (= 7.0.8)
+      rails-dom-testing (~> 2.2)
+      rails-html-sanitizer (~> 1.6)
+    actionview (7.1.2)
+      activesupport (= 7.1.2)
       builder (~> 3.1)
-      erubi (~> 1.4)
-      rails-dom-testing (~> 2.0)
-      rails-html-sanitizer (~> 1.1, >= 1.2.0)
-    activejob (7.0.8)
-      activesupport (= 7.0.8)
+      erubi (~> 1.11)
+      rails-dom-testing (~> 2.2)
+      rails-html-sanitizer (~> 1.6)
+    activejob (7.1.2)
+      activesupport (= 7.1.2)
       globalid (>= 0.3.6)
-    activemodel (7.0.8)
-      activesupport (= 7.0.8)
-    activerecord (7.0.8)
-      activemodel (= 7.0.8)
-      activesupport (= 7.0.8)
-    activesupport (7.0.8)
+    activemodel (7.1.2)
+      activesupport (= 7.1.2)
+    activerecord (7.1.2)
+      activemodel (= 7.1.2)
+      activesupport (= 7.1.2)
+      timeout (>= 0.4.0)
+    activesupport (7.1.2)
+      base64
+      bigdecimal
       concurrent-ruby (~> 1.0, >= 1.0.2)
+      connection_pool (>= 2.2.5)
+      drb
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
+      mutex_m
       tzinfo (~> 2.0)
     addressable (2.8.6)
       public_suffix (>= 2.0.2, < 6.0)
@@ -62,6 +72,7 @@ GEM
       execjs (~> 2)
     base64 (0.2.0)
     bcrypt (3.1.20)
+    bigdecimal (3.1.5)
     bindex (0.8.1)
     blankslate (3.1.3)
     bootstrap-sass (3.4.1)
@@ -84,6 +95,7 @@ GEM
       regexp_parser (>= 1.5, < 3.0)
       xpath (~> 3.2)
     concurrent-ruby (1.2.2)
+    connection_pool (2.4.1)
     crack (0.4.5)
       rexml
     crass (1.0.6)
@@ -99,6 +111,8 @@ GEM
       irb (~> 1.10)
       reline (>= 0.3.8)
     docile (1.4.0)
+    drb (2.2.0)
+      ruby2_keywords
     erubi (1.12.0)
     execjs (2.9.1)
     fastimage (2.3.0)
@@ -139,7 +153,6 @@ GEM
       net-pop
       net-smtp
     matrix (0.4.2)
-    method_source (1.0.0)
     mimemagic (0.4.3)
       nokogiri (~> 1)
       rake
@@ -152,6 +165,7 @@ GEM
       builder
       minitest (>= 5.0)
       ruby-progressbar
+    mutex_m (0.2.0)
     mysql2 (0.5.5)
     net-imap (0.4.9)
       date
@@ -180,8 +194,13 @@ GEM
     public_suffix (5.0.4)
     racc (1.7.3)
     rack (2.2.8)
+    rack-session (1.0.2)
+      rack (< 3)
     rack-test (2.1.0)
       rack (>= 1.3)
+    rackup (1.0.0)
+      rack (< 3)
+      webrick
     rails-controller-testing (1.0.5)
       actionpack (>= 5.0.1.rc1)
       actionview (>= 5.0.1.rc1)
@@ -193,13 +212,14 @@ GEM
     rails-html-sanitizer (1.6.0)
       loofah (~> 2.21)
       nokogiri (~> 1.14)
-    railties (7.0.8)
-      actionpack (= 7.0.8)
-      activesupport (= 7.0.8)
-      method_source
+    railties (7.1.2)
+      actionpack (= 7.1.2)
+      activesupport (= 7.1.2)
+      irb
+      rackup (>= 1.0.0)
       rake (>= 12.2)
-      thor (~> 1.0)
-      zeitwerk (~> 2.5)
+      thor (~> 1.0, >= 1.2.2)
+      zeitwerk (~> 2.6)
     rainbow (3.1.1)
     raindrops (0.20.1)
     rake (13.1.0)
@@ -235,6 +255,7 @@ GEM
       rubocop (>= 1.33.0, < 2.0)
       rubocop-ast (>= 1.30.0, < 2.0)
     ruby-progressbar (1.13.0)
+    ruby2_keywords (0.0.5)
     rubyzip (2.3.2)
     sassc (2.4.0)
       ffi (~> 1.9)
@@ -312,14 +333,14 @@ PLATFORMS
 
 DEPENDENCIES
   RedCloth
-  actioncable (~> 7.0.8)
-  actionmailer (~> 7.0.8)
-  actionpack (~> 7.0.8)
-  actionview (~> 7.0.8)
-  activejob (~> 7.0.8)
-  activemodel (~> 7.0.8)
-  activerecord (~> 7.0.8)
-  activesupport (~> 7.0.8)
+  actioncable (~> 7.1.2)
+  actionmailer (~> 7.1.2)
+  actionpack (~> 7.1.2)
+  actionview (~> 7.1.2)
+  activejob (~> 7.1.2)
+  activemodel (~> 7.1.2)
+  activerecord (~> 7.1.2)
+  activesupport (~> 7.1.2)
   arel-helpers
   arel_extensions
   bcrypt (~> 3.1.7)
@@ -354,7 +375,7 @@ DEPENDENCIES
   psych (~> 4)
   rails-controller-testing
   rails-html-sanitizer (>= 1.4.4)
-  railties (~> 7.0.8)
+  railties (~> 7.1.2)
   requestjs-rails
   rtf
   rubocop
