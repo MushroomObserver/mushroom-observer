@@ -186,6 +186,17 @@ class Location < AbstractModel
             )
           end
         }
+  scope :show_includes, lambda {
+    strict_loading.includes(
+      :comments,
+      :description,
+      { descriptions: [:authors, :editors] },
+      :interests,
+      :observations,
+      :rss_log,
+      :versions
+    )
+  }
 
   # Let attached observations update their cache if these fields changed.
   def update_observation_cache

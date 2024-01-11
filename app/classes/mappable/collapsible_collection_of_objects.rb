@@ -106,18 +106,24 @@ module Mappable
       (num.to_f * prec).round.to_f / prec
     end
 
+    # Sets with unknown location are messing up the maps.
+    # Dismiss any set that has an unknown location.
+    # Similar to MapSet.init_objects_and_derive_extents
+    # These are MinimalMapLocations/Observations, so their properties
+    # are different.
     def init_sets(objects)
       objects = [objects] unless objects.is_a?(Array)
       raise("Tried to create empty map!") if objects.empty?
 
       @sets = {}
       objects.each do |obj|
-        if obj.location?
+        if obj.location? && !Location.is_unknown?(obj.name)
           add_box_set(obj, [obj], MAX_PRECISION)
         elsif obj.observation?
           if obj.lat && !obj.lat_long_dubious?
             add_point_set(obj, [obj], MAX_PRECISION)
-          elsif (loc = obj.location)
+          elsif (loc = obj.location) &&
+                !Location.is_unknown?(loc.name)
             add_box_set(loc, [obj], MAX_PRECISION)
           end
         else

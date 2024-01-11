@@ -5,7 +5,12 @@ module MapHelper
   # returns an array of mapsets, each suitable for a marker or box
   def make_map(objects: [], **args)
     nothing_to_map = args[:nothing_to_map] || :runtime_map_nothing_to_map.t
-    return nothing_to_map unless objects.any?
+    # There's nothing to map if the location is unknown.
+    objects = objects.reject do |obj|
+      name = obj.respond_to?(:location) ? obj.location&.name : obj.name
+      Location.is_unknown?(name)
+    end
+    return tag.div(nothing_to_map, class: "w-100") unless objects.any?
 
     default_args = {
       map_div: "map_div",
@@ -16,7 +21,7 @@ module MapHelper
       controls: [:large_map, :map_type].to_json,
       location_format: User.current_location_format # method has a default
     }
-    map_args = default_args.merge(args.except(:objects, :nothing_to_map))
+    map_args = default_args.merge(args.except(:nothing_to_map))
     map_args[:collection] = mappable_collection(objects, map_args).to_json
     map_args[:localization] = {
       nothing_to_map: nothing_to_map,
@@ -25,7 +30,6 @@ module MapHelper
       show_all: :show_all.t,
       map_all: :map_all.t
     }.to_json
-
     map_html(map_args)
   end
 

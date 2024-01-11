@@ -18,7 +18,7 @@ module Tabs
     # Used in the observation panel
 
     def send_observer_question_tab(obs)
-      [:show_observation_send_question.t,
+      [:show_observation_send_question.l,
        add_query_param(new_question_for_observation_path(obs.id)),
        { class: tab_id(__method__.to_s), icon: :email }]
     end
@@ -27,7 +27,7 @@ module Tabs
     def observation_manage_lists_tab(obs, user)
       return unless user
 
-      [:show_observation_manage_species_lists.t,
+      [:show_observation_manage_species_lists.l,
        add_query_param(edit_observation_species_lists_path(obs.id)),
        { class: tab_id(__method__.to_s) }]
     end
@@ -55,26 +55,26 @@ module Tabs
     end
 
     def observations_of_name_tab(name)
-      [:show_observation_more_like_this.t,
+      [:show_observation_more_like_this.l,
        observations_path(name: name.id),
        { class: tab_id(__method__.to_s) }]
     end
 
     def observations_of_look_alikes_tab(name)
-      [:show_observation_look_alikes.t,
+      [:show_observation_look_alikes.l,
        observations_path(name: name.id, look_alikes: "1"),
        { class: tab_id(__method__.to_s) }]
     end
 
     def observations_of_related_taxa_tab(name)
-      [:show_observation_related_taxa.t,
+      [:show_observation_related_taxa.l,
        observations_path(name: name.id, related_taxa: "1"),
        { class: tab_id(__method__.to_s) }]
     end
 
     # from descriptions_helper
     def obs_name_description_tabs(name)
-      list_descriptions(object: name)&.map do |link|
+      list_descriptions(object: name, type: :name)&.map do |link|
         tag.div(link)
       end
     end
@@ -100,27 +100,28 @@ module Tabs
       ]
     end
 
-    def mycoportal_name_tab(name)
-      ["MyCoPortal", mycoportal_url(name),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    def observation_hide_thumbnail_map_tab(obs)
+      [:show_observation_hide_map.l,
+       javascript_hide_thumbnail_map_path(id: obs.id),
+       { class: tab_id(__method__.to_s), icon: :hide }]
     end
 
-    def mycobank_name_search_tab(name)
-      ["Mycobank", mycobank_name_search_url(name),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    def new_image_for_observation_tab(obs)
+      [:show_observation_add_images.l,
+       new_image_for_observation_path(obs.id),
+       { class: tab_id(__method__.to_s), icon: :add }]
     end
 
-    def google_images_for_name_tab(obs_name)
-      [:google_images.t,
-       format("https://images.google.com/images?q=%s",
-              obs_name.real_text_name),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    def reuse_images_for_observation_tab(obs)
+      [:show_observation_reuse_image.l,
+       reuse_images_for_observation_path(obs.id),
+       { class: tab_id(__method__.to_s), icon: :reuse }]
     end
 
-    def occurrence_map_for_name_tab(obs_name)
-      [:show_name_distribution_map.t,
-       add_query_param(map_name_path(id: obs_name.id)),
-       { class: tab_id(__method__.to_s) }]
+    def remove_images_from_observation_tab(obs)
+      [:show_observation_remove_images.l,
+       remove_images_from_observation_path(obs.id),
+       { class: tab_id(__method__.to_s), icon: :remove }]
     end
 
     ############################################
@@ -151,16 +152,16 @@ module Tabs
 
     def observations_index_sorts
       [
-        ["rss_log", :sort_by_activity.t],
-        ["date", :sort_by_date.t],
-        ["created_at", :sort_by_posted.t],
+        ["rss_log", :sort_by_activity.l],
+        ["date", :sort_by_date.l],
+        ["created_at", :sort_by_posted.l],
         # kind of redundant to sort by rss_logs, though not strictly ===
-        # ["updated_at", :sort_by_updated_at.t],
-        ["name", :sort_by_name.t],
-        ["user", :sort_by_user.t],
-        ["confidence", :sort_by_confidence.t],
-        ["thumbnail_quality", :sort_by_thumbnail_quality.t],
-        ["num_views", :sort_by_num_views.t]
+        # ["updated_at", :sort_by_updated_at.l],
+        ["name", :sort_by_name.l],
+        ["user", :sort_by_user.l],
+        ["confidence", :sort_by_confidence.l],
+        ["thumbnail_quality", :sort_by_thumbnail_quality.l],
+        ["num_views", :sort_by_num_views.l]
       ].freeze
     end
 
@@ -180,13 +181,13 @@ module Tabs
     end
 
     def observations_add_to_list_tab(query)
-      [:list_observations_add_to_list.t,
+      [:list_observations_add_to_list.l,
        add_query_param(edit_species_list_observations_path, query),
        { class: tab_id(__method__.to_s) }]
     end
 
     def observations_download_as_csv_tab(query)
-      [:list_observations_download_as_csv.t,
+      [:list_observations_download_as_csv.l,
        add_query_param(new_observations_download_path, query),
        { class: tab_id(__method__.to_s) }]
     end
@@ -264,7 +265,7 @@ module Tabs
     end
 
     def observations_index_tab
-      [:download_observations_back.t,
+      [:download_observations_back.l,
        add_query_param(observations_path),
        { class: tab_id(__method__.to_s) }]
     end

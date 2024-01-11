@@ -6,9 +6,9 @@ module Locations::Descriptions
 
     # This either finds a description by id, or sets the ivar from the param.
     def find_description!(id = nil)
-      return find_or_goto_index(LocationDescription, id) if id
-
-      @description = find_or_goto_index(LocationDescription, params[:id].to_s)
+      desc_id = id || params[:id]
+      @description = LocationDescription.show_includes.safe_find(desc_id) ||
+                     flash_error_and_goto_index(LocationDescription, desc_id)
     end
   end
 end

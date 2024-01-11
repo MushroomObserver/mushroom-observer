@@ -44,7 +44,9 @@ module MushroomObserver
       #{config.root}/app/extensions
     ]
 
-    config.load_defaults = 7.0
+    # Uncomment this after migrating to all recommended default configs for 7.1
+    # config/initializers/new_framework_defaults_7_1.rb
+    # config.load_defaults = 7.1
 
     # Set Time.zone default to the specified zone and
     # make Active Record auto-convert to this zone.
@@ -93,8 +95,11 @@ module MushroomObserver
     # Unfortunately this is also added to email templates!
     # config.action_view.annotate_rendered_view_with_filenames = true
 
-    # Rails 6.1+
-    config.active_record.legacy_connection_handling = false
+    # Not sure we're even using Rails caching yet, but this gets us current
+    config.active_support.cache_format_version = 7.1
+
+    # Strict loading - just log, don't error out the page!
+    config.active_record.action_on_strict_loading_violation = :log
   end
 end
 

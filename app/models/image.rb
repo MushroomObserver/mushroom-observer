@@ -260,6 +260,12 @@ class Image < AbstractModel
   after_update :track_copyright_changes
   before_destroy :update_thumbnails
 
+  scope :interactive_includes, lambda {
+    strict_loading.includes(
+      :image_votes, :license, :projects, :user
+    )
+  }
+
   # Array of all observations, users and glossary terms using this image.
   def all_subjects
     observations + profile_users + glossary_terms

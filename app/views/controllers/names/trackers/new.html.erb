@@ -19,4 +19,5 @@ action = { controller: "/names/trackers", action: :create, id: @name.id,
   end %>
 </div>
 
-<%= render(partial: "names/trackers/form", locals: { action: action }) %>
+<%= render(partial: "names/trackers/form", locals: { action: action,
+                                                     method: :post }) %>

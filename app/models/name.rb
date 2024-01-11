@@ -277,7 +277,8 @@
 #  ==== Synonymy
 #  synonyms:                 List of all synonyms, including this Name.
 #  synonym_ids:              List of IDs of all synonyms, including this Name
-#  other_synonym_ids         List of IDs of all synonyms, excluding this Name
+#  other_synonyms:           List of all synonyms, excluding this Name.
+#  other_synonym_ids::       List of IDs of all synonyms, excluding this Name
 #  sort_synonyms::           List of approved then deprecated synonyms.
 #  approved_synonyms::       List of approved synonyms.
 #  best_approved_synonym::   Single "best" approved synonym
@@ -663,6 +664,22 @@ class Name < AbstractModel
       where(text_name: parsed_name.text_name).
         where(author: [parsed_name.author, ""])
     end
+  }
+  scope :show_includes, lambda {
+    strict_loading.includes(
+      # :comments,
+      :correct_spelling,
+      { description: [:authors, :reviewer] },
+      { descriptions: [:authors, :editors, :reviewer, :writer_groups] },
+      { interests: :user },
+      :misspellings,
+      # { namings: [:user] },
+      # { observations: [:location, :thumb_image, :user] },
+      :rss_log,
+      { synonym: :names },
+      :user,
+      :versions
+    )
   }
 
   def <=>(other)
