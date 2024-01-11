@@ -6,7 +6,7 @@ class ContributorsController < ApplicationController
 
   # Contributors index
   def index
-    SiteData.new
+    # SiteData.new
     @users = User.by_contribution.where(contribution: 1..)
   end
 end
