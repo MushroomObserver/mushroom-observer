@@ -29,7 +29,7 @@ class UsersController < ApplicationController
   def show
     store_location
     id = params[:id].to_s
-    @show_user = find_or_goto_index(User, id)
+    return unless find_user!
 
     case params[:flow]
     when "next"
@@ -37,20 +37,20 @@ class UsersController < ApplicationController
     when "prev"
       redirect_to_next_object(:prev, User, id) and return
     end
-    # NOTE: Using resource routes, Rails won't route anything to this show
-    # action unless there's an id param, so this may be superfluous.
-    return unless @show_user
 
     @user_data = SiteData.new.get_user_data(id)
     @life_list = Checklist::ForUser.new(@show_user)
     instance_vars_for_thumbnails_in_summary!
   end
 
-  alias show_user show
-
   #############################################################################
 
   private
+
+  def find_user!
+    @show_user = User.show_includes.safe_find(params[:id]) ||
+                 flash_error_and_goto_index(User, params[:id])
+  end
 
   # Display list of User's whose name, notes, etc. match a string pattern.
   def user_search

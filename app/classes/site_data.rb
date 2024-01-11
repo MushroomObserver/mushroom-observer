@@ -36,7 +36,7 @@
 #    }
 #
 #
-class SiteData
+class SiteData # rubocop:disable Metrics/ClassLength
   ##############################################################################
   #
   #  :section: Category Definitions
@@ -139,32 +139,20 @@ class SiteData
   }.freeze
 
   # Non-default unified queries for stats for the entire site
-  # rubocop:disable Layout/MultilineMethodCallIndentation
-  # Rubocop 1.30.0 wants to allgn "where" with the open brace on the next line.
   FIELD_QUERIES = {
     contributing_users:
-      User.
-        where(contribution: 1..),
+      User.with_contribution,
     observations_with_voucher:
-      Observation.
-        where(specimen: true).
-        where(Observation[:notes].length >= 10).
-        where.not(thumb_image_id: nil),
+      Observation.with_voucher,
     observations_without_voucher:
-      Observation.
-        where(specimen: false).
-        where(Observation[:notes].length >= 10).
-        where.not(thumb_image_id: nil),
+      Observation.without_voucher,
     sequenced_observations:
-      Sequence.
-        select(:observation_id).distinct,
+      Sequence.select(:observation_id).distinct,
     species_list_entries:
       SpeciesListObservation,
     users:
-      User.
-        where.not(verified: nil)
+      User.is_verified
   }.freeze
-  # rubocop:enable Layout/MultilineMethodCallIndentation
 
   # Call these procs to determine if a given object qualifies for a given field.
   FIELD_STATE_PROCS = {
@@ -353,6 +341,7 @@ class SiteData
   #     num_images = @user_data[user_id][:images]
   #   end
   #
+  # rubocop:disable Metrics/MethodLength
   def load_field_counts(field, user_id = nil)
     count  = "*"
     table  = FIELD_TABLES[field] || field.to_s
@@ -401,6 +390,7 @@ class SiteData
       @user_data[usr_id.to_i][field] = cnt.to_i
     end
   end
+  # rubocop:enable Metrics/MethodLength
 
   # Load all the stats for a given User.  (Load for all User's if none given.)
   #

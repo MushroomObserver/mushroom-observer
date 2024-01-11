@@ -198,7 +198,7 @@
 #  crypt_password::     Password attribute is encrypted
 #                       before object is created.
 #
-class User < AbstractModel
+class User < AbstractModel # rubocop:disable Metrics/ClassLength
   require "digest/sha1"
 
   # enum definitions for use by simple_enum gem
@@ -353,6 +353,24 @@ class User < AbstractModel
   # Used to let User enter password confirmation when signing up or changing
   # password.
   attr_accessor :password_confirmation
+
+  scope :show_includes, lambda {
+    strict_loading#.includes(
+      # :comments,
+      # :description,
+      # { descriptions: [:authors, :editors] },
+      # :interests,
+      # :observations,
+      # :rss_log,
+      # :versions
+    #)
+  }
+  scope :with_contribution, lambda {
+    where(contribution: 1..)
+  }
+  scope :is_verified, lambda {
+    where.not(verified: nil)
+  }
 
   # Find admin's record.
   def self.admin

@@ -90,7 +90,7 @@
 #
 ################################################################################
 #
-class Location < AbstractModel
+class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   require "acts_as_versioned"
 
   belongs_to :description, class_name: "LocationDescription" # (main one)

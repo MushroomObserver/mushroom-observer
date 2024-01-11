@@ -540,6 +540,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       :user
     )
   }
+  # User::SiteData scopes
+  scope :with_voucher, lambda {
+    with_specimen.with_image.where(Observation[:notes].length >= 10)
+  }
+  scope :without_voucher, lambda {
+    without_specimen.with_image.where(Observation[:notes].length >= 10)
+  }
 
   def location?
     false
