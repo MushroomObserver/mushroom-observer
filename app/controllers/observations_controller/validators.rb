@@ -35,7 +35,8 @@ module ObservationsController::Validators
      @parent_deprecated, @suggest_corrections) = @resolver.ivar_array
     if @name
       @naming.name = @name
-    else
+    # else
+    elsif !success
       @naming.errors.add(:name,
                          :form_observations_there_is_a_problem_with_name.t)
       flash_object_errors(@naming)
