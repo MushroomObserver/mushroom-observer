@@ -454,6 +454,21 @@ module Observations
       assert_equal(3, namings(:coprinus_comatus_naming).vote_sum) # 2+1 = 3
     end
 
+    def test_propose_nothing
+      params = {
+        observation_id: observations(:coprinus_comatus_obs).id,
+        naming: {
+          name: "",
+          vote: { value: "" }
+        }
+      }
+      login("rolf")
+
+      post(:create, params: params)
+
+      assert_no_flash("Blank Name proposal should not cause flash.")
+    end
+
     # Now see what happens when a third party proposes a name, and it wins.
     def test_propose_dicks_naming
       o_count = Observation.count
