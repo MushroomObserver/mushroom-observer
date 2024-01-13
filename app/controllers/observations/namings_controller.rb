@@ -37,7 +37,11 @@ module Observations
         save_changes
         respond_to_successful_create
       else # If anything failed reload the form.
-        flash_object_errors(@naming) if name_missing?
+        if @what.blank?
+          flash_error(:form_naming_what_missing.t)
+        elsif name_missing?
+          flash_object_errors(@naming)
+        end
         add_reasons(params.dig(:naming, :reasons))
         respond_to_form_errors
       end
