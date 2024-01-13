@@ -877,7 +877,7 @@ class API2Test < UnitTestCase
     link = external_links(:coprinus_comatus_obs_mycoportal_link)
     assert_users_equal(mary, link.user)
     assert_users_equal(rolf, link.observation.user)
-    assert_false(link.external_site.project.is_member?(dick))
+    assert_false(link.external_site.project.member?(dick))
     new_url = "http://something.else"
     params = {
       method: :patch,
@@ -905,7 +905,7 @@ class API2Test < UnitTestCase
     link = external_links(:coprinus_comatus_obs_mycoportal_link)
     assert_users_equal(mary, link.user)
     assert_users_equal(rolf, link.observation.user)
-    assert_false(link.external_site.project.is_member?(dick))
+    assert_false(link.external_site.project.member?(dick))
     params = {
       method: :delete,
       action: :external_link,

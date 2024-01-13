@@ -2668,7 +2668,8 @@ class QueryTest < UnitTestCase
                  :NameDescription, :by_user, user: mary, by: :id)
     assert_query([name_descriptions(:draft_coprinus_comatus).id,
                   name_descriptions(:draft_lactarius_alpinus).id,
-                  name_descriptions(:peltigera_source_desc).id],
+                  name_descriptions(:peltigera_source_desc).id,
+                  name_descriptions(:tubaria_furfuracea_desc).id],
                  :NameDescription, :by_user, user: katrina, by: :id)
     assert_query([], :NameDescription, :by_user, user: junk, by: :id)
   end

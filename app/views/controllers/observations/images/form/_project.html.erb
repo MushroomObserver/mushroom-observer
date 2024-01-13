@@ -3,7 +3,7 @@
     <%= check_box_with_label(form: f_p, field: :"id_#{project.id}",
                              checked: @project_checks[project.id],
                              disabled: @image.user != @user &&
-                               !project.is_member?(@user),
+                               !project.member?(@user),
                              label: link_to_object(project)) %>
   </div>
 <% end %>

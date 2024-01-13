@@ -203,7 +203,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     proj = projects(:current_closed_project)
     user = users(:katrina)
     # Ensure fixtures not broken
-    assert(proj.is_member?(user),
+    assert(proj.member?(user),
            "Need fixtures such that `user` is a member of `proj`")
     proj_checkbox = "project_id_#{proj.id}"
     login(user)
@@ -240,7 +240,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     proj = projects(:past_project)
     user = users(:katrina)
     # Ensure fixtures not broken
-    assert(proj.is_member?(user),
+    assert(proj.member?(user),
            "Need fixtures such that `user` is a member of `proj`")
     proj_checkbox = "project_id_#{proj.id}"
     obs_location = locations(:burbank)
