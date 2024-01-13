@@ -111,10 +111,9 @@ MushroomObserver::Application.configure do
   #   .tap  { |logger| logger.formatter = ::Logger::Formatter.new }
   #   .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
 
-  # Log to STDOUT and production.log. New 7.1 logging uses BroadcastLogger
+  # Log to production.log. New 7.1 logging uses BroadcastLogger
   # Not using TaggedLogging yet.
   loggers = [
-    STDOUT,
     "log/production.log"
   ].map do |output|
     ActiveSupport::Logger.new(output).
