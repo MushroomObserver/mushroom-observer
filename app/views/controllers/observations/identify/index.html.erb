@@ -14,11 +14,9 @@ flash_error(@error) if @error && @objects.empty?
   <%= tag.ul(class: "row list-unstyled mt-3",
              data: { controller: "matrix-table",
                      action: "resize@window->matrix-table#rearrange" }) do %>
-    <%= render(partial: "shared/matrix_box",
+    <%= render(partial: "shared/matrix_box", layout: "shared/matrix_table",
                locals: { link_method: :get, identify: true },
-               layout: "shared/matrix_table",
-               collection: @objects,
-               as: :object) %>
+               collection: @objects, as: :object, cached: true) %>
     <div style="clear:left"></div>
   <% end %>
 <% end %>
