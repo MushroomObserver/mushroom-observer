@@ -29,21 +29,21 @@ export default class extends Controller {
 
   smSpacer() {
     const spacer = document.createElement('div')
-    spacer.classList.add('hidden').add('visible-sm-block')
+    spacer.classList.add('hidden', 'visible-sm-block')
     spacer.style.clear = "left"
     return spacer
   }
 
   mdSpacer() {
     const spacer = document.createElement('div')
-    spacer.classList.add('hidden').add('visible-md-block')
+    spacer.classList.add('hidden', 'visible-md-block')
     spacer.style.clear = "left"
     return spacer
   }
 
   lgSpacer() {
     const spacer = document.createElement('div')
-    spacer.classList.add('hidden').add('visible-lg-block')
+    spacer.classList.add('hidden', 'visible-lg-block')
     spacer.style.clear = "left"
     return spacer
   }
