@@ -48,7 +48,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     end
 
     namer_session.assert_selector("body.namings__create")
-    assert_flash_text(form_naming_what_missing.l, session: namer_session)
+    assert_flash_text(:form_naming_what_missing.l, session: namer_session)
     namer_session.
       # see https://github.com/MushroomObserver/mushroom-observer/issues/1796
       assert_no_selector("#flash_notices", text: "See message below")
