@@ -772,6 +772,21 @@ class NamesControllerTest < FunctionalTestCase
     )
   end
 
+  def test_show_name_inherit_link
+    name = names(:pasaria)
+    assert(!name.below_genus? && name.classification.blank?,
+           "Need fixture with rank >= Genus and lacking Classification")
+
+    login
+    get(:show, params: { id: name.id })
+
+    assert_select(
+      "#name_classification",
+      { text: /#{:show_name_inherit_classification.l}/, count: 1 },
+      "Classification area lacks a #{:show_name_inherit_classification.l} link"
+    )
+  end
+
   def assert_synonym_links(name, approve, deprecate, edit)
     assert_select("a[href*=?]", approve_name_synonym_form_path(name.id),
                   count: approve)
