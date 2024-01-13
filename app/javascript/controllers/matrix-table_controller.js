@@ -16,13 +16,13 @@ export default class extends Controller {
   add_spacers() {
     this.matrixBoxes.forEach((element, i) => {
       if (i % 2 == 0) {
-        element.insertAdjacentElement(this.smSpacer())
+        element.insertAdjacentElement('beforebegin', this.smSpacer())
       }
       if (i % 3 == 0) {
-        element.insertAdjacentElement(this.mdSpacer())
+        element.insertAdjacentElement('beforebegin', this.mdSpacer())
       }
       if (i % 4 == 0) {
-        element.insertAdjacentElement(this.lgSpacer())
+        element.insertAdjacentElement('beforebegin', this.lgSpacer())
       }
     })
   }
