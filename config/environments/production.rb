@@ -121,7 +121,7 @@ MushroomObserver::Application.configure do
   loggers = [
     "log/production.log"
   ].map do |output|
-    ActiveSupport::Logger.new(output, level: Logger::DEBUG).
+    ActiveSupport::Logger.new(output, level: Logger::INFO).
       tap { |logger| logger.formatter = Logger::Formatter.new }
     # .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
   end
