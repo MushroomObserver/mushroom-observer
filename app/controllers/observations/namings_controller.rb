@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 # Controller for handling the naming of observations
-# rubocop:disable Metrics/ClassLength
+
 module Observations
-  class NamingsController < ApplicationController
+  class NamingsController < ApplicationController # rubocop:disable Metrics/ClassLength
     before_action :login_required
     before_action :pass_query_params
 
@@ -37,11 +37,7 @@ module Observations
         save_changes
         respond_to_successful_create
       else # If anything failed reload the form.
-        if @what.blank?
-          flash_error(:form_naming_what_missing.t)
-        elsif name_missing?
-          flash_object_errors(@naming)
-        end
+        flash_naming_errors
         add_reasons(params.dig(:naming, :reasons))
         respond_to_form_errors
       end
@@ -102,6 +98,8 @@ module Observations
         format.html { default_redirect(@observation) }
       end
     end
+
+    #########
 
     private
 
@@ -261,14 +259,20 @@ module Observations
       end
     end
 
-    def name_missing?
-      if @name && @what.match(/\S/)
-        false
-      else
-        @naming.errors.add(:name,
-                           :form_observations_there_is_a_problem_with_name.t)
-        true
+    def flash_naming_errors
+      if @what.blank?
+        flash_error(:form_naming_what_missing.t)
+      elsif name_missing?
+        flash_object_errors(@naming)
       end
+    end
+
+    def name_missing?
+      return false if @name && @what.present?
+
+      @naming.errors.
+        add(:name, :form_observations_there_is_a_problem_with_name.t)
+      true
     end
 
     def respond_to_form_errors
@@ -412,4 +416,3 @@ module Observations
     end
   end
 end
-# rubocop:enable Metrics/ClassLength
