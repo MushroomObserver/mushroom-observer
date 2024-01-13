@@ -1438,6 +1438,22 @@ class ObservationsControllerTest < FunctionalTestCase
            "Observation should have log_updated_at time")
   end
 
+  def test_create_observation_without_scientific_name
+    params = { user: rolf,
+               where: locations.first.name }
+    fungi = names(:fungi)
+
+    post_requires_login(:create, params)
+
+    assert_flash_success(
+      "Omitting Scientific Name should not cause flash error or warning."
+    )
+    assert_equal(
+      fungi, Observation.last.name,
+      "Observation should be id'd as `Fungi` if user omits Scientific Name."
+    )
+  end
+
   def test_create_observation_with_unrecognized_name
     text_name = "Elfin saddle"
     params = { naming: { name: text_name },
