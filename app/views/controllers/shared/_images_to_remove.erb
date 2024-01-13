@@ -10,7 +10,7 @@
              data: { controller: "matrix-table",
                      action: "resize@window->matrix-table#rearrange" }) do %>
 
-    <%= render(layout: "shared/matrix_table",
+    <%= render(# layout: "shared/matrix_table",
                locals: { objects: @object.images }) do |image| %>
 
       <%= matrix_box(id: image.id) do %>
