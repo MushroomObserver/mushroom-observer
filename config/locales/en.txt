@@ -1592,6 +1592,7 @@
   form_naming_valid_synonyms: Preferred synonyms are
   form_naming_deprecated: The name '[name]' is deprecated.
   form_naming_not_recognized: MO does not recognize the name '[name]'.
+  form_naming_what_missing: "[:WHAT] missing"
   form_naming_parent_deprecated: The [rank] [parent] is deprecated.
   form_naming_name_help: The **scientific name** (without author) that identifies this Observation. **Leave this field blank if you don't know the scientific name.**
   form_naming_deprecated_help: Select a Prefered synonym, enter another Name, or click '[button]' to use '[name]'.
