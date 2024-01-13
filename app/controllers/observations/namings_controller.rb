@@ -316,7 +316,7 @@ module Observations
       success = resolve_name(params.dig(:naming, :name).to_s,
                              params[:approved_name],
                              params.dig(:chosen_name, :name_id).to_s)
-      flash_object_errors(@naming) if name_missing?
+      flash_naming_errors
       success
     end
 
