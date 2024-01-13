@@ -51,7 +51,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     assert_flash_text(:form_naming_what_missing.l, session: namer_session)
     namer_session.
       # see https://github.com/MushroomObserver/mushroom-observer/issues/1796
-      assert_no_selector("#flash_notices", text: "See message below")
+      assert_no_selector("#flash_notices", text: :SEE_MESSAGE_BELOW.l)
 
     namer_session.within("#obs_#{obs.id}_naming_form") do |form|
       form.fill_in("naming_name", with: text_name)
