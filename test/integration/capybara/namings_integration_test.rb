@@ -46,11 +46,12 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
       assert_true(form.has_unchecked_field?("naming_reasons_4_check"))
       form.first("input[type='submit']").click
     end
+
     namer_session.assert_selector("body.namings__create")
-    # (I don't care so long as it says something.)
-    assert_flash_text(/\S/, session: namer_session)
-    namer_session.assert_no_selector("#flash_notices", text: "See message below")
-    namer_session.assert_selector("#flash_notices", text: :form_naming_what_missing.l)
+    assert_flash_text(form_naming_what_missing.l, session: namer_session)
+    namer_session.
+      # see https://github.com/MushroomObserver/mushroom-observer/issues/1796
+      assert_no_selector("#flash_notices", text: "See message below")
 
     namer_session.within("#obs_#{obs.id}_naming_form") do |form|
       form.fill_in("naming_name", with: text_name)
