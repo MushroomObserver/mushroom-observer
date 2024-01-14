@@ -1,6 +1,29 @@
 # frozen_string_literal: true
 
 module MatrixBoxHelper
+  def matrix_grid(**args, &block)
+    partial = args[:partial].presence? || "shared/matrix_box"
+    as = args[:as].presence? || :object
+    cached = args[:cached].presence? || false
+
+    concat(
+      tag.ul(
+        class: "row list-unstyled mt-3",
+        data: { controller: "matrix-table",
+                action: "resize@window->matrix-table#rearrange" }
+      ) do
+        if block
+          capture(&block)
+        else
+          render(partial: partial,
+                 locals: args.except(:objects, :as, :partial, :cached),
+                 collection: args[:objects], as: as, cached: cached)
+        end
+      end
+    )
+    concat(tag.div("", class: "clearfix"))
+  end
+
   # Use this helper to produce a standard li.matrix-box with an object id.
   # Or, send your own column classes and other args
   def matrix_box(**args, &block)

@@ -24,7 +24,7 @@ module ImagesHelper
   #   }
   # )
   def interactive_image(image, **args)
-    presenter = ImagePresenter.new(image, args.except(:image))
+    presenter = ImagePresenter.new(image, args)
     set_width = presenter.width.present? ? "width: #{presenter.width}px;" : ""
 
     [
@@ -124,7 +124,7 @@ module ImagesHelper
                  image_or_image_id
                end
     modal_link_to("image_exif_#{image_id}", :image_show_exif.t,
-                  exif_image_path(image_id), { class: classes })
+                  exif_image_path(id: image_id), { class: classes })
   end
 
   # NOTE: `stretched_link` might be a link to #show_obs or #show_image,

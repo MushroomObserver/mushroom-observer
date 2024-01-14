@@ -7,21 +7,36 @@ if presenter
   identify ||= false
   columns ||= "col-xs-12 col-sm-6 col-md-4 col-lg-3" # maybe passed as a local
   object_id = object&.id.present? ? object.id : "no_ID"
-  # There is a lotta arg passing. TODO: Check if any view is actually sending
-  # any extra image_arg locals to this matrix_box partial. AN 2023
+  # There is a lotta arg passing. Usually, it's only object and columns.
+  # Only the identify interface sends an extra that get passed to image_args:
+  # local_assigns[:identify]. Could simplify passed_args to just pass identify.
   passed_args = local_assigns.
                 except(:columns, :object, :object_counter, :object_iteration)
-
+  # if using a partial
+  if (image = presenter.image_data&.dig(:image))
+    image_args = passed_args.merge(presenter.image_data || {})
+  end
   %>
 
   <%= matrix_box(columns: columns, id: object_id) do
     tag.div(class: "panel panel-default") do
       [
         tag.div(class: "panel-sizing") do
-          [
-            matrix_box_image(presenter, passed_args),
-            matrix_box_details(presenter, object, object_id, identify),
-          ].safe_join
+          # [
+          #   matrix_box_image(presenter, passed_args),
+          #   matrix_box_details(presenter, object, object_id, identify),
+          # ].safe_join
+          concat(
+            tag.div(class: "thumbnail-container") do
+              # interactive_image(image, **image_args)
+              # cache(image) do
+                # matrix_box_image(presenter, passed_args)
+                render(partial: "shared/interactive_image",
+                       locals: image_args)
+              # end
+            end
+          ) if image
+          concat(matrix_box_details(presenter, object, object_id, identify))
         end,
         matrix_box_log_footer(presenter),
         matrix_box_identify_footer(identify, presenter.id)
