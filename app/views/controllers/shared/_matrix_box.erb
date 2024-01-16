@@ -28,12 +28,13 @@ if presenter
           # ].safe_join
           concat(
             tag.div(class: "thumbnail-container") do
-              # interactive_image(image, **image_args)
-              # cache(image) do
+              # Helper Dependency Updated: Jan 14, 2024 at 3am
+              cache(image) do
+                # interactive_image(image, **image_args)
                 # matrix_box_image(presenter, passed_args)
-                render(partial: "shared/interactive_image",
-                       locals: image_args)
-              # end
+                concat(render(partial: "shared/interactive_image",
+                              locals: image_args))
+              end
             end
           ) if image
           concat(matrix_box_details(presenter, object, object_id, identify))
