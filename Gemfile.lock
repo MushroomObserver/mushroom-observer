@@ -1,9 +1,10 @@
 GIT
   remote: https://bogomips.org/unicorn.git
-  revision: d71d3285ea29f0978bd0b35a366a1470ca69be18
-  branch: master
+  revision: 9d7bab0bc2211b20806d4d0289a7ea992e49a8a1
+  branch: 9d7bab0bc2211b20806d4d0289a7ea992e49a8a1
   specs:
     unicorn (6.1.0)
+      kgio (~> 2.6)
       raindrops (~> 0.7)
 
 GIT
@@ -151,6 +152,7 @@ GEM
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
     json (2.7.1)
+    kgio (2.11.4)
     language_server-protocol (3.17.0.3)
     libv8-node (18.16.0.0-arm64-darwin)
     libv8-node (18.16.0.0-x86_64-darwin)
