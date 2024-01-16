@@ -9,10 +9,10 @@ if presenter
   object_id = object&.id.present? ? object.id : "no_ID"
   # There is a lotta arg passing. Usually, it's only object and columns.
   # Only the identify interface sends an extra that get passed to image_args:
-  # local_assigns[:identify]. Could simplify passed_args to just pass identify.
+  # local_assigns[:identify]. Maybe simplify passed_args to just pass identify.
   passed_args = local_assigns.
                 except(:columns, :object, :object_counter, :object_iteration)
-  # if using a partial
+  # if using interactive_image or the interactive_image partial
   if (image = presenter.image_data&.dig(:image))
     image_args = passed_args.merge(presenter.image_data || {})
   end
@@ -22,20 +22,16 @@ if presenter
     tag.div(class: "panel panel-default") do
       [
         tag.div(class: "panel-sizing") do
-          # [
-          #   matrix_box_image(presenter, passed_args),
-          #   matrix_box_details(presenter, object, object_id, identify),
-          # ].safe_join
+          # Helper Dependency Updated: Jan 14, 2024 at 3am
           concat(
-            tag.div(class: "thumbnail-container") do
-              # Helper Dependency Updated: Jan 14, 2024 at 3am
-              cache(image) do
-                # interactive_image(image, **image_args)
-                # matrix_box_image(presenter, passed_args)
-                concat(render(partial: "shared/interactive_image",
-                              locals: image_args))
-              end
-            end
+            # tag.div(class: "thumbnail-container") do
+              # cache(image) do
+                matrix_box_image(image, **image_args)
+                # concat(interactive_image(image, **image_args))
+                # concat(render(partial: "shared/interactive_image",
+                #               locals: image_args))
+              # end
+            # end
           ) if image
           concat(matrix_box_details(presenter, object, object_id, identify))
         end,
