@@ -882,6 +882,9 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     # of the other callbacks, either, since this doesn't result in emails,
     # contribution changes, or rss log entries.
     save_without_our_callbacks if save_changes
+    # update +updated_at+ for any associated observations, in order to update
+    # the cached interactive_image in the matrix_box (contrast with the above)
+    observations&.touch_all
 
     value
   end
