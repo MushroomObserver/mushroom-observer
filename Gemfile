@@ -34,6 +34,9 @@ group :rails do
   gem("railties", "~> 7.1.2")
 end
 
+# fix for unicorn 6.1.0 not being able to deal with current rack 3 yet
+# delete when unicorn updated to 7
+gem("rack", "~>2")
 # gem irb now depends on psych, but version 5 will not bundle currently
 gem("psych", "~> 4")
 # importmap for js module handling
