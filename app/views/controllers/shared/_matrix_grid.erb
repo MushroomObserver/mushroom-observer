@@ -1,0 +1,19 @@
+<%# matrix_grid: reusable wrapper for matrix boxes %>
+
+<%
+partial = local_assigns[:partial].presence? || "shared/matrix_box"
+as = local_assigns[:as].presence? || :object
+cached = local_assigns[:cached].presence? || false
+%>
+
+<%= tag.ul(class: "row list-unstyled mt-3",
+           data: { controller: "matrix-table",
+                   action: "resize@window->matrix-table#rearrange" }) do %>
+
+  <%= render(partial: partial,
+             locals: local_assigns.except(:objects, :as, :partial, :cached),
+             collection: local_assigns[:objects], as: as, cached: cached) %>
+
+<% end %>
+
+<%= tag.div("", class: "clearfix") %>
