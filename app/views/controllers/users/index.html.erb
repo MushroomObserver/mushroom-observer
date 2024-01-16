@@ -59,9 +59,7 @@ flash_error(@error) if @error && @objects.empty?
                  data: { controller: "matrix-table",
                          action: "resize@window->matrix-table#rearrange" }) do %>
         <%= render(partial: "shared/matrix_box",
-                   layout: "shared/matrix_table",
-                   collection: @objects,
-                   as: :object) %>
+                   collection: @objects, as: :object) %>
       <% end %>
     <% end %>
 <% end %>
