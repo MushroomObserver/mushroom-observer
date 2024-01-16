@@ -328,7 +328,7 @@ module Names
       project = projects(:eol_project)
       draft = name_descriptions(:draft_agaricus_campestris)
       assert(draft.belongs_to_project?(project))
-      assert_not(project.is_member?(dick))
+      assert_not(project.member?(dick))
       login(dick.login)
       get(:show, params: { id: draft.id })
       assert_redirected_to(project.show_link_args)
@@ -361,7 +361,7 @@ module Names
     end
 
     def test_edit_draft_member
-      assert(projects(:eol_project).is_member?(katrina))
+      assert(projects(:eol_project).member?(katrina))
       assert_equal("EOL Project",
                    name_descriptions(:draft_agaricus_campestris).source_name)
       edit_draft_tester(name_descriptions(:draft_agaricus_campestris),
@@ -369,7 +369,7 @@ module Names
     end
 
     def test_edit_draft_non_member
-      assert_not(projects(:eol_project).is_member?(dick))
+      assert_not(projects(:eol_project).member?(dick))
       assert_equal("EOL Project",
                    name_descriptions(:draft_coprinus_comatus).source_name)
       edit_draft_tester(name_descriptions(:draft_coprinus_comatus),

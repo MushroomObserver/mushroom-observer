@@ -70,7 +70,7 @@ class Article < AbstractModel
     #   Article write permission does not yet exist or was deleted.
     return false unless news_articles_project
 
-    news_articles_project.is_member?(user)
+    news_articles_project.member?(user)
   end
 
   # Project used to administer Article write permission.

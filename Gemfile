@@ -50,6 +50,8 @@ gem("turbo-rails")
 # gem("redis", "~> 4.0")
 # Compile SCSS for stylesheets
 gem("sassc-rails")
+# add locale to cache key
+gem("cache_with_locale")
 
 # Fix a version problem betw stimulus and sprockets. (not sprockets-rails)
 # Delete this dependency declaration if the issue gets resolved:

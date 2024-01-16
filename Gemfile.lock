@@ -85,6 +85,10 @@ GEM
     bullet (7.1.5)
       activesupport (>= 3.0.0)
       uniform_notifier (~> 1.11)
+    cache_with_locale (0.0.3)
+      actionview
+      activesupport
+      railties
     capybara (3.39.2)
       addressable
       matrix
@@ -349,6 +353,7 @@ DEPENDENCIES
   browser
   bullet
   bundler
+  cache_with_locale
   capybara (~> 3.37, >= 3.37.1)
   cuprite
   database_cleaner-active_record
