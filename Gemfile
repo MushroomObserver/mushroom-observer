@@ -100,7 +100,9 @@ gem("jbuilder")
 gem("bcrypt", "~> 3.1.7")
 
 # Use unicorn as the app server
-gem("unicorn")
+# Temporary fix for Ruby 3.3.0: use this branch
+gem("unicorn", git: "https://bogomips.org/unicorn.git",
+               branch: "master")
 
 # Use Capistrano for deployment
 # gem("capistrano", group: :development)

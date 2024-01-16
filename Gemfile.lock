@@ -1,4 +1,12 @@
 GIT
+  remote: https://bogomips.org/unicorn.git
+  revision: d71d3285ea29f0978bd0b35a366a1470ca69be18
+  branch: master
+  specs:
+    unicorn (6.1.0)
+      raindrops (~> 0.7)
+
+GIT
   remote: https://github.com/MushroomObserver/acts_as_versioned/
   revision: 56891f7f915610e9f884e3a932bfb6934303b3b8
   specs:
@@ -143,7 +151,6 @@ GEM
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
     json (2.7.1)
-    kgio (2.11.4)
     language_server-protocol (3.17.0.3)
     libv8-node (18.16.0.0-arm64-darwin)
     libv8-node (18.16.0.0-x86_64-darwin)
@@ -301,9 +308,6 @@ GEM
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.5.0)
-    unicorn (6.1.0)
-      kgio (~> 2.6)
-      raindrops (~> 0.7)
     uniform_notifier (1.16.0)
     web-console (4.2.1)
       actionview (>= 6.0.0)
@@ -395,7 +399,7 @@ DEPENDENCIES
   stimulus-rails
   terser
   turbo-rails
-  unicorn
+  unicorn!
   web-console
   webmock
   xmlrpc
