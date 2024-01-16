@@ -3,7 +3,7 @@
     <%= tag.ul(class: "row list-unstyled mt-3",
                data: { controller: "matrix-table",
                        action: "resize@window->matrix-table#rearrange" }) do %>
-      <%= @subset.each do |row| %>
+      <% @subset.each do |row| %>
         <%= matrix_box(id: row[0]) do %>
           <%= tag.div(class: "panel panel-default") do %>
             <%= tag.div(class: "thumbnail-container") do
@@ -16,7 +16,7 @@
               )
             end %>
           <% end %>
-        <% end %><!-- .matrix-box -->
+        <% end %>
       <% end %>
     <% end %>
   <% end %>
