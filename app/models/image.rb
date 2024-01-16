@@ -223,7 +223,7 @@ require("fastimage")
 #
 ################################################################################
 #
-class Image < AbstractModel
+class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   require "fileutils"
   require "net/http"
 
