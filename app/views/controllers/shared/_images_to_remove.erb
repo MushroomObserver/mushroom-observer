@@ -10,7 +10,7 @@
              data: { controller: "matrix-table",
                      action: "resize@window->matrix-table#rearrange" }) do %>
 
-    <%= @object.images.each do |image| %>
+    <% @object.images.each do |image| %>
 
       <%= matrix_box(id: image.id) do %>
         <%= tag.div(class: "py-3 text-center") do %>

@@ -42,6 +42,6 @@ flash_error(@error) if @error && @objects.empty?
     <%= render(partial: "shared/matrix_box",
                cached: true,
                collection: @objects, as: :object) %>
-    <%= tag.div("", style: "clear:left") %>
+    <div style="clear:left"></div>
   <% end %>
 <% end %>

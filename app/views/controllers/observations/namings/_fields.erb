@@ -14,10 +14,10 @@ feedback_locals = {
   parent_deprecated: @parent_deprecated,
   names: @names
 }
-
 confidences = options_for_select(Vote.confidence_menu, @vote&.value)
 select_opts = { include_blank: ["new", "create"].include?(action_name) }
 context ||= "blank"
+name_help ||= :form_naming_name_help.t
 %>
 
 <%=
@@ -40,7 +40,7 @@ context ||= "blank"
           end,
           tag.div(class: "col-xs-12 col-sm-6") do
             help_block_with_arrow("left", id: "naming_name_help") do
-              tag.p(:form_naming_name_help.t)
+              tag.p(name_help)
             end
           end
         ].safe_join
