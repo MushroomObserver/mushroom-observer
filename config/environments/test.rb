@@ -59,7 +59,7 @@ MushroomObserver::Application.configure do
   # exceptions.
   # config.action_dispatch.show_exceptions = :rescuable
   # Raise exceptions instead of rendering exception templates.
-  config.action_dispatch.show_exceptions = :none
+  config.action_dispatch.show_exceptions = false
 
   # Disable request forgery protection in test environment.
   config.action_controller.allow_forgery_protection = false
@@ -102,6 +102,8 @@ MushroomObserver::Application.configure do
   # Raise error when a before_action's only/except options reference missing
   # actions
   config.action_controller.raise_on_missing_callback_actions = true
+
+  # config.action_dispatch.show_exceptions = false
 
   config.active_support.test_order = :random
 
