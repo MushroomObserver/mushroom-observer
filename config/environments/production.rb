@@ -106,7 +106,8 @@ MushroomObserver::Application.configure do
 
   # Force all access to the app over SSL, use Strict-Transport-Security,
   # and use secure cookies.
-  config.force_ssl = true
+  # force_ssl does not work with unicorn 6.1.0 - wait for 7
+  config.force_ssl = false
 
   # Use a different logger for distributed setups.
   # Log to STDOUT by default
