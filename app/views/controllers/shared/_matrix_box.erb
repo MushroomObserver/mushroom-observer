@@ -15,7 +15,10 @@ if presenter
   # if using interactive_image or the interactive_image partial
   if (image = presenter.image_data&.dig(:image))
     image_args = passed_args.merge(presenter.image_data || {})
+  else
+    image_args = {}
   end
+  # the comment below is necessary because the helper calls `cache`
   %>
 
   <%= matrix_box(columns: columns, id: object_id) do
@@ -23,16 +26,7 @@ if presenter
       [
         tag.div(class: "panel-sizing") do
           # Helper Dependency Updated: Jan 14, 2024 at 3am
-          concat(
-            # tag.div(class: "thumbnail-container") do
-              # cache(image) do
-                matrix_box_image(image, **image_args)
-                # concat(interactive_image(image, **image_args))
-                # concat(render(partial: "shared/interactive_image",
-                #               locals: image_args))
-              # end
-            # end
-          ) if image
+          concat(matrix_box_image(image, **image_args))
           concat(matrix_box_details(presenter, object, object_id, identify))
         end,
         matrix_box_log_footer(presenter),

@@ -38,17 +38,12 @@ module MatrixBoxHelper
     end
   end
 
-  # def matrix_box_image(presenter, passed_args)
-    # return unless presenter.image_data
+  def matrix_box_image(image = nil, **)
+    return unless image
 
-    # image = presenter.image_data[:image]
-    # # for matrix_box_carousels: change to image_data.except(:images)
-    # image_args = passed_args.merge(presenter.image_data.except(:image) || {})
-
-  def matrix_box_image(image, **image_args)
     tag.div(class: "thumbnail-container") do
       cache(image) do
-        concat(interactive_image(image, **image_args))
+        concat(interactive_image(image, **))
       end
     end
   end
