@@ -294,6 +294,27 @@ class SequencesControllerTest < FunctionalTestCase
                          "User should go to last query after creating Sequence")
   end
 
+  # See https://github.com/MushroomObserver/mushroom-observer/issues/1808
+  def test_create_notes_with_caron
+    obs = observations(:detailed_unknown_obs)
+    locus = "ITS"
+    bases = ITS_BASES
+    caron = "ň"
+    params = {
+      observation_id: obs.id,
+      sequence: { locus: locus,
+                  bases: bases,
+                  notes: caron }
+    }
+
+    login
+    post(:create, params: params)
+
+    assert_flash_success
+    assert_equal(caron, Sequence.last.notes,
+                 "Failed to include utf8 caron (#{caron}) in Sequence Notes")
+  end
+
   def test_edit
     sequence = sequences(:local_sequence)
     obs      = sequence.observation
