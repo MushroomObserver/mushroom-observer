@@ -106,6 +106,7 @@ GEM
     cuprite (0.15)
       capybara (~> 3.0)
       ferrum (~> 0.14.0)
+    dalli (3.2.6)
     database_cleaner-active_record (2.1.0)
       activerecord (>= 5.a)
       database_cleaner-core (~> 2.0.0)
@@ -356,6 +357,7 @@ DEPENDENCIES
   cache_with_locale
   capybara (~> 3.37, >= 3.37.1)
   cuprite
+  dalli (~> 3.2)
   database_cleaner-active_record
   date (>= 3.2.1)
   debug (>= 1.0.0)

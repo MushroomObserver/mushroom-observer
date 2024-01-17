@@ -51,6 +51,8 @@ gem("requestjs-rails")
 gem("turbo-rails")
 # redis for combining actioncable broadcasts with turbo_stream
 # gem("redis", "~> 4.0")
+# dalli to run the memcached server
+gem("dalli", "~> 3.2")
 # Compile SCSS for stylesheets
 gem("sassc-rails")
 # add locale to cache key
