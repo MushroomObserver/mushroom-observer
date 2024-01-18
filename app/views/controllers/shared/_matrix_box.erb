@@ -28,7 +28,7 @@ if presenter
         tag.div(class: "panel-sizing") do
           [
             # Helper Dependency Updated: Jan 14, 2024 at 3am
-            matrix_box_image(image, @user, **image_args),
+            matrix_box_image(image, **image_args),
             matrix_box_details(presenter, object, object_id, identify),
           ].safe_join
         end,
