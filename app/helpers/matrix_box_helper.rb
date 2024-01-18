@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
 module MatrixBoxHelper
-  def matrix_grid(**args, &block)
-    partial = args[:partial].presence? || "shared/matrix_box"
-    as = args[:as].presence? || :object
-    cached = args[:cached].presence? || false
+  # Wrapper for a "grid" of matrix_boxes
+  def matrix_table(**args, &block)
+    partial = args[:partial] || "shared/matrix_box"
+    as = args[:as] || :object
+    cached = args[:cached] || false
 
     concat(
       tag.ul(

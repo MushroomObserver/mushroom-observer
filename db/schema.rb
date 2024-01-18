@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_12_27_170054) do
+ActiveRecord::Schema[7.1].define(version: 2024_01_17_180824) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -21,9 +21,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_12_27_170054) do
     t.datetime "verified", precision: nil
   end
 
-  create_table "articles", id: :integer, charset: "latin1", force: :cascade do |t|
+  create_table "articles", id: :integer, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "title"
-    t.text "body"
+    t.text "body", size: :medium
     t.integer "user_id"
     t.integer "rss_log_id"
     t.datetime "created_at", precision: nil, null: false
@@ -580,14 +580,14 @@ ActiveRecord::Schema[7.0].define(version: 2023_12_27_170054) do
     t.datetime "created_at", precision: nil, null: false
   end
 
-  create_table "sequences", id: :integer, charset: "latin1", force: :cascade do |t|
+  create_table "sequences", id: :integer, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "observation_id"
     t.integer "user_id"
-    t.text "locus"
-    t.text "bases"
+    t.text "locus", size: :medium
+    t.text "bases", size: :medium
     t.string "archive"
     t.string "accession"
-    t.text "notes"
+    t.text "notes", size: :medium
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
   end
