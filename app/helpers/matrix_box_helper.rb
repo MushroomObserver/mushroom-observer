@@ -7,7 +7,7 @@ module MatrixBoxHelper
     as = args[:as] || :object
     cached = args[:cached] || false
 
-    concat(
+    [
       tag.ul(
         class: "row list-unstyled mt-3",
         data: { controller: "matrix-table",
@@ -20,9 +20,9 @@ module MatrixBoxHelper
                  locals: args.except(:objects, :as, :partial, :cached),
                  collection: args[:objects], as: as, cached: cached)
         end
-      end
-    )
-    concat(tag.div("", class: "clearfix"))
+      end,
+      tag.div("", class: "clearfix")
+    ].safe_join
   end
 
   # Use this helper to produce a standard li.matrix-box with an object id.
