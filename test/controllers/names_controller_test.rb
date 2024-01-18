@@ -787,6 +787,22 @@ class NamesControllerTest < FunctionalTestCase
     )
   end
 
+  def test_show_name_sensu_lato
+    name = names(:coprinus_sensu_lato)
+    assert(name.rank == "Genus" && name.author.match?(/sensu lato/) &&
+             name.classification.present?,
+           "Test needs Genus sensu lato with a Classification")
+
+    login
+    get(:show, params: { id: name.id })
+
+    assert_select(
+      "#name_classification",
+      { text: /#{:show_name_propagate_classification.l}/, count: 0 },
+      "Name sensu lato should not have propagate classification link"
+    )
+  end
+
   def assert_synonym_links(name, approve, deprecate, edit)
     assert_select("a[href*=?]", approve_name_synonym_form_path(name.id),
                   count: approve)

@@ -74,6 +74,16 @@ coprinus_comatus:
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
   icn_id: 148667
 
+coprinus_sensu_lato:
+  <<: *DEFAULTS
+  text_name: Coprinus
+  author: sensu lato
+  display_name: '**__Coprinus__** sensu lato'
+  search_name: Coprinus sensu lato
+  sort_name: Coprinus  sensu lato
+  rank: <%= Name.ranks[:Genus] %>
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_"
+
 stereum:
   <<: *DEFAULTS
   text_name: Stereum
