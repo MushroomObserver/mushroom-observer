@@ -11,14 +11,7 @@ flash_error(@error) if @error && @objects.empty?
 </div>
 
 <%= paginate_block(@pages) do %>
-  <%= tag.ul(class: "row list-unstyled mt-3",
-             data: { controller: "matrix-table",
-                     action: "resize@window->matrix-table#rearrange" }) do %>
-    <%= render(partial: "shared/matrix_box",
-               locals: { identify: true },
-               collection: @objects, as: :object) %>
-    <div style="clear:left"></div>
-  <% end %>
+  <%= matrix_table(objects: @objects, identify: true) %>
 <% end %>
 
 <!--AJAX SAVING VOTE MESSAGE-->

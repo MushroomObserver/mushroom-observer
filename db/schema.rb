@@ -23,7 +23,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_17_180824) do
 
   create_table "articles", id: :integer, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "title"
-    t.text "body", size: :long
+    t.text "body", size: :medium
     t.integer "user_id"
     t.integer "rss_log_id"
     t.datetime "created_at", precision: nil, null: false
@@ -490,7 +490,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_17_180824) do
     t.integer "project_id", null: false
   end
 
-  create_table "project_members", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "project_members", charset: "utf8mb3", force: :cascade do |t|
     t.integer "project_id"
     t.integer "user_id"
     t.datetime "created_at", null: false
@@ -583,11 +583,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_17_180824) do
   create_table "sequences", id: :integer, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "observation_id"
     t.integer "user_id"
-    t.text "locus", size: :long
-    t.text "bases", size: :long
+    t.text "locus", size: :medium
+    t.text "bases", size: :medium
     t.string "archive"
     t.string "accession"
-    t.text "notes", size: :long
+    t.text "notes", size: :medium
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
   end
@@ -734,4 +734,5 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_17_180824) do
     t.boolean "favorite"
     t.float "value"
   end
+
 end
