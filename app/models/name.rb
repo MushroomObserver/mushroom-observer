@@ -256,6 +256,9 @@
 #  change_text_name::        Change name, updating formats.
 #  change_author::           Change author, updating formats.
 #
+#  ==== Propagation
+#  can_propagate?::          Can Classification be propagated to subtaxa?
+#
 #  ==== Taxonomy
 #  below_genus?::            Is ranked below genus?
 #  at_or_below_genus?::      Is ranked at or below genus?

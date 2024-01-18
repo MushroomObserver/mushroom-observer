@@ -39,7 +39,7 @@ end %>
   end
 end %>
 
-<%= if @name.rank == "Genus" && @first_child && @name.classification.present?
+<%= if @name.can_propagate? && @first_child && @name.classification.present?
   tag.p do
     put_button(
       name: :show_name_propagate_classification.t,

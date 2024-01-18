@@ -3284,6 +3284,31 @@ class NameTest < UnitTestCase
     assert_names_equal(names(:stereum), names(:stereum_hirsutum).accepted_genus)
   end
 
+  def test_can_propagate
+    assert(names(:coprinus).can_propagate?,
+           "Classification of genus Names should be propagable")
+
+    assert_false(names(:coprinus_sensu_lato).can_propagate?,
+                 "Classification of Names sensu lato should not be propagable")
+    [:eukarya, :fungi, :ascomycota, :ascomycetes, :agaricales,
+     :agaricaceae].each do |name|
+      assert_false(names(name).can_propagate?,
+                   "Classification of Names above genus should be propagable")
+    end
+    assert_false(
+      names(:amanita_subgenus_lepidella).can_propagate?,
+      "Classification of infra-generic Names should not be propagable"
+    )
+    assert_false(
+      names(:amanita_boudieri_var_beillei).can_propagate?,
+      "Classification of infra-specific Names should not be propagable"
+    )
+    assert_false(
+      names(:boletus_edulis_group).can_propagate?,
+      "Classification of group or clade Names should not be propagable"
+    )
+  end
+
   def test_propagate_generic_classifications
     # This should result in the classification of Coprinus being copied to
     # Chlorophyllum rachodes.
