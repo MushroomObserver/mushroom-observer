@@ -9,5 +9,5 @@ flash_error(@error) if @error && @objects.empty?
 %>
 
 <%= paginate_block(@pages) do %>
-  <%= matrix_table(objects: @objects) %>
+  <%= matrix_table(objects: @objects, cached: true) %>
 <% end %>
