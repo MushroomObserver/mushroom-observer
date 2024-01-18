@@ -6,9 +6,7 @@
 
   <%= submit_button(form: f, button: :image_remove_remove.l, center: true) %>
 
-  <%= tag.ul(class: "row list-unstyled mt-3",
-             data: { controller: "matrix-table",
-                     action: "resize@window->matrix-table#rearrange" }) do %>
+  <%= matrix_table do %>
 
     <% @object.images.each do |image| %>
 
