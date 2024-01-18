@@ -1,6 +1,9 @@
 <%= tag.div("#{:app_observations_left.t}:", class: classes[:heading]) %>
+<%= active_link_to(:app_latest.t, root_path,
+                   class: classes[:indent], id: "nav_observations_link") %>
 <%= active_link_to(:app_create_observation.t, new_observation_path,
-                   class: classes[:indent], id: "nav_new_observation_link") %>
+                   class: classes[:indent],
+                   id: "nav_new_observation_link") if @user %>
 <%= active_link_to(:app_your_observations.t,
                    observations_path(user: @user.id),
                    class: classes[:indent],
@@ -8,5 +11,3 @@
 <%= active_link_with_query(:app_help_id_obs.t, identify_observations_path,
                            class: classes[:indent],
                            id: "nav_identify_observations_link") %>
-<%= active_link_to(:app_sort_by_date_obs.t, observations_path,
-                   class: classes[:indent], id: "nav_observations_link") %>

@@ -10,50 +10,49 @@ classes = {
 }
 %>
 
-<div id="navigation">
+<% cache([user_status_string]) do %>
+  <div id="navigation">
 
-  <a id="logo_link" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>">
-    <img class="logo-trim img-responsive py-10px" alt="Mushroom Observer Logo"
-         src="/logo-trim.png"/>
-  </a><!-- #logo_link -->
+    <a id="logo_link" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>">
+      <img class="logo-trim img-responsive py-10px" alt="Mushroom Observer Logo"
+           src="/logo-trim.png"/>
+    </a><!-- #logo_link -->
 
-  <div class="<%= classes[:wrapper] %>">
+    <div class="<%= classes[:wrapper] %>" data-controller="nav-active">
 
-    <%= render(partial: "application/sidebar/info",
-                locals: { classes: classes }) %>
+      <% if in_admin_mode? %>
+        <%= render(partial: "application/sidebar/admin",
+                    locals: { classes: classes }) %>
+      <% end %>
 
-    <% if in_admin_mode? %>
-      <%= render(partial: "application/sidebar/admin",
+      <% if @user.nil? %>
+        <%= render(partial: "application/sidebar/login",
+                    locals: { classes: classes }) %>
+      <% else %>
+        <%= render(partial: "application/sidebar/user",
+                    locals: { classes: classes }) %>
+      <% end %>
+
+      <%= render(partial: "application/sidebar/observations",
                   locals: { classes: classes }) %>
-    <% end %>
 
-    <% if @user.nil? %>
-      <%= render(partial: "application/sidebar/login",
+      <%= render(partial: "application/sidebar/latest",
+                  locals: { classes: classes }) if @user %>
+
+      <%= render(partial: "application/sidebar/species_lists",
+                  locals: { classes: classes }) if @user %>
+
+      <%= render(partial: "application/sidebar/indexes",
+                  locals: { classes: classes }) if @user %>
+
+      <%= render(partial: "application/sidebar/info",
                   locals: { classes: classes }) %>
-    <% else %>
-      <%= render(partial: "application/sidebar/user",
+
+      <%= render(partial: "application/sidebar/languages",
                   locals: { classes: classes }) %>
-    <% end %>
 
-    <%= render(partial: "application/sidebar/observations",
-                locals: { classes: classes }) %>
+    </div><!-- .sidebar-nav -->
 
-    <%= render(partial: "application/sidebar/latest",
-                locals: { classes: classes }) %>
-
-    <%= render(partial: "application/sidebar/species_lists",
-                locals: { classes: classes }) %>
-
-    <%= render(partial: "application/sidebar/indexes",
-                locals: { classes: classes }) %>
-
-    <%= render(partial: "application/sidebar/more",
-                locals: { classes: classes }) %>
-
-    <%= render(partial: "application/sidebar/languages",
-                locals: { classes: classes }) %>
-
-  </div><!-- .sidebar-nav -->
-
-</div><!-- #navigation -->
-<!--/SIDEBAR LOGO AND NAVIGATION-->
+  </div><!-- #navigation -->
+  <!--/SIDEBAR LOGO AND NAVIGATION-->
+<% end %>
