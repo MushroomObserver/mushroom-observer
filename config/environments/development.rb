@@ -72,6 +72,8 @@ MushroomObserver::Application.configure do
   # Run rails dev:cache to toggle caching.
   if Rails.root.join("tmp/caching-dev.txt").exist?
     config.action_controller.perform_caching = true
+    # debugging: log fragment reads/writes
+    # (it will show [cache hit] even if set to false)
     config.action_controller.enable_fragment_cache_logging = true
 
     config.cache_store = :memory_store # :mem_cache_store via application.rb
