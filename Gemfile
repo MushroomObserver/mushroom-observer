@@ -63,6 +63,12 @@ gem("cache_with_locale")
 # https://github.com/hotwired/stimulus-rails/issues/108
 gem("sprockets", "~>4.2.1")
 
+# ViewComponents for separation of concerns and much faster template rendering
+gem("view_component")
+# Improved defaults for ViewComponents
+# https://evilmartians.com/chronicles/viewcomponent-in-the-wild-supercharging-your-components
+gem("view_component-contrib")
+
 # Security fix updates via Dependabot
 # CVE-2021-41817 regex denial of service vulnerability
 gem("date", ">= 3.2.1")
@@ -238,3 +244,5 @@ group :production do
   # https://newrelic.com/
   gem("newrelic_rpm")
 end
+
+gem "dry-initializer", "~> 3.1"
