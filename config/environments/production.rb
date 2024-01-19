@@ -117,12 +117,12 @@ MushroomObserver::Application.configure do
 
   # Log to production.log. New 7.1 logging uses BroadcastLogger
   # Not using TaggedLogging yet.
-  # NOTE: setting `output, level: Logger::INFO` is a temporary fix
-  # https://github.com/rails/rails/pull/50337
+  # NOTE: setting `output, level: Logger::DEBUG` should be temporary,
+  # for debugging only. It's very verbose.
   loggers = [
     "log/production.log"
   ].map do |output|
-    ActiveSupport::Logger.new(output).
+    ActiveSupport::Logger.new(output, level: Logger::DEBUG).
       tap { |logger| logger.formatter = Logger::Formatter.new }
     # .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
   end
