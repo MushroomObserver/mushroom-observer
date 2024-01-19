@@ -71,11 +71,9 @@ module Name::Create
   #   end
   #
   def find_or_create_name_and_parents(in_str)
-    result = []
-    if (parsed_name = parse_name(in_str))
-      result = find_or_create_parsed_name_and_parents(parsed_name)
-    end
-    result
+    return [] unless (parsed_name = parse_name(in_str))
+
+    find_or_create_parsed_name_and_parents(parsed_name)
   end
 
   def find_or_create_parsed_name_and_parents(parsed_name)
