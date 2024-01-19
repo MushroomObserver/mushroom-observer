@@ -226,8 +226,7 @@ class SpeciesListsController < ApplicationController
     @objects = @query.paginate(@pages, include:
                   [:user, :name, :location, { thumb_image: :image_votes }])
     # Save a lookup in comments_for_object
-    @comments = @species_list.comments&.
-                sort_by { |cmt| cmt[:created_at] }&.reverse
+    @comments = @species_list.comments&.sort_by(&:created_at)&.reverse
   end
 
   ##############################################################################

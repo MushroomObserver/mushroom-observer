@@ -276,9 +276,8 @@ class LocationsController < ApplicationController
 
     @versions = @location.versions
     # Save two lookups in comments_for_object
-    @comments = @location.comments&.sort_by { |cmt| cmt[:created_at] }&.reverse
-    @desc_comments = @description.comments&.
-                     sort_by { |cmt| cmt[:created_at] }&.reverse
+    @comments = @location.comments&.sort_by(&:created_at)&.reverse
+    @desc_comments = @description&.comments&.sort_by(&:created_at)&.reverse
     init_projects_ivar
   end
 

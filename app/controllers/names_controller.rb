@@ -308,7 +308,7 @@ class NamesController < ApplicationController
     # from them. Can also derive @projects from this.
     @best_description = @name.best_brief_description
     # Save a lookup in comments_for_object
-    @comments = @name.comments&.sort_by { |cmt| cmt[:created_at] }&.reverse
+    @comments = @name.comments&.sort_by(&:created_at)&.reverse
   end
 
   def init_projects_ivar
