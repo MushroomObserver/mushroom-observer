@@ -1,11 +1,16 @@
 <%= tag.div("#{:app_latest.t}:", class: classes[:heading]) %>
+<%= active_link_to(:NEWS.t, articles_path,
+               class: classes[:indent], id: "nav_articles_link") %>
 <%=
 [
-active_link_to(:app_latest_changes.t, activity_logs_path,
-               class: classes[:indent], id: "nav_activity_logs_link"),
-active_link_to(:app_newest_images.t, images_path,
-               class: classes[:indent], id: "nav_images_link"),
-active_link_to(:app_comments.t, comments_path,
-               class: classes[:indent], id: "nav_comments_link")
-].safe_join
+  active_link_to(:app_latest_changes.t, activity_logs_path,
+                class: classes[:indent],
+                id: "nav_activity_logs_link"),
+  active_link_to(:app_newest_images.t, images_path,
+                class: classes[:indent],
+                id: "nav_images_link"),
+  active_link_to(:app_comments.t, comments_path,
+                class: classes[:indent],
+                id: "nav_comments_link")
+].safe_join if @user
 %>
