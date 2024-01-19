@@ -3290,23 +3290,16 @@ class NameTest < UnitTestCase
 
     assert_false(names(:coprinus_sensu_lato).can_propagate?,
                  "Classification of Names sensu lato should not be propagable")
-    [:eukarya, :fungi, :ascomycota, :ascomycetes, :agaricales,
-     :agaricaceae].each do |name|
-      assert_false(names(name).can_propagate?,
-                   "Classification of Names above genus should be propagable")
-    end
-    assert_false(
-      names(:amanita_subgenus_lepidella).can_propagate?,
-      "Classification of infra-generic Names should not be propagable"
-    )
-    assert_false(
-      names(:amanita_boudieri_var_beillei).can_propagate?,
-      "Classification of infra-specific Names should not be propagable"
-    )
-    assert_false(
-      names(:boletus_edulis_group).can_propagate?,
-      "Classification of group or clade Names should not be propagable"
-    )
+
+    [:eukarya, :fungi, :ascomycota, :ascomycetes, :agaricales, :agaricaceae,
+     :amanita_subgenus_lepidella, :sect_agaricus, :coprinus_comatus,
+     :amanita_boudieri_var_beillei, :boletus_edulis_group].
+      each do |name|
+        assert_false(
+          names(name).can_propagate?,
+          "#{names(name).rank} Classifications shouldn't be propagable"
+        )
+      end
   end
 
   def test_propagate_generic_classifications
