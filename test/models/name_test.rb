@@ -3286,10 +3286,10 @@ class NameTest < UnitTestCase
 
   def test_can_propagate
     assert(names(:coprinus).can_propagate?,
-           "Classification of genus Names should be propagable")
+           "Genus s.s. Classifications should be propagable")
 
     assert_false(names(:coprinus_sensu_lato).can_propagate?,
-                 "Classification of Names sensu lato should not be propagable")
+                 "Names sensu lato Classifications should not be propagable")
 
     [:eukarya, :fungi, :ascomycota, :ascomycetes, :agaricales, :agaricaceae,
      :amanita_subgenus_lepidella, :sect_agaricus, :coprinus_comatus,
@@ -3297,7 +3297,7 @@ class NameTest < UnitTestCase
       each do |name|
         assert_false(
           names(name).can_propagate?,
-          "#{names(name).rank} Classifications shouldn't be propagable"
+          "#{names(name).rank} Classifications should not be propagable"
         )
       end
   end
