@@ -105,7 +105,12 @@ module Name::Create
         result.change_author(parsed_name.author)
       end
     else
-      # Try to resolve ambiguity by taking the one with author.
+      # Try to resolve ambiguity by rejecting name(s) sensu lato
+      if matches.reject { |name| name.author.match?("sensu lato") }.one?
+        return matches.reject! { |name| name.author.match?("sensu lato") }.first
+      end
+
+      # Next, to resolve ambiguity by taking the one with author.
       matches.reject! { |name| name.author.blank? }
       result = matches.first if matches.length == 1
     end
