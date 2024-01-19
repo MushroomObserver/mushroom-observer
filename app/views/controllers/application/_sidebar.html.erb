@@ -37,16 +37,32 @@ classes = {
         <%= render(partial: "application/sidebar/login",
                     locals: { classes: classes }) %>
       <% end %>
+    <% end %>
 
-      <%= render(partial: "application/sidebar/observations",
-                  locals: { classes: classes }) %>
+    <%# Cache customized for the user instance because of Your Observations.%>
+    <% cache(@user) do %>
+      <% if @user %>
+        <%= render(partial: "application/sidebar/observations",
+                   locals: { classes: classes }) %>
+      <% end %>
+    <% end %>
 
+    <%# Cache depends only on user status (logged-in? admin?) %>
+    <% cache([user_status_string]) do %>
       <%= render(partial: "application/sidebar/latest",
                   locals: { classes: classes }) %>
+    <% end %>
 
-      <%= render(partial: "application/sidebar/species_lists",
-                  locals: { classes: classes }) if @user %>
+    <%# Cache customized for the user instance because of Your Lists.%>
+    <% cache(@user) do %>
+      <% if @user %>
+        <%= render(partial: "application/sidebar/species_lists",
+                   locals: { classes: classes }) if @user %>
+      <% end %>
+    <% end %>
 
+    <%# Cache depends only on user status (logged-in? admin?) %>
+    <% cache([user_status_string]) do %>
       <%= render(partial: "application/sidebar/indexes",
                   locals: { classes: classes }) if @user %>
 
