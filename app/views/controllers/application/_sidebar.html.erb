@@ -10,26 +10,30 @@ classes = {
 }
 %>
 
-<% cache([user_status_string]) do %>
-  <div id="navigation">
+<div id="navigation">
 
-    <a id="logo_link" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>">
-      <img class="logo-trim img-responsive py-10px" alt="Mushroom Observer Logo"
-            src="/logo-trim.png"/>
-    </a><!-- #logo_link -->
+  <a id="logo_link" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>">
+    <img class="logo-trim img-responsive py-10px" alt="Mushroom Observer Logo"
+          src="/logo-trim.png"/>
+  </a><!-- #logo_link -->
 
-    <div class="<%= classes[:wrapper] %>" data-controller="nav-active">
+  <div class="<%= classes[:wrapper] %>" data-controller="nav-active">
 
+    <%# Cache customized for the user instance. %>
+    <% cache(@user) do %>
+      <% if @user %>
+        <%= render(partial: "application/sidebar/user",
+                    locals: { classes: classes }) %>
+      <% end %>
+    <% end if user %>
+
+    <%# Cache depends only on user status (logged-in? admin?) %>
+    <% cache([user_status_string]) do %>
       <% if in_admin_mode? %>
         <%= render(partial: "application/sidebar/admin",
                     locals: { classes: classes }) %>
-      <% end %>
-
-      <% if @user.nil? %>
+      <% elsif @user.nil? %>
         <%= render(partial: "application/sidebar/login",
-                    locals: { classes: classes }) %>
-      <% else %>
-        <%= render(partial: "application/sidebar/user",
                     locals: { classes: classes }) %>
       <% end %>
 
@@ -50,6 +54,7 @@ classes = {
 
       <%= render(partial: "application/sidebar/languages",
                   locals: { classes: classes }) %>
+    <% end %>
 
     </div><!-- .sidebar-nav -->
 
