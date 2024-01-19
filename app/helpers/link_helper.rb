@@ -31,8 +31,9 @@ module LinkHelper
   def active_link_to(text = nil, path = nil, **opts, &block)
     link = block ? text : path # because positional
     content = block ? capture(&block) : text
-    opts[:class] = class_names(opts[:class]) #, { active: current_page?(link) })
-    opts[:data] = { nav_active_target: "link", action: "nav-active#navigate" }
+    opts[:data] = opts[:data].merge(
+      { nav_active_target: "link", action: "nav-active#navigate" }
+    )
 
     link_to(link, opts) { content }
   end
