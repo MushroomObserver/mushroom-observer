@@ -14,13 +14,10 @@ classes = {
 
   <a id="logo_link" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>">
     <img class="logo-trim img-responsive py-10px" alt="Mushroom Observer Logo"
-         src="/logo-trim.png"/>
+          src="/logo-trim.png"/>
   </a><!-- #logo_link -->
 
-  <div class="<%= classes[:wrapper] %>">
-
-    <%= render(partial: "application/sidebar/info",
-                locals: { classes: classes }) %>
+  <div class="<%= classes[:wrapper] %>" data-controller="nav-active">
 
     <% if in_admin_mode? %>
       <%= render(partial: "application/sidebar/admin",
@@ -39,15 +36,15 @@ classes = {
                 locals: { classes: classes }) %>
 
     <%= render(partial: "application/sidebar/latest",
-                locals: { classes: classes }) %>
+                locals: { classes: classes }) if @user %>
 
     <%= render(partial: "application/sidebar/species_lists",
-                locals: { classes: classes }) %>
+                locals: { classes: classes }) if @user %>
 
     <%= render(partial: "application/sidebar/indexes",
-                locals: { classes: classes }) %>
+                locals: { classes: classes }) if @user %>
 
-    <%= render(partial: "application/sidebar/more",
+    <%= render(partial: "application/sidebar/info",
                 locals: { classes: classes }) %>
 
     <%= render(partial: "application/sidebar/languages",
