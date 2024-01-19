@@ -74,7 +74,7 @@ MushroomObserver::Application.configure do
     config.action_controller.perform_caching = true
     config.action_controller.enable_fragment_cache_logging = true
 
-    config.cache_store = :memory_store
+    config.cache_store = :memory_store # :mem_cache_store via application.rb
     config.public_file_server.headers = {
       "Cache-Control" => "public, max-age=#{2.days.to_i}"
     }
@@ -101,6 +101,17 @@ MushroomObserver::Application.configure do
 
   # Highlight code that enqueued background job in logs.
   config.active_job.verbose_enqueue_logs = true
+
+  # New 7.1 logging uses BroadcastLogger. Not using TaggedLogging yet.
+  # Enable this to format dev logs like the production logs.
+  # loggers = [
+  #   $stdout
+  # ].map do |output|
+  #   ActiveSupport::Logger.new(output).
+  #     tap { |logger| logger.formatter = Logger::Formatter.new }
+  #   # .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
+  # end
+  # config.logger = ActiveSupport::BroadcastLogger.new(*loggers)
 
   # Serve assets in rails.
   config.public_file_server.enabled = true

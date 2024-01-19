@@ -1,12 +1,27 @@
+<%= tag.div("#{:app_more.t}:", class: classes[:heading]) %>
 <%=
 [
 active_link_to(:app_intro.t, info_intro_path,
-               class: classes[:item], id: "nav_intro_link"),
+               class: classes[:indent], id: "nav_intro_link"),
 active_link_to(:app_how_to_use.t, info_how_to_use_path,
-               class: classes[:item], id: "nav_how_to_use_link"),
-active_link_to(:app_privacy_policy.t, policy_privacy_path,
-               class: classes[:item], id: "nav_privacy_link"),
+               class: classes[:indent], id: "nav_how_to_use_link"),
 active_link_to(:app_donate.t, support_donate_path,
-               class: classes[:item], id: "nav_donate_link")
+               class: classes[:indent], id: "nav_donate_link"),
+active_link_to(:app_how_to_help.t, info_how_to_help_path,
+               class: classes[:indent], id: "nav_how_to_help_link"),
+active_link_to(:app_report_a_bug.t, emails_ask_webmaster_question_path,
+               class: classes[:indent], id: "nav_bug_report_link"),
+active_link_to(:app_send_a_comment.t, emails_ask_webmaster_question_path,
+               class: classes[:indent], id: "nav_ask_webmaster_link"),
+active_link_to(:app_contributors.t, contributors_path,
+               class: classes[:indent], id: "nav_contributors_link"),
+active_link_to(:app_site_stats.t, info_site_stats_path,
+               class: classes[:indent], id: "nav_site_stats_link"),
+active_link_to(:translators_note_title.t, info_translators_note_path,
+               class: classes[:indent], id: "nav_translators_note_link"),
+active_link_to(:app_publications.t, publications_path,
+               class: classes[:indent], id: "nav_publications_link"),
+active_link_to(:app_privacy_policy.t, policy_privacy_path,
+               class: classes[:indent], id: "nav_privacy_link"),
 ].safe_join
 %>

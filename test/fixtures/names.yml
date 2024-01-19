@@ -14,10 +14,10 @@
 #   Strobilurus -- Break NameControllerTest#test_edit_name_add_author
 #   Verpa -- See :suggested_by_verpa_authored below.
 # Adding almost any Name will break ScriptTest#test_refresh_name_lister_cache.
-#   Fix this by updating mushroom-observer/test/reports/name_list_data.js
+#   Fix this by updating test/reports/name_list_data.js
 #   Suggestion: whenever adding a Name, run:
-#     rails t test/models/script_test.rb test_refresh_name_lister_cache
-#     If that fails, update name_list_data.js from the Actual results
+#     rails t test/models/script_test.rb -n test_refresh_name_lister_cache
+#     If that fails, update test/reports/name_list_data.js from the Actual results
 
 DEFAULTS: &DEFAULTS
   author:         ""
@@ -1280,3 +1280,12 @@ lycoperdon_perlatum:
   created_at: 2023-11-14 20:00:00
   updated_at: 2023-11-14 20:00:00
   rank: <%= Name.ranks[:Species] %>
+
+pasaria:
+  <<: *DEFAULTS
+  text_name: Pasaria
+  display_name: '**__Pasaria__**'
+  search_name: Pasaria
+  sort_name: Pasaria
+  rank: <%= Name.ranks[:Genus] %>
+  classification: "" # to test if inherit link exists

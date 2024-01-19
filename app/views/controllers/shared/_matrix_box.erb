@@ -7,11 +7,19 @@ if presenter
   identify ||= false
   columns ||= "col-xs-12 col-sm-6 col-md-4 col-lg-3" # maybe passed as a local
   object_id = object&.id.present? ? object.id : "no_ID"
-  # There is a lotta arg passing. TODO: Check if any view is actually sending
-  # any extra image_arg locals to this matrix_box partial. AN 2023
+  # There is a lotta arg passing. Usually, it's only object and columns.
+  # Only the identify interface sends an extra that get passed to image_args:
+  # local_assigns[:identify]. Maybe simplify passed_args to just pass identify.
   passed_args = local_assigns.
                 except(:columns, :object, :object_counter, :object_iteration)
-
+  # if using interactive_image or the interactive_image partial
+  if (image = presenter.image_data&.dig(:image))
+    image_args = passed_args.merge(presenter.image_data || {})
+  else
+    image_args = {}
+  end
+  # interactive_image votes UI is per-user, so cache must be per-user
+  # "Helper" comment below is necessary because the helper calls `cache`
   %>
 
   <%= matrix_box(columns: columns, id: object_id) do
@@ -19,7 +27,8 @@ if presenter
       [
         tag.div(class: "panel-sizing") do
           [
-            matrix_box_image(presenter, passed_args),
+            # Helper Dependency Updated: Jan 14, 2024 at 3am
+            matrix_box_image(image, **image_args),
             matrix_box_details(presenter, object, object_id, identify),
           ].safe_join
         end,

@@ -74,6 +74,21 @@ module ApplicationHelper
                      class: class_names("alert mt-3", alert_class))
   end
 
+  # Returns a string that indicates the current user/logged_in/admin status.
+  # Used as a simple cache key for templates that may have three
+  # possible versions of cached HTML
+  def user_status_string
+    if in_admin_mode?
+      "admin_mode"
+    elsif browser.bot?
+      "robot"
+    elsif !@user.nil?
+      "logged_in"
+    else
+      "no_user"
+    end
+  end
+
   # ----------------------------------------------------------------------------
 
   # Take URL that got us to this page and add one or more parameters to it.

@@ -5,9 +5,47 @@ export default class extends Controller {
   connect() {
     this.element.dataset.stimulus = "connected";
 
+    this.matrixBoxes = document.querySelectorAll('.matrix-box')
     this.boxes = document.querySelectorAll('.matrix-box .panel-sizing')
     this.footers = document.querySelectorAll('.matrix-box .log-footer')
+
+    this.add_spacers()
     this.rearrange()
+  }
+
+  add_spacers() {
+    this.matrixBoxes.forEach((element, i) => {
+      if (i % 2 == 0) {
+        element.insertAdjacentElement('beforebegin', this.smSpacer())
+      }
+      if (i % 3 == 0) {
+        element.insertAdjacentElement('beforebegin', this.mdSpacer())
+      }
+      if (i % 4 == 0) {
+        element.insertAdjacentElement('beforebegin', this.lgSpacer())
+      }
+    })
+  }
+
+  smSpacer() {
+    const spacer = document.createElement('div')
+    spacer.classList.add('hidden', 'visible-sm-block')
+    spacer.style.clear = "left"
+    return spacer
+  }
+
+  mdSpacer() {
+    const spacer = document.createElement('div')
+    spacer.classList.add('hidden', 'visible-md-block')
+    spacer.style.clear = "left"
+    return spacer
+  }
+
+  lgSpacer() {
+    const spacer = document.createElement('div')
+    spacer.classList.add('hidden', 'visible-lg-block')
+    spacer.style.clear = "left"
+    return spacer
   }
 
   rearrange() {
