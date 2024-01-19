@@ -11,8 +11,6 @@ active_link_to(:LOCATIONS.t, locations_path,
                class: classes[:indent], id: "nav_locations_link"),
 active_link_to(:NAMES.t, names_path(with_observations: true),
                class: classes[:indent], id: "nav_name_observations_link"),
-active_link_to(:NEWS.t, articles_path,
-               class: classes[:indent], id: "nav_articles_link"),
 active_link_to(:PROJECTS.t, projects_path(by: "updated_at"),
                class: classes[:indent], id: "nav_projects_link")
 ].safe_join
