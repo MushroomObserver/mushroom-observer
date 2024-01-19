@@ -21,7 +21,8 @@ add_tab_set(name_show_tabs(name: @name))
     <% end %>
 
     <%= render(partial: "comments/comments_for_object",
-               locals: {object: @name, controls: @user, limit: nil}) %>
+               locals: { object: @name, comments: @comments,
+                         controls: @user, limit: nil }) %>
 
   </div><!--LEFT COLUMN-->
 

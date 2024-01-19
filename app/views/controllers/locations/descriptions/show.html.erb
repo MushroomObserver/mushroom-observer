@@ -19,6 +19,6 @@ add_tab_set(show_description_tabs(description: @description))
   <%= render(partial: "locations/descriptions/show/location_description",
              object: @description) %>
   <%= render(partial: "comments/comments_for_object",
-              locals: {object: @description, controls: @user, limit: 10}) %>
+             locals: { object: @description, controls: @user, limit: 10 }) %>
   <%= show_object_footer(@description, @versions) %>
 </div><!--.container-text-->

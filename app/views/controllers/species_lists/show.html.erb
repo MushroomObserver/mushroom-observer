@@ -96,6 +96,7 @@ add_tab_set(species_list_show_tabs(list: @species_list))
 <% end %>
 
 <%= render(partial: "comments/comments_for_object",
-           locals: { object: @species_list, controls: @user, limit: nil }) %>
+           locals: { object: @species_list, comments: @comments,
+                     controls: @user, limit: nil }) %>
 
 <%= show_object_footer(@species_list) %>

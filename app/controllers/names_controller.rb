@@ -307,6 +307,8 @@ class NamesController < ApplicationController
     # Would be better to eager load descriptions and derive @best_description
     # from them. Can also derive @projects from this.
     @best_description = @name.best_brief_description
+    # Save a lookup in comments_for_object
+    @comments = @name.comments&.sort_by { |cmt| cmt[:created_at] }&.reverse
   end
 
   def init_projects_ivar

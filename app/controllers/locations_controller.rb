@@ -275,6 +275,10 @@ class LocationsController < ApplicationController
     update_view_stats(@description) if @description
 
     @versions = @location.versions
+    # Save two lookups in comments_for_object
+    @comments = @location.comments&.sort_by { |cmt| cmt[:created_at] }&.reverse
+    @desc_comments = @description.comments&.
+                     sort_by { |cmt| cmt[:created_at] }&.reverse
     init_projects_ivar
   end
 

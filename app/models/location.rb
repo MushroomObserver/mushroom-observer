@@ -188,8 +188,8 @@ class Location < AbstractModel
         }
   scope :show_includes, lambda {
     strict_loading.includes(
-      :comments,
-      :description,
+      { comments: :user },
+      { description: { comments: :user } },
       { descriptions: [:authors, :editors] },
       :interests,
       :observations,
