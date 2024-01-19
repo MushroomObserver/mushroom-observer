@@ -8,6 +8,7 @@ require("action_view/log_subscriber")
 # Require all Ruby files in the core_extensions directory
 Dir[Rails.root.join("lib/core_extensions/**/*.rb")].each { |f| require f }
 
+# Does not work
 # ActiveSupport.on_load(:action_view) do
 # ActionView::LogSubscriber.include(CoreExtensions::ActionView::LogSubscriber)
 # end
