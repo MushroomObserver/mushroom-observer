@@ -117,12 +117,10 @@ MushroomObserver::Application.configure do
 
   # Log to production.log. New 7.1 logging uses BroadcastLogger
   # Not using TaggedLogging yet.
-  # NOTE: setting `output, level: Logger::DEBUG` should be temporary,
-  # for debugging only. It's very verbose.
   loggers = [
     "log/production.log"
   ].map do |output|
-    ActiveSupport::Logger.new(output, level: Logger::DEBUG).
+    ActiveSupport::Logger.new(output).
       tap { |logger| logger.formatter = Logger::Formatter.new }
     # .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
   end
@@ -136,7 +134,7 @@ MushroomObserver::Application.configure do
   # personally identifiable information (PII). If you want to log everything,
   # set the level to "debug".
   # config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
-  config.log_level = :info
+  config.log_level = :debug
 
   # Disable automatic flushing of the log to improve performance.
   # config.autoflush_log = false
