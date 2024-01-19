@@ -6,7 +6,8 @@ classes = {
   item: "list-group-item",
   admin: "list-group-item list-group-item-danger indent",
   indent: "list-group-item indent",
-  mobile_only: "list-group-item visible-xs"
+  mobile_only: "visible-xs",
+  desktop_only: "hidden-xs"
 }
 %>
 
@@ -25,7 +26,7 @@ classes = {
         <%= render(partial: "application/sidebar/user",
                     locals: { classes: classes }) %>
       <% end %>
-    <% end if user %>
+    <% end %>
 
     <%# Cache depends only on user status (logged-in? admin?) %>
     <% cache([user_status_string]) do %>
@@ -56,8 +57,7 @@ classes = {
                   locals: { classes: classes }) %>
     <% end %>
 
-    </div><!-- .sidebar-nav -->
+  </div><!-- .sidebar-nav -->
 
-  </div><!-- #navigation -->
-  <!--/SIDEBAR LOGO AND NAVIGATION-->
-<% end %>
+</div><!-- #navigation -->
+<!--/SIDEBAR LOGO AND NAVIGATION-->
