@@ -10,7 +10,7 @@ module NamingsHelper
     tag.div(class: "namings-table panel panel-default mb-4",
             id: "namings_table") do
       [
-        observation_namings_table_header,
+        observation_namings_table_header(obs),
         observation_namings_table_rows(consensus), # only rows get updated
         observation_namings_table_footer(obs)
       ].safe_join
@@ -20,14 +20,19 @@ module NamingsHelper
   private
 
   # nested rows/columns parallel those in the row
-  def observation_namings_table_header
+  def observation_namings_table_header(obs)
     header = naming_header_row_content
     behavior = "flex-column justify-content-end"
+    propose_icon = propose_naming_link(
+      obs.id, text: :show_namings_propose_new_name.t,
+              btn_class: "",
+              context: "namings_table", icon: true
+    )
 
     tag.div(class: "panel-heading namings-table-header") do
       tag.div(class: "row") do
         concat(
-          tag.div(class: "col col-sm-11") do
+          tag.div(class: "col-xs-10 col-sm-11") do
             tag.div(class: "row") do
               [
                 tag.div(header[:heading],
@@ -42,7 +47,9 @@ module NamingsHelper
             end
           end
         )
-        concat(tag.div("", class: "col col-sm-1 d-none d-sm-block #{behavior}"))
+        concat(tag.div(class: "col-xs-2 col-sm-1 #{behavior}") do
+          tag.span(propose_icon, class: "float-right d-sm-none")
+        end)
       end
     end
   end
@@ -230,7 +237,8 @@ module NamingsHelper
 
   # row props have mobile-friendly labels
   def your_vote_html(naming, vote)
-    [tag.small("#{:show_namings_your_vote.t}: ", class: "visible-xs-block"),
+    [tag.small("#{:show_namings_your_vote.t}: ",
+               class: "visible-xs-inline-block"),
      naming_vote_form(naming, vote, context: "namings_table")].safe_join
   end
 
@@ -259,7 +267,8 @@ module NamingsHelper
     form_with(
       model: vote,
       url: naming_vote_form_commit_url(naming, vote), method: method,
-      id: "naming_vote_form_#{naming.id}", class: "naming-vote-form",
+      id: "naming_vote_form_#{naming.id}",
+      class: "naming-vote-form d-inline-block float-right float-sm-none",
       data: { turbo: true, controller: "naming-vote",
               localization: localizations }
     ) do |fv|
@@ -344,8 +353,8 @@ module NamingsHelper
         tag.div(class: "row") do
           tag.div(class: "col-sm-11") do
             tag.div(class: "row") do
-              concat(tag.div(buttons, class: "col-xs-6 col-md-4"))
-              concat(tag.div(help, class: "col-xs-6 col-md-8"))
+              concat(tag.div(buttons, class: "col col-md-4"))
+              concat(tag.div(help, class: "col col-md-8"))
             end
           end
         end
@@ -367,24 +376,28 @@ module NamingsHelper
 
   def observation_naming_buttons(obs, do_suggestions)
     buttons = []
-    buttons << propose_naming_link(obs.id,
-                                   text: :show_namings_propose_new_name.t,
-                                   btn_class: "btn-default btn-sm",
-                                   context: "namings_table")
+    buttons << propose_naming_link(
+      obs.id,
+      text: :show_namings_propose_new_name.t,
+      btn_class: "btn btn-default btn-sm d-none d-sm-block",
+      context: "namings_table"
+    )
     buttons << suggest_namings_link(obs) if do_suggestions
     buttons.safe_join(tag.br)
   end
 
   public
 
+  # The new_naming_tab now has an icon. icon buttons send icon: true
   def propose_naming_link(obs_id, text: :create_naming.t,
-                          context: "namings_table",
+                          context: "namings_table", icon: false,
                           btn_class: "btn-primary my-3")
-    modal_link_to(
-      "obs_#{obs_id}_naming",
-      *new_naming_tab(obs_id,
-                      text: text, btn_class: btn_class, context: context)
+    name, path, args = *new_naming_tab(
+      obs_id, text: text, btn_class: btn_class, context: context
     )
+    args = args.merge({ icon: nil }) unless icon
+
+    modal_link_to("obs_#{obs_id}_naming", name, path, args)
   end
 
   # N+1: can't move the calculation of observation.image_ids

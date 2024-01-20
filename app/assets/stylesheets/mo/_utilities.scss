@@ -614,6 +614,10 @@
 // --------------------------------------------------
 
 @media screen and (min-width: 767px) {
+  .d-sm-none {
+    display: none;
+  }
+
   .d-sm-block {
     display: block;
   }
@@ -628,6 +632,10 @@
 
   .float-sm-right {
     float: right !important;
+  }
+
+  .float-sm-none {
+    float: none !important;
   }
 
   .mt-sm-3 {
