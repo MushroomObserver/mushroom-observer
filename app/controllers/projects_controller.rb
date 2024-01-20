@@ -161,6 +161,8 @@ class ProjectsController < ApplicationController
               where("name_description_admins.user_group_id":
                     @project.admin_group_id).
               includes(:name, :user)
+    # Save a lookup in comments_for_object
+    @comments = @species_list.comments&.sort_by(&:created_at)&.reverse
   end
 
   def upload_image_if_present

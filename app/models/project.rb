@@ -75,6 +75,13 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   before_destroy :orphan_drafts
 
+  scope :show_includes, lambda {
+    strict_loading.includes(
+      { comments: :user },
+      # { observations: :namings }
+    )
+  }
+
   # Project handles all of its own logging.
   self.autolog_events = []
 
