@@ -19,7 +19,7 @@ class ProjectsController < ApplicationController
   # def show_project
   def show
     store_location
-    return unless (@project = find_or_goto_index(Project, params[:id].to_s))
+    return unless find_project_and_where!
 
     set_ivars_for_show
     check_constraint_violations
@@ -59,7 +59,7 @@ class ProjectsController < ApplicationController
   # def edit_project
   def edit
     image_ivars
-    return unless find_project!
+    return unless find_project_and_where!
 
     @start_date_fixed = @project.start_date.present?
     @end_date_fixed = @project.end_date.present?
@@ -94,7 +94,7 @@ class ProjectsController < ApplicationController
   end
 
   def update
-    return unless find_project!
+    return unless find_project_and_where!
 
     unless check_permission!(@project)
       return redirect_to(project_path(@project.id, q: get_query_param))
@@ -124,7 +124,7 @@ class ProjectsController < ApplicationController
   # Outputs: none
   # def destroy_project
   def destroy
-    return unless find_project!
+    return unless find_project_and_where!
 
     if !check_permission!(@project)
       redirect_to(project_path(@project.id, q: get_query_param))
@@ -153,7 +153,6 @@ class ProjectsController < ApplicationController
   end
 
   def set_ivars_for_show
-    @where = @project&.place_name || ""
     @canonical_url = "#{MO.http_domain}/projects/#{@project.id}"
     @is_member = @project.member?(@user)
     @is_admin = @project.is_admin?(@user)
@@ -161,6 +160,8 @@ class ProjectsController < ApplicationController
               where("name_description_admins.user_group_id":
                     @project.admin_group_id).
               includes(:name, :user)
+    # Save a lookup in comments_for_object
+    @comments = @project.comments&.sort_by(&:created_at)&.reverse
   end
 
   def upload_image_if_present
@@ -248,10 +249,11 @@ class ProjectsController < ApplicationController
              "end_date(1i)", "end_date(2i)", "end_date(3i)")
   end
 
-  def find_project!
-    @project = find_or_goto_index(Project, params[:id].to_s)
+  def find_project_and_where!
+    @project = Project.show_includes.safe_find(params[:id].to_s) ||
+               flash_error_and_goto_index(Project, params[:id].to_s)
+
     @where = @project&.location&.display_name || ""
-    @project
   end
 
   def create_members_group(title)

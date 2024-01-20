@@ -53,7 +53,8 @@ carousel_locals = {
     <% end %>
 
     <%= render(partial: "comments/comments_for_object",
-               locals: { object: @observation, controls: @user, limit: nil }) %>
+               locals: { object: @observation, comments: @comments,
+                         controls: @user, limit: nil }) %>
 
     <%= @observation.source_credit.tpl if @observation.source_noteworthy? %>
   </div>

@@ -1,6 +1,5 @@
 <% #bs4
-  comments = object.comments.includes(:user).sort_by(&:created_at).reverse
-  if limit
+  if limit && comments
     and_more = comments.length - limit
     comments = comments[0..limit-1]
   end

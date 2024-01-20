@@ -100,7 +100,8 @@ class SpeciesList < AbstractModel
   attr_accessor :data
 
   scope :show_includes, lambda {
-    includes(
+    strict_loading.includes(
+      { comments: :user },
       { observations: :namings }
     )
   }
