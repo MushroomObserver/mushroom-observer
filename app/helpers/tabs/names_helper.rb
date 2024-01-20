@@ -101,24 +101,7 @@ module Tabs
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
     end
 
-    def name_correct_spelling_tab(name)
-      [name.correct_spelling.display_name.l,
-       add_query_param(name_path(name.correct_spelling_id)),
-       { class: tab_id(__method__.to_s) }]
-    end
-
-    def show_name_tab(name)
-      [name.display_name.l, add_query_param(name_path(name.id)),
-       { class: tab_id(__method__.to_s) }]
-    end
-
     # lifeform tabs:
-    def propagate_lifeform_form_tab(name)
-      [:show_name_propagate_lifeform.t,
-       add_query_param(propagate_name_lifeform_form_path(name.id)),
-       { class: tab_id(__method__.to_s) }]
-    end
-
     def edit_name_lifeform_tab(name)
       [:EDIT.l, add_query_param(edit_name_lifeform_path(name.id)),
        { class: tab_id(__method__.to_s), icon: :edit }]
