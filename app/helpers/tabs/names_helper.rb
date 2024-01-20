@@ -234,6 +234,21 @@ module Tabs
        { class: tab_id(__method__.to_s) }]
     end
 
+    def all_names_index_tabs(query:)
+      [
+        new_name_tab,
+        all_names_tab(query),
+        coerced_observation_query_tab(query)
+      ].reject(&:empty?)
+    end
+
+    def all_names_tab(query)
+      return if query&.flavor == :all || query&.flavor&.empty?
+
+      [:all_objects.t(type: :name), names_path,
+       { class: tab_id(__method__.to_s) }]
+    end
+
     def names_index_sorts(query:)
       [
         ["name", :sort_by_name.t],
