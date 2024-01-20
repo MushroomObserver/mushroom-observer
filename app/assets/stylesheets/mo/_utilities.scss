@@ -321,6 +321,14 @@
   margin-left: 10px !important;
 }
 
+.ml-1 {
+  margin-left: 0.25rem !important;
+}
+
+.ml-2 {
+  margin-left: 0.5rem !important;
+}
+
 .ml-3 {
   margin-left: 1rem !important;
 }
@@ -606,8 +614,16 @@
 // --------------------------------------------------
 
 @media screen and (min-width: 767px) {
+  .d-sm-none {
+    display: none;
+  }
+
   .d-sm-block {
     display: block;
+  }
+
+  .d-sm-inline-block {
+    display: inline-block;
   }
 
   .d-sm-flex {
@@ -620,6 +636,10 @@
 
   .float-sm-right {
     float: right !important;
+  }
+
+  .float-sm-none {
+    float: none !important;
   }
 
   .mt-sm-3 {

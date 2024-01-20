@@ -61,6 +61,9 @@ MushroomObserver::Application.configure do
   # Full error reports are disabled and caching is turned on.
   config.consider_all_requests_local = false
   config.action_controller.perform_caching = true
+  # debugging: log fragment reads/writes
+  # (it will show [cache hit] even if set to false)
+  config.action_controller.enable_fragment_cache_logging = false
 
   # Enable Rack::Cache to put a simple HTTP cache in front of your application
   # Add `rack-cache` to your Gemfile before enabling this.
@@ -103,13 +106,25 @@ MushroomObserver::Application.configure do
 
   # Force all access to the app over SSL, use Strict-Transport-Security,
   # and use secure cookies.
-  config.force_ssl = true
+  # force_ssl does not work with unicorn 6.1.0 - wait for 7
+  config.force_ssl = false
 
   # Use a different logger for distributed setups.
   # Log to STDOUT by default
   # config.logger = ActiveSupport::Logger.new(STDOUT)
   #   .tap  { |logger| logger.formatter = ::Logger::Formatter.new }
   #   .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
+
+  # Log to production.log. New 7.1 logging uses BroadcastLogger
+  # Not using TaggedLogging yet.
+  loggers = [
+    "log/production.log"
+  ].map do |output|
+    ActiveSupport::Logger.new(output).
+      tap { |logger| logger.formatter = Logger::Formatter.new }
+    # .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
+  end
+  config.logger = ActiveSupport::BroadcastLogger.new(*loggers)
 
   # Prepend all log lines with the following tags.
   # config.log_tags = [ :request_id, :subdomain, :uuid ]

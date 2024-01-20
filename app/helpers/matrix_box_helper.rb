@@ -1,6 +1,30 @@
 # frozen_string_literal: true
 
 module MatrixBoxHelper
+  # Wrapper for a "grid" of matrix_boxes
+  def matrix_table(**args, &block)
+    partial = args[:partial] || "shared/matrix_box"
+    as = args[:as] || :object
+    cached = args[:cached] || false
+
+    [
+      tag.ul(
+        class: "row list-unstyled mt-3",
+        data: { controller: "matrix-table",
+                action: "resize@window->matrix-table#rearrange" }
+      ) do
+        if block
+          capture(&block)
+        else
+          render(partial: partial,
+                 locals: args.except(:objects, :as, :partial, :cached),
+                 collection: args[:objects], as: as, cached: cached)
+        end
+      end,
+      tag.div("", class: "clearfix")
+    ].safe_join
+  end
+
   # Use this helper to produce a standard li.matrix-box with an object id.
   # Or, send your own column classes and other args
   def matrix_box(**args, &block)
@@ -15,15 +39,14 @@ module MatrixBoxHelper
     end
   end
 
-  def matrix_box_image(presenter, passed_args)
-    return unless presenter.image_data
+  def matrix_box_image(image = nil, **args)
+    return unless image
 
-    image = presenter.image_data[:image]
-    # for matrix_box_carousels: change to image_data.except(:images)
-    image_args = passed_args.merge(presenter.image_data.except(:image) || {})
-
+    user = User.current ? "logged_in" : "no_user"
     tag.div(class: "thumbnail-container") do
-      interactive_image(image, **image_args)
+      cache([image, user]) do
+        concat(interactive_image(image, **args))
+      end
     end
   end
 
@@ -98,8 +121,9 @@ module MatrixBoxHelper
         naming_vote_form(naming, nil, context: "matrix_box")
       end
     else
-      propose_naming_link(object.id, btn_class: "btn-default mb-3",
-                                     context: "matrix_box")
+      propose_naming_link(
+        object.id, btn_class: "btn btn-default d-inline-block mb-3",
+                   context: "matrix_box")
     end
   end
 

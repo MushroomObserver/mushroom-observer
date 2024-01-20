@@ -47,7 +47,9 @@ class ProjectsControllerTest < FunctionalTestCase
     drafts = NameDescription.where(source_name: project.title)
     assert_not(drafts.empty?)
     params = { id: project.id.to_s }
+
     requires_user(:destroy, { action: :show }, params, changer.login)
+
     assert_redirected_to(project_path(project.id))
     assert(Project.find(project.id))
     assert(UserGroup.find(project.user_group.id))
@@ -67,19 +69,35 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select(
       "a[href*=?]", new_project_admin_request_path(project_id: p_id)
     )
-    assert_select("a[href*=?]", edit_project_path(p_id), count: 0)
+    assert_select("a[href*=?]", edit_project_path(p_id), false,
+                  "Non-admin should not see link to edit project")
     assert_select(
       "a[href*=?]", new_project_member_path(project_id: p_id), count: 0
     )
     assert_select("form[action=?]", project_path(p_id), count: 0)
   end
 
-  def test_show_project_logged_in
-    p_id = projects(:eol_project).id
-    requires_login(:new)
-    get(:show, params: { id: p_id })
+  def test_show_project_logged_in_owner
+    project = projects(:eol_project)
+
+    login(project.user.login)
+    get(:show, params: { id: project.id })
+
     assert_template("show")
-    assert_select("a[href*=?]", edit_project_path(p_id))
+    assert_select("a[href*=?]", edit_project_path(project), true,
+                  "Project owner should see link to edit project")
+  end
+
+  def test_show_project_logged_in_admin
+    project = projects(:eol_project)
+    assert(project.admin?(mary))
+
+    login(mary.login)
+    get(:show, params: { id: project.id })
+
+    assert_template("show")
+    assert_select("a[href*=?]", edit_project_path(project), true,
+                  "Project admmin should see link to edit project")
   end
 
   def test_show_project_with_location
@@ -294,10 +312,21 @@ class ProjectsControllerTest < FunctionalTestCase
     add_project_helper("The Test Coverage Project", "")
   end
 
-  def test_edit_project
-    project = projects(:eol_project)
-    params = { id: project.id.to_s }
-    requires_user(:edit, { action: :show }, params)
+  def test_edit_project_by_owner
+    project = projects(:two_list_project)
+    # `requires_user` calls `either_requires_either` which calls
+    # `assert_request` which requires that
+    # the request pass with the supplied user, and
+    # fail with an unsupplied user, who is either
+    #   mary if the suppled user was rolf, or
+    #   rolf if the supplied user was other than mary or rolf
+    assert(project.user == mary && !project.admin?(rolf),
+           "Test needs different fixtures")
+    project_id = project.id.to_s
+    params = { id: project_id }
+
+    requires_user(:edit, { action: :show }, params, "mary")
+
     assert_form_action(action: :update, id: project.id.to_s)
   end
 
@@ -315,12 +344,12 @@ class ProjectsControllerTest < FunctionalTestCase
   end
 
   def test_edit_project_empty_name
-    edit_project_helper("", projects(:eol_project))
+    edit_project_helper("", projects(:rolf_project))
   end
 
   def test_edit_project_existing
     edit_project_helper(projects(:bolete_project).title,
-                        projects(:eol_project))
+                        projects(:rolf_project))
   end
 
   def test_update_project
@@ -421,10 +450,19 @@ class ProjectsControllerTest < FunctionalTestCase
     destroy_project_helper(projects(:bolete_project), rolf)
   end
 
+  # prove that mere member cannot destroy project
   def test_destroy_project_member
-    eol_project = projects(:eol_project)
-    assert(eol_project.is_member?(katrina))
-    destroy_project_helper(eol_project, katrina)
+    project = projects(:rolf_project)
+    member = users(:katrina)
+    assert(
+      project.member?(member) && project.user != member &&
+      !project.admin?(member) &&
+      NameDescription.where(source_name: project.title).any?,
+      "Bad fixtures: member must be project member, but not owner or admin " \
+      "and project must be the source of a NameDescription"
+    )
+
+    destroy_project_helper(project, katrina)
   end
 
   def test_changing_project_name

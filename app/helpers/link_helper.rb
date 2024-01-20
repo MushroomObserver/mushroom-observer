@@ -24,11 +24,16 @@ module LinkHelper
   end
 
   # https://stackoverflow.com/questions/18642001/add-an-active-class-to-all-active-links-in-rails
-  # make a link that has .active class if it's a link to the current page
+  # https://stackoverflow.com/questions/75742517/how-to-highlight-active-nav-link-when-using-hotwire
+  # Make a link that is a target for the stimulus "nav-active_controller"
+  # (The controller adds .active class if it's a link to the current page,
+  # and updates the active link when navigating. Allows nav to be cached!)
   def active_link_to(text = nil, path = nil, **opts, &block)
     link = block ? text : path # because positional
     content = block ? capture(&block) : text
-    opts[:class] = class_names(opts[:class], { active: current_page?(link) })
+    opts[:data] = (opts[:data] || {}).merge(
+      { nav_active_target: "link", action: "nav-active#navigate" }
+    )
 
     link_to(link, opts) { content }
   end

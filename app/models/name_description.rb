@@ -124,7 +124,7 @@ class NameDescription < Description
     strict_loading.includes(
       { admin_groups: { users: :user_groups } },
       :authors,
-      :comments,
+      { comments: :user },
       :editors,
       :interests,
       :license,

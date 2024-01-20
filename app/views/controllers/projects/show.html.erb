@@ -53,7 +53,7 @@ add_project_banner(@project)
                   path: project_members_path(project_id: @project.id,
                                              candidate: @user.id,
                                              target: :project_index)) %>
-<% elsif @project.is_member?(@user) %>
+<% elsif @project.member?(@user) %>
   <% if @project.trusted_by?(@user) %>
     <%= put_button(name: :change_member_status_revoke_trust.l,
                    class: "btn btn-default btn-sm",
@@ -99,6 +99,7 @@ add_project_banner(@project)
 </p>
 
 <%= render(partial: "comments/comments_for_object",
-           locals: { object: @project, controls: @user, limit: nil }) %>
+           locals: { object: @project, comments: @comments,
+                     controls: @user, limit: nil }) %>
 
 <%= show_object_footer(@project) %>

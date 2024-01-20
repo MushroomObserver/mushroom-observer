@@ -1,13 +1,14 @@
 <%#
 // Re-render the whole comments_for_object block.
-// comments_for_object needs locals: object, controls, limit
+// comments_for_object needs locals: object, comments, controls, limit
 // create or update should provide.
 %>
 
 <%= turbo_stream.replace("comments_for_object") do
   render(
     partial: "comments/comments_for_object",
-    locals: { object: @target, controls: @user, limit: nil },
+    locals: { object: @target, comments: @comments,
+              controls: @user, limit: nil },
     layout: false
   )
 end %>

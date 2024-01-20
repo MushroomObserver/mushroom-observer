@@ -26,7 +26,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     login(namer, session: namer_session)
     assert_false(namer_session.has_link?(class: /edit_naming/))
     assert_false(namer_session.has_selector?(class: /destroy_naming_link_/))
-    namer_session.click_link(class: "propose-naming-link")
+    namer_session.first(class: "propose-naming-link").click
 
     # naming = namer_session.create_name(obs, text_name)
     namer_session.assert_selector("body.namings__new")
@@ -46,9 +46,12 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
       assert_true(form.has_unchecked_field?("naming_reasons_4_check"))
       form.first("input[type='submit']").click
     end
+
     namer_session.assert_selector("body.namings__create")
-    # (I don't care so long as it says something.)
-    assert_flash_text(/\S/, session: namer_session)
+    assert_flash_text(:form_naming_what_missing.l, session: namer_session)
+    namer_session.
+      # see https://github.com/MushroomObserver/mushroom-observer/issues/1796
+      assert_no_selector("#flash_notices", text: :SEE_MESSAGE_BELOW.l)
 
     namer_session.within("#obs_#{obs.id}_naming_form") do |form|
       form.fill_in("naming_name", with: text_name)

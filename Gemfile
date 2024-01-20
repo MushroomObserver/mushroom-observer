@@ -34,6 +34,9 @@ group :rails do
   gem("railties", "~> 7.1.2")
 end
 
+# fix for unicorn 6.1.0 not being able to deal with current rack 3 yet
+# delete when unicorn updated to 7
+gem("rack", "~>2")
 # gem irb now depends on psych, but version 5 will not bundle currently
 gem("psych", "~> 4")
 # importmap for js module handling
@@ -48,8 +51,12 @@ gem("requestjs-rails")
 gem("turbo-rails")
 # redis for combining actioncable broadcasts with turbo_stream
 # gem("redis", "~> 4.0")
+# dalli to run the memcached server
+gem("dalli", "~> 3.2")
 # Compile SCSS for stylesheets
 gem("sassc-rails")
+# add locale to cache key
+gem("cache_with_locale")
 
 # Fix a version problem betw stimulus and sprockets. (not sprockets-rails)
 # Delete this dependency declaration if the issue gets resolved:

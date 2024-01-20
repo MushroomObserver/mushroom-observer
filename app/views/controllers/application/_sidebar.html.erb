@@ -6,7 +6,8 @@ classes = {
   item: "list-group-item",
   admin: "list-group-item list-group-item-danger indent",
   indent: "list-group-item indent",
-  mobile_only: "list-group-item visible-xs"
+  mobile_only: "visible-xs",
+  desktop_only: "hidden-xs"
 }
 %>
 
@@ -14,44 +15,49 @@ classes = {
 
   <a id="logo_link" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>">
     <img class="logo-trim img-responsive py-10px" alt="Mushroom Observer Logo"
-         src="/logo-trim.png"/>
+          src="/logo-trim.png"/>
   </a><!-- #logo_link -->
 
-  <div class="<%= classes[:wrapper] %>">
+  <div class="<%= classes[:wrapper] %>" data-controller="nav-active">
 
-    <%= render(partial: "application/sidebar/info",
-                locals: { classes: classes }) %>
-
-    <% if in_admin_mode? %>
-      <%= render(partial: "application/sidebar/admin",
-                  locals: { classes: classes }) %>
+    <%# Cache depends only on user status (logged-in? admin?) %>
+    <% cache([user_status_string, "login"]) do %>
+      <% if in_admin_mode? %>
+        <%= render(partial: "application/sidebar/admin",
+                    locals: { classes: classes }) %>
+      <% elsif @user.nil? %>
+        <%= render(partial: "application/sidebar/login",
+                    locals: { classes: classes }) %>
+      <% end %>
     <% end %>
 
-    <% if @user.nil? %>
-      <%= render(partial: "application/sidebar/login",
+    <%# Cache customized for the user instance. %>
+    <% cache(@user) do %>
+      <% if @user %>
+        <%= render(partial: "application/sidebar/user",
+                    locals: { classes: classes }) %>
+      <% end %>
+
+      <%= render(partial: "application/sidebar/observations",
                   locals: { classes: classes }) %>
-    <% else %>
-      <%= render(partial: "application/sidebar/user",
-                  locals: { classes: classes }) %>
+
+      <%= render(partial: "application/sidebar/species_lists",
+                  locals: { classes: classes }) if @user %>
     <% end %>
 
-    <%= render(partial: "application/sidebar/observations",
-                locals: { classes: classes }) %>
+    <% cache([user_status_string, "links"]) do %>
+      <%= render(partial: "application/sidebar/latest",
+                  locals: { classes: classes }) %>
 
-    <%= render(partial: "application/sidebar/latest",
-                locals: { classes: classes }) %>
+      <%= render(partial: "application/sidebar/indexes",
+                 locals: { classes: classes }) if @user %>
 
-    <%= render(partial: "application/sidebar/species_lists",
-                locals: { classes: classes }) %>
+      <%= render(partial: "application/sidebar/info",
+                  locals: { classes: classes }) %>
 
-    <%= render(partial: "application/sidebar/indexes",
-                locals: { classes: classes }) %>
-
-    <%= render(partial: "application/sidebar/more",
-                locals: { classes: classes }) %>
-
-    <%= render(partial: "application/sidebar/languages",
-                locals: { classes: classes }) %>
+      <%= render(partial: "application/sidebar/languages",
+                  locals: { classes: classes }) %>
+    <% end %>
 
   </div><!-- .sidebar-nav -->
 

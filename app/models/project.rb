@@ -22,7 +22,7 @@
 #
 #  == Methods
 #
-#  is_member?::     Is a given User a member of this Project?
+#  member?::     Is a given User a member of this Project?
 #  is_admin?::      Is a given User an admin for this Project?
 #  can_join?::      Can the current user join this Project?
 #  can_leave?::     Can the current user leave this Project?
@@ -75,6 +75,13 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   before_destroy :orphan_drafts
 
+  scope :show_includes, lambda {
+    strict_loading.includes(
+      { comments: :user },
+      :location
+    )
+  }
+
   # Project handles all of its own logging.
   self.autolog_events = []
 
@@ -94,7 +101,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   alias unique_format_name unique_text_name
 
   # Is +user+ a member of this Project?
-  def is_member?(user)
+  def member?(user)
     user && (user_group.users.member?(user) || user.admin)
   end
 
@@ -102,10 +109,15 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   def is_admin?(user)
     user && (admin_group.users.member?(user) || user.admin)
   end
+  alias admin? is_admin?
 
   def trusted_by?(user)
     member = project_members.find_by(user: user)
     member&.trust_level != "no_trust"
+  end
+
+  def can_edit?(user = User.current)
+    admin?(user)
   end
 
   def can_edit_content?(user)
@@ -114,7 +126,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def can_join?(user)
-    open_membership && !is_member?(user)
+    open_membership && !member?(user)
   end
 
   def can_leave?(user)
@@ -128,7 +140,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def user_can_add_observation?(obs, user)
-    obs.user == user || is_member?(user)
+    obs.user == user || member?(user)
   end
 
   def count_violations

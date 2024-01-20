@@ -225,6 +225,8 @@ class SpeciesListsController < ApplicationController
     @pages = paginate_letters(:letter, :page, 100)
     @objects = @query.paginate(@pages, include:
                   [:user, :name, :location, { thumb_image: :image_votes }])
+    # Save a lookup in comments_for_object
+    @comments = @species_list.comments&.sort_by(&:created_at)&.reverse
   end
 
   ##############################################################################
