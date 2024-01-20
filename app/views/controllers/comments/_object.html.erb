@@ -34,4 +34,5 @@
 end %>
 
 <%= render(partial: "comments/comments_for_object",
-           locals: { object: object, controls: false, limit: 10 }) %>
+           locals: { object: object, comments: @comments,
+                     controls: false, limit: 10 }) %>
