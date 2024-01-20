@@ -39,13 +39,13 @@ module MatrixBoxHelper
     end
   end
 
-  def matrix_box_image(image = nil, **)
+  def matrix_box_image(image = nil, **args)
     return unless image
 
     user = User.current ? "logged_in" : "no_user"
     tag.div(class: "thumbnail-container") do
       cache([image, user]) do
-        concat(interactive_image(image, **))
+        concat(interactive_image(image, **args))
       end
     end
   end
