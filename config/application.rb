@@ -92,7 +92,7 @@ module MushroomObserver
     # Unfortunately this is also added to email templates!
     # config.action_view.annotate_rendered_view_with_filenames = true
 
-    # Strict loading - just log, don't error out the page!
+    # Strict loading - either :log, or :error out the page
     config.active_record.action_on_strict_loading_violation = :log
 
     # Just starting to use Rails caching on 7.1, so we're current
