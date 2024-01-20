@@ -26,10 +26,8 @@ target_type = tag.span(target.class.name.to_sym.t, class: "small") \
           concat(tag.span(class: "text-nowrap") do
             [
               "[",
-              modal_link_to("comment_#{comment.id}", :EDIT.t,
-                            edit_comment_path(comment.id),
-                            class: "edit_comment_link_#{comment.id}",
-                            icon: :edit),
+              modal_link_to("comment_#{comment.id}",
+                            *edit_comment_tab(comment)),
               "|",
               destroy_button(name: :comment_show_destroy.t, target: comment,
                              icon: :delete, data: { turbo: true }),
@@ -37,9 +35,10 @@ target_type = tag.span(target.class.name.to_sym.t, class: "small") \
             ].safe_join(" ")
           end) if check_permission(comment)
           concat(tag.div(comment.created_at.web_time,
-                         class: "float-right text-nowrap small my-0 mx-3"))
+                         class: "float-sm-right text-nowrap small"))
         end)
         unless comment.comment.blank?
+          concat(tag.div("", class: "clearfix"))
           concat(tag.div(comment.comment.tpl, class: "p-2 comment-body"))
         end
       end,

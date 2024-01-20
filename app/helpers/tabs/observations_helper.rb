@@ -24,8 +24,9 @@ module Tabs
     end
 
     # Used in the lists panel
+    # N+1: this looks up User.current.species_lists. Mercifully quick.
     def observation_manage_lists_tab(obs, user)
-      return unless user
+      return unless user&.species_list_ids&.any?
 
       [:show_observation_manage_species_lists.l,
        add_query_param(edit_observation_species_lists_path(obs.id)),

@@ -121,8 +121,9 @@ module MatrixBoxHelper
         naming_vote_form(naming, nil, context: "matrix_box")
       end
     else
-      propose_naming_link(object.id, btn_class: "btn-default mb-3",
-                                     context: "matrix_box")
+      propose_naming_link(
+        object.id, btn_class: "btn btn-default d-inline-block mb-3",
+                   context: "matrix_box")
     end
   end
 

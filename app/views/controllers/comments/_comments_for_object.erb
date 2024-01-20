@@ -12,7 +12,11 @@ tag.div(
 ) do
   concat([
     tag.div(class: "panel-heading") do
-      tag.h4(:COMMENTS.t, class: "panel-title")
+      tag.h4(class: "panel-title") do
+        concat(:COMMENTS.t)
+        concat(tag.span(new_comment_link(object, btn_class: nil, icon: true),
+                        class: "float-right")) if controls
+      end
     end,
     tag.div(class: "list-group list-group-flush comments") do
       if comments.empty?
@@ -26,14 +30,9 @@ tag.div(
   ].safe_join)
   concat(
     tag.div(class: "panel-footer") do
-      concat(
-        modal_link_to("comment", *new_comment_tab(object))
-      )
-      concat(
-        link_to(:show_comments_and_more.t(num: and_more),
-                comments_path(target: object.id, type: object.class.name),
-                class: "float-right")
-      ) if limit && and_more > 0
+      link_to(:show_comments_and_more.t(num: and_more),
+              comments_path(target: object.id, type: object.class.name),
+              class: "float-right")
     end
-  ) if controls
+  ) if controls && limit && and_more > 0
 end %>

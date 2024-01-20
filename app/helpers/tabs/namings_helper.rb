@@ -9,7 +9,7 @@ module Tabs
          new_observation_naming_path(observation_id: obs_id, context: context)
        ),
        { class: class_names("#{tab_id(__method__.to_s)}_#{obs_id}", btn_class,
-                            %w[btn d-inline-block propose-naming-link]) }]
+                            %w[propose-naming-link]), icon: :add }]
     end
 
     def edit_naming_tab(naming)

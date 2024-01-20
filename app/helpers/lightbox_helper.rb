@@ -50,7 +50,8 @@ module LightboxHelper
   def caption_identify_ui(obs:)
     tag.div(class: "obs-identify", id: "observation_identify_#{obs.id}") do
       [
-        propose_naming_link(obs.id, context: "lightgallery"),
+        propose_naming_link(obs.id, context: "lightgallery",
+                                    btn_class: "btn d-inline-block"),
         tag.span("&nbsp;".html_safe, class: "mx-2"),
         mark_as_reviewed_toggle(obs.id)
       ].safe_join
