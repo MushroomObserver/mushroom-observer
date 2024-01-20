@@ -29,7 +29,7 @@ class UsersController < ApplicationController
   def show
     store_location
     id = params[:id].to_s
-    return unless @show_user = find_or_goto_index(User, id)
+    return unless (@show_user = find_or_goto_index(User, id))
 
     case params[:flow]
     when "next"
