@@ -379,7 +379,7 @@ module NamingsHelper
     buttons << propose_naming_link(
       obs.id,
       text: :show_namings_propose_new_name.t,
-      btn_class: "btn btn-default btn-sm d-none d-sm-block",
+      btn_class: "btn btn-default btn-sm d-none d-sm-inline-block",
       context: "namings_table"
     )
     buttons << suggest_namings_link(obs) if do_suggestions
