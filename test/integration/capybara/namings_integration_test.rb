@@ -26,7 +26,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     login(namer, session: namer_session)
     assert_false(namer_session.has_link?(class: /edit_naming/))
     assert_false(namer_session.has_selector?(class: /destroy_naming_link_/))
-    namer_session.click_link(class: "propose-naming-link")
+    namer_session.first(class: "propose-naming-link").click
 
     # naming = namer_session.create_name(obs, text_name)
     namer_session.assert_selector("body.namings__new")
