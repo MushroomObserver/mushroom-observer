@@ -1,5 +1,5 @@
 <%
-@container = :full
+@container = :text_image
 add_index_title(@query, no_hits: "")
 add_tab_set(names_index_tabs(query: @query))
 add_sorter(@query, names_index_sorts(query: @query))
@@ -29,29 +29,25 @@ flash_error(@error) if @error && @objects.empty?
   <% if @objects.any? %>
     <% counts = Name.count_observations(@objects) %>
 
-    <table class="table table-striped w-100">
+    <div class="list-group">
       <% @objects.each do |name| %>
-        <tr>
-          <td>
-            <%= link_with_query(name.display_name.html_safe.t,
-                                name.show_link_args) + " [#{counts[name.id]}]" %>
-          </td>
-          <% if @extra_data %>
-            <%
-            data = @extra_data[name.id]
-            if data.any?
-              data.each do |val| %>
-                <td><%= val %></td>
-            <% end
-            else %>
-            <td align="center" colspan="3" class="ls-50">
-              --- not the default ---
-            </td>
-            <% end %>
+        <%= link_with_query(name.show_link_args, class: "list-group-item") do
+          concat(name.display_name.html_safe.t)
+          concat(tag.span(counts[name.id], class: "badge")) if counts[name.id]
+        end %>
+        <% if @extra_data %>
+          <%
+          data = @extra_data[name.id]
+          if data.any?
+            data.each do |val| %>
+              <span><%= val %></span>
+          <% end
+          else %>
+          <span>--- not the default ---</span>
           <% end %>
-        </tr>
+        <% end %>
       <% end %>
-    </table>
+    </div>
 
   <% end %>
 <% end %>
