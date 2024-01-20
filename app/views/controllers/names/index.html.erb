@@ -29,10 +29,10 @@ flash_error(@error) if @error && @objects.empty?
   <% if @objects.any? %>
     <% counts = Name.count_observations(@objects) %>
 
-    <div class="list-group">
+    <div class="list-group name-index">
       <% @objects.each do |name| %>
         <%= link_with_query(name.show_link_args, class: "list-group-item") do
-          concat(name.display_name.html_safe.t)
+          concat(tag.span(name.display_name.html_safe.t, class: "display-name"))
           concat(tag.span(counts[name.id], class: "badge")) if counts[name.id]
         end %>
         <% if @extra_data %>
