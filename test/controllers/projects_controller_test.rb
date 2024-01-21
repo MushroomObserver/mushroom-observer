@@ -127,6 +127,16 @@ class ProjectsControllerTest < FunctionalTestCase
                   "Date range missing from Project header")
   end
 
+  def test_show_project_with_constraint_violations
+    project = projects(:falmouth_2023_09_project)
+    assert(project.count_violations.positive?,
+           "Test needs Project fixture with constraint violations")
+    user = project.user
+
+    login(user.login)
+    get(:show, params: { id: project.id })
+  end
+
   def test_index
     login
     get(:index)

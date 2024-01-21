@@ -677,3 +677,15 @@ deprecated_name_obs:
   text_name: Petigera
   lifeform: " lichen "
   rss_log:
+
+falmouth_2022_obs:
+  <<: *DEFAULTS
+  when: 2022-09-15 # outside of dates of falmouth_2023_09_project
+  where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
+  location: falmouth
+
+nybg_2023_09_obs:
+  <<: *DEFAULTS
+  when: 2023-09-15
+  where: The New York Botanical Garden, Bronx, New York, USA
+  location: nybg_location # outside location of falmouth_2023_09_project

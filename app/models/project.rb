@@ -19,6 +19,8 @@
 #  title::          Title string.
 #  summary::        Summary of purpose.
 #  open_membership  Enable users to add themselves, disable shared editing
+#  location::
+#  image::
 #
 #  == Methods
 #
@@ -29,8 +31,9 @@
 #  current?::       Project (based on dates) has started and hasn't ended
 #  user_can_add_observation?:: Can user add observation to this Project
 #  violates_constraints?:: Does a given obs violate the Project constraints
-#  text_name::      Alias for +title+ for debugging.
-#  Proj.can_edit?:: Check if User has permission to edit an Obs/Image/etc.
+#  count_violations    # of project Observations which violate constraints
+#  text_name::         Alias for +title+ for debugging.
+#  Proj.can_edit?::    Check if User has permission to edit an Obs/Image/etc.
 #  Proj.admin_power?:: Check for admin for a project of this Obs
 #
 #  ==== Logging

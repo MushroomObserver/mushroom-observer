@@ -198,3 +198,11 @@ rolf_project:
   user: rolf
   admin_group: rolf_only
   user_group: katrina_only
+
+# includes observations that violate date and or location constraints
+falmouth_2023_09_project:
+  <<: *DEFAULTS
+  start_date: 2023-09-01
+  end_date: 2023-09-30
+  location: falmouth
+  observations: falmouth_2022_obs, nybg_2023_09_obs

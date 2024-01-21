@@ -428,7 +428,13 @@ perkatkun_obs_rss_log:
   <<: *DEFAULTS
   observation: perkatkun_obs
 
+falmouth_2022_obs_rss_log:
+  <<: *DEFAULTS
+  observation: falmouth_2022_obs
 
+nybg_2023_09_obs_rss_log:
+  <<: *DEFAULTS
+  observation: nybg_2023_09_obs
 
 species_list_rss_log:
   species_list: first_species_list
