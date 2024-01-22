@@ -203,7 +203,7 @@ module Name::Taxonomy
       words.pop
       next if name == text_name || name[-1] == "."
 
-      parent = Name.best_match(name)
+      parent = Name.best_match_old(name)
       parents << parent if parent
       return [parent] if !all && parent && !parent.deprecated
     end
@@ -211,7 +211,7 @@ module Name::Taxonomy
     # Next grab the names out of the classification string.
     lines = try(&:parse_classification) || []
     lines.reverse_each do |(_line_rank, line_name)|
-      parent = Name.best_match(line_name)
+      parent = Name.best_match_old(line_name)
       parents << parent if parent
       return [parent] if !all && !parent.deprecated
     end
@@ -507,6 +507,18 @@ module Name::Taxonomy
     # arbitrarily where there is still ambiguity.  Useful if you just need a
     # name and it's not so critical that it be the exactly correct one.
     # Refactored to do a single db lookup, rather than two.
+    def best_match_old(name)
+      matches = Name.with_correct_spelling.where(search_name: name)
+      return matches.first if matches.any?
+
+      matches  = Name.with_correct_spelling.where(text_name: name)
+      accepted = matches.reject(&:deprecated)
+      matches  = accepted if accepted.any?
+      nonsensu = matches.reject { |match| match.author.start_with?("sensu ") }
+      matches  = nonsensu if nonsensu.any?
+      matches.first
+    end
+
     def best_match(name)
       all = Name.with_correct_spelling.where(search_name: name).
             or(where(text_name: name))
