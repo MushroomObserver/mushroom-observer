@@ -1735,9 +1735,9 @@ class NameTest < UnitTestCase
 
   def test_ancestors_2
     # use Petigera instead of Peltigera because it has no classification string
-    p = names(:petigera)
-    assert_name_arrays_equal([], p.all_parents)
-    assert_name_arrays_equal([], p.children)
+    pet = names(:petigera)
+    assert_name_arrays_equal([], pet.all_parents)
+    assert_name_arrays_equal([], pet.children)
 
     pc   = create_test_name("Petigera canina (L.) Willd.")
     pcr  = create_test_name("Petigera canina var. rufescens (Weiss) Mudd")
@@ -1755,7 +1755,7 @@ class NameTest < UnitTestCase
     pph  = create_test_name("Petigera polydactylon var. hymenina (Ach.) Flotow")
     ppn  = create_test_name("Petigera polydactylon var. neopolydactyla Gyelnik")
 
-    assert_name_arrays_equal([pa, pc, pp, pp2], p.children, :sort)
+    assert_name_arrays_equal([pa, pc, pp, pp2], pet.children, :sort)
     assert_name_arrays_equal([pcr, pcs], pc.children, :sort)
     assert_name_arrays_equal([pcri], pcr.children, :sort)
     assert_name_arrays_equal([pav], pa.children, :sort)
@@ -1786,36 +1786,36 @@ class NameTest < UnitTestCase
     assert_name_arrays_equal([pp], ppn.parents)
 
     # Try it again if we clear the misspelling flag.  (Still deprecated though.)
-    p.correct_spelling = nil
-    p.save
+    pet.correct_spelling = nil
+    pet.save
 
-    assert_name_arrays_equal([p], pc.all_parents, :sort)
+    assert_name_arrays_equal([pet], pc.all_parents, :sort)
     assert_name_arrays_equal([pc], pcr.all_parents, :sort)
     assert_name_arrays_equal([pcr, pc], pcri.all_parents, :sort)
     assert_name_arrays_equal([pc], pcs.all_parents, :sort)
-    assert_name_arrays_equal([p], pa.all_parents, :sort)
+    assert_name_arrays_equal([pet], pa.all_parents, :sort)
     assert_name_arrays_equal([pa], pac.all_parents, :sort)
     assert_name_arrays_equal([pa], pav.all_parents, :sort)
-    assert_name_arrays_equal([p], pp.all_parents, :sort)
-    assert_name_arrays_equal([p], pp2.all_parents, :sort)
+    assert_name_arrays_equal([pet], pp.all_parents, :sort)
+    assert_name_arrays_equal([pet], pp2.all_parents, :sort)
     assert_name_arrays_equal([pp], pph.all_parents, :sort)
     assert_name_arrays_equal([pp], ppn.all_parents, :sort)
 
-    assert_name_arrays_equal([p], pc.parents)
+    assert_name_arrays_equal([pet], pc.parents)
     assert_name_arrays_equal([pc], pcr.parents)
     assert_name_arrays_equal([pcr], pcri.parents)
     assert_name_arrays_equal([pc], pcs.parents)
-    assert_name_arrays_equal([p], pa.parents)
+    assert_name_arrays_equal([pet], pa.parents)
     assert_name_arrays_equal([pa], pac.parents)
     assert_name_arrays_equal([pa], pav.parents)
-    assert_name_arrays_equal([p], pp.parents)
+    assert_name_arrays_equal([pet], pp.parents)
     assert_name_arrays_equal([pp], pph.parents, :sort)
     assert_name_arrays_equal([pp], ppn.parents, :sort)
 
     pp2.change_deprecated(true)
     pp2.save
 
-    assert_name_arrays_equal([pa, pc, pp, pp2], p.children, :sort)
+    assert_name_arrays_equal([pa, pc, pp, pp2], pet.children, :sort)
     assert_name_arrays_equal([pp], pph.all_parents, :sort)
     assert_name_arrays_equal([pp], ppn.all_parents, :sort)
     assert_name_arrays_equal([pp], pph.parents, :sort)
@@ -1824,9 +1824,9 @@ class NameTest < UnitTestCase
     pp.change_deprecated(true)
     pp.save
 
-    assert_name_arrays_equal([pa, pc, pp, pp2], p.children, :sort)
-    assert_name_arrays_equal([pp, p], pph.all_parents, :sort)
-    assert_name_arrays_equal([pp, p], ppn.all_parents, :sort)
+    assert_name_arrays_equal([pa, pc, pp, pp2], pet.children, :sort)
+    assert_name_arrays_equal([pp, pet], pph.all_parents, :sort)
+    assert_name_arrays_equal([pp, pet], ppn.all_parents, :sort)
     assert_name_arrays_equal([pp], pph.parents, :sort)
     assert_name_arrays_equal([pp], ppn.parents, :sort)
   end
