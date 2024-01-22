@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Name::Taxonomy
+module Name::Taxonomy # rubocop:disable Metrics:ClassLength
   # When we `include` a module, the way to add class methods is like this:
   def self.included(base)
     base.extend(ClassMethods)
@@ -134,6 +134,10 @@ module Name::Taxonomy
   #    Fungi
   #    Eukarya
   #
+  def all_parents_old
+    parents_old(all: true)
+  end
+
   def all_parents
     parents(all: true)
   end
@@ -242,27 +246,17 @@ module Name::Taxonomy
       parents << parent if parent
       return [parent] if !all && parent && !parent.deprecated
     end
-
     # Next grab the names out of the classification string.
     lines = try(&:parse_classification) || []
-    # lines.reverse_each do |(_line_rank, line_name)|
-    #   parent = Name.best_match(line_name)
-    #   parents << parent if parent
-    #   return [parent] if !all && !parent.deprecated
-    # end
-
-    reverse_names = lines.reverse.map do |(_line_rank, line_name)|
-      line_name
-    end
+    reverse_names = lines.reverse.map { |(_rank, line_name)| line_name }
 
     if all
-      # do the batch lookup
-      parents = Name.best_matches_from_array(reverse_names)
+      # do the batch lookup.
+      parents += Name.best_matches_from_array(reverse_names)
     else
       # try to find the next parent only
       reverse_names.each do |text_name|
         parent = Name.best_match(text_name)
-        # parents << parent if parent
         return [parent] unless parent&.deprecated
       end
     end
@@ -520,13 +514,13 @@ module Name::Taxonomy
     end
 
     def best_match(name)
-      all = Name.with_correct_spelling.where(search_name: name).
-            or(where(text_name: name))
+      all = Name.where(search_name: name).or(where(text_name: name)).
+            with_correct_spelling
 
-      matches = all.select { |match| match.search_name == name }
+      matches  = all.select { |match| match.search_name == name }
       return matches.first if matches.any?
 
-      matches = all.select { |match| match.text_name == name }
+      matches  = all.select { |match| match.text_name == name }
       accepted = matches.reject(&:deprecated)
       matches  = accepted if accepted.any?
       nonsensu = matches.reject { |match| match.author.start_with?("sensu ") }
@@ -538,18 +532,16 @@ module Name::Taxonomy
     # then loop over them and return the matches
     def best_matches_from_array(names)
       all = Name.with_correct_spelling.where(text_name: names)
-      names.map do |name|
-        matches = all.select { |match| match.search_name == name }
-        if matches.any?
-          matches.first
-          next
-        end
 
-        matches = all.select { |match| match.text_name == name }
-        accepted = matches.reject(&:deprecated)
-        matches  = accepted if accepted.any?
-        nonsensu = matches.reject { |match| match.author.start_with?("sensu ") }
-        matches  = nonsensu if nonsensu.any?
+      names.map do |name|
+        matches = all.select { |m| m.search_name == name }
+        unless matches.any?
+          matches = all.select { |m| m.text_name == name }
+          accepted = matches.reject(&:deprecated)
+          matches  = accepted if accepted.any?
+          nonsensu = matches.reject { |m| m.author.start_with?("sensu ") }
+          matches  = nonsensu if nonsensu.any?
+        end
         matches.first
       end
     end
