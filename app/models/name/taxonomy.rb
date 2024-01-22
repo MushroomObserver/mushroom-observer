@@ -265,7 +265,7 @@ module Name::Taxonomy # rubocop:disable Metrics:ClassLength
     parents.reject!(&:deprecated) unless parents.all?(&:deprecated)
 
     # Return single parent as an array for backwards compatibility.
-    return parents if all
+    return parents.uniq if all
     return [] unless parents.any?
 
     [parents.first]

@@ -201,9 +201,8 @@ class NamesControllerTest < FunctionalTestCase
 
     login
     get(:index, params: { near_miss_pattern: })
-
     near_misses.each do |near_miss|
-      assert_select("#results a[href*='names/#{near_miss.id}']",
+      assert_select("#results a[href*='names/#{near_miss.id}'] .display-name",
                     text: near_miss.search_name)
     end
   end
@@ -236,8 +235,8 @@ class NamesControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_displayed_title("Names with Observations")
     names.each do |name|
-      assert_select("#results a[href*='/names/#{name.id}']",
-                    text: name.search_name)
+      assert_select("#results a[href*='/names/#{name.id}'] .display-name",
+                    name.search_name)
     end
   end
 
@@ -398,7 +397,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:test_index, params: { num_per_page: 10 }.merge(query_params))
     # print @response.body
     assert_template("names/index")
-    name_links = css_select(".table a")
+    name_links = css_select(".list-group.name-index a")
     assert_equal(10, name_links.length)
     expected = Name.order("sort_name, author").limit(10).to_a
     assert_equal(expected.map(&:id), ids_from_links(name_links))
@@ -424,7 +423,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:test_index,
         params: { num_per_page: 10, page: 2 }.merge(query_params))
     assert_template("names/index")
-    name_links = css_select(".table a")
+    name_links = css_select(".list-group.name-index a")
     assert_equal(10, name_links.length)
     expected = Name.order("sort_name").limit(10).offset(10).to_a
     assert_equal(expected.map(&:id), ids_from_links(name_links))
@@ -452,7 +451,7 @@ class NamesControllerTest < FunctionalTestCase
                                letter: "L" }.merge(query_params))
     assert_template("names/index")
     assert_select("#content")
-    name_links = css_select(".table a")
+    name_links = css_select(".list-group.name-index a")
     assert_equal(l_names.size, name_links.length)
     assert_equal(Set.new(l_names.map(&:id)),
                  Set.new(ids_from_links(name_links)))
@@ -478,7 +477,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:test_index, params: { num_per_page: l_names.size,
                                letter: "L" }.merge(query_params))
     assert_template("names/index")
-    name_links = css_select(".table a")
+    name_links = css_select(".list-group.name-index a")
 
     assert_equal(l_names.size, name_links.length)
     assert_equal(Set.new(l_names.map(&:id)),
@@ -504,7 +503,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:test_index, params: { num_per_page: l_names.size, letter: "L",
                                page: 2 }.merge(query_params))
     assert_template("names/index")
-    name_links = css_select(".table a")
+    name_links = css_select(".list-group.name-index a")
     assert_equal(1, name_links.length)
     assert_equal([last_name.id], ids_from_links(name_links))
     assert_select("a", text: "2", count: 0)
@@ -784,6 +783,22 @@ class NamesControllerTest < FunctionalTestCase
       "#name_classification",
       { text: /#{:show_name_inherit_classification.l}/, count: 1 },
       "Classification area lacks a #{:show_name_inherit_classification.l} link"
+    )
+  end
+
+  def test_show_name_sensu_lato
+    name = names(:coprinus_sensu_lato)
+    assert(name.rank == "Genus" && name.author.match?(/sensu lato/) &&
+             name.classification.present?,
+           "Test needs Genus sensu lato with a Classification")
+
+    login
+    get(:show, params: { id: name.id })
+
+    assert_select(
+      "#name_classification",
+      { text: /#{:show_name_propagate_classification.l}/, count: 0 },
+      "Name sensu lato should not have propagate classification link"
     )
   end
 
