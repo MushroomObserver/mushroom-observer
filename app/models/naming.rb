@@ -145,7 +145,7 @@ class Naming < AbstractModel
   end
 
   # Send email notifications after creating or changing the Name.
-  def create_emails
+  def create_emails # rubocop:disable Metrics/MethodLength
     return unless @name_changed
 
     @name_changed = false

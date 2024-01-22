@@ -134,10 +134,6 @@ module Name::Taxonomy # rubocop:disable Metrics:ClassLength
   #    Fungi
   #    Eukarya
   #
-  def all_parents_old
-    parents_old(all: true)
-  end
-
   def all_parents
     parents(all: true)
   end
@@ -194,8 +190,13 @@ module Name::Taxonomy # rubocop:disable Metrics:ClassLength
   #    Letharia (First) Author
   #    Letharia (Another) One
   #
-  # rubocop:disable Metrics/MethodLength
-  def parents_old(all: false)
+  # NOTE: This method previously looked up each parent sequentially (from the
+  # classification string), running up to 7 separate queries of the Name table
+  # and slowing down the show_name page accordingly.
+  # It's been painstakingly refactored to batch those lookups and select the
+  # matches from a single set of results. Very time consuming!
+  # Now allows eager loading (interests) for the naming emails query.
+  def parents(all: false, includes: [])
     parents = []
 
     # Start with infrageneric and genus names.
@@ -207,56 +208,22 @@ module Name::Taxonomy # rubocop:disable Metrics:ClassLength
       words.pop
       next if name == text_name || name[-1] == "."
 
-      parent = Name.best_match_old(name)
+      parent = Name.best_match(name, includes)
       parents << parent if parent
       return [parent] if !all && parent && !parent.deprecated
     end
 
-    # Next grab the names out of the classification string.
-    lines = try(&:parse_classification) || []
-    lines.reverse_each do |(_line_rank, line_name)|
-      parent = Name.best_match_old(line_name)
-      parents << parent if parent
-      return [parent] if !all && !parent.deprecated
-    end
-
-    # Get rid of deprecated names unless all the results are deprecated.
-    parents.reject!(&:deprecated) unless parents.all?(&:deprecated)
-
-    # Return single parent as an array for backwards compatibility.
-    return parents if all
-    return [] unless parents.any?
-
-    [parents.first]
-  end
-
-  def parents(all: false)
-    parents = []
-
-    # Start with infrageneric and genus names.
-    # Get rid of quoted words and ssp., var., f., etc.
-    words = text_name.split - %w[group clade complex]
-    words.pop
-    until words.empty?
-      name = words.join(" ")
-      words.pop
-      next if name == text_name || name[-1] == "."
-
-      parent = Name.best_match(name)
-      parents << parent if parent
-      return [parent] if !all && parent && !parent.deprecated
-    end
     # Next grab the names out of the classification string.
     lines = try(&:parse_classification) || []
     reverse_names = lines.reverse.map { |(_rank, line_name)| line_name }
 
     if all
       # do the batch lookup.
-      parents += Name.best_matches_from_array(reverse_names)
+      parents += Name.best_matches_from_array(reverse_names, includes)
     else
       # try to find the next parent only
       reverse_names.each do |text_name|
-        parent = Name.best_match(text_name)
+        parent = Name.best_match(text_name, includes)
         return [parent] unless parent&.deprecated
       end
     end
@@ -270,7 +237,6 @@ module Name::Taxonomy # rubocop:disable Metrics:ClassLength
 
     [parents.first]
   end
-  # rubocop:enable Metrics/MethodLength
 
   # Returns an Array of Name's directly under this one.  Ignores misspellings,
   # but includes deprecated Name's.
@@ -500,50 +466,44 @@ module Name::Taxonomy # rubocop:disable Metrics:ClassLength
     # non-"sensu" names where possible, and finally picks the first one
     # arbitrarily where there is still ambiguity.  Useful if you just need a
     # name and it's not so critical that it be the exactly correct one.
-    # Refactored to do a single db lookup, rather than two.
-    def best_match_old(name)
-      matches = Name.with_correct_spelling.where(search_name: name)
-      return matches.first if matches.any?
+    def best_match(name, includes = [])
+      all = batch_lookup_all_matches(name, includes)
 
-      matches  = Name.with_correct_spelling.where(text_name: name)
-      accepted = matches.reject(&:deprecated)
-      matches  = accepted if accepted.any?
-      nonsensu = matches.reject { |match| match.author.start_with?("sensu ") }
-      matches  = nonsensu if nonsensu.any?
-      matches.first
+      best_match_accepted_or_nonsensu(name, all)
     end
 
-    def best_match(name)
-      all = Name.where(search_name: name).or(where(text_name: name)).
-            with_correct_spelling
+    # Does the above with a list (like parents) - does a single batch lookup,
+    # then loops over them and returns the matches
+    def best_matches_from_array(names, includes = [])
+      all = batch_lookup_all_matches(names, includes)
 
-      matches  = all.select { |match| match.search_name == name }
-      return matches.first if matches.any?
-
-      matches  = all.select { |match| match.text_name == name }
-      accepted = matches.reject(&:deprecated)
-      matches  = accepted if accepted.any?
-      nonsensu = matches.reject { |match| match.author.start_with?("sensu ") }
-      matches  = nonsensu if nonsensu.any?
-      matches.first
-    end
-
-    # take a list (like parents) and do a single batch lookup,
-    # then loop over them and return the matches
-    def best_matches_from_array(names)
-      all = Name.with_correct_spelling.where(text_name: names)
-
-      names.map do |name|
-        matches = all.select { |m| m.search_name == name }
-        unless matches.any?
-          matches = all.select { |m| m.text_name == name }
-          accepted = matches.reject(&:deprecated)
-          matches  = accepted if accepted.any?
-          nonsensu = matches.reject { |m| m.author.start_with?("sensu ") }
-          matches  = nonsensu if nonsensu.any?
-        end
-        matches.first
+      best = names.map do |name|
+        best_match_accepted_or_nonsensu(name, all)
       end
+      # must compact. best_match_accepted_or_nonsensu may return nil
+      best.compact
+    end
+
+    # Batch lookup of any name matching the given name or names (strings)
+    # Refactored to do a single db lookup, rather than two.
+    # Now allows includes, for batch lookup of Naming email interested parties
+    def batch_lookup_all_matches(name_or_names, includes = [])
+      Name.where(search_name: name_or_names).
+        or(Name.where(text_name: name_or_names)).with_correct_spelling.
+        includes(includes)
+    end
+
+    # NOTE: may return nil if no match
+    def best_match_accepted_or_nonsensu(name, all)
+      matches = all.select { |match| match.search_name == name }
+      unless matches.any?
+        matches  = all.select { |match| match.text_name == name }
+        accepted = matches.reject(&:deprecated)
+        matches  = accepted if accepted.any?
+        nonsensu = matches.reject { |match| match.author.start_with?("sensu ") }
+        matches  = nonsensu if nonsensu.any?
+      end
+      matches.first
     end
 
     # Parse the given +classification+ String, validate it, and reformat it so
@@ -562,6 +522,7 @@ module Name::Taxonomy # rubocop:disable Metrics:ClassLength
     #   Order: _Agaricales_\r\n
     #   Family: _Agaricaceae_\r\n
     #
+    # rubocop:disable Metrics/MethodLength
     def validate_classification(rank, text)
       result = text
       if text
@@ -619,6 +580,7 @@ module Name::Taxonomy # rubocop:disable Metrics:ClassLength
       end
       result
     end
+    # rubocop:enable Metrics/MethodLength
 
     # Parses the Classification String to eturns an Array of pairs of values.
     #

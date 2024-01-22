@@ -7,6 +7,11 @@ module Observations
     before_action :login_required
     before_action :pass_query_params
 
+    # Bullet wants us to eager load interests on taxa, which is loaded in
+    # Naming#create_emails
+    around_action :skip_bullet, if: -> { defined?(Bullet) },
+                                only: [:create, :update]
+
     # The route for the namings table, an index of this obs' namings
     def index
       @observation = find_or_goto_index(Observation, params[:observation_id])
