@@ -191,6 +191,41 @@ module Name::Taxonomy
   #    Letharia (Another) One
   #
   # rubocop:disable Metrics/MethodLength
+  def parents_old(all: false)
+    parents = []
+
+    # Start with infrageneric and genus names.
+    # Get rid of quoted words and ssp., var., f., etc.
+    words = text_name.split - %w[group clade complex]
+    words.pop
+    until words.empty?
+      name = words.join(" ")
+      words.pop
+      next if name == text_name || name[-1] == "."
+
+      parent = Name.best_match(name)
+      parents << parent if parent
+      return [parent] if !all && parent && !parent.deprecated
+    end
+
+    # Next grab the names out of the classification string.
+    lines = try(&:parse_classification) || []
+    lines.reverse_each do |(_line_rank, line_name)|
+      parent = Name.best_match(line_name)
+      parents << parent if parent
+      return [parent] if !all && !parent.deprecated
+    end
+
+    # Get rid of deprecated names unless all the results are deprecated.
+    parents.reject!(&:deprecated) unless parents.all?(&:deprecated)
+
+    # Return single parent as an array for backwards compatibility.
+    return parents if all
+    return [] unless parents.any?
+
+    [parents.first]
+  end
+
   def parents(all: false)
     parents = []
 
