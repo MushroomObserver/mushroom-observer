@@ -461,6 +461,8 @@
   confidence_level: confidence level
   CONFIDENCE_LEVELS: Confidence Levels
   confidence_levels: confidence levels
+  CONSTRAINT_VIOLATIONS: Constraint Violations
+  constraint_violations: constraint violations
   COPYRIGHT_HOLDER: Copyright Holder
   copyright_holder: copyright holder
   COPYRIGHT_HOLDERS: Copyright Holders
