@@ -11,5 +11,13 @@ module Projects
     def index
       return unless find_project!
     end
+
+    #########
+
+    private
+
+    def find_project!
+      @project = find_or_goto_index(Project, params[:project_id].to_s)
+    end
   end
 end
