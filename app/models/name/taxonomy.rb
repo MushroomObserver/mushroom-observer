@@ -192,11 +192,11 @@ module Name::Taxonomy # rubocop:disable Metrics:ClassLength
   #    Letharia (Another) One
   #
   # NOTE: This method previously "climbed the tree", looking up each parent
-  # in the classification string sequentially, running up to 7 separate
-  # queries of the Name table and slowing down the show_name page by about 1s.
+  # in the classification string sequentially, running up to 14 new queries
+  # of the Name table and slowing down the show_name page noticeably.
   # It's been painstakingly refactored to batch those lookups and select the
   # matches from a single set of results. Very time consuming!
-  # Bonus for the naming emails query:
+  # Bonus for the naming emails query (doesn't work yet, though):
   # Now allows eager loading (interests), plus adding self and "Lichen".
   def parents(all: false, add_self: false, add_lichen: false, includes: [])
     parents = []
