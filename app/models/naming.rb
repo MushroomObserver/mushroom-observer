@@ -145,7 +145,7 @@ class Naming < AbstractModel
   end
 
   # Send email notifications after creating or changing the Name.
-  def create_emails
+  def create_emails # rubocop:disable Metrics/MethodLength
     return unless @name_changed
 
     @name_changed = false
@@ -155,6 +155,10 @@ class Naming < AbstractModel
     taxa = name.approved_name.all_parents
     taxa.push(name)
     taxa.push(Name.find_by(text_name: "Lichen")) if name.is_lichen?
+    # taxa = name.approved_name.all_parents(
+    #   includes: [:interests], add_self: true, add_lichen: name.is_lichen?
+    # )
+
     done_user = {}
     taxa.each do |taxon|
       NameTracker.where(name: taxon).includes(:user).find_each do |n|
