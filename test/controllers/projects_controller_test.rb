@@ -135,6 +135,8 @@ class ProjectsControllerTest < FunctionalTestCase
 
     login(user.login)
     get(:show, params: { id: project.id })
+
+    assert_select("#project_summary")
   end
 
   def test_index
