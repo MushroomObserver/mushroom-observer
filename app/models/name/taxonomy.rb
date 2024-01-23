@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Name::Taxonomy # rubocop:disable Metrics:ClassLength
+module Name::Taxonomy
   # When we `include` a module, the way to add class methods is like this:
   def self.included(base)
     base.extend(ClassMethods)
