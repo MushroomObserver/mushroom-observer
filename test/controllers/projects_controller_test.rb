@@ -129,14 +129,17 @@ class ProjectsControllerTest < FunctionalTestCase
 
   def test_show_project_with_constraint_violations
     project = projects(:falmouth_2023_09_project)
-    assert(project.count_violations.positive?,
+    violations_count = project.count_violations
+    assert(violations_count.positive?,
            "Test needs Project fixture with constraint violations")
     user = project.user
+    expect =
+      "#project_summary a[href = '#{project_violations_path(project)}']"
 
     login(user.login)
     get(:show, params: { id: project.id })
 
-    assert_select("#project_summary", project_violations_path(project))
+    assert_select(expect, true, "Page is missing a link to violations")
   end
 
   def test_index
