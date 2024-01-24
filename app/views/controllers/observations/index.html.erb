@@ -6,6 +6,8 @@ add_sorter(@query, observations_index_sorts)
 @container = :full
 
 flash_error(@error) if @error && @objects.empty?
+# matrix box has two versions (image vote UI, or no)
+user = User.current ? "logged_in" : "no_user"
 %>
 
 <% if @suggest_alternate_spellings && @objects.empty?
@@ -36,5 +38,14 @@ flash_error(@error) if @error && @objects.empty?
 <% end %>
 
 <%= paginate_block(@pages) do %>
-  <%= matrix_table(objects: @objects, cached: true) %>
+  <% matrix_table do %>
+    <% @objects.each do |object| %>
+      <%# if updating matrix_box html or that of descendant partials,
+          change version to expire cache, here and in controller %>
+      <% cache(["v1", "obs_matrix_box", object.id, object.updated_at, user],
+               skip_digest: true) do %>
+        <%= render(partial: "shared/matrix_box", locals: { object: object }) %>
+      <% end %>
+    <% end %>
+  <% end %>
 <% end %>
