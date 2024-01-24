@@ -946,6 +946,7 @@ class ApplicationController < ActionController::Base
 
     Query.safe_find(id)
   end
+  helper_method :query_from_session
 
   # Get instance of Query which is being passed to subsequent pages.
   def passed_query

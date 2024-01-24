@@ -9,6 +9,8 @@ classes = {
   mobile_only: "visible-xs",
   desktop_only: "hidden-xs"
 }
+# current_query = passed_query || query_from_session
+# current_query_record = current_query&.record || "no_query"
 %>
 
 <div id="navigation">
@@ -31,19 +33,20 @@ classes = {
       <% end %>
     <% end %>
 
-    <%# Cache customized for the user instance, and their query. %>
-    <% cache([@user, passed_query]) do %>
-      <% if @user %>
-        <%= render(partial: "application/sidebar/user",
-                    locals: { classes: classes }) %>
-      <% end %>
-
-      <%= render(partial: "application/sidebar/observations",
+    <%# Cache obs/spl should be customized for current User and QueryRecord
+        (i.e. cache invalidated if query record updated, or new ID). %>
+    <%# cache([@user, current_query_record]) do %>
+    <% if @user %>
+      <%= render(partial: "application/sidebar/user",
                   locals: { classes: classes }) %>
-
-      <%= render(partial: "application/sidebar/species_lists",
-                  locals: { classes: classes }) if @user %>
     <% end %>
+
+    <%= render(partial: "application/sidebar/observations",
+                locals: { classes: classes }) %>
+
+    <%= render(partial: "application/sidebar/species_lists",
+                locals: { classes: classes }) if @user %>
+    <%# end %>
 
     <% cache([user_status_string, "links"]) do %>
       <%= render(partial: "application/sidebar/latest",
