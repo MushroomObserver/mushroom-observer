@@ -31,8 +31,8 @@ classes = {
       <% end %>
     <% end %>
 
-    <%# Cache customized for the user instance. %>
-    <% cache(@user) do %>
+    <%# Cache customized for the user instance, and their query. %>
+    <% cache([@user, passed_query]) do %>
       <% if @user %>
         <%= render(partial: "application/sidebar/user",
                     locals: { classes: classes }) %>
