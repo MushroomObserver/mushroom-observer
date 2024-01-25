@@ -36,14 +36,5 @@ flash_error(@error) if @error && @objects.empty?
 <% end %>
 
 <%= paginate_block(@pages) do %>
-  <%# simpler, but seems these are not the same keys as below.%>
-  <%#= matrix_table(objects: @objects, cached: -> object { [object, user] }) %>
-
-  <%= matrix_table do %>
-    <% @objects.each do |object| %>
-      <% cache([object, logged_in_status]) do %>
-        <%= render(partial: "shared/matrix_box", locals: { object: object }) %>
-      <% end %>
-    <% end %>
-  <% end %>
+  <%= matrix_table(objects: @objects, cached: true) %>
 <% end %>

@@ -11,13 +11,7 @@ flash_error(@error) if @error && @objects.empty?
 </div>
 
 <%= paginate_block(@pages) do %>
-  <%= matrix_table do %>
-    <% @objects.each do |object| %>
-      <% cache([object, logged_in_status]) do %>
-        <%= render(partial: "shared/matrix_box", locals: { object: object }) %>
-      <% end %>
-    <% end %>
-  <% end %>
+  <%= matrix_table(objects: @objects, identify: true, cached: true) %>
 <% end %>
 
 <!--AJAX SAVING VOTE MESSAGE-->

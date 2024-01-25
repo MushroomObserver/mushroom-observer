@@ -15,6 +15,8 @@ module MatrixBoxHelper
       ) do
         if block
           capture(&block)
+        elsif cached && args[:objects]
+          render_cached_matrix_boxes(args[:objects])
         else
           render(partial: partial,
                  locals: args.except(:objects, :as, :partial, :cached),
@@ -23,6 +25,15 @@ module MatrixBoxHelper
       end,
       tag.div("", class: "clearfix")
     ].safe_join
+  end
+
+  def render_cached_matrix_boxes(objects)
+    # matrix box has two versions (image vote UI, or no)
+    objects.each do |object|
+      cache([object, logged_in_status]) do
+        concat(render(partial: "shared/matrix_box", locals: { object: object }))
+      end
+    end
   end
 
   # Use this helper to produce a standard li.matrix-box with an object id.
