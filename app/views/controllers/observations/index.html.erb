@@ -6,8 +6,6 @@ add_sorter(@query, observations_index_sorts)
 @container = :full
 
 flash_error(@error) if @error && @objects.empty?
-# matrix box has two versions (image vote UI, or no)
-user = User.current ? "logged_in" : "no_user"
 %>
 
 <% if @suggest_alternate_spellings && @objects.empty?
@@ -43,7 +41,7 @@ user = User.current ? "logged_in" : "no_user"
 
   <%= matrix_table do %>
     <% @objects.each do |object| %>
-      <% cache([object, user]) do %>
+      <% cache([object, logged_in_status]) do %>
         <%= render(partial: "shared/matrix_box", locals: { object: object }) %>
       <% end %>
     <% end %>

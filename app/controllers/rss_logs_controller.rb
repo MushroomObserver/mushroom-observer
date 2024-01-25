@@ -81,7 +81,7 @@ class RssLogsController < ApplicationController
 
     args = {
       action: :index,
-      matrix: true,
+      matrix: true, cache: true,
       include: rss_log_includes
     }.merge(args)
 

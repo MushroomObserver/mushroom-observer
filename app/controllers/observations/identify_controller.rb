@@ -63,7 +63,7 @@ module Observations
 
     def show_selected_results(query)
       args = {
-        matrix: true,
+        matrix: true, cache: true,
         include: observation_identify_index_includes
       }
 
