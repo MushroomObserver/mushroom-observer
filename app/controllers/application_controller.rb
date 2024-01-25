@@ -954,6 +954,15 @@ class ApplicationController < ActionController::Base
   end
   helper_method :passed_query
 
+  # TODO: If we're going to cache user stuff that depends on their present q,
+  # we'll need a helper to make the current QueryRecord (not just the id)
+  # available to templates as an ApplicationController ivar. Something like:
+  #
+  # def current_query_record
+  #   current_query = passed_query || query_from_session # could both be nil!
+  #   current_query_record = current_query&.record || "no_query"
+  # end
+
   # Return query parameter(s) necessary to pass query information along to
   # the next request. *NOTE*: This method is available to views.
   def query_params(query = nil)
@@ -1006,8 +1015,6 @@ class ApplicationController < ActionController::Base
   helper_method :get_query_param
 
   # NOTE: these two methods add q: param to urls built from controllers/actions.
-  # Seem to be dodgy with Rails routes path helpers. If encountering problems,
-  # try redirect_to(whatever_objects_path(q: get_query_param)) instead.
   def redirect_with_query(args, query = nil)
     redirect_to(add_query_param(args, query))
   end
