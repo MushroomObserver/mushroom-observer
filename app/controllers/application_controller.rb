@@ -1377,7 +1377,7 @@ class ApplicationController < ActionController::Base
     if (@num_results == 1) && !args[:always_index]
       show_action_redirect(query)
     else
-      calc_pages(query, args)
+      calc_pages_and_objects(query, args)
       if block_given?
         @extra_data = @objects.each_with_object({}) do |object, data|
           row = yield(object)
@@ -1446,7 +1446,7 @@ class ApplicationController < ActionController::Base
                         id: query.result_ids.first)
   end
 
-  def calc_pages(query, args)
+  def calc_pages_and_objects(query, args)
     number_arg = args[:number_arg] || :page
     @pages = if args[:letters]
                paginate_letters(args[:letter_arg] || :letter, number_arg,
@@ -1473,15 +1473,46 @@ class ApplicationController < ActionController::Base
   end
 
   def find_objects(query, args)
+    caching = args[:cache] || false
     include = args[:include] || nil
-    # Instantiate correct subset.
     logger.warn("QUERY starting: #{query.query.inspect}")
     @timer_start = Time.current
-    @objects = query.paginate(@pages, include: include)
+
+    # Instantiate correct subset, with or without includes.
+    @objects = if caching
+                 objects_with_only_needed_eager_loads(query, include)
+               else
+                 query.paginate(@pages, include: include)
+               end
+
     @timer_end = Time.current
     logger.warn("QUERY finished: model=#{query.model}, " \
                 "flavor=#{query.flavor}, params=#{query.params.inspect}, " \
                 "time=#{(@timer_end - @timer_start).to_f}")
+  end
+
+  # If caching, only uncached objects need to eager_load the includes
+  def objects_with_only_needed_eager_loads(query, include)
+    user = User.current ? "logged_in" : "no_user"
+    locale = I18n.locale
+    objects_simple = query.paginate(@pages)
+    ids_to_eager_load = objects_simple.reject do |obj|
+      object_fragment_exist?(obj, user, locale)
+    end.pluck(:id)
+    # now get the heavy loaded instances:
+    objects_eager = query.model.where(id: ids_to_eager_load).includes(include)
+    # our Array extension: collates new instances with old, in original order
+    objects_simple.collate_new_instances(objects_eager)
+  end
+
+  # Check if a cached partial exists for this object.
+  # digest_path_from_template from ActionView::Helpers::CacheHelper :nodoc:
+  # https://stackoverflow.com/a/77862353/3357635
+  def object_fragment_exist?(obj, user, locale)
+    template = lookup_context.find(action_name, lookup_context.prefixes)
+    digest_path = helpers.digest_path_from_template(template)
+
+    fragment_exist?([digest_path, obj, user, locale])
   end
 
   def show_index_render(args)
