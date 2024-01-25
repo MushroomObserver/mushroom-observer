@@ -1471,15 +1471,16 @@ class ApplicationController < ActionController::Base
     @timer_start = Time.current
 
     # Instantiate correct subset, with or without includes.
+    # If caching, only uncached objects need to eager_load the includes
     if caching
-      obj_without_associations = query.paginate(@pages)
-      ids_needing_associations = obj_without_associations.select do |obj|
-        object_fragment_exist?(obj)
-      end.pluck(:id)
-      obj_with_associations = Observation.where(id: ids_needing_associations).
-                              includes(include)
-      @objects = obj_without_associations.
-                 collate_new_instances(obj_with_associations)
+      user = User.current ? "logged_in" : "no_user"
+      locale = specified_locale
+      objects_simple = query.paginate(@pages)
+      ids_to_eager_load = objects_simple.reject { |obj|
+        object_fragment_exist?(obj, user, locale)
+      }.pluck(:id)
+      objects_eager = Observation.where(id: ids_to_eager_load).includes(include)
+      @objects = objects_simple.collate_new_instances(objects_eager)
     else
       @objects = query.paginate(@pages, include: include)
     end
@@ -1491,11 +1492,11 @@ class ApplicationController < ActionController::Base
   end
 
   # Check if a cached partial exists for this object.
-  def object_fragment_exist?(obj)
+  # digest_path_from_template is a Rails :nodoc: method of ActionView::Cache
+  # https://stackoverflow.com/a/77862353/3357635
+  def object_fragment_exist?(obj, user, locale)
     template = lookup_context.find(action_name, lookup_context.prefixes)
     digest_path = helpers.digest_path_from_template(template)
-    user = User.current ? "logged_in" : "no_user"
-    locale = specified_locale
 
     fragment_exist?([digest_path, obj, user, locale])
   end
