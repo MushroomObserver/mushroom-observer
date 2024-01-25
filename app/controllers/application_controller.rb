@@ -1491,8 +1491,8 @@ class ApplicationController < ActionController::Base
                 "time=#{(@timer_end - @timer_start).to_f}")
   end
 
-  # Check if a cached partial exists for this object.
-  # digest_path_from_template is a Rails :nodoc: method of ActionView::Cache
+  # Check if a cached partial exists for this object. digest_path_from_template
+  # is an undocumented method of ActionView::Helpers::CacheHelper
   # https://stackoverflow.com/a/77862353/3357635
   def object_fragment_exist?(obj, user, locale)
     template = lookup_context.find(action_name, lookup_context.prefixes)
