@@ -946,12 +946,22 @@ class ApplicationController < ActionController::Base
 
     Query.safe_find(id)
   end
+  helper_method :query_from_session
 
   # Get instance of Query which is being passed to subsequent pages.
   def passed_query
     Query.safe_find(query_params[:q].to_s.dealphabetize)
   end
   helper_method :passed_query
+
+  # TODO: If we're going to cache user stuff that depends on their present q,
+  # we'll need a helper to make the current QueryRecord (not just the id)
+  # available to templates as an ApplicationController ivar. Something like:
+  #
+  # def current_query_record
+  #   current_query = passed_query || query_from_session # could both be nil!
+  #   current_query_record = current_query&.record || "no_query"
+  # end
 
   # Return query parameter(s) necessary to pass query information along to
   # the next request. *NOTE*: This method is available to views.
@@ -1005,8 +1015,6 @@ class ApplicationController < ActionController::Base
   helper_method :get_query_param
 
   # NOTE: these two methods add q: param to urls built from controllers/actions.
-  # Seem to be dodgy with Rails routes path helpers. If encountering problems,
-  # try redirect_to(whatever_objects_path(q: get_query_param)) instead.
   def redirect_with_query(args, query = nil)
     redirect_to(add_query_param(args, query))
   end
