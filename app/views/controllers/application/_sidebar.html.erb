@@ -34,10 +34,8 @@ classes = {
     <%# If caching obs/spl, this should be keyed for both User and QueryRecord
         (i.e. cache invalidated if query record updated, or new ID). %>
     <%# cache([@user, current_query_record]) do %>
-    <% if @user %>
-      <%= render(partial: "application/sidebar/user",
-                  locals: { classes: classes }) %>
-    <% end %>
+    <%= render(partial: "application/sidebar/user",
+                locals: { classes: classes }) if @user %>
 
     <%= render(partial: "application/sidebar/observations",
                 locals: { classes: classes }) %>
