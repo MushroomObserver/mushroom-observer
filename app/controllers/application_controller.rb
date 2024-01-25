@@ -1491,8 +1491,9 @@ class ApplicationController < ActionController::Base
     ids_to_eager_load = objects_simple.reject do |obj|
       object_fragment_exist?(obj, user, locale)
     end.pluck(:id)
-    objects_eager = Observation.where(id: ids_to_eager_load).includes(include)
-    # our Array extension, collates new instances in original order
+    # now get the heavy loaded instances:
+    objects_eager = query.model.where(id: ids_to_eager_load).includes(include)
+    # our Array extension: collates new instances with old, in original order
     objects_simple.collate_new_instances(objects_eager)
   end
 
