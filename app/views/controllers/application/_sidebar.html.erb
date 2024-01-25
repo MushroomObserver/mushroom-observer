@@ -20,7 +20,7 @@ classes = {
 
   <div class="<%= classes[:wrapper] %>" data-controller="nav-active">
 
-    <%# Cache depends only on user status (logged-in? admin?) %>
+    <%# This cache depends only on user status (logged-in? admin?) %>
     <% cache([user_status_string, "login"]) do %>
       <% if in_admin_mode? %>
         <%= render(partial: "application/sidebar/admin",
@@ -31,7 +31,7 @@ classes = {
       <% end %>
     <% end %>
 
-    <%# Cache obs/spl should be customized for current User and QueryRecord
+    <%# If caching obs/spl, this should be keyed for both User and QueryRecord
         (i.e. cache invalidated if query record updated, or new ID). %>
     <%# cache([@user, current_query_record]) do %>
     <% if @user %>
@@ -46,6 +46,7 @@ classes = {
                 locals: { classes: classes }) if @user %>
     <%# end %>
 
+    <%# This cache depends only on user status (logged-in? admin?) %>
     <% cache([user_status_string, "links"]) do %>
       <%= render(partial: "application/sidebar/latest",
                   locals: { classes: classes }) %>
