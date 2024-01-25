@@ -40,7 +40,7 @@ user = User.current ? "logged_in" : "no_user"
 <%= paginate_block(@pages) do %>
   <%# matrix_table(objects: @objects, cached: true) %>
 
-  <% matrix_table do %>
+  <%= matrix_table do %>
     <% @objects.each do |object| %>
       <%# if updating matrix_box html or that of descendant partials,
           change version to expire cache, here and in controller %>
