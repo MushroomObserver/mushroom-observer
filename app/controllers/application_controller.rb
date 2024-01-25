@@ -1471,19 +1471,11 @@ class ApplicationController < ActionController::Base
     @timer_start = Time.current
 
     # Instantiate correct subset, with or without includes.
-    # If caching, only uncached objects need to eager_load the includes
-    if caching
-      user = User.current ? "logged_in" : "no_user"
-      locale = specified_locale
-      objects_simple = query.paginate(@pages)
-      ids_to_eager_load = objects_simple.reject { |obj|
-        object_fragment_exist?(obj, user, locale)
-      }.pluck(:id)
-      objects_eager = Observation.where(id: ids_to_eager_load).includes(include)
-      @objects = objects_simple.collate_new_instances(objects_eager)
-    else
-      @objects = query.paginate(@pages, include: include)
-    end
+    @objects = if caching
+                 objects_with_only_needed_eager_loads(query, include)
+               else
+                 query.paginate(@pages, include: include)
+               end
 
     @timer_end = Time.current
     logger.warn("QUERY finished: model=#{query.model}, " \
@@ -1491,8 +1483,21 @@ class ApplicationController < ActionController::Base
                 "time=#{(@timer_end - @timer_start).to_f}")
   end
 
-  # Check if a cached partial exists for this object. digest_path_from_template
-  # is an undocumented method of ActionView::Helpers::CacheHelper
+  # If caching, only uncached objects need to eager_load the includes
+  def objects_with_only_needed_eager_loads(query, include)
+    user = User.current ? "logged_in" : "no_user"
+    locale = I18n.locale
+    objects_simple = query.paginate(@pages)
+    ids_to_eager_load = objects_simple.reject do |obj|
+      object_fragment_exist?(obj, user, locale)
+    end.pluck(:id)
+    objects_eager = Observation.where(id: ids_to_eager_load).includes(include)
+    # our Array extension, collates new instances in original order
+    objects_simple.collate_new_instances(objects_eager)
+  end
+
+  # Check if a cached partial exists for this object.
+  # digest_path_from_template from ActionView::Helpers::CacheHelper :nodoc:
   # https://stackoverflow.com/a/77862353/3357635
   def object_fragment_exist?(obj, user, locale)
     template = lookup_context.find(action_name, lookup_context.prefixes)
