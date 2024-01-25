@@ -99,15 +99,15 @@ class RssLogsController < ApplicationController
   # rss_logs now requires a logged in user
   def rss_log_includes
     {
-      article: :user,
-      glossary_term: :user,
-      location: :user,
-      name: :user,
-      observation: [
-        :location, :name, :user, observation_matrix_box_image_includes
-      ],
-      project: [:location, :user],
-      species_list: [:location, :user]
+      # article: :user,
+      # glossary_term: :user,
+      # location: :user,
+      # name: :user,
+      # observation: [
+      #   :location, :name, :user, observation_matrix_box_image_includes
+      # ],
+      # project: [:location, :user],
+      # species_list: [:location, :user]
     }
   end
 end
