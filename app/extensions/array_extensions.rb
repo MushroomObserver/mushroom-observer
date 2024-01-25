@@ -36,9 +36,9 @@ class Array
   # Useful for fragment caching, where only the uncached instances need
   # eager-loaded associations.
   def collate_new_instances(new_objects)
-    map_id_to_new_object = new_objects.inject({}) do |obj, map|
-      map[obj.id] = obj
-    end
-    new_objects.map { |obj| map_id_to_new_object[obj.id] || obj }
+    map_id_to_new_object = {}
+    new_objects.map { |obj| map_id_to_new_object[obj.id] = obj }
+
+    map { |obj| map_id_to_new_object[obj.id] || obj }
   end
 end
