@@ -6,6 +6,8 @@ module MatrixBoxHelper
     partial = args[:partial] || "shared/matrix_box"
     as = args[:as] || :object
     cached = args[:cached] || false
+    objects = args[:objects] || []
+    locals = args.except(:objects, :as, :partial, :cached)
 
     [
       tag.ul(
@@ -15,23 +17,23 @@ module MatrixBoxHelper
       ) do
         if block
           capture(&block)
-        elsif cached && args[:objects]
-          render_cached_matrix_boxes(args[:objects])
+        elsif cached && objects
+          render_cached_matrix_boxes(objects, locals)
         else
-          render(partial: partial,
-                 locals: args.except(:objects, :as, :partial, :cached),
-                 collection: args[:objects], as: as, cached: cached)
+          render(partial: partial, locals: locals,
+                 collection: objects, as: as)
         end
       end,
       tag.div("", class: "clearfix")
     ].safe_join
   end
 
-  def render_cached_matrix_boxes(objects)
+  def render_cached_matrix_boxes(objects, locals)
     # matrix box has two versions (image vote UI, or no)
     objects.each do |object|
       cache([object, logged_in_status]) do
-        concat(render(partial: "shared/matrix_box", locals: { object: object }))
+        concat(render(partial: "shared/matrix_box",
+                      locals: { object: object }.merge(locals)))
       end
     end
   end
