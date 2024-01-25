@@ -1369,7 +1369,7 @@ class ApplicationController < ActionController::Base
     if (@num_results == 1) && !args[:always_index]
       show_action_redirect(query)
     else
-      calc_pages(query, args)
+      calc_pages_and_objects(query, args)
       if block_given?
         @extra_data = @objects.each_with_object({}) do |object, data|
           row = yield(object)
@@ -1438,7 +1438,7 @@ class ApplicationController < ActionController::Base
                         id: query.result_ids.first)
   end
 
-  def calc_pages(query, args)
+  def calc_pages_and_objects(query, args)
     number_arg = args[:number_arg] || :page
     @pages = if args[:letters]
                paginate_letters(args[:letter_arg] || :letter, number_arg,
@@ -1465,15 +1465,39 @@ class ApplicationController < ActionController::Base
   end
 
   def find_objects(query, args)
+    caching = args[:cache] || false
     include = args[:include] || nil
-    # Instantiate correct subset.
     logger.warn("QUERY starting: #{query.query.inspect}")
     @timer_start = Time.current
-    @objects = query.paginate(@pages, include: include)
+
+    # Instantiate correct subset, with or without includes.
+    if caching
+      obj_without_associations = query.paginate(@pages)
+      ids_needing_associations = obj_without_associations.select do |obj|
+        object_fragment_exist?(obj)
+      end.pluck(:id)
+      obj_with_associations = Observation.where(id: ids_needing_associations).
+                              includes(include)
+      @objects = obj_without_associations.
+                 collate_new_instances(obj_with_associations)
+    else
+      @objects = query.paginate(@pages, include: include)
+    end
+
     @timer_end = Time.current
     logger.warn("QUERY finished: model=#{query.model}, " \
                 "flavor=#{query.flavor}, params=#{query.params.inspect}, " \
                 "time=#{(@timer_end - @timer_start).to_f}")
+  end
+
+  # Check if a cached partial exists for this object.
+  def object_fragment_exist?(obj)
+    template = lookup_context.find(action_name, lookup_context.prefixes)
+    digest_path = helpers.digest_path_from_template(template)
+    user = User.current ? "logged_in" : "no_user"
+    locale = specified_locale
+
+    fragment_exist?([digest_path, obj, user, locale])
   end
 
   def show_index_render(args)

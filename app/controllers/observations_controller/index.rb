@@ -203,6 +203,8 @@ class ObservationsController
       when "name", "reverse_name"
         args[:letters] = "names.sort_name"
       end
+      # We always want cached matrix boxes for observations if possible.
+      args[:cache] = true
       args
     end
 

@@ -38,14 +38,26 @@ user = User.current ? "logged_in" : "no_user"
 <% end %>
 
 <%= paginate_block(@pages) do %>
+  <%# matrix_table(objects: @objects, cached: true) %>
+
   <% matrix_table do %>
     <% @objects.each do |object| %>
       <%# if updating matrix_box html or that of descendant partials,
           change version to expire cache, here and in controller %>
-      <% cache(["v1", "obs_matrix_box", object.id, object.updated_at, user],
-               skip_digest: true) do %>
+      <% cache([object, user]) do %>
         <%= render(partial: "shared/matrix_box", locals: { object: object }) %>
       <% end %>
     <% end %>
   <% end %>
+
+  <%# matrix_table do %>
+    <%# @objects.each do |object| %>
+      <%# if updating matrix_box html or that of descendant partials,
+          change version to expire cache, here and in controller %>
+      <%# cache(["v1", "obs_matrix_box", object.id, object.updated_at, user],
+               skip_digest: true) do %>
+        <%# render(partial: "shared/matrix_box", locals: { object: object }) %>
+      <%# end %>
+    <%# end %>
+  <%# end %>
 <% end %>
