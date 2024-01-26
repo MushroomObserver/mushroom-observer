@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_01_26_063829) do
+ActiveRecord::Schema[7.1].define(version: 2024_01_26_071823) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -734,6 +734,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_26_063829) do
     t.integer "observation_id", default: 0
     t.boolean "favorite"
     t.float "value"
+    t.index ["naming_id"], name: "naming_index"
   end
 
 end
