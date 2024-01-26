@@ -63,7 +63,7 @@ MushroomObserver::Application.configure do
   config.action_controller.perform_caching = true
   # debugging: log fragment reads/writes
   # (it will show [cache hit] even if set to false)
-  config.action_controller.enable_fragment_cache_logging = false
+  config.action_controller.enable_fragment_cache_logging = true
 
   # Enable Rack::Cache to put a simple HTTP cache in front of your application
   # Add `rack-cache` to your Gemfile before enabling this.
@@ -134,7 +134,7 @@ MushroomObserver::Application.configure do
   # personally identifiable information (PII). If you want to log everything,
   # set the level to "debug".
   # config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
-  config.log_level = :info
+  config.log_level = :debug
 
   # Disable automatic flushing of the log to improve performance.
   # config.autoflush_log = false
