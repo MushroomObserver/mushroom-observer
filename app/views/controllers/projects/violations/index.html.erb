@@ -1,11 +1,16 @@
 <%
-add_page_title(link_to_object(@project).t + ", " + :index_violations_title.t)
+add_page_title(link_to_object(@project).t + ", " + :violations_index_title.t)
 @container = :wide
-# title & number of project
-# "Constraints"
-# Dates
-# Locality
-# lat/lon
-# buttons to remove checked Obss, remove all listed Obss
+# TODO:
 # list of Obss with checkboxes
+# buttons to remove checked Obss, remove all listed Obss
 %>
+
+<div id="constraints_summary">
+  <p><b><%= :CONSTRAINTS.l %></b></p>
+  <p><%= "#{:DATES.l}: #{@project.date_range}" %></p>
+  <p><%= "N-S: #{@project.location.north} to #{@project.location.south}; " +
+         "W-E: #{@project.location.west} to #{@project.location.east} " +
+         "(#{@project.location.name})"
+  %></p>
+</div>

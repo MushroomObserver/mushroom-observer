@@ -3245,10 +3245,7 @@
 
   # project/violations/index
   violations_index_title: "[:CONSTRAINT_VIOLATIONS]"
-  violations_any: "[form_projects_any]"
-  violations_date_range: "[:form_projects_date_range]"
-  violations_locality: [:LOCALITY]
-  violations_lat_lon: Lat/Lon
+
   violations_violations: Observations Violating Constraints
 
   # users/by_name
