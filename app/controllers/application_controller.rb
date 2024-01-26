@@ -354,10 +354,13 @@ class ApplicationController < ActionController::Base
     User.current = nil
   end
 
+  # Save a lookup of the mrtg stats "user".
+  MRTG_USER_ID = 164054
+
   def try_user_autologin(user_from_session)
     if Rails.env.production? && request.remote_ip == "127.0.0.1"
       # Request from the server itself, MRTG needs to log in to test page loads.
-      login_valid_user(User.find_by(login: "mrtg"))
+      login_valid_user(User.find(id: MRTG_USER_ID))
     elsif user_verified_and_allowed?(user = user_from_session)
       # User was already logged in.
       refresh_logged_in_user_instance(user)
@@ -384,7 +387,7 @@ class ApplicationController < ActionController::Base
 
   def refresh_logged_in_user_instance(user)
     @user = user
-    @user.reload
+    # @user.reload
   end
 
   def login_valid_user(user)
@@ -528,8 +531,8 @@ class ApplicationController < ActionController::Base
     user
   end
 
-  # Retrieve the User from session.  Returns User object or nil.  (Does not
-  # check verified status or anything.)
+  # Retrieve the User from session.  Returns freshly loaded User object or nil.
+  # (Does not check verified status or anything.)
   def session_user
     User.safe_find(session[:user_id])
   end

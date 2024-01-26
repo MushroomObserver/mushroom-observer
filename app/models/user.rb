@@ -1126,8 +1126,8 @@ class User < AbstractModel
   }
 
   def user_requirements
-    user_login_requirements
-    user_password_requirements
+    user_login_requirements if new_record? || login_changed?
+    user_password_requirements if new_record? || password_changed?
     user_other_requirements
   end
 
@@ -1141,6 +1141,7 @@ class User < AbstractModel
     end
   end
 
+  # This is a pricey lookup, avoid if not changing login
   def login_already_taken?
     other = User.find_by(login: login)
     other && other.id != id
