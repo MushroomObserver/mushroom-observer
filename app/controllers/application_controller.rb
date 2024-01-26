@@ -361,9 +361,9 @@ class ApplicationController < ActionController::Base
     if Rails.env.production? && request.remote_ip == "127.0.0.1"
       # Request from the server itself, MRTG needs to log in to test page loads.
       login_valid_user(User.find(id: MRTG_USER_ID))
-    elsif user_verified_and_allowed?(user = user_from_session)
+    elsif user_verified_and_allowed?(user_from_session)
       # User was already logged in.
-      refresh_logged_in_user_instance(user)
+      @user = user_from_session
     elsif user_verified_and_allowed?(user = validate_user_in_autologin_cookie)
       # User had "remember me" cookie set.
       login_valid_user(user)
@@ -383,11 +383,6 @@ class ApplicationController < ActionController::Base
                   (split[1] == user.auth_code)
 
     user
-  end
-
-  def refresh_logged_in_user_instance(user)
-    @user = user
-    # @user.reload
   end
 
   def login_valid_user(user)
