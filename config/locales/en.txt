@@ -244,6 +244,7 @@
   comment: comment
   COMMENTS: Comments
   comments: comments
+  CONSTRAINTS: Constraints
   CONTRIBUTORS: Contributors
   DESCRIPTION: Description
   description: description
@@ -3177,6 +3178,13 @@
   change_user_bonuses: Award Bonus
   change_user_bonuses_help: "List one bonus per line, each specifying a number of points and reason, like this:\n\n10000 German translations\n50000 Expert in hypogeous fungi\n\n\nThese will appear on the show_user page below the usual contribution scores. Keep the reasons short or it might mess up the formatting of the table on that page."
 
+  # observer/refresh_vote_cache
+  refresh_vote_cache: Refreshed vote caches.
+
+  # observer/send_feature_email
+  send_feature_email_success: Delivered feature mail.
+  send_feature_email_denied: Only the admin can send feature mail.
+
   # project/destroy_project
   destroy_project_failed: Failed to destroy project.
   destroy_project_success: Project destroyed.
@@ -3200,16 +3208,12 @@
   form_projects_ignore_date_range: Ignore above dates
   form_projects_use_date_range: Use above dates
 
-
   # project/list_projects
   list_projects_title: "[:list_objects(type=:project)]"
   list_projects_add_project: "[:add_object(type=:project)]"
 
   # draft/publish_draft
   publish_draft_denied: "Permission denied: Only the creator of a draft or a project admin can publish a draft."
-
-  # observer/refresh_vote_cache
-  refresh_vote_cache: Refreshed vote caches.
 
   # project/review_authors
   review_authors_add_author: Add
@@ -3220,10 +3224,6 @@
   review_authors_other_users: Other [:users]
   review_authors_remove_author: Remove
   review_authors_title: Reviewing Author(s) for [name]
-
-  # observer/send_feature_email
-  send_feature_email_success: Delivered feature mail.
-  send_feature_email_denied: Only the admin can send feature mail.
 
   # project/show_project
   show_project_add_members: Add Members
@@ -3244,7 +3244,12 @@
   show_project_violation_count: Project has [count] constraint violation(s)
 
   # project/violations/index
-  index_violations_title: "[:CONSTRAINT_VIOLATIONS]"
+  violations_index_title: "[:CONSTRAINT_VIOLATIONS]"
+  violations_any: "[form_projects_any]"
+  violations_date_range: "[:form_projects_date_range]"
+  violations_locality: [:LOCALITY]
+  violations_lat_lon: Lat/Lon
+  violations_violations: Observations Violating Constraints
 
   # users/by_name
   users_by_name_title: Users by Name
