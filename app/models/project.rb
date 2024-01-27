@@ -378,6 +378,10 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     Checklist::ForProject.new(self).num_names
   end
 
+  def violations
+    out_of_range_observations.to_a.union(out_of_area_observations)
+  end
+
   ##############################################################################
   #
   #  :section: queries re related Observations

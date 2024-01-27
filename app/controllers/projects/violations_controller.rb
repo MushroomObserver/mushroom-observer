@@ -10,6 +10,8 @@ module Projects
 
     def index
       return unless find_project!
+
+      @violations = @project.violations
     end
 
     #########

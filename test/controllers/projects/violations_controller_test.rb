@@ -35,6 +35,13 @@ module Projects
         { text: /#{project.location.west} \S+ #{project.location.east}/ },
         "Missing Project longitude rants"
       )
+
+      project.violations.each do |violation|
+        assert_select(
+          "#violations a", { href: /#{observation_path(violation)}/ },
+          "Non-compliant list should link to Observation #{violation}"
+        )
+      end
     end
   end
 end

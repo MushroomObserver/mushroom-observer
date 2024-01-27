@@ -3245,8 +3245,7 @@
 
   # project/violations/index
   violations_index_title: "[:CONSTRAINT_VIOLATIONS]"
-
-  violations_violations: Observations Violating Constraints
+  violations_observations: Observations Violating Constraints
 
   # users/by_name
   users_by_name_title: Users by Name
