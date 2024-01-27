@@ -5,7 +5,7 @@ require("test_helper")
 # tests of Herbarium controller
 module Projects
   class ViolationsControllerTest < FunctionalTestCase
-    def test_index
+    def test_edit
       project = projects(:falmouth_2023_09_project)
       violations_count = project.count_violations
       assert(violations_count.positive?,
@@ -13,7 +13,7 @@ module Projects
       user = project.user
 
       login(user.login)
-      get(:index, params: { project_id: project.id })
+      get(:edit, params: { id: project.id })
 
       assert_response(:success)
 

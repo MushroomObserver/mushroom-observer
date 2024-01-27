@@ -741,9 +741,13 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                         controller: "projects/members", param: :candidate
     resources :admin_requests, only: [:new, :create],
                                controller: "projects/admin_requests"
-    resources :violations, only: [:index],
-                           controller: "projects/violations"
   end
+  # Edit all of a Project's non-compliant Observations
+  get("/projects/:id/violations/edit", to: "projects/violations#edit",
+                                       as: "edit_project_violations")
+  get("/projects/:id/violations/update", to: "projects/violations#update",
+                                         via: [:patch])
+
 
   # ----- Publications: standard actions  -------------------------------------
   resources :publications
