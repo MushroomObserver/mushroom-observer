@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_01_26_082516) do
+ActiveRecord::Schema[7.1].define(version: 2024_01_26_233636) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -458,7 +458,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_26_082516) do
     t.integer "user_id"
     t.datetime "last_view", precision: nil
     t.boolean "reviewed"
-    t.index ["observation_id", "user_id"], name: "user_observation_index"
+    t.index ["observation_id"], name: "observation_index"
+    t.index ["user_id"], name: "user_index"
   end
 
   create_table "observations", id: { type: :integer, unsigned: true }, charset: "utf8mb3", force: :cascade do |t|
@@ -705,6 +706,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_26_082516) do
     t.text "notes_template"
     t.boolean "blocked", default: false, null: false
     t.boolean "no_emails", default: false, null: false
+    t.index ["login"], name: "login_index"
   end
 
   create_table "visual_group_images", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
