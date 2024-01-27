@@ -190,9 +190,11 @@ class ObservationsController
     end
 
     def define_index_args(query, args)
+      # We always want cached matrix boxes for observations if possible.
+      # cache: true  will batch load the includes only for fragments not cached.
       args = { controller: "/observations",
                action: :index,
-               matrix: true,
+               matrix: true, cache: true,
                include: observation_index_includes }.merge(args)
 
       # Paginate by letter if sorting by user.

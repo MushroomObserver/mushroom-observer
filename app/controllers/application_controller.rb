@@ -354,13 +354,16 @@ class ApplicationController < ActionController::Base
     User.current = nil
   end
 
+  # Save a lookup of the mrtg stats "user".
+  MRTG_USER_ID = 164054
+
   def try_user_autologin(user_from_session)
     if Rails.env.production? && request.remote_ip == "127.0.0.1"
       # Request from the server itself, MRTG needs to log in to test page loads.
-      login_valid_user(User.find_by(login: "mrtg"))
-    elsif user_verified_and_allowed?(user = user_from_session)
+      login_valid_user(User.find(id: MRTG_USER_ID))
+    elsif user_verified_and_allowed?(user_from_session)
       # User was already logged in.
-      refresh_logged_in_user_instance(user)
+      @user = user_from_session
     elsif user_verified_and_allowed?(user = validate_user_in_autologin_cookie)
       # User had "remember me" cookie set.
       login_valid_user(user)
@@ -380,11 +383,6 @@ class ApplicationController < ActionController::Base
                   (split[1] == user.auth_code)
 
     user
-  end
-
-  def refresh_logged_in_user_instance(user)
-    @user = user
-    @user.reload
   end
 
   def login_valid_user(user)
@@ -528,8 +526,8 @@ class ApplicationController < ActionController::Base
     user
   end
 
-  # Retrieve the User from session.  Returns User object or nil.  (Does not
-  # check verified status or anything.)
+  # Retrieve the User from session.  Returns freshly loaded User object or nil.
+  # (Does not check verified status or anything.)
   def session_user
     User.safe_find(session[:user_id])
   end
@@ -946,12 +944,22 @@ class ApplicationController < ActionController::Base
 
     Query.safe_find(id)
   end
+  helper_method :query_from_session
 
   # Get instance of Query which is being passed to subsequent pages.
   def passed_query
     Query.safe_find(query_params[:q].to_s.dealphabetize)
   end
   helper_method :passed_query
+
+  # TODO: If we're going to cache user stuff that depends on their present q,
+  # we'll need a helper to make the current QueryRecord (not just the id)
+  # available to templates as an ApplicationController ivar. Something like:
+  #
+  # def current_query_record
+  #   current_query = passed_query || query_from_session # could both be nil!
+  #   current_query_record = current_query&.record || "no_query"
+  # end
 
   # Return query parameter(s) necessary to pass query information along to
   # the next request. *NOTE*: This method is available to views.
@@ -1005,8 +1013,6 @@ class ApplicationController < ActionController::Base
   helper_method :get_query_param
 
   # NOTE: these two methods add q: param to urls built from controllers/actions.
-  # Seem to be dodgy with Rails routes path helpers. If encountering problems,
-  # try redirect_to(whatever_objects_path(q: get_query_param)) instead.
   def redirect_with_query(args, query = nil)
     redirect_to(add_query_param(args, query))
   end
@@ -1369,7 +1375,7 @@ class ApplicationController < ActionController::Base
     if (@num_results == 1) && !args[:always_index]
       show_action_redirect(query)
     else
-      calc_pages(query, args)
+      calc_pages_and_objects(query, args)
       if block_given?
         @extra_data = @objects.each_with_object({}) do |object, data|
           row = yield(object)
@@ -1438,7 +1444,7 @@ class ApplicationController < ActionController::Base
                         id: query.result_ids.first)
   end
 
-  def calc_pages(query, args)
+  def calc_pages_and_objects(query, args)
     number_arg = args[:number_arg] || :page
     @pages = if args[:letters]
                paginate_letters(args[:letter_arg] || :letter, number_arg,
@@ -1465,15 +1471,46 @@ class ApplicationController < ActionController::Base
   end
 
   def find_objects(query, args)
+    caching = args[:cache] || false
     include = args[:include] || nil
-    # Instantiate correct subset.
     logger.warn("QUERY starting: #{query.query.inspect}")
     @timer_start = Time.current
-    @objects = query.paginate(@pages, include: include)
+
+    # Instantiate correct subset, with or without includes.
+    @objects = if caching
+                 objects_with_only_needed_eager_loads(query, include)
+               else
+                 query.paginate(@pages, include: include)
+               end
+
     @timer_end = Time.current
     logger.warn("QUERY finished: model=#{query.model}, " \
                 "flavor=#{query.flavor}, params=#{query.params.inspect}, " \
                 "time=#{(@timer_end - @timer_start).to_f}")
+  end
+
+  # If caching, only uncached objects need to eager_load the includes
+  def objects_with_only_needed_eager_loads(query, include)
+    user = User.current ? "logged_in" : "no_user"
+    locale = I18n.locale
+    objects_simple = query.paginate(@pages)
+    ids_to_eager_load = objects_simple.reject do |obj|
+      object_fragment_exist?(obj, user, locale)
+    end.pluck(:id)
+    # now get the heavy loaded instances:
+    objects_eager = query.model.where(id: ids_to_eager_load).includes(include)
+    # our Array extension: collates new instances with old, in original order
+    objects_simple.collate_new_instances(objects_eager)
+  end
+
+  # Check if a cached partial exists for this object.
+  # digest_path_from_template from ActionView::Helpers::CacheHelper :nodoc:
+  # https://stackoverflow.com/a/77862353/3357635
+  def object_fragment_exist?(obj, user, locale)
+    template = lookup_context.find(action_name, lookup_context.prefixes)
+    digest_path = helpers.digest_path_from_template(template)
+
+    fragment_exist?([digest_path, obj, user, locale])
   end
 
   def show_index_render(args)

@@ -5,20 +5,20 @@ module Tabs
     # Moved download link into species_list_logged_in_show_tabs and
     # nixed user: kwarg
     # Can't access this page unless logged in as of 2023
-    def species_list_show_tabs(list:)
-      tabs = species_list_logged_in_show_tabs(list)
+    def species_list_show_tabs(list:, query: nil)
+      tabs = species_list_logged_in_show_tabs(list, query)
       return tabs unless check_permission(list)
 
       tabs += species_list_user_show_tabs(list)
       tabs
     end
 
-    def species_list_logged_in_show_tabs(list)
+    def species_list_logged_in_show_tabs(list, query = nil)
       [
         species_list_download_tab(list),
         species_list_set_source_tab(list),
         clone_species_list_tab(list),
-        species_list_add_remove_from_another_list_tab(list)
+        species_list_add_remove_from_another_list_tab(list, query)
       ]
     end
 
@@ -57,10 +57,10 @@ module Tabs
          help: :species_list_show_set_source_help.l }]
     end
 
-    def species_list_add_remove_from_another_list_tab(list)
+    def species_list_add_remove_from_another_list_tab(list, query = nil)
       [:species_list_show_add_remove_from_another_list.t,
        add_query_param(
-         edit_species_list_observations_path(species_list: list.id)
+         edit_species_list_observations_path(species_list: list.id), query
        ),
        { class: tab_id(__method__.to_s) }]
     end

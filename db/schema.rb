@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_01_17_180824) do
+ActiveRecord::Schema[7.1].define(version: 2024_01_26_082516) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -46,6 +46,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_17_180824) do
     t.string "target_type", limit: 30
     t.integer "target_id"
     t.datetime "updated_at", precision: nil
+    t.index ["target_id", "target_type"], name: "target_index"
   end
 
   create_table "copyright_changes", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -396,6 +397,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_17_180824) do
     t.string "lifeform", limit: 1024, default: " ", null: false
     t.boolean "locked", default: false, null: false
     t.integer "icn_id"
+    t.index ["synonym_id"], name: "synonym_index"
   end
 
   create_table "names_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -456,6 +458,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_17_180824) do
     t.integer "user_id"
     t.datetime "last_view", precision: nil
     t.boolean "reviewed"
+    t.index ["observation_id", "user_id"], name: "user_observation_index"
   end
 
   create_table "observations", id: { type: :integer, unsigned: true }, charset: "utf8mb3", force: :cascade do |t|
@@ -733,6 +736,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_17_180824) do
     t.integer "observation_id", default: 0
     t.boolean "favorite"
     t.float "value"
+    t.index ["naming_id"], name: "naming_index"
   end
 
 end

@@ -89,6 +89,10 @@ module ApplicationHelper
     end
   end
 
+  def logged_in_status
+    User.current ? "logged_in" : "no_user"
+  end
+
   # ----------------------------------------------------------------------------
 
   # Take URL that got us to this page and add one or more parameters to it.
