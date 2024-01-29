@@ -272,7 +272,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
               map(&:observation_id).uniq)
   }
   scope :needs_naming_and_not_reviewed_by_user, lambda { |user|
-    needs_naming.without_vote_by_user(user).not_reviewed_by_user(user).distinct
+    needs_naming.not_reviewed_by_user(user).distinct
   }
   # Higher taxa: returns narrowed-down group of id'd obs,
   # in higher taxa under the given taxon
