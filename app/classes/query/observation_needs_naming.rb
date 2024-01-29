@@ -14,7 +14,7 @@ module Query
     # 15x faster to use AR scope to assemble the IDs vs SQL SELECT DISTINCT!
     def initialize_flavor
       user = User.current_id
-      needs_naming = Observation.needs_naming_not_reviewed_by_user(user).
+      needs_naming = Observation.needs_naming_and_not_reviewed_by_user(user).
                      map(&:id).join(", ")
       where << "observations.id IN (#{needs_naming})" if needs_naming.present?
 
