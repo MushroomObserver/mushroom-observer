@@ -123,7 +123,7 @@ class ObservationsController
       return render_pattern_search_error(search) if search.errors.any?
 
       @suggest_alternate_spellings = search.query.params[:pattern]
-      if params[:needs_id]
+      if params[:needs_naming]
         redirect_to(
           identify_observations_path(q: get_query_param(search.query))
         )
@@ -134,7 +134,7 @@ class ObservationsController
 
     def render_pattern_search_error(search)
       search.errors.each { |error| flash_error(error.to_s) }
-      if params[:needs_id]
+      if params[:needs_naming]
         redirect_to(identify_observations_path(q: get_query_param))
       else
         render("index", location: observations_path)
