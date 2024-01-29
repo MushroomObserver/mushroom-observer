@@ -221,6 +221,49 @@ class Vote < AbstractModel
        updated_at <= Time.zone.parse(MO.vote_cutoff))
   end
 
+  # Used by script/refresh_caches
+  # Mark an observation as `reviewed` by a user if they've already voted on it.
+  # (The user can also independently "mark as reviewed" in the help-identify
+  # UI, so this cronjob should not reset any obs to "not reviewed".)
+  #
+  # This method makes a hash of all votes, keyed by observation and user, and
+  # stores the `updated_at` as the value, in case we need to create a new
+  # `ObservationView` record. Next, we load all ObservationViews, keyed by
+  # observation and user, and if an observation_view with `reviewed == true`
+  # matches the key of the working hash, we reset all those values to `1`.
+  # All remaining hashes with a non-`1` value will either need to set the
+  # corresponding `observation_view` with `reviewed: true`, or create a new OV.
+  def self.update_observation_views_reviewed_column
+    working_hash = {}
+    # Because of anonymous voting, many votes have user_id: 0 and are useless
+    # for setting `reviewed` status. Filter those out.
+    # Store the updated_at as the value (in case we need a new OV)
+    Vote.where.not(user_id: 0).
+      select(:observation_id, :user_id, :updated_at).each do |v|
+      working_hash[[v.observation_id, v.user_id]] = v.updated_at
+    end
+
+    ObservationView.where(reviewed: true).
+      select(:observation_id, :user_id).each do |ov|
+      if working_hash[[ov.observation_id, ov.user_id]].present?
+        working_hash[[ov.observation_id, ov.user_id]] = 1
+      end
+    end
+
+    # Remove where we've already got it reviewed.
+    working_hash.reject { |_k, v| v == 1 }
+
+    working_hash.each do |k, v|
+      ov = ObservationView.find_by(observation_id: k[0], user_id: k[1])
+      if ov
+        ov.update!(reviewed: 1)
+      else
+        ObservationView.create!(observation_id: k[0], user_id: k[1],
+                                last_viewed: v, reviewed: 1)
+      end
+    end
+  end
+
   ##############################################################################
 
   protected

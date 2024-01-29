@@ -615,6 +615,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # mess up the mirrors because misspelled names are "invisible", so their
   # classification and lifeform and such will not necessarily be kept up to
   # date.  Fixes and returns a messages for each one that was wrong.
+  # Used by refresh_caches script
   def self.make_sure_no_observations_are_misspelled
     misspellings = Observation.joins(:name).
                    where(Name[:correct_spelling_id].not_eq(nil))
@@ -626,6 +627,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     misspellings.update_all(
       Observation[:name_id].eq(Name[:correct_spelling_id]).to_sql
     )
+  end
+
+  # Use the original definition of `needs_id` to set the column values.
+  # Used by refresh_caches script
+  def self.refresh_needs_naming_column
+    Observation.with_name_above_genus.or(without_confident_name).
+      update_all(needs_naming: true)
   end
 
   def update_view_stats
