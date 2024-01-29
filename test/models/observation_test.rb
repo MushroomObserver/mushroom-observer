@@ -1129,18 +1129,22 @@ class ObservationTest < UnitTestCase
                         observations(:peltigera_obs))
   end
 
-  def test_scope_needs_id
-    assert_includes(Observation.needs_id,
+  def test_scope_needs_naming
+    assert_includes(Observation.needs_naming,
                     observations(:fungi_obs))
-    assert_not_includes(Observation.needs_id,
+    assert_not_includes(Observation.needs_naming,
                         observations(:peltigera_obs))
   end
 
-  def test_scope_needs_id_for_user
-    assert_includes(Observation.needs_id_for_user(users(:rolf)),
-                    observations(:fungi_obs))
-    assert_not_includes(Observation.needs_id_for_user(users(:rolf)),
-                        observations(:peltigera_obs))
+  def test_scope_needs_naming_and_not_reviewed_by_user
+    assert_includes(
+      Observation.needs_naming_and_not_reviewed_by_user(users(:rolf)),
+      observations(:fungi_obs)
+    )
+    assert_not_includes(
+      Observation.needs_naming_and_not_reviewed_by_user(users(:rolf)),
+      observations(:peltigera_obs)
+    )
   end
 
   def test_scope_of_name

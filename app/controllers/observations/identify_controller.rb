@@ -20,7 +20,7 @@ module Observations
     private
 
     def unfiltered_index
-      query = create_query(:Observation, :needs_id, {})
+      query = create_query(:Observation, :needs_naming, {})
 
       show_selected_results(query)
     end
@@ -44,19 +44,19 @@ module Observations
     def clade_filter(term)
       # return unless (clade = Name.find_by(text_name: term))
 
-      query = create_query(:Observation, :needs_id, { in_clade: term })
+      query = create_query(:Observation, :needs_naming, { in_clade: term })
 
       show_selected_results(query)
     end
 
     def region_filter(term)
-      query = create_query(:Observation, :needs_id, { in_region: term })
+      query = create_query(:Observation, :needs_naming, { in_region: term })
 
       show_selected_results(query)
     end
 
     # def user_filter(term)
-    #   query = create_query(:Observation, :needs_id, { by_user: term })
+    #   query = create_query(:Observation, :needs_naming, { by_user: term })
 
     #   show_selected_results(query)
     # end
