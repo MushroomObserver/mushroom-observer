@@ -8,7 +8,7 @@ require("test_helper")
 class ObservationViewsControllerTest < FunctionalTestCase
   def test_update
     login("mary")
-    obs = Observation.needs_id_for_user(users(:mary))
+    obs = Observation.needs_naming_not_reviewed_by_user(users(:mary))
     obs_count = obs.count
 
     # Have to create the o_v, none existing
@@ -17,7 +17,7 @@ class ObservationViewsControllerTest < FunctionalTestCase
       assert_redirected_to(identify_observations_path)
     end
 
-    now_obs = Observation.needs_id_for_user(users(:mary))
+    now_obs = Observation.needs_naming_not_reviewed_by_user(users(:mary))
     now_obs_count = now_obs.count
     assert_equal(obs_count - 5, now_obs_count)
   end

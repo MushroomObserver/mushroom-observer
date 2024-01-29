@@ -465,11 +465,11 @@ class ObservationsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_index_pattern_needs_id_with_filter
+  def test_index_pattern_needs_naming_with_filter
     pattern = "Briceland"
 
     login
-    get(:index, params: { pattern: pattern, needs_id: true })
+    get(:index, params: { pattern: pattern, needs_naming: true })
 
     assert_displayed_title("")
     assert_match(/^#{identify_observations_url}/, redirect_to_url,
@@ -537,11 +537,11 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_select("#results", { text: "" }, "There should be no results")
   end
 
-  def test_index_pattern_bad_pattern_from_needs_id
+  def test_index_pattern_bad_pattern_from_needs_naming
     pattern = { error: "" }
 
     login
-    get(:index, params: { pattern: pattern, needs_id: true })
+    get(:index, params: { pattern: pattern, needs_naming: true })
 
     assert_redirected_to(
       identify_observations_path,

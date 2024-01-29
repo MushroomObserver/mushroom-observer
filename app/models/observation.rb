@@ -245,7 +245,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
         -> { where(name_id: Name.with_rank_above_genus.map(&:id)) }
   scope :without_confident_name,
         -> { where(vote_cache: ..0) }
-  scope :needs_id, lambda {
+  scope :needs_naming, lambda {
     with_name_above_genus.or(without_confident_name)
   }
   scope :with_name_correctly_spelled,
@@ -269,12 +269,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     where.not(id: ObservationView.where(user_id: user_id, reviewed: 1).
               map(&:observation_id).uniq)
   }
-  scope :needs_id_for_user, lambda { |user|
-    needs_id.without_vote_by_user(user).not_reviewed_by_user(user).distinct
+  scope :needs_naming_not_reviewed_by_user, lambda { |user|
+    needs_naming.without_vote_by_user(user).not_reviewed_by_user(user).distinct
   }
   # Higher taxa: returns narrowed-down group of id'd obs,
   # in higher taxa under the given taxon
-  # scope :needs_id_by_taxon, lambda { |user, name|
+  # scope :needs_naming_by_taxon, lambda { |user, name|
   #   name_plus_subtaxa = Name.include_subtaxa_of(name)
   #   subtaxa_above_genus = name_plus_subtaxa.with_rank_above_genus.map(&:id)
   #   lower_subtaxa = name_plus_subtaxa.with_rank_at_or_below_genus.map(&:id)
