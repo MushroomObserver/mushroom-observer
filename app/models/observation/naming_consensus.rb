@@ -320,8 +320,9 @@ class Observation
                                          user_id: User.current_id))
         view.update!(last_view: Time.zone.now, reviewed: 1)
       else
-        create!(observation_id: @observation.id, user_id: User.current_id,
-                last_view: Time.zone.now, reviewed: 1)
+        ObservationView.create!(observation_id: @observation.id,
+                                user_id: User.current_id,
+                                last_view: Time.zone.now, reviewed: 1)
       end
     end
 

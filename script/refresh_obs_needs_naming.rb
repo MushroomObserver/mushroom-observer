@@ -44,14 +44,10 @@ def update_observation_views_reviewed_column
   working_hash.each do |k, v|
     ov = ObservationView.find_by(observation_id: k[0], user_id: k[1])
     if ov
-      ov.update(reviewed: 1)
+      ov.update!(reviewed: 1)
     else
-      ObservationView.create(
-        { observation_id: k[0],
-          user_id: k[1],
-          last_viewed: v,
-          reviewed: 1 }
-      )
+      ObservationView.create!(observation_id: k[0], user_id: k[1],
+                              last_viewed: v, reviewed: 1)
     end
   end
 end
