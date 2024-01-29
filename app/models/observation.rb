@@ -245,9 +245,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
         -> { where(name_id: Name.with_rank_above_genus.map(&:id)) }
   scope :without_confident_name,
         -> { where(vote_cache: ..0) }
-  scope :needs_naming, lambda {
-    with_name_above_genus.or(without_confident_name)
-  }
+  # Use this definition when running script to populate the column:
+  # scope :needs_naming, lambda {
+  #   with_name_above_genus.or(without_confident_name)
+  # }
+  scope :needs_naming, -> { where(needs_naming: true) }
   scope :with_name_correctly_spelled,
         -> { joins({ namings: :name }).where(names: { correct_spelling: nil }) }
 
