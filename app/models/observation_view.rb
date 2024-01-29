@@ -1,6 +1,16 @@
 # frozen_string_literal: true
 
-# Keep track of when each user last viewed each observation.
+# Keep track of when each user last viewed each observation, as well as
+# whether they've marked it as `reviewed` (in help identify) or voted on
+# a naming of that obs (indicating reviewed)
+
+#  == Attributes
+#
+#  observation_id::         ID of the observation.
+#  user_id::                User that  it.
+#  last_view::              Date/time it was last accessed.
+#  reviewed::               Boolean.
+
 class ObservationView < AbstractModel
   belongs_to :observation
   belongs_to :user
