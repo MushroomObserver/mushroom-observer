@@ -55,6 +55,8 @@ class NamesControllerTest < FunctionalTestCase
     get(:index)
 
     assert_displayed_title("Names by Name")
+    assert_select("#right_tabs a[href='#{names_path}']", { count: 0 },
+                  "right `tabs` should not link to All Names")
   end
 
   def test_index_with_non_default_sort
@@ -220,6 +222,8 @@ class NamesControllerTest < FunctionalTestCase
                     distinct.count },
       "Wrong number of (correctly spelled) Names"
     )
+    assert_select("#right_tabs a[href='#{names_path}']", { count: 1 },
+                  "right `tabs` should have a link to All Names")
   end
 
   def test_index_with_observations_by_letter
