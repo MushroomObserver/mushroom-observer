@@ -9,6 +9,10 @@ class RandomIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("body.observations__index")
   end
 
+  def test_uptime_probe
+    visit("/test")
+  end
+
   def test_login_and_logout
     login!(rolf)
 
