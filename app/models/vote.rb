@@ -260,7 +260,7 @@ class Vote < AbstractModel
     new_entries = []
     Vote.where.not(user_id: 0).
       select(:observation_id, :user_id, :updated_at).each do |v|
-      next if already_done[v.observation_id, v.user_id].exist?
+      next if already_done[[v.observation_id, v.user_id]].exist?
 
       new_entries << {
         observation_id: v.observation_id,
