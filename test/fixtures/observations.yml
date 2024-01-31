@@ -35,6 +35,7 @@ minimal_unknown_obs:
   <<: *DEFAULTS
   created_at: 2006-05-12 14:20:00
   updated_at: 2006-05-12 14:21:00
+  log_updated_at: 2006-05-12 14:21:00
   when: 2006-05-11
   user: mary
   location: burbank
@@ -51,6 +52,7 @@ detailed_unknown_obs:
   <<: *DEFAULTS
   created_at: 2006-05-12 17:20:00
   updated_at: 2006-05-12 17:21:00
+  log_updated_at: 2006-05-12 17:21:00
   when: 2006-05-11
   location: burbank
   where: Burbank, California, USA
@@ -71,6 +73,7 @@ coprinus_comatus_obs:
   <<: *DEFAULTS
   created_at: 2007-02-27 20:20:00
   updated_at: 2007-02-27 20:21:00
+  log_updated_at: 2007-02-27 20:21:00
   when: 2007-02-27
   user: rolf
   name: coprinus_comatus
@@ -93,6 +96,7 @@ agaricus_campestris_obs:
   <<: *DEFAULTS
   created_at: 2007-03-19 20:20:00
   updated_at: 2007-03-19 20:21:00
+  log_updated_at: 2007-03-19 20:21:00
   when: 2007-03-19
   location: burbank
   where: Burbank, California, USA
@@ -112,6 +116,7 @@ agaricus_campestrus_obs:
   <<: *DEFAULTS
   created_at: 2007-06-23 20:00:00
   updated_at: 2007-06-23 20:00:00
+  log_updated_at: 2007-06-23 20:00:00
   when: 2007-06-23
   location: burbank
   where: Burbank, California, USA
@@ -126,6 +131,7 @@ agaricus_campestras_obs:
   <<: *DEFAULTS
   created_at: 2007-06-24 09:00:00
   updated_at: 2007-06-24 09:00:01
+  log_updated_at: 2007-06-24 09:00:01
   when: 2007-06-24
   location: burbank
   where: Burbank, California, USA
@@ -140,6 +146,7 @@ agaricus_campestros_obs:
   <<: *DEFAULTS
   created_at: 2007-06-24 12:00:00
   updated_at: 2007-06-24 12:00:01
+  log_updated_at: 2007-06-24 12:00:01
   when: 2007-06-24
   location: burbank
   where: Burbank, California, USA
@@ -154,6 +161,7 @@ strobilurus_diminutivus_obs:
   <<: *DEFAULTS
   created_at: 2007-07-20 20:54:45
   updated_at: 2007-07-20 20:54:45
+  log_updated_at: 2007-07-20 20:54:45
   when: 2007-07-20
   user: rolf
   location:
@@ -167,6 +175,7 @@ stereum_hirsutum_1:
   <<: *DEFAULTS
   created_at: 2017-06-22 17:20:00
   updated_at: 2017-06-22 17:21:00
+  log_updated_at: 2017-06-22 17:21:00
   when: 2017-06-22
   location: burbank
   where: Burbank, California, USA
@@ -178,6 +187,7 @@ stereum_hirsutum_2:
   <<: *DEFAULTS
   created_at: 2017-06-23 17:20:00
   updated_at: 2017-06-23 17:21:00
+  log_updated_at: 2017-06-23 17:21:00
   when: 2017-06-23
   location: burbank
   where: Burbank, California, USA
@@ -189,6 +199,7 @@ tubaria_furfuracea_1:
   <<: *DEFAULTS
   created_at: 2017-06-24 17:20:00
   updated_at: 2017-06-24 17:21:00
+  log_updated_at: 2017-06-24 17:21:00
   when: 2017-06-24
   location: burbank
   where: Burbank, California, USA
@@ -200,6 +211,7 @@ tubaria_furfuracea_2:
   <<: *DEFAULTS
   created_at: 2017-06-24 20:20:00
   updated_at: 2017-06-24 20:21:00
+  log_updated_at: 2017-06-24 20:21:00
   when: 2017-06-24
   location: burbank
   where: Burbank, California, USA
@@ -211,6 +223,7 @@ unknown_with_no_naming:
   <<: *DEFAULTS
   created_at: 2008-09-23 17:20:00
   updated_at: 2008-09-23 17:21:00
+  log_updated_at: 2008-09-23 17:21:00
   when: 2008-09-23
   user: mary
   location:
@@ -222,6 +235,7 @@ unknown_with_lat_long:
   <<: *DEFAULTS
   created_at: 2010-07-22 09:20:00
   updated_at: 2010-07-22 09:21:00
+  log_updated_at: 2010-07-22 09:21:00
   when: 2010-07-22
   location: burbank
   where: Burbank, California, USA
@@ -238,6 +252,7 @@ trusted_hidden:
   <<: *DEFAULTS
   created_at: 2023-11-05 09:20:00
   updated_at: 2023-11-05 09:21:00
+  log_updated_at: 2023-11-05 09:21:00
   when: 2023-11-05
   location: falmouth
   where: Falmouth, Massachusetts, USA
@@ -253,6 +268,7 @@ untrusted_hidden:
   <<: *DEFAULTS
   created_at: 2023-11-05 09:20:00
   updated_at: 2023-11-05 09:21:00
+  log_updated_at: 2023-11-05 09:21:00
   when: 2023-11-05
   location: falmouth
   where: Falmouth, Massachusetts, USA
@@ -267,6 +283,7 @@ untrusted_hidden:
 amateur_obs:
   <<: *DEFAULTS
   created_at: 2010-12-31 06:46:00
+  log_updated_at: 2010-12-31 06:46:00
   when: 2010-12-30
   user: katrina
   location:
@@ -285,6 +302,7 @@ peltigera_obs:
   <<: *DEFAULTS
   created_at: 2014-04-04 04:04:03
   updated_at: 2014-04-04 04:04:03
+  log_updated_at: 2014-04-04 04:04:03
   when: 2012-06-07
   user: rolf
   location:
@@ -307,6 +325,7 @@ peltigera_mary_obs:
   <<: *DEFAULTS
   created_at: 2014-05-04 05:05:05
   updated_at: 2014-05-04 05:05:05
+  log_updated_at: 2014-05-04 05:05:05
   when: 2013-09-08
   user: mary
   location:
@@ -327,6 +346,7 @@ fungi_obs:
   <<: *DEFAULTS
   created_at: 2013-09-15 04:04:04
   updated_at: 2013-09-15 04:04:07
+  log_updated_at: 2013-09-15 04:04:07
   when: 2013-09-15
   user: rolf
   location:
@@ -345,6 +365,7 @@ boletus_edulis_obs:
   <<: *DEFAULTS
   created_at: 2014-04-21 04:04:04
   updated_at: 2014-04-21 04:04:07
+  log_updated_at: 2014-04-21 04:04:07
   when: 2014-04-21
   location:
   where: "New York, New York, USA"
@@ -360,16 +381,19 @@ boletus_edulis_obs:
 owner_only_favorite_eq_fungi:
   <<: *DEFAULTS
   created_at: 2018-04-21 04:04:04
+  log_updated_at: 2018-04-21 04:04:04
   when: 2018-04-21
 
 owner_only_favorite_eq_consensus:
   <<: *DEFAULTS
   created_at: 2018-04-21 04:06:04
+  log_updated_at: 2018-04-21 04:06:04
   when: 2018-04-21
 
 owner_only_favorite_ne_consensus:
   <<: *DEFAULTS
   created_at: 2020-02-03 04:06:04
+  log_updated_at: 2020-02-03 04:06:04
   when: 2020-02-03
   name: tremella
   text_name: Tremella
@@ -378,28 +402,33 @@ owner_only_favorite_ne_consensus:
 owner_multiple_favorites:
   <<: *DEFAULTS
   created_at: 2020-04-05 04:06:04
+  log_updated_at: 2020-04-05 04:06:04
   when: 2020-04-05
 
 owner_uncertain_favorite:
   <<: *DEFAULTS
   created_at: 2020-06-07 04:06:04
+  log_updated_at: 2020-06-07 04:06:04
   when: 2020-06-07
 
 owner_accepts_general_questions:
   <<: *DEFAULTS
   created_at: 2020-07-08 04:06:04
+  log_updated_at: 2020-07-08 04:06:04
   when: 2020-07-08
   user: roy # roy has email_general_questions == true
 
 owner_refuses_general_questions:
   <<: *DEFAULTS
   created_at: 2020-05-05 04:06:04
+  log_updated_at: 2020-05-05 04:06:04
   when: 2020-05-05
   user: dick # dick has email_general_questions == false
 
 collected_at_obs:
   <<: *DEFAULTS
   created_at: 2020-05-06 04:06:04
+  log_updated_at: 2020-05-06 04:06:04
   when: 2020-05-06
   location: collection_location
   where: Collection Location
@@ -407,6 +436,7 @@ collected_at_obs:
 displayed_at_obs:
   <<: *DEFAULTS
   created_at: 2020-05-07 04:06:04
+  log_updated_at: 2020-05-07 04:06:04
   when: 2020-05-07
   location: display_location
   where: Display Location
@@ -415,6 +445,7 @@ displayed_at_obs:
 two_img_obs:
   <<: *DEFAULTS
   created_at: 2020-05-08 04:06:04
+  log_updated_at: 2020-05-08 04:06:04
   when: 2020-05-08
   location: display_location
   where: Display Location
@@ -425,6 +456,7 @@ two_img_obs:
 imageless_unvouchered_obs:
   <<: *DEFAULTS
   created_at: 2020-11-11 04:06:04
+  log_updated_at: 2020-11-11 04:06:04
   when: 2020-11-11
   user: ignore_imageless_user
 
@@ -432,6 +464,7 @@ imageless_unvouchered_obs:
 imged_unvouchered_obs:
   <<: *DEFAULTS
   created_at: 2020-11-12 04:06:04
+  log_updated_at: 2020-11-12 04:06:04
   when: 2020-11-12
   images: query_first_image
   thumb_image: query_first_image
@@ -439,12 +472,14 @@ imged_unvouchered_obs:
 vouchered_obs:
   <<: *DEFAULTS
   created_at: 2020-11-20 04:06:04
+  log_updated_at: 2020-11-20 04:06:04
   when: 2020-11-20
   specimen: 1
 
 vouchered_imged_obs:
   <<: *DEFAULTS
   created_at: 2020-11-21 04:06:04
+  log_updated_at: 2020-11-21 04:06:04
   when: 2020-11-21
   specimen: 1
   images: query_first_image
@@ -454,6 +489,7 @@ updated_2013_obs:
   <<: *DEFAULTS
   created_at: 2013-09-08 04:06:04
   updated_at: 2013-09-08 17:21:00
+  log_updated_at: 2013-09-08 17:21:00
   when: 2013-09-08
 
 # Two Observations sortable by Name, Date, Date Posted, Time Last Modified
@@ -461,6 +497,7 @@ sortable_obs_users_first_obs:
   <<: *DEFAULTS
   created_at: 2016-01-10 17:20:00
   updated_at: 2016-01-11 17:20:00
+  log_updated_at: 2016-01-11 17:20:00
   when: 2016-01-10
   user: sortable_obs_user
   name: tremella_justpublished
@@ -473,6 +510,7 @@ sortable_obs_users_second_obs:
   <<: *DEFAULTS
   created_at: 2017-01-10 17:20:00
   updated_at: 2017-01-11 17:20:00
+  log_updated_at: 2017-01-11 17:20:00
   when: 2017-01-10
   user: sortable_obs_user
   name: tremella_mesenterica
@@ -484,6 +522,7 @@ sortable_obs_users_second_obs:
 unlisted_rolf_obs:
   <<: *DEFAULTS
   created_at: 2010-07-10 04:06:04
+  log_updated_at: 2010-07-10 04:06:04
   when: 2010-07-10
   location: point_reyes
   where: Point Reyes National Seashore, Marin Co., California, USA
@@ -494,12 +533,14 @@ unlisted_rolf_obs:
 unequal_positive_namings_obs:
   <<: *DEFAULTS
   created_at: 2010-07-11 04:06:04
+  log_updated_at: 2010-07-11 04:06:04
   when: 2010-07-11
 
 # used for testing calc_consensus
 all_namings_deprecated_obs:
   <<: *DEFAULTS
   created_at: 2010-07-12 04:06:04
+  log_updated_at: 2010-07-12 04:06:04
   when: 2010-07-12
   name: namings_deprecated
   text_name: Namings deprecated
@@ -509,6 +550,7 @@ all_namings_deprecated_obs:
 authored_with_naming_obs:
   <<: *DEFAULTS
   created_at: 2010-08-12 04:06:04
+  log_updated_at: 2010-08-12 04:06:04
   when: 2010-08-12
   name: authored_with_naming
   text_name: Psalliota naming
@@ -517,6 +559,7 @@ authored_with_naming_obs:
 other_user_owns_naming_obs:
   <<: *DEFAULTS
   created_at: 2010-08-13 04:06:04
+  log_updated_at: 2010-08-13 04:06:04
   when: 2010-08-13
   name: other_user_owns_naming_name
   text_name: Otheruserownsnaming
@@ -526,6 +569,7 @@ other_user_owns_naming_obs:
 other_user_owns_obs:
   <<: *DEFAULTS
   created_at: 2010-08-14 04:06:04
+  log_updated_at: 2010-08-14 04:06:04
   when: 2010-08-14
   name: other_user_owns_observation
   text_name: Otheruserownsobs
@@ -535,6 +579,7 @@ other_user_owns_obs:
 same_user_owns_name_and_naming_obs:
   <<: *DEFAULTS
   created_at: 2015-06-01 14:26:07
+  log_updated_at: 2015-06-01 14:26:07
   when: 2015-06-01
   name: same_user_owns_naming_and_observation
   text_name: Sameuserownsnamingandobservation
@@ -544,6 +589,7 @@ same_user_owns_name_and_naming_obs:
 locally_sequenced_obs:
   <<: *DEFAULTS
   created_at: 2015-06-01 14:36:04
+  log_updated_at: 2015-06-01 14:36:04
   when: 2015-06-01
   images: locally_sequenced_obs_image
   thumb_image: locally_sequenced_obs_image
@@ -552,11 +598,13 @@ locally_sequenced_obs:
 genbanked_obs:
   <<: *DEFAULTS
   created_at: 2015-06-02 14:26:05
+  log_updated_at: 2015-06-02 14:26:05
   when: 2015-06-02
 
 substrate_notes_obs:
   <<: *DEFAULTS
   created_at: 2015-06-02 04:07:05
+  log_updated_at: 2015-06-02 04:07:05
   when: 2015-06-02
   notes:
     :substrate: soil
@@ -564,6 +612,7 @@ substrate_notes_obs:
 substrate_and_other_notes_obs:
   <<: *DEFAULTS
   created_at: 2015-06-02 04:08:05
+  log_updated_at: 2015-06-02 04:08:05
   when: 2015-06-02
   notes:
     :substrate: soil
@@ -572,12 +621,14 @@ substrate_and_other_notes_obs:
 templater_noteless_obs:
   <<: *DEFAULTS
   created_at: 2015-05-05 03:08:03
+  log_updated_at: 2015-05-05 03:08:03
   when: 2015-05-05
   user: notes_templater
 
 templater_other_notes_obs:
   <<: *DEFAULTS
   created_at: 2015-05-05 03:09:03
+  log_updated_at: 2015-05-05 03:09:03
   when: 2015-05-05
   notes:
     :Other: some notes
@@ -586,6 +637,7 @@ templater_other_notes_obs:
 templater_orphaned_notes_obs:
   <<: *DEFAULTS
   created_at: 2015-05-05 08:06:03
+  log_updated_at: 2015-05-05 08:06:03
   when: 2015-05-05
   notes:
     :orphaned_caption: orphaned notes
@@ -594,6 +646,7 @@ templater_orphaned_notes_obs:
 template_only_obs:
   <<: *DEFAULTS
   created_at: 2015-05-05 09:03:03
+  log_updated_at: 2015-05-05 09:03:03
   when: 2015-05-05
   notes:
     :Cap: red
@@ -602,6 +655,7 @@ template_only_obs:
 template_and_other_notes_obs:
   <<: *DEFAULTS
   created_at: 2015-05-05 12:06:03
+  log_updated_at: 2015-05-05 12:06:03
   when: 2015-05-05
   notes:
     :Cap: red
@@ -611,6 +665,7 @@ template_and_other_notes_obs:
 template_and_orphaned_notes_obs:
   <<: *DEFAULTS
   created_at: 2015-05-05 14:06:03
+  log_updated_at: 2015-05-05 14:06:03
   when: 2015-05-05
   notes:
     :Cap: red
@@ -620,6 +675,7 @@ template_and_orphaned_notes_obs:
 template_and_orphaned_notes_scrambled_obs:
   <<: *DEFAULTS
   created_at: 2015-05-05 14:06:04
+  log_updated_at: 2015-05-05 14:06:04
   when: 2015-05-05
   notes:
     :Nearby_trees: pine
@@ -632,6 +688,7 @@ template_and_orphaned_notes_scrambled_obs:
 california_obs:
   <<: *DEFAULTS
   created_at: 2022-04-05 04:06:04
+  log_updated_at: 2022-04-05 04:06:04
   when: 2022-04-05
   location: california
   where: California, USA
@@ -639,6 +696,7 @@ california_obs:
 perkatkun_obs:
   <<: *DEFAULTS
   created_at: 2023-09-28 17:51:04
+  log_updated_at: 2023-09-28 17:51:04
   when: 2023-09-28
   location: perkatkun
   where: Perkatkun, Wrangel Island, Russia
@@ -647,6 +705,7 @@ perkatkun_obs:
 chlorophyllum_rachodes_obs:
   <<: *DEFAULTS
   created_at: 2023-02-04 04:06:04
+  log_updated_at: 2023-02-04 04:06:04
   when: 2023-02-04
   name: chlorophyllum_rachodes
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
@@ -654,6 +713,7 @@ chlorophyllum_rachodes_obs:
 wolf_fart:
   <<: *DEFAULTS
   created_at: 2023-11-01 04:06:04
+  log_updated_at: 2023-11-01 04:06:04
   when: 2023-11-01
   user: lone_wolf
   name: lycoperdon_perlatum
@@ -675,6 +735,7 @@ deprecated_name_obs:
   <<: *DEFAULTS
   created_at: 2014-04-04 04:05:03
   updated_at: 2014-04-04 04:05:03
+  log_updated_at: 2014-04-04 04:05:03
   when: 2012-06-07
   user: vouchered_only_user
   location:
