@@ -306,7 +306,7 @@ class Observation
       old = @observation.name
       if old != best || @observation.vote_cache != best_val
         # If naming generic or specific, and vote positive, needs_naming = 0
-        needs_naming = !best.above_genus? && best_val.positive? ? 0 : 1
+        needs_naming = !best.above_genus? && best_val&.positive? ? 0 : 1
         @observation.update(name: best, vote_cache: best_val,
                             needs_naming: needs_naming)
         mark_obs_reviewed
