@@ -29,6 +29,7 @@ DEFAULTS: &DEFAULTS
   text_name: Boletus edulis
   classification: ""
   rss_log: $LABEL_rss_log
+  needs_naming: 1
 
 minimal_unknown_obs:
   <<: *DEFAULTS
@@ -86,6 +87,7 @@ coprinus_comatus_obs:
   species_lists: one_genus_three_species_list
   herbarium_records: coprinus_comatus_nybg_spec, coprinus_comatus_rolf_spec
   collection_numbers: coprinus_comatus_coll_num
+  needs_naming: 0
 
 agaricus_campestris_obs:
   <<: *DEFAULTS
@@ -299,6 +301,7 @@ peltigera_obs:
   species_lists: one_genus_three_species_list
   lifeform: " lichen "
   herbarium_records: field_museum_record
+  needs_naming: 0
 
 peltigera_mary_obs:
   <<: *DEFAULTS
@@ -318,6 +321,7 @@ peltigera_mary_obs:
   thumb_image: rolf_profile_image
   images: rolf_profile_image
   lifeform: " lichen "
+  needs_naming: 0
 
 fungi_obs:
   <<: *DEFAULTS
@@ -335,6 +339,7 @@ fungi_obs:
   vote_cache: 3
   thumb_image: conic_image
   images: conic_image, plane_image_example
+  needs_naming: 1
 
 boletus_edulis_obs:
   <<: *DEFAULTS
@@ -350,6 +355,7 @@ boletus_edulis_obs:
     :Other: "A tasty bolete!"
   vote_cache: 3
   species_lists: one_genus_three_species_list
+  needs_naming: 0
 
 owner_only_favorite_eq_fungi:
   <<: *DEFAULTS
