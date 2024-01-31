@@ -3,7 +3,7 @@
 require("application_system_test_case")
 
 class HelpIdentifySystemTest < ApplicationSystemTestCase
-  def test_identify_index_ui
+  def test_identify_index_naming_and_vote_ui
     browser = page.driver.browser
     rolf = users("rolf")
     login!(rolf)
@@ -51,5 +51,33 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
     assert_no_selector(".lg-container")
 
     assert_selector("#box_title_#{obs.id}", text: /#{ncc.text_name}/)
+  end
+
+  def test_mark_as_reviewed_ui
+    rolf = users("rolf")
+    login!(rolf)
+
+    within("#navigation") do
+      assert_link("Help Identify")
+      click_on("Help Identify")
+    end
+    assert_selector("body.identify__index")
+
+    box_ids = find_all(".matrix-box").first(4).pluck(:id)
+    first_three = box_ids.first(3)
+    last_one = box_ids.fourth
+
+    first_three.each do |box_id|
+      assert_selector("##{box_id}")
+      within("##{box_id}") do
+        first(".caption-reviewed-link").trigger("click")
+      end
+    end
+    page.driver.browser.refresh
+
+    assert_selector("##{last_one}")
+    first_three.each do |box_id|
+      assert_no_selector("##{box_id}")
+    end
   end
 end
