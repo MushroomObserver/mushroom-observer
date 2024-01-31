@@ -269,7 +269,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   }
   scope :not_reviewed_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
-    where.not(id: ObservationView.where(user_id: user_id, reviewed: 1))
+    where.not(id: ObservationView.where(user_id: user_id, reviewed: 1).
+                  select(:observation_id))
   }
   scope :needs_naming_and_not_reviewed_by_user, lambda { |user|
     needs_naming.not_reviewed_by_user(user).distinct
