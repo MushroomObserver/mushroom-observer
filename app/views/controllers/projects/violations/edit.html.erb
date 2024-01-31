@@ -10,9 +10,9 @@ add_page_title(link_to_object(@project).t + ", " + :violations_index_title.t)
   <% rows = []
       @violations.each do |obs|
         rows << ["",
-                obs.when, obs.lat, obs.long, obs.where,
-                link_to_object(obs, obs.text_name) + " (#{obs.id})",
-                obs.user.name]
+                 obs.when, obs.lat, obs.long, obs.where,
+                 link_to_object(obs, obs.text_name) + " (#{obs.id})",
+                 obs.user.name]
       end
   %>
 
@@ -23,7 +23,7 @@ add_page_title(link_to_object(@project).t + ", " + :violations_index_title.t)
         "#{:DATES.l}: #{@project.date_range}",
         "Lat: #{@project.location.north} to #{@project.location.south}",
         "Lon: #{@project.location.west} to #{@project.location.east} ",
-        "(#{@project.location.name})",
+        "#{:WHERE.l}: #{@project.location.name}",
         "", ""],
       rows: rows
     )
