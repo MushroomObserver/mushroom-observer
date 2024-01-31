@@ -112,15 +112,15 @@ module TableHelper
     tag.td(**args[:cell_opts]) { cell.to_s }
   end
 
-  # ?
-  # def make_line(cell_opts)
-  #   colspan = cell_opts[:colspan]
-  #   if colspan
-  #     tag.tr(class: "MatrixLine") do
-  #       tag.td(tag.hr, class: "MatrixLine", colspan: colspan)
-  #     end
-  #   else
-  #     safe_empty
-  #   end
-  # end
+  def violation_rows(violations)
+    violations.each_with_object([]) do |obs, rows|
+      rows << ["",
+               obs.when,
+               obs.lat,
+               obs.long,
+               obs.where,
+               link_to_object(obs, obs.text_name) + " (#{obs.id})",
+               obs.user.name]
+    end
+  end
 end

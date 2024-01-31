@@ -1,21 +1,9 @@
 <%
-add_page_title(link_to_object(@project).t + ", " + :violations_index_title.t)
-@container = :wide
-# TODO:
-# list of Obss with checkboxes
-# buttons to remove checked Obss, remove all listed Obss
+  add_page_title(link_to_object(@project).t + ", " + :violations_index_title.t)
+  @container = :wide
 %>
 
 <div id="violations">
-  <% rows = []
-      @violations.each do |obs|
-        rows << ["",
-                 obs.when, obs.lat, obs.long, obs.where,
-                 link_to_object(obs, obs.text_name) + " (#{obs.id})",
-                 obs.user.name]
-      end
-  %>
-
   <%=
     make_table(
       headers: [
@@ -25,7 +13,7 @@ add_page_title(link_to_object(@project).t + ", " + :violations_index_title.t)
         "Lon: #{@project.location.west} to #{@project.location.east} ",
         "#{:WHERE.l}: #{@project.location.name}",
         "", ""],
-      rows: rows
+      rows: violation_rows(@violations)
     )
   %>
 </div>
