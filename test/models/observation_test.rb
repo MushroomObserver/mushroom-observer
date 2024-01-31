@@ -740,6 +740,15 @@ class ObservationTest < UnitTestCase
     assert_equal(true, mov.reviewed)
   end
 
+  def test_refresh_needs_naming_column
+    Observation.update_all(needs_naming: 0)
+    Observation.refresh_needs_naming_column
+    assert_equal(true, observations(:minimal_unknown_obs).needs_naming)
+    assert_equal(true, observations(:detailed_unknown_obs).needs_naming)
+    assert_equal(false, observations(:coprinus_comatus_obs).needs_naming)
+    assert_equal(true, observations(:agaricus_campestris_obs).needs_naming)
+  end
+
   def test_project_ownership
     # NOT owned by Bolete project, but owned by Mary
     obs = observations(:minimal_unknown_obs)
