@@ -622,6 +622,8 @@ class ObservationTest < UnitTestCase
     assert(consensus.users_favorite?(namg1, rolf))
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, consensus.consensus_naming)
+    # Check that the obs no longer `needs_naming`
+    assert_equal(false, obs.needs_naming)
 
     consensus.change_vote(namg1, 0.01, rolf)
     namg1.reload
@@ -637,6 +639,8 @@ class ObservationTest < UnitTestCase
     assert_not(consensus.users_favorite?(namg1, rolf))
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, consensus.consensus_naming)
+    # Check that the obs again `needs_naming`
+    assert_equal(true, obs.needs_naming)
 
     # Play with Rolf's vote for other namings.
     # Make votes namg1: -0.01, namg2: 1, namg3: 0
@@ -649,6 +653,8 @@ class ObservationTest < UnitTestCase
     assert_not(consensus.owners_favorite?(namg3))
     assert_names_equal(@name2, obs.name)
     assert_equal(namg2, consensus.consensus_naming)
+    # Check that the obs again does not `needs_naming`
+    assert_equal(false, obs.needs_naming)
 
     # Make votes namg1: -0.01, namg2: 1, namg3: 2
     consensus.change_vote(namg3, 2, rolf)
