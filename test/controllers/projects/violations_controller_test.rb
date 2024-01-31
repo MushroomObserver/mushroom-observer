@@ -20,18 +20,18 @@ module Projects
       assert_select("#title", { text: /#{project.title}/ },
                     "Page title should include project name")
 
-      assert_select("#constraints_summary", { text: /#{:CONSTRAINTS.l}/ })
+      assert_select("#content", { text: /#{:CONSTRAINTS.l}/ })
       assert_select(
-        "#constraints_summary", { text: /#{project.date_range}/ },
+        "#content", { text: /#{project.date_range}/ },
         "Missing Project date range"
       )
       assert_select(
-        "#constraints_summary",
+        "#content",
         { text: /#{project.location.north} \S+ #{project.location.south}/ },
         "Missing Project latitude range"
       )
       assert_select(
-        "#constraints_summary",
+        "#content",
         { text: /#{project.location.west} \S+ #{project.location.east}/ },
         "Missing Project longitude rants"
       )

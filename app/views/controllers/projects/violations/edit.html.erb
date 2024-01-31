@@ -6,20 +6,26 @@ add_page_title(link_to_object(@project).t + ", " + :violations_index_title.t)
 # buttons to remove checked Obss, remove all listed Obss
 %>
 
-<div id="constraints_summary">
-  <p class="h4"><b><%= :CONSTRAINTS.l %></b></p>
-  <p><%= "#{:DATES.l}: #{@project.date_range}" %></p>
-  <p><%= "N-S: #{@project.location.north} to #{@project.location.south}; " +
-         "W-E: #{@project.location.west} to #{@project.location.east} " +
-         "(#{@project.location.name})"
-  %></p>
-</div>
-
 <div id="violations">
-<p class="h4"><b><%= :violations_observations.l %></b></p>
-  <% @violations.each do |obs| %>
-    <%= "#{obs.when}; #{obs.lat}, #{obs.long}; " %>
-    <%= link_to_object(obs, obs.text_name) %>
-    <%= " (#{obs.id}); #{obs.user.name}" %>
-  <% end %>
+  <% rows = []
+      @violations.each do |obs|
+        rows << ["",
+                obs.when, obs.lat, obs.long, obs.where,
+                link_to_object(obs, obs.text_name) + " (#{obs.id})",
+                obs.user.name]
+      end
+  %>
+
+  <%=
+    make_table(
+      headers: [
+        "#{:CONSTRAINTS.l}:",
+        "#{:DATES.l}: #{@project.date_range}",
+        "Lat: #{@project.location.north} to #{@project.location.south}",
+        "Lon: #{@project.location.west} to #{@project.location.east} ",
+        "(#{@project.location.name})",
+        "", ""],
+      rows: rows
+    )
+  %>
 </div>
