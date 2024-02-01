@@ -262,7 +262,7 @@ class Vote < AbstractModel
       }
     end
 
-    ObservationView.upsert_all(new_entries)
+    ObservationView.in_batches.upsert_all(new_entries)
   end
 
   ##############################################################################
