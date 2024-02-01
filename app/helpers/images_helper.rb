@@ -155,7 +155,8 @@ module ImagesHelper
   def image_vote_section_html(image, votes)
     return "" unless votes && image && User.current
 
-    tag.div(class: "vote-section", id: "image_vote_#{image.id}") do
+    tag.div(class: "vote-section require-user",
+            id: "image_vote_#{image.id}") do
       image_vote_meter_and_links(image)
     end
   end
