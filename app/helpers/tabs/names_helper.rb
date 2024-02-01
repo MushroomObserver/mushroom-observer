@@ -155,7 +155,7 @@ module Tabs
     def occurrence_map_for_name_tab(name)
       [:show_name_distribution_map.t,
        add_query_param(map_name_path(id: name.id)),
-       { class: tab_id(__method__.to_s) }]
+       { class: tab_id(__method__.to_s), data: { action: "links#disable" } }]
     end
 
     # Others

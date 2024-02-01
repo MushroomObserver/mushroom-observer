@@ -132,11 +132,18 @@ module Tabs
       links = [
         *observations_at_where_tabs(query), # maybe multiple links
         map_observations_tab(query),
+        dummy_disable_tab,
         *observations_coerced_query_tabs(query), # multiple links
         observations_add_to_list_tab(query),
         observations_download_as_csv_tab(query)
       ]
       links.reject(&:empty?)
+    end
+
+    def dummy_disable_tab
+      ["Dummy link",
+       "https://google.com",
+       { class: tab_id(__method__.to_s), data: { action: "links#disable" } }]
     end
 
     def observations_at_where_tabs(query)
@@ -169,7 +176,7 @@ module Tabs
     def map_observations_tab(query)
       [:show_object.t(type: :map),
        map_observations_path(q: get_query_param(query)),
-       { class: tab_id(__method__.to_s) }]
+       { class: tab_id(__method__.to_s), data: { action: "links#disable" } }]
     end
 
     # NOTE: coerced_query_tab returns an array
