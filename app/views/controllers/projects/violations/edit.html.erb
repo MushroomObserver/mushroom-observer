@@ -12,8 +12,10 @@
         "Lat: #{@project.location.north} to #{@project.location.south}",
         "Lon: #{@project.location.west} to #{@project.location.east} ",
         "#{:WHERE.l}: #{@project.location.name}",
-        "", ""],
-      rows: violation_rows(@violations)
+        "", # consensus Name and Observation #
+        "" # Observation user
+      ],
+      rows: violation_rows(@project, @violations)
     )
   %>
 </div>
