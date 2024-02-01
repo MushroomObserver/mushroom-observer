@@ -119,20 +119,20 @@ module TableHelper
       "Lat: #{project.location.north} to #{project.location.south}",
       "Lon: #{project.location.west} to #{project.location.east} ",
       "#{:WHERE.l}: #{project.location.name}",
-      "", # consensus Name and Observation #
       "" # Observation user
     ]
   end
 
   def violation_rows(project, violations)
     violations.each_with_object([]) do |obs, rows|
-      rows << ["",
-               displayed_obs_when(project, obs),
-               obs.lat,
-               obs.long,
-               obs.where,
-               link_to_object(obs, obs.text_name) + " (#{obs.id})",
-               obs.user.name]
+      rows << [
+        link_to_object(obs, obs.text_name) + " (#{obs.id})",
+        displayed_obs_when(project, obs),
+        obs.lat,
+        obs.long,
+        obs.where,
+        obs.user.name
+      ]
     end
   end
 
