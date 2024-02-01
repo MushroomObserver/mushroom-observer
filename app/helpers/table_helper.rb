@@ -127,16 +127,16 @@ module TableHelper
     violations.each_with_object([]) do |obs, rows|
       rows << [
         link_to_object(obs, obs.text_name) + " (#{obs.id})",
-        displayed_obs_when(project, obs),
-        obs.lat,
-        obs.long,
+        styled_obs_when(project, obs),
+        styled_obs_lat(project, obs),
+        styled_obs_long(project, obs),
         obs.where,
         obs.user.name
       ]
     end
   end
 
-  def displayed_obs_when(project, obs)
+  def styled_obs_when(project, obs)
     if project.violates_date_range?(obs)
       tag.span(obs.when, class: "violation-highlight")
     else
@@ -144,12 +144,26 @@ module TableHelper
     end
   end
 
-  def displayed_obs_lat(project, obs)
+  def styled_obs_lat(project, obs)
+    return "" if obs.lat.nil?
+
+    if (project.location.south..project.location.north).cover?(obs.lat)
+      obs.lat
+    else
+      tag.span(obs.lat, class: "violation-highlight")
+    end
   end
 
-  def displayed_obs_lon(project, obs)
+  def styled_obs_long(project, obs)
+    return "" if obs.long.nil?
+
+    if (project.location.south..project.location.north).cover?(obs.long)
+      obs.long
+    else
+      tag.span(obs.long, class: "violation-highlight")
+    end
   end
 
-  def displayed_obs_where(project, obs)
+  def styled_obs_where(project, obs)
   end
 end
