@@ -112,15 +112,32 @@ module TableHelper
     tag.td(**args[:cell_opts]) { cell.to_s }
   end
 
-  def violation_rows(violations)
+  def violation_rows(project, violations)
     violations.each_with_object([]) do |obs, rows|
       rows << ["",
-               obs.when,
+               displayed_obs_when(project, obs),
                obs.lat,
                obs.long,
                obs.where,
                link_to_object(obs, obs.text_name) + " (#{obs.id})",
                obs.user.name]
     end
+  end
+
+  def displayed_obs_when(project, obs)
+    if project.violates_date_range?(obs)
+      tag.span(obs.when, class: "violation-highlight")
+    else
+      obs.when
+    end
+  end
+
+  def displayed_obs_lat(project, obs)
+  end
+
+  def displayed_obs_lon(project, obs)
+  end
+
+  def displayed_obs_where(project, obs)
   end
 end
