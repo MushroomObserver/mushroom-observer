@@ -10,23 +10,25 @@ module IdentifyHelper
   # with some additions to the lightbox JS, to keep track of the checked
   # state on show, and cost an extra db lookup. Not worth it, IMO.
   # - Nimmo 20230215
-  def mark_as_reviewed_toggle(id, selector = "caption_reviewed",
+  # https://stackoverflow.com/questions/68624668/how-can-i-submit-a-form-on-input-change-with-turbo-streams
+  def mark_as_reviewed_toggle(obs_id, selector = "caption_reviewed",
                               label_class = "", reviewed = nil)
     reviewed_text = reviewed ? :marked_as_reviewed.l : :mark_as_reviewed.l
 
-    tag.div(class: "d-inline", id: "#{selector}_toggle_#{id}") do
-      form_with(url: observation_view_path(id: id),
+    tag.div(class: "d-inline", id: "#{selector}_toggle_#{obs_id}") do
+      form_with(url: observation_view_path(id: obs_id),
                 class: "d-inline-block", method: :put,
-                data: { turbo: true }) do |f|
+                data: { turbo: true, controller: "reviewed-toggle" }) do |f|
         tag.div(class: "d-inline form-group form-inline") do
-          f.label("#{selector}_#{id}",
+          f.label("#{selector}_#{obs_id}",
                   class: "caption-reviewed-link #{label_class}") do
             concat(reviewed_text)
             concat(
               f.check_box(
                 :reviewed,
-                { checked: "1", class: "mx-3", id: "#{selector}_#{id}",
-                  onchange: "Rails.fire(this.closest('form'), 'submit')" }
+                { checked: reviewed, class: "mx-3", id: "#{selector}_#{obs_id}",
+                  data: { reviewed_toggle_target: "toggle",
+                          action: "reviewed-toggle#submitForm" } }
               )
             )
           end

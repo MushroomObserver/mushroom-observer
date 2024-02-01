@@ -221,6 +221,50 @@ class Vote < AbstractModel
        updated_at <= Time.zone.parse(MO.vote_cutoff))
   end
 
+  # Used by script/refresh_caches
+  # Mark an observation as `reviewed` by a user if they've already voted on it.
+  # (The user can also independently "mark as reviewed" in the help-identify
+  # UI, so this cronjob should not reset any obs to "not reviewed".)
+  #
+  # This method makes a hash of all votes, keyed by observation and user, and
+  # stores the `updated_at` as the value, in case we need to create a new
+  # `ObservationView` record. Next, we load all ObservationViews, keyed by
+  # observation and user, and if an observation_view with `reviewed == true`
+  # matches the key of the working hash, we reset all those values to `1`.
+  # All remaining hashes with a non-`1` value will either need to set the
+  # corresponding `observation_view` with `reviewed: true`, or create a new OV.
+  def self.update_observation_views_reviewed_column
+    join_statement = "JOIN `votes` ON " \
+      "`votes`.`observation_id` = `observation_views`.`observation_id` " \
+      "AND `votes`.`user_id` = `observation_views`.`user_id`"
+
+    ObservationView.where(reviewed: 0).joins(join_statement).
+      update_all(reviewed: 1)
+
+    # Gather a (big expensive) hash of OVs that are already in there:
+    already_done = {}
+    ObservationView.where(reviewed: 1).
+      select(:observation_id, :user_id).each do |ov|
+      already_done[[ov.observation_id, ov.user_id]] = nil
+    end
+
+    # Now create a list of OVs that are missing (dump anonymous votes):
+    new_entries = []
+    Vote.where.not(user_id: 0).
+      select(:observation_id, :user_id, :updated_at).each do |v|
+      next if already_done.key?([v.observation_id, v.user_id])
+
+      new_entries << {
+        observation_id: v.observation_id,
+        user_id: v.user_id,
+        last_view: v.updated_at,
+        reviewed: 1
+      }
+    end
+
+    ObservationView.upsert_all(new_entries)
+  end
+
   ##############################################################################
 
   protected

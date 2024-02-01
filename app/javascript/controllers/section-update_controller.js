@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 
+// Connects to data-controller="section-update"
 export default class extends Controller {
 
   // this is a handler for page elements that get updated

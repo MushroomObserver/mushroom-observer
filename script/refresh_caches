@@ -42,7 +42,9 @@ msgs = if dry_run
            Name.refresh_classification_caches +
            Name.propagate_generic_classifications +
            Observation.make_sure_no_observations_are_misspelled +
-           Observation.refresh_content_filter_caches
+           Observation.refresh_content_filter_caches +
+           Observation.refresh_needs_naming_column +
+           Vote.update_observation_views_reviewed_column
        end
 warn(msgs.join("\n")) if msgs.any?
 

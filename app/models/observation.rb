@@ -237,17 +237,20 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       where(arel_table[:when].format("%Y-%m-%d") <= latest)
   }
 
+  # For activerecord subqueries, DON'T pre-map the primary key (id)
   scope :with_name,
         -> { where.not(name: Name.unknown) }
   scope :without_name,
         -> { where(name: Name.unknown) }
   scope :with_name_above_genus,
-        -> { where(name_id: Name.with_rank_above_genus.map(&:id)) }
+        -> { where(name_id: Name.with_rank_above_genus) }
   scope :without_confident_name,
         -> { where(vote_cache: ..0) }
-  scope :needs_naming, lambda {
-    with_name_above_genus.or(without_confident_name)
-  }
+  # Use this definition when running script to populate the column:
+  # scope :needs_naming, lambda {
+  #   with_name_above_genus.or(without_confident_name)
+  # }
+  scope :needs_naming, -> { where(needs_naming: true) }
   scope :with_name_correctly_spelled,
         -> { joins({ namings: :name }).where(names: { correct_spelling: nil }) }
 
@@ -257,7 +260,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   }
   scope :without_vote_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
-    where.not(id: Vote.where(user_id: user_id).map(&:observation_id).uniq)
+    where.not(id: Vote.where(user_id: user_id))
   }
   scope :reviewed_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
@@ -267,17 +270,17 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :not_reviewed_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
     where.not(id: ObservationView.where(user_id: user_id, reviewed: 1).
-              map(&:observation_id).uniq)
+                  select(:observation_id))
   }
   scope :needs_naming_and_not_reviewed_by_user, lambda { |user|
-    needs_naming.without_vote_by_user(user).not_reviewed_by_user(user).distinct
+    needs_naming.not_reviewed_by_user(user).distinct
   }
   # Higher taxa: returns narrowed-down group of id'd obs,
   # in higher taxa under the given taxon
   # scope :needs_naming_by_taxon, lambda { |user, name|
   #   name_plus_subtaxa = Name.include_subtaxa_of(name)
-  #   subtaxa_above_genus = name_plus_subtaxa.with_rank_above_genus.map(&:id)
-  #   lower_subtaxa = name_plus_subtaxa.with_rank_at_or_below_genus.map(&:id)
+  #   subtaxa_above_genus = name_plus_subtaxa.with_rank_above_genus
+  #   lower_subtaxa = name_plus_subtaxa.with_rank_at_or_below_genus
 
   #   where(name_id: subtaxa_above_genus).or(
   #     Observation.where(name_id: lower_subtaxa).and(
@@ -311,14 +314,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     names_array = name.synonyms if args[:include_synonyms]
     # Keep names_array intact as is; maybe add more to its clone name_ids.
     # (I'm thinking it's easier to pass name ids to the Observation query)
-    name_ids = names_array.map(&:id)
+    name_ids = names_array
 
     # Add subtaxa to name_ids array. Subtaxa of synonyms too, if requested
     # (don't modify the names_array we're iterating over)
     if args[:include_subtaxa]
       names_array.each do |n|
         # |= don't add duplicates
-        name_ids |= Name.subtaxa_of(n).map(&:id)
+        name_ids |= Name.subtaxa_of(n)
       end
     end
 
@@ -613,6 +616,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # mess up the mirrors because misspelled names are "invisible", so their
   # classification and lifeform and such will not necessarily be kept up to
   # date.  Fixes and returns a messages for each one that was wrong.
+  # Used by refresh_caches script
   def self.make_sure_no_observations_are_misspelled
     misspellings = Observation.joins(:name).
                    where(Name[:correct_spelling_id].not_eq(nil))
@@ -624,6 +628,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     misspellings.update_all(
       Observation[:name_id].eq(Name[:correct_spelling_id]).to_sql
     )
+  end
+
+  # Use the original definition of `needs_id` to set the column values.
+  # Used by refresh_caches script
+  def self.refresh_needs_naming_column
+    Observation.with_name_above_genus.or(without_confident_name).
+      update_all(needs_naming: true)
   end
 
   def update_view_stats
