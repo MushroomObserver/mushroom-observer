@@ -29,9 +29,10 @@ module MatrixBoxHelper
   end
 
   def render_cached_matrix_boxes(objects, locals)
-    # matrix box has two versions (image vote UI, or no)
+    # matrix box has one version except langs.
+    # css hides image vote ui when body.no-user
     objects.each do |object|
-      cache([object, logged_in_status]) do
+      cache(object) do
         concat(render(partial: "shared/matrix_box",
                       locals: { object: object }.merge(locals)))
       end
