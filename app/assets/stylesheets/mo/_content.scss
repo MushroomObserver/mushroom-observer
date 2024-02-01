@@ -13,9 +13,15 @@
   }
 }
 
-// logged-in-user or no-user are the body classes
+// content that requires a user, or for not-logged-in users
 .no-user {
   .require-user {
+    display: none;
+  }
+}
+
+.logged-in-user {
+  .not-logged-in {
     display: none;
   }
 }
