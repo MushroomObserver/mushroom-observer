@@ -522,7 +522,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :not_logged_in_show_includes, lambda {
     strict_loading.includes(
       { comments: :user },
-      { images: [:license, :user] },
+      { images: [:image_votes, :license, :user] },
       :location,
       { name: { synonym: :names } },
       { namings: [:name, :user, { votes: [:observation, :user] }] },
