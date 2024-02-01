@@ -31,16 +31,17 @@ class Synonym < AbstractModel
   # This actually happened to Fungi itself(!)  Not sure how it happened, and
   # obviously I'd prefer to fix the cause.  But meanwhile, might as well keep
   # the site working...
-
-  def self.make_sure_all_referenced_synonyms_exist
+  def self.make_sure_all_referenced_synonyms_exist(dry_run: false)
     references = Name.select(:synonym_id).where.not(synonym: nil).distinct.
-                 order(:synonym_id).pluck(:synonym_id)
+                 order(synonym_id: :asc).pluck(:synonym_id)
     records = Synonym.order(id: :asc).pluck(:id)
     unused  = records - references
     missing = references - records
 
-    Synonym.where(id: unused).delete_all
-    Synonym.insert_all(missing.map { |m| { id: m } }) if missing.present?
+    unless dry_run
+      Synonym.where(id: unused).delete_all if unused.present?
+      Synonym.insert_all(missing.map { |m| { id: m } }) if missing.present?
+    end
 
     changed_synonyms_msgs(unused, missing)
   end
