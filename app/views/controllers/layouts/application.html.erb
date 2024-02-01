@@ -4,7 +4,8 @@
 html_class = (Rails.env == "test") ? "" : "scroll-behavior-smooth"
 whos_calling = "#{controller.controller_name}__#{controller.action_name}"
 theme_class = "theme-#{@css_theme.underscore.dasherize}"
-body_class = class_names(whos_calling, theme_class)
+location_class = "location-format-#{User.current_location_format}"
+body_class = class_names(whos_calling, theme_class, location_class)
 %>
 <!DOCTYPE html>
 <html class="<%= html_class %>">

@@ -7,9 +7,23 @@ module ObjectLinkHelper
   #   Where: <%= where_string(obs.place_name) %>
   #
   def where_string(where, count = nil)
-    result = where.t
-    result += " (#{count})" if count
-    content_tag(:span, result)
+    versions = which_where(where)
+    postal = tag.span(versions[:postal], class: "location-postal")
+    scientific = tag.span(versions[:scientific],
+                          class: "location-scientific")
+
+    add_count = count ? " (#{count})" : ""
+    tag.span { [postal, scientific, add_count].safe_join }
+  end
+
+  # Returns a hash of { postal:, scientific: } versions of where.
+  def which_where(where)
+    reverse = Location.reverse_name(where)
+    if User.current_location_format == "scientific"
+      { postal: reverse, scientific: where }
+    else
+      { postal: where, scientific: reverse }
+    end
   end
 
   # Wrap location name in link to show_location / observations/index.
