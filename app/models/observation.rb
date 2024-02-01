@@ -580,30 +580,34 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # This is meant to be run nightly to ensure that the cached name
   # and location data used by content filters is kept in sync.
-  def self.refresh_content_filter_caches
-    refresh_cached_column("name", "lifeform") +
-      refresh_cached_column("name", "text_name") +
-      refresh_cached_column("name", "classification") +
-      refresh_cached_column("location", "name", "where")
+  def self.refresh_content_filter_caches(dry_run: false)
+    refresh_cached_column(type: "name", foreign: "lifeform",
+                          dry_run: dry_run) +
+      refresh_cached_column(type: "name", foreign: "text_name",
+                            dry_run: dry_run) +
+      refresh_cached_column(type: "name", foreign: "classification",
+                            dry_run: dry_run) +
+      refresh_cached_column(type: "location", foreign: "name", local: "where",
+                            dry_run: dry_run)
   end
 
   # Refresh a column which is a mirror of a foreign column.  Fixes all the
   # errors, and reports which ids were broken.
-  def self.refresh_cached_column(type, foreign, local = foreign)
+  def self.refresh_cached_column(type: nil, foreign: nil, local: foreign,
+                                 dry_run: false)
     tbl = type.camelize.constantize.arel_table
-    broken_caches = get_broken_caches(type, tbl, foreign, local)
-    broken_caches.map do |id|
-      "Fixing #{type} #{foreign} for obs ##{id}."
+    query = Observation.joins(type.to_sym).
+            where(Observation[local.to_sym].not_eq(tbl[foreign.to_sym]))
+    msgs = query.map do |obs|
+      "Fixing #{type} #{foreign} for obs ##{obs.id}, " \
+        "was #{obs.send(local).inspect}."
     end
-    # Refresh the mirror of a foreign table's column in the observations table.
-    broken_caches.update_all(
-      Observation[local.to_sym].eq(tbl[foreign.to_sym]).to_sql
-    )
-  end
-
-  private_class_method def self.get_broken_caches(type, tbl, foreign, local)
-    Observation.joins(type.to_sym).
-      where(Observation[local.to_sym].not_eq(tbl[foreign.to_sym]))
+    unless dry_run
+      query.update_all(
+        Observation[local.to_sym].eq(tbl[foreign.to_sym]).to_sql
+      )
+    end
+    msgs
   end
 
   # Used by Name and Location to update the observation cache when a cached
@@ -617,24 +621,33 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # classification and lifeform and such will not necessarily be kept up to
   # date.  Fixes and returns a messages for each one that was wrong.
   # Used by refresh_caches script
-  def self.make_sure_no_observations_are_misspelled
-    misspellings = Observation.joins(:name).
-                   where(Name[:correct_spelling_id].not_eq(nil))
-
-    misspellings.
-      pluck(Observation[:id], Name[:text_name]).map do |id, search_name|
-      "Observation ##{id} was misspelled: #{search_name.inspect}"
+  def self.make_sure_no_observations_are_misspelled(dry_run: false)
+    query = Observation.joins(:name).
+            where(Name[:correct_spelling_id].not_eq(nil))
+    msgs = query.pluck(Observation[:id], Name[:text_name]).
+           map do |id, search_name|
+             "Observation ##{id} was misspelled: #{search_name.inspect}"
+           end
+    unless dry_run
+      query.update_all(
+        Observation[:name_id].eq(Name[:correct_spelling_id]).to_sql
+      )
     end
-    misspellings.update_all(
-      Observation[:name_id].eq(Name[:correct_spelling_id]).to_sql
-    )
+    msgs
   end
 
   # Use the original definition of `needs_id` to set the column values.
   # Used by refresh_caches script
-  def self.refresh_needs_naming_column
-    Observation.with_name_above_genus.or(without_confident_name).
-      update_all(needs_naming: true)
+  def self.refresh_needs_naming_column(dry_run: false)
+    # Need to repeat `needs_naming:false` even though AR will optimize it out
+    # and it'll only appear once in the resulting WHERE condition. Go figure.
+    query = Observation.where(needs_naming: false).without_confident_name.
+            or(where(needs_naming: false).with_name_above_genus)
+    msgs = query.map do |obs|
+      "Observation #{obs.id}, #{obs.text_name}, needs a name."
+    end
+    query.update_all(needs_naming: true) unless dry_run
+    msgs
   end
 
   def update_view_stats
