@@ -21,6 +21,8 @@
 #  open_membership  Enable users to add themselves, disable shared editing
 #  location::
 #  image::
+#  start_date::     start date or nil
+#  end_date::       end date or nil
 #
 #  == Methods
 #
@@ -429,6 +431,16 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
       violates_date_range?(observation)
   end
 
+  def violates_location?(observation)
+    return false if location.blank?
+
+    !location.found_here?(observation)
+  end
+
+  def violates_date_range?(observation)
+    excluded_from_date_range?(observation)
+  end
+
   private ###############################
 
   def obs_geoloc_outside_project_location
@@ -446,16 +458,6 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
                  # This is safe (doesn't invert observations.where(lat: nil))
                  invert_where
       )
-  end
-
-  def violates_location?(observation)
-    return false if location.blank?
-
-    !location.found_here?(observation)
-  end
-
-  def violates_date_range?(observation)
-    excluded_from_date_range?(observation)
   end
 
   def excluded_from_date_range?(observation)
