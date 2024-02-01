@@ -1,3 +1,17 @@
+// location format, when both are printed
+
+.location-format-postal {
+  .location-scientific {
+    display: none;
+  }
+}
+
+.location-format-scientific {
+  .location-postal {
+    display: none;
+  }
+}
+
 //
 // interest eyes
 // --------------------------------------------------
