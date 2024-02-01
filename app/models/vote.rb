@@ -234,35 +234,51 @@ class Vote < AbstractModel
   # All remaining hashes with a non-`1` value will either need to set the
   # corresponding `observation_view` with `reviewed: true`, or create a new OV.
   def self.update_observation_views_reviewed_column
-    join_statement = "JOIN `votes` ON " \
-      "`votes`.`observation_id` = `observation_views`.`observation_id` " \
-      "AND `votes`.`user_id` = `observation_views`.`user_id`"
+    join_votes = "JOIN `votes` "
+    on = "ON `votes`.`observation_id` = `observation_views`.`observation_id` " \
+         "AND `votes`.`user_id` = `observation_views`.`user_id`"
 
-    ObservationView.where(reviewed: 0).joins(join_statement).
+    ObservationView.where(reviewed: 0).joins(join_votes + on).
       update_all(reviewed: 1)
 
-    # Gather a (big expensive) hash of OVs that are already in there:
-    already_done = {}
-    ObservationView.where(reviewed: 1).
-      select(:observation_id, :user_id).each do |ov|
-      already_done[[ov.observation_id, ov.user_id]] = nil
-    end
+    join_ov = "LEFT OUTER JOIN `observation_views` "
+    num_added = 0
 
-    # Now create a list of OVs that are missing (dump anonymous votes):
-    new_entries = []
-    Vote.where.not(user_id: 0).
-      select(:observation_id, :user_id, :updated_at).each do |v|
-      next if already_done.key?([v.observation_id, v.user_id])
-
-      new_entries << {
-        observation_id: v.observation_id,
-        user_id: v.user_id,
-        last_view: v.updated_at,
+    Vote.where.not(user_id: 0).joins(join_ov + on).
+      where(observation_view: { id: nil }).
+      select(:observation_id, :user_id, :updated_at).each do |vote|
+      ObservationView.create!(
+        observation_id: vote.observation_id,
+        user_id: vote.user_id,
+        last_view: vote.updated_at,
         reviewed: 1
-      }
+      )
+      num_added += 1
     end
+    p(num_added)
 
-    ObservationView.upsert_all(new_entries)
+    # Gather a (big expensive) hash of OVs that are already in there:
+    # already_done = {}
+    # ObservationView.where(reviewed: 1).
+    #   select(:observation_id, :user_id).each do |ov|
+    #   already_done[[ov.observation_id, ov.user_id]] = nil
+    # end
+
+    # # Now create a list of OVs that are missing (dump anonymous votes):
+    # new_entries = []
+    # Vote.where.not(user_id: 0).
+    #   select(:observation_id, :user_id, :updated_at).each do |v|
+    #   next if already_done.key?([v.observation_id, v.user_id])
+
+    #   new_entries << {
+    #     observation_id: v.observation_id,
+    #     user_id: v.user_id,
+    #     last_view: v.updated_at,
+    #     reviewed: 1
+    #   }
+    # end
+
+    # ObservationView.upsert_all(new_entries)
   end
 
   ##############################################################################
