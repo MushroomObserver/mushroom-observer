@@ -234,14 +234,6 @@ class Vote < AbstractModel
   # All remaining hashes with a non-`1` value will either need to set the
   # corresponding `observation_view` with `reviewed: true`, or create a new OV.
   def self.update_observation_views_reviewed_column
-
-    # has to be SQL or Arel because these tables are not associated.
-    # ov = ObservationView.arel_table
-    # v = Vote.arel_table
-    # ov.where(ov[:reviewed].eq(1)).join(v).
-    #   on(ov[:observation_id].eq(v[:observation_id]).
-    #   and(ov[:user_id].eq(v[:user_id])))
-
     join_statement = "JOIN `votes` ON " \
       "`votes`.`observation_id` = `observation_views`.`observation_id` " \
       "AND `votes`.`user_id` = `observation_views`.`user_id`"
@@ -251,16 +243,16 @@ class Vote < AbstractModel
 
     # Gather a (big expensive) hash of OVs that are already in there:
     already_done = {}
-    ObservationView.where(reviewed: true).
+    ObservationView.where(reviewed: 1).
       select(:observation_id, :user_id).each do |ov|
-      already_done[[ov.observation_id, ov.user_id]] = 1
+      already_done[[ov.observation_id, ov.user_id]] = nil
     end
 
-    # Now create a list of OVs that are missing:
+    # Now create a list of OVs that are missing (dump anonymous votes):
     new_entries = []
     Vote.where.not(user_id: 0).
       select(:observation_id, :user_id, :updated_at).each do |v|
-      next if already_done[v.observation_id, v.user_id].exist?
+      next if already_done.key?([v.observation_id, v.user_id])
 
       new_entries << {
         observation_id: v.observation_id,
@@ -271,35 +263,6 @@ class Vote < AbstractModel
     end
 
     ObservationView.upsert_all(new_entries)
-
-    # working_hash = {}
-    # Because of anonymous voting, many votes have user_id: 0 and are useless
-    # for setting `reviewed` status. Filter those out.
-    # Store the updated_at as the value (in case we need a new OV)
-    # Vote.where.not(user_id: 0).
-    #   select(:observation_id, :user_id, :updated_at).each do |v|
-    #   working_hash[[v.observation_id, v.user_id]] = v.updated_at
-    # end
-
-    # ObservationView.where(reviewed: true).
-    #   select(:observation_id, :user_id).each do |ov|
-    #   if working_hash[[ov.observation_id, ov.user_id]].present?
-    #     working_hash[[ov.observation_id, ov.user_id]] = 1
-    #   end
-    # end
-
-    # # Remove where we've already got it reviewed.
-    # working_hash.reject! { |_k, v| v == 1 }
-
-    # working_hash.each do |k, v|
-    #   ov = ObservationView.find_by(observation_id: k[0], user_id: k[1])
-    #   if ov
-    #     ov.update!(reviewed: 1)
-    #   else
-    #     ObservationView.create!(observation_id: k[0], user_id: k[1],
-    #                             last_viewed: v, reviewed: 1)
-    #   end
-    # end
   end
 
   ##############################################################################

@@ -15,17 +15,19 @@ class ObservationView < AbstractModel
   belongs_to :observation
   belongs_to :user
 
-  def self.update_view_stats(obs_id, user_id)
+  def self.update_view_stats(obs_id, user_id, reviewed = nil)
     return if obs_id.blank? || user_id.blank?
 
-    # Either way, this returns the observation view so you can do other stuff
-    # like mark it reviewed
+    args = { observation_id: obs_id, user_id: user_id,
+             last_view: Time.zone.now }
+    args[:reviewed] = reviewed if reviewed.present?
+
+    # Either way, this returns the observation view instance
     if (view = find_by(observation_id: obs_id, user_id: user_id))
-      view.update!(last_view: Time.zone.now)
+      view.update!(args)
       view
     else
-      create!(observation_id: obs_id, user_id: user_id,
-              last_view: Time.zone.now)
+      create!(args)
     end
   end
 end
