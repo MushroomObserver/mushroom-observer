@@ -112,6 +112,18 @@ module TableHelper
     tag.td(**args[:cell_opts]) { cell.to_s }
   end
 
+  def violation_headers(project)
+    [
+      "#{:CONSTRAINTS.l}:",
+      "#{:DATES.l}: #{project.date_range}",
+      "Lat: #{project.location.north} to #{project.location.south}",
+      "Lon: #{project.location.west} to #{project.location.east} ",
+      "#{:WHERE.l}: #{project.location.name}",
+      "", # consensus Name and Observation #
+      "" # Observation user
+    ]
+  end
+
   def violation_rows(project, violations)
     violations.each_with_object([]) do |obs, rows|
       rows << ["",

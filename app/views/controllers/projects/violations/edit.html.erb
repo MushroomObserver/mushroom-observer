@@ -6,15 +6,7 @@
 <div id="violations">
   <%=
     make_table(
-      headers: [
-        "#{:CONSTRAINTS.l}:",
-        "#{:DATES.l}: #{@project.date_range}",
-        "Lat: #{@project.location.north} to #{@project.location.south}",
-        "Lon: #{@project.location.west} to #{@project.location.east} ",
-        "#{:WHERE.l}: #{@project.location.name}",
-        "", # consensus Name and Observation #
-        "" # Observation user
-      ],
+      headers: violation_headers(@project),
       rows: violation_rows(@project, @violations)
     )
   %>
