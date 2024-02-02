@@ -118,8 +118,9 @@ module TableHelper
       "#{:DATES.l}: #{project.date_range}",
       "Lat: #{project.location.north} to #{project.location.south}",
       "Lon: #{project.location.west} to #{project.location.east} ",
-      "#{:WHERE.l}: #{project.location.name}",
-      "" # Observation user
+      location_link(project.location.display_name, project.location,
+                    nil, false),
+      "" # column for observation.user
     ]
   end
 
@@ -130,8 +131,8 @@ module TableHelper
         styled_obs_when(project, obs),
         styled_obs_lat(project, obs),
         styled_obs_long(project, obs),
-        obs.where,
-        obs.user.name
+        styled_obs_where(project, obs),
+        user_link(obs.user)
       ]
     end
   end
@@ -165,5 +166,11 @@ module TableHelper
   end
 
   def styled_obs_where(project, obs)
+    if project.violates_location?(obs)
+      tag.span(location_link(obs.place_name, obs.location, nil, false),
+               class: "violation-highlight")
+    else
+      location_link(obs.place_name, obs.location, nil, false)
+    end
   end
 end
