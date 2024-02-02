@@ -132,7 +132,6 @@ module Tabs
       links = [
         *observations_at_where_tabs(query), # maybe multiple links
         map_observations_tab(query),
-        dummy_disable_tab,
         *observations_coerced_query_tabs(query), # multiple links
         observations_add_to_list_tab(query),
         observations_download_as_csv_tab(query)
@@ -140,6 +139,7 @@ module Tabs
       links.reject(&:empty?)
     end
 
+    # for debugging
     def dummy_disable_tab
       ["Dummy link",
        "https://google.com",
