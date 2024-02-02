@@ -356,6 +356,10 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
+  def where
+    location ? location.name : ""
+  end
+
   def place_name
     location ? location.display_name : ""
   end
