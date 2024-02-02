@@ -212,7 +212,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     select("Locations", from: "search_type")
     click_button("Search")
     # assert_selector("#results a[href]")
-    labels = find_all("#results a[href]").map(&:text)
+    labels = find_all("#results a[href] .location-postal").map(&:text)
     assert(labels.any? { |l| l.end_with?("Canada") },
            "Expected one of the results to be in Canada.\n" \
            "Found these: #{labels.inspect}")

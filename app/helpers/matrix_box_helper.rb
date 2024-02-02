@@ -139,11 +139,11 @@ module MatrixBoxHelper
   end
 
   def matrix_box_where(presenter)
-    return unless presenter.place_name
+    return unless presenter.where
 
     tag.div(class: "rss-where") do
       tag.small do
-        location_link(presenter.place_name, presenter.where)
+        location_link(presenter.where, presenter.location)
       end
     end
   end

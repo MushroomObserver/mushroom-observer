@@ -11,8 +11,8 @@ class MatrixBoxPresenter < BasePresenter
     :name,       # name of object or target
     :what,       # link to object or target
     :consensus,  # object for determining the current favorite name of an obs
-    :place_name, # place name of location
-    :where,      # location (object) of object or target
+    :where,      # place name of location
+    :location,   # location (object) of object or target
     :detail,     # string with extra details
     :time        # when object or target was last modified
 
@@ -47,8 +47,8 @@ class MatrixBoxPresenter < BasePresenter
                 end
     self.what = target || rss_log
     if target.respond_to?(:location)
-      self.place_name = target.place_name
-      self.where = target.location
+      self.where = target.where
+      self.location = target.location
     end
     self.time = rss_log.updated_at
 
@@ -91,8 +91,8 @@ class MatrixBoxPresenter < BasePresenter
     self.who        = observation.user if observation.user
     self.name       = observation.format_name.t.break_name.small_author
     self.what       = observation
-    self.place_name = observation.place_name
-    self.where      = observation.location
+    self.where      = observation.where
+    self.location   = observation.location
     self.consensus  = Observation::NamingConsensus.new(observation)
     if observation.rss_log
       self.detail = observation.rss_log.detail
@@ -129,8 +129,8 @@ class MatrixBoxPresenter < BasePresenter
     # rubocop:enable Rails/OutputSafety
     self.name = user.unique_text_name
     self.what = user
-    self.place_name = nil
-    self.where = user.location if user.location
+    self.where = user.location.name if user.location
+    self.location = user.location if user.location
     return unless user.image_id
 
     # Not user.images because that's every image they've uploaded
