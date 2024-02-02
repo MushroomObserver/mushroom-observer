@@ -1,3 +1,4 @@
+// Cached content display/hide
 // location format, when both are printed
 
 .location-format-postal {
@@ -8,6 +9,19 @@
 
 .location-format-scientific {
   .location-postal {
+    display: none;
+  }
+}
+
+// content that requires a user, or for not-logged-in users
+.no-user {
+  .require-user {
+    display: none;
+  }
+}
+
+.logged-in-user {
+  .not-logged-in {
     display: none;
   }
 }

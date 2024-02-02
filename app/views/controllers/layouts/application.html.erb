@@ -2,10 +2,11 @@
 @css_theme = css_theme
 
 html_class = (Rails.env == "test") ? "" : "scroll-behavior-smooth"
-whos_calling = "#{controller.controller_name}__#{controller.action_name}"
-theme_class = "theme-#{@css_theme.underscore.dasherize}"
-location_class = "location-format-#{User.current_location_format}"
-body_class = class_names(whos_calling, theme_class, location_class)
+ctrlr_action = "#{controller.controller_name}__#{controller.action_name}"
+theme = "theme-#{@css_theme.underscore.dasherize}"
+location_format = "location-format-#{User.current_location_format}"
+logged_in = User.current ? "logged-in-user" : "no-user"
+body_class = class_names(ctrlr_action, theme, location_format, logged_in)
 %>
 <!DOCTYPE html>
 <html class="<%= html_class %>">
