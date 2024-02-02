@@ -166,7 +166,7 @@ module ObservationsHelper
            else
              :show_observation_seen_at.t
            end}:",
-        location_link(obs.place_name, obs.location, nil, true)
+        location_link(obs.where, obs.location, nil, true)
       ].safe_join(" ")
     end
   end

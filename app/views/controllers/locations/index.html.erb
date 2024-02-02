@@ -33,9 +33,8 @@ flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
         <div class="list-group">
           <% @known_data.each do |location| %>
             <div class="list-group-item">
-              <%= link_with_query(location.display_name.t,
-                                  location.show_link_args) %>
-              (<%= observation_counts[location.id].to_i %>)
+              <%= location_link(location.name.t, location,
+                                observation_counts[location.id].to_i) %>
             </div>
           <% end %>
         </div>
@@ -51,14 +50,16 @@ flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
       </div>
       <%= paginate_block(@undef_pages, { html_id: "locations_undefined" }) do %>
         <div class="list-group">
-          <% @undef_data.each do |location, count|
+          <% @undef_data.each do |location_name, count|
             if @undef_location_format == "scientific"
-              location = Location.reverse_name(location)
+              location_name_f = Location.reverse_name(location_name)
+            else
+              location_name_f = location_name
             end %>
             <div class="list-group-item">
-              <%= location_link(location, nil, count) %>
+              <%= location_link(location_name, nil, count) %>
               <%= link_to(:list_place_names_merge.t,
-                          location_merges_form_path(where: location)) %>
+                          location_merges_form_path(where: location_name_f)) %>
             </div>
           <% end %>
         </div>
