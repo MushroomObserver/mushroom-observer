@@ -137,6 +137,10 @@ module TableHelper
     end
   end
 
+  #########
+
+  private
+
   def styled_obs_when(project, obs)
     if project.violates_date_range?(obs)
       tag.span(obs.when, class: "violation-highlight")
