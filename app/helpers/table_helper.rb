@@ -146,31 +146,26 @@ module TableHelper
   end
 
   def styled_obs_lat(project, obs)
-    return "" if obs.lat.nil?
+    return "" if obs.lat.blank?
+    return obs.lat if project.location.contains_lat?(obs.lat)
 
-    if (project.location.south..project.location.north).cover?(obs.lat)
-      obs.lat
-    else
-      tag.span(obs.lat, class: "violation-highlight")
-    end
+    tag.span(obs.lat, class: "violation-highlight")
   end
 
   def styled_obs_long(project, obs)
-    return "" if obs.long.nil?
+    return "" if obs.long.blank?
+    return obs.long if project.location.contains_long?(obs.long)
 
-    if (project.location.south..project.location.north).cover?(obs.long)
-      obs.long
-    else
-      tag.span(obs.long, class: "violation-highlight")
-    end
+    tag.span(obs.long, class: "violation-highlight")
   end
 
   def styled_obs_where(project, obs)
-    if project.violates_location?(obs)
+    if obs.lat.present? || # If lat/lon present, ignore Location for compliance
+       project.location.found_here?(obs)
+      location_link(obs.place_name, obs.location, nil, false)
+    else
       tag.span(location_link(obs.place_name, obs.location, nil, false),
                class: "violation-highlight")
-    else
-      location_link(obs.place_name, obs.location, nil, false)
     end
   end
 end
