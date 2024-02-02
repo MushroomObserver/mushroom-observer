@@ -438,7 +438,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def violates_date_range?(observation)
-    excluded_from_date_range?(observation)
+    !(start_date..end_date).cover?(observation.when)
   end
 
   private ###############################
@@ -458,22 +458,5 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
                  # This is safe (doesn't invert observations.where(lat: nil))
                  invert_where
       )
-  end
-
-  def excluded_from_date_range?(observation)
-    !included_in_date_range?(observation)
-  end
-
-  def included_in_date_range?(observation)
-    starts_no_later_than?(observation) &&
-      ends_no_earlier_than?(observation)
-  end
-
-  def starts_no_later_than?(observation)
-    !start_date&.after?(observation.when)
-  end
-
-  def ends_no_earlier_than?(observation)
-    !end_date&.before?(observation.when)
   end
 end
