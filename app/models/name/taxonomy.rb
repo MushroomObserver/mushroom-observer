@@ -624,15 +624,21 @@ module Name::Taxonomy
 
     # This is meant to be run nightly to ensure that all the classification
     # caches are up to date.  It only pays attention to genera or higher.
-    def refresh_classification_caches
-      Name.where(rank: 0..Name.ranks[:Genus]).
-        joins(:description).
+    def refresh_classification_caches(dry_run: false)
+      query =
+        Name.joins(:description).
+        where(rank: 0..Name.ranks[:Genus]).
         where(NameDescription[:classification].not_eq(Name[:classification])).
-        where(NameDescription[:classification].not_blank).
-        update_all(
+        where(NameDescription[:classification].not_blank)
+      msgs = query.map do |name|
+        "Classification for #{name.search_name} didn't match description."
+      end
+      unless dry_run || msgs.none?
+        query.update_all(
           Name[:classification].eq(NameDescription[:classification]).to_sql
         )
-      []
+      end
+      msgs
     end
   end
 end
