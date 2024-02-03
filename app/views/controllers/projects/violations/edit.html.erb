@@ -1,7 +1,11 @@
 <%
-  add_page_title(link_to_object(@project).t + ", " + :violations_index_title.t)
+  add_page_title( :violations_index_title.t)
   @container = :wide
 %>
+
+<h4 class="pb-3">
+  <%= :PROJECT.l + ": " + link_to_object(@project).t %>
+<h4>
 
 <div id="violations">
   <%=
