@@ -203,7 +203,6 @@ class ProjectsController < ApplicationController
     if pattern.match(/^\d+$/) &&
        (@project = Project.safe_find(pattern))
       set_ivars_for_show
-      check_constraint_violations
       render("show", location: project_path(@project.id))
     else
       query = create_query(:Project, :pattern_search, pattern: pattern)
