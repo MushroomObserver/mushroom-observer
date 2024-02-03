@@ -22,7 +22,6 @@ class ProjectsController < ApplicationController
     return unless find_project_and_where!
 
     set_ivars_for_show
-    check_constraint_violations
   end
 
   ##############################################################################
