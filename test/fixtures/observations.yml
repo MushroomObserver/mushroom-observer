@@ -678,6 +678,13 @@ deprecated_name_obs:
   lifeform: " lichen "
   rss_log:
 
+# meets constraints of falmouth_2023_09_project
+falmouth_2023_09_obs:
+  <<: *DEFAULTS
+  when: 2023-09-15
+  where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
+  location: falmouth
+
 falmouth_2022_obs:
   <<: *DEFAULTS
   when: 2022-09-15 # outside of dates of falmouth_2023_09_project

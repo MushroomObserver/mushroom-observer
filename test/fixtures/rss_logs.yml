@@ -432,6 +432,10 @@ falmouth_2022_obs_rss_log:
   <<: *DEFAULTS
   observation: falmouth_2022_obs
 
+falmouth_2023_09_obs_rss_log:
+  <<: *DEFAULTS
+  observation: falmouth_2023_09_obs
+
 nybg_2023_09_obs_rss_log:
   <<: *DEFAULTS
   observation: nybg_2023_09_obs

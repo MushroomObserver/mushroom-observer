@@ -10,6 +10,9 @@ module Projects
       violations_count = project.count_violations
       assert(violations_count.positive?,
              "Test needs Project fixture with constraint violations")
+      assert(project.observations.count > violations_count,
+             "Test need Project fixture with compliant Observation(s)")
+      compliant_observation = observations(:falmouth_2023_09_obs)
       user = project.user
 
       login(user.login)
@@ -17,14 +20,11 @@ module Projects
 
       assert_response(:success)
 
-      assert_select("#title", { text: /#{project.title}/ },
-                    "Page title should include project name")
-
+      assert_select("#content", { text: /#{project.title}/ },
+                    "Page should include project name")
       assert_select("#content", { text: /#{:CONSTRAINTS.l}/ })
-      assert_select(
-        "#content", { text: /#{project.date_range}/ },
-        "Missing Project date range"
-      )
+      assert_select("#content", { text: /#{project.date_range}/ },
+                    "Missing Project date range")
       assert_select(
         "#content",
         { text: /#{project.location.north} \S+ #{project.location.south}/ },
@@ -33,15 +33,23 @@ module Projects
       assert_select(
         "#content",
         { text: /#{project.location.west} \S+ #{project.location.east}/ },
-        "Missing Project longitude rants"
+        "Missing Project longitude range"
       )
-
       project.violations.each do |violation|
         assert_select(
-          "#violations a", { href: /#{observation_path(violation)}/ },
-          "Non-compliant list should link to Observation #{violation}"
+          "#violations a[href *= '#{violation.id}']", { count: 1 },
+          "Non-compliant list should have a link to Observation #{violation.id}"
         )
       end
+      Rails.root.join("tmp/response.html").open("w") do |file|
+        file.write(@response.body)
+      end
+
+      assert_select(
+        # "#violations a", { href: /#{observation_path(compliant_observation)}/ },
+        "#violations a[href *= '#{compliant_observation.id}']", { count: 0 },
+        "Non-compliant list should not link to compliant Observation"
+      )
     end
   end
 end
