@@ -41,12 +41,8 @@ module Projects
           "Non-compliant list should have a link to Observation #{violation.id}"
         )
       end
-      Rails.root.join("tmp/response.html").open("w") do |file|
-        file.write(@response.body)
-      end
 
       assert_select(
-        # "#violations a", { href: /#{observation_path(compliant_observation)}/ },
         "#violations a[href *= '#{compliant_observation.id}']", { count: 0 },
         "Non-compliant list should not link to compliant Observation"
       )
