@@ -98,7 +98,7 @@ module MushroomObserver
     # Just starting to use Rails caching on 7.1, so we're current
     config.active_support.cache_format_version = 7.1
 
-    # Set up solid_cache as the cache store
+    # Set up memcached as the cache store everywhere
     config.cache_store = :mem_cache_store
     # config.cache_store = :solid_cache_store
 
