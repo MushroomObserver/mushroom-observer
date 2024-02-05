@@ -53,6 +53,8 @@ gem("turbo-rails")
 # gem("redis", "~> 4.0")
 # dalli to run the memcached server
 gem("dalli", "~> 3.2")
+# solid_cache for cache store db
+gem("solid_cache")
 # Compile SCSS for stylesheets
 gem("sassc-rails")
 # add locale to cache key
