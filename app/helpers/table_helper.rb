@@ -151,16 +151,33 @@ module TableHelper
 
   def styled_obs_lat(project, obs)
     return "" if obs.lat.blank?
-    return obs.lat if project.location.contains_lat?(obs.lat)
 
-    tag.span(obs.lat, class: "violation-highlight")
+    displayed_coord =
+      coord_or_hidden(obs: obs, project: project, coord: obs.lat)
+    return displayed_coord if project.location.contains_lat?(obs.lat)
+
+    tag.span(displayed_coord, class: "violation-highlight")
   end
 
   def styled_obs_long(project, obs)
     return "" if obs.long.blank?
-    return obs.long if project.location.contains_long?(obs.long)
 
-    tag.span(obs.long, class: "violation-highlight")
+    displayed_coord =
+      coord_or_hidden(obs: obs, project: project, coord: obs.long)
+
+    return displayed_coord if project.location.contains_long?(obs.long)
+
+    tag.span(displayed_coord, class: "violation-highlight")
+  end
+
+  def coord_or_hidden(obs:, project:, coord:)
+    if !obs.gps_hidden? ||
+       User.current == obs.user ||
+       project.trusted_by?(User.current) && project.admin?(User.current)
+      coord
+    else
+      :hidden.l
+    end
   end
 
   def styled_obs_where(project, obs)

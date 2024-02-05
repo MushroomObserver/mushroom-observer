@@ -496,6 +496,7 @@
   full_name: full name
   FULL_NAMES: Full Names
   full_names: full names
+  hidden: hidden
   ICN_ID: ICN Identifier
   icn_id: ICN Identifier
   ID: ID

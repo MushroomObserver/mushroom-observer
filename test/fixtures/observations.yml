@@ -687,8 +687,6 @@ falmouth_2023_09_obs:
 
 brett_woods_2023_09_obs:
   <<: *DEFAULTS
-  name: coprinus_comatus
-  text_name: Coprinus comatus
   when: 2023-09-16
   where: Brett Woods, Fairfield Co., Connecticut, USA
   lat: 41.2039
