@@ -205,4 +205,4 @@ falmouth_2023_09_project:
   start_date: 2023-09-01
   end_date: 2023-09-30
   location: falmouth
-  observations: falmouth_2023_09_obs, falmouth_2022_obs, nybg_2023_09_obs
+  observations: brett_woods_2023_09_obs, falmouth_2023_09_obs, falmouth_2022_obs, nybg_2023_09_obs

@@ -436,6 +436,10 @@ falmouth_2023_09_obs_rss_log:
   <<: *DEFAULTS
   observation: falmouth_2023_09_obs
 
+brett_woods_2023_09_obs_rss_log:
+  <<: *DEFAULTS
+  observation: brett_woods_2023_09_obs
+
 nybg_2023_09_obs_rss_log:
   <<: *DEFAULTS
   observation: nybg_2023_09_obs
