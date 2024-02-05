@@ -102,7 +102,7 @@ module MushroomObserver
     config.cache_store = :mem_cache_store
     # config.cache_store = :solid_cache_store
 
-    # config.solid_cache.connects_to = { database: { writing: :cache } }
+    config.solid_cache.connects_to = { database: { writing: :cache } }
   end
 end
 
