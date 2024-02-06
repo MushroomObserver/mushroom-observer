@@ -30,7 +30,7 @@ module Tabs
 
       [:show_observation_manage_species_lists.l,
        add_query_param(edit_observation_species_lists_path(obs.id)),
-       { class: tab_id(__method__.to_s) }]
+       { class: tab_id(__method__.to_s), icon: :manage_lists }]
     end
 
     # Name panel -- generates HTML
@@ -287,10 +287,20 @@ module Tabs
       ]
     end
 
+    # Buttons in "Details" panel header
+    def obs_change_links(obs)
+      return unless check_permission(obs)
+
+      [
+        edit_button(target: obs, icon: :edit),
+        destroy_button(target: obs, icon: :delete)
+      ].safe_join(" | ")
+    end
+
     def edit_observation_tab(obs)
       [:edit_object.t(type: Observation),
        add_query_param(edit_observation_path(obs.id)),
-       { class: "#{tab_id(__method__.to_s)}_#{obs.id}" }]
+       { class: "#{tab_id(__method__.to_s)}_#{obs.id}", icon: :edit }]
     end
 
     def destroy_observation_tab(obs)

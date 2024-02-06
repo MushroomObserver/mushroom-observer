@@ -153,7 +153,8 @@ module LinkHelper
       deprecate: "ok-circle", # approved name needs to look "approved"
       approve: "exclamation-sign", # deprecated name needs to look "deprecated"
       synonyms: "random",
-      tracking: "bullhorn"
+      tracking: "bullhorn",
+      manage_lists: "indent-left"
     }.freeze
   end
 
