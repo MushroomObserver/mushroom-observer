@@ -78,6 +78,9 @@ MushroomObserver::Application.configure do
   # https://groups.google.com/g/rubyonrails-security/c/MmFO3LYQE8U?pli=1
   config.active_record.yaml_column_permitted_classes = [Symbol]
 
+  # Debugging strict loading - either :log, or :error out the page
+  # config.active_record.action_on_strict_loading_violation = :error
+
   # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr
 
