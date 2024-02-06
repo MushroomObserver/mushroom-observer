@@ -121,30 +121,7 @@ class NameDescription < Description
             where(public: true)
         }
   scope :show_includes, lambda {
-    strict_loading.includes(
-      { admin_groups: { users: :user_groups } },
-      :authors,
-      { comments: :user },
-      :editors,
-      :interests,
-      :license,
-      { name: [{ description: :reviewer },
-               { descriptions: :reviewer },
-               :interests,
-               :rss_log,
-               { synonym: :names }] },
-      { name_description_admins: :user_group },
-      { name_description_authors: :user },
-      { name_description_editors: :user },
-      { name_description_readers: :user_group },
-      { name_description_writers: :user_group },
-      :project,
-      { reader_groups: { users: :user_groups } },
-      :reviewer,
-      { user: :user_groups },
-      :versions,
-      { writer_groups: { users: :user_groups } }
-    )
+    strict_loading
   }
 
   EOL_NOTE_FIELDS = [
