@@ -123,15 +123,18 @@ module ContentHelper
   def panel_block(**args, &block)
     heading = panel_block_heading(args)
     footer = panel_block_footer(args)
+    content = capture(&block).to_s
 
     tag.div(
       class: "panel panel-default #{args[:class]}",
       **args.except(:class, :inner_class, :heading)
     ) do
       concat(heading)
-      concat(tag.div(class: "panel-body #{args[:inner_class]}") do
-        concat(capture(&block).to_s)
-      end)
+      if content.present?
+        concat(tag.div(class: "panel-body #{args[:inner_class]}") do
+          concat(content)
+        end)
+      end
       concat(footer)
     end
   end
