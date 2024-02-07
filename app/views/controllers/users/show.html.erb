@@ -7,8 +7,8 @@ add_tab_set(user_show_tabs(show_user: @show_user, user: @user))
 
 @container = :full
 
-rows = [] # user_stats_rows(@show_user, @user_data)
-paths = [] # user_stats_link_paths(@show_user)
+rows = user_stats_rows(@show_user, @user_data)
+paths = user_stats_link_paths(@show_user)
 total = 0
 %>
 
@@ -63,7 +63,6 @@ total = 0
 
   <div class="col-sm-6">
     <div class="text-center">
-      We are working on this page. User stats will be back shortly.
       <table class="table">
         <% rows.each do |row|
           field = row[:field]
@@ -103,7 +102,7 @@ total = 0
           </tr>
         <% end %>
       </table>
-      <%# if @life_list.num_species > 0
+      <%= if @life_list.num_species > 0
         :show_user_life_list.t(genera: @life_list.num_genera,
                                species: @life_list.num_species,
                                url: paths[:life_list])
