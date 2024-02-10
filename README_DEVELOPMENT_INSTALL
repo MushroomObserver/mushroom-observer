@@ -273,8 +273,8 @@ mo> rake lang:update
 #
 # 1. Check out <main> to get the `solid_cache` gem, new configs and migrations
 # 2. Run `bundle`
-# 3. Manually change your `config/database.yml`, since that file is not checked
-#    in to git. The relevant change regards **nesting** the two db configs:
+# 3. You have to manually change your `config/database.yml`, since that file is
+#    not checked in to git. The relevant change regards _nesting_ db configs:
 #
 # development:
 #   primary:
