@@ -20,18 +20,14 @@
 
   <% if reviewer? %>
     <div class="ml-3 mb-5">
-      <%= put_button(name: :review_unvetted.t,
-          path: name_description_review_status_path(desc.id,
-            value: "unvetted", q: get_query_param)
-          ) %><br/>
-      <%= put_button(name: :review_vetted.t,
-          path: name_description_review_status_path(desc.id,
-            value: "vetted", q: get_query_param)
-          ) %><br/>
-      <%= put_button(name: :review_inaccurate.t,
-          path: name_description_review_status_path(desc.id,
-            value: "inaccurate", q: get_query_param)
-          ) %>
+      <%= %w[unvetted vetted inaccurate].map do |w|
+        put_button(
+          name: "review_#{w}".to_sym.l,
+          path: name_description_review_status_path(
+            desc.id, value: w, q: get_query_param
+          )
+        )
+      end.safe_join(safe_br) %>
     </div>
   <% end %>
 <% end %>
@@ -43,9 +39,9 @@ NameDescription.all_note_fields.each do |field|
   value = notes[field].to_s
   if value.match(/\S/)
     any = true %>
-    <%= "form_names_#{field}".to_sym.t %>:
-    <%= notes_panel(value.tpl) %>
-    <br/>
+    <%= panel_block(heading: "#{"form_names_#{field}".to_sym.t}:") do
+      value.tpl
+    end %>
   <% end %>
 <% end %>
 <%= :show_description_empty.tpl if !any %>
