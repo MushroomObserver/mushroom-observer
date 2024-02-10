@@ -21,6 +21,21 @@ module Tabs
       ].reject(&:empty?)
     end
 
+    def description_change_links(desc)
+      type = desc.parent.type_tag
+      admin = is_admin?(desc)
+      [
+        edit_button(target: desc, icon: :edit),
+        destroy_button(target: desc, icon: :delete),
+        icon_link_to(*clone_description_tab(desc, type)),
+        icon_link_to(*merge_description_tab(desc, type, admin)),
+        icon_link_to(*adjust_description_permissions_tab(desc, type, admin)),
+        icon_link_to(*make_description_default_tab(desc, type)),
+        icon_link_to(*description_project_tab(desc)),
+        icon_link_to(*publish_description_draft_tab(desc, type, admin))
+      ].compact_blank.safe_join(" | ")
+    end
+
     # Components of the above AND similar links for helpers/descriptions_helper
     def description_parent_tab(description, type)
       [:show_object.t(type: type),

@@ -40,7 +40,7 @@ module DescriptionsHelper
   end
 
   # Show list of name/location descriptions.
-  def list_descriptions(object:, type:, fake_default: false)
+  def list_descriptions(object:, type:, fake_default: false, current: nil)
     user = User.current
     # Filter out empty descriptions (unless it's public or one you own).
     list = object.descriptions.includes(:user).select do |desc|
@@ -50,7 +50,8 @@ module DescriptionsHelper
 
     list = sort_description_list(object, list)
 
-    make_list_links(list, type, fake_default)
+    # Don't make a link if we're on that description's page (current)
+    make_list_links(list, type, fake_default, current)
   end
 
   # Sort, putting the default one on top, followed by public ones, followed
@@ -72,11 +73,16 @@ module DescriptionsHelper
   end
 
   # Turn each into a link to show_description, and add optional controls.
-  def make_list_links(list, type, fake_default)
+  # (or if we're on that description's page currently, just the desc title)
+  def make_list_links(list, type, fake_default, current = nil)
     list.map! do |desc|
-      item = description_link(desc)
-      links = description_mod_links(desc, type)
-      item += indent + "[ " + links.safe_join(" | ") + " ]" if links.any?
+      if desc == current
+        item = description_title(desc)
+      else
+        item = description_link(desc)
+        links = description_mod_links(desc, type)
+        item += indent + "[ " + links.safe_join(" | ") + " ]" if links.any?
+      end
       item
     end
 
@@ -91,33 +97,54 @@ module DescriptionsHelper
     list
   end
 
+  def show_description_details_and_alternates(desc, versions, projects)
+    panel_block(
+      id: "description_details",
+      heading: :show_observation_details.l,
+      heading_links: description_change_links(desc),
+      footer: show_description_export_and_review(desc)
+    ) do
+      tag.div(class: "row") do
+        [
+          tag.div(class: "col-xs-12 col-md-6") do
+            show_description_details(desc, versions)
+          end,
+          tag.div(class: "col-xs-12 col-md-6") do
+            show_alt_descriptions(object: desc.parent, projects: projects,
+                                  current: desc)
+          end
+        ].safe_join
+      end
+    end
+  end
+
   # Details of a description for a show_description page.
   def show_description_details(description, versions, user = User.current)
     type = description.parent.type_tag
 
     read = if description.reader_groups.include?(UserGroup.all_users)
-             :public.t
+             :public.l
            elsif in_admin_mode? || description.is_reader?(user)
-             :restricted.t
+             :restricted.l
            else
-             :private.t
+             :private.l
            end
 
     write = if description.writer_groups.include?(UserGroup.all_users)
-              :public.t
+              :public.l
             elsif in_admin_mode? || description.writer?(user)
-              :restricted.t
+              :restricted.l
             else
-              :private.t
+              :private.l
             end
 
     tag.div do
       [
-        ["#{:TITLE.t}:", description_title(description)].safe_join(" "),
+        ["#{:TITLE.l}:", description_title(description)].safe_join(" "),
         ["#{type.to_s.upcase.to_sym.t}:",
          description.parent.format_name.t].safe_join(" "),
-        "#{:show_description_read_permissions.t}: #{read}",
-        "#{:show_description_write_permissions.t}: #{write}",
+        "#{:show_description_read_permissions.l}: #{read}",
+        "#{:show_description_write_permissions.l}: #{write}",
         show_previous_version(description, versions)
       ].safe_join(safe_br)
     end
@@ -169,7 +196,7 @@ module DescriptionsHelper
   def show_name_description_latest_review(desc)
     tag.span(class: "help-note") do
       indent + "(" + :show_name_latest_review.t(
-        date: desc.last_review ? desc.last_review.web_time : :UNKNOWN.t,
+        date: desc.last_review ? desc.last_review.web_time : :UNKNOWN.l,
         user: user_link(desc.reviewer, desc.reviewer.login)
       ) + ")"
     end
@@ -193,15 +220,16 @@ module DescriptionsHelper
   #       One More Project
   #   </p>
   #
-  def show_alt_descriptions(object:, projects: nil)
+  def show_alt_descriptions(object:, projects: nil, current: nil)
     type = object.type_tag
 
     # Show existing drafts, with link to create new one.
-    head = tag.b(:show_name_descriptions.t) + ": "
+    head = tag.b(:show_name_descriptions.l) + ": "
     head += link_to(*create_description_tab(object, type))
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
-    list = list_descriptions(object: object, type: type).map do |link|
+    list = list_descriptions(object: object, type: type,
+                             current: current).map do |link|
       indent + link
     end
     any = list.any?
@@ -218,7 +246,7 @@ module DescriptionsHelper
   def add_list_of_projects(object, type, html, projects)
     return if projects.blank?
 
-    head2 = :show_name_create_draft.t + ": "
+    head2 = :show_name_create_draft.l + ": "
     list = [head2] + projects.map do |project|
       item = link_to(*new_description_for_project_tab(object, type, project))
       indent + item
