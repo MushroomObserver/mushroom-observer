@@ -105,7 +105,7 @@ class GlossaryTermsController < ApplicationController
 
   # Show selected list of glossary_terms.
   def show_selected_glossary_terms(query, args = {})
-    includes = @user ? { thumb_image: :image_votes } : :thumb_image
+    includes = { thumb_image: :image_votes }
     args = {
       action: :index,
       letters: "glossary_terms.name",

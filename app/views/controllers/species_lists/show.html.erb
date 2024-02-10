@@ -13,7 +13,7 @@ add_tab_set(species_list_show_tabs(list: @species_list, query: @query))
     <div><b><%= :WHEN.t %>:</b> <%= @species_list.when.web_date %></div>
     <div><b><%= :OBSERVATIONS.t %>:</b> <%= @query.num_results %></div>
     <div><b><%= :WHERE.t %>:</b>
-      <%= location_link(@species_list.place_name, @species_list.location, nil, true) rescue :UNKNOWN.t %>
+      <%= location_link(@species_list.where, @species_list.location, nil, true) rescue :UNKNOWN.t %>
     </div>
     <div><b><%= :WHO.t %>:</b> <%= user_link(@species_list.user) %></div>
     <% if @species_list.projects.any? %>
@@ -65,7 +65,7 @@ add_tab_set(species_list_show_tabs(list: @species_list, query: @query))
                                                q: get_query_param(@query))) %>
                 </p>
                 <p>
-                  <b><%= location_link(observation.place_name,
+                  <b><%= location_link(observation.where,
                                        observation.location) %></b><br/>
                   <span><%= user_link(observation.user) %></span>:
                   <span><%= observation.when.web_date %></span>

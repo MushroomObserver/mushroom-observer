@@ -153,9 +153,10 @@ module ImagesHelper
   # This is now a helper to avoid nested partials in loops - AN 2023
   # called in interactive_image above
   def image_vote_section_html(image, votes)
-    return "" unless votes && image && User.current
+    return "" unless votes && image
 
-    tag.div(class: "vote-section", id: "image_vote_#{image.id}") do
+    tag.div(class: "vote-section require-user",
+            id: "image_vote_#{image.id}") do
       image_vote_meter_and_links(image)
     end
   end

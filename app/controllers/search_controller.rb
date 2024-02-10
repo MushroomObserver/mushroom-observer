@@ -68,7 +68,7 @@ class SearchController < ApplicationController
     end
   end
 
-  # In the case of "needs_id", this is added to the search path params
+  # In the case of "needs_naming", this is added to the search path params
   def forward_pattern_search(type, pattern, special_params)
     case type
     when :google

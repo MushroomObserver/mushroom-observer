@@ -237,17 +237,20 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       where(arel_table[:when].format("%Y-%m-%d") <= latest)
   }
 
+  # For activerecord subqueries, DON'T pre-map the primary key (id)
   scope :with_name,
         -> { where.not(name: Name.unknown) }
   scope :without_name,
         -> { where(name: Name.unknown) }
   scope :with_name_above_genus,
-        -> { where(name_id: Name.with_rank_above_genus.map(&:id)) }
+        -> { where(name_id: Name.with_rank_above_genus) }
   scope :without_confident_name,
         -> { where(vote_cache: ..0) }
-  scope :needs_id, lambda {
-    with_name_above_genus.or(without_confident_name)
-  }
+  # Use this definition when running script to populate the column:
+  # scope :needs_naming, lambda {
+  #   with_name_above_genus.or(without_confident_name)
+  # }
+  scope :needs_naming, -> { where(needs_naming: true) }
   scope :with_name_correctly_spelled,
         -> { joins({ namings: :name }).where(names: { correct_spelling: nil }) }
 
@@ -257,7 +260,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   }
   scope :without_vote_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
-    where.not(id: Vote.where(user_id: user_id).map(&:observation_id).uniq)
+    where.not(id: Vote.where(user_id: user_id))
   }
   scope :reviewed_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
@@ -267,17 +270,17 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :not_reviewed_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
     where.not(id: ObservationView.where(user_id: user_id, reviewed: 1).
-              map(&:observation_id).uniq)
+                  select(:observation_id))
   }
-  scope :needs_id_for_user, lambda { |user|
-    needs_id.without_vote_by_user(user).not_reviewed_by_user(user).distinct
+  scope :needs_naming_and_not_reviewed_by_user, lambda { |user|
+    needs_naming.not_reviewed_by_user(user).distinct
   }
   # Higher taxa: returns narrowed-down group of id'd obs,
   # in higher taxa under the given taxon
-  # scope :needs_id_by_taxon, lambda { |user, name|
+  # scope :needs_naming_by_taxon, lambda { |user, name|
   #   name_plus_subtaxa = Name.include_subtaxa_of(name)
-  #   subtaxa_above_genus = name_plus_subtaxa.with_rank_above_genus.map(&:id)
-  #   lower_subtaxa = name_plus_subtaxa.with_rank_at_or_below_genus.map(&:id)
+  #   subtaxa_above_genus = name_plus_subtaxa.with_rank_above_genus
+  #   lower_subtaxa = name_plus_subtaxa.with_rank_at_or_below_genus
 
   #   where(name_id: subtaxa_above_genus).or(
   #     Observation.where(name_id: lower_subtaxa).and(
@@ -311,14 +314,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     names_array = name.synonyms if args[:include_synonyms]
     # Keep names_array intact as is; maybe add more to its clone name_ids.
     # (I'm thinking it's easier to pass name ids to the Observation query)
-    name_ids = names_array.map(&:id)
+    name_ids = names_array
 
     # Add subtaxa to name_ids array. Subtaxa of synonyms too, if requested
     # (don't modify the names_array we're iterating over)
     if args[:include_subtaxa]
       names_array.each do |n|
         # |= don't add duplicates
-        name_ids |= Name.subtaxa_of(n).map(&:id)
+        name_ids |= Name.subtaxa_of(n)
       end
     end
 
@@ -519,7 +522,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :not_logged_in_show_includes, lambda {
     strict_loading.includes(
       { comments: :user },
-      { images: [:license, :user] },
+      { images: [:image_votes, :license, :user] },
       :location,
       { name: { synonym: :names } },
       { namings: [:name, :user, { votes: [:observation, :user] }] },
@@ -577,30 +580,34 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # This is meant to be run nightly to ensure that the cached name
   # and location data used by content filters is kept in sync.
-  def self.refresh_content_filter_caches
-    refresh_cached_column("name", "lifeform") +
-      refresh_cached_column("name", "text_name") +
-      refresh_cached_column("name", "classification") +
-      refresh_cached_column("location", "name", "where")
+  def self.refresh_content_filter_caches(dry_run: false)
+    refresh_cached_column(type: "name", foreign: "lifeform",
+                          dry_run: dry_run) +
+      refresh_cached_column(type: "name", foreign: "text_name",
+                            dry_run: dry_run) +
+      refresh_cached_column(type: "name", foreign: "classification",
+                            dry_run: dry_run) +
+      refresh_cached_column(type: "location", foreign: "name", local: "where",
+                            dry_run: dry_run)
   end
 
   # Refresh a column which is a mirror of a foreign column.  Fixes all the
   # errors, and reports which ids were broken.
-  def self.refresh_cached_column(type, foreign, local = foreign)
+  def self.refresh_cached_column(type: nil, foreign: nil, local: foreign,
+                                 dry_run: false)
     tbl = type.camelize.constantize.arel_table
-    broken_caches = get_broken_caches(type, tbl, foreign, local)
-    broken_caches.map do |id|
-      "Fixing #{type} #{foreign} for obs ##{id}."
+    query = Observation.joins(type.to_sym).
+            where(Observation[local.to_sym].not_eq(tbl[foreign.to_sym]))
+    msgs = query.map do |obs|
+      "Fixing #{type} #{foreign} for obs ##{obs.id}, " \
+        "was #{obs.send(local).inspect}."
     end
-    # Refresh the mirror of a foreign table's column in the observations table.
-    broken_caches.update_all(
-      Observation[local.to_sym].eq(tbl[foreign.to_sym]).to_sql
-    )
-  end
-
-  private_class_method def self.get_broken_caches(type, tbl, foreign, local)
-    Observation.joins(type.to_sym).
-      where(Observation[local.to_sym].not_eq(tbl[foreign.to_sym]))
+    unless dry_run
+      query.update_all(
+        Observation[local.to_sym].eq(tbl[foreign.to_sym]).to_sql
+      )
+    end
+    msgs
   end
 
   # Used by Name and Location to update the observation cache when a cached
@@ -613,17 +620,34 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # mess up the mirrors because misspelled names are "invisible", so their
   # classification and lifeform and such will not necessarily be kept up to
   # date.  Fixes and returns a messages for each one that was wrong.
-  def self.make_sure_no_observations_are_misspelled
-    misspellings = Observation.joins(:name).
-                   where(Name[:correct_spelling_id].not_eq(nil))
-
-    misspellings.
-      pluck(Observation[:id], Name[:text_name]).map do |id, search_name|
-      "Observation ##{id} was misspelled: #{search_name.inspect}"
+  # Used by refresh_caches script
+  def self.make_sure_no_observations_are_misspelled(dry_run: false)
+    query = Observation.joins(:name).
+            where(Name[:correct_spelling_id].not_eq(nil))
+    msgs = query.pluck(Observation[:id], Name[:text_name]).
+           map do |id, search_name|
+             "Observation ##{id} was misspelled: #{search_name.inspect}"
+           end
+    unless dry_run
+      query.update_all(
+        Observation[:name_id].eq(Name[:correct_spelling_id]).to_sql
+      )
     end
-    misspellings.update_all(
-      Observation[:name_id].eq(Name[:correct_spelling_id]).to_sql
-    )
+    msgs
+  end
+
+  # Use the original definition of `needs_id` to set the column values.
+  # Used by refresh_caches script
+  def self.refresh_needs_naming_column(dry_run: false)
+    # Need to repeat `needs_naming:false` even though AR will optimize it out
+    # and it'll only appear once in the resulting WHERE condition. Go figure.
+    query = Observation.where(needs_naming: false).without_confident_name.
+            or(where(needs_naming: false).with_name_above_genus)
+    msgs = query.map do |obs|
+      "Observation #{obs.id}, #{obs.text_name}, needs a name."
+    end
+    query.update_all(needs_naming: true) unless dry_run
+    msgs
   end
 
   def update_view_stats

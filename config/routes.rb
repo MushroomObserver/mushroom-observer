@@ -801,6 +801,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
         via: [:put, :patch],
         as: "species_list_projects")
 
+  # ----- Test if server is up  -------------------------------------
+  resources :test, only: [:index], controller: "test"
+
   # ----- Test pages  -------------------------------------------
   namespace :test_pages do
     resource :flash_redirection, only: [:show], controller: "flash_redirection"

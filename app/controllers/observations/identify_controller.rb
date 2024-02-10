@@ -19,8 +19,16 @@ module Observations
 
     private
 
+    def q_args
+      [:Observation, :needs_naming]
+    end
+
+    def q_kwargs
+      { by: :rss_log }
+    end
+
     def unfiltered_index
-      query = create_query(:Observation, :needs_id, {})
+      query = create_query(*q_args, q_kwargs)
 
       show_selected_results(query)
     end
@@ -44,19 +52,19 @@ module Observations
     def clade_filter(term)
       # return unless (clade = Name.find_by(text_name: term))
 
-      query = create_query(:Observation, :needs_id, { in_clade: term })
+      query = create_query(*q_args, q_kwargs.merge({ in_clade: term }))
 
       show_selected_results(query)
     end
 
     def region_filter(term)
-      query = create_query(:Observation, :needs_id, { in_region: term })
+      query = create_query(*q_args, q_kwargs.merge({ in_region: term }))
 
       show_selected_results(query)
     end
 
     # def user_filter(term)
-    #   query = create_query(:Observation, :needs_id, { by_user: term })
+    #   query = create_query(*q_args, q_kwargs.merge({ by_user: term }))
 
     #   show_selected_results(query)
     # end

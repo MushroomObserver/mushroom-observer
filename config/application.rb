@@ -99,7 +99,10 @@ module MushroomObserver
     config.active_support.cache_format_version = 7.1
 
     # Set up memcached as the cache store everywhere
-    config.cache_store = :mem_cache_store
+    # config.cache_store = :mem_cache_store
+    config.cache_store = :solid_cache_store
+
+    config.solid_cache.connects_to = { database: { writing: :cache } }
   end
 end
 

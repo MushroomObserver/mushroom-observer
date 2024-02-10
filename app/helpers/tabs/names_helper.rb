@@ -101,24 +101,7 @@ module Tabs
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
     end
 
-    def name_correct_spelling_tab(name)
-      [name.correct_spelling.display_name.l,
-       add_query_param(name_path(name.correct_spelling_id)),
-       { class: tab_id(__method__.to_s) }]
-    end
-
-    def show_name_tab(name)
-      [name.display_name.l, add_query_param(name_path(name.id)),
-       { class: tab_id(__method__.to_s) }]
-    end
-
     # lifeform tabs:
-    def propagate_lifeform_form_tab(name)
-      [:show_name_propagate_lifeform.t,
-       add_query_param(propagate_name_lifeform_form_path(name.id)),
-       { class: tab_id(__method__.to_s) }]
-    end
-
     def edit_name_lifeform_tab(name)
       [:EDIT.l, add_query_param(edit_name_lifeform_path(name.id)),
        { class: tab_id(__method__.to_s), icon: :edit }]
@@ -172,7 +155,7 @@ module Tabs
     def occurrence_map_for_name_tab(name)
       [:show_name_distribution_map.t,
        add_query_param(map_name_path(id: name.id)),
-       { class: tab_id(__method__.to_s) }]
+       { class: tab_id(__method__.to_s), data: { action: "links#disable" } }]
     end
 
     # Others
@@ -231,6 +214,21 @@ module Tabs
 
       [:show_objects.t(type: :description),
        add_query_param(name_descriptions_path),
+       { class: tab_id(__method__.to_s) }]
+    end
+
+    def all_names_index_tabs(query:)
+      [
+        new_name_tab,
+        all_names_tab(query),
+        coerced_observation_query_tab(query)
+      ].reject(&:empty?)
+    end
+
+    def all_names_tab(query)
+      return if query&.flavor == :all || query&.flavor&.empty?
+
+      [:all_objects.t(type: :name), names_path,
        { class: tab_id(__method__.to_s) }]
     end
 

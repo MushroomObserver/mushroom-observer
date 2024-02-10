@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_01_26_082516) do
+ActiveRecord::Schema[7.1].define(version: 2024_01_31_201441) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -458,7 +458,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_26_082516) do
     t.integer "user_id"
     t.datetime "last_view", precision: nil
     t.boolean "reviewed"
-    t.index ["observation_id", "user_id"], name: "user_observation_index"
+    t.index ["observation_id"], name: "observation_index"
+    t.index ["user_id"], name: "user_index"
   end
 
   create_table "observations", id: { type: :integer, unsigned: true }, charset: "utf8mb3", force: :cascade do |t|
@@ -486,6 +487,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_26_082516) do
     t.boolean "gps_hidden", default: false, null: false
     t.integer "source"
     t.datetime "log_updated_at", precision: nil
+    t.boolean "needs_naming", default: false, null: false
+    t.index ["needs_naming"], name: "needs_naming_index"
   end
 
   create_table "project_images", charset: "utf8mb3", force: :cascade do |t|
@@ -738,6 +741,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_26_082516) do
     t.boolean "favorite"
     t.float "value"
     t.index ["naming_id"], name: "naming_index"
+    t.index ["observation_id"], name: "observation_index"
   end
 
 end

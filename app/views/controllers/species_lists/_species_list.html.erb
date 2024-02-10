@@ -1,7 +1,7 @@
 <div class="mt-3">
   <%= :WHEN.t %>: <span><%= species_list.when.web_date %></span>
   </br/>
-  <%= :WHERE.t %>: <%= location_link(species_list.place_name,
+  <%= :WHERE.t %>: <%= location_link(species_list.where,
                                      species_list.location, nil, true) %>
   <br/>
   <%= :WHO.t %>: <span><%= user_link(species_list.user) %></span>

@@ -2,24 +2,20 @@
 
 # helpers for creating links in views
 module ObjectLinkHelper
-  # Wrap location name in span: "<span>where (count)</span>"
+  # Wrap location name in link to show_location OR observations/index.
   #
-  #   Where: <%= where_string(obs.place_name) %>
+  # NEW 2024-02-01 AN: Only accepts a postal format string for `where`, e.g.
+  #   Location.name, Observation.where, SpeciesList.where, User.location.name
   #
-  def where_string(where, count = nil)
-    result = where.t
-    result += " (#{count})" if count
-    content_tag(:span, result)
-  end
-
-  # Wrap location name in link to show_location / observations/index.
+  # This method prints both postal and scientific formats, shown/hidden with
+  # CSS, using a governing class on the <body> that has the user's preference
   #
   #   Where: <%= location_link(obs.where, obs.location) %>
   #
   def location_link(where, location, count = nil, click = false)
     if location
       location = Location.find(location) unless location.is_a?(AbstractModel)
-      link_string = where_string(location.display_name, count)
+      link_string = where_string(location.name, count)
       link_string += " [#{:click_for_map.t}]" if click
       link_to(link_string, location_path(id: location.id),
               { id: "show_location_link_#{location.id}" })
@@ -29,6 +25,22 @@ module ObjectLinkHelper
       link_to(link_string, observations_path(where: where),
               { id: "index_observations_at_where_link" })
     end
+  end
+
+  # Wrap both formats of location.name in spans,
+  #   maybe adding a count, and wrap the whole thing in a span too:
+  #   <span><span class="location-postal">where</span> \
+  #         <span class="location-scientific">where</span> (count)</span>
+  #
+  #   Where: <%= where_string(obs.where) %>
+  #
+  def where_string(where, count = nil)
+    postal = tag.span(where, class: "location-postal")
+    scientific = tag.span(Location.reverse_name(where),
+                          class: "location-scientific")
+
+    add_count = count ? " (#{count})" : ""
+    tag.span { [postal, scientific, add_count].safe_join }
   end
 
   # Wrap name in link to show_name. Takes id or object
