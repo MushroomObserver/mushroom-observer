@@ -168,4 +168,23 @@ module ContentHelper
   def alert_block(level = :warning, string = "")
     content_tag(:div, string, class: "alert alert-#{level}")
   end
+
+  # Create a div for notes.
+  #
+  #   <%= notes_panel(html) %>
+  #
+  #   <% notes_panel() do %>
+  #     Render stuff in here.  Note lack of "=" in line above.
+  #   <% end %>
+  #
+  def notes_panel(msg = nil, &block)
+    msg = capture(&block) if block
+    result = tag.div(msg, class: "panel-body")
+    wrapper = tag.div(result, class: "panel panel-default dotted-border")
+    if block
+      concat(wrapper)
+    else
+      wrapper
+    end
+  end
 end

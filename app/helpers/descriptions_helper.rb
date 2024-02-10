@@ -219,6 +219,7 @@ module DescriptionsHelper
   #       One More Project
   #   </p>
   #
+  # Pass `current` to avoid linking to the current description on show desc page
   def show_alt_descriptions(object:, projects: nil, current: nil)
     type = object.type_tag
 
@@ -285,25 +286,6 @@ module DescriptionsHelper
       if desc.license
         concat(render(partial: "shared/form_#{desc.license.form_name}"))
       end
-    end
-  end
-
-  # Create a div for notes in Description subclasses.
-  #
-  #   <%= notes_panel(html) %>
-  #
-  #   <% notes_panel() do %>
-  #     Render stuff in here.  Note lack of "=" in line above.
-  #   <% end %>
-  #
-  def notes_panel(msg = nil, &block)
-    msg = capture(&block) if block
-    result = tag.div(msg, class: "panel-body")
-    wrapper = tag.div(result, class: "panel panel-default dotted-border")
-    if block
-      concat(wrapper)
-    else
-      wrapper
     end
   end
 
