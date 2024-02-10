@@ -198,35 +198,50 @@ jason> sudo service apache2 reload
 jason> mysql -u root -p
   create database mo_development;
   create database mo_test;
+  create database cache_development;
   create user 'mo'@'localhost' identified by 'xxx';
   # Command used to reset password if needed later:
   # set password for 'mo'@'localhost' = password('xxx');
   grant all privileges on mo_development.* to 'mo'@'localhost' with grant option;
   grant all privileges on mo_test.* to 'mo'@'localhost' with grant option;
+  grant all privileges on cache_development.* to 'mo'@'localhost' with grant option;
 mo> cp config/database.yml-template config/database.yml
 mo> vi config/database.yml
-  development:
-    adapter: mysql
-    database: mo_development
-    username: mo
-    password: xxx
+  shared:
+    adapter: mysql2
     # Default (works for MacOS X)
-    # socket: /tmp/mysql.sock
+    socket: /tmp/mysql.sock
     # For Ubuntu/Debian
-    socket: /var/run/mysqld/mysqld.sock
+    # socket: /var/run/mysqld/mysqld.sock
     # For Fedora
     # socket: /var/lib/mysql/mysql.sock
+    # Connect on a TCP socket.  If omitted, the adapter will connect on the
+    # domain socket given by socket instead.
+    #host: localhost
+    #port: 3306
+    # For mysql >= 5.7.5
+    # Do not require SELECT list to include ORDER BY columns in DISTINCT queries,
+    # And do not not require ORDER BY to include the DISTINCT column.
+    variables:
+      sql_mode: TRADITIONAL
+
+  development:
+    primary:
+      database: mo_development
+      username: mo
+      password: mo
+    cache:
+      database: cache_development
+      username: mo
+      password: mo
+      host: localhost
+      migrations_paths: "db/cache/migrate"
+
   test:
-    adapter: mysql
     database: mo_test
     username: mo
-    password: xxx
-    # Default (works for MacOS X)
-    # socket: /tmp/mysql.sock
-    # For Ubuntu/Debian
-    socket: /var/run/mysqld/mysqld.sock
-    # For Fedora
-    # socket: /var/lib/mysql/mysql.sock
+    password: mo
+
 mo> cd db
 mo> scp jason@mushroomobserver.org:/var/web/mushroom-observer/db/checkpoint.gz .
 mo> gunzip checkpoint.gz
@@ -251,3 +266,71 @@ mo> git checkout config/locales/en.txt
 mo> rake lang                  # <--- this in particular helped Han on 20120913
 mo> rake lang:update
 
+
+# NOTE: 2024/02/09 The `create database` section above contains the steps to
+# create and use a new solid_cache db. If your development install is already
+# running however, do the following to set up a solid_cache db:
+#
+# 1. Check out <main> to get the `solid_cache` gem, new configs and migrations
+# 2. Run `bundle`
+# 3. Manually change your `config/database.yml`, since that file is not checked
+#    in to git. The relevant change regards **nesting** the two db configs:
+#
+# development:
+#   primary:
+#     database: mo_development
+#     username: mo
+#     password: mo
+#   cache:
+#     database: cache_development
+#     username: mo
+#     password: mo
+#     host: 127.0.0.1
+#     migrations_paths: "db/cache/migrate"
+#
+# Your main db config should now be nested under `primary`, and the cache db
+# config under `cache`. Both can use the same mysql user/pw, there are no
+# further config changes necessary.
+#
+# 4. `sudo mysql`, create the new db and grant user 'mo' privileges in the new
+#    cache db. With a default setup, you should be able to sudo into mysql using
+#    your current user password - on a Mac, your user password - or get in with
+#    `mysql -u root` and no password.
+#
+#    $: sudo mysql (or mysql -u root)
+#
+#      Joe had trouble here. If you have ever set up a different password for
+#      mysql `root`, the first order of business is reestablishing access to
+#      myql as `root`. You will either have to find it or figure out how to
+#      reset that password. It's something like:
+#
+#      $: brew services stop mysql
+#      $: sudo mysqld_safe --skip-grant-tables --skip-networking
+#      mysql -u root
+#      mysql> USE mysql;
+#      mysql> flush privileges;
+#      mysql> ALTER USER 'root'@'localhost' IDENTIFIED BY 'NEWPASSWORD';
+#      mysql> flush privileges;
+#      mysql> quit;
+#      $: brew services restart mysql
+#      $: mysql -u root -p     # now enter your root password
+#
+#    Then, you should be in a mysql console:
+#
+#    mysql> create database cache_development;
+#    mysql> show databases; # to check that it's there
+#    mysql> grant all privileges on cache_development.* to 'mo'@'localhost' with grant option;
+#    mysql> flush privileges;
+#    mysql> quit;
+#
+# 5. Run `rails db:create` locally. Don’t worry, this will NOT re-create any
+#    existing databases, only add the new `cache_development` db, using the
+#    new cache migrations that are on the main branch under `db/cache/migrate`.
+# 6. Run `rails db:migrate`, to set up the tables in the cache db properly
+# 7. run `rails s` and observe the log when loading the home page of the site.
+#    You should find log messages saying `solid_cache` is writing to the cache
+#    db and reading from it.
+#
+# Reference
+# https://www.digitalocean.com/community/tutorials/how-to-create-a-new-user-and-grant-permissions-in-mysql
+#
