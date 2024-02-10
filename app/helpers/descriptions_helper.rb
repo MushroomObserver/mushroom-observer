@@ -91,6 +91,90 @@ module DescriptionsHelper
     list
   end
 
+  # Details of a description for a show_description page.
+  def show_description_details(description, versions, user = User.current)
+    type = description.parent.type_tag
+
+    read = if description.reader_groups.include?(UserGroup.all_users)
+             :public.t
+           elsif in_admin_mode? || description.is_reader?(user)
+             :restricted.t
+           else
+             :private.t
+           end
+
+    write = if description.writer_groups.include?(UserGroup.all_users)
+              :public.t
+            elsif in_admin_mode? || description.writer?(user)
+              :restricted.t
+            else
+              :private.t
+            end
+
+    tag.div do
+      [
+        ["#{:TITLE.t}:", description_title(description)].safe_join(" "),
+        ["#{type.to_s.upcase.to_sym.t}:",
+         description.parent.format_name.t].safe_join(" "),
+        "#{:show_description_read_permissions.t}: #{read}",
+        "#{:show_description_write_permissions.t}: #{write}",
+        show_previous_version(description, versions)
+      ].safe_join(safe_br)
+    end
+  end
+
+  def show_description_export_and_review(desc)
+    capture do
+      concat(tag.div(show_description_export_status(desc)))
+      concat(tag.div(show_name_description_review(desc)))
+    end
+  end
+
+  def show_description_export_status(desc)
+    reviewer? ? export_status_controls(desc) : ""
+  end
+
+  def show_name_description_review(desc)
+    return unless desc.parent.type_tag == :name
+
+    html = []
+    html << show_name_description_review_status(desc)
+    html << show_name_description_latest_review(desc) if desc.reviewer
+    html.safe_join
+  end
+
+  def show_name_description_review_status(desc)
+    tag.div do
+      concat("#{:show_name_content_status.l}: ")
+      concat(review_as_string(desc.review_status))
+      concat(show_name_description_review_ui(desc))
+    end
+  end
+
+  def show_name_description_review_ui(desc)
+    return unless reviewer?
+
+    tag.span(class: "ml-3") do
+      %w[unvetted vetted inaccurate].map do |w|
+        put_button(
+          name: :"review_#{w}".l,
+          path: name_description_review_status_path(
+            desc.id, value: w, q: get_query_param
+          )
+        )
+      end.safe_join(tag.span(" | "))
+    end
+  end
+
+  def show_name_description_latest_review(desc)
+    tag.span(class: "help-note") do
+      indent + "(" + :show_name_latest_review.t(
+        date: desc.last_review ? desc.last_review.web_time : :UNKNOWN.t,
+        user: user_link(desc.reviewer, desc.reviewer.login)
+      ) + ")"
+    end
+  end
+
   # Show list of alternate descriptions for show_object page.
   #
   #   <%= show_alt_descriptions(object: name, projects: projects) %>
@@ -142,6 +226,39 @@ module DescriptionsHelper
     html2 = list.safe_join(safe_br)
     html += tag.p(html2)
     html
+  end
+
+  # Loops through all notes and returns a panel with heading for each note field
+  def show_description_notes_all(desc)
+    model = desc.type_tag.to_s.camelize.constantize
+    type = desc.parent.type_tag
+    Textile.register_name(desc.name) if type == :name
+
+    any_notes = false
+    model.all_note_fields.map do |field|
+      value = desc.send(field).to_s
+      next unless value.match?(/\S/)
+
+      any_notes = true
+      concat(
+        panel_block(heading: :"form_#{type}s_#{field}".l) do
+          value.tpl
+        end
+      )
+    end
+
+    :show_description_empty.tpl unless any_notes
+  end
+
+  def show_description_authors_and_editors(desc, versions, user = User.current)
+    tag.div(class: "text-center") do
+      concat(
+        show_authors_and_editors(obj: desc, versions: versions, user: user)
+      )
+      if desc.license
+        concat(render(partial: "shared/form_#{desc.license.form_name}"))
+      end
+    end
   end
 
   # Create a div for notes in Description subclasses.

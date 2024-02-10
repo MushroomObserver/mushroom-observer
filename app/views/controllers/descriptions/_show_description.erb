@@ -1,0 +1,25 @@
+<%# Top panel for any description, the basic details and alternatives %>
+
+<%=
+panel_block(
+  id: "description_details",
+  heading: :show_observation_details.l,
+  heading_links: "",
+  footer: show_description_export_and_review(@description)
+) do %>
+  <div class="row">
+
+    <div class="col-xs-12 col-md-6">
+      <%= show_description_details(@description, @versions) %>
+    </div><!-- .col -->
+
+    <div class="col-xs-12 col-md-6">
+      <%= show_alt_descriptions(object: parent, projects: @projects) %>
+    </div><!-- .col -->
+
+  </div><!-- .row -->
+<% end %>
+
+<%= show_description_notes_all(@description) %>
+
+<%= show_description_authors_and_editors(@description, @versions) %>

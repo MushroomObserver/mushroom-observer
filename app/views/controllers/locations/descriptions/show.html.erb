@@ -5,21 +5,11 @@ add_tab_set(show_description_tabs(description: @description))
 @container = :wide
 %>
 
-<div class="row">
-  <div class="col-md-6">
-    <%= render(partial: "shared/show_description",
-              locals: {description: @description}) %>
-  </div>
-  <div class="col-md-6">
-    <%= show_alt_descriptions(object: @location, projects: @projects) %>
-  </div>
-</div><!--.row-->
+<%= render(partial: "descriptions/show_description",
+           locals: { parent: @location }) %>
 
-<div class="container-text">
-  <%= render(partial: "locations/descriptions/show/location_description",
-             object: @description) %>
-  <%= render(partial: "comments/comments_for_object",
-             locals: { object: @description, comments: @comments,
-                       controls: @user, limit: 10 }) %>
-  <%= show_object_footer(@description, @versions) %>
-</div><!--.container-text-->
+<%= render(partial: "comments/comments_for_object",
+           locals: { object: @description, comments: @comments,
+                     controls: @user, limit: 10 }) %>
+
+<%= show_object_footer(@description, @versions) %>
