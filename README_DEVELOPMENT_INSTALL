@@ -268,8 +268,8 @@ mo> rake lang:update
 
 
 # NOTE: 2024/02/09 The `create database` section above contains the steps to
-# create and use a new solid_cache db. If your development install is already
-# running however, do the following to set up a solid_cache db:
+# create and use the new solid_cache db. If your development install is already
+# running however, do the following to set it up:
 #
 # 1. Check out <main> to get the `solid_cache` gem, new configs and migrations
 # 2. Run `bundle`
@@ -331,6 +331,8 @@ mo> rake lang:update
 #    You should find log messages saying `solid_cache` is writing to the cache
 #    db and reading from it.
 #
-# Reference
+# References:
+# https://github.com/rails/solid_cache?tab=readme-ov-file#using-a-dedicated-cache-database
+# https://aungzanbaw.medium.com/how-to-reset-root-user-password-in-mysql-8-0-a5c328d098a8
 # https://www.digitalocean.com/community/tutorials/how-to-create-a-new-user-and-grant-permissions-in-mysql
 #
