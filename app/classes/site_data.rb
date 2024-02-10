@@ -36,7 +36,7 @@
 #    }
 #
 #
-class SiteData
+class SiteData # rubocop:disable Metrics/ClassLength
   ##############################################################################
   #
   #  :section: Category Definitions
@@ -352,7 +352,7 @@ class SiteData
   #   for user_id User.all.map(&;id)
   #     num_images = @user_data[user_id][:images]
   #   end
-  #
+  # rubocop:disable Metrics/MethodLength
   def load_field_counts(field, user_id = nil)
     count  = "*"
     table  = FIELD_TABLES[field] || field.to_s
@@ -401,6 +401,7 @@ class SiteData
       @user_data[usr_id.to_i][field] = cnt.to_i
     end
   end
+  # rubocop:enable Metrics/MethodLength
 
   # Load all the stats for a given User.  (Load for all User's if none given.)
   #
