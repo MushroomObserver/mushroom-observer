@@ -1,6 +1,6 @@
 class AddLoginIndexToUsers < ActiveRecord::Migration[7.1]
   def up
-    add_index :users, :login, name: :login_index
+    add_index :users, :login, name: :login_index, if_not_exists: true
   end
 
   def down
