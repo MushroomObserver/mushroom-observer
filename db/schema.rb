@@ -496,7 +496,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_31_201441) do
     t.integer "project_id", null: false
   end
 
-  create_table "project_members", charset: "utf8mb3", force: :cascade do |t|
+  create_table "project_members", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "project_id"
     t.integer "user_id"
     t.datetime "created_at", null: false
@@ -708,7 +708,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_31_201441) do
     t.text "notes_template"
     t.boolean "blocked", default: false, null: false
     t.boolean "no_emails", default: false, null: false
-    t.index ["login"], name: "login_index"
   end
 
   create_table "visual_group_images", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

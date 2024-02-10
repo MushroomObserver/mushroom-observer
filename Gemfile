@@ -50,7 +50,7 @@ gem("requestjs-rails")
 # turbo for partial page updates
 gem("turbo-rails")
 # redis for combining actioncable broadcasts with turbo_stream
-# gem("redis", "~> 4.0")
+gem("redis", "~> 4.0")
 # dalli to run the memcached server
 gem("dalli", "~> 3.2")
 # solid_cache for cache store db
