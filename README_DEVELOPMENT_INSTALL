@@ -210,9 +210,9 @@ mo> vi config/database.yml
   shared:
     adapter: mysql2
     # Default (works for MacOS X)
-    socket: /tmp/mysql.sock
+    # socket: /tmp/mysql.sock
     # For Ubuntu/Debian
-    # socket: /var/run/mysqld/mysqld.sock
+    socket: /var/run/mysqld/mysqld.sock
     # For Fedora
     # socket: /var/lib/mysql/mysql.sock
     # Connect on a TCP socket.  If omitted, the adapter will connect on the
