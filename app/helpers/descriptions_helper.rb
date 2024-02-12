@@ -227,7 +227,7 @@ module DescriptionsHelper
 
     # Show existing drafts, with link to create new one.
     head = tag.b(:show_name_descriptions.l) + ": "
-    head += link_to(*create_description_tab(object, type))
+    head += icon_link_to(*create_description_tab(object, type))
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
     list = list_descriptions(object: object, type: type,
