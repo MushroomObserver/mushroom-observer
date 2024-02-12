@@ -5,11 +5,11 @@ module Tabs
   module DescriptionsHelper
     # Links for the tabset
     def show_description_tabs(description:)
-      type = description.parent.type_tag
+      # type = description.parent.type_tag
       # admin = is_admin?(description)
       # assemble HTML for "tabset" for show_{type}_description
-      [
-        description_parent_tab(description, type)
+      # [
+        # description_parent_tab(description, type)
         # edit_description_tab(description, type),
         # destroy_description_tab(description, admin),
         # clone_description_tab(description, type),
@@ -18,7 +18,7 @@ module Tabs
         # make_description_default_tab(description, type),
         # description_project_tab(description),
         # publish_description_draft_tab(description, type, admin)
-      ].reject(&:empty?)
+      # ].reject(&:empty?)
     end
 
     def description_change_links(desc)

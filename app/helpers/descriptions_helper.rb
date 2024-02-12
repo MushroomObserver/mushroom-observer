@@ -122,7 +122,8 @@ module DescriptionsHelper
 
   # Details of a description for a show_description page.
   def show_description_details(description, versions, user = User.current)
-    type = description.parent.type_tag
+    parent = description.parent
+    type = parent.type_tag
 
     read = if description.reader_groups.include?(UserGroup.all_users)
              :public.l
@@ -143,8 +144,10 @@ module DescriptionsHelper
     tag.div do
       [
         ["#{:TITLE.l}:", description_title(description)].safe_join(" "),
-        ["#{type.to_s.upcase.to_sym.t}:",
-         description.parent.format_name.t].safe_join(" "),
+        [
+          "#{type.to_s.upcase.to_sym.t}:",
+          link_to(parent.format_name.t, add_query_param(parent.show_link_args))
+        ].safe_join(" "),
         "#{:show_description_read_permissions.l}: #{read}",
         "#{:show_description_write_permissions.l}: #{write}",
         show_previous_version(description, versions)
