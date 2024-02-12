@@ -16,7 +16,7 @@ module Locations
       login
       get(:show, params: { id: desc.id })
       assert_template("show")
-      assert_template("show/_location_description")
+      assert_template("descriptions/_show_description_details")
 
       # Unhappy paths
       # Prove they flash an error and redirect to the appropriate page

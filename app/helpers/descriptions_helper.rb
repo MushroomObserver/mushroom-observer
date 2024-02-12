@@ -97,12 +97,14 @@ module DescriptionsHelper
     list
   end
 
-  def show_description_details_and_alternates(desc, versions, projects)
+  # Be sure to preload the ivars @versions and @projects sent as args.
+  def show_description_details_and_alternates(desc, versions, projects,
+                                              review: false)
     panel_block(
       id: "description_details",
       heading: :show_observation_details.l,
       heading_links: description_change_links(desc),
-      footer: show_description_export_and_review(desc)
+      footer: review ? show_description_export_and_review(desc) : nil
     ) do
       tag.div(class: "row") do
         [
