@@ -26,7 +26,7 @@ module Tabs
       admin = is_admin?(desc)
       [
         writer?(desc) ? edit_button(target: desc, icon: :edit) : nil,
-        admin ? destroy_button(target: desc, icon: :delete): nil,
+        admin ? destroy_button(target: desc, icon: :delete) : nil,
         icon_link_to(*clone_description_tab(desc, type)),
         icon_link_to(*merge_description_tab(desc, type, admin)),
         icon_link_to(*adjust_description_permissions_tab(desc, type, admin)),
