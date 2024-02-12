@@ -14,7 +14,6 @@ Textile.register_name(@name)
 
 <%= show_past_versions(@description, @versions) %>
 
-<%= render(partial: "names/descriptions/show/name_description",
-           object: @description, locals: { review: false }) %>
+<%= render(partial: "descriptions/show_description_details") %>
 
 <%= show_object_footer(@description, @versions) %>
