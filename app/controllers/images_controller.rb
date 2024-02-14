@@ -34,11 +34,15 @@ class ImagesController < ApplicationController
     :pattern,
     :by_user,
     :for_project,
-    :by
+    :by,
+    :q,
+    :id
   ].freeze
 
   @index_subaction_dispatch_table = {
-    by: :index_query_results
+    by: :index_query_results,
+    q: :index_query_results,
+    id: :index_query_results
   }.freeze
 
   #############################################
