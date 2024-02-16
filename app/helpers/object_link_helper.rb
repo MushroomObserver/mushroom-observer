@@ -64,6 +64,14 @@ module ObjectLinkHelper
     "https://www.gbif.org/species/search?q=#{name.text_name.tr(" ", "+")}"
   end
 
+  def inat_name_search_url(name)
+    "https://www.inaturalist.org/search?q=#{name.text_name.tr(" ", "+")}"
+  end
+
+  def ncbi_nucleotide_name_search_url(name)
+    "https://www.ncbi.nlm.nih.gov/nuccore/?term=#{name.text_name.tr(" ", "+")}"
+  end
+
   # url for IF record
   def index_fungorum_record_url(record_id)
     "http://www.indexfungorum.org/Names/NamesRecord.asp?RecordID=#{record_id}"
