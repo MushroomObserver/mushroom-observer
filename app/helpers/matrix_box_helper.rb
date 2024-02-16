@@ -103,7 +103,7 @@ module MatrixBoxHelper
           link_with_query(what.show_link_args) do
             [
               matrix_box_id_tag(id: presenter.id),
-              matrix_box_title(presenter: presenter, id: object_id)
+              matrix_box_title(name: presenter.name, id: object_id)
             ].safe_join
           end
         end,
@@ -118,12 +118,8 @@ module MatrixBoxHelper
 
   # NOTE: This is what gets Turbo updates with the identify UI
   #       (does not require presenter, only obs)
-  # Russian-doll cache on the name record if the object is an observation and
-  # has a name. (It should.)
-  def matrix_box_title(presenter:, id:)
-    html = tag.span(presenter.name, class: "rss-name", id: "box_title_#{id}")
-
-    matrix_box_cacheable_fragment(html, presenter, presenter.what&.name)
+  def matrix_box_title(name:, id:)
+    tag.span(name, class: "rss-name", id: "box_title_#{id}")
   end
 
   # Obs with uncertain name: vote on naming, or propose (if it's "Fungi")
@@ -143,16 +139,14 @@ module MatrixBoxHelper
     end
   end
 
-  # Russian-doll cache on the Location record if the object is an observation
-  # and has a location. (It should.)
   def matrix_box_where(presenter)
     return unless presenter.where
 
-    html = tag.div(class: "rss-where") do
-      tag.small { location_link(presenter.where, presenter.location) }
+    tag.div(class: "rss-where") do
+      tag.small do
+        location_link(presenter.where, presenter.location)
+      end
     end
-
-    matrix_box_cacheable_fragment(html, presenter, presenter.location)
   end
 
   def matrix_box_when_who(presenter)
@@ -162,17 +156,9 @@ module MatrixBoxHelper
       tag.small(class: "nowrap-ellipsis") do
         concat(tag.span(presenter.when, class: "rss-when"))
         concat(": ")
-        concat(matrix_box_who(presenter))
+        concat(user_link(presenter.who, nil, class: "rss-who"))
       end
     end
-  end
-
-  # Russian-doll cache on the User record if the object is an observation
-  # and has a user. (It should.)
-  def matrix_box_who(presenter)
-    html = user_link(presenter.who, nil, class: "rss-who")
-
-    matrix_box_cacheable_fragment(html, presenter, presenter.who)
   end
 
   def matrix_box_log_footer(presenter)
@@ -193,23 +179,6 @@ module MatrixBoxHelper
 
     tag.div(class: "panel-footer panel-active text-center position-relative") do
       mark_as_reviewed_toggle(obs_id, "box_reviewed", "stretched-link")
-    end
-  end
-
-  # Russian doll caching: matrix_box fragments for associated records.
-  # (e.g., Name, Location, User.)
-  # NOTE: It is not necessary to cache RssLog separately.
-  # Checks if this type of matrix_box is cached, and if so, if the relevant
-  # presenter attribute (AR record) is present. If so, cache the fragment keyed
-  # on that record. If not, just serve the html.
-  # If the record is updated, it will force refresh not only this fragment's
-  # cache, but also the enclosing matrix box.
-  def matrix_box_cacheable_fragment(html, presenter, attribute)
-    cached_types = [:observation, :rss_log]
-    if cached_types.include?(presenter.type) && attribute
-      cache(attribute) { concat(html) }
-    else
-      html
     end
   end
 end
