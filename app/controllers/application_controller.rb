@@ -877,6 +877,7 @@ class ApplicationController < ActionController::Base
 
   def save_approved_given_names(names, deprecate2)
     Name.save_names(names, deprecate2)
+    touch_observations_with_changed_names(names)
     names.each { |n| flash_object_errors(n) }
   end
 
@@ -904,6 +905,14 @@ class ApplicationController < ActionController::Base
     synonym.change_deprecated(true)
     synonym.save_with_log(:log_deprecated_by, touch: true)
     Name.save_names(synonyms[0..-2], nil) # Don't change higher taxa
+    touch_observations_with_changed_names(synonyms[0..-2])
+  end
+
+  # EXPIRE CACHES OF OBS WITH THESE NAMES
+  # "touch" the updated_at column of all observations with the changed names
+  # to expire their caches. Pass AR records (not IDs) for a faster query.
+  def touch_observations_with_changed_names(names)
+    Observation.where(name_id: names).touch_all
   end
 
   ##############################################################################
