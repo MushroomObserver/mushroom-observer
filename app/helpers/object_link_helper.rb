@@ -60,6 +60,10 @@ module ObjectLinkHelper
 
   # ----- links to names and records at external websites ----------------------
 
+  def gbif_name_search_url(name)
+    "https://www.gbif.org/species/search?q=#{name.text_name.tr(" ", "+")}"
+  end
+
   # url for IF record
   def index_fungorum_record_url(record_id)
     "http://www.indexfungorum.org/Names/NamesRecord.asp?RecordID=#{record_id}"

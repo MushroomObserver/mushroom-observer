@@ -569,8 +569,20 @@ class NamesControllerTest < FunctionalTestCase
   def test_show_name_species_with_icn_id
     # Name's icn_id is filled in
     name = names(:coprinus_comatus)
+    icn_id = name.icn_id
+    assert_instance_of(Integer, icn_id,
+                       "Test needs Name fixture with icn_id (Registration #)")
+
     login
     get(:show, params: { id: name.id })
+
+    ##### Links to external taxonomy pages
+    assert_select(
+      "body a[href='#{gbif_name_search_url(name)}']", true,
+      "Page is missing a link to GBIF"
+    )
+
+    ##### Links to external nomenclature pages
     assert_select(
       "body a[href='#{index_fungorum_record_url(name.icn_id)}']", true,
       "Page is missing a link to IF record"
