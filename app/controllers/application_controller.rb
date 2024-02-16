@@ -908,7 +908,7 @@ class ApplicationController < ActionController::Base
     touch_observations_with_changed_names(synonyms[0..-2])
   end
 
-  # EXPIRE CACHES OF OBS WITH THESE NAMES
+  # EXPIRE CACHES OF OBS WITH CHANGED NAMES
   # "touch" the updated_at column of all observations with the changed names
   # to expire their caches. Pass AR records (not IDs) for a faster query.
   def touch_observations_with_changed_names(names)
