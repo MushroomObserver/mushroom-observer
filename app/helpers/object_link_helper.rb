@@ -68,6 +68,12 @@ module ObjectLinkHelper
     "https://www.inaturalist.org/search?q=#{name.text_name.tr(" ", "+")}"
   end
 
+  def mushroomexpert_name_search_url(name)
+    # Google it because mushroomexpert has no internal name search
+    "https://www.google.com/search?q=" \
+    "#{name.text_name.tr(" ", "+")}:www.mushroomexpert.com"
+  end
+
   def ncbi_nucleotide_name_search_url(name)
     "https://www.ncbi.nlm.nih.gov/nuccore/?term=#{name.text_name.tr(" ", "+")}"
   end

@@ -586,6 +586,10 @@ class NamesControllerTest < FunctionalTestCase
       "Page is missing a link to iNaturalist"
     )
     assert_select(
+      "body a[href='#{mushroomexpert_name_search_url(name)}']", true,
+      "Page is missing a link to MushroomExpert"
+    )
+    assert_select(
       "body a[href='#{ncbi_nucleotide_name_search_url(name)}']", true,
       "Page is missing a link to NCBI Nucleotide"
     )
