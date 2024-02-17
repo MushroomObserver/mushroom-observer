@@ -91,10 +91,16 @@ module ObjectLinkHelper
     "http://www.indexfungorum.org/Names/NamesRecord.asp?RecordID=#{record_id}"
   end
 
-  # url for Index Fungorum search. This is a general search.
-  # IF lacks an entry point that includes the name to be searched.
-  def index_fungorum_basic_search_url
-    "http://www.indexfungorum.org/Names/Names.asp"
+  # Use web search because IF internal search uses js form rather than a url
+  def index_fungorum_name_search_url(name)
+    # Use DuckDuckGo because the equivalent Google search results stink,
+    # and Bing shows an annoying ChatBot thing
+    # See https://github.com/MushroomObserver/mushroom-observer/issues/1884#issuecomment-1950137454
+    name_string = name.text_name.
+                  sub(/ (group|clade)$/, "").
+                  tr(" ", "+")
+    "https://duckduckgo.com/?q=site%3Aindexfungorum.org+" \
+    "%22#{name_string}%22&ia=web"
   end
 
   # url for MB record by number

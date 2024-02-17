@@ -2129,7 +2129,7 @@
   show_name_see_more: See More
   show_name_icn_id_missing: missing
   index_fungorum: Index Fungorum
-  index_fungorum_search: Index Fungorum search
+  index_fungorum_web_search: Index Fungorum web search
   mycobank: MycoBank
   mycobank_search: MycoBank search
   gsd_species_synonymy: GSD Species Synonymy

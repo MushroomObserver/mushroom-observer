@@ -632,6 +632,7 @@ class NamesControllerTest < FunctionalTestCase
     # Name is registrable, but icn_id is not filled in
     name = names(:coprinus)
     label = :ICN_ID.l.to_s
+
     login
     get(:show, params: { id: name.id })
 
@@ -641,10 +642,8 @@ class NamesControllerTest < FunctionalTestCase
       "'#{:show_name_icn_id_missing.l}' note"
     )
     assert_select(
-      "#nomenclature a:match('href',?)",
-      /#{index_fungorum_basic_search_url}/,
-      { count: 1 },
-      "Nomenclature section should have link to IF search"
+      "#nomenclature a[href='#{index_fungorum_name_search_url(name)}']", true,
+      "Nomenclature section is missing a link to Index Fungorum search"
     )
     assert_select(
       "#nomenclature a:match('href',?)", /#{mycobank_name_search_url(name)}/,
@@ -673,10 +672,8 @@ class NamesControllerTest < FunctionalTestCase
 
     # but it makes sense to link to search pages in fungal registries
     assert_select(
-      "#nomenclature a:match('href',?)",
-      /#{index_fungorum_basic_search_url}/,
-      { count: 1 },
-      "Nomenclature section should have link to IF search"
+      "#nomenclature a[href='#{index_fungorum_name_search_url(name)}']", true,
+      "Nomenclature section is missing a link to Index Fungorum search"
     )
     assert_select(
       "#nomenclature a:match('href',?)", /#{mycobank_basic_search_url}/,

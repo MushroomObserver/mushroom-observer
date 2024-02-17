@@ -86,11 +86,6 @@ module Tabs
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
     end
 
-    def index_fungorum_basic_search_tab
-      [:index_fungorum_search.l, index_fungorum_basic_search_url,
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
-    end
-
     def mycobank_name_search_tab(name)
       [:mycobank_search.l, mycobank_name_search_url(name),
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
@@ -159,6 +154,11 @@ module Tabs
 
     def inat_name_tab(name)
       ["iNaturalist", inat_name_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def index_fungorum_name_search_tab(name)
+      [:index_fungorum_web_search.l, index_fungorum_name_search_url(name),
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
     end
 
