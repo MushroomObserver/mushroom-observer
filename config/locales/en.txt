@@ -800,6 +800,7 @@
   show_location: Show [LOCATION]
   show_location_description: Show [DESCRIPTION]
   about_this_taxon: About this taxon
+  research_links: Research Links
   show_name: About [NAME]
   show_name_description: Show [DESCRIPTION]
   show_object: Show [TYPE]

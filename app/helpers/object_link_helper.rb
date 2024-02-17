@@ -60,6 +60,11 @@ module ObjectLinkHelper
 
   # ----- links to names and records at external websites ----------------------
 
+  def ascomycete_org_name_search_url(name)
+    "https://ascomycete.org/Search-Results?search=" \
+    "#{name.text_name.tr(" ", "+")}"
+  end
+
   def gbif_name_search_url(name)
     "https://www.gbif.org/species/search?q=#{name.text_name.tr(" ", "+")}"
   end
