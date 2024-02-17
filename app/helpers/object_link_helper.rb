@@ -69,9 +69,12 @@ module ObjectLinkHelper
   end
 
   def mushroomexpert_name_search_url(name)
-    # Google it because mushroomexpert has no internal name search
-    "https://www.google.com/search?q=" \
-    "#{name.text_name.tr(" ", "+")}:www.mushroomexpert.com"
+    # Use DuckDuckGo see https://github.com/MushroomObserver/mushroom-observer/issues/1884#issuecomment-1950137454
+    name_string = name.text_name.
+                  sub(/ (group|clade)$/, "").
+                  tr(" ", "+")
+    "https://duckduckgo.com/?q=site%3Amushroomexpert.com+" \
+    "%22#{name_string}%22&ia=web"
   end
 
   def mycoguide_name_search_url(name)
