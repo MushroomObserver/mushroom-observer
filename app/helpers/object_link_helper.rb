@@ -193,7 +193,7 @@ module ObjectLinkHelper
     links = users.map { |u| user_link(u, u.legal_name) }
     # interpolating would require inefficient #sanitize
     # or dangerous #html_safe
-    title + ": " + links.safe_join(", ")
+    title + ": " + links.safe_join(", ") # rubocop:disable Style/StringConcatenation
   end
 
   # Wrap object's name in link to the object, return nil if no object
