@@ -74,6 +74,10 @@ module ObjectLinkHelper
     "#{name.text_name.tr(" ", "+")}:www.mushroomexpert.com"
   end
 
+  def mycoguide_name_search_url(name)
+    "https://www.mycoguide.com/guide/search?q=#{name.text_name.tr(" ", "+")}"
+  end
+
   def ncbi_nucleotide_name_search_url(name)
     "https://www.ncbi.nlm.nih.gov/nuccore/?term=#{name.text_name.tr(" ", "+")}"
   end
