@@ -82,6 +82,10 @@ module ObjectLinkHelper
     "https://www.ncbi.nlm.nih.gov/nuccore/?term=#{name.text_name.tr(" ", "+")}"
   end
 
+  def wikipedia_term_search_url(name)
+    "https://en.wikipedia.org/w/index.php?search=#{name.text_name.tr(" ", "+")}"
+  end
+
   # url for IF record
   def index_fungorum_record_url(record_id)
     "http://www.indexfungorum.org/Names/NamesRecord.asp?RecordID=#{record_id}"

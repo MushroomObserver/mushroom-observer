@@ -177,6 +177,11 @@ module Tabs
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
     end
 
+    def wikipedia_term_tab(name)
+      ["Wikipedia", wikipedia_term_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
     def occurrence_map_for_name_tab(name)
       [:show_name_distribution_map.t,
        add_query_param(map_name_path(id: name.id)),

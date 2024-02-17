@@ -597,6 +597,10 @@ class NamesControllerTest < FunctionalTestCase
       "body a[href='#{ncbi_nucleotide_name_search_url(name)}']", true,
       "Page is missing a link to NCBI Nucleotide"
     )
+    assert_select(
+      "body a[href='#{wikipedia_term_search_url(name)}']", true,
+      "Page is missing a link to Wikipedia"
+    )
 
     ##### Links to external nomenclature pages
     assert_select(
