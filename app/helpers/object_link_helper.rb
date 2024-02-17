@@ -78,7 +78,7 @@ module ObjectLinkHelper
   end
 
   # Use web search because IF internal search uses js form rather than a url
-  def index_fungorum_name_search_url(name)
+  def index_fungorum_name_web_search_url(name)
     # Use DuckDuckGo because the equivalent Google search results stink,
     # and Bing shows an annoying ChatBot thing
     # See https://github.com/MushroomObserver/mushroom-observer/issues/1884#issuecomment-1950137454
@@ -89,7 +89,7 @@ module ObjectLinkHelper
     "%22#{name_string}%22&ia=web"
   end
 
-  def mushroomexpert_name_search_url(name)
+  def mushroomexpert_name_web_search_url(name)
     # Use DuckDuckGo see https://github.com/MushroomObserver/mushroom-observer/issues/1884#issuecomment-1950137454
     name_string = name.text_name.
                   sub(/ (group|clade)$/, "").

@@ -157,7 +157,7 @@ module Tabs
     end
 
     def index_fungorum_name_search_tab(name)
-      [:index_fungorum_web_search.l, index_fungorum_name_search_url(name),
+      [:index_fungorum_web_search.l, index_fungorum_name_web_search_url(name),
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
     end
 
@@ -167,7 +167,7 @@ module Tabs
     end
 
     def mushroomexpert_name_tab(name)
-      ["MushroomExpert", mushroomexpert_name_search_url(name),
+      ["MushroomExpert", mushroomexpert_name_web_search_url(name),
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
     end
 
