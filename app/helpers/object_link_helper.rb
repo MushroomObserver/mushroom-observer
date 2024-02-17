@@ -78,7 +78,7 @@ module ObjectLinkHelper
     "https://www.mycoguide.com/guide/search?q=#{name.text_name.tr(" ", "+")}"
   end
 
-  def ncbi_nucleotide_name_search_url(name)
+  def ncbi_nucleotide_term_search_url(name)
     "https://www.ncbi.nlm.nih.gov/nuccore/?term=#{name.text_name.tr(" ", "+")}"
   end
 

@@ -594,7 +594,7 @@ class NamesControllerTest < FunctionalTestCase
       "Page is missing a link to MycoGuide"
     )
     assert_select(
-      "body a[href='#{ncbi_nucleotide_name_search_url(name)}']", true,
+      "body a[href='#{ncbi_nucleotide_term_search_url(name)}']", true,
       "Page is missing a link to NCBI Nucleotide"
     )
     assert_select(

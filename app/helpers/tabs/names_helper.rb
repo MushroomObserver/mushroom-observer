@@ -162,8 +162,8 @@ module Tabs
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
     end
 
-    def ncbi_nucleotide_name_tab(name)
-      ["NCBI Nucleotide", ncbi_nucleotide_name_search_url(name),
+    def ncbi_nucleotide_term_tab(name)
+      ["NCBI Nucleotide", ncbi_nucleotide_term_search_url(name),
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
     end
 
