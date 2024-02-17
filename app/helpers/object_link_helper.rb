@@ -72,27 +72,6 @@ module ObjectLinkHelper
     "https://www.inaturalist.org/search?q=#{name.text_name}"
   end
 
-  def mushroomexpert_name_search_url(name)
-    # Use DuckDuckGo see https://github.com/MushroomObserver/mushroom-observer/issues/1884#issuecomment-1950137454
-    name_string = name.text_name.
-                  sub(/ (group|clade)$/, "").
-                  tr(" ", "+")
-    "https://duckduckgo.com/?q=site%3Amushroomexpert.com+" \
-    "%22#{name_string}%22&ia=web"
-  end
-
-  def mycoguide_name_search_url(name)
-    "https://www.mycoguide.com/guide/search?q=#{name.text_name}"
-  end
-
-  def ncbi_nucleotide_term_search_url(name)
-    "https://www.ncbi.nlm.nih.gov/nuccore/?term=#{name.text_name}"
-  end
-
-  def wikipedia_term_search_url(name)
-    "https://en.wikipedia.org/w/index.php?search=#{name.text_name}"
-  end
-
   # url for IF record
   def index_fungorum_record_url(record_id)
     "http://www.indexfungorum.org/Names/NamesRecord.asp?RecordID=#{record_id}"
@@ -107,6 +86,15 @@ module ObjectLinkHelper
                   sub(/ (group|clade)$/, "").
                   tr(" ", "+")
     "https://duckduckgo.com/?q=site%3Aindexfungorum.org+" \
+    "%22#{name_string}%22&ia=web"
+  end
+
+  def mushroomexpert_name_search_url(name)
+    # Use DuckDuckGo see https://github.com/MushroomObserver/mushroom-observer/issues/1884#issuecomment-1950137454
+    name_string = name.text_name.
+                  sub(/ (group|clade)$/, "").
+                  tr(" ", "+")
+    "https://duckduckgo.com/?q=site%3Amushroomexpert.com+" \
     "%22#{name_string}%22&ia=web"
   end
 
@@ -130,10 +118,18 @@ module ObjectLinkHelper
     "https://www.mycobank.org/"
   end
 
+  def mycoguide_name_search_url(name)
+    "https://www.mycoguide.com/guide/search?q=#{name.text_name}"
+  end
+
   # url for name search on MyCoPortal
   def mycoportal_url(name)
     "http://mycoportal.org/portal/taxa/index.php?taxauthid=1&taxon=" \
       "#{name.text_name}"
+  end
+
+  def ncbi_nucleotide_term_search_url(name)
+    "https://www.ncbi.nlm.nih.gov/nuccore/?term=#{name.text_name}"
   end
 
   # url of SF page with "official" synonyms by category
@@ -146,6 +142,10 @@ module ObjectLinkHelper
   # works for species, genus, family
   def species_fungorum_sf_synonymy(record_id)
     "http://www.speciesfungorum.org/Names/SynSpecies.asp?RecordID=#{record_id}"
+  end
+
+  def wikipedia_term_search_url(name)
+    "https://en.wikipedia.org/w/index.php?search=#{name.text_name}"
   end
 
   # ----------------------------------------------------------------------------
