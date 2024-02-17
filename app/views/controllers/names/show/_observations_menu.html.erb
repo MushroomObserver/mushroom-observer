@@ -30,7 +30,7 @@ heading_link = icon_link_with_query(*name_tracker_form_tab(@name, @user))
       concat(tag.p("#{:research_links.l}:"))
       concat(tag.div(class: "pl-3") do
         if @name.classification =~ /Phylum: _Ascomycota_/
-          concat(tag.p(link_to(*ascomycete_org_name_search_tab(@name))))
+          concat(tag.p(link_to(*ascomycete_org_name_tab(@name))))
         end
         concat(tag.p(link_to(*eol_name_tab(@name)))) if @name.eol_url
         concat(tag.p(link_to(*gbif_name_tab(@name))))
