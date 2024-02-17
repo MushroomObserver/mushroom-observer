@@ -45,7 +45,7 @@ module Descriptions
 
       flash_error(:runtime_name_for_description_not_found.t)
       # parent index:
-      redirect_to(send("#{parent.type_tag.to_s.pluralize}_path"))
+      redirect_to(send(:"#{parent.type_tag.to_s.pluralize}_path"))
       false
     end
 

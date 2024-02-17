@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require("test_helper")
-require("set")
 
 module Names
   class LifeformsControllerTest < FunctionalTestCase
@@ -19,9 +18,9 @@ module Names
       end
 
       # Make sure user can both add and remove lifeform categories.
-      params = { id: name.id }
+      params = { id: name.id, lifeform: {} }
       Name.all_lifeforms.each do |word|
-        params["lifeform_#{word}"] = (word == "lichenicolous" ? "1" : "")
+        params[:lifeform][word] = (word == "lichenicolous" ? "1" : "")
       end
       put(:update, params: params)
       assert_equal(" lichenicolous ", name.reload.lifeform)

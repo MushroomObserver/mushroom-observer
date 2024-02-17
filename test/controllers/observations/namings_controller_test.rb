@@ -4,6 +4,17 @@ require("test_helper")
 
 module Observations
   class NamingsControllerTest < FunctionalTestCase
+    def test_index
+      obs = observations(:coprinus_comatus_obs)
+      params = { observation_id: obs.id }
+      login(obs.user.login)
+
+      get(:index, params: params)
+      assert_no_flash(
+        "User should be able to access the no-js namings table for their obs"
+      )
+    end
+
     def test_new_form
       obs = observations(:coprinus_comatus_obs)
       params = { observation_id: obs.id.to_s }
@@ -14,7 +25,7 @@ module Observations
 
     def test_edit_form
       nam = namings(:coprinus_comatus_naming)
-      params = { id: nam.id.to_s }
+      params = { observation_id: nam.observation_id, id: nam.id.to_s }
       requires_user(:edit, { controller: "/observations", action: :show,
                              id: nam.observation_id }, params)
       assert_form_action(action: "update", approved_name: nam.text_name,
@@ -32,7 +43,7 @@ module Observations
       nam = namings(:minimal_unknown_naming)
       assert_empty(nam.votes)
       login(nam.user.login)
-      get(:edit, params: { id: nam.id })
+      get(:edit, params: { observation_id: nam.observation_id, id: nam.id })
     end
 
     def test_update_observation_new_name
@@ -40,12 +51,15 @@ module Observations
       nam = namings(:coprinus_comatus_naming)
       old_name = nam.text_name
       new_name = "Easter bunny"
-      params = { id: nam.id.to_s, naming: { name: new_name } }
+      params = {
+        observation_id: nam.observation_id,
+        id: nam.id.to_s,
+        naming: { name: new_name }
+      }
       put(:update, params: params)
       assert_edit
       assert_equal(10, rolf.reload.contribution)
-      params = assigns(:params)
-      nam = params.naming
+      nam = assigns(:naming)
       assert_not_equal(new_name, nam.text_name)
       assert_equal(old_name, nam.text_name)
       assert_select("option[selected]", count: 2)
@@ -57,6 +71,7 @@ module Observations
       old_name = nam.text_name
       new_name = "Easter bunny"
       params = {
+        observation_id: nam.observation_id,
         id: nam.id.to_s,
         naming: {
           name: new_name,
@@ -68,8 +83,7 @@ module Observations
 
       # Clones naming, creates Easter sp and E. bunny, but no votes.
       put(:update, params: params)
-      params = assigns(:params)
-      nam = params.naming
+      nam = assigns(:naming)
 
       assert_redirected_to(permanent_observation_path(nam.observation_id))
       assert_equal(new_name, nam.text_name)
@@ -85,14 +99,14 @@ module Observations
       old_name = nam.text_name
       new_name = "Amanita baccata"
       params = {
+        observation_id: nam.observation_id,
         id: nam.id.to_s,
         naming: { name: new_name }
       }
       put(:update, params: params)
       assert_edit
       assert_equal(10, rolf.reload.contribution)
-      params = assigns(:params)
-      nam = params.naming
+      nam = assigns(:naming)
       assert_not_equal(new_name, nam.text_name)
       assert_equal(old_name, nam.text_name)
       assert_select("option[selected]", count: 2)
@@ -104,6 +118,7 @@ module Observations
       old_name = nmg.text_name
       new_name = "Amanita baccata"
       params = {
+        observation_id: nmg.observation_id,
         id: nmg.id.to_s,
         naming: {
           name: new_name,
@@ -115,8 +130,7 @@ module Observations
       assert_redirected_to(permanent_observation_path(nmg.observation.id))
       # Must be cloning naming with no vote.
       assert_equal(12, rolf.reload.contribution)
-      params = assigns(:params)
-      nam = params.naming
+      nam = assigns(:naming)
       assert_equal(new_name, nam.name.text_name)
       assert_equal("#{new_name} sensu Arora", nam.text_name)
       assert_not_equal(old_name, nam.text_name)
@@ -128,14 +142,14 @@ module Observations
       old_name = nam.text_name
       new_name = "Lactarius subalpinus"
       params = {
+        observation_id: nam.observation_id,
         id: nam.id.to_s,
         naming: { name: new_name }
       }
       put(:update, params: params)
       assert_edit
       assert_equal(10, rolf.reload.contribution)
-      params = assigns(:params)
-      nam = params.naming
+      nam = assigns(:naming)
       assert_not_equal(new_name, nam.text_name)
       assert_equal(old_name, nam.text_name)
       assert_select("option[selected]", count: 2)
@@ -148,6 +162,7 @@ module Observations
       new_name = "Lactarius subalpinus"
       chosen_name = names(:lactarius_alpinus)
       params = {
+        observation_id: nmg.observation_id,
         id: nmg.id.to_s,
         naming: {
           name: new_name,
@@ -160,8 +175,7 @@ module Observations
       assert_redirected_to(permanent_observation_path(nmg.observation.id))
       # Must be cloning naming, with no vote.
       assert_equal(12, rolf.reload.contribution)
-      params = assigns(:params)
-      nam = params.naming
+      nam = assigns(:naming)
       assert_not_equal(start_name.id, nam.name_id)
       assert_equal(chosen_name.id, nam.name_id)
     end
@@ -172,6 +186,7 @@ module Observations
       start_name = nmg.name
       new_text_name = names(:lactarius_subalpinus).text_name
       params = {
+        observation_id: nmg.observation_id,
         id: nmg.id.to_s,
         naming: {
           name: new_text_name,
@@ -184,8 +199,7 @@ module Observations
       assert_redirected_to(permanent_observation_path(nmg.observation.id))
       # Must be cloning the naming, but no votes?
       assert_equal(12, rolf.reload.contribution)
-      params = assigns(:params)
-      nam = params.naming
+      nam = assigns(:naming)
       assert_not_equal(start_name.id, nam.name_id)
       assert_equal(new_text_name, nam.name.text_name)
     end
@@ -204,6 +218,7 @@ module Observations
       # Rolf makes superficial changes to his naming.
       login("rolf")
       params = {
+        observation_id: nam1.observation_id,
         id: nam1.id,
         naming: {
           name: names(:coprinus_comatus).search_name,
@@ -259,6 +274,7 @@ module Observations
       login("rolf")
       assert_equal(10, rolf.contribution)
       params = {
+        observation_id: nam1.observation_id,
         id: nam1.id,
         naming: {
           name: "Conocybe filaris",
@@ -321,22 +337,27 @@ module Observations
       n_count = Name.count
       v_count = Vote.count
 
+      nam = names(:coprinus_comatus)
+      obs = observations(:coprinus_comatus_obs)
+      nmg1 = namings(:coprinus_comatus_naming)
+      nmg2 = namings(:coprinus_comatus_other_naming)
+      consensus = Observation::NamingConsensus.new(obs)
+
       # Make a few assertions up front to make sure fixtures are as expected.
-      assert_equal(names(:coprinus_comatus).id,
-                   observations(:coprinus_comatus_obs).name_id)
-      assert(namings(:coprinus_comatus_naming).user_voted?(rolf))
-      assert(namings(:coprinus_comatus_naming).user_voted?(mary))
-      assert_not(namings(:coprinus_comatus_naming).user_voted?(dick))
-      assert(namings(:coprinus_comatus_other_naming).user_voted?(rolf))
-      assert(namings(:coprinus_comatus_other_naming).user_voted?(mary))
-      assert_not(namings(:coprinus_comatus_other_naming).user_voted?(dick))
+      assert_equal(nam.id, obs.name_id)
+      assert(consensus.user_voted?(nmg1, rolf))
+      assert(consensus.user_voted?(nmg1, mary))
+      assert_not(consensus.user_voted?(nmg1, dick))
+      assert(consensus.user_voted?(nmg2, rolf))
+      assert(consensus.user_voted?(nmg2, mary))
+      assert_not(consensus.user_voted?(nmg2, dick))
 
       # Rolf, the owner of observations(:coprinus_comatus_obs),
       # already has a naming, which he's 80% sure of.
       # Create a new one (the genus Agaricus) that he's 100%
       # sure of.  (Mary also has a naming with two votes.)
       params = {
-        observation_id: observations(:coprinus_comatus_obs).id,
+        observation_id: obs.id,
         naming: {
           name: "Agaricus",
           vote: { value: "3" },
@@ -362,19 +383,18 @@ module Observations
       assert_equal(12, rolf.reload.contribution)
 
       # Make sure everything I need is reloaded.
-      observations(:coprinus_comatus_obs).reload
+      obs.reload
 
       # Get new objects.
       naming = Naming.last
       vote = Vote.last
 
       # Make sure observation was updated and referenced correctly.
-      assert_equal(3, observations(:coprinus_comatus_obs).namings.length)
-      assert_equal(names(:agaricus).id,
-                   observations(:coprinus_comatus_obs).name_id)
+      assert_equal(3, obs.namings.length)
+      assert_equal(names(:agaricus).id, obs.name_id)
 
       # Make sure naming was created correctly and referenced.
-      assert_equal(observations(:coprinus_comatus_obs), naming.observation)
+      assert_equal(obs, naming.observation)
       assert_equal(names(:agaricus).id, naming.name_id)
       assert_equal(rolf, naming.user)
       assert_equal(3, naming.reasons_array.count(&:used?))
@@ -400,11 +420,12 @@ module Observations
       assert(nr3.used?)
       assert_not(nr4.used?)
 
-      # Make sure a few random methods work right, too.
+      # Make sure a few random methods work right, too. Must re-calc_consensus
+      consensus.calc_consensus
       assert_equal(3, naming.vote_sum)
-      assert_equal(vote, naming.users_vote(rolf))
-      assert(naming.user_voted?(rolf))
-      assert_not(naming.user_voted?(mary))
+      assert_equal(vote, consensus.users_vote(naming, rolf))
+      assert(consensus.user_voted?(naming, rolf))
+      assert_not(consensus.user_voted?(naming, mary))
     end
 
     # Now see what happens when rolf's new naming is less confident than old.
@@ -512,8 +533,8 @@ module Observations
       login("dick")
       post(:create, params: params)
       assert_response(:success) # really means failed
-      params = @controller.instance_variable_get(:@params)
-      assert_equal("Agaricus campestris L.", params.what)
+      what = @controller.instance_variable_get(:@what)
+      assert_equal("Agaricus campestris L.", what)
     end
 
     # Test a bug in name resolution: was failing to recognize that
@@ -541,7 +562,8 @@ module Observations
 
       # First delete Mary's vote for it.
       login("mary")
-      obs.change_vote(nam1, Vote.delete_vote, mary)
+      consensus = ::Observation::NamingConsensus.new(obs)
+      consensus.change_vote(nam1, Vote.delete_vote, mary)
       assert_equal(9, mary.reload.contribution)
 
       old_naming_id = nam1.id
@@ -553,7 +575,8 @@ module Observations
                      end
 
       login("rolf")
-      get(:destroy, params: { id: nam1.id })
+      get(:destroy,
+          params: { observation_id: nam1.observation_id, id: nam1.id })
 
       # Make sure naming and associated vote and reason were actually destroyed.
       assert_raises(ActiveRecord::RecordNotFound) do
@@ -586,12 +609,14 @@ module Observations
 
       # Make Dick prefer it.
       login("dick")
-      obs.change_vote(nam1, 3, dick)
+      consensus = ::Observation::NamingConsensus.new(obs)
+      consensus.change_vote(nam1, 3, dick)
       assert_equal(11, dick.reload.contribution)
 
       # Have Rolf try to destroy it.
       login("rolf")
-      get(:destroy, params: { id: nam1.id })
+      get(:destroy,
+          params: { observation_id: nam1.observation_id, id: nam1.id })
 
       # Make sure naming and associated vote and reason are still there.
       assert(Naming.find(old_naming_id))

@@ -41,7 +41,7 @@ module Query
 
     def takes_parameter?(key)
       parameter_declarations.key?(key) ||
-        parameter_declarations.key?("#{key}?".to_sym)
+        parameter_declarations.key?(:"#{key}?")
     end
 
     def initialize_flavor

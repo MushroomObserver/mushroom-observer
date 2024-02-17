@@ -1,0 +1,14 @@
+<div class="mt-3">
+  <%= :WHEN.t %>: <span><%= species_list.when.web_date %></span>
+  </br/>
+  <%= :WHERE.t %>: <%= location_link(species_list.where,
+                                     species_list.location, nil, true) %>
+  <br/>
+  <%= :WHO.t %>: <span><%= user_link(species_list.user) %></span>
+  <br/>
+  <% if species_list.notes.present? %>
+    <div class="mt-3 mb-n3">
+      <%= "#{:NOTES.l}: #{species_list.notes.to_s.html_safe}".tpl %>
+    </div>
+  <% end %>
+</div>

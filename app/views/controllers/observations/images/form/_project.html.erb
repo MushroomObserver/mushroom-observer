@@ -1,0 +1,9 @@
+<%= fields_for(:project) do |f_p| %>
+  <div class="text-nowrap">
+    <%= check_box_with_label(form: f_p, field: :"id_#{project.id}",
+                             checked: @project_checks[project.id],
+                             disabled: @image.user != @user &&
+                               !project.member?(@user),
+                             label: link_to_object(project)) %>
+  </div>
+<% end %>

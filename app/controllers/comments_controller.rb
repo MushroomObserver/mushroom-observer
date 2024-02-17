@@ -10,6 +10,7 @@
 #  destroy::
 #
 #
+# rubocop:disable Metrics/ClassLength
 class CommentsController < ApplicationController
   before_action :login_required
   # disable cop because index is defined in ApplicationController
@@ -207,11 +208,7 @@ class CommentsController < ApplicationController
 
     respond_to do |format|
       format.html
-      format.js do
-        render_modal_comment_form(
-          title: helpers.comment_form_new_title(target: @target)
-        )
-      end
+      format.turbo_stream { render_modal_comment_form }
     end
   end
 
@@ -222,7 +219,15 @@ class CommentsController < ApplicationController
     @comment = Comment.new(target: @target)
     @comment.attributes = permitted_comment_params if params[:comment]
 
-    save_comment_or_flash_errors_and_redirect!
+    unless @comment.save
+      flash_object_errors(@comment)
+      reload_form and return
+    end
+
+    @comment.log_create
+    flash_notice(:runtime_form_comments_create_success.t(id: @comment.id))
+
+    refresh_comments_or_redirect_to_show
   end
 
   # Form to edit a comment for an object..
@@ -244,12 +249,8 @@ class CommentsController < ApplicationController
     return unless check_permission_or_redirect!(@comment, @target)
 
     respond_to do |format|
+      format.turbo_stream { render_modal_comment_form }
       format.html
-      format.js do
-        render_modal_comment_form(
-          title: helpers.comment_form_edit_title(target: @target)
-        )
-      end
     end
   end
 
@@ -261,21 +262,9 @@ class CommentsController < ApplicationController
                   check_permission_or_redirect!(@comment, @target)
 
     @comment.attributes = permitted_comment_params if params[:comment]
+    reload_form and return unless comment_updated?
 
-    unless comment_updated?
-      respond_to do |format|
-        format.js { render_modal_form_reload }
-        format.html { render(:edit) and return }
-      end
-    end
-
-    respond_to do |format|
-      format.js { render_update_comments_for_object }
-      format.html do
-        redirect_with_query(controller: @target.show_controller,
-                            action: @target.show_action, id: @target.id)
-      end
-    end
+    refresh_comments_or_redirect_to_show
   end
 
   # Callback to destroy a comment.
@@ -296,7 +285,10 @@ class CommentsController < ApplicationController
       flash_notice(:runtime_form_comments_destroy_success.t(id: params[:id]))
     end
     respond_to do |format|
-      format.js { render_update_comments_for_object }
+      format.turbo_stream do
+        eager_load_target_comments
+        refresh_comments_for_object
+      end
       format.html do
         redirect_with_query(controller: @target.show_controller,
                             action: @target.show_action, id: @target.id)
@@ -306,18 +298,45 @@ class CommentsController < ApplicationController
 
   private
 
-  def render_modal_comment_form(title:)
-    render(partial: "shared/modal_form_show",
-           locals: { title: title, identifier: "comment" }) and return
+  # The identifier needs to be more specific for an edit form, because
+  # we give users the option to edit any number of their own comments on a
+  # show page. "comment" disambiguates :new, because :edit always has id
+  def render_modal_comment_form
+    render(partial: "shared/modal_form",
+           locals: { title: modal_title, identifier: modal_identifier,
+                     form: "comments/form" }) and return
   end
 
-  def render_modal_form_reload
+  def reload_modal_form
     render(partial: "shared/modal_form_reload",
-           locals: { identifier: "comment",
-                     form: "comments/form" }) and return true
+           locals: { identifier: modal_identifier,
+                     form: "comments/form" })
   end
 
-  def render_update_comments_for_object
+  def modal_identifier
+    case action_name
+    when "new", "create"
+      "comment"
+    when "edit", "update"
+      "comment_#{@comment.id}"
+    end
+  end
+
+  def modal_title
+    case action_name
+    when "new", "create"
+      helpers.comment_form_new_title(target: @target)
+    when "edit", "update"
+      helpers.comment_form_edit_title(target: @target)
+    end
+  end
+
+  def eager_load_target_comments
+    @comments = @target.comments&.includes(:user)&.
+                sort_by(&:created_at)&.reverse
+  end
+
+  def refresh_comments_for_object
     render(partial: "comments/update_comments_for_object")
   end
 
@@ -325,24 +344,23 @@ class CommentsController < ApplicationController
     params[:comment].permit([:summary, :comment])
   end
 
-  def save_comment_or_flash_errors_and_redirect!
-    unless @comment.save
-      flash_object_errors(@comment)
-      respond_to do |format|
-        format.html { render(:new) and return }
-        format.js { render_modal_form_reload }
-      end
-    end
-
-    @comment.log_create
-    flash_notice(:runtime_form_comments_create_success.t(id: @comment.id))
-
+  def reload_form
     respond_to do |format|
+      format.turbo_stream { reload_modal_form }
+      format.html { render(:new) }
+    end
+  end
+
+  def refresh_comments_or_redirect_to_show
+    respond_to do |format|
+      format.turbo_stream do
+        eager_load_target_comments
+        refresh_comments_for_object
+      end
       format.html do
         redirect_with_query(controller: @target.show_controller,
                             action: @target.show_action, id: @target.id)
       end
-      format.js { render_update_comments_for_object }
     end
   end
 
@@ -372,7 +390,9 @@ class CommentsController < ApplicationController
   def comment_updated?
     if !@comment.changed?
       flash_notice(:runtime_no_changes.t)
-      true
+      # changing this to `false`, because comment has not been changed.
+      # Flash should render in modal (the `false` path) - AN 20231201
+      false
     elsif !@comment.save
       flash_object_errors(@comment)
       false
@@ -383,3 +403,4 @@ class CommentsController < ApplicationController
     end
   end
 end
+# rubocop:enable Metrics/ClassLength

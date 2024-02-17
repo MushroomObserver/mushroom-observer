@@ -3,19 +3,14 @@
 require("test_helper")
 
 class RandomIntegrationTest < CapybaraIntegrationTestCase
-  # Test "/controller/action/type/id" route used by AJAX controller.
-  def test_ajax_router
-    visit("/ajax/auto_complete/name/Agaricus")
-    lines = JSON.parse(page.html)
-    assert_equal("A", lines.first)
-    assert(lines.include?("Agaricus"))
-    assert(lines.include?("Agaricus campestris"))
-  end
-
   def test_the_homepage
     login(users(:zero_user))
     visit("/")
     assert_selector("body.observations__index")
+  end
+
+  def test_uptime_probe
+    visit("/test")
   end
 
   def test_login_and_logout

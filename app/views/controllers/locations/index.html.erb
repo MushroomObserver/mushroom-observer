@@ -1,0 +1,64 @@
+<%
+@container = :wide
+add_index_title(@query, no_hits: "")
+add_tab_set(locations_index_tabs(query: @query))
+all_links = if (params[:id].present? ||
+                params[:by].present? ||
+                params[:by_user].present?)
+              false
+            else
+              true
+            end
+add_sorter(@query, location_index_sorts(query: @query), link_all: all_links)
+@known_pages = @pages
+@known_data  = @objects
+
+observation_counts = calc_counts(@objects)
+flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
+%>
+
+<div class="mt-3">
+  <%= :list_place_names_popularity.t %>
+  <%= :list_place_names_parenthetical.t %>
+</div>
+
+<div class="row mt-3">
+  <div class="col-md-7">
+    <% if @known_pages.any? && @known_data.any? %>
+      <div class="h4">
+        <%= :list_place_names_known.t %>
+        <%= :list_place_names_known_order.t if @default_orders %>
+      </div>
+      <%= paginate_block(@known_pages) do %>
+        <div class="list-group">
+          <% @known_data.each do |location| %>
+            <div class="list-group-item">
+              <%= location_link(location.name.t, location,
+                                observation_counts[location.id].to_i) %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div class="col-md-5">
+    <% if @undef_pages.any? && @undef_data.any? %>
+      <div class="h4">
+        <%= :list_place_names_undef.t %>
+        <%= :list_place_names_undef_order.t if @default_orders %>
+      </div>
+      <%= paginate_block(@undef_pages, { html_id: "locations_undefined" }) do %>
+        <div class="list-group">
+          <% @undef_data.each do |location_name, count| %>
+            <div class="list-group-item">
+              <%= location_link(location_name, nil, count) %>
+              <%= link_to(:list_place_names_merge.t,
+                          location_merges_form_path(where: location_name)) %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div><!--.row-->

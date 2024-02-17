@@ -10,48 +10,48 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_10_01_144823) do
-
+ActiveRecord::Schema[7.1].define(version: 2024_01_31_201441) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.datetime "created_at"
-    t.datetime "last_used"
+    t.datetime "created_at", precision: nil
+    t.datetime "last_used", precision: nil
     t.integer "num_uses", default: 0
     t.integer "user_id", null: false
     t.string "key", limit: 128, null: false
     t.text "notes"
-    t.datetime "verified"
+    t.datetime "verified", precision: nil
   end
 
-  create_table "articles", id: :integer, charset: "latin1", force: :cascade do |t|
+  create_table "articles", id: :integer, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "title"
-    t.text "body"
+    t.text "body", size: :medium
     t.integer "user_id"
     t.integer "rss_log_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
   end
 
   create_table "collection_numbers", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: nil
+    t.datetime "updated_at", precision: nil
     t.integer "user_id"
     t.string "name"
     t.string "number"
   end
 
   create_table "comments", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.datetime "created_at"
+    t.datetime "created_at", precision: nil
     t.integer "user_id"
     t.string "summary", limit: 100
     t.text "comment"
     t.string "target_type", limit: 30
     t.integer "target_id"
-    t.datetime "updated_at"
+    t.datetime "updated_at", precision: nil
+    t.index ["target_id", "target_type"], name: "target_index"
   end
 
   create_table "copyright_changes", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "user_id", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "target_type", limit: 30, null: false
     t.integer "target_id", null: false
     t.integer "year"
@@ -63,8 +63,8 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
     t.decimal "amount", precision: 12, scale: 2
     t.string "who", limit: 100
     t.string "email", limit: 100
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: nil
+    t.datetime "updated_at", precision: nil
     t.boolean "anonymous", default: false, null: false
     t.boolean "reviewed", default: true, null: false
     t.integer "user_id"
@@ -72,8 +72,8 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
   end
 
   create_table "external_links", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: nil
+    t.datetime "updated_at", precision: nil
     t.integer "user_id"
     t.integer "observation_id"
     t.integer "external_site_id"
@@ -97,8 +97,8 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
     t.integer "thumb_image_id"
     t.text "description"
     t.integer "rss_log_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: nil
+    t.datetime "updated_at", precision: nil
     t.boolean "locked", default: false, null: false
   end
 
@@ -106,7 +106,7 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
     t.integer "glossary_term_id"
     t.integer "version"
     t.integer "user_id"
-    t.datetime "updated_at"
+    t.datetime "updated_at", precision: nil
     t.string "name", limit: 1024
     t.text "description"
   end
@@ -117,8 +117,8 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
     t.string "email", limit: 80, default: "", null: false
     t.string "name", limit: 1024
     t.text "description"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: nil
+    t.datetime "updated_at", precision: nil
     t.string "code", limit: 8, default: "", null: false
     t.integer "personal_user_id"
   end
@@ -131,8 +131,8 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
   create_table "herbarium_records", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "herbarium_id", null: false
     t.text "notes"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: nil
+    t.datetime "updated_at", precision: nil
     t.integer "user_id", null: false
     t.string "initial_det", limit: 221, null: false
     t.string "accession_number", limit: 80, null: false
@@ -148,8 +148,8 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
   end
 
   create_table "images", id: { type: :integer, unsigned: true }, charset: "utf8mb3", force: :cascade do |t|
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: nil
+    t.datetime "updated_at", precision: nil
     t.string "content_type", limit: 100
     t.integer "user_id"
     t.date "when"
@@ -157,7 +157,7 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
     t.string "copyright_holder", limit: 100
     t.integer "license_id", default: 1, null: false
     t.integer "num_views", default: 0, null: false
-    t.datetime "last_view"
+    t.datetime "last_view", precision: nil
     t.integer "width"
     t.integer "height"
     t.float "vote_cache"
@@ -173,7 +173,7 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
     t.integer "target_id"
     t.integer "user_id"
     t.boolean "state"
-    t.datetime "updated_at"
+    t.datetime "updated_at", precision: nil
   end
 
   create_table "languages", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -189,7 +189,7 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
     t.string "url", limit: 200
     t.boolean "deprecated", default: false, null: false
     t.string "form_name", limit: 20
-    t.datetime "updated_at"
+    t.datetime "updated_at", precision: nil
   end
 
   create_table "location_description_admins", charset: "utf8mb3", force: :cascade do |t|
@@ -219,12 +219,12 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
 
   create_table "location_descriptions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "version"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: nil
+    t.datetime "updated_at", precision: nil
     t.integer "user_id"
     t.integer "location_id"
     t.integer "num_views", default: 0
-    t.datetime "last_view"
+    t.datetime "last_view", precision: nil
     t.integer "source_type"
     t.string "source_name", limit: 100
     t.string "locale", limit: 8
@@ -242,7 +242,7 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
   create_table "location_descriptions_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "location_description_id"
     t.integer "version"
-    t.datetime "updated_at"
+    t.datetime "updated_at", precision: nil
     t.integer "user_id"
     t.integer "license_id"
     t.integer "merge_source_id"
@@ -255,13 +255,13 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
 
   create_table "locations", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "version"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: nil
+    t.datetime "updated_at", precision: nil
     t.integer "user_id"
     t.integer "description_id"
     t.integer "rss_log_id"
     t.integer "num_views", default: 0
-    t.datetime "last_view"
+    t.datetime "last_view", precision: nil
     t.float "north"
     t.float "south"
     t.float "west"
@@ -278,7 +278,7 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
   create_table "locations_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.string "location_id"
     t.integer "version"
-    t.datetime "updated_at"
+    t.datetime "updated_at", precision: nil
     t.integer "user_id"
     t.float "north"
     t.float "south"
@@ -318,16 +318,16 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
 
   create_table "name_descriptions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "version"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: nil
+    t.datetime "updated_at", precision: nil
     t.integer "user_id"
     t.integer "name_id"
     t.integer "review_status", default: 1
-    t.datetime "last_review"
+    t.datetime "last_review", precision: nil
     t.integer "reviewer_id"
     t.boolean "ok_for_export", default: true, null: false
     t.integer "num_views", default: 0
-    t.datetime "last_view"
+    t.datetime "last_view", precision: nil
     t.integer "source_type"
     t.string "source_name", limit: 100
     t.string "locale", limit: 8
@@ -348,7 +348,7 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
   create_table "name_descriptions_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "name_description_id"
     t.integer "version"
-    t.datetime "updated_at"
+    t.datetime "updated_at", precision: nil
     t.integer "user_id"
     t.integer "license_id"
     t.integer "merge_source_id"
@@ -367,20 +367,20 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
     t.integer "user_id", default: 0, null: false
     t.integer "name_id"
     t.text "note_template"
-    t.datetime "updated_at"
+    t.datetime "updated_at", precision: nil
     t.boolean "require_specimen", default: false, null: false
     t.boolean "approved", default: true, null: false
   end
 
   create_table "names", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "version"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: nil
+    t.datetime "updated_at", precision: nil
     t.integer "user_id"
     t.integer "description_id"
     t.integer "rss_log_id"
     t.integer "num_views", default: 0
-    t.datetime "last_view"
+    t.datetime "last_view", precision: nil
     t.integer "rank"
     t.string "text_name", limit: 100
     t.string "search_name", limit: 221
@@ -397,12 +397,13 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
     t.string "lifeform", limit: 1024, default: " ", null: false
     t.boolean "locked", default: false, null: false
     t.integer "icn_id"
+    t.index ["synonym_id"], name: "synonym_index"
   end
 
   create_table "names_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "name_id"
     t.integer "version"
-    t.datetime "updated_at"
+    t.datetime "updated_at", precision: nil
     t.integer "user_id"
     t.string "text_name", limit: 100
     t.string "search_name", limit: 221
@@ -425,8 +426,8 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
   end
 
   create_table "namings", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: nil
+    t.datetime "updated_at", precision: nil
     t.integer "observation_id"
     t.integer "name_id"
     t.integer "user_id"
@@ -455,13 +456,15 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
   create_table "observation_views", charset: "utf8mb3", force: :cascade do |t|
     t.integer "observation_id"
     t.integer "user_id"
-    t.datetime "last_view"
+    t.datetime "last_view", precision: nil
     t.boolean "reviewed"
+    t.index ["observation_id"], name: "observation_index"
+    t.index ["user_id"], name: "user_index"
   end
 
   create_table "observations", id: { type: :integer, unsigned: true }, charset: "utf8mb3", force: :cascade do |t|
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: nil
+    t.datetime "updated_at", precision: nil
     t.date "when"
     t.integer "user_id"
     t.boolean "specimen", default: false, null: false
@@ -472,7 +475,7 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
     t.boolean "is_collection_location", default: true, null: false
     t.float "vote_cache", default: 0.0
     t.integer "num_views", default: 0, null: false
-    t.datetime "last_view"
+    t.datetime "last_view", precision: nil
     t.integer "rss_log_id"
     t.decimal "lat", precision: 15, scale: 10
     t.decimal "long", precision: 15, scale: 10
@@ -483,12 +486,22 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
     t.text "classification"
     t.boolean "gps_hidden", default: false, null: false
     t.integer "source"
-    t.datetime "log_updated_at"
+    t.datetime "log_updated_at", precision: nil
+    t.boolean "needs_naming", default: false, null: false
+    t.index ["needs_naming"], name: "needs_naming_index"
   end
 
   create_table "project_images", charset: "utf8mb3", force: :cascade do |t|
     t.integer "image_id", null: false
     t.integer "project_id", null: false
+  end
+
+  create_table "project_members", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "project_id"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "trust_level", default: 1, null: false
   end
 
   create_table "project_observations", charset: "utf8mb3", force: :cascade do |t|
@@ -507,13 +520,14 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
     t.integer "user_group_id", default: 0, null: false
     t.string "title", limit: 100, default: "", null: false
     t.text "summary"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: nil
+    t.datetime "updated_at", precision: nil
     t.integer "rss_log_id"
     t.boolean "open_membership", default: false, null: false
-    t.boolean "accepting_observations", default: true, null: false
     t.integer "location_id"
     t.integer "image_id"
+    t.date "start_date"
+    t.date "end_date"
   end
 
   create_table "publications", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -523,12 +537,12 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
     t.text "how_helped"
     t.boolean "mo_mentioned"
     t.boolean "peer_reviewed"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: nil
+    t.datetime "updated_at", precision: nil
   end
 
   create_table "query_records", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.datetime "updated_at"
+    t.datetime "updated_at", precision: nil
     t.integer "access_count"
     t.text "description"
     t.integer "outer_id"
@@ -553,7 +567,7 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
 
   create_table "queued_emails", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "user_id"
-    t.datetime "queued"
+    t.datetime "queued", precision: nil
     t.integer "num_attempts"
     t.string "flavor", limit: 50
     t.integer "to_user_id"
@@ -562,26 +576,26 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
   create_table "rss_logs", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "observation_id"
     t.integer "species_list_id"
-    t.datetime "updated_at"
+    t.datetime "updated_at", precision: nil
     t.text "notes"
     t.integer "name_id"
     t.integer "location_id"
     t.integer "project_id"
     t.integer "glossary_term_id"
     t.integer "article_id"
-    t.datetime "created_at", null: false
+    t.datetime "created_at", precision: nil, null: false
   end
 
-  create_table "sequences", id: :integer, charset: "latin1", force: :cascade do |t|
+  create_table "sequences", id: :integer, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "observation_id"
     t.integer "user_id"
-    t.text "locus"
-    t.text "bases"
+    t.text "locus", size: :medium
+    t.text "bases", size: :medium
     t.string "archive"
     t.string "accession"
-    t.text "notes"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.text "notes", size: :medium
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
   end
 
   create_table "species_list_observations", charset: "utf8mb3", force: :cascade do |t|
@@ -590,8 +604,8 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
   end
 
   create_table "species_lists", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: nil
+    t.datetime "updated_at", precision: nil
     t.date "when"
     t.integer "user_id"
     t.string "where", limit: 1024
@@ -609,7 +623,7 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
     t.integer "language_id", null: false
     t.string "tag", limit: 100
     t.text "text"
-    t.datetime "updated_at"
+    t.datetime "updated_at", precision: nil
     t.integer "user_id"
   end
 
@@ -617,7 +631,7 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
     t.integer "version"
     t.integer "translation_string_id"
     t.text "text"
-    t.datetime "updated_at"
+    t.datetime "updated_at", precision: nil
     t.integer "user_id"
   end
 
@@ -634,8 +648,8 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
 
   create_table "user_groups", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.string "name", default: "", null: false
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: nil
+    t.datetime "updated_at", precision: nil
     t.boolean "meta", default: false
   end
 
@@ -645,9 +659,9 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
     t.string "email", limit: 80, default: "", null: false
     t.string "theme", limit: 40
     t.string "name", limit: 80
-    t.datetime "created_at"
-    t.datetime "last_login"
-    t.datetime "verified"
+    t.datetime "created_at", precision: nil
+    t.datetime "last_login", precision: nil
+    t.datetime "verified", precision: nil
     t.integer "license_id", default: 3, null: false
     t.integer "contribution", default: 0
     t.integer "location_id"
@@ -671,7 +685,7 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
     t.boolean "email_general_commercial", default: true, null: false
     t.boolean "email_general_question", default: true, null: false
     t.boolean "email_html", default: true, null: false
-    t.datetime "updated_at"
+    t.datetime "updated_at", precision: nil
     t.boolean "admin"
     t.text "alert"
     t.boolean "email_locations_admin", default: false
@@ -681,7 +695,7 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
     t.string "default_rss_type", limit: 40, default: "all"
     t.integer "votes_anonymous", default: 1
     t.integer "location_format", default: 1
-    t.datetime "last_activity"
+    t.datetime "last_activity", precision: nil
     t.integer "hide_authors", default: 1, null: false
     t.boolean "thumbnail_maps", default: true, null: false
     t.string "auth_code", limit: 40
@@ -694,6 +708,7 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
     t.text "notes_template"
     t.boolean "blocked", default: false, null: false
     t.boolean "no_emails", default: false, null: false
+    t.index ["login"], name: "login_index"
   end
 
   create_table "visual_group_images", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -707,24 +722,26 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
     t.string "name", null: false
     t.boolean "approved", default: false, null: false
     t.text "description"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "visual_models", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "votes", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: nil
+    t.datetime "updated_at", precision: nil
     t.integer "naming_id"
     t.integer "user_id"
     t.integer "observation_id", default: 0
     t.boolean "favorite"
     t.float "value"
+    t.index ["naming_id"], name: "naming_index"
+    t.index ["observation_id"], name: "observation_index"
   end
 
 end

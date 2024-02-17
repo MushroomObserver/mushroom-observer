@@ -1,0 +1,56 @@
+<%
+approved_name = @name.approved_name
+parents = approved_name.all_parents
+%>
+
+<%= if approved_name.classification.present? && parents.any?
+  tag.div(class: "mb-2") do
+    ([approved_name] + parents).reverse.each do |n|
+      concat(tag.p do
+        concat("#{rank_as_string(n.rank)}: ")
+        concat(tag.i(link_with_query(n.text_name.t, n.show_link_args)))
+        if n == approved_name && approved_name != @name
+          concat([
+            safe_br, safe_nbsp, safe_nbsp, " (= ", tag.i(@name.text_name.t), ")"
+          ].safe_join)
+        end
+      end)
+    end
+  end
+end %>
+
+<%= if @first_child
+  type = @name.at_or_below_genus? && !@name.at_or_below_species? ?
+    :rank_species : :show_subtaxa_obss
+  tag.p do
+    link_to(:show_object.t(type: type),
+            add_query_param(names_path, @children_query))
+  end
+end %>
+
+<%= if @name.below_genus? &&
+        @name.accepted_genus.try(&:classification).to_s.strip !=
+        @name.classification.to_s.strip
+  tag.p do
+    put_button(
+      name: :show_name_refresh_classification.t,
+      path: add_query_param(refresh_name_classification_path(@name.id))
+    )
+  end
+end %>
+
+<%= if @name.can_propagate? && @first_child && @name.classification.present?
+  tag.p do
+    put_button(
+      name: :show_name_propagate_classification.t,
+      path: add_query_param(propagate_name_classification_path(@name.id))
+    )
+  end
+end %>
+
+<%= if !@name.below_genus? && @name.classification.blank?
+  tag.p do
+    link_with_query(:show_name_inherit_classification.t,
+                    inherit_name_classification_form_path(@name.id))
+  end
+end %>

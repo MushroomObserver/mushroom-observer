@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require("test_helper")
-require("set")
 
 class NamesControllerTest < FunctionalTestCase
   include ObjectLinkHelper
@@ -56,6 +55,8 @@ class NamesControllerTest < FunctionalTestCase
     get(:index)
 
     assert_displayed_title("Names by Name")
+    assert_select("#right_tabs a[href='#{names_path}']", { count: 0 },
+                  "right `tabs` should not link to All Names")
   end
 
   def test_index_with_non_default_sort
@@ -202,9 +203,8 @@ class NamesControllerTest < FunctionalTestCase
 
     login
     get(:index, params: { near_miss_pattern: })
-
     near_misses.each do |near_miss|
-      assert_select("#results a[href*='names/#{near_miss.id}']",
+      assert_select("#results a[href*='names/#{near_miss.id}'] .display-name",
                     text: near_miss.search_name)
     end
   end
@@ -222,6 +222,8 @@ class NamesControllerTest < FunctionalTestCase
                     distinct.count },
       "Wrong number of (correctly spelled) Names"
     )
+    assert_select("#right_tabs a[href='#{names_path}']", { count: 1 },
+                  "right `tabs` should have a link to All Names")
   end
 
   def test_index_with_observations_by_letter
@@ -237,8 +239,8 @@ class NamesControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_displayed_title("Names with Observations")
     names.each do |name|
-      assert_select("#results a[href*='/names/#{name.id}']",
-                    text: name.search_name)
+      assert_select("#results a[href*='/names/#{name.id}'] .display-name",
+                    name.search_name)
     end
   end
 
@@ -268,7 +270,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
       # need length; count & size return a hash; description_needed is grouped
-      { count: Name.description_needed.length },
+      { count: Name.with_correct_spelling.description_needed.length },
       "Wrong number of (correctly spelled) Names"
     )
   end
@@ -399,9 +401,9 @@ class NamesControllerTest < FunctionalTestCase
     get(:test_index, params: { num_per_page: 10 }.merge(query_params))
     # print @response.body
     assert_template("names/index")
-    name_links = css_select(".table a")
+    name_links = css_select(".list-group.name-index a")
     assert_equal(10, name_links.length)
-    expected = Name.all.order("sort_name, author").limit(10).to_a
+    expected = Name.order("sort_name, author").limit(10).to_a
     assert_equal(expected.map(&:id), ids_from_links(name_links))
     # assert_equal(@controller.url_with_query(action: "show",
     #  id: expected.first.id, only_path: true), name_links.first.url)
@@ -425,9 +427,9 @@ class NamesControllerTest < FunctionalTestCase
     get(:test_index,
         params: { num_per_page: 10, page: 2 }.merge(query_params))
     assert_template("names/index")
-    name_links = css_select(".table a")
+    name_links = css_select(".list-group.name-index a")
     assert_equal(10, name_links.length)
-    expected = Name.all.order("sort_name").limit(10).offset(10).to_a
+    expected = Name.order("sort_name").limit(10).offset(10).to_a
     assert_equal(expected.map(&:id), ids_from_links(name_links))
     url = @controller.url_with_query(controller: "/names", action: :show,
                                      id: expected.first.id, only_path: true)
@@ -453,7 +455,7 @@ class NamesControllerTest < FunctionalTestCase
                                letter: "L" }.merge(query_params))
     assert_template("names/index")
     assert_select("#content")
-    name_links = css_select(".table a")
+    name_links = css_select(".list-group.name-index a")
     assert_equal(l_names.size, name_links.length)
     assert_equal(Set.new(l_names.map(&:id)),
                  Set.new(ids_from_links(name_links)))
@@ -479,7 +481,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:test_index, params: { num_per_page: l_names.size,
                                letter: "L" }.merge(query_params))
     assert_template("names/index")
-    name_links = css_select(".table a")
+    name_links = css_select(".list-group.name-index a")
 
     assert_equal(l_names.size, name_links.length)
     assert_equal(Set.new(l_names.map(&:id)),
@@ -505,7 +507,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:test_index, params: { num_per_page: l_names.size, letter: "L",
                                page: 2 }.merge(query_params))
     assert_template("names/index")
-    name_links = css_select(".table a")
+    name_links = css_select(".list-group.name-index a")
     assert_equal(1, name_links.length)
     assert_equal([last_name.id], ids_from_links(name_links))
     assert_select("a", text: "2", count: 0)
@@ -546,18 +548,18 @@ class NamesControllerTest < FunctionalTestCase
     get(:show, params: { id: names(:coprinus_comatus).id })
     assert_template("show")
     # Creates three for children and all four observations sections,
-    # but one never used.
-    assert_equal(3, QueryRecord.count)
+    # but one never used. (? Now 4 - AN 20240107)
+    assert_equal(4, QueryRecord.count)
 
     get(:show, params: { id: names(:coprinus_comatus).id })
     assert_template("show")
     # Should re-use all the old queries.
-    assert_equal(3, QueryRecord.count)
+    assert_equal(4, QueryRecord.count)
 
     get(:show, params: { id: names(:agaricus_campestris).id })
     assert_template("show")
-    # Needs new queries this time.
-    assert_equal(7, QueryRecord.count)
+    # Needs new queries this time. (? Up from 7 - AN 20240107)
+    assert_equal(9, QueryRecord.count)
 
     # Agarcius: has children taxa.
     get(:show, params: { id: names(:agaricus).id })
@@ -773,6 +775,37 @@ class NamesControllerTest < FunctionalTestCase
     )
   end
 
+  def test_show_name_inherit_link
+    name = names(:pasaria)
+    assert(!name.below_genus? && name.classification.blank?,
+           "Need fixture with rank >= Genus and lacking Classification")
+
+    login
+    get(:show, params: { id: name.id })
+
+    assert_select(
+      "#name_classification",
+      { text: /#{:show_name_inherit_classification.l}/, count: 1 },
+      "Classification area lacks a #{:show_name_inherit_classification.l} link"
+    )
+  end
+
+  def test_show_name_sensu_lato
+    name = names(:coprinus_sensu_lato)
+    assert(name.rank == "Genus" && name.author.match?(/sensu lato/) &&
+             name.classification.present?,
+           "Test needs Genus sensu lato with a Classification")
+
+    login
+    get(:show, params: { id: name.id })
+
+    assert_select(
+      "#name_classification",
+      { text: /#{:show_name_propagate_classification.l}/, count: 0 },
+      "Name sensu lato should not have propagate classification link"
+    )
+  end
+
   def assert_synonym_links(name, approve, deprecate, edit)
     assert_select("a[href*=?]", approve_name_synonym_form_path(name.id),
                   count: approve)
@@ -794,10 +827,10 @@ class NamesControllerTest < FunctionalTestCase
     # No interest in this name yet.
     get(:show, params: { id: peltigera.id })
     assert_response(:success)
-    assert_image_link_in_html(/watch\d*.png/,
+    assert_image_link_in_html(/watch.*\.png/,
                               set_interest_path(type: "Name",
                                                 id: peltigera.id, state: 1))
-    assert_image_link_in_html(/ignore\d*.png/,
+    assert_image_link_in_html(/ignore.*\.png/,
                               set_interest_path(type: "Name",
                                                 id: peltigera.id, state: -1))
 
@@ -805,10 +838,10 @@ class NamesControllerTest < FunctionalTestCase
     Interest.create(target: peltigera, user: rolf, state: true)
     get(:show, params: { id: peltigera.id })
     assert_response(:success)
-    assert_image_link_in_html(/halfopen\d*.png/,
+    assert_image_link_in_html(/halfopen.*\.png/,
                               set_interest_path(type: "Name",
                                                 id: peltigera.id, state: 0))
-    assert_image_link_in_html(/ignore\d*.png/,
+    assert_image_link_in_html(/ignore.*\.png/,
                               set_interest_path(type: "Name",
                                                 id: peltigera.id, state: -1))
 
@@ -817,16 +850,16 @@ class NamesControllerTest < FunctionalTestCase
     Interest.create(target: peltigera, user: rolf, state: false)
     get(:show, params: { id: peltigera.id })
     assert_response(:success)
-    assert_image_link_in_html(/halfopen\d*.png/,
+    assert_image_link_in_html(/halfopen.*\.png/,
                               set_interest_path(type: "Name",
                                                 id: peltigera.id, state: 0))
-    assert_image_link_in_html(/watch\d*.png/,
+    assert_image_link_in_html(/watch.*\.png/,
                               set_interest_path(type: "Name",
                                                 id: peltigera.id, state: 1))
   end
 
   def test_next_and_prev
-    names = Name.all.order("text_name, author").to_a
+    names = Name.order("text_name, author").to_a
     name12 = names[12]
     name13 = names[13]
     name14 = names[14]

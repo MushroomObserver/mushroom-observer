@@ -1,0 +1,12 @@
+<%
+@container = :full
+add_index_title(@query)
+add_tab_set(images_index_tabs(query: @query))
+add_sorter(@query, images_index_sorts)
+
+flash_error(@error) if @error && @objects.empty?
+%>
+
+<%= paginate_block(@pages) do %>
+  <%= matrix_table(objects: @objects) %>
+<% end %>

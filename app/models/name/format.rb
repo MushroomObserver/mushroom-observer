@@ -151,16 +151,18 @@ module Name::Format
 
     # Make sure display names are in boldface for accepted names, and not in
     # boldface for deprecated names.
-    def make_sure_names_are_bolded_correctly
-      msgs = ""
+    def make_sure_names_are_bolded_correctly(dry_run: false)
+      msgs = []
       needs_fixing = Name.where(deprecated: true).
                      where(Name[:display_name].matches("%*%")).
                      or(Name.not_deprecated.
                         where(Name[:display_name].does_not_match("%*%")))
       needs_fixing.each do |name|
-        name.change_deprecated(name.deprecated)
-        name.save
-        msgs += "The name #{name.search_name.inspect} " \
+        unless dry_run
+          name.change_deprecated(name.deprecated)
+          name.save
+        end
+        msgs << "The name #{name.search_name.inspect} " \
                 "should #{name.deprecated && "not "}have been in boldface."
       end
       msgs

@@ -34,11 +34,15 @@ class ImagesController < ApplicationController
     :pattern,
     :by_user,
     :for_project,
-    :by
+    :by,
+    :q,
+    :id
   ].freeze
 
   @index_subaction_dispatch_table = {
-    by: :index_query_results
+    by: :index_query_results,
+    q: :index_query_results,
+    id: :index_query_results
   }.freeze
 
   #############################################
@@ -141,8 +145,8 @@ class ImagesController < ApplicationController
     args = {
       action: "index",
       matrix: true,
-      include: [:user, { observations: :name }, :profile_users,
-                :thumb_glossary_terms, :glossary_terms, :image_votes]
+      include: [:user, { observations: :name }, :license, :profile_users,
+                :projects, :thumb_glossary_terms, :glossary_terms, :image_votes]
     }.merge(args)
 
     # Paginate by letter if sorting by user.

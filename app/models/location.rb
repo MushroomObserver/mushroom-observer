@@ -156,7 +156,7 @@ class Location < AbstractModel
         ->(place_name) { where(Location[:name].matches("%#{place_name}")) }
   scope :in_box, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
-          box = Box.new(
+          box = Mappable::Box.new(
             north: args[:n], south: args[:s], east: args[:e], west: args[:w]
           )
           return none unless box.valid?
@@ -186,6 +186,17 @@ class Location < AbstractModel
             )
           end
         }
+  scope :show_includes, lambda {
+    strict_loading.includes(
+      { comments: :user },
+      { description: { comments: :user } },
+      { descriptions: [:authors, :editors] },
+      :interests,
+      :observations,
+      :rss_log,
+      :versions
+    )
+  }
 
   # Let attached observations update their cache if these fields changed.
   def update_observation_cache
@@ -198,7 +209,7 @@ class Location < AbstractModel
   #
   ##############################################################################
 
-  include BoxMethods
+  include Mappable::BoxMethods
 
   LXXXITUDE_REGEX = /^\s*
        (-?\d+(?:\.\d+)?) \s* (?:°|°|o|d|deg|,\s)? \s*
@@ -431,7 +442,7 @@ class Location < AbstractModel
     Location.where(name: name).or(Location.where(scientific_name: name)).first
   end
 
-  def self.user_name(user, name)
+  def self.user_format(user, name)
     if user && (user.location_format == "scientific")
       Location.reverse_name(name)
     else

@@ -1,0 +1,89 @@
+<!--[form:observation]-->
+<%
+# Data for the obs-form-images Stimulus controller.
+# Controller is on this element for the sake of image drag-and-dropzone
+max_size = MO.image_upload_max_size
+legible_max_size = (max_size.to_f/1024/1024).round
+
+image_upload_localization = {
+  uploading_text: :form_observations_uploading_images.t,
+  image_too_big_text: :form_observations_image_too_big.t(max: legible_max_size),
+  creating_observation_text: :form_observations_creating_observation.t,
+  months: :all_months.t,
+  show_on_map: :show_on_map.t,
+  something_went_wrong: :form_observations_upload_error.t
+}.to_json
+%>
+
+<%= form_with(
+  model: @observation,
+  url: add_query_param(action: action, id: @observation,
+                        approved_name: @what,
+                        approved_where: @place_name),
+  method: method,
+  multipart: true,
+  id: "observation_form",
+  data: {
+    controller: "obs-form-images",
+    upload_max_size: max_size,
+    localization: image_upload_localization,
+    obs_form_images_target: "form"
+  }
+) do |f| %>
+
+  <%= submit_button(form: f, button: button_name, center: true) %>
+
+  <%= render(partial: "observations/form/when", locals: { f: f }) %>
+  <%= render(partial: "observations/form/where",
+             locals: { f: f, button_name: button_name }) %>
+
+  <% if include_naming
+    # note this is not a separate form! just fields
+    naming_locals = {
+      f:            f,
+      action:       action,
+      button_name:  button_name,
+      show_reasons: false,
+      unfocused:    true,
+      name_help:    :form_naming_name_help_leave_blank.t
+    } %>
+    <%= render(partial: "observations/namings/fields", locals: naming_locals) %>
+
+  <% end # if include_naming %>
+
+  <%= render(partial: "observations/form/specimen_section",
+             locals: { f: f, button_name: button_name }) %>
+
+  <%= render(partial: "observations/form/notes", locals: { f: f }) %>
+
+  <% ########################### Image Forms ############################## %>
+
+  <% if include_images %>
+
+    <%= render(partial: "observations/form/images", locals: { f: f }) %>
+
+  <% end # if include_images %>
+
+  <% ##########################################################################     %>
+
+  <% if @projects.any? || @lists.any? %>
+    <%= submit_button(form: f, button: button_name, center: true) %>
+  <% end %>
+
+  <% if @projects.any? %>
+    <%= render(partial: "observations/form/projects",
+               locals: { f: f, button_name: button_name }) %>
+  <% end %>
+
+  <% if @lists.any? %>
+    <%= render(partial: "observations/form/species_lists", locals: { f: f }) %>
+  <% end %>
+
+  <%= submit_button(form: f, button: button_name, center: true) %>
+
+  <% if logging_optional %>
+    <%= check_box_with_label(form: f, field: :log_change, checked: "checked",
+                             label: :form_observations_log_change.t) %>
+  <% end %>
+
+<% end %><!--[/form:observation]-->

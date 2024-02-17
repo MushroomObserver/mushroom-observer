@@ -1,0 +1,13 @@
+<%
+carousel_locals = {
+  object: @name, images: @best_images, top_img: nil,
+  title: :show_name_most_confident.l, links: false
+}
+%>
+
+<%= if @best_images&.length&.positive?
+  tag.div(class: "panel panel-default",
+          id: "name_confident_observations") do
+    carousel_html(**carousel_locals)
+  end
+end %>

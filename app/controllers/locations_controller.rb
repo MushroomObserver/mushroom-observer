@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require("geocoder")
-
 #  :index
 #   params:
 #   advanced_search:
@@ -17,6 +15,7 @@ require("geocoder")
 #  :destroy
 
 # Locations controller.
+# rubocop:disable Metrics/ClassLength
 class LocationsController < ApplicationController
   # disable cop because index is defined in ApplicationController
   # rubocop:disable Rails/LexicallyScopedActionFilter
@@ -91,7 +90,7 @@ class LocationsController < ApplicationController
     else
       query = create_query(
         :Location, :pattern_search,
-        pattern: Location.user_name(@user, pattern)
+        pattern: Location.user_format(@user, pattern)
       )
       show_selected_locations(query, link_all_sorts: true)
     end
@@ -275,6 +274,10 @@ class LocationsController < ApplicationController
     update_view_stats(@location)
     update_view_stats(@description) if @description
 
+    @versions = @location.versions
+    # Save two lookups in comments_for_object
+    @comments = @location.comments&.sort_by(&:created_at)&.reverse
+    @desc_comments = @description&.comments&.sort_by(&:created_at)&.reverse
     init_projects_ivar
   end
 
@@ -282,13 +285,11 @@ class LocationsController < ApplicationController
     init_caller_ivars_for_new
 
     # Render a blank form.
-    user_name = Location.user_name(@user, @display_name)
+    user_format = Location.user_format(@user, @display_name)
     if @display_name
-      @dubious_where_reasons = Location.
-                               dubious_name?(user_name, true)
+      @dubious_where_reasons = Location.dubious_name?(user_format, true)
     end
     @location = Location.new
-    try_to_geocode_location(user_name)
   end
 
   def create
@@ -300,7 +301,7 @@ class LocationsController < ApplicationController
     # Look to see if the display name is already in use.
     # If it is then just use that location and ignore the other values.
     # Probably should be smarter with warnings and merges and such...
-    db_name = Location.user_name(@user, @display_name)
+    db_name = Location.user_format(@user, @display_name)
     @location = Location.find_by_name_or_reverse_name(db_name)
 
     # Location already exists.
@@ -318,7 +319,7 @@ class LocationsController < ApplicationController
     return render_new unless done
 
     if @original_name.present?
-      db_name = Location.user_name(@user, @original_name)
+      db_name = Location.user_format(@user, @original_name)
       Observation.define_a_location(@location, db_name)
       SpeciesList.define_a_location(@location, db_name)
     end
@@ -338,7 +339,7 @@ class LocationsController < ApplicationController
 
     params[:location] ||= {}
     @display_name = params[:location][:display_name].strip_squeeze
-    db_name = Location.user_name(@user, @display_name)
+    db_name = Location.user_format(@user, @display_name)
     merge = Location.find_by_name_or_reverse_name(db_name)
     if merge && merge != @location
       update_location_merge(merge)
@@ -363,7 +364,8 @@ class LocationsController < ApplicationController
   private
 
   def find_location!
-    @location = find_or_goto_index(Location, params[:id].to_s)
+    @location = Location.show_includes.safe_find(params[:id]) ||
+                flash_error_and_goto_index(Location, params[:id])
   end
 
   def render_new
@@ -415,23 +417,6 @@ class LocationsController < ApplicationController
     @set_species_list = params[:set_species_list]
     @set_user         = params[:set_user]
     @set_herbarium    = params[:set_herbarium]
-  end
-
-  def try_to_geocode_location(user_name)
-    geocoder = Geocoder.new(user_name)
-    if geocoder.valid
-      @location.display_name = @display_name
-      @location.north = geocoder.north
-      @location.south = geocoder.south
-      @location.east = geocoder.east
-      @location.west = geocoder.west
-    else
-      @location.display_name = ""
-      @location.north = 80
-      @location.south = -80
-      @location.east = 89
-      @location.west = -89
-    end
   end
 
   def create_location_ivar(done, db_name)
@@ -571,3 +556,4 @@ class LocationsController < ApplicationController
       permit(:display_name, :north, :west, :east, :south, :high, :low, :notes)
   end
 end
+# rubocop:enable Metrics/ClassLength

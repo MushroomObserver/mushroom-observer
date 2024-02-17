@@ -1,0 +1,76 @@
+<%
+@css_theme = css_theme
+
+html_class = (Rails.env == "test") ? "" : "scroll-behavior-smooth"
+ctrlr_action = "#{controller.controller_name}__#{controller.action_name}"
+theme = "theme-#{@css_theme.underscore.dasherize}"
+location_format = "location-format-#{User.current_location_format}"
+logged_in = User.current ? "logged-in-user" : "no-user"
+body_class = class_names(ctrlr_action, theme, location_format, logged_in)
+%>
+<!DOCTYPE html>
+<html class="<%= html_class %>">
+<head>
+  <%= render(partial: "application/app/head") %>
+  <%= javascript_importmap_tags %>
+</head>
+
+<body class="<%= body_class %>" data-controller="lazyload">
+  <% if Rails.env == "production" %>
+    <%= render(partial: "application/app/gtm_iframe") %>
+  <% end %>
+
+<div id="main_container" class="container-fluid"
+     data-controller="nav links" data-nav-target="container">
+
+  <%= render(partial: "application/app/banners") %>
+
+  <div class="row row-offcanvas row-offcanvas-left"
+       data-nav-target="offcanvas">
+
+    <nav id="sidebar" class="sidebar-offcanvas col-xs-8 col-sm-2 hidden-print">
+      <%= render(partial: "application/sidebar") %>
+    </nav><!-- #sidebar -->
+
+    <div id="right_side" class="col-xs-12 col-sm-10">
+
+      <%= render(partial: "application/app/hamburger") %>
+
+      <%= render(partial: "application/top_nav") %>
+
+      <%# need to print a `#page_flash` div no matter what, so js can add %>
+      <div class="container-full hidden-print" id="page_flash">
+        <%= flash_notices_html %><%# calls flash_clear %>
+      </div><!--.container-text-->
+
+      <header id="header">
+        <%= render(partial: "application/content/title_and_tab_sets") %>
+      </header>
+
+      <main id="content" class="<%= container_class %>"
+            data-controller="lightgallery">
+
+        <%# unless @user&.verified? %>
+          <%# render(partial: "application/content/login_layout") %>
+        <%# end %>
+
+        <!--MAIN_PAGE_CONTENT-->
+        <%= yield %>
+        <!--/MAIN_PAGE_CONTENT-->
+
+        <%= render(partial: "application/content/translators_credit") %>
+      </main><!-- #content -->
+
+    </div><!-- #right_side -->
+  </div><!-- .row-offcanvas -->
+</div><!-- #main_container -->
+
+<!--AJAX PROGRESS WHIRLY -->
+<%= render(partial: "shared/modal_ajax_progress") %>
+
+<%= render(partial: "application/app/media_query_tests") %>
+
+<%= render(partial: "application/app/javascript_footer") %>
+
+</body>
+</html>

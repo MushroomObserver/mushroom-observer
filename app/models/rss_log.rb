@@ -178,7 +178,7 @@ class RssLog < AbstractModel
   # Returns the associated object's id, or nil if it's an orphan.
   def target_id
     RssLog.all_types.each do |type|
-      obj_id = send("#{type}_id".to_sym)
+      obj_id = send(:"#{type}_id")
       return obj_id if obj_id
     end
     nil
@@ -188,7 +188,7 @@ class RssLog < AbstractModel
   # or nil if it's an orphan
   def target_type
     RssLog.all_types.each do |type|
-      return type.to_sym if send("#{type}_id".to_sym)
+      return type.to_sym if send(:"#{type}_id")
     end
     nil
   end
@@ -196,7 +196,7 @@ class RssLog < AbstractModel
   # Clear association with target.
   def clear_target_id
     RssLog.all_types.each do |type|
-      send("#{type}_id=", nil)
+      send(:"#{type}_id=", nil)
     end
   end
 

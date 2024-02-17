@@ -1,0 +1,12 @@
+<%
+add_page_title(:show_past_location_title.t(
+  num: @location.version, name: @location.display_name
+))
+add_tab_set(location_version_tabs(location: @location))
+%>
+
+<%= show_past_versions(@location, @versions) %>
+
+<%= render(partial: "locations/show/location", object: @location) %>
+
+<%= show_object_footer(@location, @versions) %>

@@ -143,6 +143,7 @@ module ObservationsController::EditAndUpdate
   def reload_edit_form
     @images         = @bad_images
     @new_image.when = @observation.when
+    init_project_vars
     init_project_vars_for_reload(@observation)
     init_list_vars_for_reload(@observation)
     render(action: :edit)
@@ -177,7 +178,7 @@ module ObservationsController::EditAndUpdate
     return unless checks
 
     User.current.all_editable_species_lists.includes(:observations).
-      each do |list|
+      find_each do |list|
       before = obs.species_lists.include?(list)
       after = checks["id_#{list.id}"] == "1"
       next unless before != after

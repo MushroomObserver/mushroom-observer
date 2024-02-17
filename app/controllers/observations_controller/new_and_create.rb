@@ -47,7 +47,7 @@ module ObservationsController::NewAndCreate
     @images      = []
     @good_images = []
     init_specimen_vars
-    init_project_vars
+    init_project_vars_for_create
     init_list_vars
     defaults_from_last_observation_created
   end
@@ -65,11 +65,16 @@ module ObservationsController::NewAndCreate
     return unless last_observation && last_observation.created_at > 1.hour.ago
 
     %w[when where location is_collection_location gps_hidden].each do |attr|
-      @observation.send("#{attr}=", last_observation.send(attr))
+      @observation.send(:"#{attr}=", last_observation.send(attr))
     end
-    last_observation.projects.each do |project|
-      @project_checks[project.id] = true unless project.open_membership
-    end
+
+    last_observation.projects.where(open_membership: false).
+      find_each do |project|
+        next unless project.current?
+
+        @project_checks[project.id] = true
+      end
+
     last_observation.species_lists.each do |list|
       if check_permission(list)
         @lists << list unless @lists.include?(list)
@@ -92,6 +97,7 @@ module ObservationsController::NewAndCreate
     success = true
     success = false unless validate_params(params)
     success = false unless validate_object(@observation)
+    success = false unless validate_projects(params)
     success = false if @name && !validate_object(@naming)
     success = false if @name && !@vote.value.nil? && !validate_object(@vote)
     success = false if @bad_images != []
@@ -101,14 +107,14 @@ module ObservationsController::NewAndCreate
     if success
       @observation.log(:log_observation_created)
       # should always succeed
-      save_everything_else(param_lookup([:naming, :reasons]))
+      save_everything_else(params.dig(:naming, :reasons))
       strip_images! if @observation.gps_hidden
       flash_notice(:runtime_observation_success.t(id: @observation.id))
       redirect_to_next_page
 
     # If anything failed reload the form.
     else
-      reload_new_form(param_lookup([:naming, :reasons]))
+      reload_new_form(params.dig(:naming, :reasons))
     end
   end
 
@@ -154,7 +160,7 @@ module ObservationsController::NewAndCreate
   def rough_cut(params)
     @observation.notes = notes_to_sym_and_compact
     @naming = Naming.construct({}, @observation)
-    @vote = Vote.construct(param_lookup([:naming, :vote]), @naming)
+    @vote = Vote.construct(params.dig(:naming, :vote), @naming)
     @good_images = update_good_images(params[:good_images])
     @bad_images  = create_image_objects(params[:image],
                                         @observation, @good_images)
@@ -174,8 +180,8 @@ module ObservationsController::NewAndCreate
 
     @naming.create_reasons(reason, params[:was_js_on] == "yes")
     save_with_log(@naming)
-    @observation.reload
-    @observation.change_vote(@naming, @vote.value) unless @vote.value.nil?
+    consensus = ::Observation::NamingConsensus.new(@observation.reload)
+    consensus.change_vote(@naming, @vote.value) unless @vote.value.nil?
   end
 
   def save_collection_number(obs, params)
@@ -304,6 +310,7 @@ module ObservationsController::NewAndCreate
     @images          = @bad_images
     @new_image.when  = @observation.when
     init_specimen_vars_for_reload
+    init_project_vars_for_create
     init_project_vars_for_reload(@observation)
     init_list_vars_for_reload(@observation)
     render(action: :new, location: new_observation_path(q: get_query_param))

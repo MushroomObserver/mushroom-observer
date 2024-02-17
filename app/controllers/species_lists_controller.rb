@@ -16,7 +16,11 @@ class SpeciesListsController < ApplicationController
     # Bullet wants us to eager load synonyms for @deprecated_names in
     # edit_species_list, and I thought it would be possible, but I can't
     # get it to work.  Seems toooo minor to waste any more time on.
-    :update
+    # Also, as of 20231212, it wants a cached column for Observation.name,
+    # but this is not as simple as an AR default column_cache because count
+    # needs to be recalculated whenever an observation's consensus name
+    # changes, not just on create or destroy of the Observation.name.
+    :create, :update
   ]
 
   # Used by ApplicationController to dispatch #index to a private method
@@ -221,6 +225,8 @@ class SpeciesListsController < ApplicationController
     @pages = paginate_letters(:letter, :page, 100)
     @objects = @query.paginate(@pages, include:
                   [:user, :name, :location, { thumb_image: :image_votes }])
+    # Save a lookup in comments_for_object
+    @comments = @species_list.comments&.sort_by(&:created_at)&.reverse
   end
 
   ##############################################################################

@@ -1,0 +1,26 @@
+<% link = icon_link_with_query(*observation_manage_lists_tab(obs, user)) %>
+<%=
+panel_block(heading: :show_lists_header.t,
+            heading_links: link,
+            id: "observation_species_lists") do
+
+  if obs.species_lists.any?
+    tag.ul(class: "list-unstyled mb-0") do
+      obs.species_lists.map do |spl|
+        tag.li(id: "species_list_#{spl.id}") do
+          concat(link_to(spl.format_name.t, species_list_path(spl.id)))
+          if check_permission(spl)
+            concat(put_button(name: "[#{:REMOVE.t}]",
+                              path: observation_species_list_path(
+                                id: obs.id, species_list_id: spl.id,
+                                commit: "remove"
+                              ),
+                              data: { confirm: :are_you_sure.l }))
+          end
+        end
+      end.safe_join
+    end
+  end
+
+end
+%>

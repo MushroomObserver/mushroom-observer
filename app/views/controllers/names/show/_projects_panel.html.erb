@@ -1,0 +1,9 @@
+<%= panel_block(id: "name_projects", heading: :show_name_create_draft.t) do
+  @projects.map do |project|
+    concat(link_with_query(
+      project.title,
+      new_name_description_path(@name.id, project: project.id, source: :project)
+    ))
+    concat(safe_br)
+  end
+end %>

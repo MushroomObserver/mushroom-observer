@@ -1,0 +1,29 @@
+<%# bs3
+https://getbootstrap.com/docs/3.4/javascript/#buttons-checkbox-radio
+%>
+
+<%= form_with(url: add_query_param(activity_logs_path),
+              method: :get, scope: :type,
+              class: "filter-form", id: "log_filter_form") do |f|
+
+  tag.div(class: "btn-group pb-1 hidden-xs text-nowrap") do
+    [
+      tag.span(:rss_show.t, class: "btn btn-default btn-sm disabled"),
+
+      # Everything tab
+      tag.span(
+        filter_for_everything(@types),
+        class: class_names("btn btn-default btn-sm",
+                           { active: @types == ['all'] })
+      ),
+
+      # Tab for each type of log
+      render(partial: "application/content/type",
+             collection: RssLog.all_types(&:to_s),
+             locals: { f: f }),
+
+      f.submit(:SUBMIT.t, class: "btn btn-default btn-sm")
+    ].safe_join
+  end
+
+end %>

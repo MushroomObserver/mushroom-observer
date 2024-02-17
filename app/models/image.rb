@@ -223,7 +223,7 @@ require("fastimage")
 #
 ################################################################################
 #
-class Image < AbstractModel
+class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   require "fileutils"
   require "net/http"
 
@@ -259,6 +259,12 @@ class Image < AbstractModel
 
   after_update :track_copyright_changes
   before_destroy :update_thumbnails
+
+  scope :interactive_includes, lambda {
+    strict_loading.includes(
+      :image_votes, :license, :projects, :user
+    )
+  }
 
   # Array of all observations, users and glossary terms using this image.
   def all_subjects
@@ -876,6 +882,9 @@ class Image < AbstractModel
     # of the other callbacks, either, since this doesn't result in emails,
     # contribution changes, or rss log entries.
     save_without_our_callbacks if save_changes
+    # update +updated_at+ for any associated observations, in order to update
+    # the cached interactive_image in the matrix_box (contrast with the above)
+    observations&.touch_all
 
     value
   end
@@ -1047,7 +1056,7 @@ class Image < AbstractModel
     display_names = {}
     current_names_and_ids = {}
 
-    License.all.find_each do |license|
+    License.find_each do |license|
       display_names[license.id] = license.display_name
       current_names_and_ids[license.id] = License.current_names_and_ids(license)
     end

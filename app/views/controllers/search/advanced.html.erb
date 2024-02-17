@@ -1,0 +1,55 @@
+<%
+  add_page_title(:app_advanced_search.t)
+  models = [
+    [:OBSERVATIONS.l, :observation],
+    # temporarily disabled for performance
+    # 2021-09-12 JDC
+    # [:IMAGES.l, :image],
+    [:LOCATIONS.l, :location],
+    [:NAMES.l, :name],
+  ]
+%>
+
+<%= help_block(:p, :advanced_search_caveat.t) %>
+
+<%= form_with(scope: :search, url: { action: :advanced },
+              method: :get, id: "advanced_search_form",
+              class: "pb-5 mb-5",
+              data: { controller: "advanced-search" }) do |f| %>
+
+  <%= submit_button(form: f, button: :advanced_search_submit.l, center: true) %>
+
+  <% mod_betw = help_note(:span, :advanced_search_result_type_help.t) %>
+  <%= select_with_label(
+    form: f, field: :model, label: :advanced_search_result_type.t + ":",
+    options: models, select_opts: {}, between: mod_betw,
+    data: { advanced_search_target: "searchModel",
+            action: "advanced-search#disableUnusedFilters" }
+  ) %>
+
+  <% nam_betw = help_note(:span, :advanced_search_name_help.t) %>
+  <%= autocompleter_field(form: f, field: :name,
+                          label: :NAME.t + ":", between: nam_betw,
+                          autocomplete: :name, separator: " OR ") %>
+
+  <% usr_betw = help_note(:span, :advanced_search_observer_help.t) %>
+  <%= autocompleter_field(form: f, field: :user,
+                          label: :OBSERVER.t + ":", between: usr_betw,
+                          autocomplete: :user, separator: " OR ") %>
+
+  <% loc_betw = help_note(:span, :advanced_search_location_help.t) %>
+  <%= autocompleter_field(form: f, field: :location,
+                          label: :LOCATION.t + ":", between: loc_betw,
+                          autocomplete: :location, separator: " OR " ) %>
+
+  <% cnt_betw = help_note(:span, :advanced_search_content_help.t) %>
+  <% cnt_appd = help_block(:p, :advanced_search_content_notes.t) %>
+  <%= text_field_with_label(form: f, field: :content,
+                            label: :advanced_search_content.t + ":",
+                            between: cnt_betw, append: cnt_appd) %>
+
+  <%= render(partial: "search/advanced_search_filters", locals: { f: f }) %>
+
+  <%= submit_button(form: f, button: :advanced_search_submit.l, center: true) %>
+
+<% end %>

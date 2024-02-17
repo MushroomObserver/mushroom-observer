@@ -1,0 +1,86 @@
+# Read fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+eol_member_rolf:
+  project: eol_project
+  user: rolf
+  trust_level: <%= ProjectMember.trust_levels[:editing] %>
+
+eol_member_mary:
+  project: eol_project
+  user: mary
+  trust_level: <%= ProjectMember.trust_levels[:editing] %>
+
+eol_member_katrina:
+  project: eol_project
+  user: katrina
+  trust_level: <%= ProjectMember.trust_levels[:no_trust] %>
+
+bolete_dick:
+  project: bolete_project
+  user: dick
+  trust_level: <%= ProjectMember.trust_levels[:editing] %>
+
+bolete_mary:
+  project: bolete_project
+  user: mary
+  trust_level: <%= ProjectMember.trust_levels[:editing] %>
+
+open_member_mary:
+  project: open_membership_project
+  user: mary
+  trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>
+
+open_member_katrina:
+  project: open_membership_project
+  user: katrina
+  trust_level: <%= ProjectMember.trust_levels[:no_trust] %>
+
+empty_mary:
+  project: empty_project
+  user: mary
+  trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>
+
+two_list_mary:
+  project: two_list_project
+  user: mary
+  trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>
+
+obs_collected_and_displayed_dick:
+  project: obs_collected_and_displayed_project
+  user: dick
+  trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>
+
+two_img_obs_dick:
+  project: two_img_obs_project
+  user: dick
+  trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>
+
+rss_log_dick:
+  project: rss_log_project
+  user: dick
+  trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>
+
+one_genus_two_species_dick:
+  project: one_genus_two_species_project
+  user: dick
+  trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>
+
+news_articles_article_writer:
+  project: news_articles_project
+  user: article_writer
+  trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>
+
+albion_dick:
+  project: albion_project
+  user: dick
+  trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>
+
+wrangel_island_dick:
+  project: wrangel_island_project
+  user: dick
+  trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>
+
+lone_wolf_trust:
+  project: lone_wolf_project
+  user: lone_wolf
+  trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>

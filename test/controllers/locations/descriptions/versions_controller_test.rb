@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require("test_helper")
-require("set")
 
 module Locations::Descriptions
   class VersionsControllerTest < FunctionalTestCase
@@ -18,7 +17,7 @@ module Locations::Descriptions
       get(:show, params: { id: desc.id })
       assert_template(
         "locations/descriptions/versions/show",
-        partial: "locations/descriptions/show/_location_description"
+        partial: "descriptions/_show_description_details"
       )
     end
   end

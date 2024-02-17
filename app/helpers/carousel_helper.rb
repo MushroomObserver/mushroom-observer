@@ -12,14 +12,15 @@ module CarouselHelper
   def carousel_html(**args)
     args[:images] ||= nil
     args[:object] ||= nil
+    args[:size] ||= :large
     args[:top_img] ||= args[:images].first
     args[:title] ||= :IMAGES.t
     args[:links] ||= ""
-    args[:thumbnails] ||= true
-    identifier = args[:object]&.type_tag || "image"
-    args[:html_id] ||= "#{identifier}_carousel"
+    args[:thumbnails] = true if args[:thumbnails].nil?
+    type = args[:object]&.type_tag || "image"
+    args[:html_id] ||= "#{type}_#{args[:object].id}_carousel"
 
-    tag.div(class: "panel panel-default") do
+    capture do
       if !args[:images].nil? && args[:images].any?
         concat(carousel_basic_html(**args))
       else
@@ -34,13 +35,13 @@ module CarouselHelper
   def carousel_basic_html(**args)
     tag.div(class: "carousel slide", id: args[:html_id],
             data: { ride: "false", interval: "false" }) do
+      concat(carousel_heading(args[:title], args[:links])) if args[:thumbnails]
       concat(tag.div(class: "carousel-inner bg-light", role: "listbox") do
         args[:images].each do |image|
           concat(carousel_item(image, **args))
         end
         concat(carousel_controls(args[:html_id])) if args[:images].length > 1
       end)
-      concat(carousel_heading(args[:title], args[:links]))
       concat(carousel_thumbnails(**args)) if args[:thumbnails]
     end
   end
@@ -50,19 +51,19 @@ module CarouselHelper
     # Caption needs object for copyright info
     img_args = args.except(:images, :object, :top_img, :title, :links,
                            :thumbnails, :html_id)
-    presenter_args = img_args.merge({ size: :large, fit: :contain,
-                                      original: true,
+    presenter_args = img_args.merge({ fit: :contain, original: true,
                                       extra_classes: "carousel-image" })
     presenter = ImagePresenter.new(image, presenter_args)
     active = image == args[:top_img] ? "active" : ""
 
     tag.div(class: class_names("item", active)) do
-      [
-        image_tag(presenter.img_src, presenter.options_lazy),
-        image_stretched_link(presenter.image_link, presenter.image_link_method),
-        lightbox_link(presenter.lightbox_data),
-        carousel_caption(image, args[:object], presenter)
-      ].safe_join
+      concat(image_tag(presenter.img_src, presenter.options_lazy))
+      if presenter.image_link
+        concat(image_stretched_link(presenter.image_link,
+                                    presenter.image_link_method))
+      end
+      concat(lightbox_link(presenter.lightbox_data))
+      concat(carousel_caption(image, args[:object], presenter))
     end
   end
 
@@ -115,7 +116,7 @@ module CarouselHelper
   end
 
   def carousel_thumbnails(**args)
-    tag.ol(class: "carousel-indicators bg-light mt-2 mb-0") do
+    tag.ol(class: "carousel-indicators panel-footer py-2 px-0 mb-0") do
       args[:images].each_with_index do |image, index|
         active = image == args[:top_img] ? "active" : ""
 

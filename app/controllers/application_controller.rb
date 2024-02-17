@@ -83,6 +83,7 @@
 #  extra_gc::               (filter: calls <tt>ObjectSpace.garbage_collect</tt>)
 #
 #  ==== Other stuff
+#  observation_matrix_box_image_includes:: Hash of includes for eager-loading
 #  default_thumbnail_size::      Default thumbnail size: :thumbnail or :small.
 #  default_thumbnail_size_set::  Change default thumbnail size for current user.
 #  rubric::                      Label for what the controller deals with
@@ -91,11 +92,15 @@
 #  catch_errors_and_log_request_stats::
 #                                (filter: catches errors for integration tests)
 #
+# rubocop:disable Metrics/ClassLength
 class ApplicationController < ActionController::Base
   require "extensions"
   require "login_system"
   require "csv"
   include LoginSystem
+
+  # Allow folder organization in the app/views folder
+  append_view_path Rails.root.join("app/views/controllers")
 
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
@@ -114,19 +119,11 @@ class ApplicationController < ActionController::Base
   # before_action :extra_gc
   # after_action  :extra_gc
 
-  # This discards MO "flash" messages immediately after regular controller
-  # AJAX requests, since the browser page is not reloaded and they'd
-  # confusingly reappear on the next page load, otherwise.
-  # It's intended for ajax form submissions that may need to display messages
-  # after the call, when reloading a form for example.
-  # (It doesn't apply to the AjaxController methods, including autocomplete.)
-  after_action :flash_clear_after_ajax_call
-
   # Make show_name_helper available to nested partials
   helper :show_name
 
   # Disable all filters except set_locale.
-  # (Used to streamline API and Ajax controllers.)
+  # (Used to streamline API controller.)
   def self.disable_filters
     # skip_before_action(:create_view_instance_variable)
     skip_before_action(:verify_authenticity_token)
@@ -140,10 +137,13 @@ class ApplicationController < ActionController::Base
   # Disables Bullet tester for one action. Use this in your controller:
   #   around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [ ... ]
   def skip_bullet
+    # puts("skip_bullet: OFF\n")
+    old_value = Bullet.n_plus_one_query_enable?
     Bullet.n_plus_one_query_enable = false
     yield
   ensure
-    Bullet.n_plus_one_query_enable = true
+    # puts("skip_bullet: ON\n")
+    Bullet.n_plus_one_query_enable = old_value
   end
 
   # @view can be used by classes to access view specific features like render
@@ -151,20 +151,6 @@ class ApplicationController < ActionController::Base
   # def create_view_instance_variable
   #   @view = view_context
   # end
-
-  # Utility for extracting nested params where any level might be nil
-  def param_lookup(path, default = nil)
-    result = params
-    path.each do |arg|
-      result = result[arg]
-      break if result.nil?
-    end
-    if result.nil?
-      default
-    else
-      block_given? ? yield(result) : result
-    end
-  end
 
   # Kick out agents responsible for excessive traffic.
   def kick_out_excessive_traffic
@@ -368,10 +354,16 @@ class ApplicationController < ActionController::Base
     User.current = nil
   end
 
+  # Save a lookup of the mrtg stats "user".
+  MRTG_USER_ID = 164054
+
   def try_user_autologin(user_from_session)
-    if user_verified_and_allowed?(user = user_from_session)
+    if Rails.env.production? && request.remote_ip == "127.0.0.1"
+      # Request from the server itself, MRTG needs to log in to test page loads.
+      login_valid_user(User.find(MRTG_USER_ID))
+    elsif user_verified_and_allowed?(user_from_session)
       # User was already logged in.
-      refresh_logged_in_user_instance(user)
+      @user = user_from_session
     elsif user_verified_and_allowed?(user = validate_user_in_autologin_cookie)
       # User had "remember me" cookie set.
       login_valid_user(user)
@@ -391,11 +383,6 @@ class ApplicationController < ActionController::Base
                   (split[1] == user.auth_code)
 
     user
-  end
-
-  def refresh_logged_in_user_instance(user)
-    @user = user
-    @user.reload
   end
 
   def login_valid_user(user)
@@ -423,8 +410,8 @@ class ApplicationController < ActionController::Base
 
   # Track when user last requested a page, but update at most once an hour.
   def track_last_time_user_made_a_request
-    last_activity = @user&.last_activity&.to_s("%Y%m%d%H")
-    now = Time.current.to_s("%Y%m%d%H")
+    last_activity = @user&.last_activity&.to_fs("%Y%m%d%H")
+    now = Time.current.to_fs("%Y%m%d%H")
     return if !@user || last_activity && last_activity >= now
 
     @user.last_activity = Time.current
@@ -539,8 +526,8 @@ class ApplicationController < ActionController::Base
     user
   end
 
-  # Retrieve the User from session.  Returns User object or nil.  (Does not
-  # check verified status or anything.)
+  # Retrieve the User from session.  Returns freshly loaded User object or nil.
+  # (Does not check verified status or anything.)
   def session_user
     User.safe_find(session[:user_id])
   end
@@ -816,15 +803,6 @@ class ApplicationController < ActionController::Base
     result
   end
 
-  # For AJAX requests to regular controllers:
-  # https://stackoverflow.com/a/18678966/3357635
-  def flash_clear_after_ajax_call
-    return unless !request.path.starts_with?("/ajax") && request.xhr?
-
-    # don't want the flash to appear when you reload page
-    flash_clear
-  end
-
   ##############################################################################
   #
   #  :section: Name validation
@@ -834,7 +812,7 @@ class ApplicationController < ActionController::Base
   # Goes through list of names entered by user and creates (and saves) any that
   # are not in the database (but only if user has approved them).
   #
-  # Used by: bulk_name_editor, change_synonyms, create/edit_species_list
+  # Used by: change_synonyms, create/edit_species_list
   #
   # Inputs:
   #
@@ -850,7 +828,6 @@ class ApplicationController < ActionController::Base
   #   Xxx yyy sensu Blah
   #   Valid name Author = Deprecated name Author
   #   blah blah [comment]
-  #   (this is described better in views/observer/bulk_name_edit.rhtml)
   #
   def construct_approved_names(name_list, approved_names, deprecate = false)
     return unless approved_names
@@ -889,35 +866,12 @@ class ApplicationController < ActionController::Base
     # if above parse was successful
     if (name = names.last)
       name.rank = name_parse.rank if name_parse.rank
-
-      process_given_name_comments_for_bulk_editor(name_parse, name)
-
-      # Only bulk name editor allows the synonym syntax now.  Tell it to
-      # approve the left-hand name.
-      deprecate2 = (name_parse.has_synonym ? false : deprecate)
-
-      save_approved_given_names(names, deprecate2)
+      save_approved_given_names(names, deprecate)
 
     # Parse must have failed.
     else
       flash_error(:runtime_no_create_name.t(type: :name,
                                             value: name_parse.name))
-    end
-  end
-
-  def process_given_name_comments_for_bulk_editor(name_parse, name)
-    return unless (comment = name_parse.comment)
-
-    # Okay to add citation to any record without an existing citation.
-    if comment =~ /^citation: *(.*)/
-      citation = Regexp.last_match(1)
-      name.citation = citation if name.citation.blank?
-    # Only save comment if name didn't exist
-    elsif name.new_record?
-      name.notes = comment
-    else
-      flash_warning("Didn't save comment for #{name.real_search_name}, " \
-                    "name already exists. (comment = \"#{comment}\")")
     end
   end
 
@@ -932,7 +886,6 @@ class ApplicationController < ActionController::Base
     # Parse was successful
     if (synonym = synonyms.last)
       synonym.rank = name_parse.synonym_rank if name_parse.synonym_rank
-      process_synonym_comments_for_bulk_editor(name_parse, synonym)
       save_synonyms(synonym, synonyms)
 
     # Parse must have failed.
@@ -944,18 +897,6 @@ class ApplicationController < ActionController::Base
 
   def create_synonym(name_parse)
     Name.find_or_create_name_and_parents(name_parse.synonym_search_name)
-  end
-
-  def process_synonym_comments_for_bulk_editor(name_parse, synonym)
-    return unless (comment = name_parse.synonym_comment)
-
-    # Only save comment if name didn't exist
-    if synonym.new_record?
-      synonym.notes = comment
-    else
-      flash_warning("Didn't save comment for #{synonym.real_search_name}, " \
-                    "name already exists. (comment = \"#{comment}\")")
-    end
   end
 
   # Deprecate and save.
@@ -1003,12 +944,22 @@ class ApplicationController < ActionController::Base
 
     Query.safe_find(id)
   end
+  helper_method :query_from_session
 
   # Get instance of Query which is being passed to subsequent pages.
   def passed_query
     Query.safe_find(query_params[:q].to_s.dealphabetize)
   end
   helper_method :passed_query
+
+  # TODO: If we're going to cache user stuff that depends on their present q,
+  # we'll need a helper to make the current QueryRecord (not just the id)
+  # available to templates as an ApplicationController ivar. Something like:
+  #
+  # def current_query_record
+  #   current_query = passed_query || query_from_session # could both be nil!
+  #   current_query_record = current_query&.record || "no_query"
+  # end
 
   # Return query parameter(s) necessary to pass query information along to
   # the next request. *NOTE*: This method is available to views.
@@ -1062,8 +1013,6 @@ class ApplicationController < ActionController::Base
   helper_method :get_query_param
 
   # NOTE: these two methods add q: param to urls built from controllers/actions.
-  # Seem to be dodgy with Rails routes path helpers. If encountering problems,
-  # try redirect_to(whatever_objects_path(q: get_query_param)) instead.
   def redirect_with_query(args, query = nil)
     redirect_to(add_query_param(args, query))
   end
@@ -1426,7 +1375,7 @@ class ApplicationController < ActionController::Base
     if (@num_results == 1) && !args[:always_index]
       show_action_redirect(query)
     else
-      calc_pages(query, args)
+      calc_pages_and_objects(query, args)
       if block_given?
         @extra_data = @objects.each_with_object({}) do |object, data|
           row = yield(object)
@@ -1495,7 +1444,7 @@ class ApplicationController < ActionController::Base
                         id: query.result_ids.first)
   end
 
-  def calc_pages(query, args)
+  def calc_pages_and_objects(query, args)
     number_arg = args[:number_arg] || :page
     @pages = if args[:letters]
                paginate_letters(args[:letter_arg] || :letter, number_arg,
@@ -1522,15 +1471,50 @@ class ApplicationController < ActionController::Base
   end
 
   def find_objects(query, args)
+    caching = args[:cache] || false
     include = args[:include] || nil
-    # Instantiate correct subset.
     logger.warn("QUERY starting: #{query.query.inspect}")
     @timer_start = Time.current
-    @objects = query.paginate(@pages, include: include)
+
+    # Instantiate correct subset, with or without includes.
+    @objects = if caching
+                 objects_with_only_needed_eager_loads(query, include)
+               else
+                 query.paginate(@pages, include: include)
+               end
+
     @timer_end = Time.current
     logger.warn("QUERY finished: model=#{query.model}, " \
                 "flavor=#{query.flavor}, params=#{query.params.inspect}, " \
                 "time=#{(@timer_end - @timer_start).to_f}")
+  end
+
+  # If caching, only uncached objects need to eager_load the includes
+  def objects_with_only_needed_eager_loads(query, include)
+    # user = User.current ? "logged_in" : "no_user"
+    # locale = I18n.locale
+    objects_simple = query.paginate(@pages)
+
+    # Temporarily disabling cached matrix boxes: eager load everything
+    ids_to_eager_load = objects_simple
+
+    # ids_to_eager_load = objects_simple.reject do |obj|
+    #   object_fragment_exist?(obj, user, locale)
+    # end.pluck(:id)
+    # now get the heavy loaded instances:
+    objects_eager = query.model.where(id: ids_to_eager_load).includes(include)
+    # our Array extension: collates new instances with old, in original order
+    objects_simple.collate_new_instances(objects_eager)
+  end
+
+  # Check if a cached partial exists for this object.
+  # digest_path_from_template from ActionView::Helpers::CacheHelper :nodoc:
+  # https://stackoverflow.com/a/77862353/3357635
+  def object_fragment_exist?(obj, user, locale)
+    template = lookup_context.find(action_name, lookup_context.prefixes)
+    digest_path = helpers.digest_path_from_template(template)
+
+    fragment_exist?([digest_path, obj, user, locale])
   end
 
   def show_index_render(args)
@@ -1703,6 +1687,12 @@ class ApplicationController < ActionController::Base
   #
   ##############################################################################
 
+  def observation_matrix_box_image_includes
+    { thumb_image: [:image_votes, :license, :projects, :user] }.freeze
+    # for matrix_box_carousels:
+    # { images: [:image_votes, :license, :projects, :user] }.freeze
+  end
+
   # Tell an object that someone has looked at it (unless a robot made the
   # request).
   def update_view_stats(object)
@@ -1789,15 +1779,7 @@ class ApplicationController < ActionController::Base
   end
 
   def load_for_show_observation_or_goto_index(id)
-    Observation.includes(
-      :collection_numbers,
-      { comments: :user },
-      { herbarium_records: [{ herbarium: :curators }, :user] },
-      { images: [:image_votes, :license, :projects, :user] },
-      { namings: :name },
-      :projects,
-      :sequences
-    ).find_by(id: id) ||
+    Observation.show_includes.find_by(id: id) ||
       flash_error_and_goto_index(Observation, id)
   end
 
@@ -1846,3 +1828,4 @@ class ApplicationController < ActionController::Base
     nil
   end
 end
+# rubocop:enable Metrics/ClassLength

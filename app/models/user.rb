@@ -272,6 +272,8 @@ class User < AbstractModel
   has_many :namings
   has_many :observations
   has_many :projects_created, class_name: "Project"
+  has_many :project_members, dependent: :destroy
+  has_many :projects, through: :project_members, source: :projects
   has_many :publications
   has_many :queued_emails
   has_many :sequences
@@ -315,7 +317,7 @@ class User < AbstractModel
   belongs_to :license       # user's default license
   belongs_to :location      # primary location
 
-  serialize :content_filter, Hash
+  serialize :content_filter, type: Hash
 
   ##############################################################################
   #
@@ -1124,8 +1126,8 @@ class User < AbstractModel
   }
 
   def user_requirements
-    user_login_requirements
-    user_password_requirements
+    user_login_requirements if new_record? || login_changed?
+    user_password_requirements if new_record? || password_changed?
     user_other_requirements
   end
 
@@ -1139,6 +1141,7 @@ class User < AbstractModel
     end
   end
 
+  # This is a pricey lookup, avoid if not changing login
   def login_already_taken?
     other = User.find_by(login: login)
     other && other.id != id

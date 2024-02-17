@@ -97,7 +97,7 @@ class VisualGroupsController < ApplicationController
       return @visual_group.visual_group_images.where(included: true).
              pluck(:image_id, :included)
     end
-    VisualGroupImages.new(@visual_group, @filter, true).vals
+    VisualGroupImages.new(@visual_group, @filter, :included).vals
   end
 
   def calc_edit_vals
@@ -105,7 +105,8 @@ class VisualGroupsController < ApplicationController
       return @visual_group.visual_group_images.
              where(included: @status != "excluded").pluck(:image_id, :included)
     end
-    VisualGroupImages.new(@visual_group, @filter, nil).vals
+    VisualGroupImages.new(@visual_group, @filter, :any).vals -
+      VisualGroupImages.new(@visual_group, @filter, :reviewed).vals
   end
 
   def save_visual_group

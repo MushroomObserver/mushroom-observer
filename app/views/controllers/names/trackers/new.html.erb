@@ -1,0 +1,23 @@
+<%
+# Form to create a tracker, via params[:commit]
+
+add_page_title(:email_tracking_title.t(name: @name.display_name))
+
+add_tab_set(name_forms_return_tabs(name: @name))
+
+action = { controller: "/names/trackers", action: :create, id: @name.id,
+            q: get_query_param }
+%>
+
+<div class="mt-5 mb-5">
+  <%= if @name.at_or_below_species?
+    :email_tracking_help_below_species.tp(
+      name: @name.display_name_without_authors
+    )
+  else
+    :email_tracking_help_above_species.tp(rank: @name.rank_translated)
+  end %>
+</div>
+
+<%= render(partial: "names/trackers/form", locals: { action: action,
+                                                     method: :post }) %>

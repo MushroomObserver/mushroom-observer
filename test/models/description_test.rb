@@ -225,9 +225,10 @@ class DescriptionTest < UnitTestCase
     assert_equal([rolf], desc.admins)
     assert_equal([rolf.id], desc.admin_ids)
     assert_equal(User.all, desc.writers)
-    assert_equal(User.pluck(:id), desc.writer_ids)
+    # Must order on :id because of new table index on `login`
+    assert_equal(User.order(:id).pluck(:id), desc.writer_ids)
     assert_equal(User.all, desc.readers)
-    assert_equal(User.pluck(:id), desc.reader_ids)
+    assert_equal(User.order(:id).pluck(:id), desc.reader_ids)
 
     desc = name_descriptions(:draft_coprinus_comatus)
     assert_equal([rolf, mary, katrina], desc.admins)

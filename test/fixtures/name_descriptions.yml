@@ -214,3 +214,18 @@ boletus_edulis_desc:
   updated_at:       2012-07-12 06:32:18
   user:             roy # this was admin, but we don't have an admin in test
   version:          1
+
+# A draft of owned by a non-admin member (katrina) of the rolf_project
+tubaria_furfuracea_desc:
+  <<: *DEFAULTS
+  name: tubaria_furfuracea
+  user: katrina
+  gen_desc: draft by project non-admin member (katrina) to test test_destroy_project_member
+  project: rolf_project
+  public: 0
+  source_type: <%= NameDescription.source_types[:project] %>
+  source_name: rolf_project
+  admin_groups: rolf_only, katrina_only
+  authors: katrina
+  reader_groups: rolf_only, katrina_only
+  writer_groups: rolf_only, katrina_only

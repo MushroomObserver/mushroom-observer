@@ -89,6 +89,19 @@ class LocationDescription < Description
   has_many :editors, through: :location_description_editors,
                      source: :user
 
+  scope :show_includes, lambda {
+    strict_loading.includes(
+      :authors,
+      { comments: :user },
+      :editors,
+      :interests,
+      { location: [:descriptions, :interests, :rss_log] },
+      :project,
+      :user,
+      :versions
+    )
+  }
+
   ALL_NOTE_FIELDS = [:gen_desc, :ecology, :species, :notes, :refs].freeze
 
   acts_as_versioned(

@@ -17,8 +17,8 @@ require("action_mailer/railtie")
 # require("action_mailbox/engine")
 # require("action_text/engine")
 require("action_view/railtie")
-# require("action_cable/engine")
-# require("sprockets/railtie")
+require("action_cable/engine")
+require("sprockets/railtie")
 require("rails/test_unit/railtie")
 
 # Require the gems listed in Gemfile, including any gems
@@ -32,7 +32,6 @@ module MushroomObserver
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
     # Custom directories with classes and modules you want to be autoloadable.
-    config.autoloader = :zeitwerk
     config.autoload_paths += %W[
       #{config.root}/app/classes
       #{config.root}/app/extensions
@@ -41,6 +40,10 @@ module MushroomObserver
       #{config.root}/app/classes
       #{config.root}/app/extensions
     ]
+
+    # Uncomment this after migrating to all recommended default configs for 7.1
+    # config/initializers/new_framework_defaults_7_1.rb
+    # config.load_defaults = 7.1
 
     # Set Time.zone default to the specified zone and
     # make Active Record auto-convert to this zone.
@@ -78,12 +81,28 @@ module MushroomObserver
     # generated form input IDs in 6.1, as they were in `form_for`.
     config.action_view.form_with_generates_ids = true
 
+    # Turbo supersedes the functionality offered by Rails UJS to turn links and
+    # form submissions into XMLHttpRequests, so if you're making a complete
+    # switch from Rails UJS to Turbo, you should ensure that you have this:
+    config.action_view.form_with_generates_remote_forms = false
+    # This is a UJS config that can be explicitly set
+    # config.action_view.automatically_disable_submit_tag = false
+
     # Rails 6.1 can auto-generate HTML comments with the template filename
     # Unfortunately this is also added to email templates!
     # config.action_view.annotate_rendered_view_with_filenames = true
 
-    # Rails 6.1+
-    config.active_record.legacy_connection_handling = false
+    # Strict loading - either :log, or :error out the page
+    config.active_record.action_on_strict_loading_violation = :log
+
+    # Just starting to use Rails caching on 7.1, so we're current
+    config.active_support.cache_format_version = 7.1
+
+    # Set up memcached as the cache store everywhere
+    # config.cache_store = :mem_cache_store
+    config.cache_store = :solid_cache_store
+
+    config.solid_cache.connects_to = { database: { writing: :cache } }
   end
 end
 

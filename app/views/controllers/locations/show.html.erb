@@ -1,0 +1,37 @@
+<%
+add_page_title(:show_location_title.t(name: @location.display_name))
+add_pager_for(@location)
+add_interest_icons(@user, @location)
+add_tab_set(location_show_tabs(location: @location))
+@container = :wide
+%>
+
+<%= render(partial: "locations/show/location", object: @location) %>
+
+<div class="row">
+  <div class="col-sm-8">
+    <%= render(partial: "comments/comments_for_object",
+               locals: { object: @location, comments: @comments,
+                         controls: @user, limit: 2 }) %>
+    <% if @description&.notes? %>
+      <hr/>
+      <%= show_embedded_description_title(@description, :location) %>
+      <%= render(partial: "descriptions/show_description_details",
+                 object: @description) %>
+      <%= render(partial: "comments/comments_for_object",
+                 locals: { object: @description, comments: @desc_comments,
+                           controls: @user, limit: 2 }) %>
+      <hr/>
+    <% end %>
+    <%= show_alt_descriptions(object: @location, projects: @projects) %>
+  </div>
+  <div class="col-sm-4">
+    <%= show_previous_version(@location, @versions) %>
+    <%= export_status_controls(@location) %>
+    <%= show_object_footer(@location, @versions) %>
+  </div>
+</div><!--.row-->
+
+<div class="mt-3">
+</div>
+

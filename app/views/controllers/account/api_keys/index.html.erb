@@ -1,0 +1,9 @@
+<%
+add_page_title(:account_api_keys_title.t)
+add_tab_set(account_api_tabs)
+@container = :full
+%>
+
+<%= tag.div(:account_api_keys_help.tp, class: "container-text") %>
+
+<%= render(partial: "account/api_keys/table") %>

@@ -27,7 +27,8 @@ module Report
     end
 
     def formatted_rows
-      rows = all_rows.map { |row| Row.new(row) }
+      tweaker = ProjectTweaker.new
+      rows = all_rows.map { |row| Row.new(tweaker.tweak(row)) }
       rows = sort_before(rows)
       extend_data!(rows)
       sort_after(rows.map { |row| format_row(row) })

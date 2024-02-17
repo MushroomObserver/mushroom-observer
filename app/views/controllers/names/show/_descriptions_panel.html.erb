@@ -1,0 +1,14 @@
+<%
+description_links = list_descriptions(object: @name, type: :name) || []
+heading = :show_name_descriptions.l
+link = icon_link_with_query(*name_new_description_tab(@name))
+heading_links = @user ? link&.html_safe : ""
+%>
+
+<%= panel_block(id: "name_descriptions",
+                heading: heading, heading_links: heading_links) do
+  description_links.each do |desc|
+    concat(tag.div(desc))
+  end
+  concat(:show_name_no_descriptions.t) if description_links.empty?
+end %>

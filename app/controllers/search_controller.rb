@@ -18,8 +18,8 @@ class SearchController < ApplicationController
   #   /project/project_search
   #   /species_lists/index
   def pattern
-    pattern = param_lookup([:search, :pattern]) { |p| p.to_s.strip_squeeze }
-    type = param_lookup([:search, :type], &:to_sym)
+    pattern = params.dig(:search, :pattern) { |p| p.to_s.strip_squeeze }
+    type = params.dig(:search, :type)&.to_sym
 
     # Save it so that we can keep it in the search bar in subsequent pages.
     session[:pattern] = pattern
@@ -68,7 +68,7 @@ class SearchController < ApplicationController
     end
   end
 
-  # In the case of "needs_id", this is added to the search path params
+  # In the case of "needs_naming", this is added to the search path params
   def forward_pattern_search(type, pattern, special_params)
     case type
     when :google
@@ -77,9 +77,9 @@ class SearchController < ApplicationController
          :location, :name, :observation, :project, :species_list, :user
       redirect_to_search_or_index(
         pattern: pattern,
-        search_path: send("#{type.to_s.pluralize}_path",
+        search_path: send(:"#{type.to_s.pluralize}_path",
                           params: { pattern: pattern }.merge(special_params)),
-        index_path: send("#{type.to_s.pluralize}_path", special_params)
+        index_path: send(:"#{type.to_s.pluralize}_path", special_params)
       )
     else
       flash_error(:runtime_invalid.t(type: :search, value: type.inspect))

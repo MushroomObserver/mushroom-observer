@@ -151,7 +151,8 @@ class API2
         end
       end
       naming.save!
-      obs.change_vote(naming, @vote, user)
+      consensus = ::Observation::NamingConsensus.new(obs)
+      consensus.change_vote(naming, @vote, user)
     end
 
     def create_specimen_records(obs)

@@ -1,0 +1,13 @@
+<%
+add_page_title(tag.span(:rss_log_title.t, class: "text-nowrap"))
+add_tab_set(rss_logs_index_tabs(user: @user, types: @types))
+add_type_filters
+
+@container = :full
+
+flash_error(@error) if @error && @objects.empty?
+%>
+
+<%= paginate_block(@pages) do %>
+  <%= matrix_table(objects: @objects, cached: true) %>
+<% end %>

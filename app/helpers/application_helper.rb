@@ -61,32 +61,39 @@ module ApplicationHelper
   def flash_notices_html
     return "" unless flash_notices?
 
-    klass = case flash_notice_level
-            when 0 then "alert-success"
-            when 1 then "alert-warning"
-            when 2 then "alert-danger"
-            end
+    alert_class = case flash_notice_level
+                  when 0 then "alert-success"
+                  when 1 then "alert-warning"
+                  when 2 then "alert-danger"
+                  end
 
-    tag.div(flash_get_notices, id: "flash_notices",
-                               class: class_names("alert mt-3", klass))
+    notices = flash_get_notices
+    flash_clear
+
+    tag.div(notices, id: "flash_notices",
+                     class: class_names("alert mt-3", alert_class))
+  end
+
+  # Returns a string that indicates the current user/logged_in/admin status.
+  # Used as a simple cache key for templates that may have three
+  # possible versions of cached HTML
+  def user_status_string
+    if in_admin_mode?
+      "admin_mode"
+    elsif browser.bot?
+      "robot"
+    elsif !@user.nil?
+      "logged_in"
+    else
+      "no_user"
+    end
+  end
+
+  def logged_in_status
+    User.current ? "logged_in" : "no_user"
   end
 
   # ----------------------------------------------------------------------------
-
-  # Add something to the header from within view.  This can be called as many
-  # times as necessary -- the application layout will mash them all together
-  # and stick them at the end of the <tt>&gt;head&lt;/tt> section.
-  #
-  #   <%
-  #     add_header(GMap.header)       # adds GMap general header
-  #     gmap = make_map(@locations)
-  #     add_header(finish_map(gmap))  # adds map-specific header
-  #   %>
-  #
-  def add_header(str)
-    @header ||= safe_empty
-    @header += str
-  end
 
   # Take URL that got us to this page and add one or more parameters to it.
   # Returns new URL.

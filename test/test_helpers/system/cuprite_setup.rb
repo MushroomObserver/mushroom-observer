@@ -6,7 +6,10 @@ require "capybara/cuprite"
 # Then, we need to register our driver to be able to use it later
 # with #driven_by method.
 # https://sowenjub.me/writes/replacing-selenium-with-cuprite-for-rails-system-tests/
-Capybara.register_driver(:cuprite) do |app|
+# If we re-register `:cuprite`, we get a conflict and settings are ignored
+# :cuprite is registered by Rails already in version 7
+# https://github.com/rubycdp/cuprite/issues/180
+Capybara.register_driver(:mo_cuprite) do |app|
   Capybara::Cuprite::Driver.new(
     app,
     window_size: [1200, 800],

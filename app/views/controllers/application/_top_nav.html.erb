@@ -1,0 +1,21 @@
+<!--top_nav-->
+<nav id="top_nav" class="navbar navbar-default hidden-xs hidden-print"
+     data-nav-target="topNav">
+
+  <div class="container-fluid px-0">
+    <%= tag.span(rubric, class: "hidden") %>
+    <% if controller.controller_name == "identify" %>
+      <%= render(partial: "observations/identify/form_identify_filter") %>
+    <% else ##user is logged in %>
+      <%= render(partial: "application/top_nav/search_form") %>
+    <% end %>
+
+    <% if @user.nil? %>
+      <%= render(partial: "application/top_nav/login") %>
+    <% else ##user is logged in %>
+      <%= render(partial: "application/top_nav/user_nav") %>
+    <% end %>
+  </div>
+
+</nav>
+<!--/top_nav-->

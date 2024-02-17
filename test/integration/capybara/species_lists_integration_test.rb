@@ -40,6 +40,8 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     # First attempt at creating a list.
     login!(dick)
     visit("/species_lists/new")
+    assert_selector("body.species_lists__new")
+
     member_notes = "Member notes."
     within("#species_list_form") do
       assert_field("list_members", text: "")
@@ -70,6 +72,7 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#ambiguous_names", text: /Suillus.*White/)
 
     # Fix the ambiguous names: should be good now.
+    # list_members is an autocompleter!
     within("#species_list_form") do
       assert_equal(list.split("\r\n").sort,
                    find("#list_members").text.split("\r ").sort)
@@ -104,6 +107,8 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
 
     # Try making some edits, too.
     first(:link, href: /#{edit_species_list_path(spl.id)}/).click
+    assert_selector("body.species_lists__edit")
+
     new_member_notes = "New member notes."
     within("#species_list_form") do
       assert_field("list_members", text: "")
@@ -190,7 +195,7 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_equal(loc.name, obs.last.where)
     assert_equal(loc, obs.last.location)
 
-    # Try adding a comment, just for kicks.
+    # Try adding a comment, just for kicks. This will hit HTML, not Turbo
     click_link(href: /#{new_comment_path}/)
     assert_selector("body.comments__new")
     assert_selector("#title", text: /#{spl.title}/)
@@ -205,5 +210,19 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#title", text: /#{spl.title}/)
     assert_selector(".comment", text: /Slartibartfast/)
     assert_selector(".comment", text: /Steatopygia/)
+  end
+
+  def test_add_remove_from_another_list
+    spl = species_lists(:unknown_species_list)
+
+    login
+    visit(species_list_path(spl))
+    click_on(:species_list_show_add_remove_from_another_list.l)
+
+    assert_match(
+      edit_species_list_observations_path, current_path,
+      "Clicking #{:species_list_show_add_remove_from_another_list.l} " \
+      "should go to #{:species_list_add_remove_title.l}"
+    )
   end
 end

@@ -1,114 +1,168 @@
 # frozen_string_literal: true
 
 # Controller for handling the naming of observations
+
 module Observations
-  class NamingsController < ApplicationController
+  class NamingsController < ApplicationController # rubocop:disable Metrics/ClassLength
     before_action :login_required
+    before_action :pass_query_params
 
+    # Bullet wants us to eager load interests on taxa, which is loaded in
+    # Naming#create_emails
+    around_action :skip_bullet, if: -> { defined?(Bullet) },
+                                only: [:create, :update]
+
+    # The route for the namings table, an index of this obs' namings
+    def index
+      @observation = find_or_goto_index(Observation, params[:observation_id])
+      @consensus = Observation::NamingConsensus.new(@observation)
+    end
+
+    # Note that every Naming form is also a nested Vote form.
     def new
-      pass_query_params
-      @params = NamingParams.new(params[:naming])
-      @params.observation =
-        load_for_show_observation_or_goto_index(params[:observation_id])
-      fill_in_reference_for_suggestions(@params) if params[:naming].present?
-      return unless @params.observation
-
-      @observation = @params.observation
-      @reasons = @params.reasons
+      init_ivars
+      return unless @observation
 
       respond_to do |format|
+        format.turbo_stream { render_modal_naming_form }
         format.html
-        format.js do
-          render_modal_naming_form(
-            title: helpers.naming_form_new_title(obs: @observation)
-          )
-        end
       end
     end
 
+    # Note that the `respond_to_successful_` actions do reload the associations
+    # after the save/update. Maybe naming_includes are enough here?
+    #
     def create
-      pass_query_params
-      @params = NamingParams.new(params[:naming])
-      @params.observation =
-        load_for_show_observation_or_goto_index(params[:observation_id])
-      fill_in_reference_for_suggestions(@params) if params[:naming].present?
-      return unless @params.observation
+      init_ivars
+      return unless @observation
 
-      @observation = @params.observation
-      @reasons = @params.reasons
+      @consensus = Observation::NamingConsensus.new(@observation)
 
-      create_post
+      if rough_draft && can_save?
+        save_changes
+        respond_to_successful_create
+      else # If anything failed reload the form.
+        flash_naming_errors
+        add_reasons(params.dig(:naming, :reasons))
+        respond_to_form_errors
+      end
     end
 
     def edit
-      pass_query_params
-      @params = NamingParams.new
-      naming = @params.naming = Naming.from_params(params)
-      @params.observation =
-        load_for_show_observation_or_goto_index(naming.observation_id)
-      unless check_permission!(naming)
-        return default_redirect(naming.observation)
-      end
+      init_ivars
+      @observation = Observation.show_includes.find(params[:observation_id])
+      @naming = naming_from_params
+      # N+1: What is this doing? Watch out for check_permission!
+      return default_redirect(@observation) unless check_permission!(@naming)
 
-      @params.vote = naming.owners_vote
-      @params.edit_init
-
-      @observation = @params.observation
-      @reasons = @params.reasons
+      init_edit_ivars
+      @consensus = Observation::NamingConsensus.new(@observation)
+      @vote = @consensus.owners_vote(@naming)
 
       respond_to do |format|
+        format.turbo_stream { render_modal_naming_form }
         format.html
-        format.js do
-          render_modal_naming_form(
-            title: helpers.naming_form_edit_title(obs: @observation)
-          )
-        end
       end
     end
 
     def update
-      pass_query_params
-      @params = NamingParams.new
-      naming = @params.naming = Naming.from_params(params)
-      @params.observation =
-        load_for_show_observation_or_goto_index(naming.observation_id)
-      unless check_permission!(naming)
-        return default_redirect(naming.observation)
+      init_ivars
+      @observation = Observation.show_includes.find(params[:observation_id])
+      @naming = naming_from_params
+      # N+1: What is this doing? Watch out for check_permission!
+      return default_redirect(@observation) unless check_permission!(@naming)
+
+      @consensus = Observation::NamingConsensus.new(@observation)
+      @vote = @consensus.owners_vote(@naming)
+
+      if can_update?
+        need_new_naming? ? create_new_naming : change_naming
+        respond_to_successful_update
+      else
+        add_reasons(params.dig(:naming, :reasons))
+        respond_to_form_errors
       end
-
-      @params.vote = naming.owners_vote
-
-      @observation = @params.observation
-      @reasons = @params.reasons
-      edit_post
     end
 
     def destroy
-      pass_query_params
-      naming = Naming.find(params[:id].to_s)
-      if destroy_if_we_can(naming)
+      naming = Naming.includes([:votes]).find(params[:id].to_s)
+      @observation = Observation.naming_includes.find(params[:observation_id])
+      @consensus = Observation::NamingConsensus.new(@observation)
+      if destroy_if_we_can(naming) # needs to know consensus before deleting
         flash_notice(:runtime_destroy_naming_success.t(id: params[:id].to_s))
       end
+
       respond_to do |format|
-        format.html { default_redirect(naming.observation) }
-        format.js do
-          @observation = naming.observation
-          render(partial: "update_observation") and return
+        format.turbo_stream do
+          # Reload after delete
+          (obs, consensus, owner_name) = locals_for_update_observation
+          render(partial: "observations/namings/update_observation",
+                 locals: { obs: obs, consensus: consensus,
+                           owner_name: owner_name }) and return
         end
+        format.html { default_redirect(@observation) }
       end
     end
 
+    #########
+
     private
 
-    def render_modal_naming_form(title:)
-      render(partial: "shared/modal_form_show",
+    def init_ivars
+      @naming = Naming.new
+      @vote = Vote.new
+      # @what can't be nil else rails tries to call @name.name
+      @what = params[:naming].to_s
+      @reasons = @naming.init_reasons
+      fill_in_reference_for_suggestions if params[:naming].present?
+
+      @observation = Observation.show_includes.find(params[:observation_id])
+    end
+
+    # There seems to be a chance the id will be blank, although i believe not.
+    def naming_from_params
+      if params[:id].blank?
+        @consensus = Observation::NamingConsensus.new(@observation)
+        @consensus.consensus_naming
+      else
+        @observation.namings.find(params[:id])
+      end
+    end
+
+    def init_edit_ivars
+      @what        = @naming.text_name
+      @names       = nil
+      @valid_names = nil
+      @reasons     = @naming.init_reasons
+    end
+
+    def render_modal_naming_form
+      render(partial: "shared/modal_form",
              locals: {
-               title: title,
-               identifier: "naming",
-               form_bindings: "observations/namings/form_bindings",
+               title: modal_title, local: false,
+               identifier: modal_identifier,
+               form: "observations/namings/form",
                form_locals: { show_reasons: true,
                               context: params[:context] }
              }) and return
+    end
+
+    def modal_identifier
+      case action_name
+      when "new", "create"
+        "obs_#{@observation.id}_naming"
+      when "edit", "update"
+        "obs_#{@observation.id}_naming_#{@naming.id}"
+      end
+    end
+
+    def modal_title
+      case action_name
+      when "new", "create"
+        helpers.naming_form_new_title(obs: @observation)
+      when "edit", "update"
+        helpers.naming_form_edit_title(obs: @observation)
+      end
     end
 
     def default_redirect(obs, action = :show)
@@ -116,30 +170,114 @@ module Observations
                           action: action, id: obs.id)
     end
 
-    def create_post
-      if rough_draft && can_save?
-        save_changes
-        respond_to_successful_create
-      else # If anything failed reload the form.
-        flash_object_errors(@params.naming) if @params.name_missing?
-        @params.add_reasons(param_lookup([:naming, :reasons]))
-        respond_to_form_errors
+    ##########################################################################
+    #    CREATE
+
+    # returns Boolean
+    def rough_draft
+      set_ivars_for_validation(
+        {}, # naming_args
+        params.dig(:naming, :vote), # vote_args
+        params.dig(:naming, :name), # name_str
+        params[:approved_name], # approved_name
+        params.dig(:chosen_name, :name_id).to_s # chosen_name
+      )
+    end
+
+    # returns Boolean. Was @params.rough_draft
+    def set_ivars_for_validation(naming_args, vote_args,
+                                 name_str = nil, approved_name = nil,
+                                 chosen_name = nil)
+      @naming = Naming.construct(naming_args, @observation)
+      @vote = Vote.construct(vote_args, @naming)
+      result = if name_str
+                 resolve_name(name_str, approved_name, chosen_name)
+               else
+                 true
+               end
+      @naming.name = @name
+      result
+    end
+
+    # Set the ivars for the form, and potentially form_name_feedback
+    # in the case the name is not resolved unambiguously
+    def resolve_name(given_name, approved_name, chosen_name)
+      @resolver = Naming::NameResolver.new(
+        given_name, approved_name, chosen_name
+      )
+      # NOTE: views could be refactored to access properties of the @resolver,
+      # e.g. `@resolver.valid_names`, instead of these ivars.
+      # All but success, @what, @name are only used by form_name_feedback.
+      (success, @what, @name, @names, @valid_names,
+       @parent_deprecated, @suggest_corrections) =
+        @resolver.ivar_array
+      success && @name
+    end
+
+    # We should have a @name by this point
+    def can_save?
+      unproposed_name(:runtime_create_naming_already_proposed) &&
+        valid_use_of_imageless(@name, @observation) &&
+        validate_object(@naming) &&
+        (@vote.value.nil? || validate_object(@vote))
+    end
+
+    def unproposed_name(warning)
+      if @consensus.name_been_proposed?(@name)
+        flash_warning(warning.t)
+      else
+        true
       end
+    end
+
+    # Restricts use of "Imageless" as a naming
+    # Note that obs.has_backup_data? requires eager loading
+    # species_lists and herbarium_records...
+    def valid_use_of_imageless(name, obs)
+      return true unless name.imageless? && obs.has_backup_data?
+
+      flash_warning(:runtime_bad_use_of_imageless.t)
+    end
+
+    def save_changes
+      update_naming(params.dig(:naming, :reasons), params[:was_js_on] == "yes")
+      save_with_log(@naming)
+      change_vote_with_log unless @vote.value.nil?
     end
 
     def respond_to_successful_create
       respond_to do |format|
-        format.html { default_redirect(@params.observation, :show) }
-        format.js do
+        format.turbo_stream do
+          (obs, consensus, owner_name) = locals_for_update_observation
           case params[:context]
-          when "lightbox", "matrix_box"
-            render(partial: "observations/namings/update_lightbox")
+          when "lightgallery", "matrix_box"
+            render(partial: "observations/namings/update_matrix_box",
+                   locals: { obs: obs })
           else
-            render(partial: "observations/namings/update_observation")
+            render(partial: "observations/namings/update_observation",
+                   locals: { obs: obs, consensus: consensus,
+                             owner_name: owner_name })
           end
           return
         end
+        format.html { default_redirect(@observation, :show) }
       end
+    end
+
+    def flash_naming_errors
+      if @what.blank?
+        flash_error(:form_naming_what_missing.t)
+      elsif name_missing?
+        flash_object_errors(@naming)
+      end
+    end
+
+    def name_missing?
+      return false if @name && @what.present?
+
+      @naming.errors.
+        add(:name, :form_observations_there_is_a_problem_with_name.t)
+      true
     end
 
     def respond_to_form_errors
@@ -151,110 +289,129 @@ module Observations
                     end
       respond_to do |format|
         format.html { render(action: redo_action) and return }
-        format.js do
-          render(partial: "observations/namings/form_reload") and return
+        format.turbo_stream do
+          render(partial: "shared/modal_form_reload",
+                 locals: {
+                   identifier: modal_identifier,
+                   form: "observations/namings/form",
+                   form_locals: { show_reasons: true,
+                                  context: params[:context] }
+                 }) and return true
         end
       end
     end
 
-    def fill_in_reference_for_suggestions(params)
-      params.reasons.each_value do |r|
+    def fill_in_reference_for_suggestions
+      @reasons.each_value do |r|
         r.notes = "AI Observer" if r.num == 2
       end
     end
 
-    def rough_draft
-      @params.rough_draft(
-        {},
-        param_lookup([:naming, :vote]),
-        param_lookup([:naming, :name]),
-        params[:approved_name],
-        param_lookup([:chosen_name, :name_id], "").to_s
-      )
-    end
+    ##########################################################################
+    #    UPDATE
 
-    def can_save?
-      unproposed_name(:runtime_create_naming_already_proposed) &&
-        valid_use_of_imageless(@params.name, @params.observation) &&
-        validate_object(@params.naming) &&
-        (@params.vote.value.nil? || validate_object(@params.vote))
-    end
-
-    def save_changes
-      @params.update_naming(param_lookup([:naming, :reasons]),
-                            params[:was_js_on] == "yes")
-      save_with_log(@params.naming)
-      @params.save_vote unless @params.vote.value.nil?
-    end
-
-    def unproposed_name(warning)
-      @params.name_been_proposed? ? flash_warning(warning.t) : true
-    end
-
-    def valid_use_of_imageless(name, obs)
-      return true unless name.imageless? && obs.has_backup_data?
-
-      flash_warning(:runtime_bad_use_of_imageless.t)
+    def can_update?
+      validate_name &&
+        (name_not_changing? ||
+         unproposed_name(:runtime_edit_naming_someone_else) &&
+         valid_use_of_imageless(@name, @observation))
     end
 
     def validate_name
-      success = resolve_name(param_lookup([:naming, :name], "").to_s,
-                             param_lookup([:chosen_name, :name_id], "").to_s)
-      flash_object_errors(@params.naming) if @params.name_missing?
+      success = resolve_name(params.dig(:naming, :name).to_s,
+                             params[:approved_name],
+                             params.dig(:chosen_name, :name_id).to_s)
+      flash_naming_errors
       success
     end
 
-    def resolve_name(given_name, chosen_name)
-      @params.resolve_name(given_name, params[:approved_name], chosen_name)
+    def name_not_changing?
+      @naming.name == @name
     end
 
-    def edit_post
-      if validate_name &&
-         (@params.name_not_changing? ||
-          unproposed_name(:runtime_edit_naming_someone_else) &&
-          valid_use_of_imageless(@params.name, @params.observation))
-        @params.need_new_naming? ? create_new_naming : change_naming
-        respond_to_successful_update
-      else
-        @params.add_reasons(param_lookup([:naming, :reasons]))
-        respond_to_form_errors
-      end
+    def need_new_naming?
+      !(@consensus.editable?(@naming) || name_not_changing?)
+    end
+
+    def add_reasons(reasons)
+      @reasons = @naming.init_reasons(reasons)
     end
 
     def respond_to_successful_update
       respond_to do |format|
-        format.html { default_redirect(@params.observation) }
-        format.js do
-          render(partial: "update_observation") and return
+        format.turbo_stream do
+          (obs, consensus, owner_name) = locals_for_update_observation
+          render(partial: "observations/namings/update_observation",
+                 locals: { obs: obs, consensus: consensus,
+                           owner_name: owner_name }) and return
         end
+        format.html { default_redirect(@observation) }
       end
     end
 
-    def create_new_naming
-      @params.rough_draft({}, param_lookup([:naming, :vote]))
-      naming = @params.naming
-      return unless validate_object(naming) && validate_object(@params.vote)
+    # Define local_assigns for the update_observation partial
+    # @observation.reload doesn't do the includes
+    # This is a reload of all the naming table associations, after update
+    # The destroy action already preloads the obs, however.
+    def locals_for_update_observation(preloaded_obs = nil)
+      obs = preloaded_obs || Observation.naming_includes.find(@observation.id)
+      consensus = Observation::NamingConsensus.new(obs)
+      owner_name = consensus.owner_preference
 
-      naming.create_reasons(param_lookup([:naming, :reasons]),
-                            params[:was_js_on] == "yes")
-      save_with_log(naming)
-      @params.logged_change_vote
+      [obs, consensus, owner_name]
+    end
+
+    # Use case: user changes their mind on a name they've proposed, but it's
+    # already been upvoted by others. We don't let them change this naming,
+    # because that would bring the other people's votes along with it.
+    # We make a new one, reusing the user's previously stated vote and reasons.
+    def create_new_naming
+      set_ivars_for_validation({}, params.dig(:naming, :vote))
+      return unless validate_object(@naming) && validate_object(@vote)
+
+      update_naming(params.dig(:naming, :reasons), params[:was_js_on] == "yes")
+      # need to save the naming before we can move this user's vote
+      save_with_log(@naming)
+      change_vote_with_log
       flash_warning(:create_new_naming_warn.l)
     end
 
+    def change_vote_with_log
+      @consensus.change_vote_with_log(@naming, @vote.value)
+    end
+
+    def change_vote(new_val)
+      if new_val && (!@vote || @vote.value != new_val)
+        @consensus.change_vote(@naming, new_val)
+      else
+        @consensus.reload_namings_and_votes!
+        @consensus.calc_consensus
+      end
+    end
+
+    def update_naming(reasons, was_js_on)
+      @naming.name = @name
+      @naming.create_reasons(reasons, was_js_on)
+    end
+
     def change_naming
-      return unless @params.update_name(@user,
-                                        param_lookup([:naming, :reasons]),
-                                        params[:was_js_on] == "yes")
+      return unless update_name(params.dig(:naming, :reasons),
+                                params[:was_js_on] == "yes")
 
       flash_notice(:runtime_naming_updated_at.t)
-      @params.change_vote(param_lookup([:naming, :vote, :value], &:to_i))
+      change_vote(params.dig(:naming, :vote, :value).to_i)
+    end
+
+    def update_name(reasons, was_js_on)
+      @consensus.clean_votes(@naming, @name, @user)
+      @naming.create_reasons(reasons, was_js_on)
+      @naming.update_object(@name, @naming.changed?)
     end
 
     def destroy_if_we_can(naming)
       if !check_permission!(naming)
         flash_error(:runtime_destroy_naming_denied.t(id: naming.id))
-      elsif !in_admin_mode? && !naming.deletable?
+      elsif !in_admin_mode? && !@consensus.deletable?(naming)
         flash_warning(:runtime_destroy_naming_someone_else.t)
       elsif !naming.destroy
         flash_error(:runtime_destroy_naming_failed.t(id: naming.id))

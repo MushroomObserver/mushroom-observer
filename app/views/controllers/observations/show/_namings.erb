@@ -1,0 +1,9 @@
+<%
+@query ||= nil # tbd what this was ever used for in the table
+%>
+
+<!--OBSERVATION_NAMINGS / TABLE REFRESHED BY TURBO -->
+<%= tag.div(id: "observation_namings") do
+  observation_namings_table(obs, consensus)
+end %>
+<!--/OBSERVATION_NAMINGS -->

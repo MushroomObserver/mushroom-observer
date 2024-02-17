@@ -9,8 +9,7 @@ module Names::Descriptions
     # from the show_name page.
     def update
       pass_query_params
-      id = params[:id].to_s
-      desc = NameDescription.find(id)
+      desc = NameDescription.find(params[:id].to_s)
       desc.update_review_status(params[:value]) if reviewer?
       redirect_with_query(name_path(desc.name_id))
     end

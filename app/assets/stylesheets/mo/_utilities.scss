@@ -321,6 +321,14 @@
   margin-left: 10px !important;
 }
 
+.ml-1 {
+  margin-left: 0.25rem !important;
+}
+
+.ml-2 {
+  margin-left: 0.5rem !important;
+}
+
 .ml-3 {
   margin-left: 1rem !important;
 }
@@ -589,13 +597,33 @@
   background: rgba($black, 0.6);
 }
 
+// Bootstrap 3 - collapse "fade" instead of "slide"
+.no-transition.collapsing {
+  // transition-duration: 0.3s;
+  transition: height 0s, opacity 0.3s;
+  opacity: 0;
+}
+
+// Fix for weird inherited indent from .name-section p
+.glyphicon {
+  text-indent: 0;
+}
+
 //
 // larger devices
 // --------------------------------------------------
 
 @media screen and (min-width: 767px) {
+  .d-sm-none {
+    display: none;
+  }
+
   .d-sm-block {
     display: block;
+  }
+
+  .d-sm-inline-block {
+    display: inline-block;
   }
 
   .d-sm-flex {
@@ -610,6 +638,10 @@
     float: right !important;
   }
 
+  .float-sm-none {
+    float: none !important;
+  }
+
   .mt-sm-3 {
     margin-top: 1em !important;
   }
@@ -617,5 +649,9 @@
   .px-sm-0 {
     padding-left: 0 !important;
     padding-right: 0 !important;
+  }
+
+  .table {
+    overflow-x: scroll
   }
 }

@@ -14,6 +14,12 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#box_#{rss_log.id} .rss-id",
                     text: rss_log.observation_id)
 
+    # This is a bad test.  It doesn't handle adding new observations
+    # with images at the beginning of the feed rss_log.  I had to
+    # explicitly move the wolf_fart_rss_log to happen before a
+    # more recent observation without images.
+    # Search for "lurker issue: in the rss_log fixtures.
+
     # Click on first obs immediately after one that has images.
     # NOTE: BS3 matrix-box are a bit harder to find siblings
     # because the layout clearfix boxes interrupt the matrix boxes.
@@ -34,7 +40,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
     # Click on the first image. (That's why we picked the one after this.)
     go_back_after do
-      first("#observation_carousel .image-link").click
+      first(".carousel .image-link").click
       assert_match(/#{:app_title.l}: Image/, page.title, "Wrong page")
     end
     # back at Observation
@@ -206,7 +212,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     select("Locations", from: "search_type")
     click_button("Search")
     # assert_selector("#results a[href]")
-    labels = find_all("#results a[href]").map(&:text)
+    labels = find_all("#results a[href] .location-postal").map(&:text)
     assert(labels.any? { |l| l.end_with?("Canada") },
            "Expected one of the results to be in Canada.\n" \
            "Found these: #{labels.inspect}")

@@ -5,12 +5,16 @@
 .matrix-box {
 
   .panel {
-    min-height: 200px;
+    // min-height: 200px;
     margin-bottom: $grid-gutter-width;
 
     .thumbnail-container {
       min-height: 30px;
     }
+  }
+
+  .panel-sizing {
+    min-height: 180px;
   }
 
   // for when the whole panel section is a link, or has a stretched link
@@ -61,7 +65,7 @@ h5.rss-heading {
 }
 
 .rss-detail {
-  margin-top: 5px;
+  // margin-top: 5px;
   margin-bottom: 5px;
   // text-align: center;
 }

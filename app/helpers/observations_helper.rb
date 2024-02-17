@@ -79,33 +79,22 @@ module ObservationsHelper
   ##### Portion of page title that includes user's naming preference #########
 
   # Observer Preference: Hydnum repandum
-  def owner_naming_line(obs)
+  def owner_naming_line(owner_name)
     return unless User.current&.view_owner_id
 
     [
       "#{:show_observation_owner_id.t}:",
-      owner_favorite_or_explanation(obs).t
+      owner_favorite_or_explanation(owner_name).t
     ].safe_join(" ")
   end
 
-  def owner_favorite_or_explanation(obs)
-    if (name = obs.owner_preference)
+  def owner_favorite_or_explanation(owner_name)
+    if owner_name
       link_to_display_name_brief_authors(
-        name, class: "obs_owner_naming_link_#{name.id}"
+        owner_name, class: "obs_owner_naming_link_#{owner_name.id}"
       )
     else
       :show_observation_no_clear_preference
-    end
-  end
-
-  # gathers the user's @votes indexed by naming
-  def gather_users_votes(obs, user = nil)
-    return [] unless user
-
-    obs.namings.each_with_object({}) do |naming, votes|
-      votes[naming.id] =
-        naming.votes.find { |vote| vote.user_id == user.id } ||
-        Vote.new(value: 0)
     end
   end
 
@@ -145,21 +134,10 @@ module ObservationsHelper
     return "" unless check_permission(obs)
 
     [
-      icon_link_with_query(
-        :show_observation_add_images.t,
-        new_image_for_observation_path(obs.id), icon: :add
-      ),
-      " | ",
-      icon_link_with_query(
-        :show_observation_reuse_image.t,
-        reuse_images_for_observation_path(obs.id), icon: :reuse
-      ),
-      " | ",
-      icon_link_with_query(
-        :show_observation_remove_images.t,
-        remove_images_from_observation_path(obs.id), icon: :remove
-      )
-    ].safe_join
+      icon_link_with_query(*new_image_for_observation_tab(obs)),
+      icon_link_with_query(*reuse_images_for_observation_tab(obs)),
+      icon_link_with_query(*remove_images_from_observation_tab(obs))
+    ].safe_join(" | ")
   end
 
   # The following sections of the observation_details partial are also needed as
@@ -188,7 +166,7 @@ module ObservationsHelper
            else
              :show_observation_seen_at.t
            end}:",
-        location_link(obs.place_name, obs.location, nil, true)
+        location_link(obs.where, obs.location, nil, true)
       ].safe_join(" ")
     end
   end
@@ -203,24 +181,42 @@ module ObservationsHelper
     gps_hidden_msg = tag.i("(#{:show_observation_gps_hidden.t})")
 
     tag.p(class: "obs-where-gps", id: "observation_where_gps") do
+      # XXX Consider dropping this from indexes.
       concat(gps_display_link) if obs.reveal_location?
       concat(gps_hidden_msg) if obs.gps_hidden
     end
   end
 
   def observation_details_who(obs:)
+    obs_user = obs.user
+    html = [
+      "#{:WHO.t}:",
+      user_link(obs_user)
+    ]
+    if obs_user != User.current && !obs_user.no_emails &&
+       obs_user.email_general_question
+
+      html += [
+        "[",
+        modal_link_to("observation_email", *send_observer_question_tab(obs)),
+        "]"
+      ]
+    end
+
     tag.p(class: "obs-who", id: "observation_who") do
-      ["#{:WHO.t}:", user_link(obs.user)].safe_join(" ")
+      html.safe_join(" ")
     end
   end
 
   def observation_details_notes(obs:)
     return "" unless obs.notes?
 
+    notes = obs.notes_show_formatted.sub(/^\A/, "#{:NOTES.t}:\n").tpl
+
     tag.div(class: "obs-notes", id: "observation_notes") do
       Textile.clear_textile_cache
       Textile.register_name(obs.name)
-      tag.div(obs.notes_show_formatted.sub(/^\A/, "#{:NOTES.t}:\n").tpl)
+      tag.div(notes)
     end
   end
 end

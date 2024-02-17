@@ -48,18 +48,22 @@ MushroomObserver::Application.configure do
   #  The production environment is meant for finished, "live" apps.
   # ----------------------------
 
-  # Code is not reloaded between requests
-  config.cache_classes = true
+  # Code is not reloaded between requests.
+  # Replaces config.cache_classes = true
+  config.enable_reloading = false
 
   # Eager load code on boot. This eager loads most of Rails and
-  # your application in memory, allowing both thread web servers
+  # your application in memory, allowing both threaded web servers
   # and those relying on copy on write to perform better.
   # Rake tasks automatically ignore this option for performance.
   config.eager_load = true
 
-  # Full error reports are disabled and caching is turned on
-  config.consider_all_requests_local       = false
+  # Full error reports are disabled and caching is turned on.
+  config.consider_all_requests_local = false
   config.action_controller.perform_caching = true
+  # debugging: log fragment reads/writes
+  # (it will show [cache hit] even if set to false)
+  config.action_controller.enable_fragment_cache_logging = true
 
   # Enable Rack::Cache to put a simple HTTP cache in front of your application
   # Add `rack-cache` to your Gemfile before enabling this.
@@ -67,17 +71,26 @@ MushroomObserver::Application.configure do
   # nginx, varnish or squid.
   # config.action_dispatch.rack_cache = true
 
+  # Ensures that a master key has been made available in ENV
+  # ["RAILS_MASTER_KEY"], config/master.key, or an environment
+  # key such as config/credentials/production.key. This key is used to decrypt
+  # credentials (and other encrypted files).
+  # config.require_master_key = true
+
   # Disable Rails's static asset server
   # In production, Apache or nginx will already do this
   config.public_file_server.enabled = false
 
   # Compress JavaScripts and CSS
   config.assets.compress = true
-  config.assets.js_compressor = Uglifier.new(harmony: true)
+  config.assets.js_compressor = :terser
   config.assets.css_compressor = :sass
 
   # Do not fallback to assets pipeline if a precompiled asset is missed.
   config.assets.compile = false
+
+  # Enable serving of images, stylesheets, and javascripts from an asset server.
+  # config.asset_host = "http://assets.example.com"
 
   # Generate digests for assets URLs
   config.assets.digest = true
@@ -85,7 +98,7 @@ MushroomObserver::Application.configure do
   # Version of your assets, change this if you want to expire all your assets.
   config.assets.version = "1.0"
 
-  # Specifies the header that your server uses for sending files
+  # Specifies the header that your server uses for sending files.
   # config.action_dispatch.x_sendfile_header = "X-Sendfile" # for apache
   config.action_dispatch.x_sendfile_header = "X-Accel-Redirect" # For nginx
   # If you have no front-end server that supports something like X-Sendfile,
@@ -93,29 +106,48 @@ MushroomObserver::Application.configure do
 
   # Force all access to the app over SSL, use Strict-Transport-Security,
   # and use secure cookies.
-  # config.force_ssl = true
-
-  # Set to :debug to see everything in the log.
-  config.log_level = :info
-
-  # Prepend all log lines with the following tags.
-  # config.log_tags = [ :subdomain, :uuid ]
+  # force_ssl does not work with unicorn 6.1.0 - wait for 7
+  config.force_ssl = false
 
   # Use a different logger for distributed setups.
-  # config.logger = ActiveSupport::TaggedLogging.new(SyslogLogger.new)
+  # Log to STDOUT by default
+  # config.logger = ActiveSupport::Logger.new(STDOUT)
+  #   .tap  { |logger| logger.formatter = ::Logger::Formatter.new }
+  #   .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
 
-  # Use a different cache store in production
+  # Log to production.log. New 7.1 logging uses BroadcastLogger
+  # Not using TaggedLogging yet.
+  loggers = [
+    "log/production.log"
+  ].map do |output|
+    ActiveSupport::Logger.new(output).
+      tap { |logger| logger.formatter = Logger::Formatter.new }
+    # .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
+  end
+  config.logger = ActiveSupport::BroadcastLogger.new(*loggers)
+
+  # Prepend all log lines with the following tags.
+  # config.log_tags = [ :request_id, :subdomain, :uuid ]
+
+  # Info include generic and useful information about system operation, but
+  # avoids logging too much information to avoid inadvertent exposure of
+  # personally identifiable information (PII). If you want to log everything,
+  # set the level to "debug".
+  # config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
+  config.log_level = :debug
+
+  # Disable automatic flushing of the log to improve performance.
+  # config.autoflush_log = false
+
+  # Use a different cache store in production.
   # config.cache_store = :mem_cache_store
-
-  # Enable serving of images, stylesheets, and javascripts from an asset server
-  # config.action_controller.asset_host = "http://assets.example.com"
 
   # Precompile additional assets.
   # application.js, application.css, and all non-JS/CSS in app/assets
   # folder are already added.
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
-  # the I18n.default_locale when a translation can not be found)
+  # the I18n.default_locale when a translation can not be found).
   config.i18n.fallbacks = [I18n.default_locale]
 
   # Allow YAML deserializer to deserialize symbols
@@ -125,15 +157,14 @@ MushroomObserver::Application.configure do
   # Send deprecation notices to registered listeners
   config.active_support.deprecation = :notify
 
-  # Disable automatic flushing of the log to improve performance.
-  # config.autoflush_log = false
-
-  # Use default logging formatter so that PID and timestamp are not suppressed.
-  config.log_formatter = Logger::Formatter.new if defined?(Logger)
+  # Don't log any deprecations.
+  # config.active_support.report_deprecations = false
 
   # Combine files using the "require" directives at the top of included files
   # See http://guides.rubyonrails.org/asset_pipeline.html#turning-debugging-off
   config.assets.debug = false
+
+  config.bot_enabled = true
 end
 
 file = File.expand_path("../consts-site.rb", __dir__)

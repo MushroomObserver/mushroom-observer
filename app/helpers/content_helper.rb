@@ -95,8 +95,13 @@ module ContentHelper
   end
 
   # make a help-block styled element, like a div, p
-  def help_block(element = :div, string = "")
-    content_tag(element, string, class: "help-block")
+  def help_block(element = :div, string = "", **args, &block)
+    content = block ? capture(&block) : string
+    html_options = {
+      class: class_names("help-block", args[:class])
+    }.deep_merge(args.except(:class))
+
+    content_tag(element, html_options) { content }
   end
 
   # draw a help block with an arrow
@@ -115,36 +120,71 @@ module ContentHelper
     end
   end
 
-  def panel_with_outer_heading(**args, &block)
-    html = []
-    h_tag = (args[:h_tag].presence || :h4)
-    html << content_tag(h_tag, args[:heading]) if args[:heading]
-    html << panel_block(**args.except(:heading, :h_tag), &block)
-    safe_join(html)
-  end
-
   def panel_block(**args, &block)
-    heading = if args[:heading]
-                tag.div(class: "panel-heading") do
-                  tag.h4(args[:heading], class: "panel-title")
-                end
-              else
-                ""
-              end
+    heading = panel_block_heading(args)
+    footer = panel_block_footer(args)
+    content = capture(&block).to_s
 
-    content_tag(
-      :div,
+    tag.div(
       class: "panel panel-default #{args[:class]}",
-      id: args[:id]
+      **args.except(:class, :inner_class, :heading)
     ) do
       concat(heading)
-      concat(tag.div(class: "panel-body #{args[:inner_class]}") do
-        concat(capture(&block).to_s)
-      end)
+      if content.present?
+        concat(tag.div(class: "panel-body #{args[:inner_class]}") do
+          concat(content)
+        end)
+      end
+      concat(footer)
+    end
+  end
+
+  def panel_block_heading(args)
+    if args[:heading]
+      tag.div(class: "panel-heading") do
+        tag.h4(class: "panel-title") do
+          els = [args[:heading]]
+          if args[:heading_links].present?
+            els << tag.span(args[:heading_links], class: "float-right")
+          end
+          els.safe_join
+        end
+      end
+    else
+      ""
+    end
+  end
+
+  def panel_block_footer(args)
+    if args[:footer]
+      tag.div(class: "panel-footer") do
+        args[:footer]
+      end
+    else
+      ""
     end
   end
 
   def alert_block(level = :warning, string = "")
     content_tag(:div, string, class: "alert alert-#{level}")
+  end
+
+  # Create a div for notes.
+  #
+  #   <%= notes_panel(html) %>
+  #
+  #   <% notes_panel() do %>
+  #     Render stuff in here.  Note lack of "=" in line above.
+  #   <% end %>
+  #
+  def notes_panel(msg = nil, &block)
+    msg = capture(&block) if block
+    result = tag.div(msg, class: "panel-body")
+    wrapper = tag.div(result, class: "panel panel-default dotted-border")
+    if block
+      concat(wrapper)
+    else
+      wrapper
+    end
   end
 end

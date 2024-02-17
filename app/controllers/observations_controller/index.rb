@@ -93,7 +93,7 @@ class ObservationsController
       params[:location] = where
       query = create_query(:Observation, :at_where,
                            user_where: where,
-                           location: Location.user_name(@user, where))
+                           location: Location.user_format(@user, where))
       show_selected_observations(query, always_index: 1)
     end
 
@@ -123,7 +123,7 @@ class ObservationsController
       return render_pattern_search_error(search) if search.errors.any?
 
       @suggest_alternate_spellings = search.query.params[:pattern]
-      if params[:needs_id]
+      if params[:needs_naming]
         redirect_to(
           identify_observations_path(q: get_query_param(search.query))
         )
@@ -134,7 +134,7 @@ class ObservationsController
 
     def render_pattern_search_error(search)
       search.errors.each { |error| flash_error(error.to_s) }
-      if params[:needs_id]
+      if params[:needs_naming]
         redirect_to(identify_observations_path(q: get_query_param))
       else
         render("index", location: observations_path)
@@ -190,11 +190,12 @@ class ObservationsController
     end
 
     def define_index_args(query, args)
+      # We always want cached matrix boxes for observations if possible.
+      # cache: true  will batch load the includes only for fragments not cached.
       args = { controller: "/observations",
                action: :index,
-               matrix: true,
-               include: [:name, :location, :user, :rss_log,
-                         { thumb_image: :image_votes }] }.merge(args)
+               matrix: true, cache: true,
+               include: observation_index_includes }.merge(args)
 
       # Paginate by letter if sorting by user.
       case query.params[:by]
@@ -205,6 +206,16 @@ class ObservationsController
         args[:letters] = "names.sort_name"
       end
       args
+    end
+
+    # The { images: } hash is necessary for the index carousels.
+    # :projects required by Bullet because it's needed to compute
+    # `can_edit?` for an image.
+    def observation_index_includes
+      [observation_matrix_box_image_includes,
+       :location, :name,
+       { namings: :votes },
+       :projects, :rss_log, :user]
     end
   end
 end

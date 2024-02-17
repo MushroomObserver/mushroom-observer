@@ -18,7 +18,7 @@ class ImagesControllerTest < FunctionalTestCase
   def test_index
     login
     get(:index)
-    default_sorted_by = "sort_by_#{::Query::ImageBase.default_order}".to_sym.l
+    default_sorted_by = :"sort_by_#{::Query::ImageBase.default_order}".l
 
     assert_template("index")
     assert_template(partial: "_matrix_box")
@@ -135,12 +135,13 @@ class ImagesControllerTest < FunctionalTestCase
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
                                   location: "Eastern Oklahoma")
-    ImagesController.any_instance.expects(:show_selected_images).
-      raises(StandardError)
-
     login
-    get(:index,
-        params: @controller.query_params(query).merge({ advanced_search: "1" }))
+
+    @controller.stub(:show_selected_images, -> { raise(StandardError) }) do
+      get(:index,
+          params: @controller.query_params(query).
+          merge({ advanced_search: "1" }))
+    end
 
     assert_redirected_to(search_advanced_path)
   end

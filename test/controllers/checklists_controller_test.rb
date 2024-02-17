@@ -51,7 +51,7 @@ class ChecklistsControllerTest < FunctionalTestCase
   # Prove that Site checklist goes to correct page with correct content
   def test_checklist_for_site
     login
-    expect = Name.joins(:observations).distinct
+    expect = Name.with_correct_spelling.joins(:observations).distinct
 
     get(:show)
     assert_match(/Checklist for #{:app_title.l}/, css_select("title").text,

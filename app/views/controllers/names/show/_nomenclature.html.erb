@@ -1,0 +1,124 @@
+<%# Nomenclature partial; used by:
+    show_name, show_past_name, and add_comment (via _object) %>
+<%
+approve = icon_link_with_query(*approve_synonym_form_tab(name))
+deprecate = icon_link_with_query(*deprecate_synonym_form_tab(name))
+synonyms = icon_link_with_query(*edit_synonym_form_tab(name))
+edit = icon_link_with_query(*edit_name_tab(name))
+heading_links = edit
+synonym_links = [approve, deprecate].reject(&:nil?).safe_join(" | ")
+%>
+
+<%= panel_block(heading: :show_name_nomenclature.l,
+                heading_links: heading_links,
+                inner_class: "name-section",
+                id: "nomenclature") do
+
+  concat(tag.div(class: "row") do
+
+    concat(tag.div(class: "col-sm-6 name-section") do
+      [
+        tag.p do
+          "#{:RANK.l}: #{name.rank ? rank_as_string(name.rank) : :unknown.l}"
+        end,
+        tag.p do
+          concat("#{:STATUS.l}: ")
+          concat(name.status)
+          concat(" (#{:MISSPELLED.l})") if name.is_misspelling?
+          concat(
+            [tag.span(class: "text-nowrap ml-3") { synonym_links }].safe_join
+          ) if synonym_links
+        end,
+        tag.p do
+          concat("#{:NAME.l}: ")
+          concat(h(name.real_text_name))
+          concat(
+            [tag.span(class: "text-nowrap ml-3") { synonyms }].safe_join
+          ) if synonyms
+        end
+      ].safe_join
+    end)
+
+    concat(tag.div(class: "col-sm-6 name-section") do
+      if name.icn_id?
+        [
+          tag.p do
+            [link_to(*index_fungorum_record_tab(name)),
+             "Index Fungorum"].safe_join(" ")
+          end,
+          tag.p do
+            [link_to(*mycobank_record_tab(name)),
+             "MycoBank"].safe_join(" ")
+          end,
+          tag.p do
+            if name.at_or_below_species?
+              link_to(*fungorum_gsd_synonymy_tab(name))
+            elsif ["Genus", "Family"].include?(name.rank)
+              link_to(*fungorum_sf_synonymy_tab(name))
+            end
+          end
+        ].safe_join
+      elsif name.registrable?
+        [
+          tag.p do
+            ["#{:ICN_ID.l}:",
+             tag.em(:show_name_icn_id_missing.l)].safe_join(" ")
+          end,
+          tag.p(link_to(*index_fungorum_basic_search_tab)),
+          tag.p(link_to(*mycobank_name_search_tab(name)))
+        ].safe_join
+      elsif name.searchable_in_registry?
+        [
+          tag.p(link_to(*index_fungorum_basic_search_tab)),
+          tag.p(link_to(*mycobank_basic_search_tab))
+        ].safe_join
+      end
+    end)
+
+  end)
+
+  concat(tag.p(["#{:AUTHORITY.l}: ", name.author.to_s.t].safe_join))
+  concat(tag.p(["#{:CITATION.l}: ", name.citation.to_s.tl].safe_join))
+
+  if name.is_misspelling?
+    concat(tag.p do
+      concat("#{:show_name_misspelling_correct.l}: ")
+      if name.correct_spelling
+        concat(link_with_query(name.correct_spelling.display_name.t,
+                               name_path(name.correct_spelling_id)))
+      else
+        # This can apparently happen for past_names.
+        concat(name.correct_spelling_id)
+      end
+    end)
+  end
+
+  if synonyms
+    approved_synonyms, deprecated_synonyms = name.sort_synonyms
+    misspellings = deprecated_synonyms.select(&:correct_spelling_id)
+    deprecated_synonyms.reject!(&:correct_spelling_id)
+
+    # Iterate over an array, these are very similar
+    [
+      { label: name.deprecated ?
+          :show_name_preferred_synonyms.l : :show_name_synonyms.l,
+        names: approved_synonyms },
+      { label: :show_name_deprecated_synonyms.l,
+        names: deprecated_synonyms },
+      { label: :show_name_misspelled_synonyms.l,
+        names: misspellings }
+    ].map do |possible_synonyms|
+      if possible_synonyms[:names].try(&:any?)
+        concat(tag.p do
+          concat("#{possible_synonyms[:label]}: ")
+          concat(
+            possible_synonyms[:names].map do |n|
+              link_with_query(n.display_name.t, name_path(n.id))
+            end.safe_join(", ")
+          )
+        end)
+      end
+    end
+  end
+
+end %>

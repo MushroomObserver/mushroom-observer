@@ -199,6 +199,17 @@ module Observations
       assert_equal(query.num_results, @response.body.scan("\\pard").size)
     end
 
+    def test_project_labels
+      login("roy")
+      query = Query.lookup_and_save(:Observation, :for_project,
+                                    project: projects(:open_membership_project))
+      get(:print_labels, params: { q: query.id.alphabetize })
+      trusted_hidden = observations(:trusted_hidden)
+      untrusted_hidden = observations(:untrusted_hidden)
+      assert_match(/#{trusted_hidden.lat}/, @response.body)
+      assert_no_match(/#{untrusted_hidden.lat}/, @response.body)
+    end
+
     # Print labels for all observations just to be sure all cases (more or less)
     # are tested and at least not crashing.
     def test_print_labels_all
@@ -210,17 +221,15 @@ module Observations
     def test_print_labels_query_nil
       login
       query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
-      # So pretend we're passing a query param, but that query doesn't exist
-      # Observations::DownloadsController.any_instance.
-      #   stubs(:find_query).returns(nil)
-      @controller.stubs(:find_query).returns(nil)
-      get(
-        :print_labels,
-        params: {
-          q: query.id.alphabetize,
-          commit: "Print Labels"
-        }
-      )
+
+      # simulate passing a query param, but that query doesn't exist
+      @controller.stub(:find_query, nil) do
+        get(
+          :print_labels,
+          params: { q: query.id.alphabetize, commit: "Print Labels" }
+        )
+      end
+
       assert_flash_error
     end
   end

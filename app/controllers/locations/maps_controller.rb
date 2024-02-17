@@ -5,7 +5,7 @@ module Locations
   class MapsController < ApplicationController
     before_action :login_required
 
-    # Map results of a search or index.
+    # Map results of a search or index of Locations.
     def show
       @query = find_or_create_query(:Location)
 
@@ -15,7 +15,7 @@ module Locations
       columns = %w[name north south east west].map { |x| "locations.#{x}" }
       args = { select: "DISTINCT(locations.id), #{columns.join(", ")}" }
       @locations = @query.select_rows(args).map do |id, *the_rest|
-        MinimalMapLocation.new(id, *the_rest)
+        Mappable::MinimalLocation.new(id, *the_rest)
       end
     end
   end

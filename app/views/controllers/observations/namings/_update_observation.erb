@@ -1,0 +1,36 @@
+<%#
+Update page with results of update or create naming or vote
+Has additional functionality to observations/show/section_update
+it updates the obs title and name_info.
+%>
+<%
+# Temporary: this will catch all naming and vote update actions.
+# Keeping it two lines for planned calls to other consensus methods.
+# N+1: Move consensus to controllers when tackling naming_table n+1s.
+# consensus = Observation::NamingConsensus.new(obs)
+# owner_name = consensus.owner_preference
+%>
+
+<%= turbo_stream.replace("namings_table_rows") do
+  observation_namings_table_rows(consensus)
+end %>
+
+<%= turbo_stream.replace("observation_name_info") do
+  render(
+    partial: "observations/show/name_info",
+    locals: { obs: obs },
+    layout: false
+  )
+end %>
+
+<%= turbo_stream.update("title") do
+  show_obs_title(obs: obs)
+end %>
+
+<%= turbo_stream.update("owner_naming") do
+  owner_naming_line(owner_name)
+end %>
+
+<%= turbo_stream.update("page_flash") do
+  flash_notices_html
+end %>

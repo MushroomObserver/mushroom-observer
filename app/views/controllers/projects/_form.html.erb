@@ -1,0 +1,87 @@
+<%= form_with(model: @project, id: "project_form") do |f| %>
+
+  <%= submit_button(form: f, button: button, center: true) %>
+
+  <%= check_box_with_label(form: f, field: :open_membership,
+                           label: :form_projects_open_membership.t) %>
+
+  <%= text_field_with_label(form: f, field: :title,
+                            label: :form_projects_title.t + ":",
+                            data: { autofocus: true }) %>
+
+  <%= text_area_with_label(form: f, field: :summary, rows: 5,
+                           label: :SUMMARY.t + ":") %>
+
+  <%= render(partial: "shared/textilize_help") %>
+
+  <%= autocompleter_field(form: f, field: :place_name, label: :WHERE.t + ":",
+                          between: :required, autocomplete: :location) %>
+
+  <%= tag.div(
+    tag.p("*#{:form_projects_date_range.t}*".t) +
+    tag.p(:form_projects_dates_explain.t)
+  ) %>
+  <div class="container-text ml-4">
+    <div>
+      <%= f.label(:start_date, "#{:form_projects_start_date.t}: ") %>
+      <%= f.date_select(:start_date,
+                        { class: "form-control mb-2",
+                          start_year: Date.today.year - 10,
+                          end_year: Date.today.year + 10 }) %>
+    </div>
+    <div>
+      <%= f.label(:end_date, "#{:form_projects_end_date.t}: ") %>
+      <%= f.date_select(:end_date,
+                        { class: "form-control mb-2",
+                          start_year: Date.today.year - 10,
+                          end_year: Date.today.year + 10 }) %>
+    </div>
+    <div>
+      <p>
+        <%= radio_with_label(
+              form: f, field: "dates_any", value: false, checked: !@project_dates_any,
+              label: " #{:form_projects_range.t} (#{:form_projects_use_date_range.t})"
+            ) %>
+        <%= radio_with_label(
+              form: f, field: "dates_any", value: true, checked: @project_dates_any,
+              label: " #{:form_projects_any.t} (#{:form_projects_ignore_date_range.t})"
+            ) %>
+      </p>
+
+    </div>
+  </div>
+
+  <%= file_field_with_label(
+        form: f, field: :upload_image,
+        label: :form_projects_image_upload.t + ":",
+      ) %>
+
+  <div class="form-group mt-3">
+    <%= fields_for(:upload) do |fu| %>
+
+      <div class="row">
+        <div class="col-xs-8">
+          <%= text_field_with_label(form: fu, field: :copyright_holder,
+                                    label: :profile_copyright_holder.t + ":",
+                                    value: @copyright_holder) %>
+        </div>
+        <div class="col-xs-4">
+          <%= select_with_label(form: fu, field: :copyright_year,
+                                label: :WHEN.t + ":",
+                                start_year: 1980, end_year: Time.zone.now.year,
+                                value: @copyright_year) %>
+        </div>
+      </div>
+
+      <%= select_with_label(form: fu, field: :license_id,
+                            label: :License.t + ":", options: @licenses,
+                            select_opts: { selected: @upload_license_id },
+                            append: help_block(:div,
+                                    ["(",
+                                     :profile_copyright_warning.t,
+                                     ")"].safe_join)) %>
+
+    <% end %>
+
+  </div>
+<% end %>

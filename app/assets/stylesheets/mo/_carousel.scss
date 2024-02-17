@@ -97,7 +97,7 @@
 }
 
 .carousel-heading {
-  border-top: 1px solid $panel-inner-border;
+  // border-top: 1px solid $panel-inner-border;
   border-bottom: 1px solid $panel-inner-border;
   background-color: $panel-default-heading-bg;
 }
@@ -109,7 +109,7 @@
   margin-right: 0;
   // bottom: -7.5vw;
   // height: 6vw;
-  overflow-x: hidden;
+  overflow-x: auto;
   white-space: nowrap;
 
   li {

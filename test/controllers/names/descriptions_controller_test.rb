@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require("test_helper")
-require("set")
 
 module Names
   class DescriptionsControllerTest < FunctionalTestCase
@@ -162,7 +161,7 @@ module Names
       login
       get(:show, params: params)
       assert_template("names/descriptions/show")
-      assert_template("names/descriptions/show/_name_description")
+      assert_template("descriptions/_show_description_details")
     end
 
     def test_next_description
@@ -301,7 +300,7 @@ module Names
       login(draft.user.login)
       get(:show, params: { id: draft.id })
       assert_template("names/descriptions/show")
-      assert_template("names/descriptions/show/_name_description")
+      assert_template("descriptions/_show_description_details")
     end
 
     # Ensure that an admin can see a draft they don't own
@@ -311,7 +310,7 @@ module Names
       login(mary.login)
       get(:show, params: { id: draft.id })
       assert_template("names/descriptions/show")
-      assert_template("names/descriptions/show/_name_description")
+      assert_template("descriptions/_show_description_details")
     end
 
     # Ensure that an member can see a draft they don't own
@@ -321,7 +320,7 @@ module Names
       login(katrina.login)
       get(:show, params: { id: draft.id })
       assert_template("names/descriptions/show")
-      assert_template("names/descriptions/show/_name_description")
+      assert_template("descriptions/_show_description_details")
     end
 
     # Ensure that a non-member cannot see a draft
@@ -329,7 +328,7 @@ module Names
       project = projects(:eol_project)
       draft = name_descriptions(:draft_agaricus_campestris)
       assert(draft.belongs_to_project?(project))
-      assert_not(project.is_member?(dick))
+      assert_not(project.member?(dick))
       login(dick.login)
       get(:show, params: { id: draft.id })
       assert_redirected_to(project.show_link_args)
@@ -362,7 +361,7 @@ module Names
     end
 
     def test_edit_draft_member
-      assert(projects(:eol_project).is_member?(katrina))
+      assert(projects(:eol_project).member?(katrina))
       assert_equal("EOL Project",
                    name_descriptions(:draft_agaricus_campestris).source_name)
       edit_draft_tester(name_descriptions(:draft_agaricus_campestris),
@@ -370,7 +369,7 @@ module Names
     end
 
     def test_edit_draft_non_member
-      assert_not(projects(:eol_project).is_member?(dick))
+      assert_not(projects(:eol_project).member?(dick))
       assert_equal("EOL Project",
                    name_descriptions(:draft_coprinus_comatus).source_name)
       edit_draft_tester(name_descriptions(:draft_coprinus_comatus),

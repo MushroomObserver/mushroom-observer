@@ -1,21 +1,16 @@
 # frozen_string_literal: true
 
 class ProjectsController < ApplicationController
+  include Validators
+
   before_action :login_required
   # disable cop because index is defined in ApplicationController
   before_action :pass_query_params, except: [:index] # rubocop:disable Rails/LexicallyScopedActionFilter
-
   # index::
   # ApplicationController uses this to dispatch #index to a private method
-  @index_subaction_param_keys = [
-    :pattern,
-    :by,
-    :member
-  ].freeze
+  @index_subaction_param_keys = [:pattern, :by, :member].freeze
 
-  @index_subaction_dispatch_table = {
-    by: :index_query_results
-  }.freeze
+  @index_subaction_dispatch_table = { by: :index_query_results }.freeze
 
   # Display project by itself.
   # Linked from: observations/show, list_projects
@@ -24,9 +19,10 @@ class ProjectsController < ApplicationController
   # def show_project
   def show
     store_location
-    return unless (@project = find_or_goto_index(Project, params[:id].to_s))
+    return unless find_project_and_where!
 
     set_ivars_for_show
+    check_constraint_violations
   end
 
   ##############################################################################
@@ -46,6 +42,7 @@ class ProjectsController < ApplicationController
   def new
     image_ivars
     @project = Project.new
+    @project_dates_any = true
   end
 
   # Form to edit a project
@@ -62,8 +59,11 @@ class ProjectsController < ApplicationController
   # def edit_project
   def edit
     image_ivars
-    return unless find_project!
+    return unless find_project_and_where!
 
+    @start_date_fixed = @project.start_date.present?
+    @end_date_fixed = @project.end_date.present?
+    @project_dates_any = !@start_date_fixed && !@end_date_fixed
     return if check_permission!(@project)
 
     redirect_to(project_path(@project.id, q: get_query_param))
@@ -79,6 +79,8 @@ class ProjectsController < ApplicationController
       flash_error(:add_project_need_title.t)
     elsif project
       flash_error(:add_project_already_exists.t(title: project.title))
+    elsif ProjectConstraints.new(params).ends_before_start?
+      flash_error(:add_project_ends_before_start.t)
     elsif user_group
       flash_error(:add_project_group_exists.t(group: title))
     elsif admin_group
@@ -92,7 +94,7 @@ class ProjectsController < ApplicationController
   end
 
   def update
-    return unless find_project!
+    return unless find_project_and_where!
 
     unless check_permission!(@project)
       return redirect_to(project_path(@project.id, q: get_query_param))
@@ -100,8 +102,9 @@ class ProjectsController < ApplicationController
 
     upload_image_if_present
     @summary = params[:project][:summary]
-    if valid_title && valid_where
+    if valid_title && valid_where && valid_dates
       if @project.update(project_create_params)
+        override_fixed_dates
         @project.save
         @project.log_update
         flash_notice(:runtime_edit_project_success.t(id: @project.id))
@@ -114,28 +117,6 @@ class ProjectsController < ApplicationController
     render(:edit, location: edit_project_path(@project.id, q: get_query_param))
   end
 
-  def valid_title
-    @title = params[:project][:title].to_s
-    if @title.blank?
-      flash_error(:add_project_need_title.t)
-    elsif (project2 = Project.find_by_title(@title)) &&
-          (project2 != @project)
-      flash_error(:add_project_already_exists.t(title: @title))
-    else
-      return true
-    end
-    false
-  end
-
-  def valid_where
-    where = params[:project][:place_name]
-    location = find_location(where)
-    return false if !location && where != ""
-
-    @project.location = location
-    @project.save
-  end
-
   # Callback to destroy a project.
   # Linked from: show_project, observations/show
   # Redirects to observations/show.
@@ -143,7 +124,7 @@ class ProjectsController < ApplicationController
   # Outputs: none
   # def destroy_project
   def destroy
-    return unless find_project!
+    return unless find_project_and_where!
 
     if !check_permission!(@project)
       redirect_to(project_path(@project.id, q: get_query_param))
@@ -161,31 +142,26 @@ class ProjectsController < ApplicationController
 
   def image_ivars
     @licenses = License.current_names_and_ids(@user.license)
-    if @project&.image
-      @copyright_holder  = @project.image.copyright_holder
-      @copyright_year    = @project.image.when.year
-      @upload_license_id = @project.image.license.id
-    else
-      @copyright_holder  = @user.legal_name
-      @copyright_year    = Time.zone.now.year
-      @upload_license_id = @user.license&.id
-    end
+
+    (@copyright_holder, @copyright_year, @upload_license_id) =
+      if @project&.image
+        [@project.image.copyright_holder, @project.image.when.year,
+         @project.image.license.id]
+      else
+        [@user.legal_name, Time.zone.now.year, @user.license&.id]
+      end
   end
 
   def set_ivars_for_show
-    @where = @project&.place_name || ""
     @canonical_url = "#{MO.http_domain}/projects/#{@project.id}"
-    @is_member = @project.is_member?(@user)
+    @is_member = @project.member?(@user)
     @is_admin = @project.is_admin?(@user)
     @drafts = NameDescription.joins(:admin_groups).
               where("name_description_admins.user_group_id":
                     @project.admin_group_id).
               includes(:name, :user)
-    count = @project.count_violations
-    return unless count.positive?
-
-    flash_warning(:show_project_violation_count.t(count: count,
-                                                  id: @project.id))
+    # Save a lookup in comments_for_object
+    @comments = @project.comments&.sort_by(&:created_at)&.reverse
   end
 
   def upload_image_if_present
@@ -228,6 +204,7 @@ class ProjectsController < ApplicationController
     if pattern.match(/^\d+$/) &&
        (@project = Project.safe_find(pattern))
       set_ivars_for_show
+      check_constraint_violations
       render("show", location: project_path(@project.id))
     else
       query = create_query(:Project, :pattern_search, pattern: pattern)
@@ -266,14 +243,17 @@ class ProjectsController < ApplicationController
   ##############################################################################
 
   def project_create_params
-    params.require(:project).permit(:title, :summary, :open_membership,
-                                    :accepting_observations)
+    params.require(:project).
+      permit(:title, :summary, :open_membership,
+             "start_date(1i)", "start_date(2i)", "start_date(3i)",
+             "end_date(1i)", "end_date(2i)", "end_date(3i)")
   end
 
-  def find_project!
-    @project = find_or_goto_index(Project, params[:id].to_s)
+  def find_project_and_where!
+    @project = Project.show_includes.safe_find(params[:id].to_s) ||
+               flash_error_and_goto_index(Project, params[:id].to_s)
+
     @where = @project&.location&.display_name || ""
-    @project
   end
 
   def create_members_group(title)
@@ -314,12 +294,17 @@ class ProjectsController < ApplicationController
       @project.user_group = user_group
       @project.admin_group = admin_group
       @project.location = location
+      if ProjectConstraints.new(params).allow_any_dates?
+        @project.start_date = @project.end_date = nil
+      end
+
       upload_image_if_present
       if @project.save
+        ProjectMember.create!(project: @project, user: @user,
+                              trust_level: "hidden_gps")
         @project.log_create
         flash_notice(:add_project_success.t)
-        redirect_to(project_path(@project.id, q: get_query_param))
-        return
+        return redirect_to(project_path(@project.id, q: get_query_param))
       else
         flash_object_errors(@project)
       end
@@ -329,5 +314,12 @@ class ProjectsController < ApplicationController
     @project = Project.new
     image_ivars
     render(:new, location: new_project_path(q: get_query_param))
+  end
+
+  def override_fixed_dates
+    @project.start_date = nil if params[:project][:dates_any] == "true" ||
+                                 params.dig(:start_date, :fixed) == "false"
+    @project.end_date = nil if params[:project][:dates_any] == "true" ||
+                               params.dig(:end_date, :fixed) == "false"
   end
 end

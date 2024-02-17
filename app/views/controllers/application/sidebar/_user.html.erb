@@ -1,0 +1,39 @@
+<%= tag.div("", class: class_names(classes[:item], classes[:mobile_only])) do
+  [
+    tag.i("", class: "glyphicon glyphicon-user"),
+    tag.span(h(@user.login), class: "ml-2"),
+    tag.span(class: "pull-right") do
+      link_to(:app_logout.t, account_logout_path, id: "nav_user_logout_link")
+    end
+  ].safe_join
+end %>
+<%# active_link_to(:app_your_observations.t,
+                   observations_path(user: @user.id),
+                   class: classes[:indent],
+                   id: "nav_your_observations_link") %>
+<%# active_link_to(:app_your_lists.t, species_lists_path(by_user: @user.id),
+                   class: classes[:indent],
+                   id: "nav_your_species_lists_link") %>
+<%= active_link_to(:app_comments_for_you.t,
+                   comments_path(for_user: @user.id),
+                   class: class_names(classes[:indent], classes[:mobile_only]),
+                   id: "nav_mobile_your_comments_link") %>
+<%= active_link_to(:app_your_interests.t, interests_path,
+                   class: class_names(classes[:indent], classes[:mobile_only]),
+                   id: "nav_mobile_interests_link") %>
+<%= active_link_to(:app_your_summary.t, user_path(@user.id),
+                   class: class_names(classes[:indent], classes[:mobile_only]),
+                   id: "nav_mobile_profile_link") %>
+<%= active_link_to(:app_preferences.t, edit_account_preferences_path,
+                   class: class_names(classes[:indent], classes[:mobile_only]),
+                   id: "nav_mobile_preferences_link") %>
+<%= link_to(:app_join_mailing_list.t,
+            "https://groups.google.com/forum/?fromgroups=#!forum/mo-general",
+            class: class_names(classes[:indent], classes[:mobile_only]),
+            id: "nav_mobile_mailing_list_link") %>
+<% if @user.admin && !in_admin_mode? %>
+  <%= active_link_to(:app_turn_admin_on.t, admin_mode_path(turn_on: true),
+                     class: class_names(classes[:indent],
+                                        classes[:mobile_only]),
+                     id: "nav_mobile_admin_link" ) %>
+<% end %>

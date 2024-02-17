@@ -1,0 +1,15 @@
+<%
+add_page_title(:show_past_name_title.t(
+  num:  @name.version, name: @name.display_name
+))
+add_tab_set(name_version_tabs(name: @name))
+@container = :text
+%>
+
+<div class="mt-4"></div>
+<%= render(partial: "names/show/nomenclature",
+          locals: { name: @name, synonyms: false }) %>
+
+<%= show_past_versions(@name, @versions, bold: lambda {|v| !v.deprecated}) %>
+
+<%= show_object_footer(@name, @versions) %>

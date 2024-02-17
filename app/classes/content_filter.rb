@@ -26,8 +26,9 @@
 #  * Add tests to test/integration/filter_test.rb
 #  * Supplement fixtures as needed by added tests
 #  * Add a filter definition below
-#  * In config/locales/en.txt define text to be displayed in account/prefs
-#    and search/advanced pages (search for "filters_has_images")
+#  * In config/locales/en.txt define text to be displayed in
+#    account/preferences/edit and search/advanced pages
+#    (search for "filters_has_images")
 #  * Supplement app/classes/query/initializers/xxx_filters.rb
 #
 class ContentFilter
@@ -35,7 +36,7 @@ class ContentFilter
 
   def initialize(opts)
     opts.each do |key, val|
-      send("#{key}=", val)
+      send(:"#{key}=", val)
     end
   end
 

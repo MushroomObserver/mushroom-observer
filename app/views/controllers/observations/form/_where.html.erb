@@ -1,0 +1,122 @@
+<%# Where (location) section of create_observation form
+    including location autocomplete, map, lat/long/alt %>
+
+<%# load_google_maps_api_script %>
+
+<%= tag.div(id: "observation_where", data: { controller: "map" }) do %>
+
+  <!-- WHERE_REASONS -->
+  <%= render(partial: "shared/form_location_feedback",
+             locals: { button: button_name } ) %>
+  <!-- /WHERE_REASONS -->
+
+  <!-- WHERE -->
+  <div class="row">
+    <div class="col-xs-12 col-sm-6">
+      <%= autocompleter_field(
+        form: f, field: :place_name, label: :WHERE.t + ":", between: :required,
+        autocomplete: :location, data: { map_target: "placeInput" }
+      ) %>
+    </div>
+    <div class="col-xs-12 col-sm-6">
+      <%= help_block_with_arrow("left", id: "where_help") do %>
+        <%=
+          loc1 = "Albion, Mendocino Co., California, USA"
+          loc2 = "Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil"
+          if User.current_location_format == "scientific"
+            loc1 = Location.reverse_name(loc1)
+            loc2 = Location.reverse_name(loc2)
+          end # if User.current_location_format
+          :form_observations_where_help.t(loc1: loc1, loc2: loc2)
+        %>
+      <% end # help_block_with_arrow do %>
+    </div>
+  </div><!--.row-->
+
+  <div class="row">
+    <div class="col-xs-12 col-sm-6">
+      <%= js_button(
+        button: :form_observations_locate_on_map.t,
+        name: "locate_on_map", class: "map-locate my-3",
+        data: { map_target: "findOnMap", action: "map#openMap map#findOnMap" }
+      ) %>
+      <%= help_block_with_arrow("up", id: "locate_on_map_help") do %>
+        <%= :form_observations_locate_on_map_help.t %>
+      <% end  # help_block_with_arrow do %>
+    </div>
+  </div><!--.row-->
+  <!-- /WHERE -->
+
+  <!-- IS_COLLECTION_LOCATION -->
+  <div class="row">
+    <div class="col-xs-12 col-sm-6">
+      <%= check_box_with_label(
+            form: f, field: :is_collection_location,
+            label: :form_observations_is_collection_location.t
+          ) %>
+      <%= help_block_with_arrow("up", id: "is_collection_location_help") do %>
+        <%= :form_observations_is_collection_location_help.t %>
+      <% end  # help_block_with_arrow do %>
+    </div><!--.col-->
+  </div><!--.row-->
+  <!-- /IS_COLLECTION_LOCATION -->
+
+  <!-- LAT_LONG_ALT -->
+  <div class="row mt-3" id="observation_geolocation">
+    <div class="col-sm-6">
+      <%= tag.label("#{:form_observations_click_on_map.l}:") %>
+      <%= tag.div("", id: "observation_form_map",
+                      class: "observation-form-map hidden",
+                      data: { indicator_url: asset_path('indicator.gif'),
+                              location_format: User.current_location_format,
+                              map_target: "mapDiv", editable: true,
+                              map_type: "observation" } ) %>
+      <div>
+        <%= js_button(button: :form_observations_open_map.t,
+                      name: "map-open", class: "map-open",
+                      data: { map_target: "mapOpen", action: "map#openMap" }) %>
+        <%= js_button(button: :form_observations_clear_map.t,
+                      name: "map-clear", class: "map-clear",
+                      data: { map_target: "mapClear",
+                              action: "map#clearMap" }) %>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <%= help_block_with_arrow("left", id: "geolocation_help") do %>
+        <%= :form_observations_lat_long_help.t %>
+      <% end  # help_block_with_arrow do %>
+    </div>
+  </div><!--.row-->
+
+  <div class="row mt-3" id="observation_lat_long_alt">
+    <div class="col-xs-12 col-sm-6">
+      <div class="row">
+        <div class="col-xs-12 col-sm-4">
+          <%= text_field_with_label(
+            form: f, field: :lat, label: :LATITUDE.t + ":",
+            data: { map_target: "latInput", action: "map#bufferInputs" }
+          ) %>
+        </div>
+        <div class="col-xs-12 col-sm-4">
+          <%= text_field_with_label(
+            form: f, field: :long, label: :LONGITUDE.t + ":",
+            data: { map_target: "lngInput", action: "map#bufferInputs" }
+          ) %>
+        </div>
+        <div class="col-xs-12 col-sm-4">
+          <%= text_field_with_label(
+            form: f, field: :alt, label: :ALTITUDE.t + ":",
+            append: "(#{:units_meters.t})",
+            data: { map_target: "altInput" }
+          ) %>
+        </div>
+        <div class="col-xs-12 col-sm-12">
+          <%= check_box_with_label(form: f, field: :gps_hidden,
+                                   label: :form_observations_gps_hidden.t) %>
+        </div>
+      </div><!--.row-->
+    </div>
+  </div><!--.row-->
+  <!-- /LAT_LONG_ALT -->
+
+<% end %>
