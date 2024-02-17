@@ -61,16 +61,15 @@ module ObjectLinkHelper
   # ----- links to names and records at external websites ----------------------
 
   def ascomycete_org_name_url(name)
-    "https://ascomycete.org/Search-Results?search=" \
-    "#{name.text_name.tr(" ", "+")}"
+    "https://ascomycete.org/Search-Results?search=#{name.text_name}"
   end
 
   def gbif_name_search_url(name)
-    "https://www.gbif.org/species/search?q=#{name.text_name.tr(" ", "+")}"
+    "https://www.gbif.org/species/search?q=#{name.text_name}"
   end
 
   def inat_name_search_url(name)
-    "https://www.inaturalist.org/search?q=#{name.text_name.tr(" ", "+")}"
+    "https://www.inaturalist.org/search?q=#{name.text_name}"
   end
 
   def mushroomexpert_name_search_url(name)
@@ -83,15 +82,15 @@ module ObjectLinkHelper
   end
 
   def mycoguide_name_search_url(name)
-    "https://www.mycoguide.com/guide/search?q=#{name.text_name.tr(" ", "+")}"
+    "https://www.mycoguide.com/guide/search?q=#{name.text_name}"
   end
 
   def ncbi_nucleotide_term_search_url(name)
-    "https://www.ncbi.nlm.nih.gov/nuccore/?term=#{name.text_name.tr(" ", "+")}"
+    "https://www.ncbi.nlm.nih.gov/nuccore/?term=#{name.text_name}"
   end
 
   def wikipedia_term_search_url(name)
-    "https://en.wikipedia.org/w/index.php?search=#{name.text_name.tr(" ", "+")}"
+    "https://en.wikipedia.org/w/index.php?search=#{name.text_name}"
   end
 
   # url for IF record
@@ -134,7 +133,7 @@ module ObjectLinkHelper
   # url for name search on MyCoPortal
   def mycoportal_url(name)
     "http://mycoportal.org/portal/taxa/index.php?taxauthid=1&taxon=" \
-      "#{name.text_name.tr(" ", "+")}"
+      "#{name.text_name}"
   end
 
   # url of SF page with "official" synonyms by category
