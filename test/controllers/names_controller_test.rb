@@ -642,7 +642,8 @@ class NamesControllerTest < FunctionalTestCase
       "'#{:show_name_icn_id_missing.l}' note"
     )
     assert_select(
-      "#nomenclature a[href='#{index_fungorum_name_web_search_url(name)}']", true,
+      "#nomenclature a[href='#{index_fungorum_name_web_search_url(name)}']",
+      true,
       "Nomenclature section is missing a link to Index Fungorum search"
     )
     assert_select(
@@ -672,7 +673,8 @@ class NamesControllerTest < FunctionalTestCase
 
     # but it makes sense to link to search pages in fungal registries
     assert_select(
-      "#nomenclature a[href='#{index_fungorum_name_web_search_url(name)}']", true,
+      "#nomenclature a[href='#{index_fungorum_name_web_search_url(name)}']",
+      true,
       "Nomenclature section is missing a link to Index Fungorum search"
     )
     assert_select(
