@@ -331,7 +331,7 @@ class LocationsController < ApplicationController
 
     params[:location] ||= {}
     @display_name = @location.display_name
-    update if request.method == "POST"
+    # update if request.method == "POST" # is there a link coming from an email?
   end
 
   def update

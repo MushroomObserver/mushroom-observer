@@ -65,6 +65,9 @@ module Account
     def deal_with_possible_profile_changes
       # compute legal name change now because @user.save will overwrite it
       legal_name_change = @user.legal_name_change
+      # ditto for login_changed?
+      login_changed = @user.login_changed?
+
       if !@user.changed
         flash_notice(:runtime_no_changes.t)
         redirect_to(user_path(@user.id))
@@ -73,6 +76,7 @@ module Account
         render(:edit) and return
       else
         update_copyright_holder(legal_name_change)
+        expire_caches_of_associated_observations if login_changed
         maybe_update_location_and_finish
       end
     end
@@ -81,6 +85,12 @@ module Account
       return unless legal_name_change
 
       Image.update_copyright_holder(*legal_name_change, @user)
+    end
+
+    # EXPIRE CACHES OF OBS WITH CHANGED USER LOGINS
+    # "touch" the updated_at column of all observations with the changed login
+    def expire_caches_of_associated_observations
+      Observation.where(user_id: @user.id).touch_all
     end
 
     def maybe_update_location_and_finish

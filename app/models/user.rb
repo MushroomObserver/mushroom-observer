@@ -198,7 +198,7 @@
 #  crypt_password::     Password attribute is encrypted
 #                       before object is created.
 #
-class User < AbstractModel
+class User < AbstractModel # rubocop:disable Metrics/ClassLength
   require "digest/sha1"
 
   # enum definitions for use by simple_enum gem
