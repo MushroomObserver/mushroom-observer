@@ -572,22 +572,28 @@ class NamesControllerTest < FunctionalTestCase
     icn_id = name.icn_id
     assert_instance_of(Integer, icn_id,
                        "Test needs Name fixture with icn_id (Registration #)")
+    assert_not(name.classification =~ /Ascomycete/,
+               "Test needs a Name fixture which isn't an Ascomycete")
 
     login
     get(:show, params: { id: name.id })
 
     ##### External research links
     [
-      ["Ascomycdete.org", ascomycete_org_name_url(name)],
       ["GBIF", gbif_name_search_url(name)],
       ["iNat", inat_name_search_url(name)],
       ["MushroomExpert", mushroomexpert_name_web_search_url(name)],
-      ["MyCoPortal", mycoportal_name_tab(@name)],
+      ["MyCoPortal", mycoportal_url(name)],
       ["NCBI", ncbi_nucleotide_term_search_url(name)],
       ["Wikipedia", wikipedia_term_search_url(name)]
     ].each do |site, link|
       assert_external_link(site, link)
     end
+
+    assert_select(
+      "body a[href='#{ascomycete_org_name_url(name)}']", false,
+      "Page should not have a link to Ascomycete.org"
+    )
 
     ##### External nomenclature links
     [
@@ -604,6 +610,17 @@ class NamesControllerTest < FunctionalTestCase
       "body a[href='#{link}']", true,
       "Page is missing a link to #{site}"
     )
+  end
+
+  def test_show_name_ascomycete
+    name = names(:peltigera)
+    assert(name.classification =~ /Ascomycete/,
+           "Test needs a Name fixture that's an Ascomycete")
+
+    login
+    get(:show, params: { id: name.id })
+
+    assert_external_link("Ascomycete.org", ascomycete_org_name_url(name))
   end
 
   def test_show_name_genus_with_icn_id
