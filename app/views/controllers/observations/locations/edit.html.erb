@@ -1,9 +1,7 @@
 <%
-@container = :wide
+@container = :full
 add_page_title(:list_merge_options_title.t(where: @where))
 # NOTE: the "forms" are patch buttons in the "row" partial
-# TODO: Redo partial, passing a collection? Or use helper?
-# TODO: Use list group, not table
 %>
 
 <div class="row">
@@ -13,12 +11,10 @@ add_page_title(:list_merge_options_title.t(where: @where))
       <div class="h4">
         <%= :list_merge_options_near_matches.t %>
       </div>
-      <table class="table table-striped table-location-merge-options">
-        <%# @matches.each do |location| %>
-          <%= render(partial: "observations/locations/row",
-                     locals: @matches, as: location) %>
-        <%# end %>
-      </table>
+      <div class="list-group">
+        <%= render(partial: "observations/locations/row",
+                   collection: @matches, as: :location) %>
+      </div>
     </div>
   <% end %>
 
@@ -27,12 +23,10 @@ add_page_title(:list_merge_options_title.t(where: @where))
       <div class="h4">
         <%= :list_merge_options_others.t %>
       </div>
-      <table class="table table-striped table-location-merge-options">
-        <%# @others.each do |location| %>
-          <%= render(partial: "observations/locations/row",
-                     locals: @others, as: location }) %>
-        <%# end %>
-      </table>
+      <div class="list-group">
+        <%= render(partial: "observations/locations/row",
+                   collection: @others, as: :location) %>
+      </div>
     </div>
   <% end %>
 
