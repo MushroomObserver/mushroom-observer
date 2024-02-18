@@ -14,10 +14,10 @@ add_page_title(:list_merge_options_title.t(where: @where))
         <%= :list_merge_options_near_matches.t %>
       </div>
       <table class="table table-striped table-location-merge-options">
-        <% @matches.each do |location| %>
+        <%# @matches.each do |location| %>
           <%= render(partial: "observations/locations/row",
-                     locals: { location: location }) %>
-        <% end %>
+                     locals: @matches, as: location) %>
+        <%# end %>
       </table>
     </div>
   <% end %>
@@ -28,10 +28,10 @@ add_page_title(:list_merge_options_title.t(where: @where))
         <%= :list_merge_options_others.t %>
       </div>
       <table class="table table-striped table-location-merge-options">
-        <% @others.each do |location| %>
+        <%# @others.each do |location| %>
           <%= render(partial: "observations/locations/row",
-                     locals: { location: location }) %>
-        <% end %>
+                     locals: @others, as: location }) %>
+        <%# end %>
       </table>
     </div>
   <% end %>
