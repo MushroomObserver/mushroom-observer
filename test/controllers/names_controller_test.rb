@@ -578,9 +578,11 @@ class NamesControllerTest < FunctionalTestCase
 
     ##### External research links
     [
+      ["Ascomycdete.org", ascomycete_org_name_url(name)],
       ["GBIF", gbif_name_search_url(name)],
       ["iNat", inat_name_search_url(name)],
       ["MushroomExpert", mushroomexpert_name_web_search_url(name)],
+      ["MyCoPortal", mycoportal_name_tab(@name)],
       ["NCBI", ncbi_nucleotide_term_search_url(name)],
       ["Wikipedia", wikipedia_term_search_url(name)]
     ].each do |site, link|
