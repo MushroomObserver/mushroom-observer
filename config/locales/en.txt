@@ -2871,10 +2871,10 @@
   list_name_tracker_pending_approval: "(Observer notification pending approval.)"
 
   # location/list_merge_options
-  list_merge_are_you_sure: Do merge?  This cannot be undone.
+  list_merge_are_you_sure: Assign location?  This cannot be undone.
   list_merge_options_near_matches: Near Matches
   list_merge_options_others: Other Available [:locations]
-  list_merge_options_title: Merge Options for [where]
+  list_merge_options_title: Location Matches for [where]
 
   # observer/list_notifications
   list_notifications_title: Email Alerts for [user]
