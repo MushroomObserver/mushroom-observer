@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='utf-8'?>
+<eml:eml xmlns:eml="eml://ecoinformatics.org/eml-2.0.1">
+  <dataset>
+    <title xml:lang='en'>Mushroom Observer Observations</title>
+    <creator>
+      <organizationName>Mushroom Observer</organizationName>
+      <address>
+	<city>Falmouth</city>
+	<postalCode>02556</postalCode>
+	<country>United States of America</country>
+      </address>
+      <onlineUrl>https://mushroomobserver.org</onlineUrl>
+    </creator>
+    <pubDate>2024-02-17</pubDate>
+    <language>EN</language>
+    <abstract>
+      <para>Observations and images of Fungi from the Mushroom Observer community</para>
+    </abstract>
+    <intellectualRights>
+      <para>This work is licensed under a <ulink url="http://creativecommons.org/licenses/by/4.0/legalcode"><citetitle>Creative Commons Attribution (CC-BY) 4.0 License</citetitle></ulink>.</para>
+    </intellectualRights>
+    <contact>
+      <positionName>President</positionName>
+      <individualName>
+	<givenName>Nathan</givenName>
+	<surName>Wilson</surName>
+      </individualName>
+      <electronicMailAddress>webmaster@mushroomobserver.org</electronicMailAddress>
+    </contact>
+    <metadataProvider>
+      <organizationName>Mushroom Observer</organizationName>
+      <positionName>Developer</positionName>
+      <individualName>
+	<givenName>Nathan</givenName>
+	<surName>Wilson</surName>
+      </individualName>
+      <electronicMailAddress>webmaster@mushroomobserver.org</electronicMailAddress>
+      <onlineUrl>https://mushroomobserver.org</onlineUrl>
+      <pubDate>2024-02-17</pubDate>
+    </metadataProvider>
+  </dataset>
+</eml:eml>

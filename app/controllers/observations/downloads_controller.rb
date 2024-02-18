@@ -55,8 +55,12 @@ module Observations
         Report::Raw.new(args)
       when "adolf"
         Report::Adolf.new(args)
-      when "darwin"
+      when "dwca"
         Report::Dwca.new(args)
+      when "gbif"
+        Report::Gbif.new(args)
+      when "eol"
+        Report::Eol.new(args)
       when "symbiota"
         Report::Symbiota.new(args)
       when "fundis"

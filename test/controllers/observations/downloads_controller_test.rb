@@ -121,7 +121,31 @@ module Observations
         :create,
         params: {
           q: query.id.alphabetize,
-          format: "darwin",
+          format: "dwca",
+          encoding: "UTF-8",
+          commit: "Download"
+        }
+      )
+      assert_no_flash
+      assert_response(:success)
+
+      post(
+        :create,
+        params: {
+          q: query.id.alphabetize,
+          format: "gbif",
+          encoding: "UTF-8",
+          commit: "Download"
+        }
+      )
+      assert_no_flash
+      assert_response(:success)
+
+      post(
+        :create,
+        params: {
+          q: query.id.alphabetize,
+          format: "eol",
           encoding: "UTF-8",
           commit: "Download"
         }
