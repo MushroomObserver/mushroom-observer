@@ -576,40 +576,31 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:show, params: { id: name.id })
 
-    ##### Links to external taxonomy pages
-    assert_select(
-      "body a[href='#{gbif_name_search_url(name)}']", true,
-      "Page is missing a link to GBIF"
-    )
-    assert_select(
-      "body a[href='#{inat_name_search_url(name)}']", true,
-      "Page is missing a link to iNaturalist"
-    )
-    assert_select(
-      "body a[href='#{mushroomexpert_name_web_search_url(name)}']", true,
-      "Page is missing a link to MushroomExpert"
-    )
-    assert_select(
-      "body a[href='#{ncbi_nucleotide_term_search_url(name)}']", true,
-      "Page is missing a link to NCBI Nucleotide"
-    )
-    assert_select(
-      "body a[href='#{wikipedia_term_search_url(name)}']", true,
-      "Page is missing a link to Wikipedia"
-    )
+    ##### External research links
+    [
+      ["GBIF", gbif_name_search_url(name)],
+      ["iNat", inat_name_search_url(name)],
+      ["MushroomExpert", mushroomexpert_name_web_search_url(name)],
+      ["NCBI", ncbi_nucleotide_term_search_url(name)],
+      ["Wikipedia", wikipedia_term_search_url(name)]
+    ].each do |site, link|
+      assert_external_link(site, link)
+    end
 
-    ##### Links to external nomenclature pages
+    ##### External nomenclature links
+    [
+      ["IF record", index_fungorum_record_url(name.icn_id)],
+      ["MB record", mycobank_record_url(name.icn_id)],
+      ["GSD Synonymy record", species_fungorum_gsd_synonymy(name.icn_id)]
+    ].each do |site, link|
+      assert_external_link(site, link)
+    end
+  end
+
+  def assert_external_link(site, link)
     assert_select(
-      "body a[href='#{index_fungorum_record_url(name.icn_id)}']", true,
-      "Page is missing a link to IF record"
-    )
-    assert_select(
-      "body a[href='#{mycobank_record_url(name.icn_id)}']", true,
-      "Page is missing a link to MB record"
-    )
-    assert_select(
-      "body a[href='#{species_fungorum_gsd_synonymy(name.icn_id)}']", true,
-      "Page is missing a link to GSD Synonymy record"
+      "body a[href='#{link}']", true,
+      "Page is missing a link to #{site}"
     )
   end
 
