@@ -2,9 +2,29 @@
 
 require("test_helper")
 
-module Locations
-  class ObservationsControllerTest < FunctionalTestCase
+module Observations
+  class LocationsControllerTest < FunctionalTestCase
     include ObjectLinkHelper
+
+    def test_define_location_options
+      albion = locations(:albion)
+
+      # Full match with "Albion, California, USA"
+      requires_login(:edit, where: albion.display_name)
+      assert_obj_arrays_equal([albion], assigns(:matches))
+
+      # Should match against albion.
+      requires_login(:edit, where: "Albion, CA")
+      assert_obj_arrays_equal([albion], assigns(:others))
+
+      # Should match against albion.
+      requires_login(:edit, where: "Albion Field Station, CA")
+      assert_obj_arrays_equal([albion], assigns(:others))
+
+      # Shouldn't match anything.
+      requires_login(:edit, where: "Somewhere out there")
+      assert_obj_arrays_equal([], assigns(:others))
+    end
 
     def test_add_to_location
       User.current = rolf

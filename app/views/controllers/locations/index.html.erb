@@ -53,8 +53,10 @@ flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
           <% @undef_data.each do |location_name, count| %>
             <div class="list-group-item">
               <%= location_link(location_name, nil, count) %>
-              <%= link_to(:list_place_names_merge.t,
-                          location_merges_form_path(where: location_name)) %>
+              <%= link_to(
+                :list_place_names_merge.t,
+                matching_locations_for_observations_path(where: location_name)
+              ) %>
             </div>
           <% end %>
         </div>
