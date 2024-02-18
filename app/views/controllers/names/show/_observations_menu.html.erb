@@ -21,7 +21,6 @@ heading_link = icon_link_with_query(*name_tracker_form_tab(@name, @user))
         end) if @has_subtaxa
       end)
       concat(tag.div(class: "py-3") do
-        concat(tag.p(link_to(*google_images_for_name_tab(@name))))
         concat(tag.p(link_to(*occurrence_map_for_name_tab(@name))))
       end)
     end)
@@ -34,6 +33,7 @@ heading_link = icon_link_with_query(*name_tracker_form_tab(@name, @user))
         end
         concat(tag.p(link_to(*eol_name_tab(@name)))) if @name.eol_url
         concat(tag.p(link_to(*gbif_name_tab(@name))))
+        concat(tag.p(link_to(*google_images_for_name_tab(@name))))
         concat(tag.p(link_to(*inat_name_tab(@name))))
         if @name.searchable_in_registry?
           concat(tag.p(link_to(*mushroomexpert_name_tab(@name))))
