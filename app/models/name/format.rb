@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Name::Format
+  GROUP_ADD_ON_MATCHER = / #{Name::Parse::GROUP_ABBR}/
   # When we `include` a module, the way to add class methods is like this:
   def self.included(base)
     base.extend(ClassMethods)
@@ -78,6 +79,11 @@ module Name::Format
 
   def real_search_name
     Name.display_to_real_search(self)
+  end
+
+  def s_str
+    # sub(/ #{Name::Parse::GROUP_ABBR}/, "")
+    text_name.sub(GROUP_ADD_ON_MATCHER, "")
   end
 
   # Is this the "unknown" name?
