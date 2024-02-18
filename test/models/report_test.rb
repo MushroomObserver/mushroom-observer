@@ -92,7 +92,7 @@ class ReportTest < UnitTestCase
   end
 
   def test_gbif
-    expect = ["meta.xml", "observations.csv", "multimedia.csv"]
+    expect = ["eml.xml", "meta.xml", "observations.csv", "multimedia.csv"]
     do_zip_test(Report::Gbif, expect)
   end
 

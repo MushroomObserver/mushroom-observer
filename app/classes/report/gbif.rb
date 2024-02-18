@@ -17,6 +17,8 @@ module Report
 
     # generate CSV & meta.xml and bundle into a Zip
     def render
+      filename = "#{::Rails.root}/public/dwca/eml.xml"
+      content << ["eml.xml", File.open(filename).read]
       filename = "#{::Rails.root}/public/dwca/gbif_meta.xml"
       content << ["meta.xml", File.open(filename).read]
       content << ["observations.csv", observations.render]
