@@ -118,10 +118,6 @@ module ObjectLinkHelper
     "https://www.mycobank.org/"
   end
 
-  def mycoguide_name_search_url(name)
-    "https://www.mycoguide.com/guide/search?q=#{name.text_name}"
-  end
-
   # url for name search on MyCoPortal
   def mycoportal_url(name)
     "http://mycoportal.org/portal/taxa/index.php?taxauthid=1&taxon=" \

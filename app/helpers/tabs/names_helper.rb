@@ -171,11 +171,6 @@ module Tabs
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
     end
 
-    def mycoguide_name_tab(name)
-      ["MycoGuide", mycoguide_name_search_url(name),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
-    end
-
     def mycoportal_name_tab(name)
       ["MyCoPortal", mycoportal_url(name),
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
