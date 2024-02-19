@@ -151,6 +151,11 @@ module Tabs
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
     end
 
+    def google_name_tab(name)
+      [:google_name_search.l, google_name_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
     def inat_name_tab(name)
       ["iNaturalist", inat_name_search_url(name),
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]

@@ -581,6 +581,7 @@ class NamesControllerTest < FunctionalTestCase
     ##### External research links
     [
       ["GBIF", gbif_name_search_url(name)],
+      ["Google Search", google_name_search_url(name)],
       ["iNat", inat_name_search_url(name)],
       ["MushroomExpert", mushroomexpert_name_web_search_url(name)],
       ["MyCoPortal", mycoportal_url(name)],

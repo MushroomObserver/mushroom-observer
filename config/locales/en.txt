@@ -2129,6 +2129,7 @@
   show_name_general_description: "[:form_names_gen_desc]"
   show_name_see_more: See More
   show_name_icn_id_missing: missing
+  google_name_search: Google Search
   index_fungorum: Index Fungorum
   index_fungorum_web_search: Index Fungorum web search
   mycobank: MycoBank

@@ -73,6 +73,16 @@ module ObjectLinkHelper
     "https://www.gbif.org/species/search?q=#{name.sensu_stricto}"
   end
 
+  def google_name_search_url(name)
+    if name.rank == "Group"
+      # require quoted name ss, optional group/clade/complex for best results
+      "https://www.google.com/search?q=%2B%22#{name.sensu_stricto}%22+" \
+      "%28group+OR+Clade+OR+Complex%29&"
+    else
+      "https://www.google.com/search?q=%2B%22#{name.sensu_stricto}%22"
+    end
+  end
+
   def inat_name_search_url(name)
     # omit `group`, else there are no hits
     "https://www.inaturalist.org/search?q=#{name.sensu_stricto}"
