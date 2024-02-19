@@ -27,16 +27,22 @@ module Observations
     # What the list shows is a list of defined Locations that match the given
     # +where+ string, in order of closeness of match, in the following order:
     #   1) matches = match the string
-    #   1) others that start with everything in "where" up to the comma
-    #   2) others that start with the first word in "where"
-    #   3) doesn't try other segments, because the second one could be a country
+    #   2) others that include everything in "where" up to the comma
+    #   3) others that include the first word in "where"
+    #   4) others that include the last word of the first segment in "where"
+    #      (for example, "Estado de Guerrero, México": searches for "Guerrero")
+    #   5) doesn't try other segments, because the second one could be a country
     #
-    # The form is not really a `form` and does not commit to a "create" action.
-    # It contains links to convert the observations sharing the +where+ string
+    # The form is not really a `form`, but the buttons do commit to "update".
+    # It contains links to assign the observations sharing the +where+ string
+    # to the given Location (AR record)
 
     def edit
       store_location
-      @where = Location.user_format(@user, params[:where].to_s)
+      # NOTE: Do not use or pass Location.user_format for @where.
+      # This is the string we're looking for in the db, in the `name` column,
+      # and we're also assuming "postal" order when splitting the string.
+      @where = params[:where].to_s
       @matches = Location.name_includes(@where)
       @others = []
 
@@ -46,7 +52,8 @@ module Observations
       return unless places.length > 1 || words.length > 1
 
       @others = Location.name_includes(places.first).
-                or(Location.name_includes(words.first))
+                or(Location.name_includes(words.first)).
+                or(Location.name_includes(places.first.split.last))
     end
 
     # merges_controller_test
@@ -76,7 +83,6 @@ module Observations
     # Move all the Observation's with a given +where+ into a given Location.
     def update_observations_by_where(location, given_where)
       success = true
-      # observations = Observation.find_all_by_where(given_where)
       observations = Observation.where(where: given_where)
       count = 3
       observations.each do |o|

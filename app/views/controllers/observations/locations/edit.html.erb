@@ -1,7 +1,9 @@
 <%
 @container = :full
-add_page_title(:list_merge_options_title.t(where: @where))
-# NOTE: the "forms" are patch buttons in the "row" partial
+add_page_title(
+  :list_merge_options_title.t(where: Location.user_format(@user, @where))
+)
+# NOTE: the "forms" are patch buttons. Not using a partial for speed here.
 %>
 
 <div class="row">
@@ -12,8 +14,15 @@ add_page_title(:list_merge_options_title.t(where: @where))
         <%= :list_merge_options_near_matches.t %>
       </div>
       <div class="list-group">
-        <%= render(partial: "observations/locations/row",
-                   collection: @matches, as: :location) %>
+        <% @matches.map do |location| %>
+          <div class="list-group-item">
+            <%= patch_button(name: location.display_name.t,
+                             path: assign_location_to_observations_path(
+                               where: @where, location: location
+                             ), class: "text-left",
+                             data: { confirm: :list_merge_are_you_sure.l }) %>
+          </div>
+        <% end %>
       </div>
     </div>
   <% end %>
@@ -24,8 +33,15 @@ add_page_title(:list_merge_options_title.t(where: @where))
         <%= :list_merge_options_others.t %>
       </div>
       <div class="list-group">
-        <%= render(partial: "observations/locations/row",
-                   collection: @others, as: :location) %>
+        <% @others.map do |location| %>
+          <div class="list-group-item">
+            <%= patch_button(name: location.display_name.t,
+                             path: assign_location_to_observations_path(
+                               where: @where, location: location
+                             ), class: "text-left",
+                             data: { confirm: :list_merge_are_you_sure.l }) %>
+          </div>
+        <% end %>
       </div>
     </div>
   <% end %>
