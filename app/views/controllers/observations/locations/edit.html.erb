@@ -17,8 +17,11 @@ add_page_title(
           <%= patch_button(name: location.display_name.t,
                             path: assign_location_to_observations_path(
                               where: @where, location: location
-                            ), class: "text-left",
-                            data: { confirm: :list_merge_are_you_sure.l }) %>
+                            ),
+                            class: "text-left",
+                            data: {
+                              turbo_confirm: :list_merge_are_you_sure.l
+                            }) %>
         </div>
       <% end %>
     </div>

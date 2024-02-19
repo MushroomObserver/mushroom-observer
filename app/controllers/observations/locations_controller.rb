@@ -64,8 +64,10 @@ module Observations
       if where.present? &&
          update_observations_by_where(location, where)
         flash_notice(
-          :runtime_location_merge_success.t(this: where,
-                                            that: location.display_name)
+          :runtime_location_merge_success.t(
+            this: Location.user_format(@user, where),
+            that: location.display_name
+          )
         )
       end
       redirect_to(locations_path)
