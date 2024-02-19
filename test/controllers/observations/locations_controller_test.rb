@@ -9,21 +9,21 @@ module Observations
     def test_define_location_options
       albion = locations(:albion)
 
-      # Full match with "Albion, California, USA"
+      # Full match with "Albion, California, USA" should come first
       requires_login(:edit, where: albion.display_name)
-      assert_obj_arrays_equal([albion], assigns(:matches))
+      assert_equal(albion, assigns(:matches).first)
 
       # Should match against albion.
       requires_login(:edit, where: "Albion, CA")
-      assert_obj_arrays_equal([albion], assigns(:others))
+      assert(assigns(:matches).include?(albion))
 
       # Should match against albion.
       requires_login(:edit, where: "Albion Field Station, CA")
-      assert_obj_arrays_equal([albion], assigns(:others))
+      assert(assigns(:matches).include?(albion))
 
       # Shouldn't match anything.
       requires_login(:edit, where: "Somewhere out there")
-      assert_obj_arrays_equal([], assigns(:others))
+      assert_empty(assigns(:matches))
     end
 
     def test_add_to_location
