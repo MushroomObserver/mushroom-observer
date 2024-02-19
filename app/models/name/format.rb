@@ -81,7 +81,7 @@ module Name::Format
     Name.display_to_real_search(self)
   end
 
-  def s_str
+  def sensu_stricto
     # sub(/ #{Name::Parse::GROUP_ABBR}/, "")
     text_name.sub(GROUP_ADD_ON_MATCHER, "")
   end

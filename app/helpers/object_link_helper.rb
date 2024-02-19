@@ -64,18 +64,18 @@ module ObjectLinkHelper
     # omit `group`l their search ORs all of the words
     # The site is Euro-centric, omitting many N Amer spp.
     # so ORing the words gives more results
-    "https://ascomycete.org/Search-Results?search=#{name.s_str}"
+    "https://ascomycete.org/Search-Results?search=#{name.sensu_stricto}"
   end
 
   def gbif_name_search_url(name)
     # omit `group`, else there are no hits
     # omit quotes around the name in order to get synonyms and cf's
-    "https://www.gbif.org/species/search?q=#{name.s_str}"
+    "https://www.gbif.org/species/search?q=#{name.sensu_stricto}"
   end
 
   def inat_name_search_url(name)
     # omit `group`, else there are no hits
-    "https://www.inaturalist.org/search?q=#{name.s_str}"
+    "https://www.inaturalist.org/search?q=#{name.sensu_stricto}"
   end
 
   # url for IF record
@@ -93,21 +93,21 @@ module ObjectLinkHelper
     # I want a backslash between "q=" and "site",
     # but can't figure the rigth way to do this.
     # I can construct a link_to this url
-    # https://duckduckgo.com/?q=\site%3Aindexfungorum.org+%22#Tricholoma equestre%22&ia=web
-    # If I copy the above and paste it into a browser address bar
+    # https://duckduckgo.com/?q=\site%3Aindexfungorum.org+%22Tuber+liui%22
+    # If I copy it and paste it into a browser address bar
     # DuckDuckGo goes straight to the first search result
     # It works the same if I right click on the displayed link,
     # select Copy Link Address,  and paste it into the address bar.
     # BUT if I click on the link displayed in MO, it doesn't work.
     "https://duckduckgo.com/?q=site%3Aindexfungorum.org+" \
-    "%22#{name.s_str}%22&ia=web"
+    "%22#{name.sensu_stricto}%22"
   end
 
   def mushroomexpert_name_web_search_url(name)
     # Use DuckDuckGo see https://github.com/MushroomObserver/mushroom-observer/issues/1884#issuecomment-1950137454
     # quote name sensu stricto to get right # of results.
     "https://duckduckgo.com/?q=site%3Amushroomexpert.com+" \
-    "%22#{name.s_str}%22&ia=web"
+    "%22#{name.sensu_stricto}%22&ia=web"
   end
 
   # url for MB record by number
@@ -118,7 +118,7 @@ module ObjectLinkHelper
   # url for MycoBank name search for text_name
   def mycobank_name_search_url(name)
     "#{mycobank_basic_search_url}/field/Taxon%20name/#{
-      name.s_str.gsub(" ", "%20")
+      name.sensu_stricto.gsub(" ", "%20")
     }"
   end
 
@@ -136,13 +136,13 @@ module ObjectLinkHelper
   # and all the hits will include group if hits exist
   def mycoportal_url(name)
     "http://mycoportal.org/portal/taxa/index.php?taxauthid=1&taxon=" \
-      "#{name.s_str}"
+      "#{name.sensu_stricto}"
   end
 
   # Use name s.s. because including group gets 0 or few hits;
   # i.e., only sequenquenes whose notes or other field include "group"
   def ncbi_nucleotide_term_search_url(name)
-    "https://www.ncbi.nlm.nih.gov/nuccore/?term=#{name.s_str}"
+    "https://www.ncbi.nlm.nih.gov/nuccore/?term=#{name.sensu_stricto}"
   end
 
   # url of SF page with "official" synonyms by category
@@ -160,7 +160,7 @@ module ObjectLinkHelper
   def wikipedia_term_search_url(name)
     # Use name s.s. because including "group" gets hits that
     # don't include name s.s.
-    "https://en.wikipedia.org/w/index.php?search=#{name.s_str}"
+    "https://en.wikipedia.org/w/index.php?search=#{name.sensu_stricto}"
   end
 
   # ----------------------------------------------------------------------------
