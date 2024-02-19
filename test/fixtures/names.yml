@@ -9,6 +9,8 @@
 # Do not add a Name starting with U or Z.
 #   AjaxControllerTest#test_auto_complete_name expects 0 Names starting with U.
 #   NameControllerTest pagination tests expect 0 Names staring with Z.
+# Do not add Ascomycetes
+#   This breaks NameTest#test_ancestors_3
 # Do not use the following as part of Names
 #   Lactarius   -- Breaks NameControllerTest#test_edit_name_deprecated
 #   Strobilurus -- Break NameControllerTest#test_edit_name_add_author

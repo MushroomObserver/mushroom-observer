@@ -569,20 +569,59 @@ class NamesControllerTest < FunctionalTestCase
   def test_show_name_species_with_icn_id
     # Name's icn_id is filled in
     name = names(:coprinus_comatus)
+    icn_id = name.icn_id
+    assert_instance_of(Integer, icn_id,
+                       "Test needs Name fixture with icn_id (Registration #)")
+    assert_not(name.classification =~ /Ascomycete/,
+               "Test needs a Name fixture which isn't an Ascomycete")
+
     login
     get(:show, params: { id: name.id })
+
+    ##### External research links
+    [
+      ["GBIF", gbif_name_search_url(name)],
+      ["Google Search", google_name_search_url(name)],
+      ["iNat", inat_name_search_url(name)],
+      ["MushroomExpert", mushroomexpert_name_web_search_url(name)],
+      ["MyCoPortal", mycoportal_url(name)],
+      ["NCBI", ncbi_nucleotide_term_search_url(name)],
+      ["Wikipedia", wikipedia_term_search_url(name)]
+    ].each do |site, link|
+      assert_external_link(site, link)
+    end
+
     assert_select(
-      "body a[href='#{index_fungorum_record_url(name.icn_id)}']", true,
-      "Page is missing a link to IF record"
+      "body a[href='#{ascomycete_org_name_url(name)}']", false,
+      "Page should not have a link to Ascomycete.org"
     )
+
+    ##### External nomenclature links
+    [
+      ["IF record", index_fungorum_record_url(name.icn_id)],
+      ["MB record", mycobank_record_url(name.icn_id)],
+      ["GSD Synonymy record", species_fungorum_gsd_synonymy(name.icn_id)]
+    ].each do |site, link|
+      assert_external_link(site, link)
+    end
+  end
+
+  def assert_external_link(site, link)
     assert_select(
-      "body a[href='#{mycobank_record_url(name.icn_id)}']", true,
-      "Page is missing a link to MB record"
+      "body a[href='#{link}']", true,
+      "Page is missing a link to #{site}"
     )
-    assert_select(
-      "body a[href='#{species_fungorum_gsd_synonymy(name.icn_id)}']", true,
-      "Page is missing a link to GSD Synonymy record"
-    )
+  end
+
+  def test_show_name_ascomycete
+    name = names(:peltigera)
+    assert(name.classification =~ /Ascomycete/,
+           "Test needs a Name fixture that's an Ascomycete")
+
+    login
+    get(:show, params: { id: name.id })
+
+    assert_external_link("Ascomycete.org", ascomycete_org_name_url(name))
   end
 
   def test_show_name_genus_with_icn_id
@@ -600,6 +639,7 @@ class NamesControllerTest < FunctionalTestCase
     # Name is registrable, but icn_id is not filled in
     name = names(:coprinus)
     label = :ICN_ID.l.to_s
+
     login
     get(:show, params: { id: name.id })
 
@@ -609,10 +649,9 @@ class NamesControllerTest < FunctionalTestCase
       "'#{:show_name_icn_id_missing.l}' note"
     )
     assert_select(
-      "#nomenclature a:match('href',?)",
-      /#{index_fungorum_basic_search_url}/,
-      { count: 1 },
-      "Nomenclature section should have link to IF search"
+      "#nomenclature a[href='#{index_fungorum_name_web_search_url(name)}']",
+      true,
+      "Nomenclature section is missing a link to Index Fungorum search"
     )
     assert_select(
       "#nomenclature a:match('href',?)", /#{mycobank_name_search_url(name)}/,
@@ -641,10 +680,9 @@ class NamesControllerTest < FunctionalTestCase
 
     # but it makes sense to link to search pages in fungal registries
     assert_select(
-      "#nomenclature a:match('href',?)",
-      /#{index_fungorum_basic_search_url}/,
-      { count: 1 },
-      "Nomenclature section should have link to IF search"
+      "#nomenclature a[href='#{index_fungorum_name_web_search_url(name)}']",
+      true,
+      "Nomenclature section is missing a link to Index Fungorum search"
     )
     assert_select(
       "#nomenclature a:match('href',?)", /#{mycobank_basic_search_url}/,

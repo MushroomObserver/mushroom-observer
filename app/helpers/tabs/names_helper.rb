@@ -86,11 +86,6 @@ module Tabs
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
     end
 
-    def index_fungorum_basic_search_tab
-      [:index_fungorum_search.l, index_fungorum_basic_search_url,
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
-    end
-
     def mycobank_name_search_tab(name)
       [:mycobank_search.l, mycobank_name_search_url(name),
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
@@ -135,12 +130,6 @@ module Tabs
        { class: tab_id(__method__.to_s), icon: :edit }]
     end
 
-    # Show name, obs menu. Also on Obs show, name section
-    def mycoportal_name_tab(name)
-      ["MyCoPortal", mycoportal_url(name),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
-    end
-
     def eol_name_tab(name)
       ["EOL", name.eol_url,
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
@@ -149,6 +138,51 @@ module Tabs
     def google_images_for_name_tab(name)
       [:google_images.t,
        format("https://images.google.com/images?q=%s", name.real_text_name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def ascomycete_org_name_tab(name)
+      ["Ascomycete.org", ascomycete_org_name_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def gbif_name_tab(name)
+      ["GBIF", gbif_name_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def google_name_tab(name)
+      [:google_name_search.l, google_name_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def inat_name_tab(name)
+      ["iNaturalist", inat_name_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def index_fungorum_name_search_tab(name)
+      [:index_fungorum_web_search.l, index_fungorum_name_web_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def ncbi_nucleotide_term_tab(name)
+      ["NCBI Nucleotide", ncbi_nucleotide_term_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def mushroomexpert_name_tab(name)
+      ["MushroomExpert", mushroomexpert_name_web_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def mycoportal_name_tab(name)
+      ["MyCoPortal", mycoportal_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def wikipedia_term_tab(name)
+      ["Wikipedia", wikipedia_term_search_url(name),
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
     end
 

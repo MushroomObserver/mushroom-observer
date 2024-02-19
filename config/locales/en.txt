@@ -800,6 +800,7 @@
   show_location: Show [LOCATION]
   show_location_description: Show [DESCRIPTION]
   about_this_taxon: About this taxon
+  research_links: Research Links
   show_name: About [NAME]
   show_name_description: Show [DESCRIPTION]
   show_object: Show [TYPE]
@@ -2128,8 +2129,9 @@
   show_name_general_description: "[:form_names_gen_desc]"
   show_name_see_more: See More
   show_name_icn_id_missing: missing
+  google_name_search: Google Search
   index_fungorum: Index Fungorum
-  index_fungorum_search: Index Fungorum search
+  index_fungorum_web_search: Index Fungorum web search
   mycobank: MycoBank
   mycobank_search: MycoBank search
   gsd_species_synonymy: GSD Species Synonymy
