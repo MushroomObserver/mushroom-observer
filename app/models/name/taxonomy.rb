@@ -317,12 +317,12 @@ module Name::Taxonomy
     touch_cases = text_name_changed? || author_changed? || deprecated_changed?
     no_touch_cases = lifeform_changed? || classification_changed?
 
-    hash = {}
-    hash[:updated_at] = Time.zone.now if touch_cases && !no_touch_cases
-    hash[:lifeform] = lifeform if lifeform_changed?
-    hash[:text_name] = text_name if text_name_changed?
-    hash[:classification] = classification if classification_changed?
-    Observation.where(name_id: id).update_all(hash) if hash.present?
+    updates = {}
+    updates[:updated_at] = Time.zone.now if touch_cases && !no_touch_cases
+    updates[:lifeform] = lifeform if lifeform_changed?
+    updates[:text_name] = text_name if text_name_changed?
+    updates[:classification] = classification if classification_changed?
+    Observation.where(name_id: id).update_all(updates) if updates.present?
   end
 
   # Copy classification from parent.  Just take parent's classification string
