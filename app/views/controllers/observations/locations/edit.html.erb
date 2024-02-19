@@ -6,13 +6,13 @@ add_page_title(
 # NOTE: the "forms" are patch buttons.
 %>
 
-<% if @options.any? %>
+<% if @matches.any? %>
   <div class="h4">
     <%= :list_merge_options_near_matches.t %>
   </div>
   <%= paginate_block(@pages) do %>
     <div class="list-group">
-      <% @options.map do |location| %>
+      <% @matches.map do |location| %>
         <div class="list-group-item">
           <%= patch_button(name: location.display_name.t,
                             path: assign_location_to_observations_path(

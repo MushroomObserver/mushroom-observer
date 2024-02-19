@@ -46,24 +46,7 @@ module Observations
       # This is the string we're looking for in the db, in the `name` column,
       # and we're also assuming "postal" order when splitting the string.
       @where = params[:where].to_s
-      @matches = Location.name_includes(@where)
-      @others = []
-
-      # Try for segments: split by comma, or by space if no commas
-      places = @where.split(",")
-      words = @where.split
-      return unless places.length > 1 || words.length > 1
-
-      @others = Location.name_includes(places.first)
-      if places.length > 2
-        @others += Location.name_includes(places.second_to_last.strip)
-      end
-      if places.length >= 2
-        @others += Location.name_includes(places.second_to_last.split.last)
-      end
-      @others += Location.name_includes(words.first)
-
-      @options = (@matches + @others).uniq
+      @matches = locations_matching_where
       @pages = paginate_locations!
     end
 
@@ -90,10 +73,31 @@ module Observations
 
     private
 
+    def locations_matching_where
+      matches = Location.name_includes(@where)
+
+      # Try for segments: split by comma, or by space if no commas
+      places = @where.split(",")
+      words = @where.split
+      return unless places.length > 1 || words.length > 1
+
+      matches += Location.name_includes(places.first)
+      # Try for specific segment matches if we have enough of them.
+      if places.length > 2
+        matches += Location.name_includes(places.second_to_last.strip)
+      end
+      if places.length >= 2
+        matches += Location.name_includes(places.second_to_last.split.last)
+      end
+      matches += Location.name_includes(words.first)
+
+      matches.uniq
+    end
+
     def paginate_locations!
       pages = paginate_numbers(:page, 100)
-      pages.num_total = @options.length
-      @options = @options[pages.from..pages.to]
+      pages.num_total = @matches.length
+      @matches = @matches[pages.from..pages.to]
       pages
     end
 
