@@ -307,18 +307,21 @@ module Name::Taxonomy
   end
 
   # Let attached observations update their cache if these fields changed.
+  # Also, touch if it changes the obs name in any way.
   def update_observation_cache
     relevant_changes = lifeform_changed? || text_name_changed? ||
-                       author_changed? || deprecated_changed?
+                       author_changed? || deprecated_changed? ||
+                       classification_changed?
     return unless relevant_changes
 
     touch_cases = text_name_changed? || author_changed? || deprecated_changed?
+    no_touch_cases = lifeform_changed? || classification_changed?
 
     hash = {}
-    hash[:updated_at] = Time.zone.now if touch_cases && !lifeform_changed?
+    hash[:updated_at] = Time.zone.now if touch_cases && !no_touch_cases
     hash[:lifeform] = lifeform if lifeform_changed?
     hash[:text_name] = text_name if text_name_changed?
-    hash[:author] = author if author_changed?
+    hash[:classification] = classification if classification_changed?
     Observation.where(name_id: id).update_all(hash) if hash.present?
   end
 
