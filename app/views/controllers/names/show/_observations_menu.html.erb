@@ -9,7 +9,7 @@ heading_link = icon_link_with_query(*name_tracker_form_tab(@name, @user))
 
   tag.div(class: "row") do
 
-    concat(tag.div(class: "col-sm-7 name-section") do
+    concat(tag.div(class: "col-sm-6 name-section") do
       concat(tag.p(:show_observations_of.t))
       concat(tag.div(class: "pl-3") do
         concat(name_related_taxa_observation_links(@name, @obss))
@@ -25,7 +25,7 @@ heading_link = icon_link_with_query(*name_tracker_form_tab(@name, @user))
       end)
     end)
 
-    concat(tag.div(class: "col-sm-5 name-section") do
+    concat(tag.div(class: "col-sm-6 name-section") do
       concat(tag.p("#{:research_links.l}:"))
       concat(tag.div(class: "pl-3") do
         if @name.classification =~ /Phylum: _Ascomycota_/
