@@ -423,7 +423,6 @@ class Name < AbstractModel
 
   before_create :inherit_stuff
   before_update :update_observation_cache
-  before_update :expire_caches_of_observations
   after_update :notify_users
 
   validates :icn_id, numericality: { allow_nil: true,
@@ -707,15 +706,6 @@ class Name < AbstractModel
 
     ::Query.lookup(:Name, :in_set, ids: names,
                                    title: :needed_descriptions_title.l)
-  end
-
-  # EXPIRE CACHES OF OBS WITH CHANGED NAME
-  # "touch" the updated_at column of all observations with the name
-  # to expire the obs fragment caches.
-  def expire_caches_of_observations
-    return unless text_name_changed? || author_changed? || deprecated_changed?
-
-    Observation.where(name_id: id).touch_all
   end
 
   ##############################################################################

@@ -308,12 +308,18 @@ module Name::Taxonomy
 
   # Let attached observations update their cache if these fields changed.
   def update_observation_cache
-    Observation.update_cache("name", "lifeform", id, lifeform) \
-      if lifeform_changed?
-    Observation.update_cache("name", "text_name", id, text_name) \
-      if text_name_changed?
-    Observation.update_cache("name", "classification", id, classification) \
-      if classification_changed?
+    relevant_changes = lifeform_changed? || text_name_changed? ||
+                       author_changed? || deprecated_changed?
+    return unless relevant_changes
+
+    touch_cases = text_name_changed? || author_changed? || deprecated_changed?
+
+    hash = {}
+    hash[:updated_at] = Time.zone.now if touch_cases && !lifeform_changed?
+    hash[:lifeform] = lifeform if lifeform_changed?
+    hash[:text_name] = text_name if text_name_changed?
+    hash[:author] = author if author_changed?
+    Observation.where(name_id: id).update_all(hash) if hash.present?
   end
 
   # Copy classification from parent.  Just take parent's classification string
