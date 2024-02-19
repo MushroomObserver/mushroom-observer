@@ -2656,9 +2656,11 @@ class NameTest < UnitTestCase
 
   def test_s_str
     %w[group gr gr. gp gp. clade complex].each do |str|
-      assert_equal(Name.new(text_name: "Boletus #{str}").sensu_stricto, "Boletus",
+      assert_equal(Name.new(text_name: "Tuber #{str}").sensu_stricto,
+                   "Boletus",
                    "Name s.s. should not include `#{str}`")
-      assert_equal(Name.new(text_name: "Boletus#{str}").sensu_stricto, "Boletus#{str}",
+      assert_equal(Name.new(text_name: "Boletus#{str}").sensu_stricto,
+                   "Boletus#{str}",
                    "Name ss should include `#{str}` if it's part of the genus")
     end
   end
