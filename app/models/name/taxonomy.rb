@@ -310,13 +310,9 @@ module Name::Taxonomy
   # Also, `touch` if it changes the obs name and should invalidate HTML
   # caches of the observation.
   def update_observation_cache
-    relevant_changes = lifeform_changed? || text_name_changed? ||
-                       author_changed? || deprecated_changed? ||
-                       classification_changed?
-    return unless relevant_changes
-
     touch_cases = text_name_changed? || author_changed? || deprecated_changed?
     no_touch_cases = lifeform_changed? || classification_changed?
+    return unless touch_cases || no_touch_cases
 
     updates = {}
     updates[:updated_at] = Time.zone.now if touch_cases && !no_touch_cases
