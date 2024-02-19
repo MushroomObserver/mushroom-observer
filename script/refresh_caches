@@ -62,6 +62,8 @@ msgs = progress("unused or missing synonyms...",
                 Observation, :refresh_needs_naming_column) +
        progress("observations reviewed...",
                 Vote, :update_observation_views_reviewed_column) +
+       progress("cull unverified users...",
+                User, :cull_unverified_users) +
        progress("done")
 warn(msgs.join("\n")) if msgs.any?
 
