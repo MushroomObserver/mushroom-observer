@@ -329,6 +329,9 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # go through +change_password+.)
   before_create :crypt_password
 
+  before_update :update_image_copyright_holder
+  before_update :expire_caches_of_associated_observations
+
   # Ensure that certain default values are symbols (rather than strings)
   # might only be an issue for test environment?
   # Probably better to instead use after_create and after_update,
@@ -482,6 +485,20 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     return nil if old_legal_name == new_legal_name
 
     [old_legal_name, new_legal_name]
+  end
+
+  def update_image_copyright_holder
+    return unless legal_name_change
+
+    Image.update_copyright_holder(*legal_name_change, self)
+  end
+
+  # EXPIRE CACHES OF OBS WITH CHANGED USER LOGINS
+  # "touch" the updated_at column of all observations with the changed login
+  def expire_caches_of_associated_observations
+    return unless name_changed? || login_changed?
+
+    Observation.where(user_id: id).touch_all
   end
 
   ##############################################################################
