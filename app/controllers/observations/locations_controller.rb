@@ -39,7 +39,7 @@ module Observations
 
     def edit
       store_location
-      # NOTE: Do not use or pass Location.user_format for @where.
+      # NOTE: Don't use or pass Location.user_format for @where. Needs "postal".
       # This is the string we're looking for in the db, in the `name` column,
       # and we're also assuming "postal" order when splitting the string.
       @where = params[:where].to_s
@@ -54,6 +54,9 @@ module Observations
       @others = Location.name_includes(places.first).
                 or(Location.name_includes(words.first)).
                 or(Location.name_includes(places.first.split.last))
+
+      @options = (@matches + @others).uniq
+      @pages = paginate_locations!
     end
 
     # merges_controller_test
@@ -79,6 +82,13 @@ module Observations
     end
 
     private
+
+    def paginate_locations!
+      pages = paginate_numbers(:page, 100)
+      pages.num_total = @options.length
+      @options = @options[pages.from..pages.to]
+      pages
+    end
 
     # Move all the Observation's with a given +where+ into a given Location.
     def update_observations_by_where(location, given_where)

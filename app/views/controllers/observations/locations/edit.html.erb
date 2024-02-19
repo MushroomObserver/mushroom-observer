@@ -8,24 +8,28 @@ add_page_title(
 
 <div class="row">
 
-  <% if @matches.any? %>
+  <% if @options.any? %>
     <div class="col-md-6">
       <div class="h4">
         <%= :list_merge_options_near_matches.t %>
       </div>
-      <div class="list-group">
-        <% @matches.map do |location| %>
-          <div class="list-group-item">
-            <%= patch_button(name: location.display_name.t,
-                             path: assign_location_to_observations_path(
-                               where: @where, location: location
-                             ), class: "text-left",
-                             data: { confirm: :list_merge_are_you_sure.l }) %>
-          </div>
-        <% end %>
-      </div>
+      <%= paginate_block(@pages) do %>
+        <div class="list-group">
+          <% @options.map do |location| %>
+            <div class="list-group-item">
+              <%= patch_button(name: location.display_name.t,
+                              path: assign_location_to_observations_path(
+                                where: @where, location: location
+                              ), class: "text-left",
+                              data: { confirm: :list_merge_are_you_sure.l }) %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
     </div>
   <% end %>
+<%
+=begin%>
 
   <% if @others.any? %>
     <div class="col-md-6">
@@ -45,5 +49,7 @@ add_page_title(
       </div>
     </div>
   <% end %>
+<%
+=end%>
 
 </div><!--.row-->
