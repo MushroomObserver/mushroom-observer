@@ -61,15 +61,21 @@ module ObjectLinkHelper
   # ----- links to names and records at external websites ----------------------
 
   def ascomycete_org_name_url(name)
-    "https://ascomycete.org/Search-Results?search=#{name.text_name}"
+    # omit `group`l their search ORs all of the words
+    # The site is Euro-centric, omitting many N Amer spp.
+    # so ORing the words gives more results
+    "https://ascomycete.org/Search-Results?search=#{name.s_str}"
   end
 
   def gbif_name_search_url(name)
-    "https://www.gbif.org/species/search?q=#{name.text_name}"
+    # omit `group`, else there are no hits
+    # omit quotes around the name in order to get synonyms and cf's
+    "https://www.gbif.org/species/search?q=#{name.s_str}"
   end
 
   def inat_name_search_url(name)
-    "https://www.inaturalist.org/search?q=#{name.text_name}"
+    # omit `group`, else there are no hits
+    "https://www.inaturalist.org/search?q=#{name.s_str}"
   end
 
   # url for IF record
@@ -82,20 +88,26 @@ module ObjectLinkHelper
     # Use DuckDuckGo because the equivalent Google search results stink,
     # and Bing shows an annoying ChatBot thing
     # See https://github.com/MushroomObserver/mushroom-observer/issues/1884#issuecomment-1950137454
-    name_string = name.text_name.
-                  sub(/ (group|clade)$/, "").
-                  tr(" ", "+")
+    # Quote the name s.s. to get a list of hits that includes the right one.
+    # NOTE: jdc 2024-02-18
+    # I want a backslash between "q=" and "site",
+    # but can't figure the rigth way to do this.
+    # I can construct a link_to this url
+    # https://duckduckgo.com/?q=\site%3Aindexfungorum.org+%22#Tricholoma equestre%22&ia=web
+    # If I copy the above and paste it into a browser address bar
+    # DuckDuckGo goes straight to the first search result
+    # It works the same if I right click on the displayed link,
+    # select Copy Link Address,  and paste it into the address bar.
+    # BUT if I click on the link displayed in MO, it doesn't work.
     "https://duckduckgo.com/?q=site%3Aindexfungorum.org+" \
-    "%22#{name_string}%22&ia=web"
+    "%22#{name.s_str}%22&ia=web"
   end
 
   def mushroomexpert_name_web_search_url(name)
     # Use DuckDuckGo see https://github.com/MushroomObserver/mushroom-observer/issues/1884#issuecomment-1950137454
-    name_string = name.text_name.
-                  sub(/ (group|clade)$/, "").
-                  tr(" ", "+")
+    # quote name sensu stricto to get right # of results.
     "https://duckduckgo.com/?q=site%3Amushroomexpert.com+" \
-    "%22#{name_string}%22&ia=web"
+    "%22#{name.s_str}%22&ia=web"
   end
 
   # url for MB record by number
@@ -106,7 +118,7 @@ module ObjectLinkHelper
   # url for MycoBank name search for text_name
   def mycobank_name_search_url(name)
     "#{mycobank_basic_search_url}/field/Taxon%20name/#{
-      name.text_name.gsub(" ", "%20")
+      name.s_str.gsub(" ", "%20")
     }"
   end
 
@@ -119,13 +131,18 @@ module ObjectLinkHelper
   end
 
   # url for name search on MyCoPortal
+  # use name s.s., else group names get no results, even though
+  # on the MyCoPortal website search page, I can include "group"
+  # and all the hits will include group if hits exist
   def mycoportal_url(name)
     "http://mycoportal.org/portal/taxa/index.php?taxauthid=1&taxon=" \
-      "#{name.text_name}"
+      "#{name.s_str}"
   end
 
+  # Use name s.s. because including group gets 0 or few hits;
+  # i.e., only sequenquenes whose notes or other field include "group"
   def ncbi_nucleotide_term_search_url(name)
-    "https://www.ncbi.nlm.nih.gov/nuccore/?term=#{name.text_name}"
+    "https://www.ncbi.nlm.nih.gov/nuccore/?term=#{name.s_str}"
   end
 
   # url of SF page with "official" synonyms by category
@@ -141,7 +158,9 @@ module ObjectLinkHelper
   end
 
   def wikipedia_term_search_url(name)
-    "https://en.wikipedia.org/w/index.php?search=#{name.text_name}"
+    # Use name s.s. because including "group" gets hits that
+    # don't include name s.s.
+    "https://en.wikipedia.org/w/index.php?search=#{name.s_str}"
   end
 
   # ----------------------------------------------------------------------------
