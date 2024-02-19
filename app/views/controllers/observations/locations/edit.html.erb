@@ -18,38 +18,15 @@ add_page_title(
           <% @options.map do |location| %>
             <div class="list-group-item">
               <%= patch_button(name: location.display_name.t,
-                              path: assign_location_to_observations_path(
-                                where: @where, location: location
-                              ), class: "text-left",
-                              data: { confirm: :list_merge_are_you_sure.l }) %>
+                               path: assign_location_to_observations_path(
+                                 where: @where, location: location
+                               ), class: "text-left",
+                               data: { confirm: :list_merge_are_you_sure.l }) %>
             </div>
           <% end %>
         </div>
       <% end %>
     </div>
   <% end %>
-<%
-=begin%>
-
-  <% if @others.any? %>
-    <div class="col-md-6">
-      <div class="h4">
-        <%= :list_merge_options_others.t %>
-      </div>
-      <div class="list-group">
-        <% @others.map do |location| %>
-          <div class="list-group-item">
-            <%= patch_button(name: location.display_name.t,
-                             path: assign_location_to_observations_path(
-                               where: @where, location: location
-                             ), class: "text-left",
-                             data: { confirm: :list_merge_are_you_sure.l }) %>
-          </div>
-        <% end %>
-      </div>
-    </div>
-  <% end %>
-<%
-=end%>
 
 </div><!--.row-->

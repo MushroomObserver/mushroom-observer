@@ -28,10 +28,13 @@ module Observations
     # +where+ string, in order of closeness of match, in the following order:
     #   1) matches = match the string
     #   2) others that include everything in "where" up to the comma
-    #   3) others that include the first word in "where"
+    #   3) others that include the second-to-last segment in "where"
+    #      (for example, "Plaza Garibaldi, Ciudad de Guadalajara, México":
+    #      searches for "Ciudad de Guadalajara")
     #   4) others that include the last word of the first segment in "where"
     #      (for example, "Estado de Guerrero, México": searches for "Guerrero")
-    #   5) doesn't try other segments, because the second one could be a country
+    #   5) others that include the first word in "where": "Estado"
+    #   6) doesn't try other segments, because the last one could be a country
     #
     # The form is not really a `form`, but the buttons do commit to "update".
     # It contains links to assign the observations sharing the +where+ string
@@ -51,17 +54,21 @@ module Observations
       words = @where.split
       return unless places.length > 1 || words.length > 1
 
-      @others = Location.name_includes(places.first).
-                or(Location.name_includes(words.first)).
-                or(Location.name_includes(places.first.split.last))
+      @others = Location.name_includes(places.first)
+      if places.length > 2
+        @others += Location.name_includes(places.second_to_last.strip)
+      end
+      if places.length >= 2
+        @others += Location.name_includes(places.second_to_last.split.last)
+      end
+      @others += Location.name_includes(words.first)
 
       @options = (@matches + @others).uniq
       @pages = paginate_locations!
     end
 
-    # merges_controller_test
     # Adds the Observation's associated with obs.where == params[:where]
-    # into the given Location.  Linked from +list_merge_options+, I think.
+    # into the given Location.
     def update
       location = find_or_goto_index(Location, params[:location])
       return unless location
