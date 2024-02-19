@@ -2654,9 +2654,9 @@ class NameTest < UnitTestCase
     assert_equal("__#{name.text_name}__ #{name.author}", name.display_name)
   end
 
-  def test_s_str
+  def test_sensu_stricto
     %w[group gr gr. gp gp. clade complex].each do |str|
-      assert_equal(Name.new(text_name: "Tuber #{str}").sensu_stricto,
+      assert_equal(Name.new(text_name: "Boletus #{str}").sensu_stricto,
                    "Boletus",
                    "Name s.s. should not include `#{str}`")
       assert_equal(Name.new(text_name: "Boletus#{str}").sensu_stricto,
