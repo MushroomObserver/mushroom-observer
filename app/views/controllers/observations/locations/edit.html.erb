@@ -1,32 +1,26 @@
 <%
-@container = :full
+@container = :wide
 add_page_title(
   :list_merge_options_title.t(where: Location.user_format(@user, @where))
 )
-# NOTE: the "forms" are patch buttons. Not using a partial for speed here.
+# NOTE: the "forms" are patch buttons.
 %>
 
-<div class="row">
-
-  <% if @options.any? %>
-    <div class="col-md-6">
-      <div class="h4">
-        <%= :list_merge_options_near_matches.t %>
-      </div>
-      <%= paginate_block(@pages) do %>
-        <div class="list-group">
-          <% @options.map do |location| %>
-            <div class="list-group-item">
-              <%= patch_button(name: location.display_name.t,
-                               path: assign_location_to_observations_path(
-                                 where: @where, location: location
-                               ), class: "text-left",
-                               data: { confirm: :list_merge_are_you_sure.l }) %>
-            </div>
-          <% end %>
+<% if @options.any? %>
+  <div class="h4">
+    <%= :list_merge_options_near_matches.t %>
+  </div>
+  <%= paginate_block(@pages) do %>
+    <div class="list-group">
+      <% @options.map do |location| %>
+        <div class="list-group-item">
+          <%= patch_button(name: location.display_name.t,
+                            path: assign_location_to_observations_path(
+                              where: @where, location: location
+                            ), class: "text-left",
+                            data: { confirm: :list_merge_are_you_sure.l }) %>
         </div>
       <% end %>
     </div>
   <% end %>
-
-</div><!--.row-->
+<% end %>
