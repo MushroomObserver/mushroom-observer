@@ -307,7 +307,8 @@ module Name::Taxonomy
   end
 
   # Let attached observations update their cache if these fields changed.
-  # Also, touch if it changes the obs name in any way.
+  # Also, `touch` if it changes the obs name and should invalidate HTML
+  # caches of the observation.
   def update_observation_cache
     relevant_changes = lifeform_changed? || text_name_changed? ||
                        author_changed? || deprecated_changed? ||
