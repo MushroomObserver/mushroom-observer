@@ -2654,6 +2654,17 @@ class NameTest < UnitTestCase
     assert_equal("__#{name.text_name}__ #{name.author}", name.display_name)
   end
 
+  def test_sensu_stricto
+    %w[group gr gr. gp gp. clade complex].each do |str|
+      assert_equal(Name.new(text_name: "Boletus #{str}").sensu_stricto,
+                   "Boletus",
+                   "Name s.s. should not include `#{str}`")
+      assert_equal(Name.new(text_name: "Boletus#{str}").sensu_stricto,
+                   "Boletus#{str}",
+                   "Name ss should include `#{str}` if it's part of the genus")
+    end
+  end
+
   # --------------------------------------
 
   # Just make sure mysql is collating accents and case correctly.

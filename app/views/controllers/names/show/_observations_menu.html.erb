@@ -9,7 +9,7 @@ heading_link = icon_link_with_query(*name_tracker_form_tab(@name, @user))
 
   tag.div(class: "row") do
 
-    concat(tag.div(class: "col-sm-7 name-section") do
+    concat(tag.div(class: "col-sm-6 name-section") do
       concat(tag.p(:show_observations_of.t))
       concat(tag.div(class: "pl-3") do
         concat(name_related_taxa_observation_links(@name, @obss))
@@ -20,15 +20,29 @@ heading_link = icon_link_with_query(*name_tracker_form_tab(@name, @user))
            " (#{@has_subtaxa})"].safe_join
         end) if @has_subtaxa
       end)
+      concat(tag.div(class: "py-3") do
+        concat(tag.p(link_to(*occurrence_map_for_name_tab(@name))))
+      end)
     end)
 
-    concat(tag.div(class: "col-sm-5 name-section") do
-      if @name.searchable_in_registry?
-        concat(tag.p(link_to(*mycoportal_name_tab(@name))))
-      end
-      concat(tag.p(link_to(*eol_name_tab(@name)))) if @name.eol_url
-      concat(tag.p(link_to(*google_images_for_name_tab(@name))))
-      concat(tag.p(link_to(*occurrence_map_for_name_tab(@name))))
+    concat(tag.div(class: "col-sm-6 name-section") do
+      concat(tag.p("#{:research_links.l}:"))
+      concat(tag.div(class: "pl-3") do
+        if @name.classification =~ /Phylum: _Ascomycota_/
+          concat(tag.p(link_to(*ascomycete_org_name_tab(@name))))
+        end
+        concat(tag.p(link_to(*eol_name_tab(@name)))) if @name.eol_url
+        concat(tag.p(link_to(*gbif_name_tab(@name))))
+        concat(tag.p(link_to(*google_images_for_name_tab(@name))))
+        concat(tag.p(link_to(*google_name_tab(@name))))
+        concat(tag.p(link_to(*inat_name_tab(@name))))
+        if @name.searchable_in_registry?
+          concat(tag.p(link_to(*mushroomexpert_name_tab(@name))))
+          concat(tag.p(link_to(*mycoportal_name_tab(@name))))
+        end
+        concat(tag.p(link_to(*ncbi_nucleotide_term_tab(@name))))
+        concat(tag.p(link_to(*wikipedia_term_tab(@name))))
+      end)
     end)
 
   end
