@@ -1,9 +1,19 @@
 # frozen_string_literal: true
 
 module Name::Notify
+  # Notify webmaster that a new name was created.
+  def notify_webmaster
+    user = User.current || User.admin
+    QueuedEmail::Webmaster.create_email(
+      sender_email: user.email,
+      subject: "#{user.login} created #{real_text_name}",
+      content: "#{MO.http_domain}/names/#{id}"
+    )
+  end
+
   # This is called after saving potential changes to a Name.  It will determine
   # if the changes are important enough to notify the authors, and do so.
-  def notify_users
+  def notify_users # rubocop:disable Metrics/MethodLength
     return unless saved_version_changes?
 
     sender = User.current
