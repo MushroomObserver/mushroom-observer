@@ -487,6 +487,8 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     [old_legal_name, new_legal_name]
   end
 
+  # TODO: Move this to an ActiveJob, once we get jobs going - AN 20240220
+  # This can be fairly expensive if the user has a lot of images
   def update_image_copyright_holder
     return unless legal_name_change
 
