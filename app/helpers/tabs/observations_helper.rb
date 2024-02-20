@@ -153,9 +153,24 @@ module Tabs
 
       [
         define_location_tab(query),
-        merge_locations_tab(query),
+        assign_undefined_location_tab(query),
         locations_index_tab
       ]
+    end
+
+    # these are from the observations form
+    def define_location_tab(query)
+      [:list_observations_location_define.l,
+       add_query_param(new_location_path(where: query.params[:user_where])),
+       { class: tab_id(__method__.to_s) }]
+    end
+
+    def assign_undefined_location_tab(query)
+      [:list_observations_location_merge.l,
+       add_query_param(matching_locations_for_observations_path(
+                         where: query.params[:user_where]
+                       )),
+       { class: tab_id(__method__.to_s) }]
     end
 
     def observations_index_sorts
