@@ -72,7 +72,7 @@ GEM
       execjs (~> 2)
     base64 (0.2.0)
     bcrypt (3.1.20)
-    bigdecimal (3.1.5)
+    bigdecimal (3.1.6)
     bindex (0.8.1)
     blankslate (3.1.3)
     bootstrap-sass (3.4.1)
@@ -164,7 +164,7 @@ GEM
     mini_mime (1.1.5)
     mini_racer (0.8.0)
       libv8-node (~> 18.16.0.0)
-    minitest (5.21.1)
+    minitest (5.22.2)
     minitest-reporters (1.6.1)
       ansi
       builder
@@ -190,7 +190,7 @@ GEM
     nokogiri (1.16.0-x86_64-linux)
       racc (~> 1.4)
     parallel (1.24.0)
-    parser (3.3.0.4)
+    parser (3.3.0.5)
       ast (~> 2.4.1)
       racc
     psych (4.0.6)
@@ -237,7 +237,7 @@ GEM
       railties (>= 6.1.0)
     rexml (3.2.6)
     rtf (0.3.3)
-    rubocop (1.60.1)
+    rubocop (1.60.2)
       json (~> 2.3)
       language_server-protocol (>= 3.17.0)
       parallel (~> 1.10)
