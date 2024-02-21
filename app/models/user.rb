@@ -198,7 +198,7 @@
 #  crypt_password::     Password attribute is encrypted
 #                       before object is created.
 #
-class User < AbstractModel
+class User < AbstractModel # rubocop:disable Metrics/ClassLength
   require "digest/sha1"
 
   # enum definitions for use by simple_enum gem
@@ -328,6 +328,9 @@ class User < AbstractModel
   # Encrypt password before saving the first time.  (Subsequent modifications
   # go through +change_password+.)
   before_create :crypt_password
+
+  before_update :update_image_copyright_holder
+  before_update :expire_caches_of_associated_observations
 
   # Ensure that certain default values are symbols (rather than strings)
   # might only be an issue for test environment?
@@ -482,6 +485,22 @@ class User < AbstractModel
     return nil if old_legal_name == new_legal_name
 
     [old_legal_name, new_legal_name]
+  end
+
+  # TODO: Move this to an ActiveJob, once we get jobs going - AN 20240220
+  # This can be fairly expensive if the user has a lot of images
+  def update_image_copyright_holder
+    return unless legal_name_change
+
+    Image.update_copyright_holder(*legal_name_change, self)
+  end
+
+  # EXPIRE CACHES OF OBS WITH CHANGED USER LOGINS
+  # "touch" the updated_at column of all observations with the changed login
+  def expire_caches_of_associated_observations
+    return unless name_changed? || login_changed?
+
+    Observation.where(user_id: id).touch_all
   end
 
   ##############################################################################
