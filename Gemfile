@@ -55,6 +55,8 @@ gem("turbo-rails")
 gem("dalli", "~> 3.2")
 # solid_cache for cache store db
 gem("solid_cache")
+# use solid_queue as the ActiveJob runner
+gem("solid_queue")
 # Compile SCSS for stylesheets
 gem("sassc-rails")
 # add locale to cache key
