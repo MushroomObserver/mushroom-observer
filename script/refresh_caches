@@ -7,15 +7,26 @@
 #
 #  DESCRIPTION::
 #
-#  This is a nightly cronjob that checks to make sure the classification string
-#  of each infrageneric taxon is the same as the classification string for the
-#  parent genus.  It checks for missing genera while it's at it.  It prints out
-#  a line for each taxon it finds that it has to fix.
+#  This is a nightly cronjob that performs a bunch of clean-up operations on
+#  the database:
 #
-#  It also makes sure the classification section of the default description
-#  matches the classification string cached in the name, preferring the
-#  description version above genus, and preferring the cached version below
-#  genus.
+#    Synonym.make_sure_all_referenced_synonyms_exist
+#    Name.fix_self_referential_misspellings
+#    Name.make_sure_names_are_bolded_correctly
+#    Name.refresh_classification_caches
+#    Name.propagate_generic_classifications (currently disabled)
+#    Observation.make_sure_no_observations_are_misspelled
+#    Observation.refresh_content_filter_caches
+#    Observation.refresh_needs_naming_column
+#    Vote.update_observation_views_reviewed_column
+#    User.cull_unverified_users
+#
+#  See documentation for each of these class methods for more information.
+#
+#  (The disabled job is a very complex operation that I still don't fully
+#  trust, so I'm just waiting until I have time to spot check a bunch of the
+#  literally thousands of changes it wants to make in the database before
+#  setting it loose in the wild. -JPH 20240219)
 #
 ################################################################################
 
@@ -62,6 +73,8 @@ msgs = progress("unused or missing synonyms...",
                 Observation, :refresh_needs_naming_column) +
        progress("observations reviewed...",
                 Vote, :update_observation_views_reviewed_column) +
+       progress("cull unverified users...",
+                User, :cull_unverified_users) +
        progress("done")
 warn(msgs.join("\n")) if msgs.any?
 

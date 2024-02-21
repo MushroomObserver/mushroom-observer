@@ -737,6 +737,21 @@ class User < AbstractModel
       split(",").map(&:squish).compact_blank
   end
 
+  def self.cull_unverified_users(dry_run: false)
+    ids = User.where(verified: nil, created_at: ..1.month.ago).pluck(:id)
+    return [] if ids.blank?
+
+    unless dry_run
+      ids.each do |id|
+        UserGroup.one_user(id)&.destroy
+      end
+      UserGroupUser.where(user_id: ids).delete_all
+      User.where(id: ids).delete_all
+    end
+
+    ["Deleted #{ids.count} unverified user(s)."]
+  end
+
   # Erase all references to a given user (by id).  Missing:
   # 1) *Text* references, e.g., RssLog entries refering to their login.
   # 2) Image votes.
