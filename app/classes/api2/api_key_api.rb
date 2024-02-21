@@ -3,12 +3,25 @@
 class API2
   # API for APIKey
   class APIKeyAPI < ModelAPI
-    self.model = APIKey
+    def model
+      APIKey
+    end
 
-    self.high_detail_page_length = 1000
-    self.low_detail_page_length  = 1000
-    self.put_page_length         = 1000
-    self.delete_page_length      = 1000
+    def high_detail_page_length
+      1000
+    end
+
+    def low_detail_page_length
+      1000
+    end
+
+    def put_page_length
+      1000
+    end
+
+    def delete_page_length
+      1000
+    end
 
     # the :user may be the mobile app. the :for_user is the user the key is for
     def create_params

@@ -3,18 +3,33 @@
 class API2
   # API for Name Description
   class NameDescriptionAPI < ModelAPI
-    self.model = NameDescription
+    def model
+      NameDescription
+    end
 
-    self.high_detail_page_length = 100
-    self.low_detail_page_length  = 100
-    self.put_page_length         = 100
-    self.delete_page_length      = 100
+    def high_detail_page_length
+      100
+    end
 
-    self.low_detail_includes = [
-      :license
-    ]
+    def low_detail_page_length
+      100
+    end
 
-    self.high_detail_includes = []
+    def put_page_length
+      100
+    end
+
+    def delete_page_length
+      100
+    end
+
+    def low_detail_includes
+      [:license]
+    end
+
+    def high_detail_includes
+      []
+    end
 
     def query_params
       {

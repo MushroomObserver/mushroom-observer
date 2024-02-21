@@ -3,16 +3,29 @@
 class API2
   # API for Comment
   class CommentAPI < ModelAPI
-    self.model = Comment
+    def model
+      Comment
+    end
 
-    self.high_detail_page_length = 1000
-    self.low_detail_page_length  = 1000
-    self.put_page_length         = 1000
-    self.delete_page_length      = 1000
+    def high_detail_page_length
+      1000
+    end
 
-    self.high_detail_includes = [
-      :user
-    ]
+    def low_detail_page_length
+      1000
+    end
+
+    def put_page_length
+      1000
+    end
+
+    def delete_page_length
+      1000
+    end
+
+    def high_detail_includes
+      [:user]
+    end
 
     def query_params
       @target = parse(:object, :target, limit: Comment.all_types, help: 1)

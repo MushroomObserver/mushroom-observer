@@ -3,22 +3,37 @@
 class API2
   # API for Image
   class ImageAPI < ModelAPI
-    self.model = Image
+    def model
+      Image
+    end
 
-    self.high_detail_page_length = 100
-    self.low_detail_page_length  = 1000
-    self.put_page_length         = 1000
-    self.delete_page_length      = 1000
+    def high_detail_page_length
+      100
+    end
 
-    self.low_detail_includes = [
-      :license
-    ]
+    def low_detail_page_length
+      1000
+    end
 
-    self.high_detail_includes = [
-      :license,
-      :observations,
-      :user
-    ]
+    def put_page_length
+      1000
+    end
+
+    def delete_page_length
+      1000
+    end
+
+    def low_detail_includes
+      [:license]
+    end
+
+    def high_detail_includes
+      [
+        :license,
+        :observations,
+        :user
+      ]
+    end
 
     def query_params
       {
