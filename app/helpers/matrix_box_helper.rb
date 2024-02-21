@@ -33,10 +33,10 @@ module MatrixBoxHelper
     # matrix box has one version except langs.
     # css hides image vote ui when body.no-user
     objects.each do |object|
-      # cache(object) do
-      concat(render(partial: "shared/matrix_box",
-                    locals: { object: object }.merge(locals)))
-      # end
+      cache(object) do
+        concat(render(partial: "shared/matrix_box",
+                      locals: { object: object }.merge(locals)))
+      end
     end
   end
 
@@ -79,23 +79,23 @@ module MatrixBoxHelper
   # end
 
   # NOTE: object_id may be "no_ID" for logs of deleted records
-  def matrix_box_details(presenter, object, object_id, identify)
+  def matrix_box_details(presenter, object_id, identify)
     tag.div(class: "panel-body rss-box-details") do
       [
-        matrix_box_what(presenter, object, object_id, identify),
+        matrix_box_what(presenter, object_id, identify),
         matrix_box_where(presenter),
         matrix_box_when_who(presenter)
       ].safe_join
     end
   end
 
-  def matrix_box_what(presenter, object, object_id, identify)
+  def matrix_box_what(presenter, object_id, identify)
     # heading style: bigger if no image.
     # TODO: make box layouts specific to object type
     h_style = presenter.image_data ? "h5" : "h3"
-    what = presenter.what
+    what = presenter.what # for an obs or rss_log, it's the obs
     consensus = presenter.consensus || nil
-    identify_ui = matrix_box_vote_or_propose_ui(identify, object, consensus)
+    identify_ui = matrix_box_vote_or_propose_ui(identify, what, consensus)
 
     tag.div(class: "rss-what") do
       [
