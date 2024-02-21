@@ -107,9 +107,9 @@ gem("jbuilder")
 gem("bcrypt", "~> 3.1.7")
 
 # Use unicorn as the app server
-gem("unicorn")
+# gem("unicorn")
 # Use puma as the app server
-# gem("puma")
+gem("puma")
 
 # Use Capistrano for deployment
 # gem("capistrano", group: :development)
