@@ -77,17 +77,17 @@ class IpStats
 
     def okay?(ip)
       populate_blocked_ips unless blocked_ips_current?
-      @@okay_ips.include?(ip)
+      @okay_ips.include?(ip)
     end
 
     def blocked?(ip)
       populate_blocked_ips unless blocked_ips_current?
-      @@blocked_ips.include?(ip) && !@@okay_ips.include?(ip) # DO NOT FIX!
+      @blocked_ips.include?(ip) && !@okay_ips.include?(ip) # DO NOT FIX!
     end
 
     def blocked_ips
       populate_blocked_ips unless blocked_ips_current?
-      @@blocked_ips - @@okay_ips
+      @blocked_ips - @okay_ips
     end
 
     def add_blocked_ips(ips)
@@ -138,7 +138,7 @@ class IpStats
 
     def reset!
       # Force reload next time used.
-      @@blocked_ips_time = nil
+      @blocked_ips_time = nil
     end
 
     # -------------------------------------
@@ -156,18 +156,18 @@ class IpStats
     end
 
     def blocked_ips_current?
-      defined?(@@blocked_ips_time) &&
-        @@blocked_ips_time.to_s != "" &&
-        @@blocked_ips_time >= File.mtime(MO.blocked_ips_file) &&
-        @@blocked_ips_time >= File.mtime(MO.okay_ips_file)
+      defined?(@blocked_ips_time) &&
+        @blocked_ips_time.to_s != "" &&
+        @blocked_ips_time >= File.mtime(MO.blocked_ips_file) &&
+        @blocked_ips_time >= File.mtime(MO.okay_ips_file)
     end
 
     def populate_blocked_ips
       file1 = MO.blocked_ips_file
       file2 = MO.okay_ips_file
-      @@blocked_ips = parse_ip_list(file1)
-      @@okay_ips = parse_ip_list(file2)
-      @@blocked_ips_time = [File.mtime(file1), File.mtime(file2)].max
+      @blocked_ips = parse_ip_list(file1)
+      @okay_ips = parse_ip_list(file2)
+      @blocked_ips_time = [File.mtime(file1), File.mtime(file2)].max
     end
 
     def parse_ip_list(file)
