@@ -140,8 +140,7 @@ class API2
 
   ### RESULTS ###
 
-  def model
-  end
+  def model; end
 
   def high_detail_includes
     []
