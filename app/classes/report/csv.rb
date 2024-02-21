@@ -5,11 +5,25 @@ module Report
   class CSV < BaseTable
     require "csv"
 
-    self.default_encoding = "UTF-8"
-    self.mime_type = "text/csv"
-    self.extension = "csv"
-    self.header = { header: :present }
-    self.separator = ","
+    def default_encoding
+      "UTF-8"
+    end
+
+    def mime_type
+      "text/csv"
+    end
+
+    def extension
+      "csv"
+    end
+
+    def header
+      { header: :present }
+    end
+
+    def separator
+      ","
+    end
 
     def render
       ::CSV.generate(col_sep: separator) do |csv|

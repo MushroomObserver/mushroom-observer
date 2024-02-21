@@ -7,10 +7,21 @@ module Report
   class ZipReport < Base
     attr_accessor :content # List of (name, stream) pairs
 
-    self.default_encoding = "UTF-8"
-    self.mime_type = "text/zip"
-    self.extension = "zip"
-    self.header = { header: :present }
+    def default_encoding
+      "UTF-8"
+    end
+
+    def mime_type
+      "text/zip"
+    end
+
+    def extension
+      "zip"
+    end
+
+    def header
+      { header: :present }
+    end
 
     def initialize(args)
       super(args)
