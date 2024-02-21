@@ -21,8 +21,12 @@ module Report
       { header: :present }
     end
 
-    def separator
+    def self.separator
       ","
+    end
+
+    def separator
+      self.class.separator
     end
 
     def render
