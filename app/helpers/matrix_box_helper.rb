@@ -34,8 +34,8 @@ module MatrixBoxHelper
     # css hides image vote ui when body.no-user
     objects.each do |object|
       # cache(object) do
-        concat(render(partial: "shared/matrix_box",
-                      locals: { object: object }.merge(locals)))
+      concat(render(partial: "shared/matrix_box",
+                    locals: { object: object }.merge(locals)))
       # end
     end
   end
@@ -135,7 +135,8 @@ module MatrixBoxHelper
     else
       propose_naming_link(
         object.id, btn_class: "btn btn-default d-inline-block mb-3",
-                   context: "matrix_box")
+                   context: "matrix_box"
+)
     end
   end
 

@@ -6,22 +6,6 @@
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
-# Offense count: 4
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AllowForAlignment.
-Layout/CommentIndentation:
-  Exclude:
-    - 'app/helpers/matrix_box_helper.rb'
-    - 'app/helpers/tabs/descriptions_helper.rb'
-    - 'script/refresh_caches'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: Width, AllowedPatterns.
-Layout/IndentationWidth:
-  Exclude:
-    - 'app/helpers/matrix_box_helper.rb'
-
 # Offense count: 10
 # This cop supports safe autocorrection (--autocorrect).
 # Configuration parameters: Max, AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, AllowedPatterns.
@@ -30,15 +14,7 @@ Layout/LineLength:
   Exclude:
     - 'lib/core_extensions/action_view/log_subscriber.rb'
 
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: symmetrical, new_line, same_line
-Layout/MultilineMethodCallBraceLayout:
-  Exclude:
-    - 'app/helpers/matrix_box_helper.rb'
-
-# Offense count: 3
+## Offense count: 3
 Lint/DuplicateMethods:
   Exclude:
     - 'app/classes/query/modules/active_record.rb'
