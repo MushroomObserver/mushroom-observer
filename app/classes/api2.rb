@@ -128,15 +128,11 @@ class API2
 
   attr_accessor :params, :method, :action, :version, :user, :api_key, :errors
 
-  # Give other modules ability to do additional initialization.
-  class_attribute :initializers
-  self.initializers = []
-
   ### PARAMETERS ###
 
   attr_accessor :expected_params, :ignore_params
 
-  initializers << lambda do
+  def initialize_parameters
     self.expected_params = {}
     self.ignore_params   = {}
     parse(:string, :action)
@@ -144,20 +140,36 @@ class API2
 
   ### RESULTS ###
 
-  class_attribute :model, :table, :high_detail_includes, :low_detail_includes,
-                  :high_detail_page_length, :low_detail_page_length,
-                  :put_page_length, :delete_page_length
+  def model
+  end
 
-  self.high_detail_includes = []
-  self.low_detail_includes  = []
-  self.high_detail_page_length = 10
-  self.low_detail_page_length  = 100
-  self.put_page_length         = 1000
-  self.delete_page_length      = 1000
+  def high_detail_includes
+    []
+  end
+
+  def low_detail_includes
+    []
+  end
+
+  def high_detail_page_length
+    10
+  end
+
+  def low_detail_page_length
+    100
+  end
+
+  def put_page_length
+    1000
+  end
+
+  def delete_page_length
+    1000
+  end
 
   attr_accessor :query, :detail, :page_number
 
-  initializers << lambda do
+  def initialize_results
     self.detail = parse(:enum, :detail, limit: [:none, :low, :high]) || :none
     self.page_number = parse(:integer, :page, default: 1)
   end
