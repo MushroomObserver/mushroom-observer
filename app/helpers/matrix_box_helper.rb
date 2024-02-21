@@ -135,7 +135,8 @@ module MatrixBoxHelper
     else
       propose_naming_link(
         object.id, btn_class: "btn btn-default d-inline-block mb-3",
-                   context: "matrix_box")
+                   context: "matrix_box"
+)
     end
   end
 
