@@ -610,12 +610,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     msgs
   end
 
-  # Used by Name and Location to update the observation cache when a cached
-  # field value is changed.
-  def self.update_cache(type, field, id, val)
-    Observation.where("#{type}_id": id).update_all("#{field}": val)
-  end
-
   # Check for any observations whose consensus is a misspelled name.  This can
   # mess up the mirrors because misspelled names are "invisible", so their
   # classification and lifeform and such will not necessarily be kept up to

@@ -89,7 +89,7 @@
 #  notify_users::       After save: send email notification.
 #
 ################################################################################
-#
+# rubocop:disable Metrics/ClassLength
 class Location < AbstractModel
   require "acts_as_versioned"
 
@@ -199,8 +199,13 @@ class Location < AbstractModel
   }
 
   # Let attached observations update their cache if these fields changed.
+  # Also touch updated_at to expire obs fragment caches
   def update_observation_cache
-    Observation.update_cache("location", "where", id, name) if name_changed?
+    return unless name_changed?
+
+    Observation.where(location_id: id).update_all(
+      { where: name, updated_at: Time.zone.now }
+    )
   end
 
   ##############################################################################
@@ -847,3 +852,4 @@ class Location < AbstractModel
     end
   end
 end
+# rubocop:enable Metrics/ClassLength

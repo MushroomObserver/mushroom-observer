@@ -5,8 +5,6 @@ module Report
   class BaseTable < Base
     attr_accessor :query
 
-    class_attribute :separator
-
     def initialize(args)
       super(args)
       self.query = args[:query]

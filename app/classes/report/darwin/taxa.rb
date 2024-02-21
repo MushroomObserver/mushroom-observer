@@ -6,7 +6,9 @@ module Report
     class Taxa < Report::CSV
       attr_accessor :observations
 
-      self.separator = "\t"
+      def self.separator
+        "\t"
+      end
 
       def initialize(args)
         super(args)

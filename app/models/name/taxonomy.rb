@@ -297,25 +297,6 @@ module Name::Taxonomy
     notes&.match(/\S/)
   end
 
-  # This is called before a name is created to let us populate things like
-  # classification and lifeform from the parent (if infrageneric only).
-  def inherit_stuff
-    return unless accepted_genus
-
-    self.classification ||= accepted_genus.classification
-    self.lifeform       ||= accepted_genus.lifeform
-  end
-
-  # Let attached observations update their cache if these fields changed.
-  def update_observation_cache
-    Observation.update_cache("name", "lifeform", id, lifeform) \
-      if lifeform_changed?
-    Observation.update_cache("name", "text_name", id, text_name) \
-      if text_name_changed?
-    Observation.update_cache("name", "classification", id, classification) \
-      if classification_changed?
-  end
-
   # Copy classification from parent.  Just take parent's classification string
   # and add the parent's name to the bottom of it.  Nice and easy.
   def inherit_classification(parent)

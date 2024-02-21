@@ -149,7 +149,6 @@ require("fastimage")
 #  license_history::    Accounting history of any license changes
 #                       (started using April 2012).
 #  quality::            Quality (e.g., :low, :medium, :high).
-#  reviewer::           User that reviewed it.
 #  num_views::          Number of times normal-size image has been viewed.
 #  last_view::          Last time normal-size image was viewed.
 #  transferred::        Has this image been successfully transferred to the
@@ -251,7 +250,6 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   belongs_to :user
   belongs_to :license
-  belongs_to :reviewer, class_name: "User"
 
   has_many :copyright_changes, as: :target,
                                dependent: :destroy,
