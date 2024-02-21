@@ -1,0 +1,268 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require(File.expand_path("../config/boot.rb", __dir__))
+require(File.expand_path("../config/environment.rb", __dir__))
+
+dry_run = false
+verbose = false
+ARGV.each do |flag|
+  case flag
+  when "-n", "--dry-run"
+    dry_run = true
+  when "-v", "--verbose"
+    verbose = true
+  else
+    puts("USAGE: script/check_for_broken_references " \
+         "[-n|--dry-run] [-v|--verbose]")
+    exit(1)
+  end
+end
+
+# -----------------------------------------------------
+#  First gather a list of all belongs_to reflections.
+# -----------------------------------------------------
+
+reflections = {}
+Dir.foreach(Rails.root.join("app/models")) do |path|
+  next unless path.match?(/^\w+\.rb$/)
+
+  model = begin
+            path.sub(/.rb$/, "").classify.constantize
+          rescue NameError
+            nil
+          end
+  next unless model && model < ActiveRecord::Base
+
+  model.reflect_on_all_associations(:belongs_to).each do |reflection|
+    reflections["#{model.name}.#{reflection.name}"] = :need
+  end
+end
+
+# ----------------------------------
+#  Check all the monomorphic ones.
+# ----------------------------------
+
+[
+  [APIKey,                       :user,                 :delete],
+  [Article,                      :rss_log,              :nil],
+  [Article,                      :user,                 :zero],
+  [CollectionNumber,             :user,                 :alert],
+  [Comment,                      :user,                 :alert],
+  [CopyrightChange,              :license,              :alert],
+  [CopyrightChange,              :user,                 :alert],
+  [Donation,                     :user,                 :alert],
+  [ExternalLink,                 :external_site,        :alert],
+  [ExternalLink,                 :observation,          :delete],
+  [ExternalLink,                 :user,                 :alert],
+  [ExternalSite,                 :project,              :alert],
+  [GlossaryTerm,                 :rss_log,              :nil],
+  [GlossaryTerm,                 :thumb_image,          :alert],
+  [GlossaryTerm,                 :user,                 :alert],
+  [GlossaryTermImage,            :glossary_term,        :delete],
+  [GlossaryTermImage,            :image,                :delete],
+  [GlossaryTerm::Version,        :glossary_term,        :delete],
+  [GlossaryTerm::Version,        :user,                 :zero],
+  [Herbarium,                    :location,             :alert],
+  [Herbarium,                    :personal_user,        :alert],
+  [HerbariumCurator,             :herbarium,            :delete],
+  [HerbariumCurator,             :user,                 :delete],
+  [HerbariumRecord,              :herbarium,            :alert],
+  [HerbariumRecord,              :user,                 :alert],
+  [Image,                        :license,              :alert],
+  # [Image,                      :reviewer,             :alert],
+  [Image,                        :user,                 :alert],
+  [ImageVote,                    :image,                :delete],
+  [ImageVote,                    :user,                 :delete],
+  [Interest,                     :user,                 :delete],
+  [Location,                     :description,          :nil],
+  [Location,                     :rss_log,              :nil],
+  [Location,                     :user,                 :zero],
+  [Location::Version,            :user,                 :zero],
+  [LocationDescription,          :license,              :alert],
+  [LocationDescription,          :location,             :delete],
+  [LocationDescription,          :project,              :nil],
+  [LocationDescription,          :user,                 :zero],
+  [LocationDescription::Version, :license,              :nil],
+  [LocationDescription::Version, :location_description, :delete],
+  [LocationDescription::Version, :user,                 :zero],
+  [LocationDescriptionAdmin,     :location_description, :delete],
+  [LocationDescriptionAdmin,     :user_group,           :delete],
+  [LocationDescriptionAuthor,    :location_description, :delete],
+  [LocationDescriptionAuthor,    :user,                 :delete],
+  [LocationDescriptionEditor,    :location_description, :delete],
+  [LocationDescriptionEditor,    :user,                 :delete],
+  [LocationDescriptionReader,    :location_description, :delete],
+  [LocationDescriptionReader,    :user_group,           :delete],
+  [LocationDescriptionWriter,    :location_description, :delete],
+  [LocationDescriptionWriter,    :user_group,           :delete],
+  [Name,                         :correct_spelling,     :alert],
+  [Name,                         :description,          :nil],
+  [Name,                         :rss_log,              :nil],
+  [Name,                         :synonym,              :nil],
+  [Name,                         :user,                 :zero],
+  [Name::Version,                :correct_spelling,     :nil],
+  [Name::Version,                :name,                 :delete],
+  [Name::Version,                :user,                 :zero],
+  [NameDescription,              :license,              :alert],
+  [NameDescription,              :name,                 :delete],
+  [NameDescription,              :project,              :nil],
+  [NameDescription,              :reviewer,             :alert],
+  [NameDescription,              :user,                 :alert],
+  [NameDescription::Version,     :license,              :nil],
+  [NameDescription::Version,     :name_description,     :delete],
+  [NameDescription::Version,     :user,                 :zero],
+  [NameDescriptionAdmin,         :name_description,     :delete],
+  [NameDescriptionAdmin,         :user_group,           :delete],
+  [NameDescriptionAuthor,        :name_description,     :delete],
+  [NameDescriptionAuthor,        :user,                 :delete],
+  [NameDescriptionEditor,        :name_description,     :delete],
+  [NameDescriptionEditor,        :user,                 :delete],
+  [NameDescriptionReader,        :name_description,     :delete],
+  [NameDescriptionReader,        :user_group,           :delete],
+  [NameDescriptionWriter,        :name_description,     :delete],
+  [NameDescriptionWriter,        :user_group,           :delete],
+  [NameTracker,                  :name,                 :delete],
+  [NameTracker,                  :user,                 :delete],
+  [Naming,                       :name,                 :delete],
+  [Naming,                       :observation,          :delete],
+  [Naming,                       :user,                 :alert],
+  [Observation,                  :location,             :alert],
+  [Observation,                  :name,                 :alert],
+  [Observation,                  :rss_log,              :nil],
+  [Observation,                  :thumb_image,          :alert],
+  [Observation,                  :user,                 :alert],
+  [ObservationCollectionNumber,  :collection_number,    :delete],
+  [ObservationCollectionNumber,  :observation,          :delete],
+  [ObservationHerbariumRecord,   :herbarium_record,     :delete],
+  [ObservationHerbariumRecord,   :observation,          :delete],
+  [ObservationImage,             :image,                :delete],
+  [ObservationImage,             :observation,          :delete],
+  [ObservationView,              :observation,          :delete],
+  [ObservationView,              :user,                 :delete],
+  [Project,                      :admin_group,          :alert],
+  [Project,                      :image,                :alert],
+  [Project,                      :location,             :alert],
+  [Project,                      :rss_log,              :nil],
+  [Project,                      :user,                 :alert],
+  [Project,                      :user_group,           :alert],
+  [ProjectImage,                 :image,                :delete],
+  [ProjectImage,                 :project,              :delete],
+  [ProjectMember,                :project,              :delete],
+  [ProjectMember,                :user,                 :delete],
+  [ProjectObservation,           :observation,          :delete],
+  [ProjectObservation,           :project,              :delete],
+  [ProjectSpeciesList,           :project,              :delete],
+  [ProjectSpeciesList,           :species_list,         :delete],
+  [Publication,                  :user,                 :alert],
+  [QueuedEmail,                  :to_user,              :delete],
+  [QueuedEmail,                  :user,                 :delete],
+  [QueuedEmailInteger,           :queued_email,         :delete],
+  [QueuedEmailNote,              :queued_email,         :delete],
+  [QueuedEmailString,            :queued_email,         :delete],
+  [RssLog,                       :article,              :delete],
+  [RssLog,                       :glossary_term,        :delete],
+  [RssLog,                       :location,             :delete],
+  [RssLog,                       :name,                 :delete],
+  [RssLog,                       :observation,          :delete],
+  [RssLog,                       :project,              :delete],
+  [RssLog,                       :species_list,         :delete],
+  [Sequence,                     :observation,          :alert],
+  [Sequence,                     :user,                 :alert],
+  [SpeciesList,                  :location,             :nil],
+  [SpeciesList,                  :rss_log,              :nil],
+  [SpeciesList,                  :user,                 :alert],
+  [SpeciesListObservation,       :observation,          :delete],
+  [SpeciesListObservation,       :species_list,         :delete],
+  [TranslationString,            :language,             :alert],
+  [TranslationString,            :user,                 :zero],
+  [TranslationString::Version,   :translation_string,   :delete],
+  [TranslationString::Version,   :user,                 :zero],
+  [User,                         :image,                :nil],
+  [User,                         :license,              :alert],
+  [User,                         :location,             :nil],
+  [UserGroupUser,                :user,                 :delete],
+  [UserGroupUser,                :user_group,           :delete],
+  [VisualGroup,                  :visual_model,         :alert],
+  [VisualGroupImage,             :image,                :delete],
+  [VisualGroupImage,             :visual_group,         :delete],
+  [Vote,                         :naming,               :delete],
+  [Vote,                         :observation,          :delete],
+  [Vote,                         :user,                 :delete]
+].each do |model, reflection_name, action|
+  model2 = model.name.sub("::Version", "").constantize
+  reflection =
+    model2.reflections[reflection_name.to_s] ||
+    model.reflections[reflection_name.to_s]
+  column = reflection.foreign_key
+  ref_model = reflection.class_name.constantize
+  warn("#{model.name} #{reflection_name}...") if verbose
+  reflections["#{model.name}.#{reflection_name}"] = :done
+
+  query = model.where(column => 1..).
+          and(model.where.not(column => ref_model.all))
+  ids = query.pluck(:id)
+  next if ids.none?
+
+  case action
+  when :alert
+    puts("ALERT!! #{model.table_name}.#{column} = #{ids.inspect}")
+  when :delete
+    query.delete_all unless dry_run
+    puts("DELETING #{ids.count} #{model.name.pluralize(ids.count)} " \
+         "whose #{column} doesn't exist")
+  when :nil
+    query.update_all(column => nil) unless dry_run
+    puts("SETTING #{ids.count} nonexistant #{model.table_name}.#{column} " \
+         "TO NIL")
+  when :zero
+    query.update_all(column => 0) unless dry_run
+    puts("SETTING #{ids.count} nonexistant #{model.table_name}.#{column} " \
+         "TO ZERO")
+  else
+    raise("OOPS! action for #{model.name} #{reflection_name}, " \
+          "#{action.inspect}, is invalid!")
+  end
+end
+
+# ----------------------------------
+#  Check all the polymorphic ones.
+# ----------------------------------
+
+[
+  [Comment,         Name],
+  [Comment,         Observation],
+  [Comment,         Project],
+  [Comment,         Location],
+  [Comment,         LocationDescription],
+  [Comment,         NameDescription],
+  [Comment,         SpeciesList],
+  [CopyrightChange, Image],
+  [Interest,        Observation],
+  [Interest,        Name],
+  [Interest,        Location],
+  [Interest,        Project],
+  [Interest,        SpeciesList],
+  [Interest,        NameTracker]
+].each do |model, ref_model|
+  warn("#{model.name} target #{ref_model.name}...") if verbose
+  reflections["#{model.name}.target"] = :done
+  query = model.where(target_type: ref_model.name, target_id: 1..).
+          and(model.where.not(target_id: ref_model.all))
+  ids = query.pluck(:id)
+  next if ids.none?
+
+  query.delete_all unless dry_run
+  puts("DELETING #{ids.count} #{model.name.pluralize(ids.count)} " \
+       "whose target #{ref_model.name} doesn't exist")
+end
+
+# -----------------------------------
+#  Check for reflections we missed.
+# -----------------------------------
+
+reflections.each do |key, val|
+  puts("MISSING REFLECTION #{key}") if val != :done
+end
+
+exit 0
