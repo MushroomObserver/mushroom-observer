@@ -39,3 +39,7 @@ coverage
 
 /config/credentials/production.key
 checkpoint_stripped.gz
+
+# Ignore New Relic config file. It has a key in it. 
+# You can always download a new APM config file from our NR account.
+/config/newrelic.yml
