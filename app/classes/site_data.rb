@@ -35,7 +35,7 @@
 #      },
 #    }
 #
-#
+# rubocop:disable Metrics/ClassLength
 class SiteData
   ##############################################################################
   #
@@ -453,3 +453,4 @@ class SiteData
       language_contributions.select { |_lang, score| score.positive? }
   end
 end
+# rubocop:enable Metrics/ClassLength
