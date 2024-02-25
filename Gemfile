@@ -196,7 +196,6 @@ group :test, :development do
   gem("rubocop", require: false)
   gem("rubocop-performance")
   gem("rubocop-rails")
-  gem("rubocop-thread_safety", require: false)
 end
 
 group :test do

@@ -78,7 +78,7 @@ class Vote < AbstractModel
     vote.assign_attributes(args.permit(:favorite, :value)) if args
     vote.created_at = now
     vote.updated_at = now
-    vote.user = User.current
+    vote.user = @user
     vote.naming = naming
     vote.observation = naming.observation
     vote
