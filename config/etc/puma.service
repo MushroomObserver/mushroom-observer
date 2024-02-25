@@ -27,7 +27,7 @@ WorkingDirectory=/var/web/mo
 PIDFile=/var/web/mo/tmp/puma.pid
 Environment=RAILS_ENV=production
 # Helpful for debugging socket activation, etc.
-Environment=PUMA_DEBUG=1
+# Environment=PUMA_DEBUG=1
 
 # SystemD will not run puma even if it is in your path. You must specify
 # an absolute URL to puma. For example /usr/local/bin/puma
