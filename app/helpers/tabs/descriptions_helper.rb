@@ -9,15 +9,15 @@ module Tabs
       # admin = is_admin?(description)
       # assemble HTML for "tabset" for show_{type}_description
       # [
-        # description_parent_tab(description, type)
-        # edit_description_tab(description, type),
-        # destroy_description_tab(description, admin),
-        # clone_description_tab(description, type),
-        # merge_description_tab(description, type, admin),
-        # adjust_description_permissions_tab(description, type, admin),
-        # make_description_default_tab(description, type),
-        # description_project_tab(description),
-        # publish_description_draft_tab(description, type, admin)
+      #   description_parent_tab(description, type)
+      #   edit_description_tab(description, type),
+      #   destroy_description_tab(description, admin),
+      #   clone_description_tab(description, type),
+      #   merge_description_tab(description, type, admin),
+      #   adjust_description_permissions_tab(description, type, admin),
+      #   make_description_default_tab(description, type),
+      #   description_project_tab(description),
+      #   publish_description_draft_tab(description, type, admin)
       # ].reject(&:empty?)
     end
 

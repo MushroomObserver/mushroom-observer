@@ -63,8 +63,6 @@ module Account
     end
 
     def deal_with_possible_profile_changes
-      # compute legal name change now because @user.save will overwrite it
-      legal_name_change = @user.legal_name_change
       if !@user.changed
         flash_notice(:runtime_no_changes.t)
         redirect_to(user_path(@user.id))
@@ -72,15 +70,8 @@ module Account
         flash_object_errors(@user)
         render(:edit) and return
       else
-        update_copyright_holder(legal_name_change)
         maybe_update_location_and_finish
       end
-    end
-
-    def update_copyright_holder(legal_name_change = nil)
-      return unless legal_name_change
-
-      Image.update_copyright_holder(*legal_name_change, @user)
     end
 
     def maybe_update_location_and_finish

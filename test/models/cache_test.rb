@@ -4,14 +4,14 @@ require("test_helper")
 # Test cached columns in names and observations table.
 class CacheTest < UnitTestCase
   # Prove that changing a location name will update observations.where for
-  # all the attached observations without changing the updated_at field.
+  # all the attached observations AND change the updated_at field.
   def test_changing_location_name
     loc = locations(:burbank)
     assert_not_empty(loc.observations)
     first_updated_at = loc.observations.first.updated_at
     loc.update(name: "Truman, California, USA")
     assert(loc.observations.all? { |o| o.where == loc.name })
-    assert_equal(first_updated_at, loc.observations.first.updated_at)
+    assert_not_equal(first_updated_at, loc.observations.first.updated_at)
   end
 
   # Prove that changing a name's lifeform will update observations.lifeform for
@@ -26,7 +26,7 @@ class CacheTest < UnitTestCase
   end
 
   # Prove that changing a name will update observations.text_name for
-  # all the attached observations without changing the updated_at field.
+  # all the attached observations AND change the updated_at field.
   def test_changing_text_name
     name = names(:stereum_hirsutum)
     assert_not_empty(name.observations)
@@ -34,7 +34,7 @@ class CacheTest < UnitTestCase
     name.change_text_name("Stereum blah", "Foo", "Species")
     name.save
     assert(name.observations.all? { |o| o.text_name == name.text_name })
-    assert_equal(first_updated_at, name.observations.first.updated_at)
+    assert_not_equal(first_updated_at, name.observations.first.updated_at)
   end
 
   # Prove that changing a name's classification will update

@@ -1349,6 +1349,7 @@ class ApplicationController < ActionController::Base
   # id::            Warp to page that includes object with this id.
   # action::        Template used to render results.
   # matrix::        Displaying results as matrix?
+  # cache::         Cache the HTML of the results?
   # letters::       Paginating by letter?
   # letter_arg::    Param used to store letter for pagination.
   # number_arg::    Param used to store page number for pagination.
@@ -1470,6 +1471,11 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # NOTE: there are two places where cache args have to be sent to enable
+  # efficient caching. Sending `cache: true` here to `show_index_of_objects`
+  # allows us to optimize eager-loading, doing it only for records not cached.
+  # (The other place is from the template to the `matrix_box` helper, which
+  # actually caches the HTML.)
   def find_objects(query, args)
     caching = args[:cache] || false
     include = args[:include] || nil
@@ -1510,11 +1516,11 @@ class ApplicationController < ActionController::Base
   # Check if a cached partial exists for this object.
   # digest_path_from_template from ActionView::Helpers::CacheHelper :nodoc:
   # https://stackoverflow.com/a/77862353/3357635
-  def object_fragment_exist?(obj, user, locale)
+  def object_fragment_exist?(obj, locale)
     template = lookup_context.find(action_name, lookup_context.prefixes)
     digest_path = helpers.digest_path_from_template(template)
 
-    fragment_exist?([digest_path, obj, user, locale])
+    fragment_exist?([digest_path, obj, locale])
   end
 
   def show_index_render(args)

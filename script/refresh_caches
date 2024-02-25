@@ -63,8 +63,8 @@ msgs = progress("unused or missing synonyms...",
                 Name, :make_sure_names_are_bolded_correctly) +
        progress("classification caches...",
                 Name, :refresh_classification_caches) +
-#      progress("generic classifications...",
-#               Name, :propagate_generic_classifications) +
+       # progress("generic classifications...",
+       #          Name, :propagate_generic_classifications) +
        progress("misspelled observations...",
                 Observation, :make_sure_no_observations_are_misspelled) +
        progress("content filter caches...",
