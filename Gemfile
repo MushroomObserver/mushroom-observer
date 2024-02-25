@@ -234,6 +234,8 @@ end
 
 group :production do
   # Use puma as the app server
+  # To use Webrick locally, run `bundle config set --local without 'production'`
+  # https://stackoverflow.com/a/23125762/3357635
   gem("puma")
 
   # New Relic for application and other monitoring
