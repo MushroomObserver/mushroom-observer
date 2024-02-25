@@ -106,9 +106,6 @@ gem("jbuilder")
 # Use ActiveModel has_secure_password
 gem("bcrypt", "~> 3.1.7")
 
-# Use puma as the app server
-gem("puma")
-
 # Use Capistrano for deployment
 # gem("capistrano", group: :development)
 
@@ -236,6 +233,9 @@ group :development do
 end
 
 group :production do
+  # Use puma as the app server
+  gem("puma")
+
   # New Relic for application and other monitoring
   # https://newrelic.com/
   gem("newrelic_rpm")
