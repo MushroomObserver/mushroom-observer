@@ -7,14 +7,15 @@ threads threads_count, threads_count
 # preload_app!
 prune_bundler
 
-directory           APP_PATH
-rackup              DefaultRackup
+rackup              DefaultRackup if defined?(DefaultRackup)
 port                ENV["PORT"]     || 3000
-environment         ENV["RACK_ENV"] || "production"
-redirect_stderr     "#{APP_PATH}/log/puma.stderr.log"
-redirect_stdout     "#{APP_PATH}/log/puma.stdout.log"
-bind                "#{APP_PATH}/tmp/sockets/puma.sock"
-pidfile             "#{APP_PATH}/tmp/pids/puma.pid"
+environment         ENV["RAILS_ENV"] || "production"
+
+# directory           "/var/web/mo"
+# redirect_stderr     "/var/web/mo/log/puma.stderr.log"
+# redirect_stdout     "/var/web/mo/log/puma.stdout.log"
+# bind                "/var/web/mo/tmp/sockets/puma.sock"
+# pidfile             "/var/web/mo/tmp/pids/puma.pid"
 
 # on_worker_boot do
 #   ActiveRecord::Base.establish_connection
