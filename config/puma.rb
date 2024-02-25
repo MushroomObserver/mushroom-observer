@@ -1,23 +1,21 @@
 # frozen_string_literal: true
 
-workers Integer(ENV["WEB_CONCURRENCY"] || 3)
-threads_count = Integer(ENV["MAX_THREADS"] || 1)
-threads threads_count, threads_count
+workers 3
+threads 1, 1
 
-# preload_app!
-prune_bundler
+app_path = "/var/web/mushroom-observer"
+rails_env = "production"
 
-rackup              DefaultRackup if defined?(DefaultRackup)
-port                ENV["PORT"]     || 3000
-environment         ENV["RAILS_ENV"] || "production"
+environment         rails_env
+bind                "unix://#{app_path}/tmp/sockets/puma.sock"
+stdout_redirect     "#{app_path}/log/puma.stdout.log",
+                    "#{app_path}/log/puma.stderr.log", true
+pidfile             "#{app_path}/tmp/pids/puma.pid"
+state_path          "#{app_path}/tmp/pids/puma.state"
+activate_control_app
 
-# directory           "/var/web/mo"
-# redirect_stderr     "/var/web/mo/log/puma.stderr.log"
-# redirect_stdout     "/var/web/mo/log/puma.stdout.log"
-# bind                "/var/web/mo/tmp/sockets/puma.sock"
-# pidfile             "/var/web/mo/tmp/pids/puma.pid"
-
-# on_worker_boot do
-#   ActiveRecord::Base.establish_connection
-# end
-
+on_worker_boot do
+  require "active_record"
+  ActiveRecord::Base.connection.disconnect! rescue ActiveRecord::ConnectionNotEstablished
+  ActiveRecord::Base.establish_connection(YAML.load_file("#{app_dir}/config/database.yml")[rails_env])
+end

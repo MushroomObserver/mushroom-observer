@@ -134,7 +134,7 @@ MushroomObserver::Application.configure do
   # personally identifiable information (PII). If you want to log everything,
   # set the level to "debug".
   # config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
-  config.log_level = :debug
+  config.log_level = :info
 
   # Disable automatic flushing of the log to improve performance.
   # config.autoflush_log = false
