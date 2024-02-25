@@ -144,7 +144,6 @@ GEM
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
     json (2.7.1)
-    kgio (2.11.4)
     language_server-protocol (3.17.0.3)
     libv8-node (18.16.0.0-arm64-darwin)
     libv8-node (18.16.0.0-x86_64-darwin)
@@ -196,6 +195,8 @@ GEM
     psych (4.0.6)
       stringio
     public_suffix (5.0.4)
+    puma (6.4.2)
+      nio4r (~> 2.0)
     racc (1.7.3)
     rack (2.2.8)
     rack-session (1.0.2)
@@ -225,7 +226,6 @@ GEM
       thor (~> 1.0, >= 1.2.2)
       zeitwerk (~> 2.6)
     rainbow (3.1.1)
-    raindrops (0.20.1)
     rake (13.1.0)
     rbtree (0.4.6)
     rdoc (6.6.2)
@@ -306,9 +306,6 @@ GEM
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.5.0)
-    unicorn (6.1.0)
-      kgio (~> 2.6)
-      raindrops (~> 0.7)
     uniform_notifier (1.16.0)
     web-console (4.2.1)
       actionview (>= 6.0.0)
@@ -383,6 +380,7 @@ DEPENDENCIES
   newrelic_rpm
   nokogiri (>= 1.13.10)
   psych (~> 4)
+  puma
   rack (~> 2)
   rails-controller-testing
   rails-html-sanitizer (>= 1.4.4)
@@ -403,7 +401,6 @@ DEPENDENCIES
   stimulus-rails
   terser
   turbo-rails
-  unicorn
   web-console
   webmock
   xmlrpc
