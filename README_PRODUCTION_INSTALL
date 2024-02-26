@@ -21,6 +21,7 @@ root> visudo
   %mo ALL = NOPASSWD: /bin/su - mo
   mo ALL = NOPASSWD: /usr/sbin/service nginx *
   mo ALL = NOPASSWD: /usr/sbin/service unicorn *
+  # mo ALL = NOPASSWD: /usr/sbin/service puma *
 
 # Create user accounts.
 root> useradd -m -s /bin/bash -G mo,sudo jason
@@ -185,9 +186,14 @@ root> rm /usr/share/nginx/html/index.html # (there's *got* to be a better way!)
 root> gcc /var/web/mushroom-observer/script/jpegresize.c -ljpeg -lm -O2 -o /usr/local/bin/jpegresize
 root> cp /var/web/mushroom-observer/script/exifautotran /usr/local/bin/exifautotran
 root> chmod 755 /usr/local/bin/exifautotran
-root> cp /var/web/mushroom-observer/script/unicorn /etc/init.d/unicorn
+
+root> cp /var/web/mushroom-observer/config/etc/unicorn /etc/init.d/unicorn
 root> chmod 755 /etc/init.d/unicorn
 root> update-rc.d unicorn defaults
+
+# root> cp /var/web/mushroom-observer/config/etc/puma/service /etc/systemd/system/
+# root> chmod 755 /etc/systemd/system/puma.service
+# root> systemctl enable puma
 
 --------------------------------------------------------------------------------
 
@@ -216,6 +222,9 @@ mo> rails server
 mo> unicorn_rails -c config/unicorn.rb -D
 # If there are any errors you'll find them in log/unicorn.stderr.log
 # ("service unicorn start" and "uni start" are shorthand for above command.)
+
+# mo> puma
+# check for errors on stdout/err
 
 # Apparently have to restart nginx after first time run unicorn sometimes(?)
 mo> service nginx stop
@@ -315,6 +324,8 @@ root> vi /etc/logrotate.d/unicorn
     sharedscripts
     postrotate
       kill -HUP `cat /var/web/mushroom-observer/tmp/pids/unicorn.pid`
+      # not sure this will work...
+      # kill -HUP `cat /var/web/mushroom-observer/tmp/pids/puma.pid`
       mv /var/web/mushroom-observer/log/*.gz /var/web/mushroom-observer/log/old/
     endscript
   }
@@ -357,6 +368,7 @@ root> iptables-save
 root> ps -ef | grep sshd
 root> ps -ef | grep nginx
 root> ps -ef | grep unicorn
+root> # ps -ef | grep puma
 root> ps -ef | grep mysql   # <--- make sure mysqld is NOT running!!!
 root> ps -ef | grep postfix
 
