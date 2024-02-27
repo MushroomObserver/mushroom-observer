@@ -371,7 +371,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # open_edit_observation_form
     # This is more robust in case the link becomes an icon:
     new_obs = Observation.last
-    click_link(class: "edit_observation_link_#{new_obs.id}")
+    first(class: "edit_observation_link_#{new_obs.id}").trigger("click")
     # click_link("Edit Observation")
     assert_selector("body.observations__edit")
 
