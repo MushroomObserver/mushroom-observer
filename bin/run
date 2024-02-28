@@ -1,0 +1,25 @@
+#!/usr/bin/bash
+
+app_root=/var/web/mushroom-observer
+
+if [[ $RUBY_MANAGER == "rvm" ]]; then
+  ruby_version=$(cat $app_root/.ruby-version)
+  source /usr/local/rvm/environments/ruby-$ruby_version
+fi
+
+if [[ $RUBY_MANAGER == "chruby" ]]; then
+  source /usr/local/share/chruby/chruby.sh
+  source /usr/local/share/chruby/auto.sh
+fi
+
+# UNTESTED!!!
+if [[ $RUBY_MANAGER == "rbenv" ]]; then
+  eval "$(rbenv init - bash)"
+fi
+
+cd $app_root
+
+$* @>&1 | \
+  grep -v "29: warning: nested" | \
+  grep -v '(in /home/' | \
+  grep -v '^\*\* '
