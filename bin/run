@@ -2,20 +2,27 @@
 
 app_root=/var/web/mushroom-observer
 
-if [[ $RUBY_MANAGER == "rvm" ]]; then
-  ruby_version=$(cat $app_root/.ruby-version)
-  source /usr/local/rvm/environments/ruby-$ruby_version
-fi
+case $RUBY_MANAGER in
+  "rvm")
+    ruby_version=$(cat $app_root/.ruby-version)
+    source /usr/local/rvm/environments/ruby-$ruby_version
+    ;;
 
-if [[ $RUBY_MANAGER == "chruby" ]]; then
-  source /usr/local/share/chruby/chruby.sh
-  source /usr/local/share/chruby/auto.sh
-fi
+  "chruby")
+    source /usr/local/share/chruby/chruby.sh
+    source /usr/local/share/chruby/auto.sh
+    ;;
 
-# UNTESTED!!!
-if [[ $RUBY_MANAGER == "rbenv" ]]; then
-  eval "$(rbenv init - bash)"
-fi
+  "rbenv")
+    # NOT TESTED!!
+    eval "$(rbenv init - bash)"
+    ;;
+
+  *)
+    echo 'RUBY_MANAGER env var not set!!'
+    exit 1
+    ;;
+esac
 
 cd $app_root
 
