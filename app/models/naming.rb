@@ -72,7 +72,7 @@ class Naming < AbstractModel
     naming = Naming.new(args)
     naming.created_at = now
     naming.updated_at = now
-    naming.user = @user
+    naming.user = User.current
     naming.observation = observation
     naming
   end
