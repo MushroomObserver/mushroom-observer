@@ -56,7 +56,6 @@ gem("dalli", "~> 3.2")
 # solid_cache for cache store db
 gem("solid_cache")
 # Compile SCSS for stylesheets
-gem("sassc-rails")
 # add locale to cache key
 gem("cache_with_locale")
 
@@ -88,6 +87,8 @@ gem("arel-helpers")
 # https://github.com/Faveod/arel-extensions
 gem("arel_extensions")
 
+# Use dart-sass to compile sass
+gem("dartsass-rails")
 # Use bootstrap style generator
 gem("bootstrap-sass")
 

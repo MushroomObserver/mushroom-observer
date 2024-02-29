@@ -9,3 +9,4 @@
 //= link Cantharellaceae.css
 //= link Hygrocybe.css
 //= link Sudo.css
+//= link_tree ../builds
