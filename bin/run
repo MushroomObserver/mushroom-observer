@@ -14,7 +14,6 @@ case $RUBY_MANAGER in
     ;;
 
   "rbenv")
-    # NOT TESTED!!
     eval "$(rbenv init - bash)"
     ;;
 
@@ -26,7 +25,7 @@ esac
 
 cd $app_root
 
-$* @>&1 | \
+$* 2>&1 | \
   grep -v "29: warning: nested" | \
   grep -v '(in /home/' | \
   grep -v '^\*\* '
