@@ -10,3 +10,6 @@ Rails.application.config.dartsass.builds = {
   "Hygrocybe.scss" => "Hygrocybe.css",
   "Sudo.scss" => "Sudo.css"
 }
+
+# silence the deprecation warnings for Bootstrap 3, while active
+Rails.application.config.dartsass.build_options << " --quiet-deps"
