@@ -106,9 +106,6 @@ gem("jbuilder")
 # Use ActiveModel has_secure_password
 gem("bcrypt", "~> 3.1.7")
 
-# Use unicorn as the app server
-gem("unicorn")
-
 # Use Capistrano for deployment
 # gem("capistrano", group: :development)
 
@@ -237,6 +234,12 @@ group :development do
 end
 
 group :production do
+  # Use puma as the app server
+  # To use Webrick locally, run `bundle config set --local without 'production'`
+  # https://stackoverflow.com/a/23125762/3357635
+  gem("puma")
+  # gem("unicorn")
+
   # New Relic for application and other monitoring
   # https://newrelic.com/
   gem("newrelic_rpm")

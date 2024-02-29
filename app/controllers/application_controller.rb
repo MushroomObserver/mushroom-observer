@@ -1497,16 +1497,17 @@ class ApplicationController < ActionController::Base
 
   # If caching, only uncached objects need to eager_load the includes
   def objects_with_only_needed_eager_loads(query, include)
+    # Not currently caching on user.
     # user = User.current ? "logged_in" : "no_user"
-    # locale = I18n.locale
+    locale = I18n.locale
     objects_simple = query.paginate(@pages)
 
-    # Temporarily disabling cached matrix boxes: eager load everything
-    ids_to_eager_load = objects_simple
+    # If temporarily disabling cached matrix boxes: eager load everything
+    # ids_to_eager_load = objects_simple
 
-    # ids_to_eager_load = objects_simple.reject do |obj|
-    #   object_fragment_exist?(obj, user, locale)
-    # end.pluck(:id)
+    ids_to_eager_load = objects_simple.reject do |obj|
+      object_fragment_exist?(obj, locale)
+    end.pluck(:id)
     # now get the heavy loaded instances:
     objects_eager = query.model.where(id: ids_to_eager_load).includes(include)
     # our Array extension: collates new instances with old, in original order

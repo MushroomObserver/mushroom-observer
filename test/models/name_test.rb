@@ -2663,6 +2663,11 @@ class NameTest < UnitTestCase
                    "Boletus#{str}",
                    "Name ss should include `#{str}` if it's part of the genus")
     end
+
+    # start of the epithet matches a `group` abbreviation ("gr")
+    name = Name.new(text_name: "Leptonia gracilipes")
+
+    assert_equal(name.text_name, name.sensu_stricto)
   end
 
   # --------------------------------------

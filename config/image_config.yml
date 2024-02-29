@@ -18,7 +18,7 @@ production:
     :mycolab:
       :test: :transferred_flag
       :read: https://mushroomobserver.org/images
-      :write: ssh://mo@204.93.192.148:/data/images/mo
+      :write: ssh://mo@images.mushroomobserver.org:/data/images/mo
   keep_these_image_sizes_local: []
 
 test:
