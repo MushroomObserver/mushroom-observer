@@ -39,12 +39,15 @@ jobs:
       - name: Start mySQL
         run: sudo systemctl start mysql.service
 
+      # https://github.com/trilogy-libraries/activerecord-trilogy-adapter/issues/64
+      # Issue in the trilogy gem where it cannot support `caching_sha2_password`
+      # https://github.com/trilogy-libraries/trilogy/issues/26
+      # For now need to ensure user is IDENTIFIED WITH `mysql_native_password`
+      # (change is in db/initialize.sql)
       - name: Create and configure db
         run: |
           mysql -u root -proot < db/initialize.sql
           cp db/vagrant/database.yml config
-          mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';"
-          mysql -e "FLUSH PRIVILEGES;"
 
       - name: Create test image directories
         run: |
