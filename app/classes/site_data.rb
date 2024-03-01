@@ -35,7 +35,6 @@
 #      },
 #    }
 #
-# rubocop:disable Metrics/ClassLength
 class SiteData
   ##############################################################################
   #
@@ -120,8 +119,8 @@ class SiteData
   # Table to query to get score for each category.  (Default is same as the
   # category name.)
   FIELD_TABLES = {
-    observations_with_voucher: "observations",
-    observations_without_voucher: "observations",
+    # observations_with_voucher: "observations",
+    # observations_without_voucher: "observations",
     sequenced_observations: "sequences",
     species_list_entries: "species_list_observations",
     contributing_users: "users"
@@ -129,54 +128,44 @@ class SiteData
 
   # Additional conditions to use for each category.
   FIELD_CONDITIONS = {
-    observations_with_voucher:
-      "specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL",
-    observations_without_voucher:
-      "NOT(specimen IS TRUE AND LENGTH(notes) >= 10" \
-      "AND thumb_image_id IS NOT NULL )",
+    # observations_with_voucher:
+    #   "specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL",
+    # observations_without_voucher:
+    #   "NOT(specimen IS TRUE AND LENGTH(notes) >= 10" \
+    #   "AND thumb_image_id IS NOT NULL )",
     users: "`verified` IS NOT NULL",
     contributing_users: "contribution > 0"
   }.freeze
 
   # Non-default unified queries for stats for the entire site
-  # rubocop:disable Layout/MultilineMethodCallIndentation
   # Rubocop 1.30.0 wants to allgn "where" with the open brace on the next line.
   FIELD_QUERIES = {
-    contributing_users:
-      User.
-        where(contribution: 1..),
-    observations_with_voucher:
-      Observation.
-        where(specimen: true).
-        where(Observation[:notes].length >= 10).
-        where.not(thumb_image_id: nil),
-    observations_without_voucher:
-      Observation.
-        where(specimen: false).
-        where(Observation[:notes].length >= 10).
-        where.not(thumb_image_id: nil),
-    sequenced_observations:
-      Sequence.
-        select(:observation_id).distinct,
-    species_list_entries:
-      SpeciesListObservation,
-    users:
-      User.
-        where.not(verified: nil)
+    contributing_users: User.where(contribution: 1..),
+    # observations_with_voucher:
+    #   Observation.
+    #     where(specimen: true).
+    #     where(Observation[:notes].length >= 10).
+    #     where.not(thumb_image_id: nil),
+    # observations_without_voucher:
+    #   Observation.
+    #     where(specimen: false).
+    #     where(Observation[:notes].length >= 10).
+    #     where.not(thumb_image_id: nil),
+    sequenced_observations: Sequence.select(:observation_id).distinct,
+    species_list_entries: SpeciesListObservation,
+    users: User.where.not(verified: nil)
   }.freeze
-  # rubocop:enable Layout/MultilineMethodCallIndentation
-
   # Call these procs to determine if a given object qualifies for a given field.
-  FIELD_STATE_PROCS = {
-    observations_with_voucher: lambda do |obs|
-      obs.specimen && obs.notes.to_s.length >= 10 &&
-        obs.thumb_image_id.to_i.positive?
-    end,
-    observations_without_voucher: lambda do |obs|
-      !(obs.specimen && obs.notes.to_s.length >= 10 &&
-        obs.thumb_image_id.to_i.positive?)
-    end
-  }.freeze
+  # FIELD_STATE_PROCS = {
+  #   observations_with_voucher: lambda do |obs|
+  #     obs.specimen && obs.notes.to_s.length >= 10 &&
+  #       obs.thumb_image_id.to_i.positive?
+  #   end,
+  #   observations_without_voucher: lambda do |obs|
+  #     !(obs.specimen && obs.notes.to_s.length >= 10 &&
+  #       obs.thumb_image_id.to_i.positive?)
+  #   end
+  # }.freeze
 
   # -----------------------------
   #  :section: Public Interface
@@ -221,11 +210,16 @@ class SiteData
   def self.update_weight(impact, user_id)
     return if impact.zero?
 
-    User.connection.update(%(
-      UPDATE users SET contribution =
-        IF(contribution IS NULL, #{impact}, contribution + #{impact})
-      WHERE id = #{user_id}
-    ))
+    # User.connection.update(%(
+    #   UPDATE users SET contribution =
+    #     IF(contribution IS NULL, #{impact}, contribution + #{impact})
+    #   WHERE id = #{user_id}
+    # ))
+
+    # REDO IN AR
+    # User.contribution is non-nullable and defaults to zero
+
+    User.find(user_id).increment(:contribution, impact)
   end
 
   def self.get_applicable_field(obj)
@@ -236,8 +230,8 @@ class SiteData
       FIELD_TABLES.each do |field2, table2|
         next unless table2 == table
 
-        proc = FIELD_STATE_PROCS[field2]
-        next unless proc&.call(obj)
+        # proc = FIELD_STATE_PROCS[field2]
+        # next unless proc&.call(obj)
 
         field = field2
         break
@@ -246,15 +240,15 @@ class SiteData
     field
   end
 
-  def self.get_weight_change(obj, new_field)
+  def self.get_weight_change(_obj, new_field)
     old_field = new_field
-    if FIELD_STATE_PROCS[new_field]
-      obj_copy = obj.clone
-      obj.changes.each do |attr, val_pair|
-        obj_copy[attr] = val_pair.first
-      end
-      old_field = get_applicable_field(obj_copy)
-    end
+    # if FIELD_STATE_PROCS[new_field]
+    #   obj_copy = obj.clone
+    #   obj.changes.each do |attr, val_pair|
+    #     obj_copy[attr] = val_pair.first
+    #   end
+    #   old_field = get_applicable_field(obj_copy)
+    # end
     FIELD_WEIGHTS[new_field] - FIELD_WEIGHTS[old_field]
   end
 
@@ -402,6 +396,8 @@ class SiteData
     end
   end
 
+  #############################################################################
+
   # Load all the stats for a given User.  (Load for all User's if none given.)
   #
   #   load_user_data(user.id)
@@ -453,4 +449,3 @@ class SiteData
       language_contributions.select { |_lang, score| score.positive? }
   end
 end
-# rubocop:enable Metrics/ClassLength
