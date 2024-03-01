@@ -1,6 +1,0 @@
-#!/usr/bin/bash
-
-cd /var/web/mo
-ruby_version=$(cat .ruby-version)
-ruby_env=/usr/local/rvm/environments/ruby-$ruby_version
-source $ruby_env && bundle exec puma -e production -C ./config/puma.rb config.ru
