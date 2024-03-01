@@ -63,12 +63,9 @@ gem("loofah")
 gem("nokogiri")
 gem("rails-html-sanitizer")
 
-# Use mysql2 as db connector
-# See https://github.com/brianmario/mysql2
-gem("mysql2")
-
-# Use sqlite3 as the database for Active Record
-# gem("sqlite3")
+# Use trilogy as db connector
+# See https://github.com/trilogy-libraries/trilogy/tree/main/contrib/ruby
+gem("trilogy")
 
 # Add Arel helpers for more concise query syntax in Arel
 # https://github.com/camertron/arel-helpers
