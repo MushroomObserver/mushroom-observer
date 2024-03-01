@@ -28,9 +28,6 @@ jobs:
       - name: Install additional tools
         run: sudo apt-get install exiftool
 
-      # - name: Install Firefox
-      #   run: sudo apt-get install firefox
-
       - name: Install Chrome/Chromium
         run: sudo apt-get install chromium-browser
 
