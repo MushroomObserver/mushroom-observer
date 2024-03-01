@@ -59,8 +59,8 @@ gem("cache_with_locale")
 gem("sprockets", "~>4.2.1")
 
 gem("date")
-gem("nokogiri")
 gem("loofah")
+gem("nokogiri")
 gem("rails-html-sanitizer")
 
 # Use mysql2 as db connector
