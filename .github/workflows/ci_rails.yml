@@ -43,10 +43,8 @@ jobs:
         run: |
           mysql -u root -proot < db/initialize.sql
           cp db/vagrant/database.yml config
-
-      - name: Configure gmaps api key
-        run: |
-          cp config/gmaps_api_key.yml-template config/gmaps_api_key.yml
+          mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';"
+          mysql -e "FLUSH PRIVILEGES;"
 
       - name: Create test image directories
         run: |
