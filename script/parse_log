@@ -18,7 +18,9 @@ rails_log=$app_root/log/$RAILS_ENV.log
 old_errors=$app_root/log/errors.old
 new_errors=$app_root/log/errors.new
 
-grep 'FATAL.* [A-Za-z:]*Error \|ENOMEM' $rails_log |
+grep -A1 '^E, .* ERROR \|ENOMEM' $rails_log |
+grep -v '^--' |
+grep -v '^E, ' |
 grep -v 'Using a password on the command line' |
 grep -v 'Can.t figure out how to sort' |
 grep -v 'SMTP To address may not contain CR or LF line breaks' |
