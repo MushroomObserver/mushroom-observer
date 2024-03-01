@@ -361,14 +361,16 @@ DEPENDENCIES
   bullet
   bundler
   cache_with_locale
-  capybara (~> 3.37, >= 3.37.1)
+  capybara
   cuprite
   database_cleaner-active_record
+  date
   debug (>= 1.0.0)
   fastimage
   i18n
   importmap-rails
   jbuilder
+  loofah
   mail
   mimemagic
   mini_racer
@@ -380,8 +382,10 @@ DEPENDENCIES
   net-pop
   net-smtp
   newrelic_rpm
+  nokogiri
   puma
   rails-controller-testing
+  rails-html-sanitizer
   railties (~> 7.1.3)
   redis (~> 4.0)
   requestjs-rails

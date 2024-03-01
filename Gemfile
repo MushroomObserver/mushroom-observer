@@ -58,6 +58,11 @@ gem("cache_with_locale")
 # https://github.com/hotwired/stimulus-rails/issues/108
 gem("sprockets", "~>4.2.1")
 
+gem("date")
+gem("nokogiri")
+gem("loofah")
+gem("rails-html-sanitizer")
+
 # Use mysql2 as db connector
 # See https://github.com/brianmario/mysql2
 gem("mysql2")
