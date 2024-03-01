@@ -29,7 +29,8 @@ echo Installing bundle... && bundle install && \
 echo Checking for migrations... && rake db:migrate && \
 echo Updating translations... && rake lang:update && \
 echo Precompiling assets... && rake assets:precompile && \
-echo Reloading unicorn... && /etc/init.d/unicorn reload && \
+# echo Reloading unicorn... && sudo service unicorn reload && \
+echo Reloading puma... && sudo service puma restart && \
 echo Tagging repo with $tag... && git tag $tag && \
 echo Pushing new tag... && git push --tags && \
 echo SUCCESS\!

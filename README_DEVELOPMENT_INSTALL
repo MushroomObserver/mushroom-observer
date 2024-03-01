@@ -95,14 +95,13 @@ jason> rehash
 jason> cd
 
 # Now we can install ruby gems properly.
-jason> sudo gem install rails --version=2.1.1 --verbose --no-rdoc --no-ri
+jason> sudo gem install rails --verbose --no-rdoc --no-ri
 jason> sudo gem install mysql --verbose --no-rdoc --no-ri
-jason> sudo gem install mysql2 --version=0.2.18 --verbose --no-rdoc --no-ri
+jason> sudo gem install trilogy --verbose --no-rdoc --no-ri
 jason> sudo gem install test-unit --verbose --no-rdoc --no-ri
 jason> sudo gem install RedCloth --verbose --no-rdoc --no-ri
 jason> sudo gem install sparql --verbose --no-rdoc --no-ri
 # (mysql-2.8.1) <-- needed by rake test:db:prepare, see script/run_tests
-# (mysql2-0.2.18) <-- important! 0.3.+ doesn't work with < rails 3.1.x!
 # (test-unit-2.4.8)
 # (RedCloth-4.2.9)
 # sparql installs all of these:

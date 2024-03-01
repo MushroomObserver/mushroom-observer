@@ -9,7 +9,7 @@ gem("sorted_set")
 source("https://rubygems.org")
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
-# gem("rails", "~> 7.1.2")
+# gem("rails", "~> 7.1.3")
 
 # To skip loading parts of Rails, bundle the constituent gems separately.
 # NOTE: Remember to require the classes also, in config/application.rb
@@ -19,26 +19,21 @@ source("https://rubygems.org")
 # Convenience group for updating rails constituents with one command
 # Usage: bundle update --group==rails
 group :rails do
-  gem("actioncable", "~> 7.1.2")
-  # gem("actionmailbox", "~> 7.1.2")
-  gem("actionmailer", "~> 7.1.2")
-  gem("actionpack", "~> 7.1.2")
-  # gem("actiontext", "~> 7.1.2")
-  gem("actionview", "~> 7.1.2")
-  gem("activejob", "~> 7.1.2")
-  gem("activemodel", "~> 7.1.2")
-  gem("activerecord", "~> 7.1.2")
-  # gem("activestorage", "~> 7.1.2")
-  gem("activesupport", "~> 7.1.2")
+  gem("actioncable", "~> 7.1.3")
+  # gem("actionmailbox", "~> 7.1.3")
+  gem("actionmailer", "~> 7.1.3")
+  gem("actionpack", "~> 7.1.3")
+  # gem("actiontext", "~> 7.1.3")
+  gem("actionview", "~> 7.1.3")
+  gem("activejob", "~> 7.1.3")
+  gem("activemodel", "~> 7.1.3")
+  gem("activerecord", "~> 7.1.3")
+  # gem("activestorage", "~> 7.1.3")
+  gem("activesupport", "~> 7.1.3")
   gem("bundler")
-  gem("railties", "~> 7.1.2")
+  gem("railties", "~> 7.1.3")
 end
 
-# fix for unicorn 6.1.0 not being able to deal with current rack 3 yet
-# delete when unicorn updated to 7
-gem("rack", "~>2")
-# gem irb now depends on psych, but version 5 will not bundle currently
-gem("psych", "~> 4")
 # importmap for js module handling
 gem("importmap-rails")
 # sprockets for asset compilation and versioning
@@ -50,9 +45,7 @@ gem("requestjs-rails")
 # turbo for partial page updates
 gem("turbo-rails")
 # redis for combining actioncable broadcasts with turbo_stream
-# gem("redis", "~> 4.0")
-# dalli to run the memcached server
-gem("dalli", "~> 3.2")
+gem("redis", "~> 4.0")
 # solid_cache for cache store db
 gem("solid_cache")
 # Compile SCSS for stylesheets
@@ -65,22 +58,14 @@ gem("cache_with_locale")
 # https://github.com/hotwired/stimulus-rails/issues/108
 gem("sprockets", "~>4.2.1")
 
-# Security fix updates via Dependabot
-# CVE-2021-41817 regex denial of service vulnerability
-gem("date", ">= 3.2.1")
-# CVE-2022-23476
-gem("nokogiri", ">= 1.13.10")
-# CVE-2022-23515
-gem("loofah", ">= 2.19.1")
-# CVE-2022-23518
-gem("rails-html-sanitizer", ">= 1.4.4")
+gem("date")
+gem("loofah")
+gem("nokogiri")
+gem("rails-html-sanitizer")
 
-# Use mysql2 as db connector
-# See https://github.com/brianmario/mysql2
-gem("mysql2")
-
-# Use sqlite3 as the database for Active Record
-# gem("sqlite3")
+# Use trilogy as db connector
+# See https://github.com/trilogy-libraries/trilogy/tree/main/contrib/ruby
+gem("trilogy")
 
 # Add Arel helpers for more concise query syntax in Arel
 # https://github.com/camertron/arel-helpers
@@ -104,10 +89,7 @@ gem("terser")
 gem("jbuilder")
 
 # Use ActiveModel has_secure_password
-gem("bcrypt", "~> 3.1.7")
-
-# Use unicorn as the app server
-gem("unicorn")
+gem("bcrypt")
 
 # Use Capistrano for deployment
 # gem("capistrano", group: :development)
@@ -194,11 +176,12 @@ group :test, :development do
   gem("rubocop", require: false)
   gem("rubocop-performance")
   gem("rubocop-rails")
+  gem("rubocop-thread_safety", require: false)
 end
 
 group :test do
   # Use capybara to simulate user-browser interaction
-  gem("capybara", "~> 3.37", ">= 3.37.1")
+  gem("capybara")
 
   # Use cuprite to run the browser in Capybara tests
   gem("cuprite")
@@ -236,6 +219,12 @@ group :development do
 end
 
 group :production do
+  # Use puma as the app server
+  # To use Webrick locally, run `bundle config set --local without 'production'`
+  # https://stackoverflow.com/a/23125762/3357635
+  gem("puma")
+  # gem("unicorn")
+
   # New Relic for application and other monitoring
   # https://newrelic.com/
   gem("newrelic_rpm")
