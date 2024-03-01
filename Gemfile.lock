@@ -9,25 +9,25 @@ GEM
   remote: https://rubygems.org/
   specs:
     RedCloth (4.3.3)
-    actioncable (7.1.3)
-      actionpack (= 7.1.3)
-      activesupport (= 7.1.3)
+    actioncable (7.1.3.2)
+      actionpack (= 7.1.3.2)
+      activesupport (= 7.1.3.2)
       nio4r (~> 2.0)
       websocket-driver (>= 0.6.1)
       zeitwerk (~> 2.6)
-    actionmailer (7.1.3)
-      actionpack (= 7.1.3)
-      actionview (= 7.1.3)
-      activejob (= 7.1.3)
-      activesupport (= 7.1.3)
+    actionmailer (7.1.3.2)
+      actionpack (= 7.1.3.2)
+      actionview (= 7.1.3.2)
+      activejob (= 7.1.3.2)
+      activesupport (= 7.1.3.2)
       mail (~> 2.5, >= 2.5.4)
       net-imap
       net-pop
       net-smtp
       rails-dom-testing (~> 2.2)
-    actionpack (7.1.3)
-      actionview (= 7.1.3)
-      activesupport (= 7.1.3)
+    actionpack (7.1.3.2)
+      actionview (= 7.1.3.2)
+      activesupport (= 7.1.3.2)
       nokogiri (>= 1.8.5)
       racc
       rack (>= 2.2.4)
@@ -35,22 +35,22 @@ GEM
       rack-test (>= 0.6.3)
       rails-dom-testing (~> 2.2)
       rails-html-sanitizer (~> 1.6)
-    actionview (7.1.3)
-      activesupport (= 7.1.3)
+    actionview (7.1.3.2)
+      activesupport (= 7.1.3.2)
       builder (~> 3.1)
       erubi (~> 1.11)
       rails-dom-testing (~> 2.2)
       rails-html-sanitizer (~> 1.6)
-    activejob (7.1.3)
-      activesupport (= 7.1.3)
+    activejob (7.1.3.2)
+      activesupport (= 7.1.3.2)
       globalid (>= 0.3.6)
-    activemodel (7.1.3)
-      activesupport (= 7.1.3)
-    activerecord (7.1.3)
-      activemodel (= 7.1.3)
-      activesupport (= 7.1.3)
+    activemodel (7.1.3.2)
+      activesupport (= 7.1.3.2)
+    activerecord (7.1.3.2)
+      activemodel (= 7.1.3.2)
+      activesupport (= 7.1.3.2)
       timeout (>= 0.4.0)
-    activesupport (7.1.3)
+    activesupport (7.1.3.2)
       base64
       bigdecimal
       concurrent-ruby (~> 1.0, >= 1.0.2)
@@ -78,7 +78,7 @@ GEM
     bootstrap-sass (3.4.1)
       autoprefixer-rails (>= 5.2.1)
       sassc (>= 2.0.0)
-    brakeman (6.1.1)
+    brakeman (6.1.2)
       racc
     browser (5.3.1)
     builder (3.2.4)
@@ -89,24 +89,24 @@ GEM
       actionview
       activesupport
       railties
-    capybara (3.39.2)
+    capybara (3.40.0)
       addressable
       matrix
       mini_mime (>= 0.1.3)
-      nokogiri (~> 1.8)
+      nokogiri (~> 1.11)
       rack (>= 1.6.0)
       rack-test (>= 0.6.3)
       regexp_parser (>= 1.5, < 3.0)
       xpath (~> 3.2)
     concurrent-ruby (1.2.3)
     connection_pool (2.4.1)
-    crack (0.4.5)
+    crack (1.0.0)
+      bigdecimal
       rexml
     crass (1.0.6)
     cuprite (0.15)
       capybara (~> 3.0)
       ferrum (~> 0.14.0)
-    dalli (3.2.6)
     database_cleaner-active_record (2.1.0)
       activerecord (>= 5.a)
       database_cleaner-core (~> 2.0.0)
@@ -170,7 +170,7 @@ GEM
       minitest (>= 5.0)
       ruby-progressbar
     mutex_m (0.2.0)
-    net-imap (0.4.9.1)
+    net-imap (0.4.10)
       date
       net-protocol
     net-pop (0.1.2)
@@ -179,7 +179,7 @@ GEM
       timeout
     net-smtp (0.4.0.1)
       net-protocol
-    newrelic_rpm (9.7.0)
+    newrelic_rpm (9.7.1)
     nio4r (2.7.0)
     nokogiri (1.16.2-arm64-darwin)
       racc (~> 1.4)
@@ -191,20 +191,21 @@ GEM
     parser (3.3.0.5)
       ast (~> 2.4.1)
       racc
-    psych (4.0.6)
+    prism (0.24.0)
+    psych (5.1.2)
       stringio
     public_suffix (5.0.4)
     puma (6.4.2)
       nio4r (~> 2.0)
     racc (1.7.3)
-    rack (2.2.8.1)
-    rack-session (1.0.2)
-      rack (< 3)
+    rack (3.0.9.1)
+    rack-session (2.0.0)
+      rack (>= 3.0.0)
     rack-test (2.1.0)
       rack (>= 1.3)
-    rackup (1.0.0)
-      rack (< 3)
-      webrick
+    rackup (2.1.0)
+      rack (>= 3)
+      webrick (~> 1.8)
     rails-controller-testing (1.0.5)
       actionpack (>= 5.0.1.rc1)
       actionview (>= 5.0.1.rc1)
@@ -216,9 +217,9 @@ GEM
     rails-html-sanitizer (1.6.0)
       loofah (~> 2.21)
       nokogiri (~> 1.14)
-    railties (7.1.3)
-      actionpack (= 7.1.3)
-      activesupport (= 7.1.3)
+    railties (7.1.3.2)
+      actionpack (= 7.1.3.2)
+      activesupport (= 7.1.3.2)
       irb
       rackup (>= 1.0.0)
       rake (>= 12.2)
@@ -237,7 +238,7 @@ GEM
       railties (>= 6.1.0)
     rexml (3.2.6)
     rtf (0.3.3)
-    rubocop (1.60.2)
+    rubocop (1.61.0)
       json (~> 2.3)
       language_server-protocol (>= 3.17.0)
       parallel (~> 1.10)
@@ -248,8 +249,9 @@ GEM
       rubocop-ast (>= 1.30.0, < 2.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 2.4.0, < 3.0)
-    rubocop-ast (1.30.0)
-      parser (>= 3.2.1.0)
+    rubocop-ast (1.31.0)
+      parser (>= 3.3.0.4)
+      prism (>= 0.24.0)
     rubocop-performance (1.20.2)
       rubocop (>= 1.48.1, < 2.0)
       rubocop-ast (>= 1.30.0, < 2.0)
@@ -296,7 +298,7 @@ GEM
     stimulus-rails (1.3.3)
       railties (>= 6.0.0)
     stringio (3.1.0)
-    terser (1.1.20)
+    terser (1.2.0)
       execjs (>= 0.3.0, < 3)
     thor (1.3.1)
     tilt (2.3.0)
@@ -315,7 +317,7 @@ GEM
       activemodel (>= 6.0.0)
       bindex (>= 0.4.0)
       railties (>= 6.0.0)
-    webmock (3.19.1)
+    webmock (3.23.0)
       addressable (>= 2.8.0)
       crack (>= 0.3.2)
       hashdiff (>= 0.4.0, < 2.0.0)
@@ -341,17 +343,17 @@ PLATFORMS
 
 DEPENDENCIES
   RedCloth
-  actioncable (~> 7.1.2)
-  actionmailer (~> 7.1.2)
-  actionpack (~> 7.1.2)
-  actionview (~> 7.1.2)
-  activejob (~> 7.1.2)
-  activemodel (~> 7.1.2)
-  activerecord (~> 7.1.2)
-  activesupport (~> 7.1.2)
+  actioncable (~> 7.1.3)
+  actionmailer (~> 7.1.3)
+  actionpack (~> 7.1.3)
+  actionview (~> 7.1.3)
+  activejob (~> 7.1.3)
+  activemodel (~> 7.1.3)
+  activerecord (~> 7.1.3)
+  activesupport (~> 7.1.3)
   arel-helpers
   arel_extensions
-  bcrypt (~> 3.1.7)
+  bcrypt
   blankslate
   bootstrap-sass
   brakeman
@@ -359,17 +361,16 @@ DEPENDENCIES
   bullet
   bundler
   cache_with_locale
-  capybara (~> 3.37, >= 3.37.1)
+  capybara
   cuprite
-  dalli (~> 3.2)
   database_cleaner-active_record
-  date (>= 3.2.1)
+  date
   debug (>= 1.0.0)
   fastimage
   i18n
   importmap-rails
   jbuilder
-  loofah (>= 2.19.1)
+  loofah
   mail
   mimemagic
   mini_racer
@@ -380,13 +381,11 @@ DEPENDENCIES
   net-pop
   net-smtp
   newrelic_rpm
-  nokogiri (>= 1.13.10)
-  psych (~> 4)
+  nokogiri
   puma
-  rack (~> 2)
   rails-controller-testing
-  rails-html-sanitizer (>= 1.4.4)
-  railties (~> 7.1.2)
+  rails-html-sanitizer
+  railties (~> 7.1.3)
   redis (~> 4.0)
   requestjs-rails
   rtf
