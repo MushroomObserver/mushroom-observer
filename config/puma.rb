@@ -14,8 +14,8 @@ pidfile             "#{app_path}/tmp/pids/puma.pid"
 state_path          "#{app_path}/tmp/pids/puma.state"
 activate_control_app
 
-on_worker_boot do
-  require "active_record"
-  ActiveRecord::Base.connection.disconnect! rescue ActiveRecord::ConnectionNotEstablished
-  ActiveRecord::Base.establish_connection(YAML.load_file("#{app_path}/config/database.yml")["production"]["primary"])
-end
+# on_worker_boot do
+#   require "active_record"
+#   ActiveRecord::Base.connection.disconnect! rescue ActiveRecord::ConnectionNotEstablished
+#   ActiveRecord::Base.establish_connection(YAML.load_file("#{app_path}/config/database.yml")["production"]["primary"])
+# end
