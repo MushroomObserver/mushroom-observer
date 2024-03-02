@@ -181,6 +181,25 @@ class SiteData
   def self.get_applicable_field(obj)
     field = obj.class.to_s.tableize
     FIELD_WEIGHTS[field] && field
+
+    # table = obj.class.to_s.tableize
+    # field = table.to_sym
+
+    # # not having a field weight: contributing_users, seq, seq_obs
+    # unless FIELD_WEIGHTS[field]
+    #   field = nil
+    #   # try to match it to table above
+    #   FIELD_TABLES.each do |field2, table2|
+    #     next unless table2 == table
+
+    #     proc = FIELD_STATE_PROCS[field2]
+    #     next unless proc&.call(obj)
+
+    #     field = field2
+    #     break
+    #   end
+    # end
+    # field
   end
 
   def self.get_weight_change(_obj, new_field)
