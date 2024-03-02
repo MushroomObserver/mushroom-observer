@@ -356,6 +356,34 @@ class SiteData
   end
   # rubocop:enable Metrics/MethodLength
 
+  def load_field_counts_new(field, user_id = nil)
+    return unless user_id
+
+    table = FIELD_TABLES[field] || field.to_s
+    arel_table = table.to_s.classify.constantize
+
+    case table
+    when "species_list_observations"
+      SpeciesList.joins(:species_list_observations).
+        where(user_id: user_id).group(:user_id).
+        select(Arel.star.count.as("cnt"), :user_id).order(cnt: :desc)
+    when /^(\w+)s_versions/
+      # Trouble: Can't join to table not backed by model
+      # NOTE: arel_table[:column].count(true) == "COUNT DISTINCT column"
+      parent_table = $LAST_MATCH_INFO[1]
+      parent_arel_table = parent_table.classify.constantize
+      parent_arel_table.joins(table.to_sym).
+        where(user_id: user_id).
+        where.not(user_id: "`#{table}`.`user_id`").group(:user_id).
+        select(table[:"#{parent_table}_id"].count(true).as("cnt"), :user_id).
+        order(cnt: :desc)
+    else
+      t_user_id = (table == "users" ? :id : :user_id)
+      arel_table.where("#{t_user_id}": user_id).group(:"#{t_user_id}").
+        select(Arel.star.count.as("cnt"), :"#{t_user_id}").order(cnt: :desc)
+    end
+  end
+
   # Load all the stats for a given User.  (Load for all User's if none given.)
   #
   #   load_user_data(user.id)
