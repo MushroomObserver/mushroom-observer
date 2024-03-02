@@ -190,11 +190,12 @@ class SiteData
   def self.update_weight(impact, user_id)
     return if impact.zero?
 
-    User.connection.update(%(
-      UPDATE users SET contribution =
-        IF(contribution IS NULL, #{impact}, contribution + #{impact})
-      WHERE id = #{user_id}
-    ))
+    # User.connection.update(%(
+    #   UPDATE users SET contribution =
+    #     IF(contribution IS NULL, #{impact}, contribution + #{impact})
+    #   WHERE id = #{user_id}
+    # ))
+    User.find(user_id).increment!(:contribution, impact)
   end
 
   def self.get_applicable_field(obj)
@@ -361,38 +362,44 @@ class SiteData
   #   user.contribution = @user_data[user.id][:metric]
   #
   def load_user_data(id = nil)
-    if id
-      @user_id = id.to_i
-      users = [User.find(id)]
-    else
-      @user_id = nil
-      users = User.all
-    end
+    return unless id
+
+    # if id
+    #   @user_id = id.to_i
+    #   user = [User.find(id)]
+    # else
+    #   @user_id = nil
+    #   users = User.all
+    # end
+
+    @user_id = id.to_i
+    user = User.find(id)
 
     # Prime @user_data structure.
     @user_data = {}
-    users.each do |user|
-      @user_data[user.id] = {
-        id: user.id,
-        name: user.unique_text_name,
-        bonuses: user.sum_bonuses
-      }
-      add_language_contributions(user)
-    end
+    # users.each do |user|
+    @user_data[user.id] = {
+      id: user.id,
+      name: user.unique_text_name,
+      bonuses: user.sum_bonuses
+    }
+    add_language_contributions(user)
+    # end
 
     # Load record counts for each category of individual user data.
     (ALL_FIELDS - SITE_WIDE_FIELDS).each { |field| load_field_counts(field) }
 
     # Calculate full contribution for each user.  This will also correct some
     # double-counting of versioned records.
-    users.each do |user|
-      contribution = calc_metric(@user_data[user.id])
-      # Make sure contribution caches are correct.
-      if user.contribution != contribution
-        user.contribution = contribution
-        user.save
-      end
-    end
+    # users.each do |user|
+    contribution = calc_metric(@user_data[user.id])
+    # Make sure contribution caches are correct.
+    return unless user.contribution != contribution
+
+    user.contribution = contribution
+    user.save
+    # end
+    # end
   end
 
   def add_language_contributions(user)
