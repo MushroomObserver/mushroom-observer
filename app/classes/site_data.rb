@@ -78,8 +78,6 @@ class SiteData
     :species_lists,
     :species_list_entries,
     :observations,
-    #     :observations_with_voucher,
-    #     :observations_without_voucher,
     :sequenced_observations,
     :sequences,
     :comments,
@@ -106,8 +104,6 @@ class SiteData
     names_versions: 10,
     namings: 1,
     observations: 1,
-    #     observations_with_voucher:     10,
-    #     observations_without_voucher:  1,
     sequences: 0,
     sequenced_observations: 0,
     species_list_entries: 1,
@@ -116,11 +112,9 @@ class SiteData
     votes: 1
   }.freeze
 
-  # Table to query to get score for each category.  (Default is same as the
-  # category name.)
+  # Table to query to get score for each category.
+  # (Default is same as the category name.)
   FIELD_TABLES = {
-    # observations_with_voucher: "observations",
-    # observations_without_voucher: "observations",
     sequenced_observations: "sequences",
     species_list_entries: "species_list_observations",
     contributing_users: "users"
@@ -128,44 +122,17 @@ class SiteData
 
   # Additional conditions to use for each category.
   FIELD_CONDITIONS = {
-    # observations_with_voucher:
-    #   "specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL",
-    # observations_without_voucher:
-    #   "NOT(specimen IS TRUE AND LENGTH(notes) >= 10" \
-    #   "AND thumb_image_id IS NOT NULL )",
     users: "`verified` IS NOT NULL",
     contributing_users: "contribution > 0"
   }.freeze
 
   # Non-default unified queries for stats for the entire site
-  # Rubocop 1.30.0 wants to allgn "where" with the open brace on the next line.
   FIELD_QUERIES = {
     contributing_users: User.where(contribution: 1..),
-    # observations_with_voucher:
-    #   Observation.
-    #     where(specimen: true).
-    #     where(Observation[:notes].length >= 10).
-    #     where.not(thumb_image_id: nil),
-    # observations_without_voucher:
-    #   Observation.
-    #     where(specimen: false).
-    #     where(Observation[:notes].length >= 10).
-    #     where.not(thumb_image_id: nil),
     sequenced_observations: Sequence.select(:observation_id).distinct,
     species_list_entries: SpeciesListObservation,
     users: User.where.not(verified: nil)
   }.freeze
-  # Call these procs to determine if a given object qualifies for a given field.
-  # FIELD_STATE_PROCS = {
-  #   observations_with_voucher: lambda do |obs|
-  #     obs.specimen && obs.notes.to_s.length >= 10 &&
-  #       obs.thumb_image_id.to_i.positive?
-  #   end,
-  #   observations_without_voucher: lambda do |obs|
-  #     !(obs.specimen && obs.notes.to_s.length >= 10 &&
-  #       obs.thumb_image_id.to_i.positive?)
-  #   end
-  # }.freeze
 
   # -----------------------------
   #  :section: Public Interface
@@ -178,14 +145,10 @@ class SiteData
   # points for observations with vouchers, which won't be done right until
   # someone looks at that user's summary page.
   def self.update_contribution(mode, obj, user_id = nil, num = 1)
-    # Two modes: 1) pass in object, 2) pass in field name
+    # Two modes: 1) pass in object, 2) pass in field name, when it's not ::model
     if obj.is_a?(ActiveRecord::Base)
       field = get_applicable_field(obj)
-      user_id ||= begin
-                    obj.user_id
-                  rescue StandardError
-                    nil
-                  end
+      user_id ||= obj&.user_id
     else
       field = obj
       user_id ||= User.current_id
@@ -194,6 +157,7 @@ class SiteData
     return unless weight&.positive? && user_id&.positive?
 
     update_weight(calc_impact(weight * num, mode, obj, field), user_id)
+    UserStats.where(id: user_id).increment!(field, by: num)
   end
 
   def self.calc_impact(weight, mode, obj, field)
@@ -210,45 +174,17 @@ class SiteData
   def self.update_weight(impact, user_id)
     return if impact.zero?
 
-    # User.connection.update(%(
-    #   UPDATE users SET contribution =
-    #     IF(contribution IS NULL, #{impact}, contribution + #{impact})
-    #   WHERE id = #{user_id}
-    # ))
-
-    # REDO IN AR
-    # User.contribution is non-nullable and defaults to zero
-
     User.find(user_id).increment(:contribution, impact)
   end
 
+  # An applicable field is a field that affects contribution
   def self.get_applicable_field(obj)
-    table = obj.class.to_s.tableize
-    field = table.to_sym
-    unless FIELD_WEIGHTS[field]
-      field = nil
-      FIELD_TABLES.each do |field2, table2|
-        next unless table2 == table
-
-        # proc = FIELD_STATE_PROCS[field2]
-        # next unless proc&.call(obj)
-
-        field = field2
-        break
-      end
-    end
-    field
+    field = obj.class.to_s.tableize
+    FIELD_WEIGHTS[field] && field
   end
 
   def self.get_weight_change(_obj, new_field)
     old_field = new_field
-    # if FIELD_STATE_PROCS[new_field]
-    #   obj_copy = obj.clone
-    #   obj.changes.each do |attr, val_pair|
-    #     obj_copy[attr] = val_pair.first
-    #   end
-    #   old_field = get_applicable_field(obj_copy)
-    # end
     FIELD_WEIGHTS[new_field] - FIELD_WEIGHTS[old_field]
   end
 
@@ -273,19 +209,6 @@ class SiteData
   def get_user_data(id)
     load_user_data(id)
     @user_data[@user_id]
-  end
-
-  # Load stats for all User's.  Returns nothing.  Use get_user_data to query
-  # individual User's stats.  (This is probably prohibitively expensive.)
-  #
-  #   data = SiteData.new
-  #   data.get_all_user_data
-  #   for user in user_list
-  #     hash = data.get_user_data(user.id)
-  #   end
-  #
-  def get_all_user_data
-    load_user_data(nil)
   end
 
   # ----------------------------
@@ -334,25 +257,20 @@ class SiteData
   end
 
   # Do a query to get the number of records in a given category broken down
-  # by User.  This is cached in @user_data.  Gets for a single User, or if
-  # none passed in, gets stats for eve`ry User.
+  # by User.  This is cached in @user_data.
   #
   #   # Get number of images for current user.
   #   load_field_counts(:images, User.current.id)
   #   num_images = @user_data[User.current.id][:images]
   #
-  #   # Get number of images for all users.
-  #   load_field_counts(:images)
-  #   for user_id User.all.map(&;id)
-  #     num_images = @user_data[user_id][:images]
-  #   end
-  #
   def load_field_counts(field, user_id = nil)
+    return unless user_id
+
     count  = "*"
     table  = FIELD_TABLES[field] || field.to_s
     tables = "#{table} t"
     t_user_id = (table == "users" ? "t.id " : "t.user_id ")
-    conditions = t_user_id + (user_id ? "= #{user_id}" : "> 0")
+    conditions = t_user_id + "= #{user_id}"
 
     # Exception for species list entries.
     if field == :species_list_entries
