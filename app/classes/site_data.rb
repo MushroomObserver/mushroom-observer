@@ -35,7 +35,7 @@
 #      },
 #    }
 #
-#
+# rubocop:disable Metrics/ClassLength
 class SiteData
   ##############################################################################
   #
@@ -79,8 +79,6 @@ class SiteData
     :species_lists,
     :species_list_entries,
     :observations,
-    #     :observations_with_voucher,
-    #     :observations_without_voucher,
     :sequenced_observations,
     :sequences,
     :comments,
@@ -107,8 +105,6 @@ class SiteData
     names_versions: 10,
     namings: 1,
     observations: 1,
-    #     observations_with_voucher:     10,
-    #     observations_without_voucher:  1,
     sequences: 0,
     sequenced_observations: 0,
     species_list_entries: 1,
@@ -120,8 +116,6 @@ class SiteData
   # Table to query to get score for each category.  (Default is same as the
   # category name.)
   FIELD_TABLES = {
-    observations_with_voucher: "observations",
-    observations_without_voucher: "observations",
     sequenced_observations: "sequences",
     species_list_entries: "species_list_observations",
     contributing_users: "users"
@@ -129,54 +123,29 @@ class SiteData
 
   # Additional conditions to use for each category.
   FIELD_CONDITIONS = {
-    observations_with_voucher:
-      "specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL",
-    observations_without_voucher:
-      "NOT(specimen IS TRUE AND LENGTH(notes) >= 10" \
-      "AND thumb_image_id IS NOT NULL )",
     users: "`verified` IS NOT NULL",
     contributing_users: "contribution > 0"
   }.freeze
 
   # Non-default unified queries for stats for the entire site
-  # rubocop:disable Layout/MultilineMethodCallIndentation
-  # Rubocop 1.30.0 wants to allgn "where" with the open brace on the next line.
   FIELD_QUERIES = {
-    contributing_users:
-      User.
-        where(contribution: 1..),
-    observations_with_voucher:
-      Observation.
-        where(specimen: true).
-        where(Observation[:notes].length >= 10).
-        where.not(thumb_image_id: nil),
-    observations_without_voucher:
-      Observation.
-        where(specimen: false).
-        where(Observation[:notes].length >= 10).
-        where.not(thumb_image_id: nil),
-    sequenced_observations:
-      Sequence.
-        select(:observation_id).distinct,
-    species_list_entries:
-      SpeciesListObservation,
-    users:
-      User.
-        where.not(verified: nil)
+    contributing_users: User.where(contribution: 1..),
+    sequenced_observations: Sequence.select(:observation_id).distinct,
+    species_list_entries: SpeciesListObservation,
+    users: User.where.not(verified: nil)
   }.freeze
-  # rubocop:enable Layout/MultilineMethodCallIndentation
 
   # Call these procs to determine if a given object qualifies for a given field.
-  FIELD_STATE_PROCS = {
-    observations_with_voucher: lambda do |obs|
-      obs.specimen && obs.notes.to_s.length >= 10 &&
-        obs.thumb_image_id.to_i.positive?
-    end,
-    observations_without_voucher: lambda do |obs|
-      !(obs.specimen && obs.notes.to_s.length >= 10 &&
-        obs.thumb_image_id.to_i.positive?)
-    end
-  }.freeze
+  # FIELD_STATE_PROCS = {
+  #   observations_with_voucher: lambda do |obs|
+  #     obs.specimen && obs.notes.to_s.length >= 10 &&
+  #       obs.thumb_image_id.to_i.positive?
+  #   end,
+  #   observations_without_voucher: lambda do |obs|
+  #     !(obs.specimen && obs.notes.to_s.length >= 10 &&
+  #       obs.thumb_image_id.to_i.positive?)
+  #   end
+  # }.freeze
 
   # -----------------------------
   #  :section: Public Interface
@@ -204,15 +173,15 @@ class SiteData
     weight = FIELD_WEIGHTS[field]
     return unless weight&.positive? && user_id&.positive?
 
-    update_weight(calc_impact(weight * num, mode, obj, field), user_id)
+    update_weight(calc_impact(weight * num, mode), user_id)
   end
 
-  def self.calc_impact(weight, mode, obj, field)
+  def self.calc_impact(weight, mode)
     case mode
     when :del
       -weight
     when :chg
-      get_weight_change(obj, field)
+      0 # get_weight_change(obj, field)
     else
       weight
     end
@@ -231,13 +200,14 @@ class SiteData
   def self.get_applicable_field(obj)
     table = obj.class.to_s.tableize
     field = table.to_sym
+    # no field weight: contributing_users, seq, seq_obs
     unless FIELD_WEIGHTS[field]
       field = nil
       FIELD_TABLES.each do |field2, table2|
         next unless table2 == table
 
-        proc = FIELD_STATE_PROCS[field2]
-        next unless proc&.call(obj)
+        # proc = FIELD_STATE_PROCS[field2]
+        # next unless proc&.call(obj)
 
         field = field2
         break
@@ -246,17 +216,11 @@ class SiteData
     field
   end
 
-  def self.get_weight_change(obj, new_field)
-    old_field = new_field
-    if FIELD_STATE_PROCS[new_field]
-      obj_copy = obj.clone
-      obj.changes.each do |attr, val_pair|
-        obj_copy[attr] = val_pair.first
-      end
-      old_field = get_applicable_field(obj_copy)
-    end
-    FIELD_WEIGHTS[new_field] - FIELD_WEIGHTS[old_field]
-  end
+  # This makes no sense without field procs!
+  # def self.get_weight_change(obj, new_field)
+  #   old_field = new_field
+  #   FIELD_WEIGHTS[new_field] - FIELD_WEIGHTS[old_field]
+  # end
 
   # Return stats for entire site. Returns simple hash mapping category to
   # number of records of that category.
@@ -281,19 +245,6 @@ class SiteData
     @user_data[@user_id]
   end
 
-  # Load stats for all User's.  Returns nothing.  Use get_user_data to query
-  # individual User's stats.  (This is probably prohibitively expensive.)
-  #
-  #   data = SiteData.new
-  #   data.get_all_user_data
-  #   for user in user_list
-  #     hash = data.get_user_data(user.id)
-  #   end
-  #
-  def get_all_user_data
-    load_user_data(nil)
-  end
-
   # ----------------------------
   #  :section: Private Helpers
   # ----------------------------
@@ -313,20 +264,20 @@ class SiteData
   # :doc:
   def calc_metric(data)
     metric = 0
-    if data
-      ALL_FIELDS.each do |field|
-        next unless data[field]
+    return metric unless data
 
-        # This fixes the double-counting of created records.
-        if field.to_s =~ /^(\w+)_versions$/
-          data[field] -= data[Regexp.last_match(1)] || 0
-        end
-        metric += FIELD_WEIGHTS[field] * data[field]
+    ALL_FIELDS.each do |field|
+      next unless data[field]
+
+      # This fixes the double-counting of created records.
+      if field.to_s =~ /^(\w+)_versions$/
+        data[field] -= data[Regexp.last_match(1)] || 0
       end
-      metric += data[:languages].to_i
-      metric += data[:bonuses].to_i
-      data[:metric] = metric
+      metric += FIELD_WEIGHTS[field] * data[field]
     end
+    metric += data[:languages].to_i
+    metric += data[:bonuses].to_i
+    data[:metric] = metric
     metric
   end
 
@@ -340,8 +291,7 @@ class SiteData
   end
 
   # Do a query to get the number of records in a given category broken down
-  # by User.  This is cached in @user_data.  Gets for a single User, or if
-  # none passed in, gets stats for eve`ry User.
+  # by User.  This is cached in @user_data.  Gets for a single User,
   #
   #   # Get number of images for current user.
   #   load_field_counts(:images, User.current.id)
@@ -352,13 +302,15 @@ class SiteData
   #   for user_id User.all.map(&;id)
   #     num_images = @user_data[user_id][:images]
   #   end
-  #
+  # rubocop:disable Metrics/MethodLength
   def load_field_counts(field, user_id = nil)
+    return unless user_id
+
     count  = "*"
     table  = FIELD_TABLES[field] || field.to_s
     tables = "#{table} t"
     t_user_id = (table == "users" ? "t.id " : "t.user_id ")
-    conditions = t_user_id + (user_id ? "= #{user_id}" : "> 0")
+    conditions = t_user_id + "= #{user_id}"
 
     # Exception for species list entries.
     if field == :species_list_entries
@@ -401,6 +353,7 @@ class SiteData
       @user_data[usr_id.to_i][field] = cnt.to_i
     end
   end
+  # rubocop:enable Metrics/MethodLength
 
   # Load all the stats for a given User.  (Load for all User's if none given.)
   #
@@ -453,3 +406,4 @@ class SiteData
       language_contributions.select { |_lang, score| score.positive? }
   end
 end
+# rubocop:enable Metrics/ClassLength

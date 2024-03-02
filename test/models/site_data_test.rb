@@ -35,12 +35,6 @@ class SiteDataTest < UnitTestCase
     )
   end
 
-  def test_all_user_data
-    all_user_data = SiteData.new.get_all_user_data
-
-    assert_equal(User.count, all_user_data.length)
-  end
-
   # def test_two_tiered_observation_scoring
   #   score = rolf.contribution
   #
