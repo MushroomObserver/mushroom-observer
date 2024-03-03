@@ -48,7 +48,6 @@ class SiteData
   #  ALL_FIELDS::       List of category names, in order.
   #  FIELD_WEIGHTS::    Weight of each category: number of points per record.
   #  FIELD_TABLES::     Table to query.
-  #  FIELD_CONDITIONS:: Additional conditions.
   #
   #  The default query for stats for the entire site is:
   #
@@ -122,10 +121,10 @@ class SiteData
   }.freeze
 
   # Additional conditions to use for each category.
-  FIELD_CONDITIONS = {
-    users: "`verified` IS NOT NULL",
-    contributing_users: "contribution > 0"
-  }.freeze
+  # FIELD_CONDITIONS = {
+  #   users: "`verified` IS NOT NULL",
+  #   contributing_users: "contribution > 0"
+  # }.freeze
 
   # Non-default unified queries for stats for the entire site
   FIELD_QUERIES = {
@@ -303,85 +302,53 @@ class SiteData
   #   for user_id User.all.map(&;id)
   #     num_images = @user_data[user_id][:images]
   #   end
-  # rubocop:disable Metrics/MethodLength
   def load_field_counts(field, user_id = nil)
     return unless user_id
 
-    count  = "*"
-    table  = FIELD_TABLES[field] || field.to_s
-    tables = "#{table} t"
-    t_user_id = (table == "users" ? "t.id " : "t.user_id ")
-    conditions = t_user_id + "= #{user_id}"
+    table = FIELD_TABLES[field] || field.to_s
 
-    # Exception for species list entries.
-    if field == :species_list_entries
-      tables = "species_lists t, #{table} os"
-      conditions += " AND os.species_list_id = t.id"
-    end
+    data = case table
+           when "species_list_observations"
+             count_species_list_observations(user_id)
+           when /^(\w+)s_versions/
+             parent_table = $LAST_MATCH_INFO[1]
+             count_versions(parent_table, user_id)
+           else
+             count_regular_field(table, user_id)
+           end
 
-    # Exception for past versions.
-    if table =~ /^(\w+)s_versions/
-      parent = Regexp.last_match(1)
-      count = "DISTINCT #{parent}_id"
-      tables += ", #{parent}s p"
-      conditions += " AND t.#{parent}_id = p.id"
-      conditions += " AND #{t_user_id} != p.user_id"
-    end
-
-    if (extra_conditions = FIELD_CONDITIONS[field])
-      conditions += " AND (#{extra_conditions})"
-    end
-
-    query = %(
-      SELECT COUNT(#{count}) AS cnt, #{t_user_id}
-      FROM #{tables}
-      WHERE #{conditions}
-      GROUP BY #{t_user_id}
-      ORDER BY cnt DESC
-    )
-
-    # Get data as:
-    #   data = [
-    #     [count, user_id],
-    #     [count, user_id],
-    #     ...
-    #   ]
-    data = User.connection.select_rows(query)
-
-    # Fill in @user_data structure.
     data.each do |cnt, usr_id|
       @user_data[usr_id.to_i] ||= {}
       @user_data[usr_id.to_i][field] = cnt.to_i
     end
   end
-  # rubocop:enable Metrics/MethodLength
 
-  def load_field_counts_new(field, user_id = nil)
-    return unless user_id
+  def count_species_list_observations(user_id)
+    SpeciesList.joins(:species_list_observations).
+      where(user_id: user_id).group(:user_id).
+      select(Arel.star.count.as("cnt"), :user_id).order(cnt: :desc)
+  end
 
-    table = FIELD_TABLES[field] || field.to_s
-    arel_table = table.to_s.classify.constantize
+  def count_versions(parent_table, user_id)
+    parent_class = parent_table.classify.constantize
+    version_class = "#{parent_class}::Version".constantize
+    parent_id = "#{parent_table}_id"
 
-    case table
-    when "species_list_observations"
-      SpeciesList.joins(:species_list_observations).
-        where(user_id: user_id).group(:user_id).
-        select(Arel.star.count.as("cnt"), :user_id).order(cnt: :desc)
-    when /^(\w+)s_versions/
-      # Trouble: Can't join to table not backed by model
-      # NOTE: arel_table[:column].count(true) == "COUNT DISTINCT column"
-      parent_table = $LAST_MATCH_INFO[1]
-      parent_arel_table = parent_table.classify.constantize
-      parent_arel_table.joins(table.to_sym).
-        where(user_id: user_id).
-        where.not(user_id: "`#{table}`.`user_id`").group(:user_id).
-        select(table[:"#{parent_table}_id"].count(true).as("cnt"), :user_id).
-        order(cnt: :desc)
-    else
-      t_user_id = (table == "users" ? :id : :user_id)
-      arel_table.where("#{t_user_id}": user_id).group(:"#{t_user_id}").
-        select(Arel.star.count.as("cnt"), :"#{t_user_id}").order(cnt: :desc)
-    end
+    parent_class.joins(:versions).
+      where(user_id: user_id).
+      where.not(parent_class[:user_id].eq(version_class[:user_id])).
+      group(:user_id).
+      # NOTE: arel_table[:column].count(true) means "COUNT DISTINCT column"
+      select(version_class[:"#{parent_id}"].count(true).as("cnt"), :user_id).
+      order(cnt: :desc)
+  end
+
+  def count_regular_field(table, user_id)
+    field_class = table.to_s.classify.constantize
+    t_user_id = (table == "users" ? :id : :user_id)
+
+    field_class.where("#{t_user_id}": user_id).group(:"#{t_user_id}").
+      select(Arel.star.count.as("cnt"), :"#{t_user_id}").order(cnt: :desc)
   end
 
   # Load all the stats for a given User.  (Load for all User's if none given.)
@@ -404,7 +371,7 @@ class SiteData
     user = User.find(id)
 
     # Prime @user_data structure.
-    @user_data = {}
+    @user_data ||= {}
     # users.each do |user|
     @user_data[user.id] = {
       id: user.id,
