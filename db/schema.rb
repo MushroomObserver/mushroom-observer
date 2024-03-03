@@ -102,7 +102,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_31_201441) do
     t.boolean "locked", default: false, null: false
   end
 
-  create_table "glossary_terms_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+  create_table "glossary_term_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "glossary_term_id"
     t.integer "version"
     t.integer "user_id"
@@ -239,7 +239,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_31_201441) do
     t.integer "project_id"
   end
 
-  create_table "location_descriptions_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+  create_table "location_description_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "location_description_id"
     t.integer "version"
     t.datetime "updated_at", precision: nil
@@ -275,7 +275,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_31_201441) do
     t.boolean "locked", default: false, null: false
   end
 
-  create_table "locations_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+  create_table "location_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.string "location_id"
     t.integer "version"
     t.datetime "updated_at", precision: nil
@@ -345,7 +345,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_31_201441) do
     t.integer "project_id"
   end
 
-  create_table "name_descriptions_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+  create_table "name_description_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "name_description_id"
     t.integer "version"
     t.datetime "updated_at", precision: nil
@@ -400,7 +400,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_31_201441) do
     t.index ["synonym_id"], name: "synonym_index"
   end
 
-  create_table "names_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+  create_table "name_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "name_id"
     t.integer "version"
     t.datetime "updated_at", precision: nil
@@ -627,7 +627,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_31_201441) do
     t.integer "user_id"
   end
 
-  create_table "translation_strings_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+  create_table "translation_string_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "version"
     t.integer "translation_string_id"
     t.text "text"

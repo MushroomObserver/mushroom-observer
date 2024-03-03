@@ -100,7 +100,7 @@
 #
 #  == Version
 #
-#  Changes are kept in the "names_versions" table using
+#  Changes are kept in the "name_versions" table using
 #  ActiveRecord::Acts::Versioned.
 #
 #  == Attributes
@@ -391,7 +391,7 @@ class Name < AbstractModel
   has_many :observations
 
   acts_as_versioned(
-    table_name: "names_versions",
+    # table_name: "name_versions",
     if_changed: %w[
       rank
       text_name
@@ -452,7 +452,7 @@ class Name < AbstractModel
     if (ver.version != 1) &&
        Name::Version.where(name_id: ver.name_id,
                            user_id: ver.user_id).none?
-      SiteData.update_contribution(:add, :names_versions)
+      SiteData.update_contribution(:add, :name_versions)
     end
   end
 

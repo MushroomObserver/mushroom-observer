@@ -70,11 +70,11 @@ class SiteData
     :name_description_authors,
     :name_description_editors,
     :names,
-    :names_versions,
+    :name_versions,
     :location_description_authors,
     :location_description_editors,
     :locations,
-    :locations_versions,
+    :location_versions,
     :images,
     :species_lists,
     :species_list_entries,
@@ -100,11 +100,11 @@ class SiteData
     location_description_authors: 50,
     location_description_editors: 5,
     locations: 10,
-    locations_versions: 5,
+    location_versions: 5,
     name_description_authors: 100,
     name_description_editors: 10,
     names: 10,
-    names_versions: 10,
+    name_versions: 10,
     namings: 1,
     observations: 1,
     #     observations_with_voucher:     10,
@@ -333,7 +333,7 @@ class SiteData
   # Do a query for the number of records in a given category for the entire
   # site. This is not cached. Most of these should be inexpensive queries.
   def field_count(field)
-    return 0 if /^(\w+)s_versions/.match?(field.to_s)
+    return 0 if /^(\w+)_versions/.match?(field.to_s)
 
     # constantize is safe here because `field` is not user input
     FIELD_QUERIES[field]&.count || field.to_s.classify.constantize.count
@@ -367,7 +367,7 @@ class SiteData
     end
 
     # Exception for past versions.
-    if table =~ /^(\w+)s_versions/
+    if table =~ /^(\w+)_versions/
       parent = Regexp.last_match(1)
       count = "DISTINCT #{parent}_id"
       tables += ", #{parent}s p"
