@@ -993,11 +993,11 @@
   user_stats_location_description_authors: "[:LOCATION_DESCRIPTIONS] Authored"
   user_stats_location_description_editors: "[:LOCATION_DESCRIPTIONS] Edited"
   user_stats_locations: "[:LOCATIONS] Created"
-  user_stats_location_versions: "[:LOCATIONS] Edited"
+  user_stats_locations_versions: "[:LOCATIONS] Edited"
   user_stats_name_description_authors: "[:NAME_DESCRIPTIONS] Authored"
   user_stats_name_description_editors: "[:NAME_DESCRIPTIONS] Edited"
   user_stats_names: "[:NAMES] Created"
-  user_stats_name_versions: "[:NAMES] Edited"
+  user_stats_names_versions: "[:NAMES] Edited"
   user_stats_namings: Proposed IDs
   user_stats_observations: "[:OBSERVATIONS]"
   user_stats_observations_with_voucher: Observations with Specimen, Notes and Images
@@ -1017,11 +1017,11 @@
   site_stats_location_description_authors: Authored [:LOCATION_DESCRIPTIONS]
   site_stats_location_description_editors: ""
   site_stats_locations: Defined [:LOCATIONS]
-  site_stats_location_versions: ""
+  site_stats_locations_versions: ""
   site_stats_name_description_authors: Authored [:NAME_DESCRIPTIONS]
   site_stats_name_description_editors: ""
   site_stats_names: ""
-  site_stats_name_versions: ""
+  site_stats_names_versions: ""
   site_stats_namings: Proposed IDs
   site_stats_observations: "[:OBSERVATIONS]"
   site_stats_observations_with_voucher: Observations with Full Data
