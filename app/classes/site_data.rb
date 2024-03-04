@@ -81,13 +81,40 @@ class SiteData
     species_list_entries: { weight: 1, table: :species_list_observations },
     observations: { weight: 1 },
     sequenced_observations: { weight: 0, table: :sequences },
+    listed_taxa: { weight: 0 },
+    observed_taxa: { weight: 0 },
     sequences: { weight: 0 },
-    comments: { weight: 1 },
     namings: { weight: 1 },
+    comments: { weight: 1 },
     votes: { weight: 1 },
     users: { weight: 0 },
     contributing_users: { weight: 0, table: :users }
   }.freeze
+
+  SITE_WIDE_ONLY_FIELDS = [
+    :listed_taxa,
+    :observed_taxa,
+    :users,
+    :contributing_users
+  ].freeze
+
+  SITE_WIDE_FIELDS = [
+    :images,
+    :observations,
+    :sequences,
+    :sequenced_observations,
+    :listed_taxa,
+    :observed_taxa,
+    :name_description_authors,
+    :locations,
+    :location_description_authors,
+    :species_lists,
+    :species_list_entries,
+    :namings,
+    :comments,
+    :votes,
+    :contributing_users
+  ].freeze
 
   # -----------------------------
   #  :section: Public Interface
@@ -95,7 +122,7 @@ class SiteData
 
   # Fields that should appear on a user page
   def self.user_fields
-    ALL_FIELDS.except([:users, :contributing_users])
+    ALL_FIELDS.except(*SITE_WIDE_ONLY_FIELDS)
   end
 
   def self.fields_with_weight
@@ -224,6 +251,10 @@ class SiteData
       SpeciesListObservation.count
     when :sequenced_observations
       Sequence.select(:observation_id).distinct.count
+    when :listed_taxa
+      Name.count
+    when :observed_taxa
+      Observation.select(:name_id).distinct.count
     when :contributing_users
       User.where(contribution: 1..).count
     when :users
