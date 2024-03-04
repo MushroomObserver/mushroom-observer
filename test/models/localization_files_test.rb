@@ -222,7 +222,7 @@ class LocalizationFilesTest < UnitTestCase
   end
 
   def test_site_data_translations
-    tags = SiteData::ALL_FIELDS.map do |field|
+    tags = SiteData::ALL_FIELDS.keys.map do |field|
       [
         :"user_stats_#{field}",
         :"site_stats_#{field}"

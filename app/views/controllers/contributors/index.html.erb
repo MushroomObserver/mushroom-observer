@@ -17,19 +17,19 @@ add_tab_set(contributors_index_tabs)
       <div class="list-group-item">
 
         <%= :users_by_contribution_1.tp %>
-        <% SiteData::ALL_FIELDS.select { |f| SiteData::FIELD_WEIGHTS[f] > 0}.each do |field| %>
+        <% SiteData.fields_with_weight.keys.each do |field| %>
           <div class="row">
             <div class="col-xs-8 col-xs-push-1"><%= "user_stats_#{field}".to_sym.t %> </div>
-            <div class="col-xs-2"><%= SiteData::FIELD_WEIGHTS[field] %></div>
+            <div class="col-xs-2"><%= SiteData::ALL_FIELDS[field][:weight] %></div>
           </div><!--.row-->
         <% end %>
         <p class="pt-3"><%= :users_by_contribution_2.t %></p>
         <%
-          v1 = SiteData::FIELD_WEIGHTS[:images]
-          v2 = SiteData::FIELD_WEIGHTS[:name_description_editors]
-          v3 = SiteData::FIELD_WEIGHTS[:observations]
-          v4 = SiteData::FIELD_WEIGHTS[:namings]
-          v5 = SiteData::FIELD_WEIGHTS[:votes]
+          v1 = SiteData::ALL_FIELDS[:images][:weight]
+          v2 = SiteData::ALL_FIELDS[:name_description_editors][:weight]
+          v3 = SiteData::ALL_FIELDS[:observations][:weight]
+          v4 = SiteData::ALL_FIELDS[:namings][:weight]
+          v5 = SiteData::ALL_FIELDS[:votes][:weight]
         %>
         <div class="row">
           <div class="col-xs-3 col-xs-push-1">&nbsp; &nbsp;3 * <%= v1 %></div>

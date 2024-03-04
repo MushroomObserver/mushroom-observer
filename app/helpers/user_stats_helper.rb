@@ -5,15 +5,12 @@ module UserStatsHelper
   # Rows are roughly in decreasing order of importance.
   def user_stats_rows(show_user, user_data)
     rows = []
-    # omit sequence stuff because it has no weight
-    (SiteData::ALL_FIELDS -
-    SiteData::SITE_WIDE_FIELDS -
-    [:sequences, :sequenced_observations]).each do |field|
+    SiteData.user_fields_with_weight.keys.each do |field|
       rows << {
         field: field,
         label: :"user_stats_#{field}".t,
         count: (count = user_data[field].to_i),
-        weight: (weight = SiteData::FIELD_WEIGHTS[field]),
+        weight: (weight = SiteData::ALL_FIELDS[field][:weight]),
         points: count * weight
       }
     end
