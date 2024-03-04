@@ -8,7 +8,7 @@
 #
 #  == Version
 #
-#  Changes are kept in the "locations_versions" table using
+#  Changes are kept in the "location_versions" table using
 #  ActiveRecord::Acts::Versioned.
 #
 #  == Attributes
@@ -108,7 +108,6 @@ class Location < AbstractModel
   has_many :users        # via profile location
 
   acts_as_versioned(
-    table_name: "locations_versions",
     if_changed: %w[
       name
       north
@@ -145,7 +144,7 @@ class Location < AbstractModel
        Location::Version.where(
          location_id: ver.location_id, user_id: ver.user_id
        ).count.zero?
-      SiteData.update_contribution(:add, :locations_versions)
+      SiteData.update_contribution(:add, :location_versions)
     end
   end
 
@@ -748,7 +747,7 @@ class Location < AbstractModel
     # Update contributions for editors.
     editors.delete(old_loc.user_id)
     editors.uniq.each do |user_id|
-      SiteData.update_contribution(:del, :locations_versions, user_id)
+      SiteData.update_contribution(:del, :location_versions, user_id)
     end
 
     # Finally destroy the location.

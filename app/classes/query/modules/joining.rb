@@ -99,7 +99,7 @@ module Query
           location_descriptions: :location_description_id,
           user_groups: :user_group_id
         },
-        location_descriptions_versions: {
+        location_description_versions: {
           location_descriptions: :location_description_id
         },
         location_description_writers: {
@@ -112,7 +112,7 @@ module Query
           rss_logs: :rss_log_id,
           users: :user_id
         },
-        locations_versions: {
+        location_versions: {
           locations: :location_id
         },
         name_descriptions: {
@@ -135,7 +135,7 @@ module Query
           name_descriptions: :name_description_id,
           user_groups: :user_group_id
         },
-        name_descriptions_versions: {
+        name_description_versions: {
           name_descriptions: :name_description_id
         },
         name_description_writers: {
@@ -149,7 +149,7 @@ module Query
           users: :user_id,
           "users.reviewer": :reviewer_id
         },
-        names_versions: {
+        name_versions: {
           names: :name_id
         },
         name_trackers: {

@@ -222,12 +222,14 @@ class LocalizationFilesTest < UnitTestCase
   end
 
   def test_site_data_translations
-    tags = SiteData::ALL_FIELDS.map do |field|
-      [
-        :"user_stats_#{field}",
-        :"site_stats_#{field}"
-      ]
-    end.flatten - [:user_stats_users] # not picking this up for some reason...
+    site_tags = SiteData::SITE_WIDE_FIELDS.map do |field|
+      :"site_stats_#{field}"
+    end
+    user_tags = SiteData.user_fields.keys.map do |field|
+      :"user_stats_#{field}"
+    end
+    # not picking :user_stats_users up for some reason...
+    tags = site_tags + user_tags - [:user_stats_users]
     assert_no_missing_translations(tags, "site data field")
   end
 end
