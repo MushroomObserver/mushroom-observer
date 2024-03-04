@@ -27,7 +27,7 @@ class TranslationString < AbstractModel
   belongs_to :user
 
   acts_as_versioned(
-    table_name: "translation_strings_versions",
+    # table_name: "translation_string_versions",
     if: :update_version?
   )
   non_versioned_columns.push(
