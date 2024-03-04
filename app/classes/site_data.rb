@@ -178,10 +178,9 @@ class SiteData
   end
 
   def self.get_applicable_field(obj)
-    table = obj.class.to_s.tableize
-    field = table.to_sym
+    table = obj.class.to_s.tableize.to_sym
 
-    ALL_FIELDS.key?(field) ? (ALL_FIELDS[field][:table] || field) : field
+    ALL_FIELDS.select { |_f, e| e[:table] == table }.keys.first || table
   end
 
   # Return stats for entire site. Returns simple hash mapping category to
@@ -274,7 +273,11 @@ class SiteData
   def load_field_counts(field, user_id = nil)
     return unless user_id
 
-    table = FIELD_TABLES[field] || field.to_s
+    table = if ALL_FIELDS.key?(field)
+              (ALL_FIELDS[field][:table] || field).to_s
+            else
+              field.to_s
+            end
 
     data = case table
            when "species_list_observations"
@@ -344,7 +347,9 @@ class SiteData
     add_language_contributions(user)
 
     # Load record counts for each category of individual user data.
-    SiteData.user_fields.each_key { |field| load_field_counts(field) }
+    SiteData.user_fields.each_key do |field|
+      load_field_counts(field)
+    end
 
     # Calculate full contribution for each user.
     contribution = calc_metric(@user_data)
