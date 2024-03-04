@@ -5,35 +5,11 @@
 #
 #  This class manages user contributions / rankings.
 #
-#  == Class Methods
-#
-#  update_contribution::    Callback that keeps User contribution up to date.
-#
 #  == Instance Methods
 #  ==== Public
 #  get_site_data::           Returns stats for entire site.
-#  get_user_data::           Returns stats for given user.
-#  get_all_user_data::       Returns stats for all users.
 #  ==== Private
-#  load_user_data::          Populates @user_data.
-#  load_field_counts::       Populates a single column in @user_data.
-#  calc_metric::             Calculates contribution score of a single user.
 #  field_count::             Looks up total number of entries in a given table.
-#
-#  == Internal Data Structure
-#
-#  The private method load_user_data caches its information in the instance
-#  variable +@user_data+.  Its structure is as follows:
-#
-#    @user_data = {
-#      user.id => {
-#        :id         => user.id,
-#        :name       => user.unique_text_name,
-#        :bonuses    => user.sum_bonuses,
-#        :<category> => <num_records_in_category>,
-#        :metric     => <weighted_sum_of_category_counts>,
-#      },
-#    }
 #
 class SiteData
   ##############################################################################
@@ -123,68 +99,4 @@ class SiteData
       field.to_s.classify.constantize.count
     end
   end
-
-  # Do a query to get the number of records in a given category broken down
-  # by User.  This is cached in @user_data.  Gets for a single User.
-  #
-  #   # Get number of images for current user.
-  #   load_field_counts(:images, User.current.id)
-  #   num_images = @user_data[:images]
-  #
-  def load_field_counts(field, user_id = nil)
-    return unless user_id
-
-    table = FIELD_TABLES[field] || field.to_s
-
-    data = case table
-           when "species_list_observations"
-             count_species_list_observations(user_id)
-           when /^(\w+)_versions/
-             parent_table = $LAST_MATCH_INFO[1]
-             count_versions(parent_table, user_id)
-           else
-             count_regular_field(table, user_id)
-           end
-
-    data.each_key do |cnt|
-      @user_data ||= {}
-      @user_data[field] = cnt.to_i
-    end
-  end
-
-  # Exception for species_list_entries, does a simple join:
-  def count_species_list_observations(user_id)
-    SpeciesList.joins(:species_list_observations).
-      where(user_id: user_id).group(:user_id).
-      select(Arel.star.count.as("cnt"), :user_id).order(cnt: :desc)
-  end
-
-  # Exception for versions: Corrects for double-counting of versioned records.
-  # NOTE: arel_table[:column].count(true) means "COUNT DISTINCT column"
-  def count_versions(parent_table, user_id)
-    parent_class = parent_table.classify.constantize
-    version_class = "#{parent_class}::Version".constantize
-    parent_id = "#{parent_table}_id"
-
-    parent_class.joins(:versions).
-      where(user_id: user_id).
-      where.not(parent_class[:user_id].eq(version_class[:user_id])).
-      group(:user_id).
-      select(version_class[:"#{parent_id}"].count(true).as("cnt"), :user_id).
-      order(cnt: :desc)
-  end
-
-  # Regular count, by :user_id, or :id if table is `users`
-  def count_regular_field(table, user_id)
-    field_class = table.to_s.classify.constantize
-    t_user_id = (table == "users" ? :id : :user_id)
-
-    field_class.where("#{t_user_id}": user_id).group(:"#{t_user_id}").
-      select(Arel.star.count.as("cnt"), :"#{t_user_id}").order(cnt: :desc)
-  end
-
-  public
-
-  #############################################################################
-
 end

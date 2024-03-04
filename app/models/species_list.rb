@@ -111,12 +111,12 @@ class SpeciesList < AbstractModel
 
   # Callback that updates User contribution when adding Observation's.
   def add_obs_callback(_obs)
-    SiteData.update_contribution(:add, :species_list_entries, user_id)
+    UserStats.update_contribution(:add, :species_list_entries, user_id)
   end
 
   # Callback that updates User contribution when removing Observation's.
   def remove_obs_callback(_obs)
-    SiteData.update_contribution(:del, :species_list_entries, user_id)
+    UserStats.update_contribution(:del, :species_list_entries, user_id)
   end
 
   def self.find_by_title_with_wildcards(str)

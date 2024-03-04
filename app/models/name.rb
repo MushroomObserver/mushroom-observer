@@ -451,7 +451,7 @@ class Name < AbstractModel
     if (ver.version != 1) &&
        Name::Version.where(name_id: ver.name_id,
                            user_id: ver.user_id).none?
-      SiteData.update_contribution(:add, :name_versions)
+      UserStats.update_contribution(:add, :name_versions)
     end
   end
 
