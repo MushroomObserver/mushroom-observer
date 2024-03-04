@@ -62,14 +62,10 @@ class UserStats < AbstractModel
     species_list_entries: { weight: 1, table: :species_list_observations },
     observations: { weight: 1 },
     sequenced_observations: { weight: 0, table: :sequences },
-    # listed_taxa: { weight: 0 },
-    # observed_taxa: { weight: 0 },
     sequences: { weight: 0 },
     namings: { weight: 1 },
     comments: { weight: 1 },
-    votes: { weight: 1 },
-    # users: { weight: 0 },
-    # contributing_users: { weight: 0, table: :users }
+    votes: { weight: 1 }
   }.freeze
 
   def self.fields_with_weight
@@ -122,9 +118,8 @@ class UserStats < AbstractModel
   # An applicable field is a field that affects contribution
   def self.get_applicable_field(obj)
     table = obj.class.to_s.tableize
-    field = table.to_sym
 
-    ALL_FIELDS.key?(field) ? (ALL_FIELDS[field][:table] || field) : field
+    ALL_FIELDS.select { |_f, e| e[:table] == table.to_sym }.keys.first
   end
 
   # Return stats for a single User.  Returns simple hash mapping category to
