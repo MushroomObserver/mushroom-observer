@@ -202,7 +202,7 @@ class SiteData
   #
   def get_user_data(id)
     load_user_data(id)
-    @user_data[@user_id]
+    @user_data
   end
 
   # ----------------------------
@@ -265,17 +265,12 @@ class SiteData
   end
 
   # Do a query to get the number of records in a given category broken down
-  # by User.  This is cached in @user_data.  Gets for a single User,
+  # by User.  This is cached in @user_data.  Gets for a single User.
   #
   #   # Get number of images for current user.
   #   load_field_counts(:images, User.current.id)
-  #   num_images = @user_data[User.current.id][:images]
+  #   num_images = @user_data[:images]
   #
-  #   # Get number of images for all users.
-  #   load_field_counts(:images)
-  #   for user_id User.all.map(&;id)
-  #     num_images = @user_data[user_id][:images]
-  #   end
   def load_field_counts(field, user_id = nil)
     return unless user_id
 
@@ -291,9 +286,9 @@ class SiteData
              count_regular_field(table, user_id)
            end
 
-    data.each do |cnt, usr_id|
-      @user_data[usr_id.to_i] ||= {}
-      @user_data[usr_id.to_i][field] = cnt.to_i
+    data.each_key do |cnt|
+      @user_data ||= {}
+      @user_data[field] = cnt.to_i
     end
   end
 
@@ -331,7 +326,7 @@ class SiteData
   # Load all the stats for a given User.  (Load for all User's if none given.)
   #
   #   load_user_data(user.id)
-  #   user.contribution = @user_data[user.id][:metric]
+  #   user.contribution = @user_data[:metric]
   #
   def load_user_data(id = nil)
     return unless id
@@ -341,7 +336,7 @@ class SiteData
 
     # Prime @user_data structure.
     @user_data ||= {}
-    @user_data[user.id] = {
+    @user_data = {
       id: user.id,
       name: user.unique_text_name,
       bonuses: user.sum_bonuses
@@ -352,7 +347,7 @@ class SiteData
     SiteData.user_fields.each_key { |field| load_field_counts(field) }
 
     # Calculate full contribution for each user.
-    contribution = calc_metric(@user_data[user.id])
+    contribution = calc_metric(@user_data)
     # Make sure contribution caches are correct.
     return unless user.contribution != contribution
 
@@ -365,9 +360,9 @@ class SiteData
       score = lang.official ? 0 : lang.calculate_users_contribution(user).to_i
       [lang, score]
     end
-    @user_data[user.id][:languages] =
+    @user_data[:languages] =
       language_contributions.sum { |_lang, score| score }
-    @user_data[user.id][:languages_itemized] =
+    @user_data[:languages_itemized] =
       language_contributions.select { |_lang, score| score.positive? }
   end
 end
