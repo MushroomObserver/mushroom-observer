@@ -192,52 +192,11 @@ class SiteData
     ALL_FIELDS.keys.index_with { |field| field_count(field) }
   end
 
-  # Return stats for a single User.  Returns simple hash mapping category to
-  # number of records of that category.
-  #
-  #   data = SiteData.new.get_user_data(user_id)
-  #   num_images = data[:images]
-  #
-  def get_user_data(id)
-    load_user_data(id)
-    @user_data
-  end
-
   # ----------------------------
   #  :section: Private Helpers
   # ----------------------------
 
   private
-
-  # Calculate score for a set of results:
-  #
-  #   score = calc_metric(
-  #     images:        10,
-  #     observations:  10,
-  #     comments:      23,
-  #     species_lists: 1,
-  #     ...
-  #   )
-  #
-  # :doc:
-  def calc_metric(data)
-    metric = 0
-    return metric unless data
-
-    ALL_FIELDS.each do |field, entry|
-      next unless data[field]
-
-      # This fixes the double-counting of created records.
-      if field.to_s =~ /^(\w+)_versions$/
-        data[field] -= data[Regexp.last_match(1)] || 0
-      end
-      metric += entry[:weight] * data[field]
-    end
-    metric += data[:languages].to_i
-    metric += data[:bonuses].to_i
-    data[:metric] = metric
-    metric
-  end
 
   # Do a query for the number of records in a given category for the entire
   # site. This is not cached. Most of these should be inexpensive queries.
@@ -321,7 +280,22 @@ class SiteData
       select(Arel.star.count.as("cnt"), :"#{t_user_id}").order(cnt: :desc)
   end
 
+  public
+
   #############################################################################
+
+  # Return stats for a single User.  Returns simple hash mapping category to
+  # number of records of that category.
+  #
+  #   data = SiteData.new.get_user_data(user_id)
+  #   num_images = data[:images]
+  #
+  def get_user_data(id)
+    load_user_data(id)
+    @user_data
+  end
+
+  private
 
   # Load all the stats for a given User.  (Load for all User's if none given.)
   #
@@ -353,6 +327,36 @@ class SiteData
 
     user.contribution = contribution
     user.save
+  end
+
+  # Calculate score for a set of results:
+  #
+  #   score = calc_metric(
+  #     images:        10,
+  #     observations:  10,
+  #     comments:      23,
+  #     species_lists: 1,
+  #     ...
+  #   )
+  #
+  # :doc:
+  def calc_metric(data)
+    metric = 0
+    return metric unless data
+
+    ALL_FIELDS.each do |field, entry|
+      next unless data[field]
+
+      # This fixes the double-counting of created records.
+      if field.to_s =~ /^(\w+)_versions$/
+        data[field] -= data[Regexp.last_match(1)] || 0
+      end
+      metric += entry[:weight] * data[field]
+    end
+    metric += data[:languages].to_i
+    metric += data[:bonuses].to_i
+    data[:metric] = metric
+    metric
   end
 
   def add_language_contributions(user)
