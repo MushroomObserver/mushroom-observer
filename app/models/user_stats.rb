@@ -117,9 +117,9 @@ class UserStats < AbstractModel
 
   # An applicable field is a field that affects contribution
   def self.get_applicable_field(obj)
-    table = obj.class.to_s.tableize
+    table = obj.class.to_s.tableize.to_sym
 
-    ALL_FIELDS.select { |_f, e| e[:table] == table.to_sym }.keys.first
+    ALL_FIELDS.select { |_f, e| e[:table] == table }.keys.first || table
   end
 
   # Return stats for a single User.  Returns simple hash mapping category to
