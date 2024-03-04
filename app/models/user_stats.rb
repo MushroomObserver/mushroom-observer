@@ -107,7 +107,9 @@ class UserStats < AbstractModel
   # be done right until someone looks at that user's summary page.
   #
   def self.update_contribution(mode, obj, user_id = nil, num = 1)
-    # Two modes: 1) pass in object, 2) pass in field name, when it's not ::model
+    # Two modes:
+    # 1) pass in object,
+    # 2) pass in field name, when it's not ::model
     if obj.is_a?(ActiveRecord::Base)
       field = get_applicable_field(obj)
       user_id ||= obj&.user_id
@@ -159,6 +161,8 @@ class UserStats < AbstractModel
     @user_data
   end
 
+  ##############################################################################
+
   private
 
   # Load all the stats for a given User.  (Load for all User's if none given.)
@@ -169,7 +173,6 @@ class UserStats < AbstractModel
   def load_user_data(id = nil)
     return unless id
 
-    @user_id = id.to_i
     user = User.find(id)
 
     # Prime @user_data structure.
@@ -194,7 +197,7 @@ class UserStats < AbstractModel
   end
 
   # Do a query to get the number of records in a given category for a User.
-  # his is cached in @user_data.
+  # This is cached in @user_data.
   #
   #   # Get number of images for current user.
   #   load_field_counts(:images, User.current.id)
@@ -203,7 +206,11 @@ class UserStats < AbstractModel
   def load_field_counts(field, user_id = nil)
     return unless user_id
 
-    table = ALL_FIELDS[field][:table] || field.to_s
+    table = if ALL_FIELDS.key?(field)
+              (ALL_FIELDS[field][:table] || field).to_s
+            else
+              field.to_s
+            end
 
     data = case table
            when "species_list_observations"
@@ -229,6 +236,7 @@ class UserStats < AbstractModel
   end
 
   # Exception for versions: Corrects for double-counting of versioned records.
+  #
   # NOTE: arel_table[:column].count(true) means "COUNT DISTINCT column"
   def count_versions(parent_table, user_id)
     parent_class = parent_table.classify.constantize
