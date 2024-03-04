@@ -45,8 +45,8 @@ class SiteData
   #  authored, etc.  These categories are described by a set of constants:
   #
   #  ALL_FIELDS::       List of category names, in order.
-  #  FIELD_WEIGHTS::    Weight of each category: number of points per record.
-  #  FIELD_TABLES::     Table to query.
+  #    :weight::        Weight of each category: number of points per record.
+  #    :table::         Table to query.
   #
   #  The default query for stats for the entire site is:
   #
@@ -108,10 +108,10 @@ class SiteData
 
   # This is called every time any object (not just one we care about) is
   # created or destroyed.  Figure out what kind of object from the class name,
-  # and then update the owner's contribution as appropriate. NOTE: This is only
-  # approximate.  There are now nontrivial calculations, such as awarding extra
-  # points for observations with vouchers, which won't be done right until
-  # someone looks at that user's summary page.
+  # and then update the owner's contribution as appropriate.
+  # NOTE: This is only approximate.  There are now nontrivial calculations,
+  # such as awarding extra points for observations with vouchers, which won't
+  # be done right until someone looks at that user's summary page.
   def self.update_contribution(mode, obj, user_id = nil, num = 1)
     # Two modes: 1) pass in object, 2) pass in field name
     if obj.is_a?(ActiveRecord::Base)
@@ -125,8 +125,8 @@ class SiteData
       field = obj
       user_id ||= User.current_id
     end
-    # Note this is a universal callback on save, so the obj could be anything
-    # including records we don't count
+    # NOTE: this is a universal callback on save
+    # so the obj could be anything, including records we don't count
     weight = ALL_FIELDS.key?(field) ? ALL_FIELDS[field.to_sym][:weight] : 0
     return unless weight&.positive? && user_id&.positive?
 
@@ -138,7 +138,7 @@ class SiteData
     when :del
       -weight
     when :chg
-      0 # get_weight_change(obj, field)
+      0
     else
       weight
     end
@@ -266,14 +266,14 @@ class SiteData
     end
   end
 
+  # Exception for species_list_entries, does a simple join:
   def count_species_list_observations(user_id)
     SpeciesList.joins(:species_list_observations).
       where(user_id: user_id).group(:user_id).
       select(Arel.star.count.as("cnt"), :user_id).order(cnt: :desc)
   end
 
-  # Count for any table of versions of a record.
-  # Corrects for double-counting of versioned records.
+  # Exception for versions: Corrects for double-counting of versioned records.
   # NOTE: arel_table[:column].count(true) means "COUNT DISTINCT column"
   def count_versions(parent_table, user_id)
     parent_class = parent_table.classify.constantize
@@ -288,6 +288,7 @@ class SiteData
       order(cnt: :desc)
   end
 
+  # Regular count, by :user_id, or :id if table is `users`
   def count_regular_field(table, user_id)
     field_class = table.to_s.classify.constantize
     t_user_id = (table == "users" ? :id : :user_id)
