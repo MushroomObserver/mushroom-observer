@@ -22,27 +22,7 @@ add_tab_set(info_site_stats_tabs)
 
   <div class="col-md-6 center-block">
     <table class="table">
-      <% fields = [
-        :images,
-        :observations,
-        :observations_with_voucher,
-        :observations_without_voucher,
-        :sequences,
-        :sequenced_observations,
-        :listed_taxa,
-        :observed_taxa,
-        :name_description_authors,
-        :locations,
-        :location_description_authors,
-        :species_lists,
-        :species_list_entries,
-        :namings,
-        :comments,
-        :votes,
-        :contributing_users
-      ].freeze
-
-      fields.each do |field|
+      <% SiteData::SITE_WIDE_FIELDS.each do |field|
         label = "site_stats_#{field}".to_sym.t
         count = @site_data[field]
         if count && label.present? %>

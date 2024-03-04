@@ -3259,10 +3259,10 @@ class NameTest < UnitTestCase
     names(:lichen).merge(old_name)
 
     assert_equal(
-      old_contribution - SiteData::FIELD_WEIGHTS[:name_versions],
+      old_contribution - SiteData::ALL_FIELDS[:name_versions][:weight],
       user.reload.contribution,
       "Merging a Name edited by a user should reduce user's contribution " \
-      "by #{SiteData::FIELD_WEIGHTS[:name_versions]}"
+      "by #{SiteData::ALL_FIELDS[:name_versions][:weight]}"
     )
   end
 
