@@ -35,7 +35,6 @@
 #      },
 #    }
 #
-# rubocop:disable Metrics/ClassLength
 class SiteData
   ##############################################################################
   #
@@ -65,90 +64,47 @@ class SiteData
   ##############################################################################
 
   # List of the categories.  This might be the order they appear in show_user.
-  ALL_FIELDS = [
-    :name_description_authors,
-    :name_description_editors,
-    :names,
-    :names_versions,
-    :location_description_authors,
-    :location_description_editors,
-    :locations,
-    :locations_versions,
-    :images,
-    :species_lists,
-    :species_list_entries,
-    :observations,
-    :sequenced_observations,
-    :sequences,
-    :comments,
-    :namings,
-    :votes,
-    :users,
-    :contributing_users
-  ].freeze
-
-  SITE_WIDE_FIELDS = [:users, :contributing_users].freeze
-
-  # Relative score for each category.
-  FIELD_WEIGHTS = {
-    comments: 1,
-    contributing_users: 0,
-    images: 10,
-    location_description_authors: 50,
-    location_description_editors: 5,
-    locations: 10,
-    locations_versions: 5,
-    name_description_authors: 100,
-    name_description_editors: 10,
-    names: 10,
-    names_versions: 10,
-    namings: 1,
-    observations: 1,
-    sequences: 0,
-    sequenced_observations: 0,
-    species_list_entries: 1,
-    species_lists: 5,
-    users: 0,
-    votes: 1
+  #   weight: Relative score for each category.
+  #   table: name of table to query, if it's not the same name as the key
+  #
+  ALL_FIELDS = {
+    name_description_authors: { weight: 100 },
+    name_description_editors: { weight: 10 },
+    names: { weight: 10 },
+    name_versions: { weight: 10 },
+    location_description_authors: { weight: 50 },
+    location_description_editors: { weight: 5 },
+    locations: { weight: 10 },
+    location_versions: { weight: 5 },
+    images: { weight: 10 },
+    species_lists: { weight: 5 },
+    species_list_entries: { weight: 1, table: :species_list_observations },
+    observations: { weight: 1 },
+    sequenced_observations: { weight: 0, table: :sequences },
+    sequences: { weight: 0 },
+    comments: { weight: 1 },
+    namings: { weight: 1 },
+    votes: { weight: 1 },
+    users: { weight: 0 },
+    contributing_users: { weight: 0, table: :users }
   }.freeze
-
-  # Table to query to get score for each category.  (Default is same as the
-  # category name.)
-  FIELD_TABLES = {
-    sequenced_observations: "sequences",
-    species_list_entries: "species_list_observations",
-    contributing_users: "users"
-  }.freeze
-
-  # Additional conditions to use for each category.
-  # FIELD_CONDITIONS = {
-  #   users: "`verified` IS NOT NULL",
-  #   contributing_users: "contribution > 0"
-  # }.freeze
-
-  # Non-default unified queries for stats for the entire site
-  FIELD_QUERIES = {
-    contributing_users: User.where(contribution: 1..),
-    sequenced_observations: Sequence.select(:observation_id).distinct,
-    species_list_entries: SpeciesListObservation,
-    users: User.where.not(verified: nil)
-  }.freeze
-
-  # Call these procs to determine if a given object qualifies for a given field.
-  # FIELD_STATE_PROCS = {
-  #   observations_with_voucher: lambda do |obs|
-  #     obs.specimen && obs.notes.to_s.length >= 10 &&
-  #       obs.thumb_image_id.to_i.positive?
-  #   end,
-  #   observations_without_voucher: lambda do |obs|
-  #     !(obs.specimen && obs.notes.to_s.length >= 10 &&
-  #       obs.thumb_image_id.to_i.positive?)
-  #   end
-  # }.freeze
 
   # -----------------------------
   #  :section: Public Interface
   # -----------------------------
+
+  # Fields that should appear on a user page
+  def self.user_fields
+    ALL_FIELDS.except([:users, :contributing_users])
+  end
+
+  def self.fields_with_weight
+    ALL_FIELDS.select { |_f, e| e[:weight].positive? }
+  end
+
+  def self.user_fields_with_weight
+    user_fields.select { |_f, e| e[:weight].positive? }
+  end
 
   # This is called every time any object (not just one we care about) is
   # created or destroyed.  Figure out what kind of object from the class name,
@@ -169,7 +125,9 @@ class SiteData
       field = obj
       user_id ||= User.current_id
     end
-    weight = FIELD_WEIGHTS[field]
+    # Note this is a universal callback on save, so the obj could be anything
+    # including records we don't count
+    weight = ALL_FIELDS.key?(field) ? ALL_FIELDS[field.to_sym][:weight] : 0
     return unless weight&.positive? && user_id&.positive?
 
     update_weight(calc_impact(weight * num, mode), user_id)
@@ -189,38 +147,15 @@ class SiteData
   def self.update_weight(impact, user_id)
     return if impact.zero?
 
-    # User.connection.update(%(
-    #   UPDATE users SET contribution =
-    #     IF(contribution IS NULL, #{impact}, contribution + #{impact})
-    #   WHERE id = #{user_id}
-    # ))
     User.find(user_id).increment!(:contribution, impact)
   end
 
   def self.get_applicable_field(obj)
     table = obj.class.to_s.tableize
     field = table.to_sym
-    # no field weight: contributing_users, seq, seq_obs
-    unless FIELD_WEIGHTS[field]
-      field = nil
-      FIELD_TABLES.each do |field2, table2|
-        next unless table2 == table
 
-        # proc = FIELD_STATE_PROCS[field2]
-        # next unless proc&.call(obj)
-
-        field = field2
-        break
-      end
-    end
-    field
+    ALL_FIELDS.key?(field) ? (ALL_FIELDS[field][:table] || field) : field
   end
-
-  # This makes no sense without field procs!
-  # def self.get_weight_change(obj, new_field)
-  #   old_field = new_field
-  #   FIELD_WEIGHTS[new_field] - FIELD_WEIGHTS[old_field]
-  # end
 
   # Return stats for entire site. Returns simple hash mapping category to
   # number of records of that category.
@@ -229,9 +164,7 @@ class SiteData
   #   num_images = data[:images]
   #
   def get_site_data
-    ALL_FIELDS.index_with do |field|
-      field_count(field)
-    end
+    ALL_FIELDS.keys.index_with { |field| field_count(field) }
   end
 
   # Return stats for a single User.  Returns simple hash mapping category to
@@ -266,14 +199,14 @@ class SiteData
     metric = 0
     return metric unless data
 
-    ALL_FIELDS.each do |field|
+    ALL_FIELDS.each do |field, entry|
       next unless data[field]
 
       # This fixes the double-counting of created records.
       if field.to_s =~ /^(\w+)_versions$/
         data[field] -= data[Regexp.last_match(1)] || 0
       end
-      metric += FIELD_WEIGHTS[field] * data[field]
+      metric += entry[:weight] * data[field]
     end
     metric += data[:languages].to_i
     metric += data[:bonuses].to_i
@@ -284,10 +217,20 @@ class SiteData
   # Do a query for the number of records in a given category for the entire
   # site. This is not cached. Most of these should be inexpensive queries.
   def field_count(field)
-    return 0 if /^(\w+)s_versions/.match?(field.to_s)
+    return 0 if /^(\w+)_versions/.match?(field.to_s)
 
-    # constantize is safe here because `field` is not user input
-    FIELD_QUERIES[field]&.count || field.to_s.classify.constantize.count
+    case field.to_sym
+    when :species_list_entries
+      SpeciesListObservation.count
+    when :sequenced_observations
+      Sequence.select(:observation_id).distinct.count
+    when :contributing_users
+      User.where(contribution: 1..).count
+    when :users
+      User.where.not(verified: nil).count
+    else
+      field.to_s.classify.constantize.count
+    end
   end
 
   # Do a query to get the number of records in a given category broken down
@@ -310,7 +253,7 @@ class SiteData
     data = case table
            when "species_list_observations"
              count_species_list_observations(user_id)
-           when /^(\w+)s_versions/
+           when /^(\w+)_versions/
              parent_table = $LAST_MATCH_INFO[1]
              count_versions(parent_table, user_id)
            else
@@ -329,6 +272,9 @@ class SiteData
       select(Arel.star.count.as("cnt"), :user_id).order(cnt: :desc)
   end
 
+  # Count for any table of versions of a record.
+  # Corrects for double-counting of versioned records.
+  # NOTE: arel_table[:column].count(true) means "COUNT DISTINCT column"
   def count_versions(parent_table, user_id)
     parent_class = parent_table.classify.constantize
     version_class = "#{parent_class}::Version".constantize
@@ -338,7 +284,6 @@ class SiteData
       where(user_id: user_id).
       where.not(parent_class[:user_id].eq(version_class[:user_id])).
       group(:user_id).
-      # NOTE: arel_table[:column].count(true) means "COUNT DISTINCT column"
       select(version_class[:"#{parent_id}"].count(true).as("cnt"), :user_id).
       order(cnt: :desc)
   end
@@ -359,42 +304,28 @@ class SiteData
   def load_user_data(id = nil)
     return unless id
 
-    # if id
-    #   @user_id = id.to_i
-    #   user = [User.find(id)]
-    # else
-    #   @user_id = nil
-    #   users = User.all
-    # end
-
     @user_id = id.to_i
     user = User.find(id)
 
     # Prime @user_data structure.
     @user_data ||= {}
-    # users.each do |user|
     @user_data[user.id] = {
       id: user.id,
       name: user.unique_text_name,
       bonuses: user.sum_bonuses
     }
     add_language_contributions(user)
-    # end
 
     # Load record counts for each category of individual user data.
-    (ALL_FIELDS - SITE_WIDE_FIELDS).each { |field| load_field_counts(field) }
+    SiteData.user_fields.each_key { |field| load_field_counts(field) }
 
-    # Calculate full contribution for each user.  This will also correct some
-    # double-counting of versioned records.
-    # users.each do |user|
+    # Calculate full contribution for each user.
     contribution = calc_metric(@user_data[user.id])
     # Make sure contribution caches are correct.
     return unless user.contribution != contribution
 
     user.contribution = contribution
     user.save
-    # end
-    # end
   end
 
   def add_language_contributions(user)
@@ -408,4 +339,3 @@ class SiteData
       language_contributions.select { |_lang, score| score.positive? }
   end
 end
-# rubocop:enable Metrics/ClassLength

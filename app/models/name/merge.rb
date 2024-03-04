@@ -107,7 +107,7 @@ class Name
       end
       editors.delete(old_name.user_id)
       editors.uniq.each do |user_id|
-        SiteData.update_contribution(:del, :names_versions, user_id)
+        SiteData.update_contribution(:del, :name_versions, user_id)
       end
 
       old_name.versions.each(&:destroy)
