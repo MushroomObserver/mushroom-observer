@@ -7,12 +7,12 @@
 #  update_contribution::    Callback that keeps User contribution up to date.
 #
 #  ==== Public
-#  get_user_data::           Returns stats for given user.
+#  get_user_data::          Returns stats for given user.
 #
 #  ==== Private
-#  load_user_data::          Populates @user_data.
-#  load_field_counts::       Populates a single column in @user_data.
-#  calc_metric::             Calculates contribution score of a single user.
+#  refresh_user_data::      Populates a user_data instance, all columns.
+#  refresh_field_counts::   Populates a single column in @user_data.
+#  calc_metric::            Calculates contribution score of a single user.
 #
 #
 #  == Internal Data Structure
@@ -117,8 +117,8 @@ class UserStats < AbstractModel
       field = obj
       user_id ||= User.current_id
     end
-    # NOTE: this is a universal callback on save
-    # so the obj could be anything, including records we don't count
+    # NOTE: this is a universal callback on save so `obj` could be anything,
+    #       including records we don't count
     weight = ALL_FIELDS.key?(field) ? ALL_FIELDS[field.to_sym][:weight] : 0
     return unless weight&.positive? && user_id&.positive?
 
@@ -153,11 +153,11 @@ class UserStats < AbstractModel
   # Return stats for a single User.  Returns simple hash mapping category to
   # number of records of that category.
   #
-  #   data = SiteData.new.get_user_data(user_id)
+  #   data = UserStats.new.get_user_data(user_id)
   #   num_images = data[:images]
   #
-  def get_user_data(id)
-    load_user_data(id)
+  def self.get_user_data(id)
+    refresh_user_data(id)
     @user_data
   end
 
@@ -165,12 +165,12 @@ class UserStats < AbstractModel
 
   private
 
-  # Load all the stats for a given User.  (Load for all User's if none given.)
+  # Refresh all the stats for a given User.
   #
-  #   load_user_data(user.id)
+  #   refresh_user_data(user.id)
   #   user.contribution = @user_data[:metric]
   #
-  def load_user_data(id = nil)
+  def self.refresh_user_data(id = nil)
     return unless id
 
     user = User.find(id)
@@ -184,8 +184,11 @@ class UserStats < AbstractModel
     }
     add_language_contributions(user)
 
-    # Load record counts for each category of individual user data.
-    SiteData.user_fields.each_key { |field| load_field_counts(field) }
+    # Refresh record counts for each category of @user_data.
+    ALL_FIELDS.each_key { |field| refresh_field_counts(field, id) }
+    updatable_columns = @user_data.except(
+      :id, :name, :bonuses, :languages, :languages_itemized
+    )
 
     # Calculate full contribution for each user.
     contribution = calc_metric(@user_data)
@@ -200,10 +203,10 @@ class UserStats < AbstractModel
   # This is cached in @user_data.
   #
   #   # Get number of images for current user.
-  #   load_field_counts(:images, User.current.id)
+  #   refresh_field_counts(:images, User.current.id)
   #   num_images = @user_data[:images]
   #
-  def load_field_counts(field, user_id = nil)
+  def refresh_field_counts(field, user_id = nil)
     return unless user_id
 
     table = if ALL_FIELDS.key?(field)
@@ -236,7 +239,6 @@ class UserStats < AbstractModel
   end
 
   # Exception for versions: Corrects for double-counting of versioned records.
-  #
   # NOTE: arel_table[:column].count(true) means "COUNT DISTINCT column"
   def count_versions(parent_table, user_id)
     parent_class = parent_table.classify.constantize
