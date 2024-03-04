@@ -105,7 +105,6 @@ class LocationDescription < Description
   ALL_NOTE_FIELDS = [:gen_desc, :ecology, :species, :notes, :refs].freeze
 
   acts_as_versioned(
-    # table_name: "location_description_versions",
     if_changed: ALL_NOTE_FIELDS,
     association_options: { dependent: :nullify }
   )

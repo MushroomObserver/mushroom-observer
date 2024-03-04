@@ -391,7 +391,6 @@ class Name < AbstractModel
   has_many :observations
 
   acts_as_versioned(
-    # table_name: "name_versions",
     if_changed: %w[
       rank
       text_name

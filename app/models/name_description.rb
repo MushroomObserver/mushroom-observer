@@ -132,7 +132,6 @@ class NameDescription < Description
   ).freeze
 
   acts_as_versioned(
-    # table_name: "name_description_versions",
     if_changed: ALL_NOTE_FIELDS,
     association_options: { dependent: :nullify }
   )

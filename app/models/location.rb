@@ -108,7 +108,6 @@ class Location < AbstractModel
   has_many :users        # via profile location
 
   acts_as_versioned(
-    # table_name: "location_versions",
     if_changed: %w[
       name
       north

@@ -875,7 +875,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     [:donations,                      :user_id],
     [:external_links,                 :user_id],
     [:glossary_terms,                 :user_id],
-    [:glossary_term_versions,        :user_id],
+    [:glossary_term_versions,         :user_id],
     [:herbaria,                       :personal_user_id],
     [:herbarium_curators,             :user_id],
     [:herbarium_records,              :user_id],
