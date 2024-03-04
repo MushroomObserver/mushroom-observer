@@ -785,21 +785,21 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   PUBLIC_REFERENCES = [
     [:herbaria,                       :personal_user_id],
     [:location_descriptions,          :user_id],
-    [:location_description_versions, :user_id],
+    [:location_description_versions,  :user_id],
     [:locations,                      :user_id],
-    [:location_versions,             :user_id],
+    [:location_versions,              :user_id],
     [:name_descriptions,              :user_id],
     [:name_descriptions,              :reviewer_id],
-    [:name_description_versions,     :user_id],
+    [:name_description_versions,      :user_id],
     [:names,                          :user_id],
-    [:name_versions,                 :user_id],
+    [:name_versions,                  :user_id],
     # Leave projects, because they're intertwined with descriptions too much.
     [:projects,                       :user_id],
     # Leave votes and namings, because I don't want to recalc consensuses.
     [:namings,                        :user_id],
     [:projects,                       :user_id],
     [:translation_strings,            :user_id],
-    [:translation_string_versions,   :user_id],
+    [:translation_string_versions,    :user_id],
     [:votes,                          :user_id]
   ].freeze
 
