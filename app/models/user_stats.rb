@@ -183,10 +183,10 @@ class UserStats < ApplicationRecord
       name: user.unique_text_name,
       bonuses: user.sum_bonuses
     }
-    add_language_contributions(user)
+    # add_language_contributions(user)
 
     # Refresh record counts for each category of @user_data.
-    ALL_FIELDS.each_key { |field| refresh_field_count(field, id) }
+    ALL_FIELDS.each_key { |field| refresh_field_count(field, user_id) }
 
     # Update the UserStats record in one go
     update(
@@ -200,6 +200,7 @@ class UserStats < ApplicationRecord
     # Make sure contribution caches are correct.
     return unless user.contribution != contribution
 
+    debugger
     user.update(contribution: contribution)
   end
 
@@ -213,11 +214,7 @@ class UserStats < ApplicationRecord
   def refresh_field_count(field, user_id = nil)
     return unless user_id
 
-    table = if ALL_FIELDS.key?(field)
-              (ALL_FIELDS[field][:table] || field).to_s
-            else
-              field.to_s
-            end
+    table = (ALL_FIELDS[field][:table] || field).to_s
 
     count = case table
             when "species_list_observations"
@@ -252,12 +249,11 @@ class UserStats < ApplicationRecord
       ).distinct.select(version_class.arel_table[:"#{parent_id}"]).count
   end
 
-  # Regular count, by :user_id, or :id if table is `users`
+  # Regular count, by :user_id
   def count_regular_field(table, user_id)
     field_class = table.to_s.classify.constantize
-    t_user_id = (table == "users" ? :id : :user_id)
 
-    field_class.where("#{t_user_id}": user_id).count
+    field_class.where(user_id: user_id).count
   end
 
   # Calculate score for a set of results:
