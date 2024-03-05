@@ -25,28 +25,29 @@ abort(<<HELP) if ARGV.any? { |arg| HELP_ARGS.include?(arg) }
 HELP
 
 # Get search string(s) from command line or from stdin.
+# rubocop:disable Style/NumericPredicate
+# rubocop:disable Style/ZeroLengthPredicate
 strings = ARGV.length > 0 ? ARGV : readlines
+# rubocop:enable Style/NumericPredicate
+# rubocop:enable Style/ZeroLengthPredicate
 
 string = strings.shift # string we're looking for next
 bundles = {}           # accumulates de-interlaced lines for each request
 pid = nil              # pid of last line
-found = nil            # when the string is found, this is set to the pid,
-                       # tells it to print the bundle for this pid when done
+found = nil            # when the string is found, this is set to the pid
 
 file = "#{app_root}/production.log"
 File.open(file).readlines.each do |line|
   match = line.match(/#(\d+)/)
   pid = match[1] if match
-  if line.match(/: Started [A-Z]{3,}/)
+  if line.match?(/: Started [A-Z]{3,}/)
     if found == pid
-      puts bundles[found].join("")
+      puts bundles[found].join
       exit(0) if strings.empty?
       string = strings.shift
       found = nil
-      bundles[pid] = []
-    else
-      bundles[pid] = []
     end
+    bundles[pid] = []
   end
   bundles[pid] ||= []
   bundles[pid] << line.sub(/^[A-Z], \[[^\[\]]*\]  /, "")
@@ -54,7 +55,7 @@ File.open(file).readlines.each do |line|
 end
 
 if found
-  puts bundles[found].join("")
+  puts bundles[found].join
   exit(0) if strings.empty?
   string = strings.shift
 end
