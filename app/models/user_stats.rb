@@ -74,6 +74,16 @@
 class UserStats < ApplicationRecord
   belongs_to :user
 
+  # This causes the data structures in these fields to be serialized
+  # automatically with YAML and stored as plain old text strings.
+  serialize :languages, type: Hash
+  # TODO:
+  # 1. copy user.bonuses to user_stats.bonuses after records created
+  # 2. switch `refresh_user_data` to use the method below
+  # 3. change the Admin::UsersController method that edits the user.bonuses,
+  #    to edit the bonuses here
+  serialize :bonuses
+
   ALL_FIELDS = {
     name_description_authors: { weight: 100 },
     name_description_editors: { weight: 10 },
@@ -91,7 +101,8 @@ class UserStats < ApplicationRecord
     sequences: { weight: 0 },
     namings: { weight: 1 },
     comments: { weight: 1 },
-    votes: { weight: 1 }
+    votes: { weight: 1 },
+    translation_string_versions: { weight: 1 }
   }.freeze
 
   def self.fields_with_weight
@@ -107,7 +118,7 @@ class UserStats < ApplicationRecord
   # be done right until someone looks at that user's summary page.
   #
   def self.update_contribution(mode, obj, user_id = nil, num = 1)
-    return if obj.is_a?(User) || obj.is_a?(UserStats)
+    return if obj.is_a?(User)
 
     # Two modes:
     # 1) pass in object,
@@ -183,19 +194,17 @@ class UserStats < ApplicationRecord
     @user_data = {
       id: user_id,
       name: user.unique_text_name,
-      bonuses: user.sum_bonuses
+      languages: language_contributions(user_id),
+      # temporary: copy over bonuses
+      bonuses: user.bonuses
     }
-    # add_language_contributions(user)
 
     # Refresh record counts for each category of @user_data.
     ALL_FIELDS.each_key { |field| refresh_field_count(field, user_id) }
 
-    # Update the UserStats record in one go
-    update(
-      @user_data.except(
-        :id, :name, :bonuses, :languages, :languages_itemized
-      )
-    )
+    # Update the UserStats record in one go.
+    # Temporary: remove bonuses above once populated!
+    update(@user_data.except(:id, :name))
 
     # Calculate full contribution for each user.
     contribution = calc_metric(@user_data)
@@ -281,21 +290,34 @@ class UserStats < ApplicationRecord
       end
       metric += entry[:weight] * data[field]
     end
-    metric += data[:languages].to_i
-    metric += data[:bonuses].to_i
+    # metric += data[:languages].to_i
+    metric += sum_bonuses
     data[:metric] = metric
     metric
   end
 
-  def add_language_contributions(user)
-    language_contributions = Language.all.map do |lang|
-      score = lang.official ? 0 : lang.calculate_users_contribution(user).to_i
-      [lang, score]
+  # NOTE: These do not count towards the metric. Maybe count versions?
+  def language_contributions(user_id)
+    counts = TranslationString.where(user_id: user_id).
+             select(:language_id, Arel.star.count.as("cnt")).
+             group(:language_id).order(cnt: :desc)
+
+    locale_index = Language.pluck(:id, :locale).to_h
+
+    # Turn it into a hash of translation strings by locale.
+    counts.to_h do |lang|
+      [locale_index[lang.language_id], lang.cnt]
     end
-    @user_data[:languages] =
-      language_contributions.sum { |_lang, score| score }
-    @user_data[:languages_itemized] =
-      language_contributions.select { |_lang, score| score.positive? }
+  end
+
+  # Sum up all the bonuses the User has earned.
+  #
+  #   contribution += sum_bonuses
+  #
+  def sum_bonuses
+    return nil unless bonuses
+
+    bonuses.inject(0) { |acc, elem| acc + elem[0] }
   end
 
   #  GROUPED BY USER ID BUT WITHOUT `sum`
