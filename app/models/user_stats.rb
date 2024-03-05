@@ -71,7 +71,7 @@
 #  uk::
 #  zh::
 
-class UserStats < AbstractModel
+class UserStats < ApplicationRecord
   belongs_to :user
 
   ALL_FIELDS = {
@@ -147,6 +147,7 @@ class UserStats < AbstractModel
   def self.get_applicable_field(obj)
     table = obj.class.to_s.tableize.to_sym
 
+    # We're getting the key (the `field``) from the value (of :table)
     ALL_FIELDS.select { |_f, e| e[:table] == table }.keys.first || table
   end
 
@@ -187,6 +188,7 @@ class UserStats < AbstractModel
     # Refresh record counts for each category of @user_data.
     ALL_FIELDS.each_key { |field| refresh_field_count(field, id) }
 
+    # Update the UserStats record in one go
     update(
       @user_data.except(
         :id, :name, :bonuses, :languages, :languages_itemized
@@ -194,15 +196,11 @@ class UserStats < AbstractModel
     )
 
     # Calculate full contribution for each user.
-    # @metric_data = @user_data.except(:user_id)
-    # @metric_data[:id] = @user_data[:user_id]
     contribution = calc_metric(@user_data)
     # Make sure contribution caches are correct.
-    debugger
     return unless user.contribution != contribution
 
-    user.contribution = contribution
-    user.save
+    user.update(contribution: contribution)
   end
 
   # Do a query to get the number of records in a given category for a User.
