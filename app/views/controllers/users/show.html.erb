@@ -7,7 +7,7 @@ add_tab_set(user_show_tabs(show_user: @show_user, user: @user))
 
 @container = :full
 
-rows = user_stats_rows(@show_user, @user_data)
+rows = user_stats_rows(@user_stats)
 paths = user_stats_link_paths(@show_user)
 total = 0
 %>

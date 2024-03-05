@@ -41,7 +41,7 @@ class UsersController < ApplicationController
     # unless there's an id param, so this may be superfluous.
     return unless @show_user
 
-    @user_data = @show_user.user_stats
+    @user_stats = @show_user.user_stats
     @life_list = Checklist::ForUser.new(@show_user)
     instance_vars_for_thumbnails_in_summary!
   end
