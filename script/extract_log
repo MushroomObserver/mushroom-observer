@@ -36,7 +36,7 @@ bundles = {}           # accumulates de-interlaced lines for each request
 pid = nil              # pid of last line
 found = nil            # when the string is found, this is set to the pid
 
-file = "#{app_root}/production.log"
+file = "#{app_root}/log/production.log"
 File.open(file).readlines.each do |line|
   match = line.match(/#(\d+)/)
   pid = match[1] if match
