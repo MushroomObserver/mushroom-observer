@@ -157,20 +157,19 @@ class UserStats < AbstractModel
   #   num_images = data[:images]
   #
   def self.get_user_data(id)
-    refresh_user_data(id)
+    @user_stats = UserStats.find_by(user_id: id) || UserStats.new
+    @user_stats.refresh_user_data(id)
     @user_data
   end
 
   ##############################################################################
-
-  private
 
   # Refresh all the stats for a given User.
   #
   #   refresh_user_data(user.id)
   #   user.contribution = @user_data[:metric]
   #
-  def self.refresh_user_data(id = nil)
+  def refresh_user_data(id = nil)
     return unless id
 
     user = User.find(id)
@@ -178,16 +177,17 @@ class UserStats < AbstractModel
     # Prime @user_data structure.
     @user_data ||= {}
     @user_data = {
-      id: user.id,
+      user_id: user.id,
       name: user.unique_text_name,
       bonuses: user.sum_bonuses
     }
     add_language_contributions(user)
 
     # Refresh record counts for each category of @user_data.
-    ALL_FIELDS.each_key { |field| refresh_field_counts(field, id) }
+    ALL_FIELDS.each_key { |field| refresh_field_count(field, id) }
+    debugger
     updatable_columns = @user_data.except(
-      :id, :name, :bonuses, :languages, :languages_itemized
+      :languages, :languages_itemized
     )
 
     # Calculate full contribution for each user.
@@ -206,7 +206,7 @@ class UserStats < AbstractModel
   #   refresh_field_counts(:images, User.current.id)
   #   num_images = @user_data[:images]
   #
-  def refresh_field_counts(field, user_id = nil)
+  def refresh_field_count(field, user_id = nil)
     return unless user_id
 
     table = if ALL_FIELDS.key?(field)
@@ -215,31 +215,27 @@ class UserStats < AbstractModel
               field.to_s
             end
 
-    data = case table
-           when "species_list_observations"
-             count_species_list_observations(user_id)
-           when /^(\w+)_versions/
-             parent_table = $LAST_MATCH_INFO[1]
-             count_versions(parent_table, user_id)
-           else
-             count_regular_field(table, user_id)
-           end
+    count = case table
+            when "species_list_observations"
+              count_species_list_observations(user_id)
+            when /^(\w+)_versions/
+              parent_table = $LAST_MATCH_INFO[1]
+              count_versions(parent_table, user_id)
+            else
+              count_regular_field(table, user_id)
+            end
 
-    data.each_key do |cnt|
-      @user_data ||= {}
-      @user_data[field] = cnt.to_i
-    end
+    @user_data[field] = count
   end
 
   # Exception for species_list_entries, does a simple join:
   def count_species_list_observations(user_id)
     SpeciesList.joins(:species_list_observations).
-      where(user_id: user_id).group(:user_id).
-      select(Arel.star.count.as("cnt"), :user_id).order(cnt: :desc)
+      where(user_id: user_id).count
   end
 
   # Exception for versions: Corrects for double-counting of versioned records.
-  # NOTE: arel_table[:column].count(true) means "COUNT DISTINCT column"
+  # NOTE: the version classes need `.arel_table`, unlike other models
   def count_versions(parent_table, user_id)
     parent_class = parent_table.classify.constantize
     version_class = "#{parent_class}::Version".constantize
@@ -247,10 +243,9 @@ class UserStats < AbstractModel
 
     parent_class.joins(:versions).
       where(user_id: user_id).
-      where.not(parent_class[:user_id].eq(version_class[:user_id])).
-      group(:user_id).
-      select(version_class[:"#{parent_id}"].count(true).as("cnt"), :user_id).
-      order(cnt: :desc)
+      where.not(
+        parent_class[:user_id].eq(version_class.arel_table[:user_id])
+      ).distinct.select(version_class.arel_table[:"#{parent_id}"]).count
   end
 
   # Regular count, by :user_id, or :id if table is `users`
@@ -258,8 +253,7 @@ class UserStats < AbstractModel
     field_class = table.to_s.classify.constantize
     t_user_id = (table == "users" ? :id : :user_id)
 
-    field_class.where("#{t_user_id}": user_id).group(:"#{t_user_id}").
-      select(Arel.star.count.as("cnt"), :"#{t_user_id}").order(cnt: :desc)
+    field_class.where("#{t_user_id}": user_id).count
   end
 
   # Calculate score for a set of results:
@@ -302,4 +296,37 @@ class UserStats < AbstractModel
     @user_data[:languages_itemized] =
       language_contributions.select { |_lang, score| score.positive? }
   end
+
+  #  GROUPED BY USER ID BUT WITHOUT `sum`
+  #
+  # # Exception for species_list_entries, does a simple join:
+  # def count_species_list_observations(user_id)
+  #   SpeciesList.joins(:species_list_observations).
+  #     where(user_id: user_id).group(:user_id).
+  #     select(Arel.star.count.as("cnt"), :user_id).order(cnt: :desc)
+  # end
+
+  # # Exception for versions: Corrects for double-counting of versioned records.
+  # # NOTE: arel_table[:column].count(true) means "COUNT DISTINCT column"
+  # def count_versions(parent_table, user_id)
+  #   parent_class = parent_table.classify.constantize
+  #   version_class = "#{parent_class}::Version".constantize
+  #   parent_id = "#{parent_table}_id"
+
+  #   parent_class.joins(:versions).
+  #     where(user_id: user_id).
+  #     where.not(parent_class[:user_id].eq(version_class[:user_id])).
+  #     group(:user_id).
+  #     select(version_class[:"#{parent_id}"].count(true).as("cnt"), :user_id).
+  #     order(cnt: :desc)
+  # end
+
+  # # Regular count, by :user_id, or :id if table is `users`
+  # def count_regular_field(table, user_id)
+  #   field_class = table.to_s.classify.constantize
+  #   t_user_id = (table == "users" ? :id : :user_id)
+
+  #   field_class.where("#{t_user_id}": user_id).group(:"#{t_user_id}").
+  #     select(Arel.star.count.as("cnt"), :"#{t_user_id}").order(cnt: :desc)
+  # end
 end
