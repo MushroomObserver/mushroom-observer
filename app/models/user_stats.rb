@@ -11,7 +11,7 @@
 #
 #  ==== Private
 #  refresh_user_data::      Populates a user_data instance, all columns.
-#  refresh_field_counts::   Populates a single column in @user_data.
+#  refresh_field_count::    Populates a single column in @user_data.
 #  calc_metric::            Calculates contribution score of a single user.
 #
 #
