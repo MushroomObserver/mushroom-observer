@@ -156,9 +156,10 @@ class UserStats < AbstractModel
   #   data = UserStats.new.get_user_data(user_id)
   #   num_images = data[:images]
   #
-  def self.get_user_data(id)
-    @user_stats = UserStats.find_by(user_id: id) || UserStats.new
-    @user_stats.refresh_user_data(id)
+  def self.get_user_data(user_id)
+    @user_stats = UserStats.find_by(user_id: user_id) ||
+                  UserStats.new(user_id: user_id)
+    @user_stats.refresh_user_data(user_id)
     @user_data
   end
 
@@ -169,15 +170,15 @@ class UserStats < AbstractModel
   #   refresh_user_data(user.id)
   #   user.contribution = @user_data[:metric]
   #
-  def refresh_user_data(id = nil)
-    return unless id
+  def refresh_user_data(user_id = nil)
+    return unless user_id
 
-    user = User.find(id)
+    user = User.find(user_id)
 
     # Prime @user_data structure.
     @user_data ||= {}
     @user_data = {
-      user_id: user.id,
+      id: user_id,
       name: user.unique_text_name,
       bonuses: user.sum_bonuses
     }
@@ -185,14 +186,19 @@ class UserStats < AbstractModel
 
     # Refresh record counts for each category of @user_data.
     ALL_FIELDS.each_key { |field| refresh_field_count(field, id) }
-    debugger
-    updatable_columns = @user_data.except(
-      :languages, :languages_itemized
+
+    update(
+      @user_data.except(
+        :id, :name, :bonuses, :languages, :languages_itemized
+      )
     )
 
     # Calculate full contribution for each user.
+    # @metric_data = @user_data.except(:user_id)
+    # @metric_data[:id] = @user_data[:user_id]
     contribution = calc_metric(@user_data)
     # Make sure contribution caches are correct.
+    debugger
     return unless user.contribution != contribution
 
     user.contribution = contribution
