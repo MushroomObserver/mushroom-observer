@@ -16,7 +16,7 @@
 #  get_all_user_data::       Returns stats for all users.
 #  ==== Private
 #  load_user_data::          Populates @user_data.
-#  load_field_counts::       Populates a single column in @user_data.
+#  load_field_count::       Populates a single column in @user_data.
 #  calc_metric::             Calculates contribution score of a single user.
 #  field_count::             Looks up total number of entries in a given table.
 #
@@ -263,47 +263,44 @@ class SiteData
     end
   end
 
-  # Do a query to get the number of records in a given category broken down
-  # by User.  This is cached in @user_data.  Gets for a single User.
+  # Do a query to get the number of records in a category for a single User
+  # This is cached in @user_data..
   #
   #   # Get number of images for current user.
-  #   load_field_counts(:images, User.current.id)
+  #   load_field_count(:images, User.current.id)
   #   num_images = @user_data[:images]
   #
-  def load_field_counts(field, user_id = nil)
+  def load_field_count(field, user_id = nil)
     return unless user_id
 
+    @user_data ||= {}
     table = if ALL_FIELDS.key?(field)
               (ALL_FIELDS[field][:table] || field).to_s
             else
               field.to_s
             end
 
-    data = case table
-           when "species_list_observations"
-             count_species_list_observations(user_id)
-           when /^(\w+)_versions/
-             parent_table = $LAST_MATCH_INFO[1]
-             count_versions(parent_table, user_id)
-           else
-             count_regular_field(table, user_id)
-           end
+    count = case table
+            when "species_list_observations"
+              count_species_list_observations(user_id)
+            when /^(\w+)_versions/
+              parent_table = $LAST_MATCH_INFO[1]
+              count_versions(parent_table, user_id)
+            else
+              count_regular_field(table, user_id)
+            end
 
-    data.each_key do |cnt|
-      @user_data ||= {}
-      @user_data[field] = cnt.to_i
-    end
+    @user_data[field] = count
   end
 
   # Exception for species_list_entries, does a simple join:
   def count_species_list_observations(user_id)
     SpeciesList.joins(:species_list_observations).
-      where(user_id: user_id).group(:user_id).
-      select(Arel.star.count.as("cnt"), :user_id).order(cnt: :desc)
+      where(user_id: user_id).count
   end
 
   # Exception for versions: Corrects for double-counting of versioned records.
-  # NOTE: arel_table[:column].count(true) means "COUNT DISTINCT column"
+  # NOTE: the version classes need `.arel_table`, unlike other models
   def count_versions(parent_table, user_id)
     parent_class = parent_table.classify.constantize
     version_class = "#{parent_class}::Version".constantize
@@ -311,10 +308,9 @@ class SiteData
 
     parent_class.joins(:versions).
       where(user_id: user_id).
-      where.not(parent_class[:user_id].eq(version_class[:user_id])).
-      group(:user_id).
-      select(version_class[:"#{parent_id}"].count(true).as("cnt"), :user_id).
-      order(cnt: :desc)
+      where.not(
+        parent_class[:user_id].eq(version_class.arel_table[:user_id])
+      ).distinct.select(version_class.arel_table[:"#{parent_id}"]).count
   end
 
   # Regular count, by :user_id, or :id if table is `users`
@@ -322,8 +318,7 @@ class SiteData
     field_class = table.to_s.classify.constantize
     t_user_id = (table == "users" ? :id : :user_id)
 
-    field_class.where("#{t_user_id}": user_id).group(:"#{t_user_id}").
-      select(Arel.star.count.as("cnt"), :"#{t_user_id}").order(cnt: :desc)
+    field_class.where("#{t_user_id}": user_id).count
   end
 
   # Load all the stats for a given User.  (Load for all User's if none given.)
@@ -334,7 +329,6 @@ class SiteData
   def load_user_data(id = nil)
     return unless id
 
-    @user_id = id.to_i
     user = User.find(id)
 
     # Prime @user_data structure.
@@ -348,7 +342,7 @@ class SiteData
 
     # Load record counts for each category of individual user data.
     SiteData.user_fields.each_key do |field|
-      load_field_counts(field)
+      load_field_count(field, id)
     end
 
     # Calculate full contribution for each user.
