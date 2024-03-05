@@ -107,6 +107,8 @@ class UserStats < ApplicationRecord
   # be done right until someone looks at that user's summary page.
   #
   def self.update_contribution(mode, obj, user_id = nil, num = 1)
+    return if obj.is_a?(User) || obj.is_a?(UserStats)
+
     # Two modes:
     # 1) pass in object,
     # 2) pass in field name, when it's not ::model
@@ -200,7 +202,6 @@ class UserStats < ApplicationRecord
     # Make sure contribution caches are correct.
     return unless user.contribution != contribution
 
-    debugger
     user.update(contribution: contribution)
   end
 
