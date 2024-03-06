@@ -26,7 +26,7 @@ class CreateUserStats < ActiveRecord::Migration[7.1]
       t.string(:languages)
       t.string(:bonuses)
 
-      t.timestamps
+      t.timestamps(default: Time.zone.now)
     end
     add_index(:user_stats, :user_id, name: :user_index)
   end
