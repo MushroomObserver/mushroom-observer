@@ -52,24 +52,6 @@
 #  species_lists::
 #  translation_strings_versions::
 #  votes::
-#
-#  == Counts of translation_strings_versions per language:
-#
-#  ar::
-#  be::
-#  de::
-#  el::
-#  es::
-#  fa::
-#  fr::
-#  it::
-#  jp::
-#  pl::
-#  pt::
-#  ru::
-#  tr::
-#  uk::
-#  zh::
 
 class UserStats < ApplicationRecord
   belongs_to :user
@@ -339,36 +321,72 @@ class UserStats < ApplicationRecord
     bonuses.inject(0) { |acc, elem| acc + elem[0] }
   end
 
-  #  GROUPED BY USER ID BUT WITHOUT `sum`
+  ##############################################################################
   #
-  # # Exception for species_list_entries, does a simple join:
-  # def count_species_list_observations(user_id)
-  #   SpeciesList.joins(:species_list_observations).
-  #     where(user_id: user_id).group(:user_id).
-  #     select(Arel.star.count.as("cnt"), :user_id).order(cnt: :desc)
-  # end
+  #    METHODS TO POPULATE OR REFRESH USER_STATS COLUMNS FOR ALL USERS
 
-  # # Exception for versions: Corrects for double-counting of versioned records.
-  # # NOTE: arel_table[:column].count(true) means "COUNT DISTINCT column"
-  # def count_versions(parent_table, user_id)
-  #   parent_class = parent_table.classify.constantize
-  #   version_class = "#{parent_class}::Version".constantize
-  #   parent_id = "#{parent_table}_id"
+  # Each of these methods creates a hash of partial records (a single column)
+  # keyed by user_id. At the bottom it finds or initializes the record by
+  # user_id, and updates all columns at once.
+  def self.refresh_all_user_stats
+    records = {}
+    ALL_FIELDS.each_key do |field|
+      table = (ALL_FIELDS[field]&.[](:table) || field).to_s
 
-  #   parent_class.joins(:versions).
-  #     where(user_id: user_id).
-  #     where.not(parent_class[:user_id].eq(version_class[:user_id])).
-  #     group(:user_id).
-  #     select(version_class[:"#{parent_id}"].count(true).as("cnt"), :user_id).
-  #     order(cnt: :desc)
-  # end
+      new_column = case table
+                   when "species_list_observations"
+                     refresh_species_list_observations
+                   when /^(\w+)_versions/
+                     parent_table = $LAST_MATCH_INFO[1]
+                     refresh_versions(parent_table)
+                   else
+                     refresh_regular_field(table, field)
+                   end
+      new_column ||= {}
+      records = records.deep_merge(new_column)
+    end
 
-  # # Regular count, by :user_id, or :id if table is `users`
-  # def count_regular_field(table, user_id)
-  #   field_class = table.to_s.classify.constantize
-  #   t_user_id = (table == "users" ? :id : :user_id)
+    records.each do |user_id, columns|
+      UserStats.find_or_initialize_by(user_id: user_id).update(columns)
+    end
+  end
 
-  #   field_class.where("#{t_user_id}": user_id).group(:"#{t_user_id}").
-  #     select(Arel.star.count.as("cnt"), :"#{t_user_id}").order(cnt: :desc)
-  # end
+  # Exception for species_list_entries:
+  def self.refresh_species_list_observations
+    results = SpeciesList.joins(:species_list_observations).
+              group(:user_id).distinct.
+              select(:user_id, Arel.star.count.as("cnt"))
+
+    results.to_h do |record|
+      [record.user_id, { species_list_entries: record.cnt }]
+    end
+  end
+
+  # Exception for versions: Corrects for double-counting of versioned records.
+  # NOTE: arel_table[:column].count(true) means "COUNT DISTINCT column"
+  def self.refresh_versions(parent_table)
+    # parent_class = parent_table.classify.constantize
+    # version_class = "#{parent_class}::Version".constantize
+    # parent_id = "#{parent_table}_id"
+
+    # parent_class.joins(:versions).
+    #   group(:user_id).distinct.
+    #   select(
+    #     :user_id,
+    #     where.not(parent_class[:user_id].eq(version_class[:user_id])).
+    #     count(true).as("cnt")
+    #   )
+  end
+
+  # Regular counts keyed by user_id:
+  def self.refresh_regular_field(table, field)
+    field_class = table.to_s.classify.constantize
+
+    results = field_class.group(:user_id).distinct.
+              select(:user_id, Arel.star.count.as("cnt"))
+
+    results.to_h do |record|
+      [record.user_id, { "#{field}": record.cnt }]
+    end
+  end
 end
