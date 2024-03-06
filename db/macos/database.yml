@@ -23,7 +23,6 @@ shared:
   # And do not not require ORDER BY to include the DISTINCT column.
   variables:
     sql_mode: TRADITIONAL
-    default_authentication_plugin: mysql_native_password
 
 development:
   database: mo_development
