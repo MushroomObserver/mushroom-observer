@@ -31,38 +31,36 @@ strings = ARGV.length > 0 ? ARGV : readlines
 # rubocop:enable Style/NumericPredicate
 # rubocop:enable Style/ZeroLengthPredicate
 
-pid = nil    # pid of last line
-found = nil  # when the string is found, this is set to the pid
 bundles = {} # accumulates de-interlaced lines for each request
+found = {}   # strings we have found
+pid = nil    # pid of last line
 
-string = strings.shift
-exit(0) unless string
+def print_match(bundle, strings, found)
+  strings.each do |string|
+    if bundle.join.include?(string)
+      found[string] = true
+      puts bundle.join
+    end
+  end
+end
 
 file = "#{app_root}/log/production.log"
 File.open(file).readlines.each do |line|
   match = line.match(/#(\d+)/)
   pid = match[1] if match
   if line.match?(/: Started [A-Z]{3,}/)
-    if found == pid
-      puts bundles[found].join
-      string = strings.shift
-      exit(0) unless string
-      found = nil
-    end
+    bundle = bundles[pid]
+    print_match(bundle, strings, found) if bundle
     bundles[pid] = []
   end
   bundles[pid] ||= []
   bundles[pid] << line.sub(/^[A-Z], \[[^\[\]]*\]  /, "")
-  found = pid if line.include?(string)
+end
+bundles.each do |pid, bundle|
+  print_match(bundle, strings, found)
 end
 
-if found
-  puts bundles[found].join
-  string = strings.shift
-  exit(0) unless string
-end
-
-([string] + strings).each do |str|
-  warn "Unable to find: #{str}\n"
+strings.each do |str|
+  puts "Unable to find: #{str}\n" unless found[str]
 end
 exit(1)
