@@ -118,12 +118,14 @@ class UserStats < ApplicationRecord
   # such as awarding extra points for observations with vouchers, which won't
   # be done right until someone looks at that user's summary page.
   #
+  # Two modes:
+  # 1) pass in object,
+  # NOTE: This is a universal callback on save so `obj` could be anything,
+  # including records we don't count
+  # 2) pass in field name, when it's not ::model
   def self.update_contribution(mode, obj, user_id = nil, num = 1)
     return unless obj.respond_to?(:user_id)
 
-    # Two modes:
-    # 1) pass in object,
-    # 2) pass in field name, when it's not ::model
     if obj.is_a?(ActiveRecord::Base)
       field = get_applicable_field(obj)
       user_id ||= obj&.user_id
@@ -131,15 +133,19 @@ class UserStats < ApplicationRecord
       field = obj
       user_id ||= User.current_id
     end
-    # NOTE: this is a universal callback on save so `obj` could be anything,
-    #       including records we don't count
     weight = ALL_FIELDS.key?(field) ? ALL_FIELDS[field.to_sym][:weight] : 0
     return unless weight&.positive? && user_id&.positive?
 
-    update_weight(calc_impact(weight * num, mode), user_id)
-    UserStats.where(id: user_id).increment!(field, by: num)
+    impact = calc_impact(weight * num, mode)
+    return if impact.zero?
+
+    User.find(user_id).increment!(:contribution, impact)
+    return unless (user_stat = UserStats.find_by(user_id: user_id))
+
+    user_stat.increment!(field, by: num)
   end
 
+  # impact can be positive or negative
   def self.calc_impact(weight, mode)
     case mode
     when :del
@@ -151,17 +157,11 @@ class UserStats < ApplicationRecord
     end
   end
 
-  def self.update_weight(impact, user_id)
-    return if impact.zero?
-
-    User.find(user_id).increment!(:contribution, impact)
-  end
-
-  # An applicable field is a field that affects contribution
+  # An applicable field = affects contribution. NOTE: This is a reverse lookup.
+  # Get the key (the `field`) from the value (of :table)
   def self.get_applicable_field(obj)
     table = obj.class.to_s.tableize.to_sym
 
-    # We're getting the key (the `field``) from the value (of :table)
     ALL_FIELDS.select { |_f, e| e[:table] == table }.keys.first || table
   end
 
@@ -175,7 +175,7 @@ class UserStats < ApplicationRecord
     @user_stats = UserStats.find_by(user_id: user_id) ||
                   UserStats.new(user_id: user_id)
     @user_stats.refresh_user_data(user_id)
-    @user_data
+    @user_stats
   end
 
   ##############################################################################
@@ -196,7 +196,8 @@ class UserStats < ApplicationRecord
       id: user_id,
       name: user.unique_text_name,
       languages: language_contributions(user_id),
-      # temporary: copy over bonuses
+      # temporary: copy over bonuses from User object.
+      # TODO: remove this line after initial population.
       bonuses: user.bonuses
     }
 
@@ -204,7 +205,6 @@ class UserStats < ApplicationRecord
     ALL_FIELDS.each_key { |field| refresh_field_count(field, user_id) }
 
     # Update the UserStats record in one go.
-    # Temporary: remove bonuses above once populated!
     update(@user_data.except(:id, :name))
 
     # Calculate full contribution for each user.
@@ -242,8 +242,7 @@ class UserStats < ApplicationRecord
 
   # Exception for species_list_entries, does a simple join:
   def count_species_list_observations(user_id)
-    SpeciesList.joins(:species_list_observations).
-      where(user_id: user_id).count
+    SpeciesList.joins(:species_list_observations).where(user_id: user_id).count
   end
 
   # This counts versions where the editor was not the original author
