@@ -102,6 +102,7 @@ class UserStats < ApplicationRecord
     namings: { weight: 1 },
     comments: { weight: 1 },
     votes: { weight: 1 },
+    translation_strings: { weight: 1 },
     translation_string_versions: { weight: 1 }
   }.freeze
 
@@ -118,7 +119,7 @@ class UserStats < ApplicationRecord
   # be done right until someone looks at that user's summary page.
   #
   def self.update_contribution(mode, obj, user_id = nil, num = 1)
-    return if obj.is_a?(User)
+    return unless obj.respond_to?(:user_id)
 
     # Two modes:
     # 1) pass in object,
@@ -245,7 +246,8 @@ class UserStats < ApplicationRecord
       where(user_id: user_id).count
   end
 
-  # Exception for versions: Corrects for double-counting of versioned records.
+  # This counts versions where the editor was not the original author
+  # Should correct for the double-counting of created records
   # NOTE: the version classes need `.arel_table`, unlike other models
   def count_versions(parent_table, user_id)
     parent_class = parent_table.classify.constantize
@@ -291,23 +293,39 @@ class UserStats < ApplicationRecord
       metric += entry[:weight] * data[field]
     end
     # metric += data[:languages].to_i
-    metric += sum_bonuses
+    metric += sum_bonuses.to_i
     data[:metric] = metric
     metric
   end
 
-  # NOTE: These do not count towards the metric. Maybe count versions?
+  # NOTE: These do not count towards the metric.
   def language_contributions(user_id)
-    counts = TranslationString.where(user_id: user_id).
-             select(:language_id, Arel.star.count.as("cnt")).
-             group(:language_id).order(cnt: :desc)
-
     locale_index = Language.pluck(:id, :locale).to_h
 
+    orig = TranslationString.where(user_id: user_id).
+           select(:language_id, Arel.star.count.as("cnt")).
+           group(:language_id).order(cnt: :desc)
+
     # Turn it into a hash of translation strings by locale.
-    counts.to_h do |lang|
+    counts_orig = orig.to_h do |lang|
       [locale_index[lang.language_id], lang.cnt]
     end
+
+    vers =
+      TranslationString.joins(:versions).where(user_id: user_id).where.not(
+        TranslationString[:user_id].eq(
+          TranslationString::Version.arel_table[:user_id]
+        )
+      ).distinct.select(:language_id, Arel.star.count.as("cnt")).
+      group(:language_id).order(cnt: :desc)
+
+    # Turn it into a hash of translation strings by locale.
+    counts_vers = vers.to_h do |lang|
+      [locale_index[lang.language_id], lang.cnt]
+    end
+
+    # Merges the values, whether or not the key is present both places
+    counts_orig.merge(counts_vers) { |_key, orig_v, vers_v| orig_v + vers_v }
   end
 
   # Sum up all the bonuses the User has earned.

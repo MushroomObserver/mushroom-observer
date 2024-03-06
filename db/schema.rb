@@ -671,6 +671,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_03_072017) do
     t.integer "sequenced_observations", default: 0, null: false
     t.integer "species_list_entries", default: 0, null: false
     t.integer "species_lists", default: 0, null: false
+    t.integer "translation_strings", default: 0, null: false
     t.integer "translation_string_versions", default: 0, null: false
     t.integer "votes", default: 0, null: false
     t.string "languages"
