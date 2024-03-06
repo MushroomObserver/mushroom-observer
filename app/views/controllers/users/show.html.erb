@@ -72,7 +72,7 @@ total = 0
           points = row[:points]
           url = paths[field]
           link = url ? link_to(label, url) : label
-          total += points
+          total += points.to_i
           if !count %>
             <tr>
               <td colspan="2"><%= label %></td>
