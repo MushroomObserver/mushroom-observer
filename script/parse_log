@@ -31,8 +31,8 @@ grep -v 'ActionView::Template::Error .Character not in alphabet' \
   > $new_errors || true
 
 touch $old_errors
-(diff $new_errors $old_errors || true) |
-  grep '^<' | sed 's/^< //' | $app_root/script/extract_log
-mv $new_errors $old_errors
+diff $new_errors $old_errors |
+  grep '^<' | sed 's/^< //' | $app_root/script/extract_log || true
+mv -f $new_errors $old_errors
 
 exit 0
