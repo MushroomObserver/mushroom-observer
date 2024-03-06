@@ -15,13 +15,17 @@ module UserStatsHelper
       }
     end
 
-    # Add bonuses for translations.
-    # user_data&.[](:languages_itemized)&.each do |lang, score|
-    #   rows << {
-    #     label: :show_user_language_contribution.t(name: lang.name),
-    #     points: score.to_i
-    #   }
-    # end
+    lang_name_by_locale = Language.pluck(:locale, :name).to_h
+
+    # Show a breakdown of translations
+    # NOTE: not currently in total, which is raw translation_string_versions
+    user_stats&.[](:languages)&.each do |locale, count|
+      lang_name = lang_name_by_locale[locale]
+      rows << {
+        label: :show_user_language_contribution.t(name: lang_name),
+        points: count.to_i
+      }
+    end
 
     # Add bonuses at the bottom.
     user_stats&.bonuses&.each do |points, reason|
