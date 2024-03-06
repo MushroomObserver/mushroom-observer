@@ -31,10 +31,12 @@ strings = ARGV.length > 0 ? ARGV : readlines
 # rubocop:enable Style/NumericPredicate
 # rubocop:enable Style/ZeroLengthPredicate
 
-string = strings.shift # string we're looking for next
-bundles = {}           # accumulates de-interlaced lines for each request
-pid = nil              # pid of last line
-found = nil            # when the string is found, this is set to the pid
+pid = nil    # pid of last line
+found = nil  # when the string is found, this is set to the pid
+bundles = {} # accumulates de-interlaced lines for each request
+
+string = strings.shift
+exit(0) unless string
 
 file = "#{app_root}/log/production.log"
 File.open(file).readlines.each do |line|
@@ -43,8 +45,8 @@ File.open(file).readlines.each do |line|
   if line.match?(/: Started [A-Z]{3,}/)
     if found == pid
       puts bundles[found].join
-      exit(0) if strings.empty?
       string = strings.shift
+      exit(0) unless string
       found = nil
     end
     bundles[pid] = []
@@ -56,8 +58,8 @@ end
 
 if found
   puts bundles[found].join
-  exit(0) if strings.empty?
   string = strings.shift
+  exit(0) unless string
 end
 
 ([string] + strings).each do |str|
