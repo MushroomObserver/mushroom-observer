@@ -255,9 +255,9 @@ class UserStats < ApplicationRecord
     parent_id = "#{parent_table}_id"
 
     parent_class.joins(:versions).
-      where(user_id: user_id).
+      where(version_class.arel_table[:user_id].eq(user_id)).
       where.not(
-        parent_class[:user_id].eq(version_class.arel_table[:user_id])
+        version_class.arel_table[:user_id].eq(parent_class[:user_id])
       ).distinct.select(version_class.arel_table[:"#{parent_id}"]).count
   end
 
@@ -312,9 +312,11 @@ class UserStats < ApplicationRecord
     end
 
     vers =
-      TranslationString.joins(:versions).where(user_id: user_id).where.not(
-        TranslationString[:user_id].eq(
-          TranslationString::Version.arel_table[:user_id]
+      TranslationString.joins(:versions).
+      where(TranslationString::Version.arel_table[:user_id].eq(user_id)).
+      where.not(
+        TranslationString::Version.arel_table[:user_id].eq(
+          TranslationString[:user_id]
         )
       ).distinct.select(:language_id, Arel.star.count.as("cnt")).
       group(:language_id).order(cnt: :desc)
