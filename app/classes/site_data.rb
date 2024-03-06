@@ -307,9 +307,9 @@ class SiteData
     parent_id = "#{parent_table}_id"
 
     parent_class.joins(:versions).
-      where(user_id: user_id).
+      where(version_class.arel_table[:user_id].eq(user_id)).
       where.not(
-        parent_class[:user_id].eq(version_class.arel_table[:user_id])
+        version_class.arel_table[:user_id].eq(parent_class[:user_id])
       ).distinct.select(version_class.arel_table[:"#{parent_id}"]).count
   end
 
