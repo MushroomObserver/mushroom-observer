@@ -20,7 +20,7 @@ new_errors=$app_root/log/errors.new
 
 grep -A1 '^E, .* ERROR \|ENOMEM' $rails_log |
 grep -v '^--' |
-grep -v '^E, ' |
+grep -v '^[EW], ' |
 grep -v 'Using a password on the command line' |
 grep -v 'Can.t figure out how to sort' |
 grep -v 'SMTP To address may not contain CR or LF line breaks' |

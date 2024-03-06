@@ -39,7 +39,7 @@ def print_match(bundle, strings, found)
   strings.each do |string|
     if bundle.join.include?(string)
       found[string] = true
-      puts bundle.join
+      puts(bundle.map { |line| line.sub(/^[A-Z], \[[^\[\]]*\]  /, "") }.join)
     end
   end
 end
@@ -54,9 +54,9 @@ File.open(file).readlines.each do |line|
     bundles[pid] = []
   end
   bundles[pid] ||= []
-  bundles[pid] << line.sub(/^[A-Z], \[[^\[\]]*\]  /, "")
+  bundles[pid] << line
 end
-bundles.each do |pid, bundle|
+bundles.each_value do |bundle|
   print_match(bundle, strings, found)
 end
 
