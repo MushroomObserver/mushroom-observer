@@ -125,7 +125,7 @@ class SpeciesList < AbstractModel
 
   def clear
     num = observations.count
-    SiteData.update_contribution(:del, :species_list_entries, user_id, num)
+    UserStats.update_contribution(:del, :species_list_entries, user_id, num)
 
     # "observations.delete_all" is very similar, however it requires loading
     # all of the observations (and not just their ids).  Note also that we
