@@ -699,6 +699,20 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
           result = false
         end
 
+      # Image is already saved to a tempfile (this is a puma thing, I guess?)
+      elsif upload_handle.is_a?(Tempfile)
+        begin
+          @file = upload_handle
+          self.upload_temp_file = @file.path
+          self.upload_length = @file.size
+          result = true
+        rescue StandardError => e
+          errors.add(:image,
+                     "Unexpected error while querying upload tempfile. " \
+                     "Error class #{e.class}: #{e}")
+          result = false
+        end
+
       # It should never reach here.
       else
         errors.add(:image, "Unexpected error: did not receive a valid upload " \
