@@ -1008,8 +1008,8 @@
   user_stats_species_lists: "[:SPECIES_LISTS]"
   user_stats_users: ""
   user_stats_votes: "[:VOTES]"
-  user_stats_translation_strings: "[:TRANSLATION_STRINGS] Authored"
-  user_stats_translation_string_versions: "[:TRANSLATION_STRINGS] Edited"
+  user_stats_translation_strings: "[:TRANSLATIONS] Authored"
+  user_stats_translation_string_versions: "[:TRANSLATIONS] Edited"
 
   # Site statistics field names.
   site_stats_comments: "[:COMMENTS]"
