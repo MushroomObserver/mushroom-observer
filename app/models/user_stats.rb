@@ -142,7 +142,7 @@ class UserStats < ApplicationRecord
     User.find(user_id).increment!(:contribution, impact)
     return unless (user_stat = UserStats.find_by(user_id: user_id))
 
-    user_stat.increment!(field, by: num)
+    user_stat.increment!(field, num)
   end
 
   # impact can be positive or negative
