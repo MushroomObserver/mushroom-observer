@@ -54,7 +54,8 @@ class SiteData
     :namings,
     :comments,
     :votes,
-    :contributing_users
+    :contributing_users,
+    :users
   ].freeze
 
   # -----------------------------

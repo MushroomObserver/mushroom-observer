@@ -225,7 +225,7 @@ class LocalizationFilesTest < UnitTestCase
     site_tags = SiteData::SITE_WIDE_FIELDS.map do |field|
       :"site_stats_#{field}"
     end
-    user_tags = SiteData.user_fields.keys.map do |field|
+    user_tags = UserStats::ALL_FIELDS.keys.map do |field|
       :"user_stats_#{field}"
     end
     # not picking :user_stats_users up for some reason...
