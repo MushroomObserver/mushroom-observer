@@ -80,8 +80,6 @@ class UserStats < ApplicationRecord
   # TODO:
   # 1. copy user.bonuses to user_stats.bonuses after records created
   # 2. switch `refresh_user_data` to use the method below
-  # 3. change the Admin::UsersController method that edits the user.bonuses,
-  #    to edit the bonuses here
   serialize :bonuses
 
   ALL_FIELDS = {
