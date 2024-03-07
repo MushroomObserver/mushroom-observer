@@ -283,6 +283,20 @@ class UserStats < ApplicationRecord
   def language_contributions(user_id)
     locale_index = Language.pluck(:id, :locale).to_h
 
+    # Jason :
+    # all = TranslationString::Version.joins(:translation_string).
+    #       where(TranslationString::Version.arel_table[:user_id].eq(user_id)).
+    #       select(:language_id, TranslationString[:id].count(true).as("cnt")).
+    #       group(:language_id)
+    # Jason after migration:
+    # all = TranslationString::Version.where(user_id: user_id).
+    #       select(
+    #         :language_id,
+    #         TranslationString::Version.arel_table[:translation_string_id].
+    #         count(true).as("cnt")
+    #       ).group(:language_id)
+
+
     orig = TranslationString.where(user_id: user_id).
            select(:language_id, Arel.star.count.as("cnt")).
            group(:language_id).order(cnt: :desc)
@@ -293,7 +307,7 @@ class UserStats < ApplicationRecord
     end
 
     vers =
-      TranslationString.joins(:versions).
+      TranslationString::Version.joins(:translation_string).
       where(TranslationString::Version.arel_table[:user_id].eq(user_id)).
       where.not(
         TranslationString::Version.arel_table[:user_id].eq(
@@ -397,6 +411,23 @@ class UserStats < ApplicationRecord
     results.to_h do |record|
       [record.user_id, { "#{field}": record.cnt }]
     end
+  end
+
+  def self.refresh_languages
+    # locale_index = Language.pluck(:id, :locale).to_h
+
+    # Jason after migration
+    # all = TranslationString::Version.
+    #       select(:user_id, :language_id,
+    #              TranslationString[:id].count(true).as("cnt")).
+    #       group(:user_id, :language_id)
+
+    # orig = TranslationString.
+    #        select(:user_id, :language_id,
+    #               TranslationString[:language_id].count(false).as("cnt")).
+    #        group(:user_id, :language_id)
+    # o_results = orig.to_h do |record|
+    # end
   end
 
   # This should only run once, to migrate the column from users to user_stats
