@@ -377,7 +377,7 @@ class UserStats < ApplicationRecord
     results = version_class.joins(:"#{parent_class}").
               where.not(
                 parent_class[:user_id].eq(version_class.arel_table[:user_id])
-              ).group(:user_id).distinct.select(
+              ).group(:user_id, :name_id).distinct.select(
                 :user_id,
                 version_class.arel_table[:"#{parent_id}"].count(true).as("cnt")
               )
