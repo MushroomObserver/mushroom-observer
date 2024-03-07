@@ -235,7 +235,7 @@ class UserStats < ApplicationRecord
     version_class = "#{parent_class}::Version".constantize
     parent_id = "#{parent_table}_id"
 
-    parent_class.joins(:versions).
+    version_class.joins(:"#{parent_class}").
       where(version_class.arel_table[:user_id].eq(user_id)).
       where.not(
         version_class.arel_table[:user_id].eq(parent_class[:user_id])
@@ -328,7 +328,7 @@ class UserStats < ApplicationRecord
   # Each of these methods creates a hash of partial records (a single column)
   # keyed by user_id. At the bottom it finds or initializes the record by
   # user_id, and updates all columns at once.
-  def self.refresh_all_user_stats
+  def self.refresh_all_user_stats(bonuses: false)
     records = {}
     ALL_FIELDS.each_key do |field|
       table = (ALL_FIELDS[field]&.[](:table) || field).to_s
@@ -338,11 +338,16 @@ class UserStats < ApplicationRecord
                      refresh_species_list_observations
                    when /^(\w+)_versions/
                      parent_table = $LAST_MATCH_INFO[1]
-                     refresh_versions(parent_table)
+                     refresh_versions(parent_table, field)
                    else
                      refresh_regular_field(table, field)
                    end
       new_column ||= {}
+      records = records.deep_merge(new_column)
+    end
+
+    if bonuses
+      new_column = transfer_bonuses
       records = records.deep_merge(new_column)
     end
 
@@ -364,18 +369,22 @@ class UserStats < ApplicationRecord
 
   # Exception for versions: Corrects for double-counting of versioned records.
   # NOTE: arel_table[:column].count(true) means "COUNT DISTINCT column"
-  def self.refresh_versions(parent_table)
-    # parent_class = parent_table.classify.constantize
-    # version_class = "#{parent_class}::Version".constantize
-    # parent_id = "#{parent_table}_id"
+  def self.refresh_versions(parent_table, field)
+    parent_class = parent_table.classify.constantize
+    version_class = "#{parent_class}::Version".constantize
+    parent_id = "#{parent_table}_id"
 
-    # parent_class.joins(:versions).
-    #   group(:user_id).distinct.
-    #   select(
-    #     :user_id,
-    #     where.not(parent_class[:user_id].eq(version_class[:user_id])).
-    #     count(true).as("cnt")
-    #   )
+    results = version_class.joins(:"#{parent_class}").
+              where.not(
+                parent_class[:user_id].eq(version_class.arel_table[:user_id])
+              ).group(:user_id).distinct.select(
+                :user_id,
+                version_class.arel_table[:"#{parent_id}"].count(true).as("cnt")
+              )
+
+    results.to_h do |record|
+      [record.user_id, { "#{field}": record.cnt }]
+    end
   end
 
   # Regular counts keyed by user_id:
@@ -387,6 +396,15 @@ class UserStats < ApplicationRecord
 
     results.to_h do |record|
       [record.user_id, { "#{field}": record.cnt }]
+    end
+  end
+
+  # This should only run once, to migrate the column from users to user_stats
+  def self.transfer_bonuses
+    results = User.where.not(bonuses: nil).select(:id, :bonuses)
+
+    results.to_h do |record|
+      [record.id, { bonuses: record.bonuses }]
     end
   end
 end
