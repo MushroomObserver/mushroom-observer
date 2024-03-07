@@ -672,12 +672,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_03_072017) do
     t.integer "species_list_entries", default: 0, null: false
     t.integer "species_lists", default: 0, null: false
     t.integer "translation_strings", default: 0, null: false
-    t.integer "translation_string_versions", default: 0, null: false
     t.integer "votes", default: 0, null: false
     t.string "languages"
     t.string "bonuses"
-    t.datetime "created_at", default: "2024-03-06 05:06:23", null: false
-    t.datetime "updated_at", default: "2024-03-06 05:06:23", null: false
+    t.datetime "created_at", default: "2024-03-07 07:16:11", null: false
+    t.datetime "updated_at", default: "2024-03-07 07:16:11", null: false
     t.index ["user_id"], name: "user_index"
   end
 

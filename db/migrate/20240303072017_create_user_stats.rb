@@ -20,7 +20,6 @@ class CreateUserStats < ActiveRecord::Migration[7.1]
       t.integer(:species_list_entries, default: 0, null: false)
       t.integer(:species_lists, default: 0, null: false)
       t.integer(:translation_strings, default: 0, null: false)
-      t.integer(:translation_string_versions, default: 0, null: false)
       t.integer(:votes, default: 0, null: false)
 
       t.string(:languages)
