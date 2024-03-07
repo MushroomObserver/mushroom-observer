@@ -235,7 +235,7 @@ class UserStats < ApplicationRecord
     version_class = "#{parent_class}::Version".constantize
     parent_id = "#{parent_table}_id"
 
-    version_class.joins(:"#{parent_class}").
+    version_class.joins(:"#{parent_table}").
       where(version_class.arel_table[:user_id].eq(user_id)).
       where.not(
         version_class.arel_table[:user_id].eq(parent_class[:user_id])
@@ -374,10 +374,10 @@ class UserStats < ApplicationRecord
     version_class = "#{parent_class}::Version".constantize
     parent_id = "#{parent_table}_id"
 
-    results = version_class.joins(:"#{parent_class}").
+    results = version_class.joins(:"#{parent_table}").
               where.not(
-                parent_class[:user_id].eq(version_class.arel_table[:user_id])
-              ).group(:user_id, :name_id).distinct.select(
+                version_class.arel_table[:user_id].eq(parent_class[:user_id])
+              ).group(:user_id).select(
                 :user_id,
                 version_class.arel_table[:"#{parent_id}"].count(true).as("cnt")
               )
