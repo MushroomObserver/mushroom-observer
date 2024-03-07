@@ -274,6 +274,7 @@ class Observation
       result = false
       vote = users_vote(naming, user)
       value = value.to_f
+      mark_obs_reviewed # no matter what vote, currently
 
       if value == Vote.delete_vote
         result = delete_vote(naming, vote, user)
@@ -286,7 +287,6 @@ class Observation
 
       # Update consensus if anything changed.
       calc_consensus if result
-
       result
     end
 
@@ -297,16 +297,33 @@ class Observation
     end
 
     # Recalculates consensus_naming and saves the observation accordingly.
-    # Also initiates the email blast to interested parties
+    # Resets the `needs_naming` column based on current naming specificity
+    # and confidence. Also initiates the email blast to interested parties.
     def calc_consensus
       reload_namings_and_votes!
       calculator = ::Observation::ConsensusCalculator.new(@namings)
       best, best_val = calculator.calc
       old = @observation.name
       if old != best || @observation.vote_cache != best_val
-        @observation.update(name: best, vote_cache: best_val)
+        # If naming generic or specific, and vote positive, needs_naming = 0
+        needs_naming = !best.above_genus? && best_val&.positive? ? 0 : 1
+        @observation.update(name: best, vote_cache: best_val,
+                            needs_naming: needs_naming)
       end
       @observation.reload.announce_consensus_change(old, best) if best != old
+    end
+
+    # We interpret any naming vote to mean the user has reviewed the obs.
+    # Setting this here makes the identify index query much cheaper.
+    def mark_obs_reviewed
+      if (view = ObservationView.find_by(observation_id: @observation.id,
+                                         user_id: User.current_id))
+        view.update!(last_view: Time.zone.now, reviewed: 1)
+      else
+        ObservationView.create!(observation_id: @observation.id,
+                                user_id: User.current_id,
+                                last_view: Time.zone.now, reviewed: 1)
+      end
     end
 
     # Try to guess which Naming is responsible for the consensus.

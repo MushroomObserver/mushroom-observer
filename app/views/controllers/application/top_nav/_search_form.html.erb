@@ -46,7 +46,7 @@ identify_page = controller.controller_name == "identify"
     </div><!--.form-group-->
   <% end %>
 
-  <%= hidden_field_tag(:needs_id, true) if identify_page %>
+  <%= hidden_field_tag(:needs_naming, true) if identify_page %>
 
   <div class="form-group text-nowrap">
     <%= submit_button(form: f, button: :app_search.l, class: "mr-2") %>

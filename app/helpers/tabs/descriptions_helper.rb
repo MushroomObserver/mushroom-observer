@@ -5,20 +5,35 @@ module Tabs
   module DescriptionsHelper
     # Links for the tabset
     def show_description_tabs(description:)
-      type = description.parent.type_tag
-      admin = is_admin?(description)
+      # type = description.parent.type_tag
+      # admin = is_admin?(description)
       # assemble HTML for "tabset" for show_{type}_description
+      # [
+      #   description_parent_tab(description, type)
+      #   edit_description_tab(description, type),
+      #   destroy_description_tab(description, admin),
+      #   clone_description_tab(description, type),
+      #   merge_description_tab(description, type, admin),
+      #   adjust_description_permissions_tab(description, type, admin),
+      #   make_description_default_tab(description, type),
+      #   description_project_tab(description),
+      #   publish_description_draft_tab(description, type, admin)
+      # ].reject(&:empty?)
+    end
+
+    def description_change_links(desc)
+      type = desc.parent.type_tag
+      admin = is_admin?(desc)
       [
-        description_parent_tab(description, type),
-        edit_description_tab(description, type),
-        destroy_description_tab(description, admin),
-        clone_description_tab(description, type),
-        merge_description_tab(description, type, admin),
-        adjust_description_permissions_tab(description, type, admin),
-        make_description_default_tab(description, type),
-        description_project_tab(description),
-        publish_description_draft_tab(description, type, admin)
-      ].reject(&:empty?)
+        writer?(desc) ? edit_button(target: desc, icon: :edit) : nil,
+        admin ? destroy_button(target: desc, icon: :delete) : nil,
+        icon_link_to(*clone_description_tab(desc, type)),
+        icon_link_to(*merge_description_tab(desc, type, admin)),
+        icon_link_to(*adjust_description_permissions_tab(desc, type, admin)),
+        icon_link_to(*make_description_default_tab(desc, type)),
+        icon_link_to(*description_project_tab(desc)),
+        icon_link_to(*publish_description_draft_tab(desc, type, admin))
+      ].compact_blank.safe_join(" | ")
     end
 
     # Components of the above AND similar links for helpers/descriptions_helper

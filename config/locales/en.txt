@@ -804,6 +804,7 @@
   show_location: Show [LOCATION]
   show_location_description: Show [DESCRIPTION]
   about_this_taxon: About this taxon
+  research_links: Research Links
   show_name: About [NAME]
   show_name_description: Show [DESCRIPTION]
   show_object: Show [TYPE]
@@ -996,11 +997,11 @@
   user_stats_location_description_authors: "[:LOCATION_DESCRIPTIONS] Authored"
   user_stats_location_description_editors: "[:LOCATION_DESCRIPTIONS] Edited"
   user_stats_locations: "[:LOCATIONS] Created"
-  user_stats_locations_versions: "[:LOCATIONS] Edited"
+  user_stats_location_versions: "[:LOCATIONS] Edited"
   user_stats_name_description_authors: "[:NAME_DESCRIPTIONS] Authored"
   user_stats_name_description_editors: "[:NAME_DESCRIPTIONS] Edited"
   user_stats_names: "[:NAMES] Created"
-  user_stats_names_versions: "[:NAMES] Edited"
+  user_stats_name_versions: "[:NAMES] Edited"
   user_stats_namings: Proposed IDs
   user_stats_observations: "[:OBSERVATIONS]"
   user_stats_observations_with_voucher: Observations with Specimen, Notes and Images
@@ -1020,11 +1021,11 @@
   site_stats_location_description_authors: Authored [:LOCATION_DESCRIPTIONS]
   site_stats_location_description_editors: ""
   site_stats_locations: Defined [:LOCATIONS]
-  site_stats_locations_versions: ""
+  site_stats_location_versions: ""
   site_stats_name_description_authors: Authored [:NAME_DESCRIPTIONS]
   site_stats_name_description_editors: ""
   site_stats_names: ""
-  site_stats_names_versions: ""
+  site_stats_name_versions: ""
   site_stats_namings: Proposed IDs
   site_stats_observations: "[:OBSERVATIONS]"
   site_stats_observations_with_voucher: Observations with Full Data
@@ -2132,8 +2133,9 @@
   show_name_general_description: "[:form_names_gen_desc]"
   show_name_see_more: See More
   show_name_icn_id_missing: missing
+  google_name_search: Google Search
   index_fungorum: Index Fungorum
-  index_fungorum_search: Index Fungorum search
+  index_fungorum_web_search: Index Fungorum web search
   mycobank: MycoBank
   mycobank_search: MycoBank search
   gsd_species_synonymy: GSD Species Synonymy
@@ -2875,10 +2877,10 @@
   list_name_tracker_pending_approval: "(Observer notification pending approval.)"
 
   # location/list_merge_options
-  list_merge_are_you_sure: Do merge?  This cannot be undone.
+  list_merge_are_you_sure: Assign location?  This cannot be undone.
   list_merge_options_near_matches: Near Matches
   list_merge_options_others: Other Available [:locations]
-  list_merge_options_title: Merge Options for [where]
+  list_merge_options_title: Location Matches for [where]
 
   # observer/list_notifications
   list_notifications_title: Email Alerts for [user]

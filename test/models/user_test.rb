@@ -584,4 +584,13 @@ class UserTest < UnitTestCase
     spam.publications.first.destroy
     assert_true(spam.reload.no_references_left?)
   end
+
+  def test_culling_unverified_users
+    unverified = users(:unverified)
+    msgs = User.cull_unverified_users(dry_run: true)
+    assert_equal("Deleted 1 unverified user(s).", msgs.first)
+    msgs = User.cull_unverified_users(dry_run: false)
+    assert_equal("Deleted 1 unverified user(s).", msgs.first)
+    assert_nil(User.find_by(id: unverified.id))
+  end
 end

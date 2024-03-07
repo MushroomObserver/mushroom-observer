@@ -3,17 +3,32 @@
 class API2
   # API for Name
   class NameAPI < ModelAPI
-    self.model = Name
+    def model
+      Name
+    end
 
-    self.high_detail_page_length = 100
-    self.low_detail_page_length  = 1000
-    self.put_page_length         = 1000
-    self.delete_page_length      = 1000
+    def high_detail_page_length
+      100
+    end
 
-    self.high_detail_includes = [
-      { comments: :user },
-      { synonym: :names }
-    ]
+    def low_detail_page_length
+      1000
+    end
+
+    def put_page_length
+      1000
+    end
+
+    def delete_page_length
+      1000
+    end
+
+    def high_detail_includes
+      [
+        { comments: :user },
+        { synonym: :names }
+      ]
+    end
 
     def query_params
       {

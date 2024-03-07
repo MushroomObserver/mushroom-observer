@@ -2654,6 +2654,22 @@ class NameTest < UnitTestCase
     assert_equal("__#{name.text_name}__ #{name.author}", name.display_name)
   end
 
+  def test_sensu_stricto
+    %w[group gr gr. gp gp. clade complex].each do |str|
+      assert_equal(Name.new(text_name: "Boletus #{str}").sensu_stricto,
+                   "Boletus",
+                   "Name s.s. should not include `#{str}`")
+      assert_equal(Name.new(text_name: "Boletus#{str}").sensu_stricto,
+                   "Boletus#{str}",
+                   "Name ss should include `#{str}` if it's part of the genus")
+    end
+
+    # start of the epithet matches a `group` abbreviation ("gr")
+    name = Name.new(text_name: "Leptonia gracilipes")
+
+    assert_equal(name.text_name, name.sensu_stricto)
+  end
+
   # --------------------------------------
 
   # Just make sure mysql is collating accents and case correctly.
@@ -3243,10 +3259,10 @@ class NameTest < UnitTestCase
     names(:lichen).merge(old_name)
 
     assert_equal(
-      old_contribution - SiteData::FIELD_WEIGHTS[:names_versions],
+      old_contribution - SiteData::ALL_FIELDS[:name_versions][:weight],
       user.reload.contribution,
       "Merging a Name edited by a user should reduce user's contribution " \
-      "by #{SiteData::FIELD_WEIGHTS[:names_versions]}"
+      "by #{SiteData::ALL_FIELDS[:name_versions][:weight]}"
     )
   end
 

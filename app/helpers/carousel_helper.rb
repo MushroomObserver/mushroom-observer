@@ -35,13 +35,13 @@ module CarouselHelper
   def carousel_basic_html(**args)
     tag.div(class: "carousel slide", id: args[:html_id],
             data: { ride: "false", interval: "false" }) do
+      concat(carousel_heading(args[:title], args[:links])) if args[:thumbnails]
       concat(tag.div(class: "carousel-inner bg-light", role: "listbox") do
         args[:images].each do |image|
           concat(carousel_item(image, **args))
         end
         concat(carousel_controls(args[:html_id])) if args[:images].length > 1
       end)
-      concat(carousel_heading(args[:title], args[:links])) if args[:thumbnails]
       concat(carousel_thumbnails(**args)) if args[:thumbnails]
     end
   end
@@ -116,7 +116,7 @@ module CarouselHelper
   end
 
   def carousel_thumbnails(**args)
-    tag.ol(class: "carousel-indicators bg-light mt-2 mb-0") do
+    tag.ol(class: "carousel-indicators panel-footer py-2 px-0 mb-0") do
       args[:images].each_with_index do |image, index|
         active = image == args[:top_img] ? "active" : ""
 

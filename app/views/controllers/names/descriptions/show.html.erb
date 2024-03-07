@@ -1,27 +1,16 @@
 <%
 add_page_title(@description.format_name.t)
-add_tab_set(show_description_tabs(description: @description))
+# add_tab_set(show_description_tabs(description: @description))
 @container = :wide
 %>
 
-<%= panel_block do %>
-  <div class="row">
+<%= render(partial: "descriptions/show_description_details",
+           locals: { review: true }) %>
+<%= render(partial: "descriptions/show_description_notes") %>
+<%= render(partial: "descriptions/show_description_authors_and_editors") %>
 
-    <div class="col-xs-12 col-md-6">
-      <%= render( partial: "shared/show_description",
-                  locals: { description: @description }) %>
-    </div><!-- .col -->
-
-    <div class="col-xs-12 col-md-6">
-      <%= show_alt_descriptions(object: @name, projects: @projects) %>
-    </div><!-- .col -->
-
-  </div><!-- .row -->
-<% end %>
-
-<%= render(partial: "names/descriptions/show/name_description",
-           object: @description, locals: { review: true }) %>
 <%= render(partial: "comments/comments_for_object",
            locals: { object: @description, comments: @comments,
                      controls: @user, limit: 10 }) if false %>
+
 <%= show_object_footer(@description, @versions) %>

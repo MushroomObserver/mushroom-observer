@@ -1,7 +1,7 @@
 <%
 @container = :text_image
 add_index_title(@query, no_hits: "")
-add_tab_set(names_index_tabs(query: @query))
+add_tab_set(all_names_index_tabs(query: @query))
 add_sorter(@query, names_index_sorts(query: @query))
 
 flash_error(@error) if @error && @objects.empty?

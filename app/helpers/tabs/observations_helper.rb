@@ -30,7 +30,7 @@ module Tabs
 
       [:show_observation_manage_species_lists.l,
        add_query_param(edit_observation_species_lists_path(obs.id)),
-       { class: tab_id(__method__.to_s) }]
+       { class: tab_id(__method__.to_s), icon: :manage_lists }]
     end
 
     # Name panel -- generates HTML
@@ -139,6 +139,13 @@ module Tabs
       links.reject(&:empty?)
     end
 
+    # for debugging
+    def dummy_disable_tab
+      ["Dummy link",
+       "https://google.com",
+       { class: tab_id(__method__.to_s), data: { action: "links#disable" } }]
+    end
+
     def observations_at_where_tabs(query)
       # Add some extra links to the index user is sent to if they click on an
       # undefined location.
@@ -146,9 +153,24 @@ module Tabs
 
       [
         define_location_tab(query),
-        merge_locations_tab(query),
+        assign_undefined_location_tab(query),
         locations_index_tab
       ]
+    end
+
+    # these are from the observations form
+    def define_location_tab(query)
+      [:list_observations_location_define.l,
+       add_query_param(new_location_path(where: query.params[:user_where])),
+       { class: tab_id(__method__.to_s) }]
+    end
+
+    def assign_undefined_location_tab(query)
+      [:list_observations_location_merge.l,
+       add_query_param(matching_locations_for_observations_path(
+                         where: query.params[:user_where]
+                       )),
+       { class: tab_id(__method__.to_s) }]
     end
 
     def observations_index_sorts
@@ -169,7 +191,7 @@ module Tabs
     def map_observations_tab(query)
       [:show_object.t(type: :map),
        map_observations_path(q: get_query_param(query)),
-       { class: tab_id(__method__.to_s) }]
+       { class: tab_id(__method__.to_s), data: { action: "links#disable" } }]
     end
 
     # NOTE: coerced_query_tab returns an array
@@ -280,10 +302,20 @@ module Tabs
       ]
     end
 
+    # Buttons in "Details" panel header
+    def obs_change_links(obs)
+      return unless check_permission(obs)
+
+      [
+        edit_button(target: obs, icon: :edit),
+        destroy_button(target: obs, icon: :delete)
+      ].safe_join(" | ")
+    end
+
     def edit_observation_tab(obs)
       [:edit_object.t(type: Observation),
        add_query_param(edit_observation_path(obs.id)),
-       { class: "#{tab_id(__method__.to_s)}_#{obs.id}" }]
+       { class: "#{tab_id(__method__.to_s)}_#{obs.id}", icon: :edit }]
     end
 
     def destroy_observation_tab(obs)

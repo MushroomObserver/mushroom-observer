@@ -10,7 +10,7 @@ class Query::NameByEditor < Query::NameBase
   def initialize_flavor
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
-    version_table = :names_versions
+    version_table = :name_versions
     add_join(version_table)
     where << "#{version_table}.user_id = '#{user.id}'"
     where << "names.user_id != '#{user.id}'"

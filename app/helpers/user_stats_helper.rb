@@ -5,15 +5,12 @@ module UserStatsHelper
   # Rows are roughly in decreasing order of importance.
   def user_stats_rows(show_user, user_data)
     rows = []
-    # omit sequence stuff because it has no weight
-    (SiteData::ALL_FIELDS -
-    SiteData::SITE_WIDE_FIELDS -
-    [:sequences, :sequenced_observations]).each do |field|
+    SiteData.user_fields_with_weight.each_key do |field|
       rows << {
         field: field,
         label: :"user_stats_#{field}".t,
         count: (count = user_data[field].to_i),
-        weight: (weight = SiteData::FIELD_WEIGHTS[field]),
+        weight: (weight = SiteData::ALL_FIELDS[field][:weight]),
         points: count * weight
       }
     end
@@ -58,13 +55,13 @@ module UserStatsHelper
       [:location_description_editors,
        location_descriptions_path(by_editor: user.id)],
       [:locations, locations_path(by_user: user.id)],
-      [:locations_versions, locations_path(by_editor: user.id)],
+      [:location_versions, locations_path(by_editor: user.id)],
       [:name_description_authors,
        name_descriptions_path(by_author: user.id)],
       [:name_description_editors,
        name_descriptions_path(by_editor: user.id)],
       [:names, names_path(by_user: user.id)],
-      [:names_versions, names_path(by_editor: user.id)],
+      [:name_versions, names_path(by_editor: user.id)],
       [:observations, observations_path(user: user.id)],
       [:species_lists, species_lists_path(by_user: user.id)],
       [:life_list, checklist_path(id: user.id)]

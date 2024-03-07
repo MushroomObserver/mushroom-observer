@@ -111,7 +111,7 @@ class LocationsControllerTest < FunctionalTestCase
     assert_template("show")
     assert_template("locations/show/_location")
     assert_template("comments/_comments_for_object")
-    assert_template("locations/descriptions/show/_location_description")
+    assert_template("descriptions/_show_description_details")
 
     location.reload
     assert_equal(updated_at, location.updated_at)
@@ -129,7 +129,7 @@ class LocationsControllerTest < FunctionalTestCase
     assert_template("locations/show")
     assert_template("locations/show/_location")
     assert_template("comments/_comments_for_object")
-    assert_template("locations/descriptions/show/_location_description")
+    assert_template("descriptions/_show_description_details")
   end
 
   def test_interest_in_show_location

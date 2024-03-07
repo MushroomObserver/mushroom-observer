@@ -7,15 +7,26 @@
 #
 #  DESCRIPTION::
 #
-#  This is a nightly cronjob that checks to make sure the classification string
-#  of each infrageneric taxon is the same as the classification string for the
-#  parent genus.  It checks for missing genera while it's at it.  It prints out
-#  a line for each taxon it finds that it has to fix.
+#  This is a nightly cronjob that performs a bunch of clean-up operations on
+#  the database:
 #
-#  It also makes sure the classification section of the default description
-#  matches the classification string cached in the name, preferring the
-#  description version above genus, and preferring the cached version below
-#  genus.
+#    Synonym.make_sure_all_referenced_synonyms_exist
+#    Name.fix_self_referential_misspellings
+#    Name.make_sure_names_are_bolded_correctly
+#    Name.refresh_classification_caches
+#    Name.propagate_generic_classifications (currently disabled)
+#    Observation.make_sure_no_observations_are_misspelled
+#    Observation.refresh_content_filter_caches
+#    Observation.refresh_needs_naming_column
+#    Vote.update_observation_views_reviewed_column
+#    User.cull_unverified_users
+#
+#  See documentation for each of these class methods for more information.
+#
+#  (The disabled job is a very complex operation that I still don't fully
+#  trust, so I'm just waiting until I have time to spot check a bunch of the
+#  literally thousands of changes it wants to make in the database before
+#  setting it loose in the wild. -JPH 20240219)
 #
 ################################################################################
 
@@ -23,27 +34,48 @@ require(File.expand_path("../config/boot.rb", __dir__))
 require(File.expand_path("../config/environment.rb", __dir__))
 
 dry_run = false
+verbose = false
 ARGV.each do |flag|
   case flag
   when "-n", "--dry-run"
     dry_run = true
+  when "-v", "--verbose"
+    verbose = true
   else
-    puts("USAGE: script/refresh_caches [-n|--dry-run]")
+    puts("USAGE: script/refresh_caches [-n|--dry-run] [-v|--verbose]")
     exit(1)
   end
 end
+DRY_RUN = dry_run
+VERBOSE = verbose
 
-msgs = if dry_run
-         Name.propagate_generic_classifications(dry_run: true)
-       else
-         Synonym.make_sure_all_referenced_synonyms_exist +
-           Name.fix_self_referential_misspellings +
-           Name.make_sure_names_are_bolded_correctly +
-           Name.refresh_classification_caches +
-           Name.propagate_generic_classifications +
-           Observation.make_sure_no_observations_are_misspelled +
-           Observation.refresh_content_filter_caches
-       end
+START = Time.zone.now
+def progress(msg, klass = nil, method = nil)
+  puts("#{(Time.zone.now - START).round(1)}: #{msg}") if VERBOSE
+  klass ? klass.send(method, dry_run: DRY_RUN) : []
+end
+
+msgs = progress("unused or missing synonyms...",
+                Synonym, :make_sure_all_referenced_synonyms_exist) +
+       progress("self-referential misspellings...",
+                Name, :fix_self_referential_misspellings) +
+       progress("misformatted names...",
+                Name, :make_sure_names_are_bolded_correctly) +
+       progress("classification caches...",
+                Name, :refresh_classification_caches) +
+       # progress("generic classifications...",
+       #          Name, :propagate_generic_classifications) +
+       progress("misspelled observations...",
+                Observation, :make_sure_no_observations_are_misspelled) +
+       progress("content filter caches...",
+                Observation, :refresh_content_filter_caches) +
+       progress("observations needing naming...",
+                Observation, :refresh_needs_naming_column) +
+       progress("observations reviewed...",
+                Vote, :update_observation_views_reviewed_column) +
+       progress("cull unverified users...",
+                User, :cull_unverified_users) +
+       progress("done")
 warn(msgs.join("\n")) if msgs.any?
 
 exit(0)

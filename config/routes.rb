@@ -460,14 +460,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("locations/help", to: "locations/help#show")
   # Map Locations: show
   get("locations/map", to: "locations/maps#show", as: "map_locations")
-  # Merge Locations: form and callback
-  get("locations/merges/new", to: "locations/merges#new",
-                              as: "location_merges_form")
-  post("locations/merges", to: "locations/merges#create",
-                           as: "location_merges")
-  # Add Observation (matching :where) to Location: update
-  patch("locations/add_to_location", to: "locations/observations#update",
-                                     as: "add_observation_to_location")
   # Location Reverse name order: update
   put("locations/:id/reverse_name_order",
       to: "locations/reverse_name_order#update",
@@ -715,6 +707,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       post("print_labels", to: "observations/downloads#print_labels",
                            as: "print_labels_for")
       get("identify", to: "observations/identify#index", as: "identify")
+      # Options for correlating an "undefined" +where+ to a Location: form
+      get("locations", to: "observations/locations#edit",
+                       as: "matching_locations_for")
+      # Assign Observation (matching :where) to a Location: update
+      patch("assign_location", to: "observations/locations#update",
+                               as: "assign_location_to")
     end
   end
 
@@ -806,6 +804,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
         to: "species_lists/projects#update",
         via: [:put, :patch],
         as: "species_list_projects")
+
+  # ----- Test if server is up  -------------------------------------
+  resources :test, only: [:index], controller: "test"
 
   # ----- Test pages  -------------------------------------------
   namespace :test_pages do

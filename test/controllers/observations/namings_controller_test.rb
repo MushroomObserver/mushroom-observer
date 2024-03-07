@@ -89,8 +89,10 @@ module Observations
       assert_equal(new_name, nam.text_name)
       assert_not_equal(old_name, nam.text_name)
       assert_not(nam.name.deprecated)
-      assert_equal(old_contribution + (SiteData::FIELD_WEIGHTS[:names] * 2) + 2,
-                   rolf.reload.contribution)
+      assert_equal(
+        old_contribution + (SiteData::ALL_FIELDS[:names][:weight] * 2) + 2,
+        rolf.reload.contribution
+      )
     end
 
     def test_update_observation_multiple_match

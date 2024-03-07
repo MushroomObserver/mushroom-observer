@@ -86,11 +86,6 @@ module Tabs
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
     end
 
-    def index_fungorum_basic_search_tab
-      [:index_fungorum_search.l, index_fungorum_basic_search_url,
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
-    end
-
     def mycobank_name_search_tab(name)
       [:mycobank_search.l, mycobank_name_search_url(name),
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
@@ -101,24 +96,7 @@ module Tabs
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
     end
 
-    def name_correct_spelling_tab(name)
-      [name.correct_spelling.display_name.l,
-       add_query_param(name_path(name.correct_spelling_id)),
-       { class: tab_id(__method__.to_s) }]
-    end
-
-    def show_name_tab(name)
-      [name.display_name.l, add_query_param(name_path(name.id)),
-       { class: tab_id(__method__.to_s) }]
-    end
-
     # lifeform tabs:
-    def propagate_lifeform_form_tab(name)
-      [:show_name_propagate_lifeform.t,
-       add_query_param(propagate_name_lifeform_form_path(name.id)),
-       { class: tab_id(__method__.to_s) }]
-    end
-
     def edit_name_lifeform_tab(name)
       [:EDIT.l, add_query_param(edit_name_lifeform_path(name.id)),
        { class: tab_id(__method__.to_s), icon: :edit }]
@@ -152,12 +130,6 @@ module Tabs
        { class: tab_id(__method__.to_s), icon: :edit }]
     end
 
-    # Show name, obs menu. Also on Obs show, name section
-    def mycoportal_name_tab(name)
-      ["MyCoPortal", mycoportal_url(name),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
-    end
-
     def eol_name_tab(name)
       ["EOL", name.eol_url,
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
@@ -169,10 +141,55 @@ module Tabs
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
     end
 
+    def ascomycete_org_name_tab(name)
+      ["Ascomycete.org", ascomycete_org_name_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def gbif_name_tab(name)
+      ["GBIF", gbif_name_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def google_name_tab(name)
+      [:google_name_search.l, google_name_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def inat_name_tab(name)
+      ["iNaturalist", inat_name_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def index_fungorum_name_search_tab(name)
+      [:index_fungorum_web_search.l, index_fungorum_name_web_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def ncbi_nucleotide_term_tab(name)
+      ["NCBI Nucleotide", ncbi_nucleotide_term_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def mushroomexpert_name_tab(name)
+      ["MushroomExpert", mushroomexpert_name_web_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def mycoportal_name_tab(name)
+      ["MyCoPortal", mycoportal_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def wikipedia_term_tab(name)
+      ["Wikipedia", wikipedia_term_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
     def occurrence_map_for_name_tab(name)
       [:show_name_distribution_map.t,
        add_query_param(map_name_path(id: name.id)),
-       { class: tab_id(__method__.to_s) }]
+       { class: tab_id(__method__.to_s), data: { action: "links#disable" } }]
     end
 
     # Others
@@ -231,6 +248,21 @@ module Tabs
 
       [:show_objects.t(type: :description),
        add_query_param(name_descriptions_path),
+       { class: tab_id(__method__.to_s) }]
+    end
+
+    def all_names_index_tabs(query:)
+      [
+        new_name_tab,
+        all_names_tab(query),
+        coerced_observation_query_tab(query)
+      ].reject(&:empty?)
+    end
+
+    def all_names_tab(query)
+      return if query&.flavor == :all || query&.flavor&.empty?
+
+      [:all_objects.t(type: :name), names_path,
        { class: tab_id(__method__.to_s) }]
     end
 

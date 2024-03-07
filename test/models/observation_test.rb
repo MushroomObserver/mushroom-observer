@@ -555,7 +555,8 @@ class ObservationTest < UnitTestCase
     obs = Observation.create!(
       when: Time.zone.today,
       where: "anywhere",
-      name_id: @fungi.id
+      name_id: @fungi.id,
+      needs_naming: true
     )
 
     User.current = rolf
@@ -600,8 +601,16 @@ class ObservationTest < UnitTestCase
     obs.reload
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, consensus.consensus_naming)
+    # None of the crew has reviewed the obs.
+    rov = ObservationView.find_by(observation_id: obs.id, user_id: rolf.id)
+    mov = ObservationView.find_by(observation_id: obs.id, user_id: mary.id)
+    dov = ObservationView.find_by(observation_id: obs.id, user_id: mary.id)
+    assert_nil(rov)
+    assert_nil(mov)
+    assert_nil(dov)
 
     # Play with Rolf's vote for his naming (first naming).
+    User.current = rolf # necessary for ov creation in naming_consensus
     consensus.change_vote(namg1, 2, rolf)
     namg1.reload
     obs.reload
@@ -613,6 +622,8 @@ class ObservationTest < UnitTestCase
     assert(consensus.users_favorite?(namg1, rolf))
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, consensus.consensus_naming)
+    # Check that the obs no longer `needs_naming`
+    assert_equal(false, obs.needs_naming)
 
     consensus.change_vote(namg1, 0.01, rolf)
     namg1.reload
@@ -628,6 +639,8 @@ class ObservationTest < UnitTestCase
     assert_not(consensus.users_favorite?(namg1, rolf))
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, consensus.consensus_naming)
+    # Check that the obs again `needs_naming`
+    assert_equal(true, obs.needs_naming)
 
     # Play with Rolf's vote for other namings.
     # Make votes namg1: -0.01, namg2: 1, namg3: 0
@@ -640,6 +653,8 @@ class ObservationTest < UnitTestCase
     assert_not(consensus.owners_favorite?(namg3))
     assert_names_equal(@name2, obs.name)
     assert_equal(namg2, consensus.consensus_naming)
+    # Check that the obs again does not `needs_naming`
+    assert_equal(false, obs.needs_naming)
 
     # Make votes namg1: -0.01, namg2: 1, namg3: 2
     consensus.change_vote(namg3, 2, rolf)
@@ -672,6 +687,7 @@ class ObservationTest < UnitTestCase
     assert_equal(namg3, consensus.consensus_naming)
 
     # Play with Mary's vote. Make votes:
+    User.current = mary # necessary for ov creation in naming_consensus
     # namg1 Agaricus campestris L.: rolf=1.0, mary=1.0
     # namg2 Coprinus comatus (O.F. Müll.) Pers.: rolf=1.0, mary=2.0(*)
     # namg3 Conocybe filaris: rolf=2.0(*), mary=-1.0
@@ -712,6 +728,25 @@ class ObservationTest < UnitTestCase
     assert_not(consensus.users_favorite?(namg3, dick))
     assert_names_equal(@name3, obs.name)
     assert_equal(namg3, consensus.consensus_naming)
+
+    # Check that the obs no longer `needs_naming`
+    assert_equal(false, obs.needs_naming)
+
+    # Check that this whole thing marked the obs as reviewed in the ov table
+    # for both Rolf and Mary
+    rov = ObservationView.find_by(observation_id: obs.id, user_id: rolf.id)
+    mov = ObservationView.find_by(observation_id: obs.id, user_id: mary.id)
+    assert_equal(true, rov.reviewed)
+    assert_equal(true, mov.reviewed)
+  end
+
+  def test_refresh_needs_naming_column
+    Observation.update_all(needs_naming: 0)
+    Observation.refresh_needs_naming_column
+    assert_equal(true, observations(:minimal_unknown_obs).needs_naming)
+    assert_equal(true, observations(:detailed_unknown_obs).needs_naming)
+    assert_equal(false, observations(:coprinus_comatus_obs).needs_naming)
+    assert_equal(true, observations(:agaricus_campestris_obs).needs_naming)
   end
 
   def test_project_ownership
@@ -1129,18 +1164,22 @@ class ObservationTest < UnitTestCase
                         observations(:peltigera_obs))
   end
 
-  def test_scope_needs_id
-    assert_includes(Observation.needs_id,
+  def test_scope_needs_naming
+    assert_includes(Observation.needs_naming,
                     observations(:fungi_obs))
-    assert_not_includes(Observation.needs_id,
+    assert_not_includes(Observation.needs_naming,
                         observations(:peltigera_obs))
   end
 
-  def test_scope_needs_id_for_user
-    assert_includes(Observation.needs_id_for_user(users(:rolf)),
-                    observations(:fungi_obs))
-    assert_not_includes(Observation.needs_id_for_user(users(:rolf)),
-                        observations(:peltigera_obs))
+  def test_scope_needs_naming_and_not_reviewed_by_user
+    assert_includes(
+      Observation.needs_naming_and_not_reviewed_by_user(users(:rolf)),
+      observations(:fungi_obs)
+    )
+    assert_not_includes(
+      Observation.needs_naming_and_not_reviewed_by_user(users(:rolf)),
+      observations(:peltigera_obs)
+    )
   end
 
   def test_scope_of_name

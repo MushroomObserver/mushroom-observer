@@ -1,3 +1,31 @@
+// Cached content display/hide
+// location format, when both are printed
+
+.location-format-postal {
+  .location-scientific {
+    display: none;
+  }
+}
+
+.location-format-scientific {
+  .location-postal {
+    display: none;
+  }
+}
+
+// content that requires a user, or for not-logged-in users
+.no-user {
+  .require-user {
+    display: none;
+  }
+}
+
+.logged-in-user {
+  .not-logged-in {
+    display: none;
+  }
+}
+
 //
 // interest eyes
 // --------------------------------------------------
@@ -44,9 +72,15 @@ ul.tight-list {
   padding-left: 1em;
 }
 
-div.textile img {
-  max-width: 100%;
-  max-height: auto;
+.textile {
+  img {
+    max-width: 100%;
+    max-height: auto;
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+  }
 }
 
 .panel {

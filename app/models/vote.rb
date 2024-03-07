@@ -78,7 +78,7 @@ class Vote < AbstractModel
     vote.assign_attributes(args.permit(:favorite, :value)) if args
     vote.created_at = now
     vote.updated_at = now
-    vote.user = @user
+    vote.user = User.current
     vote.naming = naming
     vote.observation = naming.observation
     vote
@@ -219,6 +219,56 @@ class Vote < AbstractModel
     (user.votes_anonymous == "yes") ||
       (user.votes_anonymous == :old &&
        updated_at <= Time.zone.parse(MO.vote_cutoff))
+  end
+
+  # Used by script/refresh_caches
+  # Mark an observation as `reviewed` by a user if they've already voted on it.
+  # (The user can also independently "mark as reviewed" in the help-identify
+  # UI, so this cronjob should not reset any obs to "not reviewed".)
+  def self.update_observation_views_reviewed_column(dry_run: false)
+    update_existing_views_corresponding_to_votes(dry_run: dry_run) +
+      add_missing_views_corresponding_to_votes(dry_run: dry_run)
+  end
+
+  # This fixes existing entries in observation_views which correspond to a vote
+  # but are not currently marked as "reviewed".
+  def self.update_existing_views_corresponding_to_votes(dry_run: false)
+    join = "JOIN `votes` ON #{votes_views_join_condition}"
+    query = ObservationView.where(reviewed: 0).joins(join)
+    msgs = query.map do |ov|
+      "User #{ov.user_id} has reviewed observation #{ov.observation_id} " \
+        "(update)"
+    end
+    query.update_all(reviewed: 1) unless dry_run
+    msgs
+  end
+
+  # This adds entries into observation_views for votes which do not presently
+  # correspond to an entry in obseration_views yet.
+  def self.add_missing_views_corresponding_to_votes(dry_run: false)
+    # This is really expensive, but AN and JH can't think of any better way.
+    join = "LEFT OUTER JOIN `observation_views` ON " \
+           "#{votes_views_join_condition}"
+    # (user 0 is used for anonymous votes, ignore those)
+    Vote.where.not(user_id: 0).joins(join).
+      where(observation_views: { id: nil }).
+      select(:observation_id, :user_id, :updated_at).map do |vote|
+      unless dry_run
+        ObservationView.create!(
+          observation_id: vote.observation_id,
+          user_id: vote.user_id,
+          last_view: vote.updated_at,
+          reviewed: 1
+        )
+      end
+      "User #{vote.user_id} has reviewed observation #{vote.observation_id} " \
+        "(insert)."
+    end
+  end
+
+  def self.votes_views_join_condition
+    "`votes`.`observation_id` = `observation_views`.`observation_id` " \
+      "AND `votes`.`user_id` = `observation_views`.`user_id`"
   end
 
   ##############################################################################

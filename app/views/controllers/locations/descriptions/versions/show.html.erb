@@ -9,7 +9,6 @@ add_tab_set(location_description_version_tabs(description: @description,
 
 <%= show_past_versions(@description, @versions) %>
 
-<%= render(partial: "locations/descriptions/show/location_description",
-           object: @description) %>
+<%= render(partial: "descriptions/show_description_details") %>
 
 <%= show_object_footer(@description, @versions) %>

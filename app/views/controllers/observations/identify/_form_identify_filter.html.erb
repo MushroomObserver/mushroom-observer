@@ -5,7 +5,7 @@
 <%# Otherwise the records have to be looked up (several times) %>
 
 <%
-# Show the incoming `needs_id` query in the search bar if there has been one
+# Show the incoming `needs_naming` query in the search bar if there has been one
 filter_type = params.dig(:filter, :type) || false
 selected = filter_type ? filter_type.to_sym : :clade
 value = filter_type ? params.dig(:filter, :term) : ""

@@ -174,14 +174,16 @@ module Name::Spelling
     # Not sure why this would ever happen, but empirically there are presently
     # three cases of it in the database.  Presumably something to do with
     # name merges?  Whatever.  This fixes it and will run nightly. -JPH 20210812
-    def fix_self_referential_misspellings
+    def fix_self_referential_misspellings(dry_run: false)
       msgs = Name.with_self_referential_misspelling.
-             select(:id, :text_name, :author).
-             map do |id, text_name, author|
-               "Name ##{id} #{text_name} #{author} was a misspelling of itself."
+             select(:id, :text_name, :author).map do |name|
+               "Name ##{name.id} #{name.text_name} #{name.author} " \
+                 "was a misspelling of itself."
              end
-      Name.with_self_referential_misspelling.
-        update_all(correct_spelling_id: nil)
+      unless dry_run
+        Name.with_self_referential_misspelling.
+          update_all(correct_spelling_id: nil)
+      end
       msgs
     end
   end

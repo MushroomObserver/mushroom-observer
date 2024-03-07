@@ -138,22 +138,5 @@ module Tabs
         link_array << search_tab_for(site.first, search_string)
       end
     end
-
-    # these are from the observations form
-    def define_location_tab(query)
-      [:list_observations_location_define.l,
-       add_query_param(new_location_path(
-                         where: query.params[:user_where]
-                       )),
-       { class: tab_id(__method__.to_s) }]
-    end
-
-    def merge_locations_tab(query)
-      [:list_observations_location_merge.l,
-       add_query_param(location_merges_form_path(
-                         where: query.params[:user_where]
-                       )),
-       { class: tab_id(__method__.to_s) }]
-    end
   end
 end

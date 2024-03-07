@@ -84,24 +84,24 @@ class UsersControllerTest < FunctionalTestCase
     get(:show, params: { id: user.id })
 
     assert_template(:show)
-    # assert_select(
-    #   "a[href = '#{location_descriptions_path}?by_author=#{user.id}']"
-    # )
-    # assert_select(
-    #   "a[href = '#{name_descriptions_path}?by_author=#{user.id}']"
-    # )
-    # assert_select(
-    #   "a:match('href', ?)",
-    #   /\?.*=(\d+).*&id=\1/, # some param=n followed by id with same value
-    #   false,
-    #   "Links should not use the same value for id and another param"
-    # )
-    # assert_select(
-    #   "a:match('href', ?)",
-    #   /\?.*id=(\d+).*&\S+=\1/, # id=n followed by another param with same value
-    #   false,
-    #   "Links should not use the same value for id and another param"
-    # )
+    assert_select(
+      "a[href = '#{location_descriptions_path}?by_author=#{user.id}']"
+    )
+    assert_select(
+      "a[href = '#{name_descriptions_path}?by_author=#{user.id}']"
+    )
+    assert_select(
+      "a:match('href', ?)",
+      /\?.*=(\d+).*&id=\1/, # some param=n followed by id with same value
+      false,
+      "Links should not use the same value for id and another param"
+    )
+    assert_select(
+      "a:match('href', ?)",
+      /\?.*id=(\d+).*&\S+=\1/, # id=n followed by another param with same value
+      false,
+      "Links should not use the same value for id and another param"
+    )
   end
 
   #   ---------------

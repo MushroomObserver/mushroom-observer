@@ -1,5 +1,5 @@
 <%
-@container = :wide
+@container = :full
 add_index_title(@query, no_hits: "")
 add_tab_set(locations_index_tabs(query: @query))
 all_links = if (params[:id].present? ||
@@ -23,7 +23,7 @@ flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
 </div>
 
 <div class="row mt-3">
-  <div class="col-md-7">
+  <div class="col-md-6">
     <% if @known_pages.any? && @known_data.any? %>
       <div class="h4">
         <%= :list_place_names_known.t %>
@@ -33,9 +33,8 @@ flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
         <div class="list-group">
           <% @known_data.each do |location| %>
             <div class="list-group-item">
-              <%= link_with_query(location.display_name.t,
-                                  location.show_link_args) %>
-              (<%= observation_counts[location.id].to_i %>)
+              <%= location_link(location.name.t, location,
+                                observation_counts[location.id].to_i) %>
             </div>
           <% end %>
         </div>
@@ -43,7 +42,7 @@ flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
     <% end %>
   </div>
 
-  <div class="col-md-5">
+  <div class="col-md-6">
     <% if @undef_pages.any? && @undef_data.any? %>
       <div class="h4">
         <%= :list_place_names_undef.t %>
@@ -51,14 +50,13 @@ flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
       </div>
       <%= paginate_block(@undef_pages, { html_id: "locations_undefined" }) do %>
         <div class="list-group">
-          <% @undef_data.each do |location, count|
-            if @undef_location_format == "scientific"
-              location = Location.reverse_name(location)
-            end %>
+          <% @undef_data.each do |location_name, count| %>
             <div class="list-group-item">
-              <%= location_link(location, nil, count) %>
-              <%= link_to(:list_place_names_merge.t,
-                          location_merges_form_path(where: location)) %>
+              <%= location_link(location_name, nil, count) %>
+              <%= link_to(
+                :list_place_names_merge.t,
+                matching_locations_for_observations_path(where: location_name)
+              ) %>
             </div>
           <% end %>
         </div>

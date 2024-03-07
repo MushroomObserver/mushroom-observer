@@ -14,6 +14,7 @@ module FormsHelper
       return args[:button]
     end
 
+    # custom text for the button while submitting
     submits_with = args[:submits_with] || submits_default_text(args[:button])
     data = args[:data] || {}
 

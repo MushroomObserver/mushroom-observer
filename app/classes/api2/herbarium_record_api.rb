@@ -3,18 +3,33 @@
 class API2
   # API for HerbariumRecord
   class HerbariumRecordAPI < ModelAPI
-    self.model = HerbariumRecord
+    def model
+      HerbariumRecord
+    end
 
-    self.high_detail_page_length = 100
-    self.low_detail_page_length  = 1000
-    self.put_page_length         = 1000
-    self.delete_page_length      = 1000
+    def high_detail_page_length
+      100
+    end
 
-    self.high_detail_includes = [
-      :observations,
-      :herbarium,
-      :user
-    ]
+    def low_detail_page_length
+      1000
+    end
+
+    def put_page_length
+      1000
+    end
+
+    def delete_page_length
+      1000
+    end
+
+    def high_detail_includes
+      [
+        :observations,
+        :herbarium,
+        :user
+      ]
+    end
 
     def query_params
       {

@@ -161,7 +161,7 @@ module Names
       login
       get(:show, params: params)
       assert_template("names/descriptions/show")
-      assert_template("names/descriptions/show/_name_description")
+      assert_template("descriptions/_show_description_details")
     end
 
     def test_next_description
@@ -300,7 +300,7 @@ module Names
       login(draft.user.login)
       get(:show, params: { id: draft.id })
       assert_template("names/descriptions/show")
-      assert_template("names/descriptions/show/_name_description")
+      assert_template("descriptions/_show_description_details")
     end
 
     # Ensure that an admin can see a draft they don't own
@@ -310,7 +310,7 @@ module Names
       login(mary.login)
       get(:show, params: { id: draft.id })
       assert_template("names/descriptions/show")
-      assert_template("names/descriptions/show/_name_description")
+      assert_template("descriptions/_show_description_details")
     end
 
     # Ensure that an member can see a draft they don't own
@@ -320,7 +320,7 @@ module Names
       login(katrina.login)
       get(:show, params: { id: draft.id })
       assert_template("names/descriptions/show")
-      assert_template("names/descriptions/show/_name_description")
+      assert_template("descriptions/_show_description_details")
     end
 
     # Ensure that a non-member cannot see a draft

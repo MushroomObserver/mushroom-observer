@@ -297,25 +297,6 @@ module Name::Taxonomy
     notes&.match(/\S/)
   end
 
-  # This is called before a name is created to let us populate things like
-  # classification and lifeform from the parent (if infrageneric only).
-  def inherit_stuff
-    return unless accepted_genus
-
-    self.classification ||= accepted_genus.classification
-    self.lifeform       ||= accepted_genus.lifeform
-  end
-
-  # Let attached observations update their cache if these fields changed.
-  def update_observation_cache
-    Observation.update_cache("name", "lifeform", id, lifeform) \
-      if lifeform_changed?
-    Observation.update_cache("name", "text_name", id, text_name) \
-      if text_name_changed?
-    Observation.update_cache("name", "classification", id, classification) \
-      if classification_changed?
-  end
-
   # Copy classification from parent.  Just take parent's classification string
   # and add the parent's name to the bottom of it.  Nice and easy.
   def inherit_classification(parent)
@@ -624,15 +605,21 @@ module Name::Taxonomy
 
     # This is meant to be run nightly to ensure that all the classification
     # caches are up to date.  It only pays attention to genera or higher.
-    def refresh_classification_caches
-      Name.where(rank: 0..Name.ranks[:Genus]).
-        joins(:description).
+    def refresh_classification_caches(dry_run: false)
+      query =
+        Name.joins(:description).
+        where(rank: 0..Name.ranks[:Genus]).
         where(NameDescription[:classification].not_eq(Name[:classification])).
-        where(NameDescription[:classification].not_blank).
-        update_all(
+        where(NameDescription[:classification].not_blank)
+      msgs = query.map do |name|
+        "Classification for #{name.search_name} didn't match description."
+      end
+      unless dry_run || msgs.none?
+        query.update_all(
           Name[:classification].eq(NameDescription[:classification]).to_sql
         )
-      []
+      end
+      msgs
     end
   end
 end

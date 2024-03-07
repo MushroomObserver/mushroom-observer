@@ -64,12 +64,12 @@ synonym_links = [approve, deprecate].reject(&:nil?).safe_join(" | ")
             ["#{:ICN_ID.l}:",
              tag.em(:show_name_icn_id_missing.l)].safe_join(" ")
           end,
-          tag.p(link_to(*index_fungorum_basic_search_tab)),
+          tag.p(link_to(*index_fungorum_name_search_tab(name))),
           tag.p(link_to(*mycobank_name_search_tab(name)))
         ].safe_join
       elsif name.searchable_in_registry?
         [
-          tag.p(link_to(*index_fungorum_basic_search_tab)),
+          tag.p(link_to(*index_fungorum_name_search_tab(name))),
           tag.p(link_to(*mycobank_basic_search_tab))
         ].safe_join
       end
