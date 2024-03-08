@@ -53,9 +53,7 @@ namespace :lang do
     "check:official",    # check syntax of official file
     "import:official",   # import any changes from official file
     "strip:all",         # strip out any strings we no longer need
-    "update:all",        # update localization (YAML) files
-    # update export (text) files (used by translation controller to build form)
-    "export:unofficial"
+    "update:all"         # update localization (YAML) files
   ]
 
   [
