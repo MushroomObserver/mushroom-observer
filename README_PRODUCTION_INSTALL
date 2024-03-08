@@ -20,8 +20,7 @@ root> visudo
   %mo ALL = NOPASSWD: /bin/su mo
   %mo ALL = NOPASSWD: /bin/su - mo
   mo ALL = NOPASSWD: /usr/sbin/service nginx *
-  mo ALL = NOPASSWD: /usr/sbin/service unicorn *
-  # mo ALL = NOPASSWD: /usr/sbin/service puma *
+  mo ALL = NOPASSWD: /usr/sbin/service puma *
 
 # Create user accounts.
 root> useradd -m -s /bin/bash -G mo,sudo jason
@@ -187,13 +186,9 @@ root> gcc /var/web/mushroom-observer/script/jpegresize.c -ljpeg -lm -O2 -o /usr/
 root> cp /var/web/mushroom-observer/script/exifautotran /usr/local/bin/exifautotran
 root> chmod 755 /usr/local/bin/exifautotran
 
-root> cp /var/web/mushroom-observer/config/etc/unicorn /etc/init.d/unicorn
-root> chmod 755 /etc/init.d/unicorn
-root> update-rc.d unicorn defaults
-
-# root> cp /var/web/mushroom-observer/config/etc/puma/service /etc/systemd/system/
-# root> chmod 755 /etc/systemd/system/puma.service
-# root> systemctl enable puma
+root> cp /var/web/mushroom-observer/config/etc/puma/service /etc/systemd/system/
+root> chmod 755 /etc/systemd/system/puma.service
+root> systemctl enable puma
 
 --------------------------------------------------------------------------------
 
@@ -219,16 +214,8 @@ mo> rake assets:precompile
 mo> rails server
 # Watch for errors in any of these!!
 
-mo> unicorn_rails -c config/unicorn.rb -D
-# If there are any errors you'll find them in log/unicorn.stderr.log
-# ("service unicorn start" and "uni start" are shorthand for above command.)
-
-# mo> puma
-# check for errors on stdout/err
-
-# Apparently have to restart nginx after first time run unicorn sometimes(?)
-mo> service nginx stop
-mo> service nginx start
+mo> puma
+check for errors on stdout/err
 
 # Should start listening on port 8080.
 # This isn't working, also seems to be an ssl issue?
@@ -311,9 +298,9 @@ mo> ssh-keygen -t rsa
   # on the image server.  Test if it worked:
 mo> ssh images.mushroomobserver.org echo hello world
 
-# Set up logrotate to archive unicorn and rails logs.
+# Set up logrotate to archive puma and rails logs.
 mo> exit
-root> vi /etc/logrotate.d/unicorn
+root> vi /etc/logrotate.d/puma
   /var/web/mushroom-observer/log/*.log {
     daily
     missingok
@@ -323,9 +310,7 @@ root> vi /etc/logrotate.d/unicorn
     delaycompress
     sharedscripts
     postrotate
-      kill -HUP `cat /var/web/mushroom-observer/tmp/pids/unicorn.pid`
-      # not sure this will work...
-      # kill -HUP `cat /var/web/mushroom-observer/tmp/pids/puma.pid`
+      kill -HUP `cat /var/web/mushroom-observer/tmp/pids/puma.pid`
       mv /var/web/mushroom-observer/log/*.gz /var/web/mushroom-observer/log/old/
     endscript
   }
@@ -364,12 +349,11 @@ mrtg> crontab -e
 root> iptables-save
 
 # Make sure all the critical processes started automatically.
-# Look for sshd, nginx, unicorn, mysqld, postfix.
+# Look for sshd, nginx, puma, mysqld, postfix.
 root> ps -ef | grep sshd
 root> ps -ef | grep nginx
-root> ps -ef | grep unicorn
-root> # ps -ef | grep puma
-root> ps -ef | grep mysql   # <--- make sure mysqld is NOT running!!!
+root> ps -ef | grep puma
+root> ps -ef | grep mysql
 root> ps -ef | grep postfix
 
 # To enable or disable startup of a service:
