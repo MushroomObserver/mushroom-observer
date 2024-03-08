@@ -82,8 +82,7 @@ class UserStats < ApplicationRecord
     namings: { weight: 1 },
     comments: { weight: 1 },
     votes: { weight: 1 },
-    translation_strings: { weight: 1 },
-    translation_string_versions: { weight: 1 }
+    translation_strings: { weight: 1 }
   }.freeze
 
   def self.fields_with_weight
@@ -177,10 +176,7 @@ class UserStats < ApplicationRecord
     @user_data = {
       id: user_id,
       name: user.unique_text_name,
-      languages: language_contributions(user_id),
-      # temporary: copy over bonuses from User object.
-      # TODO: remove this line after initial population.
-      bonuses: user.bonuses
+      languages: language_contributions(user_id)
     }
 
     # Refresh record counts for each category of @user_data.
@@ -212,9 +208,11 @@ class UserStats < ApplicationRecord
     count = case table
             when "species_list_observations"
               count_species_list_observations(user_id)
+            when "translation_strings"
+              count_translation_strings(user_id)
             when /^(\w+)_versions/
-              parent_table = $LAST_MATCH_INFO[1]
-              count_versions(parent_table, user_id)
+              parent_type = $LAST_MATCH_INFO[1]
+              count_versions(parent_type, user_id)
             else
               count_regular_field(table, user_id)
             end
@@ -227,15 +225,40 @@ class UserStats < ApplicationRecord
     SpeciesList.joins(:species_list_observations).where(user_id: user_id).count
   end
 
+  # Side effect: counts contributions by language.
+  def count_translation_strings(user_id)
+    locale_index = Language.pluck(:id, :locale).to_h
+
+    # Skip orphaned translation strings(?) with `nil` as their language id
+    all = TranslationString::Version.where(user_id: user_id).
+          where.not(language_id: nil).
+          select(
+            :language_id,
+            TranslationString::Version.arel_table[:translation_string_id].
+            count(true).as("cnt")
+          ).group(:language_id)
+
+    # Turn it into a hash of translation strings by locale.
+    results = all.to_h do |lang|
+      [locale_index[lang.language_id], lang.cnt]
+    end
+
+    # Store the breakdown in a separate column.
+    @user_data[languages] = results
+
+    # return the count of all
+    results.values.sum
+  end
+
   # This counts versions where the editor was not the original author
   # Should correct for the double-counting of created records
   # NOTE: the version classes need `.arel_table`, unlike other models
-  def count_versions(parent_table, user_id)
-    parent_class = parent_table.classify.constantize
+  def count_versions(parent_type, user_id)
+    parent_class = parent_type.classify.constantize
     version_class = "#{parent_class}::Version".constantize
-    parent_id = "#{parent_table}_id"
+    parent_id = "#{parent_type}_id"
 
-    version_class.joins(:"#{parent_table}").
+    version_class.joins(:"#{parent_type}").
       where(version_class.arel_table[:user_id].eq(user_id)).
       where.not(
         version_class.arel_table[:user_id].eq(parent_class[:user_id])
@@ -279,52 +302,6 @@ class UserStats < ApplicationRecord
     metric
   end
 
-  # NOTE: These do not count towards the metric.
-  def language_contributions(user_id)
-    locale_index = Language.pluck(:id, :locale).to_h
-
-    # Jason :
-    # all = TranslationString::Version.joins(:translation_string).
-    #       where(TranslationString::Version.arel_table[:user_id].eq(user_id)).
-    #       select(:language_id, TranslationString[:id].count(true).as("cnt")).
-    #       group(:language_id)
-    # Jason after migration:
-    # all = TranslationString::Version.where(user_id: user_id).
-    #       select(
-    #         :language_id,
-    #         TranslationString::Version.arel_table[:translation_string_id].
-    #         count(true).as("cnt")
-    #       ).group(:language_id)
-
-
-    orig = TranslationString.where(user_id: user_id).
-           select(:language_id, Arel.star.count.as("cnt")).
-           group(:language_id).order(cnt: :desc)
-
-    # Turn it into a hash of translation strings by locale.
-    counts_orig = orig.to_h do |lang|
-      [locale_index[lang.language_id], lang.cnt]
-    end
-
-    vers =
-      TranslationString::Version.joins(:translation_string).
-      where(TranslationString::Version.arel_table[:user_id].eq(user_id)).
-      where.not(
-        TranslationString::Version.arel_table[:user_id].eq(
-          TranslationString[:user_id]
-        )
-      ).distinct.select(:language_id, Arel.star.count.as("cnt")).
-      group(:language_id).order(cnt: :desc)
-
-    # Turn it into a hash of translation strings by locale.
-    counts_vers = vers.to_h do |lang|
-      [locale_index[lang.language_id], lang.cnt]
-    end
-
-    # Merges the values, whether or not the key is present both places
-    counts_orig.merge(counts_vers) { |_key, orig_v, vers_v| orig_v + vers_v }
-  end
-
   # Sum up all the bonuses the User has earned.
   #
   #   contribution += sum_bonuses
@@ -339,34 +316,44 @@ class UserStats < ApplicationRecord
   #
   #    METHODS TO POPULATE OR REFRESH USER_STATS COLUMNS FOR ALL USERS
 
-  # Each of these methods creates a hash of partial records (a single column)
-  # keyed by user_id. At the bottom it finds or initializes the record by
-  # user_id, and updates all columns at once.
-  def self.refresh_all_user_stats(bonuses: false)
-    records = {}
+  # This will create a blank user_stats record (with bonuses, initially)
+  # for every contributing user without one. Then, column by column, it
+  # calls methods that create a hash of partial user_stats records (containing
+  # a single column) keyed by user_id, and merges them column by column
+  # until all records have a value for each column except id and user_id.
+  # At the end, we find the existing user_stats record id by user_id, and
+  # add in the id and user_id, and update all records at once.
+  def self.refresh_all_user_stats
+    create_user_stats_for_all_contributors_without
+    columns = {}
+
+    # Assemble the new values column by column
     ALL_FIELDS.each_key do |field|
       table = (ALL_FIELDS[field]&.[](:table) || field).to_s
 
       new_column = case table
                    when "species_list_observations"
                      refresh_species_list_observations
+                   when "translation_strings"
+                     refresh_translation_strings
                    when /^(\w+)_versions/
-                     parent_table = $LAST_MATCH_INFO[1]
-                     refresh_versions(parent_table, field)
+                     parent_type = $LAST_MATCH_INFO[1]
+                     refresh_versions(parent_type, field)
                    else
                      refresh_regular_field(table, field)
                    end
       new_column ||= {}
-      records = records.deep_merge(new_column)
+      columns = columns.deep_merge(new_column)
     end
 
-    if bonuses
-      new_column = transfer_bonuses
-      records = records.deep_merge(new_column)
-    end
+    index = index_of_user_stats_ids_by_user_id
 
-    records.each do |user_id, columns|
-      UserStats.find_or_initialize_by(user_id: user_id).update(columns)
+    columns.each do |user_id, records|
+      records[:id] = index[user_id]
+      records[:user_id] = user_id
+      # At this point all these have a user_stats.id and a user_id.
+      # It's safe to assume they correspond to existing records.
+      UserStats.update_all!(records)
     end
   end
 
@@ -383,12 +370,12 @@ class UserStats < ApplicationRecord
 
   # Exception for versions: Corrects for double-counting of versioned records.
   # NOTE: arel_table[:column].count(true) means "COUNT DISTINCT column"
-  def self.refresh_versions(parent_table, field)
-    parent_class = parent_table.classify.constantize
+  def self.refresh_versions(parent_type, field)
+    parent_class = parent_type.classify.constantize
     version_class = "#{parent_class}::Version".constantize
-    parent_id = "#{parent_table}_id"
+    parent_id = "#{parent_type}_id"
 
-    results = version_class.joins(:"#{parent_table}").
+    results = version_class.joins(:"#{parent_type}").
               where.not(
                 version_class.arel_table[:user_id].eq(parent_class[:user_id])
               ).group(:user_id).select(
@@ -413,21 +400,34 @@ class UserStats < ApplicationRecord
     end
   end
 
-  def self.refresh_languages
-    # locale_index = Language.pluck(:id, :locale).to_h
+  def self.refresh_translation_strings
+    locale_index = Language.pluck(:id, :locale).to_h
 
-    # Jason after migration
-    # all = TranslationString::Version.
-    #       select(:user_id, :language_id,
-    #              TranslationString[:id].count(true).as("cnt")).
-    #       group(:user_id, :language_id)
+    # Note selecting/grouping :language_id gives a separate AR record per lang
+    # but then you need to aggregate those by user_id
+    by_lang = TranslationString::Version.where.not(language_id: nil).
+              select(
+                :user_id, :language_id,
+                TranslationString::Version.arel_table[:translation_string_id].
+                count(true).as("cnt")
+              ).group(:user_id, :language_id)
 
-    # orig = TranslationString.
-    #        select(:user_id, :language_id,
-    #               TranslationString[:language_id].count(false).as("cnt")).
-    #        group(:user_id, :language_id)
-    # o_results = orig.to_h do |record|
+    # This isn't quite right
+    # by_lang.to_h do |record|
+    #   [record.user_id, { locale_index[record.language_id] => record.cnt }]
     # end
+
+    # Skipping :language_id gives you the counts per user
+    all = TranslationString::Version.where.not(language_id: nil).
+          select(
+            :user_id,
+            TranslationString::Version.arel_table[:translation_string_id].
+            count(true).as("cnt")
+          ).group(:user_id)
+
+    all.to_h do |record|
+      [record.user_id, { translation_strings: record.cnt }]
+    end
   end
 
   # This should only run once, to migrate the column from users to user_stats
@@ -437,5 +437,18 @@ class UserStats < ApplicationRecord
     results.to_h do |record|
       [record.id, { bonuses: record.bonuses }]
     end
+  end
+
+  def self.create_user_stats_for_all_contributors_without
+    records = User.where(contribution: 1..).where.missing(:user_stats).
+              pluck(:id, :bonuses).map do |id, bonuses|
+                { user_id: id, bonuses: bonuses }
+              end
+
+    UserStats.insert_all(records)
+  end
+
+  def self.index_of_user_stats_ids_by_user_id
+    UserStats.pluck(:user_id, :id).to_h
   end
 end
