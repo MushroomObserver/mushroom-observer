@@ -520,13 +520,12 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # MD5 sum, etc. afterwards before it actually processes the image.
   def image=(file)
     self.upload_handle = file
-    # Image is already stored in a local temp file. This is how Rails passes
-    # large files from the webserver.
     if local_file?(file)
       init_image_from_local_file(file)
-    # Image is given as an input stream.
     elsif input_stream?(file)
       init_image_from_stream(file)
+    else
+      raise("Unexpected image upload class, #{file.class.name}.")
     end
   end
 
@@ -696,20 +695,6 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
           errors.add(:image,
                      "Unexpected error while copying attached file " \
                      "to temp file. Error class #{e.class}: #{e}")
-          result = false
-        end
-
-      # Image is already saved to a tempfile (this is a puma thing, I guess?)
-      elsif upload_handle.is_a?(Tempfile)
-        begin
-          @file = upload_handle
-          self.upload_temp_file = @file.path
-          self.upload_length = @file.size
-          result = true
-        rescue StandardError => e
-          errors.add(:image,
-                     "Unexpected error while querying upload tempfile. " \
-                     "Error class #{e.class}: #{e}")
           result = false
         end
 
