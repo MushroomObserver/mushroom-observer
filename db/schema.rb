@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_03_072017) do
+ActiveRecord::Schema[7.1].define(version: 2024_03_07_072017) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -624,6 +624,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_03_072017) do
     t.text "text"
     t.datetime "updated_at", precision: nil
     t.integer "user_id"
+    t.integer "language_id"
   end
 
   create_table "translation_strings", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -675,8 +676,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_03_072017) do
     t.integer "votes", default: 0, null: false
     t.string "languages"
     t.string "bonuses"
-    t.datetime "created_at", default: "2024-03-07 07:16:11", null: false
-    t.datetime "updated_at", default: "2024-03-07 07:16:11", null: false
+    t.string "checklist"
+    t.datetime "created_at", default: "2024-03-08 00:15:36", null: false
+    t.datetime "updated_at", default: "2024-03-08 00:15:36", null: false
     t.index ["user_id"], name: "user_index"
   end
 

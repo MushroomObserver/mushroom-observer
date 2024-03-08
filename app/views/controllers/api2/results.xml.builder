@@ -14,15 +14,15 @@ xml.response(xmlns: "#{MO.http_domain}/response.xsd") do
       xml_integer(xml, :page_number, @api.page_number)
     end
 
-    if @api.detail == :none
+    if @api.results.empty?
+      # cop gives false positive
+      xml.results(number: 0) {} # rubocop disable:Lint/EmptyBlock
+    elsif @api.detail == :none
       xml.results(number: @api.result_ids.length) do
         @api.result_ids.each do |result_id|
           xml_minimal_object(xml, :result, @api.model.type_tag, result_id)
         end
       end
-    elsif @api.results.empty?
-      # cop gives false positive
-      xml.results(number: 0) {} # rubocop disable:Lint/EmptyBlock
     else
       xml.results(number: @api.results.length) do
         xml.target! << render(
