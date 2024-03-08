@@ -24,6 +24,7 @@ class CreateUserStats < ActiveRecord::Migration[7.1]
 
       t.string(:languages)
       t.string(:bonuses)
+      t.string(:checklist)
 
       t.timestamps(default: Time.zone.now)
     end
