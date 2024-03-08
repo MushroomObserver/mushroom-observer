@@ -2,6 +2,6 @@
 
 class API2
   # Invalid classification string.
-  class BadClassification < Error
+  class BadClassification < FatalError
   end
 end
