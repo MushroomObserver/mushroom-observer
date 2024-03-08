@@ -2,6 +2,6 @@
 
 class API2
   # Tried to update name/author/rank of more than one name at once.
-  class TryingToSetMultipleNamesAtOnce < Error
+  class TryingToSetMultipleNamesAtOnce < FatalError
   end
 end

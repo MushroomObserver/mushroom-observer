@@ -26,4 +26,11 @@ class API2
       tag.t(args)
     end
   end
+
+  # API fatal exception base class.
+  class FatalError < Error
+    def initialize
+      super
+      self.fatal = true
+    end
 end

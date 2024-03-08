@@ -2,7 +2,7 @@
 
 class API2
   # Tried to create species list that already exists.
-  class SpeciesListAlreadyExists < Error
+  class SpeciesListAlreadyExists < FatalError
     def initialize(str)
       super()
       args.merge!(title: str)
