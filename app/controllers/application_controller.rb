@@ -157,10 +157,9 @@ class ApplicationController < ActionController::Base
     return true if is_cool?
 
     logger.warn("BLOCKED #{request.remote_ip}")
-    render(plain: :kick_out_message.t(ip: request.remote_ip,
-                                      email: MO.webmaster_email_address),
-           status: :too_many_requests,
-           layout: false)
+    email = MO.webmaster_email_address
+    msg = :kick_out_message.l(ip: request.remote_ip, email: email)
+    render(plain: msg, status: :too_many_requests, layout: false)
     false
   end
 
