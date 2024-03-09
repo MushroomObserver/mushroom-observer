@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# remove non-compliant Observations from a Project
+# Show and remove non-compliant Observations from a Project
 module Projects
   # Actions
   # -------
@@ -11,8 +11,6 @@ module Projects
     before_action :login_required
     before_action :pass_query_params
 
-    # get(:edit, params: { id: project.id })
-    # edit_project_violations_path(id: @project.id)
     def edit
       return unless find_project!
 
