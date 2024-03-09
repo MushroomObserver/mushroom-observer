@@ -162,6 +162,7 @@ class UserStats < ApplicationRecord
   ##############################################################################
 
   # Refresh all the stats for a given User.
+  # This can be run on demand.
   #
   #   refresh_user_data(user.id)
   #   user.contribution = @user_data[:metric]
@@ -175,8 +176,7 @@ class UserStats < ApplicationRecord
     @user_data ||= {}
     @user_data = {
       id: user_id,
-      name: user.unique_text_name,
-      languages: language_contributions(user_id)
+      name: user.unique_text_name
     }
 
     # Refresh record counts for each category of @user_data.
@@ -243,10 +243,10 @@ class UserStats < ApplicationRecord
       [locale_index[lang.language_id], lang.cnt]
     end
 
-    # Store the breakdown in a separate column.
-    @user_data[languages] = results
+    # Store the breakdown in a separate `languages` column.
+    @user_data[:languages] = results
 
-    # return the count of all
+    # return the count of all for the `translation_strings` column
     results.values.sum
   end
 
@@ -351,8 +351,8 @@ class UserStats < ApplicationRecord
     columns.each do |user_id, records|
       records[:id] = index[user_id]
       records[:user_id] = user_id
-      # At this point all these have a user_stats.id and a user_id.
-      # It's safe to assume they correspond to existing records.
+      # At this point all these hashes have a user_stats.id and a user_id.
+      # It's safe to assume they correspond to existing user_stats records.
       UserStats.update_all!(records)
     end
   end
@@ -440,15 +440,18 @@ class UserStats < ApplicationRecord
     end
   end
 
-  # This should only run once, to migrate the column from users to user_stats
-  def self.transfer_bonuses
-    results = User.where.not(bonuses: nil).select(:id, :bonuses)
+  # def self.transfer_bonuses
+  #   results = User.where.not(bonuses: nil).select(:id, :bonuses)
 
-    results.to_h do |record|
-      [record.id, { bonuses: record.bonuses }]
-    end
-  end
+  #   results.to_h do |record|
+  #     [record.id, { bonuses: record.bonuses }]
+  #   end
+  # end
 
+  # This runs after the migration, to copy columns from users to user_stats
+  # It's a batch insert, so it's fast.
+  # TODO: After the initial population, drop the column `bonuses`` from User,
+  # and remove referenes to bonus in `pluck` and the hash.
   def self.create_user_stats_for_all_contributors_without
     records = User.where(contribution: 1..).where.missing(:user_stats).
               pluck(:id, :bonuses).map do |id, bonuses|
