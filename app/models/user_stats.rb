@@ -417,11 +417,17 @@ class UserStats < ApplicationRecord
     SQL
     by_lang = TranslationString::Version.connection.execute(statement)
 
+    # Set languages hash for each user.
+    # Note query returns hash_by_ids; convert keys by language_id to locales.
     by_lang.to_h do |result|
-      [result[0], { languages: JSON.parse(result[1]) }]
+      hash_by_ids = JSON.parse(result[1])
+      hash_by_locales = hash_by_ids.map do |k, v|
+        { locale_index[k.to_i] => v }
+      end
+      [result[0], { languages: hash_by_locales }]
     end
 
-    # Skipping :language_id gives you the counts per user
+    # Skipping :language_id gives you the total unique t_s counts per user
     all = TranslationString::Version.where.not(language_id: nil).
           select(
             :user_id,
