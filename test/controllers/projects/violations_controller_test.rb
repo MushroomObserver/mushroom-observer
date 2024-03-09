@@ -46,6 +46,11 @@ module Projects
           "#violations a[href *= '#{violation.id}']", { count: 1 },
           "Non-compliant list should have a link to Observation #{violation.id}"
         )
+        assert_select(
+          "input[type=checkbox][id *= '#{violation.id}']",
+          { count: 1 },
+          "Non-compliant list should have a checkbox for Obs #{violation.id}"
+        )
       end
 
       assert_select(
@@ -56,6 +61,45 @@ module Projects
         "#violations", { text: /#{hidden_obs.lat}/, count: 1 },
         "Violation list should display hidden geoloc to trusted user"
       )
+    end
+
+    def test_edit_by_member
+      project = projects(:falmouth_2023_09_project)
+      violations = project.violations
+      violations_count = violations.size
+      assert(violations_count.positive?,
+             "Test needs Project fixture with constraint violations")
+      user = users(:roy)
+      assert(project.member?(user) && !project.is_admin?(user) &&
+             violations.map(&:user).include?(user) &&
+             violations.map(&:user).uniq.size > 1,
+             "Test needs non-admin project member user with violation(s) "\
+             "who isn't the only person with violation")
+
+      login(user.login)
+      get(:edit, params: { id: project.id })
+
+      assert_response(:success)
+
+      project.violations.each do |violation|
+        assert_select(
+          "#violations a[href *= '#{violation.id}']", { count: 1 },
+          "Non-compliant list should have a link to Observation #{violation.id}"
+        )
+        if violation.user == user
+          assert_select(
+            "input[type=checkbox][id *= '#{violation.id}']",
+            { count: 1 },
+            "Non-compliant list should have a checkbox for Obs #{violation.id}"
+          )
+        else
+          assert_select(
+            "input[type=checkbox][id *= '#{violation.id}']",
+            { count: 0 },
+            "Non-compliant list should omit a checkbox for Obs #{violation.id}"
+          )
+        end
+      end
     end
 
     def test_edit_by_non_member

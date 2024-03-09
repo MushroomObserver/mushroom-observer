@@ -7,11 +7,18 @@
   <%= :PROJECT.l + ": " + link_to_object(@project).t %>
 <h4>
 
-<div id="violations">
-  <%=
-    make_table(
-      headers: violation_headers(@project),
-      rows: violation_rows(@project, @violations)
-    )
-  %>
-</div>
+<%=
+  form_with(model: @project,
+            url: "/projects/:id/violations/update",
+            method: :post) do |form| %>
+    <div id="violations">
+      <%=
+        make_table(
+          headers: violation_headers(@project),
+          rows: violation_rows(
+            form: form, project: @project, violations: @violations
+          )
+        )
+      %>
+    </div>
+<% end %>

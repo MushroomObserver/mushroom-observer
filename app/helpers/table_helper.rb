@@ -114,6 +114,7 @@ module TableHelper
 
   def violation_headers(project)
     [
+      nil, # column for checkbox
       "#{:CONSTRAINTS.l}:",
       "#{:DATES.l}: #{project.date_range}",
       "Lat: #{project.location.north} to #{project.location.south}",
@@ -124,9 +125,10 @@ module TableHelper
     ]
   end
 
-  def violation_rows(project, violations)
+  def violation_rows(form:, project:, violations:)
     violations.each_with_object([]) do |obs, rows|
       rows << [
+        violation_checkbox(form: form, project: project, obs: obs),
         link_to_object(obs, obs.text_name) + " (#{obs.id})",
         styled_obs_when(project, obs),
         styled_obs_lat(project, obs),
@@ -140,6 +142,16 @@ module TableHelper
   #########
 
   private
+
+  def violation_checkbox(form:, project:, obs:)
+    if violation_checkbox_viewers(project, obs).include?(User.current.id)
+      form.check_box("remove_#{obs.id}")
+    end
+  end
+
+  def violation_checkbox_viewers(project, obs)
+    project.admin_group_user_ids + [obs.user_id]
+  end
 
   def styled_obs_when(project, obs)
     if project.violates_date_range?(obs)

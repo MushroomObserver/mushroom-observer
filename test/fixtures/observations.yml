@@ -769,6 +769,7 @@ falmouth_2022_obs:
 
 nybg_2023_09_obs:
   <<: *DEFAULTS
+  user: roy # not an admin of falmouth_2023_09_project
   when: 2023-09-15
   where: The New York Botanical Garden, Bronx, New York, USA
   location: nybg_location # outside location of falmouth_2023_09_project
