@@ -405,17 +405,21 @@ class UserStats < ApplicationRecord
 
     # Note selecting/grouping :language_id gives a separate AR record per lang
     # but then you need to aggregate those by user_id
-    by_lang = TranslationString::Version.where.not(language_id: nil).
-              select(
-                :user_id, :language_id,
-                TranslationString::Version.arel_table[:translation_string_id].
-                count(true).as("cnt")
-              ).group(:user_id, :language_id)
+    statement = <<-SQL.squish
+    SELECT user_id, JSON_OBJECTAGG(language_id, n)
+    FROM (
+      SELECT user_id, language_id, COUNT(DISTINCT translation_string_id) as n
+      FROM translation_string_versions
+      WHERE language_id IS NOT NULL
+      GROUP BY user_id, language_id
+    ) x
+    GROUP BY user_id
+    SQL
+    by_lang = TranslationString::Version.connection.execute(statement)
 
-    # This isn't quite right
-    # by_lang.to_h do |record|
-    #   [record.user_id, { locale_index[record.language_id] => record.cnt }]
-    # end
+    by_lang.to_h do |result|
+      [result[0], { languages: JSON.parse(result[1]) }]
+    end
 
     # Skipping :language_id gives you the counts per user
     all = TranslationString::Version.where.not(language_id: nil).
