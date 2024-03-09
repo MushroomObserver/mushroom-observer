@@ -5,6 +5,7 @@ add_tab_set(observation_maps_tabs(query: @query))
 
 objects = @observations
 objects += @locations if @locations.any?
+objects = objects.first(10_000)
 %>
 
 <%= make_map(objects: objects, # CollapsibleCollection
