@@ -40,7 +40,7 @@ module Observations
         select: columns.join(", "),
         where: "observations.lat IS NOT NULL OR " \
                 "observations.location_id IS NOT NULL",
-        limit: 10000
+        limit: 10_000
       }
       @observations =
         @query.select_rows(args).map do |id, lat, long, gps_hidden, loc_id|
