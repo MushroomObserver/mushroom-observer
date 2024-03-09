@@ -3,7 +3,7 @@
 rails_env = ENV.fetch("RAILS_ENV", "development")
 
 if rails_env == "development"
-  app_path = "/home/jason/mo/mo"
+  app_path = ENV.fetch("PWD", ".")
   port 3000
   workers 0
   threads 1, 1
@@ -12,11 +12,11 @@ elsif rails_env == "production"
   bind "unix://#{app_path}/tmp/sockets/puma.sock"
   workers 3
   threads 1, 1
+  stdout_redirect "#{app_path}/log/puma.stdout.log",
+                  "#{app_path}/log/puma.stderr.log", true
 end
 
 environment rails_env
-stdout_redirect "#{app_path}/log/puma.stdout.log",
-                "#{app_path}/log/puma.stderr.log", true
 pidfile         "#{app_path}/tmp/pids/puma.pid"
 state_path      "#{app_path}/tmp/pids/puma.state"
 activate_control_app
