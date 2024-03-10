@@ -16,8 +16,8 @@
     <div id="violations">
       <%=
         make_table(
-          headers: violation_headers(@project),
-          rows: violation_rows(
+          headers: violation_table_headers(@project),
+          rows: violation_table_rows(
             form: form, project: @project, violations: @violations
           )
         )
