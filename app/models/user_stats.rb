@@ -214,7 +214,7 @@ class UserStats < ApplicationRecord
       # The counters may have added some hashes where it found some user
       # contributions, but the fields are not yet initialized because the
       # user had zero `contribution`. These need to be filled out.
-      entries = reinitialize_columns(entries)
+      entries = fix_incomplete_columns(entries)
 
       # At this point all these hashes have a user_stats.id and a user_id.
       # It's safe to assume they correspond to existing user_stats records.
@@ -341,7 +341,7 @@ class UserStats < ApplicationRecord
     # For each record we're about to update, check for incomplete entries that
     # the counters may have added. Move the :user_id to the front of the hash
     # and fill out the rest of the attributes with defaults.
-    def reinitialize_columns(entries)
+    def fix_incomplete_columns(entries)
       # Cheat: uninitialized entries won't have `user_stats.id`
       needs_id = entries.select do |_user_id, values|
         values[:id].nil?
