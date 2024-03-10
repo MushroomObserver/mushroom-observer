@@ -4,15 +4,23 @@
 #
 #  == Class Methods
 #
-#  update_contribution::    Callback that keeps User contribution up to date.
+#  update_contribution::      Callback that keeps User contribution up to date.
+#  refresh_all_user_stats::   Callback for cron jobs that refreshes this table.
 #
 #  ==== Public
-#  get_user_data::          Returns stats for given user.
+#  get_user_data::            Returns stats for given user.
 #
 #  ==== Private
-#  refresh_user_data::      Populates a user_data instance, all columns.
-#  refresh_field_count::    Populates a single column in @user_data.
-#  calc_metric::            Calculates contribution score of a single user.
+#  refresh_user_data::        Populates a user_data instance, all columns.
+#  refresh_field_count::      Populates a single column in @user_data.
+#  calc_metric::              Calculates contribution score of a single user.
+#
+#
+#  == Instance Methods
+#
+#  sum_bonuses::              Gets the sum of bonuses (a serialized array)
+#  update_user_contribution:: Update the associated user.contribution
+#
 #
 #
 #  == Internal Data Structure
@@ -52,17 +60,22 @@
 #  species_lists::
 #  translation_strings_versions::
 #  votes::
-
+#
+#  == Serialized caches for structured data that we don't need to query:
+#
+#  languages::
+#  bonuses::
+#  checklists::
+#
+# rubocop:disable Metrics/ClassLength
 class UserStats < ApplicationRecord
   belongs_to :user
 
   # This causes the data structures in these fields to be serialized
   # automatically with YAML and stored as plain old text strings.
   serialize :languages, type: Hash
-  # TODO:
-  # 1. copy user.bonuses to user_stats.bonuses after records created
-  # 2. switch `refresh_user_data` to use the method below
   serialize :bonuses
+  serialize :checklist, type: Hash
 
   ALL_FIELDS = {
     name_description_authors: { weight: 100 },
@@ -82,72 +95,282 @@ class UserStats < ApplicationRecord
     namings: { weight: 1 },
     comments: { weight: 1 },
     votes: { weight: 1 },
-    translation_strings: { weight: 1 }
+    translation_strings: { weight: 1 },
+    languages: { weight: 0, default: {} }
   }.freeze
 
-  def self.fields_with_weight
-    ALL_FIELDS.select { |_f, e| e[:weight].positive? }
-  end
-
-  # This is called every time any object (not just one we care about) is
-  # created or destroyed.  Figure out what kind of object from the class name,
-  # and then update the owner's contribution as appropriate.
+  # Sum up all the bonuses the User has earned.
   #
-  # NOTE: This is only approximate.  There are now nontrivial calculations,
-  # such as awarding extra points for observations with vouchers, which won't
-  # be done right until someone looks at that user's summary page.
+  #   contribution += sum_bonuses
   #
-  # Two modes:
-  # 1) pass in object,
-  # NOTE: This is a universal callback on save so `obj` could be anything,
-  # including records we don't count
-  # 2) pass in field name, when it's not ::model
-  def self.update_contribution(mode, obj, user_id = nil, num = 1)
-    if obj.is_a?(ActiveRecord::Base)
-      return unless user_id || obj.respond_to?(:user_id)
+  def sum_bonuses
+    return nil unless bonuses
 
-      field = get_applicable_field(obj)
-      user_id ||= obj&.user_id
-    else
-      return unless user_id || User.current_id
+    bonuses.inject(0) { |acc, elem| acc + elem[0] }
+  end
 
-      field = obj
-      user_id ||= User.current_id
+  class << self
+    def fields_with_weight
+      ALL_FIELDS.select { |_f, e| e[:weight].positive? }
     end
-    weight = ALL_FIELDS.key?(field) ? ALL_FIELDS[field.to_sym][:weight] : 0
-    return unless weight&.positive? && user_id&.positive?
 
-    impact = calc_impact(weight * num, mode)
-    return if impact.zero?
+    # This is called every time any object (not just one we care about) is
+    # created or destroyed.  Figure out what kind of object from the class name,
+    # and then update the owner's contribution as appropriate.
+    #
+    # NOTE: This is only approximate.  There are now nontrivial calculations,
+    # such as awarding extra points for observations with vouchers, which won't
+    # be done right until someone looks at that user's summary page.
+    #
+    # Two modes:
+    # 1) pass in object,
+    # NOTE: This is a universal callback on save so `obj` could be anything,
+    # including records we don't count
+    # 2) pass in field name, when it's not ::model
+    def update_contribution(mode, obj, user_id = nil, num = 1)
+      if obj.is_a?(ActiveRecord::Base)
+        return unless user_id || obj.respond_to?(:user_id)
 
-    User.find(user_id).increment!(:contribution, impact)
-    return unless (user_stat = UserStats.find_by(user_id: user_id))
+        field = get_applicable_field(obj)
+        user_id ||= obj&.user_id
+      else
+        return unless user_id || User.current_id
 
-    user_stat.increment!(field, num)
-  end
+        field = obj
+        user_id ||= User.current_id
+      end
+      weight = ALL_FIELDS.key?(field) ? ALL_FIELDS[field.to_sym][:weight] : 0
+      return unless weight&.positive? && user_id&.positive?
 
-  # impact can be positive or negative
-  def self.calc_impact(weight, mode)
-    case mode
-    when :del
-      -weight
-    when :chg
-      0
-    else
-      weight
+      impact = calc_impact(weight * num, mode)
+      return if impact.zero?
+
+      User.find(user_id).increment!(:contribution, impact)
+      return unless (user_stat = UserStats.find_by(user_id: user_id))
+
+      user_stat.increment!(field, num)
+    end
+
+    # impact can be positive or negative
+    def calc_impact(weight, mode)
+      case mode
+      when :del
+        -weight
+      when :chg
+        0
+      else
+        weight
+      end
+    end
+
+    # applicable field = affects contribution. NOTE: This is a reverse lookup.
+    # Get the key (the `field`) from the value (of :table)
+    def get_applicable_field(obj)
+      table = obj.class.to_s.tableize.to_sym
+
+      ALL_FIELDS.select { |_f, e| e[:table] == table }.keys.first || table
+    end
+
+    ############################################################################
+    #
+    #    METHODS TO POPULATE OR REFRESH USER_STATS COLUMNS FOR ALL USERS
+
+    # This will create a blank user_stats record (with bonuses, initially)
+    # for every contributing user without one. Then, column by column, it
+    # calls methods that create a hash of partial user_stats records (containing
+    # a single column) keyed by user_id, and merges them column by column
+    # until all records have a value for each column except id and user_id.
+    # At the end, we find the existing user_stats record id by user_id, and
+    # add in the id and user_id, and update all records at once.
+    def refresh_all_user_stats
+      create_user_stats_for_all_contributors_without
+      # `entries` are { user_id: hash_of_attributes }
+      # This method fills out the columns for each user_id where not zero.
+      # Must set default values for all UserStats attributes here.
+      # `upsert_all` requires every record to have ALL the same keys.
+      entries = initialize_columns
+
+      # Assemble the new values column by column
+      ALL_FIELDS.each_key do |field|
+        table = (ALL_FIELDS[field]&.[](:table) || field).to_s
+
+        new_column = case table
+                     when "species_list_observations"
+                       refresh_species_list_observations
+                     when "translation_strings"
+                       refresh_translation_strings
+                     when "languages"
+                       refresh_languages
+                     when /^(\w+)_versions/
+                       parent_type = $LAST_MATCH_INFO[1]
+                       refresh_versions(parent_type, field)
+                     else
+                       refresh_regular_field(table, field)
+                     end
+        new_column ||= {}
+        entries = entries.deep_merge(new_column)
+      end
+
+      # The counters may have added some hashes where it found some user
+      # contributions, but the fields are not yet initialized because the
+      # user had zero `contribution`. These need to be filled out.
+      entries = reinitialize_columns(entries)
+
+      # At this point all these hashes have a user_stats.id and a user_id.
+      # It's safe to assume they correspond to existing user_stats records.
+      UserStats.upsert_all(entries.values)
+    end
+
+    private
+
+    # This runs after the migration, to copy columns from users to user_stats
+    # It's a batch insert, so it's fast.
+    # TODO: After the initial population, drop the column `bonuses`` from User,
+    # and remove referenes to bonus in `pluck` and the hash.
+    def create_user_stats_for_all_contributors_without
+      records = User.where(contribution: 1..).where.missing(:user_stats).
+                pluck(:id, :bonuses).map do |id, bonuses|
+                  { user_id: id, bonuses: bonuses }
+                end
+
+      UserStats.insert_all(records)
+    end
+
+    # For each UserStats, build a hash where every column has a default value.
+    # Make `user_id` the first column, because we're updating on that.
+    def initialize_columns
+      UserStats.pluck(:user_id).to_h do |user_id|
+        init = { user_id: user_id }
+        columns = ALL_FIELDS.keys.index_with do |field|
+          ALL_FIELDS[field][:default] || 0
+        end
+        [user_id, init.merge(columns)]
+      end
+    end
+
+    # Exception for species_list_entries:
+    def refresh_species_list_observations
+      results = SpeciesList.joins(:species_list_observations).
+                group(:user_id).distinct.
+                select(:user_id, Arel.star.count.as("cnt"))
+
+      results.to_h do |record|
+        [record.user_id, { species_list_entries: record.cnt }]
+      end
+    end
+
+    # Exception for versions: Corrects for double-counting of versioned records.
+    # NOTE: arel_table[:column].count(true) means "COUNT DISTINCT column"
+    def refresh_versions(parent_type, field)
+      parent_class = parent_type.classify.constantize
+      version_class = "#{parent_class}::Version".constantize
+      parent_id = "#{parent_type}_id"
+
+      results = version_class.joins(:"#{parent_type}").
+                where.not(
+                  version_class.arel_table[:user_id].eq(parent_class[:user_id])
+                ).group(:user_id).select(
+                  :user_id,
+                  version_class.arel_table[:"#{parent_id}"].count(true).as("cnt")
+                )
+
+      results.to_h do |record|
+        [record.user_id, { "#{field}": record.cnt }]
+      end
+    end
+
+    # Regular counts keyed by user_id:
+    def refresh_regular_field(table, field)
+      field_class = table.to_s.classify.constantize
+
+      results = field_class.group(:user_id).distinct.
+                select(:user_id, Arel.star.count.as("cnt"))
+
+      results.to_h do |record|
+        [record.user_id, { "#{field}": record.cnt }]
+      end
+    end
+
+    def refresh_translation_strings
+      # Skipping `language_id` gives total translation_string counts per user
+      all = TranslationString::Version.where.not(language_id: nil).
+            select(
+              :user_id,
+              TranslationString::Version.arel_table[:translation_string_id].
+              count(true).as("cnt")
+            ).group(:user_id)
+
+      all.to_h do |record|
+        [record.user_id, { translation_strings: record.cnt }]
+      end
+    end
+
+    def refresh_languages
+      locale_index = Language.pluck(:id, :locale).to_h
+
+      # JSON_OBJECTAGG returns a suitable object for this column, after parsing.
+      # Note selecting/grouping :language_id gives a separate AR record per lang
+      # but then you need to aggregate those by user_id
+      statement = <<-SQL.squish
+      SELECT user_id, JSON_OBJECTAGG(language_id, n)
+      FROM (
+        SELECT user_id, language_id, COUNT(DISTINCT translation_string_id) as n
+        FROM translation_string_versions
+        WHERE language_id IS NOT NULL
+        GROUP BY user_id, language_id
+      ) x
+      GROUP BY user_id
+      SQL
+      by_lang = TranslationString::Version.connection.execute(statement)
+
+      # Set languages hash for each user_id.
+      # Note query returns arrays of arrays: `[[user_id: lang_hash]]`
+      # Here's a sample value:
+      #   [11038, {12: 1617}],
+      # Inside the hash, we want to convert the `language_id` keys to locales.
+      by_lang.to_h do |result|
+        hash_by_ids = JSON.parse(result[1])
+        hash_by_locales = hash_by_ids.transform_keys do |key|
+          locale_index[key.to_i]
+        end
+        [result[0], { languages: hash_by_locales }]
+      end
+    end
+
+    # For each record we're about to update, check for incomplete entries that
+    # the counters may have added. Move the :user_id to the front of the hash
+    # and fill out the rest of the attributes with defaults.
+    def reinitialize_columns(entries)
+      # Cheat: uninitialized entries won't have `user_stats.id`
+      needs_id = entries.select do |_user_id, values|
+        values[:id].nil?
+      end
+
+      rebuilt_entries = needs_id.to_h do |user_id, values|
+        rebuilt_hash = { user_id: user_id }
+        columns = ALL_FIELDS.keys.index_with do |field|
+          values[field] || ALL_FIELDS[field][:default] || 0
+        end
+        rebuilt_hash = rebuilt_hash.merge(columns)
+
+        # Should update the user.contribution,
+        # because this means we missed it and it's out of whack.
+        @user_data = UserStats.new(rebuilt_hash)
+        @user_data.update_user_contribution
+
+        [user_id, rebuilt_hash]
+      end
+
+      entries.merge(rebuilt_entries)
     end
   end
 
-  # An applicable field = affects contribution. NOTE: This is a reverse lookup.
-  # Get the key (the `field`) from the value (of :table)
-  def self.get_applicable_field(obj)
-    table = obj.class.to_s.tableize.to_sym
+  ##############################################################################
+  #
+  #    METHODS TO REFRESH USER_STATS COLUMNS FOR A SINGLE USER
 
-    ALL_FIELDS.select { |_f, e| e[:table] == table }.keys.first || table
-  end
-
-  # Return stats for a single User.  Returns simple hash mapping category to
-  # number of records of that category.
+  # Return stats for a single User. This can be run on demand.
+  # Returns simple hash mapping category to number of records of that category.
   #
   #   data = UserStats.new.get_user_data(user_id)
   #   num_images = data[:images]
@@ -159,10 +382,7 @@ class UserStats < ApplicationRecord
     @user_stats
   end
 
-  ##############################################################################
-
-  # Refresh all the stats for a given User.
-  # This can be run on demand.
+  #    Refresh all the stats for a given UserStats instance.
   #
   #   refresh_user_data(user.id)
   #   user.contribution = @user_data[:metric]
@@ -185,12 +405,7 @@ class UserStats < ApplicationRecord
     # Update the UserStats record in one go.
     update(@user_data.except(:id, :name))
 
-    # Calculate full contribution for each user.
-    contribution = calc_metric(@user_data)
-    # Make sure contribution caches are correct.
-    return unless user.contribution != contribution
-
-    user.update(contribution: contribution)
+    update_user_contribution
   end
 
   # Do a query to get the number of records in a given category for a User.
@@ -272,6 +487,17 @@ class UserStats < ApplicationRecord
     field_class.where(user_id: user_id).count
   end
 
+  # Update the user contribution based on a UserStats instance
+  # Be sure to set @user_data = UserStats.new(attributes) before calling this
+  def update_user_contribution
+    # Calculate full contribution for each user.
+    contribution = calc_metric(@user_data)
+    # Make sure contribution caches are correct.
+    return unless user.contribution != contribution
+
+    user.update(contribution: contribution)
+  end
+
   # Calculate score for a set of results:
   #
   #   score = calc_metric(
@@ -301,167 +527,5 @@ class UserStats < ApplicationRecord
     data[:metric] = metric
     metric
   end
-
-  # Sum up all the bonuses the User has earned.
-  #
-  #   contribution += sum_bonuses
-  #
-  def sum_bonuses
-    return nil unless bonuses
-
-    bonuses.inject(0) { |acc, elem| acc + elem[0] }
-  end
-
-  ##############################################################################
-  #
-  #    METHODS TO POPULATE OR REFRESH USER_STATS COLUMNS FOR ALL USERS
-
-  # This will create a blank user_stats record (with bonuses, initially)
-  # for every contributing user without one. Then, column by column, it
-  # calls methods that create a hash of partial user_stats records (containing
-  # a single column) keyed by user_id, and merges them column by column
-  # until all records have a value for each column except id and user_id.
-  # At the end, we find the existing user_stats record id by user_id, and
-  # add in the id and user_id, and update all records at once.
-  def self.refresh_all_user_stats
-    create_user_stats_for_all_contributors_without
-    columns = {}
-
-    # Assemble the new values column by column
-    ALL_FIELDS.each_key do |field|
-      table = (ALL_FIELDS[field]&.[](:table) || field).to_s
-
-      new_column = case table
-                   when "species_list_observations"
-                     refresh_species_list_observations
-                   when "translation_strings"
-                     refresh_translation_strings
-                   when /^(\w+)_versions/
-                     parent_type = $LAST_MATCH_INFO[1]
-                     refresh_versions(parent_type, field)
-                   else
-                     refresh_regular_field(table, field)
-                   end
-      new_column ||= {}
-      columns = columns.deep_merge(new_column)
-    end
-
-    index = index_of_user_stats_ids_by_user_id
-
-    columns.each do |user_id, records|
-      records[:id] = index[user_id]
-      records[:user_id] = user_id
-      # At this point all these hashes have a user_stats.id and a user_id.
-      # It's safe to assume they correspond to existing user_stats records.
-      UserStats.update_all!(records)
-    end
-  end
-
-  # Exception for species_list_entries:
-  def self.refresh_species_list_observations
-    results = SpeciesList.joins(:species_list_observations).
-              group(:user_id).distinct.
-              select(:user_id, Arel.star.count.as("cnt"))
-
-    results.to_h do |record|
-      [record.user_id, { species_list_entries: record.cnt }]
-    end
-  end
-
-  # Exception for versions: Corrects for double-counting of versioned records.
-  # NOTE: arel_table[:column].count(true) means "COUNT DISTINCT column"
-  def self.refresh_versions(parent_type, field)
-    parent_class = parent_type.classify.constantize
-    version_class = "#{parent_class}::Version".constantize
-    parent_id = "#{parent_type}_id"
-
-    results = version_class.joins(:"#{parent_type}").
-              where.not(
-                version_class.arel_table[:user_id].eq(parent_class[:user_id])
-              ).group(:user_id).select(
-                :user_id,
-                version_class.arel_table[:"#{parent_id}"].count(true).as("cnt")
-              )
-
-    results.to_h do |record|
-      [record.user_id, { "#{field}": record.cnt }]
-    end
-  end
-
-  # Regular counts keyed by user_id:
-  def self.refresh_regular_field(table, field)
-    field_class = table.to_s.classify.constantize
-
-    results = field_class.group(:user_id).distinct.
-              select(:user_id, Arel.star.count.as("cnt"))
-
-    results.to_h do |record|
-      [record.user_id, { "#{field}": record.cnt }]
-    end
-  end
-
-  def self.refresh_translation_strings
-    locale_index = Language.pluck(:id, :locale).to_h
-
-    # Note selecting/grouping :language_id gives a separate AR record per lang
-    # but then you need to aggregate those by user_id
-    statement = <<-SQL.squish
-    SELECT user_id, JSON_OBJECTAGG(language_id, n)
-    FROM (
-      SELECT user_id, language_id, COUNT(DISTINCT translation_string_id) as n
-      FROM translation_string_versions
-      WHERE language_id IS NOT NULL
-      GROUP BY user_id, language_id
-    ) x
-    GROUP BY user_id
-    SQL
-    by_lang = TranslationString::Version.connection.execute(statement)
-
-    # Set languages hash for each user.
-    # Note query returns hash_by_ids; convert keys by language_id to locales.
-    by_lang.to_h do |result|
-      hash_by_ids = JSON.parse(result[1])
-      hash_by_locales = hash_by_ids.map do |k, v|
-        { locale_index[k.to_i] => v }
-      end
-      [result[0], { languages: hash_by_locales }]
-    end
-
-    # Skipping :language_id gives you the total unique t_s counts per user
-    all = TranslationString::Version.where.not(language_id: nil).
-          select(
-            :user_id,
-            TranslationString::Version.arel_table[:translation_string_id].
-            count(true).as("cnt")
-          ).group(:user_id)
-
-    all.to_h do |record|
-      [record.user_id, { translation_strings: record.cnt }]
-    end
-  end
-
-  # def self.transfer_bonuses
-  #   results = User.where.not(bonuses: nil).select(:id, :bonuses)
-
-  #   results.to_h do |record|
-  #     [record.id, { bonuses: record.bonuses }]
-  #   end
-  # end
-
-  # This runs after the migration, to copy columns from users to user_stats
-  # It's a batch insert, so it's fast.
-  # TODO: After the initial population, drop the column `bonuses`` from User,
-  # and remove referenes to bonus in `pluck` and the hash.
-  def self.create_user_stats_for_all_contributors_without
-    records = User.where(contribution: 1..).where.missing(:user_stats).
-              pluck(:id, :bonuses).map do |id, bonuses|
-                { user_id: id, bonuses: bonuses }
-              end
-
-    UserStats.insert_all(records)
-  end
-
-  def self.index_of_user_stats_ids_by_user_id
-    UserStats.pluck(:user_id, :id).to_h
-  end
 end
+# rubocop:enable Metrics/ClassLength
