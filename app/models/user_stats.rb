@@ -383,8 +383,6 @@ class UserStats < ApplicationRecord
     @user_stats
   end
 
-  private
-
   #   Refresh all the stats for a given UserStats instance.
   #
   #   refresh_user_data(user.id)
@@ -393,23 +391,22 @@ class UserStats < ApplicationRecord
   def refresh_user_data(user_id = nil)
     return unless user_id
 
-    user = User.find(user_id)
-
     # Prime @user_data structure.
-    @user_data ||= {}
-    @user_data = {
-      id: user_id,
-      name: user.unique_text_name
+    @user_data ||= {
+      user_id: user_id
     }
 
     # Refresh record counts for each category of @user_data.
     ALL_FIELDS.each_key { |field| refresh_field_count(field, user_id) }
 
     # Update the UserStats record in one go.
-    update(@user_data.except(:id, :name))
+    update(@user_data)
 
+    # Update the user.contribution (this step can be called separately)
     update_user_contribution
   end
+
+  private
 
   # Do a query to get the number of records in a given category for a User.
   # This is cached in @user_data.
@@ -445,6 +442,7 @@ class UserStats < ApplicationRecord
     SpeciesList.joins(:species_list_observations).where(user_id: user_id).count
   end
 
+  # Single query for both translation_strings and languages
   def count_translation_strings(user_id, by_lang: false)
     results = translation_strings_for_user(user_id)
 
@@ -498,6 +496,8 @@ class UserStats < ApplicationRecord
   # Update the user contribution based on a UserStats instance
   # Be sure to set @user_data = UserStats.new(attributes) before calling this
   def update_user_contribution
+    user = User.find(@user_data[:user_id])
+
     # Calculate full contribution for each user.
     contribution = calc_metric(@user_data)
     # Make sure contribution caches are correct.
@@ -522,7 +522,7 @@ class UserStats < ApplicationRecord
     return metric unless data
 
     ALL_FIELDS.each do |field, entry|
-      next unless data[field]
+      next unless data[field].is_a?(Integer)
 
       # This fixes the double-counting of created records.
       if field.to_s =~ /^(\w+)_versions$/
