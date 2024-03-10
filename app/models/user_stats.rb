@@ -422,7 +422,7 @@ class UserStats < ApplicationRecord
     contribution = calc_metric
     # Make sure contribution caches are correct.
     return unless user.contribution != contribution
-    debugger
+
     user.update(contribution: contribution)
   end
 
