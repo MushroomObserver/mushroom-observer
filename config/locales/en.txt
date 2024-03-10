@@ -3246,9 +3246,9 @@
   show_project_user_group: User Group
   show_project_violation_count: Project has [count] constraint violation(s)
 
-  # project/violations/index
-  violations_index_title: "[:CONSTRAINT_VIOLATIONS]"
-  violations_observations: Observations Violating Constraints
+  # project/violations/edit
+  form_violations_help: Check the Observations to be removed, then Submit
+  violations_edit_title: "[:CONSTRAINT_VIOLATIONS]"
 
   # users/by_name
   users_by_name_title: Users by Name

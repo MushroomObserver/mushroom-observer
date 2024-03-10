@@ -121,7 +121,7 @@ module TableHelper
       "Lon: #{project.location.west} to #{project.location.east} ",
       location_link(project.location.display_name, project.location,
                     nil, false),
-      "" # column for observation.user
+      nil # column for observation.user
     ]
   end
 

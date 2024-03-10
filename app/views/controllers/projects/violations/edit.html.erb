@@ -1,16 +1,18 @@
 <%
-  add_page_title( :violations_index_title.t)
+  add_page_title( :violations_edit_title.l)
   @container = :wide
 %>
 
 <h4 class="pb-3">
   <%= :PROJECT.l + ": " + link_to_object(@project).t %>
 <h4>
+<%= help_block(:div, :form_violations_help.l) %>
 
 <%=
   form_with(
     model: @project, url: project_violations_path, method: :post
-  ) do |form| %>
+  ) do |form|
+%>
     <div id="violations">
       <%=
         make_table(
@@ -21,5 +23,5 @@
         )
       %>
     </div>
-    <%= form.submit %>
+    <%= form.submit(:SUBMIT.l) %>
   <% end %>
