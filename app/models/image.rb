@@ -545,6 +545,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def init_image_from_local_file(file)
     @file = file
+    raise("Weird: file.path is blank!") if file.path.blank?
     self.upload_temp_file = file.path
     self.upload_length    = file.size
     add_extra_attributes_from_file(file)
@@ -667,7 +668,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # to the :image field.  Returns true if the file is successfully saved.
   def save_to_temp_file
     result = true
-    unless upload_temp_file
+    unless upload_temp_file.present?
 
       # Image is supplied in a input stream.  This can happen in a variety of
       # cases, including during testing, and also when the image comes in as
@@ -702,7 +703,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       else
         errors.add(:image, "Unexpected error: did not receive a valid upload " \
                            "stream from the webserver (we got an instance of " \
-                           "#{upload_handle.class.name}).  Please try again.")
+                           "#{upload_handle.class.name}). Send this to the " \
+                           "webmaster, please.  Backtrace: #{caller[0..20]}...")
         result = false
       end
     end
