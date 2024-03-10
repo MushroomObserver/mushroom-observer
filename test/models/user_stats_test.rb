@@ -18,6 +18,13 @@ class UserStatsTest < ActiveSupport::TestCase
     assert_equal(rolf.namings.size, user_data.namings)
   end
 
+  def test_refresh_all_user_stats
+    rolf = users(:rolf)
+    UserStats.refresh_all_user_stats
+    rolf_stats = UserStats.find_by(user_id: rolf.id)
+    assert_equal(rolf.observations.size, rolf_stats.observations)
+  end
+
   # def test_two_tiered_observation_scoring
   #   score = rolf.contribution
   #

@@ -237,10 +237,10 @@ class UserStats < ApplicationRecord
     end
 
     # For each UserStats, build a hash where every column has a default value.
-    # Make `user_id` the first column, because we're updating on that.
+    # Make `id` the first column, because we're updating on that.
     def initialize_columns
-      UserStats.pluck(:user_id).to_h do |user_id|
-        init = { user_id: user_id }
+      UserStats.pluck(:id, :user_id).to_h do |id, user_id|
+        init = { id: id, user_id: user_id }
         columns = ALL_FIELDS.keys.index_with do |field|
           ALL_FIELDS[field][:default] || 0
         end
@@ -348,7 +348,11 @@ class UserStats < ApplicationRecord
       end
 
       rebuilt_entries = needs_id.to_h do |user_id, values|
-        rebuilt_hash = { user_id: user_id }
+        next unless User.find(user_id)
+
+        @user_stats = UserStats.find_or_create_by(user_id: user_id)
+        rebuilt_hash = { id: @user_stats.id, user_id: user_id }
+
         columns = ALL_FIELDS.keys.index_with do |field|
           values[field] || ALL_FIELDS[field][:default] || 0
         end
@@ -356,8 +360,7 @@ class UserStats < ApplicationRecord
 
         # Should update the user.contribution,
         # because this means we missed it and it's out of whack.
-        @user_data = UserStats.new(rebuilt_hash)
-        @user_data.update_user_contribution
+        @user_stats.update_user_contribution
 
         [user_id, rebuilt_hash]
       end
@@ -368,8 +371,10 @@ class UserStats < ApplicationRecord
 
   ##############################################################################
   #
+  #
   #    METHODS TO REFRESH USER_STATS COLUMNS FOR A SINGLE USER
-
+  #
+  #
   # Return stats for a single User. This can be run on demand.
   # Returns simple hash mapping category to number of records of that category.
   #
@@ -404,6 +409,21 @@ class UserStats < ApplicationRecord
 
     # Update the user.contribution (this step can be called separately)
     update_user_contribution
+  end
+
+  # Update the user contribution based on a UserStats instance
+  # Be sure to set @user_data = UserStats.new(attributes) before calling this
+  def update_user_contribution
+    return unless user_id
+
+    user = User.find(user_id)
+
+    # Calculate full contribution for each user.
+    contribution = calc_metric
+    # Make sure contribution caches are correct.
+    return unless user.contribution != contribution
+    debugger
+    user.update(contribution: contribution)
   end
 
   private
@@ -493,19 +513,6 @@ class UserStats < ApplicationRecord
     field_class.where(user_id: user_id).count
   end
 
-  # Update the user contribution based on a UserStats instance
-  # Be sure to set @user_data = UserStats.new(attributes) before calling this
-  def update_user_contribution
-    user = User.find(@user_data[:user_id])
-
-    # Calculate full contribution for each user.
-    contribution = calc_metric(@user_data)
-    # Make sure contribution caches are correct.
-    return unless user.contribution != contribution
-
-    user.update(contribution: contribution)
-  end
-
   # Calculate score for a set of results:
   #
   #   score = calc_metric(
@@ -517,22 +524,22 @@ class UserStats < ApplicationRecord
   #   )
   #
   # :doc:
-  def calc_metric(data)
+  def calc_metric
     metric = 0
-    return metric unless data
+    return metric unless user_id
 
     ALL_FIELDS.each do |field, entry|
-      next unless data[field].is_a?(Integer)
+      next unless self[field].is_a?(Integer)
 
       # This fixes the double-counting of created records.
-      if field.to_s =~ /^(\w+)_versions$/
-        data[field] -= data[Regexp.last_match(1)] || 0
-      end
-      metric += entry[:weight] * data[field]
+      # if field.to_s =~ /^(\w+)_versions$/
+      #   user_stats[field] -= self[Regexp.last_match(1)] || 0
+      # end
+      metric += entry[:weight] * self[field]
     end
     # metric += data[:languages].to_i
     metric += sum_bonuses.to_i
-    data[:metric] = metric
+    # user_stats[:metric] = metric
     metric
   end
 end
