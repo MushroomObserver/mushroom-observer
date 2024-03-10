@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @field_slip %>
+
+<div>
+  <%= link_to "Edit this field slip", edit_field_slip_path(@field_slip) %> |
+  <%= link_to "Back to field slips", field_slips_path %>
+
+  <%= button_to "Destroy this field slip", @field_slip, method: :delete %>
+</div>

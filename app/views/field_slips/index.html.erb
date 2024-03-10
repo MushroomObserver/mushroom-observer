@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Field slips</h1>
+
+<div id="field_slips">
+  <% @field_slips.each do |field_slip| %>
+    <%= render field_slip %>
+    <p>
+      <%= link_to "Show this field slip", field_slip %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New field slip", new_field_slip_path %>

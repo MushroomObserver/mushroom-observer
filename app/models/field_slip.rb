@@ -1,0 +1,2 @@
+class FieldSlip < ApplicationRecord
+end
