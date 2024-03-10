@@ -9,7 +9,7 @@
 
 <%=
   form_with(
-    model: @project, url: project_violations_url, method: :post
+    model: @project, url: project_violations_path, method: :post
   ) do |form| %>
     <div id="violations">
       <%=
