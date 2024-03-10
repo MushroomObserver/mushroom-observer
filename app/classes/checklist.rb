@@ -178,4 +178,23 @@ class Checklist
       WHERE (#{conditions.join(") AND (")})
     )
   end
+
+  # <<-SQL.squish
+  # SELECT DISTINCT
+  #   COALESCE(
+  #     name_plus, CONCAT(deprecated, ',', text_name, ',', id, ',', `rank`)
+  #   ) AS data
+  # FROM names
+  # LEFT JOIN (
+  #   SELECT synonym_id,
+  #     MIN(
+  #       CONCAT(deprecated, ',', text_name, ',', id, ',', `rank`)
+  #     ) AS name_plus
+  #   FROM names
+  #   WHERE synonym_id IS NOT NULL
+  #   GROUP BY synonym_id
+  # ) AS temp ON names.synonym_id = temp.synonym_id
+  # WHERE id IN (SELECT name_id FROM observations);
+  # SQL
+
 end
