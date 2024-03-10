@@ -2,7 +2,7 @@
 
 class API2
   # Taxon name isn't valid.
-  class NameDoesntParse < Error
+  class NameDoesntParse < FatalError
     def initialize(str)
       super()
       args.merge!(name: str.to_s)

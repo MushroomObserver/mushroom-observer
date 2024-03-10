@@ -151,14 +151,14 @@ class LocalizationFilesTest < UnitTestCase
     end
   end
 
-  TRANSLATION_ERRORS = %w[Error ObjectError BadParameterValue].freeze
+  API_ERROR_EXCLUDE = %w[Error FatalError ObjectError BadParameterValue].freeze
   def test_api_error_translations
     tags = []
     Rails.root.glob("app/classes/api2/error/*.rb").each do |file|
       file.open("r:utf-8") do |fh|
         fh.each_line do |line|
           next unless line.match(/^\s*class (\w+) < /) &&
-                      TRANSLATION_ERRORS.exclude?(Regexp.last_match(1))
+                      API_ERROR_EXCLUDE.exclude?(Regexp.last_match(1))
 
           tags << :"api_#{Regexp.last_match(1).underscore.tr("/", "_")}"
         end

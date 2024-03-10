@@ -2,6 +2,6 @@
 
 class API2
   # Attempted to delete someone else's account.
-  class CanOnlyDeleteYourOwnAccount < Error
+  class CanOnlyDeleteYourOwnAccount < FatalError
   end
 end

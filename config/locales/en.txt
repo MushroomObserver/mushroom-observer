@@ -3590,7 +3590,7 @@
 
   # ERROR MESSAGES
 
-  kick_out_message: "We have noticed a lot of server-intensive traffic from this IP address (#{request.remote_ip}). There may be better ways of doing what you are trying to do. Please contact the webmaster ([email]) so that we can talk about it. So that we can best help you, please:\n- include a copy of this message;\n- tell how you generally use Mushroom Observer;\n- tell us what you were doing when you received this message."
+  kick_out_message: "We have noticed a lot of server-intensive traffic from this IP address ([ip]). There may be better ways of doing what you are trying to do. Please contact the webmaster ([email]) so that we can talk about it. So that we can best help you, please:\n- include a copy of this message;\n- tell how you generally use Mushroom Observer;\n- tell us what you were doing when you received this message."
 
   unsuccessful_contributor_warning: Thanks for wanting to contribute to the Mushroom Observer. This type of contribution can only be made by users who have provided at least one observation to the system.
 
@@ -3624,7 +3624,7 @@
   validate_user_email_missing: Please give us a valid email address so we can verify your [:account].
   validate_user_email_mismatch: Your email addresses don't match.  Please check for a typo.
   validate_user_login_taken: Sorry, that login name is already taken.
-  validate_image_wrong_type: The file "[file]" is not a valid image; it is comes through as '[type]'.
+  validate_image_wrong_type: The file "[file]" is not a valid image; it comes through as '[type]'.
   validate_invalid_lifeform: "Invalid lifeform word(s): [words].  We are strictly enforcing which types are allowed.  If you would like us to add support to additional lifeforms, please contact the admins and make your case."
 
   # These shouldn't need translating, but you are free to override if you need to.
