@@ -25,6 +25,7 @@ module Projects
       get(:edit, params: { id: project.id })
 
       assert_response(:success)
+      assert_form_action(action: :update)
 
       assert_select("#content", { text: /#{project.title}/ },
                     "Page should include project name")
