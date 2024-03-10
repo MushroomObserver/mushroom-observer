@@ -743,8 +743,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # Edit all of a Project's non-compliant Observations
   get("/projects/:id/violations/edit", to: "projects/violations#edit",
                                        as: "edit_project_violations")
-  get("/projects/:id/violations/update", to: "projects/violations#update",
-                                         via: [:patch])
+  post("/projects/:id/violations/update", to: "projects/violations#update",
+                                          as: "project/violations")
+
 
 
   # ----- Publications: standard actions  -------------------------------------

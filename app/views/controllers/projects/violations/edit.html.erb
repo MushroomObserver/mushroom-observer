@@ -8,9 +8,9 @@
 <h4>
 
 <%=
-  form_with(model: @project,
-            url: "/projects/#{@project.id}/violations/update",
-            method: :post) do |form| %>
+  form_with(
+    model: @project, url: project_violations_url, method: :post
+  ) do |form| %>
     <div id="violations">
       <%=
         make_table(
