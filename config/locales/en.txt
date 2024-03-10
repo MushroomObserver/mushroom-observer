@@ -1009,7 +1009,7 @@
   user_stats_users: ""
   user_stats_votes: "[:VOTES]"
   user_stats_translation_strings: "[:TRANSLATIONS] Authored"
-  user_stats_translation_string_versions: "[:TRANSLATIONS] Edited"
+  user_stats_languages: "[:TRANSLATIONS] By Language"
 
   # Site statistics field names.
   site_stats_comments: "[:COMMENTS]"

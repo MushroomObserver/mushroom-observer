@@ -225,8 +225,8 @@ class UserStats < ApplicationRecord
 
     # This runs after the migration, to copy columns from users to user_stats
     # It's a batch insert, so it's fast.
-    # TODO: After the initial population, drop the column `bonuses`` from User,
-    # and remove referenes to bonus in `pluck` and the hash.
+    # TODO: After the initial population, drop the column `bonuses` from User,
+    # and remove references to bonuses in `pluck` and the hash here.
     def create_user_stats_for_all_contributors_without
       records = User.where(contribution: 1..).where.missing(:user_stats).
                 pluck(:id, :bonuses).map do |id, bonuses|
@@ -271,7 +271,8 @@ class UserStats < ApplicationRecord
                   version_class.arel_table[:user_id].eq(parent_class[:user_id])
                 ).group(:user_id).select(
                   :user_id,
-                  version_class.arel_table[:"#{parent_id}"].count(true).as("cnt")
+                  version_class.arel_table[:"#{parent_id}"].
+                  count(true).as("cnt")
                 )
 
       results.to_h do |record|
@@ -382,7 +383,9 @@ class UserStats < ApplicationRecord
     @user_stats
   end
 
-  #    Refresh all the stats for a given UserStats instance.
+  private
+
+  #   Refresh all the stats for a given UserStats instance.
   #
   #   refresh_user_data(user.id)
   #   user.contribution = @user_data[:metric]
@@ -424,7 +427,9 @@ class UserStats < ApplicationRecord
             when "species_list_observations"
               count_species_list_observations(user_id)
             when "translation_strings"
-              count_translation_strings(user_id)
+              count_translation_strings(user_id, by_lang: false)
+            when "languages"
+              count_translation_strings(user_id, by_lang: true)
             when /^(\w+)_versions/
               parent_type = $LAST_MATCH_INFO[1]
               count_versions(parent_type, user_id)
@@ -440,11 +445,20 @@ class UserStats < ApplicationRecord
     SpeciesList.joins(:species_list_observations).where(user_id: user_id).count
   end
 
-  # Side effect: counts contributions by language.
-  def count_translation_strings(user_id)
+  def count_translation_strings(user_id, by_lang: false)
+    results = translation_strings_for_user(user_id)
+
+    if by_lang
+      results
+    else
+      results.values.sum
+    end
+  end
+
+  # Skip orphaned translation strings(?) with `nil` as their language id
+  def translation_strings_for_user(user_id)
     locale_index = Language.pluck(:id, :locale).to_h
 
-    # Skip orphaned translation strings(?) with `nil` as their language id
     all = TranslationString::Version.where(user_id: user_id).
           where.not(language_id: nil).
           select(
@@ -454,15 +468,9 @@ class UserStats < ApplicationRecord
           ).group(:language_id)
 
     # Turn it into a hash of translation strings by locale.
-    results = all.to_h do |lang|
+    all.to_h do |lang|
       [locale_index[lang.language_id], lang.cnt]
     end
-
-    # Store the breakdown in a separate `languages` column.
-    @user_data[:languages] = results
-
-    # return the count of all for the `translation_strings` column
-    results.values.sum
   end
 
   # This counts versions where the editor was not the original author

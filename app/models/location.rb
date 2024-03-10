@@ -144,7 +144,7 @@ class Location < AbstractModel
        Location::Version.where(
          location_id: ver.location_id, user_id: ver.user_id
        ).count.zero?
-       UserStats.update_contribution(:add, :location_versions)
+      UserStats.update_contribution(:add, :location_versions)
     end
   end
 
