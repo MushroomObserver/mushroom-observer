@@ -128,5 +128,28 @@ module Projects
         "Violation list should hide hidden geoloc from untrusted user"
       )
     end
+
+    def test_update
+      project = projects(:falmouth_2023_09_project)
+      violations = project.violations
+      assert(violations.size > 1,
+             "Test needs Project fixture with multiple violations")
+      nybg_2023_09_obs = observations(:nybg_2023_09_obs)
+      assert(violations.include?(nybg_2023_09_obs))
+
+      params = { id: project.id,
+                 project: { "remove_#{nybg_2023_09_obs.id}" => "1" } }
+
+      login(project.user.login)
+      assert_difference(
+        "project.violations.count", -1,
+        "Failed to remove exactly one Obs from Project"
+      ) do
+        post(:update, params: params)
+      end
+
+      assert_not_includes(project.observations, nybg_2023_09_obs,
+                          "Failed to remove checked violation from Project")
+    end
   end
 end
