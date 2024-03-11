@@ -746,8 +746,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   post("/projects/:id/violations/update", to: "projects/violations#update",
                                           as: "project/violations")
 
-
-
   # ----- Publications: standard actions  -------------------------------------
   resources :publications
 

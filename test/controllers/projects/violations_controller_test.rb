@@ -74,7 +74,7 @@ module Projects
       assert(project.member?(user) && !project.is_admin?(user) &&
              violations.map(&:user).include?(user) &&
              violations.map(&:user).uniq.size > 1,
-             "Test needs non-admin project member user with violation(s) "\
+             "Test needs non-admin project member user with violation(s) " \
              "who isn't the only person with violation")
 
       login(user.login)
