@@ -115,7 +115,7 @@ class ProjectTest < UnitTestCase
 
   def test_date_strings
     proj = projects(:pinned_date_range_project)
-    assert_equal("#{proj.start_date} - #{proj.end_date}",
+    assert_equal("#{proj.start_date} to #{proj.end_date}",
                  proj.date_range, "Wrong date range string")
 
     assert_equal(:form_projects_any.l, projects(:unlimited_project).date_range,
