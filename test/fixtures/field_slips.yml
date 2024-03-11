@@ -3,9 +3,9 @@
 one:
   observation_id: 1
   project_id: 1
-  identifier: MyString
+  code: MyString
 
 two:
   observation_id: 1
   project_id: 1
-  identifier: MyString
+  code: MyString

@@ -14,7 +14,7 @@ class FieldSlipsTest < ApplicationSystemTestCase
     visit field_slips_url
     click_on "New field slip"
 
-    fill_in "Identifier", with: @field_slip.identifier
+    fill_in "Code", with: @field_slip.code
     fill_in "Observation", with: @field_slip.observation_id
     fill_in "Project", with: @field_slip.project_id
     click_on "Create Field slip"
@@ -27,7 +27,7 @@ class FieldSlipsTest < ApplicationSystemTestCase
     visit field_slip_url(@field_slip)
     click_on "Edit this field slip", match: :first
 
-    fill_in "Identifier", with: @field_slip.identifier
+    fill_in "Code", with: @field_slip.code
     fill_in "Observation", with: @field_slip.observation_id
     fill_in "Project", with: @field_slip.project_id
     click_on "Update Field slip"

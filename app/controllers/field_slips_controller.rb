@@ -65,6 +65,6 @@ class FieldSlipsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def field_slip_params
-      params.require(:field_slip).permit(:observation_id, :project_id, :identifier)
+      params.require(:field_slip).permit(:observation_id, :project_id, :code)
     end
 end

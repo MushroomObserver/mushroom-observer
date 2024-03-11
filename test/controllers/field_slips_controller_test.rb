@@ -17,7 +17,7 @@ class FieldSlipsControllerTest < ActionDispatch::IntegrationTest
 
   test "should create field_slip" do
     assert_difference("FieldSlip.count") do
-      post field_slips_url, params: { field_slip: { identifier: @field_slip.identifier, observation_id: @field_slip.observation_id, project_id: @field_slip.project_id } }
+      post field_slips_url, params: { field_slip: { code: @field_slip.code, observation_id: @field_slip.observation_id, project_id: @field_slip.project_id } }
     end
 
     assert_redirected_to field_slip_url(FieldSlip.last)
@@ -34,7 +34,7 @@ class FieldSlipsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update field_slip" do
-    patch field_slip_url(@field_slip), params: { field_slip: { identifier: @field_slip.identifier, observation_id: @field_slip.observation_id, project_id: @field_slip.project_id } }
+    patch field_slip_url(@field_slip), params: { field_slip: { code: @field_slip.code, observation_id: @field_slip.observation_id, project_id: @field_slip.project_id } }
     assert_redirected_to field_slip_url(@field_slip)
   end
 
