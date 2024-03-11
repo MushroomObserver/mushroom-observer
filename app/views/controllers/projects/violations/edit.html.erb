@@ -1,5 +1,5 @@
 <%
-  add_page_title( :violations_edit_title.l)
+  add_page_title(:violations_edit_title.t)
   @container = :wide
 %>
 
@@ -8,7 +8,8 @@
 <h4>
 
 <div class="smaller">
-<%= help_block(:div, :form_violations_help.l) %>
+
+<%= help_block(:div, violations_help_text(@project)) %>
 
 <%=
   form_with(
@@ -25,6 +26,6 @@
         )
       %>
     </div>
-    <%= form.submit(:SUBMIT.l) %>
+    <%= form.submit(violations_submit_text(@project)) %>
   <% end %>
 </div>

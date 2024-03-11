@@ -29,6 +29,18 @@ module ProjectsHelper
     end
   end
 
+  def violations_help_text(project)
+    :form_violations_help.l if project.violations_removable_by_current_user?
+  end
+
+  def violations_submit_text(project)
+    if project.violations_removable_by_current_user?
+      :SUBMIT.l
+    else
+      :form_violations_show_project.l
+    end
+  end
+
   #########
 
   private

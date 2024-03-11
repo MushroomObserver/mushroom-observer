@@ -388,6 +388,12 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     out_of_range_observations.to_a.union(out_of_area_observations)
   end
 
+  # Is at least one violation removable by the current user?
+  def violations_removable_by_current_user?
+    admin_group_user_ids.union(violations.map(&:user_id)).
+      include?(User.current_id)
+  end
+
   ##############################################################################
   #
   #  :section: queries re related Observations
