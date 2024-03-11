@@ -6,6 +6,8 @@
 <h4 class="pb-3">
   <%= :PROJECT.l + ": " + link_to_object(@project).t %>
 <h4>
+
+<div class="smaller">
 <%= help_block(:div, :form_violations_help.l) %>
 
 <%=
@@ -25,3 +27,4 @@
     </div>
     <%= form.submit(:SUBMIT.l) %>
   <% end %>
+</div>
