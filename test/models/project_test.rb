@@ -125,6 +125,9 @@ class ProjectTest < UnitTestCase
   def test_out_of_range_observations
     assert_out_of_range_observations(projects(:current_project), expect: 0)
     assert_out_of_range_observations(projects(:unlimited_project), expect: 0)
+    assert_out_of_range_observations(projects(:no_start_date_project),
+                                     expect: 0)
+    assert_out_of_range_observations(projects(:no_end_date_project))
     assert_out_of_range_observations(projects(:future_project))
     assert_out_of_range_observations(projects(:pinned_date_range_project))
   end
@@ -132,6 +135,8 @@ class ProjectTest < UnitTestCase
   def test_in_range_observations
     assert_in_range_observations(projects(:current_project))
     assert_in_range_observations(projects(:unlimited_project))
+    assert_in_range_observations(projects(:no_start_date_project))
+    assert_in_range_observations(projects(:no_end_date_project), expect: 0)
     assert_in_range_observations(projects(:future_project), expect: 0)
     assert_in_range_observations(projects(:pinned_date_range_project),
                                  expect: 0)

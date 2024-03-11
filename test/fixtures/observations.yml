@@ -728,6 +728,8 @@ reused_observation:
   <<: *DEFAULTS
   user: rolf
   when: 2023-11-19
+  location: obs_default_location
+  where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
   species_lists: reused_list
   rss_log:
 
