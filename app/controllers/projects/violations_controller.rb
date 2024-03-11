@@ -20,7 +20,7 @@ module Projects
     def update
       return unless (@project = find_or_goto_index(Project, params[:id]))
 
-      params[:project].each do |key, value|
+      params[:project]&.each do |key, value|
         next unless key =~ /|remove_\d+$/ && value == "1"
 
         obs_id = key.sub("remove_", "")
