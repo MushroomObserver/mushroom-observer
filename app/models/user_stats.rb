@@ -347,27 +347,26 @@ class UserStats < ApplicationRecord
         values[:id].nil?
       end
 
-      entries = needs_id.to_h do |user_id, values|
-        next unless User.find_by(user_id: user_id)
+      # Reject all remaining hashes with an invalid user_id
+      unfixable = needs_id.reject do |user_id, _values|
+        User.safe_find(user_id)
+      end.keys
+      needs_id = needs_id.except(*unfixable)
+      entries = entries.except(*unfixable)
+      return entries if needs_id.empty? || needs_id.nil?
 
+      rebuilt_entries = needs_id.each do |user_id, values|
         @user_stats = UserStats.find_or_create_by(user_id: user_id)
         rebuilt_hash = { id: @user_stats.id, user_id: user_id }
 
         columns = ALL_FIELDS.keys.index_with do |field|
           values[field] || ALL_FIELDS[field][:default] || 0
         end
-        rebuilt_hash = rebuilt_hash.merge(columns)
 
-        # Should update the user.contribution,
-        # because this means we missed it and it's out of whack.
+        # Update the user.contribution, because this means it's out of whack.
         @user_stats.update_user_contribution
 
-        [user_id, rebuilt_hash]
-      end
-
-      # Toss the entries where the user_id was not valid (skipped above).
-      rebuilt_entries = entries.reject do |_user_id, values|
-        values[:id].nil?
+        rebuilt_hash.merge(columns)
       end
 
       entries.merge(rebuilt_entries)
