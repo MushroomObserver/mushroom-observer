@@ -339,16 +339,16 @@ class UserStats < ApplicationRecord
     end
 
     # For each record we're about to update, check for incomplete entries that
-    # the counters may have added. Move the :user_id to the front of the hash
-    # and fill out the rest of the attributes with defaults.
+    # the counters may have added - having a `user_id` but lacking an `id`.
+    # Check that is an existing user and fill out the rest of the attributes
+    # with defaults. (This possibility discovered on db snapshot during tests.)
     def fix_incomplete_columns(entries)
-      # Cheat: uninitialized entries won't have `user_stats.id`
       needs_id = entries.select do |_user_id, values|
         values[:id].nil?
       end
 
-      rebuilt_entries = needs_id.to_h do |user_id, values|
-        next unless User.find(user_id)
+      entries = needs_id.to_h do |user_id, values|
+        next unless User.find_by(user_id: user_id)
 
         @user_stats = UserStats.find_or_create_by(user_id: user_id)
         rebuilt_hash = { id: @user_stats.id, user_id: user_id }
@@ -363,6 +363,11 @@ class UserStats < ApplicationRecord
         @user_stats.update_user_contribution
 
         [user_id, rebuilt_hash]
+      end
+
+      # Toss the entries where the user_id was not valid (skipped above).
+      rebuilt_entries = entries.reject do |_user_id, values|
+        values[:id].nil?
       end
 
       entries.merge(rebuilt_entries)
