@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class FieldSlipsController < ApplicationController
-  before_action :set_field_slip, only: [:show, :edit, :update, :destroy]
+  before_action :set_field_slip, only: [:edit, :update, :destroy]
 
   # GET /field_slips or /field_slips.json
   def index
@@ -9,11 +9,19 @@ class FieldSlipsController < ApplicationController
   end
 
   # GET /field_slips/1 or /field_slips/1.json
-  def show; end
+  def show
+    if params[:id].match(/^\d+$/)
+      set_field_slip
+    else
+      @field_slip = FieldSlip.find_by(code: params[:id])
+    end
+    redirect_to(new_field_slip_url(code: params[:id])) unless @field_slip
+  end
 
   # GET /field_slips/new
   def new
     @field_slip = FieldSlip.new
+    @field_slip.code = params[:code] if params.include?(:code)
   end
 
   # GET /field_slips/1/edit
