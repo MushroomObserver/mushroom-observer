@@ -2,6 +2,7 @@
 
 class FieldSlipsController < ApplicationController
   before_action :set_field_slip, only: [:edit, :update, :destroy]
+  before_action :login_required, except: [:show]
 
   # GET /field_slips or /field_slips.json
   def index
