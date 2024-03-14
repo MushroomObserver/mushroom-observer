@@ -9,10 +9,10 @@
 #
 #  num_genera::      Number of genera seen.
 #  num_species::     Number of species seen.
-#  num_names::       Number of distinct names.
+#  num_taxa::        Number of distinct taxa.
 #  genera::          List of genera (text_name) seen.
 #  species::         List of species (text_name) seen.
-#  names::           List of names seen.
+#  taxa::            List of taxa seen.
 #
 #  == Usage
 #
@@ -77,7 +77,7 @@ class Checklist
   ##############################################################################
 
   def initialize
-    @genera = @species = @names = nil
+    @genera = @species = @taxa = nil
   end
 
   def num_genera
@@ -90,9 +90,9 @@ class Checklist
     @species.length
   end
 
-  def num_names
-    calc_checklist unless @names
-    @names.length
+  def num_taxa
+    calc_checklist unless @taxa
+    @taxa.length
   end
 
   def genera
@@ -105,20 +105,63 @@ class Checklist
     @species.values.sort
   end
 
-  def names
-    calc_checklist unless @names
-    @names.values.sort
+  def taxa
+    calc_checklist unless @taxa
+    @taxa.values.sort
+  end
+
+  def self.all_site_taxa_by_user
+    synonym_map = {}
+
+    synonyms = Name.connection.select_rows(%(
+    SELECT GROUP_CONCAT(n.id),
+      MIN(CONCAT(n.deprecated, ',', n.text_name, ',', n.id, ',', n.rank))
+    FROM names n
+    GROUP BY IF(synonym_id, synonym_id, -id);
+    ))
+
+    synonyms.each do |row|
+      ids, tuple = *row
+      ids.split(",").each { |id| synonym_map[id.to_i] = tuple }
+    end
+
+    calculate_taxa_by_user(synonym_map)
+  end
+
+  def self.calculate_taxa_by_user(synonym_map)
+    taxa = {}
+    genera = {}
+    species = {}
+    Observation.select(:user_id, :name_id).each do |row|
+      user_id = row[:user_id]
+      name_id = row[:name_id]
+      _dep, text_name, _id, rank = *synonym_map[name_id].split(",")
+      g, s = *text_name.split
+      taxa[user_id] ||= {}
+      genera[user_id] ||= {}
+      species[user_id] ||= {}
+      taxa[user_id][text_name] = true
+      genera[user_id][g] = true if rank.to_i <= Name.ranks[:Genus]
+      if rank.to_i <= Name.ranks[:Species]
+        species[user_id][[g, s].join(" ")] = true
+      end
+    end
+
+    { users: taxa.keys,
+      taxa: taxa.transform_values(&:size),
+      genera: genera.transform_values(&:size),
+      species: species.transform_values(&:size) }
   end
 
   private
 
   def calc_checklist
-    @names = {}
+    @taxa = {}
     @genera = {}
     @species = {}
     results = query_results_as_objects
 
-    count_names_genera_and_species(results)
+    count_taxa_genera_and_species(results)
   end
 
   def query_results_as_objects
@@ -132,10 +175,10 @@ class Checklist
   end
 
   # These can't be hashes since they get sorted
-  def count_names_genera_and_species(results)
+  def count_taxa_genera_and_species(results)
     return if results.empty?
 
-    @names = results.to_h do |result|
+    @taxa = results.to_h do |result|
       [result[:text_name], [result[:text_name], result[:id]]]
     end
 
