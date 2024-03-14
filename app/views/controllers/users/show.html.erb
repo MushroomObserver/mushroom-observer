@@ -69,6 +69,7 @@ total = 0
           label = row[:label]
           count = row[:count]
           weight = row[:weight]
+          count_text = weight ? "#{count} * #{weight}" : count
           points = row[:points]
           url = paths[field]
           link = url ? link_to(label, url) : label
@@ -82,8 +83,8 @@ total = 0
           <% elsif !label.blank? %>
             <tr>
               <td><%= link %></td>
-              <td><%= count %> * <%= weight %></td>
-              <td>=</td>
+              <td><%= count_text %></td>
+              <td><%= weight ? "=" : "" %></td>
               <td align="right"><%= points %></td>
             </tr>
           <% end %>
@@ -102,9 +103,9 @@ total = 0
           </tr>
         <% end %>
       </table>
-      <%= if @life_list.num_species > 0
-        :show_user_life_list.t(genera: @life_list.num_genera,
-                               species: @life_list.num_species,
+      <%= if @user_stats.checklist[:species] > 0
+        :show_user_life_list.t(genera: @user_stats.checklist[:genera],
+                               species: @user_stats.checklist[:species],
                                url: paths[:life_list])
       end %>
     </div><!-- .text-center -->

@@ -18,19 +18,15 @@ module UserStatsHelper
     end
 
     # Show a breakdown of translations
-    # NOTE: not currently in total, which is raw translation_string_versions
-    # if user_stats[:languages]
-    #   legend = []
-    #   lang_name_by_locale = Language.pluck(:locale, :name).to_h
-    #   user_stats[:languages].each do |locale, count|
-    #     lang_name = lang_name_by_locale[locale]
-    #     legend << "#{lang_name} (#{count})"
-    #   end
-    #   rows << {
-    #     label: legend.join(" "),
-    #     points: user_stats[:languages].values.sum
-    #   }
-    # end
+    if user_stats[:languages]
+      lang_name_by_locale = Language.pluck(:locale, :name).to_h
+      user_stats[:languages].each do |locale, count|
+        rows << {
+          label: lang_name_by_locale[locale],
+          count: count
+        }
+      end
+    end
 
     # Add bonuses at the bottom.
     user_stats&.bonuses&.each do |points, reason|
