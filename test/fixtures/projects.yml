@@ -21,6 +21,7 @@ eol_project:
   admin_group: eol_admins
   title: EOL Project
   summary: Project to make names for EOL
+  field_slip_prefix: EOL
   created_at: 2008-09-24 21:33:30
   updated_at: 2008-09-24 21:33:30
   open_membership: false
@@ -39,6 +40,7 @@ bolete_project:
   admin_group: bolete_admins
   title: Bolete Project
   summary: Project about Boletes
+  field_slip_prefix: BLT
   created_at: 2008-09-25 07:00:50
   updated_at: 2008-09-25 07:00:55
   images: in_situ_image, turned_over_image
@@ -73,6 +75,7 @@ open_membership_project:
   admin_group: burbank_admins
   title: Burbank Project
   summary: Project about Fungi of Burbank
+  field_slip_prefix: BURB
   created_at: 2008-09-25 07:00:50
   updated_at: 2008-09-25 07:00:55
   observations: owner_accepts_general_questions, unknown_with_lat_long, trusted_hidden, untrusted_hidden, reused_observation

@@ -493,6 +493,8 @@
   email_address: email address
   EMAIL_ADDRESSS: Email Addresses
   email_addresss: email addresses
+  FIELD_SLIP_PREFIX: Field Slip Prefix
+  field_slip_prefix: field slip prefix
   FULL_NAME: Full Name
   full_name: full name
   FULL_NAMES: Full Names
@@ -3244,6 +3246,7 @@
   show_project_destroy: Destroy Project
   show_project_drafts: Drafts
   show_project_edit: Edit Project
+  show_project_field_slip_prefix: Field Slip Prefix
   show_project_join: Join Project
   show_project_location: Location
   show_project_leave: Leave Project

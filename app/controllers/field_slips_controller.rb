@@ -14,15 +14,15 @@ class FieldSlipsController < ApplicationController
     if params[:id].match(/^\d+$/)
       set_field_slip
     else
-      @field_slip = FieldSlip.find_by(code: params[:id])
+      @field_slip = FieldSlip.find_by(code: params[:id].upcase)
     end
-    redirect_to(new_field_slip_url(code: params[:id])) unless @field_slip
+    redirect_to(new_field_slip_url(code: params[:id].upcase)) unless @field_slip
   end
 
   # GET /field_slips/new
   def new
     @field_slip = FieldSlip.new
-    @field_slip.code = params[:code] if params.include?(:code)
+    @field_slip.code = params[:code].upcase if params.include?(:code)
   end
 
   # GET /field_slips/1/edit
@@ -36,7 +36,7 @@ class FieldSlipsController < ApplicationController
       if @field_slip.save
         format.html do
           redirect_to(field_slip_url(@field_slip),
-                      notice: field_slip_created.t)
+                      notice: :field_slip_created.t)
         end
         format.json { render(:show, status: :created, location: @field_slip) }
       else
@@ -54,7 +54,7 @@ class FieldSlipsController < ApplicationController
       if @field_slip.update(field_slip_params)
         format.html do
           redirect_to(field_slip_url(@field_slip),
-                      notice: field_slip_updated.t)
+                      notice: :field_slip_updated.t)
         end
         format.json { render(:show, status: :ok, location: @field_slip) }
       else
@@ -73,7 +73,7 @@ class FieldSlipsController < ApplicationController
     respond_to do |format|
       format.html do
         redirect_to(field_slips_url,
-                    notice: field_slip_destroyed.t)
+                    notice: :field_slip_destroyed.t)
       end
       format.json { head(:no_content) }
     end
