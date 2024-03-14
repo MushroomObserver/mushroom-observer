@@ -11,7 +11,7 @@ class UserStatsTest < UnitTestCase
       ).distinct.select(Name::Version.arel_table[:name_id]).count
   end
 
-  def test_get_user_data
+  def test_refresh_user_stats
     user_stats = user_stats(:rolf)
     assert_equal(0, user_stats.comments)
     assert_equal(0, user_stats.images)
@@ -25,8 +25,8 @@ class UserStatsTest < UnitTestCase
     assert_equal(0, user_stats.species_lists)
     assert_equal(0, user_stats.votes)
 
-    # Assert that get_user_data both updates the db and returns the stats
-    user_data = UserStats.get_user_data(rolf.id)
+    # Assert that refresh_user_stats both updates the db and returns the stats
+    user_data = UserStats.refresh_user_stats(rolf.id)
     assert_equal(user_data, user_stats.reload)
 
     assert_equal(rolf.comments.size, user_data.comments)
