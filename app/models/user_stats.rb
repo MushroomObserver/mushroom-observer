@@ -96,7 +96,8 @@ class UserStats < ApplicationRecord
     comments: { weight: 1 },
     votes: { weight: 1 },
     translation_strings: { weight: 1 },
-    languages: { weight: 0, default: {} }
+    languages: { weight: 0, default: {} },
+    checklist: { weight: 0, default: {} }
   }.freeze
 
   # Sum up all the bonuses the User has earned.
@@ -183,7 +184,7 @@ class UserStats < ApplicationRecord
     # At the end, we find the existing user_stats record id by user_id, and
     # add in the id and user_id, and update all records at once.
     def refresh_all_user_stats
-      create_user_stats_for_all_contributors_without
+      create_user_stats_for_all_users_without
       # `entries` are { user_id: hash_of_attributes }
       # This method fills out the columns for each user_id where not zero.
       # Must set default values for all UserStats attributes here.
@@ -201,6 +202,8 @@ class UserStats < ApplicationRecord
                        refresh_translation_strings
                      when "languages"
                        refresh_languages
+                     when "checklist"
+                       refresh_checklist
                      when /^(\w+)_versions/
                        parent_type = $LAST_MATCH_INFO[1]
                        refresh_versions(parent_type, field)
@@ -214,7 +217,8 @@ class UserStats < ApplicationRecord
       # The counters may have added some hashes where it found some user
       # contributions, but the fields are not yet initialized because the
       # user had zero `contribution`. These need to be filled out.
-      entries = fix_incomplete_columns(entries)
+      # Also, there may be an "entry" for an unattributable User 0.
+      entries = fix_incomplete_columns(entries.except(0))
 
       # At this point all these hashes have a user_stats.id and a user_id.
       # It's safe to assume they correspond to existing user_stats records.
@@ -227,8 +231,8 @@ class UserStats < ApplicationRecord
     # It's a batch insert, so it's fast.
     # TODO: After the initial population, drop the column `bonuses` from User,
     # and remove references to bonuses in `pluck` and the hash here.
-    def create_user_stats_for_all_contributors_without
-      records = User.where(contribution: 1..).where.missing(:user_stats).
+    def create_user_stats_for_all_users_without
+      records = User.where.missing(:user_stats).
                 pluck(:id, :bonuses).map do |id, bonuses|
                   { user_id: id, bonuses: bonuses }
                 end
@@ -338,6 +342,18 @@ class UserStats < ApplicationRecord
       end
     end
 
+    def refresh_checklist
+      checklist_data = Checklist.all_site_taxa_by_user
+      checklist_data[:users].to_h do |user_id|
+        checklist_hash = {
+          taxa: checklist_data[:taxa][user_id],
+          genera: checklist_data[:genera][user_id],
+          species: checklist_data[:species][user_id]
+        }
+        [user_id, { checklist: checklist_hash }]
+      end
+    end
+
     # For each record we're about to update, check for incomplete entries that
     # the counters may have added - having a `user_id` but lacking an `id`.
     # Check that is an existing user and fill out the rest of the attributes
@@ -379,13 +395,13 @@ class UserStats < ApplicationRecord
   #    METHODS TO REFRESH USER_STATS COLUMNS FOR A SINGLE USER
   #
   #
-  # Return stats for a single User. This can be run on demand.
-  # Returns simple hash mapping category to number of records of that category.
+  # Refresh and return stats for a single User. This can be run on demand.
+  # Returns simple hash mapping a field to number of records of that field.
   #
-  #   data = UserStats.new.get_user_data(user_id)
+  #   data = UserStats.new.refresh_user_stats(user_id)
   #   num_images = data[:images]
   #
-  def self.get_user_data(user_id)
+  def self.refresh_user_stats(user_id)
     @user_stats = UserStats.find_by(user_id: user_id) ||
                   UserStats.new(user_id: user_id)
     @user_stats.refresh_user_data(user_id)
@@ -451,6 +467,8 @@ class UserStats < ApplicationRecord
               count_translation_strings(user_id, by_lang: false)
             when "languages"
               count_translation_strings(user_id, by_lang: true)
+            when "checklist"
+              count_checklist(user_id)
             when /^(\w+)_versions/
               parent_type = $LAST_MATCH_INFO[1]
               count_versions(parent_type, user_id)
@@ -493,6 +511,12 @@ class UserStats < ApplicationRecord
     all.to_h do |lang|
       [locale_index[lang.language_id], lang.cnt]
     end
+  end
+
+  # Gets checklist counts to save as a serialized hash
+  def count_checklist(user_id)
+    cl = Checklist::ForUser.new(User.find(user_id))
+    { taxa: cl.num_taxa, genera: cl.num_genera, species: cl.num_species }
   end
 
   # This counts versions where the editor was not the original author
