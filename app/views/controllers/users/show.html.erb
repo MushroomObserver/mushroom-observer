@@ -103,7 +103,7 @@ total = 0
           </tr>
         <% end %>
       </table>
-      <%= if @user_stats.checklist[:species] > 0
+      <%= if @user_stats.checklist[:species].to_i > 0
         :show_user_life_list.t(genera: @user_stats.checklist[:genera],
                                species: @user_stats.checklist[:species],
                                url: paths[:life_list])
