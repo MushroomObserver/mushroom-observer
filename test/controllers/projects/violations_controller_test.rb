@@ -44,7 +44,7 @@ module Projects
       )
       project.violations.each do |violation|
         assert_select(
-          "#violations a[href *= '#{violation.id}']", { count: 1 },
+          "#project_violations_form a[href *= '#{violation.id}']", { count: 1 },
           "Non-compliant list should have a link to Observation #{violation.id}"
         )
         assert_select(
@@ -55,11 +55,12 @@ module Projects
       end
 
       assert_select(
-        "#violations a[href *= '#{compliant_observation.id}']", { count: 0 },
+        "#project_violations_form a[href *= '#{compliant_observation.id}']",
+        { count: 0 },
         "Non-compliant list should not link to compliant Observation"
       )
       assert_select(
-        "#violations", { text: /#{hidden_obs.lat}/, count: 1 },
+        "#project_violations_form", { text: /#{hidden_obs.lat}/, count: 1 },
         "Violation list should display hidden geoloc to trusted user"
       )
     end
@@ -84,7 +85,7 @@ module Projects
 
       project.violations.each do |violation|
         assert_select(
-          "#violations a[href *= '#{violation.id}']", { count: 1 },
+          "#project_violations_form a[href *= '#{violation.id}']", { count: 1 },
           "Non-compliant list should have a link to Observation #{violation.id}"
         )
         if violation.user == user
@@ -118,13 +119,13 @@ module Projects
 
       violations.each do |violation|
         assert_select(
-          "#violations a[href *= '#{violation.id}']", { count: 1 },
+          "#project_violations_form a[href *= '#{violation.id}']", { count: 1 },
           "Non-compliant list should have a link to Observation #{violation.id}"
         )
       end
 
       assert_select(
-        "#violations", { text: /#{hidden_obs.lat}/, count: 0 },
+        "#project_violations_form", { text: /#{hidden_obs.lat}/, count: 0 },
         "Violation list should hide hidden geoloc from untrusted user"
       )
     end

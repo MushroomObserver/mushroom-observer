@@ -13,10 +13,11 @@
 
 <%=
   form_with(
-    model: @project, url: project_violations_path, method: :put
+    model: @project, url: project_violations_path, method: :put,
+    id: "project_violations_form"
   ) do |form|
 %>
-    <div id="violations">
+    <div>
       <%=
         make_table(
           headers: violation_table_headers(@project),
