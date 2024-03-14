@@ -87,7 +87,7 @@ module ImagesHelper
              else
                image.copyright_holder.to_s.t
              end
-    tag.div(image.license.copyright_text(image.year, holder),
+    tag.div(image.license&.copyright_text(image.year, holder),
             class: "small")
   end
 
