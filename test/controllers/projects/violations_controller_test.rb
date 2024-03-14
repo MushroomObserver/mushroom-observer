@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-# tests of Herbarium controller
+# test functions and view contents of ProjectsViolationsController
 module Projects
   class ViolationsControllerTest < FunctionalTestCase
     def test_index_by_owner
