@@ -68,4 +68,13 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     assert_nil(project.start_date, "Project Start Date should be nil")
     assert_nil(project.end_date, "Project Start Date should be nil")
   end
+
+  def test_project_violations
+    project = projects(:falmouth_2023_09_project)
+
+    login(project.user.login)
+    visit(project_path(project))
+
+    click_on(:CONSTRAINT_VIOLATIONS.l)
+  end
 end

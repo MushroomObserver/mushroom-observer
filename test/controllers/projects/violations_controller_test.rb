@@ -5,7 +5,7 @@ require("test_helper")
 # tests of Herbarium controller
 module Projects
   class ViolationsControllerTest < FunctionalTestCase
-    def test_edit_by_owner
+    def test_index_by_owner
       project = projects(:falmouth_2023_09_project)
       violations = project.violations
       violations_count = violations.size
@@ -22,7 +22,7 @@ module Projects
 
       user = project.user
       login(user.login)
-      get(:edit, params: { id: project.id })
+      get(:index, params: { project_id: project.id })
 
       assert_response(:success)
       assert_form_action(action: :update)
@@ -64,7 +64,7 @@ module Projects
       )
     end
 
-    def test_edit_by_member
+    def test_index_by_member
       project = projects(:falmouth_2023_09_project)
       violations = project.violations
       violations_count = violations.size
@@ -78,7 +78,7 @@ module Projects
              "who isn't the only person with violation")
 
       login(user.login)
-      get(:edit, params: { id: project.id })
+      get(:index, params: { project_id: project.id })
 
       assert_response(:success)
 
@@ -103,7 +103,7 @@ module Projects
       end
     end
 
-    def test_edit_by_non_member
+    def test_index_by_non_member
       project = projects(:falmouth_2023_09_project)
       violations = project.violations
       hidden_obs = observations(:brett_woods_2023_09_obs)
@@ -114,7 +114,7 @@ module Projects
       user = users(:zero_user)
 
       login(user.login)
-      get(:edit, params: { id: project.id })
+      get(:index, params: { project_id: project.id })
 
       violations.each do |violation|
         assert_select(
@@ -137,7 +137,7 @@ module Projects
       nybg_2023_09_obs = observations(:nybg_2023_09_obs)
       assert(violations.include?(nybg_2023_09_obs))
 
-      params = { id: project.id,
+      params = { project_id: project.id,
                  project: { "remove_#{nybg_2023_09_obs.id}" => "1" } }
 
       login(project.user.login)

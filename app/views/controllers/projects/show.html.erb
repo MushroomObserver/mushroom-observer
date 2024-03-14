@@ -49,7 +49,7 @@ violations_button_class =
                    project_members_path(@project.id),
                    { class: "btn btn-default btn-lg" }) %></b>
     <b><%= link_to("#{violations_count} #{:CONSTRAINT_VIOLATIONS.l}",
-                    edit_project_violations_path(id: @project.id),
+                    project_violations_path(project_id: @project.id),
                     { class: violations_button_class }) %></b>
   </p>
 <% end %>

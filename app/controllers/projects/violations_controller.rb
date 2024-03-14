@@ -18,7 +18,9 @@ module Projects
     end
 
     def update
-      return unless (@project = find_or_goto_index(Project, params[:id]))
+      unless (@project = find_or_goto_index(Project, params[:project_id]))
+        return
+      end
 
       params[:project]&.each do |key, value|
         next unless key =~ /|remove_\d+$/ && value == "1"
@@ -34,8 +36,18 @@ module Projects
 
     private
 
+    def default_index_subaction
+      list_all
+    end
+
+    def list_all
+      return unless find_project!
+
+      @violations = @project.violations
+    end
+
     def find_project!
-      @project = find_or_goto_index(Project, params[:id])
+      @project = find_or_goto_index(Project, params[:project_id])
     end
 
     def remove_observation_if_permitted(obs_id)

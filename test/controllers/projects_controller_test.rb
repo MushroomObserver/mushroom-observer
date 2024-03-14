@@ -139,7 +139,7 @@ class ProjectsControllerTest < FunctionalTestCase
 
     assert_select(
       "#project_summary a[href =
-        '#{edit_project_violations_path(id: project.id)}']",
+        '#{project_violations_path(project_id: project.id)}']",
       true, "Page is missing a link to violations"
     )
   end
