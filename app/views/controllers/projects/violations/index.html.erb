@@ -9,14 +9,12 @@
 
 <div class="smaller">
 
-<%= help_block(:div, violations_help_text(@project)) %>
+  <%= help_block(:div, violations_help_text(@project)) %>
 
-<%=
-  form_with(
-    model: @project, url: project_violations_path, method: :put,
-    id: "project_violations_form"
-  ) do |form|
-%>
+  <%= form_with(
+        model: @project, url: project_violations_path, method: :put,
+        id: "project_violations_form"
+      ) do |form| %>
     <div>
       <%=
         make_table(
@@ -29,4 +27,5 @@
     </div>
     <%= form.submit(violations_submit_text(@project)) %>
   <% end %>
+
 </div>
