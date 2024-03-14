@@ -3,11 +3,11 @@
   @container = :wide
 %>
 
-<h4 class="pb-3">
-  <%= :PROJECT.l + ": " + link_to_object(@project).t %>
 <h4>
+  <%= :PROJECT.l + ": " + link_to_object(@project).t %>
+</h4>
 
-<div class="smaller">
+<div>
 
   <%= help_block(:div, violations_help_text(@project)) %>
 
