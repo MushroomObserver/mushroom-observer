@@ -98,7 +98,9 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # characters is under 255 bytes (limit in SQL assuming all prefix
   # characters are 4-byte unicode).
   def field_slip_prefix=(val)
-    self[:field_slip_prefix] = val.strip.upcase[0, 60]
+    self[:field_slip_prefix] = if val && val.strip != ""
+                                 val.strip.upcase[0, 60]
+                               end
   end
 
   # Same as +text_name+ but with id tacked on to make unique.
