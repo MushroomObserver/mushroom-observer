@@ -415,7 +415,8 @@ export default class extends Controller {
         "click->name-list#ourClick",
         "dblclick->name-list#ourDblClick"
       ].join(" ")
-      li.setAttribute("data-action", stimulus_actions)
+      if (column != "species")
+        li.setAttribute("data-action", stimulus_actions)
 
       li.appendChild(name_el).appendChild(author_el)
       ul.appendChild(li)
