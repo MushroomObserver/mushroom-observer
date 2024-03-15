@@ -1,4 +1,4 @@
-<p style="color: green"><%= notice %></p>
+<p class="alert alert-success"><%= notice %></p>
 
 <h1>Field slips</h1>
 
@@ -6,9 +6,9 @@
   <% @field_slips.each do |field_slip| %>
     <%= render field_slip %>
     <p>
-      <%= link_to "Show this field slip", field_slip %>
+      <%= link_to :field_slip_show.t, field_slip %>
     </p>
   <% end %>
 </div>
 
-<%= link_to "New field slip", new_field_slip_path %>
+<%= link_to :field_slip_new.t, new_field_slip_path %>

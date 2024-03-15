@@ -4,7 +4,7 @@ require "test_helper"
 
 class FieldSlipsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @field_slip = field_slips(:one)
+    @field_slip = field_slips(:field_slip_one)
   end
 
   test "should get index" do

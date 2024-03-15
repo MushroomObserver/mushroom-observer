@@ -1,7 +1,10 @@
 <%= form_with(model: field_slip) do |form| %>
   <% if field_slip.errors.any? %>
-    <div style="color: red">
-      <h2><%= pluralize(field_slip.errors.count, "error") %> prohibited this field_slip from being saved:</h2>
+    <div class="alert alert-danger">
+      <h2>
+	<%= "#{pluralize(field_slip.errors.count,
+	      :error.t, plural: :errors.t)} #{:field_slip_errors.t}" %>
+      </h2>
 
       <ul>
         <% field_slip.errors.each do |error| %>

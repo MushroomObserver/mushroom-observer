@@ -1,11 +1,11 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
+field_slip_one:
   observation_id: 1
   project_id: 1
-  code: MyString
+  code: MOTEST-0001
 
-two:
+field_slip_two:
   observation_id: 1
   project_id: 1
-  code: MyString
+  code: MOTEST-0002
