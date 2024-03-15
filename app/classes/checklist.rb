@@ -5,6 +5,11 @@
 #  This class calculates a checklist of species observed by users,
 #  projects, etc.
 #
+#  == Class Methods
+#
+#  all_site_taxa_by_user::  Calculate checklist taxon stats for all users
+#                           (only the stats, not the names)
+#
 #  == Methods
 #
 #  num_genera::      Number of genera seen.
@@ -128,7 +133,7 @@ class Checklist
     calculate_taxa_by_user(synonym_map)
   end
 
-  def self.calculate_taxa_by_user(synonym_map)
+  private_class_method def self.calculate_taxa_by_user(synonym_map)
     taxa = {}
     genera = {}
     species = {}
