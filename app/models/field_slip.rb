@@ -14,5 +14,11 @@ class FieldSlip < ApplicationRecord
 
   def code=(val)
     self[:code] = val.upcase
+    unless project
+      prefix_match = code.match(/(^.+)[ -]\d+$/)
+      if prefix_match
+        self.project = Project.find_by(field_slip_prefix: prefix_match[1])
+      end
+    end
   end
 end

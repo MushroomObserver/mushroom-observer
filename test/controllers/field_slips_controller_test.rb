@@ -33,6 +33,22 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_redirected_to field_slip_url(FieldSlip.last)
   end
 
+  test "should create field_slip in project from code" do
+    login
+    project = projects(:eol_project)
+    code = "#{project.field_slip_prefix}-1234"
+    assert_difference("FieldSlip.count") do
+      post(:create,
+           params: {
+             field_slip: {
+               code: code
+             }
+           })
+    end
+    field_slip = FieldSlip.find_by(code: code)
+    assert_equal(field_slip.project, project)
+  end
+
   test "should fail to create field_slip" do
     login
     post(:create,
