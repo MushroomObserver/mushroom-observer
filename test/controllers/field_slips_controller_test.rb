@@ -33,8 +33,40 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_redirected_to field_slip_url(FieldSlip.last)
   end
 
+  test "should fail to create field_slip" do
+    login
+    post(:create,
+         params: {
+           field_slip: {
+             code: "#{@field_slip.code}",
+             observation: observations(:coprinus_comatus_obs),
+             project: projects(:eol_project)
+           }
+         })
+    assert_response 422
+  end
+
+  test "json should fail to create field_slip" do
+    login
+    post(:create,
+         format: :json,
+         params: {
+           field_slip: {
+             code: "#{@field_slip.code}",
+             observation: observations(:coprinus_comatus_obs),
+             project: projects(:eol_project)
+           }
+         })
+    assert_response 422
+  end
+
   test "should show field_slip" do
     get(:show, params: { id: @field_slip.id })
+    assert_response :success
+  end
+
+  test "should show field_slip by code" do
+    get(:show, params: { id: @field_slip.code })
     assert_response :success
   end
 
@@ -52,6 +84,27 @@ class FieldSlipsControllerTest < FunctionalTestCase
                                   observation_id: @field_slip.observation_id,
                                   project_id: @field_slip.project_id } })
     assert_redirected_to field_slip_url(@field_slip)
+  end
+
+  test "should fail to update field_slip" do
+    login
+    patch(:update,
+          params: { id: @field_slip.id,
+                    field_slip: { code: "-3.14",
+                                  observation_id: @field_slip.observation_id,
+                                  project_id: @field_slip.project_id } })
+    assert_response 422
+  end
+
+  test "json should fail to update field_slip" do
+    login
+    patch(:update,
+          format: :json,
+          params: { id: @field_slip.id,
+                    field_slip: { code: "-3.14",
+                                  observation_id: @field_slip.observation_id,
+                                  project_id: @field_slip.project_id } })
+    assert_response 422
   end
 
   test "should destroy field_slip" do
