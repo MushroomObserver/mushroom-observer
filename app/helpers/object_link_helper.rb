@@ -94,7 +94,7 @@ module ObjectLinkHelper
   end
 
   # IF lacks an entry point that includes the name to be searched.
-  def index_fungorum_basic_search_url
+  def index_fungorum_search_page_url
     "http://www.indexfungorum.org/Names/Names.asp"
   end
 
