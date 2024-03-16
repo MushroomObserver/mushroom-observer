@@ -93,6 +93,11 @@ module ObjectLinkHelper
     "http://www.indexfungorum.org/Names/NamesRecord.asp?RecordID=#{record_id}"
   end
 
+  # IF lacks an entry point that includes the name to be searched.
+  def index_fungorum_basic_search_url
+    "http://www.indexfungorum.org/Names/Names.asp"
+  end
+
   # Use web search because IF internal search uses js form rather than a url
   def index_fungorum_name_web_search_url(name)
     # Use DuckDuckGo because the equivalent Google search results stink,

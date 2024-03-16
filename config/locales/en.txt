@@ -2131,6 +2131,7 @@
   show_name_icn_id_missing: missing
   google_name_search: Google Search
   index_fungorum: Index Fungorum
+  index_fungorum_search: Index Fungorum search page
   index_fungorum_web_search: Index Fungorum web search
   mycobank: MycoBank
   mycobank_search: MycoBank search
