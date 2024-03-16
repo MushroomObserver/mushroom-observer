@@ -2756,6 +2756,8 @@
   field_slip_edit: Edit this field slip
   field_slip_index: Back to field slips
   field_slip_destroy: Destroy this field slip
+  field_slip_no_observation: Observation not found
+  field_slip_no_project: Project not found
 
   ##############################################################################
 

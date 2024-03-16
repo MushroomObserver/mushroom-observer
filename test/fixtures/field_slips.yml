@@ -1,11 +1,11 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 field_slip_one:
-  observation_id: 1
-  project_id: 1
+  observation: minimal_unknown_obs
+  project: eol_project
   code: MOTEST-0001
 
 field_slip_two:
-  observation_id: 1
-  project_id: 1
+  observation_id: detailed_unknown_obs
+  project_id: eol_project
   code: MOTEST-0002

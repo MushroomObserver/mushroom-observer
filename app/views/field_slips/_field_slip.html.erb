@@ -1,16 +1,20 @@
 <div id="<%= dom_id field_slip %>">
   <p>
     <strong>Observation:</strong>
-    <%= link_to(field_slip.observation.unique_format_name.t, observation_path(field_slip.observation)) %>
+    <% if field_slip.observation %>
+      <%= link_to(field_slip.observation.unique_format_name.t, observation_path(field_slip.observation)) %>
+    <% else %>
+      <%= :field_slip_no_observation.t %>
+    <% end %>
     <br/>
     <strong>Project:</strong>
-    <%= link_to_object(field_slip.project) %>
+    <% if field_slip.project %>
+      <%= link_to_object(field_slip.project) %>
+    <% else %>
+      <%= :field_slip_no_project.t %>
+    <% end %>
     <br/>
     <strong>Code:</strong>
     <%= field_slip.code %>
   </p>
-
-
-  <%= render(partial: "shared/matrix_box",
-             locals: { object: field_slip.observation }) %>
 </div>
