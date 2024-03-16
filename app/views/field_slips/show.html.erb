@@ -1,4 +1,6 @@
-<p class="alert alert-success"><%= notice %></p>
+<% if notice %>
+  <p class="alert alert-success"><%= notice %></p>
+<% end %>
 
 <%= render @field_slip %>
 
