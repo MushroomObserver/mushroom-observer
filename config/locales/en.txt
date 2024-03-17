@@ -1033,7 +1033,7 @@
   site_stats_sequenced_observations: Sequenced Observations
   site_stats_species_list_entries: "[:SPECIES_LIST] Entries"
   site_stats_species_lists: "[:SPECIES_LISTS]"
-  site_stats_users: Members
+  site_stats_users: Users
   site_stats_votes: "[:VOTES]"
 
   # Vote descriptions.
@@ -2133,6 +2133,7 @@
   show_name_icn_id_missing: missing
   google_name_search: Google Search
   index_fungorum: Index Fungorum
+  index_fungorum_search: Index Fungorum search page
   index_fungorum_web_search: Index Fungorum web search
   mycobank: MycoBank
   mycobank_search: MycoBank search
