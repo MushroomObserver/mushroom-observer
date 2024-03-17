@@ -244,6 +244,7 @@
   comment: comment
   COMMENTS: Comments
   comments: comments
+  CONSTRAINTS: Constraints
   CONTRIBUTORS: Contributors
   DESCRIPTION: Description
   description: description
@@ -467,6 +468,8 @@
   confidence_level: confidence level
   CONFIDENCE_LEVELS: Confidence Levels
   confidence_levels: confidence levels
+  CONSTRAINT_VIOLATIONS: Constraint Violations
+  constraint_violations: constraint violations
   COPYRIGHT_HOLDER: Copyright Holder
   copyright_holder: copyright holder
   COPYRIGHT_HOLDERS: Copyright Holders
@@ -501,6 +504,7 @@
   full_name: full name
   FULL_NAMES: Full Names
   full_names: full names
+  hidden: hidden
   ICN_ID: ICN Identifier
   icn_id: ICN Identifier
   ID: ID
@@ -1016,6 +1020,8 @@
   user_stats_species_lists: "[:SPECIES_LISTS]"
   user_stats_users: ""
   user_stats_votes: "[:VOTES]"
+  user_stats_translation_strings: "[:TRANSLATIONS] Authored"
+  user_stats_languages: "[:TRANSLATIONS] By Language"
 
   # Site statistics field names.
   site_stats_comments: "[:COMMENTS]"
@@ -1039,7 +1045,7 @@
   site_stats_sequenced_observations: Sequenced Observations
   site_stats_species_list_entries: "[:SPECIES_LIST] Entries"
   site_stats_species_lists: "[:SPECIES_LISTS]"
-  site_stats_users: Members
+  site_stats_users: Users
   site_stats_votes: "[:VOTES]"
 
   # Vote descriptions.
@@ -2139,6 +2145,7 @@
   show_name_icn_id_missing: missing
   google_name_search: Google Search
   index_fungorum: Index Fungorum
+  index_fungorum_search: Index Fungorum search page
   index_fungorum_web_search: Index Fungorum web search
   mycobank: MycoBank
   mycobank_search: MycoBank search
@@ -3202,6 +3209,13 @@
   change_user_bonuses: Award Bonus
   change_user_bonuses_help: "List one bonus per line, each specifying a number of points and reason, like this:\n\n10000 German translations\n50000 Expert in hypogeous fungi\n\n\nThese will appear on the show_user page below the usual contribution scores. Keep the reasons short or it might mess up the formatting of the table on that page."
 
+  # observer/refresh_vote_cache
+  refresh_vote_cache: Refreshed vote caches.
+
+  # observer/send_feature_email
+  send_feature_email_success: Delivered feature mail.
+  send_feature_email_denied: Only the admin can send feature mail.
+
   # project/destroy_project
   destroy_project_failed: Failed to destroy project.
   destroy_project_success: Project destroyed.
@@ -3225,16 +3239,12 @@
   form_projects_ignore_date_range: Ignore above dates
   form_projects_use_date_range: Use above dates
 
-
   # project/list_projects
   list_projects_title: "[:list_objects(type=:project)]"
   list_projects_add_project: "[:add_object(type=:project)]"
 
   # draft/publish_draft
   publish_draft_denied: "Permission denied: Only the creator of a draft or a project admin can publish a draft."
-
-  # observer/refresh_vote_cache
-  refresh_vote_cache: Refreshed vote caches.
 
   # project/review_authors
   review_authors_add_author: Add
@@ -3245,10 +3255,6 @@
   review_authors_other_users: Other [:users]
   review_authors_remove_author: Remove
   review_authors_title: Reviewing Author(s) for [name]
-
-  # observer/send_feature_email
-  send_feature_email_success: Delivered feature mail.
-  send_feature_email_denied: Only the admin can send feature mail.
 
   # project/show_project
   show_project_add_members: Add Members
@@ -3268,6 +3274,12 @@
   show_project_title: "Project: [title]"
   show_project_user_group: User Group
   show_project_violation_count: Project has [count] constraint violation(s)
+
+  # project/violations/edit
+  form_violations_help: Check the Observations to be removed, then Submit
+  violations_index_title: "[:CONSTRAINT_VIOLATIONS]"
+  form_violations_remove_selected: Remove Selected
+  form_violations_show_project: Show Project
 
   # users/by_name
   users_by_name_title: Users by Name

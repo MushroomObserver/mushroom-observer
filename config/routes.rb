@@ -744,7 +744,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                         controller: "projects/members", param: :candidate
     resources :admin_requests, only: [:new, :create],
                                controller: "projects/admin_requests"
+    resources :violations, only: [:index], controller: "projects/violations"
   end
+  # resourceful route won't work beucase it requires an additional id
+  put("/projects/:project_id/violations", to: "projects/violations#update",
+                                          as: "project_violations_update")
 
   # ----- Publications: standard actions  -------------------------------------
   resources :publications

@@ -6,9 +6,12 @@ module Admin
     def edit
       return unless (@user2 = find_or_goto_index(User, params[:id].to_s))
 
+      @user_stats = UserStats.find_by(user_id: @user2.id) ||
+                    UserStats.create(user_id: @user2.id)
+
       # Reformat bonuses as string for editing, one entry per line.
-      @val = if @user2.bonuses
-               vals = @user2.bonuses.map do |points, reason|
+      @val = if @user_stats.bonuses
+               vals = @user_stats.bonuses.map do |points, reason|
                  format("%<points>-6d %<reason>s",
                         points: points, reason: reason.gsub(/\s+/, " "))
                end
@@ -20,6 +23,8 @@ module Admin
 
     def update
       return unless (@user2 = find_or_goto_index(User, params[:id].to_s))
+
+      return unless (@user_stats = UserStats.find_by(user_id: @user2.id))
 
       # Parse new set of values.
       @val = params[:val]
@@ -61,7 +66,7 @@ module Admin
     def update_user_contribution(bonuses)
       contrib = @user2.contribution.to_i
       # Subtract old bonuses.
-      @user2.bonuses&.each_key do |points|
+      @user_stats.bonuses&.each_key do |points|
         contrib -= points
       end
       # Add new bonuses
@@ -69,9 +74,8 @@ module Admin
         contrib += points
       end
       # Update database.
-      @user2.bonuses      = bonuses
-      @user2.contribution = contrib
-      @user2.save
+      @user_stats.update(bonuses: bonuses)
+      @user2.update(contribution: contrib)
     end
   end
 end

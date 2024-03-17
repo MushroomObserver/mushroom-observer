@@ -6,6 +6,7 @@ module Admin
   class UsersControllerTest < FunctionalTestCase
     def test_change_bonuses
       user = users(:mary)
+      user_stats = user_stats(:mary)
       old_contribution = mary.contribution
       bonus = "7 lucky \n 13 unlucky"
 
@@ -22,13 +23,14 @@ module Admin
       post(:update, params: { id: user.id, val: "wong format 7" })
       assert_flash_error
       user.reload
-      assert_empty(user.bonuses)
+      assert_empty(user_stats.bonuses)
       assert_equal(old_contribution, user.contribution)
 
       # Prove that admin can change bonuses
       post(:update, params: { id: user.id, val: bonus })
       user.reload
-      assert_equal([[7, "lucky"], [13, "unlucky"]], user.bonuses)
+      user_stats.reload
+      assert_equal([[7, "lucky"], [13, "unlucky"]], user_stats.bonuses)
       assert_equal(old_contribution + 20, user.contribution)
 
       # Prove that admin can get bonuses

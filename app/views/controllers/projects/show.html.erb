@@ -1,11 +1,18 @@
 <%
 add_project_banner(@project)
 @container = :wide
+violations_count = @project.count_violations
+violations_button_class =
+  if violations_count.zero?
+    "btn btn-default btn-lg"
+  else
+    "btn btn-warning btn-constraint-warning btn-lg"
+  end
 %>
 
 <br/>
 
-<%= panel_block do %>
+<%= panel_block(id: "project_summary") do %>
   <%= ("*" + :show_project_summary.l + ":* " + @project.summary.to_s.html_safe).tpl %>
 
   <% if @project.species_lists.any? %>
@@ -32,71 +39,73 @@ add_project_banner(@project)
   <p><b><%= :show_project_field_slip_prefix.t %>:</b> <%= @project.field_slip_prefix %></p>
   <p>
     <% if @project.observations.any? %>
-      <b><%= link_to("#{@project.observations.length} #{:OBSERVATIONS.t}",
-                    observations_path(project: @project.id),
-                    { class: "btn btn-default btn-lg" }) %></b>
-      <b><%= link_to("#{@project.name_count} #{:NAMES.t}",
+      <b><%= link_to("#{@project.observations.length} #{:OBSERVATIONS.l}",
+                     observations_path(project: @project.id),
+                     { class: "btn btn-default btn-lg" }) %></b>
+      <b><%= link_to("#{@project.name_count} #{:NAMES.l}",
                     checklist_path(project_id: @project.id),
                     { class: "btn btn-default btn-lg" }) %></b>
     <% end %>
-    <b><%= link_to("#{@project.user_group.users.count} #{:MEMBERS.t}",
-                  project_members_path(project_id: @project.id),
-                  { class: "btn btn-default btn-lg" }) %></b>
+    <b><%= link_to("#{@project.user_group.users.count} #{:MEMBERS.l}",
+                   project_members_path(@project.id),
+                   { class: "btn btn-default btn-lg" }) %></b>
+    <b><%= link_to("#{violations_count} #{:CONSTRAINT_VIOLATIONS.l}",
+                    project_violations_path(project_id: @project.id),
+                    { class: violations_button_class }) %></b>
   </p>
 <% end %>
 
-
 <br/>
-<p>
-<% if @project.can_join?(@user) %>
-  <%= post_button(name: :show_project_join.t,
-                  class: "btn btn-default btn-sm",
-                  path: project_members_path(project_id: @project.id,
-                                             candidate: @user.id,
-                                             target: :project_index)) %>
-<% elsif @project.member?(@user) %>
-  <% if @project.trusted_by?(@user) %>
-    <%= put_button(name: :change_member_status_revoke_trust.l,
-                   class: "btn btn-default btn-sm",
-                   path: project_member_path(project_id: @project.id,
-                                             candidate: @user.id,
-                                             commit: :change_member_status_revoke_trust.l,
-                                             target: :project_index)) %>
+
+<p id="project_join_trust_edit">
+  <% if @project.can_join?(@user) %>
+    <%= post_button(name: :show_project_join.t,
+                    class: "btn btn-default btn-sm",
+                    path: project_members_path(project_id: @project.id,
+                                              candidate: @user.id,
+                                              target: :project_index)) %>
+  <% elsif @project.member?(@user) %>
+    <% if @project.trusted_by?(@user) %>
+      <%= put_button(name: :change_member_status_revoke_trust.l,
+                    class: "btn btn-default btn-sm",
+                    path: project_member_path(project_id: @project.id,
+                                              candidate: @user.id,
+                                              commit: :change_member_status_revoke_trust.l,
+                                              target: :project_index)) %>
+    <% else %>
+      <%= put_button(name: :change_member_hidden_gps_trust.l,
+                    class: "btn btn-default btn-sm",
+                    path: project_member_path(project_id: @project.id,
+                                              candidate: @user.id,
+                                              commit: :change_member_hidden_gps_trust.l,
+                                              target: :project_index)) %>
+    <% end %>
+    <% unless @project.can_edit_content?(@user) %>
+      <%= put_button(name: :change_member_editing_trust.l,
+                    class: "btn btn-default btn-sm",
+                    path: project_member_path(project_id: @project.id,
+                                              candidate: @user.id,
+                                              commit: :change_member_editing_trust.l,
+                                              target: :project_index)) %>
+    <% end %>
+    <% if @project.can_leave?(@user) %>
+      <%= put_button(name: :show_project_leave.t,
+                    class: "btn btn-default btn-sm",
+                    path: project_member_path(project_id: @project.id,
+                                              candidate: @user.id,
+                                              target: :project_index)) %>
+    <% end %>
+  <% end %>
+
+  <% if check_permission(@project) %>
+    <%= link_to(:show_project_edit.t,
+                edit_project_path(@project.id),
+                { class: "btn btn-default btn-sm" }) %>
   <% else %>
-    <%= put_button(name: :change_member_hidden_gps_trust.l,
-                   class: "btn btn-default btn-sm",
-                   path: project_member_path(project_id: @project.id,
-                                             candidate: @user.id,
-                                             commit: :change_member_hidden_gps_trust.l,
-                                             target: :project_index)) %>
+    <%= link_to(:show_project_admin_request.t,
+                new_project_admin_request_path(project_id: @project.id),
+                { class: "btn btn-default btn-sm" }) %>
   <% end %>
-  <% unless @project.can_edit_content?(@user) %>
-    <%= put_button(name: :change_member_editing_trust.l,
-                   class: "btn btn-default btn-sm",
-                   path: project_member_path(project_id: @project.id,
-                                             candidate: @user.id,
-                                             commit: :change_member_editing_trust.l,
-                                             target: :project_index)) %>
-  <% end %>
-  <% if @project.can_leave?(@user) %>
-    <%= put_button(name: :show_project_leave.t,
-                   class: "btn btn-default btn-sm",
-                   path: project_member_path(project_id: @project.id,
-                                             candidate: @user.id,
-                                             target: :project_index)) %>
-  <% end %>
-<% end %>
-
-<% if check_permission(@project) %>
-  <%= link_to(:show_project_edit.t,
-              edit_project_path(@project.id),
-              { class: "btn btn-default btn-sm" }) %>
-<% else %>
-  <%= link_to(:show_project_admin_request.t,
-              new_project_admin_request_path(project_id: @project.id),
-              { class: "btn btn-default btn-sm" }) %>
-<% end %>
-
 </p>
 
 <%= render(partial: "comments/comments_for_object",
