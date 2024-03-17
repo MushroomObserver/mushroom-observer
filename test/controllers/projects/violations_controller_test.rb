@@ -156,5 +156,16 @@ module Projects
       assert_not_includes(project.observations, nybg_2023_09_obs,
                           "Failed to remove checked violation from Project")
     end
+
+    def test_update_nonexistent_project
+      id = observations(:minimal_unknown_obs).id
+      nybg_2023_09_obs = observations(:nybg_2023_09_obs)
+      params = { project_id: id,
+                 project: { "remove_#{nybg_2023_09_obs.id}" => "1" } }
+      login
+      post(:update, params: params)
+
+      assert_redirected_to(projects_path)
+    end
   end
 end
