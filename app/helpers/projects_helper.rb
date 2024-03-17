@@ -7,10 +7,9 @@ module ProjectsHelper
       nil, # column for checkbox
       "#{:CONSTRAINTS.l}:",
       "#{:DATES.l}: #{project.date_range}",
-      "Lat: #{project.location.north} to #{project.location.south}",
-      "Lon: #{project.location.west} to #{project.location.east} ",
-      location_link(project.location.display_name, project.location,
-                    nil, false),
+      violation_latitude_header(project),
+      violation_longitude_header(project),
+      violation_location_header(project),
       nil # column for observation.user
     ]
   end
@@ -44,6 +43,25 @@ module ProjectsHelper
   #########
 
   private
+
+  def violation_latitude_header(project)
+    return :form_violations_latitude_none.l unless project.location
+
+    "Lat: #{project.location.north} to #{project.location.south}"
+  end
+
+  def violation_longitude_header(project)
+    return :form_violations_longitude_none.l unless project.location
+
+    "Lon: #{project.location.west} to #{project.location.east}"
+  end
+
+  def violation_location_header(project)
+    return :form_violations_location_none.t unless project.location
+
+    location_link(project.location.display_name, project.location,
+                  nil, false)
+  end
 
   def violation_checkbox(form:, project:, obs:)
     if violation_checkbox_viewers(project, obs).include?(User.current.id)
