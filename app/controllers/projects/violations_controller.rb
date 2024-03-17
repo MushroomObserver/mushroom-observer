@@ -11,12 +11,6 @@ module Projects
     before_action :login_required
     before_action :pass_query_params
 
-    def edit
-      return unless find_project!
-
-      @violations = @project.violations
-    end
-
     def update
       unless (@project = find_or_goto_index(Project, params[:project_id]))
         return
