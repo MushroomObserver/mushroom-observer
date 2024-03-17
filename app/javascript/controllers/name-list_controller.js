@@ -28,7 +28,7 @@ export default class extends Controller {
       names: null
     }
     // Current subset of SPECIES that is being displayed.
-    this.CURRENT_SPECIES = []
+    this.current_species = []
 
     this.SCROLLBAR_WIDTH = null
 
@@ -94,7 +94,7 @@ export default class extends Controller {
     const [column, i] = this.getDataFromLi(event)
 
     if (column == 'species')
-      this.insertName(this.CURRENT_SPECIES[i])
+      this.insertName(this.current_species[i])
     if (column == 'names')
       this.removeName(this.NAMES[i])
   }
@@ -203,10 +203,10 @@ export default class extends Controller {
 
       // Search for partial word.
       const list = this.FOCUS_COLUMN == 'genera' ? this.GENERA :
-        (this.FOCUS_COLUMN == 'species') ? this.CURRENT_SPECIES : this.NAMES
+        (this.FOCUS_COLUMN == 'species') ? this.current_species : this.NAMES
       let word = this.WORD
       if (this.FOCUS_COLUMN == 'species')
-        word = this.CURRENT_SPECIES[0].replace(/\*$|\|.*/, '') + ' ' + this.WORD
+        word = this.current_species[0].replace(/\*$|\|.*/, '') + ' ' + this.WORD
       this.searchListForWord(list, word)
       return
     }
@@ -276,7 +276,7 @@ export default class extends Controller {
           this.FOCUS_COLUMN = 'species'
           this.highlightCursors()
         } else if (this.FOCUS_COLUMN == 'species' && i != null) {
-          this.insertName(this.CURRENT_SPECIES[i])
+          this.insertName(this.current_species[i])
         }
         break
 
@@ -327,7 +327,7 @@ export default class extends Controller {
     if (this.FOCUS_COLUMN && this.CURSOR[this.FOCUS_COLUMN] == null)
       this.CURSOR[this.FOCUS_COLUMN] = 0
     this.highlightCursor('genera', this.GENERA)
-    this.highlightCursor('species', this.CURRENT_SPECIES)
+    this.highlightCursor('species', this.current_species)
     this.highlightCursor('names', this.NAMES)
   }
 
@@ -368,8 +368,11 @@ export default class extends Controller {
   // Draw contents of one of the three columns.
   // Sections: 'genera', 'species', 'names'; lists: GENERA, SPECIES, NAMES.
   drawColumn(column, list = []) {
-    const ul = document.createElement("ul")
+    const ul = this.DIVS[column].children.length ?
+      this.DIVS[column].firstChild :
+      this.DIVS[column].appendChild(document.createElement("ul"))
 
+    ul.innerHTML = ""
     for (let i = 0; i < list.length; i++) {
       let name = list[i]
       const x = name.indexOf('|')
@@ -415,14 +418,12 @@ export default class extends Controller {
         "click->name-list#ourClick",
         "dblclick->name-list#ourDblClick"
       ].join(" ")
-      if (column != "species")
+      if (column != "names")
         li.setAttribute("data-action", stimulus_actions)
 
       li.appendChild(name_el).appendChild(author_el)
       ul.appendChild(li)
     }
-
-    this.DIVS[column].appendChild(ul)
   }
 
   // ------------------------------  Actions  ---------------------------------
@@ -430,6 +431,10 @@ export default class extends Controller {
   // Select a genus.
   selectGenus(name) {
     let list = [name]
+    if (this.searchListForWord(this.current_species, name)) {
+      return
+    }
+
     let last = false
     this.moveCursorIn('species', null)
     if (name.charAt(name.length - 1) == '*')
@@ -446,8 +451,8 @@ export default class extends Controller {
       }
     }
     this.CURSOR['species'] = null
-    this.CURRENT_SPECIES = list
-    this.drawColumn('species', list)
+    this.current_species.push.apply(this.current_species, list)
+    this.drawColumn('species', this.current_species)
     this.scrollToCursorIn('species')
   }
 
@@ -455,12 +460,14 @@ export default class extends Controller {
   searchListForWord(list = [], word) {
     const word_len = word.length
     word = word.toLowerCase()
+    if (list.length == 0) return false
     for (let i = 0; i < list.length; i++) {
       if (list[i].substr(0, word_len).toLowerCase() == word) {
         this.moveCursorIn(this.FOCUS_COLUMN, i)
-        break
+        return true
       }
     }
+    return false
   }
 
   // Insert a name.
