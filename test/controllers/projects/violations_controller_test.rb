@@ -28,17 +28,21 @@ module Projects
       assert_form_action(action: :update)
 
       assert_select("#content", { text: /#{project.title}/ },
-                    "Page should include project name")
-      assert_select("#content", { text: /#{:CONSTRAINTS.l}/ })
-      assert_select("#content", { text: /#{project.date_range}/ },
+                    "Page missing project name")
+      assert_select("#content a[href = '#{project_path(project)}']", true,
+                    "Page missing a link to project show page")
+
+      assert_select("#project_violations_form", { text: /#{:CONSTRAINTS.l}/ })
+      assert_select("#project_violations_form",
+                    { text: /#{project.date_range}/ },
                     "Missing Project date range")
       assert_select(
-        "#content",
+        "#project_violations_form",
         { text: /#{project.location.north} \S+ #{project.location.south}/ },
         "Missing Project latitude range"
       )
       assert_select(
-        "#content",
+        "#project_violations_form",
         { text: /#{project.location.west} \S+ #{project.location.east}/ },
         "Missing Project longitude range"
       )

@@ -3,7 +3,7 @@
   @container = :wide
 %>
 
-<%= tag.h4("#{:PROJECT.l}: #{@project.title}") %>
+<%= tag.h4(:PROJECT.l + ": " + link_to_object(@project)) %>
 
 <%= help_block(:div, violations_help_text(@project)) %>
 
