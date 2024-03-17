@@ -433,6 +433,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # Obs lat/lon is outside Project.location exor
   # Obs location is not a subset of Project.location
   def out_of_area_observations
+    return [] if location.nil?
+
     obs_geoloc_outside_project_location.to_a.union(
       obs_without_geoloc_location_not_contained_in_location
     )
