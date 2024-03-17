@@ -3252,6 +3252,7 @@
   # project/violations/edit
   form_violations_help: Check the Observations to be removed, then Submit
   violations_index_title: "[:CONSTRAINT_VIOLATIONS]"
+  form_violations_remove_selected: Remove Selected
   form_violations_show_project: Show Project
 
   # users/by_name

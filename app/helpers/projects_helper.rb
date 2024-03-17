@@ -35,7 +35,7 @@ module ProjectsHelper
 
   def violations_submit_text(project)
     if project.violations_removable_by_current_user?
-      :SUBMIT.l
+      :form_violations_remove_selected.l
     else
       :form_violations_show_project.l
     end
