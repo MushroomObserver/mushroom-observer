@@ -496,7 +496,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_09_072017) do
     t.integer "project_id", null: false
   end
 
-  create_table "project_members", charset: "utf8mb3", force: :cascade do |t|
+  create_table "project_members", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "project_id"
     t.integer "user_id"
     t.datetime "created_at", null: false
@@ -654,7 +654,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_09_072017) do
     t.boolean "meta", default: false
   end
 
-  create_table "user_stats", charset: "utf8mb3", force: :cascade do |t|
+  create_table "user_stats", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "user_id", default: 0, null: false
     t.integer "comments", default: 0, null: false
     t.integer "images", default: 0, null: false
@@ -677,8 +677,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_09_072017) do
     t.string "languages"
     t.string "bonuses"
     t.string "checklist"
-    t.datetime "created_at", default: "2024-03-09 22:56:06", null: false
-    t.datetime "updated_at", default: "2024-03-09 22:56:06", null: false
+    t.datetime "created_at", default: "2024-03-17 02:18:23", null: false
+    t.datetime "updated_at", default: "2024-03-17 02:18:23", null: false
     t.index ["user_id"], name: "user_index"
   end
 

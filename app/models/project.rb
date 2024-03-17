@@ -19,6 +19,10 @@
 #  title::          Title string.
 #  summary::        Summary of purpose.
 #  open_membership  Enable users to add themselves, disable shared editing
+#  location::
+#  image::
+#  start_date::     start date or nil
+#  end_date::       end date or nil
 #
 #  == Methods
 #
@@ -29,8 +33,9 @@
 #  current?::       Project (based on dates) has started and hasn't ended
 #  user_can_add_observation?:: Can user add observation to this Project
 #  violates_constraints?:: Does a given obs violate the Project constraints
-#  text_name::      Alias for +title+ for debugging.
-#  Proj.can_edit?:: Check if User has permission to edit an Obs/Image/etc.
+#  count_violations    # of project Observations which violate constraints
+#  text_name::         Alias for +title+ for debugging.
+#  Proj.can_edit?::    Check if User has permission to edit an Obs/Image/etc.
 #  Proj.admin_power?:: Check for admin for a project of this Obs
 #
 #  ==== Logging
@@ -379,6 +384,18 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     Checklist::ForProject.new(self).num_taxa
   end
 
+  def violations
+    out_of_range_observations.to_a.union(out_of_area_observations)
+  end
+
+  # Is at least one violation removable by the current user?
+  def violations_removable_by_current_user?
+    user_ids = violations.map(&:user_id)
+    return false unless user_ids.any?
+
+    admin_group_user_ids.union(user_ids).include?(User.current_id)
+  end
+
   ##############################################################################
   #
   #  :section: queries re related Observations
@@ -426,6 +443,16 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
       violates_date_range?(observation)
   end
 
+  def violates_location?(observation)
+    return false if location.blank?
+
+    !location.found_here?(observation)
+  end
+
+  def violates_date_range?(observation)
+    !(start_date..end_date).cover?(observation.when)
+  end
+
   private ###############################
 
   def obs_geoloc_outside_project_location
@@ -443,32 +470,5 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
                  # This is safe (doesn't invert observations.where(lat: nil))
                  invert_where
       )
-  end
-
-  def violates_location?(observation)
-    return false if location.blank?
-
-    !location.found_here?(observation)
-  end
-
-  def violates_date_range?(observation)
-    excluded_from_date_range?(observation)
-  end
-
-  def excluded_from_date_range?(observation)
-    !included_in_date_range?(observation)
-  end
-
-  def included_in_date_range?(observation)
-    starts_no_later_than?(observation) &&
-      ends_no_earlier_than?(observation)
-  end
-
-  def starts_no_later_than?(observation)
-    !start_date&.after?(observation.when)
-  end
-
-  def ends_no_earlier_than?(observation)
-    !end_date&.before?(observation.when)
   end
 end
