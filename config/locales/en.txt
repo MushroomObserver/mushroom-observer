@@ -1008,6 +1008,8 @@
   user_stats_species_lists: "[:SPECIES_LISTS]"
   user_stats_users: ""
   user_stats_votes: "[:VOTES]"
+  user_stats_translation_strings: "[:TRANSLATIONS] Authored"
+  user_stats_languages: "[:TRANSLATIONS] By Language"
 
   # Site statistics field names.
   site_stats_comments: "[:COMMENTS]"
@@ -1031,7 +1033,7 @@
   site_stats_sequenced_observations: Sequenced Observations
   site_stats_species_list_entries: "[:SPECIES_LIST] Entries"
   site_stats_species_lists: "[:SPECIES_LISTS]"
-  site_stats_users: Members
+  site_stats_users: Users
   site_stats_votes: "[:VOTES]"
 
   # Vote descriptions.

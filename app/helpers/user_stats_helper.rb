@@ -3,28 +3,33 @@
 # Helpers for user view
 module UserStatsHelper
   # Rows are roughly in decreasing order of importance.
-  def user_stats_rows(show_user, user_data)
+  def user_stats_rows(user_stats)
     rows = []
-    SiteData.user_fields_with_weight.each_key do |field|
+    return rows unless user_stats
+
+    UserStats.fields_with_weight.each_key do |field|
       rows << {
         field: field,
         label: :"user_stats_#{field}".t,
-        count: (count = user_data[field].to_i),
-        weight: (weight = SiteData::ALL_FIELDS[field][:weight]),
+        count: (count = user_stats[field].to_i),
+        weight: (weight = UserStats::ALL_FIELDS[field][:weight]),
         points: count * weight
       }
     end
 
-    # Add bonuses for translations.
-    user_data&.[](:languages_itemized)&.each do |lang, score|
-      rows << {
-        label: :show_user_language_contribution.t(name: lang.name),
-        points: score.to_i
-      }
+    # Show a breakdown of translations
+    if user_stats[:languages]
+      lang_name_by_locale = Language.pluck(:locale, :name).to_h
+      user_stats[:languages].each do |locale, count|
+        rows << {
+          label: lang_name_by_locale[locale],
+          count: count
+        }
+      end
     end
 
     # Add bonuses at the bottom.
-    show_user&.bonuses&.each do |points, reason|
+    user_stats&.bonuses&.each do |points, reason|
       rows << {
         label: reason.to_s.t,
         points: points.to_i

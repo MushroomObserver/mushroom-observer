@@ -144,7 +144,7 @@ class Location < AbstractModel
        Location::Version.where(
          location_id: ver.location_id, user_id: ver.user_id
        ).count.zero?
-      SiteData.update_contribution(:add, :location_versions)
+      UserStats.update_contribution(:add, :location_versions)
     end
   end
 
@@ -747,7 +747,7 @@ class Location < AbstractModel
     # Update contributions for editors.
     editors.delete(old_loc.user_id)
     editors.uniq.each do |user_id|
-      SiteData.update_contribution(:del, :location_versions, user_id)
+      UserStats.update_contribution(:del, :location_versions, user_id)
     end
 
     # Finally destroy the location.

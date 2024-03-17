@@ -1136,7 +1136,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_flash_success
     assert_redirected_to(name_path(authored_name.id))
     assert(Name.exists?(name.id))
-    assert_equal(old_contribution + SiteData::ALL_FIELDS[:names][:weight],
+    assert_equal(old_contribution + UserStats::ALL_FIELDS[:names][:weight],
                  rolf.reload.contribution)
   end
 

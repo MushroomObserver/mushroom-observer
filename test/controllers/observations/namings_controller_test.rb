@@ -90,7 +90,7 @@ module Observations
       assert_not_equal(old_name, nam.text_name)
       assert_not(nam.name.deprecated)
       assert_equal(
-        old_contribution + (SiteData::ALL_FIELDS[:names][:weight] * 2) + 2,
+        old_contribution + (UserStats::ALL_FIELDS[:names][:weight] * 2) + 2,
         rolf.reload.contribution
       )
     end
