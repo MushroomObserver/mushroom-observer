@@ -212,17 +212,17 @@ class AbstractModel < ApplicationRecord
   end
 
   # This is called just after an object is created.
-  # 1) It passes off to SiteData, where it will decide whether this affects a
+  # 1) It passes off to UserStats, where it will decide whether this affects a
   #    user's contribution score, and if so update it appropriately.
   # 2) It finishes attaching the new RssLog if one exists.
   after_create :update_contribution
   def update_contribution
-    SiteData.update_contribution(:add, self)
+    UserStats.update_contribution(:add, self)
     attach_rss_log_final_step if has_rss_log?
   end
 
   # This is called just before an object's changes are saved.
-  # 1) It passes off to SiteData, where it will decide whether this affects a
+  # 1) It passes off to UserStats, where it will decide whether this affects a
   #    user's contribution score, and if so update it appropriately.
   # 2) It updates 'updated_at' whenever a record changes.
   # 3) It saves a message to the RssLog.
@@ -231,7 +231,7 @@ class AbstractModel < ApplicationRecord
   # either of these things.
   before_update :do_log_update
   def do_log_update
-    SiteData.update_contribution(:chg, self)
+    UserStats.update_contribution(:chg, self)
     autolog_updated if has_rss_log? && !@save_without_our_callbacks
   end
 
@@ -241,13 +241,13 @@ class AbstractModel < ApplicationRecord
   # end
 
   # This is called just before an object is destroyed.
-  # 1) It passes off to SiteData, where it will decide whether this affects a
+  # 1) It passes off to UserStats, where it will decide whether this affects a
   #    user's contribution score, and if so update it appropriately.
   # 2) It orphans the old RssLog if it had one.
   # 3) It also saves the id in case we needed to know what the id was later on.
   before_destroy :do_log_destroy
   def do_log_destroy
-    SiteData.update_contribution(:del, self)
+    UserStats.update_contribution(:del, self)
     autolog_destroyed if has_rss_log? && rss_log.present?
     @id_was = id
   end

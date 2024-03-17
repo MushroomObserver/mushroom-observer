@@ -258,6 +258,8 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
        _suffix: :filenames,
        _default: "toss"
 
+  has_one :user_stats, dependent: :destroy
+
   has_many :api_keys, dependent: :destroy
   has_many :comments
   has_many :donations

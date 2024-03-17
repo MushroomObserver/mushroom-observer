@@ -1153,13 +1153,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Callback that updates a User's contribution after adding an Observation to
   # a SpeciesList.
   def add_spl_callback(_obs)
-    SiteData.update_contribution(:add, :species_list_entries, user_id)
+    UserStats.update_contribution(:add, :species_list_entries, user_id)
   end
 
   # Callback that updates a User's contribution after removing an Observation
   # from a SpeciesList.
   def remove_spl_callback(_obs)
-    SiteData.update_contribution(:del, :species_list_entries, user_id)
+    UserStats.update_contribution(:del, :species_list_entries, user_id)
   end
 
   # Callback that logs an Observation's destruction on all of its

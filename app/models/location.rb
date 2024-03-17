@@ -67,6 +67,9 @@
 #  parse_longitude::    Validate and parse longitude from a string.
 #  parse_altitude::     Validate and parse altitude from a string.
 #  found_here?::        Was the given obs found here?
+#  contains?(lt, ln)::  Does Location contain the given latititude and longitude
+#  contains_lat?
+#  contains_long?
 #
 #  ==== Name methods
 #  display_name::       +name+ reformated based on user's preference.
@@ -144,7 +147,7 @@ class Location < AbstractModel
        Location::Version.where(
          location_id: ver.location_id, user_id: ver.user_id
        ).count.zero?
-      SiteData.update_contribution(:add, :location_versions)
+      UserStats.update_contribution(:add, :location_versions)
     end
   end
 
@@ -296,11 +299,15 @@ class Location < AbstractModel
   end
 
   def contains?(lat, long)
-    (lat <= north) && (lat >= south) && contains_longitude(long)
+    contains_lat?(lat) && contains_long?(long)
   end
 
-  def contains_longitude(long)
-    return (long >= west) && (long <= east) if west <= east
+  def contains_lat?(lat)
+    (south..north).cover?(lat)
+  end
+
+  def contains_long?(long)
+    return (west...east).cover?(long) if west <= east
 
     (long >= west) || (long <= east)
   end
@@ -747,7 +754,7 @@ class Location < AbstractModel
     # Update contributions for editors.
     editors.delete(old_loc.user_id)
     editors.uniq.each do |user_id|
-      SiteData.update_contribution(:del, :location_versions, user_id)
+      UserStats.update_contribution(:del, :location_versions, user_id)
     end
 
     # Finally destroy the location.

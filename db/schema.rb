@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_07_020000) do
+ActiveRecord::Schema[7.1].define(version: 2024_03_09_072017) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -496,7 +496,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_07_020000) do
     t.integer "project_id", null: false
   end
 
-  create_table "project_members", charset: "utf8mb3", force: :cascade do |t|
+  create_table "project_members", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "project_id"
     t.integer "user_id"
     t.datetime "created_at", null: false
@@ -652,6 +652,34 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_07_020000) do
     t.datetime "created_at", precision: nil
     t.datetime "updated_at", precision: nil
     t.boolean "meta", default: false
+  end
+
+  create_table "user_stats", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "user_id", default: 0, null: false
+    t.integer "comments", default: 0, null: false
+    t.integer "images", default: 0, null: false
+    t.integer "location_description_authors", default: 0, null: false
+    t.integer "location_description_editors", default: 0, null: false
+    t.integer "locations", default: 0, null: false
+    t.integer "location_versions", default: 0, null: false
+    t.integer "name_description_authors", default: 0, null: false
+    t.integer "name_description_editors", default: 0, null: false
+    t.integer "names", default: 0, null: false
+    t.integer "name_versions", default: 0, null: false
+    t.integer "namings", default: 0, null: false
+    t.integer "observations", default: 0, null: false
+    t.integer "sequences", default: 0, null: false
+    t.integer "sequenced_observations", default: 0, null: false
+    t.integer "species_list_entries", default: 0, null: false
+    t.integer "species_lists", default: 0, null: false
+    t.integer "translation_strings", default: 0, null: false
+    t.integer "votes", default: 0, null: false
+    t.string "languages"
+    t.string "bonuses"
+    t.string "checklist"
+    t.datetime "created_at", default: "2024-03-17 02:18:23", null: false
+    t.datetime "updated_at", default: "2024-03-17 02:18:23", null: false
+    t.index ["user_id"], name: "user_index"
   end
 
   create_table "users", id: :integer, charset: "utf8mb3", force: :cascade do |t|
