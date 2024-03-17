@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Name::Format
-  GROUP_ADD_ON_MATCHER = / #{Name::Parse::GROUP_ABBR}/
+  GROUP_AT_END_OF_TEXT_NAME = / #{Name::Parse::GROUP_ABBR}$/
   # When we `include` a module, the way to add class methods is like this:
   def self.included(base)
     base.extend(ClassMethods)
@@ -82,8 +82,7 @@ module Name::Format
   end
 
   def sensu_stricto
-    # sub(/ #{Name::Parse::GROUP_ABBR}/, "")
-    text_name.sub(GROUP_ADD_ON_MATCHER, "")
+    text_name.sub(GROUP_AT_END_OF_TEXT_NAME, "")
   end
 
   # Is this the "unknown" name?

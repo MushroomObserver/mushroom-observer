@@ -14,8 +14,9 @@ PUNCTUATION = '[ -\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]'
 class AutoComplete
   attr_accessor :string, :matches
 
-  class_attribute :limit
-  self.limit = 1000
+  def limit
+    1000
+  end
 
   def self.subclass(type)
     "AutoComplete::For#{type.camelize}".constantize

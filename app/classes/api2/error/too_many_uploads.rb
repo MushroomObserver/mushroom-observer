@@ -2,6 +2,6 @@
 
 class API2
   # Request supplied too many uploads.
-  class TooManyUploads < Error
+  class TooManyUploads < FatalError
   end
 end

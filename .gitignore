@@ -34,8 +34,14 @@ coverage
 # Ignore VS Code config
 .vscode
 
-# Ignore master key for decrypting credentials and more.
+# Ignore sensitive config stuff.
 /config/master.key
-
+/config/newrelic.yml
 /config/credentials/production.key
-checkpoint_stripped.gz
+
+# This is created by a cronjob, not checked in.
+public/name_list_data.js
+
+# DB snapshots are often lying about, don't want them accidentally checked in.
+checkpoint*
+db/checkpoint*

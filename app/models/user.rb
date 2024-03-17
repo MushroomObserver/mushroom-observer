@@ -198,7 +198,7 @@
 #  crypt_password::     Password attribute is encrypted
 #                       before object is created.
 #
-class User < AbstractModel
+class User < AbstractModel # rubocop:disable Metrics/ClassLength
   require "digest/sha1"
 
   # enum definitions for use by simple_enum gem
@@ -257,6 +257,8 @@ class User < AbstractModel
        },
        _suffix: :filenames,
        _default: "toss"
+
+  has_one :user_stats, dependent: :destroy
 
   has_many :api_keys, dependent: :destroy
   has_many :comments
@@ -328,6 +330,9 @@ class User < AbstractModel
   # Encrypt password before saving the first time.  (Subsequent modifications
   # go through +change_password+.)
   before_create :crypt_password
+
+  before_update :update_image_copyright_holder
+  before_update :expire_caches_of_associated_observations
 
   # Ensure that certain default values are symbols (rather than strings)
   # might only be an issue for test environment?
@@ -482,6 +487,22 @@ class User < AbstractModel
     return nil if old_legal_name == new_legal_name
 
     [old_legal_name, new_legal_name]
+  end
+
+  # TODO: Move this to an ActiveJob, once we get jobs going - AN 20240220
+  # This can be fairly expensive if the user has a lot of images
+  def update_image_copyright_holder
+    return unless legal_name_change
+
+    Image.update_copyright_holder(*legal_name_change, self)
+  end
+
+  # EXPIRE CACHES OF OBS WITH CHANGED USER LOGINS
+  # "touch" the updated_at column of all observations with the changed login
+  def expire_caches_of_associated_observations
+    return unless name_changed? || login_changed?
+
+    Observation.where(user_id: id).touch_all
   end
 
   ##############################################################################
@@ -737,6 +758,21 @@ class User < AbstractModel
       split(",").map(&:squish).compact_blank
   end
 
+  def self.cull_unverified_users(dry_run: false)
+    ids = User.where(verified: nil, created_at: ..1.month.ago).pluck(:id)
+    return [] if ids.blank?
+
+    unless dry_run
+      ids.each do |id|
+        UserGroup.one_user(id)&.destroy
+      end
+      UserGroupUser.where(user_id: ids).delete_all
+      User.where(id: ids).delete_all
+    end
+
+    ["Deleted #{ids.count} unverified user(s)."]
+  end
+
   # Erase all references to a given user (by id).  Missing:
   # 1) *Text* references, e.g., RssLog entries refering to their login.
   # 2) Image votes.
@@ -751,21 +787,21 @@ class User < AbstractModel
   PUBLIC_REFERENCES = [
     [:herbaria,                       :personal_user_id],
     [:location_descriptions,          :user_id],
-    [:location_descriptions_versions, :user_id],
+    [:location_description_versions,  :user_id],
     [:locations,                      :user_id],
-    [:locations_versions,             :user_id],
+    [:location_versions,              :user_id],
     [:name_descriptions,              :user_id],
     [:name_descriptions,              :reviewer_id],
-    [:name_descriptions_versions,     :user_id],
+    [:name_description_versions,      :user_id],
     [:names,                          :user_id],
-    [:names_versions,                 :user_id],
+    [:name_versions,                  :user_id],
     # Leave projects, because they're intertwined with descriptions too much.
     [:projects,                       :user_id],
     # Leave votes and namings, because I don't want to recalc consensuses.
     [:namings,                        :user_id],
     [:projects,                       :user_id],
     [:translation_strings,            :user_id],
-    [:translation_strings_versions,   :user_id],
+    [:translation_string_versions,    :user_id],
     [:votes,                          :user_id]
   ].freeze
 
@@ -841,7 +877,7 @@ class User < AbstractModel
     [:donations,                      :user_id],
     [:external_links,                 :user_id],
     [:glossary_terms,                 :user_id],
-    [:glossary_terms_versions,        :user_id],
+    [:glossary_term_versions,         :user_id],
     [:herbaria,                       :personal_user_id],
     [:herbarium_curators,             :user_id],
     [:herbarium_records,              :user_id],

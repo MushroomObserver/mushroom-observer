@@ -2663,6 +2663,11 @@ class NameTest < UnitTestCase
                    "Boletus#{str}",
                    "Name ss should include `#{str}` if it's part of the genus")
     end
+
+    # start of the epithet matches a `group` abbreviation ("gr")
+    name = Name.new(text_name: "Leptonia gracilipes")
+
+    assert_equal(name.text_name, name.sensu_stricto)
   end
 
   # --------------------------------------
@@ -3254,10 +3259,10 @@ class NameTest < UnitTestCase
     names(:lichen).merge(old_name)
 
     assert_equal(
-      old_contribution - SiteData::FIELD_WEIGHTS[:names_versions],
+      old_contribution - UserStats::ALL_FIELDS[:name_versions][:weight],
       user.reload.contribution,
       "Merging a Name edited by a user should reduce user's contribution " \
-      "by #{SiteData::FIELD_WEIGHTS[:names_versions]}"
+      "by #{UserStats::ALL_FIELDS[:name_versions][:weight]}"
     )
   end
 

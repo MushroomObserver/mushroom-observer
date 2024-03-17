@@ -143,6 +143,28 @@ past_project:
   start_date: <%= Time.zone.today - 1.year %>
   end_date: <%= Time.zone.today - 1.month %>
 
+no_start_date_project:
+  <<: *DEFAULTS
+  location: albion
+  user: roy
+  user_group: burbank_users
+  admin_group: burbank_admins
+  open_membership: true
+  start_date: nil
+  end_date: <%= Time.zone.yesterday %>
+  observations: reused_observation
+
+no_end_date_project:
+  <<: *DEFAULTS
+  location: albion
+  user: roy
+  user_group: burbank_users
+  admin_group: burbank_admins
+  open_membership: true
+  start_date: <%= Time.zone.tomorrow %>
+  end_date: nil
+  observations: reused_observation
+
 future_project:
   <<: *DEFAULTS
   user: roy
@@ -198,3 +220,16 @@ rolf_project:
   user: rolf
   admin_group: rolf_only
   user_group: katrina_only
+
+# includes observations that violate date and or location constraints
+
+# members: roy
+falmouth_2023_09_project:
+  <<: *DEFAULTS
+  user: dick
+  admin_group: dick_only
+  user_group: falmouth_2023_09_users
+  start_date: 2023-09-01
+  end_date: 2023-09-30
+  location: falmouth
+  observations: brett_woods_2023_09_obs, falmouth_2023_09_obs, falmouth_2022_obs, nybg_2023_09_obs # roy (non-admin) owns nybg_2023_09_obs

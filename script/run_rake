@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-cd /var/web/mushroom-observer
-
-ruby_version=$(cat /var/web/mushroom-observer/.ruby-version)
-source /usr/local/rvm/environments/ruby-$ruby_version
-
-rake $* -f /var/web/mushroom-observer/Rakefile | \
-  grep -v '(in /home/' | grep -v '^\*\* '

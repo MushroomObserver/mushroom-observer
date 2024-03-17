@@ -244,6 +244,7 @@
   comment: comment
   COMMENTS: Comments
   comments: comments
+  CONSTRAINTS: Constraints
   CONTRIBUTORS: Contributors
   DESCRIPTION: Description
   description: description
@@ -461,6 +462,8 @@
   confidence_level: confidence level
   CONFIDENCE_LEVELS: Confidence Levels
   confidence_levels: confidence levels
+  CONSTRAINT_VIOLATIONS: Constraint Violations
+  constraint_violations: constraint violations
   COPYRIGHT_HOLDER: Copyright Holder
   copyright_holder: copyright holder
   COPYRIGHT_HOLDERS: Copyright Holders
@@ -493,6 +496,7 @@
   full_name: full name
   FULL_NAMES: Full Names
   full_names: full names
+  hidden: hidden
   ICN_ID: ICN Identifier
   icn_id: ICN Identifier
   ID: ID
@@ -993,11 +997,11 @@
   user_stats_location_description_authors: "[:LOCATION_DESCRIPTIONS] Authored"
   user_stats_location_description_editors: "[:LOCATION_DESCRIPTIONS] Edited"
   user_stats_locations: "[:LOCATIONS] Created"
-  user_stats_locations_versions: "[:LOCATIONS] Edited"
+  user_stats_location_versions: "[:LOCATIONS] Edited"
   user_stats_name_description_authors: "[:NAME_DESCRIPTIONS] Authored"
   user_stats_name_description_editors: "[:NAME_DESCRIPTIONS] Edited"
   user_stats_names: "[:NAMES] Created"
-  user_stats_names_versions: "[:NAMES] Edited"
+  user_stats_name_versions: "[:NAMES] Edited"
   user_stats_namings: Proposed IDs
   user_stats_observations: "[:OBSERVATIONS]"
   user_stats_observations_with_voucher: Observations with Specimen, Notes and Images
@@ -1008,6 +1012,8 @@
   user_stats_species_lists: "[:SPECIES_LISTS]"
   user_stats_users: ""
   user_stats_votes: "[:VOTES]"
+  user_stats_translation_strings: "[:TRANSLATIONS] Authored"
+  user_stats_languages: "[:TRANSLATIONS] By Language"
 
   # Site statistics field names.
   site_stats_comments: "[:COMMENTS]"
@@ -1017,11 +1023,11 @@
   site_stats_location_description_authors: Authored [:LOCATION_DESCRIPTIONS]
   site_stats_location_description_editors: ""
   site_stats_locations: Defined [:LOCATIONS]
-  site_stats_locations_versions: ""
+  site_stats_location_versions: ""
   site_stats_name_description_authors: Authored [:NAME_DESCRIPTIONS]
   site_stats_name_description_editors: ""
   site_stats_names: ""
-  site_stats_names_versions: ""
+  site_stats_name_versions: ""
   site_stats_namings: Proposed IDs
   site_stats_observations: "[:OBSERVATIONS]"
   site_stats_observations_with_voucher: Observations with Full Data
@@ -1031,7 +1037,7 @@
   site_stats_sequenced_observations: Sequenced Observations
   site_stats_species_list_entries: "[:SPECIES_LIST] Entries"
   site_stats_species_lists: "[:SPECIES_LISTS]"
-  site_stats_users: Members
+  site_stats_users: Users
   site_stats_votes: "[:VOTES]"
 
   # Vote descriptions.
@@ -2131,6 +2137,7 @@
   show_name_icn_id_missing: missing
   google_name_search: Google Search
   index_fungorum: Index Fungorum
+  index_fungorum_search: Index Fungorum search page
   index_fungorum_web_search: Index Fungorum web search
   mycobank: MycoBank
   mycobank_search: MycoBank search
@@ -3177,6 +3184,13 @@
   change_user_bonuses: Award Bonus
   change_user_bonuses_help: "List one bonus per line, each specifying a number of points and reason, like this:\n\n10000 German translations\n50000 Expert in hypogeous fungi\n\n\nThese will appear on the show_user page below the usual contribution scores. Keep the reasons short or it might mess up the formatting of the table on that page."
 
+  # observer/refresh_vote_cache
+  refresh_vote_cache: Refreshed vote caches.
+
+  # observer/send_feature_email
+  send_feature_email_success: Delivered feature mail.
+  send_feature_email_denied: Only the admin can send feature mail.
+
   # project/destroy_project
   destroy_project_failed: Failed to destroy project.
   destroy_project_success: Project destroyed.
@@ -3200,16 +3214,12 @@
   form_projects_ignore_date_range: Ignore above dates
   form_projects_use_date_range: Use above dates
 
-
   # project/list_projects
   list_projects_title: "[:list_objects(type=:project)]"
   list_projects_add_project: "[:add_object(type=:project)]"
 
   # draft/publish_draft
   publish_draft_denied: "Permission denied: Only the creator of a draft or a project admin can publish a draft."
-
-  # observer/refresh_vote_cache
-  refresh_vote_cache: Refreshed vote caches.
 
   # project/review_authors
   review_authors_add_author: Add
@@ -3220,10 +3230,6 @@
   review_authors_other_users: Other [:users]
   review_authors_remove_author: Remove
   review_authors_title: Reviewing Author(s) for [name]
-
-  # observer/send_feature_email
-  send_feature_email_success: Delivered feature mail.
-  send_feature_email_denied: Only the admin can send feature mail.
 
   # project/show_project
   show_project_add_members: Add Members
@@ -3242,6 +3248,12 @@
   show_project_title: "Project: [title]"
   show_project_user_group: User Group
   show_project_violation_count: Project has [count] constraint violation(s)
+
+  # project/violations/edit
+  form_violations_help: Check the Observations to be removed, then Submit
+  violations_index_title: "[:CONSTRAINT_VIOLATIONS]"
+  form_violations_remove_selected: Remove Selected
+  form_violations_show_project: Show Project
 
   # users/by_name
   users_by_name_title: Users by Name
@@ -3588,7 +3600,7 @@
 
   # ERROR MESSAGES
 
-  kick_out_message: "We have noticed a lot of server-intensive traffic from this IP address (#{request.remote_ip}). There may be better ways of doing what you are trying to do. Please contact the webmaster ([email]) so that we can talk about it. So that we can best help you, please:\n- include a copy of this message;\n- tell how you generally use Mushroom Observer;\n- tell us what you were doing when you received this message."
+  kick_out_message: "We have noticed a lot of server-intensive traffic from this IP address ([ip]). There may be better ways of doing what you are trying to do. Please contact the webmaster ([email]) so that we can talk about it. So that we can best help you, please:\n- include a copy of this message;\n- tell how you generally use Mushroom Observer;\n- tell us what you were doing when you received this message."
 
   unsuccessful_contributor_warning: Thanks for wanting to contribute to the Mushroom Observer. This type of contribution can only be made by users who have provided at least one observation to the system.
 
@@ -3622,7 +3634,7 @@
   validate_user_email_missing: Please give us a valid email address so we can verify your [:account].
   validate_user_email_mismatch: Your email addresses don't match.  Please check for a typo.
   validate_user_login_taken: Sorry, that login name is already taken.
-  validate_image_wrong_type: The file "[file]" is not a valid image; it is comes through as '[type]'.
+  validate_image_wrong_type: The file "[file]" is not a valid image; it comes through as '[type]'.
   validate_invalid_lifeform: "Invalid lifeform word(s): [words].  We are strictly enforcing which types are allowed.  If you would like us to add support to additional lifeforms, please contact the admins and make your case."
 
   # These shouldn't need translating, but you are free to override if you need to.

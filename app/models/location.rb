@@ -8,7 +8,7 @@
 #
 #  == Version
 #
-#  Changes are kept in the "locations_versions" table using
+#  Changes are kept in the "location_versions" table using
 #  ActiveRecord::Acts::Versioned.
 #
 #  == Attributes
@@ -67,6 +67,9 @@
 #  parse_longitude::    Validate and parse longitude from a string.
 #  parse_altitude::     Validate and parse altitude from a string.
 #  found_here?::        Was the given obs found here?
+#  contains?(lt, ln)::  Does Location contain the given latititude and longitude
+#  contains_lat?
+#  contains_long?
 #
 #  ==== Name methods
 #  display_name::       +name+ reformated based on user's preference.
@@ -89,7 +92,7 @@
 #  notify_users::       After save: send email notification.
 #
 ################################################################################
-#
+# rubocop:disable Metrics/ClassLength
 class Location < AbstractModel
   require "acts_as_versioned"
 
@@ -108,7 +111,6 @@ class Location < AbstractModel
   has_many :users        # via profile location
 
   acts_as_versioned(
-    table_name: "locations_versions",
     if_changed: %w[
       name
       north
@@ -145,7 +147,7 @@ class Location < AbstractModel
        Location::Version.where(
          location_id: ver.location_id, user_id: ver.user_id
        ).count.zero?
-      SiteData.update_contribution(:add, :locations_versions)
+      UserStats.update_contribution(:add, :location_versions)
     end
   end
 
@@ -199,8 +201,13 @@ class Location < AbstractModel
   }
 
   # Let attached observations update their cache if these fields changed.
+  # Also touch updated_at to expire obs fragment caches
   def update_observation_cache
-    Observation.update_cache("location", "where", id, name) if name_changed?
+    return unless name_changed?
+
+    Observation.where(location_id: id).update_all(
+      { where: name, updated_at: Time.zone.now }
+    )
   end
 
   ##############################################################################
@@ -292,11 +299,15 @@ class Location < AbstractModel
   end
 
   def contains?(lat, long)
-    (lat <= north) && (lat >= south) && contains_longitude(long)
+    contains_lat?(lat) && contains_long?(long)
   end
 
-  def contains_longitude(long)
-    return (long >= west) && (long <= east) if west <= east
+  def contains_lat?(lat)
+    (south..north).cover?(lat)
+  end
+
+  def contains_long?(long)
+    return (west...east).cover?(long) if west <= east
 
     (long >= west) || (long <= east)
   end
@@ -743,7 +754,7 @@ class Location < AbstractModel
     # Update contributions for editors.
     editors.delete(old_loc.user_id)
     editors.uniq.each do |user_id|
-      SiteData.update_contribution(:del, :locations_versions, user_id)
+      UserStats.update_contribution(:del, :location_versions, user_id)
     end
 
     # Finally destroy the location.
@@ -847,3 +858,4 @@ class Location < AbstractModel
     end
   end
 end
+# rubocop:enable Metrics/ClassLength

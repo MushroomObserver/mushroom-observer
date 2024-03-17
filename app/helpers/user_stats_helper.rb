@@ -3,31 +3,33 @@
 # Helpers for user view
 module UserStatsHelper
   # Rows are roughly in decreasing order of importance.
-  def user_stats_rows(show_user, user_data)
+  def user_stats_rows(user_stats)
     rows = []
-    # omit sequence stuff because it has no weight
-    (SiteData::ALL_FIELDS -
-    SiteData::SITE_WIDE_FIELDS -
-    [:sequences, :sequenced_observations]).each do |field|
+    return rows unless user_stats
+
+    UserStats.fields_with_weight.each_key do |field|
       rows << {
         field: field,
         label: :"user_stats_#{field}".t,
-        count: (count = user_data[field].to_i),
-        weight: (weight = SiteData::FIELD_WEIGHTS[field]),
+        count: (count = user_stats[field].to_i),
+        weight: (weight = UserStats::ALL_FIELDS[field][:weight]),
         points: count * weight
       }
     end
 
-    # Add bonuses for translations.
-    user_data&.[](:languages_itemized)&.each do |lang, score|
-      rows << {
-        label: :show_user_language_contribution.t(name: lang.name),
-        points: score.to_i
-      }
+    # Show a breakdown of translations
+    if user_stats[:languages]
+      lang_name_by_locale = Language.pluck(:locale, :name).to_h
+      user_stats[:languages].each do |locale, count|
+        rows << {
+          label: lang_name_by_locale[locale],
+          count: count
+        }
+      end
     end
 
     # Add bonuses at the bottom.
-    show_user&.bonuses&.each do |points, reason|
+    user_stats&.bonuses&.each do |points, reason|
       rows << {
         label: reason.to_s.t,
         points: points.to_i
@@ -58,13 +60,13 @@ module UserStatsHelper
       [:location_description_editors,
        location_descriptions_path(by_editor: user.id)],
       [:locations, locations_path(by_user: user.id)],
-      [:locations_versions, locations_path(by_editor: user.id)],
+      [:location_versions, locations_path(by_editor: user.id)],
       [:name_description_authors,
        name_descriptions_path(by_author: user.id)],
       [:name_description_editors,
        name_descriptions_path(by_editor: user.id)],
       [:names, names_path(by_user: user.id)],
-      [:names_versions, names_path(by_editor: user.id)],
+      [:name_versions, names_path(by_editor: user.id)],
       [:observations, observations_path(user: user.id)],
       [:species_lists, species_lists_path(by_user: user.id)],
       [:life_list, checklist_path(id: user.id)]

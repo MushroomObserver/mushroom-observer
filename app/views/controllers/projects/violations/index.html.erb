@@ -1,0 +1,25 @@
+<%
+  add_page_title(:violations_index_title.t)
+  @container = :wide
+%>
+
+<%= tag.h4(:PROJECT.l + ": " + link_to_object(@project)) %>
+
+<%= help_block(:div, violations_help_text(@project)) %>
+
+<%= form_with(
+      model: @project, url: project_violations_path, method: :put,
+      id: "project_violations_form"
+    ) do |form| %>
+  <div>
+    <%=
+      make_table(
+        headers: violation_table_headers(@project),
+        rows: violation_table_rows(
+          form: form, project: @project, violations: @violations
+        )
+      )
+    %>
+  </div>
+  <%= form.submit(violations_submit_text(@project)) %>
+<% end %>

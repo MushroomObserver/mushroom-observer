@@ -2,6 +2,6 @@
 
 class API2
   # Tried to update name of more than one location at once.
-  class TryingToSetMultipleLocationsToSameName < Error
+  class TryingToSetMultipleLocationsToSameName < FatalError
   end
 end

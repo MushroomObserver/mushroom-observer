@@ -58,8 +58,8 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
     login!(rolf)
 
     within("#navigation") do
-      assert_link("Help Identify")
-      click_on("Help Identify")
+      assert_link(id: "nav_identify_observations_link")
+      click_link(id: "nav_identify_observations_link")
     end
     assert_selector("body.identify__index")
 

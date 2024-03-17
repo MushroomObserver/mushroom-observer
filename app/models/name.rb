@@ -100,7 +100,7 @@
 #
 #  == Version
 #
-#  Changes are kept in the "names_versions" table using
+#  Changes are kept in the "name_versions" table using
 #  ActiveRecord::Acts::Versioned.
 #
 #  == Attributes
@@ -391,7 +391,6 @@ class Name < AbstractModel
   has_many :observations
 
   acts_as_versioned(
-    table_name: "names_versions",
     if_changed: %w[
       rank
       text_name
@@ -421,10 +420,6 @@ class Name < AbstractModel
     "locked"
   )
 
-  before_create :inherit_stuff
-  before_update :update_observation_cache
-  after_update :notify_users
-
   validates :icn_id, numericality: { allow_nil: true,
                                      only_integer: true,
                                      greater_than_or_equal_to: 1 }
@@ -436,15 +431,11 @@ class Name < AbstractModel
   validate :author_ending
   validate :citation_start
 
-  # Notify webmaster that a new name was created.
-  after_create do |name|
-    user = User.current || User.admin
-    QueuedEmail::Webmaster.create_email(
-      sender_email: user.email,
-      subject: "#{user.login} created #{name.real_text_name}",
-      content: "#{MO.http_domain}/names/#{name.id}"
-    )
-  end
+  before_create :inherit_stuff
+  after_create :notify_webmaster
+
+  before_update :update_observation_cache
+  after_update :notify_users
 
   # Used by name/_form_name.rhtml
   attr_accessor :misspelling
@@ -460,7 +451,7 @@ class Name < AbstractModel
     if (ver.version != 1) &&
        Name::Version.where(name_id: ver.name_id,
                            user_id: ver.user_id).none?
-      SiteData.update_contribution(:add, :names_versions)
+      UserStats.update_contribution(:add, :name_versions)
     end
   end
 
@@ -684,6 +675,31 @@ class Name < AbstractModel
       :versions
     )
   }
+
+  # This is called before a name is created to let us populate things like
+  # classification and lifeform from the parent (if infrageneric only).
+  def inherit_stuff
+    return unless accepted_genus
+
+    self.classification ||= accepted_genus.classification
+    self.lifeform       ||= accepted_genus.lifeform
+  end
+
+  # Let attached observations update their cache if these fields changed.
+  # Also, `touch` if it changes the obs name and should invalidate HTML
+  # caches of the observation.
+  def update_observation_cache
+    touch_cases = text_name_changed? || author_changed? || deprecated_changed?
+    no_touch_cases = lifeform_changed? || classification_changed?
+    return unless touch_cases || no_touch_cases
+
+    updates = {}
+    updates[:updated_at] = Time.zone.now if touch_cases && !no_touch_cases
+    updates[:lifeform] = lifeform if lifeform_changed?
+    updates[:text_name] = text_name if text_name_changed?
+    updates[:classification] = classification if classification_changed?
+    Observation.where(name_id: id).update_all(updates) if updates.present?
+  end
 
   def <=>(other)
     sort_name <=> other.sort_name

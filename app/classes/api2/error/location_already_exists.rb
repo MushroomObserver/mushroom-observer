@@ -2,7 +2,7 @@
 
 class API2
   # Tried to create/rename a location over top of an existing one.
-  class LocationAlreadyExists < Error
+  class LocationAlreadyExists < FatalError
     def initialize(str)
       super()
       args.merge!(location: str.to_s)
