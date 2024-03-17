@@ -2,6 +2,6 @@
 
 class API2
   # Request includes an unexpected upload.
-  class UnexpectedUpload < Error
+  class UnexpectedUpload < FatalError
   end
 end

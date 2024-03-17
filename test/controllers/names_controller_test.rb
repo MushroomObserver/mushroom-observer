@@ -649,9 +649,15 @@ class NamesControllerTest < FunctionalTestCase
       "'#{:show_name_icn_id_missing.l}' note"
     )
     assert_select(
+      "#nomenclature a:match('href',?)",
+      /#{index_fungorum_search_page_url}/,
+      { count: 1 },
+      "Nomenclature section is missing a link to IF search page"
+    )
+    assert_select(
       "#nomenclature a[href='#{index_fungorum_name_web_search_url(name)}']",
       true,
-      "Nomenclature section is missing a link to Index Fungorum search"
+      "Nomenclature section is missing a link to Index Fungorum web search"
     )
     assert_select(
       "#nomenclature a:match('href',?)", /#{mycobank_name_search_url(name)}/,
@@ -680,9 +686,15 @@ class NamesControllerTest < FunctionalTestCase
 
     # but it makes sense to link to search pages in fungal registries
     assert_select(
+      "#nomenclature a:match('href',?)",
+      /#{index_fungorum_search_page_url}/,
+      { count: 1 },
+      "Nomenclature section should have link to IF search page"
+    )
+    assert_select(
       "#nomenclature a[href='#{index_fungorum_name_web_search_url(name)}']",
       true,
-      "Nomenclature section is missing a link to Index Fungorum search"
+      "Nomenclature section is missing a link to Index Fungorum web search"
     )
     assert_select(
       "#nomenclature a:match('href',?)", /#{mycobank_basic_search_url}/,
@@ -1124,7 +1136,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_flash_success
     assert_redirected_to(name_path(authored_name.id))
     assert(Name.exists?(name.id))
-    assert_equal(old_contribution + SiteData::ALL_FIELDS[:names][:weight],
+    assert_equal(old_contribution + UserStats::ALL_FIELDS[:names][:weight],
                  rolf.reload.contribution)
   end
 

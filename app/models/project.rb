@@ -381,7 +381,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def name_count
-    Checklist::ForProject.new(self).num_names
+    Checklist::ForProject.new(self).num_taxa
   end
 
   def violations

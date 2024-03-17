@@ -2,6 +2,6 @@
 
 class API2
   # Must supply both latitude and longitude, can't leave one out.
-  class LatLongMustBothBeSet < Error
+  class LatLongMustBothBeSet < FatalError
   end
 end

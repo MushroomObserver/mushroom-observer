@@ -66,6 +66,11 @@ module Tabs
 
     # Show name panels:
     # Nomenclature tabs
+    def index_fungorum_search_page_tab
+      [:index_fungorum_search.l, index_fungorum_search_page_url,
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
     def index_fungorum_record_tab(name)
       ["[##{name.icn_id}]", index_fungorum_record_url(name.icn_id),
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]

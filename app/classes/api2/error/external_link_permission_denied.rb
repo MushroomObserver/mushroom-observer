@@ -2,6 +2,6 @@
 
 class API2
   # Request to post external link requires certain permissions.
-  class ExternalLinkPermissionDenied < Error
+  class ExternalLinkPermissionDenied < FatalError
   end
 end

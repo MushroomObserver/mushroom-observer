@@ -2,6 +2,6 @@
 
 class API2
   # Missing request method.
-  class MissingMethod < Error
+  class MissingMethod < FatalError
   end
 end
