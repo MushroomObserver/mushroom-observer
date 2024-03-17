@@ -386,7 +386,7 @@ export default class extends Controller {
 
       if (x > 0) {
         author_el.classList.add("normal")
-        author_el.innerHTML = this.escapeHTML(name.substr(x + 1))
+        author_el.innerHTML = this.escapeHTML(" " + name.substr(x + 1))
         name = name.substr(0, x)
       }
 
