@@ -390,8 +390,10 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Is at least one violation removable by the current user?
   def violations_removable_by_current_user?
-    admin_group_user_ids.union(violations.map(&:user_id)).
-      include?(User.current_id)
+    user_ids = violations.map(&:user_id)
+    return false unless user_ids.any?
+
+    admin_group_user_ids.union(user_ids).include?(User.current_id)
   end
 
   ##############################################################################
