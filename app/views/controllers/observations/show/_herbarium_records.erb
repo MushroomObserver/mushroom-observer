@@ -11,7 +11,7 @@ query = Query.lookup(:HerbariumRecord, :all, observations: obs.id)
 <%=
 unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
 
-  tag.turbo_frame(
+  tag.div(
     id: "observation_herbarium_records",
     class: "obs-herbarium",
     data: { controller: "section-update",

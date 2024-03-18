@@ -10,7 +10,7 @@ obs_id = obs.id
 <%=
 unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
 
-  tag.turbo_frame(
+  tag.div(
     id: "observation_collection_numbers",
     class: "obs-collection",
     data: { controller: "section-update",
