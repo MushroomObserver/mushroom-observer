@@ -451,7 +451,9 @@ export default class extends Controller {
       }
     }
     this.CURSOR['species'] = null
-    this.current_species.push.apply(this.current_species, list)
+    // if you wanted to merge the arrays:
+    // this.current_species.push.apply(this.current_species, list)
+    this.current_species = list
     this.drawColumn('species', this.current_species)
     this.scrollToCursorIn('species')
   }
