@@ -59,7 +59,8 @@ module Tabs
 
       [tag.i(c_n.format_name.t),
        collection_number_path(id: c_n.id, q: q_id),
-       { class: "#{tab_id(__method__.to_s)}_#{c_n.id}" }]
+       { class: "#{tab_id(__method__.to_s)}_#{c_n.id}",
+         data: { turbo_frame: "_top" }}]
     end
 
     def collection_number_mod_tabs(c_n)
