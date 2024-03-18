@@ -55,10 +55,12 @@ module Tabs
 
     def show_collection_number_tab(c_n, obs)
       cn_query = Query.lookup(:CollectionNumber, :all, observations: obs.id)
+      q_id = cn_query.id&.alphabetize
 
       [tag.i(c_n.format_name.t),
-       collection_number_path(id: c_n.id, q: cn_query),
-       { class: "#{tab_id(__method__.to_s)}_#{c_n.id}" }]
+       collection_number_path(id: c_n.id, q: q_id),
+       { class: "#{tab_id(__method__.to_s)}_#{c_n.id}",
+         data: { turbo_frame: "_top" } }]
     end
 
     def collection_number_mod_tabs(c_n)
