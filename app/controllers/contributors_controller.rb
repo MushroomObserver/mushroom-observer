@@ -6,6 +6,9 @@ class ContributorsController < ApplicationController
 
   # Contributors index
   def index
-    @users = User.by_contribution.where(contribution: 1..)
+    query = create_query(:User, :with_contribution, by: :contribution)
+    args = { action: :index, matrix: true, include: [:image] }
+
+    show_index_of_objects(query, args)
   end
 end
