@@ -6,7 +6,7 @@ add_page_title(account_welcome_title(@user))
   <%= :welcome_note.tp %>
   <%= button_to(:app_logout.t,
                 account_logout_path,
-                { class: "btn", id: "nav_user_logout_link" }) %>
+                { class: "btn btn-default", id: "nav_user_logout_link" }) %>
 <% else %>
   <%= :welcome_no_user_note.tp %>
 <% end %>
