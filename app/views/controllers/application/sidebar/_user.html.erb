@@ -2,18 +2,13 @@
   [
     tag.i("", class: "glyphicon glyphicon-user"),
     tag.span(h(@user.login), class: "ml-2"),
-    tag.span(class: "pull-right") do
-      link_to(:app_logout.t, account_logout_path, id: "nav_user_logout_link")
+    tag.span(class: "pull-left") do
+      button_to(:app_logout.t,
+                account_logout_path,
+                { class: "btn", id: "nav_user_logout_link" })
     end
   ].safe_join
 end %>
-<%# active_link_to(:app_your_observations.t,
-                   observations_path(user: @user.id),
-                   class: classes[:indent],
-                   id: "nav_your_observations_link") %>
-<%# active_link_to(:app_your_lists.t, species_lists_path(by_user: @user.id),
-                   class: classes[:indent],
-                   id: "nav_your_species_lists_link") %>
 <%= active_link_to(:app_comments_for_you.t,
                    comments_path(for_user: @user.id),
                    class: class_names(classes[:indent], classes[:mobile_only]),

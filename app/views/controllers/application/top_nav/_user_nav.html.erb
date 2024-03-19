@@ -67,16 +67,18 @@
                       edit_account_preferences_path,
                       { class: "", id: "user_drop_preferences_link" }) %></li>
       <li class="divider"></li>
-      <li><%= link_to(:app_logout.t,
-                      account_logout_path,
-                      { class: "", id: "user_drop_logout_link" }) %></li>
+      <li><%= button_to(
+                :app_logout.t,
+                account_logout_path,
+                { class: "btn li_button", id: "user_drop_logout_link" }
+              ) %><li>
     </ul>
   </li>
-  <li><%= link_to("",
-                  account_logout_path,
-                  { class: "glyphicon glyphicon-log-out",
-                    id: "user_nav_logout_link",
-                    title: :app_logout.t,
-                    data: { toggle: "tooltip", placement: "bottom" } }) %>
-  </li>
+  <li><%= button_to(
+            "",
+            account_logout_path,
+            { class: "btn btn-glyphicon-only glyphicon glyphicon-log-out",
+              id: "user_nav_logout_link",
+              title: :app_logout.t }
+          ) %></li>
 </ul>
