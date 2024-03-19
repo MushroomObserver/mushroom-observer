@@ -20,6 +20,10 @@ export default class extends Controller {
   // Send the vote submit on change (action on select calls this)
   // Pauses the UI and shows the progress modal, because it takes time.
   sendVote() {
+    // Remove the modal
+    document.getElementById(
+      'modal_naming_votes_' + this.element.dataset.namingId
+    ).remove();
     // console.log("Sending Vote")
     // console.log("Pausing UI")
     document.getElementById('mo_ajax_progress_caption').innerHTML =
