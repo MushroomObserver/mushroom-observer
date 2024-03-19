@@ -51,10 +51,11 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
     # This should only be accessible if logged in.
     first(:link, text: "Preferences").click
+
     assert_selector("body.preferences__edit")
 
     # Log out and try again.
-    first(:link, text: "Logout").click
+    first(:button, text: "Logout").click
     assert_selector("body.login__logout")
     assert_no_link(text: "Preferences")
     visit("/account/preferences/edit")
@@ -113,7 +114,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     visit("/")
     assert_selector("#user_drop_down")
     links = find_all("#user_drop_down a")
-    assert_equal(8, links.length)
+    assert_equal(7, links.length)
   end
 
   # ----------------------------
@@ -223,9 +224,9 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("body.verifications__new")
 
     # They should be logged in now.
-    assert_link(:app_logout.t)
+    assert_button(:app_logout.t)
     # Log out. (must use id, there are multiple links)
-    click_link(id: "nav_user_logout_link")
+    click_button(id: "nav_user_logout_link")
     assert_no_link(:app_logout.t)
 
     # Try to use that verification code again. No can do
