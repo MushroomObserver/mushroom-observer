@@ -277,8 +277,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     get("signup", to: "/account#new") # alternate path
 
     resource :login, only: [:new, :create], controller: "login"
-    unresourced_login_gets = %w[email_new_password logout test_autologin].freeze
+    unresourced_login_gets = %w[email_new_password test_autologin].freeze
     unresourced_login_gets.each { |action| get(action, controller: "login") }
+    post("logout", controller: "login")
     post("new_password_request", controller: "login")
 
     resource :preferences, only: [:edit, :update]
