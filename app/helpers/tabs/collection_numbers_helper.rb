@@ -54,10 +54,11 @@ module Tabs
     end
 
     def show_collection_number_tab(c_n, obs)
+      # This is passed in to show_collection_number, allowing users to do prev,
+      # next and index from there to navigate through all the rest for this obs.
       cn_query = Query.lookup(:CollectionNumber, :all, observations: obs.id)
 
-      [tag.i(c_n.format_name.t),
-       collection_number_path(id: c_n.id, q: cn_query),
+      [tag.i(c_n.format_name.t), add_query_param(c_n.show_link_args, cn_query),
        { class: "#{tab_id(__method__.to_s)}_#{c_n.id}" }]
     end
 

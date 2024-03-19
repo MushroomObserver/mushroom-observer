@@ -3249,9 +3249,12 @@
   show_project_user_group: User Group
   show_project_violation_count: Project has [count] constraint violation(s)
 
-  # project/violations/edit
+  # project/violations/index
   form_violations_help: Check the Observations to be removed, then Submit
   violations_index_title: "[:CONSTRAINT_VIOLATIONS]"
+  form_violations_latitude_none: "Lat: Any"
+  form_violations_location_none: "[:LOCATION]: Any"
+  form_violations_longitude_none: "Lon: Any"
   form_violations_remove_selected: Remove Selected
   form_violations_show_project: Show Project
 

@@ -134,6 +134,28 @@ module Projects
       )
     end
 
+    def test_index_project_without_location
+      project = projects(:unlimited_project)
+      assert_nil(project.location, "Test need Project lacking a Location")
+      user = project.user
+
+      login(user.login)
+      get(:index, params: { project_id: project.id })
+
+      assert_select(
+        "#project_violations_form",
+        { text: /#{:form_violations_latitude_none.l}/ }
+      )
+      assert_select(
+        "#project_violations_form",
+        { text: /#{:form_violations_longitude_none.l}/ }
+      )
+      assert_select(
+        "#project_violations_form",
+        { text: /#{:form_violations_location_none.l}/ }
+      )
+    end
+
     def test_update
       project = projects(:falmouth_2023_09_project)
       violations = project.violations

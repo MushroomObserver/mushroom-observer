@@ -202,6 +202,7 @@ unlimited_project:
   <<: *DEFAULTS
   start_date: nil
   end_date: nil
+  location: nil
   observations: peltigera_obs, agaricus_campestris_obs, boletus_edulis_obs
 
 pinned_date_range_project:
@@ -222,7 +223,6 @@ rolf_project:
   user_group: katrina_only
 
 # includes observations that violate date and or location constraints
-
 # members: roy
 falmouth_2023_09_project:
   <<: *DEFAULTS
