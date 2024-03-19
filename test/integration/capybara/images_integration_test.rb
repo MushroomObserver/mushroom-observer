@@ -29,7 +29,7 @@ class ImagesIntegrationTest < CapybaraIntegrationTestCase
     visit(edit_image_path(img.id)) # nope
     assert_selector("body.images__show")
 
-    logout
+    first(:button, text: :app_logout.l).click
     login!("mary")
     visit(image_path(img.id))
     assert_selector("a[href*='#{edit_image_path(img.id)}']", minimum: 1)
@@ -37,7 +37,7 @@ class ImagesIntegrationTest < CapybaraIntegrationTestCase
     visit(edit_image_path(img.id))
     assert_selector("body.images__edit")
 
-    logout
+    first(:button, text: :app_logout.l).click
     login!("dick")
     visit(image_path(img.id))
     assert_selector("a[href*='#{edit_image_path(img.id)}']", minimum: 1)
