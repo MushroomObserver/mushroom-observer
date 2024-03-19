@@ -55,7 +55,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("body.preferences__edit")
 
     # Log out and try again.
-    first(:button, text: "Logout").click
+    first(:button, text: :app_logout.l).click
     assert_selector("body.login__logout")
     assert_no_link(text: "Preferences")
     visit("/account/preferences/edit")
@@ -239,8 +239,10 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       fill_in("user_password", with: "Hagrid_24!")
       click_commit
     end
-    # They should still be able to log in ok.
-    assert_link(:app_logout.t)
+
+    # They should still be able to login (with a button, not a link)
+    assert_button(:app_logout.l)
+    assert_no_link(:app_logout.l)
   end
 
   def test_correct_invalid_preferences
