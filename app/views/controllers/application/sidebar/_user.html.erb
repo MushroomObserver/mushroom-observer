@@ -1,14 +1,14 @@
 <%= tag.div("", class: class_names(classes[:item], classes[:mobile_only])) do
   [
     tag.i("", class: "glyphicon glyphicon-user"),
-    tag.span(h(@user.login), class: "ml-2"),
-    tag.span(class: "pull-left") do
-      button_to(:app_logout.t,
-                account_logout_path,
-                { class: "btn", id: "nav_user_logout_link" })
-    end
+    tag.span(h(@user.login), class: "ml-2")
   ].safe_join
 end %>
+<%= button_to(:app_logout.t,
+              account_logout_path,
+              { class: class_names("btn", "btn-link", classes[:indent],
+                                   classes[:mobile_only]),
+                id: "nav_user_logout_link" }) %>
 <%= active_link_to(:app_comments_for_you.t,
                    comments_path(for_user: @user.id),
                    class: class_names(classes[:indent], classes[:mobile_only]),
