@@ -241,7 +241,7 @@ module Observations
           case params[:context]
           when "lightgallery", "matrix_box"
             render(partial: "observations/namings/update_matrix_box",
-                   locals: { obs: obs })
+                   locals: { obs: @observation })
           else
             redirect_to_obs(@observation)
           end
