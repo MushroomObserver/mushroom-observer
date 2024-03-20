@@ -53,7 +53,7 @@ module Observations
       @observation = Observation.show_includes.find(params[:observation_id])
       @naming = naming_from_params
       # N+1: What is this doing? Watch out for check_permission!
-      return default_redirect(@observation) unless check_permission!(@naming)
+      return redirect_to_obs(@observation) unless check_permission!(@naming)
 
       init_edit_ivars
       @consensus = Observation::NamingConsensus.new(@observation)
@@ -70,14 +70,14 @@ module Observations
       @observation = Observation.show_includes.find(params[:observation_id])
       @naming = naming_from_params
       # N+1: What is this doing? Watch out for check_permission!
-      return default_redirect(@observation) unless check_permission!(@naming)
+      return redirect_to_obs(@observation) unless check_permission!(@naming)
 
       @consensus = Observation::NamingConsensus.new(@observation)
       @vote = @consensus.owners_vote(@naming)
 
       if can_update?
         need_new_naming? ? create_new_naming : change_naming
-        respond_to_successful_update
+        redirect_to_obs(@observation)
       else
         add_reasons(params.dig(:naming, :reasons))
         respond_to_form_errors
@@ -92,16 +92,7 @@ module Observations
         flash_notice(:runtime_destroy_naming_success.t(id: params[:id].to_s))
       end
 
-      respond_to do |format|
-        format.turbo_stream do
-          # Reload after delete
-          (obs, consensus, owner_name) = locals_for_update_observation
-          render(partial: "observations/namings/update_observation",
-                 locals: { obs: obs, consensus: consensus,
-                           owner_name: owner_name }) and return
-        end
-        format.html { default_redirect(@observation) }
-      end
+      redirect_to_obs(@observation)
     end
 
     #########
@@ -165,9 +156,8 @@ module Observations
       end
     end
 
-    def default_redirect(obs, action = :show)
-      redirect_with_query(controller: "/observations",
-                          action: action, id: obs.id)
+    def redirect_to_obs(obs)
+      redirect_with_query(obs.show_link_args)
     end
 
     ##########################################################################
@@ -248,19 +238,16 @@ module Observations
     def respond_to_successful_create
       respond_to do |format|
         format.turbo_stream do
-          (obs, consensus, owner_name) = locals_for_update_observation
           case params[:context]
           when "lightgallery", "matrix_box"
             render(partial: "observations/namings/update_matrix_box",
                    locals: { obs: obs })
           else
-            render(partial: "observations/namings/update_observation",
-                   locals: { obs: obs, consensus: consensus,
-                             owner_name: owner_name })
+            redirect_to_obs(@observation)
           end
           return
         end
-        format.html { default_redirect(@observation, :show) }
+        format.html { redirect_to_obs(@observation) }
       end
     end
 
@@ -335,18 +322,6 @@ module Observations
 
     def add_reasons(reasons)
       @reasons = @naming.init_reasons(reasons)
-    end
-
-    def respond_to_successful_update
-      respond_to do |format|
-        format.turbo_stream do
-          (obs, consensus, owner_name) = locals_for_update_observation
-          render(partial: "observations/namings/update_observation",
-                 locals: { obs: obs, consensus: consensus,
-                           owner_name: owner_name }) and return
-        end
-        format.html { default_redirect(@observation) }
-      end
     end
 
     # Define local_assigns for the update_observation partial
