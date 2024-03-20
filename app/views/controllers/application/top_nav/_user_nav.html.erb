@@ -70,15 +70,16 @@
       <li><%= button_to(
                 :app_logout.t,
                 account_logout_path,
-                { class: "btn btn-link li_button", id: "user_drop_logout_link" }
+                { class: "btn btn-link", id: "user_drop_logout_link" }
               ) %><li>
     </ul>
   </li>
   <li><%= button_to(
-            "",
             account_logout_path,
-            { class: "btn btn-glyphicon-only glyphicon glyphicon-log-out",
+            { class: "btn btn-link navbar-btn",
               id: "user_nav_logout_link",
               title: :app_logout.t }
-          ) %></li>
+          ) do
+            tag.span("", class: "glyphicon glyphicon-log-out")
+          end %></li>
 </ul>
