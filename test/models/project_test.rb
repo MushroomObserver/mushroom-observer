@@ -160,6 +160,13 @@ class ProjectTest < UnitTestCase
     assert_equal(expect, project.in_range_observations.count)
   end
 
+  def test_out_of_area_observations
+    project = projects(:falmouth_2023_09_project)
+    assert_equal(2, project.out_of_area_observations.size)
+
+    assert_empty(projects(:unlimited_project).out_of_area_observations)
+  end
+
   def test_place_name
     proj = projects(:eol_project)
     loc = locations(:albion)

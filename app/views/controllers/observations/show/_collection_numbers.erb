@@ -1,16 +1,12 @@
 <%
 numbers  = obs.collection_numbers
 can_edit = in_admin_mode? || obs.can_edit?
-obs_id = obs.id
-# This is passed in to show_collection_number, allowing users to do prev,
-# next and index from there to navigate through all the rest for this obs.
-# cn_query = Query.lookup(:CollectionNumber, :all, observations: obs.id)
 %>
 
 <%=
 unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
 
-  tag.turbo_frame(
+  tag.div(
     id: "observation_collection_numbers",
     class: "obs-collection",
     data: { controller: "section-update",

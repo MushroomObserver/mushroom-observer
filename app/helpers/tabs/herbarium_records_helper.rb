@@ -10,7 +10,7 @@ module Tabs
       if obs.present?
         links = [
           object_return_tab(obs),
-          new_herbarium_record_tab
+          new_herbarium_record_tab(obs)
         ]
       end
       links << new_herbarium_tab
@@ -67,15 +67,19 @@ module Tabs
       links << nonpersonal_herbaria_index_tab
     end
 
-    def show_herbarium_record_tab(h_r)
+    def show_herbarium_record_tab(h_r, obs)
+      # This is passed in to show_herbarium_record, allowing users to do prev,
+      # next and index from there to navigate through all the rest for this obs.
+      hr_query = Query.lookup(:HerbariumRecord, :all, observations: obs.id)
+
       [h_r.accession_at_herbarium.t,
-       herbarium_record_path(id: h_r.id, q: get_query_param),
+       add_query_param(h_r.show_link_args, hr_query),
        { class: "#{tab_id(__method__.to_s)}_#{h_r.id}" }]
     end
 
-    def new_herbarium_record_tab
+    def new_herbarium_record_tab(obs)
       [:create_herbarium_record.l,
-       new_herbarium_record_path(observation_id: params[:id]),
+       add_query_param(new_herbarium_record_path(observation_id: obs.id)),
        { class: tab_id(__method__.to_s), icon: :add }]
     end
 
