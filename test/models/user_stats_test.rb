@@ -80,6 +80,39 @@ class UserStatsTest < UnitTestCase
     assert_equal(mary.votes.size, mary_stats.votes)
   end
 
+  def test_refresh_all_user_stats_dry_run
+    old_rolf_stats = user_stats(:rolf)
+    assert_equal(0, old_rolf_stats.comments)
+    assert_equal(0, old_rolf_stats.images)
+    assert_equal(0, old_rolf_stats.locations)
+    assert_equal(0, old_rolf_stats.names)
+    assert_equal(0, old_rolf_stats.name_description_authors)
+    assert_equal(0, old_rolf_stats.name_description_editors)
+    assert_equal(0, old_rolf_stats.name_versions)
+    assert_equal(0, old_rolf_stats.namings)
+    assert_equal(0, old_rolf_stats.observations)
+    assert_equal(0, old_rolf_stats.species_lists)
+    assert_equal(0, old_rolf_stats.votes)
+
+    # UserStats.refresh_all_user_stats
+    # rolf_stats = UserStats.find_by(user_id: rolf.id)
+
+    UserStats.refresh_all_user_stats(dry_run: true)
+    new_rolf_stats = UserStats.find_by(user_id: rolf.id)
+
+    assert_equal(0, new_rolf_stats.comments)
+    assert_equal(0, new_rolf_stats.images)
+    assert_equal(0, new_rolf_stats.locations)
+    assert_equal(0, new_rolf_stats.names)
+    assert_equal(0, new_rolf_stats.name_description_authors)
+    assert_equal(0, new_rolf_stats.name_description_editors)
+    assert_equal(0, new_rolf_stats.name_versions)
+    assert_equal(0, new_rolf_stats.namings)
+    assert_equal(0, new_rolf_stats.observations)
+    assert_equal(0, new_rolf_stats.species_lists)
+    assert_equal(0, new_rolf_stats.votes)
+  end
+
   # def test_two_tiered_observation_scoring
   #   score = rolf.contribution
   #
