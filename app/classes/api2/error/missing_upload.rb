@@ -2,6 +2,6 @@
 
 class API2
   # Request requires upload.
-  class MissingUpload < Error
+  class MissingUpload < FatalError
   end
 end

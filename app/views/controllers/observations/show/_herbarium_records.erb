@@ -2,16 +2,12 @@
 records = obs.herbarium_records
 can_add = in_admin_mode? || obs.can_edit? ||
           @user && @user.curated_herbaria.any?
-obs_id = obs.id
-# This is passed in to show_herbarium_record, allowing users to do prev,
-# next and index from there to navigate through all the rest for this obs.
-query = Query.lookup(:HerbariumRecord, :all, observations: obs.id)
 %>
 
 <%=
 unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
 
-  tag.turbo_frame(
+  tag.div(
     id: "observation_herbarium_records",
     class: "obs-herbarium",
     data: { controller: "section-update",
@@ -25,7 +21,8 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
             "#{:Herbarium_records.t}:",
             [ # any html helper has to be safe_joined separately
               "[",
-              modal_link_to("herbarium_record", *new_herbarium_record_tab),
+              modal_link_to("herbarium_record",
+                            *new_herbarium_record_tab(obs)),
               "]"
             ].safe_join
           ].safe_join(" ")
@@ -33,7 +30,7 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
         tag.ul(class: "tight-list") do
           records.map do |record|
             tag.li(id: "herbarium_record_#{record.id}") do
-              concat(link_to(*show_herbarium_record_tab(record)))
+              concat(link_to(*show_herbarium_record_tab(record, obs)))
               if record.can_edit? || in_admin_mode?
                 concat(
                   [
@@ -60,7 +57,7 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
         end,
         tag.ul(class: "tight-list") do
           records.map do |record|
-            tag.li { link_to(*show_herbarium_record_tab(record)) }
+            tag.li { link_to(*show_herbarium_record_tab(record, obs)) }
           end.safe_join
         end
       ].safe_join(" ")
@@ -69,7 +66,8 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
       [
         :show_observation_no_herbarium_records.t,
         " [",
-        modal_link_to("herbarium_record", *new_herbarium_record_tab),
+        modal_link_to("herbarium_record",
+                      *new_herbarium_record_tab(obs)),
         "]"
       ].safe_join
     end

@@ -26,6 +26,7 @@ WorkingDirectory=/var/web/mo
 
 PIDFile=/var/web/mo/tmp/puma.pid
 Environment=RAILS_ENV=production
+Environment=RUBY_MANAGER=chruby
 # Helpful for debugging socket activation, etc.
 # Environment=PUMA_DEBUG=1
 
@@ -41,7 +42,7 @@ Environment=RAILS_ENV=production
 # Variant: Specify directives inline.
 # ExecStart=/<FULLPATH>/puma -b tcp://0.0.0.0:9292 -b ssl://0.0.0.0:9293?key=key.pem&cert=cert.pem
 
-ExecStart=/var/web/mo/bin/puma
+ExecStart=/var/web/mo/bin/run bundle exec puma -e production -C ./config/puma.rb config.ru
 ExecReload=/bin/kill -s $MAINPID
 ExecStop=/bin/kill -s QUIT $MAINPID
 

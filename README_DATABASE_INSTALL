@@ -86,7 +86,7 @@ root> service mysql restart
 remote> mysqladmin --protocol=tcp -u mo -p'$DB_PASSWORD' --host=$DB_HOST ping
 remote> vi /var/web/mo/config/database.yml
   production:
-    adapter:  mysql2
+    adapter:  trilogy
     database: mo_production
     host:     $DB_HOST
     username: mo

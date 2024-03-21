@@ -16,7 +16,7 @@ create procedure createUser(username varchar(50), pw varchar(50))
 begin
 IF (SELECT EXISTS(SELECT 1 FROM `mysql`.`user` WHERE `user` = username)) = 0 THEN
     begin
-    set @sql = CONCAT('CREATE USER ', username, '@\'localhost\' IDENTIFIED BY \'', pw, '\'');
+    set @sql = CONCAT('CREATE USER ', username, '@\'localhost\' IDENTIFIED WITH mysql_native_password BY \'', pw, '\'');
     prepare stmt from @sql;
     execute stmt;
     deallocate prepare stmt;

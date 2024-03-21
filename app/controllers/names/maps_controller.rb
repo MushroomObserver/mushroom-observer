@@ -13,7 +13,7 @@ module Names
 
       @query = create_query(:Observation, :all, names: @name.id)
       apply_content_filters(@query)
-      @observations = @query.results(include: :location).
+      @observations = @query.results(include: :location, limit: 10_000).
                       select { |o| o.lat || o.location }
     end
   end

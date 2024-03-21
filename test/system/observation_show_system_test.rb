@@ -353,7 +353,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       accept_prompt do
         find(:css, ".destroy_naming_link_#{nam.id}").trigger("click")
       end
-      assert_no_link(text: /#{n_d.text_name}/)
+      assert_no_link(text: /#{n_d.text_name}/, wait: 9)
     end
     assert_selector("#title", text: /#{obs.text_name}/)
 

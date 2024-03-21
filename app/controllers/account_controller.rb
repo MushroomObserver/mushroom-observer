@@ -128,8 +128,8 @@ class AccountController < ApplicationController
   def bogus_email?
     BOGUS_EMAILS.match?(@new_user.email) ||
       # Spammer using variations of "b.l.izk.o.ya.n201.7@gmail.com\r\n"
-      @new_user.email.remove(".").include?("blizkoyan") ||
-      @new_user.email.count(".") > 5
+      @new_user.email.to_s.remove(".").include?("blizkoyan") ||
+      @new_user.email.to_s.count(".") > 5
   end
 
   def bogus_login?

@@ -2,7 +2,7 @@
 
 class API2
   # Upload didn't make it.
-  class ImageUploadFailed < Error
+  class ImageUploadFailed < FatalError
     def initialize(img)
       super()
       args.merge!(error: img.dump_errors)

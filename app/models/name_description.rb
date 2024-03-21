@@ -5,7 +5,7 @@
 #
 #  == Version
 #
-#  Changes are kept in the "name_descriptions_versions" table using
+#  Changes are kept in the "name_description_versions" table using
 #  ActiveRecord::Acts::Versioned.
 #
 #  == Attributes
@@ -37,7 +37,7 @@
 #  refs::             (V) References
 #
 #  ('V' indicates that this attribute is versioned in
-#  name_descriptions_versions table.)
+#  name_description_versions table.)
 #
 #  == Class Methods
 #
@@ -132,7 +132,6 @@ class NameDescription < Description
   ).freeze
 
   acts_as_versioned(
-    table_name: "name_descriptions_versions",
     if_changed: ALL_NOTE_FIELDS,
     association_options: { dependent: :nullify }
   )

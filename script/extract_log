@@ -1,0 +1,66 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+app_root = File.expand_path("..", __dir__)
+
+HELP_ARGS = ["-h", "--help"].freeze
+abort(<<HELP) if ARGV.any? { |arg| HELP_ARGS.include?(arg) }
+
+  USAGE::
+
+    script/extract_log <string>
+      --or--
+    grep errors log/production.log | script/extract_log
+
+  DESCRIPTION::
+
+    Locates the given string or strings in the log, pulls all of the related
+    log messages and prints the results.
+
+  PARAMETERS::
+
+    --help     Print this message.
+    <string>   String to search for.
+
+HELP
+
+# Get search string(s) from command line or from stdin.
+# rubocop:disable Style/NumericPredicate
+# rubocop:disable Style/ZeroLengthPredicate
+strings = ARGV.length > 0 ? ARGV : readlines
+# rubocop:enable Style/NumericPredicate
+# rubocop:enable Style/ZeroLengthPredicate
+
+bundles = {} # accumulates de-interlaced lines for each request
+found = {}   # strings we have found
+pid = nil    # pid of last line
+
+def print_match(bundle, strings, found)
+  strings.each do |string|
+    if bundle.join.include?(string)
+      found[string] = true
+      puts(bundle.map { |line| line.sub(/^[A-Z], \[[^\[\]]*\]  /, "") }.join)
+    end
+  end
+end
+
+file = "#{app_root}/log/production.log"
+File.open(file).readlines.each do |line|
+  match = line.match(/#(\d+)/)
+  pid = match[1] if match
+  if line.match?(/: Started [A-Z]{3,}/)
+    bundle = bundles[pid]
+    print_match(bundle, strings, found) if bundle
+    bundles[pid] = []
+  end
+  bundles[pid] ||= []
+  bundles[pid] << line
+end
+bundles.each_value do |bundle|
+  print_match(bundle, strings, found)
+end
+
+strings.each do |str|
+  puts "Unable to find: #{str}\n" unless found[str]
+end
+exit(1)

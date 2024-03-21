@@ -1,10 +1,6 @@
 <%
 sequences = obs.sequences
 can_edit  = in_admin_mode? || obs.can_edit?
-
-# This is passed in to show_sequence, allowing users to do prev,
-# next and index from there to navigate through all the rest for this obs.
-query = Query.lookup(:Sequence, :all, observations: obs.id)
 %>
 
 <% unless @user.try(&:hide_specimen_stuff?) ||
@@ -28,25 +24,11 @@ query = Query.lookup(:Sequence, :all, observations: obs.id)
     concat(tag.ul(class:"tight-list") do
       sequences.each do |sequence|
         concat(tag.li(id: "sequence_#{sequence.id}") do
-          locus = sequence.locus.truncate(sequence.locus_width)
-          if sequence.deposit?
-            concat(link_to(
-              "#{locus} - #{sequence.archive} ##{sequence.accession}".t,
-              add_query_param(sequence.show_link_args, query),
-              class: "show_sequence_link_#{sequence.id}"
-            ))
-          else
-            concat(link_to(
-              "#{locus} - MO ##{sequence.id}".t,
-              add_query_param(sequence.show_link_args, query),
-              class: "show_sequence_link_#{sequence.id}"
-            ))
-          end
+          concat(link_to(*show_sequence_tab(sequence, obs)))
 
           links = []
           if sequence.deposit?
-            links << link_to(:show_observation_archive_link.t,
-                             sequence.accession_url, target: "_blank")
+            links << link_to(*sequence_archive_tab(sequence))
           end
           if in_admin_mode? || sequence.can_edit?(@user)
             links << modal_link_to(
@@ -61,8 +43,7 @@ query = Query.lookup(:Sequence, :all, observations: obs.id)
             )
           end
           if sequence.blastable?
-            links << link_to(:show_observation_blast_link.t,
-                            sequence.blast_url, target: "_blank")
+            links << link_to(*sequence_blast_tab(sequence))
           end
           concat(" [#{links.safe_join(' | ')}]".html_safe) if links.any?
         end)
