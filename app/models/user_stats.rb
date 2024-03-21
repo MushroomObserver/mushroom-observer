@@ -183,7 +183,7 @@ class UserStats < ApplicationRecord
     # until all records have a value for each column except id and user_id.
     # At the end, we find the existing user_stats record id by user_id, and
     # add in the id and user_id, and update all records at once.
-    def refresh_all_user_stats
+    def refresh_all_user_stats(dry_run: false)
       create_user_stats_for_all_users_without
       # `entries` are { user_id: hash_of_attributes }
       # This method fills out the columns for each user_id where not zero.
@@ -222,7 +222,11 @@ class UserStats < ApplicationRecord
 
       # At this point all these hashes have a user_stats.id and a user_id.
       # It's safe to assume they correspond to existing user_stats records.
-      UserStats.upsert_all(entries.values)
+      UserStats.upsert_all(entries.values) unless dry_run
+
+      msgs = ["UserStats updated for #{entries.size} users."]
+      msgs << "Dry run: no changes made." if dry_run
+      msgs.join(" ")
     end
 
     private
