@@ -48,8 +48,6 @@ gem("turbo-rails")
 gem("redis", "~> 4.0")
 # solid_cache for cache store db
 gem("solid_cache")
-# Compile SCSS for stylesheets
-gem("sassc-rails")
 # add locale to cache key
 gem("cache_with_locale")
 
@@ -57,6 +55,8 @@ gem("cache_with_locale")
 # Delete this dependency declaration if the issue gets resolved:
 # https://github.com/hotwired/stimulus-rails/issues/108
 gem("sprockets", "~>4.2.1")
+# Compile SCSS for stylesheets
+gem("dartsass-sprockets")
 
 gem("date")
 gem("loofah")
