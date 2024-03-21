@@ -94,9 +94,6 @@ class UserStatsTest < UnitTestCase
     assert_equal(0, old_rolf_stats.species_lists)
     assert_equal(0, old_rolf_stats.votes)
 
-    # UserStats.refresh_all_user_stats
-    # rolf_stats = UserStats.find_by(user_id: rolf.id)
-
     UserStats.refresh_all_user_stats(dry_run: true)
     new_rolf_stats = UserStats.find_by(user_id: rolf.id)
 
