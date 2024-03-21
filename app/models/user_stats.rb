@@ -183,7 +183,7 @@ class UserStats < ApplicationRecord
     # until all records have a value for each column except id and user_id.
     # At the end, we find the existing user_stats record id by user_id, and
     # add in the id and user_id, and update all records at once.
-    def refresh_all_user_stats(dry_run: true)
+    def refresh_all_user_stats(dry_run: false)
       return if dry_run
 
       create_user_stats_for_all_users_without
