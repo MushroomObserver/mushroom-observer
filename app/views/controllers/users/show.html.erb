@@ -1,7 +1,8 @@
 <%
 id = @show_user.id
-name = @show_user.unique_text_name
-add_page_title(:show_user_about.t(user: name))
+complete_name = @show_user.unique_text_name
+name = @show_user.login
+add_page_title(:show_user_about.t(user: complete_name))
 add_pager_for(@show_user)
 add_tab_set(user_show_tabs(show_user: @show_user, user: @user))
 
