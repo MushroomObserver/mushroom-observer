@@ -95,10 +95,12 @@ class UsersController < ApplicationController
     observations = @query.results(limit: 6, include: image_includes)
 
     # If not enough, check for other people's favorites
-    if observations.length < 6
+    if (MAX_THUMBS - observations.length).positive?
       @query = Query.lookup(:Observation, :by_user, user: @show_user,
                                                     by: :thumbnail_quality)
-      observations = @query.results(limit: 6, include: image_includes)
+      other_users_favorites = @query.results(limit: MAX_THUMBS,
+                                             include: image_includes)
+      observations = observations.union(other_users_favorites).take(MAX_THUMBS)
     end
 
     @best_images = observations.map(&:thumb_image)
