@@ -46,6 +46,7 @@ module ObservationsController::NewAndCreate
     @reasons     = @naming.init_reasons
     @images      = []
     @good_images = []
+    @field_code  = params[:field_code]
     init_specimen_vars
     init_project_vars_for_create
     init_list_vars
@@ -102,6 +103,7 @@ module ObservationsController::NewAndCreate
     success = false if @name && !@vote.value.nil? && !validate_object(@vote)
     success = false if @bad_images != []
     success = false if success && !save_observation(@observation)
+    update_field_slip(@observation, params[:field_code])
 
     # Once observation is saved we can save everything else.
     if success
@@ -314,5 +316,13 @@ module ObservationsController::NewAndCreate
     init_project_vars_for_reload(@observation)
     init_list_vars_for_reload(@observation)
     render(action: :new, location: new_observation_path(q: get_query_param))
+  end
+
+  def update_field_slip(observation, field_code)
+    field_slip = FieldSlip.find_by(code: field_code)
+    return unless field_slip
+
+    field_slip.observation = observation
+    field_slip.save
   end
 end

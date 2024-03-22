@@ -12,8 +12,8 @@
   <% end %>
 
   <div>
-    <%= form.label :observation_id, style: "display: block" %>
-    <%= form.number_field :observation_id %>
+    <%= form.label :code, style: "display: block" %>
+    <%= form.text_field :code %>
   </div>
 
   <div>
@@ -21,12 +21,25 @@
     <%= form.number_field :project_id %>
   </div>
 
-  <div>
-    <%= form.label :code, style: "display: block" %>
-    <%= form.text_field :code %>
-  </div>
+  <br/>
 
   <div>
-    <%= form.submit %>
+    <%= form.submit :field_slip_create_obs.t %>
   </div>
+
+  <br/>
+  <br/>
+
+  <% obs = last_observation
+     if obs %>
+    <div>
+       Last Observation: <%= link_to(obs.unique_format_name.t, observation_path(obs)) %>
+    </div>
+
+    <br/>
+
+    <div>
+      <%= form.submit :field_slip_last_obs.t %>
+    </div>
+  <% end %>
 <% end %>

@@ -1,20 +1,21 @@
 <div id="<%= dom_id field_slip %>">
   <p>
-    <strong>Observation:</strong>
-    <% if field_slip.observation %>
-      <%= link_to(field_slip.observation.unique_format_name.t, observation_path(field_slip.observation)) %>
-    <% else %>
-      <%= :field_slip_no_observation.t %>
-    <% end %>
-    <br/>
-    <strong>Project:</strong>
+    <strong><%= :PROJECT.t %>:</strong>
     <% if field_slip.project %>
       <%= link_to_object(field_slip.project) %>
     <% else %>
       <%= :field_slip_no_project.t %>
     <% end %>
     <br/>
-    <strong>Code:</strong>
-    <%= field_slip.code %>
+    <strong><%= :OBSERVATION.t %>:</strong>
+    <% if field_slip.observation %>
+      <%= link_to(field_slip.observation.unique_format_name.t, observation_path(field_slip.observation)) %>
+      <ul class="row list-unstyled">
+        <%= render(partial: "shared/matrix_box",
+                   locals: { object: field_slip.observation, columns: "col-xs-12" }) %>
+      </ul>
+    <% else %>
+      <%= :field_slip_no_observation.t %>
+    <% end %>
   </p>
 </div>

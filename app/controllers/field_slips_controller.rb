@@ -11,12 +11,18 @@ class FieldSlipsController < ApplicationController
 
   # GET /field_slips/1 or /field_slips/1.json
   def show
-    if params[:id].match(/^\d+$/)
+    obs = nil
+    if params[:id].match?(/^\d+$/)
       set_field_slip
     else
       @field_slip = FieldSlip.find_by(code: params[:id].upcase)
+      obs = @field_slip&.observation
     end
-    redirect_to(new_field_slip_url(code: params[:id].upcase)) unless @field_slip
+    if @field_slip
+      redirect_to(observation_url(id: obs.id)) if obs
+    else
+      redirect_to(new_field_slip_url(code: params[:id].upcase))
+    end
   end
 
   # GET /field_slips/new
@@ -33,10 +39,17 @@ class FieldSlipsController < ApplicationController
     @field_slip = FieldSlip.new(field_slip_params)
 
     respond_to do |format|
+      if params[:commit] == :field_slip_last_obs.t
+        @field_slip.observation = ObservationView.last(User.current)
+      end
       if @field_slip.save
         format.html do
-          redirect_to(field_slip_url(@field_slip),
-                      notice: :field_slip_created.t)
+          if params[:commit] == :field_slip_create_obs.t
+            redirect_to(new_observation_url(field_code: @field_slip.code))
+          else
+            redirect_to(field_slip_url(@field_slip),
+                        notice: :field_slip_created.t)
+          end
         end
         format.json { render(:show, status: :created, location: @field_slip) }
       else
@@ -51,10 +64,17 @@ class FieldSlipsController < ApplicationController
   # PATCH/PUT /field_slips/1 or /field_slips/1.json
   def update
     respond_to do |format|
+      if params[:commit] == :field_slip_last_obs.t
+        @field_slip.observation = ObservationView.last(User.current)
+      end
       if @field_slip.update(field_slip_params)
         format.html do
-          redirect_to(field_slip_url(@field_slip),
-                      notice: :field_slip_updated.t)
+          if params[:commit] == :field_slip_create_obs.t
+            redirect_to(new_observation_url(field_code: @field_slip.code))
+          else
+            redirect_to(field_slip_url(@field_slip),
+                        notice: :field_slip_updated.t)
+          end
         end
         format.json { render(:show, status: :ok, location: @field_slip) }
       else

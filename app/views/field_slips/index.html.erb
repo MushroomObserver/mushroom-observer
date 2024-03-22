@@ -2,14 +2,15 @@
   <p class="alert alert-success"><%= notice %></p>
 <% end %>
 
-<h1>Field slips</h1>
+<h1><%= :FIELD_SLIPS.t %></h1>
 
 <div id="field_slips">
   <% @field_slips.each do |field_slip| %>
+    <strong><%= :field_slip_code.t %>:</strong>
+    <%= field_slip.code %>
     <%= render field_slip %>
-    <p>
-      <%= link_to :field_slip_show.t, field_slip %>
-    </p>
+    <%= link_to :field_slip_show.t, field_slip %>
+    <hr/>
   <% end %>
 </div>
 
