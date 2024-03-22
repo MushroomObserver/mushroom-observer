@@ -42,6 +42,8 @@ gem("trilogy")
 gem("solid_cache")
 # add locale to cache key
 gem("cache_with_locale")
+# use solid_queue as the ActiveJob runner
+gem("solid_queue")
 
 # sprockets for asset compilation and versioning
 gem("sprockets-rails")
