@@ -55,6 +55,8 @@ gem("sprockets", "~>4.2.1")
 gem("dartsass-sprockets")
 # Use bootstrap style generator
 gem("bootstrap-sass")
+# Use Terser as compressor for JavaScript assets
+gem("terser")
 
 # importmap for js module handling
 gem("importmap-rails")
@@ -66,6 +68,8 @@ gem("requestjs-rails")
 gem("turbo-rails")
 # redis for combining actioncable broadcasts with turbo_stream
 gem("redis", "~> 4.0")
+# minimal two way bridge between the V8 JavaScript engine and Ruby
+gem("mini_racer")
 
 # Add Arel helpers for more concise query syntax in Arel
 # https://github.com/camertron/arel-helpers
@@ -73,17 +77,13 @@ gem("arel-helpers")
 # https://github.com/Faveod/arel-extensions
 gem("arel_extensions")
 
-# Use mini_racer as a substitute for therubyracer
-# If having trouble installing this gem in Vagrant:
-# gem update --system
-# bundler update
-gem("mini_racer")
+# Provide abstract base class for classes that depend upon method_missing
+gem("blankslate")
 
-# Use Terser as compressor for JavaScript assets
-gem("terser")
-
-# Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
-gem("jbuilder")
+# Simple version models and tables for classes
+# Use our own fork, which stores enum attrs as integers in the db
+gem("mo_acts_as_versioned", ">= 0.6.6",
+    git: "https://github.com/MushroomObserver/acts_as_versioned/")
 
 # Use ActiveModel has_secure_password
 gem("bcrypt")
@@ -94,30 +94,22 @@ gem("bcrypt")
 # Use i18n for internationalization
 gem("i18n")
 
-# Enable Textile markup language. See https://github.com/jgarber/redcloth,
-# https://textile-lang.com/doc/insertions-and-deletions
-gem("RedCloth")
-
-# Provide abstract base class for classes that depend upon method_missing
-gem("blankslate")
-
 # Detect which browser is used
 gem("browser")
 
+# Enable Textile markup language. See https://github.com/jgarber/redcloth,
+# https://textile-lang.com/doc/insertions-and-deletions
+gem("RedCloth")
 # Create Rich Text Format documents
 gem("rtf")
 
+# Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
+gem("jbuilder")
 # Enable remote procedure calls over HTTP (used in MO API)
 gem("xmlrpc")
 
 # Get image sizes from a file
 gem("fastimage")
-
-# Simple versioning
-# Use our own fork, which stores enum attrs as integers in the db
-gem("mo_acts_as_versioned", ">= 0.6.6",
-    git: "https://github.com/MushroomObserver/acts_as_versioned/")
-
 # for detecting file type of uploaded images
 gem("mimemagic")
 
@@ -143,7 +135,7 @@ gem("rubyzip", "~> 2.3.0")
 ########## Development, Testing, and Analysis ##################################
 group :test, :development do
   # https://github.com/ruby/debug
-  gem("debug", ">= 1.0.0")
+  gem("debug")
 
   # Use built-in Ruby coverage to generate html coverage file
   gem("simplecov", require: false)
@@ -169,7 +161,6 @@ end
 group :test do
   # Use capybara to simulate user-browser interaction
   gem("capybara")
-
   # Use cuprite to run the browser in Capybara tests
   gem("cuprite")
 
