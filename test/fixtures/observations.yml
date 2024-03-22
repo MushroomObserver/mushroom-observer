@@ -728,6 +728,8 @@ reused_observation:
   <<: *DEFAULTS
   user: rolf
   when: 2023-11-19
+  location: obs_default_location
+  where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
   species_lists: reused_list
   rss_log:
 
@@ -744,3 +746,32 @@ deprecated_name_obs:
   text_name: Petigera
   lifeform: " lichen "
   rss_log:
+
+# meets constraints of falmouth_2023_09_project
+falmouth_2023_09_obs:
+  <<: *DEFAULTS
+  when: 2023-09-15
+  where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
+  location: falmouth
+
+brett_woods_2023_09_obs:
+  <<: *DEFAULTS
+  when: 2023-09-16
+  where: Brett Woods, Fairfield Co., Connecticut, USA
+  lat: 41.2039
+  long: -73.3245
+  gps_hidden: true
+  location: brett_woods
+
+falmouth_2022_obs:
+  <<: *DEFAULTS
+  when: 2022-09-15 # outside of dates of falmouth_2023_09_project
+  where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
+  location: falmouth
+
+nybg_2023_09_obs:
+  <<: *DEFAULTS
+  user: roy # not an admin of falmouth_2023_09_project
+  when: 2023-09-15
+  where: The New York Botanical Garden, Bronx, New York, USA
+  location: nybg_location # outside location of falmouth_2023_09_project

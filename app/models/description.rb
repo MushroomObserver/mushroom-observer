@@ -479,11 +479,11 @@ class Description < AbstractModel
     return if authors.member?(user)
 
     authors.push(user)
-    SiteData.update_contribution(:add, authors_join_table, user.id)
+    UserStats.update_contribution(:add, authors_join_table, user.id)
     return unless editors.member?(user)
 
     editors.delete(user)
-    SiteData.update_contribution(:del, editors_join_table, user.id)
+    UserStats.update_contribution(:del, editors_join_table, user.id)
   end
 
   # Demote a User to "editor".  Saves User if changed.  Returns nothing.
@@ -491,12 +491,12 @@ class Description < AbstractModel
     return unless authors.member?(user)
 
     authors.delete(user)
-    SiteData.update_contribution(:del, authors_join_table, user.id)
+    UserStats.update_contribution(:del, authors_join_table, user.id)
 
     return unless !editors.member?(user) && user_made_a_change?(user)
 
     editors.push(user)
-    SiteData.update_contribution(:add, editors_join_table, user.id)
+    UserStats.update_contribution(:add, editors_join_table, user.id)
   end
 
   # Add a user on as an "editor".
@@ -504,7 +504,7 @@ class Description < AbstractModel
     return unless !authors.member?(user) && !editors.member?(user)
 
     editors.push(user)
-    SiteData.update_contribution(:add, editors_join_table, user.id)
+    UserStats.update_contribution(:add, editors_join_table, user.id)
   end
 
   ##############################################################################
@@ -528,10 +528,10 @@ class Description < AbstractModel
   def update_users_and_parent
     # Update editors' and authors' contributions.
     authors.each do |user|
-      SiteData.update_contribution(:del, authors_join_table, user.id)
+      UserStats.update_contribution(:del, authors_join_table, user.id)
     end
     editors.each do |user|
-      SiteData.update_contribution(:del, editors_join_table, user.id)
+      UserStats.update_contribution(:del, editors_join_table, user.id)
     end
 
     return unless parent.description_id == id

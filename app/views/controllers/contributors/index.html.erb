@@ -1,52 +1,54 @@
 <%
-@container = :wide
+@container = :double
 add_page_title(:users_by_contribution_title.t)
 add_tab_set(contributors_index_tabs)
 %>
 
-<div class="row">
-  <div class="col-md-6">
-    <div class="list-group">
-      <%= render(partial: "contributors/contributor",
-                  collection: @users, as: :user) %>
-    </div>
-  </div>
-
-  <div class="col-md-6">
-    <div class="list-group">
-      <div class="list-group-item">
-
-        <%= :users_by_contribution_1.tp %>
-        <% SiteData::ALL_FIELDS.select { |f| SiteData::FIELD_WEIGHTS[f] > 0}.each do |field| %>
-          <div class="row">
-            <div class="col-xs-8 col-xs-push-1"><%= "user_stats_#{field}".to_sym.t %> </div>
-            <div class="col-xs-2"><%= SiteData::FIELD_WEIGHTS[field] %></div>
-          </div><!--.row-->
-        <% end %>
-        <p class="pt-3"><%= :users_by_contribution_2.t %></p>
-        <%
-          v1 = SiteData::FIELD_WEIGHTS[:images]
-          v2 = SiteData::FIELD_WEIGHTS[:name_description_editors]
-          v3 = SiteData::FIELD_WEIGHTS[:observations]
-          v4 = SiteData::FIELD_WEIGHTS[:namings]
-          v5 = SiteData::FIELD_WEIGHTS[:votes]
-        %>
-        <div class="row">
-          <div class="col-xs-3 col-xs-push-1">&nbsp; &nbsp;3 * <%= v1 %></div>
-          <div class="col-xs-8">(<%= :users_by_contribution_2a.t %>)</div>
-          <div class="col-xs-3 col-xs-push-1">+ 1 * <%= v2 %></div>
-          <div class="col-xs-8">(<%= :users_by_contribution_2b.t %>)</div>
-          <div class="col-xs-3 col-xs-push-1">+ 1 * <%= v3 %></div>
-          <div class="col-xs-8">(<%= :users_by_contribution_2c.t %>)</div>
-          <div class="col-xs-3 col-xs-push-1">+ 1 * <%= v4 %></div>
-          <div class="col-xs-8">(<%= :users_by_contribution_2d.t %>)</div>
-          <div class="col-xs-3 col-xs-push-1">+ 1 * <%= v5 %></div>
-          <div class="col-xs-8">(<%= :users_by_contribution_2e.t %>)</div>
-          <div class="col-xs-11 col-xs-push-1">&nbsp; &nbsp;<%= 3*v1 + v2 + v3 + v4 + v5 %> <%= :users_by_contribution_2f.t %></div>
-        </div><!--.row-->
-        <%= :users_by_contribution_3.tp %>
-
+<%= paginate_block(@pages) do %>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="list-group">
+        <%= render(partial: "contributors/contributor",
+                   collection: @objects, as: :user) %>
       </div>
     </div>
-  </div>
-</div><!--.row-->
+
+    <div class="col-md-6">
+      <div class="list-group">
+        <div class="list-group-item">
+
+          <%= :users_by_contribution_1.tp %>
+          <% UserStats.fields_with_weight.keys.each do |field| %>
+            <div class="row">
+              <div class="col-xs-8 col-xs-push-1"><%= "user_stats_#{field}".to_sym.t %> </div>
+              <div class="col-xs-2"><%= UserStats::ALL_FIELDS[field][:weight] %></div>
+            </div><!--.row-->
+          <% end %>
+          <p class="pt-3"><%= :users_by_contribution_2.t %></p>
+          <%
+            v1 = UserStats::ALL_FIELDS[:images][:weight]
+            v2 = UserStats::ALL_FIELDS[:name_description_editors][:weight]
+            v3 = UserStats::ALL_FIELDS[:observations][:weight]
+            v4 = UserStats::ALL_FIELDS[:namings][:weight]
+            v5 = UserStats::ALL_FIELDS[:votes][:weight]
+          %>
+          <div class="row">
+            <div class="col-xs-3 col-xs-push-1">&nbsp; &nbsp;3 * <%= v1 %></div>
+            <div class="col-xs-8">(<%= :users_by_contribution_2a.t %>)</div>
+            <div class="col-xs-3 col-xs-push-1">+ 1 * <%= v2 %></div>
+            <div class="col-xs-8">(<%= :users_by_contribution_2b.t %>)</div>
+            <div class="col-xs-3 col-xs-push-1">+ 1 * <%= v3 %></div>
+            <div class="col-xs-8">(<%= :users_by_contribution_2c.t %>)</div>
+            <div class="col-xs-3 col-xs-push-1">+ 1 * <%= v4 %></div>
+            <div class="col-xs-8">(<%= :users_by_contribution_2d.t %>)</div>
+            <div class="col-xs-3 col-xs-push-1">+ 1 * <%= v5 %></div>
+            <div class="col-xs-8">(<%= :users_by_contribution_2e.t %>)</div>
+            <div class="col-xs-11 col-xs-push-1">&nbsp; &nbsp;<%= 3*v1 + v2 + v3 + v4 + v5 %> <%= :users_by_contribution_2f.t %></div>
+          </div><!--.row-->
+          <%= :users_by_contribution_3.tp %>
+
+        </div>
+      </div>
+    </div>
+  </div><!--.row-->
+<% end %>

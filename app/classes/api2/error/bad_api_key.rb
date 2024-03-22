@@ -2,7 +2,7 @@
 
 class API2
   # APIKey not valid.
-  class BadAPIKey < Error
+  class BadAPIKey < FatalError
     def initialize(str)
       super()
       args.merge!(key: str.to_s)

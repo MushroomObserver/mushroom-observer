@@ -1,15 +1,16 @@
 <ul class="nav navbar-nav navbar-right hidden-xs mr-0">
   <% if @user.admin %>
     <li>
-      <%= link_to(
-        "",
+      <%= button_to(
         in_admin_mode? ?
           admin_mode_path(turn_off: true) : admin_mode_path(turn_on: true),
-        { class: "glyphicon glyphicon-text-background",
+        { class: "btn btn-link navbar-btn",
           id: "user_nav_admin_mode_link",
           title: in_admin_mode? ? :app_turn_admin_off.t : :app_turn_admin_on.t,
           data: { toggle: "tooltip", placement: "bottom" } }
-      ) %>
+      ) do
+        tag.span("", class: "glyphicon glyphicon-text-background")
+      end %>
     </li>
   <% end %>
   <li>
@@ -67,16 +68,19 @@
                       edit_account_preferences_path,
                       { class: "", id: "user_drop_preferences_link" }) %></li>
       <li class="divider"></li>
-      <li><%= link_to(:app_logout.t,
-                      account_logout_path,
-                      { class: "", id: "user_drop_logout_link" }) %></li>
+      <li><%= button_to(
+                :app_logout.t,
+                account_logout_path,
+                { class: "btn btn-link", id: "user_drop_logout_link" }
+              ) %><li>
     </ul>
   </li>
-  <li><%= link_to("",
-                  account_logout_path,
-                  { class: "glyphicon glyphicon-log-out",
-                    id: "user_nav_logout_link",
-                    title: :app_logout.t,
-                    data: { toggle: "tooltip", placement: "bottom" } }) %>
-  </li>
+  <li><%= button_to(
+            account_logout_path,
+            { class: "btn btn-link navbar-btn",
+              id: "user_nav_logout_link",
+              title: :app_logout.t }
+          ) do
+            tag.span("", class: "glyphicon glyphicon-log-out")
+          end %></li>
 </ul>

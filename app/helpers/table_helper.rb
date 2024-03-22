@@ -111,16 +111,4 @@ module TableHelper
   def make_td(cell, args)
     tag.td(**args[:cell_opts]) { cell.to_s }
   end
-
-  # ?
-  # def make_line(cell_opts)
-  #   colspan = cell_opts[:colspan]
-  #   if colspan
-  #     tag.tr(class: "MatrixLine") do
-  #       tag.td(tag.hr, class: "MatrixLine", colspan: colspan)
-  #     end
-  #   else
-  #     safe_empty
-  #   end
-  # end
 end

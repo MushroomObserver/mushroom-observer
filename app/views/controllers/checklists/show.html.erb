@@ -7,13 +7,13 @@ add_page_title(checklist_show_title(user: @show_user,
 add_tab_set(checklist_show_tabs(user: @show_user,
                                  project: @project,
                                  list: @species_list))
-names = @data.names
+names = @data.taxa
 %>
 
 <div class="my-4">
   <%= :checklist_summary.t(species: @data.num_species,
                            genera: @data.num_genera,
-                           names: @data.num_names) %>
+                           names: @data.num_taxa) %>
 </div>
 
 <%= panel_block(inner_class: "checklist") do %>
