@@ -2416,6 +2416,7 @@
 
   # users/by_contribution
   users_by_contribution_title: List of Contributors
+  users_by_contribution_legend: How we estimate contribution
   users_by_contribution_2a: "[:images]"
   users_by_contribution_2b: "[:name]"
   users_by_contribution_2c: "[:observation]"

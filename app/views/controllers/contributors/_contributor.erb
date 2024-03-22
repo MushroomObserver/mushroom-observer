@@ -1,0 +1,26 @@
+<%
+# `user_counter` is a collection property that starts at 0
+number = (user_counter + 1) + (@pages.num_per_page * (@pages.number - 1))
+columns ||= "col-xs-12 col-sm-6 col-md-4 col-lg-3"
+%>
+
+<%= matrix_box(columns: columns, id: "user_#{user.id}") do %>
+  <%= tag.div(class: "panel panel-default") do %>
+    <%= tag.div(class: "panel-sizing") do %>
+      <%= if user.image_id
+        tag.div(class: "thumbnail-container") do
+          interactive_image(user.image_id, image_link: user_path(user.id),
+                            votes: false, context: :matrix_box)
+        end
+      end %>
+      <%= tag.div(class: "panel-body") do
+        [tag.h4 do
+          [user_link(user.id, user.legal_name),
+            tag.span(number, class: "badge pull-right")].safe_join
+        end,
+        "#{user.contribution} #{:users_by_contribution_2f.t}", safe_br,
+        link_to(:Observations.t, observations_path(user: user.id))].safe_join
+      end %>
+    <% end %>
+  <% end %>
+<% end %>
