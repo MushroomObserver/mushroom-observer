@@ -22,7 +22,7 @@ module UserStatsHelper
       lang_name_by_locale = Language.pluck(:locale, :name).to_h
       user_stats[:languages].each do |locale, count|
         rows << {
-          label: lang_name_by_locale[locale],
+          label: tag.span(lang_name_by_locale[locale], class: "ml-3"),
           count: count
         }
       end

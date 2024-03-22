@@ -351,6 +351,18 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     order(contribution: :desc, name: :asc, login: :asc)
   }
 
+  scope :show_includes, lambda {
+    strict_loading.includes(
+      :location,
+      :image,
+      :license,
+      { observations: {
+        thumb_image: [:image_votes, :license, :projects, :user]
+      } },
+      :user_stats
+    )
+  }
+
   # These are used by forms.
   attr_accessor :place_name
   attr_accessor :email_confirmation

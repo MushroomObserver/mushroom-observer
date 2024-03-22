@@ -2291,6 +2291,7 @@
   show_votes_gone_private: Your preferences have been updated.  Other users can no longer see your votes.
 
   # users/show
+  show_user_about: About [user]
   show_user_title: Contribution Summary for [user]
   show_user_contributors: "[:app_contributors]"
   show_user_observations_by: Observations by [name]

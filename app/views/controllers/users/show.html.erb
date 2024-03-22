@@ -1,127 +1,26 @@
 <%
 id = @show_user.id
 name = @show_user.unique_text_name
-add_page_title(:show_user_title.t(user: name))
+add_page_title(:show_user_about.t(user: name))
 add_pager_for(@show_user)
 add_tab_set(user_show_tabs(show_user: @show_user, user: @user))
 
 @container = :full
-
-rows = user_stats_rows(@user_stats)
-paths = user_stats_link_paths(@show_user)
-total = 0
 %>
 
 <div class="row">
-  <div class="col-xs-7">
-    <% if @show_user.location %>
-      <p>
-        <strong><%= :show_user_primary_location.t %>:</strong>
-        <%= location_link(nil, @show_user.location) %>
-      </p>
-    <% end %>
-    <% if !@show_user.mailing_address.blank? %>
-      <p>
-        <strong><%= :show_user_mailing_address.t %>:</strong>
-        <%= @show_user.mailing_address %>
-      </p>
-    <% end %>
-    <% if !@show_user.personal_herbarium.blank? %>
-      <p>
-        <strong><%= :show_user_personal_herbarium.t %>:</strong>
-        <%= link_to(@show_user.personal_herbarium.name.t,
-                    @show_user.personal_herbarium.show_link_args) %>
-      </p>
-    <% end %>
-    <% if !@show_user.notes.blank? %>
-      <%= @show_user.notes.tpl %>
+
+  <div class="col-xs-12 col-lg-5">
+    <%= render(partial: "users/show/profile") %>
+    <% if @show_user.contribution > 0 %>
+      <%= render(partial: "users/show/user_stats", locals: { name: name }) %>
     <% end %>
   </div>
 
-  <div class="col-xs-5">
-    <p class="mt-3">
-      <%= if @show_user.image_id
-        interactive_image(Image.find(@show_user.image_id), votes: false)
-      end %>
-      <strong><%= :show_user_joined.t %>:</strong> <%= @show_user.verified %>
-    </p>
+  <div class="col-xs-12 col-lg-7">
+    <%= render(partial: "users/show/best_images", locals: { name: name }) %>
   </div>
+
 </div><!--.row-->
 
-<% if @show_user.contribution > 0 %>
-  <div class="row">
-    <div class="col-sm-3">
-      <% if @observations %>
-        <% @observations.values_at(0, 2, 4).reject(&:nil?).each do |obs| %>
-          <div class="my-3">
-            <%= interactive_image(obs.thumb_image,
-              image_link: observation_path(id: obs.id),
-              votes: true) %>
-          </div><!--.my-3-->
-        <% end %>
-      <% end %>
-    </div><!--.col-->
 
-    <div class="col-sm-6">
-      <div class="text-center">
-        <table class="table">
-          <% rows.each do |row|
-            field = row[:field]
-            label = row[:label]
-            count = row[:count]
-            weight = row[:weight]
-            count_text = weight ? "#{count} * #{weight}" : count
-            points = row[:points]
-            url = paths[field]
-            link = url ? link_to(label, url) : label
-            total += points.to_i
-            if !count %>
-              <tr>
-                <td colspan="2"><%= label %></td>
-                <td>=</td>
-                <td align="right"><%= points %></td>
-              </tr>
-            <% elsif !label.blank? %>
-              <tr>
-                <td><%= link %></td>
-                <td><%= count_text %></td>
-                <td><%= weight ? "=" : "" %></td>
-                <td align="right"><%= points %></td>
-              </tr>
-            <% end %>
-          <% end %>
-          <% if total > 0 %>
-            <tr>
-              <td colspan="4">
-                <hr/>
-              </td>
-            </tr>
-            <tr>
-              <td><%= :show_user_total.t %></td>
-              <td></td>
-              <td>=</td>
-              <td align="right"><%= total %></td>
-            </tr>
-          <% end %>
-        </table>
-        <%= if @user_stats.checklist[:species].to_i > 0
-          :show_user_life_list.t(genera: @user_stats.checklist[:genera],
-                                species: @user_stats.checklist[:species],
-                                url: paths[:life_list])
-        end %>
-      </div><!-- .text-center -->
-    </div>
-
-    <div class="col-sm-3">
-      <% if @observations %>
-        <% @observations.values_at(1, 3, 5).reject(&:nil?).each do |obs| %>
-          <div class="my-3">
-            <%= interactive_image(obs.thumb_image,
-                          image_link: observation_path(id: obs.id),
-                          votes: true) %>
-          </div><!--.my-3-->
-        <% end %>
-      <% end %>
-    </div><!--.col-->
-  </div><!--.row-->
-<% end %>

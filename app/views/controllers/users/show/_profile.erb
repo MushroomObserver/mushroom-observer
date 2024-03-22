@@ -1,0 +1,48 @@
+<%
+heading = [
+  tag.strong(:show_user_joined.t), ": ",
+  tag.span(@show_user.verified.strftime("%Y-%m-%d"),
+           data: { time: @show_user.verified.strftime("%Y-%m-%dT%H:%M:%S") })
+].safe_join
+footer =
+  if @user_stats.checklist[:species].to_i > 0
+    :show_user_life_list.t(genera: @user_stats.checklist[:genera],
+                           species: @user_stats.checklist[:species],
+                           url: checklist_path(id: @show_user.id))
+  else
+    nil
+  end
+%>
+
+<%= panel_block(heading: heading, id: "user_profile", footer: footer) do %>
+
+  <%= if @show_user.image_id
+    tag.div(class: "float-left mr-5 mb-3") do
+      interactive_image(Image.find(@show_user.image_id), votes: false)
+    end
+  end %>
+
+  <% if @show_user.location %>
+    <p>
+      <strong><%= :show_user_primary_location.t %>:</strong>
+      <%= location_link(nil, @show_user.location) %>
+    </p>
+  <% end %>
+  <% if !@show_user.mailing_address.blank? %>
+    <p>
+      <strong><%= :show_user_mailing_address.t %>:</strong>
+      <%= @show_user.mailing_address %>
+    </p>
+  <% end %>
+  <% if !@show_user.personal_herbarium.blank? %>
+    <p>
+      <strong><%= :show_user_personal_herbarium.t %>:</strong>
+      <%= link_to(@show_user.personal_herbarium.name.t,
+                  @show_user.personal_herbarium.show_link_args) %>
+    </p>
+  <% end %>
+  <% if !@show_user.notes.blank? %>
+    <%= @show_user.notes.tpl %>
+  <% end %>
+
+<% end %>
