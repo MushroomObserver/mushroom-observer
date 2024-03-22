@@ -95,6 +95,11 @@ MushroomObserver::Application.configure do
   # Generate digests for assets URLs
   config.assets.digest = true
 
+  # Combine files using the "require" directives at the top of included files
+  # See http://guides.rubyonrails.org/asset_pipeline.html#turning-debugging-off
+  config.assets.debug = false
+  config.sass.quiet_deps = true
+
   # Version of your assets, change this if you want to expire all your assets.
   config.assets.version = "1.0"
 
@@ -159,10 +164,6 @@ MushroomObserver::Application.configure do
 
   # Don't log any deprecations.
   # config.active_support.report_deprecations = false
-
-  # Combine files using the "require" directives at the top of included files
-  # See http://guides.rubyonrails.org/asset_pipeline.html#turning-debugging-off
-  config.assets.debug = false
 
   config.bot_enabled = true
 end
