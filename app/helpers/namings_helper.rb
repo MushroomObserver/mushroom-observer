@@ -269,7 +269,7 @@ module NamingsHelper
       url: naming_vote_form_commit_url(naming, vote), method: method,
       id: "naming_vote_form_#{naming.id}",
       class: "naming-vote-form d-inline-block float-right float-sm-none",
-      data: { turbo: true, controller: "naming-vote",
+      data: { turbo: true, controller: "naming-vote", naming_id: naming.id,
               localization: localizations }
     ) do |fv|
       [

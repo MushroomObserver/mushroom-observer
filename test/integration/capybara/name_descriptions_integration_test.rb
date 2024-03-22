@@ -252,7 +252,7 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     user.save
     sess = open_session
     login!(user, session: sess)
-    sess.first(:link, href: %r{admin/session}).click
+    sess.first(:button, id: "user_nav_admin_mode_link").click
     teach_about_name_descriptions(sess)
     sess.user = user # can't assign props to session with capybara?
     sess
