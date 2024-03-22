@@ -2763,6 +2763,7 @@
   field_slip_destroy: Destroy this field slip
   field_slip_destroyed: Field slip was successfully destroyed.
   field_slip_edit: Edit this field slip
+  field_slip_editing: Editing Field Slip
   field_slip_errors: prohibited this field_slip from being saved
   field_slip_index: Back to field slips
   field_slip_last_obs: Use Last Observation

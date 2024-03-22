@@ -54,7 +54,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     post(:create,
          params: {
            field_slip: {
-             code: "#{@field_slip.code}",
+             code: @field_slip.code.to_s,
              observation: observations(:coprinus_comatus_obs),
              project: projects(:eol_project)
            }
@@ -68,7 +68,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
          format: :json,
          params: {
            field_slip: {
-             code: "#{@field_slip.code}",
+             code: @field_slip.code.to_s,
              observation: observations(:coprinus_comatus_obs),
              project: projects(:eol_project)
            }
@@ -83,7 +83,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
 
   test "should show field_slip by code" do
     get(:show, params: { id: @field_slip.code })
-    assert_response :success
+    assert_redirected_to observation_url(@field_slip.observation)
   end
 
   test "should get edit" do
