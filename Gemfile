@@ -34,10 +34,30 @@ group :rails do
   gem("railties", "~> 7.1.3")
 end
 
-# importmap for js module handling
-gem("importmap-rails")
+# Use trilogy as db connector
+# See https://github.com/trilogy-libraries/trilogy/tree/main/contrib/ruby
+gem("trilogy")
+
+# solid_cache for cache store db
+gem("solid_cache")
+# add locale to cache key
+gem("cache_with_locale")
+# use solid_queue as the ActiveJob runner
+gem("solid_queue")
+
 # sprockets for asset compilation and versioning
 gem("sprockets-rails")
+# Fix a version problem betw stimulus and sprockets. (not sprockets-rails)
+# Delete this dependency declaration if the issue gets resolved:
+# https://github.com/hotwired/stimulus-rails/issues/108
+gem("sprockets", "~>4.2.1")
+# Compile SCSS for stylesheets
+gem("dartsass-sprockets")
+# Use bootstrap style generator
+gem("bootstrap-sass")
+
+# importmap for js module handling
+gem("importmap-rails")
 # stimulus for simpler, more maintainable js
 gem("stimulus-rails")
 # requestjs for simpler js requests from stimulus
@@ -46,37 +66,17 @@ gem("requestjs-rails")
 gem("turbo-rails")
 # redis for combining actioncable broadcasts with turbo_stream
 gem("redis", "~> 4.0")
-# solid_cache for cache store db
-gem("solid_cache")
-# use solid_queue as the ActiveJob runner
-gem("solid_queue")
-# Compile SCSS for stylesheets
-gem("sassc-rails")
-# add locale to cache key
-gem("cache_with_locale")
-
-# Fix a version problem betw stimulus and sprockets. (not sprockets-rails)
-# Delete this dependency declaration if the issue gets resolved:
-# https://github.com/hotwired/stimulus-rails/issues/108
-gem("sprockets", "~>4.2.1")
 
 gem("date")
 gem("loofah")
 gem("nokogiri")
 gem("rails-html-sanitizer")
 
-# Use trilogy as db connector
-# See https://github.com/trilogy-libraries/trilogy/tree/main/contrib/ruby
-gem("trilogy")
-
 # Add Arel helpers for more concise query syntax in Arel
 # https://github.com/camertron/arel-helpers
 gem("arel-helpers")
 # https://github.com/Faveod/arel-extensions
 gem("arel_extensions")
-
-# Use bootstrap style generator
-gem("bootstrap-sass")
 
 # Use mini_racer as a substitute for therubyracer
 # If having trouble installing this gem in Vagrant:

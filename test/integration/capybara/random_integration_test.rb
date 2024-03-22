@@ -19,19 +19,22 @@ class RandomIntegrationTest < CapybaraIntegrationTestCase
     visit("/info/how_to_help")
     assert_selector("body.info__how_to_help")
     assert_no_link(href: "/account/login/new")
-    assert_link(href: "/account/logout")
+    assert_button(:app_logout.l)
+    assert_no_link(:app_logout.l)
     assert_link(href: "/users/#{rolf.id}")
 
-    first(:link, text: "Logout").click
+    first(:button, text: :app_logout.l).click
     assert_selector("body.login__logout")
     assert_link(href: "/account/login/new")
-    assert_no_link(href: "/account/logout")
+    assert_no_button(:app_logout.l)
+    assert_no_link(:app_logout.l)
     assert_no_link(href: "/users/#{rolf.id}")
 
     click_link(text: "Introduction")
     assert_selector("body.info__intro")
     assert_link(href: "/account/login/new")
-    assert_no_link(href: "/account/logout")
+    assert_no_button(:app_logout.l)
+    assert_no_link(:app_logout.l)
     assert_no_link(href: "/users/#{rolf.id}")
   end
 

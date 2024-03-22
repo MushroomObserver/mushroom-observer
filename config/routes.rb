@@ -277,8 +277,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     get("signup", to: "/account#new") # alternate path
 
     resource :login, only: [:new, :create], controller: "login"
-    unresourced_login_gets = %w[email_new_password logout test_autologin].freeze
+    unresourced_login_gets = %w[email_new_password test_autologin].freeze
     unresourced_login_gets.each { |action| get(action, controller: "login") }
+    post("logout", controller: "login")
     post("new_password_request", controller: "login")
 
     resource :preferences, only: [:edit, :update]
@@ -307,7 +308,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Admin: resources and actions ------------------------------------
   namespace :admin do
     # controls turning admin mode on and off, and switching users
-    resource :session, only: [:show, :edit, :update], controller: "session",
+    resource :session, only: [:create, :edit, :update], controller: "session",
                        as: "mode"
     get("switch_users", to: "mode#edit") # alternate path
 
