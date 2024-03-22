@@ -67,11 +67,6 @@ gem("turbo-rails")
 # redis for combining actioncable broadcasts with turbo_stream
 gem("redis", "~> 4.0")
 
-gem("date")
-gem("loofah")
-gem("nokogiri")
-gem("rails-html-sanitizer")
-
 # Add Arel helpers for more concise query syntax in Arel
 # https://github.com/camertron/arel-helpers
 gem("arel-helpers")
@@ -122,16 +117,6 @@ gem("fastimage")
 # Use our own fork, which stores enum attrs as integers in the db
 gem("mo_acts_as_versioned", ">= 0.6.6",
     git: "https://github.com/MushroomObserver/acts_as_versioned/")
-
-# email generation, parsing and sending
-gem("mail")
-# Action Mailbox depends on net/smtp, but not included with Ruby 3.1
-# temporarily add until the mail gem includes it as a dependancy.
-gem("net-smtp", require: false)
-
-# These seem to be required by unicorn -> zeitwerk
-gem("net-imap")
-gem("net-pop")
 
 # for detecting file type of uploaded images
 gem("mimemagic")
