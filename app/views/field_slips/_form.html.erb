@@ -32,8 +32,10 @@
 
   <% obs = last_observation
      if obs %>
-    <div>
-       Last Observation: <%= link_to(obs.unique_format_name.t, observation_path(obs)) %>
+     <div>
+       Last Observation:<br/>
+       <%= image_tag(Image.url(:thumbnail, obs.thumb_image_id)) %><br/>
+       <%= link_to(obs.unique_format_name.t, observation_path(obs)) %>
     </div>
 
     <br/>
@@ -41,5 +43,6 @@
     <div>
       <%= form.submit :field_slip_last_obs.t %>
     </div>
+
   <% end %>
 <% end %>
