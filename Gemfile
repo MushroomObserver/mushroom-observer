@@ -34,10 +34,30 @@ group :rails do
   gem("railties", "~> 7.1.3")
 end
 
-# importmap for js module handling
-gem("importmap-rails")
+# Use trilogy as db connector
+# See https://github.com/trilogy-libraries/trilogy/tree/main/contrib/ruby
+gem("trilogy")
+
+# solid_cache for cache store db
+gem("solid_cache")
+# add locale to cache key
+gem("cache_with_locale")
+
 # sprockets for asset compilation and versioning
 gem("sprockets-rails")
+# Fix a version problem betw stimulus and sprockets. (not sprockets-rails)
+# Delete this dependency declaration if the issue gets resolved:
+# https://github.com/hotwired/stimulus-rails/issues/108
+gem("sprockets", "~>4.2.1")
+# Compile SCSS for stylesheets
+gem("dartsass-rails")
+# Use bootstrap style generator
+gem("bootstrap-sass")
+# Use Terser as compressor for JavaScript assets
+gem("terser")
+
+# importmap for js module handling
+gem("importmap-rails")
 # stimulus for simpler, more maintainable js
 gem("stimulus-rails")
 # requestjs for simpler js requests from stimulus
@@ -46,25 +66,8 @@ gem("requestjs-rails")
 gem("turbo-rails")
 # redis for combining actioncable broadcasts with turbo_stream
 gem("redis", "~> 4.0")
-# solid_cache for cache store db
-gem("solid_cache")
-# Compile SCSS for stylesheets
-# add locale to cache key
-gem("cache_with_locale")
-
-# Fix a version problem betw stimulus and sprockets. (not sprockets-rails)
-# Delete this dependency declaration if the issue gets resolved:
-# https://github.com/hotwired/stimulus-rails/issues/108
-gem("sprockets", "~>4.2.1")
-
-gem("date")
-gem("loofah")
-gem("nokogiri")
-gem("rails-html-sanitizer")
-
-# Use trilogy as db connector
-# See https://github.com/trilogy-libraries/trilogy/tree/main/contrib/ruby
-gem("trilogy")
+# minimal two way bridge between the V8 JavaScript engine and Ruby
+gem("mini_racer")
 
 # Add Arel helpers for more concise query syntax in Arel
 # https://github.com/camertron/arel-helpers
@@ -72,22 +75,13 @@ gem("arel-helpers")
 # https://github.com/Faveod/arel-extensions
 gem("arel_extensions")
 
-# Use dart-sass to compile sass
-gem("dartsass-rails")
-# Use bootstrap style generator
-gem("bootstrap-sass")
+# Provide abstract base class for classes that depend upon method_missing
+gem("blankslate")
 
-# Use mini_racer as a substitute for therubyracer
-# If having trouble installing this gem in Vagrant:
-# gem update --system
-# bundler update
-gem("mini_racer")
-
-# Use Terser as compressor for JavaScript assets
-gem("terser")
-
-# Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
-gem("jbuilder")
+# Simple version models and tables for classes
+# Use our own fork, which stores enum attrs as integers in the db
+gem("mo_acts_as_versioned", ">= 0.6.6",
+    git: "https://github.com/MushroomObserver/acts_as_versioned/")
 
 # Use ActiveModel has_secure_password
 gem("bcrypt")
@@ -98,40 +92,22 @@ gem("bcrypt")
 # Use i18n for internationalization
 gem("i18n")
 
-# Enable Textile markup language. See https://github.com/jgarber/redcloth,
-# https://textile-lang.com/doc/insertions-and-deletions
-gem("RedCloth")
-
-# Provide abstract base class for classes that depend upon method_missing
-gem("blankslate")
-
 # Detect which browser is used
 gem("browser")
 
+# Enable Textile markup language. See https://github.com/jgarber/redcloth,
+# https://textile-lang.com/doc/insertions-and-deletions
+gem("RedCloth")
 # Create Rich Text Format documents
 gem("rtf")
 
+# Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
+gem("jbuilder")
 # Enable remote procedure calls over HTTP (used in MO API)
 gem("xmlrpc")
 
 # Get image sizes from a file
 gem("fastimage")
-
-# Simple versioning
-# Use our own fork, which stores enum attrs as integers in the db
-gem("mo_acts_as_versioned", ">= 0.6.6",
-    git: "https://github.com/MushroomObserver/acts_as_versioned/")
-
-# email generation, parsing and sending
-gem("mail")
-# Action Mailbox depends on net/smtp, but not included with Ruby 3.1
-# temporarily add until the mail gem includes it as a dependancy.
-gem("net-smtp", require: false)
-
-# These seem to be required by unicorn -> zeitwerk
-gem("net-imap")
-gem("net-pop")
-
 # for detecting file type of uploaded images
 gem("mimemagic")
 
@@ -157,7 +133,7 @@ gem("rubyzip", "~> 2.3.0")
 ########## Development, Testing, and Analysis ##################################
 group :test, :development do
   # https://github.com/ruby/debug
-  gem("debug", ">= 1.0.0")
+  gem("debug")
 
   # Use built-in Ruby coverage to generate html coverage file
   gem("simplecov", require: false)
@@ -183,7 +159,6 @@ end
 group :test do
   # Use capybara to simulate user-browser interaction
   gem("capybara")
-
   # Use cuprite to run the browser in Capybara tests
   gem("cuprite")
 
