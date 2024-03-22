@@ -83,7 +83,7 @@ class UsersController < ApplicationController
     @show_user = User.show_includes.safe_find(params[:id]) ||
                  flash_error_and_goto_index(User, params[:id])
   end
-
+  MAX_THUMBS = 6
   # set @observations whose thumbnails will display in user summary
   def define_instance_vars_for_summary!
     @user_stats = @show_user.user_stats
