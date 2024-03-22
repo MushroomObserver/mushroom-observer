@@ -20,12 +20,15 @@ module UserStatsHelper
     # Show a breakdown of translations
     if user_stats[:languages]
       lang_name_by_locale = Language.pluck(:locale, :name).to_h
+      lang_summary = []
       user_stats[:languages].each do |locale, count|
-        rows << {
-          label: tag.span(lang_name_by_locale[locale], class: "ml-3"),
-          count: count
-        }
+        lang_summary << tag.span(class: "ml-3 text-nowrap") do
+          ["[", lang_name_by_locale[locale], ": ", count, "]"].safe_join
+        end
       end
+      rows << {
+        label: lang_summary.safe_join
+      }
     end
 
     # Add bonuses at the bottom.

@@ -21,7 +21,7 @@ total = 0
       if !count %>
         <tr>
           <td colspan="2"><%= label %></td>
-          <td>=</td>
+          <td><%= weight ? "=" : "" %></td>
           <td align="right"><%= points %></td>
         </tr>
       <% elsif !label.blank? %>
@@ -33,6 +33,7 @@ total = 0
         </tr>
       <% end %>
     <% end %>
+
     <% if total > 0 %>
       <tr>
         <td colspan="4">
