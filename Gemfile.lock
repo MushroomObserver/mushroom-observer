@@ -391,7 +391,7 @@ DEPENDENCIES
   cuprite
   dartsass-sprockets
   database_cleaner-active_record
-  debug (>= 1.0.0)
+  debug
   fastimage
   i18n
   importmap-rails
