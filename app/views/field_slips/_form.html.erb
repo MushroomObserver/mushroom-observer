@@ -12,17 +12,14 @@
   <% end %>
 
   <div>
-    <%= form.label :code, style: "display: block" %>
-    <%= form.text_field :code %>
-    <br/><br/>
+    <%= text_field_with_label(form: form, field: :code) %>
   </div>
 
-  <div>
-    <% if @field_slip.projects %>
-      <%= form.select :project_id, @field_slip.projects %>
-    <% end %>
-    <br/>
-  </div>
+  <% if @field_slip.projects %>
+    <div>
+      <%= select_with_label(form: form, field: :project_id, options: @field_slip.projects) %>
+    </div>
+  <% end %>
 
   <% if field_slip&.observation
      current = field_slip.observation %>
@@ -32,7 +29,7 @@
        <%= link_to(current.unique_format_name.t, observation_path(current)) %>
     </div>
     <br/>
-    <%= form.submit :field_slip_keep_obs.t %>
+    <%= submit_button(form: form, button: :field_slip_keep_obs.t) %>
     <br/>
     <br/>
   <% end %>
@@ -40,7 +37,7 @@
   <br/>
 
   <div>
-    <%= form.submit :field_slip_create_obs.t %>
+    <%= submit_button(form: form, button: :field_slip_create_obs.t) %>
   </div>
 
   <br/>
@@ -57,7 +54,7 @@
     <br/>
 
     <div>
-      <%= form.submit :field_slip_last_obs.t %>
+      <%= submit_button(form: form, button: :field_slip_last_obs.t) %>
     </div>
 
   <% end %>
