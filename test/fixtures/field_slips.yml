@@ -3,11 +3,16 @@
 field_slip_one:
   observation: minimal_unknown_obs
   project: eol_project
-  code: MOTEST-0001
+  code: EOL-0001
   user: mary
 
 field_slip_two:
   observation: owner_accepts_general_questions
-  project_id: eol_project
-  code: MOTEST-0002
+  project: eol_project
+  code: EOL-0002
+  user: mary
+
+field_slip_no_obs:
+  project: eol_project
+  code: EOL-0003
   user: mary

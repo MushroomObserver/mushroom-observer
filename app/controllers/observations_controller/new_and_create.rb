@@ -51,6 +51,7 @@ module ObservationsController::NewAndCreate
     init_project_vars_for_create
     init_list_vars
     defaults_from_last_observation_created
+    add_field_slip_project(@field_code)
   end
 
   ##############################################################################
@@ -82,6 +83,14 @@ module ObservationsController::NewAndCreate
         @list_checks[list.id] = true
       end
     end
+  end
+
+  def add_field_slip_project(code)
+    project = FieldSlip.find_by(code: code)&.project
+    return unless project
+    return unless project&.member?(User.current)
+
+    @project_checks[project.id] = true
   end
 
   ##############################################################################
