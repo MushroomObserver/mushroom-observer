@@ -2307,7 +2307,7 @@
   show_user_personal_herbarium: Personal Fungarium
   show_user_total: Total
   show_user_language_contribution: "Translations: [name]"
-  show_user_life_list: "\"Life List\":[url]: [species] species in [genera] genera"
+  show_user_life_list: "[species] species in [genera] genera"
 
   # sequence
   sequence_edit_title: Editing [name]

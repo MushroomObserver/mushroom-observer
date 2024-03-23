@@ -4,17 +4,29 @@ heading = [
   tag.span(@show_user.verified.strftime("%Y-%m-%d"),
            data: { time: @show_user.verified.strftime("%Y-%m-%dT%H:%M:%S") })
 ].safe_join
+heading_links =
+  if @show_user != User.current && !@show_user.no_emails &&
+     @show_user.email_general_question
+    modal_link_to("user_question_email", *email_user_question_tab(@show_user))
+  else
+    nil
+  end
 footer =
   if @user_stats.checklist[:species].to_i > 0
-    :show_user_life_list.t(genera: @user_stats.checklist[:genera],
-                           species: @user_stats.checklist[:species],
-                           url: checklist_path(id: @show_user.id))
+    [link_to(checklist_path(id: @show_user.id)) do
+       tag.strong(:app_life_list.t)
+     end,
+     :show_user_life_list.t(
+       genera: @user_stats.checklist[:genera],
+       species: @user_stats.checklist[:species]
+     )].safe_join(" ")
   else
     nil
   end
 %>
 
-<%= panel_block(heading: heading, id: "user_profile", footer: footer) do %>
+<%= panel_block(heading: heading, id: "user_profile",
+                heading_links: heading_links, footer: footer) do %>
 
   <%= if @show_user.image_id
     tag.div(class: "float-left mr-5 mb-3") do
@@ -45,4 +57,12 @@ footer =
     <%= @show_user.notes.tpl %>
   <% end %>
 
+  <%= tag.div(class: "mt-3") do %>
+    <% user_profile_tabs(show_user: @show_user, user: @user).each do |tab|
+      str, url, args = tab
+      args ||= {}
+      kwargs = merge_tab_args_with_extra_args(args, { class: "d-block" }) %>
+      <%= link_to(str, url, kwargs) %>
+    <% end %>
+  <% end %>
 <% end %>

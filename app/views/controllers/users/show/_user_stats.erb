@@ -7,7 +7,7 @@ total = 0
 <%= panel_block(heading: :show_user_title.t(user: name),
                 id: "user_stats") do %>
 
-  <table class="table">
+  <table class="table bg-none mb-0">
     <% rows.each do |row|
       field = row[:field]
       label = row[:label]

@@ -83,15 +83,18 @@ class UsersController < ApplicationController
     @show_user = User.show_includes.safe_find(params[:id]) ||
                  flash_error_and_goto_index(User, params[:id])
   end
+
   MAX_THUMBS = 6
+
   # set @observations whose thumbnails will display in user summary
   def define_instance_vars_for_summary!
     @user_stats = @show_user.user_stats
 
+    # NOTE: This query is pretty well optimized.
     # First check the user's observation thumbnails for their own favorites
+    image_includes = { thumb_image: [:image_votes, :projects, :license, :user] }
     @query = Query.lookup(:Observation, :by_user, user: @show_user,
                                                   by: :owners_thumbnail_quality)
-    image_includes = { thumb_image: [:image_votes, :license, :user] }
     observations = @query.results(limit: 6, include: image_includes)
 
     # If not enough, check for other people's favorites

@@ -11,10 +11,6 @@ class EmailsControllerTest < FunctionalTestCase
   end
 
   def test_ask_questions
-    id = mary.id
-    requires_login(:ask_user_question, id: id)
-    assert_form_action(action: :ask_user_question, id: id)
-
     id = images(:in_situ_image).id
     requires_login(:commercial_inquiry, id: id)
     assert_form_action(action: :commercial_inquiry, id: id)
@@ -22,12 +18,12 @@ class EmailsControllerTest < FunctionalTestCase
     # Prove that trying to ask question of user who refuses questions
     # redirects to that user's page (instead of an email form).
     user = users(:no_general_questions_user)
-    requires_login(:ask_user_question, id: user.id)
+    requires_login(:commercial_inquiry, id: user.id)
     assert_flash_text(:permission_denied.t)
 
     # Prove that it won't email someone who has opted out of all emails.
     mary.update(no_emails: true)
-    requires_login(:ask_user_question, id: mary.id)
+    requires_login(:commercial_inquiry, id: mary.id)
     assert_flash_text(:permission_denied.t)
   end
 
@@ -99,20 +95,6 @@ class EmailsControllerTest < FunctionalTestCase
     }
     post_requires_login(:commercial_inquiry, params)
     assert_redirected_to(image_path(image.id))
-  end
-
-  def test_send_ask_user_question
-    user = mary
-    params = {
-      id: user.id,
-      email: {
-        subject: "Email subject",
-        content: "Email content"
-      }
-    }
-    post_requires_login(:ask_user_question, params)
-    assert_redirected_to(user_path(user.id))
-    assert_flash_text(:runtime_ask_user_question_success.t)
   end
 
   def test_email_merge_request

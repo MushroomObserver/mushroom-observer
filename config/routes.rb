@@ -352,9 +352,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :contributors, only: [:index]
 
   # ----- Emails: no resources, just forms ------------------------------------
-  match("/emails/ask_user_question(/:id)",
-        to: "emails#ask_user_question", via: [:get, :post], id: /\d+/,
-        as: "emails_ask_user_question")
+  # match("/emails/ask_user_question(/:id)",
+  #       to: "emails#ask_user_question", via: [:get, :post], id: /\d+/,
+  #       as: "emails_ask_user_question")
   match("/emails/ask_webmaster_question(/:id)",
         to: "emails#ask_webmaster_question", via: [:get, :post], id: /\d+/,
         as: "emails_ask_webmaster_question")
@@ -816,7 +816,14 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :translations, only: [:index, :edit, :update]
 
   # ----- Users: standard actions -------------------------------------------
-  resources :users, id: /\d+/, only: [:index, :show]
+  resources :users, id: /\d+/, only: [:index, :show] do
+    member do
+      get("emails/new", to: "users/emails#new",
+                        as: "new_question_for")
+      post("emails", to: "users/emails#create",
+                     as: "send_question_for")
+    end
+  end
 
   # ----- VisualModels: standard actions ------------------------------------
   resources :visual_models, id: /\d+/ do
