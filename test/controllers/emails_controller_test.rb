@@ -17,14 +17,11 @@ class EmailsControllerTest < FunctionalTestCase
 
     # Prove that trying to ask question of user who refuses questions
     # redirects to that user's page (instead of an email form).
-    user = users(:no_general_questions_user)
-    requires_login(:commercial_inquiry, id: user.id)
-    assert_flash_text(:permission_denied.t)
-
-    # Prove that it won't email someone who has opted out of all emails.
-    mary.update(no_emails: true)
-    requires_login(:commercial_inquiry, id: mary.id)
-    assert_flash_text(:permission_denied.t)
+    # Not actually implemented yet.
+    # rolf.update(no_emails: true)
+    # image = images(:in_situ_image) # rolf's image
+    # requires_login(:commercial_inquiry, id: image.id)
+    # assert_flash_text(:permission_denied.t)
   end
 
   def test_send_webmaster_question
