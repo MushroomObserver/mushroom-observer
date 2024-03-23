@@ -4,7 +4,7 @@ require "application_system_test_case"
 
 class FieldSlipsTest < ApplicationSystemTestCase
   setup do
-    @field_slip = field_slips(:one)
+    @field_slip = field_slips(:field_slip_one)
   end
 
   test "visiting the index" do
