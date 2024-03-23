@@ -64,6 +64,8 @@ module MushroomObserver
     # Tells rails not to generate controller-specific css and js stubs.
     config.generators.assets = false
 
+    config.sass.quiet_deps = true
+
     # This instructs ActionView how to mark form fields which have an error.
     # I just change the CSS class to "has-error", which gives it a red border.
     # This is superior to the default, which encapsulates the field in a div,
