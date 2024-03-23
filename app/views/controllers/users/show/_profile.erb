@@ -15,11 +15,11 @@ footer =
   if @user_stats.checklist[:species].to_i > 0
     [link_to(checklist_path(id: @show_user.id)) do
        tag.strong(:app_life_list.t)
-     end,
+     end, ": ",
      :show_user_life_list.t(
        genera: @user_stats.checklist[:genera],
        species: @user_stats.checklist[:species]
-     )].safe_join(" ")
+     )].safe_join
   else
     nil
   end
