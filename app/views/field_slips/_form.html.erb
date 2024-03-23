@@ -14,14 +14,15 @@
   <div>
     <%= form.label :code, style: "display: block" %>
     <%= form.text_field :code %>
+    <br/><br/>
   </div>
 
   <div>
-    <%= form.label :project_id, style: "display: block" %>
-    <%= form.number_field :project_id %>
+    <% if @field_slip.projects %>
+      <%= form.select :project_id, @field_slip.projects %>
+    <% end %>
+    <br/>
   </div>
-
-  <br/>
 
   <% if field_slip&.observation
      current = field_slip.observation %>

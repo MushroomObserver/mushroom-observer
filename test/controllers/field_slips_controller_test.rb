@@ -17,6 +17,15 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_response :success
   end
 
+  test "should get new with unknown code" do
+    login
+    project = projects(:bolete_project)
+    code = "#{project.field_slip_prefix}-1234"
+    get(:new, params: { code: code })
+    assert_response :success
+    assert(response.body.include?(project.title))
+  end
+
   test "should create field_slip with last viewed obs" do
     login(@field_slip.user.login)
     ObservationView.update_view_stats(@field_slip.observation_id,
@@ -105,7 +114,9 @@ class FieldSlipsControllerTest < FunctionalTestCase
   end
 
   test "should redirect to get new" do
-    code = "M0-1234"
+    login
+    project = projects(:bolete_project)
+    code = "#{project.field_slip_prefix}-1235"
     get(:show, params: { id: code })
     assert_redirected_to new_field_slip_url(code: code)
   end
