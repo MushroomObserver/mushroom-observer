@@ -268,7 +268,7 @@
   FIELD_SLIP: Field Slip
   field_slip: field slip
   FIELD_SLIPS: Field Slips
-  field_slips: field groups
+  field_slips: field slips
   IMAGE: Image
   image: image
   IMAGES: Images
