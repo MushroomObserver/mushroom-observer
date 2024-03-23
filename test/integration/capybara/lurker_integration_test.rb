@@ -126,7 +126,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
       )
 
       first(:link, owner.name).click
-      assert_match(/Contribution Summary/, page.title, "Wrong page")
+      assert_match(/About/, page.title, "Wrong page")
     end
     # back at Observation
 

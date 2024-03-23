@@ -17,20 +17,6 @@ class EmailsController < ApplicationController
     @email = @user.email if @user
   end
 
-  # TODO: Refactor UserQuestionMailer.build to take kwargs, eliminating
-  #       local variable assignments.
-  def ask_user_question
-    return unless (@target = find_or_goto_index(User, params[:id].to_s)) &&
-                  can_email_user_question?(@target) &&
-                  request.method == "POST"
-
-    subject = params[:email][:subject]
-    content = params[:email][:content]
-    QueuedEmail::UserQuestion.create_email(@user, @target, subject, content)
-    flash_notice(:runtime_ask_user_question_success.t)
-    redirect_to(user_path(@target.id))
-  end
-
   def commercial_inquiry
     return unless (@image = find_or_goto_index(Image, params[:id].to_s)) &&
                   can_email_user_question?(@image,

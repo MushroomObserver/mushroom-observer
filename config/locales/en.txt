@@ -2291,6 +2291,7 @@
   show_votes_gone_private: Your preferences have been updated.  Other users can no longer see your votes.
 
   # users/show
+  show_user_about: About [user]
   show_user_title: Contribution Summary for [user]
   show_user_contributors: "[:app_contributors]"
   show_user_observations_by: Observations by [name]
@@ -2306,7 +2307,7 @@
   show_user_personal_herbarium: Personal Fungarium
   show_user_total: Total
   show_user_language_contribution: "Translations: [name]"
-  show_user_life_list: "\"Life List\":[url]: [species] species in [genera] genera"
+  show_user_life_list: "[species] species in [genera] genera"
 
   # sequence
   sequence_edit_title: Editing [name]
@@ -2415,6 +2416,7 @@
 
   # users/by_contribution
   users_by_contribution_title: List of Contributors
+  users_by_contribution_legend: How we estimate contribution
   users_by_contribution_2a: "[:images]"
   users_by_contribution_2b: "[:name]"
   users_by_contribution_2c: "[:observation]"
