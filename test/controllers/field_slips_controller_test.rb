@@ -33,6 +33,41 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_redirected_to field_slip_url(FieldSlip.last)
   end
 
+  test "should create field_slip with last viewed obs" do
+    login(@field_slip.user.login)
+    ObservationView.update_view_stats(@field_slip.observation_id,
+                                      @field_slip.user_id)
+    assert_difference("FieldSlip.count") do
+      post(:create,
+           params: {
+             commit: :field_slip_last_obs.t,
+             field_slip: {
+               code: "Y#{@field_slip.code}",
+               project: projects(:eol_project)
+             }
+           })
+    end
+
+    assert_redirected_to field_slip_url(FieldSlip.last)
+    assert_equal(FieldSlip.last.observation, ObservationView.last(User.current))
+  end
+
+  test "should create field_slip and redirect to create obs" do
+    login(@field_slip.user.login)
+    assert_difference("FieldSlip.count") do
+      post(:create,
+           params: {
+             commit: :field_slip_create_obs.t,
+             field_slip: {
+               code: "Z#{@field_slip.code}",
+               project: projects(:eol_project)
+             }
+           })
+    end
+
+    assert_redirected_to new_observation_url(field_code: FieldSlip.last.code)
+  end
+
   test "should create field_slip in project from code" do
     login
     project = projects(:eol_project)
@@ -86,10 +121,22 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_redirected_to observation_url(@field_slip.observation)
   end
 
+  test "should redirect to get new" do
+    code = "M0-1234"
+    get(:show, params: { id: code })
+    assert_redirected_to new_field_slip_url(code: code)
+  end
+
   test "should get edit" do
-    login
+    login(@field_slip.user.login)
     get(:edit, params: { id: @field_slip.id })
     assert_response :success
+  end
+
+  test "should get not edit" do
+    login
+    get(:edit, params: { id: @field_slip.id })
+    assert_redirected_to field_slip_url(@field_slip)
   end
 
   test "should update field_slip" do
@@ -124,11 +171,20 @@ class FieldSlipsControllerTest < FunctionalTestCase
   end
 
   test "should destroy field_slip" do
-    login
+    login(@field_slip.user.login)
     assert_difference("FieldSlip.count", -1) do
       delete(:destroy, params: { id: @field_slip.id })
     end
 
     assert_redirected_to field_slips_url
+  end
+
+  test "should not destroy field_slip" do
+    login
+    assert_difference("FieldSlip.count", 0) do
+      delete(:destroy, params: { id: @field_slip.id })
+    end
+
+    assert_redirected_to field_slip_url(@field_slip)
   end
 end

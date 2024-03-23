@@ -4,8 +4,10 @@ field_slip_one:
   observation: minimal_unknown_obs
   project: eol_project
   code: MOTEST-0001
+  user: mary
 
 field_slip_two:
   observation_id: detailed_unknown_obs
   project_id: eol_project
   code: MOTEST-0002
+  user: mary

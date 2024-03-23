@@ -32,7 +32,11 @@ class FieldSlipsController < ApplicationController
   end
 
   # GET /field_slips/1/edit
-  def edit; end
+  def edit
+    return unless @field_slip.user != User.current
+
+    redirect_to(field_slip_url(id: @field_slip.id))
+  end
 
   # POST /field_slips or /field_slips.json
   def create
@@ -88,6 +92,11 @@ class FieldSlipsController < ApplicationController
 
   # DELETE /field_slips/1 or /field_slips/1.json
   def destroy
+    if @field_slip.user != User.current
+      redirect_to(field_slip_url(id: @field_slip.id))
+      return
+    end
+
     @field_slip.destroy!
 
     respond_to do |format|

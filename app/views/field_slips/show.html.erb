@@ -7,8 +7,9 @@
 <%= render @field_slip %>
 
 <div>
-  <%= link_to :field_slip_edit.t, edit_field_slip_path(@field_slip) %> |
   <%= link_to :field_slip_index.t, field_slips_path %>
-
-  <%= button_to :field_slip_destroy.t, @field_slip, method: :delete %>
+  <% if @field_slip.user == User.current %>
+    | <%= link_to :field_slip_edit.t, edit_field_slip_path(@field_slip) %>
+    | <%= button_to :field_slip_destroy.t, @field_slip, method: :delete %>
+  <% end %>
 </div>
