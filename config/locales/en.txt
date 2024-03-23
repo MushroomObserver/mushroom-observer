@@ -387,6 +387,7 @@
   species_list: species list
   SPECIES_LISTS: Species Lists
   species_lists: species lists
+  SpeciesList: Species List
   SPECIMEN: Specimen
   specimen: specimen
   SPECIMENS: Specimens
