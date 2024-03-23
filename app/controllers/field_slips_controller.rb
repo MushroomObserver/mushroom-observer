@@ -43,6 +43,7 @@ class FieldSlipsController < ApplicationController
     @field_slip = FieldSlip.new(field_slip_params)
 
     respond_to do |format|
+      check_project_membership(@field_slip)
       if params[:commit] == :field_slip_last_obs.t
         @field_slip.observation = ObservationView.last(User.current)
       end
@@ -118,5 +119,13 @@ class FieldSlipsController < ApplicationController
   # Only allow a list of trusted parameters through.
   def field_slip_params
     params.require(:field_slip).permit(:observation_id, :project_id, :code)
+  end
+
+  def check_project_membership(slip)
+    project = slip&.project
+    return unless project&.can_join?(User.current)
+
+    project.user_group.users << User.current
+    flash_notice(:field_slip_welcome.t(title: project.title))
   end
 end

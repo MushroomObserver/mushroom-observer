@@ -45,6 +45,28 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_equal(FieldSlip.last.observation, ObservationView.last(User.current))
   end
 
+  test "should create field_slip and join project" do
+    user = @field_slip.user
+    login(user.login)
+    project = projects(:open_membership_project)
+    assert_not(project.member?(user))
+    ObservationView.update_view_stats(@field_slip.observation_id,
+                                      @field_slip.user_id)
+    assert_difference("FieldSlip.count") do
+      post(:create,
+           params: {
+             commit: :field_slip_last_obs.t,
+             field_slip: {
+               code: "#{project.field_slip_prefix}-0001",
+               project: project
+             }
+           })
+    end
+
+    assert_redirected_to field_slip_url(FieldSlip.last)
+    assert(project.member?(user))
+  end
+
   test "should create field_slip and redirect to create obs" do
     login(@field_slip.user.login)
     assert_difference("FieldSlip.count") do
