@@ -2766,6 +2766,7 @@
   field_slip_editing: Editing Field Slip
   field_slip_errors: prohibited this field_slip from being saved
   field_slip_index: Back to field slips
+  field_slip_keep_obs: Keep Above
   field_slip_last_obs: Use Last Observation
   field_slip_new: New field slip
   field_slip_no_observation: Observation not found

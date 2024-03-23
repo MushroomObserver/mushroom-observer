@@ -23,6 +23,21 @@
 
   <br/>
 
+  <% if field_slip&.observation
+     current = field_slip.observation %>
+    <div>
+       Current Observation:<br/>
+       <%= image_tag(Image.url(:thumbnail, current.thumb_image_id)) %><br/>
+       <%= link_to(current.unique_format_name.t, observation_path(current)) %>
+    </div>
+    <br/>
+    <%= form.submit :field_slip_keep_obs.t %>
+    <br/>
+    <br/>
+  <% end %>
+
+  <br/>
+
   <div>
     <%= form.submit :field_slip_create_obs.t %>
   </div>

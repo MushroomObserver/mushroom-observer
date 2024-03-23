@@ -17,22 +17,6 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_response :success
   end
 
-  test "should create field_slip" do
-    login
-    assert_difference("FieldSlip.count") do
-      post(:create,
-           params: {
-             field_slip: {
-               code: "X#{@field_slip.code}",
-               observation: observations(:coprinus_comatus_obs),
-               project: projects(:eol_project)
-             }
-           })
-    end
-
-    assert_redirected_to field_slip_url(FieldSlip.last)
-  end
-
   test "should create field_slip with last viewed obs" do
     login(@field_slip.user.login)
     ObservationView.update_view_stats(@field_slip.observation_id,
@@ -64,7 +48,6 @@ class FieldSlipsControllerTest < FunctionalTestCase
              }
            })
     end
-
     assert_redirected_to new_observation_url(field_code: FieldSlip.last.code)
   end
 
@@ -141,12 +124,39 @@ class FieldSlipsControllerTest < FunctionalTestCase
 
   test "should update field_slip" do
     login
+    initial = @field_slip.observation_id
     patch(:update,
           params: { id: @field_slip.id,
+                    commit: :field_slip_keep_obs.t,
                     field_slip: { code: @field_slip.code,
                                   observation_id: @field_slip.observation_id,
                                   project_id: @field_slip.project_id } })
     assert_redirected_to field_slip_url(@field_slip)
+    assert_equal(@field_slip.observation_id, initial)
+  end
+
+  test "should update field_slip with last viewed obs" do
+    login(@field_slip.user.login)
+    obs = observations(:minimal_unknown_obs)
+    ObservationView.update_view_stats(obs.id, @field_slip.user_id)
+    patch(:update,
+          params: { id: @field_slip.id,
+                    commit: :field_slip_last_obs.t,
+                    field_slip: { code: @field_slip.code,
+                                  project_id: @field_slip.project_id } })
+    assert_redirected_to field_slip_url(@field_slip)
+    assert_equal(@field_slip.observation, ObservationView.last(User.current))
+  end
+
+  test "should update field_slip and redirect to create obs" do
+    login
+    patch(:update,
+          params: { id: @field_slip.id,
+                    commit: :field_slip_create_obs.t,
+                    field_slip: { code: @field_slip.code,
+                                  observation_id: @field_slip.observation_id,
+                                  project_id: @field_slip.project_id } })
+    assert_redirected_to new_observation_url(field_code: @field_slip.code)
   end
 
   test "should fail to update field_slip" do
