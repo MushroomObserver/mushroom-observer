@@ -6,7 +6,10 @@ class FieldSlipsController < ApplicationController
 
   # GET /field_slips or /field_slips.json
   def index
-    @field_slips = FieldSlip.all
+    @field_slips = FieldSlip.includes(
+      [{ observation: [:location, :name, :namings, :rss_log, :user] },
+       :project, :user]
+    )
   end
 
   # GET /field_slips/1 or /field_slips/1.json
