@@ -4,7 +4,6 @@ require("test_helper")
 
 # Test relating to projects
 class FieldSlipsIntegrationTest < CapybaraIntegrationTestCase
-
   def test_new_observation_violates_project_constraints
     project = projects(:falmouth_2023_09_project)
     user = users(:roy)
