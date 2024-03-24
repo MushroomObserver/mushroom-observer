@@ -8,11 +8,11 @@ add_tab_set(location_show_tabs)
 
 <div class="row">
   <div class="col-md-7">
-    <%= tag.div(class: "mb-5") do
-      make_map(objects: [@location])
-    end %>
-
+    <%= tag.div(class: "mb-5") { make_map(objects: [@location]) } %>
     <%= render(partial: "locations/show/descriptions") %>
+    <%= render(partial: "comments/comments_for_object",
+                locals: { object: @location, comments: @comments,
+                          controls: @user, limit: 2 }) %>
   </div>
 
   <div class="col-md-5">
