@@ -320,7 +320,7 @@ module ObservationsController::NewAndCreate
     @reasons         = @naming.init_reasons(reasons)
     @images          = @bad_images
     @new_image.when  = @observation.when
-    @field_code  = params[:field_code]
+    @field_code = params[:field_code]
     init_specimen_vars_for_reload
     init_project_vars_for_create
     init_project_vars_for_reload(@observation)
