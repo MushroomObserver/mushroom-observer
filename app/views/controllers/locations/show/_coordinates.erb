@@ -3,7 +3,7 @@
   icon_link_with_query(*edit_location_tab(@location))
 ]
 if in_admin_mode?
-  heading_links << icon_link_with_query(*delete_location_tab(@location))
+  heading_links << destroy_button(target: @location, icon: :delete)
   heading_links << icon_link_with_query(*location_reverse_order_tab(@location))
 end
 %>

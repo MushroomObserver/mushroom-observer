@@ -14,20 +14,20 @@ module Tabs
     end
 
     # Composed links because there's interest_icons
-    def location_show_tabs(location:)
-      links = [
-        observations_at_location_tab(location),
+    def location_show_tabs
+      [
+        # observations_at_location_tab(location),
         locations_index_tab,
-        new_location_tab,
-        edit_location_tab(location)
+        new_location_tab
+        # edit_location_tab(location)
       ]
-      if in_admin_mode?
-        links += [
-          destroy_location_tab(location),
-          location_reverse_order_tab(location)
-        ]
-      end
-      links
+      # if in_admin_mode?
+      #   links += [
+      #     destroy_location_tab(location),
+      #     location_reverse_order_tab(location)
+      #   ]
+      # end
+      # links
     end
 
     def location_show_heading_links(location:)
