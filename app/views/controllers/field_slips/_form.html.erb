@@ -18,32 +18,24 @@
                           options: @field_slip.projects) %>
   <% end %>
 
+  <%= submit_button(form: form, button: :field_slip_create_obs.t,
+                    class: "my-5") %>
+
   <div class="row mt-5 pt-3">
     <% if field_slip.observation %>
       <div class="col-sm-6">
-        <% btn = submit_button(form: form, button: :field_slip_keep_obs.t) %>
-        <ul class="row list-unstyled mb-0">
-          <%= render(partial: "shared/matrix_box",
-                     locals: { object: field_slip.observation, votes: false,
-                               footer: panel_block_footer(footer: btn),
-                               columns: "col-xs-12" }) %>
-        </ul>
+        <%= render(partial: "field_slips/obs_thumbnail",
+                   locals: { obs: field_slip.observation, form: form,
+                             button: :field_slip_keep_obs.t }) %>
       </div>
     <% end %>
     <% if last_observation %>
       <div class="col-sm-6">
-        <% btn = submit_button(form: form, button: :field_slip_last_obs.t) %>
-        <ul class="row list-unstyled mb-0">
-          <%= render(partial: "shared/matrix_box",
-                     locals: { object: last_observation, votes: false,
-                               footer: panel_block_footer(footer: btn),
-                               columns: "col-xs-12" }) %>
-        </ul>
+        <%= render(partial: "field_slips/obs_thumbnail",
+                   locals: { obs: last_observation, form: form,
+                             button: :field_slip_last_obs.t }) %>
       </div>
     <% end %>
   </div>
-
-  <%= submit_button(form: form, button: :field_slip_create_obs.t,
-                    class: "my-5") %>
 
 <% end %>
