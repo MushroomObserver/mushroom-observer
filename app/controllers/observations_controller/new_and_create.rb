@@ -112,7 +112,7 @@ module ObservationsController::NewAndCreate
     success = false if @name && !@vote.value.nil? && !validate_object(@vote)
     success = false if @bad_images != []
     success = false if success && !save_observation(@observation)
-    update_field_slip(@observation, params[:field_code])
+    update_field_slip(@observation, params[:field_code]) if success
 
     # Once observation is saved we can save everything else.
     if success
@@ -320,6 +320,7 @@ module ObservationsController::NewAndCreate
     @reasons         = @naming.init_reasons(reasons)
     @images          = @bad_images
     @new_image.when  = @observation.when
+    @field_code  = params[:field_code]
     init_specimen_vars_for_reload
     init_project_vars_for_create
     init_project_vars_for_reload(@observation)
