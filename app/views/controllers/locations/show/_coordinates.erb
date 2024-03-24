@@ -1,0 +1,45 @@
+<% heading_links = [
+  icon_link_with_query(*edit_location_tab(@location)),
+  icon_link_with_query(*observations_at_location_tab(@location))
+]
+if in_admin_mode?
+  heading_links << icon_link_with_query(*delete_location_tab(@location))
+  heading_links << icon_link_with_query(*location_reverse_order_tab(@location))
+end
+%>
+<%= panel_block(id: "location_coordinates",
+                heading: :COORDINATES.l,
+                heading_links: heading_links.safe_join) do %>
+
+  <div class="text-center mx-auto" style="max-width:30em">
+    <div class="text-center my-4">
+      <b><%= :NORTH.t %>:</b> <%= @location.north %>&deg;
+    </div><!-- .text-center -->
+    <div class="row">
+      <div class="col-xs-6">
+        <span class="pull-left">
+          <b><%= :WEST.t %>:</b> <%= @location.west %>&deg;
+        </span>
+      </div>
+      <div class="col-xs-6">
+        <span class="pull-right">
+          <b><%= :EAST.t %>:</b> <%= @location.east %>&deg;
+        </span>
+      </div>
+    </div>
+    <div class="text-center my-4">
+      <b><%= :SOUTH.t %>:</b> <%= @location.south %>&deg;
+    </div><!-- .text-center -->
+    <div class="text-center my-4">
+      <% if @location.high %>
+        <b class="text-nowrap"><%= :show_location_highest.t %>:</b>
+        <%= @location.high %>&nbsp;<%= :units_meters.t %><br/>
+      <% end %>
+      <% if @location.low %>
+        <b class="text-nowrap"><%= :show_location_lowest.t %>:</b>
+        <%= @location.low %>&nbsp;<%= :units_meters.t %><br/>
+      <% end %>
+    </div><!-- .text-center -->
+  </div><!-- .text-center -->
+
+<% end %>

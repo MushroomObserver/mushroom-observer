@@ -22,14 +22,15 @@ module DescriptionsHelper
   #   # Renders something like this:
   #   <p>EOL Project Draft: Show | Edit | Destroy</p>
   #
-  def show_embedded_description_title(desc, type)
-    title = description_title(desc)
-    links = description_mod_links(desc, type)
-    tag.div do
-      [tag.span(title, class: "text-lg"),
-       links.safe_join(" | ")].safe_join(safe_nbsp)
-    end
-  end
+  # Maybe unused presently
+  # def show_embedded_description_title(desc, type)
+  #   title = description_title(desc)
+  #   links = description_mod_links(desc, type)
+  #   tag.div do
+  #     [tag.span(title, class: "text-lg"),
+  #      links.safe_join(" | ")].safe_join(safe_nbsp)
+  #   end
+  # end
 
   def description_mod_links(desc, type)
     links = []
@@ -228,23 +229,25 @@ module DescriptionsHelper
   def show_alt_descriptions(object:, projects: nil, current: nil)
     type = object.type_tag
 
-    # Show existing drafts, with link to create new one.
-    head = tag.b(:show_name_descriptions.l) + ": "
-    head += icon_link_to(*create_description_tab(object, type))
-
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
     list = list_descriptions(object: object, type: type,
                              current: current).map do |link|
       indent + link
     end
     any = list.any?
-    list.unshift(head)
     list << indent + :"show_#{type}_no_descriptions".t unless any
     html = list.safe_join(safe_br)
-    html = tag.div(html)
 
     add_list_of_projects(object, type, html, projects) if projects.present?
-    html
+
+    # Show existing drafts, with link to create new one.
+    panel_block(
+      id: "alt_descriptions",
+      heading: :show_name_descriptions.l,
+      heading_links: icon_link_to(*create_description_tab(object, type)),
+    ) do
+      html
+    end
   end
 
   # Show list of projects user is a member of.

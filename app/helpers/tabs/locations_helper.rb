@@ -30,9 +30,18 @@ module Tabs
       links
     end
 
+    def location_show_heading_links(location:)
+      links = location_show_tabs(location: location)
+      icons = []
+      links.each do |link|
+        icons << icon_link_to(*link)
+      end
+      icons
+    end
+
     def new_location_tab
       [:show_location_create.t, add_query_param(new_location_path),
-       { class: tab_id(__method__.to_s) }]
+       { class: tab_id(__method__.to_s), icon: :add }]
     end
 
     def map_locations_tab
@@ -48,7 +57,7 @@ module Tabs
     def edit_location_tab(location)
       [:show_location_edit.t,
        add_query_param(edit_location_path(location.id)),
-       { class: tab_id(__method__.to_s) }]
+       { class: tab_id(__method__.to_s), icon: :edit }]
     end
 
     def destroy_location_tab(location)
@@ -58,7 +67,7 @@ module Tabs
     def location_reverse_order_tab(location)
       [:show_location_reverse.t,
        add_query_param(location_reverse_name_order_path(location.id)),
-       { class: tab_id(__method__.to_s) }]
+       { class: tab_id(__method__.to_s), icon: :back }]
     end
 
     def location_version_tabs(location:)
@@ -79,7 +88,7 @@ module Tabs
     def observations_at_location_tab(location)
       [show_obs_link_title_with_count(location),
        add_query_param(observations_path(location: location.id)),
-       { class: tab_id(__method__.to_s) }]
+       { class: tab_id(__method__.to_s), icon: :observations }]
     end
 
     def location_map_title(query:)

@@ -1,0 +1,18 @@
+<% if @description&.notes? %>
+
+  <%= panel_block(
+    id: "location_best_description",
+    heading: description_title(@description),
+    heading_links: description_mod_links(@description, :location).safe_join
+  ) do
+    render(partial: "descriptions/show_description_details",
+              object: @description)
+  end %>
+
+  <%= render(partial: "comments/comments_for_object",
+            locals: { object: @description, comments: @desc_comments,
+                      controls: @user, limit: 2 }) %>
+
+<% end %>
+
+<%= show_alt_descriptions(object: @location, projects: @projects) %>
