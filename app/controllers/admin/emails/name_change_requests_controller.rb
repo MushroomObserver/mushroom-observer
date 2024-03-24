@@ -57,7 +57,8 @@ module Admin
         temporarily_set_locale(MO.default_locale) do
           QueuedEmail::Webmaster.create_email(
             sender_email: @user.email,
-            content: change_request_content(name_with_icn_id, new_name_with_icn_id),
+            content: change_request_content(name_with_icn_id,
+                                            new_name_with_icn_id),
             subject: "Request to change Name having dependents"
           )
         end
