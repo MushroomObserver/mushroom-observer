@@ -111,7 +111,7 @@ module LinkHelper
 
   # pass title if it's a plain button (say for collapse) but you want a tooltip
   def link_icon(type, title: "")
-    return "" unless (glyph = link_icon_index[type])
+    return "" unless (glyph = LINK_ICON_INDEX[type])
 
     text = ""
     opts = { class: "glyphicon glyphicon-#{glyph} px-2" }
@@ -125,39 +125,38 @@ module LinkHelper
     tag.span(text, **opts)
   end
 
-  def link_icon_index
-    {
-      edit: "edit",
-      delete: "remove-circle",
-      add: "plus",
-      back: "step-backward",
-      show: "eye-open",
-      hide: "eye-close",
-      reuse: "share",
-      x: "remove",
-      remove: "remove-circle",
-      send: "send",
-      ban: "ban-circle",
-      minus: "minus-sign",
-      trash: "trash",
-      cancel: "remove",
-      email: "envelope",
-      question: "question-sign",
-      list: "list",
-      clone: "duplicate",
-      merge: "transfer",
-      move: "random",
-      adjust: "resize-vertical",
-      make_default: "star",
-      publish: "upload",
-      deprecate: "ok-circle", # approved name needs to look "approved"
-      approve: "exclamation-sign", # deprecated name needs to look "deprecated"
-      synonyms: "random",
-      tracking: "bullhorn",
-      manage_lists: "indent-left",
-      observations: "tags"
-    }.freeze
-  end
+  # NOTE: Specific to glyphicons
+  LINK_ICON_INDEX = {
+    edit: "edit",
+    delete: "remove-circle",
+    add: "plus",
+    back: "step-backward",
+    show: "eye-open",
+    hide: "eye-close",
+    reuse: "share",
+    x: "remove",
+    remove: "remove-circle",
+    send: "send",
+    ban: "ban-circle",
+    minus: "minus-sign",
+    trash: "trash",
+    cancel: "remove",
+    email: "envelope",
+    question: "question-sign",
+    list: "list",
+    clone: "duplicate",
+    merge: "transfer",
+    move: "random",
+    adjust: "resize-vertical",
+    make_default: "star",
+    publish: "upload",
+    deprecate: "ok-circle", # approved name needs to look "approved"
+    approve: "exclamation-sign", # deprecated name needs to look "deprecated"
+    synonyms: "random",
+    tracking: "bullhorn",
+    manage_lists: "indent-left",
+    observations: "tags"
+  }.freeze
 
   # button to destroy object
   # Used instead of link_to because method: :delete requires jquery_ujs library

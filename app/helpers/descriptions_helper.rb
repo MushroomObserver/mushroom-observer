@@ -248,6 +248,7 @@ module DescriptionsHelper
     html
   end
 
+  # This is the same as show_alt_descriptions, but in its own panel block.
   def show_alt_descriptions_panel(object:, projects: nil, current: nil)
     type = object.type_tag
 
@@ -263,7 +264,7 @@ module DescriptionsHelper
     panel_block(
       id: "alt_descriptions",
       heading: :show_name_descriptions.l,
-      heading_links: icon_link_to(*create_description_tab(object, type)),
+      heading_links: icon_link_to(*create_description_tab(object, type))
     ) do
       html
     end
