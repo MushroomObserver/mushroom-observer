@@ -8,8 +8,9 @@ module Images
     before_action :login_required
 
     def new
-      @target = find_or_goto_index(User, params[:id].to_s)
-      return unless @target && can_email_user_question?(@target)
+      return unless
+        (@image = find_or_goto_index(Image, params[:id].to_s)) &&
+        can_email_user_question?(@image, method: :email_general_commercial)
 
       respond_to do |format|
         format.html
