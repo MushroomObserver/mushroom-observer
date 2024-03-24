@@ -321,6 +321,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                                  controller: "add_user_to_group"
     namespace :emails do
       resource :features, only: [:new, :create], controller: "features"
+      resource :webmaster_questions, only: [:new, :create],
+                                     controller: "webmaster_questions"
     end
   end
 
@@ -355,9 +357,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # match("/emails/ask_user_question(/:id)",
   #       to: "emails#ask_user_question", via: [:get, :post], id: /\d+/,
   #       as: "emails_ask_user_question")
-  match("/emails/ask_webmaster_question(/:id)",
-        to: "emails#ask_webmaster_question", via: [:get, :post], id: /\d+/,
-        as: "emails_ask_webmaster_question")
+  # match("/emails/ask_webmaster_question(/:id)",
+  #       to: "emails#ask_webmaster_question", via: [:get, :post], id: /\d+/,
+  #       as: "emails_ask_webmaster_question")
   # match("/emails/commercial_inquiry(/:id)",
   #       to: "emails#commercial_inquiry", via: [:get, :post], id: /\d+/,
   #       as: "emails_commercial_inquiry")
@@ -868,7 +870,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/observer/ask_user_question/:id",
       to: redirect(path: "/users/%{id}/emails/new"))
   get("/observer/ask_webmaster_question",
-      to: redirect(path: "/emails/ask_webmaster_question"))
+      to: redirect(path: "/admin/emails/webmaster_questions/new"))
   get("/observer/commercial_inquiry/:id",
       to: redirect(path: "/images/%{id}/emails/new"))
   get("/observer/email_merge_request",

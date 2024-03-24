@@ -1,12 +1,6 @@
-<%
-add_page_title(:ask_webmaster_title.t)
+<%= form_with(url: { action: :create }) do |f| %>
 
-url = { action: :ask_webmaster_question }
-%>
-
-<%= :ask_webmaster_note.tp %>
-
-<%= form_with(url: url) do |f| %>
+  <%= :ask_webmaster_note.tp %>
 
   <%= fields_for(:user) do |f_u| %>
     <%= text_field_with_label(form: f_u, field: :email, value: @email, size: 60,
