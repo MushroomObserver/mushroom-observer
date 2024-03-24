@@ -25,7 +25,9 @@
      current = field_slip.observation %>
     <div>
        Current Observation:<br/>
-       <%= image_tag(Image.url(:thumbnail, current.thumb_image_id)) %><br/>
+       <% if current.thumb_image_id %>
+         <%= image_tag(Image.url(:thumbnail, current.thumb_image_id)) %><br/>
+       <% end %>
        <%= link_to(current.unique_format_name.t, observation_path(current)) %>
     </div>
     <br/>
@@ -47,7 +49,9 @@
      if obs %>
      <div>
        Last Observation:<br/>
-       <%= image_tag(Image.url(:thumbnail, obs.thumb_image_id)) %><br/>
+       <% if obs.thumb_image_id %>
+         <%= image_tag(Image.url(:thumbnail, obs.thumb_image_id)) %><br/>
+       <% end %>
        <%= link_to(obs.unique_format_name.t, observation_path(obs)) %>
     </div>
 
