@@ -1,0 +1,25 @@
+<%
+url = { action: :name_change_request, name_id: @name.id, new_name: @new_name }
+%>
+
+
+<%= form_with(url: url) do |f| %>
+
+  <%= :email_name_change_request_help.tp %>
+
+  <%= static_text_with_label(form: f, field: :name,
+                             label: :NAME.t + ":", inline: true,
+                             value: @name.unique_search_name +
+                                    "[##{@name.icn_id.to_s}]") %>
+
+  <%= hidden_field_with_label(form: f, field: :new_name_with_icn_id,
+                              label: :new_name.t + ":", inline: true,
+                              value: @new_name_with_icn_id) %>
+
+  <%= text_area_with_label(form: f, field: :notes, rows: 10,
+                           value: "", label: :Notes.t + ":",
+                           data: { autofocus: true }) %>
+
+  <%= submit_button(form: f, button: :SEND.l, center: true) %>
+
+<% end %>

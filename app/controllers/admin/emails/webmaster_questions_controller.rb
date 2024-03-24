@@ -2,7 +2,8 @@
 
 module Admin
   module Emails
-    class WebmasterQuestionsController < AdminController
+    # NOTE: Does not inherit from AdminController
+    class WebmasterQuestionsController < ApplicationController
       def new
         @email = params.dig(:user, :email)
         @content = params.dig(:question, :content)

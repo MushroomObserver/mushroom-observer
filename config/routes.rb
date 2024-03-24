@@ -323,6 +323,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       resource :features, only: [:new, :create], controller: "features"
       resource :webmaster_questions, only: [:new, :create],
                                      controller: "webmaster_questions"
+      resource :merge_requests, only: [:new, :create],
+                                controller: "merge_requests"
+      resource :name_change_requests, only: [:new, :create],
+                                      controller: "name_change_requests"
     end
   end
 
@@ -874,9 +878,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/observer/commercial_inquiry/:id",
       to: redirect(path: "/images/%{id}/emails/new"))
   get("/observer/email_merge_request",
-      to: redirect(path: "/emails/merge_request"))
+      to: redirect(path: "/admin/emails/merge_requests/new"))
   get("/observer/email_name_change_request",
-      to: redirect(path: "/emails/name_change_request"))
+      to: redirect(path: "/admin/emails/name_change_requests/new"))
 
   # ----- Glossary Terms: legacy action redirects
   redirect_legacy_actions(
