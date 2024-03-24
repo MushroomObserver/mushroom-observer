@@ -229,6 +229,28 @@ module DescriptionsHelper
   def show_alt_descriptions(object:, projects: nil, current: nil)
     type = object.type_tag
 
+    # Show existing drafts, with link to create new one.
+    head = tag.b(:show_name_descriptions.l) + ": "
+    head += icon_link_to(*create_description_tab(object, type))
+
+    # Add title and maybe "no descriptions", wrapping it all up in paragraph.
+    list = list_descriptions(object: object, type: type,
+                             current: current).map do |link|
+      indent + link
+    end
+    any = list.any?
+    list.unshift(head)
+    list << indent + :"show_#{type}_no_descriptions".t unless any
+    html = list.safe_join(safe_br)
+    html = tag.div(html)
+
+    add_list_of_projects(object, type, html, projects) if projects.present?
+    html
+  end
+
+  def show_alt_descriptions_panel(object:, projects: nil, current: nil)
+    type = object.type_tag
+
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
     list = list_descriptions(object: object, type: type, current: current)
     any = list.any?
