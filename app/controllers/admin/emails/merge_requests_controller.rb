@@ -2,7 +2,7 @@
 
 module Admin
   module Emails
-    class MergeRequestsController < AdminController
+    class MergeRequestsController < ApplicationController
       include ::Emailable
 
       before_action :login_required
@@ -10,7 +10,7 @@ module Admin
       def new
         return unless (@model = validate_merge_model!(params[:type]))
 
-        unless validate_model_and_objects!
+        unless validate_objects!
           redirect_back_or_default("/")
           return
         end

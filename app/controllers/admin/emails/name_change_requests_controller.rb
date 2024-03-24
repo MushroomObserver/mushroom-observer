@@ -2,7 +2,7 @@
 
 module Admin
   module Emails
-    class NameChangeRequestsController < AdminController
+    class NameChangeRequestsController < ApplicationController
       include ::Emailable
 
       before_action :login_required
@@ -10,7 +10,7 @@ module Admin
       def new
         return unless check_both_names!
 
-        unless check_different_icn_ids!
+        unless check_different_icn_ids
           redirect_back_or_default("/")
           return
         end
@@ -31,7 +31,7 @@ module Admin
       def create
         return unless check_both_names!
 
-        unless check_different_icn_ids!
+        unless (name_with_icn_id = check_different_icn_ids)
           redirect_back_or_default("/")
           return
         end
@@ -46,11 +46,11 @@ module Admin
           (@new_name_with_icn_id = params[:new_name_with_icn_id])
       end
 
-      def check_different_icn_ids!
+      def check_different_icn_ids
         name_with_icn_id = "#{@name.search_name} [##{@name.icn_id}]"
         return false if name_with_icn_id == params[:new_name_with_icn_id]
 
-        true
+        name_with_icn_id
       end
 
       def send_name_change_request(name_with_icn_id, new_name_with_icn_id)

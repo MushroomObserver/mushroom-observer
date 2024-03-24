@@ -1,0 +1,21 @@
+
+<%= form_with(url: { action: :create, type: @model.name,
+                     old_id: @old_obj.id, new_id: @new_obj.id }) do |f| %>
+
+  <%= :email_merge_request_help.tp(type: @model.type_tag) %>
+
+  <%= static_text_with_label(form: f, field: :old_obj, inline: true,
+                             label: @model.type_tag.to_s.upcase.to_sym.t + ":",
+                             value: @old_obj.unique_format_name.t) %>
+
+  <%= static_text_with_label(form: f, field: :new_obj, inline: true,
+                             label: @model.type_tag.to_s.upcase.to_sym.t + ":",
+                             value: @new_obj.unique_format_name.t) %>
+
+  <%= text_area_with_label(form: f, field: :notes, rows: 10,
+                           value: "", label: :Notes.t + ":",
+                           data: { autofocus: true }) %>
+
+  <%= submit_button(form: f, button: :SEND.l, center: true) %>
+
+<% end %>

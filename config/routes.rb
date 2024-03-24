@@ -357,26 +357,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Contributors: standard actions --------------------------------------
   resources :contributors, only: [:index]
 
-  # ----- Emails: no resources, just forms ------------------------------------
-  # match("/emails/ask_user_question(/:id)",
-  #       to: "emails#ask_user_question", via: [:get, :post], id: /\d+/,
-  #       as: "emails_ask_user_question")
-  # match("/emails/ask_webmaster_question(/:id)",
-  #       to: "emails#ask_webmaster_question", via: [:get, :post], id: /\d+/,
-  #       as: "emails_ask_webmaster_question")
-  # match("/emails/commercial_inquiry(/:id)",
-  #       to: "emails#commercial_inquiry", via: [:get, :post], id: /\d+/,
-  #       as: "emails_commercial_inquiry")
-  # match("/emails/features(/:id)",
-  #       to: "emails#features", via: [:get, :post], id: /\d+/,
-  #       as: "emails_features")
-  match("/emails/merge_request(/:id)",
-        to: "emails#merge_request", via: [:get, :post], id: /\d+/,
-        as: "emails_merge_request")
-  match("/emails/name_change_request(/:id)",
-        to: "emails#name_change_request", via: [:get, :post], id: /\d+/,
-        as: "emails_name_change_request")
-
   # ----- Export: no resources ------------------------------------
   get("/export/set_export_status(/:id)",
       to: "export#set_export_status",

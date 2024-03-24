@@ -1,9 +1,5 @@
-<%
-url = { action: :name_change_request, name_id: @name.id, new_name: @new_name }
-%>
-
-
-<%= form_with(url: url) do |f| %>
+<%= form_with(url: { action: :create, name_id: @name.id,
+                     new_name: @new_name }) do |f| %>
 
   <%= :email_name_change_request_help.tp %>
 
