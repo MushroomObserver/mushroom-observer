@@ -323,6 +323,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                                  controller: "add_user_to_group"
     namespace :emails do
       resource :features, only: [:new, :create], controller: "features"
+      resource :webmaster_questions, only: [:new, :create],
+                                     controller: "webmaster_questions"
+      resource :merge_requests, only: [:new, :create],
+                                controller: "merge_requests"
+      resource :name_change_requests, only: [:new, :create],
+                                      controller: "name_change_requests"
     end
   end
 
@@ -352,26 +358,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Contributors: standard actions --------------------------------------
   resources :contributors, only: [:index]
-
-  # ----- Emails: no resources, just forms ------------------------------------
-  match("/emails/ask_user_question(/:id)",
-        to: "emails#ask_user_question", via: [:get, :post], id: /\d+/,
-        as: "emails_ask_user_question")
-  match("/emails/ask_webmaster_question(/:id)",
-        to: "emails#ask_webmaster_question", via: [:get, :post], id: /\d+/,
-        as: "emails_ask_webmaster_question")
-  match("/emails/commercial_inquiry(/:id)",
-        to: "emails#commercial_inquiry", via: [:get, :post], id: /\d+/,
-        as: "emails_commercial_inquiry")
-  # match("/emails/features(/:id)",
-  #       to: "emails#features", via: [:get, :post], id: /\d+/,
-  #       as: "emails_features")
-  match("/emails/merge_request(/:id)",
-        to: "emails#merge_request", via: [:get, :post], id: /\d+/,
-        as: "emails_merge_request")
-  match("/emails/name_change_request(/:id)",
-        to: "emails#name_change_request", via: [:get, :post], id: /\d+/,
-        as: "emails_name_change_request")
 
   # ----- Export: no resources ------------------------------------
   get("/export/set_export_status(/:id)",
@@ -434,6 +420,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       put("transform", to: "images/transformations#update", as: "transform")
       get("exif", to: "images/exif#show", as: "exif")
       put("export", to: "images/exports#update", as: "export")
+      get("emails/new", to: "images/emails#new",
+                        as: "new_commercial_inquiry_for")
+      post("emails", to: "images/emails#create",
+                     as: "send_commercial_inquiry_for")
     end
     put("/vote", to: "images/votes#update", as: "vote")
   end
@@ -822,7 +812,14 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :translations, only: [:index, :edit, :update]
 
   # ----- Users: standard actions -------------------------------------------
-  resources :users, id: /\d+/, only: [:index, :show]
+  resources :users, id: /\d+/, only: [:index, :show] do
+    member do
+      get("emails/new", to: "users/emails#new",
+                        as: "new_question_for")
+      post("emails", to: "users/emails#create",
+                     as: "send_question_for")
+    end
+  end
 
   # ----- VisualModels: standard actions ------------------------------------
   resources :visual_models, id: /\d+/ do
@@ -859,17 +856,17 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Emails: legacy action redirects
   get("/observer/ask_observation_question/:id",
-      to: redirect(path: "/emails/ask_observation_question/%{id}"))
+      to: redirect(path: "/observations/%{id}/emails/new"))
   get("/observer/ask_user_question/:id",
-      to: redirect(path: "/emails/ask_user_question/%{id}"))
+      to: redirect(path: "/users/%{id}/emails/new"))
   get("/observer/ask_webmaster_question",
-      to: redirect(path: "/emails/ask_webmaster_question"))
+      to: redirect(path: "/admin/emails/webmaster_questions/new"))
   get("/observer/commercial_inquiry/:id",
-      to: redirect(path: "/emails/commercial_inquiry/%{id}"))
+      to: redirect(path: "/images/%{id}/emails/new"))
   get("/observer/email_merge_request",
-      to: redirect(path: "/emails/merge_request"))
+      to: redirect(path: "/admin/emails/merge_requests/new"))
   get("/observer/email_name_change_request",
-      to: redirect(path: "/emails/name_change_request"))
+      to: redirect(path: "/admin/emails/name_change_requests/new"))
 
   # ----- Glossary Terms: legacy action redirects
   redirect_legacy_actions(

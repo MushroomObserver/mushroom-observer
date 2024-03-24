@@ -351,6 +351,14 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     order(contribution: :desc, name: :asc, login: :asc)
   }
 
+  # NOTE: the obs images are a separate optimized query
+  scope :show_includes, lambda {
+    strict_loading.includes(
+      :location,
+      :user_stats
+    )
+  }
+
   # These are used by forms.
   attr_accessor :place_name
   attr_accessor :email_confirmation

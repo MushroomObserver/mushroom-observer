@@ -29,7 +29,7 @@ class UsersController < ApplicationController
   def show
     store_location
     id = params[:id].to_s
-    @show_user = find_or_goto_index(User, id)
+    find_user!
 
     case params[:flow]
     when "next"
@@ -37,13 +37,9 @@ class UsersController < ApplicationController
     when "prev"
       redirect_to_next_object(:prev, User, id) and return
     end
-    # NOTE: Rails won't route anything to this show action
-    # unless there's an id param, so this may be superfluous.
-    return unless @show_user
 
-    @user_stats = @show_user.user_stats
     @life_list = Checklist::ForUser.new(@show_user)
-    instance_vars_for_thumbnails_in_summary!
+    define_instance_vars_for_summary!
   end
 
   alias show_user show
@@ -83,16 +79,33 @@ class UsersController < ApplicationController
     show_index_of_objects(query, args)
   end
 
+  def find_user!
+    @show_user = User.show_includes.safe_find(params[:id]) ||
+                 flash_error_and_goto_index(User, params[:id])
+  end
+
+  MAX_THUMBS = 6
+
   # set @observations whose thumbnails will display in user summary
-  def instance_vars_for_thumbnails_in_summary!
+  def define_instance_vars_for_summary!
+    @user_stats = @show_user.user_stats
+
+    # NOTE: This query is pretty well optimized.
+    # First check the user's observation thumbnails for their own favorites
+    image_includes = { thumb_image: [:image_votes, :projects, :license, :user] }
     @query = Query.lookup(:Observation, :by_user, user: @show_user,
                                                   by: :owners_thumbnail_quality)
-    image_includes = { thumb_image: [:image_votes, :license, :user] }
-    @observations = @query.results(limit: 6, include: image_includes)
-    return unless @observations.length < 6
+    observations = @query.results(limit: 6, include: image_includes)
 
-    @query = Query.lookup(:Observation, :by_user, user: @show_user,
-                                                  by: :thumbnail_quality)
-    @observations = @query.results(limit: 6, include: image_includes)
+    # If not enough, check for other people's favorites
+    if (MAX_THUMBS - observations.length).positive?
+      @query = Query.lookup(:Observation, :by_user, user: @show_user,
+                                                    by: :thumbnail_quality)
+      other_users_favorites = @query.results(limit: MAX_THUMBS,
+                                             include: image_includes)
+      observations = observations.union(other_users_favorites).take(MAX_THUMBS)
+    end
+
+    @best_images = observations.map(&:thumb_image)
   end
 end

@@ -429,7 +429,7 @@ class NamesController < ApplicationController
   def update_name
     @parse = parse_name
     if !minor_change? && @name.dependents? && !in_admin_mode?
-      redirect_with_query(emails_name_change_request_path(
+      redirect_with_query(new_admin_emails_name_change_requests_path(
                             name_id: @name.id,
                             # Auricularia Bull. [#17132]
                             new_name_with_icn_id: "#{@parse.search_name} " \
@@ -631,7 +631,7 @@ class NamesController < ApplicationController
       perform_merge_names(new_name)
       redirect_to_show_name
     else
-      redirect_with_query(emails_merge_request_path(
+      redirect_with_query(new_admin_emails_merge_requests_path(
                             type: :Name, old_id: @name.id, new_id: new_name.id
                           ))
     end

@@ -14,8 +14,7 @@ target_type = tag.span(target.class.name.to_sym.t, class: "small") \
       tag.div(class: "col-xs-12 col-sm-9 col-lg-10") do
         if local_assigns[:show_name] && show_name
           concat(tag.h4(class: "mt-0") do
-            concat(target_name_link)
-            concat(target_type)
+            [target_name_link, target_type].safe_join(" ")
           end)
         end
         concat(tag.div(comment.summary.tl, class: "font-weight-bold"))

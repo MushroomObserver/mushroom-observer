@@ -8,7 +8,6 @@ module MatrixBoxHelper
     cached = args[:cached] || false
     objects = args[:objects] || []
     locals = args.except(:objects, :as, :partial, :cached)
-
     [
       tag.ul(
         class: "row list-unstyled mt-3",
@@ -54,6 +53,7 @@ module MatrixBoxHelper
     end
   end
 
+  # rubocop:disable Style/ArgumentsForwarding
   def matrix_box_image(image = nil, **args)
     return unless image
 
@@ -61,6 +61,7 @@ module MatrixBoxHelper
       interactive_image(image, **args)
     end
   end
+  # rubocop:enable Style/ArgumentsForwarding
 
   # for matrix_box_carousels:
   # def matrix_box_images(presenter)
@@ -136,7 +137,7 @@ module MatrixBoxHelper
       propose_naming_link(
         object.id, btn_class: "btn btn-default d-inline-block mb-3",
                    context: "matrix_box"
-)
+      )
     end
   end
 

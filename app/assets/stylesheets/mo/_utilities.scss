@@ -589,6 +589,10 @@
   border-radius: 0;
 }
 
+.bg-none {
+  background: none !important;
+}
+
 .bg-visible {
   background: rgba($black, 0.3);
 }

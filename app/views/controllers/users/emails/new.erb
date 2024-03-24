@@ -1,0 +1,3 @@
+<% add_page_title(:ask_user_question_title.t(user: @target.legal_name)) %>
+
+<%= render(partial: "users/emails/form", locals: { local: true }) %>

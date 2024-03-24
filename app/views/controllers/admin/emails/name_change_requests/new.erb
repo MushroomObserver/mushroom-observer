@@ -1,0 +1,7 @@
+<%
+add_page_title(:email_name_change_request_title.t)
+add_tab_set(email_name_change_request_tabs(name: @name))
+%>
+
+<%= render(partial: "admin/emails/name_change_requests/form",
+           locals: { local: true }) %>
