@@ -20,3 +20,4 @@ field_slip_no_obs:
 field_slip_falmouth_one:
   project: falmouth_2023_09_project
   code: FAL-0001
+  user: rolf

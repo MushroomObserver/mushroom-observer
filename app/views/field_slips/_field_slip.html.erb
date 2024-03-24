@@ -7,8 +7,10 @@
       <%= :field_slip_no_project.t %>
     <% end %>
     <br/>
-    <strong><%= :field_slip_creator.t %>:</strong>
-    <%= link_to(field_slip.user.legal_name, user_path(field_slip.user_id)) %><br/>
+    <% if field_slip.user %>
+      <strong><%= :field_slip_creator.t %>:</strong>
+      <%= link_to(field_slip.user.legal_name, user_path(field_slip.user_id)) %><br/>
+    <% end %>
     <strong><%= :OBSERVATION.t %>:</strong>
     <% if field_slip.observation %>
       <%= link_to(field_slip.observation.unique_format_name.t, observation_path(field_slip.observation)) %>

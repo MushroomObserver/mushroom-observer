@@ -16,30 +16,27 @@ class FieldSlipsTest < ApplicationSystemTestCase
   test "navigate to should field slip" do
     login!(mary)
     visit field_slips_url
-    click_on :field_slip_show.t
+    find(:xpath, '//*[@id="field_slips"]/a[1]').click
     assert_text :field_slip_index.t
-    click_on "Back"
   end
 
-  test "should update Field slip" do
+  test "should update field slip" do
     login!(mary)
     visit field_slip_url(@field_slip)
-    click_on "Edit this field slip", match: :first
+    click_on :field_slip_edit.t, match: :first
 
-    fill_in "Code", with: @field_slip.code
-    fill_in "Observation", with: @field_slip.observation_id
-    fill_in "Project", with: @field_slip.project_id
-    click_on "Update Field slip"
+    fill_in :field_slip_code.t, with: @field_slip.code
+    select(@field_slip.project.title, from: :PROJECT.t)
+    click_on :field_slip_keep_obs.t
 
-    assert_text "Field slip was successfully updated"
-    click_on "Back"
+    assert_text :field_slip_updated.t
   end
 
-  test "should destroy Field slip" do
+  test "should destroy field slip" do
     login!(mary)
     visit field_slip_url(@field_slip)
     click_on :field_slip_destroy.t, match: :first
 
-    assert_text "Field slip was successfully destroyed"
+    assert_text :field_slip_destroyed.t
   end
 end
