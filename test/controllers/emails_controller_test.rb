@@ -10,20 +10,6 @@ class EmailsControllerTest < FunctionalTestCase
     assert_form_action(action: :ask_webmaster_question)
   end
 
-  def test_ask_questions
-    id = images(:in_situ_image).id
-    requires_login(:commercial_inquiry, id: id)
-    assert_form_action(action: :commercial_inquiry, id: id)
-
-    # Prove that trying to ask question of user who refuses questions
-    # redirects to that user's page (instead of an email form).
-    # Not actually implemented yet.
-    # rolf.update(no_emails: true)
-    # image = images(:in_situ_image) # rolf's image
-    # requires_login(:commercial_inquiry, id: image.id)
-    # assert_flash_text(:permission_denied.t)
-  end
-
   def test_send_webmaster_question
     ask_webmaster_test("rolf@mushroomobserver.org",
                        response: :index)
@@ -80,18 +66,6 @@ class EmailsControllerTest < FunctionalTestCase
          })
     assert_response(response)
     assert_flash_text(flash) if flash
-  end
-
-  def test_send_commercial_inquiry
-    image = images(:commercial_inquiry_image)
-    params = {
-      id: image.id,
-      commercial_inquiry: {
-        content: "Testing commercial_inquiry"
-      }
-    }
-    post_requires_login(:commercial_inquiry, params)
-    assert_redirected_to(image_path(image.id))
   end
 
   def test_email_merge_request

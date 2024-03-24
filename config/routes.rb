@@ -358,9 +358,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   match("/emails/ask_webmaster_question(/:id)",
         to: "emails#ask_webmaster_question", via: [:get, :post], id: /\d+/,
         as: "emails_ask_webmaster_question")
-  match("/emails/commercial_inquiry(/:id)",
-        to: "emails#commercial_inquiry", via: [:get, :post], id: /\d+/,
-        as: "emails_commercial_inquiry")
+  # match("/emails/commercial_inquiry(/:id)",
+  #       to: "emails#commercial_inquiry", via: [:get, :post], id: /\d+/,
+  #       as: "emails_commercial_inquiry")
   # match("/emails/features(/:id)",
   #       to: "emails#features", via: [:get, :post], id: /\d+/,
   #       as: "emails_features")
@@ -428,6 +428,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       put("transform", to: "images/transformations#update", as: "transform")
       get("exif", to: "images/exif#show", as: "exif")
       put("export", to: "images/exports#update", as: "export")
+      get("emails/new", to: "images/emails#new",
+                        as: "new_commercial_inquiry_for")
+      post("emails", to: "images/emails#create",
+                     as: "send_commercial_inquiry_for")
     end
     put("/vote", to: "images/votes#update", as: "vote")
   end
@@ -860,13 +864,13 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Emails: legacy action redirects
   get("/observer/ask_observation_question/:id",
-      to: redirect(path: "/emails/ask_observation_question/%{id}"))
+      to: redirect(path: "/observations/%{id}/emails/new"))
   get("/observer/ask_user_question/:id",
-      to: redirect(path: "/emails/ask_user_question/%{id}"))
+      to: redirect(path: "/users/%{id}/emails/new"))
   get("/observer/ask_webmaster_question",
       to: redirect(path: "/emails/ask_webmaster_question"))
   get("/observer/commercial_inquiry/:id",
-      to: redirect(path: "/emails/commercial_inquiry/%{id}"))
+      to: redirect(path: "/images/%{id}/emails/new"))
   get("/observer/email_merge_request",
       to: redirect(path: "/emails/merge_request"))
   get("/observer/email_name_change_request",

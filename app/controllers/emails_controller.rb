@@ -17,19 +17,6 @@ class EmailsController < ApplicationController
     @email = @user.email if @user
   end
 
-  def commercial_inquiry
-    return unless (@image = find_or_goto_index(Image, params[:id].to_s)) &&
-                  can_email_user_question?(@image,
-                                           method: :email_general_commercial) &&
-                  request.method == "POST"
-
-    commercial_inquiry = params[:commercial_inquiry][:content]
-    QueuedEmail::CommercialInquiry.create_email(@user, @image,
-                                                commercial_inquiry)
-    flash_notice(:runtime_commercial_inquiry_success.t)
-    redirect_with_query(image_path(@image.id))
-  end
-
   def merge_request
     return unless (@model = validate_merge_model!(params[:type]))
 
