@@ -1,0 +1,12 @@
+<%= form_with(url: add_query_param({ action: :create, id: @image.id }),
+              scope: :commercial_inquiry) do |f| %>
+
+  <%= tag.div(interactive_image(@image, size: :medium, votes: false)) %>
+
+  <% label = :commercial_inquiry_header.tp(user: @image.user.legal_name) %>
+  <%= text_area_with_label(form: f, field: :content,
+                           rows: 10, label: label) %>
+
+  <%= submit_button(form: f, button: :SEND.l, center: true) %>
+
+<% end %>

@@ -86,7 +86,7 @@ module Tabs
       return unless image.user.email_general_commercial && !image.user.no_emails
 
       [:image_show_inquiry.t,
-       add_query_param(emails_commercial_inquiry_path(image.id)),
+       add_query_param(new_commercial_inquiry_for_image_path(image.id)),
        { class: tab_id(__method__.to_s) }]
     end
 
