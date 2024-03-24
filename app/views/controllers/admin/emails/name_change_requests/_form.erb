@@ -1,14 +1,7 @@
-<%
-add_page_title(:email_name_change_request_title.t)
+<%= form_with(url: { action: :create, name_id: @name.id,
+                     new_name: @new_name }) do |f| %>
 
-add_tab_set(email_name_change_request_tabs(name: @name))
-
-url = { action: :name_change_request, name_id: @name.id, new_name: @new_name }
-%>
-
-<%= :email_name_change_request_help.tp %>
-
-<%= form_with(url: url) do |f| %>
+  <%= :email_name_change_request_help.tp %>
 
   <%= static_text_with_label(form: f, field: :name,
                              label: :NAME.t + ":", inline: true,

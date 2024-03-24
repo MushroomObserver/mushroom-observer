@@ -1452,7 +1452,7 @@ class NamesControllerTest < FunctionalTestCase
     }
     login(name.user.login)
     put(:update, params: params)
-    # This does not generate a emails_name_change_request_path email,
+    # This does not generate a new_admin_emails_name_change_requests_path email,
     # both because this name has no dependents,
     # and because the email form requires a POST.
     assert(@@emails.one?)
@@ -1990,8 +1990,9 @@ class NamesControllerTest < FunctionalTestCase
     put(:update, params: params)
 
     assert_redirected_to(
-      emails_name_change_request_path(name_id: name.id,
-                                      new_name_with_icn_id: "Superboletus [#]"),
+      new_admin_emails_name_change_requests_path(
+        name_id: name.id, new_name_with_icn_id: "Superboletus [#]"
+      ),
       "User should be unable to change text_name of Name with dependents"
     )
   end
@@ -2054,7 +2055,7 @@ class NamesControllerTest < FunctionalTestCase
     put(:update, params: params)
 
     assert_redirected_to(
-      /#{emails_name_change_request_path}/,
+      /#{new_admin_emails_name_change_requests_path}/,
       "User should be unable to change an approved synonym of a Naming"
     )
   end
@@ -2141,7 +2142,7 @@ class NamesControllerTest < FunctionalTestCase
 
     put(:update, params: params)
     assert_redirected_to(
-      emails_name_change_request_path(
+      new_admin_emails_name_change_requests_path(
         name_id: name.id,
         new_name_with_icn_id: "#{name.search_name} [##{name.icn_id + 1}]"
       ),
@@ -2240,7 +2241,7 @@ class NamesControllerTest < FunctionalTestCase
 
     # Fails because Rolf isn't in admin mode.
     put(:update, params: params)
-    assert_redirected_to(emails_merge_request_path(
+    assert_redirected_to(new_admin_emails_merge_requests_path(
                            type: :Name, old_id: old_name.id, new_id: new_name.id
                          ))
     assert(Name.find(old_name.id))
@@ -2361,7 +2362,7 @@ class NamesControllerTest < FunctionalTestCase
 
     login("rolf")
     put(:update, params: params)
-    assert_redirected_to(emails_merge_request_path(
+    assert_redirected_to(new_admin_emails_merge_requests_path(
                            type: :Name, old_id: old_name.id, new_id: new_name.id
                          ))
 
@@ -2746,7 +2747,7 @@ class NamesControllerTest < FunctionalTestCase
     # Fails normally.
     login("rolf")
     put(:update, params: params)
-    assert_redirected_to(emails_merge_request_path(
+    assert_redirected_to(new_admin_emails_merge_requests_path(
                            type: :Name, old_id: old_name.id, new_id: new_name.id
                          ))
     assert(old_name.reload)

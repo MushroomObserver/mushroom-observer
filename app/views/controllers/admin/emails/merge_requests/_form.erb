@@ -1,15 +1,8 @@
-<%
-add_page_title(:email_merge_request_title.t(type: @model.type_tag))
 
-add_tab_set(email_merge_request_tabs(old_obj: @old_obj))
+<%= form_with(url: { action: :create, type: @model.name,
+                     old_id: @old_obj.id, new_id: @new_obj.id }) do |f| %>
 
-url = { action: :merge_request, type: @model.name,
-        old_id: @old_obj.id, new_id: @new_obj.id }
-%>
-
-<%= :email_merge_request_help.tp(type: @model.type_tag) %>
-
-<%= form_with(url: url) do |f| %>
+  <%= :email_merge_request_help.tp(type: @model.type_tag) %>
 
   <%= static_text_with_label(form: f, field: :old_obj, inline: true,
                              label: @model.type_tag.to_s.upcase.to_sym.t + ":",
