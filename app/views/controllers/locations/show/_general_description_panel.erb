@@ -1,0 +1,16 @@
+<% if @description&.notes? %>
+
+  <%
+  heading = :show_name_general_description.l
+  link1 = icon_link_with_query(*location_show_description_tab(@location))
+  link2 = icon_link_with_query(*location_edit_description_tab(@location))
+  heading_links = @user ? [link1, link2].reject(&:nil?).safe_join(" | ") : ""
+  %>
+
+  <%= panel_block(id: "location_general_description",
+                  heading: heading, heading_links: heading_links) do
+    @description.notes.tpl
+  end %>
+
+<% end %>
+

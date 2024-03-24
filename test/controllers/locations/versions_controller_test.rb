@@ -12,7 +12,7 @@ module Locations
       get(:show,
           params: { id: location.id, version: location.version - 1 })
       assert_template("locations/versions/show")
-      assert_template("locations/show/_location")
+      assert_template("locations/show/_notes")
     end
 
     def test_show_past_location_no_version
