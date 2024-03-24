@@ -98,29 +98,6 @@ module DescriptionsHelper
     list
   end
 
-  # Be sure to preload the ivars @versions and @projects sent as args.
-  def show_description_details_and_alternates(desc, versions, projects,
-                                              review: false)
-    panel_block(
-      id: "description_details",
-      heading: :show_observation_details.l,
-      heading_links: description_change_links(desc),
-      footer: review ? show_description_export_and_review(desc) : nil
-    ) do
-      tag.div(class: "row") do
-        [
-          tag.div(class: "col-xs-12 col-md-6") do
-            show_description_details(desc, versions)
-          end,
-          tag.div(class: "col-xs-12 col-md-6") do
-            show_alt_descriptions(object: desc.parent, projects: projects,
-                                  current: desc)
-          end
-        ].safe_join
-      end
-    end
-  end
-
   # Details of a description for a show_description page.
   def show_description_details(description, versions, user = User.current)
     parent = description.parent

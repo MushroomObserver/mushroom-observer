@@ -7,15 +7,3 @@
     @location.notes.to_s.html_safe.tpl
   end
 end %>
-
-<% footer = tag.div(id: "name_previous_export") do
-  concat(show_previous_version(@location, @versions))
-  concat(export_status_controls(@location))
-end %>
-
-<%= panel_block(id: "location_footer", footer: footer) do
-  concat(tag.div(id: "location_authors_editors") do
-    show_authors_and_editors(obj: @location, versions: @versions, user: @user)
-  end)
-  concat(:show_name_num_notifications.t(num: @location.interests))
-end %>

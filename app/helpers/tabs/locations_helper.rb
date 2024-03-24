@@ -70,6 +70,28 @@ module Tabs
        { class: tab_id(__method__.to_s), icon: :back }]
     end
 
+    # description tabs:
+    def location_show_description_tab(location)
+      return unless location&.description
+
+      [:show_name_see_more.l,
+       add_query_param(location_description_path(location.description.id)),
+       { class: tab_id(__method__.to_s), icon: :list }]
+    end
+
+    def location_edit_description_tab(location)
+      return unless location&.description
+
+      [:EDIT.l, edit_location_description_path(location.description.id),
+       { class: tab_id(__method__.to_s), icon: :edit }]
+    end
+
+    def location_new_description_tab(location)
+      [:show_name_create_description.l,
+       new_location_description_path(location.id),
+       { class: tab_id(__method__.to_s), icon: :add }]
+    end
+
     def location_version_tabs(location:)
       [location_versions_tab(location)]
     end

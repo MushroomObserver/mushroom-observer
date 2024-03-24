@@ -9,7 +9,7 @@ add_tab_set(location_show_tabs)
 <div class="row">
   <div class="col-md-7">
     <%= tag.div(class: "mb-5") { make_map(objects: [@location]) } %>
-    <%= render(partial: "locations/show/descriptions") %>
+    <%= render(partial: "locations/show/general_description_panel") %>
     <%= render(partial: "comments/comments_for_object",
                 locals: { object: @location, comments: @comments,
                           controls: @user, limit: 2 }) %>
@@ -18,6 +18,8 @@ add_tab_set(location_show_tabs)
   <div class="col-md-5">
     <%= render(partial: "locations/show/coordinates") %>
     <%= render(partial: "locations/show/notes") %>
+    <%= show_alt_descriptions_panel(object: @location, projects: @projects) %>
+    <%= render(partial: "locations/show/footer") %>
   </div>
 </div><!--.row-->
 
