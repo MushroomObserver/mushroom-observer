@@ -1,6 +1,6 @@
 <% heading_links = [
-  icon_link_with_query(*edit_location_tab(@location)),
-  icon_link_with_query(*observations_at_location_tab(@location))
+  icon_link_with_query(*observations_at_location_tab(@location)),
+  icon_link_with_query(*edit_location_tab(@location))
 ]
 if in_admin_mode?
   heading_links << icon_link_with_query(*delete_location_tab(@location))
@@ -9,7 +9,7 @@ end
 %>
 <%= panel_block(id: "location_coordinates",
                 heading: :COORDINATES.l,
-                heading_links: heading_links.safe_join) do %>
+                heading_links: heading_links.safe_join(" | ")) do %>
 
   <div class="text-center mx-auto" style="max-width:30em">
     <div class="text-center my-4">

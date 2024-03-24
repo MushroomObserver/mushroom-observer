@@ -230,10 +230,7 @@ module DescriptionsHelper
     type = object.type_tag
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
-    list = list_descriptions(object: object, type: type,
-                             current: current).map do |link|
-      indent + link
-    end
+    list = list_descriptions(object: object, type: type, current: current)
     any = list.any?
     list << indent + :"show_#{type}_no_descriptions".t unless any
     html = list.safe_join(safe_br)
