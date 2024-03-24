@@ -232,6 +232,7 @@ falmouth_2023_09_project:
   user: dick
   admin_group: dick_only
   user_group: falmouth_2023_09_users
+  field_slip_prefix: FAL
   start_date: 2023-09-01
   end_date: 2023-09-30
   location: falmouth
