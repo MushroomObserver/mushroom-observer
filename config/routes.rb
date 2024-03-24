@@ -864,13 +864,13 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Emails: legacy action redirects
   get("/observer/ask_observation_question/:id",
-      to: redirect(path: "/emails/ask_observation_question/%{id}"))
+      to: redirect(path: "/observations/%{id}/emails/new"))
   get("/observer/ask_user_question/:id",
-      to: redirect(path: "/emails/ask_user_question/%{id}"))
+      to: redirect(path: "/users/%{id}/emails/new"))
   get("/observer/ask_webmaster_question",
       to: redirect(path: "/emails/ask_webmaster_question"))
   get("/observer/commercial_inquiry/:id",
-      to: redirect(path: "/emails/commercial_inquiry/%{id}"))
+      to: redirect(path: "/images/%{id}/emails/new"))
   get("/observer/email_merge_request",
       to: redirect(path: "/emails/merge_request"))
   get("/observer/email_name_change_request",
