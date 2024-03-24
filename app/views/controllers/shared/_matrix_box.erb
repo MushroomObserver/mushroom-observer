@@ -18,6 +18,9 @@ if presenter
   else
     image_args = {}
   end
+  footer_components = passed_args[:footer].presence ||
+    [matrix_box_log_footer(presenter),
+     matrix_box_identify_footer(identify, presenter.id)]
   %>
 
   <%= matrix_box(columns: columns, id: object_id) do
@@ -29,8 +32,7 @@ if presenter
             matrix_box_details(presenter, object_id, identify),
           ].safe_join
         end,
-        matrix_box_log_footer(presenter),
-        matrix_box_identify_footer(identify, presenter.id)
+        *footer_components
       ].safe_join
     end
   end %><!-- .matrix-box -->

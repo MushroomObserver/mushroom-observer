@@ -1,0 +1,49 @@
+<%= form_with(model: field_slip) do |form| %>
+  <% if field_slip.errors.any? %>
+    <div class="alert alert-danger">
+      <%= "#{pluralize(field_slip.errors.count,
+        :error.t, plural: :errors.t)} #{:field_slip_errors.t}" %>:
+      <ul>
+        <% field_slip.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= text_field_with_label(form: form, field: :code) %>
+
+  <% if @field_slip.projects %>
+    <%= select_with_label(form: form, field: :project_id,
+                          options: @field_slip.projects) %>
+  <% end %>
+
+  <div class="row mt-5 pt-3">
+    <% if field_slip.observation %>
+      <div class="col-sm-6">
+        <% btn = submit_button(form: form, button: :field_slip_keep_obs.t) %>
+        <ul class="row list-unstyled mb-0">
+          <%= render(partial: "shared/matrix_box",
+                     locals: { object: field_slip.observation, votes: false,
+                               footer: panel_block_footer(footer: btn),
+                               columns: "col-xs-12" }) %>
+        </ul>
+      </div>
+    <% end %>
+    <% if last_observation %>
+      <div class="col-sm-6">
+        <% btn = submit_button(form: form, button: :field_slip_last_obs.t) %>
+        <ul class="row list-unstyled mb-0">
+          <%= render(partial: "shared/matrix_box",
+                     locals: { object: last_observation, votes: false,
+                               footer: panel_block_footer(footer: btn),
+                               columns: "col-xs-12" }) %>
+        </ul>
+      </div>
+    <% end %>
+  </div>
+
+  <%= submit_button(form: form, button: :field_slip_create_obs.t,
+                    class: "my-5") %>
+
+<% end %>
