@@ -46,7 +46,8 @@ class FieldSlipsController < ApplicationController
     @field_slip = FieldSlip.new(field_slip_params)
 
     respond_to do |format|
-      check_project_membership(@field_slip)
+      check_project_membership
+      check_for_last_obs
       if params[:commit] == :field_slip_last_obs.t
         @field_slip.observation = ObservationView.last(User.current)
       end
@@ -72,9 +73,7 @@ class FieldSlipsController < ApplicationController
   # PATCH/PUT /field_slips/1 or /field_slips/1.json
   def update
     respond_to do |format|
-      if params[:commit] == :field_slip_last_obs.t
-        @field_slip.observation = ObservationView.last(User.current)
-      end
+      check_for_last_obs
       if @field_slip.update(field_slip_params)
         format.html do
           if params[:commit] == :field_slip_create_obs.t
@@ -124,11 +123,22 @@ class FieldSlipsController < ApplicationController
     params.require(:field_slip).permit(:observation_id, :project_id, :code)
   end
 
-  def check_project_membership(slip)
-    project = slip&.project
+  def check_project_membership
+    project = @field_slip&.project
     return unless project&.can_join?(User.current)
 
     project.user_group.users << User.current
     flash_notice(:field_slip_welcome.t(title: project.title))
+  end
+
+  def check_for_last_obs
+    return unless params[:commit] == :field_slip_last_obs.t
+
+    obs = ObservationView.last(User.current)
+    @field_slip.observation = obs
+    project = @field_slip.project
+    return unless obs && project&.user_can_add_observation?(obs, User.current)
+
+    project.add_observation(obs)
   end
 end
