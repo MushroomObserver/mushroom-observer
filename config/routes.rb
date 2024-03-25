@@ -333,12 +333,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Articles: standard actions --------------------------------------
   resources :articles, id: /\d+/
 
-  # ----- Authors: standard actions ------------------------------------
-  namespace :authors do
-    resource :review, only: [:show, :create, :destroy], id: /\d+/
-    resource :email_requests, only: [:new, :create]
-  end
-
   # ----- Autocompleters: fetch get ------------------------------------
   get "/autocompleters/new/:type/:id", to: "autocompleters#new"
 
@@ -356,6 +350,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Contributors: standard actions --------------------------------------
   resources :contributors, only: [:index]
+
+  # ----- Descriptions: namespaced actions -------------------------------------
+  namespace :descriptions do
+    resource :authors, only: [:show, :create, :destroy], id: /\d+/
+    resource :email_requests, only: [:new, :create]
+  end
 
   # ----- Export: no resources ------------------------------------
   get("/export/set_export_status(/:id)",
