@@ -1,3 +1,7 @@
+<%
+action = controller.action_name
+%>
+
 <%= form_with(model: field_slip) do |form| %>
   <% if field_slip.errors.any? %>
     <div class="alert alert-danger">
@@ -19,9 +23,9 @@
   <% end %>
 
   <%= submit_button(form: form, button: :field_slip_create_obs.t,
-                    class: "my-5") %>
+                    class: "mt-5") if action == "new" %>
 
-  <div class="row mt-5 pt-3">
+  <div class="row mt-5">
     <% if field_slip.observation %>
       <div class="col-sm-6">
         <%= render(partial: "field_slips/obs_thumbnail",
@@ -37,5 +41,8 @@
       </div>
     <% end %>
   </div>
+
+  <%= submit_button(form: form, button: :field_slip_create_obs.t,
+                    class: "my-5") if action == "edit" %>
 
 <% end %>
