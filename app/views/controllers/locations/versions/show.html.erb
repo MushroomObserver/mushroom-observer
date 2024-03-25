@@ -5,8 +5,17 @@ add_page_title(:show_past_location_title.t(
 add_tab_set(location_version_tabs(location: @location))
 %>
 
-<%= show_past_versions(@location, @versions) %>
+<div class="row">
+  <div class="col-md-7">
+    <%= tag.div(class: "mb-5") { make_map(objects: [@location]) } %>
+  </div>
 
-<%= render(partial: "locations/show/location", object: @location) %>
+  <div class="col-md-5">
+    <%= render(partial: "locations/show/coordinates") %>
+    <%= render(partial: "locations/show/notes") %>
+  </div>
+</div>
+
+<%= show_past_versions(@location, @versions) %>
 
 <%= show_object_footer(@location, @versions) %>

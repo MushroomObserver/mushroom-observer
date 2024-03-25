@@ -22,14 +22,15 @@ module DescriptionsHelper
   #   # Renders something like this:
   #   <p>EOL Project Draft: Show | Edit | Destroy</p>
   #
-  def show_embedded_description_title(desc, type)
-    title = description_title(desc)
-    links = description_mod_links(desc, type)
-    tag.div do
-      [tag.span(title, class: "text-lg"),
-       links.safe_join(" | ")].safe_join(safe_nbsp)
-    end
-  end
+  # Maybe unused presently
+  # def show_embedded_description_title(desc, type)
+  #   title = description_title(desc)
+  #   links = description_mod_links(desc, type)
+  #   tag.div do
+  #     [tag.span(title, class: "text-lg"),
+  #      links.safe_join(" | ")].safe_join(safe_nbsp)
+  #   end
+  # end
 
   def description_mod_links(desc, type)
     links = []
@@ -95,29 +96,6 @@ module DescriptionsHelper
     end
 
     list
-  end
-
-  # Be sure to preload the ivars @versions and @projects sent as args.
-  def show_description_details_and_alternates(desc, versions, projects,
-                                              review: false)
-    panel_block(
-      id: "description_details",
-      heading: :show_observation_details.l,
-      heading_links: description_change_links(desc),
-      footer: review ? show_description_export_and_review(desc) : nil
-    ) do
-      tag.div(class: "row") do
-        [
-          tag.div(class: "col-xs-12 col-md-6") do
-            show_description_details(desc, versions)
-          end,
-          tag.div(class: "col-xs-12 col-md-6") do
-            show_alt_descriptions(object: desc.parent, projects: projects,
-                                  current: desc)
-          end
-        ].safe_join
-      end
-    end
   end
 
   # Details of a description for a show_description page.
@@ -245,6 +223,28 @@ module DescriptionsHelper
 
     add_list_of_projects(object, type, html, projects) if projects.present?
     html
+  end
+
+  # This is the same as show_alt_descriptions, but in its own panel block.
+  def show_alt_descriptions_panel(object:, projects: nil, current: nil)
+    type = object.type_tag
+
+    # Add title and maybe "no descriptions", wrapping it all up in paragraph.
+    list = list_descriptions(object: object, type: type, current: current)
+    any = list.any?
+    list << indent + :"show_#{type}_no_descriptions".t unless any
+    html = list.safe_join(safe_br)
+
+    add_list_of_projects(object, type, html, projects) if projects.present?
+
+    # Show existing drafts, with link to create new one.
+    panel_block(
+      id: "alt_descriptions",
+      heading: :show_name_descriptions.l,
+      heading_links: icon_link_to(*create_description_tab(object, type))
+    ) do
+      html
+    end
   end
 
   # Show list of projects user is a member of.

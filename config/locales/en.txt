@@ -471,6 +471,8 @@
   confidence_levels: confidence levels
   CONSTRAINT_VIOLATIONS: Constraint Violations
   constraint_violations: constraint violations
+  COORDINATES: Coordinates
+  coordinates: coordinates
   COPYRIGHT_HOLDER: Copyright Holder
   copyright_holder: copyright holder
   COPYRIGHT_HOLDERS: Copyright Holders

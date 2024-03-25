@@ -15,10 +15,10 @@ module VersionsHelper
   #
   def show_previous_version(obj, versions)
     previous_version = versions&.last(2)&.first
-    if previous_version
+    if !previous_version || previous_version&.version == obj.version
+      current_version_html(obj)
+    elsif previous_version
       previous_version_link(previous_version, obj)
-    else
-      initial_version_html(obj)
     end
   end
 
@@ -47,7 +47,7 @@ module VersionsHelper
 
   def previous_version_link(previous_version, obj)
     str = "#{:show_name_previous_version.t} #{previous_version.version}"
-    initial_version_html(obj) +
+    current_version_html(obj) +
       # FIX THIS: Send the path helper the id and version param.
       link_with_query(str,
                       { controller: "#{obj.show_controller}/versions",
@@ -57,7 +57,7 @@ module VersionsHelper
       safe_br
   end
 
-  def initial_version_html(obj)
+  def current_version_html(obj)
     :VERSION.t + ": " + obj.version.to_s + safe_br
   end
 

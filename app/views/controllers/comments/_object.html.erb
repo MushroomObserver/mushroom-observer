@@ -4,7 +4,7 @@
     render(partial: "locations/show/location", object: object)
 
   when "LocationDescription"
-    render(partial: "descriptions/show_description_details")
+    render(partial: "descriptions/description_details_and_alts_panel")
 
   when "Name"
     str = render(partial: "names/show/nomenclature",
@@ -16,7 +16,7 @@
     content_tag(:div, str, class: "name-section m-3")
 
   when "NameDescription"
-    render(partial: "descriptions/show_description_details")
+    render(partial: "descriptions/description_details_and_alts_panel")
 
   when "Observation"
     render(partial: "observations/show/observation_details",
