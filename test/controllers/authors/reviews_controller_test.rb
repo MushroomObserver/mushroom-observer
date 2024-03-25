@@ -43,13 +43,13 @@ module Authors
 
       # Rolf giveth with one hand...
       post(:create, params: params.merge(add: mary.id))
-      assert_redirected_to(authors_review_path)
+      assert_redirected_to(description_authors_path)
       desc.reload
       assert_user_arrays_equal([mary, rolf], desc.authors, :sort)
 
       # ...and taketh with the other.
       delete(:destroy, params: params.merge(remove: mary.id))
-      assert_redirected_to(authors_review_path)
+      assert_redirected_to(description_authors_path)
       desc.reload
       assert_user_arrays_equal([rolf], desc.authors)
     end
@@ -82,12 +82,12 @@ module Authors
 
       # Rolf giveth with one hand...
       post(:create, params: params.merge(add: mary.id))
-      assert_redirected_to(authors_review_path)
+      assert_redirected_to(description_authors_path)
       assert_user_arrays_equal([mary, rolf], desc.reload.authors, :sort)
 
       # ...and taketh with the other.
       delete(:destroy, params: params.merge(remove: mary.id))
-      assert_redirected_to(authors_review_path)
+      assert_redirected_to(description_authors_path)
       assert_user_arrays_equal([rolf], desc.reload.authors)
     end
   end
