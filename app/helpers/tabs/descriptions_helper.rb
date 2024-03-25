@@ -78,7 +78,7 @@ module Tabs
 
       [:show_description_merge.t,
        add_query_param(
-         send(:"#{type}_description_merges_form_path", description.id)
+         send(:"new_merge_#{type}_description_path", description.id)
        ),
        { help: :show_description_merge_help.l,
          class: tab_id(__method__.to_s), icon: :merge }]
@@ -90,7 +90,7 @@ module Tabs
       parent_type = description.parent.type_tag.to_s
       [:show_description_move.t,
        add_query_param(
-         send(:"#{type}_description_moves_form_path", description.id)
+         send(:"new_move_#{type}_description_path", description.id)
        ),
        { help: :show_description_move_help.l(parent: parent_type),
          class: tab_id(__method__.to_s), icon: :move }]
@@ -101,7 +101,7 @@ module Tabs
 
       [:show_description_adjust_permissions.t,
        add_query_param(
-         send(:"edit_#{type}_description_permissions_path", description.id)
+         send(:"edit_permissions_#{type}_description_path", description.id)
        ),
        { help: :show_description_adjust_permissions_help.l,
          class: tab_id(__method__.to_s), icon: :adjust }]
@@ -133,7 +133,7 @@ module Tabs
 
       [:show_description_publish.t,
        add_query_param(
-         send(:"#{type}_description_publish_path", description.id)
+         send(:"publish_#{type}_description_path", description.id)
        ),
        { button: :put, help: :show_description_publish_help.l,
          class: tab_id(__method__.to_s), icon: :publish }]
