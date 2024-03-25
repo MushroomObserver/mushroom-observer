@@ -16,7 +16,8 @@
       <%= link_to(field_slip.observation.unique_format_name.t, observation_path(field_slip.observation)) %>
       <ul class="row list-unstyled">
         <%= render(partial: "shared/matrix_box",
-                   locals: { object: field_slip.observation, columns: "col-xs-12" }) %>
+                   locals: { object: field_slip.observation,
+                             columns: "col-xs-12" }) %>
       </ul>
     <% else %>
       <%= :field_slip_no_observation.t %>
