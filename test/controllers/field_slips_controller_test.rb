@@ -179,6 +179,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
                                   project_id: @field_slip.project_id } })
     assert_redirected_to field_slip_url(@field_slip)
     assert_equal(@field_slip.observation, ObservationView.last(User.current))
+    assert(@field_slip.project.observations.include?(obs))
   end
 
   test "should update field_slip and redirect to create obs" do
