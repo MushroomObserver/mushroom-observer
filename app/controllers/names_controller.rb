@@ -481,9 +481,9 @@ class NamesController < ApplicationController
 
   def redirect_to_approve_or_deprecate
     if params[:name][:deprecated].to_s == "true"
-      redirect_with_query(deprecate_name_synonym_form_path(@name.id))
+      redirect_with_query(form_to_deprecate_synonym_of_name_path(@name.id))
     else
-      redirect_with_query(approve_name_synonym_form_path(@name.id))
+      redirect_with_query(form_to_approve_synonym_of_name_path(@name.id))
     end
   end
 

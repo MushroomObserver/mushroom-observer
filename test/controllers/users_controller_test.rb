@@ -85,10 +85,10 @@ class UsersControllerTest < FunctionalTestCase
 
     assert_template(:show)
     assert_select(
-      "a[href = '#{location_descriptions_path}?by_author=#{user.id}']"
+      "a[href = '#{location_descriptions_index_path}?by_author=#{user.id}']"
     )
     assert_select(
-      "a[href = '#{name_descriptions_path}?by_author=#{user.id}']"
+      "a[href = '#{name_descriptions_index_path}?by_author=#{user.id}']"
     )
     assert_select(
       "a:match('href', ?)",

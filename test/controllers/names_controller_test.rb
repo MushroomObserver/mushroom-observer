@@ -857,11 +857,11 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def assert_synonym_links(name, approve, deprecate, edit)
-    assert_select("a[href*=?]", approve_name_synonym_form_path(name.id),
+    assert_select("a[href*=?]", form_to_approve_synonym_of_name_path(name.id),
                   count: approve)
-    assert_select("a[href*=?]", deprecate_name_synonym_form_path(name.id),
+    assert_select("a[href*=?]", form_to_deprecate_synonym_of_name_path(name.id),
                   count: deprecate)
-    assert_select("a[href*=?]", edit_name_synonyms_path(name.id),
+    assert_select("a[href*=?]", edit_synonyms_of_name_path(name.id),
                   count: edit)
   end
 
@@ -1717,7 +1717,7 @@ class NamesControllerTest < FunctionalTestCase
     params[:name][:deprecated] = "false"
     put(:update, params: params)
     assert_no_flash
-    assert_redirected_to(approve_name_synonym_form_path(name.id))
+    assert_redirected_to(form_to_approve_synonym_of_name_path(name.id))
 
     # Change to deprecated: go to deprecate_name, no flash.
     name.change_deprecated(false)
@@ -1725,7 +1725,7 @@ class NamesControllerTest < FunctionalTestCase
     params[:name][:deprecated] = "true"
     put(:update, params: params)
     assert_no_flash
-    assert_redirected_to(deprecate_name_synonym_form_path(name.id))
+    assert_redirected_to(form_to_deprecate_synonym_of_name_path(name.id))
   end
 
   def test_edit_name_with_umlaut
@@ -1965,7 +1965,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_equal("Bar", name.author)
     assert_equal("Genus", name.rank)
     assert_false(name.locked)
-    assert_redirected_to(deprecate_name_synonym_form_path(name.id))
+    assert_redirected_to(form_to_deprecate_synonym_of_name_path(name.id))
   end
 
   def test_edit_misspelled_name
