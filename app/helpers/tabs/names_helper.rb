@@ -47,20 +47,22 @@ module Tabs
 
     def edit_name_synonym_tab(name)
       [:show_name_change_synonyms.l,
-       add_query_param(edit_name_synonyms_path(name.id)),
+       add_query_param(edit_synonyms_of_name_path(name.id)),
        { class: tab_id(__method__.to_s), icon: :synonyms }]
     end
 
     # Note that the "deprecate" icon appears on approved names, so it's a
     # "check" to indicate at a glance that they're approved.
     def deprecate_name_tab(name)
-      [:DEPRECATE.l, add_query_param(deprecate_name_synonym_form_path(name.id)),
+      [:DEPRECATE.l,
+       add_query_param(form_to_deprecate_synonym_of_name_path(name.id)),
        { class: tab_id(__method__.to_s), icon: :deprecate }]
     end
 
     # Likewise, the "approve" icon appears on deprecated names, so it's a "!"
     def approve_name_synonym_tab(name)
-      [:APPROVE.l, add_query_param(approve_name_synonym_form_path(name.id)),
+      [:APPROVE.l,
+       add_query_param(form_to_approve_synonym_of_name_path(name.id)),
        { class: tab_id(__method__.to_s), icon: :approve }]
     end
 
@@ -103,7 +105,7 @@ module Tabs
 
     # lifeform tabs:
     def edit_name_lifeform_tab(name)
-      [:EDIT.l, add_query_param(edit_name_lifeform_path(name.id)),
+      [:EDIT.l, add_query_param(edit_lifeform_of_name_path(name.id)),
        { class: tab_id(__method__.to_s), icon: :edit }]
     end
 
@@ -131,7 +133,7 @@ module Tabs
 
     # classification tabs:
     def name_edit_classification_tab(name)
-      [:EDIT.l, edit_name_classification_path(name.id),
+      [:EDIT.l, edit_classification_of_name_path(name.id),
        { class: tab_id(__method__.to_s), icon: :edit }]
     end
 
@@ -218,13 +220,13 @@ module Tabs
 
     def edit_name_tracker_tab(name)
       [:show_name_email_tracking.t,
-       add_query_param(edit_name_tracker_path(name.id)),
+       add_query_param(edit_tracker_of_name_path(name.id)),
        { class: tab_id(__method__.to_s), icon: :tracking }]
     end
 
     def new_name_tracker_tab(name)
       [:show_name_email_tracking.t,
-       add_query_param(new_name_tracker_path(name.id)),
+       add_query_param(new_tracker_of_name_path(name.id)),
        { class: tab_id(__method__.to_s), icon: :tracking }]
     end
 
