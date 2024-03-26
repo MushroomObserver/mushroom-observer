@@ -464,7 +464,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   end
 
   # This has a special name and optional id because we want to enable listing
-  # descriptions regardless of parent_id.
+  # descriptions regardless of parent_id, e.g. by_author.
   get("locations(/:id)/descriptions", to: "locations/descriptions#index",
                                       as: "location_descriptions_index")
 
@@ -506,7 +506,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   end
 
   # This has a special name and optional id because we want to enable listing
-  # descriptions regardless of parent_id.
+  # descriptions regardless of parent_id, e.g. by_author.
   get("names(/:id)/descriptions", to: "names/descriptions#index",
                                   as: "name_descriptions_index")
 
