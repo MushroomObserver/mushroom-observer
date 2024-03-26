@@ -4,6 +4,7 @@ class FieldSlip < AbstractModel
   belongs_to :observation
   belongs_to :project
   belongs_to :user
+  default_scope { order(:code) }
 
   validates :code, uniqueness: true
   validates :code, presence: true
