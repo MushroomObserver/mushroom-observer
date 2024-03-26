@@ -4,12 +4,12 @@ when :create
   method = :post
   button = :CREATE.l
   url = { controller: "/locations/descriptions", action: :create,
-                id: @description.location_id }
+          location_id: @description.location_id }
 when :update
   method = :put
   button = :UPDATE.l
   url = { controller: "/locations/descriptions", action: :update,
-                id: @description.id, q: get_query_param }
+          id: @description.id, q: get_query_param }
 end
 %>
 

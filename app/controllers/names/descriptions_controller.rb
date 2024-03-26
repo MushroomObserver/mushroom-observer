@@ -75,7 +75,7 @@ module Names
     def by_author
       user = find_obj_or_goto_index(
         model: User, obj_id: params[:by_author].to_s,
-        index_path: name_descriptions_path
+        index_path: name_descriptions_index_path
       )
       return unless user
 
@@ -87,7 +87,7 @@ module Names
     def by_editor
       user = find_obj_or_goto_index(
         model: User, obj_id: params[:by_editor].to_s,
-        index_path: name_descriptions_path
+        index_path: name_descriptions_index_path
       )
       return unless user
 

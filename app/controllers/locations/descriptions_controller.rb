@@ -61,7 +61,7 @@ module Locations
     def by_author
       user = find_obj_or_goto_index(
         model: User, obj_id: params[:by_author].to_s,
-        index_path: location_descriptions_path
+        index_path: location_descriptions_index_path
       )
       return unless user
 
@@ -73,7 +73,7 @@ module Locations
     def by_editor
       user = find_obj_or_goto_index(
         model: User, obj_id: params[:by_editor].to_s,
-        index_path: location_descriptions_path
+        index_path: location_descriptions_index_path
       )
       return unless user
 

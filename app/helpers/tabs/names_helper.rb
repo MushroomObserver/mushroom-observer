@@ -252,7 +252,7 @@ module Tabs
       return unless query&.coercable?(:NameDescription)
 
       [:show_objects.t(type: :description),
-       add_query_param(name_descriptions_path),
+       add_query_param(name_descriptions_index_path),
        { class: tab_id(__method__.to_s) }]
     end
 

@@ -445,7 +445,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Locations: a lot of actions  ----------------------------
   resources :locations, id: /\d+/, shallow: true do
     resources :descriptions, module: :locations, shallow_path: :locations,
-                             shallow_prefix: "location" do
+                             shallow_prefix: "location", except: :index do
       member do
         put("default", to: "descriptions/defaults#update", as: "make_default")
         get("merges/new", to: "descriptions/merges#new", as: "new_merge")
@@ -456,6 +456,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       end
     end
   end
+
+  # This has a special name and optional id because we want to enable listing
+  # descriptions regardless of parent_id.
+  get("locations(/:id)/descriptions", to: "locations/descriptions#index",
+                                      as: "location_descriptions_index")
 
   # Location Countries: show
   get("locations(/:id)/countries", to: "locations/countries#index",
@@ -509,7 +514,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Names: a lot of actions  ----------------------------
   resources :names, id: /\d+/, shallow: true do
     resources :descriptions, module: :names, shallow_path: :names,
-                             shallow_prefix: "name" do
+                             shallow_prefix: "name", except: :index do
       member do
         put("default", to: "descriptions/defaults#update", as: "make_default")
         get("merges/new", to: "descriptions/merges#new", as: "new_merge")
@@ -527,6 +532,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       end
     end
   end
+
+  # This has a special name and optional id because we want to enable listing
+  # descriptions regardless of parent_id.
+  get("names(/:id)/descriptions", to: "names/descriptions#index",
+                                  as: "name_descriptions_index")
 
   # Test Index
   get("names/test_index", to: "names#test_index", as: "names_test_index")
