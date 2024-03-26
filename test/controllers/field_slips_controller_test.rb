@@ -30,19 +30,21 @@ class FieldSlipsControllerTest < FunctionalTestCase
     login(@field_slip.user.login)
     ObservationView.update_view_stats(@field_slip.observation_id,
                                       @field_slip.user_id)
+    code = "Y#{@field_slip.code}"
     assert_difference("FieldSlip.count") do
       post(:create,
            params: {
              commit: :field_slip_last_obs.t,
              field_slip: {
-               code: "Y#{@field_slip.code}",
+               code: code,
                project: projects(:eol_project)
              }
            })
     end
 
-    assert_redirected_to field_slip_url(FieldSlip.last)
-    assert_equal(FieldSlip.last.observation, ObservationView.last(User.current))
+    slip = FieldSlip.find_by(code: code)
+    assert_redirected_to field_slip_url(slip)
+    assert_equal(slip.observation, ObservationView.last(User.current))
   end
 
   test "should create field_slip and join project" do
@@ -52,34 +54,36 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_not(project.member?(user))
     ObservationView.update_view_stats(@field_slip.observation_id,
                                       @field_slip.user_id)
+    code = "#{project.field_slip_prefix}-0001"
     assert_difference("FieldSlip.count") do
       post(:create,
            params: {
              commit: :field_slip_last_obs.t,
              field_slip: {
-               code: "#{project.field_slip_prefix}-0001",
+               code: code,
                project: project
              }
            })
     end
 
-    assert_redirected_to field_slip_url(FieldSlip.last)
+    assert_redirected_to field_slip_url(FieldSlip.find_by(code: code))
     assert(project.member?(user))
   end
 
   test "should create field_slip and redirect to create obs" do
     login(@field_slip.user.login)
+    code = "Z#{@field_slip.code}"
     assert_difference("FieldSlip.count") do
       post(:create,
            params: {
              commit: :field_slip_create_obs.t,
              field_slip: {
-               code: "Z#{@field_slip.code}",
+               code: code,
                project: projects(:eol_project)
              }
            })
     end
-    assert_redirected_to new_observation_url(field_code: FieldSlip.last.code)
+    assert_redirected_to new_observation_url(field_code: code)
   end
 
   test "should create field_slip in project from code" do
