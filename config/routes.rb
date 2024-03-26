@@ -450,6 +450,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Locations: a lot of actions  ----------------------------
   resources :locations, id: /\d+/, shallow: true do
+    member do
+      put("reverse_name_order", to: "locations/reverse_name_order#update")
+      get("versions", to: "locations/versions#show")
+    end
     resources :descriptions, module: :locations, shallow_path: :locations,
                              shallow_prefix: "location", except: :index do
       member do
@@ -458,15 +462,15 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
         post("merges", to: "descriptions/merges#create", as: "merge")
         get("moves/new", to: "descriptions/moves#new", as: "new_move")
         post("moves", to: "descriptions/moves#create", as: "move")
-        get("versions", to: "descriptions/versions#show", as: "versions")
+        get("versions", to: "descriptions/versions#show")
       end
     end
   end
 
   # This has a special name and optional id because we want to enable listing
   # descriptions regardless of parent_id, e.g. by_author.
-  get("locations(/:id)/descriptions", to: "locations/descriptions#index",
-                                      as: "location_descriptions_index")
+  get("locations(/:location_id)/descriptions",
+      to: "locations/descriptions#index", as: "location_descriptions_index")
 
   # Location Countries: show
   get("locations(/:id)/countries", to: "locations/countries#index",
@@ -475,16 +479,13 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("locations/help", to: "locations/help#show")
   # Map Locations: show
   get("locations/map", to: "locations/maps#show", as: "map_locations")
-  # Location Reverse name order: update
-  put("locations/:id/reverse_name_order",
-      to: "locations/reverse_name_order#update",
-      as: "location_reverse_name_order")
-  # Location Versions: show
-  get("locations/:id/versions", to: "locations/versions#show",
-                                as: "location_versions")
 
   # ----- Names: a lot of actions  ----------------------------
   resources :names, id: /\d+/, shallow: true do
+    member do
+      get("map", to: "names/maps#show")
+      get("versions", to: "names/versions#show")
+    end
     resources :descriptions, module: :names, shallow_path: :names,
                              shallow_prefix: "name", except: :index do
       member do
@@ -493,22 +494,20 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
         post("merges", to: "descriptions/merges#create", as: "merge")
         get("moves/new", to: "descriptions/moves#new", as: "new_move")
         post("moves", to: "descriptions/moves#create", as: "move")
-        put("publish", to: "descriptions/publish#update", as: "publish")
+        put("publish", to: "descriptions/publish#update")
         get("permissions/edit", to: "descriptions/permissions#edit",
                                 as: "edit_permissions")
-        put("permissions", to: "descriptions/permissions#update",
-                           as: "permissions")
-        put("review_status", to: "descriptions/review_status#update",
-                             as: "review_status")
-        get("versions", to: "descriptions/versions#show", as: "versions")
+        put("permissions", to: "descriptions/permissions#update")
+        put("review_status", to: "descriptions/review_status#update")
+        get("versions", to: "descriptions/versions#show")
       end
     end
   end
 
   # This has a special name and optional id because we want to enable listing
   # descriptions regardless of parent_id, e.g. by_author.
-  get("names(/:id)/descriptions", to: "names/descriptions#index",
-                                  as: "name_descriptions_index")
+  get("names(/:name_id)/descriptions",
+      to: "names/descriptions#index", as: "name_descriptions_index")
 
   # Test Index
   get("names/test_index", to: "names#test_index", as: "names_test_index")
@@ -551,7 +550,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       as: "propagate_name_lifeform")
   # Names Map: show:
   get("names/map", to: "names/maps#show", as: "map_names")
-  get("names/:id/map", to: "names/maps#show", as: "map_name")
   # Edit Name Synonyms: form and callback:
   get("names/:id/synonyms/edit", to: "names/synonyms#edit",
                                  as: "edit_name_synonyms")
@@ -584,9 +582,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                            as: "names_eol_preview")
   get("names/eol_expanded_review", to: "names/eol_data/expanded_review#show",
                                    as: "names_eol_expanded_review")
-  # Name Versions: show
-  get("names/:id/versions", to: "names/versions#show",
-                            as: "name_versions")
 
   # ----- Observations: standard actions  ----------------------------
   namespace :observations do
