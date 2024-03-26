@@ -2,9 +2,9 @@
 add_page_title(:author_request_title.t(title: @object.format_name))
 %>
 
-<%= form_with(url: descriptions_email_requests_path(
-  id: @object.id, type: @object.type_tag, q: get_query_param
-), scope: :email, id: "authors_email_requests_form") do |f| %>
+<%= form_with(url: { action: :create, id: @object.id,
+                     type: @object.type_tag, q: get_query_param },
+              scope: :email, id: "authors_email_requests_form") do |f| %>
 
   <%= :author_request_note.tp %>
 
