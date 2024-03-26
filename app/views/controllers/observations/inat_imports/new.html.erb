@@ -1,0 +1,8 @@
+<%
+  @container = :full
+  add_page_title(:create_inat_import_title.l)
+%>
+
+<%= form_with url: observations_inat_imports_path, method: :post do |form| %>
+  <%= form.submit(:IMPORT.l) %>
+<% end %>

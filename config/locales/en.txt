@@ -689,6 +689,7 @@
   edit: edit
   ENABLE: Enable
   enable: enable
+  IMPORT: Import
   # merge one object into another
   MERGE: Merge
   merge: merge
@@ -2538,7 +2539,6 @@
   show_publication_added_by: Added by
 
 
-
   # herbarium fields
   herbarium_curator: Curator
   herbarium_curators: Curators
@@ -2888,6 +2888,9 @@
   list_merge_options_near_matches: Near Matches
   list_merge_options_others: Other Available [:locations]
   list_merge_options_title: Location Matches for [where]
+
+  #observation/inat_imports
+  create_inat_import_title: Import from iNaturalist
 
   # observer/list_notifications
   list_notifications_title: Email Alerts for [user]
