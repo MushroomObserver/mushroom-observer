@@ -652,6 +652,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Observations: standard actions  ----------------------------
   namespace :observations do
     resources :downloads, only: [:new, :create]
+    resources :inat_imports, only: [:new, :create]
 
     # Not under resources :observations because the obs doesn't have an id yet
     get("images/uploads/new", to: "images/uploads#new",
