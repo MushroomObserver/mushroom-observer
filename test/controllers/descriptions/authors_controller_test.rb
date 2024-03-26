@@ -2,9 +2,9 @@
 
 require("test_helper")
 
-module Authors
-  # test of actions to manage who's a author of an object
-  class ReviewsControllerTest < FunctionalTestCase
+module Descriptions
+  # test of actions to manage who's a author of a description
+  class AuthorsControllerTest < FunctionalTestCase
     def test_review_locations
       desc = location_descriptions(:albion_desc)
       params = { id: desc.id, type: "LocationDescription" }
