@@ -1,0 +1,48 @@
+<%
+action = controller.action_name
+%>
+
+<%= form_with(model: field_slip) do |form| %>
+  <% if field_slip.errors.any? %>
+    <div class="alert alert-danger">
+      <%= "#{pluralize(field_slip.errors.count,
+        :error.t, plural: :errors.t)} #{:field_slip_errors.t}" %>:
+      <ul>
+        <% field_slip.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= text_field_with_label(form: form, field: :code) %>
+
+  <% if @field_slip.projects %>
+    <%= select_with_label(form: form, field: :project_id,
+                          options: @field_slip.projects) %>
+  <% end %>
+
+  <%= submit_button(form: form, button: :field_slip_create_obs.t,
+                    class: "mt-5") if action == "new" %>
+
+  <div class="row mt-5">
+    <% if field_slip.observation %>
+      <div class="col-sm-6">
+        <%= render(partial: "field_slips/obs_thumbnail",
+                   locals: { obs: field_slip.observation, form: form,
+                             button: :field_slip_keep_obs.t }) %>
+      </div>
+    <% end %>
+    <% if last_observation %>
+      <div class="col-sm-6">
+        <%= render(partial: "field_slips/obs_thumbnail",
+                   locals: { obs: last_observation, form: form,
+                             button: :field_slip_last_obs.t }) %>
+      </div>
+    <% end %>
+  </div>
+
+  <%= submit_button(form: form, button: :field_slip_create_obs.t,
+                    class: "my-5") if action == "edit" %>
+
+<% end %>

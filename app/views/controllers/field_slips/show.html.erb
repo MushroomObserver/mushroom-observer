@@ -1,0 +1,17 @@
+<% add_page_title(@field_slip.code) %>
+
+<% if notice %>
+  <p class="alert alert-success"><%= notice %></p>
+<% end %>
+
+<h1><%= "#{:FIELD_SLIP.t}: #{@field_slip.code}" %></h1>
+
+<%= render @field_slip %>
+
+<div>
+  <%= link_to :field_slip_index.t, field_slips_path %>
+  <% if @field_slip.user == User.current %>
+    | <%= link_to :field_slip_edit.t, edit_field_slip_path(@field_slip) %>
+    | <%= button_to :field_slip_destroy.t, @field_slip, method: :delete %>
+  <% end %>
+</div>

@@ -1,0 +1,17 @@
+<% add_page_title(:FIELD_SLIPS.t) %>
+
+<% if notice %>
+  <p class="alert alert-success"><%= notice %></p>
+<% end %>
+
+<div id="field_slips">
+  <% @field_slips.each do |field_slip| %>
+    <strong><%= :field_slip_code.t %>:</strong>
+    <%= field_slip.code %>
+    <%= render field_slip %>
+    <%= link_to :field_slip_show.t, field_slip %>
+    <hr/>
+  <% end %>
+</div>
+
+<%= link_to :field_slip_new.t, new_field_slip_path %>

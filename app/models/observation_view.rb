@@ -30,4 +30,9 @@ class ObservationView < AbstractModel
       create!(args)
     end
   end
+
+  def self.last(user)
+    view = ObservationView.where(user:).order(last_view: :desc).first
+    view&.observation
+  end
 end

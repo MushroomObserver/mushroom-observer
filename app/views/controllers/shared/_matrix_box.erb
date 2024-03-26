@@ -18,19 +18,28 @@ if presenter
   else
     image_args = {}
   end
+  header_components = passed_args[:header].presence || []
+  footer_components =
+    if passed_args[:footer] == false
+      []
+    else
+      passed_args[:footer].presence ||
+      [matrix_box_log_footer(presenter),
+       matrix_box_identify_footer(identify, presenter.id)]
+    end
   %>
 
   <%= matrix_box(columns: columns, id: object_id) do
     tag.div(class: "panel panel-default") do
       [
+        *header_components,
         tag.div(class: "panel-sizing") do
           [
             matrix_box_image(image, **image_args),
             matrix_box_details(presenter, object_id, identify),
           ].safe_join
         end,
-        matrix_box_log_footer(presenter),
-        matrix_box_identify_footer(identify, presenter.id)
+        *footer_components
       ].safe_join
     end
   end %><!-- .matrix-box -->

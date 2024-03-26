@@ -1,0 +1,12 @@
+  <%= tag.div(class: "panel panel-default") do
+    concat(panel_block_heading(
+      heading: submit_button(form: form, button: button)
+    ))
+    concat(tag.div(class: "thumbnail-container") do
+      interactive_image(obs.thumb_image_id, votes: false,
+                        image_link: observation_path(obs))
+    end) if obs.thumb_image_id.present?
+    concat(tag.div(class: "panel-body") do
+      link_to(obs.unique_format_name.t, observation_path(obs))
+    end)
+  end %>
