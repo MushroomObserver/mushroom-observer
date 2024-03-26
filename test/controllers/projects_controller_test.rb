@@ -11,6 +11,7 @@ class ProjectsControllerTest < FunctionalTestCase
       project: {
         title: title,
         summary: summary,
+        field_slip_prefix: "",
         place_name: "",
         open_membership: false,
         "start_date(1i)" => start_date&.year,

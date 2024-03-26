@@ -23,6 +23,7 @@ ACTIONS = {
     comments: {},
     external_links: {},
     external_sites: {},
+    field_slips: {},
     herbaria: {},
     herbarium_records: {},
     images: {},
@@ -40,6 +41,7 @@ ACTIONS = {
     comments: {},
     external_links: {},
     external_sites: {},
+    field_slips: {},
     herbaria: {},
     herbarium_records: {},
     images: {},
@@ -380,6 +382,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   end
   get("glossary_terms/:id/versions", to: "glossary_terms/versions#show",
                                      as: "glossary_term_versions")
+
+  # ----- Field Slip Records: standard actions --------------------------------
+  resources :field_slips
+  get("qr/:id", to: "field_slips#show", id: /.*[^\d.-].*/)
 
   # ----- Herbaria: standard actions -------------------------------------------
   namespace :herbaria do

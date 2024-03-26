@@ -255,6 +255,8 @@
   draft: draft
   DRAFTS: Drafts
   drafts: drafts
+  error: error
+  errors: errors
   EXTERNAL_LINK: External Link
   external_link: external link
   EXTERNAL_LINKS: External Links
@@ -263,6 +265,10 @@
   external_site: external site
   EXTERNAL_SITES: External Sites
   external_sites: external sites
+  FIELD_SLIP: Field Slip
+  field_slip: field slip
+  FIELD_SLIPS: Field Slips
+  field_slips: field slips
   IMAGE: Image
   image: image
   IMAGES: Images
@@ -381,6 +387,7 @@
   species_list: species list
   SPECIES_LISTS: Species Lists
   species_lists: species lists
+  SpeciesList: Species List
   SPECIMEN: Specimen
   specimen: specimen
   SPECIMENS: Specimens
@@ -494,6 +501,8 @@
   email_address: email address
   EMAIL_ADDRESSS: Email Addresses
   email_addresss: email addresses
+  FIELD_SLIP_PREFIX: Field Slip Prefix
+  field_slip_prefix: field slip prefix
   FULL_NAME: Full Name
   full_name: full name
   FULL_NAMES: Full Names
@@ -2745,8 +2754,32 @@
   show_visual_model_edit: "[:EDIT] [:VISUAL_MODEL]"
   show_visual_model_index: "[:VISUAL_MODEL] [:INDEX]"
 
+  # Visual Models
+  visual_model_errors: prohibited this visual_model from being saved
+
   # visual_models/destroy
   destroy_visual_model_success: "[:VISUAL_MODEL] [:destroyed]"
+
+  # Field Slips
+  field_slip_code: Code
+  field_slip_code_format_error: code must have non-numeric characters other than period (.) and dash (-)
+  field_slip_created: Field slip was successfully created.
+  field_slip_create_obs: Create New Observation
+  field_slip_creator: Creator
+  field_slip_destroy: Destroy this field slip
+  field_slip_destroyed: Field slip was successfully destroyed.
+  field_slip_edit: Edit this field slip
+  field_slip_editing: Editing Field Slip
+  field_slip_errors: prohibited this field_slip from being saved
+  field_slip_index: Back to field slips
+  field_slip_keep_obs: Keep Current
+  field_slip_last_obs: Use Last Observation
+  field_slip_new: Record Field Slip
+  field_slip_no_observation: Observation not found
+  field_slip_no_project: Project not found
+  field_slip_show: Show this field slip
+  field_slip_updated: Field slip was successfully updated.
+  field_slip_welcome: "Welcome to the [TITLE] project!"
 
   ##############################################################################
 
@@ -3244,6 +3277,7 @@
   show_project_destroy: Destroy Project
   show_project_drafts: Drafts
   show_project_edit: Edit Project
+  show_project_field_slip_prefix: Field Slip Prefix
   show_project_join: Join Project
   show_project_location: Location
   show_project_leave: Leave Project
@@ -4113,6 +4147,7 @@
   api_help_create_key: if you pass in your app name here it will create an api key for the user for your app to use
   api_help_creator: creator
   api_help_east: max longitude
+  api_help_field_slip_prefix_has: search within field slip prefix
   api_help_first_user: creator / first to use
   api_help_has_notes_field: is given observation notes template field filled in?
   api_help_has_obs_notes: observation has notes?

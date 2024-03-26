@@ -16,6 +16,20 @@
     end
   end %>
 
+  <% if obs.field_slips.present? %>
+    <%= tag.div(class: "obs-field-slips", id: "observation_field_slips") do
+      if obs.field_slips.count == 1
+        concat(tag.span("#{:FIELD_SLIP.t}: "))
+        concat(link_to_object(obs.field_slips[0]))
+      else
+        concat([tag.span("#{:FIELD_SLIPS.t}:"), tag.br].safe_join)
+        obs.field_slips.each do |field_slip|
+          concat(tag.div(link_to_object(field_slip), class: "indent"))
+        end
+      end
+    end %>
+  <% end %>
+
   <%= tag.p(class: "obs-specimen", id: "observation_specimen_available") do
     if obs.specimen
       :show_observation_specimen_available.t

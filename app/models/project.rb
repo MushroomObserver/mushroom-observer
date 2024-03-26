@@ -10,14 +10,15 @@
 #
 #  == Attributes
 #
-#  id::             Locally unique numerical id, starting at 1.
-#  created_at::     Date/time it was first created.
-#  updated_at::     Date/time it was last updated.
-#  user::           User that created it.
-#  admin_group::    UserGroup of admins.
-#  user_group::     UserGroup of members.
-#  title::          Title string.
-#  summary::        Summary of purpose.
+#  id::                Locally unique numerical id, starting at 1.
+#  created_at::        Date/time it was first created.
+#  updated_at::        Date/time it was last updated.
+#  user::              User that created it.
+#  admin_group::       UserGroup of admins.
+#  user_group::        UserGroup of members.
+#  title::             Title string.
+#  summary::           Summary of purpose.
+#  field_slip_prefix:: Prefix for associated field slip codes
 #  open_membership  Enable users to add themselves, disable shared editing
 #  location::
 #  image::
@@ -79,6 +80,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :species_lists, through: :project_species_lists
 
   before_destroy :orphan_drafts
+  validates :field_slip_prefix, uniqueness: true, allow_blank: true
 
   scope :show_includes, lambda {
     strict_loading.includes(
@@ -94,6 +96,16 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # returns +title+.
   def text_name
     title.to_s
+  end
+
+  # Ensure that field_slip_prefix is uppercase and at most 60
+  # characters so in the worst case the prefix plus 5 single byte
+  # characters is under 255 bytes (limit in SQL assuming all prefix
+  # characters are 4-byte unicode).
+  def field_slip_prefix=(val)
+    self[:field_slip_prefix] = if val && val.strip != ""
+                                 val.strip.upcase[0, 60]
+                               end
   end
 
   # Same as +text_name+ but with id tacked on to make unique.
