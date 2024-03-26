@@ -477,40 +477,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("locations/:id/versions", to: "locations/versions#show",
                                 as: "location_versions")
 
-  # # Make Descripton Default: callback only:
-  # put("locations/descriptions/:id/default",
-  #     to: "locations/descriptions/defaults#update",
-  #     as: "make_default_location_description")
-  # # Publish Draft Location Description: callback. Not used yet.
-  # # put("locations/descriptions/:id/publish",
-  # #     to: "locations/descriptions/publish#update",
-  # #     as: "location_description_publish")
-  # # Merge Location Descriptions: form and callback:
-  # get("locations/descriptions/:id/merges/new",
-  #     to: "locations/descriptions/merges#new",
-  #     as: "location_description_merges_form")
-  # post("locations/descriptions/:id/merges",
-  #      to: "locations/descriptions/merges#create",
-  #      as: "location_description_merges")
-  # # Move Location Descriptions: form and callback:
-  # get("locations/descriptions/:id/moves/new",
-  #     to: "locations/descriptions/moves#new",
-  #     as: "location_description_moves_form")
-  # post("locations/descriptions/:id/moves",
-  #      to: "locations/descriptions/moves#create",
-  #      as: "location_description_moves")
-  # # Edit Location Description Permissions: form and callback. Not used yet.
-  # # get("locations/descriptions/:id/permissions/edit",
-  # #     to: "locations/descriptions/permissions#edit",
-  # #     as: "edit_location_description_permissions")
-  # # put("locations/descriptions/:id/permissions",
-  # #     to: "locations/descriptions/permissions#update",
-  # #     as: "location_description_permissions")
-  # # Location Description Versions: show:
-  # get("locations/descriptions/:id/versions",
-  #     to: "locations/descriptions/versions#show",
-  #     as: "location_description_versions")
-
   # ----- Names: a lot of actions  ----------------------------
   resources :names, id: /\d+/, shallow: true do
     resources :descriptions, module: :names, shallow_path: :names,
@@ -615,63 +581,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # Name Versions: show
   get("names/:id/versions", to: "names/versions#show",
                             as: "name_versions")
-
-  # like resources, but using just an :id param:
-  # get("names(/:id)/descriptions",
-  #     to: "names/descriptions#index",
-  #     as: "name_descriptions")
-  # get("names/descriptions/:id",
-  #     to: "names/descriptions#show",
-  #     as: "name_description")
-  # get("names/:id/descriptions/new",
-  #     to: "names/descriptions#new",
-  #     as: "new_name_description")
-  # get("names/descriptions/:id/edit",
-  #     to: "names/descriptions#edit",
-  #     as: "edit_name_description")
-  # post("names/:id/descriptions",
-  #      to: "names/descriptions#create")
-  # match("names/descriptions/:id",
-  #       to: "names/descriptions#update", via: [:put, :patch])
-  # delete("names/descriptions/:id", to: "names/descriptions#destroy")
-
-  # Make Descripton Default: callback only:
-  # put("names/descriptions/:id/default",
-  #     to: "names/descriptions/defaults#update",
-  #     as: "make_default_name_description")
-  # # Publish Name Description Drafts: callback:
-  # put("names/descriptions/:id/publish",
-  #     to: "names/descriptions/publish#update",
-  #     as: "name_description_publish")
-  # # Merge Name Descriptions: form and callback:
-  # get("names/descriptions/:id/merges/new",
-  #     to: "names/descriptions/merges#new",
-  #     as: "name_description_merges_form")
-  # post("names/descriptions/:id/merges",
-  #      to: "names/descriptions/merges#create",
-  #      as: "name_description_merges")
-  # # Move Name Descriptions: form and callback:
-  # get("names/descriptions/:id/moves/new",
-  #     to: "names/descriptions/moves#new",
-  #     as: "name_description_moves_form")
-  # post("names/descriptions/:id/moves",
-  #      to: "names/descriptions/moves#create",
-  #      as: "name_description_moves")
-  # # Edit Name Description Permissions: form and callback:
-  # get("names/descriptions/:id/permissions/edit",
-  #     to: "names/descriptions/permissions#edit",
-  #     as: "edit_name_description_permissions")
-  # put("names/descriptions/:id/permissions",
-  #     to: "names/descriptions/permissions#update",
-  #     as: "name_description_permissions")
-  # # Name Description Versions: show
-  # get("names/descriptions/:id/versions",
-  #     to: "names/descriptions/versions#show",
-  #     as: "name_description_versions")
-  # # Set review_status: callback only:
-  # put("names/descriptions/:id/review_status",
-  #     to: "names/descriptions/review_status#update",
-  #     as: "name_description_review_status")
 
   # ----- Observations: standard actions  ----------------------------
   namespace :observations do
