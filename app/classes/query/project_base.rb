@@ -17,6 +17,7 @@ class Query::ProjectBase < Query::Base
       has_summary?: :boolean,
       title_has?: :string,
       summary_has?: :string,
+      field_slip_prefix_has?: :string,
       comments_has?: :string,
       member?: User
     )
@@ -58,6 +59,10 @@ class Query::ProjectBase < Query::Base
     add_search_condition(
       "projects.summary",
       params[:summary_has]
+    )
+    add_search_condition(
+      "projects.field_slip_prefix",
+      params[:field_slip_prefix_has]
     )
     add_search_condition(
       "CONCAT(comments.summary,COALESCE(comments.comment,''))",
