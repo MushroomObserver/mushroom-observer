@@ -6,6 +6,10 @@
 
 <h1><%= "#{:FIELD_SLIP.t}: #{@field_slip.code}" %></h1>
 
+<div>
+  <%= @field_slip.qr_code(field_slip_url(@field_slip)).html_safe %>
+</div>
+
 <%= render @field_slip %>
 
 <div>

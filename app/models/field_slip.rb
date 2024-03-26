@@ -39,4 +39,16 @@ class FieldSlip < AbstractModel
 
     result.unshift([project.title, project.id])
   end
+
+  def qr_code(path)
+    qr = RQRCode::QRCode.new(path, level: :m)
+    qr.as_svg(
+      color: "000",
+      shape_rendering: "crispEdges",
+      module_size: 3,
+      standalone: true,
+      use_path: true,
+      fill: :white
+    )
+  end
 end
