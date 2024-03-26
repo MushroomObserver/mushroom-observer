@@ -533,14 +533,13 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       post("synonyms/deprecate", to: "names/synonyms/deprecate#create",
                                  as: "deprecate_synonym_of")
       # new_name_tracker
-      get("trackers/new", to: "names/trackers#new", as: "new_tracker_for")
-      #
-      post("names/:id/trackers", to: "names/trackers#create")
+      get("trackers/new", to: "names/trackers#new", as: "new_tracker_of")
+      # (none)
+      post("trackers", to: "names/trackers#create")
       # edit: there's no tracker id because you can only have one per name
-      get("names/:id/trackers/edit", to: "names/trackers#edit",
-        as: "edit_name_tracker")
-      match("names/:id/trackers", to: "names/trackers#update", via: [:put, :patch])
-
+      # edit_name_tracker
+      get("trackers/edit", to: "names/trackers#edit", as: "edit_tracker_of")
+      match("trackers", to: "names/trackers#update", via: [:put, :patch])
       get("versions", to: "names/versions#show")
     end
     resources :descriptions, module: :names, shallow_path: :names,
