@@ -45,7 +45,8 @@ module Tabs
 
     def create_description_tab(object, type)
       [:show_name_create_description.t,
-       add_query_param(send(:"new_#{type}_description_path", object.id)),
+       add_query_param(send(:"new_#{type}_description_path",
+                            { "#{type}_id": object.id })),
        { class: "#{__method__}_#{object.id}", icon: :add }]
     end
 
@@ -67,7 +68,7 @@ module Tabs
       [:show_description_clone.t,
        add_query_param(
          send(:"new_#{type}_description_path",
-              { clone: description.id, id: description.parent_id })
+              { clone: description.id, "#{type}_id": description.parent_id })
        ),
        { help: :show_description_clone_help.l,
          class: tab_id(__method__.to_s), icon: :clone }]
@@ -143,7 +144,8 @@ module Tabs
       [project.title,
        add_query_param(
          send(:"new_#{type}_description_path",
-              { project: project.id, source: "project", id: object.id })
+              { project: project.id, source: "project",
+                "#{type}_id": object.id })
        ),
        { class: tab_id(__method__.to_s) }]
     end

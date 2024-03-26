@@ -170,7 +170,7 @@ module Names
     private
 
     def find_name
-      @name = Name.find(params[:id].to_s)
+      @name = Name.find(params[:name_id].to_s)
     end
 
     def find_description_parent

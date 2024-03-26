@@ -180,7 +180,7 @@ module Locations
     private
 
     def find_location
-      @location = Location.find(params[:id].to_s)
+      @location = Location.find(params[:location_id].to_s)
     end
 
     def find_description_parent
