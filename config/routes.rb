@@ -354,7 +354,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :contributors, only: [:index]
 
   # ----- Descriptions: namespaced actions -------------------------------------
-  namespace :descriptions do
+  namespace :descriptions, as: "description" do
     resource :authors, only: [:show, :create, :destroy], id: /\d+/
     resource :email_requests, only: [:new, :create]
   end
