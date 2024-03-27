@@ -4,5 +4,7 @@
 %>
 
 <%= form_with url: observations_inat_imports_path, method: :post do |form| %>
-  <%= form.submit(:IMPORT.l) %>
+  <%= form.label :inat_ids, "#{:inat_ids.l}: " %>
+  <%= form.text_field(:inat_ids, size: 40, class: "form-control") %>
+  <%= form.submit(:IMPORT.l, { class: "btn btn-default" }) %>
 <% end %>

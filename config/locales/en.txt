@@ -2891,6 +2891,7 @@
 
   #observation/inat_imports
   create_inat_import_title: Import from iNaturalist
+  inat_ids: iNat ids
 
   # observer/list_notifications
   list_notifications_title: Email Alerts for [user]

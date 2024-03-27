@@ -14,6 +14,9 @@ module Observations
       get(:new, params: params)
 
       assert_response(:success)
+      assert_form_action(action: :create)
+      assert_select("input#inat_ids", true,
+                    "Form need a field for inputting iNat ids")
     end
   end
 end
