@@ -25,5 +25,16 @@ module Observations
 
       assert_response(:success)
     end
+
+    def test_create_inat_import_bad_inat_id
+      user = users(:rolf)
+      inat_id = "badID"
+      params = { inat_ids: [inat_id] }
+
+      login(user.login)
+      put(:create, params: params)
+
+      assert_flash_warning("Missing flash warning about illegal iNat id")
+    end
   end
 end
