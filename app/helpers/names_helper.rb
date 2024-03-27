@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # helpers for ShowName view and ShowNameInfo section of ShowObservation
-module ShowNameHelper
+module NamesHelper
   ######## links to queries of observations of name... or related taxa.
   # Counting these slows down the names#show page a LOT if done separately.
   # Counts now derived from `obss`, an instantiation of Name::Observations
@@ -112,5 +112,65 @@ module ShowNameHelper
                  names: name.id,
                  include_all_name_proposals: true,
                  by: :confidence)
+  end
+
+  # CLASSIFICATION PANEL
+  def approved_name_and_parents(name)
+    approved_name = name.approved_name
+    parents = approved_name.all_parents
+
+    return unless approved_name.classification.present? && parents.any?
+
+    tag.div(class: "mb-2") do
+      ([approved_name] + parents).reverse.each do |n|
+        concat(tag.p do
+          concat("#{rank_as_string(n.rank)}: ")
+          concat(tag.i(link_with_query(n.text_name.t, n.show_link_args)))
+          if n == approved_name && approved_name != name
+            concat([
+              safe_br, safe_nbsp, safe_nbsp, " (= ", tag.i(name.text_name.t), ")"
+            ].safe_join)
+          end
+        end)
+      end
+    end
+  end
+
+  def name_children_link(name, children_query)
+    type = if name.at_or_below_genus? && !name.at_or_below_species?
+             :rank_species
+           else
+             :show_subtaxa_obss
+           end
+
+    tag.p do
+      link_to(:show_object.t(type: type),
+              add_query_param(names_path, children_query))
+    end
+  end
+
+  def refresh_classification_link(name)
+    return unless
+      name.below_genus? &&
+      name.accepted_genus.try(&:classification).to_s.strip !=
+      name.classification.to_s.strip
+
+    tag.p do
+      put_button(
+        name: :show_name_refresh_classification.t,
+        path: add_query_param(refresh_name_classification_path(@name.id))
+      )
+    end
+  end
+
+  def propagate_classification_link(name)
+    return unless name.can_propagate? && name.classification.present?
+
+    tag.p do
+      put_button(
+        name: :show_name_propagate_classification.t,
+        path: add_query_param(propagate_name_classification_path(@name.id))
+      )
+    end
   end
 end

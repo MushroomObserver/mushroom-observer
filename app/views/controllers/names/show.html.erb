@@ -35,8 +35,12 @@ add_tab_set(name_show_tabs(name: @name))
                locals: { name: @name, synonyms: true }) %>
 
     <%= tag.div(class: "row", data: { controller: "name-panels" }) do %>
-      <%= render(partial: "names/show/classification_panel") %>
-      <%= render(partial: "names/show/lifeform_panel") %>
+      <%= tag.div(class: "col-sm-6") do
+        render(partial: "names/show/classification_panel")
+      end %>
+      <%= tag.div(class: "col-sm-6") do
+        render(partial: "names/show/lifeform_panel")
+      end %>
     <% end %>
 
     <% if @name.has_notes? %>

@@ -9,8 +9,8 @@ add_tab_set(name_version_tabs(name: @name))
 <%= tag.div(class: "row mt-4") do %>
   <%= tag.div(class: "col-md-6") do %>
     <%= render(partial: "names/show/nomenclature",
-              locals: { name: @name, synonyms: false }) %>
-
+               locals: { name: @name, synonyms: false }) %>
+    <%= render(partial: "names/show/lifeform_panel") %>
     <% if @name.has_notes? %>
       <%= render(partial: "names/show/notes_panel") %>
     <% end %>
