@@ -126,12 +126,12 @@ module ContentHelper
     content = capture(&block).to_s
 
     tag.div(
-      class: "panel panel-default #{args[:class]}",
+      class: class_names("panel panel-default", args[:class]),
       **args.except(:class, :inner_class, :inner_id, :heading)
     ) do
       concat(heading)
       if content.present?
-        concat(tag.div(class: "panel-body #{args[:inner_class]}",
+        concat(tag.div(class: class_names("panel-body", args[:inner_class]),
                        id: args[:inner_id]) do
                  concat(content)
                end)
