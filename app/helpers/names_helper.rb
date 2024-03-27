@@ -140,7 +140,7 @@ module NamesHelper
     end
   end
 
-  def name_subtaxa_query_link(name, children_query)
+  def name_subtaxa_query_link(name, subtaxa_query)
     type = if name.at_or_below_genus? && !name.at_or_below_species?
              :rank_species
            else
@@ -149,7 +149,7 @@ module NamesHelper
 
     tag.p do
       link_to(:show_object.t(type: type),
-              add_query_param(names_path, children_query))
+              add_query_param(names_path, subtaxa_query))
     end
   end
 
