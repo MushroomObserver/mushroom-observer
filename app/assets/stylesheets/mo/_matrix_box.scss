@@ -103,6 +103,10 @@ h5.rss-heading {
     background: transparent;
   }
 
+  .table-hover > tbody > tr:hover {
+    background-color: rgba($panel-bg, 0.45);
+  }
+
   // .panel-footer {
   //   background: none;
   // }
