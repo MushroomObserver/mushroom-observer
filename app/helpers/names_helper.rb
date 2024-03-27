@@ -162,7 +162,7 @@ module NamesHelper
     tag.p do
       put_button(
         name: :show_name_refresh_classification.t,
-        path: add_query_param(refresh_classification_of_name_path(@name.id))
+        path: add_query_param(refresh_classification_of_name_path(name.id))
       )
     end
   end
@@ -173,7 +173,7 @@ module NamesHelper
     tag.p do
       put_button(
         name: :show_name_propagate_classification.t,
-        path: add_query_param(propagate_classification_of_name_path(@name.id))
+        path: add_query_param(propagate_classification_of_name_path(name.id))
       )
     end
   end
