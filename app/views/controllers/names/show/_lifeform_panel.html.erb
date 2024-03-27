@@ -5,9 +5,11 @@ heading_links = @user ? link.html_safe : ""
 %>
 
 <%=
-panel_block(heading: heading, heading_links: heading_links,
-            inner_class: "name-section", id: "name_lifeform",
-            data: { name_panels_target: "lifeform" }) do
+panel_block(
+  heading: heading, heading_links: heading_links,
+  inner_class: "name-section", id: "name_lifeform",
+  data: { name_panels_target: "lifeform" }
+) do
 
   if !@name.lifeform.blank?
     concat(tag.div(class: "mb-2") do
@@ -20,7 +22,7 @@ panel_block(heading: heading, heading_links: heading_links,
   if @first_child
     concat(tag.p(
       link_with_query(:show_name_propagate_lifeform.t,
-                      propagate_name_lifeform_form_path(@name.id))
+                      form_to_propagate_lifeform_of_name_path(@name.id))
     ))
   end
 

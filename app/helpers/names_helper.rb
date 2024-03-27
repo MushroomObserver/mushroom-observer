@@ -114,7 +114,10 @@ module NamesHelper
                  by: :confidence)
   end
 
+  #############################################################################
+  #
   # CLASSIFICATION PANEL
+  #
   def approved_name_and_parents(name)
     approved_name = name.approved_name
     parents = approved_name.all_parents
@@ -122,13 +125,14 @@ module NamesHelper
     return unless approved_name.classification.present? && parents.any?
 
     tag.div(class: "mb-2") do
-      ([approved_name] + parents).reverse.each do |n|
+      ([approved_name] + parents).reverse_each do |n|
         concat(tag.p do
           concat("#{rank_as_string(n.rank)}: ")
           concat(tag.i(link_with_query(n.text_name.t, n.show_link_args)))
           if n == approved_name && approved_name != name
             concat([
-              safe_br, safe_nbsp, safe_nbsp, " (= ", tag.i(name.text_name.t), ")"
+              safe_br, safe_nbsp, safe_nbsp,
+              " (= ", tag.i(name.text_name.t), ")"
             ].safe_join)
           end
         end)
@@ -136,7 +140,7 @@ module NamesHelper
     end
   end
 
-  def name_children_link(name, children_query)
+  def name_subtaxa_query_link(name, children_query)
     type = if name.at_or_below_genus? && !name.at_or_below_species?
              :rank_species
            else
@@ -158,7 +162,7 @@ module NamesHelper
     tag.p do
       put_button(
         name: :show_name_refresh_classification.t,
-        path: add_query_param(refresh_name_classification_path(@name.id))
+        path: add_query_param(refresh_classification_of_name_path(@name.id))
       )
     end
   end
@@ -169,8 +173,17 @@ module NamesHelper
     tag.p do
       put_button(
         name: :show_name_propagate_classification.t,
-        path: add_query_param(propagate_name_classification_path(@name.id))
+        path: add_query_param(propagate_classification_of_name_path(@name.id))
       )
+    end
+  end
+
+  def inherit_classification_link(name)
+    return unless !name.below_genus? && name.classification.blank?
+
+    tag.p do
+      link_with_query(:show_name_inherit_classification.t,
+                      form_to_inherit_classification_of_name_path(name.id))
     end
   end
 end

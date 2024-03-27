@@ -66,7 +66,7 @@ module Tabs
 
     def location_reverse_order_tab(location)
       [:show_location_reverse.t,
-       add_query_param(location_reverse_name_order_path(location.id)),
+       add_query_param(reverse_name_order_location_path(location.id)),
        { class: tab_id(__method__.to_s), icon: :back }]
     end
 

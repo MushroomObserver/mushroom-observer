@@ -11,16 +11,10 @@ panel_block(heading: heading, heading_links: heading_links,
             data: { name_panels_target: "classification" }) do
 
   concat(approved_name_and_parents(@name))
-  concat(name_children_link(@name, @children_query)) if @first_child
+  concat(name_subtaxa_query_link(@name, @children_query)) if @first_child
   concat(refresh_classification_link(@name))
   concat(propagate_classification_link(@name)) if @first_child
-
-  if !@name.below_genus? && @name.classification.blank?
-    concat(tag.p do
-      link_with_query(:show_name_inherit_classification.t,
-                      inherit_name_classification_form_path(@name.id))
-    end)
-  end
+  concat(inherit_classification_link(@name))
 
 end
 %>

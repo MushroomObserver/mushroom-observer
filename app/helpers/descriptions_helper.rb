@@ -168,7 +168,7 @@ module DescriptionsHelper
       concat(tag.span(" | "))
       concat(%w[unvetted vetted inaccurate].map do |w|
         put_button(name: :"review_#{w}".l,
-                   path: name_description_review_status_path(
+                   path: review_status_name_description_path(
                      desc.id, value: w, q: get_query_param
                    ))
       end.safe_join(tag.span(" | ")))
