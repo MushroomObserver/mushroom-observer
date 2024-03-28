@@ -22,6 +22,10 @@ module Observations
         @inat_ids = params[:inat_ids]
         render(:new)
       end
+
+      # Etiher of these get iNat Obs
+      # curl -X GET --header 'Accept: application/json' 'https://api.inaturalist.org/v1/observations?id=202555552'
+      # https://api.inaturalist.org/v1/observations?id=202555552
     end
   end
 end

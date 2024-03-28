@@ -17,8 +17,7 @@ module Observations
 
     def test_create_inat_import
       user = users(:rolf)
-      inat_id = 123_456_789
-      params = { ids: [inat_id] }
+      params = { inat_ids: "123456789" }
 
       login(user.login)
       put(:create, params: params)
@@ -28,8 +27,7 @@ module Observations
 
     def test_create_inat_import_bad_inat_id
       user = users(:rolf)
-      inat_id = "badID"
-      params = { inat_ids: [inat_id] }
+      params = { inat_ids: "badID" }
 
       login(user.login)
       put(:create, params: params)
