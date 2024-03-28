@@ -98,6 +98,7 @@ GEM
       rack-test (>= 0.6.3)
       regexp_parser (>= 1.5, < 3.0)
       xpath (~> 3.2)
+    chunky_png (1.4.0)
     concurrent-ruby (1.2.3)
     connection_pool (2.4.1)
     crack (1.0.0)
@@ -247,6 +248,10 @@ GEM
     requestjs-rails (0.0.11)
       railties (>= 6.1.0)
     rexml (3.2.6)
+    rqrcode (2.2.0)
+      chunky_png (~> 1.0)
+      rqrcode_core (~> 1.0)
+    rqrcode_core (1.2.0)
     rtf (0.3.3)
     rubocop (1.62.1)
       json (~> 2.3)
@@ -391,6 +396,7 @@ DEPENDENCIES
   railties (~> 7.1.3)
   redis (~> 4.0)
   requestjs-rails
+  rqrcode
   rtf
   rubocop
   rubocop-performance

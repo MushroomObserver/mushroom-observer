@@ -111,6 +111,9 @@ gem("fastimage")
 # for detecting file type of uploaded images
 gem("mimemagic")
 
+# QR code support for field slips
+gem("rqrcode")
+
 # for creating zip files
 # RubyZip 3.0 is coming!
 # **********************

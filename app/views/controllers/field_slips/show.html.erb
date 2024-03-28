@@ -4,6 +4,10 @@
   <p class="alert alert-success"><%= notice %></p>
 <% end %>
 
+<div>
+  <%= @field_slip.qr_code(field_slip_url(@field_slip)).html_safe %>
+</div>
+
 <%= render @field_slip %>
 
 <div>
