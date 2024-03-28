@@ -11,7 +11,7 @@
 
   links = []
   links.push([:author_request_add_author.t,
-    "#{MO.http_domain}/authors/review_authors/#{@object.id}?type=#{type}&add=#{@sender.id}"])
+    "#{MO.http_domain}/descriptions/authors/#{@object.id}?type=#{type}&add=#{@sender.id}"])
   links.push([:email_links_show_user.t,
     "#{MO.http_domain}/users/#{@sender.id}"])
   links.push([:email_links_latest_changes.t,

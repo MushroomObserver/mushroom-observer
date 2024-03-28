@@ -12,8 +12,9 @@ type = @object.type_tag
   <% @authors.each do |u| %>
     <%= user_link(u) %>
     | <%= destroy_button(name: :review_authors_remove_author.t,
-                         target: authors_review_path(id: @object.id,
-                                   type: type, remove: u.id)) %>
+                         target: description_authors_path(
+                           id: @object.id, type: type, remove: u.id
+                         )) %>
     <br/>
   <% end %>
 </p>
@@ -24,8 +25,9 @@ type = @object.type_tag
     unless @authors.member?(u) %>
       <%= user_link(u) %>
       | <%= post_button(name: :review_authors_add_author.t,
-                        path: authors_review_path(id: @object.id,
-                                type: type, add: u.id)) %>
+                        path: description_authors_path(
+                          id: @object.id, type: type, add: u.id
+                        )) %>
       <br/>
     <% end %>
   <% end %>

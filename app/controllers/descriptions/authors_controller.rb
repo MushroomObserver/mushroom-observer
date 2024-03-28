@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module Authors
-  # manage (review: add or remove) authors of an object, usually a Description
-  class ReviewsController < ApplicationController
+module Descriptions
+  # manage (review: add or remove) authors of a Description
+  class AuthorsController < ApplicationController
     # filters
     before_action :login_required
     before_action :pass_query_params

@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module Authors
-  # request to be an object (usually a Description) author
-  class EmailRequestsController < ApplicationController
+module Descriptions
+  # request to be an Description author
+  class AuthorRequestsController < ApplicationController
     # filters
     before_action :login_required
     before_action :pass_query_params
