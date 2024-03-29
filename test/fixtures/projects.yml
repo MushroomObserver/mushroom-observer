@@ -237,3 +237,15 @@ falmouth_2023_09_project:
   end_date: 2023-09-30
   location: falmouth
   observations: brett_woods_2023_09_obs, falmouth_2023_09_obs, falmouth_2022_obs, nybg_2023_09_obs # roy (non-admin) owns nybg_2023_09_obs
+
+# includes observations that violate date constraints
+# members: roy
+nowhere_2023_09_project:
+  <<: *DEFAULTS
+  user: dick
+  admin_group: dick_only
+  user_group: falmouth_2023_09_users
+  start_date: 2023-09-01
+  end_date: 2023-09-30
+  location: nil
+  observations: brett_woods_2023_09_obs, falmouth_2023_09_obs, falmouth_2022_obs, nybg_2023_09_obs # roy (non-admin) owns nybg_2023_09_obs

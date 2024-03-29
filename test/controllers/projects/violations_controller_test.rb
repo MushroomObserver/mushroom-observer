@@ -135,23 +135,24 @@ module Projects
     end
 
     def test_index_project_without_location
-      project = projects(:unlimited_project)
-      assert_nil(project.location, "Test need Project lacking a Location")
+      project = projects(:nowhere_2023_09_project)
+      assert(project.location.nil? && project.violations.any?,
+             "Test needs Project lacking a Location, with (date) violations")
       user = project.user
 
       login(user.login)
       get(:index, params: { project_id: project.id })
 
       assert_select(
-        "#project_violations_form",
+        "#project_violations_form th",
         { text: /#{:form_violations_latitude_none.l}/ }
       )
       assert_select(
-        "#project_violations_form",
+        "#project_violations_form th",
         { text: /#{:form_violations_longitude_none.l}/ }
       )
       assert_select(
-        "#project_violations_form",
+        "#project_violations_form th",
         { text: /#{:form_violations_location_none.l}/ }
       )
     end
