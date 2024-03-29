@@ -158,18 +158,11 @@ module Projects
         { text: /#{:form_violations_location_none.l}/ }
       )
 
-      highlighted_violation_selector =
+      highlighted_violations =
         "#project_violations_form tr td span.violation-highlight"
-
+      coordinate = /\d+\.\d+/
       assert_select(
-        highlighted_violation_selector,
-        { text: violation.lat.to_s, count: 0 },
-        "Observation lat/lon should not be highlighted as a violation " \
-        "for a Project which lacks a Location"
-      )
-      assert_select(
-        highlighted_violation_selector,
-        { text: violation.long.to_s, count: 0 },
+        highlighted_violations, { text: coordinate, count: 0 },
         "Observation lat/lon should not be highlighted as a violation " \
         "for a Project which lacks a Location"
       )
