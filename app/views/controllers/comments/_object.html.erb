@@ -1,38 +1,3 @@
-<%= case object.class.name
-
-  when "Location"
-    render(partial: "locations/show/location", object: object)
-
-  when "LocationDescription"
-    render(partial: "descriptions/description_details_and_alts_panel")
-
-  when "Name"
-    str = render(partial: "names/show/nomenclature",
-          locals: { name: object, synonyms: true })
-    if object.has_notes?
-      str += tag.p("#{:show_name_notes.t}:")
-      str += notes_panel(object.notes.tpl)
-    end
-    content_tag(:div, str, class: "name-section m-3")
-
-  when "NameDescription"
-    render(partial: "descriptions/description_details_and_alts_panel")
-
-  when "Observation"
-    render(partial: "observations/show/observation_details",
-           locals: { obs: object })
-
-  when "Project"
-    render(partial: "projects/project", object: object)
-
-  when "SpeciesList"
-    render(partial: "species_lists/species_list", object: object)
-
-  else
-    raise("We appear to have forgotten to tell add/edit_comment " +
-          "how to display objects of type \"#{object.class.name}\".")
-end %>
-
 <%= render(partial: "comments/comments_for_object",
            locals: { object: object, comments: @comments,
                      controls: false, limit: 10 }) %>
