@@ -86,7 +86,9 @@ module ProjectsHelper
 
     displayed_coord =
       coord_or_hidden(obs: obs, project: project, coord: obs.lat)
-    return displayed_coord if project&.location&.contains_lat?(obs.lat)
+
+    return displayed_coord if project.location.nil?
+    return displayed_coord if project.location.contains_lat?(obs.lat)
 
     tag.span(displayed_coord, class: "violation-highlight")
   end
@@ -97,7 +99,8 @@ module ProjectsHelper
     displayed_coord =
       coord_or_hidden(obs: obs, project: project, coord: obs.long)
 
-    return displayed_coord if project&.location&.contains_long?(obs.long)
+    return displayed_coord if project.location.nil?
+    return displayed_coord if project.location.contains_long?(obs.long)
 
     tag.span(displayed_coord, class: "violation-highlight")
   end

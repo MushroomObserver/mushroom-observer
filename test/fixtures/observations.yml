@@ -768,6 +768,8 @@ falmouth_2022_obs:
   when: 2022-09-15 # outside of dates of falmouth_2023_09_project
   where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
   location: falmouth
+  lat: 41.5862
+  long: -70.5976
 
 nybg_2023_09_obs:
   <<: *DEFAULTS
