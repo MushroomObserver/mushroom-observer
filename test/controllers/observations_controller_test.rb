@@ -1409,6 +1409,14 @@ class ObservationsControllerTest < FunctionalTestCase
   # ------------------------------
 
   # Test "new" observation form.
+  def test_observation_form_links
+    requires_login(:new)
+
+    assert_form_action(action: :create, approved_name: "")
+    assert_link_in_html(:import_observation_from_inat.l,
+                        new_observations_inat_import_path)
+  end
+
   def test_create_new_observation
     requires_login(:new)
     assert_form_action(action: :create, approved_name: "")

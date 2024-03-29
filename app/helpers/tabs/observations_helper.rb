@@ -219,7 +219,7 @@ module Tabs
     # FORMS
 
     def observation_form_new_tabs
-      [new_herbarium_tab]
+      [new_inat_import_tab, new_herbarium_tab]
     end
 
     def observation_form_edit_tabs(obs:)

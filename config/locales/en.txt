@@ -2890,7 +2890,9 @@
   list_merge_options_title: Location Matches for [where]
 
   #observation/inat_imports
-  create_inat_import_title: Import from iNaturalist
+  create_inat_import_title: Import from iNat
+  import_observation_from_inat: Import from iNat
+  inat_id: iNat id
   inat_ids: iNat ids
   runtime_illegal_inat_id: Illegal iNat id `[id]`
 
