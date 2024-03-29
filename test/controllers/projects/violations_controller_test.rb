@@ -135,24 +135,43 @@ module Projects
     end
 
     def test_index_project_without_location
-      project = projects(:unlimited_project)
-      assert_nil(project.location, "Test need Project lacking a Location")
-      user = project.user
+      project = projects(:nowhere_2023_09_project)
+      violation = observations(:falmouth_2022_obs)
+      assert(project.location.nil? && project.violations.include?(violation) &&
+              violation.lat.present?,
+             "Test needs Project lacking a Location, " \
+             "with (date) violation which has a geolocation")
 
-      login(user.login)
+      login(project.user.login)
       get(:index, params: { project_id: project.id })
 
       assert_select(
-        "#project_violations_form",
+        "#project_violations_form th",
         { text: /#{:form_violations_latitude_none.l}/ }
       )
       assert_select(
-        "#project_violations_form",
+        "#project_violations_form th",
         { text: /#{:form_violations_longitude_none.l}/ }
       )
       assert_select(
-        "#project_violations_form",
+        "#project_violations_form th",
         { text: /#{:form_violations_location_none.l}/ }
+      )
+
+      highlighted_violation_selector =
+        "#project_violations_form tr td span.violation-highlight"
+
+      assert_select(
+        highlighted_violation_selector,
+        { text: violation.lat.to_s, count: 0 },
+        "Observation lat/lon should not be highlighted as a violation " \
+        "for a Project which lacks a Location"
+      )
+      assert_select(
+        highlighted_violation_selector,
+        { text: violation.long.to_s, count: 0 },
+        "Observation lat/lon should not be highlighted as a violation " \
+        "for a Project which lacks a Location"
       )
     end
 
