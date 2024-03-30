@@ -137,6 +137,8 @@ gem("rqrcode")
 
 # PDF generation support.  prawn-svg is supposed to come before prawn.
 gem("prawn-svg")
+
+# And now prawn in a separate 'section' to make rubocop happy.
 gem("prawn")
 
 ########## Development, Testing, and Analysis ##################################
