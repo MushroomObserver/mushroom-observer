@@ -130,6 +130,9 @@ gem("mimemagic")
 # version 2.3.0.
 gem("rubyzip", "~> 2.3.0")
 
+gem("prawn-svg")
+gem("prawn")
+
 ########## Development, Testing, and Analysis ##################################
 group :test, :development do
   # https://github.com/ruby/debug
@@ -207,3 +210,5 @@ group :production do
 end
 
 gem "solid_queue", "~> 0.3.0"
+
+gem "rqrcode", "~> 2.2"

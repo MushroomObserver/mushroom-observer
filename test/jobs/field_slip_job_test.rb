@@ -3,9 +3,9 @@
 require "test_helper"
 
 class FieldSlipJobTest < ActiveJob::TestCase
-  test "perform performs" do
+  test "it should perform" do
     job = FieldSlipJob.new
-    filename = job.perform(:an_arg)
+    filename = job.perform(projects(:eol_project).id, 1234, 12)
     assert(File.exist?(filename))
     File.delete(filename)
   end
