@@ -205,3 +205,5 @@ group :production do
   # https://newrelic.com/
   gem("newrelic_rpm")
 end
+
+gem "solid_queue", "~> 0.3.0"

@@ -165,6 +165,8 @@ MushroomObserver::Application.configure do
   # config.active_support.report_deprecations = false
 
   config.bot_enabled = true
+
+  config.active_job.queue_adapter = :solid_queue
 end
 
 file = File.expand_path("../consts-site.rb", __dir__)
