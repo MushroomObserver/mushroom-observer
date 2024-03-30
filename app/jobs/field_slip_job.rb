@@ -15,8 +15,4 @@ class FieldSlipJob < ApplicationJob
     view.save_as(filename)
     filename
   end
-
-  def create_pdf(filename, title, prefix, icon, start, count)
-    
-  end
 end
