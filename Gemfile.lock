@@ -424,7 +424,7 @@ DEPENDENCIES
   railties (~> 7.1.3)
   redis (~> 4.0)
   requestjs-rails
-  rqrcode (~> 2.2)
+  rqrcode
   rtf
   rubocop
   rubocop-performance
@@ -434,7 +434,7 @@ DEPENDENCIES
   simplecov
   simplecov-lcov
   solid_cache
-  solid_queue (~> 0.3.0)
+  solid_queue
   sorted_set
   sprockets (~> 4.2.1)
   sprockets-rails
