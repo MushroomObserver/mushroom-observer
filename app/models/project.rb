@@ -67,7 +67,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :project_members, dependent: :destroy
   has_many :members, through: :project_members, source: :users
 
-  has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
+  has_many :comments, as: :target, dependent: :destroy, inverse_of: :target
+  has_many :field_slips, dependent: :destroy
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
 
   has_many :project_images, dependent: :destroy
