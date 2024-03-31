@@ -140,6 +140,7 @@ gem("prawn-svg")
 
 # And now prawn in a separate 'section' to make rubocop happy.
 gem("prawn")
+gem("prawn-manual_builder")
 
 ########## Development, Testing, and Analysis ##################################
 group :test, :development do

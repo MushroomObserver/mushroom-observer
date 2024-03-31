@@ -168,22 +168,22 @@ class FieldSlipView
     logo
   end
 
-  def qr_code(str)
+  def qr_code(code)
     title_width = 5.cm
-    svg(qr_svg("http://mushroomobserver.org/qr/#{str}"), at: [QR_LEFT, QR_TOP],
-                                                         width: QR_SIZE)
-    font("Helvetica", style: :bold)
-    text_box("#{@title} Field Slip:",
-             at: [QR_RIGHT + QR_MARGIN, QR_TOP],
-             height: FONT_SIZE,
-             width: title_width,
-             overflow: :shrink_to_fit)
-    font("Helvetica", style: :normal)
-    text_box(str,
-             at: [QR_RIGHT + QR_MARGIN, QR_TOP - FONT_SIZE * 1.5],
-             height: FONT_SIZE,
-             width: title_width,
-             overflow: :shrink_to_fit)
+    svg(qr_svg("http://mushroomobserver.org/qr/#{code}"), at: [QR_LEFT, QR_TOP],
+                                                          width: QR_SIZE)
+    font("#{Prawn::ManualBuilder::DATADIR}/fonts/DejaVuSans.ttf") do
+      text_box("#{@title} Field Slip:",
+               at: [QR_RIGHT + QR_MARGIN, QR_TOP],
+               height: FONT_SIZE,
+               width: title_width,
+               overflow: :shrink_to_fit)
+      text_box(code,
+               at: [QR_RIGHT + QR_MARGIN, QR_TOP - FONT_SIZE * 1.5],
+               height: FONT_SIZE,
+               width: title_width,
+               overflow: :shrink_to_fit)
+    end
   end
 
   def qr_svg(path)
@@ -243,18 +243,20 @@ class FieldSlipView
   end
 
   def footer(code)
-    text_box(code,
-             at: [0, CODE_MIN],
-             width: CODE_WIDTH,
-             height: FONT_SIZE,
-             overflow: :shrink_to_fit)
-    field("Other Codes", OTHER_LEFT, Y_MIN, OTHER_LEFT + OTHER_WIDTH,
-          Y_MIN - OTHER_HEIGHT)
-    text_box(code,
-             at: [OTHER_LEFT + OTHER_WIDTH + QR_MARGIN, CODE_MIN],
-             width: CODE_WIDTH,
-             height: FONT_SIZE,
-             overflow: :shrink_to_fit)
+    font("#{Prawn::ManualBuilder::DATADIR}/fonts/DejaVuSans.ttf") do
+      text_box(code,
+               at: [0, CODE_MIN],
+               width: CODE_WIDTH,
+               height: FONT_SIZE,
+               overflow: :shrink_to_fit)
+      field("Other Codes", OTHER_LEFT, Y_MIN, OTHER_LEFT + OTHER_WIDTH,
+            Y_MIN - OTHER_HEIGHT)
+      text_box(code,
+               at: [OTHER_LEFT + OTHER_WIDTH + QR_MARGIN, CODE_MIN],
+               width: CODE_WIDTH,
+               height: FONT_SIZE,
+               overflow: :shrink_to_fit)
+    end
   end
 
   def logo
