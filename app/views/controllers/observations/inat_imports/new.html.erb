@@ -1,11 +1,11 @@
 <%
-  #@container = :text
-  #@container = :text
   add_page_title(:create_inat_import_title.l)
 %>
 
 <%= form_with url: observations_inat_imports_path, method: :post do |form| %>
   <%= form.label :inat_id, "#{:inat_id.l}: " %>
-  <%= form.text_field(:inat_ids, size: 10, value: @inat_ids, class: "form-control") %>
+  <%# Plural `inat_ids` for compatibility with eventual bulk import %>
+  <%= form.text_field(:inat_ids, size: 10, value: @inat_ids,
+      class: "form-control") %>
   <%= form.submit(:IMPORT.l, { class: "btn btn-default" }) %>
 <% end %>

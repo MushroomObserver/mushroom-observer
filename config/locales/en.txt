@@ -2894,6 +2894,7 @@
   import_observation_from_inat: Import from iNat
   inat_id: iNat id
   inat_ids: iNat ids
+  inat_not_single_id: Please enter a single iNat id
   runtime_illegal_inat_id: Illegal iNat id `[id]`
 
   # observer/list_notifications
