@@ -141,6 +141,9 @@ GEM
     google-protobuf (4.26.0-x86_64-linux)
       rake (>= 13)
     hashdiff (1.1.0)
+    httparty (0.21.0)
+      mini_mime (>= 1.0.0)
+      multi_xml (>= 0.5.2)
     i18n (1.14.4)
       concurrent-ruby (~> 1.0)
     importmap-rails (2.0.1)
@@ -180,6 +183,7 @@ GEM
       builder
       minitest (>= 5.0)
       ruby-progressbar
+    multi_xml (0.6.0)
     mutex_m (0.2.0)
     net-imap (0.4.10)
       date
@@ -377,6 +381,7 @@ DEPENDENCIES
   database_cleaner-active_record
   debug
   fastimage
+  httparty
   i18n
   importmap-rails
   jbuilder
