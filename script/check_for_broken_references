@@ -57,7 +57,7 @@ end
   [ExternalLink,                 :user,                 :alert],
   [ExternalSite,                 :project,              :alert],
   [FieldSlip,                    :observation,          :delete],
-  [FieldSlip,                    :project,              :delete],
+  [FieldSlip,                    :project,              :nil],
   [FieldSlip,                    :user,                 :alert],
   [GlossaryTerm,                 :rss_log,              :nil],
   [GlossaryTerm,                 :thumb_image,          :alert],
