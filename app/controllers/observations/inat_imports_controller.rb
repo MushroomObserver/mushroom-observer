@@ -10,11 +10,8 @@ module Observations
     def new; end
 
     def create
-      # make it an array for bulk-import compatibility, easier manipulation
-      inat_id_array = params[:inat_ids].split
-
-      return redirect_to(new_observation_path) if inat_id_array.none?
-      return reload_form if bad_inat_id_param?(inat_id_array)
+      return redirect_to(new_observation_path) if params[:inat_ids].blank?
+      return reload_form if bad_inat_id_param?
 
       # return unless check_inat_ids(inat_id_array)
 
@@ -51,8 +48,9 @@ module Observations
       render(:new)
     end
 
-    def bad_inat_id_param?(inat_id_array)
-      inat_id_array.none? ||
+    def bad_inat_id_param?
+      inat_id_array = params[:inat_ids].split
+      # inat_id_array.none? ||
         multiple_ids?(inat_id_array) ||
         illegal_ids?(inat_id_array)
     end
