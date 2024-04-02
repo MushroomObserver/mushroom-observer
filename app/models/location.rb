@@ -697,18 +697,10 @@ class Location < AbstractModel
       obs.save
     end
 
-    # Move species lists over.
-    SpeciesList.where(location_id: old_loc.id).find_each do |spl|
-      spl.update_attribute(:location, self)
-    end
-
-    # Update any users who call this location their primary location.
-    User.where(location_id: old_loc.id).find_each do |user|
-      user.update_attribute(:location, self)
-    end
-
-    Herbarium.where(location_id: old_loc.id).find_each do |herbarium|
-      herbarium.update_attribute(:location, self)
+    [Herbarium, Project, SpeciesList, User].each do |klass|
+      klass.where(location_id: old_loc.id).find_each do |obj|
+        obj.update_attribute(:location, self)
+      end
     end
 
     # Move over any interest in the old name.
