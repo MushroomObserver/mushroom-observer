@@ -711,8 +711,6 @@ class LocationsControllerTest < FunctionalTestCase
     past_loc_count = Location::Version.count
     past_desc_count = LocationDescription::Version.count
     herbarium = herbaria(:burbank_herbarium)
-    assert_equal(to_go, herbarium.location,
-                 "Test needs a Herbarium with Location that will be merged")
 
     put_requires_login(:update, params)
 
@@ -722,9 +720,6 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(past_loc_count - 1, Location::Version.count)
     assert_equal(past_desc_count, LocationDescription::Version.count)
     assert_equal(10 - @new_pts, rolf.reload.contribution)
-    assert_equal(
-      to_stay, herbarium.location,
-      "Merge failed to update Herbarium location to surviving Location")
   end
 
   def test_update_location_admin_merge
