@@ -710,7 +710,6 @@ class LocationsControllerTest < FunctionalTestCase
     desc_count = LocationDescription.count
     past_loc_count = Location::Version.count
     past_desc_count = LocationDescription::Version.count
-    herbarium = herbaria(:burbank_herbarium)
 
     put_requires_login(:update, params)
 

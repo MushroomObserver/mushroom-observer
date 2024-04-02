@@ -37,7 +37,3 @@ field_museum:
 
 curatorless_herbarium:
   name: $LABEL
-
-burbank_herbarium:
-  name: $LABEL
-  location: burbank
