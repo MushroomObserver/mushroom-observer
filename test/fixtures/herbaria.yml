@@ -4,36 +4,36 @@
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 nybg_herbarium:
-    # api tests rely on these dates, and nybg must be older than field_museum
-    created_at: 2012-10-21 12:14:00
-    updated_at: 2012-10-21 12:14:00
-    name: The New York Botanical Garden
-    mailing_address: The New York Botanical Herbarium & Garden, Bronx, New York, USA
-    location: nybg_location
-    email: nybg@collectivesource.com
-    description: An awesome & world famous herbarium.
-    code: NY
-    curators: rolf, roy
+  # api tests rely on these dates, and nybg must be older than field_museum
+  created_at: 2012-10-21 12:14:00
+  updated_at: 2012-10-21 12:14:00
+  name: The New York Botanical Garden
+  mailing_address: The New York Botanical Herbarium & Garden, Bronx, New York, USA
+  location: nybg_location
+  email: nybg@collectivesource.com
+  description: An awesome & world famous herbarium.
+  code: NY
+  curators: rolf, roy
 
 rolf_herbarium:
-    name: "Uncle Rolf's Personal Herbarium"
-    personal_user: rolf
-    curators: rolf
+  name: "Uncle Rolf's Personal Herbarium"
+  personal_user: rolf
+  curators: rolf
 
 # Empty herbarium
 dick_herbarium:
-    name: "Dick's Personal Herbarium"
-    personal_user: dick
-    curators: dick
+  name: "Dick's Personal Herbarium"
+  personal_user: dick
+  curators: dick
 
 fundis_herbarium:
-    name: "Fungal Diversity Survey"
+  name: "Fungal Diversity Survey"
 
 field_museum:
-    name: The Field Museum
-    mailing_address: 1400 S. Lake Shore Drive, Chicago, IL, 60605-2496, USA
-    code: F
-    curators: rolf, thorsten
+  name: The Field Museum
+  mailing_address: 1400 S. Lake Shore Drive, Chicago, IL, 60605-2496, USA
+  code: F
+  curators: rolf, thorsten
 
 curatorless_herbarium:
-    name: $LABEL
+  name: $LABEL
