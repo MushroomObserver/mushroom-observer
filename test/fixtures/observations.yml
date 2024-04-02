@@ -10,8 +10,10 @@
 #   where: somewhere
 #   location:
 
-# IMPORTANT: When creating a new observation fixture, you need to also create a
-# corresponding rss_log, since the observation index now sorts by rss_log.
+# IMPORTANT:
+# - When creating a new observation fixture, you need to also create a
+#   corresponding rss_log, since the observation index now sorts by rss_log.
+# - DO NOT USE albion as a location; it breaks API2Test#test_patching_locations
 
 # Instead of writing simple one-off fixtures for new tests, consider creating
 # records on the fly within the test. This will generate both obs and rss_log.

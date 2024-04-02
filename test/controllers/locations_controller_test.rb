@@ -734,6 +734,8 @@ class LocationsControllerTest < FunctionalTestCase
     past_locs_to_go = to_go.versions.length
     past_descs_to_go = 0
 
+    # Cannot use a herbarium fixture here --
+    # A fixture with location `alibion` breaks API2Test#test_patching_locations
     herbarium = Herbarium.create(name: "Herbarium to move", location: to_go)
 
     make_admin("rolf")
