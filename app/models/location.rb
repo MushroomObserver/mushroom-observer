@@ -707,6 +707,10 @@ class Location < AbstractModel
       user.update_attribute(:location, self)
     end
 
+    Herbarium.where(location_id: old_loc.id).find_each do |herbarium|
+      herbarium.update_attribute(:location, self)
+    end
+
     # Move over any interest in the old name.
     Interest.where(target_type: "Location",
                    target_id: old_loc.id).find_each do |int|
