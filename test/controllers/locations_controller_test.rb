@@ -734,9 +734,10 @@ class LocationsControllerTest < FunctionalTestCase
     past_locs_to_go = to_go.versions.length
     past_descs_to_go = 0
 
-    # Cannot use a herbarium fixture here --
-    # A fixture with location `alibion` breaks API2Test#test_patching_locations
+    # Cannot use fixture here -- in these classes
+    # fixtures with location `alibion` break API2Test#test_patching_locations
     herbarium = Herbarium.create(name: "Herbarium to move", location: to_go)
+    project = Project.create(title: "Project to move", location: to_go)
 
     make_admin("rolf")
     put(:update, params: params)
@@ -749,6 +750,7 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(past_desc_count - past_descs_to_go,
                  LocationDescription::Version.count)
     assert_equal(to_stay, herbarium.reload.location)
+    assert_equal(to_stay, project.reload.location)
   end
 
   def test_post_edit_location_locked
