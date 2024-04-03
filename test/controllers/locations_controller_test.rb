@@ -759,10 +759,7 @@ class LocationsControllerTest < FunctionalTestCase
 
       next unless model_name.ancestors.include?(ActiveRecord::Base)
       next if model_name.abstract_class?
-      unless model_name.column_names.include?("location_id") ||
-             model_name.column_names.include?("location")
-        next
-      end
+      next unless model_name.column_names.include?("location_id")
 
       assert(
         [Herbarium, Interest, Location, LocationDescription, NameDescription,
