@@ -80,7 +80,7 @@ class UsersController < ApplicationController
   end
 
   # Note that the full user index is unavailable except to admins.
-  # This will just redirect to "/"
+  # The index above will just redirect again, to "/"
   def find_user!
     @show_user = User.show_includes.safe_find(params[:id]) ||
                  flash_error_and_goto_index(User, params[:id])
