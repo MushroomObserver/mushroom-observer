@@ -29,7 +29,7 @@ class UsersController < ApplicationController
   def show
     store_location
     id = params[:id].to_s
-    find_user!
+    return unless find_user!
 
     case params[:flow]
     when "next"
@@ -79,11 +79,14 @@ class UsersController < ApplicationController
     show_index_of_objects(query, args)
   end
 
+  # Note that the full user index is unavailable except to admins.
+  # This will just redirect to "/"
   def find_user!
     @show_user = User.show_includes.safe_find(params[:id]) ||
                  flash_error_and_goto_index(User, params[:id])
   end
 
+  # User's best images for #show
   MAX_THUMBS = 6
 
   # set @observations whose thumbnails will display in user summary
