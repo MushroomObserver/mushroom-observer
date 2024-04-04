@@ -104,6 +104,12 @@ class UsersControllerTest < FunctionalTestCase
     )
   end
 
+  def test_show_nonexistent_user
+    login
+    get(:show, params: { id: "123456789" })
+    assert_redirected_to({ action: :index })
+  end
+
   #   ---------------
   #    admin actions
   #   ---------------
