@@ -2779,7 +2779,11 @@
   field_slip_no_project: Project not found
   field_slip_show: Show this field slip
   field_slip_updated: Field slip was successfully updated.
-  field_slip_welcome: "Welcome to the [TITLE] project!"
+  field_slip_welcome: "Welcome to the [TITLE] Project!"
+  field_slips_for_project_title: "Create Field Slips for the [TITLE] Project"
+  field_slips_created_job: "Created job for [FILENAME]"
+  field_slips_project_update_fail: "Unable to update [TITLE] Project"
+  field_slip_job_no_project: "No Project with id=[ID]"
 
   ##############################################################################
 
@@ -3277,6 +3281,7 @@
   show_project_destroy: Destroy Project
   show_project_drafts: Drafts
   show_project_edit: Edit Project
+  show_project_field_slip_create: Create Field Slip PDF
   show_project_field_slip_prefix: Field Slip Prefix
   show_project_join: Join Project
   show_project_location: Location

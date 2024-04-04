@@ -1,0 +1,14 @@
+<%
+add_page_title(:field_slips_for_project_title.t(title: @project.title))
+
+action = { controller: "/projects/field_slips", action: :create,
+            project_id: @project.id, q: get_query_param }
+%>
+
+<div class="container-text mt-3 pb-2">
+
+  <%= form_with(url: action, id: "project_member_form") do |f| %>
+    <%= submit_button(form: f, button: :CREATE.t, class: "ml-3") %>
+  <% end %>
+
+</div><!--.container-text-->
