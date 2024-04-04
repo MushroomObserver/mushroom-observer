@@ -105,6 +105,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
   has_many :observations
+  has_many :projects
   has_many :species_lists
   has_many :herbaria     # should be at most one, but nothing preventing more
   has_many :users        # via profile location
