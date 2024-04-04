@@ -9,7 +9,7 @@ module Projects
     def test_new
       project = projects(:eol_project)
       params = {
-        project_id: project.id,
+        project_id: project.id
       }
       requires_login(:new, params)
       assert_template("new")
