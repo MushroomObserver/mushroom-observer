@@ -6,6 +6,8 @@
 
 module Projects
   class FieldSlipsController < ApplicationController
+    PDF_DIR = "public/field_slips"
+
     before_action :login_required
     before_action :pass_query_params
 
@@ -16,14 +18,15 @@ module Projects
     def create
       return unless find_project!
 
-      filename = "tmp/#{@project.field_slip_prefix}-#{Time.now.to_i}.pdf"
+      prefix = @project.field_slip_prefix
+      filename = "#{PDF_DIR}/#{prefix}-#{Time.now.to_i}.pdf"
       start = @project.next_field_slip
       @project.next_field_slip = start + 6
       if @project.save
         FieldSlipJob.perform_later(@project.id, start, 6, filename)
         flash_notice(:field_slips_created_job.t(filename:))
       else
-        flash_error(:field_slips_project_update_fail.t(title: project.title))
+        flash_error(:field_slips_project_update_fail.t(title: @project.title))
       end
       redirect_to(project_url(@project))
     end
