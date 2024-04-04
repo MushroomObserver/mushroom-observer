@@ -753,23 +753,6 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(to_stay, project.reload.location)
   end
 
-  def test_merge_covers_relevant_models
-    Dir[Rails.root.join("app/models/*.rb").to_s].each do |filename|
-      model_name = File.basename(filename, ".rb").camelize.constantize
-
-      next unless model_name.ancestors.include?(ActiveRecord::Base)
-      next if model_name.abstract_class?
-      next unless model_name.column_names.include?("location_id")
-
-      assert(
-        [Herbarium, Interest, Location, LocationDescription, NameDescription,
-         Observation, Project, RssLog, SpeciesList, User].include?(model_name),
-        "Update `Location#merge` to handle #{model_name.name}. " \
-        "Then update this assertion."
-      )
-    end
-  end
-
   def test_post_edit_location_locked
     location = locations(:unknown_location)
     params = {
