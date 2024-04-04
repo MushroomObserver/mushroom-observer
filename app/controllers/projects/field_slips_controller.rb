@@ -19,6 +19,7 @@ module Projects
       return unless find_project!
 
       prefix = @project.field_slip_prefix
+      Dir.mkdir(PDF_DIR) unless File.exist?(PDF_DIR)
       filename = "#{PDF_DIR}/#{prefix}-#{Time.now.to_i}.pdf"
       start = @project.next_field_slip
       @project.next_field_slip = start + 6
