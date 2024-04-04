@@ -21,7 +21,7 @@ module Projects
       @project.next_field_slip = start + 6
       if @project.save
         FieldSlipJob.perform_later(@project.id, start, 6, filename)
-        flash_notice(:field_slips_created_job.t(filename:)
+        flash_notice(:field_slips_created_job.t(filename:))
       else
         flash_error(:field_slips_project_update_fail.t(title: project.title))
       end
