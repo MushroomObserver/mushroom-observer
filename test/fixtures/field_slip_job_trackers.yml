@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  start: 1
+  count: 1
+  prefix: MyString
+  status: 1
+
+two:
+  start: 1
+  count: 1
+  prefix: MyString
+  status: 1
