@@ -6,13 +6,22 @@ action = { controller: "/projects/field_slips", action: :create,
 %>
 
 <div class="container-text mt-3 pb-2">
-  <p>
+  <div>
     <%= :field_slips_for_project_max_pages.t(max: @page_max) %>
-  </p>
-  <p>
+  </div>
+  <div>
     <%= form_with(url: action, id: "project_field_slip_form") do |f| %>
       <%= number_field_with_label(form: f, field: :pages, inline: true, value: "1") %>
       <%= submit_button(form: f, button: :CREATE.t, class: "ml-3") %>
     <% end %>
-  </p>
+  </div>
+  <div>
+    <ul>
+    <% @project.trackers.each do |tracker| %>
+      <li>
+        <%= tracker.description %>
+      </li>
+    <% end %>
+    </ul>
+  </div>
 </div><!--.container-text-->

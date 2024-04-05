@@ -2777,14 +2777,16 @@
   field_slip_last_obs: Use Last Observation
   field_slip_new: Record Field Slip
   field_slip_no_observation: Observation not found
-  field_slip_no_project: Project not found
+  field_slip_no_project: "Project [ID] not found"
+  field_slip_job_no_tracker: "Field Slip Tracker [ID] not found"
   field_slip_show: Show this field slip
   field_slip_updated: Field slip was successfully updated.
   field_slip_welcome: "Welcome to the [TITLE] Project!"
   field_slips_for_project_max_pages: "Each page has six field slips.  You may create up to [MAX] pages for this project."
   field_slips_for_project_title: "Create Field Slips for the [TITLE] Project"
-  field_slips_created_job: "Created job for [FILENAME]"
+  field_slips_created_job: "Created job for [filename]"
   field_slips_project_update_fail: "Unable to update [TITLE] Project"
+  field_slips_tracker_fail: "Unable to create Field Slip Tracker for [TITLE] Project"
   field_slips_too_many_pages: "You have requested more than [MAX] pages."
 
   ##############################################################################

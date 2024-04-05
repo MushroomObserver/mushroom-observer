@@ -468,6 +468,10 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     !(start_date..end_date).cover?(observation.when)
   end
 
+  def trackers
+    FieldSlipJobTracker.where(prefix: field_slip_prefix)
+  end
+
   private ###############################
 
   def obs_geoloc_outside_project_location
