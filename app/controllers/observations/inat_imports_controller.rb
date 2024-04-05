@@ -13,7 +13,19 @@ module Observations
       return redirect_to(new_observation_path) if params[:inat_ids].blank?
       return reload_form if bad_inat_id_param?
 
-      # return unless check_inat_ids(inat_id_array)
+      # TODO: Do I need timeout?
+      # TODO: need error checking
+
+      # How many responses?
+      response =
+        HTTParty.
+        get(
+          "https://api.inaturalist.org/v1/observations?" \
+          "id=#{params[:inat_ids]}" \
+          "&order=desc&order_by=created_at&only_id=true",
+          format: :plain
+        )
+      json = JSON.parse(response, symbolize_names: true)
 
 =begin from ProjectsController
       if title.blank?

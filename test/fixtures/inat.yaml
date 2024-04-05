@@ -3,22 +3,25 @@
 # in a fixture on the opposite side of the association.
 # See https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
+# These "fixtures" represent iNat observations parsed by InatsImportsController
+# There is no corresponding model, so there are no corresponding methods.
 DEFAULTS: &DEFAULTS
   user: dick
 
 # https://www.inaturalist.org/observations/202555552
+# jdc research grade observation with multiple images
 somion_unicolor:
   <<: *DEFAULTS
   inat_id: 202555552
-  user:
-  when: 2023-03-23
+  user: dick
+  when:
   where: Cochise Co., Arizona, USA
   location:
   name: somion_unicolor
   text_name: Somion unicolor
   classification: ""
-  notes:
+  notes: ""
   vote_cache: 0.0
   is_collection_location: 1
   lifeform: " "
-  needs_naming: 1
+  needs_naming: 0

@@ -5,6 +5,11 @@ require "test_helper"
 # test importing iNaturalist Observations to Mushroom Observer
 module Observations
   class InatImportsControllerTest < FunctionalTestCase
+    def setup
+      @inats = YAML.load_file("test/fixtures/inat.yaml", aliases: true).
+               deep_symbolize_keys
+    end
+
     def test_new_inat_import
       login(users(:rolf).login)
       get(:new)
@@ -16,8 +21,18 @@ module Observations
     end
 
     def test_create_inat_import
-      user = users(:rolf)
-      params = { inat_ids: "123456789" }
+      inat_obs = @inats[:somion_unicolor]
+      inat_id = inat_obs[:inat_id].to_s
+      user = users(inat_obs[:user])
+      params = { inat_ids: inat_id }
+
+      id_only_path = "test/fixtures/inat/one_obs_public_only_id.txt"
+      body = JSON.parse(File.read(id_only_path), symbolize_names: true)
+      WebMock.stub_request(
+        :get,
+        "https://api.inaturalist.org/v1/observations?id=#{inat_id}" \
+        "&order=desc&order_by=created_at&only_id=true"
+      ).to_return(body: body)
 
       login(user.login)
       put(:create, params: params)
