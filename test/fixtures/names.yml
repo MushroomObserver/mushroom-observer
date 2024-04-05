@@ -1301,3 +1301,12 @@ pasaria:
   sort_name: Pasaria
   rank: <%= Name.ranks[:Genus] %>
   classification: "" # to test if inherit link exists
+
+somion_unicolor:
+  <<: *DEFAULTS
+  text_name: Somion unicolor
+  author: '(Fr.) Spirin & Miettinen'
+  display_name: '**__Somion unicolor__** (Fr.) Spirin & Miettinen'
+  search_name: Somion unicolor (Fr.) Spirin & Miettinen
+  sort_name: Somion unicolor (Fr.) Spirin & Miettinen
+  rank: <%= Name.ranks[:Species] %>
