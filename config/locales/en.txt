@@ -2785,6 +2785,7 @@
   field_slips_for_project_max_pages: "Each page has six field slips.  You may create up to [MAX] pages for this project."
   field_slips_for_project_title: "Create Field Slips for the [TITLE] Project"
   field_slips_created_job: "Created job for [filename]"
+  field_slips_must_be_member: "You must be a project member to create field slips"
   field_slips_project_update_fail: "Unable to update [TITLE] Project"
   field_slips_tracker_fail: "Unable to create Field Slip Tracker for [TITLE] Project"
   field_slips_too_many_pages: "You have requested more than [MAX] pages."

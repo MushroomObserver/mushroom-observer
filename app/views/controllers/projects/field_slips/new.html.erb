@@ -11,7 +11,8 @@ action = { controller: "/projects/field_slips", action: :create,
   </div>
   <div>
     <%= form_with(url: action, id: "project_field_slip_form") do |f| %>
-      <%= number_field_with_label(form: f, field: :pages, inline: true, value: "1") %>
+      <%= number_field_with_label(form: f, field: :pages, inline: true,
+                                  value: @page_max.zero? ? "0" : "1") %>
       <%= submit_button(form: f, button: :CREATE.t, class: "ml-3") %>
     <% end %>
   </div>
