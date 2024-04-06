@@ -16,8 +16,6 @@ module Projects
 
     def create
       return unless find_project!
-
-      redirect_to(project_url(@project))
       return unless ok_page_count
 
       tracker = FieldSlipJobTracker.create(prefix: @project.field_slip_prefix,
@@ -35,6 +33,7 @@ module Projects
       else
         flash_error(:field_slips_tracker_fail.t(title: @project.title))
       end
+      redirect_to(project_url(@project))
     end
 
     private
@@ -58,13 +57,13 @@ module Projects
     end
 
     def ok_page_count
+      return true if page_max.positive? && pages <= page_max
+
       if page_max.zero?
         flash_error(:field_slips_must_be_member.t)
-        return false
+      else
+        flash_error(:field_slips_too_many_pages.t(max: page_max))
       end
-      return true if pages <= page_max
-
-      flash_error(:field_slips_too_many_pages.t(max: page_max))
       redirect_to(new_project_field_slip_path(project_id: @project.id))
       false
     end
