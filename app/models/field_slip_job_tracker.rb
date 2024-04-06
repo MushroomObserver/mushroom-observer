@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 class FieldSlipJobTracker < AbstractModel
-  PDF_DIR = "public/field_slips"
+  PUBLIC_DIR = "public/"
+  SUBDIR = "field_slips"
+  PDF_DIR = PUBLIC_DIR + SUBDIR
 
   enum status:
          {
@@ -31,12 +33,23 @@ class FieldSlipJobTracker < AbstractModel
   end
 
   def filename
-    @filename ||= "#{PDF_DIR}/#{prefix}-#{code_num(start)}-" \
-                  "#{code_num(last)}-#{id}.pdf"
+    @filename ||= "#{prefix}-#{code_num(start)}-#{code_num(last)}-#{id}.pdf"
   end
 
-  def description
-    "#{status}: #{filename}"
+  def filepath
+    @filepath ||= "#{PDF_DIR}/#{filename}"
+  end
+
+  def link
+    "#{MO.http_domain}/#{SUBDIR}/#{filename}"
+  end
+
+  def elapsed_time
+    if status == "Done"
+      updated_at - created_at
+    else
+      Time.zone.now - created_at
+    end
   end
 
   private

@@ -15,8 +15,8 @@ class FieldSlipJob < ApplicationJob
     view = FieldSlipView.new(project.title, tracker.prefix, icon,
                              tracker.start, tracker.count)
     view.render
-    view.save_as(tracker.filename)
+    view.save_as(tracker.filepath)
     tracker.done
-    tracker.filename
+    tracker.filepath
   end
 end

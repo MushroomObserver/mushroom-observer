@@ -16,13 +16,26 @@ action = { controller: "/projects/field_slips", action: :create,
       <%= submit_button(form: f, button: :CREATE.t, class: "ml-3") %>
     <% end %>
   </div>
-  <div>
-    <ul>
-    <% @project.trackers.each do |tracker| %>
-      <li>
-        <%= tracker.description %>
-      </li>
-    <% end %>
-    </ul>
-  </div>
+  <% if @project.member?(User.current) %>
+    <div class="mt-3">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">File</th>
+            <th scope="col">Time</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @project.trackers.each do |tracker| %>
+            <tr>
+              <td><%= field_slip_link(tracker) %></td>
+              <td><%= tracker.elapsed_time %></td>
+              <td><%= tracker.status %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
 </div><!--.container-text-->

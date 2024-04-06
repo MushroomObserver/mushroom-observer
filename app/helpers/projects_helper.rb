@@ -40,6 +40,14 @@ module ProjectsHelper
     end
   end
 
+  def field_slip_link(tracker)
+    if tracker.status == "Done"
+      link_to(tracker.filename, tracker.link)
+    else
+      tracker.filename
+    end
+  end
+
   #########
 
   private
