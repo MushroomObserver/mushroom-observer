@@ -7,6 +7,7 @@ module Projects
     include ActiveJob::TestHelper
 
     def test_new
+      FieldSlipJobTracker.find_by(status: "Done")
       project = projects(:eol_project)
       params = {
         project_id: project.id

@@ -1,7 +1,13 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-fsjt_one:
-  start: 1
+fsjt_page_one:
+  start: 0
   count: 6
   prefix: EOL
-  status: 1
+  status: <%= FieldSlipJobTracker.statuses[:Done] %>
+
+fsjt_page_two:
+  start: 6
+  count: 12
+  prefix: EOL
+  status: <%= FieldSlipJobTracker.statuses[:Starting] %>
