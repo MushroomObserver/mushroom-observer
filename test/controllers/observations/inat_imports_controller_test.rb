@@ -26,12 +26,12 @@ module Observations
       user = users(inat_obs[:user])
       params = { inat_ids: inat_id }
 
-      id_only_path = "test/fixtures/inat/one_obs_public_only_id.txt"
-      body = JSON.parse(File.read(id_only_path), symbolize_names: true)
+      path = "test/fixtures/inat/one_obs_public.txt"
+      body = JSON.parse(File.read(path), symbolize_names: true)
       WebMock.stub_request(
         :get,
         "https://api.inaturalist.org/v1/observations?id=#{inat_id}" \
-        "&order=desc&order_by=created_at&only_id=true"
+        "&order=desc&order_by=created_at&only_id=false"
       ).to_return(body: body)
 
       login(user.login)
