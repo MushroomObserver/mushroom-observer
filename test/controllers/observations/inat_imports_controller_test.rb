@@ -27,10 +27,11 @@ module Observations
       params = { inat_ids: inat_id }
 
       path = "test/fixtures/inat/one_obs_public.txt"
-      body = JSON.parse(File.read(path), symbolize_names: true)
+      body = File.read(path)
       WebMock.stub_request(
         :get,
-        "https://api.inaturalist.org/v1/observations?id=#{inat_id}" \
+        "https://api.inaturalist.org/v1" \
+        "/observations?id=#{inat_id}" \
         "&order=desc&order_by=created_at&only_id=false"
       ).to_return(body: body)
 
