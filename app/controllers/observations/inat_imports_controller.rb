@@ -81,7 +81,7 @@ module Observations
       operation = "/observations?id=#{ids}" \
                   "&order=desc&order_by=created_at&only_id=false"
       inat_response = inat_search(operation)
-      JSON.parse(inat_response, symbolize_names: true)
+      JSON.parse(inat_response.body, symbolize_names: true)
     end
 
     def inat_search(operation)
