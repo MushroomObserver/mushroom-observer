@@ -52,7 +52,6 @@ module Mappable
     attr_accessor :sets, :extents, :representative_points
 
     def initialize(objects, max_objects = MO.max_map_objects)
-
       @max_objects = max_objects
       init_sets(objects)
       group_objects_into_sets
@@ -142,6 +141,7 @@ module Mappable
           end
         elsif mappable
           # Only raise an error if it was otherwise mappable
+          # We do want to ignore non-mappable locations
           raise("Tried to map #{obj.class} #{obj.id}.")
         end
       end
@@ -151,7 +151,6 @@ module Mappable
       prec = next_precision(MAX_PRECISION)
       while @sets.length > @max_objects && prec >= MIN_PRECISION
         old_sets = @sets.values
-        # debugger
         @sets = {}
         old_sets.each do |set|
           add_box_set(set, set.objects, prec)
@@ -165,9 +164,6 @@ module Mappable
       set = @sets[[x, y, 0, 0]] ||= Mappable::MapSet.new
       set.add_objects(objs)
       set.update_extents_with_point(loc_or_obs)
-      # debugger if set.north == 34.0105 && set.east == -119.8064
-      # this works on init_sets, but group_objects_into_sets nulls the set immediately
-      # somehow @sets is losing the set between init and the very next line
     end
 
     def add_box_set(loc, objs, prec)
