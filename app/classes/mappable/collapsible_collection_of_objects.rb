@@ -109,21 +109,21 @@ module Mappable
     # Sets with unknown location are messing up the maps.
     # Dismiss any set that has an unknown location.
     # Similar to MapSet.init_objects_and_derive_extents
-    # These are MinimalMapLocations/Observations, so their properties
-    # are different.
+    # These may be Mappable::MinimalLocations/Observations, whose properties
+    # are different. Names::MapsController#show sends observations though.
     def init_sets(objects)
       objects = [objects] unless objects.is_a?(Array)
       raise("Tried to create empty map!") if objects.empty?
 
       @sets = {}
       objects.each do |obj|
-        if obj.location? && !Location.is_unknown?(obj.name)
+        if obj.location? && !Location.is_unknown?(obj.name) && !obj.vague?
           add_box_set(obj, [obj], MAX_PRECISION)
         elsif obj.observation?
           if obj.lat && !obj.lat_long_dubious?
             add_point_set(obj, [obj], MAX_PRECISION)
           elsif (loc = obj.location) &&
-                !Location.is_unknown?(loc.name)
+                !Location.is_unknown?(loc.name) && !loc.vague?
             add_box_set(loc, [obj], MAX_PRECISION)
           end
         else
@@ -136,6 +136,7 @@ module Mappable
       prec = next_precision(MAX_PRECISION)
       while @sets.length > @max_objects && prec >= MIN_PRECISION
         old_sets = @sets.values
+        # debugger
         @sets = {}
         old_sets.each do |set|
           add_box_set(set, set.objects, prec)
@@ -144,11 +145,14 @@ module Mappable
       end
     end
 
-    def add_point_set(loc, objs, prec)
-      x, y = round_lat_lng_to_precision(loc, prec)
+    def add_point_set(loc_or_obs, objs, prec)
+      x, y = round_lat_lng_to_precision(loc_or_obs, prec)
       set = @sets[[x, y, 0, 0]] ||= Mappable::MapSet.new
       set.add_objects(objs)
-      set.update_extents_with_point(loc)
+      set.update_extents_with_point(loc_or_obs)
+      # debugger if set.north == 34.0105 && set.east == -119.8064
+      # this works on init_sets, but group_objects_into_sets nulls the set immediately
+      # somehow @sets is losing the set between init and the very next line
     end
 
     def add_box_set(loc, objs, prec)

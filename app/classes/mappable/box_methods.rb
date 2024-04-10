@@ -66,6 +66,11 @@ module Mappable
       west <= east ? east - west : east - west + 360
     end
 
+    # Arbitrary test for whether box is "vague" (i.e., covers a large area).
+    def vague?
+      north_south_distance > 1 || east_west_distance > 1
+    end
+
     # Is a given lat/long coordinate within or close to the bounding box?
     def lat_long_close?(lat, long)
       delta_lat = north_south_distance * 0.20
