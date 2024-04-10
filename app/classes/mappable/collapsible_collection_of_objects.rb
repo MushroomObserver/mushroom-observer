@@ -52,6 +52,7 @@ module Mappable
     attr_accessor :sets, :extents, :representative_points
 
     def initialize(objects, max_objects = MO.max_map_objects)
+
       @max_objects = max_objects
       init_sets(objects)
       group_objects_into_sets
@@ -106,8 +107,20 @@ module Mappable
       (num.to_f * prec).round.to_f / prec
     end
 
-    # Sets with unknown location are messing up the maps.
-    # Dismiss any set that has an unknown location.
+    # Dismiss any set that has an unknown location. Also dismiss vague locations
+    # e.g. "Nova Scotia" in collections. (ok for single locations, sets of 1)
+    # Mapsets containing unknown or vague locations will obscure useful data
+    # if GPS points or useful locations are grouped with huge nonspecific areas.
+    def mappable_location?(is_collection, obj)
+      return true unless is_collection
+
+      if obj.location?
+        !obj.vague? && !Location.is_unknown?(obj.name)
+      elsif obj.observation?
+        !obj.location&.vague? && !Location.is_unknown?(obj.location&.name)
+      end
+    end
+
     # Similar to MapSet.init_objects_and_derive_extents
     # These may be Mappable::MinimalLocations/Observations, whose properties
     # are different. Names::MapsController#show sends observations though.
@@ -115,19 +128,21 @@ module Mappable
       objects = [objects] unless objects.is_a?(Array)
       raise("Tried to create empty map!") if objects.empty?
 
+      is_collection = objects.count > 1
       @sets = {}
       objects.each do |obj|
-        if obj.location? && !Location.is_unknown?(obj.name) && !obj.vague?
+        mappable = mappable_location?(is_collection, obj)
+        if obj.location? && mappable
           add_box_set(obj, [obj], MAX_PRECISION)
         elsif obj.observation?
           if obj.lat && !obj.lat_long_dubious?
             add_point_set(obj, [obj], MAX_PRECISION)
-          elsif (loc = obj.location) &&
-                !Location.is_unknown?(loc.name) && !loc.vague?
+          elsif (loc = obj.location) && mappable
             add_box_set(loc, [obj], MAX_PRECISION)
           end
-        else
-          raise("Tried to map #{obj.class}!")
+        elsif mappable
+          # Only raise an error if it was otherwise mappable
+          raise("Tried to map #{obj.class} #{obj.id}.")
         end
       end
     end

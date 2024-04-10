@@ -394,6 +394,18 @@ class CollapsibleMapTest < UnitTestCase
     assert_obj_arrays_equal([loc], mapset.underlying_locations)
   end
 
+  # CollapsibleCollection should ignore large locations and observations with
+  # vague locations like "California", when mapping multiple locations.
+  # (:california is currently one of the locations for a "Boletus edulis" obs.)
+  def test_mapping_collections_ignores_vague_locations
+    bol = observations(:boletus_edulis_obs)
+    obss = Observation.where(text_name: bol.text_name).to_a
+    coll = Mappable::CollapsibleCollectionOfObjects.new(obss)
+    coll.mapsets.each do |mapset|
+      assert_not(mapset.underlying_locations.include?(locations(:california)))
+    end
+  end
+
   def test_mapping_a_bunch_of_points
     data = [
       [10, 10],       # 0 --._____
