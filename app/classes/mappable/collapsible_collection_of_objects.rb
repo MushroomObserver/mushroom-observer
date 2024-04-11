@@ -131,7 +131,7 @@ module Mappable
         if obj.location? && mappable
           add_box_set(loc, [obj], MAX_PRECISION)
         elsif obj.observation?
-          if obj.lat && !obj.lat_long_dubious?
+          if !is_collection && obj.lat && !obj.lat_long_dubious?
             add_point_set(obj, [obj], MAX_PRECISION)
           elsif loc && mappable
             add_box_set(loc, [obj], MAX_PRECISION)
