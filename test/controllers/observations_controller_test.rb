@@ -127,9 +127,13 @@ class ObservationsControllerTest < FunctionalTestCase
 
   def test_show_observation_vague_location
     login
-    obs = observations(:california_obs)
-    get(:show, params: { id: obs.id })
+    obs1 = observations(:california_obs)
+    get(:show, params: { id: obs1.id })
     assert_match(:show_observation_vague_location.l, @response.body)
+    # Make sure it doesn't show for observations with non-vague location
+    obs2 = observations(:amateur_obs)
+    get(:show, params: { id: obs2.id })
+    assert_no_match(:show_observation_vague_location.l, @response.body)
   end
 
   def test_show_observation_hidden_gps
