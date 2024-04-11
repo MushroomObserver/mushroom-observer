@@ -130,6 +130,12 @@ class ObservationsControllerTest < FunctionalTestCase
     obs1 = observations(:california_obs)
     get(:show, params: { id: obs1.id })
     assert_match(:show_observation_vague_location.l, @response.body)
+    assert_no_match(:show_observation_improve_location.l, @response.body)
+    login("dick")
+    get(:show, params: { id: obs1.id })
+    assert_match(:show_observation_vague_location.l, @response.body)
+    assert_match(:show_observation_improve_location.l, @response.body)
+
     # Make sure it doesn't show for observations with non-vague location
     obs2 = observations(:amateur_obs)
     get(:show, params: { id: obs2.id })
