@@ -72,19 +72,21 @@ module Mappable
     #   where lat/lng in radians, R in km, Earth R rounded to 6372km
     def geometric_area
       6372 * 6372 * east_west_distance.to_radians *
-        (Math.sin(north.to_radians) - Math.sin(south.to_radians))
+        (Math.sin(north.to_radians) - Math.sin(south.to_radians)).abs
     end
 
     # Arbitrary test for whether a box covers too large an area to be useful on
     # a map with other boxes. Large boxes can obscure more precise locations.
     def vague?
-      geometric_area.to_i.abs > 24_000
+      geometric_area > 24_000 # kmˆ2
     end
 
     # Determines if a given lat/long coordinate is within, or close to, a
     # bounding box. Method is used to decide if an obs lat/lng is "dubious"
     # with respect to the observation's assigned Location.
-    # NOTE: This is fairly strict. Larger delta makes more sense in rural areas.
+    # NOTE: delta = 0.20 is a fairly strict limit.
+    # Larger delta would make more sense in rural areas, where the common-sense
+    # postal address may be quite far from the observed GPS location.
     def lat_long_close?(lat, long)
       delta = 0.20
       delta_lat = north_south_distance * delta
