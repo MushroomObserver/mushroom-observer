@@ -88,7 +88,7 @@ module Mappable
     # Larger delta makes more sense in remote areas, where the common-sense
     # postal address may be quite far from the observed GPS location.
     def lat_long_close?(lat, long)
-      delta = 7.0
+      delta = 2.0
       delta_lat = north_south_distance * delta
       delta_long = east_west_distance * delta
       return false if lat > north + delta_lat
