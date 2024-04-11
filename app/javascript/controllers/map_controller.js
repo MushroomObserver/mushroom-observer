@@ -21,6 +21,7 @@ export default class extends Controller {
     this.marker = null // Only gets set if we're in edit mode
     this.rectangle = null // Only gets set if we're in edit mode
     this.location_format = this.mapDivTarget.dataset.locationFormat
+    this.marker_color = "#D95040"
 
     // Optional data that needs parsing
     this.collection = this.mapDivTarget.dataset.collection
@@ -127,7 +128,8 @@ export default class extends Controller {
     const markerOptions = {
       position: { lat: set.lat, lng: set.lng },
       map: this.map,
-      draggable: this.editable
+      draggable: this.editable,
+      background: this.marker_color
     }
 
     if (!this.editable) {
@@ -190,7 +192,7 @@ export default class extends Controller {
   drawRectangle(set) {
     const bounds = this.boundsOf(set)
     const rectangleOptions = {
-      strokeColor: "#00ff88",
+      strokeColor: this.marker_color,
       strokeOpacity: 1,
       strokeWeight: 3,
       map: this.map,
