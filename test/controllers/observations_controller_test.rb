@@ -131,6 +131,8 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs1.id })
     assert_match(:show_observation_vague_location.l, @response.body)
     assert_no_match(:show_observation_improve_location.l, @response.body)
+
+    # Make sure it suggests choosing a better location if owner is current user
     login("dick")
     get(:show, params: { id: obs1.id })
     assert_match(:show_observation_vague_location.l, @response.body)
