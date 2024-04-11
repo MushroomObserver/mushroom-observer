@@ -66,16 +66,19 @@ module Mappable
       west <= east ? east - west : east - west + 360
     end
 
+    # Returns the area described by a box, in kmˆ2.
+    #   Formula for `the area of a patch of a sphere`:
+    #     area = Rˆ2 * (long2 - long1) * (sin(lat2) - sin(lat1))
+    #   where lat/lng in radians, R in km, Earth R rounded to 6372km
+    def geometric_area
+      6372 * 6372 * east_west_distance.to_radians *
+        (Math.sin(north.to_radians) - Math.sin(south.to_radians))
+    end
+
     # Arbitrary test for whether a box covers too large an area to be useful on
     # a map with other boxes. Large boxes can obscure more precise locations.
-    # NOTE: Formula for `the area of a patch of a sphere`, lat/lng in radians:
-    #   area = Rˆ2 * (long2 - long1) * (sin(lat2) - sin(lat1))
-    # Earth R rounded to 6372km
     def vague?
-      area = 6372 * 6372 * east_west_distance.to_radians *
-             (Math.sin(north.to_radians) - Math.sin(south.to_radians))
-
-      area.to_i.abs > 24_000
+      geometric_area.to_i.abs > 24_000
     end
 
     # Is a given lat/long coordinate within or close to the bounding box?
