@@ -404,7 +404,7 @@ class CollapsibleMapTest < UnitTestCase
     # This should toss out the location :california from the mappable set
     coll = Mappable::CollapsibleCollectionOfObjects.new(obss)
     coll.mapsets.each do |mapset|
-      assert_not(mapset.underlying_locations.include?(locations(:california)))
+      assert(mapset.underlying_locations.exclude?(locations(:california)))
     end
   end
 
