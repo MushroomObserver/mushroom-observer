@@ -143,6 +143,7 @@ module LinkHelper
     cancel: "remove",
     email: "envelope",
     question: "question-sign",
+    alert: "alert",
     list: "list",
     clone: "duplicate",
     merge: "transfer",
