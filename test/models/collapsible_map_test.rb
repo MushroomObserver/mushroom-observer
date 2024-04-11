@@ -400,6 +400,8 @@ class CollapsibleMapTest < UnitTestCase
   def test_mapping_collections_ignores_vague_locations
     bol = observations(:boletus_edulis_obs)
     obss = Observation.where(text_name: bol.text_name).to_a
+    assert(obss.include?(observations(:california_obs)))
+    # This should toss out the location :california from the mappable set
     coll = Mappable::CollapsibleCollectionOfObjects.new(obss)
     coll.mapsets.each do |mapset|
       assert_not(mapset.underlying_locations.include?(locations(:california)))
