@@ -66,17 +66,13 @@ module Mappable
       west <= east ? east - west : east - west + 360
     end
 
-    # Converts degrees to radians.
-    def to_radians(degrees)
-      degrees * Math::PI / 180.0
-    end
-
     # Arbitrary test for whether box is "vague" (i.e., covers a large area).
     # Uses formula for the area of a patch of a spherical earth where R = 6400.
-    # Rˆ2 * (long2 - long1) * (sin(lat2) - sin(lat1))
+    # area = Rˆ2 * (long2 - long1) * (sin(lat2) - sin(lat1))
+    # NOTE: Must convert degrees to radians.
     def vague?
-      area = 6400 * 6400 * to_radians(east_west_distance) *
-             (Math.sin(to_radians(north)) - Math.sin(to_radians(south)))
+      area = 6400 * 6400 * east_west_distance.to_radians *
+             (Math.sin(north.to_radians) - Math.sin(south.to_radians))
 
       area.to_i.abs > 24_000
     end
