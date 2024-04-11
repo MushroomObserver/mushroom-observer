@@ -81,10 +81,14 @@ module Mappable
       geometric_area.to_i.abs > 24_000
     end
 
-    # Is a given lat/long coordinate within or close to the bounding box?
+    # Determines if a given lat/long coordinate is within, or close to, a
+    # bounding box. Method is used to decide if an obs lat/lng is "dubious"
+    # with respect to the observation's assigned Location.
+    # NOTE: This is fairly strict. Larger delta makes more sense in rural areas.
     def lat_long_close?(lat, long)
-      delta_lat = north_south_distance * 0.20
-      delta_long = east_west_distance * 0.20
+      delta = 0.20
+      delta_lat = north_south_distance * delta
+      delta_long = east_west_distance * delta
       return false if lat > north + delta_lat
       return false if lat < south - delta_lat
 
