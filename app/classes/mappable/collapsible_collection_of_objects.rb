@@ -110,14 +110,10 @@ module Mappable
     # vague locations (e.g. "Nova Scotia") if mapping a collection of objects.
     # (Mapsets containing unknown or vague locations will obscure useful points
     # if specific locations get grouped with huge nonspecific areas.)
-    def mappable_location?(is_collection, obj)
+    def mappable_location?(is_collection, loc)
       return true unless is_collection
 
-      if obj.location?
-        !obj.vague? && !Location.is_unknown?(obj.name)
-      else
-        !obj.location&.vague? && !Location.is_unknown?(obj.location&.name)
-      end
+      !loc&.vague? && !Location.is_unknown?(loc&.name)
     end
 
     # Similar to MapSet.init_objects_and_derive_extents
@@ -127,16 +123,17 @@ module Mappable
       objects = [objects] unless objects.is_a?(Array)
       raise("Tried to create empty map!") if objects.empty?
 
-      is_collection = objects.count > 1
       @sets = {}
+      is_collection = objects.count > 1
       objects.each do |obj|
-        mappable = mappable_location?(is_collection, obj)
+        loc = obj.location? ? obj : obj.location
+        mappable = mappable_location?(is_collection, loc)
         if obj.location? && mappable
-          add_box_set(obj, [obj], MAX_PRECISION)
+          add_box_set(loc, [obj], MAX_PRECISION)
         elsif obj.observation?
           if obj.lat && !obj.lat_long_dubious?
             add_point_set(obj, [obj], MAX_PRECISION)
-          elsif (loc = obj.location) && mappable
+          elsif loc && mappable
             add_box_set(loc, [obj], MAX_PRECISION)
           end
         elsif mappable
