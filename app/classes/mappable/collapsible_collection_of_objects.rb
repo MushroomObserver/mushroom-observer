@@ -106,16 +106,16 @@ module Mappable
       (num.to_f * prec).round.to_f / prec
     end
 
-    # Dismiss any set that has an unknown location. Also dismiss vague locations
-    # e.g. "Nova Scotia" in collections. (ok for single locations, sets of 1)
-    # Mapsets containing unknown or vague locations will obscure useful data
-    # if GPS points or useful locations are grouped with huge nonspecific areas.
+    # Dismiss any obj that has an unknown location. Also dismiss objects with
+    # vague locations (e.g. "Nova Scotia") if mapping a collection of objects.
+    # (Mapsets containing unknown or vague locations will obscure useful points
+    # if specific locations get grouped with huge nonspecific areas.)
     def mappable_location?(is_collection, obj)
       return true unless is_collection
 
       if obj.location?
         !obj.vague? && !Location.is_unknown?(obj.name)
-      elsif obj.observation?
+      else
         !obj.location&.vague? && !Location.is_unknown?(obj.location&.name)
       end
     end
@@ -141,7 +141,7 @@ module Mappable
           end
         elsif mappable
           # Only raise an error if it was otherwise mappable
-          # We do want to ignore non-mappable locations
+          # We _do_ want to ignore non-mappable locations.
           raise("Tried to map #{obj.class} #{obj.id}.")
         end
       end

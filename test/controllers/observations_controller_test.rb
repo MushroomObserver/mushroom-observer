@@ -125,6 +125,13 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_equal("thumbnail", user.thumbnail_size)
   end
 
+  def test_show_observation_vague_location
+    login
+    obs = observations(:california_obs)
+    get(:show, params: { id: obs.id })
+    assert_match(:show_observation_vague_location.l, @response.body)
+  end
+
   def test_show_observation_hidden_gps
     obs = observations(:unknown_with_lat_long)
     login
