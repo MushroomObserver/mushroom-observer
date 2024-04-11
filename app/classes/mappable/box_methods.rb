@@ -84,11 +84,11 @@ module Mappable
     # Determines if a given lat/long coordinate is within, or close to, a
     # bounding box. Method is used to decide if an obs lat/lng is "dubious"
     # with respect to the observation's assigned Location.
-    # NOTE: delta = 0.20 is a fairly strict limit.
-    # Larger delta would make more sense in rural areas, where the common-sense
+    # NOTE: delta = 0.20 is way too strict a limit for remote locations.
+    # Larger delta makes more sense in remote areas, where the common-sense
     # postal address may be quite far from the observed GPS location.
     def lat_long_close?(lat, long)
-      delta = 0.20
+      delta = 7.0
       delta_lat = north_south_distance * delta
       delta_long = east_west_distance * delta
       return false if lat > north + delta_lat
