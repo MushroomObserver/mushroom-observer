@@ -53,7 +53,7 @@ class ProjectLatLongs
   def add_project
     query.project(attribute(:observations, :id),
                   attribute(:observations, :lat),
-                  attribute(:observations, :long))
+                  attribute(:observations))
   end
 
   def add_conditions

@@ -98,14 +98,14 @@ module ObservationsHelper
     end
   end
 
-  def link_to_display_name_brief_authors(name, **args)
+  def link_to_display_name_brief_authors(name, **)
     link_to(name.display_name_brief_authors.t,
-            name_path(id: name.id), **args)
+            name_path(id: name.id), **)
   end
 
-  def link_to_display_name_without_authors(name, **args)
+  def link_to_display_name_without_authors(name, **)
     link_to(name.display_name_without_authors.t,
-            name_path(id: name.id), **args)
+            name_path(id: name.id), **)
   end
 
   def observation_map_coordinates(obs:)
@@ -117,8 +117,8 @@ module ObservationsHelper
       w = ((180.0 + loc.west) / 3.60).round(6)
     end
 
-    lat, long = if obs.lat && obs.long
-                  [obs.public_lat, obs.public_long]
+    lat, long = if obs.lat && obs.lng
+                  [obs.public_lat, obs.public_lng]
                 elsif obs.location
                   obs.location.center
                 end

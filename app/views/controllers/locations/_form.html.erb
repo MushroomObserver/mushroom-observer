@@ -1,4 +1,4 @@
-<% @location.force_valid_lat_longs! %>
+<% @location.force_valid_lat_lngs! %>
 <% map_args = { editable: true, map_type: "location" } %>
 
 <%= form_with(model: @location, url: action, id: "location_form") do |f| %>
@@ -38,7 +38,7 @@
 
         <%= help_block(:div, :form_locations_help.t) %>
 
-        <%= render(partial: "locations/form/lat_long_alt_fields",
+        <%= render(partial: "locations/form/lat_lng_alt_fields",
                    locals: { f: f }) %>
 
         <%= submit_button(form: f, button: button.l, class: "mt-4",

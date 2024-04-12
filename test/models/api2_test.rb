@@ -249,7 +249,7 @@ class API2Test < UnitTestCase
     assert_nil(obs.last_view)
     assert_not_nil(obs.rss_log)
     assert(@lat == obs.lat)
-    assert(@long == obs.long)
+    assert(@long == obs.lng)
     assert(@alt == obs.alt)
     assert_obj_arrays_equal([@proj].compact, obs.projects)
     assert_obj_arrays_equal([@spl].compact, obs.species_lists)
@@ -2316,7 +2316,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(comments_has: "let's"))
     assert_api_results(obses)
 
-    obses = Observation.where(lat: [34..35], long: [-119..-118])
+    obses = Observation.where(lat: [34..35], lng: [-119..-118])
     locs = Location.in_box(n: 35, s: 34, e: -118, w: -119)
 
     obses = (obses + locs.map(&:observations)).flatten.uniq.sort_by(&:id)
@@ -2582,7 +2582,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params)
     rolfs_obs.reload
     assert_in_delta(12.34, rolfs_obs.lat, 0.0001)
-    assert_in_delta(-56.78, rolfs_obs.long, 0.0001)
+    assert_in_delta(-56.78, rolfs_obs.lng, 0.0001)
     assert_in_delta(901, rolfs_obs.alt, 0.0001)
 
     params = {
@@ -3023,7 +3023,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(confidence: "3.0"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
-    obses = Observation.where(lat: [34..35], long: [-119..-118])
+    obses = Observation.where(lat: [34..35], lng: [-119..-118])
     locs = Location.in_box(n: 35, s: 34, e: -118, w: -119)
 
     obses = (obses + locs.map(&:observations)).flatten.uniq.sort_by(&:id)
@@ -3940,7 +3940,7 @@ class API2Test < UnitTestCase
 
   def test_parse_observation
     a_campestrus_obs = observations(:agaricus_campestrus_obs)
-    unknown_lat_lon_obs = observations(:unknown_with_lat_long)
+    unknown_lat_lon_obs = observations(:unknown_with_lat_lng)
     assert_parse(:observation, nil, nil)
     assert_parse(:observation, a_campestrus_obs, nil, default: a_campestrus_obs)
     assert_parse(:observation, a_campestrus_obs, a_campestrus_obs.id)
@@ -4000,7 +4000,7 @@ class API2Test < UnitTestCase
 
   def test_parse_object
     limit = [Name, Observation, SpeciesList]
-    obs = observations(:unknown_with_lat_long)
+    obs = observations(:unknown_with_lat_lng)
     nam = names(:agaricus_campestras)
     list = species_lists(:another_species_list)
     assert_parse(:object, nil, nil, limit: limit)

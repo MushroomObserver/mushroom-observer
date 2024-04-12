@@ -13,10 +13,10 @@ module Report
     end
 
     def tweak(row)
-      lat_long = @vals[row[0]]
-      if lat_long
-        row[2] = lat_long[0]
-        row[3] = lat_long[1]
+      lat_lng = @vals[row[0]]
+      if lat_lng
+        row[2] = lat_lng[0]
+        row[3] = lat_lng[1]
       end
       row
     end

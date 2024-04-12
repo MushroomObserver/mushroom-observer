@@ -20,11 +20,11 @@
 #                 be useful on a map.
 #  delta_lat::    Returns north_south_distance * DELTA.
 #  delta_lng::    Returns east_west_distance * DELTA.
-#  lat_long_close?::  Determines if a given lat/long coordinate is within,
+#  lat_lng_close?::  Determines if a given lat/long coordinate is within,
 #                     or close to, a bounding box.
 #  contains?(lat, lng)::  Does box contain the given latititude and longitude
 #  contains_lat?
-#  contains_long?
+#  contains_lng?
 
 module Mappable
   module BoxMethods
@@ -101,14 +101,14 @@ module Mappable
     end
 
     def contains?(lat, lng)
-      contains_lat?(lat) && contains_long?(lng)
+      contains_lat?(lat) && contains_lng?(lng)
     end
 
     def contains_lat?(lat)
       (south..north).cover?(lat)
     end
 
-    def contains_long?(lng)
+    def contains_lng?(lng)
       return (west...east).cover?(lng) unless straddles_180_deg?
 
       (lng >= west) || (lng <= east)
@@ -145,7 +145,7 @@ module Mappable
     # Determines if a given lat/long coordinate is within, or close to, a
     # bounding box. Method is used to decide if an obs lat/lng is "dubious"
     # with respect to the observation's assigned Location.
-    def lat_long_close?(pt_lat, pt_lng)
+    def lat_lng_close?(pt_lat, pt_lng)
       loc = Box.new(north: north, south: south, east: east, west: west)
       expanded = loc.expand(delta_lat, delta_lng)
       expanded.contains?(pt_lat, pt_lng)

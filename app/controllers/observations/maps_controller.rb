@@ -24,7 +24,7 @@ module Observations
       @observations = [
         Mappable::MinimalObservation.new(@observation.id,
                                          @observation.public_lat,
-                                         @observation.public_long,
+                                         @observation.public_lng,
                                          @observation.location)
       ]
     end

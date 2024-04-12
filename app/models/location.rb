@@ -270,7 +270,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Useful if invalid lat/longs cause crash, e.g., in mapping code.
   # New: Ensure box has nonzero size or make_editable_map fails.
-  def force_valid_lat_longs!
+  def force_valid_lat_lngs!
     self.north = Location.parse_latitude(north) || 45
     self.south = Location.parse_latitude(south) || -45
     self.east = Location.parse_longitude(east) || 90
@@ -287,7 +287,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def found_here?(obs)
     return true if obs.location == self
-    return contains?(obs.lat, obs.long) if obs.lat && obs.long
+    return contains?(obs.lat, obs.lng) if obs.lat && obs.lng
 
     loc = obs.location
     return false unless loc
