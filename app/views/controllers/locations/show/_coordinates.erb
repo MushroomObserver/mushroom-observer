@@ -1,14 +1,14 @@
 <% heading_links = [
-  icon_link_with_query(*observations_at_location_tab(@location)),
   icon_link_with_query(*edit_location_tab(@location))
 ]
 if in_admin_mode?
   heading_links << destroy_button(target: @location, icon: :delete)
   heading_links << icon_link_with_query(*location_reverse_order_tab(@location))
 end
+footer = icon_link_with_query(*observations_at_location_tab(@location))
 %>
 <%= panel_block(id: "location_coordinates",
-                heading: :COORDINATES.l,
+                heading: :COORDINATES.l, footer: footer,
                 heading_links: heading_links.safe_join(" | ")) do %>
 
   <div class="text-center mx-auto" style="max-width:30em">
