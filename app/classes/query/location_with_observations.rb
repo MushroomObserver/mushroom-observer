@@ -18,6 +18,7 @@ module Query
         confidence?: [:float],
         is_collection_location?: :boolean,
         has_location?: :boolean,
+        has_lat_long?: :boolean,
         has_name?: :boolean,
         has_comments?: { boolean: [true] },
         has_sequences?: { boolean: [true] },
