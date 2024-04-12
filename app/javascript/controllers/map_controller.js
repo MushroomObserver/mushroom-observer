@@ -95,7 +95,7 @@ export default class extends Controller {
   drawMap() {
     this.map = new google.maps.Map(this.mapDivTarget, this.mapOptions)
     if (this.mapBounds) {
-      if (Object.keys(this.collection.sets).length = 1) {
+      if (Object.keys(this.collection.sets).length == 1) {
         const pt = new google.maps.LatLng(
           this.collection.extents.lat,
           this.collection.extents.lng
