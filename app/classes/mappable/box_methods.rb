@@ -2,21 +2,23 @@
 
 #  == Instance methods
 #
-#  north_west::  Return [north, west].
-#  north_east::  Return [north, east].
-#  south_west::  Return [south, west].
-#  south_east::  Return [south, east].
-#  lat::         Return center latitude.
-#  lng::         Return center longitude for MapSet.
-#  center::      Return center as [lat, long].
-#  edges::       Return [north, south, east, west].
-#  north_south_distance::  Return north - south.
-#  east_west_distance::    Return east - west (adjusting if straddles dateline).
-#  geometric_area::        Return the area described by a box, in kmˆ2.
-#  vague?::      Arbitrary test for whether a box covers too large an area to
-#                be useful on a map.
-#  delta_lat::   Returns north_south_distance * DELTA.
-#  delta_lng::   Returns east_west_distance * DELTA.
+#  location?::    Returns true.
+#  observation?:: Returns false.
+#  north_west::   Returns [north, west].
+#  north_east::   Returns [north, east].
+#  south_west::   Returns [south, west].
+#  south_east::   Returns [south, east].
+#  lat::          Returns center latitude.
+#  lng::          Returns center longitude for MapSet.
+#  center::       Returns center as [lat, long].
+#  edges::        Returns [north, south, east, west].
+#  north_south_distance:: Returns north - south.
+#  east_west_distance::   Returns east - west (adjusting if straddles dateline).
+#  box_area::             Returns the area described by a box, in kmˆ2.
+#  vague?::       Arbitrary test for whether a box covers too large an area to
+#                 be useful on a map.
+#  delta_lat::    Returns north_south_distance * DELTA.
+#  delta_lng::    Returns east_west_distance * DELTA.
 #  lat_long_close?::  Determines if a given lat/long coordinate is within,
 #                     or close to, a bounding box.
 #  contains?(lat, lng)::  Does box contain the given latititude and longitude
@@ -111,7 +113,7 @@ module Mappable
     #   Formula for `the area of a patch of a sphere`:
     #     area = Rˆ2 * (long2 - long1) * (sin(lat2) - sin(lat1))
     #   where lat/lng in radians, R in km, Earth R rounded to 6372km
-    def geometric_area
+    def box_area
       6372 * 6372 * east_west_distance.to_radians *
         (Math.sin(north.to_radians) - Math.sin(south.to_radians)).abs
     end
@@ -119,7 +121,7 @@ module Mappable
     # Arbitrary test for whether a box covers too large an area to be useful on
     # a map with other boxes. Large boxes can obscure more precise locations.
     def vague?
-      geometric_area > 24_000 # kmˆ2
+      box_area > 24_000 # kmˆ2
     end
 
     # NOTE: DELTA = 0.20 is way too strict a limit for remote locations.
