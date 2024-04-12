@@ -67,9 +67,6 @@
 #  parse_longitude::    Validate and parse longitude from a string.
 #  parse_altitude::     Validate and parse altitude from a string.
 #  found_here?::        Was the given obs found here?
-#  contains?(lt, ln)::  Does Location contain the given latititude and longitude
-#  contains_lat?
-#  contains_long?
 #
 #  ==== Name methods
 #  display_name::       +name+ reformated based on user's preference.
@@ -295,21 +292,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     loc = obs.location
     return false unless loc
 
+    # contains? is now a method of Mappable::BoxMethods
     contains?(loc.north, loc.west) && contains?(loc.south, loc.east)
-  end
-
-  def contains?(lat, long)
-    contains_lat?(lat) && contains_long?(long)
-  end
-
-  def contains_lat?(lat)
-    (south..north).cover?(lat)
-  end
-
-  def contains_long?(long)
-    return (west...east).cover?(long) if west <= east
-
-    (long >= west) || (long <= east)
   end
 
   ##############################################################################
