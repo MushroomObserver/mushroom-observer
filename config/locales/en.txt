@@ -3545,7 +3545,7 @@
   observation_term_has_name: Has a name? (other than "Fungi sp.")
   observation_term_has_notes: Has Notes?
   observation_term_has_location: Is the [:OBSERVATION] associated with a defined [:LOCATION]?
-  observation_term_has_lat_long: Are the [:OBSERVATION]'s [:LATITUDE] and [:LONGITUDE] fields filled in?
+  observation_term_has_geolocation: Are the [:OBSERVATION]'s [:LATITUDE] and [:LONGITUDE] fields filled in?
   observation_term_has_field: Has a given notes template field filled in.
   observation_term_has_comments: Has any comments?
   observation_term_is_collection_location: Mushroom was growing at the location. ("[:form_observations_is_collection_location]" is checked.)
