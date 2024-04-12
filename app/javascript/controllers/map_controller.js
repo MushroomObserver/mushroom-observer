@@ -90,10 +90,22 @@ export default class extends Controller {
   }
 
   // We don't draw the map for the create obs form on load, to save on API
+  // If we only have one marker, don't use fitBounds.
+  // Call setCenter, setZoom with marker position and desired zoom level.
   drawMap() {
     this.map = new google.maps.Map(this.mapDivTarget, this.mapOptions)
-    if (this.mapBounds)
-      this.map.fitBounds(this.mapBounds)
+    if (this.mapBounds) {
+      if (Object.keys(this.collection.sets).length = 1) {
+        const pt = new google.maps.LatLng(
+          this.collection.extents.lat,
+          this.collection.extents.lng
+        )
+        this.map.setCenter(pt)
+        this.map.setZoom(12)
+      } else {
+        this.map.fitBounds(this.mapBounds)
+      }
+    }
   }
 
   //
