@@ -16,7 +16,7 @@ module Query
         confidence?: [:float],
         is_collection_location?: :boolean,
         has_location?: :boolean,
-        has_lat_long?: :boolean,
+        has_lat_lng?: :boolean,
         has_name?: :boolean,
         has_sequences?: { boolean: [true] },
         has_notes_fields?: [:string],

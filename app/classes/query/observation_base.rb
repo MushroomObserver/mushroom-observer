@@ -38,7 +38,7 @@ module Query
         # boolean
         has_comments?: { boolean: [true] },
         has_location?: :boolean,
-        has_lat_long?: :boolean,
+        has_lat_lng?: :boolean,
         has_name?: :boolean,
         has_notes?: :boolean,
         has_sequences?: { boolean: [true] },
