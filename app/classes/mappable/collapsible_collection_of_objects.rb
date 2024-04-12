@@ -132,13 +132,14 @@ module Mappable
 
       @sets = {}
       is_collection = objects.count > 1
+      will_be_grouped = objects.count > @max_objects
       objects.each do |obj|
         loc = obj.location? ? obj : obj.location
         mappable = mappable_location?(is_collection, loc)
         if obj.location? && mappable
           add_box_set(loc, [obj], MAX_PRECISION)
         elsif obj.observation?
-          if (!is_collection || !loc) && obj.lat # && !obj.lat_long_dubious?
+          if (!will_be_grouped || !loc) && obj.lat # && !obj.lat_long_dubious?
             add_point_set(obj, [obj], MAX_PRECISION)
           elsif loc && mappable
             add_box_set(loc, [obj], MAX_PRECISION)
