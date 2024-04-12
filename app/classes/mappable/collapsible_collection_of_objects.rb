@@ -117,8 +117,15 @@ module Mappable
     end
 
     # Similar to MapSet.init_objects_and_derive_extents
-    # These may be Mappable::MinimalLocations/Observations, whose properties
-    # are different. Names::MapsController#show sends observations though.
+    # Objects may be observations, or Mappable::MinimalLocations/Observations,
+    # whose properties are different. Names::MapsController#show sends obs.
+    #
+    # For single observations, this always returns points if we have lat/lng...
+    # ignores "dubiousness" when the point disagrees with location.
+    #
+    # For maps of multiple observations, it returns only sets of location boxes.
+    # Even though points are noticeable at any zoom, they may get collapsed with
+    # other nearby points into tiny boxes, becoming undetectable on the map.
     def init_sets(objects)
       objects = [objects] unless objects.is_a?(Array)
       raise("Tried to create empty map!") if objects.empty?
@@ -138,7 +145,7 @@ module Mappable
           end
         elsif mappable
           # Only raise an error if it was otherwise mappable
-          # We _do_ want to ignore non-mappable locations.
+          # We do want to ignore non-mappable locations.
           raise("Tried to map #{obj.class} #{obj.id}.")
         end
       end
