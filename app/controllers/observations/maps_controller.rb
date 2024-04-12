@@ -33,7 +33,7 @@ module Observations
 
     def find_locations_matching_observations
       locations = {}
-      columns = %w[id lat long gps_hidden location_id].map do |x|
+      columns = %w[id lat lng gps_hidden location_id].map do |x|
         "observations.#{x}"
       end
       args = {

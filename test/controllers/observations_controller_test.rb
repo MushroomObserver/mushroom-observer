@@ -1835,7 +1835,7 @@ class ObservationsControllerTest < FunctionalTestCase
     obs = assigns(:observation)
 
     assert_equal(lat.to_s, obs.lat.to_s)
-    assert_equal(lng.to_s, obs.lngto_s)
+    assert_equal(lng.to_s, obs.lng.to_s)
     assert_objs_equal(Location.unknown, obs.location)
     assert_not_nil(obs.rss_log)
   end

@@ -185,7 +185,7 @@ module ObservationsHelper
   def observation_details_where_gps(obs:)
     return "" unless obs.lat
 
-    gps_display_link = link_to([obs.display_lat_long.t,
+    gps_display_link = link_to([obs.display_lat_lng.t,
                                 obs.display_alt.t,
                                 "[#{:click_for_map.t}]"].safe_join(" "),
                                map_observation_path(id: obs.id))
