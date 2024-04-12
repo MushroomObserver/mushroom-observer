@@ -1109,7 +1109,7 @@
   search_term_has_description: has_description
   search_term_has_field: has_field
   search_term_has_location: has_location
-  search_term_has_lat_lng: has_lat_lng
+  search_term_has_geolocation: has_geolocation
   search_term_has_name: has_name
   search_term_has_notes: has_notes
   search_term_has_observations: has_observations

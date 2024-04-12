@@ -1723,11 +1723,11 @@ class QueryTest < UnitTestCase
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, has_location: true)
 
-    # has_lat_lng
+    # has_geolocation
     expect = Image.joins(:observations).
              where.not(observations: { lat: false }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Image, :with_observations, has_lat_lng: true)
+    assert_query(expect, :Image, :with_observations, has_geolocation: true)
 
     # has_name
     expect = Image.joins(:observations).
@@ -2159,11 +2159,11 @@ class QueryTest < UnitTestCase
       :Location, :with_observations, has_location: true
     )
 
-    # has_lat_lng
+    # has_geolocation
     assert_query(
       Location.joins(:observations).
                where.not(observations: { lat: false }).uniq,
-      :Location, :with_observations, has_lat_lng: true
+      :Location, :with_observations, has_geolocation: true
     )
 
     # has_name
@@ -2579,11 +2579,11 @@ class QueryTest < UnitTestCase
       :Name, :with_observations, has_location: true
     )
 
-    # has_lat_lng
+    # has_geolocation
     assert_query(
       Name.joins(:observations).
            where.not(observations: { lat: false }).uniq,
-      :Name, :with_observations, has_lat_lng: true
+      :Name, :with_observations, has_geolocation: true
     )
 
     # has_name
