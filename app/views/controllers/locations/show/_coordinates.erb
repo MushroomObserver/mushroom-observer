@@ -5,7 +5,7 @@ if in_admin_mode?
   heading_links << destroy_button(target: @location, icon: :delete)
   heading_links << icon_link_with_query(*location_reverse_order_tab(@location))
 end
-footer = icon_link_to(*observations_at_location_tab(@location))
+footer = icon_link_with_query(*observations_at_location_tab(@location))
 %>
 <%= panel_block(id: "location_coordinates",
                 heading: :COORDINATES.l, footer: footer,
