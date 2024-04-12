@@ -3,6 +3,10 @@
 # in a fixture on the opposite side of the association.
 # See https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
+# IMPORTANT
+# Update LocationsControllerTest#test_update_location_admin_merge Location#merge
+# when adding a Class that has a `location` attribute
+
 DEFAULTS:
   &DEFAULTS
   locked: false
@@ -15,6 +19,8 @@ DEFAULTS:
   east: 1
   south: -1
 
+# AVOID albion as the location for other fixtures because
+# it may break API2Test#test_patching_locations.
 # no observations, 1 descsription and 2 versions all by rolf
 albion:
   <<: *DEFAULTS

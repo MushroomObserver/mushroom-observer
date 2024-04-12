@@ -264,6 +264,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :comments
   has_many :donations
   has_many :external_links
+  has_many :field_slips
   has_many :images
   has_many :interests
   has_many :locations

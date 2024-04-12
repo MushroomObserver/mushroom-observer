@@ -36,6 +36,7 @@ violations_button_class =
   <% end %>
 
   <p><b><%= :show_project_created_at.t %>:</b> <%= @project.created_at.web_date %></p>
+  <p><b><%= :show_project_field_slip_prefix.t %>:</b> <%= @project.field_slip_prefix %></p>
   <p>
     <% if @project.observations.any? %>
       <b><%= link_to("#{@project.observations.length} #{:OBSERVATIONS.l}",

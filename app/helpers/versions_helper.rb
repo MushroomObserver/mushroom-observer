@@ -36,11 +36,10 @@ module VersionsHelper
   #   </p>
   #
   def show_past_versions(obj, versions, args = {})
-    table = make_table(rows: build_version_table(obj, versions, args),
-                       table_opts: { class: "mb-0" })
-    panel = tag.div(table, class: "panel-body")
-    tag.strong("#{:VERSIONS.t}:") +
-      tag.div(panel, class: "panel panel-default")
+    panel_block(heading: :VERSIONS.t, id: "#{obj.type_tag}_versions") do
+      make_table(rows: build_version_table(obj, versions, args),
+                 table_opts: { class: "table-hover mb-0" })
+    end
   end
 
   private

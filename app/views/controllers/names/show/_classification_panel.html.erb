@@ -4,11 +4,17 @@ link = icon_link_with_query(*name_edit_classification_tab(@name))
 heading_links = @user ? link.html_safe : ""
 %>
 
-<%= tag.div(class: "col-sm-6") do
-  panel_block(heading: heading, heading_links: heading_links,
-              inner_class: "name-section",
-              id: "name_classification",
-              data: { name_panels_target: "classification" }) do
-    render(partial: "names/show/classification")
-  end
-end %>
+<%=
+panel_block(heading: heading, heading_links: heading_links,
+            inner_class: "name-section",
+            id: "name_classification",
+            data: { name_panels_target: "classification" }) do
+
+  concat(approved_name_and_parents(@name))
+  concat(name_subtaxa_query_link(@name, @children_query)) if @first_child
+  concat(refresh_classification_link(@name))
+  concat(propagate_classification_link(@name)) if @first_child
+  concat(inherit_classification_link(@name))
+
+end
+%>

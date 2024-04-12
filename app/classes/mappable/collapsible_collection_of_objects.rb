@@ -106,28 +106,48 @@ module Mappable
       (num.to_f * prec).round.to_f / prec
     end
 
-    # Sets with unknown location are messing up the maps.
-    # Dismiss any set that has an unknown location.
+    # Dismiss any obj that has an unknown location. Also dismiss objects with
+    # vague locations (e.g. "Nova Scotia") if mapping a collection of objects.
+    # (Mapsets containing unknown or vague locations will obscure useful points
+    # if specific locations get grouped with huge nonspecific areas.)
+    def mappable_location?(is_collection, loc)
+      return true unless is_collection
+
+      !loc&.vague? && !Location.is_unknown?(loc&.name)
+    end
+
     # Similar to MapSet.init_objects_and_derive_extents
-    # These are MinimalMapLocations/Observations, so their properties
-    # are different.
+    # Objects may be observations, or Mappable::MinimalLocations/Observations,
+    # whose properties are different. Names::MapsController#show sends obs.
+    #
+    # For single observations, this always returns points if we have lat/lng...
+    # ignores "dubiousness" when the point disagrees with location.
+    #
+    # For maps of multiple observations, it returns only sets of location boxes.
+    # Even though points are noticeable at any zoom, they may get collapsed with
+    # other nearby points into tiny boxes, becoming undetectable on the map.
     def init_sets(objects)
       objects = [objects] unless objects.is_a?(Array)
       raise("Tried to create empty map!") if objects.empty?
 
       @sets = {}
+      is_collection = objects.count > 1
+      will_be_grouped = objects.count > @max_objects
       objects.each do |obj|
-        if obj.location? && !Location.is_unknown?(obj.name)
-          add_box_set(obj, [obj], MAX_PRECISION)
+        loc = obj.location? ? obj : obj.location
+        mappable = mappable_location?(is_collection, loc)
+        if obj.location? && mappable
+          add_box_set(loc, [obj], MAX_PRECISION)
         elsif obj.observation?
-          if obj.lat && !obj.lat_long_dubious?
+          if (!will_be_grouped || !loc) && obj.lat # && !obj.lat_long_dubious?
             add_point_set(obj, [obj], MAX_PRECISION)
-          elsif (loc = obj.location) &&
-                !Location.is_unknown?(loc.name)
+          elsif loc && mappable
             add_box_set(loc, [obj], MAX_PRECISION)
           end
-        else
-          raise("Tried to map #{obj.class}!")
+        elsif mappable
+          # Only raise an error if it was otherwise mappable
+          # We do want to ignore non-mappable locations.
+          raise("Tried to map #{obj.class} #{obj.id}.")
         end
       end
     end
@@ -144,11 +164,11 @@ module Mappable
       end
     end
 
-    def add_point_set(loc, objs, prec)
-      x, y = round_lat_lng_to_precision(loc, prec)
+    def add_point_set(loc_or_obs, objs, prec)
+      x, y = round_lat_lng_to_precision(loc_or_obs, prec)
       set = @sets[[x, y, 0, 0]] ||= Mappable::MapSet.new
       set.add_objects(objs)
-      set.update_extents_with_point(loc)
+      set.update_extents_with_point(loc_or_obs)
     end
 
     def add_box_set(loc, objs, prec)

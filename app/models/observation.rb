@@ -199,6 +199,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   has_many :observation_collection_numbers, dependent: :destroy
   has_many :collection_numbers, through: :observation_collection_numbers
+  has_many :field_slips, dependent: :destroy
 
   has_many :observation_herbarium_records, dependent: :destroy
   has_many :herbarium_records, through: :observation_herbarium_records
@@ -503,6 +504,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :show_includes, lambda {
     strict_loading.includes(
       :collection_numbers,
+      :field_slips,
       { comments: :user },
       { external_links: { external_site: { project: :user_group } } },
       { herbarium_records: [{ herbarium: :curators }, :user] },
@@ -1076,8 +1078,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def remove_image(img)
     if images.include?(img) || thumb_image_id == img.id
       images.delete(img)
-      update(thumb_image: images.empty? ? nil : images.first) \
-        if thumb_image_id == img.id
+      if thumb_image_id == img.id
+        update(thumb_image: images.empty? ? nil : images.first)
+      end
       notify_users(:removed_image)
     end
     img
@@ -1105,6 +1108,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     return unless collection_numbers.empty?
     return unless herbarium_records.empty?
     return unless sequences.empty?
+    return unless field_slips.empty?
 
     update(specimen: false)
   end

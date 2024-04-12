@@ -3,10 +3,10 @@
 require("test_helper")
 
 # test the helpers for ObservationsController
-class NameHelperTest < ActionView::TestCase
+class NamesHelperTest < ActionView::TestCase
   # Prove that the Query's used under "Observations of" (in the
   # show_name_info area) return the correct Observations
-  include ShowNameHelper # Query's are in that helper
+  include NamesHelper # Query's are in that helper
 
   def test_observations_of_queries
     # Create 2 Names, synonymized; 6 Observations, 6 Namings:

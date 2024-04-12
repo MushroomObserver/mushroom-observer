@@ -23,6 +23,7 @@ ACTIONS = {
     comments: {},
     external_links: {},
     external_sites: {},
+    field_slips: {},
     herbaria: {},
     herbarium_records: {},
     images: {},
@@ -40,6 +41,7 @@ ACTIONS = {
     comments: {},
     external_links: {},
     external_sites: {},
+    field_slips: {},
     herbaria: {},
     herbarium_records: {},
     images: {},
@@ -333,12 +335,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Articles: standard actions --------------------------------------
   resources :articles, id: /\d+/
 
-  # ----- Authors: standard actions ------------------------------------
-  namespace :authors do
-    resource :review, only: [:show, :create, :destroy], id: /\d+/
-    resource :email_requests, only: [:new, :create]
-  end
-
   # ----- Autocompleters: fetch get ------------------------------------
   get "/autocompleters/new/:type/:id", to: "autocompleters#new"
 
@@ -356,6 +352,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Contributors: standard actions --------------------------------------
   resources :contributors, only: [:index]
+
+  # ----- Descriptions: namespaced actions -------------------------------------
+  namespace :descriptions, as: "description" do
+    resource :authors, only: [:show, :create, :destroy], id: /\d+/
+    resource :author_requests, only: [:new, :create]
+  end
 
   # ----- Export: no resources ------------------------------------
   get("/export/set_export_status(/:id)",
@@ -376,10 +378,13 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                            as: "remove_images_from")
       put("images/detach", to: "glossary_terms/images#detach",
                            as: "detach_image_from")
+      get("versions", to: "glossary_terms/versions#show", as: "version_of")
     end
   end
-  get("glossary_terms/:id/versions", to: "glossary_terms/versions#show",
-                                     as: "glossary_term_versions")
+
+  # ----- Field Slip Records: standard actions --------------------------------
+  resources :field_slips
+  get("qr/:id", to: "field_slips#show", id: /.*[^\d.-].*/)
 
   # ----- Herbaria: standard actions -------------------------------------------
   namespace :herbaria do
@@ -443,7 +448,27 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/javascript/hide_thumbnail_map", to: "javascript#hide_thumbnail_map")
 
   # ----- Locations: a lot of actions  ----------------------------
-  resources :locations, id: /\d+/
+  resources :locations, id: /\d+/, shallow: true do
+    member do
+      put("reverse_name_order", to: "locations/reverse_name_order#update")
+      get("versions", to: "locations/versions#show", as: "version_of")
+    end
+    resources :descriptions, module: :locations, shallow_path: :locations,
+                             shallow_prefix: "location", except: :index do
+      member do
+        put("default", to: "descriptions/defaults#update", as: "make_default")
+        get("merges/new", to: "descriptions/merges#new", as: "new_merge")
+        post("merges", to: "descriptions/merges#create", as: "merge")
+        get("moves/new", to: "descriptions/moves#new", as: "new_move")
+        post("moves", to: "descriptions/moves#create", as: "move")
+        get("versions", to: "descriptions/versions#show", as: "version_of")
+      end
+    end
+  end
+  # Unlike a resource route :index, this needs a special name and optional id.
+  # MO doesn't index descriptions by parent_id, we index `all` e.g. by_author.
+  get("locations(/:location_id)/descriptions",
+      to: "locations/descriptions#index", as: "location_descriptions_index")
   # Location Countries: show
   get("locations(/:id)/countries", to: "locations/countries#index",
                                    as: "location_countries")
@@ -451,134 +476,83 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("locations/help", to: "locations/help#show")
   # Map Locations: show
   get("locations/map", to: "locations/maps#show", as: "map_locations")
-  # Location Reverse name order: update
-  put("locations/:id/reverse_name_order",
-      to: "locations/reverse_name_order#update",
-      as: "location_reverse_name_order")
-  # Location Versions: show
-  get("locations/:id/versions", to: "locations/versions#show",
-                                as: "location_versions")
-
-  # like resources, but using just an :id param:
-  get("locations(/:id)/descriptions",
-      to: "locations/descriptions#index",
-      as: "location_descriptions")
-  get("locations/descriptions/:id",
-      to: "locations/descriptions#show",
-      as: "location_description")
-  get("locations/:id/descriptions/new",
-      to: "locations/descriptions#new",
-      as: "new_location_description")
-  get("locations/descriptions/:id/edit",
-      to: "locations/descriptions#edit",
-      as: "edit_location_description")
-  post("locations/:id/descriptions",
-       to: "locations/descriptions#create")
-  match("locations/descriptions/:id",
-        to: "locations/descriptions#update", via: [:put, :patch])
-  delete("locations/descriptions/:id", to: "locations/descriptions#destroy")
-
-  # Make Descripton Default: callback only:
-  put("locations/descriptions/:id/default",
-      to: "locations/descriptions/defaults#update",
-      as: "make_default_location_description")
-  # Publish Draft Location Description: callback. Not used yet.
-  # put("locations/descriptions/:id/publish",
-  #     to: "locations/descriptions/publish#update",
-  #     as: "location_description_publish")
-  # Merge Location Descriptions: form and callback:
-  get("locations/descriptions/:id/merges/new",
-      to: "locations/descriptions/merges#new",
-      as: "location_description_merges_form")
-  post("locations/descriptions/:id/merges",
-       to: "locations/descriptions/merges#create",
-       as: "location_description_merges")
-  # Move Location Descriptions: form and callback:
-  get("locations/descriptions/:id/moves/new",
-      to: "locations/descriptions/moves#new",
-      as: "location_description_moves_form")
-  post("locations/descriptions/:id/moves",
-       to: "locations/descriptions/moves#create",
-       as: "location_description_moves")
-  # Edit Location Description Permissions: form and callback. Not used yet.
-  # get("locations/descriptions/:id/permissions/edit",
-  #     to: "locations/descriptions/permissions#edit",
-  #     as: "edit_location_description_permissions")
-  # put("locations/descriptions/:id/permissions",
-  #     to: "locations/descriptions/permissions#update",
-  #     as: "location_description_permissions")
-  # Location Description Versions: show:
-  get("locations/descriptions/:id/versions",
-      to: "locations/descriptions/versions#show",
-      as: "location_description_versions")
 
   # ----- Names: a lot of actions  ----------------------------
-  resources :names, id: /\d+/
+  resources :names, id: /\d+/, shallow: true do
+    # These routes are for dealing with name attributes.
+    # They're not `resources` because they don't have their own IDs.
+    # Note that `member` routes end with the controller singular, e.g. "name"
+    member do
+      # classification
+      get("classification/edit", to: "names/classification#edit",
+                                 as: "edit_classification_of")
+      match("classification", to: "names/classification#update",
+                              via: [:put, :patch], as: "classification_of")
+      get("classification/inherit/new", to: "names/classification/inherit#new",
+                                        as: "form_to_inherit_classification_of")
+      post("classification/inherit", to: "names/classification/inherit#create",
+                                     as: "inherit_classification_of")
+      put("classification/propagate",
+          to: "names/classification/propagate#update",
+          as: "propagate_classification_of")
+      put("classification/refresh", to: "names/classification/refresh#update",
+                                    as: "refresh_classification_of")
+      # lifeforms
+      get("lifeforms/edit", to: "names/lifeforms#edit", as: "edit_lifeform_of")
+      match("lifeforms", to: "names/lifeforms#update", via: [:put, :patch],
+                         as: "lifeform_of")
+      get("lifeforms/propagate/edit", to: "names/lifeforms/propagate#edit",
+                                      as: "form_to_propagate_lifeform_of")
+      put("lifeforms/propagate", to: "names/lifeforms/propagate#update",
+                                 as: "propagate_lifeform_of")
+      # map
+      get("map", to: "names/maps#show")
+      # synonyms
+      get("synonyms/edit", to: "names/synonyms#edit", as: "edit_synonyms_of")
+      match("synonyms", to: "names/synonyms#update", via: [:put, :patch],
+                        as: "synonyms_of")
+      get("synonyms/approve/new", to: "names/synonyms/approve#new",
+                                  as: "form_to_approve_synonym_of")
+      post("synonyms/approve", to: "names/synonyms/approve#create",
+                               as: "approve_synonym_of")
+      get("synonyms/deprecate/new", to: "names/synonyms/deprecate#new",
+                                    as: "form_to_deprecate_synonym_of")
+      post("synonyms/deprecate", to: "names/synonyms/deprecate#create",
+                                 as: "deprecate_synonym_of")
+      # trackers
+      get("trackers/new", to: "names/trackers#new", as: "new_tracker_of")
+      post("trackers", to: "names/trackers#create")
+      # edit: there's no tracker id because you can only have one per name
+      get("trackers/edit", to: "names/trackers#edit", as: "edit_tracker_of")
+      match("trackers", to: "names/trackers#update", via: [:put, :patch])
+      # versions
+      get("versions", to: "names/versions#show", as: "version_of")
+    end
+    resources :descriptions, module: :names, shallow_path: :names,
+                             shallow_prefix: "name", except: :index do
+      member do
+        put("default", to: "descriptions/defaults#update", as: "make_default")
+        get("merges/new", to: "descriptions/merges#new", as: "new_merge")
+        post("merges", to: "descriptions/merges#create", as: "merge")
+        get("moves/new", to: "descriptions/moves#new", as: "new_move")
+        post("moves", to: "descriptions/moves#create", as: "move")
+        put("publish", to: "descriptions/publish#update")
+        get("permissions/edit", to: "descriptions/permissions#edit",
+                                as: "edit_permissions")
+        put("permissions", to: "descriptions/permissions#update")
+        put("review_status", to: "descriptions/review_status#update")
+        get("versions", to: "descriptions/versions#show", as: "version_of")
+      end
+    end
+  end
+  # Unlike a resource route :index, this needs a special name and optional id.
+  # MO doesn't index descriptions by parent_id, we index `all` e.g. by_author.
+  get("names(/:name_id)/descriptions",
+      to: "names/descriptions#index", as: "name_descriptions_index")
   # Test Index
   get("names/test_index", to: "names#test_index", as: "names_test_index")
-
-  # Edit Name Classification: form and callback:
-  get("names/:id/classification/edit",
-      to: "names/classification#edit",
-      as: "edit_name_classification")
-  match("names/:id/classification",
-        to: "names/classification#update", via: [:put, :patch],
-        as: "name_classification")
-  # Inherit Name Classification: form and callback:
-  get("names/:id/classification/inherit/new",
-      to: "names/classification/inherit#new",
-      as: "inherit_name_classification_form")
-  post("names/:id/classification/inherit",
-       to: "names/classification/inherit#create",
-       as: "inherit_name_classification")
-  # Propagate Name Classification: callback only:
-  put("names/:id/classification/propagate",
-      to: "names/classification/propagate#update",
-      as: "propagate_name_classification")
-  # Refresh Name Classification: callback only:
-  put("names/:id/classification/refresh",
-      to: "names/classification/refresh#update",
-      as: "refresh_name_classification")
-  # Edit Lifeforms: form and callback:
-  get("names/:id/lifeforms/edit",
-      to: "names/lifeforms#edit",
-      as: "edit_name_lifeform")
-  match("names/:id/lifeforms",
-        to: "names/lifeforms#update", via: [:put, :patch],
-        as: "name_lifeforms")
-  # Propagate Lifeforms: form and callback:
-  get("names/:id/lifeforms/propagate/edit",
-      to: "names/lifeforms/propagate#edit",
-      as: "propagate_name_lifeform_form")
-  put("names/:id/lifeforms/propagate",
-      to: "names/lifeforms/propagate#update",
-      as: "propagate_name_lifeform")
   # Names Map: show:
   get("names/map", to: "names/maps#show", as: "map_names")
-  get("names/:id/map", to: "names/maps#show", as: "map_name")
-  # Edit Name Synonyms: form and callback:
-  get("names/:id/synonyms/edit", to: "names/synonyms#edit",
-                                 as: "edit_name_synonyms")
-  match("names/:id/synonyms", to: "names/synonyms#update", via: [:put, :patch],
-                              as: "name_synonyms")
-  # Approve Name Synonyms: form and callback:
-  get("names/:id/synonyms/approve/new", to: "names/synonyms/approve#new",
-                                        as: "approve_name_synonym_form")
-  post("names/:id/synonyms/approve", to: "names/synonyms/approve#create",
-                                     as: "approve_name_synonym")
-  # Deprecate Name Synonyms: form and callback:
-  get("names/:id/synonyms/deprecate/new", to: "names/synonyms/deprecate#new",
-                                          as: "deprecate_name_synonym_form")
-  post("names/:id/synonyms/deprecate", to: "names/synonyms/deprecate#create",
-                                       as: "deprecate_name_synonym")
-  # Name Trackers: form and callback:
-  get("names/:id/trackers/new", to: "names/trackers#new",
-                                as: "new_name_tracker")
-  post("names/:id/trackers", to: "names/trackers#create")
-  # edit: there's no tracker id because you can only have one per name
-  get("names/:id/trackers/edit", to: "names/trackers#edit",
-                                 as: "edit_name_tracker")
-  match("names/:id/trackers", to: "names/trackers#update", via: [:put, :patch])
   # Approve Name Tracker: GET endpoint for admin email links
   get("names/trackers/:id/approve", to: "names/trackers/approve#new",
                                     as: "approve_name_tracker")
@@ -588,66 +562,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                            as: "names_eol_preview")
   get("names/eol_expanded_review", to: "names/eol_data/expanded_review#show",
                                    as: "names_eol_expanded_review")
-  # Name Versions: show
-  get("names/:id/versions", to: "names/versions#show",
-                            as: "name_versions")
-
-  # like resources, but using just an :id param:
-  get("names(/:id)/descriptions",
-      to: "names/descriptions#index",
-      as: "name_descriptions")
-  get("names/descriptions/:id",
-      to: "names/descriptions#show",
-      as: "name_description")
-  get("names/:id/descriptions/new",
-      to: "names/descriptions#new",
-      as: "new_name_description")
-  get("names/descriptions/:id/edit",
-      to: "names/descriptions#edit",
-      as: "edit_name_description")
-  post("names/:id/descriptions",
-       to: "names/descriptions#create")
-  match("names/descriptions/:id",
-        to: "names/descriptions#update", via: [:put, :patch])
-  delete("names/descriptions/:id", to: "names/descriptions#destroy")
-
-  # Make Descripton Default: callback only:
-  put("names/descriptions/:id/default",
-      to: "names/descriptions/defaults#update",
-      as: "make_default_name_description")
-  # Publish Name Description Drafts: callback:
-  put("names/descriptions/:id/publish",
-      to: "names/descriptions/publish#update",
-      as: "name_description_publish")
-  # Merge Name Descriptions: form and callback:
-  get("names/descriptions/:id/merges/new",
-      to: "names/descriptions/merges#new",
-      as: "name_description_merges_form")
-  post("names/descriptions/:id/merges",
-       to: "names/descriptions/merges#create",
-       as: "name_description_merges")
-  # Move Name Descriptions: form and callback:
-  get("names/descriptions/:id/moves/new",
-      to: "names/descriptions/moves#new",
-      as: "name_description_moves_form")
-  post("names/descriptions/:id/moves",
-       to: "names/descriptions/moves#create",
-       as: "name_description_moves")
-  # Edit Name Description Permissions: form and callback:
-  get("names/descriptions/:id/permissions/edit",
-      to: "names/descriptions/permissions#edit",
-      as: "edit_name_description_permissions")
-  put("names/descriptions/:id/permissions",
-      to: "names/descriptions/permissions#update",
-      as: "name_description_permissions")
-  # Name Description Versions: show
-  get("names/descriptions/:id/versions",
-      to: "names/descriptions/versions#show",
-      as: "name_description_versions")
-  # Set review_status: callback only:
-  put("names/descriptions/:id/review_status",
-      to: "names/descriptions/review_status#update",
-      as: "name_description_review_status")
 
   # ----- Observations: standard actions  ----------------------------
   namespace :observations do

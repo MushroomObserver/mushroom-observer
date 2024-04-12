@@ -1,0 +1,10 @@
+<% add_page_title(:field_slip_editing.t) %>
+
+<%= render "form", field_slip: @field_slip %>
+
+<br>
+
+<div>
+  <%= link_to :field_slip_show.t, @field_slip %> |
+  <%= link_to :field_slip_index.t, field_slips_path %>
+</div>

@@ -3,6 +3,9 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
+# DO NOT USE `albion` as an account profile primary_location;
+# it breaks API2Test#test_patching_locations
+
 DEFAULTS: &DEFAULTS
   auth_code:      cb0b1a56ab378a7c4f8ecd172dccf8b3c4a7f0ba
   contribution:   10

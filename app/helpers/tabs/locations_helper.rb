@@ -66,7 +66,7 @@ module Tabs
 
     def location_reverse_order_tab(location)
       [:show_location_reverse.t,
-       add_query_param(location_reverse_name_order_path(location.id)),
+       add_query_param(reverse_name_order_location_path(location.id)),
        { class: tab_id(__method__.to_s), icon: :back }]
     end
 
@@ -110,7 +110,7 @@ module Tabs
     def observations_at_location_tab(location)
       [show_obs_link_title_with_count(location),
        add_query_param(observations_path(location: location.id)),
-       { class: tab_id(__method__.to_s), icon: :observations }]
+       { class: tab_id(__method__.to_s), icon: :observations, show_text: true }]
     end
 
     def location_map_title(query:)

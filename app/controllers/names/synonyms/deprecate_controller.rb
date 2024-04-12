@@ -58,7 +58,7 @@ module Names::Synonyms
     end
 
     def render_new
-      render(:new, location: deprecate_name_synonym_form_path)
+      render(:new, location: form_to_deprecate_synonym_of_name_path)
     end
 
     def suggest_alternate_spellings

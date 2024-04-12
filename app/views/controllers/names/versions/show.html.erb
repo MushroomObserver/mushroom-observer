@@ -3,13 +3,23 @@ add_page_title(:show_past_name_title.t(
   num:  @name.version, name: @name.display_name
 ))
 add_tab_set(name_version_tabs(name: @name))
-@container = :text
+@container = :full
 %>
 
-<div class="mt-4"></div>
-<%= render(partial: "names/show/nomenclature",
-          locals: { name: @name, synonyms: false }) %>
+<%= tag.div(class: "row mt-4") do %>
+  <%= tag.div(class: "col-md-6") do %>
+    <%= render(partial: "names/show/nomenclature",
+               locals: { name: @name, synonyms: false }) %>
+    <%= render(partial: "names/show/lifeform_panel") %>
+    <% if @name.has_notes? %>
+      <%= render(partial: "names/show/notes_panel") %>
+    <% end %>
+  <% end %>
 
-<%= show_past_versions(@name, @versions, bold: lambda {|v| !v.deprecated}) %>
+  <%= tag.div(class: "col-md-6") do %>
+    <%= show_past_versions(@name, @versions,
+                           bold: lambda {|v| !v.deprecated}) %>
+  <% end %>
+<% end %>
 
 <%= show_object_footer(@name, @versions) %>

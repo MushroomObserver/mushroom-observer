@@ -62,6 +62,7 @@ class AccountController < ApplicationController
       UserGroup.create_user(@new_user)
       flash_notice("#{:runtime_signup_success.tp} #{:email_spam_notice.tp}")
       QueuedEmail::VerifyAccount.create_email(@new_user)
+      UserStats.create({ user_id: @new_user.id })
     end
 
     redirect_back_or_default(account_welcome_path)

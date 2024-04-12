@@ -190,6 +190,12 @@ class CommentsControllerTest < FunctionalTestCase
     assert_form_action(action: :create, target: obs_id, type: "Observation")
   end
 
+  def test_add_comment_to_project
+    project_id = projects(:eol_project).id
+    requires_login(:new, target: project_id, type: "Project")
+    assert_form_action(action: :create, target: project_id, type: "Project")
+  end
+
   def test_add_comment_no_id
     login("dick")
     get(:new)

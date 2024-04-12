@@ -1,0 +1,23 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+field_slip_one:
+  observation: minimal_unknown_obs
+  project: eol_project
+  code: EOL-0001
+  user: mary
+
+field_slip_two:
+  observation: owner_accepts_general_questions
+  project: eol_project
+  code: EOL-0002
+  user: mary
+
+field_slip_no_obs:
+  project: eol_project
+  code: EOL-0003
+  user: mary
+
+field_slip_falmouth_one:
+  project: falmouth_2023_09_project
+  code: FAL-0001
+  user: rolf

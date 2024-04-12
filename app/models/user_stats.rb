@@ -226,7 +226,7 @@ class UserStats < ApplicationRecord
 
       msgs = ["UserStats updated for #{entries.size} users."]
       msgs << "Dry run: no changes made." if dry_run
-      msgs.join(" ")
+      msgs
     end
 
     private

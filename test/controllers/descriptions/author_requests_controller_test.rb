@@ -2,9 +2,9 @@
 
 require("test_helper")
 
-module Authors
-  # test of actions to request being a author of an object
-  class EmailRequestsControllerTest < FunctionalTestCase
+module Descriptions
+  # test of actions to request being a author of a description
+  class AuthorRequestsControllerTest < FunctionalTestCase
     def test_new
       id = name_descriptions(:coprinus_comatus_desc).id
       requires_login(:new, id: id, type: :name_description)

@@ -166,9 +166,20 @@ module ObservationsHelper
            else
              :show_observation_seen_at.t
            end}:",
-        location_link(obs.where, obs.location, nil, true)
+        location_link(obs.where, obs.location, nil, true),
+        observation_where_vague_notice(obs: obs)
       ].safe_join(" ")
     end
+  end
+
+  def observation_where_vague_notice(obs:)
+    return "" unless obs.location&.vague?
+
+    title = :show_observation_vague_location.l
+    if User.current == obs.user
+      title += " #{:show_observation_improve_location.l}"
+    end
+    tag.p(class: "ml-3") { tag.em(title) }
   end
 
   def observation_details_where_gps(obs:)

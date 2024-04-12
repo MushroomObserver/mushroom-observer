@@ -4,10 +4,27 @@ link = icon_link_with_query(*edit_name_lifeform_tab(@name))
 heading_links = @user ? link.html_safe : ""
 %>
 
-<%= tag.div(class: "col-sm-6") do
-  panel_block(heading: heading, heading_links: heading_links,
-              inner_class: "name-section", id: "name_lifeform",
-              data: { name_panels_target: "lifeform" }) do
-    render(partial: "names/show/lifeform")
+<%=
+panel_block(
+  heading: heading, heading_links: heading_links,
+  inner_class: "name-section", id: "name_lifeform",
+  data: { name_panels_target: "lifeform" }
+) do
+
+  if !@name.lifeform.blank?
+    concat(tag.div(class: "mb-2") do
+      @name.lifeform.strip.split(" ").each do |word|
+        concat(tag.p(:"lifeform_#{word}".t))
+      end
+    end)
   end
-end %>
+
+  if @first_child
+    concat(tag.p(
+      link_with_query(:show_name_propagate_lifeform.t,
+                      form_to_propagate_lifeform_of_name_path(@name.id))
+    ))
+  end
+
+end
+%>

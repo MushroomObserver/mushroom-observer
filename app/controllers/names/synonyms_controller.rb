@@ -122,7 +122,7 @@ module Names
       @proposed_synonyms = @synonym_name_ids.filter_map do |id|
         Name.safe_find(id)
       end
-      render(:edit, location: edit_name_synonyms_path(@name.id))
+      render(:edit, location: edit_synonyms_of_name_path(@name.id))
     end
 
     # Helper used by change_synonyms.  Deprecates a single name.  Returns true

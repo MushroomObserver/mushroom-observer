@@ -194,7 +194,9 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def default_accession_number
-    if @observation.collection_numbers.length == 1
+    if @observation.field_slips.length == 1
+      @observation.field_slips.first.code
+    elsif @observation.collection_numbers.length == 1
       @observation.collection_numbers.first.format_name
     else
       "MO #{@observation.id}"

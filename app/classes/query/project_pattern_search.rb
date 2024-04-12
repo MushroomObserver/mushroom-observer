@@ -15,7 +15,8 @@ class Query::ProjectPatternSearch < Query::ProjectBase
   def search_fields
     "CONCAT(" \
       "projects.title," \
-      "COALESCE(projects.summary,'')" \
+      "COALESCE(projects.summary,'')," \
+      "COALESCE(projects.field_slip_prefix,'')" \
       ")"
   end
 end

@@ -31,6 +31,9 @@ image_upload_localization = {
   }
 ) do |f| %>
 
+  <%= "#{:form_observations_field_code.t} #{@field_code}" if @field_code %>
+  <%= hidden_field_tag(:field_code, @field_code) %>
+
   <%= submit_button(form: f, button: button_name, center: true) %>
 
   <%= render(partial: "observations/form/when", locals: { f: f }) %>

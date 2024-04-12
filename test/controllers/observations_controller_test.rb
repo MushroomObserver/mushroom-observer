@@ -125,6 +125,25 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_equal("thumbnail", user.thumbnail_size)
   end
 
+  def test_show_observation_vague_location
+    login
+    obs1 = observations(:california_obs)
+    get(:show, params: { id: obs1.id })
+    assert_match(:show_observation_vague_location.l, @response.body)
+    assert_no_match(:show_observation_improve_location.l, @response.body)
+
+    # Make sure it suggests choosing a better location if owner is current user
+    login("dick")
+    get(:show, params: { id: obs1.id })
+    assert_match(:show_observation_vague_location.l, @response.body)
+    assert_match(:show_observation_improve_location.l, @response.body)
+
+    # Make sure it doesn't show for observations with non-vague location
+    obs2 = observations(:amateur_obs)
+    get(:show, params: { id: obs2.id })
+    assert_no_match(:show_observation_vague_location.l, @response.body)
+  end
+
   def test_show_observation_hidden_gps
     obs = observations(:unknown_with_lat_long)
     login
@@ -1484,6 +1503,18 @@ class ObservationsControllerTest < FunctionalTestCase
     obs = assigns(:observation)
     assert_equal(where, obs.place_name)
     assert_equal("mo_website", obs.source)
+  end
+
+  def test_create_observation_with_field_slip
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        field_code: field_slips(:field_slip_no_obs).code,
+        naming: { name: "Coprinus comatus" } },
+      1, 1, 0
+    )
+    obs = assigns(:observation)
+    assert(obs.specimen)
+    assert(obs.field_slips.count == 1)
   end
 
   def test_create_observation_with_collection_number
@@ -2935,6 +2966,14 @@ class ObservationsControllerTest < FunctionalTestCase
       # meets date constraints, but membership closed
       projects(:eol_project).id => :unchecked
     )
+  end
+
+  def test_field_slip_project_checkbox
+    login("katrina")
+    slip = field_slips(:field_slip_no_obs)
+    get(:new, params: { field_code: slip.code })
+
+    assert_project_checks(slip.project.id => :checked)
   end
 
   def test_project_checkboxes_in_create_observation
