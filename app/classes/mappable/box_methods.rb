@@ -14,6 +14,7 @@
 #  edges::        Returns [north, south, east, west].
 #  north_south_distance:: Returns north - south.
 #  east_west_distance::   Returns east - west (adjusting if straddles dateline).
+#  straddles_180_deg?::   Returns true if box straddles 180 degrees.
 #  box_area::             Returns the area described by a box, in kmˆ2.
 #  vague?::       Arbitrary test for whether a box covers too large an area to
 #                 be useful on a map.
@@ -95,6 +96,10 @@ module Mappable
       west <= east ? east - west : east - west + 360
     end
 
+    def straddles_180_deg?
+      west > east
+    end
+
     def contains?(lat, lng)
       contains_lat?(lat) && contains_long?(lng)
     end
@@ -104,7 +109,7 @@ module Mappable
     end
 
     def contains_long?(lng)
-      return (west...east).cover?(lng) if west <= east
+      return (west...east).cover?(lng) unless straddles_180_deg?
 
       (lng >= west) || (lng <= east)
     end

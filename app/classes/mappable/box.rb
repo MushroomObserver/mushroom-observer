@@ -7,7 +7,6 @@
 #  == Instance methods
 #
 #  valid?::              Return true if box is valid.
-#  straddles_180_deg?::  Return true if box straddles 180 degrees.
 #  expand(delta_lat, delta_lng = nil)::  Return a new box with edges expanded
 #                                        by delta (optional delta_lng)
 
@@ -26,10 +25,6 @@ module Mappable
 
     def valid?
       args_in_bounds? && south <= north
-    end
-
-    def straddles_180_deg?
-      west > east
     end
 
     # Return a new box with edges expanded by delta (optional delta_lng)
