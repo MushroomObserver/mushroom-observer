@@ -54,6 +54,7 @@ module Query
     def initialize_boolean_parameters
       initialize_is_collection_location_parameter
       initialize_has_location_parameter
+      initialize_has_lat_long_parameter
       initialize_has_name_parameter
       initialize_has_notes_parameter
       add_join(:observations, :comments) if params[:has_comments]
@@ -74,6 +75,14 @@ module Query
         "observations.location_id IS NOT NULL",
         "observations.location_id IS NULL",
         params[:has_location]
+      )
+    end
+
+    def initialize_has_lat_long_parameter
+      add_boolean_condition(
+        "observations.lat IS NOT NULL AND observations.long IS NOT NULL",
+        "observations.lat IS NULL OR observations.long IS NULL",
+        params[:has_lat_long]
       )
     end
 
