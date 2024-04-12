@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 module Report
-  # Inserts the lat/long for hidden GPS coordinates
+  # Inserts the lat/lng for hidden GPS coordinates
   # that the current user is allowed to see if
   # they are an admin for a project that another user trusts
   class ProjectTweaker
     def initialize
       @vals = {}
-      ProjectLatLongs.new.vals.each do |row|
+      ProjectLatLngs.new.vals.each do |row|
         @vals[row[0]] = [row[1], row[2]]
       end
     end
