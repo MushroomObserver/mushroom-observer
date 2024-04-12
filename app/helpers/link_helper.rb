@@ -64,14 +64,17 @@ module LinkHelper
     content = block ? capture(&block) : text
     opts = block ? path : options
     icon_type = opts[:icon]
+    label_class = opts[:show_text] ? "pl-3" : "sr-only"
     return link_to(link, opts) { content } if icon_type.blank?
 
-    opts = { title: content,
-             data: { toggle: "tooltip" } }.deep_merge(opts.except(:icon))
+    opts = {
+      title: content,
+      data: { toggle: "tooltip" }
+    }.deep_merge(opts.except(:icon, :show_text))
 
     link_to(link, **opts) do
-      concat(tag.span(content, class: "sr-only"))
       concat(link_icon(icon_type))
+      concat(tag.span(content, class: label_class))
     end
   end
 
@@ -257,18 +260,18 @@ module LinkHelper
   # Refactor to accept a tab array
 
   # POST to a path; used instead of a link because POST link requires js
-  def post_button(name:, path:, **args, &block)
-    any_method_button(method: :post, name:, path:, **args, &block)
+  def post_button(name:, path:, **, &block)
+    any_method_button(method: :post, name:, path:, **, &block)
   end
 
   # PUT to a path; used instead of a link because PUT link requires js
-  def put_button(name:, path:, **args, &block)
-    any_method_button(method: :put, name:, path:, **args, &block)
+  def put_button(name:, path:, **, &block)
+    any_method_button(method: :put, name:, path:, **, &block)
   end
 
   # PATCH to a path; used instead of a link because PATCH link requires js
-  def patch_button(name:, path:, **args, &block)
-    any_method_button(method: :patch, name:, path:, **args, &block)
+  def patch_button(name:, path:, **, &block)
+    any_method_button(method: :patch, name:, path:, **, &block)
   end
 
   # any_method_button(method: :patch,
