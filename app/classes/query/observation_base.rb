@@ -139,8 +139,8 @@ module Query
 
     def initialize_has_geolocation_parameter
       add_boolean_condition(
-        "observations.lat IS NOT NULL AND observations.long IS NOT NULL",
-        "observations.lat IS NULL OR observations.long IS NULL",
+        "observations.lat IS NOT NULL AND observations.gps_hidden IS FALSE",
+        "observations.lat IS NULL OR observations.gps_hidden IS TRUE",
         params[:has_geolocation]
       )
     end
