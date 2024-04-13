@@ -154,7 +154,7 @@ module ObservationsController::NewAndCreate
 
   def determine_observation_location(observation)
     if Location.is_unknown?(observation.place_name) ||
-       (observation.lat && observation.long && observation.place_name.blank?)
+       (observation.lat && observation.lng && observation.place_name.blank?)
       observation.location = Location.unknown
       observation.where = nil
     end

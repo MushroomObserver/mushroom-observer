@@ -42,10 +42,10 @@
 #  where::                  Where it was seen (just a String).
 #  location::               Where it was seen (Location).
 #  lat::                    Exact latitude of location.
-#  long::                   Exact longitude of location.
+#  lng::                    Exact longitude of location.
 #  alt::                    Exact altitude of location. (meters)
 #  is_collection_location:: Is this where it was growing?
-#  gps_hidden::             Hide exact lat/long?
+#  gps_hidden::             Hide exact lat/lng?
 #  name::                   Consensus Name (never deprecated, never nil).
 #  vote_cache::             Cache Vote score for the winning Name.
 #  thumb_image::            Image to use as thumbnail (if any).
@@ -406,15 +406,15 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
             where(
               (Observation[:lat] >= resized_box.south).
               and(Observation[:lat] <= resized_box.north).
-              and(Observation[:long] >= resized_box.west).
-              or(Observation[:long] <= resized_box.east)
+              and(Observation[:lng] >= resized_box.west).
+              or(Observation[:lng] <= resized_box.east)
             )
           else
             where(
               (Observation[:lat] >= resized_box.south).
               and(Observation[:lat] <= resized_box.north).
-              and(Observation[:long] >= resized_box.west).
-              and(Observation[:long] <= resized_box.east)
+              and(Observation[:lng] >= resized_box.west).
+              and(Observation[:lng] <= resized_box.east)
             )
           end
         }
@@ -431,19 +431,19 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
           if box.straddles_180_deg?
             where(
-              Observation[:lat].eq(nil).or(Observation[:long].eq(nil)).
+              Observation[:lat].eq(nil).or(Observation[:lng].eq(nil)).
               or(Observation[:lat] < resized_box.south).
               or(Observation[:lat] > resized_box.north).
-              or((Observation[:long] < resized_box.west).
-                 and(Observation[:long] > resized_box.east))
+              or((Observation[:lng] < resized_box.west).
+                 and(Observation[:lng] > resized_box.east))
             )
           else
             where(
-              Observation[:lat].eq(nil).or(Observation[:long].eq(nil)).
+              Observation[:lat].eq(nil).or(Observation[:lng].eq(nil)).
               or(Observation[:lat] < resized_box.south).
               or(Observation[:lat] > resized_box.north).
-              or(Observation[:long] < resized_box.west).
-              or(Observation[:long] > resized_box.east)
+              or(Observation[:lng] < resized_box.west).
+              or(Observation[:lng] > resized_box.east)
             )
           end
         }
@@ -739,10 +739,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     self[:lat] = lat
   end
 
-  def long=(val)
-    long = Location.parse_longitude(val)
-    long = val if long.nil? && val.present?
-    self[:long] = long
+  def lng=(val)
+    lng = Location.parse_longitude(val)
+    lng = val if lng.nil? && val.present?
+    self[:lng] = lng
   end
 
   def alt=(val)
@@ -751,23 +751,16 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     self[:alt] = alt
   end
 
-  # Is lat/long more than 10% outside of location extents?
-  def lat_long_dubious?
-    lat && location && !location.lat_long_close?(lat, long)
-  end
-
-  # Alias for access by Mappable::CollapsibleCollectionOfObjects
-  # which must provide `lng` for Google Maps from an obs OR a MapSet
-  # Makes related methods so much simpler: parallel data types.
-  def lng
-    long
+  # Is lat/lng more than 10% outside of location extents?
+  def lat_lng_dubious?
+    lat && location && !location.lat_lng_close?(lat, lng)
   end
 
   def place_name_and_coordinates
-    if lat.present? && long.present?
+    if lat.present? && lng.present?
       lat_string = format_coordinate(lat, "N", "S")
-      long_string = format_coordinate(long, "E", "W")
-      "#{place_name} (#{lat_string} #{long_string})"
+      lng_string = format_coordinate(lng, "E", "W")
+      "#{place_name} (#{lat_string} #{lng_string})"
     else
       place_name
     end
@@ -787,19 +780,19 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     gps_hidden && user_id != User.current_id ? nil : lat
   end
 
-  def public_long
-    gps_hidden && user_id != User.current_id ? nil : long
+  def public_lng
+    gps_hidden && user_id != User.current_id ? nil : lng
   end
 
   def reveal_location?
     !gps_hidden || can_edit? || project_admin?
   end
 
-  def display_lat_long
+  def display_lat_lng
     return "" unless lat
 
     "#{lat.abs}°#{lat.negative? ? "S" : "N"} " \
-      "#{long.abs}°#{long.negative? ? "W" : "E"}"
+      "#{lng.abs}°#{lng.negative? ? "W" : "E"}"
   end
 
   def display_alt
@@ -1364,16 +1357,16 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def check_latitude
-    if lat.blank? && long.present? ||
+    if lat.blank? && lng.present? ||
        lat.present? && !Location.parse_latitude(lat)
       errors.add(:lat, :runtime_lat_long_error.t)
     end
   end
 
   def check_longitude
-    if lat.present? && long.blank? ||
-       long.present? && !Location.parse_longitude(long)
-      errors.add(:long, :runtime_lat_long_error.t)
+    if lat.present? && lng.blank? ||
+       lng.present? && !Location.parse_longitude(lng)
+      errors.add(:lng, :runtime_lat_long_error.t)
     end
   end
 

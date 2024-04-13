@@ -91,7 +91,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
       place_name: obs.place_name,
       notes: obs.notes,
       lat: obs.lat,
-      long: obs.long,
+      lng: obs.lng,
       alt: obs.alt,
       is_collection_location: obs.is_collection_location ? "1" : "0",
       specimen: obs.specimen ? "1" : "0",
@@ -465,7 +465,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert(obs.vote_cache > 2)
     assert_equal(Observation.no_notes, obs.notes)
     assert_nil(obs.lat)
-    assert_nil(obs.long)
+    assert_nil(obs.lng)
     assert_nil(obs.alt)
     assert_equal(false, obs.is_collection_location)
     assert_equal(false, obs.specimen)
@@ -807,7 +807,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
         vote: Vote.minimum_vote,
         notes: { Observation.other_notes_key => "member notes" },
         lat: "12 34 56 N",
-        long: "78 9 12 W",
+        lng: "78 9 12 W",
         alt: "345 ft",
         is_collection_location: "1",
         specimen: "1"
@@ -833,7 +833,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_equal([Observation.other_notes_key], obs.notes.keys)
     assert_equal(obs.notes[Observation.other_notes_key], "member notes")
     assert_equal(12.5822, obs.lat)
-    assert_equal(-78.1533, obs.long)
+    assert_equal(-78.1533, obs.lng)
     assert_equal(105, obs.alt)
     assert_equal(true, obs.is_collection_location)
     assert_equal(true, obs.specimen)
@@ -1312,8 +1312,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     # as defaults for future observations.
     obs1.notes = obs2.notes = { Observation.other_notes_key => "test notes" }
     obs1.lat   = obs2.lat   = "12.3456"
-    obs1.long  = obs2.long  = "-76.5432"
-    obs1.alt   = obs2.alt   = "789"
+    obs1.lng = obs2.lng = "-76.5432"
+    obs1.alt = obs2.alt = "789"
     obs1.is_collection_location = false
     obs2.is_collection_location = false
     obs1.specimen = true
@@ -1327,9 +1327,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
       klass: SpeciesList,
       expect_areas: { Observation.other_notes_key => "test notes" }
     )
-    assert_input_value(:member_lat,   "12.3456")
-    assert_input_value(:member_long,  "-76.5432")
-    assert_input_value(:member_alt,   "789")
+    assert_input_value(:member_lat, "12.3456")
+    assert_input_value(:member_lng, "-76.5432")
+    assert_input_value(:member_alt, "789")
     assert_checkbox_state(:member_is_collection_location, false)
     assert_checkbox_state(:member_specimen, true)
 
@@ -1337,8 +1337,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     # standard defaults from create_observation, instead.
     obs1.notes = "different notes"
     obs1.lat   = "-12.3456"
-    obs1.long  = "76.5432"
-    obs1.alt   = "123"
+    obs1.lng = "76.5432"
+    obs1.alt = "123"
     obs1.is_collection_location = true
     obs1.specimen = false
     obs1.save!
@@ -1350,7 +1350,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
       expect_areas: { Observation.other_notes_key => "" }
     )
     assert_input_value(:member_lat, "")
-    assert_input_value(:member_long, "")
+    assert_input_value(:member_lng, "")
     assert_input_value(:member_alt, "")
     assert_checkbox_state(:member_is_collection_location, true)
     assert_checkbox_state(:member_specimen, false)

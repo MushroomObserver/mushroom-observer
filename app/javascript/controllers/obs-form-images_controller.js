@@ -128,7 +128,7 @@ export default class extends Controller {
       const _gps = JSON.parse(_selectedItem.dataset.geocode);
 
       document.getElementById('observation_lat').value = _gps.latitude;
-      document.getElementById('observation_long').value = _gps.longitude;
+      document.getElementById('observation_lng').value = _gps.longitude;
       document.getElementById('observation_alt').value = _gps.altitude;
       this.hide(this.gpsMessagesTarget);
     }
@@ -503,11 +503,11 @@ export default class extends Controller {
               const _existingGeocode = JSON.parse(element.dataset.geocode);
               const _latDif = Math.abs(itemGeocode.latitude)
                 - Math.abs(_existingGeocode.latitude);
-              const _longDif = Math.abs(itemGeocode.longitude)
+              const _lngDif = Math.abs(itemGeocode.longitude)
                 - Math.abs(_existingGeocode.longitude);
 
               // don't add geocodes that are only slightly different
-              if ((Math.abs(_latDif) < 0.0002) || Math.abs(_longDif) < 0.0002)
+              if ((Math.abs(_latDif) < 0.0002) || Math.abs(_lngDif) < 0.0002)
                 _addGeoRadio = false;
             });
           }

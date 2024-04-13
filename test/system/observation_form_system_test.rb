@@ -96,7 +96,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     assert_field("observation_place_name", with: "")
     assert_field("observation_lat", with: "")
-    assert_field("observation_long", with: "")
+    assert_field("observation_lng", with: "")
     assert_field("observation_alt", with: "")
 
     assert_field("naming_name", with: "")
@@ -130,7 +130,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     assert_field("observation_place_name", with: "USA, California, Pasadena")
     assert_field("observation_lat", with: "")
-    assert_field("observation_long", with: "")
+    assert_field("observation_lng", with: "")
     assert_field("observation_alt", with: "")
 
     assert_field("naming_name", with: "")
@@ -147,7 +147,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_place_name", with: "Pasadena, California, USA")
     # geo-coordinates-parser will reject internally-inconsistent notation.
     fill_in("observation_lat", with: " 12deg 36.75min N ") # == 12.6125
-    fill_in("observation_long", with: " 121deg 33.14min E ") # == 121.5523
+    fill_in("observation_lng", with: " 121deg 33.14min E ") # == 121.5523
     fill_in("observation_alt", with: " 56 ft. ")
 
     fill_in("naming_name", with: "Agaricus campe")
@@ -382,7 +382,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_place_name",
                  with: "Pasadena, Some Co., California, USA")
     assert_field("observation_lat", with: "12.6125") # was 12.5927
-    assert_field("observation_long", with: "121.5523") # was -121.5525
+    assert_field("observation_lng", with: "121.5523") # was -121.5525
     assert_field("observation_alt", with: "17")
     assert_unchecked_field("observation_is_collection_location")
     assert_checked_field("observation_specimen")
@@ -408,7 +408,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     select("April", from: "observation_when_2i")
     select("15", from: "observation_when_3i")
     fill_in("observation_lat", with: "23.4567")
-    fill_in("observation_long", with: "-123.4567")
+    fill_in("observation_lng", with: "-123.4567")
     fill_in("observation_alt", with: "987m")
     check("observation_is_collection_location")
     fill_in(other_notes_id, with: "New notes for observation")
@@ -499,7 +499,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_equal(expected_values[:location], new_obs.location.display_name)
     end
     assert_gps_equal(expected_values[:lat], new_obs.lat.to_f)
-    assert_gps_equal(expected_values[:long], new_obs.long.to_f)
+    assert_gps_equal(expected_values[:lng], new_obs.lng.to_f)
     assert_gps_equal(expected_values[:alt], new_obs.alt.to_f)
   end
 
@@ -591,7 +591,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       where: "Pasadena, California, USA",
       location: nil,
       lat: 12.6125, # was 12.5760 values tweaked to move it to land
-      long: 121.5523, # was -123.7519 was in the ocean
+      lng: 121.5523, # was -123.7519 was in the ocean
       alt: 17,
       name: names(:agaricus_campestris),
       vote: Vote.next_best_vote,
@@ -621,7 +621,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     expected_values_after_location.merge(
       when: Date.parse("2011-04-15"),
       lat: 23.4567,
-      long: -123.4567,
+      lng: -123.4567,
       alt: 987,
       is_collection_location: true,
       specimen: false,

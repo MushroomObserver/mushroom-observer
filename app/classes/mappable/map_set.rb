@@ -25,9 +25,6 @@
 #  The title and caption are accessors, so they can be set in the map helper.
 #  The objects are an accessor, because they get stripped before sending to JS.
 #
-#  GOTCHA: Observations have .long, Google Map points need .lng.
-#          MapSet must provide .lng to be interoperable with other points.
-#
 module Mappable
   class MapSet
     attr_reader :north, :south, :east, :west, :is_point, :is_box,
@@ -48,7 +45,7 @@ module Mappable
         if obj.location? && !Location.is_unknown?(obj.name)
           update_extents_with_box(obj)
         elsif obj.observation?
-          if obj.lat && !obj.lat_long_dubious?
+          if obj.lat && !obj.lat_lng_dubious?
             update_extents_with_point(obj)
           elsif (loc = obj.location) &&
                 !Location.is_unknown?(loc.name)

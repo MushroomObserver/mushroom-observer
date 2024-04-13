@@ -189,7 +189,7 @@ class ProjectTest < UnitTestCase
       title: "With Location Violations",
       open_membership: true
     )
-    geoloc_in_bubank = observations(:unknown_with_lat_long)
+    geoloc_in_bubank = observations(:unknown_with_lat_lng)
     geoloc_outside_burbank =
       observations(:trusted_hidden) # lat/lon in Falmouth
     geoloc_nil_burbank_contains_loc =
