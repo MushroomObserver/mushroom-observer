@@ -2161,7 +2161,7 @@ class QueryTest < UnitTestCase
 
     # has_geolocation
     assert_query(
-      Location.joins(:observations).
+      Location.joins(:observations).where(observations: { gps_hidden: false }).
                where.not(observations: { lat: false }).uniq,
       :Location, :with_observations, has_geolocation: true
     )
