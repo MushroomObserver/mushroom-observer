@@ -16,7 +16,7 @@ module Query
         confidence?: [:float],
         is_collection_location?: :boolean,
         has_location?: :boolean,
-        has_geolocation?: :boolean,
+        has_public_lat_lng?: :boolean,
         has_name?: :boolean,
         has_sequences?: { boolean: [true] },
         has_notes_fields?: [:string],
@@ -58,7 +58,7 @@ module Query
     def initialize_boolean_parameters
       initialize_is_collection_location_parameter
       initialize_has_location_parameter
-      initialize_has_geolocation_parameter
+      initialize_has_public_lat_lng_parameter
       initialize_has_name_parameter
       initialize_has_notes_parameter
       add_has_notes_fields_condition(params[:has_notes_fields])
@@ -82,11 +82,11 @@ module Query
       )
     end
 
-    def initialize_has_geolocation_parameter
+    def initialize_has_public_lat_lng_parameter
       add_boolean_condition(
         "observations.lat IS NOT NULL AND observations.gps_hidden IS FALSE",
         "observations.lat IS NULL OR observations.gps_hidden IS TRUE",
-        params[:has_geolocation]
+        params[:has_public_lat_lng]
       )
     end
 

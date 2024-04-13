@@ -62,7 +62,7 @@ class API2
         gps_hidden: parse(:boolean, :gps_hidden, help: 1),
         has_images: parse(:boolean, :has_images),
         has_location: parse(:boolean, :has_location),
-        has_geolocation: parse(:boolean, :has_geolocation),
+        has_public_lat_lng: parse(:boolean, :has_public_lat_lng),
         has_name: parse(:boolean, :has_name, help: :min_rank),
         has_comments: parse(:boolean, :has_comments, limit: true),
         has_specimen: parse(:boolean, :has_specimen),
