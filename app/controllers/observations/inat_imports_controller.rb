@@ -71,7 +71,8 @@ module Observations
     end
 
     def import_one_observation(inat_obs_id)
-      inat_obs_data = inat_search_observations(inat_obs_id)
+      imported_inat_obs_data = inat_search_observations(inat_obs_id)
+
       # redirect_to(new_observation_path)
     end
 
@@ -81,7 +82,8 @@ module Observations
       operation = "/observations?id=#{ids}" \
                   "&order=desc&order_by=created_at&only_id=false"
       inat_response = inat_search(operation)
-      JSON.parse(inat_response.body, symbolize_names: true)
+      body = inat_response.body
+      JSON.parse(body, symbolize_names: true)
     end
 
     def inat_search(operation)
