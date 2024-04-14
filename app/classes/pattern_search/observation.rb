@@ -38,7 +38,7 @@ module PatternSearch
 
       # booleanish
       has_comments: [:has_comments, :parse_yes],
-      with_public_lat_lng: [:with_public_lat_lng, :parse_boolean],
+      has_public_lat_lng: [:has_public_lat_lng, :parse_boolean],
       has_name: [:has_name, :parse_boolean],
       has_notes: [:has_notes, :parse_boolean],
       images: [:has_images, :parse_boolean],
