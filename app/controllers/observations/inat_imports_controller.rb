@@ -17,25 +17,6 @@ module Observations
       inat_id_array.each do |inat_obs_id|
         import_one_observation(inat_obs_id)
       end
-
-=begin from ProjectsController
-      if title.blank?
-        flash_error(:add_project_need_title.t)
-      elsif project
-        flash_error(:add_project_already_exists.t(title: project.title))
-      elsif ProjectConstraints.new(params).ends_before_start?
-        flash_error(:add_project_ends_before_start.t)
-      elsif user_group
-        flash_error(:add_project_group_exists.t(group: title))
-      elsif admin_group
-        flash_error(:add_project_group_exists.t(group: admin_name))
-      else
-        return create_project(title, admin_name, params[:project][:place_name])
-      end
-      @project = Project.new
-      image_ivars
-      render(:new, location: new_project_path(q: get_query_param))
-=end
     end
 
     # ---------------------------------
@@ -72,8 +53,7 @@ module Observations
 
     def import_one_observation(inat_obs_id)
       imported_inat_obs_data = inat_search_observations(inat_obs_id)
-
-      # redirect_to(new_observation_path)
+      inat_obs = ImportedInatObs.new(imported_inat_obs_data)
     end
 
     INAT_API_BASE = "https://api.inaturalist.org/v1"
@@ -81,9 +61,7 @@ module Observations
     def inat_search_observations(ids)
       operation = "/observations?id=#{ids}" \
                   "&order=desc&order_by=created_at&only_id=false"
-      inat_response = inat_search(operation)
-      body = inat_response.body
-      JSON.parse(body, symbolize_names: true)
+      inat_search(operation).body
     end
 
     def inat_search(operation)

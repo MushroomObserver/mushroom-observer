@@ -6,7 +6,9 @@ require("test_helper")
 class ImportedInatObsTest < UnitTestCase
   def test_minimal_obs
     obs =
-      ImportedInatObs.new(File.read("test/fixtures/inat/one_obs_public.json"))
+      ImportedInatObs.new(File.read("test/fixtures/inat/one_obs_public.txt"))
+
+    assert_equal(Date.new(2023, 3, 23), obs.when)
 
 =begin
       # attributes to test
