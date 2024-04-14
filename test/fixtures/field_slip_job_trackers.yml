@@ -11,3 +11,10 @@ fsjt_page_two:
   count: 12
   prefix: EOL
   status: <%= FieldSlipJobTracker.statuses[:Starting] %>
+
+fsjt_old:
+  start: 6
+  count: 12
+  prefix: OLD
+  status: <%= FieldSlipJobTracker.statuses[:Starting] %>
+  updated_at: 2023-04-14 16:31:00
