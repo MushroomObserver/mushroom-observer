@@ -13,7 +13,6 @@ class FieldSlipJobTracker < AbstractModel
          }
 
   def self.create(*args)
-    FileUtils.mkdir_p(PDF_DIR)
     args[0][:status] = "Starting"
     super(*args)
   end
@@ -37,6 +36,7 @@ class FieldSlipJobTracker < AbstractModel
   end
 
   def filepath
+    FileUtils.mkdir_p(PDF_DIR)
     @filepath ||= "#{PDF_DIR}/#{filename}"
   end
 
