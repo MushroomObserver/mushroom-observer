@@ -5,14 +5,36 @@ require("test_helper")
 # test MO extensions to Ruby's Hash class
 class ImportedInatObsTest < UnitTestCase
   def test_minimal_obs
-    obs =
+    # import of iNat 202555552 (which is a mirror of MO 547126)
+    import =
       ImportedInatObs.new(File.read("test/fixtures/inat/one_obs_public.txt"))
 
-    assert_equal(Date.new(2023, 3, 23), obs.when)
+    # How import should be translated
+    xlation = Observation.new(
+      when: "Thu, 23 Mar 2023",
+      specimen: false,
+      notes: { Other: "on Quercus\n\n&#8212;\n\nMirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/202555552\">observation 202555552</a> on March 15, 2024." }, # rubocop:disable Layout/LineLength
+      name_id: 112_217,
+      location_id: 20_799,
+      is_collection_location: true,
+      lat: 31.8813, # rubocop:disable Style/ExponentialNotation
+      long: -109.244, # rubocop:disable Style/ExponentialNotation
+      where: "Cochise Co., Arizona, USA",
+      alt: 1942,
+      lifeform: " ",
+      text_name: "Somion unicolor",
+      classification: "Domain: _Eukarya_\r\nKingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Agaricomycetes_\r\nOrder: _Polyporales_\r\nFamily: _Cerrenaceae_\r\n", # rubocop:disable Layout/LineLength
+      gps_hidden: false,
+      source: "mo_api",
+      needs_naming: false
+    )
+
+    %w[when where].each do |attribute|
+      assert_equal(xlation.send(attribute), import.send(attribute))
+    end
 
 =begin
       # attributes to test
-      t.date "when"
       t.integer "user_id"
       t.boolean "specimen", default: false, null: false
       t.text "notes"
