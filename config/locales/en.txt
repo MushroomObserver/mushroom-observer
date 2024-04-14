@@ -1108,8 +1108,7 @@
   search_term_has_comments: has_comments
   search_term_has_description: has_description
   search_term_has_field: has_field
-  search_term_has_location: has_location
-  search_term_has_public_lat_lng: has_public_lat_lng
+  search_term_with_public_lat_lng: with_public_lat_lng
   search_term_has_name: has_name
   search_term_has_notes: has_notes
   search_term_has_observations: has_observations
@@ -3544,8 +3543,7 @@
   observation_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   observation_term_has_name: Has a name? (other than "Fungi sp.")
   observation_term_has_notes: Has Notes?
-  observation_term_has_location: Is the [:OBSERVATION] associated with a defined [:LOCATION]?
-  observation_term_has_public_lat_lng: Are the [:OBSERVATION]'s [:LATITUDE] and [:LONGITUDE] fields filled in, and public?
+  observation_term_with_public_lat_lng: Are the [:OBSERVATION]'s [:LATITUDE] and [:LONGITUDE] fields filled in, and public?
   observation_term_has_field: Has a given notes template field filled in.
   observation_term_has_comments: Has any comments?
   observation_term_is_collection_location: Mushroom was growing at the location. ("[:form_observations_is_collection_location]" is checked.)

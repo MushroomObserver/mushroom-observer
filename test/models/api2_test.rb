@@ -2248,15 +2248,6 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(has_images: "no"))
     assert_api_results(without)
 
-    with    = Observation.with_location
-    without = Observation.without_location
-    assert(with.length > 1)
-    assert(without.length > 1)
-    assert_api_pass(params.merge(has_location: "yes"))
-    assert_api_results(with)
-    assert_api_pass(params.merge(has_location: "no"))
-    assert_api_results(without)
-
     genus = Name.ranks[:Genus]
     group = Name.ranks[:Group]
     names = Name.where((Name[:rank] <= genus).or(Name[:rank] == group))
