@@ -19,14 +19,14 @@ module Query
         observations?: [Observation],
         projects?: [:string],
         species_lists?: [:string],
-        has_observation?: { boolean: [true] },
+        with_observation?: { boolean: [true] },
         size?: { string: Image.all_sizes - [:full_size] },
         content_types?: [{ string: Image.all_extensions }],
-        has_notes?: :boolean,
+        with_notes?: :boolean,
         notes_has?: :string,
         copyright_holder_has?: :string,
         license?: [License],
-        has_votes?: :boolean,
+        with_votes?: :boolean,
         quality?: [:float],
         confidence?: [:float],
         ok_for_export?: :boolean
@@ -38,7 +38,7 @@ module Query
       unless is_a?(Query::ImageWithObservations)
         add_owner_and_time_stamp_conditions("images")
         add_date_condition("images.when", params[:date])
-        add_join(:observation_images) if params[:has_observation]
+        add_join(:observation_images) if params[:with_observation]
         initialize_notes_parameters
       end
       initialize_association_parameters
@@ -50,7 +50,7 @@ module Query
     def initialize_notes_parameters
       add_boolean_condition("LENGTH(COALESCE(images.notes,'')) > 0",
                             "LENGTH(COALESCE(images.notes,'')) = 0",
-                            params[:has_notes])
+                            params[:with_notes])
       add_search_condition("images.notes", params[:notes_has])
     end
 
@@ -85,7 +85,7 @@ module Query
     def initialize_vote_parameters
       add_boolean_condition("images.vote_cache IS NOT NULL",
                             "images.vote_cache IS NULL",
-                            params[:has_votes])
+                            params[:with_votes])
       add_range_condition("images.vote_cache", params[:quality])
       add_range_condition("observations.vote_cache", params[:confidence],
                           :observation_images, :observations)

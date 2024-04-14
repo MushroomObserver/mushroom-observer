@@ -4,7 +4,7 @@ class ContentFilter
   class HasImages < BooleanFilter
     def initialize
       super(
-        sym: :has_images,
+        sym: :with_images,
         name: :IMAGES.t,
         models: [Observation],
         on_vals: %w[yes no],

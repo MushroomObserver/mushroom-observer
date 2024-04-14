@@ -460,7 +460,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
         -> { where.not(notes: no_notes) }
   scope :without_notes,
         -> { where(notes: no_notes) }
-  scope :has_notes_field,
+  scope :with_notes_field,
         ->(field) { where(Observation[:notes].matches("%:#{field}:%")) }
   scope :notes_include,
         ->(notes) { where(Observation[:notes].matches("%#{notes}%")) }

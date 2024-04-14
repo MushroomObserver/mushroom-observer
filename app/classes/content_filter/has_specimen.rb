@@ -4,7 +4,7 @@ class ContentFilter
   class HasSpecimen < BooleanFilter
     def initialize
       super(
-        sym: :has_specimen,
+        sym: :with_specimen,
         name: :SPECIMEN.t,
         models: [Observation],
         on_vals: %w[yes no],

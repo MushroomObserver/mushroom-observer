@@ -1102,17 +1102,17 @@
   search_term_deprecated: deprecated
   search_term_east: east
   search_term_exclude_consensus: exclude_consensus
-  search_term_has_author: has_author
-  search_term_has_citation: has_citation
-  search_term_has_classification: has_classification
-  search_term_has_comments: has_comments
-  search_term_has_description: has_description
+  search_term_with_author: with_author
+  search_term_with_citation: with_citation
+  search_term_with_classification: with_classification
+  search_term_with_comments: with_comments
+  search_term_with_description: with_description
   search_term_has_field: has_field
-  search_term_has_public_lat_lng: has_public_lat_lng
-  search_term_has_name: has_name
-  search_term_has_notes: has_notes
-  search_term_has_observations: has_observations
-  search_term_has_synonyms: has_synonyms
+  search_term_with_public_lat_lng: with_public_lat_lng
+  search_term_with_name: with_name
+  search_term_with_notes: with_notes
+  search_term_with_observations: with_observations
+  search_term_with_synonyms: with_synonyms
   search_term_herbarium: herbarium
   search_term_images: images
   search_term_include_all_name_proposals: include_all_name_proposals
@@ -1140,9 +1140,9 @@
   # Words recognized in search bar.
   # e.g. "user:me"
   search_value_me: me
-  # e.g. "has_images:yes"
+  # e.g. "with_images:yes"
   search_value_true: yes|true
-  # e.g. "has_specimen:no"
+  # e.g. "with_specimen:no"
   search_value_false: no|false
   # e.g. "include_misspellings:either" meaning include both correctly and incorrectly spelled names
   search_value_both: both|either
@@ -1938,8 +1938,8 @@
 
   prefs_content_filters: Content Filters
   prefs_content_filters_explanation: Control content visibility site-wide.
-  prefs_filters_has_images: Hide observations with no images
-  prefs_filters_has_specimen: Hide observations with no specimens
+  prefs_filters_with_images: Hide observations with no images
+  prefs_filters_with_specimen: Hide observations with no specimens
   prefs_filters_lichen: Filter observations of lichens
   prefs_filters_lichen_yes: Show only lichens
   prefs_filters_lichen_no: Hide lichens
@@ -2830,14 +2830,14 @@
 
   advanced_search_filters: Search Filters
   advanced_search_filters_explain: Apply to this search only, overrides your normal preferred content filters
-  advanced_search_filter_has_images: Filter observations based on whether they have images
-  advanced_search_filter_has_images_off: Include both imaged and imageless observations
-  advanced_search_filter_has_images_yes: Exclude imageless observations
-  advanced_search_filter_has_images_no: Exclude imaged observations
-  advanced_search_filter_has_specimen: Filter observations based on whether they have specimens
-  advanced_search_filter_has_specimen_off: Include both observations with and without specimens
-  advanced_search_filter_has_specimen_yes: Exclude observations without specimens
-  advanced_search_filter_has_specimen_no: Exclude observations with specimens
+  advanced_search_filter_with_images: Filter observations based on whether they have images
+  advanced_search_filter_with_images_off: Include both imaged and imageless observations
+  advanced_search_filter_with_images_yes: Exclude imageless observations
+  advanced_search_filter_with_images_no: Exclude imaged observations
+  advanced_search_filter_with_specimen: Filter observations based on whether they have specimens
+  advanced_search_filter_with_specimen_off: Include both observations with and without specimens
+  advanced_search_filter_with_specimen_yes: Exclude observations without specimens
+  advanced_search_filter_with_specimen_no: Exclude observations with specimens
   advanced_search_filter_lichen: Filter observations based on whether they are lichens
   advanced_search_filter_lichen_off: Include both lichens and nonlichens
   advanced_search_filter_lichen_yes: Include only lichen-forming, lichenicolous and allied fungi
@@ -3541,11 +3541,11 @@
   observation_term_sequence: Has a sequence?
   observation_term_specimen: Has a specimen?
   observation_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
-  observation_term_has_name: Has a name? (other than "Fungi sp.")
-  observation_term_has_notes: Has Notes?
-  observation_term_has_public_lat_lng: Are the [:OBSERVATION]'s [:LATITUDE] and [:LONGITUDE] fields filled in, and public?
+  observation_term_with_name: Has a name? (other than "Fungi sp.")
+  observation_term_with_notes: Has Notes?
+  observation_term_with_public_lat_lng: Are the [:OBSERVATION]'s [:LATITUDE] and [:LONGITUDE] fields filled in, and public?
   observation_term_has_field: Has a given notes template field filled in.
-  observation_term_has_comments: Has any comments?
+  observation_term_with_comments: Has any comments?
   observation_term_is_collection_location: Mushroom was growing at the location. ("[:form_observations_is_collection_location]" is checked.)
 
   name_term_created: Date name was first used.
@@ -3553,17 +3553,17 @@
   name_term_rank: Rank or range of ranks, e.g., "genus" or "species-form".
   name_term_include_synonyms: Include synonyms of the given names.
   name_term_include_subtaxa: Include subtaxa of the given names.
-  name_term_has_observations: Only names for which we have observations?
-  name_term_has_synonyms: Has any synonyms?
+  name_term_with_observations: Only names for which we have observations?
+  name_term_with_synonyms: Has any synonyms?
   name_term_deprecated: "\"no\" = only accepted names, \"yes\" = only deprecated names."
   name_term_include_misspellings: "\"no\" = ignore misspelled names (default), \"yes\" = only misspelled names, \"either\" = ignore whether names are misspelled or not."
   name_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
-  name_term_has_author: Has Author filled in?
-  name_term_has_citation: Has Citation filled in?
-  name_term_has_classification: Has Classification filled in?
-  name_term_has_notes: "[:form_names_taxonomic_notes] filled in?"
-  name_term_has_comments: Has any Comments?
-  name_term_has_description: Has a public description?
+  name_term_with_author: Has Author filled in?
+  name_term_with_citation: Has Citation filled in?
+  name_term_with_classification: Has Classification filled in?
+  name_term_with_notes: "[:form_names_taxonomic_notes] filled in?"
+  name_term_with_comments: Has any Comments?
+  name_term_with_description: Has a public description?
   name_term_author: Author contains this string.
   name_term_citation: Citation contains this string.
   name_term_classification: Classification contains this string.
@@ -4076,7 +4076,7 @@
   api_can_only_delete_your_own_account: Only the account owner can delete their account.
   api_can_only_synonymize_unsynonymized_names: Presently, we're only allowing API clients to synonymize unsynonymized names with other names.  If one of the names has no synonyms, synonymize that name with the others.  But there's no way to merge two sets os synonyms via the API right now.
   api_can_only_use_one_of_these_fields: "Please only use one of these parameters: [fields]."
-  api_can_only_use_this_field_if_has_specimen: The parameter, "[field]", can only be used if the observation has a specimen.
+  api_can_only_use_this_field_if_with_specimen: The parameter, "[field]", can only be used if the observation has a specimen.
   api_cant_add_herbarium_record: Only owner of observation and curators of fungarium can add fungarium records to an observation.
   api_couldnt_download_url: "Failed to download the resource at the URL, \"[url]\": [error]"
   api_create_failed: "Failed to create [type] \"[name]\": [error]"
@@ -4152,9 +4152,9 @@
   api_help_east: max longitude
   api_help_field_slip_prefix_has: search within field slip prefix
   api_help_first_user: creator / first to use
-  api_help_has_notes_field: is given observation notes template field filled in?
-  api_help_has_obs_notes: observation has notes?
-  api_help_has_observation: is attached to an observation?
+  api_help_with_notes_field: is given observation notes template field filled in?
+  api_help_with_obs_notes: observation has notes?
+  api_help_with_observation: is attached to an observation?
   api_help_initial_det: initial determination
   api_help_initial_det_has: search within initial determination
   api_help_is_collection_location: is this location where mushroom was found?

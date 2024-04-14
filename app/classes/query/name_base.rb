@@ -18,24 +18,24 @@ module Query
         users?: [User],
         misspellings?: { string: [:no, :either, :only] },
         deprecated?: { string: [:either, :no, :only] },
-        has_synonyms?: :boolean,
+        with_synonyms?: :boolean,
         locations?: [:string],
         species_lists?: [:string],
         rank?: [{ string: Name.all_ranks }],
         is_deprecated?: :boolean,
         text_name_has?: :string,
-        has_author?: :boolean,
+        with_author?: :boolean,
         author_has?: :string,
-        has_citation?: :boolean,
+        with_citation?: :boolean,
         citation_has?: :string,
-        has_classification?: :boolean,
+        with_classification?: :boolean,
         classification_has?: :string,
-        has_notes?: :boolean,
+        with_notes?: :boolean,
         notes_has?: :string,
-        has_comments?: { boolean: [true] },
+        with_comments?: { boolean: [true] },
         comments_has?: :string,
-        has_observations?: { boolean: [true] },
-        has_default_desc?: :boolean,
+        with_observations?: { boolean: [true] },
+        with_default_desc?: :boolean,
         join_desc?: { string: [:default, :any] },
         desc_type?: [{ string: [Description.all_source_types] }],
         desc_project?: [:string],
@@ -66,9 +66,9 @@ module Query
       add_boolean_condition(
         "LENGTH(COALESCE(names.notes,'')) > 0",
         "LENGTH(COALESCE(names.notes,'')) = 0",
-        params[:has_notes]
+        params[:with_notes]
       )
-      add_join(:comments) if params[:has_comments]
+      add_join(:comments) if params[:with_comments]
       add_search_condition(
         "names.notes",
         params[:notes_has]
@@ -128,42 +128,42 @@ module Query
     end
 
     def initialize_boolean_parameters
-      initialize_has_synonyms_parameter
-      initialize_has_author_parameter
-      initialize_has_citation_parameter
-      initialize_has_classification_parameter
-      add_join(:observations) if params[:has_observations]
+      initialize_with_synonyms_parameter
+      initialize_with_author_parameter
+      initialize_with_citation_parameter
+      initialize_with_classification_parameter
+      add_join(:observations) if params[:with_observations]
     end
 
-    def initialize_has_synonyms_parameter
+    def initialize_with_synonyms_parameter
       add_boolean_condition(
         "names.synonym_id IS NOT NULL",
         "names.synonym_id IS NULL",
-        params[:has_synonyms]
+        params[:with_synonyms]
       )
     end
 
-    def initialize_has_author_parameter
+    def initialize_with_author_parameter
       add_boolean_condition(
         "LENGTH(COALESCE(names.author,'')) > 0",
         "LENGTH(COALESCE(names.author,'')) = 0",
-        params[:has_author]
+        params[:with_author]
       )
     end
 
-    def initialize_has_citation_parameter
+    def initialize_with_citation_parameter
       add_boolean_condition(
         "LENGTH(COALESCE(names.citation,'')) > 0",
         "LENGTH(COALESCE(names.citation,'')) = 0",
-        params[:has_citation]
+        params[:with_citation]
       )
     end
 
-    def initialize_has_classification_parameter
+    def initialize_with_classification_parameter
       add_boolean_condition(
         "LENGTH(COALESCE(names.classification,'')) > 0",
         "LENGTH(COALESCE(names.classification,'')) = 0",
-        params[:has_classification]
+        params[:with_classification]
       )
     end
 
@@ -175,7 +175,7 @@ module Query
     end
 
     def initialize_description_parameters
-      initialize_has_default_desc_parameter
+      initialize_with_default_desc_parameter
       initialize_join_desc_parameter
       initialize_desc_type_parameter
       initialize_desc_project_parameter
@@ -183,11 +183,11 @@ module Query
       initialize_desc_content_parameter
     end
 
-    def initialize_has_default_desc_parameter
+    def initialize_with_default_desc_parameter
       add_boolean_condition(
         "names.description_id IS NOT NULL",
         "names.description_id IS NULL",
-        params[:has_default_desc]
+        params[:with_default_desc]
       )
     end
 

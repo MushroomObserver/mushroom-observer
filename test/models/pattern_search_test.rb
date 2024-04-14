@@ -650,38 +650,38 @@ class PatternSearchTest < UnitTestCase
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
-  def test_observation_search_has_names_no
+  def test_observation_search_with_names_no
     expect = Observation.without_name
     assert(expect.count.positive?)
-    x = PatternSearch::Observation.new("has_name:no")
+    x = PatternSearch::Observation.new("with_name:no")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
-  def test_observation_search_has_names_yes
+  def test_observation_search_with_names_yes
     expect = Observation.with_name
     assert(expect.count.positive?)
-    x = PatternSearch::Observation.new("has_name:yes")
+    x = PatternSearch::Observation.new("with_name:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
-  def test_observation_search_has_notes_no
+  def test_observation_search_with_notes_no
     expect = Observation.without_notes
     assert(expect.count.positive?)
-    x = PatternSearch::Observation.new("has_notes:no")
+    x = PatternSearch::Observation.new("with_notes:no")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
-  def test_observation_search_has_notes_yes
+  def test_observation_search_with_notes_yes
     expect = Observation.with_notes
     assert(expect.count.positive?)
-    x = PatternSearch::Observation.new("has_notes:yes")
+    x = PatternSearch::Observation.new("with_notes:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
-  def test_observation_search_has_comments_yes
+  def test_observation_search_with_comments_yes
     expect = Observation.with_comments
     assert(expect.count.positive?)
-    x = PatternSearch::Observation.new("has_comments:yes")
+    x = PatternSearch::Observation.new("with_comments:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
@@ -765,15 +765,15 @@ class PatternSearchTest < UnitTestCase
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
-  def test_name_search_has_synonyms
+  def test_name_search_with_synonyms
     expect = Name.without_synonyms
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("has_synonyms:no")
+    x = PatternSearch::Name.new("with_synonyms:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)
 
     expect = Name.with_synonyms.with_correct_spelling
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("has_synonyms:yes")
+    x = PatternSearch::Name.new("with_synonyms:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
@@ -818,70 +818,70 @@ class PatternSearchTest < UnitTestCase
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
-  def test_name_search_has_author
+  def test_name_search_with_author
     expect = Name.with_correct_spelling.without_author
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("has_author:no")
+    x = PatternSearch::Name.new("with_author:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)
 
     expect = Name.with_correct_spelling.with_author
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("has_author:yes")
+    x = PatternSearch::Name.new("with_author:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
-  def test_name_search_has_citation
+  def test_name_search_with_citation
     expect = Name.with_correct_spelling.without_citation
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("has_citation:no")
+    x = PatternSearch::Name.new("with_citation:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)
 
     expect = Name.with_correct_spelling.with_citation
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("has_citation:yes")
+    x = PatternSearch::Name.new("with_citation:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
-  def test_name_search_has_classification
+  def test_name_search_with_classification
     expect = Name.with_correct_spelling.without_classification
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("has_classification:no")
+    x = PatternSearch::Name.new("with_classification:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)
 
     expect = Name.with_correct_spelling.with_classification
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("has_classification:yes")
+    x = PatternSearch::Name.new("with_classification:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
-  def test_name_search_has_notes
+  def test_name_search_with_notes
     expect = Name.with_correct_spelling.without_notes
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("has_notes:no")
+    x = PatternSearch::Name.new("with_notes:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)
 
     expect = Name.with_correct_spelling.with_notes
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("has_notes:yes")
+    x = PatternSearch::Name.new("with_notes:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
-  def test_name_search_has_comments
+  def test_name_search_with_comments
     expect = Name.with_correct_spelling.with_comments
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("has_comments:yes")
+    x = PatternSearch::Name.new("with_comments:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
-  def test_name_search_has_description
+  def test_name_search_with_description
     expect = Name.with_correct_spelling.with_description
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("has_description:yes")
+    x = PatternSearch::Name.new("with_description:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
 
     expect = Name.with_correct_spelling.without_description
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("has_description:no")
+    x = PatternSearch::Name.new("with_description:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 

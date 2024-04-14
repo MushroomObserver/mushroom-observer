@@ -19,9 +19,9 @@ module Query
         locations?: [:string],
         projects?: [:string],
         title_has?: :string,
-        has_notes?: :boolean,
+        with_notes?: :boolean,
         notes_has?: :string,
-        has_comments?: { boolean: [true] },
+        with_comments?: { boolean: [true] },
         comments_has?: :string
       ).merge(names_parameter_declarations)
     end
@@ -49,9 +49,9 @@ module Query
       add_boolean_condition(
         "LENGTH(COALESCE(species_lists.notes,'')) > 0",
         "LENGTH(COALESCE(species_lists.notes,'')) = 0",
-        params[:has_notes]
+        params[:with_notes]
       )
-      add_join(:comments) if params[:has_comments]
+      add_join(:comments) if params[:with_comments]
     end
 
     def initialize_search_parameters

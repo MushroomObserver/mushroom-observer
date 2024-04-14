@@ -28,7 +28,7 @@
 #  * Add a filter definition below
 #  * In config/locales/en.txt define text to be displayed in
 #    account/preferences/edit and search/advanced pages
-#    (search for "filters_has_images")
+#    (search for "filters_with_images")
 #  * Supplement app/classes/query/initializers/xxx_filters.rb
 #
 class ContentFilter

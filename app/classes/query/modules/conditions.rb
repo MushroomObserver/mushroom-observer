@@ -12,14 +12,14 @@ module Query
                          lookup_users_by_name(params[:users]))
       end
 
-      def add_boolean_condition(true_cond, false_cond, val, *joins)
+      def add_boolean_condition(true_cond, false_cond, val, *)
         return if val.nil?
 
         @where << (val ? true_cond : false_cond)
-        add_joins(*joins)
+        add_joins(*)
       end
 
-      def add_exact_match_condition(col, vals, *joins)
+      def add_exact_match_condition(col, vals, *)
         return if vals.blank?
 
         vals = [vals] unless vals.is_a?(Array)
@@ -29,45 +29,45 @@ module Query
                   else
                     "LOWER(#{col}) IN (#{vals.join(", ")})"
                   end
-        add_joins(*joins)
+        add_joins(*)
       end
 
-      def add_search_condition(col, val, *joins)
+      def add_search_condition(col, val, *)
         return if val.blank?
 
         search = google_parse(val)
         @where += google_conditions(search, col)
-        add_joins(*joins)
+        add_joins(*)
       end
 
-      def add_range_condition(col, val, *joins)
+      def add_range_condition(col, val, *)
         return if val.blank?
         return if val[0].blank? && val[1].blank?
 
         min, max = val
         @where << "#{col} >= #{min}" if min.present?
         @where << "#{col} <= #{max}" if max.present?
-        add_joins(*joins)
+        add_joins(*)
       end
 
-      def add_string_enum_condition(col, vals, allowed, *joins)
+      def add_string_enum_condition(col, vals, allowed, *)
         return if vals.empty?
 
         vals = vals.map(&:to_s) & allowed.map(&:to_s)
         return if vals.empty?
 
         @where << "#{col} IN ('#{vals.join("','")}')"
-        add_joins(*joins)
+        add_joins(*)
       end
 
-      def add_indexed_enum_condition(col, vals, allowed, *joins)
+      def add_indexed_enum_condition(col, vals, allowed, *)
         return if vals.empty?
 
         vals = vals.filter_map { |v| allowed.index_of(v.to_sym) }
         return if vals.empty?
 
         @where << "#{col} IN (#{val.join(",")})"
-        add_joins(*joins)
+        add_joins(*)
       end
 
       def initialize_in_set_flavor(table = model.table_name)
@@ -76,23 +76,23 @@ module Query
         self.order = "FIND_IN_SET(#{table}.id,'#{set}') ASC"
       end
 
-      def add_id_condition(col, ids, *joins)
+      def add_id_condition(col, ids, *)
         return if ids.nil?
 
         set = clean_id_set(ids)
         @where << "#{col} IN (#{set})"
-        add_joins(*joins)
+        add_joins(*)
       end
 
-      def add_not_id_condition(col, ids, *joins)
+      def add_not_id_condition(col, ids, *)
         return if ids.nil?
 
         set = clean_id_set(ids)
         @where << "#{col} NOT IN (#{set})"
-        add_joins(*joins)
+        add_joins(*)
       end
 
-      def add_where_condition(table, vals, *joins)
+      def add_where_condition(table, vals, *)
         return if vals.empty?
 
         loc_col   = "#{table}.location_id"
@@ -106,10 +106,10 @@ module Query
           end
         end
         @where << cond
-        add_joins(*joins)
+        add_joins(*)
       end
 
-      def add_rank_condition(vals, *joins)
+      def add_rank_condition(vals, *)
         return if vals.empty?
 
         min, max = vals
@@ -120,10 +120,10 @@ module Query
         a, b = b, a if a > b
         ranks = all_ranks[a..b].map { |r| Name.ranks[r] }
         @where << "names.`rank` IN (#{ranks.join(",")})"
-        add_joins(*joins)
+        add_joins(*)
       end
 
-      def add_image_size_condition(vals, *joins)
+      def add_image_size_condition(vals, *)
         return if vals.empty?
 
         min, max = vals
@@ -137,10 +137,10 @@ module Query
           size = pixels[sizes.index(max) + 1]
           @where << "images.width < #{size} AND images.height < #{size}"
         end
-        add_joins(*joins)
+        add_joins(*)
       end
 
-      def add_image_type_condition(vals, *joins)
+      def add_image_type_condition(vals, *)
         return if vals.empty?
 
         exts  = Image.all_extensions.map(&:to_s)
@@ -160,15 +160,15 @@ module Query
                   else
                     str1
                   end
-        add_joins(*joins)
+        add_joins(*)
       end
 
-      def add_has_notes_fields_condition(fields, *joins)
+      def add_with_notes_fields_condition(fields, *)
         return if fields.empty?
 
         conds = fields.map { |field| notes_field_presence_condition(field) }
         @where << conds.join(" OR ")
-        add_joins(*joins)
+        add_joins(*)
       end
 
       def force_empty_results
