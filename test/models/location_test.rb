@@ -426,7 +426,7 @@ class LocationTest < UnitTestCase
     assert_equal("Un, Deux, Trois", loc.scientific_name)
   end
 
-  def test_force_valid_lat_longs
+  def test_force_valid_lat_lngs
     loc = locations(:albion)
 
     # Make sure a good location is unchanged.
@@ -434,7 +434,7 @@ class LocationTest < UnitTestCase
     loc.south = 6
     loc.east = 4
     loc.west = 2
-    loc.force_valid_lat_longs!
+    loc.force_valid_lat_lngs!
     assert_equal([8, 6, 4, 2], [loc.north, loc.south, loc.east, loc.west])
 
     # Make sure north/south reversed is fixed.
@@ -442,7 +442,7 @@ class LocationTest < UnitTestCase
     loc.south = 6
     loc.east = 4
     loc.west = 2
-    loc.force_valid_lat_longs!
+    loc.force_valid_lat_lngs!
     assert_equal([-0.9999, -1.0001, 3.0001, 2.9999],
                  [loc.north, loc.south, loc.east, loc.west])
 
@@ -451,7 +451,7 @@ class LocationTest < UnitTestCase
     loc.south = 6
     loc.east = 4
     loc.west = 4
-    loc.force_valid_lat_longs!
+    loc.force_valid_lat_lngs!
     assert_equal([6.0001, 5.9999, 4.0001, 3.9999],
                  [loc.north, loc.south, loc.east, loc.west])
 
@@ -460,7 +460,7 @@ class LocationTest < UnitTestCase
     loc.south = 6
     loc.east = -170
     loc.west = 170
-    loc.force_valid_lat_longs!
+    loc.force_valid_lat_lngs!
     assert_equal([8, 6, -170, 170], [loc.north, loc.south, loc.east, loc.west])
   end
 
@@ -486,14 +486,13 @@ class LocationTest < UnitTestCase
     assert_equal(:log_location_merged, log1.parse_log[1][0])
   end
 
-  # test BoxMethods module `lat_long_close?` method
-  def test_lat_long_close
+  # test BoxMethods module `lat_lng_close?` method
+  def test_lat_lng_close
     loc = locations(:east_lt_west_location)
-    centrum = { lat: loc.south + loc.north_south_distance / 2,
-                lon: loc.east - loc.east_west_distance / 2 }
-    assert_true(loc.lat_long_close?(centrum[:lat], centrum[:lon]),
+    # The centrum of the location is provided by BoxMethods#center, lat, lng
+    assert_true(loc.lat_lng_close?(loc.lat, loc.lng),
                 "Location's centrum should be 'close' to Location.")
-    assert_false(loc.lat_long_close?(centrum[:lat], centrum[:lon] + 180),
+    assert_false(loc.lat_lng_close?(loc.lat, loc.lng + 180),
                  "Opposite side of globe should not be 'close' to Location.")
   end
 

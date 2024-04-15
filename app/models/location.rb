@@ -67,9 +67,6 @@
 #  parse_longitude::    Validate and parse longitude from a string.
 #  parse_altitude::     Validate and parse altitude from a string.
 #  found_here?::        Was the given obs found here?
-#  contains?(lt, ln)::  Does Location contain the given latititude and longitude
-#  contains_lat?
-#  contains_long?
 #
 #  ==== Name methods
 #  display_name::       +name+ reformated based on user's preference.
@@ -92,8 +89,7 @@
 #  notify_users::       After save: send email notification.
 #
 ################################################################################
-# rubocop:disable Metrics/ClassLength
-class Location < AbstractModel
+class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   require "acts_as_versioned"
 
   belongs_to :description, class_name: "LocationDescription" # (main one)
@@ -106,6 +102,7 @@ class Location < AbstractModel
   has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
   has_many :observations
+  has_many :projects
   has_many :species_lists
   has_many :herbaria     # should be at most one, but nothing preventing more
   has_many :users        # via profile location
@@ -273,7 +270,7 @@ class Location < AbstractModel
 
   # Useful if invalid lat/longs cause crash, e.g., in mapping code.
   # New: Ensure box has nonzero size or make_editable_map fails.
-  def force_valid_lat_longs!
+  def force_valid_lat_lngs!
     self.north = Location.parse_latitude(north) || 45
     self.south = Location.parse_latitude(south) || -45
     self.east = Location.parse_longitude(east) || 90
@@ -290,26 +287,13 @@ class Location < AbstractModel
 
   def found_here?(obs)
     return true if obs.location == self
-    return contains?(obs.lat, obs.long) if obs.lat && obs.long
+    return contains?(obs.lat, obs.lng) if obs.lat && obs.lng
 
     loc = obs.location
     return false unless loc
 
+    # contains? is now a method of Mappable::BoxMethods
     contains?(loc.north, loc.west) && contains?(loc.south, loc.east)
-  end
-
-  def contains?(lat, long)
-    contains_lat?(lat) && contains_long?(long)
-  end
-
-  def contains_lat?(lat)
-    (south..north).cover?(lat)
-  end
-
-  def contains_long?(long)
-    return (west...east).cover?(long) if west <= east
-
-    (long >= west) || (long <= east)
   end
 
   ##############################################################################
@@ -697,14 +681,11 @@ class Location < AbstractModel
       obs.save
     end
 
-    # Move species lists over.
-    SpeciesList.where(location_id: old_loc.id).find_each do |spl|
-      spl.update_attribute(:location, self)
-    end
-
-    # Update any users who call this location their primary location.
-    User.where(location_id: old_loc.id).find_each do |user|
-      user.update_attribute(:location, self)
+    # change object.location without verification
+    [Herbarium, Project, SpeciesList, User].each do |klass|
+      klass.where(location_id: old_loc.id).find_each do |obj|
+        obj.update_attribute(:location, self)
+      end
     end
 
     # Move over any interest in the old name.
@@ -714,30 +695,9 @@ class Location < AbstractModel
       int.save
     end
 
-    # Add note to explain the merge
-    # Intentionally not translated
-    add_note("[admin - #{Time.zone.now}]: Merged with #{old_loc.name}: " \
-             "North: #{old_loc.north}, South: #{old_loc.south}, " \
-             "West: #{old_loc.west}, East: #{old_loc.east}")
+    add_note(explain_merge(old_loc))
 
-    # Merge the two "main" descriptions if it can.
-    if description && old_loc.description &&
-       (description.source_type == :public) &&
-       (old_loc.description.source_type == :public)
-      description.merge(old_loc.description)
-    end
-
-    # If this one doesn't have a primary description and the other does,
-    # then make it this one's.
-    if !description && old_loc.description
-      self.description = old_loc.description
-    end
-
-    # Move over any remaining descriptions.
-    old_loc.descriptions.each do |desc|
-      desc.location_id = id
-      desc.save
-    end
+    update_location_descriptions(old_loc)
 
     # Log the action.
     old_loc.rss_log&.orphan(old_loc.name, :log_location_merged,
@@ -760,6 +720,41 @@ class Location < AbstractModel
     # Finally destroy the location.
     old_loc.destroy
   end
+
+  private
+
+  def explain_merge(old_loc)
+    # Intentionally not translated
+    <<~EXPLANATION.tr("\n", " ")
+      [admin - #{Time.zone.now}]: Merged with #{old_loc.name}
+      (was Location ##{old_loc.id}):
+      North: #{old_loc.north}, South: #{old_loc.south},
+      West: #{old_loc.west}, East: #{old_loc.east}
+    EXPLANATION
+  end
+
+  def update_location_descriptions(old_loc)
+    # Merge the two "main" descriptions if it can.
+    if description && old_loc.description &&
+       (description.source_type == :public) &&
+       (old_loc.description.source_type == :public)
+      description.merge(old_loc.description)
+    end
+
+    # If this one doesn't have a primary description and the other does,
+    # then make it this one's.
+    if !description && old_loc.description
+      self.description = old_loc.description
+    end
+
+    # Move over any remaining descriptions.
+    old_loc.descriptions.each do |desc|
+      desc.location_id = id
+      desc.save
+    end
+  end
+
+  public
 
   ##############################################################################
   #
@@ -858,4 +853,3 @@ class Location < AbstractModel
     end
   end
 end
-# rubocop:enable Metrics/ClassLength

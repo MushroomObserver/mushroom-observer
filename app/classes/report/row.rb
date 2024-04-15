@@ -7,7 +7,7 @@ module Report
   # 0:: observations.id
   # 1:: observations.when
   # 2:: observations.lat
-  # 3:: observations.long
+  # 3:: observations.lng
   # 4:: observations.alt
   # 5:: observations.specimen
   # 6:: observations.is_collection_location
@@ -57,7 +57,7 @@ module Report
       @vals[2].blank? ? nil : @vals[2].to_f.round(prec)
     end
 
-    def obs_long(prec = 4)
+    def obs_lng(prec = 4)
       @vals[3].blank? ? nil : @vals[3].to_f.round(prec)
     end
 

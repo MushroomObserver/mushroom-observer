@@ -10,8 +10,10 @@
 #   where: somewhere
 #   location:
 
-# IMPORTANT: When creating a new observation fixture, you need to also create a
-# corresponding rss_log, since the observation index now sorts by rss_log.
+# IMPORTANT:
+# - When creating a new observation fixture, you need to also create a
+#   corresponding rss_log, since the observation index now sorts by rss_log.
+# - DO NOT USE albion as a location; it breaks API2Test#test_patching_locations
 
 # Instead of writing simple one-off fixtures for new tests, consider creating
 # records on the fly within the test. This will generate both obs and rss_log.
@@ -231,7 +233,7 @@ unknown_with_no_naming:
   name: fungi
   text_name: Fungi
 
-unknown_with_lat_long:
+unknown_with_lat_lng:
   <<: *DEFAULTS
   created_at: 2010-07-22 09:20:00
   updated_at: 2010-07-22 09:21:00
@@ -243,10 +245,10 @@ unknown_with_lat_long:
   name: fungi
   text_name: Fungi
   lat: 34.1622
-  long: -118.3521
+  lng: -118.3521
   alt: 123
   notes:
-    :Other: "unknown_with_lat_long"
+    :Other: "unknown_with_lat_lng"
 
 trusted_hidden:
   <<: *DEFAULTS
@@ -261,7 +263,7 @@ trusted_hidden:
   text_name: Fungi
   gps_hidden: true
   lat: 41.6022
-  long: -70.5021
+  lng: -70.5021
   alt: 123
 
 untrusted_hidden:
@@ -277,7 +279,7 @@ untrusted_hidden:
   text_name: Fungi
   gps_hidden: true
   lat: 41.6055
-  long: -70.5055
+  lng: -70.5055
   alt: 123
 
 amateur_obs:
@@ -295,7 +297,7 @@ amateur_obs:
   notes:
     :Other: "A friend showed me this."
   lat: 34.1622
-  long: -118.3521
+  lng: -118.3521
   source: <%= Observation.sources[:mo_iphone_app] %>
 
 peltigera_obs:
@@ -759,7 +761,7 @@ brett_woods_2023_09_obs:
   when: 2023-09-16
   where: Brett Woods, Fairfield Co., Connecticut, USA
   lat: 41.2039
-  long: -73.3245
+  lng: -73.3245
   gps_hidden: true
   location: brett_woods
 
@@ -769,7 +771,7 @@ falmouth_2022_obs:
   where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
   location: falmouth
   lat: 41.5862
-  long: -70.5976
+  lng: -70.5976
 
 nybg_2023_09_obs:
   <<: *DEFAULTS

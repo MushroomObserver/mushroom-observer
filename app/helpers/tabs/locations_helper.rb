@@ -110,7 +110,7 @@ module Tabs
     def observations_at_location_tab(location)
       [show_obs_link_title_with_count(location),
        add_query_param(observations_path(location: location.id)),
-       { class: tab_id(__method__.to_s), icon: :observations }]
+       { class: tab_id(__method__.to_s), icon: :observations, show_text: true }]
     end
 
     def location_map_title(query:)

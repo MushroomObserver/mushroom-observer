@@ -12,7 +12,7 @@ module Observations
 
     # NOTE: the assigns(:observations) are Mappable::MinimalObservations!
     def test_map_observation_hidden_gps
-      obs = observations(:unknown_with_lat_long)
+      obs = observations(:unknown_with_lat_lng)
       login("rolf") # a user who does not own obs
       get(:show, params: { id: obs.id })
       assert_true(assigns(:observations).map { |o| o.lat.to_s }.join.
@@ -29,7 +29,7 @@ module Observations
     end
 
     def test_map_observations_hidden_gps
-      obs = observations(:unknown_with_lat_long)
+      obs = observations(:unknown_with_lat_lng)
       query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
       assert(query.result_ids.include?(obs.id))
 

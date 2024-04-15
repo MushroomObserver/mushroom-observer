@@ -98,14 +98,14 @@ module ObservationsHelper
     end
   end
 
-  def link_to_display_name_brief_authors(name, **args)
+  def link_to_display_name_brief_authors(name, **)
     link_to(name.display_name_brief_authors.t,
-            name_path(id: name.id), **args)
+            name_path(id: name.id), **)
   end
 
-  def link_to_display_name_without_authors(name, **args)
+  def link_to_display_name_without_authors(name, **)
     link_to(name.display_name_without_authors.t,
-            name_path(id: name.id), **args)
+            name_path(id: name.id), **)
   end
 
   def observation_map_coordinates(obs:)
@@ -117,8 +117,8 @@ module ObservationsHelper
       w = ((180.0 + loc.west) / 3.60).round(6)
     end
 
-    lat, long = if obs.lat && obs.long
-                  [obs.public_lat, obs.public_long]
+    lat, long = if obs.lat && obs.lng
+                  [obs.public_lat, obs.public_lng]
                 elsif obs.location
                   obs.location.center
                 end
@@ -166,15 +166,26 @@ module ObservationsHelper
            else
              :show_observation_seen_at.t
            end}:",
-        location_link(obs.where, obs.location, nil, true)
+        location_link(obs.where, obs.location, nil, true),
+        observation_where_vague_notice(obs: obs)
       ].safe_join(" ")
     end
+  end
+
+  def observation_where_vague_notice(obs:)
+    return "" unless obs.location&.vague?
+
+    title = :show_observation_vague_location.l
+    if User.current == obs.user
+      title += " #{:show_observation_improve_location.l}"
+    end
+    tag.p(class: "ml-3") { tag.em(title) }
   end
 
   def observation_details_where_gps(obs:)
     return "" unless obs.lat
 
-    gps_display_link = link_to([obs.display_lat_long.t,
+    gps_display_link = link_to([obs.display_lat_lng.t,
                                 obs.display_alt.t,
                                 "[#{:click_for_map.t}]"].safe_join(" "),
                                map_observation_path(id: obs.id))

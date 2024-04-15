@@ -1108,7 +1108,7 @@
   search_term_has_comments: has_comments
   search_term_has_description: has_description
   search_term_has_field: has_field
-  search_term_has_location: has_location
+  search_term_has_public_lat_lng: has_public_lat_lng
   search_term_has_name: has_name
   search_term_has_notes: has_notes
   search_term_has_observations: has_observations
@@ -1623,6 +1623,7 @@
   form_naming_confidence_help: How confident are you of this identification?  Please justify how you arrived at your decision in the boxes below, as well.
 
   # observations/_form_observations
+  form_observations_field_code: for field slip
   form_observations_specimen_available: Specimen Available
   form_observations_is_collection_location: Is this location where it was collected?
   form_observations_click_on_map: Click on map for geolocation
@@ -2218,6 +2219,8 @@
   # This is used if this is NOT the location where the thing was growing.
   show_observation_seen_at: Seen at
   show_observation_gps_hidden: coordinates hidden from public
+  show_observation_vague_location: This observation will not appear on maps of its taxon because the location is too vague.
+  show_observation_improve_location: If you would like it to be included in maps, choose a more precise location.
   show_observation_specimen_available: Specimen available
   show_observation_specimen_not_available: No specimen available
   show_observation_no_images: No images
@@ -3550,7 +3553,7 @@
   observation_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   observation_term_has_name: Has a name? (other than "Fungi sp.")
   observation_term_has_notes: Has Notes?
-  observation_term_has_location: Are the [:OBSERVATION]'s [:LATITUDE] and [:LONGITUDE] fields filled in?
+  observation_term_has_public_lat_lng: Are the [:OBSERVATION]'s [:LATITUDE] and [:LONGITUDE] fields filled in, and public?
   observation_term_has_field: Has a given notes template field filled in.
   observation_term_has_comments: Has any comments?
   observation_term_is_collection_location: Mushroom was growing at the location. ("[:form_observations_is_collection_location]" is checked.)

@@ -15,7 +15,7 @@ module Query::Modules::BoundingBox
                   params[:east] && params[:west]
 
     cond1, cond2 = bounding_box_conditions
-    cond0 = lat_long_plausible
+    cond0 = lat_lng_plausible
     cond1 = cond1.join(" AND ")
     cond2 = cond2.join(" AND ")
     @where << "IF(locations.id IS NULL OR #{cond0}, #{cond1}, #{cond2})"
@@ -24,17 +24,17 @@ module Query::Modules::BoundingBox
 
   # ----------------------------------------------------------------------------
 
-  def lat_long_plausible
+  def lat_lng_plausible
     # Condition which returns true if the observation's lat/long is plausible.
-    # (should be identical to Mappable::BoxMethods.lat_long_close?)
+    # (should be identical to Mappable::BoxMethods.lat_lng_close?)
     %(
       observations.lat >= locations.south*1.2 - locations.north*0.2 AND
       observations.lat <= locations.north*1.2 - locations.south*0.2 AND
       if(locations.west <= locations.east,
-        observations.long >= locations.west*1.2 - locations.east*0.2 AND
-        observations.long <= locations.east*1.2 - locations.west*0.2,
-        observations.long >= locations.west*0.8 + locations.east*0.2 + 72 OR
-        observations.long <= locations.east*0.8 + locations.west*0.2 - 72
+        observations.lng >= locations.west*1.2 - locations.east*0.2 AND
+        observations.lng <= locations.east*1.2 - locations.west*0.2,
+        observations.lng >= locations.west*0.8 + locations.east*0.2 + 72 OR
+        observations.lng <= locations.east*0.8 + locations.west*0.2 - 72
       )
     )
   end
@@ -54,8 +54,8 @@ module Query::Modules::BoundingBox
         # point location inside target box
         "observations.lat >= #{south}",
         "observations.lat <= #{north}",
-        "observations.long >= #{west}",
-        "observations.long <= #{east}"
+        "observations.lng >= #{west}",
+        "observations.lng <= #{east}"
       ], [
         # box entirely within target box
         "locations.south >= #{south}",
@@ -73,7 +73,7 @@ module Query::Modules::BoundingBox
         # point location inside target box
         "observations.lat >= #{south}",
         "observations.lat <= #{north}",
-        "(observations.long >= #{west} OR observations.long <= #{east})"
+        "(observations.lng >= #{west} OR observations.lng <= #{east})"
       ], [
         # box entirely within target box
         "locations.south >= #{south}",

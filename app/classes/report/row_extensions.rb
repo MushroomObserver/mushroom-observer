@@ -78,8 +78,8 @@ module Report
       ((north + south) / 2).round(prec)
     end
 
-    def best_long(prec = 4)
-      long = obs_long(prec)
+    def best_lng(prec = 4)
+      long = obs_lng(prec)
       return long if long.present?
 
       east = loc_east(prec + 10)
@@ -98,11 +98,11 @@ module Report
     end
 
     def best_east(prec = 4)
-      obs_long(prec) || loc_east(prec)
+      obs_lng(prec) || loc_east(prec)
     end
 
     def best_west(prec = 4)
-      obs_long(prec) || loc_west(prec)
+      obs_lng(prec) || loc_west(prec)
     end
 
     def best_high

@@ -3,7 +3,7 @@
 # Finds all observations that the current logged in user
 # can see due to their being a project admin for a project
 # that another user trusts.
-class ProjectLatLongs
+class ProjectLatLngs
   attr_accessor :query
 
   def initialize
@@ -53,7 +53,7 @@ class ProjectLatLongs
   def add_project
     query.project(attribute(:observations, :id),
                   attribute(:observations, :lat),
-                  attribute(:observations, :long))
+                  attribute(:observations, :lng))
   end
 
   def add_conditions

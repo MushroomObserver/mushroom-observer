@@ -607,7 +607,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_gps
-    expect = Observation.where(lat: 34.1622, long: -118.3521)
+    expect = Observation.where(lat: 34.1622, lng: -118.3521)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new(
       "west:-118.4 east:-118.3 north:34.2 south:34.1"
