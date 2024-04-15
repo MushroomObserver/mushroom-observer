@@ -34,12 +34,12 @@ class SearchControllerTest < FunctionalTestCase
     login
     # Make sure all the right buttons and fields are present.
     get(:advanced)
-    assert_select("input[type=radio]#content_filter_with_images_yes")
-    assert_select("input[type=radio]#content_filter_with_images_no")
-    assert_select("input[type=radio]#content_filter_with_images_")
-    assert_select("input[type=radio]#content_filter_with_specimen_yes")
-    assert_select("input[type=radio]#content_filter_with_specimen_no")
-    assert_select("input[type=radio]#content_filter_with_specimen_")
+    assert_select("input[type=radio]#content_filter_has_images_yes")
+    assert_select("input[type=radio]#content_filter_has_images_no")
+    assert_select("input[type=radio]#content_filter_has_images_")
+    assert_select("input[type=radio]#content_filter_has_specimen_yes")
+    assert_select("input[type=radio]#content_filter_has_specimen_no")
+    assert_select("input[type=radio]#content_filter_has_specimen_")
     assert_select("input[type=radio]#content_filter_lichen_yes")
     assert_select("input[type=radio]#content_filter_lichen_no")
     assert_select("input[type=radio]#content_filter_lichen_")
@@ -52,8 +52,8 @@ class SearchControllerTest < FunctionalTestCase
         user: "rolf"
       },
       content_filter: {
-        with_images: "",
-        with_specimen: "yes",
+        has_images: "",
+        has_specimen: "yes",
         lichen: "no",
         region: "California",
         clade: ""
@@ -61,8 +61,8 @@ class SearchControllerTest < FunctionalTestCase
     }
     get(:advanced, params: params)
     query = QueryRecord.last.query
-    assert_equal("", query.params[:with_images])
-    assert_true(query.params[:with_specimen])
+    assert_equal("", query.params[:has_images])
+    assert_true(query.params[:has_specimen])
     assert_false(query.params[:lichen])
     assert_equal(["California"], query.params[:region])
     assert_equal("", query.params[:clade])

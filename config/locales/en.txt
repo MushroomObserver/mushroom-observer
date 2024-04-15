@@ -1938,8 +1938,8 @@
 
   prefs_content_filters: Content Filters
   prefs_content_filters_explanation: Control content visibility site-wide.
-  prefs_filters_with_images: Hide observations with no images
-  prefs_filters_with_specimen: Hide observations with no specimens
+  prefs_filters_has_images: Hide observations with no images
+  prefs_filters_has_specimen: Hide observations with no specimens
   prefs_filters_lichen: Filter observations of lichens
   prefs_filters_lichen_yes: Show only lichens
   prefs_filters_lichen_no: Hide lichens
