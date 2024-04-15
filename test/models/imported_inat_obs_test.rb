@@ -9,7 +9,8 @@ class ImportedInatObsTest < UnitTestCase
     import =
       ImportedInatObs.new(File.read("test/fixtures/inat/one_obs_public.txt"))
     # How import should be translated
-    # commented-out fields do not come from tanslation
+    # commented-out fields will be part of the created MO Obs,
+    # but are not supplied by
     xlation = Observation.new(
       # id: 547126,
       # user_id: 4468,
