@@ -14,7 +14,6 @@ class FieldSlipView
   X_OFFSET = -1.5
   PAGE_X_MID = X_OFFSET + PAGE_LEFT + (PAGE_RIGHT - PAGE_LEFT) / 2
   FONT_SIZE = 9
-  NOTES_FONT_SIZE = 6
 
   # Vertical
   PAGE_BOTTOM = -27
@@ -50,6 +49,7 @@ class FieldSlipView
   QR_MARGIN = 0.25.cm
 
   FIELD_HEIGHT = 1.cm
+  TEXT_OFFSET = 1.mm
 
   LOGO_SIZE = 150 * 72 / 300
   LOGO_TOP = Y_MAX - 0.5.cm
@@ -62,6 +62,15 @@ class FieldSlipView
   CODE_WIDTH = ((RULER_WIDTH - OTHER_WIDTH) / 2) - QR_MARGIN
   OTHER_LEFT = CODE_WIDTH + 0.125.in
   CODE_MIN = 5.mm
+
+  # Notes
+  NOTES_FONT_SIZE = 6
+  NOTES_TOP = LOGO_BOTTOM - 2 * FIELD_HEIGHT
+  NOTES_BOTTOM = Y_MIN + FIELD_HEIGHT
+
+  # Photo box
+  PHOTO_RIGHT = 1.75.cm
+  PHOTO_BOX_SIZE = 4.mm
 
   def initialize(title, prefix, logo, start, total)
     @title = title
@@ -226,15 +235,23 @@ class FieldSlipView
   end
 
   def notes
-    notes_top = LOGO_BOTTOM - 2 * FIELD_HEIGHT
-    notes_bottom = Y_MIN + FIELD_HEIGHT
+    field("Notes",
+          RULER_RIGHT, NOTES_TOP,
+          X_MAX, NOTES_BOTTOM)
+    subnotes
+    photo_bottom = NOTES_BOTTOM + 5.mm
+    rectangle([RULER_RIGHT + TEXT_OFFSET,
+               photo_bottom], PHOTO_BOX_SIZE, PHOTO_BOX_SIZE)
+    text_box("Photo",
+             at: [RULER_RIGHT + PHOTO_BOX_SIZE + QR_MARGIN,
+                  NOTES_BOTTOM + PHOTO_BOX_SIZE])
+  end
+
+  def subnotes
     subnote_left = 5.cm
     subnote_indent = subnote_left + NOTES_FONT_SIZE
-    field("Notes",
-          RULER_RIGHT, notes_top,
-          X_MAX, notes_bottom)
     font_size(NOTES_FONT_SIZE)
-    current_y = notes_top - NOTES_FONT_SIZE
+    current_y = NOTES_TOP - NOTES_FONT_SIZE
     text_box("Odor/taste:", at: [subnote_left, current_y])
     current_y -= NOTES_FONT_SIZE * 3
     text_box("Substrate: wood / soil / grass / dung",
@@ -249,15 +266,14 @@ class FieldSlipView
     text_box("Species:",
              at: [subnote_indent, current_y])
     text_box("Habit: single / few / many",
-             at: [RULER_RIGHT + NOTES_FONT_SIZE,
-                  notes_bottom + NOTES_FONT_SIZE * 1.5])
+             at: [RULER_RIGHT + PHOTO_RIGHT,
+                  NOTES_BOTTOM + NOTES_FONT_SIZE * 1.5])
     font_size(FONT_SIZE)
   end
 
   def field(title, left, top, right, bottom)
-    text_offset = 1.mm
     rectangle([left, top], right - left, top - bottom)
-    text_box("#{title}:", at: [left + text_offset, top - text_offset])
+    text_box("#{title}:", at: [left + TEXT_OFFSET, top - TEXT_OFFSET])
   end
 
   def footer(code)
