@@ -186,9 +186,13 @@ root> gcc /var/web/mushroom-observer/script/jpegresize.c -ljpeg -lm -O2 -o /usr/
 root> cp /var/web/mushroom-observer/script/exifautotran /usr/local/bin/exifautotran
 root> chmod 755 /usr/local/bin/exifautotran
 
-root> cp /var/web/mushroom-observer/config/etc/puma/service /etc/systemd/system/
+root> cp /var/web/mushroom-observer/config/etc/puma.service /etc/systemd/system/
 root> chmod 755 /etc/systemd/system/puma.service
 root> systemctl enable puma
+
+root> cp /var/web/mushroom-observer/config/etc/solidqueue.service /etc/systemd/system/
+root> chmod 755 /etc/systemd/system/solidqueue.service
+root> systemctl enable solidqueue
 
 --------------------------------------------------------------------------------
 
