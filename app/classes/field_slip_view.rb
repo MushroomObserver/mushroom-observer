@@ -6,6 +6,8 @@ class FieldSlipView
   include Prawn::View
 
   # Full page constants
+  SLIPS_PER_PAGE = 6
+
   # Horizontal
   PAGE_LEFT = -27
   PAGE_RIGHT = 567
@@ -92,17 +94,33 @@ class FieldSlipView
 
   def build_slips
     (0..@total - 1).each do |i|
-      x_index = i % 2
-      y_index = 2 - (i / 2) % 3
-      x = X_COORDS[x_index]
-      y = Y_COORDS[y_index]
       num = (i + @start).to_s.rjust(5, "0")
-      slip_at(x, y, "#{@prefix}-#{num}")
-      if i % 6 == 5 && i < @total - 1
-        start_new_page
-        cut_lines
-      end
+      slip_at(slip_left(i), slip_bottom(i), "#{@prefix}-#{num}")
+      new_page_check(i)
     end
+  end
+
+  def slip_left(slip_num)
+    X_COORDS[slip_num % 2]
+  end
+
+  def slip_bottom(slip_num)
+    Y_COORDS[2 - (slip_num / 2) % 3]
+  end
+
+  def new_page_check(slip_num)
+    return unless last_slip?(slip_num) && more_pages?(slip_num)
+
+    start_new_page
+    cut_lines
+  end
+
+  def last_slip?(slip_num)
+    slip_num % SLIPS_PER_PAGE == SLIPS_PER_PAGE - 1
+  end
+
+  def more_pages?(slip_num)
+    slip_num < @total - 1
   end
 
   def slip_at(x_coord, y_coord, code)
