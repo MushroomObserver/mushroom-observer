@@ -1695,15 +1695,15 @@ class QueryTest < UnitTestCase
     ##### numeric parameters #####
 
     # north/south/east/west
-    obs = observations(:unknown_with_lat_long) # obs has lat/lon
+    obs = observations(:unknown_with_lat_lng) # obs has lat/lon
     # give it some images
     obs.images = [images(:conic_image), images(:convex_image)]
     obs.save
     lat = obs.lat
-    long = obs.long
+    lng = obs.lng
     expect = Image.joins(:observations).
              where(observations: { lat: lat }).
-             where(observations: { long: long }).uniq
+             where(observations: { lng: lng }).uniq
     assert_query(
       expect,
       :Image, :with_observations,
@@ -1717,11 +1717,11 @@ class QueryTest < UnitTestCase
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, has_comments: true)
 
-    # has_location
+    # has_public_lat_lng
     expect = Image.joins(:observations).
-             where.not(observations: { location_id: false }).uniq
+             where.not(observations: { lat: false }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Image, :with_observations, has_location: true)
+    assert_query(expect, :Image, :with_observations, has_public_lat_lng: true)
 
     # has_name
     expect = Image.joins(:observations).
@@ -2146,11 +2146,11 @@ class QueryTest < UnitTestCase
       :Location, :with_observations, has_comments: true
     )
 
-    # has_location
+    # has_public_lat_lng
     assert_query(
-      Location.joins(:observations).
-               where.not(observations: { location_id: false }).uniq,
-      :Location, :with_observations, has_location: true
+      Location.joins(:observations).where(observations: { gps_hidden: false }).
+               where.not(observations: { lat: false }).uniq,
+      :Location, :with_observations, has_public_lat_lng: true
     )
 
     # has_name
@@ -2540,13 +2540,13 @@ class QueryTest < UnitTestCase
     assert_query(expect, :Name, :with_observations, confidence: [1, 3])
 
     # north/south/east/west
-    obs = observations(:unknown_with_lat_long)
+    obs = observations(:unknown_with_lat_lng)
     lat = obs.lat
-    long = obs.long
+    lng = obs.lng
     assert_query(
       Name.with_correct_spelling.joins(:observations).
            where(observations: { lat: lat }).
-           where(observations: { long: long }).uniq,
+           where(observations: { lng: lng }).uniq,
       :Name, :with_observations,
       north: lat.to_f, south: lat.to_f, west: lat.to_f, east: lat.to_f
     )
@@ -2559,11 +2559,11 @@ class QueryTest < UnitTestCase
       :Name, :with_observations, has_comments: true
     )
 
-    # has_location
+    # has_public_lat_lng
     assert_query(
-      Name.with_correct_spelling.joins(:observations).
-           where.not(observations: { location_id: false }).uniq,
-      :Name, :with_observations, has_location: true
+      Name.joins(:observations).
+           where.not(observations: { lat: false }).uniq,
+      :Name, :with_observations, has_public_lat_lng: true
     )
 
     # has_name

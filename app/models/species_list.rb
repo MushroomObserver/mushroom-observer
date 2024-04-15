@@ -328,7 +328,7 @@ class SpeciesList < AbstractModel
   #     :vote                   => Vote.maximum_vote,
   #     :notes                  => '',
   #     :lat                    => nil,
-  #     :long                   => nil,
+  #     :lng                    => nil,
   #     :alt                    => nil,
   #     :is_collection_location => true,
   #     :specimen               => false
@@ -358,7 +358,7 @@ class SpeciesList < AbstractModel
       name: name,
       notes: args[:notes],
       lat: args[:lat],
-      long: args[:long],
+      lng: args[:lng],
       alt: args[:alt],
       is_collection_location: args[:is_collection_location],
       specimen: args[:specimen]

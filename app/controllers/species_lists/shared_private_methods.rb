@@ -230,7 +230,7 @@ module SpeciesLists
         vote: member_args[:vote],
         notes: member_notes,
         lat: member_args[:lat].to_s,
-        long: member_args[:long].to_s,
+        lng: member_args[:lng].to_s,
         alt: member_args[:alt].to_s,
         is_collection_location: (member_args[:is_collection_location] == "1"),
         specimen: (member_args[:specimen] == "1")
@@ -387,7 +387,7 @@ module SpeciesLists
         h[part.to_sym] = ""
       end
       @member_lat = nil
-      @member_long = nil
+      @member_lng = nil
       @member_alt = nil
       @member_is_collection_location = true
       @member_specimen = false
@@ -408,9 +408,9 @@ module SpeciesLists
         end
       init_member_notes_for_edit(spl_obss)
       if all_obs_same_lat_lon_alt?(spl_obss)
-        @member_lat  = obs.lat
-        @member_long = obs.long
-        @member_alt  = obs.alt
+        @member_lat = obs.lat
+        @member_lng = obs.lng
+        @member_alt = obs.alt
       end
       if all_obs_same_attr?(spl_obss, :is_collection_location)
         @member_is_collection_location = obs.is_collection_location
@@ -433,7 +433,7 @@ module SpeciesLists
 
     def all_obs_same_lat_lon_alt?(observations)
       all_obs_same_attr?(observations, :lat) &&
-        all_obs_same_attr?(observations, :long) &&
+        all_obs_same_attr?(observations, :lng) &&
         all_obs_same_attr?(observations, :alt)
     end
 
@@ -449,8 +449,8 @@ module SpeciesLists
       # cannot leave @member_notes == nil because view expects a hash
       @member_notes    = member_params[:notes] || Observation.no_notes
       @member_lat      = member_params[:lat].to_s
-      @member_long     = member_params[:long].to_s
-      @member_alt      = member_params[:alt].to_s
+      @member_lng = member_params[:lng].to_s
+      @member_alt = member_params[:alt].to_s
       @member_is_collection_location =
         member_params[:is_collection_location].to_s == "1"
       @member_specimen = member_params[:specimen].to_s == "1"
