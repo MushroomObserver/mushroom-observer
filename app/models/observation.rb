@@ -102,8 +102,8 @@
 #  outside(n,s,e,w) geoloc is outside the box
 #  is_collection_location
 #  not_collection_location
-#  with_image
-#  without_image
+#  with_images
+#  without_images
 #  with_notes
 #  without_notes
 #  has_notes_field(field)
@@ -452,9 +452,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
         -> { where(is_collection_location: true) }
   scope :not_collection_location,
         -> { where(is_collection_location: false) }
-  scope :with_image,
+  scope :with_images,
         -> { where.not(thumb_image: nil) }
-  scope :without_image,
+  scope :without_images,
         -> { where(thumb_image: nil) }
   scope :with_notes,
         -> { where.not(notes: no_notes) }

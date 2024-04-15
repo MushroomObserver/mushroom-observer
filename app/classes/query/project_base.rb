@@ -10,7 +10,7 @@ class Query::ProjectBase < Query::Base
       created_at?: [:time],
       updated_at?: [:time],
       users?: [User],
-      with_image?: { boolean: [true] },
+      with_images?: { boolean: [true] },
       with_observations?: { boolean: [true] },
       with_species_lists?: { boolean: [true] },
       with_comments?: { boolean: [true] },

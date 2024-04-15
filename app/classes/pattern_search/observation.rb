@@ -41,7 +41,7 @@ module PatternSearch
       with_public_lat_lng: [:with_public_lat_lng, :parse_boolean],
       with_name: [:with_name, :parse_boolean],
       with_notes: [:with_notes, :parse_boolean],
-      with_image: [:with_image, :parse_boolean],
+      with_images: [:with_images, :parse_boolean],
       is_collection_location: [:is_collection_location, :parse_boolean],
       lichen: [:lichen, :parse_boolean],
       with_sequence: [:with_sequence, :parse_yes],
