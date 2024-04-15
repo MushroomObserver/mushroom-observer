@@ -22,7 +22,7 @@ module PatternSearch
       herbarium: [:herbaria, :parse_list_of_herbaria],
       list: [:species_lists, :parse_list_of_species_lists],
       location: [:locations, :parse_list_of_locations],
-      notes: [:notes_has, :parse_string],
+      notes_has: [:notes_has, :parse_string],
       project: [:projects, :parse_list_of_projects],
       project_lists: [:project_lists, :parse_list_of_projects],
       region: [:region, :parse_list_of_strings],
@@ -41,10 +41,10 @@ module PatternSearch
       with_public_lat_lng: [:with_public_lat_lng, :parse_boolean],
       with_name: [:with_name, :parse_boolean],
       with_notes: [:with_notes, :parse_boolean],
-      with_images: [:with_images, :parse_boolean],
+      with_image: [:with_image, :parse_boolean],
       is_collection_location: [:is_collection_location, :parse_boolean],
       lichen: [:lichen, :parse_boolean],
-      with_sequence: [:with_sequences, :parse_yes],
+      with_sequence: [:with_sequence, :parse_yes],
       with_specimen: [:with_specimen, :parse_boolean]
     }.freeze
 

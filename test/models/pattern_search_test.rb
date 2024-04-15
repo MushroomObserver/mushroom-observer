@@ -595,7 +595,7 @@ class PatternSearchTest < UnitTestCase
   def test_observation_search_comments
     expect = Observation.comments_include("complicated")
     assert(expect.count.positive?)
-    x = PatternSearch::Observation.new("comments:complicated")
+    x = PatternSearch::Observation.new("comments_has:complicated")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
@@ -916,7 +916,7 @@ class PatternSearchTest < UnitTestCase
   def test_name_search_comments
     expect = [comments(:fungi_comment).target]
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("comments:\"do not change\"")
+    x = PatternSearch::Name.new("comments_has:\"do not change\"")
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 end

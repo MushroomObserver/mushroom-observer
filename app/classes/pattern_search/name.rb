@@ -26,8 +26,8 @@ module PatternSearch
       author: [:author_has, :parse_string],
       citation: [:citation_has, :parse_string],
       classification: [:classification_has, :parse_string],
-      notes: [:notes_has, :parse_string],
-      comments: [:comments_has, :parse_string]
+      notes_has: [:notes_has, :parse_string],
+      comments_has: [:comments_has, :parse_string]
     }.freeze
 
     def self.params
