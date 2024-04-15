@@ -4,7 +4,7 @@ require("test_helper")
 
 class ContentFilterTest < UnitTestCase
   def test_filters
-    assert_equal([:with_images, :with_specimen, :lichen, :region, :clade],
+    assert_equal([:has_images, :has_specimen, :lichen, :region, :clade],
                  ContentFilter.all.map(&:sym))
     assert_equal([:region],
                  ContentFilter.by_model(Location).map(&:sym))
@@ -13,8 +13,8 @@ class ContentFilterTest < UnitTestCase
   end
 
   def test_find
-    fltr = ContentFilter.find(:with_images)
+    fltr = ContentFilter.find(:has_images)
     assert_not_nil(fltr)
-    assert_equal(:with_images, fltr.sym)
+    assert_equal(:has_images, fltr.sym)
   end
 end

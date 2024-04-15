@@ -41,8 +41,8 @@ module Account
       thumbnail_maps: "",
       view_owner_id: "",
       votes_anonymous: "yes",
-      with_images: "1",
-      with_specimen: "1",
+      has_images: "1",
+      has_specimen: "1",
       lichen: "yes",
       region: "California, USA",
       clade: "Ascomycota"
@@ -67,8 +67,8 @@ module Account
       assert_input_value(:user_thumbnail_maps, "1")
       assert_input_value(:user_view_owner_id, "1")
       assert_input_value(:user_image_size, "medium")
-      assert_input_value(:user_with_images, "")
-      assert_input_value(:user_with_specimen, "")
+      assert_input_value(:user_has_images, "")
+      assert_input_value(:user_has_specimen, "")
       assert_input_value(:user_lichen, nil)
       assert_input_value(:user_region, "")
       assert_input_value(:user_clade, "")
@@ -122,8 +122,8 @@ module Account
       assert_input_value(:user_thumbnail_maps, "")
       assert_input_value(:user_view_owner_id, "")
       assert_input_value(:user_votes_anonymous, "yes")
-      assert_input_value(:user_with_images, "1")
-      assert_input_value(:user_with_specimen, "1")
+      assert_input_value(:user_has_images, "1")
+      assert_input_value(:user_has_specimen, "1")
       assert_input_value(:user_lichen, "yes")
       assert_input_value(:user_region, "California, USA")
       assert_input_value(:user_clade, "Ascomycota")
@@ -174,8 +174,8 @@ module Account
       assert_equal(false, user.thumbnail_maps)
       assert_equal(false, user.view_owner_id)
       assert_equal("yes", user.votes_anonymous)
-      assert_equal("yes", user.content_filter[:with_images])
-      assert_equal("yes", user.content_filter[:with_specimen])
+      assert_equal("yes", user.content_filter[:has_images])
+      assert_equal("yes", user.content_filter[:has_specimen])
       assert_equal("yes", user.content_filter[:lichen])
       assert_equal("California, USA", user.content_filter[:region])
       assert_equal("Ascomycota", user.content_filter[:clade])

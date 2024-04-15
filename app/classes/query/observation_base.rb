@@ -40,7 +40,7 @@ module Query
         with_public_lat_lng?: :boolean,
         with_name?: :boolean,
         with_notes?: :boolean,
-        with_sequence?: { boolean: [true] },
+        with_sequences?: { boolean: [true] },
         is_collection_location?: :boolean
       ).merge(content_filter_parameter_declarations(Observation)).
         merge(names_parameter_declarations).
@@ -116,7 +116,7 @@ module Query
       initialize_with_notes_parameter
       add_with_notes_fields_condition(params[:with_notes_fields])
       add_join(:comments) if params[:with_comments]
-      add_join(:sequences) if params[:with_sequence]
+      add_join(:sequences) if params[:with_sequences]
     end
 
     def initialize_is_collection_location_parameter

@@ -93,7 +93,7 @@ zero_user:
 ignore_imageless_user:
   <<: *DEFAULTS
   verified:  2016-08-24 16:20:00
-  content_filter: <%= { with_images: "yes" }.to_yaml.inspect %>
+  content_filter: <%= { has_images: "yes" }.to_yaml.inspect %>
   # make this high so that there's only 1 page of observations
   layout_count: 96
 
@@ -101,7 +101,7 @@ ignore_imageless_user:
 vouchered_only_user:
   <<: *DEFAULTS
   verified:  2016-09-02 13:50:00
-  content_filter: <%= { with_specimen: "yes" }.to_yaml.inspect %>
+  content_filter: <%= { has_specimen: "yes" }.to_yaml.inspect %>
   layout_count: 24
 
 public_voter:

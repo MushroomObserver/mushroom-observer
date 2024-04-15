@@ -15,19 +15,19 @@ module PatternSearch
       include_synonyms: [:include_synonyms, :parse_boolean],
       rank: [:rank, :parse_rank_range],
 
-      with_author: [:with_author, :parse_boolean],
-      with_citation: [:with_citation, :parse_boolean],
-      with_classification: [:with_classification, :parse_boolean],
-      with_notes: [:with_notes, :parse_boolean],
-      with_comments: [:with_comments, :parse_yes],
-      with_description: [:with_default_desc, :parse_boolean],
-      with_observations: [:with_observations, :parse_yes],
+      has_author: [:with_author, :parse_boolean],
+      has_citation: [:with_citation, :parse_boolean],
+      has_classification: [:with_classification, :parse_boolean],
+      has_notes: [:with_notes, :parse_boolean],
+      has_comments: [:with_comments, :parse_yes],
+      has_description: [:with_default_desc, :parse_boolean],
+      has_observations: [:with_observations, :parse_yes],
 
       author: [:author_has, :parse_string],
       citation: [:citation_has, :parse_string],
       classification: [:classification_has, :parse_string],
-      notes_has: [:notes_has, :parse_string],
-      comments_has: [:comments_has, :parse_string]
+      notes: [:notes_has, :parse_string],
+      comments: [:comments_has, :parse_string]
     }.freeze
 
     def self.params

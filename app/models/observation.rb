@@ -110,8 +110,8 @@
 #  notes_include(note)
 #  with_specimen
 #  without_specimen
-#  with_sequence
-#  without_sequence
+#  with_sequences
+#  without_sequences
 #  confidence (min %, max %)
 #  with_comments
 #  without_comments
@@ -468,11 +468,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
         -> { where(specimen: true) }
   scope :without_specimen,
         -> { where(specimen: false) }
-  scope :with_sequence,
+  scope :with_sequences,
         -> { joins(:sequences).distinct }
-  scope :without_sequence, lambda {
+  scope :without_sequences, lambda {
     # much faster than `missing(:sequences)` which uses left outer join.
-    where.not(id: with_sequence)
+    where.not(id: with_sequences)
   }
   scope :confidence, lambda { |min, max = min| # confidence between min & max %
     where(vote_cache: (min.to_f / (100 / 3))..(max.to_f / (100 / 3)))

@@ -1095,26 +1095,28 @@
   search_term_author: author
   search_term_citation: citation
   search_term_classification: classification
-  search_term_comments_has: comments_has
+  search_term_comments: comments
   search_term_confidence: confidence
   search_term_created: created
   search_term_date: date
   search_term_deprecated: deprecated
   search_term_east: east
   search_term_exclude_consensus: exclude_consensus
-  search_term_with_author: with_author
-  search_term_with_citation: with_citation
-  search_term_with_classification: with_classification
-  search_term_with_comments: with_comments
-  search_term_with_description: with_description
-  search_term_with_field: with_field
-  search_term_with_public_lat_lng: with_public_lat_lng
-  search_term_with_name: with_name
-  search_term_with_notes: with_notes
-  search_term_with_observations: with_observations
-  search_term_with_synonyms: with_synonyms
+  search_term_has_author: has_author
+  search_term_has_citation: has_citation
+  search_term_has_classification: has_classification
+  search_term_has_comments: has_comments
+  search_term_has_description: has_description
+  search_term_has_field: has_field
+  search_term_has_images: has_images
+  search_term_has_name: has_name
+  search_term_has_notes: has_notes
+  search_term_has_observations: has_observations
+  search_term_has_public_lat_lng: has_public_lat_lng
+  search_term_has_sequence: has_sequence
+  search_term_has_specimen: has_specimen
+  search_term_has_synonyms: has_synonyms
   search_term_herbarium: herbarium
-  search_term_with_images: with_images
   search_term_include_all_name_proposals: include_all_name_proposals
   search_term_include_misspellings: include_misspellings
   search_term_include_subtaxa: include_subtaxa
@@ -1126,23 +1128,21 @@
   search_term_modified: modified
   search_term_name: name
   search_term_north: north
-  search_term_notes_has: notes_has
+  search_term_notes: notes
   search_term_project: project
   search_term_project_lists: project_lists
   search_term_rank: rank
   search_term_region: region
-  search_term_with_sequence: with_sequence
   search_term_south: south
-  search_term_with_specimen: with_specimen
   search_term_user: user
   search_term_west: west
 
   # Words recognized in search bar.
   # e.g. "user:me"
   search_value_me: me
-  # e.g. "with_images:yes"
+  # e.g. "has_images:yes"
   search_value_true: yes|true
-  # e.g. "with_specimen:no"
+  # e.g. "has_specimen:no"
   search_value_false: no|false
   # e.g. "include_misspellings:either" meaning include both correctly and incorrectly spelled names
   search_value_both: both|either
@@ -2830,14 +2830,14 @@
 
   advanced_search_filters: Search Filters
   advanced_search_filters_explain: Apply to this search only, overrides your normal preferred content filters
-  advanced_search_filter_with_images: Filter observations based on whether they have images
-  advanced_search_filter_with_images_off: Include both imaged and imageless observations
-  advanced_search_filter_with_images_yes: Exclude imageless observations
-  advanced_search_filter_with_images_no: Exclude imaged observations
-  advanced_search_filter_with_specimen: Filter observations based on whether they have specimens
-  advanced_search_filter_with_specimen_off: Include both observations with and without specimens
-  advanced_search_filter_with_specimen_yes: Exclude observations without specimens
-  advanced_search_filter_with_specimen_no: Exclude observations with specimens
+  advanced_search_filter_has_images: Filter observations based on whether they have images
+  advanced_search_filter_has_images_off: Include both imaged and imageless observations
+  advanced_search_filter_has_images_yes: Exclude imageless observations
+  advanced_search_filter_has_images_no: Exclude imaged observations
+  advanced_search_filter_has_specimen: Filter observations based on whether they have specimens
+  advanced_search_filter_has_specimen_off: Include both observations with and without specimens
+  advanced_search_filter_has_specimen_yes: Exclude observations without specimens
+  advanced_search_filter_has_specimen_no: Exclude observations with specimens
   advanced_search_filter_lichen: Filter observations based on whether they are lichens
   advanced_search_filter_lichen_off: Include both lichens and nonlichens
   advanced_search_filter_lichen_yes: Include only lichen-forming, lichenicolous and allied fungi
@@ -3530,22 +3530,22 @@
   observation_term_project_lists: Observation belongs to list in one of these projects.
   observation_term_list: Observation belongs to one of these species lists.
   observation_term_user: Observation created by one of these users.
-  observation_term_notes_has: Notes contains the given string.
-  observation_term_comments_has: Comments contain the given string.
+  observation_term_notes: Notes contains the given string.
+  observation_term_comments: Comments contain the given string.
   observation_term_confidence: Confidence is in this range.
   observation_term_east: Longitude of eastern edge of search region.
   observation_term_west: Longitude of western edge of search region.
   observation_term_north: Latitude of northern edge of search region.
   observation_term_south: Latitude of southern edge of search region.
-  observation_term_with_images: Has images? ("yes" or "no")
-  observation_term_with_sequence: Has a sequence?
-  observation_term_with_specimen: Has a specimen?
+  observation_term_has_images: Has images? ("yes" or "no")
+  observation_term_has_sequence: Has a sequence?
+  observation_term_has_specimen: Has a specimen?
   observation_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
-  observation_term_with_name: Has a name? (other than "Fungi sp.")
-  observation_term_with_notes: Has Notes?
-  observation_term_with_public_lat_lng: Are the [:OBSERVATION]'s [:LATITUDE] and [:LONGITUDE] fields filled in, and public?
-  observation_term_with_field: Has a given notes template field filled in.
-  observation_term_with_comments: Has any comments?
+  observation_term_has_name: Has a name? (other than "Fungi sp.")
+  observation_term_has_notes: Has Notes?
+  observation_term_has_public_lat_lng: Are the [:OBSERVATION]'s [:LATITUDE] and [:LONGITUDE] fields filled in, and public?
+  observation_term_has_field: Has a given notes template field filled in.
+  observation_term_has_comments: Has any comments?
   observation_term_is_collection_location: Mushroom was growing at the location. ("[:form_observations_is_collection_location]" is checked.)
 
   name_term_created: Date name was first used.
@@ -3553,22 +3553,22 @@
   name_term_rank: Rank or range of ranks, e.g., "genus" or "species-form".
   name_term_include_synonyms: Include synonyms of the given names.
   name_term_include_subtaxa: Include subtaxa of the given names.
-  name_term_with_observations: Only names for which we have observations?
-  name_term_with_synonyms: Has any synonyms?
+  name_term_has_observations: Only names for which we have observations?
+  name_term_has_synonyms: Has any synonyms?
   name_term_deprecated: "\"no\" = only accepted names, \"yes\" = only deprecated names."
   name_term_include_misspellings: "\"no\" = ignore misspelled names (default), \"yes\" = only misspelled names, \"either\" = ignore whether names are misspelled or not."
   name_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
-  name_term_with_author: Has Author filled in?
-  name_term_with_citation: Has Citation filled in?
-  name_term_with_classification: Has Classification filled in?
-  name_term_with_notes: "[:form_names_taxonomic_notes] filled in?"
-  name_term_with_comments: Has any Comments?
-  name_term_with_description: Has a public description?
+  name_term_has_author: Has Author filled in?
+  name_term_has_citation: Has Citation filled in?
+  name_term_has_classification: Has Classification filled in?
+  name_term_has_notes: "[:form_names_taxonomic_notes] filled in?"
+  name_term_has_comments: Has any Comments?
+  name_term_has_description: Has a public description?
   name_term_author: Author contains this string.
   name_term_citation: Citation contains this string.
   name_term_classification: Classification contains this string.
-  name_term_notes_has: "[:form_names_taxonomic_notes] contains this string."
-  name_term_comments_has: At least one Comment contains this string.
+  name_term_notes: "[:form_names_taxonomic_notes] contains this string."
+  name_term_comments: At least one Comment contains this string.
 
   # link to search bar help
   search_bar_help: Search Help
@@ -4002,7 +4002,6 @@
   pattern_search_syntax_error: Syntax error in pattern at [string].
   pattern_search_pattern_must_be_first_error: Filter terms come after the bare search pattern, [str].  Maybe you forgot to enclose the value for [var] in double quotes?
   pattern_search_bad_term_error: "Unexpected term in [type] search: [term]. [help]"
-  pattern_search_bad_term_error_suggestion: We've changed some terms. Please try "[new_term]:[vals]" instead of "[term]:[vals]".
   pattern_search_missing_value_error: Missing value for the term [var].
   pattern_search_too_many_values_error: Search term [term] occurs more than once.
   pattern_search_bad_boolean_error: Invalid value for [term], [value], expected "yes" or "no".

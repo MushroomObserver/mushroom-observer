@@ -370,8 +370,8 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
     # Content filters
     within("#account_preferences_form") do
-      check("user_with_images")
-      check("user_with_specimen")
+      check("user_has_images")
+      check("user_has_specimen")
       select("Show only lichens", from: "user_lichen")
       click_commit
     end

@@ -15,7 +15,7 @@ module Query
         with_public_lat_lng?: :boolean,
         with_name?: :boolean,
         with_comments?: { boolean: [true] },
-        with_sequence?: { boolean: [true] },
+        with_sequences?: { boolean: [true] },
         with_notes_fields?: [:string],
         comments_has?: :string,
         north?: :float,
@@ -57,7 +57,7 @@ module Query
       initialize_with_name_parameter
       initialize_with_notes_parameter
       add_join(:observations, :comments) if params[:with_comments]
-      add_join(:observations, :sequences) if params[:with_sequence]
+      add_join(:observations, :sequences) if params[:with_sequences]
       add_with_notes_fields_condition(params[:with_notes_fields])
     end
 
