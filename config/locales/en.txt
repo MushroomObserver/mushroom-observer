@@ -1126,7 +1126,7 @@
   search_term_modified: modified
   search_term_name: name
   search_term_north: north
-  search_term_notes: notes
+  search_term_notes_has: notes
   search_term_project: project
   search_term_project_lists: project_lists
   search_term_rank: rank
@@ -3530,7 +3530,7 @@
   observation_term_project_lists: Observation belongs to list in one of these projects.
   observation_term_list: Observation belongs to one of these species lists.
   observation_term_user: Observation created by one of these users.
-  observation_term_notes: Notes contains the given string.
+  observation_term_notes_has: Notes contains the given string.
   observation_term_comments_has: Comments contain the given string.
   observation_term_confidence: Confidence is in this range.
   observation_term_east: Longitude of eastern edge of search region.
@@ -3567,8 +3567,8 @@
   name_term_author: Author contains this string.
   name_term_citation: Citation contains this string.
   name_term_classification: Classification contains this string.
-  name_term_notes: "[:form_names_taxonomic_notes] contains this string."
-  name_term_comments: At least one Comment contains this string.
+  name_term_notes_has: "[:form_names_taxonomic_notes] contains this string."
+  name_term_comments_has: At least one Comment contains this string.
 
   # link to search bar help
   search_bar_help: Search Help

@@ -585,10 +585,10 @@ class PatternSearchTest < UnitTestCase
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
-  def test_observation_search_notes
+  def test_observation_search_notes_has
     expect = Observation.notes_include("somewhere else")
     assert(expect.count.positive?)
-    x = PatternSearch::Observation.new('notes:"somewhere else"')
+    x = PatternSearch::Observation.new('notes_has:"somewhere else"')
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
@@ -616,14 +616,14 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_images_no
-    expect = Observation.without_image
+    expect = Observation.without_images
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("with_images:no")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_images_yes
-    expect = Observation.with_image
+    expect = Observation.with_images
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("with_images:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
@@ -906,10 +906,10 @@ class PatternSearchTest < UnitTestCase
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
-  def test_name_search_notes
+  def test_name_search_notes_has
     expect = Name.with_correct_spelling.notes_include("lichen")
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("notes:lichen")
+    x = PatternSearch::Name.new("notes_has:lichen")
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
