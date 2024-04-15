@@ -148,6 +148,7 @@ module Mappable
         end
       end
       # Give the sets an initial sort by north value, before grouping.
+      # This gives orderly overlapping and means all boxes are clickable.
       @sets = @sets.sort_by { |_key, value| value.north }.reverse.to_h
     end
 
