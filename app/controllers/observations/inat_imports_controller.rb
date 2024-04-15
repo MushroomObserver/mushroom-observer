@@ -61,6 +61,13 @@ module Observations
         where: inat_obs.where
       )
       xlated_inat_obs.save
+
+      # TODO: Other things done by Observations#create
+      # @observation.log(:log_observation_created)
+      # save_everything_else(params.dig(:naming, :reasons))
+      # strip_images! if @observation.gps_hidden
+      # update_field_slip(@observation, params[:field_code])
+      # flash_notice(:runtime_observation_success.t(id: @observation.id))
     end
 
     INAT_API_BASE = "https://api.inaturalist.org/v1"
