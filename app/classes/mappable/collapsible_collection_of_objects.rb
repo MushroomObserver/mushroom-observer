@@ -147,6 +147,9 @@ module Mappable
           raise("Tried to map #{obj.class} #{obj.id}.")
         end
       end
+      # Give the sets an initial sort by north value, before grouping.
+      # This gives orderly overlapping and means all boxes are clickable.
+      @sets = @sets.sort_by { |_key, value| value.north }.reverse.to_h
     end
 
     def group_objects_into_sets
