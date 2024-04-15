@@ -82,6 +82,9 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   before_destroy :orphan_drafts
   validates :field_slip_prefix, uniqueness: true, allow_blank: true
+  validates :field_slip_prefix,
+            format: { with: /\A[A-Z0-9]+\z/,
+                      message: :alphanumerics_only.t }
 
   scope :show_includes, lambda {
     strict_loading.includes(
@@ -99,13 +102,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     title.to_s
   end
 
-  # Ensure that field_slip_prefix is uppercase and at most 60
-  # characters so in the worst case the prefix plus 5 single byte
-  # characters is under 255 bytes (limit in SQL assuming all prefix
-  # characters are 4-byte unicode).
+  # Ensure that field_slip_prefix is uppercase and at most 255
+  # characters.
   def field_slip_prefix=(val)
     self[:field_slip_prefix] = if val && val.strip != ""
-                                 val.strip.upcase[0, 60]
+                                 val.strip.upcase[0, 255]
                                end
   end
 
