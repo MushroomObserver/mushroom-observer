@@ -17,6 +17,8 @@ module Observations
       inat_id_array.each do |inat_obs_id|
         import_one_observation(inat_obs_id)
       end
+
+      redirect_to(observations_path)
     end
 
     # ---------------------------------
@@ -54,6 +56,11 @@ module Observations
     def import_one_observation(inat_obs_id)
       imported_inat_obs_data = inat_search_observations(inat_obs_id)
       inat_obs = ImportedInatObs.new(imported_inat_obs_data)
+      xlated_inat_obs = Observation.new(
+        when: inat_obs.when,
+        where: inat_obs.where
+      )
+      xlated_inat_obs.save
     end
 
     INAT_API_BASE = "https://api.inaturalist.org/v1"

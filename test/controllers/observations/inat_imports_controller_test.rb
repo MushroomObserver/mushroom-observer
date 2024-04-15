@@ -36,11 +36,11 @@ module Observations
       ).to_return(body: body)
 
       login(user.login)
-      put(:create, params: params)
+      assert_difference("Observation.count", 1, "Failed to create Obs") do
+        put(:create, params: params)
+      end
 
-      assert_response(:success)
-      # TODO: Fixme this assert redirected to? Observation create
-      # assert params?
+      assert_redirected_to(observations_path)
     end
 
     def test_create_inat_import_too_many_ids
