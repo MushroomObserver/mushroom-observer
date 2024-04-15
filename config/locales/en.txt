@@ -1126,7 +1126,7 @@
   search_term_modified: modified
   search_term_name: name
   search_term_north: north
-  search_term_notes_has: notes
+  search_term_notes_has: notes_has
   search_term_project: project
   search_term_project_lists: project_lists
   search_term_rank: rank
@@ -4002,6 +4002,7 @@
   pattern_search_syntax_error: Syntax error in pattern at [string].
   pattern_search_pattern_must_be_first_error: Filter terms come after the bare search pattern, [str].  Maybe you forgot to enclose the value for [var] in double quotes?
   pattern_search_bad_term_error: "Unexpected term in [type] search: [term]. [help]"
+  pattern_search_bad_term_error_suggestion: We've changed some terms. Please try "[new_term]:[vals]" instead of "[term]:[vals]".
   pattern_search_missing_value_error: Missing value for the term [var].
   pattern_search_too_many_values_error: Search term [term] occurs more than once.
   pattern_search_bad_boolean_error: Invalid value for [term], [value], expected "yes" or "no".
