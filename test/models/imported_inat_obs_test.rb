@@ -8,25 +8,44 @@ class ImportedInatObsTest < UnitTestCase
     # import of iNat 202555552 (which is a mirror of MO 547126)
     import =
       ImportedInatObs.new(File.read("test/fixtures/inat/one_obs_public.txt"))
-
     # How import should be translated
+    # commented-out fields do not come from tanslation
     xlation = Observation.new(
+      # id: 547126,
+      # user_id: 4468,
+      # created_at: Thu, 07 Mar 2024 18:32:18.000000000 EST -05:00,
+      # updated_at: Mon, 18 Mar 2024 18:12:05.000000000 EDT -04:00,
+
       when: "Thu, 23 Mar 2023",
-      specimen: false,
-      notes: { Other: "on Quercus\n\n&#8212;\n\nMirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/202555552\">observation 202555552</a> on March 15, 2024." }, # rubocop:disable Layout/LineLength
-      name_id: 112_217,
-      location_id: 20_799,
+
+      # locality / geoloc stuff
       is_collection_location: true,
       lat: 31.8813, # rubocop:disable Style/ExponentialNotation
       long: -109.244, # rubocop:disable Style/ExponentialNotation
-      where: "Cochise Co., Arizona, USA",
       alt: 1942,
-      lifeform: " ",
-      text_name: "Somion unicolor",
-      classification: "Domain: _Eukarya_\r\nKingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Agaricomycetes_\r\nOrder: _Polyporales_\r\nFamily: _Cerrenaceae_\r\n", # rubocop:disable Layout/LineLength
       gps_hidden: false,
-      source: "mo_api",
-      needs_naming: false
+      where: "Cochise Co., Arizona, USA",
+      # location_id needs work
+      location_id: 20799, # rubocop:disable Style/NumericLiterals
+
+      # taxonomy, nomenclature
+      text_name: "Somion unicolor",
+      needs_naming: false,
+      # name_id needs work
+      name_id: 113699, # rubocop:disable Style/NumericLiterals
+      classification: "Domain: _Eukarya_\r\nKingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Agaricomycetes_\r\nOrder: _Polyporales_\r\nFamily: _Cerrenaceae_\r\n", # rubocop:disable Layout/LineLength
+      lifeform: " ",
+
+      # miscellaneous
+      specimen: false,
+      notes: { Other: "on Quercus\n\n&#8212;\n\nMirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/202555552\">observation 202555552</a> on March 15, 2024." }, # rubocop:disable Layout/LineLength
+      source: "inat_import"
+      # thumb_image_id: 1659475,
+      # vote_cache: 2.51504,
+      # num_views: 78,
+      # last_view: Fri, 05 Apr 2024 15:59:58.000000000 EDT -04:00,
+      # rss_log_id: 661676,
+      # log_updated_at: Sat, 16 Mar 2024 17:22:51.000000000 EDT -04:00,
     )
 
     %w[when where].each do |attribute|
