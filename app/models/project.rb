@@ -83,8 +83,9 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   before_destroy :orphan_drafts
   validates :field_slip_prefix, uniqueness: true, allow_blank: true
   validates :field_slip_prefix,
+            allow_blank: true,
             format: { with: /\A[A-Z0-9]+\z/,
-                      message: :alphanumerics_only.t }
+                      message: proc { :alphanumerics_only.t } }
 
   scope :show_includes, lambda {
     strict_loading.includes(
