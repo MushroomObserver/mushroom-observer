@@ -1107,7 +1107,7 @@
   search_term_with_classification: with_classification
   search_term_with_comments: with_comments
   search_term_with_description: with_description
-  search_term_has_field: has_field
+  search_term_with_field: with_field
   search_term_with_public_lat_lng: with_public_lat_lng
   search_term_with_name: with_name
   search_term_with_notes: with_notes
@@ -3544,7 +3544,7 @@
   observation_term_with_name: Has a name? (other than "Fungi sp.")
   observation_term_with_notes: Has Notes?
   observation_term_with_public_lat_lng: Are the [:OBSERVATION]'s [:LATITUDE] and [:LONGITUDE] fields filled in, and public?
-  observation_term_has_field: Has a given notes template field filled in.
+  observation_term_with_field: Has a given notes template field filled in.
   observation_term_with_comments: Has any comments?
   observation_term_is_collection_location: Mushroom was growing at the location. ("[:form_observations_is_collection_location]" is checked.)
 
@@ -4076,7 +4076,7 @@
   api_can_only_delete_your_own_account: Only the account owner can delete their account.
   api_can_only_synonymize_unsynonymized_names: Presently, we're only allowing API clients to synonymize unsynonymized names with other names.  If one of the names has no synonyms, synonymize that name with the others.  But there's no way to merge two sets os synonyms via the API right now.
   api_can_only_use_one_of_these_fields: "Please only use one of these parameters: [fields]."
-  api_can_only_use_this_field_if_with_specimen: The parameter, "[field]", can only be used if the observation has a specimen.
+  api_can_only_use_this_field_if_has_specimen: The parameter, "[field]", can only be used if the observation has a specimen.
   api_cant_add_herbarium_record: Only owner of observation and curators of fungarium can add fungarium records to an observation.
   api_couldnt_download_url: "Failed to download the resource at the URL, \"[url]\": [error]"
   api_create_failed: "Failed to create [type] \"[name]\": [error]"
@@ -4152,9 +4152,9 @@
   api_help_east: max longitude
   api_help_field_slip_prefix_has: search within field slip prefix
   api_help_first_user: creator / first to use
-  api_help_with_notes_field: is given observation notes template field filled in?
-  api_help_with_obs_notes: observation has notes?
-  api_help_with_observation: is attached to an observation?
+  api_help_has_notes_field: is given observation notes template field filled in?
+  api_help_has_obs_notes: observation has notes?
+  api_help_has_observation: is attached to an observation?
   api_help_initial_det: initial determination
   api_help_initial_det_has: search within initial determination
   api_help_is_collection_location: is this location where mushroom was found?
