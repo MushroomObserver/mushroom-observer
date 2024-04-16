@@ -33,7 +33,7 @@ class UpdateUserContentFilter
 
     msgs = ["content_filter updated for #{entries.size} users."]
     msgs << "Dry run: no changes made." if dry_run
-    p msgs.join(" ")
+    p(msgs.join(" "))
   end
 
   def self.updatable_users
