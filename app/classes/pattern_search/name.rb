@@ -8,7 +8,7 @@ module PatternSearch
       modified: [:updated_at, :parse_date_range],
 
       deprecated: [:is_deprecated, :parse_boolean],
-      with_synonyms: [:with_synonyms, :parse_boolean],
+      has_synonyms: [:with_synonyms, :parse_boolean],
       lichen: [:lichen, :parse_boolean],
       include_misspellings: [:misspellings, :parse_yes_no_both],
       include_subtaxa: [:include_subtaxa, :parse_boolean],

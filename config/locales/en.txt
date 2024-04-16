@@ -1938,8 +1938,8 @@
 
   prefs_content_filters: Content Filters
   prefs_content_filters_explanation: Control content visibility site-wide.
-  prefs_filters_has_images: Hide observations with no images
-  prefs_filters_has_specimen: Hide observations with no specimens
+  prefs_filters_with_images: Hide observations with no images
+  prefs_filters_with_specimen: Hide observations with no specimens
   prefs_filters_lichen: Filter observations of lichens
   prefs_filters_lichen_yes: Show only lichens
   prefs_filters_lichen_no: Hide lichens
@@ -2830,14 +2830,14 @@
 
   advanced_search_filters: Search Filters
   advanced_search_filters_explain: Apply to this search only, overrides your normal preferred content filters
-  advanced_search_filter_has_images: Filter observations based on whether they have images
-  advanced_search_filter_has_images_off: Include both imaged and imageless observations
-  advanced_search_filter_has_images_yes: Exclude imageless observations
-  advanced_search_filter_has_images_no: Exclude imaged observations
-  advanced_search_filter_has_specimen: Filter observations based on whether they have specimens
-  advanced_search_filter_has_specimen_off: Include both observations with and without specimens
-  advanced_search_filter_has_specimen_yes: Exclude observations without specimens
-  advanced_search_filter_has_specimen_no: Exclude observations with specimens
+  advanced_search_filter_with_images: Filter observations based on whether they have images
+  advanced_search_filter_with_images_off: Include both imaged and imageless observations
+  advanced_search_filter_with_images_yes: Exclude imageless observations
+  advanced_search_filter_with_images_no: Exclude imaged observations
+  advanced_search_filter_with_specimen: Filter observations based on whether they have specimens
+  advanced_search_filter_with_specimen_off: Include both observations with and without specimens
+  advanced_search_filter_with_specimen_yes: Exclude observations without specimens
+  advanced_search_filter_with_specimen_no: Exclude observations with specimens
   advanced_search_filter_lichen: Filter observations based on whether they are lichens
   advanced_search_filter_lichen_off: Include both lichens and nonlichens
   advanced_search_filter_lichen_yes: Include only lichen-forming, lichenicolous and allied fungi

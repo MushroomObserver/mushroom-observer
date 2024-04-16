@@ -1399,10 +1399,17 @@ class ObservationTest < UnitTestCase
     assert_empty(Observation.with_notes_field(ARBITRARY_SHA))
   end
 
-  def test_scope_without_sequence
-    assert_includes(Observation.without_sequence,
+  def test_scope_with_sequences
+    assert_includes(Observation.with_sequences,
+                    observations(:genbanked_obs))
+    assert_not_includes(Observation.with_sequences,
+                        observations(:minimal_unknown_obs))
+  end
+
+  def test_scope_without_sequences
+    assert_includes(Observation.without_sequences,
                     observations(:minimal_unknown_obs))
-    assert_not_includes(Observation.without_sequence,
+    assert_not_includes(Observation.without_sequences,
                         observations(:genbanked_obs))
   end
 

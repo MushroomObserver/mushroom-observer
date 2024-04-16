@@ -644,7 +644,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_has_sequence
-    expect = Observation.with_sequence
+    expect = Observation.with_sequences
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_sequence:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)

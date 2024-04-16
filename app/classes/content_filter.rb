@@ -43,8 +43,8 @@ class ContentFilter
   # Array of all available filters.
   def self.all
     @@filters ||= [
-      HasImages.new,
-      HasSpecimen.new,
+      WithImages.new,
+      WithSpecimen.new,
       Lichen.new,
       Region.new,
       Clade.new

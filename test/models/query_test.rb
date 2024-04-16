@@ -1736,10 +1736,10 @@ class QueryTest < UnitTestCase
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, with_notes: true)
 
-    # with_sequence
+    # with_sequences
     expect = Image.joins(observations: :sequences).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, Image, :with_observations, with_sequence: true)
+    assert_query(expect, Image, :with_observations, with_sequences: true)
 
     # is_collection_location
     expect =
@@ -2165,10 +2165,10 @@ class QueryTest < UnitTestCase
                where.not(observations: { notes: Observation.no_notes }).uniq,
       :Location, :with_observations, with_notes: true
     )
-    # with_sequence
+    # with_sequences
     assert_query(
       Location.joins(observations: :sequences).uniq,
-      Location, :with_observations, with_sequence: true
+      Location, :with_observations, with_sequences: true
     )
     # is_collection_location
     assert_query(
@@ -2580,10 +2580,10 @@ class QueryTest < UnitTestCase
       :Name, :with_observations, with_notes: true
     )
 
-    # with_sequence
+    # with_sequences
     assert_query(
       Name.with_correct_spelling.joins(observations: :sequences).uniq,
-      Name, :with_observations, with_sequence: true
+      Name, :with_observations, with_sequences: true
     )
 
     # is_collection_location
