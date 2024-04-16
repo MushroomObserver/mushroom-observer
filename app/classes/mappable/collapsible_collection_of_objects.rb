@@ -43,9 +43,6 @@
 #    collection = Mappable::CollapsibleCollectionOfObjects.new(query.results)
 #
 ###############################################################################
-#
-#  GOTCHA: Observations have .long, Google map points need .lng
-#
 
 module Mappable
   class CollapsibleCollectionOfObjects
@@ -139,7 +136,7 @@ module Mappable
         if obj.location? && mappable
           add_box_set(loc, [obj], MAX_PRECISION)
         elsif obj.observation?
-          if (!will_be_grouped || !loc) && obj.lat # && !obj.lat_long_dubious?
+          if (!will_be_grouped || !loc) && obj.lat # && !obj.lat_lng_dubious?
             add_point_set(obj, [obj], MAX_PRECISION)
           elsif loc && mappable
             add_box_set(loc, [obj], MAX_PRECISION)
@@ -150,6 +147,9 @@ module Mappable
           raise("Tried to map #{obj.class} #{obj.id}.")
         end
       end
+      # Give the sets an initial sort by north value, before grouping.
+      # This gives orderly overlapping and means all boxes are clickable.
+      @sets = @sets.sort_by { |_key, value| value.north }.reverse.to_h
     end
 
     def group_objects_into_sets

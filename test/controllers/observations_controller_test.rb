@@ -17,7 +17,7 @@ class ObservationsControllerTest < FunctionalTestCase
   def sample_obs_fields
     { place_name: "Right Here, Massachusetts, USA",
       lat: "",
-      long: "",
+      lng: "",
       alt: "",
       "when(1i)" => "2007",
       "when(2i)" => "10",
@@ -145,7 +145,7 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def test_show_observation_hidden_gps
-    obs = observations(:unknown_with_lat_long)
+    obs = observations(:unknown_with_lat_lng)
     login
     get(:show, params: { id: obs.id })
     assert_match(/34.1622|118.3521/, @response.body)
@@ -1834,32 +1834,32 @@ class ObservationsControllerTest < FunctionalTestCase
 
   def test_create_observation_with_decimal_geolocation_and_unknown_name
     lat = 34.1622
-    long = -118.3521
+    lng = -118.3521
     generic_construct_observation({
                                     observation: { place_name: "",
-                                                   lat: lat, long: long },
+                                                   lat: lat, lng: lng },
                                     naming: { name: "Unknown" }
                                   }, 1, 0, 0)
     obs = assigns(:observation)
 
     assert_equal(lat.to_s, obs.lat.to_s)
-    assert_equal(long.to_s, obs.long.to_s)
+    assert_equal(lng.to_s, obs.lng.to_s)
     assert_objs_equal(Location.unknown, obs.location)
     assert_not_nil(obs.rss_log)
   end
 
   def test_create_observation_with_dms_geolocation_and_unknown_name
     lat2 = "34°9’43.92”N"
-    long2 = "118°21′7.56″W"
+    lng2 = "118°21′7.56″W"
     generic_construct_observation({
                                     observation: { place_name: "",
-                                                   lat: lat2, long: long2 },
+                                                   lat: lat2, lng: lng2 },
                                     naming: { name: "Unknown" }
                                   }, 1, 0, 0)
     obs = assigns(:observation)
 
     assert_equal("34.1622", obs.lat.to_s)
-    assert_equal("-118.3521", obs.long.to_s)
+    assert_equal("-118.3521", obs.lng.to_s)
     assert_objs_equal(Location.unknown, obs.location)
     assert_not_nil(obs.rss_log)
   end
@@ -1868,7 +1868,7 @@ class ObservationsControllerTest < FunctionalTestCase
     # Make sure it doesn't accept no location AND no lat/long.
     generic_construct_observation({
                                     observation: { place_name: "",
-                                                   lat: "", long: "" },
+                                                   lat: "", lng: "" },
                                     naming: { name: "Unknown" }
                                   }, 0, 0, 0)
   end
@@ -1877,7 +1877,7 @@ class ObservationsControllerTest < FunctionalTestCase
     # But create observation if explicitly tell it "unknown" location.
     generic_construct_observation({
                                     observation: { place_name: "Earth",
-                                                   lat: "", long: "" },
+                                                   lat: "", lng: "" },
                                     naming: { name: "Unknown" }
                                   }, 1, 0, 0)
   end
@@ -1906,7 +1906,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
   def test_create_observation_creating_class
     generic_construct_observation(
-      { observation: { place_name: "Earth", lat: "", long: "" },
+      { observation: { place_name: "Earth", lat: "", lng: "" },
         naming: { name: "Lecanoromycetes L." },
         approved_name: "Lecanoromycetes L." },
       1, 1, 1
@@ -1919,7 +1919,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
   def test_create_observation_creating_family
     params = {
-      observation: { place_name: "Earth", lat: "", long: "" },
+      observation: { place_name: "Earth", lat: "", lng: "" },
       naming: { name: "Acarosporaceae" },
       approved_name: "Acarosporaceae"
     }
@@ -1956,7 +1956,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
   def test_create_observation_creating_group
     generic_construct_observation(
-      { observation: { place_name: "Earth", lat: "", long: "" },
+      { observation: { place_name: "Earth", lat: "", lng: "" },
         naming: { name: "Morchella elata group" },
         approved_name: "Morchella elata group" },
       1, 1, 2
@@ -2324,7 +2324,7 @@ class ObservationsControllerTest < FunctionalTestCase
           when: Time.zone.now,
           place_name: "Burbank, California, USA",
           lat: "45.4545",
-          long: "-90.1234",
+          lng: "-90.1234",
           alt: "456",
           specimen: "0",
           thumb_image_id: "0",
@@ -2692,7 +2692,7 @@ class ObservationsControllerTest < FunctionalTestCase
       observation: {
         place_name: obs.location.name,
         lat: "",
-        long: "",
+        lng: "",
         alt: "",
         "when(1i)" => obs.when.year,
         "when(2i)" => obs.when.month,

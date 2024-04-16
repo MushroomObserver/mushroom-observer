@@ -101,7 +101,7 @@ class ReportTest < UnitTestCase
     assert(table.include?([obs.name_id.to_s, obs.text_name]))
   end
 
-  def test_fundis_no_exact_lat_long
+  def test_fundis_no_exact_lat_lng
     # There are two collection numbers for this observation.  I can't think of
     # any good way to ensure the order that these are rendered in the report be
     # consistent.  So I'm just going to delete one of the numbers.
@@ -143,8 +143,8 @@ class ReportTest < UnitTestCase
     do_csv_test(Report::Fundis, obs, expect, &:id)
   end
 
-  def test_fundis_with_exact_lat_long
-    obs = observations(:unknown_with_lat_long)
+  def test_fundis_with_exact_lat_lng
+    obs = observations(:unknown_with_lat_lng)
     obs.notes = {
       "Collector's_Name": "John Doe",
       Substrate: "wood chips",
@@ -189,7 +189,7 @@ class ReportTest < UnitTestCase
   end
 
   def test_fundis_with_hidden_gps
-    obs = observations(:unknown_with_lat_long)
+    obs = observations(:unknown_with_lat_lng)
     obs.update_attribute(:gps_hidden, true)
 
     expect = [
@@ -220,7 +220,7 @@ class ReportTest < UnitTestCase
       "",
       "",
       "",
-      "unknown_with_lat_long"
+      "unknown_with_lat_lng"
     ]
     do_csv_test(Report::Fundis, obs, expect, &:id)
 
@@ -535,7 +535,7 @@ class ReportTest < UnitTestCase
     table = CSV.parse(body, col_sep: report_type.separator)
     idx = query.results.sort_by(&:id).index(obs)
     assert_equal(obs.lat.to_s, table[idx + 1][LAT_INDEX])
-    assert_equal(obs.long.to_s, table[idx + 1][LONG_INDEX])
+    assert_equal(obs.lng.to_s, table[idx + 1][LONG_INDEX])
   end
 
   private
