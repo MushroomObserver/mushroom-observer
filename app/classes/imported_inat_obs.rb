@@ -15,6 +15,11 @@ class ImportedInatObs
     obs[:geoprivacy].present?
   end
 
+  def notes
+    desc = obs[:description]
+    { Other: desc.gsub(%r{<(/)p>}, "") }
+  end
+
   # :location seems simplest source for lat.
   # But [:geojason] might be possible.
   def lat

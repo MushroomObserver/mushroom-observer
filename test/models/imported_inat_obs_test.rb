@@ -39,7 +39,8 @@ class ImportedInatObsTest < UnitTestCase
 
       # miscellaneous
       specimen: false,
-      notes: { Other: "on Quercus\n\n&#8212;\n\nMirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/202555552\">observation 202555552</a> on March 15, 2024." }, # rubocop:disable Layout/LineLength
+      # notes: { Other: "on Quercus\n\n&#8212;\n\nMirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/202555552\">observation 202555552</a> on March 15, 2024." }, # rubocop:disable Layout/LineLength
+      notes: { Other: "on Quercus\n\n&#8212;\n\nOriginally posted to Mushroom Observer on Mar. 7, 2024." }, # rubocop:disable Layout/LineLength
       # FIXME: add new source
       source: nil
       # thumb_image_id: 1659475,
@@ -50,7 +51,7 @@ class ImportedInatObsTest < UnitTestCase
       # log_updated_at: Sat, 16 Mar 2024 17:22:51.000000000 EDT -04:00,
     )
 
-    %w[gps_hidden lat lng when where].each do |attribute|
+    %w[gps_hidden lat lng notes when where].each do |attribute|
       assert_equal(expected_xlation.send(attribute), import.send(attribute))
     end
 
