@@ -22,7 +22,7 @@ class ImportedInatObsTest < UnitTestCase
       # locality / geoloc stuff
       is_collection_location: true,
       lat: 31.8813, # rubocop:disable Style/ExponentialNotation
-      long: -109.244, # rubocop:disable Style/ExponentialNotation
+      lng: -109.244, # rubocop:disable Style/ExponentialNotation
       alt: 1942,
       gps_hidden: false,
       where: "Cochise Co., Arizona, USA",
