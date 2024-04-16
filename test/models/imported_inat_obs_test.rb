@@ -4,7 +4,7 @@ require("test_helper")
 
 # test MO extensions to Ruby's Hash class
 class ImportedInatObsTest < UnitTestCase
-  def test_minimal_obs
+  def test_public_obs
     # import of iNat 202555552 (which is a mirror of MO 547126)
     import =
       ImportedInatObs.new(File.read("test/fixtures/inat/one_obs_public.txt"))
@@ -50,7 +50,7 @@ class ImportedInatObsTest < UnitTestCase
       # log_updated_at: Sat, 16 Mar 2024 17:22:51.000000000 EDT -04:00,
     )
 
-    %w[when where].each do |attribute|
+    %w[lat lng when where].each do |attribute|
       assert_equal(expected_xlation.send(attribute), import.send(attribute))
     end
 
@@ -67,9 +67,6 @@ class ImportedInatObsTest < UnitTestCase
       t.integer "num_views", default: 0, null: false
       t.datetime "last_view", precision: nil
       t.integer "rss_log_id"
-      t.decimal "lat", precision: 15, scale: 10
-      t.decimal "long", precision: 15, scale: 10
-      t.string "where", limit: 1024
       t.integer "alt"
       t.string "lifeform", limit: 1024
       t.string "text_name", limit: 100

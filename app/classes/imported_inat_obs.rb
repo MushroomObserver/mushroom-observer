@@ -11,6 +11,16 @@ class ImportedInatObs
     @imported_inat_obs_data[:results].first
   end
 
+  # :location seems simplest source for lat.
+  # But [:geojason] might be possible.
+  def lat
+    obs[:location].split(",").first.to_f
+  end
+
+  def lng
+    obs[:location].split(",").second.to_f
+  end
+
   def when
     observed_on = obs[:observed_on_details]
     Date.new(observed_on[:year], observed_on[:month], observed_on[:day])
