@@ -17,7 +17,7 @@ class ImportedInatObs
 
   def notes
     desc = obs[:description]
-    { Other: desc.gsub(%r{<(/)p>}, "") }
+    { Other: desc.gsub(%r{</?p>}, "") }
   end
 
   # :location seems simplest source for lat.
