@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_04_15_115711) do
+ActiveRecord::Schema[7.1].define(version: 2024_04_16_050340) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -708,7 +708,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_15_115711) do
     t.integer "location_id"
     t.integer "image_id"
     t.string "locale", limit: 5
-    t.text "bonuses"
     t.boolean "email_comments_owner", default: true, null: false
     t.boolean "email_comments_response", default: true, null: false
     t.boolean "email_comments_all", default: false, null: false
