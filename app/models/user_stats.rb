@@ -233,10 +233,12 @@ class UserStats < ApplicationRecord
 
     # This runs after the migration, to copy columns from users to user_stats
     # It's a batch insert, so it's fast.
+    # TODO: After the initial population, drop the column `bonuses` from User,
+    # and remove references to bonuses in `pluck` and the hash here.
     def create_user_stats_for_all_users_without
       records = User.where.missing(:user_stats).
-                pluck(:id).map do |id|
-                  { user_id: id }
+                pluck(:id, :bonuses).map do |id, bonuses|
+                  { user_id: id, bonuses: bonuses }
                 end
 
       UserStats.insert_all(records)
