@@ -503,6 +503,7 @@
   email_addresss: email addresses
   FIELD_SLIP_PREFIX: Field Slip Prefix
   field_slip_prefix: field slip prefix
+  FILENAME: Filename
   FULL_NAME: Full Name
   full_name: full name
   FULL_NAMES: Full Names
@@ -580,6 +581,7 @@
   reviewer: reviewer
   REVIEWERS: Reviewers
   reviewers: reviewers
+  SECONDS: Seconds
   SIZE: Size
   size: size
   STATUS: Status

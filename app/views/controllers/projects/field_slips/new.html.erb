@@ -21,16 +21,16 @@ action = { controller: "/projects/field_slips", action: :create,
       <table class="table">
         <thead>
           <tr>
-            <th scope="col">File</th>
-            <th scope="col">Time</th>
-            <th scope="col">Status</th>
+            <th scope="col"><%= :FILENAME.t %></th>
+            <th scope="col"><%= :SECONDS.t %></th>
+            <th scope="col"><%= :STATUS.t %></th>
           </tr>
         </thead>
         <tbody>
-          <% @project.trackers.each do |tracker| %>
+          <% @project.trackers.order(id: :desc).each do |tracker| %>
             <tr>
               <td><%= field_slip_link(tracker) %></td>
-              <td><%= tracker.elapsed_time %></td>
+              <td><%= number_with_precision(tracker.elapsed_time, precision: 1) %></td>
               <td><%= tracker.status %></td>
             </tr>
           <% end %>
