@@ -11,7 +11,7 @@ class ImportedInatObsTest < UnitTestCase
     # How import should be translated
     # commented-out fields will be part of the created MO Obs,
     # but are not supplied by
-    xlation = Observation.new(
+    expected_xlation = Observation.new(
       # id: 547126,
       # user_id: 4468,
       # created_at: Thu, 07 Mar 2024 18:32:18.000000000 EST -05:00,
@@ -51,7 +51,7 @@ class ImportedInatObsTest < UnitTestCase
     )
 
     %w[when where].each do |attribute|
-      assert_equal(xlation.send(attribute), import.send(attribute))
+      assert_equal(expected_xlation.send(attribute), import.send(attribute))
     end
 
 =begin
