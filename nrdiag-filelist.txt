@@ -1,0 +1,195 @@
+List of files in zipfile
+Stored file name:Base/Config/newrelic.yml
+Original path:/var/web/mo/config/newrelic.yml
+
+Stored file name:Base/Config/newrelic-infra.yml
+Original path:/etc/newrelic-infra.yml
+
+Stored file name:Infra/Config/docker-config.yml
+Original path:/etc/newrelic-infra/integrations.d/docker-config.yml
+
+Stored file name:Infra/Config/discovered.yml
+Original path:/etc/newrelic-infra/logging.d/discovered.yml
+
+Stored file name:Infra/Config/logging.yml
+Original path:/etc/newrelic-infra/logging.d/logging.yml
+
+Stored file name:Base/Log/newrelic_agent.log
+Original path:/var/web/mo/log/newrelic_agent.log
+
+Stored file name:Ruby/Config/Gemfile
+Original path:/var/web/mo/Gemfile
+
+Stored file name:Ruby/Config/Gemfile.lock
+Original path:/var/web/mo/Gemfile.lock
+
+Stored file name:Infra/Config/system.sent
+Original path:/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/system.sent
+
+Stored file name:Infra/Config/dpkg.pending
+Original path:/var/db/newrelic-infra/data/.delta_repo/packages/__nria_localentity/dpkg.pending
+
+Stored file name:Infra/Config/users.json
+Original path:/var/db/newrelic-infra/data/.delta_repo/sessions/__nria_localentity/users.json
+
+Stored file name:Infra/Config/systemd.json
+Original path:/var/db/newrelic-infra/data/services/__nria_localentity/systemd.json
+
+Stored file name:Infra/Config/modules.sent
+Original path:/var/db/newrelic-infra/data/.delta_repo/kernel/__nria_localentity/modules.sent
+
+Stored file name:Infra/Config/host_aliases.pending
+Original path:/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/host_aliases.pending
+
+Stored file name:Infra/Config/systemd.pending
+Original path:/var/db/newrelic-infra/data/.delta_repo/services/__nria_localentity/systemd.pending
+
+Stored file name:Infra/Config/network_interfaces.json
+Original path:/var/db/newrelic-infra/data/system/__nria_localentity/network_interfaces.json
+
+Stored file name:Infra/Config/sshd.sent
+Original path:/var/db/newrelic-infra/data/.delta_repo/config/__nria_localentity/sshd.sent
+
+Stored file name:Infra/Config/sysctl.sent
+Original path:/var/db/newrelic-infra/data/.delta_repo/kernel/__nria_localentity/sysctl.sent
+
+Stored file name:Infra/Config/proxy_config.json
+Original path:/var/db/newrelic-infra/data/metadata/__nria_localentity/proxy_config.json
+
+Stored file name:Infra/Config/sysctl.json
+Original path:/var/db/newrelic-infra/data/.delta_repo/kernel/__nria_localentity/sysctl.json
+
+Stored file name:Infra/Config/network_interfaces.pending
+Original path:/var/db/newrelic-infra/data/.delta_repo/system/__nria_localentity/network_interfaces.pending
+
+Stored file name:Infra/Config/attributes.sent
+Original path:/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/attributes.sent
+
+Stored file name:Infra/Config/proxy_config.sent
+Original path:/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/proxy_config.sent
+
+Stored file name:Infra/Config/sysctl(1).json
+Original path:/var/db/newrelic-infra/data/kernel/__nria_localentity/sysctl.json
+
+Stored file name:Infra/Config/host_aliases.json
+Original path:/var/db/newrelic-infra/data/metadata/__nria_localentity/host_aliases.json
+
+Stored file name:Infra/Config/sshd.json
+Original path:/var/db/newrelic-infra/data/.delta_repo/config/__nria_localentity/sshd.json
+
+Stored file name:Infra/Config/attributes.json
+Original path:/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/attributes.json
+
+Stored file name:Infra/Config/modules.json
+Original path:/var/db/newrelic-infra/data/.delta_repo/kernel/__nria_localentity/modules.json
+
+Stored file name:Infra/Config/host_aliases(1).json
+Original path:/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/host_aliases.json
+
+Stored file name:Infra/Config/proxy_config.pending
+Original path:/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/proxy_config.pending
+
+Stored file name:Infra/Config/dpkg.sent
+Original path:/var/db/newrelic-infra/data/.delta_repo/packages/__nria_localentity/dpkg.sent
+
+Stored file name:Infra/Config/users(1).json
+Original path:/var/db/newrelic-infra/data/sessions/__nria_localentity/users.json
+
+Stored file name:Infra/Config/agent_config.sent
+Original path:/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/agent_config.sent
+
+Stored file name:Infra/Config/network_interfaces(1).json
+Original path:/var/db/newrelic-infra/data/.delta_repo/system/__nria_localentity/network_interfaces.json
+
+Stored file name:Infra/Config/system.json
+Original path:/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/system.json
+
+Stored file name:Infra/Config/dpkg.json
+Original path:/var/db/newrelic-infra/data/packages/__nria_localentity/dpkg.json
+
+Stored file name:Infra/Config/modules(1).json
+Original path:/var/db/newrelic-infra/data/kernel/__nria_localentity/modules.json
+
+Stored file name:Infra/Config/__nria_localentity
+Original path:/var/db/newrelic-infra/data/last_success/__nria_localentity
+
+Stored file name:Infra/Config/agent_config.json
+Original path:/var/db/newrelic-infra/data/metadata/__nria_localentity/agent_config.json
+
+Stored file name:Infra/Config/system(1).json
+Original path:/var/db/newrelic-infra/data/metadata/__nria_localentity/system.json
+
+Stored file name:Infra/Config/pidfile.json
+Original path:/var/db/newrelic-infra/data/services/__nria_localentity/pidfile.json
+
+Stored file name:Infra/Config/users.pending
+Original path:/var/db/newrelic-infra/data/.delta_repo/sessions/__nria_localentity/users.pending
+
+Stored file name:Infra/Config/users.sent
+Original path:/var/db/newrelic-infra/data/.delta_repo/sessions/__nria_localentity/users.sent
+
+Stored file name:Infra/Config/modules.pending
+Original path:/var/db/newrelic-infra/data/.delta_repo/kernel/__nria_localentity/modules.pending
+
+Stored file name:Infra/Config/systemd.sent
+Original path:/var/db/newrelic-infra/data/.delta_repo/services/__nria_localentity/systemd.sent
+
+Stored file name:Infra/Config/sshd(1).json
+Original path:/var/db/newrelic-infra/data/config/__nria_localentity/sshd.json
+
+Stored file name:Infra/Config/__nria_localentity(1)
+Original path:/var/db/newrelic-infra/data/last_entityID/__nria_localentity
+
+Stored file name:Infra/Config/host_aliases.sent
+Original path:/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/host_aliases.sent
+
+Stored file name:Infra/Config/pidfile.pending
+Original path:/var/db/newrelic-infra/data/.delta_repo/services/__nria_localentity/pidfile.pending
+
+Stored file name:Infra/Config/pidfile(1).json
+Original path:/var/db/newrelic-infra/data/.delta_repo/services/__nria_localentity/pidfile.json
+
+Stored file name:Infra/Config/systemd(1).json
+Original path:/var/db/newrelic-infra/data/.delta_repo/services/__nria_localentity/systemd.json
+
+Stored file name:Infra/Config/attributes(1).json
+Original path:/var/db/newrelic-infra/data/metadata/__nria_localentity/attributes.json
+
+Stored file name:Infra/Config/agent_config.pending
+Original path:/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/agent_config.pending
+
+Stored file name:Infra/Config/attributes.pending
+Original path:/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/attributes.pending
+
+Stored file name:Infra/Config/proxy_config(1).json
+Original path:/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/proxy_config.json
+
+Stored file name:Infra/Config/dpkg(1).json
+Original path:/var/db/newrelic-infra/data/.delta_repo/packages/__nria_localentity/dpkg.json
+
+Stored file name:Infra/Config/pidfile.sent
+Original path:/var/db/newrelic-infra/data/.delta_repo/services/__nria_localentity/pidfile.sent
+
+Stored file name:Infra/Config/delta_id_cache.json
+Original path:/var/db/newrelic-infra/data/.delta_repo/delta_id_cache.json
+
+Stored file name:Infra/Config/agent_config(1).json
+Original path:/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/agent_config.json
+
+Stored file name:Infra/Config/system.pending
+Original path:/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/system.pending
+
+Stored file name:Infra/Config/network_interfaces.sent
+Original path:/var/db/newrelic-infra/data/.delta_repo/system/__nria_localentity/network_interfaces.sent
+
+Stored file name:Infra/Config/sshd.pending
+Original path:/var/db/newrelic-infra/data/.delta_repo/config/__nria_localentity/sshd.pending
+
+Stored file name:Infra/Config/sysctl.pending
+Original path:/var/db/newrelic-infra/data/.delta_repo/kernel/__nria_localentity/sysctl.pending
+
+Stored file name:nrdiag-output.json
+Original path:./nrdiag-output.json
+
+Stored file name:nrdiag-filelist.txt
+Original path:./nrdiag-filelist.txt

@@ -701,6 +701,10 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
       # It should never reach here.
       else
+        Rails.logger.warn("Unexpected error: did not receive a valid upload " \
+                           "stream from the webserver (we got an instance of " \
+                           "#{upload_handle.class.name}). Send this to the " \
+                           "webmaster, please.  Backtrace: #{caller[0..20]}...")
         errors.add(:image, "Unexpected error: did not receive a valid upload " \
                            "stream from the webserver (we got an instance of " \
                            "#{upload_handle.class.name}). Send this to the " \

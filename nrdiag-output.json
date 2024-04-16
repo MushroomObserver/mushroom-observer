@@ -1,0 +1,1918 @@
+{
+	"RunDate": "2023-01-01T19:10:17.498125285Z",
+	"NRDiagVersion": "2.2.5",
+	"Configuration": {
+		"Verbose": false,
+		"Quiet": false,
+		"VeryQuiet": false,
+		"YesToAll": false,
+		"ShowOverrideHelp": false,
+		"AutoAttach": false,
+		"ProxySpecified": false,
+		"SkipVersionCheck": false,
+		"Tasks": "",
+		"ConfigFile": "",
+		"Override": "",
+		"OutputPath": "./",
+		"Filter": "success,warning,failure,error,info",
+		"BrowserURL": "",
+		"Suites": "",
+		"Include": ""
+	},
+	"Results": [
+		{
+			"Identifier": {
+				"Category": "Base",
+				"Subcategory": "Env",
+				"Name": "HostInfo"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Info",
+				"Summary": "Collected host information",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": {
+					"Hostname": "mushroomobserver",
+					"OS": "linux",
+					"Platform": "ubuntu",
+					"PlatformFamily": "debian",
+					"PlatformVersion": "20.04",
+					"KernelVersion": "5.4.0-132-generic",
+					"KernelArch": "x86_64",
+					"CPUs": [
+						{
+							"Cores": 1,
+							"Mhz": 2199.998
+						},
+						{
+							"Cores": 1,
+							"Mhz": 2199.998
+						}
+					],
+					"TotalVirtualMemoryMB": 1983
+				}
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "DotNetCore",
+				"Subcategory": "Agent",
+				"Name": "Installed"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Unable to locate the .NET Core agent's installation files",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Browser",
+				"Subcategory": "Agent",
+				"Name": "GetSource"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "This health check requires the usage of the command option '-browser-url'. Please re-run Diagnostics CLI using the flag in this manner: ./nrdiag -browser-url http://YOUR-WEBSITE-URL -suites browser",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Base",
+				"Subcategory": "Env",
+				"Name": "DetectAWS"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "AWS metadata endpoint timeout",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Java",
+				"Subcategory": "AppServer",
+				"Name": "WebSphere"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Warning",
+				"Summary": "We suspect this is a WebSphere environment but we're unable to determine the version. Supported status is unknown.",
+				"URL": "https://docs.newrelic.com/docs/agents/java-agent/additional-installation/ibm-websphere-application-server",
+				"FilesToCopy": null,
+				"Payload": {
+					"Name": "",
+					"Version": "Unknown",
+					"Status": "Unknown"
+				}
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Base",
+				"Subcategory": "Env",
+				"Name": "CollectEnvVars"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Info",
+				"Summary": "Gathered Environment variables of current shell.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": {
+					"HOME": "/home/mo",
+					"PATH": "/usr/local/rvm/gems/ruby-3.1.2/bin:/usr/local/rvm/gems/ruby-3.1.2@global/bin:/usr/local/rvm/rubies/ruby-3.1.2/bin:/usr/local/rvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
+					"RAILS_ENV": "production"
+				}
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Base",
+				"Subcategory": "Env",
+				"Name": "CollectSysProps"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "No new relic system properties were found",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Base",
+				"Subcategory": "Config",
+				"Name": "Collect"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Success",
+				"Summary": "There were 2 config file(s) found",
+				"URL": "",
+				"FilesToCopy": [
+					{
+						"Path": "/var/web/mo/config/newrelic.yml",
+						"Name": "./newrelic.yml",
+						"StoredName": "newrelic.yml",
+						"Streamed": false,
+						"Identifier": ""
+					},
+					{
+						"Path": "/etc/newrelic-infra.yml",
+						"Name": "./newrelic-infra.yml",
+						"StoredName": "newrelic-infra.yml",
+						"Streamed": false,
+						"Identifier": ""
+					}
+				],
+				"Payload": [
+					{
+						"FileName": "newrelic.yml",
+						"FilePath": "/var/web/mo/config/"
+					},
+					{
+						"FileName": "newrelic-infra.yml",
+						"FilePath": "/etc/"
+					}
+				]
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Base",
+				"Subcategory": "Config",
+				"Name": "Validate"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Success",
+				"Summary": "Successfully parsed config file(s) - See json for full detail",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": [
+					{
+						"FileName": "newrelic.yml",
+						"FilePath": "/var/web/mo/config/",
+						"Status": "Success",
+						"Error": ""
+					},
+					{
+						"FileName": "newrelic-infra.yml",
+						"FilePath": "/etc/",
+						"Status": "Success",
+						"Error": ""
+					}
+				]
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Node",
+				"Subcategory": "Config",
+				"Name": "Agent"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "New Relic configuration not detected for this specific agent at the location where Diagnostics CLI was ran. This will stop other health checks (targetting this agent) from running. If you are attempting to troubleshoot for this specific agent, re-run Diagnostics CLI using the command-line option '-config-file' to point to the path to this agent configuration file.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Node",
+				"Subcategory": "Env",
+				"Name": "Version"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Node agent config file not detected. This task did not run",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Node",
+				"Subcategory": "Env",
+				"Name": "NpmVersion"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Node.js was not detected. This task didn't run.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Node",
+				"Subcategory": "Env",
+				"Name": "Dependencies"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "NPM is not installed. This task did not run",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Node",
+				"Subcategory": "Agent",
+				"Name": "Version"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Node Modules not detected. This task did not run.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "DotNetCore",
+				"Subcategory": "Config",
+				"Name": "Agent"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": ".NET Core Agent not installed, not checking config",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Java",
+				"Subcategory": "Config",
+				"Name": "Agent"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "New Relic configuration not detected for this specific agent at the location where Diagnostics CLI was ran. This will stop other health checks (targetting this agent) from running. If you are attempting to troubleshoot for this specific agent, re-run Diagnostics CLI using the command-line option '-config-file' to point to the path to this agent configuration file.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Java",
+				"Subcategory": "Env",
+				"Name": "Process"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Java agent config file was not detected on this host. This task did not run",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "DotNetCore",
+				"Subcategory": "Env",
+				"Name": "Versions"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Error",
+				"Summary": "Unable to complete this health check because we ran into some unexpected errors when attempting to collect this application's .NET Core version:\nUnable to run 'dotnet --info':\n%w\nexec: \"dotnet\": executable file not found in $PATHUnable to run 'dotnet --version':\n%w\nexec: \"dotnet\": executable file not found in $PATH",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "DotNetCore",
+				"Subcategory": "Env",
+				"Name": "Process"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Did not detect .Net Core as being installed, skipping this task.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Base",
+				"Subcategory": "Config",
+				"Name": "ProxyDetect"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "No proxy server settings found for this app",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "PHP",
+				"Subcategory": "Config",
+				"Name": "Agent"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "New Relic configuration not detected for this specific agent at the location where Diagnostics CLI was ran. This will stop other health checks (targetting this agent) from running. If you are attempting to troubleshoot for this specific agent, re-run Diagnostics CLI using the command-line option '-config-file' to point to the path to this agent configuration file.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "PHP",
+				"Subcategory": "Agent",
+				"Name": "Version"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "No validations detect from PHP/Config/Agent. This task did not run",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Ruby",
+				"Subcategory": "Config",
+				"Name": "Agent"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Success",
+				"Summary": "Ruby agent identified as present on system",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": [
+					{
+						"FileName": "newrelic.yml",
+						"FilePath": "/var/web/mo/config/",
+						"Status": "Success",
+						"Error": ""
+					}
+				]
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Infra",
+				"Subcategory": "Config",
+				"Name": "Agent"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Success",
+				"Summary": "Infra agent identified as present on system from validated config file",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": [
+					{
+						"FileName": "newrelic-infra.yml",
+						"FilePath": "/etc/",
+						"Status": "Success",
+						"Error": ""
+					}
+				]
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Infra",
+				"Subcategory": "Config",
+				"Name": "IntegrationsCollect"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Success",
+				"Summary": "3 on-host integration yml file(s) found",
+				"URL": "",
+				"FilesToCopy": [
+					{
+						"Path": "/etc/newrelic-infra/integrations.d/docker-config.yml",
+						"Name": "./docker-config.yml",
+						"StoredName": "docker-config.yml",
+						"Streamed": false,
+						"Identifier": ""
+					},
+					{
+						"Path": "/etc/newrelic-infra/logging.d/discovered.yml",
+						"Name": "./discovered.yml",
+						"StoredName": "discovered.yml",
+						"Streamed": false,
+						"Identifier": ""
+					},
+					{
+						"Path": "/etc/newrelic-infra/logging.d/logging.yml",
+						"Name": "./logging.yml",
+						"StoredName": "logging.yml",
+						"Streamed": false,
+						"Identifier": ""
+					}
+				],
+				"Payload": [
+					{
+						"FileName": "docker-config.yml",
+						"FilePath": "/etc/newrelic-infra/integrations.d/"
+					},
+					{
+						"FileName": "discovered.yml",
+						"FilePath": "/etc/newrelic-infra/logging.d/"
+					},
+					{
+						"FileName": "logging.yml",
+						"FilePath": "/etc/newrelic-infra/logging.d/"
+					}
+				]
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Infra",
+				"Subcategory": "Config",
+				"Name": "IntegrationsValidate"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Success",
+				"Summary": "Successfully validated 3 yaml file(s)",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": [
+					{
+						"FileName": "docker-config.yml",
+						"FilePath": "/etc/newrelic-infra/integrations.d/",
+						"Status": "None",
+						"Error": ""
+					},
+					{
+						"FileName": "discovered.yml",
+						"FilePath": "/etc/newrelic-infra/logging.d/",
+						"Status": "None",
+						"Error": ""
+					},
+					{
+						"FileName": "logging.yml",
+						"FilePath": "/etc/newrelic-infra/logging.d/",
+						"Status": "None",
+						"Error": ""
+					}
+				]
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Base",
+				"Subcategory": "Log",
+				"Name": "Copy"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Warning",
+				"Summary": "Succesfully collected one or more New Relic Log file(s). Those file names will be listed in the nrdiag-output.json, under the payload section with the field 'CanCollect' set to true.\n\nWarning, some log files were not collected:/var/log/syslog\nIf those logs are relevant to this issue and you are working with New Relic Support, you will need to manually provide those logs.",
+				"URL": "https://docs.newrelic.com/docs/agents/manage-apm-agents/troubleshooting/generate-new-relic-agent-logs-troubleshooting",
+				"FilesToCopy": [
+					{
+						"Path": "/var/web/mo/log/newrelic_agent.log",
+						"Name": "Base/Log/newrelic_agent.log",
+						"Streamed": false
+					}
+				],
+				"Payload": [
+					{
+						"FileName": "syslog",
+						"FilePath": "/var/log/",
+						"Source": {
+							"FoundBy": "Found by looking at standard locations",
+							"KeyVals": null,
+							"FullPath": "/var/log/syslog"
+						},
+						"IsSecureLocation": true,
+						"CanCollect": false,
+						"ReasonToNotCollect": "open /var/log/syslog: permission denied"
+					},
+					{
+						"FileName": "newrelic_agent.log",
+						"FilePath": "/var/web/mo/log/",
+						"Source": {
+							"FoundBy": "Found by looking at standard locations",
+							"KeyVals": null,
+							"FullPath": "/var/web/mo/log/newrelic_agent.log"
+						},
+						"IsSecureLocation": false,
+						"CanCollect": true,
+						"ReasonToNotCollect": ""
+					}
+				]
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "PHP",
+				"Subcategory": "Daemon",
+				"Name": "Running"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "PHP Agent was not detected on this host. Skipping daemon detection.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Python",
+				"Subcategory": "Config",
+				"Name": "Agent"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "New Relic configuration not detected for this specific agent at the location where Diagnostics CLI was ran. This will stop other health checks (targetting this agent) from running. If you are attempting to troubleshoot for this specific agent, re-run Diagnostics CLI using the command-line option '-config-file' to point to the path to this agent configuration file.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Python",
+				"Subcategory": "Env",
+				"Name": "Version"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Python Agent not installed. This task didn't run.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "DotNetCore",
+				"Subcategory": "Log",
+				"Name": "LevelCollect"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": ".NET Core Agent not installed, skipping this task.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "DotNetCore",
+				"Subcategory": "Log",
+				"Name": "LevelValidate"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": ".NET Core Agent not installed, skipping this task.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "DotNetCore",
+				"Subcategory": "Requirements",
+				"Name": "OS"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Did not detect .Net Core Agent as being installed, skipping this task.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Ruby",
+				"Subcategory": "Env",
+				"Name": "Version"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Info",
+				"Summary": "ruby 3.1.2p20 (2022-04-12 revision 4491bb740a) [x86_64-linux]",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": "ruby 3.1.2p20 (2022-04-12 revision 4491bb740a) [x86_64-linux]"
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "PHP",
+				"Subcategory": "Env",
+				"Name": "PHPinfoCLI"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "PHP Agent was not detected on this host. Skipping PHP info check.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Base",
+				"Subcategory": "Containers",
+				"Name": "DetectDocker"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Error retrieving Docker Daemon info: exec: \"docker\": executable file not found in $PATH - ",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": {
+					"Driver": "",
+					"ServerVersion": "",
+					"MemTotal": 0,
+					"NCPU": 0
+				}
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Java",
+				"Subcategory": "JVM",
+				"Name": "VendorsVersions"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "This task did not detect any running Java processes on this system.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Synthetics",
+				"Subcategory": "Minion",
+				"Name": "DetectCPM"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Docker Daemon not available to detect CPM",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Synthetics",
+				"Subcategory": "Minion",
+				"Name": "CollectLogs"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "No CPMs detected to collect logs from",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Infra",
+				"Subcategory": "Agent",
+				"Name": "Version"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Info",
+				"Summary": "1.36.0",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": {
+					"Major": 1,
+					"Minor": 36,
+					"Patch": 0,
+					"Build": 0
+				}
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Infra",
+				"Subcategory": "Config",
+				"Name": "IntegrationsMatch"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Success",
+				"Summary": "Found matching integration files",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": {
+					"IntegrationFilePairs": {
+						"docker": {
+							"Configuration": {
+								"FileName": "docker-config.yml",
+								"FilePath": "/etc/newrelic-infra/integrations.d/",
+								"Status": "None",
+								"Error": ""
+							},
+							"Definition": {
+								"FileName": "",
+								"FilePath": "",
+								"Status": "None",
+								"Error": ""
+							}
+						}
+					},
+					"Errors": []
+				}
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Java",
+				"Subcategory": "Env",
+				"Name": "Version"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Warning",
+				"Summary": "Java not found in PATH",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Infra",
+				"Subcategory": "Config",
+				"Name": "ValidateJMX"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "No JMX Integration config or definition files were found. Task not executed.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Android",
+				"Subcategory": "Agent",
+				"Name": "Detect"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Android environment not detected",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "iOS",
+				"Subcategory": "Env",
+				"Name": "Detect"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "iOS environment not detected",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Base",
+				"Subcategory": "Config",
+				"Name": "LicenseKey"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Warning",
+				"Summary": "Multiple license keys detected:\n     'a233c781525e362d373c967b60f44ffe25d0NRAL' from '/var/web/mo/config/newrelic.yml'\n     '7cc43bdee5d6c1eecea4328a3f541347FFFFNRAL' from '/etc/newrelic-infra.yml'\n",
+				"URL": "https://docs.newrelic.com/docs/using-new-relic/cross-product-functions/install-configure/configure-agent",
+				"FilesToCopy": null,
+				"Payload": [
+					{
+						"Value": "a233c781525e362d373c967b60f44ffe25d0NRAL",
+						"Source": "/var/web/mo/config/newrelic.yml"
+					},
+					{
+						"Value": "7cc43bdee5d6c1eecea4328a3f541347FFFFNRAL",
+						"Source": "/etc/newrelic-infra.yml"
+					}
+				]
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Base",
+				"Subcategory": "Config",
+				"Name": "ValidateLicenseKey"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Warning",
+				"Summary": "We validated 2 license key(s):\nThe license key found in /var/web/mo/config/newrelic.yml passed our validation check when verifying against your account:\n a233c781525e362d373c967b60f44ffe25d0NRAL\nNote: If your agent is reporting an 'Invalid license key' log entry for this valid License key, reach out to New Relic support to verify any issues in our end.\n\nThe license key found in /etc/newrelic-infra.yml did not match the one assigned to your account:\n7cc43bdee5d6c1eecea4328a3f541347FFFFNRAL\nIf you are not using the account's original license key, you can ignore this warning. The Diagnostics CLI only validates the account's original license key. Read more about license keys - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#license-key\n\n",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": {
+					"a233c781525e362d373c967b60f44ffe25d0NRAL": [
+						"/var/web/mo/config/newrelic.yml"
+					]
+				}
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Base",
+				"Subcategory": "Config",
+				"Name": "RegionDetect"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Info",
+				"Summary": "1 unique New Relic region(s) detected from config.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": [
+					"us01"
+				]
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Base",
+				"Subcategory": "Collector",
+				"Name": "ConnectEU"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "EU Region not detected, skipping EU collector connect check",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Ruby",
+				"Subcategory": "Agent",
+				"Name": "Version"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Info",
+				"Summary": "8.14.0.0",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": [
+					{
+						"Major": 8,
+						"Minor": 14,
+						"Patch": 0,
+						"Build": 0
+					}
+				]
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Infra",
+				"Subcategory": "Agent",
+				"Name": "Connect"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Success",
+				"Summary": " Successfully connected to us01 Infrastructure API endpoint.",
+				"URL": "https://docs.newrelic.com/docs/apm/new-relic-apm/getting-started/networks",
+				"FilesToCopy": null,
+				"Payload": {
+					"us01": "https://infra-api.newrelic.com"
+				}
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Java",
+				"Subcategory": "Appserver",
+				"Name": "JBossAsCheck"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Java/Env/Process did not pass our validation. This task did not run.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Python",
+				"Subcategory": "Env",
+				"Name": "Dependencies"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Python Agent not installed. This task didn't run.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Python",
+				"Subcategory": "Agent",
+				"Name": "Version"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Python agent not detected",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Python",
+				"Subcategory": "Requirements",
+				"Name": "PythonVersion"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Python version not detected. This task didn't run.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Ruby",
+				"Subcategory": "Config",
+				"Name": "Collect"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Success",
+				"Summary": "Successfully added.",
+				"URL": "",
+				"FilesToCopy": [
+					{
+						"Path": "/var/web/mo/Gemfile",
+						"Name": "./Gemfile",
+						"StoredName": "Gemfile",
+						"Streamed": false,
+						"Identifier": ""
+					},
+					{
+						"Path": "/var/web/mo/Gemfile.lock",
+						"Name": "./Gemfile.lock",
+						"StoredName": "Gemfile.lock",
+						"Streamed": false,
+						"Identifier": ""
+					}
+				],
+				"Payload": [
+					"/var/web/mo/Gemfile",
+					"/var/web/mo/Gemfile.lock"
+				]
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Ruby",
+				"Subcategory": "Config",
+				"Name": "IncompatibleGems"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Success",
+				"Summary": "There were no incompatible gems found.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Node",
+				"Subcategory": "Env",
+				"Name": "NpmPackage"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Node agent config file not detected. This task did not run",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "DotNetCore",
+				"Subcategory": "Requirements",
+				"Name": "ProcessorType"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": ".NET Core Agent was not detected, skipping this task.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Base",
+				"Subcategory": "Config",
+				"Name": "ValidateHSM"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Success",
+				"Summary": "High Security Mode setting for accounts associated with found license keys match local configuration.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": [
+					{
+						"LicenseKey": "a233c781525e362d373c967b60f44ffe25d0NRAL",
+						"AccountHSM": false,
+						"LocalHSM": {
+							"/var/web/mo/config/newrelic.yml": false
+						}
+					}
+				]
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Java",
+				"Subcategory": "Config",
+				"Name": "Validate"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Java agent not detected. This task did not run.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Infra",
+				"Subcategory": "Env",
+				"Name": "ValidateZookeeperPath"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "No Kafka Integration config or definition files were found. Task not executed.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Browser",
+				"Subcategory": "Agent",
+				"Name": "Detect"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "This task did not run because the previous task 'Browser/Agent/GetSource' either did not run or was not successful.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Base",
+				"Subcategory": "Config",
+				"Name": "AppName"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Success",
+				"Summary": "1 unique application name(s) found: MushroomObserver",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": [
+					{
+						"Name": "MushroomObserver",
+						"FilePath": "/var/web/mo/config/newrelic.yml"
+					}
+				]
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Ruby",
+				"Subcategory": "Env",
+				"Name": "Process"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Success",
+				"Summary": "",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": [
+					{
+						"Proc": {
+							"pid": 313565
+						},
+						"Cwd": "/var/web/mo",
+						"EnvVars": {
+							"HOME": "/home/mo",
+							"PATH": "/usr/local/rvm/gems/ruby-3.1.2/bin:/usr/local/rvm/gems/ruby-3.1.2@global/bin:/usr/local/rvm/rubies/ruby-3.1.2/bin:/usr/local/rvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
+							"RAILS_ENV": "production"
+						}
+					},
+					{
+						"Proc": {
+							"pid": 2990279
+						},
+						"Cwd": "/var/web/mo",
+						"EnvVars": {
+							"HOME": "/home/mo",
+							"PATH": "/usr/local/rvm/gems/ruby-3.1.2/bin:/usr/local/rvm/gems/ruby-3.1.2@global/bin:/usr/local/rvm/rubies/ruby-3.1.2/bin:/usr/local/rvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
+							"RAILS_ENV": "production"
+						}
+					},
+					{
+						"Proc": {
+							"pid": 2990280
+						},
+						"Cwd": "/var/web/mo",
+						"EnvVars": {
+							"HOME": "/home/mo",
+							"PATH": "/usr/local/rvm/gems/ruby-3.1.2/bin:/usr/local/rvm/gems/ruby-3.1.2@global/bin:/usr/local/rvm/rubies/ruby-3.1.2/bin:/usr/local/rvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
+							"RAILS_ENV": "production"
+						}
+					},
+					{
+						"Proc": {
+							"pid": 2990281
+						},
+						"Cwd": "/var/web/mo",
+						"EnvVars": {
+							"HOME": "/home/mo",
+							"PATH": "/usr/local/rvm/gems/ruby-3.1.2/bin:/usr/local/rvm/gems/ruby-3.1.2@global/bin:/usr/local/rvm/rubies/ruby-3.1.2/bin:/usr/local/rvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
+							"RAILS_ENV": "production"
+						}
+					},
+					{
+						"Proc": {
+							"pid": 2990282
+						},
+						"Cwd": "/var/web/mo",
+						"EnvVars": {
+							"HOME": "/home/mo",
+							"PATH": "/usr/local/rvm/gems/ruby-3.1.2/bin:/usr/local/rvm/gems/ruby-3.1.2@global/bin:/usr/local/rvm/rubies/ruby-3.1.2/bin:/usr/local/rvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
+							"RAILS_ENV": "production"
+						}
+					},
+					{
+						"Proc": {
+							"pid": 3000681
+						},
+						"Cwd": "/var/web/mo",
+						"EnvVars": {
+							"HOME": "/home/mo",
+							"PATH": "/usr/local/rvm/gems/ruby-3.1.2/bin:/usr/local/rvm/gems/ruby-3.1.2@global/bin:/usr/local/rvm/rubies/ruby-3.1.2/bin:/usr/local/rvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
+							"RAILS_ENV": "production"
+						}
+					}
+				]
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Ruby",
+				"Subcategory": "Requirements",
+				"Name": "Version"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Failure",
+				"Summary": "Your ruby 3.1.2p20 (2022-04-12 revision 4491bb740a) [x86_64-linux] Ruby version is not in the list of supported versions by the Ruby Agent. Please review our documentation on version requirements",
+				"URL": "https://docs.newrelic.com/docs/agents/ruby-agent/getting-started/ruby-agent-requirements-supported-frameworks",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Java",
+				"Subcategory": "Agent",
+				"Name": "Version"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Java agent not detected. Task did not run.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Infra",
+				"Subcategory": "Config",
+				"Name": "IntegrationsValidateJson"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Unable to locate *-config.yml files with known JSON fields to validate.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "DotNetCore",
+				"Subcategory": "CustomInstrumentation",
+				"Name": "Collect"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": ".NET Core Agent not installed, not checking for custom instrumentation files",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Java",
+				"Subcategory": "JVM",
+				"Name": "Permissions"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Java/Env/Process check did not pass. This task did not run.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Base",
+				"Subcategory": "Env",
+				"Name": "DetectAzure"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Detected that this is not an Azure environment.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Infra",
+				"Subcategory": "Env",
+				"Name": "ClockSkew"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Success",
+				"Summary": "System clock in sync with New Relic collector",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Base",
+				"Subcategory": "Env",
+				"Name": "InitSystem"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Info",
+				"Summary": "Systemd detected",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": "Systemd"
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Infra",
+				"Subcategory": "Env",
+				"Name": "NrjmxMbeans"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "No jmx-config.yml was found or Infra/Config/ValidateJMX did not pass our validation (in which case, the issue will need to be resolved first before this task can be executed.)",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Java",
+				"Subcategory": "Config",
+				"Name": "ValidateSettings"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "No config files found",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Infra",
+				"Subcategory": "Log",
+				"Name": "LevelCheck"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Warning",
+				"Summary": "Infrastructure logging level not set to verbose (debug/trace). If troubleshooting an Infrastructure issue, please set log level to: debug in newrelic-infra.yml.",
+				"URL": "https://docs.newrelic.com/docs/infrastructure/new-relic-infrastructure/troubleshooting/generate-logs-troubleshooting-infrastructure",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Base",
+				"Subcategory": "Collector",
+				"Name": "ConnectUS"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Warning",
+				"Summary": "collector.newrelic.com (US Region) returned a non-200 STATUS CODE: 404\nPlease check network and proxy settings and try again or see -help for more options.\nResponse Body: {}",
+				"URL": "https://docs.newrelic.com/docs/apm/new-relic-apm/getting-started/networks",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Infra",
+				"Subcategory": "Config",
+				"Name": "DataDirectoryCollect"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Success",
+				"Summary": "New Relic Infrastructure data directory found",
+				"URL": "",
+				"FilesToCopy": [
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/system.sent",
+						"Name": "Infra/Config/system.sent",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/packages/__nria_localentity/dpkg.pending",
+						"Name": "Infra/Config/dpkg.pending",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/sessions/__nria_localentity/users.json",
+						"Name": "Infra/Config/users.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/services/__nria_localentity/systemd.json",
+						"Name": "Infra/Config/systemd.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/kernel/__nria_localentity/modules.sent",
+						"Name": "Infra/Config/modules.sent",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/host_aliases.pending",
+						"Name": "Infra/Config/host_aliases.pending",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/services/__nria_localentity/systemd.pending",
+						"Name": "Infra/Config/systemd.pending",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/system/__nria_localentity/network_interfaces.json",
+						"Name": "Infra/Config/network_interfaces.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/config/__nria_localentity/sshd.sent",
+						"Name": "Infra/Config/sshd.sent",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/kernel/__nria_localentity/sysctl.sent",
+						"Name": "Infra/Config/sysctl.sent",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/metadata/__nria_localentity/proxy_config.json",
+						"Name": "Infra/Config/proxy_config.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/kernel/__nria_localentity/sysctl.json",
+						"Name": "Infra/Config/sysctl.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/system/__nria_localentity/network_interfaces.pending",
+						"Name": "Infra/Config/network_interfaces.pending",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/attributes.sent",
+						"Name": "Infra/Config/attributes.sent",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/proxy_config.sent",
+						"Name": "Infra/Config/proxy_config.sent",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/kernel/__nria_localentity/sysctl.json",
+						"Name": "Infra/Config/sysctl.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/metadata/__nria_localentity/host_aliases.json",
+						"Name": "Infra/Config/host_aliases.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/config/__nria_localentity/sshd.json",
+						"Name": "Infra/Config/sshd.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/attributes.json",
+						"Name": "Infra/Config/attributes.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/kernel/__nria_localentity/modules.json",
+						"Name": "Infra/Config/modules.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/host_aliases.json",
+						"Name": "Infra/Config/host_aliases.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/proxy_config.pending",
+						"Name": "Infra/Config/proxy_config.pending",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/packages/__nria_localentity/dpkg.sent",
+						"Name": "Infra/Config/dpkg.sent",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/sessions/__nria_localentity/users.json",
+						"Name": "Infra/Config/users.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/agent_config.sent",
+						"Name": "Infra/Config/agent_config.sent",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/system/__nria_localentity/network_interfaces.json",
+						"Name": "Infra/Config/network_interfaces.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/system.json",
+						"Name": "Infra/Config/system.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/packages/__nria_localentity/dpkg.json",
+						"Name": "Infra/Config/dpkg.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/kernel/__nria_localentity/modules.json",
+						"Name": "Infra/Config/modules.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/last_success/__nria_localentity",
+						"Name": "Infra/Config/__nria_localentity",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/metadata/__nria_localentity/agent_config.json",
+						"Name": "Infra/Config/agent_config.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/metadata/__nria_localentity/system.json",
+						"Name": "Infra/Config/system.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/services/__nria_localentity/pidfile.json",
+						"Name": "Infra/Config/pidfile.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/sessions/__nria_localentity/users.pending",
+						"Name": "Infra/Config/users.pending",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/sessions/__nria_localentity/users.sent",
+						"Name": "Infra/Config/users.sent",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/kernel/__nria_localentity/modules.pending",
+						"Name": "Infra/Config/modules.pending",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/services/__nria_localentity/systemd.sent",
+						"Name": "Infra/Config/systemd.sent",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/config/__nria_localentity/sshd.json",
+						"Name": "Infra/Config/sshd.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/last_entityID/__nria_localentity",
+						"Name": "Infra/Config/__nria_localentity",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/host_aliases.sent",
+						"Name": "Infra/Config/host_aliases.sent",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/services/__nria_localentity/pidfile.pending",
+						"Name": "Infra/Config/pidfile.pending",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/services/__nria_localentity/pidfile.json",
+						"Name": "Infra/Config/pidfile.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/services/__nria_localentity/systemd.json",
+						"Name": "Infra/Config/systemd.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/metadata/__nria_localentity/attributes.json",
+						"Name": "Infra/Config/attributes.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/agent_config.pending",
+						"Name": "Infra/Config/agent_config.pending",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/attributes.pending",
+						"Name": "Infra/Config/attributes.pending",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/proxy_config.json",
+						"Name": "Infra/Config/proxy_config.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/packages/__nria_localentity/dpkg.json",
+						"Name": "Infra/Config/dpkg.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/services/__nria_localentity/pidfile.sent",
+						"Name": "Infra/Config/pidfile.sent",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/delta_id_cache.json",
+						"Name": "Infra/Config/delta_id_cache.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/agent_config.json",
+						"Name": "Infra/Config/agent_config.json",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/metadata/__nria_localentity/system.pending",
+						"Name": "Infra/Config/system.pending",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/system/__nria_localentity/network_interfaces.sent",
+						"Name": "Infra/Config/network_interfaces.sent",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/config/__nria_localentity/sshd.pending",
+						"Name": "Infra/Config/sshd.pending",
+						"Streamed": false
+					},
+					{
+						"Path": "/var/db/newrelic-infra/data/.delta_repo/kernel/__nria_localentity/sysctl.pending",
+						"Name": "Infra/Config/sysctl.pending",
+						"Streamed": false
+					}
+				],
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Infra",
+				"Subcategory": "Log",
+				"Name": "Collect"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "New Relic Infrastructure configuration file did not specify log file path",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Base",
+				"Subcategory": "Agent",
+				"Name": "EOL"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "Success",
+				"Summary": "We detected 1 New Relic agent(s) running on your system:\n1 New Relic agent(s) whose version is within the scope of support",
+				"URL": "https://discuss.newrelic.com/t/important-upcoming-changes-to-supported-agent-versions/72280",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "iOS",
+				"Subcategory": "Agent",
+				"Name": "Version"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Task did not meet requirements necessary to run: iOS environment not detected.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "DotNetCore",
+				"Subcategory": "Requirements",
+				"Name": "DotNetCoreVersion"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Did not detect .Net Core Agent as being installed, skipping this task.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Base",
+				"Subcategory": "Log",
+				"Name": "ReportingTo"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Logs founds, no instances of reporting to within logs.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Java",
+				"Subcategory": "Appserver",
+				"Name": "JbossEapCheck"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "Java config file not detected, this task didn't run",
+				"URL": "https://docs.newrelic.com/docs/agents/java-agent/getting-started/compatibility-requirements-java-agent#app-web-servers",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Python",
+				"Subcategory": "Requirements",
+				"Name": "Webframework"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "No dependencies found. This task didn't run.",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Node",
+				"Subcategory": "Requirements",
+				"Name": "ProblematicModules"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "A list of Node modules was not found. This task did not run",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": null
+			}
+		},
+		{
+			"Identifier": {
+				"Category": "Base",
+				"Subcategory": "Env",
+				"Name": "SELinux"
+			},
+			"Override": false,
+			"Result": {
+				"Status": "None",
+				"Summary": "SELinux does seem to be installed in this environment: exec: \"sestatus\": executable file not found in $PATH",
+				"URL": "",
+				"FilesToCopy": null,
+				"Payload": "Not Installed"
+			}
+		}
+	]
+}
