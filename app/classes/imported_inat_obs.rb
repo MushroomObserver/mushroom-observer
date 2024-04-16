@@ -11,6 +11,10 @@ class ImportedInatObs
     @imported_inat_obs_data[:results].first
   end
 
+  def gps_hidden
+    obs[:geoprivacy].present?
+  end
+
   # :location seems simplest source for lat.
   # But [:geojason] might be possible.
   def lat
