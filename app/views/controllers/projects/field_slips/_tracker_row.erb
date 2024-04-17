@@ -1,7 +1,7 @@
 <%=
 tag.tr(id: "field_slip_job_#{tracker.id}",
        data: { controller: "field-slip-job", tracker_id: tracker.id,
-               endpoint: field_slip_tracker_path(tracker.id) }) do
+               endpoint: field_slip_job_tracker_path(tracker.id) }) do
   [
     tag.td(data: { field_slip_job_target: "link" }) do
       # returns link to file or filename, depending on status
