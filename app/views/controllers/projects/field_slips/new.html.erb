@@ -2,7 +2,7 @@
 add_page_title(:field_slips_for_project_title.t(title: @project.title))
 
 action = { controller: "/projects/field_slips", action: :create,
-            project_id: @project.id, q: get_query_param }
+           project_id: @project.id, q: get_query_param }
 %>
 
 <div class="container-text mt-3 pb-2">
@@ -27,13 +27,28 @@ action = { controller: "/projects/field_slips", action: :create,
           </tr>
         </thead>
         <tbody>
-          <% @project.trackers.order(id: :desc).each do |tracker| %>
-            <tr>
-              <td><%= field_slip_link(tracker) %></td>
-              <td><%= number_with_precision(tracker.elapsed_time, precision: 1) %></td>
-              <td><%= tracker.status %></td>
-            </tr>
-          <% end %>
+          <%= @project.trackers.order(id: :desc).each do |tracker|
+            debugger
+            concat(tag.tr(id: "field_slip_pdf_#{tracker.id}",
+                   data: { controller: "field-slip-pdf",
+                           endpoint: pdf_endpoint(i) }) do
+              [
+                tag.td(data: { field_slip_job_target: "link" }) do
+                  # Links to the file, or just has the name, depending on status
+                  field_slip_link(tracker)
+                end,
+                tag.td(data: { field_slip_job_target: "seconds" }) do
+                  number_with_precision(tracker.elapsed_time, precision: 1)
+                end,
+                tag.td(data: { field_slip_job_target: "pages" }) do
+                  # pages_html
+                end
+                tag.td(data: { field_slip_job_target: "pages" }) do
+                  tracker.status
+                end
+              ].safe_join
+            end)
+          end %>
         </tbody>
       </table>
     </div>
