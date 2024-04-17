@@ -7,13 +7,13 @@ tag.tr(id: "field_slip_job_#{tracker.id}",
       # returns link to file or filename, depending on status
       field_slip_link(tracker)
     end,
-    tag.td(data: { field_slip_job_target: "seconds" }) do
+    tag.td(class: "text-center", data: { field_slip_job_target: "seconds" }) do
       number_with_precision(tracker.elapsed_time, precision: 1)
     end,
-    tag.td(data: { field_slip_job_target: "pages" }) do
-      tracker&.pages
+    tag.td(class: "text-center", data: { field_slip_job_target: "pages" }) do
+      # tracker.pages
     end,
-    tag.td(data: { field_slip_job_target: "status" }) do
+    tag.td(class: "text-right", data: { field_slip_job_target: "status" }) do
       tracker.status
     end
   ].safe_join

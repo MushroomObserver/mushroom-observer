@@ -10,8 +10,8 @@ action = { controller: "/projects/field_slips", action: :create,
   <div>
     <%= :field_slips_for_project_max_pages.t(max: @page_max) %>
   </div>
-  <%= form_with(url: action, id: "project_field_slip_form",
-                class: "my-3") do |f| %>
+  <%= form_with(url: action, data: { turbo: true },
+                id: "project_field_slip_form", class: "my-3") do |f| %>
     <%= number_field_with_label(form: f, field: :pages, inline: true,
                                 value: @page_max.zero? ? "0" : "1") %>
     <%= submit_button(form: f, button: :CREATE.t, class: "ml-3") %>
@@ -20,12 +20,13 @@ action = { controller: "/projects/field_slips", action: :create,
     <table class="table mt-3">
       <thead>
         <tr>
-          <th scope="col"><%= :FILENAME.t %></th>
-          <th scope="col"><%= :SECONDS.t %></th>
-          <th scope="col"><%= :STATUS.t %></th>
+          <%= tag.th(:FILENAME.t, scope: "col") %>
+          <%= tag.th(:SECONDS.t, scope: "col", class: "text-center") %>
+          <%= tag.th(:PAGES.t, scope: "col", class: "text-center") %>
+          <%= tag.th(:STATUS.t, scope: "col", class: "text-right") %>
         </tr>
       </thead>
-      <%= tag.tbody do
+      <%= tag.tbody(id: "field_slip_jobs") do
         @project.trackers.order(id: :desc).each do |tracker|
           concat(
             render(partial: "projects/field_slips/tracker_row",

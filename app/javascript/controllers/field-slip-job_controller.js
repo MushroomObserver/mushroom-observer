@@ -10,8 +10,8 @@ export default class extends Controller {
     // wherever the AJAX is going is printed on the element as a data attribute,
     // so it can be different per PDF. More importantly, it's in ruby so it can
     // be different in development, test and production
-    this.endpoint_url = this.dataset.endpoint
-    this.tracker_id = this.dataset.trackerId
+    this.endpoint_url = this.element.dataset.endpoint
+    this.tracker_id = this.element.dataset.trackerId
     this.intervalId = null
   }
 
