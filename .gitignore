@@ -41,6 +41,8 @@ coverage
 
 # This is created by a cronjob, not checked in.
 public/name_list_data.js
+# Local field slip jobs
+public/field_slips
 
 # DB snapshots are often lying about, don't want them accidentally checked in.
 checkpoint*
