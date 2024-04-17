@@ -35,6 +35,7 @@ module Projects
       end
       # redirect_to(project_url(@project))
       respond_to do |format|
+        # Append a new row to the table of field slip jobs
         format.turbo_stream do
           render(turbo_stream: turbo_stream.append(
             :field_slip_jobs, # the id of the div to append to
