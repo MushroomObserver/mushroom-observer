@@ -386,8 +386,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :field_slips
   get("qr/:id", to: "field_slips#show", id: /.*[^\d.-].*/)
 
-  # ----- Field Slip Trackers: standard actions --------------------------------
-  resources :field_slip_trackers, only: [:show]
+  # ----- Field Slip Job Trackers: show for json -------------------------------
+  resources :field_slip_job_trackers, only: [:show]
 
   # ----- Herbaria: standard actions -------------------------------------------
   namespace :herbaria do
