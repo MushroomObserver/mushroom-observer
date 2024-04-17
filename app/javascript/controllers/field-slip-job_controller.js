@@ -12,18 +12,24 @@ export default class extends Controller {
     // be different in development, test and production
     this.endpoint_url = this.dataset.endpoint
     this.tracker_id = this.dataset.trackerId
+    this.intervalId = null
   }
 
   connect() {
     // just a "sanity check" convention, so you can tell "is this thing on?"
     this.element.dataset.stimulus = "connected";
 
-    this.start_timer_sending_requests(); // we don't have to use camelCase, but that's fine too
+    if (this.statusTarget.innerHTML == "Processing") {
+      this.start_timer_sending_requests();
+    } else if (this.intervalId != null) {
+      clearInterval(this.intervalId)
+    }
   }
 
   start_timer_sending_requests() {
     // every second, send an get request to find out the doneness of the PDF
     // timer should call this.send_fetch_request(this.tracker_id)
+    this.intervalId = setInterval(this.send_fetch_request, 1000);
   }
 
   async send_fetch_request() {
