@@ -37,24 +37,8 @@ export default class extends Controller {
     const response = await get(url, { responseKind: "turbo-stream" });
     if (response.ok) {
       // turbo-stream prints the row in the page already
-      // const json = await response.json
-      // if (json) {
-      //   this.fetch_request = response
-      //   this.process_fetch_response(json)
-      // }
     } else {
       console.log(`got a ${response.status}`);
     }
   }
-
-  // process_fetch_response(json) {
-  //   secondsValue = json.secondsValue; // somehow parsed from the json
-  //   pagesValue = json.pagesValue; // somehow parsed from the json
-  //   this.updateSeconds(secondsValue);
-  //   this.updatePages(pagesValue);
-  // }
-
-  // updateSeconds(secondsValue) {
-  //   this.secondsTarget.innerHTML = secondsValue;
-  // }
 }

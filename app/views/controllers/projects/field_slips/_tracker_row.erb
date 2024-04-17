@@ -11,7 +11,7 @@ tag.tr(id: "field_slip_job_#{tracker.id}",
       number_with_precision(tracker.elapsed_time, precision: 1)
     end,
     tag.td(data: { field_slip_job_target: "pages" }) do
-      # pages_html
+      tracker&.pages
     end,
     tag.td(data: { field_slip_job_target: "status" }) do
       tracker.status
