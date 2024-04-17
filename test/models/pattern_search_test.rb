@@ -650,6 +650,31 @@ class PatternSearchTest < UnitTestCase
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
+  # 2024-04-16 temporary: test that we suggest new terms for retired terms.
+  def test_observation_search_bad_term_suggestions
+    x = PatternSearch::Observation.new("images:true")
+    assert_equal(
+      :pattern_search_bad_term_error_suggestion.tp(
+        term: "images", val: "true", new_term: "has_images"
+      ).to_s.as_displayed,
+      x.errors[0].to_s.t.as_displayed
+    )
+    y = PatternSearch::Observation.new("sequence:true")
+    assert_equal(
+      :pattern_search_bad_term_error_suggestion.tp(
+        term: "sequence", val: "true", new_term: "has_sequence"
+      ).to_s.as_displayed,
+      y.errors[0].to_s.t.as_displayed
+    )
+    z = PatternSearch::Observation.new("specimen:true")
+    assert_equal(
+      :pattern_search_bad_term_error_suggestion.tp(
+        term: "specimen", val: "true", new_term: "has_specimen"
+      ).to_s.as_displayed,
+      z.errors[0].to_s.t.as_displayed
+    )
+  end
+
   def test_observation_search_has_name_no
     expect = Observation.without_name
     assert(expect.count.positive?)
