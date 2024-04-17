@@ -1,40 +1,39 @@
 <%
 add_page_title(:field_slips_for_project_title.t(title: @project.title))
+@container = :text_image
 
 action = { controller: "/projects/field_slips", action: :create,
            project_id: @project.id, q: get_query_param }
 %>
 
-<div class="container-text mt-3 pb-2">
+<div class="mt-3 pb-2">
   <div>
     <%= :field_slips_for_project_max_pages.t(max: @page_max) %>
   </div>
-  <div>
-    <%= form_with(url: action, id: "project_field_slip_form") do |f| %>
-      <%= number_field_with_label(form: f, field: :pages, inline: true,
-                                  value: @page_max.zero? ? "0" : "1") %>
-      <%= submit_button(form: f, button: :CREATE.t, class: "ml-3") %>
-    <% end %>
-  </div>
+  <%= form_with(url: action, id: "project_field_slip_form",
+                class: "my-3") do |f| %>
+    <%= number_field_with_label(form: f, field: :pages, inline: true,
+                                value: @page_max.zero? ? "0" : "1") %>
+    <%= submit_button(form: f, button: :CREATE.t, class: "ml-3") %>
+  <% end %>
   <% if @project.member?(User.current) %>
-    <div class="mt-3">
-      <table class="table">
-        <thead>
-          <tr>
-            <th scope="col"><%= :FILENAME.t %></th>
-            <th scope="col"><%= :SECONDS.t %></th>
-            <th scope="col"><%= :STATUS.t %></th>
-          </tr>
-        </thead>
-        <tbody>
-          <%= @project.trackers.order(id: :desc).each do |tracker|
-            debugger
-            concat(tag.tr(id: "field_slip_job_#{tracker.id}",
-                   data: { controller: "field-slip-job",
-                           endpoint: field_slip_tracker_path(tracker.id) }) do
+    <table class="table mt-3">
+      <thead>
+        <tr>
+          <th scope="col"><%= :FILENAME.t %></th>
+          <th scope="col"><%= :SECONDS.t %></th>
+          <th scope="col"><%= :STATUS.t %></th>
+        </tr>
+      </thead>
+      <%= tag.tbody do
+        @project.trackers.order(id: :desc).each do |tracker|
+          concat(
+            tag.tr(id: "field_slip_job_#{tracker.id}",
+                    data: { controller: "field-slip-job",
+                            endpoint: field_slip_tracker_path(tracker.id) }) do
               [
                 tag.td(data: { field_slip_job_target: "link" }) do
-                  # returns link to file, or just filename, depending on status
+                  # returns link to file or filename, depending on status
                   field_slip_link(tracker)
                 end,
                 tag.td(data: { field_slip_job_target: "seconds" }) do
@@ -42,15 +41,15 @@ action = { controller: "/projects/field_slips", action: :create,
                 end,
                 tag.td(data: { field_slip_job_target: "pages" }) do
                   # pages_html
-                end
+                end,
                 tag.td(data: { field_slip_job_target: "status" }) do
                   tracker.status
                 end
               ].safe_join
-            end)
-          end %>
-        </tbody>
-      </table>
-    </div>
+            end
+          )
+        end
+      end %>
+    </table>
   <% end %>
-</div><!--.container-text-->
+</div><!--.margin-->
