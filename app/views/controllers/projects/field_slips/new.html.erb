@@ -29,12 +29,12 @@ action = { controller: "/projects/field_slips", action: :create,
         <tbody>
           <%= @project.trackers.order(id: :desc).each do |tracker|
             debugger
-            concat(tag.tr(id: "field_slip_pdf_#{tracker.id}",
-                   data: { controller: "field-slip-pdf",
-                           endpoint: pdf_endpoint(i) }) do
+            concat(tag.tr(id: "field_slip_job_#{tracker.id}",
+                   data: { controller: "field-slip-job",
+                           endpoint: field_slip_tracker_path(tracker.id) }) do
               [
                 tag.td(data: { field_slip_job_target: "link" }) do
-                  # Links to the file, or just has the name, depending on status
+                  # returns link to file, or just filename, depending on status
                   field_slip_link(tracker)
                 end,
                 tag.td(data: { field_slip_job_target: "seconds" }) do
@@ -43,7 +43,7 @@ action = { controller: "/projects/field_slips", action: :create,
                 tag.td(data: { field_slip_job_target: "pages" }) do
                   # pages_html
                 end
-                tag.td(data: { field_slip_job_target: "pages" }) do
+                tag.td(data: { field_slip_job_target: "status" }) do
                   tracker.status
                 end
               ].safe_join

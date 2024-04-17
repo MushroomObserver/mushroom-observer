@@ -1,9 +1,10 @@
 import { Controller } from "@hotwired/stimulus"
 import { get } from "@rails/request.js" // allows us to call `get` below
 
-// Connects to data-controller="field-slip-pdf"
+// Updates the field slip job page with the current status of the PDF
+// Connects to data-controller="field-slip-job"
 export default class extends Controller {
-  static targets = ["seconds", "pages"]
+  static targets = ["link", "seconds", "pages", "status"]
 
   initialize() {
     // wherever the AJAX is going is printed on the element as a data attribute,
