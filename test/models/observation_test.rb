@@ -1388,21 +1388,28 @@ class ObservationTest < UnitTestCase
                         observations(:displayed_at_obs))
   end
 
-  def test_scope_has_notes_field
-    assert_includes(Observation.has_notes_field("substrate"),
+  def test_scope_with_notes_field
+    assert_includes(Observation.with_notes_field("substrate"),
                     observations(:substrate_notes_obs))
     obs_substrate_in_plain_text =
       Observation.create!(notes: "The substrate is wood",
                           user: users(:rolf))
-    assert_not_includes(Observation.has_notes_field("substrate"),
+    assert_not_includes(Observation.with_notes_field("substrate"),
                         obs_substrate_in_plain_text)
-    assert_empty(Observation.has_notes_field(ARBITRARY_SHA))
+    assert_empty(Observation.with_notes_field(ARBITRARY_SHA))
   end
 
-  def test_scope_without_sequence
-    assert_includes(Observation.without_sequence,
+  def test_scope_with_sequences
+    assert_includes(Observation.with_sequences,
+                    observations(:genbanked_obs))
+    assert_not_includes(Observation.with_sequences,
+                        observations(:minimal_unknown_obs))
+  end
+
+  def test_scope_without_sequences
+    assert_includes(Observation.without_sequences,
                     observations(:minimal_unknown_obs))
-    assert_not_includes(Observation.without_sequence,
+    assert_not_includes(Observation.without_sequences,
                         observations(:genbanked_obs))
   end
 

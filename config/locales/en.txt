@@ -1108,13 +1108,15 @@
   search_term_has_comments: has_comments
   search_term_has_description: has_description
   search_term_has_field: has_field
-  search_term_has_public_lat_lng: has_public_lat_lng
+  search_term_has_images: has_images
   search_term_has_name: has_name
   search_term_has_notes: has_notes
   search_term_has_observations: has_observations
+  search_term_has_public_lat_lng: has_public_lat_lng
+  search_term_has_sequence: has_sequence
+  search_term_has_specimen: has_specimen
   search_term_has_synonyms: has_synonyms
   search_term_herbarium: herbarium
-  search_term_images: images
   search_term_include_all_name_proposals: include_all_name_proposals
   search_term_include_misspellings: include_misspellings
   search_term_include_subtaxa: include_subtaxa
@@ -1131,9 +1133,7 @@
   search_term_project_lists: project_lists
   search_term_rank: rank
   search_term_region: region
-  search_term_sequence: sequence
   search_term_south: south
-  search_term_specimen: specimen
   search_term_user: user
   search_term_west: west
 
@@ -1938,8 +1938,8 @@
 
   prefs_content_filters: Content Filters
   prefs_content_filters_explanation: Control content visibility site-wide.
-  prefs_filters_has_images: Hide observations with no images
-  prefs_filters_has_specimen: Hide observations with no specimens
+  prefs_filters_with_images: Hide observations with no images
+  prefs_filters_with_specimen: Hide observations with no specimens
   prefs_filters_lichen: Filter observations of lichens
   prefs_filters_lichen_yes: Show only lichens
   prefs_filters_lichen_no: Hide lichens
@@ -2830,14 +2830,14 @@
 
   advanced_search_filters: Search Filters
   advanced_search_filters_explain: Apply to this search only, overrides your normal preferred content filters
-  advanced_search_filter_has_images: Filter observations based on whether they have images
-  advanced_search_filter_has_images_off: Include both imaged and imageless observations
-  advanced_search_filter_has_images_yes: Exclude imageless observations
-  advanced_search_filter_has_images_no: Exclude imaged observations
-  advanced_search_filter_has_specimen: Filter observations based on whether they have specimens
-  advanced_search_filter_has_specimen_off: Include both observations with and without specimens
-  advanced_search_filter_has_specimen_yes: Exclude observations without specimens
-  advanced_search_filter_has_specimen_no: Exclude observations with specimens
+  advanced_search_filter_with_images: Filter observations based on whether they have images
+  advanced_search_filter_with_images_off: Include both imaged and imageless observations
+  advanced_search_filter_with_images_yes: Exclude imageless observations
+  advanced_search_filter_with_images_no: Exclude imaged observations
+  advanced_search_filter_with_specimen: Filter observations based on whether they have specimens
+  advanced_search_filter_with_specimen_off: Include both observations with and without specimens
+  advanced_search_filter_with_specimen_yes: Exclude observations without specimens
+  advanced_search_filter_with_specimen_no: Exclude observations with specimens
   advanced_search_filter_lichen: Filter observations based on whether they are lichens
   advanced_search_filter_lichen_off: Include both lichens and nonlichens
   advanced_search_filter_lichen_yes: Include only lichen-forming, lichenicolous and allied fungi
@@ -3537,9 +3537,9 @@
   observation_term_west: Longitude of western edge of search region.
   observation_term_north: Latitude of northern edge of search region.
   observation_term_south: Latitude of southern edge of search region.
-  observation_term_images: Has images? ("yes" or "no")
-  observation_term_sequence: Has a sequence?
-  observation_term_specimen: Has a specimen?
+  observation_term_has_images: Has images? ("yes" or "no")
+  observation_term_has_sequence: Has a sequence?
+  observation_term_has_specimen: Has a specimen?
   observation_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   observation_term_has_name: Has a name? (other than "Fungi sp.")
   observation_term_has_notes: Has Notes?
@@ -4002,6 +4002,7 @@
   pattern_search_syntax_error: Syntax error in pattern at [string].
   pattern_search_pattern_must_be_first_error: Filter terms come after the bare search pattern, [str].  Maybe you forgot to enclose the value for [var] in double quotes?
   pattern_search_bad_term_error: "Unexpected term in [type] search: [term]. [help]"
+  pattern_search_bad_term_error_suggestion: We've changed some terms. Please use "[new_term]:[vals]" instead of "[term]:[vals]".
   pattern_search_missing_value_error: Missing value for the term [var].
   pattern_search_too_many_values_error: Search term [term] occurs more than once.
   pattern_search_bad_boolean_error: Invalid value for [term], [value], expected "yes" or "no".

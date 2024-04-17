@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 class ContentFilter
-  class HasImages < BooleanFilter
+  class WithSpecimen < BooleanFilter
     def initialize
       super(
-        sym: :has_images,
-        name: :IMAGES.t,
+        sym: :with_specimen,
+        name: :SPECIMEN.t,
         models: [Observation],
         on_vals: %w[yes no],
         prefs_vals: ["yes"],
@@ -14,7 +14,7 @@ class ContentFilter
     end
 
     def sql_conditions(_query, _model, val)
-      ["observations.thumb_image_id IS #{val ? "NOT NULL" : "NULL"}"]
+      ["observations.specimen IS #{val ? "TRUE" : "FALSE"}"]
     end
   end
 end
