@@ -16,7 +16,7 @@ module Locations
       login
       get(:show, params: { id: desc.id })
       assert_template("show")
-      assert_template("descriptions/_show_description_details")
+      assert_template("descriptions/_description_details_and_alts_panel")
 
       # Unhappy paths
       # Prove they flash an error and redirect to the appropriate page
@@ -138,7 +138,7 @@ module Locations
       assert_flash_text(
         :runtime_object_not_found.l(type: "user", id: bad_user_id)
       )
-      assert_redirected_to(location_descriptions_path)
+      assert_redirected_to(location_descriptions_index_path)
     end
 
     def test_index_by_editor_of_one_description
@@ -200,7 +200,7 @@ module Locations
       assert_flash_text(
         :runtime_object_not_found.l(type: "user", id: bad_user_id)
       )
-      assert_redirected_to(location_descriptions_path)
+      assert_redirected_to(location_descriptions_index_path)
     end
 
     ############################################################################
@@ -209,8 +209,8 @@ module Locations
 
     def test_create_location_description
       loc = locations(:albion)
-      requires_login(:new, id: loc.id)
-      assert_form_action(action: :create, id: loc.id)
+      requires_login(:new, location_id: loc.id)
+      assert_form_action(action: :create, location_id: loc.id)
     end
 
     def test_create_and_save_location_description
@@ -228,7 +228,7 @@ module Locations
                                 species: "all",
                                 notes: "FunDiS participant",
                                 refs: "" },
-                 id: loc.id }
+                 location_id: loc.id }
 
       post_requires_login(:create, params)
 
@@ -241,7 +241,7 @@ module Locations
       loc = locations(:albion)
       user = login(users(:spammer).name)
       assert_false(user.successful_contributor?)
-      get(:new, params: { id: loc.id })
+      get(:new, params: { location_id: loc.id })
       assert_response(:redirect)
     end
 

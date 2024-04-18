@@ -20,12 +20,15 @@ module UserStatsHelper
     # Show a breakdown of translations
     if user_stats[:languages]
       lang_name_by_locale = Language.pluck(:locale, :name).to_h
+      lang_summary = []
       user_stats[:languages].each do |locale, count|
-        rows << {
-          label: lang_name_by_locale[locale],
-          count: count
-        }
+        lang_summary << tag.span(class: "ml-3 text-nowrap") do
+          ["[", lang_name_by_locale[locale], ": ", count, "]"].safe_join
+        end
       end
+      rows << {
+        label: lang_summary.safe_join
+      }
     end
 
     # Add bonuses at the bottom.
@@ -56,15 +59,15 @@ module UserStatsHelper
       [:comments_for, comments_path(for_user: user.id)],
       [:images, images_path(by_user: user.id)],
       [:location_description_authors,
-       location_descriptions_path(by_author: user.id)],
+       location_descriptions_index_path(by_author: user.id)],
       [:location_description_editors,
-       location_descriptions_path(by_editor: user.id)],
+       location_descriptions_index_path(by_editor: user.id)],
       [:locations, locations_path(by_user: user.id)],
       [:location_versions, locations_path(by_editor: user.id)],
       [:name_description_authors,
-       name_descriptions_path(by_author: user.id)],
+       name_descriptions_index_path(by_author: user.id)],
       [:name_description_editors,
-       name_descriptions_path(by_editor: user.id)],
+       name_descriptions_index_path(by_editor: user.id)],
       [:names, names_path(by_user: user.id)],
       [:name_versions, names_path(by_editor: user.id)],
       [:observations, observations_path(user: user.id)],

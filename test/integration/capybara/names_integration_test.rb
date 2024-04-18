@@ -114,7 +114,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
            "Test needs fixture without a lifeform")
 
     login
-    visit(edit_name_lifeform_path(name))
+    visit(edit_lifeform_of_name_path(name))
 
     check("lifeform_lichenicolous")
     click_on(:SAVE.l)

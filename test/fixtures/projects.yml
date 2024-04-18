@@ -21,6 +21,7 @@ eol_project:
   admin_group: eol_admins
   title: EOL Project
   summary: Project to make names for EOL
+  field_slip_prefix: EOL
   created_at: 2008-09-24 21:33:30
   updated_at: 2008-09-24 21:33:30
   open_membership: false
@@ -39,6 +40,7 @@ bolete_project:
   admin_group: bolete_admins
   title: Bolete Project
   summary: Project about Boletes
+  field_slip_prefix: BLT
   created_at: 2008-09-25 07:00:50
   updated_at: 2008-09-25 07:00:55
   images: in_situ_image, turned_over_image
@@ -73,9 +75,10 @@ open_membership_project:
   admin_group: burbank_admins
   title: Burbank Project
   summary: Project about Fungi of Burbank
+  field_slip_prefix: BURB
   created_at: 2008-09-25 07:00:50
   updated_at: 2008-09-25 07:00:55
-  observations: owner_accepts_general_questions, unknown_with_lat_long, trusted_hidden, untrusted_hidden, reused_observation
+  observations: owner_accepts_general_questions, unknown_with_lat_lng, trusted_hidden, untrusted_hidden, reused_observation
   open_membership: true
   species_lists: reused_list
 
@@ -113,10 +116,10 @@ one_genus_two_species_project:
 
 news_articles_project:
   <<: *DEFAULTS
-  title:       News Articles
+  title: News Articles
   admin_group: article_writers
-  user_group:  article_writers
-  summary:     Project members can create and modify News Articles.
+  user_group: article_writers
+  summary: Project members can create and modify News Articles.
 
 albion_project:
   <<: *DEFAULTS
@@ -138,7 +141,7 @@ past_project:
   admin_group: burbank_admins
   created_at: 2008-09-25 07:00:50
   updated_at: 2008-09-25 07:00:55
-  observations: owner_accepts_general_questions, unknown_with_lat_long
+  observations: owner_accepts_general_questions, unknown_with_lat_lng
   open_membership: true
   start_date: <%= Time.zone.today - 1.year %>
   end_date: <%= Time.zone.today - 1.month %>
@@ -172,7 +175,7 @@ future_project:
   admin_group: burbank_admins
   created_at: 2008-09-25 07:00:50
   updated_at: 2008-09-25 07:00:55
-  observations: owner_accepts_general_questions, unknown_with_lat_long
+  observations: owner_accepts_general_questions, unknown_with_lat_lng
   open_membership: true
   start_date: <%= Time.zone.tomorrow %>
   end_date: <%= Time.zone.tomorrow %>
@@ -184,7 +187,7 @@ current_project:
   admin_group: burbank_admins
   created_at: 2008-09-25 07:00:50
   updated_at: 2008-09-25 07:00:55
-  observations: owner_accepts_general_questions, unknown_with_lat_long
+  observations: owner_accepts_general_questions, unknown_with_lat_lng
   open_membership: true
   start_date: 2010-07-22 # date of earliest Observation
   end_date: <%= Time.zone.tomorrow %>
@@ -229,7 +232,20 @@ falmouth_2023_09_project:
   user: dick
   admin_group: dick_only
   user_group: falmouth_2023_09_users
+  field_slip_prefix: FAL
   start_date: 2023-09-01
   end_date: 2023-09-30
   location: falmouth
+  observations: brett_woods_2023_09_obs, falmouth_2023_09_obs, falmouth_2022_obs, nybg_2023_09_obs # roy (non-admin) owns nybg_2023_09_obs
+
+# includes observations that violate date constraints
+# members: roy
+nowhere_2023_09_project:
+  <<: *DEFAULTS
+  user: dick
+  admin_group: dick_only
+  user_group: falmouth_2023_09_users
+  start_date: 2023-09-01
+  end_date: 2023-09-30
+  location: nil
   observations: brett_woods_2023_09_obs, falmouth_2023_09_obs, falmouth_2022_obs, nybg_2023_09_obs # roy (non-admin) owns nybg_2023_09_obs

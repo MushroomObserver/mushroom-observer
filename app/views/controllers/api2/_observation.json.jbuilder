@@ -4,7 +4,7 @@ json.id(object.id)
 json.type("observation")
 json.date(object.when)
 json.latitude(object.public_lat) if object.lat.present?
-json.longitude(object.public_long) if object.long.present?
+json.longitude(object.public_lng) if object.lng.present?
 json.altitude(object.alt) if object.alt.present?
 json.gps_hidden(object.gps_hidden ? true : false)
 json.specimen_available(object.specimen ? true : false)

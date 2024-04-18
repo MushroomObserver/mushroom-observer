@@ -46,10 +46,12 @@ module ObservationsController::NewAndCreate
     @reasons     = @naming.init_reasons
     @images      = []
     @good_images = []
+    @field_code  = params[:field_code]
     init_specimen_vars
     init_project_vars_for_create
     init_list_vars
     defaults_from_last_observation_created
+    add_field_slip_project(@field_code)
   end
 
   ##############################################################################
@@ -83,6 +85,14 @@ module ObservationsController::NewAndCreate
     end
   end
 
+  def add_field_slip_project(code)
+    project = FieldSlip.find_by(code: code)&.project
+    return unless project
+    return unless project&.member?(User.current)
+
+    @project_checks[project.id] = true
+  end
+
   ##############################################################################
 
   public
@@ -102,20 +112,14 @@ module ObservationsController::NewAndCreate
     success = false if @name && !@vote.value.nil? && !validate_object(@vote)
     success = false if @bad_images != []
     success = false if success && !save_observation(@observation)
+    return reload_new_form(params.dig(:naming, :reasons)) unless success
 
-    # Once observation is saved we can save everything else.
-    if success
-      @observation.log(:log_observation_created)
-      # should always succeed
-      save_everything_else(params.dig(:naming, :reasons))
-      strip_images! if @observation.gps_hidden
-      flash_notice(:runtime_observation_success.t(id: @observation.id))
-      redirect_to_next_page
-
-    # If anything failed reload the form.
-    else
-      reload_new_form(params.dig(:naming, :reasons))
-    end
+    @observation.log(:log_observation_created)
+    save_everything_else(params.dig(:naming, :reasons))
+    strip_images! if @observation.gps_hidden
+    update_field_slip(@observation, params[:field_code])
+    flash_notice(:runtime_observation_success.t(id: @observation.id))
+    redirect_to_next_page
   end
 
   ##############################################################################
@@ -150,7 +154,7 @@ module ObservationsController::NewAndCreate
 
   def determine_observation_location(observation)
     if Location.is_unknown?(observation.place_name) ||
-       (observation.lat && observation.long && observation.place_name.blank?)
+       (observation.lat && observation.lng && observation.place_name.blank?)
       observation.location = Location.unknown
       observation.where = nil
     end
@@ -309,10 +313,19 @@ module ObservationsController::NewAndCreate
     @reasons         = @naming.init_reasons(reasons)
     @images          = @bad_images
     @new_image.when  = @observation.when
+    @field_code = params[:field_code]
     init_specimen_vars_for_reload
     init_project_vars_for_create
     init_project_vars_for_reload(@observation)
     init_list_vars_for_reload(@observation)
     render(action: :new, location: new_observation_path(q: get_query_param))
+  end
+
+  def update_field_slip(observation, field_code)
+    field_slip = FieldSlip.find_by(code: field_code)
+    return unless field_slip
+
+    field_slip.observation = observation
+    field_slip.save
   end
 end

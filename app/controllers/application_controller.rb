@@ -120,7 +120,7 @@ class ApplicationController < ActionController::Base
   # after_action  :extra_gc
 
   # Make show_name_helper available to nested partials
-  helper :show_name
+  helper :names
 
   # Disable all filters except set_locale.
   # (Used to streamline API controller.)

@@ -5,8 +5,9 @@
 #
 #  == Instance Methods
 #
-#  any?::   Returns false.
-#  empty?:: Returns true.
+#  any?::         Returns false.
+#  empty?::       Returns true.
+#  to_boolean::   Returns false.
 #
 ################################################################################
 
@@ -17,5 +18,9 @@ class NilClass
 
   def empty?
     true
+  end
+
+  def to_boolean
+    false
   end
 end

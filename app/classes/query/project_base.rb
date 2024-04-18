@@ -10,13 +10,14 @@ class Query::ProjectBase < Query::Base
       created_at?: [:time],
       updated_at?: [:time],
       users?: [User],
-      has_images?: { boolean: [true] },
-      has_observations?: { boolean: [true] },
-      has_species_lists?: { boolean: [true] },
-      has_comments?: { boolean: [true] },
-      has_summary?: :boolean,
+      with_images?: { boolean: [true] },
+      with_observations?: { boolean: [true] },
+      with_species_lists?: { boolean: [true] },
+      with_comments?: { boolean: [true] },
+      with_summary?: :boolean,
       title_has?: :string,
       summary_has?: :string,
+      field_slip_prefix_has?: :string,
       comments_has?: :string,
       member?: User
     )
@@ -39,14 +40,14 @@ class Query::ProjectBase < Query::Base
   end
 
   def initialize_boolean_parameters
-    add_join(:project_images) if params[:has_images]
-    add_join(:project_observations) if params[:has_observations]
-    add_join(:project_species_lists) if params[:has_species_lists]
-    add_join(:comments) if params[:has_comments]
+    add_join(:project_images) if params[:with_images]
+    add_join(:project_observations) if params[:with_observations]
+    add_join(:project_species_lists) if params[:with_species_lists]
+    add_join(:comments) if params[:with_comments]
     add_boolean_condition(
       "LENGTH(COALESCE(projects.summary,'')) > 0",
       "LENGTH(COALESCE(projects.summary,'')) = 0",
-      params[:has_summary]
+      params[:with_summary]
     )
   end
 
@@ -58,6 +59,10 @@ class Query::ProjectBase < Query::Base
     add_search_condition(
       "projects.summary",
       params[:summary_has]
+    )
+    add_search_condition(
+      "projects.field_slip_prefix",
+      params[:field_slip_prefix_has]
     )
     add_search_condition(
       "CONCAT(comments.summary,COALESCE(comments.comment,''))",

@@ -255,6 +255,8 @@
   draft: draft
   DRAFTS: Drafts
   drafts: drafts
+  error: error
+  errors: errors
   EXTERNAL_LINK: External Link
   external_link: external link
   EXTERNAL_LINKS: External Links
@@ -263,6 +265,10 @@
   external_site: external site
   EXTERNAL_SITES: External Sites
   external_sites: external sites
+  FIELD_SLIP: Field Slip
+  field_slip: field slip
+  FIELD_SLIPS: Field Slips
+  field_slips: field slips
   IMAGE: Image
   image: image
   IMAGES: Images
@@ -381,6 +387,7 @@
   species_list: species list
   SPECIES_LISTS: Species Lists
   species_lists: species lists
+  SpeciesList: Species List
   SPECIMEN: Specimen
   specimen: specimen
   SPECIMENS: Specimens
@@ -464,6 +471,8 @@
   confidence_levels: confidence levels
   CONSTRAINT_VIOLATIONS: Constraint Violations
   constraint_violations: constraint violations
+  COORDINATES: Coordinates
+  coordinates: coordinates
   COPYRIGHT_HOLDER: Copyright Holder
   copyright_holder: copyright holder
   COPYRIGHT_HOLDERS: Copyright Holders
@@ -492,6 +501,8 @@
   email_address: email address
   EMAIL_ADDRESSS: Email Addresses
   email_addresss: email addresses
+  FIELD_SLIP_PREFIX: Field Slip Prefix
+  field_slip_prefix: field slip prefix
   FULL_NAME: Full Name
   full_name: full name
   FULL_NAMES: Full Names
@@ -1097,13 +1108,15 @@
   search_term_has_comments: has_comments
   search_term_has_description: has_description
   search_term_has_field: has_field
-  search_term_has_location: has_location
+  search_term_has_images: has_images
   search_term_has_name: has_name
   search_term_has_notes: has_notes
   search_term_has_observations: has_observations
+  search_term_has_public_lat_lng: has_public_lat_lng
+  search_term_has_sequence: has_sequence
+  search_term_has_specimen: has_specimen
   search_term_has_synonyms: has_synonyms
   search_term_herbarium: herbarium
-  search_term_images: images
   search_term_include_all_name_proposals: include_all_name_proposals
   search_term_include_misspellings: include_misspellings
   search_term_include_subtaxa: include_subtaxa
@@ -1120,9 +1133,7 @@
   search_term_project_lists: project_lists
   search_term_rank: rank
   search_term_region: region
-  search_term_sequence: sequence
   search_term_south: south
-  search_term_specimen: specimen
   search_term_user: user
   search_term_west: west
 
@@ -1612,6 +1623,7 @@
   form_naming_confidence_help: How confident are you of this identification?  Please justify how you arrived at your decision in the boxes below, as well.
 
   # observations/_form_observations
+  form_observations_field_code: for field slip
   form_observations_specimen_available: Specimen Available
   form_observations_is_collection_location: Is this location where it was collected?
   form_observations_click_on_map: Click on map for geolocation
@@ -1926,8 +1938,8 @@
 
   prefs_content_filters: Content Filters
   prefs_content_filters_explanation: Control content visibility site-wide.
-  prefs_filters_has_images: Hide observations with no images
-  prefs_filters_has_specimen: Hide observations with no specimens
+  prefs_filters_with_images: Hide observations with no images
+  prefs_filters_with_specimen: Hide observations with no specimens
   prefs_filters_lichen: Filter observations of lichens
   prefs_filters_lichen_yes: Show only lichens
   prefs_filters_lichen_no: Hide lichens
@@ -2207,6 +2219,8 @@
   # This is used if this is NOT the location where the thing was growing.
   show_observation_seen_at: Seen at
   show_observation_gps_hidden: coordinates hidden from public
+  show_observation_vague_location: This observation will not appear on maps of its taxon because the location is too vague.
+  show_observation_improve_location: If you would like it to be included in maps, choose a more precise location.
   show_observation_specimen_available: Specimen available
   show_observation_specimen_not_available: No specimen available
   show_observation_no_images: No images
@@ -2291,6 +2305,7 @@
   show_votes_gone_private: Your preferences have been updated.  Other users can no longer see your votes.
 
   # users/show
+  show_user_about: About [user]
   show_user_title: Contribution Summary for [user]
   show_user_contributors: "[:app_contributors]"
   show_user_observations_by: Observations by [name]
@@ -2306,7 +2321,7 @@
   show_user_personal_herbarium: Personal Fungarium
   show_user_total: Total
   show_user_language_contribution: "Translations: [name]"
-  show_user_life_list: "\"Life List\":[url]: [species] species in [genera] genera"
+  show_user_life_list: "[species] species in [genera] genera"
 
   # sequence
   sequence_edit_title: Editing [name]
@@ -2415,6 +2430,7 @@
 
   # users/by_contribution
   users_by_contribution_title: List of Contributors
+  users_by_contribution_legend: How we estimate contribution
   users_by_contribution_2a: "[:images]"
   users_by_contribution_2b: "[:name]"
   users_by_contribution_2c: "[:observation]"
@@ -2741,8 +2757,32 @@
   show_visual_model_edit: "[:EDIT] [:VISUAL_MODEL]"
   show_visual_model_index: "[:VISUAL_MODEL] [:INDEX]"
 
+  # Visual Models
+  visual_model_errors: prohibited this visual_model from being saved
+
   # visual_models/destroy
   destroy_visual_model_success: "[:VISUAL_MODEL] [:destroyed]"
+
+  # Field Slips
+  field_slip_code: Code
+  field_slip_code_format_error: code must have non-numeric characters other than period (.) and dash (-)
+  field_slip_created: Field slip was successfully created.
+  field_slip_create_obs: Create New Observation
+  field_slip_creator: Creator
+  field_slip_destroy: Destroy this field slip
+  field_slip_destroyed: Field slip was successfully destroyed.
+  field_slip_edit: Edit this field slip
+  field_slip_editing: Editing Field Slip
+  field_slip_errors: prohibited this field_slip from being saved
+  field_slip_index: Back to field slips
+  field_slip_keep_obs: Keep Current
+  field_slip_last_obs: Use Last Observation
+  field_slip_new: Record Field Slip
+  field_slip_no_observation: Observation not found
+  field_slip_no_project: Project not found
+  field_slip_show: Show this field slip
+  field_slip_updated: Field slip was successfully updated.
+  field_slip_welcome: "Welcome to the [TITLE] project!"
 
   ##############################################################################
 
@@ -2790,14 +2830,14 @@
 
   advanced_search_filters: Search Filters
   advanced_search_filters_explain: Apply to this search only, overrides your normal preferred content filters
-  advanced_search_filter_has_images: Filter observations based on whether they have images
-  advanced_search_filter_has_images_off: Include both imaged and imageless observations
-  advanced_search_filter_has_images_yes: Exclude imageless observations
-  advanced_search_filter_has_images_no: Exclude imaged observations
-  advanced_search_filter_has_specimen: Filter observations based on whether they have specimens
-  advanced_search_filter_has_specimen_off: Include both observations with and without specimens
-  advanced_search_filter_has_specimen_yes: Exclude observations without specimens
-  advanced_search_filter_has_specimen_no: Exclude observations with specimens
+  advanced_search_filter_with_images: Filter observations based on whether they have images
+  advanced_search_filter_with_images_off: Include both imaged and imageless observations
+  advanced_search_filter_with_images_yes: Exclude imageless observations
+  advanced_search_filter_with_images_no: Exclude imaged observations
+  advanced_search_filter_with_specimen: Filter observations based on whether they have specimens
+  advanced_search_filter_with_specimen_off: Include both observations with and without specimens
+  advanced_search_filter_with_specimen_yes: Exclude observations without specimens
+  advanced_search_filter_with_specimen_no: Exclude observations with specimens
   advanced_search_filter_lichen: Filter observations based on whether they are lichens
   advanced_search_filter_lichen_off: Include both lichens and nonlichens
   advanced_search_filter_lichen_yes: Include only lichen-forming, lichenicolous and allied fungi
@@ -3240,6 +3280,7 @@
   show_project_destroy: Destroy Project
   show_project_drafts: Drafts
   show_project_edit: Edit Project
+  show_project_field_slip_prefix: Field Slip Prefix
   show_project_join: Join Project
   show_project_location: Location
   show_project_leave: Leave Project
@@ -3496,13 +3537,13 @@
   observation_term_west: Longitude of western edge of search region.
   observation_term_north: Latitude of northern edge of search region.
   observation_term_south: Latitude of southern edge of search region.
-  observation_term_images: Has images? ("yes" or "no")
-  observation_term_sequence: Has a sequence?
-  observation_term_specimen: Has a specimen?
+  observation_term_has_images: Has images? ("yes" or "no")
+  observation_term_has_sequence: Has a sequence?
+  observation_term_has_specimen: Has a specimen?
   observation_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   observation_term_has_name: Has a name? (other than "Fungi sp.")
   observation_term_has_notes: Has Notes?
-  observation_term_has_location: Are the [:OBSERVATION]'s [:LATITUDE] and [:LONGITUDE] fields filled in?
+  observation_term_has_public_lat_lng: Are the [:OBSERVATION]'s [:LATITUDE] and [:LONGITUDE] fields filled in, and public?
   observation_term_has_field: Has a given notes template field filled in.
   observation_term_has_comments: Has any comments?
   observation_term_is_collection_location: Mushroom was growing at the location. ("[:form_observations_is_collection_location]" is checked.)
@@ -3961,6 +4002,7 @@
   pattern_search_syntax_error: Syntax error in pattern at [string].
   pattern_search_pattern_must_be_first_error: Filter terms come after the bare search pattern, [str].  Maybe you forgot to enclose the value for [var] in double quotes?
   pattern_search_bad_term_error: "Unexpected term in [type] search: [term]. [help]"
+  pattern_search_bad_term_error_suggestion: We've changed some terms. Please use "[new_term]:[vals]" instead of "[term]:[vals]".
   pattern_search_missing_value_error: Missing value for the term [var].
   pattern_search_too_many_values_error: Search term [term] occurs more than once.
   pattern_search_bad_boolean_error: Invalid value for [term], [value], expected "yes" or "no".
@@ -4109,6 +4151,7 @@
   api_help_create_key: if you pass in your app name here it will create an api key for the user for your app to use
   api_help_creator: creator
   api_help_east: max longitude
+  api_help_field_slip_prefix_has: search within field slip prefix
   api_help_first_user: creator / first to use
   api_help_has_notes_field: is given observation notes template field filled in?
   api_help_has_obs_notes: observation has notes?

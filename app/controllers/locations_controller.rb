@@ -477,7 +477,7 @@ class LocationsController < ApplicationController
                                                      that: new_name))
       redirect_to(@location.show_link_args)
     else
-      redirect_with_query(emails_merge_request_path(
+      redirect_with_query(new_admin_emails_merge_requests_path(
                             type: :Location, old_id: @location.id,
                             new_id: merge.id
                           ))

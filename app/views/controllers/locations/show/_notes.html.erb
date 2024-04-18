@@ -1,0 +1,9 @@
+<%= unless @location.notes.blank?
+  panel_block(
+    id: "location_notes",
+    heading: :NOTES.l,
+    heading_links: icon_link_to(*edit_location_tab(@location))
+  ) do
+    @location.notes.to_s.html_safe.tpl
+  end
+end %>

@@ -857,11 +857,11 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def assert_synonym_links(name, approve, deprecate, edit)
-    assert_select("a[href*=?]", approve_name_synonym_form_path(name.id),
+    assert_select("a[href*=?]", form_to_approve_synonym_of_name_path(name.id),
                   count: approve)
-    assert_select("a[href*=?]", deprecate_name_synonym_form_path(name.id),
+    assert_select("a[href*=?]", form_to_deprecate_synonym_of_name_path(name.id),
                   count: deprecate)
-    assert_select("a[href*=?]", edit_name_synonyms_path(name.id),
+    assert_select("a[href*=?]", edit_synonyms_of_name_path(name.id),
                   count: edit)
   end
 
@@ -1452,7 +1452,7 @@ class NamesControllerTest < FunctionalTestCase
     }
     login(name.user.login)
     put(:update, params: params)
-    # This does not generate a emails_name_change_request_path email,
+    # This does not generate a new_admin_emails_name_change_requests_path email,
     # both because this name has no dependents,
     # and because the email form requires a POST.
     assert(@@emails.one?)
@@ -1717,7 +1717,7 @@ class NamesControllerTest < FunctionalTestCase
     params[:name][:deprecated] = "false"
     put(:update, params: params)
     assert_no_flash
-    assert_redirected_to(approve_name_synonym_form_path(name.id))
+    assert_redirected_to(form_to_approve_synonym_of_name_path(name.id))
 
     # Change to deprecated: go to deprecate_name, no flash.
     name.change_deprecated(false)
@@ -1725,7 +1725,7 @@ class NamesControllerTest < FunctionalTestCase
     params[:name][:deprecated] = "true"
     put(:update, params: params)
     assert_no_flash
-    assert_redirected_to(deprecate_name_synonym_form_path(name.id))
+    assert_redirected_to(form_to_deprecate_synonym_of_name_path(name.id))
   end
 
   def test_edit_name_with_umlaut
@@ -1965,7 +1965,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_equal("Bar", name.author)
     assert_equal("Genus", name.rank)
     assert_false(name.locked)
-    assert_redirected_to(deprecate_name_synonym_form_path(name.id))
+    assert_redirected_to(form_to_deprecate_synonym_of_name_path(name.id))
   end
 
   def test_edit_misspelled_name
@@ -1990,8 +1990,9 @@ class NamesControllerTest < FunctionalTestCase
     put(:update, params: params)
 
     assert_redirected_to(
-      emails_name_change_request_path(name_id: name.id,
-                                      new_name_with_icn_id: "Superboletus [#]"),
+      new_admin_emails_name_change_requests_path(
+        name_id: name.id, new_name_with_icn_id: "Superboletus [#]"
+      ),
       "User should be unable to change text_name of Name with dependents"
     )
   end
@@ -2054,7 +2055,7 @@ class NamesControllerTest < FunctionalTestCase
     put(:update, params: params)
 
     assert_redirected_to(
-      /#{emails_name_change_request_path}/,
+      /#{new_admin_emails_name_change_requests_path}/,
       "User should be unable to change an approved synonym of a Naming"
     )
   end
@@ -2141,7 +2142,7 @@ class NamesControllerTest < FunctionalTestCase
 
     put(:update, params: params)
     assert_redirected_to(
-      emails_name_change_request_path(
+      new_admin_emails_name_change_requests_path(
         name_id: name.id,
         new_name_with_icn_id: "#{name.search_name} [##{name.icn_id + 1}]"
       ),
@@ -2240,7 +2241,7 @@ class NamesControllerTest < FunctionalTestCase
 
     # Fails because Rolf isn't in admin mode.
     put(:update, params: params)
-    assert_redirected_to(emails_merge_request_path(
+    assert_redirected_to(new_admin_emails_merge_requests_path(
                            type: :Name, old_id: old_name.id, new_id: new_name.id
                          ))
     assert(Name.find(old_name.id))
@@ -2361,7 +2362,7 @@ class NamesControllerTest < FunctionalTestCase
 
     login("rolf")
     put(:update, params: params)
-    assert_redirected_to(emails_merge_request_path(
+    assert_redirected_to(new_admin_emails_merge_requests_path(
                            type: :Name, old_id: old_name.id, new_id: new_name.id
                          ))
 
@@ -2746,7 +2747,7 @@ class NamesControllerTest < FunctionalTestCase
     # Fails normally.
     login("rolf")
     put(:update, params: params)
-    assert_redirected_to(emails_merge_request_path(
+    assert_redirected_to(new_admin_emails_merge_requests_path(
                            type: :Name, old_id: old_name.id, new_id: new_name.id
                          ))
     assert(old_name.reload)

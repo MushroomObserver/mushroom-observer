@@ -29,7 +29,7 @@ module Names
     private
 
     def render_edit
-      render(:edit, location: edit_name_classification_path(@name))
+      render(:edit, location: edit_classification_of_name_path(@name))
     end
 
     include Names::Classification::SharedPrivateMethods

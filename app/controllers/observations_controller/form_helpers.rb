@@ -18,7 +18,7 @@ module ObservationsController::FormHelpers
 
   # NOTE: potential gotcha... Any nested attributes must come last.
   def permitted_observation_args
-    [:place_name, :where, :lat, :long, :alt, :when, "when(1i)", "when(2i)",
+    [:place_name, :where, :lat, :lng, :alt, :when, "when(1i)", "when(2i)",
      "when(3i)", :notes, :specimen, :thumb_image_id, :is_collection_location,
      :gps_hidden]
   end

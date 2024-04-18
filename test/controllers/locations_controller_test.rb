@@ -109,9 +109,9 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:show, params: { id: location.id })
     assert_template("show")
-    assert_template("locations/show/_location")
+    assert_template("locations/show/_notes")
     assert_template("comments/_comments_for_object")
-    assert_template("descriptions/_show_description_details")
+    assert_template("locations/show/_general_description_panel")
 
     location.reload
     assert_equal(updated_at, location.updated_at)
@@ -127,9 +127,9 @@ class LocationsControllerTest < FunctionalTestCase
 
   def assert_show_location
     assert_template("locations/show")
-    assert_template("locations/show/_location")
+    assert_template("locations/show/_notes")
     assert_template("comments/_comments_for_object")
-    assert_template("descriptions/_show_description_details")
+    assert_template("locations/show/_general_description_panel")
   end
 
   def test_interest_in_show_location
@@ -710,7 +710,9 @@ class LocationsControllerTest < FunctionalTestCase
     desc_count = LocationDescription.count
     past_loc_count = Location::Version.count
     past_desc_count = LocationDescription::Version.count
+
     put_requires_login(:update, params)
+
     assert_redirected_to(location_path(to_go.id))
     assert_equal(loc_count - 1, Location.count)
     assert_equal(desc_count, LocationDescription.count)
@@ -732,6 +734,11 @@ class LocationsControllerTest < FunctionalTestCase
     past_locs_to_go = to_go.versions.length
     past_descs_to_go = 0
 
+    # Cannot use fixture here -- in these classes
+    # fixtures with location `alibion` break API2Test#test_patching_locations
+    herbarium = Herbarium.create(name: "Herbarium to move", location: to_go)
+    project = Project.create(title: "Project to move", location: to_go)
+
     make_admin("rolf")
     put(:update, params: params)
 
@@ -742,6 +749,8 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(past_loc_count + 1 - past_locs_to_go, Location::Version.count)
     assert_equal(past_desc_count - past_descs_to_go,
                  LocationDescription::Version.count)
+    assert_equal(to_stay, herbarium.reload.location)
+    assert_equal(to_stay, project.reload.location)
   end
 
   def test_post_edit_location_locked

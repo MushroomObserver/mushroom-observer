@@ -1,0 +1,10 @@
+<% footer = tag.div(id: "location_previous") do
+  show_previous_version(@location, @versions)
+end %>
+
+<%= panel_block(id: "location_footer", footer: footer) do
+  concat(tag.div(id: "location_authors_editors") do
+    show_authors_and_editors(obj: @location, versions: @versions, user: @user)
+  end)
+  concat(:show_name_num_notifications.t(num: @location.interests))
+end %>

@@ -88,7 +88,6 @@
 #  email::              Email address.
 #  admin::              Allowed to enter admin mode?
 #  alert::              Alert message we need to display for User. (serialized)
-#  bonuses::            List of zero or more contribution bonuses. (serialized)
 #  contribution::       Contribution score (integer).
 #
 #  ==== Profile
@@ -155,7 +154,6 @@
 #
 #  ==== Profile
 #  percent_complete::   How much of profile has User finished?
-#  sum_bonuses::        Add up all the bonuses User has earned.
 #
 #  ==== Object ownership
 #  comments::           Comment's they've posted.
@@ -264,6 +262,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :comments
   has_many :donations
   has_many :external_links
+  has_many :field_slips
   has_many :images
   has_many :interests
   has_many :locations
@@ -349,6 +348,14 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   scope :by_contribution, lambda {
     order(contribution: :desc, name: :asc, login: :asc)
+  }
+
+  # NOTE: the obs images are a separate optimized query
+  scope :show_includes, lambda {
+    strict_loading.includes(
+      :location,
+      :user_stats
+    )
   }
 
   # These are used by forms.
@@ -715,16 +722,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     result += 1 if location_id
     result += 1 if image_id
     result * 100 / max
-  end
-
-  # Sum up all the bonuses the User has earned.
-  #
-  #   contribution += user.sum_bonuses
-  #
-  def sum_bonuses
-    return nil unless bonuses
-
-    bonuses.inject(0) { |acc, elem| acc + elem[0] }
   end
 
   def successful_contributor?

@@ -21,7 +21,7 @@ module ProjectsHelper
         link_to_object(obs, obs.text_name) + " (#{obs.id})",
         styled_obs_when(project, obs),
         styled_obs_lat(project, obs),
-        styled_obs_long(project, obs),
+        styled_obs_lng(project, obs),
         styled_obs_where(project, obs),
         user_link(obs.user)
       ]
@@ -86,18 +86,21 @@ module ProjectsHelper
 
     displayed_coord =
       coord_or_hidden(obs: obs, project: project, coord: obs.lat)
+
+    return displayed_coord if project.location.nil?
     return displayed_coord if project.location.contains_lat?(obs.lat)
 
     tag.span(displayed_coord, class: "violation-highlight")
   end
 
-  def styled_obs_long(project, obs)
-    return "" if obs.long.blank?
+  def styled_obs_lng(project, obs)
+    return "" if obs.lng.blank?
 
     displayed_coord =
-      coord_or_hidden(obs: obs, project: project, coord: obs.long)
+      coord_or_hidden(obs: obs, project: project, coord: obs.lng)
 
-    return displayed_coord if project.location.contains_long?(obs.long)
+    return displayed_coord if project.location.nil?
+    return displayed_coord if project.location.contains_lng?(obs.lng)
 
     tag.span(displayed_coord, class: "violation-highlight")
   end
@@ -114,7 +117,7 @@ module ProjectsHelper
 
   def styled_obs_where(project, obs)
     if obs.lat.present? || # If lat/lon present, ignore Location for compliance
-       project.location.found_here?(obs)
+       project&.location&.found_here?(obs)
       location_link(obs.place_name, obs.location, nil, false)
     else
       tag.span(location_link(obs.place_name, obs.location, nil, false),

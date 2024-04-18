@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_09_072017) do
+ActiveRecord::Schema[7.1].define(version: 2024_04_16_050340) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -83,6 +83,16 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_09_072017) do
   create_table "external_sites", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.string "name", limit: 100
     t.integer "project_id"
+  end
+
+  create_table "field_slips", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "observation_id"
+    t.integer "project_id"
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id"
+    t.index ["code"], name: "index_field_slips_on_code", unique: true
   end
 
   create_table "glossary_term_images", charset: "utf8mb3", force: :cascade do |t|
@@ -478,7 +488,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_09_072017) do
     t.datetime "last_view", precision: nil
     t.integer "rss_log_id"
     t.decimal "lat", precision: 15, scale: 10
-    t.decimal "long", precision: 15, scale: 10
+    t.decimal "lng", precision: 15, scale: 10
     t.string "where", limit: 1024
     t.integer "alt"
     t.string "lifeform", limit: 1024
@@ -528,6 +538,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_09_072017) do
     t.integer "image_id"
     t.date "start_date"
     t.date "end_date"
+    t.string "field_slip_prefix"
+    t.index ["field_slip_prefix"], name: "index_projects_on_field_slip_prefix", unique: true
   end
 
   create_table "publications", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -677,8 +689,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_09_072017) do
     t.string "languages"
     t.string "bonuses"
     t.string "checklist"
-    t.datetime "created_at", default: "2024-03-17 02:18:23", null: false
-    t.datetime "updated_at", default: "2024-03-17 02:18:23", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["user_id"], name: "user_index"
   end
 
@@ -696,7 +708,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_09_072017) do
     t.integer "location_id"
     t.integer "image_id"
     t.string "locale", limit: 5
-    t.text "bonuses"
     t.boolean "email_comments_owner", default: true, null: false
     t.boolean "email_comments_response", default: true, null: false
     t.boolean "email_comments_all", default: false, null: false

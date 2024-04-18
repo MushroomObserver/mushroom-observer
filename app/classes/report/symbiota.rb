@@ -55,7 +55,7 @@ module Report
         row.county,
         row.locality,
         row.best_lat,
-        row.best_long,
+        row.best_lng,
         row.best_low,
         row.best_high,
         row.obs_updated_at,

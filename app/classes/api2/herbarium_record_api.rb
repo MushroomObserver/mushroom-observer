@@ -39,7 +39,7 @@ class API2
         users: parse_array(:user, :user, help: :creator),
         herbaria: parse_array(:herbarium, :herbarium, as: :id),
         observations: parse_array(:observation, :observation, as: :id),
-        has_notes: parse(:boolean, :has_notes),
+        with_notes: parse(:boolean, :has_notes),
         initial_det: parse(:string, :initial_det, help: 1),
         accession_number: parse(:string, :accession_number, help: 1),
         notes_has: parse(:string, :notes_has, help: 1),

@@ -12,6 +12,9 @@
   <%= text_area_with_label(form: f, field: :summary, rows: 5,
                            label: :SUMMARY.t + ":") %>
 
+  <%= text_field_with_label(form: f, field: :field_slip_prefix,
+                            label: :FIELD_SLIP_PREFIX.t + ":") %>
+
   <%= render(partial: "shared/textilize_help") %>
 
   <%= autocompleter_field(form: f, field: :place_name, label: :WHERE.t + ":",

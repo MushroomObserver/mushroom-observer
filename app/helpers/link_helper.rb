@@ -64,14 +64,17 @@ module LinkHelper
     content = block ? capture(&block) : text
     opts = block ? path : options
     icon_type = opts[:icon]
+    label_class = opts[:show_text] ? "pl-3" : "sr-only"
     return link_to(link, opts) { content } if icon_type.blank?
 
-    opts = { title: content,
-             data: { toggle: "tooltip" } }.deep_merge(opts.except(:icon))
+    opts = {
+      title: content,
+      data: { toggle: "tooltip" }
+    }.deep_merge(opts.except(:icon, :show_text))
 
     link_to(link, **opts) do
-      concat(tag.span(content, class: "sr-only"))
       concat(link_icon(icon_type))
+      concat(tag.span(content, class: label_class))
     end
   end
 
@@ -111,7 +114,7 @@ module LinkHelper
 
   # pass title if it's a plain button (say for collapse) but you want a tooltip
   def link_icon(type, title: "")
-    return "" unless (glyph = link_icon_index[type])
+    return "" unless (glyph = LINK_ICON_INDEX[type])
 
     text = ""
     opts = { class: "glyphicon glyphicon-#{glyph} px-2" }
@@ -125,38 +128,39 @@ module LinkHelper
     tag.span(text, **opts)
   end
 
-  def link_icon_index
-    {
-      edit: "edit",
-      delete: "remove-circle",
-      add: "plus",
-      back: "step-backward",
-      show: "eye-open",
-      hide: "eye-close",
-      reuse: "share",
-      x: "remove",
-      remove: "remove-circle",
-      send: "send",
-      ban: "ban-circle",
-      minus: "minus-sign",
-      trash: "trash",
-      cancel: "remove",
-      email: "envelope",
-      question: "question-sign",
-      list: "list",
-      clone: "duplicate",
-      merge: "transfer",
-      move: "random",
-      adjust: "resize-vertical",
-      make_default: "star",
-      publish: "upload",
-      deprecate: "ok-circle", # approved name needs to look "approved"
-      approve: "exclamation-sign", # deprecated name needs to look "deprecated"
-      synonyms: "random",
-      tracking: "bullhorn",
-      manage_lists: "indent-left"
-    }.freeze
-  end
+  # NOTE: Specific to glyphicons
+  LINK_ICON_INDEX = {
+    edit: "edit",
+    delete: "remove-circle",
+    add: "plus",
+    back: "step-backward",
+    show: "eye-open",
+    hide: "eye-close",
+    reuse: "share",
+    x: "remove",
+    remove: "remove-circle",
+    send: "send",
+    ban: "ban-circle",
+    minus: "minus-sign",
+    trash: "trash",
+    cancel: "remove",
+    email: "envelope",
+    question: "question-sign",
+    alert: "alert",
+    list: "list",
+    clone: "duplicate",
+    merge: "transfer",
+    move: "random",
+    adjust: "resize-vertical",
+    make_default: "star",
+    publish: "upload",
+    deprecate: "ok-circle", # approved name needs to look "approved"
+    approve: "exclamation-sign", # deprecated name needs to look "deprecated"
+    synonyms: "random",
+    tracking: "bullhorn",
+    manage_lists: "indent-left",
+    observations: "tags"
+  }.freeze
 
   # button to destroy object
   # Used instead of link_to because method: :delete requires jquery_ujs library
@@ -256,18 +260,18 @@ module LinkHelper
   # Refactor to accept a tab array
 
   # POST to a path; used instead of a link because POST link requires js
-  def post_button(name:, path:, **args, &block)
-    any_method_button(method: :post, name:, path:, **args, &block)
+  def post_button(name:, path:, **, &block)
+    any_method_button(method: :post, name:, path:, **, &block)
   end
 
   # PUT to a path; used instead of a link because PUT link requires js
-  def put_button(name:, path:, **args, &block)
-    any_method_button(method: :put, name:, path:, **args, &block)
+  def put_button(name:, path:, **, &block)
+    any_method_button(method: :put, name:, path:, **, &block)
   end
 
   # PATCH to a path; used instead of a link because PATCH link requires js
-  def patch_button(name:, path:, **args, &block)
-    any_method_button(method: :patch, name:, path:, **args, &block)
+  def patch_button(name:, path:, **, &block)
+    any_method_button(method: :patch, name:, path:, **, &block)
   end
 
   # any_method_button(method: :patch,

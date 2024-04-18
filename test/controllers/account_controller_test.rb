@@ -37,6 +37,9 @@ class AccountControllerTest < FunctionalTestCase
     assert(UserGroup.all_users.users.include?(user))
     assert(group = UserGroup.one_user(user))
     assert_user_arrays_equal([user], group.users)
+
+    # Make sure user stats are created.
+    assert_not_nil(user.user_stats)
   end
 
   def test_bad_signup
@@ -91,7 +94,8 @@ class AccountControllerTest < FunctionalTestCase
     post(:create, params: { new_user: params })
     assert_flash_success
     assert_redirected_to("/bogus/location")
-    assert_not_nil(User.find_by(login: "newbob"))
+    assert_not_nil(user_id = User.find_by(login: "newbob"))
+    assert_not_nil(UserStats.find_by(user_id: user_id))
   end
 
   def test_signup_theme_errors

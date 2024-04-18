@@ -18,7 +18,7 @@ module PatternSearch
 
       # strings / lists
       comments: [:comments_has, :parse_string],
-      has_field: [:has_notes_fields, :parse_string],
+      has_field: [:with_notes_fields, :parse_string],
       herbarium: [:herbaria, :parse_list_of_herbaria],
       list: [:species_lists, :parse_list_of_species_lists],
       location: [:locations, :parse_list_of_locations],
@@ -37,15 +37,15 @@ module PatternSearch
       west: [:west, :parse_longitude],
 
       # booleanish
-      has_comments: [:has_comments, :parse_yes],
-      has_location: [:has_location, :parse_boolean],
-      has_name: [:has_name, :parse_boolean],
-      has_notes: [:has_notes, :parse_boolean],
-      images: [:has_images, :parse_boolean],
+      has_comments: [:with_comments, :parse_yes],
+      has_public_lat_lng: [:with_public_lat_lng, :parse_boolean],
+      has_name: [:with_name, :parse_boolean],
+      has_notes: [:with_notes, :parse_boolean],
+      has_images: [:with_images, :parse_boolean],
       is_collection_location: [:is_collection_location, :parse_boolean],
       lichen: [:lichen, :parse_boolean],
-      sequence: [:has_sequences, :parse_yes],
-      specimen: [:has_specimen, :parse_boolean]
+      has_sequence: [:with_sequences, :parse_yes],
+      has_specimen: [:with_specimen, :parse_boolean]
     }.freeze
 
     def self.params

@@ -98,7 +98,6 @@ MushroomObserver::Application.configure do
   # Combine files using the "require" directives at the top of included files
   # See http://guides.rubyonrails.org/asset_pipeline.html#turning-debugging-off
   config.assets.debug = false
-  config.sass.quiet_deps = true
 
   # Version of your assets, change this if you want to expire all your assets.
   config.assets.version = "1.0"
