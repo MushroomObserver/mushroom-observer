@@ -63,7 +63,7 @@ module Observations
       xlated_inat_obs.save
 
       # TODO: Other things done by Observations#create
-      # @observation.log(:log_observation_created)
+      xlated_inat_obs.log(:log_observation_created)
       # save_everything_else(params.dig(:naming, :reasons))
       # strip_images! if @observation.gps_hidden
       # update_field_slip(@observation, params[:field_code])

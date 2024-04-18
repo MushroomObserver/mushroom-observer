@@ -20,7 +20,7 @@ class ImportedInatObs
     { Other: desc.gsub(%r{</?p>}, "") }
   end
 
-  # :location seems simplest source for lat.
+  # :location seems simplest source for lat/lng
   # But [:geojason] might be possible.
   def lat
     obs[:location].split(",").first.to_f
