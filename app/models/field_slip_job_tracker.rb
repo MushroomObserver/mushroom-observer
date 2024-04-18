@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class FieldSlipJobTracker < AbstractModel
-  include Turbo::Broadcastable
   broadcasts_refreshes
 
   PUBLIC_DIR = "public/"

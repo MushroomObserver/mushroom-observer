@@ -921,6 +921,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # declare routes for the actions in the ACTIONS hash
   route_actions_hash
 
+  # ----- ActionCable: mount the server -------------------------------------
+  mount ActionCable.server => "/cable"
+
   # routes for actions that Rails automatically creates from view templates
   MO.themes.each { |scheme| get "/theme/#{scheme}" }
 end

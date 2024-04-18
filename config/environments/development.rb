@@ -148,6 +148,10 @@ MushroomObserver::Application.configure do
   config.bot_enabled = true
 
   config.active_job.queue_adapter = :solid_queue
+
+  # config.action_cable.url = "ws://localhost:3000/cable"
+  # config.action_cable.allowed_request_origins = [/http:\/\/*/,
+  #                                                /https:\/\/*/]
 end
 
 file = File.expand_path("../consts-site.rb", __dir__)
