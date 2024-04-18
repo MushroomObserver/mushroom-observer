@@ -26,7 +26,7 @@ action = { controller: "/projects/field_slips", action: :create,
           <%= tag.th(:STATUS.t, scope: "col", class: "text-right") %>
         </tr>
       </thead>
-      <%= tag.tbody(id: "field_slip_jobs") do
+      <%= tag.tbody(id: "field_slip_job_trackers") do
         @project.trackers.order(id: :desc).each do |tracker|
           concat(
             render(partial: "projects/field_slips/tracker_row",
