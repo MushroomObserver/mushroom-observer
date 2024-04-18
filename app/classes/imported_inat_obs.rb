@@ -15,6 +15,19 @@ class ImportedInatObs
     obs[:geoprivacy].present?
   end
 
+  def name_id
+    inat_name = obs[:taxon][:name]
+
+    # TODO: refine this.
+    # - include rank
+    # - might need a dictionary here
+    mo_names = Name.where(text_name: inat_name)
+    return Name.unknown.id if mo_names.none?
+    return mo_names.first.id if mo_names.one?
+
+    Name.unknown.id
+  end
+
   def notes
     desc = obs[:description]
     { Other: desc.gsub(%r{</?p>}, "") }

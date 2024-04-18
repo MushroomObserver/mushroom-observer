@@ -33,7 +33,7 @@ class ImportedInatObsTest < UnitTestCase
       text_name: "Somion unicolor",
       needs_naming: false,
       # name_id needs work
-      name_id: 113699, # rubocop:disable Style/NumericLiterals
+      name_id: names(:somion_unicolor).id,
       classification: "Domain: _Eukarya_\r\nKingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Agaricomycetes_\r\nOrder: _Polyporales_\r\nFamily: _Cerrenaceae_\r\n", # rubocop:disable Layout/LineLength
       lifeform: " ",
 
@@ -51,7 +51,7 @@ class ImportedInatObsTest < UnitTestCase
       # log_updated_at: Sat, 16 Mar 2024 17:22:51.000000000 EDT -04:00,
     )
 
-    %w[gps_hidden lat lng notes when where].each do |attribute|
+    %w[gps_hidden lat lng name_id notes when where].each do |attribute|
       assert_equal(expected_xlation.send(attribute), import.send(attribute))
     end
 
