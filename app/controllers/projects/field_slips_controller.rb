@@ -38,7 +38,7 @@ module Projects
         # Append a new row to the table of field slip jobs
         format.turbo_stream do
           render(turbo_stream: turbo_stream.prepend(
-            :field_slip_jobs, # the id of the div to append to
+            :field_slip_job_trackers, # the id of the div to append to
             partial: "projects/field_slips/tracker_row",
             locals: { tracker: tracker }
           ))
