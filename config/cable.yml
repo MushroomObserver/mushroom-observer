@@ -1,0 +1,7 @@
+# We use cables for ActionCable, which is a Rails feature that allows for
+# real-time communication between the server and the client.
+# This is useful for features that require real-time updates.
+
+development:
+  adapter: async
+  # url: redis://localhost:6379/1
