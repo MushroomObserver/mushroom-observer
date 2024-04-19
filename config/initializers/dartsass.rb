@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 Rails.application.config.dartsass.builds = {
-  "mushroom_observer.scss" => "mushroom_observer.css",
+  # "mushroom_observer.scss" => "mushroom_observer.css",
   "Admin.scss" => "Admin.css",
   "Agaricus.scss" => "Agaricus.css",
   "Amanita.scss" => "Amanita.css",
