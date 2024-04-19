@@ -1,26 +1,21 @@
 # frozen_string_literal: true
 
 #
-#  = Extensions to NilClass
+#  = Extensions to FalseClass
 #
 #  == Instance Methods
 #
-#  any?::         Returns false.
-#  empty?::       Returns true.
 #  to_boolean::   Returns false.
+#  to_i::         Returns 0.
 #
 ################################################################################
 
-class NilClass
-  def any?(*_args)
-    false
-  end
-
-  def empty?
-    true
-  end
-
+class FalseClass
   def to_boolean
     false
+  end
+
+  def to_i
+    0
   end
 end

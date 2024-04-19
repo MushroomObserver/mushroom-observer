@@ -102,16 +102,16 @@
 #  outside(n,s,e,w) geoloc is outside the box
 #  is_collection_location
 #  not_collection_location
-#  with_image
-#  without_image
+#  with_images
+#  without_images
 #  with_notes
 #  without_notes
 #  has_notes_field(field)
 #  notes_include(note)
 #  with_specimen
 #  without_specimen
-#  with_sequence
-#  without_sequence
+#  with_sequences
+#  without_sequences
 #  confidence (min %, max %)
 #  with_comments
 #  without_comments
@@ -452,15 +452,15 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
         -> { where(is_collection_location: true) }
   scope :not_collection_location,
         -> { where(is_collection_location: false) }
-  scope :with_image,
+  scope :with_images,
         -> { where.not(thumb_image: nil) }
-  scope :without_image,
+  scope :without_images,
         -> { where(thumb_image: nil) }
   scope :with_notes,
         -> { where.not(notes: no_notes) }
   scope :without_notes,
         -> { where(notes: no_notes) }
-  scope :has_notes_field,
+  scope :with_notes_field,
         ->(field) { where(Observation[:notes].matches("%:#{field}:%")) }
   scope :notes_include,
         ->(notes) { where(Observation[:notes].matches("%#{notes}%")) }
@@ -468,11 +468,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
         -> { where(specimen: true) }
   scope :without_specimen,
         -> { where(specimen: false) }
-  scope :with_sequence,
+  scope :with_sequences,
         -> { joins(:sequences).distinct }
-  scope :without_sequence, lambda {
+  scope :without_sequences, lambda {
     # much faster than `missing(:sequences)` which uses left outer join.
-    where.not(id: with_sequence)
+    where.not(id: with_sequences)
   }
   scope :confidence, lambda { |min, max = min| # confidence between min & max %
     where(vote_cache: (min.to_f / (100 / 3))..(max.to_f / (100 / 3)))

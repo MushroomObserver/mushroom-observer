@@ -2239,8 +2239,8 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(is_collection_location: "no"))
     assert_api_results(obses)
 
-    with    = Observation.with_image
-    without = Observation.without_image
+    with    = Observation.with_images
+    without = Observation.without_images
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_images: "yes"))
@@ -3031,8 +3031,8 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(is_collection_location: "no"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
-    with    = Observation.with_image
-    without = Observation.without_image
+    with    = Observation.with_images
+    without = Observation.without_images
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_images: "yes"))
