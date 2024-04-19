@@ -557,6 +557,7 @@
   owner: owner
   OWNERS: Owners
   owners: owners
+  PAGES: Pages
   PASSWORD: Password
   password: password
   PASSWORDS: Passwords
