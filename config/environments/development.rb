@@ -149,7 +149,9 @@ MushroomObserver::Application.configure do
 
   config.active_job.queue_adapter = :solid_queue
 
-  # config.action_cable.url = "ws://localhost:3000/cable"
+  # Set up ActionCable to use a standalone server at port 28080
+  config.action_cable.mount_path = nil
+  config.action_cable.url = "ws://localhost:28080" # use :wss in production
   # config.action_cable.allowed_request_origins = [/http:\/\/*/,
   #                                                /https:\/\/*/]
 end
