@@ -15,35 +15,38 @@ export default class extends Controller {
   }
 
   connect() {
-    // just a "sanity check" convention, so you can tell "is this thing on?"
+    // Just a "sanity check" convention, so you can tell "is this thing on?"
     this.element.dataset.stimulus = "connected";
     this.status_id = this.element.dataset.status
 
     this.start_timer_sending_requests()
   }
 
-  start_timer_sending_requests() {
-    // every second, send an get request to find out the doneness of the PDF
-    // timer should call this.send_fetch_request(this.tracker_id)
-    if (this.status_id != "3") {
-      this.intervalId = setInterval(this.initiate_fetch_request(), 1000);
-    } else if (this.intervalId != null) {
+  // Clear any intervals when the controller is disconnected
+  disconnect() {
+    if (this.intervalId != null) {
       clearInterval(this.intervalId)
     }
   }
 
-  initiate_fetch_request() {
-    this.send_fetch_request(this.endpoint_url)
-  }
-
-  // For some reason an async function doesn't have access to the same `this`
-  async send_fetch_request(url) {
-    console.log("sending fetch request to " + url)
-    const response = await get(url, { responseKind: "turbo-stream" });
-    if (response.ok) {
-      // turbo-stream prints the row in the page already
-    } else {
-      console.log(`got a ${response.status}`);
+  // Every second, send a get request to find out the status of the PDF.
+  // NOTE: Can't call a class function from `setInterval` because it resets
+  // the context of `this`
+  start_timer_sending_requests() {
+    if (this.status_id != "3") {
+      // Set the intervalId to the interval so we can clear it later
+      this.intervalId = setInterval(async () => {
+        // console.log("sending fetch request to " + this.endpoint_url)
+        const response = await get(this.endpoint_url,
+          { responseKind: "turbo-stream" });
+        if (response.ok) {
+          // turbo-stream prints the row in the page already
+        } else {
+          console.log(`got a ${response.status}`);
+        }
+      }, 1000);
+    } else if (this.intervalId != null) {
+      clearInterval(this.intervalId)
     }
   }
 }
