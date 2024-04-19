@@ -15,18 +15,26 @@ export default class extends Controller {
   }
 
   connect() {
-    // just a "sanity check" convention, so you can tell "is this thing on?"
+    // Just a "sanity check" convention, so you can tell "is this thing on?"
     this.element.dataset.stimulus = "connected";
     this.status_id = this.element.dataset.status
 
     this.start_timer_sending_requests()
   }
 
+  // Clear any intervals when the controller is disconnected
+  disconnect() {
+    if (this.intervalId != null) {
+      clearInterval(this.intervalId)
+    }
+  }
+
+  // Every second, send a get request to find out the status of the PDF.
+  // NOTE: Can't call a class function from `setInterval` because it resets
+  // the context of `this`
   start_timer_sending_requests() {
-    // every second, send an get request to find out the doneness of the PDF
-    // note we can't call a function of this class from setInterval
-    // because we lose the context of `this`
     if (this.status_id != "3") {
+      // Set the intervalId to the interval so we can clear it later
       this.intervalId = setInterval(async () => {
         // console.log("sending fetch request to " + this.endpoint_url)
         const response = await get(this.endpoint_url,
@@ -38,12 +46,6 @@ export default class extends Controller {
         }
       }, 1000);
     } else if (this.intervalId != null) {
-      clearInterval(this.intervalId)
-    }
-  }
-
-  disconnect() {
-    if (this.intervalId != null) {
       clearInterval(this.intervalId)
     }
   }
