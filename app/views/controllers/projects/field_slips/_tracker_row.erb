@@ -12,7 +12,7 @@ tag.tr(id: dom_id(tracker),
       number_with_precision(tracker.elapsed_time, precision: 1)
     end,
     tag.td(class: "text-center", data: { field_slip_job_target: "pages" }) do
-      # tracker.pages
+      tracker.pages.to_s
     end,
     tag.td(class: "text-right", data: { field_slip_job_target: "status" }) do
       tracker.status

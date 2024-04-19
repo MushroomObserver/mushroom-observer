@@ -14,8 +14,7 @@ class FieldSlipJob < ApplicationJob
 
     tracker.processing
     icon = "public/logo-120.png" # Will be replaced with project.logo
-    view = FieldSlipView.new(project.title, tracker.prefix, icon,
-                             tracker.start, tracker.count)
+    view = FieldSlipView.new(project.title, tracker, icon)
     view.render
     view.save_as(tracker.filepath)
     tracker.done
