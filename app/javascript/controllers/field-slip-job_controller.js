@@ -24,28 +24,27 @@ export default class extends Controller {
 
   start_timer_sending_requests() {
     // every second, send an get request to find out the doneness of the PDF
-    // timer should call this.send_fetch_request(this.tracker_id)
-    // note the lack of parentheses, we're passing the function itself,
-    // not the result of calling it
+    // note we can't call a function of this class from setInterval
+    // because we lose the context of `this`
     if (this.status_id != "3") {
-      this.intervalId = setInterval(this.initiate_fetch_request, 1000);
+      this.intervalId = setInterval(async () => {
+        // console.log("sending fetch request to " + this.endpoint_url)
+        const response = await get(this.endpoint_url,
+          { responseKind: "turbo-stream" });
+        if (response.ok) {
+          // turbo-stream prints the row in the page already
+        } else {
+          console.log(`got a ${response.status}`);
+        }
+      }, 1000);
     } else if (this.intervalId != null) {
       clearInterval(this.intervalId)
     }
   }
 
-  initiate_fetch_request() {
-    this.send_fetch_request(this.endpoint_url)
-  }
-
-  // For some reason an async function doesn't have access to the same `this`
-  async send_fetch_request(url) {
-    console.log("sending fetch request to " + url)
-    const response = await get(url, { responseKind: "turbo-stream" });
-    if (response.ok) {
-      // turbo-stream prints the row in the page already
-    } else {
-      console.log(`got a ${response.status}`);
+  disconnect() {
+    if (this.intervalId != null) {
+      clearInterval(this.intervalId)
     }
   }
 }
