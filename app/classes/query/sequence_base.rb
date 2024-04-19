@@ -45,11 +45,11 @@ module Query
         east?: :float,
         west?: :float,
         is_collection_location?: :boolean,
-        has_images?: :boolean,
-        has_name?: :boolean,
-        has_specimen?: :boolean,
-        has_obs_notes?: :boolean,
-        has_notes_fields?: [:string],
+        with_images?: :boolean,
+        with_name?: :boolean,
+        with_specimen?: :boolean,
+        with_obs_notes?: :boolean,
+        with_notes_fields?: [:string],
         obs_notes_has?: :string
       }
     end
@@ -154,47 +154,47 @@ module Query
     end
 
     def initialize_boolean_parameters
-      initialize_has_images_parameter
-      initialize_has_specimen_parameter
-      initialize_has_name_parameter
-      initialize_has_obs_notes_parameter
-      add_has_notes_fields_condition(params[:has_notes_fields], :observations)
+      initialize_with_images_parameter
+      initialize_with_specimen_parameter
+      initialize_with_name_parameter
+      initialize_with_obs_notes_parameter
+      add_with_notes_fields_condition(params[:with_notes_fields], :observations)
     end
 
-    def initialize_has_images_parameter
+    def initialize_with_images_parameter
       add_boolean_condition(
         "observations.thumb_image_id IS NOT NULL",
         "observations.thumb_image_id IS NULL",
-        params[:has_images],
+        params[:with_images],
         :observations
       )
     end
 
-    def initialize_has_specimen_parameter
+    def initialize_with_specimen_parameter
       add_boolean_condition(
         "observations.specimen IS TRUE",
         "observations.specimen IS FALSE",
-        params[:has_specimen],
+        params[:with_specimen],
         :observations
       )
     end
 
-    def initialize_has_name_parameter
+    def initialize_with_name_parameter
       genus = Name.ranks[:Genus]
       group = Name.ranks[:Group]
       add_boolean_condition(
         "names.`rank` <= #{genus} or names.`rank` = #{group}",
         "names.`rank` > #{genus} and names.`rank` < #{group}",
-        params[:has_name],
+        params[:with_name],
         :observations, :names
       )
     end
 
-    def initialize_has_obs_notes_parameter
+    def initialize_with_obs_notes_parameter
       add_boolean_condition(
         "observations.notes != #{escape(Observation.no_notes_persisted)}",
         "observations.notes  = #{escape(Observation.no_notes_persisted)}",
-        params[:has_obs_notes],
+        params[:with_obs_notes],
         :observations
       )
     end

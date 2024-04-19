@@ -1661,7 +1661,7 @@ class QueryTest < UnitTestCase
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, comments_has: "give")
 
-    # has_notes_fields
+    # with_notes_fields
     obs = observations(:substrate_notes_obs) # obs has notes substrate: field
     # give it some images
     obs.images = [images(:conic_image), images(:convex_image)]
@@ -1671,7 +1671,7 @@ class QueryTest < UnitTestCase
       where(Observation[:notes].matches("%:substrate:%")).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect,
-                 :Image, :with_observations, has_notes_fields: "substrate")
+                 :Image, :with_observations, with_notes_fields: "substrate")
 
     # herbaria
     name = "The New York Botanical Garden"
@@ -1712,34 +1712,34 @@ class QueryTest < UnitTestCase
 
     ##### boolean parameters #####
 
-    # :has_comments
+    # :with_comments
     expect = Image.joins(observations: :comments).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Image, :with_observations, has_comments: true)
+    assert_query(expect, :Image, :with_observations, with_comments: true)
 
-    # has_public_lat_lng
+    # with_public_lat_lng
     expect = Image.joins(:observations).
              where.not(observations: { lat: false }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Image, :with_observations, has_public_lat_lng: true)
+    assert_query(expect, :Image, :with_observations, with_public_lat_lng: true)
 
-    # has_name
+    # with_name
     expect = Image.joins(:observations).
              where(observations: { name_id: Name.unknown }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Image, :with_observations, has_name: false)
+    assert_query(expect, :Image, :with_observations, with_name: false)
 
-    # :has_notes
+    # :with_notes
     expect =
       Image.joins(:observations).
       where.not(observations: { notes: Observation.no_notes }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Image, :with_observations, has_notes: true)
+    assert_query(expect, :Image, :with_observations, with_notes: true)
 
-    # has_sequences
+    # with_sequences
     expect = Image.joins(observations: :sequences).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, Image, :with_observations, has_sequences: true)
+    assert_query(expect, Image, :with_observations, with_sequences: true)
 
     # is_collection_location
     expect =
@@ -2053,11 +2053,11 @@ class QueryTest < UnitTestCase
       :Location, :with_observations, comments_has: "cool"
     )
 
-    # has_notes_fields
+    # with_notes_fields
     assert_query(
       Location.joins(:observations).
                where(Observation[:notes].matches("%:substrate:%")).uniq,
-      :Location, :with_observations, has_notes_fields: "substrate"
+      :Location, :with_observations, with_notes_fields: "substrate"
     )
 
     # herbaria
@@ -2140,35 +2140,35 @@ class QueryTest < UnitTestCase
 
     ##### boolean parameters #####
 
-    # :has_comments
+    # :with_comments
     assert_query(
       Location.joins(observations: :comments).uniq,
-      :Location, :with_observations, has_comments: true
+      :Location, :with_observations, with_comments: true
     )
 
-    # has_public_lat_lng
+    # with_public_lat_lng
     assert_query(
       Location.joins(:observations).where(observations: { gps_hidden: false }).
                where.not(observations: { lat: false }).uniq,
-      :Location, :with_observations, has_public_lat_lng: true
+      :Location, :with_observations, with_public_lat_lng: true
     )
 
-    # has_name
+    # with_name
     assert_query(
       Location.joins(:observations).
                where(observations: { name_id: Name.unknown }).uniq,
-      :Location, :with_observations, has_name: false
+      :Location, :with_observations, with_name: false
     )
-    # :has_notes
+    # :with_notes
     assert_query(
       Location.joins(:observations).
                where.not(observations: { notes: Observation.no_notes }).uniq,
-      :Location, :with_observations, has_notes: true
+      :Location, :with_observations, with_notes: true
     )
-    # has_sequences
+    # with_sequences
     assert_query(
       Location.joins(observations: :sequences).uniq,
-      Location, :with_observations, has_sequences: true
+      Location, :with_observations, with_sequences: true
     )
     # is_collection_location
     assert_query(
@@ -2501,11 +2501,11 @@ class QueryTest < UnitTestCase
 
     ##### list/string parameters #####
 
-    # has_notes_fields
+    # with_notes_fields
     assert_query(
       Name.with_correct_spelling.joins(:observations).
            where(Observation[:notes].matches("%:substrate:%")).uniq,
-      :Name, :with_observations, has_notes_fields: "substrate"
+      :Name, :with_observations, with_notes_fields: "substrate"
     )
 
     # herbaria
@@ -2553,37 +2553,37 @@ class QueryTest < UnitTestCase
 
     ##### boolean parameters #####
 
-    # :has_comments
+    # :with_comments
     assert_query(
       Name.with_correct_spelling.joins(observations: :comments).uniq,
-      :Name, :with_observations, has_comments: true
+      :Name, :with_observations, with_comments: true
     )
 
-    # has_public_lat_lng
+    # with_public_lat_lng
     assert_query(
       Name.joins(:observations).
            where.not(observations: { lat: false }).uniq,
-      :Name, :with_observations, has_public_lat_lng: true
+      :Name, :with_observations, with_public_lat_lng: true
     )
 
-    # has_name
+    # with_name
     assert_query(
       Name.with_correct_spelling.joins(:observations).
            where(observations: { name_id: Name.unknown }).uniq,
-      :Name, :with_observations, has_name: false
+      :Name, :with_observations, with_name: false
     )
 
-    # :has_notes
+    # :with_notes
     assert_query(
       Name.with_correct_spelling.joins(:observations).
            where.not(observations: { notes: Observation.no_notes }).uniq,
-      :Name, :with_observations, has_notes: true
+      :Name, :with_observations, with_notes: true
     )
 
-    # has_sequences
+    # with_sequences
     assert_query(
       Name.with_correct_spelling.joins(observations: :sequences).uniq,
-      Name, :with_observations, has_sequences: true
+      Name, :with_observations, with_sequences: true
     )
 
     # is_collection_location
@@ -3185,19 +3185,19 @@ class QueryTest < UnitTestCase
   ##############################################################################
 
   def test_filtering_content
-    ##### has_images filter #####
+    ##### with_images filter #####
     expect = Observation.where.not(thumb_image_id: nil)
-    assert_query(expect, :Observation, :all, has_images: "yes")
+    assert_query(expect, :Observation, :all, with_images: "yes")
 
     expect = Observation.where(thumb_image_id: nil)
-    assert_query(expect, :Observation, :all, has_images: "no")
+    assert_query(expect, :Observation, :all, with_images: "no")
 
-    ##### has_specimen filter #####
+    ##### with_specimen filter #####
     expect = Observation.where(specimen: true)
-    assert_query(expect, :Observation, :all, has_specimen: "yes")
+    assert_query(expect, :Observation, :all, with_specimen: "yes")
 
     expect = Observation.where(specimen: false)
-    assert_query(expect, :Observation, :all, has_specimen: "no")
+    assert_query(expect, :Observation, :all, with_specimen: "no")
 
     ##### lichen filters #####
     expect_obs = Observation.where(
