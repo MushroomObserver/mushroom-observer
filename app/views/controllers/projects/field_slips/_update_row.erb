@@ -1,0 +1,4 @@
+<%= turbo_stream.replace(dom_id(tracker)) do
+  render(partial: "projects/field_slips/tracker_row",
+          locals: { tracker: tracker })
+end %>

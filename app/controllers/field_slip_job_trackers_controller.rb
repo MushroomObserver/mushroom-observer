@@ -10,7 +10,7 @@ class FieldSlipJobTrackersController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream do
-        render(partial: "projects/field_slips/tracker_row",
+        render(partial: "projects/field_slips/update_row",
                locals: { tracker: @tracker })
       end
     end

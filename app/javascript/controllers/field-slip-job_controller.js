@@ -25,8 +25,10 @@ export default class extends Controller {
   start_timer_sending_requests() {
     // every second, send an get request to find out the doneness of the PDF
     // timer should call this.send_fetch_request(this.tracker_id)
+    // note the lack of parentheses, we're passing the function itself,
+    // not the result of calling it
     if (this.status_id != "3") {
-      this.intervalId = setInterval(this.initiate_fetch_request(), 1000);
+      this.intervalId = setInterval(this.initiate_fetch_request, 1000);
     } else if (this.intervalId != null) {
       clearInterval(this.intervalId)
     }
