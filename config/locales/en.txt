@@ -1105,6 +1105,7 @@
   search_term_deprecated: deprecated
   search_term_east: east
   search_term_exclude_consensus: exclude_consensus
+  search_term_field_slip: field_slip
   search_term_has_author: has_author
   search_term_has_citation: has_citation
   search_term_has_classification: has_classification
@@ -3546,6 +3547,7 @@
   observation_term_user: Observation created by one of these users.
   observation_term_notes: Notes contains the given string.
   observation_term_comments: Comments contain the given string.
+  observation_term_field_slip: Observation corresponds to this field slip.
   observation_term_confidence: Confidence is in this range.
   observation_term_east: Longitude of eastern edge of search region.
   observation_term_west: Longitude of western edge of search region.
