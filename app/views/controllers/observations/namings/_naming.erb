@@ -1,0 +1,36 @@
+<%# locals: (consensus:, naming:) -%>
+
+<%
+# REQUIRES consensus local! turbo_streams need to figure this out.
+# Shows one proposed naming for this observation, with a tiny vote form.
+# Also naming edit and delete buttons if the current user owns the naming.
+# @vote is used by observations/namings/votes/form
+# Note the nested grid: the reasons are packed under the left 11 cols,
+# with the "eyes" graphic in the right 1 col for vertical space
+# @vote = votes[naming.id]
+
+row = naming_row_content(consensus, naming)
+%>
+
+<%=
+tag.div(class: "list-group-item", id: dom_id(naming)) do
+  tag.div(class: "row align-items-center naming-row") do
+    [
+      tag.div(class: "col col-sm-11") do
+        [
+          tag.div(class: "row align-items-center") do
+            [
+              tag.div(row[:name], class: "col col-sm-4"),
+              tag.div(row[:proposer], class: "col col-sm-3"),
+              tag.div(row[:vote_tally], class: "col col-sm-2"),
+              tag.div(row[:your_vote], class: "col col-sm-3")
+            ].safe_join
+          end,
+          tag.div(row[:reasons], class: "naming-reasons small mt-1")
+        ].safe_join
+      end,
+      tag.div(row[:eyes], class: "col-sm-1 d-none d-sm-block px-sm-0")
+    ].safe_join
+  end
+end
+%>

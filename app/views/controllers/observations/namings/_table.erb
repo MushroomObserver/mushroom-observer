@@ -1,0 +1,30 @@
+<%# locals: (consensus:, obs:) -%>
+
+<%
+namings = consensus.namings.sort_by(&:created_at)
+# NOTE: #namings is the list-group inside the panel
+%>
+
+<%=
+tag.div(class: "namings-table panel panel-default mb-4",
+        id: "observation_namings") do
+  [
+    observation_namings_table_header(obs),
+    tag.div(id: "namings", class: "list-group list-group-flush",
+            data: {
+              controller: "section-update",
+              updated_by: "modal_naming_#{consensus.observation.id}"
+            }) do
+      if consensus.namings&.length&.positive?
+        namings.each do |naming|
+          concat(render(partials: "observations/namings/naming",
+                        locals: { consensus: consensus, naming: naming }))
+        end
+      else
+        tag.div(:show_namings_no_names_yet.t, class: "list-group-item")
+      end
+    end,
+    observation_namings_table_footer(obs)
+  ].safe_join
+end
+%>

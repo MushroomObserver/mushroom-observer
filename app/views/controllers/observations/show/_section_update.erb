@@ -1,15 +1,19 @@
+<%# locals: (identifier:) -%>
+
 <%=
 # Update observation view with results of update or create
-# Needs locals: identifier
-# The namings table is a helper
-# N+1 - @observation.reload ?!
+id = "observation_#{identifier}"
+
 if identifier == "namings"
-  id = "namings_table_rows"
+  partial = "observations/namings/table"
   turbo_stream.replace(id) do
-    observation_namings_table_rows(@consensus)
+    render(
+      partial: partial,
+      locals: { obs: @observation, consensus: @consensus },
+      layout: false
+    )
   end
 else
-  id = "observation_#{identifier}"
   partial = "observations/show/#{identifier}"
   turbo_stream.replace(id) do
     render(

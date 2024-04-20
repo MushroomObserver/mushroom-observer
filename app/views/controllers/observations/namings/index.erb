@@ -1,5 +1,6 @@
+<%# Convenience template for testing. Just shows the namings table for obs %>
+
 <%=
-tag.div(id: "observation_namings") do
-  observation_namings_table(@observation, @consensus)
-end
+render(partial: "observations/namings/table",
+       locals: { obs: @observation, consensus: @consensus })
 %>

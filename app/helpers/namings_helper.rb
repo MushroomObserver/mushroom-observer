@@ -6,16 +6,6 @@
 # rubocop:disable Metrics/ModuleLength
 module NamingsHelper
   ##### Observation Naming "table" content #########
-  def observation_namings_table(obs, consensus)
-    tag.div(class: "namings-table panel panel-default mb-4",
-            id: "namings_table") do
-      [
-        observation_namings_table_header(obs),
-        observation_namings_table_rows(consensus), # only rows get updated
-        observation_namings_table_footer(obs)
-      ].safe_join
-    end
-  end
 
   private
 
@@ -70,29 +60,6 @@ module NamingsHelper
   end
 
   # NEW - needs a current consensus object
-  # n+1 should be ok
-  def observation_namings_table_rows(consensus)
-    namings = consensus.namings.sort_by(&:created_at)
-    any_names = consensus.namings&.length&.positive?
-
-    tag.div(class: "list-group list-group-flush",
-            id: "namings_table_rows",
-            data: {
-              controller: "section-update",
-              updated_by: "modal_naming_#{consensus.observation.id}"
-            }) do
-      if any_names
-        namings.each do |naming|
-          row = naming_row_content(consensus, naming)
-          concat(namings_table_row(row))
-        end
-      else
-        tag.div(:show_namings_no_names_yet.t, class: "list-group-item")
-      end
-    end
-  end
-
-  # NEW - needs a current consensus object
   def naming_row_content(consensus, naming)
     vote = consensus.users_vote(naming, User.current) || Vote.new(value: 0)
     consensus_favorite = consensus.consensus_naming
@@ -107,36 +74,6 @@ module NamingsHelper
       eyes: vote_icons_html(naming, consensus_favorite, favorite),
       reasons: reasons_html(naming)
     }
-  end
-
-  # Shows one proposed naming for this observation, with a tiny vote form.
-  # Also naming edit and delete buttons if the current user owns the naming.
-  # @vote is used by observations/namings/votes/form
-  # Note the nested grid: the reasons are packed under the left 11 cols,
-  # with the "eyes" graphic in the right 1 col for vertical space
-  # @vote = votes[naming.id]
-  def namings_table_row(row)
-    tag.div(class: "list-group-item") do
-      tag.div(class: "row align-items-center naming-row",
-              id: "observation_naming_#{row[:id]}") do
-        [
-          tag.div(class: "col col-sm-11") do
-            [
-              tag.div(class: "row align-items-center") do
-                [
-                  tag.div(row[:name], class: "col col-sm-4"),
-                  tag.div(row[:proposer], class: "col col-sm-3"),
-                  tag.div(row[:vote_tally], class: "col col-sm-2"),
-                  tag.div(row[:your_vote], class: "col col-sm-3")
-                ].safe_join
-              end,
-              tag.div(row[:reasons], class: "naming-reasons small mt-1")
-            ].safe_join
-          end,
-          tag.div(row[:eyes], class: "col-sm-1 d-none d-sm-block px-sm-0")
-        ].safe_join
-      end
-    end
   end
 
   # N+1: should not be checking permission here

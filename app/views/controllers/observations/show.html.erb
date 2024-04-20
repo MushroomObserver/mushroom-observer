@@ -49,7 +49,7 @@ carousel_locals = {
 <div class="row">
   <div class="col-xs-12 col-md-8 col-lg-7 float-sm-left">
     <% if @user %>
-      <%= render(partial: "observations/show/namings", locals: obs_locals) %>
+      <%= render(partial: "observations/namings/table", locals: obs_locals) %>
     <% end %>
 
     <%= render(partial: "comments/comments_for_object",
