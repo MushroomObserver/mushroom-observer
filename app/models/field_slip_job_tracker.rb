@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
 class FieldSlipJobTracker < AbstractModel
-  broadcasts_to ->(tracker) { "field_slip_job_tracker_#{tracker.id}" },
-                partial: "projects/field_slips/tracker_row"
-
   PUBLIC_DIR = "public/"
   SUBDIR = "field_slips"
   PDF_DIR = PUBLIC_DIR + SUBDIR
