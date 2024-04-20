@@ -600,9 +600,11 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_field_slip
-    expect = Observation.comments_include("complicated")
+    code_val = field_slips(:field_slip_one).code
+    expect = Observation.joins(:field_slips).
+             where(FieldSlip[:code].eq(code_val))
     assert(expect.count.positive?)
-    x = PatternSearch::Observation.new("comments:complicated")
+    x = PatternSearch::Observation.new("field_slip:#{code_val}")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
