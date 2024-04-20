@@ -25,7 +25,6 @@ module Projects
       }
       post_requires_login(:create, params, katrina.login)
       assert_equal(job_start + 1, enqueued_jobs.size)
-      assert_redirected_to(project_path(project.id))
     end
 
     def test_create_bad_project

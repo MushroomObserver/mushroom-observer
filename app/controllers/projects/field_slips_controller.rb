@@ -43,6 +43,7 @@ module Projects
             locals: { tracker: tracker }
           ))
         end
+        format.html
       end
     end
 
