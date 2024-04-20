@@ -25,6 +25,7 @@ checkpoints/
 production-logs
 .tm_properties
 **/*.swp
+dump.rdb
 
 # Ignore bundler config.
 .bundle
