@@ -33,7 +33,18 @@ module Projects
       else
         flash_error(:field_slips_tracker_fail.t(title: @project.title))
       end
-      redirect_to(project_url(@project))
+      # redirect_to(project_url(@project))
+      respond_to do |format|
+        # Append a new row to the table of field slip jobs
+        format.turbo_stream do
+          render(turbo_stream: turbo_stream.prepend(
+            :field_slip_job_trackers, # the id of the div to append to
+            partial: "projects/field_slips/tracker_row",
+            locals: { tracker: tracker }
+          ))
+        end
+        format.html
+      end
     end
 
     private

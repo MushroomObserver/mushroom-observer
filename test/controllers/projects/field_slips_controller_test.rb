@@ -25,7 +25,18 @@ module Projects
       }
       post_requires_login(:create, params, katrina.login)
       assert_equal(job_start + 1, enqueued_jobs.size)
-      assert_redirected_to(project_path(project.id))
+    end
+
+    def test_create_turbo_stream
+      job_start = enqueued_jobs.size
+      project = projects(:eol_project)
+      params = {
+        project_id: project.id,
+        commit: "Create"
+      }
+      login(katrina.login)
+      post(:create, params:, as: :turbo_stream)
+      assert_equal(job_start + 1, enqueued_jobs.size)
     end
 
     def test_create_bad_project
