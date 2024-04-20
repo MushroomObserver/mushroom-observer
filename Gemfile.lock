@@ -98,12 +98,16 @@ GEM
       rack-test (>= 0.6.3)
       regexp_parser (>= 1.5, < 3.0)
       xpath (~> 3.2)
+    chunky_png (1.4.0)
+    coderay (1.0.9)
     concurrent-ruby (1.2.3)
     connection_pool (2.4.1)
     crack (1.0.0)
       bigdecimal
       rexml
     crass (1.0.6)
+    css_parser (1.16.0)
+      addressable
     cuprite (0.15)
       capybara (~> 3.0)
       ferrum (~> 0.14.0)
@@ -121,6 +125,8 @@ GEM
     docile (1.4.0)
     drb (2.2.1)
     erubi (1.12.0)
+    et-orbi (1.2.11)
+      tzinfo
     execjs (2.9.1)
     fastimage (2.3.0)
     ferrum (0.14)
@@ -129,6 +135,9 @@ GEM
       webrick (~> 1.7)
       websocket-driver (>= 0.6, < 0.8)
     ffi (1.16.3)
+    fugit (1.9.0)
+      et-orbi (~> 1, >= 1.2.7)
+      raabro (~> 1.4)
     globalid (1.2.1)
       activesupport (>= 6.1)
     google-protobuf (3.25.3-arm64-darwin)
@@ -196,11 +205,24 @@ GEM
     parser (3.3.0.5)
       ast (~> 2.4.1)
       racc
+    pdf-core (0.10.0)
+    prawn (2.5.0)
+      matrix (~> 0.4)
+      pdf-core (~> 0.10.0)
+      ttfunk (~> 1.8)
+    prawn-manual_builder (0.3.1)
+      coderay (~> 1.0.7)
+    prawn-svg (0.34.2)
+      css_parser (~> 1.6)
+      matrix (~> 0.4.2)
+      prawn (>= 0.11.1, < 3)
+      rexml (~> 3.2)
     psych (5.1.2)
       stringio
     public_suffix (5.0.4)
     puma (6.4.2)
       nio4r (~> 2.0)
+    raabro (1.4.0)
     racc (1.7.3)
     rack (3.0.10)
     rack-session (2.0.0)
@@ -241,6 +263,10 @@ GEM
     requestjs-rails (0.0.11)
       railties (>= 6.1.0)
     rexml (3.2.6)
+    rqrcode (2.2.0)
+      chunky_png (~> 1.0)
+      rqrcode_core (~> 1.0)
+    rqrcode_core (1.2.0)
     rtf (0.3.3)
     rubocop (1.62.1)
       json (~> 2.3)
@@ -287,6 +313,12 @@ GEM
       activejob (>= 7)
       activerecord (>= 7)
       railties (>= 7)
+    solid_queue (0.3.0)
+      activejob (>= 7.1)
+      activerecord (>= 7.1)
+      concurrent-ruby (~> 1.2.2)
+      fugit (~> 1.9.0)
+      railties (>= 7.1)
     sorted_set (1.0.3)
       rbtree
       set (~> 1.0)
@@ -306,6 +338,8 @@ GEM
     tilt (2.3.0)
     timeout (0.4.1)
     trilogy (2.7.0)
+    ttfunk (1.8.0)
+      bigdecimal (~> 3.1)
     turbo-rails (2.0.5)
       actionpack (>= 6.0.0)
       activejob (>= 6.0.0)
@@ -378,11 +412,15 @@ DEPENDENCIES
   minitest-reporters
   mo_acts_as_versioned (>= 0.6.6)!
   newrelic_rpm
+  prawn
+  prawn-manual_builder
+  prawn-svg
   puma
   rails-controller-testing
   railties (~> 7.1.3)
   redis (~> 4.0)
   requestjs-rails
+  rqrcode
   rtf
   rubocop
   rubocop-performance
@@ -392,6 +430,7 @@ DEPENDENCIES
   simplecov
   simplecov-lcov
   solid_cache
+  solid_queue
   sorted_set
   sprockets (~> 4.2.1)
   sprockets-rails

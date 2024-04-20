@@ -36,7 +36,16 @@ violations_button_class =
   <% end %>
 
   <p><b><%= :show_project_created_at.t %>:</b> <%= @project.created_at.web_date %></p>
-  <p><b><%= :show_project_field_slip_prefix.t %>:</b> <%= @project.field_slip_prefix %></p>
+  <% if @project.field_slip_prefix %>
+    <p>
+      <b><%= :show_project_field_slip_prefix.t %>:</b> <%= @project.field_slip_prefix %>
+      <% if @project.member?(User.current) %>
+        <%= link_to(:show_project_field_slip_create.t,
+            new_project_field_slip_path(project_id: @project.id),
+            { class: "btn btn-default" }) %>
+      <% end %>
+    </p>
+  <% end %>
   <p>
     <% if @project.observations.any? %>
       <b><%= link_to("#{@project.observations.length} #{:OBSERVATIONS.l}",
