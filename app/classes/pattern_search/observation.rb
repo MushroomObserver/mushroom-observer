@@ -27,6 +27,7 @@ module PatternSearch
       project_lists: [:project_lists, :parse_list_of_projects],
       region: [:region, :parse_list_of_strings],
       user: [:users, :parse_list_of_users],
+      field_slips: [:field_slips, :parse_list_of_strings],
 
       # numeric
       confidence: [:confidence, :parse_confidence],

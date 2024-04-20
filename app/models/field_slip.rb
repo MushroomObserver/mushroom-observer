@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Attributes:
+# code:    string, unique code for field slip, starts with project prefix
+
 class FieldSlip < AbstractModel
   belongs_to :observation
   belongs_to :project
