@@ -58,10 +58,15 @@ module Observations
       inat_obs = ImportedInatObs.new(imported_inat_obs_data)
       xlated_inat_obs = Observation.new(
         when: inat_obs.when,
-        where: inat_obs.where
+        where: inat_obs.where,
+        lat: inat_obs.lat,
+        lng: inat_obs.lng,
+        gps_hidden: inat_obs.gps_hidden,
+        name_id: inat_obs.name_id,
+        text_name: inat_obs.text_name,
+        notes: inat_obs.notes
       )
       xlated_inat_obs.save
-
       # TODO: Other things done by Observations#create
       xlated_inat_obs.log(:log_observation_created)
       # save_everything_else(params.dig(:naming, :reasons))

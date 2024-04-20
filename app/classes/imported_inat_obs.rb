@@ -44,6 +44,10 @@ class ImportedInatObs
     obs[:location].split(",").second.to_f
   end
 
+  def text_name
+    Name.find(name_id).text_name
+  end
+
   def when
     observed_on = obs[:observed_on_details]
     Date.new(observed_on[:year], observed_on[:month], observed_on[:day])
