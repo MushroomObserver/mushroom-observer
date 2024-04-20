@@ -113,6 +113,9 @@ class Comment < AbstractModel
   after_create :notify_users
   after_create :oil_and_water
 
+  broadcasts_to ->(comment) { [comment.target, :comments] },
+                inserts_by: :prepend, partial: "comments/comment"
+
   scope :by_user,
         ->(user) { where(user: user) }
 

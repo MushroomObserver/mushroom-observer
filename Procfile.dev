@@ -1,3 +1,4 @@
 css: bin/rails dartsass:watch
 solidqueueworker: bundle exec rake solid_queue:start
+redis: redis-server
 actioncable: bundle exec puma -p 28080 cable/config.ru

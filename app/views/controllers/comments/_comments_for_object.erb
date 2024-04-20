@@ -5,6 +5,7 @@
   end
 %>
 
+<%= turbo_stream_from(object, :comments) %>
 <%=
 tag.div(
   class: "panel panel-default", id: "comments_for_object",
@@ -18,7 +19,7 @@ tag.div(
                         class: "float-right")) if controls
       end
     end,
-    tag.div(class: "list-group list-group-flush comments") do
+    tag.div(class: "list-group list-group-flush comments", id: "comments") do
       if comments.empty?
         tag.div(:show_comments_no_comments_yet.t, class: "list-group-item")
       else
