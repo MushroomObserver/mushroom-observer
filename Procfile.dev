@@ -1,4 +1,3 @@
-web: bin/rails server -p 3000
 css: bin/rails dartsass:watch
 solidqueueworker: bundle exec rake solid_queue:start
 actioncable: bundle exec puma -p 28080 cable/config.ru

@@ -72,12 +72,10 @@ class FieldSlipView
   PHOTO_RIGHT = 1.75.cm
   PHOTO_BOX_SIZE = 4.mm
 
-  def initialize(title, prefix, logo, start, total)
+  def initialize(title, tracker, logo)
     @title = title
-    @prefix = prefix
+    @tracker = tracker
     @logo = logo
-    @start = start
-    @total = total
   end
 
   def render
@@ -102,11 +100,13 @@ class FieldSlipView
   end
 
   def build_slips
-    (0..@total - 1).each do |i|
-      num = (i + @start).to_s.rjust(5, "0")
-      slip_at(slip_left(i), slip_bottom(i), "#{@prefix}-#{num}")
+    (0..@tracker.count - 1).each do |i|
+      num = (i + @tracker.start).to_s.rjust(5, "0")
+      slip_at(slip_left(i), slip_bottom(i), "#{@tracker.prefix}-#{num}")
       new_page_check(i)
     end
+    @tracker.pages += 1
+    @tracker.save
   end
 
   def slip_left(slip_num)
@@ -120,6 +120,8 @@ class FieldSlipView
   def new_page_check(slip_num)
     return unless last_slip?(slip_num) && more_pages?(slip_num)
 
+    @tracker.pages += 1
+    @tracker.save
     start_new_page
     cut_lines
   end
@@ -129,7 +131,7 @@ class FieldSlipView
   end
 
   def more_pages?(slip_num)
-    slip_num < @total - 1
+    slip_num < @tracker.count - 1
   end
 
   def slip_at(x_coord, y_coord, code)
