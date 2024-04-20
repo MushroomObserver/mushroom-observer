@@ -8,7 +8,9 @@ target_type = tag.span(target.class.name.to_sym.t, class: "small") \
                        rescue :runtime_object_deleted
 %>
 
-<%= tag.div(class: "list-group-item comment", id:"comment_#{comment.id}") do
+<%= turbo_stream_from(target, :comment) %>
+
+<%= tag.div(class: "list-group-item comment", id: dom_id(comment)) do
   concat(tag.div(class: "row") do
     [
       tag.div(class: "col-xs-12 col-sm-9 col-lg-10") do
@@ -25,7 +27,7 @@ target_type = tag.span(target.class.name.to_sym.t, class: "small") \
           concat(tag.span(class: "text-nowrap") do
             [
               "[",
-              modal_link_to("comment_#{comment.id}",
+              modal_link_to(dom_id(comment),
                             *edit_comment_tab(comment)),
               "|",
               destroy_button(name: :comment_show_destroy.t, target: comment,

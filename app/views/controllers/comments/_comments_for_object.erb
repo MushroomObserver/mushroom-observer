@@ -6,6 +6,7 @@
 %>
 
 <%= turbo_stream_from(object, :comments) %>
+
 <%=
 tag.div(
   class: "panel panel-default", id: "comments_for_object",
