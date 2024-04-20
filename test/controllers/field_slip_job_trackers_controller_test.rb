@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require("test_helper")
+require "test_helper"
 
 class FieldSlipJobTrackersControllerTest < FunctionalTestCase
-  include ActiveJob::TestHelper
-
-  test "should show tracker_row" do
-    login(mary.login)
-    get(:show, params: { id: field_slip_job_trackers(:fsjt_page_one).id }, as: :turbo_stream)
-    assert_response :success
+  def test_show
+    login
+    tracker = field_slip_job_trackers(:fsjt_page_one)
+    get(:show, params: { id: tracker.id }, format: :turbo_stream)
+    # response.body has the whole turbo_stream response
+    assert_response(:success)
   end
 end
