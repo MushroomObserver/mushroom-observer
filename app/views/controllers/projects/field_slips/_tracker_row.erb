@@ -1,6 +1,6 @@
 <%=
 tag.tr(id: dom_id(tracker),
-       data: { # controller: "field-slip-job",
+       data: { controller: "field-slip-job",
                status: FieldSlipJobTracker.statuses[tracker.status],
                endpoint: field_slip_job_tracker_path(tracker.id) }) do
   [

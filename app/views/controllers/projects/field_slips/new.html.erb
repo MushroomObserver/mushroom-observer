@@ -28,8 +28,10 @@ action = { controller: "/projects/field_slips", action: :create,
       </thead>
       <%= tag.tbody(id: "field_slip_job_trackers") do
         @project.trackers.order(id: :desc).each do |tracker|
-          render(partial: "projects/field_slips/tracker_row",
-                 locals: { tracker: tracker })
+          concat(
+            render(partial: "projects/field_slips/tracker_row",
+                   locals: { tracker: tracker })
+          )
         end
       end %>
     </table>

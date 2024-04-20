@@ -152,8 +152,6 @@ MushroomObserver::Application.configure do
   # Set up ActionCable to use a standalone server at port 28080
   config.action_cable.mount_path = nil
   config.action_cable.url = "ws://localhost:28080" # use :wss in production
-  # config.action_cable.allowed_request_origins = [/http:\/\/*/,
-  #                                                /https:\/\/*/]
 end
 
 file = File.expand_path("../consts-site.rb", __dir__)
