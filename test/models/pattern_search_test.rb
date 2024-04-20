@@ -599,6 +599,13 @@ class PatternSearchTest < UnitTestCase
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
+  def test_observation_search_field_slip
+    expect = Observation.comments_include("complicated")
+    assert(expect.count.positive?)
+    x = PatternSearch::Observation.new("comments:complicated")
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
+  end
+
   def test_observation_search_confidence
     expect = Observation.where(vote_cache: 3)
     assert(expect.count.positive?)
