@@ -72,8 +72,7 @@ class FieldSlipView
   PHOTO_RIGHT = 1.75.cm
   PHOTO_BOX_SIZE = 4.mm
 
-  def initialize(title, tracker, logo)
-    @title = title
+  def initialize(tracker, logo)
     @tracker = tracker
     @logo = logo
   end
@@ -202,7 +201,7 @@ class FieldSlipView
     svg(qr_svg("http://mushroomobserver.org/qr/#{code}"), at: [QR_LEFT, QR_TOP],
                                                           width: QR_SIZE)
     font("#{Prawn::ManualBuilder::DATADIR}/fonts/DejaVuSans.ttf") do
-      text_box("#{@title} Field Slip:",
+      text_box("#{@tracker.title} Field Slip:",
                at: [QR_RIGHT + QR_MARGIN, QR_TOP],
                height: FONT_SIZE,
                width: title_width,

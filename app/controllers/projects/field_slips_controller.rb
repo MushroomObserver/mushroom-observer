@@ -20,11 +20,12 @@ module Projects
 
       tracker = FieldSlipJobTracker.create(prefix: @project.field_slip_prefix,
                                            start: @project.next_field_slip,
+                                           title: @project.title,
                                            count: 6 * pages)
       if tracker
         @project.next_field_slip = tracker.last + 1
         if @project.save
-          FieldSlipJob.perform_later(@project.id, tracker.id)
+          FieldSlipJob.perform_later(tracker.id)
           flash_notice(:field_slips_created_job.t(filename: tracker.filename))
         else
           tracker.destroy
