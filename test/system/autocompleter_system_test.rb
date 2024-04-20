@@ -92,7 +92,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     obs = Observation.last
     visit(observation_path(obs.id))
 
-    scroll_to(find("#namings"), align: :center)
+    scroll_to(find("#observation_namings"), align: :center)
     assert_link(text: /Propose/)
     click_link(text: /Propose/)
     assert_selector("#modal_obs_#{obs.id}_naming", wait: 9)
@@ -107,6 +107,6 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_no_selector(".auto_complete")
     within("#obs_#{obs.id}_naming_form") { click_commit }
     assert_no_selector("#modal_obs_#{obs.id}_naming", wait: 9)
-    within("#namings") { assert_text("Peltigeraceae", wait: 6) }
+    within("#namings_table") { assert_text("Peltigeraceae", wait: 6) }
   end
 end
