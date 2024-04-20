@@ -6,11 +6,10 @@ namings = consensus.namings.sort_by(&:created_at)
 %>
 
 <%=
-tag.div(class: "namings-table panel panel-default mb-4",
-        id: "observation_namings") do
+tag.div(class: "namings-table panel panel-default mb-4", id: "namings") do
   [
     observation_namings_table_header(obs),
-    tag.div(id: "namings", class: "list-group list-group-flush",
+    tag.div(id: "namings_list", class: "list-group list-group-flush",
             data: {
               controller: "section-update",
               updated_by: "modal_naming_#{consensus.observation.id}"

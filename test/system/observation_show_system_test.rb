@@ -220,14 +220,14 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     click_link(text: /#{obs.text_name}/)
 
     assert_selector("body.observations__show")
-    assert_selector("#observation_namings")
+    assert_selector("#namings")
 
     # new naming
     n_d = names(:namings_deprecated) # Xa current
     nd1 = names(:namings_deprecated_1)
 
-    scroll_to(find("#observation_namings"), align: :center)
-    within("#observation_namings") do
+    scroll_to(find("#namings"), align: :center)
+    within("#namings") do
       assert_link(text: /Propose/)
       click_link(text: /Propose/)
     end
@@ -275,12 +275,12 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     # When this happens, naming_table is refreshed with no edit/destroy buttons.
     # Capybara author suggests trying sleep(5) after a CRUD action
     # Ah. Maybe it was just missing the scroll_to
-    scroll_to(find("#observation_namings"), align: :center)
+    scroll_to(find("#namings"), align: :center)
     sleep(2)
 
     nam = Naming.last
     assert_equal(n_d.text_name, nam.text_name)
-    within("#observation_namings") do
+    within("#namings") do
       assert_link(text: /#{n_d.text_name}/)
       assert_selector(".destroy_naming_link_#{nam.id}")
       assert_selector("#naming_vote_form_#{nam.id}")
@@ -291,7 +291,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_selector("#title", text: /#{obs.text_name}/)
     # sleep(3)
 
-    within("#observation_namings") do
+    within("#namings") do
       assert_link(text: /#{n_d.text_name}/)
       assert_selector("#naming_vote_form_#{nam.id}")
       select("I'd Call It That", from: "vote_value_#{nam.id}")
@@ -305,7 +305,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     # sleep(3)
 
     # check that there is a vote "index" tally with this naming
-    within("#observation_namings") do
+    within("#namings") do
       assert_link(href: "/observations/#{obs.id}/namings/#{nam.id}/votes")
       click_link(href: "/observations/#{obs.id}/namings/#{nam.id}/votes")
     end
@@ -318,7 +318,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_no_selector("#modal_naming_votes_#{nam.id}")
 
     # Test the link to the naming name and user
-    within("#observation_namings") do
+    within("#namings") do
       assert_link(text: /#{n_d.text_name}/)
       click_link(text: /#{n_d.text_name}/)
     end
@@ -327,7 +327,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     # Test the link to the naming user... whoa, this takes too long!
     # Re-add this test when the user page is sped up.
-    # within("#observation_namings") do
+    # within("#namings") do
     #   assert_link(text: /#{rolf.login}/)
     #   click(text: /#{rolf.login}/)
     # end
@@ -335,7 +335,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     # page.go_back
 
     # Test the edit naming form link.
-    within("#observation_namings") do
+    within("#namings") do
       assert_link(text: /#{n_d.text_name}/)
       assert_selector(".edit_naming_link_#{nam.id}")
       find(:css, ".edit_naming_link_#{nam.id}").trigger("click")
@@ -347,7 +347,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     end
     assert_no_selector("#modal_obs_#{obs.id}_naming_#{nam.id}")
 
-    within("#observation_namings") do
+    within("#namings") do
       assert_link(text: /#{n_d.text_name}/)
       assert_selector(".destroy_naming_link_#{nam.id}")
       accept_prompt do
