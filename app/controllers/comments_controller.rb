@@ -286,8 +286,8 @@ class CommentsController < ApplicationController
     end
     respond_to do |format|
       format.turbo_stream do
-        eager_load_target_comments
-        refresh_comments_for_object
+        # eager_load_target_comments
+        # refresh_comments_for_object
       end
       format.html do
         redirect_with_query(controller: @target.show_controller,
@@ -354,8 +354,8 @@ class CommentsController < ApplicationController
   def refresh_comments_or_redirect_to_show
     respond_to do |format|
       format.turbo_stream do
-        eager_load_target_comments
-        refresh_comments_for_object
+        # eager_load_target_comments
+        # refresh_comments_for_object
       end
       format.html do
         redirect_with_query(controller: @target.show_controller,
