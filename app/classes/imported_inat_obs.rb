@@ -16,12 +16,13 @@ class ImportedInatObs
   end
 
   def name_id
-    inat_name = obs[:taxon][:name]
+    inat_taxon = obs[:taxon]
 
     # TODO: refine this.
     # - include rank
     # - might need a dictionary here
-    mo_names = Name.where(text_name: inat_name)
+    mo_names = Name.where(text_name: inat_taxon[:name],
+                          rank: inat_taxon[:rank].titleize)
     return Name.unknown.id if mo_names.none?
     return mo_names.first.id if mo_names.one?
 
