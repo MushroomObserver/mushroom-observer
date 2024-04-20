@@ -51,7 +51,7 @@ class ImportedInatObsTest < UnitTestCase
       # log_updated_at: Sat, 16 Mar 2024 17:22:51.000000000 EDT -04:00,
     )
 
-    %w[gps_hidden lat lng name_id notes when where].each do |attribute|
+    %w[gps_hidden lat lng name_id notes text_name when where].each do |attribute|
       assert_equal(expected_xlation.send(attribute), import.send(attribute))
     end
 
