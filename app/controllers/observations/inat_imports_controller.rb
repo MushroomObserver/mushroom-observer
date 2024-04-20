@@ -75,13 +75,15 @@ module Observations
       # flash_notice(:runtime_observation_success.t(id: @observation.id))
     end
 
-    INAT_API_BASE = "https://api.inaturalist.org/v1"
 
     def inat_search_observations(ids)
       operation = "/observations?id=#{ids}" \
                   "&order=desc&order_by=created_at&only_id=false"
       inat_search(operation).body
     end
+
+    # TODO: move to own class so it can be called from multiple places
+    INAT_API_BASE = "https://api.inaturalist.org/v1"
 
     def inat_search(operation)
       HTTParty.get("#{INAT_API_BASE}#{operation}")
