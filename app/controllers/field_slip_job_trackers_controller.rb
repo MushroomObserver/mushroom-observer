@@ -6,6 +6,7 @@ class FieldSlipJobTrackersController < ApplicationController
   # This is only a Turbo endpoint updating the row of a particular tracker.
   def show
     return unless (@tracker = FieldSlipJobTracker.find(params[:id]))
+    return unless @tracker.user == User.current
 
     respond_to do |format|
       format.turbo_stream do

@@ -471,7 +471,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def trackers
-    FieldSlipJobTracker.where(prefix: field_slip_prefix)
+    FieldSlipJobTracker.where(prefix: field_slip_prefix,
+                              user: User.current)
   end
 
   private ###############################

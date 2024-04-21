@@ -21,6 +21,7 @@ module Projects
       tracker = FieldSlipJobTracker.create(prefix: @project.field_slip_prefix,
                                            start: @project.next_field_slip,
                                            title: @project.title,
+                                           user: User.current,
                                            count: 6 * pages)
       if tracker
         @project.next_field_slip = tracker.last + 1
