@@ -7,7 +7,7 @@ class FieldSlipJob < ApplicationJob
     log("Starting FieldSlipJob.perform(#{tracker_id})")
     cleanup_old_pdfs(tracker_id)
     tracker = FieldSlipJobTracker.find(tracker_id)
-    raise(:field_slip_job_no_tracker.t(id: tracker_id)) unless tracker
+    raise(:field_slip_job_no_tracker.t) unless tracker
 
     tracker.processing
     icon = "public/logo-120.png"

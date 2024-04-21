@@ -2782,9 +2782,10 @@
   field_slip_keep_obs: Keep Current
   field_slip_last_obs: Use Last Observation
   field_slip_new: Record Field Slip
-  field_slip_no_observation: Observation not found
-  field_slip_no_project: "Project [ID] not found"
-  field_slip_job_no_tracker: "Field Slip Tracker [ID] not found"
+  field_slip_no_observation: No Observation found
+  field_slip_no_project: No Project found
+  field_slip_nil_project: (No Project)
+  field_slip_job_no_tracker: No Field Slip Tracker found
   field_slip_show: Show this field slip
   field_slip_updated: Field slip was successfully updated.
   field_slip_welcome: "Welcome to the [TITLE] Project!"
@@ -3250,7 +3251,7 @@
   # project/edit_project
   edit_project_destroy: "[:destroy_object(type=:project)]"
   edit_project_title: "[:edit_object(type=:project)]: [title]"
-  alphanumerics_only: must only contain ASCII alphanumerics
+  alphanumerics_only: must only contain ASCII alphanumerics and dashes
 
   # project/_form_projects
   form_projects_any: Any
