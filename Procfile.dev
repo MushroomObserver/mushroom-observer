@@ -1,2 +1,0 @@
-css: bin/rails dartsass:watch
-solidqueueworker: bundle exec rake solid_queue:start
