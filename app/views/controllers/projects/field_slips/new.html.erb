@@ -21,6 +21,7 @@ action = { controller: "/projects/field_slips", action: :create,
       <thead>
         <tr>
           <%= tag.th(:FILENAME.t, scope: "col") %>
+          <%= tag.th(:USER.t, scope: "col", class: "text-center") %>
           <%= tag.th(:SECONDS.t, scope: "col", class: "text-center") %>
           <%= tag.th(:PAGES.t, scope: "col", class: "text-center") %>
           <%= tag.th(:STATUS.t, scope: "col", class: "text-right") %>
