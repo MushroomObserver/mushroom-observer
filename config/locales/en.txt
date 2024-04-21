@@ -3250,7 +3250,7 @@
   # project/edit_project
   edit_project_destroy: "[:destroy_object(type=:project)]"
   edit_project_title: "[:edit_object(type=:project)]: [title]"
-  alphanumerics_only: must only contain ASCII alphanumerics
+  alphanumerics_only: must only contain ASCII alphanumerics and dashes
 
   # project/_form_projects
   form_projects_any: Any
