@@ -36,8 +36,9 @@ class FieldSlip < AbstractModel
     result = Project.includes(:project_members).where(
       project_members: { user: User.current }
     ).order(:title).pluck(:title, :id)
-    return result unless project && result.exclude?([project.title, project.id])
-
-    result.unshift([project.title, project.id])
+    if project && result.exclude?([project.title, project.id])
+      result.unshift([project.title, project.id])
+    end
+    result.unshift([:field_slip_nil_project.t, nil])
   end
 end
