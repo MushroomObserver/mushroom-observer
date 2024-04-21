@@ -42,9 +42,11 @@ gem("trilogy")
 gem("solid_cache")
 # add locale to cache key
 gem("cache_with_locale")
+# solid_queue for jobs
+gem("solid_queue")
 
 # Compile SCSS for stylesheets
-gem("dartsass-rails")
+gem("dartsass-sprockets")
 # Use bootstrap style generator
 gem("bootstrap-sass")
 # Use Terser as compressor for JavaScript assets
@@ -123,6 +125,16 @@ gem("mimemagic")
 # lists other enhancements and bugfixes that have been implemented since
 # version 2.3.0.
 gem("rubyzip", "~> 2.3.0")
+
+# QR code generator
+gem("rqrcode")
+
+# PDF generation support.  prawn-svg is supposed to come before prawn.
+gem("prawn-svg")
+
+# And now prawn in a separate 'section' to make rubocop happy.
+gem("prawn")
+gem("prawn-manual_builder")
 
 ########## Development, Testing, and Analysis ##################################
 group :test, :development do

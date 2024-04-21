@@ -503,6 +503,7 @@
   email_addresss: email addresses
   FIELD_SLIP_PREFIX: Field Slip Prefix
   field_slip_prefix: field slip prefix
+  FILENAME: Filename
   FULL_NAME: Full Name
   full_name: full name
   FULL_NAMES: Full Names
@@ -556,6 +557,7 @@
   owner: owner
   OWNERS: Owners
   owners: owners
+  PAGES: Pages
   PASSWORD: Password
   password: password
   PASSWORDS: Passwords
@@ -580,6 +582,7 @@
   reviewer: reviewer
   REVIEWERS: Reviewers
   reviewers: reviewers
+  SECONDS: Seconds
   SIZE: Size
   size: size
   STATUS: Status
@@ -2775,14 +2778,23 @@
   field_slip_editing: Editing Field Slip
   field_slip_errors: prohibited this field_slip from being saved
   field_slip_index: Back to field slips
+  field_slip_job_no_project: "No Project with id=[ID]"
   field_slip_keep_obs: Keep Current
   field_slip_last_obs: Use Last Observation
   field_slip_new: Record Field Slip
   field_slip_no_observation: Observation not found
-  field_slip_no_project: Project not found
+  field_slip_no_project: "Project [ID] not found"
+  field_slip_job_no_tracker: "Field Slip Tracker [ID] not found"
   field_slip_show: Show this field slip
   field_slip_updated: Field slip was successfully updated.
-  field_slip_welcome: "Welcome to the [TITLE] project!"
+  field_slip_welcome: "Welcome to the [TITLE] Project!"
+  field_slips_for_project_max_pages: "Each page has six field slips.  You may create up to [MAX] pages for this project."
+  field_slips_for_project_title: "Create Field Slips for the [TITLE] Project"
+  field_slips_created_job: "Created job for [filename]"
+  field_slips_must_be_member: "You must be a project member to create field slips"
+  field_slips_project_update_fail: "Unable to update [TITLE] Project"
+  field_slips_tracker_fail: "Unable to create Field Slip Tracker for [TITLE] Project"
+  field_slips_too_many_pages: "You have requested more than [MAX] pages."
 
   ##############################################################################
 
@@ -3238,6 +3250,7 @@
   # project/edit_project
   edit_project_destroy: "[:destroy_object(type=:project)]"
   edit_project_title: "[:edit_object(type=:project)]: [title]"
+  alphanumerics_only: must only contain ASCII alphanumerics
 
   # project/_form_projects
   form_projects_any: Any
@@ -3280,6 +3293,7 @@
   show_project_destroy: Destroy Project
   show_project_drafts: Drafts
   show_project_edit: Edit Project
+  show_project_field_slip_create: Create Field Slip PDF
   show_project_field_slip_prefix: Field Slip Prefix
   show_project_join: Join Project
   show_project_location: Location
