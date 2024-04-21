@@ -1,7 +1,6 @@
 // The theme files import mushroom_observer.scss
 
 // Now set up Bootstrap with these variables.
-@import "bootstrap-sprockets";
 // This map sets Bootstrap's variables with those theme color variables.
 @import "mo/map_theme_vars_to_bootstrap_vars"; // Overwrite bootstrap variables
 // Because bootstrap-sass adds a url(font-path( that doesn't work.
