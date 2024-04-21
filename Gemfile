@@ -46,7 +46,7 @@ gem("cache_with_locale")
 gem("solid_queue")
 
 # Compile SCSS for stylesheets
-gem("dartsass-sprockets")
+gem("dartsass-rails")
 # Use bootstrap style generator
 gem("bootstrap-sass")
 # Use Terser as compressor for JavaScript assets
