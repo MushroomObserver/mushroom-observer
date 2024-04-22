@@ -69,9 +69,6 @@ jobs:
       - name: Update translation files
         run: bundle exec rake lang:update
 
-      - name: Compile SASS to CSS
-        run: bundle exec rails dartsass:build
-
       # And finally we can run the test suite
       - name: Run tests
         env:
