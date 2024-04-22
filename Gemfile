@@ -45,9 +45,16 @@ gem("cache_with_locale")
 # solid_queue for jobs
 gem("solid_queue")
 
+# sprockets for asset compilation and versioning.
+# Needed by gem bootstrap-sass, but not bootstrap (v4+)
+gem("sprockets-rails")
+# Fix a version problem betw stimulus and sprockets. (not sprockets-rails)
+# Delete this dependency declaration if the issue gets resolved:
+# https://github.com/hotwired/stimulus-rails/issues/108
+gem("sprockets", "~>4.2.1")
 # Compile SCSS for stylesheets
 gem("dartsass-rails")
-# Use bootstrap style generator
+# Bootstrap 3 SCSS and JS
 gem("bootstrap-sass")
 # Use Terser as compressor for JavaScript assets
 gem("terser")
