@@ -27,6 +27,7 @@
 #  high::         (V) Maximum elevation in meters, e.g. 100
 #  low::          (V) Minimum elevation in meters, e.g. 0
 #  notes::        (V) Arbitrary extra notes supplied by User.
+#  hidden::       (V) Should observation with this location be hidden
 #
 #  ('V' indicates that this attribute is versioned in past_locations table.)
 #

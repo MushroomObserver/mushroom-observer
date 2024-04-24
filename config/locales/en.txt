@@ -2108,6 +2108,7 @@
   show_location_editors: "[:Editors]"
   show_location_reverse: Reverse Location
   show_location_locked: This location is locked. If you want to change the location of your observation, please edit the observation instead.  Changing a location name or coordinates implicitly changes all the observations at that location, too.
+  show_location_hidden: This location is considered hidden either because it is private property whose owners do not want the location revealed or because it contains sensitive habitat. It's coordinates are intentionally imprecise and all associated observations have hidden GPS coordinates.
 
   # names
   show_name_title: "[:NAME]: [name]"
