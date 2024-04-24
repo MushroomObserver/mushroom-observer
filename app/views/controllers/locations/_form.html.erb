@@ -12,6 +12,8 @@
     <%= tag.div(class: "row", data: { controller: "map" }) do %>
       <%= tag.div(class: "col-md-8 col-lg-6") do %>
 
+        check_box_with_label(form: f, field: :hidden, class: "mt-3",
+                             label: :form_locations_hidden.t)
         <%= if in_admin_mode?
           check_box_with_label(form: f, field: :locked, class: "mt-3",
                                label: :form_locations_locked.t)
