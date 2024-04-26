@@ -1553,7 +1553,8 @@
   form_glossary_description_help: "A concise definition matching the part of speech of the Term, without repeating another Term's definition. (Instead link to the other Term.) Details:"
 
   # location/_form_location
-  form_locations_hidden: Hide location. Checking this box will hide the GPS coordinates of any observations associated with this location.  THIS CANNOT BE UNDONE.
+  form_locations_hidden: Hide location
+  form_locations_hidden_doc: Hidden locations will hide the GPS coordinates of associated observations.  They also cannot be more precise than 0.1 degrees.  This value cannot be changed when there are any associated observations.
   form_locations_locked: Lock this location so users cannot change the name or coordinates?
   form_locations_gen_desc: General Description
   form_locations_ecology: Habitat Description
