@@ -40,6 +40,9 @@ module Query
         external_sites: {
           projects: :project_id
         },
+        field_slips: {
+          observations: :observation_id
+        },
         glossary_terms: {
           "images.thumb_image": :thumb_image_id,
           rss_logs: :rss_log_id,
