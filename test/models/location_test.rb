@@ -553,4 +553,22 @@ class LocationTest < UnitTestCase
       "`scope: in_box` should be empty if N < S"
     )
   end
+
+  def test_hidden
+    User.current = mary
+    high = 60.234
+    low = 60.123
+    loc = Location.create!(
+      hidden: true,
+      name: "Somewhere Hidden",
+      north: high,
+      south: low,
+      east: high,
+      west: low
+    )
+    assert_equal(loc.north, high.ceil(1))
+    assert_equal(loc.south, low.floor(1))
+    assert_equal(loc.east, high.ceil(1))
+    assert_equal(loc.west, low.floor(1))
+  end
 end
