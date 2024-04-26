@@ -112,6 +112,8 @@ module Query
     end
 
     def initialize_field_slips_parameter
+      return unless params[:field_slips]
+
       add_join(:field_slips)
       add_exact_match_condition(
         "field_slips.code",
