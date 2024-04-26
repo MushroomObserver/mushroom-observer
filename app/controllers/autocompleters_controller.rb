@@ -3,7 +3,7 @@
 class AutocompletersController < ApplicationController
   require "cgi"
 
-  before_action :login_required
+  # Requiring login here would mean "advanced search" must also require login.
   around_action :catch_ajax_errors
 
   layout false
