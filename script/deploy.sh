@@ -28,7 +28,7 @@ echo Reapply local changes... && git stash pop && \
 echo Installing bundle... && bundle install && \
 echo Checking for migrations... && rake db:migrate && \
 echo Updating translations... && rake lang:update && \
-# echo Precompiling assets... && rake assets:precompile && \
+echo Precompiling assets... && rake assets:precompile && \
 echo Reloading puma... && sudo service puma restart && \
 echo Reloading solidqueue... && sudo service solidqueue restart && \
 echo Tagging repo with $tag... && git tag $tag && \

@@ -10,7 +10,7 @@ Rails.application.config.assets.version = "1.0"
 # are already added.
 # Rails.application.config.assets.paths << Rails.root.join("app/javascript")
 # Rails.application.config.assets.precompile += %w( search.js  jquery.min.js)
-# Rails.application.config.assets.precompile += %w[bootstrap.min.js]
+Rails.application.config.assets.precompile += %w[bootstrap.min.js]
 # Special for bootstrap-sass gem, maybe not needed
-# Rails.app.config.assets.precompile <<
-#   %r{bootstrap/glyphicons-halflings-regular\.(?:eot|svg|ttf|woff2?)$}
+Rails.app.config.assets.precompile <<
+  %r{bootstrap/glyphicons-halflings-regular\.(?:eot|svg|ttf|woff2?)$}
