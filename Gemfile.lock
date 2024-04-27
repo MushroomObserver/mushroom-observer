@@ -434,6 +434,7 @@ DEPENDENCIES
   solid_cache
   solid_queue
   sorted_set
+  sprockets
   sprockets-rails
   stimulus-rails
   terser
