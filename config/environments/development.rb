@@ -146,6 +146,8 @@ MushroomObserver::Application.configure do
   config.web_console.allowed_ips = "10.0.2.2"
 
   config.bot_enabled = true
+
+  config.active_job.queue_adapter = :solid_queue
 end
 
 file = File.expand_path("../consts-site.rb", __dir__)

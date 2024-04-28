@@ -1,0 +1,26 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+fsjt_page_one:
+  start: 0
+  count: 6
+  prefix: EOL
+  title: EOL Project
+  user: rolf
+  status: <%= FieldSlipJobTracker.statuses[:Done] %>
+
+fsjt_page_two:
+  start: 6
+  count: 12
+  prefix: EOL
+  title: EOL Project
+  user: mary
+  status: <%= FieldSlipJobTracker.statuses[:Starting] %>
+
+fsjt_old:
+  start: 6
+  count: 12
+  prefix: OLD
+  title: Old Project
+  user: mary
+  status: <%= FieldSlipJobTracker.statuses[:Done] %>
+  updated_at: 2023-04-14 16:31:00

@@ -386,6 +386,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :field_slips
   get("qr/:id", to: "field_slips#show", id: /.*[^\d.-].*/)
 
+  # ----- Field Slip Job Trackers: show for json -------------------------------
+  resources :field_slip_job_trackers, only: [:show]
+
   # ----- Herbaria: standard actions -------------------------------------------
   namespace :herbaria do
     resources :curator_requests, only: [:new, :create]
@@ -641,13 +644,15 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/policy/privacy")
 
   resources :projects do
-    resources :members, only: [:new, :create, :edit, :update, :index],
-                        controller: "projects/members", param: :candidate
     resources :admin_requests, only: [:new, :create],
                                controller: "projects/admin_requests"
+    resources :field_slips, only: [:new, :create],
+                            controller: "projects/field_slips"
+    resources :members, only: [:new, :create, :edit, :update, :index],
+                        controller: "projects/members", param: :candidate
     resources :violations, only: [:index], controller: "projects/violations"
   end
-  # resourceful route won't work beucase it requires an additional id
+  # resourceful route won't work because it requires an additional id
   put("/projects/:project_id/violations", to: "projects/violations#update",
                                           as: "project_violations_update")
 
