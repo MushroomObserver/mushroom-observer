@@ -1317,6 +1317,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     check_where
     check_user
     check_coordinates
+    check_hidden
 
     return unless @when_str
 
@@ -1376,6 +1377,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     # As of July 5, 2020 this statement appears to be unreachable
     # because .to_i returns 0 for unparsable strings.
     errors.add(:alt, :runtime_altitude_error.t)
+  end
+
+  def check_hidden
+    return unless location&.hidden
+
+    self.gps_hidden = true
   end
 
   def check_when

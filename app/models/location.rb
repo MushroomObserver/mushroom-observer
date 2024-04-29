@@ -27,6 +27,7 @@
 #  high::         (V) Maximum elevation in meters, e.g. 100
 #  low::          (V) Minimum elevation in meters, e.g. 0
 #  notes::        (V) Arbitrary extra notes supplied by User.
+#  hidden::       (V) Should observation with this location be hidden
 #
 #  ('V' indicates that this attribute is versioned in past_locations table.)
 #
@@ -127,7 +128,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     "ok_for_export",
     "rss_log_id",
     "description_id",
-    "locked"
+    "locked",
+    "hidden"
   )
 
   before_update :update_observation_cache
@@ -821,6 +823,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   validate :check_requirements
   def check_requirements
+    check_hidden
+
     if !north || (north > 90)
       errors.add(:north, :validate_location_north_too_high.t)
     end
@@ -851,5 +855,14 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     elsif name.empty?
       errors.add(:name, :validate_missing.t(field: :name))
     end
+  end
+
+  def check_hidden
+    return unless hidden
+
+    self.north = north.ceil(1)
+    self.south = south.floor(1)
+    self.east = east.ceil(1)
+    self.west = west.floor(1)
   end
 end

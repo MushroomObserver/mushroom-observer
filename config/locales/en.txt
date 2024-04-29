@@ -1554,6 +1554,8 @@
   form_glossary_description_help: "A concise definition matching the part of speech of the Term, without repeating another Term's definition. (Instead link to the other Term.) Details:"
 
   # location/_form_location
+  form_locations_hidden: Hide location
+  form_locations_hidden_doc: Hidden locations will hide the GPS coordinates of associated observations.  They also cannot be more precise than 0.1 degrees.  This value cannot be changed when there are any associated observations.
   form_locations_locked: Lock this location so users cannot change the name or coordinates?
   form_locations_gen_desc: General Description
   form_locations_ecology: Habitat Description
@@ -2109,6 +2111,7 @@
   show_location_editors: "[:Editors]"
   show_location_reverse: Reverse Location
   show_location_locked: This location is locked. If you want to change the location of your observation, please edit the observation instead.  Changing a location name or coordinates implicitly changes all the observations at that location, too.
+  show_location_hidden: This location is considered hidden either because it is private property whose owners do not want the location revealed or because it contains sensitive habitat. Its coordinates are intentionally imprecise and all associated observations have hidden GPS coordinates.
 
   # names
   show_name_title: "[:NAME]: [name]"

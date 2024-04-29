@@ -552,7 +552,9 @@ class LocationsController < ApplicationController
 
   def permitted_location_params
     params.require(:location).
-      permit(:display_name, :north, :west, :east, :south, :high, :low, :notes)
+      permit(:display_name,
+             :north, :west, :east, :south, :high, :low,
+             :notes, :hidden)
   end
 end
 # rubocop:enable Metrics/ClassLength
