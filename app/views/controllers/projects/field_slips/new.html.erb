@@ -1,9 +1,10 @@
 <%
-add_page_title(:field_slips_for_project_title.t(title: @project.title))
-@container = :text_image
+  title = :field_slips_for_project_title.t + " " + link_to_object(@project) + " " + :PROJECT.t
+  add_page_title(title)
+  @container = :text_image
 
-action = { controller: "/projects/field_slips", action: :create,
-           project_id: @project.id, q: get_query_param }
+  action = { controller: "/projects/field_slips", action: :create,
+             project_id: @project.id, q: get_query_param }
 %>
 
 <div class="mt-3 pb-2">
