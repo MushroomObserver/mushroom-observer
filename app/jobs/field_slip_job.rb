@@ -3,22 +3,19 @@
 class FieldSlipJob < ApplicationJob
   queue_as :default
 
-  def perform(project_id, tracker_id)
-    log("Starting FieldSlipJob.perform(#{project_id}, #{tracker_id})")
+  def perform(tracker_id)
+    log("Starting FieldSlipJob.perform(#{tracker_id})")
     cleanup_old_pdfs(tracker_id)
-    project = Project.find(project_id)
-    raise(:field_slip_job_no_project.t(id: project_id)) unless project
-
     tracker = FieldSlipJobTracker.find(tracker_id)
-    raise(:field_slip_job_no_tracker.t(id: tracker_id)) unless tracker
+    raise(:field_slip_job_no_tracker.t) unless tracker
 
     tracker.processing
-    icon = "public/logo-120.png" # Will be replaced with project.logo
-    view = FieldSlipView.new(project.title, tracker, icon)
+    icon = "public/logo-120.png"
+    view = FieldSlipView.new(tracker, icon)
     view.render
     view.save_as(tracker.filepath)
     tracker.done
-    log("Done with FieldSlipJob.perform(#{project_id}, #{tracker_id})")
+    log("Done with FieldSlipJob.perform(#{tracker_id})")
     tracker.filepath
   end
 

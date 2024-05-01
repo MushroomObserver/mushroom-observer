@@ -12,6 +12,8 @@ class FieldSlipJobTracker < AbstractModel
            Done: 3
          }
 
+  belongs_to :user
+
   def self.create(*args)
     args[0][:status] = "Starting"
     super(*args)

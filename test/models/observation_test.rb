@@ -1458,4 +1458,13 @@ class ObservationTest < UnitTestCase
     assert_equal("mo_iphone_app", obs.source)
     assert_equal(:source_credit_mo_iphone_app, obs.source_credit)
   end
+
+  def test_hidden_location
+    create_new_objects
+    assert_false(@cc_obs.gps_hidden)
+    @cc_obs.location = locations(:loc_hidden)
+    @cc_obs.save
+    @cc_obs.reload
+    assert(@cc_obs.gps_hidden)
+  end
 end

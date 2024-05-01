@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_04_19_201108) do
+ActiveRecord::Schema[7.1].define(version: 2024_04_23_204346) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -93,6 +93,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_19_201108) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "pages", default: 0, null: false
+    t.string "title", limit: 100, default: "", null: false
+    t.integer "user_id"
   end
 
   create_table "field_slips", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -309,6 +311,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_19_201108) do
     t.string "name", limit: 1024
     t.string "scientific_name", limit: 1024
     t.boolean "locked", default: false, null: false
+    t.boolean "hidden", default: false, null: false
   end
 
   create_table "name_description_admins", charset: "utf8mb3", force: :cascade do |t|

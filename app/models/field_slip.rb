@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Attributes:
+# code:    string, unique code for field slip, starts with project prefix
+
 class FieldSlip < AbstractModel
   belongs_to :observation
   belongs_to :project
@@ -36,8 +39,9 @@ class FieldSlip < AbstractModel
     result = Project.includes(:project_members).where(
       project_members: { user: User.current }
     ).order(:title).pluck(:title, :id)
-    return result unless project && result.exclude?([project.title, project.id])
-
-    result.unshift([project.title, project.id])
+    if project && result.exclude?([project.title, project.id])
+      result.unshift([project.title, project.id])
+    end
+    result.unshift([:field_slip_nil_project.t, nil])
   end
 end

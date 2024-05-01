@@ -6,6 +6,12 @@ add_tab_set(location_show_tabs)
 @container = :full
 %>
 
+<% if @location.hidden %>
+  <p>
+    <%= :show_location_hidden.t %>
+  </p>
+<% end %>
+
 <div class="row">
   <div class="col-md-7">
     <%= tag.div(class: "mb-5") { make_map(objects: [@location]) } %>

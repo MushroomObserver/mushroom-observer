@@ -1105,6 +1105,7 @@
   search_term_deprecated: deprecated
   search_term_east: east
   search_term_exclude_consensus: exclude_consensus
+  search_term_field_slip: field_slip
   search_term_has_author: has_author
   search_term_has_citation: has_citation
   search_term_has_classification: has_classification
@@ -1553,6 +1554,8 @@
   form_glossary_description_help: "A concise definition matching the part of speech of the Term, without repeating another Term's definition. (Instead link to the other Term.) Details:"
 
   # location/_form_location
+  form_locations_hidden: Hide location
+  form_locations_hidden_doc: Hidden locations will hide the GPS coordinates of associated observations.  They also cannot be more precise than 0.1 degrees.  This value cannot be changed when there are any associated observations.
   form_locations_locked: Lock this location so users cannot change the name or coordinates?
   form_locations_gen_desc: General Description
   form_locations_ecology: Habitat Description
@@ -2108,6 +2111,7 @@
   show_location_editors: "[:Editors]"
   show_location_reverse: Reverse Location
   show_location_locked: This location is locked. If you want to change the location of your observation, please edit the observation instead.  Changing a location name or coordinates implicitly changes all the observations at that location, too.
+  show_location_hidden: This location is considered hidden either because it is private property whose owners do not want the location revealed or because it contains sensitive habitat. Its coordinates are intentionally imprecise and all associated observations have hidden GPS coordinates.
 
   # names
   show_name_title: "[:NAME]: [name]"
@@ -2782,14 +2786,15 @@
   field_slip_keep_obs: Keep Current
   field_slip_last_obs: Use Last Observation
   field_slip_new: Record Field Slip
-  field_slip_no_observation: Observation not found
-  field_slip_no_project: "Project [ID] not found"
-  field_slip_job_no_tracker: "Field Slip Tracker [ID] not found"
+  field_slip_no_observation: No Observation found
+  field_slip_no_project: No Project found
+  field_slip_nil_project: (No Project)
+  field_slip_job_no_tracker: No Field Slip Tracker found
   field_slip_show: Show this field slip
   field_slip_updated: Field slip was successfully updated.
   field_slip_welcome: "Welcome to the [TITLE] Project!"
   field_slips_for_project_max_pages: "Each page has six field slips.  You may create up to [MAX] pages for this project."
-  field_slips_for_project_title: "Create Field Slips for the [TITLE] Project"
+  field_slips_for_project_title: Create Field Slips for the
   field_slips_created_job: "Created job for [filename]"
   field_slips_must_be_member: "You must be a project member to create field slips"
   field_slips_project_update_fail: "Unable to update [TITLE] Project"
@@ -3250,7 +3255,7 @@
   # project/edit_project
   edit_project_destroy: "[:destroy_object(type=:project)]"
   edit_project_title: "[:edit_object(type=:project)]: [title]"
-  alphanumerics_only: must only contain ASCII alphanumerics
+  alphanumerics_only: must only contain ASCII alphanumerics and dashes
 
   # project/_form_projects
   form_projects_any: Any
@@ -3546,6 +3551,7 @@
   observation_term_user: Observation created by one of these users.
   observation_term_notes: Notes contains the given string.
   observation_term_comments: Comments contain the given string.
+  observation_term_field_slip: Observation corresponds to this field slip.
   observation_term_confidence: Confidence is in this range.
   observation_term_east: Longitude of eastern edge of search region.
   observation_term_west: Longitude of western edge of search region.

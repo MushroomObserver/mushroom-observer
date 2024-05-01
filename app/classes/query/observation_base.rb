@@ -27,6 +27,7 @@ module Query
         project_lists?: [:string],
         species_lists?: [:string],
         users?: [User],
+        field_slips?: [:string],
 
         # numeric
         confidence?: [:float],
@@ -67,6 +68,7 @@ module Query
       initialize_projects_parameter
       initialize_project_lists_parameter
       initialize_species_lists_parameter
+      initialize_field_slips_parameter
     end
 
     def initialize_herbaria_parameter
@@ -106,6 +108,16 @@ module Query
         "species_list_observations.species_list_id",
         lookup_species_lists_by_name(params[:species_lists]),
         :species_list_observations
+      )
+    end
+
+    def initialize_field_slips_parameter
+      return unless params[:field_slips]
+
+      add_join(:field_slips)
+      add_exact_match_condition(
+        "field_slips.code",
+        params[:field_slips]
       )
     end
 

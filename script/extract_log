@@ -46,6 +46,7 @@ end
 
 file = "#{app_root}/log/production.log"
 File.open(file).readlines.each do |line|
+  line.scrub! # remove non-utf8 characters
   match = line.match(/#(\d+)/)
   pid = match[1] if match
   if line.match?(/: Started [A-Z]{3,}/)

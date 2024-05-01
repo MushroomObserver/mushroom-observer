@@ -6,7 +6,7 @@ class FieldSlipJobTest < ActiveJob::TestCase
   test "it should perform" do
     job = FieldSlipJob.new
     tracker = field_slip_job_trackers(:fsjt_page_two)
-    job.perform(projects(:eol_project).id, tracker.id)
+    job.perform(tracker.id)
     assert(File.exist?(tracker.filepath))
     File.delete(tracker.filepath)
   end
@@ -15,7 +15,7 @@ class FieldSlipJobTest < ActiveJob::TestCase
     old_tracker_id = field_slip_job_trackers(:fsjt_old).id
     job = FieldSlipJob.new
     tracker = field_slip_job_trackers(:fsjt_page_two)
-    job.perform(projects(:eol_project).id, tracker.id)
+    job.perform(tracker.id)
     File.delete(tracker.filepath)
     assert_nil(FieldSlipJobTracker.find_by(id: old_tracker_id))
   end
@@ -25,7 +25,7 @@ class FieldSlipJobTest < ActiveJob::TestCase
     FileUtils.touch(old_filepath)
     job = FieldSlipJob.new
     tracker = field_slip_job_trackers(:fsjt_page_two)
-    job.perform(projects(:eol_project).id, tracker.id)
+    job.perform(tracker.id)
     File.delete(tracker.filepath)
     assert_not(File.exist?(old_filepath))
   end
