@@ -59,7 +59,6 @@ class ReportTest < UnitTestCase
       obs.id.to_s,
       "#{MO.http_domain}/#{obs.id}",
       "HumanObservation",
-      # "2006-05-12 17:21:00 UTC",
       "#{obs.updated_at.api_time} UTC",
       "MushroomObserver",
       nil,
