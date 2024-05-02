@@ -727,15 +727,17 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       update_attribute(:gps_stripped, true) if strip
       strip = strip ? "1" : "0"
       if move_original
-        cmd = MO.process_image_command.
-              gsub("<id>", id.to_s).
-              gsub("<ext>", ext).
-              gsub("<set>", set).
-              gsub("<strip>", strip)
-        if !Rails.env.test? && !system(cmd)
-          errors.add(:image, :runtime_image_process_failed.t(id: id))
-          result = false
-        end
+        args = { id: id, ext: ext, set_size: set, strip_gps: strip }
+        ProcessImageJob.perform_later(args)
+        # cmd = MO.process_image_command.
+        #       gsub("<id>", id.to_s).
+        #       gsub("<ext>", ext).
+        #       gsub("<set>", set).
+        #       gsub("<strip>", strip)
+        # if !Rails.env.test? && !system(cmd)
+        #   errors.add(:image, :runtime_image_process_failed.t(id: id))
+        #   result = false
+        # end
       else
         result = false
       end
