@@ -131,6 +131,10 @@ GEM
     et-orbi (1.2.11)
       tzinfo
     execjs (2.9.1)
+    exiftool (1.2.5)
+      json
+    exiftool_vendored (12.83.0)
+      exiftool (>= 0.7.0)
     fastimage (2.3.0)
     ferrum (0.14)
       addressable (~> 2.5)
@@ -183,6 +187,7 @@ GEM
     mimemagic (0.4.3)
       nokogiri (~> 1)
       rake
+    mini_exiftool (2.11.0)
     mini_magick (4.12.0)
     mini_mime (1.1.5)
     mini_racer (0.8.0)
@@ -416,12 +421,14 @@ DEPENDENCIES
   dartsass-sprockets
   database_cleaner-active_record
   debug
+  exiftool_vendored
   fastimage
   i18n
   image_processing
   importmap-rails
   jbuilder
   mimemagic
+  mini_exiftool
   mini_racer
   minitest
   minitest-reporters

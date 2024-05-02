@@ -114,6 +114,11 @@ gem("fastimage")
 gem("mimemagic")
 # An interface between Ruby and ImageMagick/Vips
 gem("image_processing")
+# reads the output of exiftool and "vendors" the latest version of the tool
+# supports multiget, which is faster than running exiftool for each file
+gem("exiftool_vendored")
+# supports writing (as well as reading) EXIF data
+gem("mini_exiftool")
 
 # for creating zip files
 # RubyZip 3.0 is coming!
