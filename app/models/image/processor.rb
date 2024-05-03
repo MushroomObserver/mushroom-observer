@@ -26,7 +26,7 @@ class Image
     # Store Exiftool's database in a temporary directory.
     MiniExiftool.pstore_dir = Rails.root.join("tmp").to_s
 
-    PRIVATE_KEY_PATH = Rails.root.join("config", "id_rsa").to_s
+    PRIVATE_KEY_PATH = Rails.root.join(".ssh", "id_rsa").to_s
 
     def initialize(args)
       @id = args[:id]
@@ -45,26 +45,24 @@ class Image
       # Convert the original image to a JPEG if not already.
       # Note this also calls strip_gps(raw_file), possibly redundant.
       convert_raw_to_jpg if @ext != "jpg"
-
       # Strip GPS out of header of full_file if hiding coordinates.
       strip_gps(full_file) if @strip_gps
-
       # Make sure full_file is oriented correctly. (auto-orient implicit)
       auto_orient_if_needed(full_file)
-
       # Update size of original image in database if 'set' flag used.
       update_image_width_and_height(image) if @set_size
-
-      #   Make the sizes, each command a bit different.
+      # Make the sizes, each command a bit different.
       make_sizes
-
-      #   Check if all transferred
+      # Check if all transferred
       transferred = check_transferred
 
-      #   Mark image as transferred if all good
-      image.update(transferred: transferred) if transferred
-      #   Touch obs if all good
-      #   Email webmaster if there were any errors
+      # Mark image as transferred and Touch obs if all good
+      if transferred
+        image.update(transferred: transferred)
+        Observation.joins(:observation_images).
+          where(observation_images: { image_id: @id }).touch_all
+      end
+      # Email webmaster if there were any errors
 
       log("Done with Image::Process.perform(#{perform_args})")
     end
@@ -76,8 +74,7 @@ class Image
     end
 
     def convert_raw_to_jpg
-      pipeline = ImageProcessing::MiniMagick.
-                 source(raw_file).
+      pipeline = ImageProcessing::MiniMagick.source(raw_file).
                  append("-quality", 90).
                  append("-auto-orient").
                  saver(allow_splitting: true).
@@ -102,14 +99,13 @@ class Image
     def auto_orient_if_needed(file_path)
       orientable = ImageProcessing::MiniMagick::Image.open(file_path)
       original_orientation = image["%[orientation]"]
-
       orientable.auto_orient
-
       new_orientation = image["%[orientation]"]
 
       image.write(file_path) if original_orientation != new_orientation
     end
 
+    # GPS-prefixed fields are not bulk-updatable. XMP:Geotag is.
     def strip_gps(file)
       working = MiniExiftool.new(file)
       gps_fields.each { |field| working[field] = nil }
@@ -123,51 +119,25 @@ class Image
     end
 
     def make_sizes
-      convert_full_to_huge
-      convert_huge_to_large
-      convert_huge_to_medium
-      convert_medium_to_small
-      convert_small_to_thumb
+      conversions = [
+        ["full", "huge", 1280, 93],
+        ["huge", "large", 960, 94],
+        ["huge", "medium", 640, 95],
+        ["medium", "small", 320, 95],
+        ["small", "thumbnail", 160, 95]
+      ]
+      conversions.each do |source, destination, size, quality|
+        convert_source_to_destination(source, destination, size, quality)
+      end
     end
 
-    def convert_full_to_huge
-      pipeline = ImageProcessing::MiniMagick.source(full_file).
-                 append("-thumbnail", "1280x1280>").append("-quality", 93).
+    def convert_source_to_destination(source, destination, size, quality = 95)
+      pipeline = ImageProcessing::MiniMagick.source(send(:"#{source}_file")).
+                 append("-thumbnail", "#{size}x#{size}>").
+                 append("-quality", quality).
                  convert("jpg")
 
-      pipeline.call(destination: huge_file)
-    end
-
-    def convert_huge_to_large
-      pipeline = ImageProcessing::MiniMagick.source(huge_file).
-                 append("-thumbnail", "1280x1280>").append("-quality", 94).
-                 convert("jpg")
-
-      pipeline.call(destination: large_file)
-    end
-
-    def convert_huge_to_medium
-      pipeline = ImageProcessing::MiniMagick.source(huge_file).
-                 append("-thumbnail", "640x640>").append("-quality", 95).
-                 convert("jpg")
-
-      pipeline.call(destination: medium_file)
-    end
-
-    def convert_medium_to_small
-      pipeline = ImageProcessing::MiniMagick.source(medium_file).
-                 append("-thumbnail", "320x320>").append("-quality", 95).
-                 convert("jpg")
-
-      pipeline.call(destination: small_file)
-    end
-
-    def convert_small_to_thumbnail
-      pipeline = ImageProcessing::MiniMagick.source(small_file).
-                 append("-thumbnail", "160x160>").append("-quality", 95).
-                 convert("jpg")
-
-      pipeline.call(destination: thumbnail_file)
+      pipeline.call(destination: send(:"#{destination}_file"))
     end
 
     def check_transferred
@@ -180,7 +150,7 @@ class Image
       transferred_any
     end
 
-    def check_transferred_to_server(server, transferred_any = 0)
+    def check_transferred_to_server(server, transferred_any)
       subdirs = image_server_data[server][:subdirs]
       image_subdirs.each do |subdir|
         if subdirs.include?(subdir)
@@ -202,38 +172,6 @@ class Image
     def image_subdirs
       %w[1280 960 640 320 orig thumb]
     end
-
-    # def image_sizes
-    #   %w[thumbnail small medium large huge full_size]
-    # end
-
-    # def size_to_subdir(size)
-    #   case size
-    #   when "thumbnail" then "thumb"
-    #   when "small" then "320"
-    #   when "medium" then "640"
-    #   when "large" then "960"
-    #   when "huge" then "1280"
-    #   when "full_size" then "orig"
-    #   else raise("Unknown size: #{size}")
-    # end
-
-    # def subdir_to_size(subdir)
-    #   case subdir
-    #   when "thumb" then "thumbnail"
-    #   when "320" then "small"
-    #   when "640" then "medium"
-    #   when "960" then "large"
-    #   when "1280" then "huge"
-    #   when "orig" then "full_size"
-    #   else raise("Unknown subdir: #{subdir}")
-    # end
-
-    # def image_server_data
-    #   {
-
-    #   }
-    # end
 
     def raw_file(id, ext)
       "#{image_root}/orig/#{id}.#{ext}"
@@ -299,5 +237,37 @@ class Image
       ]
     end
     # rubocop:enable Metrics/MethodLength
+
+    # def image_sizes
+    #   %w[thumbnail small medium large huge full_size]
+    # end
+
+    # def size_to_subdir(size)
+    #   case size
+    #   when "thumbnail" then "thumb"
+    #   when "small" then "320"
+    #   when "medium" then "640"
+    #   when "large" then "960"
+    #   when "huge" then "1280"
+    #   when "full_size" then "orig"
+    #   else raise("Unknown size: #{size}")
+    # end
+
+    # def subdir_to_size(subdir)
+    #   case subdir
+    #   when "thumb" then "thumbnail"
+    #   when "320" then "small"
+    #   when "640" then "medium"
+    #   when "960" then "large"
+    #   when "1280" then "huge"
+    #   when "orig" then "full_size"
+    #   else raise("Unknown subdir: #{subdir}")
+    # end
+
+    # def image_server_data
+    #   {
+
+    #   }
+    # end
   end
 end
