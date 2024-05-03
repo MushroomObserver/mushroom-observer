@@ -26,6 +26,8 @@ class Image
     # Store Exiftool's database in a temporary directory.
     MiniExiftool.pstore_dir = Rails.root.join("tmp").to_s
 
+    PRIVATE_KEY_PATH = Rails.root.join("config", "id_rsa").to_s
+
     def initialize(args)
       @id = args[:id]
       @ext = args[:ext]
@@ -192,7 +194,7 @@ class Image
     end
 
     def copy_file_to_server(server, local_file, remote_file = local_file)
-      Net::SCP.start(server, "username", keys: '/path/to/private/key') do |scp|
+      Net::SCP.start(server, "username", keys: PRIVATE_KEY_PATH) do |scp|
         scp.upload!(local_file, remote_file)
       end
     end
