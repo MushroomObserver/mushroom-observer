@@ -33,9 +33,11 @@ module Observations
         put(:create, params: params)
       end
 
-      imported_obs = Observation.order(created_at: :desc).first
-      assert_not_nil(imported_obs.rss_log)
+      obs = Observation.order(created_at: :desc).first
+      assert_not_nil(obs.rss_log)
       assert_redirected_to(observations_path)
+
+      debugger
     end
 
     def test_create_inat_import_too_many_ids
