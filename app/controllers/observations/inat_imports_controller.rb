@@ -67,14 +67,15 @@ module Observations
         notes: inat_obs.notes
       )
       xlated_inat_obs.save
-      # TODO: Other things done by Observations#create
       xlated_inat_obs.log(:log_observation_created)
+
+      add_inat_images(inat_obs.obs_photos)
+      # TODO: Other things done by Observations#create
       # save_everything_else(params.dig(:naming, :reasons))
       # strip_images! if @observation.gps_hidden
       # update_field_slip(@observation, params[:field_code])
       # flash_notice(:runtime_observation_success.t(id: @observation.id))
     end
-
 
     def inat_search_observations(ids)
       operation = "/observations?id=#{ids}" \
@@ -90,6 +91,72 @@ module Observations
       # TODO: Do I need timeout?
       # TODO: need Error checking
       # TODO: Delay in order to limit rate?
+    end
+
+    def add_inat_images(obs_photos)
+      obs_photos.each do |obs_photo|
+        # TODO: move url calculation to imported_inat_obs
+        url = obs_photo[:photo][:url].sub("/square.", "/original.")
+        # FIXME: Get a key. This one belongs to @pellaea
+        api_key = APIKey.first
+
+        params = {
+          method: :post,
+          action: :image,
+          api_key: api_key.key,
+          upload_url: url
+        }
+
+        begin
+          api = API2.execute(params)
+
+        # FIXME:
+        # Temporary hack to ignore failure to delete non-existent temp file
+        rescue(Errno::ENOENT)
+        end
+
+=begin
+        temp_file = Tempfile.new("inat_photo_#{obs_photo[:photo][:id]}")
+        IO.copy_stream(open(url), temp_file.path)
+        debugger
+
+        #  1. Instantiate new Image record, filling in date, notes, etc.:
+        #
+        #       image = Image.new(
+        #         :created_at => Time.now,
+        #         :user       => @user,
+        #         :when       => observation.when,
+        #         :notes      => 'close-up of stipe'
+        #       )
+        image = Image.new(
+          created_at: Time.current,
+          user: User.current,
+          # when: when
+        )
+
+        #  2. Attach the image itself by setting the +image+ attribute, then save the
+        #     Image record:
+        #
+        #       # via HTTP form:
+        #       image.image = params[:image][:upload]
+        #
+        #       # via local file:
+        #       image.image = File.open('file.jpg')
+        #
+        #       # Supply any extra header info you may have.
+        #       image.content_type = 'image/jpeg'
+        #       image.upload_md5sum = request.header[...]
+        #
+        #       # Validate and save record.
+        #       image.save
+
+        image.image = File.open(temp_file_path)
+        image.content_type = "image/jpeg"
+        image.save
+
+        file.unlink # Deletes the temp file
+=end
+      end
     end
   end
 end

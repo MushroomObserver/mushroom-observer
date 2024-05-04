@@ -5,12 +5,11 @@ require("test_helper")
 # test MO extensions to Ruby's Hash class
 class ImportedInatObsTest < UnitTestCase
   def test_public_obs
-    # import of iNat 202555552 (which is a mirror of MO 547126)
+    # import of iNat 202555552 which is a mirror of MO 547126)
+    # For easier to to read version see test/fixtures/inat/one_obs_public.json
     import =
       ImportedInatObs.new(File.read("test/fixtures/inat/one_obs_public.txt"))
-    # How import should be translated
-    # commented-out fields will be part of the created MO Obs,
-    # but are not supplied by
+
     expected_xlation = Observation.new(
       # id: 547126,
       # user_id: 4468,
@@ -54,6 +53,10 @@ class ImportedInatObsTest < UnitTestCase
     %w[gps_hidden lat lng name_id notes text_name when where].each do |attribute|
       assert_equal(expected_xlation.send(attribute), import.send(attribute))
     end
+
+    # aws ids of the images for iNat obs 202555552
+    assert_equal([357753797, 357753842, 357753912, 357753954, 357753993], # rubocop:disable Style/NumericLiterals
+                 import.aws_photo_ids)
 
 =begin
       # attributes to test

@@ -15,6 +15,17 @@ class ImportedInatObs
     obs[:geoprivacy].present?
   end
 
+  def obs_photos
+    obs[:observation_photos]
+  end
+
+  # array of iNat photo ids usuable to get photo from aws
+  def aws_photo_ids
+    obs_photos.each_with_object([]) do |obs_photo, ary|
+      ary << obs_photo[:photo][:id]
+    end
+  end
+
   def name_id
     inat_taxon = obs[:taxon]
 
