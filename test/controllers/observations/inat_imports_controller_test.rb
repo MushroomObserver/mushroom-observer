@@ -38,12 +38,6 @@ module Observations
       assert_redirected_to(observations_path)
     end
 
-    def inat_id(path)
-      foo = File.read(path)
-      goo = JSON.parse(foo, symbolize_names: true)
-      goo[:results].first[:id]
-    end
-
     def test_create_inat_import_too_many_ids
       user = users(:rolf)
       params = { inat_ids: "12345 6789" }
