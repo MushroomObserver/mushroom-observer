@@ -19,7 +19,7 @@ module Observations
       inat_id = "202555552"
       params = { inat_ids: inat_id }
 
-      inat_response_body = File.read("test/fixtures/inat/one_obs_public.txt")
+      inat_response_body = File.read("test/fixtures/inat/somion_unicolor.txt")
       WebMock.stub_request(
         :get,
         "https://api.inaturalist.org/v1" \

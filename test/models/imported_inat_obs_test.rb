@@ -6,9 +6,9 @@ require("test_helper")
 class ImportedInatObsTest < UnitTestCase
   def test_public_obs
     # import of iNat 202555552 which is a mirror of MO 547126)
-    # For easier to to read version see test/fixtures/inat/one_obs_public.json
+    # For easier to to read version see test/fixtures/inat/somion_unicolor.json
     import =
-      ImportedInatObs.new(File.read("test/fixtures/inat/one_obs_public.txt"))
+      ImportedInatObs.new(File.read("test/fixtures/inat/somion_unicolor.txt"))
 
     expected_xlation = Observation.new(
       # id: 547126,
