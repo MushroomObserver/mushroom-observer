@@ -28,15 +28,19 @@ class ImportedInatObs
 
   def name_id
     inat_taxon = obs[:taxon]
-
-    # TODO: refine this.
-    # - include rank
-    # - might need a dictionary here
     mo_names = Name.where(text_name: inat_taxon[:name],
-                          rank: inat_taxon[:rank].titleize)
+                          rank: inat_taxon[:rank].titleize).
+               # iNat doesn't have names "sensu xxx"
+               # so don't map them to MO Names sensu xxx
+               where.not(Name[:author] =~ /^sensu /)
     return Name.unknown.id if mo_names.none?
     return mo_names.first.id if mo_names.one?
 
+    # iNat name maps to multiple MO Names
+    # So for the moment, just map it to Fungi
+    # TODO: refine this.
+    # Ideas: check iNat and MO authors, possibly prefer non-deprecated MO Name
+    # - might need a dictionary here
     Name.unknown.id
   end
 

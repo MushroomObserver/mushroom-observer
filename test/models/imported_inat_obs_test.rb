@@ -78,4 +78,17 @@ class ImportedInatObsTest < UnitTestCase
       t.boolean "gps_hidden", default: false, null: false
 =end
   end
+
+  def test_name_sensu
+    names = Name.where(text_name: "Coprinus", rank: "Genus")
+    assert(names.any? { |name| name.author.start_with?("sensu ") } &&
+           names.one? { |name| !name.author.start_with?("sensu ") },
+           "Test needs a name matching >= 1 MO `send` Name " \
+           "and exactly 1 MO non-sensu Name")
+
+    import = ImportedInatObs.new(File.read("test/fixtures/inat/coprinus.txt"))
+
+    assert_equal(names(:coprinus).text_name, import.text_name)
+    assert_equal(names(:coprinus).id, import.name_id)
+  end
 end
