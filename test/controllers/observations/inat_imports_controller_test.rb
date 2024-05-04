@@ -36,8 +36,6 @@ module Observations
       obs = Observation.order(created_at: :asc).last
       assert_not_nil(obs.rss_log)
       assert_redirected_to(observations_path)
-
-      debugger
     end
 
     def test_create_inat_import_too_many_ids
