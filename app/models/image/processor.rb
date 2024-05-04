@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# method `process`
 # This is used by ProcessImageJob to resize and transfer uploaded images to
 # the image server(s).  It is intended to run asynchronously.  One of these
 # jobs is spwaned for each image uploaded.  It takes these steps:
@@ -14,65 +15,60 @@
 # It ensures that no other processes are running ImageMagick or scp before
 # it runs its own commands.  If another is running, it sleep a few seconds
 # and tries again.
+#
+# This class could potentially also house `retransfer` and `rotate` methods
 
 class Image
   class Processor
     require "image_processing/mini_magick"
     require "exiftool_vendored"
     require "mini_exiftool"
+    require "rsync"
 
     # Use the vendored version of Exiftool.
     MiniExiftool.command = Exiftool.command
     # Store Exiftool's database in a temporary directory.
     MiniExiftool.pstore_dir = Rails.root.join("tmp").to_s
-
-    PRIVATE_KEY_PATH = Rails.root.join(".ssh", "id_rsa").to_s
+    # Where the private key is stored for scp.
+    PRIVATE_KEY_PATH = Rails.root.join(".ssh/id_rsa").to_s
 
     def initialize(args)
       @id = args[:id]
       @ext = args[:ext]
       @set_size = args[:set_size]
       @strip_gps = args[:strip_gps]
+      @transferred_any = 0
+      @image_servers = image_servers
     end
 
-    def perform
+    def process
       perform_desc = "#{@id}, #{@ext}, #{@set_size}, #{@strip_gps}"
-      log("Starting Image::Process.perform(#{perform_desc})")
+      log("Starting Image::Processor.process(#{perform_desc})")
 
       image = Image.find(@id)
       raise(:process_image_job_no_image.t) unless image
 
-      # Convert the original image to a JPEG if not already.
-      # Note this also calls strip_gps(raw_file), possibly redundant.
       convert_raw_to_jpg if @ext != "jpg"
-      # Strip GPS out of header of full_file if hiding coordinates.
       strip_gps(full_file) if @strip_gps
-      # Make sure full_file is oriented correctly. (auto-orient implicit)
       auto_orient_if_needed(full_file)
-      # Update size of original image in database if 'set' flag used.
       update_image_width_and_height(image) if @set_size
-      # Make the sizes, each command a bit different.
       make_sizes
-      # Check if all transferred
-      transferred = check_transferred
+      transfer_to_servers
 
-      # Mark image as transferred and Touch obs if all good
-      if transferred
+      # Mark image as transferred and touch related obs (for caches) if all good
+      if @transferred_any
         image.update(transferred: transferred)
         Observation.joins(:observation_images).
           where(observation_images: { image_id: @id }).touch_all
       end
-      # Email webmaster if there were any errors
+      # TODO: Email webmaster if there were any errors
 
-      log("Done with Image::Process.perform(#{perform_args})")
+      log("Done with Image::Processor.process(#{perform_args})")
     end
 
     private
 
-    def image_root
-      MO.local_image_files
-    end
-
+    # Note this also calls strip_gps(raw_file).
     def convert_raw_to_jpg
       pipeline = ImageProcessing::MiniMagick.source(raw_file).
                  append("-quality", 90).
@@ -84,11 +80,11 @@ class Image
 
       # If there were multiple layers, ImageMagick saves them as 1234-N.jpg.
       unless File.exist?(full_file)
-        biggest_layer = Dir.glob("#{image_root}/orig/#{@id}-*.jpg").first
+        biggest_layer = Dir.glob("#{local_images_path}/orig/#{@id}-*.jpg").first
         if File.exist?(biggest_layer)
           # Take the first one, and delete the rest.
           File.write(full_file, File.read(biggest_layer))
-          File.delete(Dir.glob("#{image_root}/orig/#{@id}-*.jpg"))
+          File.delete(Dir.glob("#{local_images_path}/orig/#{@id}-*.jpg"))
         end
       end
 
@@ -105,30 +101,23 @@ class Image
       image.write(file_path) if original_orientation != new_orientation
     end
 
-    # GPS-prefixed fields are not bulk-updatable. XMP:Geotag is.
-    def strip_gps(file)
-      working = MiniExiftool.new(file)
-      gps_fields.each { |field| working[field] = nil }
-      working["XMP:Geotag"] = nil
-      working.save
-    end
-
     def update_image_width_and_height(image)
       width, height = Jpegsize.dimensions(full_file)
       image.update(width: width, height: height)
     end
 
     def make_sizes
-      conversions = [
-        ["full", "huge", 1280, 93],
-        ["huge", "large", 960, 94],
-        ["huge", "medium", 640, 95],
-        ["medium", "small", 320, 95],
-        ["small", "thumbnail", 160, 95]
-      ]
-      conversions.each do |source, destination, size, quality|
+      size_conversions.each do |source, destination, size, quality|
         convert_source_to_destination(source, destination, size, quality)
       end
+    end
+
+    def size_conversions
+      [["full", "huge", 1280, 93],
+       ["huge", "large", 960, 94],
+       ["huge", "medium", 640, 95],
+       ["medium", "small", 320, 95],
+       ["small", "thumbnail", 160, 95]].freeze
     end
 
     def convert_source_to_destination(source, destination, size, quality = 95)
@@ -140,17 +129,15 @@ class Image
       pipeline.call(destination: send(:"#{destination}_file"))
     end
 
-    def check_transferred
-      transferred_any = 0
-      unless Rails.env.development?
-        MO.image_servers.each do |server|
-          transferred_any = check_transferred_to_server(server, transferred_any)
-        end
+    def transfer_to_servers
+      return if Rails.env.development?
+
+      image_servers.each do |server|
+        transfer_all_sizes_to_server_subdirectories(server)
       end
-      transferred_any
     end
 
-    def check_transferred_to_server(server, transferred_any)
+    def transfer_all_sizes_to_server_subdirectories(server)
       subdirs = image_server_data[server][:subdirs]
       image_subdirs.each do |subdir|
         if subdirs.include?(subdir)
@@ -160,45 +147,118 @@ class Image
       if @ext != "jpg" && subdirs.include?("orig")
         copy_file_to_server(server, "orig/#{@id}.#{@ext}")
       end
-      transferred_any = 1
+      @transferred_any = 1
     end
 
     def copy_file_to_server(server, local_file, remote_file = local_file)
-      Net::SCP.start(server, "username", keys: PRIVATE_KEY_PATH) do |scp|
-        scp.upload!(local_file, remote_file)
+      case image_server_data[server][:type]
+      when "file"
+        copy_file_to_local_server(server, local_file, remote_file)
+      when "ssh"
+        copy_file_to_remote_server(server, local_file, remote_file)
+      else
+        raise("Unknown image server type: #{image_server_data[server][:type]}")
+      end
+    end
+
+    def copy_file_to_local_server(server, local_file, remote_file)
+      return unless (remote_path = image_server_data[server][:path])
+
+      FileUtils.cp("#{local_images_path}/#{local_file}",
+                   "#{remote_path}/#{remote_file}")
+    end
+
+    # Rsync is used to copy files to the image server(s).
+    def copy_file_to_remote_server(server, local_file, remote_file)
+      return unless (remote_path = image_server_data[server][:path])
+
+      Rsync.run("#{local_images_path}/#{local_file}",
+                "#{remote_path}/#{remote_file}") do |result|
+        if result.success?
+          result.changes.each do |change|
+            puts "#{change.filename} (#{change.summary})"
+          end
+        else
+          puts result.error
+        end
       end
     end
 
     def image_subdirs
-      %w[1280 960 640 320 orig thumb]
+      Image::URL::SUBDIRECTORIES.values
+    end
+
+    def local_images_path
+      MO.local_image_files
+    end
+
+    def image_servers
+      MO.image_sources.each_key.map(&:to_s)
+    end
+
+    def image_server_data
+      data = {
+        local: {
+          url: "file://#{local_images_path}",
+          type: "file",
+          path: local_images_path,
+          subdirs: image_subdirs
+        }
+      }
+      MO.image_sources.each do |server, specs|
+        next unless specs[:write]
+
+        # needs Addressable to get the authority from the URI
+        # `authority` is the "user@host:port" part
+        uri = Addressable::URI.parse(specs[:write])
+        data[server] = {
+          url: format(specs[:write], root: MO.root),
+          type: uri.scheme,
+          path: uri.authority + uri.path,
+          subdirs: specs[:sizes] || image_subdirs
+        }
+      end
+      data
     end
 
     def raw_file(id, ext)
-      "#{image_root}/orig/#{id}.#{ext}"
+      "#{local_images_path}/orig/#{id}.#{ext}"
     end
 
     def full_file(id)
-      "#{image_root}/orig/#{id}.jpg"
+      "#{local_images_path}/orig/#{id}.jpg"
     end
 
     def huge_file(id)
-      "#{image_root}/1280/#{id}.jpg"
+      "#{local_images_path}/1280/#{id}.jpg"
     end
 
     def large_file(id)
-      "#{image_root}/960/#{id}.jpg"
+      "#{local_images_path}/960/#{id}.jpg"
     end
 
     def medium_file(id)
-      "#{image_root}/640/#{id}.jpg"
+      "#{local_images_path}/640/#{id}.jpg"
     end
 
     def small_file(id)
-      "#{image_root}/320/#{id}.jpg"
+      "#{local_images_path}/320/#{id}.jpg"
     end
 
     def thumb_file(id)
-      "#{image_root}/thumb/#{id}.jpg"
+      "#{local_images_path}/thumb/#{id}.jpg"
+    end
+
+    ###############################################################
+    #
+    #    Strip GPS data
+\
+    # NOTE: GPS-prefixed fields are not bulk-updatable. XMP:Geotag is.
+    def strip_gps(file)
+      working = MiniExiftool.new(file)
+      gps_fields.each { |field| working[field] = nil }
+      working["XMP:Geotag"] = nil
+      working.save
     end
 
     # rubocop:disable Metrics/MethodLength
@@ -234,40 +294,8 @@ class Image
         GPSAreaInformation
         GPSDateStamp
         GPSDifferential
-      ]
+      ].freeze
     end
     # rubocop:enable Metrics/MethodLength
-
-    # def image_sizes
-    #   %w[thumbnail small medium large huge full_size]
-    # end
-
-    # def size_to_subdir(size)
-    #   case size
-    #   when "thumbnail" then "thumb"
-    #   when "small" then "320"
-    #   when "medium" then "640"
-    #   when "large" then "960"
-    #   when "huge" then "1280"
-    #   when "full_size" then "orig"
-    #   else raise("Unknown size: #{size}")
-    # end
-
-    # def subdir_to_size(subdir)
-    #   case subdir
-    #   when "thumb" then "thumbnail"
-    #   when "320" then "small"
-    #   when "640" then "medium"
-    #   when "960" then "large"
-    #   when "1280" then "huge"
-    #   when "orig" then "full_size"
-    #   else raise("Unknown subdir: #{subdir}")
-    # end
-
-    # def image_server_data
-    #   {
-
-    #   }
-    # end
   end
 end

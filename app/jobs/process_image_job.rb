@@ -11,7 +11,7 @@ class ProcessImageJob < ApplicationJob
     # image = Image.find(args[:id])
     # raise(:process_image_job_no_image.t) unless image
 
-    # processed = Image::Process.new(args)
+    # processed = Image::Processor.process(args)
     # log("Done with ProcessImageJob.perform(#{args[:id]}, #{args[:ext]}, #{args[:set_size]}, #{args[:strip_gps]})")
     # mark image as transferred if processed?
     # return processed?

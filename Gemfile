@@ -119,6 +119,9 @@ gem("image_processing")
 gem("exiftool_vendored")
 # supports writing (as well as reading) EXIF data
 gem("mini_exiftool")
+# syncronize files between remote hosts by wrapping a call to the rsync binary
+# used in transfers to the image server
+gem("rsync")
 
 # for creating zip files
 # RubyZip 3.0 is coming!
