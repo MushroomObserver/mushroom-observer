@@ -33,7 +33,7 @@ module Observations
         put(:create, params: params)
       end
 
-      obs = Observation.order(created_at: :desc).first
+      obs = Observation.order(created_at: :asc).last
       assert_not_nil(obs.rss_log)
       assert_redirected_to(observations_path)
 
