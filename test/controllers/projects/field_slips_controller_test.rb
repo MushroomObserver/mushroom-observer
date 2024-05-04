@@ -79,12 +79,12 @@ module Projects
       assert_redirected_to(new_project_field_slip_path(project_id: project.id))
     end
 
-    def test_create_too_many_pages
+    def test_create_too_many_field_slips
       job_start = enqueued_jobs.size
       project = projects(:eol_project)
       params = {
         project_id: project.id,
-        pages: 2001,
+        field_slips: 12_001,
         commit: "Create"
       }
       post_requires_login(:create, params, rolf.login)

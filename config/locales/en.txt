@@ -2793,13 +2793,14 @@
   field_slip_show: Show this field slip
   field_slip_updated: Field slip was successfully updated.
   field_slip_welcome: "Welcome to the [TITLE] Project!"
-  field_slips_for_project_max_pages: "Each page has six field slips.  You may create up to [MAX] pages for this project."
+  field_slips_max_for_project: "You may create up to [MAX] slips for this project."
   field_slips_for_project_title: Create Field Slips for the
   field_slips_created_job: "Created job for [filename]"
   field_slips_must_be_member: "You must be a project member to create field slips"
   field_slips_project_update_fail: "Unable to update [TITLE] Project"
   field_slips_tracker_fail: "Unable to create Field Slip Tracker for [TITLE] Project"
-  field_slips_too_many_pages: "You have requested more than [MAX] pages."
+  field_slips_too_many_field_slips: "You have requested more than [MAX] slips."
+  field_slips_one_per_page: "One field slip per page. Print shops prefer this. Otherwise 6/page which works best on US letter page."
 
   ##############################################################################
 

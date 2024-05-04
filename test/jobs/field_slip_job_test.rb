@@ -11,6 +11,14 @@ class FieldSlipJobTest < ActiveJob::TestCase
     File.delete(tracker.filepath)
   end
 
+  test "it should perform with one per page" do
+    job = FieldSlipJob.new
+    tracker = field_slip_job_trackers(:fsjt_one_per_page)
+    job.perform(tracker.id)
+    assert(File.exist?(tracker.filepath))
+    File.delete(tracker.filepath)
+  end
+
   test "it should delete old trackers" do
     old_tracker_id = field_slip_job_trackers(:fsjt_old).id
     job = FieldSlipJob.new
