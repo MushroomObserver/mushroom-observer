@@ -38,8 +38,13 @@ class Image
       @ext = args[:ext]
       @set_size = args[:set_size]
       @strip_gps = args[:strip_gps]
+      @user = args[:user]
       @transferred_any = 0
       @image_servers = image_servers
+      @image_server_data = image_server_data
+      @errors = []
+      @image = Image.find(@id)
+      raise(:process_image_job_no_image.t) unless @image
     end
 
     def process
@@ -47,28 +52,19 @@ class Image
       perform_desc = "#{@id}, #{@ext}, #{@set_size}, #{@strip_gps}"
       log("Starting Image::Processor.process(#{perform_desc})")
 
-      image = Image.find(@id)
-      raise(:process_image_job_no_image.t) unless image
-
+      # image.update_attribute(:upload_status, "pending")
       convert_raw_to_jpg if @ext != "jpg"
       strip_gps(full_file) if @strip_gps
       auto_orient_if_needed(full_file)
-      update_image_width_and_height(image) if @set_size
+      update_image_width_and_height if @set_size
       make_sizes
       transfer_to_servers
 
       # Mark image as transferred and touch related obs (for caches) if all good
-      if @transferred_any
-        image.update(transferred: transferred)
-        Observation.joins(:observation_images).
-          where(observation_images: { image_id: @id }).touch_all
-      end
+      mark_image_transferred if @transferred_any
       # Email webmaster if there were any errors
-      QueuedEmail::Webmaster.create_email(
-        sender_email: @user.email,
-        subject: "[MO] process_image",
-        content: errors
-      )
+      email_webmaster if @errors.any?
+
       # for debugging
       log("Done with Image::Processor.process(#{perform_args})")
     end
@@ -100,17 +96,17 @@ class Image
     end
 
     def auto_orient_if_needed(file_path)
-      orientable = ImageProcessing::MiniMagick::Image.open(file_path)
-      original_orientation = image["%[orientation]"]
-      orientable.auto_orient
-      new_orientation = image["%[orientation]"]
+      file_to_orient = ImageProcessing::MiniMagick::Image.open(file_path)
+      original_orientation = file_to_orient["%[orientation]"]
+      file_to_orient.auto_orient
+      new_orientation = file_to_orient["%[orientation]"]
 
-      image.write(file_path) if original_orientation != new_orientation
+      file_to_orient.write(file_path) if original_orientation != new_orientation
     end
 
-    def update_image_width_and_height(image)
+    def update_image_width_and_height
       width, height = Jpegsize.dimensions(full_file)
-      image.update(width: width, height: height)
+      @image.update(width: width, height: height)
     end
 
     def make_sizes
@@ -139,13 +135,13 @@ class Image
     def transfer_to_servers
       return if Rails.env.development?
 
-      image_servers.each do |server|
+      @image_servers.each do |server|
         transfer_all_sizes_to_server_subdirectories(server)
       end
     end
 
     def transfer_all_sizes_to_server_subdirectories(server)
-      subdirs = image_server_data[server][:subdirs]
+      subdirs = @image_server_data[server][:subdirs]
       image_subdirs.each do |subdir|
         if subdirs.include?(subdir)
           copy_file_to_server(server, "#{subdir}/#{@id}.jpg")
@@ -158,13 +154,13 @@ class Image
     end
 
     def copy_file_to_server(server, local_file, remote_file = local_file)
-      case image_server_data[server][:type]
+      case @image_server_data[server][:type]
       when "file"
         copy_file_to_local_server(server, local_file, remote_file)
       when "ssh"
         copy_file_to_remote_server(server, local_file, remote_file)
       else
-        raise("Unknown image server type: #{image_server_data[server][:type]}")
+        raise("Unknown image server type: #{@image_server_data[server][:type]}")
       end
     end
 
@@ -182,13 +178,30 @@ class Image
       Rsync.run("#{local_images_path}/#{local_file}",
                 "#{remote_path}/#{remote_file}") do |result|
         if result.success?
-          result.changes.each do |change|
-            puts("#{change.filename} (#{change.summary})")
-          end
+          # result.changes.each do |change|
+          #   puts("#{change.filename} (#{change.summary})")
+          # end
         else
-          puts(result.error)
+          @errors << result.error
         end
       end
+    end
+
+    def mark_image_transferred
+      @image.update(
+        transferred: @transferred_any
+        # upload_status: "success"
+      )
+      Observation.joins(:observation_images).
+        where(observation_images: { image_id: @id }).touch_all
+    end
+
+    def email_webmaster
+      QueuedEmail::Webmaster.create_email(
+        sender_email: @user.email,
+        subject: "[MO] process_image",
+        content: @errors.join("\n")
+      )
     end
 
     def image_subdirs
@@ -215,8 +228,8 @@ class Image
       MO.image_sources.each do |server, specs|
         next unless specs[:write]
 
-        # needs Addressable to get the authority from the URI
-        # `authority` is the "user@host:port" part
+        # NOTE: needs Addressable::URI to get the authority
+        # (the "user@host:port" part)
         uri = Addressable::URI.parse(specs[:write])
         data[server] = {
           url: format(specs[:write], root: MO.root),
@@ -228,6 +241,7 @@ class Image
       data
     end
 
+    # original file locations
     def raw_file(id, ext)
       "#{local_images_path}/orig/#{id}.#{ext}"
     end
@@ -256,10 +270,7 @@ class Image
       "#{local_images_path}/thumb/#{id}.jpg"
     end
 
- ###############################################################
- #
- #    Strip GPS data
- \
+    # Strip GPS data
     # NOTE: GPS-prefixed fields are not bulk-updatable. XMP:Geotag is.
     def strip_gps(file)
       working = MiniExiftool.new(file)
