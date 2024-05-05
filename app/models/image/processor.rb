@@ -26,6 +26,7 @@ class Image
     require "image_processing/mini_magick"
     require "exiftool_vendored"
     require "mini_exiftool"
+    require "fastimage"
     require "rsync"
 
     # Use the vendored version of Exiftool.
@@ -66,7 +67,7 @@ class Image
       convert_raw_to_jpg if @ext != "jpg"
       strip_gps_from_file(full_file) if @strip_gps
       auto_orient_if_needed(full_file)
-      update_image_width_and_height if @set_size
+      update_image_record_width_and_height if @set_size
       make_sizes
       transfer_to_servers
 
@@ -115,7 +116,7 @@ class Image
     end
 
     def auto_orient_if_needed(file_path)
-      file_to_orient = ImageProcessing::MiniMagick::Image.open(file_path)
+      file_to_orient = MiniMagick::Image.open(file_path)
       original_orientation = file_to_orient["%[orientation]"]
       file_to_orient.auto_orient
       new_orientation = file_to_orient["%[orientation]"]
@@ -123,8 +124,8 @@ class Image
       file_to_orient.write(file_path) if original_orientation != new_orientation
     end
 
-    def update_image_width_and_height
-      width, height = Jpegsize.dimensions(full_file)
+    def update_image_record_width_and_height
+      width, height = FastImage.size(full_file)
       @image.update(width: width, height: height)
     end
 
@@ -139,16 +140,18 @@ class Image
        ["huge", "large", 960, 94],
        ["huge", "medium", 640, 95],
        ["medium", "small", 320, 95],
-       ["small", "thumbnail", 160, 95]].freeze
+       ["small", "thumb", 160, 95]].freeze
     end
 
     def convert_source_to_destination(source, destination, size, quality = 95)
-      pipeline = ImageProcessing::MiniMagick.source(send(:"#{source}_file")).
+      source_file = send(:"#{source}_file")
+      destination_file = send(:"#{destination}_file")
+      pipeline = ImageProcessing::MiniMagick.source(source_file).
                  append("-thumbnail", "#{size}x#{size}>").
                  append("-quality", quality).
                  convert("jpg")
 
-      pipeline.call(destination: send(:"#{destination}_file"))
+      pipeline.call(destination: destination_file)
     end
 
     def transfer_to_servers
