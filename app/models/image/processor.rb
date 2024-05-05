@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Image::Processor. Not to be confused with the ImageProcessing gem's class.
 # method `process`
 # This is used by ProcessImageJob to resize and transfer uploaded images to
 # the image server(s).  It is intended to run asynchronously.  One of these
@@ -42,6 +43,7 @@ class Image
     end
 
     def process
+      # for debugging
       perform_desc = "#{@id}, #{@ext}, #{@set_size}, #{@strip_gps}"
       log("Starting Image::Processor.process(#{perform_desc})")
 
@@ -61,8 +63,13 @@ class Image
         Observation.joins(:observation_images).
           where(observation_images: { image_id: @id }).touch_all
       end
-      # TODO: Email webmaster if there were any errors
-
+      # Email webmaster if there were any errors
+      QueuedEmail::Webmaster.create_email(
+        sender_email: @user.email,
+        subject: "[MO] process_image",
+        content: errors
+      )
+      # for debugging
       log("Done with Image::Processor.process(#{perform_args})")
     end
 
@@ -176,10 +183,10 @@ class Image
                 "#{remote_path}/#{remote_file}") do |result|
         if result.success?
           result.changes.each do |change|
-            puts "#{change.filename} (#{change.summary})"
+            puts("#{change.filename} (#{change.summary})")
           end
         else
-          puts result.error
+          puts(result.error)
         end
       end
     end
@@ -249,10 +256,10 @@ class Image
       "#{local_images_path}/thumb/#{id}.jpg"
     end
 
-    ###############################################################
-    #
-    #    Strip GPS data
-\
+ ###############################################################
+ #
+ #    Strip GPS data
+ \
     # NOTE: GPS-prefixed fields are not bulk-updatable. XMP:Geotag is.
     def strip_gps(file)
       working = MiniExiftool.new(file)
