@@ -112,6 +112,16 @@ gem("xmlrpc")
 gem("fastimage")
 # for detecting file type of uploaded images
 gem("mimemagic")
+# An interface between Ruby and ImageMagick/Vips
+gem("image_processing")
+# reads the output of exiftool and "vendors" the latest version of the tool
+# supports multiget, which is faster than running exiftool for each file
+gem("exiftool_vendored")
+# supports writing (as well as reading) EXIF data
+gem("mini_exiftool")
+# syncronize files between remote hosts by wrapping a call to the rsync binary
+# used in transfers to the image server
+gem("rsync")
 
 # for creating zip files
 # RubyZip 3.0 is coming!
