@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-# Represents the result of an iNat API observation search for one observation
+# Encapsulates the result of an iNat API search for one observation,
+# mapping iNat key/values to MO Observation attributes
 class ImportedInatObs
   def initialize(imported_inat_obs_data)
     @imported_inat_obs_data =
@@ -11,6 +12,7 @@ class ImportedInatObs
     @imported_inat_obs_data[:results].first
   end
 
+  # TODO: make this private (and don't call from elsewhere)
   def description
     obs[:description]
   end
@@ -23,6 +25,7 @@ class ImportedInatObs
     obs[:observation_photos]
   end
 
+  # TODO: move this to photos
   # array of iNat photo ids usuable to get photo from aws
   def aws_photo_ids
     obs_photos.each_with_object([]) do |obs_photo, ary|
