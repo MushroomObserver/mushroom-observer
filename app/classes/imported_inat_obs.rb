@@ -11,6 +11,10 @@ class ImportedInatObs
     @imported_inat_obs_data[:results].first
   end
 
+  def description
+    obs[:description]
+  end
+
   def gps_hidden
     obs[:geoprivacy].present?
   end
@@ -45,8 +49,9 @@ class ImportedInatObs
   end
 
   def notes
-    desc = obs[:description]
-    { Other: desc.gsub(%r{</?p>}, "") }
+    return "" if description.empty?
+
+    { Other: description.gsub(%r{</?p>}, "") }
   end
 
   # :location seems simplest source for lat/lng

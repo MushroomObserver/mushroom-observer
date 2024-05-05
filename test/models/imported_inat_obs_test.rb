@@ -4,13 +4,13 @@ require("test_helper")
 
 # test MO extensions to Ruby's Hash class
 class ImportedInatObsTest < UnitTestCase
-  def test_public_obs
+  def test_complex_public_obs
     # import of iNat 202555552 which is a mirror of MO 547126)
     # For easier to to read version see test/fixtures/inat/somion_unicolor.json
     import =
       ImportedInatObs.new(File.read("test/fixtures/inat/somion_unicolor.txt"))
 
-    expected_xlation = Observation.new(
+    expected_mapping = Observation.new(
       # id: 547126,
       # user_id: 4468,
       # created_at: Thu, 07 Mar 2024 18:32:18.000000000 EST -05:00,
@@ -51,7 +51,7 @@ class ImportedInatObsTest < UnitTestCase
     )
 
     %w[gps_hidden lat lng name_id notes text_name when where].each do |attribute|
-      assert_equal(expected_xlation.send(attribute), import.send(attribute))
+      assert_equal(expected_mapping.send(attribute), import.send(attribute))
     end
 
     # aws ids of the images for iNat obs 202555552
@@ -90,5 +90,16 @@ class ImportedInatObsTest < UnitTestCase
 
     assert_equal(names(:coprinus).text_name, import.text_name)
     assert_equal(names(:coprinus).id, import.name_id)
+  end
+
+  def test_no_description
+    inat_response = File.read("test/fixtures/inat/tremella_mesenterica.txt")
+    assert_match(/"description":null,/, inat_response,
+                 "Need iNat observation lacking description")
+
+    import = ImportedInatObs.new(inat_response)
+
+    assert_nil(import.description)
+    assert_equal("", import.notes)
   end
 end
