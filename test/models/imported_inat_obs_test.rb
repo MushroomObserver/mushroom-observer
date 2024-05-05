@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-# test MO extensions to Ruby's Hash class
+# test encapsulated imported iNat observations
 class ImportedInatObsTest < UnitTestCase
   def test_complex_public_obs
     # import of iNat 202555552 which is a mirror of MO 547126)
