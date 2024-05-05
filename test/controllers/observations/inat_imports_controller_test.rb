@@ -15,11 +15,14 @@ module Observations
                     "Form needs a field for inputting iNat ids")
     end
 
-    def test_create_public_import
-      inat_id = "202555552"
+    def test_create_simple_public_import
+      inat_id = "213508767"
       params = { inat_ids: inat_id }
+      # fixture created from iNat api for observation 213508767
+      inat_response_body =
+        File.read("test/fixtures/inat/tremella_mesenterica.txt")
 
-      inat_response_body = File.read("test/fixtures/inat/somion_unicolor.txt")
+
       WebMock.stub_request(
         :get,
         "https://api.inaturalist.org/v1" \
