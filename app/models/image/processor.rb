@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
 # Image::Processor. Not to be confused with the ImageProcessing gem's class.
-# method `process`
-# This is used by ProcessImageJob to resize and transfer uploaded images to
-# the image server(s).  It is intended to run asynchronously.  One of these
+#
+# Methods
+# `process`
+# Resize and transfer uploaded images to the image server(s).
+# It is intended to run asynchronously via Active Job.  One of these
 # jobs is spwaned for each image uploaded.  It takes these steps:
 
 # 1. convert original to jpeg if necessary
@@ -33,28 +35,36 @@ class Image
     # Where the private key is stored for scp.
     PRIVATE_KEY_PATH = Rails.root.join(".ssh/id_rsa").to_s
 
-    def initialize(args)
-      @id = args[:id]
+    def initialize(args = {})
+      # TODO: Send Image instance instead of id
+      # @image = Image.find(args[:id])
+      @image = args[:image]
+      raise(:process_image_no_image.t) unless @image
+
+      @user = args[:user]
+      raise(:process_image_no_user.t) unless @user
+
       @ext = args[:ext]
+      raise(:process_image_no_ext.t) unless @ext
+
+      @id = @image.id
       @set_size = args[:set_size]
       @strip_gps = args[:strip_gps]
-      @user = args[:user]
+
       @transferred_any = 0
       @image_servers = image_servers
       @image_server_data = image_server_data
       @errors = []
-      @image = Image.find(@id)
-      raise(:process_image_job_no_image.t) unless @image
     end
 
     def process
       # for debugging
-      perform_desc = "#{@id}, #{@ext}, #{@set_size}, #{@strip_gps}"
-      log("Starting Image::Processor.process(#{perform_desc})")
+      # perform_desc = "#{@id}, #{@ext}, #{@set_size}, #{@strip_gps}"
+      # log("Starting Image::Processor.process(#{perform_desc})")
 
       # image.update_attribute(:upload_status, "pending")
       convert_raw_to_jpg if @ext != "jpg"
-      strip_gps(full_file) if @strip_gps
+      strip_gps_from_file(full_file) if @strip_gps
       auto_orient_if_needed(full_file)
       update_image_width_and_height if @set_size
       make_sizes
@@ -66,12 +76,21 @@ class Image
       email_webmaster if @errors.any?
 
       # for debugging
-      log("Done with Image::Processor.process(#{perform_args})")
+      # log("Done with Image::Processor.process(#{perform_args})")
+    end
+
+    # Strip GPS data
+    # NOTE: GPS-prefixed fields are not bulk-updatable. XMP:Geotag is.
+    def strip_gps_from_file(file)
+      working = MiniExiftool.new(file)
+      gps_fields.each { |field| working[field] = nil }
+      working["XMP:Geotag"] = nil
+      working.save
     end
 
     private
 
-    # Note this also calls strip_gps(raw_file).
+    # Note this also calls strip_gps_from_file(raw_file).
     def convert_raw_to_jpg
       pipeline = ImageProcessing::MiniMagick.source(raw_file).
                  append("-quality", 90).
@@ -92,7 +111,7 @@ class Image
       end
 
       # Strip GPS out of header of raw_file if hiding coordinates.
-      strip_gps(raw_file) if @strip_gps
+      strip_gps_from_file(raw_file) if @strip_gps
     end
 
     def auto_orient_if_needed(file_path)
@@ -242,41 +261,32 @@ class Image
     end
 
     # original file locations
-    def raw_file(id, ext)
-      "#{local_images_path}/orig/#{id}.#{ext}"
+    def raw_file
+      "#{local_images_path}/orig/#{@id}.#{@ext}"
     end
 
-    def full_file(id)
-      "#{local_images_path}/orig/#{id}.jpg"
+    def full_file
+      "#{local_images_path}/orig/#{@id}.jpg"
     end
 
-    def huge_file(id)
-      "#{local_images_path}/1280/#{id}.jpg"
+    def huge_file
+      "#{local_images_path}/1280/#{@id}.jpg"
     end
 
-    def large_file(id)
-      "#{local_images_path}/960/#{id}.jpg"
+    def large_file
+      "#{local_images_path}/960/#{@id}.jpg"
     end
 
-    def medium_file(id)
-      "#{local_images_path}/640/#{id}.jpg"
+    def medium_file
+      "#{local_images_path}/640/#{@id}.jpg"
     end
 
-    def small_file(id)
-      "#{local_images_path}/320/#{id}.jpg"
+    def small_file
+      "#{local_images_path}/320/#{@id}.jpg"
     end
 
-    def thumb_file(id)
-      "#{local_images_path}/thumb/#{id}.jpg"
-    end
-
-    # Strip GPS data
-    # NOTE: GPS-prefixed fields are not bulk-updatable. XMP:Geotag is.
-    def strip_gps(file)
-      working = MiniExiftool.new(file)
-      gps_fields.each { |field| working[field] = nil }
-      working["XMP:Geotag"] = nil
-      working.save
+    def thumb_file
+      "#{local_images_path}/thumb/#{@id}.jpg"
     end
 
     # rubocop:disable Metrics/MethodLength
