@@ -7,13 +7,10 @@ class ProcessImageJob < ApplicationJob
   queue_as :default
 
   def perform(args)
-    # log("Starting ProcessImageJob.perform(#{args[:id]}, #{args[:ext]}, #{args[:set_size]}, #{args[:strip_gps]})")
-    # image = Image.find(args[:id])
-    # raise(:process_image_job_no_image.t) unless image
-
-    # processed = Image::Processor.process(args)
-    # log("Done with ProcessImageJob.perform(#{args[:id]}, #{args[:ext]}, #{args[:set_size]}, #{args[:strip_gps]})")
-    # mark image as transferred if processed?
-    # return processed?
+    # desc = args.pluck(:image, :ext, :set_size, :strip_gps, :user).join(", ")
+    # log("Starting ProcessImageJob.perform(#{desc})")
+    processor = Image::Processor.new(args)
+    processor.process
+    # log("Done with ProcessImageJob.perform(#{desc})")
   end
 end

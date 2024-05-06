@@ -546,6 +546,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   def init_image_from_local_file(file)
     @file = file
     raise("Weird: file.path is blank!") if file.path.blank?
+
     self.upload_temp_file = file.path
     self.upload_length    = file.size
     add_extra_attributes_from_file(file)
@@ -727,8 +728,11 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       update_attribute(:gps_stripped, true) if strip
       strip = strip ? "1" : "0"
       if move_original
-        args = { id: id, ext: ext, set_size: set, strip_gps: strip }
+        args = {
+          image: self, ext: ext, set_size: set, strip_gps: strip, user: user
+        }
         ProcessImageJob.perform_later(args)
+
         # cmd = MO.process_image_command.
         #       gsub("<id>", id.to_s).
         #       gsub("<ext>", ext).
