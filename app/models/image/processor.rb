@@ -35,10 +35,16 @@ class Image
     MiniExiftool.pstore_dir = Rails.root.join("tmp").to_s
     # Where the private key is stored for scp.
     PRIVATE_KEY_PATH = Rails.root.join(".ssh/id_rsa").to_s
+    # Source, destination sizes and quality settings for each conversion.
+    SIZE_CONVERSIONS = [
+      ["full_size", "huge", 1280, 93],
+      ["huge", "large", 960, 94],
+      ["huge", "medium", 640, 95], # huge more efficient because medium = half
+      ["medium", "small", 320, 95],
+      ["small", "thumbnail", 160, 95]
+    ].freeze
 
     def initialize(args = {})
-      # TODO: Send Image instance instead of id
-      # @image = Image.find(args[:id])
       @image = args[:image]
       raise(:process_image_no_image.t) unless @image
 
@@ -65,15 +71,12 @@ class Image
 
       # image.update_attribute(:upload_status, "pending")
       convert_raw_to_jpg if @ext != "jpg"
-      strip_gps_from_file(full_file) if @strip_gps
-      auto_orient_if_needed(full_file)
+      strip_gps_from_file(full_size_file) if @strip_gps
+      auto_orient_if_needed(full_size_file)
       update_image_record_width_and_height if @set_size
-      make_sizes
-      transfer_to_servers
-
-      # Mark image as transferred and touch related obs (for caches) if all good
-      mark_image_transferred if @transferred_any
-      # Email webmaster if there were any errors
+      make_file_sizes
+      transfer_files_to_image_servers
+      mark_image_record_transferred if @transferred_any
       email_webmaster if @errors.any?
 
       # for debugging
@@ -81,10 +84,9 @@ class Image
     end
 
     # Strip GPS data
-    # NOTE: GPS-prefixed fields are not bulk-updatable. XMP:Geotag is.
     def strip_gps_from_file(file)
       working = MiniExiftool.new(file)
-      gps_fields.each { |field| working[field] = nil }
+      working["GPS:all"] = nil
       working["XMP:Geotag"] = nil
       working.save
     end
@@ -99,14 +101,14 @@ class Image
                  saver(allow_splitting: true).
                  convert("jpg")
 
-      pipeline.call(destination: full_file)
+      pipeline.call(destination: full_size_file)
 
       # If there were multiple layers, ImageMagick saves them as 1234-N.jpg.
-      unless File.exist?(full_file)
+      unless File.exist?(full_size_file)
         biggest_layer = Dir.glob("#{local_images_path}/orig/#{@id}-*.jpg").first
         if File.exist?(biggest_layer)
           # Take the first one, and delete the rest.
-          File.write(full_file, File.read(biggest_layer))
+          File.write(full_size_file, File.read(biggest_layer))
           File.delete(Dir.glob("#{local_images_path}/orig/#{@id}-*.jpg"))
         end
       end
@@ -125,22 +127,14 @@ class Image
     end
 
     def update_image_record_width_and_height
-      width, height = FastImage.size(full_file)
+      width, height = FastImage.size(full_size_file)
       @image.update(width: width, height: height)
     end
 
-    def make_sizes
-      size_conversions.each do |source, destination, size, quality|
+    def make_file_sizes
+      SIZE_CONVERSIONS.each do |source, destination, size, quality|
         convert_source_to_destination(source, destination, size, quality)
       end
-    end
-
-    def size_conversions
-      [["full", "huge", 1280, 93],
-       ["huge", "large", 960, 94],
-       ["huge", "medium", 640, 95],
-       ["medium", "small", 320, 95],
-       ["small", "thumb", 160, 95]].freeze
     end
 
     def convert_source_to_destination(source, destination, size, quality = 95)
@@ -154,7 +148,7 @@ class Image
       pipeline.call(destination: destination_file)
     end
 
-    def transfer_to_servers
+    def transfer_files_to_image_servers
       return if Rails.env.development?
 
       @image_servers.each do |server|
@@ -209,7 +203,8 @@ class Image
       end
     end
 
-    def mark_image_transferred
+    # Mark image as transferred and touch related obs (for caches) if all good
+    def mark_image_record_transferred
       @image.update(
         transferred: @transferred_any
         # upload_status: "success"
@@ -218,6 +213,7 @@ class Image
         where(observation_images: { image_id: @id }).touch_all
     end
 
+    # Email webmaster if there were any errors
     def email_webmaster
       QueuedEmail::Webmaster.create_email(
         sender_email: @user.email,
@@ -238,6 +234,7 @@ class Image
       MO.image_sources.each_key.map(&:to_s)
     end
 
+    # NOTE: must use Addressable::URI to get "user@host:port" `authority`
     def image_server_data
       data = {
         local: {
@@ -247,11 +244,10 @@ class Image
           subdirs: image_subdirs
         }
       }
+
       MO.image_sources.each do |server, specs|
         next unless specs[:write]
 
-        # NOTE: needs Addressable::URI to get the authority
-        # (the "user@host:port" part)
         uri = Addressable::URI.parse(specs[:write])
         data[server] = {
           url: format(specs[:write], root: MO.root),
@@ -263,70 +259,16 @@ class Image
       data
     end
 
-    # original file locations
+    # Original file locations
     def raw_file
       "#{local_images_path}/orig/#{@id}.#{@ext}"
     end
 
-    def full_file
-      "#{local_images_path}/orig/#{@id}.jpg"
+    # full_size, huge, large, medium, small, thumbnail
+    Image::URL::SUBDIRECTORIES.each do |size, subdir|
+      define_method(:"#{size}_file") do
+        "#{local_images_path}/#{subdir}/#{@id}.jpg"
+      end
     end
-
-    def huge_file
-      "#{local_images_path}/1280/#{@id}.jpg"
-    end
-
-    def large_file
-      "#{local_images_path}/960/#{@id}.jpg"
-    end
-
-    def medium_file
-      "#{local_images_path}/640/#{@id}.jpg"
-    end
-
-    def small_file
-      "#{local_images_path}/320/#{@id}.jpg"
-    end
-
-    def thumb_file
-      "#{local_images_path}/thumb/#{@id}.jpg"
-    end
-
-    # rubocop:disable Metrics/MethodLength
-    def gps_fields
-      %w[
-        GPSLatitude
-        GPSLongitude
-        GPSAltitude
-        GPSLatitudeRef
-        GPSLongitudeRef
-        GPSAltitudeRef
-        GPSTimeStamp
-        GPSSatellites
-        GPSStatus
-        GPSMeasureMode
-        GPSDOP
-        GPSSpeedRef
-        GPSSpeed
-        GPSTrackRef
-        GPSTrack
-        GPSImgDirectionRef
-        GPSImgDirection
-        GPSMapDatum
-        GPSDestLatitudeRef
-        GPSDestLatitude
-        GPSDestLongitudeRef
-        GPSDestLongitude
-        GPSDestBearingRef
-        GPSDestBearing
-        GPSDestDistanceRef
-        GPSDestDistance
-        GPSProcessingMethod
-        GPSAreaInformation
-        GPSDateStamp
-        GPSDifferential
-      ].freeze
-    end
-    # rubocop:enable Metrics/MethodLength
   end
 end
