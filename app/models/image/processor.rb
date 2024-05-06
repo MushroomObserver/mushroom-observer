@@ -28,6 +28,7 @@ class Image
     require "mini_exiftool"
     require "fastimage"
     require "rsync"
+    require "open-uri"
 
     # Use the vendored version of Exiftool.
     MiniExiftool.command = Exiftool.command
@@ -173,40 +174,6 @@ class Image
       @transferred_any = 1
     end
 
-    def copy_file_to_server(server, local_file, remote_file = local_file)
-      case @image_server_data[server][:type]
-      when "file"
-        copy_file_to_local_server(server, local_file, remote_file)
-      when "ssh"
-        copy_file_to_remote_server(server, local_file, remote_file)
-      else
-        raise("Unknown image server type: #{@image_server_data[server][:type]}")
-      end
-    end
-
-    def copy_file_to_local_server(server, local_file, remote_file)
-      return unless (remote_path = image_server_data[server][:path])
-
-      FileUtils.cp("#{local_images_path}/#{local_file}",
-                   "#{remote_path}/#{remote_file}")
-    end
-
-    # Rsync is used to copy files to the image server(s).
-    def copy_file_to_remote_server(server, local_file, remote_file)
-      return unless (remote_path = image_server_data[server][:path])
-
-      Rsync.run("#{local_images_path}/#{local_file}",
-                "#{remote_path}/#{remote_file}") do |result|
-        if result.success?
-          # result.changes.each do |change|
-          #   puts("#{change.filename} (#{change.summary})")
-          # end
-        else
-          @errors << result.error
-        end
-      end
-    end
-
     # Mark image as transferred and touch related obs (for caches) if all good
     def mark_image_record_transferred
       @image.update(
@@ -272,6 +239,103 @@ class Image
     Image::URL::SUBDIRECTORIES.each do |size, subdir|
       define_method(:"#{size}_file") do
         "#{local_images_path}/#{subdir}/#{@id}.jpg"
+      end
+    end
+
+    ############################################################
+
+    def copy_file_to_server(server, local_file, remote_file = local_file)
+      case @image_server_data[server][:type]
+      when "file"
+        copy_file_to_local_server(server, local_file, remote_file)
+      when "ssh"
+        copy_file_to_remote_server(server, local_file, remote_file)
+      else
+        raise("Unknown image server type: #{@image_server_data[server][:type]}")
+      end
+    end
+
+    def copy_file_to_local_server(server, local_file, remote_file)
+      return unless (remote_path = image_server_data[server][:path])
+
+      FileUtils.cp("#{local_images_path}/#{local_file}",
+                   "#{remote_path}/#{remote_file}")
+    end
+
+    # Rsync is used to copy files to the image server(s).
+    def copy_file_to_remote_server(server, local_file, remote_file)
+      return unless (remote_path = image_server_data[server][:path])
+
+      Rsync.run("#{local_images_path}/#{local_file}",
+                "#{remote_path}/#{remote_file}") do |result|
+        if result.success?
+          # result.changes.each do |change|
+          #   puts("#{change.filename} (#{change.summary})")
+          # end
+        else
+          @errors << result.error
+        end
+      end
+    end
+
+    # This method could potentially present a security risk depending on how the
+    # remote_file parameter is being passed. If an attacker can control the
+    # remote_file parameter, they could potentially use path traversal attacks
+    # (../) to read arbitrary files from the remote server if the server is not
+    # properly configured to prevent this.
+
+    # To mitigate this risk, you should: Ensure that the remote_file parameter
+    # is properly sanitized before it's used. For example, you could ensure that
+    # it doesn't contain any ../ sequences or other special characters that
+    # could be used in a path traversal attack.
+
+    # Consider using a secure method to generate the local file path, rather
+    # than directly using the remote_file parameter. For example, you could use
+    # a hash of the remote_file parameter, or generate a random filename.
+
+    # Make sure that the remote server is properly configured to prevent path
+    # traversal attacks. For example, it should not allow requests for paths
+    # that contain ../ or other special sequences.
+
+    # Always use secure connections (HTTPS) when transferring files to prevent
+    # man-in-the-middle attacks.
+    def copy_file_from_server(server, remote_file)
+      case @image_server_data[server][:type]
+      when "file"
+        copy_file_from_local_server(server, remote_file)
+      when "ssh"
+        copy_file_from_remote_server(server, remote_file)
+      when "http"
+        copy_file_from_http_server(server, remote_file)
+      else
+        raise("Don't know how to get #{remote_file} from #{server} via: " \
+              "#{@image_server_data[server][:type]}")
+      end
+    end
+
+    def copy_file_from_local_server(server, remote_file)
+      return unless (remote_path = image_server_data[server][:path])
+
+      FileUtils.cp("#{remote_path}/#{remote_file}",
+                   "#{local_images_path}/#{remote_file}")
+    end
+
+    def copy_file_from_remote_server(server, remote_file)
+      return unless (remote_path = image_server_data[server][:path])
+
+      Rsync.run("#{remote_path}/#{remote_file}",
+                "#{local_images_path}/#{remote_file}")
+    end
+
+    def copy_file_from_http_server(server, remote_file)
+      return unless (remote_path = image_server_data[server][:path])
+
+      case io = OpenURI.open_uri("#{remote_path}/#{remote_file}")
+      when StringIO
+        File.write("#{local_images_path}/#{remote_file}", io.read)
+      when Tempfile
+        io.close
+        FileUtils.mv(io.path, "#{local_images_path}/#{remote_file}")
       end
     end
   end
