@@ -39,7 +39,7 @@ class Image
     SIZE_CONVERSIONS = [
       ["full_size", "huge", 1280, 93],
       ["huge", "large", 960, 94],
-      ["huge", "medium", 640, 95], # huge more efficient because medium = half
+      ["huge", "medium", 640, 95], # medium = half of huge
       ["medium", "small", 320, 95],
       ["small", "thumbnail", 160, 95]
     ].freeze
@@ -90,6 +90,10 @@ class Image
       working["XMP:Geotag"] = nil
       working.save
     end
+
+    # def rotate_image; end
+
+    # def retransfer_image; end
 
     private
 
