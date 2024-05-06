@@ -15,9 +15,9 @@
 # 5. copy all files to the image server(s) if in production mode
 # 6. email webmaster if there were any errors
 
-# It ensures that no other processes are running ImageMagick or scp before
-# it runs its own commands.  If another is running, it sleep a few seconds
-# and tries again.
+# Original script ensures that no other processes are running ImageMagick or
+# scp before it runs its own commands.  If another is running, it sleeps a few
+# seconds and tries again.
 #
 # This class could potentially also house `retransfer` and `rotate` methods
 
