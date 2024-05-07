@@ -53,8 +53,8 @@ class Image
       raise(:process_image_no_ext.t) unless @ext
 
       @id = @image.id
-      @set_size = args[:set_size]
-      @strip_gps = args[:strip_gps]
+      @set_size = args[:set_size] || false
+      @strip_gps = args[:strip_gps] || false
 
       @transferred_any = 0
       @image_servers = environment_image_servers
@@ -71,8 +71,7 @@ class Image
       convert_raw_to_jpg if @ext != "jpg"
       strip_gps_from_file(full_size_file) if @strip_gps
       auto_orient_if_needed(full_size_file)
-      # TODO: consolidate w/h/t and update once
-      update_image_record_width_and_height if @set_size
+      update_image_record_width_height_and_transferred if @set_size
       make_file_sizes
       transfer_files_to_image_servers
       mark_image_record_transferred if @transferred_any
@@ -90,14 +89,12 @@ class Image
       working.save
     end
 
-    def rotate(_orientation)
+    def rotate(orientation)
       make_sure_we_have_full_size_locally
       reset_file_orientation
-      # transform_full_size_file(orientation)
-      # TODO: consolidate w/h/t and update once
-      # update_image_record_width_and_height
-      # mark_image_record_not_transferred
-      # process
+      transform_full_size_file(orientation)
+      update_image_record_width_height_and_transferred
+      process
     end
 
     # def retransfer_image; end
@@ -133,7 +130,6 @@ class Image
       nil unless operations.include?(orientation)
 
       pipeline = ImageProcessing::MiniMagick.source(full_size_file)
-      #  append("-auto-orient").
 
       if %w[-90 +90 180].include?(orientation)
         pipeline.rotate(orientation)
@@ -178,9 +174,11 @@ class Image
       file_to_orient.write(file_path) if original_orientation != new_orientation
     end
 
-    def update_image_record_width_and_height
+    # This also sets transferred to false to save db writes.
+    # Needed in rotate, and later overwritten in process.
+    def update_image_record_width_height_and_transferred
       width, height = FastImage.size(full_size_file)
-      @image.update(width: width, height: height)
+      @image.update(width: width, height: height, transferred: false)
     end
 
     def make_file_sizes
