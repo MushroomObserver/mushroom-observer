@@ -24,3 +24,12 @@ fsjt_old:
   user: mary
   status: <%= FieldSlipJobTracker.statuses[:Done] %>
   updated_at: 2023-04-14 16:31:00
+
+fsjt_one_per_page:
+  start: 6
+  count: 12
+  prefix: EOL
+  title: EOL Project
+  user: mary
+  one_per_page: true
+  status: <%= FieldSlipJobTracker.statuses[:Starting] %>
