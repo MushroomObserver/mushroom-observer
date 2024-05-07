@@ -107,9 +107,8 @@ class Image
     def make_sure_we_have_full_size_locally
       return if File.exist?(full_size_file)
 
-      return unless (servers = @image_servers.excluding(:local))
-
-      servers.each do |server|
+      # return unless (servers = @image_servers.excluding(:local))
+      @image_servers.each do |server|
         next unless image_server_has_subdir?(server, "orig")
 
         copy_file_from_server(server, "orig/#{@id}.jpg")
@@ -118,8 +117,15 @@ class Image
     end
 
     def reset_file_orientation
-      working = MiniExiftool.new(full_size_file)
-      debugger
+      working = MiniExiftool.new(full_size_file, numerical: true)
+      return unless working.orientation.to_i != 1
+
+      # This should reset the orientation to 1 from the original data.
+      working.copy_tags_from(full_size_file, "all")
+      return unless working.orientation.to_i != 1
+
+      working.orientation = 1
+      working.save
     end
 
     def transform_full_size_file(orientation)
@@ -139,9 +145,9 @@ class Image
       pipeline.call(destination: full_size_file)
     end
 
-    # Note this also calls strip_gps_from_file(raw_file).
+    # Note this also calls strip_gps_from_file(original_file).
     def convert_raw_to_jpg
-      pipeline = ImageProcessing::MiniMagick.source(raw_file).
+      pipeline = ImageProcessing::MiniMagick.source(original_file).
                  append("-quality", 90).
                  append("-auto-orient").
                  saver(allow_splitting: true).
@@ -159,8 +165,8 @@ class Image
         end
       end
 
-      # Strip GPS out of header of raw_file if hiding coordinates.
-      strip_gps_from_file(raw_file) if @strip_gps
+      # Strip GPS out of header of original_file if hiding coordinates.
+      strip_gps_from_file(original_file) if @strip_gps
     end
 
     def auto_orient_if_needed(file_path)
@@ -258,7 +264,6 @@ class Image
         }
       }
 
-      debugger
       MO.image_sources.each do |server, specs|
         next unless specs[:write]
 
@@ -278,7 +283,7 @@ class Image
     end
 
     # Original file locations
-    def raw_file
+    def original_file
       "#{local_images_path}/orig/#{@id}.#{@ext}"
     end
 
@@ -303,7 +308,7 @@ class Image
     end
 
     def copy_file_to_local_server(server, local_file, remote_file)
-      return unless (remote_path = image_server_data[server][:path])
+      return unless (remote_path = @image_server_data[server][:path])
 
       FileUtils.cp("#{local_images_path}/#{local_file}",
                    "#{remote_path}/#{remote_file}")
@@ -311,7 +316,7 @@ class Image
 
     # Rsync is used to copy files to the image server(s).
     def copy_file_to_remote_server(server, local_file, remote_file)
-      return unless (remote_path = image_server_data[server][:path])
+      return unless (remote_path = @image_server_data[server][:path])
 
       Rsync.run("#{local_images_path}/#{local_file}",
                 "#{remote_path}/#{remote_file}") do |result|
@@ -347,7 +352,6 @@ class Image
     # Always use secure connections (HTTPS) when transferring files to prevent
     # man-in-the-middle attacks.
     def copy_file_from_server(server, remote_file)
-      debugger
       case @image_server_data[server][:type]
       when "file"
         copy_file_from_local_server(server, remote_file)
@@ -362,21 +366,21 @@ class Image
     end
 
     def copy_file_from_local_server(server, remote_file)
-      return unless (remote_path = image_server_data[server][:path])
+      return unless (remote_path = @image_server_data[server][:path])
 
       FileUtils.cp("#{remote_path}/#{remote_file}",
                    "#{local_images_path}/#{remote_file}")
     end
 
     def copy_file_from_remote_server(server, remote_file)
-      return unless (remote_path = image_server_data[server][:path])
+      return unless (remote_path = @image_server_data[server][:path])
 
       Rsync.run("#{remote_path}/#{remote_file}",
                 "#{local_images_path}/#{remote_file}")
     end
 
     def copy_file_from_http_server(server, remote_file)
-      return unless (remote_path = image_server_data[server][:path])
+      return unless (remote_path = @image_server_data[server][:path])
 
       case io = OpenURI.open_uri("#{remote_path}/#{remote_file}")
       when StringIO
