@@ -24,14 +24,11 @@
 class Image
   class Processor
     require "image_processing/mini_magick"
-    require "exiftool_vendored"
-    require "mini_exiftool"
+    require "mini_exiftool_vendored"
     require "fastimage"
     require "rsync"
     require "open-uri"
 
-    # Use the vendored version of Exiftool.
-    MiniExiftool.command = Exiftool.command
     # Store Exiftool's database in a temporary directory.
     MiniExiftool.pstore_dir = Rails.root.join("tmp").to_s
     # Where the private key is stored for scp.
@@ -60,7 +57,7 @@ class Image
       @strip_gps = args[:strip_gps]
 
       @transferred_any = 0
-      @image_servers = image_servers
+      @image_servers = environment_image_servers
       @image_server_data = image_server_data
       @errors = []
     end
@@ -74,6 +71,7 @@ class Image
       convert_raw_to_jpg if @ext != "jpg"
       strip_gps_from_file(full_size_file) if @strip_gps
       auto_orient_if_needed(full_size_file)
+      # TODO: consolidate w/h/t and update once
       update_image_record_width_and_height if @set_size
       make_file_sizes
       transfer_files_to_image_servers
@@ -92,11 +90,54 @@ class Image
       working.save
     end
 
-    # def rotate_image; end
+    def rotate(_orientation)
+      make_sure_we_have_full_size_locally
+      reset_file_orientation
+      # transform_full_size_file(orientation)
+      # TODO: consolidate w/h/t and update once
+      # update_image_record_width_and_height
+      # mark_image_record_not_transferred
+      # process
+    end
 
     # def retransfer_image; end
 
     private
+
+    def make_sure_we_have_full_size_locally
+      return if File.exist?(full_size_file)
+
+      return unless (servers = @image_servers.excluding(:local))
+
+      servers.each do |server|
+        next unless image_server_has_subdir?(server, "orig")
+
+        copy_file_from_server(server, "orig/#{@id}.jpg")
+        break
+      end
+    end
+
+    def reset_file_orientation
+      working = MiniExiftool.new(full_size_file)
+      debugger
+    end
+
+    def transform_full_size_file(orientation)
+      operations = %w[-90 +90 180 -h -v]
+      nil unless operations.include?(orientation)
+
+      pipeline = ImageProcessing::MiniMagick.source(full_size_file)
+      #  append("-auto-orient").
+
+      if %w[-90 +90 180].include?(orientation)
+        pipeline.rotate(orientation)
+      elsif orientation == "-h"
+        pipeline.flop
+      elsif orientation == "-v"
+        pipeline.flip
+      end
+      pipeline.call(destination: full_size_file)
+    end
 
     # Note this also calls strip_gps_from_file(raw_file).
     def convert_raw_to_jpg
@@ -201,8 +242,9 @@ class Image
       MO.local_image_files
     end
 
-    def image_servers
-      MO.image_sources.each_key.map(&:to_s)
+    # returns symbols!
+    def environment_image_servers
+      MO.image_sources.each_key.to_a
     end
 
     # NOTE: must use Addressable::URI to get "user@host:port" `authority`
@@ -216,6 +258,7 @@ class Image
         }
       }
 
+      debugger
       MO.image_sources.each do |server, specs|
         next unless specs[:write]
 
@@ -228,6 +271,10 @@ class Image
         }
       end
       data
+    end
+
+    def image_server_has_subdir?(server, subdir)
+      @image_server_data[server][:subdirs].include?(subdir)
     end
 
     # Original file locations
@@ -300,6 +347,7 @@ class Image
     # Always use secure connections (HTTPS) when transferring files to prevent
     # man-in-the-middle attacks.
     def copy_file_from_server(server, remote_file)
+      debugger
       case @image_server_data[server][:type]
       when "file"
         copy_file_from_local_server(server, remote_file)

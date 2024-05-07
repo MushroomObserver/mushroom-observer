@@ -114,11 +114,10 @@ gem("fastimage")
 gem("mimemagic")
 # An interface between Ruby and ImageMagick/Vips
 gem("image_processing")
-# reads the output of exiftool and "vendors" the latest version of the tool
-# supports multiget, which is faster than running exiftool for each file
-gem("exiftool_vendored")
-# supports writing (as well as reading) EXIF data
-gem("mini_exiftool")
+# NOTE: gem "exiftool/exiftool_vendored" is for reading only
+# This supports writing (plus reading) EXIF data, "vendors" latest exiftool.
+# If reading/writing multiple files at once, switch to "multi_exiftool" gem.
+gem("mini_exiftool_vendored")
 # syncronize files between remote hosts by wrapping a call to the rsync binary
 # used in transfers to the image server
 gem("rsync")
