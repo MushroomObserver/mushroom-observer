@@ -7,9 +7,10 @@ class ProcessImageJob < ApplicationJob
   queue_as :default
 
   rescue_from(StandardError) do |exception|
-    # Handle the error here. For example, you might send a notification email,
-    # log the error to a monitoring service, or mark the upload as failed in your database.
-    # You have access to the job's arguments in the 'arguments' instance method.
+    # Handle the error here. For example, we can send a notification email, log
+    # the error to a monitoring service, or mark the upload as failed in the
+    # database. We have access to the job's arguments in the 'arguments'
+    # instance method.
     image = Image.find(args[:id])
     image.update_attribute(:transferred, false)
     log("Error processing image #{args[:id]}: #{exception.message}")
