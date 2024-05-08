@@ -9,12 +9,13 @@
 
 <div class="mt-3 pb-2">
   <div>
-    <%= :field_slips_for_project_max_pages.t(max: @page_max) %>
+    <%= :field_slips_max_for_project.t(max: @field_slip_max) %>
   </div>
   <%= form_with(url: action, data: { turbo: true },
                 id: "project_field_slip_form", class: "my-3") do |f| %>
-    <%= number_field_with_label(form: f, field: :pages, inline: true,
-                                value: @page_max.zero? ? "0" : "1") %>
+    <%= number_field_with_label(form: f, field: :field_slips, inline: true,
+                                value: @field_slip_max.zero? ? "0" : "6") %>
+    <%= check_box_with_label(form: f, field: :one_per_page, label: :field_slips_one_per_page.t) %>
     <%= submit_button(form: f, button: :CREATE.t, class: "ml-3") %>
   <% end %>
   <% if @project.member?(User.current) %>
