@@ -33,6 +33,12 @@ class Image
     MiniExiftool.pstore_dir = Rails.root.join("tmp").to_s
     # Where the private key is stored for scp.
     PRIVATE_KEY_PATH = Rails.root.join(".ssh/id_rsa").to_s
+    # Constants for servers, paths and directories.
+    IMAGE_SUBDIRS = Image::URL::SUBDIRECTORIES.values.freeze
+    LOCAL_IMAGES_PATH = MO.local_image_files
+    # returns symbols!
+    ENV_IMAGE_SERVERS = MO.image_sources.each_key.to_a.freeze
+
     # Source, destination sizes and quality settings for each conversion.
     SIZE_CONVERSIONS = [
       ["full_size", "huge", 1280, 93],
@@ -42,14 +48,39 @@ class Image
       ["small", "thumbnail", 160, 95]
     ].freeze
 
+    # NOTE: must use Addressable::URI to get "user@host:port" `authority`
+    def image_server_data
+      data = {
+        local: {
+          url: "file://#{LOCAL_IMAGES_PATH}",
+          type: "file",
+          path: LOCAL_IMAGES_PATH,
+          subdirs: IMAGE_SUBDIRS
+        }
+      }
+
+      MO.image_sources.each do |server, specs|
+        next unless specs[:write]
+
+        uri = Addressable::URI.parse(specs[:write])
+        data[server] = {
+          url: format(specs[:write], root: MO.root),
+          type: uri.scheme,
+          path: uri.authority + uri.path,
+          subdirs: specs[:sizes] || IMAGE_SUBDIRS
+        }
+      end
+      data.freeze
+    end
+
     def initialize(args = {})
       @image = args[:image]
       raise(:process_image_no_image.t) unless @image
 
-      @user = args[:user]
+      @user = args[:user] || @image.user
       raise(:process_image_no_user.t) unless @user
 
-      @ext = args[:ext]
+      @ext = args[:ext] || @image.original_extension
       raise(:process_image_no_ext.t) unless @ext
 
       @id = @image.id
@@ -57,7 +88,7 @@ class Image
       @strip_gps = args[:strip_gps] || false
 
       @transferred_any = 0
-      @image_servers = environment_image_servers
+      @image_servers = ENV_IMAGE_SERVERS
       @image_server_data = image_server_data
       @errors = []
     end
@@ -74,7 +105,7 @@ class Image
       update_image_record_width_height_and_transferred if @set_size
       make_file_sizes
       transfer_files_to_image_servers
-      mark_image_record_transferred if @transferred_any
+      mark_image_record_transferred_and_touch_obs if @transferred_any
       email_webmaster if @errors.any?
 
       # for debugging
@@ -97,7 +128,25 @@ class Image
       process
     end
 
-    # def retransfer_image; end
+    def transfer_files_to_image_servers
+      return if Rails.env.development?
+
+      @image_servers.each do |server|
+        transfer_all_sizes_to_server_subdirectories(server)
+      end
+    end
+
+    def self.retransfer_images
+      images = Image.where(transferred: false)
+
+      images.each do |image|
+        processor = new(image: image)
+        processor.transfer_files_to_image_servers
+        if @transferred_any
+          processor.mark_image_record_transferred_and_touch_obs
+        end
+      end
+    end
 
     private
 
@@ -153,11 +202,11 @@ class Image
 
       # If there were multiple layers, ImageMagick saves them as 1234-N.jpg.
       unless File.exist?(full_size_file)
-        biggest_layer = Dir.glob("#{local_images_path}/orig/#{@id}-*.jpg").first
+        biggest_layer = Dir.glob("#{LOCAL_IMAGES_PATH}/orig/#{@id}-*.jpg").first
         if File.exist?(biggest_layer)
           # Take the first one, and delete the rest.
           File.write(full_size_file, File.read(biggest_layer))
-          File.delete(Dir.glob("#{local_images_path}/orig/#{@id}-*.jpg"))
+          File.delete(Dir.glob("#{LOCAL_IMAGES_PATH}/orig/#{@id}-*.jpg"))
         end
       end
 
@@ -198,17 +247,9 @@ class Image
       pipeline.call(destination: destination_file)
     end
 
-    def transfer_files_to_image_servers
-      return if Rails.env.development?
-
-      @image_servers.each do |server|
-        transfer_all_sizes_to_server_subdirectories(server)
-      end
-    end
-
     def transfer_all_sizes_to_server_subdirectories(server)
       subdirs = @image_server_data[server][:subdirs]
-      image_subdirs.each do |subdir|
+      IMAGE_SUBDIRS.each do |subdir|
         if subdirs.include?(subdir)
           copy_file_to_server(server, "#{subdir}/#{@id}.jpg")
         end
@@ -220,7 +261,7 @@ class Image
     end
 
     # Mark image as transferred and touch related obs (for caches) if all good
-    def mark_image_record_transferred
+    def mark_image_record_transferred_and_touch_obs
       @image.update(
         transferred: @transferred_any
         # upload_status: "success"
@@ -238,57 +279,19 @@ class Image
       )
     end
 
-    def image_subdirs
-      Image::URL::SUBDIRECTORIES.values
-    end
-
-    def local_images_path
-      MO.local_image_files
-    end
-
-    # returns symbols!
-    def environment_image_servers
-      MO.image_sources.each_key.to_a
-    end
-
-    # NOTE: must use Addressable::URI to get "user@host:port" `authority`
-    def image_server_data
-      data = {
-        local: {
-          url: "file://#{local_images_path}",
-          type: "file",
-          path: local_images_path,
-          subdirs: image_subdirs
-        }
-      }
-
-      MO.image_sources.each do |server, specs|
-        next unless specs[:write]
-
-        uri = Addressable::URI.parse(specs[:write])
-        data[server] = {
-          url: format(specs[:write], root: MO.root),
-          type: uri.scheme,
-          path: uri.authority + uri.path,
-          subdirs: specs[:sizes] || image_subdirs
-        }
-      end
-      data
-    end
-
     def image_server_has_subdir?(server, subdir)
       @image_server_data[server][:subdirs].include?(subdir)
     end
 
     # Original file locations
     def original_file
-      "#{local_images_path}/orig/#{@id}.#{@ext}"
+      "#{LOCAL_IMAGES_PATH}/orig/#{@id}.#{@ext}"
     end
 
     # full_size, huge, large, medium, small, thumbnail
     Image::URL::SUBDIRECTORIES.each do |size, subdir|
       define_method(:"#{size}_file") do
-        "#{local_images_path}/#{subdir}/#{@id}.jpg"
+        "#{LOCAL_IMAGES_PATH}/#{subdir}/#{@id}.jpg"
       end
     end
 
@@ -308,7 +311,7 @@ class Image
     def copy_file_to_local_server(server, local_file, remote_file)
       return unless (remote_path = @image_server_data[server][:path])
 
-      FileUtils.cp("#{local_images_path}/#{local_file}",
+      FileUtils.cp("#{LOCAL_IMAGES_PATH}/#{local_file}",
                    "#{remote_path}/#{remote_file}")
     end
 
@@ -316,7 +319,7 @@ class Image
     def copy_file_to_remote_server(server, local_file, remote_file)
       return unless (remote_path = @image_server_data[server][:path])
 
-      Rsync.run("#{local_images_path}/#{local_file}",
+      Rsync.run("#{LOCAL_IMAGES_PATH}/#{local_file}",
                 "#{remote_path}/#{remote_file}") do |result|
         if result.success?
           # result.changes.each do |change|
@@ -367,14 +370,14 @@ class Image
       return unless (remote_path = @image_server_data[server][:path])
 
       FileUtils.cp("#{remote_path}/#{remote_file}",
-                   "#{local_images_path}/#{remote_file}")
+                   "#{LOCAL_IMAGES_PATH}/#{remote_file}")
     end
 
     def copy_file_from_remote_server(server, remote_file)
       return unless (remote_path = @image_server_data[server][:path])
 
       Rsync.run("#{remote_path}/#{remote_file}",
-                "#{local_images_path}/#{remote_file}")
+                "#{LOCAL_IMAGES_PATH}/#{remote_file}")
     end
 
     def copy_file_from_http_server(server, remote_file)
@@ -382,10 +385,10 @@ class Image
 
       case io = OpenURI.open_uri("#{remote_path}/#{remote_file}")
       when StringIO
-        File.write("#{local_images_path}/#{remote_file}", io.read)
+        File.write("#{LOCAL_IMAGES_PATH}/#{remote_file}", io.read)
       when Tempfile
         io.close
-        FileUtils.mv(io.path, "#{local_images_path}/#{remote_file}")
+        FileUtils.mv(io.path, "#{LOCAL_IMAGES_PATH}/#{remote_file}")
       end
     end
   end
