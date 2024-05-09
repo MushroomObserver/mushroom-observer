@@ -126,6 +126,8 @@ class CommentTest < UnitTestCase
       summary: summary,
       comment: comment
     )
+    # Comments seem to not be created immediately because of broadcast job
+    sleep(1)
     assert_equal(chg, num_emails - old, queued_emails(old))
   end
 
