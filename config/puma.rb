@@ -2,7 +2,7 @@
 
 rails_env = ENV.fetch("RAILS_ENV", "development")
 
-if rails_env == "development"
+if %w[development test].include?(rails_env)
   app_path = ENV.fetch("PWD", ".")
   port 3000
   workers 0
@@ -24,7 +24,13 @@ activate_control_app
 if rails_env == "production"
   on_worker_boot do
     require "active_record"
-    ActiveRecord::Base.connection.disconnect! rescue ActiveRecord::ConnectionNotEstablished
-    ActiveRecord::Base.establish_connection(YAML.load_file("#{app_path}/config/database.yml")[rails_env]["primary"])
+    begin
+      ActiveRecord::Base.connection.disconnect!
+    rescue StandardError
+      ActiveRecord::ConnectionNotEstablished
+    end
+    ActiveRecord::Base.establish_connection(
+      YAML.load_file("#{app_path}/config/database.yml")[rails_env]["primary"]
+    )
   end
 end
