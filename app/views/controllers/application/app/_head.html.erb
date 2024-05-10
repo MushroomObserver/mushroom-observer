@@ -29,5 +29,6 @@
   stylesheet_link_tag(@css_theme, media: "screen") +
   stylesheet_link_tag(@css_theme, media: "print")
 %>
+<%= javascript_importmap_tags %>
 <%= @header unless @header.blank? %>
 <!--/APPLICATION LAYOUT HEAD-->
