@@ -167,9 +167,9 @@ MushroomObserver::Application.configure do
   config.bot_enabled = true
 
   # Set up ActionCable to use a standalone server at port 28080
-  config.action_cable.mount_path = nil
-  config.action_cable.url = "wss://localhost:28080" # use :wss in production
-  config.action_cable.allowed_request_origins = [%r{http://*}, %r{https://*/}]
+  # config.action_cable.mount_path = nil
+  # config.action_cable.url = "wss://localhost:28080" # use :wss in production
+  # config.action_cable.allowed_request_origins = [%r{http://*}, %r{https://*/}]
 
   config.active_job.queue_adapter = :solid_queue
 end
