@@ -25,7 +25,8 @@ class ImportedInatObs
     obs[:observation_photos]
   end
 
-  # TODO: move this to photos
+  # TODO: move this to photos???
+  # Probably should just be deleted
   # array of iNat photo ids usuable to get photo from aws
   def aws_photo_ids
     obs_photos.each_with_object([]) do |obs_photo, ary|
