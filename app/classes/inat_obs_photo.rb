@@ -2,13 +2,11 @@
 
 # Encapsulates one iNat observation photo (dervied from an ImportedInatObs)
 # mapping iNat key/values to MO Image attributes and associations
+# Example use:
+# InatObsPhoto.new(<imported_inat_obs>.observation_photos.first)
 class InatObsPhoto
-  def initialize(inat_obs_photo_data)
-    # TODO: Can I get rid of eval?
-    # Issue: inat_obs_photo_data is extracted from string which was JSONized
-    # Can I do something clever to initialize it with id &/or position?
-    # Maybe subclass of imported_inat_obs?
-    @inat_obs_photo = eval(inat_obs_photo_data)
+  def initialize(inat_obs_photo_ary)
+    @inat_obs_photo = inat_obs_photo_ary
   end
 
   def copyright_holder

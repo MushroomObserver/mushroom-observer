@@ -10,12 +10,6 @@ require("test_helper")
 #  :photo=>
 #   {:id=>377332865,
 #    :license_code=>"cc-by-nc",
-#    :original_dimensions=>{:width=>2048, :height=>1534},
-#    :url=>"https://inaturalist-open-data.s3.amazonaws.com/photos/377332865/square.jpeg",
-#    :attribution=>"(c) Tim C., some rights reserved (CC BY-NC)",
-#    :flags=>[],
-#    :moderator_actions=>[],
-#    :hidden=>false}}
 
 # MO image attributes
 #  datetime "created_at", precision: nil
@@ -39,10 +33,32 @@ require("test_helper")
 
 # test mapping iNat observation photo key/values to MO Image attributes
 class InatObsPhotoTest < UnitTestCase
+  #    :original_dimensions=>{:width=>2048, :height=>1534},
+#    :url=>"https://inaturalist-open-data.s3.amazonaws.com/photos/377332865/square.jpeg",
+#    :attribution=>"(c) Tim C., some rights reserved (CC BY-NC)",
+#    :flags=>[],
+#    :moderator_actions=>[],
+#    :hidden=>false}}
+
+  FOTO =
+    { id: 351481052,
+      position: 0,
+      uuid: "6c223538-04d6-404c-8e84-b7d881dbe550",
+      photo_id: 377332865,
+      photo: {
+        id: 377332865,
+        license_code: "cc-by-nc",
+        original_dimensions: { width: 2048, height: 1534 },
+        url: "https://inaturalist-open-data.s3.amazonaws.com/photos/377332865/square.jpeg",
+        attribution: "(c) Tim C., some rights reserved (CC BY-NC)",
+        flags: [],
+        moderator_actions: [],
+        hidden: false
+      } }.freeze
+
   def test_simple_photo
-    obs_photo = InatObsPhoto.new(
-      File.read("test/fixtures/inat/inat_obs_photo_351481052.txt")
-    )
+    obs_photo = InatObsPhoto.new(FOTO)
+
     expected_license =
       License.where(License[:form_name] =~ "ccbync").where(deprecated: false).
       order(id: :asc).last
