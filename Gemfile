@@ -206,8 +206,8 @@ group :development do
   # gem("rails_db", "~> 2.5.0", path: "../local_gems/rails_db")
 end
 
-group :development, :production do
-  # Use puma as the app server
+group :development, :production, :test do
+  # Use puma as the app server, also for system tests
   # To use Webrick locally, run `bundle config set --local without 'production'`
   # https://stackoverflow.com/a/23125762/3357635
   gem("puma")
