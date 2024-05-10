@@ -204,7 +204,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     end
   end
 
-  def test_add_and_edit_naming_and_comment
+  def test_add_and_edit_naming
     obs = observations(:coprinus_comatus_obs)
 
     browser = page.driver.browser
@@ -356,7 +356,24 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       assert_no_link(text: /#{n_d.text_name}/, wait: 9)
     end
     assert_selector("#title", text: /#{obs.text_name}/)
+  end
 
+  def test_add_and_edit_comment
+    obs = observations(:coprinus_comatus_obs)
+
+    # browser = page.driver.browser
+    rolf = users("rolf")
+    login!(rolf)
+
+    assert_link("Your Observations")
+    click_on("Your Observations")
+    # obs = observations(:peltigera_obs)
+
+    assert_selector("body.observations__index")
+    assert_link(text: /#{obs.text_name}/)
+    click_link(text: /#{obs.text_name}/)
+
+    assert_selector("body.observations__show")
     assert_selector("#comments_for_object")
     within("#comments_for_object") do
       assert_link(:show_comments_add_comment.l)
