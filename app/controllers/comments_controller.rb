@@ -10,7 +10,6 @@
 #  destroy::
 #
 #
-# rubocop:disable Metrics/ClassLength
 class CommentsController < ApplicationController
   before_action :login_required
   # disable cop because index is defined in ApplicationController
@@ -285,10 +284,16 @@ class CommentsController < ApplicationController
       flash_notice(:runtime_form_comments_destroy_success.t(id: params[:id]))
     end
     respond_to do |format|
-      format.turbo_stream do
-        # eager_load_target_comments
-        # refresh_comments_for_object
-      end
+      # format.turbo_stream do
+      #   render(
+      #     turbo_stream: turbo_stream.remove(
+      #       dom_id(@comment)
+      #     )
+      #   )
+      #   # eager_load_target_comments
+      #   # refresh_comments_for_object
+      # end
+      format.turbo_stream
       format.html do
         redirect_with_query(controller: @target.show_controller,
                             action: @target.show_action, id: @target.id)
@@ -353,10 +358,17 @@ class CommentsController < ApplicationController
 
   def refresh_comments_or_redirect_to_show
     respond_to do |format|
-      format.turbo_stream do
-        # eager_load_target_comments
-        # refresh_comments_for_object
-      end
+      # format.turbo_stream do
+      #   render(
+      #     turbo_stream: turbo_stream.prepend(
+      #       :comments, partial: "comments/comment",
+      #                  locals: { comment: @comment }
+      #     )
+      #   )
+      #   # eager_load_target_comments
+      #   # refresh_comments_for_object
+      # end
+      format.turbo_stream
       format.html do
         redirect_with_query(controller: @target.show_controller,
                             action: @target.show_action, id: @target.id)
@@ -403,4 +415,3 @@ class CommentsController < ApplicationController
     end
   end
 end
-# rubocop:enable Metrics/ClassLength
