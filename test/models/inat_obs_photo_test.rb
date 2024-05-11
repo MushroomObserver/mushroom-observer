@@ -63,6 +63,7 @@ class InatObsPhotoTest < UnitTestCase
       License.where(License[:form_name] =~ "ccbync").where(deprecated: false).
       order(id: :asc).last
 
+    assert_equal("jpg", obs_photo.content_type)
     assert_equal("(c) Tim C., some rights reserved (CC BY-NC)",
                  obs_photo.copyright_holder)
     assert_equal("iNat photo uuid 6c223538-04d6-404c-8e84-b7d881dbe550",

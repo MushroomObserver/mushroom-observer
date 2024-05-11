@@ -13,20 +13,25 @@ class InatObsPhoto
     photo[:attribution]
   end
 
-  def license_id
-    license(photo).id
+  # https://github.com/inaturalist/inaturalist-open-data
+  def content_type
+    "jpg"
   end
 
-  # iNat doesn't preserve (or maybe reveal) user's original filename
-  # so map it to an iNat uuid
-  def original_name
-    "iNat photo uuid #{@inat_obs_photo[:uuid]}"
+  def license_id
+    license(photo).id
   end
 
   # iNat photos don't have notes
   # It's a handy place to put the original photo dimensions
   def notes
     "original dimensions: #{original_width} x #{original_height}"
+  end
+
+  # iNat doesn't preserve (or maybe reveal) user's original filename
+  # so map it to an iNat uuid
+  def original_name
+    "iNat photo uuid #{@inat_obs_photo[:uuid]}"
   end
 
   def url
