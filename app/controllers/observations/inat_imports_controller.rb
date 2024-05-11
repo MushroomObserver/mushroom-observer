@@ -69,6 +69,8 @@ module Observations
       xlated_inat_obs.save
       xlated_inat_obs.log(:log_observation_created)
 
+      @observation = xlated_inat_obs
+
       add_inat_images(inat_obs.obs_photos)
       # TODO: Other things done by Observations#create
       # save_everything_else(params.dig(:naming, :reasons))
@@ -107,6 +109,8 @@ module Observations
         }
 
         begin
+          # FIXME: Why does API2.execute(params) return nil?
+          # Need to get the id of the image which it creates
           api = API2.execute(params)
 
         # FIXME:
@@ -114,47 +118,10 @@ module Observations
         rescue(Errno::ENOENT)
         end
 
-=begin
-        temp_file = Tempfile.new("inat_photo_#{obs_photo[:photo][:id]}")
-        IO.copy_stream(open(url), temp_file.path)
-        debugger
-
-        #  1. Instantiate new Image record, filling in date, notes, etc.:
-        #
-        #       image = Image.new(
-        #         :created_at => Time.now,
-        #         :user       => @user,
-        #         :when       => observation.when,
-        #         :notes      => 'close-up of stipe'
-        #       )
-        image = Image.new(
-          created_at: Time.current,
-          user: User.current,
-          # when: when
-        )
-
-        #  2. Attach the image itself by setting the +image+ attribute, then save the
-        #     Image record:
-        #
-        #       # via HTTP form:
-        #       image.image = params[:image][:upload]
-        #
-        #       # via local file:
-        #       image.image = File.open('file.jpg')
-        #
-        #       # Supply any extra header info you may have.
-        #       image.content_type = 'image/jpeg'
-        #       image.upload_md5sum = request.header[...]
-        #
-        #       # Validate and save record.
-        #       image.save
-
-        image.image = File.open(temp_file_path)
-        image.content_type = "image/jpeg"
-        image.save
-
-        file.unlink # Deletes the temp file
-=end
+        # FIXME: Need to get the ID of the image I just added
+        # instead of whatever image someone happened to have added last
+        # see prior FIXME
+        @observation.add_image(Image.last)
       end
     end
   end
