@@ -72,5 +72,7 @@ class InatObsPhotoTest < UnitTestCase
     assert_equal(expected_license.id,
                  obs_photo.license_id,
                  "Wrong license, expecting #{expected_license.display_name}")
+    assert_equal("https://inaturalist-open-data.s3.amazonaws.com/photos/377332865/original.jpeg",
+                 obs_photo.url)
   end
 end

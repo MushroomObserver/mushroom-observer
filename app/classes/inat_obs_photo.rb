@@ -29,6 +29,10 @@ class InatObsPhoto
     "original dimensions: #{original_width} x #{original_height}"
   end
 
+  def url
+    photo[:url].sub("/square.", "/original.")
+  end
+
   ##########
 
   private

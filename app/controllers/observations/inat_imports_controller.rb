@@ -95,8 +95,7 @@ module Observations
 
     def add_inat_images(obs_photos)
       obs_photos.each do |obs_photo|
-        # TODO: move url calculation to imported_inat_obs
-        url = obs_photo[:photo][:url].sub("/square.", "/original.")
+        photo = InatObsPhoto.new(obs_photo)
         # FIXME: Get a key. This one belongs to @pellaea
         api_key = APIKey.first
 
@@ -104,7 +103,7 @@ module Observations
           method: :post,
           action: :image,
           api_key: api_key.key,
-          upload_url: url
+          upload_url: photo.url
         }
 
         begin
