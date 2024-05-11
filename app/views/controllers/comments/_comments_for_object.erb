@@ -6,11 +6,12 @@
 %>
 
 <%= turbo_stream_from(object, :comments) %>
+<%# Note that #comments is the inner turbo-frame, not the whole panel %>
+<%# It's a turbo-frame because section-update needs to listen to frame %>
 
 <%=
 tag.div(
-  class: "panel panel-default", id: "comments_for_object",
-  data: { controller: "section-update", updated_by: "modal_comment" }
+  class: "panel panel-default", id: "comments_for_object"
 ) do
   concat([
     tag.div(class: "panel-heading") do
@@ -20,7 +21,10 @@ tag.div(
                         class: "float-right")) if controls
       end
     end,
-    tag.div(class: "list-group list-group-flush comments", id: "comments") do
+    tag.div(id: "comments", # dom_id(object, "comments"),
+            class: "list-group list-group-flush comments",
+            data: { controller: "section-update",
+                    updated_by: "modal_comment" }) do
       if comments.empty?
         tag.div(:show_comments_no_comments_yet.t, class: "list-group-item")
       else

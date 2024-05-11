@@ -226,7 +226,7 @@ class CommentsController < ApplicationController
     @comment.log_create
     flash_notice(:runtime_form_comments_create_success.t(id: @comment.id))
 
-    refresh_comments_or_redirect_to_show
+    add_comment_or_redirect_to_show
   end
 
   # Form to edit a comment for an object..
@@ -263,7 +263,7 @@ class CommentsController < ApplicationController
     @comment.attributes = permitted_comment_params if params[:comment]
     reload_form and return unless comment_updated?
 
-    refresh_comments_or_redirect_to_show
+    update_comment_or_redirect_to_show
   end
 
   # Callback to destroy a comment.
@@ -284,16 +284,12 @@ class CommentsController < ApplicationController
       flash_notice(:runtime_form_comments_destroy_success.t(id: params[:id]))
     end
     respond_to do |format|
-      # format.turbo_stream do
-      #   render(
-      #     turbo_stream: turbo_stream.remove(
-      #       dom_id(@comment)
-      #     )
-      #   )
-      #   # eager_load_target_comments
-      #   # refresh_comments_for_object
+      # format.turbo_stream # do
+      #   # render(turbo_stream: turbo_stream.remove(@comment))
+      #   # helpers.render_turbo_stream_flash_messages
+      #   eager_load_target_comments
+      #   refresh_comments_for_object
       # end
-      format.turbo_stream
       format.html do
         redirect_with_query(controller: @target.show_controller,
                             action: @target.show_action, id: @target.id)
@@ -356,19 +352,38 @@ class CommentsController < ApplicationController
     end
   end
 
-  def refresh_comments_or_redirect_to_show
+  def add_comment_or_redirect_to_show
     respond_to do |format|
-      # format.turbo_stream do
-      #   render(
-      #     turbo_stream: turbo_stream.prepend(
-      #       :comments, partial: "comments/comment",
-      #                  locals: { comment: @comment }
-      #     )
+      # format.turbo_stream # do
+      # render(
+      #   turbo_stream: turbo_stream.prepend(
+      #     :comments, partial: "comments/comment",
+      #                locals: { comment: @comment }
       #   )
-      #   # eager_load_target_comments
-      #   # refresh_comments_for_object
+      # )
+      # helpers.render_turbo_stream_flash_messages
+      # eager_load_target_comments
+      # refresh_comments_for_object
       # end
-      format.turbo_stream
+      format.html do
+        redirect_with_query(@target.show_link_args)
+      end
+    end
+  end
+
+  def update_comment_or_redirect_to_show
+    respond_to do |format|
+      # format.turbo_stream # do
+      # render(
+      #   turbo_stream: turbo_stream.replace(
+      #     :comments, partial: "comments/comment",
+      #                locals: { comment: @comment }
+      #   )
+      # )
+      # helpers.render_turbo_stream_flash_messages
+      # eager_load_target_comments
+      # refresh_comments_for_object
+      # end
       format.html do
         redirect_with_query(controller: @target.show_controller,
                             action: @target.show_action, id: @target.id)
