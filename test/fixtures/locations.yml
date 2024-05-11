@@ -271,3 +271,7 @@ loc_1_edited_by_roy:
 loc_2_edited_by_roy:
   <<: *DEFAULTS
   user: katrina
+
+loc_hidden:
+  <<: *DEFAULTS
+  hidden: true

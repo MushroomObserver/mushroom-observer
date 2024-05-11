@@ -1555,6 +1555,8 @@
   form_glossary_description_help: "A concise definition matching the part of speech of the Term, without repeating another Term's definition. (Instead link to the other Term.) Details:"
 
   # location/_form_location
+  form_locations_hidden: Hide location
+  form_locations_hidden_doc: Hidden locations will hide the GPS coordinates of associated observations.  They also cannot be more precise than 0.1 degrees.  This value cannot be changed when there are any associated observations.
   form_locations_locked: Lock this location so users cannot change the name or coordinates?
   form_locations_gen_desc: General Description
   form_locations_ecology: Habitat Description
@@ -2110,6 +2112,7 @@
   show_location_editors: "[:Editors]"
   show_location_reverse: Reverse Location
   show_location_locked: This location is locked. If you want to change the location of your observation, please edit the observation instead.  Changing a location name or coordinates implicitly changes all the observations at that location, too.
+  show_location_hidden: This location is considered hidden either because it is private property whose owners do not want the location revealed or because it contains sensitive habitat. Its coordinates are intentionally imprecise and all associated observations have hidden GPS coordinates.
 
   # names
   show_name_title: "[:NAME]: [name]"
@@ -2790,13 +2793,14 @@
   field_slip_show: Show this field slip
   field_slip_updated: Field slip was successfully updated.
   field_slip_welcome: "Welcome to the [TITLE] Project!"
-  field_slips_for_project_max_pages: "Each page has six field slips.  You may create up to [MAX] pages for this project."
-  field_slips_for_project_title: "Create Field Slips for the [TITLE] Project"
+  field_slips_max_for_project: "You may create up to [MAX] slips for this project."
+  field_slips_for_project_title: Create Field Slips for the
   field_slips_created_job: "Created job for [filename]"
   field_slips_must_be_member: "You must be a project member to create field slips"
   field_slips_project_update_fail: "Unable to update [TITLE] Project"
   field_slips_tracker_fail: "Unable to create Field Slip Tracker for [TITLE] Project"
-  field_slips_too_many_pages: "You have requested more than [MAX] pages."
+  field_slips_too_many_field_slips: "You have requested more than [MAX] slips."
+  field_slips_one_per_page: "One field slip per page. Print shops prefer this. Otherwise 6/page which works best on US letter page."
 
   ##############################################################################
 
