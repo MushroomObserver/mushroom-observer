@@ -14,6 +14,7 @@ class InatObsPhoto
   end
 
   # https://github.com/inaturalist/inaturalist-open-data
+  # FIXME should be something like img/jpg
   def content_type
     "jpg"
   end
