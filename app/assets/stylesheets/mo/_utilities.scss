@@ -589,6 +589,14 @@
   border-radius: 0;
 }
 
+.list-group-item.none-yet {
+  display: none;
+
+  &:only-child {
+    display: block;
+  }
+}
+
 .bg-none {
   background: none !important;
 }

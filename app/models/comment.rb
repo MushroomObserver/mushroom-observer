@@ -110,8 +110,8 @@ class Comment < AbstractModel
   belongs_to :target, polymorphic: true
   belongs_to :user
 
-  after_create :notify_users
-  after_create :oil_and_water
+  # after_create :notify_users
+  # after_create :oil_and_water
 
   # broadcasts_refreshes_to(->(comment) { [comment.target, :comments] })
 

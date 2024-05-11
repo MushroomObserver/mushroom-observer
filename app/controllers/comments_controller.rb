@@ -226,7 +226,7 @@ class CommentsController < ApplicationController
     @comment.log_create
     flash_notice(:runtime_form_comments_create_success.t(id: @comment.id))
 
-    add_comment_or_redirect_to_show
+    refresh_comments_or_redirect_to_show
   end
 
   # Form to edit a comment for an object..
@@ -263,7 +263,7 @@ class CommentsController < ApplicationController
     @comment.attributes = permitted_comment_params if params[:comment]
     reload_form and return unless comment_updated?
 
-    update_comment_or_redirect_to_show
+    refresh_comments_or_redirect_to_show
   end
 
   # Callback to destroy a comment.
@@ -285,10 +285,8 @@ class CommentsController < ApplicationController
     end
     respond_to do |format|
       # format.turbo_stream # do
-      #   # render(turbo_stream: turbo_stream.remove(@comment))
-      #   # helpers.render_turbo_stream_flash_messages
-      #   eager_load_target_comments
-      #   refresh_comments_for_object
+      #   this is broadcast from the Comment model
+      #   helpers.render_turbo_stream_flash_messages
       # end
       format.html do
         redirect_with_query(controller: @target.show_controller,
@@ -337,9 +335,9 @@ class CommentsController < ApplicationController
                 sort_by(&:created_at)&.reverse
   end
 
-  def refresh_comments_for_object
-    render(partial: "comments/update_comments_for_object")
-  end
+  # def refresh_comments_for_object
+  #   render(partial: "comments/update_comments_for_object")
+  # end
 
   def permitted_comment_params
     params[:comment].permit([:summary, :comment])
@@ -352,37 +350,11 @@ class CommentsController < ApplicationController
     end
   end
 
-  def add_comment_or_redirect_to_show
+  def refresh_comments_or_redirect_to_show
     respond_to do |format|
-      # format.turbo_stream # do
-      # render(
-      #   turbo_stream: turbo_stream.prepend(
-      #     :comments, partial: "comments/comment",
-      #                locals: { comment: @comment }
-      #   )
-      # )
-      # helpers.render_turbo_stream_flash_messages
-      # eager_load_target_comments
-      # refresh_comments_for_object
-      # end
-      format.html do
-        redirect_with_query(@target.show_link_args)
-      end
-    end
-  end
-
-  def update_comment_or_redirect_to_show
-    respond_to do |format|
-      # format.turbo_stream # do
-      # render(
-      #   turbo_stream: turbo_stream.replace(
-      #     :comments, partial: "comments/comment",
-      #                locals: { comment: @comment }
-      #   )
-      # )
-      # helpers.render_turbo_stream_flash_messages
-      # eager_load_target_comments
-      # refresh_comments_for_object
+      # format.turbo_stream do
+      #   this is broadcast from the Comment model
+      #   helpers.render_turbo_stream_flash_messages
       # end
       format.html do
         redirect_with_query(controller: @target.show_controller,
