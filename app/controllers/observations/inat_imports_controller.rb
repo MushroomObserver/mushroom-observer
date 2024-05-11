@@ -105,7 +105,25 @@ module Observations
           method: :post,
           action: :image,
           api_key: api_key.key,
-          upload_url: photo.url
+          upload_url: photo.url,
+          # content_type: photo.content_type,
+          # copyright_holder: photo.copyright_holder,
+          # license_id: photo.license_id,
+          # notes: photo.notes
+          # t.datetime "created_at", precision: nil
+          # t.datetime "updated_at", precision: nil
+          # t.integer "user_id"
+          # t.date "when"
+          # t.integer "num_views", default: 0, null: false
+          # t.datetime "last_view", precision: nil
+          # t.integer "width"
+          # t.integer "height"
+          # t.float "vote_cache"
+          # t.boolean "ok_for_export", default: true, null: false
+          # t.string "original_name", limit: 120, default: ""
+          # t.boolean "transferred", default: false, null: false
+          # t.boolean "gps_stripped", default: false, null: false
+          # t.boolean "diagnostic", default: true, null: false
         }
 
         begin
