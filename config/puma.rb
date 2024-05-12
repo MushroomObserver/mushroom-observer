@@ -2,18 +2,23 @@
 
 rails_env = ENV.fetch("RAILS_ENV", "development")
 
-if %w[development test].include?(rails_env)
+case rails_env
+when "development"
   app_path = ENV.fetch("PWD", ".")
-  port 3000
-  workers 0
-  threads 1, 1
-elsif rails_env == "production"
+  port(3000)
+  workers(0)
+  threads(1, 1)
+when "test"
+  app_path = ENV.fetch("PWD", ".")
+  workers(0)
+  threads(1, 1)
+when "production"
   app_path = "/var/web/mushroom-observer"
-  bind "unix://#{app_path}/tmp/sockets/puma.sock"
-  workers 3
-  threads 1, 1
-  stdout_redirect "#{app_path}/log/puma.stdout.log",
-                  "#{app_path}/log/puma.stderr.log", true
+  bind("unix://#{app_path}/tmp/sockets/puma.sock")
+  workers(3)
+  threads(1, 1)
+  stdout_redirect("#{app_path}/log/puma.stdout.log",
+                  "#{app_path}/log/puma.stderr.log", true)
 end
 
 environment rails_env

@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+# This is the connection class for the ActionCable websocket connection,
+# responsible for setting the current_user for the connection. Any live updates
+# over websockets need to be authenticated like regular requests, but they don't
+# hit the regular controller actions, so we need to authenticate them
+# separately. The current_user is set by checking the autologin cookie.
 module ApplicationCable
   class Connection < ActionCable::Connection::Base
     identified_by :current_user
