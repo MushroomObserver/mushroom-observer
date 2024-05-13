@@ -375,6 +375,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     assert_selector("body.observations__show")
     assert_selector("#comments_for_object")
+    assert_selector("turbo-cable-stream-source[connected]")
     within("#comments_for_object") do
       assert_link(:show_comments_add_comment.l)
       find(:css, ".new_comment_link_#{obs.id}").trigger("click")
@@ -396,6 +397,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_no_selector("#modal_comment")
 
     com = Comment.last
+    scroll_to(find("#comments_for_object"), align: :center)
     within("#comments_for_object") do
       assert_text("A load of bollocks")
       assert_selector(".show_user_link_#{rolf.id}")
