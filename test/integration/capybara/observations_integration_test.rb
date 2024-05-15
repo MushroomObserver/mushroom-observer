@@ -38,8 +38,9 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     login(user)
     click_link("Your Observations", match: :first)
     # Predict 1st and 2nd Observations on this page.
-    sort_order = QueryRecord.last.query.default_order
-    observations = Observation.where(user: user).order(sort_order => :desc)
+    # (Why jump through all of these hoops instead of hard-coding order?)
+    # sort_order = QueryRecord.last.query.default_order
+    observations = Observation.where(user: user).order(log_updated_at: :desc)
     first_obs = observations.first
     next_obs = observations.second
 
