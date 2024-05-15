@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_04_122906) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_15_003725) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -105,6 +105,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_04_122906) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id"
+    t.text "notes"
     t.index ["code"], name: "index_field_slips_on_code", unique: true
   end
 
