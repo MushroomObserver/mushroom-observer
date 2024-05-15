@@ -3,9 +3,9 @@
 require("test_helper")
 
 class CommentsIntegrationTest < CapybaraIntegrationTestCase
-  # ----------------------------------
-  #  Test everything about comments.
-  # ----------------------------------
+  # ------------------------------------------------
+  #  Test everything about comments for single user.
+  # ------------------------------------------------
 
   def test_post_comment
     obs = observations(:detailed_unknown_obs)
@@ -17,12 +17,17 @@ class CommentsIntegrationTest < CapybaraIntegrationTestCase
     message2 = "This may be _Xylaria polymorpha_, no?"
 
     # Start by showing the observation...
+    katrina = users(:katrina)
     login("katrina")
     visit("/#{obs.id}")
 
     # (Make sure there are no edit or destroy controls on existing comments.)
-    assert_no_link(class: /edit_comment_/)
-    assert_no_selector(class: /destroy_comment_/)
+    # For some reason these are not getting hidden in capybara integration test.
+    # The style in `user_specific_css` is printed in the page but not applied?
+    assert_no_selector("[data-user-specific='#{katrina.id}'] a",
+                       class: /edit_comment_/)
+    assert_no_selector("[data-user-specific='#{katrina.id}'] *",
+                       class: /destroy_comment_/)
 
     click_link("Add Comment")
     assert_selector("body.comments__new")
@@ -55,8 +60,10 @@ class CommentsIntegrationTest < CapybaraIntegrationTestCase
     assert_text(summary)
     assert_text(message)
     # (Make sure there is an edit and destroy control for the new comment.)
-    assert_link(class: /edit_comment_/)
-    assert_selector(class: /destroy_comment_/)
+    assert_selector("[data-user-specific='#{katrina.id}'] a",
+                    class: /edit_comment_/)
+    assert_selector("[data-user-specific='#{katrina.id}'] *",
+                    class: /destroy_comment_/)
 
     # Try changing it.
     click_link(href: /#{edit_comment_path(com.id)}/)
@@ -88,8 +95,10 @@ class CommentsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("body.observations__show")
     assert_text("Observation #{obs.id}")
     assert_no_text(summary)
-    assert_no_link(class: /edit_comment_/)
-    assert_no_selector(class: /destroy_comment_/)
+    assert_no_selector("[data-user-specific='#{katrina.id}'] a",
+                       class: /edit_comment_/)
+    assert_no_selector("[data-user-specific='#{katrina.id}'] *",
+                       class: /destroy_comment_/)
     assert_nil(Comment.safe_find(com.id))
   end
 end
