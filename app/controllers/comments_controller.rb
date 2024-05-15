@@ -9,7 +9,7 @@
 #  update::
 #  destroy::
 #
-#
+# rubocop:disable Metrics/ClassLength
 class CommentsController < ApplicationController
   before_action :login_required
   # disable cop because index is defined in ApplicationController
@@ -415,3 +415,4 @@ class CommentsController < ApplicationController
     end
   end
 end
+# rubocop:enable Metrics/ClassLength
