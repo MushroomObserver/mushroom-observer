@@ -97,7 +97,10 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
       assert_selector("#modal_comment_#{com.id}")
       within("#modal_comment_#{com.id}") do
         fill_in("comment_summary", with: "Exciting discovery")
-        fill_in("comment_comment", with: "What I meant was, Coprinus!")
+        fill_in(
+          "comment_comment",
+          with: "What I meant was, this could be _Xylaria polymorpha_, no?"
+        )
         click_commit
       end
       assert_no_selector("#modal_comment_#{com.id}")
@@ -105,6 +108,9 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
       within("#comment_#{com.id}") do
         assert_no_text("A load of bollocks")
         assert_text("Exciting discovery")
+        assert_link(
+          href: MO.http_domain + lookup_name_path("Xylaria+polymorpha")
+        )
         assert_selector(".destroy_comment_link_#{com.id}")
       end
     end
