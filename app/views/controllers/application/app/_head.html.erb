@@ -27,7 +27,8 @@
 <meta property="og:description" content="Mushroom Observer is a forum where amateur and professional mycologists can come together and celebrate their common passion for mushrooms by discussing and sharing photos of mushroom sightings from around the world."/>
 <%=
   stylesheet_link_tag(@css_theme, media: "screen") +
-  stylesheet_link_tag(@css_theme, media: "print")
+  stylesheet_link_tag(@css_theme, media: "print") +
+  render("application/app/user_specific_css")
 %>
 <%= javascript_importmap_tags %>
 <%= @header unless @header.blank? %>

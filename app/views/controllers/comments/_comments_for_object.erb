@@ -29,8 +29,7 @@ tag.div(
                      class: "list-group-item none-yet"))
       unless comments.empty?
         comments.each do |comment|
-          concat(render(partial: "comments/comment", object: comment,
-                        locals: { editable: check_permission(comment) }))
+          concat(render(partial: "comments/comment", object: comment))
         end
       end
     end

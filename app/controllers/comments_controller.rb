@@ -342,14 +342,12 @@ class CommentsController < ApplicationController
     when "create"
       @comment.broadcast_prepend_later_to(
         [@comment.target, :comments], # unique channel name
-        partial: "comments/comment", target: "comments", # dom_id of the target
-        locals: { editable: check_permission(@comment) }
+        partial: "comments/comment", target: "comments" # dom_id of the target
       )
     when "update"
       @comment.broadcast_replace_later_to(
         [@comment.target, :comments],
-        partial: "comments/comment", target: "comment_#{@comment.id}",
-        locals: { editable: check_permission(@comment) }
+        partial: "comments/comment", target: "comment_#{@comment.id}"
       )
     end
   end

@@ -24,17 +24,17 @@ target_type = tag.span(target.class.name.to_sym.t, class: "small") \
           concat(tag.span(class: "comment-author text-nowrap") do
             ["#{:BY.t}: ", user_link(user), " "].safe_join
           end)
-          concat(tag.span(class: "text-nowrap") do
+          concat(tag.span(class: "text-nowrap",
+                          data: { user_specific: comment.user.login }) do
             [
               "[",
-              modal_link_to(dom_id(comment),
-                            *edit_comment_tab(comment)),
+              modal_link_to(dom_id(comment), *edit_comment_tab(comment)),
               "|",
               destroy_button(name: :comment_show_destroy.t, target: comment,
                              icon: :delete, data: { turbo: true }),
               "]",
             ].safe_join(" ")
-          end) if editable
+          end)
           concat(tag.div(comment.created_at.web_time,
                          class: "float-sm-right text-nowrap small"))
         end)
