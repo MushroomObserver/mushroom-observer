@@ -25,7 +25,7 @@ target_type = tag.span(target.class.name.to_sym.t, class: "small") \
             ["#{:BY.t}: ", user_link(user), " "].safe_join
           end)
           concat(tag.span(class: "text-nowrap",
-                          data: { user_specific: comment.user.login }) do
+                          data: { user_specific: comment.user.id }) do
             [
               "[",
               modal_link_to(dom_id(comment), *edit_comment_tab(comment)),
