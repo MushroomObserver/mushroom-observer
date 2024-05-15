@@ -87,7 +87,7 @@ class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
     # Capybara.reset_sessions!
 
     # needed for selenium
-    Capybara.server = :webrick
+    Capybara.server = :puma
 
     # https://stackoverflow.com/questions/15675125/database-cleaner-not-working-in-minitest-rails
     # DatabaseCleaner.strategy = :transaction
