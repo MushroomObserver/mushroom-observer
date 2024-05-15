@@ -10,11 +10,15 @@ source: https://discuss.hotwired.dev/t/how-to-pass-current-user-id-to-a-controll
 <% unless in_admin_mode? %>
   <% cache User.current do %>
     <style>
-      [data-user-specific]:not(
-        [data-user-specific="<%= User.current.login %>"]
-      ) {
-        display: none;
-      }
+      <% if User.current %>
+        [data-user-specific]:not(
+          [data-user-specific="<%= User.current.login %>"]
+        ) {
+          display: none;
+        }
+      <% else %>
+        [data-user-specific] { display: none; }
+      <% end %>
     </style>
   <% end %>
 <% end %>
