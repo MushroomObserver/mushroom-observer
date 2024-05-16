@@ -381,7 +381,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     com = Comment.last
     within("#comments_for_object") do
       assert_text("A load of bollocks")
-      assert_selector(".show_user_link_#{rolf.id}")
+      assert_selector(".user_link_#{rolf.id}")
       assert_selector(".edit_comment_link_#{com.id}")
       assert_selector(".destroy_comment_link_#{com.id}")
       find(:css, ".edit_comment_link_#{com.id}").trigger("click")

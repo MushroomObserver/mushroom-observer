@@ -25,7 +25,7 @@ module Tabs
       [object_return_tab(obj)]
     end
 
-    def show_sequence_tab(seq, obs)
+    def sequence_tab(seq, obs)
       # This is passed in to show_sequence, allowing users to do prev,
       # next and index from there to navigate through all the rest for this obs.
       sq_query = Query.lookup(:Sequence, :all, observations: obs.id)

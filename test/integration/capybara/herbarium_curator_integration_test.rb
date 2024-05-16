@@ -108,7 +108,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     assert_selector(
       "a[href*='#{herbarium_records_path(herbarium_id: rec.herbarium.id)}']"
     )
-    click_on(id: "herbarium_records_for_herbarium_link")
+    first(class: "herbarium_records_for_herbarium_link").click
 
     assert_selector("body.herbarium_records__index")
     assert_selector("a[href*='#{edit_herbarium_record_path(id: rec.id)}']")
@@ -288,7 +288,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     login!("mary")
     visit(herbarium_path(nybg))
 
-    click_on(id: "new_herbaria_curator_request_link")
+    first(class: "new_herbaria_curator_request_link").click
     assert_selector("#title", text: :show_herbarium_curator_request.l)
 
     within("#herbarium_curator_request_form") do
