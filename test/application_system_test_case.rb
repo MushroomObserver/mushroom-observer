@@ -25,7 +25,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     # experimental, does it fix pending logins?
     Capybara.reset_sessions!
     # below is needed for cuprite
-    Capybara.server = :webrick
+    Capybara.server = :puma
     # Capybara.current_driver = :mo_cuprite
     Capybara.server_host = "localhost"
     Capybara.server_port = 3000

@@ -20,8 +20,7 @@ flash_error(@error) if @error && @objects.empty?
                     edit_herbarium_record_path(
                       id: rec.id, back: :index, q: get_query_param
                     ),
-                    class: "btn btn-default btn-sm",
-                    id: "edit_herbarium_record_link_#{rec.id}"
+                    class: "btn btn-default btn-sm edit_herbarium_record_link_#{rec.id}"
                   )
                 end %>
           </td>
@@ -34,7 +33,7 @@ flash_error(@error) if @error && @objects.empty?
             <%= link_to(rec.herbarium_label.t,
                         herbarium_record_path(id: rec.id,
                                               q: get_query_param),
-                        id: "show_herbarium_record_link_#{rec.id}") %>
+                        class: "herbarium_record_link_#{rec.id}") %>
           </td>
           <td>
             <%= rec.observations.map do |obs|
@@ -46,8 +45,7 @@ flash_error(@error) if @error && @objects.empty?
                   destroy_button(
                     name: :destroy_object.t(type: :herbarium_record),
                     target: herbarium_record_path(rec.id),
-                    class: "btn btn-default btn-sm",
-                    id: "destroy_herbarium_record_link_#{rec.id}"
+                    class: "btn btn-default btn-sm destroy_herbarium_record_link_#{rec.id}"
                   )
                 end %>
           </td>

@@ -74,6 +74,10 @@ module ApplicationHelper
                      class: class_names("alert mt-3", alert_class))
   end
 
+  def render_turbo_stream_flash_messages
+    turbo_stream.replace("flash", partial: "application/app/flash_notices")
+  end
+
   # Returns a string that indicates the current user/logged_in/admin status.
   # Used as a simple cache key for templates that may have three
   # possible versions of cached HTML
