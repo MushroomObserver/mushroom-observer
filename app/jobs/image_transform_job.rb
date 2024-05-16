@@ -3,7 +3,7 @@
 #  Calls `script/process_image` to create resized copies of the given original
 #  image and transfer them to the image server(s).
 #
-class ImageRotateJob < ApplicationJob
+class ImageTransformJob < ApplicationJob
   queue_as :default
 
   rescue_from(StandardError) do |exception|
@@ -13,26 +13,22 @@ class ImageRotateJob < ApplicationJob
     # instance method.
     image = Image.find(args[:id])
     image.update_attribute(:transferred, false)
-    log("Error processing image #{args[:id]}: #{exception.message}")
+    log("Error transforming image #{args[:id]}: #{exception.message}")
     image.update_attribute(:upload_status, exception.message)
   end
 
   def perform(args)
-    desc = args.pluck(:id, :ext, :set_size, :strip_gps).join(", ")
-    log("Starting ProcessImageJob.perform(#{desc})")
+    desc = args.pluck(:id, :operator).join(", ")
+    log("Starting ImageTransformJob.perform(#{desc})")
 
-    # image = Image.find(args[:id])
-    # raise(:process_image_job_no_image.t) unless image
-
-    cmd = MO.process_image_command.
+    cmd = "script/rotate_image <id> <operator>&".
           gsub("<id>", args[:id].to_s).
-          gsub("<ext>", args[:ext]).
-          gsub("<set>", args[:set]).
-          gsub("<strip>", args[:strip])
+          gsub("<operator>", args[:operator])
+
     if !Rails.env.test? && !system(cmd)
       # job cannot return errors to caller
       # errors.add(:image, :runtime_image_process_failed.t(id: args[:id]))
     end
-    log("Done with ProcessImageJob.perform(#{desc})")
+    log("Done with ImageTransformJob.perform(#{desc})")
   end
 end
