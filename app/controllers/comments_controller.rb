@@ -9,7 +9,6 @@
 #  update::
 #  destroy::
 #
-# rubocop:disable Metrics/ClassLength
 class CommentsController < ApplicationController
   before_action :login_required
   # disable cop because index is defined in ApplicationController
@@ -283,7 +282,7 @@ class CommentsController < ApplicationController
       @comment.log_destroy
       flash_notice(:runtime_form_comments_destroy_success.t(id: params[:id]))
     end
-    @comment.broadcast_remove_to([@comment.target, :comments])
+
     respond_to do |format|
       # format.turbo_stream do
       # helpers.render_turbo_stream_flash_messages
@@ -330,28 +329,6 @@ class CommentsController < ApplicationController
     end
   end
 
-  def eager_load_target_comments
-    @comments = @target.comments&.includes(:user)&.
-                sort_by(&:created_at)&.reverse
-  end
-
-  # This broadcasts the create or update via the turbo stream channel.
-  # "later" does it as a job, so it doesn't block the request.
-  def refresh_comments_for_object
-    case action_name
-    when "create"
-      @comment.broadcast_prepend_later_to(
-        [@comment.target, :comments], # unique channel name
-        partial: "comments/comment", target: "comments" # dom_id of the target
-      )
-    when "update"
-      @comment.broadcast_replace_later_to(
-        [@comment.target, :comments],
-        partial: "comments/comment", target: "comment_#{@comment.id}"
-      )
-    end
-  end
-
   def permitted_comment_params
     params[:comment].permit([:summary, :comment])
   end
@@ -364,7 +341,7 @@ class CommentsController < ApplicationController
   end
 
   def refresh_comments_or_redirect_to_show
-    refresh_comments_for_object
+    # Comment broadcasts are sent from the model
     respond_to do |format|
       # format.turbo_stream do
       # helpers.render_turbo_stream_flash_messages
@@ -415,4 +392,3 @@ class CommentsController < ApplicationController
     end
   end
 end
-# rubocop:enable Metrics/ClassLength
