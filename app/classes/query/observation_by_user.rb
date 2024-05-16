@@ -15,7 +15,7 @@ class Query::ObservationByUser < Query::ObservationBase
   end
 
   def default_order
-    "updated_at"
+    "rss_log"
   end
 
   def coerce_into_image_query

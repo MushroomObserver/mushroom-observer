@@ -152,6 +152,11 @@ gem("prawn-svg")
 gem("prawn")
 gem("prawn-manual_builder")
 
+# Use puma as the app server, also available for system tests
+# To use Webrick locally, run `bundle config set --local without 'production'`
+# https://stackoverflow.com/a/23125762/3357635
+gem("puma")
+
 ########## Development, Testing, and Analysis ##################################
 group :test, :development do
   # https://github.com/ruby/debug
@@ -214,13 +219,6 @@ group :development do
 
   # Use Rails DB to browse database at http://localhost:3000/rails/db/
   # gem("rails_db", "~> 2.5.0", path: "../local_gems/rails_db")
-end
-
-group :development, :production do
-  # Use puma as the app server
-  # To use Webrick locally, run `bundle config set --local without 'production'`
-  # https://stackoverflow.com/a/23125762/3357635
-  gem("puma")
 end
 
 group :production do
