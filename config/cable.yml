@@ -1,0 +1,15 @@
+# ActionCable is a Rails feature that allows for
+# real-time communication between the server and the client.
+
+development:
+  adapter: redis
+  url: redis://localhost:6379/4
+
+test:
+  adapter: test
+
+production:
+  adapter: redis
+  url: <%= ENV.fetch("REDIS_URL") { "redis://localhost:6379" } %>
+  channel_prefix: mo_production
+  ssl_params: { ca_file: "/etc/ssl/certs/cs-certificates.crt" }
