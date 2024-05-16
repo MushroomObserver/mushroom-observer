@@ -729,7 +729,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       strip = strip ? "1" : "0"
       if move_original
         args = { id: id, ext: ext, set_size: set, strip_gps: strip }
-        ProcessImageJob.perform_later(args)
+        ImageProcessJob.perform_later(args)
       else
         result = false
       end

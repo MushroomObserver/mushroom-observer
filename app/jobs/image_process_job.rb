@@ -3,7 +3,7 @@
 #  Calls `script/process_image` to create resized copies of the given original
 #  image and transfer them to the image server(s).
 #
-class ProcessImageJob < ApplicationJob
+class ImageProcessJob < ApplicationJob
   queue_as :default
 
   rescue_from(StandardError) do |exception|
@@ -19,7 +19,7 @@ class ProcessImageJob < ApplicationJob
 
   def perform(args)
     desc = args.pluck(:id, :ext, :set_size, :strip_gps).join(", ")
-    log("Starting ProcessImageJob.perform(#{desc})")
+    log("Starting ImageProcessJob.perform(#{desc})")
 
     # image = Image.find(args[:id])
     # raise(:process_image_job_no_image.t) unless image
@@ -33,6 +33,6 @@ class ProcessImageJob < ApplicationJob
       # job cannot return errors to caller
       # errors.add(:image, :runtime_image_process_failed.t(id: args[:id]))
     end
-    log("Done with ProcessImageJob.perform(#{desc})")
+    log("Done with ImageProcessJob.perform(#{desc})")
   end
 end
