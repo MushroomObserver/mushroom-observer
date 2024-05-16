@@ -72,7 +72,7 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
       scroll_to(find("#comments_for_object"), align: :center)
       within("#comment_#{com.id}") do
         assert_text("A load of bollocks")
-        assert_selector(".show_user_link_#{katrina.id}")
+        assert_selector(".user_link_#{katrina.id}")
         assert_selector(".edit_comment_link_#{com.id}")
         assert_selector(".destroy_comment_link_#{com.id}")
       end
@@ -82,7 +82,7 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
       scroll_to(find("#comments_for_object"), align: :center)
       within("#comment_#{com.id}") do
         assert_text("A load of bollocks")
-        assert_selector(".show_user_link_#{katrina.id}")
+        assert_selector(".user_link_#{katrina.id}")
         assert_no_selector(".edit_comment_link_#{com.id}")
         assert_no_selector(".destroy_comment_link_#{com.id}")
       end
@@ -120,7 +120,7 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
       within("#comment_#{com.id}") do
         assert_no_text("A load of bollocks")
         assert_text("Exciting discovery")
-        assert_selector(".show_user_link_#{katrina.id}")
+        assert_selector(".user_link_#{katrina.id}")
         assert_no_selector(".edit_comment_link_#{com.id}")
         assert_no_selector(".destroy_comment_link_#{com.id}")
       end
@@ -169,7 +169,7 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
       assert_selector("#comment_#{ufo.id}")
       within("#comment_#{ufo.id}") do
         assert_text("I am a UFO!")
-        assert_selector(".show_user_link_#{mary.id}")
+        assert_selector(".user_link_#{mary.id}")
         assert_no_selector(".edit_comment_link_#{ufo.id}")
         assert_no_selector(".destroy_comment_link_#{ufo.id}")
       end
@@ -180,7 +180,7 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
       assert_selector("#comment_#{ufo.id}")
       within("#comment_#{ufo.id}") do
         assert_text("I am a UFO!")
-        assert_selector(".show_user_link_#{mary.id}")
+        assert_selector(".user_link_#{mary.id}")
         assert_no_selector(".edit_comment_link_#{ufo.id}")
         assert_no_selector(".destroy_comment_link_#{ufo.id}")
       end
