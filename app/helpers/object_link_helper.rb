@@ -50,12 +50,12 @@ module ObjectLinkHelper
   def name_link(name, str = nil)
     if name.is_a?(Integer)
       str ||= "#{:NAME.t} ##{name}"
-      link_to(str, name_path(name), { id: "show_name_link_#{name}" })
+      id = name
     else
       str ||= name.display_name_brief_authors.t
-      link_to(str, name_path(name.id),
-              { id: "show_name_link_#{name.id}" })
+      id = name.id
     end
+    link_to(str, name_path(id), { class: "name_link_#{id}" })
   end
 
   # ----- links to names and records at external websites ----------------------
@@ -202,7 +202,7 @@ module ObjectLinkHelper
     link_to(
       name, user_path(user_id),
       args.merge(
-        { class: class_names("show_user_link_#{user_id}", args[:class]) }
+        { class: class_names("user_link_#{user_id}", args[:class]) }
       )
     )
   end
@@ -232,9 +232,9 @@ module ObjectLinkHelper
   def link_to_object(object, name = nil)
     return nil unless object
 
-    unique_class = "show_#{object.type_tag}_link_#{object.id}"
+    unique_class = "#{object.type_tag}_link_#{object.id}"
     link_to(name || object.title.t, object.show_link_args,
-            { id: unique_class })
+            { class: unique_class })
   end
 
   # Wrap description title in link to show_description.
@@ -246,7 +246,7 @@ module ObjectLinkHelper
     return result if result.match?("(#{:private.t})$")
 
     link_with_query(result, desc.show_link_args,
-                    id: "show_description_link_#{desc.id}")
+                    class: "description_link_#{desc.id}")
   end
 
   def observation_herbarium_record_link(obs)
@@ -255,7 +255,7 @@ module ObjectLinkHelper
 
       link_to((count == 1 ? :herbarium_record.t : :herbarium_records.t),
               herbarium_records_path(observation_id: obs.id),
-              { id: "herbarium_records_for_observation_link" })
+              { class: "herbarium_records_for_observation_link" })
     else
       return :show_observation_specimen_available.t if obs.specimen
 

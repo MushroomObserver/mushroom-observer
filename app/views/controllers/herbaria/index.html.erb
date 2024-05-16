@@ -45,7 +45,7 @@ nonpersonal = (@query&.flavor == :nonpersonal)
               <% if !@merge || !@user %>
                 <%= link_with_query(
                       herbarium.name.t, herbarium_path(herbarium),
-                      id: "show_herbarium_link_#{herbarium.id}"
+                      class: "herbarium_link_#{herbarium.id}"
                     ) %>
               <% elsif @merge != herbarium %>
                 <%# Cannot POST from a link without js; Use buttons instead %>
@@ -53,7 +53,7 @@ nonpersonal = (@query&.flavor == :nonpersonal)
                       name: herbarium.name.t,
                       path: herbaria_merges_path(src: @merge.id,
                                                  dest: herbarium.id),
-                      id: "herbaria_merges_link_#{@merge.id}_#{herbarium.id}",
+                      class: "herbaria_merges_link_#{@merge.id}_#{herbarium.id}",
                       confirm: :are_you_sure.t
                     ) %>
               <% else %>
@@ -62,9 +62,9 @@ nonpersonal = (@query&.flavor == :nonpersonal)
               <% if @user && !@merge &&
                       (herbarium.can_edit? || in_admin_mode?) %>
                 [<%= link_with_query(:EDIT.t, edit_herbarium_path(herbarium),
-                    id: "edit_herbarium_link_#{herbarium.id}") %> |
+                    class: "edit_herbarium_link_#{herbarium.id}") %> |
                 <%= link_to(:MERGE.t, herbaria_path(merge: herbarium.id),
-                    id: "merge_herbarium_link_#{herbarium.id}") %>]
+                    class: "merge_herbarium_link_#{herbarium.id}") %>]
               <% end %>
             </td>
           </tr>

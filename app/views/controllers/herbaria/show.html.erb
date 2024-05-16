@@ -15,7 +15,7 @@ map = @herbarium.location ? true : false
                     count: @herbarium.herbarium_records.length
                   ),
                   herbarium_records_path(herbarium_id: @herbarium.id),
-                  id: "herbarium_records_for_herbarium_link") %>
+                  class: "herbarium_records_for_herbarium_link") %>
     </div>
 
     <div class="mt-3">
@@ -43,7 +43,7 @@ map = @herbarium.location ? true : false
         <%= link_with_query(
               :show_herbarium_curator_request.t,
               new_herbaria_curator_request_path(id: @herbarium.id),
-              id: "new_herbaria_curator_request_link"
+              class: "new_herbaria_curator_request_link"
             ) %>
 
       <% end %>
