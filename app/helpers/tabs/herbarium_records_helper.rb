@@ -67,7 +67,7 @@ module Tabs
       links << nonpersonal_herbaria_index_tab
     end
 
-    def show_herbarium_record_tab(h_r, obs)
+    def herbarium_record_tab(h_r, obs)
       # This is passed in to show_herbarium_record, allowing users to do prev,
       # next and index from there to navigate through all the rest for this obs.
       hr_query = Query.lookup(:HerbariumRecord, :all, observations: obs.id)
