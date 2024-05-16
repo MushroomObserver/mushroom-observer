@@ -188,8 +188,7 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
 
     update_params = create_params.
                     except(:summary, :content).
-                    merge({ method: :patch,
-                            set_content: "Right on!" })
+                    merge({ method: :patch, set_content: "Right on!" })
     api = API2.execute(update_params)
     ufo = api.results.first
     assert_equal(ufo.comment, "Right on!")
