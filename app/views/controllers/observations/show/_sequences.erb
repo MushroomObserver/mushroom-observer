@@ -24,7 +24,7 @@ can_edit  = in_admin_mode? || obs.can_edit?
     concat(tag.ul(class:"tight-list") do
       sequences.each do |sequence|
         concat(tag.li(id: "sequence_#{sequence.id}") do
-          concat(link_to(*show_sequence_tab(sequence, obs)))
+          concat(link_to(*sequence_tab(sequence, obs)))
 
           links = []
           if sequence.deposit?
