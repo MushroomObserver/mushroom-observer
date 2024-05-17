@@ -26,7 +26,6 @@ class ImageTransformJob < ApplicationJob
           gsub("<id>", args[:id].to_s).
           gsub("<operator>", args[:operator])
 
-    system(cmd)
-    log("Done with ImageTransformJob.perform(#{desc})")
+    log("Done with ImageTransformJob.perform(#{desc})") if system(cmd)
   end
 end
