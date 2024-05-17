@@ -29,7 +29,8 @@ grep -v 'ActiveRecord::RecordNotFound' |
 grep -v 'InvalidAuthenticityToken' |
 grep -v 'Rack::QueryParser::InvalidParameterError' |
 grep -v 'ActionView::Template::Error .Character not in alphabet' |
-grep -v 'WebSocket error occurred: Broken pipe' \
+grep -v 'WebSocket error occurred: Broken pipe' |
+grep -v 'An unauthorized connection attempt was rejected' \
   > $new_errors || true
 
 touch $old_errors
