@@ -730,6 +730,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       if move_original
         args = { id: id, ext: ext, set_size: set, strip_gps: strip }
         ImageProcessJob.perform_later(args) unless Rails.env.test?
+        result = true
       else
         result = false
       end
