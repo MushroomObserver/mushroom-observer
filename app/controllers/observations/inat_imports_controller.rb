@@ -108,14 +108,9 @@ module Observations
           upload_url: photo.url
         }
 
-        # FIXME: Why does API2.execute(params) return nil?
-        # Need to get the id of the image which it creates
         api = API2.execute(params)
 
-        # FIXME: Need to get the ID of the image I just added
-        # instead of whatever image someone happened to have added last
-        # see prior FIXME
-        @observation.add_image(Image.last)
+        @observation.add_image(Image.find(api.results.first.id))
       end
     end
   end
