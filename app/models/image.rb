@@ -783,7 +783,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       raise("Invalid transform operator: #{operator.inspect}")
     end
     args = { id: id, operator: operator }
-    ImageProcessJob.perform_later(args) unless Rails.env.test?
+    ImageProcessJob.perform_later(**args) unless Rails.env.test?
   end
 
   # Attempt to strip GPS data from original image. Returns error message as

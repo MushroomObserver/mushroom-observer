@@ -8,24 +8,26 @@ class ImageTransformJob < ApplicationJob
 
   rescue_from(StandardError) do |exception|
     # Handle the error here. For example, we can send a notification email, log
-    # the error to a monitoring service, or mark the upload as failed in the
-    # database. We have access to the job's arguments in the 'arguments'
-    # instance method.
-    image = Image.find(arguments[:id])
+    # the error, or mark the upload as failed in the database.
+    # We have access to the job's arguments in the 'arguments' instance method.
+    # - positional args are in the arguments array by position
+    # - kwargs are in a hash in the first position of the array
+    image = Image.find(arguments[0][:id])
     # I think this is right: a transformed image needs to be retransferred
     image.update_attribute(:transferred, false)
-    log("Error transforming image #{arguments[:id]}: #{exception.message}")
-    image.update_attribute(:upload_status, exception.message)
+    logger.warn(
+      "Error processing image #{arguments[0][:id]}: #{exception.message}"
+    )
   end
 
-  def perform(args)
-    desc = args.pluck(:id, :operator).join(", ")
-    log("Starting ImageTransformJob.perform(#{desc})")
+  def perform(id:, operator:)
+    desc = [id, operator].join(", ")
+    logger.debug("Starting ImageTransformJob.perform(#{desc})")
 
     cmd = "script/rotate_image <id> <operator>&".
-          gsub("<id>", args[:id].to_s).
-          gsub("<operator>", args[:operator])
+          gsub("<id>", id.to_s).
+          gsub("<operator>", operator)
 
-    log("Done with ImageTransformJob.perform(#{desc})") if system(cmd)
+    logger.debug("Done with ImageTransformJob.perform(#{desc})") if system(cmd)
   end
 end
