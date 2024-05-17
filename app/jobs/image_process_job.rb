@@ -14,7 +14,7 @@ class ImageProcessJob < ApplicationJob
     # With kwargs, they are in a hash in the first position of the array
     image = Image.find(arguments[0][:id])
     image.update_attribute(:transferred, false)
-    log("Error processing image #{arguments[0][:id]}: #{exception.message}")
+    # log("Error processing image #{arguments[0][:id]}: #{exception.message}")
     image.update_attribute(:upload_status, exception.message)
   end
 
