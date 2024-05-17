@@ -20,7 +20,7 @@ new_errors=$app_root/log/errors.new
 
 grep -A1 '^E, .* ERROR \|ENOMEM' $rails_log |
 grep -v '^--' |
-grep -v '^[EW], ' |
+grep -v '^[EWI], ' |
 grep -v 'Using a password on the command line' |
 grep -v 'Can.t figure out how to sort' |
 grep -v 'SMTP To address may not contain CR or LF line breaks' |
@@ -28,9 +28,7 @@ grep -v 'ActionController::RoutingError' |
 grep -v 'ActiveRecord::RecordNotFound' |
 grep -v 'InvalidAuthenticityToken' |
 grep -v 'Rack::QueryParser::InvalidParameterError' |
-grep -v 'ActionView::Template::Error .Character not in alphabet' |
-grep -v 'WebSocket error occurred: Broken pipe' |
-grep -v 'An unauthorized connection attempt was rejected' \
+grep -v 'ActionView::Template::Error .Character not in alphabet' \
   > $new_errors || true
 
 touch $old_errors
