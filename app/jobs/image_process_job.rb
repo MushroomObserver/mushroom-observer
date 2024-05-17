@@ -10,17 +10,18 @@ class ImageProcessJob < ApplicationJob
     # Handle the error here. For example, we can send a notification email, log
     # the error, or mark the upload as failed in the database.
     # We have access to the job's arguments in the 'arguments' instance method.
-    # With positional args, they'll be in the arguments array by position
-    # With kwargs, they are in a hash in the first position of the array
+    # - positional args are in the arguments array by position
+    # - kwargs are in a hash in the first position of the array
     image = Image.find(arguments[0][:id])
     image.update_attribute(:transferred, false)
-    # log("Error processing image #{arguments[0][:id]}: #{exception.message}")
-    image.update_attribute(:upload_status, exception.message)
+    logger.warn(
+      "Error processing image #{arguments[0][:id]}: #{exception.message}"
+    )
   end
 
   def perform(id:, ext:, set_size:, strip_gps:)
-    # desc = [id, ext, set_size, strip_gps].join(", ")
-    # log("Starting ImageProcessJob.perform(#{desc})")
+    desc = [id, ext, set_size, strip_gps].join(", ")
+    logger.debug("Starting ImageProcessJob.perform(#{desc})")
 
     cmd = MO.process_image_command.
           gsub("<id>", id.to_s).
@@ -28,7 +29,7 @@ class ImageProcessJob < ApplicationJob
           gsub("<set>", set_size).
           gsub("<strip>", strip_gps)
 
-    # log("Done with ImageProcessJob.perform(#{desc})") if system(cmd)
-    system(cmd)
+    logger.debug("Done with ImageProcessJob.perform(#{desc})") if system(cmd)
+    # system(cmd)
   end
 end
