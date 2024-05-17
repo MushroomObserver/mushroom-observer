@@ -12,6 +12,7 @@ class ImageTransformJob < ApplicationJob
     # database. We have access to the job's arguments in the 'arguments'
     # instance method.
     image = Image.find(args[:id])
+    # I think this is right: a transformed image needs to be retransferred
     image.update_attribute(:transferred, false)
     log("Error transforming image #{args[:id]}: #{exception.message}")
     image.update_attribute(:upload_status, exception.message)
@@ -25,10 +26,7 @@ class ImageTransformJob < ApplicationJob
           gsub("<id>", args[:id].to_s).
           gsub("<operator>", args[:operator])
 
-    if !Rails.env.test? && !system(cmd)
-      # job cannot return errors to caller
-      # errors.add(:image, :runtime_image_process_failed.t(id: args[:id]))
-    end
+    system(cmd)
     log("Done with ImageTransformJob.perform(#{desc})")
   end
 end
