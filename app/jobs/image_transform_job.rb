@@ -22,12 +22,12 @@ class ImageTransformJob < ApplicationJob
 
   def perform(id:, operator:)
     desc = [id, operator].join(", ")
-    logger.debug("Starting ImageTransformJob.perform(#{desc})")
+    logger.info("Starting ImageTransformJob.perform(#{desc})")
 
     cmd = "script/rotate_image <id> <operator>&".
           gsub("<id>", id.to_s).
           gsub("<operator>", operator)
 
-    logger.debug("Done with ImageTransformJob.perform(#{desc})") if system(cmd)
+    logger.info("Done with ImageTransformJob.perform(#{desc})") if system(cmd)
   end
 end
