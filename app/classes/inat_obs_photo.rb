@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Encapsulates one iNat observation photo (dervied from an ImportedInatObs)
+# Describes one iNat observation photo (derived from an ImportedInatObs)
 # mapping iNat key/values to MO Image attributes and associations
 # Example use:
 # InatObsPhoto.new(<imported_inat_obs>.observation_photos.first)
@@ -13,10 +13,9 @@ class InatObsPhoto
     photo[:attribution]
   end
 
-  # https://github.com/inaturalist/inaturalist-open-data
-  # FIXME should be something like img/jpg
+  # https://www.iana.org/assignments/media-types/media-types.xhtml#image
   def content_type
-    "jpg"
+    "img/jpeg"
   end
 
   def license_id
