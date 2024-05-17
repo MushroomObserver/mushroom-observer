@@ -8,9 +8,8 @@ class ImageProcessJob < ApplicationJob
 
   rescue_from(StandardError) do |exception|
     # Handle the error here. For example, we can send a notification email, log
-    # the error to a monitoring service, or mark the upload as failed in the
-    # database. We have access to the job's arguments in the 'arguments'
-    # instance method.
+    # the error, or mark the upload as failed in the database.
+    # We have access to the job's arguments in the 'arguments' instance method.
     # With positional args, they'll be in the arguments array by position
     # With kwargs, they are in a hash in the first position of the array
     image = Image.find(arguments[0][:id])
@@ -21,7 +20,6 @@ class ImageProcessJob < ApplicationJob
 
   def perform(id:, ext:, set_size:, strip_gps:)
     desc = [id, ext, set_size, strip_gps].join(", ")
-    # desc = args[0].pluck(:id, :ext, :set_size, :strip_gps).join(", ")
     log("Starting ImageProcessJob.perform(#{desc})")
 
     cmd = MO.process_image_command.
