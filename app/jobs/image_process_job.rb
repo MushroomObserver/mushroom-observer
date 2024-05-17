@@ -21,18 +21,12 @@ class ImageProcessJob < ApplicationJob
     desc = args.pluck(:id, :ext, :set_size, :strip_gps).join(", ")
     log("Starting ImageProcessJob.perform(#{desc})")
 
-    # image = Image.find(args[:id])
-    # raise(:process_image_job_no_image.t) unless image
-
     cmd = MO.process_image_command.
           gsub("<id>", args[:id].to_s).
           gsub("<ext>", args[:ext]).
           gsub("<set>", args[:set]).
           gsub("<strip>", args[:strip])
-    if !Rails.env.test? && !system(cmd)
-      # job cannot return errors to caller
-      # errors.add(:image, :runtime_image_process_failed.t(id: args[:id]))
-    end
-    log("Done with ImageProcessJob.perform(#{desc})")
+
+    log("Done with ImageProcessJob.perform(#{desc})") if system(cmd)
   end
 end
