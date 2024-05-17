@@ -782,7 +782,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     else
       raise("Invalid transform operator: #{operator.inspect}")
     end
-    system("script/rotate_image #{id} #{operator}&") unless Rails.env.test?
+    args = { id: id, operator: operator }
+    ImageProcessJob.perform_later(args)
   end
 
   # Attempt to strip GPS data from original image. Returns error message as
