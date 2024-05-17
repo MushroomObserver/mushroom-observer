@@ -11,9 +11,9 @@ class ImageProcessJob < ApplicationJob
     # the error to a monitoring service, or mark the upload as failed in the
     # database. We have access to the job's arguments in the 'arguments'
     # instance method.
-    image = Image.find(args[:id])
+    image = Image.find(arguments[:id])
     image.update_attribute(:transferred, false)
-    log("Error processing image #{args[:id]}: #{exception.message}")
+    log("Error processing image #{arguments[:id]}: #{exception.message}")
     image.update_attribute(:upload_status, exception.message)
   end
 
