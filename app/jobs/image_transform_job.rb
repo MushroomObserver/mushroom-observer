@@ -7,8 +7,8 @@ class ImageTransformJob < ApplicationJob
   queue_as :default
 
   rescue_from(StandardError) do |exception|
-    # Handle the error here. For example, we can send a notification email, log
-    # the error, or mark the upload as failed in the database.
+    # Handle the error here. For example, we can send a notification email,
+    # log the error, or mark the upload as not transferred in the database.
     # We have access to the job's arguments in the 'arguments' instance method.
     # - positional args are in the arguments array by position
     # - kwargs are in a hash in the first position of the array
