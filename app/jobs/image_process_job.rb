@@ -19,8 +19,8 @@ class ImageProcessJob < ApplicationJob
   end
 
   def perform(id:, ext:, set_size:, strip_gps:)
-    desc = [id, ext, set_size, strip_gps].join(", ")
-    log("Starting ImageProcessJob.perform(#{desc})")
+    # desc = [id, ext, set_size, strip_gps].join(", ")
+    # log("Starting ImageProcessJob.perform(#{desc})")
 
     cmd = MO.process_image_command.
           gsub("<id>", id.to_s).
@@ -28,6 +28,7 @@ class ImageProcessJob < ApplicationJob
           gsub("<set>", set_size).
           gsub("<strip>", strip_gps)
 
-    log("Done with ImageProcessJob.perform(#{desc})") if system(cmd)
+    # log("Done with ImageProcessJob.perform(#{desc})") if system(cmd)
+    system(cmd)
   end
 end
