@@ -30,6 +30,5 @@ class ImageProcessJob < ApplicationJob
           gsub("<strip>", strip_gps)
 
     logger.debug("Done with ImageProcessJob.perform(#{desc})") if system(cmd)
-    # system(cmd)
   end
 end
