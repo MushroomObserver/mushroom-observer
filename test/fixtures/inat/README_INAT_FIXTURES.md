@@ -18,6 +18,7 @@ Unformatted strings comprising the complete result of an [iNat API Get Observati
 - Slime mold
 - Fungus with photo that was uploaded to iNat >= 1 dat after iNat Obs was created
 - Multiple photos, not mirrored from MO
+- Photo with license that's not the MO default
 
 Need fixtures with the following fields:
 
@@ -30,14 +31,3 @@ Need fixtures with the following fields:
   - sensu lato
   - sequence
   - Mushroom Observer URL
-
-## Images
-
-Hash comprising (describing) one of the `observation_photos` in the result of an [iNat API Get Observation query](https://api.inaturalist.org/v1/docs/#!/Observations/get_observations_id).
-<br>The number in the filename is the `observation_photo [:id]`, **not** the `photo[:id]`
-
-- `inat_obs_photo_351481052.txt` the only photo from the Observation `tremella_mesenterica.txt`.
-
-### Needed photos
-
-- with different licenses
