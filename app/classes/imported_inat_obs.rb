@@ -12,13 +12,17 @@ class ImportedInatObs
     @imported_inat_obs_data[:results].first
   end
 
-  # TODO: make this private (and don't call from elsewhere)
+  # TODO: make this private (and don't call from elsewhere)??
   def description
     obs[:description]
   end
 
   def gps_hidden
     obs[:geoprivacy].present?
+  end
+
+  def inat_id
+    obs[:id]
   end
 
   def obs_photos

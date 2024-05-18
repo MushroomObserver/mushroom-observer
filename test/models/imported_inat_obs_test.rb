@@ -4,6 +4,8 @@ require("test_helper")
 
 # test encapsulated imported iNat observations
 class ImportedInatObsTest < UnitTestCase
+  # disable cop to facilitate typing/reading id's
+  # rubocop:disable Style/NumericLiterals
   def test_complex_public_obs
     # import of iNat 202555552 which is a mirror of MO 547126)
     # For easier to to read version see test/fixtures/inat/somion_unicolor.json
@@ -20,13 +22,13 @@ class ImportedInatObsTest < UnitTestCase
 
       # locality / geoloc stuff
       is_collection_location: true,
-      lat: 31.8813, # rubocop:disable Style/ExponentialNotation
-      lng: -109.244, # rubocop:disable Style/ExponentialNotation
+      lat: 31.8813,
+      lng: -109.244,
       alt: 1942,
       gps_hidden: false,
       where: "Cochise Co., Arizona, USA",
       # location_id needs work
-      location_id: 20799, # rubocop:disable Style/NumericLiterals
+      location_id: 20799,
 
       # taxonomy, nomenclature
       text_name: "Somion unicolor",
@@ -54,8 +56,11 @@ class ImportedInatObsTest < UnitTestCase
       assert_equal(expected_mapping.send(attribute), import.send(attribute))
     end
 
+    # TODO: include in above array after creating Observation.inat_id attribute
+    assert_equal(202555552, import.inat_id)
+
     # aws ids of the images for iNat obs 202555552
-    assert_equal([357753797, 357753842, 357753912, 357753954, 357753993], # rubocop:disable Style/NumericLiterals
+    assert_equal([357753797, 357753842, 357753912, 357753954, 357753993],
                  import.aws_photo_ids)
 
 =begin
@@ -78,6 +83,7 @@ class ImportedInatObsTest < UnitTestCase
       t.boolean "gps_hidden", default: false, null: false
 =end
   end
+  # rubocop:enable Style/NumericLiterals
 
   def test_name_sensu
     names = Name.where(text_name: "Coprinus", rank: "Genus")
@@ -91,6 +97,7 @@ class ImportedInatObsTest < UnitTestCase
     assert_equal(names(:coprinus).text_name, import.text_name)
     assert_equal(names(:coprinus).id, import.name_id)
   end
+
 
   def test_no_description
     inat_response = File.read("test/fixtures/inat/tremella_mesenterica.txt")
