@@ -152,10 +152,10 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
 
     # UFO test: comment incoming via the API!
     create_params = {
+      api_key: api_keys(:marys_api_key).key,
       method: :post,
       action: :comment,
       target: "observation ##{obs.id}",
-      api_key: api_keys(:marys_api_key).key,
       summary: "UFO",
       content: "I am a UFO!"
     }

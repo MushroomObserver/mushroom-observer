@@ -25,13 +25,13 @@ tag.div(
             class: "list-group list-group-flush comments",
             data: { controller: "section-update",
                     updated_by: "modal_comment" }) do
-      concat(tag.div(:show_comments_no_comments_yet.t,
-                     class: "list-group-item none-yet"))
       unless comments.empty?
         comments.each do |comment|
           concat(render(partial: "comments/comment", object: comment))
         end
       end
+      concat(tag.div(:show_comments_no_comments_yet.t,
+                     class: "list-group-item none-yet"))
     end
   ].safe_join)
   concat(
