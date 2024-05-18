@@ -59,10 +59,6 @@ class ImportedInatObsTest < UnitTestCase
     # TODO: include in above array after creating Observation.inat_id attribute
     assert_equal(202555552, import.inat_id)
 
-    # aws ids of the images for iNat obs 202555552
-    assert_equal([357753797, 357753842, 357753912, 357753954, 357753993],
-                 import.aws_photo_ids)
-
 =begin
       # attributes to test
       t.integer "user_id"
@@ -98,7 +94,6 @@ class ImportedInatObsTest < UnitTestCase
     assert_equal(names(:coprinus).id, import.name_id)
   end
 
-
   def test_no_description
     inat_response = File.read("test/fixtures/inat/tremella_mesenterica.txt")
     assert_match(/"description":null,/, inat_response,
@@ -106,7 +101,6 @@ class ImportedInatObsTest < UnitTestCase
 
     import = ImportedInatObs.new(inat_response)
 
-    assert_nil(import.description)
     assert_equal("", import.notes)
   end
 end

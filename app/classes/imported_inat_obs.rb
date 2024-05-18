@@ -12,11 +12,6 @@ class ImportedInatObs
     @imported_inat_obs_data[:results].first
   end
 
-  # TODO: make this private (and don't call from elsewhere)??
-  def description
-    obs[:description]
-  end
-
   def gps_hidden
     obs[:geoprivacy].present?
   end
@@ -27,15 +22,6 @@ class ImportedInatObs
 
   def obs_photos
     obs[:observation_photos]
-  end
-
-  # TODO: move this to photos???
-  # Probably should just be deleted
-  # array of iNat photo ids usuable to get photo from aws
-  def aws_photo_ids
-    obs_photos.each_with_object([]) do |obs_photo, ary|
-      ary << obs_photo[:photo][:id]
-    end
   end
 
   def name_id
@@ -83,5 +69,14 @@ class ImportedInatObs
 
   def where
     obs[:place_guess]
+  end
+
+
+  ##########
+
+  private
+
+  def description
+    obs[:description]
   end
 end
