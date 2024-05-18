@@ -5,6 +5,9 @@ require "test_helper"
 # test importing iNaturalist Observations to Mushroom Observer
 module Observations
   class InatImportsControllerTest < FunctionalTestCase
+    INAT_OBS_REQUEST_PREFIX = "https://api.inaturalist.org/v1/observations?"
+    INAT_OBS_REQUEST_POSTFIX = "&order=desc&order_by=created_at&only_id=false"
+
     def test_new_inat_import
       login(users(:rolf).login)
       get(:new)
@@ -15,7 +18,7 @@ module Observations
                     "Form needs a field for inputting iNat ids")
     end
 
-    def test_create_public_import_no_photos
+    def test_create_public_import_imageless_obs
       # See test/fixtures/inat/README_INAT_FIXTURES.md
       inat_response_body =
         File.read("test/fixtures/inat/evernia_no_photos.txt")
@@ -24,9 +27,7 @@ module Observations
 
       WebMock.stub_request(
         :get,
-        "https://api.inaturalist.org/v1" \
-        "/observations?id=#{inat_id}" \
-        "&order=desc&order_by=created_at&only_id=false"
+        "#{INAT_OBS_REQUEST_PREFIX}id=#{inat_id}#{INAT_OBS_REQUEST_POSTFIX}"
       ).to_return(body: inat_response_body)
 
       login
@@ -43,25 +44,39 @@ module Observations
       assert_equal(inat_id, obs.inat_id)
     end
 
-    def test_create_public_import_with_photo
+    def test_create_public_import_obs_with_photo
       skip("Under Construction")
       # See test/fixtures/inat/README_INAT_FIXTURES.md
       inat_response_body =
         File.read("test/fixtures/inat/tremella_mesenterica.txt")
-      inat_id = "213508767"
-      params = { inat_ids: inat_id }
+      inat_obs_data = ImportedInatObs.new(inat_response_body)
+      inat_obs_id = inat_obs_data.inat_id
+      inat_obs_photo = InatObsPhoto.new(
+        inat_obs_data.obs[:observation_photos].first
+      )
+      # inat_obs = ImportedInatObs.new(inat_response_body)
+      # inat_id = ImportedInatObs.new(inat_response_body).inat_id
+      params = { inat_ids: inat_obs_id }
+      user = users(:rolf)
 
+      # stub the iNat API request
       WebMock.stub_request(
         :get,
-        "https://api.inaturalist.org/v1" \
-        "/observations?id=#{inat_id}" \
-        "&order=desc&order_by=created_at&only_id=false"
+        "#{INAT_OBS_REQUEST_PREFIX}id=#{inat_obs_id}#{INAT_OBS_REQUEST_POSTFIX}"
       ).to_return(body: inat_response_body)
 
-      login
+      # stub the aws request for the photo
+      WebMock.stub_request(
+        :get,
+        inat_obs_photo.url
+      ).to_return(body: Rails.root.join("test/images/test_image.jpg").read)
 
-      assert_difference("Observation.count", 1, "Failed to create Obs") do
-        put(:create, params: params)
+      login(user.login)
+      # TODO: fix stubbed method when InatImportsController fixes its APIKey
+      APIKey.stub(:first, api_keys(:rolfs_mo_app_api_key)) do
+        assert_difference("Observation.count", 1, "Failed to create Obs") do
+          put(:create, params: params)
+        end
       end
 
       obs = Observation.order(created_at: :asc).last
