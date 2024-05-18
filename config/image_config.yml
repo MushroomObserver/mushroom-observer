@@ -14,10 +14,10 @@ production:
   image_sources:
     :local:
       :test: file:///var/web/mo/public/images
-      :read: https://%{domain}/local_images
+      :read: https://test.mushroomobserver.org/local_images
     :mycolab:
       :test: :transferred_flag
-      :read: https://%{domain}/images
+      :read: https://test.mushroomobserver.org/images
       :write: ssh://mo@images.mushroomobserver.org:/data/images/mo
   keep_these_image_sizes_local: []
 

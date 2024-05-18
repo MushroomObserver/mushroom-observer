@@ -13,10 +13,6 @@ class ImageConfigData
     File.expand_path("..", __dir__)
   end
 
-  def domain
-    Rails.application.config.domain
-  end
-
   def local_image_files
     format(@config["local_image_files"], root: root)
   end
