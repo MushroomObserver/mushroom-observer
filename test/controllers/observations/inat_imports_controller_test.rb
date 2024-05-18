@@ -15,8 +15,33 @@ module Observations
                     "Form needs a field for inputting iNat ids")
     end
 
-    def test_create_simple_public_import
-      # fixture created from iNat api for observation 213508767
+    def test_create_public_import_no_photos
+      # See test/fixtures/inat/README_INAT_FIXTURES.md
+      inat_response_body =
+        File.read("test/fixtures/inat/evernia_no_photos.txt")
+      inat_id = ImportedInatObs.new(inat_response_body).inat_id
+      params = { inat_ids: inat_id }
+
+      WebMock.stub_request(
+        :get,
+        "https://api.inaturalist.org/v1" \
+        "/observations?id=#{inat_id}" \
+        "&order=desc&order_by=created_at&only_id=false"
+      ).to_return(body: inat_response_body)
+
+      login
+
+      assert_difference("Observation.count", 1, "Failed to create Obs") do
+        put(:create, params: params)
+      end
+
+      obs = Observation.order(created_at: :asc).last
+      assert_not_nil(obs.rss_log)
+      assert_redirected_to(observations_path)
+    end
+
+    def test_create_public_import_with_photo
+      skip("Under Construction")
       # See test/fixtures/inat/README_INAT_FIXTURES.md
       inat_response_body =
         File.read("test/fixtures/inat/tremella_mesenterica.txt")
