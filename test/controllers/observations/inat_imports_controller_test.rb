@@ -16,12 +16,12 @@ module Observations
     end
 
     def test_create_simple_public_import
-      inat_id = "213508767"
-      params = { inat_ids: inat_id }
       # fixture created from iNat api for observation 213508767
+      # See test/fixtures/inat/README_INAT_FIXTURES.md
       inat_response_body =
         File.read("test/fixtures/inat/tremella_mesenterica.txt")
-
+      inat_id = "213508767"
+      params = { inat_ids: inat_id }
 
       WebMock.stub_request(
         :get,
