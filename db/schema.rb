@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_04_122906) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_18_161547) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -512,6 +512,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_04_122906) do
     t.integer "source"
     t.datetime "log_updated_at", precision: nil
     t.boolean "needs_naming", default: false, null: false
+    t.integer "inat_id"
     t.index ["needs_naming"], name: "needs_naming_index"
   end
 

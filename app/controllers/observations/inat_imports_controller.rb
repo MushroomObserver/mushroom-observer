@@ -65,7 +65,8 @@ module Observations
         name_id: inat_obs.name_id,
         text_name: inat_obs.text_name,
         notes: inat_obs.notes,
-        source: "mo_inat_import"
+        source: "mo_inat_import",
+        inat_id: inat_obs.inat_id
       )
       @observation.save
       @observation.log(:log_observation_created)

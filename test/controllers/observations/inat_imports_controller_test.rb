@@ -40,6 +40,7 @@ module Observations
       assert_redirected_to(observations_path)
 
       assert_equal("mo_inat_import", obs.source)
+      assert_equal(inat_id, obs.inat_id)
     end
 
     def test_create_public_import_with_photo

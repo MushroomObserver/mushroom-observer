@@ -54,6 +54,7 @@
 #  num_views::              Number of times it has been viewed.
 #  last_view::              Last time it was viewed.
 #  log_updated_at::         Cache of RssLogs.updated_at, for speedier index
+#  inat_id:                 iNaturalist id of corresponding Observation
 #
 #  ==== "Fake" attributes
 #  place_name::             Wrapper on top of +where+ and +location+.
