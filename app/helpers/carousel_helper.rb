@@ -1,51 +1,6 @@
 # frozen_string_literal: true
 
 module CarouselHelper
-  # Use this to print a carousel within a div
-  # Required args: images:
-  # Optional args: object: (the carousel is usually for an object)
-  # top_img: (defaults to first), (carousel)title:, (image_edit)links:
-  # thumbnails: true for thumbnail navigation
-  # img_args: args for ImagePresenter
-  #
-  # Note: uses concat(x) instead of [x,y].safe_join because of conditionals
-  def carousel_html(**args)
-    args[:images] ||= nil
-    args[:object] ||= nil
-    args[:size] ||= :large
-    args[:top_img] ||= args[:images].first
-    args[:title] ||= :IMAGES.t
-    args[:links] ||= ""
-    args[:thumbnails] = true if args[:thumbnails].nil?
-    type = args[:object]&.type_tag || "image"
-    args[:html_id] ||= "#{type}_#{args[:object].id}_carousel"
-
-    capture do
-      if !args[:images].nil? && args[:images].any?
-        concat(carousel_basic_html(**args))
-      else
-        if args[:thumbnails] # only need this heading on a show page
-          concat(carousel_heading(args[:title], args[:links]))
-        end
-        concat(carousel_no_images_message)
-      end
-    end
-  end
-
-  def carousel_basic_html(**args)
-    tag.div(class: "carousel slide", id: args[:html_id],
-            data: { ride: "false", interval: "false" }) do
-      concat(carousel_heading(args[:title], args[:links])) if args[:thumbnails]
-      concat(tag.div(class: "carousel-inner bg-light", role: "listbox") do
-        args[:images].each do |image|
-          concat(carousel_item(image, **args))
-        end
-        concat(carousel_controls(args[:html_id])) if args[:images].length > 1
-      end)
-      concat(carousel_thumbnails(**args)) if args[:thumbnails]
-    end
-  end
-
   # args are leftover from template, could be used
   def carousel_item(image, **args)
     # Caption needs object for copyright info

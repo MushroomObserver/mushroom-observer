@@ -258,11 +258,20 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   after_update :track_copyright_changes
   before_destroy :update_thumbnails
 
+  after_commit :update_obs_images, on: :update,
+                                   if: ->(image) { image.observations.exists? }
+
   scope :interactive_includes, lambda {
     strict_loading.includes(
       :image_votes, :license, :projects, :user
     )
   }
+
+  def update_obs_images
+    broadcast_replace_later_to(->(image) { [image.observation, :images] },
+                               partial: "shared/carousel",
+                               target: "observation_images")
+  end
 
   # Array of all observations, users and glossary terms using this image.
   def all_subjects
