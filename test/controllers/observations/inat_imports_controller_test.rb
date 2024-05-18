@@ -38,6 +38,8 @@ module Observations
       obs = Observation.order(created_at: :asc).last
       assert_not_nil(obs.rss_log)
       assert_redirected_to(observations_path)
+
+      assert_equal("mo_inat_import", obs.source)
     end
 
     def test_create_public_import_with_photo

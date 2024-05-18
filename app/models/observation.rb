@@ -1130,7 +1130,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
           mo_website: 1,
           mo_android_app: 2,
           mo_iphone_app: 3,
-          mo_api: 4
+          mo_api: 4,
+          mo_inat_import: 5
         }
 
   # Message to use to credit the agent which created this observation.

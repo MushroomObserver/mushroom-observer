@@ -56,7 +56,7 @@ module Observations
     def import_one_observation(inat_obs_id)
       imported_inat_obs_data = inat_search_observations(inat_obs_id)
       inat_obs = ImportedInatObs.new(imported_inat_obs_data)
-      xlated_inat_obs = Observation.new(
+      @observation = Observation.new(
         when: inat_obs.when,
         where: inat_obs.where,
         lat: inat_obs.lat,
@@ -64,12 +64,11 @@ module Observations
         gps_hidden: inat_obs.gps_hidden,
         name_id: inat_obs.name_id,
         text_name: inat_obs.text_name,
-        notes: inat_obs.notes
+        notes: inat_obs.notes,
+        source: "mo_inat_import"
       )
-      xlated_inat_obs.save
-      xlated_inat_obs.log(:log_observation_created)
-
-      @observation = xlated_inat_obs
+      @observation.save
+      @observation.log(:log_observation_created)
 
       add_inat_images(inat_obs.obs_photos)
       # TODO: Other things done by Observations#create
