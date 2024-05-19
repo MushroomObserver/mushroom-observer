@@ -273,14 +273,15 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   def update_obs_images
     observations.each do |obs|
       carousel_locals = {
-        object: obs, images: obs.images,
+        object: obs,
+        images: obs.images,
         top_img: obs&.thumb_image || nil,
         html_id: "observation_images",
         title: :IMAGES.t,
         links: observation_show_image_links(obs: obs)
       }
 
-      broadcast_replace_later_to(-> { [obs, :images] },
+      broadcast_replace_later_to([obs, :images],
                                  partial: "shared/carousel",
                                  locals: carousel_locals,
                                  target: "observation_images")
