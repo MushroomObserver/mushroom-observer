@@ -118,10 +118,11 @@ module Observations
           api_key: api_key.key,
           upload_url: photo.url,
 
-          license: photo.license_id
+          license: photo.license_id,
+          original_name: photo.original_name
         }
 
-x        api = API2.execute(params)
+        api = API2.execute(params)
 
 
 =begin Imaage attributes
