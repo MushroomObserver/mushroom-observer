@@ -916,7 +916,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # Accept non-numeric ids for the /lookups/lookup_xxx/id actions.
   LOOKUP_ACTIONS.each do |action|
-    get("/lookups/#{action}(/:id)", to: "lookups##{action}", id: /\S.*/)
+    get("/lookups/#{action}(/:id)", to: "lookups##{action}", id: /\S.*/,
+                                    as: action)
   end
 
   # declare routes for the actions in the ACTIONS hash
