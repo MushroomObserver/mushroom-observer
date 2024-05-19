@@ -106,7 +106,6 @@ module Observations
         notes: parse(:string, :notes, default: ""),
         copyright_holder: parse(:string, :copyright_holder, limit: 100) ||
                           user.legal_name,
-        license: parse(:license, :license) || user.license,
         original_name: parse_original_name(:original_name),
         upload_md5sum: parse(:string, :md5sum),
         projects: parse_array(:project, :projects, must_be_member: true) || [],
@@ -117,10 +116,12 @@ module Observations
           method: :post,
           action: :image,
           api_key: api_key.key,
-          upload_url: photo.url
+          upload_url: photo.url,
+
+          license: photo.license_id
         }
 
-        api = API2.execute(params)
+x        api = API2.execute(params)
 
 
 =begin Imaage attributes
@@ -131,7 +132,6 @@ module Observations
     t.date "when"
     t.text "notes"
     t.string "copyright_holder", limit: 100
-    t.integer "license_id", default: 1, null: false
     t.integer "num_views", default: 0, null: false
     t.datetime "last_view", precision: nil
     t.integer "width"
