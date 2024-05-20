@@ -106,7 +106,6 @@ module Observations
         notes: parse(:string, :notes, default: ""),
         copyright_holder: parse(:string, :copyright_holder, limit: 100) ||
                           user.legal_name,
-        original_name: parse_original_name(:original_name),
         upload_md5sum: parse(:string, :md5sum),
         projects: parse_array(:project, :projects, must_be_member: true) || [],
         observations: @observations,

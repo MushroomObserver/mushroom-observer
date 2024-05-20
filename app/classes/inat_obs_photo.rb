@@ -22,8 +22,11 @@ class InatObsPhoto
     license(photo).id
   end
 
-  # iNat photos don't have notes
-  # It's a handy place to put the original photo dimensions
+  # iNat photos don't have notes.
+  # Repurpose Image notes to include iNat photo data
+  # which otherwise would not be included in the MO Image
+  # TODO: use something other than original dimensions.
+  # Maybe something like "Imported from iNat <datetime>"
   def notes
     "original dimensions: #{original_width} x #{original_height}"
   end
