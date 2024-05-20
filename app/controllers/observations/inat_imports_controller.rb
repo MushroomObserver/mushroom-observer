@@ -103,12 +103,9 @@ module Observations
         api_key = APIKey.first
 
         # ImageAPI#create params to consider adding to API params below
-        # when: parse(:date, :date, help: :when_taken) || @default_date,
         # notes: parse(:string, :notes, default: ""),
-        # upload_md5sum: parse(:string, :md5sum),
         # projects: parse_array(:project, :projects, must_be_member: true) ||
         #           [],
-        # observations: @observations,
         params = {
           method: :post,
           action: :image,
@@ -128,7 +125,6 @@ module Observations
         # Imaage attributes to potentially update manually
         # t.text "notes"
         # t.boolean "ok_for_export", default: true, null: false
-        # t.string "original_name", limit: 120, default: ""
         # t.boolean "gps_stripped", default: false, null: false
         # t.boolean "diagnostic", default: true, null: false
         image.update(
