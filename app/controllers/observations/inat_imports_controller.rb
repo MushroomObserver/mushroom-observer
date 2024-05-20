@@ -101,16 +101,16 @@ module Observations
         # FIXME: Get a key. This one belongs to @pellaea
         api_key = APIKey.first
 
-=begin  ImageAPI#create params
-        when: parse(:date, :date, help: :when_taken) || @default_date,
-        notes: parse(:string, :notes, default: ""),
-        copyright_holder: parse(:string, :copyright_holder, limit: 100) ||
-                          user.legal_name,
-        upload_md5sum: parse(:string, :md5sum),
-        projects: parse_array(:project, :projects, must_be_member: true) || [],
-        observations: @observations,
-        user: @user
-=end
+        # ImageAPI#create params to consider adding to API params below
+        # when: parse(:date, :date, help: :when_taken) || @default_date,
+        # notes: parse(:string, :notes, default: ""),
+        # copyright_holder: parse(:string, :copyright_holder, limit: 100) ||
+        #                   user.legal_name,
+        # upload_md5sum: parse(:string, :md5sum),
+        # projects: parse_array(:project, :projects, must_be_member: true) ||
+        #           [],
+        # observations: @observations,
+        # user: @user
         params = {
           method: :post,
           action: :image,
@@ -122,28 +122,21 @@ module Observations
         }
 
         api = API2.execute(params)
+        image = Image.find(api.results.first.id)
 
-
-=begin Imaage attributes
-    t.datetime "created_at", precision: nil
-    t.datetime "updated_at", precision: nil
-    t.string "content_type", limit: 100
-    t.integer "user_id"
-    t.date "when"
-    t.text "notes"
-    t.string "copyright_holder", limit: 100
-    t.integer "num_views", default: 0, null: false
-    t.datetime "last_view", precision: nil
-    t.integer "width"
-    t.integer "height"
-    t.float "vote_cache"
-    t.boolean "ok_for_export", default: true, null: false
-    t.string "original_name", limit: 120, default: ""
-    t.boolean "transferred", default: false, null: false
-    t.boolean "gps_stripped", default: false, null: false
-    t.boolean "diagnostic", default: true, null: false
-=end
-        @observation.add_image(Image.find(api.results.first.id))
+        # Imaage attributes to potentially update manually
+        # t.integer "user_id"
+        # t.text "notes"
+        # t.string "copyright_holder", limit: 100
+        # t.boolean "ok_for_export", default: true, null: false
+        # t.string "original_name", limit: 120, default: ""
+        # t.boolean "gps_stripped", default: false, null: false
+        # t.boolean "diagnostic", default: true, null: false
+        image.update(
+          # TODO: get date from EXIF; it could be > obs date
+          when: @observation.when # throws Error if done as API param above
+        )
+        @observation.add_image(image)
       end
     end
   end
