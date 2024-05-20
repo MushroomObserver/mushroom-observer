@@ -22,11 +22,8 @@ class InatObsPhoto
     license(photo).id
   end
 
-  # iNat photos don't have notes.
-  # Repurpose Image notes to include iNat photo data
-  # which otherwise would not be included in the MO Image
-  # TODO: use something other than original dimensions.
-  # Maybe something like "Imported from iNat <datetime>"
+  # Repurpose MO Image.notes to include some iNat photo data
+  # (iNat photos don't have notes or equivalent.)
   def notes
     "Imported from iNat #{DateTime.now.utc.strftime("%Y-%m-%d %H:%M:%S %z")}"
   end
