@@ -105,8 +105,6 @@ module Observations
         # ImageAPI#create params to consider adding to API params below
         # when: parse(:date, :date, help: :when_taken) || @default_date,
         # notes: parse(:string, :notes, default: ""),
-        # copyright_holder: parse(:string, :copyright_holder, limit: 100) ||
-        #                   user.legal_name,
         # upload_md5sum: parse(:string, :md5sum),
         # projects: parse_array(:project, :projects, must_be_member: true) ||
         #           [],
@@ -117,6 +115,7 @@ module Observations
           api_key: api_key.key,
           upload_url: photo.url,
 
+          copyright_holder: photo.copyright_holder,
           license: photo.license_id,
           original_name: photo.original_name
         }
@@ -128,7 +127,6 @@ module Observations
 
         # Imaage attributes to potentially update manually
         # t.text "notes"
-        # t.string "copyright_holder", limit: 100
         # t.boolean "ok_for_export", default: true, null: false
         # t.string "original_name", limit: 120, default: ""
         # t.boolean "gps_stripped", default: false, null: false
