@@ -1,0 +1,7 @@
+<%=
+tag.li(class: class_names("carousel-indicator mx-1", active),
+       data: { target: "##{args[:html_id]}",
+               slide_to: index.to_s }) do
+  carousel_thumbnail(image)
+end
+%>
