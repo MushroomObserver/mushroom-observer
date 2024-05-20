@@ -24,7 +24,8 @@ if !images.nil? && images.any?
     concat(carousel_heading(title, links)) if thumbnails
     concat(tag.div(class: "carousel-inner bg-light", role: "listbox") do
       images.each do |image|
-        concat(carousel_item(image, **local_assigns))
+        concat(render(partial: "shared/carousel_item",
+                      locals: { image, **local_assigns }))
       end
       concat(carousel_controls(html_id)) if images.length > 1
     end)
