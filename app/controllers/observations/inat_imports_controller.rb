@@ -14,6 +14,7 @@ module Observations
       return redirect_to(new_observation_path) if params[:inat_ids].blank?
       return reload_form if bad_inat_ids_param?(inat_id_array)
 
+      @user = User.current
       inat_id_array.each do |inat_obs_id|
         import_one_observation(inat_obs_id)
       end
@@ -110,7 +111,6 @@ module Observations
         # projects: parse_array(:project, :projects, must_be_member: true) ||
         #           [],
         # observations: @observations,
-        # user: @user
         params = {
           method: :post,
           action: :image,
@@ -122,10 +122,11 @@ module Observations
         }
 
         api = API2.execute(params)
+        User.current = @user # API call zaps User.current
+
         image = Image.find(api.results.first.id)
 
         # Imaage attributes to potentially update manually
-        # t.integer "user_id"
         # t.text "notes"
         # t.string "copyright_holder", limit: 100
         # t.boolean "ok_for_export", default: true, null: false
@@ -133,6 +134,7 @@ module Observations
         # t.boolean "gps_stripped", default: false, null: false
         # t.boolean "diagnostic", default: true, null: false
         image.update(
+          user_id: User.current.id, # throws Error if done as API param above
           # TODO: get date from EXIF; it could be > obs date
           when: @observation.when # throws Error if done as API param above
         )
