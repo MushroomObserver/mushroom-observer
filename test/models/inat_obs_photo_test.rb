@@ -50,8 +50,11 @@ class InatObsPhotoTest < UnitTestCase
                  inat_obs_photo.copyright_holder)
     assert_equal("iNat photo uuid 6c223538-04d6-404c-8e84-b7d881dbe550",
                  inat_obs_photo.original_name)
-    assert_equal("original dimensions: 2048 x 1534",
-                 inat_obs_photo.notes)
+    # assert_equal("original dimensions: 2048 x 1534",
+    assert_equal(
+      "Imported from iNat #{DateTime.now.utc.strftime("%Y-%m-%d %H:%M:%S %z")}",
+      inat_obs_photo.notes
+    )
     assert_equal(expected_license.id,
                  inat_obs_photo.license_id,
                  "Wrong license, expecting #{expected_license.display_name}")

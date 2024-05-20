@@ -103,7 +103,6 @@ module Observations
         api_key = APIKey.first
 
         # ImageAPI#create params to consider adding to API params below
-        # notes: parse(:string, :notes, default: ""),
         # projects: parse_array(:project, :projects, must_be_member: true) ||
         #           [],
         params = {
@@ -114,6 +113,7 @@ module Observations
 
           copyright_holder: photo.copyright_holder,
           license: photo.license_id,
+          notes: photo.notes,
           original_name: photo.original_name
         }
 
@@ -123,7 +123,6 @@ module Observations
         image = Image.find(api.results.first.id)
 
         # Imaage attributes to potentially update manually
-        # t.text "notes"
         # t.boolean "ok_for_export", default: true, null: false
         # t.boolean "gps_stripped", default: false, null: false
         # t.boolean "diagnostic", default: true, null: false

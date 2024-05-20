@@ -28,7 +28,7 @@ class InatObsPhoto
   # TODO: use something other than original dimensions.
   # Maybe something like "Imported from iNat <datetime>"
   def notes
-    "original dimensions: #{original_width} x #{original_height}"
+    "Imported from iNat #{DateTime.now.utc.strftime("%Y-%m-%d %H:%M:%S %z")}"
   end
 
   # iNat doesn't preserve (or maybe reveal) user's original filename
