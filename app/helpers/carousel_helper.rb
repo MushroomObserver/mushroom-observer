@@ -75,20 +75,10 @@ module CarouselHelper
       args[:images].each_with_index do |image, index|
         active = image == args[:top_img] ? "active" : ""
 
-        concat(tag.li(class: class_names("carousel-indicator mx-1", active),
-                      data: { target: "##{args[:html_id]}",
-                              slide_to: index.to_s }) do
-                 carousel_thumbnail(image)
-               end)
+        concat(render(partial: "shared/carousel_thumbnail",
+                      locals: { image, index, html_id }))
       end
     end
-  end
-
-  def carousel_thumbnail(image)
-    presenter_args = { fit: :contain, extra_classes: "carousel-thumbnail" }
-    presenter = ImagePresenter.new(image, presenter_args)
-
-    image_tag(presenter.img_src, presenter.options_lazy)
   end
 
   def carousel_no_images_message
