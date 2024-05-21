@@ -1,19 +1,27 @@
 <%=
 # Caption needs object for copyright info
-    img_args = local_assigns.except(:images, :object, :top_img, :title,
-                                    :links, :thumbnails, :html_id)
-    presenter_args = img_args.merge({ fit: :contain, original: true,
-                                      extra_classes: "carousel-image" })
-    presenter = ImagePresenter.new(image, presenter_args)
-    active = image == top_img ? "active" : ""
+presenter = ImagePresenter.new(image, args)
+set_width = presenter.width.present? ? "width: #{presenter.width}px;" : ""
 
-    tag.div(class: class_names("item", active)) do
-      concat(image_tag(presenter.img_src, presenter.options_lazy))
-      if presenter.image_link
-        concat(image_stretched_link(presenter.image_link,
-                                    presenter.image_link_method))
-      end
-      concat(lightbox_link(presenter.lightbox_data))
-      concat(carousel_caption(image, object, presenter))
-    end
+[
+  tag.div(class: "image-sizer position-relative mx-auto",
+          style: set_width.to_s) do
+    [
+      tag.div(class: "image-lazy-sizer overflow-hidden",
+              style: "padding-bottom: #{presenter.proportion}%;") do
+        [
+          image_tag("placeholder.svg", presenter.options_lazy),
+          tag.noscript do
+            image_tag(presenter.img_src, presenter.options_noscript)
+          end
+        ].safe_join
+      end,
+      image_stretched_link(presenter.image_link,
+                           presenter.image_link_method),
+      lightbox_link(presenter.lightbox_data),
+      image_vote_section_html(presenter.image, presenter.votes)
+    ].safe_join
+  end,
+  image_owner_original_name(presenter.image, presenter.original)
+].safe_join
 %>
