@@ -271,7 +271,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # and profile or glossary term pages that use the image.
   def update_certain_images
     broadcast_replace_later_to(
-      :image,
+      ->(image) { image },
       target: "interactive_image_#{id}",
       partial: "shared/interactive_image",
       locals: { image: self,
@@ -288,13 +288,13 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       # for observation carousels, we'll need the top image and the
       # index of this image, to keep the carousel functional after update
       broadcast_replace_later_to(
-        :image,
+        ->(image) { image },
         target: "carousel_item_#{id}",
         partial: "shared/carousel_item",
         locals: { image: self, size: :large, top_img:, object: observation }
       )
       broadcast_replace_later_to(
-        :image,
+        ->(image) { image },
         target: "carousel_thumbnail_#{id}",
         partial: "shared/carousel_thumbnail",
         locals: { image: self,
@@ -308,7 +308,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   def broadcast_to_glossary_terms
     glossary_terms.each do
       broadcast_replace_later_to(
-        :image,
+        ->(image) { image },
         target: "glossary_term_image_#{id}",
         partial: "shared/interactive_image",
         locals: { image: self, args: { size: :medium, votes: true,
@@ -320,7 +320,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   def broadcast_to_profile_users
     profile_users.each do
       broadcast_replace_later_to(
-        :image,
+        ->(image) { image },
         target: "profile_image_#{id}",
         partial: "shared/interactive_image",
         locals: { image: self, args: { votes: false,
