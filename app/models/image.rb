@@ -258,8 +258,9 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   after_update :track_copyright_changes
   before_destroy :update_thumbnails
 
-  after_commit :update_obs_images, on: :update,
-                                   if: ->(image) { image.observations.exists? }
+  broadcasts_to(:image, target: "interactive_image_#{id}")  
+  broadcasts_to(:image, target: "carousel_item_#{id}")
+  broadcasts_to(:image, target: "carousel_thumbnail_#{id}")
 
   scope :interactive_includes, lambda {
     strict_loading.includes(
