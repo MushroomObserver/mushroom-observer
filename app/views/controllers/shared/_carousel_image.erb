@@ -4,7 +4,8 @@ presenter = ImagePresenter.new(image, args)
 set_width = presenter.width.present? ? "width: #{presenter.width}px;" : ""
 
 [
-  tag.div(class: "image-sizer position-relative mx-auto",
+  tag.div(id: "interactive_image_#{image.id}",
+          class: "image-sizer position-relative mx-auto",
           style: set_width.to_s) do
     [
       tag.div(class: "image-lazy-sizer overflow-hidden",
