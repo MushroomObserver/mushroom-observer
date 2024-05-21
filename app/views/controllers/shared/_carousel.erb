@@ -8,15 +8,15 @@
 #
 # Note: uses concat(x) instead of [x,y].safe_join because of conditionals
 
-images ||= nil
-object ||= nil
+images ||= nil #
+object ||= nil #
 size ||= :large
-top_img ||= images.first
-title ||= :IMAGES.t
-links ||= ""
-thumbnails = true if thumbnails.nil?
-type = object&.type_tag || "image"
-html_id ||= "#{type}_#{object.id}_carousel"
+top_img ||= images.first #
+title ||= :IMAGES.t #
+links ||= "" #
+thumbnails = true if thumbnails.nil? #
+type = object&.type_tag || "image" #
+html_id ||= "#{type}_#{object.id}_carousel" #
 
 concat(carousel_heading(title, links)) if thumbnails
 if !images.nil? && images.any?
@@ -26,11 +26,18 @@ if !images.nil? && images.any?
       images.each do |image|
         concat(turbo_stream_from(image))
         concat(render(partial: "shared/carousel_item",
-                      locals: { image:, **local_assigns }))
+                      locals: { image:, size:, top_img:, object: }))
       end
       concat(carousel_controls(html_id)) if images.length > 1
     end)
-    concat(carousel_thumbnails(**local_assigns)) if thumbnails
+    concat(
+      tag.ol(class: "carousel-indicators panel-footer py-2 px-0 mb-0") do
+        images.each_with_index do |image, index|
+          concat(render(partial: "shared/carousel_thumbnail",
+                        locals: { image:, index:, top_img:, html_id: }))
+        end
+      end
+    ) if thumbnails
   end
 else
   concat(carousel_no_images_message)

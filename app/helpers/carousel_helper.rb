@@ -49,17 +49,6 @@ module CarouselHelper
     end
   end
 
-  def carousel_thumbnails(**args)
-    tag.ol(class: "carousel-indicators panel-footer py-2 px-0 mb-0") do
-      args[:images].each_with_index do |image, index|
-        active = image == args[:top_img] ? "active" : ""
-
-        concat(render(partial: "shared/carousel_thumbnail",
-                      locals: { image:, index:, html_id: args[:html_id] }))
-      end
-    end
-  end
-
   def carousel_no_images_message
     tag.div(:show_observation_no_images.l,
             class: "p-4 w-100 h-100 text-center h3 text-muted")

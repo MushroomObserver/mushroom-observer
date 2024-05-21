@@ -25,13 +25,9 @@
     </div><!--.text-center-->
   </div><!--.panel-heading-->
   <div class="panel-body">
-    
-    <%= interactive_image(@image,
-                          size: :huge,
-                          image_link: {},
-                          img_class: "huge-image",
-                          theater_on_click: true,
-                          votes: false) %>
+
+    <%= turbo_stream_from(@image) %>
+    <%= interactive_image(@image, **image_show_template_args) %>
 
     <div class="mt-3 text-center">
       <% if User.current %>

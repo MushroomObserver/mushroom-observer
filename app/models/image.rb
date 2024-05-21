@@ -258,12 +258,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   after_update :track_copyright_changes
   before_destroy :update_thumbnails
 
-  broadcasts_to(:image, target: "interactive_image_#{id}",
-                        partial: "shared/interactive_image")  
-  broadcasts_to(:image, target: "carousel_item_#{id}",
-                        partial: "shared/carousel_item")
-  broadcasts_to(:image, target: "carousel_thumbnail_#{id}",
-                        partial: "shared/carousel_thumbnail")
+  after_update_commit :update_certain_images
 
   scope :interactive_includes, lambda {
     strict_loading.includes(
@@ -273,22 +268,33 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # If an image is updated (generally on upload or transform)
   # broadcast to the image's observations (usually only one).
-  # Update the entire carousel
-  def update_obs_images
-    observations.each do |obs|
-      carousel_locals = {
-        object: obs,
-        images: obs.images,
-        top_img: obs&.thumb_image || nil,
-        html_id: "observation_images",
-        title: :IMAGES.t,
-        links: observation_show_image_links(obs: obs)
-      }
+  def update_certain_images
+    broadcast_replace_later_to(
+      :image,
+      target: "interactive_image_#{id}",
+      partial: "images/show/interactive_image",
+      locals: { image: self }
+    )
+    return if observations.blank?
 
-      broadcast_replace_later_to([obs, :images],
-                                 partial: "shared/carousel",
-                                 locals: carousel_locals,
-                                 target: "observation_images")
+    observations.each do |observation|
+      # for observation carousels, we'll need the top image and the
+      # index of this image, to keep the carousel functional after update
+      broadcast_replace_later_to(
+        :image,
+        target: "carousel_item_#{id}",
+        partial: "shared/carousel_item",
+        locals: { image: self, size: :large, top_img:, object: observation }
+      )
+      broadcast_replace_later_to(
+        :image,
+        target: "carousel_thumbnail_#{id}",
+        partial: "shared/carousel_thumbnail",
+        locals: { image: self,
+                  index: observation.images.find_index(self),
+                  top_img: observation.thumb_image,
+                  html_id: "observation_images" }
+      )
     end
   end
 

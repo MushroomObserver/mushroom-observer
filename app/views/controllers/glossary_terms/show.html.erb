@@ -13,7 +13,9 @@ add_tab_set(glossary_term_show_tabs(term: @glossary_term, user: @user))
   </div>
   <% if @glossary_term.thumb_image %>
     <div class="col-sm-4">
-      <%= interactive_image(@glossary_term.thumb_image, size: :medium, votes: true) %>
+      <%= interactive_image(
+        @glossary_term.thumb_image, size: :medium, votes: true
+      ) %>
     </div>
   <% end %>
 </div><!--.row-->

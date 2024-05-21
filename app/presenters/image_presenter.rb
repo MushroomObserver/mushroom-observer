@@ -49,7 +49,7 @@ class ImagePresenter < BasePresenter
       votes: true,
       original: false,
       is_set: true,
-      context: false # false to constrain width
+      full_width: false # false to constrain width
     }
     args = default_args.merge(args)
     img_urls = image&.all_urls || Image.all_urls(image_id)
@@ -112,7 +112,7 @@ class ImagePresenter < BasePresenter
     img_padding = "133.33" if img_padding.to_i > 133 # default for tall
     self.proportion = img_padding
 
-    if args[:context] == :matrix_box
+    if args[:full_width] == true
       self.width = false
     else
       # Constrain width to expected dimensions for img size (not layout)
