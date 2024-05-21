@@ -25,7 +25,7 @@
     </div><!--.text-center-->
   </div><!--.panel-heading-->
   <div class="panel-body">
-
+    <%= turbo_stream_from(@image) %>
     <%= interactive_image(@image,
                           size: :huge,
                           image_link: {},
