@@ -258,9 +258,12 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   after_update :track_copyright_changes
   before_destroy :update_thumbnails
 
-  broadcasts_to(:image, target: "interactive_image_#{id}")  
-  broadcasts_to(:image, target: "carousel_item_#{id}")
-  broadcasts_to(:image, target: "carousel_thumbnail_#{id}")
+  broadcasts_to(:image, target: "interactive_image_#{id}",
+                        partial: "shared/interactive_image")  
+  broadcasts_to(:image, target: "carousel_item_#{id}",
+                        partial: "shared/carousel_item")
+  broadcasts_to(:image, target: "carousel_thumbnail_#{id}",
+                        partial: "shared/carousel_thumbnail")
 
   scope :interactive_includes, lambda {
     strict_loading.includes(
