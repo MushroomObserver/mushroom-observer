@@ -267,16 +267,23 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   }
 
   # If an image is updated (generally on upload or transform)
-  # broadcast to the image's observations (usually only one).
+  # broadcast to the show_image page, the image's observations
+  # and profile or glossary term pages that use the image.
   def update_certain_images
     broadcast_replace_later_to(
       :image,
       target: "interactive_image_#{id}",
-      partial: "images/show/interactive_image",
-      locals: { image: self }
+      partial: "shared/interactive_image",
+      locals: { image: self,
+                args: ApplicationController.helpers.image_show_presenter_args }
     )
-    return if observations.blank?
 
+    broadcast_to_observations if observations.present?
+    broadcast_to_glossary_terms if glossary_terms.present?
+    broadcast_to_profile_users if profile_users.present?
+  end
+
+  def broadcast_to_observations
     observations.each do |observation|
       # for observation carousels, we'll need the top image and the
       # index of this image, to keep the carousel functional after update
@@ -294,6 +301,30 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
                   index: observation.images.find_index(self),
                   top_img: observation.thumb_image,
                   html_id: "observation_images" }
+      )
+    end
+  end
+
+  def broadcast_to_glossary_terms
+    glossary_terms.each do
+      broadcast_replace_later_to(
+        :image,
+        target: "glossary_term_image_#{id}",
+        partial: "shared/interactive_image",
+        locals: { image: self, args: { size: :medium, votes: true,
+                                       id_prefix: "glossary_term_image" } }
+      )
+    end
+  end
+
+  def broadcast_to_profile_users
+    profile_users.each do
+      broadcast_replace_later_to(
+        :image,
+        target: "profile_image_#{id}",
+        partial: "shared/interactive_image",
+        locals: { image: self, args: { votes: false,
+                                       id_prefix: "profile_image" } }
       )
     end
   end

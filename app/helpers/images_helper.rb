@@ -30,7 +30,7 @@ module ImagesHelper
     set_width = presenter.width.present? ? "width: #{presenter.width}px;" : ""
 
     [
-      tag.div(id: "interactive_image_#{image.id}",
+      tag.div(id: presenter.html_id,
               class: "image-sizer position-relative mx-auto",
               style: set_width.to_s) do
         [
@@ -54,7 +54,7 @@ module ImagesHelper
   end
 
   # Args for the interactive image on Images#show (particular to that context)
-  def image_show_template_args
+  def image_show_presenter_args
     { size: :huge,
       image_link: {},
       img_class: "huge-image",

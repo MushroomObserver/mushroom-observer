@@ -13,7 +13,8 @@ class ImagePresenter < BasePresenter
     :image_link_method, # needed for helper
     :lightbox_data,     # contains data passed to lightbox (incl. caption)
     :votes,             # show votes? boolean
-    :original           # show original image filename? (boolean)
+    :original,          # show original image filename? (boolean)
+    :html_id            # dom_id for broadcasts (image.id added)
 
   def initialize(image, args = {})
     super
@@ -49,7 +50,8 @@ class ImagePresenter < BasePresenter
       votes: true,
       original: false,
       is_set: true,
-      full_width: false # false to constrain width
+      full_width: false, # false to constrain width
+      id_prefix: "interactive_image"
     }
     args = default_args.merge(args)
     img_urls = image&.all_urls || Image.all_urls(image_id)
@@ -98,6 +100,7 @@ class ImagePresenter < BasePresenter
     self.image_link_method = args[:link_method]
     self.votes = args[:votes]
     self.original = args[:original]
+    self.html_id = "#{args[:id_prefix]}_#{image_id}"
   end
 
   def sizing_info_to_presenter(image, args)
