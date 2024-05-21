@@ -1,27 +1,6 @@
 # frozen_string_literal: true
 
 module CarouselHelper
-  # args are leftover from template, could be used
-  def carousel_item(image, **args)
-    # Caption needs object for copyright info
-    img_args = args.except(:images, :object, :top_img, :title, :links,
-                           :thumbnails, :html_id)
-    presenter_args = img_args.merge({ fit: :contain, original: true,
-                                      extra_classes: "carousel-image" })
-    presenter = ImagePresenter.new(image, presenter_args)
-    active = image == args[:top_img] ? "active" : ""
-
-    tag.div(class: class_names("item", active)) do
-      concat(image_tag(presenter.img_src, presenter.options_lazy))
-      if presenter.image_link
-        concat(image_stretched_link(presenter.image_link,
-                                    presenter.image_link_method))
-      end
-      concat(lightbox_link(presenter.lightbox_data))
-      concat(carousel_caption(image, args[:object], presenter))
-    end
-  end
-
   # Very similar to an interactive_image caption
   def carousel_caption(image, object, presenter)
     classes = "carousel-caption"
@@ -76,7 +55,7 @@ module CarouselHelper
         active = image == args[:top_img] ? "active" : ""
 
         concat(render(partial: "shared/carousel_thumbnail",
-                      locals: { image, index, html_id }))
+                      locals: { image:, index:, html_id: args[:html_id] }))
       end
     end
   end
