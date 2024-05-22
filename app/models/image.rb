@@ -293,21 +293,30 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     observations.each do |observation|
       # for observation carousels, we'll need the top image and the
       # index of this image, to keep the carousel functional after update
-      broadcast_replace_later_to(
-        ->(image) { image },
-        target: "carousel_item_#{id}",
-        partial: "shared/carousel_item",
-        locals: { image: self,
-                  size: :large,
-                  top_img: observation.thumb_image,
-                  object: observation }
-      )
-      broadcast_replace_later_to(
-        ->(image) { image },
-        target: "carousel_thumbnail_#{id}",
-        partial: "shared/carousel_thumbnail",
-        locals: { image: self,
-                  index: observation.images.find_index(self),
+      # broadcast_replace_later_to(
+      #   ->(image) { image },
+      #   target: "carousel_item_#{id}",
+      #   partial: "shared/carousel_item",
+      #   locals: { image: self,
+      #             size: :large,
+      #             top_img: observation.thumb_image,
+      #             object: observation }
+      # )
+      # broadcast_replace_later_to(
+      #   ->(image) { image },
+      #   target: "carousel_thumbnail_#{id}",
+      #   partial: "shared/carousel_thumbnail",
+      #   locals: { image: self,
+      #             index: observation.images.find_index(self),
+      #             top_img: observation.thumb_image,
+      #             html_id: "observation_images" }
+      # )
+      broadcast_replace_to(
+        [observation, :images],
+        target: "observation_images",
+        partial: "shared/carousel",
+        locals: { images: observation.images,
+                  object: observation,
                   top_img: observation.thumb_image,
                   html_id: "observation_images" }
       )
