@@ -188,8 +188,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   has_many :observation_images, dependent: :destroy
   # These callbacks are to update the carousel when images are added or removed
-  has_many :images, through: :observation_images,
-                    after_add: :flag_images, after_remove: :flag_images
+  has_many :images, through: :observation_images #,
+                    # after_add: :flag_images, after_remove: :flag_images
 
   has_many :project_observations, dependent: :destroy
   has_many :projects, through: :project_observations
@@ -1068,6 +1068,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       save
       notify_users(:added_image)
       reload
+      @images_changed = true
     end
     img
   end
@@ -1082,6 +1083,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
         update(thumb_image: images.empty? ? nil : images.first)
       end
       notify_users(:removed_image)
+      @images_changed = true
     end
     img
   end
