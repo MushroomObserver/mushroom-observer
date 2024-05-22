@@ -231,6 +231,7 @@ module ObservationsController::FormHelpers
         observation.add_image(image)
         image.log_create_for(observation)
       end
+      image.touch
     end
   end
 
