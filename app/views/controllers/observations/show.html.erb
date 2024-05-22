@@ -22,6 +22,7 @@ carousel_locals = {
 
 <div class="row">
   <div class="col-xs-12 col-md-8 col-lg-7 float-sm-left">
+    <%= turbo_stream_from(@observation, :images) %>
     <%= tag.div(class: "panel panel-default") do
       render(partial: "shared/carousel", locals: carousel_locals)
     end %>
