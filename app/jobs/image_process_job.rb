@@ -4,7 +4,7 @@
 #  image and transfer them to the image server(s).
 #
 class ImageProcessJob < ApplicationJob
-  queue_as :default
+  queue_as :high_priority
 
   rescue_from(StandardError) do |exception|
     # Handle the error here. For example, we can send a notification email,
