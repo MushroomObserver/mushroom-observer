@@ -222,7 +222,7 @@ module ObservationsController::FormHelpers
   end
 
   # Now that the observation has been successfully created, we can attach
-  # any images that were uploaded earlier
+  # any images that were uploaded earlier. This fires on :create and :update.
   def attach_good_images(observation, images)
     return unless images
 
@@ -233,6 +233,20 @@ module ObservationsController::FormHelpers
       end
       logger.warn("attaching_image: #{image.id} to #{observation.id}")
     end
+    broadcast_images_to_carousel(observation, images)
+  end
+
+  def broadcast_images_to_carousel(observation, images)
+    logger.warn("Broadcasting carousel update to observation #{observation.id}")
+    Turbo::StreamsChannel.broadcast_replace_later_to(
+      [observation, :images],
+      target: "observation_images",
+      partial: "shared/carousel",
+      locals: { images:,
+                object: observation,
+                top_img: observation.thumb_image,
+                html_id: "observation_images" }
+    )
   end
 
   def strip_images!
