@@ -11,7 +11,7 @@
 #
 # Note: uses concat(x) instead of [x,y].safe_join because of conditionals
 
-images ||= nil #
+images ||= object&.images || nil #
 object ||= nil #
 size ||= :large
 top_img ||= images.first #
@@ -27,7 +27,6 @@ if !images.nil? && images.any?
           data: { ride: "false", interval: "false" }) do
     concat(tag.div(class: "carousel-inner bg-light", role: "listbox") do
       images.each do |image|
-        concat(turbo_stream_from(image))
         concat(render(partial: "shared/carousel_item",
                       locals: { image:, size:, top_img:, object: }))
       end
