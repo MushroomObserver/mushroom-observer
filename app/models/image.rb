@@ -258,10 +258,10 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   after_update :track_copyright_changes
   before_destroy :update_thumbnails
 
-  after_update_commit :update_certain_images
+  # after_update_commit :update_certain_images
   after_update_commit :broadcast_to_observations
-  after_update_commit :broadcast_to_glossary_terms
-  after_update_commit :broadcast_to_profile_users
+  # after_update_commit :broadcast_to_glossary_terms
+  # after_update_commit :broadcast_to_profile_users
 
   scope :interactive_includes, lambda {
     strict_loading.includes(
@@ -287,6 +287,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def broadcast_to_observations
+    logger.warn("broadcasting to observations #{observations.count}")
     return if observations.blank?
 
     observations.each do |observation|
