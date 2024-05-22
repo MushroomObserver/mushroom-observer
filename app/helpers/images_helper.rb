@@ -56,7 +56,7 @@ module ImagesHelper
   # Args for the interactive image on Images#show (particular to that context)
   def image_show_presenter_args
     { size: :huge,
-      image_link: {},
+      image_link: "#",
       img_class: "huge-image",
       theater_on_click: true,
       votes: false }
