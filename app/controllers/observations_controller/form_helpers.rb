@@ -233,7 +233,7 @@ module ObservationsController::FormHelpers
       end
       logger.warn("attaching_image: #{image.id} to #{observation.id}")
     end
-    broadcast_images_to_carousel(observation, images)
+    # broadcast_images_to_carousel(observation, images)
   end
 
   # Only broadcast_images_to_carousel after ALL images have been attached.
