@@ -259,6 +259,9 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   before_destroy :update_thumbnails
 
   after_update_commit :update_certain_images
+  after_update_commit :broadcast_to_observations
+  after_update_commit :broadcast_to_glossary_terms
+  after_update_commit :broadcast_to_profile_users
 
   scope :interactive_includes, lambda {
     strict_loading.includes(
@@ -278,12 +281,14 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
                 args: ApplicationController.helpers.image_show_presenter_args }
     )
 
-    broadcast_to_observations if observations.present?
-    broadcast_to_glossary_terms if glossary_terms.present?
-    broadcast_to_profile_users if profile_users.present?
+    # broadcast_to_observations if observations.present?
+    # broadcast_to_glossary_terms if glossary_terms.present?
+    # broadcast_to_profile_users if profile_users.present?
   end
 
   def broadcast_to_observations
+    return if observations.blank?
+
     observations.each do |observation|
       # for observation carousels, we'll need the top image and the
       # index of this image, to keep the carousel functional after update
@@ -309,6 +314,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def broadcast_to_glossary_terms
+    return if glossary_terms.blank?
+
     glossary_terms.each do
       broadcast_replace_later_to(
         ->(image) { image },
@@ -321,6 +328,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def broadcast_to_profile_users
+    return if profile_users.blank?
+
     profile_users.each do
       broadcast_replace_later_to(
         ->(image) { image },
