@@ -291,7 +291,10 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
         ->(image) { image },
         target: "carousel_item_#{id}",
         partial: "shared/carousel_item",
-        locals: { image: self, size: :large, top_img:, object: observation }
+        locals: { image: self,
+                  size: :large,
+                  top_img: observation.thumb_image,
+                  object: observation }
       )
       broadcast_replace_later_to(
         ->(image) { image },
