@@ -187,7 +187,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :namings
 
   has_many :observation_images, dependent: :destroy
-  has_many :images, through: :observation_images
+  # These callbacks are to update the carousel when images are added or removed
+  has_many :images, through: :observation_images,
+                    after_add: :flag_images, after_remove: :flag_images
 
   has_many :project_observations, dependent: :destroy
   has_many :projects, through: :project_observations
@@ -218,6 +220,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   before_destroy :destroy_orphaned_collection_numbers
   before_destroy :notify_species_lists
   after_destroy :destroy_dependents
+  after_save :do_broadcasts
 
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
@@ -1093,6 +1096,35 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       specimen ||
       notes.length >= 100
   end
+
+  private
+
+  # ActiveRecord does change tracking for belongs_to, but not has_many.
+  # This is a workaround to flag changes to images.
+  # https://stackoverflow.com/a/60601696/3357635
+  def flag_images
+    @images_changed = true
+  end
+
+  # potentially broadcast other changes to obs here:
+  def do_broadcasts
+    # rubocop:disable Style/GuardClause
+    if @images_changed || images.any?(&:saved_changes?)
+      logger.warn("Broadcasting carousel update to observation #{id}")
+      broadcast_replace_to(
+        [self, :images],
+        target: "observation_images",
+        partial: "shared/carousel",
+        locals: { images: images,
+                  object: self,
+                  top_img: thumb_image,
+                  html_id: "observation_images" }
+      )
+    end
+    # rubocop:enable Style/GuardClause
+  end
+
+  public
 
   ##############################################################################
   #

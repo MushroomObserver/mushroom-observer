@@ -232,7 +232,6 @@ module ObservationsController::FormHelpers
         image.log_create_for(observation)
       end
       logger.warn("attaching_image: #{image.id} to #{observation.id}")
-      image.touch
     end
   end
 

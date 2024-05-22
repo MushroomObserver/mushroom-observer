@@ -258,8 +258,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   after_update :track_copyright_changes
   before_destroy :update_thumbnails
 
-  # after_update_commit :update_certain_images
-  after_update_commit :broadcast_to_observations
+  after_update_commit :update_show_image
+  # after_update_commit :broadcast_to_observations
   # after_update_commit :broadcast_to_glossary_terms
   # after_update_commit :broadcast_to_profile_users
 
@@ -272,7 +272,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # If an image is updated (generally on upload or transform)
   # broadcast to the show_image page, the image's observations
   # and profile or glossary term pages that use the image.
-  def update_certain_images
+  def update_show_image
     broadcast_replace_later_to(
       ->(image) { image },
       target: "interactive_image_#{id}",
@@ -286,42 +286,42 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     # broadcast_to_profile_users if profile_users.present?
   end
 
-  def broadcast_to_observations
-    logger.warn("broadcasting to observations #{observations.count}")
-    return if observations.blank?
+  # def broadcast_to_observations
+  #   logger.warn("broadcasting to observations #{observations.count}")
+  #   return if observations.blank?
 
-    observations.each do |observation|
-      # for observation carousels, we'll need the top image and the
-      # index of this image, to keep the carousel functional after update
-      # broadcast_replace_later_to(
-      #   ->(image) { image },
-      #   target: "carousel_item_#{id}",
-      #   partial: "shared/carousel_item",
-      #   locals: { image: self,
-      #             size: :large,
-      #             top_img: observation.thumb_image,
-      #             object: observation }
-      # )
-      # broadcast_replace_later_to(
-      #   ->(image) { image },
-      #   target: "carousel_thumbnail_#{id}",
-      #   partial: "shared/carousel_thumbnail",
-      #   locals: { image: self,
-      #             index: observation.images.find_index(self),
-      #             top_img: observation.thumb_image,
-      #             html_id: "observation_images" }
-      # )
-      broadcast_replace_to(
-        [observation, :images],
-        target: "observation_images",
-        partial: "shared/carousel",
-        locals: { images: observation.images,
-                  object: observation,
-                  top_img: observation.thumb_image,
-                  html_id: "observation_images" }
-      )
-    end
-  end
+  #   observations.each do |observation|
+  #     # for observation carousels, we'll need the top image and the
+  #     # index of this image, to keep the carousel functional after update
+  #     broadcast_replace_later_to(
+  #       ->(image) { image },
+  #       target: "carousel_item_#{id}",
+  #       partial: "shared/carousel_item",
+  #       locals: { image: self,
+  #                 size: :large,
+  #                 top_img: observation.thumb_image,
+  #                 object: observation }
+  #     )
+  #     broadcast_replace_later_to(
+  #       ->(image) { image },
+  #       target: "carousel_thumbnail_#{id}",
+  #       partial: "shared/carousel_thumbnail",
+  #       locals: { image: self,
+  #                 index: observation.images.find_index(self),
+  #                 top_img: observation.thumb_image,
+  #                 html_id: "observation_images" }
+  #     )
+  #     broadcast_replace_to(
+  #       [observation, :images],
+  #       target: "observation_images",
+  #       partial: "shared/carousel",
+  #       locals: { images: observation.images,
+  #                 object: observation,
+  #                 top_img: observation.thumb_image,
+  #                 html_id: "observation_images" }
+  #     )
+  #   end
+  # end
 
   def broadcast_to_glossary_terms
     return if glossary_terms.blank?
