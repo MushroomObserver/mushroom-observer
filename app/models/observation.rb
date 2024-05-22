@@ -1113,7 +1113,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     # rubocop:disable Style/GuardClause
     if @images_changed || images.any?(&:saved_changes?)
       logger.warn("Broadcasting carousel update to observation #{id}")
-      broadcast_replace_to(
+      broadcast_replace_later_to(
         [self, :images],
         target: "observation_images",
         partial: "shared/carousel",
