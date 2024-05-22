@@ -218,7 +218,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   before_destroy :destroy_orphaned_collection_numbers
   before_destroy :notify_species_lists
   after_destroy :destroy_dependents
-  after_save :do_broadcasts
+  # after_save :do_broadcasts
 
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
@@ -1100,27 +1100,27 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       notes.length >= 100
   end
 
-  private
+  # private
 
-  # potentially broadcast other changes to obs here:
-  def do_broadcasts
-    # rubocop:disable Style/GuardClause
-    if @images_changed || images.any?(&:saved_changes?)
-      logger.warn("Broadcasting carousel update to observation #{id}")
-      broadcast_replace_later_to(
-        [self, :images],
-        target: "observation_images",
-        partial: "shared/carousel",
-        locals: { object: self,
-                  images: images.to_a,
-                  top_img: thumb_image,
-                  html_id: "observation_images" }
-      )
-    end
-    # rubocop:enable Style/GuardClause
-  end
+  # # potentially broadcast other changes to obs here:
+  # def do_broadcasts
+  #   # rubocop:disable Style/GuardClause
+  #   if @images_changed || images.any?(&:saved_changes?)
+  #     logger.warn("Broadcasting carousel update to observation #{id}")
+  #     broadcast_replace_later_to(
+  #       [self, :images],
+  #       target: "observation_images",
+  #       partial: "shared/carousel",
+  #       locals: { object: self,
+  #                 images: images.to_a,
+  #                 top_img: thumb_image,
+  #                 html_id: "observation_images" }
+  #     )
+  #   end
+  #   # rubocop:enable Style/GuardClause
+  # end
 
-  public
+  # public
 
   ##############################################################################
   #
