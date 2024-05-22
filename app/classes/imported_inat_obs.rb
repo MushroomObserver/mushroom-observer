@@ -20,6 +20,10 @@ class ImportedInatObs
     obs[:id]
   end
 
+  def license
+    InatLicense.new(obs[:license_code]).license
+  end
+
   def obs_photos
     obs[:observation_photos]
   end

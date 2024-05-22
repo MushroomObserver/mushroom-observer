@@ -59,6 +59,11 @@ class ImportedInatObsTest < UnitTestCase
     # TODO: include in above array after creating Observation.inat_id attribute
     assert_equal(202555552, import.inat_id)
 
+    expect = License.where(License[:form_name] =~ "ccbync").
+             where(deprecated: false).order(id: :asc).first
+
+    assert_equal(expect, import.license)
+
 =begin
       # attributes to test
       t.integer "user_id"
