@@ -98,12 +98,15 @@ module ObservationsController::NewAndCreate
   public
 
   def create
+    logger.warn("ObservationsController#create: #{Time.zone.now}")
     @observation = create_observation_object(params[:observation])
+    logger.warn("create_observation_object: #{Time.zone.now}")
     # set these again, in case they are not defined
     init_license_var
     init_new_image_var(Time.zone.now)
 
     rough_cut(params)
+    logger.warn("rough_cut: #{Time.zone.now}")
     success = true
     success = false unless validate_params(params)
     success = false unless validate_object(@observation)
@@ -112,13 +115,16 @@ module ObservationsController::NewAndCreate
     success = false if @name && !@vote.value.nil? && !validate_object(@vote)
     success = false if @bad_images != []
     success = false if success && !save_observation(@observation)
+    logger.warn("save_observation: #{Time.zone.now}")
     return reload_new_form(params.dig(:naming, :reasons)) unless success
 
     @observation.log(:log_observation_created)
+    logger.warn("log_observation_created: #{Time.zone.now}")
     save_everything_else(params.dig(:naming, :reasons))
     strip_images! if @observation.gps_hidden
     update_field_slip(@observation, params[:field_code])
     flash_notice(:runtime_observation_success.t(id: @observation.id))
+    logger.warn("runtime_observation_success: #{Time.zone.now}")
     redirect_to_next_page
   end
 
@@ -172,11 +178,17 @@ module ObservationsController::NewAndCreate
 
   def save_everything_else(reason)
     update_naming(reason)
+    logger.warn("update_naming: #{Time.zone.now}")
     attach_good_images(@observation, @good_images)
+    logger.warn("attach_good_images: #{Time.zone.now}")
     update_projects(@observation, params[:project])
+    logger.warn("update_projects: #{Time.zone.now}")
     update_species_lists(@observation, params[:list])
+    logger.warn("update_species_lists: #{Time.zone.now}")
     save_collection_number(@observation, params)
+    logger.warn("save_collection_number: #{Time.zone.now}")
     save_herbarium_record(@observation, params)
+    logger.warn("save_herbarium_record: #{Time.zone.now}")
   end
 
   def update_naming(reason)
