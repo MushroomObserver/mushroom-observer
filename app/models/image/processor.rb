@@ -62,11 +62,12 @@ class Image
       MO.image_sources.each do |server, specs|
         next unless specs[:write]
 
-        uri = Addressable::URI.parse(specs[:write])
+        url = format(specs[:write], root: MO.root)
+        parsed = Addressable::URI.parse(url)
         data[server] = {
-          url: format(specs[:write], root: MO.root),
-          type: uri.scheme,
-          path: uri.authority + uri.path,
+          url: url,
+          type: parsed.scheme,
+          path: parsed.authority + parsed.path,
           subdirs: specs[:sizes] || IMAGE_SUBDIRS
         }
       end
