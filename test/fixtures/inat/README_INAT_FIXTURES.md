@@ -13,9 +13,11 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | ---- | -------- | ----- | -------- | ----- |
 | evernia_no_photos.txt | [216357655](https://www.inaturalist.org/observations/216357655) | 0 | public | |
 | tremella_mesenterica.txt | [213508767](https://www.inaturalist.org/observations/213508767) | 1 | public | |
-| coprinus.txt | [213450312](https://www.inaturalist.org/observations/213450312) | 1 | obscured | |
+| coprinus.txt | [213450312](https://www.inaturalist.org/observations/213450312) | 1 | **obscured** | |
 | somion_unicolor.json |  |  |  | Formatted version of following; facilitates viewing iNat API response key/values |
-| somion_unicolor.txt | [202555552](https://www.inaturalist.org/observations/202555552) | 5 | public | Nates, Activity, multiple IDs, **mirrored from MO**|
+| somion_unicolor.txt | [202555552](https://www.inaturalist.org/observations/202555552) | 5 | public | Notes, Activity, multiple IDs, **mirrored from MO**|
+| gyromitra_ancilis.txt | [216745568](https://www.inaturalist.org/observations/216745568) | 3 | public | **cc-by license**, multiple photos, **multiple projects** |
+| russulaceae.txt | [216675045](https://www.inaturalist.org/observations/216675045) | 2 | public | **all rights reserved**, multiple images, multiple projects, Activity |
 
 ## TODO
 
@@ -24,19 +26,13 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 - Plant or other non-fungal
 - Slime mold
 - Fungus with photo that was uploaded to iNat >= 1 day after iNat Obs was created
-- Multiple photos, not mirrored from MO
-- Photo with license that's not the MO default
-  - [216745568](https://www.inaturalist.org/observations/216745568), cc-by license, multiple photos, multiple projects
-  - [216675045](https://www.inaturalist.org/observations/216675045), all rights reserved, multiple images, multiple projects, Activity
-  - Public Domain
+- Public Domain license
 
 Need fixtures with the following fields:
 
 - Activity
 - Annotations
-  - [216853118](https://www.inaturalist.org/observations/216853118), one Annotation, one photo
 - Notes
-- Projects
 - Observation Fields
   - provisional name
   - sensu lato
