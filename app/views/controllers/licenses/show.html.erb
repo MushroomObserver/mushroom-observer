@@ -1,0 +1,15 @@
+<%
+  @container = :wide
+  add_page_title(show_license_title(@license))
+%>
+
+<div>
+  <p><b>License id:</b> <%= @license.id %></p>
+  <p><b>Updated_at:</b> <%= license_updated_at(@license) %></p>
+  <p><b>Deprecated:</b> <%= @license.deprecated.to_s %></p>
+  <p><b>Name:</b> <%= @license.display_name %></p>
+  <p><b>Form:</b> <%= @license.form_name %></p>
+  <p><b>url:</b> <%= link_to(@license.url, @license.url,
+                      { target: "_blank", rel: "noopener noreferrer" }) %>
+  </p>
+</div>

@@ -3330,6 +3330,9 @@
   users_by_name_theme: Theme
   users_by_name_verified: Verified
 
+  # licenses
+  show_license_header: License
+
   # support/create_donation
   create_donation_title: Record Mushroom Observer Donation
   create_donation_not_allowed: Only admins can record donations
