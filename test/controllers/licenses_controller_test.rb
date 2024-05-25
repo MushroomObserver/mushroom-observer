@@ -3,7 +3,10 @@ require "test_helper"
 class LicensesControllerTest < FunctionalTestCase
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
-  # happy path
+  def test_list
+    skip("Under Construction")
+  end
+
   def test_show
     license = licenses(:publicdomain)
     login("rolf")
@@ -35,5 +38,25 @@ class LicensesControllerTest < FunctionalTestCase
 
     assert_response(:redirect)
     assert_flash_text(:permission_denied.l)
+  end
+
+  def test_new
+    skip("Under Construction")
+  end
+
+  def test_create
+    skip("Under Construction")
+  end
+
+  def test_edit
+    skip("Under Construction")
+  end
+
+  def test_update
+    skip("Under Construction")
+  end
+
+  def test_delete
+    skip("Under Construction")
   end
 end
