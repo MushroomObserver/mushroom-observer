@@ -3170,7 +3170,7 @@
   add_members_change_status: Change Status
   add_members_denied: "Permission denied: only admins for a project can add new members."
   add_members_title: Add [:users] to [title]
-  add_members_not_found: User "<str>" not found.
+  add_members_not_found: User "[user]" not found.
   add_members_added_admin: Successfully added [user] to admins.
   add_members_added_member: Successfully added [user] to members.
   add_members_removed_admin: Successfully removed [user] from admins.
