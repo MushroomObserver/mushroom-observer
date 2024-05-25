@@ -263,9 +263,7 @@ module Account
     end
 
     def test_has_bulk_license_updater
-      user = users(:nonregional)
-      login("nonregional")
-
+      login
       get(:edit)
       assert_match(images_edit_licenses_path, response.body)
     end
