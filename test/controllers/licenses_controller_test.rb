@@ -3,8 +3,28 @@ require "test_helper"
 class LicensesControllerTest < FunctionalTestCase
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
-  def test_list
-    skip("Under Construction")
+  def test_index
+    login("rolf")
+    make_admin
+
+    get(:index)
+    assert(:success, "Admin should be able to see licenses index")
+    License.find_each do |license|
+      assert_select(
+        "a[href *= '#{license_path(license.id)}']", true,
+        "full License Index missing link to " \
+        "#{license.display_name} (##{license.id})"
+      )
+    end
+  end
+
+  def test_index_non_admin
+    login("rolf")
+
+    get(:index)
+
+    assert_response(:redirect)
+    assert_flash_text(:permission_denied.l)
   end
 
   def test_show
@@ -46,7 +66,13 @@ class LicensesControllerTest < FunctionalTestCase
 
   def test_create
     skip("Under Construction")
-  end
+    login("rolf")
+    make_admin
+
+    get(:new)
+
+    assert_response(:success)
+    assert_displayed_title(/#{license.display_name}/)  end
 
   def test_edit
     skip("Under Construction")

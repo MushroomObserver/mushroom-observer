@@ -3332,6 +3332,7 @@
 
   # licenses
   show_license_header: License
+  index_license_header: Licenses
 
   # support/create_donation
   create_donation_title: Record Mushroom Observer Donation

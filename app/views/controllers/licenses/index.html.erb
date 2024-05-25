@@ -1,0 +1,12 @@
+<%
+  @container = :wide
+  add_page_title(:index_license_header.t)
+
+  flash_error(@error) if @error && @objects.empty?
+%>
+
+<%= paginate_block(@pages) do %>
+  <div class="list-group">
+    <%= render(partial: "licenses/object", collection: @objects) %>
+  </div>
+<% end %>
