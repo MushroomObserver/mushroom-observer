@@ -62,11 +62,6 @@ class LicensesControllerTest < FunctionalTestCase
   end
 
   def test_new
-    skip("Under Construction")
-  end
-
-  def test_create
-    skip("Under Construction")
     login("rolf")
     make_admin
 

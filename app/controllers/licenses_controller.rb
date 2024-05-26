@@ -20,7 +20,7 @@ class LicensesController < AdminController
 
   def new
     # NOTE: 2025-05-26 jdc
-    # Added url to avoid following Failure; I don't understand why it fails.
+    # Added url to avoid this Failure; I don't understand why it fails.
     # FAIL LicensesControllerTest#test_new (2.57s)
     #      Expected HTML to contain form that posts to </licenses>,
     #      but only # found these: </licenses/new>.
