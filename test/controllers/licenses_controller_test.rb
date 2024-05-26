@@ -98,6 +98,36 @@ class LicensesControllerTest < FunctionalTestCase
     assert_redirected_to(license_path(license.id))
   end
 
+  def test_create_duplicate
+    license = licenses(:ccnc30)
+    params = { display_name: license.display_name,
+               url: license.url,
+               form_name: license.form_name,
+               deprecated: license.deprecated }
+
+    login("rolf")
+    make_admin
+
+    assert_no_difference("License.count", "Created duplicate License") do
+      post(:create, params: params)
+    end
+  end
+
+  def test_create_missing_attribute
+    license = licenses(:ccnc30)
+    params = { display_name: nil,
+               url: license.url,
+               form_name: license.form_name,
+               deprecated: license.deprecated }
+
+    login("rolf")
+    make_admin
+
+    assert_no_difference("License.count", "Created duplicate License") do
+      post(:create, params: params)
+    end
+  end
+
   def test_edit
     skip("Under Construction")
   end

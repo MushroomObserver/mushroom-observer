@@ -40,6 +40,10 @@
 ################################################################################
 
 class License < AbstractModel
+  validates :display_name, :form_name, :url, presence: true
+  # Don't add indexes because there are few Licenses, ad they rarely change
+  validates :display_name, :form_name, :url, uniqueness: true # rubocop:disable Rails/UniqueValidationWithoutIndex
+
   has_many :images
   has_many :location_descriptions
   has_many :name_descriptions

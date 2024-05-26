@@ -34,8 +34,11 @@ class LicensesController < AdminController
       url: params[:url],
       deprecated: params[:deprecated] == "true"
     )
-    @license.save
 
-    redirect_to(license_path(@license.id))
+    if @license.save
+      redirect_to(license_path(@license.id))
+    else
+      render(:new)
+    end
   end
 end
