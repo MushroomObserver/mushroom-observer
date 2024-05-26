@@ -15,12 +15,34 @@ action = controller.action_name
     </div>
   <% end %>
 
-  <%= text_field_with_label(form: form, field: :code) %>
+  <%= text_field_with_label(form: form, field: :code, inline: true, label: :field_slip_code.t + ":") %>
 
   <% if @field_slip.projects %>
-    <%= select_with_label(form: form, field: :project_id,
-                          options: @field_slip.projects) %>
+    <%= select_with_label(form: form, field: :project_id, inline: true,
+        label: :Project.t + ":", options: @field_slip.projects) %>
   <% end %>
+
+
+  <%= form.label(:date, "#{:DATE.t}: ") %>
+  <%= form.date_select(:date,
+                       { start_year: Date.today.year - 10,
+      end_year: Date.today.year + 10 }) %><br/>
+  <br/>
+
+  <%= autocompleter_field(form: form, field: :collector, inline: true,
+                          label: :COLLECTOR.t + ":", autocomplete: :user) %>
+  <%= autocompleter_field(form: form, field: :location, inline: true,
+                          label: :LOCATION.t + ":", autocomplete: :location) %>
+
+  <%= autocompleter_field(form: form, field: :name, inline: true,
+                          label: :ID.t + ":",
+                          autocomplete: :name) %>
+  <%= text_field_with_label(form: form, field: :id_by, inline: true,
+                            label: :ID_BY.t + ":") %>
+
+  <div class="mt-5">
+    Notes
+  </div>
 
   <%= submit_button(form: form, button: :field_slip_create_obs.t,
                     class: "mt-5") if action == "new" %>

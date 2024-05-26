@@ -240,6 +240,7 @@
   collection_number: collection number
   COLLECTION_NUMBERS: Collection Numbers
   collection_numbers: collection numbers
+  COLLECTOR: Collector
   COMMENT: Comment
   comment: comment
   COMMENTS: Comments
@@ -519,6 +520,7 @@
   identifier: identifier
   IDENTIFIERS: Identifiers
   identifiers: identifiers
+  ID_BY: ID By
   INDEX: Index
   index: index
   INDEXES: Indexes
