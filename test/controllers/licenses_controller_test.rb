@@ -62,7 +62,13 @@ class LicensesControllerTest < FunctionalTestCase
   end
 
   def test_new
-    skip("Under Construction")
+    login("rolf")
+    make_admin
+
+    get(:new)
+
+    assert_response(:success)
+    assert_form_action(action: :create) # "new" form posts to :create action
   end
 
   def test_create
