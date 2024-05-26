@@ -2556,8 +2556,6 @@
   show_publication_title: Publication
   show_publication_added_by: Added by
 
-
-
   # herbarium fields
   herbarium_curator: Curator
   herbarium_curators: Curators
@@ -3330,9 +3328,23 @@
   users_by_name_theme: Theme
   users_by_name_verified: Verified
 
+
   # licenses
-  show_license_header: License
+  # licenses/index
   index_license_header: Licenses
+
+  # licenses/show
+  show_license_header: License
+
+  # licenses/form
+  create_license_title: Create License
+  license_display_name: Full Name (display_name)
+  license_display_name_help: "Ex: Creative Commons Non-commercial v2.5"
+  license_form_name: Form Name
+  license_form_name_help: "Ex: ccbyncsa25"
+  license_url: url
+  license_url_help: "Ex: https://creativecommons.org/licenses/by-nc-sa/2.5/"
+
 
   # support/create_donation
   create_donation_title: Record Mushroom Observer Donation

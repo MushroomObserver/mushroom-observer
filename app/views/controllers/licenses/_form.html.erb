@@ -1,0 +1,21 @@
+<%= form_with(model: @license, url: @url) do |f| %>
+
+  <% append = help_block(:div, :license_display_name_help.t) %>
+  <%= text_field_with_label(form: f, field: :display_name,
+                            label: :license_display_name.t + ":",
+                            data: { autofocus: true },
+                            append: append)  %>
+
+  <% append = help_block(:div, :license_form_name_help.t) %>
+  <%= text_field_with_label(form: f, field: :form_name,
+                            label: :license_form_name.t + ":",
+                            append: append) %>
+
+  <% append = help_block(:div, :license_url_help.t) %>
+  <%= text_field_with_label(form: f, field: :url,
+                            label: :license_url.t + ":",
+                            append: append) %>
+
+  <%= submit_button(form: f, button: :SUBMIT.t, center: true) %>
+
+<% end %>

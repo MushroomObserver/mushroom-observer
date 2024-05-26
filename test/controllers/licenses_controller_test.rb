@@ -62,18 +62,40 @@ class LicensesControllerTest < FunctionalTestCase
   end
 
   def test_new
-    skip("Under Construction")
-  end
-
-  def test_create
-    skip("Under Construction")
     login("rolf")
     make_admin
 
     get(:new)
 
     assert_response(:success)
-    assert_displayed_title(/#{license.display_name}/)
+    assert_form_action(action: :create) # "new" form posts to :create action
+  end
+
+  def test_create
+    display_name = "Creative Commons Non-commercial v4.0"
+    assert_blank(License.where(display_name: display_name),
+                 "License already exists")
+    form_name = "ccbyncsa40"
+    url = "http://creativecommons.org/licenses/by-nc-sa/4.0/"
+    params = { display_name: display_name,
+               url: url,
+               form_name: form_name,
+               deprecated: "false" }
+
+    login("rolf")
+    make_admin
+
+    assert_difference("License.count", 1, "Failed to create License") do
+      post(:create, params: params)
+    end
+
+    license = License.last
+    assert_equal(display_name, license.display_name)
+    assert_equal(form_name, license.form_name)
+    assert_equal(url, license.url)
+    assert_false(license.deprecated)
+
+    assert_redirected_to(license_path(license.id))
   end
 
   def test_edit
