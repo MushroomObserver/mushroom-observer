@@ -41,4 +41,8 @@ class LicensesController < AdminController
       render(:new)
     end
   end
+
+  def edit
+    @license = find_or_goto_index(License, params[:id])
+  end
 end

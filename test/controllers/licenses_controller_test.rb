@@ -129,7 +129,16 @@ class LicensesControllerTest < FunctionalTestCase
   end
 
   def test_edit
-    skip("Under Construction")
+    license = licenses(:ccnc25)
+    params = { id: license.id }
+
+    login("rolf")
+    make_admin
+
+    get(:edit, params: params)
+
+    assert_response(:success)
+    assert_form_action({ action: :update }, "Edit form should post to :update")
   end
 
   def test_update

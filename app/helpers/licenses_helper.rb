@@ -4,15 +4,23 @@
 module LicensesHelper
   def show_license_title(license)
     [
+      license.display_name,
       license_title_id(license),
-      license.display_name
     ].safe_join(" ")
+  end
+end
+
+# "Editing: Creative Commons Non-commercial v3.0 (#nnn)"  textilized
+def license_edit_title(license)
+  capture do
+    concat("#{:EDITING.l}: ")
+    concat(show_license_title(license))
   end
 end
 
 def license_title_id(license)
   tag.span(class: "smaller") do
-    [:show_license_header.l, tag.span("#{license.id || "?"}:")].safe_join(" ")
+    tag.span("#(#{license.id || "?"}):")
   end
 end
 
