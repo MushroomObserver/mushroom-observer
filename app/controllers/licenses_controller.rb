@@ -74,7 +74,7 @@ class LicensesController < AdminController
     if @license.changed?
       raise(:runtime_unable_to_save_changes.t) unless @license.save
 
-      flash_notice(:runtime_updated_id.t(type: "License", id: @license.id))
+      flash_notice(:runtime_updated_id.t(type: "License", value: @license.id))
     else
       flash_warning(:runtime_no_changes.t)
     end
