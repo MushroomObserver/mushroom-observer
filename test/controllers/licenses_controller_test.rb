@@ -51,7 +51,7 @@ class LicensesControllerTest < FunctionalTestCase
   end
 
   def test_show_non_existent_license
-    license = licenses(:premier_license)
+    license = articles(:premier_article)
     login("rolf")
     make_admin
 
