@@ -2,6 +2,10 @@
 
 # helpers for show License view
 module LicensesHelper
+  def license_index_tabs
+    [new_license_tab]
+  end
+
   def show_license_title(license)
     [
       license.display_name,
@@ -29,5 +33,14 @@ module LicensesHelper
     else
       "nil"
     end
+  end
+
+  ##########
+
+  private
+
+  def new_license_tab
+    [:create_license_title.t, new_license_path,
+     { class: tab_id(__method__.to_s) }]
   end
 end

@@ -3,8 +3,6 @@
 require "test_helper"
 
 class LicensesControllerTest < FunctionalTestCase
-  # ---------- Actions to Display data (index, show, etc.) ---------------------
-
   def test_index
     login("rolf")
     make_admin
@@ -18,6 +16,10 @@ class LicensesControllerTest < FunctionalTestCase
         "#{license.display_name} (##{license.id})"
       )
     end
+    assert_select(
+      "a[href = '#{new_license_path}']", true,
+      "License Index missing link to #{:create_license_title.l}"
+    )
   end
 
   def test_index_non_admin

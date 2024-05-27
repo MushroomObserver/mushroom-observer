@@ -1,6 +1,7 @@
 <%
   @container = :wide
   add_page_title(:index_license_header.t)
+  add_tab_set(license_index_tabs)
 
   flash_error(@error) if @error && @objects.empty?
 %>
