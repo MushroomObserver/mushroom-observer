@@ -13,6 +13,6 @@ class NoteField
   end
 
   def value
-    ''
+    ""
   end
 end
