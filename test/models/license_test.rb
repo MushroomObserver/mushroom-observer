@@ -19,4 +19,9 @@ class LicenseTest < UnitTestCase
     names_and_ids = License.current_names_and_ids(licenses(:ccnc25))
     assert_equal(5, names_and_ids.length)
   end
+
+  def test_in_use
+    assert(licenses(:ccnc30).in_use?)
+    assert_not(licenses(:unused).in_use?)
+  end
 end

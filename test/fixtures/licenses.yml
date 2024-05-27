@@ -33,7 +33,7 @@ publicdomain:
   deprecated: false
   form_name: publicdomain
 
-ununsed:
+unused:
   display_name: All Rights Reserved
   url: https://en.wikipedia.org/wiki/All_rights_reserved
   deprecated: false

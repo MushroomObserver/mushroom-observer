@@ -32,6 +32,7 @@
 #  location_descriptions::  Array of Name's that use this License.
 #  name_descriptions::      Array of Name's that use this License.
 #  text_name::              Alias for +display_name+ for debugging.
+#  in_use?::                Is license used by any object?
 #
 #  == Callbacks
 #
@@ -86,15 +87,19 @@ class License < AbstractModel
     end
   end
 
+  def in_use?
+    images.any? || users.any? ||
+      location_descriptions.any? || name_descriptions.any?
+  end
+
   ###########
 
   private
 
   def prevent_destruction_of_license_in_use
-    if images.any? || location_descriptions.any? || name_descriptions.any? ||
-       users.any?
-      errors.add(:base, "Cannot delete License that's in use")
-      throw(:abort)
-    end
+    return unless in_use?
+
+    errors.add(:base, "Cannot delete License that's in use")
+    throw(:abort)
   end
 end
