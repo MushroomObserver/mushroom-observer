@@ -32,3 +32,9 @@ publicdomain:
   url: http://wiki.creativecommons.org/Public_domain/
   deprecated: false
   form_name: publicdomain
+
+ununsed:
+  display_name: All Rights Reserved
+  url: https://en.wikipedia.org/wiki/All_rights_reserved
+  deprecated: false
+  form_name: copyright
