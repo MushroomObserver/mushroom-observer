@@ -49,7 +49,7 @@ class LicensesControllerTest < FunctionalTestCase
   end
 
   def test_show_non_existent_license
-    license = articles(:premier_article)
+    license = licenses(:premier_license)
     login("rolf")
     make_admin
 
@@ -142,7 +142,27 @@ class LicensesControllerTest < FunctionalTestCase
   end
 
   def test_update
-    skip("Under Construction")
+    license = licenses(:ccwiki30)
+    params = { id: license.id,
+               license: { display_name: "X Special",
+                          form_name: "X",
+                          url: "https://x.com/explore",
+                          deprecated: "true" } }
+
+    login("rolf")
+    make_admin
+
+    put(:update, params: params)
+    license.reload
+
+    assert_flash_success
+    assert_redirected_to(license_path(license.id))
+
+    assert_equal(params.dig(:license, :display_name), license.display_name)
+    assert_equal(params.dig(:license, :form_name), license.form_name)
+    assert_equal(params.dig(:license, :url), license.url)
+    assert_equal((params.dig(:license, :deprecated) == "true"),
+                 license.deprecated)
   end
 
   def test_delete

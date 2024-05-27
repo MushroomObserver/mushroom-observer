@@ -32,7 +32,7 @@ class LicensesController < AdminController
       display_name: params[:display_name],
       form_name: params[:form_name],
       url: params[:url],
-      deprecated: params[:deprecated] == "true"
+      deprecated: (params[:deprecated] == "true")
     )
 
     if @license.save
@@ -44,5 +44,31 @@ class LicensesController < AdminController
 
   def edit
     @license = find_or_goto_index(License, params[:id])
+  end
+
+  def update
+    @license = License.find(params[:id])
+
+    @license.display_name = params.dig(:license, :display_name)
+    @license.form_name = params.dig(:license, :form_name)
+    @license.url = params.dig(:license, :url)
+    @license.deprecated = (params.dig(:license, :deprecated) == "true")
+
+    save_any_changes
+    redirect_to(license_path(@license.id))
+  end
+
+  #########
+
+  private
+
+  def save_any_changes
+    if @license.changed?
+      raise(:runtime_unable_to_save_changes.t) unless @license.save
+
+      flash_notice(:runtime_updated_id.t(type: "License", id: @license.id))
+    else
+      flash_warning(:runtime_no_changes.t)
+    end
   end
 end
