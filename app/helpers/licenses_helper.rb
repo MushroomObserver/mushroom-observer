@@ -5,7 +5,7 @@ module LicensesHelper
   def show_license_title(license)
     [
       license.display_name,
-      license_title_id(license),
+      license_title_id(license)
     ].safe_join(" ")
   end
 end
