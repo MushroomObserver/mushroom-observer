@@ -6,7 +6,7 @@ module LicensesHelper
     [new_license_tab]
   end
 
-  def show_license_title(license)
+  def license_show_title(license)
     [
       license.display_name,
       license_title_id(license)
@@ -17,7 +17,7 @@ module LicensesHelper
   def license_edit_title(license)
     capture do
       concat("#{:EDITING.l}: ")
-      concat(show_license_title(license))
+      concat(license_show_title(license))
     end
   end
 
