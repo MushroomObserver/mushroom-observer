@@ -33,6 +33,8 @@ class LicensesControllerTest < FunctionalTestCase
 
   def test_show
     license = licenses(:publicdomain)
+    assert(Image.where(license: license).any?,
+           "Need License fixture that's used")
     login("rolf")
     make_admin
 
@@ -40,6 +42,20 @@ class LicensesControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_displayed_title(/#{license.display_name}/)
+    assert_select(
+      "a[href = '#{license_path}']", true, "License page missing link to Index"
+    )
+    assert_select(
+      "a[href = '#{new_license}']", true,
+      "License page missing link to add License"
+    )
+    assert_select(
+      "a[href = '#{edit_license(license.id)}']", true,
+      "License page missing link to edit License"
+    )
+    # TODO: assert that there's no Destroy link
+    # probably need Capybara test
+    # DELETE /licenses/:id(.:format) licenses#destroy {:id=>/\d+/}
   end
 
   def test_show_non_admin
