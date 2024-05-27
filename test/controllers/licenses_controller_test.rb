@@ -173,7 +173,6 @@ class LicensesControllerTest < FunctionalTestCase
     license = licenses(:ununsed)
     params  = { id: license.id }
 
-    # Prove authorized user can destroy license
     login("rolf")
     make_admin
 
@@ -183,6 +182,24 @@ class LicensesControllerTest < FunctionalTestCase
     assert_not(
       License.exists?(license.id),
       "Failed to destroy license #{license.id}, '#{license.form_name}'"
+    )
+  end
+
+  def test_destroy_license_in_use
+    license = licenses(:ccnc30)
+    params  = { id: license.id }
+
+    login("rolf")
+    make_admin
+
+    assert_no_difference(
+      "License.count", "Destroyed License that's being used"
+    ) do
+      delete(:destroy, params: params)
+    end
+    assert(
+      License.exists?(license.id),
+      "Destroyed license #{license.id}, '#{license.form_name}'"
     )
   end
 end

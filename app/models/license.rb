@@ -40,14 +40,15 @@
 ################################################################################
 
 class License < AbstractModel
-  validates :display_name, :form_name, :url, presence: true
-  # Don't add indexes because there are few Licenses, ad they rarely change
-  validates :display_name, :form_name, :url, uniqueness: true # rubocop:disable Rails/UniqueValidationWithoutIndex
-
   has_many :images
   has_many :location_descriptions
   has_many :name_descriptions
   has_many :users
+
+  validates :display_name, :form_name, :url, presence: true
+  # Don't add indexes because there are few Licenses, and they rarely change
+  validates :display_name, :form_name, :url, uniqueness: true # rubocop:disable Rails/UniqueValidationWithoutIndex
+  before_destroy :prevent_destruction_of_license_in_use
 
   PREFERRED_LICENSE_FORM_NAME = "ccbysa30"
 
@@ -56,8 +57,7 @@ class License < AbstractModel
     License.find_by(form_name: PREFERRED_LICENSE_FORM_NAME)
   end
 
-  # Various debugging things require all models respond to text_name.  Just
-  # returns +display_name+.
+  # Various debugging things require all models respond to text_name
   def text_name
     display_name.to_s
   end
@@ -83,6 +83,18 @@ class License < AbstractModel
     else
       "".html_safe + :image_show_copyright.t.to_s + " &copy;".html_safe +
         " #{year} " + name
+    end
+  end
+
+  ###########
+
+  private
+
+  def prevent_destruction_of_license_in_use
+    if images.any? || location_descriptions.any? || name_descriptions.any? ||
+       users.any?
+      errors.add(:base, "Cannot delete License that's in use")
+      throw(:abort)
     end
   end
 end
