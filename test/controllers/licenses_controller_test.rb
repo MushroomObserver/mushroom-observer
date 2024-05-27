@@ -91,7 +91,8 @@ class LicensesControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
 
-    license = License.last
+    # Licenses lack created_at column; use updated_at instead
+    license = License.order(updated_at: :asc).last
     assert_equal(display_name, license.display_name)
     assert_equal(form_name, license.form_name)
     assert_equal(url, license.url)
