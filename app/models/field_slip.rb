@@ -44,4 +44,10 @@ class FieldSlip < AbstractModel
     end
     result.unshift([:field_slip_nil_project.t, nil])
   end
+
+  def notes_fields
+    ["Odor/Taste", "Substrate", "Plants", "Habit", "Other"].map do |field|
+      NoteField.new(name: field)
+    end
+  end
 end
