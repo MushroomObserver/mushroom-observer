@@ -16,8 +16,8 @@
                             label: :license_url.t + ":",
                             append: append) %>
 
-  TODO: add Deprecated checkbox
+  <%= check_box_with_label(form: f, name: :deprecated, field: :deprecated, checked: @deprecated,
+                           label: :license_form_checkbox_deprecated.t) %>
 
   <%= submit_button(form: f, button: :SUBMIT.t, center: true) %>
-
 <% end %>

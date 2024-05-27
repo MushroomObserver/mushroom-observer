@@ -117,6 +117,10 @@ class LicensesControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_form_action(action: :create) # "new" form posts to :create action
+    assert_select(
+      "input[type=checkbox][name='deprecated'][checked='checked']", false,
+      "New License form `deprecated` checkbox should be unchecked"
+    )
   end
 
   def test_create
@@ -179,6 +183,8 @@ class LicensesControllerTest < FunctionalTestCase
 
   def test_edit
     license = licenses(:ccnc25)
+    assert_true(license.deprecated,
+                "Test needs a License fixture which is deprecated")
     params = { id: license.id }
 
     login("rolf")
@@ -188,6 +194,10 @@ class LicensesControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_form_action({ action: :update }, "Edit form should post to :update")
+    assert_select(
+      "input[type=checkbox][name='deprecated'][checked='checked']", true,
+      "License form `Deprecated` checkbox should be checked"
+    )
   end
 
   def test_update
@@ -210,8 +220,7 @@ class LicensesControllerTest < FunctionalTestCase
     assert_equal(params.dig(:license, :display_name), license.display_name)
     assert_equal(params.dig(:license, :form_name), license.form_name)
     assert_equal(params.dig(:license, :url), license.url)
-    assert_equal((params.dig(:license, :deprecated) == "true"),
-                 license.deprecated)
+    assert_equal((params[:deprecated] == "1"), license.deprecated)
   end
 
   def test_destroy

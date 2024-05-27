@@ -44,6 +44,7 @@ class LicensesController < AdminController
 
   def edit
     @license = find_or_goto_index(License, params[:id])
+    @deprecated = @license.deprecated
   end
 
   def update
@@ -52,7 +53,7 @@ class LicensesController < AdminController
     @license.display_name = params.dig(:license, :display_name)
     @license.form_name = params.dig(:license, :form_name)
     @license.url = params.dig(:license, :url)
-    @license.deprecated = (params.dig(:license, :deprecated) == "true")
+    @license.deprecated = (params[:deprecated] == "1")
 
     save_any_changes
     redirect_to(license_path(@license.id))
