@@ -58,6 +58,13 @@ class LicensesController < AdminController
     redirect_to(license_path(@license.id))
   end
 
+  def destroy
+    if (@license = License.find(params[:id])) && @license.destroy
+      flash_notice(:runtime_destroyed_id.t(type: :license, value: params[:id]))
+    end
+    redirect_to(licenses_path)
+  end
+
   #########
 
   private

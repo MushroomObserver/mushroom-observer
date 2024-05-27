@@ -168,7 +168,20 @@ class LicensesControllerTest < FunctionalTestCase
                  license.deprecated)
   end
 
-  def test_delete
-    skip("Under Construction")
+  def test_destroy
+    license = licenses(:ununsed)
+    params  = { id: license.id }
+
+    # Prove authorized user can destroy license
+    login("rolf")
+    make_admin
+
+    assert_difference("License.count", -1, "Failed to destroy License") do
+      delete(:destroy, params: params)
+    end
+    assert_not(
+      License.exists?(license.id),
+      "Failed to destroy license #{license.id}, '#{license.form_name}'"
+    )
   end
 end
