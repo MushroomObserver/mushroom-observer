@@ -51,15 +51,16 @@ class LicensesControllerTest < FunctionalTestCase
   end
 
   def test_show_non_existent_license
-    license = articles(:premier_article)
+    # non-existent id for a License
+    license_id = observations(:minimal_unknown_obs).id
     login("rolf")
     make_admin
 
-    get(:show, params: { id: license.id })
+    get(:show, params: { id: license_id })
 
     assert_response(:redirect)
     assert_flash_text(
-      :runtime_object_not_found.l(type: :license.l, id: license.id)
+      :runtime_object_not_found.l(type: :license.l, id: license_id)
     )
   end
 
