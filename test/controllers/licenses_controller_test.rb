@@ -43,19 +43,46 @@ class LicensesControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_displayed_title(/#{license.display_name}/)
     assert_select(
-      "a[href = '#{license_path}']", true, "License page missing link to Index"
+      "a[href = '#{licenses_path}']", true, "License page missing link to Index"
     )
     assert_select(
-      "a[href = '#{new_license}']", true,
+      "a[href = '#{new_license_path}']", true,
       "License page missing link to add License"
     )
     assert_select(
-      "a[href = '#{edit_license(license.id)}']", true,
+      "a[href = '#{edit_license_path(license.id)}']", true,
       "License page missing link to edit License"
     )
-    # TODO: assert that there's no Destroy link
-    # probably need Capybara test
-    # DELETE /licenses/:id(.:format) licenses#destroy {:id=>/\d+/}
+    assert_select(
+      "button", { text: "Destroy", count: 0 },
+      "Show page for License in use should not have Destroy button"
+    )
+  end
+
+  def test_show_unused_license
+    license = licenses(:unused)
+    login("rolf")
+    make_admin
+
+    get(:show, params: { id: license.id })
+
+    assert_response(:success)
+    assert_displayed_title(/#{license.display_name}/)
+    assert_select(
+      "a[href = '#{licenses_path}']", true, "License page missing link to Index"
+    )
+    assert_select(
+      "a[href = '#{new_license_path}']", true,
+      "License page missing link to add License"
+    )
+    assert_select(
+      "a[href = '#{edit_license_path(license.id)}']", true,
+      "License page missing link to edit License"
+    )
+    assert_select(
+      "button", { text: "Destroy", count: 1 },
+      "Show page for unused License in use should have Destroy button"
+    )
   end
 
   def test_show_non_admin
@@ -188,7 +215,7 @@ class LicensesControllerTest < FunctionalTestCase
   end
 
   def test_destroy
-    license = licenses(:ununsed)
+    license = licenses(:unused)
     params  = { id: license.id }
 
     login("rolf")

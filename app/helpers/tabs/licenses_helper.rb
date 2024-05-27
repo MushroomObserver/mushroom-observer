@@ -18,15 +18,18 @@ module Tabs
     end
 
     def license_show_tabs(license)
-      links = [licenses_index_tab]
-      links.push[new_license_tab]
-      links.push[edit_license_tab(license)]
-      links.push(destroy_license_tab(license))
+      links = [licenses_index_tab, new_license_tab, edit_license_tab(license)]
+      links.push(destroy_license_tab(license)) unless license.in_use?
+      links
     end
 
     def edit_license_tab(license)
       [:EDIT.t, edit_license_path(license.id),
        { class: tab_id(__method__.to_s) }]
+    end
+
+    def destroy_license_tab(license)
+      [nil, license, { button: :destroy }]
     end
 
     # "Editing: Creative Commons Non-commercial v3.0 (#nnn)"  textilized

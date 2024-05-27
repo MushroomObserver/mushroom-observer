@@ -3335,6 +3335,7 @@
 
   # licenses/show
   show_license_header: License
+  index_license: Index
 
   # licenses/form
   create_license_title: Create License
