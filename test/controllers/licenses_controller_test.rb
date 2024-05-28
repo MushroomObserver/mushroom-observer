@@ -118,6 +118,9 @@ class LicensesControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_form_action(action: :create) # "new" form posts to :create action
     assert_select(
+      "a[href = '#{licenses_path}']", true, "License page missing link to Index"
+    )
+    assert_select(
       "input[type=checkbox][name='deprecated'][checked='checked']", false,
       "New License form `deprecated` checkbox should be unchecked"
     )

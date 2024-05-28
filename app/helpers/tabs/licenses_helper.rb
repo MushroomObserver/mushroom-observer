@@ -23,6 +23,10 @@ module Tabs
       links
     end
 
+    def license_form_new_tabs
+      [licenses_index_tab]
+    end
+
     def edit_license_tab(license)
       [:EDIT.t, edit_license_path(license.id),
        { class: tab_id(__method__.to_s) }]
