@@ -3,10 +3,8 @@
 # Licenses that are available for Images and Descriptions
 # available only to admins (because of class inheritance)
 class LicensesController < AdminController
-  # FIXME: uncomment next line after implememting :destroy
-  # before_action :store_location, except: :destroy
-  # FIXME: uncomment next line after implememting :index
-  # before_action :pass_query_params, except: :index
+  before_action :store_location, except: :destroy
+  before_action :pass_query_params, except: :index
 
   def index
     @objects = License.all
