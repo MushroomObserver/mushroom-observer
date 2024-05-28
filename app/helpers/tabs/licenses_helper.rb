@@ -27,6 +27,13 @@ module Tabs
       [licenses_index_tab]
     end
 
+    def license_form_edit_tabs(license:)
+      [
+        object_return_tab(license),
+        licenses_index_tab
+      ]
+    end
+
     def edit_license_tab(license)
       [:EDIT.t, edit_license_path(license.id),
        { class: tab_id(__method__.to_s) }]
