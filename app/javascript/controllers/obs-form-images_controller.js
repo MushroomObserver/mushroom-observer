@@ -2,6 +2,30 @@ import { Controller } from "@hotwired/stimulus"
 import { get, post } from '@rails/request.js'
 import ExifReader from 'exifreader';
 
+// When the user selects images, our JS loads them into browser memory. Note
+// that this takes a couple seconds, but it is NOT the upload step, even though
+// it may seem like it to the user: we are just displaying the image thumbnail
+// preview from memory, and offering form fields for the eventual Image record
+// creation. But nothing of the image exists on our servers yet.
+
+// On form submit, our JS blocks submission of the observation form, while it
+// first uploads the images, creates image records, processes them, and
+// transfers them. The images at the moment of creation do not have an
+// Observation association yet. If any do not process, we sort the good from the
+// bad and send them back to the JS ajax response, displaying the “good images”
+// as created records (no longer editable) and giving the user a report on the
+// “bad images”, offering a chance to add further images, or remove good
+// images.
+
+// If all images are processed without problems, the JS adds the list of created
+// image IDs to the obs form, and programmatically submits the form without any
+// further input from the user. The images are finally attached to the
+// observation after it’s created, along with collection numbers, etc. But note
+// that this create-obs step is all very quick. Even when image uploads have
+// gone smoothly, the previous step above, image upload/process/transfer,
+// accounts for ~75-95% of the time “creating the obs” that the user
+// experiences.
+
 const internalConfig = {
   // Make some of these targets for the controller
   block_form_submission: true,
@@ -41,7 +65,12 @@ export default class extends Controller {
 
     // Doesn't seem reliably available from internalConfig.
     // this.form = document.forms.observation_form;
-    this.form = this.element
+    this.form = this.element;
+    this.drop_zone = this.formTarget;
+    // todo: make targets for date and gps messages (imgMessages, gpsMessages)
+    // these are currently in observations/form/multi.html.erb
+    // change imgMessages to whenMessages, move to when section
+    // change gpsMessages to whereMessages, move to where section
     this.submit_buttons = this.element.querySelectorAll('input[type="submit"]');
     this.max_image_size = this.element.dataset.upload_max_size;
 
@@ -61,21 +90,21 @@ export default class extends Controller {
     // this.formTarget.dataset.targetStimulus = "connected";
 
     // Drag and Drop bindings on the form
-    this.formTarget.addEventListener('dragover', (e) => {
+    this.drop_zone.addEventListener('dragover', (e) => {
       e.preventDefault();
       this.addDashedBorder();
       return false;
     });
-    this.formTarget.addEventListener('dragenter', (e) => {
+    this.drop_zone.addEventListener('dragenter', (e) => {
       e.preventDefault();
       e.stopPropagation();
       this.addDashedBorder();
       return false;
     });
-    this.formTarget.addEventListener('dragleave', this.removeDashedBorder());
+    this.drop_zone.addEventListener('dragleave', this.removeDashedBorder());
 
     // ADDING FILES
-    this.formTarget.addEventListener('drop', (e) => {
+    this.drop_zone.addEventListener('drop', (e) => {
       this.dropFiles(e);
     });
 
@@ -91,12 +120,12 @@ export default class extends Controller {
 
   addDashedBorder() {
     // console.log("addDashedBorder")
-    this.formTarget.classList.add('dashed-border');
+    this.drop_zone.classList.add('dashed-border');
   }
 
   removeDashedBorder() {
     // console.log("removeDashedBorder")
-    this.formTarget.classList.remove('dashed-border');
+    this.drop_zone.classList.remove('dashed-border');
   }
 
   dropFiles(e) {
