@@ -36,6 +36,12 @@ image_upload_localization = {
 
   <%= submit_button(form: f, button: button_name, center: true) %>
 
+  <% ########################### Image Forms ############################## %>
+
+  <% if include_images %>
+    <%= render(partial: "observations/form/images", locals: { f: f }) %>
+  <% end # if include_images %>
+
   <%= render(partial: "observations/form/when", locals: { f: f }) %>
   <%= render(partial: "observations/form/where",
              locals: { f: f, button_name: button_name }) %>
@@ -59,15 +65,7 @@ image_upload_localization = {
 
   <%= render(partial: "observations/form/notes", locals: { f: f }) %>
 
-  <% ########################### Image Forms ############################## %>
-
-  <% if include_images %>
-
-    <%= render(partial: "observations/form/images", locals: { f: f }) %>
-
-  <% end # if include_images %>
-
-  <% ##########################################################################     %>
+  <% ####################################################################### %>
 
   <% if @projects.any? || @lists.any? %>
     <%= submit_button(form: f, button: button_name, center: true) %>
