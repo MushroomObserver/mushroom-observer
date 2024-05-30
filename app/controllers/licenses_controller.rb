@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 # Licenses that are available for Images and Descriptions
-# available only to admins (because of class inheritance)
+# NOTE: inherits from AdminController in order to limit actions to admins
+# NOTE: for badges see, e.g., app/views/controllers/shared/_form_ccbysa30.erb
 class LicensesController < AdminController
   before_action :store_location, except: :destroy
   before_action :pass_query_params, except: :index
@@ -57,6 +58,7 @@ class LicensesController < AdminController
     redirect_to(license_path(@license.id))
   end
 
+  # NOTE: a callback prevents destruction of licenses that are in use
   def destroy
     if (@license = License.find(params[:id])) && @license.destroy
       flash_notice(:runtime_destroyed_id.t(type: :license, value: params[:id]))
