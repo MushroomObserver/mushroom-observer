@@ -2,7 +2,7 @@
 <%= fields_for(:good_image) do |fgi| %>
 
   <%= text_area_with_label(form: fgi, field: :notes, index: image.id,
-                           value: image.notes, rows: 1, label: :NOTES.l) %>
+                           value: image.notes, rows: 3, label: :NOTES.l) %>
 
   <%= text_field_with_label(form: fgi, field: :original_name, index: image.id,
                             value: image.original_name, size: 40,
