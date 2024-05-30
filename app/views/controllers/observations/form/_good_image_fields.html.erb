@@ -1,66 +1,25 @@
 <%# good image fields partial section of create_observation form %>
 <%= fields_for(:good_image) do |fgi| %>
 
-<table class="table-observation-images">
-  <tr>
-    <td>
-      <%= fgi.label(:notes, :NOTES.t + ":", index: image.id) %>
-    </td>
-    <td>
-      <%= fgi.text_area(:notes, index: image.id, value: image.notes,
-                        rows: 1, class: "form-control form-control-sm") %>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <%= fgi.label(:original_name,
-                    :form_observations_original_name.t + ":",
-                    index: image.id) %>
-    </td>
-    <td>
-      <%= fgi.text_field(:original_name, index: image.id,
-                         value: image.original_name,
-                         size: 40, class: "form-control form-control-sm") %>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <%= fgi.label(:copyright_holder,
-                    :form_images_copyright_holder.t + ":", index: image.id) %>
-    </td>
-    <td>
-      <%= fgi.text_field(:copyright_holder, index: image.id,
-                         value: image.copyright_holder,
-                         class: "form-control form-control-sm") %>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <%= fgi.label(:when_1i,
-                    :form_images_when_taken.t + ":", index: image.id) %>
-    </td>
-    <td>
-      <div class="form-inline">
-        <%= fgi.date_select(:when,
-              date_select_opts(image).merge(index: image.id),
-              { class: "form-control form-control-sm",
-                data: { controller: "year-input" } }) %>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <%= fgi.label(:license_id,
-                    :form_images_select_license.t + ":", index: image.id) %>
-    </td>
-    <td>
-      <%= fgi.select(:license_id,
-                     License.current_names_and_ids(image.license),
-                     { selected: image.license_id,
-                       index: image.id },
-                     { class: "form-control form-control-sm" }) %>
-    </td>
-  </tr>
-</table>
+  <%= text_area_with_label(form: fgi, field: :notes, index: image.id,
+                           value: image.notes, rows: 1, label: :NOTES.l) %>
+
+  <%= text_field_with_label(form: fgi, field: :original_name, index: image.id,
+                            value: image.original_name, size: 40,
+                            label: :form_observations_original_name.l) %>
+
+  <%= text_field_with_label(form: fgi, field: :copyright_holder,
+                            index: image.id, value: image.copyright_holder,
+                            label: :form_images_copyright_holder.l) %>
+
+  <%= date_select_with_label(form: fgi, field: :when, index: image.id,
+                             value: image.when,
+                             label: :form_images_when_taken.l) %>
+
+  <%= select_with_label(form: fgi, field: :license_id, index: image.id,
+                        options: License.current_names_and_ids(image.license),
+                        select_opts: { selected: image.license_id },
+                        label: :form_images_select_license.l,
+                        append: help_block(:p, :form_images_license_help.t)) %>
 
 <% end %>
