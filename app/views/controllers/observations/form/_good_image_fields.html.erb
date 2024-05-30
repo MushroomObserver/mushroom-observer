@@ -41,8 +41,8 @@
     </td>
     <td>
       <div class="form-inline">
-        <%= fgi.date_select(:when,
-              date_select_opts(image).merge(index: image.id),
+        <%= fgi.date_select(:when, index: image.id,
+              date_select_opts({ object: image }),
               { class: "form-control form-control-sm",
                 data: { controller: "year-input" } }) %>
       </div>
