@@ -85,7 +85,7 @@
             </div>
             <div class="col-sm-8 form-inline">
               <%= fti.date_select(
-                :when, date_select_opts(@temp_image),
+                :when, date_select_opts({ object: @temp_image }),
                 { class: "form-control form-control-sm",
                   data: {
                     controller: "year-input"
