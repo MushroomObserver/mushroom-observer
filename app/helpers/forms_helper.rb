@@ -217,7 +217,7 @@ module FormsHelper
   def date_select_with_label(**args)
     opts = separate_field_options_from_args(args, [:object, :data])
     opts[:class] = "form-control"
-    opts[:data] = { controller: "date-select" }.merge(args[:data] || {})
+    opts[:data] = { controller: "year-input" }.merge(args[:data] || {})
 
     wrap_class = form_group_wrap_class(args)
 
