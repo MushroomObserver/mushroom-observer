@@ -19,7 +19,7 @@
   <%= select_with_label(form: fgi, field: :license_id, index: image.id,
                         options: License.current_names_and_ids(image.license),
                         select_opts: { selected: image.license_id },
-                        label: :form_images_select_license.l,
-                        append: help_block(:p, :form_images_license_help.t)) %>
+                        label: :form_images_select_license.t,
+                        append: help_block(:p, :form_images_license_help.t.html_safe)) %>
 
 <% end %>
