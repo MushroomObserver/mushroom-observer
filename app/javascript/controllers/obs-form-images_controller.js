@@ -30,7 +30,10 @@ const internalConfig = {
   // Make some of these targets for the controller
   block_form_submission: true,
   content: document.getElementById('content'),
+  // TODO: replace this with two routes below
   get_template_uri: "/observations/images/uploads/new",
+  // image_template_uri: "/observations/images/uploads/show",
+  // image_form_uri: "/observations/images/uploads/new",
   upload_image_uri: "/observations/images/uploads",
   // progress_uri: "/ajax/upload_progress",
   dots: [".", "..", "..."],
@@ -48,7 +51,7 @@ const internalConfig = {
 // (formerly "observation_images" section of the form)
 // Connects to data-controller="obs-form-images"
 export default class extends Controller {
-  static targets = ["form", "imgMessages", "imgDateRadios", "obsDateRadios",
+  static targets = ["form", "dateMessages", "imgDateRadios", "obsDateRadios",
     "gpsMessages", "gpsRadios", "setLatLngAlt", "ignoreGps", "imageGpsMap",
     "addedImages", "goodImages", "thumbImageId", "setThumbImg", "isThumbImg",
     "thumbImgRadio", "removeImg"]
@@ -67,10 +70,6 @@ export default class extends Controller {
     // this.form = document.forms.observation_form;
     this.form = this.element;
     this.drop_zone = this.formTarget;
-    // todo: make targets for date and gps messages (imgMessages, gpsMessages)
-    // these are currently in observations/form/multi.html.erb
-    // change imgMessages to whenMessages, move to when section
-    // change gpsMessages to whereMessages, move to where section
     this.submit_buttons = this.element.querySelectorAll('input[type="submit"]');
     this.max_image_size = this.element.dataset.upload_max_size;
 
@@ -356,9 +355,10 @@ export default class extends Controller {
 
   // Use requestjs-rails to a fetch request to get the template, populate it
   // with the item data, then get EXIF data, and read the file with FileReader.
+  // Could definitely send item.file_name and item.file_size as params.
   async loadAndDisplayItem(item) {
     const response = await get(this.get_template_uri,
-      { contentType: "text/html", query: { imgNumber: item.uuid } });
+      { contentType: "text/html", query: { img_number: item.uuid } });
 
     if (response.ok) {
       const html = await response.text
@@ -375,6 +375,8 @@ export default class extends Controller {
     }
   }
 
+  // TODO: There should be two templates. Could be a turbo response?
+  // One for the carousel image, and one for the tab for the image form.
   addTemplateToPage(item, html) {
     html = html.replace(/\s\s+/g, ' ').replace(/[\n\r]/.gm, '')
       .replace('{{img_file_name}}', item.file_name)
@@ -387,6 +389,7 @@ export default class extends Controller {
     template.innerHTML = html;
 
     // Hard to find without dev tools, but this is where the goods are:
+    // TODO: Need a carousel image element and a form element.
     item.dom_element = template.content.childNodes[0];
     // Give it a blank dataset
     item.dom_element.dataset.geocode = "";
@@ -591,6 +594,7 @@ export default class extends Controller {
     }
   }
 
+  // This is too brittle. Selectors needed.
   getUserEnteredInfo(item) {
     return {
       day: item.dom_element.querySelectorAll('select')[0].value,
@@ -623,6 +627,9 @@ export default class extends Controller {
     return _fd;
   }
 
+  // This essentially submits a "form" for each image. But there can't
+  // currently be a form element, because the image fields are nested inside
+  // the obs form. So we turn the fields into a FormData object with JS.
   async uploadItem(item) {
     // It would be nice to do a progress bar, but as of now, upload with
     // readable stream is not implemented yet for fetch in the browser spec.
@@ -720,9 +727,9 @@ export default class extends Controller {
     });
 
     if (this.areDatesInconsistent()) {
-      this.show(this.imgMessagesTarget);
+      this.show(this.dateMessagesTarget);
     } else {
-      this.hide(this.imgMessagesTarget);
+      this.hide(this.dateMessagesTarget);
     }
   }
 
@@ -731,7 +738,7 @@ export default class extends Controller {
       this.updateImageDates(simpleDate);
     if (target == "observation")
       this.observationDate(simpleDate);
-    this.hide(this.imgMessagesTarget);
+    this.hide(this.dateMessagesTarget);
   }
 
   makeImageDateRadio(simpleDate) {
@@ -769,7 +776,7 @@ export default class extends Controller {
       })
 
     if (this.areDatesInconsistent())
-      this.show(this.imgMessagesTarget);
+      this.show(this.dateMessagesTarget);
   }
 
   // gets or sets current obs date, simpledate object updates date

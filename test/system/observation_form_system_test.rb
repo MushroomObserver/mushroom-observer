@@ -165,7 +165,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       click_file_field(".file-field")
     end
     assert_selector(".added_image_wrapper", text: /Coprinus_comatus/)
-    assert_selector("#img_messages",
+    assert_selector("#date_messages",
                     text: /#{:form_observations_set_observation_date_to.l}/)
     first_image_wrapper = first(".added_image_wrapper")
 
@@ -260,8 +260,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     # Fix divergent dates: use the obs date
-    scroll_to(find("#img_messages"), align: :center)
-    within("#img_messages") do
+    scroll_to(find("#date_messages"), align: :center)
+    within("#date_messages") do
       within("#obs_date_radios") do
         choose("14-March-2010", allow_label_click: true)
         assert_checked_field("14-March-2010")
@@ -269,7 +269,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       click_button("fix_dates")
     end
     sleep(1) # wait for css hide transition
-    assert_no_selector("img_messages")
+    assert_no_selector("date_messages")
 
     # Ignore divergent GPS - maybe we took the second photo in the lab?
     scroll_to(find("#gps_messages"), align: :center)
