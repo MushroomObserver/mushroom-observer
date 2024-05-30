@@ -2,16 +2,10 @@
 
 <!-- WHEN -->
 <div class="container-text">
-  <%= f.label(:when, :WHEN.t + ":") %>
-  <div class="form-group form-inline">
-    <%=
-    f.date_select(
-      :when, date_select_opts(@observation),
-      { class: "form-control mb-2",
-        data: { controller: "year-input",
-                action: "obs-form-images#updateObservationDateRadio" } }
-    ) %>
-  </div>
+  <%= date_select_with_label(
+    form: f, field: :when, object: @observation, label: :WHEN.t + ":",
+    data: { action: "obs-form-images#updateObservationDateRadio" }
+  ) %>
 </div><!--.container-text-->
 <!-- /WHEN -->
 
