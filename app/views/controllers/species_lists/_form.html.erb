@@ -32,24 +32,20 @@
   </div>
 
   <%= text_field_with_label(form: f, field: :title, between: :required,
-                            label: :form_species_lists_title.t + ":") %>
+                            label: :form_species_lists_title.l + ":") %>
 
   <%= text_area_with_label(form: f, field: :notes, rows: 12,
-                           label: :form_species_lists_list_notes.t + ":") %>
+                           label: :form_species_lists_list_notes.l + ":") %>
   <%= render(partial: "shared/textilize_help") %>
 
-  <div class="form-group form-inline">
-    <%= f.label(:when, :WHEN.t + ":") %>
-    <%= f.date_select(:when, date_select_opts(@species_list),
-                      { class: "form-control",
-                        data: { controller: "year-input" } }) %>
-  </div>
+  <%= date_select_with_label(form: f, field: :when, object: @species_list,
+                             inline: true, label: :WHEN.l + ":") %>
 
   <%= render(partial: "shared/form_location_feedback",
              locals: { button: button } ) %>
 
   <%= autocompleter_field(form: f, field: :place_name, between: :required,
-                          label: :WHERE.t + ":", autocomplete: :location) %>
+                          label: :WHERE.l + ":", autocomplete: :location) %>
 
   <%= render(partial: "species_lists/form/fields_for_member",
              locals: { f: f }) %>
