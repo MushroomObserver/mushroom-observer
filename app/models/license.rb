@@ -92,6 +92,17 @@ class License < AbstractModel
       location_descriptions.any? || name_descriptions.any?
   end
 
+  def attribute_duplicated?
+    License.where.not(id: id).and(
+      License.where(display_name: display_name).or(
+        License.where(form_name: form_name).or(
+          License.where(url: url)
+        )
+      )
+    ).any?
+  end
+
+
   ###########
 
   private

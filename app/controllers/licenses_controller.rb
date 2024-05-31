@@ -34,7 +34,7 @@ class LicensesController < AdminController
     # I can't get @license.validates :uniqueness to work properly
     # It creates errors for each attribute, even if only one is duplicated
     # and blanks all the attributes
-    if attribute_duplicated?
+    if @license.attribute_duplicated?
       flash_warning("Duplicate display_name, form_name, or url")
       return render(:new)
     end
@@ -64,7 +64,7 @@ class LicensesController < AdminController
     @license.deprecated = (params[:deprecated] == "1")
 
     return no_changes unless @license.changed?
-    return attribute_duplicated if attribute_duplicated?
+    return attribute_duplicated if @license.attribute_duplicated?
 
     if @license.save
       flash_notice(
@@ -101,15 +101,5 @@ class LicensesController < AdminController
   def attribute_duplicated
     flash_warning("Duplicate display_name, form_name, or url")
     render(:edit)
-  end
-
-  def attribute_duplicated?
-    License.where.not(id: @license.id).and(
-      License.where(display_name: @license.display_name).or(
-        License.where(form_name: @license.form_name).or(
-          License.where(url: @license.url)
-        )
-      )
-    ).any?
   end
 end
