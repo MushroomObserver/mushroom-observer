@@ -13,7 +13,7 @@
                             label: :form_images_copyright_holder.l) %>
 
   <%= date_select_with_label(form: fgi, field: :when, index: image.id,
-                             value: image.when,
+                             value: image.when, object: image,
                              label: :form_images_when_taken.l) %>
 
   <%= select_with_label(form: fgi, field: :license_id, index: image.id,
