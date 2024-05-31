@@ -1,8 +1,8 @@
 <%# Images section of create_observation form
 Gotcha: thumb_image_id
-Although there can be radio buttons for selecting observation[thumb_image_id] 
+Although there can be radio buttons for selecting observation[thumb_image_id]
 in both the good_images and the images_upload partials, they currently *do
-not* set the observation thumb_image_id: their value is transferred by JS to  
+not* set the observation thumb_image_id: their value is transferred by JS to
 the hidden_field below with the same name, which takes precedence.
 I believe this is because in images_upload/_template.erb, the radio buttons
 do not yet have an image.id value, the image has not yet been uploaded.
@@ -26,6 +26,33 @@ good_image_ids_str = @good_images.map { |img| img.id }.join(" ")
   <%= hidden_field(:observation, :thumb_image_id,
                    data: { obs_form_images_target: "thumbImageId" }) %>
 
-  <%= render(partial: "observations/form/images_upload", locals: { f: f }) %>
+  <%= tag.div(class: "my-4", id: "observation_images_upload") do %>
+    <%= tag.p(:form_observations_upload_images.t + ":",
+              class: "font-weight-bold") %>
 
+    <!-- MULTIFILE_UPLOAD_FORM -->
+    <%= tag.div(class: "row") do %>
+      <%= tag.div(class: "col-sm-6 mt-3") do %>
+        <label class="btn btn-default file-field">
+          <input type="file" multiple id="select_images_button"
+                 data-action="change->obs-form-images#addSelectedFiles"
+                 accept="image/*"/>
+          <%= :select_file.t %>
+        </label>
+      <% end %><!--.col-->
+      <%= tag.div(class: "col-sm-6") do
+        help_block_with_arrow("left", id: "upload_multi_help") do
+          tag.p(:form_observations_upload_help_multi_select.t)
+        end
+      end %><!--.col-->
+    <% end %><!--.row-->
+
+    <!--Container for appending images-->
+    <%= tag.div(class: "images_container") do
+      tag.div("", id: "added_images_container",
+                  data: { obs_form_images_target: "addedImages" })
+    end %>
+    <!-- /MULTIFILE_UPLOAD_FORM -->
+
+  <% end %><!-- /observation_images_upload -->
 <% end %><!--#observation_images-->
