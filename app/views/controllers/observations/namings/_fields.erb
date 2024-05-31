@@ -22,11 +22,9 @@ name_help ||= :form_naming_name_help.t
 
 <%=
 [
-  tag.div(class: "row") do
-    tag.div(class: "col-xs-12") do
-      render(partial: "shared/form_name_feedback",
-             locals: feedback_locals) if @what.present?
-    end
+  tag.div do
+    render(partial: "shared/form_name_feedback",
+           locals: feedback_locals) if @what.present?
   end,
   fields_for(:naming) do |f_n|
     [
