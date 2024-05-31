@@ -47,6 +47,8 @@ good_image_ids_str = @good_images.map { |img| img.id }.join(" ")
       end %><!--.col-->
     <% end %><!--.row-->
 
+    <%= render(partial: "observations/form/images_upload/messages") %>
+
     <!--Container for appending images-->
     <%= tag.div(class: "images_container") do
       tag.div("", id: "added_images_container",
