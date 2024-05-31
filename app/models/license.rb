@@ -33,6 +33,8 @@
 #  name_descriptions::      Array of Name's that use this License.
 #  text_name::              Alias for +display_name+ for debugging.
 #  in_use?::                Is license used by any object?
+#  attribute_duplicated?    duplicate display_name, form_name_, or url
+#                           of another License?
 #
 #  == Callbacks
 #
