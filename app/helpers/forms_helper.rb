@@ -222,12 +222,14 @@ module FormsHelper
     opts[:data] = { controller: "year-input" }.merge(args[:data] || {})
 
     wrap_class = form_group_wrap_class(args)
+    selects_class = "form-inline"
+    selects_class += " d-inline-block" if args[:inline] == true
 
     tag.div(class: wrap_class) do
       concat(args[:form].label("#{args[:field]}_1i", args[:label],
                                class: "mr-3"))
       concat(args[:between]) if args[:between].present?
-      concat(tag.span(class: "form-inline") do
+      concat(tag.div(class: selects_class) do
         concat(args[:form].date_select(args[:field],
                                        date_select_opts(args), opts))
       end)
