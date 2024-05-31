@@ -135,7 +135,7 @@ class LicensesControllerTest < FunctionalTestCase
     params = { license: { display_name: display_name,
                           url: url,
                           form_name: form_name},
-               deprecated: "false" }
+               deprecated: "0" }
 
     login("rolf")
     make_admin
@@ -159,8 +159,8 @@ class LicensesControllerTest < FunctionalTestCase
     license = licenses(:ccnc30)
     params = { license: { display_name: license.display_name,
                           url: license.url,
-                          form_name: license.form_name},
-               deprecated: license.deprecated }
+                          form_name: license.form_name },
+               deprecated: (license.deprecated ? "1" : "0") }
 
     login("rolf")
     make_admin
@@ -176,12 +176,14 @@ class LicensesControllerTest < FunctionalTestCase
     params = { license: { display_name: nil,
                           url: license.url,
                           form_name: license.form_name },
-               deprecated: license.deprecated }
+               deprecated: (license.deprecated ? "1" : "0") }
 
     login("rolf")
     make_admin
 
-    assert_no_difference("License.count", "Created duplicate License") do
+    assert_no_difference(
+      "License.count", "License is missing `display_name`"
+    ) do
       post(:create, params: params)
     end
     assert_flash_warning
@@ -215,8 +217,8 @@ class LicensesControllerTest < FunctionalTestCase
     params = { id: license.id,
                license: { display_name: "X Special",
                           form_name: "X",
-                          url: "https://x.com/explore",
-                          deprecated: "true" } }
+                          url: "https://x.com/explore" },
+               deprecated: "1" }
 
     login("rolf")
     make_admin
@@ -231,6 +233,22 @@ class LicensesControllerTest < FunctionalTestCase
     assert_equal(params.dig(:license, :form_name), license.form_name)
     assert_equal(params.dig(:license, :url), license.url)
     assert_equal((params[:deprecated] == "1"), license.deprecated)
+  end
+
+  def test_update_missing_attribute
+    license = licenses(:ccnc30)
+    params = { id: license.id,
+               license: { display_name: nil,
+                          url: license.url,
+                          form_name: license.form_name },
+               deprecated: (license.deprecated ? "1" : "0") }
+
+    login("rolf")
+    make_admin
+
+    put(:update, params: params)
+    assert(license.reload.display_name, "License is missing display_name")
+    assert_flash_warning
   end
 
   def test_destroy

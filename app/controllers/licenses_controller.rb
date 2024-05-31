@@ -29,7 +29,7 @@ class LicensesController < AdminController
 
   def create
     @license = License.new(license_params)
-    @license.deprecated = (params[:deprecated] == "true")
+    @license.deprecated = (params[:deprecated] == "1")
 
     # I can't get @license.validates :uniqueness to work properly
     # It creates errors for each attribute, even if only one is duplicated
@@ -66,9 +66,15 @@ class LicensesController < AdminController
     return no_changes unless @license.changed?
     return attribute_duplicated if attribute_duplicated?
 
-    @license.save
-    flash_notice(:runtime_updated_id.t(type: "License", value: @license.id))
-    redirect_to(license_path(@license.id))
+    if @license.save
+      flash_notice(
+        :runtime_updated_id.t(type: :license, value: @license.id)
+      )
+      redirect_to(license_path(@license.id))
+    else
+      @license.errors.full_messages.each { |msg| flash_warning(msg) }
+      render(:edit)
+    end
   end
 
   # NOTE: a callback prevents destruction of licenses that are in use
