@@ -1,4 +1,4 @@
-<%= form_with(model: @license, url: @url) do |f| %>
+<%= form_with(model: @license) do |f| %>
 
   <% append = help_block(:div, :license_display_name_help.t) %>
   <%= text_field_with_label(form: f, field: :display_name,
