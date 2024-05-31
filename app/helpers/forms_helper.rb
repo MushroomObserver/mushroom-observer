@@ -214,17 +214,24 @@ module FormsHelper
     args
   end
 
+  # MO mostly uses year-input_controller to switch the year selects to
+  # text inputs, but you can pass data: { controller: "" } to get a year select.
+  # The three "selects" will always be inline, but pass inline: true to make
+  # the label and selects inline.
   def date_select_with_label(**args)
     opts = separate_field_options_from_args(args, [:object, :data])
     opts[:class] = "form-control"
     opts[:data] = { controller: "year-input" }.merge(args[:data] || {})
 
     wrap_class = form_group_wrap_class(args)
+    selects_class = "form-inline"
+    selects_class += " d-inline-block" if args[:inline] == true
 
     tag.div(class: wrap_class) do
-      concat(args[:form].label("#{args[:field]}_1i", args[:label]))
+      concat(args[:form].label("#{args[:field]}_1i", args[:label],
+                               class: "mr-3"))
       concat(args[:between]) if args[:between].present?
-      concat(tag.div(class: "form-inline") do
+      concat(tag.div(class: selects_class) do
         concat(args[:form].date_select(args[:field],
                                        date_select_opts(args), opts))
       end)
@@ -232,7 +239,7 @@ module FormsHelper
     end
   end
 
-  def date_select_opts(args)
+  def date_select_opts(args = {})
     obj = args[:object]
     start_year = args[:start_year] || 20.years.ago.year
     end_year = args[:end_year] || Time.zone.now.year
