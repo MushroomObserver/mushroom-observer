@@ -214,6 +214,8 @@ module FormsHelper
     args
   end
 
+  # MO mostly uses year-input_controller to switch the year selects to
+  # text inputs, but you can pass data: { controller: "" } to get a year select
   def date_select_with_label(**args)
     opts = separate_field_options_from_args(args, [:object, :data])
     opts[:class] = "form-control"
@@ -222,9 +224,10 @@ module FormsHelper
     wrap_class = form_group_wrap_class(args)
 
     tag.div(class: wrap_class) do
-      concat(args[:form].label("#{args[:field]}_1i", args[:label]))
+      concat(args[:form].label("#{args[:field]}_1i", args[:label],
+                               class: "mr-3"))
       concat(args[:between]) if args[:between].present?
-      concat(tag.div(class: "form-inline") do
+      concat(tag.span(class: "form-inline") do
         concat(args[:form].date_select(args[:field],
                                        date_select_opts(args), opts))
       end)
