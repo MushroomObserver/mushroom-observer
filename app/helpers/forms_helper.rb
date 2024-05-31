@@ -232,7 +232,7 @@ module FormsHelper
     end
   end
 
-  def date_select_opts(args)
+  def date_select_opts(args = {})
     obj = args[:object]
     start_year = args[:start_year] || 20.years.ago.year
     end_year = args[:end_year] || Time.zone.now.year
