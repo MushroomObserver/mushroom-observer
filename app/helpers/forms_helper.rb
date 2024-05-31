@@ -239,16 +239,19 @@ module FormsHelper
     end
   end
 
+  # The index arg is for multiple date_selects in a form
   def date_select_opts(args = {})
     obj = args[:object]
     start_year = args[:start_year] || 20.years.ago.year
     end_year = args[:end_year] || Time.zone.now.year
     init_value = obj.try(&:when).try(&:year)
     start_year = init_value if init_value && init_value < start_year
-    { start_year: start_year,
-      end_year: end_year,
-      selected: obj.try(&:when) || Time.zone.today,
-      order: args[:order] || [:day, :month, :year] }
+    opts = { start_year: start_year,
+             end_year: end_year,
+             selected: obj.try(&:when) || Time.zone.today,
+             order: args[:order] || [:day, :month, :year] }
+    opts[:index] = args[:index] if args[:index].present?
+    opts
   end
 
   # Bootstrap number_field
