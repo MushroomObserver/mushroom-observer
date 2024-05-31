@@ -58,7 +58,7 @@
 
           <div class="col-sm-8">
             <%= fti.text_area(:notes, rows: 2,
-                              class: "form-control form-control-sm") %>
+                              class: "form-control") %>
           </div><!--.col-->
 
         </div><!--.row-->
@@ -74,7 +74,7 @@
             <div class="col-sm-8">
               <%= fti.text_field(:copyright_holder,
                                  value: @image.user.legal_name,
-                                 class: "form-control form-control-sm") %>
+                                 class: "form-control") %>
             </div><!--.col-->
 
           </div><!--.row-->
@@ -86,7 +86,7 @@
             <div class="col-sm-8 form-inline">
               <%= fti.date_select(
                 :when, date_select_opts({ object: @temp_image }),
-                { class: "form-control form-control-sm",
+                { class: "form-control",
                   data: { controller: "year-input" } }
               ) %>
               <div>
@@ -104,7 +104,7 @@
             <div class="col-sm-8">
               <%= fti.select(:license_id, @licenses,
                         { selected: @user.license_id },
-                        class: "form-control form-control-sm") %>
+                        class: "form-control") %>
             </div>
           </div><!--.row-->
 
