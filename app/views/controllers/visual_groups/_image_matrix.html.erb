@@ -5,8 +5,9 @@
         <%= matrix_box(id: row[0]) do %>
           <%= tag.div(class: "panel panel-default") do %>
             <%= tag.div(class: "thumbnail-container") do
-              interactive_image(row[0], original: true, votes: false,
-                                  context: :matrix_box)
+              interactive_image(
+                row[0], original: true, votes: false, full_width: :true
+              )
             end %>
             <%= tag.div(class: "panel-body") do
               visual_group_status_links(

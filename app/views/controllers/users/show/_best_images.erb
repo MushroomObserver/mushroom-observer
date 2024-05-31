@@ -7,6 +7,6 @@ carousel_locals = {
 
 <%= if @best_images&.length&.positive?
   tag.div(class: "panel panel-default", id: "user_best_images") do
-    carousel_html(**carousel_locals)
+    render(partial: "shared/carousel", locals: carousel_locals)
   end
 end %>

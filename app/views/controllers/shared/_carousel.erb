@@ -1,0 +1,47 @@
+<%=
+# TODO: make this a component
+# Required args: images:
+# Optional args:
+#   object: (the carousel is usually for an object)
+#   top_img: (defaults to first), (carousel)title:, (image_edit)links:
+#   thumbnails: true for thumbnail navigation
+#   size: arg for ImagePresenter
+#   html_id: for carousel div
+#   links: button links for heading
+#
+# Note: uses concat(x) instead of [x,y].safe_join because of conditionals
+
+images ||= object&.images || nil #
+object ||= nil #
+size ||= :large
+top_img ||= images.first #
+title ||= :IMAGES.t #
+links ||= "" #
+thumbnails = true if thumbnails.nil? #
+type = object&.type_tag || "image" #
+html_id ||= "#{type}_#{object.id}_carousel" #
+
+concat(carousel_heading(title, links)) if thumbnails
+if !images.nil? && images.any?
+  tag.div(class: "carousel slide", id: html_id,
+          data: { ride: "false", interval: "false" }) do
+    concat(tag.div(class: "carousel-inner bg-light", role: "listbox") do
+      images.each do |image|
+        concat(render(partial: "shared/carousel_item",
+                      locals: { image:, size:, top_img:, object: }))
+      end
+      concat(carousel_controls(html_id)) if images.length > 1
+    end)
+    concat(
+      tag.ol(class: "carousel-indicators panel-footer py-2 px-0 mb-0") do
+        images.each_with_index do |image, index|
+          concat(render(partial: "shared/carousel_thumbnail",
+                        locals: { image:, index:, top_img:, html_id: }))
+        end
+      end
+    ) if thumbnails
+  end
+else
+  concat(carousel_no_images_message)
+end
+%>

@@ -130,7 +130,7 @@ module ObservationsController::FormHelpers
   # later, assuming we can create it.  Problem is if anything goes wrong, we
   # cannot repopulate the image forms (security issue associated with giving
   # file upload fields default values).  So we need to do this immediately,
-  # even if observation creation fails.  Keep a list of images we've downloaded
+  # even if observation creation fails.  Keep a list of images we've uploaded
   # successfully in @good_images (stored in hidden form field).
   #
   # INPUT: params[:image], observation, good_images (and @user)
@@ -185,11 +185,11 @@ module ObservationsController::FormHelpers
   end
   # rubocop:enable Metrics/MethodLength
 
-  # List of images that we've successfully downloaded, but which
+  # List of images that we've successfully uploaded, but which
   # haven't been attached to the observation yet.  Also supports some
   # mininal editing.  INPUT: params[:good_images] (also looks at
   # params[:image_<id>_notes]) OUTPUT: list of images
-
+  #
   def update_good_images(arg)
     # Get list of images first.
     images = (arg || "").split.filter_map do |id|
@@ -222,7 +222,7 @@ module ObservationsController::FormHelpers
   end
 
   # Now that the observation has been successfully created, we can attach
-  # any images that were downloaded earlier
+  # any images that were uploaded earlier. This fires on :create and :update.
   def attach_good_images(observation, images)
     return unless images
 
@@ -231,7 +231,24 @@ module ObservationsController::FormHelpers
         observation.add_image(image)
         image.log_create_for(observation)
       end
+      logger.warn("attaching_image: #{image.id} to #{observation.id}")
     end
+    # broadcast_images_to_carousel(observation, images)
+  end
+
+  # Only broadcast_images_to_carousel after ALL images have been attached.
+  # They should have already been processed.
+  def broadcast_images_to_carousel(observation, images)
+    logger.warn("Broadcasting carousel update to observation #{observation.id}")
+    Turbo::StreamsChannel.broadcast_replace_to(
+      [observation, :images],
+      target: "observation_images",
+      partial: "shared/carousel",
+      locals: { images:,
+                object: observation,
+                top_img: observation.thumb_image,
+                html_id: "observation_images" }
+    )
   end
 
   def strip_images!
