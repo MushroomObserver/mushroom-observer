@@ -215,7 +215,9 @@ module FormsHelper
   end
 
   # MO mostly uses year-input_controller to switch the year selects to
-  # text inputs, but you can pass data: { controller: "" } to get a year select
+  # text inputs, but you can pass data: { controller: "" } to get a year select.
+  # The three "selects" will always be inline, but pass inline: true to make
+  # the label and selects inline.
   def date_select_with_label(**args)
     opts = separate_field_options_from_args(args, [:object, :data])
     opts[:class] = "form-control"

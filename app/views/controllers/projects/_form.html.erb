@@ -28,7 +28,7 @@
   <div class="container-text ml-4">
     <%= date_select_with_label(form: f, field: :start_date, inline: true,
                                label: "#{:form_projects_start_date.t}: ",
-                               data: { controller: "" },
+                               data: { controller: "" }, class: "mb-2",
                                start_year: Date.today.year - 10,
                                end_year: Date.today.year + 10) %>
     <%= date_select_with_label(form: f, field: :end_date, inline: true,
