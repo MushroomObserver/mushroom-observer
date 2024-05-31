@@ -357,8 +357,17 @@ export default class extends Controller {
   // with the item data, then get EXIF data, and read the file with FileReader.
   // Could definitely send item.file_name and item.file_size as params.
   async loadAndDisplayItem(item) {
+    const _file_size = item.is_file ?
+      Math.floor((item.file_size / 1024)) + "kb" : "";
     const response = await get(this.get_template_uri,
-      { contentType: "text/html", query: { img_number: item.uuid } });
+      {
+        contentType: "text/html",
+        query: {
+          img_number: item.uuid,
+          img_file_name: item.file_name,
+          img_file_size: _file_size
+        }
+      });
 
     if (response.ok) {
       const html = await response.text
@@ -378,10 +387,7 @@ export default class extends Controller {
   // TODO: There should be two templates. Could be a turbo response?
   // One for the carousel image, and one for the tab for the image form.
   addTemplateToPage(item, html) {
-    html = html.replace(/\s\s+/g, ' ').replace(/[\n\r]/.gm, '')
-      .replace('{{img_file_name}}', item.file_name)
-      .replace('{{img_file_size}}', item.is_file ?
-        Math.floor((item.file_size / 1024)) + "kb" : "").trim();
+    html = html.replace(/\s\s+/g, ' ').replace(/[\n\r]/.gm, '').trim();
 
     // Create the DOM element and add it to FileStoreItem;
     // This should work if the html is valid!
