@@ -6,13 +6,9 @@
                             label: :form_images_original_name.t + ":") %>
 <% end %>
 
-<div class="form-group form-inline">
-  <%= f.label(:when_1i, :WHEN.t + ":") %>
-  <%= f.date_select(:when, date_select_opts(@image),
-                    { class: "form-control",
-                      data: { controller: "year-input" } }) %>
-  <%= help_block(:p, :form_images_when_help.t) %>
-</div>
+<%= date_select_with_label(form: f, field: :when, label: :WHEN.t + ":",
+                           object: @image, inline: true,
+                           append: help_block(:p, :form_images_when_help.t)) %>
 
 <%= select_with_label(form: f, field: :license_id, options: @licenses,
                       label: :LICENSE.t + ":",
