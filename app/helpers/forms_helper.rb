@@ -248,7 +248,7 @@ module FormsHelper
     { start_year: start_year,
       end_year: end_year,
       selected: obj.try(&:when) || Time.zone.today,
-      order: [:day, :month, :year] }
+      order: args[:order] || [:day, :month, :year] }
   end
 
   # Bootstrap number_field
