@@ -1,21 +1,21 @@
 <%= text_field_with_label(form: f, field: :copyright_holder,
-                          label: :form_images_copyright_holder.t + ":") %>
+                          label: "#{:form_images_copyright_holder.t}:") %>
 
 <% unless leave_out_original_file_name %>
   <%= text_field_with_label(form: f, field: :original_name,
-                            label: :form_images_original_name.t + ":") %>
+                            label: "#{:form_images_original_name.t}:") %>
 <% end %>
 
-<%= date_select_with_label(form: f, field: :when, label: :WHEN.t + ":",
-                           object: @image, inline: true,
+<%= date_select_with_label(form: f, field: :when, object: @image, inline: true,
+                           label: "#{:form_images_when_taken.l}:",
                            append: help_block(:p, :form_images_when_help.t)) %>
 
 <%= select_with_label(form: f, field: :license_id, options: @licenses,
-                      label: :LICENSE.t + ":",
+                      label: "#{:LICENSE.t}:",
                       append: help_block(:p, :form_images_license_help.t)) %>
 
 <%= text_area_with_label(form: f, field: :notes, data: { autofocus: true },
-                         label: :NOTES.t + ":",
+                         label: "#{:NOTES.t}:",
                          append: help_block(:p, :form_images_notes_help.t)) %>
 
 <%= render(partial: "shared/textilize_help") %>
