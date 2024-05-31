@@ -45,7 +45,7 @@ class LicensesController < AdminController
       )
       redirect_to(license_path(@license.id))
     else
-      @license.errors.full_messages.each  { |msg| flash_warning(msg) }
+      @license.errors.full_messages.each { |msg| flash_warning(msg) }
       render(:new)
     end
   end

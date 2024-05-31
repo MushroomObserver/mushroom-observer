@@ -134,7 +134,7 @@ class LicensesControllerTest < FunctionalTestCase
     url = "http://creativecommons.org/licenses/by-nc-sa/4.0/"
     params = { license: { display_name: display_name,
                           url: url,
-                          form_name: form_name},
+                          form_name: form_name },
                deprecated: "0" }
 
     login("rolf")
