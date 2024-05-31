@@ -25,27 +25,27 @@
     <%= fields_for(:list) do |f_l|
       autocompleter_field(
         form: f_l, field: :members, rows: 8, value: @list_members,
-        label: :form_species_lists_write_in_species.t + ":",
+        label: "#{:form_species_lists_write_in_species.t}:",
         autocomplete: :name, separator: "\n", textarea: true
       )
     end %>
   </div>
 
   <%= text_field_with_label(form: f, field: :title, between: :required,
-                            label: :form_species_lists_title.l + ":") %>
+                            label: "#{:form_species_lists_title.l}:") %>
 
   <%= text_area_with_label(form: f, field: :notes, rows: 12,
-                           label: :form_species_lists_list_notes.l + ":") %>
+                           label: "#{:form_species_lists_list_notes.l}:") %>
   <%= render(partial: "shared/textilize_help") %>
 
   <%= date_select_with_label(form: f, field: :when, object: @species_list,
-                             inline: true, label: :WHEN.l + ":") %>
+                             inline: true, label: "#{:WHEN.l}:") %>
 
   <%= render(partial: "shared/form_location_feedback",
              locals: { button: button } ) %>
 
   <%= autocompleter_field(form: f, field: :place_name, between: :required,
-                          label: :WHERE.l + ":", autocomplete: :location) %>
+                          label: "#{:WHERE.l}:", autocomplete: :location) %>
 
   <%= render(partial: "species_lists/form/fields_for_member",
              locals: { f: f }) %>

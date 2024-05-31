@@ -87,9 +87,8 @@
               <%= fti.date_select(
                 :when, date_select_opts({ object: @temp_image }),
                 { class: "form-control form-control-sm",
-                  data: {
-                    controller: "year-input"
-                  } }) %>
+                  data: { controller: "year-input" } }
+              ) %>
               <div>
                 <small><%= :form_images_camera_date.t %>:</small>
                 <small><a href="javascript:"><span class="camera_date_text"></span></a></small>

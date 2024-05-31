@@ -27,13 +27,13 @@
   <div class="container-text ml-4">
     <div>
       <%= date_select_with_label(form: f, field: :start_date,
-                                 label: "#{:form_projects_start_date.t}: "
+                                 label: "#{:form_projects_start_date.t}: ",
                                  start_year: Date.today.year - 10,
                                  end_year: Date.today.year + 10) %>
     </div>
     <div>
       <%= date_select_with_label(form: f, field: :end_date,
-                                 label: "#{:form_projects_end_date.t}: "
+                                 label: "#{:form_projects_end_date.t}: ",
                                  start_year: Date.today.year - 10,
                                  end_year: Date.today.year + 10) %>
     </div>
