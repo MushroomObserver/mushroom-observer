@@ -35,8 +35,12 @@ class LicensesController < AdminController
     )
 
     if @license.save
+      flash_notice(
+        :runtime_added_name.t(type: :license, value: params[:form_name])
+      )
       redirect_to(license_path(@license.id))
     else
+      @license.errors.full_messages.each  { |msg| flash_warning(msg) }
       render(:new)
     end
   end
@@ -77,6 +81,7 @@ class LicensesController < AdminController
       flash_notice(:runtime_updated_id.t(type: "License", value: @license.id))
     else
       flash_warning(:runtime_no_changes.t)
+      @license.errors.full_messages.each  { |msg| flash_warning(msg) }
     end
   end
 end

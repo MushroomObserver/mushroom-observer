@@ -151,6 +151,7 @@ class LicensesControllerTest < FunctionalTestCase
     assert_equal(url, license.url)
     assert_false(license.deprecated)
 
+    assert_flash_success
     assert_redirected_to(license_path(license.id))
   end
 
@@ -167,6 +168,7 @@ class LicensesControllerTest < FunctionalTestCase
     assert_no_difference("License.count", "Created duplicate License") do
       post(:create, params: params)
     end
+    assert_flash_warning
   end
 
   def test_create_missing_attribute
@@ -182,6 +184,7 @@ class LicensesControllerTest < FunctionalTestCase
     assert_no_difference("License.count", "Created duplicate License") do
       post(:create, params: params)
     end
+    assert_flash_warning
   end
 
   def test_edit
@@ -240,6 +243,8 @@ class LicensesControllerTest < FunctionalTestCase
     assert_difference("License.count", -1, "Failed to destroy License") do
       delete(:destroy, params: params)
     end
+    assert_flash_success
+
     assert_not(
       License.exists?(license.id),
       "Failed to destroy license #{license.id}, '#{license.form_name}'"
