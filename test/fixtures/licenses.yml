@@ -14,6 +14,7 @@ ccnc25:
   url: http://creativecommons.org/licenses/by-nc-sa/2.5/
   deprecated: true
   form_name: ccbyncsa25
+  updated_at: nil
 
 ccnc30:
   display_name: Creative Commons Non-commercial v3.0
@@ -32,6 +33,7 @@ publicdomain:
   url: http://wiki.creativecommons.org/Public_domain/
   deprecated: false
   form_name: publicdomain
+  updated_at: 2013-03-02 09:45:03
 
 unused:
   display_name: All Rights Reserved
