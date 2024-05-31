@@ -23,20 +23,25 @@ class LicensesController < AdminController
     # FAIL LicensesControllerTest#test_new (2.57s)
     #      Expected HTML to contain form that posts to </licenses>,
     #      but only # found these: </licenses/new>.
+    @license = License.new
     @url = "/licenses"
   end
 
   def create
-    @license = License.new(
-      display_name: params[:display_name],
-      form_name: params[:form_name],
-      url: params[:url],
-      deprecated: (params[:deprecated] == "true")
-    )
+    @license = License.new(license_params)
+    @license.deprecated = (params[:deprecated] == "true")
+
+    # I can't get @license.validates :uniqueness to work properly
+    # It creates errors for each attribute, even if only one is duplicated
+    # and blanks all the attributes
+    if attribute_duplicated?
+      flash_warning("Duplicate display_name, form_name, or url")
+      return render(:new)
+    end
 
     if @license.save
       flash_notice(
-        :runtime_added_name.t(type: :license, value: params[:form_name])
+        :runtime_added_name.t(type: :license, value: @license.display_name)
       )
       redirect_to(license_path(@license.id))
     else
@@ -58,7 +63,11 @@ class LicensesController < AdminController
     @license.url = params.dig(:license, :url)
     @license.deprecated = (params[:deprecated] == "1")
 
-    save_any_changes
+    return no_changes unless @license.changed?
+    return attribute_duplicated if attribute_duplicated?
+
+    @license.save
+    flash_notice(:runtime_updated_id.t(type: "License", value: @license.id))
     redirect_to(license_path(@license.id))
   end
 
@@ -74,14 +83,27 @@ class LicensesController < AdminController
 
   private
 
-  def save_any_changes
-    if @license.changed?
-      raise(:runtime_unable_to_save_changes.t) unless @license.save
+  def license_params
+    params[:license].permit(:display_name, :form_name, :url)
+  end
 
-      flash_notice(:runtime_updated_id.t(type: "License", value: @license.id))
-    else
-      flash_warning(:runtime_no_changes.t)
-      @license.errors.full_messages.each  { |msg| flash_warning(msg) }
-    end
+  def no_changes
+    flash_warning(:runtime_edit_name_no_change.l)
+    render(:edit)
+  end
+
+  def attribute_duplicated
+    flash_warning("Duplicate display_name, form_name, or url")
+    render(:edit)
+  end
+
+  def attribute_duplicated?
+    License.where.not(id: @license.id).and(
+      License.where(display_name: @license.display_name).or(
+        License.where(form_name: @license.form_name).or(
+          License.where(url: @license.url)
+        )
+      )
+    ).any?
   end
 end

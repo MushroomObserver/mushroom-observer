@@ -132,9 +132,9 @@ class LicensesControllerTest < FunctionalTestCase
                  "License already exists")
     form_name = "ccbyncsa40"
     url = "http://creativecommons.org/licenses/by-nc-sa/4.0/"
-    params = { display_name: display_name,
-               url: url,
-               form_name: form_name,
+    params = { license: { display_name: display_name,
+                          url: url,
+                          form_name: form_name},
                deprecated: "false" }
 
     login("rolf")
@@ -157,9 +157,9 @@ class LicensesControllerTest < FunctionalTestCase
 
   def test_create_duplicate
     license = licenses(:ccnc30)
-    params = { display_name: license.display_name,
-               url: license.url,
-               form_name: license.form_name,
+    params = { license: { display_name: license.display_name,
+                          url: license.url,
+                          form_name: license.form_name},
                deprecated: license.deprecated }
 
     login("rolf")
@@ -173,9 +173,9 @@ class LicensesControllerTest < FunctionalTestCase
 
   def test_create_missing_attribute
     license = licenses(:ccnc30)
-    params = { display_name: nil,
-               url: license.url,
-               form_name: license.form_name,
+    params = { license: { display_name: nil,
+                          url: license.url,
+                          form_name: license.form_name },
                deprecated: license.deprecated }
 
     login("rolf")
