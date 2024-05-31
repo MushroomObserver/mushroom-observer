@@ -102,7 +102,6 @@ class License < AbstractModel
     ).any?
   end
 
-
   ###########
 
   private
