@@ -58,7 +58,7 @@ class LicensesController < AdminController
     @license.deprecated = (params[:deprecated] == "1")
 
     return no_changes unless @license.changed?
-    return attribute_duplicated if @license.attribute_duplicated?
+    return duplicate_attribute if @license.attribute_duplicated?
 
     if @license.save
       flash_notice(
@@ -92,7 +92,7 @@ class LicensesController < AdminController
     render(:edit)
   end
 
-  def attribute_duplicated
+  def duplicate_attribute
     flash_warning("Duplicate display_name, form_name, or url")
     render(:edit)
   end
