@@ -51,6 +51,6 @@ module CarouselHelper
 
   def carousel_no_images_message
     tag.div(:show_observation_no_images.l,
-            class: "p-4 w-100 h-100 text-center h3 text-muted")
+            class: "p-4 my-5 w-100 h-100 text-center h3 text-muted")
   end
 end
