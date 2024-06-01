@@ -235,6 +235,23 @@ class LicensesControllerTest < FunctionalTestCase
     assert_equal((params[:deprecated] == "1"), license.deprecated)
   end
 
+  def test_update_no_changes
+    license = licenses(:ccwiki30)
+    params = { id: license.id,
+               license: { display_name: license.display_name,
+                          form_name: license.form_name,
+                          url: license.url },
+               deprecated: license.deprecated ? "1" : "0" }
+
+    login("rolf")
+    make_admin
+
+    put(:update, params: params)
+
+    assert_flash_text(:runtime_edit_name_no_change.l)
+    assert_form_action({ action: :update }, "Failed to re-render edit")
+  end
+
   def test_update_missing_attribute
     license = licenses(:ccnc30)
     params = { id: license.id,
@@ -249,6 +266,24 @@ class LicensesControllerTest < FunctionalTestCase
     put(:update, params: params)
     assert(license.reload.display_name, "License is missing display_name")
     assert_flash_warning
+  end
+
+  def test_update_duplicate_attribute
+    license = licenses(:ccnc30)
+    params = { id: license.id,
+               license: { display_name: license.display_name,
+                          # duplicates another license's attribute
+                          url: licenses(:ccnc25).url,
+                          form_name: license.form_name },
+               deprecated: (license.deprecated ? "1" : "0") }
+
+    login("rolf")
+    make_admin
+
+    put(:update, params: params)
+
+    assert_flash_text(:runtime_license_attributed_duplicated.l)
+    assert_form_action({ action: :update }, "Failed to re-render edit")
   end
 
   def test_destroy
