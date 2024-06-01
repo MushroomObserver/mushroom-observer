@@ -133,30 +133,34 @@
 
 
 .edit-carousel {
+  .carousel-control-wrap {
+    padding-bottom: 50%;
+  }
+
   .carousel-inner {
     .item {
       padding-bottom: 0;
     }
+  }
 
-    .image-position {
-      display: inline-block;
-      padding-bottom: 100%;
-      width: 100%;
+  .image-position {
+    display: inline-block;
+    padding-bottom: 100%;
+    width: 100%;
 
-      @media screen and (min-width: 767px) {
-        width: 50%;
-        padding-bottom: 50%;
-      }
+    @media screen and (min-width: 767px) {
+      width: 50%;
+      padding-bottom: 50%;
     }
+  }
 
-    .form-position {
-      display: inline-block;
-      padding: 1rem;
-      width: 100%;
+  .form-position {
+    display: inline-block;
+    padding: 1rem;
+    width: 100%;
 
-      @media screen and (min-width: 767px) {
-        width: 50%;
-      }
+    @media screen and (min-width: 767px) {
+      width: 50%;
     }
   }
 
