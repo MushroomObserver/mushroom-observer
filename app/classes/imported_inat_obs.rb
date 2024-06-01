@@ -33,8 +33,8 @@ class ImportedInatObs
       JSON.parse(imported_inat_obs_data, symbolize_names: true)
   end
 
-  def obs_photos
-    obs[:observation_photos]
+  def obs
+    @imported_inat_obs_data[:results].first
   end
 
   def obs_photos
