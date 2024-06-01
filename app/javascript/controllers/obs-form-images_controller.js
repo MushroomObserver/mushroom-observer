@@ -226,7 +226,7 @@ export default class extends Controller {
     for (let i = 0; i < files.length; i++) {
       // uuid is used as the index for the ruby form template. // **
       const _item = this.FileStoreItem(files[i], this.generateUUID());
-      this.loadAndDisplayItem(_item);
+      this.loadAndDisplayItem(_item, i);
 
       // add an item to the dictionary with the file size as the key
       this.fileStore.index[files[i].size] = _item;
@@ -355,14 +355,15 @@ export default class extends Controller {
 
   // Use requestjs-rails to a fetch request to get the template, populate it
   // with the item data, then get EXIF data, and read the file with FileReader.
-  // Could definitely send item.file_name and item.file_size as params.
-  async loadAndDisplayItem(item) {
+  async loadAndDisplayItem(item, i) {
     const _file_size = item.is_file ?
       Math.floor((item.file_size / 1024)) + "kb" : "";
+    const _active = i == 0 ? "active" : "";
     const response = await get(this.get_template_uri,
       {
         contentType: "text/html",
         query: {
+          active: _active,
           img_number: item.uuid,
           img_file_name: item.file_name,
           img_file_size: _file_size
