@@ -3,14 +3,14 @@
 require("test_helper")
 
 # test encapsulated imported iNat observations
-class ImportedInatObsTest < UnitTestCase
+class InatObsTest < UnitTestCase
   # disable cop to facilitate typing/reading id's
   # rubocop:disable Style/NumericLiterals
   def test_complex_public_obs
     # import of iNat 202555552 which is a mirror of MO 547126)
     # For easier to to read version see test/fixtures/inat/somion_unicolor.json
     import =
-      ImportedInatObs.new(File.read("test/fixtures/inat/somion_unicolor.txt"))
+      InatObs.new(File.read("test/fixtures/inat/somion_unicolor.txt"))
 
     expected_mapping = Observation.new(
       # id: 547126,
@@ -93,7 +93,7 @@ class ImportedInatObsTest < UnitTestCase
            "Test needs a name matching >= 1 MO `send` Name " \
            "and exactly 1 MO non-sensu Name")
 
-    import = ImportedInatObs.new(File.read("test/fixtures/inat/coprinus.txt"))
+    import = InatObs.new(File.read("test/fixtures/inat/coprinus.txt"))
 
     assert_equal(names(:coprinus).text_name, import.text_name)
     assert_equal(names(:coprinus).id, import.name_id)
@@ -104,20 +104,32 @@ class ImportedInatObsTest < UnitTestCase
     assert_match(/"description":null,/, inat_response,
                  "Need iNat observation lacking description")
 
-    import = ImportedInatObs.new(inat_response)
+    import = InatObs.new(inat_response)
 
     assert_equal("", import.notes)
   end
 
   def test_fungi
     inat_obs =
-      ImportedInatObs.new(File.read("test/fixtures/inat/somion_unicolor.txt"))
+      InatObs.new(File.read("test/fixtures/inat/somion_unicolor.txt"))
     assert(inat_obs.fungi?)
 
     inat_obs =
-      ImportedInatObs.new(
+      InatObs.new(
         File.read("test/fixtures/inat/ceanothus_cordulatus.txt")
       )
     assert_not(inat_obs.fungi?)
+  end
+
+  def test_importable
+    inat_obs =
+      InatObs.new(File.read("test/fixtures/inat/somion_unicolor.txt"))
+    assert(inat_obs.importable?)
+
+    inat_obs =
+      InatObs.new(
+        File.read("test/fixtures/inat/ceanothus_cordulatus.txt")
+      )
+    assert_not(inat_obs.importable?)
   end
 end

@@ -56,7 +56,9 @@ module Observations
 
     def import_one_observation(inat_obs_id)
       imported_inat_obs_data = inat_search_observations(inat_obs_id)
-      inat_obs = ImportedInatObs.new(imported_inat_obs_data)
+      inat_obs = InatObs.new(imported_inat_obs_data)
+      return unless inat_obs.importable?
+
       @observation = Observation.new(
         when: inat_obs.when,
         where: inat_obs.where,

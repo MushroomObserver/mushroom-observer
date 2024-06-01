@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 #
-#  = ImportedInatObs Object
+#  = InatObs Object
 #
 #  Represents the result of an iNat API search for one observation,
 #  mapping iNat key/values to MO Observation attributes
@@ -12,6 +12,7 @@
 #
 #  obs::          The iNat observation data
 #  obs_photos::   Array of iNat observation_photos
+#  importable?::  Is it importable to MO?
 #  fungi?::       Is it a fungus?
 #
 #  == MO attributes
@@ -26,7 +27,7 @@
 #  when
 #  where
 #
-class ImportedInatObs
+class InatObs
   def initialize(imported_inat_obs_data)
     @imported_inat_obs_data =
       JSON.parse(imported_inat_obs_data, symbolize_names: true)
@@ -38,6 +39,10 @@ class ImportedInatObs
 
   def obs_photos
     obs[:observation_photos]
+  end
+
+  def importable?
+    fungi?
   end
 
   def fungi?

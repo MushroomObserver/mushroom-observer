@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Describes one iNat observation photo (derived from an ImportedInatObs)
+# Describes one iNat observation photo (derived from an InatObs)
 # mapping iNat key/values to MO Image attributes and associations
 # Example use:
 # InatObsPhoto.new(<imported_inat_obs>.observation_photos.first)
