@@ -1,16 +1,43 @@
 # frozen_string_literal: true
 
-# Encapsulates the result of an iNat API search for one observation,
-# mapping iNat key/values to MO Observation attributes
+#
+#  = ImportedInatObs Object
+#
+#  Represents the result of an iNat API search for one observation,
+#  mapping iNat key/values to MO Observation attributes
+#
+#  == Class methods
+#
+#  current_names_and_ids::  List non-deprecated License names/ids.
+#
+#  == Instance methods
+#
+#  obs::          The iNat observation data
+#  obs_photos::   Array of iNat observation_photos
+#
+#  == MO attributes
+#  gps_hidden
+#  inat_id::
+#  license::
+#  name_id
+#  notes
+#  lat
+#  lng
+#  text_name
+#  when
+#  where
+#
 class ImportedInatObs
   def initialize(imported_inat_obs_data)
     @imported_inat_obs_data =
       JSON.parse(imported_inat_obs_data, symbolize_names: true)
   end
 
-  def obs
-    @imported_inat_obs_data[:results].first
+  def obs_photos
+    obs[:observation_photos]
   end
+
+  # MO attributes
 
   def gps_hidden
     obs[:geoprivacy].present?
@@ -24,8 +51,8 @@ class ImportedInatObs
     InatLicense.new(obs[:license_code]).license
   end
 
-  def obs_photos
-    obs[:observation_photos]
+  def obs
+    @imported_inat_obs_data[:results].first
   end
 
   def name_id
@@ -74,7 +101,6 @@ class ImportedInatObs
   def where
     obs[:place_guess]
   end
-
 
   ##########
 
