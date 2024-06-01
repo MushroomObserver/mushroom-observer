@@ -1,8 +1,8 @@
 <%=
-# Incoming locals: image, index, top_img, html_id
+# Incoming locals: image, index, active, html_id
 presenter_args = { fit: :contain, extra_classes: "carousel-thumbnail" }
 presenter = ImagePresenter.new(image, presenter_args)
-active = image == top_img ? "active" : ""
+active ||= ""
 
 tag.li(id: "carousel_thumbnail_#{image.id}",
        class: class_names("carousel-indicator mx-1", active),
