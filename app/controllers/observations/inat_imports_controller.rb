@@ -89,7 +89,7 @@ module Observations
     end
 
     def not_importable(inat_obs)
-      unless inat_obs.fungi?
+      unless inat_obs.taxon_importable?
         flash_error(:inat_taxon_not_importable.t(id: inat_obs.inat_id))
       end
     end

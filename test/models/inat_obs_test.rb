@@ -109,28 +109,22 @@ class InatObsTest < UnitTestCase
     assert_equal("", import.notes)
   end
 
-  def test_fungi
+  def test_taxon_importable
     inat_obs =
       InatObs.new(File.read("test/fixtures/inat/somion_unicolor.txt"))
-    assert(inat_obs.fungi?)
+    assert(inat_obs.taxon_importable?,
+           "iNat Fungi observations should be importable")
+
+    inat_obs =
+      InatObs.new(File.read("test/fixtures/inat/fuligo_septica.txt"))
+    assert(inat_obs.taxon_importable?,
+           "iNat Slime mold (Protozoa) observations should be importable")
 
     inat_obs =
       InatObs.new(
         File.read("test/fixtures/inat/ceanothus_cordulatus.txt")
       )
-    assert_not(inat_obs.fungi?)
-  end
-
-  def test_importable
-    inat_obs =
-      InatObs.new(File.read("test/fixtures/inat/somion_unicolor.txt"))
-    assert(inat_obs.importable?, "iNat Fungi observations should be importable")
-
-    inat_obs =
-      InatObs.new(
-        File.read("test/fixtures/inat/ceanothus_cordulatus.txt")
-      )
-    assert_not(inat_obs.importable?,
+    assert_not(inat_obs.taxon_importable?,
                "iNat Plant observations should not be importable")
   end
 end

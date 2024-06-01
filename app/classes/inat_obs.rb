@@ -42,11 +42,11 @@ class InatObs
   end
 
   def importable?
-    fungi?
+    taxon_importable?
   end
 
-  def fungi?
-    obs.dig(:taxon, :iconic_taxon_name) == "Fungi"
+  def taxon_importable?
+    fungi? || slime_mold?
   end
 
   ########## MO attributes
@@ -117,4 +117,21 @@ class InatObs
   def description
     obs[:description]
   end
+
+  def fungi?
+    obs.dig(:taxon, :iconic_taxon_name) == "Fungi"
+  end
+
+  def slime_mold?
+    # NOTE: 2024-06-01 jdc
+    # slime molds are polypheletic https://en.wikipedia.org/wiki/Slime_mold
+    # Protoza is paraphyletic for slime molds,
+    # but it's how they are classified in MO and MB
+    # Can this be improved by checking multiple inat [:taxon][:ancestor_ids]?
+    # I.e., is there A combination (ANDs) of higher ranks (>= Class)
+    # that's monophyletic for slime molds?
+    # Another solution: use IF API to see if IF includes the name.
+    obs.dig(:taxon, :iconic_taxon_name) == "Protozoa"
+  end
+
 end
