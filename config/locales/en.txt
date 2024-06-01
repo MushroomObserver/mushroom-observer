@@ -469,6 +469,7 @@
   confidence_level: confidence level
   CONFIDENCE_LEVELS: Confidence Levels
   confidence_levels: confidence levels
+  CONSENSUS: Consensus
   CONSTRAINT_VIOLATIONS: Constraint Violations
   constraint_violations: constraint violations
   COORDINATES: Coordinates
@@ -481,7 +482,7 @@
   correct_spelling: correct spelling
   CORRECT_SPELLINGS: Correct Spellings
   correct_spellings: correct spellings
-  CONSENSUS: Consensus
+  COUNTERPART: Counterpart
   DATE: Date
   date: date
   DATES: Dates
@@ -519,6 +520,7 @@
   identifier: identifier
   IDENTIFIERS: Identifiers
   identifiers: identifiers
+  inaturalist: iNaturalist
   INDEX: Index
   index: index
   INDEXES: Indexes
@@ -553,6 +555,7 @@
   observer: observer
   OBSERVERS: Observers
   observers: observers
+  ORIGINAL: Original
   OWNER: Owner
   owner: owner
   OWNERS: Owners
@@ -1287,6 +1290,7 @@
   source_credit_mo_android_app: Created using the "Mushroom Observer Android app":https://mushroomobserver.org/articles/34.
   source_credit_mo_iphone_app: Created using the "Mushroom Observer iPhone app":https://mushroomobserver.org/articles/34.
   source_credit_mo_api: Created using the "Mushroom Observer API":https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md.
+  source_credit_mo_inat_import: Imported from "iNaturalist":https://www.inaturalist.org using the "Mushroom Observer website":https://mushroomobserver.org
 
   ##############################################################################
 

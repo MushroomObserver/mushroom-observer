@@ -779,3 +779,7 @@ nybg_2023_09_obs:
   when: 2023-09-15
   where: The New York Botanical Garden, Bronx, New York, USA
   location: nybg_location # outside location of falmouth_2023_09_project
+
+imported_inat_obs:
+  <<: *DEFAULTS
+  inat_id: 12345

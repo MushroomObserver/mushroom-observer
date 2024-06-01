@@ -1250,6 +1250,36 @@ class ObservationsControllerTest < FunctionalTestCase
                   { count: 1 }, "Observation page missing an Add Sequence link")
   end
 
+  def test_show_observation_original_link_absent
+    obs = observations(:coprinus_comatus_obs)
+    assert_blank(obs.inat_id, "Test needs fixture without iNat id")
+
+    login
+    get(:show, params: { id: obs.id })
+
+    assert_select(
+      "#inat_id a:match('href',?)",
+      %r{https://inaturalist.org/observations/\d+},
+      false,
+      "Obs should not link to an iNat observation"
+    )
+  end
+
+  def test_show_observation_original_link_present
+    obs = observations(:imported_inat_obs)
+    assert(obs.inat_id.present?, "Test needs fixture with an iNat id")
+
+    login
+    get(:show, params: { id: obs.id })
+
+    assert_select(
+      "#inat_id a:match('href', ?)",
+      "https://inaturalist.org/observations/#{obs.inat_id}",
+      true,
+      "Obs should link to iNat original"
+    )
+  end
+
   # Refactored for CRUD routes in :collection_numbers or :herbarium_records
   def assert_show_obs(types, _id, items, can_add)
     type = types.to_s.chop
