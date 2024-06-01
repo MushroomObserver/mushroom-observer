@@ -33,17 +33,17 @@ if !images.nil? && images.any?
       # carousel-control-wrap needs to only occupy the image part of each item
       #   w-100 and padding-bottom: 50% on mobile
       #   w-50 and padding-bottom: 50% on tablet
-      concat(tag.div(class: "carousel-control-wrap")) do
-        concat(carousel_controls(html_id)) if images.length > 1
-        concat(
-          tag.ol(class: "carousel-indicators panel-footer py-2 px-0 mb-0") do
+      concat(tag.div(class: "carousel-control-wrap ab-fab") do
+        tag.div(class: "image-position") do
+          concat(carousel_controls(html_id)) if images.length > 1
+          concat(tag.ol(class: "carousel-indicators") do
             images.each_with_index do |_image, index|
-              tag.li("", class: class_names("carousel-indicator mx-1", active),
-                         data: { target: "##{html_id}", slide_to: index.to_s })
+              tag.li("", class: class_names("carousel-indicator", active),
+                        data: { target: "##{html_id}", slide_to: index.to_s })
             end
-          end
-        )
-      end
+          end)
+        end
+      end)
     end)
   end
 end

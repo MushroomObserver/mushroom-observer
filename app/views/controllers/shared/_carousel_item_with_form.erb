@@ -1,0 +1,12 @@
+<%=
+# Incoming locals: active, img_id, img_src
+# Caption needs object for copyright info
+img_class =
+
+tag.div(id: "carousel_item_#{img_id}", class: class_names("item", active)) do
+  image_tag(
+    img_src, class: "carousel-image img-fluid ab-fab object-fit-contain lazy",
+    data: { src: img_src }
+  )
+end
+%>
