@@ -124,12 +124,13 @@ class InatObsTest < UnitTestCase
   def test_importable
     inat_obs =
       InatObs.new(File.read("test/fixtures/inat/somion_unicolor.txt"))
-    assert(inat_obs.importable?)
+    assert(inat_obs.importable?, "iNat Fungi observations should be importable")
 
     inat_obs =
       InatObs.new(
         File.read("test/fixtures/inat/ceanothus_cordulatus.txt")
       )
-    assert_not(inat_obs.importable?)
+    assert_not(inat_obs.importable?,
+               "iNat Plant observations should not be importable")
   end
 end
