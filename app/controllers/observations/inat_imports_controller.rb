@@ -57,7 +57,7 @@ module Observations
     def import_one_observation(inat_obs_id)
       imported_inat_obs_data = inat_search_observations(inat_obs_id)
       inat_obs = InatObs.new(imported_inat_obs_data)
-      return unless inat_obs.importable?
+      return not_importable(inat_obs) unless inat_obs.importable?
 
       @observation = Observation.new(
         when: inat_obs.when,
@@ -86,6 +86,12 @@ module Observations
       operation = "/observations?id=#{ids}" \
                   "&order=desc&order_by=created_at&only_id=false"
       inat_search(operation).body
+    end
+
+    def not_importable(inat_obs)
+      unless inat_obs.fungi?
+        flash_error(:inat_taxon_not_importable.t(id: inat_obs.inat_id))
+      end
     end
 
     # TODO: move to own class so it can be called from multiple places

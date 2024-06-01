@@ -103,6 +103,8 @@ module Observations
       ) do
         put(:create, params: params)
       end
+
+      assert_flash_text(:inat_taxon_not_importable.l(id: inat_id))
     end
 
     def test_create_inat_import_too_many_ids

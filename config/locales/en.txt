@@ -2950,6 +2950,7 @@
   inat_ids: iNat ids
   inat_not_single_id: Please enter a single iNat id
   runtime_illegal_inat_id: Illegal iNat id `[id]`
+  inat_taxon_not_importable: Cannot import iNat id `[id]`. (Can import only Fungi.)
 
   # observer/list_notifications
   list_notifications_title: Email Alerts for [user]
