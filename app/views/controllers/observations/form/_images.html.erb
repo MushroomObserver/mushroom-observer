@@ -17,7 +17,7 @@ good_image_ids_str = @good_images.map { |img| img.id }.join(" ")
 
   <% @good_images.each do |image| %>
     <%= render(partial: "observations/form/good_image",
-               locals: { f: f, image: image }) %>
+               locals: { f:, image: }) %>
   <% end # @good_images.each do image %>
 
   <%= hidden_field_tag(:good_images, good_image_ids_str,
@@ -50,8 +50,10 @@ good_image_ids_str = @good_images.map { |img| img.id }.join(" ")
 
     <!--Container for appending images-->
     <%= tag.div(class: "images_container") do
-      tag.div("", id: "added_images_container",
-                  data: { obs_form_images_target: "addedImages" })
+      # tag.div("", id: "added_images_container",
+      #             data: { obs_form_images_target: "addedImages" })
+      render(partial: "observations/form/images/carousel",
+             locals: { f:, images: @good_images })
     end %>
     <!-- /MULTIFILE_UPLOAD_FORM -->
 

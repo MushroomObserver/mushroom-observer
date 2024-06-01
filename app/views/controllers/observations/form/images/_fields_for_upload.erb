@@ -1,0 +1,59 @@
+<%# This top part is for the upload form only %>
+<!--Replaced by javascript-->
+<%= tag.span("", class: "text-danger warn-text") %>
+<%= tag.span("", class: "text-success info-text") %>
+<!--/Replaced by javascript-->
+
+<%# Specificity of the thumb choice is coming from data attribute on item %>
+<%= tag.div(class: "form-group mb-2") do %>
+  <%= js_button(
+    button: :image_set_default.l, class: "set_thumb_image btn-sm",
+    data: { obs_form_images_target: "setThumbImg",
+            action: "obs-form-images#setObsThumbnail:prevent" }
+  ) %>
+  <%= label_tag(
+    "observation[thumb_image_id]", :image_add_default.l,
+    class: "hidden is_thumb_image",
+    data: { obs_form_images_target: "isThumbImg" }
+  ) %>
+  <%= radio_button_tag(
+    "observation[thumb_image_id]", "true",
+    class: "d-none",
+    data: { obs_form_images_target: "thumbImgRadio",
+            action: "click->obs-form-images#setHiddenThumbField" }
+  ) %>
+<% end %>
+
+<%= tag.div(class: "text-right mb-2") do
+  js_button(
+    button: :image_remove_remove.l,
+    class: "remove_image_link btn-sm fade in",
+    data: { obs_form_images_target: "removeImg" }
+  )
+end %>
+
+<%= tag.div(class: "form-group") do
+  concat(tag.div(img_file_name, class: "small"))
+  concat(tag.span(img_file_size))
+end %>
+
+<%= fields_for(:"#{img_number}_temp_image") do |fti| %>
+
+  <%= text_area_with_label(form: fti, field: :notes, rows: 2,
+                           label: :NOTES.l) %>
+
+  <%= text_field_with_label(form: fti, field: :copyright_holder,
+                            value: @image.user.legal_name,
+                            label: :form_images_copyright_holder.l) %>
+
+  <%= date_select_with_label(form: fti, field: :when, object: @image,
+                             label: :form_images_when_taken.l) %>
+  <%= tag.small("#{:form_images_camera_date.t}: ") %>
+  <%= link_to("javascript:") { tag.small("", class: "camera_date_text") } %>
+
+  <%= select_with_label(form: fti, field: :license_id,
+                        label: :form_images_select_license.t.html_safe,
+                        options: @licenses,
+                        select_opts: { selected: @user.license_id }) %>
+
+<% end # fields_for %>
