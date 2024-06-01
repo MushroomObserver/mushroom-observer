@@ -20,8 +20,7 @@ tag.div(class: "carousel slide edit-carousel", id: html_id,
     images&.each do |image|
       active = image == top_img ? "active" : ""
       concat(render(partial: "observation/form/images/carousel_item",
-                    locals: { f:, image:, img_src: image.large_url,
-                              active:, upload: false }))
+                    locals: { f:, image:, active:, upload: false }))
     end
     concat(tag.div(class: "carousel-control-wrap ab-fab") do
       tag.div(class: "image-position") do

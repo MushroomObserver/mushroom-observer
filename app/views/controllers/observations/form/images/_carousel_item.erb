@@ -1,9 +1,11 @@
 <%=
-# Incoming locals: f, img_number, img_src, active, image, upload
-# upload == no image.id, image == nil
+# Incoming locals: img_number, img_file_name, img_file_size,
+#                  f, active, image, upload, img_src
+# upload == no image.id, image == nil, image_src == nil
 image ||= nil
 img_number ||= "img_number_missing"
 img_id = image&.id || img_number # in case good_image
+img_src = upload ? "" : image&.large_url
 handle = upload ? "added_image_wrapper" : ""
 item_attrs = { id: "carousel_item_#{img_id}",
                class: class_names("item", active, handle) }

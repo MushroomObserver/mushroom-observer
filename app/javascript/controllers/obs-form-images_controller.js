@@ -435,19 +435,19 @@ export default class extends Controller {
   }
 
   fileReadImage(item) {
+    const _img = item.dom_element.querySelector('.carousel-image');
+
     if (item.is_file) {
       const fileReader = new FileReader();
 
       fileReader.onload = (fileLoadedEvent) => {
         // find the actual image element
-        const _img = item.dom_element.querySelector('.img-responsive');
         // get image element in container and set the src to base64 img url
         _img.setAttribute('src', fileLoadedEvent.target.result);
       };
 
       fileReader.readAsDataURL(item.file);
     } else {
-      const _img = item.dom_element.querySelector('.img-responsive');
       _img.setAttribute('src', item.url)
         .onerror = () => {
           alert("Couldn't read image from: " + item.url);
@@ -458,7 +458,7 @@ export default class extends Controller {
 
   // extracts the exif data async;
   getExifData(item) {
-    const _image = item.dom_element.querySelector('.img-responsive');
+    const _image = item.dom_element.querySelector('.carousel-image');
 
     _image.onload = async () => {
       item.exif_data = await ExifReader.load(_image.src);
