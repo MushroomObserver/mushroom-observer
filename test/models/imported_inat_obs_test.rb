@@ -108,4 +108,16 @@ class ImportedInatObsTest < UnitTestCase
 
     assert_equal("", import.notes)
   end
+
+  def test_fungi
+    inat_obs =
+      ImportedInatObs.new(File.read("test/fixtures/inat/somion_unicolor.txt"))
+    assert(inat_obs.fungi?)
+
+    inat_obs =
+      ImportedInatObs.new(
+        File.read("test/fixtures/inat/ceanothus_cordulatus.txt")
+      )
+    assert_not(inat_obs.fungi?)
+  end
 end

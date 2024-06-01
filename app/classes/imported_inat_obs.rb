@@ -7,13 +7,12 @@
 #  mapping iNat key/values to MO Observation attributes
 #
 #  == Class methods
-#
-#  current_names_and_ids::  List non-deprecated License names/ids.
-#
+##
 #  == Instance methods
 #
 #  obs::          The iNat observation data
 #  obs_photos::   Array of iNat observation_photos
+#  fungi?::       Is it a fungus?
 #
 #  == MO attributes
 #  gps_hidden
@@ -41,7 +40,11 @@ class ImportedInatObs
     obs[:observation_photos]
   end
 
-  # MO attributes
+  def fungi?
+    obs.dig(:taxon, :iconic_taxon_name) == "Fungi"
+  end
+
+  ########## MO attributes
 
   def gps_hidden
     obs[:geoprivacy].present?
