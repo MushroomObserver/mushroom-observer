@@ -33,6 +33,8 @@
 #  name_descriptions::      Array of Name's that use this License.
 #  text_name::              Alias for +display_name+ for debugging.
 #  in_use?::                Is license used by any object?
+#  attribute_duplicated?    duplicate display_name, form_name_, or url
+#                           of another License?
 #
 #  == Callbacks
 #
@@ -90,6 +92,16 @@ class License < AbstractModel
   def in_use?
     images.any? || users.any? ||
       location_descriptions.any? || name_descriptions.any?
+  end
+
+  def attribute_duplicated?
+    License.where.not(id: id).and(
+      License.where(display_name: display_name).or(
+        License.where(form_name: form_name).or(
+          License.where(url: url)
+        )
+      )
+    ).any?
   end
 
   ###########

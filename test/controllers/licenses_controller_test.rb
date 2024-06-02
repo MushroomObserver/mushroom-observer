@@ -132,10 +132,10 @@ class LicensesControllerTest < FunctionalTestCase
                  "License already exists")
     form_name = "ccbyncsa40"
     url = "http://creativecommons.org/licenses/by-nc-sa/4.0/"
-    params = { display_name: display_name,
-               url: url,
-               form_name: form_name,
-               deprecated: "false" }
+    params = { license: { display_name: display_name,
+                          url: url,
+                          form_name: form_name },
+               deprecated: "0" }
 
     login("rolf")
     make_admin
@@ -151,15 +151,16 @@ class LicensesControllerTest < FunctionalTestCase
     assert_equal(url, license.url)
     assert_false(license.deprecated)
 
+    assert_flash_success
     assert_redirected_to(license_path(license.id))
   end
 
   def test_create_duplicate
     license = licenses(:ccnc30)
-    params = { display_name: license.display_name,
-               url: license.url,
-               form_name: license.form_name,
-               deprecated: license.deprecated }
+    params = { license: { display_name: license.display_name,
+                          url: license.url,
+                          form_name: license.form_name },
+               deprecated: (license.deprecated ? "1" : "0") }
 
     login("rolf")
     make_admin
@@ -167,21 +168,25 @@ class LicensesControllerTest < FunctionalTestCase
     assert_no_difference("License.count", "Created duplicate License") do
       post(:create, params: params)
     end
+    assert_flash_warning
   end
 
   def test_create_missing_attribute
     license = licenses(:ccnc30)
-    params = { display_name: nil,
-               url: license.url,
-               form_name: license.form_name,
-               deprecated: license.deprecated }
+    params = { license: { display_name: nil,
+                          url: license.url,
+                          form_name: license.form_name },
+               deprecated: (license.deprecated ? "1" : "0") }
 
     login("rolf")
     make_admin
 
-    assert_no_difference("License.count", "Created duplicate License") do
+    assert_no_difference(
+      "License.count", "License is missing `display_name`"
+    ) do
       post(:create, params: params)
     end
+    assert_flash_warning
   end
 
   def test_edit
@@ -212,8 +217,8 @@ class LicensesControllerTest < FunctionalTestCase
     params = { id: license.id,
                license: { display_name: "X Special",
                           form_name: "X",
-                          url: "https://x.com/explore",
-                          deprecated: "true" } }
+                          url: "https://x.com/explore" },
+               deprecated: "1" }
 
     login("rolf")
     make_admin
@@ -230,6 +235,57 @@ class LicensesControllerTest < FunctionalTestCase
     assert_equal((params[:deprecated] == "1"), license.deprecated)
   end
 
+  def test_update_no_changes
+    license = licenses(:ccwiki30)
+    params = { id: license.id,
+               license: { display_name: license.display_name,
+                          form_name: license.form_name,
+                          url: license.url },
+               deprecated: license.deprecated ? "1" : "0" }
+
+    login("rolf")
+    make_admin
+
+    put(:update, params: params)
+
+    assert_flash_text(:runtime_edit_name_no_change.l)
+    assert_form_action({ action: :update }, "Failed to re-render edit")
+  end
+
+  def test_update_missing_attribute
+    license = licenses(:ccnc30)
+    params = { id: license.id,
+               license: { display_name: nil,
+                          url: license.url,
+                          form_name: license.form_name },
+               deprecated: (license.deprecated ? "1" : "0") }
+
+    login("rolf")
+    make_admin
+
+    put(:update, params: params)
+    assert(license.reload.display_name, "License is missing display_name")
+    assert_flash_warning
+  end
+
+  def test_update_duplicate_attribute
+    license = licenses(:ccnc30)
+    params = { id: license.id,
+               license: { display_name: license.display_name,
+                          # duplicates another license's attribute
+                          url: licenses(:ccnc25).url,
+                          form_name: license.form_name },
+               deprecated: (license.deprecated ? "1" : "0") }
+
+    login("rolf")
+    make_admin
+
+    put(:update, params: params)
+
+    assert_flash_text(:runtime_license_attributed_duplicated.l)
+    assert_form_action({ action: :update }, "Failed to re-render edit")
+  end
+
   def test_destroy
     license = licenses(:unused)
     params  = { id: license.id }
@@ -240,6 +296,8 @@ class LicensesControllerTest < FunctionalTestCase
     assert_difference("License.count", -1, "Failed to destroy License") do
       delete(:destroy, params: params)
     end
+    assert_flash_success
+
     assert_not(
       License.exists?(license.id),
       "Failed to destroy license #{license.id}, '#{license.form_name}'"

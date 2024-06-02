@@ -18,25 +18,28 @@ class LicensesController < AdminController
   end
 
   def new
-    # NOTE: 2025-05-26 jdc
-    # Added url to avoid this Failure; I don't understand why it fails.
-    # FAIL LicensesControllerTest#test_new (2.57s)
-    #      Expected HTML to contain form that posts to </licenses>,
-    #      but only # found these: </licenses/new>.
-    @url = "/licenses"
+    @license = License.new
   end
 
   def create
-    @license = License.new(
-      display_name: params[:display_name],
-      form_name: params[:form_name],
-      url: params[:url],
-      deprecated: (params[:deprecated] == "true")
-    )
+    @license = License.new(license_params)
+    @license.deprecated = (params[:deprecated] == "1")
+
+    # I can't get @license.validates :uniqueness to work properly
+    # It creates errors for each attribute, even if only one is duplicated
+    # and blanks all the attributes
+    if @license.attribute_duplicated?
+      flash_warning("Duplicate display_name, form_name, or url")
+      return render(:new)
+    end
 
     if @license.save
+      flash_notice(
+        :runtime_added_name.t(type: :license, value: @license.display_name)
+      )
       redirect_to(license_path(@license.id))
     else
+      @license.errors.full_messages.each { |msg| flash_warning(msg) }
       render(:new)
     end
   end
@@ -54,8 +57,18 @@ class LicensesController < AdminController
     @license.url = params.dig(:license, :url)
     @license.deprecated = (params[:deprecated] == "1")
 
-    save_any_changes
-    redirect_to(license_path(@license.id))
+    return no_changes unless @license.changed?
+    return duplicate_attribute if @license.attribute_duplicated?
+
+    if @license.save
+      flash_notice(
+        :runtime_updated_id.t(type: :license, value: @license.id)
+      )
+      redirect_to(license_path(@license.id))
+    else
+      @license.errors.full_messages.each { |msg| flash_warning(msg) }
+      render(:edit)
+    end
   end
 
   # NOTE: a callback prevents destruction of licenses that are in use
@@ -70,13 +83,17 @@ class LicensesController < AdminController
 
   private
 
-  def save_any_changes
-    if @license.changed?
-      raise(:runtime_unable_to_save_changes.t) unless @license.save
+  def license_params
+    params[:license].permit(:display_name, :form_name, :url)
+  end
 
-      flash_notice(:runtime_updated_id.t(type: "License", value: @license.id))
-    else
-      flash_warning(:runtime_no_changes.t)
-    end
+  def no_changes
+    flash_warning(:runtime_edit_name_no_change.l)
+    render(:edit)
+  end
+
+  def duplicate_attribute
+    flash_warning(:runtime_license_attributed_duplicated.l)
+    render(:edit)
   end
 end
