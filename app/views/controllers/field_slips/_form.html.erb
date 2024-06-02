@@ -39,6 +39,8 @@ action = controller.action_name
                           autocomplete: :name) %>
   <%= text_field_with_label(form: form, field: :id_by, inline: true,
                             label: :ID_BY.t + ":") %>
+  <%= text_field_with_label(form: form, field: :other_codes, inline: true,
+                            label: :field_slip_other_codes.t + ":") %>
 
   <div class="mt-5">
     <%= render(partial: "shared/notes_form",

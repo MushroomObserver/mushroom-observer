@@ -46,6 +46,7 @@ class FieldSlip < AbstractModel
   end
 
   def notes_fields
+    # Should we figure out a way to internationalize these tags?
     ["Odor/Taste", "Substrate", "Plants", "Habit", "Other"].map do |field|
       NoteField.new(name: field)
     end

@@ -1110,14 +1110,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     update(specimen: false)
   end
 
-  # Return primary collector and their number if available, else just return
-  # the observer's name.
-  def collector_and_number
-    return user.legal_name if collection_numbers.empty?
-
-    collection_numbers.first.format_name
-  end
-
   ##############################################################################
   #
   #  :section: Sources
@@ -1303,6 +1295,39 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       SET `where` = #{new_name}, location_id = #{location.id}
       WHERE `where` = #{old_name}
     ))
+  end
+
+  ##############################################################################
+  #
+  #  :section: Field Slips
+  #
+  ##############################################################################
+
+  def collector
+    return notes[:Collector].tl if notes.include?(:Collector)
+    return notes[:collector].tl if notes.include?(:collector)
+    return notes[:"Collector's_Name"].tl if notes.include?(:"Collector's_Name")
+    return notes[:"Collector's_name"].tl if notes.include?(:"Collector's_name")
+    return notes[:"Collector(s)"].tl if notes.include?(:"Collector(s)")
+
+    "_user #{user.login}_".tl
+  end
+
+  def field_slip_id
+    return notes[:ID].tl if notes.include?(:ID)
+
+    "_name #{name.display_name}_".tl
+  end
+
+  def field_slip_id_by
+    return notes[:ID_By].tl if notes.include?(:ID_By)
+    return notes[:Identifier].tl if notes.include?(:Identifier)
+    return notes[:Identified_by].tl if notes.include?(:Identified_by)
+
+    naming = namings.find_by(name:)
+    return "_user #{naming.user.login}_".tl if naming
+
+    ""
   end
 
   ##############################################################################

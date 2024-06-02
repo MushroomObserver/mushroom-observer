@@ -7,10 +7,21 @@
       <%= :field_slip_no_project.t %>
     <% end %>
     <br/>
+    <% if field_slip.observation
+       obs = field_slip.observation %>
+      <strong><%= :DATE.t %>: </strong><%= obs.when %><br/>
+      <strong><%= :COLLECTOR.t %>: </strong><%= obs.collector %><br/>
+      <strong><%= :LOCATION.t %>: </strong><%= location_link(obs.where, obs.location, nil, true) %><br/>
+      <strong><%= :ID.t %>: </strong><%= obs.field_slip_id %><br/>
+      <strong><%= :ID_BY.t %>: </strong><%= obs.field_slip_id_by %><br/>
+    <% end %>
+    <br/>
+
     <% if field_slip.user %>
       <strong><%= :field_slip_creator.t %>:</strong>
       <%= link_to(field_slip.user.legal_name, user_path(field_slip.user_id)) %><br/>
     <% end %>
+
     <strong><%= :OBSERVATION.t %>:</strong>
     <% if field_slip.observation %>
       <%= link_to(field_slip.observation.unique_format_name.t, observation_path(field_slip.observation)) %>
