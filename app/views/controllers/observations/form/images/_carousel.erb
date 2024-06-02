@@ -16,18 +16,19 @@ tag.div(class: "carousel slide edit-carousel", id: html_id,
         data: { ride: "false", interval: "false" }) do
   tag.div(class: "carousel-control-wrap ab-fab") do
     concat(tag.div(class: "carousel-inner ab-fab bg-light", role: "listbox",
-                  id: "added_images_container", # this is where JS appends items
-                  data: { obs_form_images_target: "addedImages" }) do
+                   id: "added_images_container", # this is where JS appends
+                   data: { obs_form_images_target: "addedImages" }) do
       images&.each do |image|
         active = image == top_img ? "active" : ""
-        concat(render(partial: "observation/form/images/carousel_item",
+        concat(render(partial: "observations/form/images/carousel_item",
                       locals: { f:, image:, active:, upload: false }))
       end
     end)
     concat(tag.div(class: "image-position ab-fab") do
       concat(carousel_controls(html_id)) if images.length > 1
       concat(tag.ol(class: "carousel-indicators") do
-        images&.each_with_index do |_image, index|
+        images&.each_with_index do |image, index|
+          active = image == top_img ? "active" : ""
           tag.li("", class: class_names("carousel-indicator", active),
                       data: { target: "##{html_id}", slide_to: index.to_s })
         end

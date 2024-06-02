@@ -362,6 +362,7 @@ export default class extends Controller {
     const response = await get(this.get_template_uri,
       {
         contentType: "text/html",
+        responseKind: "turbo-stream",
         query: {
           active: _active,
           img_number: item.uuid,
@@ -375,9 +376,9 @@ export default class extends Controller {
       if (html) {
         // the text returned is the raw HTML template
         this.addTemplateToPage(item, html)
-        // extract the EXIF data (async) and then load it
+        // extract the EXIF data (async) and then place in the DOM element
         this.getExifData(item);
-        // uses FileReader to load image as base64 async
+        // uses FileReader to load image as base64 async and set the src
         this.fileReadImage(item);
       }
     } else {
@@ -385,18 +386,18 @@ export default class extends Controller {
     }
   }
 
-  // TODO: There should be two templates. Could be a turbo response?
+  // TODO: There could be two templates. Could be a turbo response?
   // One for the carousel image, and one for the tab for the image form.
   addTemplateToPage(item, html) {
     html = html.replace(/\s\s+/g, ' ').replace(/[\n\r]/.gm, '').trim();
-
-    // Create the DOM element and add it to FileStoreItem;
-    // This should work if the html is valid!
+    // Turn the html string into nodes we can play with, if html is valid.
+    // Creates the DOM element and add it to FileStoreItem;
     const template = document.createElement('template');
     template.innerHTML = html;
 
     // Hard to find without dev tools, but this is where the goods are:
-    // TODO: Need a carousel image element and a form element.
+    // TODO: Maybe need separate carousel image element and form element?
+    // Much simpler to deal with one element, though.
     item.dom_element = template.content.childNodes[0];
     // Give it a blank dataset
     item.dom_element.dataset.geocode = "";
@@ -435,6 +436,10 @@ export default class extends Controller {
       };
   }
 
+  // This gives the img src a base64 string, or the url.
+  // In most cases it's the base64, which is as long as the file.
+  // That's why we can't send the src attribute to the template call
+  // to get a complete layout; it has to be added by JS.
   fileReadImage(item) {
     const _img = item.dom_element.querySelector('.carousel-image');
 

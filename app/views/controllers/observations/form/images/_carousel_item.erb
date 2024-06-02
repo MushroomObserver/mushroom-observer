@@ -15,16 +15,16 @@ tag.div(**item_attrs) do
   concat(tag.div(class: "image-position") do
     image_tag(
       img_src, class: "carousel-image img-fluid ab-fab object-fit-contain lazy",
-      data: { src: img_src }
+               data: { src: img_src }
     )
   end)
   concat(tag.div(class: "form-position") do
     if upload
       concat(render(partial: "observations/form/images/fields_for_upload",
-             locals: { img_number:, img_file_name:, img_file_size: }))
+                    locals: { img_number:, img_file_name:, img_file_size: }))
     else
       concat(render(partial: "observations/form/images/fields_for_edit",
-             locals: { f:, image: }))
+                    locals: { f:, image: }))
     end
   end)
 end
