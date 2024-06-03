@@ -9,23 +9,27 @@ img_src = upload ? "" : image&.large_url
 handle = upload ? "added_image_wrapper" : ""
 item_attrs = { id: "carousel_item_#{img_id}",
                class: class_names("item", active, handle) }
-item_attrs[:data] = { image_number: img_number } if upload
+item_attrs[:data] = { image_number: img_number,
+                      obs_form_images_target: "item" } if upload
 
 tag.div(**item_attrs) do
-  concat(tag.div(class: "image-position") do
-    image_tag(
-      img_src, class: "carousel-image img-fluid ab-fab object-fit-contain lazy",
-               data: { src: img_src }
-    )
-  end)
-  concat(tag.div(class: "form-position") do
-    if upload
-      concat(render(partial: "observations/form/images/fields_for_upload",
-                    locals: { img_number:, img_file_name:, img_file_size: }))
-    else
-      concat(render(partial: "observations/form/images/fields_for_edit",
-                    locals: { f:, image: }))
-    end
-  end)
+  tag.div(class: "row") do
+    concat(tag.div(class: "image-position col-12 col-sm-6") do
+      image_tag(
+        img_src,
+        class: "carousel-image img-fluid ab-fab object-fit-contain lazy",
+        data: { src: img_src }
+      )
+    end)
+    concat(tag.div(class: "form-position col-12 col-sm-6") do
+      if upload
+        concat(render(partial: "observations/form/images/fields_for_upload",
+                      locals: { img_number:, img_file_name:, img_file_size: }))
+      else
+        concat(render(partial: "observations/form/images/fields_for_edit",
+                      locals: { f:, image: }))
+      end
+    end)
+  end
 end
 %>

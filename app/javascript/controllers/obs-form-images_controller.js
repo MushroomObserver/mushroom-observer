@@ -54,7 +54,7 @@ export default class extends Controller {
   static targets = ["form", "dateMessages", "imgDateRadios", "obsDateRadios",
     "gpsMessages", "gpsRadios", "setLatLngAlt", "ignoreGps", "imageGpsMap",
     "addedImages", "goodImages", "thumbImageId", "setThumbImg", "isThumbImg",
-    "thumbImgRadio", "removeImg"]
+    "thumbImgRadio", "removeImg", "item"]
 
   initialize() {
   }
@@ -228,8 +228,6 @@ export default class extends Controller {
       const _item = this.FileStoreItem(files[i], this.generateUUID());
       this.loadAndDisplayItem(_item, i);
 
-      // add an item to the dictionary with the file size as the key
-      this.fileStore.index[files[i].size] = _item;
       this.fileStore.items.push(_item)
     }
 
@@ -249,11 +247,11 @@ export default class extends Controller {
   }
 
   addUrl(url) {
-    if (this.fileStore.index[url] == undefined) {
+    // check if the url is already in the fileStore
+    if (this.fileStore.items.find((item) => item.url === url) == undefined) {
       const _item = this.FileStoreItem(url, this.generateUUID());
-      this.loadAndDisplayItem(_item);
+      this.loadAndDisplayItem(_item, 0);
 
-      this.fileStore.index[url] = _item;
       this.fileStore.items.push(_item);
     }
   }
@@ -329,7 +327,7 @@ export default class extends Controller {
   /*********************/
   /*   FileStoreItem   */
   /*********************/
-  // This is the object itself.
+  // This is the object representing the file.
   // When initializing, also loadAndDisplayItem(item)
   FileStoreItem(file_or_url, uuid) {
     const item = {};
@@ -362,7 +360,7 @@ export default class extends Controller {
     const response = await get(this.get_template_uri,
       {
         contentType: "text/html",
-        responseKind: "turbo-stream",
+        // responseKind: "turbo-stream", // appends it to the page!
         query: {
           active: _active,
           img_number: item.uuid,
@@ -374,66 +372,109 @@ export default class extends Controller {
     if (response.ok) {
       const html = await response.text
       if (html) {
-        // the text returned is the raw HTML template
-        this.addTemplateToPage(item, html)
-        // extract the EXIF data (async) and then place in the DOM element
-        this.getExifData(item);
-        // uses FileReader to load image as base64 async and set the src
-        this.fileReadImage(item);
+        // // the text returned is the raw HTML template
+        // this.addTemplateToPage(item, html)
+        // // extract the EXIF data (async) and then place in the DOM element
+        // this.getExifData(item);
+        // // uses FileReader to load image as base64 async and set the src
+        // this.fileReadImage(item);
       }
     } else {
       console.log(`got a ${response.status}`);
     }
   }
 
-  // TODO: There could be two templates. Could be a turbo response?
-  // One for the carousel image, and one for the tab for the image form.
-  addTemplateToPage(item, html) {
-    html = html.replace(/\s\s+/g, ' ').replace(/[\n\r]/.gm, '').trim();
-    // Turn the html string into nodes we can play with, if html is valid.
-    // Creates the DOM element and add it to FileStoreItem;
-    const template = document.createElement('template');
-    template.innerHTML = html;
-
-    // Hard to find without dev tools, but this is where the goods are:
-    // TODO: Maybe need separate carousel image element and form element?
-    // Much simpler to deal with one element, though.
-    item.dom_element = template.content.childNodes[0];
-    // Give it a blank dataset
+  // When Turbo appends the blank template to the page,
+  // add details about the file to the template.
+  itemTargetConnected(itemElement) {
+    // console.log("itemTargetConnected")
+    // console.log(itemElement);
+    const item = this.findRelevantItem(itemElement);
+    // attach a reference to the dom element to the item object
+    // so we can pass around the item object and still have access to the dom
+    item.dom_element = itemElement;
     item.dom_element.dataset.geocode = "";
 
     if (item.file_size > this.max_image_size)
       item.dom_element.querySelector('.warn-text').innerText =
         this.localized_text.image_too_big_text;
 
-    // add it to the page
-    this.addedImagesTarget.append(item.dom_element);
-    // scroll to it
-    window.scrollTo({
-      top: this.addedImagesTarget.offsetTop,
-      behavior: 'smooth',
-    });
+    // the text returned is the raw HTML template
+    // this.addTemplateToPage(item)
+    // extract the EXIF data (async) and then place in the DOM element
+    this.getExifData(item);
+    // uses FileReader to load image as base64 async and set the src
+    this.fileReadImage(item);
+  }
 
-    // bind the removeItem function.
-    // can't be called from outside because it's about the FileStore item
-    item.dom_element.querySelector('.remove_image_link')
-      .onclick = () => {
-        this.removeItem(item);
-        this.refreshImageMessages();
-        this.refreshGeocodeMessages();
-      };
+  // TODO: There could be two templates. Could be a turbo response?
+  // One for the carousel image, and one for the tab for the image form.
+  // addTemplateToPage(item) {
+  // html = html.replace(/\s\s+/g, ' ').replace(/[\n\r]/.gm, '').trim();
+  // Turn the html string into nodes we can play with, if html is valid.
+  // Creates the DOM element and add it to FileStoreItem;
+  // const template = document.createElement('template');
+  // template.innerHTML = html;
 
-    // Has to be, because the select has a different controller
-    item.dom_element.querySelector('select')
-      .onchange = () => {
-        this.refreshImageMessages();
-      };
+  // Hard to find without dev tools, but this is where the goods are:
+  // TODO: Maybe need separate carousel image element and form element?
+  // Much simpler to deal with one element, though.
+  // item.dom_element = template.content.childNodes[0];
+  // item.dom_element = document.getElementById("carousel_item_" + item.uuid);
+  // Give it a blank dataset
+  // item.dom_element.dataset.geocode = "";
 
-    // Need to also bind to year input
-    item.dom_element.querySelector("[id$=_1i]")
-      .onchange = () => {
-        this.refreshImageMessages();
-      };
+  // if (item.file_size > this.max_image_size)
+  //   item.dom_element.querySelector('.warn-text').innerText =
+  //     this.localized_text.image_too_big_text;
+
+  // add it to the page
+  // this.addedImagesTarget.append(item.dom_element);
+  // scroll to it
+  // window.scrollTo({
+  //   top: this.addedImagesTarget.offsetTop,
+  //   behavior: 'smooth',
+  // });
+
+  // debugger;
+
+  // BINDINGS
+  // TODO: make stimulus actions on template?
+
+  // bind the removeItem function.
+  // can't be called from outside because it's about the FileStore item
+  // item.dom_element.querySelector('.remove_image_link')
+  //   .onclick = () => {
+  //     this.removeItem(item);
+  //     this.refreshImageMessages();
+  //     this.refreshGeocodeMessages();
+  //   };
+
+  // Has to be, because the select has a different controller
+  // item.dom_element.querySelector('select')
+  //   .onchange = () => {
+  //     this.refreshImageMessages();
+  //   };
+
+  // // Need to also bind to year input
+  // item.dom_element.querySelector("[id$=_1i]")
+  //   .onchange = () => {
+  //     this.refreshImageMessages();
+  //   };
+  // }
+
+  // This works even if the element is the item itself.
+  findRelevantItem(element) {
+    const carousel_item = element.closest(".item")
+    return this.fileStore.items.find(
+      (item) => item.uuid === carousel_item.dataset.imageNumber
+    );
+  }
+  // Maybe a function to get the item from the ancestor element image number?
+  removeClickedItem(event) {
+    debugger;
+    const item = this.findRelevantItem(event.target);
+    this.removeItem(item);
   }
 
   // This gives the img src a base64 string, or the url.
@@ -462,6 +503,7 @@ export default class extends Controller {
     }
   }
 
+  // maybe stimulus action on image?
   // extracts the exif data async;
   getExifData(item) {
     const _image = item.dom_element.querySelector('.carousel-image');
@@ -694,12 +736,6 @@ export default class extends Controller {
   removeItem(item) {
     // remove element from the dom;
     item.dom_element.remove();
-
-    // remove the file from the dictionary
-    if (item.is_file)
-      delete this.fileStore.index[this.file_size];
-    else
-      delete this.fileStore.index[this.url];
 
     // remove item from items
     const idx = this.fileStore.items.indexOf(item);

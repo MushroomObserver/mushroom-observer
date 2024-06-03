@@ -28,7 +28,8 @@
   js_button(
     button: :image_remove_remove.l,
     class: "remove_image_link btn-sm fade in",
-    data: { obs_form_images_target: "removeImg" }
+    data: { obs_form_images_target: "removeImg",
+            action: "obs-form-images#removeClickedItem:prevent" }
   )
 end %>
 

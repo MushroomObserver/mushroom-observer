@@ -21,17 +21,9 @@
     width: 100%;
     margin-right: -100%;
 
-    > div {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      object-position: center;
-    }
-
     .carousel-caption {
       @extend .bg-legible, .py-2;
-      // position: absolute;
+      position: absolute;
       bottom: 0;
       left: 50%;
       right: auto;
@@ -133,8 +125,13 @@
 
 
 .edit-carousel {
-  .carousel-control-wrap {
+  padding-bottom: 100%;
+
+  @media screen and (min-width: 768px) {
     padding-bottom: 50%;
+  }
+
+  .carousel-control-wrap {
   }
 
   .carousel-inner {
@@ -144,24 +141,16 @@
   }
 
   .image-position {
-    display: inline-block;
+    position: relative;
     padding-bottom: 100%;
-    width: 100%;
 
-    @media screen and (min-width: 767px) {
-      width: 50%;
+    @media screen and (min-width: 768px) {
       padding-bottom: 50%;
     }
   }
 
   .form-position {
-    display: inline-block;
     padding: 1rem;
-    width: 100%;
-
-    @media screen and (min-width: 767px) {
-      width: 50%;
-    }
   }
 
   .carousel-indicators {
