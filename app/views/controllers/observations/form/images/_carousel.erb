@@ -23,8 +23,8 @@ tag.div(class: "carousel slide edit-carousel", id: html_id,
                     locals: { f:, image:, active:, upload: false }))
     end
     concat(tag.div(class: "ab-fab") do
-      tag.div(class: "row") do
-        tag.div(class: "col-12 col-sm-6") do
+      tag.div(class: "row h-100") do
+        tag.div(class: "col-12 col-sm-6 h-100") do
           concat(carousel_controls(html_id)) if images.length > 1
           concat(tag.ol(class: "carousel-indicators") do
             images&.each_with_index do |image, index|

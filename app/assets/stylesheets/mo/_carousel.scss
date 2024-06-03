@@ -125,14 +125,14 @@
 
 
 .edit-carousel {
-  padding-bottom: 100%;
+  // padding-bottom: 100%;
 
-  @media screen and (min-width: 768px) {
-    padding-bottom: 50%;
-  }
+  // @media screen and (min-width: 768px) {
+  //   padding-bottom: 50%;
+  // }
 
-  .carousel-control-wrap {
-  }
+  // .carousel-control-wrap {
+  // }
 
   .carousel-inner {
     .item {
@@ -144,7 +144,7 @@
     position: relative;
     padding-bottom: 100%;
 
-    @media screen and (min-width: 768px) {
+    @media screen and (min-width: 992px) {
       padding-bottom: 50%;
     }
   }

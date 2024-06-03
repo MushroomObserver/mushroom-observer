@@ -155,9 +155,9 @@ export default class extends Controller {
     if (_selectedItem && _selectedItem.hasAttribute('data-geocode')) {
       const _gps = JSON.parse(_selectedItem.dataset.geocode);
 
-      document.getElementById('observation_lat').value = _gps.latitude;
-      document.getElementById('observation_lng').value = _gps.longitude;
-      document.getElementById('observation_alt').value = _gps.altitude;
+      document.getElementById('observation_lat').value = _gps.lat;
+      document.getElementById('observation_lng').value = _gps.lng;
+      document.getElementById('observation_alt').value = _gps.alt;
       this.hide(this.gpsMessagesTarget);
     }
   }
@@ -516,10 +516,7 @@ export default class extends Controller {
 
   // applies exif data to the DOM element, must already be attached
   applyExifData(item) {
-    const _exif = item.exif_data,
-      _camera_date = item.dom_element.querySelector(".camera_date_text");
-
-    _camera_date.dataset.found = 'false';
+    const _exif = item.exif_data;
 
     if (item.dom_element == null) {
       console.warn("Error: DOM element for this file has not been created, so cannot update it with exif data!");
@@ -528,13 +525,34 @@ export default class extends Controller {
 
     item.dom_element.dataset.initialized = "true"
 
+    this.applyExifGPS(item, _exif);
+    this.applyExifDate(item, _exif);
+
+    item.processed = true;
+  }
+
+  applyExifGPS(item, _exif) {
+    const _exif_lat = item.dom_element.querySelector(".exif_lat"),
+      _exif_lng = item.dom_element.querySelector(".exif_lng"),
+      _exif_alt = item.dom_element.querySelector(".exif_alt");
+
     // Geocode Logic
     // check if there is geodata on the image
     if (_exif.GPSLatitude && _exif.GPSLongitude) {
-      const latLngAlt = this.getLatLongEXIF(_exif);
+      const latLngAlt = this.getLatLngEXIF(_exif);
+
       // Set item's data-geocode attribute so we can have a record
       item.dom_element.dataset.geocode = JSON.stringify(latLngAlt);
+
+      _exif_lat.innerText = latLngAlt.lat.toFixed(5);
+      _exif_lng.innerText = latLngAlt.lng.toFixed(5);
+      _exif_alt.innerText = latLngAlt.alt;
     }
+  }
+
+  applyExifDate(item, _exif) {
+    const _exif_date = item.dom_element.querySelector(".exif_date");
+    _exif_date.dataset.found = 'false';
 
     // Image Date Logic
     if (_exif.DateTimeOriginal) {
@@ -548,11 +566,11 @@ export default class extends Controller {
       this.imageDate(item, _exifSimpleDate);
 
       // shows the exif date by the photo
-      _camera_date.innerText = this.simpleDateAsString(_exifSimpleDate);
-      _camera_date.dataset.found = "true";
-      _camera_date.dataset.exif_date = _exifSimpleDate;
-      // bind _camera_date so it will set the image date if clicked
-      _camera_date.onclick = () => {
+      _exif_date.innerText = this.simpleDateAsString(_exifSimpleDate);
+      _exif_date.dataset.found = "true";
+      _exif_date.dataset.exif_date = _exifSimpleDate;
+      // bind _exif_date so it will set the image date if clicked
+      _exif_date.onclick = () => {
         this.imageDate(item, _exifSimpleDate);
         this.refreshImageMessages();
       }
@@ -562,8 +580,6 @@ export default class extends Controller {
       // Use observation date
       this.imageDate(item, this.observationDate());
     }
-
-    item.processed = true;
   }
 
   // Maybe add a radio button option to set obs gps to this item's gps.
@@ -587,10 +603,10 @@ export default class extends Controller {
           if (_currentOptions.length > 0) {
             _currentOptions.forEach((element) => {
               const _existingGeocode = JSON.parse(element.dataset.geocode);
-              const _latDif = Math.abs(itemGeocode.latitude)
-                - Math.abs(_existingGeocode.latitude);
-              const _lngDif = Math.abs(itemGeocode.longitude)
-                - Math.abs(_existingGeocode.longitude);
+              const _latDif = Math.abs(itemGeocode.lat)
+                - Math.abs(_existingGeocode.lat);
+              const _lngDif = Math.abs(itemGeocode.lng)
+                - Math.abs(_existingGeocode.lng);
 
               // don't add geocodes that are only slightly different
               if ((Math.abs(_latDif) < 0.0002) || Math.abs(_lngDif) < 0.0002)
@@ -660,6 +676,7 @@ export default class extends Controller {
     };
   }
 
+  // Because it can't be a form (within a form), we build formData manually.
   asFormData(item) {
     const _info = this.getUserEnteredInfo(item),
       _fd = new FormData();
@@ -917,8 +934,8 @@ export default class extends Controller {
   /** Geocode Helpers **/
 
   makeGeocodeRadioBtn(latLngAlt) {
-    const _geocode_string = latLngAlt.latitude.toFixed(5) + ", "
-      + latLngAlt.longitude.toFixed(5),
+    const _geocode_string = latLngAlt.lat.toFixed(5) + ", "
+      + latLngAlt.lng.toFixed(5),
       _html = document.createElement('div'),
       _label = document.createElement('label'),
       _input = document.createElement('input'),
@@ -948,27 +965,23 @@ export default class extends Controller {
     return _html;
   }
 
-  getLatLongEXIF(exifObject) {
+  getLatLngEXIF(exifObject) {
     let lat = exifObject.GPSLatitude.description;
-    let long = exifObject.GPSLongitude.description;
+    let lng = exifObject.GPSLongitude.description;
 
     const alt = exifObject.GPSAltitude ? (exifObject.GPSAltitude.value[0]
       / exifObject.GPSAltitude.value[1]).toFixed(0) + " m" : "";
 
     // make sure you don't end up on the wrong side of the world
-    long = exifObject.GPSLongitudeRef.value[0] == "W" ? long * -1 : long;
+    lng = exifObject.GPSLongitudeRef.value[0] == "W" ? lng * -1 : lng;
     lat = exifObject.GPSLatitudeRef.value[0] == "S" ? lat * -1 : lat;
 
-    return {
-      latitude: lat,
-      longitude: long,
-      altitude: alt
-    }
+    return { lat, lng, alt };
   }
 
   // Create a map object and specify the DOM element for display.
   showGeocodeonMap({ params: { latLngAlt } }) {
-    const _latLng = { lat: latLngAlt.latitude, lng: latLngAlt.longitude },
+    const _latLng = { lat: latLngAlt.lat, lng: latLngAlt.lng },
       _map_container = document.getElementById('geocode_map');
 
     _map_container.setAttribute('height', '250');

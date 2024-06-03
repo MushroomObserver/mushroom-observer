@@ -14,14 +14,34 @@ item_attrs[:data] = { image_number: img_number,
 
 tag.div(**item_attrs) do
   tag.div(class: "row") do
-    concat(tag.div(class: "image-position col-12 col-sm-6") do
-      image_tag(
+    concat(tag.div(class: "image-position col-12 col-md-6") do
+      concat(image_tag(
         img_src,
         class: "carousel-image img-fluid ab-fab object-fit-contain lazy",
         data: { src: img_src }
-      )
+      ))
+      concat(tag.div(class: "ab-fab ml-4 mt-4") do
+        [
+          js_button(
+            button: :image_set_default.l, class: "set_thumb_image btn-sm",
+            data: { obs_form_images_target: "setThumbImg",
+                    action: "obs-form-images#setObsThumbnail:prevent" }
+          ),
+          label_tag(
+            "observation[thumb_image_id]", :image_add_default.l,
+            class: "hidden is_thumb_image",
+            data: { obs_form_images_target: "isThumbImg" }
+          ),
+          radio_button_tag(
+            "observation[thumb_image_id]", "true",
+            class: "d-none",
+            data: { obs_form_images_target: "thumbImgRadio",
+                    action: "click->obs-form-images#setHiddenThumbField" }
+          )
+        ].safe_join
+      end)
     end)
-    concat(tag.div(class: "form-position col-12 col-sm-6") do
+    concat(tag.div(class: "form-position col-12 col-md-6 p-4") do
       if upload
         concat(render(partial: "observations/form/images/fields_for_upload",
                       locals: { img_number:, img_file_name:, img_file_size: }))

@@ -5,37 +5,13 @@
 <!--/Replaced by javascript-->
 
 <%# Specificity of the thumb choice is coming from data attribute on item %>
-<%= tag.div(class: "form-group mb-2") do %>
-  <%= js_button(
-    button: :image_set_default.l, class: "set_thumb_image btn-sm",
-    data: { obs_form_images_target: "setThumbImg",
-            action: "obs-form-images#setObsThumbnail:prevent" }
-  ) %>
-  <%= label_tag(
-    "observation[thumb_image_id]", :image_add_default.l,
-    class: "hidden is_thumb_image",
-    data: { obs_form_images_target: "isThumbImg" }
-  ) %>
-  <%= radio_button_tag(
-    "observation[thumb_image_id]", "true",
-    class: "d-none",
-    data: { obs_form_images_target: "thumbImgRadio",
-            action: "click->obs-form-images#setHiddenThumbField" }
-  ) %>
-<% end %>
-
-<%= tag.div(class: "text-right mb-2") do
+<%= tag.div(class: "form-group text-right") do
   js_button(
     button: :image_remove_remove.l,
     class: "remove_image_link btn-sm fade in",
     data: { obs_form_images_target: "removeImg",
             action: "obs-form-images#removeClickedItem:prevent" }
   )
-end %>
-
-<%= tag.div(class: "form-group") do
-  concat(tag.div(img_file_name, class: "small"))
-  concat(tag.span(img_file_size))
 end %>
 
 <%= fields_for(:"#{img_number}_temp_image") do |fti| %>
@@ -49,8 +25,6 @@ end %>
 
   <%= date_select_with_label(form: fti, field: :when, object: @image,
                              label: :form_images_when_taken.l) %>
-  <%= tag.small("#{:form_images_camera_date.t}: ") %>
-  <%= link_to("javascript:") { tag.small("", class: "camera_date_text") } %>
 
   <%= select_with_label(form: fti, field: :license_id,
                         label: :form_images_select_license.t.html_safe,
@@ -58,3 +32,22 @@ end %>
                         select_opts: { selected: @user.license_id }) %>
 
 <% end # fields_for %>
+
+<%= tag.div(class: "well well-sm mt-4") do %>
+  <%= tag.div(class: "form-group") { tag.strong("Camera Info:") } %>
+  <%= tag.div(class: "form-group") do
+    concat(tag.div do
+      [tag.strong("Date: "), # :form_images_camera_date.t
+       link_to("javascript:") { tag.span("", class: "exif_date") }].safe_join
+    end)
+    concat(tag.div do
+      [tag.strong("Lat: ") + tag.span("", class: "exif_lat"),
+       tag.strong("Long: ") + tag.span("", class: "exif_lng"),
+       tag.strong("Alt: ") + tag.span("", class: "exif_alt")].safe_join(", ")
+    end)
+  end %>
+  <%= tag.div(class: "form-group mb-0") do
+    concat(tag.div { tag.strong("File Name: ") + img_file_name })
+    concat(tag.div { tag.strong("Size: ") + img_file_size })
+  end %>
+<% end %>
