@@ -26,12 +26,7 @@
   </div><!--.panel-heading-->
   <div class="panel-body">
 
-    <%= interactive_image(@image,
-                          size: :huge,
-                          image_link: {},
-                          img_class: "huge-image",
-                          theater_on_click: true,
-                          votes: false) %>
+    <%= interactive_image(@image, **image_show_presenter_args) %>
 
     <div class="mt-3 text-center">
       <% if User.current %>
