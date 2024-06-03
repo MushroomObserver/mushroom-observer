@@ -131,8 +131,18 @@
   //   padding-bottom: 50%;
   // }
 
-  // .carousel-control-wrap {
-  // }
+  .carousel-control-wrap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding-bottom: 50%;
+
+    @media screen and (min-width: 992px) {
+      width: 50%;
+      padding-bottom: 100%;
+    }
+  }
 
   .carousel-inner {
     .item {

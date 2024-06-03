@@ -22,19 +22,15 @@ tag.div(class: "carousel slide edit-carousel", id: html_id,
       concat(render(partial: "observations/form/images/carousel_item",
                     locals: { f:, image:, active:, upload: false }))
     end
-    concat(tag.div(class: "ab-fab") do
-      tag.div(class: "row h-100") do
-        tag.div(class: "col-12 col-sm-6 h-100") do
-          concat(carousel_controls(html_id)) if images.length > 1
-          concat(tag.ol(class: "carousel-indicators") do
-            images&.each_with_index do |image, index|
-              active = image == top_img ? "active" : ""
-              tag.li("", class: class_names("carousel-indicator", active),
-                          data: { target: "##{html_id}", slide_to: index.to_s })
-            end
-          end)
+    concat(tag.div(class: "carousel-control-wrap") do
+      concat(carousel_controls(html_id))
+      concat(tag.ol(class: "carousel-indicators") do
+        images&.each_with_index do |image, index|
+          active = image == top_img ? "active" : ""
+          tag.li("", class: class_names("carousel-indicator", active),
+                      data: { target: "##{html_id}", slide_to: index.to_s })
         end
-      end
+      end)
     end)
   end
 end

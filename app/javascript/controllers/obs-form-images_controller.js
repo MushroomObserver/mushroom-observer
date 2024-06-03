@@ -387,9 +387,12 @@ export default class extends Controller {
   // When Turbo appends the blank template to the page,
   // add details about the file to the template.
   itemTargetConnected(itemElement) {
+    // First thing, we need a callback to adjust the carousel
+    // unset all active items and indicators, show/hide controls?
+    // set active item, prepend active indicator, count items
     // console.log("itemTargetConnected")
     // console.log(itemElement);
-    const item = this.findRelevantItem(itemElement);
+    const item = this.findFileStoreItem(itemElement);
     // attach a reference to the dom element to the item object
     // so we can pass around the item object and still have access to the dom
     item.dom_element = itemElement;
@@ -464,16 +467,17 @@ export default class extends Controller {
   // }
 
   // This works even if the element is the item itself.
-  findRelevantItem(element) {
+  findFileStoreItem(element) {
     const carousel_item = element.closest(".item")
     return this.fileStore.items.find(
       (item) => item.uuid === carousel_item.dataset.imageNumber
     );
   }
+
   // Maybe a function to get the item from the ancestor element image number?
   removeClickedItem(event) {
     debugger;
-    const item = this.findRelevantItem(event.target);
+    const item = this.findFileStoreItem(event.target);
     this.removeItem(item);
   }
 
