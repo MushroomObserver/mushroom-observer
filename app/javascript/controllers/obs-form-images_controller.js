@@ -70,6 +70,7 @@ export default class extends Controller {
     // this.form = document.forms.observation_form;
     this.form = this.element;
     this.drop_zone = this.formTarget;
+    this.carousel = this.element.querySelector('.carousel');
     this.submit_buttons = this.element.querySelectorAll('input[type="submit"]');
     this.max_image_size = this.element.dataset.upload_max_size;
 
@@ -327,7 +328,7 @@ export default class extends Controller {
   /*********************/
   /*   FileStoreItem   */
   /*********************/
-  // This is the object representing the file.
+  // This is a temporary object representing the file.
   // When initializing, also loadAndDisplayItem(item)
   FileStoreItem(file_or_url, uuid) {
     const item = {};
@@ -351,8 +352,11 @@ export default class extends Controller {
     return item;
   }
 
-  // Use requestjs-rails to a fetch request to get the template, populate it
-  // with the item data, then get EXIF data, and read the file with FileReader.
+  // Use requestjs-rails to a fetch request to get the carousel-item template.
+  // with the image and its form. requestjs-rails automatically calls
+  // renderStreamMessage on the response, so it's getting prepended by Turbo.
+  // To manipulate the returned element manually, we'd have to use vanilla-JS
+  // `fetch` and prepend it to the carousel ourselves.
   async loadAndDisplayItem(item, i) {
     const _file_size = item.is_file ?
       Math.floor((item.file_size / 1024)) + "kb" : "";
@@ -360,7 +364,7 @@ export default class extends Controller {
     const response = await get(this.get_template_uri,
       {
         contentType: "text/html",
-        // responseKind: "turbo-stream", // appends it to the page!
+        responseKind: "turbo-stream", // appends it to the page!
         query: {
           active: _active,
           img_number: item.uuid,
@@ -372,30 +376,26 @@ export default class extends Controller {
     if (response.ok) {
       const html = await response.text
       if (html) {
-        // // the text returned is the raw HTML template
-        // this.addTemplateToPage(item, html)
-        // // extract the EXIF data (async) and then place in the DOM element
-        // this.getExifData(item);
-        // // uses FileReader to load image as base64 async and set the src
-        // this.fileReadImage(item);
+        // handling it with itemTargetConnected callback
       }
     } else {
       console.log(`got a ${response.status}`);
     }
   }
 
-  // When Turbo appends the blank template to the page,
-  // add details about the file to the template.
+  // Stimulus "target callback" on carousel item added.
+  // When Turbo appends the carousel item to the page, populate the fileStore
+  // item with exifData, populate the form with a few details about the file,
+  // and read the file with FileReader to display the image.
   itemTargetConnected(itemElement) {
-    // First thing, we need a callback to adjust the carousel:
-    // unset all active items and indicators, show/hide controls?
-    // set active item, prepend active indicator, count items
     // console.log("itemTargetConnected")
     // console.log(itemElement);
+    this.addCarouselIndicator();
     this.sortCarousel(itemElement);
+
     const item = this.findFileStoreItem(itemElement);
-    // attach a reference to the dom element to the item object
-    // so we can pass around the item object and still have access to the dom
+    // Attach a reference to the dom element to the item object so we can
+    // populate the item object as well as the element
     item.dom_element = itemElement;
     item.dom_element.dataset.geocode = "";
 
@@ -403,103 +403,83 @@ export default class extends Controller {
       item.dom_element.querySelector('.warn-text').innerText =
         this.localized_text.image_too_big_text;
 
-    // the text returned is the raw HTML template
-    // this.addTemplateToPage(item)
-    // extract the EXIF data (async) and then place in the DOM element
+    // extract the EXIF data (async) and populate the item and element
     this.getExifData(item);
-    // uses FileReader to load image as base64 async and set the src
+    // uses FileReader to load image as base64 async and set the img src
     this.fileReadImage(item);
   }
 
-  // Adjust the carousel controls and indicators for the new item.
-  sortCarousel(itemElement) {
-    const _carousel = itemElement.closest('.carousel'),
-      _html_id = _carousel.getAttribute('id'),
-      _indicators = _carousel.querySelector('.carousel-indicators'),
-      _controls = _carousel.querySelector('.carousel-control'),
-      _active = _carousel.querySelectorAll('.active'),
-      _count = _carousel.querySelectorAll('.item').length;
+  // Stimulus "target callback" on carousel item removed:
+  // Remove the last indicator - they're only matched to items by index
+  itemTargetDisconnected(itemElement) {
+    const _indicators =
+      this.carousel.querySelectorAll('.carousel-indicator'),
+      _count = _indicators.length;
 
+    // _count >= 1 should be the case, but just in case they're not in sync:
+    // Remove the last indicator.
+    if (_count >= 1) { _indicators[_count - 1].remove(); }
+    this.sortCarousel();
+  }
+
+  // Add an indicator for the most recent element.
+  addCarouselIndicator() {
+    const _html_id = this.carousel.getAttribute('id'),
+      _indi_controls = this.carousel.querySelector('.carousel-indicators'),
+      _indicators = this.carousel.querySelectorAll('.carousel-indicator'),
+      _new_indicator = document.createElement("li");
+
+    _new_indicator.setAttribute('data-target', '#' + _html_id);
+    _new_indicator.setAttribute('data-slide-to', 0);
+    _new_indicator.classList.add('carousel-indicator');
+    _new_indicator.classList.add('active');
+
+    // Scoot the indicators over by one
+    if (_indicators.length > 0) {
+      _indicators.forEach((indicator) => {
+        const _ref = Number(indicator.dataset.slideTo);
+        indicator.setAttribute('data-slide-to', _ref + 1);
+      });
+    }
+    _indi_controls.prepend(_new_indicator);
+  }
+
+  // Adjust the carousel controls and indicators for the new/removed item.
+  // This always makes the new (or first) element in the carousel active.
+  sortCarousel(itemElement = null) {
+    const _items = this.carousel.querySelectorAll('.item'),
+      _indi_controls = this.carousel.querySelector('.carousel-indicators'),
+      _controls = this.carousel.querySelector('.carousel-control'),
+      _active = this.carousel.querySelectorAll('.active'),
+      _count = _items.length;
+
+    // Remove all active classes from items and indicators
     _active.forEach((elem) => { elem.classList.remove('active') });
 
-    // The element has just been prepended, so it's the first one.
-    itemElement.classList.add('active');
-    uuid = itemElement.dataset.imageNumber;
-
-    // Add an indicator for the most recent element.
-    const _indicator = document.createElement("li");
-    _indicator.setAttribute('data-target', '#' + _html_id);
-    _indicator.setAttribute('data-slide-to', 0);
-    _indicator.classList.add('carousel-indicator active');
-    _indicators.prepend(_indicator);
-
-    // Show or hide the controls.
+    if (itemElement == null) {
+      // An element has been removed, so the first one is now active.
+      _items[0].classList.add('active');
+    } else {
+      // The element has just been prepended, so it's the first one.
+      itemElement.classList.add('active');
+    }
+    // Show or hide the controls, depending on the total.
     if (_count > 1) {
-      _indicators.classList.remove('d-none');
+      _indi_controls.classList.remove('d-none');
       _controls.classList.remove('d-none');
     } else {
-      _indicators.classList.add('d-none');
+      _indi_controls.classList.add('d-none');
       _controls.classList.add('d-none');
     }
   }
 
-  // TODO: There could be two templates. Could be a turbo response?
-  // One for the carousel image, and one for the tab for the image form.
-  // addTemplateToPage(item) {
-  // html = html.replace(/\s\s+/g, ' ').replace(/[\n\r]/.gm, '').trim();
-  // Turn the html string into nodes we can play with, if html is valid.
-  // Creates the DOM element and add it to FileStoreItem;
-  // const template = document.createElement('template');
-  // template.innerHTML = html;
+  // Carousel gets sorted out separately by the itemTargetDisconnected callback.
+  removeClickedItem(event) {
+    const item = this.findFileStoreItem(event.target);
+    this.removeItem(item);
+  }
 
-  // Hard to find without dev tools, but this is where the goods are:
-  // TODO: Maybe need separate carousel image element and form element?
-  // Much simpler to deal with one element, though.
-  // item.dom_element = template.content.childNodes[0];
-  // item.dom_element = document.getElementById("carousel_item_" + item.uuid);
-  // Give it a blank dataset
-  // item.dom_element.dataset.geocode = "";
-
-  // if (item.file_size > this.max_image_size)
-  //   item.dom_element.querySelector('.warn-text').innerText =
-  //     this.localized_text.image_too_big_text;
-
-  // add it to the page
-  // this.addedImagesTarget.append(item.dom_element);
-  // scroll to it
-  // window.scrollTo({
-  //   top: this.addedImagesTarget.offsetTop,
-  //   behavior: 'smooth',
-  // });
-
-  // debugger;
-
-  // BINDINGS
-  // TODO: make stimulus actions on template?
-
-  // bind the removeItem function.
-  // can't be called from outside because it's about the FileStore item
-  // item.dom_element.querySelector('.remove_image_link')
-  //   .onclick = () => {
-  //     this.removeItem(item);
-  //     this.refreshImageMessages();
-  //     this.refreshGeocodeMessages();
-  //   };
-
-  // Has to be, because the select has a different controller
-  // item.dom_element.querySelector('select')
-  //   .onchange = () => {
-  //     this.refreshImageMessages();
-  //   };
-
-  // // Need to also bind to year input
-  // item.dom_element.querySelector("[id$=_1i]")
-  //   .onchange = () => {
-  //     this.refreshImageMessages();
-  //   };
-  // }
-
-  // This works even if the element is the item itself.
+  // "closest" works even if the element is the item itself.
   findFileStoreItem(element) {
     const carousel_item = element.closest(".item")
     return this.fileStore.items.find(
@@ -507,26 +487,19 @@ export default class extends Controller {
     );
   }
 
-  // Maybe a function to get the item from the ancestor element image number?
-  removeClickedItem(event) {
-    debugger;
-    const item = this.findFileStoreItem(event.target);
-    this.removeItem(item);
-  }
-
   // This gives the img src a base64 string, or the url.
   // In most cases it's the base64, which is as long as the file.
   // That's why we can't send the src attribute to the template call
   // to get a complete layout; it has to be added by JS.
   fileReadImage(item) {
+    // find the image element in carousel-item
     const _img = item.dom_element.querySelector('.carousel-image');
 
     if (item.is_file) {
       const fileReader = new FileReader();
 
       fileReader.onload = (fileLoadedEvent) => {
-        // find the actual image element
-        // get image element in container and set the src to base64 img url
+        // set the src to base64 img url
         _img.setAttribute('src', fileLoadedEvent.target.result);
       };
 
