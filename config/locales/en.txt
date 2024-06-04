@@ -3958,7 +3958,7 @@
   runtime_invalid_classification: "[:runtime_no_parse(value=text)]"
   runtime_invalid_name: "[:runtime_invalid(type=:name,value=name)]"
   runtime_invalid_source_type: "[:runtime_invalid(type=:source)]"
-  runtime_license_attributed_duplicated: Duplicate display_name, form_name, or url
+  runtime_license_duplicate_attributed: Duplicate display_name, form_name, or url
   runtime_list_location_no_matches: "[:runtime_no_matches(type=:location)]"
   runtime_location_already_exists: "[:runtime_already_exists(type=:location,value=name)]"
   runtime_location_description_index_no_matches: "[:runtime_no_matches(type=:location_description)]"
