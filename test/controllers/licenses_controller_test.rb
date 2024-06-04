@@ -282,7 +282,7 @@ class LicensesControllerTest < FunctionalTestCase
 
     put(:update, params: params)
 
-    assert_flash_text(:runtime_license_attributed_duplicated.l)
+    assert_flash_text(:runtime_license_duplicate_attributed.l)
     assert_form_action({ action: :update }, "Failed to re-render edit")
   end
 

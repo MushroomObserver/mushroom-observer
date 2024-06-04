@@ -42,4 +42,9 @@ class LicenseTest < UnitTestCase
 
     assert_not(ccnc25.attribute_duplicated?)
   end
+
+  def test_license_badge_url
+    assert_equal("https://licensebuttons.net/l/by-nc-sa/3.0/88x31.png",
+                 licenses(:ccnc30).badge_url)
+  end
 end

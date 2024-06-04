@@ -93,7 +93,7 @@ class LicensesController < AdminController
   end
 
   def duplicate_attribute
-    flash_warning(:runtime_license_attributed_duplicated.l)
+    flash_warning(:runtime_license_duplicate_attributed.l)
     render(:edit)
   end
 end

@@ -17,9 +17,9 @@
 #  id::           Locally unique numerical id, starting at 1.
 #  updated_at::   Date/time it was last updated.
 #  deprecated::   Has this been deprecated?
-#  display_name:: Name, e.g., "Creative Commons Non-commercial v2.5"
-#  form_name::    Code, e.g., "ccbyncsa25"
-#  url::          URL,  e.g., "http://creativecommons.org/licenses/by-nc-sa/2.5/"
+#  display_name:: Name, ex: "Creative Commons Non-commercial v2.5"
+#  form_name::    Code, ex: "ccbyncsa25"
+#  url::          URL,  ex: "http://creativecommons.org/licenses/by-nc-sa/2.5/"
 #
 #  == Class methods
 #
@@ -35,6 +35,7 @@
 #  in_use?::                Is license used by any object?
 #  attribute_duplicated?    duplicate display_name, form_name_, or url
 #                           of another License?
+#  badge_url::              url of the License badge
 #
 #  == Callbacks
 #
@@ -102,6 +103,13 @@ class License < AbstractModel
         )
       )
     ).any?
+  end
+
+  LICENSE_URL_WITH_SUBDIR = %r{https?://creativecommons.org/licenses/}
+  BADGE_URL_WITH_SUBDIR = "https://licensebuttons.net/l/"
+
+  def badge_url
+    "#{url.sub(LICENSE_URL_WITH_SUBDIR, BADGE_URL_WITH_SUBDIR)}88x31.png"
   end
 
   ###########
