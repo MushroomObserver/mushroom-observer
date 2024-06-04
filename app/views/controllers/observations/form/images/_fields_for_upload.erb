@@ -34,7 +34,7 @@ end %>
 <% end # fields_for %>
 
 <%= tag.div(class: "well well-sm mt-4") do %>
-  <%= tag.div(class: "form-group") { tag.strong("Camera Info:") } %>
+  <%= tag.p { tag.strong("Camera Info:") } %>
   <%= tag.div(class: "form-group") do
     concat(tag.div do
       [tag.strong("Date: "), # :form_images_camera_date.t

@@ -28,7 +28,7 @@ tag.div(class: "carousel slide edit-carousel", id: html_id,
         images&.each_with_index do |image, index|
           active = image == top_img ? "active" : ""
           tag.li("", class: class_names("carousel-indicator", active),
-                      data: { target: "##{html_id}", slide_to: index.to_s })
+                     data: { target: "##{html_id}", slide_to: index.to_s })
         end
       end)
     end)

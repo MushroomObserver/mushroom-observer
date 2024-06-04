@@ -387,11 +387,12 @@ export default class extends Controller {
   // When Turbo appends the blank template to the page,
   // add details about the file to the template.
   itemTargetConnected(itemElement) {
-    // First thing, we need a callback to adjust the carousel
+    // First thing, we need a callback to adjust the carousel:
     // unset all active items and indicators, show/hide controls?
     // set active item, prepend active indicator, count items
     // console.log("itemTargetConnected")
     // console.log(itemElement);
+    this.sortCarousel(itemElement);
     const item = this.findFileStoreItem(itemElement);
     // attach a reference to the dom element to the item object
     // so we can pass around the item object and still have access to the dom
@@ -408,6 +409,38 @@ export default class extends Controller {
     this.getExifData(item);
     // uses FileReader to load image as base64 async and set the src
     this.fileReadImage(item);
+  }
+
+  // Adjust the carousel controls and indicators for the new item.
+  sortCarousel(itemElement) {
+    const _carousel = itemElement.closest('.carousel'),
+      _html_id = _carousel.getAttribute('id'),
+      _indicators = _carousel.querySelector('.carousel-indicators'),
+      _controls = _carousel.querySelector('.carousel-control'),
+      _active = _carousel.querySelectorAll('.active'),
+      _count = _carousel.querySelectorAll('.item').length;
+
+    _active.forEach((elem) => { elem.classList.remove('active') });
+
+    // The element has just been prepended, so it's the first one.
+    itemElement.classList.add('active');
+    uuid = itemElement.dataset.imageNumber;
+
+    // Add an indicator for the most recent element.
+    const _indicator = document.createElement("li");
+    _indicator.setAttribute('data-target', '#' + _html_id);
+    _indicator.setAttribute('data-slide-to', 0);
+    _indicator.classList.add('carousel-indicator active');
+    _indicators.prepend(_indicator);
+
+    // Show or hide the controls.
+    if (_count > 1) {
+      _indicators.classList.remove('d-none');
+      _controls.classList.remove('d-none');
+    } else {
+      _indicators.classList.add('d-none');
+      _controls.classList.add('d-none');
+    }
   }
 
   // TODO: There could be two templates. Could be a turbo response?
