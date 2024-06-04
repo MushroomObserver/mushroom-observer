@@ -3339,7 +3339,7 @@
 
   # licenses/form
   create_license_title: Create License
-  license_display_name: Full Name (display_name)
+  license_display_name: Name (display_name)
   license_display_name_help: "Ex: Creative Commons Non-commercial v2.5"
   license_form_checkbox_deprecated: Deprecated
   license_code: Code

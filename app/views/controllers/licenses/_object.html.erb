@@ -1,5 +1,5 @@
 <div class="list-group-item">
-  <%= content_tag(:big, link_with_query(object.code,
+  <%= content_tag(:big, link_with_query(object.display_name,
                   object.show_link_args)) %>,
   <b>License id:</b> <%= object.id %>,
   <b>Deprecated:</b> <%= object.deprecated.to_s %>

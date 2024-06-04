@@ -53,7 +53,6 @@ class LicensesController < AdminController
     @license = License.find(params[:id])
 
     @license.display_name = params.dig(:license, :display_name)
-    @license.code = params.dig(:license, :code)
     @license.url = params.dig(:license, :url)
     @license.deprecated = (params[:deprecated] == "1")
 
@@ -84,7 +83,7 @@ class LicensesController < AdminController
   private
 
   def license_params
-    params[:license].permit(:display_name, :code, :url)
+    params[:license].permit(:display_name, :url)
   end
 
   def no_changes

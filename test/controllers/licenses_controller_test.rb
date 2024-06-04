@@ -130,11 +130,9 @@ class LicensesControllerTest < FunctionalTestCase
     display_name = "Creative Commons Non-commercial v4.0"
     assert_blank(License.where(display_name: display_name),
                  "License already exists")
-    code = "ccbyncsa40"
     url = "http://creativecommons.org/licenses/by-nc-sa/4.0/"
     params = { license: { display_name: display_name,
-                          url: url,
-                          code: code },
+                          url: url },
                deprecated: "0" }
 
     login("rolf")
@@ -147,7 +145,6 @@ class LicensesControllerTest < FunctionalTestCase
     # Licenses lack created_at column; use updated_at instead
     license = License.order(updated_at: :asc).last
     assert_equal(display_name, license.display_name)
-    assert_equal(code, license.code)
     assert_equal(url, license.url)
     assert_false(license.deprecated)
 
@@ -158,8 +155,7 @@ class LicensesControllerTest < FunctionalTestCase
   def test_create_duplicate
     license = licenses(:ccnc30)
     params = { license: { display_name: license.display_name,
-                          url: license.url,
-                          code: license.code },
+                          url: license.url },
                deprecated: (license.deprecated ? "1" : "0") }
 
     login("rolf")
@@ -173,9 +169,7 @@ class LicensesControllerTest < FunctionalTestCase
 
   def test_create_missing_attribute
     license = licenses(:ccnc30)
-    params = { license: { display_name: nil,
-                          url: license.url,
-                          code: license.code },
+    params = { license: { display_name: nil, url: license.url },
                deprecated: (license.deprecated ? "1" : "0") }
 
     login("rolf")
@@ -216,7 +210,6 @@ class LicensesControllerTest < FunctionalTestCase
     license = licenses(:ccwiki30)
     params = { id: license.id,
                license: { display_name: "X Special",
-                          code: "X",
                           url: "https://x.com/explore" },
                deprecated: "1" }
 
@@ -230,7 +223,6 @@ class LicensesControllerTest < FunctionalTestCase
     assert_redirected_to(license_path(license.id))
 
     assert_equal(params.dig(:license, :display_name), license.display_name)
-    assert_equal(params.dig(:license, :code), license.code)
     assert_equal(params.dig(:license, :url), license.url)
     assert_equal((params[:deprecated] == "1"), license.deprecated)
   end
@@ -239,7 +231,6 @@ class LicensesControllerTest < FunctionalTestCase
     license = licenses(:ccwiki30)
     params = { id: license.id,
                license: { display_name: license.display_name,
-                          code: license.code,
                           url: license.url },
                deprecated: license.deprecated ? "1" : "0" }
 
@@ -255,9 +246,7 @@ class LicensesControllerTest < FunctionalTestCase
   def test_update_missing_attribute
     license = licenses(:ccnc30)
     params = { id: license.id,
-               license: { display_name: nil,
-                          url: license.url,
-                          code: license.code },
+               license: { display_name: nil, url: license.url },
                deprecated: (license.deprecated ? "1" : "0") }
 
     login("rolf")
@@ -273,8 +262,7 @@ class LicensesControllerTest < FunctionalTestCase
     params = { id: license.id,
                license: { display_name: license.display_name,
                           # duplicates another license's attribute
-                          url: licenses(:ccnc25).url,
-                          code: license.code },
+                          url: licenses(:ccnc25).url },
                deprecated: (license.deprecated ? "1" : "0") }
 
     login("rolf")
@@ -300,7 +288,7 @@ class LicensesControllerTest < FunctionalTestCase
 
     assert_not(
       License.exists?(license.id),
-      "Failed to destroy license #{license.id}, '#{license.code}'"
+      "Failed to destroy license #{license.id}, #{license.display_name}"
     )
   end
 
@@ -318,7 +306,7 @@ class LicensesControllerTest < FunctionalTestCase
     end
     assert(
       License.exists?(license.id),
-      "Destroyed license #{license.id}, '#{license.code}'"
+      "Destroyed license #{license.id}, '#{license.display_name}'"
     )
   end
 end
