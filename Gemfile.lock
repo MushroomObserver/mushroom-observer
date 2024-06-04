@@ -1,5 +1,5 @@
 GIT
-  remote: https://github.com/MushroomObserver/acts_as_versioned/
+  remote: https://github.com/MushroomObserver/acts_as_versioned
   revision: 56891f7f915610e9f884e3a932bfb6934303b3b8
   specs:
     mo_acts_as_versioned (0.6.6)
@@ -9,25 +9,25 @@ GEM
   remote: https://rubygems.org/
   specs:
     RedCloth (4.3.4)
-    actioncable (7.1.3.3)
-      actionpack (= 7.1.3.3)
-      activesupport (= 7.1.3.3)
+    actioncable (7.1.3.4)
+      actionpack (= 7.1.3.4)
+      activesupport (= 7.1.3.4)
       nio4r (~> 2.0)
       websocket-driver (>= 0.6.1)
       zeitwerk (~> 2.6)
-    actionmailer (7.1.3.3)
-      actionpack (= 7.1.3.3)
-      actionview (= 7.1.3.3)
-      activejob (= 7.1.3.3)
-      activesupport (= 7.1.3.3)
+    actionmailer (7.1.3.4)
+      actionpack (= 7.1.3.4)
+      actionview (= 7.1.3.4)
+      activejob (= 7.1.3.4)
+      activesupport (= 7.1.3.4)
       mail (~> 2.5, >= 2.5.4)
       net-imap
       net-pop
       net-smtp
       rails-dom-testing (~> 2.2)
-    actionpack (7.1.3.3)
-      actionview (= 7.1.3.3)
-      activesupport (= 7.1.3.3)
+    actionpack (7.1.3.4)
+      actionview (= 7.1.3.4)
+      activesupport (= 7.1.3.4)
       nokogiri (>= 1.8.5)
       racc
       rack (>= 2.2.4)
@@ -35,22 +35,22 @@ GEM
       rack-test (>= 0.6.3)
       rails-dom-testing (~> 2.2)
       rails-html-sanitizer (~> 1.6)
-    actionview (7.1.3.3)
-      activesupport (= 7.1.3.3)
+    actionview (7.1.3.4)
+      activesupport (= 7.1.3.4)
       builder (~> 3.1)
       erubi (~> 1.11)
       rails-dom-testing (~> 2.2)
       rails-html-sanitizer (~> 1.6)
-    activejob (7.1.3.3)
-      activesupport (= 7.1.3.3)
+    activejob (7.1.3.4)
+      activesupport (= 7.1.3.4)
       globalid (>= 0.3.6)
-    activemodel (7.1.3.3)
-      activesupport (= 7.1.3.3)
-    activerecord (7.1.3.3)
-      activemodel (= 7.1.3.3)
-      activesupport (= 7.1.3.3)
+    activemodel (7.1.3.4)
+      activesupport (= 7.1.3.4)
+    activerecord (7.1.3.4)
+      activemodel (= 7.1.3.4)
+      activesupport (= 7.1.3.4)
       timeout (>= 0.4.0)
-    activesupport (7.1.3.3)
+    activesupport (7.1.3.4)
       base64
       bigdecimal
       concurrent-ruby (~> 1.0, >= 1.0.2)
@@ -229,7 +229,7 @@ GEM
     puma (6.4.2)
       nio4r (~> 2.0)
     raabro (1.4.0)
-    racc (1.7.3)
+    racc (1.8.0)
     rack (3.0.11)
     rack-session (2.0.0)
       rack (>= 3.0.0)
@@ -249,9 +249,9 @@ GEM
     rails-html-sanitizer (1.6.0)
       loofah (~> 2.21)
       nokogiri (~> 1.14)
-    railties (7.1.3.3)
-      actionpack (= 7.1.3.3)
-      activesupport (= 7.1.3.3)
+    railties (7.1.3.4)
+      actionpack (= 7.1.3.4)
+      activesupport (= 7.1.3.4)
       irb
       rackup (>= 1.0.0)
       rake (>= 12.2)
