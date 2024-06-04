@@ -54,7 +54,7 @@ export default class extends Controller {
   static targets = ["form", "dateMessages", "imgDateRadios", "obsDateRadios",
     "gpsMessages", "gpsRadios", "setLatLngAlt", "ignoreGps", "imageGpsMap",
     "addedImages", "goodImages", "thumbImageId", "setThumbImg", "isThumbImg",
-    "thumbImgRadio", "removeImg", "item"]
+    "thumbImgRadio", "obsThumbImgBtn", "removeImg", "item"]
 
   initialize() {
   }
@@ -165,36 +165,29 @@ export default class extends Controller {
 
   ignoreGps() { this.hide(this.gpsMessagesTarget); }
 
-  setObsThumbnail(event) {
-    // event.target is the button clicked to make whichever the default image
-    const elem = event.target;
+  // Replaces the radio buttons. Transfers exif data directly from image.
+  transferExifToObs() {
+  }
 
+  setObsThumbnail(event) {
+    // event.target is the label.btn clicked to make whichever the default image
+    // or any descendant element that is clicked
+    const button = event.target.closest('.obs_thumb_img_btn');
     // reset selections
-    // remove hidden from the links
-    this.setThumbImgTargets.forEach((elem) => {
-      elem.classList.remove('hidden');
-    });
-    // add hidden to the default thumbnail text
-    this.isThumbImgTargets.forEach((elem) => {
-      elem.classList.add('hidden');
+    this.obsThumbImgBtnTargets.forEach((elem) => {
+      elem.classList.remove('active');
     });
     // reset the checked default thumbnail
     this.thumbImgRadioTargets.forEach((elem) => {
-      elem.setAttribute('checked', false);
+      elem.removeAttribute('checked');
     });
 
-    // set sibling selections... don't know how to use targets here
-    // add hidden to the link clicked
-    elem.classList.add('hidden');
-    // show that the image is default
-    elem.parentNode.querySelector(
-      '.is_thumb_image'
-    ).classList.remove('hidden');
-    // adjust hidden radio button to select obs thumbnail
-    elem.parentNode.querySelector(
+    // set selection...
+    button.classList.add('active');
+    button.querySelector(
       'input[type="radio"][name="observation[thumb_image_id]"]'
-      // ).setAttribute('checked', true);
-    ).click() // to trigger setHiidenThumbField below.
+    ).setAttribute('checked', '');
+    setHiddenThumbField(event)
   }
 
   // this just sets the hidden field value. do this directly or trigger click
@@ -412,13 +405,7 @@ export default class extends Controller {
   // Stimulus "target callback" on carousel item removed:
   // Remove the last indicator - they're only matched to items by index
   itemTargetDisconnected(itemElement) {
-    const _indicators =
-      this.carousel.querySelectorAll('.carousel-indicator'),
-      _count = _indicators.length;
-
-    // _count >= 1 should be the case, but just in case they're not in sync:
-    // Remove the last indicator.
-    if (_count >= 1) { _indicators[_count - 1].remove(); }
+    this.removeCarouselIndicator();
     this.sortCarousel();
   }
 
@@ -432,7 +419,6 @@ export default class extends Controller {
     _new_indicator.setAttribute('data-target', '#' + _html_id);
     _new_indicator.setAttribute('data-slide-to', 0);
     _new_indicator.classList.add('carousel-indicator');
-    _new_indicator.classList.add('active');
 
     // Scoot the indicators over by one
     if (_indicators.length > 0) {
@@ -444,11 +430,22 @@ export default class extends Controller {
     _indi_controls.prepend(_new_indicator);
   }
 
+  removeCarouselIndicator() {
+    const _indicators =
+      this.carousel.querySelectorAll('.carousel-indicator'),
+      _count = _indicators.length;
+
+    // _count >= 1 should be the case, but just in case they're not in sync:
+    // Remove the last indicator.
+    if (_count >= 1) { _indicators[_count - 1].remove(); }
+  }
+
   // Adjust the carousel controls and indicators for the new/removed item.
   // This always makes the new (or first) element in the carousel active.
   sortCarousel(itemElement = null) {
     const _items = this.carousel.querySelectorAll('.item'),
       _indi_controls = this.carousel.querySelector('.carousel-indicators'),
+      _indicators = this.carousel.querySelectorAll('.carousel-indicator'),
       _controls = this.carousel.querySelector('.carousel-control'),
       _active = this.carousel.querySelectorAll('.active'),
       _count = _items.length;
@@ -456,13 +453,15 @@ export default class extends Controller {
     // Remove all active classes from items and indicators
     _active.forEach((elem) => { elem.classList.remove('active') });
 
-    if (itemElement == null) {
-      // An element has been removed, so the first one is now active.
-      _items[0].classList.add('active');
-    } else {
-      // The element has just been prepended, so it's the first one.
-      itemElement.classList.add('active');
-    }
+    // if (itemElement == null) {
+    //   // An element has been removed, so the first one is now active.
+    //   _items[0].classList.add('active');
+    // } else {
+    //   // The element has just been prepended, so it's the first one.
+    //   itemElement.classList.add('active');
+    // }
+    _items[0].classList.add('active');
+    _indicators[0].classList.add('active');
     // Show or hide the controls, depending on the total.
     if (_count > 1) {
       _indi_controls.classList.remove('d-none');

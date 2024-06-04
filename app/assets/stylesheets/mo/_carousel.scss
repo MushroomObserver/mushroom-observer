@@ -118,7 +118,7 @@
     &.active {
       width: 6vw;
       height: 6vw;
-      opacity: 0.6;
+      opacity: 0.66;
     }
   }
 }
@@ -130,18 +130,6 @@
   // @media screen and (min-width: 768px) {
   //   padding-bottom: 50%;
   // }
-
-  .carousel-control-wrap {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    padding-bottom: 50%;
-
-    @media screen and (min-width: 992px) {
-      width: 50%;
-    }
-  }
 
   .carousel-inner {
     .item {
@@ -158,8 +146,26 @@
     }
   }
 
-  .form-position {
+  .form-panel {
     padding: 1rem;
+
+    @media screen and (min-width: 992px) {
+      padding-left: 3rem;
+    }
+  }
+
+  // This keeps the carousel controls on top of the image, not the form
+  .carousel-control-wrap {
+    position: absolute;
+    top: 6rem;
+    bottom: 6rem;
+    left: 0;
+    width: 100%;
+    padding-bottom: calc(50% - 12rem);
+
+    @media screen and (min-width: 992px) {
+      width: 50%;
+    }
   }
 
   .carousel-indicators {
@@ -175,18 +181,38 @@
 
     li {
       display: inline-block;
-      width: 10px;
-      height: 10px;
-      margin: 1px;
+      width: 1.25rem;
+      height: 1.25rem;
+      margin: 0.5rem;
       text-indent: -999px;
       cursor: pointer;
-      background-color: rgba(0,0,0,0);
-      border: 1px solid #fff;
-      border-radius: 10px;
+      background-color: rgba($black, 0.45);
+      border: 1px solid rgba($white, 0.21);
+      border-radius: 50%;
 
       &.active {
-        background-color: #fff;
+        background-color: rgba($white, 1);
+        border: 1px solid rgba($black, 0.75);
+        opacity: 0.9;
       }
+    }
+  }
+}
+
+.obs_thumb_img_btn {
+  .set_thumb_img_text {
+    display: inline;
+  }
+  .is_thumb_img_text {
+    display: none;
+  }
+
+  &.active {
+    .set_thumb_img_text {
+      display: none;
+    }
+    .is_thumb_img_text {
+      display: inline;
     }
   }
 }

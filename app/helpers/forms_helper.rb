@@ -36,13 +36,14 @@ module FormsHelper
   end
 
   # form-agnostic button, type=button
-  def js_button(**args)
+  def js_button(**args, &block)
+    button = block ? capture(&block) : args[:button]
     opts = args.except(:form, :button, :class, :center)
     opts[:class] = "btn btn-default"
     opts[:class] += " center-block my-3" if args[:center] == true
     opts[:class] += " #{args[:class]}" if args[:class].present?
 
-    button_tag(args[:button], type: :button, **opts)
+    button_tag(button, type: :button, **opts)
   end
 
   # Form field builders with labels, consistent styling and less template code!
@@ -97,6 +98,8 @@ module FormsHelper
     end
   end
 
+  # Makes an element that looks like a bootstrap button but works as a checkbox.
+  # Only works within a .btn-group wrapper. NOTE: Different from a check_box!
   def check_button_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
     opts = separate_field_options_from_args(args)
@@ -122,6 +125,20 @@ module FormsHelper
         concat(args[:label])
         concat(args[:append]) if args[:append].present?
       end
+    end
+  end
+
+  # Makes an element that looks like a bootstrap button but works as a radio.
+  # Only works within a .btn-group wrapper. NOTE: Different from a radio_button!
+  def radio_button_with_label(**args)
+    args = auto_label_if_form_is_account_prefs(args)
+    opts = separate_field_options_from_args(args)
+
+    wrap_class = form_group_wrap_class(args, "btn btn-default btn-sm")
+
+    args[:form].label(args[:field], class: wrap_class) do
+      [args[:form].radio_button(args[:field], opts.merge(class: "mt-0 mr-2")),
+       args[:label]].safe_join
     end
   end
 

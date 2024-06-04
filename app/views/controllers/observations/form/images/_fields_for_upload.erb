@@ -33,19 +33,9 @@ end %>
 
 <% end # fields_for %>
 
-<%= tag.div(class: "well well-sm mt-4") do %>
+<%= tag.div(class: "well well-sm mt-4 position-relative") do %>
   <%= tag.p { tag.strong("Camera Info:") } %>
-  <%= tag.div(class: "form-group") do
-    concat(tag.div do
-      [tag.strong("Date: "), # :form_images_camera_date.t
-       link_to("javascript:") { tag.span("", class: "exif_date") }].safe_join
-    end)
-    concat(tag.div do
-      [tag.strong("Lat: ") + tag.span("", class: "exif_lat"),
-       tag.strong("Long: ") + tag.span("", class: "exif_lng"),
-       tag.strong("Alt: ") + tag.span("", class: "exif_alt")].safe_join(", ")
-    end)
-  end %>
+  <%= carousel_exif_info %>
   <%= tag.div(class: "form-group mb-0") do
     concat(tag.div { tag.strong("File Name: ") + img_file_name })
     concat(tag.div { tag.strong("Size: ") + img_file_size })
