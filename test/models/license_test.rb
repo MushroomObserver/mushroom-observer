@@ -29,15 +29,15 @@ class LicenseTest < UnitTestCase
     ccnc25 = licenses(:ccnc25)
 
     license = License.new(display_name: ccnc25.display_name,
-                          form_name: "anything", url: "anything")
+                          code: "anything", url: "anything")
     assert(license.attribute_duplicated?)
 
     license = License.new(display_name: "anything",
-                          form_name: ccnc25.form_name, url: "anything")
+                          code: ccnc25.code, url: "anything")
     assert(license.attribute_duplicated?)
 
     license = License.new(display_name: "anything",
-                          form_name: "anything", url: ccnc25.url)
+                          code: "anything", url: ccnc25.url)
     assert(license.attribute_duplicated?)
 
     assert_not(ccnc25.attribute_duplicated?)

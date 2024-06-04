@@ -6,9 +6,9 @@
                             data: { autofocus: true },
                             append: append)  %>
 
-  <% append = help_block(:div, :license_form_name_help.t) %>
-  <%= text_field_with_label(form: f, field: :form_name,
-                            label: :license_form_name.t + ":",
+  <% append = help_block(:div, :license_code_help.t) %>
+  <%= text_field_with_label(form: f, field: :code,
+                            label: :license_code.t + ":",
                             append: append) %>
 
   <% append = help_block(:div, :license_url_help.t) %>

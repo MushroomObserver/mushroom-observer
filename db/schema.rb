@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_02_171941) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_04_130408) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -211,7 +211,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_02_171941) do
     t.string "display_name", limit: 80
     t.string "url", limit: 200
     t.boolean "deprecated", default: false, null: false
-    t.string "form_name", limit: 20
+    t.string "code", limit: 20
     t.datetime "updated_at", precision: nil
     t.datetime "created_at", precision: nil
   end

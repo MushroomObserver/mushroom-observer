@@ -18,7 +18,7 @@
 #  updated_at::   Date/time it was last updated.
 #  deprecated::   Has this been deprecated?
 #  display_name:: Name, ex: "Creative Commons Non-commercial v2.5"
-#  form_name::    Code, ex: "ccbyncsa25"
+#  code::         Code, ex: "ccbyncsa25"
 #  url::          URL,  ex: "http://creativecommons.org/licenses/by-nc-sa/2.5/"
 #
 #  == Class methods
@@ -33,7 +33,7 @@
 #  name_descriptions::      Array of Name's that use this License.
 #  text_name::              Alias for +display_name+ for debugging.
 #  in_use?::                Is license used by any object?
-#  attribute_duplicated?    duplicate display_name, form_name_, or url
+#  attribute_duplicated?    duplicate display_name, code_, or url
 #                           of another License?
 #  badge_url::              url of the License badge
 #
@@ -49,16 +49,16 @@ class License < AbstractModel
   has_many :name_descriptions
   has_many :users
 
-  validates :display_name, :form_name, :url, presence: true
+  validates :display_name, :code, :url, presence: true
   # Don't add indexes because there are few Licenses, and they rarely change
-  validates :display_name, :form_name, :url, uniqueness: true # rubocop:disable Rails/UniqueValidationWithoutIndex
+  validates :display_name, :code, :url, uniqueness: true # rubocop:disable Rails/UniqueValidationWithoutIndex
   before_destroy :prevent_destruction_of_license_in_use
 
-  PREFERRED_LICENSE_FORM_NAME = "ccbysa30"
+  PREFERRED_LICENSE_CODE = "ccbysa30"
 
   # Use this license if all else equal.
   def self.preferred
-    License.find_by(form_name: PREFERRED_LICENSE_FORM_NAME)
+    License.find_by(code: PREFERRED_LICENSE_CODE)
   end
 
   # Various debugging things require all models respond to text_name
@@ -82,7 +82,7 @@ class License < AbstractModel
   end
 
   def copyright_text(year, name)
-    if form_name == "publicdomain"
+    if code == "publicdomain"
       "".html_safe + :image_show_public_domain.t + " " + name
     else
       "".html_safe + :image_show_copyright.t.to_s + " &copy;".html_safe +
@@ -98,7 +98,7 @@ class License < AbstractModel
   def attribute_duplicated?
     License.where.not(id: id).and(
       License.where(display_name: display_name).or(
-        License.where(form_name: form_name).or(
+        License.where(code: code).or(
           License.where(url: url)
         )
       )

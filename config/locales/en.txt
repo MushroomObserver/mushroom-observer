@@ -3342,8 +3342,8 @@
   license_display_name: Full Name (display_name)
   license_display_name_help: "Ex: Creative Commons Non-commercial v2.5"
   license_form_checkbox_deprecated: Deprecated
-  license_form_name: Form Name
-  license_form_name_help: "Ex: ccbyncsa25"
+  license_code: Code
+  license_code_help: "Ex: ccbyncsa25"
   license_url: url
   license_url_help: "Ex: https://creativecommons.org/licenses/by-nc-sa/2.5/"
 

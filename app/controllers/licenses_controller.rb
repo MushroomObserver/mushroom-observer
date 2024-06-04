@@ -29,7 +29,7 @@ class LicensesController < AdminController
     # It creates errors for each attribute, even if only one is duplicated
     # and blanks all the attributes
     if @license.attribute_duplicated?
-      flash_warning("Duplicate display_name, form_name, or url")
+      flash_warning("Duplicate display_name, code, or url")
       return render(:new)
     end
 
@@ -53,7 +53,7 @@ class LicensesController < AdminController
     @license = License.find(params[:id])
 
     @license.display_name = params.dig(:license, :display_name)
-    @license.form_name = params.dig(:license, :form_name)
+    @license.code = params.dig(:license, :code)
     @license.url = params.dig(:license, :url)
     @license.deprecated = (params[:deprecated] == "1")
 
@@ -84,7 +84,7 @@ class LicensesController < AdminController
   private
 
   def license_params
-    params[:license].permit(:display_name, :form_name, :url)
+    params[:license].permit(:display_name, :code, :url)
   end
 
   def no_changes

@@ -13,30 +13,30 @@ ccnc25:
   display_name: Creative Commons Non-commercial v2.5
   url: http://creativecommons.org/licenses/by-nc-sa/2.5/
   deprecated: true
-  form_name: ccbyncsa25
+  code: ccbyncsa25
   updated_at: nil
 
 ccnc30:
   display_name: Creative Commons Non-commercial v3.0
   url: http://creativecommons.org/licenses/by-nc-sa/3.0/
   deprecated: false
-  form_name: ccbyncsa30
+  code: ccbyncsa30
 
 ccwiki30:
   display_name: Creative Commons Wikipedia Compatible v3.0
   url: http://creativecommons.org/licenses/by-sa/3.0/
   deprecated: false
-  form_name: ccbysa30
+  code: ccbysa30
 
 publicdomain:
   display_name: Public Domain
   url: http://wiki.creativecommons.org/Public_domain/
   deprecated: false
-  form_name: publicdomain
+  code: publicdomain
   updated_at: 2013-03-02 09:45:03
 
 unused:
   display_name: All Rights Reserved
   url: https://en.wikipedia.org/wiki/All_rights_reserved
   deprecated: false
-  form_name: copyright
+  code: copyright
