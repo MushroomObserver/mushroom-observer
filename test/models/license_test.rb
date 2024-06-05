@@ -41,4 +41,13 @@ class LicenseTest < UnitTestCase
     assert_equal("https://licensebuttons.net/l/by-nc-sa/3.0/88x31.png",
                  licenses(:ccnc30).badge_url)
   end
+
+  def test_preferred
+    license = licenses(:ccnc25)
+    assert(license.preferred?)
+
+    License.where.not(id: license.id).find_each do |lic|
+      assert_not(lic.preferred?)
+    end
+  end
 end

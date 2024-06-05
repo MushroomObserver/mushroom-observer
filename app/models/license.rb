@@ -50,15 +50,14 @@ class License < AbstractModel
   has_many :users
 
   validates :display_name, :url, presence: true
-  # Don't add indexes because there are few Licenses, and they rarely change
+  # Don't index: there are few Licenses, which rarely change
   validates :display_name, :url, uniqueness: true # rubocop:disable Rails/UniqueValidationWithoutIndex
   before_destroy :prevent_destruction_of_license_in_use
 
   # Use this license if all else equal.
+  # It is currently hard-coded in the schema as Licenses default `license_id`
   def self.preferred
-    License.where(
-      License[:url] =~ %r{https?://creativecommons.org/licenses/by-nc-sa/3.0/}
-    ).first
+    License.find(Image.column_defaults["license_id"])
   end
 
   def preferred?
