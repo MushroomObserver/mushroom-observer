@@ -5,7 +5,7 @@
 %>
 
 <div>
-  <% debugger; if @license.preferred? %>
+  <% if @license.preferred? %>
     <p><b><%= :license_default.t %></b></p>
   <% end %>
   <p><%= :ID.t %>: <b><%= @license.id %></b></p>
