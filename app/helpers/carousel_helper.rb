@@ -56,34 +56,35 @@ module CarouselHelper
 
   # For uploads, this should simply set a "true" value for the radio button.
   # For existing images, it should set the image id, and active class
-  def carousel_set_thumb_img(f:, image: nil, active: "")
+  def carousel_set_thumb_img(image: nil, active: "")
     value = image ? image.id : "true"
     label_classes = class_names("btn btn-default btn-sm obs_thumb_img_btn",
                                 active)
-
-    f.label(
-      :thumb_image_id,
-      class: label_classes,
-      data: { obs_form_images_target: "obsThumbImgBtn",
-              action: "click->obs-form-images#setObsThumbnail" }
-    ) do
-      [
-        f.radio_button(
-          :thumb_image_id, value,
-          class: "mr-3",
-          data: { obs_form_images_target: "thumbImgRadio" }
-        ),
-        tag.span(
-          :image_set_default.l,
-          class: "set_thumb_img_text",
-          data: { obs_form_images_target: "setThumbImg" }
-        ),
-        tag.span(
-          :image_add_default.l,
-          class: "is_thumb_img_text",
-          data: { obs_form_images_target: "isThumbImg" }
-        )
-      ].safe_join
+    fields_for(:observation) do |f|
+      f.label(
+        :thumb_image_id,
+        class: label_classes,
+        data: { obs_form_images_target: "obsThumbImgBtn",
+                action: "click->obs-form-images#setObsThumbnail" }
+      ) do
+        [
+          f.radio_button(
+            :thumb_image_id, value,
+            class: "mr-3",
+            data: { obs_form_images_target: "thumbImgRadio" }
+          ),
+          tag.span(
+            :image_set_default.l,
+            class: "set_thumb_img_text",
+            data: { obs_form_images_target: "setThumbImg" }
+          ),
+          tag.span(
+            :image_add_default.l,
+            class: "is_thumb_img_text",
+            data: { obs_form_images_target: "isThumbImg" }
+          )
+        ].safe_join
+      end
     end
   end
 

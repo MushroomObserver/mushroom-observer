@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { get, post } from '@rails/request.js'
+import { get, post, put } from '@rails/request.js'
 import ExifReader from 'exifreader';
 
 // When the user selects images, our JS loads them into browser memory. Note
@@ -171,7 +171,8 @@ export default class extends Controller {
   setObsThumbnail(event) {
     // event.target is the label.btn clicked to make whichever the default image
     // or any descendant element that is clicked
-    const button = event.target.closest('.obs_thumb_img_btn');
+    const button = event.target.closest('.obs_thumb_img_btn'),
+      radio = button.querySelector('input[type="radio"]');
     // reset selections
     this.obsThumbImgBtnTargets.forEach((elem) => {
       elem.classList.remove('active');
@@ -186,12 +187,7 @@ export default class extends Controller {
     button.querySelector(
       'input[type="radio"][name="observation[thumb_image_id]"]'
     ).setAttribute('checked', '');
-    setHiddenThumbField(event)
-  }
-
-  // this just sets the hidden field value. do this directly or trigger click
-  setHiddenThumbField(event) {
-    this.thumbImageIdTarget.setAttribute('value', event.target.value);
+    this.thumbImageIdTarget.setAttribute('value', radio.value);
   }
 
   addSelectedFiles(event) {
@@ -384,9 +380,9 @@ export default class extends Controller {
   itemTargetConnected(itemElement) {
     // console.log("itemTargetConnected")
     // console.log(itemElement);
-    this.addCarouselIndicator();
     if (itemElement.hasAttribute('data-good-image')) return;
 
+    this.addCarouselIndicator();
     this.sortCarousel();
     const item = this.findFileStoreItem(itemElement);
     // Attach a reference to the dom element to the item object so we can
@@ -446,11 +442,8 @@ export default class extends Controller {
   // Adjust the carousel controls and indicators for the new/removed item.
   sortCarousel() {
     const _items = this.carouselTarget.querySelectorAll('.item'),
-      _indicontrols = this.carouselTarget.querySelector('.carousel-indicators'),
       _indicators = this.carouselTarget.querySelectorAll('.carousel-indicator'),
-      _controls = this.carouselTarget.querySelector('.carousel-control'),
-      _active = this.carouselTarget.querySelectorAll('.active'),
-      _count = _items.length;
+      _active = this.carouselTarget.querySelectorAll('.active');
 
     // Remove all active classes from items and indicators
     _active.forEach((elem) => { elem.classList.remove('active') });
@@ -458,7 +451,17 @@ export default class extends Controller {
     // This always makes the new (or first) element in the carousel active.
     _items[0].classList.add('active');
     _indicators[0].classList.add('active');
-    // Show or hide the controls, depending on the total.
+
+    this.sortCarouselControls();
+  }
+
+  // Show or hide the controls, depending on the total.
+  sortCarouselControls() {
+    const _items = this.carouselTarget.querySelectorAll('.item'),
+      _indicontrols = this.carouselTarget.querySelector('.carousel-indicators'),
+      _controls = this.carouselTarget.querySelector('.carousel-control'),
+      _count = _items.length;
+
     if (_count > 1) {
       _indicontrols.classList.remove('d-none');
       _controls.classList.remove('d-none');
@@ -475,37 +478,22 @@ export default class extends Controller {
     this.removeItem(_item);
   }
 
-  // This is for removing an image already attached to the observation. In other
-  // words, not a fileStore item. It detaches and deletes the image from the
-  // observation, and also removes the item from the carousel.
+  // This is for detaching an image already attached to the observation.
+  // (not a fileStore item), on the obs edit form. It just removes the item
+  // from the carousel and id from "good_images". Has no effect until submit.
   removeAttachedItem(event) {
-    const _image_id = event.target.dataset.imageId;
-    this.removeImageFromObservation(_image_id);
-  }
+    const _good_images = this.goodImagesTarget.value,
+      _good_image_vals = _good_images.split(" "),
+      _image_id = event.target.dataset.imageId,
+      _thumb_id = this.thumbImageIdTarget.value;
 
-  async removeImageFromObservation(obs_id, img_id) {
-    const _remove_image_uri =
-      "/observations/" + obs_id + "/images/" + img_id + "/detach";
-    const response = await put(_remove_image_uri,
-      {
-        contentType: "text/html",
-        // responseKind: "turbo-stream", // appends it to the page!
-        // query: {
-        //   id: obs_id,
-        //   image_id: item.uuid,
-        //   img_file_name: item.file_name,
-        //   img_file_size: _file_size
-        // }
-      });
+    const _new = _good_image_vals.filter(item => item !== _image_id).join(" ");
+    this.goodImagesTarget.value = _new;
 
-    if (response.ok) {
-      const html = await response.text
-      if (html) {
-        // handling it with itemTargetConnected callback
-      }
-    } else {
-      console.log(`got a ${response.status}`);
+    if (_thumb_id == _image_id) {
+      this.thumbImageIdTarget.value = "";
     }
+    document.getElementById("carousel_item_" + _image_id).remove();
   }
 
   // "closest" works even if the element is the item itself.

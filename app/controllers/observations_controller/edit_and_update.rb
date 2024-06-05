@@ -86,6 +86,7 @@ module ObservationsController::EditAndUpdate
     warn_if_unchecking_specimen_with_records_present!
     strip_images_if_observation_gps_hidden
     validate_edit_place_name
+    detach_removed_images
     try_to_upload_images
     try_to_save_observation_if_there_are_changes
 
@@ -118,6 +119,20 @@ module ObservationsController::EditAndUpdate
     return if validate_place_name(params) && validate_projects(params)
 
     @any_errors = true
+  end
+
+  # As of 2024-06-01, users can remove images right on the edit obs form.
+  def detach_removed_images
+    new_ids = params[:good_images].split
+
+    # If it didn't make the cut, remove it.
+    @observation.images.each do |img|
+      next if new_ids.include?(img.id.to_s)
+
+      @observation.remove_image(img)
+      img.log_remove_from(@observation)
+      flash_notice(:runtime_image_remove_success.t(id: img.id))
+    end
   end
 
   def try_to_upload_images

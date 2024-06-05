@@ -76,15 +76,22 @@
   margin-bottom: 5rem; // fullscreen and caption/voting
   background: none !important;
   font-size: 2rem;
-  color: #bbb;
+  color: $white;
+  opacity: 0.75;
 
   .btn {
     font-size: inherit;
+    &:hover,
+    &:focus {
+      color: inherit;
+      text-shadow: 3px 3px 3px rgba($black, 0.5);
+    }
   }
 
   &:hover,
   &:focus {
-    color: #eee;
+    // color: rgba($white, 1);
+    opacity: 1;
   }
 }
 
@@ -150,6 +157,7 @@
     padding: 1rem;
 
     @media screen and (min-width: 992px) {
+      padding-top: 1.5rem;
       padding-left: 3rem;
     }
   }
@@ -187,7 +195,7 @@
       text-indent: -999px;
       cursor: pointer;
       background-color: rgba($black, 0.45);
-      border: 1px solid rgba($white, 0.21);
+      border: 1px solid rgba($white, 0.75);
       border-radius: 50%;
 
       &.active {

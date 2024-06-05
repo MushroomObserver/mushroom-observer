@@ -13,6 +13,15 @@ image_upload_localization = {
   show_on_map: :show_on_map.t,
   something_went_wrong: :form_observations_upload_error.t
 }.to_json
+
+data = {
+  controller: "obs-form-images",
+  upload_max_size: max_size,
+  localization: image_upload_localization,
+  obs_form_images_target: "form"
+}
+# used by stimulus to make ajax calls to the right route
+data[:observation_id] = @observation.id if action_name == "edit"
 %>
 
 <%= form_with(
@@ -23,12 +32,7 @@ image_upload_localization = {
   method: method,
   multipart: true,
   id: "observation_form",
-  data: {
-    controller: "obs-form-images",
-    upload_max_size: max_size,
-    localization: image_upload_localization,
-    obs_form_images_target: "form"
-  }
+  data: data
 ) do |f| %>
 
   <%= "#{:form_observations_field_code.t} #{@field_code}" if @field_code %>
