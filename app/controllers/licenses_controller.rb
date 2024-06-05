@@ -75,17 +75,17 @@ class LicensesController < AdminController
 
   def new_license_from_params
     license = License.new(license_params)
-    attributes_from_params(license)
+    add_deprecated(license)
   end
 
   def edited_license_from_params
     license = License.find(params[:id])
     license.display_name = params.dig(:license, :display_name)
     license.url = params.dig(:license, :url)
-    attributes_from_params(license)
+    add_deprecated(license)
   end
 
-  def attributes_from_params(license)
+  def add_deprecated(license)
     license.deprecated = (params[:deprecated] == "1")
     license
   end
