@@ -22,8 +22,7 @@ class LicensesController < AdminController
   end
 
   def create
-    @license = License.new(license_params)
-    @license.deprecated = (params[:deprecated] == "1")
+    @license = new_license_from_params
 
     # I can't get @license.validates :uniqueness to work properly
     # It creates errors for each attribute, even if only one is duplicated
@@ -50,23 +49,15 @@ class LicensesController < AdminController
   end
 
   def update
-    @license = License.find(params[:id])
-
-    @license.display_name = params.dig(:license, :display_name)
-    @license.url = params.dig(:license, :url)
-    @license.deprecated = (params[:deprecated] == "1")
+    @license = edited_license_from_params
 
     return no_changes unless @license.changed?
     return duplicate_attribute if @license.attribute_duplicated?
 
     if @license.save
-      flash_notice(
-        :runtime_updated_id.t(type: :license, value: @license.id)
-      )
-      redirect_to(license_path(@license.id))
+      update_succeded
     else
-      @license.errors.full_messages.each { |msg| flash_warning(msg) }
-      render(:edit)
+      update_failed
     end
   end
 
@@ -82,6 +73,23 @@ class LicensesController < AdminController
 
   private
 
+  def new_license_from_params
+    license = License.new(license_params)
+    attributes_from_params(license)
+  end
+
+  def edited_license_from_params
+    license = License.find(params[:id])
+    license.display_name = params.dig(:license, :display_name)
+    license.url = params.dig(:license, :url)
+    attributes_from_params(license)
+  end
+
+  def attributes_from_params(license)
+    license.deprecated = (params[:deprecated] == "1")
+    license
+  end
+
   def license_params
     params[:license].permit(:display_name, :url)
   end
@@ -93,6 +101,18 @@ class LicensesController < AdminController
 
   def duplicate_attribute
     flash_warning(:runtime_license_duplicate_attributed.l)
+    render(:edit)
+  end
+
+  def update_succeded
+    flash_notice(
+      :runtime_updated_id.t(type: :license, value: @license.id)
+    )
+    redirect_to(license_path(@license.id))
+  end
+
+  def update_failed
+    @license.errors.full_messages.each { |msg| flash_warning(msg) }
     render(:edit)
   end
 end
