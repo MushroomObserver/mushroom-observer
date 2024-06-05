@@ -164,13 +164,28 @@ export default class extends Controller {
 
   ignoreGps() { this.hide(this.gpsMessagesTarget); }
 
-  // Replaces the radio buttons. Transfers exif data directly from image.
-  transferExifToObs() {
+  // Transfers exif date and geocode directly from carousel item dataset to obs.
+  transferExifToObs(event) {
+    const _itemElement = event.target.closest('.item'),
+      _exif_data = _itemElement.dataset;
+
+    if (_exif_data.geocode) {
+      const latLngAlt = JSON.parse(_exif_data.geocode);
+
+      document.getElementById('observation_lat').value = latLngAlt.lat;
+      document.getElementById('observation_lng').value = latLngAlt.lng;
+      document.getElementById('observation_alt').value = latLngAlt.alt;
+    }
+    if (_exif_data.exif_date) {
+      const _exifSimpleDate = JSON.parse(_exif_data.exif_date);
+      this.observationDate(_exifSimpleDate);
+    }
   }
 
+  // Deactivate other radio buttons manually because they are not grouped (?)
   setObsThumbnail(event) {
     // event.target is the label.btn clicked to make whichever the default image
-    // or any descendant element that is clicked
+    // but could also be any descendant element
     const button = event.target.closest('.obs_thumb_img_btn'),
       radio = button.querySelector('input[type="radio"]');
     // reset selections
@@ -593,20 +608,24 @@ export default class extends Controller {
       this.imageDate(item, _exifSimpleDate);
 
       // shows the exif date by the photo
+      item.dom_element.dataset.exif_date = JSON.stringify(_exifSimpleDate);
       _exif_date.innerText = this.simpleDateAsString(_exifSimpleDate);
       _exif_date.dataset.found = "true";
-      _exif_date.dataset.exif_date = _exifSimpleDate;
-      // bind _exif_date so it will set the image date if clicked
-      _exif_date.onclick = () => {
-        this.imageDate(item, _exifSimpleDate);
-        this.refreshImageMessages();
-      }
     }
     // no date was found in EXIF data
     else {
       // Use observation date
       this.imageDate(item, this.observationDate());
     }
+  }
+
+  // action so .exif_date will set the image date if clicked
+  exifToImageDate(event) {
+    const _item = this.findFileStoreItem(event.target),
+      _exifSimpleDate = JSON.parse(_item.dom_element.dataset.exif_date);
+
+    this.imageDate(_item, _exifSimpleDate);
+    this.refreshImageMessages();
   }
 
   // Maybe add a radio button option to set obs gps to this item's gps.
@@ -630,14 +649,14 @@ export default class extends Controller {
           if (_currentOptions.length > 0) {
             _currentOptions.forEach((element) => {
               const _existingGeocode = JSON.parse(element.dataset.geocode);
-              const _latDif = Math.abs(itemGeocode.lat)
-                - Math.abs(_existingGeocode.lat);
-              const _lngDif = Math.abs(itemGeocode.lng)
-                - Math.abs(_existingGeocode.lng);
+              // const _latDif = Math.abs(itemGeocode.lat)
+              //   - Math.abs(_existingGeocode.lat);
+              // const _lngDif = Math.abs(itemGeocode.lng)
+              //   - Math.abs(_existingGeocode.lng);
 
               // don't add geocodes that are only slightly different
-              if ((Math.abs(_latDif) < 0.0002) || Math.abs(_lngDif) < 0.0002)
-                _addGeoRadio = false;
+              // if ((Math.abs(_latDif) < 0.0002) || Math.abs(_lngDif) < 0.0002)
+              _addGeoRadio = this.geocodesDiffer(itemGeocode, _existingGeocode);
             });
           }
 
@@ -663,6 +682,11 @@ export default class extends Controller {
         this.hide(this.gpsMessagesTarget);
       }
     }
+  }
+
+  geocodesDiffer(first, second) {
+    return Math.abs(first.lat - second.lat) >= 0.0002
+      || Math.abs(first.lng - second.lng) >= 0.0002;
   }
 
   // gets or sets image date

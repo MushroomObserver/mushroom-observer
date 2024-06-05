@@ -194,14 +194,14 @@
       margin: 0.5rem;
       text-indent: -999px;
       cursor: pointer;
-      background-color: rgba($black, 0.45);
-      border: 1px solid rgba($white, 0.75);
+      background-color: rgba($white, 1);
+      border: 1px solid rgba($black, 0.75);
       border-radius: 50%;
+      opacity: 0.9;
 
       &.active {
-        background-color: rgba($white, 1);
-        border: 1px solid rgba($black, 0.75);
-        opacity: 0.9;
+        background-color: rgba($white, 0.45);
+        border: 1px solid rgba($white, 0.75);
       }
     }
   }

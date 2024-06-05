@@ -7,8 +7,7 @@ tag.div(class: "well well-sm mt-4 position-relative") do
         tag.div do
           [
             tag.strong("Date: "), # :form_images_camera_date.t
-            # TODO: make this a stimulus target
-            link_to("javascript:") { tag.span("", class: "exif_date") }
+            carousel_exif_to_image_date_button
           ].safe_join
         end,
         tag.div do

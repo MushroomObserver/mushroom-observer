@@ -95,19 +95,32 @@ module CarouselHelper
     data[:image_id] = image_id if image_id
 
     js_button(
-      button: :image_remove_remove.l,
       class: "remove_image_link btn-sm fade in",
       data: data
-    )
+    ) do
+      [tag.span(:image_remove_remove.l),
+       tag.span(
+         "", class: "glyphicon glyphicon-remove-circle text-danger ml-3"
+       )].safe_join
+    end
   end
 
   # Replaced by js
   def carousel_upload_messages
     tag.div(class: "carousel-upload-messages") do
       [
-        tag.span("", "text-danger warn-text"),
-        tag.span("", "text-success info-text")
+        tag.span("", class: "text-danger warn-text"),
+        tag.span("", class: "text-success info-text")
       ].safe_join
+    end
+  end
+
+  def carousel_exif_to_image_date_button
+    link_to(
+      "#",
+      data: { action: "obs-form-images#exifToImageDate:prevent" }
+    ) do
+      tag.span("", class: "exif_date")
     end
   end
 
