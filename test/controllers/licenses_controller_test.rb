@@ -183,6 +183,24 @@ class LicensesControllerTest < FunctionalTestCase
     assert_flash_warning
   end
 
+  def test_create_save_failure
+    license = licenses(:ccnc30)
+    params = { license: { display_name: license.display_name,
+                          url: license.url },
+               deprecated: (license.deprecated ? "1" : "0") }
+
+    login("rolf")
+    make_admin
+
+    license.stub(:save, false) do
+      License.stub(:new, license) do
+        assert_no_difference("License.count", "`save` should have failed") do
+          post(:create, params: params)
+        end
+      end
+    end
+  end
+
   def test_edit
     license = licenses(:ccnc25)
     assert_true(license.deprecated,
