@@ -164,10 +164,17 @@ export default class extends Controller {
 
   ignoreGps() { this.hide(this.gpsMessagesTarget); }
 
-  // Transfers exif date and geocode directly from carousel item dataset to obs.
+  // Click callback for button.
   transferExifToObs(event) {
-    const _itemElement = event.target.closest('.item'),
-      _exif_data = _itemElement.dataset;
+    const _itemElement = event.target.closest('.item');
+
+    this.transferExifToObsFields(_itemElement);
+  }
+
+  // Transfers exif date and geocode directly from carousel item dataset to obs.
+  // Usable from button or itemTargetConnected callback.
+  transferExifToObsFields(element) {
+    const _exif_data = element.dataset;
 
     if (_exif_data.geocode) {
       const latLngAlt = JSON.parse(_exif_data.geocode);
@@ -181,6 +188,7 @@ export default class extends Controller {
       this.observationDate(_exifSimpleDate);
     }
   }
+
 
   // Deactivate other radio buttons manually because they are not grouped (?)
   setObsThumbnail(event) {
@@ -396,6 +404,12 @@ export default class extends Controller {
     // console.log("itemTargetConnected")
     // console.log(itemElement);
     if (itemElement.hasAttribute('data-good-image')) return;
+
+    // Transfer the exif data to the observation fields if this is the first one
+    if (this.element.dataset.exifUsed !== "true") {
+      this.transferExifToObsFields(itemElement);
+      this.element.dataset.exifUsed = "true";
+    }
 
     this.addCarouselIndicator();
     this.sortCarousel();

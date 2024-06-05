@@ -18,10 +18,14 @@ data = {
   controller: "obs-form-images",
   upload_max_size: max_size,
   localization: image_upload_localization,
-  obs_form_images_target: "form"
+  obs_form_images_target: "form",
+  exif_used: false
 }
 # used by stimulus to make ajax calls to the right route
-data[:observation_id] = @observation.id if action_name == "edit"
+if action_name == "edit"
+  data[:observation_id] = @observation.id
+  data[:exif_used] = true
+end
 %>
 
 <%= form_with(
