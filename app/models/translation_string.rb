@@ -96,4 +96,11 @@ class TranslationString < AbstractModel
   def self.banner_time
     find_by(tag: "app_banner_box", language: Language.official).updated_at
   end
+
+  # Call this method from a migration whenever we rename a tag,
+  # so we don't lose the existing translation strings.
+  def self.rename_tag(old_tag, new_tag)
+    # validate that the new tag is snake case maybe, then
+    where(tag: old_tag).update_all(tag: new_tag)
+  end
 end
