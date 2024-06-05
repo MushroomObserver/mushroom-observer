@@ -6,8 +6,11 @@
   flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= paginate_block(@pages) do %>
-  <div class="list-group">
-    <%= render(partial: "licenses/object", collection: @objects) %>
-  </div>
-<% end %>
+<div>
+  <%=
+    make_table(
+      headers: license_table_header(),
+      rows: license_table_rows()
+    )
+  %>
+</div>

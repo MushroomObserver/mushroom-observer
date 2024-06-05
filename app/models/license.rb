@@ -56,7 +56,13 @@ class License < AbstractModel
 
   # Use this license if all else equal.
   def self.preferred
-    License.find_by(url: "https://creativecommons.org/licenses/by-nc-sa/3.0/")
+    License.where(
+      License[:url] =~ %r{https?://creativecommons.org/licenses/by-nc-sa/3.0/}
+    ).first
+  end
+
+  def preferred?
+    self == License.preferred
   end
 
   # Various debugging things require all models respond to text_name
