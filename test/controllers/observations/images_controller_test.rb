@@ -490,5 +490,19 @@ module Observations
 
       assert_empty(obs.reload.images)
     end
+
+    def test_remove_image_by_id
+      obs = observations(:detailed_unknown_obs)
+      images = obs.images
+      assert(images.size > 1,
+             "Use Observation fixture with multiple images for best coverage")
+      user = obs.user
+      params = { id: obs.id, image_id: images.first.id }
+
+      login(user.login)
+      put(:detach, params: params)
+
+      assert_equal(obs.images.except(obs.images.first), obs.reload.images)
+    end
   end
 end
