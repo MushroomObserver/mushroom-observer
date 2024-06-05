@@ -54,7 +54,7 @@ export default class extends Controller {
   static targets = ["form", "dateMessages", "imgDateRadios", "obsDateRadios",
     "gpsMessages", "gpsRadios", "setLatLngAlt", "ignoreGps", "imageGpsMap",
     "addedImages", "goodImages", "thumbImageId", "setThumbImg", "isThumbImg",
-    "thumbImgRadio", "obsThumbImgBtn", "removeImg", "item"]
+    "thumbImgRadio", "obsThumbImgBtn", "removeImg", "carousel", "item"]
 
   initialize() {
   }
@@ -70,7 +70,6 @@ export default class extends Controller {
     // this.form = document.forms.observation_form;
     this.form = this.element;
     this.drop_zone = this.formTarget;
-    this.carousel = this.element.querySelector('.carousel');
     this.submit_buttons = this.element.querySelectorAll('input[type="submit"]');
     this.max_image_size = this.element.dataset.upload_max_size;
 
@@ -377,15 +376,18 @@ export default class extends Controller {
   }
 
   // Stimulus "target callback" on carousel item added.
-  // When Turbo appends the carousel item to the page, populate the fileStore
-  // item with exifData, populate the form with a few details about the file,
-  // and read the file with FileReader to display the image.
+  // When Turbo prepends the carousel item to the page, we need to
+  // - re-sort the carousel
+  // - populate the fileStore item with exifData
+  // - populate the form with a few details about the file
+  // - read the file with FileReader to display the image
   itemTargetConnected(itemElement) {
     // console.log("itemTargetConnected")
     // console.log(itemElement);
     this.addCarouselIndicator();
-    this.sortCarousel(itemElement);
+    if (itemElement.hasAttribute('data-good-image')) return;
 
+    this.sortCarousel();
     const item = this.findFileStoreItem(itemElement);
     // Attach a reference to the dom element to the item object so we can
     // populate the item object as well as the element
@@ -411,14 +413,15 @@ export default class extends Controller {
 
   // Add an indicator for the most recent element.
   addCarouselIndicator() {
-    const _html_id = this.carousel.getAttribute('id'),
-      _indi_controls = this.carousel.querySelector('.carousel-indicators'),
-      _indicators = this.carousel.querySelectorAll('.carousel-indicator'),
+    const _html_id = this.carouselTarget.getAttribute('id'),
+      _indicontrols = this.carouselTarget.querySelector('.carousel-indicators'),
+      _indicators = this.carouselTarget.querySelectorAll('.carousel-indicator'),
       _new_indicator = document.createElement("li");
 
     _new_indicator.setAttribute('data-target', '#' + _html_id);
     _new_indicator.setAttribute('data-slide-to', 0);
     _new_indicator.classList.add('carousel-indicator');
+    _new_indicator.classList.add('active');
 
     // Scoot the indicators over by one
     if (_indicators.length > 0) {
@@ -427,12 +430,12 @@ export default class extends Controller {
         indicator.setAttribute('data-slide-to', _ref + 1);
       });
     }
-    _indi_controls.prepend(_new_indicator);
+    _indicontrols.prepend(_new_indicator);
   }
 
   removeCarouselIndicator() {
     const _indicators =
-      this.carousel.querySelectorAll('.carousel-indicator'),
+      this.carouselTarget.querySelectorAll('.carousel-indicator'),
       _count = _indicators.length;
 
     // _count >= 1 should be the case, but just in case they're not in sync:
@@ -441,41 +444,68 @@ export default class extends Controller {
   }
 
   // Adjust the carousel controls and indicators for the new/removed item.
-  // This always makes the new (or first) element in the carousel active.
-  sortCarousel(itemElement = null) {
-    const _items = this.carousel.querySelectorAll('.item'),
-      _indi_controls = this.carousel.querySelector('.carousel-indicators'),
-      _indicators = this.carousel.querySelectorAll('.carousel-indicator'),
-      _controls = this.carousel.querySelector('.carousel-control'),
-      _active = this.carousel.querySelectorAll('.active'),
+  sortCarousel() {
+    const _items = this.carouselTarget.querySelectorAll('.item'),
+      _indicontrols = this.carouselTarget.querySelector('.carousel-indicators'),
+      _indicators = this.carouselTarget.querySelectorAll('.carousel-indicator'),
+      _controls = this.carouselTarget.querySelector('.carousel-control'),
+      _active = this.carouselTarget.querySelectorAll('.active'),
       _count = _items.length;
 
     // Remove all active classes from items and indicators
     _active.forEach((elem) => { elem.classList.remove('active') });
 
-    // if (itemElement == null) {
-    //   // An element has been removed, so the first one is now active.
-    //   _items[0].classList.add('active');
-    // } else {
-    //   // The element has just been prepended, so it's the first one.
-    //   itemElement.classList.add('active');
-    // }
+    // This always makes the new (or first) element in the carousel active.
     _items[0].classList.add('active');
     _indicators[0].classList.add('active');
     // Show or hide the controls, depending on the total.
     if (_count > 1) {
-      _indi_controls.classList.remove('d-none');
+      _indicontrols.classList.remove('d-none');
       _controls.classList.remove('d-none');
     } else {
-      _indi_controls.classList.add('d-none');
+      _indicontrols.classList.add('d-none');
       _controls.classList.add('d-none');
     }
   }
 
+  // This is for removing an image that hasn't been uploaded yet.
   // Carousel gets sorted out separately by the itemTargetDisconnected callback.
   removeClickedItem(event) {
-    const item = this.findFileStoreItem(event.target);
-    this.removeItem(item);
+    const _item = this.findFileStoreItem(event.target);
+    this.removeItem(_item);
+  }
+
+  // This is for removing an image already attached to the observation. In other
+  // words, not a fileStore item. It detaches and deletes the image from the
+  // observation, and also removes the item from the carousel.
+  removeAttachedItem(event) {
+    const _image_id = event.target.dataset.imageId;
+    this.removeImageFromObservation(_image_id);
+  }
+
+  async removeImageFromObservation(obs_id, img_id) {
+    const _remove_image_uri =
+      "/observations/" + obs_id + "/images/" + img_id + "/detach";
+    const response = await put(_remove_image_uri,
+      {
+        contentType: "text/html",
+        // responseKind: "turbo-stream", // appends it to the page!
+        // query: {
+        //   id: obs_id,
+        //   image_id: item.uuid,
+        //   img_file_name: item.file_name,
+        //   img_file_size: _file_size
+        // }
+      });
+
+    if (response.ok) {
+      const html = await response.text
+      if (html) {
+        // handling it with itemTargetConnected callback
+      }
+    } else {
+      console.log(`got a ${response.status}`);
+    }
   }
 
   // "closest" works even if the element is the item itself.

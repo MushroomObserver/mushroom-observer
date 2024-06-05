@@ -54,16 +54,22 @@ module CarouselHelper
             class: "p-4 my-5 w-100 h-100 text-center h3 text-muted")
   end
 
-  def carousel_set_thumb_image
-    label_tag(
-      "observation[thumb_image_id]",
-      class: "btn btn-default btn-sm obs_thumb_img_btn",
+  # For uploads, this should simply set a "true" value for the radio button.
+  # For existing images, it should set the image id, and active class
+  def carousel_set_thumb_img(f:, image: nil, active: "")
+    value = image ? image.id : "true"
+    label_classes = class_names("btn btn-default btn-sm obs_thumb_img_btn",
+                                active)
+
+    f.label(
+      :thumb_image_id,
+      class: label_classes,
       data: { obs_form_images_target: "obsThumbImgBtn",
               action: "click->obs-form-images#setObsThumbnail" }
     ) do
       [
-        radio_button_tag(
-          "observation[thumb_image_id]", "true",
+        f.radio_button(
+          :thumb_image_id, value,
           class: "mr-3",
           data: { obs_form_images_target: "thumbImgRadio" }
         ),

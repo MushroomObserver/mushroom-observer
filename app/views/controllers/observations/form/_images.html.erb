@@ -16,7 +16,7 @@ good_image_ids_str = @good_images.map { |img| img.id }.join(" ")
   <%= tag.p { tag.strong("#{:IMAGES.t}:") } %>
 
   <% @good_images.each do |image| %>
-    <%= render(partial: "observations/form/good_image",
+    <%= render(partial: "observations/form/images/good_image",
                locals: { f:, image: }) %>
   <% end # @good_images.each do image %>
 
