@@ -77,8 +77,12 @@ class FieldSlipsController < ApplicationController
       if @field_slip.update(field_slip_params)
         format.html do
           if params[:commit] == :field_slip_create_obs.t
-            redirect_to(new_observation_url(field_code: @field_slip.code))
+            redirect_to(new_observation_url(
+                          field_code: @field_slip.code,
+                          collector:, field_slip_id:, field_slip_id_by:
+                        ))
           else
+            update_observation_fields(@field_slip.observation)
             redirect_to(field_slip_url(@field_slip),
                         notice: :field_slip_updated.t)
           end
@@ -91,6 +95,40 @@ class FieldSlipsController < ApplicationController
         end
       end
     end
+  end
+
+  def update_observation_fields(observation)
+    return unless observation
+
+    observation.notes[:Collector] = collector
+    observation.notes[:Field_Slip_ID] = field_slip_id
+    observation.notes[:Field_Slip_ID_By] = field_slip_id_by
+    observation.save!
+  end
+
+  def collector
+    user_str(params[:field_slip][:collector])
+  end
+
+  def field_slip_id_by
+    user_str(params[:field_slip][:field_slip_id_by])
+  end
+
+  def field_slip_id
+    str = params[:field_slip][:field_slip_id]
+    if str.to_s.match(/ <.*>$/)
+      name = Name.find_by(login: str.to_s.sub(/ <.*>$/, ""))
+      return "_user #{user.id}_" if user
+    end
+    str
+  end
+
+  def user_str(str)
+    if str.to_s.match(/ <.*>$/)
+      user = User.find_by(login: str.to_s.sub(/ <.*>$/, ""))
+      return "_user #{user.id}_" if user
+    end
+    str
   end
 
   # DELETE /field_slips/1 or /field_slips/1.json

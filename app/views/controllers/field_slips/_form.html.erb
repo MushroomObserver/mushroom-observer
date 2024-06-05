@@ -34,10 +34,10 @@ action = controller.action_name
   <%= autocompleter_field(form: form, field: :location, inline: true,
                           label: :LOCATION.t + ":", autocomplete: :location) %>
 
-  <%= autocompleter_field(form: form, field: :name, inline: true,
+  <%= autocompleter_field(form: form, field: :field_slip_id, inline: true,
                           label: :ID.t + ":",
                           autocomplete: :name) %>
-  <%= text_field_with_label(form: form, field: :id_by, inline: true,
+  <%= text_field_with_label(form: form, field: :field_slip_id_by, inline: true,
                             label: :ID_BY.t + ":") %>
   <%= text_field_with_label(form: form, field: :other_codes, inline: true,
                             label: :field_slip_other_codes.t + ":") %>

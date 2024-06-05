@@ -10,10 +10,10 @@
     <% if field_slip.observation
        obs = field_slip.observation %>
       <strong><%= :DATE.t %>: </strong><%= obs.when %><br/>
-      <strong><%= :COLLECTOR.t %>: </strong><%= obs.collector %><br/>
+      <strong><%= :COLLECTOR.t %>: </strong><%= obs.collector.tl %><br/>
       <strong><%= :LOCATION.t %>: </strong><%= location_link(obs.where, obs.location, nil, true) %><br/>
-      <strong><%= :ID.t %>: </strong><%= obs.field_slip_id %><br/>
-      <strong><%= :ID_BY.t %>: </strong><%= obs.field_slip_id_by %><br/>
+      <strong><%= :ID.t %>: </strong><%= obs.field_slip_id.tl %><br/>
+      <strong><%= :ID_BY.t %>: </strong><%= obs.field_slip_id_by.tl %><br/>
     <% end %>
     <br/>
 

@@ -51,4 +51,28 @@ class FieldSlip < AbstractModel
       NoteField.new(name: field)
     end
   end
+
+  def location
+    return "" unless observation
+
+    return observation.place_name
+  end
+
+  def collector
+    return "" unless observation
+
+    observation.collector
+  end
+
+  def field_slip_id
+    return "" unless observation
+
+    observation.field_slip_id
+  end
+
+  def field_slip_id_by
+    return "" unless observation
+
+    observation.field_slip_id_by
+  end
 end

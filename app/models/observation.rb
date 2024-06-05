@@ -1304,28 +1304,26 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   ##############################################################################
 
   def collector
-    return notes[:Collector].tl if notes.include?(:Collector)
-    return notes[:collector].tl if notes.include?(:collector)
-    return notes[:"Collector's_Name"].tl if notes.include?(:"Collector's_Name")
-    return notes[:"Collector's_name"].tl if notes.include?(:"Collector's_name")
-    return notes[:"Collector(s)"].tl if notes.include?(:"Collector(s)")
+    return notes[:Collector] if notes.include?(:Collector)
+    return notes[:collector] if notes.include?(:collector)
+    return notes[:"Collector's_Name"] if notes.include?(:"Collector's_Name")
+    return notes[:"Collector's_name"] if notes.include?(:"Collector's_name")
+    return notes[:"Collector(s)"] if notes.include?(:"Collector(s)")
 
-    "_user #{user.login}_".tl
+    "_user #{user.login}_"
   end
 
   def field_slip_id
-    return notes[:ID].tl if notes.include?(:ID)
+    return notes[:Field_Slip_ID] if notes.include?(:Field_Slip_ID)
 
-    "_name #{name.display_name}_".tl
+    "_name #{name.text_name}_"
   end
 
   def field_slip_id_by
-    return notes[:ID_By].tl if notes.include?(:ID_By)
-    return notes[:Identifier].tl if notes.include?(:Identifier)
-    return notes[:Identified_by].tl if notes.include?(:Identified_by)
+    return notes[:Field_Slip_ID_By] if notes.include?(:Field_Slip_ID_By)
 
     naming = namings.find_by(name:)
-    return "_user #{naming.user.login}_".tl if naming
+    return "_user #{naming.user.login}_" if naming
 
     ""
   end
