@@ -3336,6 +3336,7 @@
   # licenses/show
   show_license_header: License
   index_license: Index
+  license_default: Default License
 
   # licenses/form
   create_license_title: Create License
