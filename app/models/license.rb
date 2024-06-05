@@ -15,14 +15,15 @@
 #  == Attributes
 #
 #  id::           Locally unique numerical id, starting at 1.
+#  created_at::   DateTime of creation
 #  updated_at::   Date/time it was last updated.
 #  deprecated::   Has this been deprecated?
 #  display_name:: Name, ex: "Creative Commons Non-commercial v2.5"
-#  code::         Code, ex: "ccbyncsa25"
 #  url::          URL,  ex: "http://creativecommons.org/licenses/by-nc-sa/2.5/"
 #
 #  == Class methods
 #
+#  preferred::              The fallback image license
 #  current_names_and_ids::  List non-deprecated License names/ids.
 #
 #  == Instance methods
@@ -32,17 +33,16 @@
 #  location_descriptions::  Array of Name's that use this License.
 #  name_descriptions::      Array of Name's that use this License.
 #  text_name::              Alias for +display_name+ for debugging.
-#  in_use?::                Is license used by any object?
-#  attribute_duplicated?    duplicate display_name, code_, or url
-#                           of another License?
+#
+#  attribute_duplicated?::  Duplicates another License's display_name or url?
 #  badge_url::              url of the License badge
+#  in_use?::                Is it used by any object (Image or Description)?
+#  preferred?::             Is it the default License?
 #
 #  == Callbacks
 #
 #  None.
 #
-################################################################################
-
 class License < AbstractModel
   has_many :images
   has_many :location_descriptions
