@@ -85,8 +85,8 @@ class License < AbstractModel
   end
 
   def copyright_text(year, name)
-    # match old style `public_domain` or new style `publicdomain`
-    if url.match?(/public_?domain/)
+    # match old style `Public_domain` or new style `publicdomain`
+    if url.match?(/public_?domain/i)
       "".html_safe + :image_show_public_domain.t + " " + name
     else
       "".html_safe + :image_show_copyright.t.to_s + " &copy;".html_safe +

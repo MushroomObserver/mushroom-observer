@@ -50,4 +50,19 @@ class LicenseTest < UnitTestCase
       assert_not(lic.preferred?)
     end
   end
+
+  def test_text_name
+    license = licenses(:ccnc25)
+    assert_equal(license.display_name, license.text_name)
+  end
+
+  def test_copyright_text
+    year = 2024
+    name = "Jan Borovicka"
+
+    assert_equal(licenses(:ccnc25).copyright_text(year, name),
+                 "Copyright &copy; #{year} #{name}")
+    assert_equal(licenses(:publicdomain).copyright_text(year, name),
+                 "Public Domain by #{name}")
+  end
 end
