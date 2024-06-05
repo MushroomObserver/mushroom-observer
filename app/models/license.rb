@@ -44,10 +44,10 @@
 #  None.
 #
 class License < AbstractModel
-  has_many :images
-  has_many :location_descriptions
-  has_many :name_descriptions
-  has_many :users
+  has_many :images, dependent: nil
+  has_many :location_descriptions, dependent: nil
+  has_many :name_descriptions, dependent: nil
+  has_many :users, dependent: nil
 
   validates :display_name, :url, presence: true
   # Don't index: there are few Licenses, which rarely change
@@ -87,10 +87,10 @@ class License < AbstractModel
   def copyright_text(year, name)
     # match old style `Public_domain` or new style `publicdomain`
     if url.match?(/public_?domain/i)
-      "".html_safe + :image_show_public_domain.t + " " + name
+      "#{"".html_safe}#{:image_show_public_domain.t} #{name}"
     else
-      "".html_safe + :image_show_copyright.t.to_s + " &copy;".html_safe +
-        " #{year} " + name
+      "#{"".html_safe}#{:image_show_copyright.t}" \
+      "#{" &copy;".html_safe} #{year} #{name}"
     end
   end
 
