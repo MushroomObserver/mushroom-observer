@@ -1,17 +1,9 @@
 <%# This top part is for the upload form only %>
-<!--Replaced by javascript-->
-<%= tag.span("", class: "text-danger warn-text") %>
-<%= tag.span("", class: "text-success info-text") %>
-<!--/Replaced by javascript-->
+<%= carousel_upload_messages %>
 
 <%# Specificity of the thumb choice is coming from data attribute on item %>
 <%= tag.div(class: "form-group text-right") do
-  js_button(
-    button: :image_remove_remove.l,
-    class: "remove_image_link btn-sm fade in",
-    data: { obs_form_images_target: "removeImg",
-            action: "obs-form-images#removeClickedItem:prevent" }
-  )
+  carousel_remove_image_button
 end %>
 
 <%= fields_for(:"#{img_number}_temp_image") do |fti| %>
@@ -31,13 +23,7 @@ end %>
                         options: @licenses,
                         select_opts: { selected: @user.license_id }) %>
 
-<% end # fields_for %>
-
-<%= tag.div(class: "well well-sm mt-4 position-relative") do %>
-  <%= tag.p { tag.strong("Camera Info:") } %>
-  <%= carousel_exif_info %>
-  <%= tag.div(class: "form-group mb-0") do
-    concat(tag.div { tag.strong("File Name: ") + img_file_name })
-    concat(tag.div { tag.strong("Size: ") + img_file_size })
-  end %>
 <% end %>
+
+<%= render(partial: "observations/form/images/exif_info",
+           locals: { image_file_name:, image_file_size: }) %>

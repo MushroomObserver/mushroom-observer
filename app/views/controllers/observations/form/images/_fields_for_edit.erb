@@ -1,11 +1,5 @@
 <%= tag.div(class: "form-group text-right") do
-  js_button(
-    button: :image_remove_remove.l,
-    class: "remove_image_link btn-sm fade in",
-    data: { obs_form_images_target: "removeImg",
-            image_id: image.id,
-            action: "obs-form-images#removeAttachedItem:prevent" }
-  )
+  carousel_remove_image_button(image.id)
 end %>
 
 <%# good image fields partial section of create_observation form %>
@@ -24,8 +18,7 @@ end %>
   <%= select_with_label(form: fgi, field: :license_id, index: image.id,
                         options: License.current_names_and_ids(image.license),
                         select_opts: { selected: image.license_id },
-                        label: :form_images_select_license.t,
-                        append: help_block(:p, :form_images_license_help.t.html_safe)) %>
+                        label: :form_images_select_license.t) %>
 
   <%= text_field_with_label(form: fgi, field: :original_name, index: image.id,
                             value: image.original_name, size: 40,

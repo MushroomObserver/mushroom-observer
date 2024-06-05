@@ -1,0 +1,30 @@
+<%=
+tag.div(class: "well well-sm mt-4 position-relative") do
+  [
+    tag.p { tag.strong("Camera Info:") },
+    tag.div(class: "form-group") do
+      [
+        tag.div do
+          [
+            tag.strong("Date: "), # :form_images_camera_date.t
+            # TODO: make this a stimulus target
+            link_to("javascript:") { tag.span("", class: "exif_date") }
+          ].safe_join
+        end,
+        tag.div do
+          [
+            tag.strong("Lat: ") + tag.span("", class: "exif_lat"),
+            tag.strong("Long: ") + tag.span("", class: "exif_lng"),
+            tag.strong("Alt: ") + tag.span("", class: "exif_alt")
+          ].safe_join(", ")
+        end,
+        carousel_transfer_exif_button
+      ].safe_join
+    end,
+    tag.div(class: "form-group mb-0") do
+      concat(tag.div { tag.strong("File Name: ") + img_file_name })
+      concat(tag.div { tag.strong("Size: ") + img_file_size })
+    end
+  ].safe_join
+end
+%>

@@ -88,24 +88,34 @@ module CarouselHelper
     end
   end
 
-  def carousel_exif_info
-    tag.div(class: "form-group") do
+  def carousel_remove_image_button(image_id = nil)
+    action = image_id ? "removeAttachedItem" : "removeClickedItem"
+    data = { obs_form_images_target: "removeImg",
+             action: "obs-form-images##{action}:prevent" }
+    data[:image_id] = image_id if image_id
+
+    js_button(
+      button: :image_remove_remove.l,
+      class: "remove_image_link btn-sm fade in",
+      data: data
+    )
+  end
+
+  # Replaced by js
+  def carousel_upload_messages
+    tag.div(class: "carousel-upload-messages") do
       [
-        tag.div do
-          [tag.strong("Date: "), # :form_images_camera_date.t
-           link_to("javascript:") { tag.span("", class: "exif_date") }].safe_join
-        end,
-        tag.div do
-          [tag.strong("Lat: ") + tag.span("", class: "exif_lat"),
-           tag.strong("Long: ") + tag.span("", class: "exif_lng"),
-           tag.strong("Alt: ") + tag.span("", class: "exif_alt")].safe_join(", ")
-        end,
-        js_button(
-          button: "Use this info",
-          class: "use_exif_btn btn-sm ab-top-right",
-          data: { action: "obs-form-images#transferExifToObs:prevent" }
-        )
+        tag.span("", "text-danger warn-text"),
+        tag.span("", "text-success info-text")
       ].safe_join
     end
+  end
+
+  def carousel_transfer_exif_button
+    js_button(
+      button: "Use this info",
+      class: "use_exif_btn btn-sm ab-top-right",
+      data: { action: "obs-form-images#transferExifToObs:prevent" }
+    )
   end
 end
