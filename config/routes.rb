@@ -606,8 +606,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                             as: "attach_image_to")
       get("images/remove", to: "observations/images#remove",
                            as: "remove_images_from")
-      put("images/detach", to: "observations/images#detach",
-                           as: "detach_images_from")
+      put("images(/:image_id)/detach", to: "observations/images#detach",
+                                       as: "detach_images_from")
     end
 
     collection do
