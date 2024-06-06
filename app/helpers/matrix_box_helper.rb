@@ -71,9 +71,7 @@ module MatrixBoxHelper
   #                except(:columns, :object, :object_counter,
   #                       :object_iteration).
   #                merge(presenter.image_data.except(:images) || {})
-  #   top_img = presenter.image_data[:thumb_image] || images.first
-  #   carousel_locals = { object: object, images: images, top_img: top_img,
-  #                       thumbnails: true, **image_args }
+  #   carousel_locals = { object:, images:, thumbnails: true, **image_args }
   #
   #   tag.div(class: "thumbnail-container") do
   #     # don't use a partial though, too slow. wait til we are using components
