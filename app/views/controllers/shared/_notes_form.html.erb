@@ -1,21 +1,17 @@
 <%# Notes section of a form %>
 
 <!-- NOTES -->
-<div class="mt-3" id="notes">
+<div id="notes">
 
   <p>
     <span class="font-weight-bold"> <%= :NOTES.t %>:</span> (<%= :general_textile_link.t %>)
   </p>
   <% fields.each do |field| %>
     <%= form.fields_for(:notes) do |f_n| %>
-      <div class="row">
-        <div class="col-xs-12 col-sm-6">
-          <%= text_area_with_label(
-                form: f_n, rows: 1, label: field.label + ": ",
-                field: field.name,
-                value: field.value) %>
-        </div>
-      </div><!--.row-->
+      <%= text_area_with_label(
+            form: f_n, rows: 1, label: field.label + ": ",
+            field: field.name,
+            value: field.value) %>
     <% end # form.fields_for(:notes) %>
   <% end # each do field %>
 

@@ -1,5 +1,5 @@
 <%
-action = controller.action_name
+  action = controller.action_name
 %>
 
 <%= form_with(model: field_slip) do |form| %>
@@ -15,7 +15,7 @@ action = controller.action_name
     </div>
   <% end %>
 
-  <%= text_field_with_label(form: form, field: :code, inline: true, label: :field_slip_code.t + ":") %>
+  <%= text_field_with_label(form: form, field: :code, label: :field_slip_code.t + ":") %>
 
   <% if @field_slip.projects %>
     <%= select_with_label(form: form, field: :project_id, inline: true,
@@ -29,17 +29,17 @@ action = controller.action_name
       end_year: Date.today.year + 10 }) %><br/>
   <br/>
 
-  <%= autocompleter_field(form: form, field: :collector, inline: true,
+  <%= autocompleter_field(form: form, field: :collector,
                           label: :COLLECTOR.t + ":", autocomplete: :user) %>
-  <%= autocompleter_field(form: form, field: :location, inline: true,
+  <%= autocompleter_field(form: form, field: :location,
                           label: :LOCATION.t + ":", autocomplete: :location) %>
 
-  <%= autocompleter_field(form: form, field: :field_slip_id, inline: true,
+  <%= autocompleter_field(form: form, field: :field_slip_id,
                           label: :ID.t + ":",
                           autocomplete: :name) %>
-  <%= text_field_with_label(form: form, field: :field_slip_id_by, inline: true,
+  <%= text_field_with_label(form: form, field: :field_slip_id_by,
                             label: :ID_BY.t + ":") %>
-  <%= text_field_with_label(form: form, field: :other_codes, inline: true,
+  <%= text_field_with_label(form: form, field: :other_codes,
                             label: :field_slip_other_codes.t + ":") %>
 
   <div class="mt-5">
