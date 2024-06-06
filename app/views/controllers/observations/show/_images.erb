@@ -19,8 +19,7 @@ links = observation_show_image_links(obs: obs)
       # This sort puts the thumbnail first.
       # We can't use thumb_image, because we haven't eager-loaded it;
       # we *have* eager-loaded all the other images.
-      obs.images.sort_by {|x| x.id == obs.thumb_image_id ? -1 : x.id}.
-                each do |image| %>
+      obs.images_sorted.each do |image| %>
 
         <%= tag.div(class: "list-group-item") do %>
 

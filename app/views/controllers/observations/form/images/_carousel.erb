@@ -2,12 +2,11 @@
 # TODO: make this a component
 # Optional args:
 #   images: @good_images
-#   top_img: (defaults to first), (carousel)title:, (image_edit)links:
+#   (carousel)title:, (image_edit)links:
 #
 # Note: uses concat(x) instead of [x,y].safe_join because of conditionals
 
 images ||= nil #
-top_img ||= images.first #
 html_id = "observation_upload_images_carousel"
 
 # concat(carousel_heading(title, links)) if thumbnails
@@ -18,8 +17,8 @@ tag.div(class: "carousel slide edit-carousel", id: html_id,
   tag.div(class: "carousel-inner bg-light", role: "listbox",
           id: "added_images_container", # this is where JS appends
           data: { obs_form_images_target: "addedImages" }) do
-    images&.each do |image|
-      active = (image.id == top_img.id) ? "active" : ""
+    images&.each_with_index do |image, index|
+      active = (index == 0) ? "active" : ""
       concat(render(partial: "observations/form/images/carousel_item",
                     locals: { f: f, image:, active:, upload: false }))
     end
@@ -27,7 +26,7 @@ tag.div(class: "carousel slide edit-carousel", id: html_id,
       concat(carousel_controls(html_id))
       concat(tag.ol(class: "carousel-indicators") do
         images&.each_with_index do |image, index|
-          active = (image.id == top_img.id) ? "active" : ""
+          active = (index == 0) ? "active" : ""
           concat(tag.li("", class: class_names("carousel-indicator", active),
                         data: { target: "##{html_id}", slide_to: index.to_s }))
         end

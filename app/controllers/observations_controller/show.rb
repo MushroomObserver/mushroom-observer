@@ -38,7 +38,8 @@ module ObservationsController::Show
     @consensus     = Observation::NamingConsensus.new(@observation)
     @owner_name    = @consensus.owner_preference
     register_namings_for_textile_in_notes
-    @comments = @observation.comments&.sort_by(&:created_at)&.reverse
+    @comments      = @observation.comments&.sort_by(&:created_at)&.reverse
+    @images        = @observation.images_sorted
   end
 
   def load_observation_for_show_observation_page

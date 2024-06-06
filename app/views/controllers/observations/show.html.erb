@@ -14,7 +14,7 @@ show_links = @user && (@observation.external_links.any? || @other_sites.any?)
 
 obs_locals = { obs: @observation, consensus: @consensus, user: @user }
 carousel_locals = {
-  object: @observation, images: @observation.images,
+  object: @observation, images: @images,
   top_img: @observation&.thumb_image || nil, html_id: "observation_images",
   title: :IMAGES.t, links: observation_show_image_links(obs: @observation)
 }
