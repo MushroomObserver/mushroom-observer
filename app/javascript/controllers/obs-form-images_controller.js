@@ -86,8 +86,6 @@ export default class extends Controller {
       element.disabled = false;
     });
 
-    // this.formTarget.dataset.targetStimulus = "connected";
-
     // Drag and Drop bindings on the form
     this.drop_zone.addEventListener('dragover', (e) => {
       e.preventDefault();
@@ -363,11 +361,12 @@ export default class extends Controller {
     return item;
   }
 
-  // Use requestjs-rails to a fetch request to get the carousel-item template.
+  // Use requestjs-rails to make fetch request to get the carousel-item template
   // with the image and its form. requestjs-rails automatically calls
   // renderStreamMessage on the response, so it's getting prepended by Turbo.
-  // To manipulate the returned element manually, we'd have to use vanilla-JS
-  // `fetch` and prepend it to the carousel ourselves.
+  // Population of the element with file data is done in itemTargetConnected.
+  // In order to manipulate the returned element manually, we would have to use
+  // vanilla-JS `fetch` and prepend it to the carousel ourselves.
   async loadAndDisplayItem(item, i) {
     const _file_size = item.is_file ?
       Math.floor((item.file_size / 1024)) + "kb" : "";
@@ -375,7 +374,7 @@ export default class extends Controller {
     const response = await get(this.get_template_uri,
       {
         contentType: "text/html",
-        responseKind: "turbo-stream", // appends it to the page!
+        responseKind: "turbo-stream",
         query: {
           active: _active,
           img_number: item.uuid,
@@ -406,16 +405,17 @@ export default class extends Controller {
     if (itemElement.hasAttribute('data-good-image')) return;
 
     // Transfer the exif data to the observation fields if this is the first one
+    // and set a flag so we don't do it again.
     if (this.element.dataset.exifUsed !== "true") {
       this.transferExifToObsFields(itemElement);
       this.element.dataset.exifUsed = "true";
     }
-
     this.addCarouselIndicator();
     this.sortCarousel();
-    const item = this.findFileStoreItem(itemElement);
+
     // Attach a reference to the dom element to the item object so we can
     // populate the item object as well as the element
+    const item = this.findFileStoreItem(itemElement);
     item.dom_element = itemElement;
     item.dom_element.dataset.geocode = "";
 
