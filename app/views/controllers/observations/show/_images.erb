@@ -11,7 +11,7 @@ links = observation_show_image_links(obs: obs)
     end
   end %>
 
-  <% if obs.images.any? %>
+  <% if @images.any? %>
 
     <%= tag.div(class: "show_images list-group text-center m-0") do %>
 
@@ -19,7 +19,7 @@ links = observation_show_image_links(obs: obs)
       # This sort puts the thumbnail first.
       # We can't use thumb_image, because we haven't eager-loaded it;
       # we *have* eager-loaded all the other images.
-      obs.images_sorted.each do |image| %>
+      @images.each do |image| %>
 
         <%= tag.div(class: "list-group-item") do %>
 
@@ -49,6 +49,6 @@ links = observation_show_image_links(obs: obs)
 
     <% end # .list-group %>
 
-  <% end # if obs.images.any? %>
+  <% end # if @images.any? %>
 
 <% end # .panel %>
