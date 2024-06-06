@@ -38,9 +38,7 @@ module ObservationsController::EditAndUpdate
 
     # Initialize form. Put the thumb image first.
     @images      = []
-    @good_images = @observation.images.sort_by do |img|
-      img.id == @observation.thumb_image_id ? -1 : img.id
-    end
+    @good_images = @observation.images_sorted
     init_project_vars_for_edit(@observation)
     init_list_vars_for_edit(@observation)
   end
