@@ -125,6 +125,7 @@
 #  == Instance methods
 #
 #  comments::               List of Comment's attached to this Observation.
+#  images_sorted::          List of Images attached, sorted with thumb_img first. 
 #  interests::              List of Interest's attached to this Observation.
 #  sequences::              List of Sequences which belong to this Observation.
 #  species_lists::          List of SpeciesList's that contain this Observation.
@@ -1067,6 +1068,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       reload
     end
     img
+  end
+  
+  # List of images attached to this Observation, sorted
+  # for the show/edit pages with the thumb_image first
+  def images_sorted
+    images.sort_by do |img|
+      img.id == thumb_image_id ? -1 : img.id
+    end
   end
 
   # Removes an Image from this Observation.  If it's the thumbnail, changes
