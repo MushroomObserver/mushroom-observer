@@ -162,32 +162,6 @@ export default class extends Controller {
 
   ignoreGps() { this.hide(this.gpsMessagesTarget); }
 
-  // Click callback for button.
-  transferExifToObs(event) {
-    const _itemElement = event.target.closest('.item');
-
-    this.transferExifToObsFields(_itemElement);
-  }
-
-  // Transfers exif date and geocode directly from carousel item dataset to obs.
-  // Usable from button or itemTargetConnected callback.
-  transferExifToObsFields(element) {
-    const _exif_data = element.dataset;
-
-    if (_exif_data.geocode) {
-      const latLngAlt = JSON.parse(_exif_data.geocode);
-
-      document.getElementById('observation_lat').value = latLngAlt.lat;
-      document.getElementById('observation_lng').value = latLngAlt.lng;
-      document.getElementById('observation_alt').value = latLngAlt.alt;
-    }
-    if (_exif_data.exif_date) {
-      const _exifSimpleDate = JSON.parse(_exif_data.exif_date);
-      this.observationDate(_exifSimpleDate);
-    }
-  }
-
-
   // Deactivate other radio buttons manually because they are not grouped (?)
   setObsThumbnail(event) {
     // event.target is the label.btn clicked to make whichever the default image
@@ -404,12 +378,6 @@ export default class extends Controller {
     // console.log(itemElement);
     if (itemElement.hasAttribute('data-good-image')) return;
 
-    // Transfer the exif data to the observation fields if this is the first one
-    // and set a flag so we don't do it again.
-    if (this.element.dataset.exifUsed !== "true") {
-      this.transferExifToObsFields(itemElement);
-      this.element.dataset.exifUsed = "true";
-    }
     this.addCarouselIndicator();
     this.sortCarousel();
 
@@ -585,6 +553,14 @@ export default class extends Controller {
     this.applyExifDate(item, _exif);
 
     item.processed = true;
+
+    // If this is the first one, transfer the exif data to the obs fields
+    // and set a flag so we don't do it again. Here because it's async.
+    if (this.element.dataset?.exifUsed !== "true" &&
+      item.dom_element.dataset?.geocode !== "") {
+      this.transferExifToObsFields(item.dom_element);
+      this.element.dataset.exifUsed = "true";
+    }
   }
 
   applyExifGPS(item, _exif) {
@@ -633,13 +609,38 @@ export default class extends Controller {
     }
   }
 
-  // action so .exif_date will set the image date if clicked
+  // Click callback so .exif_date will set the image date if clicked
   exifToImageDate(event) {
     const _item = this.findFileStoreItem(event.target),
       _exifSimpleDate = JSON.parse(_item.dom_element.dataset.exif_date);
 
     this.imageDate(_item, _exifSimpleDate);
     this.refreshImageMessages();
+  }
+
+  // Click callback for button.
+  transferExifToObs(event) {
+    const _itemElement = event.target.closest('.item');
+
+    this.transferExifToObsFields(_itemElement);
+  }
+
+  // Transfers exif date and geocode directly from carousel item dataset to obs.
+  // Usable from button or itemTargetConnected callback.
+  transferExifToObsFields(element) {
+    const _exif_data = element.dataset;
+
+    if (_exif_data.geocode && _exif_data.geocode !== "") {
+      const latLngAlt = JSON.parse(_exif_data.geocode);
+
+      document.getElementById('observation_lat').value = latLngAlt.lat;
+      document.getElementById('observation_lng').value = latLngAlt.lng;
+      document.getElementById('observation_alt').value = latLngAlt.alt;
+    }
+    if (_exif_data.exif_date) {
+      const _exifSimpleDate = JSON.parse(_exif_data.exif_date);
+      this.observationDate(_exifSimpleDate);
+    }
   }
 
   // Maybe add a radio button option to set obs gps to this item's gps.
