@@ -126,7 +126,7 @@ class FieldSlipsController < ApplicationController
   def user_str(str)
     if str.to_s.match(/ <.*>$/)
       user = User.find_by(login: str.to_s.sub(/ <.*>$/, ""))
-      return "_user #{user.id}_" if user
+      return "_user #{user.login}_" if user
     end
     str
   end
