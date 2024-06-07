@@ -1,0 +1,18 @@
+<%
+  @container = :wide
+  add_page_title(license_show_title(@license))
+  add_tab_set(license_show_tabs(@license))
+%>
+
+<div>
+  <p><%= :ID.t %>: <b><%= @license.id %></b></p>
+  <p><%= :license_display_name.t %>: <b><%= @license.display_name %></b></p>
+  <p>
+    <%= :license_url.t %>:
+    <b><%= link_to(@license.url, @license.url,
+                { target: "_blank", rel: "noopener noreferrer" }) %></b>
+  </p>
+  <p><%= :DEPRECATED.t %>: <b><%= @license.deprecated.to_s %></b></p>
+  <p><%= :CREATED.t %>: <b><%= license_updated_at(@license) %></b></p>
+  <p><%= :UPDATED.t %>: <b><%= license_updated_at(@license) %></b></p>
+</div>
