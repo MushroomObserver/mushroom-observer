@@ -13,6 +13,7 @@ data = { obs_form_images_target: "item" }
 data = data.merge(image_number: img_number) if upload
 data = data.merge(good_image: true) unless upload
 item_attrs = item_attrs.merge(data: data)
+exif_data = image&.read_exif_geocode || {}
 
 tag.div(**item_attrs) do
   tag.div(class: "row") do
@@ -33,7 +34,7 @@ tag.div(**item_attrs) do
                  locals: { img_number:, img_file_name:, img_file_size: })
         else
           render(partial: "observations/form/images/fields_for_edit",
-                 locals: { f:, image: })
+                 locals: { f:, image:, exif_data: })
         end
       end
     end)

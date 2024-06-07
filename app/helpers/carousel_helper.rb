@@ -115,12 +115,12 @@ module CarouselHelper
     end
   end
 
-  def carousel_exif_to_image_date_button
+  def carousel_exif_to_image_date_button(img_date = nil)
     link_to(
       "#",
       data: { action: "obs-form-images#exifToImageDate:prevent" }
     ) do
-      tag.span("", class: "exif_date")
+      tag.span(img_date, class: "exif_date")
     end
   end
 

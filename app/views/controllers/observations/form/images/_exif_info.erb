@@ -1,3 +1,5 @@
+<%# locals: (lat: "", lng: "", alt: "", date: "", img_file_name: "", img_file_size: "") -%>
+
 <%=
 tag.div(class: "well well-sm mt-4 position-relative") do
   [
@@ -7,21 +9,23 @@ tag.div(class: "well well-sm mt-4 position-relative") do
         tag.div do
           [
             tag.strong("Date: "), # :form_images_camera_date.t
-            carousel_exif_to_image_date_button
+            carousel_exif_to_image_date_button(date)
           ].safe_join
         end,
         tag.div do
           [
-            tag.strong("Lat: ") + tag.span("", class: "exif_lat"),
-            tag.strong("Long: ") + tag.span("", class: "exif_lng"),
-            tag.strong("Alt: ") + tag.span("", class: "exif_alt")
+            tag.strong("Lat: ") + tag.span(lat, class: "exif_lat"),
+            tag.strong("Long: ") + tag.span(lng, class: "exif_lng"),
+            tag.strong("Alt: ") + tag.span(alt, class: "exif_alt")
           ].safe_join(", ")
         end,
         carousel_transfer_exif_button
       ].safe_join
     end,
     tag.div(class: "form-group mb-0") do
-      concat(tag.div { tag.strong("File Name: ") + img_file_name })
+      if img_file_name.present?
+        concat(tag.div { tag.strong("File Name: ") + img_file_name })
+      end
       concat(tag.div { tag.strong("Size: ") + img_file_size })
     end
   ].safe_join

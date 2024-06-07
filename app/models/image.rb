@@ -782,21 +782,50 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Get exif data from image by reading the header straight off the file,
   # remotely. Returns nil if it fails. Costly.
-  def read_exif_data
+  def read_exif_data(flags = [])
     hide_gps = observations.any?(&:gps_hidden)
 
     if transferred
       cmd = Shellwords.escape("script/exiftool_remote")
-      url = Shellwords.escape(original_url)
-      result, status = Open3.capture2e(cmd, url)
+      path = Shellwords.escape(original_url)
     else
       cmd  = Shellwords.escape("exiftool")
-      file = Shellwords.escape(full_filepath("orig"))
-      result, status = Open3.capture2e(cmd, file)
+      path = Shellwords.escape(full_filepath("orig"))
     end
+    flags.map { |flag| Shellwords.escape(flag) }
+    result, status = Open3.capture2e(cmd, *flags, path)
 
     data = status.success? ? self.class.parse_exif_data(result, hide_gps) : nil
     [data, status, result]
+  end
+
+  # This returns a { lat:, lng:, ... } hash if the image has GPS data in EXIF.
+  # Returns nil if it fails. Note that it only reads these fields.
+  # Used for edit obs, to allow re-syncing image data to obs.
+  def read_exif_geocode
+    # flag -n means numerical format, rather than degrees/minutes/seconds.
+    flags = %w[-n -GPSLatitude -GPSLongitude -GPSAltitude -filesize
+               -DateTimeOriginal]
+    data = read_exif_data(flags)[0]
+    return nil unless data
+
+    lat = lng = alt = date = img_file_size = nil
+    data.each do |key, val|
+      lat = val if key.match?(/latitude/i)
+      lng = val if key.match?(/longitude/i)
+      alt = val if key.match?(/altitude/i)
+      date = val if key.match?(/date/i)
+      img_file_size = val if key.match?(/size/i)
+    end
+    return nil unless lat && lng
+
+    if date
+      date = DateTime.strptime(date, "%Y:%m:%d %H:%M:%S").strftime("%d-%B-%Y")
+    end
+
+    img_file_size = "#{(img_file_size.to_i / 1024).to_i}kb" if img_file_size
+
+    { lat:, lng:, alt:, date:, img_file_name: nil, img_file_size: }
   end
 
   GPS_TAGS = /latitude|longitude|gps/i
