@@ -413,7 +413,7 @@ module Observations
 
       setup_image_dirs
       fixture = "#{MO.root}/test/images/geotagged.jpg"
-      orig_file = img.local_file_name("orig")
+      orig_file = img.full_filepath("orig")
       path = orig_file.sub(%r{/[^/]*$}, "")
       FileUtils.mkdir_p(path) unless File.directory?(path)
       FileUtils.cp(fixture, orig_file)
@@ -421,7 +421,7 @@ module Observations
       post(:attach, params: { id: obs.id, mode: :reuse, img_id: img.id })
       assert_true(img.reload.gps_stripped)
       assert_not_equal(File.size(fixture),
-                       File.size(img.local_file_name("orig")))
+                       File.size(img.full_filepath("orig")))
     end
 
     def test_remove_images_page_access
