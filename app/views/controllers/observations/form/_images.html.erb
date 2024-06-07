@@ -28,25 +28,25 @@ good_image_ids_str = @good_images.map { |img| img.id }.join(" ")
 
   <%= tag.div(class: "my-4", id: "observation_images_upload") do %>
 
-    <%= tag.p(:form_observations_upload_images.t + ":",
+    <%# tag.p(:form_observations_upload_images.t + ":",
               class: "font-weight-bold") %>
 
     <!-- MULTIFILE_UPLOAD_FORM -->
-    <%= tag.div(class: "row") do %>
-      <%= tag.div(class: "col-sm-6 mt-3") do %>
+    <%# tag.div(class: "row") do %>
+      <%# tag.div(class: "col-sm-6 mt-3") do %>
         <label class="btn btn-default file-field">
           <input type="file" multiple id="select_images_button"
                  data-action="change->obs-form-images#addSelectedFiles"
                  accept="image/*"/>
           <%= :select_file.t %>
         </label>
-      <% end %><!--.col-->
-      <%= tag.div(class: "col-sm-6") do
+      <%# end %><!--.col-->
+      <%# tag.div(class: "col-sm-6") do
         help_block_with_arrow("left", id: "upload_multi_help") do
           tag.p(:form_observations_upload_help_multi_select.t)
         end
       end %><!--.col-->
-    <% end %><!--.row-->
+    <%# end %><!--.row-->
 
     <!--Container for appending images-->
     <%= tag.div(class: "images_container") do

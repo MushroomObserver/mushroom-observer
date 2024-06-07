@@ -24,6 +24,3 @@ end %>
                             value: image.original_name, size: 40,
                             label: :form_observations_original_name.l) %>
 <% end %>
-
-<%= render(partial: "observations/form/images/exif_info",
-           locals: exif_data) if exif_data.present? %>

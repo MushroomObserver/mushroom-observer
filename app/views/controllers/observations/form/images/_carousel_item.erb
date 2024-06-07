@@ -13,7 +13,9 @@ data = { obs_form_images_target: "item" }
 data = data.merge(image_number: img_number) if upload
 data = data.merge(good_image: true) unless upload
 item_attrs = item_attrs.merge(data: data)
-exif_data = image&.read_exif_geocode || {}
+exif_data = upload ? { img_file_name:, img_file_size: } :
+            image&.read_exif_geocode
+
 
 tag.div(**item_attrs) do
   tag.div(class: "row") do
@@ -30,12 +32,14 @@ tag.div(**item_attrs) do
     concat(tag.div(class: "form-position col-12 col-md-6") do
       tag.div(class: "form-panel") do
         if upload
-          render(partial: "observations/form/images/fields_for_upload",
-                 locals: { img_number:, img_file_name:, img_file_size: })
+          concat(render(partial: "observations/form/images/fields_for_upload",
+                        locals: { img_number: }))
         else
-          render(partial: "observations/form/images/fields_for_edit",
-                 locals: { f:, image:, exif_data: })
+          concat(render(partial: "observations/form/images/fields_for_edit",
+                        locals: { f:, image: }))
         end
+        concat(render(partial: "observations/form/images/exif_info",
+                      locals: exif_data)) if exif_data.present?
       end
     end)
   end
