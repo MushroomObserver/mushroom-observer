@@ -17,6 +17,11 @@
       <% if obs.other_codes != "" %>
         <strong><%= :field_slip_other_codes.t %>: </strong><%= obs.other_codes.tl %><br/>
       <% end %>
+      <% field_slip.notes_fields.each do |field| %>
+        <% if field.value.present? %>
+          <strong><%= field.label %>: </strong><%= field.value.tl %><br/>
+        <% end %>
+      <% end %>
     <% end %>
     <br/>
 
