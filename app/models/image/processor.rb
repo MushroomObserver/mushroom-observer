@@ -29,15 +29,18 @@ class Image
     require "rsync"
     require "open-uri"
 
-    # Store Exiftool's database in a temporary directory.
-    MiniExiftool.pstore_dir = Rails.root.join("tmp").to_s
-    # Where the private key is stored for scp.
-    PRIVATE_KEY_PATH = Rails.root.join(".ssh/id_rsa").to_s
     # Constants for servers, paths and directories.
     IMAGE_SUBDIRS = Image::URL::SUBDIRECTORIES.values.freeze
     LOCAL_IMAGES_PATH = MO.local_image_files
+    # Where the private key is stored for scp.
+    PRIVATE_KEY_PATH = Rails.root.join(".ssh/id_rsa").to_s
     # returns symbols!
-    ENV_IMAGE_SERVERS = MO.image_sources.each_key.to_a.freeze
+    IMAGE_SERVERS = MO.image_sources.each_key.to_a.freeze
+    # per-environment image server data
+    IMAGE_SERVER_DATA = image_server_data.freeze
+
+    # Store Exiftool's database in a temporary directory.
+    MiniExiftool.pstore_dir = Rails.root.join("tmp").to_s
 
     # Source, destination sizes and quality settings for each conversion.
     SIZE_CONVERSIONS = [
@@ -89,8 +92,6 @@ class Image
       @strip_gps = args[:strip_gps] || false
 
       @transferred_any = 0
-      @image_servers = ENV_IMAGE_SERVERS
-      @image_server_data = image_server_data
       @errors = []
     end
 
@@ -132,7 +133,7 @@ class Image
     def transfer_files_to_image_servers
       return if Rails.env.development?
 
-      @image_servers.each do |server|
+      IMAGE_SERVERS.each do |server|
         transfer_all_sizes_to_server_subdirectories(server)
       end
     end
@@ -154,8 +155,8 @@ class Image
     def make_sure_we_have_full_size_locally
       return if File.exist?(full_size_file)
 
-      # return unless (servers = @image_servers.excluding(:local))
-      @image_servers.each do |server|
+      # return unless (servers = IMAGE_SERVERS.excluding(:local))
+      IMAGE_SERVERS.each do |server|
         next unless image_server_has_subdir?(server, "orig")
 
         copy_file_from_server(server, "orig/#{@id}.jpg")
@@ -249,7 +250,7 @@ class Image
     end
 
     def transfer_all_sizes_to_server_subdirectories(server)
-      subdirs = @image_server_data[server][:subdirs]
+      subdirs = IMAGE_SERVER_DATA[server][:subdirs]
       IMAGE_SUBDIRS.each do |subdir|
         if subdirs.include?(subdir)
           copy_file_to_server(server, "#{subdir}/#{@id}.jpg")
@@ -281,7 +282,7 @@ class Image
     end
 
     def image_server_has_subdir?(server, subdir)
-      @image_server_data[server][:subdirs].include?(subdir)
+      IMAGE_SERVER_DATA[server][:subdirs].include?(subdir)
     end
 
     # Original file locations
@@ -299,18 +300,18 @@ class Image
     ############################################################
 
     def copy_file_to_server(server, local_file, remote_file = local_file)
-      case @image_server_data[server][:type]
+      case IMAGE_SERVER_DATA[server][:type]
       when "file"
         copy_file_to_local_server(server, local_file, remote_file)
       when "ssh"
         copy_file_to_remote_server(server, local_file, remote_file)
       else
-        raise("Unknown image server type: #{@image_server_data[server][:type]}")
+        raise("Unknown image server type: #{IMAGE_SERVER_DATA[server][:type]}")
       end
     end
 
     def copy_file_to_local_server(server, local_file, remote_file)
-      return unless (remote_path = @image_server_data[server][:path])
+      return unless (remote_path = IMAGE_SERVER_DATA[server][:path])
 
       FileUtils.cp("#{LOCAL_IMAGES_PATH}/#{local_file}",
                    "#{remote_path}/#{remote_file}")
@@ -318,7 +319,7 @@ class Image
 
     # Rsync is used to copy files to the image server(s).
     def copy_file_to_remote_server(server, local_file, remote_file)
-      return unless (remote_path = @image_server_data[server][:path])
+      return unless (remote_path = IMAGE_SERVER_DATA[server][:path])
 
       Rsync.run("#{LOCAL_IMAGES_PATH}/#{local_file}",
                 "#{remote_path}/#{remote_file}") do |result|
@@ -354,7 +355,7 @@ class Image
     # Always use secure connections (HTTPS) when transferring files to prevent
     # man-in-the-middle attacks.
     def copy_file_from_server(server, remote_file)
-      case @image_server_data[server][:type]
+      case IMAGE_SERVER_DATA[server][:type]
       when "file"
         copy_file_from_local_server(server, remote_file)
       when "ssh"
@@ -363,26 +364,26 @@ class Image
         copy_file_from_http_server(server, remote_file)
       else
         raise("Don't know how to get #{remote_file} from #{server} via: " \
-              "#{@image_server_data[server][:type]}")
+              "#{IMAGE_SERVER_DATA[server][:type]}")
       end
     end
 
     def copy_file_from_local_server(server, remote_file)
-      return unless (remote_path = @image_server_data[server][:path])
+      return unless (remote_path = IMAGE_SERVER_DATA[server][:path])
 
       FileUtils.cp("#{remote_path}/#{remote_file}",
                    "#{LOCAL_IMAGES_PATH}/#{remote_file}")
     end
 
     def copy_file_from_remote_server(server, remote_file)
-      return unless (remote_path = @image_server_data[server][:path])
+      return unless (remote_path = IMAGE_SERVER_DATA[server][:path])
 
       Rsync.run("#{remote_path}/#{remote_file}",
                 "#{LOCAL_IMAGES_PATH}/#{remote_file}")
     end
 
     def copy_file_from_http_server(server, remote_file)
-      return unless (remote_path = @image_server_data[server][:path])
+      return unless (remote_path = IMAGE_SERVER_DATA[server][:path])
 
       case io = OpenURI.open_uri("#{remote_path}/#{remote_file}")
       when StringIO
