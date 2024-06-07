@@ -34,6 +34,9 @@
   <%= autocompleter_field(form: form, field: :location,
                           label: :LOCATION.t + ":", autocomplete: :location) %>
 
+  <%= render(partial: "shared/notes_form",
+             locals: { form:, fields: field_slip.notes_fields }) %>
+
   <%= autocompleter_field(form: form, field: :field_slip_id,
                           label: :ID.t + ":",
                           autocomplete: :name) %>
@@ -41,11 +44,6 @@
                           label: :ID_BY.t + ":", autocomplete: :user) %>
   <%= text_field_with_label(form: form, field: :other_codes,
                             label: :field_slip_other_codes.t + ":") %>
-
-  <div class="mt-5">
-    <%= render(partial: "shared/notes_form",
-	       locals: { form:, fields: field_slip.notes_fields }) %>
-  </div>
 
   <%= submit_button(form: form, button: :field_slip_create_obs.t,
                     class: "mt-5") if action == "new" %>

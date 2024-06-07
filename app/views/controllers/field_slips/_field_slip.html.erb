@@ -1,5 +1,4 @@
 <div id="<%= dom_id field_slip %>">
-  <p>
     <strong><%= :PROJECT.t %>:</strong>
     <% if field_slip.project %>
       <%= link_to_object(field_slip.project) %>
@@ -12,15 +11,18 @@
       <strong><%= :DATE.t %>: </strong><%= obs.when %><br/>
       <strong><%= :COLLECTOR.t %>: </strong><%= obs.collector.tl %><br/>
       <strong><%= :LOCATION.t %>: </strong><%= location_link(obs.where, obs.location, nil, true) %><br/>
+      <strong><%= :NOTES.t %>:</strong>
+      <div class="ml-5 mb-3">
+        <% field_slip.notes_fields.each do |field| %>
+          <% if field.value.present? %>
+            <strong><%= field.label %>: </strong><%= field.value.tl %><br/>
+          <% end %>
+        <% end %>
+      </div>
       <strong><%= :ID.t %>: </strong><%= obs.field_slip_id.tl %><br/>
       <strong><%= :ID_BY.t %>: </strong><%= obs.field_slip_id_by.tl %><br/>
       <% if obs.other_codes != "" %>
         <strong><%= :field_slip_other_codes.t %>: </strong><%= obs.other_codes.tl %><br/>
-      <% end %>
-      <% field_slip.notes_fields.each do |field| %>
-        <% if field.value.present? %>
-          <strong><%= field.label %>: </strong><%= field.value.tl %><br/>
-        <% end %>
       <% end %>
     <% end %>
     <br/>
@@ -41,5 +43,4 @@
     <% else %>
       <%= :field_slip_no_observation.t %>
     <% end %>
-  </p>
 </div>

@@ -105,9 +105,16 @@ class FieldSlipsController < ApplicationController
     observation.notes[:Field_Slip_ID] = field_slip_id
     observation.notes[:Field_Slip_ID_By] = field_slip_id_by
     observation.notes[:Other_Codes] = params[:field_slip][:other_codes]
-    # Other notes...
+    update_notes_fields(observation)
     observation.notes.compact_blank!
     observation.save!
+  end
+
+  def update_notes_fields(observation)
+    notes = params[:field_slip][:notes]
+    @field_slip.notes_fields.each do |field|
+      observation.notes[field.name] = notes[field.name]
+    end
   end
 
   def collector

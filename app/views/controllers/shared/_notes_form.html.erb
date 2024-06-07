@@ -4,8 +4,9 @@
 <div id="notes">
 
   <p>
-    <span class="font-weight-bold"> <%= :NOTES.t %>:</span> (<%= :general_textile_link.t %>)
+    <span class="font-weight-bold"> <%= :NOTES.t %>:</span>
   </p>
+  <div class="ml-5">
   <% fields.each do |field| %>
     <%= form.fields_for(:notes) do |f_n| %>
       <%= text_area_with_label(
@@ -14,6 +15,7 @@
             value: field.value) %>
     <% end # form.fields_for(:notes) %>
   <% end # each do field %>
+  </div>
 
 </div><!--#notes-->
 <!-- /NOTES -->
