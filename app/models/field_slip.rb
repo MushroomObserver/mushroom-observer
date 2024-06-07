@@ -75,4 +75,10 @@ class FieldSlip < AbstractModel
 
     observation.field_slip_id_by
   end
+
+  def other_codes
+    return "" unless observation
+
+    observation.other_codes
+  end
 end

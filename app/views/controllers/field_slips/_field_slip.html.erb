@@ -14,6 +14,9 @@
       <strong><%= :LOCATION.t %>: </strong><%= location_link(obs.where, obs.location, nil, true) %><br/>
       <strong><%= :ID.t %>: </strong><%= obs.field_slip_id.tl %><br/>
       <strong><%= :ID_BY.t %>: </strong><%= obs.field_slip_id_by.tl %><br/>
+      <% if obs.other_codes != "" %>
+        <strong><%= :field_slip_other_codes.t %>: </strong><%= obs.other_codes.tl %><br/>
+      <% end %>
     <% end %>
     <br/>
 

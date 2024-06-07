@@ -1328,6 +1328,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     ""
   end
 
+  def other_codes
+    return notes[:Other_Codes] if notes.include?(:Other_Codes)
+
+    ""
+  end
+
   ##############################################################################
 
   protected

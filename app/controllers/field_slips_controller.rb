@@ -104,6 +104,9 @@ class FieldSlipsController < ApplicationController
     observation.notes[:Collector] = collector
     observation.notes[:Field_Slip_ID] = field_slip_id
     observation.notes[:Field_Slip_ID_By] = field_slip_id_by
+    observation.notes[:Other_Codes] = params[:field_slip][:other_codes]
+    # Other notes...
+    observation.notes.compact_blank!
     observation.save!
   end
 
