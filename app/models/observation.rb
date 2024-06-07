@@ -950,15 +950,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Array of notes parts (Strings) which are
   # neither in the notes_template nor the caption for other notes
+  # Note that underscores (_) get translated to spaces ( ) here.
   def notes_orphaned_parts(user)
     return [] if notes.blank?
 
-    # Change spaces to underscores in order to subtract template parts from
-    # stringified keys because keys have underscores instead of spaces
-    template_parts_underscored = user.notes_template_parts.each do |part|
-      part.tr!(" ", "_")
+    notes_keys = notes.keys.map(&:to_s).each do |key|
+      key.tr!("_", " ")
     end
-    notes.keys.map(&:to_s) - template_parts_underscored - [other_notes_part]
+    notes_keys - user.notes_template_parts - [other_notes_part]
   end
 
   # notes as a String, captions (keys) without added formstting,
