@@ -100,6 +100,7 @@ class FieldSlipsController < ApplicationController
   def update_observation_fields(observation)
     return unless observation
 
+    observation.place_name = params[:field_slip][:location]
     observation.notes[:Collector] = collector
     observation.notes[:Field_Slip_ID] = field_slip_id
     observation.notes[:Field_Slip_ID_By] = field_slip_id_by
