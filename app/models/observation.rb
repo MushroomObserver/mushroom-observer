@@ -697,7 +697,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # the given +display_name+.  (Fills the other in with +nil+.)
   # Adjusts for the current user's location_format as well.
   def place_name=(place_name)
-    place_name = place_name.strip_squeeze
+    place_name = place_name&.strip_squeeze
     where = if User.current_location_format == "scientific"
               Location.reverse_name(place_name)
             else

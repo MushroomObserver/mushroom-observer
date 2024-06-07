@@ -120,7 +120,7 @@ class FieldSlipsController < ApplicationController
 
   def field_slip_id
     str = params[:field_slip][:field_slip_id]
-    return str if str.starts_with?("_")
+    return str if str.empty? || str.starts_with?("_")
 
     "_#{str}_"
   end
