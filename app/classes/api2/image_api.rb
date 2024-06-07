@@ -49,10 +49,10 @@ class API2
         with_observation: parse(:boolean, :has_observation,
                                 limit: true, help: 1),
         size: parse(
-          :enum, :size, limit: Image.all_sizes - [:full_size], help: :min_size
+          :enum, :size, limit: Image::ALL_SIZES - [:full_size], help: :min_size
         ),
         content_types: parse_array(:enum, :content_type,
-                                   limit: Image.all_extensions),
+                                   limit: Image::ALL_EXTENSIONS),
         with_notes: parse(:boolean, :has_notes),
         notes_has: parse(:string, :notes_has, help: 1),
         copyright_holder_has: parse(:string, :copyright_holder_has, help: 1),

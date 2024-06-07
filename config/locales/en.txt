@@ -1710,7 +1710,7 @@
   image_add_image: "[:Image]"
   image_add_optional: "[:optional]"
   image_add_upload: "[:UPLOAD]"
-  image_add_warning: Please only upload images that you created or which you own the copyright of. By uploading images you are giving us permission to distribute this image to other users ("legalese":https://creativecommons.org/licenses/by-nc-sa/2.5/). You are also giving us permission to display this image along side advertisements or other fund-raising tools that may be used to support this site.
+  image_add_warning: Please only upload images that you created or which you own the copyright of. By uploading images you are giving us permission to distribute this image to other users ("legalese":https://creativecommons.org/licenses/by-nc-sa/4.0/). You are also giving us permission to display this image along side advertisements or other fund-raising tools that may be used to support this site.
 
   # account/profile/images/reuse
   image_reuse_all_users: Include other users' images.
@@ -2558,8 +2558,6 @@
   show_publication_title: Publication
   show_publication_added_by: Added by
 
-
-
   # herbarium fields
   herbarium_curator: Curator
   herbarium_curators: Curators
@@ -3333,6 +3331,25 @@
   users_by_name_theme: Theme
   users_by_name_verified: Verified
 
+
+  # licenses
+  # licenses/index
+  index_license_header: Licenses
+
+  # licenses/show
+  show_license_header: License
+  index_license: Index
+  license_default: Default License
+
+  # licenses/form
+  create_license_title: Create License
+  license_display_name: Name (display_name)
+  license_display_name_help: "Ex: Creative Commons Non-commercial v2.5"
+  license_form_checkbox_deprecated: Deprecated
+  license_url: url
+  license_url_help: "Ex: https://creativecommons.org/licenses/by-nc-sa/2.5/"
+
+
   # support/create_donation
   create_donation_title: Record Mushroom Observer Donation
   create_donation_not_allowed: Only admins can record donations
@@ -3507,7 +3524,10 @@
   how_contribution: "*Contribution* - A number or score that measures the quantity and quality of contributions a \"User\":#user has made to [:app_title].  Click '[:app_your_summary]' to see a break-down of your own contribution.  You earn points for every \"Observation\":#observation, \"Image\":#image, \"Comment\":#comment, etc. you have posted.  \"Describing Species\":#describing_species and \"Defining Locations\":defining_locations are some of the most important contributions a user can make.  (See \"How To Help\":/info/how_to_help for a list of other ways to help out.) Currently, contribution is used only in weighting your \"Votes\":#vote when voting on \"Proposed Names\":#proposed_names for observations."
   how_description: "*Species Description* - A collection of text describing a \"Name\":#name. Every name automatically gets one official description that everyone in the community is allowed to read and modify.  Additional descriptions may be created by any \"User\":#user, including project members.  The owner of a description may choose any level of read or write permissions, and can control who is given authorship credit.  Since descriptions, especially the official one, are often collaborative efforts, modifications by a user are subject to community review, and past versions are kept to facilitate this process.  The content of a description includes a set list of sections, including things like '[:form_names_gen_desc]', '[:form_names_diag_desc]', '[:form_names_look_alikes]', '[:form_names_refs]' and other notes."
   how_image: "*Image* - A photograph or illustration of one or more mushroom species. Images are associated with one or more \"Observations\":#observation.  A given Image is owned by a particular \"User\":#user who may or may not be the copyright holder.  Only the owner or a site administrator can remove an image or edit the associated information.  All images in the site are required to be released under one of the \"Creative Commons licenses\":https://creativecommons.org or in the public domain.  If you dispute the given copyright or the licensing of an image you are the copyright holder of, send mail to the \"webmaster\":/emails/ask_webmaster_question."
-  how_license: "*License* - \"Images\":#image on [:app_title] are posted with an explicit license.  The current options are the \"Creative Commons Attribution, Share Alike License\":https://creativecommons.org/licenses/by-sa/3.0/, the \"Creative Commons Attribution, Non-Commercial, Share Alike License\":https://creativecommons.org/licenses/by-nc-sa/3.0/ and \"Public Domain\":https://wiki.creativecommons.org/Public_domain/.  The primary difference is whether the image can be used in any potentially commercial setting.  One of the side effects of selecting the non-commercial license is that your image cannot be used on \"Wikipedia\":https://wikipedia.org.  The license can be set on a per image basis.  The looser, Wikipedia compatible license is the default for new \"Users\":#user.  However, you can select the non-commercial license to be your default by selecting it on your '\"[:app_preferences]\":/account/preferences/edit' page and clicking on '[:SAVE_CHANGES]'.  Public domain is supported primarily for images that are already in the public domain or for images from certain government institutions that cannot claim ownership of works"
+
+  how_license: "**License** – When you post an image or other content on Mushroom Observer (“your Work’), you grant one of the following \"CC (Creative Commons) Licenses\":https://creativecommons.org/licenses/ for others to use your Work: \n -  \"CC-BY-SA - Attribution-ShareAlike\":https://creativecommons.org/licenses/by-sa/4.0/ (Wikipedia compatible): MO's default license. Others can use your Work, however they must credit any new creations based on your Work the same as the original. \n - \"CC-BY - Attribution\":https://creativecommons.org/licenses/by/ (Wikipedia compatible): Others can use your Work as long as they credit you. Others can create new material based on your work. \n - \"CC-BY-NC - Attribution-NonCommercial\":https://creativecommons.org/licenses/by-nc/4.0/: Others can use your Work, and create new material based on it, however they can’t profit from the new material. \n - \"CC-BY-NC-SA - Attribution-NonCommercial-ShareAlike\":https://creativecommons.org/licenses/by-nc-sa/4.0: Others can use your Work, so long as they don’t profit off it and use identical credits for new creations. \n - \"CC-BY-ND - Attribution-NoDerivs\":https://creativecommons.org/licenses/by-nd/4.0/: Others can use your Work, however they can’t alter your Work to create new materials. \n - \"CC-BY-NC-ND - Attribution-NonCommercial-NoDerivs\":https://creativecommons.org/licenses/by-nc-nd/4.0: Others can use your Work, however they can’t profit off it or change it. \n - \"CC0 - No Copyright/Public Domain\":https://creativecommons.org/publicdomain/zero/ (Wikipedia compatible): You waive your rights to your Work. Others can use it without crediting you, and can create new material based on it. \n You can change your default license by selecting the 'License' on \"your Preferences\":/account/preferences/edit and clicking on ‘Save Changes’. You can also set licenses on a per image basis."
+
+
   how_location: "*Location* - A rectangular region enclosing a given location, as defined by the northern, southern, eastern and western boundaries.  In addition to the position, locations can also include a minimum and maximum elevation along with various notes.  Note that the elevations should be in meters not feet. A location is not considered to be owned by a particular \"User\":#user.  Any user may change or define any location, but all of a user's changes are subject to review by the community.  To help with this review process, copies of the previous versions are kept."
   how_name: "*Name* - A name for some group of mushrooms.  Most commonly this is the name of a species, but it can be any taxon (genus, family, variety, etc.).  Names can also refer to groups that are not officially recognized scientific names such as common names or functional groups like Gasteromyces.  A name is *not* considered to be owned by a particular \"User\":#user.  Any user may change any name, but all changes are subject to review by the community.  To help with this review process, copies of previous versions are kept.  Names can have an acknowledged author.  The author is normally only given for scientific names. The author should follow the standard practice of listing the person who first correctly published the name.  In the case of names at or below the species level, the author may also include the person who transfered the species to the current genus, e.g., (Singer) Jenkins."
   how_observation: "*Observation* - A record of a single mushroom species at a particular time and \"Location\":#location.  Typically associated with one or more \"Names\":#name (see \"Proposed Name\":#proposed_name below) and some number of \"Images\":#image.  Each observation is owned by a \"User\":#user, and can only be edited or deleted by that user or a site administrator.  However, any user may post \"Comments\":#comment about any observation.  Observations can also be included in one or more \"Species Lists\":#species_list."
@@ -3938,6 +3958,7 @@
   runtime_invalid_classification: "[:runtime_no_parse(value=text)]"
   runtime_invalid_name: "[:runtime_invalid(type=:name,value=name)]"
   runtime_invalid_source_type: "[:runtime_invalid(type=:source)]"
+  runtime_license_duplicate_attributed: Duplicate display_name, form_name, or url
   runtime_list_location_no_matches: "[:runtime_no_matches(type=:location)]"
   runtime_location_already_exists: "[:runtime_already_exists(type=:location,value=name)]"
   runtime_location_description_index_no_matches: "[:runtime_no_matches(type=:location_description)]"

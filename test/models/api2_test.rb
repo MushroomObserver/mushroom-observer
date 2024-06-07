@@ -1464,7 +1464,7 @@ class API2Test < UnitTestCase
       assert_no_errors(api, "Errors while posting image")
       img = Image.last
       assert_obj_arrays_equal([img], api.results)
-      actual = File.read(img.local_file_name(:full_size))
+      actual = File.read(img.full_filepath(:full_size))
       expect = Rails.root.join("test/images/test_image.jpg").read
       assert_equal(expect, actual, "Uploaded image differs from original!")
     end

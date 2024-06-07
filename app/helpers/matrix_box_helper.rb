@@ -65,17 +65,19 @@ module MatrixBoxHelper
 
   # for matrix_box_carousels:
   # def matrix_box_images(presenter)
-  #   presenter.image_data includes context: :matrix_box where appropriate
+  #   presenter.image_data includes full_width: true where appropriate
   #   images = presenter.image_data[:images]
   #   image_args = local_assigns.
   #                except(:columns, :object, :object_counter,
   #                       :object_iteration).
   #                merge(presenter.image_data.except(:images) || {})
   #   top_img = presenter.image_data[:thumb_image] || images.first
+  #   carousel_locals = { object: object, images: images, top_img: top_img,
+  #                       thumbnails: true, **image_args }
   #
   #   tag.div(class: "thumbnail-container") do
-  #     carousel_html(object: object, images: images, top_img: top_img,
-  #                   thumbnails: false, **image_args)
+  #     # don't use a partial though, too slow. wait til we are using components
+  #     render(partial: "shared/carousel", locals: carousel_locals)
   #   end
   # end
 

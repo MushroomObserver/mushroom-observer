@@ -1,0 +1,16 @@
+<%
+  @container = :wide
+  add_page_title(:index_license_header.t)
+  add_tab_set(license_index_tabs)
+
+  flash_error(@error) if @error && @objects.empty?
+%>
+
+<div>
+  <%=
+    make_table(
+      headers: license_table_header(),
+      rows: license_table_rows()
+    )
+  %>
+</div>

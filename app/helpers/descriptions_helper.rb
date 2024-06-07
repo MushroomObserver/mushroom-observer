@@ -289,7 +289,8 @@ module DescriptionsHelper
         show_authors_and_editors(obj: desc, versions: versions, user: user)
       )
       if desc.license
-        concat(render(partial: "shared/form_#{desc.license.form_name}"))
+        concat(render(partial: "shared/form_license_badge",
+                      locals: { license: desc.license }))
       end
     end
   end
