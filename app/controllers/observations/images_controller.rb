@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # Clicking on an image currently fires a GET to these actions... because it
-# comes from a link made by ImageHelper#interactive_image(link: url_args)
-# with CRUD refactor, change ImageHelper helper to fire a POST somehow?
+# comes from a link made by ImagesHelper#interactive_image(link: url_args)
+# with CRUD refactor, change ImagesHelper helper to fire a POST somehow?
 
 module Observations
   # Upload, attach, detach, edit Observation Images
@@ -346,7 +346,9 @@ module Observations
       unless check_permission!(@object)
         return redirect_with_query(permanent_observation_path(@object.id))
       end
-      return unless (images = params[:selected])
+
+      images = params[:selected] || [{ params[:image_id] => "yes" }]
+      return unless images
 
       remove_images_from_object(images)
     end

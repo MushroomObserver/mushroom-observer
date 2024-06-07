@@ -2312,7 +2312,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_false(old_img1.transferred)
     assert_false(old_img2.transferred)
 
-    orig_file = old_img1.local_file_name("orig")
+    orig_file = old_img1.full_filepath("orig")
     path = orig_file.sub(%r{/[^/]*$}, "")
     FileUtils.mkdir_p(path) unless File.directory?(path)
     FileUtils.cp(fixture, orig_file)
@@ -2348,12 +2348,12 @@ class ObservationsControllerTest < FunctionalTestCase
     # We have script/process_image disabled for tests, so it doesn't actually
     # strip the uploaded image.
     # assert_not_equal(File.size(fixture),
-    #                  File.size(new_img.local_file_name("orig")))
+    #                  File.size(new_img.full_filepath("orig")))
 
     # Make sure it stripped the image which had already been created.
     assert_true(old_img1.reload.gps_stripped)
     assert_not_equal(File.size(fixture),
-                     File.size(old_img1.local_file_name("orig")))
+                     File.size(old_img1.full_filepath("orig")))
 
     # Second pre-existing image has missing file, so stripping should fail.
     assert_false(old_img2.reload.gps_stripped)
@@ -2591,7 +2591,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_false(old_img1.gps_stripped)
     assert_false(old_img2.gps_stripped)
 
-    orig_file = old_img1.local_file_name("orig")
+    orig_file = old_img1.full_filepath("orig")
     path = orig_file.sub(%r{/[^/]*$}, "")
     FileUtils.mkdir_p(path) unless File.directory?(path)
     FileUtils.cp(fixture, orig_file)
@@ -2624,12 +2624,12 @@ class ObservationsControllerTest < FunctionalTestCase
     # We have script/process_image disabled for tests, so it doesn't actually
     # strip the uploaded image.
     # assert_not_equal(File.size(fixture),
-    #                  File.size(new_img.local_file_name("orig")))
+    #                  File.size(new_img.full_filepath("orig")))
 
     # Make sure it stripped the image which had already been created.
     assert_true(old_img1.reload.gps_stripped)
     assert_not_equal(File.size(fixture),
-                     File.size(old_img1.local_file_name("orig")))
+                     File.size(old_img1.full_filepath("orig")))
 
     # Second pre-existing image has missing file, so stripping should fail.
     assert_false(old_img2.reload.gps_stripped)

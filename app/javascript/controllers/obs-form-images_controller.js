@@ -328,8 +328,17 @@ export default class extends Controller {
   // Use requestjs-rails to a fetch request to get the template, populate it
   // with the item data, then get EXIF data, and read the file with FileReader.
   async loadAndDisplayItem(item) {
+    const _file_size = item.is_file ?
+      Math.floor((item.file_size / 1024)) + "kb" : "";
     const response = await get(this.get_template_uri,
-      { contentType: "text/html", query: { imgNumber: item.uuid } });
+      {
+        contentType: "text/html",
+        query: {
+          img_number: item.uuid,
+          img_file_name: item.file_name,
+          img_file_size: _file_size
+        }
+      });
 
     if (response.ok) {
       const html = await response.text
@@ -347,10 +356,7 @@ export default class extends Controller {
   }
 
   addTemplateToPage(item, html) {
-    html = html.replace(/\s\s+/g, ' ').replace(/[\n\r]/.gm, '')
-      .replace('{{img_file_name}}', item.file_name)
-      .replace('{{img_file_size}}', item.is_file ?
-        Math.floor((item.file_size / 1024)) + "kb" : "").trim();
+    html = html.replace(/\s\s+/g, ' ').replace(/[\n\r]/.gm, '').trim();
 
     // Create the DOM element and add it to FileStoreItem;
     // This should work if the html is valid!

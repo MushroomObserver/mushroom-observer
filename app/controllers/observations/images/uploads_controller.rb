@@ -19,7 +19,9 @@ module Observations::Images
       @licenses = License.current_names_and_ids(@user.license)
       @image = Image.new(user: @user, when: Time.zone.now)
       render(partial: "observations/form/images_upload/template",
-             locals: { img_number: params[:img_number] })
+             locals: { img_number: params[:img_number],
+                       img_file_name: params[:img_file_name],
+                       img_file_size: params[:img_file_size] })
     end
 
     # Uploads an image object without an observation.

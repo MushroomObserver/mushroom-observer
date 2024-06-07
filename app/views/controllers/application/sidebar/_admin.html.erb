@@ -26,6 +26,10 @@ active_link_to(:app_add_to_group.t, new_admin_add_user_to_group_path,
                class: classes[:admin], id: "nav_admin_add_user_to_group_link")
 %>
 <%=
+active_link_to(:LICENSES.t, licenses_path,
+               class: classes[:admin], id: "nav_admin_licenses_link")
+%>
+<%=
 active_link_to(:app_turn_admin_off.t, admin_mode_path(turn_off: true),
                class: classes[:admin], id: "nav_admin_off_link")
 %>

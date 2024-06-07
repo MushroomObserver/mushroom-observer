@@ -214,6 +214,46 @@ module FormsHelper
     args
   end
 
+  # MO mostly uses year-input_controller to switch the year selects to
+  # text inputs, but you can pass data: { controller: "" } to get a year select.
+  # The three "selects" will always be inline, but pass inline: true to make
+  # the label and selects inline.
+  def date_select_with_label(**args)
+    opts = separate_field_options_from_args(args, [:object, :data])
+    opts[:class] = "form-control"
+    opts[:data] = { controller: "year-input" }.merge(args[:data] || {})
+
+    wrap_class = form_group_wrap_class(args)
+    selects_class = "form-inline"
+    selects_class += " d-inline-block" if args[:inline] == true
+
+    tag.div(class: wrap_class) do
+      concat(args[:form].label("#{args[:field]}_1i", args[:label],
+                               class: "mr-3"))
+      concat(args[:between]) if args[:between].present?
+      concat(tag.div(class: selects_class) do
+        concat(args[:form].date_select(args[:field],
+                                       date_select_opts(args), opts))
+      end)
+      concat(args[:append]) if args[:append].present?
+    end
+  end
+
+  # The index arg is for multiple date_selects in a form
+  def date_select_opts(args = {})
+    obj = args[:object]
+    start_year = args[:start_year] || 20.years.ago.year
+    end_year = args[:end_year] || Time.zone.now.year
+    init_value = obj.try(&:when).try(&:year)
+    start_year = init_value if init_value && init_value < start_year
+    opts = { start_year: start_year,
+             end_year: end_year,
+             selected: obj.try(&:when) || Time.zone.today,
+             order: args[:order] || [:day, :month, :year] }
+    opts[:index] = args[:index] if args[:index].present?
+    opts
+  end
+
   # Bootstrap number_field
   def number_field_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
@@ -428,16 +468,6 @@ module FormsHelper
     ] + extras
 
     args.clone.except(*exceptions)
-  end
-
-  def date_select_opts(obj = nil)
-    start_year = 20.years.ago.year
-    init_value = obj.try(&:when).try(&:year)
-    start_year = init_value if init_value && init_value < start_year
-    { start_year: start_year,
-      end_year: Time.zone.now.year,
-      selected: obj.try(&:when) || Time.zone.today,
-      order: [:day, :month, :year] }
   end
 end
 # rubocop:enable Metrics/ModuleLength

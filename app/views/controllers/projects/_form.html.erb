@@ -24,34 +24,28 @@
     tag.p("*#{:form_projects_date_range.t}*".t) +
     tag.p(:form_projects_dates_explain.t)
   ) %>
-  <div class="container-text ml-4">
-    <div>
-      <%= f.label(:start_date, "#{:form_projects_start_date.t}: ") %>
-      <%= f.date_select(:start_date,
-                        { class: "form-control mb-2",
-                          start_year: Date.today.year - 10,
-                          end_year: Date.today.year + 10 }) %>
-    </div>
-    <div>
-      <%= f.label(:end_date, "#{:form_projects_end_date.t}: ") %>
-      <%= f.date_select(:end_date,
-                        { class: "form-control mb-2",
-                          start_year: Date.today.year - 10,
-                          end_year: Date.today.year + 10 }) %>
-    </div>
-    <div>
-      <p>
-        <%= radio_with_label(
-              form: f, field: "dates_any", value: false, checked: !@project_dates_any,
-              label: " #{:form_projects_range.t} (#{:form_projects_use_date_range.t})"
-            ) %>
-        <%= radio_with_label(
-              form: f, field: "dates_any", value: true, checked: @project_dates_any,
-              label: " #{:form_projects_any.t} (#{:form_projects_ignore_date_range.t})"
-            ) %>
-      </p>
 
-    </div>
+  <div class="container-text ml-4">
+    <%= date_select_with_label(form: f, field: :start_date, inline: true,
+                               label: "#{:form_projects_start_date.t}: ",
+                               data: { controller: "" }, class: "mb-2",
+                               order: [:year, :month, :day],
+                               start_year: Date.today.year - 10,
+                               end_year: Date.today.year + 10) %>
+    <%= date_select_with_label(form: f, field: :end_date, inline: true,
+                               label: "#{:form_projects_end_date.t}: ",
+                               data: { controller: "" },
+                               order: [:year, :month, :day],
+                               start_year: Date.today.year - 10,
+                               end_year: Date.today.year + 10) %>
+    <%= radio_with_label(
+      form: f, field: "dates_any", value: false, checked: !@project_dates_any,
+      label: " #{:form_projects_range.t} (#{:form_projects_use_date_range.t})"
+    ) %>
+    <%= radio_with_label(
+      form: f, field: "dates_any", value: true, checked: @project_dates_any,
+      label: " #{:form_projects_any.t} (#{:form_projects_ignore_date_range.t})"
+    ) %>
   </div>
 
   <%= file_field_with_label(

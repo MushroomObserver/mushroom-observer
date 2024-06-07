@@ -3,11 +3,12 @@
 module ImagesHelper
   # Draw an image with all the fixin's. Takes either an Image instance or an id.
   #
-  # Note: this is NOT rendering a partial because nested partials have been
-  # demonstrated to be VERY slow in loops or collections.
+  # TODO: Make this a component. This should probably not be a partial: using
+  # nested partials has been demonstrated to be VERY slow in loops or
+  # collections. (Caching helps though).
   #
   # Uses ImagePresenter to assemble data.
-  #
+
   #   link::             Hash of { controller: xxx, action: xxx, etc. }
   #   size::             Size to show, default is thumbnail.
   #   votes::            Show vote buttons?
@@ -16,19 +17,15 @@ module ImagesHelper
   #   html_options::     Additional HTML attributes to add to <img> tag.
   #   notes::            Show image notes??
   #
-  # USE: interactive_image(
-  #   image,
-  #   args = {
-  #     notes: "",
-  #     extra_classes: ""
-  #   }
-  # )
+  # USE: interactive_image( image, args = { notes: "", extra_classes: "" } )
   def interactive_image(image, **args)
+    # Caption needs object for copyright info
     presenter = ImagePresenter.new(image, args)
     set_width = presenter.width.present? ? "width: #{presenter.width}px;" : ""
 
     [
-      tag.div(class: "image-sizer position-relative mx-auto",
+      tag.div(id: presenter.html_id,
+              class: "image-sizer position-relative mx-auto",
               style: set_width.to_s) do
         [
           tag.div(class: "image-lazy-sizer overflow-hidden",
@@ -48,6 +45,15 @@ module ImagesHelper
       end,
       image_owner_original_name(presenter.image, presenter.original)
     ].safe_join
+  end
+
+  # Args for the interactive image on Images#show (particular to that context)
+  def image_show_presenter_args
+    { size: :huge,
+      image_link: "#",
+      img_class: "huge-image",
+      theater_on_click: true,
+      votes: false }
   end
 
   # Needs object for copyright info

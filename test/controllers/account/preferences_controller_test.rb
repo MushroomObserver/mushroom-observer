@@ -262,6 +262,12 @@ module Account
       assert_equal("California, USA", user.reload.content_filter[:region])
     end
 
+    def test_has_bulk_license_updater
+      login
+      get(:edit)
+      assert_match(images_edit_licenses_path, response.body)
+    end
+
     def test_no_email_hooks
       [
         :comments_owner,

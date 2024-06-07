@@ -8,7 +8,7 @@
     </td>
     <td>
       <%= fgi.text_area(:notes, index: image.id, value: image.notes,
-                        rows: 1, class: "form-control form-control-sm") %>
+                        rows: 1, class: "form-control") %>
     </td>
   </tr>
   <tr>
@@ -20,7 +20,7 @@
     <td>
       <%= fgi.text_field(:original_name, index: image.id,
                          value: image.original_name,
-                         size: 40, class: "form-control form-control-sm") %>
+                         size: 40, class: "form-control") %>
     </td>
   </tr>
   <tr>
@@ -31,7 +31,7 @@
     <td>
       <%= fgi.text_field(:copyright_holder, index: image.id,
                          value: image.copyright_holder,
-                         class: "form-control form-control-sm") %>
+                         class: "form-control") %>
     </td>
   </tr>
   <tr>
@@ -41,10 +41,11 @@
     </td>
     <td>
       <div class="form-inline">
-        <%= fgi.date_select(:when,
-              date_select_opts(image).merge(index: image.id),
-              { class: "form-control form-control-sm",
-                data: { controller: "year-input" } }) %>
+        <%= fgi.date_select(
+          :when, date_select_opts({ object: image }).merge(index: image.id),
+          { class: "form-control",
+            data: { controller: "year-input" } }
+        ) %>
       </div>
     </td>
   </tr>
@@ -58,7 +59,7 @@
                      License.current_names_and_ids(image.license),
                      { selected: image.license_id,
                        index: image.id },
-                     { class: "form-control form-control-sm" }) %>
+                     { class: "form-control" }) %>
     </td>
   </tr>
 </table>
