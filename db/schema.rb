@@ -512,7 +512,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_04_193245) do
     t.integer "source"
     t.datetime "log_updated_at", precision: nil
     t.boolean "needs_naming", default: false, null: false
-    t.integer "inat_id"
     t.index ["needs_naming"], name: "needs_naming_index"
   end
 
