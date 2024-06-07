@@ -15,14 +15,15 @@
 #  == Attributes
 #
 #  id::           Locally unique numerical id, starting at 1.
+#  created_at::   DateTime of creation
 #  updated_at::   Date/time it was last updated.
 #  deprecated::   Has this been deprecated?
-#  display_name:: Name, e.g., "Creative Commons Non-commercial v2.5"
-#  form_name::    Code, e.g., "ccbyncsa25"
-#  url::          URL,  e.g., "http://creativecommons.org/licenses/by-nc-sa/2.5/"
+#  display_name:: Name, ex: "Creative Commons Non-commercial v2.5"
+#  url::          URL,  ex: "http://creativecommons.org/licenses/by-nc-sa/2.5/"
 #
 #  == Class methods
 #
+#  preferred::              The fallback image license
 #  current_names_and_ids::  List non-deprecated License names/ids.
 #
 #  == Instance methods
@@ -33,27 +34,37 @@
 #  name_descriptions::      Array of Name's that use this License.
 #  text_name::              Alias for +display_name+ for debugging.
 #
+#  attribute_duplicated?::  Duplicates another License's display_name or url?
+#  badge_url::              url of the License badge
+#  in_use?::                Is it used by any object (Image or Description)?
+#  preferred?::             Is it the default License?
+#
 #  == Callbacks
 #
 #  None.
 #
-################################################################################
-
 class License < AbstractModel
-  has_many :images
-  has_many :location_descriptions
-  has_many :name_descriptions
-  has_many :users
+  has_many :images, dependent: nil
+  has_many :location_descriptions, dependent: nil
+  has_many :name_descriptions, dependent: nil
+  has_many :users, dependent: nil
 
-  PREFERRED_LICENSE_FORM_NAME = "ccbysa30"
+  validates :display_name, :url, presence: true
+  # Don't index: there are few Licenses, which rarely change
+  validates :display_name, :url, uniqueness: true # rubocop:disable Rails/UniqueValidationWithoutIndex
+  before_destroy :prevent_destruction_of_license_in_use
 
   # Use this license if all else equal.
+  # It is currently hard-coded in the schema as Licenses default `license_id`
   def self.preferred
-    License.find_by(form_name: PREFERRED_LICENSE_FORM_NAME)
+    License.find(Image.column_defaults["license_id"])
   end
 
-  # Various debugging things require all models respond to text_name.  Just
-  # returns +display_name+.
+  def preferred?
+    self == License.preferred
+  end
+
+  # Various debugging things require all models respond to text_name
   def text_name
     display_name.to_s
   end
@@ -74,11 +85,43 @@ class License < AbstractModel
   end
 
   def copyright_text(year, name)
-    if form_name == "publicdomain"
-      "".html_safe + :image_show_public_domain.t + " " + name
+    # match old style `Public_domain` or new style `publicdomain`
+    if url.match?(/public_?domain/i)
+      "#{"".html_safe}#{:image_show_public_domain.t} #{name}"
     else
       "".html_safe + :image_show_copyright.t.to_s + " &copy;".html_safe +
         " #{year} " + name
     end
+  end
+
+  def in_use?
+    images.any? || users.any? ||
+      location_descriptions.any? || name_descriptions.any?
+  end
+
+  def attribute_duplicated?
+    License.where.not(id: id).and(
+      License.where(display_name: display_name).or(
+        License.where(url: url)
+      )
+    ).any?
+  end
+
+  LICENSE_URL_WITH_SUBDIR = %r{https?://creativecommons.org/licenses/}
+  BADGE_URL_WITH_SUBDIR = "https://licensebuttons.net/l/"
+
+  def badge_url
+    "#{url.sub(LICENSE_URL_WITH_SUBDIR, BADGE_URL_WITH_SUBDIR)}88x31.png"
+  end
+
+  ###########
+
+  private
+
+  def prevent_destruction_of_license_in_use
+    return unless in_use?
+
+    errors.add(:base, "Cannot delete License that's in use")
+    throw(:abort)
   end
 end
