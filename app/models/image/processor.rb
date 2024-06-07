@@ -102,8 +102,8 @@ class Image
 
       # image.update_attribute(:upload_status, "pending")
       convert_raw_to_jpg if @ext != "jpg"
-      strip_gps_from_file(full_size_file) if @strip_gps
-      auto_orient_if_needed(full_size_file)
+      strip_gps_from_file(full_size_filepath) if @strip_gps
+      auto_orient_if_needed(full_size_filepath)
       update_image_record_width_height_and_transferred if @set_size
       make_file_sizes
       transfer_files_to_image_servers
@@ -153,7 +153,7 @@ class Image
     private
 
     def make_sure_we_have_full_size_locally
-      return if File.exist?(full_size_file)
+      return if File.exist?(full_size_filepath)
 
       # return unless (servers = IMAGE_SERVERS.excluding(:local))
       IMAGE_SERVERS.each do |server|
@@ -165,11 +165,11 @@ class Image
     end
 
     def reset_file_orientation
-      working = MiniExiftool.new(full_size_file, numerical: true)
+      working = MiniExiftool.new(full_size_filepath, numerical: true)
       return unless working.orientation.to_i != 1
 
       # This should reset the orientation to 1 from the original data.
-      working.copy_tags_from(full_size_file, "all")
+      working.copy_tags_from(full_size_filepath, "all")
       return unless working.orientation.to_i != 1
 
       working.orientation = 1
@@ -189,46 +189,46 @@ class Image
       elsif orientation == "-v"
         pipeline.flip
       end
-      pipeline.call(destination: full_size_file)
+      pipeline.call(destination: full_size_filepath)
     end
 
-    # Note this also calls strip_gps_from_file(original_file).
+    # Note this also calls strip_gps_from_file(original_filepath).
     def convert_raw_to_jpg
-      pipeline = ImageProcessing::MiniMagick.source(original_file).
+      pipeline = ImageProcessing::MiniMagick.source(original_filepath).
                  append("-quality", 90).
                  append("-auto-orient").
                  saver(allow_splitting: true).
                  convert("jpg")
 
-      pipeline.call(destination: full_size_file)
+      pipeline.call(destination: full_size_filepath)
 
       # If there were multiple layers, ImageMagick saves them as 1234-N.jpg.
-      unless File.exist?(full_size_file)
+      unless File.exist?(full_size_filepath)
         biggest_layer = Dir.glob("#{LOCAL_IMAGES_PATH}/orig/#{@id}-*.jpg").first
         if File.exist?(biggest_layer)
           # Take the first one, and delete the rest.
-          File.write(full_size_file, File.read(biggest_layer))
+          File.write(full_size_filepath, File.read(biggest_layer))
           File.delete(Dir.glob("#{LOCAL_IMAGES_PATH}/orig/#{@id}-*.jpg"))
         end
       end
 
       # Strip GPS out of header of original_file if hiding coordinates.
-      strip_gps_from_file(original_file) if @strip_gps
+      strip_gps_from_file(original_filepath) if @strip_gps
     end
 
-    def auto_orient_if_needed(file_path)
-      file_to_orient = MiniMagick::Image.open(file_path)
+    def auto_orient_if_needed(filepath)
+      file_to_orient = MiniMagick::Image.open(filepath)
       original_orientation = file_to_orient["%[orientation]"]
       file_to_orient.auto_orient
       new_orientation = file_to_orient["%[orientation]"]
 
-      file_to_orient.write(file_path) if original_orientation != new_orientation
+      file_to_orient.write(filepath) if original_orientation != new_orientation
     end
 
     # This also sets transferred to false to save db writes.
     # Needed in rotate, and later overwritten in process.
     def update_image_record_width_height_and_transferred
-      width, height = FastImage.size(full_size_file)
+      width, height = FastImage.size(full_size_filepath)
       @image.update(width: width, height: height, transferred: false)
     end
 
@@ -286,13 +286,13 @@ class Image
     end
 
     # Original file locations
-    def original_file
+    def original_filepath
       "#{LOCAL_IMAGES_PATH}/orig/#{@id}.#{@ext}"
     end
 
     # full_size, huge, large, medium, small, thumbnail
     Image::URL::SUBDIRECTORIES.each do |size, subdir|
-      define_method(:"#{size}_file") do
+      define_method(:"#{size}_filepath") do
         "#{LOCAL_IMAGES_PATH}/#{subdir}/#{@id}.jpg"
       end
     end
