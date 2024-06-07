@@ -55,7 +55,7 @@ class FieldSlip < AbstractModel
   def location
     return "" unless observation
 
-    return observation.place_name
+    observation.place_name
   end
 
   def collector

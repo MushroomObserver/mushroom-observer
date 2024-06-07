@@ -120,15 +120,13 @@ class FieldSlipsController < ApplicationController
 
   def field_slip_id
     str = params[:field_slip][:field_slip_id]
-    if str.to_s.match(/ <.*>$/)
-      name = Name.find_by(login: str.to_s.sub(/ <.*>$/, ""))
-      return "_user #{user.id}_" if user
-    end
-    str
+    return str if str.starts_with?("_")
+
+    "_#{str}_"
   end
 
   def user_str(str)
-    if str.to_s.match(/ <.*>$/)
+    if str.to_s.match?(/ <.*>$/)
       user = User.find_by(login: str.to_s.sub(/ <.*>$/, ""))
       return "_user #{user.login}_" if user
     end
