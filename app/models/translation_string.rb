@@ -56,11 +56,9 @@ class TranslationString < AbstractModel
 
   def self.translations(locale)
     do_init = I18n.backend.translations.empty?
-    # rubocop:disable Style/RedundantLineContinuation
     # False positive
     I18n.backend.translations(do_init: do_init) \
       [locale.to_sym][MO.locale_namespace.to_sym]
-    # rubocop:enable Style/RedundantLineContinuation
   end
 
   # Check if tag exists before storing nonsense in the I18n backend
@@ -97,10 +95,22 @@ class TranslationString < AbstractModel
     find_by(tag: "app_banner_box", language: Language.official).updated_at
   end
 
-  # Call this method from a migration whenever we rename a tag,
-  # so we don't lose the existing translation strings.
-  def self.rename_tag(old_tag, new_tag)
-    # validate that the new tag is snake case maybe, then
-    where(tag: old_tag).update_all(tag: new_tag)
+  # Call this method from a migration whenever we rename a tag, so we don't lose
+  # our existing translation strings. Requires hash of old_tag => new_tag pairs.
+  # Keys and values can be symbols or strings, but will be stored as strings.
+  def self.rename_tags(tags)
+    raise("Tags must be a hash.") unless tags.is_a?(Hash)
+
+    tags.each do |old_tag, new_tag|
+      next unless (old_tag.to_sym == old_tag.to_s.underscore.to_sym) &&
+                  (new_tag.to_sym == new_tag.to_s.underscore.to_sym)
+
+      result = where(tag: old_tag.to_s).update_all(tag: new_tag.to_s)
+      next unless result.positive?
+
+      logger.info(
+        "Renamed #{result} #{old_tag.inspect} to #{new_tag.inspect}"
+      )
+    end
   end
 end
