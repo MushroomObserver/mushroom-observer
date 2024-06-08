@@ -36,7 +36,7 @@ class FieldSlipsController < ApplicationController
 
   # GET /field_slips/1/edit
   def edit
-    return unless @field_slip.user != User.current
+    return if @field_slip.can_edit?
 
     redirect_to(field_slip_url(id: @field_slip.id))
   end
@@ -88,7 +88,7 @@ class FieldSlipsController < ApplicationController
                           notes: field_slip_notes
                         ))
           else
-            update_observation_fields(@field_slip.observation)
+            update_observation_fields
             redirect_to(field_slip_url(@field_slip),
                         notice: :field_slip_updated.t)
           end
@@ -103,13 +103,37 @@ class FieldSlipsController < ApplicationController
     end
   end
 
-  def update_observation_fields(observation)
+  def update_observation_fields
+    observation = @field_slip.observation
     return unless observation
 
+    check_name
     observation.place_name = params[:field_slip][:location]
     observation.notes.merge!(field_slip_notes)
     observation.notes.compact_blank!
     observation.save!
+  end
+
+  def check_name
+    id_str = params[:field_slip][:field_slip_id]
+    return unless id_str
+
+    id_str.tr!("_", "")
+    names = Name.find_names(id_str)
+    return unless names
+
+    name = names[0]
+    naming = @field_slip.observation.namings.find_by(name:)
+    unless naming
+      naming = Naming.construct({}, @field_slip.observation)
+      naming.name = name
+      naming.save!
+    end
+    vote = Vote.find_by(user: User.current, naming:)
+    return if vote
+
+    Vote.create!(favorite: true, value: Vote.maximum_vote, naming:)
+    Observation::NamingConsensus.new(@field_slip.observation).calc_consensus
   end
 
   def field_slip_notes

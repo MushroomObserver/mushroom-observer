@@ -55,7 +55,6 @@ class FieldSlip < AbstractModel
   def field_value(field)
     return "" unless observation
 
-    # debugger
     observation.notes[field] || ""
   end
 
@@ -87,5 +86,10 @@ class FieldSlip < AbstractModel
     return "" unless observation
 
     observation.other_codes
+  end
+
+  def can_edit?
+    user == User.current ||
+      project&.is_admin?(User.current)
   end
 end
