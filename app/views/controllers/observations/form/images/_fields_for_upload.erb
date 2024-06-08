@@ -6,7 +6,7 @@
   carousel_remove_image_button
 end %>
 
-<%= fields_for(:"#{img_number}_temp_image") do |fti| %>
+<%= fields_for(:"#{img_id}_temp_image") do |fti| %>
 
   <%= text_area_with_label(form: fti, field: :notes, rows: 2,
                            label: :NOTES.l) %>

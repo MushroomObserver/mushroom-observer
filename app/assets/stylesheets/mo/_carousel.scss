@@ -176,35 +176,35 @@
     }
   }
 
-  .carousel-indicators {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    z-index: 15;
-    width: 60%;
-    padding-left: 0;
-    margin-left: -30%;
-    text-align: center;
-    list-style: none;
+  // .carousel-indicators {
+  //   position: absolute;
+  //   bottom: 10px;
+  //   left: 50%;
+  //   z-index: 15;
+  //   width: 60%;
+  //   padding-left: 0;
+  //   margin-left: -30%;
+  //   text-align: center;
+  //   list-style: none;
 
-    li {
-      display: inline-block;
-      width: 1.25rem;
-      height: 1.25rem;
-      margin: 0.5rem;
-      text-indent: -999px;
-      cursor: pointer;
-      background-color: rgba($white, 1);
-      border: 1px solid rgba($black, 0.75);
-      border-radius: 50%;
-      opacity: 0.9;
+  //   li {
+  //     display: inline-block;
+  //     width: 1.25rem;
+  //     height: 1.25rem;
+  //     margin: 0.5rem;
+  //     text-indent: -999px;
+  //     cursor: pointer;
+  //     background-color: rgba($white, 1);
+  //     border: 1px solid rgba($black, 0.75);
+  //     border-radius: 50%;
+  //     opacity: 0.9;
 
-      &.active {
-        background-color: rgba($white, 0.45);
-        border: 1px solid rgba($white, 0.75);
-      }
-    }
-  }
+  //     &.active {
+  //       background-color: rgba($white, 0.45);
+  //       border: 1px solid rgba($white, 0.75);
+  //     }
+  //   }
+  // }
 }
 
 .obs_thumb_img_btn {

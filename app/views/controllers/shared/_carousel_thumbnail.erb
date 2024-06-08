@@ -1,13 +1,26 @@
-<%=
-# Incoming locals: image, index, active, html_id
-presenter_args = { fit: :contain, extra_classes: "carousel-thumbnail" }
-presenter = ImagePresenter.new(image, presenter_args)
-active ||= ""
+<%# locals: (image: nil, upload: false, index: "", html_id: "", img_id: "") -%>
 
-tag.li(id: "carousel_thumbnail_#{image.id}",
+<%# Generalized for uploaded images (no Image record) %>
+<%=
+data = { obs_form_images_target: "thumbnail" }
+active = (index == 0) ? "active" : ""
+
+if upload
+  img_id ||= "img_id_missing"
+  data = data.merge(image_uuid: img_id)
+  extra_classes = "carousel-thumbnail set-src"
+else
+  img_id = image.id
+  data = data.merge(good_image: true)
+  extra_classes = "carousel-thumbnail"
+end
+presenter_args = { size: :thumbnail, fit: :contain,
+                   extra_classes: extra_classes }.merge(upload: upload)
+presenter = ImagePresenter.new(image || img_id, presenter_args)
+
+tag.li(id: "carousel_thumbnail_#{img_id}",
        class: class_names("carousel-indicator mx-1", active),
-       data: { target: "##{html_id}",
-               slide_to: index.to_s }) do
+       data: { target: "##{html_id}", slide_to: index.to_s }.merge(data)) do
   image_tag(presenter.img_src, presenter.options_lazy)
 end
 %>

@@ -1,39 +1,42 @@
-<%=
-# Incoming locals: img_number, img_file_name, img_file_size,
-#                  f, active, image, upload, img_src
-# upload == no image.id, image == nil, image_src == nil
-image ||= nil
-img_number ||= "img_number_missing"
-img_id = image&.id || img_number # in case good_image
-img_src = upload ? "" : image&.large_url
-handle = upload ? "added_image_wrapper" : ""
-item_attrs = { id: "carousel_item_#{img_id}",
-               class: class_names("item", active, handle) }
-data = { obs_form_images_target: "item" }
-data = data.merge(image_number: img_number) if upload
-data = data.merge(good_image: true) unless upload
-item_attrs = item_attrs.merge(data: data)
-exif_data = upload ? { img_file_name:, img_file_size: } :
-            image&.read_exif_geocode
+<%# locals: (image: nil, img_id: nil, upload: false, index: "", f: nil, img_file_name: "", img_file_size: "") -%>
 
+<%# This may be rendered by Turbo, or by the edit action %>
+<%=
+active = index == 0 ? "active" : ""
+data = { obs_form_images_target: "item" }
+if upload
+  img_id ||= "img_id_missing"
+  # upload means: image == nil, image_src == nil (src set by js)
+  handle = "added_image_wrapper"
+  data = data.merge(image_uuid: img_id)
+  exif_data = { img_file_name:, img_file_size: }
+  extra_classes = "carousel-image set-src"
+else
+  img_id = image&.id
+  handle = ""
+  data = data.merge(good_image: true)
+  exif_data = image&.read_exif_geocode
+  extra_classes = "carousel-image"
+end
+presenter_args = { size: :large, fit: :contain,
+                   extra_classes: extra_classes }.merge(upload: upload)
+presenter = ImagePresenter.new(img_id, presenter_args)
+item_attrs = { id: "carousel_item_#{img_id}",
+               class: class_names("item", active, handle) }.merge(data: data)
 
 tag.div(**item_attrs) do
   tag.div(class: "row") do
     concat(tag.div(class: "image-position col-12 col-md-6") do
-      concat(image_tag(
-        img_src,
-        class: "carousel-image img-fluid ab-fab object-fit-contain lazy",
-        data: { src: img_src }
-      ))
+      concat(image_tag(presenter.img_src, presenter.options_lazy))
       concat(tag.div(class: "ab-fab ml-4 mt-4") do
-        carousel_set_thumb_img(image:, active:)
+        carousel_set_thumb_img_button(image:, active:)
       end)
     end)
     concat(tag.div(class: "form-position col-12 col-md-6") do
       tag.div(class: "form-panel") do
         if upload
           concat(render(partial: "observations/form/images/fields_for_upload",
-                        locals: { img_number: }))
+                        locals: { img_id: }))
         else
           concat(render(partial: "observations/form/images/fields_for_edit",
                         locals: { f:, image: }))

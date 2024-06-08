@@ -51,8 +51,8 @@ const internalConfig = {
 // (formerly "observation_images" section of the form)
 // Connects to data-controller="obs-form-images"
 export default class extends Controller {
-  static targets = ["form", "carousel", "item", "removeImg", "imageGpsMap",
-    "addedImages", "goodImages", "thumbImageId", "setThumbImg", "isThumbImg",
+  static targets = ["form", "carousel", "item", "thumbnail", "removeImg",
+    "imageGpsMap", "goodImages", "thumbImageId", "setThumbImg", "isThumbImg",
     "thumbImgRadio", "obsThumbImgBtn"]
 
   initialize() {
@@ -279,6 +279,7 @@ export default class extends Controller {
     }
     item.uuid = uuid;
     item.dom_element = null;
+    item.thumbnail_element = null;
     item.exif_data = null;
     item.processed = false; // check the async status of files
 
@@ -286,22 +287,22 @@ export default class extends Controller {
   }
 
   // Use requestjs-rails to make fetch request to get the carousel-item template
-  // with the image and its form. requestjs-rails automatically calls
-  // renderStreamMessage on the response, so it's getting prepended by Turbo.
-  // Population of the element with file data is done in itemTargetConnected.
-  // In order to manipulate the returned element manually, we would have to use
-  // vanilla-JS `fetch` and prepend it to the carousel ourselves.
+  // with the image and its form, as well as the carousel-thumbnail template.
+  // requestjs-rails automatically calls renderStreamMessage on the response, so
+  // it's getting prepended by Turbo. We populate the element with file data
+  // via itemTargetConnected. In order to manipulate the returned element
+  // manually, we would have to use vanilla-JS `fetch` and prepend it to the
+  // carousel ourselves.
   async loadAndDisplayItem(item, i) {
     const _file_size = item.is_file ?
       Math.floor((item.file_size / 1024)) + "kb" : "";
-    const _active = i == 0 ? "active" : "";
     const response = await get(this.get_template_uri,
       {
         contentType: "text/html",
         responseKind: "turbo-stream",
         query: {
-          active: _active,
-          img_number: item.uuid,
+          index: i,
+          img_id: item.uuid,
           img_file_name: item.file_name,
           img_file_size: _file_size
         }
@@ -328,7 +329,7 @@ export default class extends Controller {
     // console.log(itemElement);
     if (itemElement.hasAttribute('data-good-image')) return;
 
-    this.addCarouselIndicator();
+    // this.addCarouselIndicator();
     this.sortCarousel();
 
     // Attach a reference to the dom element to the item object so we can
@@ -344,49 +345,60 @@ export default class extends Controller {
     // extract the EXIF data (async) and populate the item and element
     this.getExifData(item);
     // uses FileReader to load image as base64 async and set the img src
-    this.fileReadImage(item);
+    this.setImgSrc(item, itemElement);
   }
 
   // Stimulus "target callback" on carousel item removed:
   // Remove the last indicator - they're only matched to items by index
-  itemTargetDisconnected(itemElement) {
-    this.removeCarouselIndicator();
-    this.sortCarousel();
+  // Can't bind to targetDisconnected because there are two targets to remove.
+  // itemTargetDisconnected(itemElement) {
+  //   // this.removeCarouselIndicator();
+  //   this.sortCarousel();
+  // }
+
+  thumbnailTargetConnected(thumbElement) {
+    if (thumbElement.hasAttribute('data-good-image')) return;
+
+    // Attach it to the FileStore item if there is one,
+    const item = this.findFileStoreItem(thumbElement);
+    item.thumbnail_element = thumbElement;
+    this.setImgSrc(item, thumbElement);
   }
 
   // Add an indicator for the most recent element.
-  addCarouselIndicator() {
-    const _html_id = this.carouselTarget.getAttribute('id'),
-      _indicontrols = this.carouselTarget.querySelector('.carousel-indicators'),
-      _indicators = this.carouselTarget.querySelectorAll('.carousel-indicator'),
-      _new_indicator = document.createElement("li");
+  // addCarouselIndicator() {
+  //   const _html_id = this.carouselTarget.getAttribute('id'),
+  //     _indicontrols = this.carouselTarget.querySelector('.carousel-indicators'),
+  //     _indicators = this.carouselTarget.querySelectorAll('.carousel-indicator'),
+  //     _new_indicator = document.createElement("li");
 
-    _new_indicator.setAttribute('data-target', '#' + _html_id);
-    _new_indicator.setAttribute('data-slide-to', 0);
-    _new_indicator.classList.add('carousel-indicator');
-    _new_indicator.classList.add('active');
+  //   _new_indicator.setAttribute('data-target', '#' + _html_id);
+  //   _new_indicator.setAttribute('data-slide-to', 0);
+  //   _new_indicator.classList.add('carousel-indicator');
+  //   _new_indicator.classList.add('active');
 
-    // Scoot the indicators over by one
-    if (_indicators.length > 0) {
-      _indicators.forEach((indicator) => {
-        const _ref = Number(indicator.dataset.slideTo);
-        indicator.setAttribute('data-slide-to', _ref + 1);
-      });
-    }
-    _indicontrols.prepend(_new_indicator);
-  }
+  //   // Scoot the indicators over by one
+  //   if (_indicators.length > 0) {
+  //     _indicators.forEach((indicator) => {
+  //       const _ref = Number(indicator.dataset.slideTo);
+  //       indicator.setAttribute('data-slide-to', _ref + 1);
+  //     });
+  //   }
+  //   _indicontrols.prepend(_new_indicator);
+  // }
 
-  removeCarouselIndicator() {
-    const _indicators =
-      this.carouselTarget.querySelectorAll('.carousel-indicator'),
-      _count = _indicators.length;
+  // removeCarouselIndicator() {
+  //   const _indicators =
+  //     this.carouselTarget.querySelectorAll('.carousel-indicator'),
+  //     _count = _indicators.length;
 
-    // _count >= 1 should be the case, but just in case they're not in sync:
-    // Remove the last indicator.
-    if (_count >= 1) { _indicators[_count - 1].remove(); }
-  }
+  //   // _count >= 1 should be the case, but just in case they're not in sync:
+  //   // Remove the last indicator.
+  //   if (_count >= 1) { _indicators[_count - 1].remove(); }
+  // }
 
   // Adjust the carousel controls and indicators for the new/removed item.
+  // Can't bind to targetDisconnected because there are two targets to remove.
   sortCarousel() {
     const _items = this.carouselTarget.querySelectorAll('.item'),
       _indicators = this.carouselTarget.querySelectorAll('.carousel-indicator'),
@@ -396,8 +408,8 @@ export default class extends Controller {
     _active.forEach((elem) => { elem.classList.remove('active') });
 
     // This always makes the new (or first) element in the carousel active.
-    _items[0].classList.add('active');
-    _indicators[0].classList.add('active');
+    _items[0]?.classList?.add('active');
+    _indicators[0]?.classList?.add('active');
 
     this.sortCarouselControls();
   }
@@ -441,13 +453,19 @@ export default class extends Controller {
       this.thumbImageIdTarget.value = "";
     }
     document.getElementById("carousel_item_" + _image_id).remove();
+    document.getElementById("carousel_thumbnail_" + _image_id).remove();
+
+    // Re-sort the carousel
+    this.sortCarousel();
   }
 
   // "closest" works even if the element is the item itself.
   findFileStoreItem(element) {
-    const carousel_item = element.closest(".item")
+    const _identifiable = element.closest(".item") ??
+      element.closest(".carousel-indicator");
+
     return this.fileStore.items.find(
-      (item) => item.uuid === carousel_item.dataset.imageNumber
+      (item) => item.uuid === _identifiable?.dataset?.imageUuid
     );
   }
 
@@ -455,9 +473,9 @@ export default class extends Controller {
   // In most cases it's the base64, which is as long as the file.
   // That's why we can't send the src attribute to the template call
   // to get a complete layout; it has to be added by JS.
-  fileReadImage(item) {
+  setImgSrc(item, element) {
     // find the image element in carousel-item
-    const _img = item.dom_element.querySelector('.carousel-image');
+    const _img = element.querySelector('.set-src');
 
     if (item.is_file) {
       const fileReader = new FileReader();
@@ -578,15 +596,20 @@ export default class extends Controller {
   // Pass an element to use from button or itemTargetConnected callback.
   // Also disables the "transfer" button for this element
   transferExifToObsFields(element) {
-    this.disableThisButton('.use_exif_btn', element);
-    const _exif_data = element.dataset;
+    this.selectExifButton('.use_exif_btn', element);
+    const _exif_data = element.dataset,
+      _obs_lat = document.getElementById('observation_lat'),
+      _obs_lng = document.getElementById('observation_lng'),
+      _obs_alt = document.getElementById('observation_alt'),
+      _event = new Event('change');
 
     if (_exif_data.geocode && _exif_data.geocode !== "") {
       const latLngAlt = JSON.parse(_exif_data.geocode);
 
-      document.getElementById('observation_lat').value = latLngAlt.lat;
-      document.getElementById('observation_lng').value = latLngAlt.lng;
-      document.getElementById('observation_alt').value = latLngAlt.alt;
+      _obs_lat.value = latLngAlt.lat;
+      _obs_lng.value = latLngAlt.lng;
+      _obs_alt.value = latLngAlt.alt;
+      _obs_lat.dispatchEvent(_event); // triggers change to update the map
     }
     if (_exif_data.exif_date) {
       const _exifSimpleDate = JSON.parse(_exif_data.exif_date);
@@ -596,7 +619,7 @@ export default class extends Controller {
 
   // Click callback for transfer, disabling this button but enabling others.
   // Kind of like radio
-  disableThisButton(selector, element) {
+  selectExifButton(selector, element) {
     // enable all the buttons
     this.carouselTarget.querySelectorAll(selector).forEach((element) => {
       element.removeAttribute('disabled');
@@ -725,11 +748,15 @@ export default class extends Controller {
   removeItem(item) {
     // remove element from the dom;
     item.dom_element.remove();
+    item.thumbnail_element.remove();
 
     // remove item from items
     const idx = this.fileStore.items.indexOf(item);
     if (idx > -1)
       this.fileStore.items.splice(idx, 1);
+
+    // Re-sort the carousel
+    this.sortCarousel();
   }
 
   /*********************/

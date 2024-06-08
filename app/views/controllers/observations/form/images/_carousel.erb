@@ -14,25 +14,22 @@ html_id = "observation_upload_images_carousel"
 tag.div(class: "carousel slide edit-carousel", id: html_id,
         data: { ride: "false", interval: "false",
                 obs_form_images_target: "carousel" }) do
-  tag.div(class: "carousel-inner bg-light", role: "listbox",
-          id: "added_images_container", # this is where JS appends
-          data: { obs_form_images_target: "addedImages" }) do
+  concat(tag.div(class: "carousel-inner bg-light", role: "listbox",
+                 id: "added_images" ) do
     images&.each_with_index do |image, index|
-      active = (index == 0) ? "active" : ""
       concat(render(partial: "observations/form/images/carousel_item",
-                    locals: { f: f, image:, active:, upload: false }))
+                    locals: { f: f, image:, index: }))
     end
     concat(tag.div(class: "carousel-control-wrap") do
-      concat(carousel_controls(html_id))
-      concat(tag.ol(class: "carousel-indicators") do
-        images&.each_with_index do |image, index|
-          active = (index == 0) ? "active" : ""
-          concat(tag.li("", class: class_names("carousel-indicator", active),
-                        data: { target: "##{html_id}", slide_to: index.to_s }))
-        end
-      end)
+      carousel_controls(html_id)
     end)
-  end
+  end)
+  concat(tag.ol(class: "carousel-indicators", id: "added_thumbnails") do
+    images&.each_with_index do |image, index|
+      concat(render(partial: "shared/carousel_thumbnail",
+                    locals: { image:, index:, html_id: }))
+    end
+  end)
 end
 # end
 %>

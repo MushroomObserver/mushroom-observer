@@ -1,4 +1,4 @@
-<div class="added_image_wrapper" data-image-number="<%= img_number %>">
+<div class="added_image_wrapper" data-image-number="<%= img_id %>">
 
   <div class="added_image_name_container row">
     <!--Replaced by javascript-->
@@ -48,7 +48,7 @@
                 data-obs-form-images-target="removeImg"><%= :image_remove_remove.t %></a>
       </div>
 
-      <%= fields_for(:"#{img_number}_temp_image") do |fti| %>
+      <%= fields_for(:"#{img_id}_temp_image") do |fti| %>
 
         <div class="row">
 

@@ -1,10 +1,11 @@
+<%# locals: (image: nil, object: nil, size: :large, index: "") -%>
+
 <%=
-# Incoming locals: image, size, active, object
-# Caption needs object for copyright info
+# Caption needs object for copyright info. Very expensive.
 presenter_args = { size:, fit: :contain, original: true,
                    extra_classes: "carousel-image" }
 presenter = ImagePresenter.new(image, presenter_args)
-active ||= ""
+active = index == 0 ? "active" : ""
 
 tag.div(id: "carousel_item_#{image.id}",
         class: class_names("item", active)) do

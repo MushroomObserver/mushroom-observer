@@ -1,24 +1,17 @@
+<%# locals: (images: nil, object: nil, size: :large, title: :IMAGES.t, links: "", thumbnails: true, type: object&.type_tag || "image", html_id: "#{type}_#{object.id}_carousel") -%>
+
 <%=
 # TODO: make this a component
 # Required args: images:
 # Optional args:
 #   object: (the carousel is usually for an object)
-#   (carousel)title:, (image_edit)links:
-#   thumbnails: true for thumbnail navigation
 #   size: arg for ImagePresenter
-#   html_id: for carousel div
+#   (carousel)title:, (image_edit)links:
 #   links: button links for heading
+#   thumbnails: true for thumbnail navigation
+#   html_id: for carousel div
 #
 # Note: uses concat(x) instead of [x,y].safe_join because of conditionals
-
-images ||= object&.images || nil #
-object ||= nil #
-size ||= :large
-title ||= :IMAGES.t #
-links ||= "" #
-thumbnails = true if thumbnails.nil? #
-type = object&.type_tag || "image" #
-html_id ||= "#{type}_#{object.id}_carousel" #
 
 concat(carousel_heading(title, links)) if thumbnails
 if !images.nil? && images.any?
@@ -26,18 +19,16 @@ if !images.nil? && images.any?
           data: { ride: "false", interval: "false" }) do
     concat(tag.div(class: "carousel-inner bg-light", role: "listbox") do
       images.each_with_index do |image, index|
-        active = index == 0 ? "active" : ""
         concat(render(partial: "shared/carousel_item",
-                      locals: { image:, size:, active:, object: }))
+                      locals: { image:, size:, index:, object: }))
       end
       concat(carousel_controls(html_id)) if images.length > 1
     end)
     concat(
       tag.ol(class: "carousel-indicators panel-footer py-2 px-0 mb-0") do
         images.each_with_index do |image, index|
-          active = index == 0 ? "active" : ""
           concat(render(partial: "shared/carousel_thumbnail",
-                        locals: { image:, index:, active:, html_id: }))
+                        locals: { image:, index:, html_id: }))
         end
       end
     ) if thumbnails

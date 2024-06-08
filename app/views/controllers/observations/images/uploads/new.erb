@@ -1,0 +1,18 @@
+<%=
+turbo_stream.prepend(
+  "added_images",
+  partial: "observations/form/images/carousel_item",
+  locals: { upload: true, index: params[:index],
+            img_id: params[:img_id],
+            img_file_name: params[:img_file_name],
+            img_file_size: params[:img_file_size] }
+)
+%>
+<%=
+turbo_stream.prepend(
+  "added_thumbnails",
+  partial: "shared/carousel_thumbnail",
+  locals: { upload: true, index: params[:index], img_id: params[:img_id],
+            html_id: "observation_upload_images_carousel" }
+)
+%>
