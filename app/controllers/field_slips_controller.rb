@@ -60,7 +60,7 @@ class FieldSlipsController < ApplicationController
                           notes: field_slip_notes
                         ))
           else
-            update_observation_fields(@field_slip.observation)
+            update_observation_fields
             redirect_to(field_slip_url(@field_slip),
                         notice: :field_slip_created.t)
           end
@@ -103,6 +103,26 @@ class FieldSlipsController < ApplicationController
     end
   end
 
+  # DELETE /field_slips/1 or /field_slips/1.json
+  def destroy
+    if @field_slip.user != User.current
+      redirect_to(field_slip_url(id: @field_slip.id))
+      return
+    end
+
+    @field_slip.destroy!
+
+    respond_to do |format|
+      format.html do
+        redirect_to(field_slips_url,
+                    notice: :field_slip_destroyed.t)
+      end
+      format.json { head(:no_content) }
+    end
+  end
+
+  private
+
   def update_observation_fields
     observation = @field_slip.observation
     return unless observation
@@ -143,7 +163,7 @@ class FieldSlipsController < ApplicationController
     notes[:Field_Slip_ID_By] = field_slip_id_by
     notes[:Other_Codes] = params[:field_slip][:other_codes]
     update_notes_fields(notes)
-    notes
+    notes.compact_blank!
   end
 
   def update_notes_fields(notes)
@@ -177,26 +197,6 @@ class FieldSlipsController < ApplicationController
     end
     str
   end
-
-  # DELETE /field_slips/1 or /field_slips/1.json
-  def destroy
-    if @field_slip.user != User.current
-      redirect_to(field_slip_url(id: @field_slip.id))
-      return
-    end
-
-    @field_slip.destroy!
-
-    respond_to do |format|
-      format.html do
-        redirect_to(field_slips_url,
-                    notice: :field_slip_destroyed.t)
-      end
-      format.json { head(:no_content) }
-    end
-  end
-
-  private
 
   # Use callbacks to share common setup or constraints between actions.
   def set_field_slip
