@@ -3,33 +3,6 @@
 
 <%# load_google_maps_api_script %>
 
-<div id="gps_messages" class="fade" style="display: none;"
-    data-obs-form-images-target="gpsMessages">
-  <div class="well well-sm">
-    <div class="row">
-
-      <div class="col-sm-7">
-        <%= tag.div("Set observation Latitude/Longitude to:",
-                    class: "font-weight-bold") %>
-        <%= tag.div("", id: "gps_radios", class: "mb-3",
-                        data: { obs_form_images_target: "gpsRadios" }) %>
-        <%= js_button(button: :UPDATE.t, name: "set_gps",
-                      id: "set_gps",
-                      data: { action: "obs-form-images#setGps" }) %>
-        <%= js_button(button: :IGNORE.t, name: "ignore_gps", id: "ignore_gps",
-                      data: { action: "obs-form-images#ignoreGps" }) %>
-      </div>
-
-      <div class="col-sm-4">
-        <%= tag.span(:form_observations_gps_info.t) %>
-        <%= tag.div("", id: "image_gps_map", class: "w-100",
-                        data: { obs_form_images_target: "imageGpsMap" }) %>
-      </div>
-
-    </div><!--.row-->
-  </div><!--.well-->
-</div><!--#geocode_messages-->
-
 <%= tag.div(id: "observation_where", data: { controller: "map" }) do %>
 
   <!-- LAT_LONG_ALT -->

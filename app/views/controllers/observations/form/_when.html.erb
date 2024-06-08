@@ -1,44 +1,5 @@
 <%# When section of create_observation form %>
 
-<!-- Container to show messages relating to the selected date -->
-<div id="date_messages" class="fade" style="display: none;"
-     data-obs-form-images-target="dateMessages">
-  <div class="well well-sm">
-    <div class="row">
-
-      <div class="col-sm-7">
-        <div class="inconsistent_date_options">
-          <%= tag.div(:form_observations_set_observation_date_to.t + ":",
-                      class: "font-weight-bold") %>
-          <%= tag.div("",
-                      id: "img_date_radios",
-                      data: { obs_form_images_target: "imgDateRadios" }) %>
-          <%= tag.div(:form_observations_set_image_dates_to.t + ":",
-                      class: "font-weight-bold") %>
-          <%= tag.div("",
-                      id: "obs_date_radios",
-                      data: { obs_form_images_target: "obsDateRadios" }) %>
-        </div>
-        <div class="mt-3">
-          <%= js_button(
-                button: :form_observations_use_date.t,
-                name: "fix_dates", id: "fix_dates",
-                data: { action: "obs-form-images#fixDates" }) %>
-          <%= js_button(
-                button: :IGNORE.t,
-                name: "ignore_dates", id: "ignore_dates",
-                data: { action: "obs-form-images#ignoreDates" }) %>
-        </div>
-      </div><!--.col-->
-
-      <div class="col-sm-4">
-        <%= tag.span(:form_observations_date_warning.t) %>
-      </div><!--.col-->
-
-    </div><!--.row-->
-  </div><!--.well-->
-</div><!--#date_messages-->
-
 <!-- WHEN -->
 <div class="container-text">
   <%= date_select_with_label(

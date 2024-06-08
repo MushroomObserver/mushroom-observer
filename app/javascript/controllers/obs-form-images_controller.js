@@ -51,10 +51,9 @@ const internalConfig = {
 // (formerly "observation_images" section of the form)
 // Connects to data-controller="obs-form-images"
 export default class extends Controller {
-  static targets = ["form", "dateMessages", "imgDateRadios", "obsDateRadios",
-    "gpsMessages", "gpsRadios", "setLatLngAlt", "ignoreGps", "imageGpsMap",
+  static targets = ["form", "carousel", "item", "removeImg", "imageGpsMap",
     "addedImages", "goodImages", "thumbImageId", "setThumbImg", "isThumbImg",
-    "thumbImgRadio", "obsThumbImgBtn", "removeImg", "carousel", "item"]
+    "thumbImgRadio", "obsThumbImgBtn"]
 
   initialize() {
   }
@@ -133,35 +132,6 @@ export default class extends Controller {
       this.addFiles(dataTransfer.files);
   }
 
-  fixDates() {
-    const _selectedItem =
-      document.querySelector('input[name=fix_date]:checked');
-
-    if (_selectedItem && _selectedItem.hasAttribute('data-date')) {
-      const _itemData = _selectedItem.dataset;
-
-      this.reconcileDates(JSON.parse(_itemData.date), _itemData.target);
-    }
-  }
-
-  ignoreDates() { this.hide(this.imageMessagesTarget); }
-
-  setGps() {
-    const _selectedItem =
-      document.querySelector('input[name=fix_geocode]:checked');
-
-    if (_selectedItem && _selectedItem.hasAttribute('data-geocode')) {
-      const _gps = JSON.parse(_selectedItem.dataset.geocode);
-
-      document.getElementById('observation_lat').value = _gps.lat;
-      document.getElementById('observation_lng').value = _gps.lng;
-      document.getElementById('observation_alt').value = _gps.alt;
-      this.hide(this.gpsMessagesTarget);
-    }
-  }
-
-  ignoreGps() { this.hide(this.gpsMessagesTarget); }
-
   // Deactivate other radio buttons manually because they are not grouped (?)
   setObsThumbnail(event) {
     // event.target is the label.btn clicked to make whichever the default image
@@ -214,20 +184,6 @@ export default class extends Controller {
 
       this.fileStore.items.push(_item)
     }
-
-    // check status of when all the selected files have processed.
-    this.checkStoreStatus();
-  }
-
-  checkStoreStatus() {
-    setTimeout(() => {
-      if (!this.areAllItemsProcessed()) {
-        this.checkStoreStatus();
-      } else {
-        this.refreshImageMessages();
-        this.refreshGeocodeMessages();
-      }
-    }, 30)
   }
 
   addUrl(url) {
@@ -238,12 +194,6 @@ export default class extends Controller {
 
       this.fileStore.items.push(_item);
     }
-  }
-
-  updateImageDates(simpleDate) {
-    this.fileStore.items.forEach((item) => {
-      this.imageDate(item, simpleDate);
-    });
   }
 
   getDistinctImageDates() {
@@ -615,7 +565,6 @@ export default class extends Controller {
       _exifSimpleDate = JSON.parse(_item.dom_element.dataset.exif_date);
 
     this.imageDate(_item, _exifSimpleDate);
-    this.refreshImageMessages();
   }
 
   // Click callback for button.
@@ -640,62 +589,6 @@ export default class extends Controller {
     if (_exif_data.exif_date) {
       const _exifSimpleDate = JSON.parse(_exif_data.exif_date);
       this.observationDate(_exifSimpleDate);
-    }
-  }
-
-  // Maybe add a radio button option to set obs gps to this item's gps.
-  // Or, if there are no more images with that location, remove the option.
-  // Or, remove the whole gps_messages box.
-  refreshGeocodeMessages() {
-    const _geoOptions = this.gpsRadiosTarget;
-    let _currentOptions = _geoOptions.querySelectorAll('input[type="radio"]');
-
-    if (this.fileStore.items.length > 0) {
-      let itemsHadGeocode = false;
-      // We're comparing items in the FileStore against existing gps options.
-      this.fileStore.items.forEach((item) => {
-        let itemData = item.dom_element.dataset;
-        if (itemData && itemData.geocode) {
-          const itemGeocode = JSON.parse(item.dom_element.dataset.geocode)
-          let _addGeoRadio = true;
-          itemsHadGeocode = true;
-
-          // check all current radio buttons
-          if (_currentOptions.length > 0) {
-            _currentOptions.forEach((element) => {
-              const _existingGeocode = JSON.parse(element.dataset.geocode);
-              // const _latDif = Math.abs(itemGeocode.lat)
-              //   - Math.abs(_existingGeocode.lat);
-              // const _lngDif = Math.abs(itemGeocode.lng)
-              //   - Math.abs(_existingGeocode.lng);
-
-              // don't add geocodes that are only slightly different
-              // if ((Math.abs(_latDif) < 0.0002) || Math.abs(_lngDif) < 0.0002)
-              _addGeoRadio = this.geocodesDiffer(itemGeocode, _existingGeocode);
-            });
-          }
-
-          if (_addGeoRadio) {
-            const _radioBtnToInsert = this.makeGeocodeRadioBtn(itemGeocode);
-            this.gpsRadiosTarget.appendChild(_radioBtnToInsert);
-          }
-        }
-      })
-
-      // Clean up if there's no images with geocodes (approximates may linger)
-      if (!itemsHadGeocode) {
-        _geoOptions.querySelectorAll('input[type="radio"]')
-          .forEach((elem) => { elem.closest('.radio').remove(); })
-      }
-
-      // now check buttons again
-      _currentOptions = _geoOptions.querySelectorAll('input[type="radio"]');
-
-      if (_currentOptions.length > 0) {
-        this.show(this.gpsMessagesTarget);
-      } else {
-        this.hide(this.gpsMessagesTarget);
-      }
     }
   }
 
@@ -844,72 +737,6 @@ export default class extends Controller {
     return false;
   }
 
-  refreshImageMessages() {
-    const _distinctImgDates = this.getDistinctImageDates(),
-      _obsDate = this.observationDate();
-
-    this.imgDateRadiosTarget.innerHTML = '';
-    this.obsDateRadiosTarget.innerHTML = '';
-    this.makeObservationDateRadio(_obsDate);
-
-    _distinctImgDates.forEach((simpleDate) => {
-      if (!this.simpleDatesAreEqual(_obsDate, simpleDate))
-        this.makeImageDateRadio(simpleDate);
-    });
-
-    if (this.areDatesInconsistent()) {
-      this.show(this.dateMessagesTarget);
-    } else {
-      this.hide(this.dateMessagesTarget);
-    }
-  }
-
-  reconcileDates(simpleDate, target) {
-    if (target == "image")
-      this.updateImageDates(simpleDate);
-    if (target == "observation")
-      this.observationDate(simpleDate);
-    this.hide(this.dateMessagesTarget);
-  }
-
-  makeImageDateRadio(simpleDate) {
-    const _date = JSON.stringify(simpleDate),
-      _date_string = this.simpleDateAsString(simpleDate),
-      _html = document.createElement('div');
-
-    _html.classList.add("radio");
-    _html.innerHTML = "<label><input type='radio' data-target='observation' data-date='" + _date + "' name='fix_date'/>" + _date_string + "</label>"
-
-    this.imgDateRadiosTarget.appendChild(_html);
-  }
-
-  makeObservationDateRadio(simpleDate) {
-    const _date = JSON.stringify(simpleDate),
-      _date_string = this.simpleDateAsString(simpleDate),
-      _html = document.createElement('div');
-
-    _html.classList.add("radio");
-    _html.innerHTML = "<label><input type='radio' data-target='image' data-date='" + _date + "' name='fix_date'/><span>" + _date_string + "</span></label>";
-
-    this.obsDateRadiosTarget.appendChild(_html);
-  }
-
-  updateObservationDateRadio() {
-    // _currentObsDate is an instance of this.SimpleDate(values)
-    const _currentObsDate = this.observationDate();
-
-    this.obsDateRadiosTarget.querySelectorAll('input')
-      .forEach((elem) => { elem.dataset.date = _currentObsDate; })
-
-    this.obsDateRadiosTarget.querySelectorAll('span')
-      .forEach((elem) => {
-        elem.innerText = this.simpleDateAsString(_currentObsDate);
-      })
-
-    if (this.areDatesInconsistent())
-      this.show(this.dateMessagesTarget);
-  }
-
   // gets or sets current obs date, simpledate object updates date
   observationDate(simpleDate) {
     // These aren't targets because they are created on the fly by Rails
@@ -998,38 +825,6 @@ export default class extends Controller {
   }
 
   /** Geocode Helpers **/
-
-  makeGeocodeRadioBtn(latLngAlt) {
-    const _geocode_string = latLngAlt.lat.toFixed(5) + ", "
-      + latLngAlt.lng.toFixed(5),
-      _html = document.createElement('div'),
-      _label = document.createElement('label'),
-      _input = document.createElement('input'),
-      _a = document.createElement('a');
-
-    _input.type = 'radio';
-    _input.name = 'fix_geocode';
-    _input.dataset.geocode = JSON.stringify(latLngAlt);
-
-    _label.appendChild(_input);
-    _label.insertAdjacentText('beforeend', _geocode_string)
-
-    // dataset is read-only. attributes must be assigned singly
-    _a.href = '#geocode_map';
-    _a.dataset.role = 'show_on_map';
-    _a.dataset.geocode = JSON.stringify(latLngAlt);
-    _a.dataset.observationImagesTarget = 'showOnMap';
-    _a.dataset.action = 'obs-form-images#showGeocodeonMap';
-    _a.dataset.observationImagesLatLngAltParam = JSON.stringify(latLngAlt)
-    _a.classList.add('ml-3');
-    _a.textContent = this.localized_text.show_on_map;
-
-    _html.classList.add("radio");
-    _html.appendChild(_label);
-    _html.appendChild(_a);
-
-    return _html;
-  }
 
   getLatLngEXIF(exifObject) {
     let lat = exifObject.GPSLatitude.description;
