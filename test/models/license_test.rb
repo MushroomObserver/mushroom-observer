@@ -43,11 +43,11 @@ class LicenseTest < UnitTestCase
   end
 
   def test_preferred
-    license = licenses(:ccnc25)
-    assert(license.preferred?)
+    preferred_license = License.preferred
+    assert(preferred_license.preferred?)
 
-    License.where.not(id: license.id).find_each do |lic|
-      assert_not(lic.preferred?)
+    License.where.not(id: preferred_license.id).find_each do |lic|
+      assert_not(lic.preferred?, "There should be only one preferred license.")
     end
   end
 

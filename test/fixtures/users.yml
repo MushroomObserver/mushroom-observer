@@ -27,7 +27,10 @@ DEFAULTS: &DEFAULTS
 rolf:
   <<: *DEFAULTS
   name: Rolf Singer
-  license: ccwiki30
+  # The default license for Users.
+  # It is hard-coded in the schema, and in licenses.yml.
+  # So `license: ccwiki30` will not work here.
+  license_id: <%= User.column_defaults["license_id"] %>
   image: rolf_profile_image
   image_size: <%= User.image_sizes[:medium] %>
   view_owner_id: true
