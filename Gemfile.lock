@@ -1,5 +1,5 @@
 GIT
-  remote: https://github.com/MushroomObserver/acts_as_versioned
+  remote: https://github.com/MushroomObserver/acts_as_versioned/
   revision: 56891f7f915610e9f884e3a932bfb6934303b3b8
   specs:
     mo_acts_as_versioned (0.6.6)
