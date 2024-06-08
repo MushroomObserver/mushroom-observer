@@ -112,7 +112,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
              project: projects(:eol_project)
            }
          })
-    assert_response 422
+    assert_equal(response.status, 422)
   end
 
   test "json should fail to create field_slip" do
@@ -126,7 +126,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
              project: projects(:eol_project)
            }
          })
-    assert_response 422
+    assert_equal(response.status, 422)
   end
 
   test "should show field_slip" do
@@ -153,8 +153,14 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_response :success
   end
 
+  test "admin should get edit" do
+    login("rolf")
+    get(:edit, params: { id: @field_slip.id })
+    assert_response :success
+  end
+
   test "should get not edit" do
-    login
+    login("dick")
     get(:edit, params: { id: @field_slip.id })
     assert_redirected_to field_slip_url(@field_slip)
   end
@@ -204,7 +210,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
                     field_slip: { code: "-3.14",
                                   observation_id: @field_slip.observation_id,
                                   project_id: @field_slip.project_id } })
-    assert_response 422
+    assert_equal(response.status, 422)
   end
 
   test "json should fail to update field_slip" do
@@ -215,7 +221,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
                     field_slip: { code: "-3.14",
                                   observation_id: @field_slip.observation_id,
                                   project_id: @field_slip.project_id } })
-    assert_response 422
+    assert_equal(response.status, 422)
   end
 
   test "should destroy field_slip" do
