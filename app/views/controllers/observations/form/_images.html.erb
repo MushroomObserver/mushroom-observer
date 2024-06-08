@@ -7,15 +7,12 @@ the hidden_field below with the same name, which takes precedence.
 I believe this is because in images_upload/_template.erb, the radio buttons
 do not yet have an image.id value, the image has not yet been uploaded.
 %>
-<%
-good_image_ids_str = @good_images.map { |img| img.id }.join(" ")
-%>
-
 <%= tag.div(class: "mb-5", id: "observation_images") do %>
 
   <%= tag.p { tag.strong("#{:IMAGES.t}:") } %>
 
-  <%= hidden_field_tag(:good_images, good_image_ids_str,
+  <%= hidden_field_tag(:good_images,
+                       @good_images.map { |img| img.id }.join(" "),
                        data: { obs_form_images_target: "goodImages" }) %>
 
   <%= f.hidden_field(:thumb_image_id,
