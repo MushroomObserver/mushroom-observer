@@ -120,7 +120,7 @@ class ImagePresenter < BasePresenter
     else
       # Constrain width to expected dimensions for img size (not layout)
       # NOTE: delete self.width if switching to full-width images everywhere
-      size = Image.all_sizes_index[args[:size]]
+      size = Image::ALL_SIZES_INDEX[args[:size]]
       container_width = img_width > img_height ? size : size / img_proportion
       self.width = container_width.to_f.truncate(0)
     end

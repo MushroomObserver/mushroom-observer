@@ -346,7 +346,9 @@ module Observations
       unless check_permission!(@object)
         return redirect_with_query(permanent_observation_path(@object.id))
       end
-      return unless (images = params[:selected])
+
+      images = params[:selected] || [{ params[:image_id] => "yes" }]
+      return unless images
 
       remove_images_from_object(images)
     end

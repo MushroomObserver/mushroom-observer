@@ -172,7 +172,7 @@
 #
 #    class SizeParser < EnumParser
 #      def initialize(api, key, args)
-#        args[:limit] = Image.all_sizes
+#        args[:limit] = Image::ALL_SIZES
 #        super
 #      end
 #    end
