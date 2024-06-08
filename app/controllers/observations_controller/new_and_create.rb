@@ -37,10 +37,7 @@ module ObservationsController::NewAndCreate
     # Clear search list. [Huh? -JPH 20120513]
     clear_query_in_session
 
-    @observation = Observation.new
-    @naming      = Naming.new
-    @vote        = Vote.new
-    @what        = "" # can't be nil else rails tries to call @name.name
+    init_observation
     @names       = nil
     @valid_names = nil
     @reasons     = @naming.init_reasons
@@ -57,6 +54,23 @@ module ObservationsController::NewAndCreate
   ##############################################################################
 
   private
+
+  def init_observation
+    @observation = Observation.new
+    @observation.notes = params[:notes].to_unsafe_h.symbolize_keys
+    @observation.place_name = params[:place_name]
+    init_naming_and_vote
+  end
+
+  def init_naming_and_vote
+    @naming      = Naming.new
+    @vote        = Vote.new
+    @what        = "" # can't be nil else rails tries to call @name.name
+    return unless params[:notes] && params[:notes][:Field_Slip_ID]
+
+    @what = params[:notes][:Field_Slip_ID].tr("_", "")
+    @vote.value = 3.0
+  end
 
   def defaults_from_last_observation_created
     # Grab defaults for date and location from last observation the user

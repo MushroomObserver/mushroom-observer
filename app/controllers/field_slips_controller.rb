@@ -54,8 +54,13 @@ class FieldSlipsController < ApplicationController
       if @field_slip.save
         format.html do
           if params[:commit] == :field_slip_create_obs.t
-            redirect_to(new_observation_url(field_code: @field_slip.code))
+            redirect_to(new_observation_url(
+                          field_code: @field_slip.code,
+                          place_name: params[:field_slip][:location],
+                          notes: field_slip_notes
+                        ))
           else
+            update_observation_fields(@field_slip.observation)
             redirect_to(field_slip_url(@field_slip),
                         notice: :field_slip_created.t)
           end
@@ -79,7 +84,8 @@ class FieldSlipsController < ApplicationController
           if params[:commit] == :field_slip_create_obs.t
             redirect_to(new_observation_url(
                           field_code: @field_slip.code,
-                          collector:, field_slip_id:, field_slip_id_by:
+                          place_name: params[:field_slip][:location],
+                          notes: field_slip_notes
                         ))
           else
             update_observation_fields(@field_slip.observation)
@@ -101,21 +107,27 @@ class FieldSlipsController < ApplicationController
     return unless observation
 
     observation.place_name = params[:field_slip][:location]
-    observation.notes[:Collector] = collector
-    observation.notes[:Field_Slip_ID] = field_slip_id
-    observation.notes[:Field_Slip_ID_By] = field_slip_id_by
-    observation.notes[:Other_Codes] = params[:field_slip][:other_codes]
-    update_notes_fields(observation)
+    observation.notes.merge!(field_slip_notes)
     observation.notes.compact_blank!
     observation.save!
   end
 
-  def update_notes_fields(observation)
-    notes = params[:field_slip][:notes]
-    return unless notes
+  def field_slip_notes
+    notes = {}
+    notes[:Collector] = collector
+    notes[:Field_Slip_ID] = field_slip_id
+    notes[:Field_Slip_ID_By] = field_slip_id_by
+    notes[:Other_Codes] = params[:field_slip][:other_codes]
+    update_notes_fields(notes)
+    notes
+  end
+
+  def update_notes_fields(notes)
+    new_notes = params[:field_slip][:notes]
+    return unless new_notes
 
     @field_slip.notes_fields.each do |field|
-      observation.notes[field.name] = notes[field.name]
+      notes[field.name] = new_notes[field.name]
     end
   end
 
