@@ -112,6 +112,8 @@ class FieldSlipsController < ApplicationController
 
   def update_notes_fields(observation)
     notes = params[:field_slip][:notes]
+    return unless notes
+
     @field_slip.notes_fields.each do |field|
       observation.notes[field.name] = notes[field.name]
     end
