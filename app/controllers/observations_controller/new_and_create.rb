@@ -37,7 +37,12 @@ module ObservationsController::NewAndCreate
     # Clear search list. [Huh? -JPH 20120513]
     clear_query_in_session
 
-    init_observation
+    @observation = Observation.new
+    if params[:notes]
+      @observation.notes = params[:notes].to_unsafe_h.symbolize_keys
+    end
+    @observation.place_name = params[:place_name]
+    init_naming_and_vote
     @names       = nil
     @valid_names = nil
     @reasons     = @naming.init_reasons
@@ -54,13 +59,6 @@ module ObservationsController::NewAndCreate
   ##############################################################################
 
   private
-
-  def init_observation
-    @observation = Observation.new
-    @observation.notes = params[:notes].to_unsafe_h.symbolize_keys
-    @observation.place_name = params[:place_name]
-    init_naming_and_vote
-  end
 
   def init_naming_and_vote
     @naming      = Naming.new
