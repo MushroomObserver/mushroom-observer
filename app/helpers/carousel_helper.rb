@@ -126,9 +126,11 @@ module CarouselHelper
 
   def carousel_transfer_exif_button
     js_button(
-      button: "Use this info",
       class: "use_exif_btn btn-sm ab-top-right",
       data: { action: "obs-form-images#transferExifToObs:prevent" }
-    )
+    ) do
+      [tag.span(:image_use_exif.l, class: "when-enabled"),
+       tag.span(:image_exif_copied.l, class: "when-disabled")].safe_join
+    end
   end
 end

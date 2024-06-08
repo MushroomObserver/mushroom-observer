@@ -575,8 +575,10 @@ export default class extends Controller {
   }
 
   // Transfers exif date and geocode directly from carousel item dataset to obs.
-  // Usable from button or itemTargetConnected callback.
+  // Pass an element to use from button or itemTargetConnected callback.
+  // Also disables the "transfer" button for this element
   transferExifToObsFields(element) {
+    this.disableThisButton('.use_exif_btn', element);
     const _exif_data = element.dataset;
 
     if (_exif_data.geocode && _exif_data.geocode !== "") {
@@ -590,6 +592,17 @@ export default class extends Controller {
       const _exifSimpleDate = JSON.parse(_exif_data.exif_date);
       this.observationDate(_exifSimpleDate);
     }
+  }
+
+  // Click callback for transfer, disabling this button but enabling others.
+  // Kind of like radio
+  disableThisButton(selector, element) {
+    // enable all the buttons
+    this.carouselTarget.querySelectorAll(selector).forEach((element) => {
+      element.removeAttribute('disabled');
+    });
+    // disable the button that was clicked, which may change the text
+    element.closest('.btn').setAttribute('disabled', 'disabled');
   }
 
   geocodesDiffer(first, second) {
