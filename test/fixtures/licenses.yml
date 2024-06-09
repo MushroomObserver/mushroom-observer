@@ -4,12 +4,6 @@
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 ccnc25:
-  # Do not autogenerate id
-  # This is the stand-in for the default license for Images.
-  # That id is defined and hard-coded in the schema, in the image table.
-  # So unless it's also hand-coded as a license fixture id, images are
-  # instantiated with the incorrect license.id.
-  id:  <%= Image.column_defaults["license_id"] %>
   display_name: Creative Commons Non-commercial v2.5
   url: https://creativecommons.org/licenses/by-nc-sa/2.5/
   deprecated: true
@@ -22,9 +16,9 @@ ccnc30:
 
 ccwiki30:
   # Do not autogenerate id
-  # This is the stand-in for the default license for Users.
-  # That id is defined and hard-coded in the schema, in the users table.
-  # So unless it's also hand-coded as a license fixture id, Users are
+  # This is the stand-in for the default license for Users and for Images.
+  # The id is defined and hard-coded in the schema, in the users table.
+  # So unless it's also hand-coded as a license fixture id, Users amd Images are
   # instantiated with the wrong preferred license.id.
   id: <%= User.column_defaults["license_id"] %>
   display_name: Creative Commons Wikipedia Compatible v3.0
