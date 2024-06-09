@@ -143,6 +143,14 @@
     .item {
       padding-bottom: 0;
     }
+
+    :not(:has(.item)) {
+      display: none;
+
+      .carousel-control-wrap {
+        display: none;
+      }
+    }
   }
 
   .image-position {
@@ -180,7 +188,11 @@
     }
   }
 
-  // .carousel-indicators {
+  .carousel-indicators {
+    :not(:has(.carousel-indicator)) {
+      display: none;
+    }
+  }
   //   position: absolute;
   //   bottom: 10px;
   //   left: 50%;

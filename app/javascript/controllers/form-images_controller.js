@@ -76,6 +76,10 @@ export default class extends Controller {
     this.set_bindings();
   }
 
+  carouselTargetConnected() {
+    this.sortCarousel();
+  }
+
   // Doing this rather than stimulus actions on the form element, because there
   // are so many, and this gives finer-grain control (e.g. dragenter, below)
   set_bindings() {
