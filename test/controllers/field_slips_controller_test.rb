@@ -252,8 +252,17 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_redirected_to field_slips_url
   end
 
-  test "should not destroy field_slip" do
+  test "admin should be able to destroy field_slip" do
     login
+    assert_difference("FieldSlip.count", -1) do
+      delete(:destroy, params: { id: @field_slip.id })
+    end
+
+    assert_redirected_to field_slips_url
+  end
+
+  test "should not destroy field_slip" do
+    login("dick")
     assert_difference("FieldSlip.count", 0) do
       delete(:destroy, params: { id: @field_slip.id })
     end
