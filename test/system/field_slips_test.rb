@@ -35,7 +35,7 @@ class FieldSlipsTest < ApplicationSystemTestCase
   test "should destroy field slip" do
     login!(mary)
     visit field_slip_url(@field_slip)
-    click_on :field_slip_destroy.t, match: :first
+    click_on :DESTROY.t, match: :first
 
     assert_text :field_slip_destroyed.t
   end
