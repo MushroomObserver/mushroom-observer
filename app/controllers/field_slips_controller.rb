@@ -140,7 +140,7 @@ class FieldSlipsController < ApplicationController
 
     id_str.tr!("_", "")
     names = Name.find_names(id_str)
-    return unless names.present?
+    return if names.blank?
 
     name = names[0]
     naming = @field_slip.observation.namings.find_by(name:)
