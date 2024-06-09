@@ -3,7 +3,8 @@
 <%# This may be rendered by Turbo, or by the edit action %>
 <%=
 active = index == 0 ? "active" : ""
-data = { form_images_target: "item", form_exif_target: "item" }
+data = { form_images_target: "item", form_exif_target: "item",
+         action: { "form-exif#processed@window->form-images#itemProcessed" } }
 if upload
   img_id ||= "img_id_missing"
   # upload means: image == nil, image_src == nil (src set by js)
@@ -14,8 +15,8 @@ if upload
 else
   img_id = image&.id
   handle = ""
-  data = data.merge(good_image: true)
   exif_data = image&.read_exif_geocode
+  data = data.merge(good_image: true, geocode: JSON.generate(exif_data))
   extra_classes = "carousel-image"
 end
 presenter_args = { size: :large, fit: :contain,

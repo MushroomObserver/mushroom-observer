@@ -47,15 +47,15 @@ export default class extends Controller {
     };
   }
 
-  // Now that we've read the data, populate exif data to the DOM element
+  // Now that we've read the data from the loaded file, populate carousel-item
   populateExifData(itemElement, exif_data) {
     itemElement.dataset.initialized = "true"
 
     this.populateExifGPS(itemElement, exif_data);
     this.populateExifDate(itemElement, exif_data);
 
-    // FIXME: emit an event that we can use to set the item as processed
-    // item.processed = true;
+    // emit an event that form-images listens for, to set the item as processed
+    this.dispatch("processed", { detail: { target: itemElement } });
 
     // If this is the first one, transfer the exif data to the obs fields
     // and set a flag so we don't do it again. Here because it's async.
@@ -116,7 +116,7 @@ export default class extends Controller {
   exifToImageDate(event) {
     const _itemElement = event.target.closest(".item"),
       _exifSimpleDate = JSON.parse(_itemElement.dataset.exif_date);
-
+    debugger
     this.imageDate(_itemElement, _exifSimpleDate);
   }
 

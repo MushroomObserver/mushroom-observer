@@ -111,10 +111,10 @@ module ObservationsHelper
   def observation_map_coordinates(obs:)
     if obs.location
       loc = obs.location
-      n = ((90.0 - loc.north) / 1.80).round(6)
-      s = ((90.0 - loc.south) / 1.80).round(6)
-      e = ((180.0 + loc.east) / 3.60).round(6)
-      w = ((180.0 + loc.west) / 3.60).round(6)
+      n = ((90.0 - loc.north) / 1.80).round(4)
+      s = ((90.0 - loc.south) / 1.80).round(4)
+      e = ((180.0 + loc.east) / 3.60).round(4)
+      w = ((180.0 + loc.west) / 3.60).round(4)
     end
 
     lat, long = if obs.lat && obs.lng
@@ -123,8 +123,8 @@ module ObservationsHelper
                   obs.location.center
                 end
     if lat && long
-      x = ((180.0 + long) / 3.60).round(6)
-      y = ((90.0 - lat) / 1.80).round(6)
+      x = ((180.0 + long) / 3.60).round(4)
+      y = ((90.0 - lat) / 1.80).round(4)
     end
 
     [n, s, e, w, lat, long, x, y]

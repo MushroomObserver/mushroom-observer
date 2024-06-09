@@ -528,6 +528,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   def init_image_from_local_file(file)
     @file = file
     raise("Weird: file.path is blank!") if file.path.blank?
+
     self.upload_temp_file = file.path
     self.upload_length    = file.size
     add_extra_attributes_from_file(file)
@@ -811,8 +812,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
     lat = lng = alt = date = img_file_size = nil
     data.each do |key, val|
-      lat = val if key.match?(/latitude/i)
-      lng = val if key.match?(/longitude/i)
+      lat = val.to_f.round(4) if key.match?(/latitude/i)
+      lng = val.to_f.round(4) if key.match?(/longitude/i)
       alt = val if key.match?(/altitude/i)
       date = val if key.match?(/date/i)
       img_file_size = val if key.match?(/size/i)

@@ -166,6 +166,12 @@ export default class extends Controller {
   /*********************/
   // Container for the image files.
 
+  // Callback for form-exif event "processed", fired from the carousel-item
+  itemProcessed(event) {
+    const _item = this.findFileStoreItem(event.target);
+    _item.processed = true;
+  }
+
   areAllItemsProcessed() {
     for (let i = 0; i < this.fileStore.items.length; i++) {
       if (!this.fileStore.items[i].processed)
