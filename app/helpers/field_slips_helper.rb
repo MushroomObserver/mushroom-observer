@@ -32,7 +32,8 @@ module FieldSlipsHelper
   end
 
   def show_field_slip_tab(field_slip)
-    [:field_slip_show.t, field_slip_path(field_slip), { class: tab_id(__method__.to_s) }]
+    [:field_slip_show.t, field_slip_path(field_slip),
+     { class: tab_id(__method__.to_s) }]
   end
 
   def edit_field_slip_tab(field_slip)
