@@ -42,8 +42,6 @@ end
   <%= "#{:form_observations_field_code.t} #{@field_code}" if @field_code %>
   <%= hidden_field_tag(:field_code, @field_code) %>
 
-  <%= submit_button(form: f, button: button_name, center: true) %>
-
   <% ########################### Image Forms ############################## %>
 
   <% if include_images %>

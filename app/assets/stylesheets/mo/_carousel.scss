@@ -110,6 +110,7 @@
   // height: 6vw;
   overflow-x: auto;
   white-space: nowrap;
+  line-height: 0;
 
   li {
     display: inline-block;
@@ -147,18 +148,21 @@
   .image-position {
     position: relative;
     padding-bottom: 100%;
+    border-bottom: 1px solid $panel-inner-border;
 
     @media screen and (min-width: 992px) {
       padding-bottom: 50%;
+      border-bottom: none;
+      border-right: 1px solid $panel-inner-border;
     }
   }
 
   .form-panel {
-    padding: 1rem;
+    padding: 1rem 1.5rem;
 
     @media screen and (min-width: 992px) {
-      padding-top: 1.5rem;
-      padding-left: 3rem;
+      padding-top: 4.5rem;
+      padding-right: 1.5rem;
     }
   }
 

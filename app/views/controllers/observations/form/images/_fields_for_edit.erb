@@ -1,7 +1,3 @@
-<%= tag.div(class: "form-group text-right") do
-  carousel_remove_image_button(image.id)
-end %>
-
 <%# good image fields partial section of create_observation form %>
 <%= fields_for(:good_image) do |fgi| %>
   <%= text_area_with_label(form: fgi, field: :notes, index: image.id,

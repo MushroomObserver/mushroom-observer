@@ -844,7 +844,7 @@
   permission_denied: Permission denied.
   removed_from_list: Removed observation from "[list]".
   removed_from_project: Removed [object] from "[project]".
-  select_file: Select file...
+  select_file: Select or drop files...
   no_file_selected: No file selected.
   SEE_MESSAGE_BELOW: See message below.
   "YES": "Yes"

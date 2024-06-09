@@ -26,11 +26,14 @@ item_attrs = { id: "carousel_item_#{img_id}",
 
 tag.div(**item_attrs) do
   tag.div(class: "row") do
+    concat(tag.div(class: "top-left p-4") do
+      carousel_set_thumb_img_button(image:, active:)
+    end)
+    concat(tag.div(class: "top-right p-4") do
+      carousel_remove_image_button(image&.id)
+    end)
     concat(tag.div(class: "image-position col-12 col-md-6") do
       concat(image_tag(presenter.img_src, presenter.options_lazy))
-      concat(tag.div(class: "ab-fab ml-4 mt-4") do
-        carousel_set_thumb_img_button(image:, active:)
-      end)
     end)
     concat(tag.div(class: "form-position col-12 col-md-6") do
       tag.div(class: "form-panel") do

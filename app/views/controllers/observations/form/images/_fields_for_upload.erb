@@ -2,10 +2,6 @@
 <%= carousel_upload_messages %>
 
 <%# Specificity of the thumb choice is coming from data attribute on item %>
-<%= tag.div(class: "form-group text-right") do
-  carousel_remove_image_button
-end %>
-
 <%= fields_for(:"#{img_id}_temp_image") do |fti| %>
 
   <%= text_area_with_label(form: fti, field: :notes, rows: 2,
