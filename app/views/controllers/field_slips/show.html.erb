@@ -1,17 +1,12 @@
-<% add_page_title("#{:FIELD_SLIP.t}: #{@field_slip.code}") %>
+<%
+  add_page_title("#{:FIELD_SLIP.t}: #{@field_slip.code}")
+  add_tab_set(field_slip_show_tabs(@field_slip))
+%>
 
 <% if notice %>
   <p class="alert alert-success"><%= notice %></p>
 <% end %>
 
 <%= render @field_slip %>
-
-<div>
-  <%= link_to :field_slip_index.t, field_slips_path %>
-  <% if @field_slip.can_edit? %>
-    | <%= link_to :field_slip_edit.t, edit_field_slip_path(@field_slip) %>
-    | <%= button_to :field_slip_destroy.t, @field_slip, method: :delete %>
-  <% end %>
-</div>
 
 <%= show_object_footer(@field_slip) %>

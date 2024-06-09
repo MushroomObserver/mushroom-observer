@@ -105,7 +105,7 @@ class FieldSlipsController < ApplicationController
 
   # DELETE /field_slips/1 or /field_slips/1.json
   def destroy
-    if @field_slip.user != User.current
+    unless @field_slip.can_edit?
       redirect_to(field_slip_url(id: @field_slip.id))
       return
     end

@@ -1,10 +1,6 @@
-<% add_page_title(:field_slip_editing.t) %>
+<%
+  add_page_title(:field_slip_editing.t)
+  add_tab_set(field_slip_edit_tabs(@field_slip))
+%>
 
 <%= render "form", field_slip: @field_slip %>
-
-<br>
-
-<div>
-  <%= link_to :field_slip_show.t, @field_slip %> |
-  <%= link_to :field_slip_index.t, field_slips_path %>
-</div>

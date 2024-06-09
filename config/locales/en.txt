@@ -2779,19 +2779,19 @@
   field_slip_creator: Creator
   field_slip_destroy: Destroy this field slip
   field_slip_destroyed: Field slip was successfully destroyed.
-  field_slip_edit: Edit this field slip
+  field_slip_edit: "Edit [:FIELD_SLIP]"
   field_slip_editing: Editing Field Slip
   field_slip_errors: prohibited this field_slip from being saved
-  field_slip_index: Back to field slips
+  field_slip_index: "[:FIELD_SLIP] Index"
   field_slip_job_no_project: "No Project with id=[ID]"
-  field_slip_keep_obs: Keep Current
-  field_slip_last_obs: Use Last Observation
+  field_slip_keep_obs: Save with Current Observation
+  field_slip_last_obs: Switch to Last Observation
   field_slip_new: Record Field Slip
   field_slip_no_observation: No Observation found
   field_slip_no_project: No Project found
   field_slip_nil_project: (No Project)
   field_slip_job_no_tracker: No Field Slip Tracker found
-  field_slip_show: Show this field slip
+  field_slip_show: "Show [:FIELD_SLIP]"
   field_slip_updated: Field slip was successfully updated.
   field_slip_welcome: "Welcome to the [TITLE] Project!"
   field_slips_max_for_project: "You may create up to [MAX] slips for this project."
