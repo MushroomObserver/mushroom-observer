@@ -118,3 +118,14 @@ a.filter-only {
     font-weight: normal;
   }
 }
+
+form {
+  .carousel-heading {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+
+    .panel-title {
+      padding-bottom: 1.5rem;
+    }
+  }
+}

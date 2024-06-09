@@ -9,7 +9,7 @@ do not yet have an image.id value, the image has not yet been uploaded.
 %>
 <%= tag.div(class: "mb-5", id: "observation_images") do %>
 
-  <%= tag.p { tag.strong("#{:IMAGES.t}:") } %>
+  <%# tag.p { tag.strong("#{:IMAGES.t}:") } %>
 
   <%= hidden_field_tag(:good_images,
                        @good_images.map { |img| img.id }.join(" "),
@@ -18,7 +18,7 @@ do not yet have an image.id value, the image has not yet been uploaded.
   <%= f.hidden_field(:thumb_image_id,
                      data: { obs_form_images_target: "thumbImageId" }) %>
 
-  <%= tag.div(class: "form-group") do %>
+  <% links = capture do %>
     <label class="btn btn-default file-field">
       <input type="file" multiple id="select_images_button"
              data-action="change->obs-form-images#addSelectedFiles"
@@ -27,9 +27,10 @@ do not yet have an image.id value, the image has not yet been uploaded.
     </label>
   <% end %><!--.col-->
 
-  <%= tag.div(class: "images_container") do
-    render(partial: "observations/form/images/carousel",
-            locals: { f: f, images: @good_images })
+  <%= tag.div(class: "images_container panel panel-default") do
+    concat(carousel_heading(:IMAGES.l, links))
+    concat(render(partial: "observations/form/images/carousel",
+                  locals: { f: f, images: @good_images }))
   end %>
 
 <% end %><!--#observation_images-->

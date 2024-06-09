@@ -9,7 +9,6 @@
 images ||= nil #
 html_id = "observation_upload_images_carousel"
 
-# concat(carousel_heading(title, links)) if thumbnails
 # printing the carousel even if empty
 tag.div(class: "carousel slide edit-carousel", id: html_id,
         data: { ride: "false", interval: "false",
@@ -24,7 +23,8 @@ tag.div(class: "carousel slide edit-carousel", id: html_id,
       carousel_controls(html_id)
     end)
   end)
-  concat(tag.ol(class: "carousel-indicators", id: "added_thumbnails") do
+  concat(tag.ol(class: "carousel-indicators panel-footer py-2 px-0 mb-0",
+                id: "added_thumbnails") do
     images&.each_with_index do |image, index|
       concat(render(partial: "shared/carousel_thumbnail",
                     locals: { image:, index:, html_id: }))
