@@ -73,24 +73,24 @@ module CarouselHelper
       f.label(
         :thumb_image_id,
         class: label_classes,
-        data: { obs_form_images_target: "obsThumbImgBtn",
-                action: "click->obs-form-images#setObsThumbnail" }
+        data: { form_images_target: "obsThumbImgBtn",
+                action: "click->form-images#setObsThumbnail" }
       ) do
         [
           f.radio_button(
             :thumb_image_id, value,
             class: "mr-3",
-            data: { obs_form_images_target: "thumbImgRadio" }
+            data: { form_images_target: "thumbImgRadio" }
           ),
           tag.span(
             :image_set_default.l,
             class: "set_thumb_img_text",
-            data: { obs_form_images_target: "setThumbImg" }
+            data: { form_images_target: "setThumbImg" }
           ),
           tag.span(
             :image_add_default.l,
             class: "is_thumb_img_text",
-            data: { obs_form_images_target: "isThumbImg" }
+            data: { form_images_target: "isThumbImg" }
           )
         ].safe_join
       end
@@ -99,8 +99,8 @@ module CarouselHelper
 
   def carousel_remove_image_button(image_id = nil)
     action = image_id ? "removeAttachedItem" : "removeClickedItem"
-    data = { obs_form_images_target: "removeImg",
-             action: "obs-form-images##{action}:prevent" }
+    data = { form_images_target: "removeImg",
+             action: "form-images##{action}:prevent" }
     data[:image_id] = image_id if image_id
 
     js_button(
@@ -127,7 +127,7 @@ module CarouselHelper
   def carousel_exif_to_image_date_button(img_date = nil)
     link_to(
       "#",
-      data: { action: "obs-form-images#exifToImageDate:prevent" }
+      data: { action: "form-exif#exifToImageDate:prevent" }
     ) do
       tag.span(img_date, class: "exif_date")
     end
@@ -136,7 +136,7 @@ module CarouselHelper
   def carousel_transfer_exif_button
     js_button(
       class: "use_exif_btn btn-sm ab-top-right",
-      data: { action: "obs-form-images#transferExifToObs:prevent" }
+      data: { action: "form-exif#transferExifToObs:prevent" }
     ) do
       [tag.span(:image_use_exif.l, class: "when-enabled"),
        tag.span(:image_exif_copied.l, class: "when-disabled")].safe_join

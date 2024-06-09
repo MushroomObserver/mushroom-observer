@@ -13,15 +13,15 @@ do not yet have an image.id value, the image has not yet been uploaded.
 
   <%= hidden_field_tag(:good_images,
                        @good_images.map { |img| img.id }.join(" "),
-                       data: { obs_form_images_target: "goodImages" }) %>
+                       data: { form_images_target: "goodImages" }) %>
 
   <%= f.hidden_field(:thumb_image_id,
-                     data: { obs_form_images_target: "thumbImageId" }) %>
+                     data: { form_images_target: "thumbImageId" }) %>
 
   <% links = capture do %>
     <label class="btn btn-default file-field">
       <input type="file" multiple id="select_images_button"
-             data-action="change->obs-form-images#addSelectedFiles"
+             data-action="change->form-images#addSelectedFiles"
              accept="image/*"/>
       <%= :select_file.t %>
     </label>

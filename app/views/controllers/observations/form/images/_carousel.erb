@@ -12,7 +12,8 @@ html_id = "observation_upload_images_carousel"
 # printing the carousel even if empty
 tag.div(class: "carousel slide edit-carousel", id: html_id,
         data: { ride: "false", interval: "false",
-                obs_form_images_target: "carousel" }) do
+                form_images_target: "carousel",
+                form_exif_target: "carousel" }) do
   concat(tag.div(class: "carousel-inner bg-light", role: "listbox",
                  id: "added_images" ) do
     images&.each_with_index do |image, index|

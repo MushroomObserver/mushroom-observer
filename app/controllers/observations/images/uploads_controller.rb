@@ -11,7 +11,7 @@ module Observations::Images
     # the create obs form, where the user can reconcile dates and locations
     # with the obs.
     # This action returns formatted HTML (upload image template) for one image
-    # to the Stimulus obs-form-images_controller. This is added to the page
+    # to the Stimulus form-images_controller. This is added to the page
     # when uploading multiple images on create observation.
     # was multi_image_template
     def new

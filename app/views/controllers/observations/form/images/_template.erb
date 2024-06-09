@@ -19,13 +19,13 @@
       <div class="form-group mb-2">
         <button type="button"
            class="set_thumb_image btn btn-sm btn-default"
-           data-obs-form-images-target="setThumbImg"
-           data-action="obs-form-images#setObsThumbnail:prevent"><%= :image_set_default.t %></button>
+           data-form-images-target="setThumbImg"
+           data-action="form-images#setObsThumbnail:prevent"><%= :image_set_default.t %></button>
         <label class="hidden is_thumb_image"
-               data-obs-form-images-target="isThumbImg"><%= :image_add_default.t %></label>
+               data-form-images-target="isThumbImg"><%= :image_add_default.t %></label>
         <input type="radio" name="observation[thumb_image_id]" value="true"
-               data-obs-form-images-target="thumbImgRadio"
-               data-action="click->obs-form-images#setHiddenThumbField"
+               data-form-images-target="thumbImgRadio"
+               data-action="click->form-images#setHiddenThumbField"
                style="display: none;" >
       </div>
 
@@ -45,7 +45,7 @@
       <div class="text-right mb-2">
         <button type="button"
                 class="remove_image_link btn btn-sm btn-default fade in"
-                data-obs-form-images-target="removeImg"><%= :image_remove_remove.t %></a>
+                data-form-images-target="removeImg"><%= :image_remove_remove.t %></a>
       </div>
 
       <%= fields_for(:"#{img_id}_temp_image") do |fti| %>

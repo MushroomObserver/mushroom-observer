@@ -1,6 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
 import { get, post, put } from '@rails/request.js'
-import ExifReader from 'exifreader';
 
 // When the user selects images, our JS loads them into browser memory. Note
 // that this takes a couple seconds, but it is NOT the upload step, even though
@@ -49,7 +48,7 @@ const internalConfig = {
 
 // This controller needs to be on the whole form, to enable the large drop area.
 // (formerly "observation_images" section of the form)
-// Connects to data-controller="obs-form-images"
+// Connects to data-controller="form-images"
 export default class extends Controller {
   static targets = ["form", "carousel", "item", "thumbnail", "removeImg",
     "imageGpsMap", "goodImages", "thumbImageId", "setThumbImg", "isThumbImg",
@@ -196,24 +195,6 @@ export default class extends Controller {
     }
   }
 
-  getDistinctImageDates() {
-    let _testAgainst = "";
-    const _distinct = [];
-
-    for (let i = 0; i < this.fileStore.items.length; i++) {
-      const _ds =
-        this.simpleDateAsString(this.imageDate(this.fileStore.items[i]));
-
-      if (_testAgainst.indexOf(_ds) != -1)
-        continue;
-
-      _testAgainst += _ds;
-      _distinct.push(this.imageDate(this.fileStore.items[i]))
-    }
-
-    return _distinct;
-  }
-
   // remove all the images as they were uploaded. unused
   removeAll() {
     // or maybe bump the item from the fileStore.items? indexOf and splice
@@ -321,40 +302,25 @@ export default class extends Controller {
   // Stimulus "target callback" on carousel item added.
   // When Turbo prepends the carousel item to the page, we need to
   // - re-sort the carousel
-  // - populate the fileStore item with exifData
-  // - populate the form with a few details about the file
   // - read the file with FileReader to display the image
   itemTargetConnected(itemElement) {
     // console.log("itemTargetConnected")
     // console.log(itemElement);
     if (itemElement.hasAttribute('data-good-image')) return;
 
-    // this.addCarouselIndicator();
     this.sortCarousel();
-
     // Attach a reference to the dom element to the item object so we can
     // populate the item object as well as the element
     const item = this.findFileStoreItem(itemElement);
     item.dom_element = itemElement;
-    item.dom_element.dataset.geocode = "";
 
     if (item.file_size > this.max_image_size)
-      item.dom_element.querySelector('.warn-text').innerText =
+      itemElement.querySelector('.warn-text').innerText =
         this.localized_text.image_too_big_text;
 
-    // extract the EXIF data (async) and populate the item and element
-    this.getExifData(item);
     // uses FileReader to load image as base64 async and set the img src
     this.setImgSrc(item, itemElement);
   }
-
-  // Stimulus "target callback" on carousel item removed:
-  // Remove the last indicator - they're only matched to items by index
-  // Can't bind to targetDisconnected because there are two targets to remove.
-  // itemTargetDisconnected(itemElement) {
-  //   // this.removeCarouselIndicator();
-  //   this.sortCarousel();
-  // }
 
   thumbnailTargetConnected(thumbElement) {
     if (thumbElement.hasAttribute('data-good-image')) return;
@@ -364,38 +330,6 @@ export default class extends Controller {
     item.thumbnail_element = thumbElement;
     this.setImgSrc(item, thumbElement);
   }
-
-  // Add an indicator for the most recent element.
-  // addCarouselIndicator() {
-  //   const _html_id = this.carouselTarget.getAttribute('id'),
-  //     _indicontrols = this.carouselTarget.querySelector('.carousel-indicators'),
-  //     _indicators = this.carouselTarget.querySelectorAll('.carousel-indicator'),
-  //     _new_indicator = document.createElement("li");
-
-  //   _new_indicator.setAttribute('data-target', '#' + _html_id);
-  //   _new_indicator.setAttribute('data-slide-to', 0);
-  //   _new_indicator.classList.add('carousel-indicator');
-  //   _new_indicator.classList.add('active');
-
-  //   // Scoot the indicators over by one
-  //   if (_indicators.length > 0) {
-  //     _indicators.forEach((indicator) => {
-  //       const _ref = Number(indicator.dataset.slideTo);
-  //       indicator.setAttribute('data-slide-to', _ref + 1);
-  //     });
-  //   }
-  //   _indicontrols.prepend(_new_indicator);
-  // }
-
-  // removeCarouselIndicator() {
-  //   const _indicators =
-  //     this.carouselTarget.querySelectorAll('.carousel-indicator'),
-  //     _count = _indicators.length;
-
-  //   // _count >= 1 should be the case, but just in case they're not in sync:
-  //   // Remove the last indicator.
-  //   if (_count >= 1) { _indicators[_count - 1].remove(); }
-  // }
 
   // Adjust the carousel controls and indicators for the new/removed item.
   // Can't bind to targetDisconnected because there are two targets to remove.
@@ -492,170 +426,6 @@ export default class extends Controller {
           alert("Couldn't read image from: " + item.url);
           this.removeItem(item);
         };
-    }
-  }
-
-  // maybe stimulus action on image?
-  // extracts the exif data async;
-  getExifData(item) {
-    const _image = item.dom_element.querySelector('.carousel-image');
-
-    _image.onload = async () => {
-      item.exif_data = await ExifReader.load(_image.src);
-      this.applyExifData(item);
-    };
-  }
-
-  // applies exif data to the DOM element, must already be attached
-  applyExifData(item) {
-    const _exif = item.exif_data;
-
-    if (item.dom_element == null) {
-      console.warn("Error: DOM element for this file has not been created, so cannot update it with exif data!");
-      return;
-    }
-
-    item.dom_element.dataset.initialized = "true"
-
-    this.applyExifGPS(item, _exif);
-    this.applyExifDate(item, _exif);
-
-    item.processed = true;
-
-    // If this is the first one, transfer the exif data to the obs fields
-    // and set a flag so we don't do it again. Here because it's async.
-    if (this.element.dataset?.exifUsed !== "true" &&
-      item.dom_element.dataset?.geocode !== "") {
-      this.transferExifToObsFields(item.dom_element);
-      this.element.dataset.exifUsed = "true";
-    }
-  }
-
-  applyExifGPS(item, _exif) {
-    const _exif_lat = item.dom_element.querySelector(".exif_lat"),
-      _exif_lng = item.dom_element.querySelector(".exif_lng"),
-      _exif_alt = item.dom_element.querySelector(".exif_alt");
-
-    // Geocode Logic
-    // check if there is geodata on the image
-    if (_exif.GPSLatitude && _exif.GPSLongitude) {
-      const latLngAlt = this.getLatLngEXIF(_exif);
-
-      // Set item's data-geocode attribute so we can have a record
-      item.dom_element.dataset.geocode = JSON.stringify(latLngAlt);
-
-      _exif_lat.innerText = latLngAlt.lat.toFixed(5);
-      _exif_lng.innerText = latLngAlt.lng.toFixed(5);
-      _exif_alt.innerText = latLngAlt.alt;
-    }
-  }
-
-  applyExifDate(item, _exif) {
-    const _exif_date = item.dom_element.querySelector(".exif_date");
-    _exif_date.dataset.found = 'false';
-
-    // Image Date Logic
-    if (_exif.DateTimeOriginal) {
-      // we found the date taken, let's parse it down.
-      // returns an array of [YYYY,MM,DD]
-      const _date_taken_array =
-        _exif.DateTimeOriginal.description.substring(' ', 10).
-          split(':').reverse(),
-        _exifSimpleDate = this.SimpleDate(..._date_taken_array);
-
-      this.imageDate(item, _exifSimpleDate);
-
-      // shows the exif date by the photo
-      item.dom_element.dataset.exif_date = JSON.stringify(_exifSimpleDate);
-      _exif_date.innerText = this.simpleDateAsString(_exifSimpleDate);
-      _exif_date.dataset.found = "true";
-    }
-    // no date was found in EXIF data
-    else {
-      // Use observation date
-      this.imageDate(item, this.observationDate());
-    }
-  }
-
-  // Click callback so .exif_date will set the image date if clicked
-  exifToImageDate(event) {
-    const _item = this.findFileStoreItem(event.target),
-      _exifSimpleDate = JSON.parse(_item.dom_element.dataset.exif_date);
-
-    this.imageDate(_item, _exifSimpleDate);
-  }
-
-  // Click callback for button.
-  transferExifToObs(event) {
-    const _itemElement = event.target.closest('.item');
-
-    this.transferExifToObsFields(_itemElement);
-  }
-
-  // Transfers exif date and geocode directly from carousel item dataset to obs.
-  // Pass an element to use from button or itemTargetConnected callback.
-  // Also disables the "transfer" button for this element
-  transferExifToObsFields(element) {
-    this.selectExifButton('.use_exif_btn', element);
-    const _exif_data = element.dataset,
-      _obs_lat = document.getElementById('observation_lat'),
-      _obs_lng = document.getElementById('observation_lng'),
-      _obs_alt = document.getElementById('observation_alt'),
-      _event = new Event('change');
-
-    if (_exif_data.geocode && _exif_data.geocode !== "") {
-      const latLngAlt = JSON.parse(_exif_data.geocode);
-
-      _obs_lat.value = latLngAlt.lat;
-      _obs_lng.value = latLngAlt.lng;
-      _obs_alt.value = latLngAlt.alt;
-      _obs_lat.dispatchEvent(_event); // triggers change to update the map
-    }
-    if (_exif_data.exif_date) {
-      const _exifSimpleDate = JSON.parse(_exif_data.exif_date);
-      this.observationDate(_exifSimpleDate);
-    }
-  }
-
-  // Click callback for transfer, disabling this button but enabling others.
-  // Kind of like radio
-  selectExifButton(selector, element) {
-    // enable all the buttons
-    this.carouselTarget.querySelectorAll(selector).forEach((element) => {
-      element.removeAttribute('disabled');
-    });
-    // disable the button that was clicked, which may change the text
-    element.closest('.btn').setAttribute('disabled', 'disabled');
-  }
-
-  geocodesDiffer(first, second) {
-    return Math.abs(first.lat - second.lat) >= 0.0002
-      || Math.abs(first.lng - second.lng) >= 0.0002;
-  }
-
-  // gets or sets image date
-  imageDate(item, simpleDate) {
-    const _img_day_select = item.dom_element.querySelector('[id$="_when_3i"]'),
-      _img_month_select = item.dom_element.querySelector('[id$="_when_2i"]'),
-      _img_year_field = item.dom_element.querySelector('[id$="_when_1i"]');
-
-    // set it if we've got a date
-    if (simpleDate) {
-      _img_day_select.value = simpleDate.day;
-      _img_month_select.value = simpleDate.month;
-      _img_year_field.value = simpleDate.year;
-
-      // Make these easier to find with Capybara by explicitly setting the HTML
-      _img_day_select.options[_img_day_select.options.selectedIndex]
-        .setAttribute('selected', 'true');
-      _img_month_select.options[_img_month_select.options.selectedIndex]
-        .setAttribute('selected', 'true');
-
-      return simpleDate;
-    } else {
-      return this.SimpleDate(
-        _img_day_select.value, _img_month_select.value, _img_year_field.value
-      )
     }
   }
 
@@ -760,77 +530,6 @@ export default class extends Controller {
   }
 
   /*********************/
-  /*    DateUpdater    */
-  /*********************/
-  // Deals with synchronizing image and observation dates through
-  // a message box presenting radio buttons. Pick image date or obs date.
-
-  // will check differences between the image dates and observation dates
-  areDatesInconsistent() {
-    const _obsDate = this.observationDate(),
-      _distinctDates = this.getDistinctImageDates();
-
-    for (let i = 0; i < _distinctDates.length; i++) {
-      if (!this.simpleDatesAreEqual(_distinctDates[i], _obsDate))
-        return true;
-    }
-    return false;
-  }
-
-  // gets or sets current obs date, simpledate object updates date
-  observationDate(simpleDate) {
-    // These aren't targets because they are created on the fly by Rails
-    // date_select, and because our year-input_controller may fire after
-    // this connects, making obs_year (the select) an obsolete element.
-    if (!this.obs_day || !this.obs_month || !this.obs_year) {
-      this.obs_day = document.getElementById('observation_when_3i');
-      this.obs_month = document.getElementById('observation_when_2i');
-      this.obs_year = document.getElementById('observation_when_1i');
-    }
-
-    // set the obs date, if passed a simpleDate
-    if (simpleDate && simpleDate.day && simpleDate.month &&
-      simpleDate.year) {
-      this.obs_day.value = simpleDate.day;
-      this.obs_month.value = simpleDate.month;
-      this.obs_year.value = simpleDate.year;
-
-      // Make these easier to find with Capybara by explicitly setting the HTML
-      this.obs_day.options[this.obs_day.options.selectedIndex]
-        .setAttribute('selected', 'true');
-      this.obs_month.options[this.obs_month.options.selectedIndex]
-        .setAttribute('selected', 'true');
-
-      return simpleDate;
-    } else {
-      // or get it. Have to check these values first, cannot send to function
-      const day = this.obs_day?.value
-      const month = this.obs_month?.value
-      const year = this.obs_year?.value
-      return this.SimpleDate(day, month, year)
-    }
-  }
-
-  /**********************/
-  /* Simple Date Object */
-  /**********************/
-
-  SimpleDate(day, month, year) {
-    return {
-      day: parseInt(day),
-      month: parseInt(month),
-      year: parseInt(year),
-    }
-  }
-
-  // returns true if same
-  simpleDatesAreEqual(simpleDate1, simpleDate2) {
-    return simpleDate1.day == simpleDate2.day
-      && simpleDate1.month == simpleDate2.month
-      && simpleDate1.year == simpleDate2.year;
-  }
-
-  /*********************/
   /*      Helpers      */
   /*********************/
 
@@ -853,49 +552,6 @@ export default class extends Controller {
     return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
       const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
       return v.toString(16);
-    });
-  }
-
-  simpleDateAsString(simpleDate) {
-    const _months = this.localized_text.months.split(' ');
-
-    return simpleDate.day + "-"
-      + _months[simpleDate.month - 1]
-      + "-" + simpleDate.year;
-  }
-
-  /** Geocode Helpers **/
-
-  getLatLngEXIF(exifObject) {
-    let lat = exifObject.GPSLatitude.description;
-    let lng = exifObject.GPSLongitude.description;
-
-    const alt = exifObject.GPSAltitude ? (exifObject.GPSAltitude.value[0]
-      / exifObject.GPSAltitude.value[1]).toFixed(0) + " m" : "";
-
-    // make sure you don't end up on the wrong side of the world
-    lng = exifObject.GPSLongitudeRef.value[0] == "W" ? lng * -1 : lng;
-    lat = exifObject.GPSLatitudeRef.value[0] == "S" ? lat * -1 : lat;
-
-    return { lat, lng, alt };
-  }
-
-  // Create a map object and specify the DOM element for display.
-  showGeocodeonMap({ params: { latLngAlt } }) {
-    const _latLng = { lat: latLngAlt.lat, lng: latLngAlt.lng },
-      _map_container = document.getElementById('geocode_map');
-
-    _map_container.setAttribute('height', '250');
-
-    // Issue: there should not be two google maps on the page.
-    const _map = new google.maps.Map(_map_container, {
-      center: _latLng,
-      zoom: 12
-    });
-
-    new google.maps.Marker({
-      map: _map,
-      position: _latLng
     });
   }
 }

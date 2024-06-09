@@ -3,7 +3,7 @@
 <%# This may be rendered by Turbo, or by the edit action %>
 <%=
 active = index == 0 ? "active" : ""
-data = { obs_form_images_target: "item" }
+data = { form_images_target: "item", form_exif_target: "item" }
 if upload
   img_id ||= "img_id_missing"
   # upload means: image == nil, image_src == nil (src set by js)
