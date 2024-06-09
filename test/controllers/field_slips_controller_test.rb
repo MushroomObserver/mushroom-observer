@@ -180,17 +180,21 @@ class FieldSlipsControllerTest < FunctionalTestCase
 
   test "should update field_slip with new name" do
     login
+    user = users(:rolf)
     initial = @field_slip.observation_id
     patch(:update,
           params: { id: @field_slip.id,
                     commit: :field_slip_keep_obs.t,
-                    field_slip: { code: @field_slip.code,
-                                  observation_id: @field_slip.observation_id,
-                                  field_slip_id: "Amanita velosa",
-                                  field_slip_id_by: "rolf <Rolf Singer>",
-                                  project_id: @field_slip.project_id } })
+                    field_slip: {
+                      code: @field_slip.code,
+                      observation_id: @field_slip.observation_id,
+                      field_slip_id: names(:coprinus_comatus).text_name,
+                      field_slip_id_by: "#{user.login} <#{user.name}>",
+                      project_id: @field_slip.project_id
+                    } })
     assert_redirected_to field_slip_url(@field_slip)
     assert_equal(@field_slip.observation_id, initial)
+    assert_equal(@field_slip.observation.name, names(:coprinus_comatus))
   end
 
   test "should update field_slip with last viewed obs" do
