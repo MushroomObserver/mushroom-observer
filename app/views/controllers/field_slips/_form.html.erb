@@ -56,10 +56,11 @@
                              button: :field_slip_keep_obs.t }) %>
       </div>
     <% end %>
-    <% if previous_observation(field_slip.observation) %>
+    <% obs = previous_observation(field_slip.observation)
+       if obs %>
       <div class="col-sm-6">
         <%= render(partial: "field_slips/obs_thumbnail",
-                   locals: { obs: last_observation, form: form,
+                   locals: { obs:, form:,
                              button: :field_slip_last_obs.t }) %>
       </div>
     <% end %>
