@@ -18,17 +18,22 @@ do not yet have an image.id value, the image has not yet been uploaded.
   <%= f.hidden_field(:thumb_image_id,
                      data: { form_images_target: "thumbImageId" }) %>
 
-  <% links = capture do %>
-    <label class="btn btn-default file-field">
-      <input type="file" multiple id="select_images_button"
-             data-action="change->form-images#addSelectedFiles"
-             accept="image/*"/>
-      <%= :select_file.t %>
-    </label>
-  <% end %><!--.col-->
-
   <%= tag.div(class: "images_container panel panel-default") do
-    concat(carousel_heading(:IMAGES.l, links))
+    concat(tag.div(class: "panel-heading carousel-heading") do
+      concat(tag.h4(:IMAGES.l, class: "panel-title"))
+      concat(
+        label_tag("select_images_button",
+                  class: "btn btn-default file-field") do
+          concat(:select_file.t)
+          concat(
+            file_field_tag(
+              :select_images_button, multiple: true, accept: "image/*",
+              data: { action: "change->form-images#addSelectedFiles" }
+            )
+          )
+        end
+      )
+    end)
     concat(render(partial: "observations/form/images/carousel",
                   locals: { f: f, images: @good_images }))
   end %>
