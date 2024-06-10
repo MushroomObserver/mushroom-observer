@@ -43,7 +43,7 @@
   <%= autocompleter_field(form: form, field: :field_slip_id_by,
                           label: :ID_BY.t + ":", autocomplete: :user) %>
   <%= text_field_with_label(form: form, field: :other_codes,
-                            label: :field_slip_other_codes.t + ":") %>
+                            label: "#{:field_slip_other_codes.t} (#{:field_slip_other_example.t}):") %>
 
   <%= submit_button(form: form, button: :field_slip_create_obs.t,
                     class: "mt-5") if action == "new" %>
