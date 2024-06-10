@@ -4,6 +4,8 @@
 module LightboxHelper
   # this link needs to contain all the data for the lightbox image
   def lightbox_link(lightbox_data)
+    return unless lightbox_data
+
     icon = tag.i("", class: "glyphicon glyphicon-fullscreen")
     caption = lightbox_caption_html(lightbox_data)
 
@@ -14,6 +16,8 @@ module LightboxHelper
 
   # everything in the caption
   def lightbox_caption_html(lightbox_data)
+    return unless lightbox_data
+
     obs = lightbox_data[:obs]
     html = []
     if obs.is_a?(Observation)
