@@ -121,7 +121,7 @@ module ObservationsController::EditAndUpdate
 
   # As of 2024-06-01, users can remove images right on the edit obs form.
   def detach_removed_images
-    new_ids = params[:good_images].split
+    new_ids = params[:good_images]&.split || []
 
     # If it didn't make the cut, remove it.
     @observation.images.each do |img|
