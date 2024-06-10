@@ -1,15 +1,15 @@
 <%# Images section of create_observation form
-Gotcha: thumb_image_id
+Gotcha: observation[thumb_image_id] is set by JS, not by radio buttons.
 Although there can be radio buttons for selecting observation[thumb_image_id]
 in both the good_images and the images_upload partials, they currently *do
 not* set the observation thumb_image_id: their value is transferred by JS to
 the hidden_field below with the same name, which takes precedence.
 I believe this is because in images_upload/_template.erb, the radio buttons
-do not yet have an image.id value, the image has not yet been uploaded.
-%>
-<%= tag.div(class: "mb-5", id: "observation_images") do %>
+do not yet have an image.id value - the image has not yet been uploaded.
+Also, note that `good_images` is currently not a field under observation,
+i.e. observation[good_images]. It's a top-level field. --%>
 
-  <%# tag.p { tag.strong("#{:IMAGES.t}:") } %>
+<%= tag.div(class: "mb-5", id: "observation_images") do %>
 
   <%= hidden_field_tag(:good_images,
                        @good_images.map { |img| img.id }.join(" "),
@@ -19,23 +19,26 @@ do not yet have an image.id value, the image has not yet been uploaded.
                      data: { form_images_target: "thumbImageId" }) %>
 
   <%= tag.div(class: "images_container panel panel-default") do
-    concat(tag.div(class: "panel-heading carousel-heading") do
-      concat(tag.h4(:IMAGES.l, class: "panel-title"))
-      concat(
-        label_tag("select_images_button",
-                  class: "btn btn-default file-field") do
-          concat(:select_file.t)
-          concat(
-            file_field_tag(
-              :select_images_button, multiple: true, accept: "image/*",
-              data: { action: "change->form-images#addSelectedFiles" }
-            )
-          )
-        end
-      )
-    end)
-    concat(render(partial: "observations/form/images/carousel",
-                  locals: { f: f, images: @good_images }))
+    [
+      tag.div(class: "panel-heading carousel-heading") do
+        [
+          tag.h4(:IMAGES.l, class: "panel-title"),
+          label_tag("select_images_button",
+                    class: "btn btn-default file-field") do
+            [
+              :select_file.t,
+              file_field_tag(
+                :select_images_button,
+                multiple: true, accept: "image/*",
+                data: { action: "change->form-images#addSelectedFiles" }
+              )
+            ].safe_join
+          end
+        ].safe_join
+      end,
+      render(partial: "observations/form/images/carousel",
+             locals: { f: f, images: @good_images })
+    ].safe_join
   end %>
 
 <% end %><!--#observation_images-->
