@@ -3004,8 +3004,9 @@ class ObservationsControllerTest < FunctionalTestCase
       :update,
       params: {
         id: @obs2.id,
-        observation: { place_name: "blah blah blah" },  # (ensures it will fail)
-        project: { "id_#{@proj1.id}" => "1" }
+        observation: { place_name: "blah blah blah" }, # (ensures it will fail)
+        project: { "id_#{@proj1.id}" => "1" },
+        good_images: @obs2_img_ids.join(" ") # necessary?
       }
     )
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
@@ -3013,7 +3014,8 @@ class ObservationsControllerTest < FunctionalTestCase
       :update,
       params: {
         id: @obs2.id,
-        project: { "id_#{@proj1.id}" => "1" }
+        project: { "id_#{@proj1.id}" => "1" },
+        good_images: @obs2_img_ids.join(" ") # necessary?
       }
     )
     assert_response(:redirect)
@@ -3029,11 +3031,12 @@ class ObservationsControllerTest < FunctionalTestCase
       :update,
       params: {
         id: @obs1.id,
-        observation: { place_name: "blah blah blah" },  # (ensures it will fail)
+        observation: { place_name: "blah blah blah" }, # (ensures it will fail)
         project: {
           "id_#{@proj1.id}" => "1",
           "id_#{@proj2.id}" => "0"
-        }
+        },
+        good_images: @obs1_img_ids.join(" ")
       }
     )
     assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
@@ -3044,7 +3047,8 @@ class ObservationsControllerTest < FunctionalTestCase
         project: {
           "id_#{@proj1.id}" => "1",
           "id_#{@proj2.id}" => "1"
-        }
+        },
+        good_images: @obs1_img_ids.join(" ")
       }
     )
     assert_response(:redirect)
@@ -3064,8 +3068,12 @@ class ObservationsControllerTest < FunctionalTestCase
     @proj2 = projects(:bolete_project)
     @obs1 = observations(:detailed_unknown_obs)
     @obs2 = observations(:coprinus_comatus_obs)
-    @img1 = @obs1.images.first
-    @img2 = @obs2.images.first
+    @obs1_imgs = @obs1.images
+    @obs2_imgs = @obs2.images
+    @img1 = @obs1_imgs.first
+    @img2 = @obs2_imgs.first
+    @obs1_img_ids = @obs1_imgs.map(&:id)
+    @obs2_img_ids = @obs2_imgs.map(&:id)
   end
 
   def assert_project_checks(project_states)
