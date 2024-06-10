@@ -2595,6 +2595,7 @@ class ObservationsControllerTest < FunctionalTestCase
         observation: {
           gps_hidden: "1"
         },
+        good_images: "#{old_img1.id} #{old_img2.id}",
         image: {
           "0" => {
             image: fixture,
