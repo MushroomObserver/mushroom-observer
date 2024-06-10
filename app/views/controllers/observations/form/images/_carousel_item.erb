@@ -23,32 +23,36 @@ presenter_args = { size: :large, fit: :contain,
                    extra_classes: extra_classes }.merge(upload: upload)
 presenter = ImagePresenter.new(img_id, presenter_args)
 item_attrs = { id: "carousel_item_#{img_id}",
-               class: class_names("item", active, handle) }.merge(data: data)
+               class: ["item", active, handle] }.merge(data: data)
 
 tag.div(**item_attrs) do
   tag.div(class: "row") do
-    concat(tag.div(class: "top-left p-4") do
-      carousel_set_thumb_img_button(image:, active:)
-    end)
-    concat(tag.div(class: "top-right p-4") do
-      carousel_remove_image_button(image&.id)
-    end)
-    concat(tag.div(class: "image-position col-12 col-md-6") do
-      concat(image_tag(presenter.img_src, presenter.options_lazy))
-    end)
-    concat(tag.div(class: "form-position col-12 col-md-6") do
-      tag.div(class: "form-panel") do
-        if upload
-          concat(render(partial: "observations/form/images/fields_for_upload",
-                        locals: { img_id: }))
-        else
-          concat(render(partial: "observations/form/images/fields_for_edit",
-                        locals: { f:, image: }))
+    [
+      tag.div(class: "col-12 col-md-6") do
+        concat(tag.div(class: "image-position") do
+          concat(image_tag(presenter.img_src, presenter.options_lazy))
+        end)
+      end,
+      tag.div(class: "col-12 col-md-6") do
+        tag.div(class: "form-panel") do
+          if upload
+            concat(render(partial: "observations/form/images/fields_for_upload",
+                          locals: { img_id: }))
+          else
+            concat(render(partial: "observations/form/images/fields_for_edit",
+                          locals: { f:, image: }))
+          end
+          concat(render(partial: "observations/form/images/exif_info",
+                        locals: exif_data)) if exif_data.present?
         end
-        concat(render(partial: "observations/form/images/exif_info",
-                      locals: exif_data)) if exif_data.present?
+      end,
+      tag.div(class: "top-left p-4") do
+        carousel_set_thumb_img_button(image:, active:)
+      end,
+      tag.div(class: "top-right p-4") do
+        carousel_remove_image_button(image&.id)
       end
-    end)
+    ].safe_join
   end
 end
 %>

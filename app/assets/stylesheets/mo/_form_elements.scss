@@ -93,17 +93,6 @@ a.filter-only {
   }
 }
 
-.added_image_wrapper {
-  @extend .py-3;
-  border-width: 1px 0 0 0;
-  border-style: solid;
-  border-color: $btn-default-border;
-
-  &:last-child {
-    border-width: 1px 0;
-  }
-}
-
 .vote-select-container {
   max-width: 21rem;
   display: inline-block;
