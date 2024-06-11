@@ -79,8 +79,8 @@ export default class extends Controller {
       // Set item's data-geocode attribute so we can have a record
       itemElement.dataset.geocode = JSON.stringify(latLngAlt);
 
-      _exif_lat.innerText = latLngAlt.lat.toFixed(5);
-      _exif_lng.innerText = latLngAlt.lng.toFixed(5);
+      _exif_lat.innerText = latLngAlt.lat.toFixed(4);
+      _exif_lng.innerText = latLngAlt.lng.toFixed(4);
       _exif_alt.innerText = latLngAlt.alt;
     }
   }
@@ -141,8 +141,8 @@ export default class extends Controller {
     if (_exif_data.geocode && _exif_data.geocode !== "") {
       const latLngAlt = JSON.parse(_exif_data.geocode);
 
-      _obs_lat.value = latLngAlt.lat;
-      _obs_lng.value = latLngAlt.lng;
+      _obs_lat.value = latLngAlt.lat.toFixed(4);
+      _obs_lng.value = latLngAlt.lng.toFixed(4);
       _obs_alt.value = latLngAlt.alt;
       _obs_lat.dispatchEvent(_event); // triggers change to update the map
     }
