@@ -39,7 +39,9 @@ end
   data: data
 ) do |f| %>
 
-  <%= "#{:form_observations_field_code.t} #{@field_code}" if @field_code %>
+  <%= if @field_code
+    tag.p("#{:form_observations_field_code.t} #{@field_code}")
+  end %>
   <%= hidden_field_tag(:field_code, @field_code) %>
 
   <% ########################### Image Forms ############################## %>
