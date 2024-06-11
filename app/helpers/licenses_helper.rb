@@ -2,12 +2,8 @@
 
 # helpers for show License view
 module LicensesHelper
-  def license_updated_at(license)
-    if license.updated_at
-      license.updated_at.strftime("%Y-%m-%d %H:%M:%S")
-    else
-      "nil"
-    end
+  def license_date(date)
+    date.strftime("%Y-%m-%d %H:%M:%S")
   end
 
   def license_table_header
