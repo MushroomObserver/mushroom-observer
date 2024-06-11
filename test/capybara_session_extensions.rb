@@ -166,7 +166,7 @@ module CapybaraSessionExtensions
   end
 
   def click_file_field(locator, session: self)
-    label = session.find(locator)
+    label = session.first(locator)
     session.scroll_to(label, align: :center)
     label.trigger("click")
   end

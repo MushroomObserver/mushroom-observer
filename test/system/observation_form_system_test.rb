@@ -198,10 +198,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # We should now get the option to set obs GPS
     # assert_selector("#gps_messages", wait: 6)
 
-    # Be sure we have two image wrappers
-    image_wrappers = all(".added_image_wrapper")
+    # Be sure we have two image wrappers. We have to wait for
+    # the first one to be hidden before we can see the second one.
+    assert_selector(first(".added_image_wrapper", visible: true).
+                    sibling(".added_image_wrapper", visible: :hidden, wait: 6))
+    image_wrappers = all(".added_image_wrapper", visible: false)
+    # debugger
     assert_equal(2, image_wrappers.length)
-    second_image_wrapper = image_wrappers[1]
+    # The new one is prepended, so second is "first"
+    second_image_wrapper = image_wrappers[0]
 
     # Check that it's the right image: this is geotagged.jpg's date
     within(second_image_wrapper) do

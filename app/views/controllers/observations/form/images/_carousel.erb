@@ -20,7 +20,7 @@ tag.div(class: "carousel slide edit-carousel", id: html_id,
       concat(render(partial: "observations/form/images/carousel_item",
                     locals: { f: f, image:, index: }))
     end
-    concat(tag.div(class: "carousel-control-wrap") do
+    concat(tag.div(class: "carousel-control-wrap row") do
       carousel_controls(html_id)
     end)
   end)
