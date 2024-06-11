@@ -65,6 +65,9 @@ module ObservationsController::Validators
 
     @suspect_checked_projects = checked_project_conflicts -
                                 @observation.projects
+    if @suspect_checked_projects.any?
+      flash_warning(:form_observations_there_is_a_problem_with_projects.t)
+    end
     @suspect_checked_projects.empty?
   end
 

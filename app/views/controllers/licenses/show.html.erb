@@ -13,6 +13,6 @@
                 { target: "_blank", rel: "noopener noreferrer" }) %></b>
   </p>
   <p><%= :DEPRECATED.t %>: <b><%= @license.deprecated.to_s %></b></p>
-  <p><%= :CREATED.t %>: <b><%= license_updated_at(@license) %></b></p>
-  <p><%= :UPDATED.t %>: <b><%= license_updated_at(@license) %></b></p>
+  <p><%= :CREATED.t %>: <b><%= license_date(@license.created_at) %></b></p>
+  <p><%= :UPDATED.t %>: <b><%= license_date(@license.updated_at) %></b></p>
 </div>

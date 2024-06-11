@@ -55,9 +55,9 @@ class License < AbstractModel
   before_destroy :prevent_destruction_of_license_in_use
 
   # Use this license if all else equal.
-  # It is currently hard-coded in the schema as Licenses default `license_id`
+  # It is hard-coded in the schema as Users default `license_id`
   def self.preferred
-    License.find(Image.column_defaults["license_id"])
+    License.find(User.column_defaults["license_id"])
   end
 
   def preferred?
