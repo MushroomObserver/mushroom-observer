@@ -168,7 +168,7 @@ module CapybaraSessionExtensions
   def click_file_field(locator, session: self)
     label = session.find(locator)
     session.scroll_to(label, align: :center)
-    label.click
+    label.trigger("click")
   end
 
   # # Cuprite: must scroll to the button or you can't click?
