@@ -185,9 +185,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # the first one to be hidden before we can see the second one.
     # first_image_wrapper = first(".added_image_wrapper", visible: true).
     #                       sibling(".added_image_wrapper", visible: :hidden)
+    sleep(2)
     image_wrappers = all(".added_image_wrapper", visible: false)
-    # debugger
     assert_equal(2, image_wrappers.length)
+    debugger
     # The new one is prepended, so second is "first"
     second_image_wrapper = image_wrappers[0]
 
@@ -206,7 +207,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # GPS should have been copied to the obs fields
     assert_equal("25.7582", find('[id$="observation_lat"]').value)
     assert_equal("-80.3731", find('[id$="observation_lng"]').value)
-    assert_equal("4m", find('[id$="observation_alt"]').value)
+    assert_equal("4 m", find('[id$="observation_alt"]').value)
 
     # Try removing the geotagged image
     scroll_to(second_image_wrapper, align: :center)
