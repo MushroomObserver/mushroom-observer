@@ -161,12 +161,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Add the images separately, so we can be sure of the order. Otherwise,
     # images appear in the order each upload finishes, which is unpredictable.
-    attach_file(Rails.root.join("test/images/Coprinus_comatus.jpg"), wait: 6) do
-      click_file_field(".file-field")
-    end
+    click_attach_file("Coprinus_comatus.jpg")
     assert_selector(".added_image_wrapper", text: /Coprinus_comatus/)
-    # assert_selector("#img_messages",
-    #                 text: /#{:form_observations_set_observation_date_to.l}/)
     first_image_wrapper = first(".added_image_wrapper")
 
     # Coprinus_comatus.jpg has a created_at date of November 20, 2006
@@ -179,29 +175,16 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_equal("20", find('[id$="_temp_image_when_3i"]').value)
     end
 
-    # "fix_date" radios: check that the first image date is available
-    # within("#img_date_radios") do
-    #   assert_unchecked_field("20-November-2006")
-    # end
-    # check that the chosen obs date is available
-    # within("#obs_date_radios") do
-    #   assert_unchecked_field("14-March-2010")
-    # this would be today's date in the format:
-    # assert_unchecked_field(local_now.strftime("%d-%B-%Y"))
-    # end
-
-    # Add a second image that's not geotagged.
-    attach_file(Rails.root.join("test/images/geotagged.jpg")) do
-      click_file_field(".file-field")
-    end
+    # Add a second image that's geotagged.
+    click_attach_file("geotagged.jpg")
 
     # We should now get the option to set obs GPS
     # assert_selector("#gps_messages", wait: 6)
 
     # Be sure we have two image wrappers. We have to wait for
     # the first one to be hidden before we can see the second one.
-    assert_selector(first(".added_image_wrapper", visible: true).
-                    sibling(".added_image_wrapper", visible: :hidden, wait: 6))
+    # first_image_wrapper = first(".added_image_wrapper", visible: true).
+    #                       sibling(".added_image_wrapper", visible: :hidden)
     image_wrappers = all(".added_image_wrapper", visible: false)
     # debugger
     assert_equal(2, image_wrappers.length)
@@ -215,9 +198,19 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_equal("31", find('[id$="_temp_image_when_3i"]').value)
     end
 
-    # Try removing it
+    # Date should have been copied to the obs fields
+    assert_equal("2018", find('[id$="observation_when_1i"]').value)
+    assert_equal("12", find('[id$="observation_when_2i"]').value)
+    assert_equal("31", find('[id$="observation_when_3i"]').value)
+
+    # GPS should have been copied to the obs fields
+    assert_equal("25.7582", find('[id$="observation_lat"]').value)
+    assert_equal("-80.3731", find('[id$="observation_lng"]').value)
+    assert_equal("4m", find('[id$="observation_alt"]').value)
+
+    # Try removing the geotagged image
     scroll_to(second_image_wrapper, align: :center)
-    within(second_image_wrapper) { find(".remove_image_link").click }
+    within(second_image_wrapper) { find(".remove_image_button").click }
 
     # We should now get no option to set obs GPS
     # assert_no_selector("#gps_messages")
@@ -228,9 +221,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     sleep(1)
     # Add geotagged.jpg again
-    attach_file(Rails.root.join("test/images/geotagged.jpg")) do
-      click_file_field(".file-field")
-    end
+    # attach_file(Rails.root.join("test/images/geotagged.jpg")) do
+    #   click_file_field(".file-field")
+    # end
+    click_attach_file("geotagged.jpg")
 
     # We should now get the option to set obs GPS again
     # assert_selector("#gps_messages")
