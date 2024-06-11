@@ -1,8 +1,33 @@
 # frozen_string_literal: true
 
-# Encapsulates the result of an iNat API search for one observation,
-# mapping iNat key/values to MO Observation attributes
-class ImportedInatObs
+#
+#  = InatObs Object
+#
+#  Represents the result of an iNat API search for one observation,
+#  mapping iNat key/values to MO Observation attributes
+#
+#  == Class methods
+##
+#  == Instance methods
+#
+#  obs::          The iNat observation data
+#  obs_photos::   Array of iNat observation_photos
+#  importable?::  Is it importable to MO?
+#  fungi?::       Is it a fungus?
+#
+#  == MO attributes
+#  gps_hidden
+#  inat_id::
+#  license::
+#  name_id
+#  notes
+#  lat
+#  lng
+#  text_name
+#  when
+#  where
+#
+class InatObs
   def initialize(imported_inat_obs_data)
     @imported_inat_obs_data =
       JSON.parse(imported_inat_obs_data, symbolize_names: true)
@@ -11,6 +36,20 @@ class ImportedInatObs
   def obs
     @imported_inat_obs_data[:results].first
   end
+
+  def obs_photos
+    obs[:observation_photos]
+  end
+
+  def importable?
+    taxon_importable?
+  end
+
+  def taxon_importable?
+    fungi? || slime_mold?
+  end
+
+  ########## MO attributes
 
   def gps_hidden
     obs[:geoprivacy].present?
@@ -22,10 +61,6 @@ class ImportedInatObs
 
   def license
     InatLicense.new(obs[:license_code]).license
-  end
-
-  def obs_photos
-    obs[:observation_photos]
   end
 
   def name_id
@@ -75,7 +110,6 @@ class ImportedInatObs
     obs[:place_guess]
   end
 
-
   ##########
 
   private
@@ -83,4 +117,21 @@ class ImportedInatObs
   def description
     obs[:description]
   end
+
+  def fungi?
+    obs.dig(:taxon, :iconic_taxon_name) == "Fungi"
+  end
+
+  def slime_mold?
+    # NOTE: 2024-06-01 jdc
+    # slime molds are polypheletic https://en.wikipedia.org/wiki/Slime_mold
+    # Protoza is paraphyletic for slime molds,
+    # but it's how they are classified in MO and MB
+    # Can this be improved by checking multiple inat [:taxon][:ancestor_ids]?
+    # I.e., is there A combination (ANDs) of higher ranks (>= Class)
+    # that's monophyletic for slime molds?
+    # Another solution: use IF API to see if IF includes the name.
+    obs.dig(:taxon, :iconic_taxon_name) == "Protozoa"
+  end
+
 end

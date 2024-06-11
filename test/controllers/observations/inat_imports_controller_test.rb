@@ -22,7 +22,7 @@ module Observations
       # See test/fixtures/inat/README_INAT_FIXTURES.md
       inat_response_body =
         File.read("test/fixtures/inat/evernia_no_photos.txt")
-      inat_id = ImportedInatObs.new(inat_response_body).inat_id
+      inat_id = InatObs.new(inat_response_body).inat_id
       params = { inat_ids: inat_id }
 
       WebMock.stub_request(
@@ -49,13 +49,13 @@ module Observations
       # See test/fixtures/inat/README_INAT_FIXTURES.md
       inat_response_body =
         File.read("test/fixtures/inat/tremella_mesenterica.txt")
-      inat_obs_data = ImportedInatObs.new(inat_response_body)
+      inat_obs_data = InatObs.new(inat_response_body)
       inat_obs_id = inat_obs_data.inat_id
       inat_obs_photo = InatObsPhoto.new(
         inat_obs_data.obs[:observation_photos].first
       )
-      # inat_obs = ImportedInatObs.new(inat_response_body)
-      # inat_id = ImportedInatObs.new(inat_response_body).inat_id
+      # inat_obs = InatObs.new(inat_response_body)
+      # inat_id = InatObs.new(inat_response_body).inat_id
       params = { inat_ids: inat_obs_id }
       user = users(:rolf)
 
@@ -82,6 +82,29 @@ module Observations
       obs = Observation.order(created_at: :asc).last
       assert_not_nil(obs.rss_log)
       assert_redirected_to(observations_path)
+    end
+
+    def test_create_import_plant
+      # See test/fixtures/inat/README_INAT_FIXTURES.md
+      inat_response_body =
+        File.read("test/fixtures/inat/ceanothus_cordulatus.txt")
+      inat_id = InatObs.new(inat_response_body).inat_id
+      params = { inat_ids: inat_id }
+
+      WebMock.stub_request(
+        :get,
+        "#{INAT_OBS_REQUEST_PREFIX}id=#{inat_id}#{INAT_OBS_REQUEST_POSTFIX}"
+      ).to_return(body: inat_response_body)
+
+      login
+
+      assert_no_difference(
+        "Observation.count", "Should not import iNat Plant observations"
+      ) do
+        put(:create, params: params)
+      end
+
+      assert_flash_text(:inat_taxon_not_importable.l(id: inat_id))
     end
 
     def test_create_inat_import_too_many_ids

@@ -7,6 +7,8 @@
                 heading_links: obs_change_links(obs),
                 class: "name-section") do %>
 
+  <%= observation_details_inat(obs: @observation) %>
+
   <%= observation_details_when_where_who(obs: obs) %>
 
   <%= tag.div(class: "obs-projects", id: "observation_projects") do

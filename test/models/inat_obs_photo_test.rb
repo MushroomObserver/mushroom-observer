@@ -34,7 +34,7 @@ require("test_helper")
 # test mapping of iNat observation photo key/values to MO Image attributes
 class InatObsPhotoTest < UnitTestCase
   def test_simple_photo
-    inat_obs_data = ImportedInatObs.new(
+    inat_obs_data = InatObs.new(
       File.read("test/fixtures/inat/tremella_mesenterica.txt")
     )
     inat_obs_photo = InatObsPhoto.new(

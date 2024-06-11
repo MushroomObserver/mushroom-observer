@@ -11,19 +11,20 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 
 | File | iNat Obs | fotos | location | Other |
 | ---- | -------- | ----- | -------- | ----- |
-| evernia_no_photos.txt | [216357655](https://www.inaturalist.org/observations/216357655) | 0 | public | |
-| tremella_mesenterica.txt | [213508767](https://www.inaturalist.org/observations/213508767) | 1 | public | |
+| ceanothus_cordulatus.txt | [219631412](https://www.inaturalist.org/observations/219631412) | 1 | public | **Plant** |
 | coprinus.txt | [213450312](https://www.inaturalist.org/observations/213450312) | 1 | **obscured** | |
+| evernia_no_photos.txt | [216357655](https://www.inaturalist.org/observations/216357655) | 0 | public | lichen |
+| fuligo_septica.txt | [216357655](https://www.inaturalist.org/observations/216357655) | 1 | public | slime mold **Protozoa** |
+| gyromitra_ancilis.txt | [216745568](https://www.inaturalist.org/observations/216745568) | 3 | public | **cc-by license**, **many projects** |
+| russulaceae.txt | [216675045](https://www.inaturalist.org/observations/216675045) | 2 | public | **all rights reserved**, many projects, Activity |
 | somion_unicolor.json |  |  |  | Formatted version of following; facilitates viewing iNat API response key/values |
-| somion_unicolor.txt | [202555552](https://www.inaturalist.org/observations/202555552) | 5 | public | Notes, Activity, multiple IDs, **mirrored from MO**|
-| gyromitra_ancilis.txt | [216745568](https://www.inaturalist.org/observations/216745568) | 3 | public | **cc-by license**, multiple photos, **multiple projects** |
-| russulaceae.txt | [216675045](https://www.inaturalist.org/observations/216675045) | 2 | public | **all rights reserved**, multiple images, multiple projects, Activity |
+| somion_unicolor.txt | [202555552](https://www.inaturalist.org/observations/202555552) | 5 | public | Notes, Activity, many IDs, **mirrored from MO**|
+| tremella_mesenterica.txt | [213508767](https://www.inaturalist.org/observations/213508767) | 1 | public | |
 
 ## TODO
 
 ### Needed Observations
 
-- Plant or other non-fungal
 - Slime mold
 - Fungus with photo that was uploaded to iNat >= 1 day after iNat Obs was created
 - Public Domain license
