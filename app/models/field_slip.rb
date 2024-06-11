@@ -59,33 +59,25 @@ class FieldSlip < AbstractModel
   end
 
   def location
-    return "" unless observation
-
-    observation.place_name
+    observation&.place_name || ""
   end
 
   def collector
-    return "" unless observation
+    observation.collector if observation&.collector
 
-    observation.collector
+    return "_user #{(user || User.current).login}_"
   end
 
   def field_slip_id
-    return "" unless observation
-
-    observation.field_slip_id
+    observation&.field_slip_id || ""
   end
 
   def field_slip_id_by
-    return "" unless observation
-
-    observation.field_slip_id_by
+    observation&.field_slip_id_by || ""
   end
 
   def other_codes
-    return "" unless observation
-
-    observation.other_codes
+    observation&.other_codes || ""
   end
 
   def can_edit?
