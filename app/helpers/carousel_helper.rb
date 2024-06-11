@@ -104,13 +104,12 @@ module CarouselHelper
     data[:image_id] = image_id if image_id
 
     js_button(
-      class: "remove_image_link btn-sm fade in",
+      name: "remove_image_button",
+      class: "remove_image_button btn-sm fade in",
       data: data
     ) do
       [tag.span(:image_remove_remove.l),
-       tag.span(
-         "", class: "glyphicon glyphicon-remove-circle text-danger ml-3"
-       )].safe_join
+       link_icon(:remove, classes: "text-danger ml-3")].safe_join
     end
   end
 
@@ -135,6 +134,7 @@ module CarouselHelper
 
   def carousel_transfer_exif_button
     js_button(
+      name: "use_exif_button",
       class: "use_exif_btn btn-sm ab-top-right",
       data: { action: "form-exif#transferExifToObs:prevent" }
     ) do

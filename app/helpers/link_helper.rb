@@ -113,11 +113,11 @@ module LinkHelper
   end
 
   # pass title if it's a plain button (say for collapse) but you want a tooltip
-  def link_icon(type, title: "")
+  def link_icon(type, title: "", classes: "px-2")
     return "" unless (glyph = LINK_ICON_INDEX[type])
 
     text = ""
-    opts = { class: "glyphicon glyphicon-#{glyph} px-2" }
+    opts = { class: "glyphicon glyphicon-#{glyph} #{classes}" }
 
     if title.present?
       tooltip_opts = { data: { toggle: "tooltip", title: title } }
