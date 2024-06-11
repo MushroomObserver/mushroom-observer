@@ -10,7 +10,6 @@ ccnc25:
   display_name: Creative Commons Non-commercial v2.5
   url: https://creativecommons.org/licenses/by-nc-sa/2.5/
   deprecated: true
-  # updated_at: nil
 
 ccnc30:
   display_name: Creative Commons Non-commercial v3.0
