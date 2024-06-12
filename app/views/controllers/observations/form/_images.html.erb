@@ -1,11 +1,11 @@
 <%# Images section of create_observation form
 Gotcha: observation[thumb_image_id] is set by JS, not by radio buttons.
-Although there can be radio buttons for selecting observation[thumb_image_id]
+Although there can be radio buttons for selecting thumb_image_id
 in both the good_images and the images_upload partials, they currently *do
-not* set the observation thumb_image_id: their value is transferred by JS to
-the hidden_field below with the same name, which takes precedence.
-I believe this is because in images_upload/_template.erb, the radio buttons
-do not yet have an image.id value - the image has not yet been uploaded.
+not* set the observation[thumb_image_id]: their value is transferred by JS to
+the hidden_field below with a similar name, which takes precedence.
+This is because when images are being uploaded, the radio buttons
+do not yet have an image.id value - the image record has not yet been created.
 Also, note that `good_images` is currently not a field under observation,
 i.e. observation[good_images]. It's a top-level field. --%>
 

@@ -64,36 +64,36 @@ module CarouselHelper
   end
 
   # For uploads, this should simply set a "true" value for the radio button.
-  # For existing images, it should set the image id, and active class
+  # For existing images, it should set the image id, and the `active` class.
+  # Note that this is not `observation[thumb_image_id]`, a hidden field that
+  # is set by the Stimulus controller on the basis of these radios' value.
   def carousel_set_thumb_img_button(image: nil, active: "")
     value = image ? image.id : "true"
     label_classes = class_names("btn btn-default btn-sm obs_thumb_img_btn",
                                 active)
-    fields_for(:observation) do |f|
-      f.label(
-        :thumb_image_id,
-        class: label_classes,
-        data: { form_images_target: "obsThumbImgBtn",
-                action: "click->form-images#setObsThumbnail" }
-      ) do
-        [
-          f.radio_button(
-            :thumb_image_id, value,
-            class: "mr-3",
-            data: { form_images_target: "thumbImgRadio" }
-          ),
-          tag.span(
-            :image_set_default.l,
-            class: "set_thumb_img_text",
-            data: { form_images_target: "setThumbImg" }
-          ),
-          tag.span(
-            :image_add_default.l,
-            class: "is_thumb_img_text",
-            data: { form_images_target: "isThumbImg" }
-          )
-        ].safe_join
-      end
+    label_tag(
+      :thumb_image_id,
+      class: label_classes,
+      data: { form_images_target: "obsThumbImgBtn",
+              action: "click->form-images#setObsThumbnail" }
+    ) do
+      [
+        radio_button_tag(
+          :thumb_image_id, value,
+          class: "mr-3",
+          data: { form_images_target: "thumbImgRadio" }
+        ),
+        tag.span(
+          :image_set_default.l,
+          class: "set_thumb_img_text",
+          data: { form_images_target: "setThumbImg" }
+        ),
+        tag.span(
+          :image_add_default.l,
+          class: "is_thumb_img_text",
+          data: { form_images_target: "isThumbImg" }
+        )
+      ].safe_join
     end
   end
 

@@ -153,7 +153,7 @@ export default class extends Controller {
     // set selection...
     button.classList.add('active');
     button.querySelector(
-      'input[type="radio"][name="observation[thumb_image_id]"]'
+      'input[type="radio"][name="thumb_image_id"]'
     ).setAttribute('checked', '');
     this.thumbImageIdTarget.setAttribute('value', radio.value);
   }
@@ -339,6 +339,7 @@ export default class extends Controller {
     const item = this.findFileStoreItem(thumbElement);
     item.thumbnail_element = thumbElement;
     this.setImgSrc(item, thumbElement);
+    this.sortCarousel();
   }
 
   // Adjust the carousel controls and indicators for the new/removed item.
@@ -355,11 +356,12 @@ export default class extends Controller {
     _items[0]?.classList?.add('active');
     _indicators[0]?.classList?.add('active');
 
-    this.sortCarouselControls();
+    this.showOrHideCarouselControls();
+    this.resortCarouselIndicators(_items, _indicators);
   }
 
   // Show or hide the controls, depending on the total.
-  sortCarouselControls() {
+  showOrHideCarouselControls() {
     const _items = this.carouselTarget.querySelectorAll('.item'),
       _indicontrols = this.carouselTarget.querySelector('.carousel-indicators'),
       _controls = this.carouselTarget.querySelector('.carousel-control'),
@@ -372,6 +374,29 @@ export default class extends Controller {
       _indicontrols.classList.add('d-none');
       _controls.classList.add('d-none');
     }
+  }
+
+  // Required because thumbnails may load out of order of items.
+  // This resorts based on the order of the items in the carousel, and sets
+  // the slideTo attribute of the indicators to match the new order.
+  resortCarouselIndicators(items, indicators) {
+    // This could load on item or indicator, and one may be ahead of other.
+    if (items.length == 0 || indicators.length == 0 ||
+      items.length !== indicators.length) return;
+
+    const _new_ordering = [],
+      _indicontrols = this.carouselTarget.querySelector('.carousel-indicators');
+
+    items.forEach((item, i) => {
+      _new_ordering[i] =
+        [...indicators].filter((indicator) => {
+          return indicator.dataset.imageUuid == item.dataset.imageUuid
+        })[0];
+    });
+    indicators.forEach((_indicator, i) => {
+      _new_ordering[i].dataset.slideTo = i;
+      _indicontrols.appendChild(_new_ordering[i]);
+    });
   }
 
   // This is for removing an image that hasn't been uploaded yet.
@@ -512,7 +537,7 @@ export default class extends Controller {
     // #good_images is a hidden field
     const _good_image_vals = this.goodImagesTarget.value || "";
     const _radio = item.dom_element.querySelector(
-      'input[name="observation[thumb_image_id]"]'
+      'input[type="radio"][name="thumb_image_id"]'
     )
 
     // add id to the good images form field.
