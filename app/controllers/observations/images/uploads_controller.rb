@@ -18,15 +18,6 @@ module Observations::Images
       @user = User.current = session_user # || raise("Must be logged in.")
       @licenses = License.current_names_and_ids(@user.license)
       @image = Image.new(user: @user, when: Time.zone.now)
-      # render(partial: "observations/form/images/carousel_item",
-      # render(turbo_stream: turbo_stream.prepend(
-      #   "added_images",
-      #   partial: "observations/form/images/carousel_item",
-      #   locals: { upload: true, index: params[:index],
-      #             img_id: params[:img_id],
-      #             img_file_name: params[:img_file_name],
-      #             img_file_size: params[:img_file_size] }
-      # ))
     end
 
     # Uploads an image object without an observation.
