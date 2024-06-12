@@ -60,7 +60,7 @@ class InatObs
   end
 
   def license
-    InatLicense.new(obs[:license_code]).license
+    InatLicense.new(obs[:license_code]).mo_license
   end
 
   def name_id

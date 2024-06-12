@@ -85,9 +85,8 @@ class License < AbstractModel
   end
 
   def self.current
-    License.where(deprecated: 0)
+    License.where(deprecated: false)
   end
-
 
   def copyright_text(year, name)
     # match old style `Public_domain` or new style `publicdomain`

@@ -19,7 +19,7 @@ class InatObsPhoto
   end
 
   def license
-    InatLicense.new(photo[:license_code]).license
+    InatLicense.new(photo[:license_code]).mo_license
   end
 
   delegate :id, to: :license, prefix: true

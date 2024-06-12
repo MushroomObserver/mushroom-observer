@@ -3,6 +3,7 @@
 require("test_helper")
 
 # test mapping iNat license_code to MO license_id
+# https://github.com/inaturalist/inaturalist/blob/main/app/models/shared/license_module.rb
 class InatLicenseTest < UnitTestCase
   def test_mapped_license
     assert_equal(licenses(:ccnc30), InatLicense.new("cc-by-nc-sa").mo_license)

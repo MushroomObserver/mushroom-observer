@@ -40,9 +40,8 @@ class InatObsPhotoTest < UnitTestCase
     inat_obs_photo = InatObsPhoto.new(
       inat_obs_data.obs[:observation_photos].first
     )
-
     expected_license =
-      License.where(License[:form_name] =~ "ccbync").where(deprecated: false).
+      License.where(License[:url] =~ "/by-nc/").where(deprecated: false).
       order(id: :asc).last
 
     assert_equal("img/jpeg", inat_obs_photo.content_type)
@@ -55,8 +54,9 @@ class InatObsPhotoTest < UnitTestCase
       "Imported from iNat #{DateTime.now.utc.strftime("%Y-%m-%d %H:%M:%S %z")}",
       inat_obs_photo.notes
     )
-    assert_equal(expected_license.id,
-                 inat_obs_photo.license_id,
+
+    assert_equal(expected_license,
+                 inat_obs_photo.license,
                  "Wrong license, expecting #{expected_license.display_name}")
     assert_equal("https://inaturalist-open-data.s3.amazonaws.com/photos/377332865/original.jpeg",
                  inat_obs_photo.url)
