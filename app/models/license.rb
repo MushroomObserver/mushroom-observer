@@ -24,7 +24,7 @@
 #  == Class methods
 #
 #  preferred::              The fallback image license
-#  current_names_and_ids::  List non-deprecated License names/ids.
+#  available_names_and_ids::  List License's available for an object
 #
 #  == Instance methods
 #
@@ -69,19 +69,15 @@ class License < AbstractModel
     display_name.to_s
   end
 
-  # Get list of non-deprecated License's.  Returns an Array of pairs (such as
-  # would be needed by a pulldown menu helper):
-  #
-  #   for name, id in License.current_names_and_ids
+  # List License's avaliable for an object
+  # Array of pairs (such as would be needed by a pulldown menu helper).
+  # Usage:
+  #   License.available_names_and_ids.each do |name, id|
   #     puts "license ##{id}: '#{name}'"
   #   end
   #
-  def self.current_names_and_ids(current_license = nil)
-    result = License.where(deprecated: 0).map { |l| [l.display_name, l.id] }
-    if current_license&.deprecated
-      result.push([current_license.display_name, current_license.id])
-    end
-    result
+  def self.available_names_and_ids(currently_chosen = nil)
+    available(currently_chosen).map { |l| [l.display_name, l.id] }
   end
 
   def self.current
@@ -119,6 +115,16 @@ class License < AbstractModel
   end
 
   ###########
+
+  class << self
+    private
+
+    def available(currently_chosen = nil)
+      return current.to_a unless currently_chosen&.deprecated?
+
+      current.to_a << currently_chosen
+    end
+  end
 
   private
 

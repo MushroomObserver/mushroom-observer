@@ -56,7 +56,7 @@
     </td>
     <td>
       <%= fgi.select(:license_id,
-                     License.current_names_and_ids(image.license),
+                     License.available_names_and_ids(image.license),
                      { selected: image.license_id,
                        index: image.id },
                      { class: "form-control" }) %>

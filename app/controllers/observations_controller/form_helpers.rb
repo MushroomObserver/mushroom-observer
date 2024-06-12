@@ -50,7 +50,7 @@ module ObservationsController::FormHelpers
   end
 
   def init_license_var
-    @licenses = License.current_names_and_ids(@user.license)
+    @licenses = License.available_names_and_ids(@user.license)
   end
 
   # Initialize image for the dynamic image form at the bottom.

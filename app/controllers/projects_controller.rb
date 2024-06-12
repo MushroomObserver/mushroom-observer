@@ -141,7 +141,7 @@ class ProjectsController < ApplicationController
   private ############################################################
 
   def image_ivars
-    @licenses = License.current_names_and_ids(@user.license)
+    @licenses = License.available_names_and_ids(@user.license)
 
     (@copyright_holder, @copyright_year, @upload_license_id) =
       if @project&.image

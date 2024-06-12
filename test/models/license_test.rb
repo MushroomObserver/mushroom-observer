@@ -3,21 +3,35 @@
 require("test_helper")
 
 class LicenseTest < UnitTestCase
-  def test_current_names_and_ids
-    names_and_ids = License.current_names_and_ids
-    assert_equal(5, names_and_ids.length)
+  def test_available_names_and_ids_nothing_chosen
+    names_and_ids = License.available_names_and_ids
+
+    assert_equal(License.current.count, names_and_ids.length)
     names_and_ids.each do |(_name, id)|
       license = License.find(id)
       assert_not(
-        license.deprecated,
+        license.deprecated?,
         "#{license.id}, #{license.display_name}, should not be deprecated."
       )
     end
   end
 
-  def test_current_names_and_ids_ccnc25
-    names_and_ids = License.current_names_and_ids(licenses(:ccnc25))
-    assert_equal(6, names_and_ids.length)
+  def test_available_names_and_ids_deprecated_chosen
+    chosen = licenses(:ccnc25)
+    assert(chosen.deprecated?, "Test needs deprecated License fixture")
+
+    names_and_ids = License.available_names_and_ids(chosen)
+
+    assert_equal(License.current.count + 1, names_and_ids.length)
+  end
+
+  def test_available_names_and_ids_nondeprecated_chosen
+    chosen = licenses(:ccbync)
+    assert_not(chosen.deprecated?, "Test needs nondeprecated License fixture")
+
+    names_and_ids = License.available_names_and_ids(chosen)
+
+    assert_equal(License.current.count, names_and_ids.length)
   end
 
   def test_in_use
