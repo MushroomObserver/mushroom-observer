@@ -29,11 +29,11 @@ select.has-error {
   input[type=file] {
     position: absolute;
     top: 0;
-    left: 0;
+    right: 0;
     min-width: 100%;
     min-height: 100%;
     font-size: 100px;
-    text-align: left;
+    text-align: right;
     opacity: 0;
     background: red;
     cursor: inherit;
