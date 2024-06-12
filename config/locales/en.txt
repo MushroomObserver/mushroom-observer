@@ -447,6 +447,7 @@
   # ("Authority" is authority on a scientific name.)
   ALTITUDE: Elevation
   altitude: elevation
+  ALT: Alt
   # online database with nucleotide Sequence data
   ARCHIVE: Archive
   archive: archive
@@ -527,6 +528,7 @@
   latitude: latitude
   LATITUDES: Latitudes
   latitudes: latitudes
+  LAT: Lat
   LOCUS: Locus
   locus: locus
   LOGIN_NAME: Login Name
@@ -537,6 +539,7 @@
   longitude: longitude
   LONGITUDES: Longitudes
   longitudes: longitudes
+  LNG: Lng
   MEMBER: Member
   member: member
   MEMBERS: Members
@@ -1711,6 +1714,9 @@
   image_add_warning: Please only upload images that you created or which you own the copyright of. By uploading images you are giving us permission to distribute this image to other users ("legalese":https://creativecommons.org/licenses/by-nc-sa/4.0/). You are also giving us permission to display this image along side advertisements or other fund-raising tools that may be used to support this site.
   image_exif_copied: Info copied
   image_use_exif: Use this info
+  image_camera_info: Camera info
+  image_file_name: File name
+  image_file_size: File size
 
   # account/profile/images/reuse
   image_reuse_all_users: Include other users' images.

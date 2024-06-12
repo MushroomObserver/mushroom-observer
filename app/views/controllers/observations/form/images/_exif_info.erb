@@ -3,20 +3,20 @@
 <%=
 tag.div(class: "well well-sm mt-4 position-relative") do
   [
-    tag.p { tag.strong("Camera Info:") },
+    tag.p { tag.strong("#{:image_camera_info.l}:") },
     tag.div(class: "form-group") do
       [
         tag.div do
           [
-            tag.strong("Date: "), # :form_images_camera_date.t
+            tag.strong("#{:DATE.l}: "), # :form_images_camera_date.t
             carousel_exif_to_image_date_button(date)
           ].safe_join
         end,
         tag.div do
           [
-            tag.strong("Lat: ") + tag.span(lat, class: "exif_lat"),
-            tag.strong("Long: ") + tag.span(lng, class: "exif_lng"),
-            tag.strong("Alt: ") + tag.span(alt, class: "exif_alt")
+            tag.strong("#{:LAT.l}: ") + tag.span(lat, class: "exif_lat"),
+            tag.strong("#{:LNG.l}: ") + tag.span(lng, class: "exif_lng"),
+            tag.strong("#{:ALT.l}: ") + tag.span(alt, class: "exif_alt")
           ].safe_join(", ")
         end,
         carousel_transfer_exif_button
@@ -24,9 +24,15 @@ tag.div(class: "well well-sm mt-4 position-relative") do
     end,
     tag.div(class: "form-group mb-0") do
       if img_file_name.present?
-        concat(tag.div { tag.strong("File Name: ") + img_file_name })
+        concat(tag.div do
+          [tag.strong("#{:image_file_name.l}: "),
+           tag.span(img_file_name, class: "img_file_name")].safe_join
+        end)
       end
-      concat(tag.div { tag.strong("Size: ") + img_file_size })
+      concat(tag.div do
+        [tag.strong("#{:image_file_size.l}: "),
+         tag.span(img_file_size, class: "img_file_size")].safe_join
+      end)
     end
   ].safe_join
 end
