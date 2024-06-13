@@ -278,12 +278,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     within("#observation_form") { click_commit }
 
-    #
-    #   This is where the error occurs.
-    #   User.current is getting dropped during the save, and message is
-    #     `Observation doesn't have naming with ID=`
-    #
-
     # It should take us to create a new location
     assert_selector("body.locations__new")
     # The observation shoulda been created OK.
