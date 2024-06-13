@@ -81,6 +81,10 @@ class InatObs
     obs[:public_positional_accuracy]
   end
 
+  def inat_quality_grade
+    obs[:quality_grade]
+  end
+
   def inat_user_login
     obs[:user][:login]
   end
