@@ -43,7 +43,7 @@ class InatObsTest < UnitTestCase
       # notes: { Other: "on Quercus\n\n&#8212;\n\nMirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/202555552\">observation 202555552</a> on March 15, 2024." }, # rubocop:disable Layout/LineLength
       notes: { Other: "on Quercus\n\n&#8212;\n\nOriginally posted to Mushroom Observer on Mar. 7, 2024." }, # rubocop:disable Layout/LineLength
       # FIXME: add new source
-      source: nil
+      source: nil,
       # thumb_image_id: 1659475,
       # vote_cache: 2.51504,
       # num_views: 78,
@@ -52,9 +52,11 @@ class InatObsTest < UnitTestCase
       # log_updated_at: Sat, 16 Mar 2024 17:22:51.000000000 EDT -04:00,
     )
 
-    %w[gps_hidden lat lng name_id notes text_name when where].each do |attribute|
-      assert_equal(expected_mapping.send(attribute), import.send(attribute))
-    end
+    # mappings to Observation attributes
+    %w[gps_hidden lat lng name_id notes text_name when where].
+      each do |attribute|
+        assert_equal(expected_mapping.send(attribute), import.send(attribute))
+      end
 
     # TODO: include in above array after creating Observation.inat_id attribute
     assert_equal(202555552, import.inat_id)
@@ -64,24 +66,23 @@ class InatObsTest < UnitTestCase
     assert_equal(expect, import.license)
 
 =begin
-      # attributes to test
+      # other Observation attribute mappings to test
       t.integer "user_id"
       t.boolean "specimen", default: false, null: false
-      t.text "notes"
       t.integer "thumb_image_id"
-      t.integer "name_id"
       t.integer "location_id"
       t.boolean "is_collection_location", default: true, null: false
-      t.float "vote_cache", default: 0.0
-      t.integer "num_views", default: 0, null: false
-      t.datetime "last_view", precision: nil
-      t.integer "rss_log_id"
       t.integer "alt"
       t.string "lifeform", limit: 1024
       t.string "text_name", limit: 100
       t.text "classification"
       t.boolean "gps_hidden", default: false, null: false
 =end
+
+    # other iNat attributes
+    assert_equal("jdcohenesq", import.inat_user_login)
+    assert_equal("Cochise Co., Arizona, USA", import.inat_place_guess)
+
   end
   # rubocop:enable Style/NumericLiterals
 
@@ -125,5 +126,21 @@ class InatObsTest < UnitTestCase
       )
     assert_not(inat_obs.taxon_importable?,
                "iNat Plant observations should not be importable")
+  end
+
+  # comma separated string of project names
+  def test_inat_project_names
+    import =
+      # has no projects
+      InatObs.new(File.read("test/fixtures/inat/somion_unicolor.txt"))
+    assert_equal("??", import.inat_project_names)
+
+    import =
+      # has one project
+      InatObs.new(File.read("test/fixtures/inat/evernia_no_photos.txt"))
+    assert_equal("Portland-Vancouver Regional Eco-Blitz, ??",
+                 import.inat_project_names)
+
+    # TODO: Test iNat obs with obs[:project_observations].many?
   end
 end

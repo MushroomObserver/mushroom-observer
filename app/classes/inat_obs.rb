@@ -14,6 +14,7 @@
 #  obs_photos::   Array of iNat observation_photos
 #  importable?::  Is it importable to MO?
 #  fungi?::       Is it a fungus?
+#  inat_user_login
 #
 #  == MO attributes
 #  gps_hidden
@@ -47,6 +48,33 @@ class InatObs
 
   def taxon_importable?
     fungi? || slime_mold?
+  end
+
+  def inat_place_guess
+    obs[:place_guess]
+  end
+
+  # comma-separated string of names of projects to which obs belongs
+  def inat_project_names
+    projects = obs[:project_observations]
+
+    # 2024-06-12 jdc
+    # 1. Stop inat_obs from returning the following when projects.empty
+    # # encoding: US-ASCII
+    # #    valid: true
+    # ""
+    #
+    # 2. Always include ?? because I cannot reliably find all the projects
+    # via the iNat API
+    return "??" if projects.empty?
+
+    # Extract the titles from each project observation
+    (projects.map { |proj| proj.dig(:project, :title) } << "??").
+      join(", ").delete_prefix(", ")
+  end
+
+  def inat_user_login
+    obs[:user][:login]
   end
 
   ########## MO attributes
@@ -107,7 +135,10 @@ class InatObs
   end
 
   def where
-    obs[:place_guess]
+    # FIXME: Make it a real MO Location
+    # Maybe smallest existing MO Location containing:
+    #   inat.location +/- inat.positional accuracy
+    inat_place_guess
   end
 
   ##########
@@ -133,5 +164,4 @@ class InatObs
     # Another solution: use IF API to see if IF includes the name.
     obs.dig(:taxon, :iconic_taxon_name) == "Protozoa"
   end
-
 end

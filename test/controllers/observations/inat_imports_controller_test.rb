@@ -42,6 +42,8 @@ module Observations
 
       assert_equal("mo_inat_import", obs.source)
       assert_equal(inat_id, obs.inat_id)
+
+      assert(obs.comments.any?, "Imported iNat should have >= 1 Comment")
     end
 
     def test_create_public_import_obs_with_photo

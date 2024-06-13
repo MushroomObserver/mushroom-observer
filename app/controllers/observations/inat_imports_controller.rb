@@ -7,6 +7,10 @@ module Observations
     before_action :login_required
     before_action :pass_query_params
 
+    # FIXME: Get a key. This one belongs to @pellaea
+    # The idea is having one key for all iNat imports
+    INAT_IMPORT_KEY = APIKey.first
+
     def new; end
 
     def create
@@ -80,6 +84,7 @@ module Observations
       # strip_images! if @observation.gps_hidden
       # update_field_slip(@observation, params[:field_code])
       # flash_notice(:runtime_observation_success.t(id: @observation.id))
+      add_inat_summmary_data(inat_obs)
     end
 
     def inat_search_observations(ids)
@@ -107,16 +112,13 @@ module Observations
     def add_inat_images(obs_photos)
       obs_photos.each do |obs_photo|
         photo = InatObsPhoto.new(obs_photo)
-        # FIXME: Get a key. This one belongs to @pellaea
-        api_key = APIKey.first
-
         # ImageAPI#create params to consider adding to API params below
         # projects: parse_array(:project, :projects, must_be_member: true) ||
         #           [],
         params = {
           method: :post,
           action: :image,
-          api_key: api_key.key,
+          api_key: INAT_IMPORT_KEY.key,
           upload_url: photo.url,
 
           copyright_holder: photo.copyright_holder,
@@ -141,6 +143,30 @@ module Observations
         )
         @observation.add_image(image)
       end
+    end
+
+    def add_inat_summmary_data(inat_obs)
+      data =
+        "User: #{inat_obs.inat_user_login}\n".
+        concat("Observed: #{inat_obs.when}\n").
+        concat("Lat/Lon: Under Development\n").
+        concat("Place: #{inat_obs.inat_place_guess}\n").
+        concat("ID: Under Development\n").
+        concat("DQA: Under Development\n").
+        concat("Annotations: Under Development\n").
+        concat("Projects: #{inat_obs.inat_project_names}\n").
+        concat("Sequences: Under Development\n").
+        concat("Observation Fields: Under Development\n").
+        concat("Tags: Under Development")
+
+      params = {
+        target: @observation,
+        summary: "iNat Data #{@observation.created_at}",
+        comment: data
+      }
+
+      Comment.create(params)
+      # TODO: Insure Comment.user is webmaster (or other special-purpose user)
     end
   end
 end
