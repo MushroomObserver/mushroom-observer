@@ -1,16 +1,18 @@
 <%# locals: (image: nil, img_id: nil, upload: false, index: "", f: nil, img_file_name: "", img_file_size: "", exif_data: {}, thumb_id: nil) -%>
 
-<%# This may be rendered by Turbo, or by the edit action %>
+<%#
+This may be rendered by Turbo, or by the edit action
+`upload` means: image may be nil... or not, on form reload.
+image_src == nil (src set by js)
+%>
+
 <%=
 active = index == 0 ? "active" : ""
 data = { form_images_target: "item", form_exif_target: "item",
          action: "form-exif#populated@window->form-images#itemExifPopulated" }
 if upload
   img_id ||= "img_id_missing"
-  # upload means: image may be nil... or not, on form reload.
-  #               image_src == nil (src set by js)
   data = data.merge(added_image: true, image_uuid: img_id)
-  # img_file_name ||= image&.original_name || ""
   exif_data = { img_file_name:, img_file_size: }
   extra_classes = "carousel-image set-src"
 else
@@ -18,8 +20,8 @@ else
   data = data.merge(good_image: true, geocode: JSON.generate(exif_data))
   extra_classes = "carousel-image"
 end
-presenter_args = { size: :large, fit: :contain,
-                   extra_classes: extra_classes }.merge(upload: upload)
+presenter_args = { size: :large, fit: :contain, extra_classes: extra_classes,
+                   upload: upload }
 presenter = ImagePresenter.new(img_id, presenter_args)
 item_attrs = { id: "carousel_item_#{img_id}",
                class: ["item carousel-item", active] }.merge(data: data)

@@ -226,7 +226,7 @@ module ObservationsController::FormHelpers
   def get_exif_data(images)
     data = {}
     images.each do |image|
-      data[image.id] = image&.read_exif_geocode
+      data[image.id] = image&.read_exif_geocode || {}
     end
     data
   end
