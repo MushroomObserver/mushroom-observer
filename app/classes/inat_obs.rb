@@ -56,7 +56,7 @@ class InatObs
 
   # comma-separated string of names of projects to which obs belongs
   def inat_project_names
-    projects = obs[:project_observations]
+    projects = inat_projects
 
     # 2024-06-12 jdc
     # 1. Stop inat_obs from returning the following when projects.empty
@@ -151,6 +151,13 @@ class InatObs
 
   def fungi?
     obs.dig(:taxon, :iconic_taxon_name) == "Fungi"
+  end
+
+  # TODO: 2024-06-13 jdc. This is unreliable.
+  # Is there a better way?
+  # See https://github.com/MushroomObserver/mushroom-observer/issues/1955#issuecomment-2164323992
+  def inat_projects
+    obs[:project_observations]
   end
 
   def slime_mold?
