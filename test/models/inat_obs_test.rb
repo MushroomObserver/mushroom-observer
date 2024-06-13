@@ -59,7 +59,6 @@ class InatObsTest < UnitTestCase
       end
 
     # TODO: include in above array after creating Observation.inat_id attribute
-    assert_equal(202555552, import.inat_id)
 
     expect = License.where(License[:url] =~ "/by-nc/").
              where(deprecated: false).order(id: :asc).first
@@ -79,10 +78,14 @@ class InatObsTest < UnitTestCase
       t.boolean "gps_hidden", default: false, null: false
 =end
 
-    # other iNat attributes
-    assert_equal("jdcohenesq", import.inat_user_login)
+    # iNat attributes
+    # NOTE: jdc 2024-06-13
+    # Might seem circular, but need to insure it works with different iNat APIs
+    assert_equal(202555552, import.inat_id)
+    assert_equal("31.8813,-109.244", import.inat_location)
     assert_equal("Cochise Co., Arizona, USA", import.inat_place_guess)
-
+    assert_equal(20, import.inat_public_positional_accuracy)
+    assert_equal("jdcohenesq", import.inat_user_login)
   end
   # rubocop:enable Style/NumericLiterals
 

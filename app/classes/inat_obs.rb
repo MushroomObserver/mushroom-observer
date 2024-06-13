@@ -50,6 +50,10 @@ class InatObs
     fungi? || slime_mold?
   end
 
+  def inat_location
+    obs[:location]
+  end
+
   def inat_place_guess
     obs[:place_guess]
   end
@@ -71,6 +75,10 @@ class InatObs
     # Extract the titles from each project observation
     (projects.map { |proj| proj.dig(:project, :title) } << "??").
       join(", ").delete_prefix(", ")
+  end
+
+  def inat_public_positional_accuracy
+    obs[:public_positional_accuracy]
   end
 
   def inat_user_login
@@ -118,11 +126,11 @@ class InatObs
   # :location seems simplest source for lat/lng
   # But [:geojason] might be possible.
   def lat
-    obs[:location].split(",").first.to_f
+    inat_location.split(",").first.to_f
   end
 
   def lng
-    obs[:location].split(",").second.to_f
+    inat_location.split(",").second.to_f
   end
 
   def text_name
