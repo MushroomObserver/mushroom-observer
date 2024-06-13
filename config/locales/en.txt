@@ -351,6 +351,7 @@
   observation: observation
   OBSERVATIONS: Observations
   observations: observations
+  OBSERVATION_FIELDS: Observation Fields
   PAST_LOCATION: Location Change
   past_location: location change
   PAST_LOCATIONS: Location Changes
@@ -439,6 +440,7 @@
   admin_group: admin group
   ADMIN_GROUPS: Admin Groups
   admin_groups: admin groups
+  ANNOTATIONS: Annotations
   # ("Author" is person(s) who wrote a book, description, or news Article.)
   AUTHOR: Author
   author: author
@@ -490,6 +492,8 @@
   # deposit of Sequence Bases in an Archive
   DEPOSIT: Deposit
   deposit: deposit
+  # DQA is iNat-ese for Data Quality Assessment
+  DQA: DQA
   EDITOR: Editor
   editor: editor
   EDITORS: Editors
@@ -529,6 +533,7 @@
   latitude: latitude
   LATITUDES: Latitudes
   latitudes: latitudes
+  LAT_LON: Lat/Lon
   LOCUS: Locus
   locus: locus
   LOGIN_NAME: Login Name
@@ -551,6 +556,7 @@
   note: note
   NOTES: Notes
   notes: notes
+  OBSERVED: Observed
   OBSERVER: Observer
   observer: observer
   OBSERVERS: Observers
@@ -565,6 +571,7 @@
   password: password
   PASSWORDS: Passwords
   passwords: passwords
+  PLACE: Place
   PREFERENCES: Preferences
   preferences: preferences
   PREFERRED_NAME: Preferred Name
@@ -613,6 +620,7 @@
   title: title
   TITLES: Titles
   titles: titles
+  UNDER_DEVELOPMENT: Under Development
   VERSION: Version
   version: version
   VERSIONS: Versions

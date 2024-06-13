@@ -147,17 +147,17 @@ module Observations
 
     def add_inat_summmary_data(inat_obs)
       data =
-        "User: #{inat_obs.inat_user_login}\n".
-        concat("Observed: #{inat_obs.when}\n").
-        concat("Lat/Lon: Under Development\n").
-        concat("Place: #{inat_obs.inat_place_guess}\n").
-        concat("ID: Under Development\n").
-        concat("DQA: Under Development\n").
-        concat("Annotations: Under Development\n").
-        concat("Projects: #{inat_obs.inat_project_names}\n").
-        concat("Sequences: Under Development\n").
-        concat("Observation Fields: Under Development\n").
-        concat("Tags: Under Development")
+        "#{:USER.t}: #{inat_obs.inat_user_login}\n".
+        concat("#{:OBSERVED.t}: #{inat_obs.when}\n").
+        concat("#{:LAT_LON.t}: #{:UNDER_DEVELOPMENT.t}\n").
+        concat("#{:PLACE.t}: #{inat_obs.inat_place_guess}\n").
+        concat("#{:ID.t}: #{:UNDER_DEVELOPMENT.t}\n").
+        concat("#{:DQA.t}: #{:UNDER_DEVELOPMENT.t}\n").
+        concat("#{:ANNOTATIONS.t}: #{:UNDER_DEVELOPMENT.t}\n").
+        concat("#{:PROJECTS.t}: #{inat_obs.inat_project_names}\n").
+        concat("#{:SEQUENCES.t}: #{:UNDER_DEVELOPMENT.t}\n").
+        concat("#{:OBSERVATION_FIELDS.t}: #{:UNDER_DEVELOPMENT.t}\n").
+        concat("#{:TAGS.t}: #{:UNDER_DEVELOPMENT.t}")
 
       params = {
         target: @observation,
