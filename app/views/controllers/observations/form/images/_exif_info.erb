@@ -1,9 +1,9 @@
-<%# locals: (lat: "", lng: "", alt: "", date: "", img_file_name: "", img_file_size: "") -%>
-
+<%# locals: (img_id: "", lat: "", lng: "", alt: "", date: "", file_name: "", file_size: "") -%>
 <%=
-tag.div(class: "well well-sm mt-4 position-relative") do
+tag.div(class: "well well-sm position-relative",
+        id: "camera_info_#{img_id}") do
   [
-    tag.p { tag.strong("#{:image_camera_info.l}:") },
+    label_tag("camera_info_#{img_id}", :image_camera_info.l),
     tag.div(class: "form-group") do
       [
         tag.div do
@@ -23,15 +23,15 @@ tag.div(class: "well well-sm mt-4 position-relative") do
       ].safe_join
     end,
     tag.div(class: "form-group mb-0") do
-      if img_file_name.present?
+      if file_name.present?
         concat(tag.div do
           [tag.strong("#{:image_file_name.l}: "),
-           tag.span(img_file_name, class: "img_file_name")].safe_join
+           tag.span(file_name, class: "file_name")].safe_join
         end)
       end
       concat(tag.div do
         [tag.strong("#{:image_file_size.l}: "),
-         tag.span(img_file_size, class: "img_file_size")].safe_join
+         tag.span(file_size, class: "file_size")].safe_join
       end)
     end
   ].safe_join

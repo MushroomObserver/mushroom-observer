@@ -187,7 +187,7 @@ module ObservationsController::FormHelpers
 
   # List of images that we've successfully uploaded, but which
   # haven't been attached to the observation yet.  Also supports some
-  # mininal editing.  INPUT: params[:good_images] (also looks at
+  # mininal editing.  INPUT: params[:good_image_ids] (also looks at
   # params[:image_<id>_notes]) OUTPUT: list of images
 
   def update_good_images(ids)

@@ -2,25 +2,26 @@
 
 <%# Generalized for uploaded images (no Image record) %>
 <%=
-data = { form_images_target: "thumbnail" }
+data = { target: "##{html_id}", slide_to: index.to_s,
+         form_images_target: "thumbnail" }
 active = (index == 0) ? "active" : ""
 
 if upload
   img_id ||= "img_id_missing"
-  data = data.merge(image_uuid: img_id)
   extra_classes = "carousel-thumbnail set-src"
+  image_status = "upload"
 else
   img_id = image.id
-  data = data.merge(good_image: true)
   extra_classes = "carousel-thumbnail"
+  image_status = "good"
 end
 presenter_args = { size: :thumbnail, fit: :contain,
                    extra_classes: extra_classes }.merge(upload: upload)
 presenter = ImagePresenter.new(image || img_id, presenter_args)
+data = data.merge(image_uuid: img_id, image_status:)
 
 tag.li(id: "carousel_thumbnail_#{img_id}",
-       class: class_names("carousel-indicator mx-1", active),
-       data: { target: "##{html_id}", slide_to: index.to_s }.merge(data)) do
+       class: ["carousel-indicator mx-1", active], data: data) do
   image_tag(presenter.img_src, presenter.options_lazy)
 end
 %>

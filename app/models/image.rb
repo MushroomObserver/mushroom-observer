@@ -810,13 +810,13 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     data = read_exif_data(flags)[0]
     return nil unless data
 
-    lat = lng = alt = date = img_file_size = nil
+    lat = lng = alt = date = file_size = nil
     data.each do |key, val|
       lat = val.to_f.round(4) if key.match?(/latitude/i)
       lng = val.to_f.round(4) if key.match?(/longitude/i)
       alt = val if key.match?(/altitude/i)
       date = val if key.match?(/date/i)
-      img_file_size = val if key.match?(/size/i)
+      file_size = val if key.match?(/size/i)
     end
     return nil unless lat && lng
 
@@ -824,9 +824,9 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       date = DateTime.strptime(date, "%Y:%m:%d %H:%M:%S").strftime("%d-%B-%Y")
     end
 
-    img_file_size = "#{(img_file_size.to_i / 1024).to_i}kb" if img_file_size
+    file_size = "#{(file_size.to_i / 1024).to_i}kb" if file_size
 
-    { lat:, lng:, alt:, date:, img_file_name: nil, img_file_size: }
+    { lat:, lng:, alt:, date:, file_name: nil, file_size: }
   end
 
   GPS_TAGS = /latitude|longitude|gps/i

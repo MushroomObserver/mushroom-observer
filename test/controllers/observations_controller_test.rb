@@ -2329,7 +2329,7 @@ class ObservationsControllerTest < FunctionalTestCase
             when: Time.zone.now
           }
         },
-        good_images: "#{old_img1.id} #{old_img2.id}"
+        good_image_ids: "#{old_img1.id} #{old_img2.id}"
       }
     )
 
@@ -2401,7 +2401,7 @@ class ObservationsControllerTest < FunctionalTestCase
         specimen: new_specimen,
         thumb_image_id: "0"
       },
-      good_images: "#{img.id} #{images(:turned_over_image).id}",
+      good_image_ids: "#{img.id} #{images(:turned_over_image).id}",
       good_image: {
         img.id => {
           notes: "new notes",
@@ -2521,7 +2521,7 @@ class ObservationsControllerTest < FunctionalTestCase
         specimen: obs.specimen,
         thumb_image_id: "0"
       },
-      good_images: img_ids.map(&:to_s).join(" "),
+      good_image_ids: img_ids.map(&:to_s).join(" "),
       good_image: {
         img2.id => { notes: "new notes for two" },
         img3.id => { notes: "new notes for three" }
@@ -2550,7 +2550,7 @@ class ObservationsControllerTest < FunctionalTestCase
         specimen: obs.specimen,
         thumb_image_id: "0"
       },
-      good_images: "",
+      good_image_ids: "",
       good_image: {},
       image: {
         "0" => {
@@ -2595,7 +2595,7 @@ class ObservationsControllerTest < FunctionalTestCase
         observation: {
           gps_hidden: "1"
         },
-        good_images: "#{old_img1.id} #{old_img2.id}",
+        good_image_ids: "#{old_img1.id} #{old_img2.id}",
         image: {
           "0" => {
             image: fixture,
@@ -2849,7 +2849,7 @@ class ObservationsControllerTest < FunctionalTestCase
             }
           },
           # (attach these two images once observation created)
-          good_images: "#{new_image1.id} #{new_image2.id}"
+          good_image_ids: "#{new_image1.id} #{new_image2.id}"
         }
       )
     end
@@ -3006,7 +3006,7 @@ class ObservationsControllerTest < FunctionalTestCase
         id: @obs2.id,
         observation: { place_name: "blah blah blah" }, # (ensures it will fail)
         project: { "id_#{@proj1.id}" => "1" },
-        good_images: @obs2_img_ids.join(" ") # necessary?
+        good_image_ids: @obs2_img_ids.join(" ") # necessary?
       }
     )
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
@@ -3015,7 +3015,7 @@ class ObservationsControllerTest < FunctionalTestCase
       params: {
         id: @obs2.id,
         project: { "id_#{@proj1.id}" => "1" },
-        good_images: @obs2_img_ids.join(" ") # necessary?
+        good_image_ids: @obs2_img_ids.join(" ") # necessary?
       }
     )
     assert_response(:redirect)
@@ -3036,7 +3036,7 @@ class ObservationsControllerTest < FunctionalTestCase
           "id_#{@proj1.id}" => "1",
           "id_#{@proj2.id}" => "0"
         },
-        good_images: @obs1_img_ids.join(" ")
+        good_image_ids: @obs1_img_ids.join(" ")
       }
     )
     assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
@@ -3048,7 +3048,7 @@ class ObservationsControllerTest < FunctionalTestCase
           "id_#{@proj1.id}" => "1",
           "id_#{@proj2.id}" => "1"
         },
-        good_images: @obs1_img_ids.join(" ")
+        good_image_ids: @obs1_img_ids.join(" ")
       }
     )
     assert_response(:redirect)

@@ -1,4 +1,4 @@
-<%# locals: (image: nil, img_id: nil, upload: false, index: "", f: nil, img_file_name: "", img_file_size: "", exif_data: {}, thumb_id: nil) -%>
+<%# locals: (image: nil, img_id: nil, upload: false, index: "", f: nil, camera_info: {}, thumb_id: nil) -%>
 
 <%#
 This may be rendered by Turbo, or by the edit action
@@ -12,17 +12,18 @@ data = { form_images_target: "item", form_exif_target: "item",
          action: "form-exif#populated@window->form-images#itemExifPopulated" }
 if upload
   img_id ||= "img_id_missing"
-  data = data.merge(added_image: true, image_uuid: img_id)
-  exif_data = { img_file_name:, img_file_size: }
   extra_classes = "carousel-image set-src"
+  image_status = "upload"
 else
   img_id = image&.id
-  data = data.merge(good_image: true, geocode: JSON.generate(exif_data))
+  data = data.merge(geocode: JSON.generate(camera_info))
   extra_classes = "carousel-image"
+  image_status = "good"
 end
 presenter_args = { size: :large, fit: :contain, extra_classes: extra_classes,
                    upload: upload }
 presenter = ImagePresenter.new(img_id, presenter_args)
+data = data.merge(image_uuid: img_id, image_status:)
 item_attrs = { id: "carousel_item_#{img_id}",
                class: ["item carousel-item", active] }.merge(data: data)
 
@@ -44,7 +45,7 @@ tag.div(**item_attrs) do
                           locals: { f:, image: }))
           end
           concat(render(partial: "observations/form/images/exif_info",
-                        locals: exif_data))
+                        locals: camera_info.merge(img_id: img_id)))
         end
       end,
       tag.div(class: "top-left p-4") do

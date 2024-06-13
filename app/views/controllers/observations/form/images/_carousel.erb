@@ -18,7 +18,7 @@ tag.div(class: "carousel slide image-form-carousel", id: html_id,
       upload = image&.created_at == nil
       concat(render(partial: "observations/form/images/carousel_item",
                     locals: { f: f, image:, index:, upload:, thumb_id:,
-                              exif_data: exif_data[image&.id] }))
+                              camera_info: exif_data[image&.id] }))
     end
     concat(tag.div(class: "carousel-control-wrap row") do
       carousel_controls(html_id)

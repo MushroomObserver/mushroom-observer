@@ -29,7 +29,7 @@ export default class extends Controller {
   itemTargetConnected(itemElement) {
     // console.log("itemTargetConnected")
     // console.log(itemElement);
-    if (itemElement.hasAttribute('data-good-image')) return;
+    if (itemElement.dataset.imageStatus == "good") return;
     itemElement.dataset.geocode = "";
 
     // extract the EXIF data (async) and populate the item and element

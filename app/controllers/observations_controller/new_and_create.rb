@@ -16,7 +16,7 @@ module ObservationsController::NewAndCreate
   #   params[:naming][:vote][...]       vote args
   #   params[:naming][:reasons][n][...] naming_reasons args
   #   params[:image][n][...]            image args
-  #   params[:good_images]              images already downloaded
+  #   params[:good_image_ids]              images already downloaded
   #   params[:was_js_on]                was form javascripty? ("yes" = true)
   #
   # Outputs:
@@ -165,7 +165,7 @@ module ObservationsController::NewAndCreate
     @observation.notes = notes_to_sym_and_compact
     @naming = Naming.construct({}, @observation)
     @vote = Vote.construct(params.dig(:naming, :vote), @naming)
-    @good_images = update_good_images(params[:good_images])
+    @good_images = update_good_images(params[:good_image_ids])
     @exif_data = get_exif_data(@good_images)
     @bad_images  = create_image_objects(params[:image],
                                         @observation, @good_images)

@@ -107,8 +107,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Add the images separately, so we can be sure of the order. Otherwise,
     # images appear in the order each upload finishes, which is unpredictable.
     click_attach_file("Coprinus_comatus.jpg")
-    first_image_wrapper = find("[data-added-image='true']", visible: :all)
-    assert_selector(".img_file_name", text: /Coprinus_comatus/, visible: :all)
+    first_image_wrapper = first(".carousel-item[data-image-status='upload']",
+                                visible: :all)
+    assert_selector(".file_name", text: /Coprinus_comatus/, visible: :all)
 
     # Coprinus_comatus.jpg has a created_at date of November 20, 2006
     # Does not work:
@@ -123,10 +124,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Add a second image that's geotagged.
     click_attach_file("geotagged.jpg")
     sleep(0.5)
-
     # Be sure we have two image wrappers. We have to wait for
     # the first one to be hidden before we can see the second one.
-    image_wrappers = all("[data-added-image='true']", visible: :all)
+    image_wrappers = all(".carousel-item[data-image-status='upload']",
+                         visible: :all)
     assert_equal(2, image_wrappers.length)
     # The new one is prepended, so second is "first"
     second_image_wrapper = image_wrappers[0]
@@ -149,14 +150,17 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_equal("4", find('[id$="observation_alt"]').value.to_i.to_s)
 
     # Ok, enough. By now, the carousel image should be showing the second image.
-    assert_selector("[data-added-image='true'][data-stimulus='connected']",
-                    visible: :visible, wait: 3)
+    assert_selector(
+      ".carousel-item[data-image-status='upload'][data-stimulus='connected']",
+      visible: :visible, wait: 3
+    )
     # Try removing the geotagged image
     scroll_to(second_image_wrapper, align: :center)
     within(second_image_wrapper) { find(".remove_image_button").click }
 
     # Be sure we have only one image wrapper now
-    image_wrappers = all("[data-added-image='true']", visible: :all)
+    image_wrappers = all(".carousel-item[data-image-status='upload']",
+                         visible: :all)
     assert_equal(1, image_wrappers.length)
 
     # Add geotagged.jpg again
@@ -164,8 +168,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     sleep(0.5)
 
     # Be sure we have two image wrappers
-    second_image_wrapper = find("[data-added-image='true']", text: "25.7582")
-    image_wrappers = all("[data-added-image='true']", visible: :all)
+    second_image_wrapper = find(".carousel-item[data-image-status='upload']",
+                                text: "25.7582")
+    image_wrappers = all(".carousel-item[data-image-status='upload']",
+                         visible: :all)
     assert_equal(image_wrappers.length, 2)
 
     within(second_image_wrapper) do
@@ -184,8 +190,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     all(".carousel-indicator").last.click
     assert_selector("#added_images", visible: :visible, wait: 3)
-    assert_selector("[data-added-image='true']", text: /Coprinus_comatus/,
-                                                 wait: 3)
+    assert_selector(".carousel-item[data-image-status='upload']",
+                    text: /Coprinus_comatus/, wait: 3)
     # Set the first (last) one as the thumb_image
     within(first_image_wrapper) do
       thumb_button = find(".obs_thumb_img_btn")
@@ -377,6 +383,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_unchecked_field("thumb_image_id_#{geo.id}", visible: :all)
 
     # submit_observation_form_with_changes
+    obs_when = find("#observation_when_1i")
+    scroll_to(obs_when, align: :center)
     fill_in("observation_when_1i", with: "2011")
     select("April", from: "observation_when_2i")
     select("15", from: "observation_when_3i")

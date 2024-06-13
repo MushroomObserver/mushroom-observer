@@ -6,14 +6,14 @@ not* set the observation[thumb_image_id]: their value is transferred by JS to
 the hidden_field below with a similar name, which takes precedence.
 This is because when images are being uploaded, the radio buttons
 do not yet have an image.id value - the image record has not yet been created.
-Also, note that `good_images` is currently not a field under observation,
-i.e. observation[good_images]. It's a top-level field. --%>
+Also, note that `good_image_ids` is currently not a field under observation,
+i.e. observation[good_image_ids]. It's a top-level field. --%>
 
 <%= tag.div(class: "mb-5", id: "observation_images") do %>
 
-  <%= hidden_field_tag(:good_images,
+  <%= hidden_field_tag(:good_image_ids,
                        @good_images.map { |img| img.id }.join(" "),
-                       data: { form_images_target: "goodImages" }) %>
+                       data: { form_images_target: "goodImageIds" }) %>
 
   <%= f.hidden_field(:thumb_image_id,
                      data: { form_images_target: "thumbImageId" }) %>

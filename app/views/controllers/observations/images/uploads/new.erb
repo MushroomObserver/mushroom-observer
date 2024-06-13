@@ -3,10 +3,10 @@
 turbo_stream.prepend(
   "added_images",
   partial: "observations/form/images/carousel_item",
-  locals: { upload: true, index: params[:index],
-            img_id: params[:img_id], image: @image,
-            img_file_name: params[:img_file_name],
-            img_file_size: params[:img_file_size] }
+  locals: { upload: true, image: @image,
+            img_id: params[:img_id], index: params[:index],
+            camera_info: { file_name: params[:file_name],
+                           file_size: params[:file_size] } }
 )
 %>
 <%=

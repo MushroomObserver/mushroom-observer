@@ -51,7 +51,7 @@ const internalConfig = {
 // Connects to data-controller="form-images"
 export default class extends Controller {
   static targets = ["form", "carousel", "item", "thumbnail", "removeImg",
-    "imageGpsMap", "goodImages", "thumbImageId", "setThumbImg", "isThumbImg",
+    "imageGpsMap", "goodImageIds", "thumbImageId", "setThumbImg", "isThumbImg",
     "thumbImgRadio", "obsThumbImgBtn"]
 
   initialize() {
@@ -293,8 +293,8 @@ export default class extends Controller {
         query: {
           index: i,
           img_id: item.uuid,
-          img_file_name: item.file_name,
-          img_file_size: _file_size
+          file_name: item.file_name,
+          file_size: _file_size
         }
       });
 
@@ -316,7 +316,7 @@ export default class extends Controller {
     itemElement.dataset.stimulus = "connected";
     // console.log("itemTargetConnected")
     // console.log(itemElement);
-    if (itemElement.hasAttribute('data-good-image')) return;
+    if (itemElement.dataset.imageStatus == "good") return;
 
     this.sortCarousel();
     // Attach a reference to the dom element to the item object so we can
@@ -334,7 +334,7 @@ export default class extends Controller {
 
   thumbnailTargetConnected(thumbElement) {
     thumbElement.dataset.stimulus = "connected";
-    if (thumbElement.hasAttribute('data-good-image')) return;
+    if (thumbElement.dataset.imageStatus == "good") return;
 
     // Attach it to the FileStore item if there is one,
     const item = this.findFileStoreItem(thumbElement);
@@ -346,19 +346,19 @@ export default class extends Controller {
   // Adjust the carousel controls and indicators for the new/removed item.
   // Can't bind to targetDisconnected because there are two targets to remove.
   sortCarousel() {
-    const _items = this.carouselTarget.querySelectorAll('.carousel-item'),
-      _indicators = this.carouselTarget.querySelectorAll('.carousel-indicator'),
+    const items = this.carouselTarget.querySelectorAll('.carousel-item'),
+      indicators = this.carouselTarget.querySelectorAll('.carousel-indicator'),
       _active = this.carouselTarget.querySelectorAll('.active');
 
     // Remove all active classes from items and indicators
     _active.forEach((elem) => { elem.classList.remove('active') });
 
     // This always makes the new (or first) element in the carousel active.
-    _items[0]?.classList?.add('active');
-    _indicators[0]?.classList?.add('active');
+    items[0]?.classList?.add('active');
+    indicators[0]?.classList?.add('active');
 
     this.showOrHideCarouselControls();
-    this.resortCarouselIndicators(_items, _indicators);
+    this.resortCarouselIndicators(items, indicators);
   }
 
   // Show or hide the controls, depending on the total.
@@ -411,13 +411,13 @@ export default class extends Controller {
   // (not a fileStore item), on the obs edit form. It just removes the item
   // from the carousel and id from "good_images". Has no effect until submit.
   removeAttachedItem(event) {
-    const _good_images = this.goodImagesTarget.value,
+    const _good_images = this.goodImageIdsTarget.value,
       _good_image_vals = _good_images.split(" "),
       _image_id = event.target.dataset.imageId,
       _thumb_id = this.thumbImageIdTarget.value;
 
     const _new = _good_image_vals.filter(item => item !== _image_id).join(" ");
-    this.goodImagesTarget.value = _new;
+    this.goodImageIdsTarget.value = _new;
 
     if (_thumb_id == _image_id) {
       this.thumbImageIdTarget.value = "";
@@ -431,6 +431,8 @@ export default class extends Controller {
 
   // "closest" works even if the element is the item itself.
   findFileStoreItem(element) {
+    if (this.fileStore == undefined) return;
+
     const _identifiable = element.closest(".carousel-item") ??
       element.closest(".carousel-indicator");
 
@@ -537,13 +539,13 @@ export default class extends Controller {
   // add the image to `good_images` and maybe set the thumb_image_id
   updateObsImages(item, image) {
     // #good_images is a hidden field
-    const _good_image_vals = this.goodImagesTarget.value || "";
+    const _good_image_vals = this.goodImageIdsTarget.value || "";
     const _radio = item.dom_element.querySelector(
       'input[type="radio"][name="thumb_image_id"]'
     )
 
     // add id to the good images form field.
-    this.goodImagesTarget.value = [_good_image_vals, image.id].join(' ').trim();
+    this.goodImageIdsTarget.value = [_good_image_vals, image.id].join(' ').trim();
 
     // set the hidden thumb_image_id field if the item's radio is checked
     if (_radio.checked) {
