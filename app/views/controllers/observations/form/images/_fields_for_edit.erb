@@ -1,4 +1,5 @@
-<%# good image fields partial section of create_observation form %>
+<%# good_image fields partial section of create_observation form %>
+
 <%= fields_for(:good_image) do |fgi| %>
   <%= text_area_with_label(form: fgi, field: :notes, index: image.id,
                            value: image.notes, rows: 3, label: :NOTES.l) %>

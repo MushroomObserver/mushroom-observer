@@ -1,3 +1,4 @@
+<%# locals: (images: nil, html_id: "observation_upload_images_carousel", thumb_id: nil, exif_data: {}, f: nil) -%>
 <%=
 # TODO: make this a component
 # Optional args:
@@ -5,9 +6,6 @@
 #   (carousel)title:, (image_edit)links:
 #
 # Note: uses concat(x) instead of [x,y].safe_join because of conditionals
-
-images ||= nil #
-html_id = "observation_upload_images_carousel"
 
 # printing the carousel even if empty
 tag.div(class: "carousel slide edit-carousel", id: html_id,
@@ -17,8 +15,10 @@ tag.div(class: "carousel slide edit-carousel", id: html_id,
   concat(tag.div(class: "carousel-inner bg-light", role: "listbox",
                  id: "added_images" ) do
     images&.each_with_index do |image, index|
+      upload = image&.created_at == nil
       concat(render(partial: "observations/form/images/carousel_item",
-                    locals: { f: f, image:, index: }))
+                    locals: { f: f, image:, index:, upload:, thumb_id:,
+                              exif_data: exif_data[image&.id] }))
     end
     concat(tag.div(class: "carousel-control-wrap row") do
       carousel_controls(html_id)

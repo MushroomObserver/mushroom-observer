@@ -165,14 +165,13 @@ module CapybaraSessionExtensions
     session.first(:button, type: "submit").click
   end
 
+  # This is a mess, but this button is very finicky
   def click_attach_file(filename, session: self)
     label = session.first(".file-field")
     session.scroll_to(label, align: :center)
-    # label.trigger("click")
-    session.attach_file(Rails.root.join("test/images/#{filename}")) do
-      label.find("#select_images_button", visible: :hidden).trigger("click")
-      sleep(3)
-    end
+    session.attach_file("select_images_button",
+                        Rails.root.join("test/images/#{filename}"),
+                        make_visible: true)
   end
 
   # # Cuprite: must scroll to the button or you can't click?

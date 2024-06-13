@@ -170,22 +170,22 @@ export default class extends Controller {
   /*********************/
   // Container for the image files.
 
-  // Callback for form-exif event "processed", fired from the carousel-item
-  itemProcessed(event) {
+  // Callback for form-exif event "populated", fired from the carousel-item
+  itemExifPopulated(event) {
     const _item = this.findFileStoreItem(event.target);
-    _item.processed = true;
+    _item.exif_populated = true;
   }
 
-  areAllItemsProcessed() {
-    for (let i = 0; i < this.fileStore.items.length; i++) {
-      if (!this.fileStore.items[i].processed)
-        return false;
-    }
+  areAllItemsExifPopulated() {
+    this.fileStore.items.forEach((item) => {
+      if (!item.exif_populated) return false;
+    });
     return true;
   }
 
   addFiles(files) {
-    // loop through attached files
+    // loop through attached FileList.
+    // FileList is a peculiar object: { 0: File, 1: File, length: 2 }
     for (let i = 0; i < files.length; i++) {
       // uuid is used as the index for the ruby form template. // **
       const _item = this.FileStoreItem(files[i], this.generateUUID());
@@ -272,8 +272,7 @@ export default class extends Controller {
     item.dom_element = null;
     item.thumbnail_element = null;
     item.exif_data = null;
-    item.processed = false; // check the async status of files
-
+    item.exif_populated = false; // check the async status of files
     return item;
   }
 
@@ -314,6 +313,7 @@ export default class extends Controller {
   // - re-sort the carousel
   // - read the file with FileReader to display the image
   itemTargetConnected(itemElement) {
+    itemElement.dataset.stimulus = "connected";
     // console.log("itemTargetConnected")
     // console.log(itemElement);
     if (itemElement.hasAttribute('data-good-image')) return;
@@ -333,6 +333,7 @@ export default class extends Controller {
   }
 
   thumbnailTargetConnected(thumbElement) {
+    thumbElement.dataset.stimulus = "connected";
     if (thumbElement.hasAttribute('data-good-image')) return;
 
     // Attach it to the FileStore item if there is one,
@@ -345,7 +346,7 @@ export default class extends Controller {
   // Adjust the carousel controls and indicators for the new/removed item.
   // Can't bind to targetDisconnected because there are two targets to remove.
   sortCarousel() {
-    const _items = this.carouselTarget.querySelectorAll('.item'),
+    const _items = this.carouselTarget.querySelectorAll('.carousel-item'),
       _indicators = this.carouselTarget.querySelectorAll('.carousel-indicator'),
       _active = this.carouselTarget.querySelectorAll('.active');
 
@@ -362,7 +363,7 @@ export default class extends Controller {
 
   // Show or hide the controls, depending on the total.
   showOrHideCarouselControls() {
-    const _items = this.carouselTarget.querySelectorAll('.item'),
+    const _items = this.carouselTarget.querySelectorAll('.carousel-item'),
       _indicontrols = this.carouselTarget.querySelector('.carousel-indicators'),
       _controls = this.carouselTarget.querySelector('.carousel-control'),
       _count = _items.length;
@@ -430,7 +431,7 @@ export default class extends Controller {
 
   // "closest" works even if the element is the item itself.
   findFileStoreItem(element) {
-    const _identifiable = element.closest(".item") ??
+    const _identifiable = element.closest(".carousel-item") ??
       element.closest(".carousel-indicator");
 
     return this.fileStore.items.find(
@@ -464,16 +465,17 @@ export default class extends Controller {
     }
   }
 
-  // This is too brittle. Selectors needed.
+  // Get the info straight from the form inputs.
   getUserEnteredInfo(item) {
-    return {
-      day: item.dom_element.querySelectorAll('select')[0].value,
-      month: item.dom_element.querySelectorAll('select')[1].value,
-      year: item.dom_element.querySelectorAll('input')[2].value,
-      license: item.dom_element.querySelectorAll('select')[2].value,
-      notes: item.dom_element.querySelectorAll('textarea')[0].value,
-      copyright_holder: item.dom_element.querySelectorAll('input')[1].value
-    };
+    const _elem = item.dom_element,
+      day = _elem.querySelector('[id$="when_3i"]').value,
+      month = _elem.querySelector('[id$="when_2i"]').value,
+      year = _elem.querySelector('[id$="when_1i"]').value,
+      license = _elem.querySelector('[id$="license_id"]').value,
+      notes = _elem.querySelector('[id$="notes"]').value,
+      copyright_holder = _elem.querySelector('[id$="copyright_holder"]').value;
+
+    return { day, month, year, license, notes, copyright_holder };
   }
 
   // Because it can't be a form (within a form), we build formData manually.

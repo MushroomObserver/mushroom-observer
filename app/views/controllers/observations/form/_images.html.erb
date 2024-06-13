@@ -37,7 +37,8 @@ i.e. observation[good_images]. It's a top-level field. --%>
         ].safe_join
       end,
       render(partial: "observations/form/images/carousel",
-             locals: { f: f, images: @good_images })
+             locals: { f: f, images: @good_images, exif_data: @exif_data,
+                       thumb_id: @observation.thumb_image_id })
     ].safe_join
   end %>
 

@@ -67,10 +67,11 @@ module CarouselHelper
   # For existing images, it should set the image id, and the `active` class.
   # Note that this is not `observation[thumb_image_id]`, a hidden field that
   # is set by the Stimulus controller on the basis of these radios' value.
-  def carousel_set_thumb_img_button(image: nil, active: "")
-    value = image ? image.id : "true"
+  def carousel_set_thumb_img_button(image: nil, thumb_id: nil)
+    value = image&.id || "true"
+    checked = thumb_id&.== image&.id
     label_classes = class_names("btn btn-default btn-sm obs_thumb_img_btn",
-                                active)
+                                active: checked)
     label_tag(
       :thumb_image_id,
       class: label_classes,
@@ -80,7 +81,7 @@ module CarouselHelper
       [
         radio_button_tag(
           :thumb_image_id, value,
-          class: "mr-3",
+          class: "mr-3", checked: checked,
           data: { form_images_target: "thumbImgRadio" }
         ),
         tag.span(
@@ -97,7 +98,7 @@ module CarouselHelper
     end
   end
 
-  def carousel_remove_image_button(image_id = nil)
+  def carousel_remove_image_button(image_id: nil)
     action = image_id ? "removeAttachedItem" : "removeClickedItem"
     data = { form_images_target: "removeImg",
              action: "form-images##{action}:prevent" }

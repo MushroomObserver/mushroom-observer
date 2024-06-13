@@ -54,8 +54,8 @@ export default class extends Controller {
     this.populateExifGPS(itemElement, exif_data);
     this.populateExifDate(itemElement, exif_data);
 
-    // emit an event that form-images listens for, to set the item as processed
-    this.dispatch("processed", { detail: { target: itemElement } });
+    // emit an event that form-images listens for, to set item.exif_populated
+    this.dispatch("populated", { detail: { target: itemElement } });
 
     // If this is the first one, transfer the exif data to the obs fields
     // and set a flag so we don't do it again. Here because it's async.
@@ -79,6 +79,7 @@ export default class extends Controller {
       // Set item's data-geocode attribute so we can have a record
       itemElement.dataset.geocode = JSON.stringify(latLngAlt);
 
+      // These are not inputs, they're spans so we can't set the value
       _exif_lat.innerText = latLngAlt.lat.toFixed(4);
       _exif_lng.innerText = latLngAlt.lng.toFixed(4);
       _exif_alt.innerText = latLngAlt.alt;
@@ -116,7 +117,7 @@ export default class extends Controller {
   exifToImageDate(event) {
     const _itemElement = event.target.closest(".item"),
       _exifSimpleDate = JSON.parse(_itemElement.dataset.exif_date);
-    debugger
+
     this.imageDate(_itemElement, _exifSimpleDate);
   }
 

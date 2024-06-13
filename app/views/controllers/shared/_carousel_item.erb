@@ -8,7 +8,7 @@ presenter = ImagePresenter.new(image, presenter_args)
 active = index == 0 ? "active" : ""
 
 tag.div(id: "carousel_item_#{image.id}",
-        class: class_names("item", active)) do
+        class: class_names("item carousel-item", active)) do
   concat(image_tag(presenter.img_src, presenter.options_lazy))
   if presenter.image_link
     concat(image_stretched_link(presenter.image_link,

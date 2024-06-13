@@ -104,11 +104,107 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_no_checked_field("observation_specimen")
     assert_field(other_notes_id, with: "")
 
-    # submit_observation_form_with_errors
+    # Add the images separately, so we can be sure of the order. Otherwise,
+    # images appear in the order each upload finishes, which is unpredictable.
+    click_attach_file("Coprinus_comatus.jpg")
+    first_image_wrapper = find("[data-added-image='true']", visible: :all)
+    assert_selector(".img_file_name", text: /Coprinus_comatus/, visible: :all)
+
+    # Coprinus_comatus.jpg has a created_at date of November 20, 2006
+    # Does not work:
+    # assert_field('[id$="when_1i"]', with: "2006")
+    # No idea why we have to do it like this, maybe value set by JS.
+    within(first_image_wrapper) do
+      assert_equal("2006", find('[id$="when_1i"]', visible: :all).value)
+      assert_equal("11", find('[id$="when_2i"]', visible: :all).value)
+      assert_equal("20", find('[id$="when_3i"]', visible: :all).value)
+    end
+
+    # Add a second image that's geotagged.
+    click_attach_file("geotagged.jpg")
+    sleep(0.5)
+
+    # Be sure we have two image wrappers. We have to wait for
+    # the first one to be hidden before we can see the second one.
+    image_wrappers = all("[data-added-image='true']", visible: :all)
+    assert_equal(2, image_wrappers.length)
+    # The new one is prepended, so second is "first"
+    second_image_wrapper = image_wrappers[0]
+
+    # Check that it's the right image: this is geotagged.jpg's date
+    within(second_image_wrapper) do
+      assert_equal("2018", find('[id$="when_1i"]', visible: :all).value)
+      assert_equal("12", find('[id$="when_2i"]', visible: :all).value)
+      assert_equal("31", find('[id$="when_3i"]', visible: :all).value)
+    end
+
+    # Date should have been copied to the obs fields
+    assert_equal("2018", find('[id$="observation_when_1i"]').value)
+    assert_equal("12", find('[id$="observation_when_2i"]').value)
+    assert_equal("31", find('[id$="observation_when_3i"]').value)
+
+    # GPS should have been copied to the obs fields
+    assert_equal("25.7582", find('[id$="observation_lat"]').value)
+    assert_equal("-80.3731", find('[id$="observation_lng"]').value)
+    assert_equal("4", find('[id$="observation_alt"]').value.to_i.to_s)
+
+    # Ok, enough. By now, the carousel image should be showing the second image.
+    assert_selector("[data-added-image='true'][data-stimulus='connected']",
+                    visible: :visible, wait: 3)
+    # Try removing the geotagged image
+    scroll_to(second_image_wrapper, align: :center)
+    within(second_image_wrapper) { find(".remove_image_button").click }
+
+    # Be sure we have only one image wrapper now
+    image_wrappers = all("[data-added-image='true']", visible: :all)
+    assert_equal(1, image_wrappers.length)
+
+    # Add geotagged.jpg again
+    click_attach_file("geotagged.jpg")
+    sleep(0.5)
+
+    # Be sure we have two image wrappers
+    second_image_wrapper = find("[data-added-image='true']", text: "25.7582")
+    image_wrappers = all("[data-added-image='true']", visible: :all)
+    assert_equal(image_wrappers.length, 2)
+
+    within(second_image_wrapper) do
+      assert_equal("2018", find('[id$="when_1i"]').value)
+      assert_equal("12", find('[id$="when_2i"]').value)
+      assert_equal("31", find('[id$="when_3i"]').value)
+    end
+
+    # Set copyright holder and image notes on both
+    all('[id$="copyright_holder"]', visible: :all).each do |el|
+      el.set(katrina.legal_name)
+    end
+    all('[id$="notes"]', visible: :all).each do |el|
+      el.set("Notes for image")
+    end
+
+    all(".carousel-indicator").last.click
+    assert_selector("#added_images", visible: :visible, wait: 3)
+    assert_selector("[data-added-image='true']", text: /Coprinus_comatus/,
+                                                 wait: 3)
+    # Set the first (last) one as the thumb_image
+    within(first_image_wrapper) do
+      thumb_button = find(".obs_thumb_img_btn")
+      scroll_to(thumb_button, align: :center)
+      thumb_button.trigger("click")
+      assert_text(:image_add_default.l)
+      assert_no_text(:image_set_default.l)
+    end
+
+    # Fill out some other stuff
+    obs_when = find("#observation_when_1i")
+    scroll_to(obs_when, align: :center)
     fill_in("observation_when_1i", with: "2010")
     select("March", from: "observation_when_2i")
     select("14", from: "observation_when_3i")
 
+    # intentional error: nonexistant place name
+    location = find("#observation_place_name")
+    scroll_to(location, align: :center)
     fill_in("observation_place_name", with: "USA, California, Pasadena")
     assert_field("observation_place_name", with: "USA, California, Pasadena")
     uncheck("observation_is_collection_location")
@@ -117,10 +213,18 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("#collection_number_number")
     fill_in("collection_number_number", with: "17-034a")
     fill_in(other_notes_id, with: "Notes for observation")
+
+    # Inherited project constraints maybe messing with this observation - clear
+    all('[id^="project_id_"]').each do |project_checkbox|
+      project_checkbox.click if project_checkbox.checked?
+    end
+
+    # submit_observation_form_with_errors
     within("#observation_form") { click_commit }
 
-    # rejected
-    assert_selector("body.observations__create")
+    # rejected, but images uploaded
+    assert_selector("body.observations__create", wait: 12)
+    assert_flash_for_images_uploaded
     assert_has_location_warning(/Unknown country/)
 
     # check form values after first changes
@@ -129,9 +233,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_select("observation_when_3i", text: "14")
 
     assert_field("observation_place_name", with: "USA, California, Pasadena")
-    assert_field("observation_lat", with: "")
-    assert_field("observation_lng", with: "")
-    assert_field("observation_alt", with: "")
+    assert_field("observation_lat", with: "25.7582")
+    assert_field("observation_lng", with: "-80.3731")
+    assert_field("observation_alt", with: "4")
 
     assert_field("naming_name", with: "")
     assert_no_checked_field("observation_is_collection_location")
@@ -159,146 +263,18 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_select("naming_vote_value",
                   selected: Vote.confidence(Vote.next_best_vote))
 
-    # Add the images separately, so we can be sure of the order. Otherwise,
-    # images appear in the order each upload finishes, which is unpredictable.
-    click_attach_file("Coprinus_comatus.jpg")
-    assert_selector(".added_image_wrapper", text: /Coprinus_comatus/)
-    first_image_wrapper = first(".added_image_wrapper")
+    # Carousel items are re-output with image records this time.
+    all(".carousel-indicator").last.click
 
-    # Coprinus_comatus.jpg has a created_at date of November 20, 2006
-    # Does not work:
-    # assert_field('[id$="_temp_image_when_1i"]', with: "2006")
-    # No idea why we have to do it like this, maybe value set by JS.
-    within(first_image_wrapper) do
-      assert_equal("2006", find('[id$="_temp_image_when_1i"]').value)
-      assert_equal("11", find('[id$="_temp_image_when_2i"]').value)
-      assert_equal("20", find('[id$="_temp_image_when_3i"]').value)
+    second_item = find(".carousel-item", text: "25.7582")
+    items = all(".carousel-item", visible: :all)
+    assert_equal(items.length, 2)
+
+    within(second_item) do
+      assert_equal("2018", find('[id$="when_1i"]').value)
+      assert_equal("12", find('[id$="when_2i"]').value)
+      assert_equal("31", find('[id$="when_3i"]').value)
     end
-
-    # Add a second image that's geotagged.
-    click_attach_file("geotagged.jpg")
-
-    # We should now get the option to set obs GPS
-    # assert_selector("#gps_messages", wait: 6)
-
-    # Be sure we have two image wrappers. We have to wait for
-    # the first one to be hidden before we can see the second one.
-    # first_image_wrapper = first(".added_image_wrapper", visible: true).
-    #                       sibling(".added_image_wrapper", visible: :hidden)
-    sleep(2)
-    image_wrappers = all(".added_image_wrapper", visible: false)
-    assert_equal(2, image_wrappers.length)
-    debugger
-    # The new one is prepended, so second is "first"
-    second_image_wrapper = image_wrappers[0]
-
-    # Check that it's the right image: this is geotagged.jpg's date
-    within(second_image_wrapper) do
-      assert_equal("2018", find('[id$="_temp_image_when_1i"]').value)
-      assert_equal("12", find('[id$="_temp_image_when_2i"]').value)
-      assert_equal("31", find('[id$="_temp_image_when_3i"]').value)
-    end
-
-    # Date should have been copied to the obs fields
-    assert_equal("2018", find('[id$="observation_when_1i"]').value)
-    assert_equal("12", find('[id$="observation_when_2i"]').value)
-    assert_equal("31", find('[id$="observation_when_3i"]').value)
-
-    # GPS should have been copied to the obs fields
-    assert_equal("25.7582", find('[id$="observation_lat"]').value)
-    assert_equal("-80.3731", find('[id$="observation_lng"]').value)
-    assert_equal("4 m", find('[id$="observation_alt"]').value)
-
-    # Try removing the geotagged image
-    scroll_to(second_image_wrapper, align: :center)
-    within(second_image_wrapper) { find(".remove_image_button").click }
-
-    # We should now get no option to set obs GPS
-    # assert_no_selector("#gps_messages")
-
-    # Be sure we have only one image wrapper now
-    image_wrappers = all(".added_image_wrapper")
-    assert_equal(1, image_wrappers.length)
-
-    sleep(1)
-    # Add geotagged.jpg again
-    # attach_file(Rails.root.join("test/images/geotagged.jpg")) do
-    #   click_file_field(".file-field")
-    # end
-    click_attach_file("geotagged.jpg")
-
-    # We should now get the option to set obs GPS again
-    # assert_selector("#gps_messages")
-    # assert_selector("#gps_radios")
-
-    # Be sure we have two image wrappers
-    image_wrappers = all(".added_image_wrapper")
-    assert_equal(image_wrappers.length, 2)
-    second_image_wrapper = image_wrappers[1]
-
-    within(second_image_wrapper) do
-      assert_equal("2018", find('[id$="_temp_image_when_1i"]').value)
-      assert_equal("12", find('[id$="_temp_image_when_2i"]').value)
-      assert_equal("31", find('[id$="_temp_image_when_3i"]').value)
-    end
-
-    # "fix_date" radios: check that the second image date is available
-    # within("#img_date_radios") do
-    #   assert_unchecked_field("31-December-2018")
-    # end
-    # "fix_gps" radios: check that the gps of "geotagged.jpg" is available
-    # within("#gps_radios") do
-    #   assert_unchecked_field("25.75820, -80.37313")
-    # end
-
-    # Set copyright holder and image notes on both
-    all('[id$="_temp_image_copyright_holder"]').each do |el|
-      el.set(katrina.legal_name)
-    end
-    all('[id$="_temp_image_notes"]').each do |el|
-      el.set("Notes for image")
-    end
-
-    # Fix divergent dates: use the obs date
-    # scroll_to(find("#date_messages"), align: :center)
-    # within("#date_messages") do
-    #   within("#obs_date_radios") do
-    #     choose("14-March-2010", allow_label_click: true)
-    #     assert_checked_field("14-March-2010")
-    #   end
-    #   click_button("fix_dates")
-    # end
-    # sleep(1) # wait for css hide transition
-    # assert_no_selector("date_messages")
-
-    # Ignore divergent GPS - maybe we took the second photo in the lab?
-    # scroll_to(find("#gps_messages"), align: :center)
-    # within("#gps_messages") do
-    #   click_button("ignore_gps")
-    # end
-    # sleep(1) # wait for css hide transition
-    # assert_no_selector("gps_messages")
-
-    # sleep(1) # wait for css hide transition
-    # Be sure the dates are applied
-    # within(first_image_wrapper) do
-    #   assert_equal("2010", find('[id$="_temp_image_when_1i"]').value)
-    #   assert_equal("3", find('[id$="_temp_image_when_2i"]').value)
-    #   assert_equal("14", find('[id$="_temp_image_when_3i"]').value)
-    # end
-    # within(second_image_wrapper) do
-    #   assert_equal("2010", find('[id$="_temp_image_when_1i"]').value)
-    #   assert_equal("3", find('[id$="_temp_image_when_2i"]').value)
-    #   assert_equal("14", find('[id$="_temp_image_when_3i"]').value)
-    # end
-
-    # Set the first one as the thumb_image
-    within(first_image_wrapper) do
-      find(".set_thumb_image").click
-      assert_selector(".is_thumb_image")
-      assert_no_selector(".set_thumb_image")
-    end
-    sleep(3)
 
     within("#observation_form") { click_commit }
 
@@ -307,7 +283,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     #   User.current is getting dropped during the save, and message is
     #     `Observation doesn't have naming with ID=`
     #
-    # debugger
 
     # It should take us to create a new location
     assert_selector("body.locations__new")
@@ -392,16 +367,20 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     cci = imgs.find { |img| img[:original_name] == "Coprinus_comatus.jpg" }
     geo = imgs.find { |img| img[:original_name] == "geotagged.jpg" }
     img_ids = imgs.map(&:id)
-    img_ids.each do |img_id|
-      assert_field("good_image_#{img_id}_when_1i", with: "2010")
-      assert_select("good_image_#{img_id}_when_2i", text: "March")
-      assert_select("good_image_#{img_id}_when_3i", text: "14")
-      assert_field("good_image_#{img_id}_copyright_holder",
-                   with: katrina.legal_name)
-      assert_field("good_image_#{img_id}_notes", with: "Notes for image")
+    imgs.each do |img|
+      assert_field("good_image_#{img.id}_when_1i",
+                   visible: :all, with: img.when.year.to_s)
+      assert_select("good_image_#{img.id}_when_2i",
+                    visible: :all, text: Date::MONTHNAMES[img.when.month])
+      assert_select("good_image_#{img.id}_when_3i",
+                    visible: :all, text: img.when.day.to_s)
+      assert_field("good_image_#{img.id}_copyright_holder",
+                   visible: :all, with: katrina.legal_name)
+      assert_field("good_image_#{img.id}_notes",
+                   visible: :all, with: "Notes for image")
     end
-    assert_checked_field("observation_thumb_image_id_#{cci.id}")
-    assert_unchecked_field("observation_thumb_image_id_#{geo.id}")
+    assert_checked_field("thumb_image_id_#{cci.id}", visible: :all)
+    assert_unchecked_field("thumb_image_id_#{geo.id}", visible: :all)
 
     # submit_observation_form_with_changes
     fill_in("observation_when_1i", with: "2011")
@@ -413,6 +392,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     check("observation_is_collection_location")
     fill_in(other_notes_id, with: "New notes for observation")
     img_ids.each do |img_id|
+      find("#carousel_thumbnail_#{img_id}").click
       fill_in("good_image_#{img_id}_when_1i", with: "2011")
       select("April", from: "good_image_#{img_id}_when_2i")
       select("15", from: "good_image_#{img_id}_when_3i")
@@ -420,8 +400,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
     obs_images = find("#observation_images")
     scroll_to(obs_images, align: :top)
-    choose("observation_thumb_image_id_#{geo.id}")
+    choose("thumb_image_id_#{geo.id}")
     sleep(1)
+
     within("#observation_form") { click_commit }
 
     assert_selector("body.observations__show")
@@ -514,7 +495,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     new_obs = Observation.last
     new_imgs = Image.last(2)
     assert_obj_arrays_equal(new_imgs, new_obs.images)
-    assert_dates_equal(expected_values[:when], new_imgs[0].when)
+    # Dates are no longer copied from image to obs/other images
+    # assert_dates_equal(expected_values[:when], new_imgs[0].when)
     assert_equal(expected_values[:user].legal_name,
                  new_imgs[0].copyright_holder)
     assert_equal(expected_values[:image_notes], new_imgs[0].notes.strip)
@@ -558,9 +540,13 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     patterns.each { |pat| assert_flash_success(pat) }
   end
 
+  def assert_flash_for_images_uploaded
+    review_flash([/uploaded image/i])
+  end
+
   def assert_flash_for_create_observation
     review_flash([/success/i, /created observation/i,
-                  /created proposed name/i, /uploaded/i])
+                  /created proposed name/i])
   end
 
   def assert_flash_for_create_location

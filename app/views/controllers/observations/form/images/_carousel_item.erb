@@ -1,21 +1,20 @@
-<%# locals: (image: nil, img_id: nil, upload: false, index: "", f: nil, img_file_name: "", img_file_size: "") -%>
+<%# locals: (image: nil, img_id: nil, upload: false, index: "", f: nil, img_file_name: "", img_file_size: "", exif_data: {}, thumb_id: nil) -%>
 
 <%# This may be rendered by Turbo, or by the edit action %>
 <%=
 active = index == 0 ? "active" : ""
 data = { form_images_target: "item", form_exif_target: "item",
-         action: "form-exif#processed@window->form-images#itemProcessed" }
+         action: "form-exif#populated@window->form-images#itemExifPopulated" }
 if upload
   img_id ||= "img_id_missing"
-  # upload means: image == nil, image_src == nil (src set by js)
-  handle = "added_image_wrapper"
-  data = data.merge(image_uuid: img_id)
+  # upload means: image may be nil... or not, on form reload.
+  #               image_src == nil (src set by js)
+  data = data.merge(added_image: true, image_uuid: img_id)
+  # img_file_name ||= image&.original_name || ""
   exif_data = { img_file_name:, img_file_size: }
   extra_classes = "carousel-image set-src"
 else
   img_id = image&.id
-  handle = ""
-  exif_data = image&.read_exif_geocode
   data = data.merge(good_image: true, geocode: JSON.generate(exif_data))
   extra_classes = "carousel-image"
 end
@@ -23,7 +22,7 @@ presenter_args = { size: :large, fit: :contain,
                    extra_classes: extra_classes }.merge(upload: upload)
 presenter = ImagePresenter.new(img_id, presenter_args)
 item_attrs = { id: "carousel_item_#{img_id}",
-               class: ["item", active, handle] }.merge(data: data)
+               class: ["item carousel-item", active] }.merge(data: data)
 
 tag.div(**item_attrs) do
   tag.div(class: "row") do
@@ -37,20 +36,20 @@ tag.div(**item_attrs) do
         tag.div(class: "form-panel") do
           if upload
             concat(render(partial: "observations/form/images/fields_for_upload",
-                          locals: { img_id: }))
+                          locals: { img_id:, image: }))
           else
             concat(render(partial: "observations/form/images/fields_for_edit",
                           locals: { f:, image: }))
           end
           concat(render(partial: "observations/form/images/exif_info",
-                        locals: exif_data)) if exif_data.present?
+                        locals: exif_data))
         end
       end,
       tag.div(class: "top-left p-4") do
-        carousel_set_thumb_img_button(image:, active:)
+        carousel_set_thumb_img_button(image:, thumb_id:)
       end,
       tag.div(class: "top-right p-4") do
-        carousel_remove_image_button(image&.id)
+        carousel_remove_image_button(image_id: image&.id)
       end
     ].safe_join
   end

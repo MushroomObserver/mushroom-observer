@@ -190,9 +190,9 @@ module ObservationsController::FormHelpers
   # mininal editing.  INPUT: params[:good_images] (also looks at
   # params[:image_<id>_notes]) OUTPUT: list of images
 
-  def update_good_images(arg)
+  def update_good_images(ids)
     # Get list of images first.
-    images = (arg || "").split.filter_map do |id|
+    images = (ids || "").split.filter_map do |id|
       Image.safe_find(id.to_i)
     end
 
@@ -219,6 +219,16 @@ module ObservationsController::FormHelpers
     end
 
     images
+  end
+
+  # For now, this has to read the exif off the actual file on the server.
+  # This is because the exif data is not stored on the Image record.
+  def get_exif_data(images)
+    data = {}
+    images.each do |image|
+      data[image.id] = image&.read_exif_geocode
+    end
+    data
   end
 
   # Now that the observation has been successfully created, we can attach

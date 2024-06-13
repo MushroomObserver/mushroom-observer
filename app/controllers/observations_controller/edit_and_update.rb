@@ -39,6 +39,7 @@ module ObservationsController::EditAndUpdate
     # Initialize form. Put the thumb image first.
     @images      = []
     @good_images = @observation.images_sorted
+    @exif_data = get_exif_data(@good_images)
     init_project_vars_for_edit(@observation)
     init_list_vars_for_edit(@observation)
   end
