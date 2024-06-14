@@ -26,13 +26,9 @@ import { get, post, put } from '@rails/request.js'
 // experiences.
 
 const internalConfig = {
-  // Make some of these targets for the controller
   block_form_submission: true,
   content: document.getElementById('content'),
-  // TODO: replace this with two routes below
   get_template_uri: "/observations/images/uploads/new",
-  // image_template_uri: "/observations/images/uploads/show",
-  // image_form_uri: "/observations/images/uploads/new",
   upload_image_uri: "/observations/images/uploads",
   // progress_uri: "/ajax/upload_progress",
   dots: [".", "..", "..."],
@@ -51,8 +47,8 @@ const internalConfig = {
 // Connects to data-controller="form-images"
 export default class extends Controller {
   static targets = ["form", "carousel", "item", "thumbnail", "removeImg",
-    "imageGpsMap", "goodImageIds", "thumbImageId", "setThumbImg", "isThumbImg",
-    "thumbImgRadio", "obsThumbImgBtn"]
+    "imageGpsMap", "goodImageIds", "thumbImageId", "thumbImgRadio",
+    "obsThumbImgBtn"]
 
   initialize() {
   }
