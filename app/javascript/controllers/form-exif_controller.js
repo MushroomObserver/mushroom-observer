@@ -262,14 +262,14 @@ export default class extends Controller {
     let lat = exifObject.GPSLatitude.description;
     let lng = exifObject.GPSLongitude.description;
 
-    const alt = exifObject.GPSAltitude ? (exifObject.GPSAltitude.value[0]
-      / exifObject.GPSAltitude.value[1]).toFixed(0) + " m" : "";
+    const alt = exifObject.GPSAltitude ? ((exifObject.GPSAltitude.value[0]
+      / exifObject.GPSAltitude.value[1]) || null).toFixed(0) + " m" : "";
 
     // make sure you don't end up on the wrong side of the world
     lng = exifObject.GPSLongitudeRef.value[0] == "W" ? lng * -1 : lng;
     lat = exifObject.GPSLatitudeRef.value[0] == "S" ? lat * -1 : lat;
 
-    return { lat, lng, alt };
+    return { lat: lat || null, lng: lng || null, alt };
   }
 
   // Create a map object and specify the DOM element for display.

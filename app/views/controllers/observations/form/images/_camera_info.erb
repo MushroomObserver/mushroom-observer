@@ -22,7 +22,7 @@ tag.div(class: "well well-sm position-relative",
         carousel_transfer_exif_button
       ].safe_join
     end,
-    tag.div(class: "form-group mb-0") do
+    tag.div(class: "form-group mb-0 overflow-hidden") do
       if file_name.present?
         concat(tag.div do
           [tag.strong("#{:image_file_name.l}: "),
