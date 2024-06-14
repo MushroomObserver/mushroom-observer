@@ -26,6 +26,7 @@ presenter = ImagePresenter.new(img_id, presenter_args)
 data = data.merge(image_uuid: img_id, image_status:)
 item_attrs = { id: "carousel_item_#{img_id}",
                class: ["item carousel-item", active] }.merge(data: data)
+camera_info ||= {}
 
 tag.div(**item_attrs) do
   tag.div(class: "row") do
@@ -37,14 +38,9 @@ tag.div(**item_attrs) do
       end,
       tag.div(class: "col-12 col-md-6") do
         tag.div(class: "form-panel") do
-          if upload
-            concat(render(partial: "observations/form/images/fields_for_upload",
-                          locals: { img_id:, image: }))
-          else
-            concat(render(partial: "observations/form/images/fields_for_edit",
-                          locals: { f:, image: }))
-          end
-          concat(render(partial: "observations/form/images/exif_info",
+          concat(render(partial: "observations/form/images/fields",
+                        locals: { upload:, img_id:, image: }))
+          concat(render(partial: "observations/form/images/camera_info",
                         locals: camera_info.merge(img_id: img_id)))
         end
       end,

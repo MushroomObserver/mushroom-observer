@@ -1,0 +1,43 @@
+<%# locals: (upload: false, img_id: nil, image: nil) -%>
+
+<%
+if upload
+  image_field = :temp_image
+  licenses = License.current_names_and_ids(@user.license)
+  selected_license = @user.license_id
+else
+  image_field = :good_image
+  licenses = License.current_names_and_ids(image.license)
+  selected_license = image.license_id
+end
+%>
+
+<%= carousel_upload_messages if upload %>
+
+<%# Specificity of the thumb choice is coming from data attribute on item %>
+<%# No field index makes it simpler to be sure we have a _temp_image field %>
+<%= fields_for(image_field) do |ffi| %>
+
+  <%= text_area_with_label(form: ffi, field: :notes, index: img_id, rows: 2,
+                            value: image&.notes, label: :NOTES.l) %>
+
+  <%= text_field_with_label(form: ffi, field: :copyright_holder, index: img_id,
+                            value: image&.copyright_holder,
+                            label: :form_images_copyright_holder.l) %>
+
+  <%= date_select_with_label(form: ffi, field: :when, index: img_id,
+                             value: image&.when, object: image,
+                             label: :form_images_when_taken.l) %>
+
+  <%= select_with_label(form: ffi, field: :license_id, index: img_id,
+                        label: :form_images_select_license.t.html_safe,
+                        options: licenses,
+                        select_opts: { selected: selected_license }) %>
+
+  <%= unless upload
+    text_field_with_label(form: ffi, field: :original_name, index: img_id,
+                          value: image&.original_name, size: 40,
+                          label: :form_observations_original_name.l)
+  end %>
+
+<% end %>
