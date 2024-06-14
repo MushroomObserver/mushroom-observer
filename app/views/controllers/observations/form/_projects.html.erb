@@ -21,11 +21,11 @@
             :form_observations_projects_out_of_range_help.
               t(button_name: button_name)
           )%>
+          <%= check_box_with_label(
+            form: f_p, field: :ignore_proj_conflicts,
+            label: :form_observations_projects_ignore_project_constraints.t
+          ) %>
         </div>
-        <%= check_box_with_label(
-          form: f_p, field: :ignore_proj_conflicts,
-          label: :form_observations_projects_ignore_project_constraints.t
-        ) %>
       </div>
     <% end %>
     <div class="col-xs-12 col-sm-6 col-sm-push-6">
