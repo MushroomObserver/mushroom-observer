@@ -372,7 +372,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     within("#account_preferences_form") do
       check("user_with_images")
       check("user_with_specimen")
-      select("Show only lichens", from: "user_lichen")
+      select(:prefs_filters_lichen_yes.l, from: "user_lichen")
       click_commit
     end
     assert_flash_success
