@@ -70,12 +70,12 @@ module CarouselHelper
   def carousel_set_thumb_img_button(image: nil, thumb_id: nil)
     value = image&.id || "true"
     checked = thumb_id&.== image&.id
-    label_classes = class_names("btn btn-default btn-sm obs_thumb_img_btn",
+    label_classes = class_names("btn btn-default btn-sm thumb_img_btn",
                                 active: checked)
     label_tag(
       :thumb_image_id,
       class: label_classes,
-      data: { form_images_target: "obsThumbImgBtn",
+      data: { form_images_target: "thumbImgBtn",
               action: "click->form-images#setObsThumbnail" }
     ) do
       [
@@ -84,16 +84,8 @@ module CarouselHelper
           class: "mr-3", checked: checked,
           data: { form_images_target: "thumbImgRadio" }
         ),
-        tag.span(
-          :image_set_default.l,
-          class: "set_thumb_img_text",
-          data: { form_images_target: "setThumbImg" }
-        ),
-        tag.span(
-          :image_add_default.l,
-          class: "is_thumb_img_text",
-          data: { form_images_target: "isThumbImg" }
-        )
+        tag.span(:image_set_default.l, class: "set_thumb_img_text"),
+        tag.span(:image_add_default.l, class: "is_thumb_img_text")
       ].safe_join
     end
   end
@@ -124,12 +116,12 @@ module CarouselHelper
     end
   end
 
-  def carousel_exif_to_image_date_button(img_date = nil)
+  def carousel_exif_to_image_date_button(date: nil)
     link_to(
       "#",
       data: { action: "form-exif#exifToImageDate:prevent" }
     ) do
-      tag.span(img_date, class: "exif_date")
+      tag.span(date, class: "exif_date")
     end
   end
 

@@ -9,7 +9,7 @@ tag.div(class: "well well-sm position-relative",
         tag.div do
           [
             tag.strong("#{:DATE.l}: "), # :form_images_camera_date.t
-            carousel_exif_to_image_date_button(date)
+            carousel_exif_to_image_date_button(date: date)
           ].safe_join
         end,
         tag.div do

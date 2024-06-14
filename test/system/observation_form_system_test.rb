@@ -194,7 +194,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                     text: /Coprinus_comatus/, wait: 3)
     # Set the first (last) one as the thumb_image
     within(first_image_wrapper) do
-      thumb_button = find(".obs_thumb_img_btn")
+      thumb_button = find(".thumb_img_btn")
       scroll_to(thumb_button, align: :center)
       thumb_button.trigger("click")
       assert_text(:image_add_default.l)

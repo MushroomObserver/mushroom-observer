@@ -48,7 +48,7 @@ const internalConfig = {
 export default class extends Controller {
   static targets = ["form", "carousel", "item", "thumbnail", "removeImg",
     "imageGpsMap", "goodImageIds", "thumbImageId", "thumbImgRadio",
-    "obsThumbImgBtn"]
+    "thumbImgBtn"]
 
   initialize() {
   }
@@ -135,10 +135,10 @@ export default class extends Controller {
   setObsThumbnail(event) {
     // event.target is the label.btn clicked to make whichever the default image
     // but could also be any descendant element
-    const button = event.target.closest('.obs_thumb_img_btn'),
+    const button = event.target.closest('.thumb_img_btn'),
       radio = button.querySelector('input[type="radio"]');
     // reset selections
-    this.obsThumbImgBtnTargets.forEach((elem) => {
+    this.thumbImgBtnTargets.forEach((elem) => {
       elem.classList.remove('active');
     });
     // reset the checked default thumbnail
