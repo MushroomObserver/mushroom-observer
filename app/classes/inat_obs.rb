@@ -85,6 +85,10 @@ class InatObs
     obs[:quality_grade]
   end
 
+  def inat_taxon_name
+    obs[:taxon][:name]
+  end
+
   def inat_user_login
     obs[:user][:login]
   end

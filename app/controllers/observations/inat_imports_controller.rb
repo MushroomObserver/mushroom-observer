@@ -152,7 +152,7 @@ module Observations
         concat("#{:LAT_LON.t}: #{inat_obs.inat_location} " \
           "+/-#{inat_obs.inat_public_positional_accuracy} m\n").
         concat("#{:PLACE.t}: #{inat_obs.inat_place_guess}\n").
-        concat("#{:ID.t}: #{:UNDER_DEVELOPMENT.t}\n").
+        concat("#{:ID.t}: #{inat_obs.inat_taxon_name}\n").
         concat("#{:DQA.t}: #{dqa(inat_obs.inat_quality_grade)}\n").
         concat("#{:ANNOTATIONS.t}: #{:UNDER_DEVELOPMENT.t}\n").
         concat("#{:PROJECTS.t}: #{inat_obs.inat_project_names}\n").

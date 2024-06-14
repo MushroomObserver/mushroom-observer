@@ -86,6 +86,7 @@ class InatObsTest < UnitTestCase
     assert_equal("Cochise Co., Arizona, USA", import.inat_place_guess)
     assert_equal(20, import.inat_public_positional_accuracy)
     assert_equal("research", import.inat_quality_grade)
+    assert_equal("Somion unicolor", import.inat_taxon_name)
     assert_equal("jdcohenesq", import.inat_user_login)
   end
   # rubocop:enable Style/NumericLiterals
