@@ -74,16 +74,33 @@ export default class extends Controller {
     // Geocode Logic
     // check if there is geodata on the image
     if (exif_data.GPSLatitude && exif_data.GPSLongitude) {
-      const latLngAlt = this.getLatLngEXIF(exif_data);
+      const latLngAlt = this.getLatLngEXIF(exif_data),
+        { lat, lng, alt } = latLngAlt;
 
       // Set item's data-geocode attribute so we can have a record
       itemElement.dataset.geocode = JSON.stringify(latLngAlt);
 
       // These are not inputs, they're spans so we can't set the value
-      _exif_lat.innerText = latLngAlt.lat.toFixed(4);
-      _exif_lng.innerText = latLngAlt.lng.toFixed(4);
-      _exif_alt.innerText = latLngAlt.alt;
+      _exif_lat.innerText = lat == null ? lat : lat.toFixed(4);
+      _exif_lng.innerText = lng == null ? lng : lng.toFixed(4);
+      _exif_alt.innerText = alt == null ? alt : alt.toFixed(0);
     }
+  }
+
+  getLatLngEXIF(exifObject) {
+    let lat = exifObject.GPSLatitude.description;
+    let lng = exifObject.GPSLongitude.description;
+
+    const alt = exifObject.GPSAltitude ? ((exifObject.GPSAltitude.value[0]
+      / exifObject.GPSAltitude.value[1]) || null) : null;
+
+    // make sure you don't end up on the wrong side of the world
+    lng = exifObject.GPSLongitudeRef.value[0] == "W" ? lng * -1 : lng;
+    lat = exifObject.GPSLatitudeRef.value[0] == "S" ? lat * -1 : lat;
+
+    lat = lat || null;
+    lng = lng || null;
+    return { lat, lng, alt };
   }
 
   populateExifDate(itemElement, exif_data) {
@@ -140,12 +157,14 @@ export default class extends Controller {
       _event = new Event('change');
 
     if (_exif_data.geocode && _exif_data.geocode !== "") {
-      const latLngAlt = JSON.parse(_exif_data.geocode);
+      const latLngAlt = JSON.parse(_exif_data.geocode),
+        { lat, lng, alt } = latLngAlt;
 
-      _obs_lat.value = latLngAlt.lat.toFixed(4);
-      _obs_lng.value = latLngAlt.lng.toFixed(4);
-      _obs_alt.value = latLngAlt.alt;
-      _obs_lat.dispatchEvent(_event); // triggers change to update the map
+      _obs_lat.value = lat == null ? lat : lat.toFixed(4);
+      _obs_lng.value = lng == null ? lng : lng.toFixed(4);
+      _obs_alt.value = alt == null ? alt : alt.toFixed(0);
+      // triggers change (defined above) to update the map
+      _obs_lat.dispatchEvent(_event);
     }
     if (_exif_data.exif_date) {
       const _exifSimpleDate = JSON.parse(_exif_data.exif_date);
@@ -257,20 +276,6 @@ export default class extends Controller {
   }
 
   /** Geocode Helpers **/
-
-  getLatLngEXIF(exifObject) {
-    let lat = exifObject.GPSLatitude.description;
-    let lng = exifObject.GPSLongitude.description;
-
-    const alt = exifObject.GPSAltitude ? (exifObject.GPSAltitude.value[0]
-      / exifObject.GPSAltitude.value[1]).toFixed(0) || "" + " m" : "";
-
-    // make sure you don't end up on the wrong side of the world
-    lng = exifObject.GPSLongitudeRef.value[0] == "W" ? lng * -1 : lng;
-    lat = exifObject.GPSLatitudeRef.value[0] == "S" ? lat * -1 : lat;
-
-    return { lat: lat || null, lng: lng || null, alt };
-  }
 
   // Create a map object and specify the DOM element for display.
   // showGeocodeOnMap({ params: { latLngAlt } }) {

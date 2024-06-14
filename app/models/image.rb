@@ -814,7 +814,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     data.each do |key, val|
       lat = val.to_f.round(4) if key.match?(/latitude/i)
       lng = val.to_f.round(4) if key.match?(/longitude/i)
-      alt = val if key.match?(/altitude/i)
+      alt = val.to_f.round(0) if key.match?(/altitude/i)
       date = val if key.match?(/date/i)
       file_size = val if key.match?(/size/i)
     end

@@ -16,7 +16,7 @@ tag.div(class: "well well-sm position-relative",
           [
             tag.strong("#{:LAT.l}: ") + tag.span(lat, class: "exif_lat"),
             tag.strong("#{:LNG.l}: ") + tag.span(lng, class: "exif_lng"),
-            tag.strong("#{:ALT.l}: ") + tag.span(alt, class: "exif_alt")
+            tag.strong("#{:ALT.l}: ") + tag.span(alt, class: "exif_alt") + " m"
           ].safe_join(", ")
         end,
         carousel_transfer_exif_button
