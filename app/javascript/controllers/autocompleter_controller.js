@@ -90,6 +90,7 @@ const INTERNAL_OPTS = {
   focused: false,        // is user in text field?
   menu_up: false,        // is pulldown visible?
   old_value: null,       // previous value of input field
+  request_params: {},    // parameters to send with AJAX request
   primer: [],            // a server-supplied list of many options
   matches: [],           // list of options currently showing
   current_row: -1,       // index of option currently highlighted (0 = none)
@@ -144,18 +145,16 @@ export default class extends Controller {
 
   // Swap out autocompleter type (and properties)
   // May be called from a <select> with `data-action: "autocompleter-swap"`
-  // or by the map controller emitting a "swap" event.
-  swap(opts = {}) {
-    let type, lat, lng;
+  // or by the map controller emitting a "swap" event with detail.
+  // (Does anybody else send opts?)
+  swap({ details: { } }) {
+    let type;
 
     if (this.hasSelectTarget) {
       type = this.selectTarget.value;
     }
-    else if (opts.hasOwnProperty("type") &&
-      opts.hasOwnProperty("lat") && opts.hasOwnProperty("lng")) {
-      type = opts.type;
-      lat = opts.lat;
-      lng = opts.lng;
+    else if (details.hasOwnProperty("type")) {
+      type = details.type;
     }
     else {
       return;
@@ -168,7 +167,7 @@ export default class extends Controller {
       this.inputTarget.setAttribute("data-autocomplete", type)
       // add dependent properties and allow overrides
       Object.assign(this, AUTOCOMPLETER_TYPES[this.TYPE]);
-      Object.assign(this, opts);
+      Object.assign(this, opts); // includes request_params
       this.prepare_input_element();
     }
   }
@@ -1015,7 +1014,7 @@ export default class extends Controller {
       return;
 
     // Make request.
-    this.send_fetch_request(val, params);
+    this.send_fetch_request(val, this.request_params);
   }
 
   // Send AJAX request for more matching strings.

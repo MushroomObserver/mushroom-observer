@@ -486,7 +486,10 @@ export default class extends Controller {
     // `location_containing`. How to get params to autocompleter?
     // May need a window event listener on the location autocomplete.
     this.dispatch("swap", {
-      detail: { type: "location_containing", lat: center.lat, lng: center.lng }
+      detail: {
+        type: "location_containing",
+        request_params: { lat: center.lat, lng: center.lng }
+      }
     })
 
     // if (this.placeInputTarget.value === '') {
