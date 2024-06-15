@@ -166,7 +166,7 @@ module ObservationsController::NewAndCreate
     @naming = Naming.construct({}, @observation)
     @vote = Vote.construct(params.dig(:naming, :vote), @naming)
     @good_images = update_good_images(params[:good_image_ids])
-    @exif_data = get_exif_data(@good_images)
+    @exif_data = get_exif_data(@good_images) # in case of form reload
     @bad_images  = create_image_objects(params[:image],
                                         @observation, @good_images)
   end
