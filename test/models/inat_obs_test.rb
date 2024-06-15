@@ -104,6 +104,12 @@ class InatObsTest < UnitTestCase
     assert_equal(names(:coprinus).id, import.name_id)
   end
 
+  def test_observation_fields
+    import = InatObs.new(File.read("test/fixtures/inat/trametes.txt"))
+    assert(import.inat_obs_fields.any?)
+debugger
+  end
+
   def test_no_description
     inat_response = File.read("test/fixtures/inat/tremella_mesenterica.txt")
     assert_match(/"description":null,/, inat_response,

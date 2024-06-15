@@ -150,14 +150,15 @@ module Observations
         "#{:USER.t}: #{inat_obs.inat_user_login}\n".
         concat("#{:OBSERVED.t}: #{inat_obs.when}\n").
         concat("#{:LAT_LON.t}: #{inat_obs.inat_location} " \
-          "+/-#{inat_obs.inat_public_positional_accuracy} m\n").
+               "+/-#{inat_obs.inat_public_positional_accuracy} m\n").
         concat("#{:PLACE.t}: #{inat_obs.inat_place_guess}\n").
         concat("#{:ID.t}: #{inat_obs.inat_taxon_name}\n").
         concat("#{:DQA.t}: #{dqa(inat_obs.inat_quality_grade)}\n").
         concat("#{:ANNOTATIONS.t}: #{:UNDER_DEVELOPMENT.t}\n").
         concat("#{:PROJECTS.t}: #{inat_obs.inat_project_names}\n").
         concat("#{:SEQUENCES.t}: #{:UNDER_DEVELOPMENT.t}\n").
-        concat("#{:OBSERVATION_FIELDS.t}: #{:UNDER_DEVELOPMENT.t}\n").
+        concat("#{:OBSERVATION_FIELDS.t}: \n" \
+               "#{obs_fields(inat_obs.inat_obs_fields)}\n").
         concat("#{:TAGS.t}: #{:UNDER_DEVELOPMENT.t}")
 
       params = {
@@ -172,15 +173,21 @@ module Observations
 
     def dqa(dqa)
       case dqa
-      when /researc/
+      when /research/
         "Research Grade"
-      when /needs/
+      when /needs_id/
         "Needs ID"
       when /casual/
         "Casual"
       else
         "??"
       end
+    end
+
+    def obs_fields(fields)
+      fields.map do |field|
+        "&nbsp;&nbsp;#{field[:name]}: #{field[:value]}"
+      end.join("\n")
     end
   end
 end
