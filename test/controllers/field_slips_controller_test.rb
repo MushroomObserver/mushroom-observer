@@ -32,7 +32,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     code = "#{project.field_slip_prefix}-1234"
     get(:new, params: { code: code })
     assert_response :success
-    assert(!response.body.include?(project.title))
+    assert(response.body.exclude?(project.title))
   end
 
   test "should get new with project if open" do
