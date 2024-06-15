@@ -25,7 +25,6 @@ class FieldSlipsTest < ApplicationSystemTestCase
     visit field_slip_url(@field_slip)
     click_on :field_slip_edit.t, match: :first
 
-    fill_in "field_slip_code", with: @field_slip.code
     select(@field_slip.project.title, from: :PROJECT.t)
     click_on :field_slip_keep_obs.t
 
