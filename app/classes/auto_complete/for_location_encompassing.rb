@@ -11,6 +11,7 @@ class AutoComplete::ForLocationEncompassing < AutoComplete::ByWord
   end
 
   # We don't care about the letter, this list should be short
+  # Maybe reject location where box is too large.
   def rough_matches(_letter)
     matches =
       Location.contains(lat: lat, lng: lng).select(:name).distinct.
