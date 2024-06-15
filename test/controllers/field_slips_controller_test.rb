@@ -152,6 +152,13 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_response :success
   end
 
+  test "should show field_slip and allow owner to change" do
+    login(@field_slip.user.login)
+    get(:show, params: { id: @field_slip.id })
+    assert_response :success
+    assert(response.body.include?(:field_slip_edit.t))
+  end
+
   test "should show field_slip by code" do
     get(:show, params: { id: @field_slip.code })
     assert_redirected_to observation_url(@field_slip.observation)
