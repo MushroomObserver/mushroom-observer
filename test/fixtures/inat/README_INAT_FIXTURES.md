@@ -1,7 +1,9 @@
 # iNat Fixtures
 
-This file describes the fixtures used to test iNat imports and photos,
-and additional fixtures needed for better testing.
+This file describes "fixtures" -- not true Rails fixtures,
+but rather data that is used to stub requests to the iNat API --
+used to test iNat imports and photos,
+and additional "fixtures" needed for better testing.
 
 ## Observations
 
@@ -25,23 +27,16 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 
 ### Needed Observations
 
-- Slime mold
-- Fungus with photo that was uploaded to iNat >= 1 day after iNat Obs was created
+iNat fungal Obss with these fields/licenses
+
 - Public Domain
 https://api.inaturalist.org/v1/observations?identified=true&license=cc0&rank=species&iconic_taxa=Fungi&quality_grade=research&page=1&order=desc&order_by=created_at&only_id=true
-
-- All Rights Reserved
-https://api.inaturalist.org/v1/observations?identified=true&licensed=false&rank=species&iconic_taxa=Fungi&quality_grade=research&page=1&order=desc&order_by=created_at&only_id=true
-https://www.inaturalist.org/observations/222157696
-- No derivatives
-
-Need fixtures with the following fields:
-
+- nonderiv license
 - Activity
 - Annotations
 - Notes
 - Observation Fields
   - provisional name
   - sensu lato
-  - sequence
-  - Mushroom Observer URL
+  - sequence (need a variety of thesel there are many ways to add sequences to iNat Obss)
+- Fungus with photo that was uploaded to iNat >= 1 day after iNat Obs was created
