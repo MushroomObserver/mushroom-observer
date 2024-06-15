@@ -15,6 +15,7 @@
 #  obs::                 The iNat observation data
 #  inat_id::
 #  inat_location::       lat,lon
+#  inat_obs_fields::     array of fields, each field a hash
 #  inat_obs_photos::     array of observation_photos
 #  inat_place_guess::
 #  inat_project_names::
