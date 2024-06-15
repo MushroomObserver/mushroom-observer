@@ -2,71 +2,77 @@
   action = controller.action_name
 %>
 
-<%= form_with(model: field_slip) do |form| %>
-  <% if field_slip.errors.any? %>
-    <div class="alert alert-danger">
-      <%= "#{pluralize(field_slip.errors.count,
-        :error.t, plural: :errors.t)} #{:field_slip_errors.t}" %>:
-      <ul>
-        <% field_slip.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
-
-  <%= text_field_with_label(form: form, field: :code, label: :field_slip_code.t + ":") %>
-
-  <% if @field_slip.projects %>
-    <%= select_with_label(form: form, field: :project_id, inline: true,
-        label: :Project.t + ":", options: @field_slip.projects) %>
-  <% end %>
-
-
-  <%= form.label(:date, "#{:DATE.t}: ") %>
-  <%= form.date_select(:date,
-                       { start_year: Date.today.year - 10,
-      end_year: Date.today.year + 10 }) %><br/>
-  <br/>
-
-  <%= autocompleter_field(form: form, field: :collector,
-                          label: :COLLECTOR.t + ":", autocomplete: :user) %>
-  <%= autocompleter_field(form: form, field: :location,
-                          label: :LOCATION.t + ":", autocomplete: :location) %>
-
-  <%= render(partial: "shared/notes_form",
-             locals: { form:, fields: field_slip.notes_fields }) %>
-
-  <%= autocompleter_field(form: form, field: :field_slip_id,
-                          label: :ID.t + ":",
-                          autocomplete: :name) %>
-  <%= autocompleter_field(form: form, field: :field_slip_id_by,
-                          label: :ID_BY.t + ":", autocomplete: :user) %>
-  <%= text_field_with_label(form: form, field: :other_codes,
-                            label: "#{:field_slip_other_codes.t} (#{:field_slip_other_example.t}):") %>
-
-  <%= submit_button(form: form, button: :field_slip_create_obs.t,
-                    class: "mt-5") if action == "new" %>
-
-  <div class="row mt-5">
-    <% if field_slip.observation %>
-      <div class="col-sm-6">
-        <%= render(partial: "field_slips/obs_thumbnail",
-                   locals: { obs: field_slip.observation, form: form,
-                             button: :field_slip_keep_obs.t }) %>
-      </div>
-    <% end %>
-    <% obs = previous_observation(field_slip.observation)
-       if obs %>
-      <div class="col-sm-6">
-        <%= render(partial: "field_slips/obs_thumbnail",
-                   locals: { obs:, form:,
-                             button: :field_slip_last_obs.t }) %>
-      </div>
-    <% end %>
+<% if field_slip.errors.any? %>
+  <div class="alert alert-danger">
+    <%= "#{pluralize(field_slip.errors.count,
+      :error.t, plural: :errors.t)} #{:field_slip_errors.t}" %>:
+    <ul>
+      <% field_slip.errors.each do |error| %>
+        <li><%= error.full_message %></li>
+      <% end %>
+    </ul>
   </div>
+<% end %>
 
-  <%= submit_button(form: form, button: :field_slip_create_obs.t,
-                    class: "my-5") if action == "edit" %>
+<% if field_slip.code %>
+  <%= form_with(model: field_slip) do |form| %>
+    <% if field_slip.projects %>
+      <%= select_with_label(form: form, field: :project_id, inline: true,
+          label: :Project.t + ":", options: field_slip.projects) %>
+    <% end %>
 
+    <%= form.hidden_field(:code, value: field_slip.code) %>
+    <%= form.label(:date, "#{:DATE.t}: ") %>
+    <%= form.date_select(:date,
+                         { start_year: Date.today.year - 10,
+        end_year: Date.today.year + 10 }) %><br/>
+    <br/>
+
+    <%= autocompleter_field(form: form, field: :collector,
+                            label: :COLLECTOR.t + ":", autocomplete: :user) %>
+    <%= autocompleter_field(form: form, field: :location,
+                            label: :LOCATION.t + ":", autocomplete: :location) %>
+
+    <%= render(partial: "shared/notes_form",
+               locals: { form:, fields: field_slip.notes_fields }) %>
+
+    <%= autocompleter_field(form: form, field: :field_slip_id,
+                            label: :ID.t + ":",
+                            autocomplete: :name) %>
+    <%= autocompleter_field(form: form, field: :field_slip_id_by,
+                            label: :ID_BY.t + ":", autocomplete: :user) %>
+    <%= text_field_with_label(form: form, field: :other_codes,
+                              label: "#{:field_slip_other_codes.t} (#{:field_slip_other_example.t}):") %>
+
+    <%= submit_button(form: form, button: :field_slip_create_obs.t,
+                      class: "mt-5") if action == "new" %>
+
+    <div class="row mt-5">
+      <% if field_slip.observation %>
+        <div class="col-sm-6">
+          <%= render(partial: "field_slips/obs_thumbnail",
+                     locals: { obs: field_slip.observation, form: form,
+                               button: :field_slip_keep_obs.t }) %>
+        </div>
+      <% end %>
+      <% obs = previous_observation(field_slip.observation)
+         if obs %>
+        <div class="col-sm-6">
+          <%= render(partial: "field_slips/obs_thumbnail",
+                     locals: { obs:, form:,
+                               button: :field_slip_last_obs.t }) %>
+        </div>
+      <% end %>
+    </div>
+
+    <%= submit_button(form: form, button: :field_slip_create_obs.t,
+                      class: "my-5") if action == "edit" %>
+
+  <% end %>
+<% else %>
+  <%= form_with(url: new_field_slip_url, method: :get) do |form| %>
+    <%= text_field_with_label(form: form, field: :code, label: :field_slip_code.t + ":") %>
+    <%= submit_button(form: form, button: :field_slip_create_obs.t,
+                      class: "mt-5") %>
+  <% end %>
 <% end %>

@@ -2793,7 +2793,7 @@
   field_slip_nil_project: (No Project)
   field_slip_other_codes: Other Codes
   field_slip_other_example: e.g., iNat ID
-  field_slip_project_success: "Field Slip added to [TITLE] Project"
+  field_slip_project_success: "Field Slip associated with the [TITLE] Project"
   field_slip_show: "Show [:FIELD_SLIP]"
   field_slip_updated: Field slip was successfully updated.
   field_slip_welcome: "Welcome to the [TITLE] Project!"

@@ -49,9 +49,8 @@ class FieldSlipsController < ApplicationController
 
   # POST /field_slips or /field_slips.json
   def create
-    @field_slip = FieldSlip.new(field_slip_params)
-
     respond_to do |format|
+      @field_slip = FieldSlip.new(field_slip_params)
       check_project_membership
       check_for_last_obs
       if params[:commit] == :field_slip_last_obs.t
@@ -59,17 +58,7 @@ class FieldSlipsController < ApplicationController
       end
       if @field_slip.save
         format.html do
-          if params[:commit] == :field_slip_create_obs.t
-            redirect_to(new_observation_url(
-                          field_code: @field_slip.code,
-                          place_name: params[:field_slip][:location],
-                          notes: field_slip_notes
-                        ))
-          else
-            update_observation_fields
-            redirect_to(field_slip_url(@field_slip),
-                        notice: :field_slip_created.t)
-          end
+          html_create
         end
         format.json { render(:show, status: :created, location: @field_slip) }
       else
@@ -128,6 +117,20 @@ class FieldSlipsController < ApplicationController
   end
 
   private
+
+  def html_create
+    if params[:commit] == :field_slip_create_obs.t
+      redirect_to(new_observation_url(
+                    field_code: @field_slip.code,
+                    place_name: params[:field_slip][:location],
+                    notes: field_slip_notes
+                  ))
+    else
+      update_observation_fields
+      redirect_to(field_slip_url(@field_slip),
+                  notice: :field_slip_created.t)
+    end
+  end
 
   def update_observation_fields
     observation = @field_slip.observation
