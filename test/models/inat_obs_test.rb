@@ -104,9 +104,14 @@ class InatObsTest < UnitTestCase
     assert_equal(names(:coprinus).id, import.name_id)
   end
 
-  def test_observation_fields
+  def test_inat_observation_fields
     import = InatObs.new(File.read("test/fixtures/inat/trametes.txt"))
     assert(import.inat_obs_fields.any?)
+  end
+
+  def test_inat_tags
+    import = InatObs.new(File.read("test/fixtures/inat/inocybe.txt"))
+    assert(2, import.inat_tags.length)
   end
 
   def test_no_description

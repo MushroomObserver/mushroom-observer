@@ -21,6 +21,7 @@
 #  inat_project_names::
 #  inat_public_positional_accuracy:: accuracy of inat_lation in meters
 #  inat_quality_grade::  casual, needs id, research
+#  inat_tags::           array of tags
 #  inat_taxon_name::     scientific name
 #  inat_user_login
 #
@@ -90,6 +91,10 @@ class InatObs
 
   def inat_quality_grade
     obs[:quality_grade]
+  end
+
+  def inat_tags
+    obs[:tags]
   end
 
   def inat_taxon_name

@@ -18,10 +18,11 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | evernia_no_photos.txt | [216357655](https://www.inaturalist.org/observations/216357655) | 0 | public | lichen |
 | fuligo_septica.txt | [219783802](https://www.inaturalist.org/observations/219783802) | 1 | public | slime mold **Protozoa** |
 | gyromitra_ancilis.txt | [216745568](https://www.inaturalist.org/observations/216745568) | 3 | public | **cc-by license**, **many projects** |
+| inocybe.txt | [222904190](https://www.inaturalist.org/observations/222904190) | 5 | public | cc-by-nc, **2 tags** |
 | russulaceae.txt | [216675045](https://www.inaturalist.org/observations/216675045) | 2 | public | **all rights reserved**, many projects, Activity |
 | somion_unicolor.json |  |  |  | Formatted version of following; facilitates viewing iNat API response key/values |
 | somion_unicolor.txt | [202555552](https://www.inaturalist.org/observations/202555552) | 5 | public | Notes, Activity, many IDs, **mirrored from MO**|
-| trametes.txt | [220370929](https://www.inaturalist.org/observations/220370929) | 1 | public | D. Miller observation with different collector; Notes; Observation Fields: Collector |
+| trametes.txt | [220370929](https://www.inaturalist.org/observations/220370929) | 2 | public | D. Miller observation with different collector; Notes; **Observation Fields: Collector** |
 | tremella_mesenterica.txt | [213508767](https://www.inaturalist.org/observations/213508767) | 1 | public | |
 
 
