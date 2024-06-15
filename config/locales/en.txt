@@ -1538,15 +1538,16 @@
   form_description_license_help: Please select "license":/info/how_to_use#license you want to use for this description.
 
   # observations/_form_images
-  form_images_when_taken: When Was It Taken
+  form_images_when_taken: When it was taken
   form_images_when_help: Date the photograph or drawing was created.
+  form_images_notes: Image notes
   form_images_notes_help: Enter notes that are specific to this particular image.
   form_images_copyright_holder: "[:COPYRIGHT_HOLDER]"
-  form_images_original_name: Original File Name
+  form_images_original_name: Original file name
   form_images_select_license: Select a "License":/info/how_to_use#license
   form_images_license_help: Select "license":/info/how_to_use#license you want to give for this image.
   form_images_project_help: Check any projects you wish to attach this image to.
-  form_images_camera_date: Camera Date
+  form_images_camera_date: Camera date
 
   # observer/_form_list_feedback
   form_list_feedback_missing_names: The following names could not be found.
@@ -1637,7 +1638,6 @@
   form_observations_is_collection_location: Is this location where it was collected?
   form_observations_click_on_map: Click on map for geolocation
   form_observations_gps_hidden: Hide exact coordinates?
-  form_observations_original_name: Original File Name
   form_observations_upload_images: Upload Images
   form_observations_uploading_images: Uploading Images
   form_observations_upload_another: Upload Another...

@@ -18,9 +18,6 @@ end
 <%# No field index makes it simpler to be sure we have a _temp_image field %>
 <%= fields_for(image_field) do |ffi| %>
 
-  <%= text_area_with_label(form: ffi, field: :notes, index: img_id, rows: 2,
-                            value: image&.notes, label: :NOTES.l) %>
-
   <%= text_field_with_label(form: ffi, field: :copyright_holder, index: img_id,
                             value: image&.copyright_holder,
                             label: :form_images_copyright_holder.l) %>
@@ -34,10 +31,13 @@ end
                         options: licenses,
                         select_opts: { selected: selected_license }) %>
 
+  <%= text_area_with_label(form: ffi, field: :notes, index: img_id, rows: 2,
+                            value: image&.notes, label: :form_images_notes.l) %>
+
   <%= unless upload
     text_field_with_label(form: ffi, field: :original_name, index: img_id,
                           value: image&.original_name, size: 40,
-                          label: :form_observations_original_name.l)
+                          label: :form_images_original_name.l)
   end %>
 
 <% end %>
