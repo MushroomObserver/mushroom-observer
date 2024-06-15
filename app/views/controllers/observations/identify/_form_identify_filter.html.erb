@@ -24,19 +24,12 @@ options = [
   <div class="form-group has-feedback has-search">
     <%= content_tag(:span, "", class: "glyphicon glyphicon-search " \
                                       "form-control-feedback") %>
-    <%# f.label(:term, "Filter by:") %>
     <%= f.text_field(
       :term, value: value, placeholder: :filter_by.l,
       class: "form-control", size: 42, autocomplete: "one-time-code",
       data: { controller: nil, autocompleter_target: "input",
               autocomplete: :clade }
     ) %>
-    <%# autocompleter_field(
-      form: f, field: :term, value: value,
-      placeholder: :filter_by.l, size: 42, autofocus: true,
-      data: { controller: nil, autocompleter: :clade,
-              action: "autocompleter-swap:swap->autocompleter#swap" }) %>
-
   </div><!--.form-group-->
 
   <%= f.select(:type, options, { selected: selected },
