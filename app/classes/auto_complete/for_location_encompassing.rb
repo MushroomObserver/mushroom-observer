@@ -10,11 +10,13 @@ class AutoComplete::ForLocationEncompassing < AutoComplete::ByWord
     self.lng = params[:lng]
   end
 
-  def rough_matches(letter)
+  # We don't care about the letter, this list should be short
+  def rough_matches(_letter)
     matches =
       Location.contains(lat: lat, lng: lng).select(:name).distinct.
-      where(Location[:name].matches("#{letter}%").
-        or(Location[:name].matches("% #{letter}%"))).pluck(:name)
+      # where(Location[:name].matches("#{letter}%").
+      #   or(Location[:name].matches("% #{letter}%"))).
+      pluck(:name)
 
     matches.map! { |m| Location.reverse_name(m) } if reverse
     matches.sort.uniq
