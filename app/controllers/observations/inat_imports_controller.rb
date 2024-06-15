@@ -78,7 +78,7 @@ module Observations
       @observation.save
       @observation.log(:log_observation_created)
 
-      add_inat_images(inat_obs.obs_photos)
+      add_inat_images(inat_obs.inat_obs_photos)
       # TODO: Other things done by Observations#create
       # save_everything_else(params.dig(:naming, :reasons))
       # strip_images! if @observation.gps_hidden
@@ -109,8 +109,8 @@ module Observations
       # TODO: Delay in order to limit rate?
     end
 
-    def add_inat_images(obs_photos)
-      obs_photos.each do |obs_photo|
+    def add_inat_images(inat_obs_photos)
+      inat_obs_photos.each do |obs_photo|
         photo = InatObsPhoto.new(obs_photo)
         # ImageAPI#create params to consider adding to API params below
         # projects: parse_array(:project, :projects, must_be_member: true) ||

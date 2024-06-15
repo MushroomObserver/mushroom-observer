@@ -10,15 +10,21 @@
 ##
 #  == Instance methods
 #
-#  obs::          The iNat observation data
-#  obs_photos::   Array of iNat observation_photos
-#  importable?::  Is it importable to MO?
-#  fungi?::       Is it a fungus?
+#  === iNat attributes & associations
+#
+#  obs::                 The iNat observation data
+#  inat_id::
+#  inat_location::       lat,lon
+#  inat_obs_photos::     array of observation_photos
+#  inat_place_guess::
+#  inat_project_names::
+#  inat_public_positional_accuracy:: accuracy of inat_lation in meters
+#  inat_quality_grade::  casual, needs id, research
+#  inat_taxon_name::     scientific name
 #  inat_user_login
 #
 #  == MO attributes
 #  gps_hidden
-#  inat_id::
 #  license::
 #  name_id
 #  notes
@@ -28,30 +34,26 @@
 #  when
 #  where
 #
+# == Utilties
+#
+#  importable?::  Is it importable to MO?
+#
 class InatObs
   def initialize(imported_inat_obs_data)
     @imported_inat_obs_data =
       JSON.parse(imported_inat_obs_data, symbolize_names: true)
   end
 
-  def obs
-    @imported_inat_obs_data[:results].first
-  end
-
-  def obs_photos
-    obs[:observation_photos]
-  end
-
-  def importable?
-    taxon_importable?
-  end
-
-  def taxon_importable?
-    fungi? || slime_mold?
+  def inat_id
+    obs[:id]
   end
 
   def inat_location
     obs[:location]
+  end
+
+  def inat_obs_photos
+    obs[:observation_photos]
   end
 
   def inat_place_guess
@@ -97,10 +99,6 @@ class InatObs
 
   def gps_hidden
     obs[:geoprivacy].present?
-  end
-
-  def inat_id
-    obs[:id]
   end
 
   def license
@@ -157,9 +155,24 @@ class InatObs
     inat_place_guess
   end
 
+  ########## utilties
+
+  def importable?
+    taxon_importable?
+  end
+
+  def taxon_importable?
+    fungi? || slime_mold?
+  end
+
   ##########
 
   private
+
+  # The data for just one obs (omits metadata about the API request)
+  def obs
+    @imported_inat_obs_data[:results].first
+  end
 
   def description
     obs[:description]
