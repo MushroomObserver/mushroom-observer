@@ -29,14 +29,15 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 
 iNat fungal Obss with these fields/licenses
 
-- Public Domain
-https://api.inaturalist.org/v1/observations?identified=true&license=cc0&rank=species&iconic_taxa=Fungi&quality_grade=research&page=1&order=desc&order_by=created_at&only_id=true
-- nonderiv license
-- Activity
-- Annotations
 - Notes
 - Observation Fields
   - provisional name
   - sensu lato
   - sequence (need a variety of thesel there are many ways to add sequences to iNat Obss)
+- Tags
+- Annotations
+- Activity
+- Public Domain
+https://api.inaturalist.org/v1/observations?identified=true&license=cc0&rank=species&iconic_taxa=Fungi&quality_grade=research&page=1&order=desc&order_by=created_at&only_id=true
+- nonderiv license
 - Fungus with photo that was uploaded to iNat >= 1 day after iNat Obs was created
