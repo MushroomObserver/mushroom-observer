@@ -55,6 +55,10 @@ const AUTOCOMPLETER_TYPES = {
     AJAX_URL: "/autocompleters/new/location/@",
     UNORDERED: true
   },
+  location_containing: { // params encoded from dataset
+    AJAX_URL: "/autocompleters/new/location_containing/@",
+    UNORDERED: true
+  },
   name: {
     AJAX_URL: "/autocompleters/new/name/@",
     COLLAPSE: 1
@@ -139,18 +143,29 @@ export default class extends Controller {
   }
 
   // Swap out autocompleter type (and properties)
-  // Action called from a <select> with `data-action: "autocompleter-swap"`
+  // May be called from a <select> with `data-action: "autocompleter-swap"`
+  // or by the map controller emitting a "swap" event.
   swap(opts = {}) {
-    if (!this.hasSelectTarget)
-      return;
+    let type, lat, lng;
 
-    const type = this.selectTarget.value;
+    if (this.hasSelectTarget) {
+      type = this.selectTarget.value;
+    }
+    else if (opts.hasOwnProperty("type") &&
+      opts.hasOwnProperty("lat") && opts.hasOwnProperty("lng")) {
+      type = opts.type;
+      lat = opts.lat;
+      lng = opts.lng;
+    }
+    else {
+      return;
+    }
 
     if (!AUTOCOMPLETER_TYPES.hasOwnProperty(type)) {
       alert("MOAutocompleter: Invalid type: \"" + this.TYPE + "\"");
     } else {
       this.TYPE = type;
-      this.inputTarget.setAttribute("data-autocompleter", type)
+      this.inputTarget.setAttribute("data-autocomplete", type)
       // add dependent properties and allow overrides
       Object.assign(this, AUTOCOMPLETER_TYPES[this.TYPE]);
       Object.assign(this, opts);
@@ -1000,11 +1015,11 @@ export default class extends Controller {
       return;
 
     // Make request.
-    this.send_fetch_request(val);
+    this.send_fetch_request(val, params);
   }
 
   // Send AJAX request for more matching strings.
-  async send_fetch_request(val) {
+  async send_fetch_request(val, params) {
     this.verbose("send_fetch_request()");
     if (val.length > this.MAX_REQUEST_LINK)
       val = val.substr(0, this.MAX_REQUEST_LINK);

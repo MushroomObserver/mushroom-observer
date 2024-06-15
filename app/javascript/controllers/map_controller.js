@@ -477,6 +477,27 @@ export default class extends Controller {
     // This is like toFixed(5), but faster and returns a number
     this.latInputTarget.value = this.roundOff(center.lat)
     this.lngInputTarget.value = this.roundOff(center.lng)
+    // If we're here, we have a lat and a lng.
+    this.updateLocationAutocompleter(center)
+  }
+
+  updateLocationAutocompleter(center) {
+    // Call the swap event on the autocompleter and send the type
+    // `location_containing`. How to get params to autocompleter?
+    // May need a window event listener on the location autocomplete.
+    this.dispatch("swap", {
+      detail: { type: "location_containing", lat: center.lat, lng: center.lng }
+    })
+
+    // if (this.placeInputTarget.value === '') {
+    //   this.geocoder.geocode({ location: center }, (results, status) => {
+    //     if (status === "OK") {
+    //       if (results[0]) {
+    //         this.placeInputTarget.value = results[0].formatted_address
+    //       }
+    //     }
+    //   })
+    // }
   }
 
   // Action called by the "Open Map" button only
