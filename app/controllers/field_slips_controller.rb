@@ -32,6 +32,12 @@ class FieldSlipsController < ApplicationController
   def new
     @field_slip = FieldSlip.new
     @field_slip.code = params[:code].upcase if params.include?(:code)
+    project = @field_slip.project
+    if project
+      flash_notice(:field_slip_project_success.t(title: project.title))
+    else
+      flash_notice(:field_slip_cant_join_project.t)
+    end
   end
 
   # GET /field_slips/1/edit

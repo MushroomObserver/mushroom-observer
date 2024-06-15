@@ -474,6 +474,10 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     FieldSlipJobTracker.where(prefix: field_slip_prefix)
   end
 
+  def can_add_field_slip(user)
+    member?(user) || can_join?(user)
+  end
+
   private ###############################
 
   def obs_geoloc_outside_project_location

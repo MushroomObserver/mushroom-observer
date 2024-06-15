@@ -18,13 +18,23 @@ class FieldSlip < AbstractModel
   end
 
   def code=(val)
-    self[:code] = val.upcase
-    return if project
+    code = val.upcase
+    return unless self[:code] != code
 
+    self[:code] = code
     prefix_match = code.match(/(^.+)[ -]\d+$/)
     return unless prefix_match
 
-    self.project = Project.find_by(field_slip_prefix: prefix_match[1])
+    candidate = Project.find_by(field_slip_prefix: prefix_match[1])
+    self.project = candidate if candidate&.can_add_field_slip(User.current)
+  end
+
+  def project=(project)
+    return unless project != self.project
+
+    self[:project_id] = if project&.can_add_field_slip(User.current)
+                          project.id
+                        end
   end
 
   def title

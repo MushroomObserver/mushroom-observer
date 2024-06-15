@@ -17,9 +17,27 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_response :success
   end
 
-  test "should get new with unknown code" do
-    login
+  test "should get new with right project if member" do
     project = projects(:bolete_project)
+    login(project.user.login)
+    code = "#{project.field_slip_prefix}-1234"
+    get(:new, params: { code: code })
+    assert_response :success
+    assert(response.body.include?(project.title))
+  end
+
+  test "should get new with no project if not member" do
+    project = projects(:bolete_project)
+    login("lone_wolf") # Not a member of bolete_project
+    code = "#{project.field_slip_prefix}-1234"
+    get(:new, params: { code: code })
+    assert_response :success
+    assert(!response.body.include?(project.title))
+  end
+
+  test "should get new with project if open" do
+    project = projects(:open_membership_project)
+    login("lone_wolf") # Not a member of open_project
     code = "#{project.field_slip_prefix}-1234"
     get(:new, params: { code: code })
     assert_response :success

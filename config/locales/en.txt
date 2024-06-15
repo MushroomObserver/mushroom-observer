@@ -2771,9 +2771,8 @@
   destroy_visual_model_success: "[:VISUAL_MODEL] [:destroyed]"
 
   # Field Slips
+  field_slip_cant_join_project: Either no Project was found or you are unable to join the associated Project
   field_slip_code: Code
-  field_slip_other_codes: Other Codes
-  field_slip_other_example: e.g., iNat ID
   field_slip_code_format_error: code must have non-numeric characters other than period (.) and dash (-)
   field_slip_created: Field slip was successfully created.
   field_slip_create_obs: Create New Observation
@@ -2785,13 +2784,16 @@
   field_slip_errors: prohibited this field_slip from being saved
   field_slip_index: "[:FIELD_SLIP] Index"
   field_slip_job_no_project: "No Project with id=[ID]"
+  field_slip_job_no_tracker: No Field Slip Tracker found
   field_slip_keep_obs: Save with Current Observation
   field_slip_last_obs: Switch to Last Observation
   field_slip_new: Record Field Slip
   field_slip_no_observation: No Observation found
   field_slip_no_project: No Project found
   field_slip_nil_project: (No Project)
-  field_slip_job_no_tracker: No Field Slip Tracker found
+  field_slip_other_codes: Other Codes
+  field_slip_other_example: e.g., iNat ID
+  field_slip_project_success: "Field Slip added to [TITLE] Project"
   field_slip_show: "Show [:FIELD_SLIP]"
   field_slip_updated: Field slip was successfully updated.
   field_slip_welcome: "Welcome to the [TITLE] Project!"
