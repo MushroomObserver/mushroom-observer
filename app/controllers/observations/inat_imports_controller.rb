@@ -159,7 +159,7 @@ module Observations
         concat("#{:SEQUENCES.t}: #{:UNDER_DEVELOPMENT.t}\n").
         concat("#{:OBSERVATION_FIELDS.t}: \n" \
                "#{obs_fields(inat_obs.inat_obs_fields)}\n").
-        concat("#{:TAGS.t}: #{inag_obs.inat_tag.join(" ")}\n")
+        concat("#{:TAGS.t}: #{inat_obs.inat_tag.join(" ")}\n")
 
       params = {
         target: @observation,
