@@ -9,7 +9,7 @@ image_src == nil (src set by js)
 <%=
 active = index == 0 ? "active" : ""
 data = { form_images_target: "item", form_exif_target: "item",
-         action: "form-exif:populated@window->form-images#itemExifPopulated" }
+         action: "form-exif:populated->form-images#itemExifPopulated" }
 if upload
   img_id ||= "img_id_missing"
   extra_classes = "carousel-image set-src"
