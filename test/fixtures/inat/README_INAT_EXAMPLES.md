@@ -1,13 +1,15 @@
-# iNat Fixtures
+# iNat Examples
 
-This file describes "fixtures" -- not true Rails fixtures,
-but rather data that is used to stub requests to the iNat API --
-used to test iNat imports and photos,
-and additional "fixtures" needed for better testing.
+This file
+
+- Describes files used to stub requests to the iNat API;
+- Lists additional examples needed for better testing.
 
 ## Observations
 
-Unformatted strings comprising the complete result of an [iNat API Get Observation query](https://api.inaturalist.org/v1/docs/#!/Observations/get_observations_id), unless otherwise noted.
+Unformatted strings comprising the complete body of a response to
+an [iNat API Get Observation query](https://api.inaturalist.org/v1/docs/#!/Observations/get_observations_id),
+unless otherwise noted.
 
 All data as of the time of importing. (The corresponding iNat Observation may have changed)
 
@@ -25,22 +27,22 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | trametes.txt | [220370929](https://www.inaturalist.org/observations/220370929) | 2 | public | D. Miller observation with different collector; Notes; **Observation Fields: Collector** |
 | tremella_mesenterica.txt | [213508767](https://www.inaturalist.org/observations/213508767) | 1 | public | |
 
-
 ## TODO
 
-### Needed Observations
+### Needed Observation Examples
 
 iNat fungal Obss with these fields/licenses
 
 - Notes
 - Observation Fields
+  - sequence (need a variety of these; there are many ways to add sequences to iNat Obss)
   - provisional name
   - sensu lato
-  - sequence (need a variety of thesel there are many ways to add sequences to iNat Obss)
-- Tags
+  - various dna fields https://www.inaturalist.org/observations/24970904 (DNA Barcode ITS, Collector, Collection Number)
 - Annotations
 - Activity
 - Public Domain
 https://api.inaturalist.org/v1/observations?identified=true&license=cc0&rank=species&iconic_taxa=Fungi&quality_grade=research&page=1&order=desc&order_by=created_at&only_id=true
 - nonderiv license
 - Fungus with photo that was uploaded to iNat >= 1 day after iNat Obs was created
+- Obs with narrower Photo license than overall Obs License
