@@ -65,6 +65,8 @@
   </div><!--.row-->
   <!-- /MAP -->
 
+  <%= submit_button(form: f, button: button_name, center: true) %>
+
   <!-- WHERE_REASONS -->
   <%= render(partial: "shared/form_location_feedback",
              locals: { button: button_name } ) %>
