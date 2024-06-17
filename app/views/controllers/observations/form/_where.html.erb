@@ -78,10 +78,13 @@
       <%= autocompleter_field(
         form: f, field: :place_name, label: :WHERE.t + ":",
         autocomplete: :location,
-        # suggestLocations event detail: { type, request_params: { lat, lng } }
-        # Event may be dispatched from either map or form-exif controller.
-        # form-exif updating the input is not enough to fire event from map,
-        # because the inputs are buffered. map fires the event after buffering.
+        # map:suggestLocations event == form-exif:suggestLocations event
+        #   detail: { type, request_params: { lat, lng } }
+        # Stimulus custom events are scoped to the controller, but identical
+        # events may be dispatched from either map or form-exif controllers.
+        # For now we have to duplicate the code, because when form-exif updates
+        # the lat/lng inputs it's not enough to be caught by map, because
+        # the inputs are buffered. map only fires the event after buffering.
         data: { map_target: "placeInput",
                 action: [
                   "map:suggestLocations@window->autocompleter#swap",

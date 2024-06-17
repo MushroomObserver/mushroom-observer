@@ -90,7 +90,8 @@ const INTERNAL_OPTS = {
   focused: false,        // is user in text field?
   menu_up: false,        // is pulldown visible?
   old_value: null,       // previous value of input field
-  request_params: {},    // parameters to send with AJAX request
+  ignore_input: false,   // ignore input changes? (for select-like behavior)
+  request_params: {},    // query parameters to send with AJAX request
   primer: [],            // a server-supplied list of many options
   matches: [],           // list of options currently showing
   current_row: -1,       // index of option currently highlighted (0 = none)
@@ -146,28 +147,28 @@ export default class extends Controller {
   // Swap out autocompleter type (and properties)
   // May be called from a <select> with `data-action: "autocompleter-swap"`
   // or by the map controller emitting a "swap" event with detail.
-  // (Does anybody else send opts?)
   swap({ detail }) {
-    let type;
+    let new_type;
 
     if (this.hasSelectTarget) {
-      type = this.selectTarget.value;
+      new_type = this.selectTarget.value;
     }
     else if (detail?.hasOwnProperty("type")) {
-      type = detail.type;
+      new_type = detail.type;
     }
     else {
       return;
     }
 
-    if (!AUTOCOMPLETER_TYPES.hasOwnProperty(type)) {
-      alert("MOAutocompleter: Invalid type: \"" + this.TYPE + "\"");
+    if (!AUTOCOMPLETER_TYPES.hasOwnProperty(new_type)) {
+      alert("MOAutocompleter: Invalid type: \"" + new_type + "\"");
     } else {
-      this.TYPE = type;
-      this.inputTarget.setAttribute("data-autocomplete", type)
+      this.TYPE = new_type;
+      this.inputTarget.setAttribute("data-autocomplete", new_type)
       // add dependent properties and allow overrides
       Object.assign(this, AUTOCOMPLETER_TYPES[this.TYPE]);
-      Object.assign(this, detail); // type, request_params
+      const { type, ...new_assigns } = detail;
+      Object.assign(this, new_assigns); // request_params
       this.prepare_input_element();
     }
   }
@@ -196,7 +197,8 @@ export default class extends Controller {
     this.inputTarget.addEventListener("keydown", this);
     this.inputTarget.addEventListener("keyup", this);
     this.inputTarget.addEventListener("keypress", this);
-    this.inputTarget.addEventListener("change", this);
+    if (this.ignore_input !== true)
+      this.inputTarget.addEventListener("change", this);
     // Turbo: check this. May need to be turbo.before_render or before_visit
     window.addEventListener("beforeunload", this);
   }
