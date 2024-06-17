@@ -485,7 +485,7 @@ export default class extends Controller {
     // Call the swap event on the autocompleter and send the type
     // `location_containing`. How to get params to autocompleter?
     // May need a window event listener on the location autocomplete.
-    this.dispatch("swap", {
+    this.dispatch("suggestLocations", {
       detail: {
         type: "location_containing",
         request_params: { lat: center.lat, lng: center.lng }

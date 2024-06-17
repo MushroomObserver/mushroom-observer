@@ -76,8 +76,15 @@
       <%= autocompleter_field(
         form: f, field: :place_name, label: :WHERE.t + ":",
         autocomplete: :location,
-        data: { map_target: "placeInput", # the swap event sends lat/lng
-                action: "map:swap@window->autocompleter#swap" }
+        # suggestLocations event detail: { type, request_params: { lat, lng } }
+        # Event may be dispatched from either map or form-exif controller.
+        # form-exif updating the input is not enough to fire event from map,
+        # because the inputs are buffered. map fires the event after buffering.
+        data: { map_target: "placeInput",
+                action: [
+                  "map:suggestLocations@window->autocompleter#swap",
+                  "form-exif:suggestLocations@window->autocompleter#swap"
+                ].join(" ")}
       ) %>
     </div>
     <div class="col-xs-12 col-sm-6">

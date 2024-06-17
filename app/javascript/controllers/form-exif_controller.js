@@ -163,8 +163,15 @@ export default class extends Controller {
       _obs_lat.value = lat == null ? lat : lat.toFixed(4);
       _obs_lng.value = lng == null ? lng : lng.toFixed(4);
       _obs_alt.value = alt == null ? alt : alt.toFixed(0);
-      // triggers change (defined above) to update the map
+      // should trigger change (defined above) to update the map
       _obs_lat.dispatchEvent(_event);
+      _obs_lng.dispatchEvent(_event);
+      this.dispatch("suggestLocations", {
+        detail: {
+          type: "location_containing",
+          request_params: { lat, lng }
+        }
+      })
     }
     if (_exif_data.exif_date) {
       const _exifSimpleDate = JSON.parse(_exif_data.exif_date);

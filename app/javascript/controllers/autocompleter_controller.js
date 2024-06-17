@@ -147,14 +147,14 @@ export default class extends Controller {
   // May be called from a <select> with `data-action: "autocompleter-swap"`
   // or by the map controller emitting a "swap" event with detail.
   // (Does anybody else send opts?)
-  swap({ details: { } }) {
+  swap({ detail }) {
     let type;
 
     if (this.hasSelectTarget) {
       type = this.selectTarget.value;
     }
-    else if (details.hasOwnProperty("type")) {
-      type = details.type;
+    else if (detail?.hasOwnProperty("type")) {
+      type = detail.type;
     }
     else {
       return;
@@ -167,7 +167,7 @@ export default class extends Controller {
       this.inputTarget.setAttribute("data-autocomplete", type)
       // add dependent properties and allow overrides
       Object.assign(this, AUTOCOMPLETER_TYPES[this.TYPE]);
-      Object.assign(this, opts); // includes request_params
+      Object.assign(this, detail); // type, request_params
       this.prepare_input_element();
     }
   }
