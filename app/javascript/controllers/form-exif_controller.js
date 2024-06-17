@@ -169,8 +169,7 @@ export default class extends Controller {
       this.dispatch("suggestLocations", {
         detail: {
           type: "location_containing",
-          request_params: { lat, lng },
-          ignore_input: true
+          request_params: { lat, lng }
         }
       })
     }

@@ -57,7 +57,7 @@ const AUTOCOMPLETER_TYPES = {
   },
   location_containing: { // params encoded from dataset
     AJAX_URL: "/autocompleters/new/location_containing/@",
-    UNORDERED: true
+    ACT_LIKE_SELECT: true
   },
   name: {
     AJAX_URL: "/autocompleters/new/name/@",
@@ -90,7 +90,6 @@ const INTERNAL_OPTS = {
   focused: false,        // is user in text field?
   menu_up: false,        // is pulldown visible?
   old_value: null,       // previous value of input field
-  ignore_input: false,   // ignore input changes? (for select-like behavior)
   request_params: {},    // query parameters to send with AJAX request
   primer: [],            // a server-supplied list of many options
   matches: [],           // list of options currently showing
@@ -183,6 +182,11 @@ export default class extends Controller {
 
     // sanity check to show which autocompleter is currently on the element
     this.inputTarget.setAttribute("data-ajax-url", this.AJAX_URL);
+
+    // If the primer is not based on input, go ahead and request from server.
+    if (this.ACT_LIKE_SELECT == true) {
+      this.inputTarget.click();
+    }
   }
 
   // NOTE: `this` within an event listener function refers to the element
