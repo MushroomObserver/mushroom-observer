@@ -14,7 +14,7 @@ const DEFAULT_OPTS = {
   // N = etc.
   COLLAPSE: 0,
   // where to request primer from
-  AJAX_URL: null,
+  AJAX_URL: "/autocompleters/new/",
   // how long to wait before sending AJAX request (seconds)
   REFRESH_DELAY: 0.10,
   // how long to wait before hiding pulldown (seconds)
@@ -28,7 +28,7 @@ const DEFAULT_OPTS = {
   // amount to move cursor on page up and down
   PAGE_SIZE: 10,
   // max length of string to send via AJAX
-  MAX_REQUEST_LINK: 50,
+  MAX_STRING_LENGTH: 50,
   // Sub-match: starts finding new matches for the string *after the separator*
   // allowed separators (e.g. " OR ")
   SEPARATOR: null,
@@ -45,38 +45,29 @@ const DEFAULT_OPTS = {
 // Allowed types of autocompleter. Sets some DEFAULT_OPTS from type
 const AUTOCOMPLETER_TYPES = {
   clade: {
-    AJAX_URL: "/autocompleters/new/clade/@",
   },
   herbarium: { // params[:user_id] handled in controller
-    AJAX_URL: "/autocompleters/new/herbarium/@",
     UNORDERED: true
   },
   location: { // params[:format] handled in controller
-    AJAX_URL: "/autocompleters/new/location/@",
     UNORDERED: true
   },
   location_containing: { // params encoded from dataset
-    AJAX_URL: "/autocompleters/new/location_containing/@",
     ACT_LIKE_SELECT: true
   },
   name: {
-    AJAX_URL: "/autocompleters/new/name/@",
     COLLAPSE: 1
   },
   project: {
-    AJAX_URL: "/autocompleters/new/project/@",
     UNORDERED: true
   },
   region: {
-    AJAX_URL: "/autocompleters/new/location/@",
     UNORDERED: true
   },
   species_list: {
-    AJAX_URL: "/autocompleters/new/species_list/@",
     UNORDERED: true
   },
   user: {
-    AJAX_URL: "/autocompleters/new/user/@",
     UNORDERED: true
   }
 }
@@ -108,6 +99,8 @@ const INTERNAL_OPTS = {
 
 // Connects to data-controller="autocomplete"
 export default class extends Controller {
+  // The select target is not the input element, but a <select> that can
+  // swap out the autocompleter type. The input element is the target.
   static targets = ["input", "select"]
 
   initialize() {
@@ -181,11 +174,13 @@ export default class extends Controller {
     this.add_event_listeners();
 
     // sanity check to show which autocompleter is currently on the element
-    this.inputTarget.setAttribute("data-ajax-url", this.AJAX_URL);
+    this.inputTarget.setAttribute("data-ajax-url", this.AJAX_URL + this.TYPE);
 
     // If the primer is not based on input, go ahead and request from server.
     if (this.ACT_LIKE_SELECT == true) {
       this.inputTarget.click();
+      this.inputTarget.focus();
+      this.inputTarget.value = ' ';
     }
   }
 
@@ -744,9 +739,10 @@ export default class extends Controller {
   // Update content of pulldown.
   update_matches() {
     this.verbose("update_matches()");
-
+    if (this.ACT_LIKE_SELECT)
+      this.current_row = 0;
     // Remember which option used to be highlighted.
-    const last = this.current_row < 0 ? null : this.matches[this.current_row];
+    const _last = this.current_row < 0 ? null : this.matches[this.current_row];
 
     // Update list of options appropriately.
     if (this.ACT_LIKE_SELECT)
@@ -758,18 +754,22 @@ export default class extends Controller {
     else
       this.update_normal();
 
-    // Sort and remove duplicates.
-    this.matches = this.remove_dups(this.matches.sort());
+    // Sort and remove duplicates, unless it's already sorted.
+    if (!this.ACT_LIKE_SELECT)
+      this.matches = this.remove_dups(this.matches.sort());
     // Try to find old highlighted row in new set of options.
-    this.update_current_row(last);
+    this.update_current_row(_last);
     // Reset width each time we change the options.
     this.current_width = this.inputTarget.offsetWidth;
   }
 
   // When "acting like a select" make it display all options in the
-  // order given right from the moment they enter the field.
+  // order given right from the moment they enter the field,
+  // and pick the first one.
   update_select() {
     this.matches = this.primer;
+    if (this.matches.length > 0)
+      this.inputTarget.value = this.matches[0];
   }
 
   // Grab all matches, doing exact match, ignoring number of words.
@@ -994,7 +994,7 @@ export default class extends Controller {
       last_request = this.last_fetch_request;
 
     // Don't make request on empty string!
-    if (!val || val.length < 1)
+    if (!this.ACT_LIKE_SELECT && (!val || val.length < 1))
       return;
 
     // Don't repeat last request accidentally!
@@ -1004,8 +1004,8 @@ export default class extends Controller {
     // Memoize this condition, used twice.
     // is the new search token an extension of the previous search string?
     const new_val_refines_last_request =
-      (last_request.length < val.length) &&
-      (last_request == val.substr(0, last_request.length));
+      (last_request?.length < val.length) &&
+      (last_request == val.substr(0, last_request?.length));
 
     // No need to make more constrained request if we got all results last time.
     if (!this.last_fetch_incomplete &&
@@ -1019,35 +1019,42 @@ export default class extends Controller {
     if (this.fetch_request && new_val_refines_last_request)
       return;
 
+    if (val.length > this.MAX_STRING_LENGTH)
+      val = val.substr(0, this.MAX_STRING_LENGTH);
+
+    const _query_params = { string: val, ...this.request_params }
+    if (this.ACT_LIKE_SELECT) { _query_params["all"] = true; }
     // Make request.
-    this.send_fetch_request(val, this.request_params);
+    this.send_fetch_request(_query_params);
   }
 
   // Send AJAX request for more matching strings.
-  async send_fetch_request(val, params) {
+  async send_fetch_request(query_params) {
     this.verbose("send_fetch_request()");
-    if (val.length > this.MAX_REQUEST_LINK)
-      val = val.substr(0, this.MAX_REQUEST_LINK);
 
     if (this.log) {
-      this.debug("Sending fetch request: " + val);
+      this.debug("Sending fetch request: " + query_params.string + "...");
     }
 
     // Need to doubly-encode this to prevent router from interpreting slashes,
     // dots, etc.
-    const url = this.AJAX_URL.replace(
-      '@', encodeURIComponent(encodeURIComponent(val.replace(/\./g, '%2e')))
-    );
+    // const url = this.AJAX_URL.replace(
+    //   '@', encodeURIComponent(encodeURIComponent(val.replace(/\./g, '%2e')))
+    // );
+    const _url = this.AJAX_URL + this.TYPE
 
-    this.last_fetch_request = val;
+    this.last_fetch_request = query_params.string;
 
-    const controller = new AbortController(),
-      signal = controller.signal;
+    const _controller = new AbortController();
 
     if (this.fetch_request)
-      controller.abort();
+      _controller.abort();
 
-    const response = await get(url, { signal });
+    const response = await get(_url, {
+      signal: _controller.signal,
+      query: query_params,
+      responseKind: "json"
+    });
     if (response.ok) {
       const json = await response.json
       if (json) {
@@ -1056,7 +1063,7 @@ export default class extends Controller {
       }
     } else {
       this.fetch_request = null;
-      console.log(`got a ${response.status}`);
+      console.log(`got a ${response.status}: ${response.text}`);
     }
 
   }

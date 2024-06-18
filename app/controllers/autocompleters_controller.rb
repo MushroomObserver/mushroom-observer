@@ -16,32 +16,32 @@ class AutocompletersController < ApplicationController
   # could add record ids. The first line of the returned results is the actual
   # (minimal) string used to match the records. If it had to truncate the list
   # of results, the last string is "...".
-  # type:: Type of string.
-  # id::   String user has entered.
+  # type::              Type of string.
+  # params[:string]::   String user has entered.
   def new
     @user = User.current = session_user
 
-    string = CGI.unescape(@id).strip_squeeze
-    if string.blank?
+    if params[:string].blank? && params[:all].blank?
       render(json: ActiveSupport::JSON.encode([]))
     else
-      render(json: ActiveSupport::JSON.encode(auto_complete_results(string)))
+      render(json: ActiveSupport::JSON.encode(auto_complete_results))
     end
   end
 
   private
 
-  def auto_complete_results(string)
+  def auto_complete_results
     case @type
-    when "location"
+    when "location", "location_containing"
       params[:format] = @user&.location_format
     when "herbarium"
       params[:user_id] = @user&.id
     end
 
-    ::AutoComplete.subclass(@type).new(string, params).matching_strings
+    ::AutoComplete.subclass(@type).new(params).matching_strings
   end
 
+  # callback on `around_action`
   def catch_ajax_errors
     prepare_parameters
     yield
@@ -53,8 +53,6 @@ class AutocompletersController < ApplicationController
 
   def prepare_parameters
     @type  = params[:type].to_s
-    @id    = params[:id].to_s
-    @value = params[:value].to_s
   end
 
   def backtrace(exception)

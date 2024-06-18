@@ -2,12 +2,12 @@
 
 # Autocompleter for location names that encompass a given lat/lng.
 class AutoComplete::ForLocationContaining < AutoComplete::ByWord
-  attr_accessor :reverse
+  attr_accessor :reverse, :lat, :lng
 
-  include Mappable::BoxMethods
+  # include Mappable::BoxMethods
 
-  def initialize(string, params)
-    super(string, params)
+  def initialize(params)
+    super
     self.reverse = (params[:format] == "scientific")
     self.lat = params[:lat]
     self.lng = params[:lng]
