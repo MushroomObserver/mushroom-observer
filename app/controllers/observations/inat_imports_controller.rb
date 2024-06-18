@@ -7,10 +7,6 @@ module Observations
     before_action :login_required
     before_action :pass_query_params
 
-    # FIXME: Get a key. This one belongs to @pellaea
-    # The idea is having one key for all iNat imports
-    INAT_IMPORT_KEY = APIKey.first
-
     def new; end
 
     def create
@@ -108,7 +104,7 @@ module Observations
         params = {
           method: :post,
           action: :image,
-          api_key: INAT_IMPORT_KEY.key,
+          api_key: inat_manager_key.key,
           upload_url: photo.url,
 
           copyright_holder: photo.copyright_holder,
@@ -133,6 +129,13 @@ module Observations
         )
         @observation.add_image(image)
       end
+    end
+
+    # Key for managing iNat imports; avoids requiring each user to have own key.
+    # FIXME: Figure out how to do this via enviroment variable. 2024-06-18 jdc
+    # This is a temp hack. Use a db >= 2024-06-18, or create key locally.
+    def inat_manager_key
+      APIKey.where(user: 4468, notes: "inat import temp").first
     end
 
     def add_inat_summmary_data(inat_obs)
