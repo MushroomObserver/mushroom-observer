@@ -8,9 +8,9 @@ class InatObsTest < UnitTestCase
   # rubocop:disable Style/NumericLiterals
   def test_complex_public_obs
     # import of iNat 202555552 which is a mirror of MO 547126)
-    # For easier to to read version see test/fixtures/inat/somion_unicolor.json
+    # For easier to to read version see test/inat/somion_unicolor.json
     import =
-      InatObs.new(File.read("test/fixtures/inat/somion_unicolor.txt"))
+      InatObs.new(File.read("test/inat/somion_unicolor.txt"))
 
     expected_mapping = Observation.new(
       # id: 547126,
@@ -98,24 +98,24 @@ class InatObsTest < UnitTestCase
            "Test needs a name matching >= 1 MO `send` Name " \
            "and exactly 1 MO non-sensu Name")
 
-    import = InatObs.new(File.read("test/fixtures/inat/coprinus.txt"))
+    import = InatObs.new(File.read("test/inat/coprinus.txt"))
 
     assert_equal(names(:coprinus).text_name, import.text_name)
     assert_equal(names(:coprinus).id, import.name_id)
   end
 
   def test_inat_observation_fields
-    import = InatObs.new(File.read("test/fixtures/inat/trametes.txt"))
+    import = InatObs.new(File.read("test/inat/trametes.txt"))
     assert(import.inat_obs_fields.any?)
   end
 
   def test_inat_tags
-    import = InatObs.new(File.read("test/fixtures/inat/inocybe.txt"))
+    import = InatObs.new(File.read("test/inat/inocybe.txt"))
     assert(2, import.inat_tags.length)
   end
 
   def test_no_description
-    inat_response = File.read("test/fixtures/inat/tremella_mesenterica.txt")
+    inat_response = File.read("test/inat/tremella_mesenterica.txt")
     assert_match(/"description":null,/, inat_response,
                  "Need iNat observation lacking description")
 
@@ -126,18 +126,18 @@ class InatObsTest < UnitTestCase
 
   def test_taxon_importable
     inat_obs =
-      InatObs.new(File.read("test/fixtures/inat/somion_unicolor.txt"))
+      InatObs.new(File.read("test/inat/somion_unicolor.txt"))
     assert(inat_obs.taxon_importable?,
            "iNat Fungi observations should be importable")
 
     inat_obs =
-      InatObs.new(File.read("test/fixtures/inat/fuligo_septica.txt"))
+      InatObs.new(File.read("test/inat/fuligo_septica.txt"))
     assert(inat_obs.taxon_importable?,
            "iNat Slime mold (Protozoa) observations should be importable")
 
     inat_obs =
       InatObs.new(
-        File.read("test/fixtures/inat/ceanothus_cordulatus.txt")
+        File.read("test/inat/ceanothus_cordulatus.txt")
       )
     assert_not(inat_obs.taxon_importable?,
                "iNat Plant observations should not be importable")
@@ -147,12 +147,12 @@ class InatObsTest < UnitTestCase
   def test_inat_project_names
     import =
       # has no projects
-      InatObs.new(File.read("test/fixtures/inat/somion_unicolor.txt"))
+      InatObs.new(File.read("test/inat/somion_unicolor.txt"))
     assert_equal("??", import.inat_project_names)
 
     import =
       # has one project
-      InatObs.new(File.read("test/fixtures/inat/evernia_no_photos.txt"))
+      InatObs.new(File.read("test/inat/evernia_no_photos.txt"))
     assert_equal("Portland-Vancouver Regional Eco-Blitz, ??",
                  import.inat_project_names)
 

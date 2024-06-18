@@ -35,7 +35,7 @@ require("test_helper")
 class InatObsPhotoTest < UnitTestCase
   def test_simple_photo
     inat_obs = InatObs.new(
-      File.read("test/fixtures/inat/tremella_mesenterica.txt")
+      File.read("test/inat/tremella_mesenterica.txt")
     )
     inat_obs_photo = InatObsPhoto.new(
       inat_obs.inat_obs_photos.first

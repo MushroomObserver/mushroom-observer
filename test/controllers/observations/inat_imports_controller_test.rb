@@ -19,9 +19,9 @@ module Observations
     end
 
     def test_create_public_import_imageless_obs
-      # See test/fixtures/inat/README_INAT_FIXTURES.md
+      # See test/inat/README_INAT_FIXTURES.md
       inat_response_body =
-        File.read("test/fixtures/inat/evernia_no_photos.txt")
+        File.read("test/inat/evernia_no_photos.txt")
       inat_id = InatObs.new(inat_response_body).inat_id
       params = { inat_ids: inat_id }
 
@@ -48,9 +48,9 @@ module Observations
 
     def test_create_public_import_obs_with_photo
       skip("Under Construction")
-      # See test/fixtures/inat/README_INAT_FIXTURES.md
+      # See test/inat/README_INAT_FIXTURES.md
       inat_response_body =
-        File.read("test/fixtures/inat/tremella_mesenterica.txt")
+        File.read("test/inat/tremella_mesenterica.txt")
       inat_obs_data = InatObs.new(inat_response_body)
       inat_obs_id = inat_obs_data.inat_id
       inat_obs_photo = InatObsPhoto.new(
@@ -87,9 +87,9 @@ module Observations
     end
 
     def test_create_import_plant
-      # See test/fixtures/inat/README_INAT_FIXTURES.md
+      # See test/inat/README_INAT_FIXTURES.md
       inat_response_body =
-        File.read("test/fixtures/inat/ceanothus_cordulatus.txt")
+        File.read("test/inat/ceanothus_cordulatus.txt")
       inat_id = InatObs.new(inat_response_body).inat_id
       params = { inat_ids: inat_id }
 

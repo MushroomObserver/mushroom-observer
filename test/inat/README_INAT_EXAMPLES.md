@@ -2,13 +2,12 @@
 
 This file
 
-- Describes files used to stub requests to the iNat API;
+- Describes files used to stub requests to the iNat API and otherwise substitute for iNat API responses;
 - Lists additional examples needed for better testing.
 
 ## Observations
 
-Unformatted strings comprising the complete body of a response to
-an [iNat API Get Observation query](https://api.inaturalist.org/v1/docs/#!/Observations/get_observations_id),
+Strings comprising the body of a response to an [iNat API Get Observation query](https://api.inaturalist.org/v1/docs/#!/Observations/get_observations_id),
 unless otherwise noted.
 
 All data as of the time of importing. (The corresponding iNat Observation may have changed)
