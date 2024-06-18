@@ -134,6 +134,10 @@ module Observations
     # Key for managing iNat imports; avoids requiring each user to have own key.
     # FIXME: Figure out how to do this via enviroment variable. 2024-06-18 jdc
     # This is a temp hack. Use a db >= 2024-06-18, or create key locally.
+    # After 2024-06-18:
+    #  - Update the local db
+    #  - Update credentials to use webmaster's "inat import" key
+    #  - Update this method to grab that key
     def inat_manager_key
       APIKey.where(user: 4468, notes: "inat import temp").first
     end
