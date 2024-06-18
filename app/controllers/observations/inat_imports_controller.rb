@@ -90,23 +90,13 @@ module Observations
     def inat_search_observations(ids)
       operation = "/observations?id=#{ids}" \
                   "&order=desc&order_by=created_at&only_id=false"
-      inat_search(operation).body
+      ::Inat.new(operation).body
     end
 
     def not_importable(inat_obs)
       unless inat_obs.taxon_importable?
         flash_error(:inat_taxon_not_importable.t(id: inat_obs.inat_id))
       end
-    end
-
-    # TODO: move to own class so it can be called from multiple places
-    INAT_API_BASE = "https://api.inaturalist.org/v1"
-
-    def inat_search(operation)
-      HTTParty.get("#{INAT_API_BASE}#{operation}")
-      # TODO: Do I need timeout?
-      # TODO: need Error checking
-      # TODO: Delay in order to limit rate?
     end
 
     def add_inat_images(inat_obs_photos)
