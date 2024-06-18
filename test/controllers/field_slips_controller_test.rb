@@ -184,6 +184,13 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_response :success
   end
 
+  test "admin should not get edit when no trust" do
+    login("rolf")
+    field_slip = field_slips(:field_slip_no_trust)
+    get(:edit, params: { id: field_slip.id })
+    assert_redirected_to field_slip_url(field_slip)
+  end
+
   test "should get not edit" do
     login("dick")
     get(:edit, params: { id: @field_slip.id })

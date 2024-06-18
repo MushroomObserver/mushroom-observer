@@ -21,3 +21,9 @@ field_slip_falmouth_one:
   project: falmouth_2023_09_project
   code: FAL-0001
   user: rolf
+
+field_slip_no_trust:
+  observation: untrusted_hidden
+  project: eol_project
+  code: EOL-0004
+  user: katrina
