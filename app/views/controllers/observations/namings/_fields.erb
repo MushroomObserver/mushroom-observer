@@ -14,7 +14,7 @@ feedback_locals = {
   parent_deprecated: @parent_deprecated,
   names: @names
 }
-menu = unless @vote&.nonzero?
+menu = unless @vote&.value&.nonzero?
          Vote.opinion_menu
        else
          Vote.confidence_menu
