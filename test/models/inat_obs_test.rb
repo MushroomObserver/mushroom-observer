@@ -114,6 +114,18 @@ class InatObsTest < UnitTestCase
     assert(2, import.inat_tags.length)
   end
 
+  def test_sequences
+    mock = File.read("test/inat/lycoperdon.txt")
+    inat_obs = InatObs.new(mock)
+    assert(inat_obs.sequences.one?)
+    sequence = inat_obs.sequences.first
+    assert(sequence.present?)
+
+    mock = File.read("test/inat/evernia_no_photos.txt")
+    inat_obs = InatObs.new(mock)
+    assert_empty(inat_obs.sequences)
+  end
+
   def test_no_description
     inat_response = File.read("test/inat/tremella_mesenterica.txt")
     assert_match(/"description":null,/, inat_response,

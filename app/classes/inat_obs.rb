@@ -149,6 +149,19 @@ class InatObs
     inat_location.split(",").second.to_f
   end
 
+  def sequences
+    obs_sequence_fields =
+      inat_obs_fields.keep_if { |f| sequence_field?(f) }
+
+    obs_sequence_fields.each_with_object([]) do |field, ary|
+      # TODO: 2024-06-19 jdc. Need more investigation/test to handle
+      # field[:value] blank or not a (pure) lists of bases
+      ary << { locus: field[:name], bases: field[:value],
+               # NTOE: 2024-06-19 jdc. Can we figure out the following?
+               archive: nil, accession: "", notes: "" }
+    end
+  end
+
   def text_name
     Name.find(name_id).text_name
   end
@@ -186,6 +199,11 @@ class InatObs
 
   def description
     obs[:description]
+  end
+
+  def sequence_field?(field)
+    field[:datatype] == "dna" ||
+      field[:name] =~ /DNA/
   end
 
   def fungi?

@@ -80,6 +80,7 @@ module Observations
       # strip_images! if @observation.gps_hidden
       # update_field_slip(@observation, params[:field_code])
       # flash_notice(:runtime_observation_success.t(id: @observation.id))
+      add_inat_sequences(inat_obs)
       add_inat_summmary_data(inat_obs)
     end
 
@@ -113,6 +114,7 @@ module Observations
           original_name: photo.original_name
         }
 
+        # TODO: Error handling? 2024-06-19 jdc.
         api = API2.execute(params)
         User.current = @user # API call zaps User.current
 
@@ -139,6 +141,9 @@ module Observations
     #  - Update credentials to use webmaster's "inat import" key
     #  - Update this method to grab that key
     def inat_manager_key
+      # FIXME: See above
+      return APIKey.where(user: @user).first if Rails.env.test?
+
       APIKey.where(user: 4468, notes: "inat import temp").first
     end
 
@@ -166,6 +171,26 @@ module Observations
 
       Comment.create(params)
       # TODO: Insure Comment.user is webmaster (or other special-purpose user)
+    end
+
+    def add_inat_sequences(inat_obs)
+      inat_obs.sequences.each do |sequence|
+        params = {
+          action: :sequence,
+          method: :post,
+          api_key: inat_manager_key.key,
+          observation: @observation.id,
+          locus: sequence[:locus],
+          bases: sequence[:bases],
+          archive: sequence[:archive],
+          accession: sequence[:accession],
+          notes: sequence[:notes]
+        }
+
+        # TODO: Error handling? 2024-06-19 jdc.
+        api = API2.execute(params)
+        User.current = @user # API call zaps User.current
+      end
     end
 
     def dqa(dqa)
