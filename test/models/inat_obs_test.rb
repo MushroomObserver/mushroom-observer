@@ -9,8 +9,7 @@ class InatObsTest < UnitTestCase
   def test_complex_public_obs
     # import of iNat 202555552 which is a mirror of MO 547126)
     # For easier to to read version see test/inat/somion_unicolor.json
-    import =
-      InatObs.new(File.read("test/inat/somion_unicolor.txt"))
+    mock_inat_obs = mock("somion_unicolor")
 
     expected_mapping = Observation.new(
       # id: 547126,
@@ -55,14 +54,15 @@ class InatObsTest < UnitTestCase
     # mappings to Observation attributes
     %w[gps_hidden lat lng name_id notes text_name when where].
       each do |attribute|
-        assert_equal(expected_mapping.send(attribute), import.send(attribute))
+        assert_equal(expected_mapping.send(attribute),
+                     mock_inat_obs.send(attribute))
       end
 
     # TODO: include in above array after creating Observation.inat_id attribute
 
     expect = License.where(License[:url] =~ "/by-nc/").
              where(deprecated: false).order(id: :asc).first
-    assert_equal(expect, import.license)
+    assert_equal(expect, mock_inat_obs.license)
 
 =begin
       # other Observation attribute mappings to test
@@ -81,13 +81,13 @@ class InatObsTest < UnitTestCase
     # iNat attributes
     # NOTE: jdc 2024-06-13
     # Might seem circular, but need to insure it works with different iNat APIs
-    assert_equal(202555552, import.inat_id)
-    assert_equal("31.8813,-109.244", import.inat_location)
-    assert_equal("Cochise Co., Arizona, USA", import.inat_place_guess)
-    assert_equal(20, import.inat_public_positional_accuracy)
-    assert_equal("research", import.inat_quality_grade)
-    assert_equal("Somion unicolor", import.inat_taxon_name)
-    assert_equal("jdcohenesq", import.inat_user_login)
+    assert_equal(202555552, mock_inat_obs.inat_id)
+    assert_equal("31.8813,-109.244", mock_inat_obs.inat_location)
+    assert_equal("Cochise Co., Arizona, USA", mock_inat_obs.inat_place_guess)
+    assert_equal(20, mock_inat_obs.inat_public_positional_accuracy)
+    assert_equal("research", mock_inat_obs.inat_quality_grade)
+    assert_equal("Somion unicolor", mock_inat_obs.inat_taxon_name)
+    assert_equal("jdcohenesq", mock_inat_obs.inat_user_login)
   end
   # rubocop:enable Style/NumericLiterals
 
@@ -98,76 +98,61 @@ class InatObsTest < UnitTestCase
            "Test needs a name matching >= 1 MO `send` Name " \
            "and exactly 1 MO non-sensu Name")
 
-    import = InatObs.new(File.read("test/inat/coprinus.txt"))
+    mock_inat_obs = mock("coprinus")
 
-    assert_equal(names(:coprinus).text_name, import.text_name)
-    assert_equal(names(:coprinus).id, import.name_id)
+    assert_equal(names(:coprinus).text_name, mock_inat_obs.text_name)
+    assert_equal(names(:coprinus).id, mock_inat_obs.name_id)
   end
 
+  # TODO: 2024-06-19 jdc. Add something w/o obs fields
   def test_inat_observation_fields
-    import = InatObs.new(File.read("test/inat/trametes.txt"))
-    assert(import.inat_obs_fields.any?)
+    assert(mock("trametes").inat_obs_fields.any?)
   end
 
+  # TODO: 2024-06-19 jdc. Add something w/o tags
   def test_inat_tags
-    import = InatObs.new(File.read("test/inat/inocybe.txt"))
-    assert(2, import.inat_tags.length)
+    assert(2, mock("inocybe").inat_tags.length)
   end
 
   def test_sequences
-    mock = File.read("test/inat/lycoperdon.txt")
-    inat_obs = InatObs.new(mock)
-    assert(inat_obs.sequences.one?)
-    sequence = inat_obs.sequences.first
+    mock_inat_obs = mock("lycoperdon")
+    assert(mock_inat_obs.sequences.one?)
+    sequence = mock_inat_obs.sequences.first
     assert(sequence.present?)
 
-    mock = File.read("test/inat/evernia_no_photos.txt")
-    inat_obs = InatObs.new(mock)
-    assert_empty(inat_obs.sequences)
+    assert_empty(mock("evernia_no_photos").sequences)
   end
 
+  # TODO: 2024-06-19 jdc. Huh? method name? Add something with notes
   def test_no_description
-    inat_response = File.read("test/inat/tremella_mesenterica.txt")
-    assert_match(/"description":null,/, inat_response,
-                 "Need iNat observation lacking description")
-
-    import = InatObs.new(inat_response)
-
-    assert_equal("", import.notes)
+    assert_equal("", mock("tremella_mesenterica").notes)
   end
 
   def test_taxon_importable
-    inat_obs =
-      InatObs.new(File.read("test/inat/somion_unicolor.txt"))
-    assert(inat_obs.taxon_importable?,
+    # TODO: 2024-06-19 jdc. Fix this after fixing `importable?`
+    assert(mock("somion_unicolor").taxon_importable?,
            "iNat Fungi observations should be importable")
 
-    inat_obs =
-      InatObs.new(File.read("test/inat/fuligo_septica.txt"))
-    assert(inat_obs.taxon_importable?,
+    assert(mock("fuligo_septica").taxon_importable?,
            "iNat Slime mold (Protozoa) observations should be importable")
 
-    inat_obs =
-      InatObs.new(
-        File.read("test/inat/ceanothus_cordulatus.txt")
-      )
-    assert_not(inat_obs.taxon_importable?,
+    assert_not(mock("ceanothus_cordulatus").taxon_importable?,
                "iNat Plant observations should not be importable")
   end
 
   # comma separated string of project names
   def test_inat_project_names
-    import =
-      # has no projects
-      InatObs.new(File.read("test/inat/somion_unicolor.txt"))
-    assert_equal("??", import.inat_project_names)
+    assert_equal("??", mock("somion_unicolor").inat_project_names,
+                 "wrong project names for iNat obs which lacks projects")
 
-    import =
-      # has one project
-      InatObs.new(File.read("test/inat/evernia_no_photos.txt"))
     assert_equal("Portland-Vancouver Regional Eco-Blitz, ??",
-                 import.inat_project_names)
+                 mock("evernia_no_photos").inat_project_names,
+                 "wrong project names for iNat obs with 1 detectable project")
 
     # TODO: Test iNat obs with obs[:project_observations].many?
+  end
+
+  def mock(filename)
+    InatObs.new(File.read("test/inat/#{filename}.txt"))
   end
 end
