@@ -425,30 +425,30 @@ export default class extends Controller {
   go_end() { this.move_cursor(this.matches.length) }
   move_cursor(rows) {
     this.verbose("move_cursor()");
-    const _old_row = this.current_row,
-      _old_scr = this.scroll_offset;
-    let _new_row = _old_row + rows,
-      _new_scr = _old_scr;
+    const old_row = this.current_row,
+      old_scr = this.scroll_offset;
+    let new_row = old_row + rows,
+      new_scr = old_scr;
 
     // Move cursor, but keep in bounds.
-    if (_new_row < 0)
-      _new_row = _old_row < 0 ? -1 : 0;
-    if (_new_row >= this.matches.length)
-      _new_row = this.matches.length - 1;
-    this.current_row = _new_row;
-    this.current_value = _new_row < 0 ? null : this.matches[_new_row];
+    if (new_row < 0)
+      new_row = old_row < 0 ? -1 : 0;
+    if (new_row >= this.matches.length)
+      new_row = this.matches.length - 1;
+    this.current_row = new_row;
+    this.current_value = new_row < 0 ? null : this.matches[new_row];
 
     // Scroll view so new row is visible.
-    if (_new_row < _new_scr)
-      _new_scr = _new_row;
-    if (_new_scr < 0)
-      _new_scr = 0;
-    if (_new_row >= _new_scr + this.PULLDOWN_SIZE)
-      _new_scr = _new_row - this.PULLDOWN_SIZE + 1;
+    if (new_row < new_scr)
+      new_scr = new_row;
+    if (new_scr < 0)
+      new_scr = 0;
+    if (new_row >= new_scr + this.PULLDOWN_SIZE)
+      new_scr = new_row - this.PULLDOWN_SIZE + 1;
 
     // Update if something changed.
-    if (_new_row != _old_row || _new_scr != _old_scr) {
-      this.scroll_offset = _new_scr;
+    if (new_row != old_row || new_scr != old_scr) {
+      this.scroll_offset = new_scr;
       this.draw_pulldown();
     }
   }
@@ -456,17 +456,17 @@ export default class extends Controller {
   // Mouse has moved over a menu item.
   highlight_row(new_hl) {
     this.verbose("highlight_row()");
-    const _rows = this.LIST_ELEM.children,
-      _old_hl = this.current_highlight;
+    const rows = this.LIST_ELEM.children,
+      old_hl = this.current_highlight;
 
     this.current_highlight = new_hl;
     this.current_row = this.scroll_offset + new_hl;
 
-    if (_old_hl != new_hl) {
-      if (_old_hl >= 0)
-        _rows[_old_hl].classList.remove(this.HOT_CLASS);
+    if (old_hl != new_hl) {
+      if (old_hl >= 0)
+        rows[old_hl].classList.remove(this.HOT_CLASS);
       if (new_hl >= 0)
-        _rows[new_hl].classList.add(this.HOT_CLASS);
+        rows[new_hl].classList.add(this.HOT_CLASS);
     }
     this.inputTarget.focus();
     this.update_width();
@@ -475,18 +475,18 @@ export default class extends Controller {
   // Called when users scrolls via scrollbar.
   our_scroll() {
     this.verbose("our_scroll()");
-    const _old_scr = this.scroll_offset,
-      _new_scr = Math.round(this.PULLDOWN_ELEM.scrollTop / this.ROW_HEIGHT),
-      _old_row = this.current_row;
-    let _new_row = this.current_row;
+    const old_scr = this.scroll_offset,
+      new_scr = Math.round(this.PULLDOWN_ELEM.scrollTop / this.ROW_HEIGHT),
+      old_row = this.current_row;
+    let new_row = this.current_row;
 
-    if (_new_row < _new_scr)
-      _new_row = _new_scr;
-    if (_new_row >= _new_scr + this.PULLDOWN_SIZE)
-      _new_row = _new_scr + this.PULLDOWN_SIZE - 1;
-    if (_new_row != _old_row || _new_scr != _old_scr) {
-      this.current_row = _new_row;
-      this.scroll_offset = _new_scr;
+    if (new_row < new_scr)
+      new_row = new_scr;
+    if (new_row >= new_scr + this.PULLDOWN_SIZE)
+      new_row = new_scr + this.PULLDOWN_SIZE - 1;
+    if (new_row != old_row || new_scr != old_scr) {
+      this.current_row = new_row;
+      this.scroll_offset = new_scr;
       this.draw_pulldown();
     }
   }
@@ -495,20 +495,20 @@ export default class extends Controller {
   select_row(row) {
     this.verbose("select_row()");
     // const old_val = this.inputTarget.value;
-    let _new_val = this.matches[this.scroll_offset + row];
+    let new_val = this.matches[this.scroll_offset + row];
     // Close pulldown unless the value the user selected uncollapses into a set
     // of new options.  In that case schedule a refresh and leave it up.
     if (this.COLLAPSE > 0 &&
-      (_new_val.match(/ /g) || []).length < this.COLLAPSE) {
-      _new_val += ' ';
+      (new_val.match(/ /g) || []).length < this.COLLAPSE) {
+      new_val += ' ';
       this.schedule_refresh();
     } else {
       this.schedule_hide();
     }
     this.inputTarget.focus();
     this.focused = true;
-    this.inputTarget.value = _new_val;
-    this.set_search_token(_new_val);
+    this.inputTarget.value = new_val;
+    this.set_search_token(new_val);
     this.our_change(false);
   }
 
@@ -516,25 +516,23 @@ export default class extends Controller {
 
   // Create div for pulldown. Presence of this is checked in system tests.
   create_pulldown() {
-    const _pulldown = document.createElement("div");
-    _pulldown.classList.add(this.PULLDOWN_CLASS);
+    const pulldown = document.createElement("div");
+    pulldown.classList.add(this.PULLDOWN_CLASS);
 
-    const _list = document.createElement('ul');
-    _list.classList.add(this.LIST_CLASS);
-
-    let i, _item;
+    const list = document.createElement('ul');
+    let i, row;
     for (i = 0; i < this.PULLDOWN_SIZE; i++) {
-      _item = document.createElement("li");
-      _item.style.display = 'none';
-      this.attach_row_events(_item, i);
-      _list.append(_item);
+      row = document.createElement("li");
+      row.style.display = 'none';
+      this.attach_row_events(row, i);
+      list.append(row);
     }
-    _pulldown.appendChild(_list)
+    pulldown.appendChild(list)
 
-    _pulldown.addEventListener("scroll", this.our_scroll.bind(this));
-    this.inputTarget.insertAdjacentElement("afterend", _pulldown);
-    this.PULLDOWN_ELEM = _pulldown;
-    this.LIST_ELEM = _list;
+    pulldown.addEventListener("scroll", this.our_scroll.bind(this));
+    this.inputTarget.insertAdjacentElement("afterend", pulldown);
+    this.PULLDOWN_ELEM = pulldown;
+    this.LIST_ELEM = list;
   }
 
   // Add "click" and "mouseover" events to a row of the pulldown menu.
@@ -559,6 +557,7 @@ export default class extends Controller {
       li = document.createElement('li');
 
     div.className = this.PULLDOWN_CLASS;
+    div.classList.add('test');
     div.style.display = 'block';
     div.style.border = div.style.margin = div.style.padding = '0px';
     li.innerHTML = 'test';
@@ -585,25 +584,25 @@ export default class extends Controller {
   // Redraw the pulldown options.
   draw_pulldown() {
     this.verbose("draw_pulldown()");
-    const _list = this.LIST_ELEM,
-      _rows = _list.children,
-      _size = this.PULLDOWN_SIZE,
-      _scroll = this.scroll_offset,
-      _current = this.current_row,
-      _matches = this.matches;
+    const list = this.LIST_ELEM,
+      rows = list.children,
+      size = this.PULLDOWN_SIZE,
+      scroll = this.scroll_offset,
+      cur = this.current_row,
+      matches = this.matches;
 
     if (this.log) {
       this.debug(
-        "Redraw: matches=" + _matches.length + ", scroll=" + _scroll + ", cursor=" + _current
+        "Redraw: matches=" + matches.length + ", scroll=" + scroll + ", cursor=" + cur
       );
     }
 
     // Get row height if haven't been able to yet.
     this.get_row_height();
-    if (_rows.length) {
-      this.update_rows(_rows, _matches, _size, _scroll);
-      this.highlight_new_row(_rows, _current, _size, _scroll)
-      this.make_menu_visible(_matches, _size, _scroll)
+    if (rows.length) {
+      this.update_rows(rows, matches, size, scroll);
+      this.highlight_new_row(rows, cur, size, scroll)
+      this.make_pulldown_visible(matches, size, scroll)
     }
 
     // Make sure input focus stays on text field!
@@ -614,19 +613,19 @@ export default class extends Controller {
   update_rows(rows, matches, size, scroll) {
     let i, x, y;
     for (i = 0; i < size; i++) {
-      let _row = rows.item(i);
-      x = _row.innerHTML;
+      let row = rows.item(i);
+      x = row.innerHTML;
       if (i + scroll < matches.length) {
         y = this.escapeHTML(matches[i + scroll]);
         if (x != y) {
           if (x == '')
-            _row.style.display = 'block';
-          _row.innerHTML = y;
+            row.style.display = 'block';
+          row.innerHTML = y;
         }
       } else {
         if (x != '') {
-          _row.innerHTML = '';
-          _row.style.display = 'none';
+          row.innerHTML = '';
+          row.style.display = 'none';
         }
       }
     }
@@ -634,62 +633,61 @@ export default class extends Controller {
 
   // Highlight that row.
   highlight_new_row(rows, cur, size, scroll) {
-    const _old_hl = this.current_highlight;
-    let _new_hl = cur - scroll;
+    const old_hl = this.current_highlight;
+    let new_hl = cur - scroll;
 
-    if (_new_hl < 0 || _new_hl >= size)
-      _new_hl = -1;
-    this.current_highlight = _new_hl;
-    if (_new_hl != _old_hl) {
-      if (_old_hl >= 0)
-        rows[_old_hl].classList.remove(this.HOT_CLASS);
-      if (_new_hl >= 0)
-        rows[_new_hl].classList.add(this.HOT_CLASS);
+    if (new_hl < 0 || new_hl >= size)
+      new_hl = -1;
+    this.current_highlight = new_hl;
+    if (new_hl != old_hl) {
+      if (old_hl >= 0)
+        rows[old_hl].classList.remove(this.HOT_CLASS);
+      if (new_hl >= 0)
+        rows[new_hl].classList.add(this.HOT_CLASS);
     }
   }
 
-  // Make menu visible if nonempty.
-  make_menu_visible(matches, size, scroll) {
-    const _pulldown = this.PULLDOWN_ELEM,
-      _list = _pulldown.children[0];
+  // Make pulldown visible if nonempty.
+  make_pulldown_visible(matches, size, scroll) {
+    const pulldown = this.PULLDOWN_ELEM,
+      list = pulldown.children[0];
 
     if (matches.length > 0) {
       // console.log("Matches:" + matches)
-      const _top = this.inputTarget.offsetTop,
-        _left = this.inputTarget.offsetLeft,
-        _hgt = this.inputTarget.offsetHeight,
-        _scr = this.inputTarget.scrollTop;
-      _pulldown.style.top = (_top + _hgt + _scr) + "px";
-      _pulldown.style.left = _left + "px";
+      const top = this.inputTarget.offsetTop,
+        left = this.inputTarget.offsetLeft,
+        hgt = this.inputTarget.offsetHeight,
+        scr = this.inputTarget.scrollTop;
+      pulldown.style.top = (top + hgt + scr) + "px";
+      pulldown.style.left = left + "px";
 
-      // Set height of menu.
-      _pulldown.style.overflowY = matches.length > size ? "scroll" : "hidden";
-      _pulldown.style.height = this.ROW_HEIGHT *
-        (size < matches.length - scroll ? size : matches.length - scroll) +
-        "px";
-      _list.style.marginTop = this.ROW_HEIGHT * scroll + "px";
-      _list.style.height = this.ROW_HEIGHT * (matches.length - scroll) + "px";
-      _pulldown.scrollTo({ top: this.ROW_HEIGHT * scroll });
+      // Set height of pulldown.
+      pulldown.style.overflowY = matches.length > size ? "scroll" : "hidden";
+      pulldown.style.height = this.ROW_HEIGHT * (size < matches.length - scroll ? size : matches.length - scroll) + "px";
+      list.style.marginTop = this.ROW_HEIGHT * scroll + "px";
+      list.style.height = this.ROW_HEIGHT * (matches.length - scroll) + "px";
+      pulldown.scrollTo({ top: this.ROW_HEIGHT * scroll });
+      // }
 
-      // Set width of menu.
+      // Set width of pulldown.
       this.set_width();
       this.update_width();
 
-      // Only show menu if it is nontrivial, i.e., show an option other than
+      // Only show pulldown if it is nontrivial, i.e., show an option other than
       // the value that's already in the text field.
       if (matches.length > 1 || this.inputTarget.value != matches[0]) {
         this.clear_hide();
-        _pulldown.style.display = 'block';
+        pulldown.style.display = 'block';
         this.menu_up = true;
       } else {
-        _pulldown.style.display = 'none';
+        pulldown.style.removeProperty('display');
         this.menu_up = false;
       }
     }
 
-    // Hide the menu if it's empty now.
+    // Hide the pulldown if it's empty now.
     else {
-      _pulldown.style.display = 'none';
+      pulldown.style.removeProperty('display');
       this.menu_up = false;
     }
   }
@@ -697,7 +695,7 @@ export default class extends Controller {
   // Hide pulldown options.
   hide_pulldown() {
     this.verbose("hide_pulldown()");
-    this.PULLDOWN_ELEM.style.display = 'none';
+    this.PULLDOWN_ELEM.style.removeProperty('display');
     this.menu_up = false;
   }
 
@@ -730,8 +728,9 @@ export default class extends Controller {
     this.verbose("update_matches()");
     if (this.ACT_LIKE_SELECT)
       this.current_row = 0;
+
     // Remember which option used to be highlighted.
-    const _last = this.current_row < 0 ? null : this.matches[this.current_row];
+    const last = this.current_row < 0 ? null : this.matches[this.current_row];
 
     // Update list of options appropriately.
     if (this.ACT_LIKE_SELECT)
@@ -747,7 +746,7 @@ export default class extends Controller {
     if (!this.ACT_LIKE_SELECT)
       this.matches = this.remove_dups(this.matches.sort());
     // Try to find old highlighted row in new set of options.
-    this.update_current_row(_last);
+    this.update_current_row(last);
     // Reset width each time we change the options.
     this.current_width = this.inputTarget.offsetWidth;
   }
@@ -763,99 +762,99 @@ export default class extends Controller {
 
   // Grab all matches, doing exact match, ignoring number of words.
   update_normal() {
-    const _token = this.get_search_token().normalize().toLowerCase(),
+    const token = this.get_search_token().normalize().toLowerCase(),
       // normalize the Unicode of each string in primer for search
-      _primer = this.primer.map((str) => { return str.normalize() }),
-      _matches = [];
+      primer = this.primer.map((str) => { return str.normalize() }),
+      matches = [];
 
-    if (_token != '') {
-      for (let i = 0; i < _primer.length; i++) {
-        let s = _primer[i + 1];
-        if (s && s.length > 0 && s.toLowerCase().indexOf(_token) >= 0) {
-          _matches.push(s);
+    if (token != '') {
+      for (let i = 0; i < primer.length; i++) {
+        let s = primer[i + 1];
+        if (s && s.length > 0 && s.toLowerCase().indexOf(token) >= 0) {
+          matches.push(s);
         }
       }
     }
 
-    this.matches = _matches;
+    this.matches = matches;
   }
 
   // Grab matches ignoring order of words.
   update_unordered() {
     // regularize spacing in the input
-    const _token = this.get_search_token().normalize().toLowerCase().
+    const token = this.get_search_token().normalize().toLowerCase().
       replace(/^ */, '').replace(/  +/g, ' '),
-      // get the separate words as _tokens
-      _tokens = _token.split(' '),
+      // get the separate words as tokens
+      tokens = token.split(' '),
       // normalize the Unicode of each string in primer for search
-      _primer = this.primer.map((str) => { return str.normalize() }),
-      _matches = [];
+      primer = this.primer.map((str) => { return str.normalize() }),
+      matches = [];
 
-    if (_token != '' && _primer.length > 1) {
-      for (let i = 1; i < _primer.length; i++) {
-        let s = _primer[i] || '',
+    if (token != '' && primer.length > 1) {
+      for (let i = 1; i < primer.length; i++) {
+        let s = primer[i] || '',
           s2 = ' ' + s.toLowerCase() + ' ',
           k;
         // check each word in the primer entry for a matching word
-        for (k = 0; k < _tokens.length; k++) {
-          if (s2.indexOf(' ' + _tokens[k]) < 0) break;
+        for (k = 0; k < tokens.length; k++) {
+          if (s2.indexOf(' ' + tokens[k]) < 0) break;
         }
-        if (k >= _tokens.length) {
-          _matches.push(s);
+        if (k >= tokens.length) {
+          matches.push(s);
         }
       }
     }
 
-    this.matches = _matches;
+    this.matches = matches;
   }
 
   // Grab all matches, preferring the ones with no additional words.
   // Note: order must have genera first, then species, then varieties.
   update_collapsed() {
-    const _token = this.get_search_token().toLowerCase(),
-      _primer = this.primer,
+    const token = this.get_search_token().toLowerCase(),
+      primer = this.primer,
       // make a lowercased duplicate of primer to regularize search
-      _primer_lc = this.primer.map((str) => { return str.toLowerCase() }),
-      _matches = [];
+      primer_lc = this.primer.map((str) => { return str.toLowerCase() }),
+      matches = [];
 
-    if (_token != '' && _primer.length > 1) {
-      let _the_rest = (_token.match(/ /g) || []).length >= this.COLLAPSE;
+    if (token != '' && primer.length > 1) {
+      let the_rest = (token.match(/ /g) || []).length >= this.COLLAPSE;
 
-      for (let i = 1; i < _primer_lc.length; i++) {
-        if (_primer_lc[i].indexOf(_token) > -1) {
-          let _s = _primer[i];
-          if (_s.length > 0) {
-            if (_the_rest || _s.indexOf(' ', _token.length) < _token.length) {
-              _matches.push(_s);
-            } else if (_matches.length > 1) {
+      for (let i = 1; i < primer_lc.length; i++) {
+        if (primer_lc[i].indexOf(token) > -1) {
+          let s = primer[i];
+          if (s.length > 0) {
+            if (the_rest || s.indexOf(' ', token.length) < token.length) {
+              matches.push(s);
+            } else if (matches.length > 1) {
               break;
             } else {
-              if (_matches[0] == _token)
-                _matches.pop();
-              _matches.push(_s);
-              _the_rest = true;
+              if (matches[0] == token)
+                matches.pop();
+              matches.push(s);
+              the_rest = true;
             }
           }
         }
       }
-      if (_matches.length == 1 &&
-        (_token == matches[0].toLowerCase() ||
-          _token == matches[0].toLowerCase() + ' '))
-        _matches.pop();
+      if (matches.length == 1 &&
+        (token == matches[0].toLowerCase() ||
+          token == matches[0].toLowerCase() + ' '))
+        matches.pop();
     }
-    this.matches = _matches;
+    this.matches = matches;
   }
 
   /**
    * Index of string in future primer array with IDs
    * where primer == [[text_string, id], [text_string, id]]
    * @param primer {!Array} - the input array
-   * @param val {object} - the value to search
+   * @param token {object} - the token to search
    * @return {Array} or just i
    */
-  // get_primer_index_of(primer, val) {
+  // get_primer_index_of(primer, token) {
   //   for (let i = 0; i < primer.length; i++) {
-  //     const index = primer[i].indexOf(val);
+  //     const index = primer[i].indexOf(token);
   //     if (index > -1) {
   //       // return [i, index];
   //       return i;
@@ -875,39 +874,39 @@ export default class extends Controller {
     return list;
   }
 
-  // Look for 'val' in list of matches and highlight it,
+  // Look for 'token' in list of matches and highlight it,
   // otherwise highlight first match.
-  update_current_row(val) {
+  update_current_row(token) {
     this.verbose("update_current_row()");
-    const _matches = this.matches,
-      _size = this.PULLDOWN_SIZE;
-    let _exact = -1,
-      _part = -1;
+    const matches = this.matches,
+      size = this.PULLDOWN_SIZE;
+    let exact = -1,
+      part = -1;
 
-    if (val && val.length > 0) {
-      for (let i = 0; i < _matches.length; i++) {
-        if (_matches[i] == val) {
-          _exact = i;
+    if (token && token.length > 0) {
+      for (let i = 0; i < matches.length; i++) {
+        if (matches[i] == token) {
+          exact = i;
           break;
         }
-        if (_matches[i] == val.substr(0, _matches[i].length) &&
-          (_part < 0 || _matches[i].length > _matches[_part].length))
-          _part = i;
+        if (matches[i] == token.substr(0, matches[i].length) &&
+          (part < 0 || matches[i].length > matches[part].length))
+          part = i;
       }
     }
-    let _new_row = _exact >= 0 ? _exact : _part >= 0 ? _part : -1;
-    let _new_scroll = this.scroll_offset;
-    if (_new_scroll > _new_row)
-      _new_scroll = _new_row;
-    if (_new_scroll > _matches.length - _size)
-      _new_scroll = _matches.length - _size;
-    if (_new_scroll < _new_row - _size + 1)
-      _new_scroll = _new_row - _size + 1;
-    if (_new_scroll < 0)
-      _new_scroll = 0;
+    let new_row = exact >= 0 ? exact : part >= 0 ? part : -1;
+    let new_scroll = this.scroll_offset;
+    if (new_scroll > new_row)
+      new_scroll = new_row;
+    if (new_scroll > matches.length - size)
+      new_scroll = matches.length - size;
+    if (new_scroll < new_row - size + 1)
+      new_scroll = new_row - size + 1;
+    if (new_scroll < 0)
+      new_scroll = 0;
 
-    this.current_row = _new_row;
-    this.scroll_offset = _new_scroll;
+    this.current_row = new_row;
+    this.scroll_offset = new_scroll;
   }
 
   /**
@@ -924,46 +923,46 @@ export default class extends Controller {
 
   // Get search token under or immediately in front of cursor.
   get_search_token() {
-    const _val = this.inputTarget.value;
-    let _token = _val;
+    const val = this.inputTarget.value;
+    let token = val;
     if (this.SEPARATOR) {
-      const _extents = this.search_token_extents();
-      _token = _val.substring(_extents.start, _extents.end);
+      const extents = this.search_token_extents();
+      token = val.substring(extents.start, extents.end);
     }
-    return _token;
+    return token;
   }
 
   // Change the token under or immediately in front of the cursor.
   set_search_token(new_val) {
-    const _old_str = this.inputTarget.value;
+    const old_str = this.inputTarget.value;
     if (this.SEPARATOR) {
-      let _new_str = "";
-      const _extents = this.search_token_extents();
+      let new_str = "";
+      const extents = this.search_token_extents();
 
-      if (_extents.start > 0)
-        _new_str += _old_str.substring(0, _extents.start);
-      _new_str += new_val;
+      if (extents.start > 0)
+        new_str += old_str.substring(0, extents.start);
+      new_str += new_val;
 
-      if (_extents.end < _old_str.length)
-        _new_str += _old_str.substring(_extents.end);
-      if (_old_str != _new_str) {
-        let _old_scroll = this.inputTarget.offsetTop;
-        this.inputTarget.value = _new_str;
+      if (extents.end < old_str.length)
+        new_str += old_str.substring(extents.end);
+      if (old_str != new_str) {
+        var old_scroll = this.inputTarget.offsetTop;
+        this.inputTarget.value = new_str;
         this.setCursorPosition(this.inputTarget[0],
-          _extents.start + new_val.length);
-        this.inputTarget.offsetTop = _old_scroll;
+          extents.start + new_val.length);
+        this.inputTarget.offsetTop = old_scroll;
       }
     } else {
-      if (_old_str != new_val)
+      if (old_str != new_val)
         this.inputTarget.value = new_val;
     }
   }
 
   // Get index of first character and character after last of current token.
   search_token_extents() {
-    const _val = this.inputTarget.value;
-    let start = _val.lastIndexOf(this.SEPARATOR),
-      end = _val.length;
+    const val = this.inputTarget.value;
+    let start = val.lastIndexOf(this.SEPARATOR),
+      end = val.length;
 
     if (start < 0)
       start = 0;
@@ -979,26 +978,26 @@ export default class extends Controller {
   refresh_primer() {
     this.verbose("refresh_primer()");
 
-    const _token = this.get_search_token().toLowerCase(),
-      _last_request = this.last_fetch_request;
+    const token = this.get_search_token().toLowerCase(),
+      last_request = this.last_fetch_request;
 
     // Don't make request on empty string!
-    if (!this.ACT_LIKE_SELECT && (!_token || _token.length < 1))
+    if (!this.ACT_LIKE_SELECT && (!token || token.length < 1))
       return;
 
     // Don't repeat last request accidentally!
-    if (_last_request == _token)
+    if (last_request == token)
       return;
 
-    // Memoize this condition, used twice.
-    // is the new search token an extension of the previous search string?
+    // Memoize this condition, used twice:
+    // "is the new search token an extension of the previous search string?"
     const new_val_refines_last_request =
-      (_last_request?.length < _token.length) &&
-      (_last_request == _token.substr(0, _last_request?.length));
+      (last_request?.length < token.length) &&
+      (last_request == token.substr(0, last_request?.length));
 
     // No need to make more constrained request if we got all results last time.
     if (!this.last_fetch_incomplete &&
-      _last_request && (_last_request.length > 0) &&
+      last_request && (last_request.length > 0) &&
       new_val_refines_last_request)
       return;
 
@@ -1008,16 +1007,16 @@ export default class extends Controller {
     if (this.fetch_request && new_val_refines_last_request)
       return;
 
-    if (_token.length > this.MAX_STRING_LENGTH)
-      _token = _token.substr(0, this.MAX_STRING_LENGTH);
+    if (token.length > this.MAX_STRING_LENGTH)
+      token = token.substr(0, this.MAX_STRING_LENGTH);
 
-    const _query_params = { string: _token, ...this.request_params }
+    const query_params = { string: token, ...this.request_params }
 
     // If it's a param search, ignore the search token and return all results.
-    if (this.ACT_LIKE_SELECT) { _query_params["all"] = true; }
+    if (this.ACT_LIKE_SELECT) { query_params["all"] = true; }
 
     // Make request.
-    this.send_fetch_request(_query_params);
+    this.send_fetch_request(query_params);
   }
 
   // Send AJAX request for more matching strings.
@@ -1028,25 +1027,19 @@ export default class extends Controller {
       this.debug("Sending fetch request: " + query_params.string + "...");
     }
 
-    // Need to doubly-encode this to prevent router from interpreting slashes,
-    // dots, etc.
-    // const url = this.AJAX_URL.replace(
-    //   '@', encodeURIComponent(encodeURIComponent(val.replace(/\./g, '%2e')))
-    // );
-    const _url = this.AJAX_URL + this.TYPE
+    const url = this.AJAX_URL + this.TYPE,
+      controller = new AbortController();
 
     this.last_fetch_request = query_params.string;
-
-    const _controller = new AbortController();
-
     if (this.fetch_request)
-      _controller.abort();
+      controller.abort();
 
-    const response = await get(_url, {
-      signal: _controller.signal,
+    const response = await get(url, {
+      signal: controller.signal,
       query: query_params,
       responseKind: "json"
     });
+
     if (response.ok) {
       const json = await response.json
       if (json) {
