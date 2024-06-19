@@ -990,22 +990,22 @@ export default class extends Controller {
     if (_last_request == _token)
       return;
 
-    // Memoize this condition, used twice.
-    // is the new search token an extension of the previous search string?
-    const new_val_refines_last_request =
+    // Memoize this condition, used twice:
+    // "is the new search token an extension of the previous search string?"
+    const _new_val_refines_last_request =
       (_last_request?.length < _token.length) &&
       (_last_request == _token.substr(0, _last_request?.length));
 
     // No need to make more constrained request if we got all results last time.
     if (!this.last_fetch_incomplete &&
       _last_request && (_last_request.length > 0) &&
-      new_val_refines_last_request)
+      _new_val_refines_last_request)
       return;
 
     // If a less constrained request is pending, wait for it to return before
     // refining the request, just in case it returns complete results
     // (rendering the more refined request unnecessary).
-    if (this.fetch_request && new_val_refines_last_request)
+    if (this.fetch_request && _new_val_refines_last_request)
       return;
 
     if (_token.length > this.MAX_STRING_LENGTH)
@@ -1028,17 +1028,10 @@ export default class extends Controller {
       this.debug("Sending fetch request: " + query_params.string + "...");
     }
 
-    // Need to doubly-encode this to prevent router from interpreting slashes,
-    // dots, etc.
-    // const url = this.AJAX_URL.replace(
-    //   '@', encodeURIComponent(encodeURIComponent(val.replace(/\./g, '%2e')))
-    // );
-    const _url = this.AJAX_URL + this.TYPE
+    const _url = this.AJAX_URL + this.TYPE,
+      _controller = new AbortController();
 
     this.last_fetch_request = query_params.string;
-
-    const _controller = new AbortController();
-
     if (this.fetch_request)
       _controller.abort();
 
@@ -1047,6 +1040,7 @@ export default class extends Controller {
       query: query_params,
       responseKind: "json"
     });
+
     if (response.ok) {
       const json = await response.json
       if (json) {
