@@ -16,14 +16,14 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | ---- | -------- | ----- | -------- | ----- |
 | ceanothus_cordulatus.txt | [219631412](https://www.inaturalist.org/observations/219631412) | 1 | public | **Plant** |
 | coprinus.txt | [213450312](https://www.inaturalist.org/observations/213450312) | 1 | **obscured** | |
-| evernia_no_photos.txt | [216357655](https://www.inaturalist.org/observations/216357655) | 0 | public | lichen |
+| evernia_no_photos.txt | [216357655](https://www.inaturalist.org/observations/216357655) | 0 | public | lichen, no fields|
 | fuligo_septica.txt | [219783802](https://www.inaturalist.org/observations/219783802) | 1 | public | slime mold **Protozoa** |
 | gyromitra_ancilis.txt | [216745568](https://www.inaturalist.org/observations/216745568) | 3 | public | **cc-by license**, **many projects** |
 | inocybe.txt | [222904190](https://www.inaturalist.org/observations/222904190) | 5 | public | cc-by-nc, **2 tags** |
 | lyocperdon.txt | [24970904](https://www.inaturalist.org/observations/24970904) | 2 | public | cc-by-nc, projects, many fields including, **DNA** converation|
 | russulaceae.txt | [216675045](https://www.inaturalist.org/observations/216675045) | 2 | public | **all rights reserved**, many projects, Activity |
 | somion_unicolor.json |  |  |  | Formatted version of following; facilitates viewing iNat API response key/values |
-| somion_unicolor.txt | [202555552](https://www.inaturalist.org/observations/202555552) | 5 | public | Notes, Activity, many IDs, **mirrored from MO** (not importable, but useful for model tests)|
+| somion_unicolor.txt | [202555552](https://www.inaturalist.org/observations/202555552) | 5 | public | Notes, Activity, >1 ID, 1 field (Mushroom Observer URL), **mirrored from MO** |
 | trametes.txt | [220370929](https://www.inaturalist.org/observations/220370929) | 2 | public | D. Miller observation with different collector; Notes; **Observation Fields: Collector** |
 | tremella_mesenterica.txt | [213508767](https://www.inaturalist.org/observations/213508767) | 1 | public | |
 

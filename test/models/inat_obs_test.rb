@@ -104,14 +104,14 @@ class InatObsTest < UnitTestCase
     assert_equal(names(:coprinus).id, mock_inat_obs.name_id)
   end
 
-  # TODO: 2024-06-19 jdc. Add something w/o obs fields
   def test_inat_observation_fields
     assert(mock("trametes").inat_obs_fields.any?)
+    assert(mock("evernia_no_photos").inat_obs_fields.none?)
   end
 
-  # TODO: 2024-06-19 jdc. Add something w/o tags
   def test_inat_tags
     assert(2, mock("inocybe").inat_tags.length)
+    assert_empty(mock("evernia_no_photos").inat_tags)
   end
 
   def test_sequences
@@ -123,9 +123,11 @@ class InatObsTest < UnitTestCase
     assert_empty(mock("evernia_no_photos").sequences)
   end
 
-  # TODO: 2024-06-19 jdc. Huh? method name? Add something with notes
-  def test_no_description
-    assert_equal("", mock("tremella_mesenterica").notes)
+  def test_notes
+    assert_equal(
+      { Other: "Collection by Heidi Randall. \nSmells like T. suaveolens. " },
+      mock("trametes").notes)
+    assert_empty(mock("tremella_mesenterica").notes)
   end
 
   def test_taxon_importable
@@ -148,8 +150,6 @@ class InatObsTest < UnitTestCase
     assert_equal("Portland-Vancouver Regional Eco-Blitz, ??",
                  mock("evernia_no_photos").inat_project_names,
                  "wrong project names for iNat obs with 1 detectable project")
-
-    # TODO: Test iNat obs with obs[:project_observations].many?
   end
 
   def mock(filename)
