@@ -643,7 +643,7 @@ export default class extends Controller {
     if (_new_hl != _old_hl) {
       if (_old_hl >= 0)
         rows[_old_hl].classList.remove(this.HOT_CLASS);
-      if (new_hl >= 0)
+      if (_new_hl >= 0)
         rows[_new_hl].classList.add(this.HOT_CLASS);
     }
   }
@@ -1116,7 +1116,7 @@ export default class extends Controller {
   // ------------------------------- DEBUGGING ------------------------------
 
   debug(str) {
-    document.getElementById("log").insertAdjacentText("beforeend", str + "<br/>");
+    // document.getElementById("log").insertAdjacentText("beforeend", str + "<br/>");
   }
 
   verbose(str) {
