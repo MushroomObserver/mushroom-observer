@@ -760,87 +760,87 @@ export default class extends Controller {
 
   // Grab all matches, doing exact match, ignoring number of words.
   update_normal() {
-    const val = this.get_search_token().normalize().toLowerCase(),
+    const _token = this.get_search_token().normalize().toLowerCase(),
       // normalize the Unicode of each string in primer for search
-      primer = this.primer.map((str) => { return str.normalize() }),
-      matches = [];
+      _primer = this.primer.map((str) => { return str.normalize() }),
+      _matches = [];
 
-    if (val != '') {
-      for (let i = 0; i < primer.length; i++) {
-        let s = primer[i + 1];
-        if (s && s.length > 0 && s.toLowerCase().indexOf(val) >= 0) {
-          matches.push(s);
+    if (_token != '') {
+      for (let i = 0; i < _primer.length; i++) {
+        let s = _primer[i + 1];
+        if (s && s.length > 0 && s.toLowerCase().indexOf(_token) >= 0) {
+          _matches.push(s);
         }
       }
     }
 
-    this.matches = matches;
+    this.matches = _matches;
   }
 
   // Grab matches ignoring order of words.
   update_unordered() {
     // regularize spacing in the input
-    const val = this.get_search_token().normalize().toLowerCase().
+    const _token = this.get_search_token().normalize().toLowerCase().
       replace(/^ */, '').replace(/  +/g, ' '),
-      // get the separate words as vals
-      vals = val.split(' '),
+      // get the separate words as _tokens
+      _tokens = _token.split(' '),
       // normalize the Unicode of each string in primer for search
-      primer = this.primer.map((str) => { return str.normalize() }),
-      matches = [];
+      _primer = this.primer.map((str) => { return str.normalize() }),
+      _matches = [];
 
-    if (val != '' && primer.length > 1) {
-      for (let i = 1; i < primer.length; i++) {
-        let s = primer[i] || '',
+    if (_token != '' && _primer.length > 1) {
+      for (let i = 1; i < _primer.length; i++) {
+        let s = _primer[i] || '',
           s2 = ' ' + s.toLowerCase() + ' ',
           k;
         // check each word in the primer entry for a matching word
-        for (k = 0; k < vals.length; k++) {
-          if (s2.indexOf(' ' + vals[k]) < 0) break;
+        for (k = 0; k < _tokens.length; k++) {
+          if (s2.indexOf(' ' + _tokens[k]) < 0) break;
         }
-        if (k >= vals.length) {
-          matches.push(s);
+        if (k >= _tokens.length) {
+          _matches.push(s);
         }
       }
     }
 
-    this.matches = matches;
+    this.matches = _matches;
   }
 
   // Grab all matches, preferring the ones with no additional words.
   // Note: order must have genera first, then species, then varieties.
   update_collapsed() {
-    const val = this.get_search_token().toLowerCase(),
-      primer = this.primer,
+    const _token = this.get_search_token().toLowerCase(),
+      _primer = this.primer,
       // make a lowercased duplicate of primer to regularize search
-      primer_lc = this.primer.map((str) => { return str.toLowerCase() }),
-      matches = [];
+      _primer_lc = this.primer.map((str) => { return str.toLowerCase() }),
+      _matches = [];
 
-    if (val != '' && primer.length > 1) {
-      let the_rest = (val.match(/ /g) || []).length >= this.COLLAPSE;
+    if (_token != '' && _primer.length > 1) {
+      let _the_rest = (_token.match(/ /g) || []).length >= this.COLLAPSE;
 
-      for (let i = 1; i < primer_lc.length; i++) {
-        if (primer_lc[i].indexOf(val) > -1) {
-          let s = primer[i];
-          if (s.length > 0) {
-            if (the_rest || s.indexOf(' ', val.length) < val.length) {
-              matches.push(s);
-            } else if (matches.length > 1) {
+      for (let i = 1; i < _primer_lc.length; i++) {
+        if (_primer_lc[i].indexOf(_token) > -1) {
+          let _s = _primer[i];
+          if (_s.length > 0) {
+            if (_the_rest || _s.indexOf(' ', _token.length) < _token.length) {
+              _matches.push(_s);
+            } else if (_matches.length > 1) {
               break;
             } else {
-              if (matches[0] == val)
-                matches.pop();
-              matches.push(s);
-              the_rest = true;
+              if (_matches[0] == _token)
+                _matches.pop();
+              _matches.push(_s);
+              _the_rest = true;
             }
           }
         }
       }
-      if (matches.length == 1 &&
-        (val == matches[0].toLowerCase() ||
-          val == matches[0].toLowerCase() + ' '))
-        matches.pop();
+      if (_matches.length == 1 &&
+        (_token == matches[0].toLowerCase() ||
+          _token == matches[0].toLowerCase() + ' '))
+        _matches.pop();
     }
-    this.matches = matches;
+    this.matches = _matches;
   }
 
   /**
@@ -876,35 +876,35 @@ export default class extends Controller {
   // otherwise highlight first match.
   update_current_row(val) {
     this.verbose("update_current_row()");
-    const matches = this.matches,
-      size = this.PULLDOWN_SIZE;
-    let exact = -1,
-      part = -1;
+    const _matches = this.matches,
+      _size = this.PULLDOWN_SIZE;
+    let _exact = -1,
+      _part = -1;
 
     if (val && val.length > 0) {
-      for (let i = 0; i < matches.length; i++) {
-        if (matches[i] == val) {
-          exact = i;
+      for (let i = 0; i < _matches.length; i++) {
+        if (_matches[i] == val) {
+          _exact = i;
           break;
         }
-        if (matches[i] == val.substr(0, matches[i].length) &&
-          (part < 0 || matches[i].length > matches[part].length))
-          part = i;
+        if (_matches[i] == val.substr(0, _matches[i].length) &&
+          (_part < 0 || _matches[i].length > _matches[_part].length))
+          _part = i;
       }
     }
-    let new_row = exact >= 0 ? exact : part >= 0 ? part : -1;
-    let new_scroll = this.scroll_offset;
-    if (new_scroll > new_row)
-      new_scroll = new_row;
-    if (new_scroll > matches.length - size)
-      new_scroll = matches.length - size;
-    if (new_scroll < new_row - size + 1)
-      new_scroll = new_row - size + 1;
-    if (new_scroll < 0)
-      new_scroll = 0;
+    let _new_row = _exact >= 0 ? _exact : _part >= 0 ? _part : -1;
+    let _new_scroll = this.scroll_offset;
+    if (_new_scroll > _new_row)
+      _new_scroll = _new_row;
+    if (_new_scroll > _matches.length - _size)
+      _new_scroll = _matches.length - _size;
+    if (_new_scroll < _new_row - _size + 1)
+      _new_scroll = _new_row - _size + 1;
+    if (_new_scroll < 0)
+      _new_scroll = 0;
 
-    this.current_row = new_row;
-    this.scroll_offset = new_scroll;
+    this.current_row = _new_row;
+    this.scroll_offset = _new_scroll;
   }
 
   /**
@@ -921,53 +921,53 @@ export default class extends Controller {
 
   // Get search token under or immediately in front of cursor.
   get_search_token() {
-    const val = this.inputTarget.value;
-    let token = val;
+    const _val = this.inputTarget.value;
+    let _token = _val;
     if (this.SEPARATOR) {
-      const s_ext = this.search_token_extents();
-      token = val.substring(s_ext.start, s_ext.end);
+      const _extents = this.search_token_extents();
+      _token = _val.substring(_extents.start, _extents.end);
     }
-    return token;
+    return _token;
   }
 
   // Change the token under or immediately in front of the cursor.
   set_search_token(new_val) {
-    const old_str = this.inputTarget.value;
+    const _old_str = this.inputTarget.value;
     if (this.SEPARATOR) {
-      let new_str = "";
-      const s_ext = this.search_token_extents();
+      let _new_str = "";
+      const _extents = this.search_token_extents();
 
-      if (s_ext.start > 0)
-        new_str += old_str.substring(0, s_ext.start);
-      new_str += new_val;
+      if (_extents.start > 0)
+        _new_str += _old_str.substring(0, _extents.start);
+      _new_str += new_val;
 
-      if (s_ext.end < old_str.length)
-        new_str += old_str.substring(s_ext.end);
-      if (old_str != new_str) {
-        var old_scroll = this.inputTarget.offsetTop;
-        this.inputTarget.value = new_str;
+      if (_extents.end < _old_str.length)
+        _new_str += _old_str.substring(_extents.end);
+      if (_old_str != _new_str) {
+        let _old_scroll = this.inputTarget.offsetTop;
+        this.inputTarget.value = _new_str;
         this.setCursorPosition(this.inputTarget[0],
-          s_ext.start + new_val.length);
-        this.inputTarget.offsetTop = old_scroll;
+          _extents.start + new_val.length);
+        this.inputTarget.offsetTop = _old_scroll;
       }
     } else {
-      if (old_str != new_val)
+      if (_old_str != new_val)
         this.inputTarget.value = new_val;
     }
   }
 
   // Get index of first character and character after last of current token.
   search_token_extents() {
-    const val = this.inputTarget.value;
-    let start = val.lastIndexOf(this.SEPARATOR),
-      end = val.length;
+    const _val = this.inputTarget.value;
+    let start = _val.lastIndexOf(this.SEPARATOR),
+      end = _val.length;
 
     if (start < 0)
       start = 0;
     else
       start += this.SEPARATOR.length;
 
-    return { start: start, end: end };
+    return { start, end };
   }
 
   // ------------------------------ Fetch matches ------------------------------
@@ -975,27 +975,27 @@ export default class extends Controller {
   // Send request for updated primer.
   refresh_primer() {
     this.verbose("refresh_primer()");
-    // let val = this.inputTarget.value.toLowerCase();
-    const val = this.get_search_token().toLowerCase(),
-      last_request = this.last_fetch_request;
+
+    const _token = this.get_search_token().toLowerCase(),
+      _last_request = this.last_fetch_request;
 
     // Don't make request on empty string!
-    if (!this.ACT_LIKE_SELECT && (!val || val.length < 1))
+    if (!this.ACT_LIKE_SELECT && (!_token || _token.length < 1))
       return;
 
     // Don't repeat last request accidentally!
-    if (last_request == val)
+    if (_last_request == _token)
       return;
 
     // Memoize this condition, used twice.
     // is the new search token an extension of the previous search string?
     const new_val_refines_last_request =
-      (last_request?.length < val.length) &&
-      (last_request == val.substr(0, last_request?.length));
+      (_last_request?.length < _token.length) &&
+      (_last_request == _token.substr(0, _last_request?.length));
 
     // No need to make more constrained request if we got all results last time.
     if (!this.last_fetch_incomplete &&
-      last_request && (last_request.length > 0) &&
+      _last_request && (_last_request.length > 0) &&
       new_val_refines_last_request)
       return;
 
@@ -1005,11 +1005,14 @@ export default class extends Controller {
     if (this.fetch_request && new_val_refines_last_request)
       return;
 
-    if (val.length > this.MAX_STRING_LENGTH)
-      val = val.substr(0, this.MAX_STRING_LENGTH);
+    if (_token.length > this.MAX_STRING_LENGTH)
+      _token = _token.substr(0, this.MAX_STRING_LENGTH);
 
-    const _query_params = { string: val, ...this.request_params }
+    const _query_params = { string: _token, ...this.request_params }
+
+    // If it's a param search, ignore the search token and return all results.
     if (this.ACT_LIKE_SELECT) { _query_params["all"] = true; }
+
     // Make request.
     this.send_fetch_request(_query_params);
   }
