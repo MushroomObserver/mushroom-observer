@@ -10,8 +10,8 @@
 class AutoComplete::ForLocation < AutoComplete::ByWord
   attr_accessor :reverse
 
-  def initialize(string, params)
-    super(string, params)
+  def initialize(params)
+    super
     self.reverse = (params[:format] == "scientific")
   end
 

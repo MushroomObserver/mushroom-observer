@@ -37,7 +37,7 @@ class AutoCompleteTest < UnitTestCase
   end
 
   def test_typical_use
-    auto = AutoComplete::ForName.new("Agaricus")
+    auto = AutoComplete::ForName.new(string: "Agaricus")
     results = auto.matching_strings
     assert_equal("A", results.first)
     assert(results.include?("Agaricus"))
@@ -46,7 +46,7 @@ class AutoCompleteTest < UnitTestCase
 
   def test_truncate
     list = %w[b0 b1 b2 b3 b4 b5 b6 b7 b8 b9]
-    auto = AutoCompleteMock.new("blah")
+    auto = AutoCompleteMock.new(string: "blah")
     auto.matches = list
     assert_equal(list, auto.matches)
 
@@ -67,7 +67,7 @@ class AutoCompleteTest < UnitTestCase
   def test_multiline_matches
     list1 = [" line one \n line two\n  ", "good match", "  padded match  "]
     list2 = ["line one", "good match", "padded match"]
-    auto = AutoCompleteMock.new("blah")
+    auto = AutoCompleteMock.new(string: "blah")
     auto.matches = list1
     assert_equal(list1, auto.matches)
     auto.clean_matches
@@ -100,7 +100,7 @@ class AutoCompleteTest < UnitTestCase
       [3, 3, "one two th"],
       [2, 3, "one two three"]
     ].each do |limit, expected_matches, expected_string|
-      auto = AutoCompleteMock.new(pattern)
+      auto = AutoCompleteMock.new(string: pattern)
       auto.matches = @list.sort_by { rand }
       auto.limit = limit
       assert_refines_correctly(auto, expected_matches, expected_string)
@@ -134,7 +134,7 @@ class AutoCompleteTest < UnitTestCase
       [2, 2, "one two shr"],
       [1, 2, "one two shree"]
     ].each do |limit, expected_matches, expected_string|
-      auto = AutoComplete::ForMock.new(pattern)
+      auto = AutoComplete::ForMock.new(string: pattern)
       auto.matches = @list.sort_by { rand }
       auto.limit = limit
       assert_refines_correctly(auto, expected_matches, expected_string)
