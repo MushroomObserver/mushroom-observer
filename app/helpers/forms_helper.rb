@@ -148,7 +148,7 @@ module FormsHelper
   # our autocompleter: use the browser standard autocomplete att "one-time-code"
   def autocompleter_field(**args)
     autocompleter_args = {
-      placeholder: :start_typing.l, autocomplete: "one-time-code",
+      placeholder: :start_typing.l, autocomplete: "off",
       data: { controller: :autocompleter, autocompleter_target: "input",
               autocomplete: args[:autocomplete], separator: args[:separator] }
     }.deep_merge(args.except(:autocomplete, :separator, :textarea))

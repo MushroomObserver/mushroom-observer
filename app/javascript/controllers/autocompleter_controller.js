@@ -14,7 +14,7 @@ const DEFAULT_OPTS = {
   // N = etc.
   COLLAPSE: 0,
   // where to request primer from
-  AJAX_URL: null,
+  AJAX_URL: "/autocompleters/new/",
   // how long to wait before sending AJAX request (seconds)
   REFRESH_DELAY: 0.10,
   // how long to wait before hiding pulldown (seconds)
@@ -28,7 +28,7 @@ const DEFAULT_OPTS = {
   // amount to move cursor on page up and down
   PAGE_SIZE: 10,
   // max length of string to send via AJAX
-  MAX_REQUEST_LINK: 50,
+  MAX_STRING_LENGTH: 50,
   // Sub-match: starts finding new matches for the string *after the separator*
   // allowed separators (e.g. " OR ")
   SEPARATOR: null,
@@ -45,34 +45,26 @@ const DEFAULT_OPTS = {
 // Allowed types of autocompleter. Sets some DEFAULT_OPTS from type
 const AUTOCOMPLETER_TYPES = {
   clade: {
-    AJAX_URL: "/autocompleters/new/clade/@",
   },
   herbarium: { // params[:user_id] handled in controller
-    AJAX_URL: "/autocompleters/new/herbarium/@",
     UNORDERED: true
   },
   location: { // params[:format] handled in controller
-    AJAX_URL: "/autocompleters/new/location/@",
     UNORDERED: true
   },
   name: {
-    AJAX_URL: "/autocompleters/new/name/@",
     COLLAPSE: 1
   },
   project: {
-    AJAX_URL: "/autocompleters/new/project/@",
     UNORDERED: true
   },
   region: {
-    AJAX_URL: "/autocompleters/new/location/@",
     UNORDERED: true
   },
   species_list: {
-    AJAX_URL: "/autocompleters/new/species_list/@",
     UNORDERED: true
   },
   user: {
-    AJAX_URL: "/autocompleters/new/user/@",
     UNORDERED: true
   }
 }
@@ -103,6 +95,8 @@ const INTERNAL_OPTS = {
 
 // Connects to data-controller="autocomplete"
 export default class extends Controller {
+  // The select target is not the input element, but a <select> that can
+  // swap out the autocompleter type. The input element is the target.
   static targets = ["input", "select"]
 
   initialize() {
@@ -167,7 +161,14 @@ export default class extends Controller {
     this.add_event_listeners();
 
     // sanity check to show which autocompleter is currently on the element
-    this.inputTarget.setAttribute("data-ajax-url", this.AJAX_URL);
+    this.inputTarget.setAttribute("data-ajax-url", this.AJAX_URL + this.TYPE);
+
+    // If the primer is not based on input, go ahead and request from server.
+    if (this.ACT_LIKE_SELECT == true) {
+      this.inputTarget.click();
+      this.inputTarget.focus();
+      this.inputTarget.value = ' ';
+    }
   }
 
   // NOTE: `this` within an event listener function refers to the element
@@ -515,8 +516,8 @@ export default class extends Controller {
 
   // Create div for pulldown. Presence of this is checked in system tests.
   create_pulldown() {
-    const div = document.createElement("div");
-    div.classList.add(this.PULLDOWN_CLASS);
+    const pulldown = document.createElement("div");
+    pulldown.classList.add(this.PULLDOWN_CLASS);
 
     const list = document.createElement('ul');
     let i, row;
@@ -526,11 +527,11 @@ export default class extends Controller {
       this.attach_row_events(row, i);
       list.append(row);
     }
-    div.appendChild(list)
+    pulldown.appendChild(list)
 
-    div.addEventListener("scroll", this.our_scroll.bind(this));
-    this.inputTarget.insertAdjacentElement("afterend", div);
-    this.PULLDOWN_ELEM = div;
+    pulldown.addEventListener("scroll", this.our_scroll.bind(this));
+    this.inputTarget.insertAdjacentElement("afterend", pulldown);
+    this.PULLDOWN_ELEM = pulldown;
     this.LIST_ELEM = list;
   }
 
@@ -556,6 +557,7 @@ export default class extends Controller {
       li = document.createElement('li');
 
     div.className = this.PULLDOWN_CLASS;
+    div.classList.add('test');
     div.style.display = 'block';
     div.style.border = div.style.margin = div.style.padding = '0px';
     li.innerHTML = 'test';
@@ -600,7 +602,7 @@ export default class extends Controller {
     if (rows.length) {
       this.update_rows(rows, matches, size, scroll);
       this.highlight_new_row(rows, cur, size, scroll)
-      this.make_menu_visible(matches, size, scroll)
+      this.make_pulldown_visible(matches, size, scroll)
     }
 
     // Make sure input focus stays on text field!
@@ -645,10 +647,10 @@ export default class extends Controller {
     }
   }
 
-  // Make menu visible if nonempty.
-  make_menu_visible(matches, size, scroll) {
-    const menu = this.PULLDOWN_ELEM,
-      inner = menu.children[0];
+  // Make pulldown visible if nonempty.
+  make_pulldown_visible(matches, size, scroll) {
+    const pulldown = this.PULLDOWN_ELEM,
+      list = pulldown.children[0];
 
     if (matches.length > 0) {
       // console.log("Matches:" + matches)
@@ -656,36 +658,36 @@ export default class extends Controller {
         left = this.inputTarget.offsetLeft,
         hgt = this.inputTarget.offsetHeight,
         scr = this.inputTarget.scrollTop;
-      menu.style.top = (top + hgt + scr) + "px";
-      menu.style.left = left + "px";
+      pulldown.style.top = (top + hgt + scr) + "px";
+      pulldown.style.left = left + "px";
 
-      // Set height of menu.
-      menu.style.overflowY = matches.length > size ? "scroll" : "hidden";
-      menu.style.height = this.ROW_HEIGHT * (size < matches.length - scroll ? size : matches.length - scroll) + "px";
-      inner.style.marginTop = this.ROW_HEIGHT * scroll + "px";
-      inner.style.height = this.ROW_HEIGHT * (matches.length - scroll) + "px";
-      menu.scrollTo({ top: this.ROW_HEIGHT * scroll });
+      // Set height of pulldown.
+      pulldown.style.overflowY = matches.length > size ? "scroll" : "hidden";
+      pulldown.style.height = this.ROW_HEIGHT * (size < matches.length - scroll ? size : matches.length - scroll) + "px";
+      list.style.marginTop = this.ROW_HEIGHT * scroll + "px";
+      list.style.height = this.ROW_HEIGHT * (matches.length - scroll) + "px";
+      pulldown.scrollTo({ top: this.ROW_HEIGHT * scroll });
       // }
 
-      // Set width of menu.
+      // Set width of pulldown.
       this.set_width();
       this.update_width();
 
-      // Only show menu if it is nontrivial, i.e., show an option other than
+      // Only show pulldown if it is nontrivial, i.e., show an option other than
       // the value that's already in the text field.
       if (matches.length > 1 || this.inputTarget.value != matches[0]) {
         this.clear_hide();
-        menu.style.display = 'block';
+        pulldown.style.display = 'block';
         this.menu_up = true;
       } else {
-        menu.style.display = 'none';
+        pulldown.style.removeProperty('display');
         this.menu_up = false;
       }
     }
 
-    // Hide the menu if it's empty now.
+    // Hide the pulldown if it's empty now.
     else {
-      menu.style.display = 'none';
+      pulldown.style.removeProperty('display');
       this.menu_up = false;
     }
   }
@@ -693,7 +695,7 @@ export default class extends Controller {
   // Hide pulldown options.
   hide_pulldown() {
     this.verbose("hide_pulldown()");
-    this.PULLDOWN_ELEM.style.display = 'none';
+    this.PULLDOWN_ELEM.style.removeProperty('display');
     this.menu_up = false;
   }
 
@@ -724,6 +726,8 @@ export default class extends Controller {
   // Update content of pulldown.
   update_matches() {
     this.verbose("update_matches()");
+    if (this.ACT_LIKE_SELECT)
+      this.current_row = 0;
 
     // Remember which option used to be highlighted.
     const last = this.current_row < 0 ? null : this.matches[this.current_row];
@@ -738,8 +742,9 @@ export default class extends Controller {
     else
       this.update_normal();
 
-    // Sort and remove duplicates.
-    this.matches = this.remove_dups(this.matches.sort());
+    // Sort and remove duplicates, unless it's already sorted.
+    if (!this.ACT_LIKE_SELECT)
+      this.matches = this.remove_dups(this.matches.sort());
     // Try to find old highlighted row in new set of options.
     this.update_current_row(last);
     // Reset width each time we change the options.
@@ -747,22 +752,25 @@ export default class extends Controller {
   }
 
   // When "acting like a select" make it display all options in the
-  // order given right from the moment they enter the field.
+  // order given right from the moment they enter the field,
+  // and pick the first one.
   update_select() {
     this.matches = this.primer;
+    if (this.matches.length > 0)
+      this.inputTarget.value = this.matches[0];
   }
 
   // Grab all matches, doing exact match, ignoring number of words.
   update_normal() {
-    const val = this.get_search_token().normalize().toLowerCase(),
+    const token = this.get_search_token().normalize().toLowerCase(),
       // normalize the Unicode of each string in primer for search
       primer = this.primer.map((str) => { return str.normalize() }),
       matches = [];
 
-    if (val != '') {
+    if (token != '') {
       for (let i = 0; i < primer.length; i++) {
         let s = primer[i + 1];
-        if (s && s.length > 0 && s.toLowerCase().indexOf(val) >= 0) {
+        if (s && s.length > 0 && s.toLowerCase().indexOf(token) >= 0) {
           matches.push(s);
         }
       }
@@ -774,24 +782,24 @@ export default class extends Controller {
   // Grab matches ignoring order of words.
   update_unordered() {
     // regularize spacing in the input
-    const val = this.get_search_token().normalize().toLowerCase().
+    const token = this.get_search_token().normalize().toLowerCase().
       replace(/^ */, '').replace(/  +/g, ' '),
-      // get the separate words as vals
-      vals = val.split(' '),
+      // get the separate words as tokens
+      tokens = token.split(' '),
       // normalize the Unicode of each string in primer for search
       primer = this.primer.map((str) => { return str.normalize() }),
       matches = [];
 
-    if (val != '' && primer.length > 1) {
+    if (token != '' && primer.length > 1) {
       for (let i = 1; i < primer.length; i++) {
         let s = primer[i] || '',
           s2 = ' ' + s.toLowerCase() + ' ',
           k;
         // check each word in the primer entry for a matching word
-        for (k = 0; k < vals.length; k++) {
-          if (s2.indexOf(' ' + vals[k]) < 0) break;
+        for (k = 0; k < tokens.length; k++) {
+          if (s2.indexOf(' ' + tokens[k]) < 0) break;
         }
-        if (k >= vals.length) {
+        if (k >= tokens.length) {
           matches.push(s);
         }
       }
@@ -803,25 +811,25 @@ export default class extends Controller {
   // Grab all matches, preferring the ones with no additional words.
   // Note: order must have genera first, then species, then varieties.
   update_collapsed() {
-    const val = this.get_search_token().toLowerCase(),
+    const token = this.get_search_token().toLowerCase(),
       primer = this.primer,
       // make a lowercased duplicate of primer to regularize search
       primer_lc = this.primer.map((str) => { return str.toLowerCase() }),
       matches = [];
 
-    if (val != '' && primer.length > 1) {
-      let the_rest = (val.match(/ /g) || []).length >= this.COLLAPSE;
+    if (token != '' && primer.length > 1) {
+      let the_rest = (token.match(/ /g) || []).length >= this.COLLAPSE;
 
       for (let i = 1; i < primer_lc.length; i++) {
-        if (primer_lc[i].indexOf(val) > -1) {
+        if (primer_lc[i].indexOf(token) > -1) {
           let s = primer[i];
           if (s.length > 0) {
-            if (the_rest || s.indexOf(' ', val.length) < val.length) {
+            if (the_rest || s.indexOf(' ', token.length) < token.length) {
               matches.push(s);
             } else if (matches.length > 1) {
               break;
             } else {
-              if (matches[0] == val)
+              if (matches[0] == token)
                 matches.pop();
               matches.push(s);
               the_rest = true;
@@ -830,8 +838,8 @@ export default class extends Controller {
         }
       }
       if (matches.length == 1 &&
-        (val == matches[0].toLowerCase() ||
-          val == matches[0].toLowerCase() + ' '))
+        (token == matches[0].toLowerCase() ||
+          token == matches[0].toLowerCase() + ' '))
         matches.pop();
     }
     this.matches = matches;
@@ -841,12 +849,12 @@ export default class extends Controller {
    * Index of string in future primer array with IDs
    * where primer == [[text_string, id], [text_string, id]]
    * @param primer {!Array} - the input array
-   * @param val {object} - the value to search
+   * @param token {object} - the token to search
    * @return {Array} or just i
    */
-  // get_primer_index_of(primer, val) {
+  // get_primer_index_of(primer, token) {
   //   for (let i = 0; i < primer.length; i++) {
-  //     const index = primer[i].indexOf(val);
+  //     const index = primer[i].indexOf(token);
   //     if (index > -1) {
   //       // return [i, index];
   //       return i;
@@ -866,22 +874,22 @@ export default class extends Controller {
     return list;
   }
 
-  // Look for 'val' in list of matches and highlight it,
+  // Look for 'token' in list of matches and highlight it,
   // otherwise highlight first match.
-  update_current_row(val) {
+  update_current_row(token) {
     this.verbose("update_current_row()");
     const matches = this.matches,
       size = this.PULLDOWN_SIZE;
     let exact = -1,
       part = -1;
 
-    if (val && val.length > 0) {
+    if (token && token.length > 0) {
       for (let i = 0; i < matches.length; i++) {
-        if (matches[i] == val) {
+        if (matches[i] == token) {
           exact = i;
           break;
         }
-        if (matches[i] == val.substr(0, matches[i].length) &&
+        if (matches[i] == token.substr(0, matches[i].length) &&
           (part < 0 || matches[i].length > matches[part].length))
           part = i;
       }
@@ -918,8 +926,8 @@ export default class extends Controller {
     const val = this.inputTarget.value;
     let token = val;
     if (this.SEPARATOR) {
-      const s_ext = this.search_token_extents();
-      token = val.substring(s_ext.start, s_ext.end);
+      const extents = this.search_token_extents();
+      token = val.substring(extents.start, extents.end);
     }
     return token;
   }
@@ -929,19 +937,19 @@ export default class extends Controller {
     const old_str = this.inputTarget.value;
     if (this.SEPARATOR) {
       let new_str = "";
-      const s_ext = this.search_token_extents();
+      const extents = this.search_token_extents();
 
-      if (s_ext.start > 0)
-        new_str += old_str.substring(0, s_ext.start);
+      if (extents.start > 0)
+        new_str += old_str.substring(0, extents.start);
       new_str += new_val;
 
-      if (s_ext.end < old_str.length)
-        new_str += old_str.substring(s_ext.end);
+      if (extents.end < old_str.length)
+        new_str += old_str.substring(extents.end);
       if (old_str != new_str) {
         var old_scroll = this.inputTarget.offsetTop;
         this.inputTarget.value = new_str;
         this.setCursorPosition(this.inputTarget[0],
-          s_ext.start + new_val.length);
+          extents.start + new_val.length);
         this.inputTarget.offsetTop = old_scroll;
       }
     } else {
@@ -961,7 +969,7 @@ export default class extends Controller {
     else
       start += this.SEPARATOR.length;
 
-    return { start: start, end: end };
+    return { start, end };
   }
 
   // ------------------------------ Fetch matches ------------------------------
@@ -969,23 +977,23 @@ export default class extends Controller {
   // Send request for updated primer.
   refresh_primer() {
     this.verbose("refresh_primer()");
-    // let val = this.inputTarget.value.toLowerCase();
-    const val = this.get_search_token().toLowerCase(),
+
+    const token = this.get_search_token().toLowerCase(),
       last_request = this.last_fetch_request;
 
     // Don't make request on empty string!
-    if (!val || val.length < 1)
+    if (!this.ACT_LIKE_SELECT && (!token || token.length < 1))
       return;
 
     // Don't repeat last request accidentally!
-    if (last_request == val)
+    if (last_request == token)
       return;
 
-    // Memoize this condition, used twice.
-    // is the new search token an extension of the previous search string?
+    // Memoize this condition, used twice:
+    // "is the new search token an extension of the previous search string?"
     const new_val_refines_last_request =
-      (last_request.length < val.length) &&
-      (last_request == val.substr(0, last_request.length));
+      (last_request?.length < token.length) &&
+      (last_request == token.substr(0, last_request?.length));
 
     // No need to make more constrained request if we got all results last time.
     if (!this.last_fetch_incomplete &&
@@ -999,35 +1007,39 @@ export default class extends Controller {
     if (this.fetch_request && new_val_refines_last_request)
       return;
 
+    if (token.length > this.MAX_STRING_LENGTH)
+      token = token.substr(0, this.MAX_STRING_LENGTH);
+
+    const query_params = { string: token, ...this.request_params }
+
+    // If it's a param search, ignore the search token and return all results.
+    if (this.ACT_LIKE_SELECT) { query_params["all"] = true; }
+
     // Make request.
-    this.send_fetch_request(val);
+    this.send_fetch_request(query_params);
   }
 
   // Send AJAX request for more matching strings.
-  async send_fetch_request(val) {
+  async send_fetch_request(query_params) {
     this.verbose("send_fetch_request()");
-    if (val.length > this.MAX_REQUEST_LINK)
-      val = val.substr(0, this.MAX_REQUEST_LINK);
 
     if (this.log) {
-      this.debug("Sending fetch request: " + val);
+      this.debug("Sending fetch request: " + query_params.string + "...");
     }
 
-    // Need to doubly-encode this to prevent router from interpreting slashes,
-    // dots, etc.
-    const url = this.AJAX_URL.replace(
-      '@', encodeURIComponent(encodeURIComponent(val.replace(/\./g, '%2e')))
-    );
+    const url = this.AJAX_URL + this.TYPE,
+      controller = new AbortController();
 
-    this.last_fetch_request = val;
-
-    const controller = new AbortController(),
-      signal = controller.signal;
-
+    this.last_fetch_request = query_params.string;
     if (this.fetch_request)
       controller.abort();
 
-    const response = await get(url, { signal });
+    const response = await get(url, {
+      signal: controller.signal,
+      query: query_params,
+      responseKind: "json"
+    });
+
     if (response.ok) {
       const json = await response.json
       if (json) {
@@ -1036,7 +1048,7 @@ export default class extends Controller {
       }
     } else {
       this.fetch_request = null;
-      console.log(`got a ${response.status}`);
+      console.log(`got a ${response.status}: ${response.text}`);
     }
 
   }
@@ -1097,7 +1109,7 @@ export default class extends Controller {
   // ------------------------------- DEBUGGING ------------------------------
 
   debug(str) {
-    document.getElementById("log").insertAdjacentText("beforeend", str + "<br/>");
+    // document.getElementById("log").insertAdjacentText("beforeend", str + "<br/>");
   }
 
   verbose(str) {
