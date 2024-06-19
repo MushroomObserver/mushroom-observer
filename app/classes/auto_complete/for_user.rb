@@ -2,14 +2,15 @@
 
 class AutoComplete::ForUser < AutoComplete::ByString
   def rough_matches(letter)
-    users = User.select(:login, :name).distinct.
+    users = User.select(:login, :name, :id).distinct.
             where(User[:login].matches("#{letter}%").
               or(User[:name].matches("#{letter}%")).
               or(User[:name].matches("% #{letter}%"))).
-            order(login: :asc).pluck(:login, :name)
+            order(login: :asc).pluck(:login, :name, :id)
 
-    users.map do |login, name|
-      name.empty? ? login : "#{login} <#{name}>"
+    users.map do |login, name, id|
+      user_name = name.empty? ? login : "#{login} <#{name}>"
+      [user_name, id]
     end.sort
   end
 end

@@ -11,10 +11,11 @@ class AutoComplete::ForHerbarium < AutoComplete::ByWord
       order(
         Arel.when(Herbarium[:code].is_null).then(Herbarium[:name]).
              else(Herbarium[:code]).asc, Herbarium[:name].asc
-      ).pluck(:code, :name)
+      ).pluck(:code, :name, :id)
 
-    herbaria.map do |code, name|
-      code.empty? ? name : "#{code} - #{name}"
-    end.sort
+    herbaria.map do |code, name, id|
+      composed_name = code.empty? ? name : "#{code} - #{name}"
+      [composed_name, id]
+    end.sort_by(&:first).uniq
   end
 end

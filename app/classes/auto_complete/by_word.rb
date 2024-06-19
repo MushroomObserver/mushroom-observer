@@ -17,13 +17,13 @@ class AutoComplete::ByWord < AutoComplete
       word.chars.each do |letter|
         part += letter
         regex = /(^|#{PUNCTUATION})#{part}/i
-        matches.select! { |m| m.match(regex) }
+        matches.select! { |m, _id| m.match(regex) }
         return used + part if matches.length <= limit
       end
       if n < words.length
         used += "#{word} "
         regex = /(^|#{PUNCTUATION})#{word}(#{PUNCTUATION}|$)/i
-        matches.select! { |m| m.match(regex) }
+        matches.select! { |m, _id| m.match(regex) }
         return used if matches.length <= limit
       else
         used += word

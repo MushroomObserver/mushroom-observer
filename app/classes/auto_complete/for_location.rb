@@ -22,9 +22,9 @@ class AutoComplete::ForLocation < AutoComplete::ByWord
         or(Observation[:where].matches("% #{letter}%"))).pluck(:where) +
       Location.select(:name).distinct.
       where(Location[:name].matches("#{letter}%").
-        or(Location[:name].matches("% #{letter}%"))).pluck(:name)
+        or(Location[:name].matches("% #{letter}%"))).pluck(:name, :id)
 
-    matches.map! { |m| Location.reverse_name(m) } if reverse
+    matches.map! { |m, id| [Location.reverse_name(m), id] } if reverse
     matches.sort.uniq
   end
 end

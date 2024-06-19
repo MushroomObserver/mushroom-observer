@@ -29,7 +29,7 @@ class AutoComplete
     self.all = params[:all].present?
   end
 
-  def matching_strings
+  def matching_records
     # just use the first letter of the string to define the matches
     self.matches = rough_matches(string[0])
     clean_matches
@@ -37,20 +37,23 @@ class AutoComplete
 
     minimal_string = refine_matches # defined in subclass
     truncate_matches
-    [minimal_string] + matches
-    # [[minimal_string, nil]] + matches
+    # [minimal_string] + matches
+    [[minimal_string, nil]] + matches
+    # Could be nice for JSON:
+    # this will return a hash indexed by the IDs of the records
+    # ([[minimal_string, 0]] + matches).to_h(&:reverse)
   end
 
   private
 
   def clean_matches
-    matches.map! do |str|
-      str.sub(/\s*[\r\n]\s*.*/m, "").sub(/\A\s+/, "").sub(/\s+\Z/, "")
-    end
-    # matches.map! do |str, id|
-    #   clean = str.sub(/\s*[\r\n]\s*.*/m, "").sub(/\A\s+/, "").sub(/\s+\Z/, "")
-    #   [clean, id]
+    # matches.map! do |str|
+    #   str.sub(/\s*[\r\n]\s*.*/m, "").sub(/\A\s+/, "").sub(/\s+\Z/, "")
     # end
+    matches.map! do |str, id|
+      clean = str.sub(/\s*[\r\n]\s*.*/m, "").sub(/\A\s+/, "").sub(/\s+\Z/, "")
+      [clean, id]
+    end
     matches.uniq!
   end
 
@@ -58,7 +61,7 @@ class AutoComplete
     return unless matches.length > limit
 
     matches.slice!(limit..-1)
-    matches.push("...")
-    # matches.push(["...", nil])
+    # matches.push("...")
+    matches.push(["...", nil])
   end
 end

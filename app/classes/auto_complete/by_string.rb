@@ -9,8 +9,8 @@ class AutoComplete::ByString < AutoComplete
   # with the correct first letter.  Applies additional letters one at a time
   # until the number of matches falls below limit.
   #
-  # Returns the final (minimal) string actually used, and changes matches in
-  # place.  The array 'matches' is guaranteed to be <= limit.
+  # Returns the final (minimal) [string, id] actually used, and changes matches
+  # in place.  The array 'matches' is guaranteed to be <= limit.
   def refine_matches
     # Get rid of trivial case immediately.
     return string[0] if matches.length <= limit
@@ -20,7 +20,7 @@ class AutoComplete::ByString < AutoComplete
     string.chars.each do |letter|
       used += letter
       regex = /(^|#{PUNCTUATION})#{used}/i
-      matches.select! { |m| m.match(regex) }
+      matches.select! { |m, _id| m.match(regex) }
       break if matches.length <= limit
     end
     used
