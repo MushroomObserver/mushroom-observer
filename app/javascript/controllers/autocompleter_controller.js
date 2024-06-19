@@ -425,30 +425,30 @@ export default class extends Controller {
   go_end() { this.move_cursor(this.matches.length) }
   move_cursor(rows) {
     this.verbose("move_cursor()");
-    const old_row = this.current_row,
-      old_scr = this.scroll_offset;
-    let new_row = old_row + rows,
-      new_scr = old_scr;
+    const _old_row = this.current_row,
+      _old_scr = this.scroll_offset;
+    let _new_row = _old_row + rows,
+      _new_scr = _old_scr;
 
     // Move cursor, but keep in bounds.
-    if (new_row < 0)
-      new_row = old_row < 0 ? -1 : 0;
-    if (new_row >= this.matches.length)
-      new_row = this.matches.length - 1;
-    this.current_row = new_row;
-    this.current_value = new_row < 0 ? null : this.matches[new_row];
+    if (_new_row < 0)
+      _new_row = _old_row < 0 ? -1 : 0;
+    if (_new_row >= this.matches.length)
+      _new_row = this.matches.length - 1;
+    this.current_row = _new_row;
+    this.current_value = _new_row < 0 ? null : this.matches[_new_row];
 
     // Scroll view so new row is visible.
-    if (new_row < new_scr)
-      new_scr = new_row;
-    if (new_scr < 0)
-      new_scr = 0;
-    if (new_row >= new_scr + this.PULLDOWN_SIZE)
-      new_scr = new_row - this.PULLDOWN_SIZE + 1;
+    if (_new_row < _new_scr)
+      _new_scr = _new_row;
+    if (_new_scr < 0)
+      _new_scr = 0;
+    if (_new_row >= _new_scr + this.PULLDOWN_SIZE)
+      _new_scr = _new_row - this.PULLDOWN_SIZE + 1;
 
     // Update if something changed.
-    if (new_row != old_row || new_scr != old_scr) {
-      this.scroll_offset = new_scr;
+    if (_new_row != _old_row || _new_scr != _old_scr) {
+      this.scroll_offset = _new_scr;
       this.draw_pulldown();
     }
   }
@@ -456,17 +456,17 @@ export default class extends Controller {
   // Mouse has moved over a menu item.
   highlight_row(new_hl) {
     this.verbose("highlight_row()");
-    const rows = this.LIST_ELEM.children,
-      old_hl = this.current_highlight;
+    const _rows = this.LIST_ELEM.children,
+      _old_hl = this.current_highlight;
 
     this.current_highlight = new_hl;
     this.current_row = this.scroll_offset + new_hl;
 
-    if (old_hl != new_hl) {
-      if (old_hl >= 0)
-        rows[old_hl].classList.remove(this.HOT_CLASS);
+    if (_old_hl != new_hl) {
+      if (_old_hl >= 0)
+        _rows[_old_hl].classList.remove(this.HOT_CLASS);
       if (new_hl >= 0)
-        rows[new_hl].classList.add(this.HOT_CLASS);
+        _rows[new_hl].classList.add(this.HOT_CLASS);
     }
     this.inputTarget.focus();
     this.update_width();
@@ -475,18 +475,18 @@ export default class extends Controller {
   // Called when users scrolls via scrollbar.
   our_scroll() {
     this.verbose("our_scroll()");
-    const old_scr = this.scroll_offset,
-      new_scr = Math.round(this.PULLDOWN_ELEM.scrollTop / this.ROW_HEIGHT),
-      old_row = this.current_row;
-    let new_row = this.current_row;
+    const _old_scr = this.scroll_offset,
+      _new_scr = Math.round(this.PULLDOWN_ELEM.scrollTop / this.ROW_HEIGHT),
+      _old_row = this.current_row;
+    let _new_row = this.current_row;
 
-    if (new_row < new_scr)
-      new_row = new_scr;
-    if (new_row >= new_scr + this.PULLDOWN_SIZE)
-      new_row = new_scr + this.PULLDOWN_SIZE - 1;
-    if (new_row != old_row || new_scr != old_scr) {
-      this.current_row = new_row;
-      this.scroll_offset = new_scr;
+    if (_new_row < _new_scr)
+      _new_row = _new_scr;
+    if (_new_row >= _new_scr + this.PULLDOWN_SIZE)
+      _new_row = _new_scr + this.PULLDOWN_SIZE - 1;
+    if (_new_row != _old_row || _new_scr != _old_scr) {
+      this.current_row = _new_row;
+      this.scroll_offset = _new_scr;
       this.draw_pulldown();
     }
   }
@@ -495,20 +495,20 @@ export default class extends Controller {
   select_row(row) {
     this.verbose("select_row()");
     // const old_val = this.inputTarget.value;
-    let new_val = this.matches[this.scroll_offset + row];
+    let _new_val = this.matches[this.scroll_offset + row];
     // Close pulldown unless the value the user selected uncollapses into a set
     // of new options.  In that case schedule a refresh and leave it up.
     if (this.COLLAPSE > 0 &&
-      (new_val.match(/ /g) || []).length < this.COLLAPSE) {
-      new_val += ' ';
+      (_new_val.match(/ /g) || []).length < this.COLLAPSE) {
+      _new_val += ' ';
       this.schedule_refresh();
     } else {
       this.schedule_hide();
     }
     this.inputTarget.focus();
     this.focused = true;
-    this.inputTarget.value = new_val;
-    this.set_search_token(new_val);
+    this.inputTarget.value = _new_val;
+    this.set_search_token(_new_val);
     this.our_change(false);
   }
 
@@ -516,23 +516,25 @@ export default class extends Controller {
 
   // Create div for pulldown. Presence of this is checked in system tests.
   create_pulldown() {
-    const div = document.createElement("div");
-    div.classList.add(this.PULLDOWN_CLASS);
+    const _pulldown = document.createElement("div");
+    _pulldown.classList.add(this.PULLDOWN_CLASS);
 
-    const list = document.createElement('ul');
-    let i, row;
+    const _list = document.createElement('ul');
+    _list.classList.add(this.LIST_CLASS);
+
+    let i, _item;
     for (i = 0; i < this.PULLDOWN_SIZE; i++) {
-      row = document.createElement("li");
-      row.style.display = 'none';
-      this.attach_row_events(row, i);
-      list.append(row);
+      _item = document.createElement("li");
+      _item.style.display = 'none';
+      this.attach_row_events(_item, i);
+      _list.append(_item);
     }
-    div.appendChild(list)
+    _pulldown.appendChild(_list)
 
-    div.addEventListener("scroll", this.our_scroll.bind(this));
-    this.inputTarget.insertAdjacentElement("afterend", div);
-    this.PULLDOWN_ELEM = div;
-    this.LIST_ELEM = list;
+    _pulldown.addEventListener("scroll", this.our_scroll.bind(this));
+    this.inputTarget.insertAdjacentElement("afterend", _pulldown);
+    this.PULLDOWN_ELEM = _pulldown;
+    this.LIST_ELEM = _list;
   }
 
   // Add "click" and "mouseover" events to a row of the pulldown menu.
@@ -583,25 +585,25 @@ export default class extends Controller {
   // Redraw the pulldown options.
   draw_pulldown() {
     this.verbose("draw_pulldown()");
-    const list = this.LIST_ELEM,
-      rows = list.children,
-      size = this.PULLDOWN_SIZE,
-      scroll = this.scroll_offset,
-      cur = this.current_row,
-      matches = this.matches;
+    const _list = this.LIST_ELEM,
+      _rows = _list.children,
+      _size = this.PULLDOWN_SIZE,
+      _scroll = this.scroll_offset,
+      _current = this.current_row,
+      _matches = this.matches;
 
     if (this.log) {
       this.debug(
-        "Redraw: matches=" + matches.length + ", scroll=" + scroll + ", cursor=" + cur
+        "Redraw: matches=" + _matches.length + ", scroll=" + _scroll + ", cursor=" + _current
       );
     }
 
     // Get row height if haven't been able to yet.
     this.get_row_height();
-    if (rows.length) {
-      this.update_rows(rows, matches, size, scroll);
-      this.highlight_new_row(rows, cur, size, scroll)
-      this.make_menu_visible(matches, size, scroll)
+    if (_rows.length) {
+      this.update_rows(_rows, _matches, _size, _scroll);
+      this.highlight_new_row(_rows, _current, _size, _scroll)
+      this.make_menu_visible(_matches, _size, _scroll)
     }
 
     // Make sure input focus stays on text field!
@@ -612,19 +614,19 @@ export default class extends Controller {
   update_rows(rows, matches, size, scroll) {
     let i, x, y;
     for (i = 0; i < size; i++) {
-      let row = rows.item(i);
-      x = row.innerHTML;
+      let _row = rows.item(i);
+      x = _row.innerHTML;
       if (i + scroll < matches.length) {
         y = this.escapeHTML(matches[i + scroll]);
         if (x != y) {
           if (x == '')
-            row.style.display = 'block';
-          row.innerHTML = y;
+            _row.style.display = 'block';
+          _row.innerHTML = y;
         }
       } else {
         if (x != '') {
-          row.innerHTML = '';
-          row.style.display = 'none';
+          _row.innerHTML = '';
+          _row.style.display = 'none';
         }
       }
     }
@@ -632,41 +634,42 @@ export default class extends Controller {
 
   // Highlight that row.
   highlight_new_row(rows, cur, size, scroll) {
-    const old_hl = this.current_highlight;
-    let new_hl = cur - scroll;
+    const _old_hl = this.current_highlight;
+    let _new_hl = cur - scroll;
 
-    if (new_hl < 0 || new_hl >= size)
-      new_hl = -1;
-    this.current_highlight = new_hl;
-    if (new_hl != old_hl) {
-      if (old_hl >= 0)
-        rows[old_hl].classList.remove(this.HOT_CLASS);
+    if (_new_hl < 0 || _new_hl >= size)
+      _new_hl = -1;
+    this.current_highlight = _new_hl;
+    if (_new_hl != _old_hl) {
+      if (_old_hl >= 0)
+        rows[_old_hl].classList.remove(this.HOT_CLASS);
       if (new_hl >= 0)
-        rows[new_hl].classList.add(this.HOT_CLASS);
+        rows[_new_hl].classList.add(this.HOT_CLASS);
     }
   }
 
   // Make menu visible if nonempty.
   make_menu_visible(matches, size, scroll) {
-    const menu = this.PULLDOWN_ELEM,
-      inner = menu.children[0];
+    const _pulldown = this.PULLDOWN_ELEM,
+      _list = _pulldown.children[0];
 
     if (matches.length > 0) {
       // console.log("Matches:" + matches)
-      const top = this.inputTarget.offsetTop,
-        left = this.inputTarget.offsetLeft,
-        hgt = this.inputTarget.offsetHeight,
-        scr = this.inputTarget.scrollTop;
-      menu.style.top = (top + hgt + scr) + "px";
-      menu.style.left = left + "px";
+      const _top = this.inputTarget.offsetTop,
+        _left = this.inputTarget.offsetLeft,
+        _hgt = this.inputTarget.offsetHeight,
+        _scr = this.inputTarget.scrollTop;
+      _pulldown.style.top = (_top + _hgt + _scr) + "px";
+      _pulldown.style.left = _left + "px";
 
       // Set height of menu.
-      menu.style.overflowY = matches.length > size ? "scroll" : "hidden";
-      menu.style.height = this.ROW_HEIGHT * (size < matches.length - scroll ? size : matches.length - scroll) + "px";
-      inner.style.marginTop = this.ROW_HEIGHT * scroll + "px";
-      inner.style.height = this.ROW_HEIGHT * (matches.length - scroll) + "px";
-      menu.scrollTo({ top: this.ROW_HEIGHT * scroll });
-      // }
+      _pulldown.style.overflowY = matches.length > size ? "scroll" : "hidden";
+      _pulldown.style.height = this.ROW_HEIGHT *
+        (size < matches.length - scroll ? size : matches.length - scroll) +
+        "px";
+      _list.style.marginTop = this.ROW_HEIGHT * scroll + "px";
+      _list.style.height = this.ROW_HEIGHT * (matches.length - scroll) + "px";
+      _pulldown.scrollTo({ top: this.ROW_HEIGHT * scroll });
 
       // Set width of menu.
       this.set_width();
@@ -676,17 +679,17 @@ export default class extends Controller {
       // the value that's already in the text field.
       if (matches.length > 1 || this.inputTarget.value != matches[0]) {
         this.clear_hide();
-        menu.style.display = 'block';
+        _pulldown.style.display = 'block';
         this.menu_up = true;
       } else {
-        menu.style.display = 'none';
+        _pulldown.style.display = 'none';
         this.menu_up = false;
       }
     }
 
     // Hide the menu if it's empty now.
     else {
-      menu.style.display = 'none';
+      _pulldown.style.display = 'none';
       this.menu_up = false;
     }
   }
