@@ -20,15 +20,15 @@ module Observations
 
     def test_create_public_import_imageless_obs
       # See test/inat/README_INAT_FIXTURES.md
-      inat_response_body =
+      mock_inat_response =
         File.read("test/inat/evernia_no_photos.txt")
-      inat_id = InatObs.new(inat_response_body).inat_id
+      inat_id = InatObs.new(mock_inat_response).inat_id
       params = { inat_ids: inat_id }
 
       WebMock.stub_request(
         :get,
         "#{INAT_OBS_REQUEST_PREFIX}id=#{inat_id}#{INAT_OBS_REQUEST_POSTFIX}"
-      ).to_return(body: inat_response_body)
+      ).to_return(body: mock_inat_response)
 
       login
 
@@ -48,16 +48,11 @@ module Observations
 
     def test_create_public_import_obs_with_photo
       skip("Under Construction")
-      # See test/inat/README_INAT_FIXTURES.md
-      inat_response_body =
+      mock_inat_response =
         File.read("test/inat/tremella_mesenterica.txt")
-      inat_obs_data = InatObs.new(inat_response_body)
-      inat_obs_id = inat_obs_data.inat_id
-      inat_obs_photo = InatObsPhoto.new(
-        inat_obs_data.obs[:observation_photos].first
-      )
-      # inat_obs = InatObs.new(inat_response_body)
-      # inat_id = InatObs.new(inat_response_body).inat_id
+      inat_obs = InatObs.new(mock_inat_response)
+      inat_obs_id = inat_obs.inat_id
+      inat_obs_photo = InatObsPhoto.new(inat_obs.inat_obs_photos.first)
       params = { inat_ids: inat_obs_id }
       user = users(:rolf)
 
@@ -65,7 +60,7 @@ module Observations
       WebMock.stub_request(
         :get,
         "#{INAT_OBS_REQUEST_PREFIX}id=#{inat_obs_id}#{INAT_OBS_REQUEST_POSTFIX}"
-      ).to_return(body: inat_response_body)
+      ).to_return(body: mock_inat_response)
 
       # stub the aws request for the photo
       WebMock.stub_request(
@@ -77,7 +72,7 @@ module Observations
       # TODO: fix stubbed method when InatImportsController fixes its APIKey
       APIKey.stub(:first, api_keys(:rolfs_mo_app_api_key)) do
         assert_difference("Observation.count", 1, "Failed to create Obs") do
-          put(:create, params: params)
+          post(:create, params: params)
         end
       end
 
@@ -88,15 +83,15 @@ module Observations
 
     def test_create_import_plant
       # See test/inat/README_INAT_FIXTURES.md
-      inat_response_body =
+      mock_inat_response =
         File.read("test/inat/ceanothus_cordulatus.txt")
-      inat_id = InatObs.new(inat_response_body).inat_id
+      inat_id = InatObs.new(mock_inat_response).inat_id
       params = { inat_ids: inat_id }
 
       WebMock.stub_request(
         :get,
         "#{INAT_OBS_REQUEST_PREFIX}id=#{inat_id}#{INAT_OBS_REQUEST_POSTFIX}"
-      ).to_return(body: inat_response_body)
+      ).to_return(body: mock_inat_response)
 
       login
 
