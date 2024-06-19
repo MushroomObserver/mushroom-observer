@@ -520,11 +520,14 @@ export default class extends Controller {
     pulldown.classList.add(this.PULLDOWN_CLASS);
 
     const list = document.createElement('ul');
-    let i, row;
+    let i, row, link;
     for (i = 0; i < this.PULLDOWN_SIZE; i++) {
       row = document.createElement("li");
-      row.style.display = 'none';
-      this.attach_row_events(row, i);
+      link = document.createElement("a");
+      link.href = '#';
+      this.attach_row_link_events(link, i);
+      row.appendChild(link);
+      // row.style.display = 'none';
       list.append(row);
     }
     pulldown.appendChild(list)
@@ -539,11 +542,12 @@ export default class extends Controller {
   // Need to do this in a separate method, otherwise row doesn't get
   // a separate value for each row!  Something to do with scope of
   // variables inside for loops.
-  attach_row_events(e, row) {
-    e.addEventListener("click", (function () {
+  attach_row_link_events(element, row) {
+    element.addEventListener("click", ((e) => {
+      e.preventDefault();
       this.select_row(row);
     }).bind(this));
-    e.addEventListener("mouseover", (function () {
+    element.addEventListener("mouseover", ((e) => {
       this.highlight_row(row);
     }).bind(this));
   }
@@ -554,13 +558,16 @@ export default class extends Controller {
   get_row_height() {
     const div = document.createElement('div'),
       ul = document.createElement('ul'),
-      li = document.createElement('li');
+      li = document.createElement('li'),
+      a = document.createElement('a');
 
     div.className = this.PULLDOWN_CLASS;
-    div.classList.add('test');
+    div.classList.add('temp');
     div.style.display = 'block';
     div.style.border = div.style.margin = div.style.padding = '0px';
-    li.innerHTML = 'test';
+    a.href = '#';
+    a.innerHTML = 'test';
+    li.appendChild(a);
     ul.appendChild(li);
     div.appendChild(ul);
     document.body.appendChild(div);
@@ -609,23 +616,25 @@ export default class extends Controller {
     this.inputTarget.focus();
   }
 
-  // Update menu text first.
+  // Update menu text first. This is sort of a "virtual list" implementation.
+  // Keeps few elements in the DOM, but updates them as needed.
   update_rows(rows, matches, size, scroll) {
-    let i, x, y;
+    let i, text, stored;
     for (i = 0; i < size; i++) {
       let row = rows.item(i);
-      x = row.innerHTML;
+      let link = row.children[0];
+      text = link.innerHTML;
       if (i + scroll < matches.length) {
-        y = this.escapeHTML(matches[i + scroll]);
-        if (x != y) {
-          if (x == '')
-            row.style.display = 'block';
-          row.innerHTML = y;
+        stored = this.escapeHTML(matches[i + scroll]);
+        if (text != stored) {
+          // if (text == '')
+          //   row.style.display = 'block';
+          link.innerHTML = stored;
         }
       } else {
-        if (x != '') {
-          row.innerHTML = '';
-          row.style.display = 'none';
+        if (text != '') {
+          link.innerHTML = '';
+          // row.style.display = 'none';
         }
       }
     }
