@@ -610,7 +610,7 @@ export default class extends Controller {
     this.inputTarget.focus();
   }
 
-  // Update menu text first.
+  // Update menu text first - add from stored matches.
   update_rows(rows, matches, size, scroll) {
     let i, x, y;
     for (i = 0; i < size; i++) {
