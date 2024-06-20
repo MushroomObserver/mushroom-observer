@@ -37,9 +37,13 @@ const DEFAULT_OPTS = {
   // include pulldown-icon on right, and always show all options
   ACT_LIKE_SELECT: false,
   // class of pulldown div, selected by system tests
-  PULLDOWN_CLASS: 'auto_complete',
-  // class of <li> when highlighted
-  HOT_CLASS: 'selected'
+  PULLDOWN_CLASSES: ['auto_complete', 'dropdown-menu'],
+  // class of pulldown <ul>, purely for developer comprehension of how it's used
+  LIST_CLASSES: ['virtual_list'],
+  // class of pulldown <li>
+  ITEM_CLASSES: ['dropdown-item'],
+  // class of <li> when highlighted.
+  HOT_CLASS: 'active'
 }
 
 // Allowed types of autocompleter. Sets some DEFAULT_OPTS from type
@@ -514,20 +518,30 @@ export default class extends Controller {
 
   // ------------------------------ Pulldown ------------------------------
 
-  // Create div for pulldown. Presence of this is checked in system tests.
+  // Create hidden pulldown <div> that is a sibling of the input element., The
+  // pulldown contains a <ul> and ten blank <li><a> elements. Note that unlike
+  // in the standard Bootstrap markup, our pulldown is a <div> with a <ul>
+  // inside. The <div> in our case gets the .dropdown-menu class, because it's
+  // the "window" to the nested <ul> virtual list. The <ul> has an accurate
+  // calculated height to imply scrollability, but never contains more than 10
+  // <li> elements. This keeps the DOM responsive even with very large lists.
+  // The <li> elements are updated with the actual items from the stored
+  // `matches` array as needed.
+  //
   create_pulldown() {
     const pulldown = document.createElement("div");
-    pulldown.classList.add(this.PULLDOWN_CLASS);
+    pulldown.classList.add(...this.PULLDOWN_CLASSES);
 
     const list = document.createElement('ul');
+    list.classList.add(...this.LIST_CLASSES);
     let i, row, link;
     for (i = 0; i < this.PULLDOWN_SIZE; i++) {
       row = document.createElement("li");
+      row.classList.add(...this.ITEM_CLASSES);
       link = document.createElement("a");
       link.href = '#';
       this.attach_row_link_events(link, i);
       row.appendChild(link);
-      // row.style.display = 'none';
       list.append(row);
     }
     pulldown.appendChild(list)
@@ -561,12 +575,12 @@ export default class extends Controller {
       li = document.createElement('li'),
       a = document.createElement('a');
 
-    div.className = this.PULLDOWN_CLASS;
-    div.classList.add('temp');
+    div.classList.add(...this.PULLDOWN_CLASSES, 'temp');
     div.style.display = 'block';
     div.style.border = div.style.margin = div.style.padding = '0px';
     a.href = '#';
     a.innerHTML = 'test';
+    li.classList.add(...this.ITEM_CLASSES);
     li.appendChild(a);
     ul.appendChild(li);
     div.appendChild(ul);
@@ -656,19 +670,22 @@ export default class extends Controller {
     }
   }
 
-  // Make pulldown visible if nonempty.
+  // Make pulldown visible if nonempty. Positioning currently depends on
+  // Bootstrap classes: the .dropdown-menu will be positioned relative to the
+  // wrapping .form-group which must have either class .position-relative or
+  // .dropdown
   make_pulldown_visible(matches, size, scroll) {
     const pulldown = this.PULLDOWN_ELEM,
       list = pulldown.children[0];
 
     if (matches.length > 0) {
       // console.log("Matches:" + matches)
-      const top = this.inputTarget.offsetTop,
-        left = this.inputTarget.offsetLeft,
-        hgt = this.inputTarget.offsetHeight,
-        scr = this.inputTarget.scrollTop;
-      pulldown.style.top = (top + hgt + scr) + "px";
-      pulldown.style.left = left + "px";
+      // const top = this.inputTarget.offsetTop,
+      //   left = this.inputTarget.offsetLeft,
+      //   hgt = this.inputTarget.offsetHeight,
+      //   scr = this.inputTarget.scrollTop;
+      // pulldown.style.top = (top + hgt + scr) + "px";
+      // pulldown.style.left = left + "px";
 
       // Set height of pulldown.
       pulldown.style.overflowY = matches.length > size ? "scroll" : "hidden";
@@ -676,7 +693,6 @@ export default class extends Controller {
       list.style.marginTop = this.ROW_HEIGHT * scroll + "px";
       list.style.height = this.ROW_HEIGHT * (matches.length - scroll) + "px";
       pulldown.scrollTo({ top: this.ROW_HEIGHT * scroll });
-      // }
 
       // Set width of pulldown.
       this.set_width();
@@ -684,6 +700,8 @@ export default class extends Controller {
 
       // Only show pulldown if it is nontrivial, i.e., show an option other than
       // the value that's already in the text field.
+      // To show, if wrapping div is .dropdown, we can classList.add('.open')
+      // instead of style.display = 'block'
       if (matches.length > 1 || this.inputTarget.value != matches[0]) {
         this.clear_hide();
         pulldown.style.display = 'block';
