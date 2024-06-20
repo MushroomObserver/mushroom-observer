@@ -2954,9 +2954,10 @@
   list_merge_options_others: Other Available [:locations]
   list_merge_options_title: Location Matches for [where]
 
-  #observation/inat_imports
+  # observation/inat_imports
   create_inat_import_title: Import from iNat
   import_observation_from_inat: Import from iNat
+  inat_data_comment: Inat Data
   inat_id: iNat id
   inat_ids: iNat ids
   inat_not_single_id: Please enter a single iNat id

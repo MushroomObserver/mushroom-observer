@@ -47,12 +47,11 @@ module Observations
     end
 
     def test_create_public_import_obs_with_photo
-      skip("Under Construction")
       mock_inat_response =
-        File.read("test/inat/tremella_mesenterica.txt")
+        File.read("test/inat/lycoperdon.txt")
       inat_obs = InatObs.new(mock_inat_response)
       inat_obs_id = inat_obs.inat_id
-      inat_obs_photo = InatObsPhoto.new(inat_obs.inat_obs_photos.first)
+      # inat_obs_photo = InatObsPhoto.new(inat_obs.inat_obs_photos.first)
       params = { inat_ids: inat_obs_id }
       user = users(:rolf)
 
@@ -63,22 +62,36 @@ module Observations
       ).to_return(body: mock_inat_response)
 
       # stub the aws request for the photo
-      WebMock.stub_request(
-        :get,
-        inat_obs_photo.url
-      ).to_return(body: Rails.root.join("test/images/test_image.jpg").read)
+      # WebMock.stub_request(
+      #  :get,
+      #   inat_obs_photo.url
+      # ).to_return(body: Rails.root.join("test/images/test_image.jpg").read)
 
       login(user.login)
       # TODO: fix stubbed method when InatImportsController fixes its APIKey
-      APIKey.stub(:first, api_keys(:rolfs_mo_app_api_key)) do
-        assert_difference("Observation.count", 1, "Failed to create Obs") do
-          post(:create, params: params)
-        end
+      # APIKey.stub(:first, api_keys(:rolfs_mo_app_api_key)) do
+      assert_difference("Observation.count", 1, "Failed to create Obs") do
+        post(:create, params: params)
       end
+      # end
 
       obs = Observation.order(created_at: :asc).last
       assert_not_nil(obs.rss_log)
       assert_redirected_to(observations_path)
+
+      inat_data_comment =
+        Comment.where(target_type: "Observation", target_id: obs.id).
+        where(Comment[:summary] =~ /^Inat Data/)
+      assert(inat_data_comment.one?)
+      comment = inat_data_comment.first.comment
+      [
+        :USER.l, :OBSERVED.l, :LAT_LON.l, :PLACE.l, :ID.l, :DQA.l,
+        :ANNOTATIONS.l,:PROJECTS.l, :SEQUENCES.l, :OBSERVATION_FIELDS.l, :TAGS.l
+      ].each do |caption|
+        assert_match(/#{caption}/, comment)
+      end
+
+      assert(obs.sequences.one?)
     end
 
     def test_create_import_plant
