@@ -552,18 +552,18 @@ export default class extends Controller {
     this.LIST_ELEM = list;
   }
 
-  // Add "click" and "mouseover" events to a row of the pulldown menu.
+  // Add "click" events to a row of the pulldown menu.
   // Need to do this in a separate method, otherwise row doesn't get
   // a separate value for each row!  Something to do with scope of
-  // variables inside for loops.
+  // variables inside `for` loops. By using <a>, we can skip "mouseover".
   attach_row_link_events(element, row) {
     element.addEventListener("click", ((e) => {
       e.preventDefault();
       this.select_row(row);
     }).bind(this));
-    element.addEventListener("mouseover", ((e) => {
-      this.highlight_row(row);
-    }).bind(this));
+    // element.addEventListener("mouseover", ((e) => {
+    //   this.highlight_row(row);
+    // }).bind(this));
   }
 
   // Stimulus: print this in the document already
