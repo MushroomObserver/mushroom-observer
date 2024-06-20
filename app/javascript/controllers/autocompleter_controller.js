@@ -81,6 +81,7 @@ const INTERNAL_OPTS = {
   SCROLLBAR_WIDTH: null, // width of scrollbar in browser (determined below)
   focused: false,        // is user in text field?
   menu_up: false,        // is pulldown visible?
+  dropdown_wrap: null,   // wrapping div for pulldown
   old_value: null,       // previous value of input field
   primer: [],            // a server-supplied list of many options
   matches: [],           // list of options currently showing
@@ -128,6 +129,11 @@ export default class extends Controller {
 
     // Figure out a few browser-dependent dimensions.
     this.getScrollBarWidth;
+
+    // This cannot be a target because it's "above" the controller scope in DOM.
+    this.dropdown_wrap = this.inputTarget.closest('.dropdown');
+    if (this.dropdown_wrap == undefined)
+      alert("MOAutocompleter: needs a wrapping div with class: \"dropdown\"");
 
     // Create pulldown.
     this.create_pulldown();
@@ -575,9 +581,11 @@ export default class extends Controller {
       li = document.createElement('li'),
       a = document.createElement('a');
 
-    div.classList.add(...this.PULLDOWN_CLASSES, 'temp');
-    div.style.display = 'block';
-    div.style.border = div.style.margin = div.style.padding = '0px';
+    div.classList.add('test');
+    // div.style.display = 'block';
+    // div.style.border = div.style.margin = div.style.padding = '0px';
+    // ul.style.border = ul.style.margin = ul.style.padding = '0px';
+    ul.classList.add(...this.LIST_CLASSES)
     a.href = '#';
     a.innerHTML = 'test';
     li.classList.add(...this.ITEM_CLASSES);
@@ -680,7 +688,7 @@ export default class extends Controller {
 
     if (matches.length > 0) {
       // console.log("Matches:" + matches)
-      // const top = this.inputTarget.offsetTop,
+      // const top = this.dropdown_wrap.offsetTop,
       //   left = this.inputTarget.offsetLeft,
       //   hgt = this.inputTarget.offsetHeight,
       //   scr = this.inputTarget.scrollTop;
@@ -689,7 +697,9 @@ export default class extends Controller {
 
       // Set height of pulldown.
       pulldown.style.overflowY = matches.length > size ? "scroll" : "hidden";
-      pulldown.style.height = this.ROW_HEIGHT * (size < matches.length - scroll ? size : matches.length - scroll) + "px";
+      pulldown.style.height = this.ROW_HEIGHT *
+        (size < matches.length - scroll ? size : matches.length - scroll) +
+        "px";
       list.style.marginTop = this.ROW_HEIGHT * scroll + "px";
       list.style.height = this.ROW_HEIGHT * (matches.length - scroll) + "px";
       pulldown.scrollTo({ top: this.ROW_HEIGHT * scroll });
@@ -704,25 +714,23 @@ export default class extends Controller {
       // instead of style.display = 'block'
       if (matches.length > 1 || this.inputTarget.value != matches[0]) {
         this.clear_hide();
-        pulldown.style.display = 'block';
+        this.dropdown_wrap?.classList?.add('open');
         this.menu_up = true;
       } else {
-        pulldown.style.removeProperty('display');
-        this.menu_up = false;
+        hide_pulldown();
       }
     }
 
     // Hide the pulldown if it's empty now.
     else {
-      pulldown.style.removeProperty('display');
-      this.menu_up = false;
+      this.hide_pulldown();
     }
   }
 
   // Hide pulldown options.
   hide_pulldown() {
     this.verbose("hide_pulldown()");
-    this.PULLDOWN_ELEM.style.removeProperty('display');
+    this.dropdown_wrap?.classList?.remove('open');
     this.menu_up = false;
   }
 

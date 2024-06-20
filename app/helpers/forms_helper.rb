@@ -160,7 +160,7 @@ module FormsHelper
       data: { controller: :autocompleter, autocompleter_target: "input",
               type: args[:type], separator: args[:separator] }
     }.deep_merge(args.except(:type, :separator, :textarea))
-    ac_args[:class] = class_names("position-relative", args[:class])
+    ac_args[:class] = class_names("dropdown", args[:class])
 
     if args[:textarea] == true
       text_area_with_label(**ac_args)
