@@ -97,7 +97,7 @@ const INTERNAL_OPTS = {
   key_timer: null        // timer used to emulate key repeat
 }
 
-// Connects to data-controller="autocomplete"
+// Connects to data-controller="autocompleter"
 export default class extends Controller {
   // The select target is not the input element, but a <select> that can
   // swap out the autocompleter type. The input element is the target.
@@ -109,7 +109,7 @@ export default class extends Controller {
     // Check the type of autocompleter set on the input element
     // maybe should not happen on connect, or we could be resetting type
     // Or maybe it should, and the filter swapper should just change this? no.
-    this.TYPE = this.inputTarget.dataset.autocomplete;
+    this.TYPE = this.inputTarget.dataset.type;
     if (!AUTOCOMPLETER_TYPES.hasOwnProperty(this.TYPE))
       alert("MOAutocompleter: Invalid type: \"" + this.TYPE + "\"");
 
@@ -148,7 +148,7 @@ export default class extends Controller {
       alert("MOAutocompleter: Invalid type: \"" + this.TYPE + "\"");
     } else {
       this.TYPE = type;
-      this.inputTarget.setAttribute("data-autocompleter", type)
+      this.inputTarget.setAttribute("data-type", type)
       // add dependent properties and allow overrides
       Object.assign(this, AUTOCOMPLETER_TYPES[this.TYPE]);
       Object.assign(this, opts);

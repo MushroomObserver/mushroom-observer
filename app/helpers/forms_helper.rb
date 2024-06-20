@@ -151,15 +151,15 @@ module FormsHelper
   # autocomplete via `autocomplete="off"` — the W3C standard API, but it
   # has never been honored by Chrome or Safari. Chrome seems to be in a race to
   # defeat the evolving hacks by developers to disable inappropriate
-  # autocompletes, and Safari is not much better - you just can't
-  # turn their crap off. (documented on SO)
+  # autocompletes, and Safari is not much better - you just can't turn their
+  # crap off. (documented on SO)
   #
   def autocompleter_field(**args)
     ac_args = {
       placeholder: :start_typing.l, autocomplete: "off",
       data: { controller: :autocompleter, autocompleter_target: "input",
-              autocomplete: args[:autocomplete], separator: args[:separator] }
-    }.deep_merge(args.except(:autocomplete, :separator, :textarea))
+              type: args[:type], separator: args[:separator] }
+    }.deep_merge(args.except(:type, :separator, :textarea))
     ac_args[:class] = class_names("position-relative", args[:class])
 
     if args[:textarea] == true
