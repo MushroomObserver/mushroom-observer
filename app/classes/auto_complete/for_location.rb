@@ -26,7 +26,7 @@ class AutoComplete::ForLocation < AutoComplete::ByWord
         or(Location[:name].matches("% #{letter}%"))).pluck(:name, :id)
 
     matches.map! { |m, id| [Location.reverse_name(m), id] } if reverse
-    # remove matches without an id and sort by unique name
-    matches.reject { |m| m[1].nil? }.sort_by(&:first).uniq(&:first)
+    # matches without id are strings only. give id: 0, and sort by unique name
+    matches.map { |m, id| [m, id.nil? ? 0 : id] }.sort_by(&:first).uniq(&:first)
   end
 end

@@ -46,7 +46,6 @@ class AutocompletersControllerTest < FunctionalTestCase
 
   ##############################################################################
 
-  # rubocop:disable Style/CollectionCompact
   def test_auto_complete_location
     login("rolf")
     # names of Locations whose names have words starting with "m"
@@ -60,7 +59,7 @@ class AutocompletersControllerTest < FunctionalTestCase
 
     expect = m.sort_by(&:first).uniq(&:first)
     expect.unshift(["M", 0])
-    expect = expect.reject { |_n, id| id.nil? }
+    expect = expect.map { |n, id| [n, id.nil? ? 0 : id] }
     expect = expect.map { |name, id| { name:, id: } }
     good_autocompleter_request(type: :location, string: "Modesto")
     assert_equivalent(expect, JSON.parse(@response.body))
@@ -69,7 +68,7 @@ class AutocompletersControllerTest < FunctionalTestCase
     expect = m.map { |name, id| [Location.reverse_name(name), id] }.
              sort_by(&:first).uniq(&:first)
     expect.unshift(["M", 0])
-    expect = expect.reject { |_n, id| id.nil? }
+    expect = expect.map { |n, id| [n, id.nil? ? 0 : id] }
     expect = expect.map { |name, id| { name:, id: } }
     good_autocompleter_request(type: :location, string: "Modesto")
     assert_equivalent(expect, JSON.parse(@response.body))
@@ -78,7 +77,6 @@ class AutocompletersControllerTest < FunctionalTestCase
     good_autocompleter_request(type: :location, string: "Xystus")
     assert_equivalent([{ name: "X", id: 0 }], JSON.parse(@response.body))
   end
-  # rubocop:enable Style/CollectionCompact
 
   def test_auto_complete_herbarium
     login("rolf")
