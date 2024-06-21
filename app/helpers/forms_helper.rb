@@ -133,9 +133,10 @@ module FormsHelper
     opts[:class] = "form-control"
 
     wrap_class = form_group_wrap_class(args)
+    wrap_data = args[:wrap_data] || {}
     label_opts = field_label_opts(args)
 
-    tag.div(class: wrap_class) do
+    tag.div(class: wrap_class, data: wrap_data) do
       concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
       concat(args[:form].text_field(args[:field], opts))
@@ -157,10 +158,11 @@ module FormsHelper
   def autocompleter_field(**args)
     ac_args = {
       placeholder: :start_typing.l, autocomplete: "off",
-      data: { controller: :autocompleter, autocompleter_target: "input",
-              type: args[:type], separator: args[:separator] }
+      data: { autocompleter_target: "input" }
     }.deep_merge(args.except(:type, :separator, :textarea))
     ac_args[:class] = class_names("dropdown", args[:class])
+    ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
+                            separator: args[:separator] }
 
     if args[:textarea] == true
       text_area_with_label(**ac_args)
@@ -178,9 +180,10 @@ module FormsHelper
     opts[:class] += " text-monospace" if args[:monospace].present?
 
     wrap_class = form_group_wrap_class(args)
+    wrap_data = args[:wrap_data] || {}
     label_opts = field_label_opts(args)
 
-    tag.div(class: wrap_class) do
+    tag.div(class: wrap_class, data: wrap_data) do
       concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
       concat(args[:form].text_area(args[:field], opts))
@@ -473,7 +476,7 @@ module FormsHelper
   def separate_field_options_from_args(args, extras = [])
     exceptions = [
       :form, :field, :label, :class, :width, :inline, :between, :append,
-      :optional, :required, :monospace, :type
+      :optional, :required, :monospace, :type, :wrap_data
     ] + extras
 
     args.clone.except(*exceptions)

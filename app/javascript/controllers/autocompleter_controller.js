@@ -121,17 +121,16 @@ const INTERNAL_OPTS = {
 
 // Connects to data-controller="autocompleter"
 export default class extends Controller {
-  // The select target is not the input element, but a <select> that can
-  // swap out the autocompleter type. The input element is the target.
+  // The root element should usually be the .form-group wrapping the <input>.
+  // The select target is not the <input> element, but a <select> that can
+  // swap out the autocompleter type. The <input> element is its target.
   static targets = ["input", "select"]
 
   initialize() {
     Object.assign(this, DEFAULT_OPTS);
 
-    // Check the type of autocompleter set on the input element
-    // maybe should not happen on connect, or we could be resetting type
-    // Or maybe it should, and the filter swapper should just change this? no.
-    this.TYPE = this.inputTarget.dataset.type;
+    // Check the type of autocompleter set on the root or input element
+    this.TYPE = this.element.dataset.type || this.inputTarget.dataset.type;
     if (!AUTOCOMPLETER_TYPES.hasOwnProperty(this.TYPE))
       alert("MOAutocompleter: Invalid type: \"" + this.TYPE + "\"");
 
@@ -151,9 +150,9 @@ export default class extends Controller {
     // Figure out a few browser-dependent dimensions.
     this.getScrollBarWidth;
 
-    // Wrap cannot be a target because it's "above" the controller scope in DOM.
-    this.dropdown_wrap = this.inputTarget.closest("." + this.WRAP_CLASS);
-    if (this.dropdown_wrap == undefined)
+    // Wrap is usually the root element with the controller, a ".form-group".
+    this.dropdown_wrap = this.element || this.inputTarget.parentElement;
+    if (this.dropdown_wrap.classList.contains(this.WRAP_CLASS) == false)
       alert("MOAutocompleter: needs a wrapping div with class: \"" +
         this.WRAP_CLASS + "\"");
 
@@ -176,6 +175,8 @@ export default class extends Controller {
     } else if (detail?.hasOwnProperty("type")) {
       type = detail.type;
     }
+    debugger
+    if (type == undefined) { return; }
 
     if (!AUTOCOMPLETER_TYPES.hasOwnProperty(type)) {
       alert("MOAutocompleter: Invalid type: \"" + type + "\"");
