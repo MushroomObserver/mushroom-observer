@@ -45,7 +45,7 @@ class AutoCompleteTest < UnitTestCase
   end
 
   def test_truncate
-    list = %w[b0 b1 b2 b3 b4 b5 b6 b7 b8 b9].map { |str| [str, 0] }
+    list = %w[b0 b1 b2 b3 b4 b5 b6 b7 b8 b9].map { |str| { name: str, id: 0 } }
     auto = AutoCompleteMock.new(string: "blah")
     auto.matches = list
     assert_equal(list, auto.matches)
@@ -56,22 +56,23 @@ class AutoCompleteTest < UnitTestCase
 
     auto.limit = 9
     auto.truncate_matches
-    list[9] = "..."
+    list[9] = { name: "...", id: nil }
     assert_equal(list, auto.matches)
 
     auto.limit = 1
     auto.truncate_matches
-    assert_equal([["b0", 0], ["...", nil]], auto.matches)
+    assert_equal([{ name: "b0", id: 0 }, { name: "...", id: nil }],
+                 auto.matches)
   end
 
   def test_multiline_matches
     list1 = [" line one \n line two\n  ", "good match", "  padded match  "]
     list2 = ["line one", "good match", "padded match"]
     auto = AutoCompleteMock.new(string: "blah")
-    auto.matches = list1.map { |str| [str, 0] }
-    assert_equal(list1.map { |str| [str, 0] }, auto.matches)
+    auto.matches = list1.map { |str| { name: str, id: 0 } }
+    assert_equal(list1.map { |str| { name: str, id: 0 } }, auto.matches)
     auto.clean_matches
-    assert_equal(list2.map { |str| [str, 0] }, auto.matches)
+    assert_equal(list2.map { |str| { name: str, id: 0 } }, auto.matches)
   end
 
   def test_refine_token_by_string
@@ -101,7 +102,7 @@ class AutoCompleteTest < UnitTestCase
       [2, 3, "one two three"]
     ].each do |limit, expected_matches, expected_string|
       auto = AutoCompleteMock.new(string: pattern)
-      auto.matches = @list.sort_by { rand }.map { |str| [str, 0] }
+      auto.matches = @list.sort_by { rand }.map { |str| { name: str, id: 0 } }
       auto.limit = limit
       assert_refines_correctly(auto, expected_matches, expected_string)
     end
@@ -135,7 +136,7 @@ class AutoCompleteTest < UnitTestCase
       [1, 2, "one two shree"]
     ].each do |limit, expected_matches, expected_string|
       auto = AutoComplete::ForMock.new(string: pattern)
-      auto.matches = @list.sort_by { rand }.map { |str| [str, 0] }
+      auto.matches = @list.sort_by { rand }.map { |str| { name: str, id: 0 } }
       auto.limit = limit
       assert_refines_correctly(auto, expected_matches, expected_string)
     end
