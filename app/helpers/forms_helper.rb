@@ -133,9 +133,10 @@ module FormsHelper
     opts[:class] = "form-control"
 
     wrap_class = form_group_wrap_class(args)
+    wrap_data = args[:wrap_data] || {}
     label_opts = field_label_opts(args)
 
-    tag.div(class: wrap_class) do
+    tag.div(class: wrap_class, data: wrap_data) do
       concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
       concat(args[:form].text_field(args[:field], opts))
@@ -143,20 +144,30 @@ module FormsHelper
     end
   end
 
-  # This allows incoming data attributes to deep_merge with autocompleter's data
-  # 2023 hack to defeat unhelpful browser autocompletes that get in the way of
-  # our autocompleter: use the browser standard autocomplete att "one-time-code"
+  # MO's autocompleter_field is a text_field that fetches suggestions from the
+  # db for the requested model. (For a textarea, pass textarea: true.) The
+  # stimulus controller handles keyboard and mouse interactions, does the
+  # fetching, and draws the dropdown menu. `args` allow incoming data attributes
+  # to deep_merge with controller data. We attempt to disable browser
+  # autocomplete via `autocomplete="off"` — the W3C standard API, but it
+  # has never been honored by Chrome or Safari. Chrome seems to be in a race to
+  # defeat the evolving hacks by developers to disable inappropriate
+  # autocompletes, and Safari is not much better - you just can't turn their
+  # crap off. (documented on SO)
+  #
   def autocompleter_field(**args)
-    autocompleter_args = {
+    ac_args = {
       placeholder: :start_typing.l, autocomplete: "off",
-      data: { controller: :autocompleter, autocompleter_target: "input",
-              autocomplete: args[:autocomplete], separator: args[:separator] }
-    }.deep_merge(args.except(:autocomplete, :separator, :textarea))
+      data: { autocompleter_target: "input" }
+    }.deep_merge(args.except(:type, :separator, :textarea))
+    ac_args[:class] = class_names("dropdown", args[:class])
+    ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
+                            separator: args[:separator] }
 
     if args[:textarea] == true
-      text_area_with_label(**autocompleter_args)
+      text_area_with_label(**ac_args)
     else
-      text_field_with_label(**autocompleter_args)
+      text_field_with_label(**ac_args)
     end
   end
 
@@ -169,9 +180,10 @@ module FormsHelper
     opts[:class] += " text-monospace" if args[:monospace].present?
 
     wrap_class = form_group_wrap_class(args)
+    wrap_data = args[:wrap_data] || {}
     label_opts = field_label_opts(args)
 
-    tag.div(class: wrap_class) do
+    tag.div(class: wrap_class, data: wrap_data) do
       concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
       concat(args[:form].text_area(args[:field], opts))
@@ -464,7 +476,7 @@ module FormsHelper
   def separate_field_options_from_args(args, extras = [])
     exceptions = [
       :form, :field, :label, :class, :width, :inline, :between, :append,
-      :optional, :required, :monospace, :type
+      :optional, :required, :monospace, :type, :wrap_data
     ] + extras
 
     args.clone.except(*exceptions)

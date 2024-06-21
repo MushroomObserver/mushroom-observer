@@ -2,8 +2,26 @@ import { Controller } from "@hotwired/stimulus"
 import { escapeHTML, getScrollBarWidth, EVENT_KEYS } from "src/mo_utilities"
 import { get } from "@rails/request.js"
 
+// @pellaea's autocompleter is different from other open source autocompleter
+// libraries. It can match words out of order, as in "scientific"
+// location_format, and is closely configured to work with the responses MO's
+// AutocompleteController produces.
+
+// It is MUCH quicker than off-the-shelf autocompleters in dealing with AJAX
+// queries for names and locations, because it calls the db once for all entries
+// starting with the typed letter of the alphabet, and then consults this
+// internal primer to refine results as the user types more, rather than making
+// separate server requests for every letter typed.
+
+// It implements a "virtual list" for the pulldown, which is impossible with the
+// HTML <datalist> spec. When there are thousands of `matches`, it is
+// impractical to keep them all as DOM nodes; the page becomes unresponsive.
+// This controller hot-swaps the innerHTML in the same 10 <li> elements as the
+// user scrolls with values from the fetched `matches`, and adjusts the
+// margin-top of the <ul> to simulate scrolling.
+
 const DEFAULT_OPTS = {
-  // what type of autocompleter, subclass of AutoComplete
+  // what type of autocompleter, corresponds to a subclass of `AutoComplete`
   TYPE: null,
   // Whether to ignore order of words when matching, set by type
   // (collapse must be 0 if this is true!)
@@ -13,6 +31,8 @@ const DEFAULT_OPTS = {
   // 2 = autocomplete first word, then second word, then the rest
   // N = etc.
   COLLAPSE: 0,
+  // whether to send a new request for every letter, in the case of "region"
+  WHOLE_WORDS_ONLY: false,
   // where to request primer from
   AJAX_URL: "/autocompleters/new/",
   // how long to wait before sending AJAX request (seconds)
@@ -36,10 +56,17 @@ const DEFAULT_OPTS = {
   SHOW_ERRORS: false,
   // include pulldown-icon on right, and always show all options
   ACT_LIKE_SELECT: false,
+  // class of enclosing wrap div, usually also a .form-group.
+  // Must have position: relative (or absolute...)
+  WRAP_CLASS: 'dropdown',
   // class of pulldown div, selected by system tests
-  PULLDOWN_CLASS: 'auto_complete',
-  // class of <li> when highlighted
-  HOT_CLASS: 'selected'
+  PULLDOWN_CLASSES: ['auto_complete', 'dropdown-menu'],
+  // class of pulldown <ul>, purely for developer comprehension of how it's used
+  LIST_CLASSES: ['virtual_list'],
+  // class of pulldown <li>
+  ITEM_CLASSES: ['dropdown-item'],
+  // class of <li> when highlighted.
+  HOT_CLASS: 'active'
 }
 
 // Allowed types of autocompleter. Sets some DEFAULT_OPTS from type
@@ -59,7 +86,8 @@ const AUTOCOMPLETER_TYPES = {
     UNORDERED: true
   },
   region: {
-    UNORDERED: true
+    UNORDERED: true,
+    WHOLE_WORDS_ONLY: true
   },
   species_list: {
     UNORDERED: true
@@ -77,6 +105,7 @@ const INTERNAL_OPTS = {
   SCROLLBAR_WIDTH: null, // width of scrollbar in browser (determined below)
   focused: false,        // is user in text field?
   menu_up: false,        // is pulldown visible?
+  dropdown_wrap: null,   // wrapping div for pulldown
   old_value: null,       // previous value of input field
   primer: [],            // a server-supplied list of many options
   matches: [],           // list of options currently showing
@@ -93,19 +122,18 @@ const INTERNAL_OPTS = {
   key_timer: null        // timer used to emulate key repeat
 }
 
-// Connects to data-controller="autocomplete"
+// Connects to data-controller="autocompleter"
 export default class extends Controller {
-  // The select target is not the input element, but a <select> that can
-  // swap out the autocompleter type. The input element is the target.
+  // The root element should usually be the .form-group wrapping the <input>.
+  // The select target is not the <input> element, but a <select> that can
+  // swap out the autocompleter type. The <input> element is its target.
   static targets = ["input", "select"]
 
   initialize() {
     Object.assign(this, DEFAULT_OPTS);
 
-    // Check the type of autocompleter set on the input element
-    // maybe should not happen on connect, or we could be resetting type
-    // Or maybe it should, and the filter swapper should just change this? no.
-    this.TYPE = this.inputTarget.dataset.autocomplete;
+    // Check the type of autocompleter set on the root or input element
+    this.TYPE = this.element.dataset.type ?? this.inputTarget.dataset.type;
     if (!AUTOCOMPLETER_TYPES.hasOwnProperty(this.TYPE))
       alert("MOAutocompleter: Invalid type: \"" + this.TYPE + "\"");
 
@@ -125,6 +153,18 @@ export default class extends Controller {
     // Figure out a few browser-dependent dimensions.
     this.getScrollBarWidth;
 
+    let wrap = this.element;
+    // Wrap is usually the root element with the controller, a ".form-group".
+    // But it could have different markup.
+    if (this.element.classList.contains(this.WRAP_CLASS)) {
+      this.dropdown_wrap = this.element;
+    } else if (wrap = this.inputTarget.closest('.' + this.WRAP_CLASS)) {
+      this.dropdown_wrap = wrap;
+    } else {
+      alert("MOAutocompleter: needs a wrapping div with class: \"" +
+        this.WRAP_CLASS + "\"");
+    }
+
     // Create pulldown.
     this.create_pulldown();
 
@@ -133,22 +173,31 @@ export default class extends Controller {
   }
 
   // Swap out autocompleter type (and properties)
-  // Action called from a <select> with `data-action: "autocompleter-swap"`
-  swap(opts = {}) {
-    if (!this.hasSelectTarget)
-      return;
+  // Action may be called from a <select> with
+  // `data-action: "autocompleter-swap:swap->autocompleter#swap"`
+  // or an event dispatched by another controller.
+  swap({ detail }) {
+    let type;
 
-    const type = this.selectTarget.value;
+    if (this.hasSelectTarget) {
+      type = this.selectTarget.value;
+    } else if (detail?.hasOwnProperty("type")) {
+      type = detail.type;
+    }
+    if (type == undefined) { return; }
 
     if (!AUTOCOMPLETER_TYPES.hasOwnProperty(type)) {
-      alert("MOAutocompleter: Invalid type: \"" + this.TYPE + "\"");
+      alert("MOAutocompleter: Invalid type: \"" + type + "\"");
     } else {
       this.TYPE = type;
-      this.inputTarget.setAttribute("data-autocompleter", type)
+      this.element.setAttribute("data-type", type)
       // add dependent properties and allow overrides
       Object.assign(this, AUTOCOMPLETER_TYPES[this.TYPE]);
-      Object.assign(this, opts);
+      Object.assign(this, detail); // type, request_params
+      this.primer = [];
+      this.matches = [];
       this.prepare_input_element();
+      this.schedule_refresh(); // refresh the primer
     }
   }
 
@@ -514,17 +563,30 @@ export default class extends Controller {
 
   // ------------------------------ Pulldown ------------------------------
 
-  // Create div for pulldown. Presence of this is checked in system tests.
+  // Create hidden pulldown <div> that is a sibling of the input element., The
+  // pulldown contains a <ul> and ten blank <li><a> elements. Note that unlike
+  // in the standard Bootstrap markup, our pulldown is a <div> with a <ul>
+  // inside. The <div> in our case gets the .dropdown-menu class, because it's
+  // the "window" to the nested <ul> virtual list. The <ul> has an accurate
+  // calculated height to imply scrollability, but never contains more than 10
+  // <li> elements. This keeps the DOM responsive even with very large lists.
+  // The <li> elements are updated with the actual items from the stored
+  // `matches` array as needed.
+  //
   create_pulldown() {
     const pulldown = document.createElement("div");
-    pulldown.classList.add(this.PULLDOWN_CLASS);
+    pulldown.classList.add(...this.PULLDOWN_CLASSES);
 
     const list = document.createElement('ul');
-    let i, row;
+    list.classList.add(...this.LIST_CLASSES);
+    let i, row, link;
     for (i = 0; i < this.PULLDOWN_SIZE; i++) {
       row = document.createElement("li");
-      row.style.display = 'none';
-      this.attach_row_events(row, i);
+      row.classList.add(...this.ITEM_CLASSES);
+      link = document.createElement("a");
+      link.href = '#';
+      this.attach_row_link_events(link, i);
+      row.appendChild(link);
       list.append(row);
     }
     pulldown.appendChild(list)
@@ -535,17 +597,18 @@ export default class extends Controller {
     this.LIST_ELEM = list;
   }
 
-  // Add "click" and "mouseover" events to a row of the pulldown menu.
+  // Add "click" events to a row of the pulldown menu.
   // Need to do this in a separate method, otherwise row doesn't get
   // a separate value for each row!  Something to do with scope of
-  // variables inside for loops.
-  attach_row_events(e, row) {
-    e.addEventListener("click", (function () {
+  // variables inside `for` loops. By using <a>, we can skip "mouseover".
+  attach_row_link_events(element, row) {
+    element.addEventListener("click", ((e) => {
+      e.preventDefault();
       this.select_row(row);
     }).bind(this));
-    e.addEventListener("mouseover", (function () {
-      this.highlight_row(row);
-    }).bind(this));
+    // element.addEventListener("mouseover", ((e) => {
+    //   this.highlight_row(row);
+    // }).bind(this));
   }
 
   // Stimulus: print this in the document already
@@ -554,13 +617,15 @@ export default class extends Controller {
   get_row_height() {
     const div = document.createElement('div'),
       ul = document.createElement('ul'),
-      li = document.createElement('li');
+      li = document.createElement('li'),
+      a = document.createElement('a');
 
-    div.className = this.PULLDOWN_CLASS;
     div.classList.add('test');
-    div.style.display = 'block';
-    div.style.border = div.style.margin = div.style.padding = '0px';
-    li.innerHTML = 'test';
+    ul.classList.add(...this.LIST_CLASSES)
+    a.href = '#';
+    a.innerHTML = 'test';
+    li.classList.add(...this.ITEM_CLASSES);
+    li.appendChild(a);
     ul.appendChild(li);
     div.appendChild(ul);
     document.body.appendChild(div);
@@ -581,7 +646,13 @@ export default class extends Controller {
     }
   }
 
-  // Redraw the pulldown options.
+  // The pulldown is a "virtual list": the <div> contains a <ul> that has only
+  // {PULLDOWN_SIZE} (10) <li> elements, but added height and margin to make the
+  // element seem "scrollable" within the outer <div>. As the user scrolls, the
+  // content of the items is hot-swapped-in from the full `this.matches` list,
+  // kept in browser memory, and the <ul> top margin and height are adjusted
+  // accordingly. This sleight of hand keeps far fewer elements in the DOM, and
+  // is essential for making the page responsive.
   draw_pulldown() {
     this.verbose("draw_pulldown()");
     const list = this.LIST_ELEM,
@@ -609,23 +680,25 @@ export default class extends Controller {
     this.inputTarget.focus();
   }
 
-  // Update menu text first.
+  // This function swaps out the innerHTML of the items from the `matches` array
+  // as needed, as the user scrolls.
   update_rows(rows, matches, size, scroll) {
-    let i, x, y;
+    let i, text, stored;
     for (i = 0; i < size; i++) {
       let row = rows.item(i);
-      x = row.innerHTML;
+      let link = row.children[0];
+      text = link.innerHTML;
       if (i + scroll < matches.length) {
-        y = this.escapeHTML(matches[i + scroll]);
-        if (x != y) {
-          if (x == '')
-            row.style.display = 'block';
-          row.innerHTML = y;
+        stored = this.escapeHTML(matches[i + scroll]);
+        if (text != stored) {
+          // if (text == '')
+          //   row.style.display = 'block';
+          link.innerHTML = stored;
         }
       } else {
-        if (x != '') {
-          row.innerHTML = '';
-          row.style.display = 'none';
+        if (text != '') {
+          link.innerHTML = '';
+          // row.style.display = 'none';
         }
       }
     }
@@ -647,55 +720,53 @@ export default class extends Controller {
     }
   }
 
-  // Make pulldown visible if nonempty.
+  // Make pulldown visible if nonempty. Positioning currently depends on
+  // Bootstrap classes: the .dropdown-menu will be positioned relative to the
+  // wrapping .form-group which must have either class .position-relative or
+  // .dropdown
   make_pulldown_visible(matches, size, scroll) {
     const pulldown = this.PULLDOWN_ELEM,
       list = pulldown.children[0];
 
     if (matches.length > 0) {
       // console.log("Matches:" + matches)
-      const top = this.inputTarget.offsetTop,
-        left = this.inputTarget.offsetLeft,
-        hgt = this.inputTarget.offsetHeight,
-        scr = this.inputTarget.scrollTop;
-      pulldown.style.top = (top + hgt + scr) + "px";
-      pulldown.style.left = left + "px";
-
       // Set height of pulldown.
       pulldown.style.overflowY = matches.length > size ? "scroll" : "hidden";
-      pulldown.style.height = this.ROW_HEIGHT * (size < matches.length - scroll ? size : matches.length - scroll) + "px";
+      pulldown.style.height = this.ROW_HEIGHT *
+        (size < matches.length - scroll ? size : matches.length - scroll) +
+        "px";
+      // Set margin-top and declared height of virtual list.
       list.style.marginTop = this.ROW_HEIGHT * scroll + "px";
       list.style.height = this.ROW_HEIGHT * (matches.length - scroll) + "px";
       pulldown.scrollTo({ top: this.ROW_HEIGHT * scroll });
-      // }
 
       // Set width of pulldown.
       this.set_width();
       this.update_width();
 
       // Only show pulldown if it is nontrivial, i.e., show an option other than
-      // the value that's already in the text field.
+      // the value that's already in the text field. If wrapping div is
+      // .dropdown, we can classList.add('.open') instead of
+      // style.display = 'block'
       if (matches.length > 1 || this.inputTarget.value != matches[0]) {
         this.clear_hide();
-        pulldown.style.display = 'block';
+        this.dropdown_wrap?.classList?.add('open');
         this.menu_up = true;
       } else {
-        pulldown.style.removeProperty('display');
-        this.menu_up = false;
+        hide_pulldown();
       }
     }
 
     // Hide the pulldown if it's empty now.
     else {
-      pulldown.style.removeProperty('display');
-      this.menu_up = false;
+      this.hide_pulldown();
     }
   }
 
   // Hide pulldown options.
   hide_pulldown() {
     this.verbose("hide_pulldown()");
-    this.PULLDOWN_ELEM.style.removeProperty('display');
+    this.dropdown_wrap?.classList?.remove('open');
     this.menu_up = false;
   }
 
@@ -925,6 +996,13 @@ export default class extends Controller {
   get_search_token() {
     const val = this.inputTarget.value;
     let token = val;
+
+    // If we're only looking for whole words, don't make a request unless
+    // trailing space or comma, indicating a user has finished typing a word.
+    if (this.WHOLE_WORDS_ONLY && token.charAt(token.length - 1) != ',' &&
+      token.charAt(token.length - 1) != ' ') {
+      return '';
+    }
     if (this.SEPARATOR) {
       const extents = this.search_token_extents();
       token = val.substring(extents.start, extents.end);
@@ -978,7 +1056,8 @@ export default class extends Controller {
   refresh_primer() {
     this.verbose("refresh_primer()");
 
-    const token = this.get_search_token().toLowerCase(),
+    // token may be refined within this function, so it's a variable.
+    let token = this.get_search_token().toLowerCase(),
       last_request = this.last_fetch_request;
 
     // Don't make request on empty string!
@@ -992,6 +1071,7 @@ export default class extends Controller {
     // Memoize this condition, used twice:
     // "is the new search token an extension of the previous search string?"
     const new_val_refines_last_request =
+      !this.WHOLE_WORDS_ONLY &&
       (last_request?.length < token.length) &&
       (last_request == token.substr(0, last_request?.length));
 
@@ -1010,10 +1090,16 @@ export default class extends Controller {
     if (token.length > this.MAX_STRING_LENGTH)
       token = token.substr(0, this.MAX_STRING_LENGTH);
 
+    // If we're only looking for whole words, strip off trailing space or comma
+    if (this.WHOLE_WORDS_ONLY) {
+      token = token.trim().replace(/,.*$/, '')
+    }
+
     const query_params = { string: token, ...this.request_params }
 
     // If it's a param search, ignore the search token and return all results.
     if (this.ACT_LIKE_SELECT) { query_params["all"] = true; }
+    if (this.WHOLE_WORDS_ONLY) { query_params["whole"] = true; }
 
     // Make request.
     this.send_fetch_request(query_params);

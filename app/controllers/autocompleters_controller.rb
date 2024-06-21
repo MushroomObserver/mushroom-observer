@@ -32,7 +32,7 @@ class AutocompletersController < ApplicationController
 
   def auto_complete_results
     case @type
-    when "location", "location_containing"
+    when "location", "location_containing", "region"
       params[:format] = @user&.location_format
     when "herbarium"
       params[:user_id] = @user&.id
