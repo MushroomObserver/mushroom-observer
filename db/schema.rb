@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_04_122906) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_08_213317) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -178,7 +178,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_04_122906) do
     t.date "when"
     t.text "notes"
     t.string "copyright_holder", limit: 100
-    t.integer "license_id", default: 1, null: false
+    t.integer "license_id", default: 10, null: false
     t.integer "num_views", default: 0, null: false
     t.datetime "last_view", precision: nil
     t.integer "width"
@@ -211,8 +211,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_04_122906) do
     t.string "display_name", limit: 80
     t.string "url", limit: 200
     t.boolean "deprecated", default: false, null: false
-    t.string "form_name", limit: 20
     t.datetime "updated_at", precision: nil
+    t.datetime "created_at", precision: nil
   end
 
   create_table "location_description_admins", charset: "utf8mb3", force: :cascade do |t|
@@ -821,7 +821,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_04_122906) do
     t.datetime "created_at", precision: nil
     t.datetime "last_login", precision: nil
     t.datetime "verified", precision: nil
-    t.integer "license_id", default: 3, null: false
+    t.integer "license_id", default: 10, null: false
     t.integer "contribution", default: 0
     t.integer "location_id"
     t.integer "image_id"

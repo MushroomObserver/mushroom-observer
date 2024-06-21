@@ -336,7 +336,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :articles, id: /\d+/
 
   # ----- Autocompleters: fetch get ------------------------------------
-  get "/autocompleters/new/:type/:id", to: "autocompleters#new"
+  get "/autocompleters/new/:type", to: "autocompleters#new"
 
   # ----- Checklist: just the show --------------------------------------
   get "/checklist", to: "checklists#show"
@@ -449,6 +449,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
   get("/javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
   get("/javascript/hide_thumbnail_map", to: "javascript#hide_thumbnail_map")
+
+  resources :licenses, id: /\d+/
 
   # ----- Locations: a lot of actions  ----------------------------
   resources :locations, id: /\d+/, shallow: true do

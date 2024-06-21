@@ -24,15 +24,15 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     find_field("search_name").click
     browser.keyboard.type("agaricus camp")
     assert_selector(".auto_complete") # wait
-    assert_selector(".auto_complete ul li", text: "Agaricus campestras")
-    assert_selector(".auto_complete ul li", text: "Agaricus campestris")
-    assert_selector(".auto_complete ul li", text: "Agaricus campestros")
-    assert_selector(".auto_complete ul li", text: "Agaricus campestrus")
-    assert_no_selector(".auto_complete ul li", text: "Agaricus campestruss")
+    assert_selector(".auto_complete ul li a", text: "Agaricus campestras")
+    assert_selector(".auto_complete ul li a", text: "Agaricus campestris")
+    assert_selector(".auto_complete ul li a", text: "Agaricus campestros")
+    assert_selector(".auto_complete ul li a", text: "Agaricus campestrus")
+    assert_no_selector(".auto_complete ul li a", text: "Agaricus campestruss")
     browser.keyboard.type(:down, :down, :down, :tab)
     assert_field("search_name", with: "Agaricus campestros")
     browser.keyboard.type(:delete, :delete)
-    assert_selector(".auto_complete ul li", text: "Agaricus campestrus")
+    assert_selector(".auto_complete ul li a", text: "Agaricus campestrus")
     browser.keyboard.type(:down, :down, :down, :down, :tab)
     assert_field("search_name", with: "Agaricus campestrus")
 
@@ -40,9 +40,9 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     find_field("search_user").click
     browser.keyboard.type("r")
     assert_selector(".auto_complete") # wait
-    assert_selector(".auto_complete ul li", text: "Rolf Singer")
-    assert_selector(".auto_complete ul li", text: "Roy Halling")
-    assert_selector(".auto_complete ul li", text: "Roy Rogers")
+    assert_selector(".auto_complete ul li a", text: "Rolf Singer")
+    assert_selector(".auto_complete ul li a", text: "Roy Halling")
+    assert_selector(".auto_complete ul li a", text: "Roy Rogers")
     browser.keyboard.type(:down, :down, :tab)
     sleep(1)
     assert_field("search_user", with: "roy <Roy Halling>")
@@ -51,7 +51,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     find_field("search_location").click
     browser.keyboard.type("USA, Califo")
     assert_selector(".auto_complete") # wait
-    assert_selector(".auto_complete ul li", count: 10)
+    assert_selector(".auto_complete ul li a", count: 10)
     assert_selector(
       ".auto_complete ul li",
       text: "Point Reyes National Seashore"
@@ -67,7 +67,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     find("#content_filter_clade").click
     browser.keyboard.type("Agari")
     assert_selector(".auto_complete") # wait
-    assert_selector(".auto_complete ul li")
+    assert_selector(".auto_complete ul li a")
     browser.keyboard.type(:down, :tab)
     sleep(1)
     assert_field("content_filter_clade", with: "Agaricaceae")
@@ -100,7 +100,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     find_field("naming_name").click
     browser.keyboard.type("Peltige")
     assert_selector(".auto_complete", wait: 3) # wait
-    assert_selector(".auto_complete ul li")
+    assert_selector(".auto_complete ul li a")
     browser.keyboard.type(:down, :down, :tab)
     assert_field("naming_name", with: "Peltigeraceae ")
     browser.keyboard.type(:tab)

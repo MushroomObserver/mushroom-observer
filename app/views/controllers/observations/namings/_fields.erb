@@ -14,7 +14,12 @@ feedback_locals = {
   parent_deprecated: @parent_deprecated,
   names: @names
 }
-confidences = options_for_select(Vote.confidence_menu, @vote&.value)
+menu = unless @vote&.value&.nonzero?
+         Vote.opinion_menu
+       else
+         Vote.confidence_menu
+       end
+confidences = options_for_select(menu, @vote&.value)
 select_opts = { include_blank: ["new", "create"].include?(action_name) }
 context ||= "blank"
 name_help ||= :form_naming_name_help.t
@@ -32,8 +37,8 @@ name_help ||= :form_naming_name_help.t
         [
           tag.div(class: "col-xs-12 col-sm-6") do
             autocompleter_field(
-              form: f_n, field: :name, label: :WHAT.t + ":", value: @what,
-              autofocus: focus_on_name, autocomplete: :name
+              form: f_n, field: :name, type: :name, label: "#{:WHAT.t}:",
+              value: @what, autofocus: focus_on_name
             )
           end,
           tag.div(class: "col-xs-12 col-sm-6") do

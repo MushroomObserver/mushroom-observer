@@ -127,8 +127,8 @@ module Query
         return if vals.empty?
 
         min, max = vals
-        sizes = Image.all_sizes
-        pixels = Image.all_sizes_in_pixels
+        sizes = Image::ALL_SIZES
+        pixels = Image::ALL_SIZES_IN_PIXELS
         if min
           size = pixels[sizes.index(min)]
           @where << "images.width >= #{size} OR images.height >= #{size}"
@@ -143,8 +143,8 @@ module Query
       def add_image_type_condition(vals, *)
         return if vals.empty?
 
-        exts  = Image.all_extensions.map(&:to_s)
-        mimes = Image.all_content_types.map(&:to_s) - [""]
+        exts  = Image::ALL_EXTENSIONS.map(&:to_s)
+        mimes = Image::ALL_CONTENT_TYPES.map(&:to_s) - [""]
         types = vals & exts
         return if vals.empty?
 
