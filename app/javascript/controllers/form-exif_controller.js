@@ -85,8 +85,7 @@ export default class extends Controller {
       _exif_lat.innerText = lat == null ? lat : lat.toFixed(4);
       _exif_lng.innerText = lng == null ? lng : lng.toFixed(4);
       _exif_alt.innerText = alt == null ? alt : alt.toFixed(0);
-      _use_exif_button.dataset.hasExif = 'true';
-      _use_exif_button.removeAttribute('disabled');
+      _use_exif_button.classList.remove('d-none');
     }
   }
 
@@ -126,8 +125,7 @@ export default class extends Controller {
       itemElement.dataset.exif_date = JSON.stringify(_exifSimpleDate);
       _exif_date.innerText = this.simpleDateAsString(_exifSimpleDate);
       _exif_date.dataset.found = "true";
-      _use_exif_button.dataset.hasExif = 'true';
-      _use_exif_button.removeAttribute('disabled');
+      _use_exif_button.classList.remove('d-none');
     }
     // no date was found in EXIF data
     else {
@@ -155,7 +153,7 @@ export default class extends Controller {
   // Pass an element to use from button or itemTargetConnected callback.
   // Also disables the "transfer" button for this element
   transferExifToObsFields(element) {
-    this.selectExifButton('.use_exif_btn[data-has-exif="true"]', element);
+    this.selectExifButton('.use_exif_btn', element);
     const _exif_data = element.dataset,
       _obs_lat = document.getElementById('observation_lat'),
       _obs_lng = document.getElementById('observation_lng'),
