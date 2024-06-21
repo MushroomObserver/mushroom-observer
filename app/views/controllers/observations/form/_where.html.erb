@@ -76,8 +76,7 @@
   <div class="row">
     <div class="col-xs-12 col-sm-6">
       <%= autocompleter_field(
-        form: f, field: :place_name, label: :WHERE.t + ":",
-        autocomplete: :location,
+        form: f, field: :place_name, type: :location, label: :WHERE.t + ":",
         # map:suggestLocations event == form-exif:suggestLocations event
         #   detail: { type, request_params: { lat, lng } }
         # Stimulus custom events are scoped to the controller, but identical

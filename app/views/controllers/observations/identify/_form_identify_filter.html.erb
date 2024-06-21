@@ -19,16 +19,16 @@ options = [
 <%= form_with(url: identify_observations_path, method: :get,
               class: "navbar-form navbar-left", scope: :filter,
               id: "identify_filter",
-              data: { controller: :autocompleter }) do |f| %>
+              data: { controller: :autocompleter, type: :clade }) do |f| %>
 
-  <div class="form-group has-feedback has-search">
-    <%= content_tag(:span, "", class: "glyphicon glyphicon-search " \
-                                      "form-control-feedback") %>
+  <div class="form-group has-feedback has-search dropdown">
+    <%= tag.span(
+      "", class: "glyphicon glyphicon-search form-control-feedback"
+    ) %>
     <%= f.text_field(
       :term, value: value, placeholder: :filter_by.l,
       class: "form-control", size: 42, autocomplete: "one-time-code",
-      data: { controller: nil, autocompleter_target: "input",
-              autocomplete: :clade }
+      data: { autocompleter_target: "input" }
     ) %>
   </div><!--.form-group-->
 
