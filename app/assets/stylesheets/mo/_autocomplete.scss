@@ -36,6 +36,11 @@ li.dropdown-item {
     color: $dropdown-link-color;
     text-decoration: none;
 
+    // &[data-deprecated="true"] {
+    //   opacity: 0.81;
+    //   font-style: italic;
+    // }
+
     &:hover {
       color: $dropdown-link-color;
       background-color: $dropdown-link-hover-bg;

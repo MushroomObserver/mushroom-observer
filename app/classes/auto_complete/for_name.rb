@@ -9,10 +9,11 @@ class AutoComplete::ForName < AutoComplete::ByString
             where(Name[:text_name].matches("#{letter}%")).
             pluck(:text_name, :id, :deprecated).sort_by do |x, _id, _d|
       (x.match?(" ") ? "b" : "a") + x
-    end.uniq
+    end
 
     names.map! do |name, id, deprecated|
       { name: name, id: id, deprecated: deprecated || false }
     end
+    names.uniq! { |name| name[:name] }
   end
 end
