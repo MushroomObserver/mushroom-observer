@@ -31,6 +31,8 @@ const DEFAULT_OPTS = {
   // 2 = autocomplete first word, then second word, then the rest
   // N = etc.
   COLLAPSE: 0,
+  // whether to send a new request for every letter, in the case of "region"
+  WHOLE_WORDS_ONLY: false,
   // where to request primer from
   AJAX_URL: "/autocompleters/new/",
   // how long to wait before sending AJAX request (seconds)
@@ -84,7 +86,8 @@ const AUTOCOMPLETER_TYPES = {
     UNORDERED: true
   },
   region: {
-    UNORDERED: true
+    UNORDERED: true,
+    WHOLE_WORDS_ONLY: true
   },
   species_list: {
     UNORDERED: true
@@ -130,7 +133,7 @@ export default class extends Controller {
     Object.assign(this, DEFAULT_OPTS);
 
     // Check the type of autocompleter set on the root or input element
-    this.TYPE = this.element.dataset.type || this.inputTarget.dataset.type;
+    this.TYPE = this.element.dataset.type ?? this.inputTarget.dataset.type;
     if (!AUTOCOMPLETER_TYPES.hasOwnProperty(this.TYPE))
       alert("MOAutocompleter: Invalid type: \"" + this.TYPE + "\"");
 
@@ -150,11 +153,17 @@ export default class extends Controller {
     // Figure out a few browser-dependent dimensions.
     this.getScrollBarWidth;
 
+    let wrap = this.element;
     // Wrap is usually the root element with the controller, a ".form-group".
-    this.dropdown_wrap = this.element || this.inputTarget.parentElement;
-    if (this.dropdown_wrap.classList.contains(this.WRAP_CLASS) == false)
+    // But it could have different markup.
+    if (this.element.classList.contains(this.WRAP_CLASS)) {
+      this.dropdown_wrap = this.element;
+    } else if (wrap = this.inputTarget.closest('.' + this.WRAP_CLASS)) {
+      this.dropdown_wrap = wrap;
+    } else {
       alert("MOAutocompleter: needs a wrapping div with class: \"" +
         this.WRAP_CLASS + "\"");
+    }
 
     // Create pulldown.
     this.create_pulldown();
@@ -175,18 +184,20 @@ export default class extends Controller {
     } else if (detail?.hasOwnProperty("type")) {
       type = detail.type;
     }
-    debugger
     if (type == undefined) { return; }
 
     if (!AUTOCOMPLETER_TYPES.hasOwnProperty(type)) {
       alert("MOAutocompleter: Invalid type: \"" + type + "\"");
     } else {
       this.TYPE = type;
-      this.inputTarget.setAttribute("data-type", type)
+      this.element.setAttribute("data-type", type)
       // add dependent properties and allow overrides
       Object.assign(this, AUTOCOMPLETER_TYPES[this.TYPE]);
       Object.assign(this, detail); // type, request_params
+      this.primer = [];
+      this.matches = [];
       this.prepare_input_element();
+      this.schedule_refresh(); // refresh the primer
     }
   }
 
@@ -719,18 +730,12 @@ export default class extends Controller {
 
     if (matches.length > 0) {
       // console.log("Matches:" + matches)
-      // const top = this.dropdown_wrap.offsetTop,
-      //   left = this.inputTarget.offsetLeft,
-      //   hgt = this.inputTarget.offsetHeight,
-      //   scr = this.inputTarget.scrollTop;
-      // pulldown.style.top = (top + hgt + scr) + "px";
-      // pulldown.style.left = left + "px";
-
       // Set height of pulldown.
       pulldown.style.overflowY = matches.length > size ? "scroll" : "hidden";
       pulldown.style.height = this.ROW_HEIGHT *
         (size < matches.length - scroll ? size : matches.length - scroll) +
         "px";
+      // Set margin-top and declared height of virtual list.
       list.style.marginTop = this.ROW_HEIGHT * scroll + "px";
       list.style.height = this.ROW_HEIGHT * (matches.length - scroll) + "px";
       pulldown.scrollTo({ top: this.ROW_HEIGHT * scroll });
@@ -991,6 +996,13 @@ export default class extends Controller {
   get_search_token() {
     const val = this.inputTarget.value;
     let token = val;
+
+    // If we're only looking for whole words, don't make a request unless
+    // trailing space or comma, indicating a user has finished typing a word.
+    if (this.WHOLE_WORDS_ONLY && token.charAt(token.length - 1) != ',' &&
+      token.charAt(token.length - 1) != ' ') {
+      return '';
+    }
     if (this.SEPARATOR) {
       const extents = this.search_token_extents();
       token = val.substring(extents.start, extents.end);
@@ -1044,7 +1056,8 @@ export default class extends Controller {
   refresh_primer() {
     this.verbose("refresh_primer()");
 
-    const token = this.get_search_token().toLowerCase(),
+    // token may be refined within this function, so it's a variable.
+    let token = this.get_search_token().toLowerCase(),
       last_request = this.last_fetch_request;
 
     // Don't make request on empty string!
@@ -1058,6 +1071,7 @@ export default class extends Controller {
     // Memoize this condition, used twice:
     // "is the new search token an extension of the previous search string?"
     const new_val_refines_last_request =
+      !this.WHOLE_WORDS_ONLY &&
       (last_request?.length < token.length) &&
       (last_request == token.substr(0, last_request?.length));
 
@@ -1076,10 +1090,16 @@ export default class extends Controller {
     if (token.length > this.MAX_STRING_LENGTH)
       token = token.substr(0, this.MAX_STRING_LENGTH);
 
+    // If we're only looking for whole words, strip off trailing space or comma
+    if (this.WHOLE_WORDS_ONLY) {
+      token = token.trim().replace(/,.*$/, '')
+    }
+
     const query_params = { string: token, ...this.request_params }
 
     // If it's a param search, ignore the search token and return all results.
     if (this.ACT_LIKE_SELECT) { query_params["all"] = true; }
+    if (this.WHOLE_WORDS_ONLY) { query_params["whole"] = true; }
 
     // Make request.
     this.send_fetch_request(query_params);

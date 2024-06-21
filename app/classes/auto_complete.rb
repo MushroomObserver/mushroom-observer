@@ -10,7 +10,7 @@
 ################################################################################
 
 class AutoComplete
-  attr_accessor :string, :matches, :all
+  attr_accessor :string, :matches, :all, :whole
 
   PUNCTUATION = '[ -\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]'
 
@@ -27,11 +27,13 @@ class AutoComplete
   def initialize(params = {})
     self.string = params[:string].to_s.strip_squeeze
     self.all = params[:all].present?
+    self.whole = params[:whole].present?
   end
 
   def matching_strings
-    # just use the first letter of the string to define the matches
-    self.matches = rough_matches(string[0])
+    # unless 'whole', use the first letter of the string to define the matches
+    token = whole ? string : string[0]
+    self.matches = rough_matches(token)
     clean_matches
     return matches if all
 
