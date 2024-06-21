@@ -42,7 +42,7 @@
     <div class="col-sm-6">
       <%= tag.label("#{:form_observations_click_on_map.l}:") %>
       <%= tag.div("", id: "observation_form_map",
-                      class: "observation-form-map hidden",
+                      class: "observation-form-map d-none",
                       data: { indicator_url: asset_path('indicator.gif'),
                               location_format: User.current_location_format,
                               map_target: "mapDiv", editable: true,
