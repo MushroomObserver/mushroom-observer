@@ -11,9 +11,9 @@ class AutoComplete::ForRegion < AutoComplete::ByWord
 
   def rough_matches(words)
     words = Location.reverse_name(words) if reverse
-    matches = Observation.in_region(words).pluck(:where)
+    matches = Observation.in_region(words).pluck(:where, :location_id)
 
-    matches.map! { |m| Location.reverse_name(m) } if reverse
-    matches.sort.uniq
+    matches.map! { |m, _id| Location.reverse_name(m) } if reverse
+    matches.reject { |m| m[1].nil? }.sort_by(&:first).uniq(&:first)
   end
 end

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 class AutoComplete::ByWord < AutoComplete
-  # Same as AutoCompleteByString#refine_matches, except words are allowed
+  # Same as AutoCompleteByString#refine_token, except words are allowed
   # to be out of order.
-  def refine_matches
+  def refine_token
     # Get rid of trivial case immediately.
     return string[0] if matches.length <= limit
 

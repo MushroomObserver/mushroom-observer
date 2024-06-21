@@ -19,12 +19,14 @@ class AutoComplete::ForLocation < AutoComplete::ByWord
     matches =
       Observation.select(:where).distinct.
       where(Observation[:where].matches("#{letter}%").
-        or(Observation[:where].matches("% #{letter}%"))).pluck(:where) +
+        or(Observation[:where].matches("% #{letter}%"))).
+      pluck(:where, :location_id) +
       Location.select(:name).distinct.
       where(Location[:name].matches("#{letter}%").
         or(Location[:name].matches("% #{letter}%"))).pluck(:name, :id)
 
     matches.map! { |m, id| [Location.reverse_name(m), id] } if reverse
-    matches.sort.uniq
+    # remove matches without an id and sort by unique name
+    matches.reject { |m| m[1].nil? }.sort_by(&:first).uniq(&:first)
   end
 end

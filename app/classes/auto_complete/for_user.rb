@@ -11,6 +11,6 @@ class AutoComplete::ForUser < AutoComplete::ByString
     users.map do |login, name, id|
       user_name = name.empty? ? login : "#{login} <#{name}>"
       [user_name, id]
-    end.sort
+    end.sort_by(&:first)
   end
 end

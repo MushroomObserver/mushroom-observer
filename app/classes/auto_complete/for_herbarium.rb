@@ -16,6 +16,6 @@ class AutoComplete::ForHerbarium < AutoComplete::ByWord
     herbaria.map do |code, name, id|
       composed_name = code.empty? ? name : "#{code} - #{name}"
       [composed_name, id]
-    end.sort_by(&:first).uniq
+    end.sort_by(&:first).uniq(&:first)
   end
 end

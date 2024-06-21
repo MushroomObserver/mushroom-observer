@@ -11,7 +11,7 @@ class AutoComplete::ByString < AutoComplete
   #
   # Returns the final (minimal) [string, id] actually used, and changes matches
   # in place.  The array 'matches' is guaranteed to be <= limit.
-  def refine_matches
+  def refine_token
     # Get rid of trivial case immediately.
     return string[0] if matches.length <= limit
 

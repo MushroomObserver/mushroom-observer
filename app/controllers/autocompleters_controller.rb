@@ -37,8 +37,7 @@ class AutocompletersController < ApplicationController
     when "herbarium"
       params[:user_id] = @user&.id
     end
-
-    ::AutoComplete.subclass(@type).new(params).matching_strings
+    ::AutoComplete.subclass(@type).new(params).matching_records
   end
 
   # callback on `around_action`
