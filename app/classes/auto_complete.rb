@@ -3,9 +3,9 @@
 #
 #  = AutoComplete base class
 #
-#    auto = AutoCompleteName.new('Agaricus') # ...or...
-#    auto = AutoComplete.subclass('name').new('Agaricus')
-#    render(:inline => auto.matching_strings.join("\n"))
+#    results = AutoCompleteName.new(string: 'Agaricus') # ...or...
+#    results = AutoComplete.subclass('name').new(string: 'Agaricus')
+#    render(json: ActiveSupport::JSON.encode(results)
 #
 ################################################################################
 
@@ -30,29 +30,30 @@ class AutoComplete
     self.whole = params[:whole].present?
   end
 
-  def matching_strings
+  # returns an array of { name:, id: } objects
+  def matching_records
     # unless 'whole', use the first letter of the string to define the matches
     token = whole ? string : string[0]
-    self.matches = rough_matches(token)
+    self.matches = rough_matches(token) || [] # defined in type-subclass
     clean_matches
-    return matches if all
 
-    minimal_string = refine_matches # defined in subclass
-    truncate_matches
-    [minimal_string] + matches
-    # [[minimal_string, nil]] + matches
+    unless all
+      minimal_string = refine_token # defined in subclass
+      matches.unshift({ name: minimal_string, id: 0 })
+      truncate_matches
+    end
+
+    matches
   end
 
   private
 
   def clean_matches
-    matches.map! do |str|
-      str.sub(/\s*[\r\n]\s*.*/m, "").sub(/\A\s+/, "").sub(/\s+\Z/, "")
+    matches.map! do |obj|
+      obj[:name] = obj[:name].sub(/\s*[\r\n]\s*.*/m, "").
+                   sub(/\A\s+/, "").sub(/\s+\Z/, "")
+      obj
     end
-    # matches.map! do |str, id|
-    #   clean = str.sub(/\s*[\r\n]\s*.*/m, "").sub(/\A\s+/, "").sub(/\s+\Z/, "")
-    #   [clean, id]
-    # end
     matches.uniq!
   end
 
@@ -60,7 +61,6 @@ class AutoComplete
     return unless matches.length > limit
 
     matches.slice!(limit..-1)
-    matches.push("...")
-    # matches.push(["...", nil])
+    matches.push({ name: "...", id: nil })
   end
 end
