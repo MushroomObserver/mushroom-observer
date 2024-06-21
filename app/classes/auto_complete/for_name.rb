@@ -14,6 +14,6 @@ class AutoComplete::ForName < AutoComplete::ByString
     names.map! do |name, id, deprecated|
       { name: name, id: id, deprecated: deprecated || false }
     end
-    names.uniq! { |name| name[:name] }
+    names.uniq { |name| name[:name] }
   end
 end

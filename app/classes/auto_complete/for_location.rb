@@ -34,6 +34,6 @@ class AutoComplete::ForLocation < AutoComplete::ByWord
     end
     # Sort by name and prefer those with a non-zero ID
     locations.sort_by! { |loc| [loc[:name], -loc[:id]] }
-    locations.uniq! { |loc| loc[:name] }
+    locations.uniq { |loc| loc[:name] }
   end
 end

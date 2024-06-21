@@ -108,19 +108,17 @@ class AutocompletersControllerTest < FunctionalTestCase
 
   def test_auto_complete_name
     login("rolf")
-    names = Name.all.reject(&:correct_spelling).
-            pluck(:text_name, :id, :deprecated).uniq.
-            select { |n, _i, _d| n[0] == "A" }.sort
-    expect_genera = names.reject do |n, _i, _d|
-      n.include?(" ")
+    names = Name.with_correct_spelling.
+            select(:text_name, :id, :deprecated).distinct.
+            where(Name[:text_name].matches("A%")).
+            pluck(:text_name, :id, :deprecated).sort_by do |x, _id, _d|
+              (x.match?(" ") ? "b" : "a") + x
+            end
+
+    expect = names.map do |name, id, deprecated|
+      { name:, id:, deprecated: deprecated || false }
     end
-    expect_species = names.select do |n, _i, _d|
-      n.include?(" ")
-    end
-    expect = expect_genera + expect_species
-    expect.map! do |name, id, deprecated|
-      { name:, id:, deprecated: }
-    end
+    expect.uniq! { |name| name[:name] }
     expect.unshift({ name: "A", id: 0 })
 
     good_autocompleter_request(type: :name, string: "Agaricus")

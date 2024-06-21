@@ -22,6 +22,6 @@ class AutoComplete::ForRegion < AutoComplete::ByWord
     end
     # Sort by name and prefer those with a non-zero ID
     regions.sort_by! { |reg| [reg[:name], -reg[:id]] }
-    regions.uniq! { |reg| reg[:name] }
+    regions.uniq { |reg| reg[:name] }
   end
 end

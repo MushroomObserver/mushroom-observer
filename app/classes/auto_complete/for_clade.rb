@@ -12,5 +12,6 @@ class AutoComplete::ForClade < AutoComplete::ByString
       { name: name, id: id, deprecated: deprecated || false }
     end
     clades.sort_by! { |clade| clade[:name] }
+    clades.uniq { |clade| clade[:name] }
   end
 end
