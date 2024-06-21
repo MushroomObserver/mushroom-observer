@@ -842,17 +842,16 @@ export default class extends Controller {
   update_normal() {
     const token = this.get_search_token().normalize().toLowerCase(),
       // normalize the Unicode of each string in primer for search
-      primer = this.primer.map((obj) => {
-        obj['name'] = obj['name'].normalize();
-        return obj;
-      }),
+      primer = this.primer.map((obj) => (
+        { name: obj['name'].normalize(), id: obj['id'] }
+      )),
       matches = [];
 
-    if (token != '') {
-      for (let i = 0; i < primer.length; i++) {
-        let s = primer[i + 1]['name'];
+    if (token != '' && primer.length > 1) {
+      for (let i = 1; i < primer.length; i++) {
+        let s = primer[i]['name'];
         if (s && s.length > 0 && s.toLowerCase().indexOf(token) >= 0) {
-          matches.push(primer[i + 1]);
+          matches.push(primer[i]);
         }
       }
     }
@@ -868,10 +867,9 @@ export default class extends Controller {
       // get the separate words as tokens
       tokens = token.split(' '),
       // normalize the Unicode of each string in primer for search
-      primer = this.primer.map((obj) => {
-        obj['name'] = obj['name'].normalize();
-        return obj;
-      }),
+      primer = this.primer.map((obj) => (
+        { name: obj['name'].normalize(), id: obj['id'] }
+      )),
       matches = [];
 
     if (token != '' && primer.length > 1) {
