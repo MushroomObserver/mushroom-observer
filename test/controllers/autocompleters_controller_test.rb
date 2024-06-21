@@ -111,12 +111,14 @@ class AutocompletersControllerTest < FunctionalTestCase
     names = Name.with_correct_spelling.
             select(:text_name, :id, :deprecated).distinct.
             where(Name[:text_name].matches("A%")).
-            pluck(:text_name, :id, :deprecated).sort_by do |x, _id, _d|
-              (x.match?(" ") ? "b" : "a") + x
-            end
+            pluck(:text_name, :id, :deprecated)
 
     expect = names.map do |name, id, deprecated|
-      { name:, id:, deprecated: deprecated || false }
+      dep_string = deprecated.nil? ? "false" : deprecated.to_s
+      { name: name, id: id, deprecated: dep_string }
+    end
+    expect.sort_by! do |name|
+      [(name[:name].match?(" ") ? "b" : "a") + name[:name], name[:deprecated]]
     end
     expect.uniq! { |name| name[:name] }
     expect.unshift({ name: "A", id: 0 })
