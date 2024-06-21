@@ -574,6 +574,8 @@ export default class extends Controller {
   // `matches` array as needed.
   //
   create_pulldown() {
+    if (this.PULLDOWN_ELEM) return;
+
     const pulldown = document.createElement("div");
     pulldown.classList.add(...this.PULLDOWN_CLASSES);
 
@@ -685,12 +687,12 @@ export default class extends Controller {
   update_rows(rows, matches, size, scroll) {
     let i, text, stored;
     for (i = 0; i < size; i++) {
-      let row = rows.item(i);
-      let link = row.children[0];
+      let row = rows.item(i),
+        link = row.children[0];
       text = link.innerHTML;
       if (i + scroll < matches.length) {
-        stored = this.escapeHTML(matches[i + scroll]['name']);
-        let { name: _, ...new_data } = matches[i + scroll];
+        const { name, ...new_data } = matches[i + scroll];
+        stored = this.escapeHTML(name);
         if (text != stored) {
           link.innerHTML = stored;
           // Give the link the dataset of matches[i + scroll], minus name
@@ -701,7 +703,7 @@ export default class extends Controller {
       } else {
         if (text != '') {
           link.innerHTML = '';
-          Object.keys(new_data).forEach(key => {
+          Object.keys(link.dataset).forEach(key => {
             delete link.dataset[key];
           });
         }
@@ -842,15 +844,16 @@ export default class extends Controller {
   update_normal() {
     const token = this.get_search_token().normalize().toLowerCase(),
       // normalize the Unicode of each string in primer for search
-      primer = this.primer.map((obj) => (
-        { name: obj['name'].normalize(), id: obj['id'] }
+      primer = this.primer,
+      primer_nm = this.primer.map((obj) => (
+        { name: obj['name'].normalize().toLowerCase() }
       )),
       matches = [];
 
     if (token != '' && primer.length > 1) {
       for (let i = 1; i < primer.length; i++) {
-        let s = primer[i]['name'];
-        if (s && s.length > 0 && s.toLowerCase().indexOf(token) >= 0) {
+        let s = primer_nm[i]['name'];
+        if (s && s.length > 0 && s.indexOf(token) >= 0) {
           matches.push(primer[i]);
         }
       }
@@ -866,16 +869,17 @@ export default class extends Controller {
       replace(/^ */, '').replace(/  +/g, ' '),
       // get the separate words as tokens
       tokens = token.split(' '),
+      primer = this.primer,
       // normalize the Unicode of each string in primer for search
-      primer = this.primer.map((obj) => (
-        { name: obj['name'].normalize(), id: obj['id'] }
+      primer_nm = this.primer.map((obj) => (
+        { name: obj['name'].normalize().toLowerCase() }
       )),
       matches = [];
 
     if (token != '' && primer.length > 1) {
       for (let i = 1; i < primer.length; i++) {
-        let s = primer[i]['name'] || '',
-          s2 = ' ' + s.toLowerCase() + ' ',
+        let s = primer_nm[i]['name'] || '',
+          s2 = ' ' + s + ' ',
           k;
         // check each word in the primer entry for a matching word
         for (k = 0; k < tokens.length; k++) {
@@ -897,14 +901,14 @@ export default class extends Controller {
       primer = this.primer,
       // make a lowercased duplicate of primer to regularize search
       primer_lc = this.primer.map((obj) => (
-        { name: obj['name'].toLowerCase(), id: obj['id'] }
+        { name: obj['name'].toLowerCase() }
       )),
       matches = [];
 
     if (token != '' && primer.length > 1) {
       let the_rest = (token.match(/ /g) || []).length >= this.COLLAPSE;
 
-      for (let i = 1; i < primer_lc.length; i++) {
+      for (let i = 1; i < primer.length; i++) {
         if (primer_lc[i]['name'].indexOf(token) > -1) {
           let s = primer[i]['name'];
           if (s.length > 0) {
@@ -1157,6 +1161,12 @@ export default class extends Controller {
   // 1. first line is string actually used to match;
   // 2. the last string is "..." if the set of results is incomplete;
   // 3. the rest are matching results.
+  //
+  // `this.primer` is a huge array of records usually matching only the first
+  // letter typed, which is assumed not to change too often. `this.matches` is
+  // the smaller array of records "refined" from the primer, matching the search
+  // token as it is typed out. The pulldown menu is populated with the matches.
+  //
   process_fetch_response(new_primer) {
     this.verbose("process_fetch_response()");
 
@@ -1180,8 +1190,8 @@ export default class extends Controller {
 
     // Log requests and responses if in debug mode.
     if (this.log) {
-      this.debug("Got response for " + this.escapeHTML(this.last_fetch_request) +
-        ": " + (new_primer.length - 1) + " strings (" +
+      this.debug("Got response for " + this.escapeHTML(this.last_fetch_request)
+        + ": " + (new_primer.length - 1) + " strings (" +
         (this.last_fetch_incomplete ? "incomplete" : "complete") + ").");
     }
 
@@ -1208,11 +1218,13 @@ export default class extends Controller {
   // ------------------------------- DEBUGGING ------------------------------
 
   debug(str) {
-    // document.getElementById("log").insertAdjacentText("beforeend", str + "<br/>");
+    // document.getElementById("log").insertAdjacentText("beforeend",
+    //   str + "<br/>");
   }
 
   verbose(str) {
     // console.log(str);
-    // document.getElementById("log").insertAdjacentText("beforeend", str + "<br/>");
+    // document.getElementById("log").insertAdjacentText("beforeend",
+    //   str + "<br/>");
   }
 }

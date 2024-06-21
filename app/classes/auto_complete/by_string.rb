@@ -20,7 +20,7 @@ class AutoComplete::ByString < AutoComplete
     string.chars.each do |letter|
       used += letter
       regex = /(^|#{PUNCTUATION})#{used}/i
-      matches.select! { |m, _id| m.match(regex) }
+      matches.select! { |obj| obj[:name].match(regex) }
       break if matches.length <= limit
     end
     used

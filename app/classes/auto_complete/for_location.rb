@@ -15,8 +15,9 @@ class AutoComplete::ForLocation < AutoComplete::ByWord
     self.reverse = (params[:format] == "scientific")
   end
 
+  # Using observation.where gives the possibility of strings with no ID.
   def rough_matches(letter)
-    matches =
+    locations =
       Observation.select(:where).distinct.
       where(Observation[:where].matches("#{letter}%").
         or(Observation[:where].matches("% #{letter}%"))).
@@ -25,8 +26,14 @@ class AutoComplete::ForLocation < AutoComplete::ByWord
       where(Location[:name].matches("#{letter}%").
         or(Location[:name].matches("% #{letter}%"))).pluck(:name, :id)
 
-    matches.map! { |m, id| [Location.reverse_name(m), id] } if reverse
-    # matches without id are strings only. give id: 0, and sort by unique name
-    matches.map { |m, id| [m, id.nil? ? 0 : id] }.sort_by(&:first).uniq(&:first)
+    # matches without id are "where" strings only.
+    # give them an id: 0, and sort by unique name
+    locations.map! do |loc, id|
+      format = reverse ? Location.reverse_name(loc) : loc
+      { name: format, id: id.nil? ? 0 : id }
+    end
+    # Sort by name and prefer those with a non-zero ID
+    locations.sort_by! { |loc| [loc[:name], -loc[:id]] }
+    locations.uniq! { |loc| loc[:name] }
   end
 end

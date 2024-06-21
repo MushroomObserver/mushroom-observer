@@ -8,9 +8,10 @@ class AutoComplete::ForUser < AutoComplete::ByString
               or(User[:name].matches("% #{letter}%"))).
             order(login: :asc).pluck(:login, :name, :id)
 
-    users.map do |login, name, id|
+    users.map! do |login, name, id|
       user_name = name.empty? ? login : "#{login} <#{name}>"
-      [user_name, id]
-    end.sort_by(&:first)
+      { name: user_name, id: id }
+    end
+    users.sort_by! { |user| user[:name] }
   end
 end

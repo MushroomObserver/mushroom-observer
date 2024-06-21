@@ -34,24 +34,25 @@ class AutoComplete
   def matching_records
     # unless 'whole', use the first letter of the string to define the matches
     token = whole ? string : string[0]
-    self.matches = rough_matches(token)
+    self.matches = rough_matches(token) || [] # defined in type-subclass
     clean_matches
 
     unless all
       minimal_string = refine_token # defined in subclass
-      matches.unshift([minimal_string, 0])
+      matches.unshift({ name: minimal_string, id: 0 })
       truncate_matches
     end
 
-    matches.map { |name, id| { name:, id: } }
+    matches
   end
 
   private
 
   def clean_matches
-    matches.map! do |str, id|
-      clean = str.sub(/\s*[\r\n]\s*.*/m, "").sub(/\A\s+/, "").sub(/\s+\Z/, "")
-      [clean, id]
+    matches.map! do |obj|
+      obj[:name] = obj[:name].sub(/\s*[\r\n]\s*.*/m, "").
+                   sub(/\A\s+/, "").sub(/\s+\Z/, "")
+      obj
     end
     matches.uniq!
   end
@@ -60,6 +61,6 @@ class AutoComplete
     return unless matches.length > limit
 
     matches.slice!(limit..-1)
-    matches.push(["...", nil])
+    matches.push({ name: "...", id: nil })
   end
 end

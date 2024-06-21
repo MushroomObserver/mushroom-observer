@@ -49,27 +49,27 @@ class AutocompletersControllerTest < FunctionalTestCase
   def test_auto_complete_location
     login("rolf")
     # names of Locations whose names have words starting with "m"
-    m_loc_names = Location.where(Location[:name].matches_regexp("\\bM")).
-                  pluck(:name, :id)
+    m_loc_names = Location.where(Location[:name].
+                  matches_regexp("\\bM")).pluck(:name, :id)
     # wheres of Observations whose wheres have words starting with "m"
     # need extra "observation" to avoid confusing sql with bare "where".
     m_obs_wheres = Observation.where(Observation[:where].
                    matches_regexp("\\bM")).pluck(:where, :location_id)
-    m = m_loc_names + m_obs_wheres
+    locs = m_loc_names + m_obs_wheres
+    locs.unshift(["M", 0])
 
-    expect = m.sort_by(&:first).uniq(&:first)
-    expect.unshift(["M", 0])
-    expect = expect.map { |n, id| [n, id.nil? ? 0 : id] }
-    expect = expect.map { |name, id| { name:, id: } }
+    expect = locs.map { |name, id| { name:, id: id.nil? ? 0 : id } }
+    expect.sort_by! { |loc| [loc[:name], -loc[:id]] }
+    expect.uniq! { |loc| loc[:name] }
     good_autocompleter_request(type: :location, string: "Modesto")
     assert_equivalent(expect, JSON.parse(@response.body))
 
     login("roy") # prefers location_format: :scientific
-    expect = m.map { |name, id| [Location.reverse_name(name), id] }.
-             sort_by(&:first).uniq(&:first)
-    expect.unshift(["M", 0])
-    expect = expect.map { |n, id| [n, id.nil? ? 0 : id] }
-    expect = expect.map { |name, id| { name:, id: } }
+    expect = locs.map do |name, id|
+      { name: Location.reverse_name(name), id: id.nil? ? 0 : id }
+    end
+    expect.sort_by! { |loc| [loc[:name], -loc[:id]] }
+    expect.uniq! { |loc| loc[:name] }
     good_autocompleter_request(type: :location, string: "Modesto")
     assert_equivalent(expect, JSON.parse(@response.body))
 
@@ -81,12 +81,13 @@ class AutocompletersControllerTest < FunctionalTestCase
   def test_auto_complete_herbarium
     login("rolf")
     # names of Herbariums whose names have words starting with "m"
-    m = Herbarium.where(Herbarium[:name].matches_regexp("\\bD")).
-        pluck(:name, :id)
+    herbs = Herbarium.where(Herbarium[:name].matches_regexp("\\bD")).
+            pluck(:name, :id)
+    herbs.unshift(["D", 0])
 
-    expect = m.sort_by(&:first).uniq(&:first)
-    expect.unshift(["D", 0])
-    expect = expect.map { |name, id| { name:, id: } }
+    expect = herbs.map { |name, id| { name:, id: } }
+    expect.sort_by! { |hrb| hrb[:name] }
+    expect.uniq! { |hrb| hrb[:name] }
     good_autocompleter_request(type: :herbarium, string: "Dick")
     assert_equivalent(expect, JSON.parse(@response.body))
   end
@@ -99,27 +100,35 @@ class AutocompletersControllerTest < FunctionalTestCase
 
   def test_auto_complete_name_above_genus
     login("rolf")
-    expect = [{ name: "F", id: 0 }, { name: "Fungi", id: names(:fungi).id }]
+    expect = [{ name: "F", id: 0 },
+              { name: "Fungi", id: names(:fungi).id, deprecated: false }]
     good_autocompleter_request(type: :clade, string: "Fung")
     assert_equivalent(expect, JSON.parse(@response.body))
   end
 
   def test_auto_complete_name
     login("rolf")
-    expect = Name.all.reject(&:correct_spelling).
-             pluck(:text_name, :id).uniq.select { |n, _i| n[0] == "A" }.sort
-    expect_genera = expect.reject { |n, _i| n.include?(" ") }.map do |name, id|
-      { name:, id: }
+    names = Name.all.reject(&:correct_spelling).
+            pluck(:text_name, :id, :deprecated).uniq.
+            select { |n, _i, _d| n[0] == "A" }.sort
+    expect_genera = names.reject do |n, _i, _d|
+      n.include?(" ")
     end
-    expect_species = expect.select { |n, _i| n.include?(" ") }.map do |name, id|
-      { name:, id: }
+    expect_species = names.select do |n, _i, _d|
+      n.include?(" ")
     end
-    expect = [{ name: "A", id: 0 }] + expect_genera + expect_species
+    expect = expect_genera + expect_species
+    expect.map! do |name, id, deprecated|
+      { name:, id:, deprecated: }
+    end
+    expect.unshift({ name: "A", id: 0 })
+
     good_autocompleter_request(type: :name, string: "Agaricus")
     assert_equivalent(expect, JSON.parse(@response.body))
 
     good_autocompleter_request(type: :name, string: "Umbilicaria")
-    assert_equivalent([{ name: "U", id: 0 }], JSON.parse(@response.body))
+    assert_equivalent([{ name: "U", id: 0 }],
+                      JSON.parse(@response.body))
   end
 
   def test_auto_complete_project

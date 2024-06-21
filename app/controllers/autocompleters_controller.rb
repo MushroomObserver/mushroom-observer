@@ -31,12 +31,10 @@ class AutocompletersController < ApplicationController
   private
 
   def auto_complete_results
-    case @type
-    when "location", "location_containing", "region"
-      params[:format] = @user&.location_format
-    when "herbarium"
-      params[:user_id] = @user&.id
-    end
+    # add useful params that the controller knows about
+    params[:format] = @user&.location_format
+    params[:user_id] = @user&.id
+
     ::AutoComplete.subclass(@type).new(params).matching_records
   end
 
