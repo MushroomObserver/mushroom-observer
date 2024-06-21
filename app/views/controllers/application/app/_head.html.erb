@@ -12,6 +12,8 @@
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="turbo-refresh-scroll" content="preserve">
+<meta name="turbo-prefetch" content="false">
+<%= action_cable_meta_tag %>
 <%= auto_discovery_link_tag(
   :rss, activity_logs_rss_path, { title: :app_rss.l }
 ) %>
@@ -26,7 +28,9 @@
 <meta property="og:description" content="Mushroom Observer is a forum where amateur and professional mycologists can come together and celebrate their common passion for mushrooms by discussing and sharing photos of mushroom sightings from around the world."/>
 <%=
   stylesheet_link_tag(@css_theme, media: "screen") +
-  stylesheet_link_tag(@css_theme, media: "print")
+  stylesheet_link_tag(@css_theme, media: "print") +
+  render("application/app/user_specific_css")
 %>
+<%= javascript_importmap_tags %>
 <%= @header unless @header.blank? %>
 <!--/APPLICATION LAYOUT HEAD-->

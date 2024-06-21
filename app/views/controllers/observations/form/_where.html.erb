@@ -14,8 +14,8 @@
   <div class="row">
     <div class="col-xs-12 col-sm-6">
       <%= autocompleter_field(
-        form: f, field: :place_name, label: :WHERE.t + ":", between: :required,
-        autocomplete: :location, data: { map_target: "placeInput" }
+        form: f, field: :place_name, type: :location, label: "#{:WHERE.t}:",
+        between: :required, data: { map_target: "placeInput" }
       ) %>
     </div>
     <div class="col-xs-12 col-sm-6">

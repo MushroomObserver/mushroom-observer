@@ -110,6 +110,10 @@ class Comment < AbstractModel
   belongs_to :target, polymorphic: true
   belongs_to :user
 
+  broadcasts_to(->(comment) { [comment.target, :comments] },
+                inserts_by: :prepend, partial: "comments/comment",
+                target: "comments")
+
   after_create :notify_users
   after_create :oil_and_water
 

@@ -2,35 +2,55 @@
 // autocompletion
 // --------------------------------------------------
 
-div.auto_complete {
-  position: absolute;
-  color: $dropdown-link-color;
-  background-color: $dropdown-bg;
+.dropdown-menu.auto_complete {
+  // position: absolute;
+  // color: $dropdown-link-color;
+  // background-color: $dropdown-bg;
   margin: 0px;
-  border: 1px solid $dropdown-border;
+  // border: 1px solid $dropdown-border;
+  border-radius: 0;
   padding: 0px;
   overflow-x: hidden;
-  display: none;
-  text-align: left;
-  z-index: 100;
+  // display: none;
+  // text-align: left;
+  // z-index: 100;
+}
 
-  ul {
-    margin: 0px;
-    border: 0px;
-    padding: 0px;
-    list-style: none;
-    overflow-x: hidden;
+ul.virtual_list {
+  margin: 0px;
+  border: 0px;
+  padding: 0px;
+  list-style: none;
+  overflow-x: hidden;
+}
 
-    li {
-      margin: 0px;
-      border: 0px;
-      padding: 2px 4px 2px 4px;
-      white-space: nowrap;
-      cursor: pointer;
+li.dropdown-item {
+  margin: 0px;
+  border: 0px;
+  white-space: nowrap;
+  cursor: pointer;
+
+  a {
+    display: block;
+    padding: 2px 4px;
+    color: $dropdown-link-color;
+    text-decoration: none;
+
+    // &[data-deprecated="true"] {
+    //   opacity: 0.81;
+    //   font-style: italic;
+    // }
+
+    &:hover {
+      color: $dropdown-link-color;
+      background-color: $dropdown-link-hover-bg;
+      text-decoration: none;
     }
+  }
 
-    li.selected {
-      color: $dropdown-link-hover-color;
+  &.active {
+    a {
+      color: $dropdown-link-color;
       background-color: $dropdown-link-hover-bg;
     }
   }

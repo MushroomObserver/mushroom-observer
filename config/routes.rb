@@ -336,7 +336,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :articles, id: /\d+/
 
   # ----- Autocompleters: fetch get ------------------------------------
-  get "/autocompleters/new/:type/:id", to: "autocompleters#new"
+  get "/autocompleters/new/:type", to: "autocompleters#new"
 
   # ----- Checklist: just the show --------------------------------------
   get "/checklist", to: "checklists#show"
@@ -449,6 +449,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
   get("/javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
   get("/javascript/hide_thumbnail_map", to: "javascript#hide_thumbnail_map")
+
+  resources :licenses, id: /\d+/
 
   # ----- Locations: a lot of actions  ----------------------------
   resources :locations, id: /\d+/, shallow: true do
@@ -606,8 +608,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                             as: "attach_image_to")
       get("images/remove", to: "observations/images#remove",
                            as: "remove_images_from")
-      put("images/detach", to: "observations/images#detach",
-                           as: "detach_images_from")
+      put("images(/:image_id)/detach", to: "observations/images#detach",
+                                       as: "detach_images_from")
     end
 
     collection do
@@ -915,7 +917,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # Accept non-numeric ids for the /lookups/lookup_xxx/id actions.
   LOOKUP_ACTIONS.each do |action|
-    get("/lookups/#{action}(/:id)", to: "lookups##{action}", id: /\S.*/)
+    get("/lookups/#{action}(/:id)", to: "lookups##{action}", id: /\S.*/,
+                                    as: action)
   end
 
   # declare routes for the actions in the ACTIONS hash
