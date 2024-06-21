@@ -21,13 +21,13 @@ end
   <%= text_area_with_label(form: ffi, field: :notes, index: img_id, rows: 2,
                            value: image&.notes, label: :form_images_notes.l) %>
 
-  <%= text_field_with_label(form: ffi, field: :copyright_holder, index: img_id,
-                            value: image&.copyright_holder,
-                            label: :form_images_copyright_holder.l) %>
-
   <%= date_select_with_label(form: ffi, field: :when, index: img_id,
                              value: image&.when, object: image,
                              label: :form_images_when_taken.l) %>
+
+  <%= text_field_with_label(form: ffi, field: :copyright_holder, index: img_id,
+                            value: image&.copyright_holder,
+                            label: :form_images_copyright_holder.l) %>
 
   <%= select_with_label(form: ffi, field: :license_id, index: img_id,
                         label: :form_images_select_license.t.html_safe,
