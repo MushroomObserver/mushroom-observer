@@ -2,8 +2,26 @@ import { Controller } from "@hotwired/stimulus"
 import { escapeHTML, getScrollBarWidth, EVENT_KEYS } from "src/mo_utilities"
 import { get } from "@rails/request.js"
 
+// @pellaea's autocompleter is different from other open source autocompleter
+// libraries. It can match words out of order, as in "scientific"
+// location_format, and is closely configured to work with the responses MO's
+// AutocompleteController produces.
+
+// It is MUCH quicker than off-the-shelf autocompleters in dealing with AJAX
+// queries for names and locations, because it calls the db once for all entries
+// starting with the typed letter of the alphabet, and then consults this
+// internal primer to refine results as the user types more, rather than making
+// separate server requests for every letter typed.
+
+// It implements a "virtual list" for the pulldown, which is impossible with the
+// HTML <datalist> spec. When there are thousands of `matches`, it is
+// impractical to keep them all as DOM nodes; the page becomes unresponsive.
+// This controller hot-swaps the innerHTML in the same 10 <li> elements as the
+// user scrolls with values from the fetched `matches`, and adjusts the
+// margin-top of the <ul> to simulate scrolling.
+
 const DEFAULT_OPTS = {
-  // what type of autocompleter, subclass of AutoComplete
+  // what type of autocompleter, corresponds to a subclass of `AutoComplete`
   TYPE: null,
   // Whether to ignore order of words when matching, set by type
   // (collapse must be 0 if this is true!)
@@ -36,6 +54,9 @@ const DEFAULT_OPTS = {
   SHOW_ERRORS: false,
   // include pulldown-icon on right, and always show all options
   ACT_LIKE_SELECT: false,
+  // class of enclosing wrap div, usually also a .form-group.
+  // Must have position: relative (or absolute...)
+  WRAP_CLASS: 'dropdown',
   // class of pulldown div, selected by system tests
   PULLDOWN_CLASSES: ['auto_complete', 'dropdown-menu'],
   // class of pulldown <ul>, purely for developer comprehension of how it's used
@@ -130,10 +151,11 @@ export default class extends Controller {
     // Figure out a few browser-dependent dimensions.
     this.getScrollBarWidth;
 
-    // This cannot be a target because it's "above" the controller scope in DOM.
-    this.dropdown_wrap = this.inputTarget.closest('.dropdown');
+    // Wrap cannot be a target because it's "above" the controller scope in DOM.
+    this.dropdown_wrap = this.inputTarget.closest("." + this.WRAP_CLASS);
     if (this.dropdown_wrap == undefined)
-      alert("MOAutocompleter: needs a wrapping div with class: \"dropdown\"");
+      alert("MOAutocompleter: needs a wrapping div with class: \"" +
+        this.WRAP_CLASS + "\"");
 
     // Create pulldown.
     this.create_pulldown();
@@ -143,7 +165,9 @@ export default class extends Controller {
   }
 
   // Swap out autocompleter type (and properties)
-  // Action called from a <select> with `data-action: "autocompleter-swap"`
+  // Action may be called from a <select> with
+  // `data-action: "autocompleter-swap:swap->autocompleter#swap"`
+  // or an event dispatched by another controller.
   swap(opts = {}) {
     if (!this.hasSelectTarget)
       return;
@@ -582,9 +606,6 @@ export default class extends Controller {
       a = document.createElement('a');
 
     div.classList.add('test');
-    // div.style.display = 'block';
-    // div.style.border = div.style.margin = div.style.padding = '0px';
-    // ul.style.border = ul.style.margin = ul.style.padding = '0px';
     ul.classList.add(...this.LIST_CLASSES)
     a.href = '#';
     a.innerHTML = 'test';
@@ -610,7 +631,13 @@ export default class extends Controller {
     }
   }
 
-  // Redraw the pulldown options.
+  // The pulldown is a "virtual list": the <div> contains a <ul> that has only
+  // {PULLDOWN_SIZE} (10) <li> elements, but added height and margin to make the
+  // element seem "scrollable" within the outer <div>. As the user scrolls, the
+  // content of the items is hot-swapped-in from the full `this.matches` list,
+  // kept in browser memory, and the <ul> top margin and height are adjusted
+  // accordingly. This sleight of hand keeps far fewer elements in the DOM, and
+  // is essential for making the page responsive.
   draw_pulldown() {
     this.verbose("draw_pulldown()");
     const list = this.LIST_ELEM,
@@ -638,8 +665,8 @@ export default class extends Controller {
     this.inputTarget.focus();
   }
 
-  // Update menu text first. This is sort of a "virtual list" implementation.
-  // Keeps few elements in the DOM, but updates them as needed.
+  // This function swaps out the innerHTML of the items from the `matches` array
+  // as needed, as the user scrolls.
   update_rows(rows, matches, size, scroll) {
     let i, text, stored;
     for (i = 0; i < size; i++) {
@@ -709,9 +736,9 @@ export default class extends Controller {
       this.update_width();
 
       // Only show pulldown if it is nontrivial, i.e., show an option other than
-      // the value that's already in the text field.
-      // To show, if wrapping div is .dropdown, we can classList.add('.open')
-      // instead of style.display = 'block'
+      // the value that's already in the text field. If wrapping div is
+      // .dropdown, we can classList.add('.open') instead of
+      // style.display = 'block'
       if (matches.length > 1 || this.inputTarget.value != matches[0]) {
         this.clear_hide();
         this.dropdown_wrap?.classList?.add('open');
