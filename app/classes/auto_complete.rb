@@ -9,10 +9,10 @@
 #
 ################################################################################
 
-PUNCTUATION = '[ -\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]'
-
 class AutoComplete
-  attr_accessor :string, :matches
+  attr_accessor :string, :matches, :all, :whole
+
+  PUNCTUATION = '[ -\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]'
 
   def limit
     1000
@@ -24,28 +24,26 @@ class AutoComplete
     raise("Invalid auto-complete type: #{type.inspect}")
   end
 
-  def initialize(string, _params = {})
-    self.string = string.to_s.strip_squeeze
+  def initialize(params = {})
+    self.string = params[:string].to_s.strip_squeeze
+    self.all = params[:all].present?
+    self.whole = params[:whole].present?
   end
 
   def matching_strings
-    self.matches = rough_matches(string[0])
+    # unless 'whole', use the first letter of the string to define the matches
+    token = whole ? string : string[0]
+    self.matches = rough_matches(token)
     clean_matches
-    minimal_string = refine_matches
+    return matches if all
+
+    minimal_string = refine_matches # defined in subclass
     truncate_matches
     [minimal_string] + matches
     # [[minimal_string, nil]] + matches
   end
 
   private
-
-  def truncate_matches
-    return unless matches.length > limit
-
-    matches.slice!(limit..-1)
-    matches.push("...")
-    # matches.push(["...", nil])
-  end
 
   def clean_matches
     matches.map! do |str|
@@ -56,5 +54,13 @@ class AutoComplete
     #   [clean, id]
     # end
     matches.uniq!
+  end
+
+  def truncate_matches
+    return unless matches.length > limit
+
+    matches.slice!(limit..-1)
+    matches.push("...")
+    # matches.push(["...", nil])
   end
 end

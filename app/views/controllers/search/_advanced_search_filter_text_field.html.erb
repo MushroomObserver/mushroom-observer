@@ -7,8 +7,7 @@ autocompleter = case filter.sym.to_s
                 end
 between = help_note(:span, :"advanced_search_filter_#{filter.sym}".t)
 autocompleter_field(
-  form: f, field: filter.sym, label: filter.name + ":",
-  between: between, value: @filter_defaults[filter.sym],
-  autocomplete: autocompleter, separator: " OR "
+  form: f, field: filter.sym, type: autocompleter, label: "#{filter.name}:",
+  between: between, value: @filter_defaults[filter.sym], separator: " OR "
 )
 %>

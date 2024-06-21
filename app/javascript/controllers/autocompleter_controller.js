@@ -2,8 +2,26 @@ import { Controller } from "@hotwired/stimulus"
 import { escapeHTML, getScrollBarWidth, EVENT_KEYS } from "src/mo_utilities"
 import { get } from "@rails/request.js"
 
+// @pellaea's autocompleter is different from other open source autocompleter
+// libraries. It can match words out of order, as in "scientific"
+// location_format, and is closely configured to work with the responses MO's
+// AutocompleteController produces.
+
+// It is MUCH quicker than off-the-shelf autocompleters in dealing with AJAX
+// queries for names and locations, because it calls the db once for all entries
+// starting with the typed letter of the alphabet, and then consults this
+// internal primer to refine results as the user types more, rather than making
+// separate server requests for every letter typed.
+
+// It implements a "virtual list" for the pulldown, which is impossible with the
+// HTML <datalist> spec. When there are thousands of `matches`, it is
+// impractical to keep them all as DOM nodes; the page becomes unresponsive.
+// This controller hot-swaps the innerHTML in the same 10 <li> elements as the
+// user scrolls with values from the fetched `matches`, and adjusts the
+// margin-top of the <ul> to simulate scrolling.
+
 const DEFAULT_OPTS = {
-  // what type of autocompleter, subclass of AutoComplete
+  // what type of autocompleter, corresponds to a subclass of `AutoComplete`
   TYPE: null,
   // Whether to ignore order of words when matching, set by type
   // (collapse must be 0 if this is true!)
@@ -13,8 +31,10 @@ const DEFAULT_OPTS = {
   // 2 = autocomplete first word, then second word, then the rest
   // N = etc.
   COLLAPSE: 0,
+  // whether to send a new request for every letter, in the case of "region"
+  WHOLE_WORDS_ONLY: false,
   // where to request primer from
-  AJAX_URL: null,
+  AJAX_URL: "/autocompleters/new/",
   // how long to wait before sending AJAX request (seconds)
   REFRESH_DELAY: 0.10,
   // how long to wait before hiding pulldown (seconds)
@@ -28,7 +48,7 @@ const DEFAULT_OPTS = {
   // amount to move cursor on page up and down
   PAGE_SIZE: 10,
   // max length of string to send via AJAX
-  MAX_REQUEST_LINK: 50,
+  MAX_STRING_LENGTH: 50,
   // Sub-match: starts finding new matches for the string *after the separator*
   // allowed separators (e.g. " OR ")
   SEPARATOR: null,
@@ -36,43 +56,43 @@ const DEFAULT_OPTS = {
   SHOW_ERRORS: false,
   // include pulldown-icon on right, and always show all options
   ACT_LIKE_SELECT: false,
+  // class of enclosing wrap div, usually also a .form-group.
+  // Must have position: relative (or absolute...)
+  WRAP_CLASS: 'dropdown',
   // class of pulldown div, selected by system tests
-  PULLDOWN_CLASS: 'auto_complete',
-  // class of <li> when highlighted
-  HOT_CLASS: 'selected'
+  PULLDOWN_CLASSES: ['auto_complete', 'dropdown-menu'],
+  // class of pulldown <ul>, purely for developer comprehension of how it's used
+  LIST_CLASSES: ['virtual_list'],
+  // class of pulldown <li>
+  ITEM_CLASSES: ['dropdown-item'],
+  // class of <li> when highlighted.
+  HOT_CLASS: 'active'
 }
 
 // Allowed types of autocompleter. Sets some DEFAULT_OPTS from type
 const AUTOCOMPLETER_TYPES = {
   clade: {
-    AJAX_URL: "/autocompleters/new/clade/@",
   },
   herbarium: { // params[:user_id] handled in controller
-    AJAX_URL: "/autocompleters/new/herbarium/@",
     UNORDERED: true
   },
   location: { // params[:format] handled in controller
-    AJAX_URL: "/autocompleters/new/location/@",
     UNORDERED: true
   },
   name: {
-    AJAX_URL: "/autocompleters/new/name/@",
     COLLAPSE: 1
   },
   project: {
-    AJAX_URL: "/autocompleters/new/project/@",
     UNORDERED: true
   },
   region: {
-    AJAX_URL: "/autocompleters/new/location/@",
-    UNORDERED: true
+    UNORDERED: true,
+    WHOLE_WORDS_ONLY: true
   },
   species_list: {
-    AJAX_URL: "/autocompleters/new/species_list/@",
     UNORDERED: true
   },
   user: {
-    AJAX_URL: "/autocompleters/new/user/@",
     UNORDERED: true
   }
 }
@@ -85,6 +105,7 @@ const INTERNAL_OPTS = {
   SCROLLBAR_WIDTH: null, // width of scrollbar in browser (determined below)
   focused: false,        // is user in text field?
   menu_up: false,        // is pulldown visible?
+  dropdown_wrap: null,   // wrapping div for pulldown
   old_value: null,       // previous value of input field
   primer: [],            // a server-supplied list of many options
   matches: [],           // list of options currently showing
@@ -101,17 +122,18 @@ const INTERNAL_OPTS = {
   key_timer: null        // timer used to emulate key repeat
 }
 
-// Connects to data-controller="autocomplete"
+// Connects to data-controller="autocompleter"
 export default class extends Controller {
+  // The root element should usually be the .form-group wrapping the <input>.
+  // The select target is not the <input> element, but a <select> that can
+  // swap out the autocompleter type. The <input> element is its target.
   static targets = ["input", "select"]
 
   initialize() {
     Object.assign(this, DEFAULT_OPTS);
 
-    // Check the type of autocompleter set on the input element
-    // maybe should not happen on connect, or we could be resetting type
-    // Or maybe it should, and the filter swapper should just change this? no.
-    this.TYPE = this.inputTarget.dataset.autocomplete;
+    // Check the type of autocompleter set on the root or input element
+    this.TYPE = this.element.dataset.type ?? this.inputTarget.dataset.type;
     if (!AUTOCOMPLETER_TYPES.hasOwnProperty(this.TYPE))
       alert("MOAutocompleter: Invalid type: \"" + this.TYPE + "\"");
 
@@ -131,6 +153,18 @@ export default class extends Controller {
     // Figure out a few browser-dependent dimensions.
     this.getScrollBarWidth;
 
+    let wrap = this.element;
+    // Wrap is usually the root element with the controller, a ".form-group".
+    // But it could have different markup.
+    if (this.element.classList.contains(this.WRAP_CLASS)) {
+      this.dropdown_wrap = this.element;
+    } else if (wrap = this.inputTarget.closest('.' + this.WRAP_CLASS)) {
+      this.dropdown_wrap = wrap;
+    } else {
+      alert("MOAutocompleter: needs a wrapping div with class: \"" +
+        this.WRAP_CLASS + "\"");
+    }
+
     // Create pulldown.
     this.create_pulldown();
 
@@ -139,22 +173,31 @@ export default class extends Controller {
   }
 
   // Swap out autocompleter type (and properties)
-  // Action called from a <select> with `data-action: "autocompleter-swap"`
-  swap(opts = {}) {
-    if (!this.hasSelectTarget)
-      return;
+  // Action may be called from a <select> with
+  // `data-action: "autocompleter-swap:swap->autocompleter#swap"`
+  // or an event dispatched by another controller.
+  swap({ detail }) {
+    let type;
 
-    const type = this.selectTarget.value;
+    if (this.hasSelectTarget) {
+      type = this.selectTarget.value;
+    } else if (detail?.hasOwnProperty("type")) {
+      type = detail.type;
+    }
+    if (type == undefined) { return; }
 
     if (!AUTOCOMPLETER_TYPES.hasOwnProperty(type)) {
-      alert("MOAutocompleter: Invalid type: \"" + this.TYPE + "\"");
+      alert("MOAutocompleter: Invalid type: \"" + type + "\"");
     } else {
       this.TYPE = type;
-      this.inputTarget.setAttribute("data-autocompleter", type)
+      this.element.setAttribute("data-type", type)
       // add dependent properties and allow overrides
       Object.assign(this, AUTOCOMPLETER_TYPES[this.TYPE]);
-      Object.assign(this, opts);
+      Object.assign(this, detail); // type, request_params
+      this.primer = [];
+      this.matches = [];
       this.prepare_input_element();
+      this.schedule_refresh(); // refresh the primer
     }
   }
 
@@ -167,7 +210,14 @@ export default class extends Controller {
     this.add_event_listeners();
 
     // sanity check to show which autocompleter is currently on the element
-    this.inputTarget.setAttribute("data-ajax-url", this.AJAX_URL);
+    this.inputTarget.setAttribute("data-ajax-url", this.AJAX_URL + this.TYPE);
+
+    // If the primer is not based on input, go ahead and request from server.
+    if (this.ACT_LIKE_SELECT == true) {
+      this.inputTarget.click();
+      this.inputTarget.focus();
+      this.inputTarget.value = ' ';
+    }
   }
 
   // NOTE: `this` within an event listener function refers to the element
@@ -513,38 +563,52 @@ export default class extends Controller {
 
   // ------------------------------ Pulldown ------------------------------
 
-  // Create div for pulldown. Presence of this is checked in system tests.
+  // Create hidden pulldown <div> that is a sibling of the input element., The
+  // pulldown contains a <ul> and ten blank <li><a> elements. Note that unlike
+  // in the standard Bootstrap markup, our pulldown is a <div> with a <ul>
+  // inside. The <div> in our case gets the .dropdown-menu class, because it's
+  // the "window" to the nested <ul> virtual list. The <ul> has an accurate
+  // calculated height to imply scrollability, but never contains more than 10
+  // <li> elements. This keeps the DOM responsive even with very large lists.
+  // The <li> elements are updated with the actual items from the stored
+  // `matches` array as needed.
+  //
   create_pulldown() {
-    const div = document.createElement("div");
-    div.classList.add(this.PULLDOWN_CLASS);
+    const pulldown = document.createElement("div");
+    pulldown.classList.add(...this.PULLDOWN_CLASSES);
 
     const list = document.createElement('ul');
-    let i, row;
+    list.classList.add(...this.LIST_CLASSES);
+    let i, row, link;
     for (i = 0; i < this.PULLDOWN_SIZE; i++) {
       row = document.createElement("li");
-      row.style.display = 'none';
-      this.attach_row_events(row, i);
+      row.classList.add(...this.ITEM_CLASSES);
+      link = document.createElement("a");
+      link.href = '#';
+      this.attach_row_link_events(link, i);
+      row.appendChild(link);
       list.append(row);
     }
-    div.appendChild(list)
+    pulldown.appendChild(list)
 
-    div.addEventListener("scroll", this.our_scroll.bind(this));
-    this.inputTarget.insertAdjacentElement("afterend", div);
-    this.PULLDOWN_ELEM = div;
+    pulldown.addEventListener("scroll", this.our_scroll.bind(this));
+    this.inputTarget.insertAdjacentElement("afterend", pulldown);
+    this.PULLDOWN_ELEM = pulldown;
     this.LIST_ELEM = list;
   }
 
-  // Add "click" and "mouseover" events to a row of the pulldown menu.
+  // Add "click" events to a row of the pulldown menu.
   // Need to do this in a separate method, otherwise row doesn't get
   // a separate value for each row!  Something to do with scope of
-  // variables inside for loops.
-  attach_row_events(e, row) {
-    e.addEventListener("click", (function () {
+  // variables inside `for` loops. By using <a>, we can skip "mouseover".
+  attach_row_link_events(element, row) {
+    element.addEventListener("click", ((e) => {
+      e.preventDefault();
       this.select_row(row);
     }).bind(this));
-    e.addEventListener("mouseover", (function () {
-      this.highlight_row(row);
-    }).bind(this));
+    // element.addEventListener("mouseover", ((e) => {
+    //   this.highlight_row(row);
+    // }).bind(this));
   }
 
   // Stimulus: print this in the document already
@@ -553,12 +617,15 @@ export default class extends Controller {
   get_row_height() {
     const div = document.createElement('div'),
       ul = document.createElement('ul'),
-      li = document.createElement('li');
+      li = document.createElement('li'),
+      a = document.createElement('a');
 
-    div.className = this.PULLDOWN_CLASS;
-    div.style.display = 'block';
-    div.style.border = div.style.margin = div.style.padding = '0px';
-    li.innerHTML = 'test';
+    div.classList.add('test');
+    ul.classList.add(...this.LIST_CLASSES)
+    a.href = '#';
+    a.innerHTML = 'test';
+    li.classList.add(...this.ITEM_CLASSES);
+    li.appendChild(a);
     ul.appendChild(li);
     div.appendChild(ul);
     document.body.appendChild(div);
@@ -579,7 +646,13 @@ export default class extends Controller {
     }
   }
 
-  // Redraw the pulldown options.
+  // The pulldown is a "virtual list": the <div> contains a <ul> that has only
+  // {PULLDOWN_SIZE} (10) <li> elements, but added height and margin to make the
+  // element seem "scrollable" within the outer <div>. As the user scrolls, the
+  // content of the items is hot-swapped-in from the full `this.matches` list,
+  // kept in browser memory, and the <ul> top margin and height are adjusted
+  // accordingly. This sleight of hand keeps far fewer elements in the DOM, and
+  // is essential for making the page responsive.
   draw_pulldown() {
     this.verbose("draw_pulldown()");
     const list = this.LIST_ELEM,
@@ -600,30 +673,32 @@ export default class extends Controller {
     if (rows.length) {
       this.update_rows(rows, matches, size, scroll);
       this.highlight_new_row(rows, cur, size, scroll)
-      this.make_menu_visible(matches, size, scroll)
+      this.make_pulldown_visible(matches, size, scroll)
     }
 
     // Make sure input focus stays on text field!
     this.inputTarget.focus();
   }
 
-  // Update menu text first.
+  // This function swaps out the innerHTML of the items from the `matches` array
+  // as needed, as the user scrolls.
   update_rows(rows, matches, size, scroll) {
-    let i, x, y;
+    let i, text, stored;
     for (i = 0; i < size; i++) {
       let row = rows.item(i);
-      x = row.innerHTML;
+      let link = row.children[0];
+      text = link.innerHTML;
       if (i + scroll < matches.length) {
-        y = this.escapeHTML(matches[i + scroll]);
-        if (x != y) {
-          if (x == '')
-            row.style.display = 'block';
-          row.innerHTML = y;
+        stored = this.escapeHTML(matches[i + scroll]);
+        if (text != stored) {
+          // if (text == '')
+          //   row.style.display = 'block';
+          link.innerHTML = stored;
         }
       } else {
-        if (x != '') {
-          row.innerHTML = '';
-          row.style.display = 'none';
+        if (text != '') {
+          link.innerHTML = '';
+          // row.style.display = 'none';
         }
       }
     }
@@ -645,55 +720,53 @@ export default class extends Controller {
     }
   }
 
-  // Make menu visible if nonempty.
-  make_menu_visible(matches, size, scroll) {
-    const menu = this.PULLDOWN_ELEM,
-      inner = menu.children[0];
+  // Make pulldown visible if nonempty. Positioning currently depends on
+  // Bootstrap classes: the .dropdown-menu will be positioned relative to the
+  // wrapping .form-group which must have either class .position-relative or
+  // .dropdown
+  make_pulldown_visible(matches, size, scroll) {
+    const pulldown = this.PULLDOWN_ELEM,
+      list = pulldown.children[0];
 
     if (matches.length > 0) {
       // console.log("Matches:" + matches)
-      const top = this.inputTarget.offsetTop,
-        left = this.inputTarget.offsetLeft,
-        hgt = this.inputTarget.offsetHeight,
-        scr = this.inputTarget.scrollTop;
-      menu.style.top = (top + hgt + scr) + "px";
-      menu.style.left = left + "px";
+      // Set height of pulldown.
+      pulldown.style.overflowY = matches.length > size ? "scroll" : "hidden";
+      pulldown.style.height = this.ROW_HEIGHT *
+        (size < matches.length - scroll ? size : matches.length - scroll) +
+        "px";
+      // Set margin-top and declared height of virtual list.
+      list.style.marginTop = this.ROW_HEIGHT * scroll + "px";
+      list.style.height = this.ROW_HEIGHT * (matches.length - scroll) + "px";
+      pulldown.scrollTo({ top: this.ROW_HEIGHT * scroll });
 
-      // Set height of menu.
-      menu.style.overflowY = matches.length > size ? "scroll" : "hidden";
-      menu.style.height = this.ROW_HEIGHT * (size < matches.length - scroll ? size : matches.length - scroll) + "px";
-      inner.style.marginTop = this.ROW_HEIGHT * scroll + "px";
-      inner.style.height = this.ROW_HEIGHT * (matches.length - scroll) + "px";
-      menu.scrollTo({ top: this.ROW_HEIGHT * scroll });
-      // }
-
-      // Set width of menu.
+      // Set width of pulldown.
       this.set_width();
       this.update_width();
 
-      // Only show menu if it is nontrivial, i.e., show an option other than
-      // the value that's already in the text field.
+      // Only show pulldown if it is nontrivial, i.e., show an option other than
+      // the value that's already in the text field. If wrapping div is
+      // .dropdown, we can classList.add('.open') instead of
+      // style.display = 'block'
       if (matches.length > 1 || this.inputTarget.value != matches[0]) {
         this.clear_hide();
-        menu.style.display = 'block';
+        this.dropdown_wrap?.classList?.add('open');
         this.menu_up = true;
       } else {
-        menu.style.display = 'none';
-        this.menu_up = false;
+        hide_pulldown();
       }
     }
 
-    // Hide the menu if it's empty now.
+    // Hide the pulldown if it's empty now.
     else {
-      menu.style.display = 'none';
-      this.menu_up = false;
+      this.hide_pulldown();
     }
   }
 
   // Hide pulldown options.
   hide_pulldown() {
     this.verbose("hide_pulldown()");
-    this.PULLDOWN_ELEM.style.display = 'none';
+    this.dropdown_wrap?.classList?.remove('open');
     this.menu_up = false;
   }
 
@@ -724,6 +797,8 @@ export default class extends Controller {
   // Update content of pulldown.
   update_matches() {
     this.verbose("update_matches()");
+    if (this.ACT_LIKE_SELECT)
+      this.current_row = 0;
 
     // Remember which option used to be highlighted.
     const last = this.current_row < 0 ? null : this.matches[this.current_row];
@@ -738,8 +813,9 @@ export default class extends Controller {
     else
       this.update_normal();
 
-    // Sort and remove duplicates.
-    this.matches = this.remove_dups(this.matches.sort());
+    // Sort and remove duplicates, unless it's already sorted.
+    if (!this.ACT_LIKE_SELECT)
+      this.matches = this.remove_dups(this.matches.sort());
     // Try to find old highlighted row in new set of options.
     this.update_current_row(last);
     // Reset width each time we change the options.
@@ -747,22 +823,25 @@ export default class extends Controller {
   }
 
   // When "acting like a select" make it display all options in the
-  // order given right from the moment they enter the field.
+  // order given right from the moment they enter the field,
+  // and pick the first one.
   update_select() {
     this.matches = this.primer;
+    if (this.matches.length > 0)
+      this.inputTarget.value = this.matches[0];
   }
 
   // Grab all matches, doing exact match, ignoring number of words.
   update_normal() {
-    const val = this.get_search_token().normalize().toLowerCase(),
+    const token = this.get_search_token().normalize().toLowerCase(),
       // normalize the Unicode of each string in primer for search
       primer = this.primer.map((str) => { return str.normalize() }),
       matches = [];
 
-    if (val != '') {
+    if (token != '') {
       for (let i = 0; i < primer.length; i++) {
         let s = primer[i + 1];
-        if (s && s.length > 0 && s.toLowerCase().indexOf(val) >= 0) {
+        if (s && s.length > 0 && s.toLowerCase().indexOf(token) >= 0) {
           matches.push(s);
         }
       }
@@ -774,24 +853,24 @@ export default class extends Controller {
   // Grab matches ignoring order of words.
   update_unordered() {
     // regularize spacing in the input
-    const val = this.get_search_token().normalize().toLowerCase().
+    const token = this.get_search_token().normalize().toLowerCase().
       replace(/^ */, '').replace(/  +/g, ' '),
-      // get the separate words as vals
-      vals = val.split(' '),
+      // get the separate words as tokens
+      tokens = token.split(' '),
       // normalize the Unicode of each string in primer for search
       primer = this.primer.map((str) => { return str.normalize() }),
       matches = [];
 
-    if (val != '' && primer.length > 1) {
+    if (token != '' && primer.length > 1) {
       for (let i = 1; i < primer.length; i++) {
         let s = primer[i] || '',
           s2 = ' ' + s.toLowerCase() + ' ',
           k;
         // check each word in the primer entry for a matching word
-        for (k = 0; k < vals.length; k++) {
-          if (s2.indexOf(' ' + vals[k]) < 0) break;
+        for (k = 0; k < tokens.length; k++) {
+          if (s2.indexOf(' ' + tokens[k]) < 0) break;
         }
-        if (k >= vals.length) {
+        if (k >= tokens.length) {
           matches.push(s);
         }
       }
@@ -803,25 +882,25 @@ export default class extends Controller {
   // Grab all matches, preferring the ones with no additional words.
   // Note: order must have genera first, then species, then varieties.
   update_collapsed() {
-    const val = this.get_search_token().toLowerCase(),
+    const token = this.get_search_token().toLowerCase(),
       primer = this.primer,
       // make a lowercased duplicate of primer to regularize search
       primer_lc = this.primer.map((str) => { return str.toLowerCase() }),
       matches = [];
 
-    if (val != '' && primer.length > 1) {
-      let the_rest = (val.match(/ /g) || []).length >= this.COLLAPSE;
+    if (token != '' && primer.length > 1) {
+      let the_rest = (token.match(/ /g) || []).length >= this.COLLAPSE;
 
       for (let i = 1; i < primer_lc.length; i++) {
-        if (primer_lc[i].indexOf(val) > -1) {
+        if (primer_lc[i].indexOf(token) > -1) {
           let s = primer[i];
           if (s.length > 0) {
-            if (the_rest || s.indexOf(' ', val.length) < val.length) {
+            if (the_rest || s.indexOf(' ', token.length) < token.length) {
               matches.push(s);
             } else if (matches.length > 1) {
               break;
             } else {
-              if (matches[0] == val)
+              if (matches[0] == token)
                 matches.pop();
               matches.push(s);
               the_rest = true;
@@ -830,8 +909,8 @@ export default class extends Controller {
         }
       }
       if (matches.length == 1 &&
-        (val == matches[0].toLowerCase() ||
-          val == matches[0].toLowerCase() + ' '))
+        (token == matches[0].toLowerCase() ||
+          token == matches[0].toLowerCase() + ' '))
         matches.pop();
     }
     this.matches = matches;
@@ -841,12 +920,12 @@ export default class extends Controller {
    * Index of string in future primer array with IDs
    * where primer == [[text_string, id], [text_string, id]]
    * @param primer {!Array} - the input array
-   * @param val {object} - the value to search
+   * @param token {object} - the token to search
    * @return {Array} or just i
    */
-  // get_primer_index_of(primer, val) {
+  // get_primer_index_of(primer, token) {
   //   for (let i = 0; i < primer.length; i++) {
-  //     const index = primer[i].indexOf(val);
+  //     const index = primer[i].indexOf(token);
   //     if (index > -1) {
   //       // return [i, index];
   //       return i;
@@ -866,22 +945,22 @@ export default class extends Controller {
     return list;
   }
 
-  // Look for 'val' in list of matches and highlight it,
+  // Look for 'token' in list of matches and highlight it,
   // otherwise highlight first match.
-  update_current_row(val) {
+  update_current_row(token) {
     this.verbose("update_current_row()");
     const matches = this.matches,
       size = this.PULLDOWN_SIZE;
     let exact = -1,
       part = -1;
 
-    if (val && val.length > 0) {
+    if (token && token.length > 0) {
       for (let i = 0; i < matches.length; i++) {
-        if (matches[i] == val) {
+        if (matches[i] == token) {
           exact = i;
           break;
         }
-        if (matches[i] == val.substr(0, matches[i].length) &&
+        if (matches[i] == token.substr(0, matches[i].length) &&
           (part < 0 || matches[i].length > matches[part].length))
           part = i;
       }
@@ -917,9 +996,16 @@ export default class extends Controller {
   get_search_token() {
     const val = this.inputTarget.value;
     let token = val;
+
+    // If we're only looking for whole words, don't make a request unless
+    // trailing space or comma, indicating a user has finished typing a word.
+    if (this.WHOLE_WORDS_ONLY && token.charAt(token.length - 1) != ',' &&
+      token.charAt(token.length - 1) != ' ') {
+      return '';
+    }
     if (this.SEPARATOR) {
-      const s_ext = this.search_token_extents();
-      token = val.substring(s_ext.start, s_ext.end);
+      const extents = this.search_token_extents();
+      token = val.substring(extents.start, extents.end);
     }
     return token;
   }
@@ -929,19 +1015,19 @@ export default class extends Controller {
     const old_str = this.inputTarget.value;
     if (this.SEPARATOR) {
       let new_str = "";
-      const s_ext = this.search_token_extents();
+      const extents = this.search_token_extents();
 
-      if (s_ext.start > 0)
-        new_str += old_str.substring(0, s_ext.start);
+      if (extents.start > 0)
+        new_str += old_str.substring(0, extents.start);
       new_str += new_val;
 
-      if (s_ext.end < old_str.length)
-        new_str += old_str.substring(s_ext.end);
+      if (extents.end < old_str.length)
+        new_str += old_str.substring(extents.end);
       if (old_str != new_str) {
         var old_scroll = this.inputTarget.offsetTop;
         this.inputTarget.value = new_str;
         this.setCursorPosition(this.inputTarget[0],
-          s_ext.start + new_val.length);
+          extents.start + new_val.length);
         this.inputTarget.offsetTop = old_scroll;
       }
     } else {
@@ -961,7 +1047,7 @@ export default class extends Controller {
     else
       start += this.SEPARATOR.length;
 
-    return { start: start, end: end };
+    return { start, end };
   }
 
   // ------------------------------ Fetch matches ------------------------------
@@ -969,23 +1055,25 @@ export default class extends Controller {
   // Send request for updated primer.
   refresh_primer() {
     this.verbose("refresh_primer()");
-    // let val = this.inputTarget.value.toLowerCase();
-    const val = this.get_search_token().toLowerCase(),
+
+    // token may be refined within this function, so it's a variable.
+    let token = this.get_search_token().toLowerCase(),
       last_request = this.last_fetch_request;
 
     // Don't make request on empty string!
-    if (!val || val.length < 1)
+    if (!this.ACT_LIKE_SELECT && (!token || token.length < 1))
       return;
 
     // Don't repeat last request accidentally!
-    if (last_request == val)
+    if (last_request == token)
       return;
 
-    // Memoize this condition, used twice.
-    // is the new search token an extension of the previous search string?
+    // Memoize this condition, used twice:
+    // "is the new search token an extension of the previous search string?"
     const new_val_refines_last_request =
-      (last_request.length < val.length) &&
-      (last_request == val.substr(0, last_request.length));
+      !this.WHOLE_WORDS_ONLY &&
+      (last_request?.length < token.length) &&
+      (last_request == token.substr(0, last_request?.length));
 
     // No need to make more constrained request if we got all results last time.
     if (!this.last_fetch_incomplete &&
@@ -999,35 +1087,45 @@ export default class extends Controller {
     if (this.fetch_request && new_val_refines_last_request)
       return;
 
+    if (token.length > this.MAX_STRING_LENGTH)
+      token = token.substr(0, this.MAX_STRING_LENGTH);
+
+    // If we're only looking for whole words, strip off trailing space or comma
+    if (this.WHOLE_WORDS_ONLY) {
+      token = token.trim().replace(/,.*$/, '')
+    }
+
+    const query_params = { string: token, ...this.request_params }
+
+    // If it's a param search, ignore the search token and return all results.
+    if (this.ACT_LIKE_SELECT) { query_params["all"] = true; }
+    if (this.WHOLE_WORDS_ONLY) { query_params["whole"] = true; }
+
     // Make request.
-    this.send_fetch_request(val);
+    this.send_fetch_request(query_params);
   }
 
   // Send AJAX request for more matching strings.
-  async send_fetch_request(val) {
+  async send_fetch_request(query_params) {
     this.verbose("send_fetch_request()");
-    if (val.length > this.MAX_REQUEST_LINK)
-      val = val.substr(0, this.MAX_REQUEST_LINK);
 
     if (this.log) {
-      this.debug("Sending fetch request: " + val);
+      this.debug("Sending fetch request: " + query_params.string + "...");
     }
 
-    // Need to doubly-encode this to prevent router from interpreting slashes,
-    // dots, etc.
-    const url = this.AJAX_URL.replace(
-      '@', encodeURIComponent(encodeURIComponent(val.replace(/\./g, '%2e')))
-    );
+    const url = this.AJAX_URL + this.TYPE,
+      controller = new AbortController();
 
-    this.last_fetch_request = val;
-
-    const controller = new AbortController(),
-      signal = controller.signal;
-
+    this.last_fetch_request = query_params.string;
     if (this.fetch_request)
       controller.abort();
 
-    const response = await get(url, { signal });
+    const response = await get(url, {
+      signal: controller.signal,
+      query: query_params,
+      responseKind: "json"
+    });
+
     if (response.ok) {
       const json = await response.json
       if (json) {
@@ -1036,7 +1134,7 @@ export default class extends Controller {
       }
     } else {
       this.fetch_request = null;
-      console.log(`got a ${response.status}`);
+      console.log(`got a ${response.status}: ${response.text}`);
     }
 
   }
@@ -1097,7 +1195,7 @@ export default class extends Controller {
   // ------------------------------- DEBUGGING ------------------------------
 
   debug(str) {
-    document.getElementById("log").insertAdjacentText("beforeend", str + "<br/>");
+    // document.getElementById("log").insertAdjacentText("beforeend", str + "<br/>");
   }
 
   verbose(str) {
