@@ -168,20 +168,23 @@ export default class extends Controller {
   // Action may be called from a <select> with
   // `data-action: "autocompleter-swap:swap->autocompleter#swap"`
   // or an event dispatched by another controller.
-  swap(opts = {}) {
-    if (!this.hasSelectTarget)
-      return;
+  swap({ detail }) {
+    let type;
 
-    const type = this.selectTarget.value;
+    if (this.hasSelectTarget) {
+      type = this.selectTarget.value;
+    } else if (detail?.hasOwnProperty("type")) {
+      type = detail.type;
+    }
 
     if (!AUTOCOMPLETER_TYPES.hasOwnProperty(type)) {
-      alert("MOAutocompleter: Invalid type: \"" + this.TYPE + "\"");
+      alert("MOAutocompleter: Invalid type: \"" + type + "\"");
     } else {
       this.TYPE = type;
       this.inputTarget.setAttribute("data-type", type)
       // add dependent properties and allow overrides
       Object.assign(this, AUTOCOMPLETER_TYPES[this.TYPE]);
-      Object.assign(this, opts);
+      Object.assign(this, detail); // type, request_params
       this.prepare_input_element();
     }
   }
