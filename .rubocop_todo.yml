@@ -275,7 +275,6 @@ Rails/HasManyOrHasOneDependent:
   Exclude:
     - 'app/models/external_site.rb'
     - 'app/models/image.rb'
-    - 'app/models/license.rb'
     - 'app/models/location.rb'
     - 'app/models/name.rb'
     - 'app/models/observation.rb'
@@ -483,7 +482,6 @@ Style/StringConcatenation:
     - 'app/models/comment/callbacks.rb'
     - 'app/models/interest.rb'
     - 'app/models/language_exporter.rb'
-    - 'app/models/license.rb'
     - 'app/models/name/parse.rb'
     - 'app/models/rss_log.rb'
     - 'config/unicorn.rb'

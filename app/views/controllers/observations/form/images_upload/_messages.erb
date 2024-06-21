@@ -1,21 +1,3 @@
-<!-- MULTIFILE_UPLOAD_FORM -->
-
-<div class="row">
-  <div class="col-sm-6 mt-3">
-    <label class="btn btn-default file-field">
-      <input type="file" multiple id="select_images_button"
-             data-action="change->obs-form-images#addSelectedFiles"
-             accept="image/*"/>
-      <%= :select_file.t %>
-    </label>
-  </div><!--.col-->
-  <div class="col-sm-6">
-    <%= help_block_with_arrow("left", id: "upload_multi_help") do
-      tag.p(:form_observations_upload_help_multi_select.t)
-    end %>
-  </div><!--.col-->
-</div><!--.row-->
-
 
 <!-- Container to show messages relating to the selected images -->
 <div id="img_messages" class="fade" style="display: none;"
@@ -82,10 +64,3 @@
     </div><!--.row-->
   </div><!--.well-->
 </div><!--#geocode_messages-->
-
-<!--Container for appending images-->
-<div class="images_container">
-  <%= tag.div("", id: "added_images_container",
-              data: { obs_form_images_target: "addedImages" }) %>
-</div>
-<!-- /MULTIFILE_UPLOAD_FORM -->

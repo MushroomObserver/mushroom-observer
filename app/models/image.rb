@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require("open3")
-require("mimemagic")
-require("fastimage")
+# require("open3")
+# require("mimemagic")
+# require("fastimage")
 #
 #  = Image Model
 #
@@ -164,16 +164,20 @@ require("fastimage")
 #  upload_md5sum::      MD5 hash of the upload (if available).
 #  upload_original_name:: Name of the file on the user's machine (if available).
 #
+#  == Class Constants
+#
+#  ALL_SIZES_INDEX::    Hash of image sizes and their pixel dimensions.
+#  ALL_SIZES::          All image sizes from +:thumbnail+ to +:full_size+.
+#  ALL_SIZES_IN_PIXELS:: All image sizes as pixels instead of Symbols.
+#  ALL_EXTENSIONS::     All image extensions, with "raw" for "other".
+#  ALL_CONTENT_TYPES::  All image content_types, with +nil+ for "other".
+#
 #  == Class Methods
 #
 #  validate_vote::      Validate a vote value.
-#  file_name::          Filename (relative to MO.local_image_files)
+#  full_filepath::      Full filepath (relative to MO.local_image_files)
 #                       given size and id.
-#  url::                Full URL on image server given size and id.
-#  all_sizes::          All image sizes from +:thumbnail+ to +:full_size+.
-#  all_sizes_in_pixels:: All image sizes as pixels instead of Symbol's.
-#  all_extensions::     All image extensions, with "raw" for "other".
-#  all_content_types::  All image content_types, with +nil+ for "other".
+#  url::                relative URL on image server given size and id.
 #  licenses_for_user_by_type:
 #                       Expensive query of image licenses the user has used.
 #  process_license_changes_for_user: Change licenses from one type to another.
@@ -225,6 +229,10 @@ require("fastimage")
 class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   require "fileutils"
   require "net/http"
+  require "English"
+  require "open3"
+  require "mimemagic"
+  require "fastimage"
 
   has_many :glossary_term_images, dependent: :destroy
   has_many :glossary_terms, through: :glossary_term_images
@@ -318,42 +326,32 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   ##############################################################################
 
   # Return a hash of all image sizes as pixels (Integer) indexed by Symbol.
-  def self.all_sizes_index
-    {
-      thumbnail: 160,
-      small: 320,
-      medium: 640,
-      large: 960,
-      huge: 1280,
-      full_size: 1e10
-    }
-  end
+  ALL_SIZES_INDEX = {
+    thumbnail: 160,
+    small: 320,
+    medium: 640,
+    large: 960,
+    huge: 1280,
+    full_size: 1e10
+  }.freeze
 
   # Return an Array of all image sizes from +:thumbnail+ to +:full_size+.
-  def self.all_sizes
-    all_sizes_index.keys
-  end
+  ALL_SIZES = ALL_SIZES_INDEX.keys.freeze
 
   # Return an Array of all image sizes as pixels (Integer) instead of Symbol's.
-  def self.all_sizes_in_pixels
-    all_sizes_index.values
-  end
+  ALL_SIZES_IN_PIXELS = ALL_SIZES_INDEX.values.freeze
 
   # Return an Array of all the extensions of all the image types we explicitly
   # support.
-  def self.all_extensions
-    %w[jpg gif png tiff bmp raw]
-  end
+  ALL_EXTENSIONS = %w[jpg gif png tiff bmp raw].freeze
 
   # Return an Array of all the extensions of all the image content types we
   # explicitly support.  (These will correspond one-to-one with the values
   # returned by +all_extensions+.)  (Note that the catch-all "raw" is just
   # referred to as +nil+ here, however the actual content type should be stored
   # in the image.  It's just that we haven't seen any other types yet.)
-  def self.all_content_types
-    ["image/jpeg", "image/gif", "image/png", "image/tiff", "image/x-ms-bmp",
-     "image/bmp", nil]
-  end
+  ALL_CONTENT_TYPES = ["image/jpeg", "image/gif", "image/png", "image/tiff",
+                       "image/x-ms-bmp", "image/bmp", nil].freeze
 
   def image_url(size)
     Image::URL.new(
@@ -383,7 +381,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def all_urls
     hash = {}
-    Image.all_sizes.each do |size|
+    ALL_SIZES.each do |size|
       hash[size] = image_url(size).url
     end
     hash
@@ -391,42 +389,26 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def self.all_urls(id, args = {})
     hash = {}
-    all_sizes.each do |size|
+    ALL_SIZES.each do |size|
       hash[size] = image_url(size, id, args).url
     end
     hash
   end
 
-  def local_file_name(size)
-    image_url(size).file_name(MO.local_image_files)
+  def full_filepath(size)
+    image_url(size).full_filepath(MO.local_image_files)
+  end
+
+  # Defines methods for each size. e.g. `{size}_url`
+  # full_size_url, huge_url, large_url, medium_url, small_url, thumbnail_url
+  ALL_SIZES.each do |size|
+    define_method(:"#{size}_url") do
+      url(size)
+    end
   end
 
   def original_url
     url(:original)
-  end
-
-  def full_size_url
-    url(:full_size)
-  end
-
-  def huge_url
-    url(:huge)
-  end
-
-  def large_url
-    url(:large)
-  end
-
-  def medium_url
-    url(:medium)
-  end
-
-  def small_url
-    url(:small)
-  end
-
-  def thumbnail_url
-    url(:thumbnail)
   end
 
   def original_extension
@@ -753,7 +735,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # Move temp file into its final position.  Adds any errors to the :image
   # field and returns false.
   def move_original
-    original_image = local_file_name(:original)
+    original_image = full_filepath(:original)
     unless File.rename(upload_temp_file, original_image)
       raise(SystemCallError.new("Try again."))
     end
@@ -771,7 +753,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Get image size from JPEG header and set the corresponding record fields.
   # Saves the record. NOTE: Requires gem("fastimage")
-  def set_image_size(file = local_file_name(:full_size))
+  def set_image_size(file = full_filepath(:full_size))
     w, h = FastImage.size(file)
     return unless /^\d+$/.match?(w.to_s)
 
@@ -803,6 +785,34 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
     update_attribute(:gps_stripped, true)
     nil
+  end
+
+  # Get exif data from image by reading the header straight off the file,
+  # remotely. Returns nil if it fails. Costly.
+  def read_exif_data
+    hide_gps = observations.any?(&:gps_hidden)
+
+    if transferred
+      cmd = Shellwords.escape("script/exiftool_remote")
+      url = Shellwords.escape(original_url)
+      result, status = Open3.capture2e(cmd, url)
+    else
+      cmd  = Shellwords.escape("exiftool")
+      file = Shellwords.escape(full_filepath("orig"))
+      result, status = Open3.capture2e(cmd, file)
+    end
+
+    data = status.success? ? self.class.parse_exif_data(result, hide_gps) : nil
+    [data, status, result]
+  end
+
+  GPS_TAGS = /latitude|longitude|gps/i
+
+  def self.parse_exif_data(result, hide_gps)
+    result.fix_utf8.split("\n").
+      map { |line| line.split(/\s*:\s+/, 2) }.
+      select { |_key, val| val != "" && val != "n/a" }.
+      reject { |key, _val| hide_gps && key.match(GPS_TAGS) }
   end
 
   ##############################################################################

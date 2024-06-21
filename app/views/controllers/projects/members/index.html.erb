@@ -17,9 +17,8 @@ action = { controller: "/projects/members", action: :create,
   <%= form_with(url: action, id: "project_member_form") do |f| %>
 
     <%= autocompleter_field(
-      form: f, field: :candidate, value: @candidate,
-      label: :LOGIN_NAME.t + ":", size: 42, autofocus: true,
-      data: { autocomplete: :user }
+      form: f, field: :candidate, type: :user, value: @candidate,
+      label:"#{:LOGIN_NAME.t }:", size: 42, autofocus: true,
     ) %>
 
     <%= submit_button(form: f, button: :ADD.t, class: "ml-3") %>
@@ -42,8 +41,9 @@ action = { controller: "/projects/members", action: :create,
       <tr>
         <td class="text-center">
 	  <%= if user.image_id
-                interactive_image(Image.find(user.image_id), votes: false,
-	                          size: :thumbnail)
+          interactive_image(
+            Image.find(user.image_id), votes: false, size: :thumbnail
+          )
 	      end %>
           <%= user_link(user, user.login) %>
         </td>

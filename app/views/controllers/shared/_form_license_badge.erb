@@ -1,0 +1,8 @@
+        <%=
+          tag.div(id: "license") do
+            link_to(license.url, rel: "license") do
+              image_tag(license.badge_url,
+                    alt: license.display_name, class: "border-none")
+            end
+          end
+        %>
