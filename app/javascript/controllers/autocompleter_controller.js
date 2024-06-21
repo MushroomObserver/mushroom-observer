@@ -900,7 +900,7 @@ export default class extends Controller {
         { name: obj['name'].toLowerCase(), id: obj['id'] }
       )),
       matches = [];
-    debugger
+
     if (token != '' && primer.length > 1) {
       let the_rest = (token.match(/ /g) || []).length >= this.COLLAPSE;
 
