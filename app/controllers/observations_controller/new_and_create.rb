@@ -253,7 +253,7 @@ module ObservationsController::NewAndCreate
     herbarium = params2[:herbarium_name].to_s.strip_html.strip_squeeze
     herbarium = lookup_herbarium(herbarium)
     init_det  = initial_determination(obs)
-    accession = params2[:herbarium_id].to_s.strip_html.strip_squeeze
+    accession = params2[:accession_number].to_s.strip_html.strip_squeeze
     accession = default_accession_number(obs, params) if accession.blank?
     notes = params2[:herbarium_record_notes]
     [herbarium, init_det, accession, notes]
@@ -309,7 +309,7 @@ module ObservationsController::NewAndCreate
     # If user checks specimen box and nothing else, do not create record.
     obs.collection_numbers.empty? &&
       herbarium == @user.preferred_herbarium &&
-      params[:herbarium_record][:herbarium_id].blank?
+      params[:herbarium_record][:accession_number].blank?
   end
 
   def redirect_to_next_page

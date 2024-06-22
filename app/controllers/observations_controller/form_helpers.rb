@@ -63,7 +63,7 @@ module ObservationsController::FormHelpers
     @collectors_name   = @user.legal_name
     @collectors_number = ""
     @herbarium_name    = @user.preferred_herbarium_name
-    @herbarium_id      = ""
+    @accession_number  = ""
   end
 
   def init_specimen_vars_for_reload
@@ -74,8 +74,8 @@ module ObservationsController::FormHelpers
     end
     return unless params[:herbarium_record]
 
-    @herbarium_name = params[:herbarium_record][:herbarium_name]
-    @herbarium_id   = params[:herbarium_record][:herbarium_id]
+    @herbarium_name   = params[:herbarium_record][:herbarium_name]
+    @accession_number = params[:herbarium_record][:accession_number]
   end
 
   def init_project_vars
