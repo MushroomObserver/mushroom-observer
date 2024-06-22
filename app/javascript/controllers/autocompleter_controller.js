@@ -184,9 +184,9 @@ export default class extends Controller {
     }
   }
 
-  pulldownTargetConnected() {
-    this.getRowHeight();
-  }
+  // pulldownTargetConnected() {
+  //   this.getRowHeight();
+  // }
 
   // Prepare input element: attach elements, set properties.
   prepareInputElement() {
@@ -565,6 +565,13 @@ export default class extends Controller {
       li = this.listTarget.children[0].cloneNode(true),
       a = li.children[0];
 
+    Object.keys(ul.dataset).forEach(dataKey => {
+      delete ul.dataset[dataKey];
+    });
+    Object.keys(a.dataset).forEach(dataKey => {
+      delete a.dataset[dataKey];
+    });
+
     div.classList.add('test');
     a.innerHTML = 'test';
     ul.appendChild(li);
@@ -606,15 +613,14 @@ export default class extends Controller {
         "Redraw: matches=" + matches.length + ", scroll=" + scroll + ", cursor=" + cur
       );
     }
-
     // Get row height if haven't been able to yet.
-    this.getRowHeight();
+    if (!this.ROW_HEIGHT)
+      this.getRowHeight();
     if (rows.length) {
       this.updateRows(rows, matches, size, scroll);
       this.highlightNewRow(rows, cur, size, scroll)
       this.makePulldownVisible(matches, size, scroll)
     }
-
     // Make sure input focus stays on text field!
     this.inputTarget.focus();
   }

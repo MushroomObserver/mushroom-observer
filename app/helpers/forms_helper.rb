@@ -171,9 +171,9 @@ module FormsHelper
     end
 
     if args[:textarea] == true
-      concat(text_area_with_label(**ac_args))
+      text_area_with_label(**ac_args)
     else
-      concat(text_field_with_label(**ac_args))
+      text_field_with_label(**ac_args)
     end
   end
 
