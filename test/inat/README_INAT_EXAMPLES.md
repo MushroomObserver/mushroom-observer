@@ -20,6 +20,7 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | fuligo_septica.txt | [219783802](https://www.inaturalist.org/observations/219783802) | 1 | public | slime mold **Protozoa** |
 | gyromitra_ancilis.txt | [216745568](https://www.inaturalist.org/observations/216745568) | 3 | public | **cc-by license**, **many projects** |
 | inocybe.txt | [222904190](https://www.inaturalist.org/observations/222904190) | 5 | public | cc-by-nc, **2 tags** |
+| lentinellus_ursinus.txt | [24970904](https://api.inaturalist.org/v1/observations/220796026) | 2 | obscured | **ID matches many MO names** |
 | lyocperdon.txt | [24970904](https://www.inaturalist.org/observations/24970904) | 2 | public | cc-by-nc, projects, Activity, >1 field including, **DNA** |
 | russulaceae.txt | [216675045](https://www.inaturalist.org/observations/216675045) | 2 | public | **all rights reserved**, many projects, Activity |
 | somion_unicolor.json |  |  |  | Formatted version of following; facilitates viewing iNat API response key/values |
@@ -42,7 +43,7 @@ iNat fungal Obss with these fields/licenses
 - Annotations
 - Activity
 - Public Domain
-https://api.inaturalist.org/v1/observations?identified=true&license=cc0&rank=species&iconic_taxa=Fungi&quality_grade=research&page=1&order=desc&order_by=created_at&only_id=true
+<https://api.inaturalist.org/v1/observations?identified=true&license=cc0&rank=species&iconic_taxa=Fungi&quality_grade=research&page=1&order=desc&order_by=created_at&only_id=true>
 - nonderiv license
 - Fungus with photo that was uploaded to iNat >= 1 day after iNat Obs was created
 - Obs with narrower Photo license than overall Obs License

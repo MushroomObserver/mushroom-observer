@@ -98,7 +98,7 @@ class InatObs
   end
 
   def inat_taxon_name
-    obs[:taxon][:name]
+    inat_taxon[:name]
   end
 
   def inat_user_login
@@ -116,10 +116,9 @@ class InatObs
   end
 
   def name_id
-    inat_taxon = obs[:taxon]
     mo_names = Name.where(text_name: inat_taxon[:name],
                           rank: inat_taxon[:rank].titleize).
-               # iNat doesn't have names "sensu xxx"
+               # iNat doesn't have taxon names "sensu xxx"
                # so don't map them to MO Names sensu xxx
                where.not(Name[:author] =~ /^sensu /)
     return Name.unknown.id if mo_names.none?
@@ -217,6 +216,10 @@ class InatObs
   # See https://github.com/MushroomObserver/mushroom-observer/issues/1955#issuecomment-2164323992
   def inat_projects
     obs[:project_observations]
+  end
+
+  def inat_taxon
+    obs[:taxon]
   end
 
   def slime_mold?

@@ -75,6 +75,7 @@ coprinus_comatus:
   updated_at: 2007-02-27 20:48:00
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
   icn_id: 148667
+  deprecated: false
 
 coprinus_sensu_lato:
   <<: *DEFAULTS
@@ -85,6 +86,7 @@ coprinus_sensu_lato:
   sort_name: Coprinus  sensu lato
   rank: <%= Name.ranks[:Genus] %>
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_"
+  deprecated: false
 
 stereum:
   <<: *DEFAULTS
@@ -635,6 +637,7 @@ lentinellus_ursinus_author1:
   sort_name: Lentinellus ursinus  Kühner
   created_at: 2008-03-19 08:35:37
   updated_at: 2008-03-19 08:35:37
+  deprecated: false
 
 lentinellus_ursinus_author2:
   <<: *DEFAULTS
@@ -646,6 +649,7 @@ lentinellus_ursinus_author2:
   sort_name: Lentinellus ursinus  Kuhner
   created_at: 2008-03-19 08:35:37
   updated_at: 2008-03-19 08:35:37
+  deprecated: false
 
 macrocybe:
   <<: *DEFAULTS

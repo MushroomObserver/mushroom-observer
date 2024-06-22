@@ -51,14 +51,12 @@ class InatObsTest < UnitTestCase
       # log_updated_at: Sat, 16 Mar 2024 17:22:51.000000000 EDT -04:00,
     )
 
-    # mappings to Observation attributes
+    # mapping to MO Observation attributes
     %w[gps_hidden lat lng name_id notes text_name when where].
       each do |attribute|
         assert_equal(expected_mapping.send(attribute),
                      mock_inat_obs.send(attribute))
       end
-
-    # TODO: include in above array after creating Observation.inat_id attribute
 
     expect = License.where(License[:url] =~ "/by-nc/").
              where(deprecated: false).order(id: :asc).first
@@ -92,16 +90,29 @@ class InatObsTest < UnitTestCase
   # rubocop:enable Style/NumericLiterals
 
   def test_name_sensu
-    names = Name.where(text_name: "Coprinus", rank: "Genus")
+    # Make sure fixtures still OK
+    names = Name.where(text_name: "Coprinus", rank: "Genus", deprecated: false)
     assert(names.any? { |name| name.author.start_with?("sensu ") } &&
            names.one? { |name| !name.author.start_with?("sensu ") },
-           "Test needs a name matching >= 1 MO `send` Name " \
+           "Test needs a Name fixture matching >= 1 MO `sensu` Name " \
            "and exactly 1 MO non-sensu Name")
 
     mock_inat_obs = mock("coprinus")
 
-    assert_equal(names(:coprinus).text_name, mock_inat_obs.text_name)
     assert_equal(names(:coprinus).id, mock_inat_obs.name_id)
+    assert_equal(names(:coprinus).text_name, mock_inat_obs.text_name)
+  end
+
+  def test_names_alternative_authors
+    # Make sure fixtures still OK
+    names = Name.where(text_name: "Lentinellus ursinus", rank: "Species",
+                       deprecated: false)
+    assert(names.many? { |name| !name.author.start_with?("sensu ") },
+           "Test needs a name with many non-sensu matching fixtures")
+
+    mock_inat_obs = mock("lentinellus_ursinus")
+    assert_equal(Name.unknown.id, mock_inat_obs.name_id)
+    assert_equal(Name.unknown.text_name, mock_inat_obs.text_name)
   end
 
   def test_inat_observation_fields
@@ -140,6 +151,11 @@ class InatObsTest < UnitTestCase
 
     assert_not(mock("ceanothus_cordulatus").taxon_importable?,
                "iNat Plant observations should not be importable")
+  end
+
+  def test_inat_obs_photos
+    assert(mock("evernia_no_photos").inat_obs_photos.none?)
+    assert(mock("coprinus").inat_obs_photos.one?)
   end
 
   # comma separated string of project names
