@@ -164,10 +164,34 @@ module FormsHelper
     ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
                             separator: args[:separator] }
 
-    if args[:textarea] == true
-      text_area_with_label(**ac_args)
+    concat(if args[:textarea] == true
+             text_area_with_label(**ac_args)
+           else
+             text_field_with_label(**ac_args)
+           end)
+    concat(autocompleter_dropdown)
+    concat(args[:form].hidden_field("#{args[:type]}_id")) if args[:form]
+  end
+
+  def autocompleter_dropdown
+    tag.div(class: "auto_complete dropdown-menu",
+            data: { autocompleter_target: "pulldown" }) do
+      tag.ul(class: "virtual_list") do
+        10.times do
+          concat(tag.li(class: "dropdown-item") { tag.a("", href: "#") })
+        end
+      end
+    end
+  end
+
+  def autocompleter_type_to_model(type)
+    case type
+    when :region
+      :location
+    when :clade
+      :name
     else
-      text_field_with_label(**ac_args)
+      type
     end
   end
 
