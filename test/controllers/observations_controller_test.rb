@@ -31,7 +31,7 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def default_herbarium_record_fields
-    { herbarium_name: "", herbarium_id: "" }
+    { herbarium_name: "", accession_number: "" }
   end
 
   def location_exists_or_place_name_blank(params)
@@ -1436,7 +1436,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_input_value(:collection_number_number, "")
     assert_input_value(:herbarium_record_herbarium_name,
                        users(:rolf).preferred_herbarium_name)
-    assert_input_value(:herbarium_record_herbarium_id, "")
+    assert_input_value(:herbarium_record_accession_number, "")
     assert_true(@response.body.include?("Albion, Mendocino Co., California"))
     users(:rolf).update(location_format: "scientific")
     get(:new)
@@ -1577,7 +1577,7 @@ class ObservationsControllerTest < FunctionalTestCase
       { observation: { specimen: "1" },
         herbarium_record: {
           herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
-          herbarium_id: "1234"
+          accession_number: "1234"
         },
         naming: { name: "Coprinus comatus" } },
       1, 1, 0
@@ -1592,14 +1592,14 @@ class ObservationsControllerTest < FunctionalTestCase
       { observation: { specimen: "1" },
         herbarium_record: {
           herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
-          herbarium_id: "1234"
+          accession_number: "1234"
         },
         naming: { name: "Cortinarius sp." } },
       0, 0, 0
     )
     assert_input_value(:herbarium_record_herbarium_name,
                        "NY - The New York Botanical Garden")
-    assert_input_value(:herbarium_record_herbarium_id, "1234")
+    assert_input_value(:herbarium_record_accession_number, "1234")
   end
 
   def test_create_observation_with_herbarium_no_id
@@ -1608,7 +1608,7 @@ class ObservationsControllerTest < FunctionalTestCase
       { observation: { specimen: "1" },
         herbarium_record: {
           herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
-          herbarium_id: ""
+          accession_number: ""
         },
         naming: { name: name } },
       1, 1, 0
@@ -1620,11 +1620,10 @@ class ObservationsControllerTest < FunctionalTestCase
 
   def test_create_observation_with_herbarium_but_no_specimen
     generic_construct_observation(
-      { herbarium_record:
-                          { herbarium_name: herbaria(
-                            :nybg_herbarium
-                          ).auto_complete_name,
-                            herbarium_id: "1234" },
+      { herbarium_record: {
+          herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
+          accession_number: "1234"
+        },
         naming: { name: "Coprinus comatus" } },
       1, 1, 0
     )
@@ -1637,7 +1636,7 @@ class ObservationsControllerTest < FunctionalTestCase
     generic_construct_observation(
       { observation: { specimen: "1" },
         herbarium_record: { herbarium_name: "A Brand New Herbarium",
-                            herbarium_id: "" },
+                            accession_number: "" },
         naming: { name: "Coprinus comatus" } },
       1, 1, 0
     )
@@ -1650,7 +1649,7 @@ class ObservationsControllerTest < FunctionalTestCase
     generic_construct_observation(
       { observation: { specimen: "1" },
         herbarium_record: { herbarium_name: katrina.personal_herbarium_name,
-                            herbarium_id: "12345" },
+                            accession_number: "12345" },
         naming: { name: "Coprinus comatus" } },
       1, 1, 0, katrina
     )
