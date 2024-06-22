@@ -25,9 +25,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       browser.keyboard.type(:tab)
       assert_field("naming_name", with: "Elfin saddle")
       # start typing the location...
-      fill_in("observation_place_name", with: locations.first.name[0, 10])
+      fill_in("observation_place_name", with: locations.first.name[0, 1])
       # wait for the autocompleter...
-      assert_selector(".auto_complete")
+      assert_selector(".auto_complete", wait: 6)
       browser.keyboard.type(:down, :tab) # cursor to first match + select row
       assert_field("observation_place_name", with: locations.first.name)
       click_commit

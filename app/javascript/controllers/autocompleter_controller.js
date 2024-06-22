@@ -537,7 +537,7 @@ export default class extends Controller {
       idx = parseInt(idx.target.parentElement.dataset.row);
 
     // const old_val = this.inputTarget.value;
-    let new_val = this.matches[this.scroll_offset + idx];
+    let new_val = this.matches[this.scroll_offset + idx]['name'];
     // Close pulldown unless the value the user selected uncollapses into a set
     // of new options.  In that case schedule a refresh and leave it up.
     if (this.COLLAPSE > 0 &&
@@ -610,7 +610,8 @@ export default class extends Controller {
 
     if (this.log) {
       this.debug(
-        "Redraw: matches=" + matches.length + ", scroll=" + scroll + ", cursor=" + cur
+        "Redraw: matches=" + matches.length +
+        ", scroll=" + scroll + ", cursor=" + cur
       );
     }
     // Get row height if haven't been able to yet.
@@ -630,20 +631,25 @@ export default class extends Controller {
   updateRows(rows, matches, size, scroll) {
     let i, text, stored;
     for (i = 0; i < size; i++) {
-      let row = rows.item(i);
-      let link = row.children[0];
+      let row = rows.item(i),
+        link = row.children[0];
       text = link.innerHTML;
       if (i + scroll < matches.length) {
-        stored = this.escapeHTML(matches[i + scroll]);
+        const { name, ...new_data } = matches[i + scroll];
+        stored = this.escapeHTML(name);
         if (text != stored) {
-          // if (text == '')
-          //   row.style.display = 'block';
           link.innerHTML = stored;
+          // Give the link the dataset of matches[i + scroll], minus name
+          Object.keys(new_data).forEach(key => {
+            link.dataset[key] = new_data[key];
+          });
         }
       } else {
         if (text != '') {
           link.innerHTML = '';
-          // row.style.display = 'none';
+          Object.keys(link.dataset).forEach(key => {
+            delete link.dataset[key];
+          });
         }
       }
     }
@@ -762,7 +768,9 @@ export default class extends Controller {
 
     // Sort and remove duplicates, unless it's already sorted.
     if (!this.ACT_LIKE_SELECT)
-      this.matches = this.removeDups(this.matches.sort());
+      this.matches = this.remove_dups(this.matches.sort(
+        (a, b) => (a.name || "").localeCompare(b.name || "")
+      ));
     // Try to find old highlighted row in new set of options.
     this.updateCurrentRow(last);
     // Reset width each time we change the options.
@@ -775,21 +783,24 @@ export default class extends Controller {
   populateSelect() {
     this.matches = this.primer;
     if (this.matches.length > 0)
-      this.inputTarget.value = this.matches[0];
+      this.inputTarget.value = this.matches[0]['name'];
   }
 
   // Grab all matches, doing exact match, ignoring number of words.
   populateNormal() {
     const token = this.getSearchToken().normalize().toLowerCase(),
       // normalize the Unicode of each string in primer for search
-      primer = this.primer.map((str) => { return str.normalize() }),
+      primer = this.primer,
+      primer_nm = this.primer.map((obj) => (
+        { name: obj['name'].normalize().toLowerCase() }
+      )),
       matches = [];
 
-    if (token != '') {
-      for (let i = 0; i < primer.length; i++) {
-        let s = primer[i + 1];
-        if (s && s.length > 0 && s.toLowerCase().indexOf(token) >= 0) {
-          matches.push(s);
+    if (token != '' && primer.length > 1) {
+      for (let i = 1; i < primer.length; i++) {
+        let s = primer_nm[i]['name'];
+        if (s && s.length > 0 && s.indexOf(token) >= 0) {
+          matches.push(primer[i]);
         }
       }
     }
@@ -803,21 +814,24 @@ export default class extends Controller {
       replace(/^ */, '').replace(/  +/g, ' '),
       // get the separate words as tokens
       tokens = token.split(' '),
+      primer = this.primer,
       // normalize the Unicode of each string in primer for search
-      primer = this.primer.map((str) => { return str.normalize() }),
+      primer_nm = this.primer.map((obj) => (
+        { name: obj['name'].normalize().toLowerCase() }
+      )),
       matches = [];
 
     if (token != '' && primer.length > 1) {
       for (let i = 1; i < primer.length; i++) {
-        let s = primer[i] || '',
-          s2 = ' ' + s.toLowerCase() + ' ',
+        let s = primer_nm[i]['name'] || '',
+          s2 = ' ' + s + ' ',
           k;
         // check each word in the primer entry for a matching word
         for (k = 0; k < tokens.length; k++) {
           if (s2.indexOf(' ' + tokens[k]) < 0) break;
         }
         if (k >= tokens.length) {
-          matches.push(s);
+          matches.push(primer[i]);
         }
       }
     }
@@ -830,32 +844,34 @@ export default class extends Controller {
     const token = this.getSearchToken().toLowerCase(),
       primer = this.primer,
       // make a lowercased duplicate of primer to regularize search
-      primer_lc = this.primer.map((str) => { return str.toLowerCase() }),
+      primer_lc = this.primer.map((obj) => (
+        { name: obj['name'].toLowerCase() }
+      )),
       matches = [];
 
     if (token != '' && primer.length > 1) {
       let the_rest = (token.match(/ /g) || []).length >= this.COLLAPSE;
 
-      for (let i = 1; i < primer_lc.length; i++) {
-        if (primer_lc[i].indexOf(token) > -1) {
-          let s = primer[i];
+      for (let i = 1; i < primer.length; i++) {
+        if (primer_lc[i]['name'].indexOf(token) > -1) {
+          let s = primer[i]['name'];
           if (s.length > 0) {
             if (the_rest || s.indexOf(' ', token.length) < token.length) {
-              matches.push(s);
+              matches.push(primer[i]);
             } else if (matches.length > 1) {
               break;
             } else {
               if (matches[0] == token)
                 matches.pop();
-              matches.push(s);
+              matches.push(primer[i]);
               the_rest = true;
             }
           }
         }
       }
       if (matches.length == 1 &&
-        (token == matches[0].toLowerCase() ||
-          token == matches[0].toLowerCase() + ' '))
+        (token == matches[0]['name'].toLowerCase() ||
+          token == matches[0]['name'].toLowerCase() + ' '))
         matches.pop();
     }
     this.matches = matches;
@@ -884,12 +900,13 @@ export default class extends Controller {
 
     if (token && token.length > 0) {
       for (let i = 0; i < matches.length; i++) {
-        if (matches[i] == token) {
+        if (matches[i]['name'] == token) {
           exact = i;
           break;
         }
-        if (matches[i] == token.substr(0, matches[i].length) &&
-          (part < 0 || matches[i].length > matches[part].length))
+        if (matches[i]['name'] == token.substr(0, matches[i]['name'].length) &&
+          (part < 0 ||
+            matches[i]['name'].length > matches[part]['name'].length))
           part = i;
       }
     }
@@ -1071,18 +1088,23 @@ export default class extends Controller {
   // 1. first line is string actually used to match;
   // 2. the last string is "..." if the set of results is incomplete;
   // 3. the rest are matching results.
+  //
+  // `this.primer` is a huge array of records usually matching only the first
+  // letter typed, which is assumed not to change too often. `this.matches` is
+  // the smaller array of records "refined" from the primer, matching the search
+  // token as it is typed out. The pulldown menu is populated with the matches.
+  //
   processFetchResponse(new_primer) {
     this.verbose("processFetchResponse()");
 
     // Clear flag telling us request is pending.
     this.fetch_request = null;
-
     // Record string actually used to do matching: might be less strict
     // than one sent in request.
-    this.last_fetch_request = new_primer[0];
+    this.last_fetch_request = new_primer[0]['name'];
 
     // Check for trailing "..." signaling incomplete set of results.
-    if (new_primer[new_primer.length - 1] == "...") {
+    if (new_primer[new_primer.length - 1]['name'] == "...") {
       this.last_fetch_incomplete = true;
       new_primer = new_primer.slice(0, new_primer.length - 1);
       if (this.focused)
@@ -1095,8 +1117,9 @@ export default class extends Controller {
 
     // Log requests and responses if in debug mode.
     if (this.log) {
-      this.debug("Got response for " + this.escapeHTML(this.last_fetch_request) +
-        ": " + (new_primer.length - 1) + " strings (" +
+      this.debug("Got response for " +
+        this.escapeHTML(this.last_fetch_request) + ": " +
+        (new_primer.length - 1) + " strings (" +
         (this.last_fetch_incomplete ? "incomplete" : "complete") + ").");
     }
 
