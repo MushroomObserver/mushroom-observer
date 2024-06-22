@@ -333,8 +333,9 @@ export default class extends Controller {
     // this.debug("ourChange(" + this.inputTarget.value + ")");
     if (new_val != old_val) {
       this.old_value = new_val;
-      if (do_refresh)
+      if (do_refresh) {
         this.scheduleRefresh();
+      }
     }
   }
 
@@ -401,6 +402,7 @@ export default class extends Controller {
         this.refreshPrimer();
       this.populateMatches();
       this.drawPulldown();
+      this.hiddenTarget.value = '';
     }), this.REFRESH_DELAY * 1000);
   }
 
@@ -534,10 +536,12 @@ export default class extends Controller {
   selectRow(idx) {
     this.verbose("selectRow()");
     if (idx instanceof Event)
-      idx = parseInt(idx.target.parentElement.dataset.row);
+      idx = parseInt(idx.target.dataset.row);
 
     // const old_val = this.inputTarget.value;
-    let new_val = this.matches[this.scroll_offset + idx]['name'];
+    let new_data = this.matches[this.scroll_offset + idx],
+      new_val = new_data['name'],
+      new_id = new_data['id'];
     // Close pulldown unless the value the user selected uncollapses into a set
     // of new options.  In that case schedule a refresh and leave it up.
     if (this.COLLAPSE > 0 &&
@@ -550,6 +554,7 @@ export default class extends Controller {
     this.inputTarget.focus();
     this.focused = true;
     this.inputTarget.value = new_val;
+    this.hiddenTarget.value = new_id;
     this.setSearchToken(new_val);
     this.ourChange(false);
   }
@@ -648,7 +653,8 @@ export default class extends Controller {
         if (text != '') {
           link.innerHTML = '';
           Object.keys(link.dataset).forEach(key => {
-            delete link.dataset[key];
+            if (!['row', 'action'].includes(key))
+              delete link.dataset[key];
           });
         }
       }
@@ -768,7 +774,7 @@ export default class extends Controller {
 
     // Sort and remove duplicates, unless it's already sorted.
     if (!this.ACT_LIKE_SELECT)
-      this.matches = this.remove_dups(this.matches.sort(
+      this.matches = this.removeDups(this.matches.sort(
         (a, b) => (a.name || "").localeCompare(b.name || "")
       ));
     // Try to find old highlighted row in new set of options.
