@@ -19,7 +19,7 @@ tag.div(class: "well well-sm position-relative",
             tag.strong("#{:ALT.l}: ") + tag.span(alt, class: "exif_alt") + " m"
           ].safe_join(", ")
         end,
-        carousel_transfer_exif_button
+        carousel_transfer_exif_button(has_exif: date.present? || lat.present?)
       ].safe_join
     end,
     tag.div(class: "form-group mb-0 overflow-hidden") do
