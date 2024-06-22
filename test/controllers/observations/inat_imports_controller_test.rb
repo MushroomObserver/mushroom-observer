@@ -46,7 +46,7 @@ module Observations
       assert(obs.comments.any?, "Imported iNat should have >= 1 Comment")
     end
 
-    def test_create_public_import_obs_with_photo
+    def test_create_obs_with_photo
       mock_inat_response =
         File.read("test/inat/lycoperdon.txt")
       inat_obs = InatObs.new(mock_inat_response)

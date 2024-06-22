@@ -101,8 +101,6 @@ module Observations
     end
 
     def add_inat_images(inat_obs_photos)
-
-
       inat_obs_photos.each do |obs_photo|
         photo = InatObsPhoto.new(obs_photo)
         # ImageAPI#create params to consider adding to API params below
@@ -120,8 +118,8 @@ module Observations
           original_name: photo.original_name
         }
 
+        api = InatPhotoImporter.new(params)
         # TODO: Error handling? 2024-06-19 jdc.
-        api = API2.execute(params)
         User.current = @user # API call zaps User.current
 
         image = Image.find(api.results.first.id)
