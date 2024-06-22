@@ -59,12 +59,6 @@ const DEFAULT_OPTS = {
   // class of enclosing wrap div, usually also a .form-group.
   // Must have position: relative (or absolute...)
   WRAP_CLASS: 'dropdown',
-  // class of pulldown div, selected by system tests
-  PULLDOWN_CLASSES: ['auto_complete', 'dropdown-menu'],
-  // class of pulldown <ul>, purely for developer comprehension of how it's used
-  LIST_CLASSES: ['virtual_list'],
-  // class of pulldown <li>
-  ITEM_CLASSES: ['dropdown-item'],
   // class of <li> when highlighted.
   HOT_CLASS: 'active'
 }
@@ -99,13 +93,10 @@ const AUTOCOMPLETER_TYPES = {
 
 // These are internal state variables the user should leave alone.
 const INTERNAL_OPTS = {
-  PULLDOWN_ELEM: null,   // DOM element of pulldown div
-  LIST_ELEM: null,       // DOM element of pulldown ul
   ROW_HEIGHT: null,      // height of a ul li row in pixels (determined below)
   SCROLLBAR_WIDTH: null, // width of scrollbar in browser (determined below)
   focused: false,        // is user in text field?
   menu_up: false,        // is pulldown visible?
-  dropdown_wrap: null,   // wrapping div for pulldown
   old_value: null,       // previous value of input field
   primer: [],            // a server-supplied list of many options
   matches: [],           // list of options currently showing
@@ -127,7 +118,7 @@ export default class extends Controller {
   // The root element should usually be the .form-group wrapping the <input>.
   // The select target is not the <input> element, but a <select> that can
   // swap out the autocompleter type. The <input> element is its target.
-  static targets = ["input", "select"]
+  static targets = ["input", "select", "pulldown", "list", "hidden", "wrap"]
 
   initialize() {
     Object.assign(this, DEFAULT_OPTS);
@@ -153,23 +144,15 @@ export default class extends Controller {
     // Figure out a few browser-dependent dimensions.
     this.getScrollBarWidth;
 
-    let wrap = this.element;
     // Wrap is usually the root element with the controller, a ".form-group".
     // But it could have different markup.
-    if (this.element.classList.contains(this.WRAP_CLASS)) {
-      this.dropdown_wrap = this.element;
-    } else if (wrap = this.inputTarget.closest('.' + this.WRAP_CLASS)) {
-      this.dropdown_wrap = wrap;
-    } else {
+    if (!this.hasWrapTarget) {
       alert("MOAutocompleter: needs a wrapping div with class: \"" +
         this.WRAP_CLASS + "\"");
     }
 
-    // Create pulldown.
-    this.create_pulldown();
-
     // Attach events, etc. to input element.
-    this.prepare_input_element();
+    this.prepareInputElement();
   }
 
   // Swap out autocompleter type (and properties)
@@ -196,18 +179,22 @@ export default class extends Controller {
       Object.assign(this, detail); // type, request_params
       this.primer = [];
       this.matches = [];
-      this.prepare_input_element();
-      this.schedule_refresh(); // refresh the primer
+      this.prepareInputElement();
+      this.scheduleRefresh(); // refresh the primer
     }
   }
 
+  pulldownTargetConnected() {
+    this.getRowHeight();
+  }
+
   // Prepare input element: attach elements, set properties.
-  prepare_input_element() {
+  prepareInputElement() {
     // console.log(elem)
     this.old_value = null;
 
     // Attach events
-    this.add_event_listeners();
+    this.addEventListeners();
 
     // sanity check to show which autocompleter is currently on the element
     this.inputTarget.setAttribute("data-ajax-url", this.AJAX_URL + this.TYPE);
@@ -224,7 +211,7 @@ export default class extends Controller {
   // (the eventTarget) -- unless you pass an arrow function as the listener.
   // But writing a specially named function handleEvent() allows delegating
   // the class as the handler. more info below:
-  add_event_listeners() {
+  addEventListeners() {
     // Stimulus - data-actions on the input can route events to actions here
     this.inputTarget.addEventListener("focus", this);
     this.inputTarget.addEventListener("click", this);
@@ -245,25 +232,25 @@ export default class extends Controller {
     // console.log(this.name);
     switch (event.type) {
       case "focus":
-        this.our_focus(event);
+        this.ourFocus(event);
         break;
       case "click":
-        this.our_click(event);
+        this.ourClick(event);
         break;
       case "blur":
-        this.our_blur(event);
+        this.ourBlur(event);
         break;
       case "keydown":
-        this.our_keydown(event);
+        this.ourKeydown(event);
         break;
       case "keyup":
-        this.our_keyup(event);
+        this.ourKeyup(event);
         break;
       case "change":
-        this.our_change(event);
+        this.ourChange(event);
         break;
       case "beforeunload":
-        this.our_unload(event);
+        this.ourUnload(event);
         break;
     }
   }
@@ -271,110 +258,110 @@ export default class extends Controller {
   // ------------------------------ Events ------------------------------
 
   // User pressed a key in the text field.
-  our_keydown(event) {
+  ourKeydown(event) {
     const key = event.which == 0 ? event.keyCode : event.which;
     // this.debug("keydown(" + key + ")");
-    this.clear_key();
+    this.clearKey();
     this.focused = true;
     if (this.menu_up) {
       switch (key) {
         case this.EVENT_KEYS.esc:
-          this.schedule_hide();
+          this.scheduleHide();
           this.menu_up = false;
           break;
         case this.EVENT_KEYS.tab:
         case this.EVENT_KEYS.return:
           event.preventDefault();
           if (this.current_row >= 0)
-            this.select_row(this.current_row - this.scroll_offset);
+            this.selectRow(this.current_row - this.scroll_offset);
           break;
         case this.EVENT_KEYS.home:
-          this.go_home();
+          this.goHome();
           break;
         case this.EVENT_KEYS.end:
-          this.go_end();
+          this.goEnd();
           break;
         case this.EVENT_KEYS.pageup:
-          this.page_up();
-          this.schedule_key(this.page_up);
+          this.pageUp();
+          this.scheduleKey(this.pageUp);
           break;
         case this.EVENT_KEYS.up:
-          this.arrow_up();
-          this.schedule_key(this.arrow_up);
+          this.arrowUp();
+          this.scheduleKey(this.arrowUp);
           break;
         case this.EVENT_KEYS.down:
-          this.arrow_down();
-          this.schedule_key(this.arrow_down);
+          this.arrowDown();
+          this.scheduleKey(this.arrowDown);
           break;
         case this.EVENT_KEYS.pagedown:
-          this.page_down();
-          this.schedule_key(this.page_down);
+          this.pageDown();
+          this.scheduleKey(this.pageDown);
           break;
         default:
           this.current_row = -1;
           break;
       }
     }
-    if (this.menu_up && this.is_hot_key(key) &&
+    if (this.menu_up && this.isHotKey(key) &&
       !(key == 9 || this.current_row < 0))
       return false;
     return true;
   }
 
   // Need to prevent these keys from being processed by form.
-  our_keypress(event) {
+  ourKeypress(event) {
     const key = event.which == 0 ? event.keyCode : event.which;
-    // this.debug("keypress(key=" + key + ", menu_up=" + this.menu_up + ", hot=" + this.is_hot_key(key) + ")");
-    if (this.menu_up && this.is_hot_key(key) &&
+    // this.debug("keypress(key=" + key + ", menu_up=" + this.menu_up + ", hot=" + this.isHotKey(key) + ")");
+    if (this.menu_up && this.isHotKey(key) &&
       !(key == 9 || this.current_row < 0))
       return false;
     return true;
   }
 
   // User has released a key.
-  our_keyup(event) {
+  ourKeyup(event) {
     // this.debug("keyup()");
-    this.clear_key();
-    this.our_change(true);
+    this.clearKey();
+    this.ourChange(true);
     return true;
   }
 
   // Input field has changed.
-  our_change(do_refresh) {
+  ourChange(do_refresh) {
     const old_val = this.old_value;
     const new_val = this.inputTarget.value;
-    // this.debug("our_change(" + this.inputTarget.value + ")");
+    // this.debug("ourChange(" + this.inputTarget.value + ")");
     if (new_val != old_val) {
       this.old_value = new_val;
       if (do_refresh)
-        this.schedule_refresh();
+        this.scheduleRefresh();
     }
   }
 
   // User clicked into text field.
-  our_click(event) {
+  ourClick(event) {
     if (this.ACT_LIKE_SELECT)
-      this.schedule_refresh();
+      this.scheduleRefresh();
     return false;
   }
 
   // User entered text field.
-  our_focus(event) {
-    // this.debug("our_focus()");
+  ourFocus(event) {
+    // this.debug("ourFocus()");
     if (!this.ROW_HEIGHT)
-      this.get_row_height();
+      this.getRowHeight();
     this.focused = true;
   }
 
   // User left the text field.
-  our_blur(event) {
-    // this.debug("our_blur()");
-    this.schedule_hide();
+  ourBlur(event) {
+    // this.debug("ourBlur()");
+    this.scheduleHide();
     this.focused = false;
   }
 
   // User has navigated away from page.
-  our_unload() {
+  ourUnload() {
     // If native browser autocomplete is turned off, browsers like chrome
     // and firefox will not remember the value of fields when you go back.
     // This hack re-enables native autocomplete before leaving the page.
@@ -384,7 +371,7 @@ export default class extends Controller {
   }
 
   // Prevent these keys from propagating to the input field.
-  is_hot_key(key) {
+  isHotKey(key) {
     switch (key) {
       case this.EVENT_KEYS.esc:
       case this.EVENT_KEYS.return:
@@ -403,44 +390,44 @@ export default class extends Controller {
   // ------------------------------ Timers ------------------------------
 
   // Schedule primer to be refreshed after polite delay.
-  schedule_refresh() {
-    this.verbose("schedule_refresh()");
-    this.clear_refresh();
+  scheduleRefresh() {
+    this.verbose("scheduleRefresh()");
+    this.clearRefresh();
     this.refresh_timer = window.setTimeout((() => {
       this.verbose("doing_refresh()");
       // this.debug("refresh_timer(" + this.inputTarget.value + ")");
       this.old_value = this.inputTarget.value;
       if (this.AJAX_URL)
-        this.refresh_primer();
-      this.update_matches();
-      this.draw_pulldown();
+        this.refreshPrimer();
+      this.populateMatches();
+      this.drawPulldown();
     }), this.REFRESH_DELAY * 1000);
   }
 
   // Schedule pulldown to be hidden if nothing happens in the meantime.
-  schedule_hide() {
-    this.clear_hide();
-    this.hide_timer = setTimeout(this.hide_pulldown.bind(this), this.HIDE_DELAY * 1000);
+  scheduleHide() {
+    this.clearHide();
+    this.hide_timer = setTimeout(this.hidePulldown.bind(this), this.HIDE_DELAY * 1000);
   }
 
   // Schedule a method to be called after key stays pressed for some time.
-  schedule_key(action) {
-    this.clear_key();
+  scheduleKey(action) {
+    this.clearKey();
     this.key_timer = setTimeout((function () {
       action.call(this);
-      this.schedule_key2(action);
+      this.scheduleKey2(action);
     }).bind(this), this.KEY_DELAY_1 * 1000);
   }
-  schedule_key2(action) {
-    this.clear_key();
+  scheduleKey2(action) {
+    this.clearKey();
     this.key_timer = setTimeout((function () {
       action.call(this);
-      this.schedule_key2(action);
+      this.scheduleKey2(action);
     }).bind(this), this.KEY_DELAY_2 * 1000);
   }
 
   // Clear refresh timer.
-  clear_refresh() {
+  clearRefresh() {
     if (this.refresh_timer) {
       clearTimeout(this.refresh_timer);
       this.refresh_timer = null;
@@ -448,7 +435,7 @@ export default class extends Controller {
   }
 
   // Clear hide timer.
-  clear_hide() {
+  clearHide() {
     if (this.hide_timer) {
       clearTimeout(this.hide_timer);
       this.hide_timer = null;
@@ -456,7 +443,7 @@ export default class extends Controller {
   }
 
   // Clear key timer.
-  clear_key() {
+  clearKey() {
     if (this.key_timer) {
       clearTimeout(this.key_timer);
       this.key_timer = null;
@@ -466,14 +453,14 @@ export default class extends Controller {
   // ------------------------------ Cursor ------------------------------
 
   // Move cursor up or down some number of rows.
-  page_up() { this.move_cursor(-this.PAGE_SIZE); }
-  page_down() { this.move_cursor(this.PAGE_SIZE); }
-  arrow_up() { this.move_cursor(-1); }
-  arrow_down() { this.move_cursor(1); }
-  go_home() { this.move_cursor(-this.matches.length) }
-  go_end() { this.move_cursor(this.matches.length) }
-  move_cursor(rows) {
-    this.verbose("move_cursor()");
+  pageUp() { this.moveCursor(-this.PAGE_SIZE); }
+  pageDown() { this.moveCursor(this.PAGE_SIZE); }
+  arrowUp() { this.moveCursor(-1); }
+  arrowDown() { this.moveCursor(1); }
+  goHome() { this.moveCursor(-this.matches.length) }
+  goEnd() { this.moveCursor(this.matches.length) }
+  moveCursor(rows) {
+    this.verbose("moveCursor()");
     const old_row = this.current_row,
       old_scr = this.scroll_offset;
     let new_row = old_row + rows,
@@ -498,14 +485,14 @@ export default class extends Controller {
     // Update if something changed.
     if (new_row != old_row || new_scr != old_scr) {
       this.scroll_offset = new_scr;
-      this.draw_pulldown();
+      this.drawPulldown();
     }
   }
 
   // Mouse has moved over a menu item.
-  highlight_row(new_hl) {
-    this.verbose("highlight_row()");
-    const rows = this.LIST_ELEM.children,
+  highlightRow(new_hl) {
+    this.verbose("highlightRow()");
+    const rows = this.listTarget.children,
       old_hl = this.current_highlight;
 
     this.current_highlight = new_hl;
@@ -518,14 +505,14 @@ export default class extends Controller {
         rows[new_hl].classList.add(this.HOT_CLASS);
     }
     this.inputTarget.focus();
-    this.update_width();
+    this.updateWidth();
   }
 
   // Called when users scrolls via scrollbar.
-  our_scroll() {
-    this.verbose("our_scroll()");
+  scrollList() {
+    this.verbose("scrollList()");
     const old_scr = this.scroll_offset,
-      new_scr = Math.round(this.PULLDOWN_ELEM.scrollTop / this.ROW_HEIGHT),
+      new_scr = Math.round(this.pulldownTarget.scrollTop / this.ROW_HEIGHT),
       old_row = this.current_row;
     let new_row = this.current_row;
 
@@ -536,109 +523,62 @@ export default class extends Controller {
     if (new_row != old_row || new_scr != old_scr) {
       this.current_row = new_row;
       this.scroll_offset = new_scr;
-      this.draw_pulldown();
+      this.drawPulldown();
     }
   }
 
   // User selects a value, either pressing tab/return or clicking on an option.
-  select_row(row) {
-    this.verbose("select_row()");
+  // Argument needed is the index of the row, not the <li> element. This method
+  // may be called from a Stimulus target action or a listener in this class, so
+  // the index may be an integer, or have to be derived from the event.target.
+  selectRow(idx) {
+    this.verbose("selectRow()");
+    if (idx instanceof Event)
+      idx = parseInt(idx.target.parentElement.dataset.row);
+
     // const old_val = this.inputTarget.value;
-    let new_val = this.matches[this.scroll_offset + row];
+    let new_val = this.matches[this.scroll_offset + idx];
     // Close pulldown unless the value the user selected uncollapses into a set
     // of new options.  In that case schedule a refresh and leave it up.
     if (this.COLLAPSE > 0 &&
       (new_val.match(/ /g) || []).length < this.COLLAPSE) {
       new_val += ' ';
-      this.schedule_refresh();
+      this.scheduleRefresh();
     } else {
-      this.schedule_hide();
+      this.scheduleHide();
     }
     this.inputTarget.focus();
     this.focused = true;
     this.inputTarget.value = new_val;
-    this.set_search_token(new_val);
-    this.our_change(false);
+    this.setSearchToken(new_val);
+    this.ourChange(false);
   }
 
   // ------------------------------ Pulldown ------------------------------
 
-  // Create hidden pulldown <div> that is a sibling of the input element., The
-  // pulldown contains a <ul> and ten blank <li><a> elements. Note that unlike
-  // in the standard Bootstrap markup, our pulldown is a <div> with a <ul>
-  // inside. The <div> in our case gets the .dropdown-menu class, because it's
-  // the "window" to the nested <ul> virtual list. The <ul> has an accurate
-  // calculated height to imply scrollability, but never contains more than 10
-  // <li> elements. This keeps the DOM responsive even with very large lists.
-  // The <li> elements are updated with the actual items from the stored
-  // `matches` array as needed.
-  //
-  create_pulldown() {
-    const pulldown = document.createElement("div");
-    pulldown.classList.add(...this.PULLDOWN_CLASSES);
-
-    const list = document.createElement('ul');
-    list.classList.add(...this.LIST_CLASSES);
-    let i, row, link;
-    for (i = 0; i < this.PULLDOWN_SIZE; i++) {
-      row = document.createElement("li");
-      row.classList.add(...this.ITEM_CLASSES);
-      link = document.createElement("a");
-      link.href = '#';
-      this.attach_row_link_events(link, i);
-      row.appendChild(link);
-      list.append(row);
-    }
-    pulldown.appendChild(list)
-
-    pulldown.addEventListener("scroll", this.our_scroll.bind(this));
-    this.inputTarget.insertAdjacentElement("afterend", pulldown);
-    this.PULLDOWN_ELEM = pulldown;
-    this.LIST_ELEM = list;
-  }
-
-  // Add "click" events to a row of the pulldown menu.
-  // Need to do this in a separate method, otherwise row doesn't get
-  // a separate value for each row!  Something to do with scope of
-  // variables inside `for` loops. By using <a>, we can skip "mouseover".
-  attach_row_link_events(element, row) {
-    element.addEventListener("click", ((e) => {
-      e.preventDefault();
-      this.select_row(row);
-    }).bind(this));
-    // element.addEventListener("mouseover", ((e) => {
-    //   this.highlight_row(row);
-    // }).bind(this));
-  }
-
-  // Stimulus: print this in the document already
-  // Get actual row height when it becomes available.
-  // Experimentally creates a test row.
-  get_row_height() {
+  // The pulldownTarget is printed in the document already. This measures
+  // the row height when it becomes available. Creates a test row by cloning
+  // the elements and adding text, which gives the correct height.
+  getRowHeight() {
     const div = document.createElement('div'),
-      ul = document.createElement('ul'),
-      li = document.createElement('li'),
-      a = document.createElement('a');
+      ul = this.listTarget.cloneNode(false),
+      li = this.listTarget.children[0].cloneNode(true),
+      a = li.children[0];
 
     div.classList.add('test');
-    ul.classList.add(...this.LIST_CLASSES)
-    a.href = '#';
     a.innerHTML = 'test';
-    li.classList.add(...this.ITEM_CLASSES);
-    li.appendChild(a);
     ul.appendChild(li);
     div.appendChild(ul);
     document.body.appendChild(div);
     this.temp_row = div;
-    // window.setTimeout(this.set_row_height(), 100);
-    this.set_row_height();
+    this.setRowHeight();
   }
-  set_row_height() {
+
+  setRowHeight() {
     if (this.temp_row) {
       this.ROW_HEIGHT = this.temp_row.offsetHeight;
       if (!this.ROW_HEIGHT) {
-        // window.setTimeout(this.set_row_height(), 100);
-        this.set_row_height();
+        this.setRowHeight();
       } else {
         document.body.removeChild(this.temp_row);
         this.temp_row = null;
@@ -653,10 +593,9 @@ export default class extends Controller {
   // kept in browser memory, and the <ul> top margin and height are adjusted
   // accordingly. This sleight of hand keeps far fewer elements in the DOM, and
   // is essential for making the page responsive.
-  draw_pulldown() {
-    this.verbose("draw_pulldown()");
-    const list = this.LIST_ELEM,
-      rows = list.children,
+  drawPulldown() {
+    this.verbose("drawPulldown()");
+    const rows = this.listTarget.children,
       size = this.PULLDOWN_SIZE,
       scroll = this.scroll_offset,
       cur = this.current_row,
@@ -669,11 +608,11 @@ export default class extends Controller {
     }
 
     // Get row height if haven't been able to yet.
-    this.get_row_height();
+    this.getRowHeight();
     if (rows.length) {
-      this.update_rows(rows, matches, size, scroll);
-      this.highlight_new_row(rows, cur, size, scroll)
-      this.make_pulldown_visible(matches, size, scroll)
+      this.updateRows(rows, matches, size, scroll);
+      this.highlightNewRow(rows, cur, size, scroll)
+      this.makePulldownVisible(matches, size, scroll)
     }
 
     // Make sure input focus stays on text field!
@@ -682,7 +621,7 @@ export default class extends Controller {
 
   // This function swaps out the innerHTML of the items from the `matches` array
   // as needed, as the user scrolls.
-  update_rows(rows, matches, size, scroll) {
+  updateRows(rows, matches, size, scroll) {
     let i, text, stored;
     for (i = 0; i < size; i++) {
       let row = rows.item(i);
@@ -705,7 +644,7 @@ export default class extends Controller {
   }
 
   // Highlight that row.
-  highlight_new_row(rows, cur, size, scroll) {
+  highlightNewRow(rows, cur, size, scroll) {
     const old_hl = this.current_highlight;
     let new_hl = cur - scroll;
 
@@ -724,9 +663,9 @@ export default class extends Controller {
   // Bootstrap classes: the .dropdown-menu will be positioned relative to the
   // wrapping .form-group which must have either class .position-relative or
   // .dropdown
-  make_pulldown_visible(matches, size, scroll) {
-    const pulldown = this.PULLDOWN_ELEM,
-      list = pulldown.children[0];
+  makePulldownVisible(matches, size, scroll) {
+    const pulldown = this.pulldownTarget,
+      list = this.listTarget;
 
     if (matches.length > 0) {
       // console.log("Matches:" + matches)
@@ -741,83 +680,85 @@ export default class extends Controller {
       pulldown.scrollTo({ top: this.ROW_HEIGHT * scroll });
 
       // Set width of pulldown.
-      this.set_width();
-      this.update_width();
+      this.setWidth();
+      this.updateWidth();
 
       // Only show pulldown if it is nontrivial, i.e., show an option other than
       // the value that's already in the text field. If wrapping div is
       // .dropdown, we can classList.add('.open') instead of
       // style.display = 'block'
       if (matches.length > 1 || this.inputTarget.value != matches[0]) {
-        this.clear_hide();
-        this.dropdown_wrap?.classList?.add('open');
+        this.clearHide();
+        this.wrapTarget?.classList?.add('open');
         this.menu_up = true;
       } else {
-        hide_pulldown();
+        hidePulldown();
       }
-    }
-
-    // Hide the pulldown if it's empty now.
-    else {
-      this.hide_pulldown();
+    } else {
+      // Hide the pulldown if it's empty now.
+      this.hidePulldown();
     }
   }
 
   // Hide pulldown options.
-  hide_pulldown() {
-    this.verbose("hide_pulldown()");
-    this.dropdown_wrap?.classList?.remove('open');
+  hidePulldown() {
+    this.verbose("hidePulldown()");
+    this.wrapTarget?.classList?.remove('open');
     this.menu_up = false;
   }
 
   // Update width of pulldown.
-  update_width() {
-    this.verbose("update_width()");
-    let w = this.LIST_ELEM.offsetWidth;
+  updateWidth() {
+    this.verbose("updateWidth()");
+    let w = this.listTarget.offsetWidth;
     if (this.matches.length > this.PULLDOWN_SIZE)
       w += this.SCROLLBAR_WIDTH;
     if (this.current_width < w) {
       this.current_width = w;
-      this.set_width();
+      this.setWidth();
     }
   }
 
   // Set width of pulldown.
-  set_width() {
-    this.verbose("set_width()");
+  setWidth() {
+    this.verbose("setWidth()");
     const w1 = this.current_width;
     let w2 = w1;
     if (this.matches.length > this.PULLDOWN_SIZE)
       w2 -= this.SCROLLBAR_WIDTH;
-    this.LIST_ELEM.style.minWidth = w2 + 'px';
+    this.listTarget.style.minWidth = w2 + 'px';
   }
 
   // ------------------------------ Matches ------------------------------
 
-  // Update content of pulldown.
-  update_matches() {
-    this.verbose("update_matches()");
+  // Populate virtual list of `matches` from `primer`. This is sort of a query
+  // after the query: the `primer` is like an alphabet-letter volume fetched
+  // from ActiveRecord's encyclopedia of all possible records, and these
+  // functions maintain the evolving `matches` list based on the user's input.
+  // There are four strategies for refining the list, below.
+  populateMatches() {
+    this.verbose("populateMatches()");
     if (this.ACT_LIKE_SELECT)
       this.current_row = 0;
 
     // Remember which option used to be highlighted.
     const last = this.current_row < 0 ? null : this.matches[this.current_row];
 
-    // Update list of options appropriately.
+    // Populate list of matches appropriately.
     if (this.ACT_LIKE_SELECT)
-      this.update_select();
+      this.populateSelect();
     else if (this.COLLAPSE > 0)
-      this.update_collapsed();
+      this.populateCollapsed();
     else if (this.UNORDERED)
-      this.update_unordered();
+      this.populateUnordered();
     else
-      this.update_normal();
+      this.populateNormal();
 
     // Sort and remove duplicates, unless it's already sorted.
     if (!this.ACT_LIKE_SELECT)
-      this.matches = this.remove_dups(this.matches.sort());
+      this.matches = this.removeDups(this.matches.sort());
     // Try to find old highlighted row in new set of options.
-    this.update_current_row(last);
+    this.updateCurrentRow(last);
     // Reset width each time we change the options.
     this.current_width = this.inputTarget.offsetWidth;
   }
@@ -825,15 +766,15 @@ export default class extends Controller {
   // When "acting like a select" make it display all options in the
   // order given right from the moment they enter the field,
   // and pick the first one.
-  update_select() {
+  populateSelect() {
     this.matches = this.primer;
     if (this.matches.length > 0)
       this.inputTarget.value = this.matches[0];
   }
 
   // Grab all matches, doing exact match, ignoring number of words.
-  update_normal() {
-    const token = this.get_search_token().normalize().toLowerCase(),
+  populateNormal() {
+    const token = this.getSearchToken().normalize().toLowerCase(),
       // normalize the Unicode of each string in primer for search
       primer = this.primer.map((str) => { return str.normalize() }),
       matches = [];
@@ -846,14 +787,13 @@ export default class extends Controller {
         }
       }
     }
-
     this.matches = matches;
   }
 
   // Grab matches ignoring order of words.
-  update_unordered() {
+  populateUnordered() {
     // regularize spacing in the input
-    const token = this.get_search_token().normalize().toLowerCase().
+    const token = this.getSearchToken().normalize().toLowerCase().
       replace(/^ */, '').replace(/  +/g, ' '),
       // get the separate words as tokens
       tokens = token.split(' '),
@@ -875,14 +815,13 @@ export default class extends Controller {
         }
       }
     }
-
     this.matches = matches;
   }
 
   // Grab all matches, preferring the ones with no additional words.
   // Note: order must have genera first, then species, then varieties.
-  update_collapsed() {
-    const token = this.get_search_token().toLowerCase(),
+  populateCollapsed() {
+    const token = this.getSearchToken().toLowerCase(),
       primer = this.primer,
       // make a lowercased duplicate of primer to regularize search
       primer_lc = this.primer.map((str) => { return str.toLowerCase() }),
@@ -916,25 +855,8 @@ export default class extends Controller {
     this.matches = matches;
   }
 
-  /**
-   * Index of string in future primer array with IDs
-   * where primer == [[text_string, id], [text_string, id]]
-   * @param primer {!Array} - the input array
-   * @param token {object} - the token to search
-   * @return {Array} or just i
-   */
-  // get_primer_index_of(primer, token) {
-  //   for (let i = 0; i < primer.length; i++) {
-  //     const index = primer[i].indexOf(token);
-  //     if (index > -1) {
-  //       // return [i, index];
-  //       return i;
-  //     }
-  //   }
-  // }
-
   // Remove duplicates from a sorted array.
-  remove_dups(list) {
+  removeDups(list) {
     let i, j;
     for (i = 0, j = 1; j < list.length; j++) {
       if (list[j] != list[i])
@@ -947,8 +869,8 @@ export default class extends Controller {
 
   // Look for 'token' in list of matches and highlight it,
   // otherwise highlight first match.
-  update_current_row(token) {
-    this.verbose("update_current_row()");
+  updateCurrentRow(token) {
+    this.verbose("updateCurrentRow()");
     const matches = this.matches,
       size = this.PULLDOWN_SIZE;
     let exact = -1,
@@ -993,7 +915,7 @@ export default class extends Controller {
   */
 
   // Get search token under or immediately in front of cursor.
-  get_search_token() {
+  getSearchToken() {
     const val = this.inputTarget.value;
     let token = val;
 
@@ -1004,18 +926,18 @@ export default class extends Controller {
       return '';
     }
     if (this.SEPARATOR) {
-      const extents = this.search_token_extents();
+      const extents = this.searchTokenExtents();
       token = val.substring(extents.start, extents.end);
     }
     return token;
   }
 
   // Change the token under or immediately in front of the cursor.
-  set_search_token(new_val) {
+  setSearchToken(new_val) {
     const old_str = this.inputTarget.value;
     if (this.SEPARATOR) {
       let new_str = "";
-      const extents = this.search_token_extents();
+      const extents = this.searchTokenExtents();
 
       if (extents.start > 0)
         new_str += old_str.substring(0, extents.start);
@@ -1037,7 +959,7 @@ export default class extends Controller {
   }
 
   // Get index of first character and character after last of current token.
-  search_token_extents() {
+  searchTokenExtents() {
     const val = this.inputTarget.value;
     let start = val.lastIndexOf(this.SEPARATOR),
       end = val.length;
@@ -1053,11 +975,11 @@ export default class extends Controller {
   // ------------------------------ Fetch matches ------------------------------
 
   // Send request for updated primer.
-  refresh_primer() {
-    this.verbose("refresh_primer()");
+  refreshPrimer() {
+    this.verbose("refreshPrimer()");
 
     // token may be refined within this function, so it's a variable.
-    let token = this.get_search_token().toLowerCase(),
+    let token = this.getSearchToken().toLowerCase(),
       last_request = this.last_fetch_request;
 
     // Don't make request on empty string!
@@ -1102,26 +1024,26 @@ export default class extends Controller {
     if (this.WHOLE_WORDS_ONLY) { query_params["whole"] = true; }
 
     // Make request.
-    this.send_fetch_request(query_params);
+    this.sendFetchRequest(query_params);
   }
 
-  // Send AJAX request for more matching strings.
-  async send_fetch_request(query_params) {
-    this.verbose("send_fetch_request()");
+  // Send fetch request for more matching strings.
+  async sendFetchRequest(query_params) {
+    this.verbose("sendFetchRequest()");
 
     if (this.log) {
       this.debug("Sending fetch request: " + query_params.string + "...");
     }
 
     const url = this.AJAX_URL + this.TYPE,
-      controller = new AbortController();
+      abort_controller = new AbortController();
 
     this.last_fetch_request = query_params.string;
     if (this.fetch_request)
-      controller.abort();
+      abort_controller.abort();
 
     const response = await get(url, {
-      signal: controller.signal,
+      signal: abort_controller.signal,
       query: query_params,
       responseKind: "json"
     });
@@ -1130,7 +1052,7 @@ export default class extends Controller {
       const json = await response.json
       if (json) {
         this.fetch_request = response
-        this.process_fetch_response(json)
+        this.processFetchResponse(json)
       }
     } else {
       this.fetch_request = null;
@@ -1143,8 +1065,8 @@ export default class extends Controller {
   // 1. first line is string actually used to match;
   // 2. the last string is "..." if the set of results is incomplete;
   // 3. the rest are matching results.
-  process_fetch_response(new_primer) {
-    this.verbose("process_fetch_response()");
+  processFetchResponse(new_primer) {
+    this.verbose("processFetchResponse()");
 
     // Clear flag telling us request is pending.
     this.fetch_request = null;
@@ -1158,9 +1080,9 @@ export default class extends Controller {
       this.last_fetch_incomplete = true;
       new_primer = new_primer.slice(0, new_primer.length - 1);
       if (this.focused)
-        // (just in case we need to refine the request due to
-        //  activity while waiting for this response)
-        this.schedule_refresh();
+        // just in case we need to refine the request due to
+        // activity while waiting for this response
+        this.scheduleRefresh();
     } else {
       this.last_fetch_incomplete = false;
     }
@@ -1175,8 +1097,8 @@ export default class extends Controller {
     // Update menu if anything has changed.
     if (this.primer != new_primer && this.focused) {
       this.primer = new_primer;
-      this.update_matches();
-      this.draw_pulldown();
+      this.populateMatches();
+      this.drawPulldown();
     }
   }
 
@@ -1195,11 +1117,13 @@ export default class extends Controller {
   // ------------------------------- DEBUGGING ------------------------------
 
   debug(str) {
-    // document.getElementById("log").insertAdjacentText("beforeend", str + "<br/>");
+    // document.getElementById("log").
+    //   insertAdjacentText("beforeend", str + "<br/>");
   }
 
   verbose(str) {
     // console.log(str);
-    // document.getElementById("log").insertAdjacentText("beforeend", str + "<br/>");
+    // document.getElementById("log").
+    //   insertAdjacentText("beforeend", str + "<br/>");
   }
 }

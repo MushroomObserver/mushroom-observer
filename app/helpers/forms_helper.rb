@@ -162,26 +162,42 @@ module FormsHelper
     }.deep_merge(args.except(:type, :separator, :textarea))
     ac_args[:class] = class_names("dropdown", args[:class])
     ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
-                            separator: args[:separator] }
+                            separator: args[:separator],
+                            autocompleter_target: "wrap" }
+    ac_args[:append] = capture do
+      concat(autocompleter_hidden_field(**args)) if args[:form]
+      concat(autocompleter_dropdown)
+      concat(args[:append])
+    end
 
-    concat(if args[:textarea] == true
-             text_area_with_label(**ac_args)
-           else
-             text_field_with_label(**ac_args)
-           end)
-    concat(autocompleter_dropdown)
-    concat(args[:form].hidden_field("#{args[:type]}_id")) if args[:form]
+    if args[:textarea] == true
+      concat(text_area_with_label(**ac_args))
+    else
+      concat(text_field_with_label(**ac_args))
+    end
   end
 
   def autocompleter_dropdown
     tag.div(class: "auto_complete dropdown-menu",
-            data: { autocompleter_target: "pulldown" }) do
-      tag.ul(class: "virtual_list") do
-        10.times do
-          concat(tag.li(class: "dropdown-item") { tag.a("", href: "#") })
+            data: { autocompleter_target: "pulldown",
+                    action: "scroll->autocompleter#scrollList:passive" }) do
+      tag.ul(class: "virtual_list",
+             data: { autocompleter_target: "list" }) do
+        10.times do |i|
+          concat(tag.li(class: "dropdown-item") do
+            link_to("", "#", data: {
+                      row: i, action: "click->autocompleter#selectRow:prevent"
+                    })
+          end)
         end
       end
     end
+  end
+
+  def autocompleter_hidden_field(**args)
+    type = autocompleter_type_to_model(args[:type])
+    args[:form].hidden_field(:"#{type}_id",
+                             data: { autocompleter_target: "hidden" })
   end
 
   def autocompleter_type_to_model(type)
