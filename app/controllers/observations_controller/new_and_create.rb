@@ -152,7 +152,10 @@ module ObservationsController::NewAndCreate
     end
   end
 
+  # Only set location if it is not already set by the autocompleter.
   def determine_observation_location(observation)
+    return observation if observation.location_id
+
     if Location.is_unknown?(observation.place_name) ||
        (observation.lat && observation.lng && observation.place_name.blank?)
       observation.location = Location.unknown
