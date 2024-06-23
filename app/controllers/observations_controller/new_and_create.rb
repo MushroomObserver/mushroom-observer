@@ -66,7 +66,7 @@ module ObservationsController::NewAndCreate
                        order(:created_at).last
     return unless last_observation && last_observation.created_at > 1.hour.ago
 
-    %w[when where location is_collection_location gps_hidden].each do |attr|
+    %w[when where location_id is_collection_location gps_hidden].each do |attr|
       @observation.send(:"#{attr}=", last_observation.send(attr))
     end
 
@@ -304,7 +304,7 @@ module ObservationsController::NewAndCreate
   end
 
   def redirect_to_next_page
-    if @observation.location.nil?
+    if @observation.location_id.nil?
       redirect_to(new_location_path(where: @observation.place_name,
                                     set_observation: @observation.id))
     else
