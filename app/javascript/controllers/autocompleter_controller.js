@@ -491,7 +491,8 @@ export default class extends Controller {
     }
   }
 
-  // Mouse has moved over a menu item.
+  // User has tabbed or arrowDown/Up to a menu item.
+  // (mouseover handled by CSS)
   highlightRow(new_hl) {
     this.verbose("highlightRow()");
     const rows = this.listTarget.children,
@@ -608,10 +609,7 @@ export default class extends Controller {
   drawPulldown() {
     this.verbose("drawPulldown()");
     const rows = this.listTarget.children,
-      size = this.PULLDOWN_SIZE,
-      scroll = this.scroll_offset,
-      cur = this.current_row,
-      matches = this.matches;
+      scroll = this.scroll_offset;
 
     if (this.log) {
       this.debug(
@@ -623,28 +621,30 @@ export default class extends Controller {
     if (!this.ROW_HEIGHT)
       this.getRowHeight();
     if (rows.length) {
-      this.updateRows(rows, matches, size, scroll);
-      this.highlightNewRow(rows, cur, size, scroll)
-      this.makePulldownVisible(matches, size, scroll)
+      this.updateRows(rows);
+      this.highlightNewRow(rows);
+      this.makePulldownVisible();
+      this.populateHiddenId();
     }
     // Make sure input focus stays on text field!
     this.inputTarget.focus();
   }
 
   // This function swaps out the innerHTML of the items from the `matches` array
-  // as needed, as the user scrolls.
-  updateRows(rows, matches, size, scroll) {
+  // as needed, as the user scrolls. rows are the <li> elements in the pulldown.
+  //  Called from drawPulldown().
+  updateRows(rows) {
     let i, text, stored;
-    for (i = 0; i < size; i++) {
+    for (i = 0; i < this.PULLDOWN_SIZE; i++) {
       let row = rows.item(i),
         link = row.children[0];
       text = link.innerHTML;
-      if (i + scroll < matches.length) {
-        const { name, ...new_data } = matches[i + scroll];
+      if (i + this.scroll_offset < this.matches.length) {
+        const { name, ...new_data } = this.matches[i + this.scroll_offset];
         stored = this.escapeHTML(name);
         if (text != stored) {
           link.innerHTML = stored;
-          // Give the link the dataset of matches[i + scroll], minus name
+          // Assign the dataset of matches[i + this.scroll_offset], minus name
           Object.keys(new_data).forEach(key => {
             link.dataset[key] = new_data[key];
           });
@@ -661,12 +661,13 @@ export default class extends Controller {
     }
   }
 
-  // Highlight that row.
-  highlightNewRow(rows, cur, size, scroll) {
+  // Highlight that row (CSS only - does not populate hidden ID).
+  //  Called from drawPulldown().
+  highlightNewRow(rows) {
     const old_hl = this.current_highlight;
-    let new_hl = cur - scroll;
+    let new_hl = this.current_row - this.scroll_offset;
 
-    if (new_hl < 0 || new_hl >= size)
+    if (new_hl < 0 || new_hl >= this.PULLDOWN_SIZE)
       new_hl = -1;
     this.current_highlight = new_hl;
     if (new_hl != old_hl) {
@@ -679,32 +680,33 @@ export default class extends Controller {
 
   // Make pulldown visible if nonempty. Positioning currently depends on
   // Bootstrap classes: the .dropdown-menu will be positioned relative to the
-  // wrapping .form-group which must have either class .position-relative or
-  // .dropdown
-  makePulldownVisible(matches, size, scroll) {
-    const pulldown = this.pulldownTarget,
-      list = this.listTarget;
+  // wrapping .form-group which must have class .dropdown.
+  //  Called from drawPulldown().
+  makePulldownVisible() {
+    const matches = this.matches,
+      offset = this.scroll_offset,
+      size = this.PULLDOWN_SIZE,
+      row_height = this.ROW_HEIGHT,
+      length_ahead = this.matches.length - this.scroll_offset,
+      current_size = size < length_ahead ? size : length_ahead,
+      overflow = this.matches.length > this.PULLDOWN_SIZE ? "scroll" : "hidden";
 
     if (matches.length > 0) {
       // console.log("Matches:" + matches)
+      this.pulldownTarget.style.overflowY = overflow;
       // Set height of pulldown.
-      pulldown.style.overflowY = matches.length > size ? "scroll" : "hidden";
-      pulldown.style.height = this.ROW_HEIGHT *
-        (size < matches.length - scroll ? size : matches.length - scroll) +
-        "px";
+      this.pulldownTarget.style.height = row_height * current_size + "px";
       // Set margin-top and declared height of virtual list.
-      list.style.marginTop = this.ROW_HEIGHT * scroll + "px";
-      list.style.height = this.ROW_HEIGHT * (matches.length - scroll) + "px";
-      pulldown.scrollTo({ top: this.ROW_HEIGHT * scroll });
+      this.listTarget.style.marginTop = row_height * offset + "px";
+      this.listTarget.style.height = row_height * length_ahead + "px";
+      this.pulldownTarget.scrollTo({ top: row_height * offset });
 
       // Set width of pulldown.
       this.setWidth();
       this.updateWidth();
 
-      // Only show pulldown if it is nontrivial, i.e., show an option other than
-      // the value that's already in the text field. If wrapping div is
-      // .dropdown, we can classList.add('.open') instead of
-      // style.display = 'block'
+      // Only show pulldown if it is nontrivial, i.e., has an option other than
+      // the value that's already in the text field.
       if (matches.length > 1 || this.inputTarget.value != matches[0]) {
         this.clearHide();
         this.wrapTarget?.classList?.add('open');
@@ -715,6 +717,21 @@ export default class extends Controller {
     } else {
       // Hide the pulldown if it's empty now.
       this.hidePulldown();
+    }
+  }
+
+  // Assign ID of any perfectly matching option, even if not expressly selected.
+  // This guards against user selecting a match, then, say, deleting a letter
+  // and retyping the letter. Without this, an exact match would lose its ID.
+  populateHiddenId() {
+    this.verbose("populateHiddenId()");
+    if (this.COLLAPSE > 0) return;
+
+    const perfect_match =
+      this.matches.find((m) => m['name'] === this.inputTarget.value.trim());
+
+    if (perfect_match) {
+      this.hiddenTarget.value = perfect_match['id'];
     }
   }
 
