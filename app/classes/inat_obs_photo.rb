@@ -47,12 +47,4 @@ class InatObsPhoto
   def photo
     @inat_obs_photo[:photo]
   end
-
-  def original_height
-    photo[:original_dimensions][:height]
-  end
-
-  def original_width
-    photo[:original_dimensions][:width]
-  end
 end
