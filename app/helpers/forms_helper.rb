@@ -164,8 +164,11 @@ module FormsHelper
     ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
                             separator: args[:separator],
                             autocompleter_target: "wrap" }
-    ac_args[:append] = capture do
+    ac_args[:between] = capture do
       concat(autocompleter_hidden_field(**args)) if args[:form]
+      concat(args[:between])
+    end
+    ac_args[:append] = capture do
       concat(autocompleter_dropdown)
       concat(args[:append])
     end
@@ -196,8 +199,8 @@ module FormsHelper
 
   def autocompleter_hidden_field(**args)
     type = autocompleter_type_to_model(args[:type])
-    args[:form].hidden_field(:"#{type}_id",
-                             data: { autocompleter_target: "hidden" })
+    args[:form].text_field(:"#{type}_id",
+                           data: { autocompleter_target: "hidden" })
   end
 
   def autocompleter_type_to_model(type)
