@@ -110,7 +110,8 @@ const INTERNAL_OPTS = {
   fetch_request: null,   // ajax request while underway
   refresh_timer: null,   // timer used to delay update after typing
   hide_timer: null,      // timer used to delay hiding of pulldown
-  key_timer: null        // timer used to emulate key repeat
+  key_timer: null,       // timer used to emulate key repeat
+  log: false             // log debug messages to console?
 }
 
 // Connects to data-controller="autocompleter"
@@ -1130,10 +1131,10 @@ export default class extends Controller {
     if (new_primer[new_primer.length - 1]['name'] == "...") {
       this.last_fetch_incomplete = true;
       new_primer = new_primer.slice(0, new_primer.length - 1);
-      if (this.focused)
-        // just in case we need to refine the request due to
-        // activity while waiting for this response
-        this.scheduleRefresh();
+      // if (this.focused)
+      //   just in case we need to refine the request due to
+      //   activity while waiting for this response
+      //   this.scheduleRefresh();
     } else {
       this.last_fetch_incomplete = false;
     }
