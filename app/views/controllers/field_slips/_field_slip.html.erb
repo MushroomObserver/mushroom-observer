@@ -27,14 +27,15 @@
     <% end %>
     <br/>
 
-    <% if field_slip.user %>
+    <% if (usr = field_slip.user) %>
       <strong><%= :field_slip_creator.t %>:</strong>
-      <%= link_to(field_slip.user.legal_name, user_path(field_slip.user_id)) %><br/>
+      <%= user_link(usr, usr.legal_name) %><br/>
     <% end %>
 
     <strong><%= :OBSERVATION.t %>:</strong>
-    <% if field_slip.observation %>
-      <%= link_to(field_slip.observation.unique_format_name.t, observation_path(field_slip.observation)) %>
+    <% if (obs = field_slip.observation) %>
+      <%= link_to(obs.unique_format_name.t, observation_path(obs),
+                  class: "observation_link_#{obs.id}") %>
       <ul class="row list-unstyled">
         <%= render(partial: "shared/matrix_box",
                    locals: { object: field_slip.observation,
