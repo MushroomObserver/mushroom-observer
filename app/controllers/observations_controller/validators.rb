@@ -51,7 +51,7 @@ module ObservationsController::Validators
     success = true
     @place_name = @observation.place_name
     @dubious_where_reasons = []
-    if @place_name != params[:approved_where] && @observation.location.nil?
+    if @place_name != params[:approved_where] && @observation.location_id.nil?
       db_name = Location.user_format(@user, @place_name)
       @dubious_where_reasons = Location.dubious_name?(db_name, true)
       success = false if @dubious_where_reasons != []
