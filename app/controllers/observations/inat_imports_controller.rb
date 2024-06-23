@@ -77,7 +77,8 @@ module Observations
       # NOTE: 2024-06-19 jdc. I can't figure out how to properly stub
       # adding an image from an external source.
       # Skipping images when testing will allow some more controller testing.
-      add_inat_images(inat_obs.inat_obs_photos) unless Rails.env.test?
+      # add_inat_images(inat_obs.inat_obs_photos) unless Rails.env.test?
+      add_inat_images(inat_obs.inat_obs_photos)
 
       # TODO: Other things done by Observations#create
       # save_everything_else(params.dig(:naming, :reasons))
@@ -118,8 +119,9 @@ module Observations
           original_name: photo.original_name
         }
 
-        api = InatPhotoImporter.new(params)
+        api = InatPhotoImporter.new(params).api
         # TODO: Error handling? 2024-06-19 jdc.
+
         User.current = @user # API call zaps User.current
 
         image = Image.find(api.results.first.id)
