@@ -66,28 +66,36 @@ const DEFAULT_OPTS = {
 // Allowed types of autocompleter. Sets some DEFAULT_OPTS from type
 const AUTOCOMPLETER_TYPES = {
   clade: {
+    model: 'name'
   },
   herbarium: { // params[:user_id] handled in controller
-    UNORDERED: true
+    UNORDERED: true,
+    model: 'herbarium'
   },
   location: { // params[:format] handled in controller
-    UNORDERED: true
+    UNORDERED: true,
+    model: 'location'
   },
   name: {
-    COLLAPSE: 1
+    COLLAPSE: 1,
+    model: 'name'
   },
   project: {
-    UNORDERED: true
+    UNORDERED: true,
+    model: 'project'
   },
   region: {
     UNORDERED: true,
-    WHOLE_WORDS_ONLY: true
+    WHOLE_WORDS_ONLY: true,
+    model: 'location'
   },
   species_list: {
-    UNORDERED: true
+    UNORDERED: true,
+    model: 'species_list'
   },
   user: {
-    UNORDERED: true
+    UNORDERED: true,
+    model: 'user'
   }
 }
 
@@ -176,11 +184,12 @@ export default class extends Controller {
       this.TYPE = type;
       this.element.setAttribute("data-type", type)
       // add dependent properties and allow overrides
-      Object.assign(this, AUTOCOMPLETER_TYPES[this.TYPE]);
+      Object.assign(this, AUTOCOMPLETER_TYPES[type]);
       Object.assign(this, detail); // type, request_params
       this.primer = [];
       this.matches = [];
       this.prepareInputElement();
+      this.prepareHiddenInput();
       this.scheduleRefresh(); // refresh the primer
     }
   }
@@ -193,6 +202,7 @@ export default class extends Controller {
   prepareInputElement() {
     // console.log(elem)
     this.old_value = null;
+    this.inputTarget.value = '';
 
     // Attach events
     this.addEventListeners();
@@ -206,6 +216,15 @@ export default class extends Controller {
       this.inputTarget.focus();
       this.inputTarget.value = ' ';
     }
+  }
+
+  // When swapping autocompleter types, swap the hidden input identifiers.
+  prepareHiddenInput() {
+    const identifier = AUTOCOMPLETER_TYPES[this.TYPE]['model'] + '_id',
+      form = this.hiddenTarget.name.split('[')[0];
+
+    this.hiddenTarget.name = form + '[' + identifier + ']';
+    this.hiddenTarget.id = identifier;
   }
 
   // NOTE: `this` within an event listener function refers to the element
