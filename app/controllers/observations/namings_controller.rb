@@ -121,7 +121,7 @@ module Observations
     end
 
     def init_edit_ivars
-      @given_name = @naming.text_name
+      @given_name  = @naming.text_name
       @names       = nil
       @valid_names = nil
       @reasons     = @naming.init_reasons
@@ -168,7 +168,7 @@ module Observations
       args = {
         naming_args: {},
         vote_args: params.dig(:naming, :vote),
-        given_name: params.dig(:naming, :name_id) || params.dig(:naming, :name),
+        given_name: params.dig(:naming, :name),
         approved_name: params[:approved_name],
         chosen_name: params.dig(:chosen_name, :name_id).to_s
       }
@@ -179,7 +179,7 @@ module Observations
     def resolve_ivars_for_validation(**args)
       @naming = Naming.construct(args[:naming_args], @observation)
       @vote = Vote.construct(args[:vote_args], @naming)
-      result = if name_str
+      result = if args[:given_name]
                  resolve_name(args[:given_name], args[:approved_name],
                               args[:chosen_name])
                else
@@ -310,7 +310,7 @@ module Observations
     end
 
     def validate_name
-      given_name = params.dig(:naming, :name_id) || params.dig(:naming, :name)
+      given_name = params.dig(:naming, :name)
       success = resolve_name(given_name,
                              params[:approved_name],
                              params.dig(:chosen_name, :name_id).to_s)
