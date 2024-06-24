@@ -49,7 +49,7 @@ module ObservationsController::Validators
         # `success' is not allowed as an instance variable name
         success = value
       else
-        instance_variable_set(ivar, value)
+        instance_variable_set(:"@#{ivar}", value)
       end
     end
     success

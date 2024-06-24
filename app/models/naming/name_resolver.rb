@@ -135,7 +135,7 @@ class Naming
     # Convenience method returning a hash for mass ivar assignment
     def results
       { success: @success,
-        what: @given_name,
+        given_name: @given_name,
         name: @name,
         names: @names,
         valid_names: @valid_names,
