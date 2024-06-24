@@ -50,7 +50,7 @@ module Names::Synonyms
     private
 
     def we_have_a_what!
-      return true if @what.present?
+      return true if @given_name.present?
 
       flash_error(:runtime_name_deprecate_must_choose.t)
       render_new
@@ -62,7 +62,7 @@ module Names::Synonyms
     end
 
     def suggest_alternate_spellings
-      @valid_names = Name.suggest_alternate_spellings(@what)
+      @valid_names = Name.suggest_alternate_spellings(@given_name)
       @suggest_corrections = true
       render_new
     end
@@ -74,7 +74,7 @@ module Names::Synonyms
     end
 
     def init_ivars_for_new
-      @what             = params[:proposed_name].to_s.strip_squeeze
+      @given_name = params[:proposed_name].to_s.strip_squeeze
       @comment          = params[:comment].to_s.strip_squeeze
       @list_members     = nil
       @new_names        = []
@@ -90,14 +90,14 @@ module Names::Synonyms
                   (name = Name.safe_find(params[:chosen_name][:name_id]))
                  [name]
                else
-                 Name.find_names_filling_in_authors(@what)
+                 Name.find_names_filling_in_authors(@given_name)
                end
     end
 
     def try_to_set_names_from_approved_name
       approved_name = params[:approved_name].to_s.strip_squeeze
       if @names.empty? &&
-         (new_name = Name.create_needed_names(approved_name, @what))
+         (new_name = Name.create_needed_names(approved_name, @given_name))
         @names = [new_name]
       end
     end
