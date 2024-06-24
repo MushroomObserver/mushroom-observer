@@ -69,18 +69,13 @@ module Observations
 
       # prepare to stub InatPhotoImporter
       user = users(:rolf)
-      expected_mo_img = Image.create(
-        content_type: "image/jpeg",
-        user_id: user.id,
-        notes: "Imported from iNat " \
-               "#{DateTime.now.utc.strftime("%Y-%m-%d %H:%M:%S %z")}",
-        copyright_holder: "(c) Tim C., some rights reserved (CC BY-NC)",
-        license_id: 6,
-        width: 2048,
-        height: 1534,
-        original_name: "iNat photo uuid 6c223538-04d6-404c-8e84-b7d881dbe550"
+
+      mock_inat_photo = inat_obs.inat_obs_photos.first
+      mock_api = MockApi.new(
+        results: [
+          expected_mo_image(mock_inat_photo: mock_inat_photo, user: user)
+        ]
       )
-      mock_api = MockApi.new(results: [expected_mo_img])
       mock_importer = Minitest::Mock.new
       mock_importer.expect(:api, mock_api)
 
@@ -99,23 +94,43 @@ module Observations
       assert_not_nil(obs.rss_log)
       assert_redirected_to(observations_path)
 
-      inat_data_comment =
-        Comment.where(target_type: "Observation", target_id: obs.id).
-        where(Comment[:summary] =~ /^Inat Data/)
-      assert(inat_data_comment.one?)
-      comment = inat_data_comment.first.comment
+      obs_comments =
+        Comment.where(target_type: "Observation", target_id: obs.id)
+      assert(obs_comments.one?)
+      assert(obs_comments.where(Comment[:summary] =~ /^Inat Data/).present?,
+             "Missing Initial Commment (#{:inat_data_comment.l})")
+      inat_data_comment = obs_comments.first.comment
       [
         :USER.l, :OBSERVED.l, :LAT_LON.l, :PLACE.l, :ID.l, :DQA.l,
         :ANNOTATIONS.l, :PROJECTS.l, :SEQUENCES.l, :OBSERVATION_FIELDS.l,
         :TAGS.l
       ].each do |caption|
         assert_match(
-          /#{caption}/, comment,
+          /#{caption}/, inat_data_comment,
           "Initial Commment (#{:inat_data_comment.l}) is missing #{caption}"
         )
       end
 
       assert(obs.sequences.none?)
+    end
+
+    def expected_mo_image(mock_inat_photo:, user:)
+      Image.create(
+        content_type: "image/jpeg",
+        user_id: user.id,
+        notes: "Imported from iNat " \
+               "#{DateTime.now.utc.strftime("%Y-%m-%d %H:%M:%S %z")}",
+        copyright_holder: mock_inat_photo[:photo][:attribution],
+        license_id: expected_mo_photo_license(mock_inat_photo),
+        width: 2048,
+        height: 1534,
+        original_name: "iNat photo uuid #{mock_inat_photo[:uuid]}"
+      )
+    end
+
+    def expected_mo_photo_license(mock_inat_photo)
+      InatLicense.new(mock_inat_photo[:photo][:license_code]).
+        mo_license.id
     end
 
     def test_create_import_plant
