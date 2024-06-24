@@ -201,7 +201,6 @@ module Observations
       success = false
       @resolver.results.each do |ivar, value|
         if ivar == :success
-          # `success' is not allowed as an instance variable name
           success = value
         else
           instance_variable_set(:"@#{ivar}", value)
