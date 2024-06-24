@@ -165,23 +165,23 @@ module Observations
 
     # returns Boolean
     def rough_draft
-      set_ivars_for_validation(
-        {}, # naming_args
-        params.dig(:naming, :vote), # vote_args
-        params.dig(:naming, :name), # name_str
-        params[:approved_name], # approved_name
-        params.dig(:chosen_name, :name_id).to_s # chosen_name
-      )
+      args = {
+        naming_args: {},
+        vote_args: params.dig(:naming, :vote),
+        given_name: params.dig(:naming, :name_id) || params.dig(:naming, :name),
+        approved_name: params[:approved_name],
+        chosen_name: params.dig(:chosen_name, :name_id).to_s
+      }
+      resolve_ivars_for_validation(**args)
     end
 
     # returns Boolean. Was @params.rough_draft
-    def set_ivars_for_validation(naming_args, vote_args,
-                                 name_str = nil, approved_name = nil,
-                                 chosen_name = nil)
-      @naming = Naming.construct(naming_args, @observation)
-      @vote = Vote.construct(vote_args, @naming)
+    def resolve_ivars_for_validation(**args)
+      @naming = Naming.construct(args[:naming_args], @observation)
+      @vote = Vote.construct(args[:vote_args], @naming)
       result = if name_str
-                 resolve_name(name_str, approved_name, chosen_name)
+                 resolve_name(args[:given_name], args[:approved_name],
+                              args[:chosen_name])
                else
                  true
                end
@@ -310,7 +310,8 @@ module Observations
     end
 
     def validate_name
-      success = resolve_name(params.dig(:naming, :name).to_s,
+      given_name = params.dig(:naming, :name_id) || params.dig(:naming, :name)
+      success = resolve_name(given_name,
                              params[:approved_name],
                              params.dig(:chosen_name, :name_id).to_s)
       flash_naming_errors
@@ -346,7 +347,8 @@ module Observations
     # because that would bring the other people's votes along with it.
     # We make a new one, reusing the user's previously stated vote and reasons.
     def create_new_naming
-      set_ivars_for_validation({}, params.dig(:naming, :vote))
+      resolve_ivars_for_validation(naming_args: {},
+                                   vote_args: params.dig(:naming, :vote))
       return unless validate_object(@naming) && validate_object(@vote)
 
       update_naming(params.dig(:naming, :reasons), params[:was_js_on] == "yes")
