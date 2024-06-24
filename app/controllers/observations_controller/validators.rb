@@ -23,8 +23,7 @@ module ObservationsController::Validators
   end
 
   def validate_name(params)
-    (success, @what, @name, @names, @valid_names,
-     @parent_deprecated, @suggest_corrections) = resolve_name_ivars(params)
+    success = resolve_name_ivars(params)
     if @name
       @naming.name = @name
     elsif !success
@@ -46,8 +45,16 @@ module ObservationsController::Validators
     )
     # NOTE: views could be refactored to access properties of the @resolver,
     # e.g. `@resolver.valid_names`, instead of these ivars.
-    # All but success, @what, @name are only used by form_name_feedback.
-    @resolver.ivar_array
+    # All but success, @given_name, @name are only used by form_name_feedback.
+    success = false
+    @resolver.results.each do |ivar, value|
+      if ivar == :success
+        success = value
+      else
+        instance_variable_set(:"@#{ivar}", value)
+      end
+    end
+    success
   end
 
   def validate_place_name(params)

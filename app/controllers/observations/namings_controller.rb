@@ -102,8 +102,8 @@ module Observations
     def init_ivars
       @naming = Naming.new
       @vote = Vote.new
-      # @what can't be nil else rails tries to call @name.name
-      @what = params[:naming].to_s
+      # @given_name can't be nil else rails tries to call @name.name
+      @given_name = params[:naming].to_s
       @reasons = @naming.init_reasons
       fill_in_reference_for_suggestions if params[:naming].present?
 
@@ -121,7 +121,7 @@ module Observations
     end
 
     def init_edit_ivars
-      @what        = @naming.text_name
+      @given_name = @naming.text_name
       @names       = nil
       @valid_names = nil
       @reasons     = @naming.init_reasons
@@ -165,23 +165,23 @@ module Observations
 
     # returns Boolean
     def rough_draft
-      set_ivars_for_validation(
-        {}, # naming_args
-        params.dig(:naming, :vote), # vote_args
-        params.dig(:naming, :name), # name_str
-        params[:approved_name], # approved_name
-        params.dig(:chosen_name, :name_id).to_s # chosen_name
-      )
+      args = {
+        naming_args: {},
+        vote_args: params.dig(:naming, :vote),
+        given_name: params.dig(:naming, :name_id) || params.dig(:naming, :name),
+        approved_name: params[:approved_name],
+        chosen_name: params.dig(:chosen_name, :name_id).to_s
+      }
+      resolve_ivars_for_validation(**args)
     end
 
     # returns Boolean. Was @params.rough_draft
-    def set_ivars_for_validation(naming_args, vote_args,
-                                 name_str = nil, approved_name = nil,
-                                 chosen_name = nil)
-      @naming = Naming.construct(naming_args, @observation)
-      @vote = Vote.construct(vote_args, @naming)
+    def resolve_ivars_for_validation(**args)
+      @naming = Naming.construct(args[:naming_args], @observation)
+      @vote = Vote.construct(args[:vote_args], @naming)
       result = if name_str
-                 resolve_name(name_str, approved_name, chosen_name)
+                 resolve_name(args[:given_name], args[:approved_name],
+                              args[:chosen_name])
                else
                  true
                end
@@ -197,10 +197,15 @@ module Observations
       )
       # NOTE: views could be refactored to access properties of the @resolver,
       # e.g. `@resolver.valid_names`, instead of these ivars.
-      # All but success, @what, @name are only used by form_name_feedback.
-      (success, @what, @name, @names, @valid_names,
-       @parent_deprecated, @suggest_corrections) =
-        @resolver.ivar_array
+      # All but success, @given_name, @name are only used by form_name_feedback.
+      success = false
+      @resolver.results.each do |ivar, value|
+        if ivar == :success
+          success = value
+        else
+          instance_variable_set(:"@#{ivar}", value)
+        end
+      end
       success && @name
     end
 
@@ -252,7 +257,7 @@ module Observations
     end
 
     def flash_naming_errors
-      if @what.blank?
+      if @given_name.blank?
         flash_error(:form_naming_what_missing.t)
       elsif name_missing?
         flash_object_errors(@naming)
@@ -260,7 +265,7 @@ module Observations
     end
 
     def name_missing?
-      return false if @name && @what.present?
+      return false if @name && @given_name.present?
 
       @naming.errors.
         add(:name, :form_observations_there_is_a_problem_with_name.t)
@@ -305,7 +310,8 @@ module Observations
     end
 
     def validate_name
-      success = resolve_name(params.dig(:naming, :name).to_s,
+      given_name = params.dig(:naming, :name_id) || params.dig(:naming, :name)
+      success = resolve_name(given_name,
                              params[:approved_name],
                              params.dig(:chosen_name, :name_id).to_s)
       flash_naming_errors
@@ -341,7 +347,8 @@ module Observations
     # because that would bring the other people's votes along with it.
     # We make a new one, reusing the user's previously stated vote and reasons.
     def create_new_naming
-      set_ivars_for_validation({}, params.dig(:naming, :vote))
+      resolve_ivars_for_validation(naming_args: {},
+                                   vote_args: params.dig(:naming, :vote))
       return unless validate_object(@naming) && validate_object(@vote)
 
       update_naming(params.dig(:naming, :reasons), params[:was_js_on] == "yes")

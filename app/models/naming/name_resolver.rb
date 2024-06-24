@@ -37,7 +37,7 @@ class Naming
 
     def initialize(given_name, approved_name, chosen_name)
       @success = true
-      @what = given_name
+      @given_name = given_name
       @name = nil
       @names = nil
       @valid_names = nil
@@ -49,9 +49,11 @@ class Naming
 
     # rubocop:disable Metrics/MethodLength
     def resolve(given_name, approved_name, chosen_name)
-      what2 = given_name.to_s.tr("_", " ").strip_squeeze
+      corrected = given_name.to_s.tr("_", " ").strip_squeeze
       approved_name2 = approved_name.to_s.tr("_", " ").strip_squeeze
-      return if what2.blank? || Name.names_for_unknown.member?(what2.downcase)
+      if corrected.blank? || Name.names_for_unknown.member?(corrected.downcase)
+        return
+      end
 
       @success = false
 
@@ -82,17 +84,17 @@ class Naming
       # EXCEPT in the case of user supplying author for existing name that
       # has no author.)
       if @names.empty? &&
-         (@name = Name.create_needed_names(approved_name2, what2))
+         (@name = Name.create_needed_names(approved_name2, corrected))
         @names << name
       end
 
       # No matches -- suggest some correct names to make Debbie happy.
       if @names.empty?
-        if (parent = Name.parent_if_parent_deprecated(what2))
-          @valid_names = Name.names_from_synonymous_genera(what2, parent)
+        if (parent = Name.parent_if_parent_deprecated(corrected))
+          @valid_names = Name.names_from_synonymous_genera(corrected, parent)
           @parent_deprecated = parent
         else
-          @valid_names = Name.suggest_alternate_spellings(what2)
+          @valid_names = Name.suggest_alternate_spellings(corrected)
           @suggest_corrections = true
         end
 
@@ -112,7 +114,7 @@ class Naming
           # Fill in author, just in case user has chosen between two authors.
           # If the form fails for some other reason and we don't do this, it
           # will ask the user to choose between the authors *again* later.
-          @what = name.real_search_name
+          @given_name = name.real_search_name
           # (This is the only way to get out of here with success.)
           @success = true
         end
@@ -135,10 +137,15 @@ class Naming
     end
     # rubocop:enable Metrics/MethodLength
 
-    # Convenience method returning an array for mass ivar assignment
-    def ivar_array
-      [@success, @what, @name, @names, @valid_names, @parent_deprecated,
-       @suggest_corrections]
+    # Convenience method returning a hash for mass ivar assignment
+    def results
+      { success: @success,
+        given_name: @given_name,
+        name: @name,
+        names: @names,
+        valid_names: @valid_names,
+        parent_deprecated: @parent_deprecated,
+        suggest_corrections: @suggest_corrections }
     end
   end
 end

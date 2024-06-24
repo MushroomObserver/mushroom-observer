@@ -21,7 +21,7 @@ module ObservationsController::NewAndCreate
   #
   # Outputs:
   #   @observation, @naming, @vote      empty objects
-  #   @what, @names, @valid_names       name validation
+  #   @given_name, @names, @valid_names       name validation
   #   @reasons                          array of naming_reasons
   #   @images                           array of images
   #   @licenses                         used for image license menu
@@ -40,7 +40,7 @@ module ObservationsController::NewAndCreate
     @observation = Observation.new
     @naming      = Naming.new
     @vote        = Vote.new
-    @what        = "" # can't be nil else rails tries to call @name.name
+    @given_name = "" # can't be nil else rails tries to call @name.name
     @names       = nil
     @valid_names = nil
     @reasons     = @naming.init_reasons
