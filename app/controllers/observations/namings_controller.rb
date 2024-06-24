@@ -168,7 +168,7 @@ module Observations
       args = {
         naming_args: {},
         vote_args: params.dig(:naming, :vote),
-        given_name: params.dig(:naming, :name_id) || params.dig(:naming, :name),
+        given_name: params.dig(:naming, :name),
         approved_name: params[:approved_name],
         chosen_name: params.dig(:chosen_name, :name_id).to_s
       }
@@ -310,7 +310,7 @@ module Observations
     end
 
     def validate_name
-      given_name = params.dig(:naming, :name_id) || params.dig(:naming, :name)
+      given_name = params.dig(:naming, :name)
       success = resolve_name(given_name,
                              params[:approved_name],
                              params.dig(:chosen_name, :name_id).to_s)
