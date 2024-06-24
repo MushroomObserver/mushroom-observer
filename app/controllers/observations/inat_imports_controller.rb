@@ -161,7 +161,7 @@ module Observations
                "+/-#{inat_obs.inat_public_positional_accuracy} m\n").
         concat("#{:PLACE.t}: #{inat_obs.inat_place_guess}\n").
         concat("#{:ID.t}: #{inat_obs.inat_taxon_name}\n").
-        concat("#{:DQA.t}: #{dqa(inat_obs.inat_quality_grade)}\n").
+        concat("#{:DQA.t}: #{inat_obs.dqa}\n").
         concat("#{:ANNOTATIONS.t}: #{:UNDER_DEVELOPMENT.t}\n").
         concat("#{:PROJECTS.t}: #{inat_obs.inat_project_names}\n").
         concat("#{:SEQUENCES.t}: #{:UNDER_DEVELOPMENT.t}\n").
@@ -196,19 +196,6 @@ module Observations
         # TODO: Error handling? 2024-06-19 jdc.
         api = API2.execute(params)
         User.current = @user # API call zaps User.current
-      end
-    end
-
-    def dqa(dqa)
-      case dqa
-      when /research/
-        "Research Grade"
-      when /needs_id/
-        "Needs ID"
-      when /casual/
-        "Casual"
-      else
-        "??"
       end
     end
 

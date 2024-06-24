@@ -46,6 +46,8 @@ class InatObs
       JSON.parse(imported_inat_obs_data, symbolize_names: true)
   end
 
+  ########## iNat attributes
+
   def inat_id
     obs[:id]
   end
@@ -175,6 +177,19 @@ class InatObs
     # Maybe smallest existing MO Location containing:
     #   inat.location +/- inat.positional accuracy
     inat_place_guess
+  end
+
+  ########## Other mappings used in MO Observations
+
+  def dqa
+    case inat_quality_grade
+    when "research"
+      :inat_dqa_research.l
+    when "needs_id"
+      :inat_dqa_needs_id.l
+    when "casual"
+      :inat_dqa_casual.l
+    end
   end
 
   ########## utilties

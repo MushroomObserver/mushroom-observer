@@ -125,6 +125,12 @@ class InatObsTest < UnitTestCase
     assert_empty(mock("evernia_no_photos").inat_tags)
   end
 
+  def test_dqa
+    assert_equal(:inat_dqa_casual.l, mock("evernia_no_photos").dqa)
+    assert_equal(:inat_dqa_needs_id.l, mock("coprinus").dqa)
+    assert_equal(:inat_dqa_research.l, mock("somion_unicolor").dqa)
+  end
+
   def test_sequences
     mock_inat_obs = mock("lycoperdon")
     assert(mock_inat_obs.sequences.one?)
