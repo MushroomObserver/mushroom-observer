@@ -58,33 +58,23 @@ module Observations
     end
 
     def test_create_obs_with_photo
-      # stub the iNat API request for the iNat observation
+      user = users(:rolf)
       mock_inat_response = File.read("test/inat/tremella_mesenterica.txt")
       inat_obs = InatObs.new(mock_inat_response)
       inat_obs_id = inat_obs.inat_id
+
+      # stub the iNat API request for the iNat observation
       WebMock.stub_request(
         :get,
         "#{INAT_OBS_REQUEST_PREFIX}id=#{inat_obs_id}#{INAT_OBS_REQUEST_POSTFIX}"
       ).to_return(body: mock_inat_response)
 
-      # prepare to stub InatPhotoImporter
-      user = users(:rolf)
+      login(user.login)
 
-      mock_inat_photo = inat_obs.inat_obs_photos.first
-      mock_api = MockApi.new(
-        results: [
-          expected_mo_image(mock_inat_photo: mock_inat_photo, user: user)
-        ]
-      )
-      mock_importer = Minitest::Mock.new
-      mock_importer.expect(:api, mock_api)
-
-      # NOTE: This stubs the InatPhotoImporter's return value,
-      # but doesn't add an Image to the MO Observation.
+      # NOTE: Stubs the importer's return value, but not its side-effect --
+      # i.e., doesn't add an Image to the MO Observation.
       # Enables testing everything except Observation.images. jdc 2024-06-23
-      InatPhotoImporter.stub(:new, mock_importer) do
-        login(user.login)
-
+      InatPhotoImporter.stub(:new, mock_photo_importer(inat_obs)) do
         assert_difference("Observation.count", 1, "Failed to create Obs") do
           post(:create, params: { inat_ids: inat_obs_id })
         end
@@ -112,6 +102,19 @@ module Observations
       end
 
       assert(obs.sequences.none?)
+    end
+
+    def mock_photo_importer(inat_obs)
+      mock_inat_photo = inat_obs.inat_obs_photos.first
+      mock_api = MockApi.new(
+        results: [
+          expected_mo_image(mock_inat_photo: mock_inat_photo,
+                            user: User.current)
+        ]
+      )
+      mock_photo_importer = Minitest::Mock.new
+      mock_photo_importer.expect(:api, mock_api)
+      mock_photo_importer
     end
 
     def expected_mo_image(mock_inat_photo:, user:)
