@@ -301,7 +301,7 @@ module ObservationsController::NewAndCreate
   end
 
   def redirect_to_next_page
-    if @observation.location.nil?
+    if @observation.location_id.nil?
       redirect_to(new_location_path(where: @observation.place_name,
                                     set_observation: @observation.id))
     else
