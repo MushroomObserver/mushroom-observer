@@ -130,10 +130,15 @@ class Naming
     end
     # rubocop:enable Metrics/MethodLength
 
-    # Convenience method returning an array for mass ivar assignment
-    def ivar_array
-      [@success, @what, @name, @names, @valid_names, @parent_deprecated,
-       @suggest_corrections]
+    # Convenience method returning a hash for mass ivar assignment
+    def results
+      { success: @success,
+        what: @what,
+        name: @name,
+        names: @names,
+        valid_names: @valid_names,
+        parent_deprecated: @parent_deprecated,
+        suggest_corrections: @suggest_corrections }
     end
   end
 end

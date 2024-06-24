@@ -198,10 +198,10 @@ module Observations
       # NOTE: views could be refactored to access properties of the @resolver,
       # e.g. `@resolver.valid_names`, instead of these ivars.
       # All but success, @what, @name are only used by form_name_feedback.
-      (success, @what, @name, @names, @valid_names,
-       @parent_deprecated, @suggest_corrections) =
-        @resolver.ivar_array
-      success && @name
+      @resolver.results.each do |ivar, value|
+        instance_variable_set(ivar, value)
+      end
+      @success && @name
     end
 
     # We should have a @name by this point
