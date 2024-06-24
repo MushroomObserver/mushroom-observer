@@ -60,13 +60,13 @@ module Observations
     def test_create_obs_with_photo
       user = users(:rolf)
       mock_inat_response = File.read("test/inat/tremella_mesenterica.txt")
-      inat_obs = InatObs.new(mock_inat_response)
-      inat_obs_id = inat_obs.inat_id
+      inat_obs ||= InatObs.new(mock_inat_response)
 
       # stub the iNat API request for the iNat observation
       WebMock.stub_request(
         :get,
-        "#{INAT_OBS_REQUEST_PREFIX}id=#{inat_obs_id}#{INAT_OBS_REQUEST_POSTFIX}"
+        "#{INAT_OBS_REQUEST_PREFIX}id=#{inat_obs.inat_id}" \
+          "#{INAT_OBS_REQUEST_POSTFIX}"
       ).to_return(body: mock_inat_response)
 
       login(user.login)
@@ -76,7 +76,7 @@ module Observations
       # Enables testing everything except Observation.images. jdc 2024-06-23
       InatPhotoImporter.stub(:new, mock_photo_importer(inat_obs)) do
         assert_difference("Observation.count", 1, "Failed to create Obs") do
-          post(:create, params: { inat_ids: inat_obs_id })
+          post(:create, params: { inat_ids: inat_obs.inat_id })
         end
       end
 
