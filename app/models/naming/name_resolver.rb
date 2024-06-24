@@ -35,21 +35,21 @@ class Naming
     attr_reader :success, :name, :names, :valid_names, :parent_deprecated,
                 :suggest_corrections
 
-    def initialize(what, approved_name, chosen_name)
+    def initialize(given_name, approved_name, chosen_name)
       @success = true
-      @what = what
+      @what = given_name
       @name = nil
       @names = nil
       @valid_names = nil
       @parent_deprecated = nil
       @suggest_corrections = false
 
-      resolve(what, approved_name, chosen_name)
+      resolve(given_name, approved_name, chosen_name)
     end
 
     # rubocop:disable Metrics/MethodLength
-    def resolve(what, approved_name, chosen_name)
-      what2 = what.to_s.tr("_", " ").strip_squeeze
+    def resolve(given_name, approved_name, chosen_name)
+      what2 = given_name.to_s.tr("_", " ").strip_squeeze
       approved_name2 = approved_name.to_s.tr("_", " ").strip_squeeze
       return if what2.blank? || Name.names_for_unknown.member?(what2.downcase)
 
@@ -59,17 +59,22 @@ class Naming
       # Has user chosen among multiple matching names or among
       # multiple approved names?
       if chosen_name.blank?
-        what2 = Name.fix_capitalized_species_epithet(what2)
+        # If it's an autocompleted match, take that directly.
+        # (It could still be deprecated, but we'll deal with that below.)
+        if given_name.is_a?(Integer)
+          @names = [Name.safe_find(given_name)]
+        else
+          what2 = Name.fix_capitalized_species_epithet(what2)
 
-        # Look up name: can return zero (unrecognized), one
-        # (unambiguous match), or many (multiple authors match).
-        @names = Name.find_names_filling_in_authors(what2)
+          # Look up name: can return zero (unrecognized), one
+          # (unambiguous match), or many (multiple authors match).
+          @names = Name.find_names_filling_in_authors(what2)
+        end
       else
         @names = [Name.find(chosen_name)]
-        # This tells it to check if this name is deprecated below EVEN
-        # IF the user didn't change the what field.  This will solve
-        # the problem of multiple matching deprecated names discussed
-        # below.
+        # This tells it to check if this name is deprecated (below) EVEN IF the
+        # user didn't change the what field.  This will solve the problem of
+        # multiple matching deprecated names discussed below.
         ignore_approved_name = true
       end
 
@@ -96,7 +101,7 @@ class Naming
         target_name = names.first
         # Single matching name.  Check if it's deprecated.
         if target_name.deprecated &&
-           (ignore_approved_name || (approved_name != what))
+           (ignore_approved_name || (approved_name != given_name))
           # User has not explicitly approved the deprecated name: get list of
           # valid synonyms.  Will display them for user to choose among.
           @valid_names = target_name.approved_synonyms

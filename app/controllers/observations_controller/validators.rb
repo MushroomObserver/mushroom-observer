@@ -36,7 +36,10 @@ module ObservationsController::Validators
   end
 
   def resolve_name_ivars(params)
-    given_name = params.dig(:naming, :name).to_s
+    # this would come from observation/naming/fields
+    given_name = params.dig(:naming, :name_id).to_i ||
+                 params.dig(:naming, :name).to_s
+    # this would come from form_name_feedback
     chosen_name = params.dig(:chosen_name, :name_id).to_s
     @resolver = Naming::NameResolver.new(
       given_name, params[:approved_name], chosen_name
