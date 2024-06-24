@@ -21,7 +21,7 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | gyromitra_ancilis.txt | [216745568](https://www.inaturalist.org/observations/216745568) | 3 | public | **cc-by license**, **many projects** |
 | inocybe.txt | [222904190](https://www.inaturalist.org/observations/222904190) | 5 | public | cc-by-nc, **2 tags** |
 | lentinellus_ursinus.txt | [24970904](https://api.inaturalist.org/v1/observations/220796026) | 2 | obscured | **ID matches many MO names** |
-| lyocperdon.txt | [24970904](https://www.inaturalist.org/observations/24970904) | 2 | public | cc-by-nc, projects, Activity, >1 field including, **DNA** |
+| lycoperdon.txt | [24970904](https://www.inaturalist.org/observations/24970904) | 2 | public | cc-by-nc, projects, Activity, many fields including **DNA** |
 | russulaceae.txt | [216675045](https://www.inaturalist.org/observations/216675045) | 2 | public | **all rights reserved**, many projects, Activity |
 | somion_unicolor.json |  |  |  | Formatted version of following; facilitates viewing iNat API response key/values |
 | somion_unicolor.txt | [202555552](https://www.inaturalist.org/observations/202555552) | 5 | public | Research Grade, Notes, Activity, >1 ID, 1 field (Mushroom Observer URL), **mirrored from MO** |
