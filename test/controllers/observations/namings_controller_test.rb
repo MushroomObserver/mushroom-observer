@@ -536,7 +536,7 @@ module Observations
       login("dick")
       post(:create, params: params)
       assert_response(:success) # really means failed
-      what = @controller.instance_variable_get(:@what)
+      what = @controller.instance_variable_get(:@given_name)
       assert_equal("Agaricus campestris L.", what)
     end
 

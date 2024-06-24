@@ -102,8 +102,8 @@ module Observations
     def init_ivars
       @naming = Naming.new
       @vote = Vote.new
-      # @what can't be nil else rails tries to call @name.name
-      @what = params[:naming].to_s
+      # @given_name can't be nil else rails tries to call @name.name
+      @given_name = params[:naming].to_s
       @reasons = @naming.init_reasons
       fill_in_reference_for_suggestions if params[:naming].present?
 
@@ -121,7 +121,7 @@ module Observations
     end
 
     def init_edit_ivars
-      @what        = @naming.text_name
+      @given_name = @naming.text_name
       @names       = nil
       @valid_names = nil
       @reasons     = @naming.init_reasons
@@ -197,11 +197,17 @@ module Observations
       )
       # NOTE: views could be refactored to access properties of the @resolver,
       # e.g. `@resolver.valid_names`, instead of these ivars.
-      # All but success, @what, @name are only used by form_name_feedback.
+      # All but success, @given_name, @name are only used by form_name_feedback.
+      success = false
       @resolver.results.each do |ivar, value|
-        instance_variable_set(ivar, value)
+        if ivar == :success
+          # `success' is not allowed as an instance variable name
+          success = value
+        else
+          instance_variable_set(ivar, value)
+        end
       end
-      @success && @name
+      success && @name
     end
 
     # We should have a @name by this point
@@ -252,7 +258,7 @@ module Observations
     end
 
     def flash_naming_errors
-      if @what.blank?
+      if @given_name.blank?
         flash_error(:form_naming_what_missing.t)
       elsif name_missing?
         flash_object_errors(@naming)
@@ -260,7 +266,7 @@ module Observations
     end
 
     def name_missing?
-      return false if @name && @what.present?
+      return false if @name && @given_name.present?
 
       @naming.errors.
         add(:name, :form_observations_there_is_a_problem_with_name.t)

@@ -35,23 +35,25 @@ class Naming
     attr_reader :success, :name, :names, :valid_names, :parent_deprecated,
                 :suggest_corrections
 
-    def initialize(what, approved_name, chosen_name)
+    def initialize(given_name, approved_name, chosen_name)
       @success = true
-      @what = what
+      @given_name = given_name
       @name = nil
       @names = nil
       @valid_names = nil
       @parent_deprecated = nil
       @suggest_corrections = false
 
-      resolve(what, approved_name, chosen_name)
+      resolve(given_name, approved_name, chosen_name)
     end
 
     # rubocop:disable Metrics/MethodLength
-    def resolve(what, approved_name, chosen_name)
-      what2 = what.to_s.tr("_", " ").strip_squeeze
+    def resolve(given_name, approved_name, chosen_name)
+      corrected = given_name.to_s.tr("_", " ").strip_squeeze
       approved_name2 = approved_name.to_s.tr("_", " ").strip_squeeze
-      return if what2.blank? || Name.names_for_unknown.member?(what2.downcase)
+      if corrected.blank? || Name.names_for_unknown.member?(corrected.downcase)
+        return
+      end
 
       @success = false
 
@@ -59,11 +61,11 @@ class Naming
       # Has user chosen among multiple matching names or among
       # multiple approved names?
       if chosen_name.blank?
-        what2 = Name.fix_capitalized_species_epithet(what2)
+        corrected = Name.fix_capitalized_species_epithet(corrected)
 
         # Look up name: can return zero (unrecognized), one
         # (unambiguous match), or many (multiple authors match).
-        @names = Name.find_names_filling_in_authors(what2)
+        @names = Name.find_names_filling_in_authors(corrected)
       else
         @names = [Name.find(chosen_name)]
         # This tells it to check if this name is deprecated below EVEN
@@ -77,17 +79,17 @@ class Naming
       # EXCEPT in the case of user supplying author for existing name that
       # has no author.)
       if @names.empty? &&
-         (@name = Name.create_needed_names(approved_name2, what2))
+         (@name = Name.create_needed_names(approved_name2, corrected))
         @names << name
       end
 
       # No matches -- suggest some correct names to make Debbie happy.
       if @names.empty?
-        if (parent = Name.parent_if_parent_deprecated(what2))
-          @valid_names = Name.names_from_synonymous_genera(what2, parent)
+        if (parent = Name.parent_if_parent_deprecated(corrected))
+          @valid_names = Name.names_from_synonymous_genera(corrected, parent)
           @parent_deprecated = parent
         else
-          @valid_names = Name.suggest_alternate_spellings(what2)
+          @valid_names = Name.suggest_alternate_spellings(corrected)
           @suggest_corrections = true
         end
 
@@ -96,7 +98,7 @@ class Naming
         target_name = names.first
         # Single matching name.  Check if it's deprecated.
         if target_name.deprecated &&
-           (ignore_approved_name || (approved_name != what))
+           (ignore_approved_name || (approved_name != given_name))
           # User has not explicitly approved the deprecated name: get list of
           # valid synonyms.  Will display them for user to choose among.
           @valid_names = target_name.approved_synonyms
@@ -107,7 +109,7 @@ class Naming
           # Fill in author, just in case user has chosen between two authors.
           # If the form fails for some other reason and we don't do this, it
           # will ask the user to choose between the authors *again* later.
-          @what = name.real_search_name
+          @given_name = name.real_search_name
           # (This is the only way to get out of here with success.)
           @success = true
         end
@@ -133,7 +135,7 @@ class Naming
     # Convenience method returning a hash for mass ivar assignment
     def results
       { success: @success,
-        what: @what,
+        what: @given_name,
         name: @name,
         names: @names,
         valid_names: @valid_names,

@@ -8,7 +8,7 @@ when "new", "create"
   method = :post
   id = "obs_#{@observation.id}_naming_form"
   url = observation_namings_path(observation_id: @observation.id,
-                                 approved_name: @what,
+                                 approved_name: @given_name,
                                  q: get_query_param)
 when "edit", "update"
   button_name = :SAVE_EDITS.l
@@ -16,7 +16,7 @@ when "edit", "update"
   id = "obs_#{@observation.id}_naming_#{@naming.id}_form"
   url = observation_naming_path(observation_id: @observation.id,
                                 id: @naming.id,
-                                approved_name: @what,
+                                approved_name: @given_name,
                                 q: get_query_param)
 end
 

@@ -4,11 +4,11 @@ add_page_title(:name_deprecate_title.t(name: @name.display_name))
 add_tab_set(name_forms_return_tabs(name: @name))
 
 action = { controller: "/names/synonyms/deprecate", action: :create,
-            id: @name.id, approved_name: @what }
+            id: @name.id, approved_name: @given_name }
 
 feedback_locals = {
   button_name: :SUBMIT.l,
-  what: @what,
+  what: @given_name,
   valid_names: @valid_names,
   suggest_corrections: @suggest_corrections,
   parent_deprecated: @parent_deprecated,
@@ -26,11 +26,11 @@ end
   <%= submit_button(form: f, button: :SUBMIT.l, center: true) %>
 
   <%= render(partial: "shared/form_name_feedback",
-             locals: feedback_locals.merge({ f: f })) if @what.present? %>
+             locals: feedback_locals.merge({ f: f })) if @given_name.present? %>
 
   <%= autocompleter_field(
     form: f, field: :proposed_name, type: :name,
-    value: @what, label: "#{:name_deprecate_preferred.t}:", autofocus: true,
+    value: @given_name, label: "#{:name_deprecate_preferred.t}:", autofocus: true,
     append: help_note(:div, :name_deprecate_preferred_help.tp), inline: true
   ) %>
 
