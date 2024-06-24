@@ -137,7 +137,8 @@ module Projects
     def test_index_project_without_location
       project = projects(:nowhere_2023_09_project)
       violation = observations(:falmouth_2022_obs)
-      assert(project.location.nil? && project.violations.include?(violation) &&
+      assert(project.location_id.nil? &&
+             project.violations.include?(violation) &&
               violation.lat.present?,
              "Test needs Project lacking a Location, " \
              "with (date) violation which has a geolocation")
