@@ -156,14 +156,6 @@ module Observations
       end
     end
 
-    # Figure out whether we have a :name_id to pass to the resolver.
-    # If not, we pass the :name as a string. (Note :name_id is a sting)
-    def given_name_or_id
-      params.dig(:naming, :name_id).present? &&
-        params.dig(:naming, :name_id).to_i.nonzero? ||
-        params.dig(:naming, :name)
-    end
-
     def redirect_to_obs(obs)
       redirect_with_query(obs.show_link_args)
     end
