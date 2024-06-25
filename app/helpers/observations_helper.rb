@@ -108,6 +108,24 @@ module ObservationsHelper
             name_path(id: name.id), **)
   end
 
+  def observation_details_inat(obs:)
+    return nil if obs.inat_id.blank?
+
+    inat_link_desc = if obs.source == "mo_inat_import"
+                       :ORIGINAL.t
+                     else
+                       :COUNTERPART.t
+                     end
+
+    tag.p(id: "inat_id") do
+      [
+        "#{inat_link_desc}:",
+        link_to("#{:inaturalist.t} ##{obs.inat_id}",
+                "https://inaturalist.org/observations/#{obs.inat_id}")
+      ].safe_join(" ")
+    end
+  end
+
   def observation_map_coordinates(obs:)
     if obs.location
       loc = obs.location

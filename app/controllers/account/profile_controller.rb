@@ -5,7 +5,7 @@ module Account
     before_action :login_required
 
     def edit
-      @licenses = License.current_names_and_ids(@user.license)
+      @licenses = License.available_names_and_ids(@user.license)
       @place_name = @user.location ? @user.location.display_name : ""
       if @user.image
         @copyright_holder  = @user.image.copyright_holder
@@ -19,7 +19,7 @@ module Account
     end
 
     def update
-      @licenses = License.current_names_and_ids(@user.license)
+      @licenses = License.available_names_and_ids(@user.license)
 
       [:name, :notes, :mailing_address].each do |arg|
         val = params[:user][arg].to_s

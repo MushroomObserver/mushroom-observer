@@ -351,6 +351,7 @@
   observation: observation
   OBSERVATIONS: Observations
   observations: observations
+  OBSERVATION_FIELDS: Observation Fields
   PAST_LOCATION: Location Change
   past_location: location change
   PAST_LOCATIONS: Location Changes
@@ -439,6 +440,7 @@
   admin_group: admin group
   ADMIN_GROUPS: Admin Groups
   admin_groups: admin groups
+  ANNOTATIONS: Annotations
   # ("Author" is person(s) who wrote a book, description, or news Article.)
   AUTHOR: Author
   author: author
@@ -469,6 +471,7 @@
   confidence_level: confidence level
   CONFIDENCE_LEVELS: Confidence Levels
   confidence_levels: confidence levels
+  CONSENSUS: Consensus
   CONSTRAINT_VIOLATIONS: Constraint Violations
   constraint_violations: constraint violations
   COORDINATES: Coordinates
@@ -481,7 +484,7 @@
   correct_spelling: correct spelling
   CORRECT_SPELLINGS: Correct Spellings
   correct_spellings: correct spellings
-  CONSENSUS: Consensus
+  COUNTERPART: Counterpart
   DATE: Date
   date: date
   DATES: Dates
@@ -489,6 +492,8 @@
   # deposit of Sequence Bases in an Archive
   DEPOSIT: Deposit
   deposit: deposit
+  # DQA is iNat-ese for Data Quality Assessment
+  DQA: DQA
   EDITOR: Editor
   editor: editor
   EDITORS: Editors
@@ -519,6 +524,7 @@
   identifier: identifier
   IDENTIFIERS: Identifiers
   identifiers: identifiers
+  inaturalist: iNaturalist
   INDEX: Index
   index: index
   INDEXES: Indexes
@@ -527,6 +533,7 @@
   latitude: latitude
   LATITUDES: Latitudes
   latitudes: latitudes
+  LAT_LON: Lat/Lon
   LOCUS: Locus
   locus: locus
   LOGIN_NAME: Login Name
@@ -549,10 +556,12 @@
   note: note
   NOTES: Notes
   notes: notes
+  OBSERVED: Observed
   OBSERVER: Observer
   observer: observer
   OBSERVERS: Observers
   observers: observers
+  ORIGINAL: Original
   OWNER: Owner
   owner: owner
   OWNERS: Owners
@@ -562,6 +571,7 @@
   password: password
   PASSWORDS: Passwords
   passwords: passwords
+  PLACE: Place
   PREFERENCES: Preferences
   preferences: preferences
   PREFERRED_NAME: Preferred Name
@@ -610,6 +620,7 @@
   title: title
   TITLES: Titles
   titles: titles
+  UNDER_DEVELOPMENT: Under Development
   VERSION: Version
   version: version
   VERSIONS: Versions
@@ -701,6 +712,7 @@
   edit: edit
   ENABLE: Enable
   enable: enable
+  IMPORT: Import
   # merge one object into another
   MERGE: Merge
   merge: merge
@@ -1286,6 +1298,7 @@
   source_credit_mo_android_app: Created using the "Mushroom Observer Android app":https://mushroomobserver.org/articles/34.
   source_credit_mo_iphone_app: Created using the "Mushroom Observer iPhone app":https://mushroomobserver.org/articles/34.
   source_credit_mo_api: Created using the "Mushroom Observer API":https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md.
+  source_credit_mo_inat_import: Imported from "iNaturalist":https://www.inaturalist.org using the "Mushroom Observer website":https://mushroomobserver.org
 
   ##############################################################################
 
@@ -2940,6 +2953,19 @@
   list_merge_options_near_matches: Near Matches
   list_merge_options_others: Other Available [:locations]
   list_merge_options_title: Location Matches for [where]
+
+  # observation/inat_imports
+  create_inat_import_title: Import from iNat
+  import_observation_from_inat: Import from iNat
+  inat_data_comment: Inat Data
+  inat_dqa_casual: Casual
+  inat_dqa_needs_id: Needs ID
+  inat_dqa_research: Research Grade
+  inat_id: iNat id
+  inat_ids: iNat ids
+  inat_not_single_id: Please enter a single iNat id
+  runtime_illegal_inat_id: Illegal iNat id `[id]`
+  inat_taxon_not_importable: Cannot import iNat id `[id]`. (Can import only Fungi.)
 
   # observer/list_notifications
   list_notifications_title: Email Alerts for [user]

@@ -143,7 +143,7 @@ class GlossaryTermsController < ApplicationController
     @copyright_holder = params.dig(:upload, :copyright_holder) || @user.name
     @copyright_year = params.dig(:upload, :copyright_year)&.to_i ||
                       Time.now.utc.year
-    @licenses = License.current_names_and_ids(@user.license)
+    @licenses = License.available_names_and_ids(@user.license)
     @upload_license_id = params.dig(:upload, :license_id) || @user.license_id
   end
 
