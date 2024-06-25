@@ -13,14 +13,14 @@
 #    update_good_images(...)
 #    attach_good_images(...)
 
-module ObservationsController::FormHelpers
+module ObservationsController::SharedFormMethods
   private
 
   # NOTE: potential gotcha... Any nested attributes must come last.
   def permitted_observation_args
-    [:place_name, :where, :lat, :lng, :alt, :when, "when(1i)", "when(2i)",
-     "when(3i)", :notes, :specimen, :thumb_image_id, :is_collection_location,
-     :gps_hidden]
+    [:place_name, :location_id, :where, :lat, :lng, :alt,
+     :when, "when(1i)", "when(2i)", "when(3i)", :notes, :specimen,
+     :thumb_image_id, :is_collection_location, :gps_hidden]
   end
 
   def update_permitted_observation_attributes

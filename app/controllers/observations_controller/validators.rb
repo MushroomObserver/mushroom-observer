@@ -16,14 +16,16 @@
 module ObservationsController::Validators
   private
 
-  def validate_params(params)
-    validate_name(params) &&
-      validate_place_name(params) &&
-      validate_projects(params)
+  def validate_params
+    validate_name &&
+      validate_place_name &&
+      validate_projects
   end
 
-  def validate_name(params)
-    success = resolve_name_ivars(params)
+  # Maybe move this to a shared NamingsController::Validators module,
+  # or just include in both ObservationsController and NamingsController
+  def validate_name
+    success = resolve_name(**name_args)
     if @name
       @naming.name = @name
     elsif !success
@@ -34,17 +36,25 @@ module ObservationsController::Validators
     success
   end
 
-  def resolve_name_ivars(params)
-    given_name = params.dig(:naming, :name).to_s
-    chosen_name = params.dig(:chosen_name, :name_id).to_s
-    @resolver = Naming::NameResolver.new(
-      given_name, params[:approved_name], chosen_name
-    )
-    # NOTE: views could be refactored to access properties of the @resolver,
-    # e.g. `@resolver.valid_names`, instead of these ivars.
-    # All but success, @given_name, @name are only used by form_name_feedback.
+  # given_name, given_id from observation/naming/fields. Note: nil.to_i == 0
+  # approved_name, chosen_name from form_name_feedback
+  # also used in namings_controller
+  def name_args
+    {
+      given_name: params.dig(:naming, :name).to_s,
+      # given_id: params.dig(:naming, :name_id).to_i,
+      approved_name: params[:approved_name].to_s,
+      chosen_name: params.dig(:chosen_name, :name_id).to_s
+    }
+  end
+
+  # Set the ivars for the form: @given_name, @name - and potentially ivars for
+  # form_name_feedback in the case the name is not resolved unambiguously:
+  # @names, @valid_names, @parent_deprecated, @suggest_corrections.
+  def resolve_name(**)
+    resolver = Naming::NameResolver.new(**)
     success = false
-    @resolver.results.each do |ivar, value|
+    resolver.results.each do |ivar, value|
       if ivar == :success
         success = value
       else
@@ -54,7 +64,7 @@ module ObservationsController::Validators
     success
   end
 
-  def validate_place_name(params)
+  def validate_place_name
     success = true
     @place_name = @observation.place_name
     @dubious_where_reasons = []
@@ -66,7 +76,7 @@ module ObservationsController::Validators
     success
   end
 
-  def validate_projects(params)
+  def validate_projects
     return true if params[:project].empty? ||
                    params[:project][:ignore_proj_conflicts]
 

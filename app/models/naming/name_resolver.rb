@@ -35,7 +35,8 @@ class Naming
     attr_reader :success, :name, :names, :valid_names, :parent_deprecated,
                 :suggest_corrections
 
-    def initialize(given_name, approved_name, chosen_name)
+    def initialize(given_name: "", approved_name: "",
+                   chosen_name: "")
       @success = true
       @given_name = given_name
       @name = nil
@@ -44,11 +45,11 @@ class Naming
       @parent_deprecated = nil
       @suggest_corrections = false
 
-      resolve(given_name, approved_name, chosen_name)
+      resolve(given_name:, approved_name:, chosen_name:)
     end
 
     # rubocop:disable Metrics/MethodLength
-    def resolve(given_name, approved_name, chosen_name)
+    def resolve(given_name:, approved_name:, chosen_name:)
       corrected = given_name.to_s.tr("_", " ").strip_squeeze
       approved_name2 = approved_name.to_s.tr("_", " ").strip_squeeze
       if corrected.blank? || Name.names_for_unknown.member?(corrected.downcase)
@@ -56,22 +57,26 @@ class Naming
       end
 
       @success = false
-
       ignore_approved_name = false
       # Has user chosen among multiple matching names or among
       # multiple approved names?
       if chosen_name.blank?
+        # If it's an autocompleted match, take that directly.
+        # (It could still be deprecated, but we'll deal with that below.)
+        # if given_id.is_a?(Integer) && given_id.nonzero?
+        #   @names = [Name.find(given_id)]
+        # else
         corrected = Name.fix_capitalized_species_epithet(corrected)
 
         # Look up name: can return zero (unrecognized), one
         # (unambiguous match), or many (multiple authors match).
         @names = Name.find_names_filling_in_authors(corrected)
+        # end
       else
         @names = [Name.find(chosen_name)]
-        # This tells it to check if this name is deprecated below EVEN
-        # IF the user didn't change the what field.  This will solve
-        # the problem of multiple matching deprecated names discussed
-        # below.
+        # This tells it to check if this name is deprecated (below) EVEN IF the
+        # user didn't change the what field.  This will solve the problem of
+        # multiple matching deprecated names discussed below.
         ignore_approved_name = true
       end
 

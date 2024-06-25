@@ -2,7 +2,7 @@
 
 # see observations_controller.rb
 module ObservationsController::EditAndUpdate
-  include ObservationsController::FormHelpers
+  include ObservationsController::SharedFormMethods
   include ObservationsController::Validators
 
   # Form to edit an existing observation.
@@ -113,7 +113,7 @@ module ObservationsController::EditAndUpdate
   end
 
   def validate_edit_place_name
-    return if validate_place_name(params) && validate_projects(params)
+    return if validate_place_name && validate_projects
 
     @any_errors = true
   end

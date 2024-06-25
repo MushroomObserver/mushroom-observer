@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module ObservationsController::NewAndCreate
-  include ObservationsController::FormHelpers
+  include ObservationsController::SharedFormMethods
   include ObservationsController::Validators
 
   # Form to create a new observation, naming, vote, and images.
@@ -40,7 +40,7 @@ module ObservationsController::NewAndCreate
     @observation = Observation.new
     @naming      = Naming.new
     @vote        = Vote.new
-    @given_name = "" # can't be nil else rails tries to call @name.name
+    @given_name  = "" # can't be nil else rails tries to call @name.name
     @names       = nil
     @valid_names = nil
     @reasons     = @naming.init_reasons
@@ -66,7 +66,7 @@ module ObservationsController::NewAndCreate
                        order(:created_at).last
     return unless last_observation && last_observation.created_at > 1.hour.ago
 
-    %w[when where location is_collection_location gps_hidden].each do |attr|
+    %w[when where location_id is_collection_location gps_hidden].each do |attr|
       @observation.send(:"#{attr}=", last_observation.send(attr))
     end
 
@@ -103,11 +103,11 @@ module ObservationsController::NewAndCreate
     init_license_var
     init_new_image_var(Time.zone.now)
 
-    rough_cut(params)
+    rough_cut
     success = true
-    success = false unless validate_params(params)
+    success = false unless validate_params
     success = false unless validate_object(@observation)
-    success = false unless validate_projects(params)
+    success = false unless validate_projects
     success = false if @name && !validate_object(@naming)
     success = false if @name && !@vote.value.nil? && !validate_object(@vote)
     success = false if @bad_images != []
@@ -152,7 +152,10 @@ module ObservationsController::NewAndCreate
     end
   end
 
+  # Only set location if it is not already set by the autocompleter.
   def determine_observation_location(observation)
+    return observation if observation.location_id
+
     if Location.is_unknown?(observation.place_name) ||
        (observation.lat && observation.lng && observation.place_name.blank?)
       observation.location = Location.unknown
@@ -161,7 +164,7 @@ module ObservationsController::NewAndCreate
     observation
   end
 
-  def rough_cut(params)
+  def rough_cut
     @observation.notes = notes_to_sym_and_compact
     @naming = Naming.construct({}, @observation)
     @vote = Vote.construct(params.dig(:naming, :vote), @naming)
@@ -175,8 +178,8 @@ module ObservationsController::NewAndCreate
     attach_good_images(@observation, @good_images)
     update_projects(@observation, params[:project])
     update_species_lists(@observation, params[:list])
-    save_collection_number(@observation, params)
-    save_herbarium_record(@observation, params)
+    save_collection_number(@observation)
+    save_herbarium_record(@observation)
   end
 
   def update_naming(reason)
@@ -188,10 +191,10 @@ module ObservationsController::NewAndCreate
     consensus.change_vote(@naming, @vote.value) unless @vote.value.nil?
   end
 
-  def save_collection_number(obs, params)
+  def save_collection_number(obs)
     return unless obs.specimen
 
-    name, number = normalize_collection_number_params(params)
+    name, number = normalize_collection_number_params
     return unless number
 
     col_num = CollectionNumber.where(name: name, number: number).first
@@ -204,7 +207,7 @@ module ObservationsController::NewAndCreate
     col_num.add_observation(obs)
   end
 
-  def normalize_collection_number_params(params)
+  def normalize_collection_number_params
     params2 = params[:collection_number] || return
     name    = params2[:name].to_s.strip_html.strip_squeeze
     number  = params2[:number].to_s.strip_html.strip_squeeze
@@ -212,9 +215,9 @@ module ObservationsController::NewAndCreate
     number.blank? ? [] : [name, number]
   end
 
-  def save_herbarium_record(obs, params)
+  def save_herbarium_record(obs)
     herbarium, initial_det, accession_number, herbarium_record_notes =
-      normalize_herbarium_record_params(obs, params)
+      normalize_herbarium_record_params(obs)
     return if not_creating_record?(obs, herbarium, accession_number)
 
     herbarium_record = lookup_herbarium_record(herbarium, accession_number)
@@ -236,13 +239,13 @@ module ObservationsController::NewAndCreate
     herbarium_record.add_observation(obs)
   end
 
-  def normalize_herbarium_record_params(obs, params)
+  def normalize_herbarium_record_params(obs)
     params2   = params[:herbarium_record] || return
     herbarium = params2[:herbarium_name].to_s.strip_html.strip_squeeze
     herbarium = lookup_herbarium(herbarium)
     init_det  = initial_determination(obs)
     accession = params2[:accession_number].to_s.strip_html.strip_squeeze
-    accession = default_accession_number(obs, params) if accession.blank?
+    accession = default_accession_number(obs) if accession.blank?
     notes = params2[:herbarium_record_notes]
     [herbarium, init_det, accession, notes]
   end
@@ -267,8 +270,8 @@ module ObservationsController::NewAndCreate
     (obs.name || Name.unknown).text_name
   end
 
-  def default_accession_number(obs, params)
-    name, number = normalize_collection_number_params(params)
+  def default_accession_number(obs)
+    name, number = normalize_collection_number_params
     number ? "#{name} #{number}" : "MO #{obs.id}"
   end
 
