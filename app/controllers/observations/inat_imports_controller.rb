@@ -120,9 +120,8 @@ module Observations
         }
 
         api = InatPhotoImporter.new(params).api
-        # TODO: Error handling? 2024-06-19 jdc.
-
         User.current = @user # API call zaps User.current
+        # TODO: Error handling? 2024-06-19 jdc.
 
         image = Image.find(api.results.first.id)
 

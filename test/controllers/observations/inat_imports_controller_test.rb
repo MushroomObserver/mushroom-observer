@@ -57,26 +57,63 @@ module Observations
       assert(obs.comments.any?, "Imported iNat should have >= 1 Comment")
     end
 
+    def test_stub_aws_request_for_image
+      skip(<<SKIP)
+  Skipped because it throws:
+  cp: /Users/joe/mushroom-observer/public/test_images/orig/1062213410.jpg: No such file or directory
+  ERROR Observations::InatImportsControllerTest#test_stub_aws_request_for_image (6.15s)
+  Minitest::UnexpectedError:         RuntimeError: Something went wrong on the server and we failed to save image #1062213410.  Please try again.
+SKIP
+      user = users(:rolf)
+      mock_inat_response = File.read("test/inat/trametes.txt")
+      inat_obs ||= InatObs.new(mock_inat_response)
+
+      stub_inat_api_request(inat_obs.inat_id, mock_inat_response)
+
+      # see test/models/api2_test.rb#test_posting_image_via_url
+      stub_request(
+        :get,
+        "https://inaturalist-open-data.s3.amazonaws.com/photos/390156951/original.jpg"
+      ).with(
+        headers: {
+          "Accept" => "image/*",
+          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Host" => "inaturalist-open-data.s3.amazonaws.com",
+          "User-Agent" => "Ruby"
+        }
+      ).to_return(
+        status: 200,
+        body: Rails.root.join("test/images/geotagged.jpg"),
+        headers: {}
+      )
+
+      login(user.login)
+
+      File.stub(:rename, false) do
+
+        assert_difference("Observation.count", 1, "Failed to create Obs") do
+          post(:create, params: { inat_ids: inat_obs.inat_id })
+        end
+
+      end
+    end
+
     def test_create_obs_with_photo
       user = users(:rolf)
       mock_inat_response = File.read("test/inat/tremella_mesenterica.txt")
-      inat_obs ||= InatObs.new(mock_inat_response)
+      inat_obs = InatObs.new(mock_inat_response)
+      inat_obs_id = inat_obs.inat_id
 
-      # stub the iNat API request for the iNat observation
-      WebMock.stub_request(
-        :get,
-        "#{INAT_OBS_REQUEST_PREFIX}id=#{inat_obs.inat_id}" \
-          "#{INAT_OBS_REQUEST_POSTFIX}"
-      ).to_return(body: mock_inat_response)
+      stub_inat_api_request(inat_obs_id, mock_inat_response)
 
       login(user.login)
 
       # NOTE: Stubs the importer's return value, but not its side-effect --
-      # i.e., doesn't add an Image to the MO Observation.
+      # i.e., doesn't add Image(s) to the MO Observation.
       # Enables testing everything except Observation.images. jdc 2024-06-23
       InatPhotoImporter.stub(:new, mock_photo_importer(inat_obs)) do
         assert_difference("Observation.count", 1, "Failed to create Obs") do
-          post(:create, params: { inat_ids: inat_obs.inat_id })
+          post(:create, params: { inat_ids: inat_obs_id })
         end
       end
 
@@ -102,6 +139,14 @@ module Observations
       end
 
       assert(obs.sequences.none?)
+    end
+
+    def stub_inat_api_request(inat_obs_id, mock_inat_response)
+      WebMock.stub_request(
+        :get,
+        "#{INAT_OBS_REQUEST_PREFIX}id=#{inat_obs_id}" \
+          "#{INAT_OBS_REQUEST_POSTFIX}"
+      ).to_return(body: mock_inat_response)
     end
 
     def mock_photo_importer(inat_obs)
