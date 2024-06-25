@@ -23,7 +23,15 @@ module ObservationsController::Validators
   end
 
   def validate_name(params)
-    success = resolve_name_ivars(params)
+    # this would come from observation/naming/fields. Note: nil.to_i == 0
+    given_name    = params.dig(:naming, :name).to_s
+    given_id      = params.dig(:naming, :name_id).to_i
+    # this would come from form_name_feedback
+    approved_name = params[:approved_name].to_s
+    chosen_name   = params.dig(:chosen_name, :name_id).to_s
+
+    success = resolve_name_ivars(given_name:, given_id:, approved_name:,
+                                 chosen_name:)
     if @name
       @naming.name = @name
     elsif !success
@@ -34,20 +42,13 @@ module ObservationsController::Validators
     success
   end
 
-  def resolve_name_ivars(params)
-    # this would come from observation/naming/fields. Note: nil.to_i == 0
-    given_name = params.dig(:naming, :name_id).to_i.nonzero? ||
-                 params.dig(:naming, :name).to_s
-    # this would come from form_name_feedback
-    chosen_name = params.dig(:chosen_name, :name_id).to_s
-    @resolver = Naming::NameResolver.new(
-      given_name, params[:approved_name], chosen_name
-    )
-    # NOTE: views could be refactored to access properties of the @resolver,
-    # e.g. `@resolver.valid_names`, instead of these ivars.
-    # All but success, @given_name, @name are only used by form_name_feedback.
+  # Set the ivars for the form: @given_name, @name - and potentially ivars for
+  # form_name_feedback in the case the name is not resolved unambiguously:
+  # @names, @valid_names, @parent_deprecated, @suggest_corrections.
+  def resolve_name_ivars(**)
+    resolver = Naming::NameResolver.new(**)
     success = false
-    @resolver.results.each do |ivar, value|
+    resolver.results.each do |ivar, value|
       if ivar == :success
         success = value
       else
