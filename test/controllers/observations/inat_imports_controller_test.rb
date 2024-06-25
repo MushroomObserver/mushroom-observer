@@ -32,13 +32,10 @@ module Observations
     def test_create_import_evernia_no_photos
       mock_inat_response =
         File.read("test/inat/evernia_no_photos.txt")
-      inat_id = InatObs.new(mock_inat_response).inat_id
-      params = { inat_ids: inat_id }
+      inat_obs_id = InatObs.new(mock_inat_response).inat_id
+      params = { inat_ids: inat_obs_id }
 
-      WebMock.stub_request(
-        :get,
-        "#{INAT_OBS_REQUEST_PREFIX}id=#{inat_id}#{INAT_OBS_REQUEST_POSTFIX}"
-      ).to_return(body: mock_inat_response)
+      stub_inat_api_request(inat_obs_id, mock_inat_response)
 
       login
 
@@ -51,7 +48,10 @@ module Observations
       assert_redirected_to(observations_path)
 
       assert_equal("mo_inat_import", obs.source)
-      assert_equal(inat_id, obs.inat_id)
+      assert_equal(inat_obs_id, obs.inat_id)
+
+
+      assert_equal(0, obs.images.length, "Obs should not have 0 images")
 
       assert(obs.comments.any?, "Imported iNat should have >= 1 Comment")
     end
@@ -79,13 +79,15 @@ module Observations
         )
       end
 
+      assert(obs.images.any?, "Obs should have images")
       assert(obs.sequences.none?)
     end
 
     def test_create_obs_lycoperdon
       obs = import_mock_observation("lycoperdon")
 
-      assert(obs.sequences.one?)
+      assert(obs.images.any?, "Obs should have images")
+      assert(obs.sequences.one?, "Obs should have a sequence")
     end
 
     def import_mock_observation(filename)
