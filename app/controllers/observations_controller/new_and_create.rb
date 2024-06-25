@@ -40,7 +40,7 @@ module ObservationsController::NewAndCreate
     @observation = Observation.new
     @naming      = Naming.new
     @vote        = Vote.new
-    @given_name = "" # can't be nil else rails tries to call @name.name
+    @given_name  = "" # can't be nil else rails tries to call @name.name
     @names       = nil
     @valid_names = nil
     @reasons     = @naming.init_reasons

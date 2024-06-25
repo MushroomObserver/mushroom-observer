@@ -35,8 +35,8 @@ module ObservationsController::Validators
   end
 
   def resolve_name_ivars(params)
-    # this would come from observation/naming/fields
-    given_name = params.dig(:naming, :name_id).to_i ||
+    # this would come from observation/naming/fields. Note: nil.to_i == 0
+    given_name = params.dig(:naming, :name_id).to_i.nonzero? ||
                  params.dig(:naming, :name).to_s
     # this would come from form_name_feedback
     chosen_name = params.dig(:chosen_name, :name_id).to_s

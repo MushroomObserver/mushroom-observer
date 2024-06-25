@@ -47,7 +47,6 @@ class ObservationsControllerTest < FunctionalTestCase
     n_count = Name.count
     score   = user.reload.contribution
     params  = modified_generic_params(params, user)
-
     post_requires_login(:create, params)
 
     begin

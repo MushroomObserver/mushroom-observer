@@ -102,8 +102,8 @@ module Observations
     def init_ivars
       @naming = Naming.new
       @vote = Vote.new
-      # @given_name can't be nil else rails tries to call @name.name
-      @given_name = params[:naming].to_s
+      # @given_name can't be nil else rails tries to call @name.name # CHECK
+      @given_name = given_name_or_id
       @reasons = @naming.init_reasons
       fill_in_reference_for_suggestions if params[:naming].present?
 
@@ -156,6 +156,10 @@ module Observations
       end
     end
 
+    def given_name_or_id
+      params.dig(:naming, :name_id)&.nonzero? || params.dig(:naming, :name)
+    end
+
     def redirect_to_obs(obs)
       redirect_with_query(obs.show_link_args)
     end
@@ -168,7 +172,7 @@ module Observations
       args = {
         naming_args: {},
         vote_args: params.dig(:naming, :vote),
-        given_name: params.dig(:naming, :name_id) || params.dig(:naming, :name),
+        given_name: given_name_or_id,
         approved_name: params[:approved_name],
         chosen_name: params.dig(:chosen_name, :name_id).to_s
       }
@@ -310,7 +314,7 @@ module Observations
     end
 
     def validate_name
-      given_name = params.dig(:naming, :name_id) || params.dig(:naming, :name)
+      given_name = given_name_or_id
       success = resolve_name(given_name,
                              params[:approved_name],
                              params.dig(:chosen_name, :name_id).to_s)

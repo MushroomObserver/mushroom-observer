@@ -56,21 +56,20 @@ class Naming
       end
 
       @success = false
-
       ignore_approved_name = false
       # Has user chosen among multiple matching names or among
       # multiple approved names?
       if chosen_name.blank?
         # If it's an autocompleted match, take that directly.
         # (It could still be deprecated, but we'll deal with that below.)
-        if given_name.is_a?(Integer)
-          @names = [Name.safe_find(given_name)]
+        if given_name.is_a?(Integer) && given_name.nonzero?
+          @names = [Name.find(given_name)]
         else
-          what2 = Name.fix_capitalized_species_epithet(what2)
+          corrected = Name.fix_capitalized_species_epithet(corrected)
 
           # Look up name: can return zero (unrecognized), one
           # (unambiguous match), or many (multiple authors match).
-          @names = Name.find_names_filling_in_authors(what2)
+          @names = Name.find_names_filling_in_authors(corrected)
         end
       else
         @names = [Name.find(chosen_name)]
