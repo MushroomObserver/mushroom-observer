@@ -23,7 +23,7 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | lentinellus_ursinus.txt | [24970904](https://api.inaturalist.org/v1/observations/220796026) | 2 | obscured | **ID matches many MO names** |
 | lycoperdon.txt | [24970904](https://www.inaturalist.org/observations/24970904) | 2 | public | cc-by-nc, projects, Activity, many fields including **DNA** |
 | russulaceae.txt | [216675045](https://www.inaturalist.org/observations/216675045) | 2 | public | **all rights reserved**, many projects, Activity |
-| somion_unicolor.json |  |  |  | Formatted version of following; facilitates viewing iNat API response key/values |
+| somion_unicolor.json |  |  |  | Formatted version of following; facilitates viewing iNat API response key/values test/inat/somion_unicolor.json |
 | somion_unicolor.txt | [202555552](https://www.inaturalist.org/observations/202555552) | 5 | public | Research Grade, Notes, Activity, >1 ID, 1 field (Mushroom Observer URL), **mirrored from MO** |
 | trametes.txt | [220370929](https://www.inaturalist.org/observations/220370929) | 2 | public | D. Miller observation with different collector; Notes; **Observation Fields: Collector** |
 | tremella_mesenterica.txt | [213508767](https://www.inaturalist.org/observations/213508767) | 1 | public | |
