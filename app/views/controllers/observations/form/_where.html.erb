@@ -15,7 +15,7 @@
     <div class="col-xs-12 col-sm-6">
       <%= autocompleter_field(
         form: f, field: :place_name, type: :location, label: "#{:WHERE.t}:",
-        between: :required, data: { map_target: "placeInput" }
+        hidden: @observation.location_id, data: { map_target: "placeInput" }
       ) %>
     </div>
     <div class="col-xs-12 col-sm-6">
