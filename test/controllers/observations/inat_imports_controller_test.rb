@@ -29,8 +29,7 @@ module Observations
                     "Form needs a field for inputting iNat ids")
     end
 
-    def test_create_public_import_imageless_obs
-      # See test/inat/README_INAT_FIXTURES.md
+    def test_create_import_evernia_no_photos
       mock_inat_response =
         File.read("test/inat/evernia_no_photos.txt")
       inat_id = InatObs.new(mock_inat_response).inat_id
@@ -57,46 +56,9 @@ module Observations
       assert(obs.comments.any?, "Imported iNat should have >= 1 Comment")
     end
 
-    def test_create_obs_many_photos
-      user = users(:rolf)
-      mock_inat_response = File.read("test/inat/lycoperdon.txt")
-      inat_obs = InatObs.new(mock_inat_response)
-      inat_obs_id = inat_obs.inat_id
+    def test_create_obs_tremella_mesenterica
+      obs = import_mock_observation("tremella_mesenterica")
 
-      stub_inat_api_request(inat_obs_id, mock_inat_response)
-
-      login(user.login)
-
-      # NOTE: Stubs the importer's return value, but not its side-effect --
-      # i.e., doesn't add Image(s) to the MO Observation.
-      # Enables testing everything except Observation.images. jdc 2024-06-23
-      InatPhotoImporter.stub(:new, mock_photo_importer(inat_obs)) do
-        assert_difference("Observation.count", 1, "Failed to create Obs") do
-          post(:create, params: { inat_ids: inat_obs_id })
-        end
-      end
-    end
-
-    def test_create_obs_one_photo
-      user = users(:rolf)
-      mock_inat_response = File.read("test/inat/tremella_mesenterica.txt")
-      inat_obs = InatObs.new(mock_inat_response)
-      inat_obs_id = inat_obs.inat_id
-
-      stub_inat_api_request(inat_obs_id, mock_inat_response)
-
-      login(user.login)
-
-      # NOTE: Stubs the importer's return value, but not its side-effect --
-      # i.e., doesn't add Image(s) to the MO Observation.
-      # Enables testing everything except Observation.images. jdc 2024-06-23
-      InatPhotoImporter.stub(:new, mock_photo_importer(inat_obs)) do
-        assert_difference("Observation.count", 1, "Failed to create Obs") do
-          post(:create, params: { inat_ids: inat_obs_id })
-        end
-      end
-
-      obs = Observation.order(created_at: :asc).last
       assert_not_nil(obs.rss_log)
       assert_redirected_to(observations_path)
 
@@ -118,6 +80,34 @@ module Observations
       end
 
       assert(obs.sequences.none?)
+    end
+
+    def test_create_obs_lycoperdon
+      obs = import_mock_observation("lycoperdon")
+
+      assert(obs.sequences.one?)
+    end
+
+    def import_mock_observation(filename)
+      user = users(:rolf)
+      mock_inat_response = File.read("test/inat/#{filename}.txt")
+      inat_obs = InatObs.new(mock_inat_response)
+      inat_obs_id = inat_obs.inat_id
+
+      stub_inat_api_request(inat_obs_id, mock_inat_response)
+
+      login(user.login)
+
+      # NOTE: Stubs the importer's return value, but not its side-effect --
+      # i.e., doesn't add Image(s) to the MO Observation.
+      # Enables testing everything except Observation.images. jdc 2024-06-23
+      InatPhotoImporter.stub(:new, mock_photo_importer(inat_obs)) do
+        assert_difference("Observation.count", 1, "Failed to create Obs") do
+          post(:create, params: { inat_ids: inat_obs_id })
+        end
+      end
+
+      Observation.order(created_at: :asc).last
     end
 
     def stub_inat_api_request(inat_obs_id, mock_inat_response)
@@ -166,13 +156,11 @@ module Observations
       # See test/inat/README_INAT_FIXTURES.md
       mock_inat_response =
         File.read("test/inat/ceanothus_cordulatus.txt")
-      inat_id = InatObs.new(mock_inat_response).inat_id
-      params = { inat_ids: inat_id }
+      inat_obs = InatObs.new(mock_inat_response)
+      inat_obs_id = inat_obs.inat_id
+      params = { inat_ids: inat_obs_id }
 
-      WebMock.stub_request(
-        :get,
-        "#{INAT_OBS_REQUEST_PREFIX}id=#{inat_id}#{INAT_OBS_REQUEST_POSTFIX}"
-      ).to_return(body: mock_inat_response)
+      stub_inat_api_request(inat_obs_id, mock_inat_response)
 
       login
 
@@ -182,7 +170,7 @@ module Observations
         put(:create, params: params)
       end
 
-      assert_flash_text(:inat_taxon_not_importable.l(id: inat_id))
+      assert_flash_text(:inat_taxon_not_importable.l(id: inat_obs_id))
     end
 
     def test_create_inat_import_too_many_ids
