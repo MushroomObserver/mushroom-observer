@@ -163,13 +163,8 @@ module Observations
     ##########################################################################
     #    CREATE
 
-    # returns Boolean
-    def rough_draft
-      resolve_ivars_for_validation
-    end
-
     # returns Boolean. Also called by create_new_naming.
-    def resolve_ivars_for_validation
+    def rough_draft
       @naming = Naming.construct({}, @observation)
       @vote = Vote.construct(params.dig(:naming, :vote), @naming)
       result = if name_args[:given_name]
@@ -342,7 +337,7 @@ module Observations
     # because that would bring the other people's votes along with it.
     # We make a new one, reusing the user's previously stated vote and reasons.
     def create_new_naming
-      resolve_ivars_for_validation
+      rough_draft
       return unless validate_object(@naming) && validate_object(@vote)
 
       update_naming(params.dig(:naming, :reasons), params[:was_js_on] == "yes")
