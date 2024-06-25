@@ -163,25 +163,12 @@ module Observations
     ##########################################################################
     #    CREATE
 
-    # returns Boolean
+    # returns Boolean. Also called by create_new_naming.
     def rough_draft
-      args = {
-        naming_args: {},
-        vote_args: params.dig(:naming, :vote),
-        given_name: params.dig(:naming, :name),
-        approved_name: params[:approved_name],
-        chosen_name: params.dig(:chosen_name, :name_id).to_s
-      }
-      resolve_ivars_for_validation(**args)
-    end
-
-    # returns Boolean. Was @params.rough_draft
-    def resolve_ivars_for_validation(**args)
-      @naming = Naming.construct(args[:naming_args], @observation)
-      @vote = Vote.construct(args[:vote_args], @naming)
-      result = if args[:given_name]
-                 resolve_name(args[:given_name], args[:approved_name],
-                              args[:chosen_name])
+      @naming = Naming.construct({}, @observation)
+      @vote = Vote.construct(params.dig(:naming, :vote), @naming)
+      result = if name_args[:given_name]
+                 resolve_name(**name_args)
                else
                  true
                end
@@ -189,17 +176,25 @@ module Observations
       result
     end
 
-    # Set the ivars for the form, and potentially form_name_feedback
-    # in the case the name is not resolved unambiguously
-    def resolve_name(given_name, approved_name, chosen_name)
-      @resolver = Naming::NameResolver.new(
-        given_name, approved_name, chosen_name
-      )
-      # NOTE: views could be refactored to access properties of the @resolver,
-      # e.g. `@resolver.valid_names`, instead of these ivars.
-      # All but success, @given_name, @name are only used by form_name_feedback.
+    # given_name, given_id from observation/naming/fields. Note: nil.to_i == 0
+    # approved_name, chosen_name from form_name_feedback
+    # also used in namings_controller
+    def name_args
+      {
+        given_name: params.dig(:naming, :name).to_s,
+        # given_id: params.dig(:naming, :name_id).to_i,
+        approved_name: params[:approved_name].to_s,
+        chosen_name: params.dig(:chosen_name, :name_id).to_s
+      }
+    end
+
+    # Set the ivars for the form: @given_name, @name - and potentially ivars for
+    # form_name_feedback in the case the name is not resolved unambiguously:
+    # @names, @valid_names, @parent_deprecated, @suggest_corrections.
+    def resolve_name(**)
+      resolver = Naming::NameResolver.new(**)
       success = false
-      @resolver.results.each do |ivar, value|
+      resolver.results.each do |ivar, value|
         if ivar == :success
           success = value
         else
@@ -310,10 +305,7 @@ module Observations
     end
 
     def validate_name
-      given_name = params.dig(:naming, :name)
-      success = resolve_name(given_name,
-                             params[:approved_name],
-                             params.dig(:chosen_name, :name_id).to_s)
+      success = resolve_name(**name_args)
       flash_naming_errors
       success
     end
@@ -347,8 +339,7 @@ module Observations
     # because that would bring the other people's votes along with it.
     # We make a new one, reusing the user's previously stated vote and reasons.
     def create_new_naming
-      resolve_ivars_for_validation(naming_args: {},
-                                   vote_args: params.dig(:naming, :vote))
+      rough_draft
       return unless validate_object(@naming) && validate_object(@vote)
 
       update_naming(params.dig(:naming, :reasons), params[:was_js_on] == "yes")
