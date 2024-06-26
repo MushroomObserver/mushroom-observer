@@ -189,7 +189,9 @@ export default class extends Controller {
       this.primer = [];
       this.matches = [];
       this.prepareInputElement();
+      this.inputTarget.value = '';
       this.prepareHiddenInput();
+      this.hiddenTarget.value = '';
       this.scheduleRefresh(); // refresh the primer
     }
   }
@@ -202,7 +204,6 @@ export default class extends Controller {
   prepareInputElement() {
     // console.log(elem)
     this.old_value = null;
-    this.inputTarget.value = '';
 
     // Attach events
     this.addEventListeners();
