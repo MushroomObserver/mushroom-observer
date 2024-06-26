@@ -166,12 +166,12 @@ module Observations
     #    CREATE
 
     # returns Boolean. Also called by create_new_naming.
-    # Uses name_args, resolve_name from ObservationsController::Validators
+    # Uses resolve_name from ObservationsController::Validators
     def rough_draft
       @naming = Naming.construct({}, @observation)
       @vote = Vote.construct(params.dig(:naming, :vote), @naming)
-      success = if name_args[:given_name]
-                  resolve_name(**name_args)
+      success = if params.dig(:naming, :name).present?
+                  resolve_name
                 else
                   true
                 end

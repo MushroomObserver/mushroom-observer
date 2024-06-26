@@ -24,7 +24,7 @@ module ObservationsController::Validators
   end
 
   def validate_name
-    success = resolve_name(**name_args)
+    success = resolve_name
     if @name
       @naming.name = @name
     elsif !success
@@ -35,24 +35,12 @@ module ObservationsController::Validators
     success
   end
 
-  # given_name, given_id from observation/naming/fields. Note: nil.to_i == 0
-  # approved_name, chosen_name from form_name_feedback
-  # also used in namings_controller
-  def name_args
-    {
-      given_name: params.dig(:naming, :name).to_s,
-      # given_id: params.dig(:naming, :name_id).to_i,
-      approved_name: params[:approved_name].to_s,
-      chosen_name: params.dig(:chosen_name, :name_id).to_s
-    }
-  end
-
   # Set the ivars for the form: @given_name, @name - and potentially ivars for
   # form_name_feedback in the case the name is not resolved unambiguously:
   # @names, @valid_names, @parent_deprecated, @suggest_corrections.
   # Returns true if the name is resolved unambiguously.
-  def resolve_name(**)
-    resolver = Naming::NameResolver.new(**)
+  def resolve_name
+    resolver = Naming::NameResolver.new(**name_params)
     success = false
     resolver.results.each do |ivar, value|
       if ivar == :success
@@ -62,6 +50,18 @@ module ObservationsController::Validators
       end
     end
     success
+  end
+
+  # given_name, given_id from observation/naming/fields. Note: nil.to_i == 0
+  # approved_name, chosen_name from form_name_feedback
+  # also used in namings_controller
+  def name_params
+    {
+      given_name: params.dig(:naming, :name).to_s,
+      # given_id: params.dig(:naming, :name_id).to_i,
+      approved_name: params[:approved_name].to_s,
+      chosen_name: params.dig(:chosen_name, :name_id).to_s
+    }
   end
 
   def validate_place_name
