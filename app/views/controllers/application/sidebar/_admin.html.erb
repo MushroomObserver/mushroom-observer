@@ -30,6 +30,7 @@ active_link_to(:LICENSES.t, licenses_path,
                class: classes[:admin], id: "nav_admin_licenses_link")
 %>
 <%=
-active_link_to(:app_turn_admin_off.t, admin_mode_path(turn_off: true),
-               class: classes[:admin], id: "nav_admin_off_link")
+button_to(:app_turn_admin_off.t, admin_mode_path(turn_off: true),
+          class: [classes[:admin], "btn btn-link"], id: "nav_admin_off_link",
+          method: :post)
 %>
