@@ -104,7 +104,7 @@ module Observations
     def init_ivars
       @naming = Naming.new
       @vote = Vote.new
-      # @given_name can't be nil else rails tries to call @name.name
+      # @given_name can't be nil else rails tries to call @name.name # CHECK
       @given_name = params[:naming].to_s
       @reasons = @naming.init_reasons
       fill_in_reference_for_suggestions if params[:naming].present?

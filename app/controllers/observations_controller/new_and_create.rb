@@ -154,6 +154,8 @@ module ObservationsController::NewAndCreate
 
   # We don't have an @observation yet.
   def determine_observation_location(observation)
+    return observation if observation.location_id
+
     if Location.is_unknown?(observation.place_name) ||
        (observation.lat && observation.lng && observation.place_name.blank?)
       observation.location = Location.unknown
