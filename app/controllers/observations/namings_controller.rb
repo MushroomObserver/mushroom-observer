@@ -170,13 +170,13 @@ module Observations
     def rough_draft
       @naming = Naming.construct({}, @observation)
       @vote = Vote.construct(params.dig(:naming, :vote), @naming)
-      result = if name_args[:given_name]
-                 resolve_name(**name_args)
-               else
-                 true
-               end
+      success = if name_args[:given_name]
+                  resolve_name(**name_args)
+                else
+                  true
+                end
       @naming.name = @name
-      result
+      success && @name
     end
 
     # We should have a @name by this point

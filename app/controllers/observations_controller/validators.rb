@@ -50,6 +50,7 @@ module ObservationsController::Validators
   # Set the ivars for the form: @given_name, @name - and potentially ivars for
   # form_name_feedback in the case the name is not resolved unambiguously:
   # @names, @valid_names, @parent_deprecated, @suggest_corrections.
+  # Returns true if the name is resolved unambiguously.
   def resolve_name(**)
     resolver = Naming::NameResolver.new(**)
     success = false
