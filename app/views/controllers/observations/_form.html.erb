@@ -31,7 +31,7 @@ end
 <%= form_with(
   model: @observation,
   url: add_query_param(action: action, id: @observation,
-                        approved_name: @what,
+                        approved_name: @given_name,
                         approved_where: @place_name),
   method: method,
   multipart: true,
