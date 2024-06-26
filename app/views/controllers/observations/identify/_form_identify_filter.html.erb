@@ -27,6 +27,7 @@ options = [
       "", class: "glyphicon glyphicon-search form-control-feedback"
     ) %>
     <%# f.label(:term, "Filter by:") %>
+    <%= autocompleter_hidden_field(form: f, type: :clade) %>
     <%= f.text_field(
       :term, value: value, placeholder: :filter_by.l,
       class: "form-control", size: 42, autocomplete: "one-time-code",
