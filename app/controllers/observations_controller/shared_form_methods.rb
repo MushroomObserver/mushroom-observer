@@ -1,18 +1,33 @@
 # frozen_string_literal: true
 
-#  :section: Helpers
+#  :section: Shared form private methods
 #
-#    create_observation_object(...)     create rough first-drafts.
+#    permitted_observation_args
+#    update_permitted_observation_attributes
+#    permitted_observation_params
+#    notes_to_sym_and_compact
+#    notes_param_present?
 #
-#    save_observation(...)              Save validated objects.
+#    init_license_var
+#    init_new_image_var
+#    init_specimen_vars
+#    init_specimen_vars_for_reload
+#    init_project_vars
+#    init_project_vars_for_create
+#    init_project_vars_for_reload
+#    init_list_vars
+#    init_list_vars_for_reload
+#    save_observation
 #
-#    update_observation_object(...)     Update and save existing objects.
+#    create_image_objects_and_update_bad_images
+#    try_to_save_image
+#    update_good_images
+#    attach_good_images
+#    strip_images!
 #
-#    init_image()                       Handle image uploads.
-#    create_image_objects(...)
-#    update_good_images(...)
-#    attach_good_images(...)
-
+#    update_projects
+#    update_species_lists
+#
 module ObservationsController::SharedFormMethods
   private
 
@@ -92,8 +107,8 @@ module ObservationsController::SharedFormMethods
     end
   end
 
-  def init_project_vars_for_reload(obs)
-    obs.projects.each do |proj|
+  def init_project_vars_for_reload
+    @observation.projects.each do |proj|
       @projects << proj unless @projects.include?(proj)
     end
     @projects.each do |proj|
@@ -107,9 +122,9 @@ module ObservationsController::SharedFormMethods
     @list_checks = {}
   end
 
-  def init_list_vars_for_reload(obs)
+  def init_list_vars_for_reload
     init_list_vars
-    @lists = @lists.union(obs.species_lists)
+    @lists = @lists.union(@observation.species_lists)
     @lists.each do |list|
       @list_checks[list.id] = params.dig(:list, "id_#{list.id}") == "1"
     end
@@ -118,11 +133,11 @@ module ObservationsController::SharedFormMethods
   ##############################################################################
 
   # Save observation now that everything is created successfully.
-  def save_observation(observation)
-    return true if observation.save
+  def save_observation
+    return true if @observation.save
 
     flash_error(:runtime_no_save_observation.t)
-    flash_object_errors(observation)
+    flash_object_errors(@observation)
     false
   end
 
@@ -130,74 +145,68 @@ module ObservationsController::SharedFormMethods
   # later, assuming we can create it.  Problem is if anything goes wrong, we
   # cannot repopulate the image forms (security issue associated with giving
   # file upload fields default values).  So we need to do this immediately,
-  # even if observation creation fails.  Keep a list of images we've downloaded
+  # even if observation creation fails.  Keep a list of images we've uploaded
   # successfully in @good_images (stored in hidden form field).
   #
   # INPUT: params[:image], observation, good_images (and @user)
   # OUTPUT: list of images we couldn't create
   #
-  # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
+  def create_image_objects_and_update_bad_images
+    @bad_images = []
+    # can't do each_with_index here because it's ActionController::Parameters
+    params[:image]&.each do |idx, args|
+      next if (upload = args[:image]).blank?
 
-  # rubocop:disable Metrics/MethodLength
-  def create_image_objects(args, observation, good_images)
-    bad_images = []
-    if args
-      i = 0
-      while (args2 = args[i.to_s])
-        if (upload = args2[:image]).present?
-          if upload.respond_to?(:original_filename)
-            name = upload.original_filename.force_encoding("utf-8")
-          end
-          # image = Image.new(args2) # Rails 3.2
-          image = Image.new(args2.permit(permitted_image_args))
-          # image = Image.new(args2.permit(:all))
-          image.created_at = Time.zone.now
-          image.updated_at = image.created_at
-          # If image.when is 1950 it means user never saw the form
-          # field, so we should use default instead.
-          image.when = observation.when if image.when.year == 1950
-          image.user = @user
-          if !image.save
-            bad_images.push(image)
-            flash_object_errors(image)
-          elsif !image.process_image(strip: observation.gps_hidden)
-            name_str = name ? "'#{name}'" : "##{image.id}"
-            flash_notice(:runtime_no_upload_image.t(name: name_str))
-            bad_images.push(image)
-            flash_object_errors(image)
-          else
-            name = image.original_name
-            name = "##{image.id}" if name.empty?
-            flash_notice(:runtime_image_uploaded.t(name: name))
-            good_images.push(image)
-            if observation.thumb_image_id == -i
-              observation.thumb_image_id = image.id
-            end
-          end
-        end
-        i += 1
+      if upload.respond_to?(:original_filename)
+        name = upload.original_filename.force_encoding("utf-8")
+      end
+      image = Image.new(args.permit(permitted_image_args))
+      image.created_at = Time.zone.now
+      image.updated_at = image.created_at
+      # If image.when is 1950 it means user never saw the form
+      # field, so we should use default instead.
+      image.when = @observation.when if image.when.year == 1950
+      image.user = @user
+      try_to_save_image(idx.to_i, image, name)
+    end
+    @observation.thumb_image_id = nil if @observation.thumb_image_id&.<= 0
+    @bad_images
+  end
+
+  # Try to save a single image.  If successful, add it to good_images.
+  def try_to_save_image(idx, image, name)
+    if !image.save
+      @bad_images.push(image)
+      flash_object_errors(image)
+    elsif !image.process_image(strip: @observation.gps_hidden)
+      name_str = name ? "'#{name}'" : "##{image.id}"
+      flash_notice(:runtime_no_upload_image.t(name: name_str))
+      @bad_images.push(image)
+      flash_object_errors(image)
+    else
+      name = image.original_name
+      name = "##{image.id}" if name.empty?
+      flash_notice(:runtime_image_uploaded.t(name: name))
+      @good_images.push(image)
+      if @observation.thumb_image_id == -idx
+        @observation.thumb_image_id = image.id
       end
     end
-    if observation.thumb_image_id && observation.thumb_image_id.to_i <= 0
-      observation.thumb_image_id = nil
-    end
-    bad_images
   end
-  # rubocop:enable Metrics/MethodLength
 
-  # List of images that we've successfully downloaded, but which
-  # haven't been attached to the observation yet.  Also supports some
-  # mininal editing.  INPUT: params[:good_images] (also looks at
-  # params[:image_<id>_notes]) OUTPUT: list of images
+  # List of images that we've successfully uploaded, but which haven't been
+  # attached to the observation yet.  Also supports some mininal editing.
+  # INPUT: params[:good_images] (also looks at params[:image_<id>_notes])
+  # OUTPUT: list of images
 
-  def update_good_images(arg)
+  def update_good_images
     # Get list of images first.
-    images = (arg || "").split.filter_map do |id|
+    @good_images = (params[:good_images] || "").split.filter_map do |id|
       Image.safe_find(id.to_i)
     end
 
     # Now check for edits.
-    images.each do |image|
+    @good_images.map do |image|
       next unless check_permission(image)
 
       args = params.dig(:good_image, image.id.to_s)
@@ -217,19 +226,17 @@ module ObservationsController::SharedFormMethods
         flash_object_errors(image)
       end
     end
-
-    images
   end
 
   # Now that the observation has been successfully created, we can attach
-  # any images that were downloaded earlier
-  def attach_good_images(observation, images)
-    return unless images
+  # any images that were uploaded earlier
+  def attach_good_images
+    return unless @good_images
 
-    images.each do |image|
-      unless observation.image_ids.include?(image.id)
-        observation.add_image(image)
-        image.log_create_for(observation)
+    @good_images.each do |image|
+      unless @observation.image_ids.include?(image.id)
+        @observation.add_image(image)
+        image.log_create_for(@observation)
       end
     end
   end
@@ -238,6 +245,47 @@ module ObservationsController::SharedFormMethods
     @observation.images.each do |img|
       error = img.strip_gps!
       flash_error(:runtime_failed_to_strip_gps.t(msg: error)) if error
+    end
+  end
+
+  ##############################################################################
+
+  def update_projects
+    return unless (checks = params[:project])
+
+    User.current.projects_member(include: :observations).each do |project|
+      before = @observation.projects.include?(project)
+      after = checks["id_#{project.id}"] == "1"
+      next unless before != after
+
+      if after
+        project.add_observation(@observation)
+        flash_notice(:attached_to_project.t(object: :observation,
+                                            project: project.title))
+      else
+        project.remove_observation(@observation)
+        flash_notice(:removed_from_project.t(object: :observation,
+                                             project: project.title))
+      end
+    end
+  end
+
+  def update_species_lists
+    return unless (checks = params[:list])
+
+    User.current.all_editable_species_lists.includes(:observations).
+      find_each do |list|
+      before = @observation.species_lists.include?(list)
+      after = checks["id_#{list.id}"] == "1"
+      next unless before != after
+
+      if after
+        list.add_observation(@observation)
+        flash_notice(:added_to_list.t(list: list.title))
+      else
+        list.remove_observation(@observation)
+        flash_notice(:removed_from_list.t(list: list.title))
+      end
     end
   end
 end

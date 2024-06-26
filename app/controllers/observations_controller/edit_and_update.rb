@@ -119,10 +119,9 @@ module ObservationsController::EditAndUpdate
   end
 
   def try_to_upload_images
-    @good_images = update_good_images(params[:good_images])
-    @bad_images  = create_image_objects(params[:image],
-                                        @observation, @good_images)
-    attach_good_images(@observation, @good_images)
+    update_good_images
+    create_image_objects_and_update_bad_images
+    attach_good_images
     @any_errors = true if @bad_images.any?
   end
 
@@ -130,7 +129,7 @@ module ObservationsController::EditAndUpdate
     return unless @dubious_where_reasons == [] && @observation.changed?
 
     @observation.updated_at = Time.zone.now
-    if save_observation(@observation)
+    if save_observation
       id = @observation.id
       flash_notice(:runtime_edit_observation_success.t(id: id))
       touch = params[:log_change] == "1"
@@ -144,53 +143,14 @@ module ObservationsController::EditAndUpdate
     @images         = @bad_images
     @new_image.when = @observation.when
     init_project_vars
-    init_project_vars_for_reload(@observation)
-    init_list_vars_for_reload(@observation)
+    init_project_vars_for_reload
+    init_list_vars_for_reload
     render(action: :edit)
   end
 
   def update_project_and_species_list_attachments
-    update_projects(@observation, params[:project])
-    update_species_lists(@observation, params[:list])
-  end
-
-  def update_projects(obs, checks)
-    return unless checks
-
-    User.current.projects_member(include: :observations).each do |project|
-      before = obs.projects.include?(project)
-      after = checks["id_#{project.id}"] == "1"
-      next unless before != after
-
-      if after
-        project.add_observation(obs)
-        flash_notice(:attached_to_project.t(object: :observation,
-                                            project: project.title))
-      else
-        project.remove_observation(obs)
-        flash_notice(:removed_from_project.t(object: :observation,
-                                             project: project.title))
-      end
-    end
-  end
-
-  def update_species_lists(obs, checks)
-    return unless checks
-
-    User.current.all_editable_species_lists.includes(:observations).
-      find_each do |list|
-      before = obs.species_lists.include?(list)
-      after = checks["id_#{list.id}"] == "1"
-      next unless before != after
-
-      if after
-        list.add_observation(obs)
-        flash_notice(:added_to_list.t(list: list.title))
-      else
-        list.remove_observation(obs)
-        flash_notice(:removed_from_list.t(list: list.title))
-      end
-    end
+    update_projects
+    update_species_lists
   end
 
   def redirect_to_observation_or_create_location
