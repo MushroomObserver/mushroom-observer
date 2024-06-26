@@ -3,6 +3,16 @@
 require("test_helper")
 
 class AdminIntegrationTest < CapybaraIntegrationTestCase
+  def test_turn_admin_mode_on_and_off
+    refute_selector(id: "nav_admin_on_link")
+
+    put_user_in_admin_mode(rolf)
+    assert_selector(id: "nav_admin_off_link")
+
+    click_on(id: "nav_admin_off_link")
+    assert_selector(id: "nav_mobile_admin_link")
+  end
+
   # This test is not much more than a stub.
   # Should test somebody making a donation, admin reviews.
   def test_review_donations
