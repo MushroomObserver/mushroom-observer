@@ -4,6 +4,8 @@
 
 module Observations
   class NamingsController < ApplicationController # rubocop:disable Metrics/ClassLength
+    include ObservationsController::Validators
+
     before_action :login_required
     before_action :pass_query_params
 
@@ -163,49 +165,17 @@ module Observations
     ##########################################################################
     #    CREATE
 
-    # returns Boolean
+    # returns Boolean. Also called by create_new_naming.
+    # Uses name_args, resolve_name from ObservationsController::Validators
     def rough_draft
-      args = {
-        naming_args: {},
-        vote_args: params.dig(:naming, :vote),
-        given_name: params.dig(:naming, :name),
-        approved_name: params[:approved_name],
-        chosen_name: params.dig(:chosen_name, :name_id).to_s
-      }
-      resolve_ivars_for_validation(**args)
-    end
-
-    # returns Boolean. Was @params.rough_draft
-    def resolve_ivars_for_validation(**args)
-      @naming = Naming.construct(args[:naming_args], @observation)
-      @vote = Vote.construct(args[:vote_args], @naming)
-      result = if args[:given_name]
-                 resolve_name(args[:given_name], args[:approved_name],
-                              args[:chosen_name])
-               else
-                 true
-               end
+      @naming = Naming.construct({}, @observation)
+      @vote = Vote.construct(params.dig(:naming, :vote), @naming)
+      success = if name_args[:given_name]
+                  resolve_name(**name_args)
+                else
+                  true
+                end
       @naming.name = @name
-      result
-    end
-
-    # Set the ivars for the form, and potentially form_name_feedback
-    # in the case the name is not resolved unambiguously
-    def resolve_name(given_name, approved_name, chosen_name)
-      @resolver = Naming::NameResolver.new(
-        given_name, approved_name, chosen_name
-      )
-      # NOTE: views could be refactored to access properties of the @resolver,
-      # e.g. `@resolver.valid_names`, instead of these ivars.
-      # All but success, @given_name, @name are only used by form_name_feedback.
-      success = false
-      @resolver.results.each do |ivar, value|
-        if ivar == :success
-          success = value
-        else
-          instance_variable_set(:"@#{ivar}", value)
-        end
-      end
       success && @name
     end
 
@@ -310,10 +280,7 @@ module Observations
     end
 
     def validate_name
-      given_name = params.dig(:naming, :name)
-      success = resolve_name(given_name,
-                             params[:approved_name],
-                             params.dig(:chosen_name, :name_id).to_s)
+      success = resolve_name(**name_args)
       flash_naming_errors
       success
     end
@@ -347,8 +314,7 @@ module Observations
     # because that would bring the other people's votes along with it.
     # We make a new one, reusing the user's previously stated vote and reasons.
     def create_new_naming
-      resolve_ivars_for_validation(naming_args: {},
-                                   vote_args: params.dig(:naming, :vote))
+      rough_draft
       return unless validate_object(@naming) && validate_object(@vote)
 
       update_naming(params.dig(:naming, :reasons), params[:was_js_on] == "yes")
