@@ -1,18 +1,19 @@
 # frozen_string_literal: true
 
-#  :section: Helpers
+#  :section: Validators
 #
-#    create_observation_object(...)     create rough first-drafts.
+#    validate_params
 #
-#    save_observation(...)              Save validated objects.
+#    validate_name
+#      name_args
+#      resolve_name(...)
 #
-#    update_observation_object(...)     Update and save existing objects.
+#    validate_place_name
 #
-#    init_image()                       Handle image uploads.
-#    create_image_objects(...)
-#    update_good_images(...)
-#    attach_good_images(...)
+#    validate_projects
+#      checked_project_conflicts
 
+# Included in both ObservationsController and NamingsController
 module ObservationsController::Validators
   private
 
@@ -22,8 +23,6 @@ module ObservationsController::Validators
       validate_projects
   end
 
-  # Maybe move this to a shared NamingsController::Validators module,
-  # or just include in both ObservationsController and NamingsController
   def validate_name
     success = resolve_name(**name_args)
     if @name
@@ -51,6 +50,7 @@ module ObservationsController::Validators
   # Set the ivars for the form: @given_name, @name - and potentially ivars for
   # form_name_feedback in the case the name is not resolved unambiguously:
   # @names, @valid_names, @parent_deprecated, @suggest_corrections.
+  # Returns true if the name is resolved unambiguously.
   def resolve_name(**)
     resolver = Naming::NameResolver.new(**)
     success = false
