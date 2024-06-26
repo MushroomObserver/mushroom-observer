@@ -170,7 +170,7 @@ module Observations
     def rough_draft
       @naming = Naming.construct({}, @observation)
       @vote = Vote.construct(params.dig(:naming, :vote), @naming)
-      success = if params.dig(:naming, :name).present?
+      success = if params.dig(:naming, :name)
                   resolve_name
                 else
                   true
@@ -273,13 +273,13 @@ module Observations
     #    UPDATE
 
     def can_update?
-      validate_name &&
+      validate_naming &&
         (name_not_changing? ||
          unproposed_name(:runtime_edit_naming_someone_else) &&
          valid_use_of_imageless(@name, @observation))
     end
 
-    def validate_name
+    def validate_naming
       success = resolve_name
       flash_naming_errors
       success
