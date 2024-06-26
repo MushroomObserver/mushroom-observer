@@ -4,6 +4,8 @@
 
 module Observations
   class NamingsController < ApplicationController # rubocop:disable Metrics/ClassLength
+    include ObservationsController::Validators
+
     before_action :login_required
     before_action :pass_query_params
 
@@ -164,41 +166,16 @@ module Observations
     #    CREATE
 
     # returns Boolean. Also called by create_new_naming.
+    # Uses name_args, resolve_name from ObservationsController::Validators
     def rough_draft
       @naming = Naming.construct({}, @observation)
       @vote = Vote.construct(params.dig(:naming, :vote), @naming)
-      result = if name_args[:given_name]
-                 resolve_name(**name_args)
-               else
-                 true
-               end
+      success = if name_args[:given_name]
+                  resolve_name(**name_args)
+                else
+                  true
+                end
       @naming.name = @name
-      result
-    end
-
-    # also used below in create_new_naming
-    def name_args
-      {
-        given_name: params.dig(:naming, :name).to_s,
-        given_id: params.dig(:naming, :name_id).to_i,
-        approved_name: params[:approved_name].to_s,
-        chosen_name: params.dig(:chosen_name, :name_id).to_s
-      }
-    end
-
-    # Set the ivars for the form: @given_name, @name - and potentially ivars for
-    # form_name_feedback in the case the name is not resolved unambiguously:
-    # @names, @valid_names, @parent_deprecated, @suggest_corrections.
-    def resolve_name(**)
-      resolver = Naming::NameResolver.new(**)
-      success = false
-      resolver.results.each do |ivar, value|
-        if ivar == :success
-          success = value
-        else
-          instance_variable_set(:"@#{ivar}", value)
-        end
-      end
       success && @name
     end
 
