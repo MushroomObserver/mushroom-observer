@@ -5,7 +5,7 @@
 #    validate_params
 #
 #    validate_name
-#      name_args
+#      name_params
 #      resolve_name(...)
 #
 #    validate_place_name

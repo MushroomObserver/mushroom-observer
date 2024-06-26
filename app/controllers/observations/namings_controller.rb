@@ -280,7 +280,7 @@ module Observations
     end
 
     def validate_name
-      success = resolve_name(**name_args)
+      success = resolve_name
       flash_naming_errors
       success
     end
