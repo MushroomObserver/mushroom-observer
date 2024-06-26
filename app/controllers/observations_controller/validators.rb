@@ -13,6 +13,7 @@
 #    update_good_images(...)
 #    attach_good_images(...)
 
+# Included in both ObservationsController and NamingsController
 module ObservationsController::Validators
   private
 
@@ -22,8 +23,6 @@ module ObservationsController::Validators
       validate_projects
   end
 
-  # Maybe move this to a shared NamingsController::Validators module,
-  # or just include in both ObservationsController and NamingsController
   def validate_name
     success = resolve_name(**name_args)
     if @name
