@@ -306,8 +306,8 @@ module Tabs
       return unless check_permission(obs)
 
       [
-        obs_change_links(obs),
-        print_labels_button(obs)
+        print_labels_button(obs),
+        obs_change_links(obs)
       ].safe_join(" | ")
     end
 
@@ -335,14 +335,11 @@ module Tabs
     def print_labels_button(obs)
       name = :download_observations_print_labels.l
       query = Query.lookup(Observation, :in_set, ids: [obs.id])
-      label = tag.span(name, class: "sr-only")
+      path = add_query_param(observations_downloads_path(commit: name), query)
 
-      button_to(
-        [label, link_icon(:print)].safe_join,
-        add_query_param(observations_downloads_path(commit: name), query),
-        data: { turbo: false, toggle: "tooltip", placement: "top",
-                title: name }
-      )
+      post_button(name: name, path: path, icon: :print,
+                  class: "print_label_observation_#{obs.id}",
+                  form: { data: { turbo: false } })
     end
   end
 end

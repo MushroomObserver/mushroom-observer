@@ -208,7 +208,7 @@ module LinkHelper
   end
 
   def button_atts(action, target, args, name)
-    if target.is_a?(String)
+    if target.is_a?(String) # ignores action
       path = target
       identifier = "" # can send one via args[:class]
     else
@@ -283,14 +283,15 @@ module LinkHelper
   # NOTE: button_to with block generates a button, not an input #quirksmode
   def any_method_button(name:, path:, method: :post, **args, &block)
     content = block ? capture(&block) : name
-    tip = content ? { toggle: "tooltip", placement: "top", title: name } : {}
+    path, identifier, icon, content = button_atts(method, path, args, name)
+
     html_options = {
       method: method,
-      class: "",
+      class: class_names(identifier, args[:class]), # usually also btn
       form: { data: { turbo: true } },
-      data: tip
+      data: { toggle: "tooltip", placement: "top", title: name }
     }.merge(args) # currently don't have to merge class arg upstream
 
-    button_to(path, html_options) { content }
+    button_to(path, html_options) { [content, icon].safe_join }
   end
 end
