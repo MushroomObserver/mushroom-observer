@@ -166,12 +166,12 @@ module Observations
     #    CREATE
 
     # returns Boolean. Also called by create_new_naming.
-    # Uses name_args, resolve_name from ObservationsController::Validators
+    # Uses resolve_name from ObservationsController::Validators
     def rough_draft
       @naming = Naming.construct({}, @observation)
       @vote = Vote.construct(params.dig(:naming, :vote), @naming)
-      success = if name_args[:given_name]
-                  resolve_name(**name_args)
+      success = if params.dig(:naming, :name)
+                  resolve_name
                 else
                   true
                 end
@@ -273,14 +273,14 @@ module Observations
     #    UPDATE
 
     def can_update?
-      validate_name &&
+      validate_naming &&
         (name_not_changing? ||
          unproposed_name(:runtime_edit_naming_someone_else) &&
          valid_use_of_imageless(@name, @observation))
     end
 
-    def validate_name
-      success = resolve_name(**name_args)
+    def validate_naming
+      success = resolve_name
       flash_naming_errors
       success
     end
