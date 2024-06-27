@@ -207,9 +207,10 @@ module LinkHelper
     end
   end
 
+  # Attempts to put together some common button attributes. Overrides available.
   def button_atts(action, target, args, name)
-    if target.is_a?(String) # ignores action
-      path = target
+    if target.is_a?(String) || target.is_a?(Hash) # eg { controller:, action: }
+      path = target # ignores `action`
       identifier = "" # can send one via args[:class]
     else
       prefix = action == :destroy ? "" : "#{action}_"
