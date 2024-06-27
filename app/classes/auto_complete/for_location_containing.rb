@@ -21,9 +21,13 @@ class AutoComplete::ForLocationContaining < AutoComplete::ByWord
         location_box(loc).vague?
       end.sort_by! do |loc|
         location_box(loc).box_area
-      end.pluck(:name)
+      end.pluck(:name, :id)
 
-    matches.map! { |m| Location.reverse_name(m) } if reverse
+    matches.map! do |loc, id|
+      format = reverse ? Location.reverse_name(loc) : loc
+      { name: format, id: id.nil? ? 0 : id }
+    end
+    # Don't re-sort, we want to keep the area order
     matches.uniq
   end
   # rubocop:enable Style/MultilineBlockChain
