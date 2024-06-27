@@ -302,6 +302,15 @@ module Tabs
       ]
     end
 
+    def obs_details_links(obs)
+      return unless check_permission(obs)
+
+      [
+        obs_change_links(obs),
+        print_labels_button(obs)
+      ].safe_join(" | ")
+    end
+
     # Buttons in "Details" panel header
     def obs_change_links(obs)
       return unless check_permission(obs)
@@ -320,6 +329,20 @@ module Tabs
 
     def destroy_observation_tab(obs)
       [nil, obs, { button: :destroy }]
+    end
+
+    # for show_obs - query is for a single obs label
+    def print_labels_button(obs)
+      name = :download_observations_print_labels.l
+      query = Query.lookup(Observation, :in_set, ids: [obs.id])
+      label = tag.span(name, class: "sr-only")
+
+      button_to(
+        [label, link_icon(:print)].safe_join,
+        add_query_param(observations_downloads_path(commit: name), query),
+        data: { turbo: false, toggle: "tooltip", placement: "top",
+                title: name }
+      )
     end
   end
 end

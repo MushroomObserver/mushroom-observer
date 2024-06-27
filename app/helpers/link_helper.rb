@@ -159,7 +159,8 @@ module LinkHelper
     synonyms: "random",
     tracking: "bullhorn",
     manage_lists: "indent-left",
-    observations: "tags"
+    observations: "tags",
+    print: "print"
   }.freeze
 
   # button to destroy object
