@@ -2957,7 +2957,7 @@
   # observation/inat_imports
   create_inat_import_title: Import from iNat
   import_observation_from_inat: Import from iNat
-  inat_data_comment: Inat Data
+  inat_data_comment: iNat Data
   inat_dqa_casual: Casual
   inat_dqa_needs_id: Needs ID
   inat_dqa_research: Research Grade
