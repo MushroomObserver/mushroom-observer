@@ -285,7 +285,7 @@ module Tabs
     end
 
     def obs_details_links(obs)
-      return unless check_permission(obs)
+      return print_labels_button(obs) unless check_permission(obs)
 
       [print_labels_button(obs),
        obs_change_links(obs)].safe_join(" | ")
