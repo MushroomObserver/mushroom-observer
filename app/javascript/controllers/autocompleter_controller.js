@@ -73,6 +73,10 @@ const AUTOCOMPLETER_TYPES = {
   location: { // params[:format] handled in controller
     UNORDERED: true
   },
+  location_containing: { // params encoded from dataset
+    ACT_LIKE_SELECT: true,
+    model: 'location'
+  },
   name: {
     COLLAPSE: 1
   },
