@@ -179,3 +179,8 @@ nonregional:
   <<: *DEFAULTS
   email: "bogus"
   content_filter: <%= { region: "Massachusetts" }.to_yaml.inspect %>
+
+# manages iNat imports; name and login must mirror production
+webmaster:
+  <<: *DEFAULTS
+  login: "MO Webmaster"

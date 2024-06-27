@@ -50,10 +50,14 @@ module Observations
       assert_equal("mo_inat_import", obs.source)
       assert_equal(inat_obs_id, obs.inat_id)
 
-
       assert_equal(0, obs.images.length, "Obs should not have 0 images")
 
       assert(obs.comments.any?, "Imported iNat should have >= 1 Comment")
+      obs_comments =
+        Comment.where(target_type: "Observation", target_id: obs.id)
+      assert(obs_comments.one?)
+      assert(obs_comments.where(Comment[:summary] =~ /^iNat Data/).present?,
+             "Missing Initial Commment (#{:inat_data_comment.l})")
     end
 
     def test_create_obs_tremella_mesenterica
@@ -65,8 +69,12 @@ module Observations
       obs_comments =
         Comment.where(target_type: "Observation", target_id: obs.id)
       assert(obs_comments.one?)
-      assert(obs_comments.where(Comment[:summary] =~ /^Inat Data/).present?,
+      assert(obs_comments.where(Comment[:summary] =~ /^iNat Data/).present?,
              "Missing Initial Commment (#{:inat_data_comment.l})")
+      assert_equal(
+        users(:webmaster), obs_comments.first.user,
+        "Comment user should be webmaster (vs user who imported iNat Obs)"
+      )
       inat_data_comment = obs_comments.first.comment
       [
         :USER.l, :OBSERVED.l, :LAT_LON.l, :PLACE.l, :ID.l, :DQA.l,

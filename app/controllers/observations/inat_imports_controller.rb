@@ -152,6 +152,10 @@ module Observations
       APIKey.where(user: 4468, notes: "inat import temp").first
     end
 
+    def inat_manager
+      User.where(login: "MO Webmaster").first
+    end
+
     def add_inat_summmary_data(inat_obs)
       data =
         "#{:USER.t}: #{inat_obs.inat_user_login}\n".
@@ -171,11 +175,11 @@ module Observations
       params = {
         target: @observation,
         summary: "#{:inat_data_comment.t} #{@observation.created_at}",
-        comment: data
+        comment: data,
+        user: inat_manager
       }
 
       Comment.create(params)
-      # TODO: Insure Comment.user is webmaster (or other special-purpose user)
     end
 
     def add_inat_sequences(inat_obs)
