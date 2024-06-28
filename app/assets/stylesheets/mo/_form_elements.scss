@@ -117,3 +117,12 @@ form {
     }
   }
 }
+
+// date selects: individual fields not full-width even on mobile
+.form-inline.date-selects {
+  .form-control {
+    display: inline-block;
+    width: auto;
+    vertical-align: middle;
+  }
+}
