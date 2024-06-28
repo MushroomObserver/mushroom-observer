@@ -106,7 +106,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # submit_observation_form_with_errors
     fill_in("observation_when_1i", with: "2010")
-    select("March", from: "observation_when_2i")
+    select("August", from: "observation_when_2i")
     select("14", from: "observation_when_3i")
 
     fill_in("observation_place_name", with: "USA, California, Pasadena")
@@ -125,7 +125,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # check form values after first changes
     assert_field("observation_when_1i", with: "2010")
-    assert_select("observation_when_2i", text: "March")
+    assert_select("observation_when_2i", text: "August")
     assert_select("observation_when_3i", text: "14")
 
     assert_field("observation_place_name", with: "USA, California, Pasadena")
@@ -185,7 +185,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
     # check that the chosen obs date is available
     within("#obs_date_radios") do
-      assert_unchecked_field("14-March-2010")
+      assert_unchecked_field("14-August-2010")
       # this would be today's date in the format:
       # assert_unchecked_field(local_now.strftime("%d-%B-%Y"))
     end
@@ -263,8 +263,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(find("#img_messages"), align: :center)
     within("#img_messages") do
       within("#obs_date_radios") do
-        choose("14-March-2010", allow_label_click: true)
-        assert_checked_field("14-March-2010")
+        choose("14-August-2010", allow_label_click: true)
+        assert_checked_field("14-August-2010")
       end
       click_button("fix_dates")
     end
@@ -283,12 +283,12 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Be sure the dates are applied
     within(first_image_wrapper) do
       assert_equal("2010", find('[id$="_temp_image_when_1i"]').value)
-      assert_equal("3", find('[id$="_temp_image_when_2i"]').value)
+      assert_equal("8", find('[id$="_temp_image_when_2i"]').value)
       assert_equal("14", find('[id$="_temp_image_when_3i"]').value)
     end
     within(second_image_wrapper) do
       assert_equal("2010", find('[id$="_temp_image_when_1i"]').value)
-      assert_equal("3", find('[id$="_temp_image_when_2i"]').value)
+      assert_equal("8", find('[id$="_temp_image_when_2i"]').value)
       assert_equal("14", find('[id$="_temp_image_when_3i"]').value)
     end
 
@@ -377,7 +377,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # check the fields
     assert_field("observation_when_1i", with: "2010")
-    assert_select("observation_when_2i", text: "March")
+    assert_select("observation_when_2i", text: "August")
     assert_select("observation_when_3i", text: "14")
     assert_field("observation_place_name",
                  with: "Pasadena, Some Co., California, USA")
@@ -394,7 +394,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     img_ids = imgs.map(&:id)
     img_ids.each do |img_id|
       assert_field("good_image_#{img_id}_when_1i", with: "2010")
-      assert_select("good_image_#{img_id}_when_2i", text: "March")
+      assert_select("good_image_#{img_id}_when_2i", text: "August")
       assert_select("good_image_#{img_id}_when_3i", text: "14")
       assert_field("good_image_#{img_id}_copyright_holder",
                    with: katrina.legal_name)
@@ -587,7 +587,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   def expected_values_after_create
     {
       user: katrina,
-      when: Date.parse("2010-03-14"),
+      when: Date.parse("2010-08-14"),
       where: "Pasadena, California, USA",
       location: nil,
       lat: 12.6125, # was 12.5760 values tweaked to move it to land
