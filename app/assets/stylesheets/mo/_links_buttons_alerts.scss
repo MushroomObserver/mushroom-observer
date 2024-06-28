@@ -34,3 +34,22 @@
     text-align: center;
   }
 }
+
+button:not(:disabled) {
+  .when-disabled {
+    display: none;
+  }
+  .when-enabled {
+    display: inline-block;
+  }
+}
+
+button:disabled {
+  .when-disabled {
+    display: inline-block;
+  }
+  .when-enabled {
+    display: none;
+  }
+}
+
