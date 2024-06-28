@@ -301,7 +301,7 @@ module FormsHelper
     opts[:data] = { controller: "year-input" }.merge(args[:data] || {})
     date_select_opts = date_select_opts(args)
     wrap_class = form_group_wrap_class(args)
-    selects_class = "form-inline"
+    selects_class = "form-inline date-selects"
     selects_class += " d-inline-block" if args[:inline] == true
     identifier = [args[:form].object_name, args[:index], args[:field]].
                  compact.join("_")
