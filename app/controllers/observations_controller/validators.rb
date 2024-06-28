@@ -78,7 +78,7 @@ module ObservationsController::Validators
 
   def validate_projects
     return true if params[:project].empty? ||
-                   params[:project][:ignore_proj_conflicts]
+                   params[:project][:ignore_proj_conflicts] == "1"
 
     @suspect_checked_projects = checked_project_conflicts -
                                 @observation.projects

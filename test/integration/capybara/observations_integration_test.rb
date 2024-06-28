@@ -292,9 +292,10 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
       "Observation should not be added to Project if user unchecks Project"
     )
 
-    # 2. Prove that Observation is created if user fixes dates to be in-range
+    # 2. Prove that Observation is created if user fixes dates and
+    # location to be in-range
     visit(new_observation_path)
-    fill_in(:WHERE.l, with: obs_location.name)
+    fill_in(:WHERE.l, with: proj.location.name)
     check(proj_checkbox)
     first(:button, "Create").click
     assert_selector(
