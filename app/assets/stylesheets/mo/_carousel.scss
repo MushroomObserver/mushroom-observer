@@ -178,13 +178,14 @@
   .carousel-control-wrap {
     position: absolute;
     top: 6rem;
-    bottom: 6rem;
+    bottom: calc(50% - 6rem);
     left: 0;
     width: 100%;
     padding-bottom: calc(50% - 12rem);
 
     @media screen and (min-width: 992px) {
       width: 50%;
+      bottom: 6rem;
     }
   }
 

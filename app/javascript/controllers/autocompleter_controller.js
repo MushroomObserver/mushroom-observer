@@ -427,14 +427,15 @@ export default class extends Controller {
         this.refreshPrimer();
       this.populateMatches();
       this.drawPulldown();
-      this.hiddenTarget.value = '';
     }), this.REFRESH_DELAY * 1000);
   }
 
   // Schedule pulldown to be hidden if nothing happens in the meantime.
   scheduleHide() {
     this.clearHide();
-    this.hide_timer = setTimeout(this.hidePulldown.bind(this), this.HIDE_DELAY * 1000);
+    this.hide_timer = setTimeout(
+      this.hidePulldown.bind(this), this.HIDE_DELAY * 1000
+    );
   }
 
   // Schedule a method to be called after key stays pressed for some time.
@@ -649,7 +650,7 @@ export default class extends Controller {
       this.updateRows(rows);
       this.highlightNewRow(rows);
       this.makePulldownVisible();
-      this.populateHiddenId();
+      this.updateHiddenId();
     }
     // Make sure input focus stays on text field!
     this.inputTarget.focus();
@@ -748,8 +749,8 @@ export default class extends Controller {
   // Assign ID of any perfectly matching option, even if not expressly selected.
   // This guards against user selecting a match, then, say, deleting a letter
   // and retyping the letter. Without this, an exact match would lose its ID.
-  populateHiddenId() {
-    this.verbose("populateHiddenId()");
+  updateHiddenId() {
+    this.verbose("updateHiddenId()");
     if (this.COLLAPSE > 0) return;
 
     const perfect_match =
@@ -757,6 +758,8 @@ export default class extends Controller {
 
     if (perfect_match) {
       this.hiddenTarget.value = perfect_match['id'];
+    } else {
+      this.hiddenTarget.value = '';
     }
   }
 

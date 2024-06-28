@@ -217,9 +217,9 @@ module FormsHelper
   # minimum args :form, :type
   def autocompleter_hidden_field(**args)
     model = autocompleter_type_to_model(args[:type])
-    args[:form].hidden_field(:"#{model}_id",
-                             value: args[:hidden],
-                             data: { autocompleter_target: "hidden" })
+    args[:form].text_field(:"#{model}_id",
+                           value: args[:hidden],
+                           data: { autocompleter_target: "hidden" })
   end
 
   def autocompleter_type_to_model(type)
