@@ -139,17 +139,12 @@ module Observations
     end
 
     # Key for managing iNat imports; avoids requiring each user to have own key.
-    # FIXME: Figure out how to do this via enviroment variable. 2024-06-18 jdc
-    # This is a temp hack. Use a db >= 2024-06-18, or create key locally.
-    # After 2024-06-18:
-    #  - Update the local db
-    #  - Update credentials to use webmaster's "inat import" key
-    #  - Update this method to grab that key
+    # NOTE: Can this be done more elegantly via enviroment variable?
+    # It now relies on duplicating the following in the live db & fixtures:
+    # User with login: MO Webmaster, API_key with `notes: "inat import"`
+    # 2024-06-18 jdc
     def inat_manager_key
-      # FIXME: See above
-      return APIKey.where(user: @user).first if Rails.env.test?
-
-      APIKey.where(user: 4468, notes: "inat import temp").first
+      APIKey.where(user: inat_manager, notes: "inat import").first
     end
 
     def inat_manager
