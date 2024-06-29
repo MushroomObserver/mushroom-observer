@@ -239,7 +239,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
   # when creating an Observation
   def test_add_out_of_range_observation_to_project
     proj = projects(:past_project)
-    user = users(:katrina)
+    user = users(:roy)
     # Ensure fixtures not broken
     assert(proj.member?(user),
            "Need fixtures such that `user` is a member of `proj`")
@@ -264,9 +264,10 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
       "#flash_notices",
       text: :form_observations_there_is_a_problem_with_projects.t.strip_html
     )
+    default_obs = Observation.where(user_id: user.id).order(:created_at).last
     within("#project_messages") do # out-of-range warning message
       assert(has_text?(:form_observations_projects_out_of_range.l(
-                         date: Time.zone.today,
+                         date: default_obs.when,
                          place_name: obs_location.name
                        )),
              "Missing out-of-range warning with observation date")
@@ -295,7 +296,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     # 2. Prove that Observation is created if user fixes dates and
     # location to be in-range
     visit(new_observation_path)
-    fill_in(:WHERE.l, with: proj.location.name)
+    fill_in(:WHERE.l, with: proj.location.display_name)
     check(proj_checkbox)
     first(:button, "Create").click
     assert_selector(

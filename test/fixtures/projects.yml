@@ -143,8 +143,8 @@ past_project:
   updated_at: 2008-09-25 07:00:55
   observations: owner_accepts_general_questions, unknown_with_lat_lng
   open_membership: true
-  start_date: <%= Time.zone.today - 1.year %>
-  end_date: <%= Time.zone.today - 1.month %>
+  start_date: 2010-09-26
+  end_date: 2010-10-26
 
 no_start_date_project:
   <<: *DEFAULTS

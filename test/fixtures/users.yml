@@ -77,7 +77,7 @@ roy:
   name: Roy Halling
   email_general_question: true
   location_format: <%= User.location_formats[:scientific] %>
-  user_groups: all_users, burbank_admins, falmouth_2023_09_users
+  user_groups: all_users, burbank_admins, burbank_users, falmouth_2023_09_users
 
 spammer:
   <<: *DEFAULTS
