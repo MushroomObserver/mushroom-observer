@@ -19,8 +19,7 @@ module ObservationsController::Validators
 
   def validate_params
     validate_name &&
-      validate_place_name &&
-      validate_projects
+      validate_place_name
   end
 
   def validate_name
