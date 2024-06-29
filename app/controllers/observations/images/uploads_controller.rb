@@ -10,18 +10,14 @@ module Observations::Images
     # First, each selected image with its EXIF data is read and displayed in
     # the create obs form, where the user can reconcile dates and locations
     # with the obs.
-    # This action returns formatted HTML (upload image template) to the Stimulus
-    # obs-form-images_controller that's added to the page when uploading
-    # multiple images on create observation
+    # This action returns formatted HTML (upload image template) for one image
+    # to the Stimulus form-images_controller. This is added to the page
+    # when uploading multiple images on create observation.
     # was multi_image_template
     def new
       @user = User.current = session_user # || raise("Must be logged in.")
-      @licenses = License.current_names_and_ids(@user.license)
-      @image = Image.new(user: @user, when: Time.zone.now)
-      render(partial: "observations/form/images_upload/template",
-             locals: { img_number: params[:img_number],
-                       img_file_name: params[:img_file_name],
-                       img_file_size: params[:img_file_size] })
+      @image = Image.new(user: @user, when: Time.zone.now,
+                         copyright_holder: @user.legal_name)
     end
 
     # Uploads an image object without an observation.

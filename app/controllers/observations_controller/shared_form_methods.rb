@@ -201,7 +201,7 @@ module ObservationsController::SharedFormMethods
 
   def update_good_images
     # Get list of images first.
-    @good_images = (params[:good_images] || "").split.filter_map do |id|
+    @good_images = (params[:good_image_ids] || "").split.filter_map do |id|
       Image.safe_find(id.to_i)
     end
 
@@ -226,6 +226,16 @@ module ObservationsController::SharedFormMethods
         flash_object_errors(image)
       end
     end
+  end
+
+  # For now, this has to read the exif off the actual file on the server.
+  # This is because the exif data is not stored on the Image record.
+  def get_exif_data(images)
+    data = {}
+    images.each do |image|
+      data[image.id] = image&.read_exif_geocode || {}
+    end
+    data
   end
 
   # Now that the observation has been successfully created, we can attach

@@ -36,13 +36,14 @@ module FormsHelper
   end
 
   # form-agnostic button, type=button
-  def js_button(**args)
+  def js_button(**args, &block)
+    button = block ? capture(&block) : args[:button]
     opts = args.except(:form, :button, :class, :center)
     opts[:class] = "btn btn-default"
     opts[:class] += " center-block my-3" if args[:center] == true
     opts[:class] += " #{args[:class]}" if args[:class].present?
 
-    button_tag(args[:button], type: :button, **opts)
+    button_tag(button, type: :button, **opts)
   end
 
   # Form field builders with labels, consistent styling and less template code!
@@ -97,6 +98,8 @@ module FormsHelper
     end
   end
 
+  # Makes an element that looks like a bootstrap button but works as a checkbox.
+  # Only works within a .btn-group wrapper. NOTE: Different from a check_box!
   def check_button_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
     opts = separate_field_options_from_args(args)
@@ -122,6 +125,20 @@ module FormsHelper
         concat(args[:label])
         concat(args[:append]) if args[:append].present?
       end
+    end
+  end
+
+  # Makes an element that looks like a bootstrap button but works as a radio.
+  # Only works within a .btn-group wrapper. NOTE: Different from a radio_button!
+  def radio_button_with_label(**args)
+    args = auto_label_if_form_is_account_prefs(args)
+    opts = separate_field_options_from_args(args)
+
+    wrap_class = form_group_wrap_class(args, "btn btn-default btn-sm")
+
+    args[:form].label(args[:field], class: wrap_class) do
+      [args[:form].radio_button(args[:field], opts.merge(class: "mt-0 mr-2")),
+       args[:label]].safe_join
     end
   end
 
@@ -275,22 +292,26 @@ module FormsHelper
   # text inputs, but you can pass data: { controller: "" } to get a year select.
   # The three "selects" will always be inline, but pass inline: true to make
   # the label and selects inline.
+  # The form label does not correspond exactly to any of the three fields, so
+  # it identifies the wrapping div. (That's also valid HTML.)
+  # https://stackoverflow.com/a/16426122/3357635
   def date_select_with_label(**args)
     opts = separate_field_options_from_args(args, [:object, :data])
     opts[:class] = "form-control"
     opts[:data] = { controller: "year-input" }.merge(args[:data] || {})
-
+    date_select_opts = date_select_opts(args)
     wrap_class = form_group_wrap_class(args)
-    selects_class = "form-inline"
+    selects_class = "form-inline date-selects"
     selects_class += " d-inline-block" if args[:inline] == true
-
+    identifier = [args[:form].object_name, args[:index], args[:field]].
+                 compact.join("_")
+    label_opts = { class: "mr-3" }
+    label_opts[:index] = args[:index] if args[:index].present?
     tag.div(class: wrap_class) do
-      concat(args[:form].label("#{args[:field]}_1i", args[:label],
-                               class: "mr-3"))
+      concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
-      concat(tag.div(class: selects_class) do
-        concat(args[:form].date_select(args[:field],
-                                       date_select_opts(args), opts))
+      concat(tag.div(class: selects_class, id: identifier) do
+        concat(args[:form].date_select(args[:field], date_select_opts, opts))
       end)
       concat(args[:append]) if args[:append].present?
     end
@@ -302,9 +323,10 @@ module FormsHelper
     start_year = args[:start_year] || 20.years.ago.year
     end_year = args[:end_year] || Time.zone.now.year
     init_value = obj.try(&:when).try(&:year)
-    start_year = init_value if init_value && init_value < start_year
-    opts = { start_year: start_year,
-             end_year: end_year,
+    if init_value && init_value < start_year && init_value > 1900
+      start_year = init_value
+    end
+    opts = { start_year: start_year, end_year: end_year,
              selected: obj.try(&:when) || Time.zone.today,
              order: args[:order] || [:day, :month, :year] }
     opts[:index] = args[:index] if args[:index].present?

@@ -34,7 +34,6 @@ select.has-error {
     min-height: 100%;
     font-size: 100px;
     text-align: right;
-    filter: alpha(opacity=0);
     opacity: 0;
     background: red;
     cursor: inherit;
@@ -93,17 +92,6 @@ a.filter-only {
   }
 }
 
-.added_image_wrapper {
-  @extend .py-3;
-  border-width: 1px 0 0 0;
-  border-style: solid;
-  border-color: $btn-default-border;
-
-  &:last-child {
-    border-width: 1px 0;
-  }
-}
-
 .vote-select-container {
   max-width: 21rem;
   display: inline-block;
@@ -116,5 +104,25 @@ a.filter-only {
 .name-radio {
   label {
     font-weight: normal;
+  }
+}
+
+form {
+  .carousel-heading {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+
+    .panel-title {
+      padding-bottom: 1.5rem;
+    }
+  }
+}
+
+// date selects: individual fields not full-width even on mobile
+.form-inline.date-selects {
+  .form-control {
+    display: inline-block;
+    width: auto;
+    vertical-align: middle;
   }
 }

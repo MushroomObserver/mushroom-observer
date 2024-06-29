@@ -16,17 +16,17 @@ module ObservationsController::NewAndCreate
   #   params[:naming][:vote][...]       vote args
   #   params[:naming][:reasons][n][...] naming_reasons args
   #   params[:image][n][...]            image args
-  #   params[:good_images]              images already downloaded
+  #   params[:good_image_ids]           images already uploaded
   #   params[:was_js_on]                was form javascripty? ("yes" = true)
   #
   # Outputs:
   #   @observation, @naming, @vote      empty objects
-  #   @given_name, @names, @valid_names       name validation
+  #   @given_name, @names, @valid_names name validation
   #   @reasons                          array of naming_reasons
   #   @images                           array of images
   #   @licenses                         used for image license menu
   #   @new_image                        blank image object
-  #   @good_images                      list of images already downloaded
+  #   @good_images                      list of images already uploaded
   #
 
   def new
@@ -179,6 +179,7 @@ module ObservationsController::NewAndCreate
     @naming = Naming.construct({}, @observation)
     @vote = Vote.construct(params.dig(:naming, :vote), @naming)
     update_good_images
+    @exif_data = get_exif_data(@good_images) # in case of form reload
     create_image_objects_and_update_bad_images
   end
 
