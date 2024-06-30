@@ -94,12 +94,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_select("observation_when_2i", text: local_now.strftime("%B"))
     assert_select("observation_when_3i", text: local_now.day.to_s)
 
-    assert_field("observation_place_name", with: "")
+    last_obs = Observation.where(user_id: User.current.id).
+                 order(:created_at).last
+    assert_field("observation_place_name", with: last_obs.where)
     assert_field("observation_lat", with: "")
     assert_field("observation_lng", with: "")
     assert_field("observation_alt", with: "")
 
     assert_field("naming_name", with: "")
+    assert(last_obs.is_collection_location)
     assert_checked_field("observation_is_collection_location")
     assert_no_checked_field("observation_specimen")
     assert_field(other_notes_id, with: "")
