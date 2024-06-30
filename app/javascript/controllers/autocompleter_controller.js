@@ -73,6 +73,7 @@ const AUTOCOMPLETER_TYPES = {
     model: 'herbarium'
   },
   location: { // params[:format] handled in controller
+    ACT_LIKE_SELECT: false,
     UNORDERED: true,
     model: 'location'
   },
@@ -197,7 +198,11 @@ export default class extends Controller {
       this.inputTarget.value = '';
       this.prepareHiddenInput();
       this.hiddenTarget.value = '';
-      this.scheduleRefresh(); // refresh the primer
+      if (this.ACT_LIKE_SELECT) {
+        this.refreshPrimer(); // directly refresh the primer, no delay
+      } else {
+        this.scheduleRefresh();
+      }
     }
   }
 
@@ -835,8 +840,10 @@ export default class extends Controller {
   // and pick the first one.
   populateSelect() {
     this.matches = this.primer;
-    if (this.matches.length > 0)
+    if (this.matches.length > 0) {
       this.inputTarget.value = this.matches[0]['name'];
+      this.hiddenTarget.value = this.matches[0]['id'];
+    }
   }
 
   // Grab all matches, doing exact match, ignoring number of words.
@@ -1058,13 +1065,13 @@ export default class extends Controller {
     let token = this.getSearchToken().toLowerCase(),
       last_request = this.last_fetch_request;
 
-    // Don't make request on empty string!
-    if (!this.ACT_LIKE_SELECT && (!token || token.length < 1))
-      return;
-
-    // Don't repeat last request accidentally!
-    if (last_request == token)
-      return;
+    // Unless we don't care about input (as with location_containing),
+    // don't make request on empty string, or repeat last request accidentally.
+    if (!this.ACT_LIKE_SELECT) {
+      if (!token || token.length < 1 || last_request == token) {
+        return;
+      }
+    }
 
     // Memoize this condition, used twice:
     // "is the new search token an extension of the previous search string?"
