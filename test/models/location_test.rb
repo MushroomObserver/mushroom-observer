@@ -554,6 +554,119 @@ class LocationTest < UnitTestCase
     )
   end
 
+  def test_scope_contains_centrum
+    albion = locations(:albion)
+    centrum =
+      { lat: albion.south + (albion.north - albion.south) / 2,
+        lng: albion.east + (albion.west - albion.east) / 2 }
+    locs_containing_centrum =
+      Location.contains(lat: centrum[:lat], lng: centrum[:lng])
+    assert_includes(locs_containing_centrum, locations(:albion),
+                    "Location should `contain`` its centrum")
+    assert_not_includes(locs_containing_centrum, locations(:gualala),
+                        "Location should not `contain` external point")
+  end
+
+  def test_scope_contains_corners
+    loc = locations(:albion)
+    external_loc = locations(:perkatkun)
+    ne_corner = { lat: loc.north, lng: loc.east }
+    sw_corner = { lat: loc.south, lng: loc.west }
+
+    containing_locs =
+      Location.contains(lat: ne_corner[:lat], lng: ne_corner[:lng])
+
+    assert_includes(containing_locs, loc,
+                    "Location should `contain` its NE corner")
+    assert_not_includes(containing_locs, external_loc,
+                        "Non-intersecting Location should not `contain` point")
+
+    containing_locs =
+      Location.contains(lat: sw_corner[:lat], lng: sw_corner[:lng])
+
+    assert_includes(containing_locs, loc,
+                    "Location should `contain` its SW corner")
+    assert_not_includes(containing_locs, external_loc,
+                        "Non-intersecting Location should not `contain` point")
+
+    skip("Scope `contains` under construction")
+
+    loc = locations(:perkatkun)
+    external_loc = locations(:albion)
+    ne_corner = { lat: loc.north, lng: loc.east }
+    sw_corner = { lat: loc.south, lng: loc.west }
+
+    containing_locs =
+      Location.contains(lat: ne_corner[:lat], lng: ne_corner[:lng])
+
+    assert_includes(containing_locs, loc,
+                    "Location should `contain` its NE corner")
+    assert_not_includes(containing_locs, external_loc,
+                        "Non-intersecting Location should not `contain` point")
+
+    containing_locs =
+      Location.contains(lat: sw_corner[:lat], lng: sw_corner[:lng])
+
+    assert_includes(containing_locs, loc,
+                    "Location should `contain` its SW corner")
+    assert_not_includes(containing_locs, external_loc,
+                        "Non-intersecting Location should not `contain` point")
+  end
+
+  # Isolated portion of another test
+  def test_scope_contains_foo
+    loc = locations(:perkatkun)
+    external_loc = locations(:albion)
+    ne_corner = { lat: loc.north, lng: loc.east }
+    sw_corner = { lat: loc.south, lng: loc.west }
+
+    containing_locs =
+      Location.contains(lat: ne_corner[:lat], lng: ne_corner[:lng])
+
+    assert_includes(containing_locs, loc,
+                    "Location should `contain` its NE corner")
+    assert_not_includes(containing_locs, external_loc,
+                        "Non-intersecting Location should not `contain` point")
+
+    containing_locs =
+      Location.contains(lat: sw_corner[:lat], lng: sw_corner[:lng])
+
+    assert_includes(containing_locs, loc,
+                    "Location should `contain` its SW corner")
+    assert_not_includes(containing_locs, external_loc,
+                        "Non-intersecting Location should not `contain` point")
+  end
+
+  def test_scope_contains_box
+    loc = locations(:albion)
+    external_loc = locations(:perkatkun)
+
+    containing_locs =
+      Location.contains(n: loc.north, s: loc.south, e: loc.east, w: loc.west)
+
+    assert_includes(containing_locs, loc,
+                    "Location should `contain` itself")
+    assert_not_includes(
+      containing_locs, external_loc,
+      "Containing Locations should exclude non-intersecting Locations"
+    )
+
+    skip("Scope `contains` under construction")
+
+    loc = locations(:perkatkun)
+    external_loc = locations(:albion)
+
+    containing_locs =
+      Location.contains(n: loc.north, s: loc.south, e: loc.east, w: loc.west)
+
+    assert_includes(containing_locs, loc,
+                    "Location should `contain` itself")
+    assert_not_includes(
+      containing_locs, external_loc,
+      "Containing Locations should exclude non-intersecting Locations"
+    )
+  end
+
   def test_hidden
     User.current = mary
     high = 60.234
