@@ -169,9 +169,10 @@ export default class extends Controller {
   }
 
   // Swap out autocompleter type (and properties)
-  // Action may be called from a <select> with
+  // Callable externally. Action may be called from a <select> with
   // `data-action: "autocompleter-swap:swap->autocompleter#swap"`
   // or an event dispatched by another controller.
+  // Callable internally if you pass a detail object with a type property.
   swap({ detail }) {
     let type;
 
@@ -415,7 +416,8 @@ export default class extends Controller {
 
   // ------------------------------ Timers ------------------------------
 
-  // Schedule primer to be refreshed after polite delay.
+  // Schedule matches to be recalculated from primer, or even primer refreshed,
+  // after a polite delay. (Primer only refreshed if first letter changes.)
   scheduleRefresh() {
     this.verbose("scheduleRefresh()");
     this.clearRefresh();
@@ -424,8 +426,8 @@ export default class extends Controller {
       // this.debug("refresh_timer(" + this.inputTarget.value + ")");
       this.old_value = this.inputTarget.value;
       if (this.AJAX_URL)
-        this.refreshPrimer();
-      this.populateMatches();
+        this.refreshPrimer(); // async, anything after this executes immediately
+      this.populateMatches(); // still necessary if primer unchanged, as likely
       this.drawPulldown();
     }), this.REFRESH_DELAY * 1000);
   }

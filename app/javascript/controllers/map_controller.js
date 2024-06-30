@@ -272,7 +272,12 @@ export default class extends Controller {
       this.keypress_id = setTimeout(this.calculateRectangle(), 500)
     }
     else if (this.map_type === "observation" && this.opened) {
-      this.keypress_id = setTimeout(this.calculateMarker(), 500)
+      // If they just cleared the inputs, swap back to a location autocompleter
+      if (this.latInputTarget.value == this.lngInputTarget.value == "") {
+        this.dispatch("suggestLocations", { detail: { type: "location" } })
+      } else {
+        this.keypress_id = setTimeout(this.calculateMarker(), 500)
+      }
     }
   }
 
@@ -300,6 +305,11 @@ export default class extends Controller {
       });
   }
 
+  // Called from the geocoder response, to update the map and inputs
+  // This only grabs the first result.
+  // If we have multiple, a different function should show them: maybe
+  // dispatch an event to autocompleter with the results reformatted?
+  // https://developers.google.com/maps/documentation/javascript/geocoding#GeocodingResponses
   respondToGeocode(results) {
     const viewport = results[0].geometry.viewport.toJSON()
     const extents = results[0].geometry.bounds?.toJSON() // may not exist
@@ -451,8 +461,8 @@ export default class extends Controller {
     }
     // Toss any degree-minute-second notation and just take the first number
     catch {
-      lat = parseFloat(this.latInputTarget.value)
-      lng = parseFloat(this.lngInputTarget.value)
+      lat = parseFloat(origLat)
+      lng = parseFloat(origLng)
     }
 
     if (!lat || !lng)
@@ -483,8 +493,7 @@ export default class extends Controller {
 
   updateLocationAutocompleter({ lat, lng }) {
     // Call the swap event on the autocompleter and send the type
-    // `location_containing`. How to get params to autocompleter?
-    // May need a window event listener on the location autocomplete.
+    // `location_containing`.
     this.dispatch("suggestLocations", {
       detail: {
         type: "location_containing",
@@ -543,13 +552,13 @@ export default class extends Controller {
 
   // Action called from the "Clear Map" button
   clearMap() {
-    // const inputTargets = [
-    //   this.latInputTarget, this.lngInputTarget, this.altInputTarget
-    // ]
-    // inputTargets.forEach((element) => {
-    //   element.value = ''
-    // })
-    this.marker.setVisible(false)
+    const inputTargets = [
+      this.latInputTarget, this.lngInputTarget, this.altInputTarget
+    ]
+    inputTargets.forEach((element) => { element.value = '' })
+    this.dispatch("suggestLocations", { detail: { type: "location" } })
+    if (this.marker)
+      this.marker.setVisible(false)
   }
 
   //
