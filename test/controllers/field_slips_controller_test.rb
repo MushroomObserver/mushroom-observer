@@ -297,7 +297,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
 
   test "should update field_slip with last viewed obs" do
     login(@field_slip.user.login)
-    obs = observations(:minimal_unknown_obs)
+    obs = observations(:detailed_unknown_obs)
     ObservationView.update_view_stats(obs.id, @field_slip.user_id)
     patch(:update,
           params: { id: @field_slip.id,
@@ -305,7 +305,8 @@ class FieldSlipsControllerTest < FunctionalTestCase
                     field_slip: { code: @field_slip.code,
                                   project_id: @field_slip.project_id } })
     assert_redirected_to field_slip_url(@field_slip)
-    assert_equal(@field_slip.observation, ObservationView.last(User.current))
+    assert_equal(@field_slip.reload.observation,
+                 ObservationView.last(User.current))
     assert(@field_slip.project.observations.include?(obs))
   end
 

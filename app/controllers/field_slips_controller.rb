@@ -68,9 +68,11 @@ class FieldSlipsController < ApplicationController
 
   # PATCH/PUT /field_slips/1 or /field_slips/1.json
   def update
+    old_obs = @field_slip.observation
     respond_to do |format|
       if check_last_obs && @field_slip.update(field_slip_params)
         format.html do
+          disconnect_observation(old_obs)
           if params[:commit] == :field_slip_create_obs.t
             redirect_to(new_observation_url(
                           field_code: @field_slip.code,
@@ -220,10 +222,23 @@ class FieldSlipsController < ApplicationController
     flash_notice(:field_slip_welcome.t(title: project.title))
   end
 
+  def disconnect_observation(obs)
+    return if params[:commit] == :field_slip_keep_obs.t
+
+    proj = @field_slip.project
+    return unless proj && obs
+
+    flash_warning(:field_slip_remove_observation.t(
+                    observation: obs.unique_format_name,
+                    title: proj.title
+                  ))
+    proj.remove_observation(obs)
+  end
+
   def check_last_obs
     return true unless params[:commit] == :field_slip_last_obs.t
 
-    obs = ObservationView.last(User.current)
+    obs = ObservationView.previous(User.current, @field_slip.observation)
     return false unless obs # This should really ever happen
 
     project = @field_slip.project
