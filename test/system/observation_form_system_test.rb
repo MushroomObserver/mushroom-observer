@@ -61,6 +61,69 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_flash_success(/created observation/i)
   end
 
+  def test_autofill_location_from_geotagged_image
+    setup_image_dirs # in general_extensions
+    login!(katrina)
+
+    university_park = Location.new(
+      name: "University Park, Miami-Dade County, Florida, USA",
+      **UNIVERSITY_PARK_EXTENTS
+    )
+    university_park.save!
+
+    # open_create_observation_form
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    # check new observation form defaults
+    assert_date_is_now
+    assert_place_is_empty
+
+    # Add a geotagged image
+    click_attach_file("geotagged.jpg")
+    sleep(0.5)
+
+    # we should have the new type of location_containing autocompleter now
+    assert_selector("[data-type='location_containing']")
+    # GPS should have been copied to the obs fields
+    assert_equal("25.7582", find('[id$="observation_lat"]').value)
+    assert_equal("-80.3731", find('[id$="observation_lng"]').value)
+    assert_equal("4", find('[id$="observation_alt"]').value.to_i.to_s)
+    # Place name should have been filled, by matching it to the location
+    assert_equal(university_park.name,
+                 find('[id$="observation_place_name"]').value)
+    # now check that the "use_exif" button is disabled
+    assert_no_button(:image_use_exif.l)
+
+    # now clear the lat-lng-alt fields, and the place name should clear too
+    click_button(:form_observations_clear_map.t.as_displayed)
+    assert_field("observation_place_name", with: "")
+    assert_selector("[data-type='location']")
+
+    # check that the "use_exif" button is re-enabled
+    assert_button(:image_use_exif.l)
+    click_button(:image_use_exif.l)
+    # wait for the form to update
+    assert_selector("[data-type='location_containing']")
+    # GPS should have been copied to the obs fields
+    assert_equal("25.7582", find('[id$="observation_lat"]').value)
+    assert_equal("-80.3731", find('[id$="observation_lng"]').value)
+    assert_equal("4", find('[id$="observation_alt"]').value.to_i.to_s)
+    # Place name should have been filled
+    assert_equal(university_park.name,
+                 find('[id$="observation_place_name"]').value)
+    # now check that the "use_exif" button is disabled
+    assert_no_button(:image_use_exif.l)
+  end
+
+  # The geotagged.jpg is from here.
+  UNIVERSITY_PARK_EXTENTS = {
+    north: 25.762050,
+    south: 25.733291,
+    east: -80.351868,
+    west: -80.385170
+  }.freeze
+
   # Google seems to give accurate bounds to this place, but the
   # geometry.location_type of "Pasadena, California" is "APPROXIMATE".
   # Viewport and bounds are separate fields in the Geocoder response,
@@ -81,7 +144,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   def test_post_edit_and_destroy_with_details_and_location
     browser = page.driver.browser
     setup_image_dirs # in general_extensions
-    local_now = Time.zone.now.in_time_zone
 
     # open_create_observation_form
     visit(new_observation_path)
@@ -90,14 +152,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("body.observations__new")
 
     # check new observation form defaults
-    assert_field("observation_when_1i", with: local_now.year.to_s)
-    assert_select("observation_when_2i", text: local_now.strftime("%B"))
-    assert_select("observation_when_3i", text: local_now.day.to_s)
-
-    assert_field("observation_place_name", with: "")
-    assert_field("observation_lat", with: "")
-    assert_field("observation_lng", with: "")
-    assert_field("observation_alt", with: "")
+    assert_date_is_now
+    assert_place_is_empty
 
     assert_field("naming_name", with: "")
     assert_checked_field("observation_is_collection_location")
@@ -431,6 +487,22 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     visit(activity_logs_path)
     assert_no_link(href: %r{/#{obs.id}/})
     assert_link(href: /activity_logs/, text: /Agaricus campestris/)
+  end
+
+  def assert_date_is_now
+    local_now = Time.zone.now.in_time_zone
+
+    # check new observation form defaults
+    assert_field("observation_when_1i", with: local_now.year.to_s)
+    assert_select("observation_when_2i", text: local_now.strftime("%B"))
+    assert_select("observation_when_3i", text: local_now.day.to_s)
+  end
+
+  def assert_place_is_empty
+    assert_field("observation_place_name", with: "")
+    assert_field("observation_lat", with: "")
+    assert_field("observation_lng", with: "")
+    assert_field("observation_alt", with: "")
   end
 
   # Rename from new_observation to just observation ***
