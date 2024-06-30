@@ -55,7 +55,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
              commit: :field_slip_last_obs.t,
              field_slip: {
                code: code,
-               project: projects(:eol_project)
+               project_id: projects(:eol_project).id
              }
            })
     end
@@ -63,6 +63,51 @@ class FieldSlipsControllerTest < FunctionalTestCase
     slip = FieldSlip.find_by(code: code)
     assert_redirected_to field_slip_url(slip)
     assert_equal(slip.observation, ObservationView.last(User.current))
+  end
+
+  test "should allow admin to create field_slip with constraint violation" do
+    login("dick") # Admin of :falmouth_2023_09_project
+    ObservationView.update_view_stats(@field_slip.observation_id,
+                                      User.current.id)
+    proj = projects(:falmouth_2023_09_project)
+    code = "#{proj.field_slip_prefix}-1234"
+    assert_difference("FieldSlip.count") do
+      post(:create,
+           params: {
+             commit: :field_slip_last_obs.t,
+             field_slip: {
+               code: code,
+               project_id: proj.id
+             }
+           })
+    end
+
+    assert_flash_warning
+    slip = FieldSlip.find_by(code: code)
+    assert_redirected_to field_slip_url(slip)
+    assert_equal(slip.observation, ObservationView.last(User.current))
+  end
+
+  test "should not create field_slip with last viewed obs due to constraints" do
+    login(@field_slip.user.login)
+    ObservationView.update_view_stats(@field_slip.observation_id,
+                                      @field_slip.user_id)
+    proj = projects(:falmouth_2023_09_project)
+    code = "#{proj.field_slip_prefix}-1234"
+    assert_difference("FieldSlip.count", 0) do
+      post(:create,
+           params: {
+             commit: :field_slip_last_obs.t,
+             field_slip: {
+               code: code,
+               project_id: proj.id
+             }
+           })
+    end
+
+    assert_flash_error
+    assert_nil(FieldSlip.find_by(code: code))
+    assert_equal(response.status, 422)
   end
 
   test "should create field_slip and join project" do
@@ -79,7 +124,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
              commit: :field_slip_last_obs.t,
              field_slip: {
                code: code,
-               project: project
+               project_id: project.id
              }
            })
     end
@@ -97,7 +142,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
              commit: :field_slip_create_obs.t,
              field_slip: {
                code: code,
-               project: projects(:eol_project)
+               project_id: projects(:eol_project).id
              }
            })
     end
@@ -127,7 +172,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
            field_slip: {
              code: @field_slip.code.to_s,
              observation: observations(:coprinus_comatus_obs),
-             project: projects(:eol_project)
+             project_id: projects(:eol_project).id
            }
          })
     assert_equal(response.status, 422)
@@ -141,7 +186,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
            field_slip: {
              code: @field_slip.code.to_s,
              observation: observations(:coprinus_comatus_obs),
-             project: projects(:eol_project)
+             project_id: projects(:eol_project).id
            }
          })
     assert_equal(response.status, 422)

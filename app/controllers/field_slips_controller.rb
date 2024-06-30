@@ -52,11 +52,7 @@ class FieldSlipsController < ApplicationController
     respond_to do |format|
       @field_slip = FieldSlip.new(field_slip_params)
       check_project_membership
-      check_for_last_obs
-      if params[:commit] == :field_slip_last_obs.t
-        @field_slip.observation = ObservationView.last(User.current)
-      end
-      if @field_slip.save
+      if check_last_obs && @field_slip.save
         format.html do
           html_create
         end
@@ -73,8 +69,7 @@ class FieldSlipsController < ApplicationController
   # PATCH/PUT /field_slips/1 or /field_slips/1.json
   def update
     respond_to do |format|
-      check_for_last_obs
-      if @field_slip.update(field_slip_params)
+      if check_last_obs && @field_slip.update(field_slip_params)
         format.html do
           if params[:commit] == :field_slip_create_obs.t
             redirect_to(new_observation_url(
@@ -225,14 +220,27 @@ class FieldSlipsController < ApplicationController
     flash_notice(:field_slip_welcome.t(title: project.title))
   end
 
-  def check_for_last_obs
-    return unless params[:commit] == :field_slip_last_obs.t
+  def check_last_obs
+    return true unless params[:commit] == :field_slip_last_obs.t
 
     obs = ObservationView.last(User.current)
-    @field_slip.observation = obs
-    project = @field_slip.project
-    return unless obs && project&.user_can_add_observation?(obs, User.current)
+    return false unless obs # This should really ever happen
 
-    project.add_observation(obs)
+    project = @field_slip.project
+    if project
+      return false unless project.user_can_add_observation?(obs, User.current)
+
+      if project.violates_constraints?(obs)
+        if project.admin?(User.current)
+          flash_warning(:field_slip_constraint_violation.t)
+        else
+          flash_error(:field_slip_constraint_violation.t)
+          return false
+        end
+      end
+      project.add_observation(obs)
+    end
+    @field_slip.observation = obs
+    true
   end
 end

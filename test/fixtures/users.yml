@@ -57,7 +57,7 @@ dick:
   name: Tricky Dick
   email_general_question: false
   verified: 2006-03-02 21:14:00
-  user_groups: all_users, bolete_users, bolete_admins, albion_users, albion_admins, dick_only
+  user_groups: all_users, bolete_users, bolete_admins, albion_users, albion_admins, dick_only, falmouth_2023_09_users
 
 lone_wolf:
   <<: *DEFAULTS
