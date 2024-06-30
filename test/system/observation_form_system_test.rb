@@ -65,6 +65,30 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     setup_image_dirs # in general_extensions
     login!(katrina)
 
+    # open_create_observation_form
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    # check new observation form defaults
+    assert_date_is_now
+    assert_place_is_empty
+
+    # Add a geotagged image
+    click_attach_file("geotagged.jpg")
+    sleep(0.5)
+
+    # we should have the new type of location_containing autocompleter now
+    assert_selector("[data-type='location_containing']")
+    # GPS should have been copied to the obs fields
+    assert_equal("25.7582", find('[id$="observation_lat"]').value)
+    assert_equal("-80.3731", find('[id$="observation_lng"]').value)
+    assert_equal("4", find('[id$="observation_alt"]').value.to_i.to_s)
+    # Place name should not have been filled, because no locations match
+    assert_equal("", find('[id$="observation_place_name"]').value)
+    # now check that the "use_exif" button is disabled
+    assert_no_button(:image_use_exif.l)
+
+    # now create the location and start again.
     university_park = Location.new(
       name: "University Park, Miami-Dade County, Florida, USA",
       **UNIVERSITY_PARK_EXTENTS
