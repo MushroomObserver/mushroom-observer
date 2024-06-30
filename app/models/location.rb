@@ -150,6 +150,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
+  ROUND_ERROR = 0.00001
+
   # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
   scope :name_includes,
         ->(place_name) { where(Location[:name].matches("%#{place_name}%")) }
@@ -198,6 +200,69 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
       :versions
     )
   }
+
+  # TODO: return empty relation if params missing, bad
+  scope :contains, # Use named parameters (lat:, lng:, or n:, s:, e:, w:)
+        lambda { |**args|
+          if args[:lat] && args[:lng]
+            args => {lat:, lng:}
+            n = s = lat
+            e = w = lng
+          elsif args[:n]
+            args => {n:, s:, e:, w:}
+          end
+
+          shrunk_n = n - ROUND_ERROR
+          shrunk_s = s + ROUND_ERROR
+          shrunk_e = e - ROUND_ERROR
+          shrunk_w = w + ROUND_ERROR
+
+          # Location straddles n & s
+          where(
+            Location[:south].lteq(shrunk_s).
+              and(Location[:north].gteq(shrunk_n)).
+
+            # and Location east/west straddle e & w
+            and(
+              # Location east/west do not straddle 180 degrees
+              Location[:west].lteq(Location[:east]).
+              and(Location[:west].lteq(shrunk_w)).
+                # TODO: Fix or understand the next line. It seems backwards.
+                and(Location[:east].lteq(shrunk_e))
+=begin
+                .
+              or(
+                # Location east/west straddle 180 degrees
+                Location[:west].gt(Location[:east]).
+                  and(Location[:west].gteq(shrunk_w)).
+                  and(Location[:east].lteq(shrunk_e))
+              )
+=end
+            )
+          )
+            # and(Location.where(Location[:west].lteq(w + ROUND_ERROR))).
+            # and(Location.where(Location[:east].gteq(e - ROUND_ERROR)))
+
+
+=begin
+            # Location straddles e/w
+            and(
+              # containing location does not straddle 180
+              Location[:west].lteq(Location[:east]).
+                and(Location[:west].lteq(w + ROUND_ERROR)).
+                and(Location[:east].gteq(e - ROUND_ERROR))
+              # containing location west > east
+              # or(Location[:west].gteq(w - ROUND_ERROR).
+              #  and(Location[:east].lteq(e + ROUND_ERROR)))
+
+=begin
+              # containing location straddles 180 deg
+              or(Location[:west].gt(Location[:east]).
+                and(
+                  Location[:west].lteq(w + ROUND_ERROR).or(Location[:east].gteq(e - ROUND_ERROR))
+                ))
+=end
+        }
 
   # Let attached observations update their cache if these fields changed.
   # Also touch updated_at to expire obs fragment caches
