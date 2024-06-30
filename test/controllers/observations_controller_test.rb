@@ -2965,7 +2965,14 @@ class ObservationsControllerTest < FunctionalTestCase
     slip = field_slips(:field_slip_no_obs)
     get(:new, params: { field_code: slip.code })
 
-    assert_project_checks(slip.project.id => :checked)
+    User.current.project_members.each do |membership|
+      proj = membership.project
+      if proj == slip.project || (proj.current? && proj.field_slip_prefix.nil?)
+        assert_project_checks(proj.id => :checked)
+      else
+        assert_project_checks(proj.id => :unchecked)
+      end
+    end
   end
 
   def test_notes_to_name

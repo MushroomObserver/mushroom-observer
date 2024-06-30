@@ -12,7 +12,7 @@ class FieldSlipsController < ApplicationController
     )
   end
 
-  # GET /field_slips/1 or /field_slips/1.json
+  # GET /field_slips/1 or /field_slips/1.json or /qr/XYZ-123
   def show
     obs = nil
     if params[:id].match?(/^\d+$/)
