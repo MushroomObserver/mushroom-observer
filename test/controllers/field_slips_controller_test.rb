@@ -245,20 +245,24 @@ class FieldSlipsControllerTest < FunctionalTestCase
   test "should update field_slip" do
     login
     initial = @field_slip.observation_id
+    notes = "Some notes"
     patch(:update,
           params: { id: @field_slip.id,
                     commit: :field_slip_keep_obs.t,
                     field_slip: { code: @field_slip.code,
                                   observation_id: @field_slip.observation_id,
-                                  project_id: @field_slip.project_id } })
+                                  project_id: @field_slip.project_id,
+                                  notes: { Other: notes } } })
     assert_redirected_to field_slip_url(@field_slip)
     assert_equal(@field_slip.observation_id, initial)
+    assert_equal(@field_slip.observation.notes[:Other], notes)
   end
 
   test "should update field_slip with new name" do
     login
     user = users(:rolf)
     initial = @field_slip.observation_id
+    notes = "New notes"
     patch(:update,
           params: { id: @field_slip.id,
                     commit: :field_slip_keep_obs.t,
@@ -267,11 +271,28 @@ class FieldSlipsControllerTest < FunctionalTestCase
                       observation_id: @field_slip.observation_id,
                       field_slip_id: names(:coprinus_comatus).text_name,
                       field_slip_id_by: "#{user.login} <#{user.name}>",
-                      project_id: @field_slip.project_id
+                      project_id: @field_slip.project_id,
+                      notes: { Other: notes }
                     } })
     assert_redirected_to field_slip_url(@field_slip)
     assert_equal(@field_slip.observation_id, initial)
     assert_equal(@field_slip.observation.name, names(:coprinus_comatus))
+    assert_equal(@field_slip.observation.notes[:Other], notes)
+  end
+
+  test "should update field_slip and clear other notes" do
+    field_slip = field_slips(:field_slip_falmouth_one)
+    assert(field_slip.observation.notes[:Other].present?)
+    login
+    patch(:update,
+          params: { id: field_slip.id,
+                    commit: :field_slip_keep_obs.t,
+                    field_slip: { code: field_slip.code,
+                                  observation_id: field_slip.observation_id,
+                                  project_id: field_slip.project_id,
+                                  notes: { Other: "" } } })
+    assert_redirected_to field_slip_url(field_slip)
+    assert(field_slip.observation.reload.notes[:Other].blank?)
   end
 
   test "should update field_slip with last viewed obs" do

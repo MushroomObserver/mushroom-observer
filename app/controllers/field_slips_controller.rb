@@ -75,7 +75,7 @@ class FieldSlipsController < ApplicationController
             redirect_to(new_observation_url(
                           field_code: @field_slip.code,
                           place_name: params[:field_slip][:location],
-                          notes: field_slip_notes
+                          notes: field_slip_notes.compact_blank!
                         ))
           else
             update_observation_fields
@@ -118,7 +118,7 @@ class FieldSlipsController < ApplicationController
       redirect_to(new_observation_url(
                     field_code: @field_slip.code,
                     place_name: params[:field_slip][:location],
-                    notes: field_slip_notes
+                    notes: field_slip_notes.compact_blank!
                   ))
     else
       update_observation_fields
@@ -167,7 +167,7 @@ class FieldSlipsController < ApplicationController
     notes[:Field_Slip_ID_By] = field_slip_id_by
     notes[:Other_Codes] = params[:field_slip][:other_codes]
     update_notes_fields(notes)
-    notes.compact_blank!
+    notes
   end
 
   def update_notes_fields(notes)
