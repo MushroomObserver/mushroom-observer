@@ -13,7 +13,7 @@ const internalConfig = {
 // (formerly "observation_images" section of the form)
 // Connects to data-controller="form-exif"
 export default class extends Controller {
-  static targets = ["carousel", "item"]
+  static targets = ["carousel", "item", "useExifBtn"]
 
   connect() {
     this.element.dataset.stimulus = "connected";
@@ -153,7 +153,8 @@ export default class extends Controller {
   // Pass an element to use from button or itemTargetConnected callback.
   // Also disables the "transfer" button for this element
   transferExifToObsFields(element) {
-    this.selectExifButton('.use_exif_btn', element);
+    // disables the button, even when called programmatically
+    this.selectExifButton(element);
     const _exif_data = element.dataset,
       _obs_lat = document.getElementById('observation_lat'),
       _obs_lng = document.getElementById('observation_lng'),
@@ -183,15 +184,23 @@ export default class extends Controller {
     }
   }
 
-  // Happens on click for transfer, disabling this button but enabling others.
-  // Kind of like radio
-  selectExifButton(selector, element) {
-    // enable all the buttons
-    this.carouselTarget.querySelectorAll(selector).forEach((element) => {
+  // Happens on click for transfer, or when an image with GPS is added to
+  // carousel, disabling this button but enabling others. Kind of like radio.
+  // Called on the element rather than the button(!) because it may be called
+  // programmatically when an image is added with GPS.
+  selectExifButton(element) {
+    this.reenableButtons();
+    // disable the button for this element, which may change the text
+    const btns = this.useExifBtnTargets.filter((btn) => element.contains(btn));
+    if (btns.length > 0)
+      btns[0].setAttribute('disabled', 'disabled');
+  }
+
+  // enable all the buttons
+  reenableButtons() {
+    this.useExifBtnTargets.forEach((element) => {
       element.removeAttribute('disabled');
     });
-    // disable the button that was clicked, which may change the text
-    element.querySelector(selector).setAttribute('disabled', 'disabled');
   }
 
   /*********************/

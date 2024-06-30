@@ -58,8 +58,10 @@
                       data: { map_target: "mapOpen", action: "map#openMap" }) %>
         <%= js_button(button: :form_observations_clear_map.t,
                       name: "map-clear", class: "map-clear",
-                      data: { map_target: "mapClear",
-                              action: "map#clearMap" }) %>
+                      data: {
+                        map_target: "mapClear",
+                        action: "map#clearMap form-exif#reenableButtons"
+                      }) %>
       </div>
     </div>
   </div><!--.row-->

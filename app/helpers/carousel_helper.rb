@@ -130,7 +130,8 @@ module CarouselHelper
       name: "use_exif_button",
       class: class_names("use_exif_btn btn-sm ab-top-right",
                          "d-none": !has_exif),
-      data: { action: "form-exif#transferExifToObs:prevent" }
+      data: { form_exif_target: "useExifBtn",
+              action: "form-exif#transferExifToObs:prevent" }
     ) do
       [tag.span(:image_use_exif.l, class: "when-enabled"),
        tag.span(:image_exif_copied.l, class: "when-disabled")].safe_join
