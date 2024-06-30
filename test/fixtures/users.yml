@@ -179,3 +179,7 @@ nonregional:
   <<: *DEFAULTS
   email: "bogus"
   content_filter: <%= { region: "Massachusetts" }.to_yaml.inspect %>
+
+foray_newbie:
+  <<: *DEFAULTS
+  user_groups: all_users, burbank_users, foray_newbie_only

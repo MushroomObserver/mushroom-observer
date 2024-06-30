@@ -50,7 +50,7 @@ module ObservationsController::New
     @good_images = []
     @field_code  = params[:field_code]
     init_specimen_vars
-    init_project_vars_for_create
+    init_project_vars_for_new
     init_list_vars
     defaults_from_last_observation_created
     add_field_slip_project(@field_code)
@@ -70,16 +70,25 @@ module ObservationsController::New
     @vote.value = 3.0
   end
 
+  def init_project_vars_for_new
+    init_project_vars
+    @projects.each do |proj|
+      @project_checks[proj.id] = proj.current?
+    end
+  end
+
   def defaults_from_last_observation_created
-    # Grab defaults for date and location from last observation the user
-    # created if it was less than an hour ago
-    # (i.e. if its creation time is larger than one hour ago)
+    # Grab defaults from last observation the user created.
+    # Only grab "when" if was created at most an hour ago.
     last_observation = Observation.where(user_id: @user.id).
                        order(:created_at).last
-    return unless last_observation && last_observation.created_at > 1.hour.ago
+    return unless last_observation
 
-    %w[when where location_id is_collection_location gps_hidden].each do |attr|
+    %w[where location_id is_collection_location gps_hidden].each do |attr|
       @observation.send(:"#{attr}=", last_observation.send(attr))
+    end
+    if last_observation.created_at > 1.hour.ago
+      @observation.when = last_observation.when
     end
 
     @project_checks = {}

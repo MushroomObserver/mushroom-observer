@@ -2947,7 +2947,7 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def test_inital_project_checkboxes
-    login("katrina")
+    login("foray_newbie")
     get(:new)
 
     assert_project_checks(
@@ -2955,8 +2955,8 @@ class ObservationsControllerTest < FunctionalTestCase
       projects(:current_project).id => :checked,
       # open-membership, doesn't meet date constraints
       projects(:past_project).id => :unchecked,
-      # meets date constraints, but membership closed
-      projects(:eol_project).id => :unchecked
+      # meets date constraints, but not a member
+      projects(:eol_project).id => :no_field
     )
   end
 
