@@ -95,7 +95,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_select("observation_when_3i", text: local_now.day.to_s)
 
     last_obs = Observation.where(user_id: User.current.id).
-                 order(:created_at).last
+               order(:created_at).last
     assert_field("observation_place_name", with: last_obs.where)
     assert_field("observation_lat", with: "")
     assert_field("observation_lng", with: "")
