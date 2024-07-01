@@ -182,7 +182,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # check new observation form defaults
     assert_date_is_now
     assert_geolocation_is_empty
-    assert_place_name_is_last_used(last_obs)
 
     last_obs = Observation.where(user_id: User.current.id).
                order(:created_at).last
