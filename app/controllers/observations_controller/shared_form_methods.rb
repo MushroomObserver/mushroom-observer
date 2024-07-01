@@ -13,7 +13,6 @@
 #    init_specimen_vars
 #    init_specimen_vars_for_reload
 #    init_project_vars
-#    init_project_vars_for_create
 #    init_project_vars_for_reload
 #    init_list_vars
 #    init_list_vars_for_reload
@@ -97,14 +96,6 @@ module ObservationsController::SharedFormMethods
     @projects = User.current.projects_member(order: :title,
                                              include: :user_group)
     @project_checks = {}
-  end
-
-  def init_project_vars_for_create
-    init_project_vars
-    @projects.each do |proj|
-      @project_checks[proj.id] = (proj.open_membership &&
-                                  proj.current?)
-    end
   end
 
   def init_project_vars_for_reload

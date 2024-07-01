@@ -2947,7 +2947,7 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def test_inital_project_checkboxes
-    login("katrina")
+    login("foray_newbie")
     get(:new)
 
     assert_project_checks(
@@ -2955,8 +2955,8 @@ class ObservationsControllerTest < FunctionalTestCase
       projects(:current_project).id => :checked,
       # open-membership, doesn't meet date constraints
       projects(:past_project).id => :unchecked,
-      # meets date constraints, but membership closed
-      projects(:eol_project).id => :unchecked
+      # meets date constraints, but not a member
+      projects(:eol_project).id => :no_field
     )
   end
 
@@ -2965,7 +2965,22 @@ class ObservationsControllerTest < FunctionalTestCase
     slip = field_slips(:field_slip_no_obs)
     get(:new, params: { field_code: slip.code })
 
-    assert_project_checks(slip.project.id => :checked)
+    User.current.project_members.each do |membership|
+      proj = membership.project
+      if proj == slip.project || (proj.current? && proj.field_slip_prefix.nil?)
+        assert_project_checks(proj.id => :checked)
+      else
+        assert_project_checks(proj.id => :unchecked)
+      end
+    end
+  end
+
+  def test_notes_to_name
+    login("katrina")
+    name = names(:coprinus_comatus)
+    get(:new, params: { notes: { Field_Slip_ID: name.text_name } })
+
+    assert_match(name.text_name, @response.body)
   end
 
   def test_project_checkboxes_in_create_observation
