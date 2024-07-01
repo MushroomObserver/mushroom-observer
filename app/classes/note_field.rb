@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# limitations on Projects
+# Simple PORO to help with structure notes
 class NoteField
   attr_reader :name
   attr_reader :value
