@@ -297,6 +297,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
 
   test "should update field_slip with last viewed obs" do
     login(@field_slip.user.login)
+    orig_obs = @field_slip.observation
     obs = observations(:detailed_unknown_obs)
     ObservationView.update_view_stats(obs.id, @field_slip.user_id)
     patch(:update,
@@ -308,6 +309,23 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_equal(@field_slip.reload.observation,
                  ObservationView.last(User.current))
     assert(@field_slip.project.observations.include?(obs))
+    assert_not(@field_slip.project.observations.include?(orig_obs))
+  end
+
+  test "should not remove obs from project when multiple reasons" do
+    field_slip = field_slips(:field_slip_nowhere_one)
+    field_slips(:field_slip_nowhere_dup)
+    login(field_slip.user.login)
+    orig_obs = field_slip.observation
+    obs = observations(:detailed_unknown_obs)
+    ObservationView.update_view_stats(obs.id, field_slip.user_id)
+    patch(:update,
+          params: { id: field_slip.id,
+                    commit: :field_slip_last_obs.t,
+                    field_slip: { code: field_slip.code,
+                                  project_id: field_slip.project_id } })
+    assert_redirected_to field_slip_url(field_slip)
+    assert(field_slip.project.observations.include?(orig_obs))
   end
 
   test "should update field_slip and redirect to create obs" do

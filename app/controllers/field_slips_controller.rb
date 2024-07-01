@@ -227,6 +227,7 @@ class FieldSlipsController < ApplicationController
 
     proj = @field_slip.project
     return unless proj && obs
+    return if FieldSlip.find_by(observation: obs, project: proj)
 
     flash_warning(:field_slip_remove_observation.t(
                     observation: obs.unique_format_name,
@@ -239,7 +240,7 @@ class FieldSlipsController < ApplicationController
     return true unless params[:commit] == :field_slip_last_obs.t
 
     obs = ObservationView.previous(User.current, @field_slip.observation)
-    return false unless obs # This should really ever happen
+    return false unless obs # This should not ever happen
 
     project = @field_slip.project
     if project

@@ -28,3 +28,15 @@ field_slip_no_trust:
   project: eol_project
   code: EOL-0004
   user: katrina
+
+field_slip_nowhere_one:
+  observation: falmouth_2022_obs
+  project: open_membership_project
+  code: OPEN-0002
+  user: katrina
+
+field_slip_nowhere_dup:
+  observation: falmouth_2022_obs
+  project: open_membership_project
+  code: OPEN-0003
+  user: katrina
