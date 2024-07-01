@@ -19,8 +19,7 @@ module ObservationsController::Validators
 
   def validate_params
     validate_name &&
-      validate_place_name &&
-      validate_projects
+      validate_place_name
   end
 
   def validate_name
@@ -77,11 +76,20 @@ module ObservationsController::Validators
   end
 
   def validate_projects
-    return true if params[:project].empty? ||
-                   params[:project][:ignore_proj_conflicts]
+    return true if params[:project].empty?
 
-    @suspect_checked_projects = checked_project_conflicts -
-                                @observation.projects
+    conflicting_projects = checked_project_conflicts - @observation.projects
+    @error_checked_projects = conflicting_projects.reject do |proj|
+      proj.is_admin?(User.current)
+    end
+    if @error_checked_projects.any?
+      flash_error(:form_observations_there_is_a_problem_with_projects.t)
+      return false
+    end
+
+    return true if params[:project][:ignore_proj_conflicts] == "1"
+
+    @suspect_checked_projects = conflicting_projects - @error_checked_projects
     if @suspect_checked_projects.any?
       flash_warning(:form_observations_there_is_a_problem_with_projects.t)
     end

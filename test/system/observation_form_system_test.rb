@@ -94,12 +94,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_select("observation_when_2i", text: local_now.strftime("%B"))
     assert_select("observation_when_3i", text: local_now.day.to_s)
 
-    assert_field("observation_place_name", with: "")
+    last_obs = Observation.where(user_id: User.current.id).
+               order(:created_at).last
+    assert_field("observation_place_name", with: last_obs.where)
     assert_field("observation_lat", with: "")
     assert_field("observation_lng", with: "")
     assert_field("observation_alt", with: "")
 
     assert_field("naming_name", with: "")
+    assert(last_obs.is_collection_location)
     assert_checked_field("observation_is_collection_location")
     assert_no_checked_field("observation_specimen")
     assert_field(other_notes_id, with: "")
@@ -205,7 +208,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     obs_when = find("#observation_when_1i")
     scroll_to(obs_when, align: :center)
     fill_in("observation_when_1i", with: "2010")
-    select("March", from: "observation_when_2i")
+    select("August", from: "observation_when_2i")
     select("14", from: "observation_when_3i")
 
     # intentional error: nonexistant place name
@@ -235,7 +238,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # check form values after first changes
     assert_field("observation_when_1i", with: "2010")
-    assert_select("observation_when_2i", text: "March")
+    assert_select("observation_when_2i", text: "August")
     assert_select("observation_when_3i", text: "14")
 
     assert_field("observation_place_name", with: "USA, California, Pasadena")
@@ -352,7 +355,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # check the fields
     assert_field("observation_when_1i", with: "2010")
-    assert_select("observation_when_2i", text: "March")
+    assert_select("observation_when_2i", text: "August")
     assert_select("observation_when_3i", text: "14")
     assert_field("observation_place_name",
                  with: "Pasadena, Some Co., California, USA")
@@ -575,7 +578,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   def expected_values_after_create
     {
       user: katrina,
-      when: Date.parse("2010-03-14"),
+      when: Date.parse("2010-08-14"),
       where: "Pasadena, California, USA",
       location: nil,
       lat: 12.6125, # was 12.5760 values tweaked to move it to land
