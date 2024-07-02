@@ -9,7 +9,7 @@
 }
 
 .d-flex {
-  display: flex;
+  display: flex !important;
 }
 
 .flex-column {
@@ -659,19 +659,19 @@
 
 @media screen and (min-width: 767px) {
   .d-sm-none {
-    display: none;
+    display: none !important;
   }
 
   .d-sm-block {
-    display: block;
+    display: block !important;
   }
 
   .d-sm-inline-block {
-    display: inline-block;
+    display: inline-block !important;
   }
 
   .d-sm-flex {
-    display: flex;
+    display: flex !important;
   }
 
   .float-sm-left {
@@ -696,6 +696,6 @@
   }
 
   .table {
-    overflow-x: scroll
+    overflow-x: scroll;
   }
 }

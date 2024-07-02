@@ -371,6 +371,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_equal("31", find('[id$="when_3i"]').value)
     end
 
+    # will have cleared the place_name field, lat/lng doesn't match Pasadena
+    fill_in("observation_place_name", with: "Pasadena, California, USA")
+
     within("#observation_form") { click_commit }
 
     # It should take us to create a new location
@@ -477,11 +480,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("observation_when_1i", with: "2011")
     select("April", from: "observation_when_2i")
     select("15", from: "observation_when_3i")
+    # this will reset the place_name field
     fill_in("observation_lat", with: "23.4567")
     fill_in("observation_lng", with: "-123.4567")
     fill_in("observation_alt", with: "987m")
+    fill_in("observation_place_name",
+            with: "Pasadena, Some Co., California, USA")
     check("observation_is_collection_location")
     fill_in(other_notes_id, with: "New notes for observation")
+
     img_ids.each do |img_id|
       find("#carousel_thumbnail_#{img_id}").click
       fill_in("good_image_#{img_id}_when_1i", with: "2011")
@@ -489,6 +496,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       select("15", from: "good_image_#{img_id}_when_3i")
       fill_in("good_image_#{img_id}_notes", with: "New notes for image")
     end
+
     obs_images = find("#observation_images")
     scroll_to(obs_images, align: :top)
     choose("thumb_image_id_#{geo.id}")
