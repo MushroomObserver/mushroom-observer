@@ -1582,14 +1582,14 @@
 
   # names/_form_name
   form_names_locked: Lock this name so users cannot change name, author or rank?
-  form_names_detailed_help: "For detailed help see <a href=\"https://docs.google.com/document/d/1xOEIAGzb2NoGfeC1QMvVmwtWK-gYyZqKkt7yKv61WY0\" target=\"_new\">Names in Mushroom Observer</a>."
+  form_names_detailed_help: For detailed help see <a href="https://docs.google.com/document/d/1xOEIAGzb2NoGfeC1QMvVmwtWK-gYyZqKkt7yKv61WY0" target="_new">Names in Mushroom Observer</a>.
   form_names_text_name: Scientific Name
-  form_names_icn_id: "Identifier"
+  form_names_icn_id: Identifier
   form_names_identifier_help: "Preferably include the <a href=\"https://www.indexfungorum.org/\">Index Fungorum</a> Registration Identifier or <a href=\"https://www.mycobank.org/\">MycoBank</a> #."
   form_names_misspelling: This name is misspelt.
   form_names_misspelling_it_should_be: It should be
   form_names_taxonomic_notes: Notes on Taxonomy
-  form_names_taxonomic_notes_warning: "Please avoid duplicating information from <a href=\"https://www.indexfungorum.org/\">Index Fungorum</a> (IF) or  <a href=\"https://www.mycobank.org/\">MycoBank</a> (MB) in the [:form_names_taxonomic_notes]. Instead, complete the <b>[:form_names_icn_id]</b> field above. This will automatically create links to both IF and MB."
+  form_names_taxonomic_notes_warning: Please avoid duplicating information from <a href="https://www.indexfungorum.org/">Index Fungorum</a> (IF) or  <a href="https://www.mycobank.org/">MycoBank</a> (MB) in the [:form_names_taxonomic_notes]. Instead, complete the <b>[:form_names_icn_id]</b> field above. This will automatically create links to both IF and MB.
   form_names_classification: Taxonomic Classification
   form_names_gen_desc: General Description
   form_names_diag_desc: Diagnostic Description
@@ -2251,7 +2251,7 @@
   show_observation_view_notifications: View Notifications
   show_observation_hide_map: Hide thumbnail map.
   show_observation_thumbnail_map_hidden: Thumbnail map hidden.  To re-enable this feature, go to your "[:app_preferences]":/account/preferences/edit page.
-  show_observation_add_link: "Create [site] link"
+  show_observation_add_link: Create [site] link
   show_observation_add_link_dialog: "Enter a link here to this observation on [site]. Use the full URL, including \"https://\":"
   show_observation_no_collection_numbers: No [:collection_numbers]
   show_observation_remove_collection_number: Remove collection number from this observation
@@ -2789,33 +2789,33 @@
   field_slip_creator: Creator
   field_slip_destroy: Destroy this field slip
   field_slip_destroyed: Field slip was successfully destroyed.
-  field_slip_edit: "Edit [:FIELD_SLIP]"
+  field_slip_edit: Edit [:FIELD_SLIP]
   field_slip_editing: Editing Field Slip
   field_slip_errors: prohibited this field_slip from being saved
   field_slip_index: "[:FIELD_SLIP] Index"
-  field_slip_job_no_project: "No Project with id=[ID]"
+  field_slip_job_no_project: No Project with id=[ID]
   field_slip_job_no_tracker: No Field Slip Tracker found
   field_slip_keep_obs: Save with Current Observation
   field_slip_last_obs: Switch to Last Observation
   field_slip_new: Record Field Slip
   field_slip_no_observation: No Observation found
   field_slip_no_project: No Project found
-  field_slip_nil_project: (No Project)
+  field_slip_nil_project: "(No Project)"
   field_slip_other_codes: Other Codes
   field_slip_other_example: e.g., iNat ID
-  field_slip_project_success: "Field Slip associated with the [TITLE] Project"
-  field_slip_remove_observation: "Removed [OBSERVATION] from [TITLE] Project"
-  field_slip_show: "Show [:FIELD_SLIP]"
+  field_slip_project_success: Field Slip associated with the [TITLE] Project
+  field_slip_remove_observation: Removed [OBSERVATION] from [TITLE] Project
+  field_slip_show: Show [:FIELD_SLIP]
   field_slip_updated: Field slip was successfully updated.
-  field_slip_welcome: "Welcome to the [TITLE] Project!"
-  field_slips_max_for_project: "You may create up to [MAX] slips for this project."
+  field_slip_welcome: Welcome to the [TITLE] Project!
+  field_slips_max_for_project: You may create up to [MAX] slips for this project.
   field_slips_for_project_title: Create Field Slips for the
-  field_slips_created_job: "Created job for [filename]"
-  field_slips_must_be_member: "You must be a project member to create field slips"
-  field_slips_project_update_fail: "Unable to update [TITLE] Project"
-  field_slips_tracker_fail: "Unable to create Field Slip Tracker for [TITLE] Project"
-  field_slips_too_many_field_slips: "You have requested more than [MAX] slips."
-  field_slips_one_per_page: "One field slip per page. Print shops prefer this. Otherwise 6/page which works best on US letter page."
+  field_slips_created_job: Created job for [filename]
+  field_slips_must_be_member: You must be a project member to create field slips
+  field_slips_project_update_fail: Unable to update [TITLE] Project
+  field_slips_tracker_fail: Unable to create Field Slip Tracker for [TITLE] Project
+  field_slips_too_many_field_slips: You have requested more than [MAX] slips.
+  field_slips_one_per_page: One field slip per page. Print shops prefer this. Otherwise 6/page which works best on US letter page.
 
   ##############################################################################
 
@@ -3277,7 +3277,7 @@
   form_projects_any: Any
   form_projects_date_range: Date Range
   form_projects_date_fixed: Use above date
-  form_projects_dates_explain: "Default earliest and latest dates for [:OBSERVATIONS]. Users will be warned if trying to add an Observation outside of this range, but they can override the warning."
+  form_projects_dates_explain: Default earliest and latest dates for [:OBSERVATIONS]. Users will be warned if trying to add an Observation outside of this range, but they can override the warning.
   form_projects_end_date: Project End Date
   form_projects_range: Range
   form_projects_start_date: Project Start Date
@@ -3539,8 +3539,7 @@
   how_description: "*Species Description* - A collection of text describing a \"Name\":#name. Every name automatically gets one official description that everyone in the community is allowed to read and modify.  Additional descriptions may be created by any \"User\":#user, including project members.  The owner of a description may choose any level of read or write permissions, and can control who is given authorship credit.  Since descriptions, especially the official one, are often collaborative efforts, modifications by a user are subject to community review, and past versions are kept to facilitate this process.  The content of a description includes a set list of sections, including things like '[:form_names_gen_desc]', '[:form_names_diag_desc]', '[:form_names_look_alikes]', '[:form_names_refs]' and other notes."
   how_image: "*Image* - A photograph or illustration of one or more mushroom species. Images are associated with one or more \"Observations\":#observation.  A given Image is owned by a particular \"User\":#user who may or may not be the copyright holder.  Only the owner or a site administrator can remove an image or edit the associated information.  All images in the site are required to be released under one of the \"Creative Commons licenses\":https://creativecommons.org or in the public domain.  If you dispute the given copyright or the licensing of an image you are the copyright holder of, send mail to the \"webmaster\":/emails/ask_webmaster_question."
 
-  how_license: "**License** – When you post an image or other content on Mushroom Observer (“your Work’), you grant one of the following \"CC (Creative Commons) Licenses\":https://creativecommons.org/licenses/ for others to use your Work: \n -  \"CC-BY-SA - Attribution-ShareAlike\":https://creativecommons.org/licenses/by-sa/4.0/ (Wikipedia compatible): MO's default license. Others can use your Work, however they must credit any new creations based on your Work the same as the original. \n - \"CC-BY - Attribution\":https://creativecommons.org/licenses/by/ (Wikipedia compatible): Others can use your Work as long as they credit you. Others can create new material based on your work. \n - \"CC-BY-NC - Attribution-NonCommercial\":https://creativecommons.org/licenses/by-nc/4.0/: Others can use your Work, and create new material based on it, however they can’t profit from the new material. \n - \"CC-BY-NC-SA - Attribution-NonCommercial-ShareAlike\":https://creativecommons.org/licenses/by-nc-sa/4.0: Others can use your Work, so long as they don’t profit off it and use identical credits for new creations. \n - \"CC-BY-ND - Attribution-NoDerivs\":https://creativecommons.org/licenses/by-nd/4.0/: Others can use your Work, however they can’t alter your Work to create new materials. \n - \"CC-BY-NC-ND - Attribution-NonCommercial-NoDerivs\":https://creativecommons.org/licenses/by-nc-nd/4.0: Others can use your Work, however they can’t profit off it or change it. \n - \"CC0 - No Copyright/Public Domain\":https://creativecommons.org/publicdomain/zero/ (Wikipedia compatible): You waive your rights to your Work. Others can use it without crediting you, and can create new material based on it. \n You can change your default license by selecting the 'License' on \"your Preferences\":/account/preferences/edit and clicking on ‘Save Changes’. You can also set licenses on a per image basis."
-
+  how_license: "**License** – When you post an image or other content on Mushroom Observer (“your Work’), you grant one of the following \"CC (Creative Commons) Licenses\":https://creativecommons.org/licenses/ for others to use your Work:\n-  \"CC-BY-SA - Attribution-ShareAlike\":https://creativecommons.org/licenses/by-sa/4.0/ (Wikipedia compatible): MO's default license. Others can use your Work, however they must credit any new creations based on your Work the same as the original.\n- \"CC-BY - Attribution\":https://creativecommons.org/licenses/by/ (Wikipedia compatible): Others can use your Work as long as they credit you. Others can create new material based on your work.\n- \"CC-BY-NC - Attribution-NonCommercial\":https://creativecommons.org/licenses/by-nc/4.0/: Others can use your Work, and create new material based on it, however they can’t profit from the new material.\n- \"CC-BY-NC-SA - Attribution-NonCommercial-ShareAlike\":https://creativecommons.org/licenses/by-nc-sa/4.0: Others can use your Work, so long as they don’t profit off it and use identical credits for new creations.\n- \"CC-BY-ND - Attribution-NoDerivs\":https://creativecommons.org/licenses/by-nd/4.0/: Others can use your Work, however they can’t alter your Work to create new materials.\n- \"CC-BY-NC-ND - Attribution-NonCommercial-NoDerivs\":https://creativecommons.org/licenses/by-nc-nd/4.0: Others can use your Work, however they can’t profit off it or change it.\n- \"CC0 - No Copyright/Public Domain\":https://creativecommons.org/publicdomain/zero/ (Wikipedia compatible): You waive your rights to your Work. Others can use it without crediting you, and can create new material based on it.\nYou can change your default license by selecting the 'License' on \"your Preferences\":/account/preferences/edit and clicking on ‘Save Changes’. You can also set licenses on a per image basis."
 
   how_location: "*Location* - A rectangular region enclosing a given location, as defined by the northern, southern, eastern and western boundaries.  In addition to the position, locations can also include a minimum and maximum elevation along with various notes.  Note that the elevations should be in meters not feet. A location is not considered to be owned by a particular \"User\":#user.  Any user may change or define any location, but all of a user's changes are subject to review by the community.  To help with this review process, copies of the previous versions are kept."
   how_name: "*Name* - A name for some group of mushrooms.  Most commonly this is the name of a species, but it can be any taxon (genus, family, variety, etc.).  Names can also refer to groups that are not officially recognized scientific names such as common names or functional groups like Gasteromyces.  A name is *not* considered to be owned by a particular \"User\":#user.  Any user may change any name, but all changes are subject to review by the community.  To help with this review process, copies of previous versions are kept.  Names can have an acknowledged author.  The author is normally only given for scientific names. The author should follow the standard practice of listing the person who first correctly published the name.  In the case of names at or below the species level, the author may also include the person who transfered the species to the current genus, e.g., (Singer) Jenkins."
@@ -3775,7 +3774,7 @@
   validate_observation_when_missing: "[:validate_missing(field=:date)]"
   validate_observation_where_too_long: "[:validate_too_long(field=:location,max=1024)]"
   validate_project_admin_group_missing: "[:validate_missing(field=:admin_group)]"
-  validate_project_ends_before_start: "End date is before the start date"
+  validate_project_ends_before_start: End date is before the start date
   validate_project_title_missing: "[:validate_missing(field=:title)]"
   validate_project_title_too_long: "[:validate_too_long(field=:title,max=100)]"
   validate_project_user_group_missing: "[:validate_missing(field=:user_group)]"
