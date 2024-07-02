@@ -226,7 +226,7 @@ export default class extends Controller {
 
     // If the primer is not based on input, go ahead and request from server.
     if (this.ACT_LIKE_SELECT == true) {
-      // this.inputTarget.click();
+      this.inputTarget.click();
       this.inputTarget.focus();
       // this.inputTarget.value = ' ';
     }
