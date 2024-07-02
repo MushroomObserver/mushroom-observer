@@ -173,6 +173,9 @@ export default class extends Controller {
   // Callable externally. Action may be called from a <select> with
   // `data-action: "autocompleter-swap:swap->autocompleter#swap"`
   // or an event dispatched by another controller.
+  // The event may not pass a type, or it may be the same as the current type.
+  // Re-initializing the current type is ok, often means we need to refresh
+  // the primer (as with location_containing a changed lat/lng)
   // Callable internally if you pass a detail object with a type property.
   swap({ detail }) {
     let type;
@@ -223,9 +226,9 @@ export default class extends Controller {
 
     // If the primer is not based on input, go ahead and request from server.
     if (this.ACT_LIKE_SELECT == true) {
-      this.inputTarget.click();
+      // this.inputTarget.click();
       this.inputTarget.focus();
-      this.inputTarget.value = ' ';
+      // this.inputTarget.value = ' ';
     }
   }
 
@@ -646,8 +649,8 @@ export default class extends Controller {
 
     if (this.log) {
       this.debug(
-        "Redraw: matches=" + matches.length +
-        ", scroll=" + scroll + ", cursor=" + cur
+        "Redraw: matches=" + this.matches.length +
+        ", scroll=" + scroll + ", cursor=" + this.current_row
       );
     }
     // Get row height if haven't been able to yet.
@@ -676,11 +679,13 @@ export default class extends Controller {
         const { name, ...new_data } = this.matches[i + this.scroll_offset];
         stored = this.escapeHTML(name);
         if (text != stored) {
+          // if (stored === " ") stored = "&nbsp;";
           link.innerHTML = stored;
           // Assign the dataset of matches[i + this.scroll_offset], minus name
           Object.keys(new_data).forEach(key => {
             link.dataset[key] = new_data[key];
           });
+          link.classList.remove('d-none');
         }
       } else {
         if (text != '') {
@@ -689,6 +694,7 @@ export default class extends Controller {
             if (!['row', 'action'].includes(key))
               delete link.dataset[key];
           });
+          link.classList.add('d-none');
         }
       }
     }
@@ -837,10 +843,14 @@ export default class extends Controller {
 
   // When "acting like a select" make it display all options in the
   // order given right from the moment they enter the field,
-  // and pick the first one.
+  // and pick the first one, as long as there isn't one already selected.
   populateSelect() {
     this.matches = this.primer;
-    if (this.matches.length > 0) {
+    const _already_selected = this.matches.find(
+      (m) => m['name'] === this.inputTarget.value
+    );
+
+    if (this.matches.length > 0 && !_already_selected) {
       this.inputTarget.value = this.matches[0]['name'];
       this.hiddenTarget.value = this.matches[0]['id'];
     }
@@ -1161,7 +1171,8 @@ export default class extends Controller {
     this.fetch_request = null;
     // Record string actually used to do matching: might be less strict
     // than one sent in request.
-    this.last_fetch_request = new_primer[0]['name'];
+    if (new_primer.length > 0)
+      this.last_fetch_request = new_primer[0]['name'];
 
     // Check for trailing "..." signaling incomplete set of results.
     if (new_primer[new_primer.length - 1]['name'] == "...") {

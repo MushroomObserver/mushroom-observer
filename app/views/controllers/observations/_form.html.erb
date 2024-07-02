@@ -15,7 +15,11 @@ image_upload_localization = {
 }.to_json
 
 data = {
-  controller: "form-images form-exif",
+  controller: "form-images form-exif map",
+  action: [
+    "map:reenableBtns@window->form-exif#reenableButtons",
+    "form-exif:pointChanged@window->map#calculateMarker"
+  ].join(" "),
   upload_max_size: max_size,
   localization: image_upload_localization,
   form_images_target: "form",

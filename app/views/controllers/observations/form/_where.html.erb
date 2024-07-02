@@ -3,7 +3,11 @@
 
 <%# load_google_maps_api_script %>
 
-<%= tag.div(id: "observation_where", data: { controller: "map" }) do %>
+<%= tag.div(
+  id: "observation_where",
+  # data: { controller: "map",
+  #         action: "form-exif:pointChanged@window->map#calculateMarker" }
+) do %>
 
   <!-- LAT_LONG_ALT -->
   <div class="row mt-3" id="observation_lat_lng_alt">
@@ -75,22 +79,22 @@
   <!-- /WHERE_REASONS -->
 
   <!-- WHERE -->
+  <%# NOTE: Both map and form-exif controllers dispatch a pointChanged event.
+  # map:pointChanged event == form-exif:pointChanged event
+  #   detail: { type, request_params: { lat, lng } }
+  # For now we have to duplicate the code, because when form-exif updates
+  # the lat/lng inputs it's not enough to be caught by map, because
+  # the inputs are buffered. map only fires the event after buffering.
+  %>
   <div class="row">
     <div class="col-xs-12 col-sm-6">
       <%= autocompleter_field(
         form: f, field: :place_name, type: :location, label: "#{:WHERE.t}:",
-        # map:suggestLocations event == form-exif:suggestLocations event
-        #   detail: { type, request_params: { lat, lng } }
-        # Stimulus custom events are scoped to the controller, but identical
-        # events may be dispatched from either map or form-exif controllers.
-        # For now we have to duplicate the code, because when form-exif updates
-        # the lat/lng inputs it's not enough to be caught by map, because
-        # the inputs are buffered. map only fires the event after buffering.
         data: { map_target: "placeInput",
                 action: [
-                  "map:suggestLocations@window->autocompleter#swap",
-                  "form-exif:suggestLocations@window->autocompleter#swap"
-                ].join(" ")}
+                  "map:pointChanged@window->autocompleter#swap",
+                  "form-exif:pointChanged@window->autocompleter#swap"
+                ].join(" ") }
       ) %>
     </div>
     <div class="col-xs-12 col-sm-6">
