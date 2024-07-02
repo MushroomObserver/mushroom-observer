@@ -40,8 +40,8 @@ class AutoComplete
     unless all
       minimal_string = refine_token # defined in subclass
       matches.unshift({ name: minimal_string, id: 0 })
-      truncate_matches
     end
+    truncate_matches
 
     matches
   end

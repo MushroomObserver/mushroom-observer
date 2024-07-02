@@ -3,7 +3,11 @@
 
 <%# load_google_maps_api_script %>
 
-<%= tag.div(id: "observation_where", data: { controller: "map" }) do %>
+<%= tag.div(
+  id: "observation_where",
+  # data: { controller: "map",
+  #         action: "form-exif:pointChanged@window->map#calculateMarker" }
+) do %>
 
   <!-- LAT_LONG_ALT -->
   <div class="row mt-3" id="observation_lat_lng_alt">
@@ -58,8 +62,10 @@
                       data: { map_target: "mapOpen", action: "map#openMap" }) %>
         <%= js_button(button: :form_observations_clear_map.t,
                       name: "map-clear", class: "map-clear",
-                      data: { map_target: "mapClear",
-                              action: "map#clearMap" }) %>
+                      data: {
+                        map_target: "mapClear",
+                        action: "map#clearMap form-exif#reenableButtons"
+                      }) %>
       </div>
     </div>
   </div><!--.row-->
@@ -73,11 +79,22 @@
   <!-- /WHERE_REASONS -->
 
   <!-- WHERE -->
+  <%# NOTE: Both map and form-exif controllers dispatch a pointChanged event.
+  # map:pointChanged event == form-exif:pointChanged event
+  #   detail: { type, request_params: { lat, lng } }
+  # For now we have to duplicate the code, because when form-exif updates
+  # the lat/lng inputs it's not enough to be caught by map, because
+  # the inputs are buffered. map only fires the event after buffering.
+  %>
   <div class="row">
     <div class="col-xs-12 col-sm-6">
       <%= autocompleter_field(
         form: f, field: :place_name, type: :location, label: "#{:WHERE.t}:",
-        data: { map_target: "placeInput" }
+        data: { map_target: "placeInput",
+                action: [
+                  "map:pointChanged@window->autocompleter#swap",
+                  "form-exif:pointChanged@window->autocompleter#swap"
+                ].join(" ") }
       ) %>
     </div>
     <div class="col-xs-12 col-sm-6">

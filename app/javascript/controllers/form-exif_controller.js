@@ -13,7 +13,7 @@ const internalConfig = {
 // (formerly "observation_images" section of the form)
 // Connects to data-controller="form-exif"
 export default class extends Controller {
-  static targets = ["carousel", "item"]
+  static targets = ["carousel", "item", "useExifBtn"]
 
   connect() {
     this.element.dataset.stimulus = "connected";
@@ -153,12 +153,10 @@ export default class extends Controller {
   // Pass an element to use from button or itemTargetConnected callback.
   // Also disables the "transfer" button for this element
   transferExifToObsFields(element) {
-    this.selectExifButton('.use_exif_btn', element);
     const _exif_data = element.dataset,
       _obs_lat = document.getElementById('observation_lat'),
       _obs_lng = document.getElementById('observation_lng'),
-      _obs_alt = document.getElementById('observation_alt'),
-      _event = new Event('change');
+      _obs_alt = document.getElementById('observation_alt');
 
     if (_exif_data.geocode && _exif_data.geocode !== "") {
       const latLngAlt = JSON.parse(_exif_data.geocode),
@@ -167,24 +165,42 @@ export default class extends Controller {
       _obs_lat.value = lat == null ? lat : lat.toFixed(4);
       _obs_lng.value = lng == null ? lng : lng.toFixed(4);
       _obs_alt.value = alt == null ? alt : alt.toFixed(0);
-      // triggers change (defined above) to update the map
-      _obs_lat.dispatchEvent(_event);
+
+      // should trigger change to update the map
+      this.dispatch("pointChanged", {
+        detail: {
+          type: "location_containing",
+          request_params: { lat, lng }
+        }
+      });
     }
     if (_exif_data.exif_date) {
       const _exifSimpleDate = JSON.parse(_exif_data.exif_date);
       this.observationDate(_exifSimpleDate);
     }
+    // disables the button, even when called programmatically
+    this.selectExifButton(element);
   }
 
-  // Happens on click for transfer, disabling this button but enabling others.
-  // Kind of like radio
-  selectExifButton(selector, element) {
-    // enable all the buttons
-    this.carouselTarget.querySelectorAll(selector).forEach((element) => {
-      element.removeAttribute('disabled');
+  // Disables this button but enables others, kind of like a radio. Happens on
+  // click for transfer, or when an image with GPS is added to carousel. Called
+  // on the element rather than the button(!) because it may be called
+  // programmatically when an image is added with GPS.
+  selectExifButton(element) {
+    this.reenableButtons();
+    // disable the button for this element, which may change the text
+    const btns = this.useExifBtnTargets.filter((btn) => element.contains(btn));
+    if (btns.length > 0)
+      btns[0].setAttribute('disabled', 'disabled');
+  }
+
+  // enable all the buttons
+  reenableButtons(event) {
+    if (event?.detail?.reenableButtons === false) return;
+
+    this.useExifBtnTargets.forEach((btn) => {
+      btn.removeAttribute('disabled');
     });
-    // disable the button that was clicked, which may change the text
-    element.querySelector(selector).setAttribute('disabled', 'disabled');
   }
 
   /*********************/

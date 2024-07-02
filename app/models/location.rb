@@ -187,17 +187,29 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
             )
           end
         }
+  scope :contains, # Use named parameters (lat:, lng:), any order
+        lambda { |**args|
+          args => {lat:, lng:}
+          where(
+            Location[:south].lteq(lat).and(Location[:north].gteq(lat)).
+            and(
+              Location[:west].lteq(lng).and(Location[:east].gteq(lng)).or(
+                Location[:west].gteq(lng).and(Location[:east].lteq(lng))
+              )
+            )
+          )
+        }
   scope :show_includes, lambda {
-    strict_loading.includes(
-      { comments: :user },
-      { description: { comments: :user } },
-      { descriptions: [:authors, :editors] },
-      :interests,
-      :observations,
-      :rss_log,
-      :versions
-    )
-  }
+                          strict_loading.includes(
+                            { comments: :user },
+                            { description: { comments: :user } },
+                            { descriptions: [:authors, :editors] },
+                            :interests,
+                            :observations,
+                            :rss_log,
+                            :versions
+                          )
+                        }
 
   # Let attached observations update their cache if these fields changed.
   # Also touch updated_at to expire obs fragment caches

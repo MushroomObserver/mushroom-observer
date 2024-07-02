@@ -73,7 +73,12 @@ const AUTOCOMPLETER_TYPES = {
     model: 'herbarium'
   },
   location: { // params[:format] handled in controller
+    ACT_LIKE_SELECT: false,
     UNORDERED: true,
+    model: 'location'
+  },
+  location_containing: { // params encoded from dataset
+    ACT_LIKE_SELECT: true,
     model: 'location'
   },
   name: {
@@ -165,9 +170,13 @@ export default class extends Controller {
   }
 
   // Swap out autocompleter type (and properties)
-  // Action may be called from a <select> with
+  // Callable externally. Action may be called from a <select> with
   // `data-action: "autocompleter-swap:swap->autocompleter#swap"`
   // or an event dispatched by another controller.
+  // The event may not pass a type, or it may be the same as the current type.
+  // Re-initializing the current type is ok, often means we need to refresh
+  // the primer (as with location_containing a changed lat/lng)
+  // Callable internally if you pass a detail object with a type property.
   swap({ detail }) {
     let type;
 
@@ -192,7 +201,11 @@ export default class extends Controller {
       this.inputTarget.value = '';
       this.prepareHiddenInput();
       this.hiddenTarget.value = '';
-      this.scheduleRefresh(); // refresh the primer
+      if (this.ACT_LIKE_SELECT) {
+        this.refreshPrimer(); // directly refresh the primer, no delay
+      } else {
+        this.scheduleRefresh();
+      }
     }
   }
 
@@ -215,7 +228,7 @@ export default class extends Controller {
     if (this.ACT_LIKE_SELECT == true) {
       this.inputTarget.click();
       this.inputTarget.focus();
-      this.inputTarget.value = ' ';
+      // this.inputTarget.value = ' ';
     }
   }
 
@@ -411,7 +424,8 @@ export default class extends Controller {
 
   // ------------------------------ Timers ------------------------------
 
-  // Schedule primer to be refreshed after polite delay.
+  // Schedule matches to be recalculated from primer, or even primer refreshed,
+  // after a polite delay. (Primer only refreshed if first letter changes.)
   scheduleRefresh() {
     this.verbose("scheduleRefresh()");
     this.clearRefresh();
@@ -420,8 +434,8 @@ export default class extends Controller {
       // this.debug("refresh_timer(" + this.inputTarget.value + ")");
       this.old_value = this.inputTarget.value;
       if (this.AJAX_URL)
-        this.refreshPrimer();
-      this.populateMatches();
+        this.refreshPrimer(); // async, anything after this executes immediately
+      this.populateMatches(); // still necessary if primer unchanged, as likely
       this.drawPulldown();
     }), this.REFRESH_DELAY * 1000);
   }
@@ -635,8 +649,8 @@ export default class extends Controller {
 
     if (this.log) {
       this.debug(
-        "Redraw: matches=" + matches.length +
-        ", scroll=" + scroll + ", cursor=" + cur
+        "Redraw: matches=" + this.matches.length +
+        ", scroll=" + scroll + ", cursor=" + this.current_row
       );
     }
     // Get row height if haven't been able to yet.
@@ -665,11 +679,13 @@ export default class extends Controller {
         const { name, ...new_data } = this.matches[i + this.scroll_offset];
         stored = this.escapeHTML(name);
         if (text != stored) {
+          // if (stored === " ") stored = "&nbsp;";
           link.innerHTML = stored;
           // Assign the dataset of matches[i + this.scroll_offset], minus name
           Object.keys(new_data).forEach(key => {
             link.dataset[key] = new_data[key];
           });
+          link.classList.remove('d-none');
         }
       } else {
         if (text != '') {
@@ -678,6 +694,7 @@ export default class extends Controller {
             if (!['row', 'action'].includes(key))
               delete link.dataset[key];
           });
+          link.classList.add('d-none');
         }
       }
     }
@@ -826,11 +843,17 @@ export default class extends Controller {
 
   // When "acting like a select" make it display all options in the
   // order given right from the moment they enter the field,
-  // and pick the first one.
+  // and pick the first one, as long as there isn't one already selected.
   populateSelect() {
     this.matches = this.primer;
-    if (this.matches.length > 0)
+    const _already_selected = this.matches.find(
+      (m) => m['name'] === this.inputTarget.value
+    );
+
+    if (this.matches.length > 0 && !_already_selected) {
       this.inputTarget.value = this.matches[0]['name'];
+      this.hiddenTarget.value = this.matches[0]['id'];
+    }
   }
 
   // Grab all matches, doing exact match, ignoring number of words.
@@ -1052,13 +1075,13 @@ export default class extends Controller {
     let token = this.getSearchToken().toLowerCase(),
       last_request = this.last_fetch_request;
 
-    // Don't make request on empty string!
-    if (!this.ACT_LIKE_SELECT && (!token || token.length < 1))
-      return;
-
-    // Don't repeat last request accidentally!
-    if (last_request == token)
-      return;
+    // Unless we don't care about input (as with location_containing),
+    // don't make request on empty string, or repeat last request accidentally.
+    if (!this.ACT_LIKE_SELECT) {
+      if (!token || token.length < 1 || last_request == token) {
+        return;
+      }
+    }
 
     // Memoize this condition, used twice:
     // "is the new search token an extension of the previous search string?"
@@ -1148,7 +1171,8 @@ export default class extends Controller {
     this.fetch_request = null;
     // Record string actually used to do matching: might be less strict
     // than one sent in request.
-    this.last_fetch_request = new_primer[0]['name'];
+    if (new_primer.length > 0)
+      this.last_fetch_request = new_primer[0]['name'];
 
     // Check for trailing "..." signaling incomplete set of results.
     if (new_primer[new_primer.length - 1]['name'] == "...") {

@@ -14,7 +14,7 @@ export default class extends Controller {
     "getElevation", "mapOpen", "mapClear", "latInput", "lngInput", "altInput"]
 
   connect() {
-    this.element.dataset.stimulus = "connected";
+    this.element.dataset.stimulus = "connected"
     this.map_type = this.mapDivTarget.dataset.mapType
     this.editable = (this.mapDivTarget.dataset.editable === "true")
     this.opened = this.map_type !== "observation"
@@ -90,7 +90,7 @@ export default class extends Controller {
   }
 
   // We don't draw the map for the create obs form on load, to save on API
-  // If we only have one marker, don't use fitBounds.
+  // If we only have one marker, don't use fitBounds - it's too zoomed in.
   // Call setCenter, setZoom with marker position and desired zoom level.
   drawMap() {
     this.map = new google.maps.Map(this.mapDivTarget, this.mapOptions)
@@ -165,7 +165,7 @@ export default class extends Controller {
     }
   }
 
-  // Only for single markers
+  // Only for single markers: listeners for dragging the marker
   makeMarkerEditable(marker) {
     ["position_changed", "dragend"].forEach((eventName) => {
       marker.addListener(eventName, () => {
@@ -176,6 +176,8 @@ export default class extends Controller {
         // } else
         if (this.hasLatInputTarget) {
           this.updateLatLngInputs(newPosition)
+          // Moving the marker means we're no longer on the image lat/lng
+          this.dispatch("reenableBtns")
         }
         // this.sampleElevationCenterOf(newPosition)
         this.getElevations([newPosition])
@@ -271,8 +273,25 @@ export default class extends Controller {
     if (this.map_type === "location") {
       this.keypress_id = setTimeout(this.calculateRectangle(), 500)
     }
-    else if (this.map_type === "observation" && this.opened) {
-      this.keypress_id = setTimeout(this.calculateMarker(), 500)
+    else if (this.map_type === "observation") {
+      console.log("pointChanged")
+      // If they just cleared the inputs, swap back to a location autocompleter
+      if (this.latInputTarget.value === this.lngInputTarget.value === "") {
+        this.dispatch("pointChanged", { detail: { type: "location" } })
+      } else {
+        this.dispatch("pointChanged", {
+          detail: {
+            type: "location_containing",
+            request_params: {
+              lat: this.latInputTarget.value,
+              lng: this.lngInputTarget.value
+            }
+          }
+        })
+        if (this.opened) {
+          this.keypress_id = setTimeout(this.calculateMarker(), 500)
+        }
+      }
     }
   }
 
@@ -295,12 +314,19 @@ export default class extends Controller {
         this.respondToGeocode(results)
       })
       .catch((e) => {
-        console.error("Geocode was not successful: " + e)
+        console.log("Geocode was not successful: " + e)
         // alert("Geocode was not successful for the following reason: " + e)
       });
   }
 
+  // Called from the geocoder response, to update the map and inputs
+  // This only grabs the first result.
+  // If we have multiple, a different function should show them: maybe
+  // dispatch an event to autocompleter with the results reformatted?
+  // https://developers.google.com/maps/documentation/javascript/geocoding#GeocodingResponses
   respondToGeocode(results) {
+    if (results.length == 0) return false
+
     const viewport = results[0].geometry.viewport.toJSON()
     const extents = results[0].geometry.bounds?.toJSON() // may not exist
     const center = results[0].geometry.location.toJSON()
@@ -427,9 +453,16 @@ export default class extends Controller {
   // Also via openMap, checks if `Lat` & `Lng` fields already populated on load
   // if so, drops a pin on that location and center. otherwise, checks if place
   // input has been prepopulated and uses that to focus map and drop a marker.
-  calculateMarker() {
+  calculateMarker(event) {
+    if (this.map == undefined) return false
+
     let location
-    if (location = this.validateLatLngInputs()) {
+    if (event?.detail?.request_params) {
+      location = event.detail.request_params
+    } else {
+      location = this.validateLatLngInputs()
+    }
+    if (location) {
       this.placeMarker(location)
       this.map.setCenter(location)
       this.map.setZoom(8)
@@ -451,8 +484,8 @@ export default class extends Controller {
     }
     // Toss any degree-minute-second notation and just take the first number
     catch {
-      lat = parseFloat(this.latInputTarget.value)
-      lng = parseFloat(this.lngInputTarget.value)
+      lat = parseFloat(origLat)
+      lng = parseFloat(origLng)
     }
 
     if (!lat || !lng)
@@ -477,6 +510,29 @@ export default class extends Controller {
     // This is like toFixed(5), but faster and returns a number
     this.latInputTarget.value = this.roundOff(center.lat)
     this.lngInputTarget.value = this.roundOff(center.lng)
+    // If we're here, we have a lat and a lng.
+    this.updateLocationAutocompleter(center)
+  }
+
+  updateLocationAutocompleter({ lat, lng }) {
+    // Call the swap event on the autocompleter and send the type
+    // `location_containing`.
+    this.dispatch("pointChanged", {
+      detail: {
+        type: "location_containing",
+        request_params: { lat, lng },
+      }
+    })
+
+    // if (this.placeInputTarget.value === '') {
+    //   this.geocoder.geocode({ location: center }, (results, status) => {
+    //     if (status === "OK") {
+    //       if (results[0]) {
+    //         this.placeInputTarget.value = results[0].formatted_address
+    //       }
+    //     }
+    //   })
+    // }
   }
 
   // Action called by the "Open Map" button only
@@ -519,13 +575,13 @@ export default class extends Controller {
 
   // Action called from the "Clear Map" button
   clearMap() {
-    // const inputTargets = [
-    //   this.latInputTarget, this.lngInputTarget, this.altInputTarget
-    // ]
-    // inputTargets.forEach((element) => {
-    //   element.value = ''
-    // })
-    this.marker.setVisible(false)
+    const inputTargets = [
+      this.latInputTarget, this.lngInputTarget, this.altInputTarget
+    ]
+    inputTargets.forEach((element) => { element.value = '' })
+    this.dispatch("pointChanged", { detail: { type: "location" } })
+    if (this.marker)
+      this.marker.setVisible(false)
   }
 
   //
