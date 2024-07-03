@@ -1638,7 +1638,7 @@
   form_observations_field_code: for field slip
   form_observations_specimen_available: Specimen Available
   form_observations_is_collection_location: Is this location where it was collected?
-  form_observations_click_on_map: Click on map for geolocation
+  form_observations_click_on_map: Click to open map
   form_observations_gps_hidden: Hide exact coordinates?
   form_observations_upload_images: Upload Images
   form_observations_uploading_images: Uploading Images

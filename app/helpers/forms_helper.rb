@@ -156,7 +156,14 @@ module FormsHelper
     tag.div(class: wrap_class, data: wrap_data) do
       concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
-      concat(args[:form].text_field(args[:field], opts))
+      if args[:addon].present?
+        concat(tag.div(class: "input-group") do
+          concat(args[:form].text_field(args[:field], opts))
+          concat(tag.span(args[:addon], class: "input-group-addon"))
+        end)
+      else
+        concat(args[:form].text_field(args[:field], opts))
+      end
       concat(args[:append]) if args[:append].present?
     end
   end
@@ -548,7 +555,7 @@ module FormsHelper
   def separate_field_options_from_args(args, extras = [])
     exceptions = [
       :form, :field, :label, :class, :width, :inline, :between, :append,
-      :optional, :required, :monospace, :type, :wrap_data
+      :addon, :optional, :required, :monospace, :type, :wrap_data
     ] + extras
 
     args.clone.except(*exceptions)
