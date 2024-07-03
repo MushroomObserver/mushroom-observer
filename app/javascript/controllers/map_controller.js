@@ -235,8 +235,8 @@ export default class extends Controller {
   }
 
   placeRectangle(extents) {
-    console.log("placeRectangle")
-    console.log({ extents })
+    // console.log("placeRectangle")
+    // console.log({ extents })
     if (!this.rectangle) {
       this.drawRectangle(extents)
     } else {
@@ -285,7 +285,7 @@ export default class extends Controller {
       this.keypress_id = setTimeout(this.calculateRectangle(), 500)
     }
     else if (this.map_type === "observation") {
-      console.log("pointChanged")
+      // console.log("pointChanged")
       // If they just cleared the inputs, swap back to a location autocompleter
       if (this.latInputTarget.value === this.lngInputTarget.value === "") {
         this.dispatch("pointChanged", { detail: { type: "location" } })
@@ -314,7 +314,7 @@ export default class extends Controller {
       return false
 
     this.showBoxBtnTarget.disabled = true
-    console.log("showBox")
+    // console.log("showBox")
     let id
     if (this.hasLocationIdTarget && (id = this.locationIdTarget.value)) {
       this.fetchMOLocation(id)
@@ -336,7 +336,7 @@ export default class extends Controller {
     if (response.ok) {
       const json = await response.json
       if (json) {
-        console.log(json)
+        // console.log(json)
         this.mapLocationBounds(json)
       }
     } else {
