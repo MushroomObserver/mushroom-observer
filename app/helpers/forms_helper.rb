@@ -176,12 +176,13 @@ module FormsHelper
     ac_args = {
       placeholder: :start_typing.l, autocomplete: "off",
       data: { autocompleter_target: "input" }
-    }.deep_merge(args.except(:type, :separator, :textarea))
+    }.deep_merge(args.except(:type, :separator, :textarea, :hidden_data))
     ac_args[:class] = class_names("dropdown", args[:class])
     ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
                             separator: args[:separator],
                             autocompleter_target: "wrap" }
     ac_args[:between] = capture do
+      concat(autocompleter_has_id_indicator)
       concat(autocompleter_hidden_field(**args)) if args[:form]
       concat(args[:between])
     end
@@ -214,12 +215,16 @@ module FormsHelper
     end
   end
 
-  # minimum args :form, :type
+  def autocompleter_has_id_indicator
+    link_icon(:check, title: :autocompleter_has_id.l,
+                      classes: "px-2 text-success has-id-indicator")
+  end
+
+  # minimum args :form, :type. Send :hidden_data to merge with hidden field data
   def autocompleter_hidden_field(**args)
     model = autocompleter_type_to_model(args[:type])
-    args[:form].text_field(:"#{model}_id",
-                           value: args[:hidden],
-                           data: { autocompleter_target: "hidden" })
+    data = { autocompleter_target: "hidden" }.merge(args[:hidden_data] || {})
+    args[:form].text_field(:"#{model}_id", value: args[:hidden], data:)
   end
 
   def autocompleter_type_to_model(type)

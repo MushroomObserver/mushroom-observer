@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import { Loader } from "@googlemaps/js-api-loader"
 import { convert } from "geo-coordinates-parser"
+import { get } from '@rails/request.js'
 
 // Connects to data-controller="map"
 // The connected element can be a map, or in the case of a form with a map UI,
@@ -10,8 +11,9 @@ import { convert } from "geo-coordinates-parser"
 export default class extends Controller {
   // it may or may not be the root element of the controller.
   static targets = ["mapDiv", "southInput", "westInput", "northInput",
-    "eastInput", "highInput", "lowInput", "placeInput", "findOnMap",
-    "getElevation", "mapOpen", "mapClear", "latInput", "lngInput", "altInput"]
+    "eastInput", "highInput", "lowInput", "placeInput", "locationId",
+    "showBoxBtn", "getElevation", "showPointBtn", "mapClearBtn",
+    "latInput", "lngInput", "altInput"]
 
   connect() {
     this.element.dataset.stimulus = "connected"
@@ -22,6 +24,7 @@ export default class extends Controller {
     this.rectangle = null // Only gets set if we're in edit mode
     this.location_format = this.mapDivTarget.dataset.locationFormat
     this.marker_color = "#D95040"
+    this.LOCATION_API_URL = "/api2/locations/"
 
     // Optional data that needs parsing
     this.collection = this.mapDivTarget.dataset.collection
@@ -201,31 +204,39 @@ export default class extends Controller {
   //
   //  RECTANGLES For info mapType, need to pass the whole set.
   //             For location mapType, the `set` can just be bounds.
+  //             For observation mapType, the rectangle is display-only.
   //
-
   drawRectangle(set) {
-    const bounds = this.boundsOf(set)
-    const rectangleOptions = {
-      strokeColor: this.marker_color,
-      strokeOpacity: 1,
-      strokeWeight: 3,
-      map: this.map,
-      bounds: bounds,
-      editable: this.editable,
-      draggable: this.editable
-    }
+    const bounds = this.boundsOf(set),
+      editable = this.editable && this.map_type !== "observation",
+      rectangleOptions = {
+        strokeColor: this.marker_color,
+        strokeOpacity: 1,
+        strokeWeight: 3,
+        map: this.map,
+        bounds: bounds,
+        clickable: editable,
+        draggable: editable,
+        editable: editable
+      },
+      rectangle = new google.maps.Rectangle(rectangleOptions)
 
-    const rectangle = new google.maps.Rectangle(rectangleOptions)
-
-    if (!this.editable) {
+    if (this.map_type === "observation") {
+      // that's it. obs rectangles are not clickable
+      this.rectangle = rectangle
+    } else if (!this.editable) {
+      // there could be many, does not set this.rectangle
       this.giveRectangleInfoWindow(set, rectangle)
     } else {
       this.makeRectangleEditable(rectangle)
       // this.map.fitBounds(bounds) // Only fit bounds if it's a location map
+      this.rectangle = rectangle
     }
   }
 
   placeRectangle(extents) {
+    console.log("placeRectangle")
+    console.log({ extents })
     if (!this.rectangle) {
       this.drawRectangle(extents)
     } else {
@@ -234,6 +245,7 @@ export default class extends Controller {
     this.map.fitBounds(extents) // overwrite viewport (may zoom in a bit?)
   }
 
+  // Add listeners to the rectangle for dragging and resizing
   // possibly also listen to "dragstart", "drag" ? not necessary.
   makeRectangleEditable(rectangle) {
     ["bounds_changed", "dragend"].forEach((eventName) => {
@@ -245,7 +257,6 @@ export default class extends Controller {
         this.map.fitBounds(newBounds)
       })
     })
-    this.rectangle = rectangle
   }
 
   // For rectangles: make a clickable info window
@@ -295,13 +306,61 @@ export default class extends Controller {
     }
   }
 
-  // Action to geocode a location from a place name or address.
-  // Can be called directly from a button, so check for input value
-  findOnMap() {
-    if (!this.hasPlaceInputTarget || !this.placeInputTarget.value)
+  // Action to map an MO location, or geocode a location from a place name.
+  // Can be called directly from a button, so check for input values.
+  showBox() {
+    if (!this.opened ||
+      !this.hasPlaceInputTarget || !this.placeInputTarget.value)
       return false
 
-    this.findOnMapTarget.disabled = true
+    this.showBoxBtnTarget.disabled = true
+    console.log("showBox")
+    let id
+    if (this.hasLocationIdTarget && (id = this.locationIdTarget.value)) {
+      this.fetchMOLocation(id)
+    } else {
+      this.geolocatePlaceName()
+    }
+  }
+
+  // Fetches a location from the MO API and maps the bounds
+  async fetchMOLocation(id) {
+    if (!id) return
+
+    const url = this.LOCATION_API_URL + id,
+      response = await get(url, {
+        query: { detail: "low" },
+        responseKind: "json"
+      })
+
+    if (response.ok) {
+      const json = await response.json
+      if (json) {
+        console.log(json)
+        this.mapLocationBounds(json)
+      }
+    } else {
+      console.log(`got a ${response.status}: ${response.text}`);
+    }
+  }
+
+  // Attributes are particular to the MO API response
+  mapLocationBounds(json) {
+    if (json.results.length == 0 || !json.results[0].latitude_north)
+      return false
+
+    const location = json.results[0],
+      bounds = {
+        north: location.latitude_north,
+        south: location.latitude_south,
+        east: location.longitude_east,
+        west: location.longitude_west
+      }
+
+    this.placeClosestRectangle(bounds, null)
+  }
+
+  geolocatePlaceName() {
     let address = this.placeInputTarget.value
 
     if (this.location_format == "scientific") {
@@ -320,7 +379,7 @@ export default class extends Controller {
   }
 
   // Called from the geocoder response, to update the map and inputs
-  // This only grabs the first result.
+  // This only grabs the first result. FIXME: SETS LAT/LNG INPUTS
   // If we have multiple, a different function should show them: maybe
   // dispatch an event to autocompleter with the results reformatted?
   // https://developers.google.com/maps/documentation/javascript/geocoding#GeocodingResponses
@@ -339,7 +398,7 @@ export default class extends Controller {
       this.placeClosestRectangle(viewport, extents)
     }
     this.updateFields(viewport, extents, center)
-    this.findOnMapTarget.disabled = false
+    this.showBoxBtnTarget.disabled = false
   }
 
   // NOTE: Currently we're not going to allow Google API geocoded places that
@@ -467,7 +526,7 @@ export default class extends Controller {
       this.map.setCenter(location)
       this.map.setZoom(8)
     } else if (this.placeInputTarget.value !== '') {
-      this.findOnMap()
+      this.showBox()
     }
   }
 
@@ -544,9 +603,9 @@ export default class extends Controller {
     this.mapDivTarget.classList.remove("d-none")
     this.mapDivTarget.style.backgroundImage = "url(" + this.indicatorUrl + ")"
 
-    // this.mapClearTarget.classList.remove("d-none")
-    // this.mapOpenTarget.style.display = "none"
-    this.mapOpenTarget.setAttribute("data-action", "map#showMarker")
+    // this.mapClearBtnTarget.classList.remove("d-none")
+    // this.showPointBtnTarget.style.display = "none"
+    this.showPointBtnTarget.setAttribute("data-action", "map#showMarker")
 
     this.drawMap()
     this.makeMapClickable()
@@ -600,7 +659,7 @@ export default class extends Controller {
     return bounds
   }
 
-  // findOnMap may fill the extents of a rectangle or a point in the inputs.
+  // mapBounds may fill the extents of a rectangle or a point in the inputs.
   // extentsForInput(extents, center) {
   //   let bounds
   //   if (extents) {

@@ -200,7 +200,7 @@ export default class extends Controller {
       this.prepareInputElement();
       this.inputTarget.value = '';
       this.prepareHiddenInput();
-      this.hiddenTarget.value = '';
+      this.clearHiddenId();
       if (this.ACT_LIKE_SELECT) {
         this.refreshPrimer(); // directly refresh the primer, no delay
       } else {
@@ -223,7 +223,11 @@ export default class extends Controller {
 
     // sanity check to show which autocompleter is currently on the element
     this.inputTarget.setAttribute("data-ajax-url", this.AJAX_URL + this.TYPE);
-
+    if (this.hiddenTarget.value != '') {
+      this.wrapTarget.classList.add('has-id');
+    } else {
+      this.wrapTarget.classList.remove('has-id');
+    }
     // If the primer is not based on input, go ahead and request from server.
     if (this.ACT_LIKE_SELECT == true) {
       this.inputTarget.click();
@@ -591,7 +595,7 @@ export default class extends Controller {
     this.inputTarget.focus();
     this.focused = true;
     this.inputTarget.value = new_val;
-    this.hiddenTarget.value = new_id;
+    this.assignHiddenId(new_id);
     this.setSearchToken(new_val);
     this.ourChange(false);
   }
@@ -770,9 +774,33 @@ export default class extends Controller {
       this.matches.find((m) => m['name'] === this.inputTarget.value.trim());
 
     if (perfect_match) {
-      this.hiddenTarget.value = perfect_match['id'];
+      this.assignHiddenId(perfect_match['id']);
     } else {
-      this.hiddenTarget.value = '';
+      this.clearHiddenId();
+    }
+  }
+
+  assignHiddenId(id) {
+    if (!id) return;
+
+    this.hiddenTarget.value = id;
+    this.wrapTarget.classList.add('has-id');
+    this.dispatchHiddenIdEvents();
+  }
+
+  clearHiddenId() {
+    this.hiddenTarget.value = '';
+    this.wrapTarget.classList.remove('has-id');
+    this.dispatchHiddenIdEvents();
+  }
+
+  dispatchHiddenIdEvents() {
+    if (this.TYPE == 'location_containing' || this.TYPE == 'location') {
+      // this.hiddenTarget.dispatchEvent(new Event('change'));
+      this.dispatch('locationIdChanged', {
+        detail: { id: this.hiddenTarget.value }
+      });
+      console.log("dispatched change event");
     }
   }
 
@@ -852,7 +880,7 @@ export default class extends Controller {
 
     if (this.matches.length > 0 && !_already_selected) {
       this.inputTarget.value = this.matches[0]['name'];
-      this.hiddenTarget.value = this.matches[0]['id'];
+      this.assignHiddenId(this.matches[0]['id']);
     }
   }
 

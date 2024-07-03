@@ -154,6 +154,7 @@ module LinkHelper
     adjust: "resize-vertical",
     make_default: "star",
     publish: "upload",
+    check: "ok-circle",
     deprecate: "ok-circle", # approved name needs to look "approved"
     approve: "exclamation-sign", # deprecated name needs to look "deprecated"
     synonyms: "random",

@@ -59,11 +59,12 @@
       <div>
         <%= js_button(button: :form_observations_open_map.t,
                       name: "map-open", class: "map-open",
-                      data: { map_target: "mapOpen", action: "map#openMap" }) %>
+                      data: { map_target: "showPointBtn",
+                              action: "map#openMap" }) %>
         <%= js_button(button: :form_observations_clear_map.t,
                       name: "map-clear", class: "map-clear",
                       data: {
-                        map_target: "mapClear",
+                        map_target: "mapClearBtn",
                         action: "map#clearMap form-exif#reenableButtons"
                       }) %>
       </div>
@@ -90,6 +91,7 @@
     <div class="col-xs-12 col-sm-6">
       <%= autocompleter_field(
         form: f, field: :place_name, type: :location, label: "#{:WHERE.t}:",
+        hidden_data: { map_target: "locationId" },
         data: { map_target: "placeInput",
                 action: [
                   "map:pointChanged@window->autocompleter#swap",
@@ -117,7 +119,8 @@
       <%= js_button(
         button: :form_observations_locate_on_map.t,
         name: "locate_on_map", class: "map-locate my-3",
-        data: { map_target: "findOnMap", action: "map#openMap map#findOnMap" }
+        data: { map_target: "showBoxBtn",
+                action: "map#openMap map#showBox" }
       ) %>
       <%= help_block_with_arrow("up", id: "locate_on_map_help") do %>
         <%= :form_observations_locate_on_map_help.t %>
