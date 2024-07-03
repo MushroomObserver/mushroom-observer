@@ -9,10 +9,10 @@
   #         action: "form-exif:pointChanged@window->map#calculateMarker" }
 ) do %>
 
-  <!-- LAT_LONG_ALT -->
-  <div class="row mt-3" id="observation_lat_lng_alt">
+  <div class="row mt-3">
     <div class="col-xs-12 col-sm-6">
-      <div class="row no-gutters">
+      <!-- LAT_LONG_ALT -->
+      <div class="row no-gutters" id="observation_lat_lng_alt">
         <div class="col-xs-4">
           <%= text_field_with_label(
             form: f, field: :lat, label: :LATITUDE.t + ":",
@@ -32,63 +32,26 @@
             data: { map_target: "altInput" }
           ) %>
         </div>
-        <div class="col-xs-12 col-sm-12">
-          <%= check_box_with_label(form: f, field: :gps_hidden,
-                                   label: :form_observations_gps_hidden.t) %>
-        </div>
       </div><!--.row-->
-    </div>
-    <div class="col-xs-12 col-sm-6">
-      <%= help_block_with_arrow("left", id: "geolocation_help") do %>
+      <%= help_block_with_arrow("up", id: "geolocation_help") do %>
         <%= :form_observations_lat_long_help.t %>
       <% end  # help_block_with_arrow do %>
-    </div>
-  </div><!--.row-->
-  <!-- /LAT_LONG_ALT -->
+      <%= check_box_with_label(form: f, field: :gps_hidden,
+                               label: :form_observations_gps_hidden.t) %>
+      <!-- /LAT_LONG_ALT -->
 
-  <!-- MAP -->
-  <div class="row mt-3" id="observation_geolocation">
-    <div class="col-sm-6">
-      <%= tag.label("#{:form_observations_click_on_map.l}:") %>
-      <%= tag.div("", id: "observation_form_map",
-                      class: "observation-form-map d-none",
-                      data: { indicator_url: asset_path('indicator.gif'),
-                              location_format: User.current_location_format,
-                              map_target: "mapDiv", editable: true,
-                              map_type: "observation" } ) %>
-      <div>
-        <%= js_button(button: :form_observations_open_map.t,
-                      name: "map-open", class: "map-open",
-                      data: { map_target: "showPointBtn",
-                              action: "map#openMap" }) %>
-        <%= js_button(button: :form_observations_clear_map.t,
-                      name: "map-clear", class: "map-clear",
-                      data: {
-                        map_target: "mapClearBtn",
-                        action: "map#clearMap form-exif#reenableButtons"
-                      }) %>
-      </div>
-    </div>
-  </div><!--.row-->
-  <!-- /MAP -->
+      <!-- WHERE_REASONS -->
+      <%= render(partial: "shared/form_location_feedback",
+                locals: { button: button_name } ) %>
+      <!-- /WHERE_REASONS -->
 
-  <%= submit_button(form: f, button: button_name, center: true) %>
-
-  <!-- WHERE_REASONS -->
-  <%= render(partial: "shared/form_location_feedback",
-             locals: { button: button_name } ) %>
-  <!-- /WHERE_REASONS -->
-
-  <!-- WHERE -->
-  <%# NOTE: Both map and form-exif controllers dispatch a pointChanged event.
-  # map:pointChanged event == form-exif:pointChanged event
-  #   detail: { type, request_params: { lat, lng } }
-  # For now we have to duplicate the code, because when form-exif updates
-  # the lat/lng inputs it's not enough to be caught by map, because
-  # the inputs are buffered. map only fires the event after buffering.
-  %>
-  <div class="row">
-    <div class="col-xs-12 col-sm-6">
+      <%# NOTE: Both map & form-exif controllers dispatch a pointChanged event.
+      map:pointChanged event == form-exif:pointChanged event
+        detail: { type, request_params: { lat, lng } }
+      For now we have to duplicate the code, because when form-exif updates
+      the lat/lng inputs it's not enough to be caught by map, because
+      the inputs are buffered. map only fires the event after buffering. %>
+      <!-- WHERE -->
       <%= autocompleter_field(
         form: f, field: :place_name, type: :location, label: "#{:WHERE.t}:",
         hidden_data: { map_target: "locationId" },
@@ -98,9 +61,7 @@
                   "form-exif:pointChanged@window->autocompleter#swap"
                 ].join(" ") }
       ) %>
-    </div>
-    <div class="col-xs-12 col-sm-6">
-      <%= help_block_with_arrow("left", id: "where_help") do %>
+      <%= help_block_with_arrow("top", id: "where_help") do %>
         <%=
           loc1 = "Albion, Mendocino Co., California, USA"
           loc2 = "Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil"
@@ -111,11 +72,7 @@
           :form_observations_where_help.t(loc1: loc1, loc2: loc2)
         %>
       <% end # help_block_with_arrow do %>
-    </div>
-  </div><!--.row-->
 
-  <div class="row">
-    <div class="col-xs-12 col-sm-6">
       <%= js_button(
         button: :form_observations_locate_on_map.t,
         name: "locate_on_map", class: "map-locate my-3",
@@ -125,13 +82,9 @@
       <%= help_block_with_arrow("up", id: "locate_on_map_help") do %>
         <%= :form_observations_locate_on_map_help.t %>
       <% end  # help_block_with_arrow do %>
-    </div>
-  </div><!--.row-->
-  <!-- /WHERE -->
+      <!-- /WHERE -->
 
-  <!-- IS_COLLECTION_LOCATION -->
-  <div class="row">
-    <div class="col-xs-12 col-sm-6">
+      <!-- IS_COLLECTION_LOCATION -->
       <%= check_box_with_label(
             form: f, field: :is_collection_location,
             label: :form_observations_is_collection_location.t
@@ -139,8 +92,33 @@
       <%= help_block_with_arrow("up", id: "is_collection_location_help") do %>
         <%= :form_observations_is_collection_location_help.t %>
       <% end  # help_block_with_arrow do %>
+      <!-- /IS_COLLECTION_LOCATION -->
     </div><!--.col-->
+
+    <!-- MAP -->
+    <div class="col-xs-12 col-sm-6" id="observation_geolocation">
+      <%= tag.label("#{:form_observations_click_on_map.l}:") %>
+      <%= tag.div("", id: "observation_form_map",
+                      class: "observation-form-map d-none",
+                      data: { indicator_url: asset_path('indicator.gif'),
+                              location_format: User.current_location_format,
+                              map_target: "mapDiv", editable: true,
+                              map_type: "observation" } ) %>
+      <%= tag.div do %>
+        <%= js_button(button: :form_observations_open_map.t,
+                      name: "map-open", class: "map-open",
+                      data: { map_target: "showPointBtn",
+                              action: "map#openMap" }) %>
+        <%= js_button(button: :form_observations_clear_map.t,
+                      name: "map-clear", class: "map-clear",
+                      data: {
+                        map_target: "mapClearBtn",
+                        action: "map#clearMap form-exif#reenableButtons"
+                      }) %>
+      <% end %>
+    </div>
+    <!-- /MAP -->
+
   </div><!--.row-->
-  <!-- /IS_COLLECTION_LOCATION -->
 
 <% end %>
