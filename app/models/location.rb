@@ -212,56 +212,20 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
             args => {n:, s:, e:, w:}
           end
 
-          shrunk_n = n - ROUND_ERROR
-          shrunk_s = s + ROUND_ERROR
-          shrunk_e = e - ROUND_ERROR
-          shrunk_w = w + ROUND_ERROR
+          # Correct for possible floating point rounding
+          # Shift points by 180 degrees to simplify east/west comparisons
+          # (Avoids issues with locations straddling 180)
+          shrunk_n = n - ROUND_ERROR + 180
+          shrunk_s = s + ROUND_ERROR + 180
+          shrunk_e = e - ROUND_ERROR + 180
+          shrunk_w = w + ROUND_ERROR + 180
 
-          # Location straddles n & s
           where(
             Location[:south].lteq(shrunk_s).
-              and(Location[:north].gteq(shrunk_n)).
-
-            # and Location east/west straddle e & w
-            and(
-              # Location east/west do not straddle 180 degrees
-              Location[:west].lteq(Location[:east]).
-              and(Location[:west].lteq(shrunk_w)).
-                # TODO: Fix or understand the next line. It seems backwards.
-                and(Location[:east].lteq(shrunk_e))
-=begin
-                .
-              or(
-                # Location east/west straddle 180 degrees
-                Location[:west].gt(Location[:east]).
-                  and(Location[:west].gteq(shrunk_w)).
-                  and(Location[:east].lteq(shrunk_e))
-              )
-=end
-            )
+            and(Location[:north].lteq(shrunk_n)).
+            and((Location[:west] + 180) <= shrunk_w).
+            and((Location[:east] + 180) >= shrunk_e)
           )
-            # and(Location.where(Location[:west].lteq(w + ROUND_ERROR))).
-            # and(Location.where(Location[:east].gteq(e - ROUND_ERROR)))
-
-
-=begin
-            # Location straddles e/w
-            and(
-              # containing location does not straddle 180
-              Location[:west].lteq(Location[:east]).
-                and(Location[:west].lteq(w + ROUND_ERROR)).
-                and(Location[:east].gteq(e - ROUND_ERROR))
-              # containing location west > east
-              # or(Location[:west].gteq(w - ROUND_ERROR).
-              #  and(Location[:east].lteq(e + ROUND_ERROR)))
-
-=begin
-              # containing location straddles 180 deg
-              or(Location[:west].gt(Location[:east]).
-                and(
-                  Location[:west].lteq(w + ROUND_ERROR).or(Location[:east].gteq(e - ROUND_ERROR))
-                ))
-=end
         }
 
   # Let attached observations update their cache if these fields changed.

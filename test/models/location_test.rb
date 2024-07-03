@@ -575,7 +575,6 @@ class LocationTest < UnitTestCase
 
     containing_locs =
       Location.contains(lat: ne_corner[:lat], lng: ne_corner[:lng])
-
     assert_includes(containing_locs, loc,
                     "Location should `contain` its NE corner")
     assert_not_includes(containing_locs, external_loc,
@@ -589,32 +588,6 @@ class LocationTest < UnitTestCase
     assert_not_includes(containing_locs, external_loc,
                         "Non-intersecting Location should not `contain` point")
 
-    skip("Scope `contains` under construction")
-
-    loc = locations(:perkatkun)
-    external_loc = locations(:albion)
-    ne_corner = { lat: loc.north, lng: loc.east }
-    sw_corner = { lat: loc.south, lng: loc.west }
-
-    containing_locs =
-      Location.contains(lat: ne_corner[:lat], lng: ne_corner[:lng])
-
-    assert_includes(containing_locs, loc,
-                    "Location should `contain` its NE corner")
-    assert_not_includes(containing_locs, external_loc,
-                        "Non-intersecting Location should not `contain` point")
-
-    containing_locs =
-      Location.contains(lat: sw_corner[:lat], lng: sw_corner[:lng])
-
-    assert_includes(containing_locs, loc,
-                    "Location should `contain` its SW corner")
-    assert_not_includes(containing_locs, external_loc,
-                        "Non-intersecting Location should not `contain` point")
-  end
-
-  # Isolated portion of another test
-  def test_scope_contains_foo
     loc = locations(:perkatkun)
     external_loc = locations(:albion)
     ne_corner = { lat: loc.north, lng: loc.east }
@@ -650,8 +623,6 @@ class LocationTest < UnitTestCase
       containing_locs, external_loc,
       "Containing Locations should exclude non-intersecting Locations"
     )
-
-    skip("Scope `contains` under construction")
 
     loc = locations(:perkatkun)
     external_loc = locations(:albion)
