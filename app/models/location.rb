@@ -213,18 +213,17 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
           end
 
           # Correct for possible floating point rounding
-          # Shift points by 180 degrees to simplify east/west comparisons
-          # (Avoids issues with locations straddling 180)
-          shrunk_n = n - ROUND_ERROR + 180
-          shrunk_s = s + ROUND_ERROR + 180
-          shrunk_e = e - ROUND_ERROR + 180
-          shrunk_w = w + ROUND_ERROR + 180
+          shrunk_n = n - ROUND_ERROR
+          shrunk_s = s + ROUND_ERROR
+          shrunk_e = e - ROUND_ERROR
+          shrunk_w = w + ROUND_ERROR
 
           where(
             Location[:south].lteq(shrunk_s).
-            and(Location[:north].lteq(shrunk_n)).
-            and((Location[:west] + 180) <= shrunk_w).
-            and((Location[:east] + 180) >= shrunk_e)
+            and(Location[:north].gteq(shrunk_n)).
+            # Simplify e/w comparisons, avoiding straddling 180)
+            and((Location[:west] + 180) <= shrunk_w + 180).
+            and((Location[:east] + 180) >= shrunk_e + 180)
           )
         }
 
