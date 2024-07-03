@@ -55,9 +55,12 @@ end
     <%= render(partial: "observations/form/images", locals: { f: f }) %>
   <% end # if include_images %>
 
-  <%= render(partial: "observations/form/when", locals: { f: f }) %>
-  <%= render(partial: "observations/form/where",
-             locals: { f: f, button_name: button_name }) %>
+  <%= panel_block(id: "observation_details",
+                  heading: :show_observation_details.l) do %>
+    <%= render(partial: "observations/form/when", locals: { f: f }) %>
+    <%= render(partial: "observations/form/where",
+              locals: { f: f, button_name: button_name }) %>
+  <% end %>
 
   <% if include_naming
     # note this is not a separate form! just fields
