@@ -92,19 +92,23 @@
       <%= tag.label("#{:form_observations_click_on_map.l}:") %>
       <%= tag.div do %>
         <%= js_button(
+          button: link_icon(:globe), # :form_observations_open_map.t,
+          name: "map_open", class: "map-open",
+          data: { map_target: "openMapBtn", action: "map#openMap" }
+        ) %>
+        <%= js_button(
           button: :form_observations_open_map.t,
-          name: "map-open", class: "map-open",
-          data: { map_target: "showPointBtn", action: "map#openMap" }
+          name: "show_point", class: "show-point",
+          data: { map_target: "showPointBtn", action: "map#showMarker" }
         ) %>
         <%= js_button(
           button: :form_observations_locate_on_map.t,
           name: "locate_on_map", class: "map-locate my-3",
-          data: { map_target: "showBoxBtn",
-                  action: "map#openMap map#showBox" }
+          data: { map_target: "showBoxBtn", action: "map#showBox" }
         ) %>
         <%= js_button(
           button: :form_observations_clear_map.t,
-          name: "map-clear", class: "map-clear",
+          name: "map_clear", class: "map-clear",
           data: { map_target: "mapClearBtn",
                   action: "map#clearMap form-exif#reenableButtons" }
         ) %>

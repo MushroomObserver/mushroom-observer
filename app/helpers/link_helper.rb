@@ -161,7 +161,8 @@ module LinkHelper
     tracking: "bullhorn",
     manage_lists: "indent-left",
     observations: "tags",
-    print: "print"
+    print: "print",
+    globe: "globe"
   }.freeze
 
   # button to destroy object

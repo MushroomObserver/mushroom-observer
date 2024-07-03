@@ -242,6 +242,7 @@ export default class extends Controller {
     } else {
       this.rectangle.setBounds(extents)
     }
+    this.rectangle.setVisible(true)
     this.map.fitBounds(extents) // overwrite viewport (may zoom in a bit?)
   }
 
@@ -308,18 +309,26 @@ export default class extends Controller {
 
   // Action to map an MO location, or geocode a location from a place name.
   // Can be called directly from a button, so check for input values.
+  // Now fired from location id, including when it's zero (yikes!)
   showBox() {
     if (!this.opened ||
       !this.hasPlaceInputTarget || !this.placeInputTarget.value)
       return false
 
+    // buffer inputs if they're still typing
+    // clearTimeout(this.keypress_id)
+    this.keypress_id = setTimeout(this.getABox(), 500)
+  }
+
+  getABox() {
     this.showBoxBtnTarget.disabled = true
     // console.log("showBox")
     let id
     if (this.hasLocationIdTarget && (id = this.locationIdTarget.value)) {
       this.fetchMOLocation(id)
-    } else {
-      this.geolocatePlaceName()
+    } else if (this.map_type == "location") {
+      // clearTimeout(this.geolocate_buffer)
+      this.geolocate_buffer = setTimeout(this.geolocatePlaceName(), 1000)
     }
   }
 
@@ -393,11 +402,12 @@ export default class extends Controller {
     if (viewport)
       this.map.fitBounds(viewport)
     if (this.map_type === "observation") {
-      this.placeMarker(center)
+      // this.placeMarker(center)
+      this.placeClosestRectangle(viewport, extents)
     } else if (this.map_type === "location") {
       this.placeClosestRectangle(viewport, extents)
+      this.updateFields(viewport, extents, center)
     }
-    this.updateFields(viewport, extents, center)
     this.showBoxBtnTarget.disabled = false
   }
 
@@ -513,7 +523,9 @@ export default class extends Controller {
   // if so, drops a pin on that location and center. otherwise, checks if place
   // input has been prepopulated and uses that to focus map and drop a marker.
   calculateMarker(event) {
-    if (this.map == undefined) return false
+    if (this.map == undefined ||
+      this.latInputTarget.value === '' || this.lngInputTarget.value === ''
+    ) return false
 
     let location
     if (event?.detail?.request_params) {
@@ -605,15 +617,15 @@ export default class extends Controller {
 
     // this.mapClearBtnTarget.classList.remove("d-none")
     // this.showPointBtnTarget.style.display = "none"
-    this.showPointBtnTarget.setAttribute("data-action", "map#showMarker")
+    // this.showPointBtnTarget.setAttribute("data-action", "map#showMarker")
 
     this.drawMap()
     this.makeMapClickable()
-    this.calculateMarker()
   }
 
   showMarker() {
-    this.marker.setVisible(true)
+    this.calculateMarker()
+    if (this.marker) this.marker.setVisible(true)
   }
 
   makeMapClickable() {
@@ -634,13 +646,17 @@ export default class extends Controller {
 
   // Action called from the "Clear Map" button
   clearMap() {
-    const inputTargets = [
-      this.latInputTarget, this.lngInputTarget, this.altInputTarget
-    ]
-    inputTargets.forEach((element) => { element.value = '' })
-    this.dispatch("pointChanged", { detail: { type: "location" } })
+    // const inputTargets = [
+    //   this.latInputTarget, this.lngInputTarget, this.altInputTarget
+    // ]
+    // inputTargets.forEach((element) => { element.value = '' })
+    // this.dispatch("pointChanged", { detail: { type: "location" } })
     if (this.marker)
       this.marker.setVisible(false)
+    if (this.rectangle) {
+      this.rectangle.setVisible(false)
+      this.showBoxBtnTarget.disabled = false
+    }
   }
 
   //
