@@ -22,7 +22,7 @@ class AutoComplete::ForLocation < AutoComplete::ByWord
       # where(Observation[:where].matches("#{letter}%").
       #   or(Observation[:where].matches("% #{letter}%"))).
       # pluck(:where, :location_id) +
-      Location.select(:name, :north, south:, east:, west:).
+      Location.select(:name, :north, :south, :east, :west).
       where(Location[:name].matches("#{letter}%").
         or(Location[:name].matches("% #{letter}%"))).
       pluck(:name, :id, :north, :south, :east, :west)
