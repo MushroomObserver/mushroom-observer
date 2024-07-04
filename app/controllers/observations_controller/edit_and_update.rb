@@ -24,9 +24,7 @@ module ObservationsController::EditAndUpdate
   #   @good_images                      list of images already attached
   #
   def edit
-    return unless (@observation = find_or_goto_index(
-      Observation, params[:id].to_s
-    ))
+    return unless find_observation!
 
     # Make sure user owns this observation!
     unless check_permission!(@observation)
@@ -40,11 +38,17 @@ module ObservationsController::EditAndUpdate
     @images      = []
     @good_images = @observation.images_sorted
     @exif_data = get_exif_data(@good_images)
+    @location = @observation.location
     init_project_vars_for_edit(@observation)
     init_list_vars_for_edit(@observation)
   end
 
   private
+
+  def find_observation!
+    @observation = Observation.edit_includes.safe_find(params[:id]) ||
+                   flash_error_and_goto_index(Observation, params[:id])
+  end
 
   def init_project_vars_for_edit(obs)
     init_project_vars
@@ -67,9 +71,7 @@ module ObservationsController::EditAndUpdate
   public
 
   def update
-    return unless (@observation = find_or_goto_index(
-      Observation, params[:id].to_s
-    ))
+    return unless find_observation!
 
     # Make sure user owns this observation!
     unless check_permission!(@observation)

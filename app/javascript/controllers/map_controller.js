@@ -291,7 +291,8 @@ export default class extends Controller {
       // If they just cleared the inputs, swap back to a location autocompleter
       if (this.latInputTarget.value === "" ||
         this.lngInputTarget.value === "") {
-        this.marker.setVisible(false)
+        if (this.marker)
+          this.marker.setVisible(false)
         this.dispatch("pointChanged", { detail: { type: "location" } })
       } else {
         this.dispatch("pointChanged", {

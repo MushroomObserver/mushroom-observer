@@ -19,7 +19,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       # %e is day of month, no leading zero
       assert_select("observation_when_3i", text: Time.zone.today.strftime("%e"))
       assert_selector("#where_help",
-                      text: "Albion, Mendocino Co., California")
+                      text: "Albion, Mendocino Co., California", visible: :all)
       fill_in("naming_name", with: "Elfin saddle")
       # don't wait for the autocompleter - we know it's an elfin saddle!
       browser.keyboard.type(:tab)
@@ -61,6 +61,14 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_flash_success(/created observation/i)
   end
 
+  # The geotagged.jpg is from here.
+  UNIVERSITY_PARK_EXTENTS = {
+    north: 25.762050,
+    south: 25.733291,
+    east: -80.351868,
+    west: -80.385170
+  }.freeze
+
   def test_autofill_location_from_geotagged_image
     setup_image_dirs # in general_extensions
     login!(katrina)
@@ -75,6 +83,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     last_obs = Observation.where(user_id: User.current.id).
                order(:created_at).last
     assert_field("observation_place_name", with: last_obs.where)
+    assert_field("observation_location_id", with: last_obs.location_id,
+                                            visible: :all)
 
     # Add a geotagged image
     click_attach_file("geotagged.jpg")
@@ -106,6 +116,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_date_is_now
     assert_geolocation_is_empty
     assert_field("observation_place_name", with: last_obs.where)
+    assert_field("observation_location_id", with: last_obs.location_id,
+                                            visible: :all)
 
     # Add a geotagged image
     click_attach_file("geotagged.jpg")
@@ -118,8 +130,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_equal("-80.3731", find('[id$="observation_lng"]').value)
     assert_equal("4", find('[id$="observation_alt"]').value.to_i.to_s)
     # Place name should have been filled, by matching it to the location
+    assert_equal(university_park.id,
+                 find('[id$="observation_location_id"]').value, visible: all,
+                                                                wait: 6)
     assert_equal(university_park.name,
-                 find('[id$="observation_place_name"]').value)
+                 find('[id$="observation_place_name"]').value, wait: 6)
     # now check that the "use_exif" button is disabled
     assert_no_button(:image_use_exif.l)
 
@@ -138,19 +153,14 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_equal("-80.3731", find('[id$="observation_lng"]').value)
     assert_equal("4", find('[id$="observation_alt"]').value.to_i.to_s)
     # Place name should have been filled
+    assert_equal(university_park.id,
+                 find('[id$="observation_location_id"]').value, visible: all,
+                                                                wait: 6)
     assert_equal(university_park.name,
                  find('[id$="observation_place_name"]').value)
     # now check that the "use_exif" button is disabled
     assert_no_button(:image_use_exif.l)
   end
-
-  # The geotagged.jpg is from here.
-  UNIVERSITY_PARK_EXTENTS = {
-    north: 25.762050,
-    south: 25.733291,
-    east: -80.351868,
-    west: -80.385170
-  }.freeze
 
   # Google seems to give accurate bounds to this place, but the
   # geometry.location_type of "Pasadena, California" is "APPROXIMATE".
