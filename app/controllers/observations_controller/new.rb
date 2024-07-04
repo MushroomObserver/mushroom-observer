@@ -80,13 +80,17 @@ module ObservationsController::New
   def defaults_from_last_observation_created
     # Grab defaults from last observation the user created.
     # Only grab "when" if was created at most an hour ago.
-    last_observation = Observation.where(user_id: @user.id).
+    last_observation = Observation.
+                       includes(:location, :projects, :species_lists).
+                       where(user_id: @user.id).
                        order(:created_at).last
     return unless last_observation
 
     %w[where location_id is_collection_location gps_hidden].each do |attr|
       @observation.send(:"#{attr}=", last_observation.send(attr))
     end
+    @location = @observation.location
+
     if last_observation.created_at > 1.hour.ago
       @observation.when = last_observation.when
     end
