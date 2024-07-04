@@ -288,7 +288,9 @@ export default class extends Controller {
     else if (this.map_type === "observation") {
       // console.log("pointChanged")
       // If they just cleared the inputs, swap back to a location autocompleter
-      if (this.latInputTarget.value === this.lngInputTarget.value === "") {
+      if (this.latInputTarget.value === "" ||
+        this.lngInputTarget.value === "") {
+        this.marker.setVisible(false)
         this.dispatch("pointChanged", { detail: { type: "location" } })
       } else {
         this.dispatch("pointChanged", {

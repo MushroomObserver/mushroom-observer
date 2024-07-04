@@ -14,7 +14,7 @@
       <!-- /WHEN -->
 
       <%= tag.div(id: "observation_where") do %>
-        <%# label_tag(:where, "#{:WHERE.l}:") %>
+        <%= label_tag(:where, "#{:WHERE.l}:") %>
         <!-- LAT_LONG_ALT -->
         <div class="row no-gutters" id="observation_lat_lng_alt">
           <div class="col-xs-4">
@@ -41,7 +41,7 @@
 
         <%= collapse_help_block("up", id: "geolocation_help") do %>
           <%= :form_observations_lat_long_help.t %>
-        <% end  # help_block_with_arrow do %>
+        <% end %>
 
         <%= check_box_with_label(form: f, field: :gps_hidden,
                                 label: :form_observations_gps_hidden.t) %>
@@ -60,7 +60,11 @@
         the inputs are buffered. map only fires the event after buffering. %>
         <!-- WHERE -->
         <%= autocompleter_field(
-          form: f, field: :place_name, type: :location, label: "#{:WHERE.t}:",
+          form: f, field: :place_name, type: :location,
+          label: [tag.span("#{:form_observations_locality.l}:",
+                           class: "unconstrained-label"),
+                  tag.span("#{:form_observations_locality_contains.l}:",
+                           class: "constrained-label")].safe_join(" "),
           between: collapse_info_trigger("where_help"),
           hidden_data: { map_target: "locationId" },
           data: { map_target: "placeInput",
@@ -89,15 +93,16 @@
 
     <!-- MAP -->
     <div class="col-xs-12 col-sm-6" id="observation_geolocation">
-      <%= tag.label("#{:form_observations_click_on_map.l}:") %>
+      <%# tag.label("#{:form_observations_click_on_map.l}:") %>
       <%= tag.div do %>
         <%= js_button(
-          button: link_icon(:globe), # :form_observations_open_map.t,
+          button: [link_icon(:globe),
+                   :form_observations_open_map.t].safe_join(" "),
           name: "map_open", class: "map-open",
           data: { map_target: "openMapBtn", action: "map#openMap" }
         ) %>
         <%= js_button(
-          button: :form_observations_open_map.t,
+          button: :form_observations_show_point.t,
           name: "show_point", class: "show-point",
           data: { map_target: "showPointBtn", action: "map#showMarker" }
         ) %>

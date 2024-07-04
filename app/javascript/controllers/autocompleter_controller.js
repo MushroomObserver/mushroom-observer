@@ -179,7 +179,6 @@ export default class extends Controller {
   // Callable internally if you pass a detail object with a type property.
   swap({ detail }) {
     let type;
-
     if (this.hasSelectTarget) {
       type = this.selectTarget.value;
     } else if (detail?.hasOwnProperty("type")) {
@@ -203,8 +202,10 @@ export default class extends Controller {
       this.clearHiddenId();
       if (this.ACT_LIKE_SELECT) {
         this.refreshPrimer(); // directly refresh the primer, no delay
+        this.element.classList.add('constrained');
       } else {
         this.scheduleRefresh();
+        this.element.classList.remove('constrained');
       }
     }
   }
@@ -800,7 +801,7 @@ export default class extends Controller {
       this.dispatch('locationIdChanged', {
         detail: { id: this.hiddenTarget.value }
       });
-      console.log("dispatched change event");
+      // console.log("dispatched locationIdChanged event");
     }
   }
 

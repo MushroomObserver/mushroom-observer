@@ -136,3 +136,16 @@ form {
     display: inline-block;
   }
 }
+
+.constrained-label {
+  display: none;
+}
+
+.constrained {
+  .unconstrained-label {
+    display: none;
+  }
+  .constrained-label {
+    display: inline-block;
+  }
+}
