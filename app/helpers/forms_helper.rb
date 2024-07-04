@@ -94,6 +94,7 @@ module FormsHelper
       args[:form].label(args[:field]) do
         concat(args[:form].check_box(args[:field], opts))
         concat(args[:label])
+        concat(args[:append]) if args[:append].present?
       end
     end
   end
@@ -189,9 +190,9 @@ module FormsHelper
                             separator: args[:separator],
                             autocompleter_target: "wrap" }
     ac_args[:between] = capture do
+      concat(args[:between])
       concat(autocompleter_has_id_indicator)
       concat(autocompleter_hidden_field(**args)) if args[:form]
-      concat(args[:between])
     end
     ac_args[:append] = capture do
       concat(autocompleter_dropdown)
@@ -224,7 +225,7 @@ module FormsHelper
 
   def autocompleter_has_id_indicator
     link_icon(:check, title: :autocompleter_has_id.l,
-                      classes: "px-2 text-success has-id-indicator")
+                      classes: "ml-3 px-2 text-success has-id-indicator")
   end
 
   # minimum args :form, :type. Send :hidden_data to merge with hidden field data

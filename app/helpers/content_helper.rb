@@ -135,10 +135,10 @@ module ContentHelper
     end
   end
 
-  def collapse_info_trigger(id)
+  def collapse_info_trigger(id, **args)
     link_to(link_icon(:question), "##{id}",
-            class: "info-collapse-trigger", role: "button",
-            data: { toggle: "collapse" },
+            class: class_names("info-collapse-trigger", args[:class]),
+            role: "button", data: { toggle: "collapse" },
             aria: { expanded: "false", controls: id })
   end
 
