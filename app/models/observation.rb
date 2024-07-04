@@ -550,6 +550,24 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       :user
     )
   }
+  scope :edit_includes, lambda {
+    strict_loading.includes(
+      :collection_numbers,
+      :field_slips,
+      { external_links: { external_site: { project: :user_group } } },
+      { herbarium_records: [{ herbarium: :curators }, :user] },
+      { images: [:image_votes, :license, :projects, :user] },
+      { interests: :user },
+      :location,
+      { name: { synonym: :names } },
+      { projects: :admin_group },
+      :rss_log,
+      :sequences,
+      { species_lists: [:projects, :user] },
+      :thumb_image,
+      :user
+    )
+  }
 
   def location?
     false
