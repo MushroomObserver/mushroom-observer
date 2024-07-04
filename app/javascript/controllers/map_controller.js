@@ -325,7 +325,7 @@ export default class extends Controller {
   }
 
   getABox() {
-    this.showBoxBtnTarget.disabled = true
+    // this.showBoxBtnTarget.disabled = true
     // console.log("showBox")
     let id
     if (this.hasLocationIdTarget && (id = this.locationIdTarget.value)) {
@@ -427,7 +427,7 @@ export default class extends Controller {
       this.placeClosestRectangle(viewport, extents)
       this.updateFields(viewport, extents, center)
     }
-    this.showBoxBtnTarget.disabled = false
+    // this.showBoxBtnTarget.disabled = false
   }
 
   // NOTE: Currently we're not going to allow Google API geocoded places that
@@ -674,7 +674,7 @@ export default class extends Controller {
       this.marker.setVisible(false)
     if (this.rectangle) {
       this.rectangle.setVisible(false)
-      this.showBoxBtnTarget.disabled = false
+      // this.showBoxBtnTarget.disabled = false
     }
   }
 

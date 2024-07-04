@@ -32,6 +32,7 @@ class AutoComplete::ForLocationContaining < AutoComplete::ByWord
     # rubocop:enable Metrics/ParameterLists
     # Don't re-sort, we want to keep the area order
     locations.uniq { |loc| loc[:name] }
+    # locations.append({ name: " ", id: 0 })
   end
   # rubocop:enable Style/MultilineBlockChain
 

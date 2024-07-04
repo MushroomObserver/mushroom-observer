@@ -856,8 +856,10 @@ export default class extends Controller {
   // There are four strategies for refining the list, below.
   populateMatches() {
     this.verbose("populateMatches()");
-    if (this.ACT_LIKE_SELECT)
-      this.current_row = 0;
+    // if (this.ACT_LIKE_SELECT) {
+    //   debugger;
+    //   this.current_row = 0;
+    // }
 
     // Remember which option used to be highlighted.
     const last = this.current_row < 0 ? null : this.matches[this.current_row];
@@ -887,12 +889,20 @@ export default class extends Controller {
   // order given right from the moment they enter the field,
   // and pick the first one, as long as there isn't one already selected.
   populateSelect() {
+    // Laborious but necessary(?) way to check if these are the same options.
+    const match_names = this.matches.map((m) => m['name']),
+      primer_names = this.primer.map((m) => m['name']);
+
+    if (match_names.every(item => primer_names.includes(item)) &&
+      primer_names.every(item => match_names.includes(item))) return;
+
     this.matches = this.primer;
     const _already_selected = this.matches.find(
       (m) => m['name'] === this.inputTarget.value
     );
 
     if (this.matches.length > 0 && !_already_selected) {
+      debugger;
       this.inputTarget.value = this.matches[0]['name'];
       this.assignHiddenId(this.matches[0]);
     }
