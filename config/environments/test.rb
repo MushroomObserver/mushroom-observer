@@ -82,7 +82,7 @@ MushroomObserver::Application.configure do
   # config.active_record.shared_connection = true
 
   # Debugging strict loading - either :log, or :error out the page
-  config.active_record.action_on_strict_loading_violation = :error
+  # config.active_record.action_on_strict_loading_violation = :error
 
   # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr
