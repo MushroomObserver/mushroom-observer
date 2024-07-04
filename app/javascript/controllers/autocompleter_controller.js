@@ -1203,7 +1203,8 @@ export default class extends Controller {
       this.last_fetch_request = new_primer[0]['name'];
 
     // Check for trailing "..." signaling incomplete set of results.
-    if (new_primer[new_primer.length - 1]['name'] == "...") {
+    if (new_primer.length > 1 &&
+      new_primer[new_primer.length - 1]['name'] == "...") {
       this.last_fetch_incomplete = true;
       new_primer = new_primer.slice(0, new_primer.length - 1);
       // if (this.focused)
