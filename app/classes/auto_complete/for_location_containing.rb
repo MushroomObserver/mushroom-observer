@@ -16,7 +16,7 @@ class AutoComplete::ForLocationContaining < AutoComplete::ByWord
   # We don't care about matching a user input letter, this list should be short
   # rubocop:disable Style/MultilineBlockChain
   def rough_matches(_letter)
-    matches =
+    locations =
       Location.select(:name, :north, :south, :east, :west).
       contains(lat: lat, lng: lng).reject do |loc|
         location_box(loc).vague?
@@ -25,13 +25,13 @@ class AutoComplete::ForLocationContaining < AutoComplete::ByWord
       end.pluck(:name, :id, :north, :south, :east, :west)
 
     # rubocop:disable Metrics/ParameterLists
-    matches.map! do |loc, id, north, south, east, west|
-      format = reverse ? Location.reverse_name(loc) : loc
+    locations.map! do |name, id, north, south, east, west|
+      format = reverse ? Location.reverse_name(name) : name
       { name: format, id:, north:, south:, east:, west: }
     end
     # rubocop:enable Metrics/ParameterLists
     # Don't re-sort, we want to keep the area order
-    matches.uniq
+    locations.uniq { |loc| loc[:name] }
   end
   # rubocop:enable Style/MultilineBlockChain
 

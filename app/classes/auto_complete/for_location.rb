@@ -15,23 +15,17 @@ class AutoComplete::ForLocation < AutoComplete::ByWord
     self.reverse = (params[:format] == "scientific")
   end
 
-  # Using observation.where gives the possibility of strings with no ID.
+  # We're no longer matching undefined observation.where strings.
   def rough_matches(letter)
     locations =
-      # Observation.select(:where).distinct.
-      # where(Observation[:where].matches("#{letter}%").
-      #   or(Observation[:where].matches("% #{letter}%"))).
-      # pluck(:where, :location_id) +
       Location.select(:name, :north, :south, :east, :west).
       where(Location[:name].matches("#{letter}%").
         or(Location[:name].matches("% #{letter}%"))).
       pluck(:name, :id, :north, :south, :east, :west)
 
-    # matches without id are "where" strings only.
-    # give them an id: 0, and sort by unique name id: id.nil? ? 0 : id
     # rubocop:disable Metrics/ParameterLists
-    locations.map! do |loc, id, north, south, east, west|
-      format = reverse ? Location.reverse_name(loc) : loc
+    locations.map! do |name, id, north, south, east, west|
+      format = reverse ? Location.reverse_name(name) : name
       { name: format, id:, north:, south:, east:, west: }
     end
     # rubocop:enable Metrics/ParameterLists
