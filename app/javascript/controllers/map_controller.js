@@ -42,6 +42,7 @@ export default class extends Controller {
     this.old_location = null
     this.keypress_id = 0
     this.timeout_id = 0
+    this.geolocate_buffer = 0
 
     const loader = new Loader({
       apiKey: "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA",
@@ -327,49 +328,64 @@ export default class extends Controller {
     // console.log("showBox")
     let id
     if (this.hasLocationIdTarget && (id = this.locationIdTarget.value)) {
-      this.fetchMOLocation(id)
+      this.mapLocationBounds()
     } else if (this.map_type == "location") {
       // clearTimeout(this.geolocate_buffer)
       this.geolocate_buffer = setTimeout(this.geolocatePlaceName(), 1000)
     }
   }
 
-  // Fetches a location from the MO API and maps the bounds
-  async fetchMOLocation(id) {
-    if (!id) return
-
-    const url = this.LOCATION_API_URL + id,
-      response = await get(url, {
-        query: { detail: "low" },
-        responseKind: "json"
-      })
-
-    if (response.ok) {
-      const json = await response.json
-      if (json) {
-        // console.log(json)
-        this.mapLocationBounds(json)
-      }
-    } else {
-      console.log(`got a ${response.status}: ${response.text}`);
-    }
-  }
-
-  // Attributes are particular to the MO API response
-  mapLocationBounds(json) {
-    if (json.results.length == 0 || !json.results[0].latitude_north)
+  // The locationIdTarget should have the bounds in its dataset
+  mapLocationBounds() {
+    if (!this.hasLocationIdTarget || !this.locationIdTarget.dataset.north)
       return false
 
-    const location = json.results[0],
-      bounds = {
-        north: location.latitude_north,
-        south: location.latitude_south,
-        east: location.longitude_east,
-        west: location.longitude_west
-      }
+    const bounds = {
+      north: parseFloat(this.locationIdTarget.dataset.north),
+      south: parseFloat(this.locationIdTarget.dataset.south),
+      east: parseFloat(this.locationIdTarget.dataset.east),
+      west: parseFloat(this.locationIdTarget.dataset.west)
+    }
 
     this.placeClosestRectangle(bounds, null)
   }
+  // Fetches a location from the MO API and maps the bounds
+  // async fetchMOLocation(id) {
+  //   if (!id) return
+
+  //   const url = this.LOCATION_API_URL + id,
+  //     response = await get(url, {
+  //       query: { detail: "low" },
+  //       responseKind: "json"
+  //     })
+
+  //   if (response.ok) {
+  //     const json = await response.json
+  //     if (json) {
+  //       // console.log(json)
+  //       this.mapLocationBounds(json)
+  //     }
+  //   } else {
+  //     console.log(`got a ${response.status}: ${response.text}`);
+  //   }
+  // }
+
+  // Attributes are particular to the MO API response,
+  // note they are different from the Location db column names.
+  // mapLocationBounds(json) {
+  //   if (json.results.length == 0 || !json.results[0].latitude_north)
+  //     return false
+
+  //   const location = json.results[0],
+  //     bounds = {
+  //       north: location.latitude_north,
+  //       south: location.latitude_south,
+  //       east: location.longitude_east,
+  //       west: location.longitude_west
+  //     }
+
+  //   this.placeClosestRectangle(bounds, null)
+  // }
 
   geolocatePlaceName() {
     let address = this.placeInputTarget.value

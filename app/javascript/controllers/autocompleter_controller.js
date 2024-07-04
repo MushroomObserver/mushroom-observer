@@ -596,7 +596,7 @@ export default class extends Controller {
     this.inputTarget.focus();
     this.focused = true;
     this.inputTarget.value = new_val;
-    this.assignHiddenId(new_id);
+    this.assignHiddenId(new_data);
     this.setSearchToken(new_val);
     this.ourChange(false);
   }
@@ -684,7 +684,7 @@ export default class extends Controller {
         const { name, ...new_data } = this.matches[i + this.scroll_offset];
         stored = this.escapeHTML(name);
         if (text != stored) {
-          // if (stored === " ") stored = "&nbsp;";
+          if (stored === " ") stored = "&nbsp;";
           link.innerHTML = stored;
           // Assign the dataset of matches[i + this.scroll_offset], minus name
           Object.keys(new_data).forEach(key => {
@@ -775,22 +775,35 @@ export default class extends Controller {
       this.matches.find((m) => m['name'] === this.inputTarget.value.trim());
 
     if (perfect_match) {
-      this.assignHiddenId(perfect_match['id']);
+      this.assignHiddenId(perfect_match);
     } else {
       this.clearHiddenId();
     }
   }
 
-  assignHiddenId(id) {
-    if (!id) return;
+  // Assigns not only the ID, but also any data attributes of selected row.
+  assignHiddenId(match) {
+    if (!match) return;
 
-    this.hiddenTarget.value = id;
+    this.hiddenTarget.value = match['id'];
+    Object.keys(match).forEach(key => {
+      if (!['id', 'name'].includes(key))
+        this.hiddenTarget.dataset[key] = match[key];
+    });
+
     this.wrapTarget.classList.add('has-id');
     this.dispatchHiddenIdEvents();
   }
 
+  // Clears not only the ID, but also any data attributes of selected row.
+  // Don't remove target data-attributes.
   clearHiddenId() {
     this.hiddenTarget.value = '';
+    Object.keys(this.hiddenTarget.dataset).forEach(key => {
+      if (!key.match(/Target/))
+        delete this.hiddenTarget.dataset[key];
+    });
+
     this.wrapTarget.classList.remove('has-id');
     this.dispatchHiddenIdEvents();
   }
@@ -881,7 +894,7 @@ export default class extends Controller {
 
     if (this.matches.length > 0 && !_already_selected) {
       this.inputTarget.value = this.matches[0]['name'];
-      this.assignHiddenId(this.matches[0]['id']);
+      this.assignHiddenId(this.matches[0]);
     }
   }
 
