@@ -117,7 +117,7 @@ module LinkHelper
     return "" unless (glyph = LINK_ICON_INDEX[type])
 
     text = ""
-    opts = { class: "glyphicon glyphicon-#{glyph} #{classes}" }
+    opts = { class: "glyphicon glyphicon-#{glyph} link-icon #{classes}" }
 
     if title.present?
       tooltip_opts = { data: { toggle: "tooltip", title: title } }

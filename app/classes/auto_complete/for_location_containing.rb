@@ -17,7 +17,7 @@ class AutoComplete::ForLocationContaining < AutoComplete::ByWord
   # rubocop:disable Style/MultilineBlockChain
   def rough_matches(_letter)
     locations =
-      Location.select(:name, :north, :south, :east, :west).
+      Location.select(:name, :id, :north, :south, :east, :west).
       contains(lat: lat, lng: lng).reject do |loc|
         location_box(loc).vague?
       end.sort_by! do |loc|
