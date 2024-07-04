@@ -199,17 +199,18 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
             )
           )
         }
-  scope :show_includes, lambda {
-                          strict_loading.includes(
-                            { comments: :user },
-                            { description: { comments: :user } },
-                            { descriptions: [:authors, :editors] },
-                            :interests,
-                            :observations,
-                            :rss_log,
-                            :versions
-                          )
-                        }
+  scope :show_includes,
+        lambda {
+          strict_loading.includes(
+            { comments: :user },
+            { description: { comments: :user } },
+            { descriptions: [:authors, :editors] },
+            :interests,
+            :observations,
+            :rss_log,
+            :versions
+          )
+        }
 
   # Let attached observations update their cache if these fields changed.
   # Also touch updated_at to expire obs fragment caches
