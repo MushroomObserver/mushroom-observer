@@ -232,13 +232,19 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
                 and(Location[:north].gteq(shrunk_n)).
               and(
                 # Location doesn't straddle 180
-                (Location[:west] <= Location[:east]).
+                ( # rubocop:disable Style/RedundantParentheses
+                  Location[:west].lteq(Location[:east]).
                   and(Location[:west] <= shrunk_w).
-                  and(Location[:east] >= shrunk_e).
+                  and(Location[:east] >= shrunk_e)
+                ).
                 # Location straddles 180
-                or(Location[:west] > Location[:east]).
-                  and(Location[:west] <= shrunk_w).
-                  or(Location[:east] >= shrunk_e)
+                or(
+                  Location[:west].gt(Location[:east]).
+                  and(
+                    (Location[:west] <= shrunk_w).
+                    or(Location[:east] >= shrunk_e)
+                  )
+                )
               )
             )
           else

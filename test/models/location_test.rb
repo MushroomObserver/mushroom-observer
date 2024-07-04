@@ -628,10 +628,32 @@ class LocationTest < UnitTestCase
   end
 
   def test_scope_contains_box
+    # loc doesn't straddle 180
+    #   potential br (bounding rectangle) entirely to "left" of loc
     do_contains_box(loc: albion, external_loc: perkatkun,
                     regions: [california, earth])
-    do_contains_box(loc: perkatkun, external_loc: albion,
-                    regions: [wrangel, earth])
+
+    #   potential br (bounding rectangle) overlaps only "left" side of loc
+    overlaps_albion_west =
+      Location.create(
+        name: "overlaps_albion_west", user: users(:rolf),
+        north: albion.north, south: albion.south, east: albion.east - 0.05,
+        west: albion.west - 0.05
+      )
+    do_contains_box(loc: albion, external_loc: overlaps_albion_west)
+
+    #   potential br (bounding rectangle) overlaps only "right" side of loc
+    overlaps_albion_east =
+      Location.create(
+        name: "overlaps_albion_east", user: users(:rolf),
+        north: albion.north, south: albion.south, west: albion.west + 0.05,
+        east: albion.east + 0.05
+      )
+    do_contains_box(loc: albion, external_loc: overlaps_albion_east)
+
+    #   potential br (bounding rectangle) entirely to "right" of loc
+    nybg = locations(:nybg_location)
+    do_contains_box(loc: albion, external_loc: nybg)
   end
 
   def do_contains_box(loc:, external_loc: nil,
