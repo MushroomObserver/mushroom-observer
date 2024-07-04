@@ -902,7 +902,6 @@ export default class extends Controller {
     );
 
     if (this.matches.length > 0 && !_already_selected) {
-      debugger;
       this.inputTarget.value = this.matches[0]['name'];
       this.assignHiddenId(this.matches[0]);
     }
