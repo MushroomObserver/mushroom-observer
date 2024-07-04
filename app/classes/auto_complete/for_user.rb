@@ -6,12 +6,17 @@ class AutoComplete::ForUser < AutoComplete::ByString
             where(User[:login].matches("#{letter}%").
               or(User[:name].matches("#{letter}%")).
               or(User[:name].matches("% #{letter}%"))).
-            order(login: :asc).pluck(:login, :name, :id)
+            order(login: :asc)
 
-    users.map! do |login, name, id|
-      user_name = name.empty? ? login : "#{login} <#{name}>"
-      { name: user_name, id: id }
+    matches = users.map do |user|
+      user = user.attributes.symbolize_keys
+      user[:name] = if user[:name].empty?
+                      user[:login]
+                    else
+                      "#{user[:login]} <#{user[:name]}>"
+                    end
+      user.except(:login, :bonuses) # idk why this is getting bonuses
     end
-    users.sort_by! { |user| user[:name] }
+    matches.sort_by! { |user| user[:name] }
   end
 end

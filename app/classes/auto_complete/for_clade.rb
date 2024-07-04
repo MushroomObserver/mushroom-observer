@@ -5,13 +5,15 @@ class AutoComplete::ForClade < AutoComplete::ByString
     # (this sort puts higher rank on top)
     clades = Name.with_correct_spelling.with_rank_above_genus.
              where(Name[:text_name].matches("#{letter}%")).order(rank: :desc).
-             select(:text_name, :rank, :id, :deprecated).
-             pluck(:text_name, :id, :deprecated).uniq(&:first)
+             select(:text_name, :rank, :id, :deprecated)
 
-    clades.map! do |name, id, deprecated|
-      { name: name, id: id, deprecated: deprecated || false }
+    matches = clades.map do |clade|
+      clade = clade.attributes.symbolize_keys
+      clade[:deprecated] = clade[:deprecated] || false
+      clade[:name] = clade[:text_name]
+      clade.except(:text_name, :rank)
     end
-    clades.sort_by! { |clade| clade[:name] }
-    clades.uniq { |clade| clade[:name] }
+    matches.sort_by! { |clade| clade[:name] }
+    matches.uniq { |clade| clade[:name] }
   end
 end

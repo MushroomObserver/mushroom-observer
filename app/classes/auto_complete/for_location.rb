@@ -18,19 +18,18 @@ class AutoComplete::ForLocation < AutoComplete::ByWord
   # We're no longer matching undefined observation.where strings.
   def rough_matches(letter)
     locations =
-      Location.select(:name, :north, :south, :east, :west).
+      Location.select(:name, :id, :north, :south, :east, :west).
       where(Location[:name].matches("#{letter}%").
-        or(Location[:name].matches("% #{letter}%"))).
-      pluck(:name, :id, :north, :south, :east, :west)
+        or(Location[:name].matches("% #{letter}%")))
 
-    # rubocop:disable Metrics/ParameterLists
-    locations.map! do |name, id, north, south, east, west|
-      format = reverse ? Location.reverse_name(name) : name
-      { name: format, id:, north:, south:, east:, west: }
+    # Turn the instances into hashes, and alter name order if requested
+    matches = locations.map do |location|
+      location = location.attributes.symbolize_keys
+      location[:name] = Location.reverse_name(location[:name]) if reverse
+      location
     end
-    # rubocop:enable Metrics/ParameterLists
     # Sort by name and prefer those with a non-zero ID
-    locations.sort_by! { |loc| [loc[:name], -loc[:id]] }
-    locations.uniq { |loc| loc[:name] }
+    matches.sort_by! { |loc| [loc[:name], -loc[:id]] }
+    # matches.uniq { |loc| loc[:name] }
   end
 end
