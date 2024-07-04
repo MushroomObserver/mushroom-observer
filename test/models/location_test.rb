@@ -596,7 +596,7 @@ class LocationTest < UnitTestCase
       Location.contains(lat: ne_corner[:lat], lng: ne_corner[:lng])
     assert_includes(
       containers, loc,
-      " #{loc.name} should contain its NE corner"
+      "#{loc.name} should contain its NE corner"
     )
     assert_not_includes(
       containers, external_loc,
@@ -608,7 +608,7 @@ class LocationTest < UnitTestCase
       Location.contains(lat: sw_corner[:lat], lng: sw_corner[:lng])
     assert_includes(
       containers, loc,
-      " #{loc.name} should contain its SW corner"
+      "#{loc.name} should contain its SW corner"
     )
     assert_not_includes(
       containers, external_loc,
@@ -644,7 +644,7 @@ class LocationTest < UnitTestCase
     end
     assert_not_includes(
       containers, external_loc,
-      "#{external_loc.name} shouldn't contain SW corner of #{loc.name}"
+      "#{external_loc.name} shouldn't contain #{loc.name}"
     )
   end
 

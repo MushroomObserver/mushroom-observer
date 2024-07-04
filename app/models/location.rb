@@ -218,13 +218,40 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
           shrunk_e = e - ROUND_ERROR
           shrunk_w = w + ROUND_ERROR
 
-          where(
-            Location[:south].lteq(shrunk_s).
-            and(Location[:north].gteq(shrunk_n)).
-            # Simplify e/w comparisons, avoiding straddling 180)
-            and((Location[:west] + 180) <= shrunk_w + 180).
-            and((Location[:east] + 180) >= shrunk_e + 180)
-          )
+          # w/e    | Location     | Location contains w/e
+          # ______ | ____________ | ______________________
+          # w <= e | west <= east | west <= w && e <= east
+          # w <= e | west > east  | west <= w || e <= east
+          # w > e  | west <= east | none
+          # w > e  | west > east  | west <= w && e <= east
+
+          if w <= e
+            # w / e don't straddle 180
+            where(
+              Location[:south].lteq(shrunk_s).
+                and(Location[:north].gteq(shrunk_n)).
+              and(
+                # Location doesn't straddle 180
+                (Location[:west] <= Location[:east]).
+                  and(Location[:west] <= shrunk_w).
+                  and(Location[:east] >= shrunk_e).
+                # Location straddles 180
+                or(Location[:west] > Location[:east]).
+                  and(Location[:west] <= shrunk_w).
+                  or(Location[:east] >= shrunk_e)
+              )
+            )
+          else
+            # w / e straddle 180
+            where(
+              Location[:south].lteq(shrunk_s).
+                and(Location[:north].gteq(shrunk_n)).
+              # Location straddles 180
+              and(Location[:west] > Location[:east]).
+                and(Location[:west] <= shrunk_w).
+                and(Location[:east] >= shrunk_e)
+            )
+          end
         }
 
   # Let attached observations update their cache if these fields changed.
