@@ -583,48 +583,44 @@ class LocationTest < UnitTestCase
     locations(:east_lt_west_location)
   end
 
-  def do_contains_lat_lng(loc:, external_loc:,
+  def do_contains_lat_lng(loc:, external_loc: nil,
                           regions: [locations(:unknown_location)])
     center =
       { lat: loc.south + (loc.north - loc.south) / 2,
         lng: loc.east + (loc.west - loc.east) / 2 }
     containers =
       Location.contains(lat: center[:lat], lng: center[:lng])
-    assert_includes(
-      containers, loc,
-      "#{loc.name} should contain its center"
-    )
-    regions.each do |region|
-      assert_includes(
-        containers, region,
-        "#{region.name} should contain #{loc.name}"
-      )
-    end
 
-    assert_not_includes(
-      containers, external_loc,
-      "#{loc.name} should not contain #{external_loc.name}"
-    )
+    assert_includes(containers, loc,
+                    "#{loc.name} should contain its center")
+    regions.each do |region|
+      assert_includes(containers, region,
+                      "#{region.name} should contain #{loc.name}")
+    end
+    if external_loc.present?
+      assert_not_includes(containers, external_loc,
+                          "#{loc.name} should not contain #{external_loc.name}")
+    end
 
     ne_corner = { lat: loc.north, lng: loc.east }
     containers =
       Location.contains(lat: ne_corner[:lat], lng: ne_corner[:lng])
-    assert_includes(
-      containers, loc,
-      "#{loc.name} should contain its NE corner"
-    )
-    assert_not_includes(
-      containers, external_loc,
-      "#{external_loc.name} shouldn't contain NE corner of #{loc.name}"
-    )
+    assert_includes(containers, loc,
+                    "#{loc.name} should contain its NE corner")
+    if external_loc.present?
+      assert_not_includes(
+        containers, external_loc,
+        "#{external_loc.name} shouldn't contain NE corner of #{loc.name}"
+      )
+    end
 
     sw_corner = { lat: loc.south, lng: loc.west }
     containers =
       Location.contains(lat: sw_corner[:lat], lng: sw_corner[:lng])
-    assert_includes(
-      containers, loc,
-      "#{loc.name} should contain its SW corner"
-    )
+    assert_includes(containers, loc,
+                    "#{loc.name} should contain its SW corner")
+    return if external_loc.blank?
+
     assert_not_includes(
       containers, external_loc,
       "#{external_loc.name} shouldn't contain SW corner of #{loc.name}"
@@ -638,7 +634,7 @@ class LocationTest < UnitTestCase
                     regions: [wrangel, earth])
   end
 
-  def do_contains_box(loc:, external_loc:,
+  def do_contains_box(loc:, external_loc: nil,
                       regions: [locations(:unknown_location)])
     containers =
       Location.contains(n: loc.north, s: loc.south, e: loc.east, w: loc.west)
@@ -651,6 +647,8 @@ class LocationTest < UnitTestCase
         "#{region.name} should contain #{loc.name}"
       )
     end
+    return if external_loc.blank?
+
     assert_not_includes(
       containers, external_loc,
       "#{external_loc.name} shouldn't contain #{loc.name}"
