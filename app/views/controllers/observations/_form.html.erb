@@ -56,7 +56,7 @@ end
   <% end # if include_images %>
 
   <%= render(partial: "observations/form/details",
-            locals: { f: f, button_name: button_name, location: @location }) %>
+             locals: { f: f, button_name: button_name, location: @location }) %>
 
   <% if include_naming
     # note this is not a separate form! just fields
