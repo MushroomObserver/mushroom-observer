@@ -554,19 +554,33 @@ class LocationTest < UnitTestCase
     )
   end
 
-  def test_scope_contains_lat_lng
-    albion = locations(:albion)
-    perkatkun = locations(:perkatkun)
-    california = locations(:california)
-    earth = locations(:unknown_location)
-    wrangel = locations(:east_lt_west_location)
-
+  def test_scope_contains_point
     do_contains_lat_lng(loc: albion, external_loc: locations(:gualala),
                         regions: [california, earth])
     do_contains_lat_lng(loc: albion, external_loc: perkatkun,
                         regions: [california, earth])
     do_contains_lat_lng(loc: perkatkun, external_loc: albion,
                         regions: [wrangel, earth])
+  end
+
+  def albion
+    locations(:albion)
+  end
+
+  def california
+    locations(:california)
+  end
+
+  def earth
+    locations(:unknown_location)
+  end
+
+  def perkatkun
+    locations(:perkatkun)
+  end
+
+  def wrangel
+    locations(:east_lt_west_location)
   end
 
   def do_contains_lat_lng(loc:, external_loc:,
@@ -586,6 +600,7 @@ class LocationTest < UnitTestCase
         "#{region.name} should contain #{loc.name}"
       )
     end
+
     assert_not_includes(
       containers, external_loc,
       "#{loc.name} should not contain #{external_loc.name}"
@@ -617,12 +632,6 @@ class LocationTest < UnitTestCase
   end
 
   def test_scope_contains_box
-    albion = locations(:albion)
-    perkatkun = locations(:perkatkun)
-    california = locations(:california)
-    earth = locations(:unknown_location)
-    wrangel = locations(:east_lt_west_location)
-
     do_contains_box(loc: albion, external_loc: perkatkun,
                     regions: [california, earth])
     do_contains_box(loc: perkatkun, external_loc: albion,
