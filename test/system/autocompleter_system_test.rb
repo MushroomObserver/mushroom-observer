@@ -76,7 +76,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
       ".auto_complete ul li",
       text: "Point Reyes National Seashore"
     )
-    @browser.keyboard.type(:down, :down, :down, :down, :down, :down, :tab)
+    @browser.keyboard.type(:down, :down, :down, :down, :down, :tab)
     sleep(1)
     assert_field(
       "search_location",
