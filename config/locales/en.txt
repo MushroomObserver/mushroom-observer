@@ -1391,6 +1391,7 @@
 
   # autocompleters
   start_typing: Start typing...
+  autocompleter_has_id: Match found
 
   # emails/ask_observation_question
   ask_observation_question_title: Question about [name]
