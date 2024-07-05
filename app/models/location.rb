@@ -201,7 +201,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     )
   }
 
-  # TODO: return empty relation if params missing, bad
   scope :contains, # Use named parameters (lat:, lng:, or n:, s:, e:, w:)
         lambda { |**args|
           if args[:lat] && args[:lng]
@@ -227,42 +226,29 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
           if w <= e
             # w / e don't straddle 180
-            where(
-              Location[:south].lteq(shrunk_s).
-                and(Location[:north].gteq(shrunk_n)).
-              and(
-                # Location doesn't straddle 180
-                ( # rubocop:disable Style/RedundantParentheses
-                  Location[:west].lteq(Location[:east]).
-                  and(Location[:west] <= shrunk_w).
-                  and(Location[:east] >= shrunk_e)
-                ).
-                # Location straddles 180
-                or(
-                  Location[:west].gt(Location[:east]).
-                  and(
-                    (Location[:west] <= shrunk_w).
-                    or(Location[:east] >= shrunk_e)
-                  )
-                )
-              )
-            )
+            where(Location[:south].lteq(shrunk_s).
+                    and(Location[:north].gteq(shrunk_n)).
+                  #   Location doesn't straddle 180
+                  and(Location[:west].lteq(Location[:east]).
+                      and(Location[:west] <= shrunk_w).
+                      and(Location[:east] >= shrunk_e).
+                    #  Location straddles 180
+                    or(Location[:west].gt(Location[:east]).
+                      #    need not check e, since w <= e
+                      and((Location[:west] <= shrunk_w).
+                        #  need not check w for same reason
+                        or(Location[:east] >= shrunk_e)))))
           else
             # w / e straddle 180
-            where(
-              Location[:south].lteq(shrunk_s).
-                and(Location[:north].gteq(shrunk_n)).
+            where(Location[:south].lteq(shrunk_s).
+                  and(Location[:north].gteq(shrunk_n)).
             # Location straddles 180
-            and(
-              # Location 100% wrap-around; necessary bounds w/e
-              Location[:west] == Location[:east] - 360).
-              or(
-                # Location < 100% wrap-around
-                (Location[:west].gt(Location[:east])). # rubocop:disable Style/RedundantParentheses
-                and(Location[:west] <= shrunk_w).
-                and(Location[:east] >= shrunk_e)
-              )
-            )
+            #   Location 100% wrap; necessarily straddles w/e
+            and(Location[:west] == Location[:east] - 360).
+            #   Location < 100% wrap-around
+            or((Location[:west].gt(Location[:east])). # rubocop:disable Style/RedundantParentheses
+              and(Location[:west] <= shrunk_w).
+              and(Location[:east] >= shrunk_e)))
           end
         }
 
