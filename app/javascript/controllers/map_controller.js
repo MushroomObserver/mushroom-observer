@@ -407,7 +407,7 @@ export default class extends Controller {
   }
 
   // Called from the geocoder response, to update the map and inputs
-  // This only grabs the first result. FIXME: SETS LAT/LNG INPUTS
+  // This only grabs the first result. NOTE: SETS LAT/LNG INPUTS if observation
   // If we have multiple, a different function should show them: maybe
   // dispatch an event to autocompleter with the results reformatted?
   // https://developers.google.com/maps/documentation/javascript/geocoding#GeocodingResponses

@@ -77,6 +77,7 @@ module ObservationsController::SharedFormMethods
     @collectors_name   = @user.legal_name
     @collectors_number = ""
     @herbarium_name    = @user.preferred_herbarium_name
+    @herbarium_id      = @user.preferred_herbarium&.id
     @accession_number  = ""
   end
 
@@ -89,6 +90,7 @@ module ObservationsController::SharedFormMethods
     return unless params[:herbarium_record]
 
     @herbarium_name   = params[:herbarium_record][:herbarium_name]
+    @herbarium_id     = params[:herbarium_record][:herbarium_id]
     @accession_number = params[:herbarium_record][:accession_number]
   end
 

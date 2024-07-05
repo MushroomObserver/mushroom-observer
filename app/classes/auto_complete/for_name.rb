@@ -17,7 +17,8 @@ class AutoComplete::ForName < AutoComplete::ByString
     # This sort puts genera and higher on top, everything else on bottom,
     # and sorts alphabetically within each group, and non-deprecated dups first
     matches.sort_by! do |name|
-      [(name[:name].match?(" ") ? "b" : "a") + name[:name], name[:deprecated]]
+      [(name[:name].match?(" ") ? "b" : "a") + name[:name],
+       name[:deprecated].to_i]
     end
     matches.uniq { |name| name[:name] }
   end
