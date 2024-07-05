@@ -13,9 +13,10 @@
       <!-- /WHEN -->
 
       <%= tag.div(id: "observation_where") do %>
-        <%=
-        [label_tag(:where, "#{:WHERE_GROUP.l}:"),
-         tag.span("#{:form_observations_click_point.l}.")].safe_join(" ") %>
+        <%= [
+          label_tag(:where, "#{:WHERE_GROUP.l}:"),
+          tag.span("#{:form_observations_click_point.l}.")
+        ].safe_join(" ") %>
         <!-- LAT_LONG_ALT -->
         <div class="row no-gutters" id="observation_lat_lng_alt">
           <div class="col-xs-4">
