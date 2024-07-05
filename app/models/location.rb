@@ -224,8 +224,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
           # w > e  | west <= east | none
           # w > e  | west > east  | west <= w && e <= east
 
-          if w <= e
-            # w / e don't straddle 180
+          if w <= e # w / e don't straddle 180
             where(Location[:south].lteq(shrunk_s).
                     and(Location[:north].gteq(shrunk_n)).
                   #   Location doesn't straddle 180
@@ -238,8 +237,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
                       and((Location[:west] <= shrunk_w).
                         #  need not check w for same reason
                         or(Location[:east] >= shrunk_e)))))
-          else
-            # w / e straddle 180
+          else # w / e straddle 180
             where(Location[:south].lteq(shrunk_s).
                   and(Location[:north].gteq(shrunk_n)).
             # Location straddles 180
