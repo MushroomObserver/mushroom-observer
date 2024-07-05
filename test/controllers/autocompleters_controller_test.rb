@@ -75,6 +75,18 @@ class AutocompletersControllerTest < FunctionalTestCase
     assert_equivalent([{ name: "X", id: 0 }], JSON.parse(@response.body))
   end
 
+  def test_auto_complete_location_containing
+    login("rolf")
+    point_in_albion = { lat: 39.253, lng: -123.8 }
+    locs = Location.where(id: locations(:albion).id).
+           select(:name, :id, :north, :south, :east, :west)
+    expect = locs.map { |loc| loc.attributes.symbolize_keys }
+
+    good_autocompleter_request(type: :location_containing, string: "",
+                               all: true, **point_in_albion)
+    assert_equivalent(expect, JSON.parse(@response.body))
+  end
+
   def test_auto_complete_herbarium
     login("rolf")
     # names of Herbariums whose names have words starting with "m"
