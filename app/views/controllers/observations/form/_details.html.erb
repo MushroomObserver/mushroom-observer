@@ -6,7 +6,6 @@
 
   <div class="row mt-3">
     <div class="col-xs-12 col-md-6">
-
       <!-- WHEN -->
       <%= date_select_with_label(
         form: f, field: :when, object: @observation, label: :WHEN.t + ":",
@@ -14,25 +13,27 @@
       <!-- /WHEN -->
 
       <%= tag.div(id: "observation_where") do %>
-        <%= label_tag(:where, "#{:WHERE_GROUP.l}:") %>
+        <%=
+        [label_tag(:where, "#{:WHERE_GROUP.l}:"),
+         tag.span("#{:form_observations_click_point.l}.")].safe_join(" ") %>
         <!-- LAT_LONG_ALT -->
         <div class="row no-gutters" id="observation_lat_lng_alt">
           <div class="col-xs-4">
             <%= text_field_with_label(
-              form: f, field: :lat, label: :LATITUDE.t + ":", class: "mb-0",
+              form: f, field: :lat, label: :LATITUDE.l + ":", class: "mb-0",
               between: collapse_info_trigger("geolocation_help"),
               data: { map_target: "latInput", action: "map#bufferInputs" }
             ) %>
           </div>
           <div class="col-xs-4">
             <%= text_field_with_label(
-              form: f, field: :lng, label: :LONGITUDE.t + ":", class: "mb-0",
+              form: f, field: :lng, label: :LONGITUDE.l + ":", class: "mb-0",
               data: { map_target: "lngInput", action: "map#bufferInputs" }
             ) %>
           </div>
           <div class="col-xs-4">
             <%= text_field_with_label(
-              form: f, field: :alt, label: :ALTITUDE.t + ":", class: "mb-0",
+              form: f, field: :alt, label: :ALTITUDE.l + ":", class: "mb-0",
               addon: "m", # (#{:units_meters.t})
               data: { map_target: "altInput" }
             ) %>
@@ -44,7 +45,7 @@
         <% end %>
 
         <%= check_box_with_label(form: f, field: :gps_hidden,
-                                label: :form_observations_gps_hidden.t) %>
+                                label: :form_observations_gps_hidden.l) %>
         <!-- /LAT_LONG_ALT -->
 
         <!-- WHERE_REASONS -->
@@ -53,7 +54,6 @@
         <!-- /WHERE_REASONS -->
 
         <%# NOTE: Both map & form-exif controllers dispatch pointChanged event.
-            map:pointChanged event == form-exif:pointChanged event
             detail: { type, request_params: { lat, lng } }
         For now we have to duplicate the code. When form-exif updates
         the lat/lng inputs it's not enough to be caught by map, because
@@ -83,7 +83,7 @@
         <!-- IS_COLLECTION_LOCATION -->
         <%= check_box_with_label(
               form: f, field: :is_collection_location,
-              label: :form_observations_is_collection_location.t,
+              label: :form_observations_is_collection_location.l,
               append: collapse_info_trigger("is_collection_location_help",
                                             class: "ml-3")
             ) %>
@@ -100,25 +100,28 @@
       <%= tag.div(class: "btn-group", role: "group",
                   data: { map_target: "controlWrap" }) do %>
         <%= js_button(
-          button: [link_icon(:globe),
-                   :form_observations_open_map.t].safe_join(" "),
+          button: [
+            link_icon(:globe),
+            tag.span(:form_observations_open_map.l, class: "map-show mx-2"),
+            tag.span(:form_observations_hide_map.l, class: "map-hide mx-2")
+          ].safe_join,
           name: "map_toggle", class: "map-toggle",
           data: { map_target: "toggleMapBtn", action: "map#toggleMap",
                   toggle: "collapse", target: "#observation_form_map" },
           aria: { expanded: "false", controls: "observation_form_map" }
         ) %>
         <%= js_button(
-          button: :form_observations_show_point.t,
+          button: :form_observations_show_point.l,
           name: "map_point", class: "map-point",
           data: { map_target: "showPointBtn", action: "map#showMarker" }
         ) %>
         <%= js_button(
-          button: :form_observations_locate_on_map.t,
+          button: :form_observations_locate_on_map.l,
           name: "map_location", class: "map-location",
           data: { map_target: "showBoxBtn", action: "map#showBox" }
         ) %>
         <%= js_button(
-          button: :form_observations_clear_map.t,
+          button: :form_observations_clear_map.l,
           name: "map_clear", class: "map-clear",
           data: { map_target: "mapClearBtn",
                   action: "map#clearMap form-exif#reenableButtons" }

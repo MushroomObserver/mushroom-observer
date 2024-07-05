@@ -1654,9 +1654,11 @@
   form_observations_log_change: Log Change
   form_observations_is_collection_location_help: Check when the location is where the mushroom was growing.  Uncheck when it is only where the mushroom was seen (e.g., mushroom fairs, grocery, foray id table where collection location is unknown etc.).
   form_observations_open_map: Open map
+  form_observations_hide_map: Hide map
   form_observations_show_point: Show point
   form_observations_clear_map: Clear location
   form_observations_locate_on_map: Show locality
+  form_observations_click_point: Click a point on the map to set a location
   form_observations_locality_contains: Localities containing this point
   form_observations_notes_help: Please include any additional information you can think of about this observation that isn't clear from the photographs, e.g., habitat, substrate or nearby trees; distinctive texture, scent, taste, staining or bruising; results of chemical or microscopic analyses, etc.
   form_observations_remove_image_confirm: Are you sure you want to remove this image?  This will only remove this image from this observation.  If it is attached to other observations, it will remain attached to them.

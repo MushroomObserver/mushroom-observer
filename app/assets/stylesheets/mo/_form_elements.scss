@@ -151,13 +151,18 @@ form {
 }
 
 .map-point,
-.map-location {
+.map-location,
+.map-hide {
   display: none;
 }
 
 .map-open {
+  .map-show {
+    display: none;
+  }
   .map-point,
-  .map-location {
+  .map-location,
+  .map-hide {
     display: inline-block;
   }
 }
