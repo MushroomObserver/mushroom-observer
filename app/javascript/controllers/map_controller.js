@@ -40,8 +40,8 @@ export default class extends Controller {
     // These private vars are for keeping track of user inputs to a form
     // that should update the form after a timeout.
     this.old_location = null
-    this.keypress_id = 0
-    this.timeout_id = 0
+    this.marker_buffer = 0
+    this.ac_buffer = 0
     this.geolocate_buffer = 0
 
     const loader = new Loader({
@@ -284,30 +284,42 @@ export default class extends Controller {
   // and from observation form lat_lng inputs (debounces inputs)
   bufferInputs() {
     if (this.map_type === "location") {
-      this.keypress_id = setTimeout(this.calculateRectangle(), 500)
+      this.clearMarkerDrawBuffer()
+      this.marker_buffer = setTimeout(this.calculateRectangle(), 500)
     }
     else if (this.map_type === "observation") {
       // console.log("pointChanged")
       // If they just cleared the inputs, swap back to a location autocompleter
+      const center = this.validateLatLngInputs(false)
+      if (!center) return
+
+      this.clearAutocompleterSwapBuffer()
+      this.ac_buffer = setTimeout(this.dispatchPointChanged(center), 1000)
+
       if (this.latInputTarget.value === "" ||
         this.lngInputTarget.value === "") {
         if (this.marker)
           this.marker.setVisible(false)
-        this.dispatch("pointChanged", { detail: { type: "location" } })
       } else {
-        this.dispatch("pointChanged", {
-          detail: {
-            type: "location_containing",
-            request_params: {
-              lat: this.latInputTarget.value,
-              lng: this.lngInputTarget.value
-            }
-          }
-        })
         if (this.opened) {
-          this.keypress_id = setTimeout(this.calculateMarker(), 500)
+          this.clearMarkerDrawBuffer()
+          this.marker_buffer = setTimeout(this.calculateMarker(), 500)
         }
       }
+    }
+  }
+
+  clearAutocompleterSwapBuffer() {
+    if (this.ac_buffer) {
+      clearTimeout(this.ac_buffer)
+      this.ac_buffer = 0
+    }
+  }
+
+  clearMarkerDrawBuffer() {
+    if (this.marker_buffer) {
+      clearTimeout(this.marker_buffer)
+      this.marker_buffer = 0
     }
   }
 
@@ -320,8 +332,8 @@ export default class extends Controller {
       return false
 
     // buffer inputs if they're still typing
-    // clearTimeout(this.keypress_id)
-    this.keypress_id = setTimeout(this.getABox(), 500)
+    // clearTimeout(this.marker_buffer)
+    this.marker_buffer = setTimeout(this.getABox(), 500)
   }
 
   getABox() {
@@ -350,43 +362,6 @@ export default class extends Controller {
 
     this.placeClosestRectangle(bounds, null)
   }
-  // Fetches a location from the MO API and maps the bounds
-  // async fetchMOLocation(id) {
-  //   if (!id) return
-
-  //   const url = this.LOCATION_API_URL + id,
-  //     response = await get(url, {
-  //       query: { detail: "low" },
-  //       responseKind: "json"
-  //     })
-
-  //   if (response.ok) {
-  //     const json = await response.json
-  //     if (json) {
-  //       // console.log(json)
-  //       this.mapLocationBounds(json)
-  //     }
-  //   } else {
-  //     console.log(`got a ${response.status}: ${response.text}`);
-  //   }
-  // }
-
-  // Attributes are particular to the MO API response,
-  // note they are different from the Location db column names.
-  // mapLocationBounds(json) {
-  //   if (json.results.length == 0 || !json.results[0].latitude_north)
-  //     return false
-
-  //   const location = json.results[0],
-  //     bounds = {
-  //       north: location.latitude_north,
-  //       south: location.latitude_south,
-  //       east: location.longitude_east,
-  //       west: location.longitude_west
-  //     }
-
-  //   this.placeClosestRectangle(bounds, null)
-  // }
 
   geolocatePlaceName() {
     let address = this.placeInputTarget.value
@@ -550,7 +525,7 @@ export default class extends Controller {
     if (event?.detail?.request_params) {
       location = event.detail.request_params
     } else {
-      location = this.validateLatLngInputs()
+      location = this.validateLatLngInputs(true)
     }
     if (location) {
       this.placeMarker(location)
@@ -562,7 +537,7 @@ export default class extends Controller {
   }
 
   // Convert from human readable and do a rough check if they make sense
-  validateLatLngInputs() {
+  validateLatLngInputs(update = false) {
     const origLat = this.latInputTarget.value,
       origLng = this.lngInputTarget.value
     let lat, lng
@@ -584,7 +559,7 @@ export default class extends Controller {
       return false
     const location = { lat: lat, lng: lng }
 
-    this.updateLatLngInputs(location)
+    if (update) this.updateLatLngInputs(location)
     return location
   }
 
@@ -601,38 +576,43 @@ export default class extends Controller {
     this.latInputTarget.value = this.roundOff(center.lat)
     this.lngInputTarget.value = this.roundOff(center.lng)
     // If we're here, we have a lat and a lng.
-    this.updateLocationAutocompleter(center)
+    this.dispatchPointChanged(center)
   }
 
-  updateLocationAutocompleter({ lat, lng }) {
+  dispatchPointChanged({ lat, lng }) {
     // Call the swap event on the autocompleter and send the type
     // `location_containing`.
-    this.dispatch("pointChanged", {
-      detail: {
-        type: "location_containing",
-        request_params: { lat, lng },
-      }
-    })
+    if (lat && lng) {
+      this.dispatch("pointChanged", {
+        detail: {
+          type: "location_containing",
+          request_params: { lat, lng },
+        }
+      })
 
-    // if (this.placeInputTarget.value === '') {
-    //   this.geocoder.geocode({ location: center }, (results, status) => {
-    //     if (status === "OK") {
-    //       if (results[0]) {
-    //         this.placeInputTarget.value = results[0].formatted_address
-    //       }
-    //     }
-    //   })
-    // }
+      // if (this.placeInputTarget.value === '') {
+      //   this.geocoder.geocode({ location: center }, (results, status) => {
+      //     if (status === "OK") {
+      //       if (results[0]) {
+      //         this.placeInputTarget.value = results[0].formatted_address
+      //       }
+      //     }
+      //   })
+      // }
+    } else {
+      this.dispatch("pointChanged", { detail: { type: "location" } })
+    }
   }
 
-  // Action called by the "Open Map" button only
+  // Action called by the "Open Map" button only.
+  // open/close handled by BS collapse
   openMap() {
     if (this.opened) return false
 
     this.opened = true
 
-    this.mapDivTarget.classList.remove("d-none")
-    this.mapDivTarget.style.backgroundImage = "url(" + this.indicatorUrl + ")"
+    // this.mapDivTarget.classList.remove("d-none")
+    // this.mapDivTarget.style.backgroundImage = "url(" + this.indicatorUrl + ")"
 
     // this.mapClearBtnTarget.classList.remove("d-none")
     // this.showPointBtnTarget.style.display = "none"
@@ -665,15 +645,19 @@ export default class extends Controller {
 
   // Action called from the "Clear Map" button
   clearMap() {
-    // const inputTargets = [
-    //   this.latInputTarget, this.lngInputTarget, this.altInputTarget
-    // ]
-    // inputTargets.forEach((element) => { element.value = '' })
-    // this.dispatch("pointChanged", { detail: { type: "location" } })
-    if (this.marker)
-      this.marker.setVisible(false)
+    const inputTargets = [
+      this.latInputTarget, this.lngInputTarget, this.altInputTarget,
+      this.placeInputTarget
+    ]
+    inputTargets.forEach((element) => { element.value = '' })
+
+    if (this.marker) {
+      this.marker.setMap(null)
+      this.marker = null
+    }
     if (this.rectangle) {
-      this.rectangle.setVisible(false)
+      this.rectangle.setMap(null)
+      this.rectangle = null
       // this.showBoxBtnTarget.disabled = false
     }
   }
@@ -778,4 +762,42 @@ export default class extends Controller {
     const rounded = Math.round(number * 10000) / 10000
     return rounded
   }
+
+  // Fetches a location from the MO API and maps the bounds
+  // async fetchMOLocation(id) {
+  //   if (!id) return
+
+  //   const url = this.LOCATION_API_URL + id,
+  //     response = await get(url, {
+  //       query: { detail: "low" },
+  //       responseKind: "json"
+  //     })
+
+  //   if (response.ok) {
+  //     const json = await response.json
+  //     if (json) {
+  //       // console.log(json)
+  //       this.mapLocationBounds(json)
+  //     }
+  //   } else {
+  //     console.log(`got a ${response.status}: ${response.text}`);
+  //   }
+  // }
+
+  // Attributes are particular to the MO API response,
+  // note they are different from the Location db column names.
+  // mapLocationBounds(json) {
+  //   if (json.results.length == 0 || !json.results[0].latitude_north)
+  //     return false
+
+  //   const location = json.results[0],
+  //     bounds = {
+  //       north: location.latitude_north,
+  //       south: location.latitude_south,
+  //       east: location.longitude_east,
+  //       west: location.longitude_west
+  //     }
+
+  //   this.placeClosestRectangle(bounds, null)
+  // }
 }
