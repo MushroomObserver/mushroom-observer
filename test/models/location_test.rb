@@ -654,6 +654,32 @@ class LocationTest < UnitTestCase
     #   potential br (bounding rectangle) entirely to "right" of loc
     nybg = locations(:nybg_location)
     do_contains_box(loc: albion, external_loc: nybg)
+
+    # loc straddles 180
+    #   potential br entirely outside of loc
+    russia = Location.create(
+      name: "russia", user: users(:rolf),
+      north: 86.217, south: 38.083, west: 27.370116, east: -168.995128
+    )
+    do_contains_box(loc: wrangel, external_loc: albion,
+                    regions: [russia, earth])
+    #   potential br overlaps only "left" side of loc
+    overlaps_wrangel_west =
+      Location.create(
+        name: "overlaps_wrangel_west", user: users(:rolf),
+        north: wrangel.north, south: wrangel.south, east: wrangel.east - 0.05,
+        west: wrangel.west - 0.05
+      )
+    do_contains_box(loc: wrangel, external_loc: overlaps_wrangel_west)
+
+    #   potential br (bounding rectangle) overlaps only "right" side of loc
+    overlaps_wrangel_east =
+      Location.create(
+        name: "overlaps_wrangel_east", user: users(:rolf),
+        north: wrangel.north, south: wrangel.south, east: wrangel.east + 0.05,
+        west: wrangel.west + 0.05
+      )
+    do_contains_box(loc: wrangel, external_loc: overlaps_wrangel_east)
   end
 
   def do_contains_box(loc:, external_loc: nil,
