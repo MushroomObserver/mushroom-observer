@@ -1655,8 +1655,8 @@
   form_observations_log_change: Log Change
   form_observations_is_collection_location_help: Check when the location is where the mushroom was growing.  Uncheck when it is only where the mushroom was seen (e.g., mushroom fairs, grocery, foray id table where collection location is unknown etc.).
   # form_observations_click_on_map: Click to open map
-  form_observations_open_map: [:SHOW] map
-  form_observations_hide_map: [:HIDE] map
+  form_observations_open_map: "[:SHOW] [:map]"
+  form_observations_hide_map: "[:HIDE] [:map]"
   # form_observations_show_point: Show point
   # form_observations_locate_on_map: Show locality
   form_observations_clear_map: Clear location
