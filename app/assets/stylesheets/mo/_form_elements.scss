@@ -149,3 +149,15 @@ form {
     display: inline-block;
   }
 }
+
+.map-point,
+.map-location {
+  display: none;
+}
+
+.map-open {
+  .map-point,
+  .map-location {
+    display: inline-block;
+  }
+}

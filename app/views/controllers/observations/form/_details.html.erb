@@ -97,23 +97,24 @@
     <!-- MAP -->
     <div class="col-xs-12 col-md-6" id="observation_geolocation">
       <%# tag.label("#{:form_observations_click_on_map.l}:") %>
-      <%= tag.div(class: "btn-group", role: "group") do %>
+      <%= tag.div(class: "btn-group", role: "group",
+                  data: { map_target: "controlWrap" }) do %>
         <%= js_button(
           button: [link_icon(:globe),
                    :form_observations_open_map.t].safe_join(" "),
-          name: "map_open", class: "map-open",
-          data: { map_target: "openMapBtn", action: "map#openMap",
+          name: "map_toggle", class: "map-toggle",
+          data: { map_target: "toggleMapBtn", action: "map#toggleMap",
                   toggle: "collapse", target: "#observation_form_map" },
           aria: { expanded: "false", controls: "observation_form_map" }
         ) %>
         <%= js_button(
           button: :form_observations_show_point.t,
-          name: "show_point", class: "show-point",
+          name: "map_point", class: "map-point",
           data: { map_target: "showPointBtn", action: "map#showMarker" }
         ) %>
         <%= js_button(
           button: :form_observations_locate_on_map.t,
-          name: "locate_on_map", class: "map-locate",
+          name: "map_location", class: "map-location",
           data: { map_target: "showBoxBtn", action: "map#showBox" }
         ) %>
         <%= js_button(

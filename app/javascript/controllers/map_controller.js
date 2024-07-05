@@ -12,7 +12,7 @@ export default class extends Controller {
   // it may or may not be the root element of the controller.
   static targets = ["mapDiv", "southInput", "westInput", "northInput",
     "eastInput", "highInput", "lowInput", "placeInput", "locationId",
-    "showBoxBtn", "getElevation", "showPointBtn", "mapClearBtn",
+    "showBoxBtn", "getElevation", "showPointBtn", "mapClearBtn", "controlWrap",
     "latInput", "lngInput", "altInput"]
 
   connect() {
@@ -293,8 +293,7 @@ export default class extends Controller {
       const center = this.validateLatLngInputs(false)
       if (!center) return
 
-      this.clearAutocompleterSwapBuffer()
-      this.ac_buffer = setTimeout(this.dispatchPointChanged(center), 1000)
+      this.dispatchPointChanged(center)
 
       if (this.latInputTarget.value === "" ||
         this.lngInputTarget.value === "") {
@@ -303,7 +302,7 @@ export default class extends Controller {
       } else {
         if (this.opened) {
           this.clearMarkerDrawBuffer()
-          this.marker_buffer = setTimeout(this.calculateMarker(), 500)
+          this.marker_buffer = setTimeout(this.calculateMarker(), 2000)
         }
       }
     }
@@ -513,7 +512,7 @@ export default class extends Controller {
   //
 
   // Action called after bufferInputs from lat/lng inputs, to update map marker.
-  // Also via openMap, checks if `Lat` & `Lng` fields already populated on load
+  // Also via toggleMap, checks if `Lat` & `Lng` fields already populated on load
   // if so, drops a pin on that location and center. otherwise, checks if place
   // input has been prepopulated and uses that to focus map and drop a marker.
   calculateMarker(event) {
@@ -582,13 +581,17 @@ export default class extends Controller {
   dispatchPointChanged({ lat, lng }) {
     // Call the swap event on the autocompleter and send the type
     // `location_containing`.
+    this.clearAutocompleterSwapBuffer()
+
     if (lat && lng) {
-      this.dispatch("pointChanged", {
-        detail: {
-          type: "location_containing",
-          request_params: { lat, lng },
-        }
-      })
+      this.ac_buffer = setTimeout(() => {
+        this.dispatch("pointChanged", {
+          detail: {
+            type: "location_containing",
+            request_params: { lat, lng },
+          }
+        })
+      }, 1000)
 
       // if (this.placeInputTarget.value === '') {
       //   this.geocoder.geocode({ location: center }, (results, status) => {
@@ -600,26 +603,32 @@ export default class extends Controller {
       //   })
       // }
     } else {
-      this.dispatch("pointChanged", { detail: { type: "location" } })
+      this.ac_buffer = setTimeout(() => {
+        this.dispatch("pointChanged", { detail: { type: "location" } })
+      }, 1000)
     }
   }
 
   // Action called by the "Open Map" button only.
   // open/close handled by BS collapse
-  openMap() {
-    if (this.opened) return false
+  toggleMap() {
+    if (this.opened) {
+      this.opened = false
+      this.controlWrapTarget.classList.remove("map-open")
+    } else {
+      this.opened = true
 
-    this.opened = true
+      this.controlWrapTarget.classList.add("map-open")
+      // this.mapDivTarget.classList.remove("d-none")
+      // this.mapDivTarget.style.backgroundImage = "url(" + this.indicatorUrl + ")"
 
-    // this.mapDivTarget.classList.remove("d-none")
-    // this.mapDivTarget.style.backgroundImage = "url(" + this.indicatorUrl + ")"
+      // this.mapClearBtnTarget.classList.remove("d-none")
+      // this.showPointBtnTarget.style.display = "none"
+      // this.showPointBtnTarget.setAttribute("data-action", "map#showMarker")
 
-    // this.mapClearBtnTarget.classList.remove("d-none")
-    // this.showPointBtnTarget.style.display = "none"
-    // this.showPointBtnTarget.setAttribute("data-action", "map#showMarker")
-
-    this.drawMap()
-    this.makeMapClickable()
+      this.drawMap()
+      this.makeMapClickable()
+    }
   }
 
   showMarker() {
@@ -660,6 +669,8 @@ export default class extends Controller {
       this.rectangle = null
       // this.showBoxBtnTarget.disabled = false
     }
+    this.dispatch("reenableBtns")
+    this.dispatchPointChanged({ lat: null, lng: null })
   }
 
   //
