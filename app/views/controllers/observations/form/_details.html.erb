@@ -111,12 +111,12 @@
                   toggle: "collapse", target: "#observation_form_map" },
           aria: { expanded: "false", controls: "observation_form_map" }
         ) %>
-        <%= js_button(
+        <%# js_button(
           button: :form_observations_show_point.l,
           name: "map_point", class: "map-point",
           data: { map_target: "showPointBtn", action: "map#showMarker" }
         ) %>
-        <%= js_button(
+        <%# js_button(
           button: :form_observations_locate_on_map.l,
           name: "map_location", class: "map-location",
           data: { map_target: "showBoxBtn", action: "map#showBox" }

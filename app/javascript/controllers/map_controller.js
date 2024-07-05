@@ -12,7 +12,8 @@ export default class extends Controller {
   // it may or may not be the root element of the controller.
   static targets = ["mapDiv", "southInput", "westInput", "northInput",
     "eastInput", "highInput", "lowInput", "placeInput", "locationId",
-    "showBoxBtn", "getElevation", "showPointBtn", "mapClearBtn", "controlWrap",
+    "getElevation", "mapClearBtn", "controlWrap",
+    // "showPointBtn", "showBoxBtn",
     "latInput", "lngInput", "altInput"]
 
   connect() {

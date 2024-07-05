@@ -230,7 +230,7 @@ export default class extends Controller {
       this.wrapTarget.classList.remove('has-id');
     }
     // If the primer is not based on input, go ahead and request from server.
-    if (this.ACT_LIKE_SELECT == true) {
+    if (this.ACT_LIKE_SELECT == true && this.primer.length > 0) {
       this.inputTarget.click();
       this.inputTarget.focus();
       // this.inputTarget.value = ' ';
