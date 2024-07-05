@@ -243,8 +243,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
             # Location straddles 180
             #   Location 100% wrap; necessarily straddles w/e
             and(Location[:west] == Location[:east] - 360).
-            #   Location < 100% wrap-around
-            or((Location[:west].gt(Location[:east])). # rubocop:disable Style/RedundantParentheses
+            #  Location < 100% wrap-around
+            or(Location[:west].gt(Location[:east]).
               and(Location[:west] <= shrunk_w).
               and(Location[:east] >= shrunk_e)))
           end
