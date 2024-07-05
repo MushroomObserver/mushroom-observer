@@ -187,7 +187,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
             )
           end
         }
-  scope :contains, # Use named parameters (lat:, lng:), any order
+  scope :contains_point, # Use named parameters (lat:, lng:), any order
         lambda { |**args|
           args => {lat:, lng:}
           where(
