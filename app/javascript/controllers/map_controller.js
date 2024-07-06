@@ -345,7 +345,8 @@ export default class extends Controller {
       this.mapLocationBounds()
     } else if (this.map_type == "location") {
       // clearTimeout(this.geolocate_buffer)
-      this.geolocate_buffer = setTimeout(this.geolocatePlaceName(), 1000)
+      // this.geolocate_buffer = setTimeout(this.geolocatePlaceName(), 500)
+      this.geolocatePlaceName()
     }
   }
 
