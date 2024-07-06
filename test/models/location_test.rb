@@ -555,7 +555,6 @@ class LocationTest < UnitTestCase
   end
 
   def test_scope_contains_box
-    debugger
     # loc doesn't straddle 180
     #   potential br (bounding rectangle, external_loc) to "left" of loc
     do_contains_box(loc: albion, external_loc: perkatkun,
