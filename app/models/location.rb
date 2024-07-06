@@ -150,7 +150,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
-  ROUND_ERROR = 0.00001
+  ROUND_ERROR = 0.0005
 
   # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
   scope :name_includes,

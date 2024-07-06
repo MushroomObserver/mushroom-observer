@@ -561,6 +561,7 @@ class LocationTest < UnitTestCase
                         regions: [california, earth])
     do_contains_lat_lng(loc: perkatkun, external_loc: albion,
                         regions: [wrangel, earth])
+    do_contains_lat_lng(loc: california, regions: [earth])
   end
 
   def albion
@@ -680,6 +681,10 @@ class LocationTest < UnitTestCase
         west: wrangel.west + 0.05
       )
     do_contains_box(loc: wrangel, external_loc: overlaps_wrangel_east)
+
+    # These failed depending on the rounding correction used by `contains_box`
+    do_contains_box(loc: perkatkun, regions: [wrangel, earth])
+    do_contains_box(loc: california, regions: [earth])
   end
 
   def do_contains_box(loc:, external_loc: nil,
