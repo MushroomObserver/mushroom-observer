@@ -631,6 +631,8 @@ export default class extends Controller {
       if (this.map == undefined) {
         this.drawMap()
         this.makeMapClickable()
+      } else {
+        this.map.fitBounds(this.mapBounds)
       }
 
       let center
