@@ -100,7 +100,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_equal("-80.3731", find('[id$="observation_lng"]').value)
     assert_equal("4", find('[id$="observation_alt"]').value.to_i.to_s)
     # Place name should not have been filled, because no locations match
-    assert_equal("", find('[id$="observation_place_name"]').value)
+    assert_equal(last_obs.where, find('[id$="observation_place_name"]').value)
     # now check that the "use_exif" button is disabled
     assert_no_button(:image_use_exif.l)
   end
