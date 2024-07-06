@@ -522,6 +522,21 @@ class LocationTest < UnitTestCase
     assert_empty(Location.in_region(ARBITRARY_SHA))
   end
 
+  def test_scope_contains_point
+    [
+      locations(:albion),
+      locations(:perkatkun),
+      locations(:east_lt_west_location)
+    ].each { |loc| contains_corners(loc) }
+  end
+
+  def contains_corners(loc)
+    assert(Location.contains_point(lat: loc.north, lng: loc.east).
+      include?(loc), "#{loc.name} should contain its NE corner")
+    assert(Location.contains_point(lat: loc.south, lng: loc.west).
+      include?(loc), "#{loc.name} should contain its SW corner")
+  end
+
   # supplements API tests
   def test_scope_in_box
     cal = locations(:california)

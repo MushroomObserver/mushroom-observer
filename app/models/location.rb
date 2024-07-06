@@ -150,6 +150,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
+  FLOAT_ERROR = 0.0005
+
   # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
   scope :name_includes,
         ->(place_name) { where(Location[:name].matches("%#{place_name}%")) }
@@ -191,10 +193,14 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
         lambda { |**args|
           args => {lat:, lng:}
           where(
-            Location[:south].lteq(lat).and(Location[:north].gteq(lat)).
+            (Location[:south]).lteq(lat + FLOAT_ERROR).
+              and((Location[:north]).gteq(lat - FLOAT_ERROR)).
             and(
-              Location[:west].lteq(lng).and(Location[:east].gteq(lng)).or(
-                Location[:west].gteq(lng).and(Location[:east].lteq(lng))
+              Location[:west].lteq(lng + FLOAT_ERROR).
+                and(Location[:east].gteq(lng - FLOAT_ERROR)).
+              or(
+                Location[:west].gteq(lng - FLOAT_ERROR).
+                  and(Location[:east].lteq(lng + FLOAT_ERROR))
               )
             )
           )
