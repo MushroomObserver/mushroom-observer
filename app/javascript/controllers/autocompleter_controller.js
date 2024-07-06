@@ -111,7 +111,7 @@ const INTERNAL_OPTS = {
   focused: false,        // is user in text field?
   menu_up: false,        // is pulldown visible?
   old_value: null,       // previous value of input field
-  stored_id: null,       // id of selected option
+  stored_id: 0,          // id of selected option
   primer: [],            // a server-supplied list of many options
   matches: [],           // list of options currently showing
   current_row: -1,       // index of option currently highlighted (0 = none)
@@ -782,9 +782,11 @@ export default class extends Controller {
   // Assigns not only the ID, but also any data attributes of selected row.
   assignHiddenId(match) {
     if (!match) return;
-
-    this.hiddenTarget.value = match['id'];
+    // store the old value of the hidden input
     this.stored_id = this.hiddenTarget.value;
+    // update the new value of the hidden input
+    this.hiddenTarget.value = match['id'];
+    // assign the dataset of the selected row to the hidden input
     Object.keys(match).forEach(key => {
       if (!['id', 'name'].includes(key))
         this.hiddenTarget.dataset[key] = match[key];
@@ -798,7 +800,7 @@ export default class extends Controller {
   // Don't remove target data-attributes.
   clearHiddenId() {
     this.hiddenTarget.value = '';
-    this.stored_id = null;
+    this.stored_id = 0;
     Object.keys(this.hiddenTarget.dataset).forEach(key => {
       if (!key.match(/Target/))
         delete this.hiddenTarget.dataset[key];
@@ -809,13 +811,17 @@ export default class extends Controller {
   }
 
   dispatchHiddenIdEvents() {
-    if ((this.TYPE == 'location_containing' || this.TYPE == 'location') &&
-      this.hiddenTarget.value != this.stored_id) {
-      // console.log("dispatching locationIdChanged event");
-      this.dispatch('locationIdChanged', {
-        detail: { id: this.hiddenTarget.value }
-      });
+    const hidden_id = parseInt(this.hiddenTarget.value || 0),
+      stored_id = parseInt(this.stored_id || 0);
+
+    if (hidden_id === stored_id) {
+      return;
     }
+    debugger;
+    // console.log("dispatching locationIdChanged event");
+    this.dispatch('locationIdChanged', {
+      detail: { id: this.hiddenTarget.value }
+    });
   }
 
   // Hide pulldown options.
