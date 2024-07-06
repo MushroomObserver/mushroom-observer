@@ -168,6 +168,7 @@ export default class extends Controller {
       this.marker.setPosition(location)
       this.map.panTo(location)
     }
+    this.marker.setVisible(true)
   }
 
   // Only for single markers: listeners for dragging the marker
@@ -325,7 +326,7 @@ export default class extends Controller {
 
   // Action to map an MO location, or geocode a location from a place name.
   // Can be called directly from a button, so check for input values.
-  // Now fired from location id, including when it's zero (yikes!)
+  // Now fired from location id, including when it's zero
   showBox() {
     // console.log("showBox")
     if (!this.opened ||
@@ -337,6 +338,7 @@ export default class extends Controller {
     this.marker_buffer = setTimeout(this.checkForBox(), 500)
   }
 
+  // Check what kind of input we have and call the appropriate function
   checkForBox() {
     // this.showBoxBtnTarget.disabled = true
     // console.log("checkForBox")
@@ -348,6 +350,7 @@ export default class extends Controller {
       // this.geolocate_buffer = setTimeout(this.geolocatePlaceName(), 500)
       this.geolocatePlaceName()
     }
+    if (this.rectangle) this.rectangle.setVisible(true)
   }
 
   // The locationIdTarget should have the bounds in its dataset
@@ -618,17 +621,18 @@ export default class extends Controller {
       this.controlWrapTarget.classList.remove("map-open")
     } else {
       this.opened = true
-
       this.controlWrapTarget.classList.add("map-open")
       // this.mapDivTarget.classList.remove("d-none")
       // this.mapDivTarget.style.backgroundImage = "url(" + this.indicatorUrl + ")"
-
       // this.mapClearBtnTarget.classList.remove("d-none")
       // this.showPointBtnTarget.style.display = "none"
       // this.showPointBtnTarget.setAttribute("data-action", "map#showMarker")
 
-      this.drawMap()
-      this.makeMapClickable()
+      if (this.map == undefined) {
+        this.drawMap()
+        this.makeMapClickable()
+      }
+
       let center
       if (center = this.validateLatLngInputs(false)) {
         this.calculateMarker({ detail: { request_params: center } })
