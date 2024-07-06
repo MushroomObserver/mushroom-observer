@@ -327,18 +327,19 @@ export default class extends Controller {
   // Can be called directly from a button, so check for input values.
   // Now fired from location id, including when it's zero (yikes!)
   showBox() {
+    // console.log("showBox")
     if (!this.opened ||
       !this.hasPlaceInputTarget || !this.placeInputTarget.value)
       return false
 
     // buffer inputs if they're still typing
-    // clearTimeout(this.marker_buffer)
-    this.marker_buffer = setTimeout(this.getABox(), 500)
+    clearTimeout(this.marker_buffer)
+    this.marker_buffer = setTimeout(this.checkForBox(), 500)
   }
 
-  getABox() {
+  checkForBox() {
     // this.showBoxBtnTarget.disabled = true
-    // console.log("showBox")
+    // console.log("checkForBox")
     let id
     if (this.hasLocationIdTarget && (id = this.locationIdTarget.value)) {
       this.mapLocationBounds()
@@ -531,8 +532,6 @@ export default class extends Controller {
       this.placeMarker(location)
       this.map.setCenter(location)
       this.map.setZoom(8)
-    } else if (this.placeInputTarget.value !== '') {
-      this.showBox()
     }
   }
 
@@ -629,6 +628,12 @@ export default class extends Controller {
 
       this.drawMap()
       this.makeMapClickable()
+      let center
+      if (center = this.validateLatLngInputs(false)) {
+        this.calculateMarker({ detail: { request_params: center } })
+      }
+      // console.log("toggleMap")
+      this.checkForBox() // regardless if point
     }
   }
 

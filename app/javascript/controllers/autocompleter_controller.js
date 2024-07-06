@@ -111,6 +111,7 @@ const INTERNAL_OPTS = {
   focused: false,        // is user in text field?
   menu_up: false,        // is pulldown visible?
   old_value: null,       // previous value of input field
+  stored_id: null,       // id of selected option
   primer: [],            // a server-supplied list of many options
   matches: [],           // list of options currently showing
   current_row: -1,       // index of option currently highlighted (0 = none)
@@ -119,6 +120,7 @@ const INTERNAL_OPTS = {
   current_width: 0,      // current width of menu
   scroll_offset: 0,      // scroll offset
   last_fetch_request: '', // last fetch request we got results for
+  last_fetch_params: '',  // last fetch request we sent, minus the string
   last_fetch_incomplete: true, // did we get all the results we requested?
   fetch_request: null,   // ajax request while underway
   refresh_timer: null,   // timer used to delay update after typing
@@ -178,6 +180,7 @@ export default class extends Controller {
   // the primer (as with location_containing a changed lat/lng)
   // Callable internally if you pass a detail object with a type property.
   swap({ detail }) {
+    // console.log("swapping autocompleter type");
     let type;
     if (this.hasSelectTarget) {
       type = this.selectTarget.value;
@@ -193,15 +196,17 @@ export default class extends Controller {
       this.element.setAttribute("data-type", type)
       // add dependent properties and allow overrides
       Object.assign(this, AUTOCOMPLETER_TYPES[type]);
+      // sanity check to show which autocompleter is currently on the element
       Object.assign(this, detail); // type, request_params
       this.primer = [];
       this.matches = [];
       this.prepareInputElement();
-      this.inputTarget.value = '';
       this.prepareHiddenInput();
       this.clearHiddenId();
       if (this.ACT_LIKE_SELECT) {
-        this.refreshPrimer(); // directly refresh the primer, no delay
+        // primer is not based on input, so go ahead and request from server.
+        this.focused = true; // so it will draw the pulldown immediately
+        this.refreshPrimer(); // directly refresh the primer, no buffer
         this.element.classList.add('constrained');
       } else {
         this.scheduleRefresh();
@@ -222,22 +227,15 @@ export default class extends Controller {
     // Attach events
     this.addEventListeners();
 
-    // sanity check to show which autocompleter is currently on the element
-    this.inputTarget.setAttribute("data-ajax-url", this.AJAX_URL + this.TYPE);
     if (this.hiddenTarget.value != '') {
       this.wrapTarget.classList.add('has-id');
     } else {
       this.wrapTarget.classList.remove('has-id');
     }
-    // If the primer is not based on input, go ahead and request from server.
-    if (this.ACT_LIKE_SELECT == true && this.primer.length > 0) {
-      this.inputTarget.click();
-      this.inputTarget.focus();
-      // this.inputTarget.value = ' ';
-    }
   }
 
   // When swapping autocompleter types, swap the hidden input identifiers.
+  // and save the current value of the hidden input.
   prepareHiddenInput() {
     const identifier = AUTOCOMPLETER_TYPES[this.TYPE]['model'] + '_id',
       form = this.hiddenTarget.name.split('[')[0];
@@ -786,6 +784,7 @@ export default class extends Controller {
     if (!match) return;
 
     this.hiddenTarget.value = match['id'];
+    this.stored_id = this.hiddenTarget.value;
     Object.keys(match).forEach(key => {
       if (!['id', 'name'].includes(key))
         this.hiddenTarget.dataset[key] = match[key];
@@ -799,6 +798,7 @@ export default class extends Controller {
   // Don't remove target data-attributes.
   clearHiddenId() {
     this.hiddenTarget.value = '';
+    this.stored_id = null;
     Object.keys(this.hiddenTarget.dataset).forEach(key => {
       if (!key.match(/Target/))
         delete this.hiddenTarget.dataset[key];
@@ -809,12 +809,12 @@ export default class extends Controller {
   }
 
   dispatchHiddenIdEvents() {
-    if (this.TYPE == 'location_containing' || this.TYPE == 'location') {
-      // this.hiddenTarget.dispatchEvent(new Event('change'));
+    if ((this.TYPE == 'location_containing' || this.TYPE == 'location') &&
+      this.hiddenTarget.value != this.stored_id) {
+      // console.log("dispatching locationIdChanged event");
       this.dispatch('locationIdChanged', {
         detail: { id: this.hiddenTarget.value }
       });
-      // console.log("dispatched locationIdChanged event");
     }
   }
 
@@ -1124,14 +1124,15 @@ export default class extends Controller {
 
     // token may be refined within this function, so it's a variable.
     let token = this.getSearchToken().toLowerCase(),
-      last_request = this.last_fetch_request;
+      last_request = this.last_fetch_request.toLowerCase();
 
-    // Unless we don't care about input (as with location_containing),
-    // don't make request on empty string, or repeat last request accidentally.
-    if (!this.ACT_LIKE_SELECT) {
-      if (!token || token.length < 1 || last_request == token) {
-        return;
-      }
+    // Don't repeat last request accidentally, and unless we don't care about
+    // input (as with location_containing), don't make request on empty string.
+    // Furthermore, don't keep requesting if someone's trying to delete a
+    // selection already made in act_like_select.
+    if (last_request == token ||
+      (!this.ACT_LIKE_SELECT && (!token || token.length < 1))) {
+      return;
     }
 
     // Memoize this condition, used twice:
@@ -1167,6 +1168,11 @@ export default class extends Controller {
     if (this.ACT_LIKE_SELECT) { query_params["all"] = true; }
     if (this.WHOLE_WORDS_ONLY) { query_params["whole"] = true; }
 
+    // If in select mode (ignoring string), and params haven't changed, bail.
+    const { string, ...new_params } = query_params;
+    if (this.last_fetch_params && this.ACT_LIKE_SELECT &&
+      (JSON.stringify(new_params) === this.last_fetch_params)) return;
+
     // Make request.
     this.sendFetchRequest(query_params);
   }
@@ -1182,7 +1188,10 @@ export default class extends Controller {
     const url = this.AJAX_URL + this.TYPE,
       abort_controller = new AbortController();
 
-    this.last_fetch_request = query_params.string;
+    const { string, ...params } = query_params;
+    this.last_fetch_request = string;
+    this.last_fetch_params = JSON.stringify(params);
+
     if (this.fetch_request)
       abort_controller.abort();
 
@@ -1251,6 +1260,12 @@ export default class extends Controller {
       this.primer = new_primer;
       this.populateMatches();
       this.drawPulldown();
+    }
+
+    // If act like select, focus the input field.
+    if (this.primer.length > 0 && this.ACT_LIKE_SELECT) {
+      this.inputTarget.click();
+      this.inputTarget.focus();
     }
   }
 
