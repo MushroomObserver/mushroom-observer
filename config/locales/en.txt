@@ -1658,7 +1658,7 @@
   form_observations_open_map: "[:SHOW] [:map]"
   form_observations_hide_map: "[:HIDE] [:map]"
   # form_observations_show_point: Show point
-  # form_observations_locate_on_map: Show locality
+  form_observations_locate_on_map: Show locality
   form_observations_clear_map: Clear location
   form_observations_click_point: Click a point on the map to set a location
   form_observations_locality_contains: Localities containing this point
