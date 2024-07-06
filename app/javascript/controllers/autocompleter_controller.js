@@ -817,7 +817,7 @@ export default class extends Controller {
     if (hidden_id === stored_id) {
       return;
     }
-    debugger;
+
     // console.log("dispatching locationIdChanged event");
     this.dispatch('locationIdChanged', {
       detail: { id: this.hiddenTarget.value }
@@ -863,7 +863,6 @@ export default class extends Controller {
   populateMatches() {
     this.verbose("populateMatches()");
     // if (this.ACT_LIKE_SELECT) {
-    //   debugger;
     //   this.current_row = 0;
     // }
 

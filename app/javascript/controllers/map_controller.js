@@ -181,7 +181,7 @@ export default class extends Controller {
         //   this.updateBoundsInputs(bounds)
         // } else
         if (this.hasLatInputTarget) {
-          this.updateLatLngInputs(newPosition)
+          this.updateLatLngInputs(newPosition) // dispatches pointChanged
           // Moving the marker means we're no longer on the image lat/lng
           this.dispatch("reenableBtns")
         }
