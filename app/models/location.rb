@@ -201,15 +201,9 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     )
   }
 
-  scope :contains, # Use named parameters (lat:, lng:, or n:, s:, e:, w:)
+  scope :contains_box, # Use named parameters, n:, s:, e:, w:
         lambda { |**args|
-          if args[:lat] && args[:lng]
-            args => {lat:, lng:}
-            n = s = lat
-            e = w = lng
-          elsif args[:n]
-            args => {n:, s:, e:, w:}
-          end
+          args => {n:, s:, e:, w:}
 
           # Correct for possible floating point rounding
           shrunk_n = n - ROUND_ERROR
