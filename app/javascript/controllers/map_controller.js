@@ -146,7 +146,8 @@ export default class extends Controller {
       position: { lat: set.lat, lng: set.lng },
       map: this.map,
       draggable: this.editable,
-      background: this.marker_color
+      background: this.marker_color,
+      zoomOnClick: false
     }
 
     if (!this.editable) {
@@ -161,6 +162,7 @@ export default class extends Controller {
     }
   }
 
+  // There may not be a marker yet.
   placeMarker(location) {
     if (!this.marker) {
       this.drawMarker(location)
@@ -518,7 +520,7 @@ export default class extends Controller {
   //
 
   // Action called after bufferInputs from lat/lng inputs, to update map marker.
-  // Also via toggleMap, checks if `Lat` & `Lng` fields already populated on load
+  // Also via toggleMap, checks if lat & lng fields already populated on load
   // if so, drops a pin on that location and center. otherwise, checks if place
   // input has been prepopulated and uses that to focus map and drop a marker.
   calculateMarker(event) {
@@ -617,17 +619,14 @@ export default class extends Controller {
   // Action called by the "Open Map" button only.
   // open/close handled by BS collapse
   toggleMap() {
+    // console.log("toggleMap")
+
     if (this.opened) {
       this.opened = false
       this.controlWrapTarget.classList.remove("map-open")
     } else {
       this.opened = true
       this.controlWrapTarget.classList.add("map-open")
-      // this.mapDivTarget.classList.remove("d-none")
-      // this.mapDivTarget.style.backgroundImage = "url(" + this.indicatorUrl + ")"
-      // this.mapClearBtnTarget.classList.remove("d-none")
-      // this.showPointBtnTarget.style.display = "none"
-      // this.showPointBtnTarget.setAttribute("data-action", "map#showMarker")
 
       if (this.map == undefined) {
         this.drawMap()
@@ -636,18 +635,18 @@ export default class extends Controller {
         this.map.fitBounds(this.mapBounds)
       }
 
-      let center
-      if (center = this.validateLatLngInputs(false)) {
-        this.calculateMarker({ detail: { request_params: center } })
-      }
-      // console.log("toggleMap")
-      this.checkForBox() // regardless if point
+      setTimeout(() => {
+        this.checkForBox() // regardless if point
+        this.checkForMarker()
+      }, 500) // wait for map to open
     }
   }
 
-  showMarker() {
-    this.calculateMarker()
-    if (this.marker) this.marker.setVisible(true)
+  checkForMarker() {
+    let center
+    if (center = this.validateLatLngInputs(false)) {
+      this.calculateMarker({ detail: { request_params: center } })
+    }
   }
 
   makeMapClickable() {
