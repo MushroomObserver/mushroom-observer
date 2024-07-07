@@ -5,8 +5,13 @@ class AutoComplete::ForSpeciesList < AutoComplete::ByWord
     lists = SpeciesList.select(:title, :id).distinct.
             where(SpeciesList[:title].matches("#{letter}%").
               or(SpeciesList[:title].matches("% #{letter}%"))).
-            order(title: :asc).pluck(:title, :id)
+            order(title: :asc)
 
-    lists.map! { |name, id| { name:, id: } }
+    # Turn the instances into hashes, and alter title key
+    lists.map do |list|
+      list = list.attributes.symbolize_keys
+      { name: list[:title], id: list[:id] }
+    end
+    # matches.sort_by! { |list| list[:name] }
   end
 end

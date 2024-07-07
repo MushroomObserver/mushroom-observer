@@ -94,6 +94,7 @@ module FormsHelper
       args[:form].label(args[:field]) do
         concat(args[:form].check_box(args[:field], opts))
         concat(args[:label])
+        concat(args[:append]) if args[:append].present?
       end
     end
   end
@@ -156,7 +157,14 @@ module FormsHelper
     tag.div(class: wrap_class, data: wrap_data) do
       concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
-      concat(args[:form].text_field(args[:field], opts))
+      if args[:addon].present?
+        concat(tag.div(class: "input-group") do
+          concat(args[:form].text_field(args[:field], opts))
+          concat(tag.span(args[:addon], class: "input-group-addon"))
+        end)
+      else
+        concat(args[:form].text_field(args[:field], opts))
+      end
       concat(args[:append]) if args[:append].present?
     end
   end
@@ -176,14 +184,16 @@ module FormsHelper
     ac_args = {
       placeholder: :start_typing.l, autocomplete: "off",
       data: { autocompleter_target: "input" }
-    }.deep_merge(args.except(:type, :separator, :textarea))
+    }.deep_merge(args.except(:type, :separator, :textarea,
+                             :hidden, :hidden_data))
     ac_args[:class] = class_names("dropdown", args[:class])
     ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
                             separator: args[:separator],
                             autocompleter_target: "wrap" }
     ac_args[:between] = capture do
-      concat(autocompleter_hidden_field(**args)) if args[:form]
       concat(args[:between])
+      concat(autocompleter_has_id_indicator)
+      concat(autocompleter_hidden_field(**args)) if args[:form]
     end
     ac_args[:append] = capture do
       concat(autocompleter_dropdown)
@@ -197,29 +207,17 @@ module FormsHelper
     end
   end
 
-  def autocompleter_dropdown
-    tag.div(class: "auto_complete dropdown-menu",
-            data: { autocompleter_target: "pulldown",
-                    action: "scroll->autocompleter#scrollList:passive" }) do
-      tag.ul(class: "virtual_list",
-             data: { autocompleter_target: "list" }) do
-        10.times do |i|
-          concat(tag.li(class: "dropdown-item") do
-            link_to("", "#", data: {
-                      row: i, action: "click->autocompleter#selectRow:prevent"
-                    })
-          end)
-        end
-      end
-    end
+  def autocompleter_has_id_indicator
+    link_icon(:check, title: :autocompleter_has_id.l,
+                      classes: "ml-3 px-2 text-success has-id-indicator")
   end
 
-  # minimum args :form, :type
+  # minimum args :form, :type.
+  # Send :hidden to fill the id, :hidden_data to merge with hidden field data
   def autocompleter_hidden_field(**args)
     model = autocompleter_type_to_model(args[:type])
-    args[:form].hidden_field(:"#{model}_id",
-                             value: args[:hidden],
-                             data: { autocompleter_target: "hidden" })
+    data = { autocompleter_target: "hidden" }.merge(args[:hidden_data] || {})
+    args[:form].hidden_field(:"#{model}_id", value: args[:hidden], data:)
   end
 
   def autocompleter_type_to_model(type)
@@ -230,6 +228,22 @@ module FormsHelper
       :name
     else
       type
+    end
+  end
+
+  def autocompleter_dropdown
+    tag.div(class: "auto_complete dropdown-menu",
+            data: { autocompleter_target: "pulldown",
+                    action: "scroll->autocompleter#scrollList:passive" }) do
+      tag.ul(class: "virtual_list", data: { autocompleter_target: "list" }) do
+        10.times do |i|
+          concat(tag.li(class: "dropdown-item") do
+            link_to("", "#", data: {
+                      row: i, action: "click->autocompleter#selectRow:prevent"
+                    })
+          end)
+        end
+      end
     end
   end
 
@@ -543,7 +557,7 @@ module FormsHelper
   def separate_field_options_from_args(args, extras = [])
     exceptions = [
       :form, :field, :label, :class, :width, :inline, :between, :append,
-      :optional, :required, :monospace, :type, :wrap_data
+      :addon, :optional, :required, :monospace, :type, :wrap_data
     ] + extras
 
     args.clone.except(*exceptions)

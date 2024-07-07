@@ -73,7 +73,12 @@ const AUTOCOMPLETER_TYPES = {
     model: 'herbarium'
   },
   location: { // params[:format] handled in controller
+    ACT_LIKE_SELECT: false,
     UNORDERED: true,
+    model: 'location'
+  },
+  location_containing: { // params encoded from dataset
+    ACT_LIKE_SELECT: true,
     model: 'location'
   },
   name: {
@@ -106,6 +111,7 @@ const INTERNAL_OPTS = {
   focused: false,        // is user in text field?
   menu_up: false,        // is pulldown visible?
   old_value: null,       // previous value of input field
+  stored_id: 0,          // id of selected option
   primer: [],            // a server-supplied list of many options
   matches: [],           // list of options currently showing
   current_row: -1,       // index of option currently highlighted (0 = none)
@@ -114,6 +120,7 @@ const INTERNAL_OPTS = {
   current_width: 0,      // current width of menu
   scroll_offset: 0,      // scroll offset
   last_fetch_request: '', // last fetch request we got results for
+  last_fetch_params: '',  // last fetch request we sent, minus the string
   last_fetch_incomplete: true, // did we get all the results we requested?
   fetch_request: null,   // ajax request while underway
   refresh_timer: null,   // timer used to delay update after typing
@@ -165,12 +172,16 @@ export default class extends Controller {
   }
 
   // Swap out autocompleter type (and properties)
-  // Action may be called from a <select> with
+  // Callable externally. Action may be called from a <select> with
   // `data-action: "autocompleter-swap:swap->autocompleter#swap"`
   // or an event dispatched by another controller.
+  // The event may not pass a type, or it may be the same as the current type.
+  // Re-initializing the current type is ok, often means we need to refresh
+  // the primer (as with location_containing a changed lat/lng)
+  // Callable internally if you pass a detail object with a type property.
   swap({ detail }) {
+    // console.log("swapping autocompleter type");
     let type;
-
     if (this.hasSelectTarget) {
       type = this.selectTarget.value;
     } else if (detail?.hasOwnProperty("type")) {
@@ -185,14 +196,22 @@ export default class extends Controller {
       this.element.setAttribute("data-type", type)
       // add dependent properties and allow overrides
       Object.assign(this, AUTOCOMPLETER_TYPES[type]);
+      // sanity check to show which autocompleter is currently on the element
       Object.assign(this, detail); // type, request_params
       this.primer = [];
       this.matches = [];
       this.prepareInputElement();
-      this.inputTarget.value = '';
       this.prepareHiddenInput();
-      this.hiddenTarget.value = '';
-      this.scheduleRefresh(); // refresh the primer
+      this.clearHiddenId();
+      if (this.ACT_LIKE_SELECT) {
+        // primer is not based on input, so go ahead and request from server.
+        this.focused = true; // so it will draw the pulldown immediately
+        this.refreshPrimer(); // directly refresh the primer, no buffer
+        this.element.classList.add('constrained');
+      } else {
+        this.scheduleRefresh();
+        this.element.classList.remove('constrained');
+      }
     }
   }
 
@@ -208,18 +227,15 @@ export default class extends Controller {
     // Attach events
     this.addEventListeners();
 
-    // sanity check to show which autocompleter is currently on the element
-    this.inputTarget.setAttribute("data-ajax-url", this.AJAX_URL + this.TYPE);
-
-    // If the primer is not based on input, go ahead and request from server.
-    if (this.ACT_LIKE_SELECT == true) {
-      this.inputTarget.click();
-      this.inputTarget.focus();
-      this.inputTarget.value = ' ';
+    if (this.hiddenTarget.value != '') {
+      this.wrapTarget.classList.add('has-id');
+    } else {
+      this.wrapTarget.classList.remove('has-id');
     }
   }
 
   // When swapping autocompleter types, swap the hidden input identifiers.
+  // and save the current value of the hidden input.
   prepareHiddenInput() {
     const identifier = AUTOCOMPLETER_TYPES[this.TYPE]['model'] + '_id',
       form = this.hiddenTarget.name.split('[')[0];
@@ -411,7 +427,8 @@ export default class extends Controller {
 
   // ------------------------------ Timers ------------------------------
 
-  // Schedule primer to be refreshed after polite delay.
+  // Schedule matches to be recalculated from primer, or even primer refreshed,
+  // after a polite delay. (Primer only refreshed if first letter changes.)
   scheduleRefresh() {
     this.verbose("scheduleRefresh()");
     this.clearRefresh();
@@ -420,8 +437,8 @@ export default class extends Controller {
       // this.debug("refresh_timer(" + this.inputTarget.value + ")");
       this.old_value = this.inputTarget.value;
       if (this.AJAX_URL)
-        this.refreshPrimer();
-      this.populateMatches();
+        this.refreshPrimer(); // async, anything after this executes immediately
+      this.populateMatches(); // still necessary if primer unchanged, as likely
       this.drawPulldown();
     }), this.REFRESH_DELAY * 1000);
   }
@@ -577,7 +594,7 @@ export default class extends Controller {
     this.inputTarget.focus();
     this.focused = true;
     this.inputTarget.value = new_val;
-    this.hiddenTarget.value = new_id;
+    this.assignHiddenId(new_data);
     this.setSearchToken(new_val);
     this.ourChange(false);
   }
@@ -635,8 +652,8 @@ export default class extends Controller {
 
     if (this.log) {
       this.debug(
-        "Redraw: matches=" + matches.length +
-        ", scroll=" + scroll + ", cursor=" + cur
+        "Redraw: matches=" + this.matches.length +
+        ", scroll=" + scroll + ", cursor=" + this.current_row
       );
     }
     // Get row height if haven't been able to yet.
@@ -665,11 +682,13 @@ export default class extends Controller {
         const { name, ...new_data } = this.matches[i + this.scroll_offset];
         stored = this.escapeHTML(name);
         if (text != stored) {
+          if (stored === " ") stored = "&nbsp;";
           link.innerHTML = stored;
           // Assign the dataset of matches[i + this.scroll_offset], minus name
           Object.keys(new_data).forEach(key => {
             link.dataset[key] = new_data[key];
           });
+          link.classList.remove('d-none');
         }
       } else {
         if (text != '') {
@@ -678,6 +697,7 @@ export default class extends Controller {
             if (!['row', 'action'].includes(key))
               delete link.dataset[key];
           });
+          link.classList.add('d-none');
         }
       }
     }
@@ -753,10 +773,55 @@ export default class extends Controller {
       this.matches.find((m) => m['name'] === this.inputTarget.value.trim());
 
     if (perfect_match) {
-      this.hiddenTarget.value = perfect_match['id'];
+      this.assignHiddenId(perfect_match);
     } else {
-      this.hiddenTarget.value = '';
+      this.clearHiddenId();
     }
+  }
+
+  // Assigns not only the ID, but also any data attributes of selected row.
+  assignHiddenId(match) {
+    if (!match) return;
+    // store the old value of the hidden input
+    this.stored_id = this.hiddenTarget.value;
+    // update the new value of the hidden input
+    this.hiddenTarget.value = match['id'];
+    // assign the dataset of the selected row to the hidden input
+    Object.keys(match).forEach(key => {
+      if (!['id', 'name'].includes(key))
+        this.hiddenTarget.dataset[key] = match[key];
+    });
+
+    this.wrapTarget.classList.add('has-id');
+    this.dispatchHiddenIdEvents();
+  }
+
+  // Clears not only the ID, but also any data attributes of selected row.
+  // Don't remove target data-attributes.
+  clearHiddenId() {
+    this.hiddenTarget.value = '';
+    this.stored_id = 0;
+    Object.keys(this.hiddenTarget.dataset).forEach(key => {
+      if (!key.match(/Target/))
+        delete this.hiddenTarget.dataset[key];
+    });
+
+    this.wrapTarget.classList.remove('has-id');
+    this.dispatchHiddenIdEvents();
+  }
+
+  dispatchHiddenIdEvents() {
+    const hidden_id = parseInt(this.hiddenTarget.value || 0),
+      stored_id = parseInt(this.stored_id || 0);
+
+    if (hidden_id === stored_id) {
+      return;
+    }
+
+    // console.log("dispatching locationIdChanged event");
+    this.dispatch('locationIdChanged', {
+      detail: { id: this.hiddenTarget.value }
+    });
   }
 
   // Hide pulldown options.
@@ -797,8 +862,6 @@ export default class extends Controller {
   // There are four strategies for refining the list, below.
   populateMatches() {
     this.verbose("populateMatches()");
-    if (this.ACT_LIKE_SELECT)
-      this.current_row = 0;
 
     // Remember which option used to be highlighted.
     const last = this.current_row < 0 ? null : this.matches[this.current_row];
@@ -826,11 +889,25 @@ export default class extends Controller {
 
   // When "acting like a select" make it display all options in the
   // order given right from the moment they enter the field,
-  // and pick the first one.
+  // and pick the first one, as long as there isn't one already selected.
+  // They can still override the selections by clearing the field and typing.
   populateSelect() {
+    // Laborious but necessary(?) way to check if these are the same options.
+    const match_names = this.matches.map((m) => m['name']),
+      primer_names = this.primer.map((m) => m['name']);
+
+    if (match_names.every(item => primer_names.includes(item)) &&
+      primer_names.every(item => match_names.includes(item))) return;
+
     this.matches = this.primer;
-    if (this.matches.length > 0)
+    const _already_selected = this.matches.find(
+      (m) => m['name'] === this.inputTarget.value
+    );
+
+    if (this.matches.length > 0 && !_already_selected) {
       this.inputTarget.value = this.matches[0]['name'];
+      this.assignHiddenId(this.matches[0]);
+    }
   }
 
   // Grab all matches, doing exact match, ignoring number of words.
@@ -1050,15 +1127,16 @@ export default class extends Controller {
 
     // token may be refined within this function, so it's a variable.
     let token = this.getSearchToken().toLowerCase(),
-      last_request = this.last_fetch_request;
+      last_request = this.last_fetch_request.toLowerCase();
 
-    // Don't make request on empty string!
-    if (!this.ACT_LIKE_SELECT && (!token || token.length < 1))
+    // Don't repeat last request accidentally, and unless we don't care about
+    // input (as with location_containing), don't make request on empty string.
+    // Furthermore, don't keep requesting if someone's trying to delete a
+    // selection already made in act_like_select.
+    if (!this.ACT_LIKE_SELECT &&
+      (last_request == token || (!token || token.length < 1))) {
       return;
-
-    // Don't repeat last request accidentally!
-    if (last_request == token)
-      return;
+    }
 
     // Memoize this condition, used twice:
     // "is the new search token an extension of the previous search string?"
@@ -1093,6 +1171,11 @@ export default class extends Controller {
     if (this.ACT_LIKE_SELECT) { query_params["all"] = true; }
     if (this.WHOLE_WORDS_ONLY) { query_params["whole"] = true; }
 
+    // If in select mode (ignoring string), and params haven't changed, bail.
+    const { string, ...new_params } = query_params;
+    if (this.last_fetch_params && this.ACT_LIKE_SELECT &&
+      (JSON.stringify(new_params) === this.last_fetch_params)) return;
+
     // Make request.
     this.sendFetchRequest(query_params);
   }
@@ -1108,7 +1191,10 @@ export default class extends Controller {
     const url = this.AJAX_URL + this.TYPE,
       abort_controller = new AbortController();
 
-    this.last_fetch_request = query_params.string;
+    const { string, ...params } = query_params;
+    this.last_fetch_request = string;
+    this.last_fetch_params = JSON.stringify(params);
+
     if (this.fetch_request)
       abort_controller.abort();
 
@@ -1148,10 +1234,12 @@ export default class extends Controller {
     this.fetch_request = null;
     // Record string actually used to do matching: might be less strict
     // than one sent in request.
-    this.last_fetch_request = new_primer[0]['name'];
+    if (new_primer.length > 0)
+      this.last_fetch_request = new_primer[0]['name'];
 
     // Check for trailing "..." signaling incomplete set of results.
-    if (new_primer[new_primer.length - 1]['name'] == "...") {
+    if (new_primer.length > 1 &&
+      new_primer[new_primer.length - 1]['name'] == "...") {
       this.last_fetch_incomplete = true;
       new_primer = new_primer.slice(0, new_primer.length - 1);
       // if (this.focused)
@@ -1175,6 +1263,12 @@ export default class extends Controller {
       this.primer = new_primer;
       this.populateMatches();
       this.drawPulldown();
+    }
+
+    // If act like select, focus the input field.
+    if (this.primer.length > 0 && this.ACT_LIKE_SELECT) {
+      this.inputTarget.click();
+      this.inputTarget.focus();
     }
   }
 

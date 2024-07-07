@@ -126,3 +126,43 @@ form {
     vertical-align: middle;
   }
 }
+
+.has-id-indicator {
+  display: none;
+}
+
+.has-id {
+  .has-id-indicator {
+    display: inline-block;
+  }
+}
+
+.constrained-label {
+  display: none;
+}
+
+.constrained {
+  .unconstrained-label {
+    display: none;
+  }
+  .constrained-label {
+    display: inline-block;
+  }
+}
+
+.map-point,
+.map-location,
+.map-hide {
+  display: none;
+}
+
+.map-open {
+  .map-show {
+    display: none;
+  }
+  .map-point,
+  .map-location,
+  .map-hide {
+    display: inline-block;
+  }
+}

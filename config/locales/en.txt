@@ -656,10 +656,13 @@
 
   # Labels for fields answering: "What did you observe?", "When did you observe
   # it?", "Where did you observe it?", and "Who observed it?".
+  # "WHERE_GROUP" is used for the whole group of lat/lng and place_name.
   WHAT: Scientific Name
   what: scientific name
   WHEN: When
   when: when
+  WHERE_GROUP: Where
+  where_group: where
   WHERE: Locality
   where: locality
   WHO: Who
@@ -731,6 +734,8 @@
   send: send
   SHOW: Show
   show: show
+  HIDE: Hide
+  hide: hide
   # submit a form
   SUBMIT: Submit
   submit: submit
@@ -1391,6 +1396,7 @@
 
   # autocompleters
   start_typing: Start typing...
+  autocompleter_has_id: Match found
 
   # emails/ask_observation_question
   ask_observation_question_title: Question about [name]
@@ -1639,7 +1645,6 @@
   form_observations_field_code: for field slip
   form_observations_specimen_available: Specimen Available
   form_observations_is_collection_location: Is this location where it was collected?
-  form_observations_click_on_map: Click on map for geolocation
   form_observations_gps_hidden: Hide exact coordinates?
   form_observations_upload_images: Upload Images
   form_observations_uploading_images: Uploading Images
@@ -1650,16 +1655,18 @@
   form_observations_lat_long_help: "Optional GPS location within **[:WHERE]**. Latitude must be -90.0 to 90.0;  longitude must be -180.0 to 180.0. Elevation will be converted to meters. If you choose to provide this data please make it as accurate as possible. Examples: \"34.1164\" = \"34°6&apos;59&quot;N\", \"-118.1459\" = \"118 8.754 W\", \"239 m\" = \"784 ft.\""
   form_observations_log_change: Log Change
   form_observations_is_collection_location_help: Check when the location is where the mushroom was growing.  Uncheck when it is only where the mushroom was seen (e.g., mushroom fairs, grocery, foray id table where collection location is unknown etc.).
-  form_observations_open_map: Find point on map
-  form_observations_clear_map: Clear map
-  form_observations_locate_on_map: Locate area on map
+  form_observations_open_map: "[:SHOW] [:map]"
+  form_observations_hide_map: "[:HIDE] [:map]"
+  form_observations_clear_map: Clear location
+  form_observations_click_point: Click a point on the map to set a location
+  form_observations_locality_contains: Localities containing this point
   form_observations_notes_help: Please include any additional information you can think of about this observation that isn't clear from the photographs, e.g., habitat, substrate or nearby trees; distinctive texture, scent, taste, staining or bruising; results of chemical or microscopic analyses, etc.
   form_observations_remove_image_confirm: Are you sure you want to remove this image?  This will only remove this image from this observation.  If it is attached to other observations, it will remain attached to them.
   form_observations_specimen_available_help: Check when there is a preserved specimen available for further study.
   form_observations_upload_help: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation.
   form_observations_upload_help_multi_select: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation. In the file select dialog you can select multiple images at a time.  You can also continue to add additional images by clicking the button below.
-  form_observations_where_help: "Place where the Observation was made. **In the US this should be at least as precise as the county.**\nInclude administrative divisons ordered from smallest to largest, ending with the full name of the country, except use 'USA' for the United States of America.\nExamples:\n&nbsp;&nbsp; [loc1]\n&nbsp;&nbsp; [loc2]"
-  form_observations_locate_on_map_help: Use the Locate on Map Button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude.
+  form_observations_where_help: "Place where the Observation was made. **In the US this should be at least as precise as the county.**\n&nbsp;\nInclude administrative divisons ordered from smallest to largest, ending with the full name of the country, except use 'USA' for the United States of America.\nExamples:\n&nbsp;&nbsp; [loc1]\n&nbsp;&nbsp; [loc2]"
+  form_observations_locate_on_map_help: "Use the **[:form_observations_open_map]** button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude."
   form_observations_dubious_help: Click '[button]' to use this location name or edit the text below to correct any typo.
   form_observations_project_help: Check any projects you wish to attach this observation to.  All images you upload will also automatically be attached to these projects, too.
   form_observations_list_help: Check any species lists you would like to add this observation to.

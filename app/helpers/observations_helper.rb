@@ -230,4 +230,17 @@ module ObservationsHelper
       tag.div(notes)
     end
   end
+
+  def observation_location_help
+    loc1 = "Albion, Mendocino Co., California, USA"
+    loc2 = "Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil"
+    if User.current_location_format == "scientific"
+      loc1 = Location.reverse_name(loc1)
+      loc2 = Location.reverse_name(loc2)
+    end
+
+    [tag.div(:form_observations_where_help.t(loc1: loc1, loc2: loc2),
+             class: "mb-3"),
+     tag.div(:form_observations_locate_on_map_help.t)].safe_join
+  end
 end

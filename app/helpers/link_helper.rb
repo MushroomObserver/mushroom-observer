@@ -117,7 +117,7 @@ module LinkHelper
     return "" unless (glyph = LINK_ICON_INDEX[type])
 
     text = ""
-    opts = { class: "glyphicon glyphicon-#{glyph} #{classes}" }
+    opts = { class: "glyphicon glyphicon-#{glyph} link-icon #{classes}" }
 
     if title.present?
       tooltip_opts = { data: { toggle: "tooltip", title: title } }
@@ -154,13 +154,15 @@ module LinkHelper
     adjust: "resize-vertical",
     make_default: "star",
     publish: "upload",
+    check: "ok-circle",
     deprecate: "ok-circle", # approved name needs to look "approved"
     approve: "exclamation-sign", # deprecated name needs to look "deprecated"
     synonyms: "random",
     tracking: "bullhorn",
     manage_lists: "indent-left",
     observations: "tags",
-    print: "print"
+    print: "print",
+    globe: "globe"
   }.freeze
 
   # button to destroy object

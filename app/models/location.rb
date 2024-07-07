@@ -189,17 +189,34 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
             )
           end
         }
-  scope :show_includes, lambda {
-    strict_loading.includes(
-      { comments: :user },
-      { description: { comments: :user } },
-      { descriptions: [:authors, :editors] },
-      :interests,
-      :observations,
-      :rss_log,
-      :versions
-    )
-  }
+  scope :contains_point, # Use named parameters (lat:, lng:), any order
+        lambda { |**args|
+          args => {lat:, lng:}
+          where(
+            (Location[:south]).lteq(lat + FLOAT_ERROR).
+              and((Location[:north]).gteq(lat - FLOAT_ERROR)).
+            and(
+              Location[:west].lteq(lng + FLOAT_ERROR).
+                and(Location[:east].gteq(lng - FLOAT_ERROR)).
+              or(
+                Location[:west].gteq(lng - FLOAT_ERROR).
+                  and(Location[:east].lteq(lng + FLOAT_ERROR))
+              )
+            )
+          )
+        }
+  scope :show_includes,
+        lambda {
+          strict_loading.includes(
+            { comments: :user },
+            { description: { comments: :user } },
+            { descriptions: [:authors, :editors] },
+            :interests,
+            :observations,
+            :rss_log,
+            :versions
+          )
+        }
 
   scope :contains_box, # Use named parameters, n:, s:, e:, w:
         lambda { |**args|
