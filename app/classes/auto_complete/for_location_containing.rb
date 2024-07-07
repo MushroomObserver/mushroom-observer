@@ -19,7 +19,7 @@ class AutoComplete::ForLocationContaining < AutoComplete::ByWord
   def rough_matches(_letter)
     locations =
       Location.select(:name, :id, :north, :south, :east, :west).
-      contains_point(lat: lat, lng: lng).reject do |loc|
+      contains_point(lat: lat.to_f, lng: lng.to_f).reject do |loc|
         location_box(loc).vague?
       end.sort_by! do |loc|
         location_box(loc).box_area
