@@ -1479,6 +1479,7 @@
   download_observations_utf16: UTF-16 (best for Windows 7 and up)
   download_observations_print_labels_header: Or you can print labels for the selected observations
   download_observations_print_labels: Print Labels
+  download_observations_too_many_results: You are trying to download too many Observations. Please see <a href="https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md#csv-files" target="_new">CSV Files</a> for an alternative.
 
   # location/edit_location
   edit_location_title: "[:edit_object(type=:location)]"
