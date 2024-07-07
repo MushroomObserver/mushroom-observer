@@ -14,8 +14,10 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 
 | File | iNat Obs | fotos | location | Other |
 | ---- | -------- | ----- | -------- | ----- |
+| arrhenia_sp_NYO2.txt | [184219885](https://www.inaturalist.org/observations/184219885) | 1 | public | **mo-style Provisional Species Name**, **DNA** |
 | ceanothus_cordulatus.txt | [219631412](https://www.inaturalist.org/observations/219631412) | 1 | public | **Plant** |
 | coprinus.txt | [213450312](https://www.inaturalist.org/observations/213450312) | 1 | **obscured** | Needs ID |
+| donadina_PNW01.txt | [212320801](https://www.inaturalist.org/observations/212320801) | 1 | public | **non-mo-style Provisional Species Name**, **DNA** |
 | evernia_no_photos.txt | [216357655](https://www.inaturalist.org/observations/216357655) | 0 | public | Casual, lichen, no fields|
 | fuligo_septica.txt | [219783802](https://www.inaturalist.org/observations/219783802) | 1 | public | slime mold **Protozoa** |
 | gyromitra_ancilis.txt | [216745568](https://www.inaturalist.org/observations/216745568) | 3 | public | **cc-by license**, **many projects** |
@@ -37,11 +39,10 @@ iNat fungal Obss with these fields/licenses
 - Notes
 - Observation Fields
   - sequence (need a variety of these; there are many ways to add sequences to iNat Obss)
-  - provisional name
   - sensu lato
   - various dna fields (DNA Barcode ITS, Collector, Collection Number)
-- Annotations
 - Activity
+- Annotations
 - Public Domain
 <https://api.inaturalist.org/v1/observations?identified=true&license=cc0&rank=species&iconic_taxa=Fungi&quality_grade=research&page=1&order=desc&order_by=created_at&only_id=true>
 - nonderiv license
