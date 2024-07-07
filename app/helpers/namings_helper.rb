@@ -256,9 +256,12 @@ module NamingsHelper
   def naming_vote_form(naming, vote, context: "blank")
     vote_id = vote&.id
     method = vote_id ? :patch : :post
-    menu = Vote.confidence_menu
     can_vote = check_permission(naming)
-    menu = [Vote.no_opinion] + menu if !can_vote || !vote || vote&.value&.zero?
+    menu = if !can_vote || !vote || vote&.value&.zero?
+             Vote.opinion_menu
+           else
+             Vote.confidence_menu
+           end
     localizations = {
       lose_changes: :show_namings_lose_changes.l.tr("\n", " "),
       saving: :show_namings_saving.l

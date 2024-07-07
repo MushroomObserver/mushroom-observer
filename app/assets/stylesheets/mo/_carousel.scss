@@ -21,17 +21,9 @@
     width: 100%;
     margin-right: -100%;
 
-    > div {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      object-position: center;
-    }
-
     .carousel-caption {
       @extend .bg-legible, .py-2;
-      // position: absolute;
+      position: absolute;
       bottom: 0;
       left: 50%;
       right: auto;
@@ -84,15 +76,22 @@
   margin-bottom: 5rem; // fullscreen and caption/voting
   background: none !important;
   font-size: 2rem;
-  color: #bbb;
+  color: $white;
+  opacity: 0.75;
 
   .btn {
     font-size: inherit;
+    &:hover,
+    &:focus {
+      color: inherit;
+      text-shadow: 3px 3px 3px rgba($black, 0.5);
+    }
   }
 
   &:hover,
   &:focus {
-    color: #eee;
+    // color: rgba($white, 1);
+    opacity: 1;
   }
 }
 
@@ -111,6 +110,7 @@
   // height: 6vw;
   overflow-x: auto;
   white-space: nowrap;
+  line-height: 0;
 
   li {
     display: inline-block;
@@ -126,7 +126,118 @@
     &.active {
       width: 6vw;
       height: 6vw;
-      opacity: 0.6;
+      opacity: 0.66;
+    }
+  }
+}
+
+
+.image-form-carousel {
+  // padding-bottom: 100%;
+
+  // @media screen and (min-width: 768px) {
+  //   padding-bottom: 50%;
+  // }
+
+  .carousel-inner {
+    .item {
+      padding-bottom: 0;
+    }
+
+    // &:not(:has(.item)) {
+    //   display: none;
+
+    //   .carousel-control-wrap {
+    //     display: none;
+    //   }
+    // }
+  }
+
+  .image-position {
+    position: relative;
+    padding-bottom: 100%;
+    border-bottom: 1px solid $panel-inner-border;
+
+    @media screen and (min-width: 992px) {
+      // padding-bottom: 50%;
+      border-bottom: none;
+      border-right: 1px solid $panel-inner-border;
+    }
+  }
+
+  .form-panel {
+    padding: 1rem 1.5rem;
+
+    @media screen and (min-width: 992px) {
+      padding-top: 4.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  // This keeps the carousel controls on top of the image, not the form
+  .carousel-control-wrap {
+    position: absolute;
+    top: 6rem;
+    bottom: calc(50% - 6rem);
+    left: 0;
+    width: 100%;
+    padding-bottom: calc(50% - 12rem);
+
+    @media screen and (min-width: 992px) {
+      width: 50%;
+      bottom: 6rem;
+    }
+  }
+
+  // .carousel-indicators {
+  //   &:not(:has(.carousel-indicator)) {
+  //     display: none;
+  //   }
+  // }
+  //   position: absolute;
+  //   bottom: 10px;
+  //   left: 50%;
+  //   z-index: 15;
+  //   width: 60%;
+  //   padding-left: 0;
+  //   margin-left: -30%;
+  //   text-align: center;
+  //   list-style: none;
+
+  //   li {
+  //     display: inline-block;
+  //     width: 1.25rem;
+  //     height: 1.25rem;
+  //     margin: 0.5rem;
+  //     text-indent: -999px;
+  //     cursor: pointer;
+  //     background-color: rgba($white, 1);
+  //     border: 1px solid rgba($black, 0.75);
+  //     border-radius: 50%;
+  //     opacity: 0.9;
+
+  //     &.active {
+  //       background-color: rgba($white, 0.45);
+  //       border: 1px solid rgba($white, 0.75);
+  //     }
+  //   }
+  // }
+}
+
+.thumb_img_btn {
+  .set_thumb_img_text {
+    display: inline;
+  }
+  .is_thumb_img_text {
+    display: none;
+  }
+
+  &.active {
+    .set_thumb_img_text {
+      display: none;
+    }
+    .is_thumb_img_text {
+      display: inline;
     }
   }
 }

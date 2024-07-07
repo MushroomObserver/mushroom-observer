@@ -95,7 +95,7 @@ module SpeciesLists
       @place_name = @species_list.place_name
       @dubious_where_reasons = []
       unless (@place_name != params[:approved_where]) &&
-             @species_list.location.nil?
+             @species_list.location_id.nil?
         return
       end
 
@@ -172,7 +172,7 @@ module SpeciesLists
       update_projects(@species_list, params[:project])
       construct_observations(@species_list, sorter)
 
-      if @species_list.location.nil?
+      if @species_list.location_id.nil?
         redirect_to(new_location_path(where: @place_name,
                                       set_species_list: @species_list.id))
       else

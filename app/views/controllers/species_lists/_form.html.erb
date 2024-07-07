@@ -24,9 +24,9 @@
   <div class="form-group mt-3">
     <%= fields_for(:list) do |f_l|
       autocompleter_field(
-        form: f_l, field: :members, rows: 8, value: @list_members,
+        form: f_l, field: :members, type: :name, rows: 8, value: @list_members,
         label: "#{:form_species_lists_write_in_species.t}:",
-        autocomplete: :name, separator: "\n", textarea: true
+        separator: "\n", textarea: true
       )
     end %>
   </div>
@@ -44,8 +44,8 @@
   <%= render(partial: "shared/form_location_feedback",
              locals: { button: button } ) %>
 
-  <%= autocompleter_field(form: f, field: :place_name, between: :required,
-                          label: "#{:WHERE.l}:", autocomplete: :location) %>
+  <%= autocompleter_field(form: f, field: :place_name, type: :location,
+                          label: "#{:WHERE.l}:", between: :required) %>
 
   <%= render(partial: "species_lists/form/fields_for_member",
              locals: { f: f }) %>

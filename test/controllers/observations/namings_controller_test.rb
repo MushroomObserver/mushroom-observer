@@ -44,6 +44,7 @@ module Observations
       assert_empty(nam.votes)
       login(nam.user.login)
       get(:edit, params: { observation_id: nam.observation_id, id: nam.id })
+      assert_select("#naming_vote_value", text: /#{:vote_no_opinion.l}/)
     end
 
     def test_update_observation_new_name
@@ -535,7 +536,7 @@ module Observations
       login("dick")
       post(:create, params: params)
       assert_response(:success) # really means failed
-      what = @controller.instance_variable_get(:@what)
+      what = @controller.instance_variable_get(:@given_name)
       assert_equal("Agaricus campestris L.", what)
     end
 

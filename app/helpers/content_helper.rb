@@ -127,7 +127,7 @@ module ContentHelper
 
     tag.div(
       class: class_names("panel panel-default", args[:class]),
-      **args.except(:class, :inner_class, :inner_id, :heading)
+      **args.except(:class, :inner_class, :inner_id, :heading, :heading_links)
     ) do
       concat(heading)
       if content.present?

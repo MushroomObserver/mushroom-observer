@@ -485,15 +485,20 @@ export default class extends Controller {
 
     this.opened = true
 
-    this.mapDivTarget.classList.remove("hidden")
+    this.mapDivTarget.classList.remove("d-none")
     this.mapDivTarget.style.backgroundImage = "url(" + this.indicatorUrl + ")"
 
-    this.mapClearTarget.classList.remove("hidden")
-    this.mapOpenTarget.style.display = "none"
+    // this.mapClearTarget.classList.remove("d-none")
+    // this.mapOpenTarget.style.display = "none"
+    this.mapOpenTarget.setAttribute("data-action", "map#showMarker")
 
     this.drawMap()
     this.makeMapClickable()
     this.calculateMarker()
+  }
+
+  showMarker() {
+    this.marker.setVisible(true)
   }
 
   makeMapClickable() {
@@ -514,12 +519,12 @@ export default class extends Controller {
 
   // Action called from the "Clear Map" button
   clearMap() {
-    const inputTargets = [
-      this.latInputTarget, this.lngInputTarget, this.altInputTarget
-    ]
-    inputTargets.forEach((element) => {
-      element.value = ''
-    })
+    // const inputTargets = [
+    //   this.latInputTarget, this.lngInputTarget, this.altInputTarget
+    // ]
+    // inputTargets.forEach((element) => {
+    //   element.value = ''
+    // })
     this.marker.setVisible(false)
   }
 

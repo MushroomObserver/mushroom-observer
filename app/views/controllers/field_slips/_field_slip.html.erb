@@ -1,5 +1,4 @@
 <div id="<%= dom_id field_slip %>">
-  <p>
     <strong><%= :PROJECT.t %>:</strong>
     <% if field_slip.project %>
       <%= link_to_object(field_slip.project) %>
@@ -7,13 +6,36 @@
       <%= :field_slip_no_project.t %>
     <% end %>
     <br/>
-    <% if field_slip.user %>
-      <strong><%= :field_slip_creator.t %>:</strong>
-      <%= link_to(field_slip.user.legal_name, user_path(field_slip.user_id)) %><br/>
+    <% if field_slip.observation
+       obs = field_slip.observation %>
+      <strong><%= :DATE.t %>: </strong><%= obs.when %><br/>
+      <strong><%= :COLLECTOR.t %>: </strong><%= obs.collector.tl %><br/>
+      <strong><%= :LOCATION.t %>: </strong><%= location_link(obs.where, obs.location, nil, true) %><br/>
+      <strong><%= :NOTES.t %>:</strong>
+      <div class="ml-5 mb-3">
+        <% field_slip.notes_fields.each do |field| %>
+          <% if field.value.present? %>
+            <strong><%= field.label %>: </strong><%= field.value.tl %><br/>
+          <% end %>
+        <% end %>
+      </div>
+      <strong><%= :ID.t %>: </strong><%= obs.field_slip_id.tl %><br/>
+      <strong><%= :ID_BY.t %>: </strong><%= obs.field_slip_id_by.tl %><br/>
+      <% if obs.other_codes != "" %>
+        <strong><%= :field_slip_other_codes.t %>: </strong><%= obs.other_codes.tl %><br/>
+      <% end %>
     <% end %>
+    <br/>
+
+    <% if (usr = field_slip.user) %>
+      <strong><%= :field_slip_creator.t %>:</strong>
+      <%= user_link(usr, usr.legal_name) %><br/>
+    <% end %>
+
     <strong><%= :OBSERVATION.t %>:</strong>
-    <% if field_slip.observation %>
-      <%= link_to(field_slip.observation.unique_format_name.t, observation_path(field_slip.observation)) %>
+    <% if (obs = field_slip.observation) %>
+      <%= link_to(obs.unique_format_name.t, observation_path(obs),
+                  class: "observation_link_#{obs.id}") %>
       <ul class="row list-unstyled">
         <%= render(partial: "shared/matrix_box",
                    locals: { object: field_slip.observation,
@@ -22,5 +44,4 @@
     <% else %>
       <%= :field_slip_no_observation.t %>
     <% end %>
-  </p>
 </div>
