@@ -150,7 +150,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
-  ROUND_ERROR = 0.0005
+  FLOAT_ERROR = 0.0005
 
   # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
   scope :name_includes,
@@ -206,10 +206,10 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
           args => {n:, s:, e:, w:}
 
           # Correct for possible floating point rounding
-          shrunk_n = n - ROUND_ERROR
-          shrunk_s = s + ROUND_ERROR
-          shrunk_e = e - ROUND_ERROR
-          shrunk_w = w + ROUND_ERROR
+          shrunk_n = n - FLOAT_ERROR
+          shrunk_s = s + FLOAT_ERROR
+          shrunk_e = e - FLOAT_ERROR
+          shrunk_w = w + FLOAT_ERROR
 
           # w/e    | Location     | Location contains w/e
           # ______ | ____________ | ______________________
