@@ -184,7 +184,8 @@ module FormsHelper
     ac_args = {
       placeholder: :start_typing.l, autocomplete: "off",
       data: { autocompleter_target: "input" }
-    }.deep_merge(args.except(:type, :separator, :textarea, :hidden_data))
+    }.deep_merge(args.except(:type, :separator, :textarea,
+                             :hidden, :hidden_data))
     ac_args[:class] = class_names("dropdown", args[:class])
     ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
                             separator: args[:separator],
@@ -206,29 +207,13 @@ module FormsHelper
     end
   end
 
-  def autocompleter_dropdown
-    tag.div(class: "auto_complete dropdown-menu",
-            data: { autocompleter_target: "pulldown",
-                    action: "scroll->autocompleter#scrollList:passive" }) do
-      tag.ul(class: "virtual_list",
-             data: { autocompleter_target: "list" }) do
-        10.times do |i|
-          concat(tag.li(class: "dropdown-item") do
-            link_to("", "#", data: {
-                      row: i, action: "click->autocompleter#selectRow:prevent"
-                    })
-          end)
-        end
-      end
-    end
-  end
-
   def autocompleter_has_id_indicator
     link_icon(:check, title: :autocompleter_has_id.l,
                       classes: "ml-3 px-2 text-success has-id-indicator")
   end
 
-  # minimum args :form, :type. Send :hidden_data to merge with hidden field data
+  # minimum args :form, :type.
+  # Send :hidden to fill the id, :hidden_data to merge with hidden field data
   def autocompleter_hidden_field(**args)
     model = autocompleter_type_to_model(args[:type])
     data = { autocompleter_target: "hidden" }.merge(args[:hidden_data] || {})
@@ -243,6 +228,22 @@ module FormsHelper
       :name
     else
       type
+    end
+  end
+
+  def autocompleter_dropdown
+    tag.div(class: "auto_complete dropdown-menu",
+            data: { autocompleter_target: "pulldown",
+                    action: "scroll->autocompleter#scrollList:passive" }) do
+      tag.ul(class: "virtual_list", data: { autocompleter_target: "list" }) do
+        10.times do |i|
+          concat(tag.li(class: "dropdown-item") do
+            link_to("", "#", data: {
+                      row: i, action: "click->autocompleter#selectRow:prevent"
+                    })
+          end)
+        end
+      end
     end
   end
 
