@@ -862,9 +862,6 @@ export default class extends Controller {
   // There are four strategies for refining the list, below.
   populateMatches() {
     this.verbose("populateMatches()");
-    // if (this.ACT_LIKE_SELECT) {
-    //   this.current_row = 0;
-    // }
 
     // Remember which option used to be highlighted.
     const last = this.current_row < 0 ? null : this.matches[this.current_row];
@@ -893,6 +890,7 @@ export default class extends Controller {
   // When "acting like a select" make it display all options in the
   // order given right from the moment they enter the field,
   // and pick the first one, as long as there isn't one already selected.
+  // They can still override the selections by clearing the field and typing.
   populateSelect() {
     // Laborious but necessary(?) way to check if these are the same options.
     const match_names = this.matches.map((m) => m['name']),

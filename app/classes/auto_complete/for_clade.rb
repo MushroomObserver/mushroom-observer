@@ -7,6 +7,7 @@ class AutoComplete::ForClade < AutoComplete::ByString
              where(Name[:text_name].matches("#{letter}%")).order(rank: :desc).
              select(:text_name, :rank, :id, :deprecated)
 
+    # Turn the instances into hashes
     matches = clades.map do |clade|
       clade = clade.attributes.symbolize_keys
       clade[:deprecated] = clade[:deprecated] || false

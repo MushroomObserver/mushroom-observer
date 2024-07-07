@@ -13,6 +13,7 @@ class AutoComplete::ForHerbarium < AutoComplete::ByWord
              else(Herbarium[:code]).asc, Herbarium[:name].asc
       )
 
+    # Turn the instances into hashes, and figure out what name to display
     matches = herbaria.map do |herbarium|
       herbarium = herbarium.attributes.symbolize_keys
       herbarium[:name] = if herbarium[:code].blank?
