@@ -595,6 +595,7 @@ export default class extends Controller {
             request_params: { lat, lng },
           }
         })
+        // console.log("dispatchPointChanged")
       }, 1000)
 
       // if (this.placeInputTarget.value === '') {

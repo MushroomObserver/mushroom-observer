@@ -1135,8 +1135,8 @@ export default class extends Controller {
     // input (as with location_containing), don't make request on empty string.
     // Furthermore, don't keep requesting if someone's trying to delete a
     // selection already made in act_like_select.
-    if (last_request == token ||
-      (!this.ACT_LIKE_SELECT && (!token || token.length < 1))) {
+    if (!this.ACT_LIKE_SELECT &&
+      (last_request == token || (!token || token.length < 1))) {
       return;
     }
 
