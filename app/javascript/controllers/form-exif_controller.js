@@ -153,13 +153,10 @@ export default class extends Controller {
   // Pass an element to use from button or itemTargetConnected callback.
   // Also disables the "transfer" button for this element
   transferExifToObsFields(element) {
-    // disables the button, even when called programmatically
-    this.selectExifButton(element);
     const _exif_data = element.dataset,
       _obs_lat = document.getElementById('observation_lat'),
       _obs_lng = document.getElementById('observation_lng'),
-      _obs_alt = document.getElementById('observation_alt'),
-      _event = new Event('change');
+      _obs_alt = document.getElementById('observation_alt');
 
     if (_exif_data.geocode && _exif_data.geocode !== "") {
       const latLngAlt = JSON.parse(_exif_data.geocode),
@@ -168,25 +165,26 @@ export default class extends Controller {
       _obs_lat.value = lat == null ? lat : lat.toFixed(4);
       _obs_lng.value = lng == null ? lng : lng.toFixed(4);
       _obs_alt.value = alt == null ? alt : alt.toFixed(0);
-      // should trigger change (defined above) to update the map
-      _obs_lat.dispatchEvent(_event);
-      _obs_lng.dispatchEvent(_event);
-      this.dispatch("suggestLocations", {
+
+      // should trigger change to update the map
+      this.dispatch("pointChanged", {
         detail: {
           type: "location_containing",
           request_params: { lat, lng }
         }
-      })
+      });
     }
     if (_exif_data.exif_date) {
       const _exifSimpleDate = JSON.parse(_exif_data.exif_date);
       this.observationDate(_exifSimpleDate);
     }
+    // disables the button, even when called programmatically
+    this.selectExifButton(element);
   }
 
-  // Happens on click for transfer, or when an image with GPS is added to
-  // carousel, disabling this button but enabling others. Kind of like radio.
-  // Called on the element rather than the button(!) because it may be called
+  // Disables this button but enables others, kind of like a radio. Happens on
+  // click for transfer, or when an image with GPS is added to carousel. Called
+  // on the element rather than the button(!) because it may be called
   // programmatically when an image is added with GPS.
   selectExifButton(element) {
     this.reenableButtons();
@@ -197,9 +195,11 @@ export default class extends Controller {
   }
 
   // enable all the buttons
-  reenableButtons() {
-    this.useExifBtnTargets.forEach((element) => {
-      element.removeAttribute('disabled');
+  reenableButtons(event) {
+    if (event?.detail?.reenableButtons === false) return;
+
+    this.useExifBtnTargets.forEach((btn) => {
+      btn.removeAttribute('disabled');
     });
   }
 

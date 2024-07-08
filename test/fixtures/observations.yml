@@ -772,6 +772,8 @@ falmouth_2022_obs:
   location: falmouth
   lat: 41.5862
   lng: -70.5976
+  notes:
+    :Other: Some notes
 
 nybg_2023_09_obs:
   <<: *DEFAULTS

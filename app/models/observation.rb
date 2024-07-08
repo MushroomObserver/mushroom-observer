@@ -550,6 +550,24 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       :user
     )
   }
+  scope :edit_includes, lambda {
+    strict_loading.includes(
+      :collection_numbers,
+      :field_slips,
+      { external_links: { external_site: { project: :user_group } } },
+      { herbarium_records: [{ herbarium: :curators }, :user] },
+      { images: [:image_votes, :license, :projects, :user] },
+      { interests: :user },
+      :location,
+      { name: { synonym: :names } },
+      { projects: :admin_group },
+      :rss_log,
+      :sequences,
+      { species_lists: [:projects, :user] },
+      :thumb_image,
+      :user
+    )
+  }
 
   def location?
     false
@@ -698,7 +716,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # the given +display_name+.  (Fills the other in with +nil+.)
   # Adjusts for the current user's location_format as well.
   def place_name=(place_name)
-    place_name = place_name.strip_squeeze
+    place_name = place_name&.strip_squeeze
     where = if User.current_location_format == "scientific"
               Location.reverse_name(place_name)
             else
@@ -951,15 +969,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Array of notes parts (Strings) which are
   # neither in the notes_template nor the caption for other notes
+  # Note that underscores (_) get translated to spaces ( ) here.
   def notes_orphaned_parts(user)
     return [] if notes.blank?
 
-    # Change spaces to underscores in order to subtract template parts from
-    # stringified keys because keys have underscores instead of spaces
-    template_parts_underscored = user.notes_template_parts.each do |part|
-      part.tr!(" ", "_")
+    notes_keys = notes.keys.map(&:to_s).each do |key|
+      key.tr!("_", " ")
     end
-    notes.keys.map(&:to_s) - template_parts_underscored - [other_notes_part]
+    notes_keys - user.notes_template_parts - [other_notes_part]
   end
 
   # notes as a String, captions (keys) without added formstting,
@@ -1117,14 +1134,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     return unless field_slips.empty?
 
     update(specimen: false)
-  end
-
-  # Return primary collector and their number if available, else just return
-  # the observer's name.
-  def collector_and_number
-    return user.legal_name if collection_numbers.empty?
-
-    collection_numbers.first.format_name
   end
 
   ##############################################################################
@@ -1312,6 +1321,43 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       SET `where` = #{new_name}, location_id = #{location.id}
       WHERE `where` = #{old_name}
     ))
+  end
+
+  ##############################################################################
+  #
+  #  :section: Field Slips
+  #
+  ##############################################################################
+
+  def collector
+    return notes[:Collector] if notes.include?(:Collector)
+    return notes[:collector] if notes.include?(:collector)
+    return notes[:"Collector's_Name"] if notes.include?(:"Collector's_Name")
+    return notes[:"Collector's_name"] if notes.include?(:"Collector's_name")
+    return notes[:"Collector(s)"] if notes.include?(:"Collector(s)")
+
+    "_user #{user.login}_"
+  end
+
+  def field_slip_id
+    return notes[:Field_Slip_ID] if notes.include?(:Field_Slip_ID)
+
+    "_name #{name.text_name}_"
+  end
+
+  def field_slip_id_by
+    return notes[:Field_Slip_ID_By] if notes.include?(:Field_Slip_ID_By)
+
+    naming = namings.find_by(name:)
+    return "_user #{naming.user.login}_" if naming
+
+    ""
+  end
+
+  def other_codes
+    return notes[:Other_Codes] if notes.include?(:Other_Codes)
+
+    ""
   end
 
   ##############################################################################

@@ -5,11 +5,11 @@
 // --------------------------------------------------
 
 .d-none {
-  display: none;
+  display: none !important;
 }
 
 .d-flex {
-  display: flex;
+  display: flex !important;
 }
 
 .flex-column {
@@ -136,6 +136,10 @@
 
 .font-weight-bold {
   font-weight: 800 !important;
+}
+
+.font-weight-normal {
+  font-weight: normal !important;
 }
 
 .smaller {
@@ -647,6 +651,13 @@
 // Fix for weird inherited indent from .name-section p
 .glyphicon {
   text-indent: 0;
+  top: 3px;
+  font-size: 112%;
+
+  &.link-icon {
+    background-color: white;
+    border-radius: 50%;
+  }
 }
 
 .violation-highlight {
@@ -659,19 +670,19 @@
 
 @media screen and (min-width: 767px) {
   .d-sm-none {
-    display: none;
+    display: none !important;
   }
 
   .d-sm-block {
-    display: block;
+    display: block !important;
   }
 
   .d-sm-inline-block {
-    display: inline-block;
+    display: inline-block !important;
   }
 
   .d-sm-flex {
-    display: flex;
+    display: flex !important;
   }
 
   .float-sm-left {
@@ -696,6 +707,6 @@
   }
 
   .table {
-    overflow-x: scroll
+    overflow-x: scroll;
   }
 }

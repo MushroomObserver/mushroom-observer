@@ -37,7 +37,7 @@ class FieldSlipsIntegrationTest < CapybaraIntegrationTestCase
   def test_destroying_a_field_slip
     login!(mary)
     visit(field_slip_url(@field_slip))
-    click_on(:field_slip_destroy.t, match: :first)
+    click_on(:DESTROY.t, match: :first)
 
     assert_text(:field_slip_destroyed.t)
   end
@@ -52,7 +52,7 @@ class FieldSlipsIntegrationTest < CapybaraIntegrationTestCase
     visit("/qr/NFAL-0001")
     click_on(:field_slip_create_obs.l)
 
-    fill_in(:WHERE.l, with: locations(:albion).name)
+    fill_in(:WHERE.l, with: locations(:albion).name, visible: :any)
     assert_no_difference(
       "Observation.count",
       "Observation shouldn't be created before confirming constraint violation"

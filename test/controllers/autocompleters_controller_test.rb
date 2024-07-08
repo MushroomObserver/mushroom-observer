@@ -49,43 +49,52 @@ class AutocompletersControllerTest < FunctionalTestCase
   def test_auto_complete_location
     login("rolf")
     # names of Locations whose names have words starting with "m"
-    m_loc_names = Location.where(Location[:name].
-                  matches_regexp("\\bM")).pluck(:name, :id)
-    # wheres of Observations whose wheres have words starting with "m"
-    # need extra "observation" to avoid confusing sql with bare "where".
-    m_obs_wheres = Observation.where(Observation[:where].
-                   matches_regexp("\\bM")).pluck(:where, :location_id)
-    locs = m_loc_names + m_obs_wheres
-    locs.unshift(["M", 0])
+    locs = Location.where(Location[:name].matches_regexp("\\bM")).
+           select(:name, :id, :north, :south, :east, :west)
 
-    expect = locs.map { |name, id| { name:, id: id.nil? ? 0 : id } }
+    expect = locs.map { |loc| loc.attributes.symbolize_keys }
+    expect.unshift({ name: "M", id: 0 })
     expect.sort_by! { |loc| [loc[:name], -loc[:id]] }
     expect.uniq! { |loc| loc[:name] }
     good_autocompleter_request(type: :location, string: "Modesto")
     assert_equivalent(expect, JSON.parse(@response.body))
 
     login("roy") # prefers location_format: :scientific
-    expect = locs.map do |name, id|
-      { name: Location.reverse_name(name), id: id.nil? ? 0 : id }
+    expect = locs.map do |loc|
+      loc = loc.attributes.symbolize_keys
+      loc[:name] = Location.reverse_name(loc[:name])
+      loc
     end
+    expect.unshift({ name: "M", id: 0 })
     expect.sort_by! { |loc| [loc[:name], -loc[:id]] }
     expect.uniq! { |loc| loc[:name] }
     good_autocompleter_request(type: :location, string: "Modesto")
     assert_equivalent(expect, JSON.parse(@response.body))
-
     login("mary") # prefers location_format: :postal
     good_autocompleter_request(type: :location, string: "Xystus")
     assert_equivalent([{ name: "X", id: 0 }], JSON.parse(@response.body))
+  end
+
+  def test_auto_complete_location_containing
+    login("rolf")
+    point_in_albion = { lat: 39.253, lng: -123.8 }
+    locs = Location.where(id: locations(:albion).id).
+           select(:name, :id, :north, :south, :east, :west)
+    expect = locs.map { |loc| loc.attributes.symbolize_keys }
+
+    good_autocompleter_request(type: :location_containing, string: "",
+                               all: true, **point_in_albion)
+    assert_equivalent(expect, JSON.parse(@response.body))
   end
 
   def test_auto_complete_herbarium
     login("rolf")
     # names of Herbariums whose names have words starting with "m"
     herbs = Herbarium.where(Herbarium[:name].matches_regexp("\\bD")).
-            pluck(:name, :id)
-    herbs.unshift(["D", 0])
+            select(:name, :id)
 
-    expect = herbs.map { |name, id| { name:, id: } }
+    expect = herbs.map { |hrb| hrb.attributes.symbolize_keys }
+    expect.unshift({ name: "D", id: 0 })
     expect.sort_by! { |hrb| hrb[:name] }
     expect.uniq! { |hrb| hrb[:name] }
     good_autocompleter_request(type: :herbarium, string: "Dick")
@@ -110,12 +119,14 @@ class AutocompletersControllerTest < FunctionalTestCase
     login("rolf")
     names = Name.with_correct_spelling.
             select(:text_name, :id, :deprecated).distinct.
-            where(Name[:text_name].matches("A%")).
-            pluck(:text_name, :id, :deprecated)
+            where(Name[:text_name].matches("A%"))
 
-    expect = names.map do |name, id, deprecated|
-      dep_string = deprecated.nil? ? "false" : deprecated.to_s
-      { name: name, id: id, deprecated: dep_string }
+    expect = names.map do |name|
+      name = name.attributes.symbolize_keys
+      name[:deprecated] = name[:deprecated] || false
+      name[:name] = name[:text_name]
+      name.delete(:text_name) # faster than `except`
+      name
     end
     expect.sort_by! do |name|
       [(name[:name].match?(" ") ? "b" : "a") + name[:name], name[:deprecated]]
@@ -157,8 +168,11 @@ class AutocompletersControllerTest < FunctionalTestCase
 
   def test_auto_complete_species_list
     login("rolf")
-    list1, list2, list3, list4 = SpeciesList.order(:title).pluck(:title, :id).
-                                 take(4).map { |name, id| { name:, id: } }
+    list1, list2, list3, list4 = SpeciesList.order(:title).select(:title, :id).
+                                 take(4).map do |list|
+                                   list = list.attributes.symbolize_keys
+                                   { name: list[:title], id: list[:id] }
+                                 end
 
     assert_equal("A Species List", list1[:name])
     assert_equal("Another Species List", list2[:name])
