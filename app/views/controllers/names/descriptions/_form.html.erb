@@ -9,7 +9,7 @@
                locals: {f: f}) %>
 
     <p><strong><%= :DESCRIPTION.t %>:</strong></p>
-    <%= render(partial: "shared/textilize_help") %>
+    <%= help_block(:div, textilize_help, id: "textilize_note") %>
 
     <% rank = rank_as_lower_string(@description.parent.rank) %>
     <% NameDescription.all_note_fields.each do |field| %>

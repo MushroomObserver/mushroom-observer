@@ -13,40 +13,51 @@
       <!-- /WHEN -->
 
       <%= tag.div(id: "observation_where") do %>
-        <%= [
-          label_tag(:where, "#{:WHERE_GROUP.l}:"),
-          tag.span("#{:form_observations_click_point.l}.")
-        ].safe_join(" ") %>
+        <%= tag.p do
+          [tag.strong("#{:WHERE_GROUP.l}:"),
+           collapse_info_trigger("geolocation_help")].safe_join(" ")
+        end %>
         <!-- LAT_LONG_ALT -->
         <div class="row no-gutters" id="observation_lat_lng_alt">
           <div class="col-xs-4">
             <%= text_field_with_label(
-              form: f, field: :lat, label: :LATITUDE.l + ":", class: "mb-0",
-              between: collapse_info_trigger("geolocation_help"),
+              form: f, field: :lat, class: "mb-0", addon: "º",
+              label: [
+                tag.span("#{:LATITUDE.l}:", class: "d-none d-sm-inline"),
+                tag.span("#{:LAT.l}:", class: "d-inline d-sm-none")
+              ].safe_join,
               data: { map_target: "latInput", action: "map#bufferInputs" }
             ) %>
           </div>
           <div class="col-xs-4">
             <%= text_field_with_label(
-              form: f, field: :lng, label: :LONGITUDE.l + ":", class: "mb-0",
+              form: f, field: :lng, class: "mb-0", addon: "º",
+              label: [
+                tag.span("#{:LONGITUDE.l}:", class: "d-none d-sm-inline"),
+                tag.span("#{:LNG.l}:", class: "d-inline d-sm-none")
+              ].safe_join,
               data: { map_target: "lngInput", action: "map#bufferInputs" }
             ) %>
           </div>
           <div class="col-xs-4">
             <%= text_field_with_label(
-              form: f, field: :alt, label: :ALTITUDE.l + ":", class: "mb-0",
-              addon: "m", # (#{:units_meters.t})
+              form: f, field: :alt, class: "mb-0", addon: "m",
+              label: [
+                tag.span("#{:ALTITUDE.l}:", class: "d-none d-sm-inline"),
+                tag.span("#{:ALT.l}:", class: "d-inline d-sm-none")
+              ].safe_join, # (#{:units_meters.t})
               data: { map_target: "altInput" }
             ) %>
           </div>
         </div><!--.row-->
 
         <%= collapse_help_block(nil, id: "geolocation_help") do %>
-          <%= :form_observations_lat_long_help.t %>
+          <%= tag.p(:form_observations_click_point.l) %>
+          <%= tag.p(:form_observations_lat_long_help.t) %>
         <% end %>
 
         <%= check_box_with_label(form: f, field: :gps_hidden,
-                                label: :form_observations_gps_hidden.l) %>
+                                 label: :form_observations_gps_hidden.l) %>
         <!-- /LAT_LONG_ALT -->
 
         <!-- WHERE_REASONS -->

@@ -82,6 +82,13 @@ module ContentHelper
   #
   #   <%= help_tooltip(label, title: "Click here to do something.") %>
   #
+  def textilize_help
+    link = link_to(:shared_textile_link.t, info_textile_sandbox_path,
+                   target: "_new")
+    str = :shared_textile_help.l % link
+    str.html_safe
+  end
+
   def help_tooltip(label, **args)
     args[:data] ||= {}
     tag.span(label, title: args[:title],

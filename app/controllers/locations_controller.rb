@@ -290,6 +290,11 @@ class LocationsController < ApplicationController
       @dubious_where_reasons = Location.dubious_name?(user_format, true)
     end
     @location = Location.new
+
+    respond_to do |format|
+      format.turbo_stream { render_modal_location_form }
+      format.html
+    end
   end
 
   def create
@@ -331,6 +336,11 @@ class LocationsController < ApplicationController
 
     params[:location] ||= {}
     @display_name = @location.display_name
+
+    respond_to do |format|
+      format.turbo_stream { render_modal_location_form }
+      format.html
+    end
   end
 
   def update
@@ -546,6 +556,30 @@ class LocationsController < ApplicationController
       show_url: "#{MO.http_domain}/locations/#{@location.id}",
       edit_url: "#{MO.http_domain}/locations/#{@location.id}/edit"
     )
+  end
+
+  def render_modal_location_form
+    render(partial: "shared/modal_form",
+           locals: { title: modal_title, identifier: modal_identifier,
+                     form: "locations/form" }) and return
+  end
+
+  def modal_identifier
+    case action_name
+    when "new", "create"
+      "location"
+    when "edit", "update"
+      "location_#{@location.id}"
+    end
+  end
+
+  def modal_title
+    case action_name
+    when "new", "create"
+      :create_location_title.t
+    when "edit", "update"
+      :edit_location_title.t(name: @location.display_name)
+    end
   end
 
   ##############################################################################
