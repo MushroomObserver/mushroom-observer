@@ -117,6 +117,7 @@ const INTERNAL_OPTS = {
   menu_up: false,        // is pulldown visible?
   old_value: null,       // previous value of input field
   stored_id: 0,          // id of selected option
+  stored_data: '{}',     // JSON of selected option
   primer: [],            // a server-supplied list of many options
   matches: [],           // list of options currently showing
   current_row: -1,       // index of option currently highlighted (0 = none)
@@ -125,7 +126,7 @@ const INTERNAL_OPTS = {
   current_width: 0,      // current width of menu
   scroll_offset: 0,      // scroll offset
   last_fetch_request: '', // last fetch request we got results for
-  last_fetch_params: '',  // last fetch request we sent, minus the string
+  last_fetch_params: '', // last fetch request we sent, minus the string
   last_fetch_incomplete: true, // did we get all the results we requested?
   fetch_request: null,   // ajax request while underway
   refresh_timer: null,   // timer used to delay update after typing
@@ -216,24 +217,37 @@ export default class extends Controller {
       if (this.TYPE === "location_google") {
         this.inputTarget.closest("form").classList.add('map-outlet');
       } else if (this.ACT_LIKE_SELECT) {
+        this.inputTarget.closest("form").classList.remove('map-outlet');
         // primer is not based on input, so go ahead and request from server.
         this.focused = true; // so it will draw the pulldown immediately
         this.refreshPrimer(); // directly refresh the primer w/request_params
         this.element.classList.add('constrained');
       } else {
+        this.inputTarget.closest("form").classList.remove('map-outlet');
         this.scheduleRefresh();
         this.element.classList.remove('constrained');
       }
     }
   }
 
+  // Connects the location_google autocompleter to call map controller methods
   mapOutletConnected(outlet, element) {
-    outlet.toggleMapBtnTarget.click();
+    console.log("map outlet connected");
+    // open the map if not already open
+    if (!outlet.opened) outlet.toggleMapBtnTarget.click();
+    // set the map type so box is editable
     outlet.map_type = "location";
-    // outlet.marker.setEditable(false); messes up map
+    // outlet.marker.setDraggable(false); messes up map
+    // outlet.marker.setClickable(false); messes up map
     outlet.geocodeLatLng();
     this.dispatchHiddenIdEvents();
-    // it's only updating box if locationid changes?
+  }
+
+  mapOutletDisconnected(outlet, element) {
+    console.log("map outlet disconnected");
+    outlet.map_type = "observation";
+    if (outlet.rectangle) outlet.rectangle.setEditable(false);
+    this.dispatchHiddenIdEvents();
   }
 
   // pulldownTargetConnected() {
@@ -835,13 +849,16 @@ export default class extends Controller {
     if (!match) return;
     // store the old value of the hidden input
     this.stored_id = this.hiddenTarget.value;
-    // update the new value of the hidden input
+    // update the new value of the hidden input, which casts it as a string.
     this.hiddenTarget.value = match['id'];
     // assign the dataset of the selected row to the hidden input
     Object.keys(match).forEach(key => {
       if (!['id', 'name'].includes(key))
         this.hiddenTarget.dataset[key] = match[key];
     });
+    const { north, south, east, west } = this.hiddenTarget.dataset,
+      hidden_data = { id: this.hiddenTarget.value, north, south, east, west };
+    this.stored_data = JSON.stringify(hidden_data);
 
     this.wrapTarget.classList.add('has-id');
     this.dispatchHiddenIdEvents();
@@ -856,20 +873,27 @@ export default class extends Controller {
       if (!key.match(/Target/))
         delete this.hiddenTarget.dataset[key];
     });
+    this.stored_data = JSON.stringify(
+      { id: "0", north: "", south: "", east: "", west: "" }
+    );
 
     this.wrapTarget.classList.remove('has-id');
     this.dispatchHiddenIdEvents();
   }
 
+  // called on assign and clear, also when mapOutlet is connected
   dispatchHiddenIdEvents() {
     const hidden_id = parseInt(this.hiddenTarget.value || 0),
-      stored_id = parseInt(this.stored_id || 0);
-
-    if (hidden_id === stored_id) {
+      stored_id = parseInt(this.stored_id || 0),
+      { north, south, east, west } = this.hiddenTarget.dataset,
+      hidden_data = { id: new String(hidden_id), north, south, east, west };
+    // comparing data, not just ids, because google locations have same 0 id
+    if (hidden_data === this.stored_data) {
+      console.log("not dispatching locationIdChanged event");
       return;
     }
-
-    // console.log("dispatching locationIdChanged event");
+    // maybe call this locationDataChanged
+    console.log("dispatching locationIdChanged event");
     this.dispatch('locationIdChanged', {
       detail: { id: this.hiddenTarget.value }
     });
