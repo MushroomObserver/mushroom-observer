@@ -97,6 +97,14 @@
         <%= collapse_help_block(nil, id: "where_help") do
           observation_location_help
         end %>
+        <%= fields_for(:location) do |f_l| %>
+          <%= f_l.hidden_field(:north, data: { map_target: "northInput" }) %>
+          <%= f_l.hidden_field(:south, data: { map_target: "southInput" }) %>
+          <%= f_l.hidden_field(:east, data: { map_target: "eastInput" }) %>
+          <%= f_l.hidden_field(:west, data: { map_target: "westInput" }) %>
+          <%= f_l.hidden_field(:low, data: { map_target: "lowInput" }) %>
+          <%= f_l.hidden_field(:high, data: { map_target: "highInput" }) %>
+        <% end %>
         <!-- /WHERE -->
 
         <!-- IS_COLLECTION_LOCATION -->
@@ -143,14 +151,6 @@
                     map_target: "mapDiv", editable: true,
                     map_type: "observation" }
       ) %>
-      <%= fields_for(:location) do |f_l| %>
-        <%= f_l.hidden_field(:north, data: { map_target: "northInput" }) %>
-        <%= f_l.hidden_field(:south, data: { map_target: "southInput" }) %>
-        <%= f_l.hidden_field(:east, data: { map_target: "eastInput" }) %>
-        <%= f_l.hidden_field(:west, data: { map_target: "westInput" }) %>
-        <%= f_l.hidden_field(:low, data: { map_target: "lowInput" }) %>
-        <%= f_l.hidden_field(:high, data: { map_target: "highInput" }) %>
-      <% end %>
     </div>
     <!-- /MAP -->
 
