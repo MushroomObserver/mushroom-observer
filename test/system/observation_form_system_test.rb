@@ -439,7 +439,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("location_display_name",
             with: "Pasadena: Disneyland, Some Co., California, USA")
     fill_in("location_notes", with: "oops")
-    debugger
+
     within("#location_form") { click_commit }
 
     assert_selector("body.locations__create")
