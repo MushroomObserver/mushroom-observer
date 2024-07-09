@@ -37,7 +37,7 @@ end %>
 ) %>
 <%= collapse_help_block(nil, id: "notes_help") do
   concat(tag.p(:form_locations_notes_help.t))
-  concat(tag.p(textilize_help))
+  concat(tag.p(:shared_textile_help.l))
 end %>
 
 <% if location.observations.empty? %>

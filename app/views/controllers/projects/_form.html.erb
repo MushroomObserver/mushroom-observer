@@ -15,7 +15,7 @@
   <%= text_field_with_label(form: f, field: :field_slip_prefix,
                             label: :FIELD_SLIP_PREFIX.t + ":") %>
 
-  <%= help_block(:div, textilize_help, id: "textilize_note") %>
+  <%= help_block(:div, :shared_textile_help.l, id: "textilize_note") %>
 
   <%= autocompleter_field(form: f, field: :place_name, type: :location,
                           label: "#{:WHERE.t}:", between: :required) %>
