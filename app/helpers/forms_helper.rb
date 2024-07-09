@@ -162,6 +162,11 @@ module FormsHelper
           concat(args[:form].text_field(args[:field], opts))
           concat(tag.span(args[:addon], class: "input-group-addon"))
         end)
+      elsif args[:button].present?
+        concat(tag.div(class: "input-group") do
+          concat(args[:form].text_field(args[:field], opts))
+          concat(tag.span(args[:button], class: "input-group-btn"))
+        end)
       else
         concat(args[:form].text_field(args[:field], opts))
       end
@@ -189,6 +194,7 @@ module FormsHelper
     ac_args[:class] = class_names("dropdown", args[:class])
     ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
                             separator: args[:separator],
+                            autocompleter_map_outlet: args[:map_outlet],
                             autocompleter_target: "wrap" }
     ac_args[:between] = capture do
       concat(args[:between])

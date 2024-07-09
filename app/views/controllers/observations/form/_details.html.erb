@@ -81,10 +81,17 @@
           hidden_data: { map_target: "locationId",
                          north: location&.north, south: location&.south,
                          east: location&.east, west: location&.west },
+          button: modal_link_to("location",
+                                :form_observations_create_location.l,
+                                new_location_path, icon: :add,
+                                class: "btn btn-outline-secondary"),
+          map_outlet: ".map-outlet",
           data: { map_target: "placeInput",
+                  create_text: :form_observations_create_location.l,
                   action: [
                     "map:pointChanged@window->autocompleter#swap",
-                    "form-exif:pointChanged@window->autocompleter#swap"
+                    "form-exif:pointChanged@window->autocompleter#swap",
+                    "map:googlePrimer@window->autocompleter#refreshGoogle"
                   ].join(" ") }
         ) %>
         <%= collapse_help_block(nil, id: "where_help") do
@@ -136,6 +143,14 @@
                     map_target: "mapDiv", editable: true,
                     map_type: "observation" }
       ) %>
+      <%= fields_for(:location) do |f_l| %>
+        <%= f_l.hidden_field(:north, data: { map_target: "northInput" }) %>
+        <%= f_l.hidden_field(:south, data: { map_target: "southInput" }) %>
+        <%= f_l.hidden_field(:east, data: { map_target: "eastInput" }) %>
+        <%= f_l.hidden_field(:west, data: { map_target: "westInput" }) %>
+        <%= f_l.hidden_field(:low, data: { map_target: "lowInput" }) %>
+        <%= f_l.hidden_field(:high, data: { map_target: "highInput" }) %>
+      <% end %>
     </div>
     <!-- /MAP -->
 

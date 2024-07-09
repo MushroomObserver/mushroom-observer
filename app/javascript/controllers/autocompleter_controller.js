@@ -75,11 +75,16 @@ const AUTOCOMPLETER_TYPES = {
   location: { // params[:format] handled in controller
     ACT_LIKE_SELECT: false,
     UNORDERED: true,
-    model: 'location'
+    model: 'location',
+    create_link: '/locations/new?where='
   },
   location_containing: { // params encoded from dataset
     ACT_LIKE_SELECT: true,
-    model: 'location'
+    model: 'location',
+    create_link: '/locations/new?where='
+  },
+  location_google: { // params encoded from dataset
+    ACT_LIKE_SELECT: true,
   },
   name: {
     COLLAPSE: 1,
@@ -126,7 +131,8 @@ const INTERNAL_OPTS = {
   refresh_timer: null,   // timer used to delay update after typing
   hide_timer: null,      // timer used to delay hiding of pulldown
   key_timer: null,       // timer used to emulate key repeat
-  log: false             // log debug messages to console?
+  log: false,            // log debug messages to console?
+  has_create_link: false // pulldown currently has link to create new record
 }
 
 // Connects to data-controller="autocompleter"
@@ -135,6 +141,7 @@ export default class extends Controller {
   // The select target is not the <input> element, but a <select> that can
   // swap out the autocompleter type. The <input> element is its target.
   static targets = ["input", "select", "pulldown", "list", "hidden", "wrap"]
+  static outlets = ["map"]
 
   initialize() {
     Object.assign(this, DEFAULT_OPTS);
@@ -167,6 +174,9 @@ export default class extends Controller {
         this.WRAP_CLASS + "\"");
     }
 
+    this.create_text = this.inputTarget.dataset?.createText ?? null;
+    this.default_action =
+      this.listTarget?.children[0]?.children[0]?.dataset.action;
     // Attach events, etc. to input element.
     this.prepareInputElement();
   }
@@ -203,16 +213,27 @@ export default class extends Controller {
       this.prepareInputElement();
       this.prepareHiddenInput();
       this.clearHiddenId();
-      if (this.ACT_LIKE_SELECT) {
+      if (this.TYPE === "location_google") {
+        this.inputTarget.closest("form").classList.add('map-outlet');
+      } else if (this.ACT_LIKE_SELECT) {
         // primer is not based on input, so go ahead and request from server.
         this.focused = true; // so it will draw the pulldown immediately
-        this.refreshPrimer(); // directly refresh the primer, no buffer
+        this.refreshPrimer(); // directly refresh the primer w/request_params
         this.element.classList.add('constrained');
       } else {
         this.scheduleRefresh();
         this.element.classList.remove('constrained');
       }
     }
+  }
+
+  mapOutletConnected(outlet, element) {
+    outlet.toggleMapBtnTarget.click();
+    outlet.map_type = "location";
+    // outlet.marker.setEditable(false); messes up map
+    outlet.geocodeLatLng();
+    this.dispatchHiddenIdEvents();
+    // it's only updating box if locationid changes?
   }
 
   // pulldownTargetConnected() {
@@ -645,6 +666,7 @@ export default class extends Controller {
   // kept in browser memory, and the <ul> top margin and height are adjusted
   // accordingly. This sleight of hand keeps far fewer elements in the DOM, and
   // is essential for making the page responsive.
+  // Called after populateMatches()
   drawPulldown() {
     this.verbose("drawPulldown()");
     const rows = this.listTarget.children,
@@ -673,34 +695,63 @@ export default class extends Controller {
   // as needed, as the user scrolls. rows are the <li> elements in the pulldown.
   //  Called from drawPulldown().
   updateRows(rows) {
-    let i, text, stored;
+    let i, text;
     for (i = 0; i < this.PULLDOWN_SIZE; i++) {
       let row = rows.item(i),
         link = row.children[0];
       text = link.innerHTML;
+      if (i === 0) link.setAttribute('href', "#");
       if (i + this.scroll_offset < this.matches.length) {
-        const { name, ...new_data } = this.matches[i + this.scroll_offset];
-        stored = this.escapeHTML(name);
-        if (text != stored) {
-          if (stored === " ") stored = "&nbsp;";
-          link.innerHTML = stored;
-          // Assign the dataset of matches[i + this.scroll_offset], minus name
-          Object.keys(new_data).forEach(key => {
-            link.dataset[key] = new_data[key];
-          });
-          link.classList.remove('d-none');
-        }
+        this.updateRow(i, link, text);
       } else {
-        if (text != '') {
-          link.innerHTML = '';
-          Object.keys(link.dataset).forEach(key => {
-            if (!['row', 'action'].includes(key))
-              delete link.dataset[key];
-          });
-          link.classList.add('d-none');
-        }
+        this.emptyRow(i, link, text);
       }
     }
+    // If no matches, show a link to create a new record.
+    if (this.matches.length === 1 && this.has_create_link === true) {
+      this.addCreateLink(rows.item(0));
+    }
+  }
+
+  // Needs to restore href and data-action if they were changed.
+  updateRow(i, link, text) {
+    const { name, ...new_data } = this.matches[i + this.scroll_offset];
+    let stored = this.escapeHTML(name);
+
+    if (text != stored) {
+      if (stored === " ") stored = "&nbsp;";
+      link.innerHTML = stored;
+      // Assign the dataset of matches[i + this.scroll_offset], minus name
+      Object.keys(new_data).forEach(key => {
+        link.dataset[key] = new_data[key];
+      });
+      if (i === 0) link.dataset.action = this.default_action;
+      delete this.dataset?.turboStream;
+      link.classList.remove('d-none');
+    }
+  }
+
+  emptyRow(i, link, text) {
+    if (text != '') {
+      link.innerHTML = '';
+      Object.keys(link.dataset).forEach(key => {
+        if (!['row', 'action'].includes(key))
+          delete link.dataset[key];
+      });
+      if (i === 0) link.dataset.action = this.default_action;
+      link.classList.add('d-none');
+    }
+  }
+
+  // Add a link to create a new record: changes href and data-action.
+  addCreateLink(row) {
+    const link = row.children[0];
+    link.setAttribute('href',
+      this.create_link + this.inputTarget.value
+    );
+    delete link.dataset?.action;
+    link.dataset.turboStream = "true";
+    link.classList.remove('d-none');
   }
 
   // Highlight that row (CSS only - does not populate hidden ID).
@@ -749,7 +800,7 @@ export default class extends Controller {
 
       // Only show pulldown if it is nontrivial, i.e., has an option other than
       // the value that's already in the text field.
-      if (matches.length > 1 || this.inputTarget.value != matches[0]) {
+      if (matches.length > 1 || this.inputTarget.value != matches[0]['name']) {
         this.clearHide();
         this.wrapTarget?.classList?.add('open');
         this.menu_up = true;
@@ -891,6 +942,7 @@ export default class extends Controller {
   // order given right from the moment they enter the field,
   // and pick the first one, as long as there isn't one already selected.
   // They can still override the selections by clearing the field and typing.
+  // The create link is added both here and in the updateRows() method.
   populateSelect() {
     // Laborious but necessary(?) way to check if these are the same options.
     const match_names = this.matches.map((m) => m['name']),
@@ -905,8 +957,12 @@ export default class extends Controller {
     );
 
     if (this.matches.length > 0 && !_already_selected) {
-      this.inputTarget.value = this.matches[0]['name'];
-      this.assignHiddenId(this.matches[0]);
+      if (!this.has_create_link) {
+        this.inputTarget.value = this.matches[0]['name'];
+        this.assignHiddenId(this.matches[0]);
+      } else {
+        this.inputTarget.value = " ";
+      }
     }
   }
 
@@ -1214,7 +1270,11 @@ export default class extends Controller {
       this.fetch_request = null;
       console.log(`got a ${response.status}: ${response.text}`);
     }
+  }
 
+  // Map controller sends back a primer formatted for the autocompleter
+  refreshGoogle({ detail }) {
+    this.processFetchResponse(detail.primer)
   }
 
   // Process response from server:
@@ -1258,15 +1318,27 @@ export default class extends Controller {
         (this.last_fetch_incomplete ? "incomplete" : "complete") + ").");
     }
 
-    // Update menu if anything has changed.
-    if (this.primer != new_primer && this.focused) {
+    if (new_primer.length === 0 && this.ACT_LIKE_SELECT
+      && this.create_link && this.create_text) {
+      // If no matches, show a link to create a new record.
+      this.has_create_link = true;
+      // this.primer = [{ name: this.create_text, id: 0 }];
+      const { lat, lng, ...params } = JSON.parse(this.last_fetch_params);
+      this.swap({
+        detail: {
+          type: "location_google", request_params: { lat, lng },
+        }
+      })
+    } else if (this.primer != new_primer && this.focused) {
+      // Update menu if anything has changed.
+      this.has_create_link = false;
       this.primer = new_primer;
       this.populateMatches();
       this.drawPulldown();
     }
 
-    // If act like select, focus the input field.
-    if (this.primer.length > 0 && this.ACT_LIKE_SELECT) {
+    // If act like select, focus the input field.`
+    if ((this.primer.length > 0) && this.ACT_LIKE_SELECT) {
       this.inputTarget.click();
       this.inputTarget.focus();
     }

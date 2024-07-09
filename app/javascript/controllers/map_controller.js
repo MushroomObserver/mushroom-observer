@@ -12,7 +12,7 @@ export default class extends Controller {
   // it may or may not be the root element of the controller.
   static targets = ["mapDiv", "southInput", "westInput", "northInput",
     "eastInput", "highInput", "lowInput", "placeInput", "locationId",
-    "getElevation", "mapClearBtn", "controlWrap",
+    "getElevation", "mapClearBtn", "controlWrap", "toggleMapBtn",
     // "showPointBtn", "showBoxBtn",
     "latInput", "lngInput", "altInput"]
 
@@ -370,6 +370,36 @@ export default class extends Controller {
     this.placeClosestRectangle(bounds, null)
   }
 
+  geocodeLatLng() {
+    const location = this.validateLatLngInputs(false)
+
+    this.geocoder
+      .geocode({ location: location })
+      .then((result) => {
+        const { results } = result // destructure, results is part of the result
+        this.dispatchPrimer(results)
+        this.respondToGeocode(results)
+      })
+      .catch((e) => {
+        console.log("Geocode was not successful: " + e)
+        // alert("Geocode was not successful for the following reason: " + e)
+      });
+  }
+
+  // Build a primer for the autocompleter with bounding box data, but no id
+  dispatchPrimer(results) {
+    const primer = results.map((result) => {
+      const { north, south, east, west } = result.geometry.viewport.toJSON()
+      let name = result.formatted_address,
+        id = 0
+      if (this.location_format == "scientific") {
+        name = name.split(/, */).reverse().join(", ")
+      }
+      return { name, north, south, east, west, id }
+    })
+    this.dispatch("googlePrimer", { detail: { primer } })
+  }
+
   geolocatePlaceName() {
     let address = this.placeInputTarget.value
 
@@ -669,7 +699,9 @@ export default class extends Controller {
   clearMap() {
     const inputTargets = [
       this.latInputTarget, this.lngInputTarget, this.altInputTarget,
-      this.placeInputTarget
+      this.placeInputTarget, this.northInputTarget, this.southInputTarget,
+      this.eastInputTarget, this.westInputTarget, this.highInputTarget,
+      this.lowInputTarget
     ]
     inputTargets.forEach((element) => { element.value = '' })
 
