@@ -330,7 +330,7 @@ export default class extends Controller {
   // Can be called directly from a button, so check for input values.
   // Now fired from location id, including when it's zero
   showBox() {
-    // console.log("showBox")
+    console.log("showBox")
     if (!this.opened ||
       !this.hasPlaceInputTarget || !this.placeInputTarget.value)
       return false
@@ -549,11 +549,20 @@ export default class extends Controller {
   //  OBSERVATION FORM
   //
 
+  // called by toggleMap
+  checkForMarker() {
+    let center
+    if (center = this.validateLatLngInputs(false)) {
+      this.calculateMarker({ detail: { request_params: center } })
+    }
+  }
+
   // Action called after bufferInputs from lat/lng inputs, to update map marker.
   // Also via toggleMap, checks if lat & lng fields already populated on load
   // if so, drops a pin on that location and center. otherwise, checks if place
   // input has been prepopulated and uses that to focus map and drop a marker.
   calculateMarker(event) {
+    console.log("calculateMarker")
     if (this.map == undefined ||
       this.latInputTarget.value === '' || this.lngInputTarget.value === ''
     ) return false
@@ -567,7 +576,7 @@ export default class extends Controller {
     if (location) {
       this.placeMarker(location)
       this.map.setCenter(location)
-      this.map.setZoom(8)
+      this.map.setZoom(9)
     }
   }
 
@@ -669,13 +678,6 @@ export default class extends Controller {
         this.checkForBox() // regardless if point
         this.checkForMarker()
       }, 500) // wait for map to open
-    }
-  }
-
-  checkForMarker() {
-    let center
-    if (center = this.validateLatLngInputs(false)) {
-      this.calculateMarker({ detail: { request_params: center } })
     }
   }
 
