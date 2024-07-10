@@ -64,6 +64,7 @@ const DEFAULT_OPTS = {
 }
 
 // Allowed types of autocompleter. Sets some DEFAULT_OPTS from type
+// Model is used for the field identifier in the hidden input.
 const AUTOCOMPLETER_TYPES = {
   clade: {
     model: 'name'
@@ -85,6 +86,7 @@ const AUTOCOMPLETER_TYPES = {
   },
   location_google: { // params encoded from dataset
     ACT_LIKE_SELECT: true,
+    model: 'location', // because it's creating a location
   },
   name: {
     COLLAPSE: 1,
