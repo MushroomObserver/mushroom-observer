@@ -859,8 +859,12 @@ export default class extends Controller {
   assignHiddenId(match) {
     this.verbose("assignHiddenId(match)");
     if (!match) return;
-    // store the old value of the hidden input
-    this.stored_id = this.hiddenTarget.value;
+    // store the old value and data of the hidden input
+    this.stored_id = this.hiddenTarget.value; // cast as string
+    let { north, south, east, west } = this.hiddenTarget.dataset,
+      hidden_data = { id: this.stored_id, north, south, east, west };
+    this.stored_data = JSON.stringify(hidden_data);
+
     // update the new value of the hidden input, which casts it as a string.
     this.hiddenTarget.value = match['id'];
     // assign the dataset of the selected row to the hidden input
@@ -868,9 +872,8 @@ export default class extends Controller {
       if (!['id', 'name'].includes(key))
         this.hiddenTarget.dataset[key] = match[key];
     });
-    const { north, south, east, west } = this.hiddenTarget.dataset,
-      hidden_data = { id: this.hiddenTarget.value, north, south, east, west };
-    this.stored_data = JSON.stringify(hidden_data);
+    ({ north, south, east, west } = this.hiddenTarget.dataset);
+    hidden_data = { id: this.hiddenTarget.value, north, south, east, west };
 
     this.wrapTarget.classList.add('has-id');
     this.dispatchHiddenIdEvents();
@@ -902,15 +905,16 @@ export default class extends Controller {
       hidden_data = { id: new String(hidden_id), north, south, east, west };
 
     // comparing data, not just ids, because google locations have same 0 id
-    if (hidden_data === this.stored_data) {
-      console.log(hidden_data, this.stored_data);
+    if (JSON.stringify(hidden_data) === this.stored_data) {
       console.log("not dispatching hiddenIdDataChanged");
+      console.log(JSON.stringify(hidden_data), this.stored_data);
       return;
     }
 
     clearTimeout(this.data_timer);
     this.data_timer = setTimeout(() => {
       console.log("dispatching hiddenIdDataChanged");
+      console.log(JSON.stringify(hidden_data), this.stored_data);
       this.dispatch('hiddenIdDataChanged', {
         detail: { id: this.hiddenTarget.value }
       });
