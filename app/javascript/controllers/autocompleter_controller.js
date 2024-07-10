@@ -117,7 +117,7 @@ const INTERNAL_OPTS = {
   menu_up: false,        // is pulldown visible?
   old_value: null,       // previous value of input field
   stored_id: 0,          // id of selected option
-  stored_data: '{}',     // JSON of selected option
+  stored_data: { id: 0 }, // data of selected option
   primer: [],            // a server-supplied list of many options
   matches: [],           // list of options currently showing
   current_row: -1,       // index of option currently highlighted (0 = none)
@@ -253,6 +253,12 @@ export default class extends Controller {
     outlet.map_type = "observation";
     if (outlet.rectangle) outlet.rectangle.setEditable(false);
     // this.dispatchHiddenIdEvents();
+    outlet.northInputTarget.value = '';
+    outlet.southInputTarget.value = '';
+    outlet.eastInputTarget.value = '';
+    outlet.westInputTarget.value = '';
+    outlet.highInputTarget.value = '';
+    outlet.lowInputTarget.value = '';
   }
 
   // pulldownTargetConnected() {
@@ -856,24 +862,22 @@ export default class extends Controller {
   }
 
   // Assigns not only the ID, but also any data attributes of selected row.
+  // Data is stored as numbers and floats, not strings.
   assignHiddenId(match) {
     this.verbose("assignHiddenId(match)");
     if (!match) return;
-    // store the old value and data of the hidden input
-    this.stored_id = this.hiddenTarget.value; // cast as string
-    let { north, south, east, west } = this.hiddenTarget.dataset,
-      hidden_data = { id: this.stored_id, north, south, east, west };
-    this.stored_data = JSON.stringify(hidden_data);
+    // Before we change the hidden input, store the old value and data
+    this.stored_id = parseInt(this.hiddenTarget.value); // value is a string
+    let { north, south, east, west } = this.hiddenTarget.dataset;
+    this.stored_data = { id: this.stored_id, north, south, east, west };
 
     // update the new value of the hidden input, which casts it as a string.
-    this.hiddenTarget.value = match['id'];
+    this.hiddenTarget.value = match['id']; // converts to string
     // assign the dataset of the selected row to the hidden input
     Object.keys(match).forEach(key => {
       if (!['id', 'name'].includes(key))
         this.hiddenTarget.dataset[key] = match[key];
     });
-    ({ north, south, east, west } = this.hiddenTarget.dataset);
-    hidden_data = { id: this.hiddenTarget.value, north, south, east, west };
 
     this.wrapTarget.classList.add('has-id');
     this.dispatchHiddenIdEvents();
@@ -889,9 +893,7 @@ export default class extends Controller {
       if (!key.match(/Target/))
         delete this.hiddenTarget.dataset[key];
     });
-    this.stored_data = JSON.stringify(
-      { id: "0", north: "", south: "", east: "", west: "" }
-    );
+    this.stored_data = { id: 0 };
 
     this.wrapTarget.classList.remove('has-id');
     this.dispatchHiddenIdEvents();
@@ -900,25 +902,26 @@ export default class extends Controller {
   // called on assign and clear, also when mapOutlet is connected
   dispatchHiddenIdEvents() {
     const hidden_id = parseInt(this.hiddenTarget.value || 0),
-      stored_id = parseInt(this.stored_id || 0),
+      // stored_id = parseInt(this.stored_id || 0),
       { north, south, east, west } = this.hiddenTarget.dataset,
-      hidden_data = { id: new String(hidden_id), north, south, east, west };
+      hidden_data = { id: hidden_id, north, south, east, west };
 
     // comparing data, not just ids, because google locations have same 0 id
-    if (JSON.stringify(hidden_data) === this.stored_data) {
-      console.log("not dispatching hiddenIdDataChanged");
-      console.log(JSON.stringify(hidden_data), this.stored_data);
-      return;
+    if (JSON.stringify(hidden_data) === JSON.stringify(this.stored_data)) {
+      this.verbose("not dispatching hiddenIdDataChanged");
+      this.verbose("stored_data: " + JSON.stringify(this.stored_data));
+      this.verbose("hidden_data: " + JSON.stringify(hidden_data));
+    } else {
+      clearTimeout(this.data_timer);
+      this.data_timer = setTimeout(() => {
+        this.verbose("dispatching hiddenIdDataChanged");
+        this.verbose("stored_data: " + JSON.stringify(this.stored_data));
+        this.verbose("hidden_data: " + JSON.stringify(hidden_data))
+        this.dispatch('hiddenIdDataChanged', {
+          detail: { id: this.hiddenTarget.value }
+        });
+      }, 750)
     }
-
-    clearTimeout(this.data_timer);
-    this.data_timer = setTimeout(() => {
-      console.log("dispatching hiddenIdDataChanged");
-      console.log(JSON.stringify(hidden_data), this.stored_data);
-      this.dispatch('hiddenIdDataChanged', {
-        detail: { id: this.hiddenTarget.value }
-      });
-    }, 750)
   }
 
   // Hide pulldown options.
@@ -1412,7 +1415,7 @@ export default class extends Controller {
   }
 
   verbose(str) {
-    console.log(str);
+    // console.log(str);
     // document.getElementById("log").
     //   insertAdjacentText("beforeend", str + "<br/>");
   }
