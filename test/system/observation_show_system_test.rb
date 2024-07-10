@@ -3,20 +3,30 @@
 require("application_system_test_case")
 
 class ObservationShowSystemTest < ApplicationSystemTestCase
-  def test_add_and_edit_associated_records
-    obs = observations(:peltigera_obs)
+  setup do
+    @obs = observations(:peltigera_obs)
+  end
 
-    # browser = page.driver.browser
+  def test_visit_show_observation
+    # # browser = page.driver.browser
     rolf = users("rolf")
     login!(rolf)
 
     assert_link("Your Observations")
     click_on("Your Observations")
-    # obs = observations(:peltigera_obs)
 
     assert_selector("body.observations__index")
-    assert_link(text: /#{obs.text_name}/)
-    click_link(text: /#{obs.text_name}/)
+    assert_link(text: /#{@obs.text_name}/)
+    click_link(text: /#{@obs.text_name}/)
+    assert_selector("body.observations__show")
+
+    assert_selector(".print_label_observation_#{@obs.id}")
+  end
+
+  def test_add_and_edit_collection_numbers
+    rolf = users("rolf")
+    login!(rolf)
+    visit(observation_path(@obs))
     assert_selector("body.observations__show")
 
     scroll_to(find("#observation_collection_numbers"), align: :center)
@@ -57,6 +67,28 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     assert_equal(c_n.reload.number, "021345")
 
+    # try remove links
+    # collection_number
+    within("#observation_collection_numbers") do
+      assert_link(:REMOVE.l)
+      find(:css, ".remove_collection_number_link_#{c_n.id}").trigger("click")
+    end
+    # confirm is in modal
+    assert_selector("#modal_collection_number_observation")
+    within("#modal_collection_number_observation") do
+      assert_button(:REMOVE.l)
+      find(:css, ".remove_collection_number_link_#{c_n.id}").trigger("click")
+    end
+    assert_no_selector("#modal_collection_number_observation")
+    assert_no_link(text: /021345/)
+  end
+
+  def test_add_and_edit_herbarium_records
+    rolf = users("rolf")
+    login!(rolf)
+    visit(observation_path(@obs))
+    assert_selector("body.observations__show")
+
     # Has a fungarium record: :field_museum_record. Try edit
     fmr = herbarium_records(:field_museum_record)
     within("#observation_herbarium_records") do
@@ -77,6 +109,28 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     within("#observation_herbarium_records") do
       assert_link(text: /6234234/)
     end
+
+    # try remove links
+    # herbarium_record
+    within("#observation_herbarium_records") do
+      assert_link(:REMOVE.l)
+      find(:css, ".remove_herbarium_record_link_#{fmr.id}").trigger("click")
+    end
+    # confirm is in modal
+    assert_selector("#modal_herbarium_record_observation")
+    within("#modal_herbarium_record_observation") do
+      assert_button(:REMOVE.l)
+      find(:css, ".remove_herbarium_record_link_#{fmr.id}").trigger("click")
+    end
+    assert_no_selector("#modal_herbarium_record_observation")
+    assert_no_link(text: /6234234/)
+  end
+
+  def test_add_and_edit_sequences
+    rolf = users("rolf")
+    login!(rolf)
+    visit(observation_path(@obs))
+    assert_selector("body.observations__show")
 
     # new sequence
     assert_link(:show_observation_add_sequence.l)
@@ -124,6 +178,23 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_equal(seq.reload.notes, "Oh yea.")
     assert_no_selector("#modal_sequence_#{seq.id}")
 
+    # try remove links
+    # sequence
+    within("#observation_sequences") do
+      assert_button(:destroy_object.t(type: :sequence))
+      accept_confirm do
+        find(:css, ".destroy_sequence_link_#{seq.id}").trigger("click")
+      end
+      assert_no_link(text: /LSU/)
+    end
+  end
+
+  def test_add_and_edit_external_links
+    rolf = users("rolf")
+    login!(rolf)
+    visit(observation_path(@obs))
+    assert_selector("body.observations__show")
+
     # new external link
     site = external_sites(:mycoportal)
     within("#observation_external_links") do
@@ -157,43 +228,6 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_equal(link.reload.url, "https://wedont.validatethese.urls/yet")
 
     # try remove links
-    # collection_number
-    within("#observation_collection_numbers") do
-      assert_link(:REMOVE.l)
-      find(:css, ".remove_collection_number_link_#{c_n.id}").trigger("click")
-    end
-    # confirm is in modal
-    assert_selector("#modal_collection_number_observation")
-    within("#modal_collection_number_observation") do
-      assert_button(:REMOVE.l)
-      find(:css, ".remove_collection_number_link_#{c_n.id}").trigger("click")
-    end
-    assert_no_selector("#modal_collection_number_observation")
-    assert_no_link(text: /021345/)
-
-    # herbarium_record
-    within("#observation_herbarium_records") do
-      assert_link(:REMOVE.l)
-      find(:css, ".remove_herbarium_record_link_#{fmr.id}").trigger("click")
-    end
-    # confirm is in modal
-    assert_selector("#modal_herbarium_record_observation")
-    within("#modal_herbarium_record_observation") do
-      assert_button(:REMOVE.l)
-      find(:css, ".remove_herbarium_record_link_#{fmr.id}").trigger("click")
-    end
-    assert_no_selector("#modal_herbarium_record_observation")
-    assert_no_link(text: /6234234/)
-
-    # sequence
-    within("#observation_sequences") do
-      assert_button(:destroy_object.t(type: :sequence))
-      accept_confirm do
-        find(:css, ".destroy_sequence_link_#{seq.id}").trigger("click")
-      end
-      assert_no_link(text: /LSU/)
-    end
-
     # external_link
     within("#observation_external_links") do
       assert_button(text: :destroy_object.t(type: :external_link))

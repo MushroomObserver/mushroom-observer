@@ -28,19 +28,19 @@
   ) %>
 
   <% nam_betw = help_note(:span, :advanced_search_name_help.t) %>
-  <%= autocompleter_field(form: f, field: :name,
-                          label: :NAME.t + ":", between: nam_betw,
-                          autocomplete: :name, separator: " OR ") %>
+  <%= autocompleter_field(form: f, field: :name, type: :name,
+                          label: "#{:NAME.t}:", between: nam_betw,
+                          separator: " OR ") %>
 
   <% usr_betw = help_note(:span, :advanced_search_observer_help.t) %>
-  <%= autocompleter_field(form: f, field: :user,
-                          label: :OBSERVER.t + ":", between: usr_betw,
-                          autocomplete: :user, separator: " OR ") %>
+  <%= autocompleter_field(form: f, field: :user, type: :user,
+                          label: "#{:OBSERVER.t}:", between: usr_betw,
+                          separator: " OR ") %>
 
   <% loc_betw = help_note(:span, :advanced_search_location_help.t) %>
-  <%= autocompleter_field(form: f, field: :location,
-                          label: :LOCATION.t + ":", between: loc_betw,
-                          autocomplete: :location, separator: " OR " ) %>
+  <%= autocompleter_field(form: f, field: :location, type: :location,
+                          label: "#{:LOCATION.t}:", between: loc_betw,
+                          separator: " OR " ) %>
 
   <% cnt_betw = help_note(:span, :advanced_search_content_help.t) %>
   <% cnt_appd = help_block(:p, :advanced_search_content_notes.t) %>

@@ -10,21 +10,26 @@
 class AutoComplete::ForLocation < AutoComplete::ByWord
   attr_accessor :reverse
 
-  def initialize(string, params)
-    super(string, params)
+  def initialize(params)
+    super
     self.reverse = (params[:format] == "scientific")
   end
 
+  # We're no longer matching undefined observation.where strings.
   def rough_matches(letter)
-    matches =
-      Observation.select(:where).distinct.
-      where(Observation[:where].matches("#{letter}%").
-        or(Observation[:where].matches("% #{letter}%"))).pluck(:where) +
-      Location.select(:name).distinct.
+    locations =
+      Location.select(:name, :id, :north, :south, :east, :west).
       where(Location[:name].matches("#{letter}%").
-        or(Location[:name].matches("% #{letter}%"))).pluck(:name)
+        or(Location[:name].matches("% #{letter}%")))
 
-    matches.map! { |m| Location.reverse_name(m) } if reverse
-    matches.sort.uniq
+    # Turn the instances into hashes, and alter name order if requested
+    matches = locations.map do |location|
+      location = location.attributes.symbolize_keys
+      location[:name] = Location.reverse_name(location[:name]) if reverse
+      location
+    end
+    # Sort by name and prefer those with a non-zero ID
+    matches.sort_by! { |loc| [loc[:name], -loc[:id]] }
+    # matches.uniq { |loc| loc[:name] }
   end
 end

@@ -31,7 +31,7 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def default_herbarium_record_fields
-    { herbarium_name: "", herbarium_id: "" }
+    { herbarium_name: "", accession_number: "" }
   end
 
   def location_exists_or_place_name_blank(params)
@@ -1474,7 +1474,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_input_value(:collection_number_number, "")
     assert_input_value(:herbarium_record_herbarium_name,
                        users(:rolf).preferred_herbarium_name)
-    assert_input_value(:herbarium_record_herbarium_id, "")
+    assert_input_value(:herbarium_record_accession_number, "")
     assert_true(@response.body.include?("Albion, Mendocino Co., California"))
     users(:rolf).update(location_format: "scientific")
     get(:new)
@@ -1615,7 +1615,7 @@ class ObservationsControllerTest < FunctionalTestCase
       { observation: { specimen: "1" },
         herbarium_record: {
           herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
-          herbarium_id: "1234"
+          accession_number: "1234"
         },
         naming: { name: "Coprinus comatus" } },
       1, 1, 0
@@ -1630,14 +1630,14 @@ class ObservationsControllerTest < FunctionalTestCase
       { observation: { specimen: "1" },
         herbarium_record: {
           herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
-          herbarium_id: "1234"
+          accession_number: "1234"
         },
         naming: { name: "Cortinarius sp." } },
       0, 0, 0
     )
     assert_input_value(:herbarium_record_herbarium_name,
                        "NY - The New York Botanical Garden")
-    assert_input_value(:herbarium_record_herbarium_id, "1234")
+    assert_input_value(:herbarium_record_accession_number, "1234")
   end
 
   def test_create_observation_with_herbarium_no_id
@@ -1646,7 +1646,7 @@ class ObservationsControllerTest < FunctionalTestCase
       { observation: { specimen: "1" },
         herbarium_record: {
           herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
-          herbarium_id: ""
+          accession_number: ""
         },
         naming: { name: name } },
       1, 1, 0
@@ -1658,11 +1658,10 @@ class ObservationsControllerTest < FunctionalTestCase
 
   def test_create_observation_with_herbarium_but_no_specimen
     generic_construct_observation(
-      { herbarium_record:
-                          { herbarium_name: herbaria(
-                            :nybg_herbarium
-                          ).auto_complete_name,
-                            herbarium_id: "1234" },
+      { herbarium_record: {
+          herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
+          accession_number: "1234"
+        },
         naming: { name: "Coprinus comatus" } },
       1, 1, 0
     )
@@ -1675,7 +1674,7 @@ class ObservationsControllerTest < FunctionalTestCase
     generic_construct_observation(
       { observation: { specimen: "1" },
         herbarium_record: { herbarium_name: "A Brand New Herbarium",
-                            herbarium_id: "" },
+                            accession_number: "" },
         naming: { name: "Coprinus comatus" } },
       1, 1, 0
     )
@@ -1688,7 +1687,7 @@ class ObservationsControllerTest < FunctionalTestCase
     generic_construct_observation(
       { observation: { specimen: "1" },
         herbarium_record: { herbarium_name: katrina.personal_herbarium_name,
-                            herbarium_id: "12345" },
+                            accession_number: "12345" },
         naming: { name: "Coprinus comatus" } },
       1, 1, 0, katrina
     )
@@ -2367,7 +2366,7 @@ class ObservationsControllerTest < FunctionalTestCase
             when: Time.zone.now
           }
         },
-        good_images: "#{old_img1.id} #{old_img2.id}"
+        good_image_ids: "#{old_img1.id} #{old_img2.id}"
       }
     )
 
@@ -2439,7 +2438,7 @@ class ObservationsControllerTest < FunctionalTestCase
         specimen: new_specimen,
         thumb_image_id: "0"
       },
-      good_images: "#{img.id} #{images(:turned_over_image).id}",
+      good_image_ids: "#{img.id} #{images(:turned_over_image).id}",
       good_image: {
         img.id => {
           notes: "new notes",
@@ -2559,7 +2558,7 @@ class ObservationsControllerTest < FunctionalTestCase
         specimen: obs.specimen,
         thumb_image_id: "0"
       },
-      good_images: img_ids.map(&:to_s).join(" "),
+      good_image_ids: img_ids.map(&:to_s).join(" "),
       good_image: {
         img2.id => { notes: "new notes for two" },
         img3.id => { notes: "new notes for three" }
@@ -2588,7 +2587,7 @@ class ObservationsControllerTest < FunctionalTestCase
         specimen: obs.specimen,
         thumb_image_id: "0"
       },
-      good_images: "",
+      good_image_ids: "",
       good_image: {},
       image: {
         "0" => {
@@ -2633,6 +2632,7 @@ class ObservationsControllerTest < FunctionalTestCase
         observation: {
           gps_hidden: "1"
         },
+        good_image_ids: "#{old_img1.id} #{old_img2.id}",
         image: {
           "0" => {
             image: fixture,
@@ -2886,7 +2886,7 @@ class ObservationsControllerTest < FunctionalTestCase
             }
           },
           # (attach these two images once observation created)
-          good_images: "#{new_image1.id} #{new_image2.id}"
+          good_image_ids: "#{new_image1.id} #{new_image2.id}"
         }
       )
     end
@@ -2985,7 +2985,7 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def test_inital_project_checkboxes
-    login("katrina")
+    login("foray_newbie")
     get(:new)
 
     assert_project_checks(
@@ -2993,8 +2993,8 @@ class ObservationsControllerTest < FunctionalTestCase
       projects(:current_project).id => :checked,
       # open-membership, doesn't meet date constraints
       projects(:past_project).id => :unchecked,
-      # meets date constraints, but membership closed
-      projects(:eol_project).id => :unchecked
+      # meets date constraints, but not a member
+      projects(:eol_project).id => :no_field
     )
   end
 
@@ -3003,7 +3003,22 @@ class ObservationsControllerTest < FunctionalTestCase
     slip = field_slips(:field_slip_no_obs)
     get(:new, params: { field_code: slip.code })
 
-    assert_project_checks(slip.project.id => :checked)
+    User.current.project_members.each do |membership|
+      proj = membership.project
+      if proj == slip.project || (proj.current? && proj.field_slip_prefix.nil?)
+        assert_project_checks(proj.id => :checked)
+      else
+        assert_project_checks(proj.id => :unchecked)
+      end
+    end
+  end
+
+  def test_notes_to_name
+    login("katrina")
+    name = names(:coprinus_comatus)
+    get(:new, params: { notes: { Field_Slip_ID: name.text_name } })
+
+    assert_match(name.text_name, @response.body)
   end
 
   def test_project_checkboxes_in_create_observation
@@ -3041,8 +3056,9 @@ class ObservationsControllerTest < FunctionalTestCase
       :update,
       params: {
         id: @obs2.id,
-        observation: { place_name: "blah blah blah" },  # (ensures it will fail)
-        project: { "id_#{@proj1.id}" => "1" }
+        observation: { place_name: "blah blah blah" }, # (ensures it will fail)
+        project: { "id_#{@proj1.id}" => "1" },
+        good_image_ids: @obs2_img_ids.join(" ") # necessary?
       }
     )
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
@@ -3050,7 +3066,8 @@ class ObservationsControllerTest < FunctionalTestCase
       :update,
       params: {
         id: @obs2.id,
-        project: { "id_#{@proj1.id}" => "1" }
+        project: { "id_#{@proj1.id}" => "1" },
+        good_image_ids: @obs2_img_ids.join(" ") # necessary?
       }
     )
     assert_response(:redirect)
@@ -3066,11 +3083,12 @@ class ObservationsControllerTest < FunctionalTestCase
       :update,
       params: {
         id: @obs1.id,
-        observation: { place_name: "blah blah blah" },  # (ensures it will fail)
+        observation: { place_name: "blah blah blah" }, # (ensures it will fail)
         project: {
           "id_#{@proj1.id}" => "1",
           "id_#{@proj2.id}" => "0"
-        }
+        },
+        good_image_ids: @obs1_img_ids.join(" ")
       }
     )
     assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
@@ -3081,7 +3099,8 @@ class ObservationsControllerTest < FunctionalTestCase
         project: {
           "id_#{@proj1.id}" => "1",
           "id_#{@proj2.id}" => "1"
-        }
+        },
+        good_image_ids: @obs1_img_ids.join(" ")
       }
     )
     assert_response(:redirect)
@@ -3101,8 +3120,12 @@ class ObservationsControllerTest < FunctionalTestCase
     @proj2 = projects(:bolete_project)
     @obs1 = observations(:detailed_unknown_obs)
     @obs2 = observations(:coprinus_comatus_obs)
-    @img1 = @obs1.images.first
-    @img2 = @obs2.images.first
+    @obs1_imgs = @obs1.images
+    @obs2_imgs = @obs2.images
+    @img1 = @obs1_imgs.first
+    @img2 = @obs2_imgs.first
+    @obs1_img_ids = @obs1_imgs.map(&:id)
+    @obs2_img_ids = @obs2_imgs.map(&:id)
   end
 
   def assert_project_checks(project_states)

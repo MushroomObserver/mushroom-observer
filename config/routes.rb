@@ -336,7 +336,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :articles, id: /\d+/
 
   # ----- Autocompleters: fetch get ------------------------------------
-  get "/autocompleters/new/:type/:id", to: "autocompleters#new"
+  get "/autocompleters/new/:type", to: "autocompleters#new"
 
   # ----- Checklist: just the show --------------------------------------
   get "/checklist", to: "checklists#show"

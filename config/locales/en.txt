@@ -240,6 +240,7 @@
   collection_number: collection number
   COLLECTION_NUMBERS: Collection Numbers
   collection_numbers: collection numbers
+  COLLECTOR: Collector
   COMMENT: Comment
   comment: comment
   COMMENTS: Comments
@@ -449,6 +450,7 @@
   # ("Authority" is authority on a scientific name.)
   ALTITUDE: Elevation
   altitude: elevation
+  ALT: Alt
   # online database with nucleotide Sequence data
   ARCHIVE: Archive
   archive: archive
@@ -524,6 +526,7 @@
   identifier: identifier
   IDENTIFIERS: Identifiers
   identifiers: identifiers
+  ID_BY: ID By
   inaturalist: iNaturalist
   INDEX: Index
   index: index
@@ -533,6 +536,7 @@
   latitude: latitude
   LATITUDES: Latitudes
   latitudes: latitudes
+  LAT: Lat
   LAT_LON: Lat/Lon
   LOCUS: Locus
   locus: locus
@@ -544,6 +548,7 @@
   longitude: longitude
   LONGITUDES: Longitudes
   longitudes: longitudes
+  LNG: Lng
   MEMBER: Member
   member: member
   MEMBERS: Members
@@ -662,10 +667,13 @@
 
   # Labels for fields answering: "What did you observe?", "When did you observe
   # it?", "Where did you observe it?", and "Who observed it?".
+  # "WHERE_GROUP" is used for the whole group of lat/lng and place_name.
   WHAT: Scientific Name
   what: scientific name
   WHEN: When
   when: when
+  WHERE_GROUP: Where
+  where_group: where
   WHERE: Locality
   where: locality
   WHO: Who
@@ -738,6 +746,8 @@
   send: send
   SHOW: Show
   show: show
+  HIDE: Hide
+  hide: hide
   # submit a form
   SUBMIT: Submit
   submit: submit
@@ -856,7 +866,7 @@
   permission_denied: Permission denied.
   removed_from_list: Removed observation from "[list]".
   removed_from_project: Removed [object] from "[project]".
-  select_file: Select file...
+  select_file: Select or drop files...
   no_file_selected: No file selected.
   SEE_MESSAGE_BELOW: See message below.
   "YES": "Yes"
@@ -1399,6 +1409,7 @@
 
   # autocompleters
   start_typing: Start typing...
+  autocompleter_has_id: Match found
 
   # emails/ask_observation_question
   ask_observation_question_title: Question about [name]
@@ -1487,6 +1498,7 @@
   download_observations_utf16: UTF-16 (best for Windows 7 and up)
   download_observations_print_labels_header: Or you can print labels for the selected observations
   download_observations_print_labels: Print Labels
+  download_observations_too_many_results: You are trying to download too many Observations. Please see <a href="https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md#csv-files" target="_new">CSV Files</a> for an alternative.
 
   # location/edit_location
   edit_location_title: "[:edit_object(type=:location)]"
@@ -1548,15 +1560,16 @@
   form_description_license_help: Please select "license":/info/how_to_use#license you want to use for this description.
 
   # observations/_form_images
-  form_images_when_taken: When Was It Taken
+  form_images_when_taken: When it was taken
   form_images_when_help: Date the photograph or drawing was created.
+  form_images_notes: Image notes
   form_images_notes_help: Enter notes that are specific to this particular image.
   form_images_copyright_holder: "[:COPYRIGHT_HOLDER]"
-  form_images_original_name: Original File Name
+  form_images_original_name: Original file name
   form_images_select_license: Select a "License":/info/how_to_use#license
   form_images_license_help: Select "license":/info/how_to_use#license you want to give for this image.
   form_images_project_help: Check any projects you wish to attach this image to.
-  form_images_camera_date: Camera Date
+  form_images_camera_date: Camera date
 
   # observer/_form_list_feedback
   form_list_feedback_missing_names: The following names could not be found.
@@ -1589,14 +1602,14 @@
 
   # names/_form_name
   form_names_locked: Lock this name so users cannot change name, author or rank?
-  form_names_detailed_help: "For detailed help see <a href=\"https://docs.google.com/document/d/1xOEIAGzb2NoGfeC1QMvVmwtWK-gYyZqKkt7yKv61WY0\" target=\"_new\">Names in Mushroom Observer</a>."
+  form_names_detailed_help: For detailed help see <a href="https://docs.google.com/document/d/1xOEIAGzb2NoGfeC1QMvVmwtWK-gYyZqKkt7yKv61WY0" target="_new">Names in Mushroom Observer</a>.
   form_names_text_name: Scientific Name
-  form_names_icn_id: "Identifier"
+  form_names_icn_id: Identifier
   form_names_identifier_help: "Preferably include the <a href=\"https://www.indexfungorum.org/\">Index Fungorum</a> Registration Identifier or <a href=\"https://www.mycobank.org/\">MycoBank</a> #."
   form_names_misspelling: This name is misspelt.
   form_names_misspelling_it_should_be: It should be
   form_names_taxonomic_notes: Notes on Taxonomy
-  form_names_taxonomic_notes_warning: "Please avoid duplicating information from <a href=\"https://www.indexfungorum.org/\">Index Fungorum</a> (IF) or  <a href=\"https://www.mycobank.org/\">MycoBank</a> (MB) in the [:form_names_taxonomic_notes]. Instead, complete the <b>[:form_names_icn_id]</b> field above. This will automatically create links to both IF and MB."
+  form_names_taxonomic_notes_warning: Please avoid duplicating information from <a href="https://www.indexfungorum.org/">Index Fungorum</a> (IF) or  <a href="https://www.mycobank.org/">MycoBank</a> (MB) in the [:form_names_taxonomic_notes]. Instead, complete the <b>[:form_names_icn_id]</b> field above. This will automatically create links to both IF and MB.
   form_names_classification: Taxonomic Classification
   form_names_gen_desc: General Description
   form_names_diag_desc: Diagnostic Description
@@ -1645,9 +1658,7 @@
   form_observations_field_code: for field slip
   form_observations_specimen_available: Specimen Available
   form_observations_is_collection_location: Is this location where it was collected?
-  form_observations_click_on_map: Click on map for geolocation
   form_observations_gps_hidden: Hide exact coordinates?
-  form_observations_original_name: Original File Name
   form_observations_upload_images: Upload Images
   form_observations_uploading_images: Uploading Images
   form_observations_upload_another: Upload Another...
@@ -1657,16 +1668,18 @@
   form_observations_lat_long_help: "Optional GPS location within **[:WHERE]**. Latitude must be -90.0 to 90.0;  longitude must be -180.0 to 180.0. Elevation will be converted to meters. If you choose to provide this data please make it as accurate as possible. Examples: \"34.1164\" = \"34°6&apos;59&quot;N\", \"-118.1459\" = \"118 8.754 W\", \"239 m\" = \"784 ft.\""
   form_observations_log_change: Log Change
   form_observations_is_collection_location_help: Check when the location is where the mushroom was growing.  Uncheck when it is only where the mushroom was seen (e.g., mushroom fairs, grocery, foray id table where collection location is unknown etc.).
-  form_observations_open_map: Open Interactive Map
-  form_observations_clear_map: Clear Map
-  form_observations_locate_on_map: Locate on Map
+  form_observations_open_map: "[:SHOW] [:map]"
+  form_observations_hide_map: "[:HIDE] [:map]"
+  form_observations_clear_map: Clear location
+  form_observations_click_point: Click a point on the map to set a location
+  form_observations_locality_contains: Localities containing this point
   form_observations_notes_help: Please include any additional information you can think of about this observation that isn't clear from the photographs, e.g., habitat, substrate or nearby trees; distinctive texture, scent, taste, staining or bruising; results of chemical or microscopic analyses, etc.
   form_observations_remove_image_confirm: Are you sure you want to remove this image?  This will only remove this image from this observation.  If it is attached to other observations, it will remain attached to them.
   form_observations_specimen_available_help: Check when there is a preserved specimen available for further study.
   form_observations_upload_help: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation.
   form_observations_upload_help_multi_select: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation. In the file select dialog you can select multiple images at a time.  You can also continue to add additional images by clicking the button below.
-  form_observations_where_help: "Place where the Observation was made. **In the US this should be at least as precise as the county.**\nInclude administrative divisons ordered from smallest to largest, ending with the full name of the country, except use 'USA' for the United States of America.\nExamples:\n&nbsp;&nbsp; [loc1]\n&nbsp;&nbsp; [loc2]"
-  form_observations_locate_on_map_help: Use the Locate on Map Button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude.
+  form_observations_where_help: "Place where the Observation was made. **In the US this should be at least as precise as the county.**\n&nbsp;\nInclude administrative divisons ordered from smallest to largest, ending with the full name of the country, except use 'USA' for the United States of America.\nExamples:\n&nbsp;&nbsp; [loc1]\n&nbsp;&nbsp; [loc2]"
+  form_observations_locate_on_map_help: "Use the **[:form_observations_open_map]** button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude."
   form_observations_dubious_help: Click '[button]' to use this location name or edit the text below to correct any typo.
   form_observations_project_help: Check any projects you wish to attach this observation to.  All images you upload will also automatically be attached to these projects, too.
   form_observations_list_help: Check any species lists you would like to add this observation to.
@@ -1683,7 +1696,8 @@
 
   form_observations_there_is_a_problem_with_projects: This observation violates the constraints of one or more selected projects. "+[:SEE_MESSAGE_BELOW]+":#project_messages
   form_observations_projects_out_of_range: The observation date ([date]) or location ([place_name]) is outside the range of these checked project(s)
-  form_observations_projects_out_of_range_help: "Either:\n- Uncheck out-of-range projects;\n- Change the observation date or location if it is incorrect; or\n- (undesirably) Check [:form_observations_projects_ignore_project_constraints] to ignore the project constraints.\nThen click [button_name]."
+  form_observations_projects_out_of_range_help: "Either:\n- Uncheck out-of-range projects; or\n- Change the observation date or location if it is incorrect"
+  form_observations_projects_out_of_range_admin_help: "; or\n- (undesirably) Check [:form_observations_projects_ignore_project_constraints] to ignore the project constraints.\nThen click [button_name]."
   form_observations_projects_ignore_project_constraints: Ignore Project Constraints
 
   form_observations_there_is_a_problem_with_location: There is a problem with the location. "+[:SEE_MESSAGE_BELOW]+":#location_messages
@@ -1722,6 +1736,11 @@
   image_add_optional: "[:optional]"
   image_add_upload: "[:UPLOAD]"
   image_add_warning: Please only upload images that you created or which you own the copyright of. By uploading images you are giving us permission to distribute this image to other users ("legalese":https://creativecommons.org/licenses/by-nc-sa/4.0/). You are also giving us permission to display this image along side advertisements or other fund-raising tools that may be used to support this site.
+  image_exif_copied: Info copied
+  image_use_exif: Use this info
+  image_camera_info: Camera info
+  image_file_name: File name
+  image_file_size: File size
 
   # account/profile/images/reuse
   image_reuse_all_users: Include other users' images.
@@ -2253,7 +2272,7 @@
   show_observation_view_notifications: View Notifications
   show_observation_hide_map: Hide thumbnail map.
   show_observation_thumbnail_map_hidden: Thumbnail map hidden.  To re-enable this feature, go to your "[:app_preferences]":/account/preferences/edit page.
-  show_observation_add_link: "Create [site] link"
+  show_observation_add_link: Create [site] link
   show_observation_add_link_dialog: "Enter a link here to this observation on [site]. Use the full URL, including \"https://\":"
   show_observation_no_collection_numbers: No [:collection_numbers]
   show_observation_remove_collection_number: Remove collection number from this observation
@@ -2782,36 +2801,42 @@
   destroy_visual_model_success: "[:VISUAL_MODEL] [:destroyed]"
 
   # Field Slips
+  field_slip_cant_join_project: Either no Project was found or you are unable to join the associated Project
   field_slip_code: Code
   field_slip_code_format_error: code must have non-numeric characters other than period (.) and dash (-)
+  field_slip_constraint_violation: The selected observation violates one or more project constraints
   field_slip_created: Field slip was successfully created.
   field_slip_create_obs: Create New Observation
   field_slip_creator: Creator
   field_slip_destroy: Destroy this field slip
   field_slip_destroyed: Field slip was successfully destroyed.
-  field_slip_edit: Edit this field slip
+  field_slip_edit: Edit [:FIELD_SLIP]
   field_slip_editing: Editing Field Slip
   field_slip_errors: prohibited this field_slip from being saved
-  field_slip_index: Back to field slips
-  field_slip_job_no_project: "No Project with id=[ID]"
-  field_slip_keep_obs: Keep Current
-  field_slip_last_obs: Use Last Observation
+  field_slip_index: "[:FIELD_SLIP] Index"
+  field_slip_job_no_project: No Project with id=[ID]
+  field_slip_job_no_tracker: No Field Slip Tracker found
+  field_slip_keep_obs: Save with Current Observation
+  field_slip_last_obs: Switch to Last Observation
   field_slip_new: Record Field Slip
   field_slip_no_observation: No Observation found
   field_slip_no_project: No Project found
-  field_slip_nil_project: (No Project)
-  field_slip_job_no_tracker: No Field Slip Tracker found
-  field_slip_show: Show this field slip
+  field_slip_nil_project: "(No Project)"
+  field_slip_other_codes: Other Codes
+  field_slip_other_example: e.g., iNat ID
+  field_slip_project_success: Field Slip associated with the [TITLE] Project
+  field_slip_remove_observation: Removed [OBSERVATION] from [TITLE] Project
+  field_slip_show: Show [:FIELD_SLIP]
   field_slip_updated: Field slip was successfully updated.
-  field_slip_welcome: "Welcome to the [TITLE] Project!"
-  field_slips_max_for_project: "You may create up to [MAX] slips for this project."
+  field_slip_welcome: Welcome to the [TITLE] Project!
+  field_slips_max_for_project: You may create up to [MAX] slips for this project.
   field_slips_for_project_title: Create Field Slips for the
-  field_slips_created_job: "Created job for [filename]"
-  field_slips_must_be_member: "You must be a project member to create field slips"
-  field_slips_project_update_fail: "Unable to update [TITLE] Project"
-  field_slips_tracker_fail: "Unable to create Field Slip Tracker for [TITLE] Project"
-  field_slips_too_many_field_slips: "You have requested more than [MAX] slips."
-  field_slips_one_per_page: "One field slip per page. Print shops prefer this. Otherwise 6/page which works best on US letter page."
+  field_slips_created_job: Created job for [filename]
+  field_slips_must_be_member: You must be a project member to create field slips
+  field_slips_project_update_fail: Unable to update [TITLE] Project
+  field_slips_tracker_fail: Unable to create Field Slip Tracker for [TITLE] Project
+  field_slips_too_many_field_slips: You have requested more than [MAX] slips.
+  field_slips_one_per_page: One field slip per page. Print shops prefer this. Otherwise 6/page which works best on US letter page.
 
   ##############################################################################
 
@@ -3286,7 +3311,7 @@
   form_projects_any: Any
   form_projects_date_range: Date Range
   form_projects_date_fixed: Use above date
-  form_projects_dates_explain: "Default earliest and latest dates for [:OBSERVATIONS]. Users will be warned if trying to add an Observation outside of this range, but they can override the warning."
+  form_projects_dates_explain: Default earliest and latest dates for [:OBSERVATIONS]. Users will be warned if trying to add an Observation outside of this range, but they can override the warning.
   form_projects_end_date: Project End Date
   form_projects_range: Range
   form_projects_start_date: Project Start Date
@@ -3548,8 +3573,7 @@
   how_description: "*Species Description* - A collection of text describing a \"Name\":#name. Every name automatically gets one official description that everyone in the community is allowed to read and modify.  Additional descriptions may be created by any \"User\":#user, including project members.  The owner of a description may choose any level of read or write permissions, and can control who is given authorship credit.  Since descriptions, especially the official one, are often collaborative efforts, modifications by a user are subject to community review, and past versions are kept to facilitate this process.  The content of a description includes a set list of sections, including things like '[:form_names_gen_desc]', '[:form_names_diag_desc]', '[:form_names_look_alikes]', '[:form_names_refs]' and other notes."
   how_image: "*Image* - A photograph or illustration of one or more mushroom species. Images are associated with one or more \"Observations\":#observation.  A given Image is owned by a particular \"User\":#user who may or may not be the copyright holder.  Only the owner or a site administrator can remove an image or edit the associated information.  All images in the site are required to be released under one of the \"Creative Commons licenses\":https://creativecommons.org or in the public domain.  If you dispute the given copyright or the licensing of an image you are the copyright holder of, send mail to the \"webmaster\":/emails/ask_webmaster_question."
 
-  how_license: "**License** – When you post an image or other content on Mushroom Observer (“your Work’), you grant one of the following \"CC (Creative Commons) Licenses\":https://creativecommons.org/licenses/ for others to use your Work: \n -  \"CC-BY-SA - Attribution-ShareAlike\":https://creativecommons.org/licenses/by-sa/4.0/ (Wikipedia compatible): MO's default license. Others can use your Work, however they must credit any new creations based on your Work the same as the original. \n - \"CC-BY - Attribution\":https://creativecommons.org/licenses/by/ (Wikipedia compatible): Others can use your Work as long as they credit you. Others can create new material based on your work. \n - \"CC-BY-NC - Attribution-NonCommercial\":https://creativecommons.org/licenses/by-nc/4.0/: Others can use your Work, and create new material based on it, however they can’t profit from the new material. \n - \"CC-BY-NC-SA - Attribution-NonCommercial-ShareAlike\":https://creativecommons.org/licenses/by-nc-sa/4.0: Others can use your Work, so long as they don’t profit off it and use identical credits for new creations. \n - \"CC-BY-ND - Attribution-NoDerivs\":https://creativecommons.org/licenses/by-nd/4.0/: Others can use your Work, however they can’t alter your Work to create new materials. \n - \"CC-BY-NC-ND - Attribution-NonCommercial-NoDerivs\":https://creativecommons.org/licenses/by-nc-nd/4.0: Others can use your Work, however they can’t profit off it or change it. \n - \"CC0 - No Copyright/Public Domain\":https://creativecommons.org/publicdomain/zero/ (Wikipedia compatible): You waive your rights to your Work. Others can use it without crediting you, and can create new material based on it. \n You can change your default license by selecting the 'License' on \"your Preferences\":/account/preferences/edit and clicking on ‘Save Changes’. You can also set licenses on a per image basis."
-
+  how_license: "**License** – When you post an image or other content on Mushroom Observer (“your Work’), you grant one of the following \"CC (Creative Commons) Licenses\":https://creativecommons.org/licenses/ for others to use your Work:\n-  \"CC-BY-SA - Attribution-ShareAlike\":https://creativecommons.org/licenses/by-sa/4.0/ (Wikipedia compatible): MO's default license. Others can use your Work, however they must credit any new creations based on your Work the same as the original.\n- \"CC-BY - Attribution\":https://creativecommons.org/licenses/by/ (Wikipedia compatible): Others can use your Work as long as they credit you. Others can create new material based on your work.\n- \"CC-BY-NC - Attribution-NonCommercial\":https://creativecommons.org/licenses/by-nc/4.0/: Others can use your Work, and create new material based on it, however they can’t profit from the new material.\n- \"CC-BY-NC-SA - Attribution-NonCommercial-ShareAlike\":https://creativecommons.org/licenses/by-nc-sa/4.0: Others can use your Work, so long as they don’t profit off it and use identical credits for new creations.\n- \"CC-BY-ND - Attribution-NoDerivs\":https://creativecommons.org/licenses/by-nd/4.0/: Others can use your Work, however they can’t alter your Work to create new materials.\n- \"CC-BY-NC-ND - Attribution-NonCommercial-NoDerivs\":https://creativecommons.org/licenses/by-nc-nd/4.0: Others can use your Work, however they can’t profit off it or change it.\n- \"CC0 - No Copyright/Public Domain\":https://creativecommons.org/publicdomain/zero/ (Wikipedia compatible): You waive your rights to your Work. Others can use it without crediting you, and can create new material based on it.\nYou can change your default license by selecting the 'License' on \"your Preferences\":/account/preferences/edit and clicking on ‘Save Changes’. You can also set licenses on a per image basis."
 
   how_location: "*Location* - A rectangular region enclosing a given location, as defined by the northern, southern, eastern and western boundaries.  In addition to the position, locations can also include a minimum and maximum elevation along with various notes.  Note that the elevations should be in meters not feet. A location is not considered to be owned by a particular \"User\":#user.  Any user may change or define any location, but all of a user's changes are subject to review by the community.  To help with this review process, copies of the previous versions are kept."
   how_name: "*Name* - A name for some group of mushrooms.  Most commonly this is the name of a species, but it can be any taxon (genus, family, variety, etc.).  Names can also refer to groups that are not officially recognized scientific names such as common names or functional groups like Gasteromyces.  A name is *not* considered to be owned by a particular \"User\":#user.  Any user may change any name, but all changes are subject to review by the community.  To help with this review process, copies of previous versions are kept.  Names can have an acknowledged author.  The author is normally only given for scientific names. The author should follow the standard practice of listing the person who first correctly published the name.  In the case of names at or below the species level, the author may also include the person who transfered the species to the current genus, e.g., (Singer) Jenkins."
@@ -3784,7 +3808,7 @@
   validate_observation_when_missing: "[:validate_missing(field=:date)]"
   validate_observation_where_too_long: "[:validate_too_long(field=:location,max=1024)]"
   validate_project_admin_group_missing: "[:validate_missing(field=:admin_group)]"
-  validate_project_ends_before_start: "End date is before the start date"
+  validate_project_ends_before_start: End date is before the start date
   validate_project_title_missing: "[:validate_missing(field=:title)]"
   validate_project_title_too_long: "[:validate_too_long(field=:title,max=100)]"
   validate_project_user_group_missing: "[:validate_missing(field=:user_group)]"

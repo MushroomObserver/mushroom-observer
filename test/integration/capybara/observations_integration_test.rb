@@ -211,7 +211,9 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
 
     # create an Observation with Project selected
     visit(new_observation_path)
-    fill_in(:WHERE.l, with: locations(:unknown_location).name)
+    assert_selector("#observation_place_name", visible: :any)
+    fill_in(id: "observation_place_name", visible: :any,
+            with: locations(:unknown_location).name)
     check(proj_checkbox)
     first(:button, "Create").click
 
@@ -239,7 +241,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
   # when creating an Observation
   def test_add_out_of_range_observation_to_project
     proj = projects(:past_project)
-    user = users(:katrina)
+    user = users(:roy)
     # Ensure fixtures not broken
     assert(proj.member?(user),
            "Need fixtures such that `user` is a member of `proj`")
@@ -250,9 +252,11 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     # Try adding out-of-range Observation to Project
     # It should reload the form with warnings and a hidden field
     visit(new_observation_path)
+    assert_selector("#observation_place_name", visible: :any)
     assert(has_unchecked_field?(proj_checkbox),
            "Missing an unchecked box for Project which has ended")
-    fill_in(:WHERE.l, with: obs_location.name)
+    fill_in(id: "observation_place_name", visible: :any,
+            with: obs_location.name)
     check(proj_checkbox)
     assert_selector("##{proj_checkbox}[checked='checked']")
     assert_no_difference("Observation.count",
@@ -264,9 +268,10 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
       "#flash_notices",
       text: :form_observations_there_is_a_problem_with_projects.t.strip_html
     )
+    default_obs = Observation.where(user_id: user.id).order(:created_at).last
     within("#project_messages") do # out-of-range warning message
       assert(has_text?(:form_observations_projects_out_of_range.l(
-                         date: Time.zone.today,
+                         date: default_obs.when,
                          place_name: obs_location.name
                        )),
              "Missing out-of-range warning with observation date")
@@ -292,9 +297,12 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
       "Observation should not be added to Project if user unchecks Project"
     )
 
-    # 2. Prove that Observation is created if user fixes dates to be in-range
+    # 2. Prove that Observation is created if user fixes dates and
+    # location to be in-range
     visit(new_observation_path)
-    fill_in(:WHERE.l, with: obs_location.name)
+    assert_selector("#observation_place_name", visible: :any)
+    fill_in(id: "observation_place_name", visible: :any,
+            with: proj.location.display_name)
     check(proj_checkbox)
     first(:button, "Create").click
     assert_selector(
@@ -318,7 +326,9 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
 
     # 3. Prove Obs is created if user overrides Project date ranges
     visit(new_observation_path)
-    fill_in(:WHERE.l, with: obs_location.name)
+    assert_selector("#observation_place_name", visible: :any)
+    fill_in(id: "observation_place_name", visible: :any,
+            with: obs_location.name)
     check(proj_checkbox)
     # reset Observation date, making it out-of-range
     select(Time.zone.today.day, from: "observation_when_3i")

@@ -36,13 +36,14 @@ module FormsHelper
   end
 
   # form-agnostic button, type=button
-  def js_button(**args)
+  def js_button(**args, &block)
+    button = block ? capture(&block) : args[:button]
     opts = args.except(:form, :button, :class, :center)
     opts[:class] = "btn btn-default"
     opts[:class] += " center-block my-3" if args[:center] == true
     opts[:class] += " #{args[:class]}" if args[:class].present?
 
-    button_tag(args[:button], type: :button, **opts)
+    button_tag(button, type: :button, **opts)
   end
 
   # Form field builders with labels, consistent styling and less template code!
@@ -93,10 +94,13 @@ module FormsHelper
       args[:form].label(args[:field]) do
         concat(args[:form].check_box(args[:field], opts))
         concat(args[:label])
+        concat(args[:append]) if args[:append].present?
       end
     end
   end
 
+  # Makes an element that looks like a bootstrap button but works as a checkbox.
+  # Only works within a .btn-group wrapper. NOTE: Different from a check_box!
   def check_button_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
     opts = separate_field_options_from_args(args)
@@ -125,6 +129,20 @@ module FormsHelper
     end
   end
 
+  # Makes an element that looks like a bootstrap button but works as a radio.
+  # Only works within a .btn-group wrapper. NOTE: Different from a radio_button!
+  def radio_button_with_label(**args)
+    args = auto_label_if_form_is_account_prefs(args)
+    opts = separate_field_options_from_args(args)
+
+    wrap_class = form_group_wrap_class(args, "btn btn-default btn-sm")
+
+    args[:form].label(args[:field], class: wrap_class) do
+      [args[:form].radio_button(args[:field], opts.merge(class: "mt-0 mr-2")),
+       args[:label]].safe_join
+    end
+  end
+
   # Bootstrap text_field
   def text_field_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
@@ -133,30 +151,99 @@ module FormsHelper
     opts[:class] = "form-control"
 
     wrap_class = form_group_wrap_class(args)
+    wrap_data = args[:wrap_data] || {}
     label_opts = field_label_opts(args)
 
-    tag.div(class: wrap_class) do
+    tag.div(class: wrap_class, data: wrap_data) do
       concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
-      concat(args[:form].text_field(args[:field], opts))
+      if args[:addon].present?
+        concat(tag.div(class: "input-group") do
+          concat(args[:form].text_field(args[:field], opts))
+          concat(tag.span(args[:addon], class: "input-group-addon"))
+        end)
+      else
+        concat(args[:form].text_field(args[:field], opts))
+      end
       concat(args[:append]) if args[:append].present?
     end
   end
 
-  # This allows incoming data attributes to deep_merge with autocompleter's data
-  # 2023 hack to defeat unhelpful browser autocompletes that get in the way of
-  # our autocompleter: use the browser standard autocomplete att "one-time-code"
+  # MO's autocompleter_field is a text_field that fetches suggestions from the
+  # db for the requested model. (For a textarea, pass textarea: true.) The
+  # stimulus controller handles keyboard and mouse interactions, does the
+  # fetching, and draws the dropdown menu. `args` allow incoming data attributes
+  # to deep_merge with controller data. We attempt to disable browser
+  # autocomplete via `autocomplete="off"` — the W3C standard API, but it
+  # has never been honored by Chrome or Safari. Chrome seems to be in a race to
+  # defeat the evolving hacks by developers to disable inappropriate
+  # autocompletes, and Safari is not much better - you just can't turn their
+  # crap off. (documented on SO)
+  #
   def autocompleter_field(**args)
-    autocompleter_args = {
-      placeholder: :start_typing.l, autocomplete: "one-time-code",
-      data: { controller: :autocompleter, autocompleter_target: "input",
-              autocomplete: args[:autocomplete], separator: args[:separator] }
-    }.deep_merge(args.except(:autocomplete, :separator, :textarea))
+    ac_args = {
+      placeholder: :start_typing.l, autocomplete: "off",
+      data: { autocompleter_target: "input" }
+    }.deep_merge(args.except(:type, :separator, :textarea,
+                             :hidden, :hidden_data))
+    ac_args[:class] = class_names("dropdown", args[:class])
+    ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
+                            separator: args[:separator],
+                            autocompleter_target: "wrap" }
+    ac_args[:between] = capture do
+      concat(args[:between])
+      concat(autocompleter_has_id_indicator)
+      concat(autocompleter_hidden_field(**args)) if args[:form]
+    end
+    ac_args[:append] = capture do
+      concat(autocompleter_dropdown)
+      concat(args[:append])
+    end
 
     if args[:textarea] == true
-      text_area_with_label(**autocompleter_args)
+      text_area_with_label(**ac_args)
     else
-      text_field_with_label(**autocompleter_args)
+      text_field_with_label(**ac_args)
+    end
+  end
+
+  def autocompleter_has_id_indicator
+    link_icon(:check, title: :autocompleter_has_id.l,
+                      classes: "ml-3 px-2 text-success has-id-indicator")
+  end
+
+  # minimum args :form, :type.
+  # Send :hidden to fill the id, :hidden_data to merge with hidden field data
+  def autocompleter_hidden_field(**args)
+    model = autocompleter_type_to_model(args[:type])
+    data = { autocompleter_target: "hidden" }.merge(args[:hidden_data] || {})
+    args[:form].hidden_field(:"#{model}_id", value: args[:hidden], data:)
+  end
+
+  def autocompleter_type_to_model(type)
+    case type
+    when :region
+      :location
+    when :clade
+      :name
+    else
+      type
+    end
+  end
+
+  def autocompleter_dropdown
+    tag.div(class: "auto_complete dropdown-menu",
+            data: { autocompleter_target: "pulldown",
+                    action: "scroll->autocompleter#scrollList:passive" }) do
+      tag.ul(class: "virtual_list", data: { autocompleter_target: "list" }) do
+        10.times do |i|
+          concat(tag.li(class: "dropdown-item") do
+            link_to("", "#", data: {
+                      row: i, action: "click->autocompleter#selectRow:prevent"
+                    })
+          end)
+        end
+      end
     end
   end
 
@@ -169,9 +256,10 @@ module FormsHelper
     opts[:class] += " text-monospace" if args[:monospace].present?
 
     wrap_class = form_group_wrap_class(args)
+    wrap_data = args[:wrap_data] || {}
     label_opts = field_label_opts(args)
 
-    tag.div(class: wrap_class) do
+    tag.div(class: wrap_class, data: wrap_data) do
       concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
       concat(args[:form].text_area(args[:field], opts))
@@ -218,22 +306,26 @@ module FormsHelper
   # text inputs, but you can pass data: { controller: "" } to get a year select.
   # The three "selects" will always be inline, but pass inline: true to make
   # the label and selects inline.
+  # The form label does not correspond exactly to any of the three fields, so
+  # it identifies the wrapping div. (That's also valid HTML.)
+  # https://stackoverflow.com/a/16426122/3357635
   def date_select_with_label(**args)
     opts = separate_field_options_from_args(args, [:object, :data])
     opts[:class] = "form-control"
     opts[:data] = { controller: "year-input" }.merge(args[:data] || {})
-
+    date_select_opts = date_select_opts(args)
     wrap_class = form_group_wrap_class(args)
-    selects_class = "form-inline"
+    selects_class = "form-inline date-selects"
     selects_class += " d-inline-block" if args[:inline] == true
-
+    identifier = [args[:form].object_name, args[:index], args[:field]].
+                 compact.join("_")
+    label_opts = { class: "mr-3" }
+    label_opts[:index] = args[:index] if args[:index].present?
     tag.div(class: wrap_class) do
-      concat(args[:form].label("#{args[:field]}_1i", args[:label],
-                               class: "mr-3"))
+      concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
-      concat(tag.div(class: selects_class) do
-        concat(args[:form].date_select(args[:field],
-                                       date_select_opts(args), opts))
+      concat(tag.div(class: selects_class, id: identifier) do
+        concat(args[:form].date_select(args[:field], date_select_opts, opts))
       end)
       concat(args[:append]) if args[:append].present?
     end
@@ -245,9 +337,10 @@ module FormsHelper
     start_year = args[:start_year] || 20.years.ago.year
     end_year = args[:end_year] || Time.zone.now.year
     init_value = obj.try(&:when).try(&:year)
-    start_year = init_value if init_value && init_value < start_year
-    opts = { start_year: start_year,
-             end_year: end_year,
+    if init_value && init_value < start_year && init_value > 1900
+      start_year = init_value
+    end
+    opts = { start_year: start_year, end_year: end_year,
              selected: obj.try(&:when) || Time.zone.today,
              order: args[:order] || [:day, :month, :year] }
     opts[:index] = args[:index] if args[:index].present?
@@ -464,7 +557,7 @@ module FormsHelper
   def separate_field_options_from_args(args, extras = [])
     exceptions = [
       :form, :field, :label, :class, :width, :inline, :between, :append,
-      :optional, :required, :monospace, :type
+      :addon, :optional, :required, :monospace, :type, :wrap_data
     ] + extras
 
     args.clone.except(*exceptions)
