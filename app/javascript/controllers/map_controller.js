@@ -557,9 +557,10 @@ export default class extends Controller {
     }
   }
 
-  // Action called after bufferInputs from lat/lng inputs, to update map marker.
-  // Also via toggleMap, checks if lat & lng fields already populated on load
-  // if so, drops a pin on that location and center. otherwise, checks if place
+  // Action called via toggleMap, after bufferInputs from lat/lng inputs, to
+  // update map marker, and directly by form-exif controller emitting the
+  // pointChanged event. Checks if lat & lng fields already populated on load if
+  // so, drops a pin on that location and center. Otherwise, checks if place
   // input has been prepopulated and uses that to focus map and drop a marker.
   calculateMarker(event) {
     console.log("calculateMarker")
@@ -675,8 +676,8 @@ export default class extends Controller {
       }
 
       setTimeout(() => {
-        this.checkForBox() // regardless if point
         this.checkForMarker()
+        this.checkForBox() // regardless if point
       }, 500) // wait for map to open
     }
   }

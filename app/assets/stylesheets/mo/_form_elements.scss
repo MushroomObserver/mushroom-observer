@@ -141,12 +141,31 @@ form {
   display: none;
 }
 
+.create-label {
+  display: none;
+}
+
 .constrained {
   .unconstrained-label {
     display: none;
   }
   .constrained-label {
     display: inline-block;
+  }
+  .create-label {
+    display: none;
+  }
+}
+
+.create {
+  .create-label {
+    display: inline-block;
+  }
+  .unconstrained-label {
+    display: none;
+  }
+  .constrained-label {
+    display: none;
   }
 }
 

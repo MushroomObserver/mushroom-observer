@@ -132,6 +132,7 @@ const INTERNAL_OPTS = {
   refresh_timer: null,   // timer used to delay update after typing
   hide_timer: null,      // timer used to delay hiding of pulldown
   key_timer: null,       // timer used to emulate key repeat
+  data_timer: null,      // timer used to delay hidden data updated event (map)
   log: false,            // log debug messages to console?
   has_create_link: false // pulldown currently has link to create new record
 }
@@ -191,7 +192,6 @@ export default class extends Controller {
   // the primer (as with location_containing a changed lat/lng)
   // Callable internally if you pass a detail object with a type property.
   swap({ detail }) {
-    // console.log("swapping autocompleter type");
     let type;
     if (this.hasSelectTarget) {
       type = this.selectTarget.value;
@@ -203,6 +203,7 @@ export default class extends Controller {
     if (!AUTOCOMPLETER_TYPES.hasOwnProperty(type)) {
       alert("MOAutocompleter: Invalid type: \"" + type + "\"");
     } else {
+      this.verbose("swapping autocompleter type " + type);
       this.TYPE = type;
       this.element.setAttribute("data-type", type)
       // add dependent properties and allow overrides
@@ -216,23 +217,27 @@ export default class extends Controller {
       this.clearHiddenId();
       if (this.TYPE === "location_google") {
         this.inputTarget.closest("form").classList.add('map-outlet');
+        this.element.classList.add('create');
+        this.element.classList.remove('constrained');
       } else if (this.ACT_LIKE_SELECT) {
         this.inputTarget.closest("form").classList.remove('map-outlet');
         // primer is not based on input, so go ahead and request from server.
         this.focused = true; // so it will draw the pulldown immediately
         this.refreshPrimer(); // directly refresh the primer w/request_params
         this.element.classList.add('constrained');
+        this.element.classList.remove('create');
       } else {
         this.inputTarget.closest("form").classList.remove('map-outlet');
+        this.verbose("regular swap");
         this.scheduleRefresh();
-        this.element.classList.remove('constrained');
+        this.element.classList.remove('constrained', 'create');
       }
     }
   }
 
   // Connects the location_google autocompleter to call map controller methods
   mapOutletConnected(outlet, element) {
-    console.log("map outlet connected");
+    this.verbose("map outlet connected");
     // open the map if not already open
     if (!outlet.opened) outlet.toggleMapBtnTarget.click();
     // set the map type so box is editable
@@ -240,14 +245,14 @@ export default class extends Controller {
     // outlet.marker.setDraggable(false); messes up map
     // outlet.marker.setClickable(false); messes up map
     outlet.geocodeLatLng();
-    this.dispatchHiddenIdEvents();
+    // this.dispatchHiddenIdEvents();
   }
 
   mapOutletDisconnected(outlet, element) {
-    console.log("map outlet disconnected");
+    this.verbose("map outlet disconnected");
     outlet.map_type = "observation";
     if (outlet.rectangle) outlet.rectangle.setEditable(false);
-    this.dispatchHiddenIdEvents();
+    // this.dispatchHiddenIdEvents();
   }
 
   // pulldownTargetConnected() {
@@ -406,6 +411,7 @@ export default class extends Controller {
     if (new_val != old_val) {
       this.old_value = new_val;
       if (do_refresh) {
+        this.verbose("ourChange()");
         this.scheduleRefresh();
       }
     }
@@ -414,7 +420,8 @@ export default class extends Controller {
   // User clicked into text field.
   ourClick(event) {
     if (this.ACT_LIKE_SELECT)
-      this.scheduleRefresh();
+      this.verbose("ourClick()");
+    this.scheduleRefresh();
     return false;
   }
 
@@ -467,7 +474,7 @@ export default class extends Controller {
   scheduleRefresh() {
     this.verbose("scheduleRefresh()");
     this.clearRefresh();
-    this.refresh_timer = window.setTimeout((() => {
+    this.refresh_timer = setTimeout((() => {
       this.verbose("doing_refresh()");
       // this.debug("refresh_timer(" + this.inputTarget.value + ")");
       this.old_value = this.inputTarget.value;
@@ -622,6 +629,7 @@ export default class extends Controller {
     if (this.COLLAPSE > 0 &&
       (new_val.match(/ /g) || []).length < this.COLLAPSE) {
       new_val += ' ';
+      this.verbose("gotcha!()");
       this.scheduleRefresh();
     } else {
       this.scheduleHide();
@@ -709,6 +717,7 @@ export default class extends Controller {
   // as needed, as the user scrolls. rows are the <li> elements in the pulldown.
   //  Called from drawPulldown().
   updateRows(rows) {
+    this.verbose("updateRows(rows)");
     let i, text;
     for (i = 0; i < this.PULLDOWN_SIZE; i++) {
       let row = rows.item(i),
@@ -771,6 +780,7 @@ export default class extends Controller {
   // Highlight that row (CSS only - does not populate hidden ID).
   //  Called from drawPulldown().
   highlightNewRow(rows) {
+    this.verbose("highlightNewRow(rows)");
     const old_hl = this.current_highlight;
     let new_hl = this.current_row - this.scroll_offset;
 
@@ -790,6 +800,7 @@ export default class extends Controller {
   // wrapping .form-group which must have class .dropdown.
   //  Called from drawPulldown().
   makePulldownVisible() {
+    this.verbose("makePulldownVisible()");
     const matches = this.matches,
       offset = this.scroll_offset,
       size = this.PULLDOWN_SIZE,
@@ -819,7 +830,7 @@ export default class extends Controller {
         this.wrapTarget?.classList?.add('open');
         this.menu_up = true;
       } else {
-        hidePulldown();
+        this.hidePulldown();
       }
     } else {
       // Hide the pulldown if it's empty now.
@@ -846,6 +857,7 @@ export default class extends Controller {
 
   // Assigns not only the ID, but also any data attributes of selected row.
   assignHiddenId(match) {
+    this.verbose("assignHiddenId(match)");
     if (!match) return;
     // store the old value of the hidden input
     this.stored_id = this.hiddenTarget.value;
@@ -867,6 +879,7 @@ export default class extends Controller {
   // Clears not only the ID, but also any data attributes of selected row.
   // Don't remove target data-attributes.
   clearHiddenId() {
+    this.verbose("clearHiddenId()");
     this.hiddenTarget.value = '';
     this.stored_id = 0;
     Object.keys(this.hiddenTarget.dataset).forEach(key => {
@@ -887,16 +900,21 @@ export default class extends Controller {
       stored_id = parseInt(this.stored_id || 0),
       { north, south, east, west } = this.hiddenTarget.dataset,
       hidden_data = { id: new String(hidden_id), north, south, east, west };
+
     // comparing data, not just ids, because google locations have same 0 id
     if (hidden_data === this.stored_data) {
-      console.log("not dispatching locationIdChanged event");
+      console.log(hidden_data, this.stored_data);
+      console.log("not dispatching hiddenIdDataChanged");
       return;
     }
-    // maybe call this locationDataChanged
-    console.log("dispatching locationIdChanged event");
-    this.dispatch('locationIdChanged', {
-      detail: { id: this.hiddenTarget.value }
-    });
+
+    clearTimeout(this.data_timer);
+    this.data_timer = setTimeout(() => {
+      console.log("dispatching hiddenIdDataChanged");
+      this.dispatch('hiddenIdDataChanged', {
+        detail: { id: this.hiddenTarget.value }
+      });
+    }, 750)
   }
 
   // Hide pulldown options.
@@ -956,6 +974,8 @@ export default class extends Controller {
       this.matches = this.removeDups(this.matches.sort(
         (a, b) => (a.name || "").localeCompare(b.name || "")
       ));
+
+    this.verbose(this.matches);
     // Try to find old highlighted row in new set of options.
     this.updateCurrentRow(last);
     // Reset width each time we change the options.
@@ -976,11 +996,11 @@ export default class extends Controller {
       primer_names.every(item => match_names.includes(item))) return;
 
     this.matches = this.primer;
-    const _already_selected = this.matches.find(
+
+    const _selected = this.matches.find(
       (m) => m['name'] === this.inputTarget.value
     );
-
-    if (this.matches.length > 0 && !_already_selected) {
+    if (this.matches.length > 0 && !_selected) {
       if (!this.has_create_link) {
         this.inputTarget.value = this.matches[0]['name'];
         this.assignHiddenId(this.matches[0]);
@@ -1363,7 +1383,7 @@ export default class extends Controller {
 
     // If act like select, focus the input field.`
     if ((this.primer.length > 0) && this.ACT_LIKE_SELECT) {
-      this.inputTarget.click();
+      // this.inputTarget.click(); // this fires another scheduleRefresh
       this.inputTarget.focus();
     }
   }
@@ -1388,7 +1408,7 @@ export default class extends Controller {
   }
 
   verbose(str) {
-    // console.log(str);
+    console.log(str);
     // document.getElementById("log").
     //   insertAdjacentText("beforeend", str + "<br/>");
   }
