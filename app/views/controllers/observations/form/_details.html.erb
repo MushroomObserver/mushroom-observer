@@ -65,11 +65,12 @@
                    locals: { button: button_name } ) %>
         <!-- /WHERE_REASONS -->
 
-        <%# NOTE: Both map & form-exif controllers dispatch pointChanged event.
+        <%# NOTE:
+        Both the map & form-exif controllers dispatch a pointChanged event.
             detail: { type, request_params: { lat, lng } }
-        For now we have to duplicate the code. When form-exif updates
-        the lat/lng inputs it's not enough to be caught by map, because
-        the inputs are buffered. map only fires the event after buffering. %>
+        For now we need both events. When form-exif updates the lat/lng inputs,
+        it's not caught as a change by map, because it's been changed by js.
+        Also, map only fires the event after buffering. %>
         <!-- WHERE -->
         <%= autocompleter_field(
           form: f, field: :place_name, type: :location,
@@ -83,10 +84,10 @@
           hidden_data: { map_target: "locationId",
                          north: location&.north, south: location&.south,
                          east: location&.east, west: location&.west },
-          button: modal_link_to("location",
-                                :form_observations_create_location.l,
-                                new_location_path, icon: :add,
-                                class: "btn btn-default"),
+          # button: modal_link_to("location",
+          #                       :form_observations_create_location.l,
+          #                       new_location_path, icon: :add,
+          #                       class: "btn btn-default"),
           map_outlet: ".map-outlet",
           data: { map_target: "placeInput",
                   create_text: :form_observations_create_location.l,
