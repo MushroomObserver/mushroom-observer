@@ -77,12 +77,12 @@ const AUTOCOMPLETER_TYPES = {
     ACT_LIKE_SELECT: false,
     UNORDERED: true,
     model: 'location',
-    create_link: '/locations/new?where='
+    // create_link: '/locations/new?where='
   },
   location_containing: { // params encoded from dataset
     ACT_LIKE_SELECT: true,
     model: 'location',
-    create_link: '/locations/new?where='
+    // create_link: '/locations/new?where='
   },
   location_google: { // params encoded from dataset
     ACT_LIKE_SELECT: true,
@@ -178,7 +178,7 @@ export default class extends Controller {
         this.WRAP_CLASS + "\"");
     }
 
-    this.create_text = this.inputTarget.dataset?.createText ?? null;
+    // this.create_text = this.inputTarget.dataset?.createText ?? null;
     this.default_action =
       this.listTarget?.children[0]?.children[0]?.dataset.action;
     // Attach events, etc. to input element.
@@ -739,9 +739,9 @@ export default class extends Controller {
       }
     }
     // If no matches, show a link to create a new record.
-    if (this.matches.length === 1 && this.has_create_link === true) {
-      this.addCreateLink(rows.item(0));
-    }
+    // if (this.matches.length === 1 && this.has_create_link === true) {
+    //   this.addCreateLink(rows.item(0));
+    // }
   }
 
   // Needs to restore href and data-action if they were changed.
@@ -775,15 +775,15 @@ export default class extends Controller {
   }
 
   // Add a link to create a new record: changes href and data-action.
-  addCreateLink(row) {
-    const link = row.children[0];
-    link.setAttribute('href',
-      this.create_link + this.inputTarget.value
-    );
-    delete link.dataset?.action;
-    link.dataset.turboStream = "true";
-    link.classList.remove('d-none');
-  }
+  // addCreateLink(row) {
+  //   const link = row.children[0];
+  //   link.setAttribute('href',
+  //     this.create_link + this.inputTarget.value
+  //   );
+  //   delete link.dataset?.action;
+  //   link.dataset.turboStream = "true";
+  //   link.classList.remove('d-none');
+  // }
 
   // Highlight that row (CSS only - does not populate hidden ID).
   //  Called from drawPulldown().
@@ -1010,12 +1010,12 @@ export default class extends Controller {
       (m) => m['name'] === this.inputTarget.value
     );
     if (this.matches.length > 0 && !_selected) {
-      if (!this.has_create_link) {
-        this.inputTarget.value = this.matches[0]['name'];
-        this.assignHiddenId(this.matches[0]);
-      } else {
-        this.inputTarget.value = " ";
-      }
+      // if (!this.has_create_link) {
+      this.inputTarget.value = this.matches[0]['name'];
+      this.assignHiddenId(this.matches[0]);
+      // } else {
+      //   this.inputTarget.value = " ";
+      // }
     }
   }
 
@@ -1371,12 +1371,11 @@ export default class extends Controller {
         (this.last_fetch_incomplete ? "incomplete" : "complete") + ").");
     }
 
-    if (new_primer.length === 0 && this.ACT_LIKE_SELECT
-      && this.create_link && this.create_text) {
+    if (new_primer.length === 0 && this.ACT_LIKE_SELECT) {
       // If no matches, show a link to create a new record.
-      this.has_create_link = true;
+      // this.has_create_link = true;
       // this.primer = [{ name: this.create_text, id: 0 }];
-      const { lat, lng, ...params } = JSON.parse(this.last_fetch_params);
+      const { lat, lng, ..._params } = JSON.parse(this.last_fetch_params);
       this.swap({
         detail: {
           type: "location_google", request_params: { lat, lng },
@@ -1384,7 +1383,7 @@ export default class extends Controller {
       })
     } else if (this.primer != new_primer && this.focused) {
       // Update menu if anything has changed.
-      this.has_create_link = false;
+      // this.has_create_link = false;
       this.primer = new_primer;
       this.populateMatches();
       this.drawPulldown();
