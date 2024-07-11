@@ -1661,6 +1661,7 @@
   form_observations_click_point: "Tip: select a locality to center the map, then click a point on the map to set a location."
   form_observations_locality_contains: Localities containing this point
   form_observations_create_location: "[:CREATE] [:location]"
+  form_observations_use_location: "Use this [:location]"
   form_observations_notes_help: Please include any additional information you can think of about this observation that isn't clear from the photographs, e.g., habitat, substrate or nearby trees; distinctive texture, scent, taste, staining or bruising; results of chemical or microscopic analyses, etc.
   form_observations_remove_image_confirm: Are you sure you want to remove this image?  This will only remove this image from this observation.  If it is attached to other observations, it will remain attached to them.
   form_observations_specimen_available_help: Check when there is a preserved specimen available for further study.

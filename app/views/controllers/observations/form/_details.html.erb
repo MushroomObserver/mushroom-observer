@@ -89,13 +89,17 @@
           #                       new_location_path, icon: :add,
           #                       class: "btn btn-default"),
           create_text: :form_observations_create_location.l,
+          keep_text: :form_observations_use_location.l,
+          # find_text: :form_locations_find_on_map.l,
           map_outlet: ".map-outlet",
-          data: { map_target: "placeInput",
-                  action: [
-                    "map:pointChanged@window->autocompleter#swap",
-                    "form-exif:pointChanged@window->autocompleter#swap",
-                    "map:googlePrimer@window->autocompleter#refreshGoogle"
-                  ].join(" ") }
+          data: {
+            map_target: "placeInput",
+            action: [
+              "map:pointChanged@window->autocompleter#swap",
+              "form-exif:pointChanged@window->autocompleter#swap",
+              "map:googlePrimer@window->autocompleter#refreshGooglePrimer"
+            ].join(" ")
+          }
         ) %>
         <%= collapse_help_block(nil, id: "where_help") do
           observation_location_help

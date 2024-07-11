@@ -199,7 +199,9 @@ module FormsHelper
     ac_args[:between] = capture do
       concat(args[:between])
       concat(autocompleter_has_id_indicator)
-      concat(autocompleter_create_button(args))
+      concat(autocompleter_create_button(args)) if args[:create_text]
+      concat(autocompleter_find_button(args)) if args[:find_text]
+      concat(autocompleter_keep_button(args)) if args[:keep_text]
       concat(autocompleter_hidden_field(**args)) if args[:form]
     end
     ac_args[:append] = capture do
@@ -222,11 +224,31 @@ module FormsHelper
 
   def autocompleter_create_button(args)
     icon_link_to(
-      args[:create_text] || :CREATE.l, "#",
+      args[:create_text], "#",
       icon: :plus, show_text: false, icon_class: "text-primary",
       name: "create_#{args[:type]}", class: "ml-3 d-none",
       data: { autocompleter_target: "createBtn",
               action: "autocompleter#swapCreate:prevent" }
+    )
+  end
+
+  def autocompleter_find_button(args)
+    icon_link_to(
+      args[:find_text], "#",
+      icon: :find_on_map, show_text: false, icon_class: "text-primary",
+      name: "find_#{args[:type]}", class: "ml-3 d-none",
+      data: { map_target: "showBoxBtn",
+              action: "map#showBox:prevent" }
+    )
+  end
+
+  def autocompleter_keep_button(args)
+    icon_link_to(
+      args[:keep_text], "#",
+      icon: :apply, show_text: false, icon_class: "text-primary",
+      name: "keep_#{args[:type]}", class: "ml-3 d-none",
+      data: { map_target: "lockBoxBtn",
+              action: "map#toggleBoxLock:prevent" }
     )
   end
 

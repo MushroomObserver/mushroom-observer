@@ -88,7 +88,7 @@ module LinkHelper
     opts = block ? path : options
     icon_type = opts[:icon]
     icon_class = class_names(opts[:icon_class], "px-2")
-    label_class = opts[:show_text] ? "pl-3" : "sr-only"
+    label_class = opts[:show_text] ? "pl-3 d-none d-sm-inline" : "sr-only"
     return link_to(link, opts) { content } if icon_type.blank?
 
     opts = {
@@ -165,7 +165,9 @@ module LinkHelper
     manage_lists: "indent-left",
     observations: "tags",
     print: "print",
-    globe: "globe"
+    globe: "globe",
+    find_on_map: "screenshot",
+    apply: "check"
   }.freeze
 
   # button to destroy object

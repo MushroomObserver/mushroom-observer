@@ -13,8 +13,8 @@ export default class extends Controller {
   static targets = ["mapDiv", "southInput", "westInput", "northInput",
     "eastInput", "highInput", "lowInput", "placeInput", "locationId",
     "getElevation", "mapClearBtn", "controlWrap", "toggleMapBtn",
-    // "showPointBtn", "showBoxBtn",
-    "latInput", "lngInput", "altInput"]
+    // "showPointBtn",
+    "latInput", "lngInput", "altInput", "showBoxBtn", "lockBoxBtn"]
 
   connect() {
     this.element.dataset.stimulus = "connected"
@@ -92,6 +92,25 @@ export default class extends Controller {
 
   helpDebug() {
     debugger
+  }
+
+  toggleBoxLock(event) {
+    if (this.rectangle) {
+      const icon = this.lockBoxBtnTarget.firstChild
+      if (this.rectangle.getEditable() === true) {
+        this.rectangle.setEditable(false)
+        this.map_type = "observation"
+        icon.classList.remove("glyphicon-check")
+        icon.classList.add("glyphicon-edit")
+        this.showBoxBtnTarget.classList.add("d-none")
+      } else {
+        this.rectangle.setEditable(true)
+        this.map_type = "location"
+        icon.classList.remove("glyphicon-edit")
+        icon.classList.add("glyphicon-check")
+        this.showBoxBtnTarget.classList.remove("d-none")
+      }
+    }
   }
 
   // We don't draw the map for the create obs form on load, to save on API
@@ -400,7 +419,7 @@ export default class extends Controller {
     this.dispatch("googlePrimer", { detail: { primer } })
   }
 
-  geolocatePlaceName() {
+  geolocatePlaceName(multiple = false) {
     let address = this.placeInputTarget.value
 
     if (this.location_format == "scientific") {
@@ -410,6 +429,7 @@ export default class extends Controller {
       .geocode({ address: address })
       .then((result) => {
         const { results } = result // destructure, results is part of the result
+        this.dispatchPrimer(results) // will be ignored by non-autocompleters
         this.respondToGeocode(results)
       })
       .catch((e) => {

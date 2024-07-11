@@ -253,7 +253,12 @@ export default class extends Controller {
     outlet.map_type = "location";
     // outlet.marker.setDraggable(false); messes up map
     // outlet.marker.setClickable(false); messes up map
-    outlet.geocodeLatLng();
+    if (outlet.latInputTarget.value && outlet.lngInputTarget.value) {
+      outlet.geocodeLatLng();
+    } else {
+      outlet.lockBoxBtnTarget.classList.remove("d-none");
+    }
+    this.createBtnTarget.classList.add('d-none');
     // this.dispatchHiddenIdEvents();
   }
 
@@ -261,6 +266,13 @@ export default class extends Controller {
     this.verbose("map outlet disconnected");
     outlet.map_type = "observation";
     if (outlet.rectangle) outlet.rectangle.setEditable(false);
+
+    // Make the map show box button back into a create button
+    delete this.createBtnTarget.dataset.mapTarget;
+    const create_action = this.createBtnTarget.dataset.action
+      .replace("map#showBox:prevent", "autocompleter#swapCreate:prevent");
+    this.createBtnTarget.dataset.action = create_action;
+
     // this.dispatchHiddenIdEvents();
     outlet.northInputTarget.value = '';
     outlet.southInputTarget.value = '';
@@ -487,16 +499,34 @@ export default class extends Controller {
   // Schedule matches to be recalculated from primer, or even primer refreshed,
   // after a polite delay. (Primer only refreshed if first letter changes.)
   scheduleRefresh() {
-    this.verbose("scheduleRefresh()");
+    if (this.TYPE === "location_google") {
+      this.scheduleGoogleRefresh();
+    } else {
+      this.verbose("scheduleRefresh()");
+      this.clearRefresh();
+      this.refresh_timer = setTimeout((() => {
+        this.verbose("doing_refresh()");
+        // this.debug("refresh_timer(" + this.inputTarget.value + ")");
+        this.old_value = this.inputTarget.value;
+        if (this.AJAX_URL)
+          this.refreshPrimer(); // async, anything after this executes immediately
+        this.populateMatches(); // still necessary if primer unchanged, as likely
+        this.drawPulldown();
+      }), this.REFRESH_DELAY * 1000);
+    }
+  }
+
+  scheduleGoogleRefresh() {
+    if (!this.hasMapOutlet) return;
+
+    this.verbose("scheduleGoogleRefresh()");
     this.clearRefresh();
     this.refresh_timer = setTimeout((() => {
-      this.verbose("doing_refresh()");
-      // this.debug("refresh_timer(" + this.inputTarget.value + ")");
+      this.verbose("doing_google_refresh()");
       this.old_value = this.inputTarget.value;
-      if (this.AJAX_URL)
-        this.refreshPrimer(); // async, anything after this executes immediately
-      this.populateMatches(); // still necessary if primer unchanged, as likely
-      this.drawPulldown();
+      this.mapOutlet.geolocatePlaceName(true); // async, anything after this executes immediately
+      // this.populateMatches(); // still necessary if primer unchanged, as likely
+      // this.drawPulldown();
     }), this.REFRESH_DELAY * 1000);
   }
 
@@ -1077,7 +1107,7 @@ export default class extends Controller {
     }
     // If no matches, show a link to create a new record.
     // This is here because the primer may have results, but not the matches.
-    if (this.hasCreateBtnTarget) {
+    if (this.hasCreateBtnTarget && this.TYPE !== "location_google") {
       if (matches.length === 0) {
         clearTimeout(this.create_timer);
         this.create_timer = setTimeout(() => {
@@ -1345,7 +1375,7 @@ export default class extends Controller {
   }
 
   // Map controller sends back a primer formatted for the autocompleter
-  refreshGoogle({ detail }) {
+  refreshGooglePrimer({ detail }) {
     this.processFetchResponse(detail.primer)
   }
 
@@ -1389,7 +1419,8 @@ export default class extends Controller {
         (new_primer.length - 1) + " strings (" +
         (this.last_fetch_incomplete ? "incomplete" : "complete") + ").");
     }
-    console.log("new_primer length:" + new_primer.length)
+
+    this.verbose("new_primer length:" + new_primer.length)
     if (new_primer.length === 0) {
       // this.has_create_link = true;
       // this.primer = [{ name: this.create_text, id: 0 }];
@@ -1436,7 +1467,7 @@ export default class extends Controller {
   }
 
   verbose(str) {
-    // console.log(str);
+    console.log(str);
     // document.getElementById("log").
     //   insertAdjacentText("beforeend", str + "<br/>");
   }
