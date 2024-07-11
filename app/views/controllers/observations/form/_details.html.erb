@@ -126,7 +126,15 @@
 
     <!-- MAP -->
     <div class="col-xs-12 col-md-6" id="observation_geolocation">
-      <%= tag.div(class: "btn-group", role: "group",
+      <%= tag.div(
+        "", id: "observation_form_map",
+            class: "observation-form-map collapse",
+            data: { indicator_url: asset_path('indicator.gif'),
+                    location_format: User.current_location_format,
+                    map_target: "mapDiv", editable: true,
+                    map_type: "observation" }
+      ) %>
+      <%= tag.div(class: "btn-group my-3", role: "group",
                   data: { map_target: "controlWrap" }) do %>
         <%= js_button(
           button: [
@@ -146,14 +154,6 @@
                   action: "map#clearMap form-exif#reenableButtons" }
         ) %>
       <% end %>
-      <%= tag.div(
-        "", id: "observation_form_map",
-            class: "observation-form-map collapse",
-            data: { indicator_url: asset_path('indicator.gif'),
-                    location_format: User.current_location_format,
-                    map_target: "mapDiv", editable: true,
-                    map_type: "observation" }
-      ) %>
     </div>
     <!-- /MAP -->
 
