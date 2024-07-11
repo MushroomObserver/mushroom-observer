@@ -115,6 +115,9 @@ gem("mimemagic")
 
 # Get data from third-party websites
 gem("httparty")
+# Gems used for iNat import
+gem("oauth2")
+gem("rest-client")
 
 # for creating zip files
 # RubyZip 3.0 is coming!
