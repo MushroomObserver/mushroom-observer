@@ -190,7 +190,7 @@ module FormsHelper
       placeholder: :start_typing.l, autocomplete: "off",
       data: { autocompleter_target: "input" }
     }.deep_merge(args.except(:type, :separator, :textarea,
-                             :hidden, :hidden_data))
+                             :hidden, :hidden_data, :create_text))
     ac_args[:class] = class_names("dropdown", args[:class])
     ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
                             separator: args[:separator],
@@ -199,6 +199,7 @@ module FormsHelper
     ac_args[:between] = capture do
       concat(args[:between])
       concat(autocompleter_has_id_indicator)
+      concat(autocompleter_create_button(args))
       concat(autocompleter_hidden_field(**args)) if args[:form]
     end
     ac_args[:append] = capture do
@@ -215,7 +216,18 @@ module FormsHelper
 
   def autocompleter_has_id_indicator
     link_icon(:check, title: :autocompleter_has_id.l,
-                      classes: "ml-3 px-2 text-success has-id-indicator")
+                      class: "ml-3 px-2 text-success has-id-indicator d-none",
+                      data: { autocompleter_target: "hasIdIndicator" })
+  end
+
+  def autocompleter_create_button(args)
+    icon_link_to(
+      args[:create_text] || :CREATE.l, "#",
+      icon: :plus, show_text: false, icon_class: "text-primary",
+      name: "create_#{args[:type]}", class: "ml-3 d-none",
+      data: { autocompleter_target: "createBtn",
+              action: "autocompleter#swapCreate:prevent" }
+    )
   end
 
   # minimum args :form, :type.

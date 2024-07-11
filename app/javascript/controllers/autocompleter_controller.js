@@ -36,9 +36,9 @@ const DEFAULT_OPTS = {
   // where to request primer from
   AJAX_URL: "/autocompleters/new/",
   // how long to wait before sending AJAX request (seconds)
-  REFRESH_DELAY: 0.10,
+  REFRESH_DELAY: 0.33,
   // how long to wait before hiding pulldown (seconds)
-  HIDE_DELAY: 0.25,
+  HIDE_DELAY: 0.50,
   // initial key repeat delay (seconds)
   KEY_DELAY_1: 0.50,
   // subsequent key repeat delay (seconds)
@@ -135,6 +135,7 @@ const INTERNAL_OPTS = {
   hide_timer: null,      // timer used to delay hiding of pulldown
   key_timer: null,       // timer used to emulate key repeat
   data_timer: null,      // timer used to delay hidden data updated event (map)
+  create_timer: null,    // timer used to delay create link
   log: false,            // log debug messages to console?
   has_create_link: false // pulldown currently has link to create new record
 }
@@ -144,7 +145,8 @@ export default class extends Controller {
   // The root element should usually be the .form-group wrapping the <input>.
   // The select target is not the <input> element, but a <select> that can
   // swap out the autocompleter type. The <input> element is its target.
-  static targets = ["input", "select", "pulldown", "list", "hidden", "wrap"]
+  static targets = ["input", "select", "pulldown", "list", "hidden", "wrap",
+    "createBtn", "hasIdIndicator"]
   static outlets = ["map"]
 
   initialize() {
@@ -237,6 +239,11 @@ export default class extends Controller {
     }
   }
 
+  swapCreate() {
+    this.createBtnTarget.classList.add('d-none');
+    this.swap({ detail: { type: "location_google" } });
+  }
+
   // Connects the location_google autocompleter to call map controller methods
   mapOutletConnected(outlet, element) {
     this.verbose("map outlet connected");
@@ -276,9 +283,9 @@ export default class extends Controller {
     this.addEventListeners();
 
     if (this.hiddenTarget.value != '') {
-      this.wrapTarget.classList.add('has-id');
+      this.hasIdIndicatorTarget.classList.remove('d-none');
     } else {
-      this.wrapTarget.classList.remove('has-id');
+      this.hasIdIndicatorTarget.classList.add('d-none');
     }
   }
 
@@ -519,10 +526,10 @@ export default class extends Controller {
 
   // Clear refresh timer.
   clearRefresh() {
-    if (this.refresh_timer) {
-      clearTimeout(this.refresh_timer);
-      this.refresh_timer = null;
-    }
+    // if (this.refresh_timer) {
+    clearTimeout(this.refresh_timer);
+    //   this.refresh_timer = null;
+    // }
   }
 
   // Clear hide timer.
@@ -881,7 +888,7 @@ export default class extends Controller {
         this.hiddenTarget.dataset[key] = match[key];
     });
 
-    this.wrapTarget.classList.add('has-id');
+    this.hasIdIndicatorTarget.classList.remove('d-none');
     this.dispatchHiddenIdEvents();
   }
 
@@ -897,7 +904,7 @@ export default class extends Controller {
     });
     this.stored_data = { id: 0 };
 
-    this.wrapTarget.classList.remove('has-id');
+    this.hasIdIndicatorTarget.classList.add('d-none');
     this.dispatchHiddenIdEvents();
   }
 
@@ -1066,6 +1073,18 @@ export default class extends Controller {
         if (k >= tokens.length) {
           matches.push(primer[i]);
         }
+      }
+    }
+    // If no matches, show a link to create a new record.
+    // This is here because the primer may have results, but not the matches.
+    if (this.hasCreateBtnTarget) {
+      if (matches.length === 0) {
+        clearTimeout(this.create_timer);
+        this.create_timer = setTimeout(() => {
+          this.createBtnTarget.classList.remove('d-none');
+        }, 1000)
+      } else {
+        this.createBtnTarget.classList.add('d-none');
       }
     }
     this.matches = matches;
@@ -1370,17 +1389,18 @@ export default class extends Controller {
         (new_primer.length - 1) + " strings (" +
         (this.last_fetch_incomplete ? "incomplete" : "complete") + ").");
     }
-
-    if (new_primer.length === 0 && this.ACT_LIKE_SELECT) {
-      // If no matches, show a link to create a new record.
+    console.log("new_primer length:" + new_primer.length)
+    if (new_primer.length === 0) {
       // this.has_create_link = true;
       // this.primer = [{ name: this.create_text, id: 0 }];
-      const { lat, lng, ..._params } = JSON.parse(this.last_fetch_params);
-      this.swap({
-        detail: {
-          type: "location_google", request_params: { lat, lng },
-        }
-      })
+      if (this.ACT_LIKE_SELECT) {
+        const { lat, lng, ..._params } = JSON.parse(this.last_fetch_params);
+        this.swap({
+          detail: {
+            type: "location_google", request_params: { lat, lng },
+          }
+        })
+      }
     } else if (this.primer != new_primer && this.focused) {
       // Update menu if anything has changed.
       // this.has_create_link = false;

@@ -88,9 +88,9 @@
           #                       :form_observations_create_location.l,
           #                       new_location_path, icon: :add,
           #                       class: "btn btn-default"),
+          create_text: :form_observations_create_location.l,
           map_outlet: ".map-outlet",
           data: { map_target: "placeInput",
-                  # create_text: :form_observations_create_location.l,
                   action: [
                     "map:pointChanged@window->autocompleter#swap",
                     "form-exif:pointChanged@window->autocompleter#swap",
