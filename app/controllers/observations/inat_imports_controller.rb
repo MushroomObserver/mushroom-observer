@@ -23,21 +23,22 @@ module Observations
     end
 
     # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
-    site = "https://www.inaturalist.org"
-    app_id = Rails.application.credentials.inat.id
-    app_secret = Rails.application.credentials.inat.secret
-    # you can set this to some URL you control for testing
-    # redirect_uri = "https://mushroomobserver.org/observations/inat_imports/auth"
-    redirect_uri = "http://localhost:3000/observations/inat_imports/auth"
-
-    # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
     def auth
+      site = "https://www.inaturalist.org"
+      app_id = Rails.application.credentials.inat.id
+      app_secret = Rails.application.credentials.inat.secret
+      # you can set this to some URL you control for testing
+      # redirect_uri = "https://mushroomobserver.org/observations/inat_imports/auth"
+      redirect_uri = "http://localhost:3000/observations/inat_imports/auth"
       # REQUEST AN AUTHORIZATION CODE
       # Your web app should redirect the user to this url.
       # They should see a screen offering them the choice to
       # authorize your app. If they aggree,
       # they will be redirected to your redirect_uri with a "code" parameter
       # url = "#{site}/oauth/authorize?client_id=#{app_id}&redirect_uri=#{redirect_uri}&response_type=code"  # rubocop:disable Layout/LineLength
+
+      @params = params
+      auth_code = @params[:code]
 
       #       # REQUEST AN AUTH TOKEN
       #       # Once your app has that code parameter,
@@ -47,15 +48,14 @@ module Observations
       #       print("Code: ")
       #       auth_code = gets.strip
       #       puts
-      @params = params
       #
-      #       payload = {
-      #         client_id: app_id,
-      #         client_secret: app_secret,
-      #         code: auth_code,
-      #         redirect_uri: redirect_uri,
-      #         grant_type: "authorization_code"
-      #       }
+      payload = {
+        client_id: app_id,
+        client_secret: app_secret,
+        code: auth_code,
+        redirect_uri: redirect_uri,
+        grant_type: "authorization_code"
+      }
       #       puts("POST #{site}/oauth/token, payload: #{payload.inspect}")
       #       puts(response = RestClient.post("#{site}/oauth/token", payload))
       #       puts
