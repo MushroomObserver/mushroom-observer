@@ -205,6 +205,15 @@ module Observations
       assert_flash_text(:runtime_illegal_inat_id.l(id: id))
       assert_form_action(action: :create)
     end
+
+    def test_authenticate
+      user = users(:rolf)
+
+      login(user.login)
+      post(:auth)
+
+      assert_response(:success)
+    end
   end
 end
 

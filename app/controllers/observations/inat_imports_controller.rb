@@ -22,6 +22,11 @@ module Observations
       redirect_to(observations_path)
     end
 
+    # iNat redirects user here if they authorize MO to access their iNat data
+    # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
+    def auth
+    end
+
     # ---------------------------------
 
     private
@@ -96,9 +101,9 @@ module Observations
     end
 
     def not_importable(inat_obs)
-      unless inat_obs.taxon_importable?
-        flash_error(:inat_taxon_not_importable.t(id: inat_obs.inat_id))
-      end
+      return if inat_obs.taxon_importable?
+
+      flash_error(:inat_taxon_not_importable.t(id: inat_obs.inat_id))
     end
 
     def add_inat_images(inat_obs_photos)
