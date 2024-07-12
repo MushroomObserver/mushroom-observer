@@ -41,9 +41,12 @@ export default class extends Controller {
     // These private vars are for keeping track of user inputs to a form
     // that should update the form after a timeout.
     this.old_location = null
-    this.marker_buffer = 0
+    this.marker_draw_buffer = 0
     this.ac_buffer = 0
     this.geolocate_buffer = 0
+    this.marker_edit_buffer = 0
+    this.rectangle_edit_buffer = 0
+    this.ignorePlaceInput = false
 
     const loader = new Loader({
       apiKey: "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA",
@@ -88,10 +91,6 @@ export default class extends Controller {
       .catch((e) => {
         console.error("error loading gmaps: " + e)
       })
-  }
-
-  helpDebug() {
-    debugger
   }
 
   toggleBoxLock(event) {
@@ -141,7 +140,7 @@ export default class extends Controller {
   // the `key` of each set is an array [x,y,w,h]
   buildOverlays() {
     for (const [_xywh, set] of Object.entries(this.collection.sets)) {
-      // console.log({ set })
+      // this.verbose({ set })
       // NOTE: according to the MapSet class, location sets are always is_box.
       if (this.isPoint(set)) {
         this.drawMarker(set)
@@ -160,7 +159,20 @@ export default class extends Controller {
   //            and in observation mapType (`set` can just be a latLng object)
   //
 
+  // There may not be a marker yet.
+  placeMarker(location) {
+    this.verbose("placeMarker")
+    if (!this.marker) {
+      this.drawMarker(location)
+    } else {
+      this.marker.setPosition(location)
+      this.map.panTo(location)
+    }
+    this.marker.setVisible(true)
+  }
+
   drawMarker(set) {
+    this.verbose("drawMarker")
     const markerOptions = {
       position: { lat: set.lat, lng: set.lng },
       map: this.map,
@@ -172,31 +184,24 @@ export default class extends Controller {
     if (!this.editable) {
       markerOptions.title = set.title
     }
-    const marker = new google.maps.Marker(markerOptions)
+    this.marker = new google.maps.Marker(markerOptions)
 
     if (!this.editable && set != null) {
-      this.giveMarkerInfoWindow(set, marker)
+      this.giveMarkerInfoWindow(set)
     } else {
-      this.makeMarkerEditable(marker)
+      this.makeMarkerEditable()
     }
-  }
-
-  // There may not be a marker yet.
-  placeMarker(location) {
-    if (!this.marker) {
-      this.drawMarker(location)
-    } else {
-      this.marker.setPosition(location)
-      this.map.panTo(location)
-    }
-    this.marker.setVisible(true)
   }
 
   // Only for single markers: listeners for dragging the marker
-  makeMarkerEditable(marker) {
+  makeMarkerEditable() {
+    if (!this.marker) return
+    // clearTimeout(this.marker_edit_buffer)
+    // this.marker_edit_buffer = setTimeout(() => {
+    this.verbose("makeMarkerEditable")
     ["position_changed", "dragend"].forEach((eventName) => {
-      marker.addListener(eventName, () => {
-        const newPosition = marker.getPosition()?.toJSON() // latlng object
+      this.marker.addListener(eventName, () => {
+        const newPosition = this.marker.getPosition()?.toJSON() // latlng object
         // if (this.hasNorthInputTarget) {
         //   const bounds = this.boundsOfPoint(newPosition)
         //   this.updateBoundsInputs(bounds)
@@ -211,17 +216,19 @@ export default class extends Controller {
         this.map.panTo(newPosition)
       })
     })
-    this.marker = marker
+    // this.marker = marker
+    // }, 1000)
   }
 
   // For point markers: make a clickable InfoWindow
-  giveMarkerInfoWindow(set, marker) {
+  giveMarkerInfoWindow(set) {
+    this.verbose("giveMarkerInfoWindow")
     const info_window = new google.maps.InfoWindow({
       content: set.caption
     })
 
-    google.maps.event.addListener(marker, "click", () => {
-      info_window.open(this.map, marker)
+    google.maps.event.addListener(this.marker, "click", () => {
+      info_window.open(this.map, this.marker)
     })
   }
 
@@ -230,37 +237,10 @@ export default class extends Controller {
   //             For location mapType, the `set` can just be bounds.
   //             For observation mapType, the rectangle is display-only.
   //
-  drawRectangle(set) {
-    const bounds = this.boundsOf(set),
-      editable = this.editable && this.map_type !== "observation",
-      rectangleOptions = {
-        strokeColor: this.marker_color,
-        strokeOpacity: 1,
-        strokeWeight: 3,
-        map: this.map,
-        bounds: bounds,
-        clickable: editable,
-        draggable: editable,
-        editable: editable
-      },
-      rectangle = new google.maps.Rectangle(rectangleOptions)
-
-    if (this.map_type === "observation") {
-      // that's it. obs rectangles are not clickable
-      this.rectangle = rectangle
-    } else if (!this.editable) {
-      // there could be many, does not set this.rectangle
-      this.giveRectangleInfoWindow(set, rectangle)
-    } else {
-      this.makeRectangleEditable(rectangle)
-      // this.map.fitBounds(bounds) // Only fit bounds if it's a location map
-      this.rectangle = rectangle
-    }
-  }
 
   placeRectangle(extents) {
-    // console.log("placeRectangle")
-    // console.log({ extents })
+    this.verbose("placeRectangle")
+    // this.verbose({ extents })
     if (!this.rectangle) {
       this.drawRectangle(extents)
     } else {
@@ -270,31 +250,67 @@ export default class extends Controller {
     this.map.fitBounds(extents) // overwrite viewport (may zoom in a bit?)
   }
 
-  // Add listeners to the rectangle for dragging and resizing
-  // possibly also listen to "dragstart", "drag" ? not necessary.
-  makeRectangleEditable(rectangle) {
-    ["bounds_changed", "dragend"].forEach((eventName) => {
-      rectangle.addListener(eventName, () => {
-        const newBounds = rectangle.getBounds()?.toJSON() // nsew object
-        // console.log({ newBounds })
+  drawRectangle(set) {
+    this.verbose("drawRectangle")
+    const bounds = this.boundsOf(set),
+      editable = this.editable && this.map_type !== "observation",
+      rectangleOptions = {
+        strokeColor: this.marker_color,
+        strokeOpacity: 1,
+        strokeWeight: 3,
+        map: this.map,
+        bounds: bounds,
+        clickable: editable,
+        draggable: false,
+        editable: editable
+      };
+
+    this.rectangle = new google.maps.Rectangle(rectangleOptions)
+
+    if (this.map_type === "observation") {
+      // that's it. obs rectangles are not clickable
+      // this.rectangle = rectangle
+    } else if (!this.editable) {
+      // there could be many, does not set this.rectangle
+      this.giveRectangleInfoWindow(set)
+    } else {
+      this.makeRectangleEditable()
+      // this.map.fitBounds(bounds) // Only fit bounds if it's a location map
+      // this.rectangle = rectangle
+    }
+  }
+
+  // Add listeners to the rectangle for dragging and resizing (possibly also
+  // listen to "dragstart", "drag" ? not necessary). If we're just switching to
+  // location mode, we need a buffer or it's too fast
+  makeRectangleEditable() {
+    // clearTimeout(this.rectangle_buffer)
+    // this.rectangle_buffer = setTimeout(() => {
+    this.verbose("makeRectangleEditable")
+    ["bounds_changed"].forEach((eventName) => { // , "dragend"
+      this.rectangle.addListener(eventName, () => {
+        const newBounds = this.rectangle.getBounds()?.toJSON() // nsew object
+        // this.verbose({ newBounds })
         this.updateBoundsInputs(newBounds)
         this.getElevations(this.sampleElevationPointsOf(newBounds))
         this.map.fitBounds(newBounds)
       })
     })
+    // }, 1000)
   }
 
   // For rectangles: make a clickable info window
   // https://stackoverflow.com/questions/26171285/googlemaps-api-rectangle-and-infowindow-coupling-issue
-  giveRectangleInfoWindow(set, rectangle) {
-    const center = rectangle.getBounds().getCenter()
+  giveRectangleInfoWindow(set) {
+    this.verbose("giveRectangleInfoWindow")
+    const center = this.rectangle.getBounds().getCenter()
     const info_window = new google.maps.InfoWindow({
       content: set.caption,
       position: center
     })
 
-    google.maps.event.addListener(rectangle, "click", () => {
-      info_window.open(this.map, rectangle)
+    google.maps.event.addListener(this.rectangle, "click", () => {
+      info_window.open(this.map, this.rectangle)
     })
   }
 
@@ -306,12 +322,15 @@ export default class extends Controller {
   // Action called from the location form n_s_e_w_hi_lo inputs onChange
   // and from observation form lat_lng inputs (debounces inputs)
   bufferInputs() {
-    if (this.map_type === "location") {
-      this.clearMarkerDrawBuffer()
-      this.marker_buffer = setTimeout(this.calculateRectangle(), 500)
+    if (["location"].includes(this.map_type)) {
+      if (this.opened) {
+        this.clearMarkerDrawBuffer()
+        // this.marker_draw_buffer = setTimeout(this.calculateMarker(), 1000)
+        this.marker_draw_buffer = setTimeout(this.calculateRectangle(), 1000)
+      }
     }
-    else if (this.map_type === "observation") {
-      // console.log("pointChanged")
+    if (["observation", "hybrid"].includes(this.map_type)) {
+      // this.verbose("pointChanged")
       // If they just cleared the inputs, swap back to a location autocompleter
       const center = this.validateLatLngInputs(false)
       if (!center) return
@@ -319,16 +338,18 @@ export default class extends Controller {
       this.dispatchPointChanged(center)
 
       if (this.latInputTarget.value === "" ||
-        this.lngInputTarget.value === "") {
-        if (this.marker)
-          this.marker.setVisible(false)
+        this.lngInputTarget.value === "" && this.marker) {
+        this.marker.setVisible(false) // delete the marker immediately
       } else {
         if (this.opened) {
           this.clearMarkerDrawBuffer()
-          this.marker_buffer = setTimeout(this.calculateMarker(), 2000)
+          this.marker_draw_buffer = setTimeout(this.calculateMarker(), 1000)
         }
       }
     }
+  }
+
+  trackingLatLngInputs() {
   }
 
   clearAutocompleterSwapBuffer() {
@@ -339,9 +360,9 @@ export default class extends Controller {
   }
 
   clearMarkerDrawBuffer() {
-    if (this.marker_buffer) {
-      clearTimeout(this.marker_buffer)
-      this.marker_buffer = 0
+    if (this.marker_draw_buffer) {
+      clearTimeout(this.marker_draw_buffer)
+      this.marker_draw_buffer = 0
     }
   }
 
@@ -349,29 +370,29 @@ export default class extends Controller {
   // Can be called directly from a button, so check for input values.
   // Now fired from location id, including when it's zero
   showBox() {
-    console.log("showBox")
+    this.verbose("showBox")
     if (!this.opened ||
       !this.hasPlaceInputTarget || !this.placeInputTarget.value)
       return false
 
     // buffer inputs if they're still typing
-    clearTimeout(this.marker_buffer)
-    this.marker_buffer = setTimeout(this.checkForBox(), 500)
+    clearTimeout(this.marker_draw_buffer)
+    this.marker_draw_buffer = setTimeout(this.checkForBox(), 500)
   }
 
   // Check what kind of input we have and call the appropriate function
   checkForBox() {
     // this.showBoxBtnTarget.disabled = true
-    // console.log("checkForBox")
+    this.verbose("checkForBox")
     let id
     if (this.hasLocationIdTarget && (id = this.locationIdTarget.value)) {
       this.mapLocationBounds()
-    } else if (this.map_type == "location") {
-      // clearTimeout(this.geolocate_buffer)
-      // this.geolocate_buffer = setTimeout(this.geolocatePlaceName(), 500)
+      // Only geocode lat/lng if we have no location_id
+    } else if (["location", "hybrid"].includes(this.map_type)) {
       if (this.latInputTarget.value && this.lngInputTarget.value) {
         this.geocodeLatLng() // 5 possible results
-      } else {
+        // ...and only geolocate placeName if we have no lat/lng
+      } else if (this.ignorePlaceInput === false) {
         this.geolocatePlaceName() // 1 result
       }
     }
@@ -394,12 +415,14 @@ export default class extends Controller {
   }
 
   geocodeLatLng() {
+    this.verbose("geocodeLatLng")
     const location = this.validateLatLngInputs(false)
 
     this.geocoder
       .geocode({ location: location })
       .then((result) => {
         const { results } = result // destructure, results is part of the result
+        this.ignorePlaceInput = true
         this.dispatchPrimer(results)
         this.respondToGeocode(results)
       })
@@ -411,6 +434,8 @@ export default class extends Controller {
 
   // Build a primer for the autocompleter with bounding box data, but -1 id
   dispatchPrimer(results) {
+    this.verbose("dispatchPrimer")
+
     const primer = results.map((result) => {
       const { north, south, east, west } = result.geometry.viewport.toJSON()
       let name = result.formatted_address,
@@ -424,6 +449,7 @@ export default class extends Controller {
   }
 
   geolocatePlaceName(multiple = false) {
+    this.verbose("geolocatePlaceName")
     let address = this.placeInputTarget.value
 
     if (this.location_format == "scientific") {
@@ -450,13 +476,15 @@ export default class extends Controller {
   respondToGeocode(results) {
     if (results.length == 0) return false
 
+    this.verbose("respondToGeocode, map_type: " + this.map_type)
+
     const viewport = results[0].geometry.viewport.toJSON()
     const extents = results[0].geometry.bounds?.toJSON() // may not exist
     const center = results[0].geometry.location.toJSON()
 
     if (viewport)
       this.map.fitBounds(viewport)
-    if (this.map_type === "observation") {
+    if (["observation", "hybrid"].includes(this.map_type)) {
       // this.placeMarker(center)
       this.placeClosestRectangle(viewport, extents)
     } else if (this.map_type === "location") {
@@ -516,7 +544,7 @@ export default class extends Controller {
   updateElevationInputs(results) {
     if (this.hasLowInputTarget) {
       const hiLo = this.highAndLowOf(results)
-      // console.log({ hiLo })
+      // this.verbose({ hiLo })
       this.lowInputTarget.value = this.roundOff(parseFloat(hiLo.low))
       this.highInputTarget.value = this.roundOff(parseFloat(hiLo.high))
     } else if (this.hasAltInputTarget) {
@@ -587,7 +615,7 @@ export default class extends Controller {
   // so, drops a pin on that location and center. Otherwise, checks if place
   // input has been prepopulated and uses that to focus map and drop a marker.
   calculateMarker(event) {
-    console.log("calculateMarker")
+    this.verbose("calculateMarker")
     if (this.map == undefined ||
       this.latInputTarget.value === '' || this.lngInputTarget.value === ''
     ) return false
@@ -661,7 +689,7 @@ export default class extends Controller {
             request_params: { lat, lng },
           }
         })
-        // console.log("dispatchPointChanged")
+        // this.verbose("dispatchPointChanged")
       }, 1000)
 
       // if (this.placeInputTarget.value === '') {
@@ -683,7 +711,7 @@ export default class extends Controller {
   // Action called by the "Open Map" button only.
   // open/close handled by BS collapse
   toggleMap() {
-    // console.log("toggleMap")
+    // this.verbose("toggleMap")
 
     if (this.opened) {
       this.opened = false
@@ -715,7 +743,7 @@ export default class extends Controller {
       this.map.setCenter(location)
       let zoom = this.map.getZoom()
       if (zoom < 15) {
-        // console.log(zoom)
+        // this.verbose(zoom)
         this.map.setZoom(zoom + 2)
       }
       this.updateFields(null, null, location)
@@ -859,11 +887,11 @@ export default class extends Controller {
   //   if (response.ok) {
   //     const json = await response.json
   //     if (json) {
-  //       // console.log(json)
+  //       // this.verbose(json)
   //       this.mapLocationBounds(json)
   //     }
   //   } else {
-  //     console.log(`got a ${response.status}: ${response.text}`);
+  //     this.verbose(`got a ${response.status}: ${response.text}`);
   //   }
   // }
 
@@ -883,4 +911,16 @@ export default class extends Controller {
 
   //   this.placeClosestRectangle(bounds, null)
   // }
+
+  // ------------------------------- DEBUGGING ------------------------------
+
+  helpDebug() {
+    debugger
+  }
+
+  verbose(str) {
+    console.log(str);
+    // document.getElementById("log").
+    //   insertAdjacentText("beforeend", str + "<br/>");
+  }
 }

@@ -250,7 +250,7 @@ export default class extends Controller {
     // open the map if not already open
     if (!outlet.opened) outlet.toggleMapBtnTarget.click();
     // set the map type so box is editable
-    outlet.map_type = "location";
+    outlet.map_type = "hybrid";
     // outlet.marker.setDraggable(false); messes up map
     // outlet.marker.setClickable(false); messes up map
     if (outlet.latInputTarget.value && outlet.lngInputTarget.value) {
@@ -516,16 +516,22 @@ export default class extends Controller {
     }
   }
 
+  // This should only refresh the primer if we don't have lat/lngs - the lat/lng
+  // effectively locks the selections. Otherwise if we ask on the string, we'll
+  // get stuck with geolocatePlaceName results, which is only ever one result
   scheduleGoogleRefresh() {
-    if (!this.hasMapOutlet) return;
+    if (!this.hasMapOutlet || !this.mapOutlet?.latInputTarget.value ||
+      this.mapOutlet?.lngInputTarget.value) return;
 
     this.verbose("scheduleGoogleRefresh()");
     this.clearRefresh();
     this.refresh_timer = setTimeout((() => {
       this.verbose("doing_google_refresh()");
       this.old_value = this.inputTarget.value;
-      this.mapOutlet.geolocatePlaceName(true); // async, anything after this executes immediately
-      // this.populateMatches(); // still necessary if primer unchanged, as likely
+      // async, anything after this executes immediately
+      this.mapOutlet.geolocatePlaceName(true);
+      // still necessary if primer unchanged, as likely?
+      // this.populateMatches();
       // this.drawPulldown();
     }), this.REFRESH_DELAY * 1000);
   }
