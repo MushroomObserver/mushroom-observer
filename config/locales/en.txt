@@ -2987,9 +2987,9 @@
   inat_dqa_casual: Casual
   inat_dqa_needs_id: Needs ID
   inat_dqa_research: Research Grade
-  inat_id: iNat id
-  inat_ids: iNat ids
-  inat_not_single_id: Please enter a single iNat id
+  inat_id: iNat observation number
+  inat_ids: iNat observation numbers
+  inat_not_single_id: Please enter a single iNat observation number
   runtime_illegal_inat_id: Illegal iNat id `[id]`
   inat_taxon_not_importable: Cannot import iNat id `[id]`. (Can import only Fungi.)
 
