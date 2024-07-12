@@ -945,7 +945,7 @@ export default class extends Controller {
       { north, south, east, west } = this.hiddenTarget.dataset,
       hidden_data = { id: hidden_id, north, south, east, west };
 
-    // comparing data, not just ids, because google locations have same 0 id
+    // comparing data, not just ids, because google locations have same -1 id
     if (JSON.stringify(hidden_data) === JSON.stringify(this.stored_data)) {
       this.verbose("not dispatching hiddenIdDataChanged");
       this.verbose("stored_data: " + JSON.stringify(this.stored_data));
