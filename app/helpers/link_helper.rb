@@ -88,7 +88,11 @@ module LinkHelper
     opts = block ? path : options
     icon_type = opts[:icon]
     icon_class = class_names(opts[:icon_class], "px-2")
-    label_class = opts[:show_text] ? "pl-3 d-none d-sm-inline" : "sr-only"
+    label_class = if opts[:show_text]
+                    "pl-3 d-none d-sm-inline font-weight-bold"
+                  else
+                    "sr-only"
+                  end
     return link_to(link, opts) { content } if icon_type.blank?
 
     opts = {

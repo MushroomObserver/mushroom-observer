@@ -8,8 +8,24 @@
   display: none !important;
 }
 
+.d-inline {
+  display: inline !important;
+}
+
+.d-inline-block {
+  display: inline-block !important;
+}
+
+.d-block {
+  display: block !important;
+}
+
 .d-flex {
   display: flex !important;
+}
+
+.d-inline-flex {
+  display: inline-flex !important;
 }
 
 .flex-column {
@@ -18,6 +34,10 @@
 
 .align-items-center {
   align-items: center !important;
+}
+
+.justify-content-between {
+  justify-content: space-between !important;
 }
 
 .w-auto {
@@ -66,22 +86,6 @@
 
 .position-fixed {
   position: fixed !important;
-}
-
-.d-inline {
-  display: inline !important;
-}
-
-.d-inline-block {
-  display: inline-block !important;
-}
-
-.d-block {
-  display: block !important;
-}
-
-.d-flex {
-  display: flex !important;
 }
 
 .float-right {
@@ -450,6 +454,10 @@
 .px-3 {
   padding-left: 1rem !important;
   padding-right: 1rem !important;
+}
+
+.pl-2 {
+  padding-left: 0.5rem !important;
 }
 
 .pl-3 {

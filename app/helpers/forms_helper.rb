@@ -144,6 +144,7 @@ module FormsHelper
   end
 
   # Bootstrap text_field
+  # rubocop:disable Metrics/MethodLength
   def text_field_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
     args = check_for_optional_or_required_note(args)
@@ -153,16 +154,26 @@ module FormsHelper
     wrap_class = form_group_wrap_class(args)
     wrap_data = args[:wrap_data] || {}
     label_opts = field_label_opts(args)
+    label_opts[:class] = class_names(label_opts[:class], args[:label_class])
 
     tag.div(class: wrap_class, data: wrap_data) do
-      concat(args[:form].label(args[:field], args[:label], label_opts))
-      concat(args[:between]) if args[:between].present?
-      if args[:addon].present?
+      # The label row is complicated, many potential buttons here. `between`
+      # comes right after the label on left, `between_end` is right justified
+      concat(tag.div(class: "d-flex justify-content-between") do
+        concat(tag.div do
+          concat(args[:form].label(args[:field], args[:label], label_opts))
+          concat(args[:between]) if args[:between].present?
+        end)
+        concat(tag.div do
+          concat(args[:between_end]) if args[:between_end].present?
+        end)
+      end)
+      if args[:addon].present? # text addon, not interactive
         concat(tag.div(class: "input-group") do
           concat(args[:form].text_field(args[:field], opts))
           concat(tag.span(args[:addon], class: "input-group-addon"))
         end)
-      elsif args[:button].present?
+      elsif args[:button].present? # button addon, interactive
         concat(tag.div(class: "input-group") do
           concat(args[:form].text_field(args[:field], opts))
           concat(tag.span(args[:button], class: "input-group-btn"))
@@ -173,6 +184,7 @@ module FormsHelper
       concat(args[:append]) if args[:append].present?
     end
   end
+  # rubocop:enable Metrics/MethodLength
 
   # MO's autocompleter_field is a text_field that fetches suggestions from the
   # db for the requested model. (For a textarea, pass textarea: true.) The
@@ -199,10 +211,12 @@ module FormsHelper
     ac_args[:between] = capture do
       concat(args[:between])
       concat(autocompleter_has_id_indicator)
-      concat(autocompleter_create_button(args)) if args[:create_text]
       concat(autocompleter_find_button(args)) if args[:find_text]
       concat(autocompleter_keep_button(args)) if args[:keep_text]
       concat(autocompleter_hidden_field(**args)) if args[:form]
+    end
+    ac_args[:between_end] = capture do
+      autocompleter_create_button(args) if args[:create_text]
     end
     ac_args[:append] = capture do
       concat(autocompleter_dropdown)
@@ -225,7 +239,7 @@ module FormsHelper
   def autocompleter_create_button(args)
     icon_link_to(
       args[:create_text], "#",
-      icon: :plus, show_text: false, icon_class: "text-primary",
+      icon: :plus, show_text: true, icon_class: "text-primary",
       name: "create_#{args[:type]}", class: "ml-3 d-none",
       data: { autocompleter_target: "createBtn",
               action: "autocompleter#swapCreate:prevent" }
