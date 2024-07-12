@@ -246,6 +246,7 @@ export default class extends Controller {
     } else {
       this.rectangle.setBounds(extents)
     }
+    this.rectangle.setEditable(true)
     this.rectangle.setVisible(true)
     this.map.fitBounds(extents) // overwrite viewport (may zoom in a bit?)
   }
