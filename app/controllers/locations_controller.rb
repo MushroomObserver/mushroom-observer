@@ -316,7 +316,7 @@ class LocationsController < ApplicationController
 
     # Need to create location.
     else
-      done = create_location_ivar(done, db_name)
+      done = create_location_ivar_and_save(done, db_name)
     end
 
     # If done, update any observations at @display_name,
@@ -428,7 +428,7 @@ class LocationsController < ApplicationController
     @set_herbarium    = params[:set_herbarium]
   end
 
-  def create_location_ivar(done, db_name)
+  def create_location_ivar_and_save(done, db_name)
     @location = Location.new(permitted_location_params)
     @location.display_name = @display_name # (strip_squozen)
 
