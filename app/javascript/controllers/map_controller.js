@@ -369,7 +369,11 @@ export default class extends Controller {
     } else if (this.map_type == "location") {
       // clearTimeout(this.geolocate_buffer)
       // this.geolocate_buffer = setTimeout(this.geolocatePlaceName(), 500)
-      this.geolocatePlaceName()
+      if (this.latInputTarget.value && this.lngInputTarget.value) {
+        this.geocodeLatLng() // 5 possible results
+      } else {
+        this.geolocatePlaceName() // 1 result
+      }
     }
     if (this.rectangle) this.rectangle.setVisible(true)
   }
@@ -405,12 +409,12 @@ export default class extends Controller {
       });
   }
 
-  // Build a primer for the autocompleter with bounding box data, but no id
+  // Build a primer for the autocompleter with bounding box data, but -1 id
   dispatchPrimer(results) {
     const primer = results.map((result) => {
       const { north, south, east, west } = result.geometry.viewport.toJSON()
       let name = result.formatted_address,
-        id = 0
+        id = -1
       if (this.location_format == "scientific") {
         name = name.split(/, */).reverse().join(", ")
       }
