@@ -100,8 +100,8 @@ module ObservationsController::Create
   # present, create a new @location, and associate it with the @observation
   def create_new_location_if_requested
     # Ensure we have the minimum necessary to create a new location
-    unless params[:location_id].to_i == -1 &&
-           (where = params.dig(:observation, :place_name)).present? &&
+    unless @observation.location_id == -1 &&
+           (name = params.dig(:observation, :place_name)).present? &&
            (north = params.dig(:location, :north)).present? &&
            (south = params.dig(:location, :south)).present? &&
            (east = params.dig(:location, :east)).present? &&
@@ -109,7 +109,7 @@ module ObservationsController::Create
       return false
     end
 
-    attributes = { where:, north:, south:, east:, west: }
+    attributes = { north:, south:, east:, west: }
     # Add optional attributes
     [:high, :low, :notes].each do |key|
       if (val = params.dig(:location, key)).present?
@@ -122,6 +122,9 @@ module ObservationsController::Create
     end
     attributes[:user_id] = @user.id
     @location = Location.new(attributes)
+    # Now that we have a Location instance, use the setter method in the model,
+    # which handles scientific/postal format
+    @location.display_name = name
     save_with_log(@location)
     # Associate the location with the observation
     @observation.location_id = @location.id
