@@ -13,6 +13,7 @@ module Observations
       inat_id_array = params[:inat_ids].split
       return redirect_to(new_observation_path) if params[:inat_ids].blank?
       return reload_form if bad_inat_ids_param?(inat_id_array)
+      return consent_required if params[:consent] == "0"
 
       @user = User.current
       inat_id_array.each do |inat_obs_id|
@@ -83,6 +84,12 @@ module Observations
     private
 
     def reload_form
+      @inat_ids = params[:inat_ids]
+      render(:new)
+    end
+
+    def consent_required
+      flash_warning(:inat_consent_required.t)
       @inat_ids = params[:inat_ids]
       render(:new)
     end

@@ -2983,15 +2983,20 @@
   # observation/inat_imports
   create_inat_import_title: Import from iNat
   import_observation_from_inat: Import from iNat
+  inat_import_consent: (Required) I consent to creating MushroomObserver Observation(s) based on my iNaturalist observations, including their photos.
+  inat_consent_required: Your consent is required to import Inat observations. Please check the checkbox to give your consent.
   inat_data_comment: iNat Data
   inat_dqa_casual: Casual
   inat_dqa_needs_id: Needs ID
   inat_dqa_research: Research Grade
-  inat_id: iNat id
-  inat_ids: iNat ids
-  inat_not_single_id: Please enter a single iNat id
+  inat_id: iNat observation number
+  inat_ids: iNat observation numbers
+  inat_not_single_id: Please enter a single iNat observation number
   runtime_illegal_inat_id: Illegal iNat id `[id]`
   inat_taxon_not_importable: Cannot import iNat id `[id]`. (Can import only Fungi.)
+  inat_details_heading: "Details/Caveats"
+  inat_details_list: "- MO will list most iNat data and/or map it to analogous MO fields. \n - The MO Observation links to the iNat observation and vice versa. \n - MO Consensus ID is an analog of the iNat Community ID. \n  - Coordinates are hidden from the public if iNat hid/obscured them. \n - Location is a rectangle with an MO-style name, rather than the iNat Place name. \n - iNat Projects are not included (iNat's API does not provide that data). \n"
+
 
   # observer/list_notifications
   list_notifications_title: Email Alerts for [user]
