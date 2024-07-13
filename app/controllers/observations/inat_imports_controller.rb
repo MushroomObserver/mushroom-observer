@@ -13,8 +13,6 @@ module Observations
       inat_id_array = params[:inat_ids].split
       return redirect_to(new_observation_path) if params[:inat_ids].blank?
       return reload_form if bad_inat_ids_param?(inat_id_array)
-
-      debugger
       return consent_required if params[:consent] == "0"
 
       @user = User.current
