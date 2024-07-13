@@ -1,0 +1,2 @@
+class InatImport < ApplicationRecord
+end
