@@ -3,16 +3,17 @@
 %>
 
 <div>
-  <%= form_with url: observations_inat_imports_path, method: :post do |form| %>
-    <%= form.label :inat_id, "#{:inat_id.l}: " %>
+  <%= form_with url: observations_inat_imports_path, method: :post do |f| %>
+    <%= f.label :inat_id, "#{:inat_id.l}: " %>
     <%# Plural `inat_ids` for compatibility with eventual bulk import %>
-    <%= form.text_field(:inat_ids, size: 10, value: @inat_ids,
+    <%= f.text_field(:inat_ids, size: 10, value: @inat_ids,
         class: "form-control") %>
-    <%= form.submit(:IMPORT.l, { class: "btn btn-default" }) %>
+    <%= check_box_with_label(form: f, field: :consent,
+                             class: "mt-3", label: :inat_import_consent.t) %>
+    <%= panel_block do %>
+      <p><b><%= :inat_details_heading.t %></b></p>
+      <%= :inat_details_list.t %>
+    <% end %>
+    <%= f.submit(:IMPORT.l, { class: "btn btn-default" }) %>
   <% end %>
 </div>
-
-<%= panel_block do %>
-  <p><b><%= :inat_details_heading.t %></b></p>
-  <%= :inat_details_list.t %>
-<% end %>

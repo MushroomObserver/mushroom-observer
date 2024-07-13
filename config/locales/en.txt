@@ -2983,6 +2983,8 @@
   # observation/inat_imports
   create_inat_import_title: Import from iNat
   import_observation_from_inat: Import from iNat
+  inat_import_consent: (Required) I consent to creating MushroomObserver Observation(s) based on my iNaturalist observations, including their photos.
+  inat_consent_required: Your consent is required to import Inat observations. Please check the checkbox to give your consent.
   inat_data_comment: iNat Data
   inat_dqa_casual: Casual
   inat_dqa_needs_id: Needs ID

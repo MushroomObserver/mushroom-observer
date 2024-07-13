@@ -27,6 +27,8 @@ module Observations
       assert_form_action(action: :create)
       assert_select("input#inat_ids", true,
                     "Form needs a field for inputting iNat ids")
+      assert_select("input[type=checkbox][id=consent]", true,
+                    "Form needs checkbox requiring consent")
     end
 
     def test_create_import_evernia_no_photos
@@ -96,6 +98,25 @@ module Observations
 
       assert(obs.images.any?, "Obs should have images")
       assert(obs.sequences.one?, "Obs should have a sequence")
+    end
+
+    def test_create_import_no_consent
+      mock_inat_response =
+        File.read("test/inat/evernia_no_photos.txt")
+      inat_obs_id = InatObs.new(mock_inat_response).inat_id
+      # TODO: remove consent key after creating model with default consent
+      params = { inat_ids: inat_obs_id, consent: 0 }
+
+      stub_inat_api_request(inat_obs_id, mock_inat_response)
+
+      login
+
+      assert_no_difference("Observation.count",
+                           "iNat obss imported without consent") do
+        put(:create, params: params)
+      end
+
+      assert_flash_warning
     end
 
     def import_mock_observation(filename)
