@@ -31,7 +31,27 @@ module Observations
                     "Form needs checkbox requiring consent")
     end
 
-    def test_create_import_no_consent
+    def test_create_inat_import_authorization_request
+      params = { inat_ids: 123_456_789, consent: 1 }
+      url =
+        "https://www.inaturalist.org/oauth/authorize?" \
+        "client_id=#{Rails.application.credentials.inat.id}" \
+        "&redirect_uri=http://localhost:3000/observations/inat_imports/auth" \
+        "&response_type=code"
+      stub_request(:any, url)
+
+      login
+      assert_no_difference(
+        "Observation.count",
+        "Authorization request to iNat shouldn't create MO Observation(s)"
+      ) do
+        post(:create, params: params)
+      end
+
+      assert_response(:redirect)
+    end
+
+    def test_create_inat_import_no_consent
       mock_inat_response =
         File.read("test/inat/evernia_no_photos.txt")
       inat_obs_id = InatObs.new(mock_inat_response).inat_id
