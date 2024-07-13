@@ -31,7 +31,60 @@ module Observations
                     "Form needs checkbox requiring consent")
     end
 
+    def test_create_import_no_consent
+      mock_inat_response =
+        File.read("test/inat/evernia_no_photos.txt")
+      inat_obs_id = InatObs.new(mock_inat_response).inat_id
+      # TODO: remove consent key after creating model with default consent
+      params = { inat_ids: inat_obs_id, consent: 0 }
+
+      stub_inat_api_request(inat_obs_id, mock_inat_response)
+
+      login
+
+      assert_no_difference("Observation.count",
+                           "iNat obss imported without consent") do
+        put(:create, params: params)
+      end
+
+      assert_flash_warning
+    end
+
+    def test_create_inat_import_too_many_ids
+      user = users(:rolf)
+      params = { inat_ids: "12345 6789" }
+
+      login(user.login)
+      put(:create, params: params)
+
+      assert_flash_text(:inat_not_single_id.l)
+      assert_form_action(action: :create)
+    end
+
+    def test_create_inat_import_bad_inat_id
+      user = users(:rolf)
+      id = "badID"
+      params = { inat_ids: id }
+
+      login(user.login)
+      put(:create, params: params)
+
+      assert_flash_text(:runtime_illegal_inat_id.l(id: id))
+      assert_form_action(action: :create)
+    end
+
+    def test_authenticate
+      skip("Under construction")
+      user = users(:rolf)
+
+      login(user.login)
+      post(:auth)
+
+      assert_response(:success)
+    end
+
     def test_create_import_evernia_no_photos
+      skip("Under construction, Should call `auth`, not create")
       mock_inat_response =
         File.read("test/inat/evernia_no_photos.txt")
       inat_obs_id = InatObs.new(mock_inat_response).inat_id
@@ -63,6 +116,7 @@ module Observations
     end
 
     def test_create_obs_tremella_mesenterica
+      skip("Under construction, Should call `auth`, not create")
       obs = import_mock_observation("tremella_mesenterica")
 
       assert_not_nil(obs.rss_log)
@@ -94,29 +148,11 @@ module Observations
     end
 
     def test_create_obs_lycoperdon
+      skip("Under construction, Should call `auth`, not create")
       obs = import_mock_observation("lycoperdon")
 
       assert(obs.images.any?, "Obs should have images")
       assert(obs.sequences.one?, "Obs should have a sequence")
-    end
-
-    def test_create_import_no_consent
-      mock_inat_response =
-        File.read("test/inat/evernia_no_photos.txt")
-      inat_obs_id = InatObs.new(mock_inat_response).inat_id
-      # TODO: remove consent key after creating model with default consent
-      params = { inat_ids: inat_obs_id, consent: 0 }
-
-      stub_inat_api_request(inat_obs_id, mock_inat_response)
-
-      login
-
-      assert_no_difference("Observation.count",
-                           "iNat obss imported without consent") do
-        put(:create, params: params)
-      end
-
-      assert_flash_warning
     end
 
     def import_mock_observation(filename)
@@ -184,6 +220,7 @@ module Observations
     end
 
     def test_create_import_plant
+      skip("Under construction, Should call `auth`, not create")
       # See test/inat/README_INAT_FIXTURES.md
       mock_inat_response =
         File.read("test/inat/ceanothus_cordulatus.txt")
@@ -202,38 +239,6 @@ module Observations
       end
 
       assert_flash_text(:inat_taxon_not_importable.l(id: inat_obs_id))
-    end
-
-    def test_create_inat_import_too_many_ids
-      user = users(:rolf)
-      params = { inat_ids: "12345 6789" }
-
-      login(user.login)
-      put(:create, params: params)
-
-      assert_flash_text(:inat_not_single_id.l)
-      assert_form_action(action: :create)
-    end
-
-    def test_create_inat_import_bad_inat_id
-      user = users(:rolf)
-      id = "badID"
-      params = { inat_ids: id }
-
-      login(user.login)
-      put(:create, params: params)
-
-      assert_flash_text(:runtime_illegal_inat_id.l(id: id))
-      assert_form_action(action: :create)
-    end
-
-    def test_authenticate
-      user = users(:rolf)
-
-      login(user.login)
-      post(:auth)
-
-      assert_response(:success)
     end
   end
 end

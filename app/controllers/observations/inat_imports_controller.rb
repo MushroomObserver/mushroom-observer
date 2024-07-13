@@ -7,6 +7,14 @@ module Observations
     before_action :login_required
     before_action :pass_query_params
 
+    # constants for iNat authorization and authentication
+    # Where to redirect user for authorization
+    SITE = "https://www.inaturalist.org"
+    # Where iNat will send the code once authorized
+    REDIRECT_URI = "http://localhost:3000/observations/inat_imports/auth"
+    # iNat's id for the MO application
+    APP_ID = Rails.application.credentials.inat.id
+
     def new; end
 
     def create
@@ -16,14 +24,9 @@ module Observations
       return consent_required if params[:consent] == "0"
 
       @user = User.current
-      inat_id_array.each do |inat_obs_id|
-        import_one_observation(inat_obs_id)
-      end
-
-      redirect_to(observations_path)
+      request_user_authorization
     end
 
-    # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
     def auth
       site = "https://www.inaturalist.org"
       app_id = Rails.application.credentials.inat.id
@@ -54,7 +57,7 @@ module Observations
         client_id: app_id,
         client_secret: app_secret,
         code: auth_code,
-        redirect_uri: redirect_uri,
+        redirect_uri: REDIRECT_URI,
         grant_type: "authorization_code"
       }
       #       puts("POST #{site}/oauth/token, payload: #{payload.inspect}")
@@ -77,6 +80,13 @@ module Observations
       #       puts("GET /users/edit.json, headers: #{headers.inspect}")
       #       puts(RestClient.get("#{site}/users/edit.json", headers))
       #       puts
+
+      # Actually do the imports
+      inat_id_array.each do |inat_obs_id|
+        import_one_observation(inat_obs_id)
+      end
+
+      redirect_to(observations_path)
     end
 
     # ---------------------------------
@@ -150,6 +160,14 @@ module Observations
       # flash_notice(:runtime_observation_success.t(id: @observation.id))
       add_inat_sequences(inat_obs)
       add_inat_summmary_data(inat_obs)
+    end
+
+    def request_user_authorization
+      url =
+        "#{SITE}/oauth/authorize?client_id=#{APP_ID}" \
+        "&redirect_uri=#{REDIRECT_URI}&response_type=code"
+
+      redirect_to(url, allow_other_host: true)
     end
 
     def inat_search_observations(ids)
