@@ -199,7 +199,8 @@ export default class extends Controller {
     // clearTimeout(this.marker_edit_buffer)
     // this.marker_edit_buffer = setTimeout(() => {
     this.verbose("makeMarkerEditable")
-    ["position_changed", "dragend"].forEach((eventName) => {
+    const events = ["position_changed", "dragend"]
+    events.forEach((eventName) => {
       this.marker.addListener(eventName, () => {
         const newPosition = this.marker.getPosition()?.toJSON() // latlng object
         // if (this.hasNorthInputTarget) {
@@ -288,7 +289,8 @@ export default class extends Controller {
     // clearTimeout(this.rectangle_buffer)
     // this.rectangle_buffer = setTimeout(() => {
     this.verbose("makeRectangleEditable")
-    ["bounds_changed"].forEach((eventName) => { // , "dragend"
+    const events = ["bounds_changed", "dragend"]
+    events.forEach((eventName) => {
       this.rectangle.addListener(eventName, () => {
         const newBounds = this.rectangle.getBounds()?.toJSON() // nsew object
         // this.verbose({ newBounds })
