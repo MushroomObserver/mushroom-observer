@@ -39,7 +39,6 @@ module Observations
       # authorize your app. If they aggree,
       # they will be redirected to your redirect_uri with a "code" parameter
       # url = "#{site}/oauth/authorize?client_id=#{app_id}&redirect_uri=#{redirect_uri}&response_type=code"  # rubocop:disable Layout/LineLength
-      debugger
       @params = params
       auth_code = @params[:code]
 
