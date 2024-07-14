@@ -61,6 +61,7 @@
 #
 #  == Class methods
 #
+#  last_by_user::           Find last Observation by a given User.
 #  define_a_location::      Update any observations using the old "where" name.
 #  touch_when_logging::     Override of AbstractModel's hook when updating log
 #  ---
@@ -367,6 +368,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   scope :by_user,
         ->(user) { where(user: user) }
+  scope :last_by_user,
+        lambda { |user|
+          includes(:location, :projects, :species_lists).
+            where(user_id: user.id).order(:created_at).last
+        }
   scope :mappable,
         -> { where.not(location: nil).or(where.not(lat: nil)) }
   scope :unmappable,
