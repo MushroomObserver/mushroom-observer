@@ -32,24 +32,19 @@ module Observations
     end
 
     def test_create_inat_import_authorization_request
-      params = { inat_ids: 123_456_789, consent: 1 }
-      url =
-        "https://www.inaturalist.org/oauth/authorize?" \
-        "client_id=#{Rails.application.credentials.inat.id}" \
-        "&redirect_uri=http://localhost:3000/observations/inat_imports/auth" \
-        "&response_type=code"
-      stub_request(:any, url)
       user = users(:rolf)
       inat_import = inat_imports(:rolf_inat_import)
       assert_equal("Unstarted", inat_import.state,
                    "Need a Unstarted inat_import fixture")
 
+      stub_request(:any, authorization_url)
       login(user.login)
+
       assert_no_difference(
         "Observation.count",
         "Authorization request to iNat shouldn't create MO Observation(s)"
       ) do
-        post(:create, params: params)
+        post(:create, params: { inat_ids: 123_456_789, consent: 1 })
       end
 
       assert_response(:redirect)
@@ -117,6 +112,7 @@ module Observations
       params = { inat_ids: inat_obs_id }
 
       stub_inat_api_request(inat_obs_id, mock_inat_response)
+      stub_request(:any, authorization_url)
 
       login
 
@@ -179,6 +175,28 @@ module Observations
 
       assert(obs.images.any?, "Obs should have images")
       assert(obs.sequences.one?, "Obs should have a sequence")
+    end
+
+    def test_create_import_plant
+      skip("Under construction, Should call `auth`, not create")
+      # See test/inat/README_INAT_FIXTURES.md
+      mock_inat_response =
+        File.read("test/inat/ceanothus_cordulatus.txt")
+      inat_obs = InatObs.new(mock_inat_response)
+      inat_obs_id = inat_obs.inat_id
+      params = { inat_ids: inat_obs_id }
+
+      stub_inat_api_request(inat_obs_id, mock_inat_response)
+
+      login
+
+      assert_no_difference(
+        "Observation.count", "Should not import iNat Plant observations"
+      ) do
+        put(:create, params: params)
+      end
+
+      assert_flash_text(:inat_taxon_not_importable.l(id: inat_obs_id))
     end
 
     def import_mock_observation(filename)
@@ -245,26 +263,11 @@ module Observations
         mo_license.id
     end
 
-    def test_create_import_plant
-      skip("Under construction, Should call `auth`, not create")
-      # See test/inat/README_INAT_FIXTURES.md
-      mock_inat_response =
-        File.read("test/inat/ceanothus_cordulatus.txt")
-      inat_obs = InatObs.new(mock_inat_response)
-      inat_obs_id = inat_obs.inat_id
-      params = { inat_ids: inat_obs_id }
-
-      stub_inat_api_request(inat_obs_id, mock_inat_response)
-
-      login
-
-      assert_no_difference(
-        "Observation.count", "Should not import iNat Plant observations"
-      ) do
-        put(:create, params: params)
-      end
-
-      assert_flash_text(:inat_taxon_not_importable.l(id: inat_obs_id))
+    def authorization_url
+      "https://www.inaturalist.org/oauth/authorize?" \
+      "client_id=#{Rails.application.credentials.inat.id}" \
+      "&redirect_uri=http://localhost:3000/observations/inat_imports/auth" \
+      "&response_type=code"
     end
   end
 end
