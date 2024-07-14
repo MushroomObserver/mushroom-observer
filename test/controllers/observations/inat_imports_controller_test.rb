@@ -39,8 +39,12 @@ module Observations
         "&redirect_uri=http://localhost:3000/observations/inat_imports/auth" \
         "&response_type=code"
       stub_request(:any, url)
+      user = users(:rolf)
+      inat_import = inat_imports(:rolf_inat_import)
+      assert_equal("Unstarted", inat_import.state,
+                   "Need a Unstarted inat_import fixture")
 
-      login
+      login(user.login)
       assert_no_difference(
         "Observation.count",
         "Authorization request to iNat shouldn't create MO Observation(s)"
@@ -49,6 +53,8 @@ module Observations
       end
 
       assert_response(:redirect)
+      assert_equal("Authorizing", inat_import.reload.state,
+                   "MO should be awaiting authorization from iNat")
     end
 
     def test_create_inat_import_no_consent

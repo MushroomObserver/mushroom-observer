@@ -23,24 +23,23 @@ module Observations
       return reload_form if bad_inat_ids_param?(inat_id_array)
       return consent_required if params[:consent] == "0"
 
-      @user = User.current
       request_user_authorization
     end
 
     def auth
-      site = "https://www.inaturalist.org"
-      app_id = Rails.application.credentials.inat.id
-      app_secret = Rails.application.credentials.inat.secret
+      # site = "https://www.inaturalist.org"
+      # app_id = Rails.application.credentials.inat.id
+      # app_secret = Rails.application.credentials.inat.secret
       # you can set this to some URL you control for testing
       # redirect_uri = "https://mushroomobserver.org/observations/inat_imports/auth"
-      redirect_uri = "http://localhost:3000/observations/inat_imports/auth"
+      # redirect_uri = "http://localhost:3000/observations/inat_imports/auth"
       # REQUEST AN AUTHORIZATION CODE
       # Your web app should redirect the user to this url.
       # They should see a screen offering them the choice to
       # authorize your app. If they aggree,
       # they will be redirected to your redirect_uri with a "code" parameter
       # url = "#{site}/oauth/authorize?client_id=#{app_id}&redirect_uri=#{redirect_uri}&response_type=code"  # rubocop:disable Layout/LineLength
-
+      debugger
       @params = params
       auth_code = @params[:code]
 
@@ -162,11 +161,15 @@ module Observations
       add_inat_summmary_data(inat_obs)
     end
 
+    # send user to iNat so that user can authorize MO to access user's iNat data
     def request_user_authorization
+      inat_import = InatImport.find_or_create_by(user: User.current)
+      inat_import.state = "Authorizing"
+      inat_import.save
+
       url =
         "#{SITE}/oauth/authorize?client_id=#{APP_ID}" \
         "&redirect_uri=#{REDIRECT_URI}&response_type=code"
-
       redirect_to(url, allow_other_host: true)
     end
 
