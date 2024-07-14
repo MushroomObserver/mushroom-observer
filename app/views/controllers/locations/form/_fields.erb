@@ -26,10 +26,10 @@ end %>
 <%= render(partial: "locations/form/north_south_east_west_alt_fields",
            locals: { f: f }) %>
 
-<%= if in_admin_mode?
-  check_box_with_label(form: f, field: :locked, class: "mt-3",
-                       label: :form_locations_locked.t)
-end %>
+<% if in_admin_mode? %>
+  <%= check_box_with_label(form: f, field: :locked, class: "mt-3",
+                       label: :form_locations_locked.t) %>
+<% end %>
 
 <%= text_area_with_label(
   form: f, field: :notes, label: :NOTES.t + ":",
