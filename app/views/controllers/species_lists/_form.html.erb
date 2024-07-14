@@ -39,7 +39,7 @@
                            append: help_block(:div, :shared_textile_help.l,
                                               id: "textilize_note")) %>
 
-  <%= date_select_with_label(form: f, field: :when, object: @species_list,
+  <%= date_select_with_label(form: f, field: :when,
                              inline: true, label: "#{:WHEN.l}:") %>
 
   <%= render(partial: "shared/form_location_feedback",

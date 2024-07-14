@@ -367,7 +367,7 @@ module FormsHelper
     opts = separate_field_options_from_args(args, [:object, :data])
     opts[:class] = "form-control"
     opts[:data] = { controller: "year-input" }.merge(args[:data] || {})
-    date_select_opts = date_select_opts(args)
+    date_opts = date_select_opts(args)
     wrap_class = form_group_wrap_class(args)
     selects_class = "form-inline date-selects"
     selects_class += " d-inline-block" if args[:inline] == true
@@ -379,7 +379,7 @@ module FormsHelper
       concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
       concat(tag.div(class: selects_class, id: identifier) do
-        concat(args[:form].date_select(args[:field], date_select_opts, opts))
+        concat(args[:form].date_select(args[:field], date_opts, opts))
       end)
       concat(args[:append]) if args[:append].present?
     end
@@ -387,15 +387,16 @@ module FormsHelper
 
   # The index arg is for multiple date_selects in a form
   def date_select_opts(args = {})
-    obj = args[:object]
+    field = args[:field] || :when
+    obj = args[:object] || args[:form]&.object
     start_year = args[:start_year] || 20.years.ago.year
     end_year = args[:end_year] || Time.zone.now.year
-    init_value = obj.try(&:when).try(&:year)
+    init_value = obj.try(&field).try(&:year)
     if init_value && init_value < start_year && init_value > 1900
       start_year = init_value
     end
     opts = { start_year: start_year, end_year: end_year,
-             selected: obj.try(&:when) || Time.zone.today,
+             selected: obj.try(&field) || Time.zone.today,
              order: args[:order] || [:day, :month, :year] }
     opts[:index] = args[:index] if args[:index].present?
     opts
