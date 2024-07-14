@@ -30,38 +30,6 @@ module Observations
       request_inat_user_authorization
     end
 
-    # iNat redirects here after user completes iNat authorization
-    def auth
-      auth_code = params[:code]
-
-      inat_import = InatImport.find_or_create_by(user: User.current)
-      inat_import.state = "Authenticating"
-      inat_import.save
-
-      payload = {
-        client_id: APP_ID,
-        client_secret: Rails.application.credentials.inat.secret,
-        code: auth_code,
-        redirect_uri: REDIRECT_URI,
-        grant_type: "authorization_code"
-      }
-      response = RestClient.post("#{SITE}/oauth/token", payload)
-
-      inat_import.token = response.body
-      inat_import.state = "Importing"
-      inat_import.save
-
-      # Actually do the imports
-      inat_id_array.each do |inat_obs_id|
-        import_one_observation(inat_obs_id)
-      end
-
-      inat_import.state = "Done"
-      inat_import.save
-
-      redirect_to(observations_path)
-    end
-
     # ---------------------------------
 
     private
@@ -95,8 +63,68 @@ module Observations
       true
     end
 
+    # send user to iNat so that user can authorize MO to access user's iNat data
+    def request_inat_user_authorization
+      redirect_to(inat_authorization_url, allow_other_host: true)
+    end
+
+    def inat_authorization_url
+      "https://www.inaturalist.org/oauth/authorize" \
+      "?client_id=#{Rails.application.credentials.inat.id}" \
+      "&redirect_uri=#{REDIRECT_URI}" \
+      "&response_type=code"
+    end
+
+    # ---------------------------------
+
+    public
+
+    # iNat redirects here after user completes iNat authorization
+    def auth
+      auth_code = params[:code]
+      return not_authorized if auth_code.blank?
+
+      inat_import = InatImport.find_or_create_by(user: User.current)
+      inat_import.state = "Authenticating"
+      inat_import.save
+
+      payload = {
+        client_id: APP_ID,
+        client_secret: Rails.application.credentials.inat.secret,
+        code: auth_code,
+        redirect_uri: REDIRECT_URI,
+        grant_type: "authorization_code"
+      }
+      response = RestClient.post("#{SITE}/oauth/token", payload)
+
+      inat_import.token = response.body
+      inat_import.state = "Importing"
+      inat_import.save
+
+      # Actually do the imports
+      inat_id_array(inat_import).each do |inat_obs_id|
+        import_one_observation(inat_obs_id)
+      end
+
+      inat_import.state = "Done"
+      inat_import.save
+
+      redirect_to(observations_path)
+    end
+
+    # ---------------------------------
+
+    private
+
+    def not_authorized
+      flash_error(:inat_no_authorization.l)
+      redirect_to(observations_path)
+    end
+
     def inat_id_array(inat_import)
-      if inat_import.inat_ids.include?(",")
+      if inat_import.inat_ids.blank?
+        []
+      elsif inat_import.inat_ids.include?(",")
         JSON.parse(inat_import.inat_ids)
       else
         [inat_import.inat_ids]
@@ -136,18 +164,6 @@ module Observations
       # flash_notice(:runtime_observation_success.t(id: @observation.id))
       add_inat_sequences(inat_obs)
       add_inat_summmary_data(inat_obs)
-    end
-
-    # send user to iNat so that user can authorize MO to access user's iNat data
-    def request_inat_user_authorization
-      redirect_to(inat_authorization_url, allow_other_host: true)
-    end
-
-    def inat_authorization_url
-      "https://www.inaturalist.org/oauth/authorize" \
-      "?client_id=#{Rails.application.credentials.inat.id}" \
-      "&redirect_uri=#{REDIRECT_URI}" \
-      "&response_type=code"
     end
 
     def inat_search_observations(ids)

@@ -94,14 +94,47 @@ module Observations
       assert_form_action(action: :create)
     end
 
-    def test_authenticate
-      skip("Under construction")
+    def test_create_inat_import_authorization_denied
+      inat_authorization_callback_params =
+        { error: "access_denied",
+          error_description: "The resource owner or authorization server " \
+                             "denied the request." }
+      login
+
+      get(:auth, params: inat_authorization_callback_params)
+
+      assert_redirected_to(observations_path)
+      assert_flash_error
+    end
+
+    def test_create_inat_import_authorized
       user = users(:rolf)
+      inat_import = inat_imports(:rolf_inat_import)
+
+      # A blank list to test `auth` without importing anything.
+      inat_import.inat_ids = ""
+      inat_import.save
+      inat_authorization_callback_params = { code: "Go123MO" }
+
+      stub_request(:post, "https://www.inaturalist.org/oauth/token").
+        with(
+          body: { "client_id" => "myXFJot7KEZ2L0lE3Mr7eENJGHbiAj2JPNmCCyfs8xI",
+                  "client_secret" => "w6NdJUsYYMgRIe9cHwcw6nyXU12-mUqkAJsY3Z_Eiac", "code" => "Go123MO", "grant_type" => "authorization_code", "redirect_uri" => "http://localhost:3000/observations/inat_imports/auth" },
+          headers: {
+            "Accept" => "*/*",
+            "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+            "Content-Length" => "234",
+            "Content-Type" => "application/x-www-form-urlencoded",
+            "Host" => "www.inaturalist.org",
+            "User-Agent" => "rest-client/2.1.0 (darwin23 x86_64) ruby/3.3.0p0"
+          }
+        ).
+        to_return(status: 200, body: "", headers: {})
 
       login(user.login)
-      post(:auth)
+      get(:auth, params: inat_authorization_callback_params)
 
-      assert_response(:success)
+      assert_redirected_to(observations_path)
     end
 
     def test_create_import_evernia_no_photos
@@ -109,11 +142,11 @@ module Observations
       mock_inat_response =
         File.read("test/inat/evernia_no_photos.txt")
       inat_obs_id = InatObs.new(mock_inat_response).inat_id
-      params = { inat_ids: inat_obs_id }
-
       stub_inat_api_request(inat_obs_id, mock_inat_response)
+
       stub_request(:any, authorization_url)
 
+      params = { inat_ids: inat_obs_id }
       login
 
       assert_difference("Observation.count", 1, "Failed to create Obs") do
