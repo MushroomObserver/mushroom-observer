@@ -112,7 +112,7 @@ module ObservationsController::Create
   def rough_cut_location_if_requested
     # Ensure we have the minimum necessary to create a new location
     unless @observation.location_id == -1 &&
-           (name = params.dig(:observation, :place_name)).present? &&
+           (place_name = params.dig(:observation, :place_name)).present? &&
            (north = params.dig(:location, :north)).present? &&
            (south = params.dig(:location, :south)).present? &&
            (east = params.dig(:location, :east)).present? &&
@@ -132,10 +132,11 @@ module ObservationsController::Create
       attributes[:hidden] = hidden
     end
     attributes[:user_id] = @user.id
+
     @location = Location.new(attributes)
-    # Now that we have a Location instance, use the setter method in the model,
-    # which handles scientific/postal format
-    @location.display_name = name
+    # With a Location instance, we can use the `display_name=` setter method,
+    # which figures out scientific/postal format of user input
+    @location.display_name = place_name
     save_with_log(@location)
     # Associate the location with the observation
     @observation.location_id = @location.id
@@ -288,7 +289,8 @@ module ObservationsController::Create
     @reasons         = @naming.init_reasons(reasons)
     @images          = @bad_images
     @new_image.when  = @observation.when
-    @field_code = params[:field_code]
+    @field_code      = params[:field_code]
+    init_location_var_for_reload
     init_specimen_vars_for_reload
     init_project_vars
     init_project_vars_for_reload
@@ -303,5 +305,11 @@ module ObservationsController::Create
 
     field_slip.observation = @observation
     field_slip.save
+  end
+
+  def init_location_var_for_reload
+    return if @location || !@observation.location_id
+
+    @location = @observation.location
   end
 end
