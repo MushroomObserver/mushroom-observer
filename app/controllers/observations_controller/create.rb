@@ -39,9 +39,9 @@ module ObservationsController::Create
     rough_cut_location_if_requested
     success = true
     success = false unless validate_name
+    success = false unless validate_place_name # in case somehow there is no id
     success = false unless validate_object(@observation)
     success = false unless validate_projects
-    success = false if @location && !validate_place_name
     success = false if @name && !validate_object(@naming)
     success = false if @name && !@vote.value.nil? && !validate_object(@vote)
     success = false if @bad_images != []
