@@ -19,70 +19,48 @@ module Observations
 
     def create
       inat_id_array = params[:inat_ids].split
+      # TODO: convert params[:inat_ids] to a list of numbers
       return redirect_to(new_observation_path) if params[:inat_ids].blank?
       return reload_form if bad_inat_ids_param?(inat_id_array)
       return consent_required if params[:consent] == "0"
 
-      request_user_authorization
+      inat_import = InatImport.find_or_create_by(user: User.current)
+      inat_import.state = "Authorizing"
+      inat_import.inat_ids = inat_id_array
+      inat_import.save
+      request_inat_user_authorization
     end
 
+    # iNat redirects here after user completes iNat authorization
     def auth
-      # site = "https://www.inaturalist.org"
-      # app_id = Rails.application.credentials.inat.id
-      # app_secret = Rails.application.credentials.inat.secret
-      # you can set this to some URL you control for testing
-      # redirect_uri = "https://mushroomobserver.org/observations/inat_imports/auth"
-      # redirect_uri = "http://localhost:3000/observations/inat_imports/auth"
-      # REQUEST AN AUTHORIZATION CODE
-      # Your web app should redirect the user to this url.
-      # They should see a screen offering them the choice to
-      # authorize your app. If they aggree,
-      # they will be redirected to your redirect_uri with a "code" parameter
-      # url = "#{site}/oauth/authorize?client_id=#{app_id}&redirect_uri=#{redirect_uri}&response_type=code"  # rubocop:disable Layout/LineLength
-      @params = params
-      auth_code = @params[:code]
+      auth_code = params[:code]
 
-      #       # REQUEST AN AUTH TOKEN
-      #       # Once your app has that code parameter,
-      #       # you can exchange it for an access token:
-      #       puts("Go to #{url}, approve the app, and you should be redirected to your " +
-      #            "redirect_uri. Copy and paste the 'code' param here.")
-      #       print("Code: ")
-      #       auth_code = gets.strip
-      #       puts
-      #
+      inat_import = InatImport.find_or_create_by(user: User.current)
+      inat_import.state = "Authenticating"
+      inat_import.save
+
       payload = {
-        client_id: app_id,
-        client_secret: app_secret,
+        client_id: APP_ID,
+        client_secret: Rails.application.credentials.inat.secret,
         code: auth_code,
         redirect_uri: REDIRECT_URI,
         grant_type: "authorization_code"
       }
-      #       puts("POST #{site}/oauth/token, payload: #{payload.inspect}")
-      #       puts(response = RestClient.post("#{site}/oauth/token", payload))
-      #       puts
-      #       # response will be a chunk of JSON looking like
-      #       # {
-      #       #   "access_token":"xxx",
-      #       #   "token_type":"bearer",
-      #       #   "expires_in":null,
-      #       #   "refresh_token":null,
-      #       #   "scope":"write"
-      #       # }
-      #
-      #       # Store the token (access_token) in your web app.
-      #       # You can now use it to make authorized
-      #       # requests on behalf of the user, like retrieving profile data:
-      #       token = JSON.parse(response)["access_token"]
-      #       headers = { "Authorization" => "Bearer #{token}" }
-      #       puts("GET /users/edit.json, headers: #{headers.inspect}")
-      #       puts(RestClient.get("#{site}/users/edit.json", headers))
-      #       puts
+
+      response = RestClient.post("#{SITE}/oauth/token", payload, headers = {})
+
+      inat_import.token = response.body
+      inat_import.state = "Importing"
+      inat_import.save
 
       # Actually do the imports
+      inat_id_array = inat_import.inat_ids
       inat_id_array.each do |inat_obs_id|
         import_one_observation(inat_obs_id)
       end
+
+      inat_import.state = "Done"
+      inat_import.save
 
       redirect_to(observations_path)
     end
@@ -161,15 +139,15 @@ module Observations
     end
 
     # send user to iNat so that user can authorize MO to access user's iNat data
-    def request_user_authorization
-      inat_import = InatImport.find_or_create_by(user: User.current)
-      inat_import.state = "Authorizing"
-      inat_import.save
+    def request_inat_user_authorization
+      redirect_to(inat_authorization_url, allow_other_host: true)
+    end
 
-      url =
-        "#{SITE}/oauth/authorize?client_id=#{APP_ID}" \
-        "&redirect_uri=#{REDIRECT_URI}&response_type=code"
-      redirect_to(url, allow_other_host: true)
+    def inat_authorization_url
+      "https://www.inaturalist.org/oauth/authorize" \
+      "?client_id=#{Rails.application.credentials.inat.id}" \
+      "&redirect_uri=#{REDIRECT_URI}" \
+      "&response_type=code"
     end
 
     def inat_search_observations(ids)
