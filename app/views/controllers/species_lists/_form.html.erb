@@ -38,7 +38,7 @@
                            label: "#{:form_species_lists_list_notes.l}:",
                            append: render(partial: "shared/textilize_help")) %>
 
-  <%= date_select_with_label(form: f, field: :when, object: @species_list,
+  <%= date_select_with_label(form: f, field: :when,
                              inline: true, label: "#{:WHEN.l}:") %>
 
   <%= render(partial: "shared/form_location_feedback",
