@@ -124,6 +124,17 @@ module ObservationsController::SharedFormMethods
   end
 
   ##############################################################################
+  # Save location only (at this point rest of form is okay).
+  def save_location
+    if @location.save
+      flash_notice(:runtime_location_success.t(id: @location.id))
+      true
+    else
+      # Failed to create location
+      flash_object_errors(@location)
+      false
+    end
+  end
 
   # Save observation now that everything is created successfully.
   def save_observation

@@ -34,16 +34,18 @@ module ObservationsController::Create
     # set these again, in case they are not defined
     init_license_var
     init_new_image_var(Time.zone.now)
-    create_new_location_if_requested
 
     rough_cut
+    rough_cut_location_if_requested
     success = true
-    success = false unless validate_params
+    success = false unless validate_name
     success = false unless validate_object(@observation)
     success = false unless validate_projects
+    success = false if @location && !validate_place_name
     success = false if @name && !validate_object(@naming)
     success = false if @name && !@vote.value.nil? && !validate_object(@vote)
     success = false if @bad_images != []
+    success = false if success && !save_location
     success = false if success && !save_observation
     return reload_new_form(params.dig(:naming, :reasons)) unless success
 
@@ -95,10 +97,19 @@ module ObservationsController::Create
     observation
   end
 
+  def rough_cut
+    @observation.notes = notes_to_sym_and_compact
+    @naming = Naming.construct({}, @observation)
+    @vote = Vote.construct(params.dig(:naming, :vote), @naming)
+    update_good_images
+    @exif_data = get_exif_data(@good_images) # in case of form reload
+    create_image_objects_and_update_bad_images
+  end
+
   # We now have an @observation, and maybe a "-1" location_id, indicating a
   # new Location (if accompanied by bounding box lat/lng). If everything is
   # present, create a new @location, and associate it with the @observation
-  def create_new_location_if_requested
+  def rough_cut_location_if_requested
     # Ensure we have the minimum necessary to create a new location
     unless @observation.location_id == -1 &&
            (name = params.dig(:observation, :place_name)).present? &&
@@ -128,15 +139,6 @@ module ObservationsController::Create
     save_with_log(@location)
     # Associate the location with the observation
     @observation.location_id = @location.id
-  end
-
-  def rough_cut
-    @observation.notes = notes_to_sym_and_compact
-    @naming = Naming.construct({}, @observation)
-    @vote = Vote.construct(params.dig(:naming, :vote), @naming)
-    update_good_images
-    @exif_data = get_exif_data(@good_images) # in case of form reload
-    create_image_objects_and_update_bad_images
   end
 
   def save_everything_else(reason)

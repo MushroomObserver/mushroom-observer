@@ -2,8 +2,6 @@
 
 #  :section: Validators
 #
-#    validate_params
-#
 #    validate_name
 #      name_params
 #      resolve_name(...)
@@ -16,11 +14,6 @@
 # Included in both ObservationsController and NamingsController
 module ObservationsController::Validators
   private
-
-  def validate_params
-    validate_name &&
-      validate_place_name
-  end
 
   def validate_name
     success = resolve_name
