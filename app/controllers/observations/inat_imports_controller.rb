@@ -18,16 +18,15 @@ module Observations
     def new; end
 
     def create
-      inat_id_array = params[:inat_ids].split
-      # TODO: convert params[:inat_ids] to a list of numbers
       return redirect_to(new_observation_path) if params[:inat_ids].blank?
-      return reload_form if bad_inat_ids_param?(inat_id_array)
+      return reload_form if bad_inat_ids_param?
       return consent_required if params[:consent] == "0"
 
       inat_import = InatImport.find_or_create_by(user: User.current)
       inat_import.state = "Authorizing"
-      inat_import.inat_ids = inat_id_array
+      inat_import.inat_ids = params[:inat_ids]
       inat_import.save
+
       request_inat_user_authorization
     end
 
@@ -46,15 +45,13 @@ module Observations
         redirect_uri: REDIRECT_URI,
         grant_type: "authorization_code"
       }
-
-      response = RestClient.post("#{SITE}/oauth/token", payload, headers = {})
+      response = RestClient.post("#{SITE}/oauth/token", payload)
 
       inat_import.token = response.body
       inat_import.state = "Importing"
       inat_import.save
 
       # Actually do the imports
-      inat_id_array = inat_import.inat_ids
       inat_id_array.each do |inat_obs_id|
         import_one_observation(inat_obs_id)
       end
@@ -80,27 +77,30 @@ module Observations
       render(:new)
     end
 
-    def bad_inat_ids_param?(inat_id_array)
-      multiple_ids?(inat_id_array) ||
-        illegal_ids?(inat_id_array)
+    def bad_inat_ids_param?
+      contains_illegal_characters? || multiple_ids?
     end
 
-    def multiple_ids?(inat_id_array)
-      return false unless inat_id_array.many?
+    def contains_illegal_characters?
+      return false unless /[^\d ,]/.match?(params[:inat_ids])
+
+      flash_warning(:runtime_illegal_inat_id.l)
+      true
+    end
+
+    def multiple_ids?
+      return false unless /[ ,]/.match?(params[:inat_ids])
 
       flash_warning(:inat_not_single_id.l)
       true
     end
 
-    def illegal_ids?(inat_id_array)
-      illegal_ids = []
-      inat_id_array.each do |id|
-        next if /\A\d+\z/.match?(id)
-
-        illegal_ids << id
-        flash_warning(:runtime_illegal_inat_id.l(id: id))
+    def inat_id_array(inat_import)
+      if inat_import.inat_ids.include?(",")
+        JSON.parse(inat_import.inat_ids)
+      else
+        [inat_import.inat_ids]
       end
-      illegal_ids.any?
     end
 
     def import_one_observation(inat_obs_id)
