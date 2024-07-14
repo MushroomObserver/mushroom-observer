@@ -246,6 +246,8 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     assert(proj.member?(user),
            "Need fixtures such that `user` is a member of `proj`")
     proj_checkbox = "project_id_#{proj.id}"
+    last_obs = Observation.last_by_user(user)
+    last_location = last_obs.location
     obs_location = locations(:burbank)
     login(user)
 
@@ -255,6 +257,10 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#observation_place_name", visible: :any)
     assert(has_unchecked_field?(proj_checkbox),
            "Missing an unchecked box for Project which has ended")
+    assert_field("observation_location_id",
+                 type: :hidden, with: last_location.id)
+    assert_field("observation_place_name", with: last_location.name)
+    # NOTE: that changing the place name will not change the id
     fill_in(id: "observation_place_name", visible: :any,
             with: obs_location.name)
     check(proj_checkbox)
@@ -268,14 +274,12 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
       "#flash_notices",
       text: :form_observations_there_is_a_problem_with_projects.t.strip_html
     )
-    default_obs = Observation.where(user_id: user.id).order(:created_at).last
     within("#project_messages") do # out-of-range warning message
       assert(has_text?(:form_observations_projects_out_of_range.l(
-                         date: default_obs.when,
-                         place_name: obs_location.name
+                         date: last_obs.when,
+                         place_name: last_location.display_name
                        )),
              "Missing out-of-range warning with observation date")
-
       assert(has_text?(proj.title) && has_text?(proj.constraints),
              "Warning is missing out-of-range project's title or constraints")
     end
@@ -303,6 +307,8 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#observation_place_name", visible: :any)
     fill_in(id: "observation_place_name", visible: :any,
             with: proj.location.display_name)
+    find_field(id: "observation_location_id", type: :hidden).
+      set(proj.location.id) # this is what counts, would be handled by js
     check(proj_checkbox)
     first(:button, "Create").click
     assert_selector(
@@ -328,7 +334,9 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     visit(new_observation_path)
     assert_selector("#observation_place_name", visible: :any)
     fill_in(id: "observation_place_name", visible: :any,
-            with: obs_location.name)
+            with: obs_location.name) # ignored, it's the ID that matters
+    find_field(id: "observation_location_id", type: :hidden).
+      set(obs_location.id) # this is what counts
     check(proj_checkbox)
     # reset Observation date, making it out-of-range
     select(Time.zone.today.day, from: "observation_when_3i")
