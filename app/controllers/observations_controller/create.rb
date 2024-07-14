@@ -45,7 +45,7 @@ module ObservationsController::Create
     success = false if @name && !validate_object(@naming)
     success = false if @name && !@vote.value.nil? && !validate_object(@vote)
     success = false if @bad_images != []
-    success = false if success && !save_location
+    success = false if success && @location && !save_location
     success = false if success && !save_observation
     return reload_new_form(params.dig(:naming, :reasons)) unless success
 
