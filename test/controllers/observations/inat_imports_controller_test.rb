@@ -116,19 +116,19 @@ module Observations
       # A blank list to test `auth` without importing anything.
       inat_import.inat_ids = ""
       inat_import.save
-      inat_authorization_callback_params = { code: "Go123MO" }
+      inat_authorization_callback_params = { code: "MockCode" }
 
       stub_request(:post, "https://www.inaturalist.org/oauth/token").
         with(
           body: { "client_id" => Rails.application.credentials.inat.id,
                   "client_secret" => Rails.application.credentials.inat.secret,
-                  "code" => "Go123MO",
+                  "code" => "MockCode",
                   "grant_type" => "authorization_code",
                   "redirect_uri" => REDIRECT_URI },
           headers: {
             "Accept" => "*/*",
             "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-            "Content-Length" => "234",
+            "Content-Length" => "235",
             "Content-Type" => "application/x-www-form-urlencoded",
             "Host" => "www.inaturalist.org",
             "User-Agent" => "rest-client/2.1.0 (darwin23 x86_64) ruby/3.3.0p0"
