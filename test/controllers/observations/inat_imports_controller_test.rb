@@ -134,7 +134,7 @@ module Observations
             "User-Agent" => "rest-client/2.1.0 (darwin23 x86_64) ruby/3.3.0p0"
           }
         ).
-        to_return(status: 200, body: "", headers: {})
+        to_return(status: 200, body: "MockToken", headers: {})
 
       login(user.login)
       get(:auth, params: inat_authorization_callback_params)
