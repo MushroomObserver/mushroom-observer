@@ -93,18 +93,19 @@ export default class extends Controller {
       })
   }
 
+  // Not sure we're using this yet
   toggleBoxLock(event) {
     if (this.rectangle) {
       const icon = this.lockBoxBtnTarget.firstChild
       if (this.rectangle.getEditable() === true) {
         this.rectangle.setEditable(false)
-        this.map_type = "observation"
+        // this.map_type = "observation"
         icon.classList.remove("glyphicon-check")
         icon.classList.add("glyphicon-edit")
         this.showBoxBtnTarget.classList.add("d-none")
       } else {
         this.rectangle.setEditable(true)
-        this.map_type = "location"
+        // this.map_type = "location"
         icon.classList.remove("glyphicon-edit")
         icon.classList.add("glyphicon-check")
         this.showBoxBtnTarget.classList.remove("d-none")
@@ -247,7 +248,8 @@ export default class extends Controller {
     } else {
       this.rectangle.setBounds(extents)
     }
-    this.rectangle.setEditable(true)
+    const _types = ["location", "hybrid"]
+    if (_types.includes(this.map_type)) { this.rectangle.setEditable(true) }
     this.rectangle.setVisible(true)
     this.map.fitBounds(extents) // overwrite viewport (may zoom in a bit?)
   }
@@ -270,7 +272,7 @@ export default class extends Controller {
     this.rectangle = new google.maps.Rectangle(rectangleOptions)
 
     if (this.map_type === "observation") {
-      // that's it. obs rectangles are not clickable
+      // that's it. obs rectangles for MO locations are not clickable
       // this.rectangle = rectangle
     } else if (!this.editable) {
       // there could be many, does not set this.rectangle
