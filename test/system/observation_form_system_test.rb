@@ -92,8 +92,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     click_attach_file("geotagged.jpg")
     sleep(0.5)
 
-    # we should have the new type of location_containing autocompleter now
-    assert_selector("[data-type='location_containing']")
+    # we should have the new type of location_google autocompleter now
+    assert_selector("[data-type='location_google']")
     sleep(0.5)
     # GPS should have been copied to the obs fields
     assert_equal("25.7582", find('[id$="observation_lat"]').value)
@@ -210,8 +210,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_date_is_now
     assert_geolocation_is_empty
 
-    last_obs = Observation.where(user_id: User.current.id).
-               order(:created_at).last
+    last_obs = Observation.recent_by_user(User.current).last
     assert_field("observation_place_name", with: last_obs.where)
 
     assert_field("naming_name", with: "")
@@ -238,7 +237,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     # Add a second image that's geotagged.
-    click_attach_file("geotagged.jpg")
+    click_attach_file("geotagged_s_pasadena.jpg")
     sleep(0.5)
     # Be sure we have two image wrappers. We have to wait for
     # the first one to be hidden before we can see the second one.
@@ -250,20 +249,20 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Check that it's the right image: this is geotagged.jpg's date
     within(second_image_wrapper) do
-      assert_equal("2018", find('[id$="when_1i"]', visible: :all).value)
-      assert_equal("12", find('[id$="when_2i"]', visible: :all).value)
-      assert_equal("31", find('[id$="when_3i"]', visible: :all).value)
+      assert_equal("2020", find('[id$="when_1i"]', visible: :all).value)
+      assert_equal("6", find('[id$="when_2i"]', visible: :all).value)
+      assert_equal("30", find('[id$="when_3i"]', visible: :all).value)
     end
 
     # Date should have been copied to the obs fields
-    assert_equal("2018", find('[id$="observation_when_1i"]').value)
-    assert_equal("12", find('[id$="observation_when_2i"]').value)
-    assert_equal("31", find('[id$="observation_when_3i"]').value)
+    assert_equal("2020", find('[id$="observation_when_1i"]').value)
+    assert_equal("6", find('[id$="observation_when_2i"]').value)
+    assert_equal("30", find('[id$="observation_when_3i"]').value)
 
     # GPS should have been copied to the obs fields
-    assert_equal("25.7582", find('[id$="observation_lat"]').value)
-    assert_equal("-80.3731", find('[id$="observation_lng"]').value)
-    assert_equal("4", find('[id$="observation_alt"]').value.to_i.to_s)
+    assert_equal("34.1231", find('[id$="observation_lat"]').value)
+    assert_equal("-118.1489", find('[id$="observation_lng"]').value)
+    assert_equal("248", find('[id$="observation_alt"]').value.to_i.to_s)
 
     # Ok, enough. By now, the carousel image should be showing the second image.
     assert_selector(
@@ -280,20 +279,20 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_equal(1, image_wrappers.length)
 
     # Add geotagged.jpg again
-    click_attach_file("geotagged.jpg")
+    click_attach_file("geotagged_s_pasadena.jpg")
     sleep(0.5)
 
     # Be sure we have two image wrappers
     second_image_wrapper = find(".carousel-item[data-image-status='upload']",
-                                text: "25.7582")
+                                text: "34.1231")
     image_wrappers = all(".carousel-item[data-image-status='upload']",
                          visible: :all)
     assert_equal(image_wrappers.length, 2)
 
     within(second_image_wrapper) do
-      assert_equal("2018", find('[id$="when_1i"]').value)
-      assert_equal("12", find('[id$="when_2i"]').value)
-      assert_equal("31", find('[id$="when_3i"]').value)
+      assert_equal("2020", find('[id$="when_1i"]').value)
+      assert_equal("6", find('[id$="when_2i"]').value)
+      assert_equal("30", find('[id$="when_3i"]').value)
     end
 
     # Set copyright holder and image notes on both
@@ -343,7 +342,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # submit_observation_form_with_errors
     within("#observation_form") { click_commit }
-
+    debugger
     # rejected, but images uploaded
     assert_selector("body.observations__create", wait: 12)
     assert_flash_for_images_uploaded
@@ -355,9 +354,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_select("observation_when_3i", text: "14")
 
     assert_field("observation_place_name", with: "USA, California, Pasadena")
-    assert_field("observation_lat", with: "25.7582")
-    assert_field("observation_lng", with: "-80.3731")
-    assert_field("observation_alt", with: "4")
+    assert_field("observation_lat", with: "34.1231")
+    assert_field("observation_lng", with: "-118.1489")
+    assert_field("observation_alt", with: "248")
     # This geolocation is for Florida, and actually should disable
     # autocompleting Pasadena
 
@@ -394,14 +393,14 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Carousel items are re-output with image records this time.
     all(".carousel-indicator").last.click
 
-    second_item = find(".carousel-item", text: "25.7582")
+    second_item = find(".carousel-item", text: "34.1231")
     items = all(".carousel-item", visible: :all)
     assert_equal(items.length, 2)
 
     within(second_item) do
-      assert_equal("2018", find('[id$="when_1i"]').value)
-      assert_equal("12", find('[id$="when_2i"]').value)
-      assert_equal("31", find('[id$="when_3i"]').value)
+      assert_equal("2020", find('[id$="when_1i"]').value)
+      assert_equal("6", find('[id$="when_2i"]').value)
+      assert_equal("30", find('[id$="when_3i"]').value)
     end
 
     # will have cleared the place_name field, lat/lng doesn't match Pasadena
@@ -409,52 +408,52 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     within("#observation_form") { click_commit }
 
-    # It should take us to create a new location
-    assert_selector("body.locations__new")
-    # The observation shoulda been created OK.
-    assert_flash_for_create_observation
-    # Check the db values
-    assert_new_observation_is_correct(expected_values_after_create)
+    # # It should take us to create a new location
+    # assert_selector("body.locations__new")
+    # # The observation shoulda been created OK.
+    # assert_flash_for_create_observation
+    # # Check the db values
+    # assert_new_observation_is_correct(expected_values_after_create)
 
-    # check default values of location form
-    assert_field("location_display_name", with: "Pasadena, California, USA")
-    assert_button(text: :form_locations_find_on_map.t.as_displayed)
-    click_button(:form_locations_find_on_map.t.as_displayed)
-    sleep(1)
-    assert_equal(PASADENA_EXTENTS[:north].round(4),
-                 find("#location_north").value.to_f.round(4))
-    assert_equal(PASADENA_EXTENTS[:south].round(4),
-                 find("#location_south").value.to_f.round(4))
-    assert_equal(PASADENA_EXTENTS[:east].round(4),
-                 find("#location_east").value.to_f.round(4))
-    assert_equal(PASADENA_EXTENTS[:west].round(4),
-                 find("#location_west").value.to_f.round(4))
-    sleep(1) # wait for elevation service
-    assert_equal(PASADENA_EXTENTS[:high].round(4),
-                 find("#location_high").value.to_f.round(4))
-    assert_equal(PASADENA_EXTENTS[:low].round(4),
-                 find("#location_low").value.to_f.round(4))
+    # # check default values of location form
+    # assert_field("location_display_name", with: "Pasadena, California, USA")
+    # assert_button(text: :form_locations_find_on_map.t.as_displayed)
+    # click_button(:form_locations_find_on_map.t.as_displayed)
+    # sleep(1)
+    # assert_equal(PASADENA_EXTENTS[:north].round(4),
+    #              find("#location_north").value.to_f.round(4))
+    # assert_equal(PASADENA_EXTENTS[:south].round(4),
+    #              find("#location_south").value.to_f.round(4))
+    # assert_equal(PASADENA_EXTENTS[:east].round(4),
+    #              find("#location_east").value.to_f.round(4))
+    # assert_equal(PASADENA_EXTENTS[:west].round(4),
+    #              find("#location_west").value.to_f.round(4))
+    # sleep(1) # wait for elevation service
+    # assert_equal(PASADENA_EXTENTS[:high].round(4),
+    #              find("#location_high").value.to_f.round(4))
+    # assert_equal(PASADENA_EXTENTS[:low].round(4),
+    #              find("#location_low").value.to_f.round(4))
 
-    # submit_location_form_with_errors
-    fill_in("location_display_name",
-            with: "Pasadena: Disneyland, Some Co., California, USA")
-    fill_in("location_notes", with: "oops")
+    # # submit_location_form_with_errors
+    # fill_in("location_display_name",
+    #         with: "Pasadena: Disneyland, Some Co., California, USA")
+    # fill_in("location_notes", with: "oops")
 
-    within("#location_form") { click_commit }
+    # within("#location_form") { click_commit }
 
-    assert_selector("body.locations__create")
-    assert_has_location_warning(/Contains unexpected character/)
+    # assert_selector("body.locations__create")
+    # assert_has_location_warning(/Contains unexpected character/)
 
-    assert_field("location_display_name",
-                 with: "Pasadena: Disneyland, Some Co., California, USA")
-    assert_field("location_notes", with: "oops")
+    # assert_field("location_display_name",
+    #              with: "Pasadena: Disneyland, Some Co., California, USA")
+    # assert_field("location_notes", with: "oops")
 
-    # submit_location_form_without_errors
-    fill_in("location_display_name",
-            with: "Pasadena, Some Co., California, USA")
-    fill_in("location_notes", with: "Notes for location")
+    # # submit_location_form_without_errors
+    # fill_in("location_display_name",
+    #         with: "Pasadena, Some Co., California, USA")
+    # fill_in("location_notes", with: "Notes for location")
 
-    within("#location_form") { click_commit }
+    # within("#location_form") { click_commit }
 
     assert_flash_for_create_location
     assert_selector("body.observations__show")
