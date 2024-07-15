@@ -216,6 +216,7 @@ export default class extends Controller {
       Object.assign(this, detail); // type, request_params
       this.primer = [];
       this.matches = [];
+      this.stored_data = { id: 0 }
       this.prepareInputElement();
       this.prepareHiddenInput();
       this.clearHiddenId();
@@ -250,7 +251,7 @@ export default class extends Controller {
     // open the map if not already open
     if (!outlet.opened) outlet.toggleMapBtnTarget.click();
     // set the map type so box is editable
-    outlet.map_type = "hybrid";
+    outlet.map_type = "hybrid"; // only if location_google
     // outlet.marker.setDraggable(false); messes up map
     // outlet.marker.setClickable(false); messes up map
     if (outlet.latInputTarget.value && outlet.lngInputTarget.value) {
