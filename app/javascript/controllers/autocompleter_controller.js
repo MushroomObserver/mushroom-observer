@@ -241,7 +241,7 @@ export default class extends Controller {
   }
 
   swapCreate() {
-    this.createBtnTarget.classList.add('d-none');
+    // this.createBtnTarget.classList.add('d-none');
     this.swap({ detail: { type: "location_google" } });
   }
 
@@ -273,6 +273,7 @@ export default class extends Controller {
     const create_action = this.createBtnTarget.dataset.action
       .replace("map#showBox:prevent", "autocompleter#swapCreate:prevent");
     this.createBtnTarget.dataset.action = create_action;
+    this.createBtnTarget.classList.remove('d-none');
 
     // this.dispatchHiddenIdEvents();
     outlet.northInputTarget.value = '';
@@ -509,20 +510,28 @@ export default class extends Controller {
         this.verbose("doing_refresh()");
         // this.debug("refresh_timer(" + this.inputTarget.value + ")");
         this.old_value = this.inputTarget.value;
-        if (this.AJAX_URL)
-          this.refreshPrimer(); // async, anything after this executes immediately
-        this.populateMatches(); // still necessary if primer unchanged, as likely
+        if (this.AJAX_URL) {
+          // async, anything after this executes immediately
+          this.refreshPrimer();
+        }
+        // still necessary if primer unchanged, as likely
+        this.populateMatches();
         this.drawPulldown();
       }), this.REFRESH_DELAY * 1000);
     }
   }
 
   // This should only refresh the primer if we don't have lat/lngs - the lat/lng
-  // effectively locks the selections. Otherwise if we ask on the string, we'll
-  // get stuck with geolocatePlaceName results, which is only ever one result
+  // effectively keeps the selections. If we refresh on the string, we'll get
+  // stuck with a single geolocatePlaceName result, which is only ever one.
+  // If we don't have lat/lngs, just draw the pulldown.
   scheduleGoogleRefresh() {
-    if (!this.hasMapOutlet || !this.mapOutlet?.latInputTarget.value ||
-      this.mapOutlet?.lngInputTarget.value) return;
+    if (this.hasMapOutlet &&
+      this.mapOutlet?.latInputTarget.value &&
+      this.mapOutlet?.lngInputTarget.value) {
+      this.drawPulldown();
+      return;
+    }
 
     this.verbose("scheduleGoogleRefresh()");
     this.clearRefresh();
