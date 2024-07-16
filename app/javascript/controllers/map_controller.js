@@ -395,7 +395,7 @@ export default class extends Controller {
       // Only geocode lat/lng if we have no location_id
     } else if (["location", "hybrid"].includes(this.map_type)) {
       if (this.latInputTarget.value && this.lngInputTarget.value) {
-        this.geocodeLatLng() // 5 possible results
+        this.geocodeLatLng() // multiple possible results
         // ...and only geolocate placeName if we have no lat/lng
       } else if (this.ignorePlaceInput === false) {
         this.geolocatePlaceName() // 1 result
@@ -426,7 +426,8 @@ export default class extends Controller {
     this.geocoder
       .geocode({ location: location })
       .then((result) => {
-        const { results } = result // destructure, results is part of the result
+        let { results } = result // destructure, results is part of the result
+        results = this.siftResults(results)
         this.ignorePlaceInput = true
         this.dispatchPrimer(results)
         this.respondToGeocode(results)
@@ -435,6 +436,19 @@ export default class extends Controller {
         console.log("Geocode was not successful: " + e)
         // alert("Geocode was not successful for the following reason: " + e)
       });
+  }
+
+  siftResults(results) {
+    this.verbose("siftResults")
+    if (results.length == 0) return results
+    const no_go_types = ["plus_code", "street_address", "street_number"]
+    let sifted = []
+    results.forEach((result) => {
+      if (!no_go_types.some(t => result.types.includes(t))) {
+        sifted.push(result)
+      }
+    })
+    return sifted
   }
 
   // Build a primer for the autocompleter with bounding box data, but -1 id
@@ -681,9 +695,8 @@ export default class extends Controller {
     this.dispatchPointChanged(center)
   }
 
+  // Call the swap event on the autocompleter and send the type we need
   dispatchPointChanged({ lat, lng }) {
-    // Call the swap event on the autocompleter and send the type
-    // `location_containing`.
     this.clearAutocompleterSwapBuffer()
 
     if (lat && lng) {
@@ -764,6 +777,7 @@ export default class extends Controller {
       this.lowInputTarget
     ]
     inputTargets.forEach((element) => { element.value = '' })
+    this.ignorePlaceInput = false // turn string geolocation back on
 
     if (this.marker) {
       this.marker.setMap(null)
