@@ -240,7 +240,7 @@ module FormsHelper
     icon_link_to(
       args[:create_text], "#",
       icon: :plus, show_text: true, icon_class: "text-primary",
-      name: "create_#{args[:type]}", class: "ml-3 d-none",
+      name: "create_#{args[:type]}", class: "ml-3",
       data: { autocompleter_target: "createBtn",
               action: "autocompleter#swapCreate:prevent" }
     )
