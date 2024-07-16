@@ -457,11 +457,23 @@ export default class extends Controller {
 
     const primer = results.map((result) => {
       const { north, south, east, west } = result.geometry.viewport.toJSON()
-      let name = result.formatted_address,
+      let name_components = [],
         id = -1
+      // Format the address components for MO style.
+      result.address_components.forEach((component) => {
+        if (component.types.includes("country") &&
+          component.short_name == "US") {
+          name_components.push("USA")
+        } else if (component.types.includes("postal_code")) {
+          // skip
+        } else {
+          name_components.push(component.long_name)
+        }
+      })
       if (this.location_format == "scientific") {
-        name = name.split(/, */).reverse().join(", ")
+        name_components.reverse()
       }
+      let name = name_components.join(", ")
       return { name, north, south, east, west, id }
     })
     this.dispatch("googlePrimer", { detail: { primer } })
