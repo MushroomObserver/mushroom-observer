@@ -247,7 +247,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # The new one is prepended, so second is "first"
     second_image_wrapper = image_wrappers[0]
 
-    # Check that it's the right image: this is geotagged.jpg's date
+    # Check that it's the right image: this is geotagged_s_pasadena.jpg's date
     within(second_image_wrapper) do
       assert_equal("2020", find('[id$="when_1i"]', visible: :all).value)
       assert_equal("6", find('[id$="when_2i"]', visible: :all).value)
@@ -278,7 +278,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                          visible: :all)
     assert_equal(1, image_wrappers.length)
 
-    # Add geotagged.jpg again
+    # Add geotagged_s_pasadena.jpg again
     click_attach_file("geotagged_s_pasadena.jpg")
     sleep(0.5)
 
@@ -316,14 +316,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_no_text(:image_set_default.l)
     end
 
-    # Fill out some other stuff
+    # Override the dates from the geotagged image for this obs
     obs_when = find("#observation_when_1i")
     scroll_to(obs_when, align: :center)
     fill_in("observation_when_1i", with: "2010")
     select("August", from: "observation_when_2i")
     select("14", from: "observation_when_3i")
 
-    # intentional error: nonexistant place name
+    # intentional error: nonexistant place name. Also, katrina's preference is
+    # for postal format locations. Should not validate the country "Pasadena".
     location = find("#observation_place_name")
     scroll_to(location, align: :center)
     fill_in("observation_place_name", with: "USA, California, Pasadena")
