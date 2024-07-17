@@ -298,6 +298,8 @@ module Observations
         to_return(status: 200, body: "MockToken", headers: {})
     end
 
+    # url where user is sent to authorize MO to see iNat confidential data
+    # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
     def authorization_url
       "https://www.inaturalist.org/oauth/authorize?" \
       "client_id=#{Rails.application.credentials.inat.id}" \
