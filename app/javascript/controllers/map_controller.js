@@ -94,6 +94,7 @@ export default class extends Controller {
   }
 
   // Not sure we're using this yet
+  // FIXME: This is a placeholder for a future feature
   toggleBoxLock(event) {
     if (this.rectangle) {
       const icon = this.lockBoxBtnTarget.firstChild
@@ -197,9 +198,10 @@ export default class extends Controller {
   // Only for single markers: listeners for dragging the marker
   makeMarkerEditable() {
     if (!this.marker) return
+
+    this.verbose("makeMarkerEditable")
     // clearTimeout(this.marker_edit_buffer)
     // this.marker_edit_buffer = setTimeout(() => {
-    this.verbose("makeMarkerEditable")
     const events = ["position_changed", "dragend"]
     events.forEach((eventName) => {
       this.marker.addListener(eventName, () => {
@@ -218,6 +220,12 @@ export default class extends Controller {
         this.map.panTo(newPosition)
       })
     })
+    // Give the current value to the inputs
+    const newPosition = this.marker.getPosition()?.toJSON()
+    if (this.hasLatInputTarget && !this.latInputTarget.value) {
+      this.updateLatLngInputs(newPosition)
+    }
+
     // this.marker = marker
     // }, 1000)
   }
@@ -241,8 +249,8 @@ export default class extends Controller {
   //
 
   placeRectangle(extents) {
-    this.verbose("placeRectangle")
-    // this.verbose({ extents })
+    this.verbose("placeRectangle()")
+    this.verbose(extents)
     if (!this.rectangle) {
       this.drawRectangle(extents)
     } else {
@@ -255,7 +263,8 @@ export default class extends Controller {
   }
 
   drawRectangle(set) {
-    this.verbose("drawRectangle")
+    this.verbose("drawRectangle()")
+    this.verbose(set)
     const bounds = this.boundsOf(set),
       editable = this.editable && this.map_type !== "observation",
       rectangleOptions = {
@@ -288,9 +297,9 @@ export default class extends Controller {
   // listen to "dragstart", "drag" ? not necessary). If we're just switching to
   // location mode, we need a buffer or it's too fast
   makeRectangleEditable() {
+    this.verbose("makeRectangleEditable")
     // clearTimeout(this.rectangle_buffer)
     // this.rectangle_buffer = setTimeout(() => {
-    this.verbose("makeRectangleEditable")
     const events = ["bounds_changed", "dragend"]
     events.forEach((eventName) => {
       this.rectangle.addListener(eventName, () => {
@@ -382,10 +391,11 @@ export default class extends Controller {
 
     // buffer inputs if they're still typing
     clearTimeout(this.marker_draw_buffer)
-    this.marker_draw_buffer = setTimeout(this.checkForBox(), 500)
+    this.marker_draw_buffer = setTimeout(this.checkForBox(), 1000)
   }
 
   // Check what kind of input we have and call the appropriate function
+  // FIXME: This is hyperactive. It's firing when we're changing things
   checkForBox() {
     // this.showBoxBtnTarget.disabled = true
     this.verbose("checkForBox")
@@ -441,7 +451,8 @@ export default class extends Controller {
   siftResults(results) {
     this.verbose("siftResults")
     if (results.length == 0) return results
-    const no_go_types = ["plus_code", "street_address", "street_number"]
+    const no_go_types =
+      ["plus_code", "street_address", "street_number", "route"]
     let sifted = []
     results.forEach((result) => {
       if (!no_go_types.some(t => result.types.includes(t))) {
@@ -454,29 +465,43 @@ export default class extends Controller {
   // Build a primer for the autocompleter with bounding box data, but -1 id
   dispatchPrimer(results) {
     this.verbose("dispatchPrimer")
+    let north, south, east, west, name, id = -1
 
     const primer = results.map((result) => {
-      const { north, south, east, west } = result.geometry.viewport.toJSON()
-      let name_components = [],
-        id = -1
-      // Format the address components for MO style.
-      result.address_components.forEach((component) => {
-        if (component.types.includes("country") &&
-          component.short_name == "US") {
-          name_components.push("USA")
-        } else if (component.types.includes("postal_code")) {
-          // skip
-        } else {
-          name_components.push(component.long_name)
-        }
-      })
-      if (this.location_format == "scientific") {
-        name_components.reverse()
+      // geometry.bounds is preferred, but will not exist for point locations.
+      // MO locations are always boxes, so we can use viewport if bounds null.
+      if (result.geometry.bounds) {
+        ({ north, south, east, west } = result.geometry.bounds.toJSON())
+      } else {
+        ({ north, south, east, west } = result.geometry.viewport.toJSON())
       }
-      let name = name_components.join(", ")
+      name = this.formatMOPlaceName(result)
       return { name, north, south, east, west, id }
     })
     this.dispatch("googlePrimer", { detail: { primer } })
+  }
+
+  formatMOPlaceName(result) {
+    let name_components = []
+    // Format the address components for MO style.
+    result.address_components.forEach((component) => {
+      if (component.types.includes("country") &&
+        component.short_name == "US") {
+        // MO uses "USA" for US
+        name_components.push("USA")
+      } else if (component.types.includes("administrative_area_level_2") && component.long_name.includes("County")) {
+        // MO uses "Co." for County
+        name_components.push(component.long_name.replace("County", "Co."))
+      } else if (component.types.includes("postal_code")) {
+        // skip postal_code in all cases
+      } else {
+        name_components.push(component.long_name)
+      }
+    })
+    if (this.location_format == "scientific") {
+      name_components.reverse()
+    }
+    return name_components.join(", ")
   }
 
   geolocatePlaceName(multiple = false) {

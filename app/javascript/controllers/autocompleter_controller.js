@@ -678,13 +678,11 @@ export default class extends Controller {
   // the index may be an integer, or have to be derived from the event.target.
   selectRow(idx) {
     this.verbose("selectRow()");
-    if (idx instanceof Event)
-      idx = parseInt(idx.target.dataset.row);
+    if (this.matches.length === 0) return;
 
-    // const old_val = this.inputTarget.value;
+    if (idx instanceof Event) { idx = parseInt(idx.target.dataset.row); }
     let new_data = this.matches[this.scroll_offset + idx],
-      new_val = new_data['name'],
-      new_id = new_data['id'];
+      new_val = new_data.name;
     // Close pulldown unless the value the user selected uncollapses into a set
     // of new options.  In that case schedule a refresh and leave it up.
     if (this.COLLAPSE > 0 &&
@@ -919,12 +917,11 @@ export default class extends Controller {
   // Assigns not only the ID, but also any data attributes of selected row.
   // Data is stored as numbers and floats, not strings.
   assignHiddenId(match) {
-    this.verbose("assignHiddenId(match)");
+    this.verbose("assignHiddenId()");
+    this.verbose(match);
     if (!match) return;
     // Before we change the hidden input, store the old value and data
-    this.stored_id = parseInt(this.hiddenTarget.value); // value is a string
-    let { north, south, east, west } = this.hiddenTarget.dataset;
-    this.stored_data = { id: this.stored_id, north, south, east, west };
+    this.storeCurrentHiddenData();
 
     // update the new value of the hidden input, which casts it as a string.
     this.hiddenTarget.value = match['id']; // converts to string
@@ -942,16 +939,25 @@ export default class extends Controller {
   // Don't remove target data-attributes.
   clearHiddenId() {
     this.verbose("clearHiddenId()");
+    // Before we change the hidden input, store the old value and data
+    this.storeCurrentHiddenData();
+
     this.hiddenTarget.value = '';
-    this.stored_id = 0;
     Object.keys(this.hiddenTarget.dataset).forEach(key => {
       if (!key.match(/Target/))
         delete this.hiddenTarget.dataset[key];
     });
-    this.stored_data = { id: 0 };
 
     this.hasIdIndicatorTarget.classList.add('d-none');
     this.dispatchHiddenIdEvents();
+  }
+
+  storeCurrentHiddenData() {
+    this.verbose("storeCurrentHiddenData()");
+    this.stored_id = parseInt(this.hiddenTarget.value); // value is a string
+    let { north, south, east, west } = this.hiddenTarget.dataset;
+    this.stored_data = { id: this.stored_id, north, south, east, west };
+    this.verbose("stored_data: " + JSON.stringify(this.stored_data));
   }
 
   // called on assign and clear, also when mapOutlet is connected
@@ -961,17 +967,14 @@ export default class extends Controller {
       { north, south, east, west } = this.hiddenTarget.dataset,
       hidden_data = { id: hidden_id, north, south, east, west };
 
+    this.verbose("hidden_data: " + JSON.stringify(hidden_data));
     // comparing data, not just ids, because google locations have same -1 id
-    if (JSON.stringify(hidden_data) === JSON.stringify(this.stored_data)) {
+    if (JSON.stringify(hidden_data) == JSON.stringify(this.stored_data)) {
       this.verbose("not dispatching hiddenIdDataChanged");
-      this.verbose("stored_data: " + JSON.stringify(this.stored_data));
-      this.verbose("hidden_data: " + JSON.stringify(hidden_data));
     } else {
       clearTimeout(this.data_timer);
       this.data_timer = setTimeout(() => {
         this.verbose("dispatching hiddenIdDataChanged");
-        this.verbose("stored_data: " + JSON.stringify(this.stored_data));
-        this.verbose("hidden_data: " + JSON.stringify(hidden_data))
         this.dispatch('hiddenIdDataChanged', {
           detail: { id: this.hiddenTarget.value }
         });
@@ -1309,6 +1312,7 @@ export default class extends Controller {
     // selection already made in act_like_select.
     if (!this.ACT_LIKE_SELECT &&
       (last_request == token || (!token || token.length < 1))) {
+      this.verbose("same request, bailing");
       return;
     }
 
@@ -1322,14 +1326,18 @@ export default class extends Controller {
     // No need to make more constrained request if we got all results last time.
     if (!this.last_fetch_incomplete &&
       last_request && (last_request.length > 0) &&
-      new_val_refines_last_request)
+      new_val_refines_last_request) {
+      this.verbose("got all results last time, bailing");
       return;
+    }
 
     // If a less constrained request is pending, wait for it to return before
     // refining the request, just in case it returns complete results
     // (rendering the more refined request unnecessary).
-    if (this.fetch_request && new_val_refines_last_request)
+    if (this.fetch_request && new_val_refines_last_request) {
+      this.verbose("request pending, bailing");
       return;
+    }
 
     if (token.length > this.MAX_STRING_LENGTH)
       token = token.substr(0, this.MAX_STRING_LENGTH);
@@ -1348,7 +1356,11 @@ export default class extends Controller {
     // If in select mode (ignoring string), and params haven't changed, bail.
     const { string, ...new_params } = query_params;
     if (this.last_fetch_params && this.ACT_LIKE_SELECT &&
-      (JSON.stringify(new_params) === this.last_fetch_params)) return;
+      (JSON.stringify(new_params) === this.last_fetch_params)) {
+      this.verbose("params haven't changed, bailing");
+      this.verbose(new_params)
+      return;
+    }
 
     // Make request.
     this.sendFetchRequest(query_params);
@@ -1357,9 +1369,10 @@ export default class extends Controller {
   // Send fetch request for more matching strings.
   async sendFetchRequest(query_params) {
     this.verbose("sendFetchRequest()");
+    this.verbose(query_params);
 
     if (this.log) {
-      this.debug("Sending fetch request: " + query_params.string + "...");
+      this.verbose("Sending fetch request: " + query_params.string + "...");
     }
 
     const url = this.AJAX_URL + this.TYPE,
