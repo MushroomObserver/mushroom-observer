@@ -6,7 +6,7 @@ require "test_helper"
 module Observations
   # a duck type of API2::ImageAPI with enough attributes
   # to preventInatsImportController from throwing an error
-  class MockApi
+  class MockImageAPI
     attr_reader :errors, :results
 
     def initialize(errors: [], results: [])
@@ -261,7 +261,7 @@ module Observations
 
     def mock_photo_importer(inat_obs)
       mock_inat_photo = inat_obs.inat_obs_photos.first
-      mock_api = MockApi.new(
+      mock_image_api = MockImageAPI.new(
         results: [
           expected_mo_image(mock_inat_photo: mock_inat_photo,
                             user: User.current)
@@ -269,7 +269,7 @@ module Observations
       )
       mock_photo_importer = Minitest::Mock.new
       inat_obs.inat_obs_photos.length.times do
-        mock_photo_importer.expect(:api, mock_api)
+        mock_photo_importer.expect(:api, mock_image_api)
       end
       mock_photo_importer
     end
