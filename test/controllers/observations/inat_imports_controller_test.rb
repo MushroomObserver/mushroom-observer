@@ -191,7 +191,6 @@ module Observations
     end
 
     def test_create_obs_lycoperdon
-      skip("Under construction, Should call `auth`, not create")
       obs = import_mock_observation("lycoperdon")
 
       assert(obs.images.any?, "Obs should have images")
