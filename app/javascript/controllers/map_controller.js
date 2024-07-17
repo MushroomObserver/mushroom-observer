@@ -448,14 +448,16 @@ export default class extends Controller {
       });
   }
 
+  // Remove certain types of results from the geocoder response:
+  // both too precise and too general.
   siftResults(results) {
     this.verbose("siftResults")
     if (results.length == 0) return results
-    const no_go_types =
-      ["plus_code", "street_address", "street_number", "route"]
+    const _skip_types =
+      ["plus_code", "street_address", "street_number", "route", "country"]
     let sifted = []
     results.forEach((result) => {
-      if (!no_go_types.some(t => result.types.includes(t))) {
+      if (!_skip_types.some(t => result.types.includes(t))) {
         sifted.push(result)
       }
     })
@@ -467,10 +469,11 @@ export default class extends Controller {
     this.verbose("dispatchPrimer")
     let north, south, east, west, name, id = -1
 
+    // Prefer geometry.bounds, but bounds do not exist for point locations.
+    // MO locations must be boxes, so use viewport if bounds null.
+    // Viewport should exist on all results. The box is editable, after all.
     const primer = results.map((result) => {
-      // geometry.bounds is preferred, but will not exist for point locations.
-      // MO locations are always boxes, so we can use viewport if bounds null.
-      if (result.geometry.bounds) {
+      if (result.geometry?.bounds) {
         ({ north, south, east, west } = result.geometry.bounds.toJSON())
       } else {
         ({ north, south, east, west } = result.geometry.viewport.toJSON())
@@ -481,19 +484,16 @@ export default class extends Controller {
     this.dispatch("googlePrimer", { detail: { primer } })
   }
 
+  // Format the address components for MO style.
   formatMOPlaceName(result) {
     let name_components = []
-    // Format the address components for MO style.
     result.address_components.forEach((component) => {
-      if (component.types.includes("country") &&
-        component.short_name == "US") {
+      if (component.types.includes("country") && component.short_name == "US") {
         // MO uses "USA" for US
         name_components.push("USA")
       } else if (component.types.includes("administrative_area_level_2") && component.long_name.includes("County")) {
         // MO uses "Co." for County
         name_components.push(component.long_name.replace("County", "Co."))
-      } else if (component.types.includes("postal_code")) {
-        // skip postal_code in all cases
       } else {
         name_components.push(component.long_name)
       }
