@@ -118,16 +118,7 @@ module Observations
       inat_import.save
       inat_authorization_callback_params = { code: "MockCode" }
 
-      stub_request(:post, "https://www.inaturalist.org/oauth/token").
-        with(
-          body: { "client_id" => Rails.application.credentials.inat.id,
-                  "client_secret" => Rails.application.credentials.inat.secret,
-                  "code" => "MockCode",
-                  "grant_type" => "authorization_code",
-                  "redirect_uri" => REDIRECT_URI }
-        ).
-        to_return(status: 200, body: "MockToken", headers: {})
-
+      stub_token_request
       login(user.login)
       get(:auth, params: inat_authorization_callback_params)
 
@@ -291,6 +282,20 @@ module Observations
     def expected_mo_photo_license(mock_inat_photo)
       InatLicense.new(mock_inat_photo[:photo][:license_code]).
         mo_license.id
+    end
+
+    # simulate exchanging iNat code for oauth token
+    # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
+    def stub_token_request
+      stub_request(:post, "https://www.inaturalist.org/oauth/token").
+        with(
+          body: { "client_id" => Rails.application.credentials.inat.id,
+                  "client_secret" => Rails.application.credentials.inat.secret,
+                  "code" => "MockCode",
+                  "grant_type" => "authorization_code",
+                  "redirect_uri" => REDIRECT_URI }
+        ).
+        to_return(status: 200, body: "MockToken", headers: {})
     end
 
     def authorization_url
