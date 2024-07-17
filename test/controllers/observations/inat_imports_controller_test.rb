@@ -126,21 +126,17 @@ module Observations
     end
 
     def test_create_import_evernia_no_photos
-      mock_inat_response =
-        File.read("test/inat/evernia_no_photos.txt")
+      user = rolf
+      filename = "evernia_no_photos"
+      mock_inat_response = File.read("test/inat/#{filename}.txt")
       inat_obs_id = InatObs.new(mock_inat_response).inat_id
-      stub_inat_api_request(inat_obs_id, mock_inat_response)
 
-      stub_request(:any, authorization_url)
+      stub_inat_api_request(inat_obs_id, mock_inat_response)
+      simulate_authorization(user: user, inat_obs_id: inat_obs_id)
       stub_token_request
 
       params = { inat_ids: inat_obs_id, code: "MockCode" }
-      login
-
-      inat_import = InatImport.find_or_create_by(user: User.current)
-      inat_import.inat_ids = inat_obs_id
-      inat_import.state = "Authorizing"
-      inat_import.save
+      login(user.login)
 
       assert_difference("Observation.count", 1, "Failed to create Obs") do
         post(:auth, params: params)
@@ -164,7 +160,6 @@ module Observations
     end
 
     def test_create_obs_tremella_mesenterica
-      skip("Under construction, Should call `auth`, not create")
       obs = import_mock_observation("tremella_mesenterica")
 
       assert_not_nil(obs.rss_log)
@@ -232,7 +227,10 @@ module Observations
       inat_obs_id = inat_obs.inat_id
 
       stub_inat_api_request(inat_obs_id, mock_inat_response)
+      simulate_authorization(user: user, inat_obs_id: inat_obs_id)
+      stub_token_request
 
+      params = { inat_ids: inat_obs_id, code: "MockCode" }
       login(user.login)
 
       # NOTE: Stubs the importer's return value, but not its side-effect --
@@ -240,7 +238,7 @@ module Observations
       # Enables testing everything except Observation.images. jdc 2024-06-23
       InatPhotoImporter.stub(:new, mock_photo_importer(inat_obs)) do
         assert_difference("Observation.count", 1, "Failed to create Obs") do
-          post(:create, params: { inat_ids: inat_obs_id })
+          post(:auth, params: params)
         end
       end
 
@@ -289,7 +287,25 @@ module Observations
         mo_license.id
     end
 
-    # simulate exchanging iNat code for oauth token
+    def simulate_authorization(user: rolf, inat_obs_id: "")
+      inat_import = InatImport.find_or_create_by(user: user)
+      inat_import.inat_ids = inat_obs_id
+      inat_import.state = "Authorizing"
+      inat_import.save
+      stub_request(:any, authorization_url)
+    end
+
+    # iNat url where user is sent in order to authorize MO access
+    # to iNat confidential data
+    # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
+    def authorization_url
+      "https://www.inaturalist.org/oauth/authorize?" \
+      "client_id=#{Rails.application.credentials.inat.id}" \
+      "&redirect_uri=http://localhost:3000/observations/inat_imports/auth" \
+      "&response_type=code"
+    end
+
+    # stub exchanging iNat code for oauth token
     # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
     def stub_token_request
       stub_request(:post, "https://www.inaturalist.org/oauth/token").
@@ -301,15 +317,6 @@ module Observations
                   "redirect_uri" => REDIRECT_URI }
         ).
         to_return(status: 200, body: "MockToken", headers: {})
-    end
-
-    # url where user is sent to authorize MO to see iNat confidential data
-    # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
-    def authorization_url
-      "https://www.inaturalist.org/oauth/authorize?" \
-      "client_id=#{Rails.application.credentials.inat.id}" \
-      "&redirect_uri=http://localhost:3000/observations/inat_imports/auth" \
-      "&response_type=code"
     end
   end
 end
