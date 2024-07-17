@@ -126,19 +126,24 @@ module Observations
     end
 
     def test_create_import_evernia_no_photos
-      skip("Under construction, Should call `auth`, not create")
       mock_inat_response =
         File.read("test/inat/evernia_no_photos.txt")
       inat_obs_id = InatObs.new(mock_inat_response).inat_id
       stub_inat_api_request(inat_obs_id, mock_inat_response)
 
       stub_request(:any, authorization_url)
+      stub_token_request
 
-      params = { inat_ids: inat_obs_id }
+      params = { inat_ids: inat_obs_id, code: "MockCode" }
       login
 
+      inat_import = InatImport.find_or_create_by(user: User.current)
+      inat_import.inat_ids = inat_obs_id
+      inat_import.state = "Authorizing"
+      inat_import.save
+
       assert_difference("Observation.count", 1, "Failed to create Obs") do
-        put(:create, params: params)
+        post(:auth, params: params)
       end
 
       obs = Observation.order(created_at: :asc).last
