@@ -795,12 +795,8 @@ export default class extends Controller {
       const location = e.latLng.toJSON()
       this.placeMarker(location)
       this.marker.setVisible(true)
-      this.map.setCenter(location)
-      let zoom = this.map.getZoom()
-      if (zoom < 15) {
-        // this.verbose(zoom)
-        this.map.setZoom(zoom + 2)
-      }
+      this.map.panTo(location)
+      // if (zoom < 15) { this.map.setZoom(zoom + 2) } // for incremental zoom
       this.updateFields(null, null, location)
     });
   }
