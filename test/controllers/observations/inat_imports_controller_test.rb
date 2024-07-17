@@ -198,22 +198,22 @@ module Observations
     end
 
     def test_create_import_plant
-      skip("Under construction, Should call `auth`, not create")
-      # See test/inat/README_INAT_FIXTURES.md
-      mock_inat_response =
-        File.read("test/inat/ceanothus_cordulatus.txt")
-      inat_obs = InatObs.new(mock_inat_response)
-      inat_obs_id = inat_obs.inat_id
-      params = { inat_ids: inat_obs_id }
+      user = rolf
+      filename = "ceanothus_cordulatus"
+      mock_inat_response = File.read("test/inat/#{filename}.txt")
+      inat_obs_id = InatObs.new(mock_inat_response).inat_id
 
       stub_inat_api_request(inat_obs_id, mock_inat_response)
+      simulate_authorization(user: user, inat_obs_id: inat_obs_id)
+      stub_token_request
 
-      login
+      params = { inat_ids: inat_obs_id, code: "MockCode" }
+      login(user.login)
 
       assert_no_difference(
         "Observation.count", "Should not import iNat Plant observations"
       ) do
-        put(:create, params: params)
+        post(:auth, params: params)
       end
 
       assert_flash_text(:inat_taxon_not_importable.l(id: inat_obs_id))
