@@ -1,7 +1,17 @@
 # frozen_string_literal: true
 
 # import iNaturalist Observations as MO Observations
-# (There is no corresponding InatImport model.)
+#
+# 1. User calls `new`, fills out form
+# 2. `create` saves tracking information in the simple iNatImport model
+#    attributes include: user, inat_ids, token, state.
+# 3. `create` redirects the user to iNat at the inat_authorization_url
+# 4. user logs into iNat, authorizes MO to access user's confidential iNat data
+# 5. upon authorization, iNat sends user to `authenticate` (the redirect_url)
+# 6. MO continues the import in the `authenticate` action
+#    Gets data from, and updates, InatImport
+#    Trades the `code` which it received from iNat for a token
+#
 module Observations
   class InatImportsController < ApplicationController
     before_action :login_required
@@ -11,7 +21,8 @@ module Observations
     # Where to redirect user for authorization
     SITE = "https://www.inaturalist.org"
     # Where iNat will send the code once authorized
-    REDIRECT_URI = "http://localhost:3000/observations/inat_imports/auth"
+    REDIRECT_URI =
+      "http://localhost:3000/observations/inat_imports/authenticate"
     # iNat's id for the MO application
     APP_ID = Rails.application.credentials.inat.id
 
@@ -80,7 +91,7 @@ module Observations
     public
 
     # iNat redirects here after user completes iNat authorization
-    def auth
+    def authenticate
       auth_code = params[:code]
       return not_authorized if auth_code.blank?
 

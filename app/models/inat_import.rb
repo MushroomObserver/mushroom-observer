@@ -4,17 +4,18 @@
 #
 # == Attributes
 #
-#  user::
+#  user::   user who initiated the iNat import
 #  state::  state of the import
-#  token::  JSON Web Token (JWT) supplied by iNat
-#
-# == methods
+#  token::  authenticity token supplied by iNat
+#  inat_ids:: string representing the iNat obss to be imported
 #
 class InatImport < ApplicationRecord
   enum state:
   {
     Unstarted: 0,
-    Authorizing: 1, # waiting for User to authorize MO to access iNat data
+    # waiting for User to authorize MO to access iNat data
+    Authorizing: 1,
+    # trading iNat authorization code for an authentication token
     Authenticating: 2,
     Importing: 3,
     Done: 4

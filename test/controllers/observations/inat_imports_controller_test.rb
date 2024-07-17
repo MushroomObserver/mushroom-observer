@@ -19,7 +19,8 @@ module Observations
     INAT_OBS_REQUEST_PREFIX = "https://api.inaturalist.org/v1/observations?"
     INAT_OBS_REQUEST_POSTFIX = "&order=desc&order_by=created_at&only_id=false"
     # Where iNat will send the code once authorized
-    REDIRECT_URI = "http://localhost:3000/observations/inat_imports/auth"
+    REDIRECT_URI =
+      "http://localhost:3000/observations/inat_imports/authenticate"
 
     def test_new_inat_import
       login(users(:rolf).login)
@@ -103,7 +104,7 @@ module Observations
                              "denied the request." }
       login
 
-      get(:auth, params: inat_authorization_callback_params)
+      get(:authenticate, params: inat_authorization_callback_params)
 
       assert_redirected_to(observations_path)
       assert_flash_error
@@ -113,14 +114,14 @@ module Observations
       user = users(:rolf)
       inat_import = inat_imports(:rolf_inat_import)
 
-      # A blank list to test `auth` without importing anything.
+      # A blank list to test `authenticate` without importing anything.
       inat_import.inat_ids = ""
       inat_import.save
       inat_authorization_callback_params = { code: "MockCode" }
 
       stub_token_request
       login(user.login)
-      get(:auth, params: inat_authorization_callback_params)
+      get(:authenticate, params: inat_authorization_callback_params)
 
       assert_redirected_to(observations_path)
     end
@@ -139,7 +140,7 @@ module Observations
       login(user.login)
 
       assert_difference("Observation.count", 1, "Failed to create Obs") do
-        post(:auth, params: params)
+        post(:authenticate, params: params)
       end
 
       obs = Observation.order(created_at: :asc).last
@@ -213,7 +214,7 @@ module Observations
       assert_no_difference(
         "Observation.count", "Should not import iNat Plant observations"
       ) do
-        post(:auth, params: params)
+        post(:authenticate, params: params)
       end
 
       assert_flash_text(:inat_taxon_not_importable.l(id: inat_obs_id))
@@ -237,7 +238,7 @@ module Observations
       # Enables testing everything except Observation.images. jdc 2024-06-23
       InatPhotoImporter.stub(:new, mock_photo_importer(inat_obs)) do
         assert_difference("Observation.count", 1, "Failed to create Obs") do
-          post(:auth, params: params)
+          post(:authenticate, params: params)
         end
       end
 
@@ -298,9 +299,9 @@ module Observations
     # to iNat confidential data
     # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
     def authorization_url
-      "https://www.inaturalist.org/oauth/authorize?" \
+      "https://www.inaturalist.org/oauthenticate/authorize?" \
       "client_id=#{Rails.application.credentials.inat.id}" \
-      "&redirect_uri=http://localhost:3000/observations/inat_imports/auth" \
+      "&redirect_uri=#{REDIRECT_URI}" \
       "&response_type=code"
     end
 
