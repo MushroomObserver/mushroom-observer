@@ -453,14 +453,16 @@ export default class extends Controller {
   siftResults(results) {
     this.verbose("siftResults")
     if (results.length == 0) return results
-    const _skip_types =
-      ["plus_code", "street_address", "street_number", "route", "country"]
+    const _skip_types = ["plus_code", "establishment", "premise",
+      "point_of_interest", "street_address", "street_number", "route",
+      "country", "postal_code"]
     let sifted = []
     results.forEach((result) => {
       if (!_skip_types.some(t => result.types.includes(t))) {
         sifted.push(result)
       }
     })
+    debugger
     return sifted
   }
 
@@ -486,14 +488,17 @@ export default class extends Controller {
 
   // Format the address components for MO style.
   formatMOPlaceName(result) {
-    let name_components = []
+    let name_components = [], usa_location = false
     result.address_components.forEach((component) => {
       if (component.types.includes("country") && component.short_name == "US") {
         // MO uses "USA" for US
+        usa_location = true
         name_components.push("USA")
       } else if (component.types.includes("administrative_area_level_2") && component.long_name.includes("County")) {
         // MO uses "Co." for County
         name_components.push(component.long_name.replace("County", "Co."))
+      } else if (component.types.includes("postal_code") && usa_location) {
+        // skip it for the US. Other countries it's an important differentiator
       } else {
         name_components.push(component.long_name)
       }
