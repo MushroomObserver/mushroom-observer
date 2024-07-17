@@ -196,6 +196,24 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     alt: 262.5840148925781
   }.freeze
 
+  SOUTH_PASADENA_EXTENTS = {
+    north: 34.1257,
+    south: 34.0986,
+    east: -118.1345,
+    west: -118.178,
+    high: 235,
+    low: 159
+  }.freeze
+
+  S_PAS_EXIF = {
+    lat: 34.1231,
+    lng: -118.1489,
+    alt: 248,
+    year: 2020,
+    month: 6,
+    day: 30
+  }.freeze
+
   def test_post_edit_and_destroy_with_details_and_location
     # browser = page.driver.browser
     setup_image_dirs # in general_extensions
@@ -249,20 +267,27 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Check that it's the right image: this is geotagged_s_pasadena.jpg's date
     within(second_image_wrapper) do
-      assert_equal("2020", find('[id$="when_1i"]', visible: :all).value)
-      assert_equal("6", find('[id$="when_2i"]', visible: :all).value)
-      assert_equal("30", find('[id$="when_3i"]', visible: :all).value)
+      assert_equal(S_PAS_EXIF[:year].to_s,
+                   find('[id$="when_1i"]', visible: :all).value)
+      assert_equal(S_PAS_EXIF[:month].to_s,
+                   find('[id$="when_2i"]', visible: :all).value)
+      assert_equal(S_PAS_EXIF[:day].to_s,
+                   find('[id$="when_3i"]', visible: :all).value)
     end
 
     # Date should have been copied to the obs fields
-    assert_equal("2020", find('[id$="observation_when_1i"]').value)
-    assert_equal("6", find('[id$="observation_when_2i"]').value)
-    assert_equal("30", find('[id$="observation_when_3i"]').value)
+    assert_equal(S_PAS_EXIF[:year].to_s,
+                 find('[id$="observation_when_1i"]').value)
+    assert_equal(S_PAS_EXIF[:month].to_s,
+                 find('[id$="observation_when_2i"]').value)
+    assert_equal(S_PAS_EXIF[:day].to_s,
+                 find('[id$="observation_when_3i"]').value)
 
     # GPS should have been copied to the obs fields
-    assert_equal("34.1231", find('[id$="observation_lat"]').value)
-    assert_equal("-118.1489", find('[id$="observation_lng"]').value)
-    assert_equal("248", find('[id$="observation_alt"]').value.to_i.to_s)
+    assert_equal(S_PAS_EXIF[:lat].to_s, find('[id$="observation_lat"]').value)
+    assert_equal(S_PAS_EXIF[:lng].to_s, find('[id$="observation_lng"]').value)
+    assert_equal(S_PAS_EXIF[:alt].to_s,
+                 find('[id$="observation_alt"]').value.to_i.to_s)
 
     # Ok, enough. By now, the carousel image should be showing the second image.
     assert_selector(
@@ -274,9 +299,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     within(second_image_wrapper) { find(".remove_image_button").click }
 
     # Be sure we have only one image wrapper now
-    image_wrappers = all(".carousel-item[data-image-status='upload']",
-                         visible: :all)
-    assert_equal(1, image_wrappers.length)
+    # image_wrappers = all(".carousel-item[data-image-status='upload']",
+    #                      visible: :all)
+    # assert_equal(1, image_wrappers.length)
+    assert_selector(".carousel-item[data-image-status='upload']",
+                    visible: :all, count: 1)
 
     # Add geotagged_s_pasadena.jpg again
     click_attach_file("geotagged_s_pasadena.jpg")
@@ -284,15 +311,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Be sure we have two image wrappers
     second_image_wrapper = find(".carousel-item[data-image-status='upload']",
-                                text: "34.1231")
+                                text: S_PAS_EXIF[:lat].to_s)
     image_wrappers = all(".carousel-item[data-image-status='upload']",
                          visible: :all)
     assert_equal(image_wrappers.length, 2)
 
     within(second_image_wrapper) do
-      assert_equal("2020", find('[id$="when_1i"]').value)
-      assert_equal("6", find('[id$="when_2i"]').value)
-      assert_equal("30", find('[id$="when_3i"]').value)
+      assert_equal(S_PAS_EXIF[:year].to_s, find('[id$="when_1i"]').value)
+      assert_equal(S_PAS_EXIF[:month].to_s, find('[id$="when_2i"]').value)
+      assert_equal(S_PAS_EXIF[:day].to_s, find('[id$="when_3i"]').value)
     end
 
     # Set copyright holder and image notes on both
@@ -343,7 +370,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # submit_observation_form_with_errors
     within("#observation_form") { click_commit }
-    debugger
+
     # rejected, but images uploaded
     assert_selector("body.observations__create", wait: 12)
     assert_flash_for_images_uploaded
@@ -355,11 +382,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_select("observation_when_3i", text: "14")
 
     assert_field("observation_place_name", with: "USA, California, Pasadena")
-    assert_field("observation_lat", with: "34.1231")
-    assert_field("observation_lng", with: "-118.1489")
-    assert_field("observation_alt", with: "248")
-    # This geolocation is for Florida, and actually should disable
-    # autocompleting Pasadena
+    assert_field("observation_lat", with: S_PAS_EXIF[:lat].to_s)
+    assert_field("observation_lng", with: S_PAS_EXIF[:lng].to_s)
+    assert_field("observation_alt", with: S_PAS_EXIF[:alt].to_s)
+    # This geolocation is for Pasadena
 
     assert_field("naming_name", with: "")
     assert_no_checked_field("observation_is_collection_location")
@@ -377,9 +403,14 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("observation_place_name", with: "Pasadena, California, USA")
     assert_field("observation_place_name", with: "Pasadena, California, USA")
     # geo-coordinates-parser will reject internally-inconsistent notation.
-    fill_in("observation_lat", with: " 12deg 36.75min N ") # == 12.6125
-    fill_in("observation_lng", with: " 121deg 33.14min E ") # == 121.5523
-    fill_in("observation_alt", with: " 56 ft. ")
+    # These coordinates for Dayhagan, Oriental Mindoro, MIMAROPA, Philippines
+    # not Pasadena, California, USA.
+    # fill_in("observation_lat", with: " 12deg 36.75min N ") # == 12.6125
+    # fill_in("observation_lng", with: " 121deg 33.14min E ") # == 121.5523
+    # fill_in("observation_alt", with: " 56 ft. ")
+    assert_field("observation_lat", with: S_PAS_EXIF[:lat].to_s)
+    assert_field("observation_lng", with: S_PAS_EXIF[:lng].to_s)
+    assert_field("observation_alt", with: S_PAS_EXIF[:alt].to_s)
 
     # fill_in("naming_name", with: "Agaricus campe")
     # assert_selector(".auto_complete")
@@ -394,18 +425,43 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Carousel items are re-output with image records this time.
     all(".carousel-indicator").last.click
 
-    second_item = find(".carousel-item", text: "34.1231")
+    second_item = find(".carousel-item", text: S_PAS_EXIF[:lat].to_s)
     items = all(".carousel-item", visible: :all)
     assert_equal(items.length, 2)
 
     within(second_item) do
-      assert_equal("2020", find('[id$="when_1i"]').value)
-      assert_equal("6", find('[id$="when_2i"]').value)
-      assert_equal("30", find('[id$="when_3i"]').value)
+      assert_equal(S_PAS_EXIF[:year].to_s, find('[id$="when_1i"]').value)
+      assert_equal(S_PAS_EXIF[:month].to_s, find('[id$="when_2i"]').value)
+      assert_equal(S_PAS_EXIF[:day].to_s, find('[id$="when_3i"]').value)
     end
 
-    # will have cleared the place_name field, lat/lng doesn't match Pasadena
     fill_in("observation_place_name", with: "Pasadena, California, USA")
+    click_on(:form_observations_create_location.l)
+    # This will have cleared the place_name field.
+    # lat/lng does not match Pasadena but does match South Pasadena
+    assert_selector("[data-type='location_google']")
+    assert_selector(".dropdown-item a[data-id='-1']",
+                    text: "South Pasadena, Los Angeles Co., California, USA",
+                    visible: :all)
+    # There may be more than one of these, click the first
+    find(".dropdown-item a[data-id='-1']",
+         text: "South Pasadena, Los Angeles Co., California, USA",
+         visible: :all).trigger("click")
+
+    debugger
+    assert_field("observation_location_id", visible: :all, with: -1)
+    assert_field("location_north", visible: :all,
+                                   with: SOUTH_PASADENA_EXTENTS[:north].to_s)
+    assert_field("location_south", visible: :all,
+                                   with: SOUTH_PASADENA_EXTENTS[:south].to_s)
+    assert_field("location_west", visible: :all,
+                                  with: SOUTH_PASADENA_EXTENTS[:west].to_s)
+    assert_field("location_east", visible: :all,
+                                  with: SOUTH_PASADENA_EXTENTS[:east].to_s)
+    assert_field("location_low", visible: :all,
+                                 with: SOUTH_PASADENA_EXTENTS[:low].to_s)
+    assert_field("location_high", visible: :all,
+                                  with: SOUTH_PASADENA_EXTENTS[:high].to_s)
 
     within("#observation_form") { click_commit }
 
@@ -723,7 +779,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     {
       user: katrina,
       when: Date.parse("2010-08-14"),
-      where: "Pasadena, California, USA",
+      where: "South Pasadena, Los Angeles Co., California, USA",
       location: nil,
       lat: 12.6125, # was 12.5760 values tweaked to move it to land
       lng: 121.5523, # was -123.7519 was in the ocean
@@ -741,14 +797,14 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   def expected_values_after_location
     expected_values_after_create.merge(
       where: nil,
-      location: "Pasadena, Some Co., California, USA",
-      north: PASADENA_EXTENTS[:north],
-      south: PASADENA_EXTENTS[:south],
-      east: PASADENA_EXTENTS[:east],
-      west: PASADENA_EXTENTS[:west],
-      high: 5678,
-      low: 1234,
-      location_notes: "Notes for location"
+      location: "South Pasadena, Los Angeles Co., California, USA",
+      north: SOUTH_PASADENA_EXTENTS[:north],
+      south: SOUTH_PASADENA_EXTENTS[:south],
+      east: SOUTH_PASADENA_EXTENTS[:east],
+      west: SOUTH_PASADENA_EXTENTS[:west],
+      high: SOUTH_PASADENA_EXTENTS[:high],
+      low: SOUTH_PASADENA_EXTENTS[:low]
+      # location_notes: "Notes for location"
     )
   end
 
