@@ -454,8 +454,7 @@ export default class extends Controller {
     this.verbose("siftResults")
     if (results.length == 0) return results
     const _skip_types = ["plus_code", "establishment", "premise",
-      "point_of_interest", "street_address", "street_number", "route",
-      "country", "postal_code"]
+      "subpremise", "point_of_interest", "street_address", "street_number", "route", "postal_code", "country"]
     let sifted = []
     results.forEach((result) => {
       if (!_skip_types.some(t => result.types.includes(t))) {
