@@ -77,7 +77,7 @@ jobs:
 
       # https://github.com/marketplace/actions/coveralls-github-action
       - name: Coveralls GitHub Action
-        uses: coverallsapp/github-action@v2.3.0
+        uses: coverallsapp/github-action@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: ./coverage/lcov/lcov.info
