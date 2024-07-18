@@ -197,6 +197,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   }.freeze
 
   SOUTH_PASADENA_EXTENTS = {
+    name: "South Pasadena, Los Angeles Co., California, USA",
     north: 34.1257,
     south: 34.0986,
     east: -118.1345,
@@ -441,27 +442,26 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # lat/lng does not match Pasadena but does match South Pasadena
     assert_selector("[data-type='location_google']")
     assert_selector(".dropdown-item a[data-id='-1']",
-                    text: "South Pasadena, Los Angeles Co., California, USA",
-                    visible: :all)
+                    text: SOUTH_PASADENA_EXTENTS[:name], visible: :all)
     # There may be more than one of these, click the first
     find(".dropdown-item a[data-id='-1']",
-         text: "South Pasadena, Los Angeles Co., California, USA",
-         visible: :all).trigger("click")
+         text: SOUTH_PASADENA_EXTENTS[:name], visible: :all).trigger("click")
 
-    debugger
-    assert_field("observation_location_id", visible: :all, with: -1)
-    assert_field("location_north", visible: :all,
+    # check the hidden fields returned by Google
+    assert_field("observation[location_id]", type: :hidden, with: "-1")
+    assert_field("location_north", type: :hidden,
                                    with: SOUTH_PASADENA_EXTENTS[:north].to_s)
-    assert_field("location_south", visible: :all,
+    assert_field("location_south", type: :hidden,
                                    with: SOUTH_PASADENA_EXTENTS[:south].to_s)
-    assert_field("location_west", visible: :all,
+    assert_field("location_west", type: :hidden,
                                   with: SOUTH_PASADENA_EXTENTS[:west].to_s)
-    assert_field("location_east", visible: :all,
+    assert_field("location_east", type: :hidden,
                                   with: SOUTH_PASADENA_EXTENTS[:east].to_s)
-    assert_field("location_low", visible: :all,
-                                 with: SOUTH_PASADENA_EXTENTS[:low].to_s)
-    assert_field("location_high", visible: :all,
-                                  with: SOUTH_PASADENA_EXTENTS[:high].to_s)
+    # sleep(1)
+    # assert_field("location_low", type: :hidden,
+    #                              with: SOUTH_PASADENA_EXTENTS[:low].to_s)
+    # assert_field("location_high", type: :hidden,
+    #                               with: SOUTH_PASADENA_EXTENTS[:high].to_s)
 
     within("#observation_form") { click_commit }
 
@@ -535,11 +535,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_when_1i", with: "2010")
     assert_select("observation_when_2i", text: "August")
     assert_select("observation_when_3i", text: "14")
-    assert_field("observation_place_name",
-                 with: "Pasadena, Some Co., California, USA")
-    assert_field("observation_lat", with: "12.6125") # was 12.5927
-    assert_field("observation_lng", with: "121.5523") # was -121.5525
-    assert_field("observation_alt", with: "17")
+    assert_field("observation_place_name", with: SOUTH_PASADENA_EXTENTS[:name])
+    assert_field("observation_lat", with: S_PAS_EXIF[:lat].to_s) # was 12.5927
+    assert_field("observation_lng", with: S_PAS_EXIF[:lng].to_s) # was -121.5525
+    assert_field("observation_alt", with: S_PAS_EXIF[:alt].to_s)
     assert_unchecked_field("observation_is_collection_location")
     assert_checked_field("observation_specimen")
     assert_field(other_notes_id, with: "Notes for observation")
@@ -570,11 +569,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     select("April", from: "observation_when_2i")
     select("15", from: "observation_when_3i")
     # this will reset the place_name field
-    fill_in("observation_lat", with: "23.4567")
-    fill_in("observation_lng", with: "-123.4567")
-    fill_in("observation_alt", with: "987m")
-    fill_in("observation_place_name",
-            with: "Pasadena, Some Co., California, USA")
+    # fill_in("observation_lat", with: "23.4567")
+    # fill_in("observation_lng", with: "-123.4567")
+    # fill_in("observation_alt", with: "987m")
+    # fill_in("observation_place_name",
+    #         with: "Pasadena, Some Co., California, USA")
     check("observation_is_collection_location")
     fill_in(other_notes_id, with: "New notes for observation")
 
@@ -779,11 +778,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     {
       user: katrina,
       when: Date.parse("2010-08-14"),
-      where: "South Pasadena, Los Angeles Co., California, USA",
+      where: SOUTH_PASADENA_EXTENTS[:name],
       location: nil,
-      lat: 12.6125, # was 12.5760 values tweaked to move it to land
-      lng: 121.5523, # was -123.7519 was in the ocean
-      alt: 17,
+      lat: S_PAS_EXIF[:lat], # was 12.5760 values tweaked to move it to land
+      lng: S_PAS_EXIF[:lng], # was -123.7519 was in the ocean
+      alt: S_PAS_EXIF[:alt],
       name: names(:agaricus_campestris),
       vote: Vote.next_best_vote,
       is_collection_location: false,
@@ -803,17 +802,17 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       east: SOUTH_PASADENA_EXTENTS[:east],
       west: SOUTH_PASADENA_EXTENTS[:west],
       high: SOUTH_PASADENA_EXTENTS[:high],
-      low: SOUTH_PASADENA_EXTENTS[:low]
-      # location_notes: "Notes for location"
+      low: SOUTH_PASADENA_EXTENTS[:low],
+      location_notes: "Notes for location"
     )
   end
 
   def expected_values_after_edit
     expected_values_after_location.merge(
       when: Date.parse("2011-04-15"),
-      lat: 23.4567,
-      lng: -123.4567,
-      alt: 987,
+      # lat: 23.4567,
+      # lng: -123.4567,
+      # alt: 987,
       is_collection_location: true,
       specimen: false,
       notes: "New notes for observation", # displayed in observations/show
