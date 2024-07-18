@@ -120,12 +120,17 @@ module ObservationsController::Create
       return false
     end
 
-    attributes = { north:, south:, east:, west: }
+    # must round explicitly, or Rails rounds it at one place because strings.
+    attributes = { north: north.to_f.round(4), south: south.to_f.round(4),
+                   east: east.to_f.round(4), west: west.to_f.round(4) }
     # Add optional attributes
-    [:high, :low, :notes].each do |key|
+    [:high, :low].each do |key|
       if (val = params.dig(:location, key)).present?
-        attributes[key] = val
+        attributes[key] = val.to_f.round(0)
       end
+    end
+    if (notes = params.dig(:location, :notes)).present?
+      attributes[:notes] = notes
     end
     # Add hidden attribute if the obs is hidden (or ignore?)
     if (hidden = params.dig(:observation, :gps_hidden)).present?
