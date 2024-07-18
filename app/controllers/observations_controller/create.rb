@@ -120,23 +120,16 @@ module ObservationsController::Create
       return false
     end
 
-    # must round explicitly, or Rails rounds it at one place because strings.
-    attributes = { north: north.to_f.round(4), south: south.to_f.round(4),
-                   east: east.to_f.round(4), west: west.to_f.round(4) }
-    # Add optional attributes
-    [:high, :low].each do |key|
+    # Ignore hidden attribute even if the obs is hidden, because saving a
+    # Location with `hidden: true` fuzzes the lat/lng bounds unpredictably.
+    attributes = { hidden: false, user_id: @user.id,
+                   north:, south:, east:, west: }
+    # Add optional attributes. :notes not implemented yet.
+    [:high, :low, :notes].each do |key|
       if (val = params.dig(:location, key)).present?
-        attributes[key] = val.to_f.round(0)
+        attributes[key] = val
       end
     end
-    if (notes = params.dig(:location, :notes)).present?
-      attributes[:notes] = notes
-    end
-    # Add hidden attribute if the obs is hidden (or ignore?)
-    if (hidden = params.dig(:observation, :gps_hidden)).present?
-      attributes[:hidden] = hidden
-    end
-    attributes[:user_id] = @user.id
 
     @location = Location.new(attributes)
     # With a Location instance, we can use the `display_name=` setter method,
