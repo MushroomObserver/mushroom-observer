@@ -520,7 +520,9 @@ export default class extends Controller {
         if (this.AJAX_URL) { this.refreshPrimer(); }
         // still necessary if primer unchanged, as likely
         this.populateMatches();
-        if (this.matches.length > 1) { this.drawPulldown(); }
+        if (!this.ACT_LIKE_SELECT || this.matches.length > 1) {
+          this.drawPulldown();
+        }
       }), this.REFRESH_DELAY * 1000);
     }
   }
@@ -1470,7 +1472,9 @@ export default class extends Controller {
       // this.has_create_link = false;
       this.primer = new_primer;
       this.populateMatches();
-      if (this.matches.length > 1) { this.drawPulldown(); }
+      if (!this.ACT_LIKE_SELECT || this.matches.length > 1) {
+        this.drawPulldown();
+      }
     }
 
     // If act like select, focus the input field.`
