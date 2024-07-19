@@ -80,6 +80,10 @@ class License < AbstractModel
     available(currently_chosen).map { |l| [l.display_name, l.id] }
   end
 
+  def self.narrowest_available
+    License.where(License[:url] =~ /by-nc-sa/).where(deprecated: false).last
+  end
+
   def self.current
     License.where(deprecated: false)
   end
