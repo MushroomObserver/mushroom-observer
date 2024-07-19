@@ -11,7 +11,7 @@ class Inat
     sleep(1.second) # 60 requests/minute rate limit per iNat policy
     # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
     headers = { "Authorization" => "Bearer #{token}" }
-    @inat = HTTParty.get("#{API_BASE}#{operation}", { headers: headers })
+    @inat = RestClient.get("#{API_BASE}#{operation}", headers)
   end
 
   def body
