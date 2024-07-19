@@ -61,6 +61,48 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_flash_success(/created observation/i)
   end
 
+  def test_trying_to_create_duplicate_location_just_uses_existing_location
+    setup_image_dirs # in general_extensions
+    login!(katrina)
+
+    # open_create_observation_form
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    # check new observation form defaults
+    assert_date_is_now
+    assert_geolocation_is_empty
+    last_obs = Observation.where(user_id: User.current.id).
+               order(:created_at).last
+    # This is currently "Falmouth, Massachusetts, USA"
+    existing_loc = Location.find(last_obs.location_id)
+    # We just need to check this is not the most recent location.
+    assert_not_equal(Location.last.id, existing_loc.id)
+    assert_field("observation_place_name", with: last_obs.where)
+    assert_field("observation_location_id", with: last_obs.location_id,
+                                            type: :hidden)
+
+    # autocompleter is unconstrained
+    assert_selector("[data-type='location']")
+    # Now switch to "create location" mode, without changing the location name.
+    click_on(:form_observations_create_location.l)
+    assert_selector("[data-type='location_google']")
+    assert_field("observation_place_name", with: last_obs.where)
+    # This should have cleared the location_id field.
+    assert_field("observation_location_id", with: "", type: :hidden)
+
+    within("#observation_form") { click_commit }
+
+    # Observation should have saved with the existing location_id for U.P.
+    assert_flash_success(/created observation/i)
+    assert_selector("body.observations__show")
+
+    obs = Observation.last
+    assert_equal(existing_loc.name, obs.where)
+    assert_equal(existing_loc.id, obs.location_id)
+    assert_not_equal(Location.last.id, obs.location_id)
+  end
+
   def test_autofill_location_from_geotagged_image_nothing_matches
     setup_image_dirs # in general_extensions
     login!(katrina)
@@ -94,6 +136,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Place name should now have been filled by Google, no MO locations match
     assert_equal(UNIVERSITY_PARK[:name],
                  find('[id$="observation_place_name"]').value)
+    assert_field("observation_location_id", with: "-1", type: :hidden)
+
     # now check that the "use_exif" button is disabled
     assert_no_button(:image_use_exif.l)
   end
@@ -102,8 +146,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     setup_image_dirs # in general_extensions
     login!(katrina)
 
-    # This will make "University Park" katrina's most recent location,
-    # so it will be prefilled in the obs form.
+    # Make "University Park" available as a matching location.
     university_park = Location.new(**UNIVERSITY_PARK)
     # Sanity check the lat/lng. `contains?(lat, lng)` is a Mappable::BoxMethod
     assert(university_park.contains?(GEOTAGGED_EXIF[:lat],
@@ -120,6 +163,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_geolocation_is_empty
     last_obs = Observation.where(user_id: User.current.id).
                order(:created_at).last
+    # This is currently "Falmouth, Massachusetts, USA"
     assert_field("observation_place_name", with: last_obs.where)
     assert_field("observation_location_id", with: last_obs.location_id,
                                             type: :hidden)
@@ -138,20 +182,18 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # now check that the "use_exif" button is disabled
     assert_no_button(:image_use_exif.l)
 
-    # Place name should have been filled, but query may be in progress.
-    # Commenting this out for now, it's too flaky. it's retested below.
-    # assert_selector(".auto_complete")
-    # assert_field("observation[place_name]", with: university_park.name,
-    #                                         wait: 6)
-    # assert_field("observation[location_id]", with: university_park.id,
-    #                                          type: :hidden)
+    # Place name should have been filled.
+    assert_field("observation[place_name]", with: university_park.name,
+                                            wait: 6)
+    assert_field("observation[location_id]", with: university_park.id,
+                                             type: :hidden)
 
-    # now clear a lat-lng-alt field, and the place name should clear too
-    click_button(:form_observations_clear_map.t.as_displayed)
+    # now clear all location fields, and the place name should clear too
+    click_button(:form_observations_clear_map.l)
     # fill_in("observation_lat", with: "")
-    # assert_field("observation_place_name", with: "")
-    # should have swapped autocompleter back to "location", but it doesn't
-    # assert_selector("[data-type='location']")
+    assert_field("observation_place_name", with: "")
+    # should have swapped autocompleter back to "location"
+    assert_selector("[data-type='location']")
 
     # check that the "use_exif" button is re-enabled
     assert_button(:image_use_exif.l)
@@ -163,10 +205,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_image_date_copied_to_obs(GEOTAGGED_EXIF)
 
     # Finally, the query should have gone through and the place name filled
-    # assert_field("observation[place_name]", with: university_park.name,
-    #                                         wait: 6)
-    # assert_field("observation[location_id]", with: university_park.id,
-    #                                          type: :hidden)
+    assert_field("observation[place_name]", with: university_park.name,
+                                            wait: 6)
+    assert_field("observation[location_id]", with: university_park.id,
+                                             type: :hidden)
     # now check that the "use_exif" button is disabled
     assert_no_button(:image_use_exif.l)
   end
@@ -349,13 +391,13 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_image_exif_available(SO_PASA_EXIF)
     end
 
-    fill_in("observation_place_name", with: "Pasadena, California, USA")
     click_on(:form_observations_create_location.l)
-    # This will have cleared the place_name field.
-    # lat/lng does not match Pasadena, but does match South Pasadena
+    # lat/lng does not match Google's Pasadena, but does match South Pasadena
     assert_selector("[data-type='location_google']")
+    # assert_selector(".auto_complete", wait: 6)
+    find("#observation_place_name").trigger("focus")
     assert_selector(".dropdown-item a[data-id='-1']",
-                    text: SOUTH_PASADENA[:name], visible: :all)
+                    text: SOUTH_PASADENA[:name], visible: :all, wait: 6)
     # There may be more than one of these, click the first
     find(".dropdown-item a[data-id='-1']",
          text: SOUTH_PASADENA[:name], visible: :all).trigger("click")
@@ -480,7 +522,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     west: -80.385170
   }.freeze
 
-  # The image geotagged_s_pasadena.jpg has this data.
+  # The image geotagged.jpg has this data.
   GEOTAGGED_EXIF = {
     lat: 25.7582,
     lng: -80.3731,
