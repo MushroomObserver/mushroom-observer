@@ -7,10 +7,11 @@
 class Inat
   API_BASE = "https://api.inaturalist.org/v1"
 
-  def initialize(operation)
+  def initialize(operation:, token: "")
     sleep(1.second) # 60 requests/minute rate limit per iNat policy
-
-    @inat = HTTParty.get("#{API_BASE}#{operation}")
+    # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
+    headers = { "Authorization" => "Bearer #{token}" }
+    @inat = HTTParty.get("#{API_BASE}#{operation}", { headers: headers })
   end
 
   def body

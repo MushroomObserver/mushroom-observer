@@ -180,7 +180,11 @@ module Observations
     def inat_search_observations(ids)
       operation = "/observations?id=#{ids}" \
                   "&order=desc&order_by=created_at&only_id=false"
-      ::Inat.new(operation).body
+      ::Inat.new(operation: operation, token: inat_import.token).body
+    end
+
+    def inat_import
+      InatImport.find_by(user: User.current)
     end
 
     def not_importable(inat_obs)
