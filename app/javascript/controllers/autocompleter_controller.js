@@ -216,7 +216,8 @@ export default class extends Controller {
       Object.assign(this, detail); // type, request_params
       this.primer = [];
       this.matches = [];
-      this.stored_data = { id: 0 }
+      this.stored_data = { id: 0 };
+      this.last_fetch_params = '';
       this.prepareInputElement();
       this.prepareHiddenInput();
       this.clearHiddenId();
@@ -515,13 +516,11 @@ export default class extends Controller {
         this.verbose("doing_refresh()");
         // this.debug("refresh_timer(" + this.inputTarget.value + ")");
         this.old_value = this.inputTarget.value;
-        if (this.AJAX_URL) {
-          // async, anything after this executes immediately
-          this.refreshPrimer();
-        }
+        // async, anything after this executes immediately
+        if (this.AJAX_URL) { this.refreshPrimer(); }
         // still necessary if primer unchanged, as likely
         this.populateMatches();
-        this.drawPulldown();
+        if (this.matches.length > 1) { this.drawPulldown(); }
       }), this.REFRESH_DELAY * 1000);
     }
   }
@@ -1471,11 +1470,11 @@ export default class extends Controller {
       // this.has_create_link = false;
       this.primer = new_primer;
       this.populateMatches();
-      this.drawPulldown();
+      if (this.matches.length > 1) { this.drawPulldown(); }
     }
 
     // If act like select, focus the input field.`
-    if ((this.primer.length > 0) && this.ACT_LIKE_SELECT) {
+    if ((this.primer.length > 1) && this.ACT_LIKE_SELECT) {
       // this.inputTarget.click(); // this fires another scheduleRefresh
       this.inputTarget.focus();
     }
