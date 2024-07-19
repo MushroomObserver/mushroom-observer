@@ -135,9 +135,26 @@ module ObservationsController::Create
     # With a Location instance, we can use the `display_name=` setter method,
     # which figures out scientific/postal format of user input
     @location.display_name = place_name
-    save_with_log(@location)
-    # Associate the location with the observation
-    @observation.location_id = @location.id
+  end
+
+  def save_location
+    @dubious_where_reasons =
+      Location.dubious_name?(@location.display_name, true)
+
+    # Validate the location name.
+    if @dubious_where_reasons.empty?
+      if save_with_log(@location)
+        # Associate the location with the observation
+        @observation.location_id = @location.id
+        true
+      else
+        # Failed to create location
+        flash_object_errors(@location)
+        false
+      end
+    else
+      false
+    end
   end
 
   def save_everything_else(reason)
