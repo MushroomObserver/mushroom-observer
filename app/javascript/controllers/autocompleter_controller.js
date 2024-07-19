@@ -75,17 +75,20 @@ const AUTOCOMPLETER_TYPES = {
   },
   location: { // params[:format] handled in controller
     ACT_LIKE_SELECT: false,
+    AUTOFILL_SINGLE_MATCH: false,
     UNORDERED: true,
     model: 'location',
     // create_link: '/locations/new?where='
   },
   location_containing: { // params encoded from dataset
     ACT_LIKE_SELECT: true,
+    AUTOFILL_SINGLE_MATCH: true,
     model: 'location',
     // create_link: '/locations/new?where='
   },
   location_google: { // params encoded from dataset
     ACT_LIKE_SELECT: true,
+    AUTOFILL_SINGLE_MATCH: false,
     model: 'location', // because it's creating a location
   },
   name: {
@@ -146,7 +149,7 @@ export default class extends Controller {
   // The select target is not the <input> element, but a <select> that can
   // swap out the autocompleter type. The <input> element is its target.
   static targets = ["input", "select", "pulldown", "list", "hidden", "wrap",
-    "createBtn", "hasIdIndicator"]
+    "createBtn", "hasIdIndicator", "keepBtn"]
   static outlets = ["map"]
 
   initialize() {
@@ -220,7 +223,10 @@ export default class extends Controller {
       this.last_fetch_params = '';
       this.prepareInputElement();
       this.prepareHiddenInput();
-      this.clearHiddenId();
+      if (!this.hasKeepBtnTarget ||
+        !this.keepBtnTarget.classList.contains('active')) {
+        this.clearHiddenId();
+      }
       if (this.TYPE === "location_google") {
         this.inputTarget.closest("form").classList.add('map-outlet');
         this.element.classList.add('create');
@@ -297,10 +303,12 @@ export default class extends Controller {
     // Attach events
     this.addEventListeners();
 
-    if (this.hiddenTarget.value != '') {
-      this.hasIdIndicatorTarget.classList.remove('d-none');
+    const hiddenId = parseInt(this.hiddenTarget.value);
+
+    if (hiddenId !== NaN && hiddenId > 0) {
+      this.wrapTarget.classList.add('has-id');
     } else {
-      this.hasIdIndicatorTarget.classList.add('d-none');
+      this.wrapTarget.classList.remove('has-id');
     }
   }
 
@@ -520,7 +528,7 @@ export default class extends Controller {
         if (this.AJAX_URL) { this.refreshPrimer(); }
         // still necessary if primer unchanged, as likely
         this.populateMatches();
-        if (!this.ACT_LIKE_SELECT || this.matches.length > 1) {
+        if (!this.AUTOFILL_SINGLE_MATCH || this.matches.length > 1) {
           this.drawPulldown();
         }
       }), this.REFRESH_DELAY * 1000);
@@ -914,7 +922,10 @@ export default class extends Controller {
       this.matches.find((m) => m['name'] === this.inputTarget.value.trim());
 
     if (perfect_match) {
-      this.assignHiddenId(perfect_match);
+      // only assign if it's not already assigned
+      if (this.hiddenTarget.value != perfect_match['id']) {
+        this.assignHiddenId(perfect_match);
+      }
     } else {
       this.clearHiddenId();
     }
@@ -937,7 +948,9 @@ export default class extends Controller {
         this.hiddenTarget.dataset[key] = match[key];
     });
 
-    this.hasIdIndicatorTarget.classList.remove('d-none');
+    if (match['id'] > 0) {
+      this.wrapTarget.classList.add('has-id');
+    }
     this.dispatchHiddenIdEvents();
   }
 
@@ -954,7 +967,6 @@ export default class extends Controller {
         delete this.hiddenTarget.dataset[key];
     });
 
-    this.hasIdIndicatorTarget.classList.add('d-none');
     this.dispatchHiddenIdEvents();
   }
 
@@ -981,6 +993,8 @@ export default class extends Controller {
       clearTimeout(this.data_timer);
       this.data_timer = setTimeout(() => {
         this.verbose("dispatching hiddenIdDataChanged");
+        this.wrapTarget.classList.remove('has-id');
+        this.keepBtnTarget.classList.remove('active');
         this.dispatch('hiddenIdDataChanged', {
           detail: { id: this.hiddenTarget.value }
         });
@@ -1472,7 +1486,7 @@ export default class extends Controller {
       // this.has_create_link = false;
       this.primer = new_primer;
       this.populateMatches();
-      if (!this.ACT_LIKE_SELECT || this.matches.length > 1) {
+      if (!this.AUTOFILL_SINGLE_MATCH || this.matches.length > 1) {
         this.drawPulldown();
       }
     }

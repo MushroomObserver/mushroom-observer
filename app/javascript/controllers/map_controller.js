@@ -93,23 +93,21 @@ export default class extends Controller {
       })
   }
 
-  // Not sure we're using this yet
-  // FIXME: This is a placeholder for a future feature
+  // Lock rectangle so it's not editable, and show this state in the icon link
   toggleBoxLock(event) {
-    if (this.rectangle) {
-      const icon = this.lockBoxBtnTarget.firstChild
+    if (this.rectangle && this.hasLockBoxBtnTarget) {
       if (this.rectangle.getEditable() === true) {
         this.rectangle.setEditable(false)
-        // this.map_type = "observation"
-        icon.classList.remove("glyphicon-check")
-        icon.classList.add("glyphicon-edit")
-        this.showBoxBtnTarget.classList.add("d-none")
+        this.rectangle.setOptions({ clickable: false })
+        this.lockBoxBtnTarget.classList.add("active")
+        const active_title = this.lockBoxBtnTarget.dataset?.activeTitle ?? ''
+        this.lockBoxBtnTarget.setAttribute("title", active_title)
       } else {
         this.rectangle.setEditable(true)
-        // this.map_type = "location"
-        icon.classList.remove("glyphicon-edit")
-        icon.classList.add("glyphicon-check")
-        this.showBoxBtnTarget.classList.remove("d-none")
+        this.rectangle.setOptions({ clickable: true })
+        this.lockBoxBtnTarget.classList.remove("active")
+        const title = this.lockBoxBtnTarget.dataset?.title ?? ''
+        this.lockBoxBtnTarget.setAttribute("title", title)
       }
     }
   }
@@ -216,7 +214,7 @@ export default class extends Controller {
           this.dispatch("reenableBtns")
         }
         // this.sampleElevationCenterOf(newPosition)
-        this.getElevations([newPosition])
+        this.getElevations([newPosition], "point")
         this.map.panTo(newPosition)
       })
     })
@@ -306,7 +304,7 @@ export default class extends Controller {
         const newBounds = this.rectangle.getBounds()?.toJSON() // nsew object
         // this.verbose({ newBounds })
         this.updateBoundsInputs(newBounds)
-        this.getElevations(this.sampleElevationPointsOf(newBounds))
+        this.getElevations(this.sampleElevationPointsOf(newBounds), "rectangle")
         this.map.fitBounds(newBounds)
       })
     })
@@ -404,7 +402,8 @@ export default class extends Controller {
       this.mapLocationBounds()
       // Only geocode lat/lng if we have no location_id
     } else if (["location", "hybrid"].includes(this.map_type)) {
-      if (this.latInputTarget.value && this.lngInputTarget.value) {
+      if (this.hasLatInputTarget && this.hasLngInputTarget &&
+        this.latInputTarget.value && this.lngInputTarget.value) {
         this.geocodeLatLng() // multiple possible results
         // ...and only geolocate placeName if we have no lat/lng
       } else if (this.ignorePlaceInput === false) {
@@ -461,7 +460,6 @@ export default class extends Controller {
         sifted.push(result)
       }
     })
-    debugger
     return sifted
   }
 
@@ -557,7 +555,7 @@ export default class extends Controller {
   // NOTE: Currently we're not going to allow Google API geocoded places that
   // are returned as points to be locations. We're forcing them to be rectangles
   updateFields(viewport, extents, center) {
-    let points = [] // for elevation
+    let points = [], type = "" // for elevation
     if (this.hasNorthInputTarget) {
       // Prefer extents for rectangle, fallback to viewport
       let bounds = extents || viewport
@@ -569,21 +567,25 @@ export default class extends Controller {
       //   this.updateBoundsInputs(this.boundsOfPoint(center))
       //   points = [center] // this.sampleElevationCenterOf(center)
       // }
+      type = "rectangle"
     } else if (this.hasLatInputTarget) {
       if (center != undefined && center?.lat) {
         this.updateLatLngInputs(center)
         points = [center] // this.sampleElevationCenterOf(center)
       }
+      type = "point"
     }
-    if (points)
-      this.getElevations(points) // updates inputs
+    if (points && type)
+      this.getElevations(points, type) // updates inputs
   }
 
   // Action attached to the "Get Elevation" button. (points is then the event)
-  getElevations(points) {
+  getElevations(points, type = "") {
     // "Get Elevation" button on a form sends this param
-    if (points.hasOwnProperty('params') && points.params?.points === "input")
+    if (points.hasOwnProperty('params') && points.params?.points === "input") {
       points = this.sampleElevationPoints() // from marker or rectangle
+      type = points.params?.type
+    }
 
     const locationElevationRequest = { locations: points }
 
@@ -591,7 +593,7 @@ export default class extends Controller {
       (results, status) => {
         if (status === google.maps.ElevationStatus.OK) {
           if (results[0]) {
-            this.updateElevationInputs(results)
+            this.updateElevationInputs(results, type)
           } else {
             console.log({ status })
           }
@@ -599,15 +601,16 @@ export default class extends Controller {
       })
   }
 
-  // requires an array of results from this.getElevations(points) above
+  // requires an array of results from this.getElevations(points, type) above
   //   result objects have the form {elevation:, location:, resolution:}
-  updateElevationInputs(results) {
-    if (this.hasLowInputTarget) {
+  updateElevationInputs(results, type) {
+    if (this.hasLowInputTarget && type === "rectangle") {
       const hiLo = this.highAndLowOf(results)
       // this.verbose({ hiLo })
       this.lowInputTarget.value = this.roundOff(parseFloat(hiLo.low))
       this.highInputTarget.value = this.roundOff(parseFloat(hiLo.high))
-    } else if (this.hasAltInputTarget) {
+    }
+    if (this.hasAltInputTarget && type === "point") {
       // should just need one result
       this.altInputTarget.value =
         this.roundOff(parseFloat(results[0].elevation))

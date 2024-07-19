@@ -232,7 +232,7 @@ module FormsHelper
 
   def autocompleter_has_id_indicator
     link_icon(:check, title: :autocompleter_has_id.l,
-                      class: "ml-3 px-2 text-success has-id-indicator d-none",
+                      class: "ml-3 px-2 text-success has-id-indicator",
                       data: { autocompleter_target: "hasIdIndicator" })
   end
 
@@ -240,7 +240,7 @@ module FormsHelper
     icon_link_to(
       args[:create_text], "#",
       icon: :plus, show_text: true, icon_class: "text-primary",
-      name: "create_#{args[:type]}", class: "ml-3",
+      name: "create_#{args[:type]}", class: "ml-3 create-button",
       data: { autocompleter_target: "createBtn",
               action: "autocompleter#swapCreate:prevent" }
     )
@@ -260,8 +260,9 @@ module FormsHelper
     icon_link_to(
       args[:keep_text], "#",
       icon: :apply, show_text: false, icon_class: "text-primary",
+      active_icon: :edit, active_content: args[:edit_text],
       name: "keep_#{args[:type]}", class: "ml-3 d-none",
-      data: { map_target: "lockBoxBtn",
+      data: { autocompleter_target: "keepBtn", map_target: "lockBoxBtn",
               action: "map#toggleBoxLock:prevent" }
     )
   end

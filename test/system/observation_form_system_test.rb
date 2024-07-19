@@ -84,11 +84,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # autocompleter is unconstrained
     assert_selector("[data-type='location']")
-    # Now switch to "create location" mode, without changing the location name.
-    click_on(:form_observations_create_location.l)
+    find(id: "observation_place_name").trigger("click")
+    # This should make the "create_locality" button appear.
+    click_on(:form_observations_create_locality.l)
     assert_selector("[data-type='location_google']")
     assert_field("observation_place_name", with: last_obs.where)
-    # This should have cleared the location_id field.
     assert_field("observation_location_id", with: "", type: :hidden)
 
     within("#observation_form") { click_commit }
@@ -282,7 +282,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Be sure we have only one image wrapper now
     assert_selector(".carousel-item[data-image-status='upload']",
-                    visible: :all, count: 1)
+                    visible: :all, count: 1, wait: 6)
 
     # Add geotagged_s_pasadena.jpg again
     click_attach_file("geotagged_s_pasadena.jpg")
@@ -391,7 +391,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_image_exif_available(SO_PASA_EXIF)
     end
 
-    click_on(:form_observations_create_location.l)
+    fill_in("observation_place_name", with: "")
+    click_on(:form_observations_create_locality.l)
     # lat/lng does not match Google's Pasadena, but does match South Pasadena
     assert_selector("[data-type='location_google']")
     # assert_selector(".auto_complete", wait: 6)

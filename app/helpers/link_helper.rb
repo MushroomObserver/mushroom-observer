@@ -78,6 +78,8 @@ module LinkHelper
     end
   end
 
+  # Icon link with optional active state. (Tooltip title must be swapped in JS.)
+  # Now also accepts active state options: active_icon, active_content
   # NOTE: Takes same args as link_to, e.g. *edit_description_tab(desc, type)
   # icon_link_to(text, path, **args)
   def icon_link_to(text = nil, path = nil, options = {}, &block)
@@ -85,24 +87,32 @@ module LinkHelper
 
     link = block ? text : path # because positional
     content = block ? capture(&block) : text
-    opts = block ? path : options
+    opts = block ? path : options # because positional
     icon_type = opts[:icon]
-    icon_class = class_names(opts[:icon_class], "px-2")
-    label_class = if opts[:show_text]
-                    "pl-2 d-none d-sm-inline font-weight-bold"
-                  else
-                    "sr-only"
-                  end
     return link_to(link, opts) { content } if icon_type.blank?
 
-    opts = {
-      title: content,
-      data: { toggle: "tooltip" }
-    }.deep_merge(opts.except(:icon, :show_text))
+    active_icon = opts[:active_icon]
+    active_content = options[:active_content]
+    stateful = active_icon && active_content
+    icon_class = class_names(opts[:icon_class], "px-2")
+    icon_active_class = class_names(icon_class, "active-icon")
+    label_show_classes = "pl-2 d-none d-sm-inline font-weight-bold"
+    label_class = opts[:show_text] ? label_show_classes : "sr-only"
+    label_active_class = class_names(label_class, "active-label")
 
-    link_to(link, **opts) do
+    link_opts = {
+      role: "button", title: content, # title is what shows up in tooltip
+      class: class_names("icon-link", opts[:class]),
+      data: { toggle: "tooltip", title: content, # needed for swapping only
+              active_title: opts[:active_content] }
+    }.deep_merge(opts.except(:class, :icon, :icon_class, :show_text,
+                             :active_icon, :active_content))
+
+    link_to(link, **link_opts) do
       concat(link_icon(icon_type, class: icon_class))
+      concat(link_icon(active_icon, class: icon_active_class)) if stateful
       concat(tag.span(content, class: label_class))
+      concat(tag.span(active_content, class: label_active_class)) if stateful
     end
   end
 
