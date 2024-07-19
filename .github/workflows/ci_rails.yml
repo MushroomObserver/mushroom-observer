@@ -76,8 +76,8 @@ jobs:
         run: bundle exec rails test:all
 
       # https://github.com/marketplace/actions/coveralls-github-action
-      - name: Coveralls
-        uses: coverallsapp/github-action@master
+      - name: Coveralls GitHub Action
+        uses: coverallsapp/github-action@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: ./coverage/lcov/lcov.info
