@@ -309,8 +309,13 @@ export default class extends Controller {
     const identifier = AUTOCOMPLETER_TYPES[this.TYPE]['model'] + '_id',
       form = this.hiddenTarget.name.split('[')[0];
 
-    this.hiddenTarget.name = form + '[' + identifier + ']';
-    this.hiddenTarget.id = identifier;
+    if (form === "") {
+      this.hiddenTarget.name = identifier;
+      this.hiddenTarget.id = identifier;
+    } else {
+      this.hiddenTarget.name = form + '[' + identifier + ']';
+      this.hiddenTarget.id = form + "_" + identifier;
+    }
   }
 
   // NOTE: `this` within an event listener function refers to the element
