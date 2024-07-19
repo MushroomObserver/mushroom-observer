@@ -157,7 +157,7 @@ module ObservationsController::Create
     end
 
     @dubious_where_reasons =
-      Location.dubious_name?(@location.display_name, true)
+      Location.dubious_name?(place_name, true)
 
     @dubious_where_reasons.empty?
   end
