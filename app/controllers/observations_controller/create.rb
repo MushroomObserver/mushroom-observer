@@ -133,26 +133,43 @@ module ObservationsController::Create
 
     @location = Location.new(attributes)
     # With a Location instance, we can use the `display_name=` setter method,
-    # which figures out scientific/postal format of user input
-    @location.display_name = place_name
+    # which figures out scientific/postal format of user input and sets
+    # location `name` and `scientific_name` accordingly.
+    @location.display_name = Location.user_format(@user, place_name)
   end
 
-  def save_location
+  # The form may be in a state where it has an existing MO Location name in the
+  # `place_name` field, but not the corresponding MO location_id. It could be
+  # because of user trying to create a duplicate, or because the user had a
+  # prefilled location, but clicked on the "Create Location" button - this keeps
+  # the place_name, but clears the location_id field. Either way, we need to
+  # check if we already have a location by this name. If so, find the existing
+  # location and use that for the obs.
+  def validate_place_name
+    # If there is no place_name, we don't need to check for duplicates.
+    return true unless (place_name = params.dig(:observation, :place_name))
+
+    name = Location.user_format(@user, place_name)
+    if Location.location_exists(name)
+      location = Location.find_by(name: name)
+      @observation.location_id = location.id
+      return true
+    end
+
     @dubious_where_reasons =
       Location.dubious_name?(@location.display_name, true)
 
-    # Validate the location name.
-    if @dubious_where_reasons.empty?
-      if save_with_log(@location)
-        # Associate the location with the observation
-        @observation.location_id = @location.id
-        true
-      else
-        # Failed to create location
-        flash_object_errors(@location)
-        false
-      end
+    @dubious_where_reasons.empty?
+  end
+
+  def save_location
+    if save_with_log(@location)
+      # Associate the location with the observation
+      @observation.location_id = @location.id
+      true
     else
+      # Failed to create location
+      flash_object_errors(@location)
       false
     end
   end
