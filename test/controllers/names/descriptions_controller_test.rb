@@ -14,7 +14,6 @@ module Names
 
     CREATE_NAME_DESCRIPTION_PARTIALS = %w[
       _fields_for_description
-      _:shared_textile_help.l
       _form
     ].freeze
 
