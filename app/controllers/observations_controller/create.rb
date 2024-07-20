@@ -30,16 +30,17 @@ module ObservationsController::Create
   #
 
   def create
+    # Create a bare observation
     @observation = create_observation_object(params[:observation])
-    # set these again, in case they are not defined
+    # Set license/image defaults again, in case they are not defined
     init_license_var
     init_new_image_var(Time.zone.now)
 
     rough_cut
-    rough_cut_location_if_requested
+    rough_cut_new_location_if_requested # may set @location
     success = true
     success = false unless validate_name
-    success = false unless validate_place_name # in case somehow there is no id
+    success = false unless validate_place_name # if there is no id
     success = false unless validate_object(@observation)
     success = false unless validate_projects
     success = false if @name && !validate_object(@naming)
@@ -65,36 +66,16 @@ module ObservationsController::Create
   # once we're sure everything is correct.
   # INPUT: params[:observation] (and @user) (and various notes params)
   # OUTPUT: new observation
-  def create_observation_object(args)
-    now = Time.zone.now
-    observation = new_observation(args)
-    observation.created_at = now
-    observation.updated_at = now
-    observation.user       = @user
-    observation.name       = Name.unknown
-    observation.source     = "mo_website"
-    determine_observation_location(observation)
-  end
-
   # NOTE: Call `to_h` on the permitted params if problems with nested params.
-  # As of rails 5, params are an ActionController::Parameters object,
-  # not a hash.
-  def new_observation(args)
-    if args
-      Observation.new(args.permit(permitted_observation_args).to_h)
-    else
-      Observation.new
-    end
-  end
-
-  # We don't have an @observation yet.
-  def determine_observation_location(observation)
-    if Location.is_unknown?(observation.place_name) ||
-       (observation.lat && observation.lng && observation.place_name.blank?)
-      observation.location = Location.unknown
-      observation.where = nil
-    end
-    observation
+  # As of rails 5, params are ActionController::Parameters object, not hash.
+  def create_observation_object(args = {})
+    args = args&.permit(permitted_observation_args).to_h
+    now = Time.zone.now
+    Observation.new(args&.merge({ created_at: now,
+                                  updated_at: now,
+                                  user: @user,
+                                  name: Name.unknown,
+                                  source: "mo_website" }))
   end
 
   def rough_cut
@@ -109,7 +90,7 @@ module ObservationsController::Create
   # We now have an @observation, and maybe a "-1" location_id, indicating a
   # new Location (if accompanied by bounding box lat/lng). If everything is
   # present, create a new @location, and associate it with the @observation
-  def rough_cut_location_if_requested
+  def rough_cut_new_location_if_requested
     # Ensure we have the minimum necessary to create a new location
     unless @observation.location_id == -1 &&
            (place_name = params.dig(:observation, :place_name)).present? &&
@@ -146,12 +127,19 @@ module ObservationsController::Create
   # check if we already have a location by this name. If so, find the existing
   # location and use that for the obs.
   def validate_place_name
+    place_name = @observation.place_name
+    # Set location to unknown if place_name blank && lat/lng are present
+    if Location.is_unknown?(place_name) ||
+       (@observation.lat && @observation.lng && place_name.blank?)
+      @observation.location = Location.unknown
+      @observation.where = nil
+    end
     # If there is no place_name, we don't need to check for duplicates.
-    return true unless (place_name = params.dig(:observation, :place_name))
+    return true if place_name.blank?
 
     name = Location.user_format(@user, place_name)
-    if Location.location_exists(name)
-      location = Location.find_by(name: name)
+    # can't use Location.location_exists?, true for undefined where strings
+    if (location = Location.find_by(name: name))
       @observation.location_id = location.id
       return true
     end
