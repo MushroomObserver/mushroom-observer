@@ -16,7 +16,6 @@ class InatObsTest < UnitTestCase
       # user_id: 4468,
       # created_at: Thu, 07 Mar 2024 18:32:18.000000000 EST -05:00,
       # updated_at: Mon, 18 Mar 2024 18:12:05.000000000 EDT -04:00,
-
       when: "Thu, 23 Mar 2023",
 
       # locality / geoloc stuff
@@ -42,7 +41,7 @@ class InatObsTest < UnitTestCase
       # notes: { Other: "on Quercus\n\n&#8212;\n\nMirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/202555552\">observation 202555552</a> on March 15, 2024." }, # rubocop:disable Layout/LineLength
       notes: { Other: "on Quercus\n\n&#8212;\n\nOriginally posted to Mushroom Observer on Mar. 7, 2024." }, # rubocop:disable Layout/LineLength
       # FIXME: add new source
-      source: nil,
+      source: nil
       # thumb_image_id: 1659475,
       # vote_cache: 2.51504,
       # num_views: 78,
@@ -62,19 +61,17 @@ class InatObsTest < UnitTestCase
              where(deprecated: false).order(id: :asc).first
     assert_equal(expect, mock_inat_obs.license)
 
-=begin
-      # other Observation attribute mappings to test
-      t.integer "user_id"
-      t.boolean "specimen", default: false, null: false
-      t.integer "thumb_image_id"
-      t.integer "location_id"
-      t.boolean "is_collection_location", default: true, null: false
-      t.integer "alt"
-      t.string "lifeform", limit: 1024
-      t.string "text_name", limit: 100
-      t.text "classification"
-      t.boolean "gps_hidden", default: false, null: false
-=end
+    #       # other Observation attribute mappings to test
+    #       t.integer "user_id"
+    #       t.boolean "specimen", default: false, null: false
+    #       t.integer "thumb_image_id"
+    #       t.integer "location_id"
+    #       t.boolean "is_collection_location", default: true, null: false
+    #       t.integer "alt"
+    #       t.string "lifeform", limit: 1024
+    #       t.string "text_name", limit: 100
+    #       t.text "classification"
+    #       t.boolean "gps_hidden", default: false, null: false
 
     # iNat attributes
     # NOTE: jdc 2024-06-13
@@ -131,6 +128,37 @@ class InatObsTest < UnitTestCase
     assert_equal(:inat_dqa_research.l, mock("somion_unicolor").dqa)
   end
 
+  def test_location
+    loc = locations(:albion)
+    all_bounding_boxes =
+      Location.contains_box(n: loc.north, s: loc.south,
+                            e: loc.east, w: loc.west)
+    phony_locs = Location.where(north: 90, south: -90,
+                                west: -180, east: 180).
+                 where.not(name: "Earth")
+    bounding_boxes =
+      all_bounding_boxes.where.not(id: phony_locs.select(:id))
+    assert(bounding_boxes.many?,
+           "Test needs a Location fixture with multiple true bounding boxes")
+
+    # modify a mock_inat_obs instead of trying to create one from scratch
+    mock_inat_obs = mock("somion_unicolor")
+    loc_center = "#{loc.south + ((loc.north - loc.south) / 2)}," \
+          "#{loc.west + ((loc.east - loc.west) / 2)}"
+    mock_inat_obs.inat_location = loc_center
+
+    skip("Under Construction")
+    assert_equal(mock_inat_obs.location, loc)
+  end
+
+  def test_notes
+    assert_equal(
+      { Other: "Collection by Heidi Randall. \nSmells like T. suaveolens. " },
+      mock("trametes").notes
+    )
+    assert_empty(mock("tremella_mesenterica").notes)
+  end
+
   def test_sequences
     mock_inat_obs = mock("lycoperdon")
     assert(mock_inat_obs.sequences.one?)
@@ -138,13 +166,6 @@ class InatObsTest < UnitTestCase
     assert(sequence.present?)
 
     assert_empty(mock("evernia_no_photos").sequences)
-  end
-
-  def test_notes
-    assert_equal(
-      { Other: "Collection by Heidi Randall. \nSmells like T. suaveolens. " },
-      mock("trametes").notes)
-    assert_empty(mock("tremella_mesenterica").notes)
   end
 
   def test_taxon_importable

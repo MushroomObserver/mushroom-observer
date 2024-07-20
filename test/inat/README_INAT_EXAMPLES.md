@@ -47,4 +47,4 @@ iNat fungal Obss with these fields/licenses
 <https://api.inaturalist.org/v1/observations?identified=true&license=cc0&rank=species&iconic_taxa=Fungi&quality_grade=research&page=1&order=desc&order_by=created_at&only_id=true>
 - nonderiv license
 - Fungus with photo that was uploaded to iNat >= 1 day after iNat Obs was created
-- Obs with narrower Photo license than overall Obs License
+- Obs with narrower Photo license than overall Obs License.

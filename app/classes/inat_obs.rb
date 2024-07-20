@@ -56,6 +56,10 @@ class InatObs
     obs[:location]
   end
 
+  def inat_location=(location)
+    obs[:location] = location
+  end
+
   def inat_obs_fields
     obs[:ofvs]
   end
@@ -140,7 +144,11 @@ class InatObs
     { Other: description.gsub(%r{</?p>}, "") }
   end
 
-  # :location seems simplest source for lat/lng
+  def location
+    # something like: mbr(inat_location)
+  end
+
+  # :inat_location seems simplest source for lat/lng
   # But [:geojason] might be possible.
   def lat
     inat_location.split(",").first.to_f
@@ -235,6 +243,9 @@ class InatObs
 
   def inat_taxon
     obs[:taxon]
+  end
+
+  def mbr(lat, lng)
   end
 
   def slime_mold?
