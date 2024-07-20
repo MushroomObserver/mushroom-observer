@@ -144,7 +144,6 @@ module FormsHelper
   end
 
   # Bootstrap text_field
-  # rubocop:disable Metrics/MethodLength
   def text_field_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
     args = check_for_optional_or_required_note(args)
@@ -184,7 +183,6 @@ module FormsHelper
       concat(args[:append]) if args[:append].present?
     end
   end
-  # rubocop:enable Metrics/MethodLength
 
   # MO's autocompleter_field is a text_field that fetches suggestions from the
   # db for the requested model. (For a textarea, pass textarea: true.) The
