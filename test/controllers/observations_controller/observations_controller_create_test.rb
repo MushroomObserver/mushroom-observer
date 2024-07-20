@@ -49,7 +49,6 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     n_count = Name.count
     score   = user.reload.contribution
     params  = modified_generic_params(params, user)
-
     post_requires_login(:create, params)
 
     begin
@@ -520,11 +519,11 @@ class ObservationsControllerCreateTest < FunctionalTestCase
   end
 
   def test_create_observation_with_empty_geolocation_and_location
-    # Make sure it doesn't accept no location AND no lat/long.
+    # We do accept no location AND no lat/long, we assign "Earth"
     generic_construct_observation(
       { observation: { place_name: "", lat: "", lng: "" },
         naming: { name: "Unknown" } },
-      0, 0, 0
+      1, 0, 0
     )
   end
 
