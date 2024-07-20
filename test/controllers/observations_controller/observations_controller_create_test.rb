@@ -519,11 +519,11 @@ class ObservationsControllerCreateTest < FunctionalTestCase
   end
 
   def test_create_observation_with_empty_geolocation_and_location
-    # We do accept no location AND no lat/long, we assign "Earth"
+    # Make sure it doesn't accept no location AND no lat/long.
     generic_construct_observation(
       { observation: { place_name: "", lat: "", lng: "" },
         naming: { name: "Unknown" } },
-      1, 0, 0
+      0, 0, 0
     )
   end
 
