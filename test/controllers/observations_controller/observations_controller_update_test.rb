@@ -337,7 +337,6 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     }
     login(user.login)
     put(:update, params: params)
-
     assert_redirected_to(action: :show, id: obs.id)
     assert_equal(notes, obs.reload.notes)
   end

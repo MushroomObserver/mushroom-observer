@@ -144,7 +144,7 @@ module ObservationsController::EditAndUpdate
   end
 
   def try_to_save_observation_if_there_are_changes
-    return unless @dubious_where_reasons == [] && @observation.changed?
+    return unless @dubious_where_reasons.blank? && @observation.changed?
 
     @observation.updated_at = Time.zone.now
     if save_observation
