@@ -116,7 +116,7 @@ module ObservationsController::Create
     # With a Location instance, we can use the `display_name=` setter method,
     # which figures out scientific/postal format of user input and sets
     # location `name` and `scientific_name` accordingly.
-    @location.display_name = Location.user_format(@user, place_name)
+    @location.display_name = place_name
   end
 
   # The form may be in a state where it has an existing MO Location name in the
@@ -147,9 +147,7 @@ module ObservationsController::Create
       return true
     end
 
-    @dubious_where_reasons =
-      Location.dubious_name?(place_name, true)
-
+    @dubious_where_reasons = Location.dubious_name?(name, true)
     @dubious_where_reasons.empty?
   end
 
