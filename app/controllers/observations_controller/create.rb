@@ -128,14 +128,17 @@ module ObservationsController::Create
   # location and use that for the obs.
   def validate_place_name
     place_name = @observation.place_name
+    lat = @observation.lat
+    lng = @observation.lng
+    return false if !lat && !lng && place_name.blank?
+
     # Set location to unknown if place_name blank && lat/lng are present
-    if Location.is_unknown?(place_name) ||
-       (@observation.lat && @observation.lng && place_name.blank?)
+    if Location.is_unknown?(place_name) || (lat && lng && place_name.blank?)
       @observation.location = Location.unknown
       @observation.where = nil
+      # If it's unknown, we don't need to check for duplicates.
+      return true
     end
-    # If there is no place_name, we don't need to check for duplicates.
-    return true if place_name.blank?
 
     name = Location.user_format(@user, place_name)
     # can't use Location.location_exists?, true for undefined where strings
@@ -169,10 +172,6 @@ module ObservationsController::Create
     update_species_lists
     save_collection_number
     save_herbarium_record
-  end
-
-  def create_location_if_requested
-    nil unless @location
   end
 
   def update_naming(reason)
