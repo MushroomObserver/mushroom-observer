@@ -394,7 +394,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Carousel items are re-output with image records this time.
     all(".carousel-indicator").last.click
 
-    second_item = find(".carousel-item", text: "25.7582")
+    assert_selector(".carousel-item", text: "25.7582", visible: :all)
+    second_item = find(".carousel-item", text: "25.7582", visible: :all)
     items = all(".carousel-item", visible: :all)
     assert_equal(items.length, 2)
 
