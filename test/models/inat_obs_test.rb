@@ -147,8 +147,7 @@ class InatObsTest < UnitTestCase
           "#{loc.west + ((loc.east - loc.west) / 2)}"
     mock_inat_obs.inat_location = loc_center
 
-    skip("Under Construction")
-    assert_equal(mock_inat_obs.location, loc)
+    assert_equal(loc, mock_inat_obs.location)
   end
 
   def test_notes

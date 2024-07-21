@@ -32,6 +32,7 @@
 #  notes
 #  lat
 #  lng
+#  location
 #  text_name
 #  when
 #  where
@@ -144,8 +145,28 @@ class InatObs
     { Other: description.gsub(%r{</?p>}, "") }
   end
 
+  # min bounding box of (iNat location adjusted for accuracy)
   def location
-    # something like: mbr(inat_location)
+    accuracy_in_meters = obs[:public_positional_accuracy]
+
+    accuracy_in_degrees =
+      if obs[:geoprivacy].present?
+        { lat: accuracy_in_meters / 111_111,
+          lng: accuracy_in_meters / 111_111 * Math.cos(to_rad(lat)) }
+      else
+        # FIXME: This is a gross approximate placeholder
+        # https://www.inaturalist.org/pages/help#geoprivacy
+        { lat: accuracy_in_meters / 111_111,
+          lng: accuracy_in_meters / 111_111 }
+      end
+
+    north = [lat + accuracy_in_degrees[:lat], 90].min
+    south = [lat - accuracy_in_degrees[:lat], -90].max
+    east = ((lng + 180 + accuracy_in_degrees[:lng]) % 360) - 180
+    west = ((lng + 180 - accuracy_in_degrees[:lng]) % 360) - 180
+
+    Location.contains_box(n: north, s: south, e: east, w: west).
+      min_by { |loc| location_box(loc).box_area }
   end
 
   # :inat_location seems simplest source for lat/lng
@@ -245,9 +266,6 @@ class InatObs
     obs[:taxon]
   end
 
-  def mbr(lat, lng)
-  end
-
   def slime_mold?
     # NOTE: 2024-06-01 jdc
     # slime molds are polypheletic https://en.wikipedia.org/wiki/Slime_mold
@@ -258,5 +276,15 @@ class InatObs
     # that's monophyletic for slime molds?
     # Another solution: use IF API to see if IF includes the name.
     obs.dig(:taxon, :iconic_taxon_name) == "Protozoa"
+  end
+
+  def to_rad(degrees)
+    degrees * Math::PI / 180.0
+  end
+
+  # copied from AutoComplete::ForLocationContaining
+  def location_box(loc)
+    Mappable::Box.new(north: loc[:north], south: loc[:south],
+                      east: loc[:east], west: loc[:west])
   end
 end
