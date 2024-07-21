@@ -148,6 +148,13 @@ class InatObsTest < UnitTestCase
     mock_inat_obs.inat_location = loc_center
 
     assert_equal(loc, mock_inat_obs.location)
+
+    # Simulate nil accuracy, which is the case for some iNat obss
+    # e.g., https://www.inaturalist.org/observations/230672879
+    mock_inat_obs.inat_positional_accuracy = nil
+    mock_inat_obs.inat_public_positional_accuracy = nil
+
+    assert_equal(loc, mock_inat_obs.location)
   end
 
   def test_notes

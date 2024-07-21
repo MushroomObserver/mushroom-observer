@@ -57,6 +57,7 @@ class InatObs
     obs[:location]
   end
 
+  # for test purposes
   def inat_location=(location)
     obs[:location] = location
   end
@@ -92,8 +93,20 @@ class InatObs
       join(", ").delete_prefix(", ")
   end
 
+  def inat_positional_accuracy
+    obs[:public_positional_accuracy]
+  end
+
+  def inat_positional_accuracy=(accuracy)
+    obs[:positional_accuracy] = accuracy
+  end
+
   def inat_public_positional_accuracy
     obs[:public_positional_accuracy]
+  end
+
+  def inat_public_positional_accuracy=(accuracy)
+    obs[:public_positional_accuracy] = accuracy
   end
 
   def inat_quality_grade
@@ -147,7 +160,7 @@ class InatObs
 
   # min bounding box of (iNat location adjusted for accuracy)
   def location
-    accuracy_in_meters = obs[:public_positional_accuracy]
+    accuracy_in_meters = obs[:public_positional_accuracy] || 0
 
     accuracy_in_degrees =
       if obs[:geoprivacy].present?

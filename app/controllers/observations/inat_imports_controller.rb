@@ -149,6 +149,7 @@ module Observations
 
       @observation = Observation.new(
         when: inat_obs.when,
+        location: inat_obs.location,
         where: inat_obs.where,
         lat: inat_obs.lat,
         lng: inat_obs.lng,

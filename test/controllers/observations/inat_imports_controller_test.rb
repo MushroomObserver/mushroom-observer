@@ -132,6 +132,15 @@ module Observations
       mock_inat_response = File.read("test/inat/#{filename}.txt")
       inat_obs_id = InatObs.new(mock_inat_response).inat_id
 
+      loc = Location.create(
+        user: users(:rolf),
+        name: "Troutdale, Multnomah Co., Oregon, USA",
+        north: 45.5609,
+        south: 45.5064,
+        east: -122.367,
+        west: -122.431
+      )
+
       stub_inat_api_request(inat_obs_id, mock_inat_response)
       simulate_authorization(user: user, inat_obs_id: inat_obs_id)
       stub_token_request
@@ -151,6 +160,8 @@ module Observations
       assert_equal(inat_obs_id, obs.inat_id)
 
       assert_equal(0, obs.images.length, "Obs should not have 0 images")
+
+      assert_equal(loc, obs.location)
 
       assert(obs.comments.any?, "Imported iNat should have >= 1 Comment")
       obs_comments =
