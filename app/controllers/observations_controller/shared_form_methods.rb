@@ -126,7 +126,9 @@ module ObservationsController::SharedFormMethods
   ##############################################################################
   # Save location only (at this point rest of form is okay).
   def save_location
-    if @location.save
+    if save_with_log(@location)
+      # Associate the location with the observation
+      @observation.location_id = @location.id
       flash_notice(:runtime_location_success.t(id: @location.id))
       true
     else

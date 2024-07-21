@@ -151,18 +151,6 @@ module ObservationsController::Create
     @dubious_where_reasons.empty?
   end
 
-  def save_location
-    if save_with_log(@location)
-      # Associate the location with the observation
-      @observation.location_id = @location.id
-      true
-    else
-      # Failed to create location
-      flash_object_errors(@location)
-      false
-    end
-  end
-
   def save_everything_else(reason)
     update_naming(reason)
     attach_good_images
