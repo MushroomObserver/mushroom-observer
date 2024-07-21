@@ -124,6 +124,38 @@ module ObservationsController::SharedFormMethods
   end
 
   ##############################################################################
+  # We now have an @observation, and maybe a "-1" location_id, indicating a
+  # new Location (if accompanied by bounding box lat/lng). If everything is
+  # present, create a new @location, and associate it with the @observation
+  def rough_cut_new_location_if_requested
+    # Ensure we have the minimum necessary to create a new location
+    unless @observation.location_id == -1 &&
+           (place_name = params.dig(:observation, :place_name)).present? &&
+           (north = params.dig(:location, :north)).present? &&
+           (south = params.dig(:location, :south)).present? &&
+           (east = params.dig(:location, :east)).present? &&
+           (west = params.dig(:location, :west)).present?
+      return false
+    end
+
+    # Ignore hidden attribute even if the obs is hidden, because saving a
+    # Location with `hidden: true` fuzzes the lat/lng bounds unpredictably.
+    attributes = { hidden: false, user_id: @user.id,
+                   north:, south:, east:, west: }
+    # Add optional attributes. :notes not implemented yet.
+    [:high, :low, :notes].each do |key|
+      if (val = params.dig(:location, key)).present?
+        attributes[key] = val
+      end
+    end
+
+    @location = Location.new(attributes)
+    # With a Location instance, we can use the `display_name=` setter method,
+    # which figures out scientific/postal format of user input and sets
+    # location `name` and `scientific_name` accordingly.
+    @location.display_name = place_name
+  end
+
   # Save location only (at this point rest of form is okay).
   def save_location
     if save_with_log(@location)
