@@ -17,7 +17,7 @@ module Observations
 
   class InatImportsControllerTest < FunctionalTestCase
     INAT_OBS_REQUEST_PREFIX = "https://api.inaturalist.org/v1/observations?"
-    INAT_OBS_REQUEST_POSTFIX = "&order=desc&order_by=created_at&only_id=false"
+    INAT_OBS_REQUEST_POSTFIX = "&order=asc&order_by=id&only_id=false"
     # Where iNat will send the code once authorized
     REDIRECT_URI =
       "http://localhost:3000/observations/inat_imports/authenticate"
@@ -58,11 +58,11 @@ module Observations
     def test_create_inat_import_no_consent
       mock_inat_response =
         File.read("test/inat/evernia_no_photos.txt")
-      inat_obs_id = InatObs.new(mock_inat_response).inat_id
+      inat_import_ids = InatObs.new(mock_inat_response).inat_id
       # TODO: remove consent key after creating model with default consent
-      params = { inat_ids: inat_obs_id, consent: 0 }
+      params = { inat_ids: inat_import_ids, consent: 0 }
 
-      stub_inat_api_request(inat_obs_id, mock_inat_response)
+      stub_inat_api_request(inat_import_ids, mock_inat_response)
 
       login
 
@@ -130,7 +130,7 @@ module Observations
       user = rolf
       filename = "evernia_no_photos"
       mock_inat_response = File.read("test/inat/#{filename}.txt")
-      inat_obs_id = InatObs.new(mock_inat_response).inat_id
+      inat_import_ids = InatObs.new(mock_inat_response).inat_id
 
       loc = Location.create(
         user: users(:rolf),
@@ -141,11 +141,11 @@ module Observations
         west: -122.431
       )
 
-      stub_inat_api_request(inat_obs_id, mock_inat_response)
-      simulate_authorization(user: user, inat_obs_id: inat_obs_id)
+      stub_inat_api_request(inat_import_ids, mock_inat_response)
+      simulate_authorization(user: user, inat_import_ids: inat_import_ids)
       stub_token_request
 
-      params = { inat_ids: inat_obs_id, code: "MockCode" }
+      params = { inat_ids: inat_import_ids, code: "MockCode" }
       login(user.login)
 
       assert_difference("Observation.count", 1, "Failed to create Obs") do
@@ -157,7 +157,7 @@ module Observations
       assert_redirected_to(observations_path)
 
       assert_equal("mo_inat_import", obs.source)
-      assert_equal(inat_obs_id, obs.inat_id)
+      assert_equal(inat_import_ids, obs.inat_id)
 
       assert_equal(0, obs.images.length, "Obs should not have 0 images")
 
@@ -213,13 +213,13 @@ module Observations
       user = rolf
       filename = "ceanothus_cordulatus"
       mock_inat_response = File.read("test/inat/#{filename}.txt")
-      inat_obs_id = InatObs.new(mock_inat_response).inat_id
+      inat_import_ids = InatObs.new(mock_inat_response).inat_id
 
-      stub_inat_api_request(inat_obs_id, mock_inat_response)
-      simulate_authorization(user: user, inat_obs_id: inat_obs_id)
+      stub_inat_api_request(inat_import_ids, mock_inat_response)
+      simulate_authorization(user: user, inat_import_ids: inat_import_ids)
       stub_token_request
 
-      params = { inat_ids: inat_obs_id, code: "MockCode" }
+      params = { inat_ids: inat_import_ids, code: "MockCode" }
       login(user.login)
 
       assert_no_difference(
@@ -228,20 +228,41 @@ module Observations
         post(:authenticate, params: params)
       end
 
-      assert_flash_text(:inat_taxon_not_importable.l(id: inat_obs_id))
+      assert_flash_text(:inat_taxon_not_importable.l(id: inat_import_ids))
+    end
+
+    def test_create_import_multiple
+      inat_obss =
+        "216357655, 219783802" # evernia_no_photos, fuligo_septica
+      user = users(:rolf)
+      filename = "listed_ids"
+      mock_inat_response = File.read("test/inat/#{filename}.txt")
+
+      # test that mock was constructed properly
+      json = JSON.parse(mock_inat_response)
+      assert_equal(2, json["total_results"])
+      assert_equal(1, json["page"])
+      assert_equal(30, json["per_page"])
+      # mock is sorted by id, asc
+      assert_equal(216_357_655, json["results"].first["id"])
+      assert_equal(219_783_802, json["results"].second["id"])
+
+      # stub_inat_api_request(inat_import_ids, mock_inat_response)
+      # simulate_authorization(user: user, inat_import_ids: inat_import_ids)
+      stub_token_request
     end
 
     def import_mock_observation(filename)
       user = users(:rolf)
       mock_inat_response = File.read("test/inat/#{filename}.txt")
       inat_obs = InatObs.new(mock_inat_response)
-      inat_obs_id = inat_obs.inat_id
+      inat_import_ids = inat_obs.inat_id
 
-      stub_inat_api_request(inat_obs_id, mock_inat_response)
-      simulate_authorization(user: user, inat_obs_id: inat_obs_id)
+      stub_inat_api_request(inat_import_ids, mock_inat_response)
+      simulate_authorization(user: user, inat_import_ids: inat_import_ids)
       stub_token_request
 
-      params = { inat_ids: inat_obs_id, code: "MockCode" }
+      params = { inat_ids: inat_import_ids, code: "MockCode" }
       login(user.login)
 
       # NOTE: Stubs the importer's return value, but not its side-effect --
@@ -256,10 +277,10 @@ module Observations
       Observation.order(created_at: :asc).last
     end
 
-    def stub_inat_api_request(inat_obs_id, mock_inat_response)
+    def stub_inat_api_request(inat_obs_ids, mock_inat_response)
       WebMock.stub_request(
         :get,
-        "#{INAT_OBS_REQUEST_PREFIX}id=#{inat_obs_id}" \
+        "#{INAT_OBS_REQUEST_PREFIX}id=#{inat_obs_ids}" \
           "#{INAT_OBS_REQUEST_POSTFIX}"
       ).to_return(body: mock_inat_response)
     end
@@ -298,9 +319,9 @@ module Observations
         mo_license.id
     end
 
-    def simulate_authorization(user: rolf, inat_obs_id: "")
+    def simulate_authorization(user: rolf, inat_import_ids: "")
       inat_import = InatImport.find_or_create_by(user: user)
-      inat_import.inat_ids = inat_obs_id
+      inat_import.inat_ids = inat_import_ids
       inat_import.state = "Authorizing"
       inat_import.save
       stub_request(:any, authorization_url)
