@@ -134,8 +134,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # we should have the new type of location_google autocompleter now
     assert_selector("[data-type='location_google']")
     # Place name should now have been filled by Google, no MO locations match
-    assert_equal(UNIVERSITY_PARK[:name],
-                 find('[id$="observation_place_name"]').value)
+    assert_field("observation_place_name", with: UNIVERSITY_PARK[:name])
     assert_field("observation_location_id", with: "-1", type: :hidden)
 
     # now check that the "use_exif" button is disabled
