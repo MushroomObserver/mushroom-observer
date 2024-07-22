@@ -382,8 +382,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Carousel items are re-output with image records this time.
     all(".carousel-indicator").last.click
 
-    assert_selector(".carousel-item", text: "25.7582", visible: :all)
-    second_item = find(".carousel-item", text: "25.7582", visible: :all)
+    assert_selector(".carousel-item", text: SO_PASA_EXIF[:lat].to_s,
+                                      visible: :all)
+    second_item = find(".carousel-item", text: SO_PASA_EXIF[:lat].to_s,
+                                         visible: :all)
     items = all(".carousel-item", visible: :all)
     assert_equal(items.length, 2)
 
@@ -596,10 +598,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
 
   def assert_image_gps_copied_to_obs(image_data)
-    assert_equal(image_data[:lat].to_s, find('[id$="observation_lat"]').value)
-    assert_equal(image_data[:lng].to_s, find('[id$="observation_lng"]').value)
-    assert_equal(image_data[:alt].to_s,
-                 find('[id$="observation_alt"]').value.to_i.to_s)
+    assert_field("observation_lat", with: image_data[:lat].to_s)
+    assert_field("observation_lng", with: image_data[:lng].to_s)
+    # We look up the alt from lat/lng, so it's not copied from the image.
+    # assert_field("observation_alt", with: image_data[:alt].to_i.to_s)
   end
 
   def assert_image_date_copied_to_obs(image_data)
@@ -678,7 +680,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
     assert_gps_equal(expected_values[:lat], new_obs.lat.to_f)
     assert_gps_equal(expected_values[:lng], new_obs.lng.to_f)
-    assert_gps_equal(expected_values[:alt], new_obs.alt.to_f)
+    # We look up the alt from lat/lng, so it's not copied from the image.
+    # assert_gps_equal(expected_values[:alt], new_obs.alt.to_f)
   end
 
   def assert_observation_has_correct_name(expected_values)
