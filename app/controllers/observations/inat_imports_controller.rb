@@ -143,7 +143,7 @@ module Observations
     end
 
     def import_one_observation(inat_obs_id)
-      imported_inat_obs_data = inat_search_observations(inat_obs_id)
+      imported_inat_obs_data = inat_search_observations(ids: inat_obs_id)
       inat_obs = InatObs.new(imported_inat_obs_data)
       return not_importable(inat_obs) unless inat_obs.importable?
 
@@ -178,9 +178,11 @@ module Observations
       add_inat_summmary_data(inat_obs)
     end
 
-    def inat_search_observations(ids)
-      operation = "/observations?id=#{ids}" \
-                  "&order=asc&order_by=id&only_id=false"
+    def inat_search_observations(ids: nil, only_id: false,
+                                 sort: "order=asc&order_by=id",
+                                 other_params: nil)
+      operation =
+        "/observations?id=#{ids}&only_id=#{only_id}&#{sort}&#{other_params}"
       ::Inat.new(operation: operation, token: inat_import.token).body
     end
 
