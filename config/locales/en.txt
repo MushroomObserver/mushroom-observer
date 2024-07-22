@@ -2989,8 +2989,7 @@
   inat_dqa_casual: Casual
   inat_dqa_needs_id: Needs ID
   inat_dqa_research: Research Grade
-  inat_id: iNat observation number
-  inat_ids: iNat observation numbers
+  inat_id_list: "Comma separated list of iNat observation #s"
   inat_not_single_id: Please enter a single iNat observation number
   runtime_illegal_inat_id: iNat observation number can contain only numbers, commas, and spaces
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data

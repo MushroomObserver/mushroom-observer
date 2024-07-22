@@ -4,7 +4,7 @@
 
 <div>
   <%= form_with url: observations_inat_imports_path, method: :post do |f| %>
-    <%= f.label :inat_id, "#{:inat_id.l}: " %>
+    <%= f.label :inat_id, "#{:inat_id_list.l}: " %>
     <%# Plural `inat_ids` for compatibility with eventual bulk import %>
     <%= f.text_field(:inat_ids, size: 10, value: @inat_ids,
         class: "form-control") %>
