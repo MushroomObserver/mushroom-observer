@@ -255,6 +255,7 @@ east_lt_west_location:
 perkatkun:
   <<: *DEFAULTS
   name: Perkatkun, Wrangel Island, Russia
+  # NOTE: MySQL rounds the following. jdc 2024-07-06
   north: 71.154802
   west: -179.809370
   south: 71.104900

@@ -11,11 +11,19 @@ class AutoComplete::ForHerbarium < AutoComplete::ByWord
       order(
         Arel.when(Herbarium[:code].is_null).then(Herbarium[:name]).
              else(Herbarium[:code]).asc, Herbarium[:name].asc
-      ).pluck(:code, :name, :id)
+      )
 
-    herbaria.map! do |code, name, id|
-      { name: code.empty? ? name : "#{code} - #{name}", id: id }
+    # Turn the instances into hashes, and figure out what name to display
+    matches = herbaria.map do |herbarium|
+      herbarium = herbarium.attributes.symbolize_keys
+      herbarium[:name] = if herbarium[:code].blank?
+                           herbarium[:name]
+                         else
+                           "#{herbarium[:code]} - #{herbarium[:name]}"
+                         end
+      herbarium.delete(:code) # faster than `except`
+      herbarium
     end
-    herbaria.sort_by! { |herb| herb[:name] }
+    matches.sort_by! { |herb| herb[:name] }
   end
 end

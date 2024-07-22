@@ -14,7 +14,8 @@ class ImagePresenter < BasePresenter
     :lightbox_data,     # contains data passed to lightbox (incl. caption)
     :votes,             # show votes? boolean
     :original,          # show original image filename? (boolean)
-    :html_id            # dom_id for broadcasts (image.id added)
+    :html_id,           # dom_id for broadcasts (image.id added)
+    :upload             # is this an upload image? (no image instance, id fake)
 
   def initialize(image, args = {})
     super
@@ -51,10 +52,15 @@ class ImagePresenter < BasePresenter
       original: false,
       is_set: true,
       full_width: false, # false to constrain width
-      id_prefix: "interactive_image"
+      id_prefix: "interactive_image",
+      upload: false
     }
     args = default_args.merge(args)
-    img_urls = image&.all_urls || Image.all_urls(image_id)
+    img_urls = if args[:upload] == true
+                 {}
+               else
+                 image&.all_urls || Image.all_urls(image_id)
+               end
 
     args_to_presenter(image, image_id, img_urls, args)
     sizing_info_to_presenter(image, args)
@@ -63,7 +69,7 @@ class ImagePresenter < BasePresenter
 
   def args_to_presenter(image, image_id, img_urls, args)
     # Store these urls once, since they are computed
-    img_src = img_urls[args[:size]]
+    img_src = img_urls[args[:size]] || ""
     # img_srcset = thumbnail_srcset(img_urls[:small], img_urls[:medium],
     #                               img_urls[:large], img_urls[:huge])
     # img_sizes = args[:data_sizes] || thumbnail_srcset_sizes
@@ -104,6 +110,8 @@ class ImagePresenter < BasePresenter
   end
 
   def sizing_info_to_presenter(image, args)
+    return {} unless image
+
     # For lazy load content pre-sizing: set img width and height, using
     # `style= "padding-bottom: proportion%;"`
     # NOTE: requires image, or defaults to 1:1. Be sure it works in all cases
@@ -127,6 +135,8 @@ class ImagePresenter < BasePresenter
   end
 
   def lightbox_args_to_presenter(image, image_id, img_urls, args)
+    return {} unless image
+
     # The src size appearing in the lightbox is a user pref
     lb_size = User.current&.image_size&.to_sym || :huge
 

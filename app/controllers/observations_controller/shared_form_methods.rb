@@ -13,7 +13,6 @@
 #    init_specimen_vars
 #    init_specimen_vars_for_reload
 #    init_project_vars
-#    init_project_vars_for_create
 #    init_project_vars_for_reload
 #    init_list_vars
 #    init_list_vars_for_reload
@@ -78,6 +77,7 @@ module ObservationsController::SharedFormMethods
     @collectors_name   = @user.legal_name
     @collectors_number = ""
     @herbarium_name    = @user.preferred_herbarium_name
+    @herbarium_id      = @user.preferred_herbarium&.id
     @accession_number  = ""
   end
 
@@ -90,6 +90,7 @@ module ObservationsController::SharedFormMethods
     return unless params[:herbarium_record]
 
     @herbarium_name   = params[:herbarium_record][:herbarium_name]
+    @herbarium_id     = params[:herbarium_record][:herbarium_id]
     @accession_number = params[:herbarium_record][:accession_number]
   end
 
@@ -97,14 +98,6 @@ module ObservationsController::SharedFormMethods
     @projects = User.current.projects_member(order: :title,
                                              include: :user_group)
     @project_checks = {}
-  end
-
-  def init_project_vars_for_create
-    init_project_vars
-    @projects.each do |proj|
-      @project_checks[proj.id] = (proj.open_membership &&
-                                  proj.current?)
-    end
   end
 
   def init_project_vars_for_reload
@@ -201,7 +194,7 @@ module ObservationsController::SharedFormMethods
 
   def update_good_images
     # Get list of images first.
-    @good_images = (params[:good_images] || "").split.filter_map do |id|
+    @good_images = (params[:good_image_ids] || "").split.filter_map do |id|
       Image.safe_find(id.to_i)
     end
 
@@ -226,6 +219,16 @@ module ObservationsController::SharedFormMethods
         flash_object_errors(image)
       end
     end
+  end
+
+  # For now, this has to read the exif off the actual file on the server.
+  # This is because the exif data is not stored on the Image record.
+  def get_exif_data(images)
+    data = {}
+    images.each do |image|
+      data[image.id] = image&.read_exif_geocode || {}
+    end
+    data
   end
 
   # Now that the observation has been successfully created, we can attach

@@ -24,9 +24,7 @@ module ObservationsController::EditAndUpdate
   #   @good_images                      list of images already attached
   #
   def edit
-    return unless (@observation = find_or_goto_index(
-      Observation, params[:id].to_s
-    ))
+    return unless find_observation!
 
     # Make sure user owns this observation!
     unless check_permission!(@observation)
@@ -36,14 +34,21 @@ module ObservationsController::EditAndUpdate
     init_license_var
     init_new_image_var(@observation.when)
 
-    # Initialize form.
+    # Initialize form. Put the thumb image first.
     @images      = []
-    @good_images = @observation.images
+    @good_images = @observation.images_sorted
+    @exif_data = get_exif_data(@good_images)
+    @location = @observation.location
     init_project_vars_for_edit(@observation)
     init_list_vars_for_edit(@observation)
   end
 
   private
+
+  def find_observation!
+    @observation = Observation.edit_includes.safe_find(params[:id]) ||
+                   flash_error_and_goto_index(Observation, params[:id])
+  end
 
   def init_project_vars_for_edit(obs)
     init_project_vars
@@ -66,9 +71,7 @@ module ObservationsController::EditAndUpdate
   public
 
   def update
-    return unless (@observation = find_or_goto_index(
-      Observation, params[:id].to_s
-    ))
+    return unless find_observation!
 
     # Make sure user owns this observation!
     unless check_permission!(@observation)
@@ -84,6 +87,7 @@ module ObservationsController::EditAndUpdate
     warn_if_unchecking_specimen_with_records_present!
     strip_images_if_observation_gps_hidden
     validate_edit_place_name
+    detach_removed_images
     try_to_upload_images
     try_to_save_observation_if_there_are_changes
 
@@ -116,6 +120,20 @@ module ObservationsController::EditAndUpdate
     return if validate_place_name && validate_projects
 
     @any_errors = true
+  end
+
+  # As of 2024-06-01, users can remove images right on the edit obs form.
+  def detach_removed_images
+    new_ids = params[:good_image_ids]&.split || []
+
+    # If it didn't make the cut, remove it.
+    @observation.images.each do |img|
+      next if new_ids.include?(img.id.to_s)
+
+      @observation.remove_image(img)
+      img.log_remove_from(@observation)
+      flash_notice(:runtime_image_remove_success.t(id: img.id))
+    end
   end
 
   def try_to_upload_images

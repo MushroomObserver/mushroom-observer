@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ObservationsController::NewAndCreate
+module ObservationsController::Create
   include ObservationsController::SharedFormMethods
   include ObservationsController::Validators
 
@@ -16,86 +16,18 @@ module ObservationsController::NewAndCreate
   #   params[:naming][:vote][...]       vote args
   #   params[:naming][:reasons][n][...] naming_reasons args
   #   params[:image][n][...]            image args
-  #   params[:good_images]              images already downloaded
+  #   params[:good_image_ids]           images already uploaded
   #   params[:was_js_on]                was form javascripty? ("yes" = true)
   #
   # Outputs:
   #   @observation, @naming, @vote      empty objects
-  #   @given_name, @names, @valid_names       name validation
+  #   @given_name, @names, @valid_names name validation
   #   @reasons                          array of naming_reasons
   #   @images                           array of images
   #   @licenses                         used for image license menu
   #   @new_image                        blank image object
-  #   @good_images                      list of images already downloaded
+  #   @good_images                      list of images already uploaded
   #
-
-  def new
-    # These are needed to create pulldown menus in form.
-    init_license_var
-    init_new_image_var(Time.zone.now)
-
-    # Clear search list. [Huh? -JPH 20120513]
-    clear_query_in_session
-
-    @observation = Observation.new
-    @naming      = Naming.new
-    @vote        = Vote.new
-    @given_name  = "" # can't be nil else rails tries to call @name.name
-    @names       = nil
-    @valid_names = nil
-    @reasons     = @naming.init_reasons
-    @images      = []
-    @good_images = []
-    @field_code  = params[:field_code]
-    init_specimen_vars
-    init_project_vars_for_create
-    init_list_vars
-    defaults_from_last_observation_created
-    add_field_slip_project(@field_code)
-  end
-
-  ##############################################################################
-
-  private
-
-  def defaults_from_last_observation_created
-    # Grab defaults for date and location from last observation the user
-    # created if it was less than an hour ago
-    # (i.e. if its creation time is larger than one hour ago)
-    last_observation = Observation.where(user_id: @user.id).
-                       order(:created_at).last
-    return unless last_observation && last_observation.created_at > 1.hour.ago
-
-    %w[when where location_id is_collection_location gps_hidden].each do |attr|
-      @observation.send(:"#{attr}=", last_observation.send(attr))
-    end
-
-    last_observation.projects.where(open_membership: false).
-      find_each do |project|
-        next unless project.current?
-
-        @project_checks[project.id] = true
-      end
-
-    last_observation.species_lists.each do |list|
-      if check_permission(list)
-        @lists << list unless @lists.include?(list)
-        @list_checks[list.id] = true
-      end
-    end
-  end
-
-  def add_field_slip_project(code)
-    project = FieldSlip.find_by(code: code)&.project
-    return unless project
-    return unless project&.member?(User.current)
-
-    @project_checks[project.id] = true
-  end
-
-  ##############################################################################
-
-  public
 
   def create
     @observation = create_observation_object(params[:observation])
@@ -167,6 +99,7 @@ module ObservationsController::NewAndCreate
     @naming = Naming.construct({}, @observation)
     @vote = Vote.construct(params.dig(:naming, :vote), @naming)
     update_good_images
+    @exif_data = get_exif_data(@good_images) # in case of form reload
     create_image_objects_and_update_bad_images
   end
 
@@ -315,7 +248,7 @@ module ObservationsController::NewAndCreate
     @new_image.when  = @observation.when
     @field_code = params[:field_code]
     init_specimen_vars_for_reload
-    init_project_vars_for_create
+    init_project_vars
     init_project_vars_for_reload
     init_list_vars_for_reload
     render(action: :new, location: new_observation_path(q: get_query_param))
