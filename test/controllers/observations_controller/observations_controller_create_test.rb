@@ -36,10 +36,9 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     { herbarium_name: "", accession_number: "" }
   end
 
-  def location_exists_or_place_name_blank(params)
-    Location.find_by(name: params[:observation][:place_name]) ||
-      Location.is_unknown?(params[:observation][:place_name]) ||
-      params[:observation][:place_name].blank?
+  def location_exists_or_place_name_blank(params, user)
+    name = Location.user_format(user, params[:observation][:place_name])
+    Location.find_by(name:) || Location.is_unknown?(name) || name.blank?
   end
 
   # Test constructing observations in various ways (with minimal namings)
@@ -56,7 +55,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     begin
       if o_num.zero?
         assert_response(:success)
-      elsif location_exists_or_place_name_blank(params)
+      elsif location_exists_or_place_name_blank(params, user)
         # assert_redirected_to(action: :show)
         assert_response(:redirect)
         assert_match(%r{/test.host/\d+\Z}, @response.redirect_url)
@@ -715,10 +714,11 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       params.merge({ observation: { place_name: where, location_id: -1 } }),
       1, 0, 0, 1
     )
+    # Location should now already exist (because of the above).
     where = "USA, California, Los Angeles Co., Burbank"
     generic_construct_observation(
       params.merge({ observation: { place_name: where, location_id: -1 } }),
-      1, 0, 0, 1, roy
+      1, 0, 0, 0, roy
     )
 
     # Test mix of city and county
@@ -727,10 +727,11 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       params.merge({ observation: { place_name: where, location_id: -1 } }),
       1, 0, 0, 1
     )
+    # Location should now already exist (because of the above).
     where = "USA, Massachusetts, Barnstable Co., Falmouth"
     generic_construct_observation(
       params.merge({ observation: { place_name: where, location_id: -1 } }),
-      1, 0, 0, 1, roy
+      1, 0, 0, 0, roy
     )
 
     # Test some bad terms

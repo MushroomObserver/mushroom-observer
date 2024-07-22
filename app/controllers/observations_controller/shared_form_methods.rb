@@ -124,10 +124,16 @@ module ObservationsController::SharedFormMethods
   end
 
   ##############################################################################
-  # We now have an @observation, and maybe a "-1" location_id, indicating a
-  # new Location (if accompanied by bounding box lat/lng). If everything is
-  # present, create a new @location, and associate it with the @observation
-  def rough_cut_new_location_if_requested
+  #  Locations — may be created in the obs form
+  #
+  # By now we have an @observation, and maybe a "-1" location_id, indicating a
+  # new Location if accompanied by bounding box lat/lng. If the location name
+  # does not exist already, and the bounding box is present, create a new
+  # @location, and associate it with the @observation
+  def create_location_object_if_new
+    # Resets the location_id to MO's existing Location if it already exists.
+    return false if place_name_exists?
+
     # Ensure we have the minimum necessary to create a new location
     unless @observation.location_id == -1 &&
            (place_name = params.dig(:observation, :place_name)).present? &&
@@ -156,12 +162,40 @@ module ObservationsController::SharedFormMethods
     @location.display_name = place_name
   end
 
+  # Check if we somehow got a location name that exists in the db, but didn't
+  # get a location_id, or the location name is out of sync with the location_id.
+  # (This should not usually happen with the autocompleter). If it happens,
+  # match the obs to the existing Location by name. If the user was trying to
+  # create a new Location with the existing name, use the existing location and
+  # flash that we did that, returning `true` so we can bail on creating a "new"
+  # location, but go ahead with the observation save.
+  def place_name_exists?
+    name = Location.user_format(@user, @observation.place_name)
+    location = Location.find_by(name: name)
+    if !@observation.location_id&.positive? && location ||
+       (location && (@observation.location_id != location&.id))
+      if @observation.location_id == -1
+        flash_warning(:runtime_location_already_exists.t(name: name))
+      end
+      @observation.location_id = location.id
+      return true
+    end
+
+    false
+  end
+
+  def try_to_save_location_if_new
+    return if @any_errors || !@location&.new_record? || save_location
+
+    @any_errors = true
+  end
+
   # Save location only (at this point rest of form is okay).
   def save_location
     if save_with_log(@location)
       # Associate the location with the observation
       @observation.location_id = @location.id
-      flash_notice(:runtime_location_success.t(id: @location.id))
+      # flash_notice(:runtime_location_success.t(id: @location.id))
       true
     else
       # Failed to create location
@@ -178,6 +212,8 @@ module ObservationsController::SharedFormMethods
     flash_object_errors(@observation)
     false
   end
+
+  ##############################################################################
 
   # Attempt to upload any images.  We will attach them to the observation
   # later, assuming we can create it.  Problem is if anything goes wrong, we

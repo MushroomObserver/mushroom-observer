@@ -37,21 +37,28 @@ module ObservationsController::Create
     init_new_image_var(Time.zone.now)
 
     rough_cut
-    rough_cut_new_location_if_requested # may set @location
-    success = true
-    success = false unless validate_name
-    success = false unless validate_place_name # if there is no id
-    success = false unless validate_object(@observation)
-    success = false unless validate_projects
-    success = false if @name && !validate_object(@naming)
-    success = false if @name && !@vote.value.nil? && !validate_object(@vote)
-    success = false if @bad_images != []
-    success = false if success && @location && !save_location
-    success = false if success && !save_observation
-    return reload_new_form(params.dig(:naming, :reasons)) unless success
+    create_location_object_if_new # may set @location
+
+    @any_errors = false
+    validate_name
+    validate_place_name
+    validate_observation
+    validate_projects
+    validate_naming if @name
+    validate_vote if @name
+    validate_images
+    try_to_save_location_if_new
+    try_to_save_new_observation
+    return reload_new_form(params.dig(:naming, :reasons)) if @any_errors
 
     @observation.log(:log_observation_created)
-    save_everything_else(params.dig(:naming, :reasons))
+
+    update_naming(params.dig(:naming, :reasons))
+    attach_good_images
+    update_projects
+    update_species_lists
+    save_collection_number
+    save_herbarium_record
     strip_images! if @observation.gps_hidden
     update_field_slip
     flash_notice(:runtime_observation_success.t(id: @observation.id))
@@ -87,45 +94,13 @@ module ObservationsController::Create
     create_image_objects_and_update_bad_images
   end
 
-  # The form may be in a state where it has an existing MO Location name in the
-  # `place_name` field, but not the corresponding MO location_id. It could be
-  # because of user trying to create a duplicate, or because the user had a
-  # prefilled location, but clicked on the "Create Location" button - this keeps
-  # the place_name, but clears the location_id field. Either way, we need to
-  # check if we already have a location by this name. If so, find the existing
-  # location and use that for the obs.
-  def validate_place_name
-    place_name = @observation.place_name
-    lat = @observation.lat
-    lng = @observation.lng
-    return false if !lat && !lng && place_name.blank?
+  def try_to_save_new_observation
+    return false if @any_errors
 
-    # Set location to unknown if place_name blank && lat/lng are present
-    if Location.is_unknown?(place_name) || (lat && lng && place_name.blank?)
-      @observation.location = Location.unknown
-      @observation.where = nil
-      # If it's unknown, we don't need to check for duplicates.
-      return true
-    end
+    return true if save_observation
 
-    name = Location.user_format(@user, place_name)
-    # can't use Location.location_exists?, true for undefined where strings
-    if (location = Location.find_by(name: name))
-      @observation.location_id = location.id
-      return true
-    end
-
-    @dubious_where_reasons = Location.dubious_name?(name, true)
-    @dubious_where_reasons.empty?
-  end
-
-  def save_everything_else(reason)
-    update_naming(reason)
-    attach_good_images
-    update_projects
-    update_species_lists
-    save_collection_number
-    save_herbarium_record
+    @any_errors = true
+    false
   end
 
   def update_naming(reason)

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 #  :section: Validators
+#  These validators return Boolean values, and also set the @any_errors ivar.
 #
 #    validate_name
 #      name_params
@@ -24,7 +25,10 @@ module ObservationsController::Validators
                          :form_observations_there_is_a_problem_with_name.t)
       flash_object_errors(@naming)
     end
-    success
+    return true if success
+
+    @any_errors = true
+    false
   end
 
   # Set the ivars for the form: @given_name, @name - and potentially ivars for
@@ -56,16 +60,36 @@ module ObservationsController::Validators
     }
   end
 
+  # The form may be in a state where it has an existing MO Location name in the
+  # `place_name` field, but not the corresponding MO location_id. It could be
+  # because of user trying to create a duplicate, or because the user had a
+  # prefilled location, but clicked on the "Create Location" button - this keeps
+  # the place_name, but clears the location_id field. Either way, we need to
+  # check if we already have a location by this name. If so, find the existing
+  # location and use that for the obs.
   def validate_place_name
-    success = true
-    @place_name = @observation.place_name
-    @dubious_where_reasons = []
-    if @place_name != params[:approved_where] && @observation.location_id.nil?
-      db_name = Location.user_format(@user, @place_name)
-      @dubious_where_reasons = Location.dubious_name?(db_name, true)
-      success = false if @dubious_where_reasons != []
+    place_name = @observation.place_name
+    lat = @observation.lat
+    lng = @observation.lng
+    if !lat && !lng && place_name.blank?
+      @any_errors = true
+      return false
     end
-    success
+
+    # Set location to unknown if place_name blank && lat/lng are present
+    if Location.is_unknown?(place_name) || (lat && lng && place_name.blank?)
+      @observation.location = Location.unknown
+      @observation.where = nil
+      # If it's unknown, we're good. don't need to check for duplicates.
+      return true
+    end
+
+    name = Location.user_format(@user, @observation.place_name)
+    @dubious_where_reasons = Location.dubious_name?(name, true)
+    return true if @dubious_where_reasons.empty?
+
+    @any_errors = true
+    false
   end
 
   def validate_projects
@@ -77,6 +101,7 @@ module ObservationsController::Validators
     end
     if @error_checked_projects.any?
       flash_error(:form_observations_there_is_a_problem_with_projects.t)
+      @any_errors = true
       return false
     end
 
@@ -86,7 +111,10 @@ module ObservationsController::Validators
     if @suspect_checked_projects.any?
       flash_warning(:form_observations_there_is_a_problem_with_projects.t)
     end
-    @suspect_checked_projects.empty?
+    return true if @suspect_checked_projects.empty?
+
+    @any_errors = true
+    false
   end
 
   def checked_project_conflicts
@@ -100,5 +128,33 @@ module ObservationsController::Validators
     Project.where(id: checked_proj_ids).includes(:location).select do |proj|
       proj.violates_constraints?(@observation)
     end
+  end
+
+  def validate_observation
+    return true if validate_object(@observation)
+
+    @any_errors = true
+    false
+  end
+
+  def validate_naming
+    return true if !@name || validate_object(@naming)
+
+    @any_errors = true
+    false
+  end
+
+  def validate_vote
+    return true if !@name || @vote.value.nil? || validate_object(@vote)
+
+    @any_errors = true
+    false
+  end
+
+  def validate_images
+    return true if @bad_images.empty?
+
+    @any_errors = true
+    false
   end
 end
