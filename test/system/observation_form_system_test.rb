@@ -278,6 +278,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Try removing the geotagged image
     scroll_to(second_image_wrapper, align: :center)
     within(second_image_wrapper) { find(".remove_image_button").click }
+    sleep(0.5)
 
     # Be sure we have only one image wrapper now
     assert_selector(".carousel-item[data-image-status='upload']",
