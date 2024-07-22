@@ -256,7 +256,11 @@ module ObservationsController::Create
   end
 
   def init_location_var_for_reload
-    return if @location || !@observation.location_id
+    # keep location_id if it's -1 (new)
+    if @location || @observation.location_id.nil? ||
+       @observation.location_id.zero?
+      return
+    end
 
     @location = @observation.location
   end

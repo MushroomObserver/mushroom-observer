@@ -47,6 +47,8 @@ export default class extends Controller {
     this.marker_edit_buffer = 0
     this.rectangle_edit_buffer = 0
     this.ignorePlaceInput = false
+    this.lastGeocodedLatLng = { lat: null, lng: null }
+    this.lastGeolocatedAddress = ""
 
     const loader = new Loader({
       apiKey: "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA",
@@ -165,6 +167,7 @@ export default class extends Controller {
     if (!this.marker) {
       this.drawMarker(location)
     } else {
+      this.verbose("marker.setPosition")
       this.marker.setPosition(location)
       this.map.panTo(location)
     }
@@ -189,6 +192,7 @@ export default class extends Controller {
     if (!this.editable && set != null) {
       this.giveMarkerInfoWindow(set)
     } else {
+      this.getElevations([set], "point")
       this.makeMarkerEditable()
     }
   }
@@ -393,20 +397,20 @@ export default class extends Controller {
   }
 
   // Check what kind of input we have and call the appropriate function
-  // FIXME: This is hyperactive. It's firing when we're changing things
   checkForBox() {
     // this.showBoxBtnTarget.disabled = true
     this.verbose("checkForBox")
-    let id
+    let id, location
     if (this.hasLocationIdTarget && (id = this.locationIdTarget.value)) {
       this.mapLocationBounds()
-      // Only geocode lat/lng if we have no location_id
+      // Only geocode lat/lng if we have no location_id and not ignoring place
     } else if (["location", "hybrid"].includes(this.map_type)) {
-      if (this.hasLatInputTarget && this.hasLngInputTarget &&
-        this.latInputTarget.value && this.lngInputTarget.value) {
-        this.geocodeLatLng() // multiple possible results
+      if (location = this.validateLatLngInputs(false) &&
+        this.ignorePlaceInput !== false) {
+        this.geocodeLatLng(location) // multiple possible results
         // ...and only geolocate placeName if we have no lat/lng
       } else if (this.ignorePlaceInput === false) {
+        // ...and only geolocate placeName if we have no lat/lng
         this.geolocatePlaceName() // 1 result
       }
     }
@@ -428,10 +432,15 @@ export default class extends Controller {
     this.placeClosestRectangle(bounds, null)
   }
 
-  geocodeLatLng() {
-    this.verbose("geocodeLatLng")
-    const location = this.validateLatLngInputs(false)
+  // Geocode a lat/lng location. If we have multiple results, we'll dispatch
+  // Send the location from validateLatLngInputs(false) to avoid duplicate calls
+  geocodeLatLng(location) {
+    if (JSON.stringify(location) == JSON.stringify(this.lastGeocodedLatLng))
+      return
 
+    this.lastGeocodedLatLng = location
+    this.verbose("geocodeLatLng(location)")
+    this.verbose(location)
     this.geocoder
       .geocode({ location: location })
       .then((result) => {
@@ -453,7 +462,8 @@ export default class extends Controller {
     this.verbose("siftResults")
     if (results.length == 0) return results
     const _skip_types = ["plus_code", "establishment", "premise",
-      "subpremise", "point_of_interest", "street_address", "street_number", "route", "postal_code", "country"]
+      "subpremise", "point_of_interest", "street_address", "street_number",
+      "route", "postal_code", "country"]
     let sifted = []
     results.forEach((result) => {
       if (!_skip_types.some(t => result.types.includes(t))) {
@@ -491,11 +501,12 @@ export default class extends Controller {
         // MO uses "USA" for US
         usa_location = true
         name_components.push("USA")
-      } else if (component.types.includes("administrative_area_level_2") && component.long_name.includes("County")) {
+      } else if (component.types.includes("administrative_area_level_2") &&
+        component.long_name.includes("County")) {
         // MO uses "Co." for County
         name_components.push(component.long_name.replace("County", "Co."))
-      } else if (component.types.includes("postal_code") && usa_location) {
-        // skip it for the US. Other countries it's an important differentiator
+      } else if (component.types.includes("postal_code")) {
+        // skip it for all. non-US countries it's an important differentiator?
       } else {
         name_components.push(component.long_name)
       }
@@ -507,9 +518,12 @@ export default class extends Controller {
   }
 
   geolocatePlaceName(multiple = false) {
-    this.verbose("geolocatePlaceName")
     let address = this.placeInputTarget.value
+    if (address === this.lastGeolocatedAddress) return
 
+    this.lastGeolocatedAddress = address
+    this.verbose("geolocatePlaceName(address)")
+    this.verbose(address)
     if (this.location_format == "scientific") {
       address = address.split(/, */).reverse().join(", ")
     }
@@ -698,6 +712,10 @@ export default class extends Controller {
 
   // Convert from human readable and do a rough check if they make sense
   validateLatLngInputs(update = false) {
+    if (!this.hasLatInputTarget || !this.hasLngInputTarget ||
+      !this.latInputTarget.value || !this.lngInputTarget.value)
+      return false
+
     const origLat = this.latInputTarget.value,
       origLng = this.lngInputTarget.value
     let lat, lng
@@ -736,7 +754,8 @@ export default class extends Controller {
     this.latInputTarget.value = this.roundOff(center.lat)
     this.lngInputTarget.value = this.roundOff(center.lng)
     // If we're here, we have a lat and a lng.
-    this.dispatchPointChanged(center)
+    if (this.ignorePlaceInput !== false)
+      this.dispatchPointChanged(center)
   }
 
   // Call the swap event on the autocompleter and send the type we need
@@ -978,7 +997,7 @@ export default class extends Controller {
   }
 
   verbose(str) {
-    console.log(str);
+    // console.log(str);
     // document.getElementById("log").
     //   insertAdjacentText("beforeend", str + "<br/>");
   }

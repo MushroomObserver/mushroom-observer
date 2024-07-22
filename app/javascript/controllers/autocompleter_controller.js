@@ -254,15 +254,16 @@ export default class extends Controller {
 
   // Connects the location_google autocompleter to call map controller methods
   mapOutletConnected(outlet, element) {
-    this.verbose("map outlet connected");
+    this.verbose("mapOutletConnected()");
     // open the map if not already open
     if (!outlet.opened) outlet.toggleMapBtnTarget.click();
     // set the map type so box is editable
     outlet.map_type = "hybrid"; // only if location_google
     // outlet.marker.setDraggable(false); messes up map
     // outlet.marker.setClickable(false); messes up map
-    if (outlet.latInputTarget.value && outlet.lngInputTarget.value) {
-      outlet.geocodeLatLng();
+    let location
+    if (location = outlet.validateLatLngInputs(false)) {
+      outlet.geocodeLatLng(location);
     } else {
       outlet.lockBoxBtnTarget.classList.remove("d-none");
     }
@@ -926,9 +927,16 @@ export default class extends Controller {
       if (this.hiddenTarget.value != perfect_match['id']) {
         this.assignHiddenId(perfect_match);
       }
-    } else {
+    } else if (!this.ignoringTextInput()) {
       this.clearHiddenId();
     }
+  }
+
+  // only clear if we're not in "ignorePlaceInput" mode
+  ignoringTextInput() {
+    if (!this.hasMapOutlet) return false;
+
+    return this.mapOutlet.ignorePlaceInput;
   }
 
   // Assigns not only the ID, but also any data attributes of selected row.
@@ -948,7 +956,7 @@ export default class extends Controller {
         this.hiddenTarget.dataset[key] = match[key];
     });
 
-    if (match['id'] > 0) {
+    if (match['id'] !== 0) {
       this.wrapTarget.classList.add('has-id');
     }
     this.dispatchHiddenIdEvents();
@@ -1519,7 +1527,7 @@ export default class extends Controller {
   }
 
   verbose(str) {
-    console.log(str);
+    // console.log(str);
     // document.getElementById("log").
     //   insertAdjacentText("beforeend", str + "<br/>");
   }
