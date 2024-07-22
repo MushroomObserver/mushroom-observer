@@ -16,7 +16,7 @@ module Observations
   end
 
   class InatImportsControllerTest < FunctionalTestCase
-    INAT_OBS_REQUEST_PREFIX = "https://api.inaturalist.org/v1/observations?"
+    INAT_OBS_REQUEST_PREFIX = "https://api.inaturalist.org/v1/observations"
     INAT_OBS_REQUEST_POSTFIX = "&order=asc&order_by=id&only_id=false"
     # Where iNat will send the code once authorized
     REDIRECT_URI =
@@ -280,8 +280,8 @@ module Observations
     def stub_inat_api_request(inat_obs_ids, mock_inat_response)
       WebMock.stub_request(
         :get,
-        "#{INAT_OBS_REQUEST_PREFIX}id=#{inat_obs_ids}" \
-          "#{INAT_OBS_REQUEST_POSTFIX}"
+        "#{INAT_OBS_REQUEST_PREFIX}?id=#{inat_obs_ids}" \
+          "&id_above=&only_id=false&order=asc&order_by=id&per_page=200"
       ).to_return(body: mock_inat_response)
     end
 

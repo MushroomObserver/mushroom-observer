@@ -178,11 +178,13 @@ module Observations
       add_inat_summmary_data(inat_obs)
     end
 
-    def inat_search_observations(ids: nil, only_id: false,
-                                 sort: "order=asc&order_by=id",
+    # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
+    def inat_search_observations(ids: nil, id_above: nil, only_id: false,
+                                 per_page: 200, sort: "order=asc&order_by=id",
                                  other_params: nil)
       operation =
-        "/observations?id=#{ids}&only_id=#{only_id}&#{sort}&#{other_params}"
+        "/observations?id=#{ids}&id_above=#{id_above}&only_id=#{only_id}" \
+        "&per_page=#{per_page}&#{sort}&#{other_params}"
       ::Inat.new(operation: operation, token: inat_import.token).body
     end
 
