@@ -187,7 +187,7 @@ class InatObsTest < UnitTestCase
   end
 
   def test_inat_obs_photos
-    assert(mock("evernia_no_photos").inat_obs_photos.none?)
+    assert(mock("favolus_brasiliensis").inat_obs_photos.none?)
     assert(mock("coprinus").inat_obs_photos.one?)
   end
 
