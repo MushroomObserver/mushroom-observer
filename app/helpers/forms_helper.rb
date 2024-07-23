@@ -251,6 +251,7 @@ module FormsHelper
   def text_area_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
     args = check_for_optional_or_required_note(args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-control"
     opts[:class] += " text-monospace" if args[:monospace].present?
@@ -552,13 +553,30 @@ module FormsHelper
     args
   end
 
+  # Adds a help block to the field, with a collapse trigger beside the label.
+  def check_for_help_block(args)
+    return args unless args[:help].present? && args[:field].present?
+
+    args[:between] = capture do
+      concat(collapse_info_trigger("#{args[:field]}_help"))
+      concat(args[:between])
+    end
+    args[:append] = capture do
+      concat(args[:append])
+      concat(collapse_help_block(nil, id: "#{args[:field]}_help") do
+        concat(args[:help])
+      end)
+    end
+    args
+  end
+
   # These are args that should not be passed to the field
   # Note that :value is sometimes explicitly passed, so it must
   # be excluded separately (not here)
   def separate_field_options_from_args(args, extras = [])
     exceptions = [
       :form, :field, :label, :class, :width, :inline, :between, :append,
-      :addon, :optional, :required, :monospace, :type, :wrap_data
+      :help, :addon, :optional, :required, :monospace, :type, :wrap_data
     ] + extras
 
     args.clone.except(*exceptions)

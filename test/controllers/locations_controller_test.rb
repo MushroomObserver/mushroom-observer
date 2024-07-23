@@ -81,7 +81,6 @@ class LocationsControllerTest < FunctionalTestCase
       assert_template("edit")
     end
     assert_template("locations/_form")
-    assert_template("shared/_textilize_help")
     assert_equal(loc_count, Location.count)
     assert_equal(past_loc_count, Location::Version.count)
     assert_equal(desc_count, LocationDescription.count)
