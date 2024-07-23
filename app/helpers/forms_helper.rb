@@ -553,6 +553,7 @@ module FormsHelper
     args
   end
 
+  # Adds a help block to the field, with a collapse trigger beside the label.
   def check_for_help_block(args)
     return args unless args[:help].present? && args[:field].present?
 
