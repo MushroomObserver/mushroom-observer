@@ -91,7 +91,7 @@ statuses = [[:ACCEPTED.l, false], [:DEPRECATED.l, true]]
   <%= text_area_with_label(form: f, field: :notes, rows: 6,
                            label: "#{:form_names_taxonomic_notes.l}:",
                            between: between) %>
-  <%= render(partial: "shared/textilize_help") %>
+  <%= help_block(:div, :shared_textile_help.l, id: "textilize_note") %>
 
   <%= submit_button(form: f, button: button, center: true) %>
 
