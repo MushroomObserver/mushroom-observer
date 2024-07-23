@@ -82,7 +82,6 @@ module ContentHelper
   #
   #   <%= help_tooltip(label, title: "Click here to do something.") %>
   #
-
   def help_tooltip(label, **args)
     args[:data] ||= {}
     tag.span(label, title: args[:title],
