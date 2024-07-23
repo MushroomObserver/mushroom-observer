@@ -43,35 +43,34 @@
 #
 class InatObs
   def initialize(imported_inat_obs_data)
-    @imported_inat_obs_data =
-      JSON.parse(imported_inat_obs_data, symbolize_names: true)
+    @obs = JSON.parse(imported_inat_obs_data, symbolize_names: true)
   end
 
   ########## iNat attributes
 
   def inat_id
-    obs[:id]
+    @obs[:id]
   end
 
   def inat_location
-    obs[:location]
+    @obs[:location]
   end
 
   # for test purposes
   def inat_location=(location)
-    obs[:location] = location
+    @obs[:location] = location
   end
 
   def inat_obs_fields
-    obs[:ofvs]
+    @obs[:ofvs]
   end
 
   def inat_obs_photos
-    obs[:observation_photos]
+    @obs[:observation_photos]
   end
 
   def inat_place_guess
-    obs[:place_guess]
+    @obs[:place_guess]
   end
 
   # comma-separated string of names of projects to which obs belongs
@@ -94,27 +93,27 @@ class InatObs
   end
 
   def inat_positional_accuracy
-    obs[:public_positional_accuracy]
+    @obs[:public_positional_accuracy]
   end
 
   def inat_positional_accuracy=(accuracy)
-    obs[:positional_accuracy] = accuracy
+    @obs[:positional_accuracy] = accuracy
   end
 
   def inat_public_positional_accuracy
-    obs[:public_positional_accuracy]
+    @obs[:public_positional_accuracy]
   end
 
   def inat_public_positional_accuracy=(accuracy)
-    obs[:public_positional_accuracy] = accuracy
+    @obs[:public_positional_accuracy] = accuracy
   end
 
   def inat_quality_grade
-    obs[:quality_grade]
+    @obs[:quality_grade]
   end
 
   def inat_tags
-    obs[:tags]
+    @obs[:tags]
   end
 
   def inat_taxon_name
@@ -122,17 +121,17 @@ class InatObs
   end
 
   def inat_user_login
-    obs[:user][:login]
+    @obs[:user][:login]
   end
 
   ########## MO attributes
 
   def gps_hidden
-    obs[:geoprivacy].present?
+    @obs[:geoprivacy].present?
   end
 
   def license
-    InatLicense.new(obs[:license_code]).mo_license
+    InatLicense.new(@obs[:license_code]).mo_license
   end
 
   def name_id
@@ -160,10 +159,10 @@ class InatObs
 
   # min bounding box of (iNat location adjusted for accuracy)
   def location
-    accuracy_in_meters = obs[:public_positional_accuracy] || 0
+    accuracy_in_meters = @obs[:public_positional_accuracy] || 0
 
     accuracy_in_degrees =
-      if obs[:geoprivacy].present?
+      if @obs[:geoprivacy].present?
         { lat: accuracy_in_meters / 111_111,
           lng: accuracy_in_meters / 111_111 * Math.cos(to_rad(lat)) }
       else
@@ -210,7 +209,7 @@ class InatObs
   end
 
   def when
-    observed_on = obs[:observed_on_details]
+    observed_on = @obs[:observed_on_details]
     Date.new(observed_on[:year], observed_on[:month], observed_on[:day])
   end
 
@@ -248,13 +247,8 @@ class InatObs
 
   private
 
-  # The data for just one obs (omits metadata about the API request)
-  def obs
-    @imported_inat_obs_data
-  end
-
   def description
-    obs[:description]
+    @obs[:description]
   end
 
   def sequence_field?(field)
@@ -263,20 +257,19 @@ class InatObs
   end
 
   def fungi?
-    obs.dig(:taxon, :iconic_taxon_name) == "Fungi"
+    @obs.dig(:taxon, :iconic_taxon_name) == "Fungi"
   end
 
-  # TODO: 2024-06-13 jdc. This is buggy.
-  # I can't find a reliable way to get Projects via the API.
-  # It may be returning only "traditional" Projects (project type is "")
-  # Is there a better way?
-  # See https://github.com/MushroomObserver/mushroom-observer/issues/1955#issuecomment-2164323992
+  # TODO: 2024-07-23 jdc. Improve this.
+  # (But the best possible is Traditional projects and
+  # non_traditional_projects with joined Collection/Umbrella projects )
+  # https://forum.inaturalist.org/t/given-an-observation-id-get-a-list-of-project/53476?u=joecohen
   def inat_projects
-    obs[:project_observations]
+    @obs[:project_observations]
   end
 
   def inat_taxon
-    obs[:taxon]
+    @obs[:taxon]
   end
 
   def slime_mold?
@@ -288,7 +281,7 @@ class InatObs
     # I.e., is there A combination (ANDs) of higher ranks (>= Class)
     # that's monophyletic for slime molds?
     # Another solution: use IF API to see if IF includes the name.
-    obs.dig(:taxon, :iconic_taxon_name) == "Protozoa"
+    @obs.dig(:taxon, :iconic_taxon_name) == "Protozoa"
   end
 
   def to_rad(degrees)
