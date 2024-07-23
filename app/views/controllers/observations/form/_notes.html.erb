@@ -31,7 +31,7 @@ end
         <% @observation.form_notes_parts(@user).each do |part| %>
           <%= text_area_with_label(
                 form: f_n, rows:, help:,
-                label: other ? "#{:NOTES.t}:" : strip_tags(part.tl) + ":",
+                label: other ? "#{:NOTES.t}:" : "#{strip_tags(part.tl)}:",
                 field: @observation.notes_normalized_key(part),
                 value: @observation.notes_part_value(part)
               ) %>
