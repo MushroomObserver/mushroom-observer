@@ -250,7 +250,7 @@ class InatObs
 
   # The data for just one obs (omits metadata about the API request)
   def obs
-    @imported_inat_obs_data[:results].first
+    @imported_inat_obs_data
   end
 
   def description
