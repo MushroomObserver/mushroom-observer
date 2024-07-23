@@ -123,7 +123,8 @@ class InatObsTest < UnitTestCase
   end
 
   def test_dqa
-    assert_equal(:inat_dqa_casual.l, mock("evernia_no_photos").dqa)
+    debugger
+    assert_equal(:inat_dqa_casual.l, mock("russulaceae").dqa)
     assert_equal(:inat_dqa_needs_id.l, mock("coprinus").dqa)
     assert_equal(:inat_dqa_research.l, mock("somion_unicolor").dqa)
   end
