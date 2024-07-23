@@ -26,8 +26,8 @@ end
                             data: { autofocus: true }) %>
 
   <%= text_area_with_label(form: f, field: :comment, rows: 10,
-                           label: :form_comments_comment.t + ":") %>
-  <%= help_block(:div, :shared_textile_help.l, id: "textilize_note") %>
+                           label: :form_comments_comment.t + ":",
+                           help: :shared_textile_help.l) %>
 
   <%= submit_button(form: f, button: button, center: true) %>
 

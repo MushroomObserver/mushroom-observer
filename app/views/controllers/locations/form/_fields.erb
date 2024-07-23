@@ -31,24 +31,17 @@ end %>
                            label: :form_locations_locked.t) %>
 <% end %>
 
+<% help = [tag.p(:form_locations_notes_help.t),
+           tag.p(:shared_textile_help.l)].safe_join %>
 <%= text_area_with_label(
-  form: f, field: :notes, label: :NOTES.t + ":",
-  between: collapse_info_trigger("notes_help")
+  form: f, field: :notes, label: :NOTES.t + ":", help:
 ) %>
-<%= collapse_help_block(nil, id: "notes_help") do
-  concat(tag.p(:form_locations_notes_help.t))
-  concat(tag.p(:shared_textile_help.l))
-end %>
 
 <% if location.observations.empty? %>
   <%= check_box_with_label(
     form: f, field: :hidden, class: "mt-3 mr-3",
-    label: :form_locations_hidden.t,
-    append: collapse_info_trigger("location_hidden_help", class: "ml-3")
+    label: :form_locations_hidden.t, help: :form_locations_hidden_doc.t
   ) %>
-  <%= collapse_help_block(nil, id: "location_hidden_help") do
-    :form_locations_hidden_doc.t
-  end %>
 <% end %>
 
 <%= submit_button(form: f, button: button, class: "mt-4",
