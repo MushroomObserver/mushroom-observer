@@ -1,58 +1,43 @@
 <%# Notes section of create_observation form %>
 
+<%
+# Users may have custom notes "parts". This prints a single large textarea and
+# textile help block if there's only one notes part. Otherwise, it prints
+# smaller textareas and a general textile help link.
+
+help = general_help = other = nil
+if @observation.form_notes_parts(@user) == [Observation.other_notes_part]
+  help = [tag.p(:form_observations_notes_help.t),
+          tag.p(:shared_textile_help.l)].safe_join
+  other = true
+  rows = 10
+else
+  general_help = tag.p do
+      [
+        tag.strong("#{:NOTES.t}:", class: "mr-3"),
+        collapse_info_trigger("notes_help"),
+        collapse_help_block(nil, :shared_textile_help.l, id: "notes_help")
+      ].safe_join
+    end
+  rows = 1
+end
+%>
 <!-- NOTES -->
-<div class="mt-3" id="observation_notes">
-
-  <%= content_tag(:p, "#{:NOTES.t}:", class: "font-weight-bold") %>
-
-  <% if @observation.form_notes_parts(@user) == [Observation.other_notes_part]
-      part = Observation.other_notes_part %>
-
-    <%= f.fields_for(:notes) do |f_n| %>
-
-      <div class="row">
-        <div class="col-xs-12 col-sm-6">
-          <% help = [tag.p(:form_observations_notes_help.t),
-                     tag.p(:shared_textile_help.l)].safe_join %>
-          <%= f_n.text_area(@observation.notes_normalized_key(part),
-                            value: @observation.notes_part_value(part),
-                            rows: 10, class: "form-control mb-3", help:) %>
-        </div>
-        <div class="col-xs-12 col-sm-6">
-          <%= help_block_with_arrow("left", id: "notes_help") do %>
-            <%= content_tag(:p, :form_observations_notes_help.t,
-                            class: "pt-0 mt-0") %>
-            <%= help_block(:div, :shared_textile_help.l, id: "textilize_note") %>
-          <% end # help_block_with_arrow %>
-        </div>
-      </div><!--.row-->
-
-    <% end # f.fields_for(:notes) %>
-
-  <% else %>
-
-    (<%= :general_textile_link.t %>)
-    <% @observation.form_notes_parts(@user).each do |part| %>
-
+<%= tag.div(class: "mt-3", id: "observation_notes") do
+  tag.div(class: "row") do
+    tag.div(class: "col-xs-12 col-sm-6") do %>
+      <%= general_help %>
       <%= f.fields_for(:notes) do |f_n| %>
-
-        <div class="row">
-          <div class="col-xs-12 col-sm-6">
-            <%= text_area_with_label(
-                  form: f_n, rows: 1, label: strip_tags(part.tl) + ": ",
-                  field: @observation.notes_normalized_key(part),
-                  value: @observation.notes_part_value(part)
-                ) %>
-          </div>
-        </div><!--.row-->
-
+        <% @observation.form_notes_parts(@user).each do |part| %>
+          <%= text_area_with_label(
+                form: f_n, rows:, help:,
+                label: other ? "#{:NOTES.t}:" : strip_tags(part.tl) + ":",
+                field: @observation.notes_normalized_key(part),
+                value: @observation.notes_part_value(part)
+              ) %>
+        <% end # each do part %>
       <% end # f.fields_for(:notes) %>
-
-    <% end # each do part %>
-
-  <% end # if user_notes_part %>
-
-
-
-</div><!--#observation_notes-->
+    <% end
+  end
+end %><!--#observation_notes-->
 <!-- /NOTES -->

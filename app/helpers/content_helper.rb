@@ -119,13 +119,14 @@ module ContentHelper
     end
   end
 
-  def collapse_help_block(direction = nil, **args, &block)
+  def collapse_help_block(direction = nil, string = nil, **args, &block)
     div_class = "well well-sm help-block position-relative"
     div_class += " mt-3" if direction == "up"
+    content = block ? capture(&block) : string
 
     tag.div(class: "collapse", id: args[:id]) do
       tag.div(class: div_class) do
-        concat(capture(&block).to_s)
+        concat(content)
         if direction
           arrow_class = "arrow-#{direction}"
           arrow_class += " hidden-xs" unless args[:mobile]
