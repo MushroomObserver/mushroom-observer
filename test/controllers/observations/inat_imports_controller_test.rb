@@ -57,7 +57,7 @@ module Observations
 
     def test_create_inat_import_no_consent
       mock_inat_response =
-        File.read("test/inat/evernia_no_photos.txt")
+        File.read("test/inat/evernia.txt")
       inat_import_ids = InatObs.new(mock_inat_response).inat_id
       # TODO: remove consent key after creating model with default consent
       params = { inat_ids: inat_import_ids, consent: 0 }
@@ -126,9 +126,9 @@ module Observations
       assert_redirected_to(observations_path)
     end
 
-    def test_create_import_evernia_no_photos
+    def test_create_import_evernia
       user = rolf
-      filename = "evernia_no_photos"
+      filename = "evernia"
       mock_inat_response = File.read("test/inat/#{filename}.txt")
       inat_import_ids = InatObs.new(mock_inat_response).inat_id
 
@@ -233,7 +233,7 @@ module Observations
 
     def test_create_import_multiple
       inat_obss =
-        "216357655, 219783802" # evernia_no_photos, fuligo_septica
+        "216357655, 219783802" # evernia, fuligo_septica
       user = users(:rolf)
       filename = "listed_ids"
       mock_inat_response = File.read("test/inat/#{filename}.txt")

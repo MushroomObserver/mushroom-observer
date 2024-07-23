@@ -114,12 +114,12 @@ class InatObsTest < UnitTestCase
 
   def test_inat_observation_fields
     assert(mock("trametes").inat_obs_fields.any?)
-    assert(mock("evernia_no_photos").inat_obs_fields.none?)
+    assert(mock("evernia").inat_obs_fields.none?)
   end
 
   def test_inat_tags
     assert(2, mock("inocybe").inat_tags.length)
-    assert_empty(mock("evernia_no_photos").inat_tags)
+    assert_empty(mock("evernia").inat_tags)
   end
 
   def test_dqa
@@ -171,7 +171,7 @@ class InatObsTest < UnitTestCase
     sequence = mock_inat_obs.sequences.first
     assert(sequence.present?)
 
-    assert_empty(mock("evernia_no_photos").sequences)
+    assert_empty(mock("evernia").sequences)
   end
 
   def test_taxon_importable
@@ -197,7 +197,7 @@ class InatObsTest < UnitTestCase
                  "wrong project names for iNat obs which lacks projects")
 
     assert_equal("Portland-Vancouver Regional Eco-Blitz, ??",
-                 mock("evernia_no_photos").inat_project_names,
+                 mock("evernia").inat_project_names,
                  "wrong project names for iNat obs with 1 detectable project")
   end
 
