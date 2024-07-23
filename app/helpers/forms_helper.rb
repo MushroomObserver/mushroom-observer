@@ -554,7 +554,7 @@ module FormsHelper
   end
 
   def check_for_help_block(args)
-    return unless args[:help].present? && args[:field].present?
+    return args unless args[:help].present? && args[:field].present?
 
     args[:between] = capture do
       concat(collapse_info_trigger("#{args[:field]}_help"))
