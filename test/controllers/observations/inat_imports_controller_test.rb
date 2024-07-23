@@ -127,11 +127,6 @@ module Observations
     end
 
     def test_create_import_evernia
-      user = rolf
-      filename = "evernia"
-      mock_inat_response = File.read("test/inat/#{filename}.txt")
-      inat_import_ids = InatObs.new(mock_inat_response).inat_id
-
       loc = Location.create(
         user: users(:rolf),
         name: "Troutdale, Multnomah Co., Oregon, USA",
@@ -141,28 +136,14 @@ module Observations
         west: -122.431
       )
 
-      stub_inat_api_request(inat_import_ids, mock_inat_response)
-      simulate_authorization(user: user, inat_import_ids: inat_import_ids)
-      stub_token_request
+      obs = import_mock_observation("evernia")
 
-      params = { inat_ids: inat_import_ids, code: "MockCode" }
-      login(user.login)
-
-      assert_difference("Observation.count", 1, "Failed to create Obs") do
-        post(:authenticate, params: params)
-      end
-
-      obs = Observation.order(created_at: :asc).last
       assert_not_nil(obs.rss_log)
       assert_redirected_to(observations_path)
 
       assert_equal("mo_inat_import", obs.source)
-      assert_equal(inat_import_ids, obs.inat_id)
-
-      assert_equal(0, obs.images.length, "Obs should not have 0 images")
-
+      assert_equal(1, obs.images.length, "Obs should have 1 image")
       assert_equal(loc, obs.location)
-
       assert(obs.comments.any?, "Imported iNat should have >= 1 Comment")
       obs_comments =
         Comment.where(target_type: "Observation", target_id: obs.id)
