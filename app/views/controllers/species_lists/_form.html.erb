@@ -36,8 +36,7 @@
 
   <%= text_area_with_label(form: f, field: :notes, rows: 12,
                            label: "#{:form_species_lists_list_notes.l}:",
-                           append: help_block(:div, :shared_textile_help.l,
-                                              id: "textilize_note")) %>
+                           help: :shared_textile_help.l) %>
 
   <%= date_select_with_label(form: f, field: :when,
                              inline: true, label: "#{:WHEN.l}:") %>

@@ -90,8 +90,7 @@ statuses = [[:ACCEPTED.l, false], [:DEPRECATED.l, true]]
   <% between = tag.div(:form_names_taxonomic_notes_warning.t, class: "mark") %>
   <%= text_area_with_label(form: f, field: :notes, rows: 6,
                            label: "#{:form_names_taxonomic_notes.l}:",
-                           between: between) %>
-  <%= help_block(:div, :shared_textile_help.l, id: "textilize_note") %>
+                           between: between, help: :shared_textile_help.l) %>
 
   <%= submit_button(form: f, button: button, center: true) %>
 

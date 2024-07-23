@@ -12,9 +12,11 @@
 
       <div class="row">
         <div class="col-xs-12 col-sm-6">
+          <% help = [tag.p(:form_observations_notes_help.t),
+                     tag.p(:shared_textile_help.l)].safe_join %>
           <%= f_n.text_area(@observation.notes_normalized_key(part),
                             value: @observation.notes_part_value(part),
-                            rows: 10, class: "form-control mb-3") %>
+                            rows: 10, class: "form-control mb-3", help:) %>
         </div>
         <div class="col-xs-12 col-sm-6">
           <%= help_block_with_arrow("left", id: "notes_help") do %>
