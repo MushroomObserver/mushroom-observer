@@ -34,7 +34,7 @@ module Observations
                     "Form needs checkbox requiring consent")
     end
 
-    def test_create_inat_import_authorization_request
+    def test_import_authorization_request
       user = users(:rolf)
       inat_import = inat_imports(:rolf_inat_import)
       assert_equal("Unstarted", inat_import.state,
@@ -55,7 +55,7 @@ module Observations
                    "MO should be awaiting authorization from iNat")
     end
 
-    def test_create_inat_import_no_consent
+    def test_import_no_consent
       mock_search = File.read("test/inat/evernia.txt")
       inat_obs = InatObs.new(
         JSON.generate(JSON.parse(mock_search)["results"].first)
@@ -75,7 +75,7 @@ module Observations
       assert_flash_warning
     end
 
-    def test_create_inat_import_bad_inat_id
+    def test_import_bad_inat_id
       user = users(:rolf)
       id = "badID"
       params = { inat_ids: id }
@@ -87,7 +87,7 @@ module Observations
       assert_form_action(action: :create)
     end
 
-    def test_create_inat_import_authorization_denied
+    def test_import_authorization_denied
       inat_authorization_callback_params =
         { error: "access_denied",
           error_description: "The resource owner or authorization server " \
@@ -100,7 +100,7 @@ module Observations
       assert_flash_error
     end
 
-    def test_create_inat_import_authorized
+    def test_import_authorized
       user = users(:rolf)
       inat_import = inat_imports(:rolf_inat_import)
 
@@ -116,7 +116,7 @@ module Observations
       assert_redirected_to(observations_path)
     end
 
-    def test_create_import_evernia
+    def test_import_evernia
       loc = Location.create(
         user: users(:rolf),
         name: "Troutdale, Multnomah Co., Oregon, USA",
@@ -142,7 +142,7 @@ module Observations
              "Missing Initial Commment (#{:inat_data_comment.l})")
     end
 
-    def test_create_obs_tremella_mesenterica
+    def test_import_tremella_mesenterica
       obs = import_mock_observation("tremella_mesenterica")
 
       assert_not_nil(obs.rss_log)
@@ -173,14 +173,14 @@ module Observations
       assert(obs.sequences.none?)
     end
 
-    def test_create_obs_lycoperdon
+    def test_import_lycoperdon
       obs = import_mock_observation("lycoperdon")
 
       assert(obs.images.any?, "Obs should have images")
       assert(obs.sequences.one?, "Obs should have a sequence")
     end
 
-    def test_create_import_plant
+    def test_import_plant
       user = rolf
       filename = "ceanothus_cordulatus"
       mock_search = File.read("test/inat/#{filename}.txt")
@@ -204,7 +204,7 @@ module Observations
       assert_flash_text(:inat_taxon_not_importable.l(id: inat_import_ids))
     end
 
-    def test_create_import_multiple
+    def test_import_multiple
       # NOTE: using obss without photos to avoid stubbing photo import
       # amanita_flavorubens, calostoma lutescens
       inat_obss = "231104466,195434438"
