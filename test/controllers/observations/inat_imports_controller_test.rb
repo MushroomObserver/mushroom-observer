@@ -216,24 +216,34 @@ module Observations
     end
 
     def test_create_import_multiple
-      inat_obss =
-        "216357655, 219783802" # evernia, fuligo_septica
+      # NOTE: using obss without photos to avoid stubbing photo import
+      # amanita_flavorubens, calostoma lutescens
+      inat_obss = "231104466,195434438"
+      inat_import_ids = inat_obss
       user = users(:rolf)
       filename = "listed_ids"
       mock_inat_response = File.read("test/inat/#{filename}.txt")
-
-      # test that mock was constructed properly
+      # prove that mock was constructed properly
       json = JSON.parse(mock_inat_response)
       assert_equal(2, json["total_results"])
       assert_equal(1, json["page"])
       assert_equal(30, json["per_page"])
       # mock is sorted by id, asc
-      assert_equal(216_357_655, json["results"].first["id"])
-      assert_equal(219_783_802, json["results"].second["id"])
+      assert_equal(195_434_438, json["results"].first["id"])
+      assert_equal(231_104_466, json["results"].second["id"])
 
-      # stub_inat_api_request(inat_import_ids, mock_inat_response)
-      # simulate_authorization(user: user, inat_import_ids: inat_import_ids)
+      simulate_authorization(user: user, inat_import_ids: inat_import_ids)
       stub_token_request
+      stub_inat_api_request(inat_import_ids, mock_inat_response)
+
+      params = { inat_ids: inat_import_ids, code: "MockCode" }
+      login(user.login)
+
+      assert_difference(
+        "Observation.count", 2, "Failed to create multiple observations"
+      ) do
+        post(:authenticate, params: params)
+      end
     end
 
     def import_mock_observation(filename)
