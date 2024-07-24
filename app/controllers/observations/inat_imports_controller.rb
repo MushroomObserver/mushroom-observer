@@ -175,6 +175,8 @@ module Observations
     end
 
     def import_requested_observations(inat_ids: nil)
+      return if inat_ids.blank?
+
       last_import_id = 0
       loop do
         page = inat_search_observations(ids: inat_ids, id_above: last_import_id)
