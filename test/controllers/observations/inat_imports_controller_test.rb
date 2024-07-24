@@ -47,12 +47,26 @@ module Observations
         "Observation.count",
         "Authorization request to iNat shouldn't create MO Observation(s)"
       ) do
-        post(:create, params: { inat_ids: 123_456_789, consent: 1 })
+        post(:create,
+             params: { inat_ids: 123_456_789, inat_username: "rolf",
+                       consent: 1 })
       end
 
       assert_response(:redirect)
       assert_equal("Authorizing", inat_import.reload.state,
                    "MO should be awaiting authorization from iNat")
+    end
+
+    def test_import_missing_username
+      user = users(:rolf)
+      id = "123"
+      params = { inat_ids: id }
+
+      login(user.login)
+      put(:create, params: params)
+
+      assert_flash_text(:inat_missing_username.l)
+      assert_form_action(action: :create)
     end
 
     def test_import_no_consent
@@ -73,18 +87,6 @@ module Observations
       end
 
       assert_flash_warning
-    end
-
-    def test_import_bad_inat_id
-      user = users(:rolf)
-      id = "badID"
-      params = { inat_ids: id }
-
-      login(user.login)
-      put(:create, params: params)
-
-      assert_flash_text(:runtime_illegal_inat_id.l(id: id))
-      assert_form_action(action: :create)
     end
 
     def test_import_authorization_denied

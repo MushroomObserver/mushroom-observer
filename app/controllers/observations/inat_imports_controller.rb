@@ -30,6 +30,7 @@ module Observations
 
     def create
       return redirect_to(new_observation_path) if params[:inat_ids].blank?
+      return username_required if params[:inat_username].blank?
       return reload_form if bad_inat_ids_param?
       return consent_required if params[:consent] == "0"
 
@@ -52,6 +53,13 @@ module Observations
 
     def consent_required
       flash_warning(:inat_consent_required.t)
+      @inat_ids = params[:inat_ids]
+      @inat_username = params[:inat_username]
+      render(:new)
+    end
+
+    def username_required
+      flash_warning(:inat_missing_username.l)
       @inat_ids = params[:inat_ids]
       render(:new)
     end
