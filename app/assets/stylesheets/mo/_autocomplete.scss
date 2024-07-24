@@ -2,6 +2,23 @@
 // autocompletion
 // --------------------------------------------------
 
+// autocompleter state - do we have a match?
+.has-id-indicator {
+  display: none;
+}
+.create-button {
+  display: inline-block;
+}
+
+.has-id {
+  .has-id-indicator {
+    display: inline-block;
+  }
+  .create-button {
+    display: none;
+  }
+}
+
 .dropdown-menu.auto_complete {
   // position: absolute;
   // color: $dropdown-link-color;

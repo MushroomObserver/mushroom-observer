@@ -162,14 +162,32 @@ module FormsHelper
     wrap_class = form_group_wrap_class(args)
     wrap_data = args[:wrap_data] || {}
     label_opts = field_label_opts(args)
+    label_opts[:class] = class_names(label_opts[:class], args[:label_class])
 
     tag.div(class: wrap_class, data: wrap_data) do
-      concat(args[:form].label(args[:field], args[:label], label_opts))
-      concat(args[:between]) if args[:between].present?
-      if args[:addon].present?
+      # The label row is complicated, many potential buttons here. `between`
+      # comes right after the label on left, `between_end` is right justified
+      concat(tag.div(class: "d-flex justify-content-between") do
+        concat(tag.div do
+          concat(args[:form].label(args[:field], args[:label], label_opts))
+          concat(args[:between]) if args[:between].present?
+        end)
+        concat(tag.div do
+          concat(args[:between_end]) if args[:between_end].present?
+        end)
+      end)
+      if args[:addon].present? # text addon, not interactive
         concat(tag.div(class: "input-group") do
           concat(args[:form].text_field(args[:field], opts))
           concat(tag.span(args[:addon], class: "input-group-addon"))
+        end)
+      elsif args[:button].present? # button addon, interactive
+        concat(tag.div(class: "input-group") do
+          concat(args[:form].text_field(args[:field], opts))
+          concat(tag.span(class: "input-group-btn") do
+            js_button(button: args[:button], class: "btn btn-default",
+                      data: args[:button_data] || {})
+          end)
         end)
       else
         concat(args[:form].text_field(args[:field], opts))
@@ -194,15 +212,21 @@ module FormsHelper
       placeholder: :start_typing.l, autocomplete: "off",
       data: { autocompleter_target: "input" }
     }.deep_merge(args.except(:type, :separator, :textarea,
-                             :hidden, :hidden_data))
+                             :hidden, :hidden_data, :create_text))
     ac_args[:class] = class_names("dropdown", args[:class])
     ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
                             separator: args[:separator],
+                            autocompleter_map_outlet: args[:map_outlet],
                             autocompleter_target: "wrap" }
     ac_args[:between] = capture do
       concat(args[:between])
       concat(autocompleter_has_id_indicator)
+      concat(autocompleter_find_button(args)) if args[:find_text]
+      concat(autocompleter_keep_button(args)) if args[:keep_text]
       concat(autocompleter_hidden_field(**args)) if args[:form]
+    end
+    ac_args[:between_end] = capture do
+      autocompleter_create_button(args) if args[:create_text]
     end
     ac_args[:append] = capture do
       concat(autocompleter_dropdown)
@@ -218,7 +242,39 @@ module FormsHelper
 
   def autocompleter_has_id_indicator
     link_icon(:check, title: :autocompleter_has_id.l,
-                      classes: "ml-3 px-2 text-success has-id-indicator")
+                      class: "ml-3 px-2 text-success has-id-indicator",
+                      data: { autocompleter_target: "hasIdIndicator" })
+  end
+
+  def autocompleter_create_button(args)
+    icon_link_to(
+      args[:create_text], "#",
+      icon: :plus, show_text: true, icon_class: "text-primary",
+      name: "create_#{args[:type]}", class: "ml-3 create-button",
+      data: { autocompleter_target: "createBtn",
+              action: "autocompleter#swapCreate:prevent" }
+    )
+  end
+
+  def autocompleter_find_button(args)
+    icon_link_to(
+      args[:find_text], "#",
+      icon: :find_on_map, show_text: false, icon_class: "text-primary",
+      name: "find_#{args[:type]}", class: "ml-3 d-none",
+      data: { map_target: "showBoxBtn",
+              action: "map#showBox:prevent" }
+    )
+  end
+
+  def autocompleter_keep_button(args)
+    icon_link_to(
+      args[:keep_text], "#",
+      icon: :apply, show_text: false, icon_class: "text-primary",
+      active_icon: :edit, active_content: args[:edit_text],
+      name: "keep_#{args[:type]}", class: "ml-3 d-none",
+      data: { autocompleter_target: "keepBtn", map_target: "lockBoxBtn",
+              action: "map#toggleBoxLock:prevent" }
+    )
   end
 
   # minimum args :form, :type.

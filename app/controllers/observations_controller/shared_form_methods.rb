@@ -32,9 +32,9 @@ module ObservationsController::SharedFormMethods
 
   # NOTE: potential gotcha... Any nested attributes must come last.
   def permitted_observation_args
-    [:place_name, :where, :lat, :lng, :alt, # :location_id,
-     :when, "when(1i)", "when(2i)", "when(3i)", :notes, :specimen,
-     :thumb_image_id, :is_collection_location, :gps_hidden]
+    [:lat, :lng, :alt, :gps_hidden, :place_name, :where, :location_id,
+     :is_collection_location, :when, "when(1i)", "when(2i)", "when(3i)",
+     :notes, :specimen, :thumb_image_id]
   end
 
   def update_permitted_observation_attributes
@@ -124,6 +124,85 @@ module ObservationsController::SharedFormMethods
   end
 
   ##############################################################################
+  #  Locations — may be created in the obs form
+  #
+  # By now we have an @observation, and maybe a "-1" location_id, indicating a
+  # new Location if accompanied by bounding box lat/lng. If the location name
+  # does not exist already, and the bounding box is present, create a new
+  # @location, and associate it with the @observation
+  def create_location_object_if_new
+    # Resets the location_id to MO's existing Location if it already exists.
+    return false if place_name_exists?
+
+    # Ensure we have the minimum necessary to create a new location
+    unless @observation.location_id == -1 &&
+           (place_name = params.dig(:observation, :place_name)).present? &&
+           (north = params.dig(:location, :north)).present? &&
+           (south = params.dig(:location, :south)).present? &&
+           (east = params.dig(:location, :east)).present? &&
+           (west = params.dig(:location, :west)).present?
+      return false
+    end
+
+    # Ignore hidden attribute even if the obs is hidden, because saving a
+    # Location with `hidden: true` fuzzes the lat/lng bounds unpredictably.
+    attributes = { hidden: false, user_id: @user.id,
+                   north:, south:, east:, west: }
+    # Add optional attributes. :notes not implemented yet.
+    [:high, :low, :notes].each do |key|
+      if (val = params.dig(:location, key)).present?
+        attributes[key] = val
+      end
+    end
+
+    @location = Location.new(attributes)
+    # With a Location instance, we can use the `display_name=` setter method,
+    # which figures out scientific/postal format of user input and sets
+    # location `name` and `scientific_name` accordingly.
+    @location.display_name = place_name
+  end
+
+  # Check if we somehow got a location name that exists in the db, but didn't
+  # get a location_id, or the location name is out of sync with the location_id.
+  # (This should not usually happen with the autocompleter). If it happens,
+  # match the obs to the existing Location by name. If the user was trying to
+  # create a new Location with the existing name, use the existing location and
+  # flash that we did that, returning `true` so we can bail on creating a "new"
+  # location, but go ahead with the observation save.
+  def place_name_exists?
+    name = Location.user_format(@user, @observation.place_name)
+    location = Location.find_by(name: name)
+    if !@observation.location_id&.positive? && location ||
+       (location && (@observation.location_id != location&.id))
+      if @observation.location_id == -1
+        flash_warning(:runtime_location_already_exists.t(name: name))
+      end
+      @observation.location_id = location.id
+      return true
+    end
+
+    false
+  end
+
+  def try_to_save_location_if_new
+    return if @any_errors || !@location&.new_record? || save_location
+
+    @any_errors = true
+  end
+
+  # Save location only (at this point rest of form is okay).
+  def save_location
+    if save_with_log(@location)
+      # Associate the location with the observation
+      @observation.location_id = @location.id
+      # flash_notice(:runtime_location_success.t(id: @location.id))
+      true
+    else
+      # Failed to create location
+      flash_object_errors(@location)
+      false
+    end
+  end
 
   # Save observation now that everything is created successfully.
   def save_observation
@@ -133,6 +212,8 @@ module ObservationsController::SharedFormMethods
     flash_object_errors(@observation)
     false
   end
+
+  ##############################################################################
 
   # Attempt to upload any images.  We will attach them to the observation
   # later, assuming we can create it.  Problem is if anything goes wrong, we

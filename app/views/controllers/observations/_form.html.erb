@@ -19,7 +19,7 @@ data = {
   action: [
     "map:reenableBtns@window->form-exif#reenableButtons",
     "form-exif:pointChanged@window->map#calculateMarker",
-    "autocompleter:locationIdChanged@window->map#showBox",
+    "autocompleter:hiddenIdDataChanged@window->map#showBox",
   ].join(" "),
   upload_max_size: max_size,
   localization: image_upload_localization,
