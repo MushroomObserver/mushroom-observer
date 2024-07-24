@@ -1,0 +1,23 @@
+<%# Project and List section of create_observation form  %>
+
+<%= panel_block(id: "observation_projects_and_lists",
+                heading: "#{:PROJECTS.l}/#{:SPECIES_LISTS.l}") do %>
+
+  <%= tag.div(class: "row mt-3") do %>
+    <% if @projects.any? %>
+      <%= tag.div(class: "col-xs-12 col-sm-6") do %>
+        <%= render(partial: "observations/form/projects",
+                  locals: { f:, button_name: }) %>
+      <% end %>
+    <% end %>
+    <% if @lists.any? %>
+      <%= tag.div(class: "col-xs-12 col-sm-6") do %>
+        <%= render(partial: "observations/form/species_lists",
+              locals: { f: f }) %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+<% end %>
+
+
