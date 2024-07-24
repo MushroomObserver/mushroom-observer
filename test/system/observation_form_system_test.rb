@@ -18,7 +18,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_select("observation_when_2i", text: Time.zone.today.strftime("%B"))
       # %e is day of month, no leading zero
       assert_select("observation_when_3i", text: Time.zone.today.strftime("%e"))
-      assert_selector("#where_help",
+      assert_selector("#observation_place_name_help",
                       text: "Albion, Mendocino Co., California", visible: :all)
       fill_in("naming_name", with: "Elfin saddle")
       # don't wait for the autocompleter - we know it's an elfin saddle!

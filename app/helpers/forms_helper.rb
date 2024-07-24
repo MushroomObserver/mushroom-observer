@@ -184,7 +184,10 @@ module FormsHelper
       elsif args[:button].present? # button addon, interactive
         concat(tag.div(class: "input-group") do
           concat(args[:form].text_field(args[:field], opts))
-          concat(tag.span(args[:button], class: "input-group-btn"))
+          concat(tag.span(class: "input-group-btn") do
+            js_button(button: args[:button], class: "btn btn-default",
+                      data: args[:button_data] || {})
+          end)
         end)
       else
         concat(args[:form].text_field(args[:field], opts))
@@ -647,7 +650,8 @@ module FormsHelper
   def separate_field_options_from_args(args, extras = [])
     exceptions = [
       :form, :field, :label, :class, :width, :inline, :between, :append,
-      :help, :addon, :optional, :required, :monospace, :type, :wrap_data
+      :help, :addon, :optional, :required, :monospace, :type, :wrap_data,
+      :button, :button_data
     ] + extras
 
     args.clone.except(*exceptions)
