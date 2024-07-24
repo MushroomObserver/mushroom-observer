@@ -1,27 +1,12 @@
 <%# locals: (display_name: nil, location: nil, button: nil, f: nil) -%>
 
-<%= tag.div(class: "mt-3") do
-  f.label(:display_name, :WHERE.t + ":")
-end %>
-
-<%= tag.div(class: "input-group") do %>
-  <%= f.text_field(:display_name, value: display_name,
-    class: "form-control", between: collapse_info_trigger("locality_help"),
-    data: { autofocus: true, map_target: "placeInput" }
-  ) %>
-
-  <%= tag.span(class: "input-group-btn") do
-    tag.button(
-      :form_locations_find_on_map.t,
-      type: "button", class: "btn btn-default",
-      data: { map_target: "showBoxBtn", action: "map#showBox"}
-    )
-  end %>
-
-  <%= collapse_help_block(nil, id: "locality_help") do
-    :form_locations_help.t
-  end %>
-<% end %>
+<%= text_field_with_label(
+  form: f, field: :display_name, value: display_name,
+  label: "#{:WHERE.t}:", help: :form_locations_help.t,
+  data: { autofocus: true, map_target: "placeInput" },
+  button: :form_locations_find_on_map.t,
+  button_data: { map_target: "showBoxBtn", action: "map#showBox" }
+) %>
 
 <%= render(partial: "locations/form/north_south_east_west_alt_fields",
            locals: { f: f }) %>
