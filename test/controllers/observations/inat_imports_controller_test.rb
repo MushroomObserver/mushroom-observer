@@ -38,6 +38,7 @@ module Observations
 
     def test_import_authorization_request
       user = users(:rolf)
+      inat_username = "rolf"
       inat_import = inat_imports(:rolf_inat_import)
       assert_equal("Unstarted", inat_import.state,
                    "Need a Unstarted inat_import fixture")
@@ -50,13 +51,15 @@ module Observations
         "Authorization request to iNat shouldn't create MO Observation(s)"
       ) do
         post(:create,
-             params: { inat_ids: 123_456_789, inat_username: "rolf",
+             params: { inat_ids: 123_456_789, inat_username: inat_username,
                        consent: 1 })
       end
 
       assert_response(:redirect)
       assert_equal("Authorizing", inat_import.reload.state,
                    "MO should be awaiting authorization from iNat")
+      assert_equal(inat_username, inat_import.inat_username,
+                   "Failed to save InatImport.inat_username")
     end
 
     def test_import_missing_username
