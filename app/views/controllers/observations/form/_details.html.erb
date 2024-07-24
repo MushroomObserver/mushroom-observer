@@ -80,14 +80,10 @@
 
         <!-- IS_COLLECTION_LOCATION -->
         <%= check_box_with_label(
-              form: f, field: :is_collection_location,
-              label: :form_observations_is_collection_location.l,
-              append: collapse_info_trigger("is_collection_location_help",
-                                            class: "ml-3")
-            ) %>
-        <%= collapse_help_block(nil, id: "is_collection_location_help") do %>
-          <%= :form_observations_is_collection_location_help.t %>
-        <% end %>
+          form: f, field: :is_collection_location,
+          label: :form_observations_is_collection_location.l,
+          help: :form_observations_is_collection_location_help.t
+        ) %>
         <!-- /IS_COLLECTION_LOCATION -->
       <% end %>
     </div><!--.col-->
