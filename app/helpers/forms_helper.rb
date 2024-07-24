@@ -86,6 +86,7 @@ module FormsHelper
   #
   def check_box_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
 
     wrap_class = form_group_wrap_class(args, "checkbox")
@@ -94,6 +95,9 @@ module FormsHelper
       args[:form].label(args[:field]) do
         concat(args[:form].check_box(args[:field], opts))
         concat(args[:label])
+        if args[:between].present?
+          concat(tag.div(class: "d-inline-block ml-3") { args[:between] })
+        end
         concat(args[:append]) if args[:append].present?
       end
     end
@@ -116,6 +120,7 @@ module FormsHelper
   # Bootstrap radio: form, field, value, label, class, checked
   def radio_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args, [:value])
 
     wrap_class = form_group_wrap_class(args, "radio")
@@ -124,6 +129,9 @@ module FormsHelper
       args[:form].label("#{args[:field]}_#{args[:value]}") do
         concat(args[:form].radio_button(args[:field], args[:value], opts))
         concat(args[:label])
+        if args[:between].present?
+          concat(tag.div(class: "d-inline-block ml-3") { args[:between] })
+        end
         concat(args[:append]) if args[:append].present?
       end
     end
@@ -147,6 +155,7 @@ module FormsHelper
   def text_field_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
     args = check_for_optional_or_required_note(args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-control"
 
@@ -327,6 +336,7 @@ module FormsHelper
     args = auto_label_if_form_is_account_prefs(args)
     args = select_generate_default_options(args)
     args = check_for_optional_or_required_note(args)
+    args = check_for_help_block(args)
 
     opts = separate_field_options_from_args(
       args, [:options, :select_opts, :start_year, :end_year]
@@ -364,6 +374,7 @@ module FormsHelper
   # it identifies the wrapping div. (That's also valid HTML.)
   # https://stackoverflow.com/a/16426122/3357635
   def date_select_with_label(**args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args, [:object, :data])
     opts[:class] = "form-control"
     opts[:data] = { controller: "year-input" }.merge(args[:data] || {})
@@ -405,6 +416,7 @@ module FormsHelper
   # Bootstrap number_field
   def number_field_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-control"
     opts[:min] ||= 1
@@ -419,6 +431,7 @@ module FormsHelper
 
   # Bootstrap password_field
   def password_field_with_label(**args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-control"
     opts[:value] ||= ""
@@ -477,6 +490,7 @@ module FormsHelper
 
   # Bootstrap url_field
   def url_field_with_label(**args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-control"
     opts[:value] ||= ""
@@ -491,6 +505,7 @@ module FormsHelper
 
   # Bootstrap file input field with client-side size validation.
   def file_field_with_label(**args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
     input_span_class = "file-field btn btn-default"
     max_size = MO.image_upload_max_size
@@ -608,15 +623,18 @@ module FormsHelper
 
   # Adds a help block to the field, with a collapse trigger beside the label.
   def check_for_help_block(args)
-    return args unless args[:help].present? && args[:field].present?
+    unless args[:help].present? && args[:field].present? && args[:form].present?
+      return args
+    end
 
+    id = "#{args[:form].object_name}_#{args[:field]}_help"
     args[:between] = capture do
-      concat(collapse_info_trigger("#{args[:field]}_help"))
+      concat(collapse_info_trigger(id))
       concat(args[:between])
     end
     args[:append] = capture do
       concat(args[:append])
-      concat(collapse_help_block(nil, id: "#{args[:field]}_help") do
+      concat(collapse_help_block(nil, id:) do
         concat(args[:help])
       end)
     end

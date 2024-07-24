@@ -79,15 +79,11 @@
                            class: "constrained-label"),
                   tag.span("#{:form_observations_create_locality.l}:",
                            class: "create-label")].safe_join(" "),
-          between: collapse_info_trigger("where_help"),
+          help: observation_location_help,
           hidden: location&.id,
           hidden_data: { map_target: "locationId",
                          north: location&.north, south: location&.south,
                          east: location&.east, west: location&.west },
-          # button: modal_link_to("location",
-          #                       :form_observations_create_locality.l,
-          #                       new_location_path, icon: :add,
-          #                       class: "btn btn-default"),
           create_text: :form_observations_create_locality.l,
           keep_text: :form_observations_use_locality.l,
           edit_text: :form_observations_edit_locality.l,
@@ -102,9 +98,6 @@
             ].join(" ")
           }
         ) %>
-        <%= collapse_help_block(nil, id: "where_help") do
-          observation_location_help
-        end %>
         <%= fields_for(:location) do |f_l| %>
           <% %w[north south east west low high].each do |key| %>
             <%= f_l.hidden_field(:"#{key}", value: @location&.send(key) || nil,
@@ -115,14 +108,10 @@
 
         <!-- IS_COLLECTION_LOCATION -->
         <%= check_box_with_label(
-              form: f, field: :is_collection_location,
-              label: :form_observations_is_collection_location.l,
-              append: collapse_info_trigger("is_collection_location_help",
-                                            class: "ml-3")
-            ) %>
-        <%= collapse_help_block(nil, id: "is_collection_location_help") do %>
-          <%= :form_observations_is_collection_location_help.t %>
-        <% end %>
+          form: f, field: :is_collection_location,
+          label: :form_observations_is_collection_location.l,
+          help: :form_observations_is_collection_location_help.t
+        ) %>
         <!-- /IS_COLLECTION_LOCATION -->
       <% end %>
     </div><!--.col-->
