@@ -382,7 +382,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                   selected: Vote.confidence(Vote.next_best_vote))
 
     # Carousel items are re-output with image records this time.
-    all(".carousel-indicator").last.click
+    all(".carousel-indicator").last.trigger("click")
 
     assert_selector(".carousel-item", text: SO_PASA_EXIF[:lat].to_s,
                                       visible: :all)
@@ -591,6 +591,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
 
   def assert_image_exif_available(image_data)
+    assert_selector('[id$="when_1i"]', visible: :any)
+    assert_selector('[id$="when_2i"]', visible: :any)
+    assert_selector('[id$="when_3i"]', visible: :any)
     assert_equal(image_data[:year].to_s,
                  find('[id$="when_1i"]', visible: :all).value)
     assert_equal(image_data[:month].to_s,
