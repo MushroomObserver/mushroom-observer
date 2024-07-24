@@ -112,11 +112,6 @@ module Observations
       inat_import.state = "Importing"
       inat_import.save
 
-      # Actually do the imports
-      #       inat_id_list(inat_import).each do |inat_obs_id|
-      #         import_one_observation(inat_obs_id)
-      #       end
-
       import_requested_observations(inat_ids: inat_id_list(inat_import))
 
       inat_import.state = "Done"

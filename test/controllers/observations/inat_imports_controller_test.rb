@@ -56,14 +56,15 @@ module Observations
     end
 
     def test_create_inat_import_no_consent
-      mock_inat_response =
-        File.read("test/inat/evernia.txt")
-      inat_import_ids = InatObs.new(mock_inat_response).inat_id
+      mock_search = File.read("test/inat/evernia.txt")
+      inat_obs = InatObs.new(
+        JSON.generate(JSON.parse(mock_search)["results"].first)
+      )
+      inat_import_ids = inat_obs.inat_id
+      stub_inat_api_request(inat_import_ids, mock_search)
+
       # TODO: remove consent key after creating model with default consent
       params = { inat_ids: inat_import_ids, consent: 0 }
-
-      stub_inat_api_request(inat_import_ids, mock_inat_response)
-
       login
 
       assert_no_difference("Observation.count",
@@ -193,10 +194,12 @@ module Observations
     def test_create_import_plant
       user = rolf
       filename = "ceanothus_cordulatus"
-      mock_inat_response = File.read("test/inat/#{filename}.txt")
-      inat_import_ids = InatObs.new(mock_inat_response).inat_id
+      mock_search = File.read("test/inat/#{filename}.txt")
+      inat_import_ids = InatObs.new(
+        JSON.generate(JSON.parse(mock_search)["results"].first)
+      ).inat_id
 
-      stub_inat_api_request(inat_import_ids, mock_inat_response)
+      stub_inat_api_request(inat_import_ids, mock_search)
       simulate_authorization(user: user, inat_import_ids: inat_import_ids)
       stub_token_request
 
@@ -235,11 +238,13 @@ module Observations
 
     def import_mock_observation(filename)
       user = users(:rolf)
-      mock_inat_response = File.read("test/inat/#{filename}.txt")
-      inat_obs = InatObs.new(mock_inat_response)
+      mock_search = File.read("test/inat/#{filename}.txt")
+      inat_obs = InatObs.new(
+        JSON.generate(JSON.parse(mock_search)["results"].first)
+      )
       inat_import_ids = inat_obs.inat_id
 
-      stub_inat_api_request(inat_import_ids, mock_inat_response)
+      stub_inat_api_request(inat_import_ids, mock_search)
       simulate_authorization(user: user, inat_import_ids: inat_import_ids)
       stub_token_request
 
