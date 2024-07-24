@@ -35,13 +35,13 @@ end
 
 <%= form_with(
   model: @observation,
-  url: add_query_param(action: action, id: @observation,
-                        approved_name: @given_name,
-                        approved_where: @place_name),
-  method: method,
+  url: add_query_param(action:, id: @observation,
+                       approved_name: @given_name,
+                       approved_where: @place_name),
+  method:,
   multipart: true,
   id: "observation_form",
-  data: data
+  data:
 ) do |f| %>
 
   <%= if @field_code
@@ -53,29 +53,17 @@ end
 
   <% if include_images %>
     <%= render(partial: "observations/form/images", locals: { f: f }) %>
-  <% end # if include_images %>
+  <% end %>
+
+  <% ############################# Details ################################ %>
 
   <%= render(partial: "observations/form/details",
-             locals: { f: f, button_name: button_name, location: @location }) %>
+             locals: { f:, button_name:, location: @location }) %>
 
-  <% if include_naming
-    # note this is not a separate form! just fields
-    naming_locals = {
-      f:            f,
-      action:       action,
-      button_name:  button_name,
-      show_reasons: false,
-      unfocused:    true,
-      name_help:    :form_naming_name_help_leave_blank.t
-    } %>
-    <%= render(partial: "observations/namings/fields", locals: naming_locals) %>
+  <% ########################## Identification ############################ %>
 
-  <% end # if include_naming %>
-
-  <%= render(partial: "observations/form/specimen_section",
-             locals: { f: f, button_name: button_name }) %>
-
-  <%= render(partial: "observations/form/notes", locals: { f: f }) %>
+  <%= render(partial: "observations/form/identification",
+             locals: { f:, action:, button_name:, include_naming: }) %>
 
   <% ####################################################################### %>
 
@@ -85,7 +73,7 @@ end
 
   <% if @projects.any? %>
     <%= render(partial: "observations/form/projects",
-               locals: { f: f, button_name: button_name }) %>
+               locals: { f:, button_name: }) %>
   <% end %>
 
   <% if @lists.any? %>

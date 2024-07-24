@@ -270,6 +270,8 @@
   field_slip: field slip
   FIELD_SLIPS: Field Slips
   field_slips: field slips
+  IDENTIFICATION: Identification
+  identification: identification
   IMAGE: Image
   image: image
   IMAGES: Images

@@ -1,21 +1,48 @@
-<%# Notes section of a form %>
+<%# Notes section of any form %>
 
+<%
+# Users may have custom notes "parts". This prints a single large textarea and
+# textile help block if there's only one notes part. Otherwise, it prints
+# smaller textareas and a general textile help link.
+
+help = general_help = other = nil
+if fields == [Observation.other_notes_part]
+  help = [tag.p(:form_observations_notes_help.t),
+          tag.p(:shared_textile_help.l)].safe_join
+  other = true
+  rows = 10
+else
+  general_help = tag.p do
+    [
+      tag.strong("#{:NOTES.t}:", class: "mr-3"),
+      collapse_info_trigger("notes_help"),
+      collapse_help_block(nil, :shared_textile_help.l, id: "notes_help")
+    ].safe_join
+  end
+  rows = 1
+end
+indent = form.object_name == "observation" ? "" : "ml-5"
+%>
 <!-- NOTES -->
 <%= tag.div(id: "#{form.object_name}_notes") do %>
-
-  <%= tag.p do
-    tag.span("#{:NOTES.t}:", class:"font-weight-bold")
-  end %>
-  <%= tag.div(class: "ml-5") do %>
-    <% form.fields_for(:notes) do |f_n| %>
-      <% fields.each do |field| %>
+  <%= general_help %>
+  <%= tag.div(class: indent) do %>
+    <%= form.fields_for(:notes) do |f_n| %>
+      <% fields.each do |part| %>
+        <% if form.object_name == "observation"
+          field = @observation.notes_normalized_key(part)
+          value = @observation.notes_part_value(part)
+          label = other ? "#{:NOTES.t}:" : "#{part.to_s.humanize}:"
+        else
+          field = part.name
+          value = part.value
+          label = part.label + ":"
+        end %>
         <%= text_area_with_label(
-              form: f_n, rows: 1, label: field.label + ": ",
-              field: field.name,
-              value: field.value) %>
-      <% end # each do field %>
-    <% end # form.fields_for(:notes) %>
+              form: f_n, rows:, help:, field:, value:, label:
+            ) %>
+      <% end %>
+    <% end %>
   <% end %>
-
-<% end %><!--#notes-->
+<% end %><!--#{form.object_name}_notes-->
 <!-- /NOTES -->
