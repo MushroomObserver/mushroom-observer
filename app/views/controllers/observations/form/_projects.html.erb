@@ -59,12 +59,14 @@ end
       ].safe_join
     end %>
 
-    <% @projects.each do |project| %>
-      <%= check_box_with_label(
-        form: f_p, field: :"id_#{project.id}", label: project.title,
-        checked: @project_checks[project.id],
-        disabled: !project.user_can_add_observation?(@observation, @user)
-      ) %>
+    <%= tag.div(class: "overflow-scroll-checklist") do %>
+      <% @projects.each do |project| %>
+        <%= check_box_with_label(
+          form: f_p, field: :"id_#{project.id}", label: project.title,
+          checked: @project_checks[project.id],
+          disabled: !project.user_can_add_observation?(@observation, @user)
+        ) %>
+      <% end %>
     <% end %>
 
   <% end %>

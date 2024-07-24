@@ -1,6 +1,6 @@
 @import "defaults";
 
-$BODY_BG_COLOR:               #DE01DD; // DD00DD
+$BODY_BG_COLOR:               #DD00DD;
 
 $LOGO_BORDER_COLOR:           black;
 $LOGO_BORDER_WIDTH:           2px; // vs 1px in default
@@ -9,7 +9,7 @@ $LOGO_BG_COLOR:               yellow;
 $LOGO_HOVER_FG_COLOR:         purple;
 $LOGO_HOVER_BG_COLOR:         yellow;
 
-$LEFT_BAR_BORDER_COLOR:       gray;
+$LEFT_BAR_BORDER_COLOR:       #555555; // gray
 $LEFT_BAR_BORDER_RADIUS:      0px;
 $LEFT_BAR_HEADER_FG_COLOR:    black;
 $LEFT_BAR_HEADER_BG_COLOR:    yellow;

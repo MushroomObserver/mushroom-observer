@@ -175,3 +175,8 @@ form {
     display: inline-block;
   }
 }
+
+.overflow-scroll-checklist {
+  max-height: 30rem;
+  overflow-y: auto;
+}

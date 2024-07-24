@@ -2,6 +2,7 @@
 
 <%= tag.div(id: "observation_projects") do %>
   <%= fields_for(:list) do |f_l| %>
+
     <%= tag.p do
       [
         tag.strong("#{:SPECIES_LISTS.l}:", class: "mr-3"),
@@ -12,7 +13,7 @@
       ].safe_join
     end %>
 
-    <%= fields_for(:list) do |f_l| %>
+    <%= tag.div(class: "overflow-scroll-checklist") do %>
       <% @lists.each do |list| %>
         <%= check_box_with_label(
           form: f_l, field: :"id_#{list.id}", label: list.title,
