@@ -65,7 +65,7 @@ module Observations
       params = { inat_ids: id }
 
       login(user.login)
-      put(:create, params: params)
+      post(:create, params: params)
 
       assert_flash_text(:inat_missing_username.l)
       assert_form_action(action: :create)
@@ -85,7 +85,7 @@ module Observations
 
       assert_no_difference("Observation.count",
                            "iNat obss imported without consent") do
-        put(:create, params: params)
+        post(:create, params: params)
       end
 
       assert_flash_warning
