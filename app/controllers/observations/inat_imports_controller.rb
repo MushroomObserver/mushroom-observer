@@ -134,42 +134,6 @@ module Observations
       inat_import.inat_ids.delete(" ")
     end
 
-    def import_one_observation(inat_obs_id)
-      imported_inat_obs_data = inat_search_observations(ids: inat_obs_id)
-      inat_obs = InatObs.new(imported_inat_obs_data)
-      return not_importable(inat_obs) unless inat_obs.importable?
-
-      @observation = Observation.new(
-        when: inat_obs.when,
-        location: inat_obs.location,
-        where: inat_obs.where,
-        lat: inat_obs.lat,
-        lng: inat_obs.lng,
-        gps_hidden: inat_obs.gps_hidden,
-        name_id: inat_obs.name_id,
-        text_name: inat_obs.text_name,
-        notes: inat_obs.notes,
-        source: "mo_inat_import",
-        inat_id: inat_obs.inat_id
-      )
-      @observation.save
-      @observation.log(:log_observation_created)
-
-      # NOTE: 2024-06-19 jdc. I can't figure out how to properly stub
-      # adding an image from an external source.
-      # Skipping images when testing will allow some more controller testing.
-      # add_inat_images(inat_obs.inat_obs_photos) unless Rails.env.test?
-      add_inat_images(inat_obs.inat_obs_photos)
-
-      # TODO: Other things done by Observations#create
-      # save_everything_else(params.dig(:naming, :reasons))
-      # strip_images! if @observation.gps_hidden
-      # update_field_slip(@observation, params[:field_code])
-      # flash_notice(:runtime_observation_success.t(id: @observation.id))
-      add_inat_sequences(inat_obs)
-      add_inat_summmary_data(inat_obs)
-    end
-
     def import_requested_observations(inat_ids: nil)
       return if inat_ids.blank?
 
