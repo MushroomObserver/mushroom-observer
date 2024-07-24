@@ -68,16 +68,8 @@ end
   <% ####################################################################### %>
 
   <% if @projects.any? || @lists.any? %>
-    <%= submit_button(form: f, button: button_name, center: true) %>
-  <% end %>
-
-  <% if @projects.any? %>
-    <%= render(partial: "observations/form/projects",
+    <%= render(partial: "observations/form/projects_and_lists",
                locals: { f:, button_name: }) %>
-  <% end %>
-
-  <% if @lists.any? %>
-    <%= render(partial: "observations/form/species_lists", locals: { f: f }) %>
   <% end %>
 
   <%= submit_button(form: f, button: button_name, center: true) %>
