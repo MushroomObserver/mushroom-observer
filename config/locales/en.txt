@@ -305,6 +305,10 @@
   lichen: lichen
   LINKS: Links
   links: links
+  LOCALITY: Locality
+  locality: locality
+  LOCALITIES: Localities
+  localities: localities
   LOCATION: Location
   location: location
   LOCATIONS: Locations
@@ -746,6 +750,8 @@
   # upload an image or checklist
   UPLOAD: Upload
   upload: upload
+  USE: Use
+  use: use
 
   # Common adjectives.
   ANONYMOUS: Anonymous
@@ -1567,7 +1573,7 @@
   form_glossary_description_help: "A concise definition matching the part of speech of the Term, without repeating another Term's definition. (Instead link to the other Term.) Details:"
 
   # location/_form_location
-  form_locations_hidden: Hide location
+  form_locations_hidden: Hide observations at this location
   form_locations_hidden_doc: Hidden locations will hide the GPS coordinates of associated observations.  They also cannot be more precise than 0.1 degrees.  This value cannot be changed when there are any associated observations.
   form_locations_locked: Lock this location so users cannot change the name or coordinates?
   form_locations_gen_desc: General Description
@@ -1576,9 +1582,9 @@
   form_locations_notes: "[:Notes]"
   form_locations_refs: "[:form_names_refs]"
   form_locations_refs_help: "[:form_names_refs_help]"
-  form_locations_help: "<a href=\"/location/help\" target=\"_new\">Help</a>"
-  form_locations_find_on_map: Find on Map >
-  form_locations_get_elevation: Get Elevation
+  form_locations_help: "Here you can define the place where you observed mushrooms, if a matching place doesn't exist in Mushroom Observer already. Please try to define locations that will be reusable by yourself or others. If you have an idea of the location's name, you can start typing and Google will return its best guess of the place you typed, and draw a box of the approximate boundaries on the map. At this point, you can manually edit both the boundaries and the name of the place. <a href=\"/locations/help\" target=\"_new\">More about Locations on MO.</a>"
+  form_locations_find_on_map: Find on Map
+  form_locations_get_elevation: Get Elevations
   form_locations_lat_long_help: All values should be in decimal degrees.
   form_locations_license_help: Select "license":/info/how_to_use#license you want to give for the above text.
   form_locations_gen_desc_help: Describe the geographical location of this location.
@@ -1646,20 +1652,23 @@
   form_observations_specimen_available: Specimen Available
   form_observations_is_collection_location: Is this location where it was collected?
   form_observations_gps_hidden: Hide exact coordinates?
-  form_observations_upload_images: Upload Images
-  form_observations_uploading_images: Uploading Images
-  form_observations_upload_another: Upload Another...
-  form_observations_creating_observation: Creating Observation
-  form_observations_edit_image: Edit Image
-  form_observations_remove_image: Remove Image
+  form_observations_upload_images: "Upload [:images]"
+  form_observations_uploading_images: "Uploading [:images]"
+  form_observations_upload_another: Upload another...
+  form_observations_creating_observation: "Creating [:observation]"
+  form_observations_edit_image: "[:EDIT] [:image]"
+  form_observations_remove_image: "[:REMOVE] [:image]"
   form_observations_lat_long_help: "Optional GPS location within **[:WHERE]**. Latitude must be -90.0 to 90.0;  longitude must be -180.0 to 180.0. Elevation will be converted to meters. If you choose to provide this data please make it as accurate as possible. Examples: \"34.1164\" = \"34°6&apos;59&quot;N\", \"-118.1459\" = \"118 8.754 W\", \"239 m\" = \"784 ft.\""
   form_observations_log_change: Log Change
   form_observations_is_collection_location_help: Check when the location is where the mushroom was growing.  Uncheck when it is only where the mushroom was seen (e.g., mushroom fairs, grocery, foray id table where collection location is unknown etc.).
   form_observations_open_map: "[:SHOW] [:map]"
   form_observations_hide_map: "[:HIDE] [:map]"
-  form_observations_clear_map: Clear location
-  form_observations_click_point: Click a point on the map to set a location
-  form_observations_locality_contains: Localities containing this point
+  form_observations_clear_map: "[:CLEAR] [:location]"
+  form_observations_click_point: "Tip: select a locality to center the map, then click a point on the map to set a location."
+  form_observations_locality_contains: "[:LOCALITIES] containing this point"
+  form_observations_create_locality: "[:CREATE] [:locality]"
+  form_observations_use_locality: "[:USE] this [:locality]"
+  form_observations_edit_locality: "[:EDIT] this [:locality]"
   form_observations_notes_help: Please include any additional information you can think of about this observation that isn't clear from the photographs, e.g., habitat, substrate or nearby trees; distinctive texture, scent, taste, staining or bruising; results of chemical or microscopic analyses, etc.
   form_observations_remove_image_confirm: Are you sure you want to remove this image?  This will only remove this image from this observation.  If it is attached to other observations, it will remain attached to them.
   form_observations_specimen_available_help: Check when there is a preserved specimen available for further study.
@@ -3559,7 +3568,7 @@
 
   # Location help
   location_help_title: Locations in Mushroom Observer
-  location_help_intro: "The Mushroom Observer provides two ways to represent the geographic location of an observation.  The simplest are latitude and longitude positions associated with the observation.  Please keep these accurate to within at least 300 meters (or about 1000 feet).  However, the more widely used method is a simple phrase describing the location.  For example, \"Beebe Woods, Falmouth, Massachusetts, USA\". The goal of these location names is to provide a consistent, reusable way of talking about where an observation was made without necessarily revealing a precise \"spot\". If you are comfortable provide more precise lat/longs for an observation, the location names are still useful for searches so you are encouraged to provide them as well.  The location names should, by default, go from the smallest contained area to the country name.  If you prefer to describe your locations as going from the largest (country) down to the smallest contained area, you can change your preference from the default, \"Postal\", to \"Scientific\" on your preference page.  There are cases such as \"Great Smoky Mountains National Park, Blount Co., Tennessee, USA\", where the area you are describing overlaps a number of counties, states or even countries.  In these cases, the country and other official political boundaries should come at the end as shown in the example.\n\nOriginally, the Mushroom Observer was very loose about these location names, hoping that the users would create a reasonably consistent set of rules and correct each other.  After about four years and thousands of location names, we found that there were rules emerging, but they were not applied at all consistently and people were not tending to directly correct each other. Consequently, we have tried to codify these rules and when reasonable to provide warnings if you attempt to create a new location that violates these rules. It is not always possible to correct identify \"bad\" locations, so if you get some warnings, but after reviewing the location decide it should be \"good\", then simply resubmitting the form will force the name into the database. However, all new location names will get reviewed regularly and may get changed to better fit the consensus rules.  Below are some examples of \"bad\" and \"good\" location names followed by a more detailed explanation of the current rules. Each example is labeled with the following section that explains the example in more detail.  These rules are by no means set it stone and we encourage the discussion and revision of them."
+  location_help_intro: "The Mushroom Observer provides two ways to represent the geographic location of an observation.  The simplest are latitude and longitude positions associated with the observation.  Please keep these accurate to within at least 300 meters (or about 1000 feet).  However, the more widely used method is a simple phrase describing the location.  For example, \"Beebe Woods, Falmouth, Massachusetts, USA\". The goal of these location names is to provide a consistent, reusable way of talking about where an observation was made without necessarily revealing a precise \"spot\". If you are comfortable providing more precise lat/longs for an observation, the location names are still useful for searches so you are encouraged to provide them as well.  The location names should, by default, go from the smallest contained area to the country name.  If you prefer to describe your locations as going from the largest (country) down to the smallest contained area, you can change your preference from the default, \"Postal\", to \"Scientific\" on your preference page.  There are cases such as \"Great Smoky Mountains National Park, Blount Co., Tennessee, USA\", where the area you are describing overlaps a number of counties, states or even countries.  In these cases, the country and other official political boundaries should come at the end as shown in the example.\n\nOriginally, the Mushroom Observer was very loose about these location names, hoping that the users would create a reasonably consistent set of rules and correct each other.  After about four years and thousands of location names, we found that there were rules emerging, but they were not applied at all consistently and people were not tending to directly correct each other. Consequently, we have tried to codify these rules and when reasonable to provide warnings if you attempt to create a new location that violates these rules. It is not always possible to correct identify \"bad\" locations, so if you get some warnings, but after reviewing the location decide it should be \"good\", then simply resubmitting the form will force the name into the database. However, all new location names will get reviewed regularly and may get changed to better fit the consensus rules.  Below are some examples of \"bad\" and \"good\" location names followed by a more detailed explanation of the current rules. Each example is labeled with the following section that explains the example in more detail.  These rules are by no means set it stone and we encourage the discussion and revision of them."
   location_help_example_help: These are cases that are not detected automatically, so no warning would be given.
   location_help_example_title: Some examples
   location_help_bad: Bad

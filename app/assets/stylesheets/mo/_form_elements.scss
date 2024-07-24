@@ -127,17 +127,11 @@ form {
   }
 }
 
-.has-id-indicator {
+.constrained-label {
   display: none;
 }
 
-.has-id {
-  .has-id-indicator {
-    display: inline-block;
-  }
-}
-
-.constrained-label {
+.create-label {
   display: none;
 }
 
@@ -147,6 +141,21 @@ form {
   }
   .constrained-label {
     display: inline-block;
+  }
+  .create-label {
+    display: none;
+  }
+}
+
+.create {
+  .create-label {
+    display: inline-block;
+  }
+  .unconstrained-label {
+    display: none;
+  }
+  .constrained-label {
+    display: none;
   }
 }
 

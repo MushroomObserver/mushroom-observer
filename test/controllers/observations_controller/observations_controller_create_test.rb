@@ -36,26 +36,26 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     { herbarium_name: "", accession_number: "" }
   end
 
-  def location_exists_or_place_name_blank(params)
-    Location.find_by(name: params[:observation][:place_name]) ||
-      Location.is_unknown?(params[:observation][:place_name]) ||
-      params[:observation][:place_name].blank?
+  def location_exists_or_place_name_blank(params, user)
+    name = Location.user_format(user, params[:observation][:place_name])
+    Location.find_by(name:) || Location.is_unknown?(name) || name.blank?
   end
 
   # Test constructing observations in various ways (with minimal namings)
-  def generic_construct_observation(params, o_num, g_num, n_num, user = rolf)
+  def generic_construct_observation(params, o_num, g_num, n_num, l_num,
+                                    user = rolf)
     o_count = Observation.count
     g_count = Naming.count
     n_count = Name.count
+    l_count = Location.count
     score   = user.reload.contribution
     params  = modified_generic_params(params, user)
-
     post_requires_login(:create, params)
 
     begin
       if o_num.zero?
         assert_response(:success)
-      elsif location_exists_or_place_name_blank(params)
+      elsif location_exists_or_place_name_blank(params, user)
         # assert_redirected_to(action: :show)
         assert_response(:redirect)
         assert_match(%r{/test.host/\d+\Z}, @response.redirect_url)
@@ -73,7 +73,8 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_equal(o_count + o_num, Observation.count, "Wrong Observation count")
     assert_equal(g_count + g_num, Naming.count, "Wrong Naming count")
     assert_equal(n_count + n_num, Name.count, "Wrong Name count")
-    assert_equal(score + o_num + g_num * 2 + n_num * 10,
+    assert_equal(l_count + l_num, Location.count, "Wrong Location count")
+    assert_equal(score + o_num + g_num * 2 + n_num * 10 + l_num * 10,
                  user.reload.contribution,
                  "Wrong User score")
     return unless o_num == 1
@@ -111,7 +112,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     params = {
       naming: { name: "", vote: { value: "" } },
       user: rolf,
-      where: locations.first.name
+      observation: { place_name: locations.first.name }
     }
 
     users(:rolf).login
@@ -123,7 +124,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
 
   def test_create_observation_without_scientific_name
     params = { user: rolf,
-               where: locations.first.name }
+               observation: { place_name: locations.first.name } }
     fungi = names(:fungi)
 
     post_requires_login(:create, params)
@@ -141,7 +142,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     text_name = "Elfin saddle"
     params = { naming: { name: text_name },
                user: rolf,
-               where: locations.first.name }
+               observation: { place_name: locations.first.name } }
     post_requires_login(:create, params)
 
     assert_select("div[id='name_messages']",
@@ -154,7 +155,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       { observation: { place_name: where },
         naming: { name: "Coprinus comatus" },
         approved_place_name: "" },
-      1, 1, 0
+      1, 1, 0, 0
     )
     obs = assigns(:observation)
     assert_equal(where, obs.place_name)
@@ -166,7 +167,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       { observation: { specimen: "1" },
         field_code: field_slips(:field_slip_no_obs).code,
         naming: { name: "Coprinus comatus" } },
-      1, 1, 0
+      1, 1, 0, 0
     )
     obs = assigns(:observation)
     assert(obs.specimen)
@@ -178,7 +179,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       { observation: { specimen: "1" },
         collection_number: { name: "Billy Bob", number: "17-034" },
         naming: { name: "Coprinus comatus" } },
-      1, 1, 0
+      1, 1, 0, 0
     )
     obs = assigns(:observation)
     assert(obs.specimen)
@@ -190,7 +191,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       { observation: { specimen: "1" },
         collection_number: { name: "Rolf Singer", number: "1" },
         naming: { name: "Coprinus comatus" } },
-      1, 1, 0
+      1, 1, 0, 0
     )
     obs = assigns(:observation)
     assert(obs.specimen)
@@ -203,7 +204,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       { observation: { specimen: "1" },
         collection_number: { name: "Rolf Singer", number: "" },
         naming: { name: "Coprinus comatus" } },
-      1, 1, 0
+      1, 1, 0, 0
     )
     obs = assigns(:observation)
     assert(obs.specimen)
@@ -214,7 +215,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     generic_construct_observation(
       { collection_number: { name: "Rolf Singer", number: "3141" },
         naming: { name: "Coprinus comatus" } },
-      1, 1, 0
+      1, 1, 0, 0
     )
     obs = assigns(:observation)
     assert_not(obs.specimen)
@@ -226,7 +227,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       { observation: { specimen: "1" },
         collection_number: { name: "", number: "27-18A.2" },
         naming: { name: "Coprinus comatus" } },
-      1, 1, 0
+      1, 1, 0, 0
     )
     obs = assigns(:observation)
     assert(obs.specimen)
@@ -244,7 +245,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
           accession_number: "1234"
         },
         naming: { name: "Coprinus comatus" } },
-      1, 1, 0
+      1, 1, 0, 0
     )
     obs = assigns(:observation)
     assert(obs.specimen)
@@ -259,7 +260,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
           accession_number: "1234"
         },
         naming: { name: "Cortinarius sp." } },
-      0, 0, 0
+      0, 0, 0, 0
     )
     assert_input_value(:herbarium_record_herbarium_name,
                        "NY - The New York Botanical Garden")
@@ -275,7 +276,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
           accession_number: ""
         },
         naming: { name: name } },
-      1, 1, 0
+      1, 1, 0, 0
     )
     obs = assigns(:observation)
     assert_true(obs.specimen)
@@ -289,7 +290,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
           accession_number: "1234"
         },
         naming: { name: "Coprinus comatus" } },
-      1, 1, 0
+      1, 1, 0, 0
     )
     obs = assigns(:observation)
     assert_not(obs.specimen)
@@ -302,7 +303,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
         herbarium_record: { herbarium_name: "A Brand New Herbarium",
                             accession_number: "" },
         naming: { name: "Coprinus comatus" } },
-      1, 1, 0
+      1, 1, 0, 0
     )
     obs = assigns(:observation)
     assert(obs.specimen)
@@ -315,7 +316,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
         herbarium_record: { herbarium_name: katrina.personal_herbarium_name,
                             accession_number: "12345" },
         naming: { name: "Coprinus comatus" } },
-      1, 1, 0, katrina
+      1, 1, 0, 0, katrina
     )
     obs = assigns(:observation)
     assert(obs.specimen)
@@ -332,7 +333,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     generic_construct_observation(
       { observation: { place_name: where, thumb_image_id: "0" },
         naming: { name: "Coprinus comatus" } },
-      1, 1, 0
+      1, 1, 0, 0
     )
     obs = assigns(:observation)
     nam = assigns(:naming)
@@ -350,7 +351,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     where = "Unknown, Massachusetts, USA"
     generic_construct_observation(
       { observation: { place_name: where }, naming: { name: "Unknown" } },
-      1, 0, 0
+      1, 0, 0, 0
     )
     obs = assigns(:observation)
     assert_equal(where, obs.where) # Make sure it's the right observation
@@ -359,7 +360,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
 
   def test_create_observation_with_new_name
     generic_construct_observation(
-      { naming: { name: "New name" } }, 0, 0, 0
+      { naming: { name: "New name" } }, 0, 0, 0, 0
     )
   end
 
@@ -367,7 +368,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     # Test an observation creation with an approved new name
     generic_construct_observation(
       { naming: { name: "Argus arg-arg" }, approved_name: "Argus arg-arg" },
-      1, 1, 2
+      1, 1, 2, 0
     )
   end
 
@@ -375,7 +376,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     generic_construct_observation(
       { naming: { name: "Another new-name  " },
         approved_name: "Another new-name  " },
-      1, 1, 2
+      1, 1, 2, 0
     )
   end
 
@@ -386,7 +387,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     generic_construct_observation(
       { naming: { name: "Macrocybe section Fakesection" },
         approved_name: "Macrocybe section Fakesection" },
-      1, 1, 1
+      1, 1, 1, 0
     )
   end
 
@@ -394,13 +395,14 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     generic_construct_observation(
       { naming: { name: "This is a bunch of junk" },
         approved_name: "This is a bunch of junk" },
-      0, 0, 0
+      0, 0, 0, 0
     )
   end
 
   def test_create_observation_with_multiple_name_matches
     generic_construct_observation(
-      { naming: { name: "Amanita baccata" } }, 0, 0, 0
+      { naming: { name: "Amanita baccata" } },
+      0, 0, 0, 0
     )
   end
 
@@ -408,14 +410,14 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     generic_construct_observation(
       { naming: { name: "Amanita baccata" },
         chosen_name: { name_id: names(:amanita_baccata_arora).id } },
-      1, 1, 0
+      1, 1, 0, 0
     )
   end
 
   def test_create_observation_choosing_deprecated_one_of_multiple_name_matches
     generic_construct_observation(
       { naming: { name: names(:pluteus_petasatus_deprecated).text_name } },
-      1, 1, 0
+      1, 1, 0, 0
     )
     nam = assigns(:naming)
     assert_equal(names(:pluteus_petasatus_approved).id, nam.name_id)
@@ -423,7 +425,8 @@ class ObservationsControllerCreateTest < FunctionalTestCase
 
   def test_create_observation_with_deprecated_name
     generic_construct_observation(
-      { naming: { name: "Lactarius subalpinus" } }, 0, 0, 0
+      { naming: { name: "Lactarius subalpinus" } },
+      0, 0, 0, 0
     )
   end
 
@@ -432,7 +435,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       { naming: { name: "Lactarius subalpinus" },
         approved_name: "Lactarius subalpinus",
         chosen_name: { name_id: names(:lactarius_alpinus).id } },
-      1, 1, 0
+      1, 1, 0, 0
     )
     nam = assigns(:naming)
     assert_equal(nam.name, names(:lactarius_alpinus))
@@ -443,7 +446,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       { naming: { name: "Lactarius subalpinus" },
         approved_name: "Lactarius subalpinus",
         chosen_name: {} },
-      1, 1, 0
+      1, 1, 0, 0
     )
     nam = assigns(:naming)
     assert_equal(nam.name, names(:lactarius_subalpinus))
@@ -455,7 +458,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     generic_construct_observation(
       { naming: { name: "Agaricus novus" },
         approved_name: "Agaricus novus" },
-      1, 1, 2
+      1, 1, 2, 0
     )
     name = Name.find_by(text_name: "Agaricus novus")
     assert(name)
@@ -475,7 +478,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     where = "Simple, Massachusetts, USA"
     generic_construct_observation(
       { observation: { place_name: where }, naming: { name: name.text_name } },
-      1, 1, 0
+      1, 1, 0, 0
     )
     obs = assigns(:observation)
     nam = assigns(:naming)
@@ -493,7 +496,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     generic_construct_observation(
       { observation: { place_name: "", lat: lat, lng: lng },
         naming: { name: "Unknown" } },
-      1, 0, 0
+      1, 0, 0, 0
     )
     obs = assigns(:observation)
 
@@ -509,7 +512,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     generic_construct_observation(
       { observation: { place_name: "", lat: lat2, lng: lng2 },
         naming: { name: "Unknown" } },
-      1, 0, 0
+      1, 0, 0, 0
     )
     obs = assigns(:observation)
 
@@ -524,7 +527,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     generic_construct_observation(
       { observation: { place_name: "", lat: "", lng: "" },
         naming: { name: "Unknown" } },
-      0, 0, 0
+      0, 0, 0, 0
     )
   end
 
@@ -533,7 +536,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     generic_construct_observation(
       { observation: { place_name: "Earth", lat: "", lng: "" },
         naming: { name: "Unknown" } },
-      1, 0, 0
+      1, 0, 0, 0
     )
   end
 
@@ -549,7 +552,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       generic_construct_observation(
         { observation: { place_name: where, alt: input },
           naming: { name: "Unknown" } },
-        1, 0, 0
+        1, 0, 0, 0
       )
       obs = assigns(:observation)
 
@@ -564,7 +567,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       { observation: { place_name: "Earth", lat: "", lng: "" },
         naming: { name: "Lecanoromycetes L." },
         approved_name: "Lecanoromycetes L." },
-      1, 1, 1
+      1, 1, 1, 0
     )
     name = Name.last
     assert_equal("Lecanoromycetes", name.text_name)
@@ -614,7 +617,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       { observation: { place_name: "Earth", lat: "", lng: "" },
         naming: { name: "Morchella elata group" },
         approved_name: "Morchella elata group" },
-      1, 1, 2
+      1, 1, 2, 0
     )
     name = Name.last
     assert_equal("Morchella elata group", name.text_name)
@@ -636,7 +639,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     generic_construct_observation(
       { observation: { place_name: "Earth" },
         naming: { name: "Cladina pictum" } },
-      0, 0, 0, roy
+      0, 0, 0, 0, roy
     )
     assert_names_equal(cladina, assigns(:parent_deprecated))
     assert_obj_arrays_equal([cladonia_picta], assigns(:valid_names))
@@ -645,7 +648,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       { observation: { place_name: "Earth" },
         naming: { name: "Cladina pictum" },
         approved_name: "Cladina pictum" },
-      1, 1, 1, roy
+      1, 1, 1, 0, roy
     )
 
     name = Name.last
@@ -653,97 +656,106 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_true(name.deprecated)
   end
 
+  # The ones that should pass here now need to match fixtures, in order to
+  # generate a location_id, or they will be rejected.
   def test_construct_observation_dubious_place_names
+    # Location box necessary for new locations (these are all non-fixtures).
+    params = {
+      naming: { name: "Unknown" },
+      location: { north: 35, south: 34, east: -117, west: -118 }
+    }
     # Test a reversed name with a scientific user
     where = "USA, Massachusetts, Reversed"
     generic_construct_observation(
-      { observation: { place_name: where }, naming: { name: "Unknown" } },
-      1, 0, 0, roy
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      1, 0, 0, 1, roy
     )
 
     # Test missing space.
     where = "Reversible, Massachusetts,USA"
     generic_construct_observation(
-      { observation: { place_name: where }, naming: { name: "Unknown" } },
-      0, 0, 0
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      0, 0, 0, 0
     )
     # (This is accepted now for some reason.)
     where = "USA,Massachusetts, Reversible"
     generic_construct_observation(
-      { observation: { place_name: where }, naming: { name: "Unknown" } },
-      1, 0, 0, roy
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      1, 0, 0, 1, roy
     )
 
     # Test a bogus country name
     where = "Bogus, Massachusetts, UAS"
     generic_construct_observation(
-      { observation: { place_name: where }, naming: { name: "Unknown" } },
-      0, 0, 0
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      0, 0, 0, 0
     )
     where = "UAS, Massachusetts, Bogus"
     generic_construct_observation(
-      { observation: { place_name: where }, naming: { name: "Unknown" } },
-      0, 0, 0, roy
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      0, 0, 0, 0, roy
     )
 
     # Test a bad state name
     where = "Bad State Name, USA"
     generic_construct_observation(
-      { observation: { place_name: where }, naming: { name: "Unknown" } },
-      0, 0, 0
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      0, 0, 0, 0
     )
     where = "USA, Bad State Name"
     generic_construct_observation(
-      { observation: { place_name: where }, naming: { name: "Unknown" } },
-      0, 0, 0, roy
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      0, 0, 0, 0, roy
     )
 
     # Test mix of city and county
     where = "Burbank, Los Angeles Co., California, USA"
     generic_construct_observation(
-      { observation: { place_name: where }, naming: { name: "Unknown" } },
-      1, 0, 0
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      1, 0, 0, 1
     )
+    # Location should now already exist (because of the above).
     where = "USA, California, Los Angeles Co., Burbank"
     generic_construct_observation(
-      { observation: { place_name: where }, naming: { name: "Unknown" } },
-      1, 0, 0, roy
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      1, 0, 0, 0, roy
     )
 
     # Test mix of city and county
     where = "Falmouth, Barnstable Co., Massachusetts, USA"
     generic_construct_observation(
-      { observation: { place_name: where }, naming: { name: "Unknown" } },
-      1, 0, 0
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      1, 0, 0, 1
     )
+    # Location should now already exist (because of the above).
     where = "USA, Massachusetts, Barnstable Co., Falmouth"
     generic_construct_observation(
-      { observation: { place_name: where }, naming: { name: "Unknown" } },
-      1, 0, 0, roy
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      1, 0, 0, 0, roy
     )
 
     # Test some bad terms
     where = "Some County, Ohio, USA"
     generic_construct_observation(
-      { observation: { place_name: where }, naming: { name: "Unknown" } },
-      0, 0, 0
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      0, 0, 0, 0
     )
     where = "Old Rd, Ohio, USA"
     generic_construct_observation(
-      { observation: { place_name: where }, naming: { name: "Unknown" } },
-      0, 0, 0
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      0, 0, 0, 0
     )
     where = "Old Rd., Ohio, USA"
     generic_construct_observation(
-      { observation: { place_name: where }, naming: { name: "Unknown" } },
-      1, 0, 0
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      1, 0, 0, 1
     )
 
     # Test some acceptable additions
     where = "near Burbank, Southern California, USA"
     generic_construct_observation(
-      { observation: { place_name: where }, naming: { name: "Unknown" } },
-      1, 0, 0
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      1, 0, 0, 1
     )
   end
 

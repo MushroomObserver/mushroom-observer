@@ -86,6 +86,7 @@ module FormsHelper
   #
   def check_box_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
 
     wrap_class = form_group_wrap_class(args, "checkbox")
@@ -94,6 +95,9 @@ module FormsHelper
       args[:form].label(args[:field]) do
         concat(args[:form].check_box(args[:field], opts))
         concat(args[:label])
+        if args[:between].present?
+          concat(tag.div(class: "d-inline-block ml-3") { args[:between] })
+        end
         concat(args[:append]) if args[:append].present?
       end
     end
@@ -116,6 +120,7 @@ module FormsHelper
   # Bootstrap radio: form, field, value, label, class, checked
   def radio_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args, [:value])
 
     wrap_class = form_group_wrap_class(args, "radio")
@@ -124,6 +129,9 @@ module FormsHelper
       args[:form].label("#{args[:field]}_#{args[:value]}") do
         concat(args[:form].radio_button(args[:field], args[:value], opts))
         concat(args[:label])
+        if args[:between].present?
+          concat(tag.div(class: "d-inline-block ml-3") { args[:between] })
+        end
         concat(args[:append]) if args[:append].present?
       end
     end
@@ -147,20 +155,39 @@ module FormsHelper
   def text_field_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
     args = check_for_optional_or_required_note(args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-control"
 
     wrap_class = form_group_wrap_class(args)
     wrap_data = args[:wrap_data] || {}
     label_opts = field_label_opts(args)
+    label_opts[:class] = class_names(label_opts[:class], args[:label_class])
 
     tag.div(class: wrap_class, data: wrap_data) do
-      concat(args[:form].label(args[:field], args[:label], label_opts))
-      concat(args[:between]) if args[:between].present?
-      if args[:addon].present?
+      # The label row is complicated, many potential buttons here. `between`
+      # comes right after the label on left, `between_end` is right justified
+      concat(tag.div(class: "d-flex justify-content-between") do
+        concat(tag.div do
+          concat(args[:form].label(args[:field], args[:label], label_opts))
+          concat(args[:between]) if args[:between].present?
+        end)
+        concat(tag.div do
+          concat(args[:between_end]) if args[:between_end].present?
+        end)
+      end)
+      if args[:addon].present? # text addon, not interactive
         concat(tag.div(class: "input-group") do
           concat(args[:form].text_field(args[:field], opts))
           concat(tag.span(args[:addon], class: "input-group-addon"))
+        end)
+      elsif args[:button].present? # button addon, interactive
+        concat(tag.div(class: "input-group") do
+          concat(args[:form].text_field(args[:field], opts))
+          concat(tag.span(class: "input-group-btn") do
+            js_button(button: args[:button], class: "btn btn-default",
+                      data: args[:button_data] || {})
+          end)
         end)
       else
         concat(args[:form].text_field(args[:field], opts))
@@ -185,15 +212,21 @@ module FormsHelper
       placeholder: :start_typing.l, autocomplete: "off",
       data: { autocompleter_target: "input" }
     }.deep_merge(args.except(:type, :separator, :textarea,
-                             :hidden, :hidden_data))
+                             :hidden, :hidden_data, :create_text))
     ac_args[:class] = class_names("dropdown", args[:class])
     ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
                             separator: args[:separator],
+                            autocompleter_map_outlet: args[:map_outlet],
                             autocompleter_target: "wrap" }
     ac_args[:between] = capture do
       concat(args[:between])
       concat(autocompleter_has_id_indicator)
+      concat(autocompleter_find_button(args)) if args[:find_text]
+      concat(autocompleter_keep_button(args)) if args[:keep_text]
       concat(autocompleter_hidden_field(**args)) if args[:form]
+    end
+    ac_args[:between_end] = capture do
+      autocompleter_create_button(args) if args[:create_text]
     end
     ac_args[:append] = capture do
       concat(autocompleter_dropdown)
@@ -209,7 +242,39 @@ module FormsHelper
 
   def autocompleter_has_id_indicator
     link_icon(:check, title: :autocompleter_has_id.l,
-                      classes: "ml-3 px-2 text-success has-id-indicator")
+                      class: "ml-3 px-2 text-success has-id-indicator",
+                      data: { autocompleter_target: "hasIdIndicator" })
+  end
+
+  def autocompleter_create_button(args)
+    icon_link_to(
+      args[:create_text], "#",
+      icon: :plus, show_text: true, icon_class: "text-primary",
+      name: "create_#{args[:type]}", class: "ml-3 create-button",
+      data: { autocompleter_target: "createBtn",
+              action: "autocompleter#swapCreate:prevent" }
+    )
+  end
+
+  def autocompleter_find_button(args)
+    icon_link_to(
+      args[:find_text], "#",
+      icon: :find_on_map, show_text: false, icon_class: "text-primary",
+      name: "find_#{args[:type]}", class: "ml-3 d-none",
+      data: { map_target: "showBoxBtn",
+              action: "map#showBox:prevent" }
+    )
+  end
+
+  def autocompleter_keep_button(args)
+    icon_link_to(
+      args[:keep_text], "#",
+      icon: :apply, show_text: false, icon_class: "text-primary",
+      active_icon: :edit, active_content: args[:edit_text],
+      name: "keep_#{args[:type]}", class: "ml-3 d-none",
+      data: { autocompleter_target: "keepBtn", map_target: "lockBoxBtn",
+              action: "map#toggleBoxLock:prevent" }
+    )
   end
 
   # minimum args :form, :type.
@@ -274,6 +339,7 @@ module FormsHelper
     args = auto_label_if_form_is_account_prefs(args)
     args = select_generate_default_options(args)
     args = check_for_optional_or_required_note(args)
+    args = check_for_help_block(args)
 
     opts = separate_field_options_from_args(
       args, [:options, :select_opts, :start_year, :end_year]
@@ -311,6 +377,7 @@ module FormsHelper
   # it identifies the wrapping div. (That's also valid HTML.)
   # https://stackoverflow.com/a/16426122/3357635
   def date_select_with_label(**args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args, [:object, :data])
     opts[:class] = "form-control"
     opts[:data] = { controller: "year-input" }.merge(args[:data] || {})
@@ -352,6 +419,7 @@ module FormsHelper
   # Bootstrap number_field
   def number_field_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-control"
     opts[:min] ||= 1
@@ -366,6 +434,7 @@ module FormsHelper
 
   # Bootstrap password_field
   def password_field_with_label(**args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-control"
     opts[:value] ||= ""
@@ -424,6 +493,7 @@ module FormsHelper
 
   # Bootstrap url_field
   def url_field_with_label(**args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-control"
     opts[:value] ||= ""
@@ -438,6 +508,7 @@ module FormsHelper
 
   # Bootstrap file input field with client-side size validation.
   def file_field_with_label(**args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
     input_span_class = "file-field btn btn-default"
     max_size = MO.image_upload_max_size
@@ -555,15 +626,18 @@ module FormsHelper
 
   # Adds a help block to the field, with a collapse trigger beside the label.
   def check_for_help_block(args)
-    return args unless args[:help].present? && args[:field].present?
+    unless args[:help].present? && args[:field].present? && args[:form].present?
+      return args
+    end
 
+    id = "#{args[:form].object_name}_#{args[:field]}_help"
     args[:between] = capture do
-      concat(collapse_info_trigger("#{args[:field]}_help"))
+      concat(collapse_info_trigger(id))
       concat(args[:between])
     end
     args[:append] = capture do
       concat(args[:append])
-      concat(collapse_help_block(nil, id: "#{args[:field]}_help") do
+      concat(collapse_help_block(nil, id:) do
         concat(args[:help])
       end)
     end
@@ -576,7 +650,8 @@ module FormsHelper
   def separate_field_options_from_args(args, extras = [])
     exceptions = [
       :form, :field, :label, :class, :width, :inline, :between, :append,
-      :help, :addon, :optional, :required, :monospace, :type, :wrap_data
+      :help, :addon, :optional, :required, :monospace, :type, :wrap_data,
+      :button, :button_data
     ] + extras
 
     args.clone.except(*exceptions)

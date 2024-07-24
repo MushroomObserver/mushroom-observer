@@ -102,7 +102,7 @@ module CarouselHelper
       data: data
     ) do
       [tag.span(:image_remove_remove.l),
-       link_icon(:remove, classes: "text-danger ml-3")].safe_join
+       link_icon(:remove, class: "text-danger ml-3")].safe_join
     end
   end
 
