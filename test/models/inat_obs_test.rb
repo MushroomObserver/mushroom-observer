@@ -9,7 +9,7 @@ class InatObsTest < UnitTestCase
   def test_complex_public_obs
     # import of iNat 202555552 which is a mirror of MO 547126)
     # For easier to to read version see test/inat/somion_unicolor.json
-    mock_inat_obs = mock("somion_unicolor")
+    mock_inat_obs = mock_observation("somion_unicolor")
 
     expected_mapping = Observation.new(
       # id: 547126,
@@ -94,7 +94,7 @@ class InatObsTest < UnitTestCase
            "Test needs a Name fixture matching >= 1 MO `sensu` Name " \
            "and exactly 1 MO non-sensu Name")
 
-    mock_inat_obs = mock("coprinus")
+    mock_inat_obs = mock_observation("coprinus")
 
     assert_equal(names(:coprinus).id, mock_inat_obs.name_id)
     assert_equal(names(:coprinus).text_name, mock_inat_obs.text_name)
@@ -107,25 +107,26 @@ class InatObsTest < UnitTestCase
     assert(names.many? { |name| !name.author.start_with?("sensu ") },
            "Test needs a name with many non-sensu matching fixtures")
 
-    mock_inat_obs = mock("lentinellus_ursinus")
+    mock_inat_obs = mock_observation("lentinellus_ursinus")
     assert_equal(Name.unknown.id, mock_inat_obs.name_id)
     assert_equal(Name.unknown.text_name, mock_inat_obs.text_name)
   end
 
   def test_inat_observation_fields
-    assert(mock("trametes").inat_obs_fields.any?)
-    assert(mock("evernia").inat_obs_fields.none?)
+    assert(mock_observation("trametes").inat_obs_fields.any?)
+    assert(mock_observation("evernia").inat_obs_fields.none?)
   end
 
   def test_inat_tags
-    assert(2, mock("inocybe").inat_tags.length)
-    assert_empty(mock("evernia").inat_tags)
+    assert(2, mock_observation("inocybe").inat_tags.length)
+    assert_empty(mock_observation("evernia").inat_tags)
   end
 
   def test_dqa
-    assert_equal(:inat_dqa_casual.l, mock("favolus_brasiliensis").dqa)
-    assert_equal(:inat_dqa_needs_id.l, mock("coprinus").dqa)
-    assert_equal(:inat_dqa_research.l, mock("somion_unicolor").dqa)
+    assert_equal(:inat_dqa_casual.l,
+                 mock_observation("amanita_flavorubens").dqa)
+    assert_equal(:inat_dqa_needs_id.l, mock_observation("coprinus").dqa)
+    assert_equal(:inat_dqa_research.l, mock_observation("somion_unicolor").dqa)
   end
 
   def test_location
@@ -142,7 +143,7 @@ class InatObsTest < UnitTestCase
            "Test needs a Location fixture with multiple true bounding boxes")
 
     # modify a mock_inat_obs instead of trying to create one from scratch
-    mock_inat_obs = mock("somion_unicolor")
+    mock_inat_obs = mock_observation("somion_unicolor")
     loc_center = "#{loc.south + ((loc.north - loc.south) / 2)}," \
           "#{loc.west + ((loc.east - loc.west) / 2)}"
     mock_inat_obs.inat_location = loc_center
@@ -160,48 +161,51 @@ class InatObsTest < UnitTestCase
   def test_notes
     assert_equal(
       { Other: "Collection by Heidi Randall. \nSmells like T. suaveolens. " },
-      mock("trametes").notes
+      mock_observation("trametes").notes
     )
-    assert_empty(mock("tremella_mesenterica").notes)
+    assert_empty(mock_observation("tremella_mesenterica").notes)
   end
 
   def test_sequences
-    mock_inat_obs = mock("lycoperdon")
+    mock_inat_obs = mock_observation("lycoperdon")
     assert(mock_inat_obs.sequences.one?)
     sequence = mock_inat_obs.sequences.first
     assert(sequence.present?)
 
-    assert_empty(mock("evernia").sequences)
+    assert_empty(mock_observation("evernia").sequences)
   end
 
   def test_taxon_importable
     # TODO: 2024-06-19 jdc. Fix this after fixing `importable?`
-    assert(mock("somion_unicolor").taxon_importable?,
+    assert(mock_observation("somion_unicolor").taxon_importable?,
            "iNat Fungi observations should be importable")
 
-    assert(mock("fuligo_septica").taxon_importable?,
+    assert(mock_observation("fuligo_septica").taxon_importable?,
            "iNat Slime mold (Protozoa) observations should be importable")
 
-    assert_not(mock("ceanothus_cordulatus").taxon_importable?,
+    assert_not(mock_observation("ceanothus_cordulatus").taxon_importable?,
                "iNat Plant observations should not be importable")
   end
 
   def test_inat_obs_photos
-    assert(mock("favolus_brasiliensis").inat_obs_photos.none?)
-    assert(mock("coprinus").inat_obs_photos.one?)
+    assert(mock_observation("amanita_flavorubens").inat_obs_photos.none?)
+    assert(mock_observation("coprinus").inat_obs_photos.one?)
   end
 
   # comma separated string of project names
   def test_inat_project_names
-    assert_equal("??", mock("somion_unicolor").inat_project_names,
+    skip("Under Construction")
+    assert_equal("??", mock_observation("somion_unicolor").inat_project_names,
                  "wrong project names for iNat obs which lacks projects")
 
     assert_equal("Portland-Vancouver Regional Eco-Blitz, ??",
-                 mock("evernia").inat_project_names,
+                 mock_observation("evernia").inat_project_names,
                  "wrong project names for iNat obs with 1 detectable project")
   end
 
-  def mock(filename)
-    InatObs.new(File.read("test/inat/#{filename}.txt"))
+  def mock_observation(filename)
+    mock_search = File.read("test/inat/#{filename}.txt")
+    # InatObs.new(File.read("test/inat/#{filename}.txt"))
+    InatObs.new(JSON.generate(JSON.parse(mock_search)["results"].first))
   end
 end

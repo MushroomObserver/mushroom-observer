@@ -113,9 +113,11 @@ module Observations
       inat_import.save
 
       # Actually do the imports
-      inat_id_array(inat_import).each do |inat_obs_id|
-        import_one_observation(inat_obs_id)
-      end
+      #       inat_id_list(inat_import).each do |inat_obs_id|
+      #         import_one_observation(inat_obs_id)
+      #       end
+
+      import_requested_observations(inat_ids: inat_id_list(inat_import))
 
       inat_import.state = "Done"
       inat_import.save
@@ -132,14 +134,8 @@ module Observations
       redirect_to(observations_path)
     end
 
-    def inat_id_array(inat_import)
-      if inat_import.inat_ids.blank?
-        []
-      elsif inat_import.inat_ids.include?(",")
-        JSON.parse(inat_import.inat_ids)
-      else
-        [inat_import.inat_ids]
-      end
+    def inat_id_list(inat_import)
+      inat_import.inat_ids.delete(" ")
     end
 
     def import_one_observation(inat_obs_id)
@@ -178,6 +174,22 @@ module Observations
       add_inat_summmary_data(inat_obs)
     end
 
+    def import_requested_observations(inat_ids: nil)
+      last_import_id = 0
+      loop do
+        page = inat_search_observations(ids: inat_ids, id_above: last_import_id)
+        import_page(page)
+
+        parsed_page = JSON.parse(page)
+        last_import_id = parsed_page["results"].last["id"]
+        if parsed_page["total_results"] > parsed_page["page"] * parsed_page["per_page"]
+          next
+        end
+
+        break
+      end
+    end
+
     # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
     def inat_search_observations(ids: nil, id_above: nil, only_id: false,
                                  per_page: 200, sort: "order=asc&order_by=id",
@@ -186,6 +198,47 @@ module Observations
         "/observations?id=#{ids}&id_above=#{id_above}&only_id=#{only_id}" \
         "&per_page=#{per_page}&#{sort}&#{other_params}"
       ::Inat.new(operation: operation, token: inat_import.token).body
+    end
+
+    def import_page(page)
+      JSON.parse(page)["results"].each do |result|
+        import_one_result(JSON.generate(result))
+      end
+    end
+
+    def import_one_result(result)
+      inat_obs = InatObs.new(result)
+      return not_importable(inat_obs) unless inat_obs.importable?
+
+      @observation = Observation.new(
+        when: inat_obs.when,
+        location: inat_obs.location,
+        where: inat_obs.where,
+        lat: inat_obs.lat,
+        lng: inat_obs.lng,
+        gps_hidden: inat_obs.gps_hidden,
+        name_id: inat_obs.name_id,
+        text_name: inat_obs.text_name,
+        notes: inat_obs.notes,
+        source: "mo_inat_import",
+        inat_id: inat_obs.inat_id
+      )
+      @observation.save
+      @observation.log(:log_observation_created)
+
+      # NOTE: 2024-06-19 jdc. I can't figure out how to properly stub
+      # adding an image from an external source.
+      # Skipping images when testing will allow some more controller testing.
+      # add_inat_images(inat_obs.inat_obs_photos) unless Rails.env.test?
+      add_inat_images(inat_obs.inat_obs_photos)
+
+      # TODO: Other things done by Observations#create
+      # save_everything_else(params.dig(:naming, :reasons))
+      # strip_images! if @observation.gps_hidden
+      # update_field_slip(@observation, params[:field_code])
+      # flash_notice(:runtime_observation_success.t(id: @observation.id))
+      add_inat_sequences(inat_obs)
+      add_inat_summmary_data(inat_obs)
     end
 
     def inat_import

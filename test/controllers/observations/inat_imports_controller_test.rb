@@ -258,11 +258,11 @@ module Observations
       Observation.order(created_at: :asc).last
     end
 
-    def stub_inat_api_request(inat_obs_ids, mock_inat_response)
+    def stub_inat_api_request(inat_obs_ids, mock_inat_response, id_above: 0)
       WebMock.stub_request(
         :get,
         "#{INAT_OBS_REQUEST_PREFIX}?id=#{inat_obs_ids}" \
-          "&id_above=&only_id=false&order=asc&order_by=id&per_page=200"
+          "&id_above=#{id_above}&only_id=false&order=asc&order_by=id&per_page=200"
       ).to_return(body: mock_inat_response)
     end
 
