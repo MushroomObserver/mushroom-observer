@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { escapeHTML, getScrollBarWidth, EVENT_KEYS } from "src/mo_utilities"
+import { mo_form_utilities, EVENT_KEYS } from "src/mo_form_utilities"
 import { get } from "@rails/request.js"
 
 // @pellaea's autocompleter is different from other open source autocompleter
@@ -166,8 +166,7 @@ export default class extends Controller {
 
     // Shared MO utilities, imported at the top:
     this.EVENT_KEYS = EVENT_KEYS;
-    this.escapeHTML = escapeHTML;
-    this.getScrollBarWidth = getScrollBarWidth;
+    Object.assign(this, mo_form_utilities);
   }
 
   connect() {
@@ -188,6 +187,7 @@ export default class extends Controller {
       this.listTarget?.children[0]?.children[0]?.dataset.action;
     // Attach events, etc. to input element.
     this.prepareInputElement();
+    debugger
   }
 
   // Swap out autocompleter type (and properties)
