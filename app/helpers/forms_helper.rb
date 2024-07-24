@@ -594,7 +594,8 @@ module FormsHelper
   def separate_field_options_from_args(args, extras = [])
     exceptions = [
       :form, :field, :label, :class, :width, :inline, :between, :append,
-      :help, :addon, :optional, :required, :monospace, :type, :wrap_data
+      :help, :addon, :optional, :required, :monospace, :type, :wrap_data,
+      :button, :button_data
     ] + extras
 
     args.clone.except(*exceptions)
