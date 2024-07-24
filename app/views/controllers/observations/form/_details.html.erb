@@ -65,7 +65,7 @@
           label: [tag.span("#{:WHERE.l}:", class: "unconstrained-label"),
                   tag.span("#{:form_observations_locality_contains.l}:",
                            class: "constrained-label")].safe_join(" "),
-          between: collapse_info_trigger("where_help"),
+          help: observation_location_help,
           hidden: location&.id,
           hidden_data: { map_target: "locationId",
                          north: location&.north, south: location&.south,
@@ -76,9 +76,6 @@
                     "form-exif:pointChanged@window->autocompleter#swap"
                   ].join(" ") }
         ) %>
-        <%= collapse_help_block(nil, id: "where_help") do
-          observation_location_help
-        end %>
         <!-- /WHERE -->
 
         <!-- IS_COLLECTION_LOCATION -->
