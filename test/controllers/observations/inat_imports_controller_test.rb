@@ -275,7 +275,7 @@ module Observations
       WebMock.stub_request(
         :get,
         "#{INAT_OBS_REQUEST_PREFIX}?id=#{inat_obs_ids}" \
-          "&id_above=#{id_above}&only_id=false&order=asc&order_by=id&per_page=200"
+          "&id_above=#{id_above}&only_id=false&order=asc&order_by=id&per_page=200&user_login="
       ).to_return(body: mock_inat_response)
     end
 

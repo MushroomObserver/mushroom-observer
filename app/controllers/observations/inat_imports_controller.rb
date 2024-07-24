@@ -113,7 +113,8 @@ module Observations
       inat_import.state = "Importing"
       inat_import.save
 
-      import_requested_observations(inat_ids: inat_id_list(inat_import))
+      # import_requested_observations(inat_ids: inat_id_list(inat_import))
+      import_requested_observations(inat_import)
 
       inat_import.state = "Done"
       inat_import.save
@@ -130,21 +131,23 @@ module Observations
       redirect_to(observations_path)
     end
 
-    def inat_id_list(inat_import)
-      inat_import.inat_ids.delete(" ")
-    end
-
-    def import_requested_observations(inat_ids: nil)
+    def import_requested_observations(inat_import)
+      inat_ids = inat_id_list(inat_import)
       return if inat_ids.blank?
 
       last_import_id = 0
       loop do
-        page = inat_search_observations(ids: inat_ids, id_above: last_import_id)
+        page =
+          inat_search_observations(
+            ids: inat_ids, id_above: last_import_id,
+            user_login: inat_import.inat_username
+          )
         import_page(page)
 
         parsed_page = JSON.parse(page)
         last_import_id = parsed_page["results"].last["id"]
-        if parsed_page["total_results"] > parsed_page["page"] * parsed_page["per_page"]
+        if parsed_page["total_results"] >
+           parsed_page["page"] * parsed_page["per_page"]
           next
         end
 
@@ -152,13 +155,18 @@ module Observations
       end
     end
 
+    def inat_id_list(inat_import)
+      inat_import.inat_ids.delete(" ")
+    end
+
     # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
     def inat_search_observations(ids: nil, id_above: nil, only_id: false,
                                  per_page: 200, sort: "order=asc&order_by=id",
-                                 other_params: nil)
+                                 # prevents user from importing others' obss
+                                 user_login: nil)
       operation =
         "/observations?id=#{ids}&id_above=#{id_above}&only_id=#{only_id}" \
-        "&per_page=#{per_page}&#{sort}&#{other_params}"
+        "&per_page=#{per_page}&#{sort}&user_login=#{user_login}"
       ::Inat.new(operation: operation, token: inat_import.token).body
     end
 
