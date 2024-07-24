@@ -75,17 +75,6 @@ module Observations
       assert_flash_warning
     end
 
-    def test_create_inat_import_too_many_ids
-      user = users(:rolf)
-      params = { inat_ids: "12345 6789" }
-
-      login(user.login)
-      put(:create, params: params)
-
-      assert_flash_text(:inat_not_single_id.l)
-      assert_form_action(action: :create)
-    end
-
     def test_create_inat_import_bad_inat_id
       user = users(:rolf)
       id = "badID"

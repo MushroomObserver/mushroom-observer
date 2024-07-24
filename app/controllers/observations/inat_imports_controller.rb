@@ -57,7 +57,7 @@ module Observations
     end
 
     def bad_inat_ids_param?
-      contains_illegal_characters? || multiple_ids?
+      contains_illegal_characters?
     end
 
     def contains_illegal_characters?
@@ -67,14 +67,6 @@ module Observations
       true
     end
 
-    def multiple_ids?
-      return false unless /[ ,]/.match?(params[:inat_ids])
-
-      flash_warning(:inat_not_single_id.l)
-      true
-    end
-
-    # send user to iNat so that user can authorize MO to access user's iNat data
     def request_inat_user_authorization
       redirect_to(inat_authorization_url, allow_other_host: true)
     end

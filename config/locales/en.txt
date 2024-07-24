@@ -2990,7 +2990,6 @@
   inat_dqa_needs_id: Needs ID
   inat_dqa_research: Research Grade
   inat_id_list: "Comma separated list of iNat observation #s"
-  inat_not_single_id: Please enter a single iNat observation number
   runtime_illegal_inat_id: iNat observation number can contain only numbers, commas, and spaces
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
   inat_taxon_not_importable: Cannot import iNat id `[id]`. (Can import only Fungi.)
