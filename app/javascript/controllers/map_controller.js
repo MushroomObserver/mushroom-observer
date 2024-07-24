@@ -386,11 +386,11 @@ export default class extends Controller {
   // Can be called directly from a button, so check for input values.
   // Now fired from location id, including when it's zero
   showBox() {
-    this.verbose("showBox")
     if (!this.opened ||
       !this.hasPlaceInputTarget || !this.placeInputTarget.value)
       return false
 
+    this.verbose("showBox")
     // buffer inputs if they're still typing
     clearTimeout(this.marker_draw_buffer)
     this.marker_draw_buffer = setTimeout(this.checkForBox(), 1000)
@@ -540,10 +540,9 @@ export default class extends Controller {
       });
   }
 
-  // Called from the geocoder response, to update the map and inputs
-  // This only grabs the first result. NOTE: SETS LAT/LNG INPUTS if observation
-  // If we have multiple, a different function should show them: maybe
-  // dispatch an event to autocompleter with the results reformatted?
+  // Called from the geocoder response, to update the map and inputs. If
+  // geolocating a string, this only grabs the first result. If geocoding a
+  // lat/lng, there may be several. NOTE: SETS LAT/LNG INPUTS if observation.
   // https://developers.google.com/maps/documentation/javascript/geocoding#GeocodingResponses
   respondToGeocode(results) {
     if (results.length == 0) return false
@@ -556,19 +555,20 @@ export default class extends Controller {
 
     if (viewport)
       this.map.fitBounds(viewport)
-    if (["observation", "hybrid"].includes(this.map_type)) {
-      // this.placeMarker(center)
-      this.placeClosestRectangle(viewport, extents)
-    } else if (this.map_type === "location") {
-      this.placeClosestRectangle(viewport, extents)
-      this.updateFields(viewport, extents, center)
-    }
+    // if (["observation", "hybrid"].includes(this.map_type)) {
+    //   // this.placeMarker(center)
+    //   this.placeClosestRectangle(viewport, extents)
+    // } else if (this.map_type === "location") {
+    // }
+    this.placeClosestRectangle(viewport, extents)
+    this.updateFields(viewport, extents, center)
     // this.showBoxBtnTarget.disabled = false
   }
 
   // NOTE: Currently we're not going to allow Google API geocoded places that
   // are returned as points to be locations. We're forcing them to be rectangles
   updateFields(viewport, extents, center) {
+    this.verbose("updateFields")
     let points = [], type = "" // for elevation
     if (this.hasNorthInputTarget) {
       // Prefer extents for rectangle, fallback to viewport
@@ -595,6 +595,7 @@ export default class extends Controller {
 
   // Action attached to the "Get Elevation" button. (points is then the event)
   getElevations(points, type = "") {
+    this.verbose("getElevations")
     // "Get Elevation" button on a form sends this param
     if (points.hasOwnProperty('params') && points.params?.points === "input") {
       points = this.sampleElevationPoints() // from marker or rectangle
@@ -618,6 +619,7 @@ export default class extends Controller {
   // requires an array of results from this.getElevations(points, type) above
   //   result objects have the form {elevation:, location:, resolution:}
   updateElevationInputs(results, type) {
+    this.verbose("updateElevationInputs")
     if (this.hasLowInputTarget && type === "rectangle") {
       const hiLo = this.highAndLowOf(results)
       // this.verbose({ hiLo })
@@ -645,6 +647,7 @@ export default class extends Controller {
     const west = parseFloat(this.westInputTarget.value)
 
     if (!(isNaN(north) || isNaN(south) || isNaN(east) || isNaN(west))) {
+      this.verbose("calculateRectangle")
       const bounds = { north: north, south: south, east: east, west: west }
       if (this.rectangle) {
         this.rectangle.setBounds(bounds)
@@ -658,6 +661,7 @@ export default class extends Controller {
     // Prefer extents for rectangle, fallback to viewport
     let bounds = extents || viewport
     if (bounds != undefined && bounds?.north) {
+      this.verbose("placeClosestRectangle")
       this.placeRectangle(bounds)
     }
     // else if (center) {
@@ -668,6 +672,9 @@ export default class extends Controller {
 
   // takes a LatLngBoundsLiteral object {south:, west:, north:, east:}
   updateBoundsInputs(bounds) {
+    if (!this.hasSouthInputTarget) return false
+
+    this.verbose("updateBoundsInputs")
     this.southInputTarget.value = this.roundOff(bounds?.south)
     this.westInputTarget.value = this.roundOff(bounds?.west)
     this.northInputTarget.value = this.roundOff(bounds?.north)

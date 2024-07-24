@@ -187,7 +187,6 @@ export default class extends Controller {
       this.listTarget?.children[0]?.children[0]?.dataset.action;
     // Attach events, etc. to input element.
     this.prepareInputElement();
-    debugger
   }
 
   // Swap out autocompleter type (and properties)
