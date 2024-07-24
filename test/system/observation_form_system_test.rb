@@ -392,7 +392,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                   selected: Vote.confidence(Vote.next_best_vote))
 
     # Carousel items are re-output with image records this time.
-    all(".carousel-indicator").last.click
+    all(".carousel-indicator").last.trigger("click")
 
     assert_selector(".carousel-item", text: "25.7582", visible: :all)
     second_item = find(".carousel-item", text: "25.7582", visible: :all)
@@ -400,6 +400,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_equal(items.length, 2)
 
     within(second_item) do
+      assert_selector('[id$="when_1i"]', visible: :any)
+      assert_selector('[id$="when_2i"]', visible: :any)
+      assert_selector('[id$="when_3i"]', visible: :any)
       assert_equal("2018", find('[id$="when_1i"]').value)
       assert_equal("12", find('[id$="when_2i"]').value)
       assert_equal("31", find('[id$="when_3i"]').value)
