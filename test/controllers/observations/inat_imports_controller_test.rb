@@ -30,6 +30,8 @@ module Observations
       assert_form_action(action: :create)
       assert_select("input#inat_ids", true,
                     "Form needs a field for inputting iNat ids")
+      assert_select("input#inat_username", true,
+                    "Form needs a field for inputting iNat username")
       assert_select("input[type=checkbox][id=consent]", true,
                     "Form needs checkbox requiring consent")
     end
@@ -241,7 +243,9 @@ module Observations
       user = users(:rolf)
       mock_search = File.read("test/inat/#{filename}.txt")
       inat_obs = InatObs.new(
-        JSON.generate(JSON.parse(mock_search)["results"].first)
+        JSON.generate(
+          JSON.parse(mock_search)["results"].first
+        )
       )
       inat_import_ids = inat_obs.inat_id
 

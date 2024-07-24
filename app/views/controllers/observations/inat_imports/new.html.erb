@@ -5,7 +5,7 @@
 <div>
   <%= form_with url: observations_inat_imports_path, method: :post do |f| %>
     <%= f.label :inat_username, "#{:inat_username.l}: " %>
-    <%= f.text_field(:inat_ids, size: 10, value: @inat_username,
+    <%= f.text_field(:inat_username, size: 10, value: @inat_username,
         class: "form-control") %>
     <%= f.label :inat_id, "#{:inat_id_list.l}: " %>
     <%= f.text_field(:inat_ids, size: 10, value: @inat_ids,
