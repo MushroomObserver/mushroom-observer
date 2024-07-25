@@ -2983,18 +2983,23 @@
   # observation/inat_imports
   create_inat_import_title: Import from iNat
   import_observation_from_inat: Import from iNat
+  inat_choose_observations: "Inat Observations to Import:"
+  inat_import_list: "Comma separated list of observation #s"
+  inat_import_all: Import all my iNat observations
   inat_import_consent: (Required) I consent to creating MushroomObserver Observation(s) based on my iNaturalist observations, including their photos.
   inat_consent_required: Your consent is required to import Inat observations. Please check the checkbox to give your consent.
+  inat_username: Your iNat Username (mandatory)
+  runtime_illegal_inat_id: iNat observation number can contain only numbers, commas, and spaces
+  inat_missing_username: Missing your iNat Username
+  inat_no_imports_designated: Imports missing. Complete [:inat_import_list], or select [:inat_import_all]
+
+  inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
+  inat_taxon_not_importable: Cannot import iNat id `[id]`. (Can import only Fungi.)
+
   inat_data_comment: iNat Data
   inat_dqa_casual: Casual
   inat_dqa_needs_id: Needs ID
   inat_dqa_research: Research Grade
-  inat_id_list: "Comma separated list of iNat observation #s"
-  runtime_illegal_inat_id: iNat observation number can contain only numbers, commas, and spaces
-  inat_username: Your iNat Username (mandatory)
-  inat_missing_username: Missing your iNat Username
-  inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
-  inat_taxon_not_importable: Cannot import iNat id `[id]`. (Can import only Fungi.)
   inat_details_heading: "Details/Caveats"
   inat_details_list: "- MO will list most iNat data and/or map it to analogous MO fields. \n - The MO Observation links to the iNat observation and vice versa. \n - MO Consensus ID is an analog of the iNat Community ID. \n  - Coordinates are hidden from the public if iNat hid/obscured them. \n - Location is a rectangle with an MO-style name, rather than the iNat Place name. \n - iNat Projects are not included (iNat's API does not provide that data). \n"
 

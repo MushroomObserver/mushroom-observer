@@ -29,9 +29,9 @@ module Observations
     def new; end
 
     def create
-      return redirect_to(new_observation_path) if params[:inat_ids].blank?
       return username_required if params[:inat_username].blank?
       return reload_form if bad_inat_ids_param?
+      return designation_required unless imports_designated?
       return consent_required if params[:consent] == "0"
 
       inat_import = InatImport.find_or_create_by(user: User.current)
@@ -50,6 +50,16 @@ module Observations
     def reload_form
       @inat_ids = params[:inat_ids]
       render(:new)
+    end
+
+    def designation_required
+      flash_warning(:inat_no_imports_designated.t)
+      @inat_username = params[:inat_username]
+      render(:new)
+    end
+
+    def imports_designated?
+      params[:all] == 1 || params[:inat_ids].present?
     end
 
     def consent_required

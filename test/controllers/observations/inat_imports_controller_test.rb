@@ -32,11 +32,13 @@ module Observations
                     "Form needs a field for inputting iNat ids")
       assert_select("input#inat_username", true,
                     "Form needs a field for inputting iNat username")
+      assert_select("input[type=checkbox][id=all]", true,
+                    "Form needs checkbox for importing all a user's iNat obss")
       assert_select("input[type=checkbox][id=consent]", true,
                     "Form needs checkbox requiring consent")
     end
 
-    def test_import_authorization_request
+    def test_create_authorization_request
       user = users(:rolf)
       inat_username = "rolf"
       inat_import = inat_imports(:rolf_inat_import)
@@ -62,7 +64,7 @@ module Observations
                    "Failed to save InatImport.inat_username")
     end
 
-    def test_import_missing_username
+    def test_create_missing_username
       user = users(:rolf)
       id = "123"
       params = { inat_ids: id }
@@ -74,7 +76,7 @@ module Observations
       assert_form_action(action: :create)
     end
 
-    def test_import_no_consent
+    def test_create_no_consent
       mock_search = File.read("test/inat/evernia.txt")
       inat_obs = InatObs.new(
         JSON.generate(JSON.parse(mock_search)["results"].first)
