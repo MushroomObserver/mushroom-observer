@@ -56,9 +56,8 @@ class TranslationString < AbstractModel
 
   def self.translations(locale)
     do_init = I18n.backend.translations.empty?
-    # False positive
-    I18n.backend.translations(do_init: do_init) \
-      [locale.to_sym][MO.locale_namespace.to_sym]
+    I18n.backend.
+      translations(do_init: do_init)[locale.to_sym][MO.locale_namespace.to_sym]
   end
 
   # Check if tag exists before storing nonsense in the I18n backend
@@ -101,9 +100,13 @@ class TranslationString < AbstractModel
   def self.rename_tags(tags)
     raise("Tags must be a hash.") unless tags.is_a?(Hash)
 
+    # Make sure all tags are valid.
+    # Don't use `underscore` here because it downcases the string.
     tags.each do |old_tag, new_tag|
-      next unless (old_tag.to_sym == old_tag.to_s.underscore.to_sym) &&
-                  (new_tag.to_sym == new_tag.to_s.underscore.to_sym)
+      unless (old_tag.to_sym == old_tag.to_s.tr(" ", "_").to_sym) &&
+             (new_tag.to_sym == new_tag.to_s.tr(" ", "_").to_sym)
+        raise("Tags must be symbols or strings with no spaces.")
+      end
 
       result = where(tag: old_tag.to_s).update_all(tag: new_tag.to_s)
       next unless result.positive?
