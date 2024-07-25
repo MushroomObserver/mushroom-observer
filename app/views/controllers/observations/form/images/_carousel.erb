@@ -1,4 +1,4 @@
-<%# locals: (images: nil, html_id: "observation_upload_images_carousel", thumb_id: nil, exif_data: {}, f: nil) -%>
+<%# locals: (images: nil, html_id: "observation_upload_images_carousel", thumb_id: nil, exif_data: {}) -%>
 <%=
 # NOTE: make this a component
 # Optional args:
@@ -17,7 +17,7 @@ tag.div(class: "carousel slide image-form-carousel", id: html_id,
     images&.each_with_index do |image, index|
       upload = image&.created_at == nil
       concat(render(partial: "observations/form/images/carousel_item",
-                    locals: { f: f, image:, index:, upload:, thumb_id:,
+                    locals: { image:, index:, upload:, thumb_id:,
                               camera_info: exif_data[image&.id] }))
     end
     concat(tag.div(class: "carousel-control-wrap row") do

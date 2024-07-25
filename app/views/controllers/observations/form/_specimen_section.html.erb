@@ -1,8 +1,7 @@
-<%
-# Specimen section of create_observation form,
-# for collection_number and herbarium_record.
-# Fields hidden unless box checked.
-%>
+<%# locals: (f:, action:) -%>
+
+<%# Specimen section of create_observation form, for collection_number and
+herbarium_record. Fields hidden unless box checked. %>
 
 <%= tag.div(id: "observation_specimen_section",
             data: { controller: "specimen",
@@ -17,25 +16,21 @@
               action: "change->specimen#hideShowFields" }
     ) %>
     <!-- no_specimen_fields -->
-    <% if button_name == :SAVE_EDITS.l %>
+    <% if action == :update %>
       <%= help_block_with_arrow(nil) do
         :form_observations_edit_specimens_help.t
       end %>
-    <% end # if button_name %>
+    <% end %>
     <!-- /no_specimen_fields -->
   <% end %>
 
-  <% if button_name == :CREATE.l %>
+  <% if action == :create %>
     <!-- specimen_fields -->
     <%= tag.div(id: "specimen_fields",
                 class: ("hidden" if !@observation.specimen),
                 data: { specimen_target: "fields" }) do %>
-
-      <%= render(partial: "observations/form/collection_number",
-                 locals: { f: f } ) %>
-      <%= render(partial: "observations/form/herbarium_record",
-                 locals: { f: f } ) %>
-
+      <%= render(partial: "observations/form/collection_number") %>
+      <%= render(partial: "observations/form/herbarium_record") %>
     <% end %>
     <!-- /specimen_fields -->
   <% end %>
