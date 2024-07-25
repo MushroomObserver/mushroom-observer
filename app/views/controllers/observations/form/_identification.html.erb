@@ -1,3 +1,5 @@
+<%# locals: (f:, action:, button_name:, include_naming:) -%>
+
 <%= panel_block(id: "observation_identification",
                 heading: :IDENTIFICATION.l) do %>
   <%= tag.div(class: "row mt-3") do %>
@@ -15,7 +17,7 @@
                    locals: naming_locals) %>
       <% end %>
       <%= render(partial: "observations/form/specimen_section",
-                 locals: { f:, button_name: }) %>
+                 locals: { f:, action: }) %>
     <% end %>
     <%= tag.div(class: "col-xs-12 col-sm-6") do %>
       <%= render(partial: "shared/notes_fields",

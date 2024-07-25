@@ -1,3 +1,4 @@
+<%# locals: (f:) -%>
 <%# Images section of create_observation form
 Gotcha: observation[thumb_image_id] is set by JS, not by radio buttons.
 Although there can be radio buttons for selecting thumb_image_id
@@ -37,7 +38,7 @@ i.e. observation[good_image_ids]. It's a top-level field. --%>
         ].safe_join
       end,
       render(partial: "observations/form/images/carousel",
-             locals: { f: f, images: @good_images, exif_data: @exif_data || {},
+             locals: { images: @good_images, exif_data: @exif_data || {},
                        thumb_id: @observation.thumb_image_id })
     ].safe_join
   end %>
