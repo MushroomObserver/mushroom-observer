@@ -30,9 +30,10 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | lycoperdon.txt | [24970904](https://www.inaturalist.org/observations/24970904) | 2 | public | cc-by-nc, projects, Activity, many fields including **DNA**, place: E. side of Metolius River, Sisters Ranger District, Deschutes National Forest, Jefferson County, Oregon, US |
 | russulaceae.txt | [216675045](https://www.inaturalist.org/observations/216675045) | 2 | public | **all rights reserved**, many projects, Activity; place: Point Defiance Park, Tacoma, WA, US |
 | somion_unicolor.json |  |  |  | Formatted version of following; facilitates viewing iNat API response key/values test/inat/somion_unicolor.json |
-| somion_unicolor.txt | [202555552](https://www.inaturalist.org/observations/202555552) | 5 | public | Research Grade, Notes, Activity, >1 ID, 1 field (Mushroom Observer URL), **mirrored from MO** |
+| somion_unicolor.txt | [**202555552**](https://www.inaturalist.org/observations/202555552) | 5 | public | Research Grade, Notes, Activity, >1 ID, 1 field (Mushroom Observer URL), **mirrored from MO** |
 | trametes.txt | [220370929](https://www.inaturalist.org/observations/220370929) | 2 | public | D. Miller observation with different collector; Notes; **Observation Fields: Collector**, place: 25th Ave NE, Seattle, WA, US, with huge error |
 | tremella_mesenterica.txt | [213508767](https://www.inaturalist.org/observations/213508767) | 1 | public | place: Lewisville, TX 75057, USA |
+| zero_results.txt | n.a. | | n.a. | response with total_results: 0, to expose and prevent reversion of bug |
 
 ## TODO
 

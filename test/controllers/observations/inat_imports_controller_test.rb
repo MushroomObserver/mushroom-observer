@@ -211,6 +211,26 @@ module Observations
       assert_flash_text(:inat_taxon_not_importable.l(id: inat_import_ids))
     end
 
+    def test_import_zero_results
+      user = rolf
+      filename = "zero_results"
+      mock_search = File.read("test/inat/#{filename}.txt")
+      inat_import_ids = "123"
+
+      stub_inat_api_request(inat_import_ids, mock_search)
+      simulate_authorization(user: user, inat_import_ids: inat_import_ids)
+      stub_token_request
+
+      params = { inat_ids: inat_import_ids, code: "MockCode" }
+      login(user.login)
+
+      assert_no_difference(
+        "Observation.count", "Should not import iNat Plant observations"
+      ) do
+        post(:authenticate, params: params)
+      end
+    end
+
     def test_import_multiple
       # NOTE: using obss without photos to avoid stubbing photo import
       # amanita_flavorubens, calostoma lutescens

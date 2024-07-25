@@ -142,17 +142,24 @@ module Observations
             ids: inat_ids, id_above: last_import_id,
             user_login: inat_import.inat_username
           )
-        import_page(page)
+        break if page_empty?(page)
 
+        import_page(page)
         parsed_page = JSON.parse(page)
         last_import_id = parsed_page["results"].last["id"]
-        if parsed_page["total_results"] >
-           parsed_page["page"] * parsed_page["per_page"]
-          next
-        end
+        break if done_with_page?(parsed_page)
 
-        break
+        next
       end
+    end
+
+    def page_empty?(page)
+      JSON.parse(page)["total_results"].zero?
+    end
+
+    def done_with_page?(parsed_page)
+      parsed_page["total_results"] <=
+        parsed_page["page"] * parsed_page["per_page"]
     end
 
     def inat_id_list(inat_import)
