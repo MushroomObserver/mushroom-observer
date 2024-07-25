@@ -77,23 +77,15 @@ module Observations
     end
 
     def test_create_no_consent
-      mock_search = File.read("test/inat/evernia.txt")
-      inat_obs = InatObs.new(
-        JSON.generate(JSON.parse(mock_search)["results"].first)
-      )
-      inat_import_ids = inat_obs.inat_id
-      stub_inat_api_request(inat_import_ids, mock_search)
-
-      # TODO: remove consent key after creating model with default consent
-      params = { inat_ids: inat_import_ids, consent: 0 }
+      params = { inat_username: "anything", inat_ids: 123,
+                 consent: 0 }
       login
-
       assert_no_difference("Observation.count",
                            "iNat obss imported without consent") do
         post(:create, params: params)
       end
 
-      assert_flash_warning
+      assert_flash_text(:inat_consent_required.l)
     end
 
     def test_import_authorization_denied
@@ -249,6 +241,25 @@ module Observations
       # mock is sorted by id, asc
       assert_equal(195_434_438, json["results"].first["id"])
       assert_equal(231_104_466, json["results"].second["id"])
+
+      simulate_authorization(user: user, inat_import_ids: inat_import_ids)
+      stub_token_request
+      stub_inat_api_request(inat_import_ids, mock_inat_response)
+
+      params = { inat_ids: inat_import_ids, code: "MockCode" }
+      login(user.login)
+
+      assert_difference(
+        "Observation.count", 2, "Failed to create multiple observations"
+      ) do
+        post(:authenticate, params: params)
+      end
+    end
+
+    def test_import_all
+      skip("under construction")
+      user = users(:rolf)
+      inat_import_ids = ""
 
       simulate_authorization(user: user, inat_import_ids: inat_import_ids)
       stub_token_request

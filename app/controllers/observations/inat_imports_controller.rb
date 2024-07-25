@@ -49,13 +49,13 @@ module Observations
 
     def reload_form
       @inat_ids = params[:inat_ids]
+      @inat_username = params[:inat_username]
       render(:new)
     end
 
     def designation_required
       flash_warning(:inat_no_imports_designated.t)
-      @inat_username = params[:inat_username]
-      render(:new)
+      reload_form
     end
 
     def imports_designated?
@@ -64,15 +64,12 @@ module Observations
 
     def consent_required
       flash_warning(:inat_consent_required.t)
-      @inat_ids = params[:inat_ids]
-      @inat_username = params[:inat_username]
-      render(:new)
+      reload_form
     end
 
     def username_required
       flash_warning(:inat_missing_username.l)
-      @inat_ids = params[:inat_ids]
-      render(:new)
+      reload_form
     end
 
     def bad_inat_ids_param?
