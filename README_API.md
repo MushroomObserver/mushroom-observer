@@ -1,62 +1,46 @@
 Mushroom Observer API
 =====================
 
-Change Log
-----------
+Intended Use
+------------
 
-v1 -- First version 2016.
-v2 -- Latest version 2020.
+Our API is intended for individual MO users to create and modify their and other users' MO Observations (and other objects)
+and for developing applications to support them.
+It is not intended for data scraping or for generalized experimentation with AI, image recognition or large data sets.
+For those purposes you should use the CSV files described below.
 
-The endpoint is now "api2" instead of "api".  The old endpoint will be phased
-out some time in 2021.  The default format is now JSON not XML, since JSON is
-significantly faster.  And a few result structures have been tweaked slightly:
-
-api_keys -- field names were wrong (created_at, last_used, num_uses)
-
-herbarium_records -- field names were wrong (initial_determination,
-accession_number)
-
-images -- moved observation_ids to high-detail response
-
-observations -- full consensus, location and owner details moved to high detail
-response, now only consensus_id, consensus_name, location_id, location_name and
-owner_id are found in low detail response; votes moved up to top level of the
-structure for high detail response (used to be buried within namings)
-
-projects -- removed admin and member ids
-
-species_lists -- removed project_ids, full location details only available in
-high detail response now
-
-collection_numbers, comments, external_links, herbarium_records -- only
-includes observation ids now not full details
+We're an all-volunteer organization with a tiny budget and scarce resources.
+Using the API to obtain large amounts of data puts an unnecessary strain on those resources and adversely impacts other users.
+If we notice improper usage of the API or usage that seriously impacts our performance we may institute blocks without notification.
 
 CSV files
 ---------
 
-Note that we update a set of CSV files nightly which are straight dumps of the
-database.  If you are looking for large quantities of data, e.g. for data
-anaylsis or image recognition, plase look at these files first to see if they
+We update a set of CSV files nightly which are straight dumps of the MO
+database. If you are looking for large quantities of data, e.g. for data
+anaylsis or image recognition, look at these files first to see if they
 have the information you need.  That will save our server a considerable amount
 of unnecessary traffic, and probably save you a lot of work!
 
-* https://mushroomobserver.org/observations.csv
-* https://mushroomobserver.org/images_observations.csv
-* https://mushroomobserver.org/images.csv
-* https://mushroomobserver.org/names.csv
-* https://mushroomobserver.org/name_classifications.csv
-* https://mushroomobserver.org/name_descriptions.csv
-* https://mushroomobserver.org/locations.csv
-* https://mushroomobserver.org/location_descriptions.csv
+* <https://mushroomobserver.org/observations.csv>
+* <https://mushroomobserver.org/images_observations.csv>
+* <https://mushroomobserver.org/images.csv>
+* <https://mushroomobserver.org/names.csv>
+* <https://mushroomobserver.org/name_classifications.csv>
+* <https://mushroomobserver.org/name_descriptions.csv>
+* <https://mushroomobserver.org/locations.csv>
+* <https://mushroomobserver.org/location_descriptions.csv>
 
 Overview
 --------
 
 Mushroom Observer supports a simple API based on sending GET, POST, PATCH and
 DELETE requests to URLs of the form:
-```
+
+```ruby
 https://mushroomobserver.org/api2/<database_table>
 ```
+
 GET requests are read-only and do not require authentication.  POST (create),
 PATCH (update) and DELETE (destroy) requests require authentication via an API
 key (see below).
@@ -203,6 +187,7 @@ safe to mess around with strange parameters and see what they do.  Note that
 XML responses include a copy of the SQL query used.  This can be a very
 effective way of discovering exactly how unfamiliar parameters work.  Here's
 the SQL query from one of the examples above:
+
 ```sql
 SELECT DISTINCT observations.id
 FROM `observations`
@@ -210,6 +195,7 @@ WHERE MONTH(observations.when) >= 6 AND MONTH(observations.when) <= 6
 AND (observations.location_id IN (694,...,14040) OR observations.where LIKE '%Delaware%')
 ORDER BY observations.id ASC
 ```
+
 See also the database diagram here:
 
 * [DATA_STRUCTURE.gif](DATA_STRUCTURE.gif)
@@ -217,3 +203,33 @@ See also the database diagram here:
 and the database schema here:
 
 * [db/schema.rb](db/schema.rb)
+
+Change Log
+----------
+
+v1 -- First version 2016.
+v2 -- Latest version 2020.
+
+The endpoint is now "api2" instead of "api".  The old endpoint will be phased
+out some time in 2021.  The default format is now JSON not XML, since JSON is
+significantly faster.  And a few result structures have been tweaked slightly:
+
+api_keys -- field names were wrong (created_at, last_used, num_uses)
+
+herbarium_records -- field names were wrong (initial_determination,
+accession_number)
+
+images -- moved observation_ids to high-detail response
+
+observations -- full consensus, location and owner details moved to high detail
+response, now only consensus_id, consensus_name, location_id, location_name and
+owner_id are found in low detail response; votes moved up to top level of the
+structure for high detail response (used to be buried within namings)
+
+projects -- removed admin and member ids
+
+species_lists -- removed project_ids, full location details only available in
+high detail response now
+
+collection_numbers, comments, external_links, herbarium_records -- only
+includes observation ids now not full details

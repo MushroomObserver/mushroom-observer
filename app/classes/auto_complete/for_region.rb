@@ -14,14 +14,17 @@ class AutoComplete::ForRegion < AutoComplete::ByWord
   # "scientific" format users will have the country first, so reverse words
   def rough_matches(words)
     words = Location.reverse_name(words) if reverse
-    regions = Observation.in_region(words).pluck(:where, :location_id)
+    regions = Observation.in_region(words).select(:where, :location_id)
 
-    regions.map! do |reg, id|
-      format = reverse ? Location.reverse_name(reg) : loc
-      { name: format, id: id.nil? ? 0 : id }
+    # Turn the instances into hashes, and alter name order if requested
+    # Also change the names of the hash keys.
+    matches = regions.map do |region|
+      region = region.attributes.symbolize_keys
+      format = reverse ? Location.reverse_name(region[:where]) : region[:where]
+      { name: format, id: region[:location_id] || 0 }
     end
     # Sort by name and prefer those with a non-zero ID
-    regions.sort_by! { |reg| [reg[:name], -reg[:id]] }
-    regions.uniq { |reg| reg[:name] }
+    matches.sort_by! { |reg| [reg[:name], -reg[:id]] }
+    matches.uniq { |reg| reg[:name] }
   end
 end

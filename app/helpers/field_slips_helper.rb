@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 module FieldSlipsHelper
-  def last_observation
+  def previous_observation(observation)
     return unless User.current
 
-    ObservationView.last(User.current)
+    ObservationView.previous(User.current, observation)
   end
 end

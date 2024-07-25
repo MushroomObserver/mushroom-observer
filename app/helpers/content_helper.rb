@@ -109,15 +109,38 @@ module ContentHelper
     div_class = "well well-sm help-block position-relative"
     div_class += " mt-3" if direction == "up"
 
-    content_tag(:div, class: div_class,
-                      id: args[:id]) do
+    tag.div(class: div_class, id: args[:id]) do
       concat(capture(&block).to_s)
       if direction
         arrow_class = "arrow-#{direction}"
         arrow_class += " hidden-xs" unless args[:mobile]
-        concat(content_tag(:div, "", class: arrow_class))
+        concat(tag.div("", class: arrow_class))
       end
     end
+  end
+
+  def collapse_help_block(direction = nil, string = nil, **args, &block)
+    div_class = "well well-sm help-block position-relative"
+    div_class += " mt-3" if direction == "up"
+    content = block ? capture(&block) : string
+
+    tag.div(class: "collapse", id: args[:id]) do
+      tag.div(class: div_class) do
+        concat(content)
+        if direction
+          arrow_class = "arrow-#{direction}"
+          arrow_class += " hidden-xs" unless args[:mobile]
+          concat(tag.div("", class: arrow_class))
+        end
+      end
+    end
+  end
+
+  def collapse_info_trigger(id, **args)
+    link_to(link_icon(:question), "##{id}",
+            class: class_names("info-collapse-trigger", args[:class]),
+            role: "button", data: { toggle: "collapse" },
+            aria: { expanded: "false", controls: id })
   end
 
   def panel_block(**args, &block)
@@ -127,7 +150,7 @@ module ContentHelper
 
     tag.div(
       class: class_names("panel panel-default", args[:class]),
-      **args.except(:class, :inner_class, :inner_id, :heading)
+      **args.except(:class, :inner_class, :inner_id, :heading, :heading_links)
     ) do
       concat(heading)
       if content.present?

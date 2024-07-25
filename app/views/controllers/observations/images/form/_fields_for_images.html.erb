@@ -14,8 +14,7 @@
                       label: "#{:LICENSE.t}:",
                       append: help_block(:p, :form_images_license_help.t)) %>
 
+<% help = [tag.p(:form_images_notes_help.t),
+           tag.p(:shared_textile_help.l)].safe_join %>
 <%= text_area_with_label(form: f, field: :notes, data: { autofocus: true },
-                         label: "#{:NOTES.t}:",
-                         append: help_block(:p, :form_images_notes_help.t)) %>
-
-<%= render(partial: "shared/textilize_help") %>
+                         label: "#{:NOTES.t}:", help:) %>

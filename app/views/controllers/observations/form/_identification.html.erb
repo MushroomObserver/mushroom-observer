@@ -1,0 +1,27 @@
+<%= panel_block(id: "observation_identification",
+                heading: :IDENTIFICATION.l) do %>
+  <%= tag.div(class: "row mt-3") do %>
+    <%= tag.div(class: "col-xs-12 col-sm-6") do %>
+      <% if include_naming
+        naming_locals = {
+          f:            f,
+          action:       action,
+          button_name:  button_name,
+          show_reasons: false,
+          unfocused:    true,
+          name_help:    :form_naming_name_help_leave_blank.t
+        } %>
+        <%= render(partial: "observations/namings/fields",
+                   locals: naming_locals) %>
+      <% end %>
+      <%= render(partial: "observations/form/specimen_section",
+                 locals: { f:, button_name: }) %>
+    <% end %>
+    <%= tag.div(class: "col-xs-12 col-sm-6") do %>
+      <%= render(partial: "shared/notes_fields",
+                 locals: { form: f,
+                           fields: @observation.form_notes_parts(@user) }) %>
+    <% end %>
+  <% end %>
+  <%= submit_button(form: f, button: button_name, center: true) %>
+<% end %>

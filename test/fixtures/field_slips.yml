@@ -18,6 +18,25 @@ field_slip_no_obs:
   user: mary
 
 field_slip_falmouth_one:
+  observation: falmouth_2022_obs
   project: falmouth_2023_09_project
   code: FAL-0001
   user: rolf
+
+field_slip_no_trust:
+  observation: untrusted_hidden
+  project: eol_project
+  code: EOL-0004
+  user: katrina
+
+field_slip_nowhere_one:
+  observation: falmouth_2022_obs
+  project: open_membership_project
+  code: OPEN-0002
+  user: katrina
+
+field_slip_nowhere_dup:
+  observation: falmouth_2022_obs
+  project: open_membership_project
+  code: OPEN-0003
+  user: katrina

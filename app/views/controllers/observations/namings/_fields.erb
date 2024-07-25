@@ -2,13 +2,13 @@
 # This is included by obs form, naming new/edit form + lightbox identifier
 
 unfocused ||= false
-focus_on_name = !unfocused && (button_name != :CREATE.l || @what.empty?)
-focus_on_vote = !unfocused && (button_name == :CREATE.l && @what.present?)
+focus_on_name = !unfocused && (button_name != :CREATE.l || @given_name.empty?)
+focus_on_vote = !unfocused && (button_name == :CREATE.l && @given_name.present?)
 
 feedback_locals = {
   f: f,
   button_name: button_name,
-  what: @what,
+  given_name: @given_name,
   valid_names: @valid_names,
   suggest_corrections: @suggest_corrections,
   parent_deprecated: @parent_deprecated,
@@ -29,39 +29,22 @@ name_help ||= :form_naming_name_help.t
 [
   tag.div do
     render(partial: "shared/form_name_feedback",
-           locals: feedback_locals) if @what.present?
+           locals: feedback_locals) if @given_name.present?
   end,
   fields_for(:naming) do |f_n|
     [
-      tag.div(class: "row mt-3") do
-        [
-          tag.div(class: "col-xs-12 col-sm-6") do
-            autocompleter_field(
-              form: f_n, field: :name, type: :name, label: "#{:WHAT.t}:",
-              value: @what, autofocus: focus_on_name
-            )
-          end,
-          tag.div(class: "col-xs-12 col-sm-6") do
-            help_block_with_arrow("left", id: "naming_name_help") do
-              tag.p(name_help)
-            end
-          end
-        ].safe_join
+      autocompleter_field(
+        form: f_n, field: :name, type: :name, label: "#{:WHAT.t}:",
+        value: @given_name, autofocus: focus_on_name, help: name_help
+      ),
+      f_n.fields_for(:vote) do |f_v|
+        select_with_label(form: f_v, field: :value,
+                          options: confidences, select_opts: select_opts,
+                          label: :form_naming_confidence.t + ":",
+                          autofocus: focus_on_vote)
       end,
-      tag.div(class: "row mt-3") do
-        tag.div(class: "col-xs-12 col-sm-6") do
-          [
-            f_n.fields_for(:vote) do |f_v|
-              select_with_label(form: f_v, field: :value,
-                                options: confidences, select_opts: select_opts,
-                                label: :form_naming_confidence.t + ":",
-                                autofocus: focus_on_vote)
-            end,
-            f_n.fields_for(:reasons) do |f_r|
-              naming_form_reasons_fields(f_r, @reasons)
-            end
-          ].safe_join
-        end
+      f_n.fields_for(:reasons) do |f_r|
+        naming_form_reasons_fields(f_r, @reasons)
       end
     ].safe_join
   end,
