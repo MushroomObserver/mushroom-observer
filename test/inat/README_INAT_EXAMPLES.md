@@ -24,6 +24,7 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | evernia.txt | [216357655](https://www.inaturalist.org/observations/216357655) | 0 | public | Casual, lichen, no fields, place: Troutdale |
 | fuligo_septica.txt | [219783802](https://www.inaturalist.org/observations/219783802) | 1 | public | slime mold **Protozoa** Richmond, CA |
 | gyromitra_ancilis.txt | [216745568](https://www.inaturalist.org/observations/216745568) | 3 | public | **cc-by license**, **many projects**, US 20, Linn Co.|
+| import_all.txt |  |  | | all fungal obss (total of 5) of iNat user devin189, 2 per page |
 | inocybe.txt | [222904190](https://www.inaturalist.org/observations/222904190) | 5 | public | cc-by-nc, **2 tags∆∆** |
 | lentinellus_ursinus.txt | [220796026](https://inaturalist.org/observations/220796026) | 2 | obscured | **ID matches many MO names** |
 | listed_ids.txt | [231104466](https://www.inaturalist.org/observations/231104466) [195434438](https://www.inaturalist.org/observations/195434438) | na | na | response to request for 2 obs by number (amanita_flavorubens, evernia) |
