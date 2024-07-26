@@ -31,11 +31,12 @@ data = {
   form_images_target: "form",
   exif_used: create ? false : true
 }
+projects_lists = @projects.any? || @lists.any?
 tabs = [
   { id: "record", name: :RECORD.l, active: true },
-  { id: "identify", name: :IDENTIFY.l },
-  { id: "add_to", name: :ADD_TO.l }
+  { id: "identify", name: :IDENTIFY.l }
 ]
+tabs << { id: "add_to", name: :ADD_TO.l } if projects_lists
 %>
 
 <%= form_with(
@@ -54,18 +55,17 @@ tabs = [
   end %>
   <%= hidden_field_tag(:field_code, @field_code) %>
 
-  <%= tab_nav(tabs:) %>
   <%= tab_content do %>
     <%= render(partial: "observations/form/record_step",
-              locals: { f:, button_name:, location: @location,
-                        logging_optional: }) %>
+               locals: { f:, button_name:, location: @location,
+                         logging_optional: }) %>
 
     <%= render(partial: "observations/form/identify_step",
-              locals: { f:, action:, button_name:, include_naming: }) %>
+               locals: { f:, action:, button_name:, include_naming: }) %>
 
-    <% if @projects.any? || @lists.any? %>
+    <% if projects_lists %>
       <%= render(partial: "observations/form/add_to_step",
-                locals: { f:, button_name: }) %>
+                 locals: { f:, button_name: }) %>
     <% end %>
   <% end %>
 
