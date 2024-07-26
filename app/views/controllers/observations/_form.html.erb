@@ -32,11 +32,6 @@ data = {
   exif_used: create ? false : true
 }
 projects_lists = @projects.any? || @lists.any?
-tabs = [
-  { id: "record", name: :RECORD.l, active: true },
-  { id: "identify", name: :IDENTIFY.l }
-]
-tabs << { id: "add_to", name: :ADD_TO.l } if projects_lists
 %>
 
 <%= form_with(

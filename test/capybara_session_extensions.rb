@@ -162,7 +162,7 @@ module CapybaraSessionExtensions
 
   # Many forms have more than one submit button
   def click_commit(session: self)
-    session.first(:button, type: "submit").click
+    session.first(:button, type: "submit", visible: :any).click
   end
 
   # This is a mess, but this button is very finicky
