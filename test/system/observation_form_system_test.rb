@@ -308,7 +308,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Be sure we have only one image wrapper now
     assert_selector(".carousel-item[data-image-status='upload']",
-                    visible: :all, count: 1, wait: 6)
+                    visible: :all, count: 1, wait: 9)
 
     # Add geotagged_s_pasadena.jpg again
     click_attach_file("geotagged_s_pasadena.jpg")
@@ -442,6 +442,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Move to the next step, Identification
     within(step_nav_1) { click_on(:NEXT.l) }
 
+    assert_selector("[data-type='name'][data-stimulus='connected']")
     fill_in("naming_name", with: "Agaricus campestris")
     assert_field("naming_name", with: "Agaricus campestris")
     select(Vote.confidence(Vote.next_best_vote), from: "naming_vote_value")
