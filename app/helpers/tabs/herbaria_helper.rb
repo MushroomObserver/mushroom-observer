@@ -53,7 +53,7 @@ module Tabs
     end
 
     def herbarium_form_new_tabs
-      nonpersonal_herbaria_index_tab
+      [nonpersonal_herbaria_index_tab]
     end
 
     def herbarium_form_edit_tabs(herbarium:)
