@@ -1009,7 +1009,9 @@ export default class extends Controller {
       this.data_timer = setTimeout(() => {
         this.verbose("dispatching hiddenIdDataChanged");
         this.wrapTarget.classList.remove('has-id');
-        this.keepBtnTarget.classList.remove('active');
+        if (this.hasKeepBtnTarget) {
+          this.keepBtnTarget.classList.remove('active');
+        }
         this.inputTarget.focus();
         this.dispatch('hiddenIdDataChanged', {
           detail: { id: this.hiddenTarget.value }
