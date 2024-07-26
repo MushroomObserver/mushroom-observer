@@ -647,8 +647,8 @@
   prev: prev
   NEXT: Next
   next: next
-  BACK: Prev
-  back: prev
+  BACK: Back
+  back: back
   FORWARD: Next
   forward: next
   EAST: East
@@ -754,6 +754,9 @@
   upload: upload
   USE: Use
   use: use
+  RECORD: Record
+  IDENTIFY: Identify
+  ADD_TO: Add to
 
   # Common adjectives.
   ANONYMOUS: Anonymous

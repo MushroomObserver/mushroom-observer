@@ -217,7 +217,7 @@ module ContentHelper
     if args[:tabs]
       content = capture do
         args[:tabs].each do |tab|
-          concat(tab_link(tab[:name], id: tab[:id], active: tab[:active]))
+          concat(tab_item(tab[:name], id: tab[:id], active: tab[:active]))
         end
       end
     elsif block
@@ -236,8 +236,8 @@ module ContentHelper
     end
   end
 
-  # Bootstrap "tab"
-  def tab_link(name, **args)
+  # Bootstrap "tab" item in ul/li tablist
+  def tab_item(name, **args)
     active = args[:active] ? "active" : nil
     disabled = args[:disabled] ? "disabled" : nil
 
@@ -245,12 +245,19 @@ module ContentHelper
       role: "presentation",
       class: class_names(active, disabled, args[:class])
     ) do
-      link_to(
-        name, "##{args[:id]}-tab-pane",
-        role: "tab", id: "#{args[:id]}-tab",
-        data: { toggle: "tab" }, aria: { controls: "#{args[:id]}-tab-pane" }
-      )
+      tab_link(name, **args.except(:active, :disabled, :class))
     end
+  end
+
+  # Bootstrap tab - just the link. Use for independent tab (e.g. button).
+  def tab_link(name, **args)
+    classes = args[:button] ? "btn btn-default" : "nav-link"
+
+    link_to(
+      name, "##{args[:id]}-tab-pane",
+      role: "tab", id: "#{args[:id]}-tab", class: classes,
+      data: { toggle: "tab" }, aria: { controls: "#{args[:id]}-tab-pane" }
+    )
   end
 
   # Bootstrap tabpanel wrapper

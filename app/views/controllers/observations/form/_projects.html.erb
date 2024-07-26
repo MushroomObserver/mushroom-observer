@@ -28,7 +28,7 @@ end
         <% [error_messages, suspect_messages].compact.each do |messages| %>
           <%= tag.div(class: "alert alert-#{messages[:level]}") do
             [
-              tag.p(
+              tag.div(
                 "#{:form_observations_projects_out_of_range.t(
                   date: @observation.when,
                   place_name: @observation.place_name
@@ -50,7 +50,7 @@ end
       ) %>
     <% end %>
 
-    <%= tag.p do
+    <%= tag.div do
       [
         tag.strong("#{:PROJECTS.l}:", class: "mr-3"),
         collapse_info_trigger("project_help"),

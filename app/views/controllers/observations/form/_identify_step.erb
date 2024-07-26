@@ -26,6 +26,13 @@
                             fields: @observation.form_notes_parts(@user) }) %>
       <% end %>
     <% end %>
-    <%= submit_button(form: f, button: button_name, center: true) %>
+
+    <%= tag.div(class: "row mt-5 text-center") do
+      [
+        tab_link(:BACK.l, id: "record", button: true),
+        tab_link(:NEXT.l, id: "add_to", button: true),
+        submit_button(form: f, button: button_name)
+      ].safe_join(" ")
+    end %>
   <% end %>
 <% end %>
