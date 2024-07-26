@@ -29,13 +29,8 @@ data = {
   upload_max_size: max_size,
   localization: image_upload_localization,
   form_images_target: "form",
-  exif_used: false
+  exif_used: create ? false : true
 }
-# used by stimulus to make ajax calls to the right route
-if action_name == "edit"
-  data[:observation_id] = @observation.id
-  data[:exif_used] = true
-end
 %>
 
 <%= form_with(
