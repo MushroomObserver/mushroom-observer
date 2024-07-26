@@ -12,28 +12,32 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     click_on("Create Observation")
 
     assert_selector("body.observations__new")
-    within("#observation_form") do
-      # MOAutocompleter replaces year select with text field
-      assert_field("observation_when_1i", with: Time.zone.today.year.to_s)
-      assert_select("observation_when_2i", text: Time.zone.today.strftime("%B"))
-      # %e is day of month, no leading zero
-      assert_select("observation_when_3i", text: Time.zone.today.strftime("%e"))
-      assert_selector("#observation_place_name_help",
-                      text: "Albion, Mendocino Co., California", visible: :all)
-      fill_in("naming_name", with: "Elfin saddle")
-      # don't wait for the autocompleter - we know it's an elfin saddle!
-      browser.keyboard.type(:tab)
-      assert_field("naming_name", with: "Elfin saddle")
-      # start typing the location...
-      fill_in("observation_place_name", with: locations.first.name[0, 1])
-      # wait for the autocompleter...
-      assert_selector(".auto_complete", wait: 6)
-      browser.keyboard.type(:down, :tab) # cursor to first match + select row
-      assert_field("observation_place_name", with: locations.first.name)
-      click_commit
-    end
+    # MOAutocompleter replaces year select with text field
+    assert_field("observation_when_1i", with: Time.zone.today.year.to_s)
+    assert_select("observation_when_2i", text: Time.zone.today.strftime("%B"))
+    # %e is day of month, no leading zero
+    assert_select("observation_when_3i", text: Time.zone.today.strftime("%e"))
+    assert_selector("#observation_place_name_help",
+                    text: "Albion, Mendocino Co., California", visible: :all)
+    # start typing the location...
+    fill_in("observation_place_name", with: locations.first.name[0, 1])
+    # wait for the autocompleter...
+    assert_selector(".auto_complete", wait: 6)
+    browser.keyboard.type(:down, :tab) # cursor to first match + select row
+    assert_field("observation_place_name", with: locations.first.name)
 
-    assert_selector("#name_messages", text: "MO does not recognize the name")
+    # Move to the next step, Identification
+    step_nav_1 = find("#step-nav-1")
+    scroll_to(step_nav_1, align: :top)
+    within(step_nav_1) { click_on(:NEXT.l) }
+
+    fill_in("naming_name", with: "Elfin saddle")
+    # don't wait for the autocompleter - we know it's an elfin saddle!
+    browser.keyboard.type(:tab)
+    assert_field("naming_name", with: "Elfin saddle")
+
+    within("#observation_form") { click_commit }
+
     assert_flash_error(
       :form_observations_there_is_a_problem_with_name.t.html_to_ascii
     )
@@ -43,19 +47,25 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # click_button("map_location")
     # assert_selector("#observation_form_map > div > div > iframe")
 
-    within("#observation_form") do
-      fill_in("naming_name", with: "Coprinus com")
-      browser.keyboard.type(:tab)
-      # wait for the autocompleter!
-      assert_selector(".auto_complete")
-      browser.keyboard.type(:down, :tab) # cursor to first match + select row
-      browser.keyboard.type(:tab)
-      assert_field("naming_name", with: "Coprinus comatus")
-      # Place name should stay filled
-      browser.keyboard.type(:tab)
-      assert_field("observation_place_name", with: locations.first.name)
-      click_commit
-    end
+    assert_field("observation_place_name", with: locations.first.name)
+
+    # Move to the next step, Identification
+    step_nav_1 = find("#step-nav-1")
+    scroll_to(step_nav_1, align: :top)
+    within(step_nav_1) { click_on(:NEXT.l) }
+
+    assert_selector("#name_messages", text: "MO does not recognize the name")
+    fill_in("naming_name", with: "Coprinus com")
+    browser.keyboard.type(:tab)
+    # wait for the autocompleter!
+    assert_selector(".auto_complete")
+    browser.keyboard.type(:down, :tab) # cursor to first match + select row
+    browser.keyboard.type(:tab)
+    assert_field("naming_name", with: "Coprinus comatus")
+    # Place name should stay filled
+    browser.keyboard.type(:tab)
+
+    within("#observation_form") { click_commit }
 
     assert_selector("body.observations__show")
     assert_flash_success(/created observation/i)
