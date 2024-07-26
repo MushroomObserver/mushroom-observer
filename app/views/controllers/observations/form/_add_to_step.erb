@@ -1,0 +1,24 @@
+<%# locals: (f:, button_name:) -%>
+<%# Add to Project and List section of create_observation form  %>
+
+<%= tab_panel(id: "add_to") do %>
+  <%= panel_block(id: "observation_projects_and_lists",
+                  heading: "#{:PROJECTS.l}/#{:SPECIES_LISTS.l}") do %>
+
+    <%= tag.div(class: "row mt-3") do %>
+      <% if @projects.any? %>
+        <%= tag.div(class: "col-xs-12 col-sm-6") do
+          render(partial: "observations/form/projects",
+                locals: { button_name: })
+        end %>
+      <% end %>
+      <% if @lists.any? %>
+        <%= tag.div(class: "col-xs-12 col-sm-6") do
+          render(partial: "observations/form/species_lists")
+        end %>
+      <% end %>
+    <% end %>
+    <%= submit_button(form: f, button: button_name, center: true) %>
+  <% end %>
+<% end %>
+

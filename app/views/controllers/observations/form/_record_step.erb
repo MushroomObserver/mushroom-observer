@@ -1,0 +1,10 @@
+<%# locals: (f:, button_name:, location:, logging_optional:) -%>
+
+<%= tab_panel(id: "record", active: true) do %>
+
+  <%= render(partial: "observations/form/images", locals: { f: f }) %>
+
+  <%= render(partial: "observations/form/details",
+             locals: { f:, button_name:, location:, logging_optional: }) %>
+
+<% end %>

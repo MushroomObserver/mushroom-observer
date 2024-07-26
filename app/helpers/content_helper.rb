@@ -211,4 +211,70 @@ module ContentHelper
       wrapper
     end
   end
+
+  # Bootstrap tablist
+  def tab_nav(**args, &block)
+    if args[:tabs]
+      content = capture do
+        args[:tabs].each do |tab|
+          concat(tab_link(tab[:name], id: tab[:id], active: tab[:active]))
+        end
+      end
+    elsif block
+      content = capture(&block).to_s
+    else
+      content = ""
+    end
+    style = args[:style] || "pills"
+
+    tag.ul(
+      role: "tablist",
+      class: class_names("nav nav-#{style}", args[:class]),
+      **args.except(:class, :style)
+    ) do
+      content
+    end
+  end
+
+  # Bootstrap "tab"
+  def tab_link(name, **args)
+    active = args[:active] ? "active" : nil
+    disabled = args[:disabled] ? "disabled" : nil
+
+    tag.li(
+      role: "presentation",
+      class: class_names(active, disabled, args[:class])
+    ) do
+      link_to(
+        name, "##{args[:id]}-tab-pane",
+        role: "tab", id: "#{args[:id]}-tab",
+        data: { toggle: "tab" }, aria: { controls: "#{args[:id]}-tab-pane" }
+      )
+    end
+  end
+
+  # Bootstrap tabpanel wrapper
+  def tab_content(**args, &block)
+    content = capture(&block).to_s
+
+    tag.div(class: class_names("tab-content", args[:class]),
+            **args.except(:class)) do
+      content
+    end
+  end
+
+  # Bootstrap tabpanel
+  def tab_panel(**args, &block)
+    content = capture(&block).to_s
+    active = args[:active] ? "in active" : nil
+
+    tag.div(
+      role: "tabpanel", id: "#{args[:id]}-tab-pane",
+      class: class_names("tab-pane fade", active, args[:class]),
+      aria: { labelledby: "#{args[:id]}-tab" },
+      **args.except(:class)
+    ) do
+      content
+    end
+  end
 end

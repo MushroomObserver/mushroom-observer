@@ -31,11 +31,11 @@ data = {
   form_images_target: "form",
   exif_used: false
 }
-# used by stimulus to make ajax calls to the right route
-if action_name == "edit"
-  data[:observation_id] = @observation.id
-  data[:exif_used] = true
-end
+tabs = [
+  { id: "record", name: :RECORD.l, active: true },
+  { id: "identify", name: :IDENTIFY.l },
+  { id: "add_to", name: :ADD_TO.l }
+]
 %>
 
 <%= form_with(
@@ -54,30 +54,19 @@ end
   end %>
   <%= hidden_field_tag(:field_code, @field_code) %>
 
-  <% ########################### Image Forms ############################## %>
+  <%= tab_nav(tabs:) %>
+  <%= tab_content do %>
+    <%= render(partial: "observations/form/record_step",
+              locals: { f:, button_name:, location: @location,
+                        logging_optional: }) %>
 
-  <%= render(partial: "observations/form/images", locals: { f: f }) %>
+    <%= render(partial: "observations/form/identify_step",
+              locals: { f:, action:, button_name:, include_naming: }) %>
 
-  <% ############################# Details ################################ %>
-
-  <%= render(partial: "observations/form/details",
-             locals: { f:, button_name:, location: @location }) %>
-
-  <% ########################## Identification ############################ %>
-
-  <%= render(partial: "observations/form/identification",
-             locals: { f:, action:, button_name:, include_naming: }) %>
-
-  <% ####################################################################### %>
-
-  <% if @projects.any? || @lists.any? %>
-    <%= render(partial: "observations/form/projects_and_lists",
-               locals: { f:, button_name: }) %>
-  <% end %>
-
-  <% if logging_optional %>
-    <%= check_box_with_label(form: f, field: :log_change, checked: "checked",
-                             label: :form_observations_log_change.t) %>
+    <% if @projects.any? || @lists.any? %>
+      <%= render(partial: "observations/form/add_to_step",
+                locals: { f:, button_name: }) %>
+    <% end %>
   <% end %>
 
 <% end %><!--[/form:observation]-->
