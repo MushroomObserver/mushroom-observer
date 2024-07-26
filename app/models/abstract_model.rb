@@ -162,8 +162,23 @@ class AbstractModel < ApplicationRecord
   #   # (Note that in this case this is equivalent to "self.object"!)
   #   obj = Comment.find_object(self.object_type, self.object_id)
   #
-  def self.find_object(type, id)
-    type.classify.constantize.find(id.to_i)
+  NAME_TO_TYPE = {
+    "location_description" => "LocationDescription",
+    "LocationDescription" => "LocationDescription",
+    "Name" => "Name",
+    "name_description" => "NameDescription",
+    "NameDescription" => "NameDescription",
+    "NameTracker" => "NameTracker",
+    "Observation" => "Observation",
+    "Project" => "Project",
+    "SpeciesList" => "SpeciesList"
+  }.freeze
+
+  def self.find_object(type_name, id)
+    type = NAME_TO_TYPE[type_name]
+    raise(NameError) unless type
+
+    type.constantize.find(id.to_i)
   rescue NameError, ActiveRecord::RecordNotFound
     nil
   end
