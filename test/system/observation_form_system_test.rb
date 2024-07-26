@@ -101,6 +101,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_place_name", with: last_obs.where)
     assert_field("observation_location_id", with: "", type: :hidden)
 
+    # Move to the next step, Identification
+    step_nav_1 = find("#step-nav-1")
+    scroll_to(step_nav_1, align: :top)
+    within(step_nav_1) { click_on(:NEXT.l) }
+
     within("#observation_form") { click_commit }
 
     # Observation should have saved with the existing location_id for U.P.
