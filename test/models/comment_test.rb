@@ -11,6 +11,13 @@ class CommentTest < UnitTestCase
     QueuedEmail.queue = false
   end
 
+  def test_find_object_for_all_types
+    Comment.all_types.each do |type|
+      assert(AbstractModel.find_object(type.to_s, type.first.id),
+             "Unable to use find_object to find #{type}")
+    end
+  end
+
   def test_user_highlighting_parsing
     do_highlight_test([], "")
     do_highlight_test([mary], "_user #{mary.id}_")
