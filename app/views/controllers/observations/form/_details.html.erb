@@ -2,12 +2,19 @@
 
 <%# When and Where (location) section of create_observation form
     including location autocomplete, map, lat/long/alt %>
+<%
+t_s = {
+  lat: { abbr: :LAT.l, full: :LATITUDE.l },
+  lng: { abbr: :LNG.l, full: :LONGITUDE.l },
+  alt: { abbr: :ALT.l, full: :ALTITUDE.l }
+}
+%>
 
 <%= panel_block(id: "observation_details",
                 heading: :show_observation_details.l) do %>
 
-  <div class="row mt-3">
-    <div class="col-xs-12 col-md-6">
+  <%= tag.div(class: "row mt-3") do %>
+    <%= tag.div(class: "col-xs-12 col-md-6") do %>
       <!-- WHEN -->
       <%= date_select_with_label(
         form: f, field: :when, label: :WHEN.t + ":",
@@ -19,39 +26,23 @@
           [tag.strong("#{:WHERE_GROUP.l}:"),
            collapse_info_trigger("geolocation_help")].safe_join(" ")
         end %>
+
         <!-- LAT_LONG_ALT -->
-        <div class="row no-gutters" id="observation_lat_lng_alt">
-          <div class="col-xs-4">
-            <%= text_field_with_label(
-              form: f, field: :lat, class: "mb-0", addon: "º",
-              label: [
-                tag.span("#{:LATITUDE.l}:", class: "d-none d-sm-inline"),
-                tag.span("#{:LAT.l}:", class: "d-inline d-sm-none")
-              ].safe_join,
-              data: { map_target: "latInput", action: "map#bufferInputs" }
-            ) %>
-          </div>
-          <div class="col-xs-4">
-            <%= text_field_with_label(
-              form: f, field: :lng, class: "mb-0", addon: "º",
-              label: [
-                tag.span("#{:LONGITUDE.l}:", class: "d-none d-sm-inline"),
-                tag.span("#{:LNG.l}:", class: "d-inline d-sm-none")
-              ].safe_join,
-              data: { map_target: "lngInput", action: "map#bufferInputs" }
-            ) %>
-          </div>
-          <div class="col-xs-4">
-            <%= text_field_with_label(
-              form: f, field: :alt, class: "mb-0", addon: "m",
-              label: [
-                tag.span("#{:ALTITUDE.l}:", class: "d-none d-sm-inline"),
-                tag.span("#{:ALT.l}:", class: "d-inline d-sm-none")
-              ].safe_join, # (#{:units_meters.t})
-              data: { map_target: "altInput" }
-            ) %>
-          </div>
-        </div><!--.row-->
+        <%= tag.div(class: "row no-gutters",
+                    id: "observation_lat_lng_alt") do %>
+          <% [:lat, :lng, :alt].each do |key| %>
+            <%= tag.div(class: "col-xs-4") do
+              text_field_with_label(
+                form: f, field: key, class: "mb-0", addon: "º",
+                label: [
+                  tag.span("#{t_s[key][:full]}:", class: "d-none d-sm-inline"),
+                  tag.span("#{t_s[key][:abbr]}:", class: "d-inline d-sm-none")
+                ].safe_join,
+                data: { map_target: "#{key}Input", action: "map#bufferInputs" }
+              )
+            end %>
+          <% end %>
+        <% end %>
 
         <%= collapse_help_block(nil, id: "geolocation_help") do %>
           <%= tag.p(:form_observations_click_point.l) %>
@@ -67,12 +58,6 @@
                    locals: { button: button_name } ) %>
         <!-- /WHERE_REASONS -->
 
-        <%# NOTE:
-        Both the map & form-exif controllers dispatch a pointChanged event.
-            detail: { type, request_params: { lat, lng } }
-        For now we need both events. When form-exif updates the lat/lng inputs,
-        it's not caught as a change by map, because it's been changed by js.
-        Also, map only fires the event after buffering. %>
         <!-- WHERE -->
         <%= autocompleter_field(
           form: f, field: :place_name, type: :location,
@@ -101,6 +86,7 @@
             ].join(" ")
           }
         ) %>
+
         <%= fields_for(:location) do |f_l| %>
           <% %w[north south east west low high].each do |key| %>
             <%= f_l.hidden_field(:"#{key}", value: @location&.send(key) || nil,
@@ -125,10 +111,11 @@
         <% end %>
 
       <% end %>
-    </div><!--.col-->
+    <% end %><!--.col-->
 
     <!-- MAP -->
-    <div class="col-xs-12 col-md-6" id="observation_geolocation">
+    <%= tag.div(class: "col-xs-12 col-md-6",
+                id: "observation_geolocation") do %>
       <%= tag.div(
         "", id: "observation_form_map",
             class: "observation-form-map collapse",
@@ -157,9 +144,9 @@
                   action: "map#clearMap form-exif#reenableButtons" }
         ) %>
       <% end %>
-    </div>
+    <% end %>
     <!-- /MAP -->
 
-  </div><!--.row-->
+  <% end %><!--.row-->
 
 <% end %>

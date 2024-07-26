@@ -29,7 +29,7 @@ data = {
   upload_max_size: max_size,
   localization: image_upload_localization,
   form_images_target: "form",
-  exif_used: false
+  exif_used: create ? false : true
 }
 tabs = [
   { id: "record", name: :RECORD.l, active: true },
