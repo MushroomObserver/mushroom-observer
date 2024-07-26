@@ -156,13 +156,10 @@ class AbstractModel < ApplicationRecord
     nil
   end
 
-  # Look up an object given type and id.
-  #
-  #   # Look up the object a comment is attached to.
-  #   # (Note that in this case this is equivalent to "self.object"!)
-  #   obj = Comment.find_object(self.object_type, self.object_id)
-  #
+  # At minimum this list should include all objects that can have
+  # comments since this gets used by the Comment show page.
   NAME_TO_TYPE = {
+    "Location" => "Location",
     "location_description" => "LocationDescription",
     "LocationDescription" => "LocationDescription",
     "Name" => "Name",
@@ -174,6 +171,12 @@ class AbstractModel < ApplicationRecord
     "SpeciesList" => "SpeciesList"
   }.freeze
 
+  # Look up an object given type and id.
+  #
+  #   # Look up the object a comment is attached to.
+  #   # (Note that in this case this is equivalent to "self.object"!)
+  #   obj = Comment.find_object(self.object_type, self.object_id)
+  #
   def self.find_object(type_name, id)
     type = NAME_TO_TYPE[type_name]
     raise(NameError) unless type
