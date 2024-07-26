@@ -306,9 +306,12 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     within(second_image_wrapper) { find(".remove_image_button").click }
     sleep(1)
 
+    # Be sure second image has been removed
+    assert_no_selector(".carousel-item[data-image-status='upload']",
+                       text: "geotagged_s_pasadena.jpg")
     # Be sure we have only one image wrapper now
     assert_selector(".carousel-item[data-image-status='upload']",
-                    visible: :all, count: 1, wait: 9)
+                    visible: :all, count: 1)
 
     # Add geotagged_s_pasadena.jpg again
     click_attach_file("geotagged_s_pasadena.jpg")
