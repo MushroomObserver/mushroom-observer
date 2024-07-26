@@ -272,7 +272,7 @@ module ContentHelper
       role: "tabpanel", id: "#{args[:id]}-tab-pane",
       class: class_names("tab-pane fade", active, args[:class]),
       aria: { labelledby: "#{args[:id]}-tab" },
-      **args.except(:class)
+      **args.except(:class, :id)
     ) do
       content
     end
