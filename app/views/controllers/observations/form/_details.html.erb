@@ -10,8 +10,7 @@ t_s = {
 }
 %>
 
-<%= panel_block(id: "observation_details",
-                heading: :show_observation_details.l) do %>
+<%= tag.div(class: "panel-body border-top", id: "observation_details") do %>
 
   <%= tag.div(class: "row mt-3") do %>
     <%= tag.div(class: "col-xs-12 col-md-6") do %>
@@ -148,9 +147,5 @@ t_s = {
     <!-- /MAP -->
 
   <% end %><!--.row-->
-
-  <%= tag.div(class: "row mt-5 text-center", id: "step-nav-1") do
-    tab_link(:NEXT.l, id: "identify", button: true)
-  end %>
 
 <% end %>
