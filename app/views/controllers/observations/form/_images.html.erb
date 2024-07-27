@@ -8,9 +8,9 @@ the hidden_field below with a similar name, which takes precedence.
 This is because when images are being uploaded, the radio buttons
 do not yet have an image.id value - the image record has not yet been created.
 Also, note that `good_image_ids` is currently not a field under observation,
-i.e. observation[good_image_ids]. It's a top-level field. --%>
+i.e. not observation[good_image_ids]. It's a top-level field. --%>
 
-<%= tag.div(class: "mb-5", id: "observation_images") do %>
+<%= tag.div(id: "observation_images") do %>
 
   <%= hidden_field_tag(:good_image_ids,
                        @good_images.map { |img| img.id }.join(" "),
@@ -19,28 +19,25 @@ i.e. observation[good_image_ids]. It's a top-level field. --%>
   <%= f.hidden_field(:thumb_image_id,
                      data: { form_images_target: "thumbImageId" }) %>
 
-  <%= tag.div(class: "images_container panel panel-default") do
+  <%= tag.div(class: "panel-body border-bottom") do
     [
-      tag.div(class: "panel-heading carousel-heading") do
+      tag.h4(:IMAGES.l, class: "panel-title d-inline-block mr-4"),
+      label_tag(:select_images_button,
+                class: "btn btn-default file-field") do
         [
-          tag.h4(:IMAGES.l, class: "panel-title d-inline-block mr-4"),
-          label_tag(:select_images_button,
-                    class: "btn btn-default file-field") do
-            [
-              :select_file.t,
-              file_field_tag(
-                :select_images_button,
-                multiple: true, accept: "image/*",
-                data: { action: "change->form-images#addSelectedFiles" }
-              )
-            ].safe_join
-          end
+          :select_file.t,
+          file_field_tag(
+            :select_images_button,
+            multiple: true, accept: "image/*",
+            data: { action: "change->form-images#addSelectedFiles" }
+          )
         ].safe_join
-      end,
-      render(partial: "observations/form/images/carousel",
-             locals: { images: @good_images, exif_data: @exif_data || {},
-                       thumb_id: @observation.thumb_image_id })
+      end
     ].safe_join
   end %>
+
+  <%= render(partial: "observations/form/images/carousel",
+             locals: { images: @good_images, exif_data: @exif_data || {},
+                       thumb_id: @observation.thumb_image_id }) %>
 
 <% end %><!--#observation_images-->

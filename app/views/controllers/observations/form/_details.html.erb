@@ -1,4 +1,4 @@
-<%# locals: (f:, button_name:, location:) -%>
+<%# locals: (f:, button_name:, location:, logging_optional:) -%>
 
 <%# When and Where (location) section of create_observation form
     including location autocomplete, map, lat/long/alt %>
@@ -10,8 +10,7 @@ t_s = {
 }
 %>
 
-<%= panel_block(id: "observation_details",
-                heading: :show_observation_details.l) do %>
+<%= tag.div(class: "panel-body border-top", id: "observation_details") do %>
 
   <%= tag.div(class: "row mt-3") do %>
     <%= tag.div(class: "col-xs-12 col-md-6") do %>
@@ -102,6 +101,14 @@ t_s = {
           help: :form_observations_is_collection_location_help.t
         ) %>
         <!-- /IS_COLLECTION_LOCATION -->
+
+        <% if logging_optional %>
+          <%= check_box_with_label(
+            form: f, field: :log_change, checked: "checked",
+            label: :form_observations_log_change.t
+          ) %>
+        <% end %>
+
       <% end %>
     <% end %><!--.col-->
 

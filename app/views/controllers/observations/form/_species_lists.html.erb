@@ -3,7 +3,7 @@
 <%= tag.div(id: "observation_projects") do %>
   <%= fields_for(:list) do |f_l| %>
 
-    <%= tag.p do
+    <%= tag.div do
       [
         tag.strong("#{:SPECIES_LISTS.l}:", class: "mr-3"),
         collapse_info_trigger("species_lists_help"),

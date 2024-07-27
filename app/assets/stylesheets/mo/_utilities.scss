@@ -154,6 +154,16 @@
   border: none !important;
 }
 
+.border-top {
+  border-top-width: 1px !important;
+  border-top-style: solid !important;
+}
+
+.border-bottom {
+  border-bottom-width: 1px !important;
+  border-bottom-style: solid !important;
+}
+
 .rounded-0 {
   border-radius: 0 !important;
 }
