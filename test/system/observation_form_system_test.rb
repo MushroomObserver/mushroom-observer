@@ -147,7 +147,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_image_date_copied_to_obs(GEOTAGGED_EXIF)
     sleep(0.5)
     # we should have the new type of location_google autocompleter now
-    assert_selector("[data-type='location_google']")
+    assert_selector("[data-type='location_google'][data-stimulus='connected']")
     # Place name should now have been filled by Google, no MO locations match
     assert_field("observation_place_name", with: UNIVERSITY_PARK[:name],
                                            wait: 6)
@@ -308,7 +308,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Be sure second image has been removed
     assert_no_selector(".carousel-item[data-image-status='upload']",
-                       text: "geotagged_s_pasadena.jpg")
+                       text: "geotagged_s_pasadena.jpg", wait: 9)
     # Be sure we have only one image wrapper now
     assert_selector(".carousel-item[data-image-status='upload']",
                     visible: :all, count: 1)
