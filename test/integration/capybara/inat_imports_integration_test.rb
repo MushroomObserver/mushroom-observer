@@ -4,7 +4,7 @@ require("test_helper")
 
 # Test things that are untestable in integration tests
 class InatImportsTest < CapybaraIntegrationTestCase
-  def test_link_to_licenses
+  def test_inat_import_no_imports_designated
     login(mary)
     visit(new_observations_inat_import_path)
 
