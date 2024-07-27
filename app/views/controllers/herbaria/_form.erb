@@ -45,27 +45,41 @@ end
     ) %>
   <% end %>
 
-  <% if !@herbarium.personal_user_id %>
-    <%= text_field_with_label(form: f, field: :code, size: 8, inline: true,
-                              label: :create_herbarium_code.l + ":",
-                              help: :create_herbarium_code_help.t,
+  <%= js_button(
+    button: :more_options.l, id: "more_options_button",
+    name: "more_options_button",
+    data: { toggle: "collapse", target: "#herbarium_options" },
+    aria: { expanded: "false", controls: "herbarium_options" }
+  ) %>
+
+  <%= tag.div(
+    id: "herbarium_options",
+    class: "collapse",
+    aria: { expanded: "false", controlled_by: "more_options_button" }
+  ) do %>
+
+    <% if !@herbarium.personal_user_id %>
+      <%= text_field_with_label(form: f, field: :code, size: 8, inline: true,
+                                label: :create_herbarium_code.l + ":",
+                                help: :create_herbarium_code_help.t,
+                                between: :optional) %>
+    <% end %>
+
+    <%= autocompleter_field(form: f, field: :place_name, type: :location,
+                            label: :LOCATION.l + ":", between: :optional) %>
+
+    <%= text_field_with_label(form: f, field: :email,
+                              label: :create_herbarium_email.l + ":",
                               between: :optional) %>
-  <% end %>
 
-  <%= autocompleter_field(form: f, field: :place_name, type: :location,
-                          label: :LOCATION.l + ":", between: :optional) %>
-
-  <%= text_field_with_label(form: f, field: :email,
-                            label: :create_herbarium_email.l + ":",
+    <%= text_area_with_label(form: f, field: :mailing_address, rows: 5,
+                            label: :create_herbarium_mailing_address.l + ":",
                             between: :optional) %>
 
-  <%= text_area_with_label(form: f, field: :mailing_address, rows: 5,
-                           label: :create_herbarium_mailing_address.l + ":",
-                           between: :optional) %>
-
-  <%= text_area_with_label(form: f, field: :description, rows: 10,
-                           label: :NOTES.l + ":",
-                           between: :optional) %>
+    <%= text_area_with_label(form: f, field: :description, rows: 10,
+                            label: :NOTES.l + ":",
+                            between: :optional) %>
+  <% end %>
 
   <%= submit_button(form: f, button: button_name, center: true) %>
 

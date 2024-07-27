@@ -99,6 +99,10 @@ class HerbariaController < ApplicationController
 
   def new
     @herbarium = Herbarium.new
+    respond_to do |format|
+      format.turbo_stream { render_modal_herbarium_form }
+      format.html
+    end
   end
 
   def edit
@@ -109,6 +113,34 @@ class HerbariaController < ApplicationController
     @herbarium.place_name         = @herbarium.location.try(&:name)
     @herbarium.personal           = @herbarium.personal_user_id.present?
     @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
+    respond_to do |format|
+      format.turbo_stream { render_modal_herbarium_form }
+      format.html
+    end
+  end
+
+  def render_modal_herbarium_record_form
+    render(partial: "shared/modal_form",
+           locals: { title: modal_title, identifier: modal_identifier,
+                     form: "herbaria/form" }) and return
+  end
+
+  def modal_identifier
+    case action_name
+    when "new", "create"
+      "herbarium"
+    when "edit", "update"
+      "herbarium_#{@herbarium.id}"
+    end
+  end
+
+  def modal_title
+    case action_name
+    when "new", "create"
+      :create_herbarium_title.l
+    when "edit", "update"
+      :edit_herbarium_title.l
+    end
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
@@ -337,6 +369,14 @@ class HerbariaController < ApplicationController
                                   where: @herbarium.place_name,
                                   set_herbarium: @herbarium.id))
     true
+  end
+
+  # this updates both the form and the flash
+  def reload_herbarium_modal_form_and_flash
+    render(
+      partial: "shared/modal_form_reload",
+      locals: { identifier: modal_identifier, form: "herbaria/form" }
+    ) and return true
   end
 
   def herbarium_params
