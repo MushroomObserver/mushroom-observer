@@ -69,9 +69,7 @@ end
     <%= autocompleter_field(
       form: f, field: :place_name, type: :location,
       label: :LOCATION.l + ":", between: :optional,
-      hidden_data: { map_target: "locationId",
-                     north: location&.north, south: location&.south,
-                     east: location&.east, west: location&.west },
+      hidden_data: { map_target: "locationId" },
       create_text: :form_observations_create_locality.l,
       data: {
         map_target: "placeInput",
