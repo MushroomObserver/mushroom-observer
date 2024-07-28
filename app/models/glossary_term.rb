@@ -31,7 +31,6 @@ class GlossaryTerm < AbstractModel
 
   ALL_TERM_FIELDS = [:name, :description].freeze
   acts_as_versioned(
-    table_name: "glossary_terms_versions",
     if_changed: ALL_TERM_FIELDS,
     association_options: { dependent: :nullify }
   )

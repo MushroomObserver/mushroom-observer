@@ -13,7 +13,9 @@ class ImagePresenter < BasePresenter
     :image_link_method, # needed for helper
     :lightbox_data,     # contains data passed to lightbox (incl. caption)
     :votes,             # show votes? boolean
-    :original           # show original image filename? (boolean)
+    :original,          # show original image filename? (boolean)
+    :html_id,           # dom_id for broadcasts (image.id added)
+    :upload             # is this an upload image? (no image instance, id fake)
 
   def initialize(image, args = {})
     super
@@ -49,10 +51,16 @@ class ImagePresenter < BasePresenter
       votes: true,
       original: false,
       is_set: true,
-      context: false # false to constrain width
+      full_width: false, # false to constrain width
+      id_prefix: "interactive_image",
+      upload: false
     }
     args = default_args.merge(args)
-    img_urls = image&.all_urls || Image.all_urls(image_id)
+    img_urls = if args[:upload] == true
+                 {}
+               else
+                 image&.all_urls || Image.all_urls(image_id)
+               end
 
     args_to_presenter(image, image_id, img_urls, args)
     sizing_info_to_presenter(image, args)
@@ -61,7 +69,7 @@ class ImagePresenter < BasePresenter
 
   def args_to_presenter(image, image_id, img_urls, args)
     # Store these urls once, since they are computed
-    img_src = img_urls[args[:size]]
+    img_src = img_urls[args[:size]] || ""
     # img_srcset = thumbnail_srcset(img_urls[:small], img_urls[:medium],
     #                               img_urls[:large], img_urls[:huge])
     # img_sizes = args[:data_sizes] || thumbnail_srcset_sizes
@@ -98,9 +106,12 @@ class ImagePresenter < BasePresenter
     self.image_link_method = args[:link_method]
     self.votes = args[:votes]
     self.original = args[:original]
+    self.html_id = "#{args[:id_prefix]}_#{image_id}"
   end
 
   def sizing_info_to_presenter(image, args)
+    return {} unless image
+
     # For lazy load content pre-sizing: set img width and height, using
     # `style= "padding-bottom: proportion%;"`
     # NOTE: requires image, or defaults to 1:1. Be sure it works in all cases
@@ -112,18 +123,20 @@ class ImagePresenter < BasePresenter
     img_padding = "133.33" if img_padding.to_i > 133 # default for tall
     self.proportion = img_padding
 
-    if args[:context] == :matrix_box
+    if args[:full_width] == true
       self.width = false
     else
       # Constrain width to expected dimensions for img size (not layout)
       # NOTE: delete self.width if switching to full-width images everywhere
-      size = Image.all_sizes_index[args[:size]]
+      size = Image::ALL_SIZES_INDEX[args[:size]]
       container_width = img_width > img_height ? size : size / img_proportion
       self.width = container_width.to_f.truncate(0)
     end
   end
 
   def lightbox_args_to_presenter(image, image_id, img_urls, args)
+    return {} unless image
+
     # The src size appearing in the lightbox is a user pref
     lb_size = User.current&.image_size&.to_sym || :huge
 

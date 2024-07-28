@@ -29,7 +29,7 @@ delete from t using location_description_readers as t
  inner join location_descriptions as ld on ld.id = t.location_description_id
  where ld.public = false;
 
-delete from t using location_descriptions_versions as t
+delete from t using location_description_versions as t
  inner join location_descriptions as ld on ld.id = t.location_description_id
  where ld.public = false;
 
@@ -55,7 +55,7 @@ delete from t using name_description_readers as t
  inner join name_descriptions as ld on ld.id = t.name_description_id
  where ld.public = false;
 
-delete from t using name_descriptions_versions as t
+delete from t using name_description_versions as t
  inner join name_descriptions as ld on ld.id = t.name_description_id
  where ld.public = false;
 

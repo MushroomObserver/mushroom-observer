@@ -35,6 +35,8 @@ synonym_links = [approve, deprecate].reject(&:nil?).safe_join(" | ")
           concat(
             [tag.span(class: "text-nowrap ml-3") { synonyms }].safe_join
           ) if synonyms
+          concat(tag.p(["#{:AUTHORITY.l}: ", name.author.to_s.t].safe_join))
+          concat(tag.p(["#{:CITATION.l}: ", name.citation.to_s.tl].safe_join))
         end
       ].safe_join
     end)
@@ -64,11 +66,13 @@ synonym_links = [approve, deprecate].reject(&:nil?).safe_join(" | ")
             ["#{:ICN_ID.l}:",
              tag.em(:show_name_icn_id_missing.l)].safe_join(" ")
           end,
+          tag.p(link_to(*index_fungorum_search_page_tab)),
           tag.p(link_to(*index_fungorum_name_search_tab(name))),
           tag.p(link_to(*mycobank_name_search_tab(name)))
         ].safe_join
       elsif name.searchable_in_registry?
         [
+          tag.p(link_to(*index_fungorum_search_page_tab)),
           tag.p(link_to(*index_fungorum_name_search_tab(name))),
           tag.p(link_to(*mycobank_basic_search_tab))
         ].safe_join
@@ -76,9 +80,6 @@ synonym_links = [approve, deprecate].reject(&:nil?).safe_join(" | ")
     end)
 
   end)
-
-  concat(tag.p(["#{:AUTHORITY.l}: ", name.author.to_s.t].safe_join))
-  concat(tag.p(["#{:CITATION.l}: ", name.citation.to_s.tl].safe_join))
 
   if name.is_misspelling?
     concat(tag.p do

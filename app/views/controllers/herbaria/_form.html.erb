@@ -9,8 +9,9 @@
                             between: :required) %>
 
   <% if in_admin_mode? %>
-    <%= autocompleter_field(form: f, field: :personal_user_name, inline: true,
-                            label: :edit_herbarium_admin_make_personal.t, autocomplete: :user) %>
+    <%= autocompleter_field(form: f, field: :personal_user_name, type: :user,
+                            label: :edit_herbarium_admin_make_personal.t,
+                            inline: true) %>
 
     <% if button_name != :CREATE %>
       <%= help_block_with_arrow("up") do %>
@@ -49,9 +50,8 @@
     <%= help_block_with_arrow("up") do :create_herbarium_code_help.t end %>
   <% end %>
 
-  <%= autocompleter_field(form: f, field: :place_name,
-                          label: :LOCATION.t + ":", between: :optional,
-                          autocomplete: :location) %>
+  <%= autocompleter_field(form: f, field: :place_name, type: :location,
+                          label: :LOCATION.t + ":", between: :optional) %>
 
   <%= text_field_with_label(form: f, field: :email,
                             label: :create_herbarium_email.t + ":",

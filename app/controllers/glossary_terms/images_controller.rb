@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # Clicking on an image currently fires a GET to these actions... because it
-# comes from a link made by thumbnail_helper#interactive_image(link: url_args)
-# with CRUD refactor, change thumbnail helper to fire a POST somehow?
+# comes from a link made by ImagesHelper#interactive_image(link: url_args)
+# with CRUD refactor, change ImagesHelper to fire a POST somehow?
 
 module GlossaryTerms
   class ImagesController < ApplicationController

@@ -80,7 +80,7 @@ module Herbaria
       post(:create, params: { src: fundis.id, dest: marys.id })
 
       assert_redirected_to(
-        emails_merge_request_path(
+        new_admin_emails_merge_requests_path(
           type: :Herbarium, old_id: fundis.id, new_id: marys.id
         )
       )
@@ -116,7 +116,7 @@ module Herbaria
       post(:create, params: { src: nybg.id, dest: nybg.id })
 
       assert_redirected_to(
-        emails_merge_request_path(
+        new_admin_emails_merge_requests_path(
           type: :Herbarium, old_id: nybg.id, new_id: nybg.id
         )
       )
@@ -126,7 +126,7 @@ module Herbaria
       login("mary")
       post(:create, params: { src: fundis.id, dest: nybg.id })
       assert_redirected_to(
-        emails_merge_request_path(
+        new_admin_emails_merge_requests_path(
           type: :Herbarium, old_id: fundis.id, new_id: nybg.id
         )
       )

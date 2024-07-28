@@ -36,7 +36,7 @@ flash_error(@error) if @error && !@interests.any?(&:target)
           <td>
             <% if item.target_type == "NameTracker" %>
               <%= link_to(:show_object.t(type: target.type_tag),
-                          new_name_tracker_path(target.name_id)) %> |
+                          new_tracker_of_name_path(target.name_id)) %> |
             <% else %>
               <%= link_to(:show_object.t(type: target.type_tag),
                           target.show_link_args) %> |

@@ -1,0 +1,26 @@
+<%# locals: (f:, button_name:, location:, logging_optional:) -%>
+<%# NOTE: not using panel_block helper, because it has three panel-body divs %>
+
+<%= tab_panel(id: "record", active: true) do %>
+  <%= tag.div(
+    id: "observation_images_details", class: "panel panel-default"
+  ) do %>
+
+    <%= tag.div(class: "panel-heading") do
+      tag.h4("#{:IMAGES.l} + #{:show_observation_details.l}",
+             class: "panel-title")
+    end %>
+
+    <%= render(partial: "observations/form/images", locals: { f: f }) %>
+
+    <%= render(partial: "observations/form/details",
+               locals: { f:, button_name:, location:, logging_optional: }) %>
+
+    <%= tag.div(class: "panel-body mt-4") do
+      tag.div(class: "text-center", id: "step-nav-1") do
+        tab_link(:NEXT.l, id: "identify", button: true)
+      end
+    end %>
+
+  <% end %>
+<% end %>

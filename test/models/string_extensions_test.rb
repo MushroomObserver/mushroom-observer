@@ -18,6 +18,14 @@ class StringExtensionsTest < UnitTestCase
     assert_raises(RuntimeError) { "Z".dealphabetize("ABC") }
   end
 
+  def test_to_boolean
+    assert_equal(true, "true".to_boolean)
+    assert_equal(true, "tabbouleh".to_boolean)
+    assert_equal(false, "false".to_boolean)
+    assert_equal(true, "1".to_boolean)
+    assert_equal(false, "0".to_boolean)
+  end
+
   def test_random_no_seed_string
     srand(314_159)
     random_str = String.random(10)

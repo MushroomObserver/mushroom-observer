@@ -52,7 +52,7 @@ module FooterHelper
     authors += safe_nbsp
     authors += link_with_query(
       "(#{:review_authors_review_authors.t})",
-      authors_review_path(id: obj.id, type: obj.type_tag)
+      description_authors_path(id: obj.id, type: obj.type_tag)
     )
     authors
   end
@@ -61,7 +61,7 @@ module FooterHelper
     authors += safe_nbsp
     authors += link_with_query(
       "(#{:review_authors_review_authors.t})",
-      authors_review_path(id: obj.id, type: obj.type_tag)
+      description_authors_path(id: obj.id, type: obj.type_tag)
     )
     authors
   end
@@ -69,6 +69,7 @@ module FooterHelper
   def html_undescribed_obj_authors_and_editors(obj, versions)
     type = obj.type_tag
 
+    versions ||= []
     editors = versions.map(&:user_id).uniq - [obj.user_id]
     editors = User.where(id: editors).to_a
     authors = user_list(:"show_#{type}_creator", [obj.user])

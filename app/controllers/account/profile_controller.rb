@@ -77,8 +77,7 @@ module Account
     def maybe_update_location_and_finish
       if @need_location
         flash_notice(:runtime_profile_must_define.t)
-        redirect_to(location_create_location_path,
-                    where: @place_name, set_user: @user.id)
+        redirect_to(new_location_path(where: @place_name, set_user: @user.id))
       else
         flash_notice(:runtime_profile_success.t)
         redirect_to(user_path(@user.id))

@@ -5,12 +5,4 @@ add_tab_set(observation_form_edit_tabs(obs: @observation))
 @container = :wide
 %>
 
-<%= render(partial: "observations/form", locals: {
-      action: :update,
-      method: :patch,
-      logging_optional: true,
-      include_naming: false,
-      include_images: true,
-      button_name: :SAVE_EDITS.l,
-      has_specimen: (@observation.herbarium_records.length > 0)
-}) %>
+<%= render(partial: "observations/form", locals: { action: :update }) %>

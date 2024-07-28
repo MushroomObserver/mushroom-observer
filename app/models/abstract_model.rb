@@ -156,14 +156,32 @@ class AbstractModel < ApplicationRecord
     nil
   end
 
+  # At minimum this list should include all objects that can have
+  # comments since this gets used by the Comment show page.
+  NAME_TO_TYPE = {
+    "Location" => "Location",
+    "location_description" => "LocationDescription",
+    "LocationDescription" => "LocationDescription",
+    "Name" => "Name",
+    "name_description" => "NameDescription",
+    "NameDescription" => "NameDescription",
+    "NameTracker" => "NameTracker",
+    "Observation" => "Observation",
+    "Project" => "Project",
+    "SpeciesList" => "SpeciesList"
+  }.freeze
+
   # Look up an object given type and id.
   #
   #   # Look up the object a comment is attached to.
   #   # (Note that in this case this is equivalent to "self.object"!)
   #   obj = Comment.find_object(self.object_type, self.object_id)
   #
-  def self.find_object(type, id)
-    type.classify.constantize.find(id.to_i)
+  def self.find_object(type_name, id)
+    type = NAME_TO_TYPE[type_name]
+    raise(NameError) unless type
+
+    type.constantize.find(id.to_i)
   rescue NameError, ActiveRecord::RecordNotFound
     nil
   end
@@ -212,17 +230,17 @@ class AbstractModel < ApplicationRecord
   end
 
   # This is called just after an object is created.
-  # 1) It passes off to SiteData, where it will decide whether this affects a
+  # 1) It passes off to UserStats, where it will decide whether this affects a
   #    user's contribution score, and if so update it appropriately.
   # 2) It finishes attaching the new RssLog if one exists.
   after_create :update_contribution
   def update_contribution
-    SiteData.update_contribution(:add, self)
+    UserStats.update_contribution(:add, self)
     attach_rss_log_final_step if has_rss_log?
   end
 
   # This is called just before an object's changes are saved.
-  # 1) It passes off to SiteData, where it will decide whether this affects a
+  # 1) It passes off to UserStats, where it will decide whether this affects a
   #    user's contribution score, and if so update it appropriately.
   # 2) It updates 'updated_at' whenever a record changes.
   # 3) It saves a message to the RssLog.
@@ -231,7 +249,7 @@ class AbstractModel < ApplicationRecord
   # either of these things.
   before_update :do_log_update
   def do_log_update
-    SiteData.update_contribution(:chg, self)
+    UserStats.update_contribution(:chg, self)
     autolog_updated if has_rss_log? && !@save_without_our_callbacks
   end
 
@@ -241,13 +259,13 @@ class AbstractModel < ApplicationRecord
   # end
 
   # This is called just before an object is destroyed.
-  # 1) It passes off to SiteData, where it will decide whether this affects a
+  # 1) It passes off to UserStats, where it will decide whether this affects a
   #    user's contribution score, and if so update it appropriately.
   # 2) It orphans the old RssLog if it had one.
   # 3) It also saves the id in case we needed to know what the id was later on.
   before_destroy :do_log_destroy
   def do_log_destroy
-    SiteData.update_contribution(:del, self)
+    UserStats.update_contribution(:del, self)
     autolog_destroyed if has_rss_log? && rss_log.present?
     @id_was = id
   end

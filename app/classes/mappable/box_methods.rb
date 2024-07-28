@@ -1,5 +1,31 @@
 # frozen_string_literal: true
 
+#  == Instance methods
+#
+#  location?::    Returns true.
+#  observation?:: Returns false.
+#  north_west::   Returns [north, west].
+#  north_east::   Returns [north, east].
+#  south_west::   Returns [south, west].
+#  south_east::   Returns [south, east].
+#  lat::          Returns center latitude.
+#  lng::          Returns center longitude for MapSet.
+#  center::       Returns center as [lat, long].
+#  edges::        Returns [north, south, east, west].
+#  north_south_distance:: Returns north - south.
+#  east_west_distance::   Returns east - west (adjusting if straddles dateline).
+#  straddles_180_deg?::   Returns true if box straddles 180 degrees.
+#  box_area::             Returns the area described by a box, in kmˆ2.
+#  vague?::       Arbitrary test for whether a box covers too large an area to
+#                 be useful on a map.
+#  delta_lat::    Returns north_south_distance * DELTA.
+#  delta_lng::    Returns east_west_distance * DELTA.
+#  lat_lng_close?::  Determines if a given lat/long coordinate is within,
+#                     or close to, a bounding box.
+#  contains?(lat, lng)::  Does box contain the given latititude and longitude
+#  contains_lat?
+#  contains_lng?
+
 module Mappable
   module BoxMethods
     def location?
@@ -40,7 +66,11 @@ module Mappable
     # Return center longitude for MapSet. (Google Maps takes `lng`, not `long`)
     def lng
       lng = (east + west) / 2.0
-      lng += 180 if west > east
+      if west > east && lng.negative?
+        lng += 180
+      elsif west > east && lng.positive?
+        lng -= 180
+      end
       lng
     rescue StandardError
       nil
@@ -66,20 +96,59 @@ module Mappable
       west <= east ? east - west : east - west + 360
     end
 
-    # Is a given lat/long coordinate within or close to the bounding box?
-    def lat_long_close?(lat, long)
-      delta_lat = north_south_distance * 0.20
-      delta_long = east_west_distance * 0.20
-      return false if lat > north + delta_lat
-      return false if lat < south - delta_lat
+    def straddles_180_deg?
+      west > east
+    end
 
-      if west <= east
-        return false if long > east + delta_long
-        return false if long < west - delta_long
-      elsif long < west + delta_long && long > east - delta_long
-        return false
-      end
-      true
+    def contains?(lat, lng)
+      contains_lat?(lat) && contains_lng?(lng)
+    end
+
+    def contains_lat?(lat)
+      (south..north).cover?(lat)
+    end
+
+    def contains_lng?(lng)
+      return (west...east).cover?(lng) unless straddles_180_deg?
+
+      (lng >= west) || (lng <= east)
+    end
+
+    # Returns the area described by a box, in kmˆ2.
+    #   Formula for `the area of a patch of a sphere`:
+    #     area = Rˆ2 * (long2 - long1) * (sin(lat2) - sin(lat1))
+    #   where lat/lng in radians, R in km, Earth R rounded to 6372km
+    def box_area
+      6372 * 6372 * east_west_distance.to_radians *
+        (Math.sin(north.to_radians) - Math.sin(south.to_radians)).abs
+    end
+
+    # Arbitrary test for whether a box covers too large an area to be useful on
+    # a map with other boxes. Large boxes can obscure more precise locations.
+    def vague?
+      box_area > 24_000 # kmˆ2
+    end
+
+    # NOTE: DELTA = 0.20 is way too strict a limit for remote locations.
+    # Larger delta makes more sense in remote areas, where the common-sense
+    # postal address may be quite far from the observed GPS location.
+    DELTA = 2.0
+
+    def delta_lat
+      north_south_distance * DELTA
+    end
+
+    def delta_lng
+      east_west_distance * DELTA
+    end
+
+    # Determines if a given lat/long coordinate is within, or close to, a
+    # bounding box. Method is used to decide if an obs lat/lng is "dubious"
+    # with respect to the observation's assigned Location.
+    def lat_lng_close?(pt_lat, pt_lng)
+      loc = Box.new(north: north, south: south, east: east, west: west)
+      expanded = loc.expand(delta_lat, delta_lng)
+      expanded.contains?(pt_lat, pt_lng)
     end
   end
 end

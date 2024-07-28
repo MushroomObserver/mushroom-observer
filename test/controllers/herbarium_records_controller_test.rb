@@ -164,7 +164,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
   end
 
   def test_new_herbarium_record
-    obs_id = observations(:coprinus_comatus_obs).id
+    obs_id = observations(:unknown_with_no_naming).id
     get(:new, params: { observation_id: obs_id })
     assert_response(:redirect)
 
@@ -172,7 +172,35 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     get(:new, params: { observation_id: obs_id })
     assert_template("new")
     assert_template("shared/_matrix_box")
+    assert_equal(assigns(:herbarium_record).accession_number, "MO #{obs_id}")
+  end
+
+  def test_new_herbarium_record_with_collection_number
+    obs = observations(:coprinus_comatus_obs)
+    get(:new, params: { observation_id: obs.id })
+    assert_response(:redirect)
+
+    login("rolf")
+    get(:new, params: { observation_id: obs.id })
+    assert_template("new")
+    assert_template("shared/_matrix_box")
     assert(assigns(:herbarium_record))
+    assert_equal(assigns(:herbarium_record).accession_number,
+                 obs.collection_numbers.first.format_name)
+  end
+
+  def test_new_herbarium_record_with_field_slip
+    obs = observations(:owner_accepts_general_questions)
+    get(:new, params: { observation_id: obs.id })
+    assert_response(:redirect)
+
+    login("rolf")
+    get(:new, params: { observation_id: obs.id })
+    assert_template("new")
+    assert_template("shared/_matrix_box")
+    assert(assigns(:herbarium_record))
+    assert_equal(assigns(:herbarium_record).accession_number,
+                 obs.field_slips.first.code)
   end
 
   def test_create_herbarium_record

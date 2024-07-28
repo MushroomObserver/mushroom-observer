@@ -2,7 +2,7 @@
 
 class API2
   # User not verified yet.
-  class UserNotVerified < Error
+  class UserNotVerified < FatalError
     def initialize(user)
       super()
       args.merge!(login: user.login)

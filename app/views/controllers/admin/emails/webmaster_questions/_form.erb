@@ -1,0 +1,23 @@
+<%= form_with(url: { action: :create }) do |f| %>
+
+  <%= :ask_webmaster_note.tp %>
+
+  <%= fields_for(:user) do |f_u| %>
+    <%= text_field_with_label(form: f_u, field: :email, value: @email, size: 60,
+                              label: :ask_webmaster_your_email.t + ":",
+                              data: {
+                                autofocus: @email.blank? || @email_error
+                              }) %>
+  <% end %>
+
+  <%= fields_for(:question) do |f_q| %>
+    <%= text_area_with_label(form: f_q, field: :content, value: @content,
+                             rows: 10, label: :ask_webmaster_question.t + ":",
+                             data: {
+                               autofocus: !@email.blank? && !@email_error
+                             }) %>
+  <% end %>
+
+  <%= submit_button(form: f, button: :SEND.l, center: true) %>
+
+<% end %>

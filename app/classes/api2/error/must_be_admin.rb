@@ -2,7 +2,7 @@
 
 class API2
   # Request requires you to be project admin.
-  class MustBeAdmin < Error
+  class MustBeAdmin < FatalError
     def initialize(proj)
       super()
       args.merge!(project: proj.title)

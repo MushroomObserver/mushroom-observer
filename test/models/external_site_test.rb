@@ -25,7 +25,7 @@ class ExternalSiteTest < UnitTestCase
     assert_not_empty(site.errors[:project])
   end
 
-  def test_create_name_too_long
+  def test_create_name_too_lng
     site = ExternalSite.create(name: "x" * 1000)
     assert_not_empty(site.errors[:name])
   end

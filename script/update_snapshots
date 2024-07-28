@@ -28,8 +28,8 @@ mysql --defaults-extra-file=$config_file -q -s -e 'select id, name_id, source_ty
 echo "name_id	domain	kingdom	phylum	class	order	family" > $public/name_classifications.csv
 mysql --defaults-extra-file=$config_file -q -s -e 'select id, classification from names where length(classification) > 0' | $script/parse_classification.rb >> $public/name_classifications.csv
 
-echo "id	name_id	when	location_id	lat	long	alt	vote_cache	is_collection_location	thumb_image_id" > $public/observations.csv
-mysql --defaults-extra-file=$config_file -q -s -e 'select id, name_id, `when`, location_id, if(gps_hidden, round(lat, 0), lat) as lat, if(gps_hidden, round(`long`, 0), `long`) as `long`, alt, vote_cache, is_collection_location, thumb_image_id from observations' >> $public/observations.csv
+echo "id	name_id	when	location_id	lat	lng	 alt	vote_cache	is_collection_location	thumb_image_id" > $public/observations.csv
+mysql --defaults-extra-file=$config_file -q -s -e 'select id, name_id, `when`, location_id, if(gps_hidden, round(lat, 0), lat) as lat, if(gps_hidden, round(`lng`, 0), `lng`) as `lng`, alt, vote_cache, is_collection_location, thumb_image_id from observations' >> $public/observations.csv
 
 echo "model_id	model_name	label	image_id" > $public/ml_images.csv
 mysql --defaults-extra-file=$config_file -q -s -e 'select vm.id, vm.name, vg.name, vgi.image_id from visual_models vm, visual_groups vg, visual_group_images vgi where vgi.visual_group_id = vg.id and vg.visual_model_id = vm.id and vgi.included = 1' >> $public/ml_images.csv

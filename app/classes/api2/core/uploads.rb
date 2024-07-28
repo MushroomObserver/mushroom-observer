@@ -95,7 +95,7 @@ module API2::Uploads
     end
 
     def clean_up
-      File.delete(@temp_file) if @temp_file
+      File.delete(@temp_file) if @temp_file && File.exist?(@temp_file.path)
     end
   end
 

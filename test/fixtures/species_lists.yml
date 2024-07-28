@@ -3,6 +3,8 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
+# DO NOT USE `albion` as a location; it breaks API2Test#test_patching_locations
+
 DEFAULTS: &DEFAULTS
   user:     mary
   where:    "Burbank, California, USA"

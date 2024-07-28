@@ -2,6 +2,6 @@
 
 class API2
   # Error thrown when PATCH or DELETE abort from errors before doing anything.
-  class AbortDueToErrors < Error
+  class AbortDueToErrors < FatalError
   end
 end

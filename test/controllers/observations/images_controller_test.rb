@@ -413,7 +413,7 @@ module Observations
 
       setup_image_dirs
       fixture = "#{MO.root}/test/images/geotagged.jpg"
-      orig_file = img.local_file_name("orig")
+      orig_file = img.full_filepath("orig")
       path = orig_file.sub(%r{/[^/]*$}, "")
       FileUtils.mkdir_p(path) unless File.directory?(path)
       FileUtils.cp(fixture, orig_file)
@@ -421,7 +421,7 @@ module Observations
       post(:attach, params: { id: obs.id, mode: :reuse, img_id: img.id })
       assert_true(img.reload.gps_stripped)
       assert_not_equal(File.size(fixture),
-                       File.size(img.local_file_name("orig")))
+                       File.size(img.full_filepath("orig")))
     end
 
     def test_remove_images_page_access
@@ -489,6 +489,25 @@ module Observations
       put(:detach, params: params)
 
       assert_empty(obs.reload.images)
+    end
+
+    def test_remove_image_by_id
+      obs = observations(:detailed_unknown_obs)
+      images = obs.images
+      assert(images.size > 1,
+             "Use Observation fixture with multiple images for best coverage")
+      user = obs.user
+      login(user.login)
+
+      params = { id: obs.id, image_id: "bad_id" }
+      # It will just skip a bad image id.
+      put(:detach, params: params)
+      assert_equal(obs.images, obs.reload.images)
+
+      params[:image_id] = images.first.id
+      put(:detach, params: params)
+
+      assert_equal(obs.images.except(obs.images.first), obs.reload.images)
     end
   end
 end

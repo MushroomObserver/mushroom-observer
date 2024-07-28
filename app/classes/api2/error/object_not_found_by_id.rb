@@ -2,7 +2,7 @@
 
 class API2
   # Referenced object id doesn't exist.
-  class ObjectNotFoundById < Error
+  class ObjectNotFoundById < FatalError
     def initialize(id, model)
       super()
       args.merge!(id: id.to_s, type: model.type_tag)

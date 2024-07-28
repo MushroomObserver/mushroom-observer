@@ -25,7 +25,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     # experimental, does it fix pending logins?
     Capybara.reset_sessions!
     # below is needed for cuprite
-    Capybara.server = :webrick
+    Capybara.server = :puma
     # Capybara.current_driver = :mo_cuprite
     Capybara.server_host = "localhost"
     Capybara.server_port = 3000
@@ -37,6 +37,8 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     # max wait time. With Cuprite, there is no need for that - except on GitHub.
     # you can set the Capybara default value 2 here explicitly, but fails on CI.
     Capybara.default_max_wait_time = 3
+    # disable CSS transitions and jQuery animations
+    Capybara.disable_animation = true
     # Capybara.always_include_port = true
     # Capybara.raise_server_errors = true
     # default in test_helper = true. some SO threads suggest false

@@ -88,7 +88,6 @@
 #  email::              Email address.
 #  admin::              Allowed to enter admin mode?
 #  alert::              Alert message we need to display for User. (serialized)
-#  bonuses::            List of zero or more contribution bonuses. (serialized)
 #  contribution::       Contribution score (integer).
 #
 #  ==== Profile
@@ -155,7 +154,6 @@
 #
 #  ==== Profile
 #  percent_complete::   How much of profile has User finished?
-#  sum_bonuses::        Add up all the bonuses User has earned.
 #
 #  ==== Object ownership
 #  comments::           Comment's they've posted.
@@ -258,10 +256,14 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
        _suffix: :filenames,
        _default: "toss"
 
+  has_one :user_stats, dependent: :destroy
+
   has_many :api_keys, dependent: :destroy
   has_many :comments
   has_many :donations
   has_many :external_links
+  has_many :field_slips
+  has_many :field_slip_job_trackers
   has_many :images
   has_many :interests
   has_many :locations
@@ -347,6 +349,14 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   scope :by_contribution, lambda {
     order(contribution: :desc, name: :asc, login: :asc)
+  }
+
+  # NOTE: the obs images are a separate optimized query
+  scope :show_includes, lambda {
+    strict_loading.includes(
+      :location,
+      :user_stats
+    )
   }
 
   # These are used by forms.
@@ -715,16 +725,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     result * 100 / max
   end
 
-  # Sum up all the bonuses the User has earned.
-  #
-  #   contribution += user.sum_bonuses
-  #
-  def sum_bonuses
-    return nil unless bonuses
-
-    bonuses.inject(0) { |acc, elem| acc + elem[0] }
-  end
-
   def successful_contributor?
     observations.any?
   end
@@ -785,21 +785,21 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   PUBLIC_REFERENCES = [
     [:herbaria,                       :personal_user_id],
     [:location_descriptions,          :user_id],
-    [:location_descriptions_versions, :user_id],
+    [:location_description_versions,  :user_id],
     [:locations,                      :user_id],
-    [:locations_versions,             :user_id],
+    [:location_versions,              :user_id],
     [:name_descriptions,              :user_id],
     [:name_descriptions,              :reviewer_id],
-    [:name_descriptions_versions,     :user_id],
+    [:name_description_versions,      :user_id],
     [:names,                          :user_id],
-    [:names_versions,                 :user_id],
+    [:name_versions,                  :user_id],
     # Leave projects, because they're intertwined with descriptions too much.
     [:projects,                       :user_id],
     # Leave votes and namings, because I don't want to recalc consensuses.
     [:namings,                        :user_id],
     [:projects,                       :user_id],
     [:translation_strings,            :user_id],
-    [:translation_strings_versions,   :user_id],
+    [:translation_string_versions,    :user_id],
     [:votes,                          :user_id]
   ].freeze
 
@@ -875,7 +875,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     [:donations,                      :user_id],
     [:external_links,                 :user_id],
     [:glossary_terms,                 :user_id],
-    [:glossary_terms_versions,        :user_id],
+    [:glossary_term_versions,         :user_id],
     [:herbaria,                       :personal_user_id],
     [:herbarium_curators,             :user_id],
     [:herbarium_records,              :user_id],

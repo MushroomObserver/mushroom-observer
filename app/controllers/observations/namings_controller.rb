@@ -4,6 +4,8 @@
 
 module Observations
   class NamingsController < ApplicationController # rubocop:disable Metrics/ClassLength
+    include ObservationsController::Validators
+
     before_action :login_required
     before_action :pass_query_params
 
@@ -53,7 +55,7 @@ module Observations
       @observation = Observation.show_includes.find(params[:observation_id])
       @naming = naming_from_params
       # N+1: What is this doing? Watch out for check_permission!
-      return default_redirect(@observation) unless check_permission!(@naming)
+      return redirect_to_obs(@observation) unless check_permission!(@naming)
 
       init_edit_ivars
       @consensus = Observation::NamingConsensus.new(@observation)
@@ -70,14 +72,14 @@ module Observations
       @observation = Observation.show_includes.find(params[:observation_id])
       @naming = naming_from_params
       # N+1: What is this doing? Watch out for check_permission!
-      return default_redirect(@observation) unless check_permission!(@naming)
+      return redirect_to_obs(@observation) unless check_permission!(@naming)
 
       @consensus = Observation::NamingConsensus.new(@observation)
       @vote = @consensus.owners_vote(@naming)
 
       if can_update?
         need_new_naming? ? create_new_naming : change_naming
-        respond_to_successful_update
+        redirect_to_obs(@observation)
       else
         add_reasons(params.dig(:naming, :reasons))
         respond_to_form_errors
@@ -92,16 +94,7 @@ module Observations
         flash_notice(:runtime_destroy_naming_success.t(id: params[:id].to_s))
       end
 
-      respond_to do |format|
-        format.turbo_stream do
-          # Reload after delete
-          (obs, consensus, owner_name) = locals_for_update_observation
-          render(partial: "observations/namings/update_observation",
-                 locals: { obs: obs, consensus: consensus,
-                           owner_name: owner_name }) and return
-        end
-        format.html { default_redirect(@observation) }
-      end
+      redirect_to_obs(@observation)
     end
 
     #########
@@ -111,8 +104,8 @@ module Observations
     def init_ivars
       @naming = Naming.new
       @vote = Vote.new
-      # @what can't be nil else rails tries to call @name.name
-      @what = params[:naming].to_s
+      # @given_name can't be nil else rails tries to call @name.name
+      @given_name = params[:naming].to_s
       @reasons = @naming.init_reasons
       fill_in_reference_for_suggestions if params[:naming].present?
 
@@ -130,7 +123,7 @@ module Observations
     end
 
     def init_edit_ivars
-      @what        = @naming.text_name
+      @given_name  = @naming.text_name
       @names       = nil
       @valid_names = nil
       @reasons     = @naming.init_reasons
@@ -165,52 +158,24 @@ module Observations
       end
     end
 
-    def default_redirect(obs, action = :show)
-      redirect_with_query(controller: "/observations",
-                          action: action, id: obs.id)
+    def redirect_to_obs(obs)
+      redirect_with_query(obs.show_link_args)
     end
 
     ##########################################################################
     #    CREATE
 
-    # returns Boolean
+    # returns Boolean. Also called by create_new_naming.
+    # Uses resolve_name from ObservationsController::Validators
     def rough_draft
-      set_ivars_for_validation(
-        {}, # naming_args
-        params.dig(:naming, :vote), # vote_args
-        params.dig(:naming, :name), # name_str
-        params[:approved_name], # approved_name
-        params.dig(:chosen_name, :name_id).to_s # chosen_name
-      )
-    end
-
-    # returns Boolean. Was @params.rough_draft
-    def set_ivars_for_validation(naming_args, vote_args,
-                                 name_str = nil, approved_name = nil,
-                                 chosen_name = nil)
-      @naming = Naming.construct(naming_args, @observation)
-      @vote = Vote.construct(vote_args, @naming)
-      result = if name_str
-                 resolve_name(name_str, approved_name, chosen_name)
-               else
-                 true
-               end
+      @naming = Naming.construct({}, @observation)
+      @vote = Vote.construct(params.dig(:naming, :vote), @naming)
+      success = if params.dig(:naming, :name)
+                  resolve_name
+                else
+                  true
+                end
       @naming.name = @name
-      result
-    end
-
-    # Set the ivars for the form, and potentially form_name_feedback
-    # in the case the name is not resolved unambiguously
-    def resolve_name(given_name, approved_name, chosen_name)
-      @resolver = Naming::NameResolver.new(
-        given_name, approved_name, chosen_name
-      )
-      # NOTE: views could be refactored to access properties of the @resolver,
-      # e.g. `@resolver.valid_names`, instead of these ivars.
-      # All but success, @what, @name are only used by form_name_feedback.
-      (success, @what, @name, @names, @valid_names,
-       @parent_deprecated, @suggest_corrections) =
-        @resolver.ivar_array
       success && @name
     end
 
@@ -248,24 +213,21 @@ module Observations
     def respond_to_successful_create
       respond_to do |format|
         format.turbo_stream do
-          (obs, consensus, owner_name) = locals_for_update_observation
           case params[:context]
           when "lightgallery", "matrix_box"
             render(partial: "observations/namings/update_matrix_box",
-                   locals: { obs: obs })
+                   locals: { obs: @observation })
           else
-            render(partial: "observations/namings/update_observation",
-                   locals: { obs: obs, consensus: consensus,
-                             owner_name: owner_name })
+            redirect_to_obs(@observation)
           end
           return
         end
-        format.html { default_redirect(@observation, :show) }
+        format.html { redirect_to_obs(@observation) }
       end
     end
 
     def flash_naming_errors
-      if @what.blank?
+      if @given_name.blank?
         flash_error(:form_naming_what_missing.t)
       elsif name_missing?
         flash_object_errors(@naming)
@@ -273,7 +235,7 @@ module Observations
     end
 
     def name_missing?
-      return false if @name && @what.present?
+      return false if @name && @given_name.present?
 
       @naming.errors.
         add(:name, :form_observations_there_is_a_problem_with_name.t)
@@ -311,16 +273,14 @@ module Observations
     #    UPDATE
 
     def can_update?
-      validate_name &&
+      validate_naming &&
         (name_not_changing? ||
          unproposed_name(:runtime_edit_naming_someone_else) &&
          valid_use_of_imageless(@name, @observation))
     end
 
-    def validate_name
-      success = resolve_name(params.dig(:naming, :name).to_s,
-                             params[:approved_name],
-                             params.dig(:chosen_name, :name_id).to_s)
+    def validate_naming
+      success = resolve_name
       flash_naming_errors
       success
     end
@@ -335,18 +295,6 @@ module Observations
 
     def add_reasons(reasons)
       @reasons = @naming.init_reasons(reasons)
-    end
-
-    def respond_to_successful_update
-      respond_to do |format|
-        format.turbo_stream do
-          (obs, consensus, owner_name) = locals_for_update_observation
-          render(partial: "observations/namings/update_observation",
-                 locals: { obs: obs, consensus: consensus,
-                           owner_name: owner_name }) and return
-        end
-        format.html { default_redirect(@observation) }
-      end
     end
 
     # Define local_assigns for the update_observation partial
@@ -366,7 +314,7 @@ module Observations
     # because that would bring the other people's votes along with it.
     # We make a new one, reusing the user's previously stated vote and reasons.
     def create_new_naming
-      set_ivars_for_validation({}, params.dig(:naming, :vote))
+      rough_draft
       return unless validate_object(@naming) && validate_object(@vote)
 
       update_naming(params.dig(:naming, :reasons), params[:was_js_on] == "yes")

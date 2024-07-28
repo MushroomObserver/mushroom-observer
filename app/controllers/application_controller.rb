@@ -120,7 +120,7 @@ class ApplicationController < ActionController::Base
   # after_action  :extra_gc
 
   # Make show_name_helper available to nested partials
-  helper :show_name
+  helper :names
 
   # Disable all filters except set_locale.
   # (Used to streamline API controller.)
@@ -157,9 +157,9 @@ class ApplicationController < ActionController::Base
     return true if is_cool?
 
     logger.warn("BLOCKED #{request.remote_ip}")
-    render(plain: :kick_out_message.t(email: MO.webmaster_email_address),
-           status: :too_many_requests,
-           layout: false)
+    email = MO.webmaster_email_address
+    msg = :kick_out_message.l(ip: request.remote_ip, email: email)
+    render(plain: msg, status: :too_many_requests, layout: false)
     false
   end
 
@@ -1497,16 +1497,17 @@ class ApplicationController < ActionController::Base
 
   # If caching, only uncached objects need to eager_load the includes
   def objects_with_only_needed_eager_loads(query, include)
+    # Not currently caching on user.
     # user = User.current ? "logged_in" : "no_user"
-    # locale = I18n.locale
+    locale = I18n.locale
     objects_simple = query.paginate(@pages)
 
-    # Temporarily disabling cached matrix boxes: eager load everything
-    ids_to_eager_load = objects_simple
+    # If temporarily disabling cached matrix boxes: eager load everything
+    # ids_to_eager_load = objects_simple
 
-    # ids_to_eager_load = objects_simple.reject do |obj|
-    #   object_fragment_exist?(obj, user, locale)
-    # end.pluck(:id)
+    ids_to_eager_load = objects_simple.reject do |obj|
+      object_fragment_exist?(obj, locale)
+    end.pluck(:id)
     # now get the heavy loaded instances:
     objects_eager = query.model.where(id: ids_to_eager_load).includes(include)
     # our Array extension: collates new instances with old, in original order

@@ -4,6 +4,7 @@ json.id(object.id)
 json.type("project")
 json.title(object.title.to_s)
 json.summary(object.summary.to_s.tpl_nodiv) if object.summary.present?
+json.title(object.field_slip_prefix.to_s) if object.field_slip_prefix.present?
 json.created_at(object.created_at.try(&:utc))
 json.updated_at(object.updated_at.try(&:utc))
 if detail

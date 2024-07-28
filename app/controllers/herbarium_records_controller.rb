@@ -194,7 +194,9 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def default_accession_number
-    if @observation.collection_numbers.length == 1
+    if @observation.field_slips.length == 1
+      @observation.field_slips.first.code
+    elsif @observation.collection_numbers.length == 1
       @observation.collection_numbers.first.format_name
     else
       "MO #{@observation.id}"
@@ -356,7 +358,7 @@ class HerbariumRecordsController < ApplicationController
     if name.blank?
       flash_error(:create_herbarium_record_missing_herbarium_name.t)
       false
-    elsif !@herbarium_record.herbarium.nil?
+    elsif !@herbarium_record.herbarium_id.nil?
       true
     elsif name != @user.personal_herbarium_name || @user.personal_herbarium
       flash_warning(:create_herbarium_separately.t)

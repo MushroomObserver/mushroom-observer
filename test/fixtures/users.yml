@@ -3,6 +3,9 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
+# DO NOT USE `albion` as an account profile primary_location;
+# it breaks API2Test#test_patching_locations
+
 DEFAULTS: &DEFAULTS
   auth_code:      cb0b1a56ab378a7c4f8ecd172dccf8b3c4a7f0ba
   contribution:   10
@@ -24,7 +27,10 @@ DEFAULTS: &DEFAULTS
 rolf:
   <<: *DEFAULTS
   name: Rolf Singer
-  license: ccwiki30
+  # The default license for Users.
+  # It is hard-coded in the schema, and in licenses.yml.
+  # So `license: ccwiki30` will not work here.
+  license_id: <%= User.column_defaults["license_id"] %>
   image: rolf_profile_image
   image_size: <%= User.image_sizes[:medium] %>
   view_owner_id: true
@@ -51,7 +57,7 @@ dick:
   name: Tricky Dick
   email_general_question: false
   verified: 2006-03-02 21:14:00
-  user_groups: all_users, bolete_users, bolete_admins, albion_users, albion_admins, dick_only
+  user_groups: all_users, bolete_users, bolete_admins, albion_users, albion_admins, dick_only, falmouth_2023_09_users
 
 lone_wolf:
   <<: *DEFAULTS
@@ -71,7 +77,7 @@ roy:
   name: Roy Halling
   email_general_question: true
   location_format: <%= User.location_formats[:scientific] %>
-  user_groups: all_users, burbank_admins
+  user_groups: all_users, burbank_admins, burbank_users, falmouth_2023_09_users
 
 spammer:
   <<: *DEFAULTS
@@ -90,7 +96,7 @@ zero_user:
 ignore_imageless_user:
   <<: *DEFAULTS
   verified:  2016-08-24 16:20:00
-  content_filter: <%= { has_images: "yes" }.to_yaml.inspect %>
+  content_filter: <%= { with_images: "yes" }.to_yaml.inspect %>
   # make this high so that there's only 1 page of observations
   layout_count: 96
 
@@ -98,7 +104,7 @@ ignore_imageless_user:
 vouchered_only_user:
   <<: *DEFAULTS
   verified:  2016-09-02 13:50:00
-  content_filter: <%= { has_specimen: "yes" }.to_yaml.inspect %>
+  content_filter: <%= { with_specimen: "yes" }.to_yaml.inspect %>
   layout_count: 24
 
 public_voter:
@@ -173,3 +179,7 @@ nonregional:
   <<: *DEFAULTS
   email: "bogus"
   content_filter: <%= { region: "Massachusetts" }.to_yaml.inspect %>
+
+foray_newbie:
+  <<: *DEFAULTS
+  user_groups: all_users, burbank_users, foray_newbie_only

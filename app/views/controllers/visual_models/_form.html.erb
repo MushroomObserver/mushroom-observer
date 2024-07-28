@@ -1,8 +1,8 @@
 <%= form_with(model: visual_model) do |f| %>
   <% if visual_model.errors.any? %>
     <div id="error_explanation">
-      <h2><%= pluralize(visual_model.errors.count, "error") %> prohibited this visual_model from being saved:</h2>
-
+      <%= "#{pluralize(visual_model.errors.count,
+        :error.t, plural: :errors.t)} #{:visual_model_errors.t}" %>:
       <ul>
         <% visual_model.errors.each do |error| %>
           <li><%= error.full_message %></li>

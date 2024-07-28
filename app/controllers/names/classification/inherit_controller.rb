@@ -36,7 +36,7 @@ module Names::Classification
     private
 
     def render_new
-      render("new", location: inherit_name_classification_form_path)
+      render("new", location: form_to_inherit_classification_of_name_path)
     end
 
     include Names::Classification::SharedPrivateMethods

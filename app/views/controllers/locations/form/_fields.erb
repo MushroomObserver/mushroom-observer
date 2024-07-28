@@ -1,0 +1,33 @@
+<%# locals: (display_name: nil, location: nil, button: nil, f: nil) -%>
+
+<%= text_field_with_label(
+  form: f, field: :display_name, value: display_name,
+  label: "#{:WHERE.t}:", help: :form_locations_help.t,
+  data: { autofocus: true, map_target: "placeInput" },
+  button: :form_locations_find_on_map.t,
+  button_data: { map_target: "showBoxBtn", action: "map#showBox" }
+) %>
+
+<%= render(partial: "locations/form/north_south_east_west_alt_fields",
+           locals: { f: f }) %>
+
+<% if in_admin_mode? %>
+  <%= check_box_with_label(form: f, field: :locked, class: "mt-3",
+                           label: :form_locations_locked.t) %>
+<% end %>
+
+<% help = [tag.p(:form_locations_notes_help.t),
+           tag.p(:shared_textile_help.l)].safe_join %>
+<%= text_area_with_label(
+  form: f, field: :notes, label: :NOTES.t + ":", help:
+) %>
+
+<% if location.observations.empty? %>
+  <%= check_box_with_label(
+    form: f, field: :hidden, class: "mt-3 mr-3",
+    label: :form_locations_hidden.t, help: :form_locations_hidden_doc.t
+  ) %>
+<% end %>
+
+<%= submit_button(form: f, button: button, class: "mt-4",
+                  center: false) %>

@@ -119,6 +119,7 @@ mysql -u root
 ```
 
 5. Inside the MySQL prompt (in the new terminal window), update the root password:
+Temporarily use `mysql_native_password` instead of `caching_sha2_password`
 
 ```sql
 USE mysql;
@@ -131,7 +132,7 @@ FLUSH PRIVILEGES;
 exit;
 # Setting it to null above seems necessary. Then:
 mysql -u root
-ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY 'root';
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
 ```
 
 6. Stop Safe Mode MySQL Server:
@@ -228,9 +229,9 @@ Then:
 Mac users have to uncomment/comment the relevant/irrelevant lines in `config/database.yml`:
 ```yml
 shared:
-  adapter: mysql2
+  adapter: trilogy
   # Default (works for MacOS X), uncomment this line
-  socket: /tmp/mysql.sock 
+  socket: /tmp/mysql.sock
   # For Ubuntu/Debian, comment out this line
   # socket: /var/run/mysqld/mysqld.sock
 ```
@@ -326,20 +327,12 @@ else
 fi
 ```
 
-### Install mysql2
+### Install trilogy
 
-@mo-nathan needed to run the following to get the `mysql2`` gem to install.
-Your mileage may vary...
-
-```sh
-gem install mysql2 -v '0.5.3' -- --with-opt-dir=$(brew --prefix openssl) --with-ldflags=-L/opt/homebrew/opt/zstd/lib
-bundle config --global build.mysql2 "--with-opt-dir=$(brew --prefix openssl) --with-ldflags=-L/opt/homebrew/opt/zstd/lib"
-```
-
-JoeCohen just did:
+Currently do this:
 
 ```sh
-gem install mysql2
+gem install trilogy
 ```
 
 ### Continue the mo-dev script

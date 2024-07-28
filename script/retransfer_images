@@ -34,7 +34,8 @@ for id in $ids; do
     done
   done
 
-  run_mysql "UPDATE images SET transferred=TRUE WHERE id=$id" || \
+  run_mysql "UPDATE images SET transferred=TRUE WHERE id=$id" &&
+  run_mysql "UPDATE observations, observation_images SET observations.updated_at = NOW() WHERE observation_images.image_id = $id AND observation_images.observation_id = observations.id" || \
     die "Failed to set transferred bit on $id."
 done
 

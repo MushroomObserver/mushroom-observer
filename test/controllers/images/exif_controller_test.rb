@@ -10,7 +10,7 @@ module Images
       image.update_attribute(:transferred, false)
 
       fixture = "#{MO.root}/test/images/geotagged.jpg"
-      file = image.local_file_name("orig")
+      file = image.full_filepath("orig")
       path = file.sub(%r{/[^/]*$}, "")
       FileUtils.mkdir_p(path) unless File.directory?(path)
       FileUtils.cp(fixture, file)
@@ -27,11 +27,11 @@ module Images
     def test_exif_parser
       fixture = "#{MO.root}/test/images/geotagged.jpg"
       result, _status = Open3.capture2e("exiftool", fixture)
-      unstripped = @controller.test_parse_exif_data(result, false)
+      unstripped = Image.parse_exif_data(result, false)
       assert_not_empty(unstripped.select do |key, _val|
                          key.match(/latitude|longitude|gps/i)
                        end)
-      stripped = @controller.test_parse_exif_data(result, true)
+      stripped = Image.parse_exif_data(result, true)
       assert_empty(stripped.select do |key, _val|
                      key.match(/latitude|longitude|gps/i)
                    end)
