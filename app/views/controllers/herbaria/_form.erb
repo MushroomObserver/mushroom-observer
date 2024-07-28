@@ -54,7 +54,8 @@ end
 
   <%= tag.div(
     id: "herbarium_options",
-    class: "collapse",
+    class: "collapse map-outlet",
+    data: { controller: "map" },
     aria: { expanded: "false", controlled_by: "more_options_button" }
   ) do %>
 
@@ -65,8 +66,17 @@ end
                                 between: :optional) %>
     <% end %>
 
-    <%= autocompleter_field(form: f, field: :place_name, type: :location,
-                            label: :LOCATION.l + ":", between: :optional) %>
+    <%= autocompleter_field(
+      form: f, field: :place_name, type: :location,
+      label: :LOCATION.l + ":", between: :optional,
+      hidden_data: { map_target: "locationId",
+                     north: location&.north, south: location&.south,
+                     east: location&.east, west: location&.west },
+      create_text: :form_observations_create_locality.l,
+      data: {
+        map_target: "placeInput",
+        action: "map:googlePrimer@window->autocompleter#refreshGooglePrimer" }
+    ) %>
 
     <%= text_field_with_label(form: f, field: :email,
                               label: :create_herbarium_email.l + ":",
