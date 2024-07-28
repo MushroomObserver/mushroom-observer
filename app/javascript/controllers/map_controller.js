@@ -1,4 +1,4 @@
-import GeocodeController from "geocode_controller.js"
+import GeocodeController from "./geocode_controller.js"
 import { Loader } from "@googlemaps/js-api-loader"
 
 // Connects to data-controller="map"
@@ -39,7 +39,7 @@ export default class extends GeocodeController {
     // that should update the form after a timeout.
     this.old_location = null
     this.marker_draw_buffer = 0
-    this.ac_buffer = 0
+    this.autocomplete_buffer = 0
     this.geolocate_buffer = 0
     this.marker_edit_buffer = 0
     this.rectangle_edit_buffer = 0
@@ -363,9 +363,9 @@ export default class extends GeocodeController {
   }
 
   clearAutocompleterSwapBuffer() {
-    if (this.ac_buffer) {
-      clearTimeout(this.ac_buffer)
-      this.ac_buffer = 0
+    if (this.autocomplete_buffer) {
+      clearTimeout(this.autocomplete_buffer)
+      this.autocomplete_buffer = 0
     }
   }
 
