@@ -327,12 +327,13 @@ module Observations
       params = <<~PARAMS.delete("\n")
         ?id=#{inat_obs_ids}
         &user_login=
-        &iconic_taxa=Fungi
+        &iconic_taxa=#{Observations::InatImportsController::ICONIC_TAXA}
         &id_above=#{id_above}
         &per_page=200
         &order=asc&order_by=id
         &only_id=false
       PARAMS
+
       WebMock.stub_request(
         :get,
         "#{INAT_OBS_REQUEST_PREFIX}#{params}"

@@ -25,6 +25,8 @@ module Observations
       "http://localhost:3000/observations/inat_imports/authenticate"
     # iNat's id for the MO application
     APP_ID = Rails.application.credentials.inat.id
+    # limit results of all iNat API requests
+    ICONIC_TAXA = "Fungi,Protozoa"
 
     def new; end
 
