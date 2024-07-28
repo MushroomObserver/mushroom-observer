@@ -257,22 +257,38 @@ module Observations
     end
 
     def test_import_all
-      skip("under construction")
       user = users(:rolf)
+      login(user.login)
+
+      filename = "import_all"
+      mock_search = File.read("test/inat/#{filename}.txt")
+      # shorten it to one page to avoid stubbing multiple inat api requests
+      mock_search = limit_result_to_first_page(mock_search)
+      # delete the photos in order to avoid stubbing photo imports
+      mock_search = results_without_photos(mock_search)
+
       inat_import_ids = ""
 
-      simulate_authorization(user: user, inat_import_ids: inat_import_ids)
+      simulate_authorization(user: user, inat_import_ids: inat_import_ids,
+                             import_all: true)
       stub_token_request
-      stub_inat_api_request(inat_import_ids, mock_inat_response)
+      stub_inat_api_request(inat_import_ids, mock_search)
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
-      login(user.login)
 
       assert_difference(
         "Observation.count", 2, "Failed to create multiple observations"
       ) do
         post(:authenticate, params: params)
       end
+    end
+
+    # Turn results with many pages into results with one page
+    # By ignoring all pages but the first
+    def limit_result_to_first_page(mock_search)
+      ms_hash = JSON.parse(mock_search)
+      ms_hash["total_results"] = ms_hash["results"].length
+      JSON.generate(ms_hash)
     end
 
     def import_mock_observation(filename)
@@ -347,9 +363,12 @@ module Observations
         mo_license.id
     end
 
-    def simulate_authorization(user: rolf, inat_import_ids: "")
+    def simulate_authorization(user: rolf, inat_import_ids: "",
+                               import_all: false)
       inat_import = InatImport.find_or_create_by(user: user)
-      inat_import.inat_ids = inat_import_ids
+      inat_import.import_all = import_all
+      # ignore list of ids if importing all a user's iNat obss
+      inat_import.inat_ids = import_all == true ? "" : inat_import_ids
       inat_import.state = "Authorizing"
       inat_import.save
       stub_request(:any, authorization_url)
@@ -377,6 +396,15 @@ module Observations
                   "redirect_uri" => REDIRECT_URI }
         ).
         to_return(status: 200, body: "MockToken", headers: {})
+    end
+
+    def results_without_photos(mock_search)
+      ms_hash = JSON.parse(mock_search)
+      ms_hash["results"].each do |result|
+        result["observation_photos"] = []
+        result["photos"] = []
+      end
+      JSON.generate(ms_hash)
     end
   end
 end

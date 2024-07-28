@@ -36,6 +36,7 @@ module Observations
 
       inat_import = InatImport.find_or_create_by(user: User.current)
       inat_import.state = "Authorizing"
+      inat_import.import_all = params[:all]
       inat_import.inat_ids = params[:inat_ids]
       inat_import.inat_username = params[:inat_username]
       inat_import.save
@@ -59,7 +60,7 @@ module Observations
     end
 
     def imports_designated?
-      params[:all] == 1 || params[:inat_ids].present?
+      params[:all] == "1" || params[:inat_ids].present?
     end
 
     def consent_required
@@ -107,6 +108,7 @@ module Observations
       inat_import.state = "Authenticating"
       inat_import.save
 
+      # exchange code received from iNat for an access token
       payload = {
         client_id: APP_ID,
         client_secret: Rails.application.credentials.inat.secret,
@@ -115,12 +117,10 @@ module Observations
         grant_type: "authorization_code"
       }
       response = RestClient.post("#{SITE}/oauth/token", payload)
-
       inat_import.token = response.body
       inat_import.state = "Importing"
       inat_import.save
 
-      # import_requested_observations(inat_ids: inat_id_list(inat_import))
       import_requested_observations(inat_import)
 
       inat_import.state = "Done"
@@ -140,7 +140,7 @@ module Observations
 
     def import_requested_observations(inat_import)
       inat_ids = inat_id_list(inat_import)
-      return if inat_ids.blank?
+      return if inat_import[:import_all].blank? && inat_ids.blank?
 
       last_import_id = 0
       loop do
@@ -180,7 +180,8 @@ module Observations
                                  user_login: nil)
       operation =
         "/observations?id=#{ids}&id_above=#{id_above}&only_id=#{only_id}" \
-        "&per_page=#{per_page}&#{sort}&user_login=#{user_login}"
+        "&per_page=#{per_page}&#{sort}&user_login=#{user_login}" \
+        "&iconic_taxa=Fungi,Protozoa"
       ::Inat.new(operation: operation, token: inat_import.token).body
     end
 
