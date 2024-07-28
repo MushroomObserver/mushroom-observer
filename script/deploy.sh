@@ -22,14 +22,40 @@ fi
 
 tag=`date "+deploy-%Y-%m-%d-%H-%M"`
 echo Going for it\!
-echo Stash local changes... && git stash && \
-echo Getting latest code from github... && git pull && \
-echo Reapply local changes... && git stash pop && \
+
+STASH_RESULT=`git stash`
+if [ $? -ne 0 ]; then
+    echo git stash failed.
+    exit 1
+fi
+
+echo $STASH_RESULT | grep 'No local changes to save'
+STASH_STATUS=$?
+
+if [ $STASH_STATUS -ne 0 ]; then
+    echo Stashed some changes...
+fi
+
+echo Getting latest code from github... && git pull
+if [ $? -ne 0 ]; then
+    echo git pull failed.
+    exit 1
+fi
+
+if [ $STASH_RESULT -ne 'No local changes to save' ]; then
+    echo Reapply local changes... && git stash pop
+    if [ $? -ne 0 ]; then
+	echo Applying the stashed changes failed.
+	exit 1
+    fi
+fi
+
 echo Installing bundle... && bundle install && \
 echo Checking for migrations... && rake db:migrate && \
 echo Updating translations... && rake lang:update && \
 echo Precompiling assets... && rake assets:precompile && \
-echo Reloading unicorn... && /etc/init.d/unicorn reload && \
+echo Reloading puma... && sudo service puma restart && \
+echo Reloading solidqueue... && sudo service solidqueue restart && \
 echo Tagging repo with $tag... && git tag $tag && \
 echo Pushing new tag... && git push --tags && \
 echo SUCCESS\!

@@ -126,7 +126,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
       )
 
       first(:link, owner.name).click
-      assert_match(/Contribution Summary/, page.title, "Wrong page")
+      assert_match(/About/, page.title, "Wrong page")
     end
     # back at Observation
 
@@ -267,7 +267,9 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     assert_match("Location: Burbank, California, USA", page.title, "Wrong page")
 
     # Get a list of observations from there.  (Several so goes to index.)
-    within("#right_tabs") { click_link(text: "Observations at this Location") }
+    within("#location_coordinates") do
+      click_link(text: "Observations at this Location")
+    end
     assert_match("Observations from Burbank",
                  page.title, "Wrong page")
     save_results = find_all("#results a").select do |l|

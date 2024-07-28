@@ -1,0 +1,6 @@
+<%
+  add_page_title("#{:field_slip_new.t}: #{@field_slip.code}")
+  add_tab_set([field_slips_index_tab])
+%>
+
+<%= render "form", field_slip: @field_slip %>

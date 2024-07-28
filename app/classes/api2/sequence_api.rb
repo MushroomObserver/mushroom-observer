@@ -57,11 +57,11 @@ class API2
         west: w,
         is_collection_location: parse(:boolean, :is_collection_location,
                                       help: 1),
-        has_images: parse(:boolean, :has_images),
-        has_name: parse(:boolean, :has_name, help: :min_rank),
-        has_specimen: parse(:boolean, :has_specimen),
-        has_obs_notes: parse(:boolean, :has_obs_notes, help: 1),
-        has_notes_fields: parse(:string, :has_notes_field, help: 1),
+        with_images: parse(:boolean, :has_images),
+        with_name: parse(:boolean, :has_name, help: :min_rank),
+        with_specimen: parse(:boolean, :has_specimen),
+        with_obs_notes: parse(:boolean, :has_obs_notes, help: 1),
+        with_notes_fields: parse(:string, :has_notes_field, help: 1),
         obs_notes_has: parse(:string, :obs_notes_has, help: 1)
       }.merge(parse_names_parameters)
     end

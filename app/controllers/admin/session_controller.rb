@@ -15,7 +15,7 @@ module Admin
     before_action :login_required
 
     # The route to turn admin mode on or off. Takes params.
-    def show
+    def create
       if params[:turn_on]
         session[:admin] = true if @user&.admin && !in_admin_mode?
       elsif params[:turn_off]

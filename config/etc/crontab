@@ -1,19 +1,20 @@
+RUBY_MANAGER=chruby
 RAILS_ENV=production
 MAILTO=webmaster@mushroomobserver.org
 
-*   * * * * /var/web/mo/script/run_script update_ip_stats.rb
-*/5 * * * * /var/web/mo/script/run_rake email:send
-*/6 * * * * /var/web/mo/script/run_script retransfer_images
-*/4 * * * * /var/web/mo/script/run_script parse_log
-1   * * * * /var/web/mo/script/run_script check_for_orphaned_thumbnails
-13  3 * * * /var/web/mo/script/run_script backup_blocked_ips.sh
-33  3 * * * /var/web/mo/script/run_script refresh_name_lister_cache
-53  3 * * * /var/web/mo/script/run_script check_rss_logs
-13  4 * * * /var/web/mo/script/run_script verify_images
-43  4 * * * /var/web/mo/script/run_script refresh_sitemap
-13  5 * * * /var/web/mo/script/run_script refresh_caches
-43  5 * * * /var/web/mo/script/run_script backup_database.sh
-13  6 * * * /var/web/mo/script/run_script update_googlebots.rb
-43  6 * * * /var/web/mo/script/run_script update_snapshots
-13  7 * * 0 /var/web/mo/script/run_script check_for_broken_references
+*   * * * * /var/web/mo/bin/run script/update_ip_stats.rb
+*/5 * * * * /var/web/mo/bin/run rake email:send -f /var/web/mushroom-observer/Rakefile
+*/6 * * * * /var/web/mo/bin/run script/retransfer_images
+*/4 * * * * /var/web/mo/bin/run script/parse_log
+1   * * * * /var/web/mo/bin/run script/check_for_orphaned_thumbnails
+13  3 * * * /var/web/mo/bin/run script/backup_blocked_ips.sh
+33  3 * * * /var/web/mo/bin/run script/refresh_name_lister_cache
+53  3 * * * /var/web/mo/bin/run script/check_rss_logs
+13  4 * * * /var/web/mo/bin/run script/verify_images
+43  4 * * * /var/web/mo/bin/run script/refresh_sitemap
+13  5 * * * /var/web/mo/bin/run script/refresh_caches
+43  5 * * * /var/web/mo/bin/run script/backup_database.sh
+13  6 * * * /var/web/mo/bin/run script/update_googlebots.rb
+43  6 * * * /var/web/mo/bin/run script/update_snapshots
+13  7 * * 0 /var/web/mo/bin/run script/check_for_broken_references
 13  9 * * * sudo /usr/bin/certbot renew --quiet

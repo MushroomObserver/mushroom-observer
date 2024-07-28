@@ -11,6 +11,7 @@ class ProjectsControllerTest < FunctionalTestCase
       project: {
         title: title,
         summary: summary,
+        field_slip_prefix: "",
         place_name: "",
         open_membership: false,
         "start_date(1i)" => start_date&.year,
@@ -125,6 +126,23 @@ class ProjectsControllerTest < FunctionalTestCase
 
     assert_select("#header", { text: /#{project.date_range}/ },
                   "Date range missing from Project header")
+  end
+
+  def test_show_project_with_constraint_violations
+    project = projects(:falmouth_2023_09_project)
+    violations_count = project.count_violations
+    assert(violations_count.positive?,
+           "Test needs Project fixture with constraint violations")
+    user = project.user
+
+    login(user.login)
+    get(:show, params: { id: project.id })
+
+    assert_select(
+      "#project_summary a[href =
+        '#{project_violations_path(project_id: project.id)}']",
+      true, "Page is missing a link to violations"
+    )
   end
 
   def test_index

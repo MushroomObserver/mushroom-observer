@@ -22,11 +22,9 @@ module ObservationsController::Show
   def show
     pass_query_params
     store_location
-    case params[:flow]
-    when "next"
-      redirect_to_next_object(:next, Observation, params[:id]) and return
-    when "prev"
-      redirect_to_next_object(:prev, Observation, params[:id]) and return
+    if params[:flow].present?
+      redirect_to_next_object(params[:flow].to_sym, Observation, params[:id])
+      return
     end
 
     check_if_user_wants_to_make_their_votes_public
@@ -40,7 +38,8 @@ module ObservationsController::Show
     @consensus     = Observation::NamingConsensus.new(@observation)
     @owner_name    = @consensus.owner_preference
     register_namings_for_textile_in_notes
-    @comments = @observation.comments&.sort_by(&:created_at)&.reverse
+    @comments      = @observation.comments&.sort_by(&:created_at)&.reverse
+    @images        = @observation.images_sorted
   end
 
   def load_observation_for_show_observation_page

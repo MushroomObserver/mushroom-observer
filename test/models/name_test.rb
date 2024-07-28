@@ -2663,6 +2663,11 @@ class NameTest < UnitTestCase
                    "Boletus#{str}",
                    "Name ss should include `#{str}` if it's part of the genus")
     end
+
+    # start of the epithet matches a `group` abbreviation ("gr")
+    name = Name.new(text_name: "Leptonia gracilipes")
+
+    assert_equal(name.text_name, name.sensu_stricto)
   end
 
   # --------------------------------------
@@ -3254,10 +3259,10 @@ class NameTest < UnitTestCase
     names(:lichen).merge(old_name)
 
     assert_equal(
-      old_contribution - SiteData::FIELD_WEIGHTS[:names_versions],
+      old_contribution - UserStats::ALL_FIELDS[:name_versions][:weight],
       user.reload.contribution,
       "Merging a Name edited by a user should reduce user's contribution " \
-      "by #{SiteData::FIELD_WEIGHTS[:names_versions]}"
+      "by #{UserStats::ALL_FIELDS[:name_versions][:weight]}"
     )
   end
 
@@ -3644,19 +3649,19 @@ class NameTest < UnitTestCase
       Observation.create!(name: names_without_observations.first,
                           location: nil,
                           lat: cal.north,
-                          long: cal.east,
+                          lng: cal.east,
                           user: rolf)
-    obs_in_cal_without_lat_long =
+    obs_in_cal_without_lat_lng =
       Observation.create!(name: names_without_observations.second,
                           location: locations(:burbank),
                           lat: nil,
-                          long: nil,
+                          lng: nil,
                           user: rolf)
 
     assert_includes(names_in_cal_box, obs_on_cal_border.name)
     assert_not_includes(
       names_in_cal_box,
-      obs_in_cal_without_lat_long.name,
+      obs_in_cal_without_lat_lng.name,
       "Name.in_box should exclude Names whose only Observations lack lat/long"
     )
     assert_empty(Name.in_box(n: 0.0001, s: 0, e: 0.0001, w: 0))

@@ -2,7 +2,7 @@
 
 class API2
   # Cannot update location/name unless you own all its observations.
-  class MustOwnAllObservations < Error
+  class MustOwnAllObservations < FatalError
     def initialize(type)
       super()
       args.merge!(type: type)

@@ -8,7 +8,7 @@ xml.tag!(
 ) do
   xml_date(xml, :date, object.when)
   xml_latitude(xml, :latitude, object.public_lat)
-  xml_longitude(xml, :longitude, object.public_long)
+  xml_longitude(xml, :longitude, object.public_lng)
   xml_altitude(xml, :altitude, object.alt)
   xml_boolean(xml, :gps_hidden, object.gps_hidden)
   xml_boolean(xml, :specimen_available, object.specimen)

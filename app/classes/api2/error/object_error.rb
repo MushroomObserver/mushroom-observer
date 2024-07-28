@@ -2,7 +2,7 @@
 
 class API2
   # API exception base class for errors having to do with database records.
-  class ObjectError < Error
+  class ObjectError < FatalError
     def initialize(obj)
       super()
       args.merge!(type: obj.type_tag, name: display_name(obj))

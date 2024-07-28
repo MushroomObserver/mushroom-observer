@@ -98,33 +98,33 @@ module ObservationsHelper
     end
   end
 
-  def link_to_display_name_brief_authors(name, **args)
+  def link_to_display_name_brief_authors(name, **)
     link_to(name.display_name_brief_authors.t,
-            name_path(id: name.id), **args)
+            name_path(id: name.id), **)
   end
 
-  def link_to_display_name_without_authors(name, **args)
+  def link_to_display_name_without_authors(name, **)
     link_to(name.display_name_without_authors.t,
-            name_path(id: name.id), **args)
+            name_path(id: name.id), **)
   end
 
   def observation_map_coordinates(obs:)
     if obs.location
       loc = obs.location
-      n = ((90.0 - loc.north) / 1.80).round(6)
-      s = ((90.0 - loc.south) / 1.80).round(6)
-      e = ((180.0 + loc.east) / 3.60).round(6)
-      w = ((180.0 + loc.west) / 3.60).round(6)
+      n = ((90.0 - loc.north) / 1.80).round(4)
+      s = ((90.0 - loc.south) / 1.80).round(4)
+      e = ((180.0 + loc.east) / 3.60).round(4)
+      w = ((180.0 + loc.west) / 3.60).round(4)
     end
 
-    lat, long = if obs.lat && obs.long
-                  [obs.public_lat, obs.public_long]
+    lat, long = if obs.lat && obs.lng
+                  [obs.public_lat, obs.public_lng]
                 elsif obs.location
                   obs.location.center
                 end
     if lat && long
-      x = ((180.0 + long) / 3.60).round(6)
-      y = ((90.0 - lat) / 1.80).round(6)
+      x = ((180.0 + long) / 3.60).round(4)
+      y = ((90.0 - lat) / 1.80).round(4)
     end
 
     [n, s, e, w, lat, long, x, y]
@@ -166,15 +166,26 @@ module ObservationsHelper
            else
              :show_observation_seen_at.t
            end}:",
-        location_link(obs.where, obs.location, nil, true)
+        location_link(obs.where, obs.location, nil, true),
+        observation_where_vague_notice(obs: obs)
       ].safe_join(" ")
     end
+  end
+
+  def observation_where_vague_notice(obs:)
+    return "" unless obs.location&.vague?
+
+    title = :show_observation_vague_location.l
+    if User.current == obs.user
+      title += " #{:show_observation_improve_location.l}"
+    end
+    tag.p(class: "ml-3") { tag.em(title) }
   end
 
   def observation_details_where_gps(obs:)
     return "" unless obs.lat
 
-    gps_display_link = link_to([obs.display_lat_long.t,
+    gps_display_link = link_to([obs.display_lat_lng.t,
                                 obs.display_alt.t,
                                 "[#{:click_for_map.t}]"].safe_join(" "),
                                map_observation_path(id: obs.id))
@@ -218,5 +229,18 @@ module ObservationsHelper
       Textile.register_name(obs.name)
       tag.div(notes)
     end
+  end
+
+  def observation_location_help
+    loc1 = "Albion, Mendocino Co., California, USA"
+    loc2 = "Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil"
+    if User.current_location_format == "scientific"
+      loc1 = Location.reverse_name(loc1)
+      loc2 = Location.reverse_name(loc2)
+    end
+
+    [tag.div(:form_observations_where_help.t(loc1: loc1, loc2: loc2),
+             class: "mb-3"),
+     tag.div(:form_observations_locate_on_map_help.t)].safe_join
   end
 end

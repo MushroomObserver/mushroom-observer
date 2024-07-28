@@ -27,7 +27,7 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
     within(".lg-sub-html") do
       click_on("Propose a Name")
     end
-    assert_selector("#modal_obs_#{obs.id}_naming", wait: 9)
+    assert_selector("#modal_obs_#{obs.id}_naming", wait: 12)
     assert_selector("#obs_#{obs.id}_naming_form")
 
     ncc = names(:coprinus_comatus)
@@ -58,8 +58,8 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
     login!(rolf)
 
     within("#navigation") do
-      assert_link("Help Identify")
-      click_on("Help Identify")
+      assert_link(id: "nav_identify_observations_link")
+      click_link(id: "nav_identify_observations_link")
     end
     assert_selector("body.identify__index")
 

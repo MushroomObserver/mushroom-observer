@@ -1,22 +1,26 @@
 <%# species_list section of create_observation form %>
 
-<div class="row mt-3" id="observation_species_lists">
-  <div class="col-xs-12 col-sm-6 col-sm-push-6">
-    <%= help_block_with_arrow("left", id: "species_lists_help") do %>
-      <%= :form_observations_list_help.t %>
-    <% end %>
-  </div>
-  <div class="col-xs-12 col-sm-6 col-sm-pull-6">
-    <strong><%= :SPECIES_LISTS.t %>:</strong>
+<%= tag.div(id: "observation_projects") do %>
+  <%= fields_for(:list) do |f_l| %>
 
-    <%= fields_for(:list) do |f_l| %>
+    <%= tag.div do
+      [
+        tag.strong("#{:SPECIES_LISTS.l}:", class: "mr-3"),
+        collapse_info_trigger("species_lists_help"),
+        collapse_help_block(nil, id: "species_lists_help") do
+          :form_observations_list_help.t
+        end
+      ].safe_join
+    end %>
+
+    <%= tag.div(class: "overflow-scroll-checklist") do %>
       <% @lists.each do |list| %>
-        <%= check_box_with_label(form: f_l, field: :"id_#{list.id}",
-                                 checked: @list_checks[list.id],
-                                 disabled: !check_permission(list),
-                                 label: list.title) %>
+        <%= check_box_with_label(
+          form: f_l, field: :"id_#{list.id}", label: list.title,
+          checked: @list_checks[list.id], disabled: !check_permission(list)
+        ) %>
       <% end %>
     <% end %>
 
-  </div><!--.col-->
-</div><!--.row-->
+  <% end %>
+<% end %>

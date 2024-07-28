@@ -1,0 +1,151 @@
+<%# locals: (f:, button_name:, location:, logging_optional:) -%>
+
+<%# When and Where (location) section of create_observation form
+    including location autocomplete, map, lat/long/alt %>
+<%
+t_s = {
+  lat: { abbr: :LAT.l, full: :LATITUDE.l },
+  lng: { abbr: :LNG.l, full: :LONGITUDE.l },
+  alt: { abbr: :ALT.l, full: :ALTITUDE.l }
+}
+%>
+
+<%= tag.div(class: "panel-body border-top", id: "observation_details") do %>
+
+  <%= tag.div(class: "row mt-3") do %>
+    <%= tag.div(class: "col-xs-12 col-md-6") do %>
+      <!-- WHEN -->
+      <%= date_select_with_label(
+        form: f, field: :when, label: :WHEN.t + ":",
+      ) %>
+      <!-- /WHEN -->
+
+      <%= tag.div(id: "observation_where") do %>
+        <%= tag.p do
+          [tag.strong("#{:WHERE_GROUP.l}:"),
+           collapse_info_trigger("geolocation_help")].safe_join(" ")
+        end %>
+
+        <!-- LAT_LONG_ALT -->
+        <%= tag.div(class: "row no-gutters",
+                    id: "observation_lat_lng_alt") do %>
+          <% [:lat, :lng, :alt].each do |key| %>
+            <%= tag.div(class: "col-xs-4") do
+              text_field_with_label(
+                form: f, field: key, class: "mb-0", addon: "º",
+                label: [
+                  tag.span("#{t_s[key][:full]}:", class: "d-none d-sm-inline"),
+                  tag.span("#{t_s[key][:abbr]}:", class: "d-inline d-sm-none")
+                ].safe_join,
+                data: { map_target: "#{key}Input", action: "map#bufferInputs" }
+              )
+            end %>
+          <% end %>
+        <% end %>
+
+        <%= collapse_help_block(nil, id: "geolocation_help") do %>
+          <%= tag.p(:form_observations_click_point.l) %>
+          <%= tag.p(:form_observations_lat_long_help.t) %>
+        <% end %>
+
+        <%= check_box_with_label(form: f, field: :gps_hidden,
+                                 label: :form_observations_gps_hidden.l) %>
+        <!-- /LAT_LONG_ALT -->
+
+        <!-- WHERE_REASONS -->
+        <%= render(partial: "shared/form_location_feedback",
+                   locals: { button: button_name } ) %>
+        <!-- /WHERE_REASONS -->
+
+        <!-- WHERE -->
+        <%= autocompleter_field(
+          form: f, field: :place_name, type: :location,
+          label: [tag.span("#{:WHERE.l}:", class: "unconstrained-label"),
+                  tag.span("#{:form_observations_locality_contains.l}:",
+                           class: "constrained-label"),
+                  tag.span("#{:form_observations_create_locality.l}:",
+                           class: "create-label")].safe_join(" "),
+          help: observation_location_help,
+          hidden: location&.id,
+          hidden_data: { map_target: "locationId",
+                         north: location&.north, south: location&.south,
+                         east: location&.east, west: location&.west },
+          # These are button tooltips:
+          create_text: :form_observations_create_locality.l,
+          keep_text: :form_observations_use_locality.l,
+          edit_text: :form_observations_edit_locality.l,
+          # find_text: :form_locations_find_on_map.l,
+          map_outlet: ".map-outlet",
+          data: {
+            map_target: "placeInput",
+            action: [
+              "map:pointChanged@window->autocompleter#swap",
+              "form-exif:pointChanged@window->autocompleter#swap",
+              "map:googlePrimer@window->autocompleter#refreshGooglePrimer"
+            ].join(" ")
+          }
+        ) %>
+
+        <%= fields_for(:location) do |f_l| %>
+          <% %w[north south east west low high].each do |key| %>
+            <%= f_l.hidden_field(:"#{key}", value: @location&.send(key) || nil,
+                                data: { map_target: "#{key}Input" }) %>
+          <% end %>
+        <% end %>
+        <!-- /WHERE -->
+
+        <!-- IS_COLLECTION_LOCATION -->
+        <%= check_box_with_label(
+          form: f, field: :is_collection_location,
+          label: :form_observations_is_collection_location.l,
+          help: :form_observations_is_collection_location_help.t
+        ) %>
+        <!-- /IS_COLLECTION_LOCATION -->
+
+        <% if logging_optional %>
+          <%= check_box_with_label(
+            form: f, field: :log_change, checked: "checked",
+            label: :form_observations_log_change.t
+          ) %>
+        <% end %>
+
+      <% end %>
+    <% end %><!--.col-->
+
+    <!-- MAP -->
+    <%= tag.div(class: "col-xs-12 col-md-6",
+                id: "observation_geolocation") do %>
+      <%= tag.div(
+        "", id: "observation_form_map",
+            class: "observation-form-map collapse",
+            data: { indicator_url: asset_path('indicator.gif'),
+                    location_format: User.current_location_format,
+                    map_target: "mapDiv", editable: true,
+                    map_type: "observation" }
+      ) %>
+      <%= tag.div(class: "btn-group my-3", role: "group",
+                  data: { map_target: "controlWrap" }) do %>
+        <%= js_button(
+          button: [
+            link_icon(:globe),
+            tag.span(:form_observations_open_map.l, class: "map-show mx-2"),
+            tag.span(:form_observations_hide_map.l, class: "map-hide mx-2")
+          ].safe_join,
+          name: "map_toggle", class: "map-toggle",
+          data: { map_target: "toggleMapBtn", action: "map#toggleMap",
+                  toggle: "collapse", target: "#observation_form_map" },
+          aria: { expanded: "false", controls: "observation_form_map" }
+        ) %>
+        <%= js_button(
+          button: :form_observations_clear_map.l,
+          name: "map_clear", class: "map-clear",
+          data: { map_target: "mapClearBtn",
+                  action: "map#clearMap form-exif#reenableButtons" }
+        ) %>
+      <% end %>
+    <% end %>
+    <!-- /MAP -->
+
+  <% end %><!--.row-->
+
+<% end %>

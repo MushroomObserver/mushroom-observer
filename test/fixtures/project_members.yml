@@ -84,3 +84,8 @@ lone_wolf_trust:
   project: lone_wolf_project
   user: lone_wolf
   trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>
+
+falmouth_2023_09_roy:
+  project: falmouth_2023_09_project
+  user: roy
+  trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>

@@ -68,4 +68,32 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     assert_nil(project.start_date, "Project Start Date should be nil")
     assert_nil(project.end_date, "Project Start Date should be nil")
   end
+
+  def test_project_maintain_dates
+    project = projects(:pinned_date_range_project)
+    start_date = project.start_date
+    assert(start_date < Time.zone.today)
+    end_date = project.end_date
+    assert(end_date < Time.zone.today)
+    login(project.user.login)
+
+    visit(project_path(project))
+    click_on(:show_project_edit.l)
+    click_on(:SAVE_EDITS.l)
+
+    project.reload
+    assert(project.start_date == start_date,
+           "Project Start Date should not be today")
+    assert(project.end_date == end_date,
+           "Project Start Date should not be today")
+  end
+
+  def test_project_violations
+    project = projects(:falmouth_2023_09_project)
+
+    login(project.user.login)
+    visit(project_path(project))
+
+    click_on(:CONSTRAINT_VIOLATIONS.l)
+  end
 end

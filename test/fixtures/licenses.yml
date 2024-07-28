@@ -3,32 +3,37 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
+DEFAULTS: &DEFAULTS
+  created_at: 2010-07-10 20:00:00
+
 ccnc25:
-  # Do not autogenerate id
-  # This is the default license for images.
-  # That id is defined and hard-coded in the schema, in the image table.
-  # So unless it's also hand-coded as a license fixture id, images are
-  # instantiated with the incorrect license.id.
-  id: 1
   display_name: Creative Commons Non-commercial v2.5
-  url: http://creativecommons.org/licenses/by-nc-sa/2.5/
+  url: https://creativecommons.org/licenses/by-nc-sa/2.5/
   deprecated: true
-  form_name: ccbyncsa25
 
 ccnc30:
   display_name: Creative Commons Non-commercial v3.0
-  url: http://creativecommons.org/licenses/by-nc-sa/3.0/
+  url: https://creativecommons.org/licenses/by-nc-sa/3.0/
   deprecated: false
-  form_name: ccbyncsa30
 
 ccwiki30:
+  # Do not autogenerate id
+  # This is the stand-in for the default license for Users and for Images.
+  # The id is defined and hard-coded in the schema, in the users table.
+  # So unless it's also hand-coded as a license fixture id, Users amd Images are
+  # instantiated with the wrong preferred license.id.
+  id: <%= User.column_defaults["license_id"] %>
   display_name: Creative Commons Wikipedia Compatible v3.0
-  url: http://creativecommons.org/licenses/by-sa/3.0/
+  url: https://creativecommons.org/licenses/by-sa/3.0/
   deprecated: false
-  form_name: ccbysa30
 
 publicdomain:
   display_name: Public Domain
-  url: http://wiki.creativecommons.org/Public_domain/
+  url: https://wiki.creativecommons.org/Public_domain/
   deprecated: false
-  form_name: publicdomain
+  updated_at: 2013-03-02 09:45:03
+
+unused:
+  display_name: All Rights Reserved
+  url: https://en.wikipedia.org/wiki/All_rights_reserved
+  deprecated: false

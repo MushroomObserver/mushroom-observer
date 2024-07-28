@@ -6,8 +6,7 @@
 
 # jQuery is tricky with importmap: must use cdn.jsdelivr.net, NOT jspm
 # (which is for React and similar), or else `$` will not be available globally
-pin "jquery", to: "https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.js",
-              preload: true
+pin "jquery", preload: true # @3.7.1
 
 pin "bootstrap", to: "bootstrap.min.js", preload: true
 # pin "bootstrap" # @3.4.1

@@ -1,0 +1,375 @@
+# frozen_string_literal: true
+
+#  :section: Shared form private methods
+#
+#    permitted_observation_args
+#    update_permitted_observation_attributes
+#    permitted_observation_params
+#    notes_to_sym_and_compact
+#    notes_param_present?
+#
+#    init_license_var
+#    init_new_image_var
+#    init_specimen_vars
+#    init_specimen_vars_for_reload
+#    init_project_vars
+#    init_project_vars_for_reload
+#    init_list_vars
+#    init_list_vars_for_reload
+#    save_observation
+#
+#    create_image_objects_and_update_bad_images
+#    try_to_save_image
+#    update_good_images
+#    attach_good_images
+#    strip_images!
+#
+#    update_projects
+#    update_species_lists
+#
+module ObservationsController::SharedFormMethods
+  private
+
+  # NOTE: potential gotcha... Any nested attributes must come last.
+  def permitted_observation_args
+    [:lat, :lng, :alt, :gps_hidden, :place_name, :where, :location_id,
+     :is_collection_location, :when, "when(1i)", "when(2i)", "when(3i)",
+     :notes, :specimen, :thumb_image_id]
+  end
+
+  def update_permitted_observation_attributes
+    @observation.attributes = permitted_observation_params || {}
+  end
+
+  # NOTE: call `to_h` on the permitted params if problems with nested params.
+  # As of rails 5, params are an ActionController::Parameters object,
+  # not a hash.
+  def permitted_observation_params
+    return unless params[:observation]
+
+    params[:observation].permit(permitted_observation_args).to_h
+  end
+
+  # Symbolize keys; delete key/value pair if value blank
+  # Also avoids param permitting issues
+  def notes_to_sym_and_compact
+    return Observation.no_notes unless notes_param_present?
+
+    symbolized = params[:observation][:notes].to_unsafe_h.symbolize_keys
+    symbolized.compact_blank!
+  end
+
+  def notes_param_present?
+    params.dig(:observation, :notes).present?
+  end
+
+  def init_license_var
+    @licenses = License.current_names_and_ids(@user.license)
+  end
+
+  # Initialize image for the dynamic image form at the bottom.
+  def init_new_image_var(default_date)
+    @new_image = Image.new(when: default_date, license: @user.license,
+                           copyright_holder: @user.legal_name)
+  end
+
+  def init_specimen_vars
+    @collectors_name   = @user.legal_name
+    @collectors_number = ""
+    @herbarium_name    = @user.preferred_herbarium_name
+    @herbarium_id      = @user.preferred_herbarium&.id
+    @accession_number  = ""
+  end
+
+  def init_specimen_vars_for_reload
+    init_specimen_vars
+    if params[:collection_number]
+      @collectors_name   = params[:collection_number][:name]
+      @collectors_number = params[:collection_number][:number]
+    end
+    return unless params[:herbarium_record]
+
+    @herbarium_name   = params[:herbarium_record][:herbarium_name]
+    @herbarium_id     = params[:herbarium_record][:herbarium_id]
+    @accession_number = params[:herbarium_record][:accession_number]
+  end
+
+  def init_project_vars
+    @projects = User.current.projects_member(order: :title,
+                                             include: :user_group)
+    @project_checks = {}
+  end
+
+  def init_project_vars_for_reload
+    @observation.projects.each do |proj|
+      @projects << proj unless @projects.include?(proj)
+    end
+    @projects.each do |proj|
+      p = params[:project]
+      @project_checks[proj.id] = p.nil? ? false : p["id_#{proj.id}"] == "1"
+    end
+  end
+
+  def init_list_vars
+    @lists = User.current.all_editable_species_lists.sort_by(&:title)
+    @list_checks = {}
+  end
+
+  def init_list_vars_for_reload
+    init_list_vars
+    @lists = @lists.union(@observation.species_lists)
+    @lists.each do |list|
+      @list_checks[list.id] = params.dig(:list, "id_#{list.id}") == "1"
+    end
+  end
+
+  ##############################################################################
+  #  Locations — may be created in the obs form
+  #
+  # By now we have an @observation, and maybe a "-1" location_id, indicating a
+  # new Location if accompanied by bounding box lat/lng. If the location name
+  # does not exist already, and the bounding box is present, create a new
+  # @location, and associate it with the @observation
+  def create_location_object_if_new
+    # Resets the location_id to MO's existing Location if it already exists.
+    return false if place_name_exists?
+
+    # Ensure we have the minimum necessary to create a new location
+    unless @observation.location_id == -1 &&
+           (place_name = params.dig(:observation, :place_name)).present? &&
+           (north = params.dig(:location, :north)).present? &&
+           (south = params.dig(:location, :south)).present? &&
+           (east = params.dig(:location, :east)).present? &&
+           (west = params.dig(:location, :west)).present?
+      return false
+    end
+
+    # Ignore hidden attribute even if the obs is hidden, because saving a
+    # Location with `hidden: true` fuzzes the lat/lng bounds unpredictably.
+    attributes = { hidden: false, user_id: @user.id,
+                   north:, south:, east:, west: }
+    # Add optional attributes. :notes not implemented yet.
+    [:high, :low, :notes].each do |key|
+      if (val = params.dig(:location, key)).present?
+        attributes[key] = val
+      end
+    end
+
+    @location = Location.new(attributes)
+    # With a Location instance, we can use the `display_name=` setter method,
+    # which figures out scientific/postal format of user input and sets
+    # location `name` and `scientific_name` accordingly.
+    @location.display_name = place_name
+  end
+
+  # Check if we somehow got a location name that exists in the db, but didn't
+  # get a location_id, or the location name is out of sync with the location_id.
+  # (This should not usually happen with the autocompleter). If it happens,
+  # match the obs to the existing Location by name. If the user was trying to
+  # create a new Location with the existing name, use the existing location and
+  # flash that we did that, returning `true` so we can bail on creating a "new"
+  # location, but go ahead with the observation save.
+  def place_name_exists?
+    name = Location.user_format(@user, @observation.place_name)
+    location = Location.find_by(name: name)
+    if !@observation.location_id&.positive? && location ||
+       (location && (@observation.location_id != location&.id))
+      if @observation.location_id == -1
+        flash_warning(:runtime_location_already_exists.t(name: name))
+      end
+      @observation.location_id = location.id
+      return true
+    end
+
+    false
+  end
+
+  def try_to_save_location_if_new
+    return if @any_errors || !@location&.new_record? || save_location
+
+    @any_errors = true
+  end
+
+  # Save location only (at this point rest of form is okay).
+  def save_location
+    if save_with_log(@location)
+      # Associate the location with the observation
+      @observation.location_id = @location.id
+      # flash_notice(:runtime_location_success.t(id: @location.id))
+      true
+    else
+      # Failed to create location
+      flash_object_errors(@location)
+      false
+    end
+  end
+
+  # Save observation now that everything is created successfully.
+  def save_observation
+    return true if @observation.save
+
+    flash_error(:runtime_no_save_observation.t)
+    flash_object_errors(@observation)
+    false
+  end
+
+  ##############################################################################
+
+  # Attempt to upload any images.  We will attach them to the observation
+  # later, assuming we can create it.  Problem is if anything goes wrong, we
+  # cannot repopulate the image forms (security issue associated with giving
+  # file upload fields default values).  So we need to do this immediately,
+  # even if observation creation fails.  Keep a list of images we've uploaded
+  # successfully in @good_images (stored in hidden form field).
+  #
+  # INPUT: params[:image], observation, good_images (and @user)
+  # OUTPUT: list of images we couldn't create
+  #
+  def create_image_objects_and_update_bad_images
+    @bad_images = []
+    # can't do each_with_index here because it's ActionController::Parameters
+    params[:image]&.each do |idx, args|
+      next if (upload = args[:image]).blank?
+
+      if upload.respond_to?(:original_filename)
+        name = upload.original_filename.force_encoding("utf-8")
+      end
+      image = Image.new(args.permit(permitted_image_args))
+      image.created_at = Time.zone.now
+      image.updated_at = image.created_at
+      # If image.when is 1950 it means user never saw the form
+      # field, so we should use default instead.
+      image.when = @observation.when if image.when.year == 1950
+      image.user = @user
+      try_to_save_image(idx.to_i, image, name)
+    end
+    @observation.thumb_image_id = nil if @observation.thumb_image_id&.<= 0
+    @bad_images
+  end
+
+  # Try to save a single image.  If successful, add it to good_images.
+  def try_to_save_image(idx, image, name)
+    if !image.save
+      @bad_images.push(image)
+      flash_object_errors(image)
+    elsif !image.process_image(strip: @observation.gps_hidden)
+      name_str = name ? "'#{name}'" : "##{image.id}"
+      flash_notice(:runtime_no_upload_image.t(name: name_str))
+      @bad_images.push(image)
+      flash_object_errors(image)
+    else
+      name = image.original_name
+      name = "##{image.id}" if name.empty?
+      flash_notice(:runtime_image_uploaded.t(name: name))
+      @good_images.push(image)
+      if @observation.thumb_image_id == -idx
+        @observation.thumb_image_id = image.id
+      end
+    end
+  end
+
+  # List of images that we've successfully uploaded, but which haven't been
+  # attached to the observation yet.  Also supports some mininal editing.
+  # INPUT: params[:good_images] (also looks at params[:image_<id>_notes])
+  # OUTPUT: list of images
+
+  def update_good_images
+    # Get list of images first.
+    @good_images = (params[:good_image_ids] || "").split.filter_map do |id|
+      Image.safe_find(id.to_i)
+    end
+
+    # Now check for edits.
+    @good_images.map do |image|
+      next unless check_permission(image)
+
+      args = params.dig(:good_image, image.id.to_s)
+      next unless args
+
+      image.attributes = args.permit(permitted_image_args)
+      next unless image.when_changed? ||
+                  image.notes_changed? ||
+                  image.copyright_holder_changed? ||
+                  image.license_id_changed? ||
+                  image.original_name_changed?
+
+      image.updated_at = Time.zone.now
+      if image.save
+        flash_notice(:runtime_image_updated_notes.t(id: image.id))
+      else
+        flash_object_errors(image)
+      end
+    end
+  end
+
+  # For now, this has to read the exif off the actual file on the server.
+  # This is because the exif data is not stored on the Image record.
+  def get_exif_data(images)
+    data = {}
+    images.each do |image|
+      data[image.id] = image&.read_exif_geocode || {}
+    end
+    data
+  end
+
+  # Now that the observation has been successfully created, we can attach
+  # any images that were uploaded earlier
+  def attach_good_images
+    return unless @good_images
+
+    @good_images.each do |image|
+      unless @observation.image_ids.include?(image.id)
+        @observation.add_image(image)
+        image.log_create_for(@observation)
+      end
+    end
+  end
+
+  def strip_images!
+    @observation.images.each do |img|
+      error = img.strip_gps!
+      flash_error(:runtime_failed_to_strip_gps.t(msg: error)) if error
+    end
+  end
+
+  ##############################################################################
+
+  def update_projects
+    return unless (checks = params[:project])
+
+    User.current.projects_member(include: :observations).each do |project|
+      before = @observation.projects.include?(project)
+      after = checks["id_#{project.id}"] == "1"
+      next unless before != after
+
+      if after
+        project.add_observation(@observation)
+        flash_notice(:attached_to_project.t(object: :observation,
+                                            project: project.title))
+      else
+        project.remove_observation(@observation)
+        flash_notice(:removed_from_project.t(object: :observation,
+                                             project: project.title))
+      end
+    end
+  end
+
+  def update_species_lists
+    return unless (checks = params[:list])
+
+    User.current.all_editable_species_lists.includes(:observations).
+      find_each do |list|
+      before = @observation.species_lists.include?(list)
+      after = checks["id_#{list.id}"] == "1"
+      next unless before != after
+
+      if after
+        list.add_observation(@observation)
+        flash_notice(:added_to_list.t(list: list.title))
+      else
+        list.remove_observation(@observation)
+        flash_notice(:removed_from_list.t(list: list.title))
+      end
+    end
+  end
+end

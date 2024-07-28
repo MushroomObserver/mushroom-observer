@@ -133,7 +133,7 @@ MushroomObserver::Application.configure do
   config.assets.logger = false
 
   # Suppress logger output for asset requests.
-  config.assets.quiet = true
+  config.assets.quiet = false
 
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true
@@ -146,6 +146,12 @@ MushroomObserver::Application.configure do
   config.web_console.allowed_ips = "10.0.2.2"
 
   config.bot_enabled = true
+
+  config.active_job.queue_adapter = :solid_queue
+
+  # Set up ActionCable to use a standalone server at port 28080
+  # config.action_cable.mount_path = nil
+  # config.action_cable.url = "ws://localhost:28080" # use :wss in production
 end
 
 file = File.expand_path("../consts-site.rb", __dir__)

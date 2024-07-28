@@ -90,7 +90,7 @@ module Projects
         set_status(project, :member, user, :add)
         @candidate = nil
       else
-        flash_error(:add_members_not_found.t(str))
+        flash_error(:add_members_not_found.t(user: str))
       end
       return_to_caller(project, params[:target])
     end

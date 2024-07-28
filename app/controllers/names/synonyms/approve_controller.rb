@@ -31,7 +31,7 @@ module Names::Synonyms
     private
 
     def render_new
-      render(:new, location: approve_name_synonym_form_path)
+      render(:new, location: form_to_approve_synonym_of_name_path)
     end
 
     def deprecate_others

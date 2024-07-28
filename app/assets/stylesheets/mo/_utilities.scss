@@ -5,11 +5,27 @@
 // --------------------------------------------------
 
 .d-none {
-  display: none;
+  display: none !important;
+}
+
+.d-inline {
+  display: inline !important;
+}
+
+.d-inline-block {
+  display: inline-block !important;
+}
+
+.d-block {
+  display: block !important;
 }
 
 .d-flex {
-  display: flex;
+  display: flex !important;
+}
+
+.d-inline-flex {
+  display: inline-flex !important;
 }
 
 .flex-column {
@@ -18,6 +34,10 @@
 
 .align-items-center {
   align-items: center !important;
+}
+
+.justify-content-between {
+  justify-content: space-between !important;
 }
 
 .w-auto {
@@ -66,22 +86,6 @@
 
 .position-fixed {
   position: fixed !important;
-}
-
-.d-inline {
-  display: inline !important;
-}
-
-.d-inline-block {
-  display: inline-block !important;
-}
-
-.d-block {
-  display: block !important;
-}
-
-.d-flex {
-  display: flex !important;
 }
 
 .float-right {
@@ -138,12 +142,26 @@
   font-weight: 800 !important;
 }
 
+.font-weight-normal {
+  font-weight: normal !important;
+}
+
 .smaller {
   font-size: 80% !important;
 }
 
 .border-none {
   border: none !important;
+}
+
+.border-top {
+  border-top-width: 1px !important;
+  border-top-style: solid !important;
+}
+
+.border-bottom {
+  border-bottom-width: 1px !important;
+  border-bottom-style: solid !important;
 }
 
 .rounded-0 {
@@ -357,6 +375,14 @@
   padding: 1rem !important;
 }
 
+.p-4 {
+  padding: 1.5rem !important;
+}
+
+.p-5 {
+  padding: 3rem !important;
+}
+
 .p-5px {
   padding: 5px !important;
 }
@@ -402,6 +428,10 @@
   padding-top: 1rem !important;
 }
 
+.pt-4 {
+  padding-top: 1.5rem !important;
+}
+
 .pb-1 {
   padding-bottom: .25rem !important;
 }
@@ -412,6 +442,10 @@
 
 .pb-3 {
   padding-bottom: 1rem !important;
+}
+
+.pb-4 {
+  padding-bottom: 1.5rem !important;
 }
 
 .pb-5 {
@@ -432,8 +466,16 @@
   padding-right: 1rem !important;
 }
 
+.pl-2 {
+  padding-left: 0.5rem !important;
+}
+
 .pl-3 {
   padding-left: 1rem !important;
+}
+
+.pl-4 {
+  padding-left: 1.5rem !important;
 }
 
 .pr-10px {
@@ -574,6 +616,14 @@
   left: auto;
 }
 
+.ab-top-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: auto;
+  left: auto;
+}
+
 .click-container {
   a.ab-fab {
 
@@ -587,6 +637,18 @@
 
 .list-group-flush {
   border-radius: 0;
+}
+
+.list-group-item.none-yet {
+  display: none;
+
+  &:only-child {
+    display: block;
+  }
+}
+
+.bg-none {
+  background: none !important;
 }
 
 .bg-visible {
@@ -607,6 +669,17 @@
 // Fix for weird inherited indent from .name-section p
 .glyphicon {
   text-indent: 0;
+  top: 3px;
+  font-size: 112%;
+
+  &.link-icon {
+    background-color: white;
+    border-radius: 50%;
+  }
+}
+
+.violation-highlight {
+  background-color: orange;
 }
 
 //
@@ -615,19 +688,23 @@
 
 @media screen and (min-width: 767px) {
   .d-sm-none {
-    display: none;
+    display: none !important;
   }
 
   .d-sm-block {
-    display: block;
+    display: block !important;
+  }
+
+  .d-sm-inline {
+    display: inline !important;
   }
 
   .d-sm-inline-block {
-    display: inline-block;
+    display: inline-block !important;
   }
 
   .d-sm-flex {
-    display: flex;
+    display: flex !important;
   }
 
   .float-sm-left {
@@ -652,6 +729,6 @@
   }
 
   .table {
-    overflow-x: scroll
+    overflow-x: scroll;
   }
 }

@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+# UserStats
+#
+rolf:
+  user: rolf
+
+mary:
+  user: mary
+
+dick:
+  user: dick
+
+katrina:
+  user: katrina

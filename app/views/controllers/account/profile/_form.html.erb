@@ -7,7 +7,7 @@
                             label: :profile_name.t + ":") %>
 
   <%= autocompleter_field(
-    form: f, field: :place_name, autocomplete: :location,
+    form: f, field: :place_name, type: :location,
     label: :profile_location.t + ":", between: "(33%)"
   ) %>
 

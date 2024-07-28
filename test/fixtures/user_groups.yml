@@ -30,6 +30,12 @@ lone_wolf_users:
 lone_wolf_admins:
   name: Lone Wolf Project.admin
 
+falmouth_2023_09_users:
+  name: falmouth_2023_09 Project
+
+falmouth_2023_09_admins:
+  name: falmouth_2023_09 Project.admin
+
 burbank_users:
   name: Burbank Project
 

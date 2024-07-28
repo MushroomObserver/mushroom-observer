@@ -109,15 +109,38 @@ module ContentHelper
     div_class = "well well-sm help-block position-relative"
     div_class += " mt-3" if direction == "up"
 
-    content_tag(:div, class: div_class,
-                      id: args[:id]) do
+    tag.div(class: div_class, id: args[:id]) do
       concat(capture(&block).to_s)
       if direction
         arrow_class = "arrow-#{direction}"
         arrow_class += " hidden-xs" unless args[:mobile]
-        concat(content_tag(:div, "", class: arrow_class))
+        concat(tag.div("", class: arrow_class))
       end
     end
+  end
+
+  def collapse_help_block(direction = nil, string = nil, **args, &block)
+    div_class = "well well-sm help-block position-relative"
+    div_class += " mt-3" if direction == "up"
+    content = block ? capture(&block) : string
+
+    tag.div(class: "collapse", id: args[:id]) do
+      tag.div(class: div_class) do
+        concat(content)
+        if direction
+          arrow_class = "arrow-#{direction}"
+          arrow_class += " hidden-xs" unless args[:mobile]
+          concat(tag.div("", class: arrow_class))
+        end
+      end
+    end
+  end
+
+  def collapse_info_trigger(id, **args)
+    link_to(link_icon(:question), "##{id}",
+            class: class_names("info-collapse-trigger", args[:class]),
+            role: "button", data: { toggle: "collapse" },
+            aria: { expanded: "false", controls: id })
   end
 
   def panel_block(**args, &block)
@@ -126,14 +149,15 @@ module ContentHelper
     content = capture(&block).to_s
 
     tag.div(
-      class: "panel panel-default #{args[:class]}",
-      **args.except(:class, :inner_class, :heading)
+      class: class_names("panel panel-default", args[:class]),
+      **args.except(:class, :inner_class, :inner_id, :heading, :heading_links)
     ) do
       concat(heading)
       if content.present?
-        concat(tag.div(class: "panel-body #{args[:inner_class]}") do
-          concat(content)
-        end)
+        concat(tag.div(class: class_names("panel-body", args[:inner_class]),
+                       id: args[:inner_id]) do
+                 concat(content)
+               end)
       end
       concat(footer)
     end
@@ -185,6 +209,79 @@ module ContentHelper
       concat(wrapper)
     else
       wrapper
+    end
+  end
+
+  # Bootstrap tablist
+  def tab_nav(**args, &block)
+    if args[:tabs]
+      content = capture do
+        args[:tabs].each do |tab|
+          concat(tab_item(tab[:name], id: tab[:id], active: tab[:active]))
+        end
+      end
+    elsif block
+      content = capture(&block).to_s
+    else
+      content = ""
+    end
+    style = args[:style] || "pills"
+
+    tag.ul(
+      role: "tablist",
+      class: class_names("nav nav-#{style}", args[:class]),
+      **args.except(:class, :style)
+    ) do
+      content
+    end
+  end
+
+  # Bootstrap "tab" item in ul/li tablist
+  def tab_item(name, **args)
+    active = args[:active] ? "active" : nil
+    disabled = args[:disabled] ? "disabled" : nil
+
+    tag.li(
+      role: "presentation",
+      class: class_names(active, disabled, args[:class])
+    ) do
+      tab_link(name, **args.except(:active, :disabled, :class))
+    end
+  end
+
+  # Bootstrap tab - just the link. Use for independent tab (e.g. button).
+  def tab_link(name, **args)
+    classes = args[:button] ? "btn btn-default" : "nav-link"
+
+    link_to(
+      name, "##{args[:id]}-tab-pane",
+      role: "tab", id: "#{args[:id]}-tab", class: classes,
+      data: { toggle: "tab" }, aria: { controls: "#{args[:id]}-tab-pane" }
+    )
+  end
+
+  # Bootstrap tabpanel wrapper
+  def tab_content(**args, &block)
+    content = capture(&block).to_s
+
+    tag.div(class: class_names("tab-content", args[:class]),
+            **args.except(:class)) do
+      content
+    end
+  end
+
+  # Bootstrap tabpanel
+  def tab_panel(**args, &block)
+    content = capture(&block).to_s
+    active = args[:active] ? "in active" : nil
+
+    tag.div(
+      role: "tabpanel", id: "#{args[:id]}-tab-pane",
+      class: class_names("tab-pane fade", active, args[:class]),
+      aria: { labelledby: "#{args[:id]}-tab" },
+      **args.except(:class, :id)
+    ) do
+      content
     end
   end
 end

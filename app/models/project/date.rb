@@ -9,7 +9,7 @@ module Project::Date
   def date_range(format = "%Y-%m-%d")
     return :form_projects_any.l unless start_date.present? && end_date.present?
 
-    "#{start_date.strftime(format)} - #{end_date.strftime(format)}"
+    "#{start_date.strftime(format)} to #{end_date.strftime(format)}"
   end
 
   ####################################################################

@@ -23,8 +23,10 @@
 #  gsub_html_special_chars:: auxiliary to html_to_ascii
 #  unescape_html::      Render special encoded characters as regular characters
 #  as_displayed::       Render everything humanly legible, for integration tests
+#  ---
 #  break_name::         Break a taxon name at the author
 #  small_author::       Wrap the author in a <small> span
+#  ---
 #  nowrap::             Surround HTML string inside '<nowrap>' span.
 #  strip_squeeze::      Strip and squeeze spaces.
 #  rand_char::          Pick a single random character from the string.
@@ -33,7 +35,9 @@
 #  is_nonascii_character?:: Does string start with non-ASCII character?
 #  percent_match::      Measure how closely this String matches another String.
 #  unindent::           Remove indentation (e.g., from here docs).
+#  ---
 #  md5sum::             Calculate MD5 sum.
+#  to_boolean::         Evaluates and returns a Boolean.
 #
 ################################################################################
 
@@ -720,5 +724,9 @@ class String
   #
   def print_thing(thing)
     print("#{self}: #{thing.class}: #{thing}\n")
+  end
+
+  def to_boolean
+    ActiveRecord::Type::Boolean.new.cast(self)
   end
 end

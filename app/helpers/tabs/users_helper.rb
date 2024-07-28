@@ -2,8 +2,12 @@
 
 module Tabs
   module UsersHelper
-    def user_show_tabs(show_user:, user:)
-      links = [site_contributors_tab]
+    def user_show_tabs
+      [site_contributors_tab]
+    end
+
+    def user_profile_tabs(show_user:, user:)
+      links = []
       links += if show_user == user
                  links_for_this_user(show_user)
                else
@@ -34,8 +38,8 @@ module Tabs
     def links_for_that_user(user)
       [
         user_observations_tab(user),
-        comments_for_user_tab(user),
-        email_user_question_tab(user)
+        comments_for_user_tab(user)
+        # email_user_question_tab(user)
       ]
     end
 
@@ -50,21 +54,21 @@ module Tabs
     end
 
     def user_observations_tab(user, text = nil)
-      text ||= :show_user_observations_by.t(name: user.unique_text_name)
+      text ||= :show_user_observations_by.t(name: user.text_name)
       [text, observations_path(user: user.id),
        { class: tab_id(__method__.to_s) }]
     end
 
     def comments_for_user_tab(user, text = nil)
-      text ||= :show_user_comments_for.t(name: user.unique_text_name)
+      text ||= :show_user_comments_for.t(name: user.text_name)
       [text, comments_path(for_user: user.id),
        { class: tab_id(__method__.to_s) }]
     end
 
     def email_user_question_tab(user)
       [:show_user_email_to.t(name: user.unique_text_name),
-       emails_ask_user_question_path(user.id),
-       { class: tab_id(__method__.to_s) }]
+       new_question_for_user_path(user.id),
+       { class: tab_id(__method__.to_s), icon: :email }]
     end
 
     def user_tabs_for_admin(user)

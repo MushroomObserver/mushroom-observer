@@ -22,11 +22,12 @@ end
 
   <%= text_field_with_label(form: f, field: :summary, size: 80,
                             label: :form_comments_summary.t + ":",
+                            autofocus: true, # only this has effect
                             data: { autofocus: true }) %>
 
   <%= text_area_with_label(form: f, field: :comment, rows: 10,
-                           label: :form_comments_comment.t + ":") %>
-  <%= render(partial: "shared/textilize_help") %>
+                           label: :form_comments_comment.t + ":",
+                           help: :shared_textile_help.l) %>
 
   <%= submit_button(form: f, button: button, center: true) %>
 

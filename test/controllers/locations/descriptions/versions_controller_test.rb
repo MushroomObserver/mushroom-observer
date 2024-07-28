@@ -17,7 +17,7 @@ module Locations::Descriptions
       get(:show, params: { id: desc.id })
       assert_template(
         "locations/descriptions/versions/show",
-        partial: "descriptions/_show_description_details"
+        partial: "descriptions/_description_details_and_alts_panel"
       )
     end
   end

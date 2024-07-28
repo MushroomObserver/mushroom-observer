@@ -45,7 +45,8 @@ module Tabs
 
     def create_description_tab(object, type)
       [:show_name_create_description.t,
-       add_query_param(send(:"new_#{type}_description_path", object.id)),
+       add_query_param(send(:"new_#{type}_description_path",
+                            { "#{type}_id": object.id })),
        { class: "#{__method__}_#{object.id}", icon: :add }]
     end
 
@@ -67,7 +68,7 @@ module Tabs
       [:show_description_clone.t,
        add_query_param(
          send(:"new_#{type}_description_path",
-              { clone: description.id, id: description.parent_id })
+              { clone: description.id, "#{type}_id": description.parent_id })
        ),
        { help: :show_description_clone_help.l,
          class: tab_id(__method__.to_s), icon: :clone }]
@@ -78,7 +79,7 @@ module Tabs
 
       [:show_description_merge.t,
        add_query_param(
-         send(:"#{type}_description_merges_form_path", description.id)
+         send(:"new_merge_#{type}_description_path", description.id)
        ),
        { help: :show_description_merge_help.l,
          class: tab_id(__method__.to_s), icon: :merge }]
@@ -90,7 +91,7 @@ module Tabs
       parent_type = description.parent.type_tag.to_s
       [:show_description_move.t,
        add_query_param(
-         send(:"#{type}_description_moves_form_path", description.id)
+         send(:"new_move_#{type}_description_path", description.id)
        ),
        { help: :show_description_move_help.l(parent: parent_type),
          class: tab_id(__method__.to_s), icon: :move }]
@@ -101,7 +102,7 @@ module Tabs
 
       [:show_description_adjust_permissions.t,
        add_query_param(
-         send(:"edit_#{type}_description_permissions_path", description.id)
+         send(:"edit_permissions_#{type}_description_path", description.id)
        ),
        { help: :show_description_adjust_permissions_help.l,
          class: tab_id(__method__.to_s), icon: :adjust }]
@@ -133,7 +134,7 @@ module Tabs
 
       [:show_description_publish.t,
        add_query_param(
-         send(:"#{type}_description_publish_path", description.id)
+         send(:"publish_#{type}_description_path", description.id)
        ),
        { button: :put, help: :show_description_publish_help.l,
          class: tab_id(__method__.to_s), icon: :publish }]
@@ -143,7 +144,8 @@ module Tabs
       [project.title,
        add_query_param(
          send(:"new_#{type}_description_path",
-              { project: project.id, source: "project", id: object.id })
+              { project: project.id, source: "project",
+                "#{type}_id": object.id })
        ),
        { class: tab_id(__method__.to_s) }]
     end

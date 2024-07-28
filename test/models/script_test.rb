@@ -85,7 +85,7 @@ class ScriptTest < UnitTestCase
   test "parse_log" do
     script = script_file("parse_log")
     tempfile = Tempfile.new("test").path
-    cmd = "#{script} 2>&1 > #{tempfile}"
+    cmd = "#{script} &>#{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)
     assert status, "Something went wrong with #{script}:\n#{errors}"
