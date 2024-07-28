@@ -12,28 +12,32 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     click_on("Create Observation")
 
     assert_selector("body.observations__new")
-    within("#observation_form") do
-      # MOAutocompleter replaces year select with text field
-      assert_field("observation_when_1i", with: Time.zone.today.year.to_s)
-      assert_select("observation_when_2i", text: Time.zone.today.strftime("%B"))
-      # %e is day of month, no leading zero
-      assert_select("observation_when_3i", text: Time.zone.today.strftime("%e"))
-      assert_selector("#observation_place_name_help",
-                      text: "Albion, Mendocino Co., California", visible: :all)
-      fill_in("naming_name", with: "Elfin saddle")
-      # don't wait for the autocompleter - we know it's an elfin saddle!
-      browser.keyboard.type(:tab)
-      assert_field("naming_name", with: "Elfin saddle")
-      # start typing the location...
-      fill_in("observation_place_name", with: locations.first.name[0, 1])
-      # wait for the autocompleter...
-      assert_selector(".auto_complete", wait: 6)
-      browser.keyboard.type(:down, :tab) # cursor to first match + select row
-      assert_field("observation_place_name", with: locations.first.name)
-      click_commit
-    end
+    # MOAutocompleter replaces year select with text field
+    assert_field("observation_when_1i", with: Time.zone.today.year.to_s)
+    assert_select("observation_when_2i", text: Time.zone.today.strftime("%B"))
+    # %e is day of month, no leading zero
+    assert_select("observation_when_3i", text: Time.zone.today.strftime("%e"))
+    assert_selector("#observation_place_name_help",
+                    text: "Albion, Mendocino Co., California", visible: :all)
+    # start typing the location...
+    fill_in("observation_place_name", with: locations.first.name[0, 1])
+    # wait for the autocompleter...
+    assert_selector(".auto_complete", wait: 6)
+    browser.keyboard.type(:down, :tab) # cursor to first match + select row
+    assert_field("observation_place_name", with: locations.first.name)
 
-    assert_selector("#name_messages", text: "MO does not recognize the name")
+    # Move to the next step, Identification
+    step_nav_1 = find("#step-nav-1")
+    scroll_to(step_nav_1, align: :top)
+    within(step_nav_1) { click_on(:NEXT.l) }
+
+    fill_in("naming_name", with: "Elfin saddle")
+    # don't wait for the autocompleter - we know it's an elfin saddle!
+    browser.keyboard.type(:tab)
+    assert_field("naming_name", with: "Elfin saddle")
+
+    within("#observation_form") { click_commit }
+
     assert_flash_error(
       :form_observations_there_is_a_problem_with_name.t.html_to_ascii
     )
@@ -43,19 +47,25 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # click_button("map_location")
     # assert_selector("#observation_form_map > div > div > iframe")
 
-    within("#observation_form") do
-      fill_in("naming_name", with: "Coprinus com")
-      browser.keyboard.type(:tab)
-      # wait for the autocompleter!
-      assert_selector(".auto_complete")
-      browser.keyboard.type(:down, :tab) # cursor to first match + select row
-      browser.keyboard.type(:tab)
-      assert_field("naming_name", with: "Coprinus comatus")
-      # Place name should stay filled
-      browser.keyboard.type(:tab)
-      assert_field("observation_place_name", with: locations.first.name)
-      click_commit
-    end
+    assert_field("observation_place_name", with: locations.first.name)
+
+    # Move to the next step, Identification
+    step_nav_1 = find("#step-nav-1")
+    scroll_to(step_nav_1, align: :top)
+    within(step_nav_1) { click_on(:NEXT.l) }
+
+    assert_selector("#name_messages", text: "MO does not recognize the name")
+    fill_in("naming_name", with: "Coprinus com")
+    browser.keyboard.type(:tab)
+    # wait for the autocompleter!
+    assert_selector(".auto_complete")
+    browser.keyboard.type(:down, :tab) # cursor to first match + select row
+    browser.keyboard.type(:tab)
+    assert_field("naming_name", with: "Coprinus comatus")
+    # Place name should stay filled
+    browser.keyboard.type(:tab)
+
+    within("#observation_form") { click_commit }
 
     assert_selector("body.observations__show")
     assert_flash_success(/created observation/i)
@@ -90,6 +100,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("[data-type='location_google']")
     assert_field("observation_place_name", with: last_obs.where)
     assert_field("observation_location_id", with: "", type: :hidden)
+
+    # Move to the next step, Identification
+    step_nav_1 = find("#step-nav-1")
+    scroll_to(step_nav_1, align: :top)
+    within(step_nav_1) { click_on(:NEXT.l) }
 
     within("#observation_form") { click_commit }
 
@@ -132,7 +147,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_image_date_copied_to_obs(GEOTAGGED_EXIF)
     sleep(0.5)
     # we should have the new type of location_google autocompleter now
-    assert_selector("[data-type='location_google']")
+    assert_selector("[data-type='location_google'][data-stimulus='connected']")
     # Place name should now have been filled by Google, no MO locations match
     assert_field("observation_place_name", with: UNIVERSITY_PARK[:name],
                                            wait: 6)
@@ -230,11 +245,21 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     last_obs = Observation.recent_by_user(User.current).last
     assert_field("observation_place_name", with: last_obs.where)
 
+    # Move to the next step, Identification
+    step_nav_1 = find("#step-nav-1")
+    scroll_to(step_nav_1, align: :top)
+    within(step_nav_1) { click_on(:NEXT.l) }
+
     assert_field("naming_name", with: "")
     assert(last_obs.is_collection_location)
-    assert_checked_field("observation_is_collection_location")
-    assert_no_checked_field("observation_specimen")
-    assert_field(other_notes_id, with: "")
+    assert_checked_field("observation_is_collection_location", visible: :all)
+    assert_no_checked_field("observation_specimen", visible: :all)
+    assert_field(other_notes_id, with: "", visible: :all)
+
+    # Move to the previous step, Images/Details
+    step_nav_2 = find("#step-nav-2")
+    scroll_to(step_nav_2, align: :top)
+    within(step_nav_2) { click_on(:BACK.l) }
 
     # Add the images separately, so we can be sure of the order. Otherwise,
     # images appear in the order each upload finishes, which is unpredictable.
@@ -279,11 +304,14 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Try removing the geotagged image
     scroll_to(second_image_wrapper, align: :center)
     within(second_image_wrapper) { find(".remove_image_button").click }
-    sleep(0.5)
+    sleep(1)
 
+    # Be sure second image has been removed
+    assert_no_selector(".carousel-item[data-image-status='upload']",
+                       text: "geotagged_s_pasadena.jpg", wait: 9)
     # Be sure we have only one image wrapper now
     assert_selector(".carousel-item[data-image-status='upload']",
-                    visible: :all, count: 1, wait: 6)
+                    visible: :all, count: 1)
 
     # Add geotagged_s_pasadena.jpg again
     click_attach_file("geotagged_s_pasadena.jpg")
@@ -334,16 +362,26 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(location, align: :center)
     fill_in("observation_place_name", with: "USA, California, Pasadena")
     assert_field("observation_place_name", with: "USA, California, Pasadena")
-    uncheck("observation_is_collection_location")
-    check("observation_specimen")
+    uncheck("observation_is_collection_location", visible: :all)
 
-    assert_selector("#collection_number_number")
+    # Move to the next step, Identification
+    within(step_nav_1) { click_on(:NEXT.l) }
+    sleep(1)
+
+    specimen_section = find("#observation_specimen_section", visible: :all)
+    scroll_to(specimen_section, align: :center)
+    assert_field("observation_specimen")
+    check("observation_specimen")
+    assert_field("collection_number_number")
     fill_in("collection_number_number", with: "17-034a")
-    fill_in(other_notes_id, with: "Notes for observation")
+    fill_in(other_notes_id, with: "Notes for observation", visible: :all)
+
+    # Move to the next step, Projects/Lists
+    within(step_nav_2) { click_on(:NEXT.l) }
 
     # Inherited project constraints maybe messing with this observation - clear
-    all('[id^="project_id_"]').each do |project_checkbox|
-      project_checkbox.click if project_checkbox.checked?
+    all('[id^="project_id_"]', visible: :all).each do |project_checkbox|
+      project_checkbox.trigger("click") if project_checkbox.checked?
     end
 
     # submit_observation_form_with_errors
@@ -363,23 +401,17 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_image_gps_copied_to_obs(SO_PASA_EXIF)
     # This geolocation is for Pasadena
 
-    assert_field("naming_name", with: "")
-    assert_no_checked_field("observation_is_collection_location")
-    assert_checked_field("observation_specimen")
-    assert_field("collection_number_number", with: "17-034a")
-    assert_field(other_notes_id, with: "Notes for observation")
+    assert_field("naming_name", with: "", visible: :all)
+    assert_no_checked_field("observation_is_collection_location", visible: :all)
+    assert_checked_field("observation_specimen", visible: :all)
+    assert_field("collection_number_number", with: "17-034a", visible: :all)
+    assert_field(other_notes_id, with: "Notes for observation", visible: :all)
 
     # Submit observation form without errors
     fill_in("observation_place_name", with: "Pasadena, California, USA")
     assert_field("observation_place_name", with: "Pasadena, California, USA")
     # Be sure this is still the South Pasadena box:
     assert_image_gps_copied_to_obs(SO_PASA_EXIF)
-
-    fill_in("naming_name", with: "Agaricus campestris")
-    assert_field("naming_name", with: "Agaricus campestris")
-    select(Vote.confidence(Vote.next_best_vote), from: "naming_vote_value")
-    assert_select("naming_vote_value",
-                  selected: Vote.confidence(Vote.next_best_vote))
 
     # Carousel items are re-output with image records this time.
     all(".carousel-indicator").last.trigger("click")
@@ -410,6 +442,16 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Check the hidden fields returned by Google
     assert_hidden_location_fields_filled(SOUTH_PASADENA)
 
+    # Move to the next step, Identification
+    within(step_nav_1) { click_on(:NEXT.l) }
+
+    assert_selector("[data-type='name'][data-stimulus='connected']")
+    fill_in("naming_name", with: "Agaricus campestris")
+    assert_field("naming_name", with: "Agaricus campestris")
+    select(Vote.confidence(Vote.next_best_vote), from: "naming_vote_value")
+    assert_select("naming_vote_value",
+                  selected: Vote.confidence(Vote.next_best_vote))
+
     within("#observation_form") { click_commit }
 
     assert_flash_for_create_location
@@ -433,8 +475,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_place_name", with: SOUTH_PASADENA[:name])
     assert_image_gps_copied_to_obs(SO_PASA_EXIF)
     assert_unchecked_field("observation_is_collection_location")
-    assert_checked_field("observation_specimen")
-    assert_field(other_notes_id, with: "Notes for observation")
+    assert_checked_field("observation_specimen", visible: :all)
+    assert_field(other_notes_id, with: "Notes for observation", visible: :all)
 
     imgs = Image.last(2)
     cci = imgs.find { |img| img[:original_name] == "Coprinus_comatus.jpg" }
@@ -462,7 +504,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     select("April", from: "observation_when_2i")
     select("15", from: "observation_when_3i")
     check("observation_is_collection_location")
-    fill_in(other_notes_id, with: "New notes for observation")
 
     img_ids.each do |img_id|
       find("#carousel_thumbnail_#{img_id}").click
@@ -477,8 +518,14 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     choose("thumb_image_id_#{geo.id}", visible: :all)
     sleep(1)
 
+    # Move to the next step, Identification
+    within(step_nav_1) { click_on(:NEXT.l) }
+    sleep(1)
+
     obs_notes = find("#observation_notes")
     scroll_to(obs_notes, align: :top)
+    fill_in(other_notes_id, with: "New notes for observation")
+
     within("#observation_form") { click_commit }
 
     assert_selector("body.observations__show")
@@ -591,9 +638,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
 
   def assert_image_exif_available(image_data)
-    assert_selector('[id$="when_1i"]', visible: :any)
-    assert_selector('[id$="when_2i"]', visible: :any)
-    assert_selector('[id$="when_3i"]', visible: :any)
+    assert_selector('[id$="when_1i"]', visible: :all)
+    assert_selector('[id$="when_2i"]', visible: :all)
+    assert_selector('[id$="when_3i"]', visible: :all)
     assert_equal(image_data[:year].to_s,
                  find('[id$="when_1i"]', visible: :all).value)
     assert_equal(image_data[:month].to_s,

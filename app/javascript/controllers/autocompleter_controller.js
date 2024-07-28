@@ -189,14 +189,22 @@ export default class extends Controller {
     this.prepareInputElement();
   }
 
-  // Swap out autocompleter type (and properties)
-  // Callable externally. Action may be called from a <select> with
-  // `data-action: "autocompleter-swap:swap->autocompleter#swap"`
-  // or an event dispatched by another controller.
-  // The event may not pass a type, or it may be the same as the current type.
-  // Re-initializing the current type is ok, often means we need to refresh
-  // the primer (as with location_containing a changed lat/lng)
+  // Reinitialize autocompleter type (and properties). Callable externally.
+  // For example, `swap` may be called from a change event dispatched by another
+  // controller: `data-action: "map:pointChanged->autocompleter#swap"`. Both the
+  // map & form-exif controllers dispatch a pointChanged event, when changing
+  // lat/lngs. For now we need both events - when form-exif updates the lat/lng
+  // inputs programmatically, it's not caught as a `change` by map. (Also, map
+  // only fires its event after buffering.)
+  //
+  // Events should pass a detail object with a type property. Example: `event: {
+  // detail: { type, request_params: { lat, lng } } }`. However, the calling
+  // event may not pass a type, or it may be the same as the current type.
+  // Re-initializing the current type is ok, often means we need to refresh the
+  // primer (as with location_containing a changed lat/lng).
+  //
   // Callable internally if you pass a detail object with a type property.
+  //
   swap({ detail }) {
     let type;
     if (this.hasSelectTarget) {
@@ -1001,7 +1009,9 @@ export default class extends Controller {
       this.data_timer = setTimeout(() => {
         this.verbose("dispatching hiddenIdDataChanged");
         this.wrapTarget.classList.remove('has-id');
-        this.keepBtnTarget.classList.remove('active');
+        if (this.hasKeepBtnTarget) {
+          this.keepBtnTarget.classList.remove('active');
+        }
         this.inputTarget.focus();
         this.dispatch('hiddenIdDataChanged', {
           detail: { id: this.hiddenTarget.value }
