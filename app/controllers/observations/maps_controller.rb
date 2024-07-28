@@ -24,7 +24,7 @@ module Observations
       @observations = [
         Mappable::MinimalObservation.new(@observation.id,
                                          @observation.public_lat,
-                                         @observation.public_long,
+                                         @observation.public_lng,
                                          @observation.location)
       ]
     end
@@ -33,13 +33,14 @@ module Observations
 
     def find_locations_matching_observations
       locations = {}
-      columns = %w[id lat long gps_hidden location_id].map do |x|
+      columns = %w[id lat lng gps_hidden location_id].map do |x|
         "observations.#{x}"
       end
       args = {
         select: columns.join(", "),
         where: "observations.lat IS NOT NULL OR " \
-                "observations.location_id IS NOT NULL"
+                "observations.location_id IS NOT NULL",
+        limit: 10_000
       }
       @observations =
         @query.select_rows(args).map do |id, lat, long, gps_hidden, loc_id|

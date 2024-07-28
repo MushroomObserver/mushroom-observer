@@ -36,13 +36,14 @@ class API2
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
         users: parse_array(:user, :user, help: :creator),
-        has_images: parse(:boolean, :has_images, limit: true),
-        has_observations: parse(:boolean, :has_observations, limit: true),
-        has_species_lists: parse(:boolean, :has_species_lists, limit: true),
-        has_comments: parse(:boolean, :has_comments, limit: true),
-        has_summary: parse(:boolean, :has_summary),
+        with_images: parse(:boolean, :has_images, limit: true),
+        with_observations: parse(:boolean, :has_observations, limit: true),
+        with_species_lists: parse(:boolean, :has_species_lists, limit: true),
+        with_comments: parse(:boolean, :has_comments, limit: true),
+        with_summary: parse(:boolean, :has_summary),
         title_has: parse(:string, :title_has, help: 1),
         summary_has: parse(:string, :summary_has, help: 1),
+        field_slip_prefix_has: parse(:string, :field_slip_prefix_has, help: 1),
         comments_has: parse(:string, :comments_has, help: 1)
       }
     end
@@ -52,6 +53,7 @@ class API2
       {
         title: parse(:string, :title, limit: 100),
         summary: parse(:string, :summary, default: ""),
+        field_slip_prefix: parse(:string, :field_slip_prefix, default: ""),
         user: @user
       }
     end
@@ -60,7 +62,8 @@ class API2
       parse_update_params
       {
         title: parse(:string, :set_title, limit: 100, not_blank: true),
-        summary: parse(:string, :set_summary)
+        summary: parse(:string, :set_summary),
+        field_slip_prefix: parse(:string, :set_field_slip_prefix)
       }
     end
 

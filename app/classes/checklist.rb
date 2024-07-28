@@ -5,14 +5,19 @@
 #  This class calculates a checklist of species observed by users,
 #  projects, etc.
 #
+#  == Class Methods
+#
+#  all_site_taxa_by_user::  Calculate checklist taxon stats for all users
+#                           (only the stats, not the names)
+#
 #  == Methods
 #
 #  num_genera::      Number of genera seen.
 #  num_species::     Number of species seen.
-#  num_names::       Number of distinct names.
+#  num_taxa::        Number of distinct taxa.
 #  genera::          List of genera (text_name) seen.
 #  species::         List of species (text_name) seen.
-#  names::           List of names seen.
+#  taxa::            List of taxa seen.
 #
 #  == Usage
 #
@@ -36,7 +41,7 @@ class Checklist
 
     def query
       super(
-        conditions: ["o.user_id = #{@user.id}"]
+        subquery_scope: Observation.where(user_id: @user.id)
       )
     end
   end
@@ -51,9 +56,8 @@ class Checklist
 
     def query
       super(
-        tables: ["project_observations op"],
-        conditions: ["op.observation_id = o.id",
-                     "op.project_id = #{@project.id}"]
+        subquery_scope: Observation.joins(:project_observations).
+          where(ProjectObservation.arel_table[:project_id].eq(@project.id))
       )
     end
   end
@@ -68,9 +72,9 @@ class Checklist
 
     def query
       super(
-        tables: ["species_list_observations os"],
-        conditions: ["os.observation_id = o.id",
-                     "os.species_list_id = #{@list.id}"]
+        subquery_scope: Observation.joins(:species_list_observations).
+          where(SpeciesListObservation.arel_table[:species_list_id].
+                eq(@list.id))
       )
     end
   end
@@ -78,7 +82,7 @@ class Checklist
   ##############################################################################
 
   def initialize
-    @genera = @species = @names = nil
+    @genera = @species = @taxa = nil
   end
 
   def num_genera
@@ -91,9 +95,9 @@ class Checklist
     @species.length
   end
 
-  def num_names
-    calc_checklist unless @names
-    @names.length
+  def num_taxa
+    calc_checklist unless @taxa
+    @taxa.length
   end
 
   def genera
@@ -106,76 +110,137 @@ class Checklist
     @species.values.sort
   end
 
-  def names
-    calc_checklist unless @names
-    @names.values.sort
+  def taxa
+    calc_checklist unless @taxa
+    @taxa.values.sort
+  end
+
+  def self.all_site_taxa_by_user
+    synonym_map = {}
+
+    synonyms = Name.connection.select_rows(%(
+    SELECT GROUP_CONCAT(n.id),
+      MIN(CONCAT(n.deprecated, ',', n.text_name, ',', n.id, ',', n.rank))
+    FROM names n
+    GROUP BY IF(synonym_id, synonym_id, -id);
+    ))
+
+    synonyms.each do |row|
+      ids, tuple = *row
+      ids.split(",").each { |id| synonym_map[id.to_i] = tuple }
+    end
+
+    calculate_taxa_by_user(synonym_map)
+  end
+
+  private_class_method def self.calculate_taxa_by_user(synonym_map)
+    taxa = {}
+    genera = {}
+    species = {}
+    Observation.select(:user_id, :name_id).each do |row|
+      user_id = row[:user_id]
+      name_id = row[:name_id]
+      _dep, text_name, _id, rank = *synonym_map[name_id].split(",")
+      g, s = *text_name.split
+      taxa[user_id] ||= {}
+      genera[user_id] ||= {}
+      species[user_id] ||= {}
+      taxa[user_id][text_name] = true
+      genera[user_id][g] = true if rank.to_i <= Name.ranks[:Genus]
+      if rank.to_i <= Name.ranks[:Species]
+        species[user_id][[g, s].join(" ")] = true
+      end
+    end
+
+    { users: taxa.keys,
+      taxa: taxa.transform_values(&:size),
+      genera: genera.transform_values(&:size),
+      species: species.transform_values(&:size) }
   end
 
   private
 
   def calc_checklist
-    @names = {}
+    @taxa = {}
     @genera = {}
     @species = {}
-    synonyms = count_nonsynonyms_and_gather_synonyms
-    count_synonyms(synonyms)
+    results = query_results_as_objects
+
+    count_taxa_genera_and_species(results)
   end
 
-  def count_nonsynonyms_and_gather_synonyms
-    synonyms = {}
-    Name.connection.select_rows(query).each do
-      |id, name, syn_id, deprecated, rank|
-      if syn_id && deprecated == 1
-        # wait until we find an accepted synonym
-        synonyms[syn_id] ||= nil
-      elsif syn_id
-        # use the first accepted synonym we encounter
-        synonyms[syn_id] ||= [name, id, rank]
-      else
-        # count non-synonyms immediately
-        count_species([name, id, rank])
-      end
-    end
-    synonyms
-  end
-
-  def count_synonyms(synonyms)
-    synonyms.each do |syn_id, text_info|
-      unless text_info
-        text_info = Name.where(synonym_id: syn_id).
-                    order(deprecated: :asc).pick(:text_name, :id, :rank)
-        text_info[2] = Name.ranks[text_info[2]]
-      end
-      count_species(text_info)
+  def query_results_as_objects
+    query.map do |row|
+      columns = row.cnc.split(",")
+      { deprecated: columns[0].to_i,
+        text_name: columns[1],
+        id: columns[2].to_i,
+        rank: columns[3].to_i }
     end
   end
 
-  def count_species(text_info)
-    return if text_info.blank?
+  # These can't be hashes since they get sorted
+  def count_taxa_genera_and_species(results)
+    return if results.empty?
 
-    text_name, id, rank = text_info
-    @names[text_name] = [text_name, id]
-    return unless rank < Name.ranks[:Genus]
+    @taxa = results.to_h do |result|
+      [result[:text_name], [result[:text_name], result[:id]]]
+    end
 
-    g, s = text_name.split(" ", 3)
-    @genera[g] = g
-    @species[[g, s]] = ["#{g} #{s}", id] # Can't be hash since it gets sorted
+    # For Genus results, we're taking everything above Species up to Genus
+    g_results = results.select do |result|
+      [(Name.ranks[:Species] + 1)..Name.ranks[:Genus]].include?(result[:rank])
+    end
+
+    s_results = results.select do |result|
+      result[:rank] <= Name.ranks[:Species]
+    end
+
+    # This could include groups etc, so we just want to store the genus names.
+    # Doubles and parent/children will just overwrite each other, no IDs stored.
+    @genera = g_results.to_h do |result|
+      genus_name = result[:text_name].split(" ", 2)
+      [genus_name, genus_name]
+    end
+
+    s_results.each do |result|
+      g, s = result[:text_name].split(" ", 3)
+      @genera[g] = g
+      @species[[g, s]] = ["#{g} #{s}", result[:id]]
+    end
   end
 
+  # This `query` returns concatenated strings with info about the names we want.
+  # The `minimum` here ensures one name per /group by synonym_id/.
+  # The returned strings have to be unpacked (split on ",") to be used.
+  #
+  # (There's a way to have SQL return a JSON_OBJECT for the first name of each
+  # sorted group via a window function, but it's much harder to write.)
+  #
+  # It should produce this SQL:
+  # %(
+  #   SELECT MIN(CONCAT(n.deprecated, ',', n.text_name, ',', n.id, ',', n.rank))
+  #   FROM names n
+  #   WHERE id IN (SELECT name_id FROM #{subquery})
+  #   GROUP BY IF(synonym_id, synonym_id, -id);
+  # )
+  #
+  # The subquery_scope that we select name_ids from can be anything:
+  #
+  # observations;
+  # observations WHERE user_id = 252;
+  # observations JOIN project_observations ON blah blah...
+  # Oddly it doesn't make a difference whether the subquery is DISTINCT or
+  # not. (because of the MIN)
+  #
   def query(args = {})
-    tables = [
-      "names n",
-      "observations o"
-    ]
-    conditions = [
-      "n.id = o.name_id"
-    ]
-    tables += args[:tables] || []
-    conditions += args[:conditions] || []
-    %(
-      SELECT n.id, n.text_name, n.synonym_id, n.deprecated, n.rank
-      FROM #{tables.join(", ")}
-      WHERE (#{conditions.join(") AND (")})
-    )
+    subquery_scope = args[:subquery_scope] || Observation
+
+    Name.where(id: subquery_scope.select(:name_id)).
+      select(
+        (Name[:deprecated].cast('char') + "," + Name[:text_name] + "," +
+         Name[:id].cast('char') + "," + Name[:rank].cast('char')).minimum.
+         as("cnc")
+      ).group("IF(synonym_id, synonym_id, -id)")
   end
 end

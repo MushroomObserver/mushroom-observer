@@ -55,20 +55,20 @@ class Image
     end
 
     def local_file_exists?(spec)
-      File.exist?(file_name(spec)[7..])
+      File.exist?(full_filepath(spec)[7..])
     end
 
     def remote_file_exists?(spec)
-      url = URI.parse(file_name(spec))
+      url = URI.parse(full_filepath(spec))
       result = Net::HTTP.new(url.host, url.port).request_head(url.path)
       result.code == 200
     end
 
     def source_url(source)
-      file_name(format_spec(source, :read))
+      full_filepath(format_spec(source, :read))
     end
 
-    def file_name(path)
+    def full_filepath(path)
       "#{path}/#{subdirectory}/#{id}.#{extension}"
     end
 

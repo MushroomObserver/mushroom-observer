@@ -80,7 +80,7 @@ class Language < AbstractModel
   end
 
   private_class_method def self.get_user_translation_contributions_overall(user)
-    v = Arel::Table.new(:translation_strings_versions)
+    v = Arel::Table.new(:translation_string_versions)
     TranslationString::Version.
       where(user_id: user.id).
       group(:translation_string_id).
@@ -98,7 +98,7 @@ class Language < AbstractModel
   end
 
   def get_user_translation_contributions(user)
-    v = Arel::Table.new(:translation_strings_versions)
+    v = Arel::Table.new(:translation_string_versions)
     TranslationString.
       # includes([:user, :versions]).
       joins(:versions).

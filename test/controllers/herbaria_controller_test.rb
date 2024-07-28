@@ -623,7 +623,7 @@ class HerbariaControllerTest < FunctionalTestCase
     patch(:update, params: { herbarium: params, id: nybg.id })
 
     assert_equal(last_update, nybg.reload.updated_at)
-    assert_redirected_to(emails_merge_request_path(
+    assert_redirected_to(new_admin_emails_merge_requests_path(
                            type: :Herbarium, old_id: nybg.id, new_id: other.id
                          ))
   end

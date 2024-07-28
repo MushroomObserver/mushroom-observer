@@ -373,7 +373,7 @@ class ImagesControllerTest < FunctionalTestCase
     assert_template("show", partial: "_form_ccbyncsa25")
     image.reload
     assert_equal(num_views + 1, image.num_views)
-    (Image.all_sizes + [:original]).each do |size|
+    (Image::ALL_SIZES + [:original]).each do |size|
       get(:show, params: { id: image.id, size: size })
       assert_template("show", partial: "_form_ccbyncsa25")
     end
@@ -411,7 +411,7 @@ class ImagesControllerTest < FunctionalTestCase
 
     assert_template("show", partial: "_form_ccbyncsa25")
     assert_equal(num_views + 1, image.reload.num_views)
-    (Image.all_sizes + [:original]).each do |size|
+    (Image::ALL_SIZES + [:original]).each do |size|
       get(:show, params: { id: image.id, size: size })
       assert_template("show", partial: "_form_ccbyncsa25")
     end

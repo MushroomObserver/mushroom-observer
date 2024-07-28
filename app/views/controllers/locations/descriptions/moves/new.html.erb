@@ -4,7 +4,7 @@ add_tab_set(
   location_description_form_permissions_tabs(description: @description)
 )
 action = { controller: "/names/descriptions/moves", action: :create,
-            id: @description.id, q: get_query_param }
+           id: @description.id, q: get_query_param }
 %>
 
 <%= render(partial: "descriptions/form_move",

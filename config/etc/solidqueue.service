@@ -1,0 +1,22 @@
+[Unit]
+Description=SolidQueue
+After=network.target
+
+[Service]
+Type=simple
+User=mo
+WorkingDirectory=/var/web/mo
+ExecStart=/var/web/mo/bin/run bundle exec rake solid_queue:start
+
+# Greatly reduce Ruby memory fragmentation and heap usage
+# https://www.mikeperham.com/2018/04/25/taming-rails-memory-bloat/
+#Environment=MALLOC_ARENA_MAX=2
+
+Environment="RAILS_ENV=production"
+
+Restart=always
+
+SyslogIdentifier=solidqueue
+
+[Install]
+WantedBy=multi-user.target

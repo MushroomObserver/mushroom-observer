@@ -3,8 +3,18 @@
 class AutoComplete::ForClade < AutoComplete::ByString
   def rough_matches(letter)
     # (this sort puts higher rank on top)
-    Name.with_correct_spelling.with_rank_above_genus.
-      where(Name[:text_name].matches("#{letter}%")).order(rank: :desc).
-      select(:text_name, :rank).map(&:text_name).uniq
+    clades = Name.with_correct_spelling.with_rank_above_genus.
+             where(Name[:text_name].matches("#{letter}%")).order(rank: :desc).
+             select(:text_name, :rank, :id, :deprecated)
+
+    # Turn the instances into hashes
+    matches = clades.map do |clade|
+      clade = clade.attributes.symbolize_keys
+      clade[:deprecated] = clade[:deprecated] || false
+      clade[:name] = clade[:text_name]
+      clade.except(:text_name, :rank)
+    end
+    matches.sort_by! { |clade| clade[:name] }
+    matches.uniq { |clade| clade[:name] }
   end
 end

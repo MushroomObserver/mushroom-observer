@@ -4,12 +4,12 @@ when :create
   method = :post
   button = :CREATE.l
   url = { controller: "/locations/descriptions", action: :create,
-                id: @description.location_id }
+          location_id: @description.location_id }
 when :update
   method = :put
   button = :UPDATE.l
   url = { controller: "/locations/descriptions", action: :update,
-                id: @description.id, q: get_query_param }
+          id: @description.id, q: get_query_param }
 end
 %>
 
@@ -31,7 +31,7 @@ end
         ) %>
   <% end %>
 
-  <%= render(partial: "shared/textilize_help") %>
+  <%= help_block(:div, :shared_textile_help.l, id: "textilize_note") %>
 
   <%= submit_button(form: f, button: button, center: true) %>
 

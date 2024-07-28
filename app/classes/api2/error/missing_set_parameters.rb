@@ -2,6 +2,6 @@
 
 class API2
   # PATCH request missing all set parameters.
-  class MissingSetParameters < Error
+  class MissingSetParameters < FatalError
   end
 end

@@ -3,20 +3,30 @@
 require("application_system_test_case")
 
 class ObservationShowSystemTest < ApplicationSystemTestCase
-  def test_add_and_edit_associated_records
-    obs = observations(:peltigera_obs)
+  setup do
+    @obs = observations(:peltigera_obs)
+  end
 
-    # browser = page.driver.browser
+  def test_visit_show_observation
+    # # browser = page.driver.browser
     rolf = users("rolf")
     login!(rolf)
 
     assert_link("Your Observations")
     click_on("Your Observations")
-    # obs = observations(:peltigera_obs)
 
     assert_selector("body.observations__index")
-    assert_link(text: /#{obs.text_name}/)
-    click_link(text: /#{obs.text_name}/)
+    assert_link(text: /#{@obs.text_name}/)
+    click_link(text: /#{@obs.text_name}/)
+    assert_selector("body.observations__show")
+
+    assert_selector(".print_label_observation_#{@obs.id}")
+  end
+
+  def test_add_and_edit_collection_numbers
+    rolf = users("rolf")
+    login!(rolf)
+    visit(observation_path(@obs))
     assert_selector("body.observations__show")
 
     scroll_to(find("#observation_collection_numbers"), align: :center)
@@ -57,6 +67,28 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     assert_equal(c_n.reload.number, "021345")
 
+    # try remove links
+    # collection_number
+    within("#observation_collection_numbers") do
+      assert_link(:REMOVE.l)
+      find(:css, ".remove_collection_number_link_#{c_n.id}").trigger("click")
+    end
+    # confirm is in modal
+    assert_selector("#modal_collection_number_observation")
+    within("#modal_collection_number_observation") do
+      assert_button(:REMOVE.l)
+      find(:css, ".remove_collection_number_link_#{c_n.id}").trigger("click")
+    end
+    assert_no_selector("#modal_collection_number_observation")
+    assert_no_link(text: /021345/)
+  end
+
+  def test_add_and_edit_herbarium_records
+    rolf = users("rolf")
+    login!(rolf)
+    visit(observation_path(@obs))
+    assert_selector("body.observations__show")
+
     # Has a fungarium record: :field_museum_record. Try edit
     fmr = herbarium_records(:field_museum_record)
     within("#observation_herbarium_records") do
@@ -77,6 +109,28 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     within("#observation_herbarium_records") do
       assert_link(text: /6234234/)
     end
+
+    # try remove links
+    # herbarium_record
+    within("#observation_herbarium_records") do
+      assert_link(:REMOVE.l)
+      find(:css, ".remove_herbarium_record_link_#{fmr.id}").trigger("click")
+    end
+    # confirm is in modal
+    assert_selector("#modal_herbarium_record_observation")
+    within("#modal_herbarium_record_observation") do
+      assert_button(:REMOVE.l)
+      find(:css, ".remove_herbarium_record_link_#{fmr.id}").trigger("click")
+    end
+    assert_no_selector("#modal_herbarium_record_observation")
+    assert_no_link(text: /6234234/)
+  end
+
+  def test_add_and_edit_sequences
+    rolf = users("rolf")
+    login!(rolf)
+    visit(observation_path(@obs))
+    assert_selector("body.observations__show")
 
     # new sequence
     assert_link(:show_observation_add_sequence.l)
@@ -124,6 +178,23 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_equal(seq.reload.notes, "Oh yea.")
     assert_no_selector("#modal_sequence_#{seq.id}")
 
+    # try remove links
+    # sequence
+    within("#observation_sequences") do
+      assert_button(:destroy_object.t(type: :sequence))
+      accept_confirm do
+        find(:css, ".destroy_sequence_link_#{seq.id}").trigger("click")
+      end
+      assert_no_link(text: /LSU/)
+    end
+  end
+
+  def test_add_and_edit_external_links
+    rolf = users("rolf")
+    login!(rolf)
+    visit(observation_path(@obs))
+    assert_selector("body.observations__show")
+
     # new external link
     site = external_sites(:mycoportal)
     within("#observation_external_links") do
@@ -157,43 +228,6 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_equal(link.reload.url, "https://wedont.validatethese.urls/yet")
 
     # try remove links
-    # collection_number
-    within("#observation_collection_numbers") do
-      assert_link(:REMOVE.l)
-      find(:css, ".remove_collection_number_link_#{c_n.id}").trigger("click")
-    end
-    # confirm is in modal
-    assert_selector("#modal_collection_number_observation")
-    within("#modal_collection_number_observation") do
-      assert_button(:REMOVE.l)
-      find(:css, ".remove_collection_number_link_#{c_n.id}").trigger("click")
-    end
-    assert_no_selector("#modal_collection_number_observation")
-    assert_no_link(text: /021345/)
-
-    # herbarium_record
-    within("#observation_herbarium_records") do
-      assert_link(:REMOVE.l)
-      find(:css, ".remove_herbarium_record_link_#{fmr.id}").trigger("click")
-    end
-    # confirm is in modal
-    assert_selector("#modal_herbarium_record_observation")
-    within("#modal_herbarium_record_observation") do
-      assert_button(:REMOVE.l)
-      find(:css, ".remove_herbarium_record_link_#{fmr.id}").trigger("click")
-    end
-    assert_no_selector("#modal_herbarium_record_observation")
-    assert_no_link(text: /6234234/)
-
-    # sequence
-    within("#observation_sequences") do
-      assert_button(:destroy_object.t(type: :sequence))
-      accept_confirm do
-        find(:css, ".destroy_sequence_link_#{seq.id}").trigger("click")
-      end
-      assert_no_link(text: /LSU/)
-    end
-
     # external_link
     within("#observation_external_links") do
       assert_button(text: :destroy_object.t(type: :external_link))
@@ -201,210 +235,6 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
         find(:css, ".destroy_external_link_link_#{link.id}").trigger("click")
       end
       assert_no_link(text: /MycoPortal/)
-    end
-  end
-
-  def test_add_and_edit_naming_and_comment
-    obs = observations(:coprinus_comatus_obs)
-
-    browser = page.driver.browser
-    rolf = users("rolf")
-    login!(rolf)
-
-    assert_link("Your Observations")
-    click_on("Your Observations")
-    # obs = observations(:peltigera_obs)
-
-    assert_selector("body.observations__index")
-    assert_link(text: /#{obs.text_name}/)
-    click_link(text: /#{obs.text_name}/)
-
-    assert_selector("body.observations__show")
-    assert_selector("#observation_namings")
-
-    # new naming
-    n_d = names(:namings_deprecated) # Xa current
-    nd1 = names(:namings_deprecated_1)
-
-    scroll_to(find("#observation_namings"), align: :center)
-    within("#observation_namings") do
-      assert_link(text: /Propose/)
-      click_link(text: /Propose/)
-    end
-
-    assert_selector("#modal_obs_#{obs.id}_naming", wait: 9)
-    assert_selector("#obs_#{obs.id}_naming_form", wait: 9)
-    within("#obs_#{obs.id}_naming_form") do
-      assert_field("naming_name", wait: 4)
-      # fill_in("naming_name", with: nd1.text_name)
-      # Using autocomplete to slow things down here, otherwise button blocked.
-      find_field("naming_name").click
-      nam = nd1.text_name[0..-2]
-      browser.keyboard.type(nam)
-      assert_selector(".auto_complete", wait: 4)
-      browser.keyboard.type(:down, :tab)
-      assert_no_selector(".auto_complete")
-      click_commit
-    end
-
-    assert_selector(
-      "#modal_obs_#{obs.id}_naming_flash",
-      text: :form_observations_there_is_a_problem_with_name.t.html_to_ascii
-    )
-    assert_selector("#name_messages", text: /deprecated/)
-
-    within("#obs_#{obs.id}_naming_form") do
-      fill_in("naming_name", with: "")
-      # fill_in("naming_name", with: n_d.text_name)
-      # Using autocomplete to slow things down here, otherwise session lost.
-      find_field("naming_name").click
-      nam = n_d.text_name[0..-2]
-      browser.keyboard.type(nam)
-      assert_selector(".auto_complete", wait: 4)
-      browser.keyboard.type(:down, :tab)
-      assert_no_selector(".auto_complete")
-      assert_selector("#naming_vote_value")
-      select("Doubtful", from: "naming_vote_value")
-      click_commit
-    end
-    assert_no_selector("#modal_obs_#{obs.id}_naming", wait: 6)
-
-    # Test problems have occurred here: Something in
-    # Observations::NamingsController#create seems to execute before the
-    # previous action can rewrite the cookie, so we lose the session_user.
-    # When this happens, naming_table is refreshed with no edit/destroy buttons.
-    # Capybara author suggests trying sleep(5) after a CRUD action
-    # Ah. Maybe it was just missing the scroll_to
-    scroll_to(find("#observation_namings"), align: :center)
-    sleep(2)
-
-    nam = Naming.last
-    assert_equal(n_d.text_name, nam.text_name)
-    within("#observation_namings") do
-      assert_link(text: /#{n_d.text_name}/)
-      assert_selector(".destroy_naming_link_#{nam.id}")
-      assert_selector("#naming_vote_form_#{nam.id}")
-      select("Could Be", from: "vote_value_#{nam.id}")
-    end
-
-    assert_no_selector("#mo_ajax_progress")
-    assert_selector("#title", text: /#{obs.text_name}/)
-    # sleep(3)
-
-    within("#observation_namings") do
-      assert_link(text: /#{n_d.text_name}/)
-      assert_selector("#naming_vote_form_#{nam.id}")
-      select("I'd Call It That", from: "vote_value_#{nam.id}")
-    end
-    # assert_selector("#mo_ajax_progress", wait: 4)
-    # assert_selector("#mo_ajax_progress_caption",
-    #                 text: /#{:show_namings_saving.l}/)
-
-    assert_no_selector("#mo_ajax_progress")
-    assert_selector("#title", text: /#{nam.text_name}/)
-    # sleep(3)
-
-    # check that there is a vote "index" tally with this naming
-    within("#observation_namings") do
-      assert_link(href: "/observations/#{obs.id}/namings/#{nam.id}/votes")
-      click_link(href: "/observations/#{obs.id}/namings/#{nam.id}/votes")
-    end
-    assert_selector("#modal_naming_votes_#{nam.id}")
-
-    within("#modal_naming_votes_#{nam.id}") do
-      assert_text(nam.text_name)
-      find(:css, ".close").click
-    end
-    assert_no_selector("#modal_naming_votes_#{nam.id}")
-
-    # Test the link to the naming name and user
-    within("#observation_namings") do
-      assert_link(text: /#{n_d.text_name}/)
-      click_link(text: /#{n_d.text_name}/)
-    end
-    assert_selector("body.names__show", wait: 15)
-    page.go_back
-
-    # Test the link to the naming user... whoa, this takes too long!
-    # Re-add this test when the user page is sped up.
-    # within("#observation_namings") do
-    #   assert_link(text: /#{rolf.login}/)
-    #   click(text: /#{rolf.login}/)
-    # end
-    # assert_selector("body.users__show", wait: 30)
-    # page.go_back
-
-    # Test the edit naming form link.
-    within("#observation_namings") do
-      assert_link(text: /#{n_d.text_name}/)
-      assert_selector(".edit_naming_link_#{nam.id}")
-      find(:css, ".edit_naming_link_#{nam.id}").trigger("click")
-    end
-    assert_selector("#modal_obs_#{obs.id}_naming_#{nam.id}", wait: 9)
-    assert_selector("#obs_#{obs.id}_naming_#{nam.id}_form", wait: 9)
-    within("#modal_obs_#{obs.id}_naming_#{nam.id}") do
-      find(:css, ".close").click
-    end
-    assert_no_selector("#modal_obs_#{obs.id}_naming_#{nam.id}")
-
-    within("#observation_namings") do
-      assert_link(text: /#{n_d.text_name}/)
-      assert_selector(".destroy_naming_link_#{nam.id}")
-      accept_prompt do
-        find(:css, ".destroy_naming_link_#{nam.id}").trigger("click")
-      end
-      assert_no_link(text: /#{n_d.text_name}/)
-    end
-    assert_selector("#title", text: /#{obs.text_name}/)
-
-    assert_selector("#comments_for_object")
-    within("#comments_for_object") do
-      assert_link(:show_comments_add_comment.l)
-      find(:css, ".new_comment_link_#{obs.id}").trigger("click")
-    end
-
-    assert_selector("#modal_comment")
-    within("#modal_comment") do
-      assert_selector("#comment_comment")
-      fill_in("comment_comment", with: "What do you mean, Coprinus?")
-      click_commit
-    end
-    # Cannot submit comment without summary
-    assert_selector("#modal_comment_flash", text: /Missing/)
-    within("#modal_comment") do
-      assert_selector("#comment_comment", text: "What do you mean, Coprinus?")
-      fill_in("comment_summary", with: "A load of bollocks")
-      click_commit
-    end
-    assert_no_selector("#modal_comment")
-
-    com = Comment.last
-    within("#comments_for_object") do
-      assert_text("A load of bollocks")
-      assert_selector(".show_user_link_#{rolf.id}")
-      assert_selector(".edit_comment_link_#{com.id}")
-      assert_selector(".destroy_comment_link_#{com.id}")
-      find(:css, ".edit_comment_link_#{com.id}").trigger("click")
-    end
-
-    assert_selector("#modal_comment_#{com.id}")
-    within("#modal_comment_#{com.id}") do
-      fill_in("comment_summary", with: "Exciting discovery")
-      fill_in("comment_comment", with: "What I meant was, Coprinus!")
-      click_commit
-    end
-    assert_no_selector("#modal_comment_#{com.id}")
-
-    within("#comments_for_object") do
-      assert_no_text("A load of bollocks")
-      assert_text("Exciting discovery")
-      assert_selector(".destroy_comment_link_#{com.id}")
-      accept_confirm do
-        find(:css, ".destroy_comment_link_#{com.id}").trigger("click")
-      end
-
-      assert_no_text("Exciting discovery")
-      assert_no_selector(".destroy_comment_link_#{com.id}")
     end
   end
 end

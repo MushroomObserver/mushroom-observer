@@ -14,7 +14,6 @@ module Names
 
     CREATE_NAME_DESCRIPTION_PARTIALS = %w[
       _fields_for_description
-      _textilize_help
       _form
     ].freeze
 
@@ -91,7 +90,7 @@ module Names
       assert_flash_text(
         :runtime_object_not_found.l(type: "user", id: bad_user_id)
       )
-      assert_redirected_to(name_descriptions_path)
+      assert_redirected_to(name_descriptions_index_path)
     end
 
     def test_index_by_editor_of_one_description
@@ -152,7 +151,7 @@ module Names
       assert_flash_text(
         :runtime_object_not_found.l(type: "user", id: bad_user_id)
       )
-      assert_redirected_to(name_descriptions_path)
+      assert_redirected_to(name_descriptions_index_path)
     end
 
     def test_show_name_description
@@ -161,7 +160,7 @@ module Names
       login
       get(:show, params: params)
       assert_template("names/descriptions/show")
-      assert_template("descriptions/_show_description_details")
+      assert_template("descriptions/_description_details_and_alts_panel")
     end
 
     def test_next_description
@@ -202,7 +201,7 @@ module Names
     def create_draft_tester(project, name, user = nil, success: true)
       count = NameDescription.count
       params = {
-        id: name.id,
+        name_id: name.id,
         source: "project",
         project: project.id
       }
@@ -278,7 +277,7 @@ module Names
 
     def test_create_name_description
       name = names(:peltigera)
-      params = { "id" => name.id.to_s }
+      params = { "name_id" => name.id.to_s }
       requires_login(:new, params)
       assert_form_action(action: :create)
     end
@@ -300,7 +299,7 @@ module Names
       login(draft.user.login)
       get(:show, params: { id: draft.id })
       assert_template("names/descriptions/show")
-      assert_template("descriptions/_show_description_details")
+      assert_template("descriptions/_description_details_and_alts_panel")
     end
 
     # Ensure that an admin can see a draft they don't own
@@ -310,7 +309,7 @@ module Names
       login(mary.login)
       get(:show, params: { id: draft.id })
       assert_template("names/descriptions/show")
-      assert_template("descriptions/_show_description_details")
+      assert_template("descriptions/_description_details_and_alts_panel")
     end
 
     # Ensure that an member can see a draft they don't own
@@ -320,7 +319,7 @@ module Names
       login(katrina.login)
       get(:show, params: { id: draft.id })
       assert_template("names/descriptions/show")
-      assert_template("descriptions/_show_description_details")
+      assert_template("descriptions/_description_details_and_alts_panel")
     end
 
     # Ensure that a non-member cannot see a draft
@@ -413,7 +412,7 @@ module Names
     def test_create_description_load_form_no_desc_yet
       name = names(:conocybe_filaris)
       assert_equal(0, name.descriptions.length)
-      params = { id: name.id }
+      params = { name_id: name.id }
 
       # Make sure it requires login.
       requires_login(:new, params)
@@ -445,7 +444,7 @@ module Names
     def test_create_description_load_form_already_has_desc
       name = names(:peltigera)
       assert_not_equal(0, name.descriptions.length)
-      params = { id: name.id }
+      params = { name_id: name.id }
 
       # Make sure it requires login.
       requires_login(:new, params)
@@ -498,7 +497,7 @@ module Names
 
       # Minimum args.
       params = {
-        id: name.id,
+        name_id: name.id,
         description: empty_notes.merge(
           source_type: "public",
           source_name: "",
@@ -534,7 +533,7 @@ module Names
       name = names(:coprinus_comatus)
       assert(default = name.description)
       assert_not_equal(0, name.descriptions.length)
-      params[:id] = name.id
+      params[:name_id] = name.id
       params[:description][:public]       = "0"
       params[:description][:public_write] = "0"
       params[:description][:source_name]  = "Alternate Description"
@@ -563,7 +562,7 @@ module Names
       final_class = "Order: _Agaricales_\r\nFamily: _Agaricaceae_"
 
       params = {
-        id: name.id,
+        name_id: name.id,
         description: empty_notes.merge(
           source_type: "public",
           source_name: "",
@@ -597,7 +596,7 @@ module Names
       assert_equal(0, name.descriptions.length)
 
       params = {
-        id: name.id,
+        name_id: name.id,
         description: empty_notes.merge(
           source_type: "source",
           source_name: "Mushrooms Demystified",

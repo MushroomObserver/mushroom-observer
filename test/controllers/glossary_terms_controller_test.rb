@@ -71,7 +71,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_operator(term.version, :>, 1,
                     "Test needs a GlossaryTerm fixture with multiple versions")
     prior_version_path =
-      glossary_term_versions_path(term.id, version: term.version - 1)
+      version_of_glossary_term_path(term.id, version: term.version - 1)
 
     login
     get(:show, params: { id: term.id })

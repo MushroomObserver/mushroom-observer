@@ -67,7 +67,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     obs = observations(:detailed_unknown_obs)
     rec = obs.herbarium_records.find { |r| r.can_edit?(mary) }
     visit("/#{obs.id}")
-    click_link(class: "show_herbarium_record_link_#{rec.id}")
+    click_link(class: "herbarium_record_link_#{rec.id}")
 
     assert_selector("body.herbarium_records__show")
     click_on(text: "Edit Fungarium Record")
@@ -108,11 +108,11 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     assert_selector(
       "a[href*='#{herbarium_records_path(herbarium_id: rec.herbarium.id)}']"
     )
-    click_on(id: "herbarium_records_for_herbarium_link")
+    first(class: "herbarium_records_for_herbarium_link").click
 
     assert_selector("body.herbarium_records__index")
     assert_selector("a[href*='#{edit_herbarium_record_path(id: rec.id)}']")
-    click_on(id: "edit_herbarium_record_link_#{rec.id}")
+    click_on(class: "edit_herbarium_record_link_#{rec.id}")
 
     assert_selector("body.herbarium_records__edit")
     within("#herbarium_record_form") do
@@ -134,7 +134,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     end
 
     assert_selector("body.herbarium_records__index")
-    click_on(id: "destroy_herbarium_record_link_#{rec.id}")
+    click_on(class: "destroy_herbarium_record_link_#{rec.id}")
 
     assert_selector("body.herbarium_records__index")
     assert_not(obs.reload.herbarium_records.include?(rec))
@@ -146,7 +146,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     visit(herbaria_path(flavor: :all))
     assert_selector("body.herbaria__index")
 
-    herbaria_show_links = page.all("td > a[id*='show_herbarium_link']")
+    herbaria_show_links = page.all("td > a[class^='herbarium_link']")
 
     assert_equal(
       Herbarium.count, herbaria_show_links.size,
@@ -156,7 +156,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     first_herbarium_path = herbaria_show_links.first["href"].sub(/\?.*/, "")
     first("#sorts a", text: "Reverse Order").click
 
-    reverse_herbaria_show_links = page.all("td > a[id*='show_herbarium_link']")
+    reverse_herbaria_show_links = page.all("td > a[class^='herbarium_link']")
 
     assert_equal(
       first_herbarium_path,
@@ -288,7 +288,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     login!("mary")
     visit(herbarium_path(nybg))
 
-    click_on(id: "new_herbaria_curator_request_link")
+    first(class: "new_herbaria_curator_request_link").click
     assert_selector("#title", text: :show_herbarium_curator_request.l)
 
     within("#herbarium_curator_request_form") do

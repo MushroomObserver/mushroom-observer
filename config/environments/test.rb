@@ -77,6 +77,9 @@ MushroomObserver::Application.configure do
   # Allow YAML deserializer to deserialize symbols
   # https://groups.google.com/g/rubyonrails-security/c/MmFO3LYQE8U?pli=1
   config.active_record.yaml_column_permitted_classes = [Symbol]
+  # If test server is running puma for action cable,
+  # ensure that test database is shared between threads
+  # config.active_record.shared_connection = true
 
   # Debugging strict loading - either :log, or :error out the page
   # config.active_record.action_on_strict_loading_violation = :error

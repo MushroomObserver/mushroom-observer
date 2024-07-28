@@ -1,0 +1,7 @@
+<%
+add_page_title(:email_merge_request_title.t(type: @model.type_tag))
+add_tab_set(email_merge_request_tabs(old_obj: @old_obj))
+%>
+
+<%= render(partial: "admin/emails/merge_requests/form",
+           locals: { local: true }) %>

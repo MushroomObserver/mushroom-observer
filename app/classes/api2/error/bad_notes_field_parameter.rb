@@ -2,7 +2,7 @@
 
 class API2
   # Notes template field didn't parse.
-  class BadNotesFieldParameter < Error
+  class BadNotesFieldParameter < FatalError
     def initialize(str)
       super()
       args.merge!(val: str.to_s)

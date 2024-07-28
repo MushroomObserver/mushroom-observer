@@ -14,7 +14,7 @@ class Descriptions < ActiveRecord::Migration
     add_column :users, :email_locations_admin, :boolean, default: false
     add_column :users, :email_names_admin,     :boolean, default: false
     add_column :users, :thumbnail_size, :enum, default: :thumbnail, limit: [:thumbnail, :small]
-    add_column :users, :image_size,     :enum, default: :medium, limit: Image.all_sizes
+    add_column :users, :image_size,     :enum, default: :medium, limit: Image::ALL_SIZES
 
     # ----------------------------
     #  Add size to image.

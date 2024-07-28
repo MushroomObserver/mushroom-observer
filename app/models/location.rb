@@ -8,7 +8,7 @@
 #
 #  == Version
 #
-#  Changes are kept in the "locations_versions" table using
+#  Changes are kept in the "location_versions" table using
 #  ActiveRecord::Acts::Versioned.
 #
 #  == Attributes
@@ -27,6 +27,7 @@
 #  high::         (V) Maximum elevation in meters, e.g. 100
 #  low::          (V) Minimum elevation in meters, e.g. 0
 #  notes::        (V) Arbitrary extra notes supplied by User.
+#  hidden::       (V) Should observation with this location be hidden
 #
 #  ('V' indicates that this attribute is versioned in past_locations table.)
 #
@@ -89,8 +90,7 @@
 #  notify_users::       After save: send email notification.
 #
 ################################################################################
-# rubocop:disable Metrics/ClassLength
-class Location < AbstractModel
+class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   require "acts_as_versioned"
 
   belongs_to :description, class_name: "LocationDescription" # (main one)
@@ -103,12 +103,12 @@ class Location < AbstractModel
   has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
   has_many :observations
+  has_many :projects
   has_many :species_lists
   has_many :herbaria     # should be at most one, but nothing preventing more
   has_many :users        # via profile location
 
   acts_as_versioned(
-    table_name: "locations_versions",
     if_changed: %w[
       name
       north
@@ -128,7 +128,8 @@ class Location < AbstractModel
     "ok_for_export",
     "rss_log_id",
     "description_id",
-    "locked"
+    "locked",
+    "hidden"
   )
 
   before_update :update_observation_cache
@@ -145,9 +146,11 @@ class Location < AbstractModel
        Location::Version.where(
          location_id: ver.location_id, user_id: ver.user_id
        ).count.zero?
-      SiteData.update_contribution(:add, :locations_versions)
+      UserStats.update_contribution(:add, :location_versions)
     end
   end
+
+  FLOAT_ERROR = 0.0005
 
   # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
   scope :name_includes,
@@ -186,17 +189,77 @@ class Location < AbstractModel
             )
           end
         }
-  scope :show_includes, lambda {
-    strict_loading.includes(
-      { comments: :user },
-      { description: { comments: :user } },
-      { descriptions: [:authors, :editors] },
-      :interests,
-      :observations,
-      :rss_log,
-      :versions
-    )
-  }
+  scope :contains_point, # Use named parameters (lat:, lng:), any order
+        lambda { |**args|
+          args => {lat:, lng:}
+          where(
+            (Location[:south]).lteq(lat + FLOAT_ERROR).
+              and((Location[:north]).gteq(lat - FLOAT_ERROR)).
+            and(
+              Location[:west].lteq(lng + FLOAT_ERROR).
+                and(Location[:east].gteq(lng - FLOAT_ERROR)).
+              or(
+                Location[:west].gteq(lng - FLOAT_ERROR).
+                  and(Location[:east].lteq(lng + FLOAT_ERROR))
+              )
+            )
+          )
+        }
+  scope :show_includes,
+        lambda {
+          strict_loading.includes(
+            { comments: :user },
+            { description: { comments: :user } },
+            { descriptions: [:authors, :editors] },
+            :interests,
+            :observations,
+            :rss_log,
+            :versions
+          )
+        }
+
+  scope :contains_box, # Use named parameters, n:, s:, e:, w:
+        lambda { |**args|
+          args => {n:, s:, e:, w:}
+
+          # Correct for possible floating point rounding
+          shrunk_n = n - FLOAT_ERROR
+          shrunk_s = s + FLOAT_ERROR
+          shrunk_e = e - FLOAT_ERROR
+          shrunk_w = w + FLOAT_ERROR
+
+          # w/e    | Location     | Location contains w/e
+          # ______ | ____________ | ______________________
+          # w <= e | west <= east | west <= w && e <= east
+          # w <= e | west > east  | west <= w || e <= east
+          # w > e  | west <= east | none
+          # w > e  | west > east  | west <= w && e <= east
+
+          if w <= e # w / e don't straddle 180
+            where(Location[:south].lteq(shrunk_s).
+                    and(Location[:north].gteq(shrunk_n)).
+                  #   Location doesn't straddle 180
+                  and(Location[:west].lteq(Location[:east]).
+                      and(Location[:west] <= shrunk_w).
+                      and(Location[:east] >= shrunk_e).
+                    #  Location straddles 180
+                    or(Location[:west].gt(Location[:east]).
+                      #    need not check e, since w <= e
+                      and((Location[:west] <= shrunk_w).
+                        #  need not check w for same reason
+                        or(Location[:east] >= shrunk_e)))))
+          else # w / e straddle 180
+            where(Location[:south].lteq(shrunk_s).
+                  and(Location[:north].gteq(shrunk_n)).
+            # Location straddles 180
+            #   Location 100% wrap; necessarily straddles w/e
+            and(Location[:west] == Location[:east] - 360).
+            #  Location < 100% wrap-around
+            or(Location[:west].gt(Location[:east]).
+              and(Location[:west] <= shrunk_w).
+              and(Location[:east] >= shrunk_e)))
+          end
+        }
 
   # Let attached observations update their cache if these fields changed.
   # Also touch updated_at to expire obs fragment caches
@@ -271,7 +334,7 @@ class Location < AbstractModel
 
   # Useful if invalid lat/longs cause crash, e.g., in mapping code.
   # New: Ensure box has nonzero size or make_editable_map fails.
-  def force_valid_lat_longs!
+  def force_valid_lat_lngs!
     self.north = Location.parse_latitude(north) || 45
     self.south = Location.parse_latitude(south) || -45
     self.east = Location.parse_longitude(east) || 90
@@ -288,22 +351,13 @@ class Location < AbstractModel
 
   def found_here?(obs)
     return true if obs.location == self
-    return contains?(obs.lat, obs.long) if obs.lat && obs.long
+    return contains?(obs.lat, obs.lng) if obs.lat && obs.lng
 
     loc = obs.location
     return false unless loc
 
+    # contains? is now a method of Mappable::BoxMethods
     contains?(loc.north, loc.west) && contains?(loc.south, loc.east)
-  end
-
-  def contains?(lat, long)
-    (lat <= north) && (lat >= south) && contains_longitude(long)
-  end
-
-  def contains_longitude(long)
-    return (long >= west) && (long <= east) if west <= east
-
-    (long >= west) || (long <= east)
   end
 
   ##############################################################################
@@ -691,14 +745,11 @@ class Location < AbstractModel
       obs.save
     end
 
-    # Move species lists over.
-    SpeciesList.where(location_id: old_loc.id).find_each do |spl|
-      spl.update_attribute(:location, self)
-    end
-
-    # Update any users who call this location their primary location.
-    User.where(location_id: old_loc.id).find_each do |user|
-      user.update_attribute(:location, self)
+    # change object.location without verification
+    [Herbarium, Project, SpeciesList, User].each do |klass|
+      klass.where(location_id: old_loc.id).find_each do |obj|
+        obj.update_attribute(:location, self)
+      end
     end
 
     # Move over any interest in the old name.
@@ -708,12 +759,45 @@ class Location < AbstractModel
       int.save
     end
 
-    # Add note to explain the merge
-    # Intentionally not translated
-    add_note("[admin - #{Time.zone.now}]: Merged with #{old_loc.name}: " \
-             "North: #{old_loc.north}, South: #{old_loc.south}, " \
-             "West: #{old_loc.west}, East: #{old_loc.east}")
+    add_note(explain_merge(old_loc))
 
+    update_location_descriptions(old_loc)
+
+    # Log the action.
+    old_loc.rss_log&.orphan(old_loc.name, :log_location_merged,
+                            this: old_loc.name, that: name)
+    old_loc.rss_log = nil
+
+    # Destroy past versions.
+    editors = []
+    old_loc.versions.each do |ver|
+      editors << ver.user_id
+      ver.destroy
+    end
+
+    # Update contributions for editors.
+    editors.delete(old_loc.user_id)
+    editors.uniq.each do |user_id|
+      UserStats.update_contribution(:del, :location_versions, user_id)
+    end
+
+    # Finally destroy the location.
+    old_loc.destroy
+  end
+
+  private
+
+  def explain_merge(old_loc)
+    # Intentionally not translated
+    <<~EXPLANATION.tr("\n", " ")
+      [admin - #{Time.zone.now}]: Merged with #{old_loc.name}
+      (was Location ##{old_loc.id}):
+      North: #{old_loc.north}, South: #{old_loc.south},
+      West: #{old_loc.west}, East: #{old_loc.east}
+    EXPLANATION
+  end
+
+  def update_location_descriptions(old_loc)
     # Merge the two "main" descriptions if it can.
     if description && old_loc.description &&
        (description.source_type == :public) &&
@@ -732,28 +816,9 @@ class Location < AbstractModel
       desc.location_id = id
       desc.save
     end
-
-    # Log the action.
-    old_loc.rss_log&.orphan(old_loc.name, :log_location_merged,
-                            this: old_loc.name, that: name)
-    old_loc.rss_log = nil
-
-    # Destroy past versions.
-    editors = []
-    old_loc.versions.each do |ver|
-      editors << ver.user_id
-      ver.destroy
-    end
-
-    # Update contributions for editors.
-    editors.delete(old_loc.user_id)
-    editors.uniq.each do |user_id|
-      SiteData.update_contribution(:del, :locations_versions, user_id)
-    end
-
-    # Finally destroy the location.
-    old_loc.destroy
   end
+
+  public
 
   ##############################################################################
   #
@@ -820,6 +885,8 @@ class Location < AbstractModel
 
   validate :check_requirements
   def check_requirements
+    check_hidden
+
     if !north || (north > 90)
       errors.add(:north, :validate_location_north_too_high.t)
     end
@@ -851,5 +918,13 @@ class Location < AbstractModel
       errors.add(:name, :validate_missing.t(field: :name))
     end
   end
+
+  def check_hidden
+    return unless hidden
+
+    self.north = north.ceil(1)
+    self.south = south.floor(1)
+    self.east = east.ceil(1)
+    self.west = west.floor(1)
+  end
 end
-# rubocop:enable Metrics/ClassLength

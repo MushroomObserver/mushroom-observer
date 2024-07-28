@@ -151,14 +151,14 @@ class LocalizationFilesTest < UnitTestCase
     end
   end
 
-  TRANSLATION_ERRORS = %w[Error ObjectError BadParameterValue].freeze
+  API_ERROR_EXCLUDE = %w[Error FatalError ObjectError BadParameterValue].freeze
   def test_api_error_translations
     tags = []
     Rails.root.glob("app/classes/api2/error/*.rb").each do |file|
       file.open("r:utf-8") do |fh|
         fh.each_line do |line|
           next unless line.match(/^\s*class (\w+) < /) &&
-                      TRANSLATION_ERRORS.exclude?(Regexp.last_match(1))
+                      API_ERROR_EXCLUDE.exclude?(Regexp.last_match(1))
 
           tags << :"api_#{Regexp.last_match(1).underscore.tr("/", "_")}"
         end
@@ -222,12 +222,17 @@ class LocalizationFilesTest < UnitTestCase
   end
 
   def test_site_data_translations
-    tags = SiteData::ALL_FIELDS.map do |field|
-      [
-        :"user_stats_#{field}",
-        :"site_stats_#{field}"
-      ]
-    end.flatten - [:user_stats_users] # not picking this up for some reason...
-    assert_no_missing_translations(tags, "site data field")
+    site_tags = SiteData::SITE_WIDE_FIELDS.map do |field|
+      :"site_stats_#{field}"
+    end
+    assert_no_missing_translations(site_tags, "site data field")
+  end
+
+  def test_user_data_translations
+    non_integers = [:languages, :checklist]
+    user_tags = UserStats::ALL_FIELDS.except(*non_integers).keys.map do |field|
+      :"user_stats_#{field}"
+    end
+    assert_no_missing_translations(user_tags, "user data field")
   end
 end

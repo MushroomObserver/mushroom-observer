@@ -2,7 +2,7 @@
 
 class API2
   # Tried to set herbarium_record info without claiming specimen present.
-  class CanOnlyUseThisFieldIfHasSpecimen < Error
+  class CanOnlyUseThisFieldIfHasSpecimen < FatalError
     def initialize(field)
       super()
       args.merge!(field: field)

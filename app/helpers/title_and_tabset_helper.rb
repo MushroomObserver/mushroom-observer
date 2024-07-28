@@ -103,7 +103,7 @@ module TitleAndTabsetHelper
            else
              send(:"#{object.type_tag}_path", object.id, flow: "next")
            end
-    link_with_query("#{:FORWARD.t} »", path)
+    link_with_query("#{:NEXT.t} »", path)
   end
 
   # link to previous object in query results
@@ -113,7 +113,7 @@ module TitleAndTabsetHelper
            else
              send(:"#{object.type_tag}_path", object.id, flow: "prev")
            end
-    link_with_query("« #{:BACK.t}", path)
+    link_with_query("« #{:PREV.t}", path)
   end
 
   # Short-hand to render shared tab_set partial for a given set of tabs.

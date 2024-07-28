@@ -2,7 +2,7 @@
 
 class API2
   # Name parameter has multiple matches.
-  class AmbiguousName < Error
+  class AmbiguousName < FatalError
     def initialize(name, others)
       super()
       str = others.map(&:real_search_name).join(" / ")

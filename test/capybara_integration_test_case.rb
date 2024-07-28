@@ -22,16 +22,17 @@
 #
 #        # Create two sessions: think "browser" - each session represents the
 #        # actions of a single user in one or more tabs of a single browser.
+#        # Note this works differently for system tests: no Session.new
 #        rolf_session = Capybara::Session.new(:rack_test, Rails.application)
-#        using_session(rolf_session) { login_user('rolf') }
+#        using_session(rolf_session) { login!(rolf) }
 #        mary_session = Capybara::Session.new(:rack_test, Rails.application)
-#        using_session(mary_session) { login_user('mary') }
+#        using_session(mary_session) { login!(mary) }
 #
 #        # Have Rolf do some stuff.
-#        using_session(rolf) { visit('/edit_rolfs_stuff') }
+#        using_session(rolf_session) { visit('/edit_rolfs_stuff') }
 #
 #        # Have Mary do stuff.
-#        using_session(mary) { visit('/edit_rolfs_stuff') }
+#        using_session(mary_session) { visit('/edit_rolfs_stuff') }
 #        mary.assert_redirect
 #
 #        # You can also create anonymous sessions.
@@ -87,7 +88,7 @@ class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
     # Capybara.reset_sessions!
 
     # needed for selenium
-    Capybara.server = :webrick
+    Capybara.server = :puma
 
     # https://stackoverflow.com/questions/15675125/database-cleaner-not-working-in-minitest-rails
     # DatabaseCleaner.strategy = :transaction
