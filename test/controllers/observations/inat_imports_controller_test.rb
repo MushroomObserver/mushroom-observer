@@ -321,11 +321,21 @@ module Observations
     end
 
     def stub_inat_api_request(inat_obs_ids, mock_inat_response, id_above: 0)
+      # mirror param order of iNat example/test page
+      # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
+      # for convenience in creating mock responses from that page
+      params = <<~PARAMS.delete("\n")
+        ?id=#{inat_obs_ids}
+        &user_login=
+        &iconic_taxa=Fungi
+        &id_above=#{id_above}
+        &per_page=200
+        &order=asc&order_by=id
+        &only_id=false
+      PARAMS
       WebMock.stub_request(
         :get,
-        "#{INAT_OBS_REQUEST_PREFIX}?id=#{inat_obs_ids}" \
-          "&id_above=#{id_above}&only_id=false&order=asc&order_by=id" \
-          "&per_page=200&user_login="
+        "#{INAT_OBS_REQUEST_PREFIX}#{params}"
       ).to_return(body: mock_inat_response)
     end
 
