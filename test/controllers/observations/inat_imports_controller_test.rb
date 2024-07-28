@@ -184,12 +184,12 @@ module Observations
     def test_import_plant
       user = rolf
       filename = "ceanothus_cordulatus"
-      mock_search = File.read("test/inat/#{filename}.txt")
+      mock_search_result = File.read("test/inat/#{filename}.txt")
       inat_import_ids = InatObs.new(
-        JSON.generate(JSON.parse(mock_search)["results"].first)
+        JSON.generate(JSON.parse(mock_search_result)["results"].first)
       ).inat_id
 
-      stub_inat_api_request(inat_import_ids, mock_search)
+      stub_inat_api_request(inat_import_ids, mock_search_result)
       simulate_authorization(user: user, inat_import_ids: inat_import_ids)
       stub_token_request
 
@@ -208,10 +208,10 @@ module Observations
     def test_import_zero_results
       user = rolf
       filename = "zero_results"
-      mock_search = File.read("test/inat/#{filename}.txt")
+      mock_search_result = File.read("test/inat/#{filename}.txt")
       inat_import_ids = "123"
 
-      stub_inat_api_request(inat_import_ids, mock_search)
+      stub_inat_api_request(inat_import_ids, mock_search_result)
       simulate_authorization(user: user, inat_import_ids: inat_import_ids)
       stub_token_request
 
@@ -261,18 +261,18 @@ module Observations
       login(user.login)
 
       filename = "import_all"
-      mock_search = File.read("test/inat/#{filename}.txt")
+      mock_search_result = File.read("test/inat/#{filename}.txt")
       # shorten it to one page to avoid stubbing multiple inat api requests
-      mock_search = limit_result_to_first_page(mock_search)
+      mock_search_result = limited_to_first_page(mock_search_result)
       # delete the photos in order to avoid stubbing photo imports
-      mock_search = results_without_photos(mock_search)
+      mock_search_result = result_without_photos(mock_search_result)
 
       inat_import_ids = ""
 
       simulate_authorization(user: user, inat_import_ids: inat_import_ids,
                              import_all: true)
       stub_token_request
-      stub_inat_api_request(inat_import_ids, mock_search)
+      stub_inat_api_request(inat_import_ids, mock_search_result)
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
 
@@ -285,23 +285,23 @@ module Observations
 
     # Turn results with many pages into results with one page
     # By ignoring all pages but the first
-    def limit_result_to_first_page(mock_search)
-      ms_hash = JSON.parse(mock_search)
+    def limited_to_first_page(mock_search_result)
+      ms_hash = JSON.parse(mock_search_result)
       ms_hash["total_results"] = ms_hash["results"].length
       JSON.generate(ms_hash)
     end
 
     def import_mock_observation(filename)
       user = users(:rolf)
-      mock_search = File.read("test/inat/#{filename}.txt")
+      mock_search_result = File.read("test/inat/#{filename}.txt")
       inat_obs = InatObs.new(
         JSON.generate(
-          JSON.parse(mock_search)["results"].first
+          JSON.parse(mock_search_result)["results"].first
         )
       )
       inat_import_ids = inat_obs.inat_id
 
-      stub_inat_api_request(inat_import_ids, mock_search)
+      stub_inat_api_request(inat_import_ids, mock_search_result)
       simulate_authorization(user: user, inat_import_ids: inat_import_ids)
       stub_token_request
 
@@ -398,8 +398,8 @@ module Observations
         to_return(status: 200, body: "MockToken", headers: {})
     end
 
-    def results_without_photos(mock_search)
-      ms_hash = JSON.parse(mock_search)
+    def result_without_photos(mock_search_result)
+      ms_hash = JSON.parse(mock_search_result)
       ms_hash["results"].each do |result|
         result["observation_photos"] = []
         result["photos"] = []
