@@ -10,6 +10,8 @@ class Inat
 
   # TODO: Add a verb param so that this can be used for non-GET requests
   def initialize(operation:, token: "")
+    # TODO: Use a class variable to track time of last request
+    # Then sleep for minimum time
     sleep(1.second) # 60 requests/minute rate limit per iNat policy
     # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
     headers = { "Authorization" => "Bearer #{token}" }
