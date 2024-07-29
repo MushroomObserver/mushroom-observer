@@ -184,6 +184,7 @@ export default class extends Controller {
 
     this.verbose("geocode:updatePlaceInputTarget")
     this.placeInputTarget.value = this.formatMOPlaceName(result)
+    this.placeInputTarget.classList.add("geocoded")
   }
 
   // NOTE: Second branch of conditional is for map controller
