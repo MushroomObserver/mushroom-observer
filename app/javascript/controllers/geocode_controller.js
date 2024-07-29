@@ -15,6 +15,9 @@ export default class extends Controller {
 
     // These private vars are for keeping track of user inputs to a form
     // that should update the form after a timeout.
+    this.map_type = null
+    this.map = null // Only gets set in map controller
+
     this.old_location = null
     this.autocomplete_buffer = 0
     this.geolocate_buffer = 0
@@ -33,11 +36,6 @@ export default class extends Controller {
       .then((google) => {
         this.elevationService = new google.maps.ElevationService()
         this.geocoder = new google.maps.Geocoder()
-        // Everything except the obs form map: draw the map.
-        if (!(this.map_type === "observation" && this.editable)) {
-          this.drawMap()
-          this.buildOverlays()
-        }
       })
       .catch((e) => {
         console.error("error loading gmaps: " + e)
@@ -51,7 +49,7 @@ export default class extends Controller {
       return
 
     this.lastGeocodedLatLng = location
-    this.verbose("geocodeLatLng(location)")
+    this.verbose("geocode:geocodeLatLng")
     this.verbose(location)
     this.geocoder
       .geocode({ location: location })
@@ -68,11 +66,36 @@ export default class extends Controller {
       });
   }
 
+  geolocatePlaceName() {
+    let address = this.placeInputTarget.value
+    if (address === this.lastGeolocatedAddress) return
+
+    this.lastGeolocatedAddress = address
+    this.verbose("geocode:geolocatePlaceName")
+    this.verbose(address)
+    if (this.location_format == "scientific") {
+      address = address.split(/, */).reverse().join(", ")
+    }
+    this.geocoder
+      .geocode({ address: address })
+      .then((result) => {
+        const { results } = result // destructure, results is part of the result
+        this.dispatchPrimer(results) // will be ignored by non-autocompleters
+        this.respondToGeocode(results)
+      })
+      .catch((e) => {
+        console.log("Geocode was not successful: " + e)
+        // alert("Geocode was not successful for the following reason: " + e)
+      });
+  }
+
   // Remove certain types of results from the geocoder response:
-  // both too precise and too general.
+  // both too precise and too general, before dispatchPrimer
   siftResults(results) {
-    this.verbose("siftResults")
     if (results.length == 0) return results
+
+    this.verbose("geocode:siftResults")
+    this.verbose(results)
     const _skip_types = ["plus_code", "establishment", "premise",
       "subpremise", "point_of_interest", "street_address", "street_number",
       "route", "postal_code", "country"]
@@ -87,9 +110,7 @@ export default class extends Controller {
 
   // Build a primer for the autocompleter with bounding box data, but -1 id
   dispatchPrimer(results) {
-    this.verbose("dispatchPrimer")
     let north, south, east, west, name, id = -1
-
     // Prefer geometry.bounds, but bounds do not exist for point locations.
     // MO locations must be boxes, so use viewport if bounds null.
     // Viewport should exist on all results. The box is editable, after all.
@@ -102,6 +123,9 @@ export default class extends Controller {
       name = this.formatMOPlaceName(result)
       return { name, north, south, east, west, id }
     })
+    this.verbose("geocode:dispatchPrimer")
+    this.verbose(primer)
+
     this.dispatch("googlePrimer", { detail: { primer } })
   }
 
@@ -129,29 +153,6 @@ export default class extends Controller {
     return name_components.join(", ")
   }
 
-  geolocatePlaceName(multiple = false) {
-    let address = this.placeInputTarget.value
-    if (address === this.lastGeolocatedAddress) return
-
-    this.lastGeolocatedAddress = address
-    this.verbose("geolocatePlaceName(address)")
-    this.verbose(address)
-    if (this.location_format == "scientific") {
-      address = address.split(/, */).reverse().join(", ")
-    }
-    this.geocoder
-      .geocode({ address: address })
-      .then((result) => {
-        const { results } = result // destructure, results is part of the result
-        this.dispatchPrimer(results) // will be ignored by non-autocompleters
-        this.respondToGeocode(results)
-      })
-      .catch((e) => {
-        console.log("Geocode was not successful: " + e)
-        // alert("Geocode was not successful for the following reason: " + e)
-      });
-  }
-
   // Called from the geocoder response, to update the map and inputs. If
   // geolocating a string, this only grabs the first result. If geocoding a
   // lat/lng, there may be several. NOTE: SETS LAT/LNG INPUTS if observation.
@@ -159,7 +160,7 @@ export default class extends Controller {
   respondToGeocode(results) {
     if (results.length == 0) return false
 
-    this.verbose("respondToGeocode, map_type: " + this.map_type)
+    this.verbose("geocode:respondToGeocode, map_type: " + this.map_type)
 
     const viewport = results[0].geometry.viewport.toJSON()
     const extents = results[0].geometry.bounds?.toJSON() // may not exist
@@ -170,12 +171,24 @@ export default class extends Controller {
     if (this.map)
       this.placeClosestRectangle(viewport, extents)
     this.updateFields(viewport, extents, center)
+    // For non-autocompleted place input in the location form
+    this.updatePlaceInputTarget(results[0])
     // this.showBoxBtnTarget.disabled = false
+  }
+
+  // Update the place input target with an MO-formatted version of the Google
+  // result, only if we're on a form with a non-autocompleted place input.
+  updatePlaceInputTarget(result) {
+    if (!this.hasPlaceInputTarget ||
+      this.placeInputTarget.dataset?.controller == "autocomplete") return false
+
+    this.verbose("geocode:updatePlaceInputTarget")
+    this.placeInputTarget.value = this.formatMOPlaceName(result)
   }
 
   // NOTE: Second branch of conditional is for map controller
   updateFields(viewport, extents, center) {
-    this.verbose("updateFields")
+    this.verbose("geocode:updateFields")
     let points = [], type = "" // for elevation
     if (this.hasNorthInputTarget) {
       // Prefer extents for rectangle, fallback to viewport
@@ -203,7 +216,7 @@ export default class extends Controller {
   // Action can be attached to the "Get Elevation" button.
   // `points` is then the event
   getElevations(points, type = "") {
-    this.verbose("getElevations")
+    this.verbose("geocode:getElevations")
     // "Get Elevation" button on a form sends this param
     if (this.hasGetElevationTarget &&
       points.hasOwnProperty('params') && points.params?.points === "input") {
@@ -249,7 +262,7 @@ export default class extends Controller {
   updateBoundsInputs(bounds) {
     if (!this.hasSouthInputTarget) return false
 
-    this.verbose("updateBoundsInputs")
+    this.verbose("geocode:updateBoundsInputs")
     this.southInputTarget.value = this.roundOff(bounds?.south)
     this.westInputTarget.value = this.roundOff(bounds?.west)
     this.northInputTarget.value = this.roundOff(bounds?.north)
@@ -259,7 +272,7 @@ export default class extends Controller {
   // requires an array of results from this.getElevations(points, type) above
   //   result objects have the form {elevation:, location:, resolution:}
   updateElevationInputs(results, type) {
-    this.verbose("updateElevationInputs")
+    this.verbose("geocode:updateElevationInputs")
     if (this.hasLowInputTarget && type === "rectangle") {
       const hiLo = this.highAndLowOf(results)
       // this.verbose({ hiLo })
@@ -335,7 +348,7 @@ export default class extends Controller {
             request_params: { lat, lng },
           }
         })
-        // this.verbose("dispatchPointChanged")
+        // this.verbose("geocode:dispatchPointChanged")
       }, 1000)
 
       // if (this.placeInputTarget.value === '') {

@@ -160,11 +160,11 @@ export default class extends GeocodeController {
 
   // There may not be a marker yet.
   placeMarker(location) {
-    this.verbose("placeMarker")
+    this.verbose("map:placeMarker")
     if (!this.marker) {
       this.drawMarker(location)
     } else {
-      this.verbose("marker.setPosition")
+      this.verbose("map:marker.setPosition")
       this.marker.setPosition(location)
       this.map.panTo(location)
     }
@@ -172,7 +172,7 @@ export default class extends GeocodeController {
   }
 
   drawMarker(set) {
-    this.verbose("drawMarker")
+    this.verbose("map:drawMarker")
     const markerOptions = {
       position: { lat: set.lat, lng: set.lng },
       map: this.map,
@@ -198,7 +198,7 @@ export default class extends GeocodeController {
   makeMarkerEditable() {
     if (!this.marker) return
 
-    this.verbose("makeMarkerEditable")
+    this.verbose("map:makeMarkerEditable")
     // clearTimeout(this.marker_edit_buffer)
     // this.marker_edit_buffer = setTimeout(() => {
     const events = ["position_changed", "dragend"]
@@ -231,7 +231,7 @@ export default class extends GeocodeController {
 
   // For point markers: make a clickable InfoWindow
   giveMarkerInfoWindow(set) {
-    this.verbose("giveMarkerInfoWindow")
+    this.verbose("map:giveMarkerInfoWindow")
     const info_window = new google.maps.InfoWindow({
       content: set.caption
     })
@@ -248,7 +248,7 @@ export default class extends GeocodeController {
   //
 
   placeRectangle(extents) {
-    this.verbose("placeRectangle()")
+    this.verbose("map:placeRectangle()")
     this.verbose(extents)
     if (!this.rectangle) {
       this.drawRectangle(extents)
@@ -262,7 +262,7 @@ export default class extends GeocodeController {
   }
 
   drawRectangle(set) {
-    this.verbose("drawRectangle()")
+    this.verbose("map:drawRectangle()")
     this.verbose(set)
     const bounds = this.boundsOf(set),
       editable = this.editable && this.map_type !== "observation",
@@ -296,7 +296,7 @@ export default class extends GeocodeController {
   // listen to "dragstart", "drag" ? not necessary). If we're just switching to
   // location mode, we need a buffer or it's too fast
   makeRectangleEditable() {
-    this.verbose("makeRectangleEditable")
+    this.verbose("map:makeRectangleEditable")
     // clearTimeout(this.rectangle_buffer)
     // this.rectangle_buffer = setTimeout(() => {
     const events = ["bounds_changed", "dragend"]
@@ -315,7 +315,7 @@ export default class extends GeocodeController {
   // For rectangles: make a clickable info window
   // https://stackoverflow.com/questions/26171285/googlemaps-api-rectangle-and-infowindow-coupling-issue
   giveRectangleInfoWindow(set) {
-    this.verbose("giveRectangleInfoWindow")
+    this.verbose("map:giveRectangleInfoWindow")
     const center = this.rectangle.getBounds().getCenter()
     const info_window = new google.maps.InfoWindow({
       content: set.caption,
@@ -343,7 +343,7 @@ export default class extends GeocodeController {
       }
     }
     if (["observation", "hybrid"].includes(this.map_type)) {
-      // this.verbose("pointChanged")
+      // this.verbose("map:pointChanged")
       // If they just cleared the inputs, swap back to a location autocompleter
       const center = this.validateLatLngInputs(false)
       if (!center) return
@@ -384,7 +384,7 @@ export default class extends GeocodeController {
       !this.hasPlaceInputTarget || !this.placeInputTarget.value)
       return false
 
-    this.verbose("showBox")
+    this.verbose("map:showBox")
     // buffer inputs if they're still typing
     clearTimeout(this.marker_draw_buffer)
     this.marker_draw_buffer = setTimeout(this.checkForBox(), 1000)
@@ -393,7 +393,7 @@ export default class extends GeocodeController {
   // Check what kind of input we have and call the appropriate function
   checkForBox() {
     // this.showBoxBtnTarget.disabled = true
-    this.verbose("checkForBox")
+    this.verbose("map:checkForBox")
     let id, location
     if (this.hasLocationIdTarget && (id = this.locationIdTarget.value)) {
       this.mapLocationBounds()
@@ -438,7 +438,7 @@ export default class extends GeocodeController {
     const west = parseFloat(this.westInputTarget.value)
 
     if (!(isNaN(north) || isNaN(south) || isNaN(east) || isNaN(west))) {
-      this.verbose("calculateRectangle")
+      this.verbose("map:calculateRectangle")
       const bounds = { north: north, south: south, east: east, west: west }
       if (this.rectangle) {
         this.rectangle.setBounds(bounds)
@@ -452,7 +452,7 @@ export default class extends GeocodeController {
     // Prefer extents for rectangle, fallback to viewport
     let bounds = extents || viewport
     if (bounds != undefined && bounds?.north) {
-      this.verbose("placeClosestRectangle")
+      this.verbose("map:placeClosestRectangle")
       this.placeRectangle(bounds)
     }
     // else if (center) {
@@ -479,7 +479,7 @@ export default class extends GeocodeController {
   // so, drops a pin on that location and center. Otherwise, checks if place
   // input has been prepopulated and uses that to focus map and drop a marker.
   calculateMarker(event) {
-    this.verbose("calculateMarker")
+    this.verbose("map:calculateMarker")
     if (this.map == undefined ||
       this.latInputTarget.value === '' || this.lngInputTarget.value === ''
     ) return false
@@ -500,7 +500,7 @@ export default class extends GeocodeController {
   // Action called by the "Open Map" button only.
   // open/close handled by BS collapse
   toggleMap() {
-    // this.verbose("toggleMap")
+    // this.verbose("map:toggleMap")
 
     if (this.opened) {
       this.opened = false
@@ -630,5 +630,17 @@ export default class extends GeocodeController {
       points = this.sampleElevationPointsOf(bounds)
     }
     return points
+  }
+
+  // ------------------------------- DEBUGGING ------------------------------
+
+  helpDebug() {
+    debugger
+  }
+
+  verbose(str) {
+    // console.log(str);
+    // document.getElementById("log").
+    //   insertAdjacentText("beforeend", str + "<br/>");
   }
 }
