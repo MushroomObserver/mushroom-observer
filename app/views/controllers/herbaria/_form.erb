@@ -22,7 +22,10 @@ if in_admin_mode? && !create
 end
 %>
 
-<%= form_with(model: @herbarium, id: "herbarium_form") do |f| %>
+<%= form_with(
+  model: @herbarium, id: "herbarium_form",
+  data: { controller: "geocode" }
+) do |f| %>
 
   <%= submit_button(form: f, button: button_name, center: true) %>
 
@@ -33,61 +36,50 @@ end
                             between: :required, help:) %>
 
   <% if in_admin_mode? %>
+
     <%= autocompleter_field(form: f, field: :personal_user_name, type: :user,
                             label: :edit_herbarium_admin_make_personal.t,
                             help: admin_help, inline: true) %>
+
   <% elsif action == :create || @herbarium.can_make_personal?(@user) %>
+
     <%= check_box_with_label(
       form: f, field: :personal, label: :create_herbarium_personal.l,
       help: :create_herbarium_personal_help.t(
         name: @user.personal_herbarium_name
       )
     ) %>
+
   <% end %>
 
-  <%= js_button(
-    button: :more_options.l, id: "more_options_button",
-    name: "more_options_button",
-    data: { toggle: "collapse", target: "#herbarium_options" },
-    aria: { expanded: "false", controls: "herbarium_options" }
+  <% if !@herbarium.personal_user_id %>
+    <%= text_field_with_label(form: f, field: :code, size: 8, inline: true,
+                              label: :create_herbarium_code.l + ":",
+                              help: :create_herbarium_code_help.t,
+                              between: :optional) %>
+  <% end %>
+
+  <%= autocompleter_field(
+    form: f, field: :place_name, type: :location,
+    label: :LOCATION.l + ":", between: :optional,
+    hidden_data: { map_target: "locationId" },
+    create_text: :form_observations_create_locality.l,
+    data: {
+      map_target: "placeInput",
+      action: "map:googlePrimer@window->autocompleter#refreshGooglePrimer" }
   ) %>
 
-  <%= tag.div(
-    id: "herbarium_options",
-    class: "collapse map-outlet",
-    data: { controller: "map" },
-    aria: { expanded: "false", controlled_by: "more_options_button" }
-  ) do %>
-
-    <% if !@herbarium.personal_user_id %>
-      <%= text_field_with_label(form: f, field: :code, size: 8, inline: true,
-                                label: :create_herbarium_code.l + ":",
-                                help: :create_herbarium_code_help.t,
-                                between: :optional) %>
-    <% end %>
-
-    <%= autocompleter_field(
-      form: f, field: :place_name, type: :location,
-      label: :LOCATION.l + ":", between: :optional,
-      hidden_data: { map_target: "locationId" },
-      create_text: :form_observations_create_locality.l,
-      data: {
-        map_target: "placeInput",
-        action: "map:googlePrimer@window->autocompleter#refreshGooglePrimer" }
-    ) %>
-
-    <%= text_field_with_label(form: f, field: :email,
-                              label: :create_herbarium_email.l + ":",
-                              between: :optional) %>
-
-    <%= text_area_with_label(form: f, field: :mailing_address, rows: 5,
-                            label: :create_herbarium_mailing_address.l + ":",
+  <%= text_field_with_label(form: f, field: :email,
+                            label: :create_herbarium_email.l + ":",
                             between: :optional) %>
 
-    <%= text_area_with_label(form: f, field: :description, rows: 10,
-                            label: :NOTES.l + ":",
-                            between: :optional) %>
-  <% end %>
+  <%= text_area_with_label(form: f, field: :mailing_address, rows: 5,
+                          label: :create_herbarium_mailing_address.l + ":",
+                          between: :optional) %>
+
+  <%= text_area_with_label(form: f, field: :description, rows: 10,
+                          label: :NOTES.l + ":",
+                          between: :optional) %>
 
   <%= submit_button(form: f, button: button_name, center: true) %>
 
