@@ -1,4 +1,4 @@
-import GeocodeController from "./geocode_controller.js"
+import GeocodeController from "controllers/geocode_controller"
 import { Loader } from "@googlemaps/js-api-loader"
 
 // Connects to data-controller="map"
