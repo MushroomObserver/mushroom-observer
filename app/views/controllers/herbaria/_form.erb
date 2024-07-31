@@ -62,10 +62,10 @@ end
   <%= autocompleter_field(
     form: f, field: :place_name, type: :location,
     label: :LOCATION.l + ":", between: :optional,
-    hidden_data: { map_target: "locationId" },
+    hidden_data: { geocode_target: "locationId" },
     create_text: :form_observations_create_locality.l,
     data: {
-      map_target: "placeInput",
+      geocode_target: "placeInput",
       action: "geocode:googlePrimer@window->autocompleter#refreshGooglePrimer" }
   ) %>
 
