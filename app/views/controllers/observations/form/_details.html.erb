@@ -86,12 +86,8 @@ t_s = {
           }
         ) %>
 
-        <%= fields_for(:location) do |f_l| %>
-          <% %w[north south east west low high].each do |key| %>
-            <%= f_l.hidden_field(:"#{key}", value: @location&.send(key) || nil,
-                                data: { map_target: "#{key}Input" }) %>
-          <% end %>
-        <% end %>
+        <%= render(partial: "locations/form/bounds_hidden_fields",
+                   locals: { location: @location, target_type: :map_target }) %>
         <!-- /WHERE -->
 
         <!-- IS_COLLECTION_LOCATION -->
