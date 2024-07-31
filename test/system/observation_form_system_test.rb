@@ -129,10 +129,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # check new observation form defaults
     assert_date_is_now
     assert_geolocation_is_empty
-    last_obs = Observation.where(user_id: User.current.id).
-               order(:created_at).last
+    last_obs = Observation.recent_by_user(User.current).last
     assert_selector("#observation_place_name", wait: 6)
     assert_selector("#observation_location_id", visible: :all)
+    sleep(0.5)
     assert_field("observation_place_name", with: last_obs.where)
     assert_field("observation_location_id", with: last_obs.location_id,
                                             type: :hidden)
@@ -176,8 +176,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # check new observation form defaults
     assert_date_is_now
     assert_geolocation_is_empty
-    last_obs = Observation.where(user_id: User.current.id).
-               order(:created_at).last
+    last_obs = Observation.recent_by_user(User.current).last
     # This is currently "Falmouth, Massachusetts, USA"
     assert_field("observation_place_name", with: last_obs.where)
     assert_field("observation_location_id", with: last_obs.location_id,

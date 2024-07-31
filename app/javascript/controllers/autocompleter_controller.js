@@ -164,6 +164,10 @@ export default class extends Controller {
     Object.assign(this, AUTOCOMPLETER_TYPES[this.TYPE]);
     Object.assign(this, INTERNAL_OPTS);
 
+    // Does this autocompleter affect a map?
+    this.hasMap = this.inputTarget.dataset.hasOwnProperty("mapTarget");
+    this.hasGeocode = this.inputTarget.dataset.hasOwnProperty("geocodeTarget");
+
     // Shared MO utilities, imported at the top:
     this.EVENT_KEYS = EVENT_KEYS;
     Object.assign(this, mo_form_utilities);
@@ -234,23 +238,36 @@ export default class extends Controller {
         !this.keepBtnTarget.classList.contains('active')) {
         this.clearHiddenId();
       }
-      if (this.TYPE === "location_google") {
-        this.inputTarget.closest("form").classList.add('map-outlet');
-        this.element.classList.add('create');
-        this.element.classList.remove('constrained');
-      } else if (this.ACT_LIKE_SELECT) {
-        this.inputTarget.closest("form").classList.remove('map-outlet');
-        // primer is not based on input, so go ahead and request from server.
-        this.focused = true; // so it will draw the pulldown immediately
-        this.refreshPrimer(); // directly refresh the primer w/request_params
-        this.element.classList.add('constrained');
-        this.element.classList.remove('create');
-      } else {
-        this.inputTarget.closest("form").classList.remove('map-outlet');
-        this.verbose("autocompleter: regular swap");
-        this.scheduleRefresh();
-        this.element.classList.remove('constrained', 'create');
-      }
+      this.constrainedSelectionUI();
+    }
+  }
+
+  constrainedSelectionUI() {
+    const outlet_class = this.appropriateOutletClass();
+    if (this.TYPE === "location_google") {
+      this.inputTarget.closest("form").classList.add(outlet_class);
+      this.element.classList.add('create');
+      this.element.classList.remove('constrained');
+    } else if (this.ACT_LIKE_SELECT) {
+      this.inputTarget.closest("form").classList.remove(outlet_class);
+      // primer is not based on input, so go ahead and request from server.
+      this.focused = true; // so it will draw the pulldown immediately
+      this.refreshPrimer(); // directly refresh the primer w/request_params
+      this.element.classList.add('constrained');
+      this.element.classList.remove('create');
+    } else {
+      this.inputTarget.closest("form").classList.remove(outlet_class);
+      this.verbose("autocompleter: regular swap");
+      this.scheduleRefresh();
+      this.element.classList.remove('constrained', 'create');
+    }
+  }
+
+  appropriateOutletClass() {
+    if (this.hasMap) {
+      return 'map-outlet';
+    } else if (this.hasGeocode) {
+      return 'geocode-outlet';
     }
   }
 
