@@ -1423,7 +1423,8 @@
   ask_webmaster_title: Email Question or Comment
   ask_webmaster_your_email: Your email address
   ask_webmaster_question: Question or Comment
-  ask_webmaster_note: "Thanks for your interest in the Mushroom Observer website.  This website was first launched in mid-2006.  The site is owned by the non-profit \"Mushroom Observer, Inc.\":/support/governance and administered by a group of volunteer developers and maintainers.  We welcome any questions you might have about using the site or comments on how the site might be improved.  You can vote and comment on all the various suggestions for future development there.  However, they are only rough guides, subject to bugs or others issues that may come up and, of course, the availability of our own time to work on the site.\n\nThe Mushroom Observer Team"
+  ask_webmaster_note: "Thanks for your interest in the Mushroom Observer website. This website was first launched in mid-2006. The site is owned by the non-profit \"Mushroom Observer, Inc.\":/support/governance and administered by a group of volunteer developers and maintainers. We welcome any questions about using the site or comments on how the site might be improved. \n\n [:ask_webmaster_bug] \n\nThe Mushroom Observer Team"
+  ask_webmaster_bug: "**Bug Reports**\n If you are reporting a bug, please let us know what hardware, operating system, and browser you use, and exactly what you were doing. (Which page(s) you were viewing, what you typed, which lin(s) you clicked.)"
 
   # comments/new
   comment_add_title: Add Comment to [name]
