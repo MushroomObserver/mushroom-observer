@@ -8,7 +8,7 @@
   button_data: { map_target: "showBoxBtn", action: "map#showBox" }
 ) %>
 
-<%= render(partial: "locations/form/north_south_east_west_alt_fields",
+<%= render(partial: "locations/form/bounds_fields",
            locals: { f: f }) %>
 
 <% if in_admin_mode? %>
