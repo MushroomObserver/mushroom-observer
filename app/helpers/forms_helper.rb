@@ -218,6 +218,7 @@ module FormsHelper
     ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
                             separator: args[:separator],
                             autocompleter_map_outlet: args[:map_outlet],
+                            autocompleter_geocode_outlet: args[:geocode_outlet],
                             autocompleter_target: "wrap" }
     ac_args[:between] = capture do
       concat(args[:between])
