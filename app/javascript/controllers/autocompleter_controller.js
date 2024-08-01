@@ -330,7 +330,7 @@ export default class extends Controller {
 
     const hiddenId = parseInt(this.hiddenTarget.value);
 
-    if (hiddenId !== NaN && hiddenId > 0) {
+    if (hiddenId !== NaN && hiddenId != 0) {
       this.wrapTarget.classList.add('has-id');
     } else {
       this.wrapTarget.classList.remove('has-id');
