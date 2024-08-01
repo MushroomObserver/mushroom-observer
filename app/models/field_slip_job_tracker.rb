@@ -15,6 +15,7 @@ class FieldSlipJobTracker < AbstractModel
   belongs_to :user
 
   def self.create(*args)
+    args[0][:version] = 2 if User.current.id == 1
     args[0][:status] = "Starting"
     super(*args)
   end
@@ -34,7 +35,11 @@ class FieldSlipJobTracker < AbstractModel
   end
 
   def filename
-    @filename ||= "#{prefix}-#{code_num(start)}-#{code_num(last)}-#{id}.pdf"
+    @filename ||= if version == 1
+                    "#{prefix}-#{code_num(start)}-#{code_num(last)}-#{id}.pdf"
+                  else
+                    "MO-#{id}.pdf"
+                  end
   end
 
   def filepath
