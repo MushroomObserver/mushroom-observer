@@ -50,14 +50,12 @@ class SpeciesListsControllerTest < FunctionalTestCase
   def assert_create_species_list
     assert_template("new")
     assert_template("shared/_form_list_feedback")
-    assert_template("shared/_textilize_help")
     assert_template("species_lists/_form")
   end
 
   def assert_edit_species_list
     assert_template("edit")
     assert_template("shared/_form_list_feedback")
-    assert_template("shared/_textilize_help")
     assert_template("species_lists/_form")
   end
 

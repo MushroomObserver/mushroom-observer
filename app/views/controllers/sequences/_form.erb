@@ -4,11 +4,11 @@ when "new", "create"
   url_params = add_query_param(
     { action: :create, observation_id: @observation.id }
   )
-  button = :ADD.t
+  button = :ADD.l
 when "edit", "update"
   url_params = add_query_param({ action: :update })
   url_params = url_params.merge({ back: @back }) if @back.present?
-  button = :UPDATE.t
+  button = :UPDATE.l
 end
 form_args = {
   model: @sequence, url: url_params, id: "sequence_form"

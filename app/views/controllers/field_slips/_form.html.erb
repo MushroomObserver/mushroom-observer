@@ -33,7 +33,7 @@
     <%= autocompleter_field(form: form, field: :location,
                             label: :LOCATION.t + ":", type: :location) %>
 
-    <%= render(partial: "shared/notes_form",
+    <%= render(partial: "shared/notes_fields",
                locals: { form:, fields: field_slip.notes_fields }) %>
 
     <%= autocompleter_field(form: form, field: :field_slip_id,

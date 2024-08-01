@@ -19,7 +19,7 @@
 #  allow the owner/authors of the object commented on to be notified of the
 #  new comment.  Just follow these easy steps:
 #
-#  1. Add to +all_types+ Array in this file.
+#  1. Add to +all_types+ Array in this file and AbstractModel.NAME_TO_TYPE
 #  2. Add +has_many+ relationships to the model:
 #
 #       has_many :comments,  :as => :target, :dependent => :destroy

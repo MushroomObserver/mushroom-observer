@@ -239,6 +239,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
 
   # Test user's options when an out-of-date-range project is checked
   # when creating an Observation
+  # proj.location == albion, proj.start_date 2010/9/26, end_date 2010/10/26
   def test_add_out_of_range_observation_to_project
     proj = projects(:past_project)
     user = users(:roy)
@@ -246,17 +247,22 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     assert(proj.member?(user),
            "Need fixtures such that `user` is a member of `proj`")
     proj_checkbox = "project_id_#{proj.id}"
+    last_obs = Observation.recent_by_user(user).last
+    last_location = last_obs.location # nybg_location
     obs_location = locations(:burbank)
+    assert_not_equal(proj.location, last_location)
+    assert_not_equal(proj.location, obs_location)
     login(user)
 
-    # Try adding out-of-range Observation to Project
+    # Try adding out-of-range Observation (by both date and location) to Project
     # It should reload the form with warnings and a hidden field
     visit(new_observation_path)
     assert_selector("#observation_place_name", visible: :any)
     assert(has_unchecked_field?(proj_checkbox),
            "Missing an unchecked box for Project which has ended")
-    fill_in(id: "observation_place_name", visible: :any,
-            with: obs_location.name)
+    assert_field("observation_location_id",
+                 type: :hidden, with: last_location.id)
+    assert_field("observation_place_name", with: last_location.display_name)
     check(proj_checkbox)
     assert_selector("##{proj_checkbox}[checked='checked']")
     assert_no_difference("Observation.count",
@@ -268,14 +274,12 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
       "#flash_notices",
       text: :form_observations_there_is_a_problem_with_projects.t.strip_html
     )
-    default_obs = Observation.where(user_id: user.id).order(:created_at).last
     within("#project_messages") do # out-of-range warning message
       assert(has_text?(:form_observations_projects_out_of_range.l(
-                         date: default_obs.when,
-                         place_name: obs_location.name
+                         date: last_obs.when,
+                         place_name: last_location.display_name
                        )),
              "Missing out-of-range warning with observation date")
-
       assert(has_text?(proj.title) && has_text?(proj.constraints),
              "Warning is missing out-of-range project's title or constraints")
     end
@@ -299,20 +303,27 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
 
     # 2. Prove that Observation is created if user fixes dates and
     # location to be in-range
+    # First, change the location to be in range, but not the date.
     visit(new_observation_path)
     assert_selector("#observation_place_name", visible: :any)
     fill_in(id: "observation_place_name", visible: :any,
             with: proj.location.display_name)
+    # this is what counts, would be handled by js
+    find_field(id: "observation_location_id",
+               type: :hidden).set(proj.location.id)
     check(proj_checkbox)
     first(:button, "Create").click
     assert_selector(
       "#flash_notices",
       text: :form_observations_there_is_a_problem_with_projects.t.strip_html
     )
-    # Change the Obs date to be in range
+    # Change the Obs date to be in range - this should do it.
     select(proj.end_date.day, from: "observation_when_3i")
     select(Date::MONTHNAMES[proj.end_date.month], from: "observation_when_2i")
     select(proj.end_date.year, from: "observation_when_1i")
+    # must be re-set, why? Seems @location should be set by previous commit
+    find_field(id: "observation_location_id",
+               type: :hidden).set(proj.location.id)
     assert_difference(
       "Observation.count", 1,
       "Failed to created Obs after setting When within Project date range"
@@ -328,7 +339,9 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     visit(new_observation_path)
     assert_selector("#observation_place_name", visible: :any)
     fill_in(id: "observation_place_name", visible: :any,
-            with: obs_location.name)
+            with: obs_location.name) # ignored, it's the ID that matters
+    find_field(id: "observation_location_id", type: :hidden).
+      set(obs_location.id) # this is what counts
     check(proj_checkbox)
     # reset Observation date, making it out-of-range
     select(Time.zone.today.day, from: "observation_when_3i")
