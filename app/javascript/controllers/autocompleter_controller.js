@@ -330,7 +330,7 @@ export default class extends Controller {
 
     const hiddenId = parseInt(this.hiddenTarget.value);
 
-    if (hiddenId !== NaN && hiddenId != 0) {
+    if (hiddenId && hiddenId !== NaN && hiddenId != 0) {
       this.wrapTarget.classList.add('has-id');
     } else {
       this.wrapTarget.classList.remove('has-id');
@@ -578,7 +578,11 @@ export default class extends Controller {
       this.verbose("autocompleter:doing_google_refresh()");
       this.old_value = this.inputTarget.value;
       // async, anything after this executes immediately
-      this.mapOutlet.geolocatePlaceName(true);
+      if (this.hasGeocodeOutlet) {
+        this.geocodeOutlet.geolocatePlaceName(true);
+      } else if (this.hasMapOutlet) {
+        this.mapOutlet.geolocatePlaceName(true);
+      }
       // still necessary if primer unchanged, as likely?
       // this.populateMatches();
       // this.drawPulldown();
