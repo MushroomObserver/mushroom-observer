@@ -212,7 +212,8 @@ module FormsHelper
       placeholder: :start_typing.l, autocomplete: "off",
       data: { autocompleter_target: "input" }
     }.deep_merge(args.except(:type, :separator, :textarea,
-                             :hidden, :hidden_data, :create_text))
+                             :hidden, :hidden_data, :create_text,
+                             :keep_text, :edit_text))
     ac_args[:class] = class_names("dropdown", args[:class])
     ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
                             separator: args[:separator],
