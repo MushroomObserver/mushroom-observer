@@ -61,13 +61,20 @@ end
 
   <%= autocompleter_field(
     form: f, field: :place_name, type: :location,
-    label: :LOCATION.l + ":", between: :optional,
+    label: [tag.span("#{:LOCATION.l}:", class: "unconstrained-label"),
+            tag.span("#{:form_observations_create_locality.l}:",
+                      class: "create-label")].safe_join(" "),
+    between: :optional,
     hidden_data: { geocode_target: "locationId" },
     create_text: :form_observations_create_locality.l,
     data: {
       geocode_target: "placeInput",
-      action: "geocode:googlePrimer@window->autocompleter#refreshGooglePrimer" }
+      action: "geocode:googlePrimer@window->autocompleter#refreshGooglePrimer"
+    }
   ) %>
+
+  <%= render(partial: "locations/form/bounds_hidden_fields",
+             locals: { location: @location, target_type: :geocode }) %>
 
   <%= text_field_with_label(form: f, field: :email,
                             label: :create_herbarium_email.l + ":",
