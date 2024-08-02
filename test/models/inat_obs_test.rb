@@ -83,6 +83,8 @@ class InatObsTest < UnitTestCase
     assert_equal("research", mock_inat_obs.inat_quality_grade)
     assert_equal("Somion unicolor", mock_inat_obs.inat_taxon_name)
     assert_equal("jdcohenesq", mock_inat_obs.inat_user_login)
+    # Inocutis dryophila suggested once
+    # then Somion unicolor suggested twice
     assert_equal(3, mock_inat_obs.inat_identifications.size)
   end
   # rubocop:enable Style/NumericLiterals
