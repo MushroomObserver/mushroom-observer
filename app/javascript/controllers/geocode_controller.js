@@ -291,6 +291,7 @@ export default class extends Controller {
 
   // Convert from human readable and do a rough check if they make sense
   validateLatLngInputs(update = false) {
+    this.verbose("geocode:validateLatLngInputs")
     if (!this.hasLatInputTarget || !this.hasLngInputTarget ||
       !this.latInputTarget.value || !this.lngInputTarget.value)
       return false
@@ -429,7 +430,7 @@ export default class extends Controller {
   }
 
   verbose(str) {
-    // console.log(str);
+    console.log(str);
     // document.getElementById("log").
     //   insertAdjacentText("beforeend", str + "<br/>");
   }
