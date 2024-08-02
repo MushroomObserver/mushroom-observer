@@ -1423,8 +1423,8 @@
   ask_webmaster_title: Email Question or Comment
   ask_webmaster_your_email: Your email address
   ask_webmaster_question: Question or Comment
-  ask_webmaster_note: "Thanks for your interest in the Mushroom Observer website. This website was first launched in mid-2006. The site is owned by the non-profit \"Mushroom Observer, Inc.\":/support/governance and administered by volunteer developers and maintainers. We welcome questions about using the site or comments on how the site might be improved. \n\n [:ask_webmaster_bug] \n\nThe Mushroom Observer Team"
-  ask_webmaster_bug: "**Bug Reports**\n If you are reporting a bug, please let us know what hardware, operating system, and browser you use, and exactly what you were doing. (Which page(s) you were viewing, what you typed, which link(s) you clicked.)"
+  ask_webmaster_note: "Thanks for your interest in the Mushroom Observer website. This website was first launched in mid-2006. The site is owned by the non-profit \"Mushroom Observer, Inc.\":/support/governance and administered by volunteer developers and maintainers. We welcome questions about using the site or comments on how the site might be improved.\n\n[:ask_webmaster_bug]\n\nThe Mushroom Observer Team"
+  ask_webmaster_bug: "**Bug Reports**\nIf you are reporting a bug, please let us know what hardware, operating system, and browser you use, and exactly what you were doing. (Which page(s) you were viewing, what you typed, which link(s) you clicked.)"
 
   # comments/new
   comment_add_title: Add Comment to [name]
@@ -1588,7 +1588,7 @@
   form_locations_notes: "[:Notes]"
   form_locations_refs: "[:form_names_refs]"
   form_locations_refs_help: "[:form_names_refs_help]"
-  form_locations_help: "Here you can define the place where you observed mushrooms, if a matching place doesn't exist in Mushroom Observer already. Please try to define locations that will be reusable by yourself or others. If you have an idea of the location's name, you can start typing and Google will return its best guess of the place you typed, and draw a box of the approximate boundaries on the map. At this point, you can manually edit both the boundaries and the name of the place. <a href=\"/locations/help\" target=\"_new\">More about Locations on MO.</a>"
+  form_locations_help: Here you can define the place where you observed mushrooms, if a matching place doesn't exist in Mushroom Observer already. Please try to define locations that will be reusable by yourself or others. If you have an idea of the location's name, you can start typing and Google will return its best guess of the place you typed, and draw a box of the approximate boundaries on the map. At this point, you can manually edit both the boundaries and the name of the place. <a href="/locations/help" target="_new">More about Locations on MO.</a>
   form_locations_find_on_map: Find on Map
   form_locations_get_elevation: Get Elevations
   form_locations_lat_long_help: All values should be in decimal degrees.
@@ -1658,10 +1658,10 @@
   form_observations_specimen_available: Specimen Available
   form_observations_is_collection_location: Is this location where it was collected?
   form_observations_gps_hidden: Hide exact coordinates?
-  form_observations_upload_images: "Upload [:images]"
-  form_observations_uploading_images: "Uploading [:images]"
+  form_observations_upload_images: Upload [:images]
+  form_observations_uploading_images: Uploading [:images]
   form_observations_upload_another: Upload another...
-  form_observations_creating_observation: "Creating [:observation]"
+  form_observations_creating_observation: Creating [:observation]
   form_observations_edit_image: "[:EDIT] [:image]"
   form_observations_remove_image: "[:REMOVE] [:image]"
   form_observations_lat_long_help: "Optional GPS location within **[:WHERE]**. Latitude must be -90.0 to 90.0;  longitude must be -180.0 to 180.0. Elevation will be converted to meters. If you choose to provide this data please make it as accurate as possible. Examples: \"34.1164\" = \"34°6&apos;59&quot;N\", \"-118.1459\" = \"118 8.754 W\", \"239 m\" = \"784 ft.\""
@@ -1681,7 +1681,7 @@
   form_observations_upload_help: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation.
   form_observations_upload_help_multi_select: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation. In the file select dialog you can select multiple images at a time.  You can also continue to add additional images by clicking the button below.
   form_observations_where_help: "Place where the Observation was made. **In the US this should be at least as precise as the county.**\n&nbsp;\nInclude administrative divisons ordered from smallest to largest, ending with the full name of the country, except use 'USA' for the United States of America.\nExamples:\n&nbsp;&nbsp; [loc1]\n&nbsp;&nbsp; [loc2]"
-  form_observations_locate_on_map_help: "Use the **[:form_observations_open_map]** button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude."
+  form_observations_locate_on_map_help: Use the **[:form_observations_open_map]** button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude.
   form_observations_dubious_help: Click '[button]' to use this location name or edit the text below to correct any typo.
   form_observations_project_help: Check any projects you wish to attach this observation to.  All images you upload will also automatically be attached to these projects, too.
   form_observations_list_help: Check any species lists you would like to add this observation to.
