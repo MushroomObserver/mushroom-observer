@@ -4,34 +4,28 @@ class FieldSlipJob < ApplicationJob
   queue_as :default
 
   def perform(tracker_id)
-    extra_log("Start")
     log("Starting FieldSlipJob.perform(#{tracker_id})")
     cleanup_old_pdfs(tracker_id)
     tracker = FieldSlipJobTracker.find(tracker_id)
+    tracker.append_note("Got tracker")
+    tracker.append_note(Dir.glob("public/field_slips/*").join("\n"))
     raise(:field_slip_job_no_tracker.t) unless tracker
 
-    extra_log("Processing")
     tracker.processing
     icon = "public/logo-120.png"
     view = FieldSlipView.new(tracker, icon)
     view.render
     view.save_as(tracker.filepath)
-    extra_log("Done")
+    tracker.append_note("Done")
+    tracker.append_note(Dir.glob("public/field_slips/*").join("\n"))
     tracker.done
     log("Done with FieldSlipJob.perform(#{tracker_id})")
-    extra_log("End")
     tracker.filepath
   end
 
   private
 
   MAX_JOB_AGE = 1.week
-
-  def extra_log(msg)
-    open("/tmp/extra_log", "a") do |f|
-      f.write("#{msg}\n")
-    end
-  end
 
   def cleanup_old_pdfs(tracker_id)
     FieldSlipJobTracker.where.not(id: tracker_id).find_each do |tracker|
