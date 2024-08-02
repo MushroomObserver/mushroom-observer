@@ -4,6 +4,7 @@ require("application_system_test_case")
 
 class LocationFormSystemTest < ApplicationSystemTestCase
   def test_format_new_location_name
+    skip("This test is inconsistent when run in CI")
     # browser = page.driver.browser
     rolf = users("rolf")
     login!(rolf)

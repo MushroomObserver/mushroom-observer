@@ -2,7 +2,7 @@
 
 class FieldSlipJobTracker < AbstractModel
   PUBLIC_DIR = "public/"
-  SUBDIR = "field_slips"
+  SUBDIR = "shared"
   PDF_DIR = PUBLIC_DIR + SUBDIR
 
   enum status:
@@ -15,7 +15,6 @@ class FieldSlipJobTracker < AbstractModel
   belongs_to :user
 
   def self.create(*args)
-    args[0][:version] = 2 if User.current.id == 1
     args[0][:status] = "Starting"
     super(*args)
   end
@@ -35,11 +34,7 @@ class FieldSlipJobTracker < AbstractModel
   end
 
   def filename
-    @filename ||= if version == 1
-                    "#{prefix}-#{code_num(start)}-#{code_num(last)}-#{id}.pdf"
-                  else
-                    "MO-#{id}.pdf"
-                  end
+    @filename ||= "#{prefix}-#{code_num(start)}-#{code_num(last)}-#{id}.pdf"
   end
 
   def filepath
@@ -57,11 +52,6 @@ class FieldSlipJobTracker < AbstractModel
     else
       Time.zone.now - created_at
     end
-  end
-
-  def append_note(note)
-    self.notes = (notes || "") + note + "\n"
-    save
   end
 
   private
