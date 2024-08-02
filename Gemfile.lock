@@ -1,5 +1,5 @@
 GIT
-  remote: https://github.com/MushroomObserver/acts_as_versioned/
+  remote: https://github.com/MushroomObserver/acts_as_versioned
   revision: 56891f7f915610e9f884e3a932bfb6934303b3b8
   specs:
     mo_acts_as_versioned (0.6.6)
@@ -273,7 +273,7 @@ GEM
       io-console (~> 0.5)
     requestjs-rails (0.0.11)
       railties (>= 6.1.0)
-    rexml (3.3.2)
+    rexml (3.3.3)
       strscan
     rqrcode (2.2.0)
       chunky_png (~> 1.0)
