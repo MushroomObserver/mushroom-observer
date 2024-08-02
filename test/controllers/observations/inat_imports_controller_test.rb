@@ -172,6 +172,7 @@ module Observations
 
       assert(obs.images.any?, "Obs should have images")
       assert(obs.sequences.none?)
+      assert_equal(2, obs.namings.size)
     end
 
     def test_import_lycoperdon

@@ -219,11 +219,12 @@ module Observations
       # add_inat_images(inat_obs.inat_obs_photos) unless Rails.env.test?
       add_inat_images(inat_obs.inat_obs_photos)
 
+      add_namings(inat_obs)
+
       # TODO: Other things done by Observations#create
       # save_everything_else(params.dig(:naming, :reasons))
       # strip_images! if @observation.gps_hidden
       # update_field_slip(@observation, params[:field_code])
-      # flash_notice(:runtime_observation_success.t(id: @observation.id))
       add_inat_sequences(inat_obs)
       add_inat_summmary_data(inat_obs)
     end
@@ -288,6 +289,23 @@ module Observations
       User.where(login: "MO Webmaster").first
     end
 
+    def add_namings(inat_obs)
+      inat_obs.inat_identifications.each do |identification|
+        inat_taxon = ::InatTaxon.new(identification[:taxon])
+        next if name_already_proposed?(inat_taxon)
+
+        naming = Naming.new(observation: @observation,
+                            user: User.current,
+                            name: inat_taxon.name)
+        naming.save
+      end
+    end
+
+    def name_already_proposed?(inat_taxon)
+      Naming.where(observation_id: @observation.id).
+        map(&:name).include?(inat_taxon.name)
+    end
+
     def add_inat_summmary_data(inat_obs)
       data =
         "#{:USER.t}: #{inat_obs.inat_user_login}\n".
@@ -301,7 +319,7 @@ module Observations
         concat("#{:PROJECTS.t}: #{inat_obs.inat_project_names}\n").
         concat("#{:SEQUENCES.t}: #{:UNDER_DEVELOPMENT.t}\n").
         concat("#{:OBSERVATION_FIELDS.t}: \n" \
-               "#{obs_fields(inat_obs.inat_obs_fields)}\n").
+         "#{obs_fields(inat_obs.inat_obs_fields)}\n").
         concat("#{:TAGS.t}: #{inat_obs.inat_tags.join(" ")}\n")
 
       params = {
