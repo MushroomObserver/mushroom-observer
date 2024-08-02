@@ -60,7 +60,7 @@ class FieldSlipJobTracker < AbstractModel
   end
 
   def append_note(note)
-    self.notes = (self.notes || "") + note + "\n"
+    self.notes = (notes || "") + note + "\n"
     save
   end
 
