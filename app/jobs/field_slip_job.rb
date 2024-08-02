@@ -7,8 +7,6 @@ class FieldSlipJob < ApplicationJob
     log("Starting FieldSlipJob.perform(#{tracker_id})")
     cleanup_old_pdfs(tracker_id)
     tracker = FieldSlipJobTracker.find(tracker_id)
-    tracker.append_note("Got tracker")
-    tracker.append_note(Dir.glob("public/field_slips/*").join("\n"))
     raise(:field_slip_job_no_tracker.t) unless tracker
 
     tracker.processing
@@ -16,8 +14,6 @@ class FieldSlipJob < ApplicationJob
     view = FieldSlipView.new(tracker, icon)
     view.render
     view.save_as(tracker.filepath)
-    tracker.append_note("Done")
-    tracker.append_note(Dir.glob("public/field_slips/*").join("\n"))
     tracker.done
     log("Done with FieldSlipJob.perform(#{tracker_id})")
     tracker.filepath
