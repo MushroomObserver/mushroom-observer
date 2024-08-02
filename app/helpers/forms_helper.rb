@@ -213,12 +213,12 @@ module FormsHelper
       data: { autocompleter_target: "input" }
     }.deep_merge(args.except(:type, :separator, :textarea,
                              :hidden, :hidden_data, :create_text,
-                             :keep_text, :edit_text))
+                             :keep_text, :edit_text, :find_text))
     ac_args[:class] = class_names("dropdown", args[:class])
     ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
                             separator: args[:separator],
-                            autocompleter_map_outlet: args[:map_outlet],
-                            autocompleter_geocode_outlet: args[:geocode_outlet],
+                            autocompleter_map_outlet: ".map-outlet",
+                            autocompleter_geocode_outlet: ".geocode-outlet",
                             autocompleter_target: "wrap" }
     ac_args[:between] = capture do
       concat(args[:between])
