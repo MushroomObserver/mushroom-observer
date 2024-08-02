@@ -23,7 +23,7 @@ end
 %>
 
 <%= form_with(
-  model: @herbarium, id: "herbarium_form", class: "map-outlet",
+  model: @herbarium, id: "herbarium_form", class: "geocode-outlet",
   data: { controller: "geocode" }
 ) do |f| %>
 
@@ -67,7 +67,6 @@ end
     between: :optional,
     hidden_data: { geocode_target: "locationId" },
     create_text: :form_observations_create_locality.l,
-    geocode_outlet: ".geocode-outlet",
     data: {
       geocode_target: "placeInput",
       action: "geocode:googlePrimer@window->autocompleter#refreshGooglePrimer"
