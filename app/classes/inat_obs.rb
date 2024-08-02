@@ -121,6 +121,10 @@ class InatObs
     @obs[:tags]
   end
 
+  def inat_taxon
+    @obs[:taxon]
+  end
+
   def inat_taxon_name
     inat_taxon[:name]
   end
@@ -271,10 +275,6 @@ class InatObs
   # https://forum.inaturalist.org/t/given-an-observation-id-get-a-list-of-project/53476?u=joecohen
   def inat_projects
     @obs[:project_observations]
-  end
-
-  def inat_taxon
-    @obs[:taxon]
   end
 
   def slime_mold?

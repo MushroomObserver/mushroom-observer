@@ -28,7 +28,7 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | inocybe.txt | [222904190](https://www.inaturalist.org/observations/222904190) | 5 | public | cc-by-nc, **2 tags∆∆** |
 | lentinellus_ursinus.txt | [220796026](https://inaturalist.org/observations/220796026) | 2 | obscured | **ID matches many MO names** |
 | listed_ids.txt | [231104466](https://www.inaturalist.org/observations/231104466) [195434438](https://www.inaturalist.org/observations/195434438) | na | na | response to request for 2 obs by number (amanita_flavorubens, evernia) |
-| lycoperdon.txt | [24970904](https://www.inaturalist.org/observations/24970904) | 2 | public | cc-by-nc, projects, Activity, many fields including **DNA**, place: E. side of Metolius River, Sisters Ranger District, Deschutes National Forest, Jefferson County, Oregon, US |
+| lycoperdon.txt | [24970904](https://www.inaturalist.org/observations/24970904) | 2 | public | cc-by-nc, projects, **multiple ids**, many fields including **DNA**, place: E. side of Metolius River, Sisters Ranger District, Deschutes National Forest, Jefferson County, Oregon, US |
 | russulaceae.txt | [216675045](https://www.inaturalist.org/observations/216675045) | 2 | public | **all rights reserved**, many projects, Activity; place: Point Defiance Park, Tacoma, WA, US |
 | somion_unicolor.json |  |  |  | Formatted version of following; facilitates viewing iNat API response key/values test/inat/somion_unicolor.json |
 | somion_unicolor.txt | [**202555552**](https://www.inaturalist.org/observations/202555552) | 5 | public | Research Grade, Notes, Activity, >1 ID, 1 field (Mushroom Observer URL), **mirrored from MO** |
