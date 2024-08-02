@@ -14,6 +14,7 @@
 #
 #  obs::                 The iNat observation data
 #  inat_id::
+#  inat_identifications  array of identifications, taxa need not be unique
 #  inat_location::       lat,lon
 #  inat_obs_fields::     array of fields, each field a hash
 #  inat_obs_photos::     array of observation_photos
@@ -50,6 +51,10 @@ class InatObs
 
   def inat_id
     @obs[:id]
+  end
+
+  def inat_identifications
+    @obs[:identifications]
   end
 
   def inat_location
