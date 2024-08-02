@@ -259,6 +259,14 @@ export default class extends Controller {
     ]
   }
 
+  // Computes the center of a Google Maps Rectangle's LatLngBoundsLiteral object
+  centerFromBounds(bounds) {
+    let lat = (bounds?.north + bounds?.south) / 2.0
+    let lng = (bounds?.east + bounds?.west) / 2.0
+    if (bounds?.west > bounds?.east) { lng += 180 }
+    return { lat: lat, lng: lng }
+  }
+
   // takes a LatLngBoundsLiteral object {south:, west:, north:, east:}
   updateBoundsInputs(bounds) {
     if (!this.hasSouthInputTarget) return false
@@ -366,6 +374,13 @@ export default class extends Controller {
       this.autocomplete_buffer = setTimeout(() => {
         this.dispatch("pointChanged", { detail: { type: "location" } })
       }, 1000)
+    }
+  }
+
+  clearAutocompleterSwapBuffer() {
+    if (this.autocomplete_buffer) {
+      clearTimeout(this.autocomplete_buffer)
+      this.autocomplete_buffer = 0
     }
   }
 
