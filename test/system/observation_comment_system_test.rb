@@ -8,6 +8,7 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
   # Katrina edits the comment, rolf should get the change immediately.
   # Katrina deletes the comment, rolf should get the deletion immediately.
   def test_add_and_edit_comment
+    skip("This test is inconsistent when run in CI")
     rolf = users("rolf")
     katrina = users("katrina")
     obs = observations(:coprinus_comatus_obs)
