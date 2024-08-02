@@ -362,13 +362,6 @@ export default class extends GeocodeController {
     }
   }
 
-  clearAutocompleterSwapBuffer() {
-    if (this.autocomplete_buffer) {
-      clearTimeout(this.autocomplete_buffer)
-      this.autocomplete_buffer = 0
-    }
-  }
-
   clearMarkerDrawBuffer() {
     if (this.marker_draw_buffer) {
       clearTimeout(this.marker_draw_buffer)
@@ -606,14 +599,6 @@ export default class extends GeocodeController {
       nw: set.north_west
     }
     return corners
-  }
-
-  // Computes the center of a Google Maps Rectangle's LatLngBoundsLiteral object
-  centerFromBounds(bounds) {
-    let lat = (bounds?.north + bounds?.south) / 2.0
-    let lng = (bounds?.east + bounds?.west) / 2.0
-    if (bounds?.west > bounds?.east) { lng += 180 }
-    return { lat: lat, lng: lng }
   }
 
   //
