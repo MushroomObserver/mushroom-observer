@@ -295,7 +295,7 @@ module Observations
         next if name_already_proposed?(inat_taxon.name)
 
         naming = Naming.new(observation: @observation,
-                            user: User.current,
+                            user: naming_user(identification),
                             name: inat_taxon.name)
         naming.save
       end
@@ -304,6 +304,19 @@ module Observations
     def name_already_proposed?(name)
       Naming.where(observation_id: @observation.id).
         map(&:name).include?(name)
+    end
+
+    def naming_user(identification)
+      importer =
+        InatImport.where(user_id: User.current.id).first.inat_username
+
+      if identification[:user][:login] == importer
+        User.current
+      else
+        # iNat user who made this identification might not be an MO User
+        # So make inat_manager the user for the Proposed Name
+        inat_manager
+      end
     end
 
     def add_inat_summmary_data(inat_obs)

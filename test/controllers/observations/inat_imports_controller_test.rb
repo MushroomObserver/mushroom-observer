@@ -175,6 +175,18 @@ module Observations
       assert_equal(2, obs.namings.size)
     end
 
+    def test_import_namings
+      obs = import_mock_observation("tremella_mesenterica")
+
+      # iNat obs has two namings:
+      # Tremella mesenterica, by the obs creator
+      # Naematelia aurantia (maps to Fungi in tests) by another iNat user
+      namings = obs.namings
+      assert_equal(2, namings.length)
+      assert_equal(obs.user, namings.first.user)
+      assert_equal(users(:webmaster), namings.last.user)
+    end
+
     def test_import_lycoperdon
       obs = import_mock_observation("lycoperdon")
 
@@ -302,9 +314,12 @@ module Observations
       )
       inat_import_ids = inat_obs.inat_id
 
-      stub_inat_api_request(inat_import_ids, mock_search_result)
-      simulate_authorization(user: user, inat_import_ids: inat_import_ids)
+      simulate_authorization(user: user,
+                             inat_username: inat_obs.inat_user_login,
+                             inat_import_ids: inat_import_ids)
       stub_token_request
+      stub_inat_api_request(inat_import_ids, mock_search_result,
+                            inat_user_login: inat_obs.inat_user_login)
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
       login(user.login)
@@ -321,13 +336,14 @@ module Observations
       Observation.order(created_at: :asc).last
     end
 
-    def stub_inat_api_request(inat_obs_ids, mock_inat_response, id_above: 0)
+    def stub_inat_api_request(inat_obs_ids, mock_inat_response, id_above: 0,
+                              inat_user_login: nil)
       # mirror param order of iNat example/test page
       # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
       # for convenience in creating mock responses from that page
       params = <<~PARAMS.delete("\n")
         ?id=#{inat_obs_ids}
-        &user_login=
+        &user_login=#{inat_user_login}
         &iconic_taxa=#{Observations::InatImportsController::ICONIC_TAXA}
         &id_above=#{id_above}
         &per_page=200
@@ -375,13 +391,15 @@ module Observations
         mo_license.id
     end
 
-    def simulate_authorization(user: rolf, inat_import_ids: "",
-                               import_all: false)
+    def simulate_authorization(
+      user: rolf, inat_username: nil, inat_import_ids: "", import_all: false
+    )
       inat_import = InatImport.find_or_create_by(user: user)
       inat_import.import_all = import_all
       # ignore list of ids if importing all a user's iNat obss
       inat_import.inat_ids = import_all == true ? "" : inat_import_ids
       inat_import.state = "Authorizing"
+      inat_import.inat_username = inat_username
       inat_import.save
       stub_request(:any, authorization_url)
     end
