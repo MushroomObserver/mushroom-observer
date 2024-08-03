@@ -286,7 +286,7 @@ module Observations
     end
 
     def inat_manager
-      User.where(login: "MO Webmaster").first
+      User.find_by(login: "MO Webmaster")
     end
 
     def add_namings(inat_obs)

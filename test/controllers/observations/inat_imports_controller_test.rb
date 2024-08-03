@@ -176,15 +176,46 @@ module Observations
     end
 
     def test_import_namings
+      # This iNat id has two identifications:
+      # Tremella mesenterica, which in is fixtures
+      # "Naematelia aurantia, which is not
+      Name.new(text_name: "Naematelia aurantia",
+               author: "(Schwein.) Burt",
+               display_name: "Naematelia aurantia",
+               rank: "Species",
+               user: rolf).save
+      # iNat Community Taxon, which is not an identification for this iNat obs
+      Name.new(text_name: "Tremellales",
+               author: "Fr.",
+               display_name: "Tremellales",
+               rank: "Order",
+               user: rolf).save
+
+      tremellales = Name.find_by(text_name: "Tremellales")
+      t_mesenterica = Name.find_by(text_name: "Tremella mesenterica")
+      n_aurantia = Name.find_by(text_name: "Naematelia aurantia")
+
       obs = import_mock_observation("tremella_mesenterica")
 
-      # iNat obs has two namings:
-      # Tremella mesenterica, by the obs creator
-      # Naematelia aurantia (maps to Fungi in tests) by another iNat user
+      assert_equal(tremellales, obs.name)
+
       namings = obs.namings
-      assert_equal(2, namings.length)
-      assert_equal(obs.user, namings.first.user)
-      assert_equal(users(:webmaster), namings.last.user)
+      assert_includes(
+        namings, namings.find_by(name: t_mesenterica),
+        "Missing Proposed Name by MO User who is doing the import"
+      )
+      assert_includes(
+        namings, namings.find_by(name: t_mesenterica, user: User.current),
+        "Proposed Name has wrong User"
+      )
+      assert_includes(
+        namings, namings.find_by(name: n_aurantia),
+        "Missing Proposed Name by iNat user who isn't doing the import"
+      )
+      assert_includes(
+        namings, namings.find_by(name: n_aurantia, user: inat_manager),
+        "Proposed Name has wrong User"
+      )
     end
 
     def test_import_lycoperdon
@@ -294,6 +325,10 @@ module Observations
       ) do
         post(:authenticate, params: params)
       end
+    end
+
+    def inat_manager
+      User.find_by(login: "MO Webmaster")
     end
 
     # Turn results with many pages into results with one page
