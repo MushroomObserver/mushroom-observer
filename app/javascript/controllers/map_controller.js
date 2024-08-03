@@ -387,25 +387,23 @@ export default class extends GeocodeController {
   checkForBox() {
     // this.showBoxBtnTarget.disabled = true
     this.verbose("map:checkForBox")
-    let id, location
-    if (this.hasLocationIdTarget && (id = this.locationIdTarget.value)) {
-      this.mapLocationBounds()
+    let id
+    if (id = this?.locationIdTarget?.value) {
+      this.mapLocationIdData()
       // Only geocode lat/lng if we have no location_id and not ignoring place
     } else if (["location", "hybrid"].includes(this.map_type)) {
-      if (location = this.validateLatLngInputs(false) &&
-        this.ignorePlaceInput !== false) {
-        this.geocodeLatLng(location) // multiple possible results
+      if (this.ignorePlaceInput !== false) {
+        this.tryToGeocode() // multiple possible results
         // ...and only geolocate placeName if we have no lat/lng
-      } else if (this.ignorePlaceInput === false) {
-        // ...and only geolocate placeName if we have no lat/lng
-        this.geolocatePlaceName() // 1 result
+      } else {
+        this.tryToGeolocate()
       }
     }
     if (this.rectangle) this.rectangle.setVisible(true)
   }
 
   // The locationIdTarget should have the bounds in its dataset
-  mapLocationBounds() {
+  mapLocationIdData() {
     if (!this.hasLocationIdTarget || !this.locationIdTarget.dataset.north)
       return false
 

@@ -42,12 +42,18 @@ export default class extends Controller {
       })
   }
 
+  tryToGeocode() {
+    let location
+
+    if (location = this.validateLatLngInputs(false) &&
+      JSON.stringify(location) !== JSON.stringify(this.lastGeocodedLatLng)) {
+      this.geocodeLatLng(location)
+    }
+  }
+
   // Geocode a lat/lng location. If we have multiple results, we'll dispatch
   // Send the location from validateLatLngInputs(false) to avoid duplicate calls
   geocodeLatLng(location) {
-    if (JSON.stringify(location) == JSON.stringify(this.lastGeocodedLatLng))
-      return
-
     this.lastGeocodedLatLng = location
     this.verbose("geocode:geocodeLatLng")
     this.verbose(location)
@@ -66,10 +72,16 @@ export default class extends Controller {
       });
   }
 
-  geolocatePlaceName() {
+  tryToGeolocate() {
     let address = this.placeInputTarget.value
-    if (address === this.lastGeolocatedAddress) return
 
+    if (this.ignorePlaceInput === false && address !== ""
+      && address !== this.lastGeolocatedAddress) {
+      this.geolocatePlaceName(address)
+    }
+  }
+
+  geolocatePlaceName(address) {
     this.lastGeolocatedAddress = address
     this.verbose("geocode:geolocatePlaceName")
     this.verbose(address)
