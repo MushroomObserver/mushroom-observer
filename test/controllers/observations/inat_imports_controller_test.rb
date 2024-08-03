@@ -172,7 +172,6 @@ module Observations
 
       assert(obs.images.any?, "Obs should have images")
       assert(obs.sequences.none?)
-      assert_equal(2, obs.namings.size)
     end
 
     def test_import_namings
@@ -199,12 +198,23 @@ module Observations
       assert_equal(tremellales, obs.name)
 
       namings = obs.namings
+      naming = namings.find_by(name: tremellales)
+      assert(naming.present?, "Missing Naming for MO consensus ID")
+      assert_equal(
+        inat_manager, naming.user,
+        "Naming not corresponding to iNat ID should have `user: inat_manager`"
+      )
+      vote = Vote.find_by(naming: naming, user: naming.user)
+      assert(vote.present?, "Naming is missing a Vote")
+      assert_equal(1, vote.value, "Vote for MO consensus should be 1")
+
       naming = namings.find_by(name: t_mesenterica)
       assert(naming.present?,
              "Missing Naming for iNat identification by MO User")
       assert_equal(User.current, naming.user, "Naming has wrong User")
       vote = Vote.find_by(naming: naming, user: naming.user)
       assert(vote.present?, "Naming is missing a Vote")
+      assert_equal(0, vote.value, "Vote for non-consensus name should be 0")
 
       naming = namings.find_by(name: n_aurantia)
       assert(naming.present?,
@@ -212,6 +222,7 @@ module Observations
       assert_equal(inat_manager, naming.user, "Naming has wrong User")
       vote = Vote.find_by(naming: naming, user: naming.user)
       assert(vote.present?, "Naming is missing a Vote")
+      assert_equal(0, vote.value, "Vote for non-consensus name should be 0")
     end
 
     def test_import_lycoperdon

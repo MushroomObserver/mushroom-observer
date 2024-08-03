@@ -303,6 +303,22 @@ module Observations
         Vote.new(naming: naming, observation: @observation,
                  user: user, value: 0).save
       end
+
+      naming = Naming.find_by(observation: @observation,
+                              name: @observation.name)
+
+      if naming.nil?
+        naming = Naming.new(observation: @observation,
+                            user: inat_manager,
+                            name: @observation.name)
+        naming.save
+        Vote.new(naming: naming, observation: @observation,
+                 user: inat_manager, value: 1).save
+      else
+        vote = Vote.find_by(naming: naming, observation: @observation)
+        vote.value = 1
+        vote.save
+      end
     end
 
     def name_already_proposed?(name)
