@@ -294,10 +294,14 @@ module Observations
         inat_taxon = ::InatTaxon.new(identification[:taxon])
         next if name_already_proposed?(inat_taxon.name)
 
+        user = naming_user(identification)
         naming = Naming.new(observation: @observation,
-                            user: naming_user(identification),
+                            user: user,
                             name: inat_taxon.name)
         naming.save
+
+        Vote.new(naming: naming, observation: @observation,
+                 user: user, value: 0).save
       end
     end
 

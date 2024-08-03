@@ -203,11 +203,15 @@ module Observations
       assert(naming.present?,
              "Missing Naming for iNat identification by MO User")
       assert_equal(User.current, naming.user, "Naming has wrong User")
+      vote = Vote.find_by(naming: naming, user: naming.user)
+      assert(vote.present?, "Naming is missing a Vote")
 
       naming = namings.find_by(name: n_aurantia)
       assert(naming.present?,
              "Missing Naming for iNat identification by random iNat user")
       assert_equal(inat_manager, naming.user, "Naming has wrong User")
+      vote = Vote.find_by(naming: naming, user: naming.user)
+      assert(vote.present?, "Naming is missing a Vote")
     end
 
     def test_import_lycoperdon
