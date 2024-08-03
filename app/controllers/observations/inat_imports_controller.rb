@@ -320,29 +320,37 @@ module Observations
     end
 
     def add_inat_summmary_data(inat_obs)
-      data =
-        "#{:USER.t}: #{inat_obs.inat_user_login}\n".
-        concat("#{:OBSERVED.t}: #{inat_obs.when}\n").
-        concat("#{:LAT_LON.t}: #{inat_obs.inat_location} " \
-               "+/-#{inat_obs.inat_public_positional_accuracy} m\n").
-        concat("#{:PLACE.t}: #{inat_obs.inat_place_guess}\n").
-        concat("#{:ID.t}: #{inat_obs.inat_taxon_name}\n").
-        concat("#{:DQA.t}: #{inat_obs.dqa}\n").
-        concat("#{:ANNOTATIONS.t}: #{:UNDER_DEVELOPMENT.t}\n").
-        concat("#{:PROJECTS.t}: #{inat_obs.inat_project_names}\n").
-        concat("#{:SEQUENCES.t}: #{:UNDER_DEVELOPMENT.t}\n").
-        concat("#{:OBSERVATION_FIELDS.t}: \n" \
-         "#{obs_fields(inat_obs.inat_obs_fields)}\n").
-        concat("#{:TAGS.t}: #{inat_obs.inat_tags.join(" ")}\n")
-
       params = {
         target: @observation,
         summary: "#{:inat_data_comment.t} #{@observation.created_at}",
-        comment: data,
+        comment: comment(inat_obs),
         user: inat_manager
       }
 
       Comment.create(params)
+    end
+
+    def comment(inat_obs)
+      <<~COMMENT.gsub(/^\s+/, "")
+        #{:USER.t}: #{inat_obs.inat_user_login}
+        #{:OBSERVED.t}: #{inat_obs.when}\n
+        #{:LAT_LON.t}: #{lat_lon_accuracy(inat_obs)}\n
+        #{:PLACE.t}: #{inat_obs.inat_place_guess}\n
+        #{:ID.t}: #{inat_obs.inat_taxon_name}\n
+        #{:DQA.t}: #{inat_obs.dqa}\n
+        #{:ANNOTATIONS.t}: #{:UNDER_DEVELOPMENT.t}\n
+        #{:PROJECTS.t}: #{inat_obs.inat_project_names}\n
+        #{:SEQUENCES.t}: #{:UNDER_DEVELOPMENT.t}\n
+        #{:OBSERVATION_FIELDS.t}: \n\
+
+        #{obs_fields(inat_obs.inat_obs_fields)}\n
+        #{:TAGS.t}: #{inat_obs.inat_tags.join(" ")}\n
+      COMMENT
+    end
+
+    def lat_lon_accuracy(inat_obs)
+      "#{inat_obs.inat_location} " \
+      "+/-#{inat_obs.inat_public_positional_accuracy} m"
     end
 
     def add_inat_sequences(inat_obs)
