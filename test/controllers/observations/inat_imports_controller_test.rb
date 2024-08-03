@@ -176,46 +176,38 @@ module Observations
     end
 
     def test_import_namings
-      # This iNat id has two identifications:
+      # This iNat obs has two identifications:
       # Tremella mesenterica, which in is fixtures
+      t_mesenterica = Name.find_by(text_name: "Tremella mesenterica")
       # "Naematelia aurantia, which is not
       Name.new(text_name: "Naematelia aurantia",
                author: "(Schwein.) Burt",
                display_name: "Naematelia aurantia",
                rank: "Species",
                user: rolf).save
+      n_aurantia = Name.find_by(text_name: "Naematelia aurantia")
       # iNat Community Taxon, which is not an identification for this iNat obs
       Name.new(text_name: "Tremellales",
                author: "Fr.",
                display_name: "Tremellales",
                rank: "Order",
                user: rolf).save
-
       tremellales = Name.find_by(text_name: "Tremellales")
-      t_mesenterica = Name.find_by(text_name: "Tremella mesenterica")
-      n_aurantia = Name.find_by(text_name: "Naematelia aurantia")
 
       obs = import_mock_observation("tremella_mesenterica")
 
       assert_equal(tremellales, obs.name)
 
       namings = obs.namings
-      assert_includes(
-        namings, namings.find_by(name: t_mesenterica),
-        "Missing Proposed Name by MO User who is doing the import"
-      )
-      assert_includes(
-        namings, namings.find_by(name: t_mesenterica, user: User.current),
-        "Proposed Name has wrong User"
-      )
-      assert_includes(
-        namings, namings.find_by(name: n_aurantia),
-        "Missing Proposed Name by iNat user who isn't doing the import"
-      )
-      assert_includes(
-        namings, namings.find_by(name: n_aurantia, user: inat_manager),
-        "Proposed Name has wrong User"
-      )
+      naming = namings.find_by(name: t_mesenterica)
+      assert(naming.present?,
+             "Missing Naming for iNat identification by MO User")
+      assert_equal(User.current, naming.user, "Naming has wrong User")
+
+      naming = namings.find_by(name: n_aurantia)
+      assert(naming.present?,
+             "Missing Naming for iNat identification by random iNat user")
+      assert_equal(inat_manager, naming.user, "Naming has wrong User")
     end
 
     def test_import_lycoperdon
