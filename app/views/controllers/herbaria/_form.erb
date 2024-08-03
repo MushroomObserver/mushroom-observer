@@ -24,7 +24,11 @@ end
 
 <%= form_with(
   model: @herbarium, id: "herbarium_form", class: "geocode-outlet",
-  data: { controller: "geocode" }
+  data: {
+    controller: "geocode",
+    action:
+      "autocompleter:hiddenIdDataChanged@window->geocode#geolocatePlaceName"
+  }
 ) do |f| %>
 
   <%= submit_button(form: f, button: button_name, center: true) %>
