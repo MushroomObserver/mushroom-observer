@@ -235,7 +235,7 @@ export default class extends Controller {
       this.prepareInputElement();
       this.prepareHiddenInput();
       if (!this.hasKeepBtnTarget ||
-        !this.keepBtnTarget.classList.contains('active')) {
+        !this.keepBtnTarget?.classList?.contains('active')) {
         this.clearHiddenId();
       }
       this.constrainedSelectionUI();
@@ -291,7 +291,7 @@ export default class extends Controller {
     } else {
       outlet.lockBoxBtnTarget.classList.remove("d-none");
     }
-    this.createBtnTarget.classList.add('d-none');
+    // this.createBtnTarget.classList.add('d-none');
     // this.dispatchHiddenIdEvents();
   }
 
@@ -301,11 +301,11 @@ export default class extends Controller {
     if (outlet.rectangle) outlet.rectangle.setEditable(false);
 
     // Make the map show box button back into a create button
-    delete this.createBtnTarget.dataset.mapTarget;
-    const create_action = this.createBtnTarget.dataset.action
-      .replace("map#showBox:prevent", "autocompleter#swapCreate:prevent");
-    this.createBtnTarget.dataset.action = create_action;
-    this.createBtnTarget.classList.remove('d-none');
+    // delete this.createBtnTarget.dataset.mapTarget;
+    // const create_action = this.createBtnTarget.dataset.action
+    //   .replace("map#showBox:prevent", "autocompleter#swapCreate:prevent");
+    // this.createBtnTarget.dataset.action = create_action;
+    // this.createBtnTarget.classList.remove('d-none');
 
     // this.dispatchHiddenIdEvents();
     outlet.northInputTarget.value = '';
@@ -328,13 +328,8 @@ export default class extends Controller {
     // Attach events
     this.addEventListeners();
 
-    const hiddenId = parseInt(this.hiddenTarget.value);
-
-    if (hiddenId && hiddenId !== NaN && hiddenId != 0) {
-      this.wrapTarget.classList.add('has-id');
-    } else {
-      this.wrapTarget.classList.remove('has-id');
-    }
+    const hidden_id = parseInt(this.hiddenTarget.value);
+    this.hasIdOrNo(hidden_id);
   }
 
   // When swapping autocompleter types, swap the hidden input identifiers.
@@ -974,9 +969,7 @@ export default class extends Controller {
         this.hiddenTarget.dataset[key] = match[key];
     });
 
-    if (match['id'] !== 0) {
-      this.wrapTarget.classList.add('has-id');
-    }
+    this.hasIdOrNo(parseInt(match['id']));
     this.dispatchHiddenIdEvents();
   }
 
@@ -994,6 +987,14 @@ export default class extends Controller {
     });
 
     this.dispatchHiddenIdEvents();
+  }
+
+  hasIdOrNo(hidden_id) {
+    if (hidden_id && hidden_id !== NaN && hidden_id != 0) {
+      this.wrapTarget.classList.add('has-id');
+    } else {
+      this.wrapTarget.classList.remove('has-id');
+    }
   }
 
   storeCurrentHiddenData() {
@@ -1019,7 +1020,7 @@ export default class extends Controller {
       clearTimeout(this.data_timer);
       this.data_timer = setTimeout(() => {
         this.verbose("autocompleter: dispatching hiddenIdDataChanged");
-        this.wrapTarget.classList.remove('has-id');
+        this.hasIdOrNo(hidden_id);
         if (this.hasKeepBtnTarget) {
           this.keepBtnTarget.classList.remove('active');
         }
