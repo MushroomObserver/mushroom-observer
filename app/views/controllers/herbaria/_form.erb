@@ -30,10 +30,8 @@ end
   }
 ) do |f| %>
 
-  <%= submit_button(form: f, button: button_name, center: true) %>
-
-  <%= f.hidden_field :back, value: @back %>
-  <%= f.hidden_field :q, value: get_query_param %>
+  <%= f.hidden_field(:back, value: @back) %>
+  <%= f.hidden_field(:q, value: get_query_param) %>
 
   <%= text_field_with_label(form: f, field: :name, label: :NAME.t + ":",
                             between: :required, help:) %>
@@ -54,6 +52,8 @@ end
     ) %>
 
   <% end %>
+
+  <%= submit_button(form: f, button: button_name, center: true) %>
 
   <% if !@herbarium.personal_user_id %>
     <%= text_field_with_label(form: f, field: :code, size: 8, inline: true,
@@ -84,12 +84,12 @@ end
                             between: :optional) %>
 
   <%= text_area_with_label(form: f, field: :mailing_address, rows: 5,
-                          label: :create_herbarium_mailing_address.l + ":",
-                          between: :optional) %>
+                           label: :create_herbarium_mailing_address.l + ":",
+                           between: :optional) %>
 
   <%= text_area_with_label(form: f, field: :description, rows: 10,
-                          label: :NOTES.l + ":",
-                          between: :optional) %>
+                           label: :NOTES.l + ":",
+                           between: :optional) %>
 
   <%= submit_button(form: f, button: button_name, center: true) %>
 
