@@ -292,7 +292,7 @@ module Observations
     def add_namings(inat_obs)
       inat_obs.inat_identifications.each do |identification|
         inat_taxon = ::InatTaxon.new(identification[:taxon])
-        next if name_already_proposed?(inat_taxon)
+        next if name_already_proposed?(inat_taxon.name)
 
         naming = Naming.new(observation: @observation,
                             user: User.current,
@@ -301,9 +301,9 @@ module Observations
       end
     end
 
-    def name_already_proposed?(inat_taxon)
+    def name_already_proposed?(name)
       Naming.where(observation_id: @observation.id).
-        map(&:name).include?(inat_taxon.name)
+        map(&:name).include?(name)
     end
 
     def add_inat_summmary_data(inat_obs)
