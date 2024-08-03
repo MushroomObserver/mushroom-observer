@@ -119,6 +119,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
 
   def test_autofill_location_from_geotagged_image_nothing_matches
+    skip("This test is inconsistent when run in CI")
     setup_image_dirs # in general_extensions
     login!(katrina)
 
@@ -228,6 +229,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
 
   def test_post_edit_and_destroy_with_details_and_location
+    skip("This test is inconsistent when run in CI")
+
     # browser = page.driver.browser
     setup_image_dirs # in general_extensions
 

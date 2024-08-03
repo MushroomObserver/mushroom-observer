@@ -1,0 +1,780 @@
+repo_name: MushroomObserver/mushroom-observer
+report_id: d76790ec18ce3a3d3185d97cb81feeb9
+version: 0.1
+repo_type: Public
+timestamp: '2024-08-01T19:49:45+00:00'
+requested_by: nimmolo
+provider: github
+branch: main
+detected_tools_count: 57
+tools:
+- name: C lang
+  description: One of the most widely used programming languages of all time
+  website_url: http://en.wikipedia.org/wiki/C_(programming_language)
+  open_source: true
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Languages
+  image_url: https://img.stackshare.io/no-img-open-source.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer
+  detection_source: Repo Metadata
+- name: JavaScript
+  description: Lightweight, interpreted, object-oriented language with first-class
+    functions
+  website_url: https://developer.mozilla.org/en-US/docs/Web/JavaScript
+  open_source: true
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Languages
+  image_url: https://img.stackshare.io/service/1209/javascript.jpeg
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer
+  detection_source: Repo Metadata
+- name: Perl
+  description: Highly capable, feature-rich programming language with over 26 years
+    of development
+  website_url: http://www.perl.org/
+  open_source: true
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Languages
+  image_url: https://img.stackshare.io/service/1048/perl.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer
+  detection_source: Repo Metadata
+- name: Python
+  description: A clear and powerful object-oriented programming language, comparable
+    to Perl, Ruby, Scheme, or Java.
+  website_url: https://www.python.org
+  open_source: true
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Languages
+  image_url: https://img.stackshare.io/service/993/pUBY5pVj.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer
+  detection_source: Repo Metadata
+- name: Ruby
+  description: A dynamic, interpreted, open source programming language with a focus
+    on simplicity and productivity
+  website_url: https://www.ruby-lang.org
+  version: 3.3.0
+  open_source: true
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Languages
+  image_url: https://img.stackshare.io/service/989/ruby.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Repo Metadata
+  last_updated_by: andrew nimmo
+  last_updated_on: 2022-05-27 21:10:59.000000000 Z
+- name: SQL
+  description: It is a domain-specific language used in programming
+  website_url: https://en.wikipedia.org/wiki/SQL
+  open_source: true
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Languages
+  image_url: https://img.stackshare.io/service/2271/default_068d33483bba6b81ee13fbd4dc7aab9780896a54.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/db/clean.sql
+  detection_source: db/clean.sql
+  last_updated_by: Joe Cohen
+  last_updated_on: 2017-08-29 17:55:52.000000000 Z
+- name: Bootstrap
+  description: Simple and flexible HTML, CSS, and JS for popular UI components and
+    interactions
+  website_url: http://getbootstrap.com/
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Front-End Frameworks
+  image_url: https://img.stackshare.io/service/1101/C9QJ7V3X.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-04-22 06:32:59.000000000 Z
+- name: GraphQL
+  description: A data query language and runtime
+  website_url: http://graphql.org/
+  open_source: false
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Query Languages
+  image_url: https://img.stackshare.io/service/3820/12972006.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/public/graphql/schema.graphql
+  detection_source: public/graphql/schema.graphql
+  last_updated_by: andrew nimmo
+  last_updated_on: 2022-02-08 08:45:30.000000000 Z
+- name: Redis
+  description: Open source (BSD licensed), in-memory data structure store
+  website_url: http://redis.io/
+  version: 4.8.1
+  license: BSD-3-Clause
+  open_source: true
+  hosted_saas: false
+  category: Data Stores
+  sub_category: In-Memory Databases
+  image_url: https://img.stackshare.io/service/1031/default_cbce472cd134adc6688572f999e9122b9657d4ba.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-03-22 03:40:42.000000000 Z
+- name: Brakeman
+  description: A static analysis security vulnerability scanner for Ruby on Rails
+    applications
+  website_url: http://brakemanscanner.org/
+  version: 6.1.2
+  open_source: true
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Code Review
+  image_url: https://img.stackshare.io/service/6577/7b894961369b7c73e2a32f11f845e049_400x400.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: Joe Cohen
+  last_updated_on: 2023-01-03 18:31:56.000000000 Z
+- name: Bundler
+  description: A consistent environment for tracking and installing  gems and versions
+  website_url: http://bundler.io
+  open_source: false
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Front End Package Manager
+  image_url: https://img.stackshare.io/service/2988/4e77LXIo_400x400.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-05-16 03:02:26.000000000 Z
+- name: Capybara
+  description: Acceptance test framework for web applications
+  website_url: http://jnicklas.github.io/capybara/
+  version: 3.40.0
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Testing Frameworks
+  image_url: https://img.stackshare.io/service/2595/capybara.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-02-29 18:51:47.000000000 Z
+- name: Git
+  description: Fast, scalable, distributed revision control system
+  website_url: http://git-scm.com/
+  open_source: true
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Version Control System
+  image_url: https://img.stackshare.io/service/1046/git.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer
+  detection_source: Repo Metadata
+- name: GitHub Actions
+  description: Automate your workflow from idea to production
+  website_url: https://github.com/features/actions
+  open_source: false
+  hosted_saas: true
+  category: Build, Test, Deploy
+  sub_category: Continuous Integration
+  image_url: https://img.stackshare.io/service/11563/actions.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/.github/workflows/ci_rails.yml
+  detection_source: ".github/workflows/ci_rails.yml"
+  last_updated_by: Joe Cohen
+  last_updated_on: 2024-07-18 12:33:46.000000000 Z
+- name: NGINX
+  description: A high performance free open source web server powering busiest sites
+    on the Internet.
+  website_url: http://nginx.org
+  open_source: false
+  hosted_saas: false
+  category: Application Hosting
+  sub_category: Web Servers
+  image_url: https://img.stackshare.io/service/1052/YMxUfyWf.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/config/etc/nginx.conf
+  detection_source: config/etc/nginx.conf
+  last_updated_by: Jason
+  last_updated_on: 2014-07-27 19:02:00.000000000 Z
+- name: New Relic
+  description: New Relic is the industry’s largest and most comprehensive cloud-based
+    observability platform.
+  website_url: http://newrelic.com
+  open_source: false
+  hosted_saas: true
+  category: Monitoring
+  sub_category: Performance Monitoring
+  image_url: https://img.stackshare.io/service/103/default_193410db3a7e419c7b436961bf41d733c7346b59.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile
+  detection_source: Gemfile
+  last_updated_by: JoeCohen
+  last_updated_on: 2022-12-19 21:33:06.000000000 Z
+- name: Puma
+  description: A Modern, Concurrent Web Server for Ruby
+  website_url: http://puma.io/
+  version: 6.4.2
+  license: BSD-3-Clause
+  open_source: true
+  hosted_saas: false
+  category: Application Hosting
+  sub_category: Web Servers
+  image_url: https://img.stackshare.io/service/1055/favicon.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: Nathan Wilson
+  last_updated_on: 2014-03-18 22:04:54.000000000 Z
+- name: RuboCop
+  description: A Ruby static code analyzer, based on the community Ruby style guide
+  website_url: http://batsov.com/rubocop/
+  version: 1.65.0
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Code Review
+  image_url: https://img.stackshare.io/service/2643/rubocop.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: Joe Cohen
+  last_updated_on: 2023-01-03 18:31:56.000000000 Z
+- name: RubyGems
+  description: Easily download, install, and use ruby software packages on your system
+  website_url: https://rubygems.org/
+  open_source: false
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Package Managers
+  image_url: https://img.stackshare.io/service/12795/5jL6-BA5_400x400.jpeg
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-03-22 03:40:42.000000000 Z
+- name: npm
+  description: The package manager for JavaScript.
+  website_url: https://www.npmjs.com/
+  open_source: false
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Front End Package Manager
+  image_url: https://img.stackshare.io/service/1120/lejvzrnlpb308aftn31u.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile
+  detection_source: Gemfile
+  last_updated_by: Nathan Wilson
+  last_updated_on: 2014-03-18 22:04:54.000000000 Z
+- name: Shell
+  description: A shell is a text-based terminal, used for manipulating programs and
+    files. Shell scripts typically manage program execution.
+  website_url: https://en.wikipedia.org/wiki/Shell_script
+  open_source: false
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Languages
+  image_url: https://img.stackshare.io/service/4631/default_c2062d40130562bdc836c13dbca02d318205a962.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer
+  detection_source: Repo Metadata
+- name: actioncable
+  website_url: https://github.com/rails/rails/tree/master/actioncable
+  open_source: false
+  hosted_saas: false
+  image_url: https://img.stackshare.io/service/8738/no-img-open-source.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-05-16 03:02:26.000000000 Z
+- name: RedCloth
+  description: Textile parser for Ruby
+  package_url: https://rubygems.org/RedCloth
+  version: 4.3.4
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/18977/default_bc359c39d5bb5b07850d1bca94ab8afbc55734a2.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-03-22 03:45:49.000000000 Z
+- name: actioncable
+  description: Structure many real-time application concerns into channels over a
+    single WebSocket connection
+  package_url: https://rubygems.org/actioncable
+  version: 7.1.3
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/rubygems/image.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-05-16 03:02:26.000000000 Z
+- name: actionmailer
+  description: Email on Rails
+  package_url: https://rubygems.org/actionmailer
+  version: 7.1.3
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/19030/default_5e6f4490e7ced4a026c6f8459237f2bb9d24fbdb.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-05-16 03:02:26.000000000 Z
+- name: actionpack
+  description: Web apps on Rails
+  package_url: https://rubygems.org/actionpack
+  version: 7.1.3
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/18865/default_2fe576f13c88e20e645ee0a744c045ee730bcad6.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-05-16 03:02:26.000000000 Z
+- name: actionview
+  description: Simple
+  package_url: https://rubygems.org/actionview
+  version: 7.1.3
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/19060/default_7520676ca0e090ecd07df08a8e0994b056912237.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-05-16 03:02:26.000000000 Z
+- name: activejob
+  description: Declare job classes that can be run by a variety of queuing backends
+  package_url: https://rubygems.org/activejob
+  version: 7.1.3
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/19166/default_f74adb1c8d95c3268ea94f5ba9bbb60a0bc900ed.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-03-22 03:40:42.000000000 Z
+- name: activemodel
+  description: A toolkit for building modeling frameworks like Active Record
+  package_url: https://rubygems.org/activemodel
+  version: 7.1.3
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/18858/default_098b6651de16fb4d6fdc54a8089650263c837883.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-03-22 03:45:49.000000000 Z
+- name: activerecord
+  description: Databases on Rails
+  package_url: https://rubygems.org/activerecord
+  version: 7.1.3
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/18828/default_07d724f95ff4caf087b38d9eb083e0406bcfdadf.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-03-22 03:40:42.000000000 Z
+- name: activesupport
+  description: A toolkit of support libraries and Ruby core extensions extracted from
+    the Rails framework
+  package_url: https://rubygems.org/activesupport
+  version: 7.1.3
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/18817/default_b17f14dbef6c1275120b34d9ec2eff5942499bd5.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: Nathan Wilson
+  last_updated_on: 2024-03-30 20:52:37.000000000 Z
+- name: bcrypt
+  description: Bcrypt
+  package_url: https://rubygems.org/bcrypt
+  version: 3.1.20
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/19054/default_2be036aaca5c71baf790e00f1ef80dd37a625905.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-02-29 18:51:47.000000000 Z
+- name: blankslate
+  description: BlankSlate extracted from Builder
+  package_url: https://rubygems.org/blankslate
+  version: 3.1.3
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/19501/default_42d3fa2d5b834c67c8a751c77da442242d04b268.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-03-22 03:45:49.000000000 Z
+- name: bootstrap-sass
+  description: Bootstrap-sass is a Sass-powered version of Bootstrap 3
+  package_url: https://rubygems.org/bootstrap-sass
+  version: 3.4.1
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/18976/default_bc359c39d5bb5b07850d1bca94ab8afbc55734a2.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-04-22 06:32:59.000000000 Z
+- name: browser
+  description: Do some browser detection with Ruby
+  package_url: https://rubygems.org/browser
+  version: 6.0.0
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/19740/default_dd31b4f280886d69f8a43459d55ecc7f1ae44486.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2023-10-05 06:37:58.000000000 Z
+- name: bullet
+  description: Help to kill N+1 queries and unused eager loading
+  package_url: https://rubygems.org/bullet
+  version: 7.2.0
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/rubygems/image.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: Jason
+  last_updated_on: 2022-03-09 01:26:13.000000000 Z
+- name: fastimage
+  description: FastImage finds the size or type of an image given its uri by fetching
+    as little as needed
+  package_url: https://rubygems.org/fastimage
+  version: 2.3.1
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/19239/default_c4ed1d3f735f11415ee5d02b5a5ba48490465220.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-04-22 05:49:55.000000000 Z
+- name: i18n
+  description: New wave Internationalization support for Ruby
+  package_url: https://rubygems.org/i18n
+  version: 1.14.5
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/18859/default_098b6651de16fb4d6fdc54a8089650263c837883.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: Joe Cohen
+  last_updated_on: 2020-08-14 03:07:54.000000000 Z
+- name: jbuilder
+  description: Create JSON structures via a Builder-style DSL
+  package_url: https://rubygems.org/jbuilder
+  version: 2.12.0
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/19105/default_fca7ffebc4c078263714788a3e4853bf74bde297.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: Nathan Wilson
+  last_updated_on: 2024-03-31 14:54:16.000000000 Z
+- name: mimemagic
+  description: Fast mime detection by extension or content in pure ruby
+  package_url: https://rubygems.org/mimemagic
+  version: 0.4.3
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/19182/default_992f30e8abd98f8427f66b25a8cb98662661c0ea.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: Joe Cohen
+  last_updated_on: 2020-08-14 03:07:54.000000000 Z
+- name: mini_racer
+  description: Minimal embedded v8 engine for Ruby
+  package_url: https://rubygems.org/mini_racer
+  version: 0.12.0
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/rubygems/image.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-03-22 03:40:42.000000000 Z
+- name: minitest
+  description: Minitest provides a complete suite of testing facilities supporting
+    TDD, BDD, mocking, and benchmarking
+  package_url: https://rubygems.org/minitest
+  version: 5.24.1
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/18818/default_f36df1cfa9ff6061d7f9b4879088be8538581c49.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-05-16 03:02:26.000000000 Z
+- name: minitest-reporters
+  description: Death to haphazard monkey-patching! Extend Minitest through simple
+    hooks
+  package_url: https://rubygems.org/minitest-reporters
+  version: 1.7.1
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/18888/default_1e22ca9f3f63a8c93249bae500705b9451e7e882.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-05-16 03:02:26.000000000 Z
+- name: newrelic_rpm
+  description: New Relic is a performance management system, developed by New Relic,
+    Inc
+  package_url: https://rubygems.org/newrelic_rpm
+  version: 9.11.0
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/19246/default_518f3430d0c3ea4653c591ebd7e75da67f51cfaf.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: JoeCohen
+  last_updated_on: 2022-12-19 21:33:06.000000000 Z
+- name: prawn
+  description: Prawn is a fast, tiny, and nimble PDF generator for Ruby
+  package_url: https://rubygems.org/prawn
+  version: 2.4.0
+  license: GPL-2.0,GPL-3.0
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/19058/default_cafacebf9602efba5c9e675f02335a1684f56941.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: Nathan Wilson
+  last_updated_on: 2024-03-31 14:54:16.000000000 Z
+- name: rails-controller-testing
+  description: Extracting `assigns` and `assert_template` from ActionDispatch
+  package_url: https://rubygems.org/rails-controller-testing
+  version: 1.0.5
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/19298/default_665ed3fcb2a1ba0439337b543b18095155087d89.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-05-16 03:02:26.000000000 Z
+- name: railties
+  description: 'Rails internals: application bootup'
+  package_url: https://rubygems.org/railties
+  version: 7.1.3
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/18847/default_49e8e438a279d3b7963273823890f9482ce83fb4.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-04-22 05:49:55.000000000 Z
+- name: rqrcode
+  description: Rqrcode is a library for encoding QR Codes
+  package_url: https://rubygems.org/rqrcode
+  version: 2.2.0
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/19491/default_235e01dd950d1f80c14beead28dc8c06a1dbf108.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: Nathan Wilson
+  last_updated_on: 2024-03-30 20:52:37.000000000 Z
+- name: rubocop-performance
+  description: A collection of RuboCop cops to check for performance optimizations
+    in Ruby code
+  package_url: https://rubygems.org/rubocop-performance
+  version: 1.21.1
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/19003/default_ed0106f3a65a9fdb4ffde124a531663be2de70ba.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: Nathan Wilson
+  last_updated_on: 2024-03-30 21:27:12.000000000 Z
+- name: rubocop-rails
+  description: Automatic Rails code style checking tool
+  package_url: https://rubygems.org/rubocop-rails
+  version: 2.25.1
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/19270/default_67289672b0f514dd92f3c786eb2cf0a39b0db10f.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-04-22 05:49:55.000000000 Z
+- name: rubyzip
+  description: Rubyzip is a ruby module for reading and writing zip files
+  package_url: https://rubygems.org/rubyzip
+  version: 2.3.2
+  license: BSD-2-Clause
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/18887/default_1e22ca9f3f63a8c93249bae500705b9451e7e882.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-03-22 03:40:42.000000000 Z
+- name: simplecov
+  description: Code coverage for Ruby 1.9+ with a powerful configuration library and
+    automatic merging of coverage across test suites
+  package_url: https://rubygems.org/simplecov
+  version: 0.22.0
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/18819/default_6564ae059af6c4ea7065fd2329370c7a05341cf8.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-03-22 03:45:49.000000000 Z
+- name: sprockets
+  description: Sprockets is a Rack-based asset packaging system that concatenates
+    and serves JavaScript
+  package_url: https://rubygems.org/sprockets
+  version: 4.2.1
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/18932/default_36bbb38c1cd5521e90d6e99982778960b00ec515.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-04-22 06:32:59.000000000 Z
+- name: sprockets-rails
+  description: Sprockets Rails integration
+  package_url: https://rubygems.org/sprockets-rails
+  version: 3.5.1
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/19198/default_be4b4d308c5637e0747ed40c613027452d6ef0c5.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: andrew nimmo
+  last_updated_on: 2024-04-22 06:32:59.000000000 Z
+- name: web-console
+  description: A debugging tool for your Ruby on Rails applications
+  package_url: https://rubygems.org/web-console
+  version: 4.2.1
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/rubygems/image.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: Joseph D. Cohen
+  last_updated_on: 2022-07-12 23:59:11.000000000 Z
+- name: webmock
+  description: WebMock allows stubbing HTTP requests and setting expectations on HTTP
+    requests
+  package_url: https://rubygems.org/webmock
+  version: 3.23.1
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/18824/default_6564ae059af6c4ea7065fd2329370c7a05341cf8.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: Jason
+  last_updated_on: 2022-03-09 01:26:13.000000000 Z
+- name: xmlrpc
+  description: XMLRPC is a lightweight protocol that enables remote procedure calls
+    over HTTP
+  package_url: https://rubygems.org/xmlrpc
+  version: 0.3.3
+  license: Ruby
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: RubyGems Packages
+  image_url: https://img.stackshare.io/package/rubygems/image.png
+  detection_source_url: https://github.com/MushroomObserver/mushroom-observer/blob/main/Gemfile.lock
+  detection_source: Gemfile
+  last_updated_by: Joe Cohen
+  last_updated_on: 2020-08-14 03:07:54.000000000 Z
