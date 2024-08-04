@@ -297,7 +297,7 @@ module FormsHelper
   # minimum args :form, :type.
   # Send :hidden to fill the id, :hidden_data to merge with hidden field data
   def autocompleter_hidden_field(**args)
-    return unless args[:form].present? && args[:type].present? && args[:hidden]
+    return unless args[:form].present? && args[:type].present?
 
     model = autocompleter_type_to_model(args[:type])
     data = { autocompleter_target: "hidden" }.merge(args[:hidden_data] || {})
