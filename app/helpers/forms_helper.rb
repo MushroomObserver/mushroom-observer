@@ -208,31 +208,7 @@ module FormsHelper
   # crap off. (documented on SO)
   #
   def autocompleter_field(**args)
-    ac_args = {
-      placeholder: :start_typing.l, autocomplete: "off",
-      data: { autocompleter_target: "input" }
-    }.deep_merge(args.except(:type, :separator, :textarea,
-                             :hidden, :hidden_data, :create_text,
-                             :keep_text, :edit_text))
-    ac_args[:class] = class_names("dropdown", args[:class])
-    ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
-                            separator: args[:separator],
-                            autocompleter_map_outlet: args[:map_outlet],
-                            autocompleter_target: "wrap" }
-    ac_args[:between] = capture do
-      concat(args[:between])
-      concat(autocompleter_has_id_indicator)
-      concat(autocompleter_find_button(args)) if args[:find_text]
-      concat(autocompleter_keep_button(args)) if args[:keep_text]
-      concat(autocompleter_hidden_field(**args)) if args[:form]
-    end
-    ac_args[:between_end] = capture do
-      autocompleter_create_button(args) if args[:create_text]
-    end
-    ac_args[:append] = capture do
-      concat(autocompleter_dropdown)
-      concat(args[:append])
-    end
+    ac_args = autocompleter_field_args(**args)
 
     if args[:textarea] == true
       text_area_with_label(**ac_args)
@@ -241,6 +217,40 @@ module FormsHelper
     end
   end
 
+  # rubocop:disable Metrics/AbcSize
+  def autocompleter_field_args(**args)
+    ac_args = {
+      placeholder: :start_typing.l, autocomplete: "off",
+      data: { autocompleter_target: "input" }
+    }.deep_merge(args.except(:type, :separator, :textarea,
+                             :hidden, :hidden_data, :create_text,
+                             :keep_text, :edit_text, :find_text))
+    ac_args[:class] = class_names("dropdown", args[:class])
+    ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
+                            separator: args[:separator],
+                            autocompleter_map_outlet: ".map-outlet",
+                            autocompleter_geocode_outlet: ".geocode-outlet",
+                            autocompleter_target: "wrap" }
+    ac_args[:between] = capture do
+      [
+        args[:between],
+        autocompleter_has_id_indicator,
+        autocompleter_find_button(args),
+        autocompleter_keep_button(args),
+        autocompleter_hidden_field(**args)
+      ].safe_join
+    end
+    ac_args[:between_end] = capture do
+      autocompleter_create_button(args)
+    end
+    ac_args[:append] = capture do
+      concat(autocompleter_dropdown)
+      concat(args[:append])
+    end
+    ac_args
+  end
+  # rubocop:enable Metrics/AbcSize
+
   def autocompleter_has_id_indicator
     link_icon(:check, title: :autocompleter_has_id.l,
                       class: "ml-3 px-2 text-success has-id-indicator",
@@ -248,6 +258,8 @@ module FormsHelper
   end
 
   def autocompleter_create_button(args)
+    return unless args[:create_text]
+
     icon_link_to(
       args[:create_text], "#",
       icon: :plus, show_text: true, icon_class: "text-primary",
@@ -258,6 +270,8 @@ module FormsHelper
   end
 
   def autocompleter_find_button(args)
+    return unless args[:find_text]
+
     icon_link_to(
       args[:find_text], "#",
       icon: :find_on_map, show_text: false, icon_class: "text-primary",
@@ -268,6 +282,8 @@ module FormsHelper
   end
 
   def autocompleter_keep_button(args)
+    return unless args[:keep_text]
+
     icon_link_to(
       args[:keep_text], "#",
       icon: :apply, show_text: false, icon_class: "text-primary",
@@ -281,6 +297,8 @@ module FormsHelper
   # minimum args :form, :type.
   # Send :hidden to fill the id, :hidden_data to merge with hidden field data
   def autocompleter_hidden_field(**args)
+    return unless args[:form].present? && args[:type].present?
+
     model = autocompleter_type_to_model(args[:type])
     data = { autocompleter_target: "hidden" }.merge(args[:hidden_data] || {})
     args[:form].hidden_field(:"#{model}_id", value: args[:hidden], data:)
