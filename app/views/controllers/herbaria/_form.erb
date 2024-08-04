@@ -23,7 +23,7 @@ end
 %>
 
 <%= form_with(
-  model: @herbarium, id: "herbarium_form", class: "geocode-outlet",
+  model: @herbarium, id: "herbarium_form",
   data: {
     controller: "map",
     action: "autocompleter:hiddenIdDataChanged@window->map#showBox"
