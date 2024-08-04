@@ -207,18 +207,9 @@ module FormsHelper
   # autocompletes, and Safari is not much better - you just can't turn their
   # crap off. (documented on SO)
   #
-  def autocompleter_field(**args)
-    ac_args = autocompleter_field_args(**args)
-
-    if args[:textarea] == true
-      text_area_with_label(**ac_args)
-    else
-      text_field_with_label(**ac_args)
-    end
-  end
-
   # rubocop:disable Metrics/AbcSize
-  def autocompleter_field_args(**args)
+  # rubocop:disable Metrics/MethodLength
+  def autocompleter_field(**args)
     ac_args = {
       placeholder: :start_typing.l, autocomplete: "off",
       data: { autocompleter_target: "input" }
@@ -247,9 +238,15 @@ module FormsHelper
       concat(autocompleter_dropdown)
       concat(args[:append])
     end
-    ac_args
+
+    if args[:textarea] == true
+      text_area_with_label(**ac_args)
+    else
+      text_field_with_label(**ac_args)
+    end
   end
   # rubocop:enable Metrics/AbcSize
+  # rubocop:enable Metrics/MethodLength
 
   def autocompleter_has_id_indicator
     link_icon(:check, title: :autocompleter_has_id.l,
