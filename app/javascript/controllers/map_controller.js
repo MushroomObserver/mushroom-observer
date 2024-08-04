@@ -388,7 +388,7 @@ export default class extends GeocodeController {
     // this.showBoxBtnTarget.disabled = true
     this.verbose("map:checkForBox")
     let id
-    if (id = this?.locationIdTarget?.value) {
+    if (this.hasLocationIdTarget && (id = this.locationIdTarget.value)) {
       this.mapLocationIdData()
       // Only geocode lat/lng if we have no location_id and not ignoring place
     } else if (["location", "hybrid"].includes(this.map_type)) {

@@ -283,16 +283,13 @@ export default class extends Controller {
     if (!outlet.opened) outlet.toggleMapBtnTarget.click();
     // set the map type so box is editable
     outlet.map_type = "hybrid"; // only if location_google
-    // outlet.marker.setDraggable(false); messes up map
-    // outlet.marker.setClickable(false); messes up map
+
     let location
     if (location = outlet.validateLatLngInputs(false)) {
       outlet.geocodeLatLng(location);
     } else {
       outlet.lockBoxBtnTarget.classList.remove("d-none");
     }
-    // this.createBtnTarget.classList.add('d-none');
-    // this.dispatchHiddenIdEvents();
   }
 
   mapOutletDisconnected(outlet, element) {
@@ -300,14 +297,6 @@ export default class extends Controller {
     outlet.map_type = "observation";
     if (outlet.rectangle) outlet.rectangle.setEditable(false);
 
-    // Make the map show box button back into a create button
-    // delete this.createBtnTarget.dataset.mapTarget;
-    // const create_action = this.createBtnTarget.dataset.action
-    //   .replace("map#showBox:prevent", "autocompleter#swapCreate:prevent");
-    // this.createBtnTarget.dataset.action = create_action;
-    // this.createBtnTarget.classList.remove('d-none');
-
-    // this.dispatchHiddenIdEvents();
     outlet.northInputTarget.value = '';
     outlet.southInputTarget.value = '';
     outlet.eastInputTarget.value = '';
@@ -328,8 +317,11 @@ export default class extends Controller {
     // Attach events
     this.addEventListeners();
 
-    const hidden_id = parseInt(this.hiddenTarget.value);
-    this.hasIdOrNo(hidden_id);
+    let hidden_id
+    if (this.hasHiddenTarget &&
+      (hidden_id = parseInt(this.hiddenTarget.value))) {
+      this.hasIdOrNo(hidden_id);
+    }
   }
 
   // When swapping autocompleter types, swap the hidden input identifiers.

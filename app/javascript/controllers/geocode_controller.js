@@ -3,8 +3,9 @@ import { Loader } from "@googlemaps/js-api-loader"
 import { convert } from "geo-coordinates-parser"
 
 // Connects to data-controller="geocode"
-// The connected element should contain a location autocompleter and
-// bounding box/elevation inputs.
+// Sort of the "lite" version of the map controller: no map, no markers, but it
+// can geocode and get elevations. The connected element should contain a
+// location autocompleter and bounding box/elevation inputs.
 export default class extends Controller {
   static targets = ["southInput", "westInput", "northInput", "eastInput",
     "highInput", "lowInput", "placeInput", "locationId",
