@@ -16,7 +16,7 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | File | iNat Obs | fotos | location | Other |
 | ---- | -------- | ----- | -------- | ----- |
 | amanita_flavorubens.txt | [231104466](https://www.inaturalist.org/observations/231104466) | **0** | public | Casual |
-| arrhenia_sp_NYO2.txt | [184219885](https://www.inaturalist.org/observations/184219885) | 1 | public | **mo-style Provisional Species Name**, **DNA** |
+| arrhenia_sp_NY02.txt | [184219885](https://www.inaturalist.org/observations/184219885) | 1 | public | **mo-style Provisional Species Name**, **DNA** |
 | calostoma_lutescens.txt | [195434438](https://www.inaturalist.org/observations/195434438) | **0** | public |  |
 | ceanothus_cordulatus.txt | [219631412](https://www.inaturalist.org/observations/219631412) | 1 | public | **Plant** |
 | coprinus.txt | [213450312](https://www.inaturalist.org/observations/213450312) | 1 | **obscured** | Needs ID |
