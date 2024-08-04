@@ -214,7 +214,7 @@ module FormsHelper
       placeholder: :start_typing.l, autocomplete: "off",
       data: { autocompleter_target: "input" }
     }.deep_merge(args.except(:type, :separator, :textarea,
-                             :hidden, :hidden_data, :create_text,
+                             :hidden_value, :hidden_data, :create_text,
                              :keep_text, :edit_text, :find_text))
     ac_args[:class] = class_names("dropdown", args[:class])
     ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
@@ -332,7 +332,7 @@ module FormsHelper
 
     model = autocompleter_type_to_model(args[:type])
     data = { autocompleter_target: "hidden" }.merge(args[:hidden_data] || {})
-    args[:form].hidden_field(:"#{model}_id", value: args[:hidden], data:)
+    args[:form].hidden_field(:"#{model}_id", value: args[:hidden_value], data:)
   end
 
   def autocompleter_type_to_model(type)

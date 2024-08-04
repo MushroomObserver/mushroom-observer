@@ -66,7 +66,7 @@ t_s = {
                   tag.span("#{:form_observations_create_locality.l}:",
                            class: "create-label")].safe_join(" "),
           help: observation_location_help,
-          hidden: location&.id,
+          hidden_value: location&.id,
           hidden_data: { map_target: "locationId",
                          north: location&.north, south: location&.south,
                          east: location&.east, west: location&.west },
