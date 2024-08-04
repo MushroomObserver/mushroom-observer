@@ -161,37 +161,6 @@ module Observations
     end
 
     def test_import_tremella_mesenterica
-      obs = import_mock_observation("tremella_mesenterica")
-
-      assert_not_nil(obs.rss_log)
-      assert_redirected_to(observations_path)
-
-      obs_comments =
-        Comment.where(target_type: "Observation", target_id: obs.id)
-      assert(obs_comments.one?)
-      assert(obs_comments.where(Comment[:summary] =~ /^iNat Data/).present?,
-             "Missing Initial Commment (#{:inat_data_comment.l})")
-      assert_equal(
-        users(:webmaster), obs_comments.first.user,
-        "Comment user should be webmaster (vs user who imported iNat Obs)"
-      )
-      inat_data_comment = obs_comments.first.comment
-      [
-        :USER.l, :OBSERVED.l, :LAT_LON.l, :PLACE.l, :ID.l, :DQA.l,
-        :ANNOTATIONS.l, :PROJECTS.l, :SEQUENCES.l, :OBSERVATION_FIELDS.l,
-        :TAGS.l
-      ].each do |caption|
-        assert_match(
-          /#{caption}/, inat_data_comment,
-          "Initial Commment (#{:inat_data_comment.l}) is missing #{caption}"
-        )
-      end
-
-      assert(obs.images.any?, "Obs should have images")
-      assert(obs.sequences.none?)
-    end
-
-    def test_import_namings
       # This iNat obs has two identifications:
       # Tremella mesenterica, which in is fixtures
       t_mesenterica = Name.find_by(text_name: "Tremella mesenterica")
@@ -211,6 +180,9 @@ module Observations
       tremellales = Name.find_by(text_name: "Tremellales")
 
       obs = import_mock_observation("tremella_mesenterica")
+
+      assert_not_nil(obs.rss_log)
+      assert_redirected_to(observations_path)
 
       assert_equal(tremellales, obs.name)
 
@@ -240,6 +212,30 @@ module Observations
       vote = Vote.find_by(naming: naming, user: naming.user)
       assert(vote.present?, "Naming is missing a Vote")
       assert_equal(0, vote.value, "Vote for non-consensus name should be 0")
+
+      obs_comments =
+        Comment.where(target_type: "Observation", target_id: obs.id)
+      assert(obs_comments.one?)
+      assert(obs_comments.where(Comment[:summary] =~ /^iNat Data/).present?,
+             "Missing Initial Commment (#{:inat_data_comment.l})")
+      assert_equal(
+        users(:webmaster), obs_comments.first.user,
+        "Comment user should be webmaster (vs user who imported iNat Obs)"
+      )
+      inat_data_comment = obs_comments.first.comment
+      [
+        :USER.l, :OBSERVED.l, :LAT_LON.l, :PLACE.l, :ID.l, :DQA.l,
+        :ANNOTATIONS.l, :PROJECTS.l, :SEQUENCES.l, :OBSERVATION_FIELDS.l,
+        :TAGS.l
+      ].each do |caption|
+        assert_match(
+          /#{caption}/, inat_data_comment,
+          "Initial Commment (#{:inat_data_comment.l}) is missing #{caption}"
+        )
+      end
+
+      assert(obs.images.any?, "Obs should have images")
+      assert(obs.sequences.none?)
     end
 
     def test_import_lycoperdon
