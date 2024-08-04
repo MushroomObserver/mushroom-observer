@@ -3,8 +3,9 @@ import { Loader } from "@googlemaps/js-api-loader"
 import { convert } from "geo-coordinates-parser"
 
 // Connects to data-controller="geocode"
-// The connected element should contain a location autocompleter and
-// bounding box/elevation inputs.
+// Sort of the "lite" version of the map controller: no map, no markers, but it
+// can geocode and get elevations. The connected element should contain a
+// location autocompleter and bounding box/elevation inputs.
 export default class extends Controller {
   static targets = ["southInput", "westInput", "northInput", "eastInput",
     "highInput", "lowInput", "placeInput", "locationId",
@@ -42,12 +43,18 @@ export default class extends Controller {
       })
   }
 
+  tryToGeocode() {
+    let location
+
+    if (location = this.validateLatLngInputs(false) &&
+      JSON.stringify(location) !== JSON.stringify(this.lastGeocodedLatLng)) {
+      this.geocodeLatLng(location)
+    }
+  }
+
   // Geocode a lat/lng location. If we have multiple results, we'll dispatch
   // Send the location from validateLatLngInputs(false) to avoid duplicate calls
   geocodeLatLng(location) {
-    if (JSON.stringify(location) == JSON.stringify(this.lastGeocodedLatLng))
-      return
-
     this.lastGeocodedLatLng = location
     this.verbose("geocode:geocodeLatLng")
     this.verbose(location)
@@ -66,10 +73,16 @@ export default class extends Controller {
       });
   }
 
-  geolocatePlaceName() {
+  tryToGeolocate() {
     let address = this.placeInputTarget.value
-    if (address === this.lastGeolocatedAddress) return
 
+    if (this.ignorePlaceInput === false && address !== ""
+      && address !== this.lastGeolocatedAddress) {
+      this.geolocatePlaceName(address)
+    }
+  }
+
+  geolocatePlaceName(address) {
     this.lastGeolocatedAddress = address
     this.verbose("geocode:geolocatePlaceName")
     this.verbose(address)
@@ -166,10 +179,10 @@ export default class extends Controller {
     const extents = results[0].geometry.bounds?.toJSON() // may not exist
     const center = results[0].geometry.location.toJSON()
 
-    if (viewport)
-      this.map.fitBounds(viewport)
-    if (this.map)
-      this.placeClosestRectangle(viewport, extents)
+    if (this.map) {
+      if (viewport) this.map.fitBounds(viewport)
+      this.placeClosestRectangle(viewport, extents) // viewport is optional
+    }
     this.updateFields(viewport, extents, center)
     // For non-autocompleted place input in the location form
     this.updatePlaceInputTarget(results[0])
@@ -259,6 +272,14 @@ export default class extends Controller {
     ]
   }
 
+  // Computes the center of a Google Maps Rectangle's LatLngBoundsLiteral object
+  centerFromBounds(bounds) {
+    let lat = (bounds?.north + bounds?.south) / 2.0
+    let lng = (bounds?.east + bounds?.west) / 2.0
+    if (bounds?.west > bounds?.east) { lng += 180 }
+    return { lat: lat, lng: lng }
+  }
+
   // takes a LatLngBoundsLiteral object {south:, west:, north:, east:}
   updateBoundsInputs(bounds) {
     if (!this.hasSouthInputTarget) return false
@@ -291,6 +312,7 @@ export default class extends Controller {
 
   // Convert from human readable and do a rough check if they make sense
   validateLatLngInputs(update = false) {
+    this.verbose("geocode:validateLatLngInputs")
     if (!this.hasLatInputTarget || !this.hasLngInputTarget ||
       !this.latInputTarget.value || !this.lngInputTarget.value)
       return false
@@ -368,6 +390,13 @@ export default class extends Controller {
     }
   }
 
+  clearAutocompleterSwapBuffer() {
+    if (this.autocomplete_buffer) {
+      clearTimeout(this.autocomplete_buffer)
+      this.autocomplete_buffer = 0
+    }
+  }
+
   // Sorts the LocationElevationResponse.results.elevation objects and
   // computes the high and low of these results using bounds and center
   highAndLowOf(results) {
@@ -429,7 +458,7 @@ export default class extends Controller {
   }
 
   verbose(str) {
-    // console.log(str);
+    console.log(str);
     // document.getElementById("log").
     //   insertAdjacentText("beforeend", str + "<br/>");
   }

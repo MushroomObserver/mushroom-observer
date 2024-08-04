@@ -96,6 +96,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("[data-type='location']")
     find(id: "observation_place_name").trigger("click")
     # This should make the "create_locality" button appear.
+    assert_selector(".create-button span",
+                    text: /#{:form_observations_create_locality.l}/)
     click_on(:form_observations_create_locality.l)
     assert_selector("[data-type='location_google']")
     assert_field("observation_place_name", with: last_obs.where)

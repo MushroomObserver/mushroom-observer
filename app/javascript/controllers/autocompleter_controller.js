@@ -235,7 +235,7 @@ export default class extends Controller {
       this.prepareInputElement();
       this.prepareHiddenInput();
       if (!this.hasKeepBtnTarget ||
-        !this.keepBtnTarget.classList.contains('active')) {
+        !this.keepBtnTarget?.classList?.contains('active')) {
         this.clearHiddenId();
       }
       this.constrainedSelectionUI();
@@ -283,16 +283,13 @@ export default class extends Controller {
     if (!outlet.opened) outlet.toggleMapBtnTarget.click();
     // set the map type so box is editable
     outlet.map_type = "hybrid"; // only if location_google
-    // outlet.marker.setDraggable(false); messes up map
-    // outlet.marker.setClickable(false); messes up map
+
     let location
     if (location = outlet.validateLatLngInputs(false)) {
       outlet.geocodeLatLng(location);
     } else {
       outlet.lockBoxBtnTarget.classList.remove("d-none");
     }
-    this.createBtnTarget.classList.add('d-none');
-    // this.dispatchHiddenIdEvents();
   }
 
   mapOutletDisconnected(outlet, element) {
@@ -300,14 +297,6 @@ export default class extends Controller {
     outlet.map_type = "observation";
     if (outlet.rectangle) outlet.rectangle.setEditable(false);
 
-    // Make the map show box button back into a create button
-    delete this.createBtnTarget.dataset.mapTarget;
-    const create_action = this.createBtnTarget.dataset.action
-      .replace("map#showBox:prevent", "autocompleter#swapCreate:prevent");
-    this.createBtnTarget.dataset.action = create_action;
-    this.createBtnTarget.classList.remove('d-none');
-
-    // this.dispatchHiddenIdEvents();
     outlet.northInputTarget.value = '';
     outlet.southInputTarget.value = '';
     outlet.eastInputTarget.value = '';
@@ -328,13 +317,8 @@ export default class extends Controller {
     // Attach events
     this.addEventListeners();
 
-    const hiddenId = parseInt(this.hiddenTarget.value);
-
-    if (hiddenId !== NaN && hiddenId != 0) {
-      this.wrapTarget.classList.add('has-id');
-    } else {
-      this.wrapTarget.classList.remove('has-id');
-    }
+    const hidden_id = parseInt(this.hiddenTarget.value);
+    this.hasIdOrNo(hidden_id);
   }
 
   // When swapping autocompleter types, swap the hidden input identifiers.
@@ -578,7 +562,11 @@ export default class extends Controller {
       this.verbose("autocompleter:doing_google_refresh()");
       this.old_value = this.inputTarget.value;
       // async, anything after this executes immediately
-      this.mapOutlet.geolocatePlaceName(true);
+      if (this.hasGeocodeOutlet) {
+        this.geocodeOutlet.geolocatePlaceName(true);
+      } else if (this.hasMapOutlet) {
+        this.mapOutlet.geolocatePlaceName(true);
+      }
       // still necessary if primer unchanged, as likely?
       // this.populateMatches();
       // this.drawPulldown();
@@ -970,9 +958,7 @@ export default class extends Controller {
         this.hiddenTarget.dataset[key] = match[key];
     });
 
-    if (match['id'] !== 0) {
-      this.wrapTarget.classList.add('has-id');
-    }
+    this.hasIdOrNo(parseInt(match['id']));
     this.dispatchHiddenIdEvents();
   }
 
@@ -990,6 +976,14 @@ export default class extends Controller {
     });
 
     this.dispatchHiddenIdEvents();
+  }
+
+  hasIdOrNo(hidden_id) {
+    if (hidden_id && hidden_id !== NaN && hidden_id != 0) {
+      this.wrapTarget.classList.add('has-id');
+    } else {
+      this.wrapTarget.classList.remove('has-id');
+    }
   }
 
   storeCurrentHiddenData() {
@@ -1015,7 +1009,7 @@ export default class extends Controller {
       clearTimeout(this.data_timer);
       this.data_timer = setTimeout(() => {
         this.verbose("autocompleter: dispatching hiddenIdDataChanged");
-        this.wrapTarget.classList.remove('has-id');
+        this.hasIdOrNo(hidden_id);
         if (this.hasKeepBtnTarget) {
           this.keepBtnTarget.classList.remove('active');
         }
@@ -1543,7 +1537,7 @@ export default class extends Controller {
   }
 
   verbose(str) {
-    // console.log(str);
+    console.log(str);
     // document.getElementById("log").
     //   insertAdjacentText("beforeend", str + "<br/>");
   }
