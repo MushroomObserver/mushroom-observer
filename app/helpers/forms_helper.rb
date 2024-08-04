@@ -207,8 +207,37 @@ module FormsHelper
   # autocompletes, and Safari is not much better - you just can't turn their
   # crap off. (documented on SO)
   #
+  # rubocop:disable Metrics/AbcSize
+  # rubocop:disable Metrics/MethodLength
   def autocompleter_field(**args)
-    ac_args = autocompleter_field_args(**args)
+    ac_args = {
+      placeholder: :start_typing.l, autocomplete: "off",
+      data: { autocompleter_target: "input" }
+    }.deep_merge(args.except(:type, :separator, :textarea,
+                             :hidden, :hidden_data, :create_text,
+                             :keep_text, :edit_text, :find_text))
+    ac_args[:class] = class_names("dropdown", args[:class])
+    ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
+                            separator: args[:separator],
+                            autocompleter_map_outlet: ".map-outlet",
+                            autocompleter_geocode_outlet: ".geocode-outlet",
+                            autocompleter_target: "wrap" }
+    ac_args[:between] = capture do
+      [
+        args[:between],
+        autocompleter_has_id_indicator,
+        autocompleter_find_button(args),
+        autocompleter_keep_button(args),
+        autocompleter_hidden_field(**args)
+      ].safe_join
+    end
+    ac_args[:between_end] = capture do
+      autocompleter_create_button(args)
+    end
+    ac_args[:append] = capture do
+      concat(autocompleter_dropdown)
+      concat(args[:append])
+    end
 
     if args[:textarea] == true
       text_area_with_label(**ac_args)
@@ -216,6 +245,8 @@ module FormsHelper
       text_field_with_label(**ac_args)
     end
   end
+  # rubocop:enable Metrics/AbcSize
+  # rubocop:enable Metrics/MethodLength
 
   # rubocop:disable Metrics/AbcSize
   def autocompleter_field_args(**args)

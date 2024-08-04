@@ -317,11 +317,8 @@ export default class extends Controller {
     // Attach events
     this.addEventListeners();
 
-    let hidden_id
-    if (this.hasHiddenTarget &&
-      (hidden_id = parseInt(this.hiddenTarget.value))) {
-      this.hasIdOrNo(hidden_id);
-    }
+    const hidden_id = parseInt(this.hiddenTarget.value);
+    this.hasIdOrNo(hidden_id);
   }
 
   // When swapping autocompleter types, swap the hidden input identifiers.
