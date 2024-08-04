@@ -111,34 +111,10 @@ t_s = {
     <!-- MAP -->
     <%= tag.div(class: "col-xs-12 col-md-6",
                 id: "observation_geolocation") do %>
-      <%= tag.div(
-        "", id: "observation_form_map",
-            class: "form-map collapse",
-            data: { indicator_url: asset_path('indicator.gif'),
-                    location_format: User.current_location_format,
-                    map_target: "mapDiv", editable: true,
-                    map_type: "observation" }
+      <%= render(
+        partial: "shared/form_location_map",
+        locals: { id: "observation_form_map", map_type: "observation" }
       ) %>
-      <%= tag.div(class: "btn-group my-3", role: "group",
-                  data: { map_target: "controlWrap" }) do %>
-        <%= js_button(
-          button: [
-            link_icon(:globe),
-            tag.span(:form_observations_open_map.l, class: "map-show mx-2"),
-            tag.span(:form_observations_hide_map.l, class: "map-hide mx-2")
-          ].safe_join,
-          name: "map_toggle", class: "map-toggle",
-          data: { map_target: "toggleMapBtn", action: "map#toggleMap",
-                  toggle: "collapse", target: "#observation_form_map" },
-          aria: { expanded: "false", controls: "observation_form_map" }
-        ) %>
-        <%= js_button(
-          button: :form_observations_clear_map.l,
-          name: "map_clear", class: "map-clear",
-          data: { map_target: "mapClearBtn",
-                  action: "map#clearMap form-exif#reenableButtons" }
-        ) %>
-      <% end %>
     <% end %>
     <!-- /MAP -->
 
