@@ -15,11 +15,7 @@ class InatTaxon
   end
 
   def name
-    mo_names = Name.where(text_name: @inat_taxon[:name],
-                          rank: @inat_taxon[:rank].titleize).
-               # iNat doesn't have taxon names "sensu xxx"
-               # so don't map them to MO Names sensu xxx
-               where.not(Name[:author] =~ /^sensu /)
+    mo_names = matching_mo_names
     return Name.unknown if mo_names.none?
     return mo_names.first if mo_names.one?
 
@@ -29,5 +25,29 @@ class InatTaxon
     # Ideas: check iNat and MO authors, possibly prefer non-deprecated MO Name
     # - might need a dictionary here
     Name.unknown
+  end
+
+  #########
+
+  private
+
+  def matching_mo_names
+    return matching_complexes if complex?
+
+    Name.where(text_name: @inat_taxon[:name],
+               rank: @inat_taxon[:rank].titleize).
+      # iNat doesn't have taxon names "sensu xxx"
+      # so don't map them to MO Names sensu xxx
+      where.not(Name[:author] =~ /^sensu /)
+  end
+
+  def complex?
+    @inat_taxon[:rank] == "complex"
+  end
+
+  def matching_complexes
+    # text_names of MO groups include "group" or the like
+    Name.where(Name[:text_name] =~ /^#{@inat_taxon[:name]}/).
+      where(rank: "Group")
   end
 end

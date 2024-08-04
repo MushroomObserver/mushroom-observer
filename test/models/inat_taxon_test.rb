@@ -18,6 +18,27 @@ class InatTaxonTest < UnitTestCase
                  "Incorrect MO Name for iNat identification")
   end
 
+  def test_complex
+    user = rolf
+    x_campanella_group = Name.new(
+      rank: "Group",
+      text_name: "Xeromphalina campanella group",
+      search_name: "Xeromphalina campanella group",
+      display_name: "**__Xeromphalina campanella__** group",
+      sort_name: "Xeromphalina campanella   group",
+      citation: "\"??Mycologia?? 107(6): 1270\":" \
+                "https://www.tandfonline.com/doi/full/10.3852/15-087 (2017)",
+      user: user
+    )
+    x_campanella_group.save
+
+    mock_inat_obs = mock_observation("xeromphalina_campanella_complex")
+    inat_taxon = InatTaxon.new(mock_inat_obs.inat_taxon)
+
+    assert_equal(x_campanella_group, inat_taxon.name,
+                 "Incorrect MO Name for iNat community id")
+  end
+
   ########
 
   private
