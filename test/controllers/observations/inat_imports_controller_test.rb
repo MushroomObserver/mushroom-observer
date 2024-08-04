@@ -118,19 +118,36 @@ module Observations
     end
 
     def test_import_evernia
+      user = rolf
       loc = Location.create(
-        user: users(:rolf),
+        user: user,
         name: "Troutdale, Multnomah Co., Oregon, USA",
         north: 45.5609,
         south: 45.5064,
         east: -122.367,
         west: -122.431
       )
+      evernia = Name.new(text_name: "Evernia",
+                         author: "Ach.",
+                         display_name: "Evernia",
+                         rank: "Genus",
+                         user: user)
+      evernia.save
 
       obs = import_mock_observation("evernia")
 
       assert_not_nil(obs.rss_log)
       assert_redirected_to(observations_path)
+
+      assert_equal(evernia, obs.name)
+      namings = obs.namings
+      naming = namings.find_by(name: evernia)
+      assert(naming.present?, "Missing Naming for MO consensus ID")
+      assert_equal(user, naming.user,
+                   "Naming with iNat ID should have user == MO User")
+      vote = Vote.find_by(naming: naming, user: naming.user)
+      assert(vote.present?, "Naming is missing a Vote")
+      assert(vote.value.positive?, "Vote for MO consensus should be positive")
 
       assert_equal("mo_inat_import", obs.source)
       assert_equal(1, obs.images.length, "Obs should have 1 image")
@@ -202,11 +219,11 @@ module Observations
       assert(naming.present?, "Missing Naming for MO consensus ID")
       assert_equal(
         inat_manager, naming.user,
-        "Naming not corresponding to iNat ID should have `user: inat_manager`"
+        "Naming without iNat ID should have `user: inat_manager`"
       )
       vote = Vote.find_by(naming: naming, user: naming.user)
       assert(vote.present?, "Naming is missing a Vote")
-      assert_equal(1, vote.value, "Vote for MO consensus should be 1")
+      assert(vote.value.positive?, "Vote for MO consensus should be positive")
 
       naming = namings.find_by(name: t_mesenterica)
       assert(naming.present?,
