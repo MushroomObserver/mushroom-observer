@@ -68,16 +68,16 @@ end
             tag.span("#{:form_observations_create_locality.l}:",
                       class: "create-label")].safe_join(" "),
     between: :optional,
-    hidden_data: { geocode_target: "locationId" },
+    hidden_data: { map_target: "locationId" },
     create_text: :form_observations_create_locality.l,
     data: {
-      geocode_target: "placeInput",
-      action: "geocode:googlePrimer@window->autocompleter#refreshGooglePrimer"
+      map_target: "placeInput",
+      action: "map:googlePrimer@window->autocompleter#refreshGooglePrimer"
     }
   ) %>
 
   <%= render(partial: "locations/form/bounds_hidden_fields",
-             locals: { location: @location, target_type: :geocode }) %>
+             locals: { location: @location, target_controller: :map }) %>
 
   <!-- MAP -->
   <%= tag.div(id: "herbarium_geolocation") do %>
