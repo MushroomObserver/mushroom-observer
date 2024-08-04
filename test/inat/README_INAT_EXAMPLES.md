@@ -20,7 +20,7 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | calostoma_lutescens.txt | [195434438](https://www.inaturalist.org/observations/195434438) | **0** | public |  |
 | ceanothus_cordulatus.txt | [219631412](https://www.inaturalist.org/observations/219631412) | 1 | public | **Plant** |
 | coprinus.txt | [213450312](https://www.inaturalist.org/observations/213450312) | 1 | **obscured** | Needs ID |
-| donadina_PNW01.txt | [212320801](https://www.inaturalist.org/observations/212320801) | 1 | public | **non-mo-style Provisional Species Name**, **DNA** |
+| donadina_PNW01.txt | [212320801](https://www.inaturalist.org/observations/212320801) | 1 | public | **non-mo-style Provisional Species Name (PNW)**, **DNA** |
 | evernia.txt | [216357655](https://www.inaturalist.org/observations/216357655) | 0 | public | Casual, lichen, no fields, place: Troutdale |
 | fuligo_septica.txt | [219783802](https://www.inaturalist.org/observations/219783802) | 1 | public | slime mold **Protozoa** Richmond, CA |
 | gyromitra_ancilis.txt | [216745568](https://www.inaturalist.org/observations/216745568) | 3 | public | **cc-by license**, **many projects**, US 20, Linn Co.|
@@ -34,6 +34,7 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | somion_unicolor.txt | [**202555552**](https://www.inaturalist.org/observations/202555552) | 5 | public | Research Grade, Notes, Activity, >1 ID, 1 field (Mushroom Observer URL), **mirrored from MO** |
 | trametes.txt | [220370929](https://www.inaturalist.org/observations/220370929) | 2 | public | D. Miller observation with different collector; Notes; **Observation Fields: Collector**, place: 25th Ave NE, Seattle, WA, US, with huge error |
 | tremella_mesenterica.txt | [213508767](https://www.inaturalist.org/observations/213508767) | 1 | public | place: Lewisville, TX 75057, USA |
+| xeromphalina_campanella_complex.txt | [215969102](https://www.inaturalist.org/observations/215969102) | 2 | public | **Complex** |
 | zero_results.txt | n.a. | | n.a. | response with total_results: 0, to expose and prevent reversion of bug |
 
 ## TODO

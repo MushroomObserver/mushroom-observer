@@ -304,21 +304,7 @@ module Observations
                  user: user, value: 0).save
       end
 
-      naming = Naming.find_by(observation: @observation,
-                              name: @observation.name)
-
-      if naming.nil?
-        naming = Naming.new(observation: @observation,
-                            user: inat_manager,
-                            name: @observation.name)
-        naming.save
-        Vote.new(naming: naming, observation: @observation,
-                 user: inat_manager, value: 1).save
-      else
-        vote = Vote.find_by(naming: naming, observation: @observation)
-        vote.value = 1
-        vote.save
-      end
+      adjust_consensus_name_naming
     end
 
     def name_already_proposed?(name)
@@ -336,6 +322,24 @@ module Observations
         # iNat user who made this identification might not be an MO User
         # So make inat_manager the user for the Proposed Name
         inat_manager
+      end
+    end
+
+    def adjust_consensus_name_naming
+      naming = Naming.find_by(observation: @observation,
+                              name: @observation.name)
+
+      if naming.nil?
+        naming = Naming.new(observation: @observation,
+                            user: inat_manager,
+                            name: @observation.name)
+        naming.save
+        Vote.new(naming: naming, observation: @observation,
+                 user: inat_manager, value: 1).save
+      else
+        vote = Vote.find_by(naming: naming, observation: @observation)
+        vote.value = 1
+        vote.save
       end
     end
 
