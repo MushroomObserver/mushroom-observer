@@ -25,8 +25,8 @@ end
 <%= form_with(
   model: @herbarium, id: "herbarium_form", class: "geocode-outlet",
   data: {
-    controller: "geocode",
-    action: "autocompleter:hiddenIdDataChanged@window->geocode#tryToGeolocate"
+    controller: "map",
+    action: "autocompleter:hiddenIdDataChanged@window->map#showBox"
   }
 ) do |f| %>
 
@@ -78,6 +78,39 @@ end
 
   <%= render(partial: "locations/form/bounds_hidden_fields",
              locals: { location: @location, target_type: :geocode }) %>
+
+  <!-- MAP -->
+  <%= tag.div(id: "herbarium_geolocation") do %>
+    <%= tag.div(
+      "", id: "herbarium_form_map",
+          class: "form-map collapse",
+          data: { indicator_url: asset_path('indicator.gif'),
+                  location_format: User.current_location_format,
+                  map_target: "mapDiv", editable: true,
+                  map_type: "location" }
+    ) %>
+    <%= tag.div(class: "btn-group my-3", role: "group",
+                data: { map_target: "controlWrap" }) do %>
+      <%= js_button(
+        button: [
+          link_icon(:globe),
+          tag.span(:form_observations_open_map.l, class: "map-show mx-2"),
+          tag.span(:form_observations_hide_map.l, class: "map-hide mx-2")
+        ].safe_join,
+        name: "map_toggle", class: "map-toggle",
+        data: { map_target: "toggleMapBtn", action: "map#toggleMap",
+                toggle: "collapse", target: "#herbarium_form_map" },
+        aria: { expanded: "false", controls: "herbarium_form_map" }
+      ) %>
+      <%= js_button(
+        button: :form_observations_clear_map.l,
+        name: "map_clear", class: "map-clear",
+        data: { map_target: "mapClearBtn",
+                action: "map#clearMap form-exif#reenableButtons" }
+      ) %>
+    <% end %>
+  <% end %>
+  <!-- /MAP -->
 
   <%= text_field_with_label(form: f, field: :email,
                             label: :create_herbarium_email.l + ":",
