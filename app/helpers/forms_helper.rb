@@ -248,40 +248,6 @@ module FormsHelper
   # rubocop:enable Metrics/AbcSize
   # rubocop:enable Metrics/MethodLength
 
-  # rubocop:disable Metrics/AbcSize
-  def autocompleter_field_args(**args)
-    ac_args = {
-      placeholder: :start_typing.l, autocomplete: "off",
-      data: { autocompleter_target: "input" }
-    }.deep_merge(args.except(:type, :separator, :textarea,
-                             :hidden, :hidden_data, :create_text,
-                             :keep_text, :edit_text, :find_text))
-    ac_args[:class] = class_names("dropdown", args[:class])
-    ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
-                            separator: args[:separator],
-                            autocompleter_map_outlet: ".map-outlet",
-                            autocompleter_geocode_outlet: ".geocode-outlet",
-                            autocompleter_target: "wrap" }
-    ac_args[:between] = capture do
-      [
-        args[:between],
-        autocompleter_has_id_indicator,
-        autocompleter_find_button(args),
-        autocompleter_keep_button(args),
-        autocompleter_hidden_field(**args)
-      ].safe_join
-    end
-    ac_args[:between_end] = capture do
-      autocompleter_create_button(args)
-    end
-    ac_args[:append] = capture do
-      concat(autocompleter_dropdown)
-      concat(args[:append])
-    end
-    ac_args
-  end
-  # rubocop:enable Metrics/AbcSize
-
   def autocompleter_has_id_indicator
     link_icon(:check, title: :autocompleter_has_id.l,
                       class: "ml-3 px-2 text-success has-id-indicator",
