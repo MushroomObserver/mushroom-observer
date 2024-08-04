@@ -287,7 +287,7 @@ export default class extends Controller {
     let location
     if (location = outlet.validateLatLngInputs(false)) {
       outlet.geocodeLatLng(location);
-    } else {
+    } else if (outlet.hasLockBoxBtnTarget) {
       outlet.lockBoxBtnTarget.classList.remove("d-none");
     }
   }

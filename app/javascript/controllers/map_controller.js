@@ -138,6 +138,8 @@ export default class extends GeocodeController {
   // set.center is an array [lat, lng]
   // the `key` of each set is an array [x,y,w,h]
   buildOverlays() {
+    if (!this.collection) return
+
     for (const [_xywh, set] of Object.entries(this.collection.sets)) {
       // this.verbose({ set })
       // NOTE: according to the MapSet class, location sets are always is_box.
