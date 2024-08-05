@@ -120,6 +120,30 @@ class InatObsTest < UnitTestCase
     assert(mock_observation("evernia").inat_obs_fields.none?)
   end
 
+  def test_provisional_name
+    mock_inat_obs = mock_observation("arrhenia_sp_NY02")
+    prov_name = mock_inat_obs.inat_prov_name
+    assert(prov_name.present?)
+    assert_equal('Arrhenia "sp-NY02"', prov_name)
+    assert_equal('Arrhenia "sp-NY02"', mock_inat_obs.provisional_name)
+
+    mock_inat_obs = mock_observation("donadina_PNW01")
+    prov_name = mock_inat_obs.inat_prov_name
+    assert(prov_name.present?)
+    assert_equal("Donadinia PNW01", prov_name)
+    assert_equal('Donadinia "sp-PNW01"', mock_inat_obs.provisional_name)
+
+    assert_blank(
+      mock_observation("amanita_flavorubens").inat_prov_name,
+      "inat_prov_name should be blank for obs without observation fields"
+    )
+    assert_blank(
+      mock_observation("trametes").inat_prov_name,
+      "inat_prov_name should be blank for obs with observation fields, " \
+      "but no provisional name field"
+    )
+  end
+
   def test_inat_tags
     assert(2, mock_observation("inocybe").inat_tags.length)
     assert_empty(mock_observation("evernia").inat_tags)

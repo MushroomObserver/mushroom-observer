@@ -20,6 +20,7 @@
 #  inat_obs_photos::     array of observation_photos
 #  inat_place_guess::
 #  inat_project_names::
+#  inat_prov_name::      provisional species name
 #  inat_public_positional_accuracy:: accuracy of inat_lation in meters
 #  inat_quality_grade::  casual, needs id, research
 #  inat_tags::           array of tags
@@ -38,7 +39,12 @@
 #  when
 #  where
 #
-# == Utilties
+# == Other mappings used in MO Observations
+#
+#  dqa::               data quality grade
+#  provisional_name::  MO text_name corresponding to inat_prov_name
+#
+# == Utilities
 #
 #  importable?::  Is it importable to MO?
 #
@@ -78,6 +84,10 @@ class InatObs
     @obs[:place_guess]
   end
 
+  def inat_positional_accuracy
+    @obs[:public_positional_accuracy]
+  end
+
   # comma-separated string of names of projects to which obs belongs
   def inat_project_names
     projects = inat_projects
@@ -97,8 +107,19 @@ class InatObs
       join(", ").delete_prefix(", ")
   end
 
-  def inat_positional_accuracy
-    @obs[:public_positional_accuracy]
+  # NOTE: iNat allows only 1 obs field with a given :name per obs.
+  # I assume iNat users will add only 1 proviisonal name per obs
+  def inat_prov_name
+    obs_fields = inat_obs_fields
+    return nil if obs_fields.blank?
+
+    prov_name_field =
+      inat_obs_fields.find do |field|
+        field[:name] =~ /^Provisional Species Name/
+      end
+    return nil if prov_name_field.blank?
+
+    prov_name_field[:value]
   end
 
   def inat_positional_accuracy=(accuracy)
@@ -242,7 +263,21 @@ class InatObs
     end
   end
 
-  ########## utilties
+  # The MO text_name for an iNat provisional species name
+  def provisional_name
+    prov_sp_name = inat_prov_name
+    return nil if prov_sp_name.blank?
+    return prov_sp_name if in_mo_format?(prov_sp_name)
+
+    # prepend the epithet with "sp-"
+    # epithet must start with lower case letter, else MO thinks it's an author
+    # quote the epithet by convention to indicate it will be replaced
+    # by a ICN style published or provisional name.
+    # Ex: Donadinia PNW01 => Donadinia "sp-PNW01"
+    prov_sp_name.sub(/ (.*)/, ' "sp-\1"')
+  end
+
+  ########## Utilities
 
   def importable?
     taxon_importable?
@@ -275,6 +310,11 @@ class InatObs
   # https://forum.inaturalist.org/t/given-an-observation-id-get-a-list-of-project/53476?u=joecohen
   def inat_projects
     @obs[:project_observations]
+  end
+
+  def in_mo_format?(prov_sp_name)
+    # Genus followed by quoted epithet starting with a lower-case letter
+    prov_sp_name =~ /[A-Z][a-z]+ "[a-z]\S+"/
   end
 
   def slime_mold?
