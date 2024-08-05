@@ -11,7 +11,8 @@ export default class extends GeocodeController {
   static targets = ["mapDiv", "southInput", "westInput", "northInput",
     "eastInput", "highInput", "lowInput", "placeInput", "locationId",
     "getElevation", "mapClearBtn", "controlWrap", "toggleMapBtn",
-    "latInput", "lngInput", "altInput", "showBoxBtn", "lockBoxBtn"]
+    "latInput", "lngInput", "altInput", "showBoxBtn", "lockBoxBtn",
+    "autocompleter"]
 
   connect() {
     this.element.dataset.stimulus = "connected"
@@ -373,10 +374,15 @@ export default class extends GeocodeController {
 
   // Action to map an MO location, or geocode a location from a place name.
   // Can be called directly from a button, so check for input values.
-  // Now fired from location id, including when it's zero
+  // Now fired when locationIdTarget changes, including when it's zero
   showBox() {
-    if (!this.opened ||
-      !this.hasPlaceInputTarget || !this.placeInputTarget.value)
+    if (!(this.opened && this.hasPlaceInputTarget &&
+      this.placeInputTarget.value))
+      return false
+
+    // Forms where location is optional: stay mum unless we're in create mode
+    if (this.hasAutocompleterTarget &&
+      !this.autocompleterTarget.classList.contains("create"))
       return false
 
     this.verbose("map:showBox")
@@ -531,11 +537,14 @@ export default class extends GeocodeController {
   // Action called from the "Clear Map" button
   clearMap() {
     const inputTargets = [
-      this.latInputTarget, this.lngInputTarget, this.altInputTarget,
       this.placeInputTarget, this.northInputTarget, this.southInputTarget,
       this.eastInputTarget, this.westInputTarget, this.highInputTarget,
       this.lowInputTarget
     ]
+    if (this.hasLatInputTarget) { inputTargets.push(this.latInputTarget) }
+    if (this.hasLngInputTarget) { inputTargets.push(this.lngInputTarget) }
+    if (this.hasAltInputTarget) { inputTargets.push(this.altInputTarget) }
+
     inputTargets.forEach((element) => { element.value = '' })
     this.ignorePlaceInput = false // turn string geolocation back on
 
@@ -624,7 +633,7 @@ export default class extends GeocodeController {
   }
 
   verbose(str) {
-    // console.log(str);
+    console.log(str);
     // document.getElementById("log").
     //   insertAdjacentText("beforeend", str + "<br/>");
   }

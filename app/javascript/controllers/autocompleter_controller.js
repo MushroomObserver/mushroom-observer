@@ -149,7 +149,7 @@ export default class extends Controller {
   // The select target is not the <input> element, but a <select> that can
   // swap out the autocompleter type. The <input> element is its target.
   static targets = ["input", "select", "pulldown", "list", "hidden", "wrap",
-    "createBtn", "hasIdIndicator", "keepBtn"]
+    "createBtn", "hasIdIndicator", "keepBtn", "mapWrap"]
   static outlets = ["map"]
 
   initialize() {
@@ -247,6 +247,7 @@ export default class extends Controller {
     if (this.TYPE === "location_google") {
       this.inputTarget.closest("form").classList.add(outlet_class);
       this.element.classList.add('create');
+      this.element.classList.remove('offer-create');
       this.element.classList.remove('constrained');
     } else if (this.ACT_LIKE_SELECT) {
       this.inputTarget.closest("form").classList.remove(outlet_class);
@@ -280,7 +281,8 @@ export default class extends Controller {
   mapOutletConnected(outlet, element) {
     this.verbose("autocompleter:mapOutletConnected()");
     // open the map if not already open
-    if (!outlet.opened) outlet.toggleMapBtnTarget.click();
+    if (!outlet.opened && !outlet.hasAutocompleterTarget)
+      outlet.toggleMapBtnTarget.click();
     // set the map type so box is editable
     outlet.map_type = "hybrid"; // only if location_google
 
@@ -318,7 +320,7 @@ export default class extends Controller {
     this.addEventListeners();
 
     const hidden_id = parseInt(this.hiddenTarget.value);
-    this.hasIdOrNo(hidden_id);
+    this.cssHasIdOrNo(hidden_id);
   }
 
   // When swapping autocompleter types, swap the hidden input identifiers.
@@ -958,7 +960,7 @@ export default class extends Controller {
         this.hiddenTarget.dataset[key] = match[key];
     });
 
-    this.hasIdOrNo(parseInt(match['id']));
+    this.cssHasIdOrNo(parseInt(match['id']));
     this.dispatchHiddenIdEvents();
   }
 
@@ -978,11 +980,29 @@ export default class extends Controller {
     this.dispatchHiddenIdEvents();
   }
 
-  hasIdOrNo(hidden_id) {
+  // Respond to the state of the hidden input. Initially we may not have id, but
+  // we also don't offer create until they've typed something.
+  cssHasIdOrNo(hidden_id) {
+    this.verbose("autocompleter:cssHasIdOrNo()");
+
     if (hidden_id && hidden_id !== NaN && hidden_id != 0) {
       this.wrapTarget.classList.add('has-id');
+      this.wrapTarget.classList.remove('offer-create');
     } else {
       this.wrapTarget.classList.remove('has-id');
+      if (this.inputTarget.value &&
+        !this.wrapTarget.classList.contains('create')) {
+        this.wrapTarget.classList.add('offer-create');
+      }
+    }
+    // On forms where a map may not be relevant, we also show/hide the map.
+    // Only show if we're in "create" mode.
+    if (this.hasMapWrapTarget) {
+      if (this.wrapTarget.classList.contains('create')) {
+        this.mapWrapTarget.classList.remove('d-none');
+      } else {
+        this.mapWrapTarget.classList.add('d-none');
+      }
     }
   }
 
@@ -1009,7 +1029,7 @@ export default class extends Controller {
       clearTimeout(this.data_timer);
       this.data_timer = setTimeout(() => {
         this.verbose("autocompleter: dispatching hiddenIdDataChanged");
-        this.hasIdOrNo(hidden_id);
+        this.cssHasIdOrNo(hidden_id);
         if (this.hasKeepBtnTarget) {
           this.keepBtnTarget.classList.remove('active');
         }
