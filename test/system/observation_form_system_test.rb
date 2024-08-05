@@ -96,6 +96,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("[data-type='location']")
     find(id: "observation_place_name").trigger("click")
     # This should make the "create_locality" button appear.
+    # It works fine in headless mode.
     assert_selector(".create-button span",
                     text: /#{:form_observations_create_locality.l}/)
     click_on(:form_observations_create_locality.l)
