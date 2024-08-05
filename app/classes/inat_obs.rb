@@ -222,9 +222,7 @@ class InatObs
   end
 
   def sequences
-    obs_sequence_fields =
-      inat_obs_fields.keep_if { |f| sequence_field?(f) }
-
+    obs_sequence_fields = inat_obs_fields.select { |f| sequence_field?(f) }
     obs_sequence_fields.each_with_object([]) do |field, ary|
       # TODO: 2024-06-19 jdc. Need more investigation/test to handle
       # field[:value] blank or not a (pure) lists of bases
@@ -297,7 +295,7 @@ class InatObs
 
   def sequence_field?(field)
     field[:datatype] == "dna" ||
-      field[:name] =~ /DNA/
+      field[:name] =~ /DNA/ && field[:value] =~ /^[ACTG]{,10}/
   end
 
   def fungi?
