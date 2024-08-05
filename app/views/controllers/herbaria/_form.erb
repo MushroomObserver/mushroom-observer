@@ -23,7 +23,7 @@ end
 %>
 
 <%= form_with(
-  model: @herbarium, id: "herbarium_form",
+  model: @herbarium, id: "herbarium_form", class: "map-outlet",
   data: {
     controller: "map",
     action: "autocompleter:hiddenIdDataChanged@window->map#showBox"
@@ -62,12 +62,24 @@ end
                               between: :optional) %>
   <% end %>
 
+  <!-- MAP -->
+  <% append = capture do
+    tag.div(id: "herbarium_geolocation", class: "mb-5 d-none",
+            data: { autocompleter_target: "mapWrap" }) do
+      render(partial: "shared/form_location_map",
+             locals: { id: "herbarium_form_map" })
+    end
+  end %>
+  <!-- /MAP -->
+
   <%= autocompleter_field(
     form: f, field: :place_name, type: :location,
     label: [tag.span("#{:LOCATION.l}:", class: "unconstrained-label"),
             tag.span("#{:form_observations_create_locality.l}:",
-                      class: "create-label")].safe_join(" "),
+                     class: "create-label")].safe_join(" "),
+    wrap_data: { map_target: "autocompleter" },
     between: :optional,
+    append:,
     hidden_data: { map_target: "locationId" },
     create_text: :form_observations_create_locality.l,
     data: {
@@ -79,12 +91,6 @@ end
   <%= render(partial: "locations/form/bounds_hidden_fields",
              locals: { location: @location, target_controller: :map }) %>
 
-  <!-- MAP -->
-  <%= tag.div(id: "herbarium_geolocation", class: "mb-5") do %>
-    <%= render(partial: "shared/form_location_map",
-               locals: { id: "herbarium_form_map" }) %>
-  <% end %>
-  <!-- /MAP -->
 
   <%= text_field_with_label(form: f, field: :email,
                             label: :create_herbarium_email.l + ":",
