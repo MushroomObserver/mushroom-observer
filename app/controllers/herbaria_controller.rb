@@ -121,7 +121,8 @@ class HerbariaController < ApplicationController
 
   def render_modal_herbarium_form
     render(partial: "shared/modal_form",
-           locals: { title: modal_title, identifier: modal_identifier,
+           locals: { title: modal_title, action: modal_form_action,
+                     identifier: modal_identifier,
                      form: "herbaria/form" }) and return
   end
 
@@ -140,6 +141,13 @@ class HerbariaController < ApplicationController
       :create_herbarium_title.l
     when "edit", "update"
       :edit_herbarium_title.l
+    end
+  end
+
+  def modal_form_action
+    case action_name
+    when "new", "create" then :create
+    when "edit", "update" then :update
     end
   end
 
