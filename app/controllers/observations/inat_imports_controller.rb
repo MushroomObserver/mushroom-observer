@@ -211,8 +211,7 @@ module Observations
       # Skipping images when testing will allow some more controller testing.
       # add_inat_images(inat_obs.inat_obs_photos) unless Rails.env.test?
       add_inat_images(inat_obs.inat_obs_photos)
-
-      add_namings(inat_obs)
+      update_names_and_proposals(inat_obs)
       add_inat_sequences(inat_obs)
       add_inat_summmary_data(inat_obs)
       # TODO: Other things done by Observations#create
@@ -281,7 +280,13 @@ module Observations
       User.find_by(login: "MO Webmaster")
     end
 
-    def add_namings(inat_obs)
+    def update_names_and_proposals(inat_obs)
+      add_namings_for_identifications(inat_obs)
+      add_provisional_name(inat_obs) # iNat provisional are not identifications
+      adjust_consensus_name_naming # also adds naming for provisionals
+    end
+
+    def add_namings_for_identifications(inat_obs)
       inat_obs.inat_identifications.each do |identification|
         inat_taxon = ::InatTaxon.new(identification[:taxon])
         next if name_already_proposed?(inat_taxon.name)
@@ -289,9 +294,6 @@ module Observations
         add_naming_with_vote(name: inat_taxon.name,
                              user: naming_user(identification), value: 0)
       end
-
-      add_provisional_namings(inat_obs)
-      adjust_consensus_name_naming
     end
 
     def name_already_proposed?(name)
@@ -321,7 +323,7 @@ module Observations
                   user: user, value: value)
     end
 
-    def add_provisional_namings(inat_obs)
+    def add_provisional_name(inat_obs)
       nom_prov = inat_obs.provisional_name
       return if nom_prov.blank?
 
@@ -344,7 +346,7 @@ module Observations
                # TODO: Fix sort_name.
                # See app/models/name/parse.rb#format_sort_name
              end
-      # If iNat user created a provisional name, make it the MO consensus, and
+      # If iNat user created a provisional name, treat it as thet MO consensus;
       # let the calling method (add_namings) add a Naming and Vote
       @observation.update(name: name, text_name: nom_prov)
     end
