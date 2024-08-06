@@ -4,7 +4,7 @@
   <%= panel_block(id: "observation_identification",
                   heading: "#{:IDENTIFICATION.l} + #{:NOTES.l}") do %>
     <%= tag.div(class: "row mt-3") do %>
-      <%= tag.div(class: "col-xs-12 col-sm-6") do %>
+      <%= tag.div(class: "col-xs-12 col-lg-6") do %>
         <% if include_naming
           naming_locals = {
             f:            f,
@@ -20,7 +20,7 @@
         <%= render(partial: "observations/form/specimen_section",
                   locals: { f:, action: }) %>
       <% end %>
-      <%= tag.div(class: "col-xs-12 col-sm-6") do %>
+      <%= tag.div(class: "col-xs-12 col-lg-6") do %>
         <%= render(partial: "shared/notes_fields",
                   locals: { form: f,
                             fields: @observation.form_notes_parts(@user) }) %>
