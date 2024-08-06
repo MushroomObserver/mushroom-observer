@@ -6,6 +6,9 @@
 
 # helpers for form tags
 # rubocop:disable Metrics/ModuleLength
+# rubocop:disable Metrics/AbcSize
+# rubocop:disable Metrics/MethodLength
+# rubocop:disable Metrics/CyclomaticComplexity
 module FormsHelper
   # Bootstrap submit button
   # <%= submit_button(form: f, button: button.t, center: true) %>
@@ -233,8 +236,6 @@ module FormsHelper
   # autocompletes, and Safari is not much better - you just can't turn their
   # crap off. (documented on SO)
   #
-  # rubocop:disable Metrics/AbcSize
-  # rubocop:disable Metrics/MethodLength
   def autocompleter_field(**args)
     ac_args = {
       placeholder: :start_typing.l, autocomplete: "off",
@@ -272,8 +273,6 @@ module FormsHelper
       text_field_with_label(**ac_args)
     end
   end
-  # rubocop:enable Metrics/AbcSize
-  # rubocop:enable Metrics/MethodLength
 
   def autocompleter_has_id_indicator
     link_icon(:check, title: :autocompleter_has_id.l,
@@ -680,3 +679,6 @@ module FormsHelper
   end
 end
 # rubocop:enable Metrics/ModuleLength
+# rubocop:enable Metrics/AbcSize
+# rubocop:enable Metrics/MethodLength
+# rubocop:enable Metrics/CyclomaticComplexity
