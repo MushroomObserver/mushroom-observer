@@ -127,12 +127,11 @@ module Observations
         east: -122.367,
         west: -122.431
       )
-      evernia = Name.new(text_name: "Evernia",
-                         author: "Ach.",
-                         display_name: "Evernia",
-                         rank: "Genus",
-                         user: user)
-      evernia.save
+      evernia = Name.create(text_name: "Evernia",
+                            author: "Ach.",
+                            display_name: "Evernia",
+                            rank: "Genus",
+                            user: user)
 
       obs = import_mock_observation("evernia")
 
@@ -165,19 +164,17 @@ module Observations
       # Tremella mesenterica, which in is fixtures
       t_mesenterica = Name.find_by(text_name: "Tremella mesenterica")
       # "Naematelia aurantia, which is not
-      Name.new(text_name: "Naematelia aurantia",
-               author: "(Schwein.) Burt",
-               display_name: "Naematelia aurantia",
-               rank: "Species",
-               user: rolf).save
-      n_aurantia = Name.find_by(text_name: "Naematelia aurantia")
+      n_aurantia = Name.create(text_name: "Naematelia aurantia",
+                               author: "(Schwein.) Burt",
+                               display_name: "Naematelia aurantia",
+                               rank: "Species",
+                               user: rolf)
       # iNat Community Taxon, which is not an identification for this iNat obs
-      Name.new(text_name: "Tremellales",
-               author: "Fr.",
-               display_name: "Tremellales",
-               rank: "Order",
-               user: rolf).save
-      tremellales = Name.find_by(text_name: "Tremellales")
+      tremellales = Name.create(text_name: "Tremellales",
+                                author: "Fr.",
+                                display_name: "Tremellales",
+                                rank: "Order",
+                                user: rolf)
 
       obs = import_mock_observation("tremella_mesenterica")
 
@@ -247,14 +244,13 @@ module Observations
 
     def test_import_arrhenia_sp_NY02 # rubocop:disable Naming/MethodName
       user = rolf
-      name = Name.new(
+      name = Name.create(
         text_name: 'Arrhenia "sp-NY02"',
         author: "S.D. Russell crypt. temp.",
         display_name: '**__Arrhenia "sp-NY02"__** S.D. Russell crypt. temp.',
         rank: "Species",
         user: user
       )
-      name.save
 
       obs = import_mock_observation("arrhenia_sp_NY02")
 
