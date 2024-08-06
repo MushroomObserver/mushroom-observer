@@ -245,6 +245,30 @@ module Observations
       assert(obs.sequences.one?, "Obs should have a sequence")
     end
 
+    def test_import_arrhenia_sp_NY02 # rubocop:disable Naming/MethodName
+      skip("under construction")
+      user = rolf
+      name = Name.new(
+        text_name: 'Arrhenia "sp-NY02"',
+        author: "S.D. Russell crypt. temp.",
+        display_name: '**__Arrhenia "sp-NY02"__** S.D. Russell crypt. temp.',
+        rank: "Species",
+        user: user
+      )
+
+      obs = import_mock_observation("arrhenia_sp_NY02")
+
+      namings = obs.namings
+      naming = namings.find_by(name: name)
+      assert(naming.present?, "Missing Naming for provisional name")
+      assert_equal(inat_manager, naming.user,
+                   "Naming without iNat ID should have user: inat_manager")
+      vote = Vote.find_by(naming: naming, user: naming.user)
+      assert(vote.present?, "Naming is missing a Vote")
+      assert_equal(name, obs.name, "Consensus ID should be provisional name")
+      assert(vote.value.positive?, "Vote for MO consensus should be positive")
+    end
+
     def test_import_plant
       user = rolf
       filename = "ceanothus_cordulatus"

@@ -220,13 +220,12 @@ module Observations
       add_inat_images(inat_obs.inat_obs_photos)
 
       add_namings(inat_obs)
-
+      add_inat_sequences(inat_obs)
+      add_inat_summmary_data(inat_obs)
       # TODO: Other things done by Observations#create
       # save_everything_else(params.dig(:naming, :reasons))
       # strip_images! if @observation.gps_hidden
       # update_field_slip(@observation, params[:field_code])
-      add_inat_sequences(inat_obs)
-      add_inat_summmary_data(inat_obs)
     end
 
     def inat_import
@@ -304,6 +303,7 @@ module Observations
                  user: user, value: 0).save
       end
 
+      add_provisional_namings(inat_obs)
       adjust_consensus_name_naming
     end
 
@@ -325,7 +325,33 @@ module Observations
       end
     end
 
+    def add_provisional_namings(inat_obs)
+      nom_prov = inat_obs.provisional_name
+      return if nom_prov.blank?
+
+      mo_counterpart = Name.where(text_name: nom_prov)
+      return if mo_counterpart.many?
+
+      if mo_counterpart.none?
+        # TO_DO: include sort name
+        mo_counterpart =
+          Name.create(
+            text_name: nom_prov, author: "crypt. temp.",
+            display_name: "**__#{nom_prov}__** crypt. temp.",
+            rank: "Species",
+            user: inat_manager
+          )
+      end
+
+      # If iNat user created a provisional name, make it the MO consensus, and
+      # let the calling method (add_namings) add a Naming and Vote
+      @observation.name = mo_counterpart
+      @observation.text_name = nom_prov
+      @observation.save
+    end
+
     def adjust_consensus_name_naming
+      debugger
       naming = Naming.find_by(observation: @observation,
                               name: @observation.name)
 
