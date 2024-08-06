@@ -106,20 +106,22 @@ class HerbariaController < ApplicationController
     end
   end
 
-  # rubocop:disable Metrics/AbcSize
   def edit
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium && make_sure_can_edit!
 
-    @herbarium.place_name         = @herbarium.location.try(&:name)
-    @herbarium.personal           = @herbarium.personal_user_id.present?
-    @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
+    set_up_herbarium_for_edit
     respond_to do |format|
       format.turbo_stream { render_modal_herbarium_form }
       format.html
     end
   end
-  # rubocop:enable Metrics/AbcSize
+
+  def set_up_herbarium_for_edit
+    @herbarium.place_name         = @herbarium.location.try(&:name)
+    @herbarium.personal           = @herbarium.personal_user_id.present?
+    @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
+  end
 
   def render_modal_herbarium_form
     render(partial: "shared/modal_form",
@@ -287,7 +289,6 @@ class HerbariaController < ApplicationController
     true
   end
 
-  # rubocop:disable Metrics/AbcSize
   def validate_admin_personal_user!
     return true unless in_admin_mode?
     return true if nonpersonal!
@@ -308,11 +309,14 @@ class HerbariaController < ApplicationController
     flash_notice(
       :edit_herbarium_successfully_made_personal.t(user: user.login)
     )
+    update_personal_herbarium(user)
+  end
+
+  def update_personal_herbarium(user)
     @herbarium.curators.clear
     @herbarium.add_curator(user)
     @herbarium.personal_user_id = user.id
   end
-  # rubocop:enable Metrics/AbcSize
 
   # Return true/false if @herbarium nonpersonal/personal,
   # making it nonpersonal & flashing message if possible
