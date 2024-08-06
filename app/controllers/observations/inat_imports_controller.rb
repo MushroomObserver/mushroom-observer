@@ -351,7 +351,6 @@ module Observations
     end
 
     def adjust_consensus_name_naming
-      debugger
       naming = Naming.find_by(observation: @observation,
                               name: @observation.name)
 
