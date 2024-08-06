@@ -119,7 +119,7 @@ class HerbariaController < ApplicationController
     end
   end
 
-  def render_modal_herbarium_record_form
+  def render_modal_herbarium_form
     render(partial: "shared/modal_form",
            locals: { title: modal_title, identifier: modal_identifier,
                      form: "herbaria/form" }) and return
