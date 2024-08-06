@@ -6,6 +6,9 @@
 
 # helpers for form tags
 # rubocop:disable Metrics/ModuleLength
+# rubocop:disable Metrics/AbcSize
+# rubocop:disable Metrics/MethodLength
+# rubocop:disable Metrics/CyclomaticComplexity
 module FormsHelper
   # Bootstrap submit button
   # <%= submit_button(form: f, button: button.t, center: true) %>
@@ -165,17 +168,7 @@ module FormsHelper
     label_opts[:class] = class_names(label_opts[:class], args[:label_class])
 
     tag.div(class: wrap_class, data: wrap_data) do
-      # The label row is complicated, many potential buttons here. `between`
-      # comes right after the label on left, `between_end` is right justified
-      concat(tag.div(class: "d-flex justify-content-between") do
-        concat(tag.div do
-          concat(args[:form].label(args[:field], args[:label], label_opts))
-          concat(args[:between]) if args[:between].present?
-        end)
-        concat(tag.div do
-          concat(args[:between_end]) if args[:between_end].present?
-        end)
-      end)
+      concat(text_label_row(args, label_opts))
       if args[:addon].present? # text addon, not interactive
         concat(tag.div(class: "input-group") do
           concat(args[:form].text_field(args[:field], opts))
@@ -196,6 +189,42 @@ module FormsHelper
     end
   end
 
+  # Bootstrap text_area
+  def text_area_with_label(**args)
+    args = auto_label_if_form_is_account_prefs(args)
+    args = check_for_optional_or_required_note(args)
+    args = check_for_help_block(args)
+    opts = separate_field_options_from_args(args)
+    opts[:class] = "form-control"
+    opts[:class] += " text-monospace" if args[:monospace].present?
+
+    wrap_class = form_group_wrap_class(args)
+    wrap_data = args[:wrap_data] || {}
+    label_opts = field_label_opts(args)
+
+    tag.div(class: wrap_class, data: wrap_data) do
+      concat(text_label_row(args, label_opts))
+      concat(args[:form].text_area(args[:field], opts))
+      concat(args[:append]) if args[:append].present?
+    end
+  end
+
+  # The label row for autocompleters is potentially complicated, many buttons.
+  # Content for `between` and `label_after` come right after the label on left,
+  # content for `label_end` is at the end of the same line, right justified.
+  def text_label_row(args, label_opts)
+    tag.div(class: "d-flex justify-content-between") do
+      concat(tag.div do
+        concat(args[:form].label(args[:field], args[:label], label_opts))
+        concat(args[:between]) if args[:between].present?
+        concat(args[:label_after]) if args[:label_after].present?
+      end)
+      concat(tag.div do
+        concat(args[:label_end]) if args[:label_end].present?
+      end)
+    end
+  end
+
   # MO's autocompleter_field is a text_field that fetches suggestions from the
   # db for the requested model. (For a textarea, pass textarea: true.) The
   # stimulus controller handles keyboard and mouse interactions, does the
@@ -207,31 +236,30 @@ module FormsHelper
   # autocompletes, and Safari is not much better - you just can't turn their
   # crap off. (documented on SO)
   #
-  # rubocop:disable Metrics/AbcSize
-  # rubocop:disable Metrics/MethodLength
   def autocompleter_field(**args)
     ac_args = {
       placeholder: :start_typing.l, autocomplete: "off",
       data: { autocompleter_target: "input" }
-    }.deep_merge(args.except(:type, :separator, :textarea,
+    }.deep_merge(args.except(:wrap_data, :type, :separator, :textarea,
                              :hidden_value, :hidden_data, :create_text,
                              :keep_text, :edit_text, :find_text))
     ac_args[:class] = class_names("dropdown", args[:class])
-    ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
-                            separator: args[:separator],
-                            autocompleter_map_outlet: ".map-outlet",
-                            autocompleter_geocode_outlet: ".geocode-outlet",
-                            autocompleter_target: "wrap" }
-    ac_args[:between] = capture do
+    ac_args[:wrap_data] = {
+      controller: :autocompleter, type: args[:type],
+      separator: args[:separator],
+      autocompleter_map_outlet: ".map-outlet",
+      autocompleter_geocode_outlet: ".geocode-outlet",
+      autocompleter_target: "wrap"
+    }.deep_merge(args[:wrap_data] || {})
+    ac_args[:label_after] = capture do
       [
-        args[:between],
         autocompleter_has_id_indicator,
         autocompleter_find_button(args),
         autocompleter_keep_button(args),
         autocompleter_hidden_field(**args)
       ].safe_join
     end
-    ac_args[:between_end] = capture do
+    ac_args[:label_end] = capture do
       autocompleter_create_button(args)
     end
     ac_args[:append] = capture do
@@ -245,8 +273,6 @@ module FormsHelper
       text_field_with_label(**ac_args)
     end
   end
-  # rubocop:enable Metrics/AbcSize
-  # rubocop:enable Metrics/MethodLength
 
   def autocompleter_has_id_indicator
     link_icon(:check, title: :autocompleter_has_id.l,
@@ -325,27 +351,6 @@ module FormsHelper
           end)
         end
       end
-    end
-  end
-
-  # Bootstrap text_area
-  def text_area_with_label(**args)
-    args = auto_label_if_form_is_account_prefs(args)
-    args = check_for_optional_or_required_note(args)
-    args = check_for_help_block(args)
-    opts = separate_field_options_from_args(args)
-    opts[:class] = "form-control"
-    opts[:class] += " text-monospace" if args[:monospace].present?
-
-    wrap_class = form_group_wrap_class(args)
-    wrap_data = args[:wrap_data] || {}
-    label_opts = field_label_opts(args)
-
-    tag.div(class: wrap_class, data: wrap_data) do
-      concat(args[:form].label(args[:field], args[:label], label_opts))
-      concat(args[:between]) if args[:between].present?
-      concat(args[:form].text_area(args[:field], opts))
-      concat(args[:append]) if args[:append].present?
     end
   end
 
@@ -634,7 +639,7 @@ module FormsHelper
     keys = [:optional, :required].freeze
     positions.each do |pos|
       keys.each do |key|
-        args[pos] = help_note(:span, "(#{key.t})") if args[pos] == key
+        args[pos] = help_note(:span, "(#{key.l})") if args[pos] == key
       end
     end
     args
@@ -648,8 +653,8 @@ module FormsHelper
 
     id = "#{args[:form].object_name}_#{args[:field]}_help"
     args[:between] = capture do
-      concat(collapse_info_trigger(id))
       concat(args[:between])
+      concat(collapse_info_trigger(id))
     end
     args[:append] = capture do
       concat(args[:append])
@@ -665,12 +670,15 @@ module FormsHelper
   # be excluded separately (not here)
   def separate_field_options_from_args(args, extras = [])
     exceptions = [
-      :form, :field, :label, :class, :width, :inline, :between, :between_end,
-      :append, :help, :addon, :optional, :required, :monospace, :type,
-      :wrap_data, :button, :button_data
+      :form, :field, :label, :class, :width, :inline, :between, :label_after,
+      :label_end, :append, :help, :addon, :optional, :required, :monospace,
+      :type, :wrap_data, :button, :button_data
     ] + extras
 
     args.clone.except(*exceptions)
   end
 end
 # rubocop:enable Metrics/ModuleLength
+# rubocop:enable Metrics/AbcSize
+# rubocop:enable Metrics/MethodLength
+# rubocop:enable Metrics/CyclomaticComplexity

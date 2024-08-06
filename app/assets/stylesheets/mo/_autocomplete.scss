@@ -6,16 +6,20 @@
 .has-id-indicator {
   display: none;
 }
-.create-button {
-  display: inline-block;
-}
-
 .has-id {
   .has-id-indicator {
     display: inline-block;
   }
+}
+
+// initially we may not have id, but we also don't offer create
+// until they've typed something
+.create-button {
+  display: none;
+}
+.offer-create {
   .create-button {
-    display: none;
+    display: inline-block;
   }
 }
 
