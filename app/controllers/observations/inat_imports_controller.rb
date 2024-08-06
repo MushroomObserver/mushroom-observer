@@ -37,11 +37,10 @@ module Observations
       return consent_required if params[:consent] == "0"
 
       inat_import = InatImport.find_or_create_by(user: User.current)
-      inat_import.state = "Authorizing"
-      inat_import.import_all = params[:all]
-      inat_import.inat_ids = params[:inat_ids]
-      inat_import.inat_username = params[:inat_username]
-      inat_import.save
+      inat_import.update(state: "Authorizing",
+                         import_all: params[:all],
+                         inat_ids: params[:inat_ids],
+                         inat_username: params[:inat_username])
 
       request_inat_user_authorization
     end
@@ -107,8 +106,7 @@ module Observations
       return not_authorized if auth_code.blank?
 
       inat_import = InatImport.find_or_create_by(user: User.current)
-      inat_import.state = "Authenticating"
-      inat_import.save
+      inat_import.update(state: "Authenticating")
 
       # exchange code received from iNat for an access token
       payload = {
@@ -119,15 +117,11 @@ module Observations
         grant_type: "authorization_code"
       }
       response = RestClient.post("#{SITE}/oauth/token", payload)
-      inat_import.token = response.body
-      inat_import.state = "Importing"
-      inat_import.save
+      inat_import.update(token: response.body, state: "Importing")
 
       import_requested_observations(inat_import)
 
-      inat_import.state = "Done"
-      inat_import.save
-
+      inat_import.update(state: "Done")
       redirect_to(observations_path)
     end
 
@@ -197,7 +191,7 @@ module Observations
       inat_obs = InatObs.new(result)
       return not_importable(inat_obs) unless inat_obs.importable?
 
-      @observation = Observation.new(
+      @observation = Observation.create(
         when: inat_obs.when,
         location: inat_obs.location,
         where: inat_obs.where,
@@ -210,7 +204,6 @@ module Observations
         source: "mo_inat_import",
         inat_id: inat_obs.inat_id
       )
-      @observation.save
       @observation.log(:log_observation_created)
 
       # NOTE: 2024-06-19 jdc. I can't figure out how to properly stub
@@ -293,14 +286,8 @@ module Observations
         inat_taxon = ::InatTaxon.new(identification[:taxon])
         next if name_already_proposed?(inat_taxon.name)
 
-        user = naming_user(identification)
-        naming = Naming.new(observation: @observation,
-                            user: user,
-                            name: inat_taxon.name)
-        naming.save
-
-        Vote.new(naming: naming, observation: @observation,
-                 user: user, value: 0).save
+        add_naming_with_vote(name: inat_taxon.name,
+                             user: naming_user(identification), value: 0)
       end
 
       add_provisional_namings(inat_obs)
@@ -323,6 +310,15 @@ module Observations
         # So make inat_manager the user for the Proposed Name
         inat_manager
       end
+    end
+
+    def add_naming_with_vote(name:, user: User.current, value: 0)
+      naming = Naming.create(observation: @observation,
+                             user: user,
+                             name: name)
+
+      Vote.create(naming: naming, observation: @observation,
+                  user: user, value: value)
     end
 
     def add_provisional_namings(inat_obs)
@@ -350,9 +346,7 @@ module Observations
              end
       # If iNat user created a provisional name, make it the MO consensus, and
       # let the calling method (add_namings) add a Naming and Vote
-      @observation.name = name
-      @observation.text_name = nom_prov
-      @observation.save
+      @observation.update(name: name, text_name: nom_prov)
     end
 
     def adjust_consensus_name_naming
@@ -360,16 +354,11 @@ module Observations
                               name: @observation.name)
 
       if naming.nil?
-        naming = Naming.new(observation: @observation,
-                            user: inat_manager,
-                            name: @observation.name)
-        naming.save
-        Vote.new(naming: naming, observation: @observation,
-                 user: inat_manager, value: 1).save
+        add_naming_with_vote(name: @observation.name,
+                             user: inat_manager, value: 1)
       else
         vote = Vote.find_by(naming: naming, observation: @observation)
-        vote.value = 1
-        vote.save
+        vote.update(value: 1)
       end
     end
 
