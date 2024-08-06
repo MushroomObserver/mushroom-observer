@@ -552,6 +552,8 @@ export default class extends Controller {
   // If we don't have lat/lngs, just draw the pulldown.
   scheduleGoogleRefresh() {
     if (this.hasMapOutlet &&
+      this.mapOutlet.hasLatInputTarget &&
+      this.mapOutlet.hasLngInputTarget &&
       this.mapOutlet?.latInputTarget.value &&
       this.mapOutlet?.lngInputTarget.value) {
       this.drawPulldown();
@@ -562,12 +564,13 @@ export default class extends Controller {
     this.clearRefresh();
     this.refresh_timer = setTimeout((() => {
       this.verbose("autocompleter:doing_google_refresh()");
+      this.verbose(this.inputTarget.value);
       this.old_value = this.inputTarget.value;
       // async, anything after this executes immediately
       if (this.hasGeocodeOutlet) {
-        this.geocodeOutlet.geolocatePlaceName(true);
+        this.geocodeOutlet.geolocatePlaceName(this.inputTarget.value);
       } else if (this.hasMapOutlet) {
-        this.mapOutlet.geolocatePlaceName(true);
+        this.mapOutlet.geolocatePlaceName(this.inputTarget.value);
       }
       // still necessary if primer unchanged, as likely?
       // this.populateMatches();
