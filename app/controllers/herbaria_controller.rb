@@ -45,6 +45,7 @@
 # See https://tinyurl.com/ynapvpt7
 
 # View and modify Herbaria (displayed as "Fungaria")
+# rubocop:disable Metrics/ClassLength
 class HerbariaController < ApplicationController
   before_action :login_required
   # only: [:create, :destroy, :edit, :new, :update]
@@ -105,10 +106,10 @@ class HerbariaController < ApplicationController
     end
   end
 
+  # rubocop:disable Metrics/AbcSize
   def edit
     @herbarium = find_or_goto_index(Herbarium, params[:id])
-    return unless @herbarium
-    return unless make_sure_can_edit!
+    return unless @herbarium && make_sure_can_edit!
 
     @herbarium.place_name         = @herbarium.location.try(&:name)
     @herbarium.personal           = @herbarium.personal_user_id.present?
@@ -118,6 +119,7 @@ class HerbariaController < ApplicationController
       format.html
     end
   end
+  # rubocop:enable Metrics/AbcSize
 
   def render_modal_herbarium_form
     render(partial: "shared/modal_form",
@@ -285,6 +287,7 @@ class HerbariaController < ApplicationController
     true
   end
 
+  # rubocop:disable Metrics/AbcSize
   def validate_admin_personal_user!
     return true unless in_admin_mode?
     return true if nonpersonal!
@@ -309,6 +312,7 @@ class HerbariaController < ApplicationController
     @herbarium.add_curator(user)
     @herbarium.personal_user_id = user.id
   end
+  # rubocop:enable Metrics/AbcSize
 
   # Return true/false if @herbarium nonpersonal/personal,
   # making it nonpersonal & flashing message if possible
@@ -395,3 +399,4 @@ class HerbariaController < ApplicationController
              :place_name, :personal, :personal_user_name)
   end
 end
+# rubocop:enable Metrics/ClassLength
