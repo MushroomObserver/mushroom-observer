@@ -242,18 +242,42 @@ module Observations
       assert(obs.sequences.one?, "Obs should have a sequence")
     end
 
-    def test_import_arrhenia_sp_NY02 # rubocop:disable Naming/MethodName
-      user = rolf
+    # Prove that Namings, Votes, Identification are correct
+    # When iNat obs has provisional name that's in MO
+    def test_import_arrhenia_sp_ny02_old_name
       name = Name.create(
         text_name: 'Arrhenia "sp-NY02"',
         author: "S.D. Russell crypt. temp.",
         display_name: '**__Arrhenia "sp-NY02"__** S.D. Russell crypt. temp.',
         rank: "Species",
-        user: user
+        user: rolf
       )
 
       obs = import_mock_observation("arrhenia_sp_NY02")
 
+      namings = obs.namings
+      naming = namings.find_by(name: name)
+      assert(naming.present?, "Missing Naming for provisional name")
+      assert_equal(inat_manager, naming.user,
+                   "Naming without iNat ID should have user: inat_manager")
+      vote = Vote.find_by(naming: naming, user: naming.user)
+      assert(vote.present?, "Naming is missing a Vote")
+      assert_equal(name, obs.name, "Consensus ID should be provisional name")
+      assert(vote.value.positive?, "Vote for MO consensus should be positive")
+    end
+
+    # Prove that Namings, Votes, Identification are correct
+    # when iNat obs has provisional name that wasn't in MO
+    def test_import_arrhenia_sp_ny02_new_name
+      assert_nil(Name.find_by(text_name: 'Arrhenia "sp-NY02"'),
+                 "Test requires that MO not yest have provisional name")
+
+      obs = import_mock_observation("arrhenia_sp_NY02")
+
+      name = Name.find_by(text_name: 'Arrhenia "sp-NY02"')
+      assert(name.rss_log_id.present?)
+
+      assert(name.present?, "Failed to create provisional name")
       namings = obs.namings
       naming = namings.find_by(name: name)
       assert(naming.present?, "Missing Naming for provisional name")

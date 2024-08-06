@@ -336,19 +336,21 @@ module Observations
       name = if mo_counterparts.one?
                mo_counterparts.first
              else
-               Name.create(
-                 text_name: nom_prov,
-                 author: "crypt. temp.",
-                 # search_name: "#{nom_prov} crypt. temp.",
-                 # display_name: "**__#{nom_prov}__** crypt. temp.",
-                 # sort_name: "**__#{nom_prov}__**  crypt. temp.",
-                 rank: "Species",
-                 user: inat_manager
-               )
-               # TODO: Fix sort_name.
-               # See app/models/name/parse.rb#format_sort_name
+               params = {
+                 method: :post,
+                 action: :name,
+                 api_key: inat_manager_key.key,
+                 name: "#{nom_prov} crypt. temp.",
+                 rank: "Species"
+               }
+               api = API2.execute(params)
+               User.current = @user # API call zaps User.current
+
+               new_name = api.results.first
+               new_name.log(:log_name_created)
+               new_name
              end
-      # If iNat user created a provisional name, treat it as thet MO consensus;
+      # If iNat obs has a provisional name, treat it as the MO consensus;
       # let the calling method (add_namings) add a Naming and Vote
       @observation.update(name: name, text_name: nom_prov)
     end
