@@ -479,9 +479,9 @@ export default class extends GeocodeController {
   // input has been prepopulated and uses that to focus map and drop a marker.
   calculateMarker(event) {
     this.verbose("map:calculateMarker")
-    if (this.map == undefined ||
-      this.latInputTarget.value === '' || this.lngInputTarget.value === ''
-    ) return false
+    if (this.map == undefined || !this.hasLatInputTarget ||
+      this.latInputTarget.value === '' || this.lngInputTarget.value === '')
+      return false
 
     let location
     if (event?.detail?.request_params) {
