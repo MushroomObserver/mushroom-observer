@@ -242,7 +242,8 @@ module FormsHelper
       data: { autocompleter_target: "input" }
     }.deep_merge(args.except(:wrap_data, :type, :separator, :textarea,
                              :hidden_value, :hidden_data, :create_text,
-                             :keep_text, :edit_text, :find_text))
+                             :keep_text, :edit_text, :find_text, :create,
+                             :create_path))
     ac_args[:class] = class_names("dropdown", args[:class])
     ac_args[:wrap_data] = {
       controller: :autocompleter, type: args[:type],
@@ -260,7 +261,8 @@ module FormsHelper
       ].safe_join
     end
     ac_args[:label_end] = capture do
-      autocompleter_create_button(args)
+      concat(autocompleter_create_button(args))
+      concat(autocompleter_modal_create_link(args))
     end
     ac_args[:append] = capture do
       concat(autocompleter_dropdown)
@@ -281,7 +283,7 @@ module FormsHelper
   end
 
   def autocompleter_create_button(args)
-    return unless args[:create_text]
+    return if !args[:create_text] || args[:create].present?
 
     icon_link_to(
       args[:create_text], "#",
@@ -289,6 +291,18 @@ module FormsHelper
       name: "create_#{args[:type]}", class: "ml-3 create-button",
       data: { autocompleter_target: "createBtn",
               action: "autocompleter#swapCreate:prevent" }
+    )
+  end
+
+  def autocompleter_modal_create_link(args)
+    return unless args[:create_text] && args[:create].present? &&
+                  args[:create_path].present?
+
+    modal_link_to(
+      args[:create], args[:create_text], args[:create_path],
+      icon: :plus, show_text: true, icon_class: "text-primary",
+      name: "create_#{args[:type]}", class: "ml-3 create-link",
+      data: { autocompleter_target: "createBtn" }
     )
   end
 
