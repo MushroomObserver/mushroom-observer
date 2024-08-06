@@ -329,23 +329,28 @@ module Observations
       nom_prov = inat_obs.provisional_name
       return if nom_prov.blank?
 
-      mo_counterpart = Name.where(text_name: nom_prov)
-      return if mo_counterpart.many?
+      mo_counterparts = Name.where(text_name: nom_prov)
+      # Don't try to resolve if many MO names have this text name
+      return if mo_counterparts.many?
 
-      if mo_counterpart.none?
-        # TO_DO: include sort name
-        mo_counterpart =
-          Name.create(
-            text_name: nom_prov, author: "crypt. temp.",
-            display_name: "**__#{nom_prov}__** crypt. temp.",
-            rank: "Species",
-            user: inat_manager
-          )
-      end
-
+      name = if mo_counterparts.one?
+               mo_counterparts.first
+             else
+               Name.create(
+                 text_name: nom_prov,
+                 author: "crypt. temp.",
+                 # search_name: "#{nom_prov} crypt. temp.",
+                 # display_name: "**__#{nom_prov}__** crypt. temp.",
+                 # sort_name: "**__#{nom_prov}__**  crypt. temp.",
+                 rank: "Species",
+                 user: inat_manager
+               )
+               # TODO: Fix sort_name.
+               # See app/models/name/parse.rb#format_sort_name
+             end
       # If iNat user created a provisional name, make it the MO consensus, and
       # let the calling method (add_namings) add a Naming and Vote
-      @observation.name = mo_counterpart
+      @observation.name = name
       @observation.text_name = nom_prov
       @observation.save
     end

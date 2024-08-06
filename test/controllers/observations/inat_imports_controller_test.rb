@@ -246,7 +246,6 @@ module Observations
     end
 
     def test_import_arrhenia_sp_NY02 # rubocop:disable Naming/MethodName
-      skip("under construction")
       user = rolf
       name = Name.new(
         text_name: 'Arrhenia "sp-NY02"',
@@ -255,6 +254,7 @@ module Observations
         rank: "Species",
         user: user
       )
+      name.save
 
       obs = import_mock_observation("arrhenia_sp_NY02")
 
