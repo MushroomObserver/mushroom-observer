@@ -82,9 +82,13 @@ end
     append:,
     hidden_data: { map_target: "locationId" },
     create_text: :form_observations_create_locality.l,
+    map_outlet: "herbarium_form_map",
     data: {
       map_target: "placeInput",
-      action: "map:googlePrimer@window->autocompleter#refreshGooglePrimer"
+      action: [
+        "map:pointChanged@window->autocompleter#swap",
+        "map:googlePrimer@window->autocompleter#refreshGooglePrimer"
+      ]
     }
   ) %>
 

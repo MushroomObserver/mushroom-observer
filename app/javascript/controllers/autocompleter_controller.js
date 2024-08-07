@@ -232,12 +232,12 @@ export default class extends Controller {
       this.matches = [];
       this.stored_data = { id: 0 };
       this.last_fetch_params = '';
-      this.prepareInputElement();
-      this.prepareHiddenInput();
       if (!this.hasKeepBtnTarget ||
         !this.keepBtnTarget?.classList?.contains('active')) {
         this.clearHiddenId();
       }
+      this.prepareInputElement();
+      this.prepareHiddenInput();
       this.constrainedSelectionUI();
     }
   }
@@ -245,11 +245,13 @@ export default class extends Controller {
   constrainedSelectionUI() {
     const outlet_class = this.appropriateOutletClass();
     if (this.TYPE === "location_google") {
+      this.verbose("autocompleter: location_google swap");
       this.inputTarget.closest("form").classList.add(outlet_class);
       this.element.classList.add('create');
       this.element.classList.remove('offer-create');
       this.element.classList.remove('constrained');
     } else if (this.ACT_LIKE_SELECT) {
+      this.verbose("autocompleter: ACT_LIKE_SELECT swap");
       this.inputTarget.closest("form").classList.remove(outlet_class);
       // primer is not based on input, so go ahead and request from server.
       this.focused = true; // so it will draw the pulldown immediately
@@ -257,8 +259,8 @@ export default class extends Controller {
       this.element.classList.add('constrained');
       this.element.classList.remove('create');
     } else {
-      this.inputTarget.closest("form").classList.remove(outlet_class);
       this.verbose("autocompleter: regular swap");
+      this.inputTarget.closest("form").classList.remove(outlet_class);
       this.scheduleRefresh();
       this.element.classList.remove('constrained', 'create');
     }
