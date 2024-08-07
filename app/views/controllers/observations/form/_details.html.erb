@@ -4,9 +4,9 @@
     including location autocomplete, map, lat/long/alt %>
 <%
 t_s = {
-  lat: { abbr: :LAT.l, full: :LATITUDE.l },
-  lng: { abbr: :LNG.l, full: :LONGITUDE.l },
-  alt: { abbr: :ALT.l, full: :ALTITUDE.l }
+  lat: { abbr: :LAT.l, full: :LATITUDE.l, addon: "º" },
+  lng: { abbr: :LNG.l, full: :LONGITUDE.l, addon: "º" },
+  alt: { abbr: :ALT.l, full: :ALTITUDE.l, addon: "m" }
 }
 %>
 
@@ -32,7 +32,7 @@ t_s = {
           <% [:lat, :lng, :alt].each do |key| %>
             <%= tag.div(class: "col-xs-4") do
               text_field_with_label(
-                form: f, field: key, class: "mb-0", addon: "º",
+                form: f, field: key, class: "mb-0", addon: t_s[key][:addon],
                 label: [
                   tag.span("#{t_s[key][:full]}:", class: "d-none d-sm-inline"),
                   tag.span("#{t_s[key][:abbr]}:", class: "d-inline d-sm-none")
@@ -57,7 +57,6 @@ t_s = {
                    locals: { button: button_name } ) %>
         <!-- /WHERE_REASONS -->
 
-        <!-- WHERE -->
         <%= autocompleter_field(
           form: f, field: :place_name, type: :location,
           label: [tag.span("#{:WHERE.l}:", class: "unconstrained-label"),
