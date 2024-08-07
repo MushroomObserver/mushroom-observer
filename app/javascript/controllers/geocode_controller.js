@@ -10,6 +10,7 @@ export default class extends Controller {
   static targets = ["southInput", "westInput", "northInput", "eastInput",
     "highInput", "lowInput", "placeInput", "locationId",
     "latInput", "lngInput", "altInput", "getElevation"]
+  static outlets = ["autocompleter"]
 
   connect() {
     this.element.dataset.stimulus = "connected"
@@ -122,6 +123,7 @@ export default class extends Controller {
   }
 
   // Build a primer for the autocompleter with bounding box data, but -1 id
+  // FIXME: rename this function
   dispatchPrimer(results) {
     let north, south, east, west, name, id = -1
     // Prefer geometry.bounds, but bounds do not exist for point locations.
@@ -139,7 +141,11 @@ export default class extends Controller {
     this.verbose("geocode:dispatchPrimer")
     this.verbose(primer)
 
-    this.dispatch("googlePrimer", { detail: { primer } })
+    // FIXME: this should call autocompleter#refreshGooglePrimer directly
+    if (this.hasAutocompleterOutlet) {
+      this.autocompleterOutlet.refreshGooglePrimer({ primer })
+    }
+    // this.dispatch("googlePrimer", { detail: { primer } })
   }
 
   // Format the address components for MO style.
@@ -360,17 +366,25 @@ export default class extends Controller {
   }
 
   // Call the swap event on the autocompleter and send the type we need
+  // FIXME: rename this function
   dispatchPointChanged({ lat, lng }) {
     this.clearAutocompleterSwapBuffer()
 
     if (lat && lng) {
       this.autocomplete_buffer = setTimeout(() => {
-        this.dispatch("pointChanged", {
-          detail: {
-            type: "location_containing",
-            request_params: { lat, lng },
-          }
-        })
+        // FIXME: Instead of dispatching a pointChanged event, we should
+        // call the swap method in the paired autocompleter controller.
+        // this.dispatch("pointChanged", {
+        //   detail: {
+        //     type: "location_containing",
+        //     request_params: { lat, lng },
+        //   }
+        // })
+        if (this.hasAutocompleterOutlet) {
+          this.autocompleterOutlet.swap(
+            { type: "location_containing", request_params: { lat, lng } }
+          )
+        }
         // this.verbose("geocode:dispatchPointChanged")
       }, 1000)
 
@@ -385,7 +399,10 @@ export default class extends Controller {
       // }
     } else {
       this.autocomplete_buffer = setTimeout(() => {
-        this.dispatch("pointChanged", { detail: { type: "location" } })
+        // this.dispatch("pointChanged", { detail: { type: "location" } })
+        if (this.hasAutocompleterOutlet) {
+          this.autocompleterOutlet.swap({ type: "location" })
+        }
       }, 1000)
     }
   }

@@ -210,6 +210,7 @@ export default class extends Controller {
   // Callable internally if you pass a detail object with a type property.
   //
   swap({ detail }) {
+    debugger;
     let type;
     if (this.hasSelectTarget) {
       type = this.selectTarget.value;

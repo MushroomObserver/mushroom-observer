@@ -33,6 +33,7 @@ module AutocompleterHelper
     end
   end
 
+  # Any arg not on this list gets sent to the text field/area.
   def autocompleter_outer_args
     [:wrap_data, :type, :separator, :textarea, :hidden_value, :hidden_data,
      :create_text, :keep_text, :edit_text, :find_text, :create, :create_path,

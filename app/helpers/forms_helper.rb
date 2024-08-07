@@ -166,7 +166,7 @@ module FormsHelper
     label_opts = field_label_opts(args)
     label_opts[:class] = class_names(label_opts[:class], args[:label_class])
 
-    tag.div(class: wrap_class, data: wrap_data) do
+    tag.div(class: wrap_class, data: wrap_data, id: args[:wrap_id]) do
       concat(text_label_row(args, label_opts))
       if args[:addon].present? # text addon, not interactive
         concat(tag.div(class: "input-group") do
@@ -542,7 +542,7 @@ module FormsHelper
     exceptions = [
       :form, :field, :label, :class, :width, :inline, :between, :label_after,
       :label_end, :append, :help, :addon, :optional, :required, :monospace,
-      :type, :wrap_data, :button, :button_data
+      :type, :wrap_data, :wrap_id, :button, :button_data
     ] + extras
 
     args.clone.except(*exceptions)
