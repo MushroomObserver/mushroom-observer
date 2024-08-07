@@ -23,11 +23,11 @@ end
 %>
 
 <%= form_with(
-  model: @herbarium, id: "herbarium_form", class: "map-outlet",
+  model: @herbarium, id: "herbarium_form",
   data: {
     controller: "map",
     map_autocompleter_outlet: "herbarium_location_autocompleter",
-    action: "autocompleter:hiddenIdDataChanged@window->map#showBox"
+    # action: "autocompleter:hiddenIdDataChanged@window->map#showBox"
   }
 ) do |f| %>
 
@@ -84,15 +84,13 @@ end
     append:,
     hidden_data: { map_target: "locationId" },
     create_text: :form_observations_create_locality.l,
-    map_outlet: "#herbarium_form_map.map-outlet",
-    # FIXME: there are two maps, and either map action could affect this
-    # autocompleter. Map needs to use its own autocompleter outlet
+    map_outlet: "#herbarium_form",
     data: {
       map_target: "placeInput",
-      action: [
+      # action: [
         # "map:pointChanged@window->autocompleter#swap",
-        "map:googlePrimer@window->autocompleter#refreshGooglePrimer"
-      ]
+        # "map:googlePrimer@window->autocompleter#refreshGooglePrimer"
+      # ]
     }
   ) %>
 

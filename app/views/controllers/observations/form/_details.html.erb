@@ -75,7 +75,7 @@ t_s = {
           edit_text: :form_observations_edit_locality.l,
           # find_text: :form_locations_find_on_map.l,
           # Be precise about which map controller to connect to:
-          map_outlet: "#observation_form.map-outlet",
+          map_outlet: "#observation_form",
           wrap_id: "observation_location_autocompleter",
           # FIXME: any map action could affect this autocompleter.
           # Map needs to use its own autocompleter outlet
@@ -84,7 +84,7 @@ t_s = {
             action: [
               # "map:pointChanged@window->autocompleter#swap",
               "form-exif:pointChanged@window->autocompleter#swap",
-              "map:googlePrimer@window->autocompleter#refreshGooglePrimer"
+              # "map:googlePrimer@window->autocompleter#refreshGooglePrimer"
             ].join(" ")
           }
         ) %>
