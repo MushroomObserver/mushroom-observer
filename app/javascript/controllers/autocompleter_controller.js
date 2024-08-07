@@ -210,7 +210,6 @@ export default class extends Controller {
   // Callable internally if you pass a detail object with a type property.
   //
   swap({ detail }) {
-    debugger;
     let type;
     if (this.hasSelectTarget) {
       type = this.selectTarget.value;
@@ -267,6 +266,8 @@ export default class extends Controller {
     }
   }
 
+  // The autocompleter is paired with map controller by id, but only if this
+  // class is added. This allows us to hook events on mapOutletConnected.
   appropriateOutletClass() {
     if (this.hasMap) {
       return 'map-outlet';
