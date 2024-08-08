@@ -229,12 +229,12 @@ export default class extends Controller {
       this.matches = [];
       this.stored_data = { id: 0 };
       this.last_fetch_params = '';
+      this.prepareInputElement();
+      this.prepareHiddenInput();
       if (!this.hasKeepBtnTarget ||
         !this.keepBtnTarget?.classList?.contains('active')) {
         this.clearHiddenId();
       }
-      this.prepareInputElement();
-      this.prepareHiddenInput();
       this.constrainedSelectionUI();
     }
   }
@@ -569,7 +569,6 @@ export default class extends Controller {
       this.verbose("autocompleter: doing google refresh");
       this.verbose(this.inputTarget.value);
       this.old_value = this.inputTarget.value;
-      debugger;
       // async, anything after this executes immediately
       if (this.hasGeocodeOutlet) {
         this.geocodeOutlet.geolocatePlaceName(this.inputTarget.value);
