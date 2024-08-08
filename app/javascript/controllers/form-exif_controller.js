@@ -178,12 +178,6 @@ export default class extends Controller {
           { detail: { request_params: { lat, lng } } }
         );
       }
-      // this.dispatch("pointChanged", {
-      //   detail: {
-      //     type: "location_containing",
-      //     request_params: { lat, lng }
-      //   }
-      // });
     }
     if (_exif_data.exif_date) {
       const _exifSimpleDate = JSON.parse(_exif_data.exif_date);

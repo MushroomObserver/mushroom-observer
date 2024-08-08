@@ -186,28 +186,25 @@ export default class extends Controller {
         this.WRAP_CLASS + "\"");
     }
 
-    // this.create_text = this.inputTarget.dataset?.createText ?? null;
     this.default_action =
       this.listTarget?.children[0]?.children[0]?.dataset.action;
     // Attach events, etc. to input element.
     this.prepareInputElement();
   }
 
-  // Reinitialize autocompleter type (and properties). Callable externally.
-  // For example, `swap` may be called from a change event dispatched by another
-  // controller: `data-action: "map:pointChanged->autocompleter#swap"`. Both the
-  // map & form-exif controllers dispatch a pointChanged event, when changing
-  // lat/lngs. For now we need both events - when form-exif updates the lat/lng
-  // inputs programmatically, it's not caught as a `change` by map. (Also, map
-  // only fires its event after buffering.)
+  // Reinitialize autocompleter type (and properties). Callable externally. For
+  // example, `swap` may be called from a change event dispatched by another
+  // controller: `data-action: "map:pointChanged->autocompleter#swap"`. The
+  // form-exif and geocode/map controllers use their autocompleterOutlet to call
+  // swap() directly, when changing lat/lngs. We need both - when form-exif
+  // updates the lat/lng inputs programmatically, it's not caught as a `change`
+  // by geocode/map. (Also, geocode/map only fires its swap after buffering.)
   //
-  // Events should pass a detail object with a type property. Example: `event: {
-  // detail: { type, request_params: { lat, lng } } }`. However, the calling
-  // event may not pass a type, or it may be the same as the current type.
-  // Re-initializing the current type is ok, often means we need to refresh the
-  // primer (as with location_containing a changed lat/lng).
-  //
-  // Callable internally if you pass a detail object with a type property.
+  // Callers of swap() should pass a detail object with a type property.
+  // Example: `event: { detail: { type, request_params: { lat, lng } } }`.
+  // However, the caller may not pass a type, or it may be the same as the
+  // current type. Re-initializing the current type is ok, often means we need
+  // to refresh the primer (as with location_containing a changed lat/lng).
   //
   swap({ detail }) {
     let type;
@@ -243,7 +240,6 @@ export default class extends Controller {
   }
 
   constrainedSelectionUI() {
-    // const outlet_class = this.appropriateOutletClass();
     if (this.TYPE === "location_google") {
       this.verbose("autocompleter: location_google swap");
       this.element.classList.add('create');
@@ -251,17 +247,13 @@ export default class extends Controller {
       this.element.classList.remove('constrained');
       if (this.hasMapWrapTarget) {
         this.mapWrapTarget.classList.remove('d-none');
-        // Instead of adding outlet class, call stuff in mapOutletConnected
         this.activateMapOutlet();
-        // this.inputTarget.closest("form").classList.add(outlet_class);
       } else {
         this.verbose("autocompleter: no map wrap");
       }
     } else if (this.ACT_LIKE_SELECT) {
       this.verbose("autocompleter: ACT_LIKE_SELECT swap");
-      // Instead of removing outlet class, call stuff in mapOutletDisconnected
       this.deactivateMapOutlet();
-      // this.inputTarget.closest("form").classList.remove(outlet_class);
       // primer is not based on input, so go ahead and request from server.
       this.focused = true; // so it will draw the pulldown immediately
       this.refreshPrimer(); // directly refresh the primer w/request_params
@@ -269,26 +261,13 @@ export default class extends Controller {
       this.element.classList.remove('create');
     } else {
       this.verbose("autocompleter: regular swap");
-      // Instead of removing outlet class, call stuff in mapOutletDisconnected
       this.deactivateMapOutlet();
-      // this.inputTarget.closest("form").classList.remove(outlet_class);
       this.scheduleRefresh();
       this.element.classList.remove('constrained', 'create');
     }
   }
 
-  // The autocompleter is paired with map controller by id, but only if this
-  // class is added. This allows us to hook events on mapOutletConnected.
-  // appropriateOutletClass() {
-  //   if (this.hasMap) {
-  //     return 'map-outlet';
-  //   } else if (this.hasGeocode) {
-  //     return 'geocode-outlet';
-  //   }
-  // }
-
   swapCreate() {
-    // this.createBtnTarget.classList.add('d-none');
     this.swap({ detail: { type: "location_google" } });
   }
 
@@ -556,7 +535,7 @@ export default class extends Controller {
       this.verbose("autocompleter:scheduleRefresh()");
       this.clearRefresh();
       this.refresh_timer = setTimeout((() => {
-        this.verbose("autocompleter:doing_refresh()");
+        this.verbose("autocompleter: doing refreshPrimer()");
         // this.debug("refresh_timer(" + this.inputTarget.value + ")");
         this.old_value = this.inputTarget.value;
         // async, anything after this executes immediately
@@ -590,7 +569,6 @@ export default class extends Controller {
       this.verbose("autocompleter: doing google refresh");
       this.verbose(this.inputTarget.value);
       this.old_value = this.inputTarget.value;
-      debugger;
       // async, anything after this executes immediately
       if (this.hasGeocodeOutlet) {
         this.geocodeOutlet.geolocatePlaceName(this.inputTarget.value);
@@ -989,7 +967,7 @@ export default class extends Controller {
     });
 
     this.cssHasIdOrNo(parseInt(match['id']));
-    this.dispatchHiddenIdEvents();
+    this.hiddenIdChanged();
   }
 
   // Clears not only the ID, but also any data attributes of selected row.
@@ -1005,7 +983,7 @@ export default class extends Controller {
         delete this.hiddenTarget.dataset[key];
     });
 
-    this.dispatchHiddenIdEvents();
+    this.hiddenIdChanged();
   }
 
   // Respond to the state of the hidden input. Initially we may not have id, but
@@ -1043,8 +1021,7 @@ export default class extends Controller {
   }
 
   // called on assign and clear, also when mapOutlet is connected
-  // FIXME: rename this function
-  dispatchHiddenIdEvents() {
+  hiddenIdChanged() {
     const hidden_id = parseInt(this.hiddenTarget.value || 0),
       // stored_id = parseInt(this.stored_id || 0),
       { north, south, east, west } = this.hiddenTarget.dataset,
@@ -1066,9 +1043,6 @@ export default class extends Controller {
         if (this.hasMapOutlet) {
           this.mapOutlet.showBox();
         }
-        // this.dispatch('hiddenIdDataChanged', {
-        //   detail: { id: this.hiddenTarget.value }
-        // });
       }, 750)
     }
   }
@@ -1589,7 +1563,7 @@ export default class extends Controller {
   }
 
   verbose(str) {
-    console.log(str);
+    // console.log(str);
     // document.getElementById("log").
     //   insertAdjacentText("beforeend", str + "<br/>");
   }
