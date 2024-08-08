@@ -229,30 +229,30 @@ export default class extends Controller {
       this.matches = [];
       this.stored_data = { id: 0 };
       this.last_fetch_params = '';
+      this.prepareInputElement();
+      this.prepareHiddenInput();
       if (!this.hasKeepBtnTarget ||
         !this.keepBtnTarget?.classList?.contains('active')) {
         this.clearHiddenId();
       }
-      this.prepareInputElement();
-      this.prepareHiddenInput();
       this.constrainedSelectionUI();
     }
   }
 
   constrainedSelectionUI() {
     if (this.TYPE === "location_google") {
-      this.verbose("autocompleter: location_google swap");
+      this.verbose("autocompleter: swapped to location_google");
       this.element.classList.add('create');
       this.element.classList.remove('offer-create');
       this.element.classList.remove('constrained');
       if (this.hasMapWrapTarget) {
         this.mapWrapTarget.classList.remove('d-none');
-        this.activateMapOutlet();
       } else {
         this.verbose("autocompleter: no map wrap");
       }
+      this.activateMapOutlet();
     } else if (this.ACT_LIKE_SELECT) {
-      this.verbose("autocompleter: ACT_LIKE_SELECT swap");
+      this.verbose("autocompleter: swapped to ACT_LIKE_SELECT");
       this.deactivateMapOutlet();
       // primer is not based on input, so go ahead and request from server.
       this.focused = true; // so it will draw the pulldown immediately
@@ -260,7 +260,7 @@ export default class extends Controller {
       this.element.classList.add('constrained');
       this.element.classList.remove('create');
     } else {
-      this.verbose("autocompleter: regular swap");
+      this.verbose("autocompleter: swapped regular");
       this.deactivateMapOutlet();
       this.scheduleRefresh();
       this.element.classList.remove('constrained', 'create');
