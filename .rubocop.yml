@@ -1,4 +1,7 @@
 inherit_from: .rubocop_todo.yml
+inherit_mode:
+  merge:
+    - Exclude
 
 require:
   - rubocop-performance
@@ -178,7 +181,7 @@ Rails/WhereExists:
 Style/AccessorGrouping:
   # https://github.com/MushroomObserver/mushroom-observer/pull/988
   Enabled: false
-  # The followin Exclude in case we re-enable the cop
+  # The following are Exclude in case we re-enable the cop
   # Exclude files that individually comment accessors
   # else Rubocop concatenates the accessors and comments on a single line.
   # Disabling Style/AccessorGrouping around the accessors doesn't
