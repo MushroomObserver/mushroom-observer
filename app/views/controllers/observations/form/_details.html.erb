@@ -69,7 +69,7 @@ t_s = {
           hidden_data: { map_target: "locationId",
                          north: location&.north, south: location&.south,
                          east: location&.east, west: location&.west },
-          # These are button tooltips:
+          # These text strings are the button tooltips:
           create_text: :form_observations_create_locality.l,
           keep_text: :form_observations_use_locality.l,
           edit_text: :form_observations_edit_locality.l,
@@ -77,15 +77,11 @@ t_s = {
           # Be precise about which map controller to connect to:
           map_outlet: "#observation_form",
           wrap_id: "observation_location_autocompleter",
-          # FIXME: any map action could affect this autocompleter.
-          # Map needs to use its own autocompleter outlet
+          # Action ok because there's only one form-exif controller on the page,
+          # and it should only affect this autocompleter:
           data: {
             map_target: "placeInput",
-            action: [
-              # "map:pointChanged@window->autocompleter#swap",
-              "form-exif:pointChanged@window->autocompleter#swap",
-              # "map:googlePrimer@window->autocompleter#refreshGooglePrimer"
-            ].join(" ")
+            action: "form-exif:pointChanged@window->autocompleter#swap"
           }
         ) %>
 

@@ -360,46 +360,27 @@ export default class extends Controller {
     this.lngInputTarget.value = this.roundOff(center.lng)
     // If we're here, we have a lat and a lng.
     if (this.ignorePlaceInput !== false)
-      this.dispatchPointChanged(center)
+      this.sendPointChanged(center)
   }
 
   // Call the swap event on the autocompleter and send the type we need
-  // FIXME: rename this function
-  dispatchPointChanged({ lat, lng }) {
+  sendPointChanged({ lat, lng }) {
     this.clearAutocompleterSwapBuffer()
 
     if (lat && lng) {
       this.autocomplete_buffer = setTimeout(() => {
-        // FIXME: Instead of dispatching a pointChanged event, we should
-        // call the swap method in the paired autocompleter controller.
-        // this.dispatch("pointChanged", {
-        //   detail: {
-        //     type: "location_containing",
-        //     request_params: { lat, lng },
-        //   }
-        // })
         if (this.hasAutocompleterOutlet) {
-          this.autocompleterOutlet.swap(
-            { type: "location_containing", request_params: { lat, lng } }
-          )
+          this.autocompleterOutlet.swap({
+            detail:
+              { type: "location_containing", request_params: { lat, lng } }
+          })
         }
-        // this.verbose("geocode:dispatchPointChanged")
+        // this.verbose("geocode:sendPointChanged")
       }, 1000)
-
-      // if (this.placeInputTarget.value === '') {
-      //   this.geocoder.geocode({ location: center }, (results, status) => {
-      //     if (status === "OK") {
-      //       if (results[0]) {
-      //         this.placeInputTarget.value = results[0].formatted_address
-      //       }
-      //     }
-      //   })
-      // }
     } else {
       this.autocomplete_buffer = setTimeout(() => {
-        // this.dispatch("pointChanged", { detail: { type: "location" } })
         if (this.hasAutocompleterOutlet) {
-          this.autocompleterOutlet.swap({ type: "location" })
+          this.autocompleterOutlet.swap({ detail: { type: "location" } })
         }
       }, 1000)
     }
@@ -473,7 +454,7 @@ export default class extends Controller {
   }
 
   verbose(str) {
-    console.log(str);
+    // console.log(str);
     // document.getElementById("log").
     //   insertAdjacentText("beforeend", str + "<br/>");
   }

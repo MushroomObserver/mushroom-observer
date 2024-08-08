@@ -433,8 +433,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     click_on(:form_observations_create_locality.l)
     # lat/lng does not match Google's Pasadena, but does match South Pasadena
     assert_selector("[data-type='location_google']")
-    # assert_selector(".auto_complete", wait: 6)
     find("#observation_place_name").trigger("focus")
+    # assert_selector(".auto_complete", wait: 6)
     assert_selector(".dropdown-item a[data-id='-1']",
                     text: SOUTH_PASADENA[:name], visible: :all, wait: 6)
     # There may be more than one of these, click the first

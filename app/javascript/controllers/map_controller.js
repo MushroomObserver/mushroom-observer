@@ -351,7 +351,7 @@ export default class extends GeocodeController {
       const center = this.validateLatLngInputs(false)
       if (!center) return
 
-      this.dispatchPointChanged(center)
+      this.sendPointChanged(center)
 
       if (this.latInputTarget.value === "" ||
         this.lngInputTarget.value === "" && this.marker) {
@@ -557,7 +557,7 @@ export default class extends GeocodeController {
       // this.showBoxBtnTarget.disabled = false
     }
     this.dispatch("reenableBtns")
-    this.dispatchPointChanged({ lat: null, lng: null })
+    this.sendPointChanged({ lat: null, lng: null })
   }
 
   //
@@ -632,7 +632,7 @@ export default class extends GeocodeController {
   }
 
   verbose(str) {
-    console.log(str);
+    // console.log(str);
     // document.getElementById("log").
     //   insertAdjacentText("beforeend", str + "<br/>");
   }
