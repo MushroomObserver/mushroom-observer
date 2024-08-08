@@ -71,12 +71,12 @@ module Tabs
     end
 
     def new_herbarium_tab
-      [:create_herbarium.t, add_query_param(new_herbarium_path),
+      [:create_herbarium.l, add_query_param(new_herbarium_path),
        { class: tab_id(__method__.to_s) }]
     end
 
     def edit_herbarium_tab(herbarium)
-      [:edit_herbarium.t,
+      [:edit_herbarium.l,
        add_query_param(edit_herbarium_path(herbarium.id)),
        { class: tab_id(__method__.to_s) }]
     end

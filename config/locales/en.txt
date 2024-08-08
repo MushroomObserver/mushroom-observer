@@ -2606,7 +2606,7 @@
   show_herbarium_request_sent: Request has been sent to admins.  We'll get back to you as soon as possible.
 
   # herbaria/create
-  create_herbarium: Create New Fungarium
+  create_herbarium: Create Fungarium
   create_herbarium_title: Create New Fungarium
   create_herbarium_personal: Check this box if this is your personal fungarium
   create_herbarium_personal_help: Each user can have one personal fungarium that they have curator privileges for. By default it is called "[name]", but you can change that name to anything you like.
