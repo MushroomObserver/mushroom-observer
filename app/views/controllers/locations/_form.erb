@@ -22,7 +22,8 @@ when "edit", "update"
 end
 
 form_args = {
-  model: @location, url: url_params, id: "location_form"
+  model: @location, url: url_params, id: "location_form",
+  data: { controller: "map", map_open: true }
 }
 
 if local_assigns[:local] == true
@@ -43,7 +44,7 @@ map_args = { editable: true, map_type: "location" }
 
     <%# NOTE: All other Stimulus data is on the map div, but we need
     the fields inside the controller scope, so map has controller: nil %>
-    <%= tag.div(class: "row", data: { controller: "map" }) do %>
+    <%= tag.div(class: "row") do %>
       <%= tag.div(class: "col-md-8 col-lg-6") do %>
         <%= render(partial: "locations/form/fields",
                    locals: { f:, button:, location: @location,

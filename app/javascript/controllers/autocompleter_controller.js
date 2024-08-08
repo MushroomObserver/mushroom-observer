@@ -232,45 +232,60 @@ export default class extends Controller {
       this.matches = [];
       this.stored_data = { id: 0 };
       this.last_fetch_params = '';
-      this.prepareInputElement();
-      this.prepareHiddenInput();
       if (!this.hasKeepBtnTarget ||
         !this.keepBtnTarget?.classList?.contains('active')) {
         this.clearHiddenId();
       }
+      this.prepareInputElement();
+      this.prepareHiddenInput();
       this.constrainedSelectionUI();
     }
   }
 
   constrainedSelectionUI() {
-    const outlet_class = this.appropriateOutletClass();
+    // const outlet_class = this.appropriateOutletClass();
     if (this.TYPE === "location_google") {
-      this.inputTarget.closest("form").classList.add(outlet_class);
+      this.verbose("autocompleter: location_google swap");
       this.element.classList.add('create');
       this.element.classList.remove('offer-create');
       this.element.classList.remove('constrained');
+      if (this.hasMapWrapTarget) {
+        this.mapWrapTarget.classList.remove('d-none');
+        // Instead of adding outlet class, call stuff in mapOutletConnected
+        this.activateMapOutlet();
+        // this.inputTarget.closest("form").classList.add(outlet_class);
+      } else {
+        this.verbose("autocompleter: no map wrap");
+      }
     } else if (this.ACT_LIKE_SELECT) {
-      this.inputTarget.closest("form").classList.remove(outlet_class);
+      this.verbose("autocompleter: ACT_LIKE_SELECT swap");
+      // Instead of removing outlet class, call stuff in mapOutletDisconnected
+      this.deactivateMapOutlet();
+      // this.inputTarget.closest("form").classList.remove(outlet_class);
       // primer is not based on input, so go ahead and request from server.
       this.focused = true; // so it will draw the pulldown immediately
       this.refreshPrimer(); // directly refresh the primer w/request_params
       this.element.classList.add('constrained');
       this.element.classList.remove('create');
     } else {
-      this.inputTarget.closest("form").classList.remove(outlet_class);
       this.verbose("autocompleter: regular swap");
+      // Instead of removing outlet class, call stuff in mapOutletDisconnected
+      this.deactivateMapOutlet();
+      // this.inputTarget.closest("form").classList.remove(outlet_class);
       this.scheduleRefresh();
       this.element.classList.remove('constrained', 'create');
     }
   }
 
-  appropriateOutletClass() {
-    if (this.hasMap) {
-      return 'map-outlet';
-    } else if (this.hasGeocode) {
-      return 'geocode-outlet';
-    }
-  }
+  // The autocompleter is paired with map controller by id, but only if this
+  // class is added. This allows us to hook events on mapOutletConnected.
+  // appropriateOutletClass() {
+  //   if (this.hasMap) {
+  //     return 'map-outlet';
+  //   } else if (this.hasGeocode) {
+  //     return 'geocode-outlet';
+  //   }
+  // }
 
   swapCreate() {
     // this.createBtnTarget.classList.add('d-none');
@@ -278,33 +293,42 @@ export default class extends Controller {
   }
 
   // Connects the location_google autocompleter to call map controller methods
-  mapOutletConnected(outlet, element) {
-    this.verbose("autocompleter:mapOutletConnected()");
+  activateMapOutlet() {
+    if (!this.hasMapOutlet) {
+      this.verbose("autocompleter: no map outlet");
+      return;
+    }
+
+    this.verbose("autocompleter:activateMapOutlet()");
     // open the map if not already open
-    if (!outlet.opened && !outlet.hasAutocompleterTarget)
-      outlet.toggleMapBtnTarget.click();
+    if (!this.mapOutlet.opened && this.mapOutlet.hasToggleMapBtnTarget) {
+      this.verbose("autocompleter: open map");
+      this.mapOutlet.toggleMapBtnTarget.click();
+    }
     // set the map type so box is editable
-    outlet.map_type = "hybrid"; // only if location_google
+    this.mapOutlet.map_type = "hybrid"; // only if location_google
 
     let location
-    if (location = outlet.validateLatLngInputs(false)) {
-      outlet.geocodeLatLng(location);
-    } else if (outlet.hasLockBoxBtnTarget) {
-      outlet.lockBoxBtnTarget.classList.remove("d-none");
+    if (location = this.mapOutlet.validateLatLngInputs(false)) {
+      this.mapOutlet.geocodeLatLng(location);
+    } else if (this.mapOutlet.hasLockBoxBtnTarget) {
+      this.mapOutlet.lockBoxBtnTarget.classList.remove("d-none");
     }
   }
 
-  mapOutletDisconnected(outlet, element) {
-    this.verbose("autocompleter: map outlet disconnected");
-    outlet.map_type = "observation";
-    if (outlet.rectangle) outlet.rectangle.setEditable(false);
+  deactivateMapOutlet() {
+    if (!this.hasMapOutlet) return;
 
-    outlet.northInputTarget.value = '';
-    outlet.southInputTarget.value = '';
-    outlet.eastInputTarget.value = '';
-    outlet.westInputTarget.value = '';
-    outlet.highInputTarget.value = '';
-    outlet.lowInputTarget.value = '';
+    this.verbose("autocompleter: deactivateMapOutlet()");
+    this.mapOutlet.map_type = "observation";
+    if (this.mapOutlet.rectangle) this.mapOutlet.rectangle.setEditable(false);
+
+    this.mapOutlet.northInputTarget.value = '';
+    this.mapOutlet.southInputTarget.value = '';
+    this.mapOutlet.eastInputTarget.value = '';
+    this.mapOutlet.westInputTarget.value = '';
+    this.mapOutlet.highInputTarget.value = '';
+    this.mapOutlet.lowInputTarget.value = '';
   }
 
   // pulldownTargetConnected() {
@@ -563,9 +587,10 @@ export default class extends Controller {
     this.verbose("autocompleter:scheduleGoogleRefresh()");
     this.clearRefresh();
     this.refresh_timer = setTimeout((() => {
-      this.verbose("autocompleter:doing_google_refresh()");
+      this.verbose("autocompleter: doing google refresh");
       this.verbose(this.inputTarget.value);
       this.old_value = this.inputTarget.value;
+      debugger;
       // async, anything after this executes immediately
       if (this.hasGeocodeOutlet) {
         this.geocodeOutlet.geolocatePlaceName(this.inputTarget.value);
@@ -1018,6 +1043,7 @@ export default class extends Controller {
   }
 
   // called on assign and clear, also when mapOutlet is connected
+  // FIXME: rename this function
   dispatchHiddenIdEvents() {
     const hidden_id = parseInt(this.hiddenTarget.value || 0),
       // stored_id = parseInt(this.stored_id || 0),
@@ -1027,19 +1053,22 @@ export default class extends Controller {
     this.verbose("autocompleter:hidden_data: " + JSON.stringify(hidden_data));
     // comparing data, not just ids, because google locations have same -1 id
     if (JSON.stringify(hidden_data) == JSON.stringify(this.stored_data)) {
-      this.verbose("autocompleter: not dispatching hiddenIdDataChanged");
+      this.verbose("autocompleter: hidden data did not change");
     } else {
       clearTimeout(this.data_timer);
       this.data_timer = setTimeout(() => {
-        this.verbose("autocompleter: dispatching hiddenIdDataChanged");
+        this.verbose("autocompleter: hidden data changed");
         this.cssHasIdOrNo(hidden_id);
         if (this.hasKeepBtnTarget) {
           this.keepBtnTarget.classList.remove('active');
         }
         this.inputTarget.focus();
-        this.dispatch('hiddenIdDataChanged', {
-          detail: { id: this.hiddenTarget.value }
-        });
+        if (this.hasMapOutlet) {
+          this.mapOutlet.showBox();
+        }
+        // this.dispatch('hiddenIdDataChanged', {
+        //   detail: { id: this.hiddenTarget.value }
+        // });
       }, 750)
     }
   }
@@ -1466,8 +1495,8 @@ export default class extends Controller {
   }
 
   // Map controller sends back a primer formatted for the autocompleter
-  refreshGooglePrimer({ detail }) {
-    this.processFetchResponse(detail.primer)
+  refreshGooglePrimer({ primer }) {
+    this.processFetchResponse(primer)
   }
 
   // Process response from server:

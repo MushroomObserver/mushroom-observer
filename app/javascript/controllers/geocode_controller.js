@@ -10,6 +10,7 @@ export default class extends Controller {
   static targets = ["southInput", "westInput", "northInput", "eastInput",
     "highInput", "lowInput", "placeInput", "locationId",
     "latInput", "lngInput", "altInput", "getElevation"]
+  static outlets = ["autocompleter"]
 
   connect() {
     this.element.dataset.stimulus = "connected"
@@ -64,7 +65,7 @@ export default class extends Controller {
         let { results } = result // destructure, results is part of the result
         results = this.siftResults(results)
         this.ignorePlaceInput = true
-        this.dispatchPrimer(results)
+        this.sendPrimer(results)
         this.respondToGeocode(results)
       })
       .catch((e) => {
@@ -93,7 +94,7 @@ export default class extends Controller {
       .geocode({ address: address })
       .then((result) => {
         const { results } = result // destructure, results is part of the result
-        this.dispatchPrimer(results) // will be ignored by non-autocompleters
+        this.sendPrimer(results) // will be ignored by non-autocompleters
         this.respondToGeocode(results)
       })
       .catch((e) => {
@@ -103,7 +104,7 @@ export default class extends Controller {
   }
 
   // Remove certain types of results from the geocoder response:
-  // both too precise and too general, before dispatchPrimer
+  // both too precise and too general, before sendPrimer
   siftResults(results) {
     if (results.length == 0) return results
 
@@ -122,7 +123,7 @@ export default class extends Controller {
   }
 
   // Build a primer for the autocompleter with bounding box data, but -1 id
-  dispatchPrimer(results) {
+  sendPrimer(results) {
     let north, south, east, west, name, id = -1
     // Prefer geometry.bounds, but bounds do not exist for point locations.
     // MO locations must be boxes, so use viewport if bounds null.
@@ -136,10 +137,13 @@ export default class extends Controller {
       name = this.formatMOPlaceName(result)
       return { name, north, south, east, west, id }
     })
-    this.verbose("geocode:dispatchPrimer")
+    this.verbose("geocode:sendPrimer")
     this.verbose(primer)
 
-    this.dispatch("googlePrimer", { detail: { primer } })
+    // Call autocompleter#refreshGooglePrimer directly
+    if (this.hasAutocompleterOutlet) {
+      this.autocompleterOutlet.refreshGooglePrimer({ primer })
+    }
   }
 
   // Format the address components for MO style.
@@ -360,17 +364,25 @@ export default class extends Controller {
   }
 
   // Call the swap event on the autocompleter and send the type we need
+  // FIXME: rename this function
   dispatchPointChanged({ lat, lng }) {
     this.clearAutocompleterSwapBuffer()
 
     if (lat && lng) {
       this.autocomplete_buffer = setTimeout(() => {
-        this.dispatch("pointChanged", {
-          detail: {
-            type: "location_containing",
-            request_params: { lat, lng },
-          }
-        })
+        // FIXME: Instead of dispatching a pointChanged event, we should
+        // call the swap method in the paired autocompleter controller.
+        // this.dispatch("pointChanged", {
+        //   detail: {
+        //     type: "location_containing",
+        //     request_params: { lat, lng },
+        //   }
+        // })
+        if (this.hasAutocompleterOutlet) {
+          this.autocompleterOutlet.swap(
+            { type: "location_containing", request_params: { lat, lng } }
+          )
+        }
         // this.verbose("geocode:dispatchPointChanged")
       }, 1000)
 
@@ -385,7 +397,10 @@ export default class extends Controller {
       // }
     } else {
       this.autocomplete_buffer = setTimeout(() => {
-        this.dispatch("pointChanged", { detail: { type: "location" } })
+        // this.dispatch("pointChanged", { detail: { type: "location" } })
+        if (this.hasAutocompleterOutlet) {
+          this.autocompleterOutlet.swap({ type: "location" })
+        }
       }, 1000)
     }
   }
