@@ -23,7 +23,7 @@ end
 
 form_args = {
   model: @location, url: url_params, id: "location_form",
-  data: { controller: "map" }
+  data: { controller: "map", map_open: true }
 }
 
 if local_assigns[:local] == true

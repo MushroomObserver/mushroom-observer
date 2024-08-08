@@ -246,14 +246,16 @@ export default class extends Controller {
     // const outlet_class = this.appropriateOutletClass();
     if (this.TYPE === "location_google") {
       this.verbose("autocompleter: location_google swap");
-      // Instead of adding outlet class, call stuff in mapOutletConnected
-      this.activateMapOutlet();
-      // this.inputTarget.closest("form").classList.add(outlet_class);
       this.element.classList.add('create');
       this.element.classList.remove('offer-create');
       this.element.classList.remove('constrained');
       if (this.hasMapWrapTarget) {
         this.mapWrapTarget.classList.remove('d-none');
+        // Instead of adding outlet class, call stuff in mapOutletConnected
+        this.activateMapOutlet();
+        // this.inputTarget.closest("form").classList.add(outlet_class);
+      } else {
+        this.verbose("autocompleter: no map wrap");
       }
     } else if (this.ACT_LIKE_SELECT) {
       this.verbose("autocompleter: ACT_LIKE_SELECT swap");
@@ -292,12 +294,17 @@ export default class extends Controller {
 
   // Connects the location_google autocompleter to call map controller methods
   activateMapOutlet() {
-    if (!this.hasMapOutlet) return;
+    if (!this.hasMapOutlet) {
+      this.verbose("autocompleter: no map outlet");
+      return;
+    }
 
     this.verbose("autocompleter:activateMapOutlet()");
     // open the map if not already open
-    if (!this.mapOutlet.opened && !this.mapOutlet.hasAutocompleterTarget)
+    if (!this.mapOutlet.opened && this.mapOutlet.hasToggleMapBtnTarget) {
+      this.verbose("autocompleter: open map");
       this.mapOutlet.toggleMapBtnTarget.click();
+    }
     // set the map type so box is editable
     this.mapOutlet.map_type = "hybrid"; // only if location_google
 

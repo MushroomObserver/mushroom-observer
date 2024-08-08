@@ -18,7 +18,7 @@ export default class extends GeocodeController {
     this.element.dataset.stimulus = "connected"
     this.map_type = this.mapDivTarget.dataset.mapType
     this.editable = (this.mapDivTarget.dataset.editable === "true")
-    this.opened = this.map_type !== "observation"
+    this.opened = this.element.dataset.mapOpen === "true"
     this.marker = null // Only gets set if we're in edit mode
     this.rectangle = null // Only gets set if we're in edit mode
     this.location_format = this.mapDivTarget.dataset.locationFormat
@@ -511,7 +511,7 @@ export default class extends GeocodeController {
       if (this.map == undefined) {
         this.drawMap()
         this.makeMapClickable()
-      } else {
+      } else if (this.mapBounds) {
         this.map.fitBounds(this.mapBounds)
       }
 
@@ -558,9 +558,6 @@ export default class extends GeocodeController {
       // this.showBoxBtnTarget.disabled = false
     }
     this.dispatch("reenableBtns")
-    // FIXME: This is a problem when there are two maps on the page.
-    // It emits the event to both maps, but only one should respond.
-    // Button should have an action instead that only affects the map it's in.
     this.dispatchPointChanged({ lat: null, lng: null })
   }
 

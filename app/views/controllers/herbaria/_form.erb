@@ -25,7 +25,7 @@ end
 <%= form_with(
   model: @herbarium, id: "herbarium_form",
   data: {
-    controller: "map",
+    controller: "map", map_open: false,
     map_autocompleter_outlet: "herbarium_location_autocompleter",
     # action: "autocompleter:hiddenIdDataChanged@window->map#showBox"
   }
