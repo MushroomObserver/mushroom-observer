@@ -19,13 +19,14 @@ image_upload_localization = {
   show_on_map: :show_on_map.t,
   something_went_wrong: :form_observations_upload_error.t
 }.to_json
+# Outlets are how the stimulus controllers call each others' methods.
 data = {
   controller: "form-images form-exif map",
-  action: [
-    "map:reenableBtns@window->form-exif#reenableButtons",
-    "form-exif:pointChanged@window->map#calculateMarker",
-    "autocompleter:hiddenIdDataChanged@window->map#showBox",
-  ].join(" "),
+  map_autocompleter_outlet: "#observation_location_autocompleter",
+  map_open: false,
+  form_exif_autocompleter_outlet: "#observation_location_autocompleter",
+  form_exif_map_outlet: "#observation_form",
+  action: "map:reenableBtns@window->form-exif#reenableButtons",
   upload_max_size: max_size,
   localization: image_upload_localization,
   form_images_target: "form",

@@ -186,28 +186,25 @@ export default class extends Controller {
         this.WRAP_CLASS + "\"");
     }
 
-    // this.create_text = this.inputTarget.dataset?.createText ?? null;
     this.default_action =
       this.listTarget?.children[0]?.children[0]?.dataset.action;
     // Attach events, etc. to input element.
     this.prepareInputElement();
   }
 
-  // Reinitialize autocompleter type (and properties). Callable externally.
-  // For example, `swap` may be called from a change event dispatched by another
-  // controller: `data-action: "map:pointChanged->autocompleter#swap"`. Both the
-  // map & form-exif controllers dispatch a pointChanged event, when changing
-  // lat/lngs. For now we need both events - when form-exif updates the lat/lng
-  // inputs programmatically, it's not caught as a `change` by map. (Also, map
-  // only fires its event after buffering.)
+  // Reinitialize autocompleter type (and properties). Callable externally. For
+  // example, `swap` may be called from a change event dispatched by another
+  // controller: `data-action: "map:pointChanged->autocompleter#swap"`. The
+  // form-exif and geocode/map controllers use their autocompleterOutlet to call
+  // swap() directly, when changing lat/lngs. We need both - when form-exif
+  // updates the lat/lng inputs programmatically, it's not caught as a `change`
+  // by geocode/map. (Also, geocode/map only fires its swap after buffering.)
   //
-  // Events should pass a detail object with a type property. Example: `event: {
-  // detail: { type, request_params: { lat, lng } } }`. However, the calling
-  // event may not pass a type, or it may be the same as the current type.
-  // Re-initializing the current type is ok, often means we need to refresh the
-  // primer (as with location_containing a changed lat/lng).
-  //
-  // Callable internally if you pass a detail object with a type property.
+  // Callers of swap() should pass a detail object with a type property.
+  // Example: `event: { detail: { type, request_params: { lat, lng } } }`.
+  // However, the caller may not pass a type, or it may be the same as the
+  // current type. Re-initializing the current type is ok, often means we need
+  // to refresh the primer (as with location_containing a changed lat/lng).
   //
   swap({ detail }) {
     let type;
@@ -243,68 +240,74 @@ export default class extends Controller {
   }
 
   constrainedSelectionUI() {
-    const outlet_class = this.appropriateOutletClass();
     if (this.TYPE === "location_google") {
-      this.inputTarget.closest("form").classList.add(outlet_class);
+      this.verbose("autocompleter: swapped to location_google");
       this.element.classList.add('create');
       this.element.classList.remove('offer-create');
       this.element.classList.remove('constrained');
+      if (this.hasMapWrapTarget) {
+        this.mapWrapTarget.classList.remove('d-none');
+      } else {
+        this.verbose("autocompleter: no map wrap");
+      }
+      this.activateMapOutlet();
     } else if (this.ACT_LIKE_SELECT) {
-      this.inputTarget.closest("form").classList.remove(outlet_class);
+      this.verbose("autocompleter: swapped to ACT_LIKE_SELECT");
+      this.deactivateMapOutlet();
       // primer is not based on input, so go ahead and request from server.
       this.focused = true; // so it will draw the pulldown immediately
       this.refreshPrimer(); // directly refresh the primer w/request_params
       this.element.classList.add('constrained');
       this.element.classList.remove('create');
     } else {
-      this.inputTarget.closest("form").classList.remove(outlet_class);
-      this.verbose("autocompleter: regular swap");
+      this.verbose("autocompleter: swapped regular");
+      this.deactivateMapOutlet();
       this.scheduleRefresh();
       this.element.classList.remove('constrained', 'create');
     }
   }
 
-  appropriateOutletClass() {
-    if (this.hasMap) {
-      return 'map-outlet';
-    } else if (this.hasGeocode) {
-      return 'geocode-outlet';
-    }
-  }
-
   swapCreate() {
-    // this.createBtnTarget.classList.add('d-none');
     this.swap({ detail: { type: "location_google" } });
   }
 
   // Connects the location_google autocompleter to call map controller methods
-  mapOutletConnected(outlet, element) {
-    this.verbose("autocompleter:mapOutletConnected()");
+  activateMapOutlet() {
+    if (!this.hasMapOutlet) {
+      this.verbose("autocompleter: no map outlet");
+      return;
+    }
+
+    this.verbose("autocompleter:activateMapOutlet()");
     // open the map if not already open
-    if (!outlet.opened && !outlet.hasAutocompleterTarget)
-      outlet.toggleMapBtnTarget.click();
+    if (!this.mapOutlet.opened && this.mapOutlet.hasToggleMapBtnTarget) {
+      this.verbose("autocompleter: open map");
+      this.mapOutlet.toggleMapBtnTarget.click();
+    }
     // set the map type so box is editable
-    outlet.map_type = "hybrid"; // only if location_google
+    this.mapOutlet.map_type = "hybrid"; // only if location_google
 
     let location
-    if (location = outlet.validateLatLngInputs(false)) {
-      outlet.geocodeLatLng(location);
-    } else if (outlet.hasLockBoxBtnTarget) {
-      outlet.lockBoxBtnTarget.classList.remove("d-none");
+    if (location = this.mapOutlet.validateLatLngInputs(false)) {
+      this.mapOutlet.geocodeLatLng(location);
+    } else if (this.mapOutlet.hasLockBoxBtnTarget) {
+      this.mapOutlet.lockBoxBtnTarget.classList.remove("d-none");
     }
   }
 
-  mapOutletDisconnected(outlet, element) {
-    this.verbose("autocompleter: map outlet disconnected");
-    outlet.map_type = "observation";
-    if (outlet.rectangle) outlet.rectangle.setEditable(false);
+  deactivateMapOutlet() {
+    if (!this.hasMapOutlet) return;
 
-    outlet.northInputTarget.value = '';
-    outlet.southInputTarget.value = '';
-    outlet.eastInputTarget.value = '';
-    outlet.westInputTarget.value = '';
-    outlet.highInputTarget.value = '';
-    outlet.lowInputTarget.value = '';
+    this.verbose("autocompleter: deactivateMapOutlet()");
+    this.mapOutlet.map_type = "observation";
+    if (this.mapOutlet.rectangle) this.mapOutlet.rectangle.setEditable(false);
+
+    this.mapOutlet.northInputTarget.value = '';
+    this.mapOutlet.southInputTarget.value = '';
+    this.mapOutlet.eastInputTarget.value = '';
+    this.mapOutlet.westInputTarget.value = '';
+    this.mapOutlet.highInputTarget.value = '';
+    this.mapOutlet.lowInputTarget.value = '';
   }
 
   // pulldownTargetConnected() {
@@ -532,7 +535,7 @@ export default class extends Controller {
       this.verbose("autocompleter:scheduleRefresh()");
       this.clearRefresh();
       this.refresh_timer = setTimeout((() => {
-        this.verbose("autocompleter:doing_refresh()");
+        this.verbose("autocompleter: doing refreshPrimer()");
         // this.debug("refresh_timer(" + this.inputTarget.value + ")");
         this.old_value = this.inputTarget.value;
         // async, anything after this executes immediately
@@ -563,7 +566,7 @@ export default class extends Controller {
     this.verbose("autocompleter:scheduleGoogleRefresh()");
     this.clearRefresh();
     this.refresh_timer = setTimeout((() => {
-      this.verbose("autocompleter:doing_google_refresh()");
+      this.verbose("autocompleter: doing google refresh");
       this.verbose(this.inputTarget.value);
       this.old_value = this.inputTarget.value;
       // async, anything after this executes immediately
@@ -964,7 +967,7 @@ export default class extends Controller {
     });
 
     this.cssHasIdOrNo(parseInt(match['id']));
-    this.dispatchHiddenIdEvents();
+    this.hiddenIdChanged();
   }
 
   // Clears not only the ID, but also any data attributes of selected row.
@@ -980,7 +983,7 @@ export default class extends Controller {
         delete this.hiddenTarget.dataset[key];
     });
 
-    this.dispatchHiddenIdEvents();
+    this.hiddenIdChanged();
   }
 
   // Respond to the state of the hidden input. Initially we may not have id, but
@@ -1018,7 +1021,7 @@ export default class extends Controller {
   }
 
   // called on assign and clear, also when mapOutlet is connected
-  dispatchHiddenIdEvents() {
+  hiddenIdChanged() {
     const hidden_id = parseInt(this.hiddenTarget.value || 0),
       // stored_id = parseInt(this.stored_id || 0),
       { north, south, east, west } = this.hiddenTarget.dataset,
@@ -1027,19 +1030,19 @@ export default class extends Controller {
     this.verbose("autocompleter:hidden_data: " + JSON.stringify(hidden_data));
     // comparing data, not just ids, because google locations have same -1 id
     if (JSON.stringify(hidden_data) == JSON.stringify(this.stored_data)) {
-      this.verbose("autocompleter: not dispatching hiddenIdDataChanged");
+      this.verbose("autocompleter: hidden data did not change");
     } else {
       clearTimeout(this.data_timer);
       this.data_timer = setTimeout(() => {
-        this.verbose("autocompleter: dispatching hiddenIdDataChanged");
+        this.verbose("autocompleter: hidden data changed");
         this.cssHasIdOrNo(hidden_id);
         if (this.hasKeepBtnTarget) {
           this.keepBtnTarget.classList.remove('active');
         }
         this.inputTarget.focus();
-        this.dispatch('hiddenIdDataChanged', {
-          detail: { id: this.hiddenTarget.value }
-        });
+        if (this.hasMapOutlet) {
+          this.mapOutlet.showBox();
+        }
       }, 750)
     }
   }
@@ -1466,8 +1469,8 @@ export default class extends Controller {
   }
 
   // Map controller sends back a primer formatted for the autocompleter
-  refreshGooglePrimer({ detail }) {
-    this.processFetchResponse(detail.primer)
+  refreshGooglePrimer({ primer }) {
+    this.processFetchResponse(primer)
   }
 
   // Process response from server:
@@ -1560,7 +1563,7 @@ export default class extends Controller {
   }
 
   verbose(str) {
-    console.log(str);
+    // console.log(str);
     // document.getElementById("log").
     //   insertAdjacentText("beforeend", str + "<br/>");
   }

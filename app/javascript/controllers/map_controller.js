@@ -18,7 +18,7 @@ export default class extends GeocodeController {
     this.element.dataset.stimulus = "connected"
     this.map_type = this.mapDivTarget.dataset.mapType
     this.editable = (this.mapDivTarget.dataset.editable === "true")
-    this.opened = this.map_type !== "observation"
+    this.opened = this.element.dataset.mapOpen === "true"
     this.marker = null // Only gets set if we're in edit mode
     this.rectangle = null // Only gets set if we're in edit mode
     this.location_format = this.mapDivTarget.dataset.locationFormat
@@ -351,7 +351,7 @@ export default class extends GeocodeController {
       const center = this.validateLatLngInputs(false)
       if (!center) return
 
-      this.dispatchPointChanged(center)
+      this.sendPointChanged(center)
 
       if (this.latInputTarget.value === "" ||
         this.lngInputTarget.value === "" && this.marker) {
@@ -500,7 +500,6 @@ export default class extends GeocodeController {
   // open/close handled by BS collapse
   toggleMap() {
     // this.verbose("map:toggleMap")
-
     if (this.opened) {
       this.opened = false
       this.controlWrapTarget.classList.remove("map-open")
@@ -511,7 +510,7 @@ export default class extends GeocodeController {
       if (this.map == undefined) {
         this.drawMap()
         this.makeMapClickable()
-      } else {
+      } else if (this.mapBounds) {
         this.map.fitBounds(this.mapBounds)
       }
 
@@ -558,7 +557,7 @@ export default class extends GeocodeController {
       // this.showBoxBtnTarget.disabled = false
     }
     this.dispatch("reenableBtns")
-    this.dispatchPointChanged({ lat: null, lng: null })
+    this.sendPointChanged({ lat: null, lng: null })
   }
 
   //
@@ -633,7 +632,7 @@ export default class extends GeocodeController {
   }
 
   verbose(str) {
-    console.log(str);
+    // console.log(str);
     // document.getElementById("log").
     //   insertAdjacentText("beforeend", str + "<br/>");
   }

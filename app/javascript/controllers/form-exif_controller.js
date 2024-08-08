@@ -14,6 +14,7 @@ const internalConfig = {
 // Connects to data-controller="form-exif"
 export default class extends Controller {
   static targets = ["carousel", "item", "useExifBtn"]
+  static outlets = ["autocompleter", "map"]
 
   connect() {
     this.element.dataset.stimulus = "connected";
@@ -166,13 +167,17 @@ export default class extends Controller {
       _obs_lng.value = lng == null ? lng : lng.toFixed(4);
       _obs_alt.value = alt == null ? alt : alt.toFixed(0);
 
-      // should trigger change to update the map
-      this.dispatch("pointChanged", {
-        detail: {
-          type: "location_containing",
-          request_params: { lat, lng }
-        }
-      });
+      // should trigger change to update the autocompleter and the map
+      if (this.hasAutocompleterOutlet) {
+        this.autocompleterOutlet.swap({
+          detail: { type: "location_containing", request_params: { lat, lng } }
+        });
+      }
+      if (this.hasMapOutlet) {
+        this.mapOutlet.calculateMarker(
+          { detail: { request_params: { lat, lng } } }
+        );
+      }
     }
     if (_exif_data.exif_date) {
       const _exifSimpleDate = JSON.parse(_exif_data.exif_date);
