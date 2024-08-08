@@ -500,7 +500,6 @@ export default class extends GeocodeController {
   // open/close handled by BS collapse
   toggleMap() {
     // this.verbose("map:toggleMap")
-
     if (this.opened) {
       this.opened = false
       this.controlWrapTarget.classList.remove("map-open")
