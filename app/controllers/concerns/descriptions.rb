@@ -303,7 +303,7 @@ module Descriptions
     end
 
     def find_licenses
-      @licenses = License.current_names_and_ids
+      @licenses = License.available_names_and_ids
     end
 
     # Log action in parent

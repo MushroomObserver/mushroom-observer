@@ -358,6 +358,7 @@
   observation: observation
   OBSERVATIONS: Observations
   observations: observations
+  OBSERVATION_FIELDS: Observation Fields
   PAST_LOCATION: Location Change
   past_location: location change
   PAST_LOCATIONS: Location Changes
@@ -446,6 +447,7 @@
   admin_group: admin group
   ADMIN_GROUPS: Admin Groups
   admin_groups: admin groups
+  ANNOTATIONS: Annotations
   # ("Author" is person(s) who wrote a book, description, or news Article.)
   AUTHOR: Author
   author: author
@@ -477,6 +479,7 @@
   confidence_level: confidence level
   CONFIDENCE_LEVELS: Confidence Levels
   confidence_levels: confidence levels
+  CONSENSUS: Consensus
   CONSTRAINT_VIOLATIONS: Constraint Violations
   constraint_violations: constraint violations
   COORDINATES: Coordinates
@@ -489,7 +492,7 @@
   correct_spelling: correct spelling
   CORRECT_SPELLINGS: Correct Spellings
   correct_spellings: correct spellings
-  CONSENSUS: Consensus
+  COUNTERPART: Counterpart
   DATE: Date
   date: date
   DATES: Dates
@@ -497,6 +500,8 @@
   # deposit of Sequence Bases in an Archive
   DEPOSIT: Deposit
   deposit: deposit
+  # DQA is iNat-ese for Data Quality Assessment
+  DQA: DQA
   EDITOR: Editor
   editor: editor
   EDITORS: Editors
@@ -528,6 +533,7 @@
   IDENTIFIERS: Identifiers
   identifiers: identifiers
   ID_BY: ID By
+  inaturalist: iNaturalist
   INDEX: Index
   index: index
   INDEXES: Indexes
@@ -537,6 +543,7 @@
   LATITUDES: Latitudes
   latitudes: latitudes
   LAT: Lat
+  LAT_LON: Lat/Lon
   LOCUS: Locus
   locus: locus
   LOGIN_NAME: Login Name
@@ -560,10 +567,12 @@
   note: note
   NOTES: Notes
   notes: notes
+  OBSERVED: Observed
   OBSERVER: Observer
   observer: observer
   OBSERVERS: Observers
   observers: observers
+  ORIGINAL: Original
   OWNER: Owner
   owner: owner
   OWNERS: Owners
@@ -573,6 +582,7 @@
   password: password
   PASSWORDS: Passwords
   passwords: passwords
+  PLACE: Place
   PREFERENCES: Preferences
   preferences: preferences
   PREFERRED_NAME: Preferred Name
@@ -621,6 +631,7 @@
   title: title
   TITLES: Titles
   titles: titles
+  UNDER_DEVELOPMENT: Under Development
   VERSION: Version
   version: version
   VERSIONS: Versions
@@ -715,6 +726,7 @@
   edit: edit
   ENABLE: Enable
   enable: enable
+  IMPORT: Import
   # merge one object into another
   MERGE: Merge
   merge: merge
@@ -1307,6 +1319,7 @@
   source_credit_mo_android_app: Created using the "Mushroom Observer Android app":https://mushroomobserver.org/articles/34.
   source_credit_mo_iphone_app: Created using the "Mushroom Observer iPhone app":https://mushroomobserver.org/articles/34.
   source_credit_mo_api: Created using the "Mushroom Observer API":https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md.
+  source_credit_mo_inat_import: Imported from "iNaturalist":https://www.inaturalist.org using the "Mushroom Observer website":https://mushroomobserver.org
 
   ##############################################################################
 
@@ -1695,6 +1708,7 @@
   form_observations_upload_error: Something went wrong while uploading image. Skipping it for now. You can try uploading it again later after we've created the observation.
   form_observations_collection_number_help: Enter the collector's full name and their record identifier.  The identifier can be anything.  It's whatever you use to keep track of your specimens, and it is typically written on the specimen label.  This is most commonly a sequential number starting at 1 for your first specimen, and working up over your life time.  Another common format is a year or date along with a collection number for that date, e.g., "17-034".  But it can be anything you like, including letters and punctuation.
   form_observations_herbarium_record_help: If you've sent a specimen to a fungarium, you can enter that here, along with their accession number if you know it.  Otherwise let it default to your personal fungarium and leave the accession number blank.
+  form_observations_original_name: Original Name
 
   form_observations_there_is_a_problem_with_projects: This observation violates the constraints of one or more selected projects. "+[:SEE_MESSAGE_BELOW]+":#project_messages
   form_observations_projects_out_of_range: The observation date ([date]) or location ([place_name]) is outside the range of these checked project(s)
@@ -2980,6 +2994,30 @@
   list_merge_options_near_matches: Near Matches
   list_merge_options_others: Other Available [:locations]
   list_merge_options_title: Location Matches for [where]
+
+  # observation/inat_imports
+  create_inat_import_title: Import from iNat
+  import_observation_from_inat: Import from iNat
+  inat_choose_observations: "Inat Observations to Import:"
+  inat_import_list: "Comma separated list of observation #s"
+  inat_import_all: Import all my iNat observations
+  inat_import_consent: (Required) I consent to creating MushroomObserver Observation(s) based on my iNaturalist observations, including their photos.
+  inat_consent_required: Your consent is required to import Inat observations. Please check the checkbox to give your consent.
+  inat_username: Your iNat Username (mandatory)
+  runtime_illegal_inat_id: iNat observation number can contain only numbers, commas, and spaces
+  inat_missing_username: Missing your iNat Username
+  inat_no_imports_designated: Imports missing. Complete [:inat_import_list], or select [:inat_import_all]
+
+  inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
+  inat_taxon_not_importable: Cannot import iNat id `[id]`. (Can import only Fungi.)
+
+  inat_data_comment: iNat Data
+  inat_dqa_casual: Casual
+  inat_dqa_needs_id: Needs ID
+  inat_dqa_research: Research Grade
+  inat_details_heading: "Details/Caveats"
+  inat_details_list: "- MO will list most iNat data and/or map it to analogous MO fields. \n - The MO Observation links to the iNat observation and vice versa. \n - MO Consensus ID is an analog of the iNat Community ID. \n  - Coordinates are hidden from the public if iNat hid/obscured them. \n - MO will use the iNat Provisional Species Name as the MO Consensus ID \n - Location is a rectangle with an MO-style name, rather than the iNat Place name. \n - iNat Projects are not included (iNat's API does not provide that data). \n"
+
 
   # observer/list_notifications
   list_notifications_title: Email Alerts for [user]

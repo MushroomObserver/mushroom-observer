@@ -48,3 +48,5 @@ public/field_slips
 # DB snapshots are often lying about, don't want them accidentally checked in.
 checkpoint*
 db/checkpoint*
+
+/config/credentials/test.key

@@ -30,6 +30,13 @@ rolfs_mo_app_api_key:
   key: aSDfkljJsdfglkDJSwEarLKjkerADGl
   notes: MO App
 
+# Used to access MO API during iNat imports
+inat_manager_mo_app_api_key:
+  user: webmaster
+  key: for_testing_purposes_only
+  notes: inat import
+  verified: 2024-06-28 12:25:00
+
 # The next 3 fixtures are used to test whether sql collates accented letters.
 # Has nothing to do with APIs; This is just a convenient spot to add fixtures.
 api_key_u_1:

@@ -5,6 +5,7 @@
 
 DEFAULTS: &DEFAULTS
   created_at: 2010-07-10 20:00:00
+  deprecated: false
 
 ccnc25:
   display_name: Creative Commons Non-commercial v2.5
@@ -14,7 +15,6 @@ ccnc25:
 ccnc30:
   display_name: Creative Commons Non-commercial v3.0
   url: https://creativecommons.org/licenses/by-nc-sa/3.0/
-  deprecated: false
 
 ccwiki30:
   # Do not autogenerate id
@@ -25,15 +25,16 @@ ccwiki30:
   id: <%= User.column_defaults["license_id"] %>
   display_name: Creative Commons Wikipedia Compatible v3.0
   url: https://creativecommons.org/licenses/by-sa/3.0/
-  deprecated: false
+
+ccbync:
+  display_name: Creative Commons Attribution Non-commercial v4.0
+  url: https://creativecommons.org/licenses/by-nc/4.0/
 
 publicdomain:
   display_name: Public Domain
   url: https://wiki.creativecommons.org/Public_domain/
-  deprecated: false
   updated_at: 2013-03-02 09:45:03
 
 unused:
   display_name: All Rights Reserved
   url: https://en.wikipedia.org/wiki/All_rights_reserved
-  deprecated: false

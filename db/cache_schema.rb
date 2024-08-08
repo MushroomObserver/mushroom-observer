@@ -11,7 +11,7 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[7.1].define(version: 2024_02_03_041048) do
-  create_table "solid_cache_entries", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "solid_cache_entries", charset: "utf8mb3", force: :cascade do |t|
     t.binary "key", limit: 1024, null: false
     t.binary "value", size: :long, null: false
     t.datetime "created_at", null: false

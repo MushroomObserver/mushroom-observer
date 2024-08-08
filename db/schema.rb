@@ -191,6 +191,17 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_02_092653) do
     t.boolean "diagnostic", default: true, null: false
   end
 
+  create_table "inat_imports", charset: "utf8mb3", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "state", default: 0
+    t.string "inat_ids"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "token"
+    t.string "inat_username"
+    t.boolean "import_all"
+  end
+
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.string "target_type", limit: 30
     t.integer "target_id"
@@ -512,6 +523,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_02_092653) do
     t.integer "source"
     t.datetime "log_updated_at", precision: nil
     t.boolean "needs_naming", default: false, null: false
+    t.integer "inat_id"
     t.index ["needs_naming"], name: "needs_naming_index"
   end
 

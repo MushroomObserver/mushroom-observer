@@ -3,11 +3,11 @@
 <%
 if upload
   image_field = :temp_image
-  licenses = License.current_names_and_ids(@user.license)
+  licenses = License.available_names_and_ids(@user.license)
   selected_license = @user.license_id
 else
   image_field = :good_image
-  licenses = License.current_names_and_ids(image.license)
+  licenses = License.available_names_and_ids(image.license)
   selected_license = image.license_id
 end
 %>

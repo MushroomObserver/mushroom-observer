@@ -55,7 +55,7 @@ module Observations
     end
 
     def current_license_names_and_ids
-      License.current_names_and_ids(@image.license)
+      License.available_names_and_ids(@image.license)
     end
 
     def rough_cut_image

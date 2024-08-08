@@ -16,6 +16,7 @@ module Observations::Images
     # was multi_image_template
     def new
       @user = User.current = session_user # || raise("Must be logged in.")
+      @licenses = License.available_names_and_ids(@user.license)
       @image = Image.new(user: @user, when: Time.zone.now,
                          copyright_holder: @user.legal_name)
     end
