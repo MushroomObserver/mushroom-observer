@@ -286,11 +286,16 @@ export default class extends Controller {
     }
     // set the map type so box is editable
     this.mapOutlet.map_type = "hybrid"; // only if location_google
+    // set the map to stop ignoring place input
+    this.mapOutlet.ignorePlaceInput = false;
 
-    let location
-    if (location = this.mapOutlet.validateLatLngInputs(false)) {
-      this.mapOutlet.geocodeLatLng(location);
-    } else if (this.mapOutlet.hasLockBoxBtnTarget) {
+    // 2024-08-09: Don't geocode lat/lng when switching to location_google.
+    // This is for custom locations and should pay attention to place_name only.
+    // let location
+    // if (location = this.mapOutlet.validateLatLngInputs(false)) {
+    //   this.mapOutlet.tryToGeocode();
+    // } else
+    if (this.mapOutlet.hasLockBoxBtnTarget) {
       this.mapOutlet.lockBoxBtnTarget.classList.remove("d-none");
     }
   }
