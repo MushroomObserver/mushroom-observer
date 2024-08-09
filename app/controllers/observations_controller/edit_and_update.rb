@@ -83,7 +83,7 @@ module ObservationsController::EditAndUpdate
     @any_errors = false
 
     update_permitted_observation_attributes # may set a new location_id
-    create_location_object_if_new
+    create_location_object_if_new(@observation)
     @observation.notes = notes_to_sym_and_compact
     warn_if_unchecking_specimen_with_records_present!
     strip_images! if @observation.gps_hidden
@@ -92,7 +92,7 @@ module ObservationsController::EditAndUpdate
     validate_projects
     detach_removed_images
     try_to_upload_images
-    try_to_save_location_if_new
+    try_to_save_location_if_new(@observation)
     try_to_update_observation_if_there_are_changes
 
     reload_edit_form and return if @any_errors
