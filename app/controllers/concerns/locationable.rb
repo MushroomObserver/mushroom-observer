@@ -36,10 +36,10 @@ module Locationable
   extend ActiveSupport::Concern
 
   included do
-    # By now we have an object ivar, and maybe a "-1" location_id, indicating a
-    # new Location if accompanied by bounding box lat/lng. If the location name
-    # does not exist already, and the bounding box is present, create a new
-    # @location, and associate it with the @object.
+    # By now we should have an object (pass the ivar!), and maybe a "-1"
+    # location_id, indicating a new Location if accompanied by bounding box
+    # lat/lng. If the location name does not exist already, and the bounding box
+    # is present, create a new @location, and associate it with the @object.
     def create_location_object_if_new(object)
       # Resets the location_id to MO's existing Location if it already exists.
       return false if place_name_exists?(object)

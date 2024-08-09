@@ -4,6 +4,7 @@
 module ObservationsController::EditAndUpdate
   include ObservationsController::SharedFormMethods
   include ObservationsController::Validators
+  include ::Locationable
 
   # Form to edit an existing observation.
   # Linked from: left panel
