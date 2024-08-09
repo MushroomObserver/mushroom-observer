@@ -5,10 +5,8 @@
 #  date_select_opts
 
 # helpers for form tags
-# rubocop:disable Metrics/ModuleLength
-# rubocop:disable Metrics/AbcSize
-# rubocop:disable Metrics/CyclomaticComplexity
-module FormsHelper
+
+module FormsHelper # rubocop:disable Metrics/ModuleLength
   # Bootstrap submit button
   # <%= submit_button(form: f, button: button.t, center: true) %>
   def submit_button(**args)
@@ -548,6 +546,3 @@ module FormsHelper
     args.clone.except(*exceptions)
   end
 end
-# rubocop:enable Metrics/ModuleLength
-# rubocop:enable Metrics/AbcSize
-# rubocop:enable Metrics/CyclomaticComplexity

@@ -3,6 +3,7 @@
 module ObservationsController::Create
   include ObservationsController::SharedFormMethods
   include ObservationsController::Validators
+  include ::Locationable
 
   # Form to create a new observation, naming, vote, and images.
   # Linked from: left panel
@@ -37,7 +38,7 @@ module ObservationsController::Create
     init_new_image_var(Time.zone.now)
 
     rough_cut
-    create_location_object_if_new # may set @location
+    create_location_object_if_new(@observation) # may set @location
 
     @any_errors = false
     validate_name
@@ -47,7 +48,7 @@ module ObservationsController::Create
     validate_naming if @name
     validate_vote if @name
     validate_images
-    try_to_save_location_if_new
+    try_to_save_location_if_new(@observation)
     try_to_save_new_observation
     return reload_new_form(params.dig(:naming, :reasons)) if @any_errors
 
