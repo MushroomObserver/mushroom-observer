@@ -163,9 +163,9 @@ class HerbariaController < ApplicationController
     @herbarium = Herbarium.new(herbarium_params)
     normalize_parameters
     create_location_object_if_new(@herbarium)
-    return render(:new) unless validate_herbarium!
-
     try_to_save_location_if_new(@herbarium)
+    return render(:new) unless validate_herbarium! && !@any_errors
+
     @herbarium.save
     @herbarium.add_curator(@user) if @herbarium.personal_user
     notify_admins_of_new_herbarium unless @herbarium.personal_user
@@ -179,9 +179,9 @@ class HerbariaController < ApplicationController
     @herbarium.attributes = herbarium_params
     normalize_parameters
     create_location_object_if_new(@herbarium)
-    return unless validate_herbarium!
-
     try_to_save_location_if_new(@herbarium)
+    return unless validate_herbarium! && !@any_errors
+
     @herbarium.save
     redirect_to_create_location_or_referrer_or_show_location
   end
