@@ -286,9 +286,19 @@ class InatObs
 
   private
 
-  def description
-    @obs[:description]
+  # ----- location-related
+
+  def to_rad(degrees)
+    degrees * Math::PI / 180.0
   end
+
+  # copied from AutoComplete::ForLocationContaining
+  def location_box(loc)
+    Mappable::Box.new(north: loc[:north], south: loc[:south],
+                      east: loc[:east], west: loc[:west])
+  end
+
+  # ---- name-related
 
   def full_name
     if infrageneric?
@@ -349,6 +359,17 @@ class InatObs
     Name.unknown.id
   end
 
+  def in_mo_format?(prov_sp_name)
+    # Genus followed by quoted epithet starting with a lower-case letter
+    prov_sp_name =~ /[A-Z][a-z]+ "[a-z]\S+"/
+  end
+
+  # ----- Other
+
+  def description
+    @obs[:description]
+  end
+
   def sequence_field?(field)
     field[:datatype] == "dna" ||
       field[:name] =~ /DNA/ && field[:value] =~ /^[ACTG]{,10}/
@@ -366,11 +387,6 @@ class InatObs
     @obs[:project_observations]
   end
 
-  def in_mo_format?(prov_sp_name)
-    # Genus followed by quoted epithet starting with a lower-case letter
-    prov_sp_name =~ /[A-Z][a-z]+ "[a-z]\S+"/
-  end
-
   def slime_mold?
     # NOTE: 2024-06-01 jdc
     # slime molds are polypheletic https://en.wikipedia.org/wiki/Slime_mold
@@ -381,15 +397,5 @@ class InatObs
     # that's monophyletic for slime molds?
     # Another solution: use IF API to see if IF includes the name.
     @obs.dig(:taxon, :iconic_taxon_name) == "Protozoa"
-  end
-
-  def to_rad(degrees)
-    degrees * Math::PI / 180.0
-  end
-
-  # copied from AutoComplete::ForLocationContaining
-  def location_box(loc)
-    Mappable::Box.new(north: loc[:north], south: loc[:south],
-                      east: loc[:east], west: loc[:west])
   end
 end
