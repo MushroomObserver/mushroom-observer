@@ -45,9 +45,9 @@ export default class extends Controller {
   }
 
   tryToGeocode() {
-    let location
+    const location = this.validateLatLngInputs(false)
 
-    if (location = this.validateLatLngInputs(false) &&
+    if (location &&
       JSON.stringify(location) !== JSON.stringify(this.lastGeocodedLatLng)) {
       this.geocodeLatLng(location)
     }
@@ -75,10 +75,10 @@ export default class extends Controller {
   }
 
   tryToGeolocate() {
-    let address = this.placeInputTarget.value
+    const address = this.placeInputTarget.value
 
-    if (this.ignorePlaceInput === false && address !== ""
-      && address !== this.lastGeolocatedAddress) {
+    if (this.ignorePlaceInput === false &&
+      address !== "" && address !== this.lastGeolocatedAddress) {
       this.geolocatePlaceName(address)
     }
   }
@@ -449,9 +449,9 @@ export default class extends Controller {
 
   // ------------------------------- DEBUGGING ------------------------------
 
-  helpDebug() {
-    debugger
-  }
+  // helpDebug() {
+  //   debugger
+  // }
 
   verbose(str) {
     // console.log(str);

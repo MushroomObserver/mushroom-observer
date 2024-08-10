@@ -385,6 +385,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     all('[id^="project_id_"]', visible: :all).each do |project_checkbox|
       project_checkbox.trigger("click") if project_checkbox.checked?
     end
+    step_nav_3 = find("#step-nav-3")
+    within(step_nav_3) { click_on(:BACK.l) }
 
     # submit_observation_form_with_errors
     within("#observation_form") { click_commit }
