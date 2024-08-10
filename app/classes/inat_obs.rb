@@ -178,55 +178,6 @@ class InatObs
     best_mo_name(mo_names)
   end
 
-  # For infrageneric ranks, the iNat `:name` string is only the epithet.
-  # Ex: "Distantes"
-  # So get a complete string. Ex: "Morchella section Distantes"
-  def full_name
-    if infrageneric?
-      genus_rank_epithet
-    else
-      inat_taxon[:name]
-    end
-  end
-
-  def infrageneric?
-    %w[subgenus section subsection stirps series subseries].
-      include?(inat_taxon[:rank])
-  end
-
-  def genus_rank_epithet
-    # Search the identifications of this iNat observation
-    # for an identification of the inat_taxon[:id]
-    inat_identifications.each do |identification|
-      next unless identifies_this_obs?(identification)
-
-      # search the identification's ancestors to find the genus
-      identification[:taxon][:ancestors].each do |ancestor|
-        next unless ancestor[:rank] == "genus"
-
-        #  return a string comprising Genus rank epithet
-        #  ex: "Morchella section Distantes"
-        return "#{ancestor[:name]} #{inat_taxon[:rank]} #{inat_taxon[:name]}"
-      end
-    end
-  end
-
-  def identifies_this_obs?(identification)
-    identification[:taxon][:id] == inat_taxon[:id]
-  end
-
-  def best_mo_name(mo_names)
-    return Name.unknown.id if mo_names.none?
-    return mo_names.first.id if mo_names.one?
-
-    # iNat name maps to multiple MO Names
-    # So for the moment, just map it to Fungi
-    # TODO: refine this.
-    # Ideas: check iNat and MO authors, possibly prefer non-deprecated MO Name
-    # - might need a dictionary here
-    Name.unknown.id
-  end
-
   def notes
     return "" if description.empty?
 
@@ -337,6 +288,65 @@ class InatObs
 
   def description
     @obs[:description]
+  end
+
+  def full_name
+    if infrageneric?
+      # iNat :name string is only the epithet. Ex: "Distantes"
+      prepend_genus_and_rank
+    elsif infraspecific?
+      # iNat :name string omits the rank. Ex: "Inonotus obliquus sterilis"
+      insert_rank_between_species_and_final_epithet
+    else
+      inat_taxon[:name]
+    end
+  end
+
+  def infrageneric?
+    %w[subgenus section subsection stirps series subseries].
+      include?(inat_taxon[:rank])
+  end
+
+  def prepend_genus_and_rank
+    # Search the identifications of this iNat observation
+    # for an identification of the inat_taxon[:id]
+    inat_identifications.each do |identification|
+      next unless identifies_this_obs?(identification)
+
+      # search the identification's ancestors to find the genus
+      identification[:taxon][:ancestors].each do |ancestor|
+        next unless ancestor[:rank] == "genus"
+
+        #  return a string comprising Genus rank epithet
+        #  ex: "Morchella section Distantes"
+        return "#{ancestor[:name]} #{inat_taxon[:rank]} #{inat_taxon[:name]}"
+      end
+    end
+  end
+
+  def infraspecific?
+    %w[subspecies variety form].include?(inat_taxon[:rank])
+  end
+
+  def insert_rank_between_species_and_final_epithet
+    words = inat_taxon[:name].split
+    "#{words[0..1].join(" ")} #{inat_taxon[:rank]} #{words[2]}"
+  end
+
+  def identifies_this_obs?(identification)
+    identification[:taxon][:id] == inat_taxon[:id]
+  end
+
+  def best_mo_name(mo_names)
+    return Name.unknown.id if mo_names.none?
+    return mo_names.first.id if mo_names.one?
+
+    # iNat name maps to multiple MO Names
+    # So for the moment, just map it to Fungi
+    # TODO: refine this.
+    # Ideas: check iNat and MO authors, possibly prefer non-deprecated MO Name
+    # - might need a dictionary here
+    Name.unknown.id
   end
 
   def sequence_field?(field)
