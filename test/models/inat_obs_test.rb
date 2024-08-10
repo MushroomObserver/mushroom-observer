@@ -103,6 +103,24 @@ class InatObsTest < UnitTestCase
     assert_equal(names(:coprinus).text_name, mock_inat_obs.text_name)
   end
 
+  def test_infrageneric_name
+    name = Name.create(
+      user: rolf,
+      rank: "Section",
+      text_name: "Morchella sect. Distantes",
+      search_name: "Morchella sect. Distantes Boud.",
+      display_name: "**__Morchella__** sect. **__Distantes__** Boud.",
+      sort_name: "Morchella  {2sect.  Distantes  Boud.",
+      author: "Boud.",
+      icn_id: 547_941
+    )
+
+    mock_inat_obs = mock_observation("distantes")
+
+    assert_equal(name.id, mock_inat_obs.name_id)
+    assert_equal(name.text_name, mock_inat_obs.text_name)
+  end
+
   def test_names_alternative_authors
     # Make sure fixtures still OK
     names = Name.where(text_name: "Lentinellus ursinus", rank: "Species",

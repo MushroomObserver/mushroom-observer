@@ -165,11 +165,57 @@ class InatObs
   end
 
   def name_id
-    mo_names = Name.where(text_name: inat_taxon[:name],
-                          rank: inat_taxon[:rank].titleize).
+    mo_names = Name.where(
+      # parse it to get MO's text_name rank abbreviation
+      # E.g. "sect." instead of "section"
+      text_name: Name.parse_name(full_name).text_name,
+      rank: inat_taxon[:rank].titleize
+    ).
                # iNat doesn't have taxon names "sensu xxx"
                # so don't map them to MO Names sensu xxx
                where.not(Name[:author] =~ /^sensu /)
+
+    best_mo_name(mo_names)
+  end
+
+  # For infrageneric ranks, the iNat `:name` string is only the epithet.
+  # Ex: "Distantes"
+  # So get a complete string. Ex: "Morchella section Distantes"
+  def full_name
+    if infrageneric?
+      genus_rank_epithet
+    else
+      inat_taxon[:name]
+    end
+  end
+
+  def infrageneric?
+    %w[subgenus section subsection stirps series subseries].
+      include?(inat_taxon[:rank])
+  end
+
+  def genus_rank_epithet
+    # Search the identifications of this iNat observation
+    # for an identification of the inat_taxon[:id]
+    inat_identifications.each do |identification|
+      next unless identifies_this_obs?(identification)
+
+      # search the identification's ancestors to find the genus
+      identification[:taxon][:ancestors].each do |ancestor|
+        next unless ancestor[:rank] == "genus"
+
+        #  return a string comprising Genus rank epithet
+        #  ex: "Morchella section Distantes"
+        return "#{ancestor[:name]} #{inat_taxon[:rank]} #{inat_taxon[:name]}"
+      end
+    end
+  end
+
+  def identifies_this_obs?(identification)
+    identification[:taxon][:id] == inat_taxon[:id]
+  end
+
+  def best_mo_name(mo_names)
     return Name.unknown.id if mo_names.none?
     return mo_names.first.id if mo_names.one?
 
