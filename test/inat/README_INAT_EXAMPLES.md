@@ -20,6 +20,7 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | calostoma_lutescens.txt | [195434438](https://www.inaturalist.org/observations/195434438) | **0** | public |  |
 | ceanothus_cordulatus.txt | [219631412](https://www.inaturalist.org/observations/219631412) | 1 | public | **Plant** |
 | coprinus.txt | [213450312](https://www.inaturalist.org/observations/213450312) | 1 | **obscured** | Needs ID |
+| distantes.txt | [215996396](https://www.inaturalist.org/observations/215996396) | 1 | **obscured** | Needs ID, jdc Obs, taxon[:name]: "Distantes" rank:"section", rank_level:13|
 | donadina_PNW01.txt | [212320801](https://www.inaturalist.org/observations/212320801) | 1 | public | **non-mo-style Provisional Species Name (PNW)**, **DNA** |
 | evernia.txt | [216357655](https://www.inaturalist.org/observations/216357655) | 0 | public | Casual, lichen, no fields, place: Troutdale |
 | fuligo_septica.txt | [219783802](https://www.inaturalist.org/observations/219783802) | 1 | public | slime mold **Protozoa** Richmond, CA |
