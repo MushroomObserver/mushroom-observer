@@ -215,6 +215,13 @@ export default class extends Controller {
     }
     if (type == undefined) { return; }
 
+    let location = false;
+    if (detail.hasOwnProperty("request_params") &&
+      detail.request_params.hasOwnProperty("lat") &&
+      detail.request_params.hasOwnProperty("lng")) {
+      location = detail.request_params;
+    }
+
     if (!AUTOCOMPLETER_TYPES.hasOwnProperty(type)) {
       alert("MOAutocompleter: Invalid type: \"" + type + "\"");
     } else {
@@ -235,11 +242,13 @@ export default class extends Controller {
         !this.keepBtnTarget?.classList?.contains('active')) {
         this.clearHiddenId();
       }
-      this.constrainedSelectionUI();
+      this.constrainedSelectionUI(location);
     }
   }
 
-  constrainedSelectionUI() {
+  // Depending on the type of autocompleter, the UI may need to change.
+  // detail may also contain request_params for lat/lng.
+  constrainedSelectionUI(location = false) {
     if (this.TYPE === "location_google") {
       this.verbose("autocompleter: swapped to location_google");
       this.element.classList.add('create');
@@ -250,7 +259,7 @@ export default class extends Controller {
       } else {
         this.verbose("autocompleter: no map wrap");
       }
-      this.activateMapOutlet();
+      this.activateMapOutlet(location);
     } else if (this.ACT_LIKE_SELECT) {
       this.verbose("autocompleter: swapped to ACT_LIKE_SELECT");
       this.deactivateMapOutlet();
@@ -272,7 +281,7 @@ export default class extends Controller {
   }
 
   // Connects the location_google autocompleter to call map controller methods
-  activateMapOutlet() {
+  activateMapOutlet(location = false) {
     if (!this.hasMapOutlet) {
       this.verbose("autocompleter: no map outlet");
       return;
@@ -289,13 +298,13 @@ export default class extends Controller {
     // set the map to stop ignoring place input
     this.mapOutlet.ignorePlaceInput = false;
 
-    // 2024-08-09: Don't geocode lat/lng when switching to location_google.
-    // This is for custom locations and should pay attention to place_name only.
-    // let location
-    // if (location = this.mapOutlet.validateLatLngInputs(false)) {
-    //   this.mapOutlet.tryToGeocode();
-    // } else
-    if (this.mapOutlet.hasLockBoxBtnTarget) {
+    // 2024-08-09: Unless the swap call (form-exif) sent request_params lat/lng,
+    // don't geocode lat/lng when switching to location_google. Usually, this is
+    // for geolocating place_names and should pay attention to text only.
+    if (location) {
+      // this.mapOutlet.geocodeLatLng(location);
+      this.mapOutlet.tryToGeocode();
+    } else if (this.mapOutlet.hasLockBoxBtnTarget) {
       this.mapOutlet.lockBoxBtnTarget.classList.remove("d-none");
     }
   }
