@@ -280,7 +280,7 @@ export default class extends Controller {
     this.swap({ detail: { type: "location_google" } });
   }
 
-  // Connects the location_google autocompleter to call map controller methods
+  // Connects autocompleter to map controller to call its methods
   activateMapOutlet(location = false) {
     if (!this.hasMapOutlet) {
       this.verbose("autocompleter: no map outlet");
@@ -298,9 +298,9 @@ export default class extends Controller {
     // set the map to stop ignoring place input
     this.mapOutlet.ignorePlaceInput = false;
 
-    // 2024-08-09: Unless the swap call (form-exif) sent request_params lat/lng,
-    // don't geocode lat/lng when switching to location_google. Usually, this is
-    // for geolocating place_names and should pay attention to text only.
+    // Often, this swap to location_google is for geolocating place_names and
+    // should pay attention to text only. But in some cases the swap (e.g., from
+    // form-exif) sends request_params lat/lng, so geocode when switching.
     if (location) {
       // this.mapOutlet.geocodeLatLng(location);
       this.mapOutlet.tryToGeocode();
