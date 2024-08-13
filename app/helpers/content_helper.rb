@@ -143,6 +143,8 @@ module ContentHelper
             aria: { expanded: "false", controls: id })
   end
 
+  # For a collapsing panel_block, pass an HTML id for args[:collapse] and
+  # args[:collapse_show] to show it open by default.
   def panel_block(**args, &block)
     heading = panel_block_heading(args)
     footer = panel_block_footer(args)
