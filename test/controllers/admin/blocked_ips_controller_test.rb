@@ -43,6 +43,15 @@ module Admin
       assert(time < File.mtime(MO.blocked_ips_file))
       IpStats.reset!
       assert_false(IpStats.blocked?(new_ip))
+
+      time = 1.minute.ago
+      File.utime(time.to_time, time.to_time, MO.blocked_ips_file)
+      patch(:update, params: { add_bad: " #{new_ip} " })
+      assert_no_flash
+      assert(time < File.mtime(MO.blocked_ips_file))
+      IpStats.reset!
+      assert_true(IpStats.blocked?(new_ip),
+                  "It should ignore leading & trailing spaces in ip addr")
     end
   end
 end
