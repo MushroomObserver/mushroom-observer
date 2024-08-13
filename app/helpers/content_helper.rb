@@ -180,6 +180,7 @@ module ContentHelper
     end
   end
 
+  # NOTE: args[:collapse_show] should be a boolean
   def panel_collapse_trigger(args)
     icon_link_to(
       :OPEN.l,
@@ -189,7 +190,7 @@ module ContentHelper
       active_content: :CLOSE.l,
       class: "panel-collapse-trigger",
       role: "button", data: { toggle: "collapse" },
-      aria: { expanded: args[:collapsed], controls: args }
+      aria: { expanded: args[:collapse_show], controls: args }
     )
   end
 
@@ -203,7 +204,9 @@ module ContentHelper
   end
 
   def panel_collapse_body(args, content)
-    tag.div(class: class_names("panel-collapse collapse", args[:collapsed]),
+    open = args[:collapse_show] ? "in" : ""
+
+    tag.div(class: class_names("panel-collapse collapse", open),
             id: args[:collapse]) do
       concat(panel_body(args, content))
     end
