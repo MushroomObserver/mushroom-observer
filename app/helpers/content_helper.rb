@@ -180,6 +180,19 @@ module ContentHelper
     end
   end
 
+  def panel_collapse_trigger(args)
+    icon_link_to(
+      :OPEN.l,
+      "##{args[:collapse]}",
+      icon: link_icon(:chevron_down),
+      active_icon: link_icon(:chevron_up),
+      active_content: :CLOSE.l,
+      class: "panel-collapse-trigger",
+      role: "button", data: { toggle: "collapse" },
+      aria: { expanded: args[:collapsed], controls: args }
+    )
+  end
+
   def panel_body(args, content)
     return "" if content.blank?
 
@@ -187,13 +200,6 @@ module ContentHelper
             id: args[:inner_id]) do
       concat(content)
     end
-  end
-
-  def panel_collapse_trigger(args)
-    link_to(link_icon(:chevron_down), "##{args[:collapse]}",
-            class: "panel-collapse-trigger",
-            role: "button", data: { toggle: "collapse" },
-            aria: { expanded: "false", controls: args } )
   end
 
   def panel_collapse_body(args, content)
