@@ -181,7 +181,11 @@ module LinkHelper
     print: "print",
     globe: "globe",
     find_on_map: "screenshot",
-    apply: "check"
+    apply: "check",
+    chevron_down: "chevron-down",
+    chevron_up: "chevron-up",
+    chevron_left: "chevron-left",
+    chevron_right: "chevron-right"
   }.freeze
 
   # button to destroy object

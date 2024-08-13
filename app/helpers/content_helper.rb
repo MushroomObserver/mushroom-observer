@@ -153,11 +153,10 @@ module ContentHelper
       **args.except(:class, :inner_class, :inner_id, :heading, :heading_links)
     ) do
       concat(heading)
-      if content.present?
-        concat(tag.div(class: class_names("panel-body", args[:inner_class]),
-                       id: args[:inner_id]) do
-                 concat(content)
-               end)
+      if args[:collapse].present?
+        concat(panel_collapse_body(args, content))
+      else
+        concat(panel_block_body(args, content))
       end
       concat(footer)
     end
@@ -170,12 +169,37 @@ module ContentHelper
           els = [args[:heading]]
           if args[:heading_links].present?
             els << tag.span(args[:heading_links], class: "float-right")
+          elsif args[:collapse].present?
+            els << panel_collapse_trigger(args)
           end
           els.safe_join
         end
       end
     else
       ""
+    end
+  end
+
+  def panel_body(args, content)
+    return "" if content.blank?
+
+    tag.div(class: class_names("panel-body", args[:inner_class]),
+            id: args[:inner_id]) do
+      concat(content)
+    end
+  end
+
+  def panel_collapse_trigger(args)
+    link_to(link_icon(:chevron_down), "##{args[:collapse]}",
+            class: "panel-collapse-trigger",
+            role: "button", data: { toggle: "collapse" },
+            aria: { expanded: "false", controls: args } )
+  end
+
+  def panel_collapse_body(args, content)
+    tag.div(class: class_names("panel-collapse collapse", args[:collapsed]),
+            id: args[:collapse]) do
+      concat(panel_body(args, content))
     end
   end
 
