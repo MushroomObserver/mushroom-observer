@@ -155,8 +155,9 @@ module Observations
       last_import_id = 0
       loop do
         page =
+          # make an iNat API search observations request
           inat_search_observations(
-            ids: inat_ids, id_above: last_import_id,
+            id: inat_ids, id_above: last_import_id,
             user_login: @inat_import.inat_username
           )
         break if page_empty?(page)
@@ -191,7 +192,7 @@ module Observations
     # multiple times.
     def inat_search_observations(**args)
       query_args = {
-        ids: nil, id_above: nil, only_id: false, per_page: 200,
+        id: nil, id_above: nil, only_id: false, per_page: 200,
         order: "asc", order_by: "id",
         # prevents user from importing others' obss
         user_login: nil, iconic_taxa: ICONIC_TAXA
