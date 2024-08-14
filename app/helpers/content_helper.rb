@@ -152,7 +152,7 @@ module ContentHelper
 
     tag.div(
       class: class_names("panel panel-default", args[:class]),
-      **args.except(:class, :inner_class, :inner_id, :heading, :heading_links)
+      **args.except(*panel_inner_args)
     ) do
       concat(heading)
       if args[:collapse].present?
@@ -162,6 +162,12 @@ module ContentHelper
       end
       concat(footer)
     end
+  end
+
+  # Args passed to panel components that are not applied to the outer div.
+  def panel_inner_args
+    [:class, :inner_class, :inner_id, :heading, :heading_links, :collapse,
+     :collapse_show, :footer].freeze
   end
 
   def panel_block_heading(args)
