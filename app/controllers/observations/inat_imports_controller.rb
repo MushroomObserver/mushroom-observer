@@ -123,8 +123,8 @@ module Observations
       access_token = JSON.parse(oauth_response.body)["access_token"]
 
       # Use the `access_token` to request a `jwt`, right away.
-      jwt_response = RestClient.get(
-        "https://www.inaturalist.org/users/api_token",
+      jwt_response = RestClient::Request.execute(
+        method: :get, url: "https://www.inaturalist.org/users/api_token",
         headers: { authorization: "Bearer #{access_token}", accept: :json }
       )
       api_token = JSON.parse(jwt_response)["api_token"]
@@ -184,15 +184,21 @@ module Observations
     end
 
     # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
-    def inat_search_observations(ids: nil, id_above: nil, only_id: false,
-                                 per_page: 200, sort: "order=asc&order_by=id",
-                                 # prevents user from importing others' obss
-                                 user_login: nil)
-      operation =
-        "/observations?id=#{ids}&id_above=#{id_above}&only_id=#{only_id}" \
-        "&per_page=#{per_page}&#{sort}&user_login=#{user_login}" \
-        "&iconic_taxa=Fungi,Protozoa"
-      ::Inat.new(operation: operation, token: inat_import.token).body
+    # https://stackoverflow.com/a/11251654/3357635
+    # Note that the `ids` parameter may be a comma-separated list of iNat obs
+    # ids - that needs to be URL encoded to a string when passed as an arg here
+    # because URI.encode_www_form deals with arrays by passing the same key
+    # multiple times.
+    def inat_search_observations(**args)
+      query_args = {
+        ids: nil, id_above: nil, only_id: false, per_page: 200,
+        order: "asc", order_by: "id",
+        # prevents user from importing others' obss
+        user_login: nil, iconic_taxa: ICONIC_TAXA
+      }.merge(args)
+
+      query = URI.encode_www_form(query_args)
+      ::Inat.new(operation: query, token: inat_import.token).body
     end
 
     def import_page(page)
