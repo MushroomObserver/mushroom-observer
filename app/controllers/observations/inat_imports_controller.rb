@@ -110,7 +110,7 @@ module Observations
       inat_import = InatImport.find_or_create_by(user: User.current)
       inat_import.update(state: "Authenticating")
 
-      # exchange code received from iNat for an access token
+      # exchange code received from iNat for an oAuth `access_token`
       payload = {
         client_id: APP_ID,
         client_secret: Rails.application.credentials.inat.secret,
@@ -119,7 +119,21 @@ module Observations
         grant_type: "authorization_code"
       }
       response = RestClient.post("#{SITE}/oauth/token", payload)
-      inat_import.update(token: response.body, state: "Importing")
+      # Nimmo note: does the `response.body` actually contain only the
+      # `access_token`, or do you have to parse it? With my password
+      # authentication example, the token was in the field ["access_token"], but
+      # this is a different workflow, so IDK what the response is like.
+      token = JSON.parse(response.body)["access_token"] # or just response.body
+      # Anyway, something like that. Then use it to request the jwt, right away.
+      jwt_request = RestClient.get(
+        "https://www.inaturalist.org/users/api_token",
+        headers: { authorization: "Bearer #{token}", accept: :json }
+      )
+      jwt = JSON.parse(jwt_request)["api_token"]
+
+      # Now that we've got the right token, we can make authenticated requests
+      # to iNat that get the real real private data.
+      inat_import.update(token: jwt, state: "Importing")
 
       import_requested_observations(inat_import)
 
