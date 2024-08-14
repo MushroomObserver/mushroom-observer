@@ -118,19 +118,20 @@ module Observations
         redirect_uri: REDIRECT_URI,
         grant_type: "authorization_code"
       }
-      response = RestClient.post("#{SITE}/oauth/token", payload)
+      oauth_response = RestClient.post("#{SITE}/oauth/token", payload)
       # The actual token is in the field ["access_token"].
-      token = JSON.parse(response.body)["access_token"]
-      # Use the `access_token` to request the `jwt`, right away.
-      jwt_request = RestClient.get(
+      access_token = JSON.parse(oauth_response.body)["access_token"]
+
+      # Use the `access_token` to request a `jwt`, right away.
+      jwt_response = RestClient.get(
         "https://www.inaturalist.org/users/api_token",
-        headers: { authorization: "Bearer #{token}", accept: :json }
+        headers: { authorization: "Bearer #{access_token}", accept: :json }
       )
-      jwt = JSON.parse(jwt_request)["api_token"]
+      api_token = JSON.parse(jwt_response)["api_token"]
 
       # Now that we've got the right token, we can make authenticated requests
       # to iNat that get the real real private data.
-      inat_import.update(token: jwt, state: "Importing")
+      inat_import.update(token: api_token, state: "Importing")
 
       import_requested_observations(inat_import)
 
