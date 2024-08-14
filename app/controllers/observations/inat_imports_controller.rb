@@ -119,12 +119,9 @@ module Observations
         grant_type: "authorization_code"
       }
       response = RestClient.post("#{SITE}/oauth/token", payload)
-      # Nimmo note: does the `response.body` actually contain only the
-      # `access_token`, or do you have to parse it? With my password
-      # authentication example, the token was in the field ["access_token"], but
-      # this is a different workflow, so IDK what the response is like.
-      token = JSON.parse(response.body)["access_token"] # or just response.body
-      # Anyway, something like that. Then use it to request the jwt, right away.
+      # The actual token is in the field ["access_token"].
+      token = JSON.parse(response.body)["access_token"]
+      # Use the `access_token` to request the `jwt`, right away.
       jwt_request = RestClient.get(
         "https://www.inaturalist.org/users/api_token",
         headers: { authorization: "Bearer #{token}", accept: :json }
