@@ -4,7 +4,7 @@
   id: "observation_identification",
   heading: "#{:IDENTIFICATION.l} + #{:SPECIMEN.l}",
   collapse: "observation_specimen_inner",
-  open: false
+  open: @given_name.present?
 ) do %>
   <%= tag.div(class: "row mt-3") do %>
     <%= tag.div(class: "col-xs-12 col-lg-6") do %>
@@ -18,7 +18,7 @@
           name_help:    :form_naming_name_help_leave_blank.t
         } %>
         <%= render(partial: "observations/namings/fields",
-                  locals: naming_locals) %>
+                   locals: naming_locals) %>
       <% end %>
     <% end %>
     <%= tag.div(class: "col-xs-12 col-lg-6") do %>
