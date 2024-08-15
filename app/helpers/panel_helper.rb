@@ -4,20 +4,26 @@
 module PanelHelper
   # For a collapsing panel_block, pass an HTML id for args[:collapse] and
   # args[:collapse_show] to show it open by default.
+  # Pass args[:panel_bodies] to create multiple panel bodies, or args[:content]
+  # to pass preformatted content instead of building `panel-body` here.
   def panel_block(**args, &block)
-    heading = panel_block_heading(args)
-    footer = panel_block_footer(args)
-    content = capture(&block).to_s
+    heading = panel_heading(args)
+    footer = panel_footer(args)
+    content = block ? capture(&block).to_s : ""
 
     tag.div(
       class: class_names("panel panel-default", args[:class]),
       **args.except(*panel_inner_args)
     ) do
       concat(heading)
-      if args[:collapse].present?
+      if args[:panel_bodies].present?
+        concat(panel_bodies(args))
+      elsif args[:content].present?
+        concat(args[:content])
+      elsif args[:collapse].present?
         concat(panel_collapse_body(args, content))
       else
-        concat(panel_block_body(args, content))
+        concat(panel_body(args, content))
       end
       concat(footer)
     end
@@ -25,35 +31,34 @@ module PanelHelper
 
   # Args passed to panel components that are not applied to the outer div.
   def panel_inner_args
-    [:class, :inner_class, :inner_id, :heading, :heading_links, :collapse,
-     :open, :footer].freeze
+    [:class, :inner_class, :inner_id, :heading, :heading_links, :panel_bodies,
+     :collapse, :open, :footer].freeze
   end
 
-  def panel_block_heading(args)
-    if args[:heading]
-      tag.div(class: "panel-heading") do
-        tag.h4(class: "panel-title") do
-          els = [args[:heading]]
-          if args[:heading_links].present?
-            els << tag.span(args[:heading_links], class: "float-right")
-          elsif args[:collapse].present?
-            els << panel_collapse_trigger(args)
-          end
-          els.safe_join
+  def panel_heading(args)
+    return "" unless args[:heading]
+
+    tag.div(class: "panel-heading") do
+      tag.h4(class: "panel-title") do
+        els = [args[:heading]]
+        if args[:heading_links].present?
+          els << tag.span(args[:heading_links], class: "float-right")
+        elsif args[:collapse].present?
+          els << tag.span(panel_collapse_trigger(args), class: "float-right")
         end
+        els.safe_join
       end
-    else
-      ""
     end
   end
 
-  # NOTE: args[:collapse_show] should be a boolean
+  # The caret icon that toggles the panel collapse.
+  # NOTE: args[:open] should be a boolean
   def panel_collapse_trigger(args)
     icon_link_to(
       :OPEN.l,
       "##{args[:collapse]}",
-      icon: link_icon(:chevron_down),
-      active_icon: link_icon(:chevron_up),
+      icon: :chevron_down,
+      active_icon: :chevron_up,
       active_content: :CLOSE.l,
       class: "panel-collapse-trigger",
       role: "button", data: { toggle: "collapse" },
@@ -70,6 +75,13 @@ module PanelHelper
     end
   end
 
+  # Some panels need multiple panel bodies.
+  def panel_bodies(args)
+    args[:panel_bodies].map do |body|
+      panel_body(args, body)
+    end.safe_join
+  end
+
   def panel_collapse_body(args, content)
     open = args[:open] ? "in" : ""
 
@@ -79,7 +91,7 @@ module PanelHelper
     end
   end
 
-  def panel_block_footer(args)
+  def panel_footer(args)
     if args[:footer]
       tag.div(class: "panel-footer") do
         args[:footer]
