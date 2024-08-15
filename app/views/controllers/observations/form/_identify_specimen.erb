@@ -7,7 +7,7 @@
   open: @given_name.present?
 ) do %>
   <%= tag.div(class: "row mt-3") do %>
-    <%= tag.div(class: "col-xs-12 col-lg-6") do %>
+    <%= tag.div(class: "col-xs-12 col-md-6") do %>
       <% if include_naming
         naming_locals = {
           f:            f,
@@ -21,7 +21,7 @@
                    locals: naming_locals) %>
       <% end %>
     <% end %>
-    <%= tag.div(class: "col-xs-12 col-lg-6") do %>
+    <%= tag.div(class: "col-xs-12 col-md-6") do %>
       <%= render(partial: "observations/form/specimen_section",
                  locals: { f:, action: }) %>
     <% end %>
