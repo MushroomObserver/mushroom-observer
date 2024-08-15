@@ -16,5 +16,11 @@
     <%= render(partial: "observations/form/details",
                locals: { f:, button_name:, location:, logging_optional: }) %>
 
+    <%= tag.div(class: "panel-body mt-4") do
+      tag.div(class: "text-center", id: "step-nav-1") do
+        tab_link(:NEXT.l, id: "identify", button: true)
+      end
+    end %>
+
   <% end %>
 <% end %>

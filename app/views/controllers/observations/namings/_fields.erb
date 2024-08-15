@@ -23,14 +23,19 @@ confidences = options_for_select(menu, @vote&.value)
 select_opts = { include_blank: ["new", "create"].include?(action_name) }
 context ||= "blank"
 name_help ||= :form_naming_name_help.t
+feedback = if @given_name.present?
+             tag.div do
+               render(partial: "shared/form_name_feedback",
+                      locals: feedback_locals)
+             end
+           else
+             ""
+           end
 %>
 
 <%=
 [
-  tag.div do
-    render(partial: "shared/form_name_feedback",
-           locals: feedback_locals) if @given_name.present?
-  end,
+  feedback,
   fields_for(:naming) do |f_n|
     [
       autocompleter_field(
@@ -49,5 +54,5 @@ name_help ||= :form_naming_name_help.t
     ].safe_join
   end,
   hidden_field_tag(:context, context)
-].safe_join
+].compact.safe_join
 %>

@@ -32,18 +32,6 @@ data = {
   form_images_target: "form",
   exif_used: create ? false : true
 }
-naming_locals = if include_naming
-                  {
-                    f:            f,
-                    action:       action,
-                    button_name:  button_name,
-                    show_reasons: false,
-                    unfocused:    true,
-                    name_help:    :form_naming_name_help_leave_blank.t
-                  }
-                else
-                  {}
-                end
 show_projects = @projects.any? || @error_checked_projects.any? ||
                 @suspect_checked_projects.any?
 show_lists = @lists.any?
@@ -65,48 +53,19 @@ show_lists = @lists.any?
     <%= hidden_field_tag(:field_code, @field_code) %>
   <% end %>
 
-  <%# tab_content do %>
-    <%= render(partial: "observations/form/record_step",
-               locals: { f:, button_name:, location: @location,
-                         logging_optional: }) %>
-
-    <%= render(partial: "observations/form/identify_step",
-               locals: { f:, action:, button_name:, include_naming: }) %>
-
-    <% if projects_lists %>
-      <%= render(partial: "observations/form/add_to_step",
-                 locals: { f:, button_name: }) %>
-    <% end %>
-  <%# end %>
-
+  <% content = [
+    render(partial: "observations/form/images", locals: { f: }),
+    render(partial: "observations/form/details",
+           locals: { f:, button_name:, location: @location, logging_optional:,
+                     action:, include_naming: }),
+  ].safe_join %>
   <%= panel_block(
     heading: "#{:IMAGES.l} + #{:show_observation_details.l}",
-    id: "observation_images_details"
-  ) do %>
-    <%= render(partial: "observations/form/images", locals: { f: }) %>
+    id: "observation_images_details", content:
+  ) %>
 
-    <%= render(partial: "observations/form/details",
-               locals: { f:, button_name:, location:, logging_optional: }) %>
-  <% end %>
-
-  <%= panel_block(
-    heading: :IDENTIFICATION.l,
-    id: "observation_identification",
-    collapse: "observation_identification_inner",
-    open: false
-  ) do
-    render(partial: "observations/namings/fields", locals: naming_locals)
-  end %>
-
-  <%= panel_block(
-    heading: :SPECIMEN.l,
-    id: "observation_specimen",
-    collapse: "observation_specimen_inner",
-    open: false
-  ) do
-    render(partial: "observations/form/specimen_section",
-           locals: { f:, action: })
-  end %>
+  <%= render(partial: "observations/form/identify_specimen",
+             locals: { f:, action:, button_name:, include_naming: }) %>
 
   <%= panel_block(
     heading: :NOTES.l,
@@ -117,6 +76,8 @@ show_lists = @lists.any?
     render(partial: "shared/notes_fields",
            locals: { form: f, fields: @observation.form_notes_parts(@user) })
   end %>
+
+  <%= submit_button(form: f, button: button_name, center: true) %>
 
   <% if show_projects %>
     <%= panel_block(

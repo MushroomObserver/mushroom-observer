@@ -1,13 +1,25 @@
-<%# locals: (f:, button_name:, location:, logging_optional:) -%>
+<%# locals: (f:, action:, button_name:, location:, logging_optional:, include_naming: false) -%>
 
 <%# When and Where (location) section of create_observation form
-    including location autocomplete, map, lat/long/alt %>
+    including location autocomplete, map, lat/long/alt, naming %>
 <%
 t_s = {
   lat: { abbr: :LAT.l, full: :LATITUDE.l, addon: "º" },
   lng: { abbr: :LNG.l, full: :LONGITUDE.l, addon: "º" },
   alt: { abbr: :ALT.l, full: :ALTITUDE.l, addon: "m" }
 }
+naming_locals = if include_naming
+                  {
+                    f:            f,
+                    action:       action,
+                    button_name:  button_name,
+                    show_reasons: false,
+                    unfocused:    true,
+                    name_help:    :form_naming_name_help_leave_blank.t
+                  }
+                else
+                  {}
+                end
 %>
 
 <%= tag.div(class: "panel-body border-top", id: "observation_details") do %>
@@ -21,44 +33,13 @@ t_s = {
       <!-- /WHEN -->
 
       <%= tag.div(id: "observation_where") do %>
-        <%= tag.p do
-          [tag.strong("#{:WHERE_GROUP.l}:"),
-           collapse_info_trigger("geolocation_help")].safe_join(" ")
-        end %>
-
-        <!-- LAT_LONG_ALT -->
-        <%= tag.div(class: "row no-gutters",
-                    id: "observation_lat_lng_alt") do %>
-          <% [:lat, :lng, :alt].each do |key| %>
-            <%= tag.div(class: "col-xs-4") do
-              text_field_with_label(
-                form: f, field: key, class: "mb-0", addon: t_s[key][:addon],
-                label: [
-                  tag.span("#{t_s[key][:full]}:", class: "d-none d-sm-inline"),
-                  tag.span("#{t_s[key][:abbr]}:", class: "d-inline d-sm-none")
-                ].safe_join,
-                data: { map_target: "#{key}Input", action: "map#bufferInputs" }
-              )
-            end %>
-          <% end %>
-        <% end %>
-
-        <%= collapse_help_block(nil, id: "geolocation_help") do %>
-          <%= tag.p(:form_observations_click_point.l) %>
-          <%= tag.p(:form_observations_lat_long_help.t) %>
-        <% end %>
-
-        <%= check_box_with_label(form: f, field: :gps_hidden,
-                                 label: :form_observations_gps_hidden.l) %>
-        <!-- /LAT_LONG_ALT -->
-
         <!-- WHERE_REASONS -->
         <%= render(partial: "shared/form_location_feedback",
                    locals: { button: button_name } ) %>
         <!-- /WHERE_REASONS -->
 
         <%= autocompleter_field(
-          form: f, field: :place_name, type: :location,
+          form: f, field: :place_name, type: :location, class: "mb-0",
           label: [tag.span("#{:WHERE.l}:", class: "unconstrained-label"),
                   tag.span("#{:form_observations_locality_contains.l}:",
                            class: "constrained-label"),
@@ -85,17 +66,51 @@ t_s = {
           }
         ) %>
 
-        <%= render(partial: "locations/form/bounds_hidden_fields",
-                   locals: { location: @location, target_controller: :map }) %>
-        <!-- /WHERE -->
-
         <!-- IS_COLLECTION_LOCATION -->
         <%= check_box_with_label(
           form: f, field: :is_collection_location,
           label: :form_observations_is_collection_location.l,
-          help: :form_observations_is_collection_location_help.t
+          help: :form_observations_is_collection_location_help.t,
+          class: "ml-5 mb-5"
         ) %>
         <!-- /IS_COLLECTION_LOCATION -->
+
+        <%= render(partial: "locations/form/bounds_hidden_fields",
+                   locals: { location: @location, target_controller: :map }) %>
+        <!-- /WHERE -->
+
+        <!-- LAT_LONG_ALT -->
+        <%= tag.p do
+          [tag.strong("#{:GEOLOCATION.l}:"),
+           collapse_info_trigger("geolocation_help")].safe_join(" ")
+        end %>
+
+        <%= tag.div(class: "row no-gutters",
+                    id: "observation_lat_lng_alt") do %>
+          <% [:lat, :lng, :alt].each do |key| %>
+            <%= tag.div(class: "col-xs-4") do
+              text_field_with_label(
+                form: f, field: key, class: "mb-0", addon: t_s[key][:addon],
+                label: [
+                  tag.span("#{t_s[key][:full]}:", class: "d-none d-sm-inline"),
+                  tag.span("#{t_s[key][:abbr]}:", class: "d-inline d-sm-none")
+                ].safe_join,
+                data: { map_target: "#{key}Input", action: "map#bufferInputs" }
+              )
+            end %>
+          <% end %>
+        <% end %>
+
+        <%= collapse_help_block(nil, id: "geolocation_help") do %>
+          <%= tag.p(:form_observations_click_point.l) %>
+          <%= tag.p(:form_observations_lat_long_help.t) %>
+        <% end %>
+
+        <%= check_box_with_label(
+          form: f, field: :gps_hidden, label: :form_observations_gps_hidden.l,
+          class: "ml-5 mb-5"
+        ) %>
+        <!-- /LAT_LONG_ALT -->
 
         <% if logging_optional %>
           <%= check_box_with_label(
@@ -103,7 +118,6 @@ t_s = {
             label: :form_observations_log_change.t
           ) %>
         <% end %>
-
       <% end %>
     <% end %><!--.col-->
 
@@ -111,12 +125,11 @@ t_s = {
     <%= tag.div(class: "col-xs-12 col-md-6",
                 id: "observation_geolocation") do %>
       <%= render(
-        partial: "shared/form_location_map",
-        locals: { id: "observation_form_map", map_type: "observation" }
-      ) %>
+            partial: "shared/form_location_map",
+            locals: { id: "observation_form_map", map_type: "observation" }
+          ) %>
     <% end %>
     <!-- /MAP -->
-
   <% end %><!--.row-->
 
 <% end %>

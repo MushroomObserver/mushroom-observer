@@ -1,0 +1,29 @@
+<%# locals: (f:, action:, button_name:, include_naming:) -%>
+
+<%= panel_block(
+  id: "observation_identification",
+  heading: "#{:IDENTIFICATION.l} + #{:SPECIMEN.l}",
+  collapse: "observation_specimen_inner",
+  open: false
+) do %>
+  <%= tag.div(class: "row mt-3") do %>
+    <%= tag.div(class: "col-xs-12 col-lg-6") do %>
+      <% if include_naming
+        naming_locals = {
+          f:            f,
+          action:       action,
+          button_name:  button_name,
+          show_reasons: false,
+          unfocused:    true,
+          name_help:    :form_naming_name_help_leave_blank.t
+        } %>
+        <%= render(partial: "observations/namings/fields",
+                  locals: naming_locals) %>
+      <% end %>
+    <% end %>
+    <%= tag.div(class: "col-xs-12 col-lg-6") do %>
+      <%= render(partial: "observations/form/specimen_section",
+                 locals: { f:, action: }) %>
+    <% end %>
+  <% end %>
+<% end %>
