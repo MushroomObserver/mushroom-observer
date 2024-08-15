@@ -32,7 +32,21 @@ data = {
   form_images_target: "form",
   exif_used: create ? false : true
 }
-projects_lists = @projects.any? || @lists.any?
+naming_locals = if include_naming
+                  {
+                    f:            f,
+                    action:       action,
+                    button_name:  button_name,
+                    show_reasons: false,
+                    unfocused:    true,
+                    name_help:    :form_naming_name_help_leave_blank.t
+                  }
+                else
+                  {}
+                end
+show_projects = @projects.any? || @error_checked_projects.any? ||
+                @suspect_checked_projects.any?
+show_lists = @lists.any?
 %>
 
 <%= form_with(
@@ -46,12 +60,12 @@ projects_lists = @projects.any? || @lists.any?
   data:
 ) do |f| %>
 
-  <%= if @field_code
-    tag.p("#{:form_observations_field_code.t} #{@field_code}")
-  end %>
-  <%= hidden_field_tag(:field_code, @field_code) %>
+  <% if @field_code %>
+    <%= tag.p("#{:form_observations_field_code.t} #{@field_code}") %>
+    <%= hidden_field_tag(:field_code, @field_code) %>
+  <% end %>
 
-  <%= tab_content do %>
+  <%# tab_content do %>
     <%= render(partial: "observations/form/record_step",
                locals: { f:, button_name:, location: @location,
                          logging_optional: }) %>
@@ -63,6 +77,67 @@ projects_lists = @projects.any? || @lists.any?
       <%= render(partial: "observations/form/add_to_step",
                  locals: { f:, button_name: }) %>
     <% end %>
+  <%# end %>
+
+  <%= panel_block(
+    heading: "#{:IMAGES.l} + #{:show_observation_details.l}",
+    id: "observation_images_details"
+  ) do %>
+    <%= render(partial: "observations/form/images", locals: { f: }) %>
+
+    <%= render(partial: "observations/form/details",
+               locals: { f:, button_name:, location:, logging_optional: }) %>
+  <% end %>
+
+  <%= panel_block(
+    heading: :IDENTIFICATION.l,
+    id: "observation_identification",
+    collapse: "observation_identification_inner",
+    open: false
+  ) do
+    render(partial: "observations/namings/fields", locals: naming_locals)
+  end %>
+
+  <%= panel_block(
+    heading: :SPECIMEN.l,
+    id: "observation_specimen",
+    collapse: "observation_specimen_inner",
+    open: false
+  ) do
+    render(partial: "observations/form/specimen_section",
+           locals: { f:, action: })
+  end %>
+
+  <%= panel_block(
+    heading: :NOTES.l,
+    id: "observation_notes",
+    collapse: "observation_notes_inner",
+    open: false
+  ) do
+    render(partial: "shared/notes_fields",
+           locals: { form: f, fields: @observation.form_notes_parts(@user) })
+  end %>
+
+  <% if show_projects %>
+    <%= panel_block(
+      heading: :PROJECTS.l,
+      id: "observation_projects",
+      collapse: "observation_projects_inner",
+      open: false
+    ) do
+      render(partial: "observations/form/projects", locals: { button_name: })
+    end %>
+  <% end %>
+
+  <% if show_lists %>
+    <%= panel_block(
+      heading: :SPECIES_LISTS.l,
+      id: "observation_lists",
+      collapse: "observation_lists_inner",
+      open: false
+    ) do
+      render(partial: "observations/form/species_lists")
+    end %>
   <% end %>
 
 <% end %><!--[/form:observation]-->

@@ -22,8 +22,8 @@
       <% end %>
       <%= tag.div(class: "col-xs-12 col-lg-6") do %>
         <%= render(partial: "shared/notes_fields",
-                  locals: { form: f,
-                            fields: @observation.form_notes_parts(@user) }) %>
+                   locals: { form: f,
+                             fields: @observation.form_notes_parts(@user) }) %>
       <% end %>
     <% end %>
 
