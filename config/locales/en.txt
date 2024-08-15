@@ -1741,6 +1741,7 @@
   image_exif_copied: Info copied
   image_use_exif: Use this info
   image_camera_info: Camera info
+  image_no_geolocation: No geolocation found
   image_file_name: File name
   image_file_size: File size
 
