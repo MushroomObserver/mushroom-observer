@@ -110,7 +110,7 @@ module Observations
       inat_import.save
       inat_authorization_callback_params = { code: "MockCode" }
 
-      stub_token_request
+      stub_access_token_request
       login(user.login)
       get(:authenticate, params: inat_authorization_callback_params)
 
@@ -299,7 +299,7 @@ module Observations
 
       stub_inat_api_request(inat_import_ids, mock_search_result)
       simulate_authorization(user: user, inat_import_ids: inat_import_ids)
-      stub_token_request
+      stub_access_token_request
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
       login(user.login)
@@ -321,7 +321,7 @@ module Observations
 
       stub_inat_api_request(inat_import_ids, mock_search_result)
       simulate_authorization(user: user, inat_import_ids: inat_import_ids)
-      stub_token_request
+      stub_access_token_request
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
       login(user.login)
@@ -351,7 +351,7 @@ module Observations
       assert_equal(231_104_466, json["results"].second["id"])
 
       simulate_authorization(user: user, inat_import_ids: inat_import_ids)
-      stub_token_request
+      stub_access_token_request
       stub_inat_api_request(inat_import_ids, mock_inat_response)
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
@@ -379,7 +379,7 @@ module Observations
 
       simulate_authorization(user: user, inat_import_ids: inat_import_ids,
                              import_all: true)
-      stub_token_request
+      stub_access_token_request
       stub_inat_api_request(inat_import_ids, mock_search_result)
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
@@ -416,7 +416,7 @@ module Observations
       simulate_authorization(user: user,
                              inat_username: inat_obs.inat_user_login,
                              inat_import_ids: inat_import_ids)
-      stub_token_request
+      stub_access_token_request
       stub_inat_api_request(inat_import_ids, mock_search_result,
                             inat_user_login: inat_obs.inat_user_login)
 
@@ -515,7 +515,7 @@ module Observations
 
     # stub exchanging iNat code for oauth token
     # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
-    def stub_token_request
+    def stub_access_token_request
       stub_request(:post, "https://www.inaturalist.org/oauth/token").
         with(
           body: { "client_id" => Rails.application.credentials.inat.id,
@@ -524,7 +524,9 @@ module Observations
                   "grant_type" => "authorization_code",
                   "redirect_uri" => REDIRECT_URI }
         ).
-        to_return(status: 200, body: "MockToken", headers: {})
+        to_return(status: 200,
+                  body: { access_token: "MockAccessToken" }.to_json,
+                  headers: {})
     end
 
     def result_without_photos(mock_search_result)
