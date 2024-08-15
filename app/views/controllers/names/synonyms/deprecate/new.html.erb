@@ -9,10 +9,10 @@ action = { controller: "/names/synonyms/deprecate", action: :create,
 feedback_locals = {
   button_name: :SUBMIT.l,
   given_name: @given_name,
+  names: @names,
   valid_names: @valid_names,
   suggest_corrections: @suggest_corrections,
-  parent_deprecated: @parent_deprecated,
-  names: @names
+  parent_deprecated: @parent_deprecated
 }
 
 deprecate_comments_help = capture do
@@ -26,7 +26,7 @@ end
   <%= submit_button(form: f, button: :SUBMIT.l, center: true) %>
 
   <%= render(partial: "shared/form_name_feedback",
-             locals: feedback_locals.merge({ f: f })) if @given_name.present? %>
+             locals: feedback_locals) if @given_name.present? %>
 
   <%= autocompleter_field(
     form: f, field: :proposed_name, type: :name,
