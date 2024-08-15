@@ -29,8 +29,8 @@ herbarium_record. Fields hidden unless box checked. %>
     <%= tag.div(id: "specimen_fields",
                 class: ("hidden" if !@observation.specimen),
                 data: { specimen_target: "fields" }) do %>
-      <%= render(partial: "observations/form/collection_number") %>
-      <%= render(partial: "observations/form/herbarium_record") %>
+      <%= render(partial: "observations/form/specimen/collection_number") %>
+      <%= render(partial: "observations/form/specimen/herbarium_record") %>
     <% end %>
     <!-- /specimen_fields -->
   <% end %>

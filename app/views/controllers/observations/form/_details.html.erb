@@ -8,18 +8,6 @@ t_s = {
   lng: { abbr: :LNG.l, full: :LONGITUDE.l, addon: "º" },
   alt: { abbr: :ALT.l, full: :ALTITUDE.l, addon: "m" }
 }
-naming_locals = if include_naming
-                  {
-                    f:            f,
-                    action:       action,
-                    button_name:  button_name,
-                    show_reasons: false,
-                    unfocused:    true,
-                    name_help:    :form_naming_name_help_leave_blank.t
-                  }
-                else
-                  {}
-                end
 %>
 
 <%= tag.div(class: "panel-body border-top", id: "observation_details") do %>

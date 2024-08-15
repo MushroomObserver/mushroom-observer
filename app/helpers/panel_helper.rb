@@ -18,8 +18,8 @@ module PanelHelper
       concat(heading)
       if args[:panel_bodies].present?
         concat(panel_bodies(args))
-      elsif args[:content].present?
-        concat(args[:content])
+      elsif args[:formatted_content].present?
+        concat(content)
       elsif args[:collapse].present?
         concat(panel_collapse_body(args, content))
       else
