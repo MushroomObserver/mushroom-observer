@@ -101,15 +101,15 @@ naming_locals = if include_naming
           <% end %>
         <% end %>
 
-        <%= collapse_help_block(nil, id: "geolocation_help") do %>
-          <%= tag.p(:form_observations_click_point.l) %>
-          <%= tag.p(:form_observations_lat_long_help.t) %>
-        <% end %>
-
         <%= check_box_with_label(
           form: f, field: :gps_hidden, label: :form_observations_gps_hidden.l,
           class: "ml-5 mb-5"
         ) %>
+
+        <%= collapse_help_block(nil, id: "geolocation_help") do %>
+          <%= tag.p(:form_observations_click_point.l) %>
+          <%= tag.p(:form_observations_lat_long_help.t) %>
+        <% end %>
         <!-- /LAT_LONG_ALT -->
 
         <% if logging_optional %>
