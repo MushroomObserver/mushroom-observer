@@ -321,8 +321,8 @@ module Observations
       mock_search_result = File.read("test/inat/#{filename}.txt")
       inat_import_ids = "123"
 
-      stub_inat_api_request(inat_import_ids, mock_search_result)
       simulate_authorization(user: user, inat_import_ids: inat_import_ids)
+      stub_inat_api_request(inat_import_ids, mock_search_result)
       stub_access_token_request
       stub_jwt_request
 
@@ -330,7 +330,8 @@ module Observations
       login(user.login)
 
       assert_no_difference(
-        "Observation.count", "Should not import iNat Plant observations"
+        "Observation.count",
+        "Should not import if there's no iNat obs with a matching id"
       ) do
         post(:authenticate, params: params)
       end
