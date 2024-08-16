@@ -321,8 +321,8 @@ module Observations
       mock_search_result = File.read("test/inat/#{filename}.txt")
       inat_import_ids = "123"
 
-      simulate_authorization(user: user, inat_import_ids: inat_import_ids)
       stub_inat_api_request(inat_import_ids, mock_search_result)
+      simulate_authorization(user: user, inat_import_ids: inat_import_ids)
       stub_access_token_request
       stub_jwt_request
 
