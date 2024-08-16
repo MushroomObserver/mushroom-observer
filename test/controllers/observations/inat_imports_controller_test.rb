@@ -111,6 +111,7 @@ module Observations
       inat_authorization_callback_params = { code: "MockCode" }
 
       stub_access_token_request
+      stub_jwt_request
       login(user.login)
       get(:authenticate, params: inat_authorization_callback_params)
 
@@ -300,6 +301,7 @@ module Observations
       stub_inat_api_request(inat_import_ids, mock_search_result)
       simulate_authorization(user: user, inat_import_ids: inat_import_ids)
       stub_access_token_request
+      stub_jwt_request
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
       login(user.login)
@@ -322,6 +324,7 @@ module Observations
       stub_inat_api_request(inat_import_ids, mock_search_result)
       simulate_authorization(user: user, inat_import_ids: inat_import_ids)
       stub_access_token_request
+      stub_jwt_request
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
       login(user.login)
@@ -419,6 +422,7 @@ module Observations
       stub_access_token_request
       stub_inat_api_request(inat_import_ids, mock_search_result,
                             inat_user_login: inat_obs.inat_user_login)
+      stub_jwt_request
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
       login(user.login)
@@ -437,23 +441,25 @@ module Observations
 
     def stub_inat_api_request(inat_obs_ids, mock_inat_response, id_above: 0,
                               inat_user_login: nil)
-      # mirror param order of iNat example/test page
-      # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
-      # for convenience in creating mock responses from that page
-      params = <<~PARAMS.delete("\n")
-        ?id=#{inat_obs_ids}
-        &user_login=#{inat_user_login}
-        &iconic_taxa=#{Observations::InatImportsController::ICONIC_TAXA}
+      # params must be in same order as in the controller
+      # omit trailing "=" since the controller omits it (via `merge`)
+      params = <<~PARAMS.delete("\n").chomp("=")
+        ?iconic_taxa=#{Observations::InatImportsController::ICONIC_TAXA}
+        &id=#{inat_obs_ids}
         &id_above=#{id_above}
         &per_page=200
-        &order=asc&order_by=id
         &only_id=false
+        &order=asc&order_by=id
+        &user_login=#{inat_user_login}
       PARAMS
-
-      WebMock.stub_request(
-        :get,
-        "#{INAT_OBS_REQUEST_PREFIX}#{params}"
-      ).to_return(body: mock_inat_response)
+      stub_request(:get, "#{INAT_OBS_REQUEST_PREFIX}#{params}").
+        with(headers:
+        { "Accept" => "application/json",
+          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Authorization" => "Bearer",
+          "Host" => "api.inaturalist.org",
+          "User-Agent" => "rest-client/2.1.0 (darwin23 x86_64) ruby/3.3.0p0" }).
+        to_return(body: mock_inat_response)
     end
 
     def mock_photo_importer(inat_obs)
@@ -526,6 +532,21 @@ module Observations
         ).
         to_return(status: 200,
                   body: { access_token: "MockAccessToken" }.to_json,
+                  headers: {})
+    end
+
+    def stub_jwt_request
+      stub_request(:get, "https://www.inaturalist.org/users/api_token").
+        with(
+          headers: {
+            "Accept" => "application/json",
+            "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+            "Authorization" => "Bearer MockAccessToken",
+            "Host" => "www.inaturalist.org"
+          }
+        ).
+        to_return(status: 200,
+                  body: { access_token: "MockJWT" }.to_json,
                   headers: {})
     end
 
