@@ -39,31 +39,43 @@ module PanelHelper
     return "" unless args[:heading]
 
     tag.div(class: "panel-heading") do
-      tag.h4(class: "panel-title") do
-        els = [args[:heading]]
-        if args[:heading_links].present?
-          els << tag.span(args[:heading_links], class: "float-right")
-        elsif args[:collapse].present?
-          els << tag.span(panel_collapse_trigger(args), class: "float-right")
-        end
-        els.safe_join
+      if args[:collapse].present?
+        panel_heading_collapse_elements(args)
+      else
+        panel_heading_elements(args)
       end
     end
   end
 
-  # The caret icon that toggles the panel collapse.
+  def panel_heading_elements(args)
+    els = [args[:heading]]
+    if args[:heading_links].present?
+      els << tag.span(args[:heading_links], class: "float-right")
+    end
+
+    tag.h4(class: "panel-title") { els.safe_join }
+  end
+
+  # The whole heading is a link that toggles the panel collapse.
   # NOTE: args[:open] should be a boolean
-  def panel_collapse_trigger(args)
-    icon_link_to(
-      :OPEN.l,
-      "##{args[:collapse]}",
-      icon: :chevron_down,
-      active_icon: :chevron_up,
-      active_content: :CLOSE.l,
-      class: "panel-collapse-trigger",
-      role: "button", data: { toggle: "collapse" },
-      aria: { expanded: args[:open], controls: args }
-    )
+  def panel_heading_collapse_elements(args)
+    tag.h4(class: "panel-title") do
+      link_to(
+        "##{args[:collapse]}",
+        class: "panel-collapse-trigger",
+        role: "button", data: { toggle: "collapse" },
+        aria: { expanded: args[:open], controls: args[:collapse] }
+      ) do
+        [args[:heading],
+         tag.span(panel_collapse_icons, class: "float-right")].safe_join
+      end
+    end
+  end
+
+  # The caret icon that indicates toggling the panel open/collapsed.
+  def panel_collapse_icons
+    [link_icon(:chevron_down, title: :OPEN.l, class: "active-icon"),
+     link_icon(:chevron_up, title: :CLOSE.l)].safe_join
   end
 
   def panel_body(args, content)
