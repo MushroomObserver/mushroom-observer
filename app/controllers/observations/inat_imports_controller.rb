@@ -38,11 +38,11 @@ module Observations
       return designation_required unless imports_designated?
       return consent_required if params[:consent] == "0"
 
-      inat_import = InatImport.find_or_create_by(user: User.current)
-      inat_import.update(state: "Authorizing",
-                         import_all: params[:all],
-                         inat_ids: params[:inat_ids],
-                         inat_username: params[:inat_username])
+      @inat_import = InatImport.find_or_create_by(user: User.current)
+      @inat_import.update(state: "Authorizing",
+                          import_all: params[:all],
+                          inat_ids: params[:inat_ids],
+                          inat_username: params[:inat_username])
 
       request_inat_user_authorization
     end
@@ -107,10 +107,10 @@ module Observations
       auth_code = params[:code]
       return not_authorized if auth_code.blank?
 
-      inat_import = InatImport.find_or_create_by(user: User.current)
-      inat_import.update(state: "Authenticating")
+      @inat_import = InatImport.find_or_create_by(user: User.current)
+      @inat_import.update(state: "Authenticating")
 
-      # exchange code received from iNat for an access token
+      # exchange code received from iNat for an oAuth `access_token`
       payload = {
         client_id: APP_ID,
         client_secret: Rails.application.credentials.inat.secret,
@@ -118,12 +118,24 @@ module Observations
         redirect_uri: REDIRECT_URI,
         grant_type: "authorization_code"
       }
-      response = RestClient.post("#{SITE}/oauth/token", payload)
-      inat_import.update(token: response.body, state: "Importing")
+      oauth_response = RestClient.post("#{SITE}/oauth/token", payload)
+      # The actual token is in the field ["access_token"].
+      access_token = JSON.parse(oauth_response.body)["access_token"]
 
-      import_requested_observations(inat_import)
+      # Use the `access_token` to request a `jwt`, right away.
+      jwt_response = RestClient::Request.execute(
+        method: :get, url: "https://www.inaturalist.org/users/api_token",
+        headers: { authorization: "Bearer #{access_token}", accept: :json }
+      )
+      api_token = JSON.parse(jwt_response)["api_token"]
 
-      inat_import.update(state: "Done")
+      # Now that we've got the right token, we can make authenticated requests
+      # to iNat that get the real real private data.
+      @inat_import.update(token: api_token, state: "Importing")
+
+      import_requested_observations
+
+      @inat_import.update(state: "Done")
       redirect_to(observations_path)
     end
 
@@ -136,16 +148,17 @@ module Observations
       redirect_to(observations_path)
     end
 
-    def import_requested_observations(inat_import)
-      inat_ids = inat_id_list(inat_import)
-      return if inat_import[:import_all].blank? && inat_ids.blank?
+    def import_requested_observations
+      inat_ids = inat_id_list
+      return if @inat_import[:import_all].blank? && inat_ids.blank?
 
       last_import_id = 0
       loop do
         page =
+          # make an iNat API search observations request
           inat_search_observations(
-            ids: inat_ids, id_above: last_import_id,
-            user_login: inat_import.inat_username
+            id: inat_ids, id_above: last_import_id,
+            user_login: @inat_import.inat_username
           )
         break if page_empty?(page)
 
@@ -167,21 +180,36 @@ module Observations
         parsed_page["page"] * parsed_page["per_page"]
     end
 
-    def inat_id_list(inat_import)
-      inat_import.inat_ids.delete(" ")
+    def inat_id_list
+      @inat_import.inat_ids.delete(" ")
     end
 
     # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
-    def inat_search_observations(ids: nil, id_above: nil, only_id: false,
-                                 per_page: 200, sort: "order=asc&order_by=id",
-                                 # prevents user from importing others' obss
-                                 user_login: nil)
-      operation =
-        "/observations?id=#{ids}&id_above=#{id_above}&only_id=#{only_id}" \
-        "&per_page=#{per_page}&#{sort}&user_login=#{user_login}" \
-        "&iconic_taxa=Fungi,Protozoa"
-      ::Inat.new(operation: operation, token: inat_import.token).body
+    # https://stackoverflow.com/a/11251654/3357635
+    # Note that the `ids` parameter may be a comma-separated list of iNat obs
+    # ids - that needs to be URL encoded to a string when passed as an arg here
+    # because URI.encode_www_form deals with arrays by passing the same key
+    # multiple times.
+    def inat_search_observations(**args)
+      query_args = {
+        id: nil, id_above: nil, only_id: false, per_page: 200,
+        order: "asc", order_by: "id",
+        # prevents user from importing others' obss
+        user_login: nil, iconic_taxa: ICONIC_TAXA
+      }.merge(args)
+
+      query = URI.encode_www_form(query_args)
+      # ::Inat.new(operation: query, token: @inat_import.token).body
+
+      # Nimmo 2024-06-19 jdc. Moving the request from the inat class to here.
+      # RestClient::Request.execute wasn't available in the class
+      headers = { authorization: "Bearer #{@inat_import.token}", accept: :json }
+      @inat = RestClient::Request.execute(
+        method: :get, url: "#{API_BASE}/observations?#{query}", headers: headers
+      )
     end
+
+    API_BASE = "https://api.inaturalist.org/v1"
 
     def import_page(page)
       JSON.parse(page)["results"].each do |result|
@@ -222,9 +250,9 @@ module Observations
       # update_field_slip(@observation, params[:field_code])
     end
 
-    def inat_import
-      InatImport.find_by(user: User.current)
-    end
+    # def find_inat_import
+    #   InatImport.find_by(user: User.current)
+    # end
 
     def not_importable(inat_obs)
       return if inat_obs.taxon_importable?

@@ -110,7 +110,8 @@ module Observations
       inat_import.save
       inat_authorization_callback_params = { code: "MockCode" }
 
-      stub_token_request
+      stub_access_token_request
+      stub_jwt_request
       login(user.login)
       get(:authenticate, params: inat_authorization_callback_params)
 
@@ -299,7 +300,8 @@ module Observations
 
       stub_inat_api_request(inat_import_ids, mock_search_result)
       simulate_authorization(user: user, inat_import_ids: inat_import_ids)
-      stub_token_request
+      stub_access_token_request
+      stub_jwt_request
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
       login(user.login)
@@ -321,13 +323,15 @@ module Observations
 
       stub_inat_api_request(inat_import_ids, mock_search_result)
       simulate_authorization(user: user, inat_import_ids: inat_import_ids)
-      stub_token_request
+      stub_access_token_request
+      stub_jwt_request
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
       login(user.login)
 
       assert_no_difference(
-        "Observation.count", "Should not import iNat Plant observations"
+        "Observation.count",
+        "Should not import if there's no iNat obs with a matching id"
       ) do
         post(:authenticate, params: params)
       end
@@ -351,7 +355,7 @@ module Observations
       assert_equal(231_104_466, json["results"].second["id"])
 
       simulate_authorization(user: user, inat_import_ids: inat_import_ids)
-      stub_token_request
+      stub_access_token_request
       stub_inat_api_request(inat_import_ids, mock_inat_response)
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
@@ -379,7 +383,7 @@ module Observations
 
       simulate_authorization(user: user, inat_import_ids: inat_import_ids,
                              import_all: true)
-      stub_token_request
+      stub_access_token_request
       stub_inat_api_request(inat_import_ids, mock_search_result)
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
@@ -416,9 +420,10 @@ module Observations
       simulate_authorization(user: user,
                              inat_username: inat_obs.inat_user_login,
                              inat_import_ids: inat_import_ids)
-      stub_token_request
+      stub_access_token_request
       stub_inat_api_request(inat_import_ids, mock_search_result,
                             inat_user_login: inat_obs.inat_user_login)
+      stub_jwt_request
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
       login(user.login)
@@ -437,23 +442,24 @@ module Observations
 
     def stub_inat_api_request(inat_obs_ids, mock_inat_response, id_above: 0,
                               inat_user_login: nil)
-      # mirror param order of iNat example/test page
-      # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
-      # for convenience in creating mock responses from that page
-      params = <<~PARAMS.delete("\n")
-        ?id=#{inat_obs_ids}
-        &user_login=#{inat_user_login}
-        &iconic_taxa=#{Observations::InatImportsController::ICONIC_TAXA}
+      # params must be in same order as in the controller
+      # omit trailing "=" since the controller omits it (via `merge`)
+      params = <<~PARAMS.delete("\n").chomp("=")
+        ?iconic_taxa=#{Observations::InatImportsController::ICONIC_TAXA}
+        &id=#{inat_obs_ids}
         &id_above=#{id_above}
         &per_page=200
-        &order=asc&order_by=id
         &only_id=false
+        &order=asc&order_by=id
+        &user_login=#{inat_user_login}
       PARAMS
-
-      WebMock.stub_request(
-        :get,
-        "#{INAT_OBS_REQUEST_PREFIX}#{params}"
-      ).to_return(body: mock_inat_response)
+      stub_request(:get, "#{INAT_OBS_REQUEST_PREFIX}#{params}").
+        with(headers:
+        { "Accept" => "application/json",
+          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Authorization" => "Bearer",
+          "Host" => "api.inaturalist.org" }).
+        to_return(body: mock_inat_response)
     end
 
     def mock_photo_importer(inat_obs)
@@ -515,7 +521,7 @@ module Observations
 
     # stub exchanging iNat code for oauth token
     # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
-    def stub_token_request
+    def stub_access_token_request
       stub_request(:post, "https://www.inaturalist.org/oauth/token").
         with(
           body: { "client_id" => Rails.application.credentials.inat.id,
@@ -524,7 +530,24 @@ module Observations
                   "grant_type" => "authorization_code",
                   "redirect_uri" => REDIRECT_URI }
         ).
-        to_return(status: 200, body: "MockToken", headers: {})
+        to_return(status: 200,
+                  body: { access_token: "MockAccessToken" }.to_json,
+                  headers: {})
+    end
+
+    def stub_jwt_request
+      stub_request(:get, "https://www.inaturalist.org/users/api_token").
+        with(
+          headers: {
+            "Accept" => "application/json",
+            "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+            "Authorization" => "Bearer MockAccessToken",
+            "Host" => "www.inaturalist.org"
+          }
+        ).
+        to_return(status: 200,
+                  body: { access_token: "MockJWT" }.to_json,
+                  headers: {})
     end
 
     def result_without_photos(mock_search_result)
