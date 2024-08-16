@@ -1,14 +1,14 @@
 <%# locals: (img_id: "", lat: "", lng: "", alt: "", date: "", file_name: "", file_size: "") -%>
 <%
-if lat.present?
-  geolocation = [
+# on new form, lat will not be present until form-exif reads it from the image
+gps = tag.span(class: "exif_gps") do
+  [
     tag.strong("#{:LAT.l}: ") + tag.span(lat, class: "exif_lat"),
     tag.strong("#{:LNG.l}: ") + tag.span(lng, class: "exif_lng"),
     tag.strong("#{:ALT.l}: ") + tag.span(alt, class: "exif_alt") + " m"
   ].safe_join(", ")
-else
-  geolocation = tag.span("#{:image_no_geolocation.l}")
 end
+no_gps = tag.span("#{:image_no_geolocation.l}", class: "exif_no_gps d-none")
 %>
 
 <%=
@@ -21,7 +21,7 @@ tag.div(class: "well well-sm position-relative", id: "camera_info_#{img_id}") do
           [tag.strong("#{:DATE.l}: "), # :form_images_camera_date.t
            carousel_exif_to_image_date_button(date: date)].safe_join
         end,
-        tag.div(geolocation),
+        tag.div { [gps, no_gps].safe_join },
         carousel_transfer_exif_button(has_exif: date.present? || lat.present?)
       ].safe_join
     end,
