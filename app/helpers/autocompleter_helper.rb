@@ -21,15 +21,19 @@ module AutocompleterHelper
       data: { autocompleter_target: "input" }
     }.deep_merge(args.except(*autocompleter_outer_args))
     ac_args[:class] = class_names("dropdown", args[:class])
-    ac_args[:wrap_data] = autocompleter_wrap_data(args)
+    # doing our own wrap here, because dropdown is position-absolute
+    ac_args[:wrap_data] = { autocompleter_target: "wrap"}
     ac_args[:label_after] = autocompleter_label_after(args)
     ac_args[:label_end] = autocompleter_label_end(args)
-    ac_args[:append] = autocompleter_append(args)
+    ac_args[:append] = autocompleter_dropdown
 
-    if args[:textarea] == true
-      text_area_with_label(**ac_args)
-    else
-      text_field_with_label(**ac_args)
+    tag.div(data: autocompleter_wrap_data(args)) do
+      if args[:textarea] == true
+        concat(text_area_with_label(**ac_args))
+      else
+        concat(text_field_with_label(**ac_args))
+      end
+      concat(args[:append])
     end
   end
 
@@ -37,7 +41,7 @@ module AutocompleterHelper
   def autocompleter_outer_args
     [:wrap_data, :type, :separator, :textarea, :hidden_value, :hidden_data,
      :create_text, :keep_text, :edit_text, :find_text, :create, :create_path,
-     :map_outlet, :geocode_outlet]
+     :map_outlet, :geocode_outlet].freeze
   end
 
   def autocompleter_wrap_data(args)
@@ -45,8 +49,7 @@ module AutocompleterHelper
       controller: :autocompleter, type: args[:type],
       separator: args[:separator],
       autocompleter_map_outlet: args[:map_outlet],
-      autocompleter_geocode_outlet: args[:geocode_outlet],
-      autocompleter_target: "wrap"
+      autocompleter_geocode_outlet: args[:geocode_outlet]
     }.deep_merge(args[:wrap_data] || {})
   end
 
@@ -65,13 +68,6 @@ module AutocompleterHelper
     capture do
       concat(autocompleter_create_button(args))
       concat(autocompleter_modal_create_link(args))
-    end
-  end
-
-  def autocompleter_append(args)
-    capture do
-      concat(autocompleter_dropdown)
-      concat(args[:append])
     end
   end
 

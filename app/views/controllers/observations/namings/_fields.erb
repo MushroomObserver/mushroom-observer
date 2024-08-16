@@ -20,25 +20,18 @@ menu = unless @vote&.value&.nonzero?
        end
 confidences = options_for_select(menu, @vote&.value)
 select_opts = { include_blank: create }
-feedback = if @given_name.present?
-             tag.div do
-               render(partial: "shared/form_name_feedback",
-                      locals: feedback_locals)
-             end
-           else
-             ""
-           end
 %>
 
-<%=
-[
-  feedback,
-  fields_for(:naming) do |f_n|
+<% if @given_name.present? %>
+  <%= tag.div do
+        render(partial: "shared/form_name_feedback", locals: feedback_locals)
+      end %>
+<% end %>
+
+<%= fields_for(:naming) do |f_n| %>
+  <% vote_reasons = tag.div(data: { autocompleter_target: "collapseFields" },
+                            class: "d-none") do
     [
-      autocompleter_field(
-        form: f_n, field: :name, type: :name, label: "#{:WHAT.t}:",
-        value: @given_name, autofocus: focus_on_name, help: name_help
-      ),
       f_n.fields_for(:vote) do |f_v|
         select_with_label(form: f_v, field: :value,
                           options: confidences, select_opts: select_opts,
@@ -49,7 +42,12 @@ feedback = if @given_name.present?
         naming_form_reasons_fields(f_r, @reasons)
       end
     ].safe_join
-  end,
-  hidden_field_tag(:context, context)
-].compact.safe_join
-%>
+  end %>
+  <%= autocompleter_field(
+    form: f_n, field: :name, type: :name, label: "#{:WHAT.t}:",
+    value: @given_name, autofocus: focus_on_name, help: name_help,
+    append: vote_reasons
+  ) %>
+<% end %>
+
+<%= hidden_field_tag(:context, context) %>

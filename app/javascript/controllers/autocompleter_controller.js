@@ -149,7 +149,7 @@ export default class extends Controller {
   // The select target is not the <input> element, but a <select> that can
   // swap out the autocompleter type. The <input> element is its target.
   static targets = ["input", "select", "pulldown", "list", "hidden", "wrap",
-    "createBtn", "hasIdIndicator", "keepBtn", "mapWrap"]
+    "createBtn", "hasIdIndicator", "keepBtn", "mapWrap", "collapseFields"]
   static outlets = ["map"]
 
   initialize() {
@@ -174,7 +174,7 @@ export default class extends Controller {
   }
 
   connect() {
-    this.element.dataset.stimulus = "connected";
+    this.element.dataset.stimulus = "autocompleter-connected";
 
     // Figure out a few browser-dependent dimensions.
     this.getScrollBarWidth;
@@ -1008,12 +1008,14 @@ export default class extends Controller {
     if (hidden_id && hidden_id !== NaN && hidden_id != 0) {
       this.wrapTarget.classList.add('has-id');
       this.wrapTarget.classList.remove('offer-create');
+      this.cssUncollapseFields()
     } else {
       this.wrapTarget.classList.remove('has-id');
       if (this.inputTarget.value &&
         !this.wrapTarget.classList.contains('create')) {
         this.wrapTarget.classList.add('offer-create');
       }
+      this.cssCollapseFields()
     }
     // On forms where a map may not be relevant, we also show/hide the map.
     // Only show if we're in "create" mode.
@@ -1024,6 +1026,18 @@ export default class extends Controller {
         this.mapWrapTarget.classList.add('d-none');
       }
     }
+  }
+
+  cssCollapseFields() {
+    if (!this.hasCollapseFieldsTarget) return;
+
+    this.collapseFieldsTarget.classList.add('d-none');
+  }
+
+  cssUncollapseFields() {
+    if (!this.hasCollapseFieldsTarget) return;
+
+    this.collapseFieldsTarget.classList.remove('d-none');
   }
 
   storeCurrentHiddenData() {
