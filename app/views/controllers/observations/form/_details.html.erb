@@ -77,7 +77,8 @@ t_s = {
                   action: "change->checkbox-collapse#hideShowFields" }
         ) %>
 
-        <%= tag.div(class: "hidden",
+        <%= tag.div(id: "observation_geolocation",
+                    style: ("display: none;" unless @observation.lat),
                     data: { checkbox_collapse_target: "fields" }) do %>
 
           <%= tag.p(:form_observations_click_point.l) %>
@@ -121,8 +122,7 @@ t_s = {
     <% end %><!--.col-->
 
     <!-- MAP -->
-    <%= tag.div(class: "col-xs-12 col-md-6",
-                id: "observation_geolocation") do %>
+    <%= tag.div(class: "col-xs-12 col-md-6") do %>
       <%= render(
             partial: "shared/form_location_map",
             locals: { id: "observation_form_map", map_type: "observation" }

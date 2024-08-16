@@ -6,12 +6,6 @@ export default class extends Controller {
 
   connect() {
     this.element.dataset.stimulus = "checkbox-collapse-connected";
-
-    this.showPref = this.element.dataset.userPref
-    if (this.hasFieldsTarget && this.showPref) {
-      this.fieldsTarget.style.display = "none"
-      this.fieldsTarget.classList.remove("hidden")
-    }
   }
 
   // Only show if user prefers

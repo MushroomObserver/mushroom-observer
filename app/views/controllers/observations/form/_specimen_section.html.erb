@@ -4,8 +4,7 @@
 herbarium_record. Fields hidden unless box checked. %>
 
 <%= tag.div(id: "observation_specimen_section",
-            data: { controller: "checkbox-collapse",
-                    user_pref: (!@user.try(&:hide_specimen_stuff?)) }) do %>
+            data: { controller: "checkbox-collapse" }) do %>
 
   <%= tag.div(class: "mt-3") do %>
     <%= check_box_with_label(
@@ -27,7 +26,7 @@ herbarium_record. Fields hidden unless box checked. %>
   <% if action == :create %>
     <!-- specimen_fields -->
     <%= tag.div(id: "specimen_fields",
-                class: ("hidden" if !@observation.specimen),
+                style: ("display: none;" unless @observation.specimen),
                 data: { checkbox_collapse_target: "fields" }) do %>
       <%= render(partial: "observations/form/specimen/collection_number") %>
       <%= render(partial: "observations/form/specimen/herbarium_record") %>
