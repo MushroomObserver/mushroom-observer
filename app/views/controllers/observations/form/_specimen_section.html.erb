@@ -4,16 +4,16 @@
 herbarium_record. Fields hidden unless box checked. %>
 
 <%= tag.div(id: "observation_specimen_section",
-            data: { controller: "specimen",
-                    user_pref: (!@user.try(&:hide_specimen_stuff?)) }) do %>
+            data: { controller: "checkbox-collapse",
+                    checked: (!@user.try(&:hide_specimen_stuff?)) }) do %>
 
   <%= tag.div(class: "mt-3") do %>
     <%= check_box_with_label(
       form: f, field: :specimen,
       label: :form_observations_specimen_available.t,
       help: :form_observations_specimen_available_help.t,
-      data: { specimen_target: "checkbox",
-              action: "change->specimen#hideShowFields" }
+      data: { checkbox_collapse_target: "checkbox",
+              action: "change->checkbox-collapse#hideShowFields" }
     ) %>
     <!-- no_specimen_fields -->
     <% if action == :update %>
@@ -28,7 +28,7 @@ herbarium_record. Fields hidden unless box checked. %>
     <!-- specimen_fields -->
     <%= tag.div(id: "specimen_fields",
                 class: ("hidden" if !@observation.specimen),
-                data: { specimen_target: "fields" }) do %>
+                data: { checkbox_collapse_target: "fields" }) do %>
       <%= render(partial: "observations/form/specimen/collection_number") %>
       <%= render(partial: "observations/form/specimen/herbarium_record") %>
     <% end %>

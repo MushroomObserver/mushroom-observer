@@ -1,5 +1,5 @@
-<%# locals: (action:) -%>
 <%
+# Declaring permitted locals in a magic comment doesn't work here (?)
 create = (action == :create)
 method = create ? :post : :patch
 button_name = create ? :CREATE.l : :SAVE_EDITS.l
@@ -12,6 +12,8 @@ naming_locals = {
   unfocused:    true,
   name_help:    :form_naming_name_help_leave_blank.t
 }
+show_notes = @observation.notes.present?
+notes_fields = @observation.form_notes_parts(@user)
 show_projects = @projects.any? || @error_checked_projects.any? ||
                 @suspect_checked_projects.any?
 show_lists = @lists.any?
@@ -35,6 +37,7 @@ form_element_data = {
   map_open: false,
   form_exif_autocompleter_outlet: "#observation_location_autocompleter",
   form_exif_map_outlet: "#observation_form",
+  form_exif_checkbox_collapse_outlet: "#observation_details",
   action: "map:reenableBtns@window->form-exif#reenableButtons",
   upload_max_size: max_size,
   localization: image_upload_localization,
@@ -92,10 +95,10 @@ form_element_data = {
     heading: :NOTES.l,
     id: "observation_notes",
     collapse: "observation_notes_inner",
-    open: false
+    open: notes_fields.length > 1
   ) do
     render(partial: "shared/notes_fields",
-           locals: { form: f, fields: @observation.form_notes_parts(@user) })
+           locals: { form: f, fields: notes_fields })
   end %>
 
   <% if show_projects %>
@@ -103,7 +106,7 @@ form_element_data = {
       heading: :PROJECTS.l,
       id: "observation_projects",
       collapse: "observation_projects_inner",
-      open: false
+      open: @project_checks.any?
     ) do
       render(partial: "observations/form/projects", locals: { button_name: })
     end %>
@@ -114,7 +117,7 @@ form_element_data = {
       heading: :SPECIES_LISTS.l,
       id: "observation_lists",
       collapse: "observation_lists_inner",
-      open: false
+      open: @list_checks.any?
     ) do
       render(partial: "observations/form/species_lists")
     end %>

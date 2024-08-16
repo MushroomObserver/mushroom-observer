@@ -10,7 +10,8 @@ t_s = {
 }
 %>
 
-<%= tag.div(class: "panel-body border-top", id: "observation_details") do %>
+<%= tag.div(class: "panel-body border-top", id: "observation_details",
+            data: { controller: "checkbox-collapse" }) do %>
 
   <%= tag.div(class: "row mt-3") do %>
     <%= tag.div(class: "col-xs-12 col-md-6") do %>
@@ -54,6 +55,10 @@ t_s = {
           }
         ) %>
 
+        <%= render(partial: "locations/form/bounds_hidden_fields",
+                   locals: { location: @location, target_controller: :map }) %>
+        <!-- /WHERE -->
+
         <!-- IS_COLLECTION_LOCATION -->
         <%= check_box_with_label(
           form: f, field: :is_collection_location,
@@ -63,40 +68,46 @@ t_s = {
         ) %>
         <!-- /IS_COLLECTION_LOCATION -->
 
-        <%= render(partial: "locations/form/bounds_hidden_fields",
-                   locals: { location: @location, target_controller: :map }) %>
-        <!-- /WHERE -->
-
         <!-- LAT_LONG_ALT -->
-        <%= tag.p do
-          [tag.strong("#{:GEOLOCATION.l}:"),
-           collapse_info_trigger("geolocation_help")].safe_join(" ")
-        end %>
-
-        <%= tag.div(class: "row no-gutters",
-                    id: "observation_lat_lng_alt") do %>
-          <% [:lat, :lng, :alt].each do |key| %>
-            <%= tag.div(class: "col-xs-4") do
-              text_field_with_label(
-                form: f, field: key, class: "mb-0", addon: t_s[key][:addon],
-                label: [
-                  tag.span("#{t_s[key][:full]}:", class: "d-none d-sm-inline"),
-                  tag.span("#{t_s[key][:abbr]}:", class: "d-inline d-sm-none")
-                ].safe_join,
-                data: { map_target: "#{key}Input", action: "map#bufferInputs" }
-              )
-            end %>
-          <% end %>
-        <% end %>
-
         <%= check_box_with_label(
-          form: f, field: :gps_hidden, label: :form_observations_gps_hidden.l,
-          class: "ml-5 mb-5"
+          form: f, field: :has_geolocation, # field is ignored
+          label: "#{:GEOLOCATION.l}:",
+          help: :form_observations_lat_long_help.t,
+          data: { checkbox_collapse_target: "checkbox",
+                  action: "change->checkbox-collapse#hideShowFields" }
         ) %>
 
-        <%= collapse_help_block(nil, id: "geolocation_help") do %>
+        <%= tag.div(class: "hidden",
+                    data: { checkbox_collapse_target: "fields" }) do %>
+
           <%= tag.p(:form_observations_click_point.l) %>
-          <%= tag.p(:form_observations_lat_long_help.t) %>
+
+          <%= tag.div(class: "row no-gutters",
+                      id: "observation_lat_lng_alt") do %>
+            <% [:lat, :lng, :alt].each do |key| %>
+              <%= tag.div(class: "col-xs-4") do
+                text_field_with_label(
+                  form: f, field: key, class: "mb-0", addon: t_s[key][:addon],
+                  label: [
+                    tag.span("#{t_s[key][:full]}:",
+                             class: "d-none d-sm-inline"),
+                    tag.span("#{t_s[key][:abbr]}:",
+                             class: "d-inline d-sm-none")
+                  ].safe_join,
+                  data: { map_target: "#{key}Input",
+                          action: "map#bufferInputs" }
+                )
+              end %>
+            <% end %>
+          <% end %>
+
+          <%= check_box_with_label(
+            form: f, field: :gps_hidden, label: :form_observations_gps_hidden.l,
+            class: "ml-5 mb-5"
+          ) %>
+
+        <%# collapse_help_block(nil, id: "geolocation_help") do %>
+          <%# tag.p(:form_observations_lat_long_help.t) %>
         <% end %>
         <!-- /LAT_LONG_ALT -->
 
