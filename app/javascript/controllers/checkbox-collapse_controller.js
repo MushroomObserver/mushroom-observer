@@ -7,19 +7,19 @@ export default class extends Controller {
   connect() {
     this.element.dataset.stimulus = "checkbox-collapse-connected";
 
-    this.checked = this.element.dataset.checked
-    if (this.hasFieldsTarget && this.checked) {
-      this.hideShowFields()
+    this.showPref = this.element.dataset.userPref
+    if (this.hasFieldsTarget && this.showPref) {
+      this.fieldsTarget.style.display = "none"
+      this.fieldsTarget.classList.remove("hidden")
     }
   }
 
   // Only show if user prefers
   hideShowFields() {
     if (this.checkboxTarget.checked) {
-      this.fieldsTarget.classList.remove("hidden")
-      this.hideFields()
+      $(this.fieldsTarget).show()
     } else {
-      this.showFields()
+      $(this.fieldsTarget).hide()
     }
   }
 
@@ -31,6 +31,7 @@ export default class extends Controller {
   }
 
   showFields() {
+    this.fieldsTarget.classList.remove("hidden")
     $(this.fieldsTarget).show()
     this.checkCheckbox()
   }

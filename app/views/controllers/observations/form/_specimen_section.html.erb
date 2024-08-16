@@ -5,7 +5,7 @@ herbarium_record. Fields hidden unless box checked. %>
 
 <%= tag.div(id: "observation_specimen_section",
             data: { controller: "checkbox-collapse",
-                    checked: (!@user.try(&:hide_specimen_stuff?)) }) do %>
+                    user_pref: (!@user.try(&:hide_specimen_stuff?)) }) do %>
 
   <%= tag.div(class: "mt-3") do %>
     <%= check_box_with_label(
