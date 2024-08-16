@@ -12,7 +12,6 @@ naming_locals = {
   unfocused:    true,
   name_help:    :form_naming_name_help_leave_blank.t
 }
-naming_locals = {} unless create
 show_projects = @projects.any? || @error_checked_projects.any? ||
                 @suspect_checked_projects.any?
 show_lists = @lists.any?
@@ -79,7 +78,7 @@ form_element_data = {
     tag.div(class: "row mt-3") do
       concat(tag.div(class: "col-xs-12 col-md-6") do
         render(partial: "observations/namings/fields", locals: naming_locals)
-      end)
+      end) if create
       concat(tag.div(class: "col-xs-12 col-md-6") do
         render(partial: "observations/form/specimen_section",
                locals: { f:, action: })

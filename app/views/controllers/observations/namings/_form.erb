@@ -26,7 +26,7 @@ end
 
 # `local` true means do not send via Turbo.
 form_args = { model: @naming, url: url, method: method, id: id }
-if local_assigns[:local] == true
+if local
   form_args = form_args.merge({ local: true })
 else
   form_args = form_args.deep_merge({ data: { turbo: true } })
