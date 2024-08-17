@@ -152,10 +152,13 @@ module Observations
       inat_ids = inat_id_list
       return if @inat_import[:import_all].blank? && inat_ids.blank?
 
+      # Get one page at a time, until done with all pages
+      # To get one page, use iNats `per_page` & `id_above` params.
+      # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
       last_import_id = 0
       loop do
         page =
-          # make an iNat API search observations request
+          # get a page of observations with id > id of last imported obs
           inat_search_observations(
             id: inat_ids, id_above: last_import_id,
             user_login: @inat_import.inat_username
@@ -164,8 +167,9 @@ module Observations
 
         import_page(page)
         parsed_page = JSON.parse(page)
+
         last_import_id = parsed_page["results"].last["id"]
-        break if done_with_page?(parsed_page)
+        break if last_page?(parsed_page)
 
         next
       end
@@ -175,7 +179,7 @@ module Observations
       JSON.parse(page)["total_results"].zero?
     end
 
-    def done_with_page?(parsed_page)
+    def last_page?(parsed_page)
       parsed_page["total_results"] <=
         parsed_page["page"] * parsed_page["per_page"]
     end
