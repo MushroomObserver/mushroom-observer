@@ -38,6 +38,54 @@ module Observations
                     "Form needs checkbox requiring consent")
     end
 
+    def test_create_missing_username
+      user = users(:rolf)
+      id = "123"
+      params = { inat_ids: id }
+
+      login(user.login)
+      post(:create, params: params)
+
+      assert_flash_text(:inat_missing_username.l)
+      assert_form_action(action: :create)
+    end
+
+    def test_create_no_observations_designated
+      params = { inat_username: "anything", inat_ids: "",
+                 consent: 1 }
+      login
+      assert_no_difference("Observation.count",
+                           "Imported observation(s) though none designated") do
+        post(:create, params: params)
+      end
+
+      assert_flash_text(:inat_no_imports_designated.l)
+    end
+
+    def test_create_illega_observation_id
+      params = { inat_username: "anything", inat_ids: "123*",
+                 consent: 1 }
+      login
+      assert_no_difference("Observation.count",
+                           "Imported observation(s) though none designated") do
+        post(:create, params: params)
+      end
+
+      assert_flash_text(:runtime_illegal_inat_id.l)
+    end
+
+    def test_create_no_consent
+      params = { inat_username: "anything", inat_ids: 123,
+                 consent: 0 }
+      login
+      assert_no_difference("Observation.count",
+                           "iNat obss imported without consent") do
+        post(:create, params: params)
+      end
+
+      assert_flash_text(:inat_consent_required.l)
+    end
+
     def test_create_authorization_request
       user = users(:rolf)
       inat_username = "rolf"
@@ -62,30 +110,6 @@ module Observations
                    "MO should be awaiting authorization from iNat")
       assert_equal(inat_username, inat_import.inat_username,
                    "Failed to save InatImport.inat_username")
-    end
-
-    def test_create_missing_username
-      user = users(:rolf)
-      id = "123"
-      params = { inat_ids: id }
-
-      login(user.login)
-      post(:create, params: params)
-
-      assert_flash_text(:inat_missing_username.l)
-      assert_form_action(action: :create)
-    end
-
-    def test_create_no_consent
-      params = { inat_username: "anything", inat_ids: 123,
-                 consent: 0 }
-      login
-      assert_no_difference("Observation.count",
-                           "iNat obss imported without consent") do
-        post(:create, params: params)
-      end
-
-      assert_flash_text(:inat_consent_required.l)
     end
 
     def test_import_authorization_denied
