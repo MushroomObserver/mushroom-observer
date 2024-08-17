@@ -43,7 +43,7 @@ export default class extends Controller {
   }
 
   connect() {
-    this.element.dataset.stimulus = "connected";
+    this.element.dataset.stimulus = "name-list-connected";
 
     // These are the div elements for each column.
     this.DIVS = {

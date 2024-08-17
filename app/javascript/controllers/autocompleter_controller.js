@@ -149,7 +149,7 @@ export default class extends Controller {
   // The select target is not the <input> element, but a <select> that can
   // swap out the autocompleter type. The <input> element is its target.
   static targets = ["input", "select", "pulldown", "list", "hidden", "wrap",
-    "createBtn", "hasIdIndicator", "keepBtn", "mapWrap"]
+    "createBtn", "hasIdIndicator", "keepBtn", "mapWrap", "collapseFields"]
   static outlets = ["map"]
 
   initialize() {
@@ -174,7 +174,7 @@ export default class extends Controller {
   }
 
   connect() {
-    this.element.dataset.stimulus = "connected";
+    this.element.dataset.stimulus = "autocompleter-connected";
 
     // Figure out a few browser-dependent dimensions.
     this.getScrollBarWidth;
@@ -479,6 +479,11 @@ export default class extends Controller {
     const old_val = this.old_value;
     const new_val = this.inputTarget.value;
     // this.debug("ourChange(" + this.inputTarget.value + ")");
+    if (new_val.length > 0) {
+      this.cssUncollapseFields();
+    } else {
+      this.cssCollapseFields();
+    }
     if (new_val != old_val) {
       this.old_value = new_val;
       if (do_refresh) {
@@ -1024,6 +1029,18 @@ export default class extends Controller {
         this.mapWrapTarget.classList.add('d-none');
       }
     }
+  }
+
+  cssCollapseFields() {
+    if (!this.hasCollapseFieldsTarget) return;
+
+    $(this.collapseFieldsTarget).collapse('hide');
+  }
+
+  cssUncollapseFields() {
+    if (!this.hasCollapseFieldsTarget) return;
+
+    $(this.collapseFieldsTarget).collapse('show');
   }
 
   storeCurrentHiddenData() {

@@ -2,6 +2,8 @@ import { Controller } from "@hotwired/stimulus"
 
 // Controller deals with naming vote select bindings ** per select. **
 // the controller is on the <form>
+
+// Connects to data-controller="naming-vote"
 export default class extends Controller {
   static targets = ["select", "submit"]
 
@@ -11,7 +13,7 @@ export default class extends Controller {
 
   connect() {
     // console.log("Hello Modal");
-    this.element.dataset.stimulus = "connected";
+    this.element.dataset.stimulus = "naming-vote-connected";
     // The localized text is for the modal progress caption.
     Object.assign(this.localized_text,
       JSON.parse(this.element.dataset.localization));

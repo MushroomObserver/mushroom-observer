@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 // Connects to data-controller="links"
 export default class extends Controller {
   connect() {
-    this.element.dataset.stimulus = "connected";
+    this.element.dataset.stimulus = "links-connected";
   }
 
   disable(e) {

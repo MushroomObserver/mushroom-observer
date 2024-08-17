@@ -22,7 +22,8 @@ on an ancestor element that also contains the inputs
       tag.span(:form_observations_hide_map.l, class: "map-hide mx-2")
     ].safe_join,
     name: "map_toggle", class: "map-toggle",
-    data: { map_target: "toggleMapBtn", action: "map#toggleMap",
+    data: { map_target: "toggleMapBtn",
+            action: "map#toggleMap form-exif#showFields",
             toggle: "collapse", target: "##{id}" },
     aria: { expanded: "false", controls: id }
   ) %>
