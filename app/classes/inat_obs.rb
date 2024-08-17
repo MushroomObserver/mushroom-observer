@@ -14,17 +14,19 @@
 #
 #  obs::                 The iNat observation data
 #  inat_id::
-#  inat_identifications  array of identifications, taxa need not be unique
-#  inat_location::       lat,lon
-#  inat_obs_fields::     array of fields, each field a hash
-#  inat_obs_photos::     array of observation_photos
+#  inat_identifications    array of identifications, taxa need not be unique
+#  inat_location::         lat,lon
+#  inat_obs_fields::       array of fields, each field a hash
+#  inat_obs_photos::       array of observation_photos
 #  inat_place_guess::
+#  inat_private_location:: lat, lon
 #  inat_project_names::
-#  inat_prov_name::      provisional species name
-#  inat_public_positional_accuracy:: accuracy of inat_lation in meters
-#  inat_quality_grade::  casual, needs id, research
-#  inat_tags::           array of tags
-#  inat_taxon_name::     scientific name
+#  inat_prov_name::        provisional species name
+#  inat_positional_accuracy::  accuracy of inat_location in meters
+#  inat_public_positional_accuracy::  blurred accuracy
+#  inat_quality_grade::    casual, needs id, research
+#  inat_tags::             array of tags
+#  inat_taxon_name::       scientific name
 #  inat_user_login
 #
 #  == MO attributes
@@ -63,6 +65,8 @@ class InatObs
     @obs[:identifications]
   end
 
+  # iNat fudges this for obscured observations. Cf. inat_private_location
+  # https://help.inaturalist.org/en/support/solutions/articles/151000169938-what-is-geoprivacy-what-does-it-mean-for-an-observation-to-be-obscured-
   def inat_location
     @obs[:location]
   end
@@ -84,8 +88,8 @@ class InatObs
     @obs[:place_guess]
   end
 
-  def inat_positional_accuracy
-    @obs[:public_positional_accuracy]
+  def inat_private_location
+    @obs[:private_location]
   end
 
   # comma-separated string of names of projects to which obs belongs
@@ -122,14 +126,26 @@ class InatObs
     prov_name_field[:value]
   end
 
+  # unblurred accuracy. Cf. inat_public_positional_accuracy
+  # https://help.inaturalist.org/en/support/solutions/articles/151000169938-what-is-geoprivacy-what-does-it-mean-for-an-observation-to-be-obscured-
+  def inat_positional_accuracy
+    @obs[:public_positional_accuracy]
+  end
+
+  # For testing. It's often much easier to modify an existing mock obs
+  # than to create a new one.
   def inat_positional_accuracy=(accuracy)
     @obs[:positional_accuracy] = accuracy
   end
 
+  # Blurred for obscured observations. Cf. inat_positional_accuracy
+  # https://help.inaturalist.org/en/support/solutions/articles/151000169938-what-is-geoprivacy-what-does-it-mean-for-an-observation-to-be-obscured-
   def inat_public_positional_accuracy
     @obs[:public_positional_accuracy]
   end
 
+  # For testing. It's often much easier to modify an existing mock obs
+  # than to create a new one.
   def inat_public_positional_accuracy=(accuracy)
     @obs[:public_positional_accuracy] = accuracy
   end
@@ -184,38 +200,25 @@ class InatObs
     { Other: description.gsub(%r{</?p>}, "") }
   end
 
-  # min bounding box of (iNat location adjusted for accuracy)
+  # min bounding rectangle of iNat location blurred by public accuracy
   def location
-    accuracy_in_meters = @obs[:public_positional_accuracy] || 0
-
-    accuracy_in_degrees =
-      if @obs[:geoprivacy].present?
-        { lat: accuracy_in_meters / 111_111,
-          lng: accuracy_in_meters / 111_111 * Math.cos(to_rad(lat)) }
-      else
-        # FIXME: This is a gross approximate placeholder
-        # https://www.inaturalist.org/pages/help#geoprivacy
-        { lat: accuracy_in_meters / 111_111,
-          lng: accuracy_in_meters / 111_111 }
-      end
-
-    north = [lat + accuracy_in_degrees[:lat], 90].min
-    south = [lat - accuracy_in_degrees[:lat], -90].max
-    east = ((lng + 180 + accuracy_in_degrees[:lng]) % 360) - 180
-    west = ((lng + 180 - accuracy_in_degrees[:lng]) % 360) - 180
-
-    Location.contains_box(n: north, s: south, e: east, w: west).
+    Location.contains_box(n: blurred_north,
+                          s: blurred_south,
+                          e: blurred_east,
+                          w: blurred_west).
       min_by { |loc| location_box(loc).box_area }
   end
 
-  # :inat_location seems simplest source for lat/lng
-  # But [:geojason] might be possible.
+  # location seems simplest source for lat/lng
+  # But :geojason might be possible.
   def lat
-    inat_location.split(",").first.to_f
+    location = inat_private_location || inat_location
+    location.split(",").first.to_f
   end
 
   def lng
-    inat_location.split(",").second.to_f
+    location = inat_private_location || inat_location
+    location.split(",").second.to_f
   end
 
   def sequences
@@ -274,6 +277,13 @@ class InatObs
 
   ########## Utilities
 
+  def public_accuracy_in_degrees
+    accuracy_in_meters = (inat_public_positional_accuracy || 0).to_f
+
+    { lat: accuracy_in_meters / 111_111,
+      lng: accuracy_in_meters / 111_111 * Math.cos(to_rad(lat)) }
+  end
+
   def importable?
     taxon_importable?
   end
@@ -287,6 +297,22 @@ class InatObs
   private
 
   # ----- location-related
+
+  def blurred_north
+    [lat + public_accuracy_in_degrees[:lat], 90].min
+  end
+
+  def blurred_south
+    [lat - public_accuracy_in_degrees[:lat], -90].max
+  end
+
+  def blurred_east
+    ((lng + public_accuracy_in_degrees[:lng] + 180) % 360) - 180
+  end
+
+  def blurred_west
+    ((lng - public_accuracy_in_degrees[:lng] + 180) % 360) - 180
+  end
 
   def to_rad(degrees)
     degrees * Math::PI / 180.0

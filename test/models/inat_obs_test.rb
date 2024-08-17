@@ -194,7 +194,7 @@ class InatObsTest < UnitTestCase
     assert_equal(:inat_dqa_research.l, mock_observation("somion_unicolor").dqa)
   end
 
-  def test_location
+  def test_public_location
     loc = locations(:albion)
     all_bounding_boxes =
       Location.contains_box(n: loc.north, s: loc.south,
@@ -221,6 +221,55 @@ class InatObsTest < UnitTestCase
     mock_inat_obs.inat_public_positional_accuracy = nil
 
     assert_equal(loc, mock_inat_obs.location)
+  end
+
+  def test_obscured_location
+    mock_inat_obs = mock_observation("distantes")
+
+    Location.create(user: rolf,
+                    name: "Unblurred Location",
+                    north: mock_inat_obs.lat + 0.001,
+                    south: mock_inat_obs.lat - 0.001,
+                    east: mock_inat_obs.lng + 0.001,
+                    west: mock_inat_obs.lng - 0.001)
+
+    blurred_location =
+      Location.create(
+        user: rolf,
+        name: "Blurred Location",
+        north: mock_inat_obs.lat +
+               mock_inat_obs.public_accuracy_in_degrees[:lat],
+        south: mock_inat_obs.lat -
+               mock_inat_obs.public_accuracy_in_degrees[:lat],
+        east: mock_inat_obs.lng +
+              mock_inat_obs.public_accuracy_in_degrees[:lng],
+        west: mock_inat_obs.lng -
+              mock_inat_obs.public_accuracy_in_degrees[:lng]
+      )
+
+    Location.create(
+      user: rolf,
+      name: "Insufficiently Blurred Location",
+      north: mock_inat_obs.lat +
+             mock_inat_obs.public_accuracy_in_degrees[:lat] - 0.001,
+      south: mock_inat_obs.lat -
+             mock_inat_obs.public_accuracy_in_degrees[:lat] + 0.001,
+      east: mock_inat_obs.lng +
+            mock_inat_obs.public_accuracy_in_degrees[:lng] - 0.001,
+      west: mock_inat_obs.lng -
+            mock_inat_obs.public_accuracy_in_degrees[:lng] + 0.001
+    )
+
+    assert_equal(
+      [44.4659, -121.6967], [mock_inat_obs.lat, mock_inat_obs.lng],
+      "Failed to import or use private lat/lng of obscured observation"
+    )
+    assert(mock_inat_obs.gps_hidden,
+           "Obscured observation should have its gps hidden")
+    assert_equal(
+      blurred_location, mock_inat_obs.location,
+      "Location should be blurred by at least Inat public_position_accuracy"
+    )
   end
 
   def test_notes
