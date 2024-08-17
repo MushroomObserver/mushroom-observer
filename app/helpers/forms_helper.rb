@@ -164,7 +164,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     label_opts = field_label_opts(args)
     label_opts[:class] = class_names(label_opts[:class], args[:label_class])
 
-    tag.div(class: wrap_class, data: wrap_data, id: args[:wrap_id]) do
+    tag.div(class: wrap_class, data: wrap_data) do
       concat(text_label_row(args, label_opts))
       if args[:addon].present? # text addon, not interactive
         concat(tag.div(class: "input-group") do

@@ -21,13 +21,14 @@ module AutocompleterHelper
       data: { autocompleter_target: "input" }
     }.deep_merge(args.except(*autocompleter_outer_args))
     ac_args[:class] = class_names("dropdown", args[:class])
-    # doing our own wrap here, because dropdown is position-absolute
-    ac_args[:wrap_data] = { autocompleter_target: "wrap"}
+    # inner form-group wrap, because dropdown is position-absolute
+    ac_args[:wrap_data] = { autocompleter_target: "wrap" }
     ac_args[:label_after] = autocompleter_label_after(args)
     ac_args[:label_end] = autocompleter_label_end(args)
     ac_args[:append] = autocompleter_dropdown
 
-    tag.div(data: autocompleter_wrap_data(args)) do
+    tag.div(id: args[:controller_id],
+            data: autocompleter_controller_data(args)) do
       if args[:textarea] == true
         concat(text_area_with_label(**ac_args))
       else
@@ -39,18 +40,20 @@ module AutocompleterHelper
 
   # Any arg not on this list gets sent to the text field/area.
   def autocompleter_outer_args
-    [:wrap_data, :type, :separator, :textarea, :hidden_value, :hidden_data,
-     :create_text, :keep_text, :edit_text, :find_text, :create, :create_path,
-     :map_outlet, :geocode_outlet].freeze
+    [:controller_data, :controller_id, :type, :separator, :textarea,
+     :hidden_value, :hidden_data, :create_text, :keep_text, :edit_text,
+     :find_text, :create, :create_path, :map_outlet, :geocode_outlet].freeze
   end
 
-  def autocompleter_wrap_data(args)
+  # This data goes on the outer div (controller element), not the input field.
+  def autocompleter_controller_data(args)
     {
-      controller: :autocompleter, type: args[:type],
+      controller: :autocompleter,
+      type: args[:type],
       separator: args[:separator],
       autocompleter_map_outlet: args[:map_outlet],
       autocompleter_geocode_outlet: args[:geocode_outlet]
-    }.deep_merge(args[:wrap_data] || {})
+    }.deep_merge(args[:outer_data] || {})
   end
 
   def autocompleter_label_after(args)
