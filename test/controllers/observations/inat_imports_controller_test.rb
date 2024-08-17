@@ -134,8 +134,7 @@ module Observations
       inat_import.save
       inat_authorization_callback_params = { code: "MockCode" }
 
-      stub_access_token_request
-      stub_jwt_request
+      stub_token_requests
       login(user.login)
       get(:authenticate, params: inat_authorization_callback_params)
 
@@ -322,10 +321,9 @@ module Observations
         JSON.generate(JSON.parse(mock_search_result)["results"].first)
       ).inat_id
 
-      stub_inat_api_request(inat_import_ids, mock_search_result)
-      simulate_authorization(user: user, inat_import_ids: inat_import_ids)
-      stub_access_token_request
-      stub_jwt_request
+      simulate_all_inat_interactions(user: user,
+                                     inat_import_ids: inat_import_ids,
+                                     mock_inat_response: mock_search_result)
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
       login(user.login)
@@ -345,10 +343,10 @@ module Observations
       mock_search_result = File.read("test/inat/#{filename}.txt")
       inat_import_ids = "123"
 
-      stub_inat_api_request(inat_import_ids, mock_search_result)
-      simulate_authorization(user: user, inat_import_ids: inat_import_ids)
-      stub_access_token_request
-      stub_jwt_request
+      simulate_all_inat_interactions(
+        user: user, inat_import_ids: inat_import_ids,
+        mock_inat_response: mock_search_result
+      )
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
       login(user.login)
@@ -378,10 +376,10 @@ module Observations
       assert_equal(195_434_438, json["results"].first["id"])
       assert_equal(231_104_466, json["results"].second["id"])
 
-      simulate_authorization(user: user, inat_import_ids: inat_import_ids)
-      stub_access_token_request
-      stub_jwt_request
-      stub_inat_api_request(inat_import_ids, mock_inat_response)
+      simulate_all_inat_interactions(
+        user: user, inat_import_ids: inat_import_ids,
+        mock_inat_response: mock_inat_response
+      )
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
       login(user.login)
@@ -406,11 +404,11 @@ module Observations
 
       inat_import_ids = ""
 
-      simulate_authorization(user: user, inat_import_ids: inat_import_ids,
-                             import_all: true)
-      stub_access_token_request
-      stub_jwt_request
-      stub_inat_api_request(inat_import_ids, mock_search_result)
+      simulate_all_inat_interactions(
+        user: user, inat_import_ids: inat_import_ids,
+        mock_inat_response: mock_search_result,
+        import_all: true
+      )
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
 
@@ -425,13 +423,7 @@ module Observations
       User.find_by(login: "MO Webmaster")
     end
 
-    # Turn results with many pages into results with one page
-    # By ignoring all pages but the first
-    def limited_to_first_page(mock_search_result)
-      ms_hash = JSON.parse(mock_search_result)
-      ms_hash["total_results"] = ms_hash["results"].length
-      JSON.generate(ms_hash)
-    end
+    ########## Utilities
 
     def import_mock_observation(filename)
       user = users(:rolf)
@@ -443,13 +435,11 @@ module Observations
       )
       inat_import_ids = inat_obs.inat_id
 
-      simulate_authorization(user: user,
-                             inat_username: inat_obs.inat_user_login,
-                             inat_import_ids: inat_import_ids)
-      stub_access_token_request
-      stub_jwt_request
-      stub_inat_api_request(inat_import_ids, mock_search_result,
-                            inat_user_login: inat_obs.inat_user_login)
+      simulate_all_inat_interactions(
+        user: user, inat_username: inat_obs.inat_user_login,
+        inat_import_ids: inat_import_ids,
+        mock_inat_response: mock_search_result
+      )
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
       login(user.login)
@@ -464,6 +454,89 @@ module Observations
       end
 
       Observation.order(created_at: :asc).last
+    end
+
+    def simulate_all_inat_interactions(
+      mock_inat_response:, user: rolf, inat_username: nil, inat_import_ids: "",
+      import_all: false, id_above: 0
+    )
+      simulate_inat_accredications(
+        user: user, inat_username: inat_username,
+        inat_import_ids: inat_import_ids, import_all: import_all
+      )
+      stub_inat_api_request(inat_import_ids, mock_inat_response,
+                            id_above: id_above,
+                            inat_user_login: inat_username)
+    end
+
+    def simulate_inat_accredications(
+      user: rolf, inat_username: nil, inat_import_ids: "", import_all: false
+    )
+      simulate_authorization(
+        user: user, inat_username: inat_username,
+        inat_import_ids: inat_import_ids, import_all: import_all
+      )
+      stub_token_requests
+    end
+
+    def simulate_authorization(
+      user: rolf, inat_username: nil, inat_import_ids: "", import_all: false
+    )
+      inat_import = InatImport.find_or_create_by(user: user)
+      inat_import.import_all = import_all
+      # ignore list of ids if importing all a user's iNat obss
+      inat_import.inat_ids = import_all == true ? "" : inat_import_ids
+      inat_import.state = "Authorizing"
+      inat_import.inat_username = inat_username
+      inat_import.save
+      stub_request(:any, authorization_url)
+    end
+
+    # iNat url where user is sent in order to authorize MO access
+    # to iNat confidential data
+    # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
+    def authorization_url
+      "https://www.inaturalist.org/oauthenticate/authorize?" \
+      "client_id=#{Rails.application.credentials.inat.id}" \
+      "&redirect_uri=#{REDIRECT_URI}" \
+      "&response_type=code"
+    end
+
+    def stub_token_requests
+      stub_oauth_token_request
+      # must trade oauth access token for a JWT in order to use iNat API v1
+      stub_jwt_request
+    end
+
+    # stub exchanging iNat code for oauth token
+    # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
+    def stub_oauth_token_request
+      stub_request(:post, "https://www.inaturalist.org/oauth/token").
+        with(
+          body: { "client_id" => Rails.application.credentials.inat.id,
+                  "client_secret" => Rails.application.credentials.inat.secret,
+                  "code" => "MockCode",
+                  "grant_type" => "authorization_code",
+                  "redirect_uri" => REDIRECT_URI }
+        ).
+        to_return(status: 200,
+                  body: { access_token: "MockAccessToken" }.to_json,
+                  headers: {})
+    end
+
+    def stub_jwt_request
+      stub_request(:get, "https://www.inaturalist.org/users/api_token").
+        with(
+          headers: {
+            "Accept" => "application/json",
+            "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+            "Authorization" => "Bearer MockAccessToken",
+            "Host" => "www.inaturalist.org"
+          }
+        ).
+        to_return(status: 200,
+                  body: { access_token: "MockJWT" }.to_json,
+                  headers: {})
     end
 
     def stub_inat_api_request(inat_obs_ids, mock_inat_response, id_above: 0,
@@ -481,10 +554,10 @@ module Observations
       PARAMS
       stub_request(:get, "#{INAT_OBS_REQUEST_PREFIX}#{params}").
         with(headers:
-        { "Accept" => "application/json",
-          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-          "Authorization" => "Bearer",
-          "Host" => "api.inaturalist.org" }).
+      { "Accept" => "application/json",
+        "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+        "Authorization" => "Bearer",
+        "Host" => "api.inaturalist.org" }).
         to_return(body: mock_inat_response)
     end
 
@@ -522,66 +595,20 @@ module Observations
         mo_license.id
     end
 
-    def simulate_authorization(
-      user: rolf, inat_username: nil, inat_import_ids: "", import_all: false
-    )
-      inat_import = InatImport.find_or_create_by(user: user)
-      inat_import.import_all = import_all
-      # ignore list of ids if importing all a user's iNat obss
-      inat_import.inat_ids = import_all == true ? "" : inat_import_ids
-      inat_import.state = "Authorizing"
-      inat_import.inat_username = inat_username
-      inat_import.save
-      stub_request(:any, authorization_url)
-    end
-
-    # iNat url where user is sent in order to authorize MO access
-    # to iNat confidential data
-    # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
-    def authorization_url
-      "https://www.inaturalist.org/oauthenticate/authorize?" \
-      "client_id=#{Rails.application.credentials.inat.id}" \
-      "&redirect_uri=#{REDIRECT_URI}" \
-      "&response_type=code"
-    end
-
-    # stub exchanging iNat code for oauth token
-    # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
-    def stub_access_token_request
-      stub_request(:post, "https://www.inaturalist.org/oauth/token").
-        with(
-          body: { "client_id" => Rails.application.credentials.inat.id,
-                  "client_secret" => Rails.application.credentials.inat.secret,
-                  "code" => "MockCode",
-                  "grant_type" => "authorization_code",
-                  "redirect_uri" => REDIRECT_URI }
-        ).
-        to_return(status: 200,
-                  body: { access_token: "MockAccessToken" }.to_json,
-                  headers: {})
-    end
-
-    def stub_jwt_request
-      stub_request(:get, "https://www.inaturalist.org/users/api_token").
-        with(
-          headers: {
-            "Accept" => "application/json",
-            "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-            "Authorization" => "Bearer MockAccessToken",
-            "Host" => "www.inaturalist.org"
-          }
-        ).
-        to_return(status: 200,
-                  body: { access_token: "MockJWT" }.to_json,
-                  headers: {})
-    end
-
     def result_without_photos(mock_search_result)
       ms_hash = JSON.parse(mock_search_result)
       ms_hash["results"].each do |result|
         result["observation_photos"] = []
         result["photos"] = []
       end
+      JSON.generate(ms_hash)
+    end
+
+    # Turn results with many pages into results with one page
+    # By ignoring all pages but the first
+    def limited_to_first_page(mock_search_result)
+      ms_hash = JSON.parse(mock_search_result)
+      ms_hash["total_results"] = ms_hash["results"].length
       JSON.generate(ms_hash)
     end
   end
