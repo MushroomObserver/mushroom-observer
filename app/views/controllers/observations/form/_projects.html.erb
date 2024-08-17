@@ -20,7 +20,7 @@ if @suspect_checked_projects.any?
 end
 %>
 
-<%= tag.div(id: "observation_projects") do %>
+<%# tag.div(id: "observation_projects") do %>
   <%= fields_for(:project) do |f_p| %>
 
     <% if error_messages.present? || suspect_messages.present? %>
@@ -71,5 +71,5 @@ end
     <% end %>
 
   <% end %>
-<% end %>
+<%# end %>
 

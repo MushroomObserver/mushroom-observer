@@ -92,14 +92,14 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     wrap_class = form_group_wrap_class(args, "checkbox")
 
     tag.div(class: wrap_class) do
-      args[:form].label(args[:field]) do
+      concat(args[:form].label(args[:field]) do
         concat(args[:form].check_box(args[:field], opts))
         concat(args[:label])
         if args[:between].present?
           concat(tag.div(class: "d-inline-block ml-3") { args[:between] })
         end
-        concat(args[:append]) if args[:append].present?
-      end
+      end)
+      concat(args[:append]) if args[:append].present?
     end
   end
 
@@ -126,14 +126,14 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     wrap_class = form_group_wrap_class(args, "radio")
 
     tag.div(class: wrap_class) do
-      args[:form].label("#{args[:field]}_#{args[:value]}") do
+      concat(args[:form].label("#{args[:field]}_#{args[:value]}") do
         concat(args[:form].radio_button(args[:field], args[:value], opts))
         concat(args[:label])
         if args[:between].present?
           concat(tag.div(class: "d-inline-block ml-3") { args[:between] })
         end
-        concat(args[:append]) if args[:append].present?
-      end
+      end)
+      concat(args[:append]) if args[:append].present?
     end
   end
 
@@ -164,7 +164,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     label_opts = field_label_opts(args)
     label_opts[:class] = class_names(label_opts[:class], args[:label_class])
 
-    tag.div(class: wrap_class, data: wrap_data, id: args[:wrap_id]) do
+    tag.div(class: wrap_class, data: wrap_data) do
       concat(text_label_row(args, label_opts))
       if args[:addon].present? # text addon, not interactive
         concat(tag.div(class: "input-group") do

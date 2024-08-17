@@ -13,7 +13,7 @@ export default class extends Controller {
   static outlets = ["autocompleter"]
 
   connect() {
-    this.element.dataset.stimulus = "connected"
+    this.element.dataset.stimulus = "geocode-connected"
 
     // These private vars are for keeping track of user inputs to a form
     // that should update the form after a timeout.
@@ -45,9 +45,9 @@ export default class extends Controller {
   }
 
   tryToGeocode() {
-    let location
+    const location = this.validateLatLngInputs(false)
 
-    if (location = this.validateLatLngInputs(false) &&
+    if (location &&
       JSON.stringify(location) !== JSON.stringify(this.lastGeocodedLatLng)) {
       this.geocodeLatLng(location)
     }
@@ -75,10 +75,10 @@ export default class extends Controller {
   }
 
   tryToGeolocate() {
-    let address = this.placeInputTarget.value
+    const address = this.placeInputTarget.value
 
-    if (this.ignorePlaceInput === false && address !== ""
-      && address !== this.lastGeolocatedAddress) {
+    if (this.ignorePlaceInput === false &&
+      address !== "" && address !== this.lastGeolocatedAddress) {
       this.geolocatePlaceName(address)
     }
   }
@@ -449,9 +449,9 @@ export default class extends Controller {
 
   // ------------------------------- DEBUGGING ------------------------------
 
-  helpDebug() {
-    debugger
-  }
+  // helpDebug() {
+  //   debugger
+  // }
 
   verbose(str) {
     // console.log(str);

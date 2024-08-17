@@ -15,7 +15,7 @@ export default class extends GeocodeController {
     "autocompleter"]
 
   connect() {
-    this.element.dataset.stimulus = "connected"
+    this.element.dataset.stimulus = "map-connected"
     this.map_type = this.mapDivTarget.dataset.mapType
     this.editable = (this.mapDivTarget.dataset.editable === "true")
     this.opened = this.element.dataset.mapOpen === "true"
@@ -398,11 +398,11 @@ export default class extends GeocodeController {
     let id
     if (this.hasLocationIdTarget && (id = this.locationIdTarget.value)) {
       this.mapLocationIdData()
-      // Only geocode lat/lng if we have no location_id and not ignoring place
     } else if (["location", "hybrid"].includes(this.map_type)) {
+      // Only geocode lat/lng if we have no location_id and not ignoring place
+      // ...and only geolocate placeName if we have no lat/lng
       if (this.ignorePlaceInput !== false) {
         this.tryToGeocode() // multiple possible results
-        // ...and only geolocate placeName if we have no lat/lng
       } else {
         this.tryToGeolocate()
       }
@@ -499,7 +499,7 @@ export default class extends GeocodeController {
   // Action called by the "Open Map" button only.
   // open/close handled by BS collapse
   toggleMap() {
-    // this.verbose("map:toggleMap")
+    this.verbose("map:toggleMap")
     if (this.opened) {
       this.opened = false
       this.controlWrapTarget.classList.remove("map-open")
@@ -627,9 +627,9 @@ export default class extends GeocodeController {
 
   // ------------------------------- DEBUGGING ------------------------------
 
-  helpDebug() {
-    debugger
-  }
+  // helpDebug() {
+  //   debugger
+  // }
 
   verbose(str) {
     // console.log(str);
