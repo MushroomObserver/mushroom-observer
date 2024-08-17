@@ -13,8 +13,8 @@ const internalConfig = {
 // (formerly "observation_images" section of the form)
 // Connects to data-controller="form-exif"
 export default class extends Controller {
-  static targets = ["carousel", "item", "useExifBtn"]
-  static outlets = ["autocompleter", "map", "checkbox-collapse"]
+  static targets = ["carousel", "item", "useExifBtn", "collapseFields"]
+  static outlets = ["autocompleter", "map"]
 
   connect() {
     this.element.dataset.stimulus = "form-exif-connected";
@@ -193,8 +193,13 @@ export default class extends Controller {
     // disables the button, even when called programmatically
     this.selectExifButton(element);
     // show the geolocation fields
-    if (this.hasCheckboxCollapseOutlet) {
-      this.checkboxCollapseOutlet.showFields();
+    this.showFields();
+  }
+
+  // show the geolocation fields
+  showFields() {
+    if (this.hasCollapseFieldsTarget) {
+      $(this.collapseFieldsTarget).collapse('show');
     }
   }
 

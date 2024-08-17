@@ -10,8 +10,7 @@ t_s = {
 }
 %>
 
-<%= tag.div(class: "panel-body border-top", id: "observation_details",
-            data: { controller: "checkbox-collapse" }) do %>
+<%= tag.div(class: "panel-body border-top", id: "observation_details") do %>
 
   <%= tag.div(class: "row mt-3") do %>
     <%= tag.div(class: "col-xs-12 col-md-6") do %>
@@ -73,13 +72,14 @@ t_s = {
           form: f, field: :has_geolocation, # field is ignored
           label: "#{:GEOLOCATION.l}:",
           help: :form_observations_lat_long_help.t,
-          data: { checkbox_collapse_target: "checkbox",
-                  action: "change->checkbox-collapse#hideShowFields" }
+          data: { toggle: "collapse", target: "#observation_geolocation" },
+          aria: { controls: "observation_geolocation",
+                  expanded: @observation.lat }
         ) %>
 
         <%= tag.div(id: "observation_geolocation",
-                    style: ("display: none;" unless @observation.lat),
-                    data: { checkbox_collapse_target: "fields" }) do %>
+                    class: class_names("collapse", ("in" if @observation.lat)),
+                    data: { form_exif_target: "collapseFields" }) do %>
 
           <%= tag.p(:form_observations_click_point.l) %>
 
