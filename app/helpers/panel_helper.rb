@@ -18,8 +18,6 @@ module PanelHelper
       concat(heading)
       if args[:panel_bodies].present?
         concat(panel_bodies(args))
-      elsif args[:formatted_content].present?
-        concat(content)
       elsif args[:collapse].present?
         concat(panel_collapse_body(args, content))
       else
@@ -59,10 +57,12 @@ module PanelHelper
   # The whole heading is a link that toggles the panel collapse.
   # NOTE: args[:open] should be a boolean
   def panel_heading_collapse_elements(args)
+    collapsed = args[:open] ? "" : "collapsed"
+
     tag.h4(class: "panel-title") do
       link_to(
         "##{args[:collapse]}",
-        class: "panel-collapse-trigger",
+        class: class_names("panel-collapse-trigger", collapsed),
         role: "button", data: { toggle: "collapse" },
         aria: { expanded: args[:open], controls: args[:collapse] }
       ) do
@@ -78,15 +78,6 @@ module PanelHelper
      link_icon(:chevron_up, title: :CLOSE.l)].safe_join
   end
 
-  def panel_body(args, content)
-    return "" if content.blank?
-
-    tag.div(class: class_names("panel-body", args[:inner_class]),
-            id: args[:inner_id]) do
-      concat(content)
-    end
-  end
-
   # Some panels need multiple panel bodies.
   def panel_bodies(args)
     args[:panel_bodies].map do |body|
@@ -100,6 +91,16 @@ module PanelHelper
     tag.div(class: class_names("panel-collapse collapse", open),
             id: args[:collapse]) do
       concat(panel_body(args, content))
+    end
+  end
+
+  def panel_body(args, content)
+    return "" if content.blank?
+    return content if args[:formatted_content]
+
+    tag.div(class: class_names("panel-body", args[:inner_class]),
+            id: args[:inner_id]) do
+      concat(content)
     end
   end
 
