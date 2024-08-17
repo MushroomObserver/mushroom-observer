@@ -6,7 +6,7 @@ export default class extends Controller {
   // this is a handler for page elements that get updated
   // on successful form submit, so it "cleans up"
   connect() {
-    this.element.dataset.stimulus = "connected";
+    this.element.dataset.stimulus = "section-update-connected";
 
     // Note: this is simpler than adding an action on every frame. hides modal
     this.element.addEventListener("turbo:frame-render", this.updated());
