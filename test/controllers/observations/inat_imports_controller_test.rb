@@ -356,6 +356,7 @@ module Observations
 
       simulate_authorization(user: user, inat_import_ids: inat_import_ids)
       stub_access_token_request
+      stub_jwt_request
       stub_inat_api_request(inat_import_ids, mock_inat_response)
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
@@ -384,6 +385,7 @@ module Observations
       simulate_authorization(user: user, inat_import_ids: inat_import_ids,
                              import_all: true)
       stub_access_token_request
+      stub_jwt_request
       stub_inat_api_request(inat_import_ids, mock_search_result)
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
@@ -421,9 +423,9 @@ module Observations
                              inat_username: inat_obs.inat_user_login,
                              inat_import_ids: inat_import_ids)
       stub_access_token_request
+      stub_jwt_request
       stub_inat_api_request(inat_import_ids, mock_search_result,
                             inat_user_login: inat_obs.inat_user_login)
-      stub_jwt_request
 
       params = { inat_ids: inat_import_ids, code: "MockCode" }
       login(user.login)
