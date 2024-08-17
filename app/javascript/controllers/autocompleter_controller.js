@@ -479,6 +479,11 @@ export default class extends Controller {
     const old_val = this.old_value;
     const new_val = this.inputTarget.value;
     // this.debug("ourChange(" + this.inputTarget.value + ")");
+    if (new_val.length > 0) {
+      this.cssUncollapseFields();
+    } else {
+      this.cssCollapseFields();
+    }
     if (new_val != old_val) {
       this.old_value = new_val;
       if (do_refresh) {
@@ -1008,14 +1013,12 @@ export default class extends Controller {
     if (hidden_id && hidden_id !== NaN && hidden_id != 0) {
       this.wrapTarget.classList.add('has-id');
       this.wrapTarget.classList.remove('offer-create');
-      this.cssUncollapseFields()
     } else {
       this.wrapTarget.classList.remove('has-id');
       if (this.inputTarget.value &&
         !this.wrapTarget.classList.contains('create')) {
         this.wrapTarget.classList.add('offer-create');
       }
-      this.cssCollapseFields()
     }
     // On forms where a map may not be relevant, we also show/hide the map.
     // Only show if we're in "create" mode.
@@ -1031,13 +1034,13 @@ export default class extends Controller {
   cssCollapseFields() {
     if (!this.hasCollapseFieldsTarget) return;
 
-    this.collapseFieldsTarget.classList.add('d-none');
+    $(this.collapseFieldsTarget).collapse('hide');
   }
 
   cssUncollapseFields() {
     if (!this.hasCollapseFieldsTarget) return;
 
-    this.collapseFieldsTarget.classList.remove('d-none');
+    $(this.collapseFieldsTarget).collapse('show');
   }
 
   storeCurrentHiddenData() {

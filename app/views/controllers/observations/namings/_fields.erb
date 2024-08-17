@@ -30,7 +30,7 @@ select_opts = { include_blank: create }
 
 <%= fields_for(:naming) do |f_n| %>
   <% vote_reasons = tag.div(data: { autocompleter_target: "collapseFields" },
-                            class: "d-none") do
+                            class: ("collapse" if context == "blank")) do
     [
       f_n.fields_for(:vote) do |f_v|
         select_with_label(form: f_v, field: :value,
