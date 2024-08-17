@@ -13,7 +13,7 @@ naming_locals = {
   name_help:    :form_naming_name_help_leave_blank.t
 }
 notes_fields = @observation.form_notes_parts(@user)
-open_notes = notes_fields.length > 1 || !create # @observation.notes.present?
+notes_open = (create && notes_fields.length > 1) || @observation.notes.present?
 show_projects = @projects.any? || @error_checked_projects.any? ||
                 @suspect_checked_projects.any?
 show_lists = @lists.any?
@@ -75,7 +75,7 @@ form_element_data = {
   <%= panel_block(
     heading: "#{:IDENTIFICATION.l} + #{:SPECIMEN.l}",
     id: "observation_naming_specimen", # @given_name.present?
-    collapse: "observation_naming_specimen_inner", open: true
+    collapse: "observation_naming_specimen_inner", open: create
   ) do
     tag.div(class: "row mt-3") do
       concat(tag.div(class: "col-xs-12 col-md-6") do
@@ -92,7 +92,7 @@ form_element_data = {
 
   <%= panel_block(
     heading: :NOTES.l, id: "observation_notes",
-    collapse: "observation_notes_inner", open: open_notes
+    collapse: "observation_notes_inner", open: notes_open
   ) do
     render(partial: "shared/notes_fields",
            locals: { form: f, fields: notes_fields })
