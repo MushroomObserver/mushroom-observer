@@ -298,20 +298,21 @@ class InatObs
 
   # ----- location-related
 
+  # These give a good approximation of the iNat blurred bounding box
   def blurred_north
-    [lat + public_accuracy_in_degrees[:lat], 90].min
+    [lat + public_accuracy_in_degrees[:lat] / 2, 90].min
   end
 
   def blurred_south
-    [lat - public_accuracy_in_degrees[:lat], -90].max
+    [lat - public_accuracy_in_degrees[:lat] / 2, -90].max
   end
 
   def blurred_east
-    ((lng + public_accuracy_in_degrees[:lng] + 180) % 360) - 180
+    ((lng + public_accuracy_in_degrees[:lng] / 2 + 180) % 360) - 180
   end
 
   def blurred_west
-    ((lng - public_accuracy_in_degrees[:lng] + 180) % 360) - 180
+    ((lng - public_accuracy_in_degrees[:lng] / 2 + 180) % 360) - 180
   end
 
   def to_rad(degrees)

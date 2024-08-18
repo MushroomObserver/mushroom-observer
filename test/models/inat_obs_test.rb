@@ -238,13 +238,13 @@ class InatObsTest < UnitTestCase
         user: rolf,
         name: "Blurred Location",
         north: mock_inat_obs.lat +
-               mock_inat_obs.public_accuracy_in_degrees[:lat],
+               mock_inat_obs.public_accuracy_in_degrees[:lat] / 2,
         south: mock_inat_obs.lat -
-               mock_inat_obs.public_accuracy_in_degrees[:lat],
+               mock_inat_obs.public_accuracy_in_degrees[:lat] / 2,
         east: mock_inat_obs.lng +
-              mock_inat_obs.public_accuracy_in_degrees[:lng],
+              mock_inat_obs.public_accuracy_in_degrees[:lng] / 2,
         west: mock_inat_obs.lng -
-              mock_inat_obs.public_accuracy_in_degrees[:lng]
+              mock_inat_obs.public_accuracy_in_degrees[:lng] / 2
       )
 
     Location.create(
