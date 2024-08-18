@@ -81,16 +81,17 @@ module LinkHelper
   # Icon link with optional active state. (Tooltip title must be swapped in JS.)
   # Now also accepts active state options: active_icon, active_content
   # NOTE: Takes same args as link_to, e.g. *edit_description_tab(desc, type)
-  # icon_link_to(text, path, **args)
+  # icon_link_to(text, path, **args). Can also print a button_to.
   def icon_link_to(text = nil, path = nil, options = {}, &block)
     return unless text
 
-    link = block ? text : path # because positional
+    link_path = block ? text : path # because positional
     content = block ? capture(&block) : text
     opts = block ? path : options # because positional
     icon_type = opts[:icon]
     return link_to(link, opts) { content } if icon_type.blank?
 
+    # method = opts[:button] ? :button_to : :link_to
     active_icon = opts[:active_icon]
     active_content = options[:active_content]
     stateful = active_icon && active_content
@@ -106,13 +107,18 @@ module LinkHelper
       data: { toggle: "tooltip", title: content, # needed for swapping only
               active_title: opts[:active_content] }
     }.deep_merge(opts.except(:class, :icon, :icon_class, :show_text,
-                             :active_icon, :active_content))
+                             :active_icon, :active_content, :button_to))
 
-    link_to(link, **link_opts) do
+    html = capture do
       concat(link_icon(icon_type, class: icon_class))
       concat(link_icon(active_icon, class: icon_active_class)) if stateful
       concat(tag.span(content, class: label_class))
       concat(tag.span(active_content, class: label_active_class)) if stateful
+    end
+    if opts[:button_to]
+      button_to(html, link_path, **link_opts)
+    else
+      link_to(html, link_path, **link_opts)
     end
   end
 
@@ -137,11 +143,11 @@ module LinkHelper
 
     if args[:title].present?
       title = args[:title]
-      args[:data] = { toggle: "tooltip", title: }.merge(args[:data] || {})
+      args[:data] = { toggle: "tooltip" }.merge(args[:data] || {})
       text = tag.span(title, class: "sr-only")
     end
 
-    tag.span(text, **args.except(:title))
+    tag.span(text, **args)
   end
 
   # NOTE: Specific to glyphicons
@@ -156,6 +162,12 @@ module LinkHelper
     x: "remove",
     remove: "remove-circle",
     send: "send",
+    log_in: "log-in",
+    log_out: "log-out",
+    admin: "text-background",
+    inbox: "inbox",
+    interests: "bullhorn",
+    settings: "cog",
     ban: "ban-circle",
     plus: "plus-sign",
     minus: "minus-sign",
