@@ -4,15 +4,19 @@
 #
 # Work flow:
 # 1. User calls `new`, fills out form
-# 2. `create` saves tracking information in the iNatImport model
-#    attributes include: user, inat_ids, token, state.
-# 3. `create` redirects the user to iNat at the inat_authorization_url
-# 4. user logs into iNat, authorizes MO to access user's confidential iNat data
-# 5. upon authorization, iNat sends user to `authenticate` (the redirect_url)
-# 6. MO continues in the `authenticate` action
+# 2. create
+#      saves tracking information in the iNatImport model
+#        attributes include: user, inat_ids, token, state.
+#    passes things off (redirects) to iNat at the inat_authorization_url
+# 3. iNat
+#    checks if MO is authorized to access iNat user's confidential data
+#      if not, asks iNat user for authorization
+#    passes things back to MO at the the redirect_url (authenticate)
+# 5. MO continues in the `authenticate` action
 #    Gets data from, and updates, InatImport
-#    Trades the `code` which it received from iNat for a token
-#    Makes an authenticated iNat API request search for the desired iNat obss
+#    Uses the `code` it received from iNat to obtain an oauth token
+#    Uses the oauth token obtain a JWT
+#    Makes an authenticated iNat API request for the desired observations
 #    For each iNat obs in the search results, creates an InatObs and imports it
 module Observations
   class InatImportsController < ApplicationController
