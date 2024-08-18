@@ -20,11 +20,15 @@ module Observations
     before_action :pass_query_params
 
     # constants for iNat authorization and authentication
-    # Where to redirect user for authorization
+    #
+    # Site for authorization and authentication requests
     SITE = "https://www.inaturalist.org"
-    # Where iNat will send the code once authorized
+
+    # iNat goes here when iNat user authorizes MO access to user's data
     REDIRECT_URI =
       "http://localhost:3000/observations/inat_imports/authenticate"
+    # The iNat API
+    API_BASE = "https://api.inaturalist.org/v1"
     # iNat's id for the MO application
     APP_ID = Rails.application.credentials.inat.id
     # limit results of all iNat API requests
@@ -108,31 +112,12 @@ module Observations
       return not_authorized if auth_code.blank?
 
       @inat_import = InatImport.find_or_create_by(user: User.current)
+
       @inat_import.update(state: "Authenticating")
+      api_token = obtain_api_token(auth_code)
 
-      # exchange code received from iNat for an oAuth `access_token`
-      payload = {
-        client_id: APP_ID,
-        client_secret: Rails.application.credentials.inat.secret,
-        code: auth_code,
-        redirect_uri: REDIRECT_URI,
-        grant_type: "authorization_code"
-      }
-      oauth_response = RestClient.post("#{SITE}/oauth/token", payload)
-      # The actual token is in the field ["access_token"].
-      access_token = JSON.parse(oauth_response.body)["access_token"]
-
-      # Use the `access_token` to request a `jwt`, right away.
-      jwt_response = RestClient::Request.execute(
-        method: :get, url: "https://www.inaturalist.org/users/api_token",
-        headers: { authorization: "Bearer #{access_token}", accept: :json }
-      )
-      api_token = JSON.parse(jwt_response)["api_token"]
-
-      # Now that we've got the right token, we can make authenticated requests
-      # to iNat that get the real real private data.
       @inat_import.update(token: api_token, state: "Importing")
-
+      # Make authenticated requests with the token
       import_requested_observations
 
       @inat_import.update(state: "Done")
@@ -148,35 +133,59 @@ module Observations
       redirect_to(observations_path)
     end
 
+    def obtain_api_token(auth_code)
+      # Use "code" received from iNat to obtain an oAuth `access_token`
+      # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
+      payload = {
+        client_id: APP_ID,
+        client_secret: Rails.application.credentials.inat.secret,
+        code: auth_code,
+        redirect_uri: REDIRECT_URI,
+        grant_type: "authorization_code"
+      }
+      oauth_response = RestClient.post("#{SITE}/oauth/token", payload)
+      # The actual token is in the field ["access_token"].
+      access_token = JSON.parse(oauth_response.body)["access_token"]
+
+      # Use the access_token to obtain a JWT
+      # https://www.inaturalist.org/pages/api+recommended+practices
+      jwt_response = RestClient::Request.execute(
+        method: :get, url: "#{SITE}/users/api_token",
+        headers: { authorization: "Bearer #{access_token}", accept: :json }
+      )
+
+      JSON.parse(jwt_response)["api_token"]
+    end
+
     def import_requested_observations
       inat_ids = inat_id_list
       return if @inat_import[:import_all].blank? && inat_ids.blank?
 
-      # Get one page at a time, until done with all pages
+      # Search for one page of results at a time, until done with all pages
       # To get one page, use iNats `per_page` & `id_above` params.
       # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
       last_import_id = 0
       loop do
-        page =
+        page_of_observations =
           # get a page of observations with id > id of last imported obs
-          inat_search_observations(
+          next_page(
             id: inat_ids, id_above: last_import_id,
             user_login: @inat_import.inat_username
           )
-        break if page_empty?(page)
+        parsed_page = JSON.parse(page_of_observations)
+        break if page_empty?(parsed_page)
 
-        import_page(page)
-        parsed_page = JSON.parse(page)
+        import_page(page_of_observations)
 
         last_import_id = parsed_page["results"].last["id"]
-        break if last_page?(parsed_page)
+        next unless last_page?(parsed_page)
 
-        next
+        break
       end
     end
 
     def page_empty?(page)
-      JSON.parse(page)["total_results"].zero?
+      page["total_results"].zero?
     end
 
     def last_page?(parsed_page)
@@ -188,13 +197,14 @@ module Observations
       @inat_import.inat_ids.delete(" ")
     end
 
+    # This is where we actually hit the iNat API
     # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
     # https://stackoverflow.com/a/11251654/3357635
     # Note that the `ids` parameter may be a comma-separated list of iNat obs
     # ids - that needs to be URL encoded to a string when passed as an arg here
     # because URI.encode_www_form deals with arrays by passing the same key
     # multiple times.
-    def inat_search_observations(**args)
+    def next_page(**args)
       query_args = {
         id: nil, id_above: nil, only_id: false, per_page: 200,
         order: "asc", order_by: "id",
@@ -212,8 +222,6 @@ module Observations
         method: :get, url: "#{API_BASE}/observations?#{query}", headers: headers
       )
     end
-
-    API_BASE = "https://api.inaturalist.org/v1"
 
     def import_page(page)
       JSON.parse(page)["results"].each do |result|
