@@ -44,20 +44,16 @@
       <li><%= link_to(:app_your_observations.l,
                       observations_path(user: @user.id),
                       { class: "" } ) %></li>
-      <li><%= link_to(:app_your_projects.l,
-                      projects_path(member: @user.id),
+      <li><%= link_to(:app_your_projects.l, projects_path(member: @user.id),
                       { class: "", id: "user_drop_projects_link" }) %></li>
-      <li><%= link_to(:app_your_lists.l,
-                      species_lists_path(by_user: @user.id),
-                      { class: "", id: "user_drop_species_lists_link" } ) %></li>
-      <li><%= link_to(:app_your_interests.l,
-                      interests_path,
+      <li><%= link_to(:app_your_lists.l, species_lists_path(by_user: @user.id),
+                      { class: "",
+                        id: "user_drop_species_lists_link" } ) %></li>
+      <li><%= link_to(:app_your_interests.l, interests_path,
                       { class: "", id: "user_drop_interests_link" }) %></li>
-      <li><%= link_to(:app_your_summary.l,
-                      user_path(@user.id),
+      <li><%= link_to(:app_your_summary.l, user_path(@user.id),
                       { class: "", id: "user_drop_profile_link" }) %></li>
-      <li><%= link_to(:app_preferences.l,
-                      edit_account_preferences_path,
+      <li><%= link_to(:app_preferences.l, edit_account_preferences_path,
                       { class: "", id: "user_drop_preferences_link" }) %></li>
       <li class="divider"></li>
       <li><%= button_to(
