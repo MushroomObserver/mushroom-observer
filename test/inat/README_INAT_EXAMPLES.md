@@ -9,6 +9,7 @@ This file
 
 Strings comprising the body of a response to an [iNat API Observation Search](https://api.inaturalist.org/v1/docs/#!/Observations/get_observations),
 unless otherwise noted.
+The files do not contain conidential data, except as otherwise noted.
 The file is in json format. It includes the complete search result, which includes `results`, which include the `observation`(s).
 
 All data as of the time of importing. (The corresponding iNat Observation may have changed)
@@ -20,7 +21,7 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | calostoma_lutescens| [195434438](https://www.inaturalist.org/observations/195434438) | **0** | public |  |
 | ceanothus_cordulatus| [219631412](https://www.inaturalist.org/observations/219631412) | 1 | public | **Plant** |
 | coprinus| [213450312](https://www.inaturalist.org/observations/213450312) | 1 | **obscured** | Needs ID |
-| distantes| [215996396](https://www.inaturalist.org/observations/215996396) | 1 | **obscured** | Needs ID, jdc Obs, taxon[:name]: "Distantes" rank:"section", rank_level:13|
+| distantes| [215996396](https://www.inaturalist.org/observations/215996396) | 1 | **obscured, includes confidential gps** | Needs ID, jdc Obs, taxon[:name]: "Distantes" rank:"section", rank_level:13|
 | donadina_PNW01| [212320801](https://www.inaturalist.org/observations/212320801) | 1 | public | **non-mo-style Provisional Species Name (PNW)**, **DNA** |
 | evernia| [216357655](https://www.inaturalist.org/observations/216357655) | 0 | public | Casual, lichen, no fields, place: Troutdale |
 | fuligo_septica| [219783802](https://www.inaturalist.org/observations/219783802) | 1 | public | slime mold **Protozoa** Richmond, CA |
@@ -28,7 +29,7 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | import_all|  |  | | all fungal obss (total of 5) of iNat user devin189, 2 per page (this user had few fungal observations) |
 | inocybe| [222904190](https://www.inaturalist.org/observations/222904190) | 5 | public | cc-by-nc, **2 tags∆∆** |
 | i_obliquus_f_sterilis | [232919689](https://www.inaturalist.org/observations/232919689) | 1 | public | cc-by-nc, **infraspecific name** |
-| lentinellus_ursinus| [220796026](https://inaturalist.org/observations/220796026) | 2 | obscured | **ID matches many MO names** |
+| lentinellus_ursinus| [220796026](https://inaturalist.org/observations/220796026) | 2 | obscured | **ID matches many MO Name fixtures** |
 | listed_ids| [231104466](https://www.inaturalist.org/observations/231104466) [195434438](https://www.inaturalist.org/observations/195434438) | na | na | response to request for 2 obs by number (amanita_flavorubens, evernia) |
 | lycoperdon| [24970904](https://www.inaturalist.org/observations/24970904) | 2 | public | cc-by-nc, projects, **multiple ids**, many fields including **DNA**, place: E. side of Metolius River, Sisters Ranger District, Deschutes National Forest, Jefferson County, Oregon, US |
 | russulaceae| [216675045](https://www.inaturalist.org/observations/216675045) | 2 | public | **all rights reserved**, many projects, Activity; place: Point Defiance Park, Tacoma, WA, US |

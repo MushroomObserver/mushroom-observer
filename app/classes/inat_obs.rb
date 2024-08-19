@@ -181,17 +181,19 @@ class InatObs
   end
 
   def name_id
-    mo_names = Name.where(
-      # parse it to get MO's text_name rank abbreviation
-      # E.g. "sect." instead of "section"
-      text_name: Name.parse_name(full_name).text_name,
-      rank: inat_taxon[:rank].titleize
-    ).
-               # iNat doesn't have taxon names "sensu xxx"
-               # so don't map them to MO Names sensu xxx
-               where.not(Name[:author] =~ /^sensu /)
+    names =
+      Name.where(
+        # parse it to get MO's text_name rank abbreviation
+        # E.g. "sect." instead of "section"
+        text_name: Name.parse_name(full_name).text_name,
+        rank: inat_taxon[:rank].titleize,
+        correct_spelling_id: nil
+      ).
+      # iNat lacks taxa "sensu xxx", so ignore MO Names sensu xxx
+      where.not(Name[:author] =~ /^sensu /).
+      order(deprecated: :asc)
 
-    best_mo_name(mo_names)
+    best_mo_name(names)
   end
 
   def notes
@@ -374,15 +376,11 @@ class InatObs
     identification[:taxon][:id] == inat_taxon[:id]
   end
 
-  def best_mo_name(mo_names)
-    return Name.unknown.id if mo_names.none?
-    return mo_names.first.id if mo_names.one?
+  def best_mo_name(names)
+    # It's simplest to pick the 1st one if there are any
+    # (They've already been sorted)
+    return names.first.id if names.any?
 
-    # iNat name maps to multiple MO Names
-    # So for the moment, just map it to Fungi
-    # TODO: refine this.
-    # Ideas: check iNat and MO authors, possibly prefer non-deprecated MO Name
-    # - might need a dictionary here
     Name.unknown.id
   end
 

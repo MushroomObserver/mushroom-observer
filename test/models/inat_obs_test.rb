@@ -149,8 +149,25 @@ class InatObsTest < UnitTestCase
            "Test needs a name with many non-sensu matching fixtures")
 
     mock_inat_obs = mock_observation("lentinellus_ursinus")
-    assert_equal(Name.unknown.id, mock_inat_obs.name_id)
-    assert_equal(Name.unknown.text_name, mock_inat_obs.text_name)
+    assert_equal(
+      "Lentinellus ursinus", mock_inat_obs.text_name,
+      "Any of multiple, correctly spelled, approved Names will do."
+    )
+  end
+
+  def test_names_approved_vs_deprecated
+    # Make sure fixtures still OK
+    names = Name.where(text_name: "Lentinellus ursinus", rank: "Species",
+                       deprecated: false)
+    assert(names.many? { |name| !name.author.start_with?("sensu ") },
+           "Test needs a name with many non-sensu matching fixtures")
+    first_name = names.first
+    first_name.deprecated = true
+    first_name.save
+
+    mock_inat_obs = mock_observation("lentinellus_ursinus")
+    assert_equal(names.second.id, mock_inat_obs.name_id,
+                 "Prefer non-deprecated Name when mapping iNat id to MO Name")
   end
 
   def test_inat_observation_fields
