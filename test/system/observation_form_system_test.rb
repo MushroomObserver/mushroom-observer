@@ -230,7 +230,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
 
   def test_post_edit_and_destroy_with_details_and_location
-    browser = page.driver.browser
+    # browser = page.driver.browser
     setup_image_dirs # in general_extensions
 
     # open_create_observation_form
