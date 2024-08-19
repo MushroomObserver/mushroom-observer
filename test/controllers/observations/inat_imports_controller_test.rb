@@ -16,11 +16,9 @@ module Observations
   end
 
   class InatImportsControllerTest < FunctionalTestCase
-    INAT_OBS_REQUEST_PREFIX = "https://api.inaturalist.org/v1/observations"
-    INAT_OBS_REQUEST_POSTFIX = "&order=asc&order_by=id&only_id=false"
-    # Where iNat will send the code once authorized
-    REDIRECT_URI =
-      "http://localhost:3000/observations/inat_imports/authenticate"
+    SITE = Observations::InatImportsController::SITE
+    REDIRECT_URI = Observations::InatImportsController::REDIRECT_URI
+    API_BASE = Observations::InatImportsController::API_BASE
 
     def test_new_inat_import
       login(users(:rolf).login)
@@ -62,7 +60,7 @@ module Observations
       assert_flash_text(:inat_no_imports_designated.l)
     end
 
-    def test_create_illega_observation_id
+    def test_create_illegal_observation_id
       params = { inat_username: "anything", inat_ids: "123*",
                  consent: 1 }
       login
@@ -511,7 +509,7 @@ module Observations
     # stub exchanging iNat code for oauth token
     # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
     def stub_oauth_token_request
-      stub_request(:post, "https://www.inaturalist.org/oauth/token").
+      stub_request(:post, "#{SITE}/oauth/token").
         with(
           body: { "client_id" => Rails.application.credentials.inat.id,
                   "client_secret" => Rails.application.credentials.inat.secret,
@@ -525,7 +523,7 @@ module Observations
     end
 
     def stub_jwt_request
-      stub_request(:get, "https://www.inaturalist.org/users/api_token").
+      stub_request(:get, "#{SITE}/users/api_token").
         with(
           headers: {
             "Accept" => "application/json",
@@ -552,7 +550,7 @@ module Observations
         &order=asc&order_by=id
         &user_login=#{inat_user_login}
       PARAMS
-      stub_request(:get, "#{INAT_OBS_REQUEST_PREFIX}#{params}").
+      stub_request(:get, "#{API_BASE}/observations#{params}").
         with(headers:
       { "Accept" => "application/json",
         "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
