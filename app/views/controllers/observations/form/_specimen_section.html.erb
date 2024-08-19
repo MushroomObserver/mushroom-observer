@@ -5,9 +5,9 @@ herbarium_record. Fields hidden unless box checked. %>
 
 <%= tag.div(id: "observation_specimen_section") do %>
 
-  <%= tag.div(class: "mt-3") do %>
+  <%= tag.div do %>
     <%= check_box_with_label(
-      form: f, field: :specimen,
+      form: f, field: :specimen, class: "mt-0",
       label: :form_observations_specimen_available.t,
       help: :form_observations_specimen_available_help.t,
       data: { toggle: "collapse", target: "#specimen_fields" },
