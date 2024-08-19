@@ -27,9 +27,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_place_name", with: locations.first.name)
 
     # Move to the next step, Identification
-    step_nav_1 = find("#step-nav-1")
-    scroll_to(step_nav_1, align: :top)
-    within(step_nav_1) { click_on(:NEXT.l) }
+    naming = find("#observation_naming_specimen")
+    scroll_to(naming, align: :top)
 
     fill_in("naming_name", with: "Elfin saddle")
     # don't wait for the autocompleter - we know it's an elfin saddle!
@@ -50,9 +49,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_place_name", with: locations.first.name)
 
     # Move to the next step, Identification
-    step_nav_1 = find("#step-nav-1")
-    scroll_to(step_nav_1, align: :top)
-    within(step_nav_1) { click_on(:NEXT.l) }
+    naming = find("#observation_naming_specimen")
+    scroll_to(naming, align: :top)
 
     assert_selector("#name_messages", text: "MO does not recognize the name")
     fill_in("naming_name", with: "Coprinus com")
@@ -105,9 +103,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_location_id", with: "", type: :hidden)
 
     # Move to the next step, Identification
-    step_nav_1 = find("#step-nav-1")
-    scroll_to(step_nav_1, align: :top)
-    within(step_nav_1) { click_on(:NEXT.l) }
+    naming = find("#observation_naming_specimen")
+    scroll_to(naming, align: :top)
 
     within("#observation_form") { click_commit }
 
@@ -150,7 +147,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_image_date_copied_to_obs(GEOTAGGED_EXIF)
     sleep(0.5)
     # we should have the new type of location_google autocompleter now
-    assert_selector("[data-type='location_google'][data-stimulus='connected']")
+    assert_selector(
+      "[data-type='location_google'][data-stimulus='autocompleter-connected']"
+    )
     # Place name should now have been filled by Google, no MO locations match
     assert_field("observation_place_name", with: UNIVERSITY_PARK[:name],
                                            wait: 6)
@@ -231,7 +230,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
 
   def test_post_edit_and_destroy_with_details_and_location
-    # browser = page.driver.browser
+    browser = page.driver.browser
     setup_image_dirs # in general_extensions
 
     # open_create_observation_form
@@ -248,9 +247,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_place_name", with: last_obs.where)
 
     # Move to the next step, Identification
-    step_nav_1 = find("#step-nav-1")
-    scroll_to(step_nav_1, align: :top)
-    within(step_nav_1) { click_on(:NEXT.l) }
+    naming = find("#observation_naming_specimen")
+    scroll_to(naming, align: :top)
 
     assert_field("naming_name", with: "")
     assert(last_obs.is_collection_location)
@@ -259,9 +257,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field(other_notes_id, with: "", visible: :all)
 
     # Move to the previous step, Images/Details
-    step_nav_2 = find("#step-nav-2")
-    scroll_to(step_nav_2, align: :top)
-    within(step_nav_2) { click_on(:BACK.l) }
+    images_details = find("#observation_images_details")
+    scroll_to(images_details, align: :top)
 
     # Add the images separately, so we can be sure of the order. Otherwise,
     # images appear in the order each upload finishes, which is unpredictable.
@@ -367,7 +364,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     uncheck("observation_is_collection_location", visible: :all)
 
     # Move to the next step, Identification
-    within(step_nav_1) { click_on(:NEXT.l) }
+    naming = find("#observation_naming_specimen")
+    scroll_to(naming, align: :top)
     sleep(1)
 
     specimen_section = find("#observation_specimen_section", visible: :all)
@@ -379,14 +377,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in(other_notes_id, with: "Notes for observation", visible: :all)
 
     # Move to the next step, Projects/Lists
-    within(step_nav_2) { click_on(:NEXT.l) }
+    projects = find("#observation_projects")
+    scroll_to(projects, align: :top)
 
     # Inherited project constraints maybe messing with this observation - clear
     all('[id^="project_id_"]', visible: :all).each do |project_checkbox|
       project_checkbox.trigger("click") if project_checkbox.checked?
     end
-    step_nav_3 = find("#step-nav-3")
-    within(step_nav_3) { click_on(:BACK.l) }
+    naming = find("#observation_naming_specimen")
+    scroll_to(naming, align: :top)
 
     # submit_observation_form_with_errors
     within("#observation_form") { click_commit }
@@ -439,6 +438,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # assert_selector(".auto_complete", wait: 6)
     assert_selector(".dropdown-item a[data-id='-1']",
                     text: SOUTH_PASADENA[:name], visible: :all, wait: 6)
+    debugger
     # There may be more than one of these, click the first
     find(".dropdown-item a[data-id='-1']",
          text: SOUTH_PASADENA[:name], visible: :all).trigger("click")
@@ -447,7 +447,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_hidden_location_fields_filled(SOUTH_PASADENA)
 
     # Move to the next step, Identification
-    within(step_nav_1) { click_on(:NEXT.l) }
+    naming = find("#observation_naming_specimen")
+    scroll_to(naming, align: :top)
 
     assert_selector("[data-type='name'][data-stimulus='connected']")
     fill_in("naming_name", with: "Agaricus campestris")
@@ -523,7 +524,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     sleep(1)
 
     # Move to the next step, Identification
-    within(step_nav_1) { click_on(:NEXT.l) }
+    naming = find("#observation_naming_specimen")
+    scroll_to(naming, align: :top)
     sleep(1)
 
     obs_notes = find("#observation_notes")
@@ -636,9 +638,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
 
   def assert_geolocation_is_empty
-    assert_field("observation_lat", with: "")
-    assert_field("observation_lng", with: "")
-    assert_field("observation_alt", with: "")
+    assert_field("observation_lat", with: "", visible: :all)
+    assert_field("observation_lng", with: "", visible: :all)
+    assert_field("observation_alt", with: "", visible: :all)
   end
 
   def assert_image_exif_available(image_data)
