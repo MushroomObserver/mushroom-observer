@@ -430,12 +430,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_image_exif_available(SO_PASA_EXIF)
     end
 
-    fill_in("observation_place_name", with: "")
+    fill_in("observation_place_name", with: "south pas")
     click_on(:form_observations_create_locality.l)
     # lat/lng does not match Google's Pasadena, but does match South Pasadena
     assert_selector("[data-type='location_google']")
     find("#observation_place_name").trigger("focus")
-    fill_in("observation_place_name", with: "south pas")
     # assert_selector(".auto_complete", wait: 6)
     # assert_selector(".dropdown-item a[data-id='-1']",
     #                 text: SOUTH_PASADENA[:name], visible: :all, wait: 6)
@@ -443,6 +442,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # find(".dropdown-item a[data-id='-1']",
     #      text: SOUTH_PASADENA[:name], visible: :all).trigger("click")
     assert_field("observation_place_name", with: SOUTH_PASADENA[:name])
+    sleep(1)
     # debugger
     # Check the hidden fields returned by Google
     assert_hidden_location_fields_filled(SOUTH_PASADENA)
