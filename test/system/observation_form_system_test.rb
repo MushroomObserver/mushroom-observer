@@ -435,13 +435,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # lat/lng does not match Google's Pasadena, but does match South Pasadena
     assert_selector("[data-type='location_google']")
     find("#observation_place_name").trigger("focus")
+    fill_in("observation_place_name", with: "south pas")
     # assert_selector(".auto_complete", wait: 6)
-    assert_selector(".dropdown-item a[data-id='-1']",
-                    text: SOUTH_PASADENA[:name], visible: :all, wait: 6)
+    # assert_selector(".dropdown-item a[data-id='-1']",
+    #                 text: SOUTH_PASADENA[:name], visible: :all, wait: 6)
     # There may be more than one of these, click the first
-    find(".dropdown-item a[data-id='-1']",
-         text: SOUTH_PASADENA[:name], visible: :all).trigger("click")
-
+    # find(".dropdown-item a[data-id='-1']",
+    #      text: SOUTH_PASADENA[:name], visible: :all).trigger("click")
+    assert_field("observation_place_name", with: SOUTH_PASADENA[:name])
+    # debugger
     # Check the hidden fields returned by Google
     assert_hidden_location_fields_filled(SOUTH_PASADENA)
 
@@ -449,7 +451,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     naming = find("#observation_naming_specimen")
     scroll_to(naming, align: :top)
 
-    assert_selector("[data-type='name'][data-stimulus='connected']")
+    assert_selector(
+      "[data-type='name'][data-stimulus='autocompleter-connected']"
+    )
     fill_in("naming_name", with: "Agaricus campestris")
     assert_field("naming_name", with: "Agaricus campestris")
     select(Vote.confidence(Vote.next_best_vote), from: "naming_vote_value")
