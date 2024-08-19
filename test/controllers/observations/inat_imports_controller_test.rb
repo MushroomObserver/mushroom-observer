@@ -16,6 +16,8 @@ module Observations
   end
 
   class InatImportsControllerTest < FunctionalTestCase
+    include ActiveJob::TestHelper
+
     SITE = Observations::InatImportsController::SITE
     REDIRECT_URI = Observations::InatImportsController::REDIRECT_URI
     API_BASE = Observations::InatImportsController::API_BASE
@@ -127,7 +129,7 @@ module Observations
       user = users(:rolf)
       inat_import = inat_imports(:rolf_inat_import)
 
-      # A blank list to test `authenticate` without importing anything.
+      # Blank id_list in order to prevent importing any observations
       inat_import.inat_ids = ""
       inat_import.save
       inat_authorization_callback_params = { code: "MockCode" }
@@ -135,6 +137,8 @@ module Observations
       stub_token_requests
       login(user.login)
       get(:authenticate, params: inat_authorization_callback_params)
+
+      assert_enqueued_jobs(1)
 
       assert_redirected_to(observations_path)
     end
