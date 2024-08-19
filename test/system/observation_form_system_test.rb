@@ -438,7 +438,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # assert_selector(".auto_complete", wait: 6)
     assert_selector(".dropdown-item a[data-id='-1']",
                     text: SOUTH_PASADENA[:name], visible: :all, wait: 6)
-    debugger
     # There may be more than one of these, click the first
     find(".dropdown-item a[data-id='-1']",
          text: SOUTH_PASADENA[:name], visible: :all).trigger("click")
