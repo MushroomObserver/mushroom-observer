@@ -3,15 +3,7 @@
 <%# tag.div(id: "observation_lists") do %>
   <%= fields_for(:list) do |f_l| %>
 
-    <%= tag.div do
-      [
-        tag.strong("#{:SPECIES_LISTS.l}:", class: "mr-3"),
-        collapse_info_trigger("species_lists_help"),
-        collapse_help_block(nil, id: "species_lists_help") do
-          :form_observations_list_help.t
-        end
-      ].safe_join
-    end %>
+    <%= tag.p(:form_observations_list_help.t) %>
 
     <%= tag.div(class: "overflow-scroll-checklist") do %>
       <% @lists.each do |list| %>

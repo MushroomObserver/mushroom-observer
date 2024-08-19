@@ -25,7 +25,7 @@ end
 indent = form.object_name == "observation" ? "" : "ml-5"
 %>
 <!-- NOTES -->
-<%= tag.div(id: "#{form.object_name}_notes") do %>
+<%= tag.div(id: "#{form.object_name}_notes_fields") do %>
   <%= general_help %>
   <%= tag.div(class: indent) do %>
     <%= form.fields_for(:notes) do |f_n| %>

@@ -50,15 +50,7 @@ end
       ) %>
     <% end %>
 
-    <%= tag.div do
-      [
-        tag.strong("#{:PROJECTS.l}:", class: "mr-3"),
-        collapse_info_trigger("project_help"),
-        collapse_help_block(nil, id: "project_help") do
-          :form_observations_project_help.t
-        end
-      ].safe_join
-    end %>
+    <%= tag.p(:form_observations_project_help.t) %>
 
     <%= tag.div(class: "overflow-scroll-checklist") do %>
       <% @projects.each do |project| %>
