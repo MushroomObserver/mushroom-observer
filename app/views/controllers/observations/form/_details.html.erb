@@ -72,7 +72,8 @@ t_s = {
           form: f, field: :has_geolocation, # field is ignored
           label: "#{:GEOLOCATION.l}:",
           help: :form_observations_lat_long_help.t,
-          data: { toggle: "collapse", target: "#observation_geolocation" },
+          data: { toggle: "collapse", target: "#observation_geolocation",
+                  form_exif_target: "collapseCheck" },
           aria: { controls: "observation_geolocation",
                   expanded: @observation.lat }
         ) %>
