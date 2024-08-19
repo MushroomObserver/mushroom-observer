@@ -13,7 +13,8 @@ const internalConfig = {
 // (formerly "observation_images" section of the form)
 // Connects to data-controller="form-exif"
 export default class extends Controller {
-  static targets = ["carousel", "item", "useExifBtn", "collapseFields"]
+  static targets = ["carousel", "item", "useExifBtn",
+    "collapseFields", "collapseCheck"]
   static outlets = ["autocompleter", "map"]
 
   connect() {
@@ -200,6 +201,7 @@ export default class extends Controller {
   showFields() {
     if (this.hasCollapseFieldsTarget) {
       $(this.collapseFieldsTarget).collapse('show');
+      this.collapseCheckTarget.checked = true
     }
   }
 

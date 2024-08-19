@@ -14,7 +14,7 @@ body_class = class_names(ctrlr_action, theme, location_format, logged_in)
   <%= render(partial: "application/app/head") %>
 </head>
 
-<body class="<%= body_class %>" data-controller="lazyload">
+<body class="<%= body_class %>" data-controller="lazyload tooltip">
   <% if Rails.env == "production" %>
     <%= render(partial: "application/app/gtm_iframe") %>
   <% end %>
