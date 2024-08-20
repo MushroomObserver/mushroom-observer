@@ -111,7 +111,6 @@ module Tabs
        { class: tab_id(__method__.to_s), icon: :reuse }]
     end
 
-
     ############################################
     # INDEX
 
