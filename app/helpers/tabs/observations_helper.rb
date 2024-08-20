@@ -105,23 +105,12 @@ module Tabs
        { class: tab_id(__method__.to_s), icon: :hide }]
     end
 
-    def new_image_for_observation_tab(obs)
-      [:show_observation_add_images.l,
-       new_image_for_observation_path(obs.id),
-       { class: tab_id(__method__.to_s), icon: :add }]
-    end
-
     def reuse_images_for_observation_tab(obs)
       [:show_observation_reuse_image.l,
        reuse_images_for_observation_path(obs.id),
        { class: tab_id(__method__.to_s), icon: :reuse }]
     end
 
-    def remove_images_from_observation_tab(obs)
-      [:show_observation_remove_images.l,
-       remove_images_from_observation_path(obs.id),
-       { class: tab_id(__method__.to_s), icon: :remove }]
-    end
 
     ############################################
     # INDEX
