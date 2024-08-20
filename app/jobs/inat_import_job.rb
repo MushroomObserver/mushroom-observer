@@ -10,10 +10,10 @@ class InatImportJob < ApplicationJob
   ICONIC_TAXA = "Fungi,Protozoa"
   queue_as :default
 
-  def perform(access_token, inat_import)
+  def perform(inat_import)
     @inat_import = inat_import
     @inat_import.update(state: "Authenticating")
-    api_token = obtain_api_token(access_token)
+    api_token = obtain_api_token(@inat_import.token)
 
     inat_import.update(token: api_token, state: "Importing")
     # Make authenticated requests with the token
