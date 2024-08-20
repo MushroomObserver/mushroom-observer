@@ -57,6 +57,7 @@ left_cols = add_right_tabs ? "col-xs-8 col-lg-7" : "col-xs-12"
   <%= content_tag_if(add_right_tabs, :div, id: "right_tabs",
                     class: "hidden-print text-right col-sm-4 col-lg-5 mb-3") do
         concat(yield(:interest_icons))
+        concat(yield(:edit_icons))
         concat(yield(:tab_set))
       end %>
 

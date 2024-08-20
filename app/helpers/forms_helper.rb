@@ -396,6 +396,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   end
 
   # Bootstrap file input field with client-side size validation.
+  # This could be redone as an input group with a "browse" button, in BS4.
   def file_field_with_label(**args)
     args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
@@ -424,23 +425,6 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
       )
       concat(tag.span(:no_file_selected.t, data: { file_input_target: "name" }))
     end
-  end
-
-  # To be retired in favor of the above:
-  # Create stylable file input field with client-side size validation.
-  def custom_file_field(obj, attr, opts = {})
-    max_size = MO.image_upload_max_size
-    max_size_in_mb = (max_size.to_f / 1024 / 1024).round
-    file_field = file_field(
-      obj,
-      attr,
-      opts.merge(
-        max_upload_msg: :validate_image_file_too_big.l(max: max_size_in_mb),
-        max_upload_size: max_size
-      )
-    )
-    tag.span(:select_file.t + file_field, class: "file-field btn btn-default") +
-      tag.span(:no_file_selected.t)
   end
 
   # Unused
