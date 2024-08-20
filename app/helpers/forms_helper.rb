@@ -435,8 +435,11 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
       obj,
       attr,
       opts.merge(
-        max_upload_msg: :validate_image_file_too_big.l(max: max_size_in_mb),
-        max_upload_size: max_size
+        data: {
+          controller: "file-input",
+          max_upload_msg: :validate_image_file_too_big.l(max: max_size_in_mb),
+          max_upload_size: max_size
+        }
       )
     )
     tag.span(:select_file.t + file_field, class: "file-field btn btn-default") +
