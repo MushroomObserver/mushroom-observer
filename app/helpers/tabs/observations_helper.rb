@@ -239,17 +239,6 @@ module Tabs
       [object_return_tab(image)]
     end
 
-    def observation_images_new_tabs(obs:)
-      [object_return_tab(obs),
-       edit_observation_tab(obs)]
-    end
-
-    # Note this takes `obj:` not `obs:`
-    def observation_images_remove_tabs(obj:)
-      [object_return_tab(obj),
-       edit_observation_tab(obj)]
-    end
-
     def observation_images_reuse_tabs(obs:)
       [object_return_tab(obs),
        edit_observation_tab(obs)]
