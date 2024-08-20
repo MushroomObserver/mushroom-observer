@@ -280,6 +280,17 @@ export default class extends Controller {
     this.swap({ detail: { type: "location_google" } });
   }
 
+  leaveCreate() {
+    if (!(['location_google'].includes(this.TYPE) && this.hasMapOutlet)) return;
+
+    this.verbose("autocompleter: leaveCreate()");
+    const location = this.mapOutlet.validateLatLngInputs(false);
+    // Will swap to location, or location_containing if lat/lngs are present
+    if (this.mapOutlet.ignorePlaceInput !== true) {
+      this.mapOutlet.sendPointChanged(location);
+    }
+  }
+
   // Connects autocompleter to map controller to call its methods
   activateMapOutlet(location = false) {
     if (!this.hasMapOutlet) {
@@ -304,8 +315,6 @@ export default class extends Controller {
     if (location) {
       // this.mapOutlet.geocodeLatLng(location);
       this.mapOutlet.tryToGeocode();
-    } else if (this.mapOutlet.hasLockBoxBtnTarget) {
-      this.mapOutlet.lockBoxBtnTarget.classList.remove("d-none");
     }
   }
 
@@ -313,8 +322,9 @@ export default class extends Controller {
     if (!this.hasMapOutlet) return;
 
     this.verbose("autocompleter: deactivateMapOutlet()");
+    if (this.mapOutlet.rectangle) this.mapOutlet.clearRectangle();
     this.mapOutlet.map_type = "observation";
-    if (this.mapOutlet.rectangle) this.mapOutlet.rectangle.setEditable(false);
+    // if (this.mapOutlet.rectangle) this.mapOutlet.rectangle.setEditable(false);
 
     this.mapOutlet.northInputTarget.value = '';
     this.mapOutlet.southInputTarget.value = '';
@@ -479,16 +489,17 @@ export default class extends Controller {
     const old_val = this.old_value;
     const new_val = this.inputTarget.value;
     // this.debug("ourChange(" + this.inputTarget.value + ")");
-    if (new_val.length > 0) {
-      this.cssUncollapseFields();
-    } else {
+    if (new_val.length == 0) {
       this.cssCollapseFields();
-    }
-    if (new_val != old_val) {
-      this.old_value = new_val;
-      if (do_refresh) {
-        this.verbose("autocompleter:ourChange()");
-        this.scheduleRefresh();
+      this.leaveCreate();
+    } else {
+      this.cssUncollapseFields();
+      if (new_val != old_val) {
+        this.old_value = new_val;
+        if (do_refresh) {
+          this.verbose("autocompleter:ourChange()");
+          this.scheduleRefresh();
+        }
       }
     }
   }
@@ -1013,11 +1024,17 @@ export default class extends Controller {
     if (hidden_id && hidden_id !== NaN && hidden_id != 0) {
       this.wrapTarget.classList.add('has-id');
       this.wrapTarget.classList.remove('offer-create');
+      if (this.hasKeepBtnTarget) {
+        this.keepBtnTarget.classList.remove("d-none");
+      }
     } else {
       this.wrapTarget.classList.remove('has-id');
       if (this.inputTarget.value &&
         !this.wrapTarget.classList.contains('create')) {
         this.wrapTarget.classList.add('offer-create');
+      }
+      if (this.hasKeepBtnTarget) {
+        this.keepBtnTarget.classList.add("d-none");
       }
     }
     // On forms where a map may not be relevant, we also show/hide the map.
