@@ -1,22 +1,29 @@
 # frozen_string_literal: true
 
 class InatImportJob < ApplicationJob
+  # iNat's id for the MO application
+  APP_ID = Observations::InatImportsController::APP_ID
+  # site for authorization, authentication
   SITE = Observations::InatImportsController::SITE
-  # iNat goes here when iNat user authorizes MO access to user's data
+  # iNat calls this after iNat user authorizes MO access to user's data
   REDIRECT_URI = Observations::InatImportsController::REDIRECT_URI
   # The iNat API
   API_BASE = "https://api.inaturalist.org/v1"
-  # limit results of all iNat API requests
+  # limit results iNat API requests, with Protozoa as a proxy for slime molds
   ICONIC_TAXA = "Fungi,Protozoa"
+
   queue_as :default
 
   def perform(inat_import)
     @inat_import = inat_import
-    @inat_import.update(state: "Authenticating")
-    api_token = obtain_api_token(@inat_import.token)
 
+    access_token =
+      use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
+    @inat_import.update(token: access_token)
+
+    api_token = trade_access_token_for_jwt_api_token(@inat_import.token)
     inat_import.update(token: api_token, state: "Importing")
-    # Make authenticated requests with the token
+
     import_requested_observations
 
     inat_import.update(state: "Done")
@@ -24,14 +31,25 @@ class InatImportJob < ApplicationJob
 
   private
 
-  # Use the access_token to obtain a JWT
+  # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
+  def use_auth_code_to_obtain_oauth_access_token(auth_code)
+    payload = {
+      client_id: APP_ID,
+      client_secret: Rails.application.credentials.inat.secret,
+      code: auth_code,
+      redirect_uri: REDIRECT_URI,
+      grant_type: "authorization_code"
+    }
+    oauth_response = RestClient.post("#{SITE}/oauth/token", payload)
+    JSON.parse(oauth_response.body)["access_token"]
+  end
+
   # https://www.inaturalist.org/pages/api+recommended+practices
-  def obtain_api_token(access_token)
+  def trade_access_token_for_jwt_api_token(access_token)
     jwt_response = RestClient::Request.execute(
       method: :get, url: "#{SITE}/users/api_token",
       headers: { authorization: "Bearer #{access_token}", accept: :json }
     )
-
     JSON.parse(jwt_response)["api_token"]
   end
 

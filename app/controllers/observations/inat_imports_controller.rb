@@ -1,23 +1,35 @@
 # frozen_string_literal: true
 
 # import iNaturalist Observations as MO Observations
+# Actions
+# -------
+# new (get)
+# create (post)
+# authorization_response (get)
 #
 # Work flow:
 # 1. User calls `new`, fills out form
 # 2. create
-#      saves tracking information in the iNatImport model
-#        attributes include: user, inat_ids, token, state.
+#      saves some user data in a iNatImport instance
+#        attributes include: user, inat_ids, token, state
 #    passes things off (redirects) to iNat at the inat_authorization_url
 # 3. iNat
 #    checks if MO is authorized to access iNat user's confidential data
 #      if not, asks iNat user for authorization
-#    passes things back to MO at the the redirect_url (authenticate)
-# 5. MO continues in the `authenticate` action
-#    Gets data from, and updates, InatImport
-#    Uses the `code` it received from iNat to obtain an oauth token
-#    Uses the oauth token obtain a JWT
-#    Makes an authenticated iNat API request for the desired observations
-#    For each iNat obs in the search results, creates an InatObs and imports it
+#    iNat calls the MO redirect_url (authorization_response) with a code param
+# 4. MO continues in the authorization_response action
+#    Reads the saved InatImport instance
+#    Updates the InatImport instance with the code received from iNat
+#    Enqueues an InatImportJob, passing in the InatImport instance
+# 5. The rest happens in the background. The InatImportJob:
+#      Uses the `code` to obtain an oauth access_token
+#      Trades the oauth token for a JWT api_token
+#      Makes an authenticated iNat API request for the desired observations
+#      For each iNat obs in the results,
+#         creates an InatObs
+#         adds an MO Observation, mapping InatObs details to the MO Observation
+#         adds Inat photos to the MO Observation via the MO API
+#
 module Observations
   class InatImportsController < ApplicationController
     before_action :login_required
@@ -28,8 +40,6 @@ module Observations
     # what iNat will call after user responds to authorization request
     REDIRECT_URI =
       "http://localhost:3000/observations/inat_imports/authorization_response"
-    # The iNat API
-    API_BASE = "https://api.inaturalist.org/v1"
     # iNat's id for the MO application
     APP_ID = Rails.application.credentials.inat.id
 
@@ -96,7 +106,7 @@ module Observations
 
     def inat_authorization_url
       "#{SITE}/oauth/authorize" \
-      "?client_id=#{Rails.application.credentials.inat.id}" \
+      "?client_id=#{APP_ID}" \
       "&redirect_uri=#{REDIRECT_URI}" \
       "&response_type=code"
     end
@@ -111,12 +121,10 @@ module Observations
       return not_authorized if auth_code.blank?
 
       @inat_import = InatImport.find_or_create_by(user: User.current)
-      @inat_import.update(state: "Authenticating")
+      @inat_import.update(token: auth_code, state: "Authenticating")
 
-      access_token = obtain_access_token(auth_code)
-      @inat_import.update(token: access_token, state: "Importing")
-
-      # InatImportJob.perform_later(
+      # TODO: restore `perform_later`
+      # InatImportJob.perform_later(@inat_import)
       InatImportJob.perform_now(@inat_import)
 
       redirect_to(observations_path)
@@ -129,20 +137,6 @@ module Observations
     def not_authorized
       flash_error(:inat_no_authorization.l)
       redirect_to(observations_path)
-    end
-
-    def obtain_access_token(auth_code)
-      # Use "code" received from iNat to obtain an oAuth `access_token`
-      # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
-      payload = {
-        client_id: APP_ID,
-        client_secret: Rails.application.credentials.inat.secret,
-        code: auth_code,
-        redirect_uri: REDIRECT_URI,
-        grant_type: "authorization_code"
-      }
-      oauth_response = RestClient.post("#{SITE}/oauth/token", payload)
-      JSON.parse(oauth_response.body)["access_token"]
     end
   end
 end
