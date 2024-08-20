@@ -14,9 +14,9 @@ add_tab_set(observation_images_new_tabs(obs: @observation))
 
   <div id="license-notice mt-3"><%= :image_add_warning.tp %></div>
 
-  <%= submit_button(form: f, button: :image_add_upload.l, center: true) %>
-
   <%= render(partial: "observations/images/form/fields_for_upload") %>
+
+  <%= submit_button(form: f, button: :image_add_upload.l, center: true) %>
 
   <%= render(partial: "observations/images/form/fields_for_images",
              locals: { f: f, leave_out_original_file_name: true }) %>
