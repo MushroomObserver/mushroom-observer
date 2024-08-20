@@ -15,11 +15,11 @@ class InatImportJob < ApplicationJob
     @inat_import.update(state: "Authenticating")
     api_token = obtain_api_token(access_token)
 
-    @inat_import.update(token: api_token, state: "Importing")
+    inat_import.update(token: api_token, state: "Importing")
     # Make authenticated requests with the token
     import_requested_observations
 
-    @inat_import.update(state: "Done")
+    inat_import.update(state: "Done")
   end
 
   private
