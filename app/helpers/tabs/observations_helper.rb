@@ -273,10 +273,7 @@ module Tabs
     end
 
     def obs_details_links(obs)
-      return print_labels_button(obs) unless check_permission(obs)
-
-      [print_labels_button(obs),
-       obs_change_links(obs)].safe_join(" | ")
+      print_labels_button(obs)
     end
 
     # Buttons in "Details" panel header
