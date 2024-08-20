@@ -3,8 +3,7 @@
 class InatImportJob < ApplicationJob
   SITE = Observations::InatImportsController::SITE
   # iNat goes here when iNat user authorizes MO access to user's data
-  REDIRECT_URI =
-    "http://localhost:3000/observations/inat_imports/authenticate"
+  REDIRECT_URI = Observations::InatImportsController::REDIRECT_URI
   # The iNat API
   API_BASE = "https://api.inaturalist.org/v1"
   # iNat's id for the MO application
@@ -14,14 +13,15 @@ class InatImportJob < ApplicationJob
   queue_as :default
 
   def perform(auth_code, inat_import)
-    inat_import.update(state: "Authenticating")
+    @inat_import = inat_import
+    @inat_import.update(state: "Authenticating")
     api_token = obtain_api_token(auth_code)
 
-    inat_import.update(token: api_token, state: "Importing")
+    @inat_import.update(token: api_token, state: "Importing")
     # Make authenticated requests with the token
     import_requested_observations
 
-    inat_import.update(state: "Done")
+    @inat_import.update(state: "Done")
   end
 
   private
@@ -155,10 +155,6 @@ class InatImportJob < ApplicationJob
     # update_field_slip(@observation, params[:field_code])
   end
 
-  # def find_inat_import
-  #   InatImport.find_by(user: User.current)
-  # end
-
   def not_importable(inat_obs)
     return if inat_obs.taxon_importable?
 
@@ -184,7 +180,7 @@ class InatImportJob < ApplicationJob
       }
 
       api = InatPhotoImporter.new(params).api
-      User.current = @user # API call zaps User.current
+      # User.current = @user # API call zaps User.current
       # TODO: Error handling? 2024-06-19 jdc.
 
       image = Image.find(api.results.first.id)
@@ -194,7 +190,7 @@ class InatImportJob < ApplicationJob
       # t.boolean "gps_stripped", default: false, null: false
       # t.boolean "diagnostic", default: true, null: false
       image.update(
-        user_id: User.current.id, # throws Error if done as API param above
+        user_id: @inat_import.user_id, # throws Error if done as API param above
         # TODO: get date from EXIF; it could be > obs date
         when: @observation.when # throws Error if done as API param above
       )
@@ -237,11 +233,10 @@ class InatImportJob < ApplicationJob
   end
 
   def naming_user(identification)
-    importer =
-      InatImport.where(user_id: User.current.id).first.inat_username
+    importer = @inat_import.user
 
-    if identification[:user][:login] == importer
-      User.current
+    if identification[:user][:login] == importer.login
+      importer
     else
       # iNat user who made this identification might not be an MO User
       # So make inat_manager the user for the Proposed Name
@@ -249,7 +244,7 @@ class InatImportJob < ApplicationJob
     end
   end
 
-  def add_naming_with_vote(name:, user: User.current, value: 0)
+  def add_naming_with_vote(name:, user: @inat_import.user, value: 0)
     naming = Naming.create(observation: @observation,
                            user: user,
                            name: name)
@@ -277,7 +272,7 @@ class InatImportJob < ApplicationJob
                rank: "Species"
              }
              api = API2.execute(params)
-             User.current = @user # API call zaps User.current
+             # User.current = @user # API call zaps User.current
 
              new_name = api.results.first
              new_name.log(:log_name_created)
@@ -322,7 +317,7 @@ class InatImportJob < ApplicationJob
 
       # TODO: Error handling? 2024-06-19 jdc.
       api = API2.execute(params)
-      User.current = @user # API call zaps User.current
+      # User.current = @user # API call zaps User.current
     end
   end
 

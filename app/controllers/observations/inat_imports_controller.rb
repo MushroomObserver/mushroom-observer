@@ -23,10 +23,11 @@ module Observations
     before_action :login_required
     before_action :pass_query_params
 
-    # constants for iNat authorization and authentication
-    #
     # Site for authorization and authentication requests
     SITE = "https://www.inaturalist.org"
+    # what iNat will call after user responds to authorization request
+    REDIRECT_URI =
+      "http://localhost:3000/observations/inat_imports/authenticate"
 
     def new; end
 
