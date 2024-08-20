@@ -8,7 +8,7 @@ class InatImportJob < ApplicationJob
   # iNat calls this after iNat user authorizes MO access to user's data
   REDIRECT_URI = Observations::InatImportsController::REDIRECT_URI
   # The iNat API
-  API_BASE = "https://api.inaturalist.org/v1"
+  API_BASE = Observations::InatImportsController::API_BASE
   # limit results iNat API requests, with Protozoa as a proxy for slime molds
   ICONIC_TAXA = "Fungi,Protozoa"
 
