@@ -1,4 +1,4 @@
-<%# locals: (local:, show_reasons: true, form_locals: {}) -%>
+<%# locals: (local: false, form_locals: {}) -%>
 
 <%
 # Fields must be separate because they're included in the obs form too.
@@ -35,7 +35,7 @@ end
 # `naming_locals`: modal forms can accept a `form_locals` local. The controller
 # may send `context` (i.e. where the form appears), which defaults to "blank".
 # `show_reasons` is false on the obs form, true on the naming form.
-naming_locals = { create:, button_name:, show_reasons: }.merge(form_locals)
+naming_locals = { create:, button_name:, show_reasons: true, context: "blank" }.merge(form_locals)
 %>
 
 <%= form_with(**form_args) do |f| %>
