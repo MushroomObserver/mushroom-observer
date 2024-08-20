@@ -535,6 +535,7 @@ export default class extends GeocodeController {
 
   // Action called from the "Clear Map" button
   clearMap() {
+    this.verbose("map:clearMap")
     const inputTargets = [
       this.placeInputTarget, this.northInputTarget, this.southInputTarget,
       this.eastInputTarget, this.westInputTarget, this.highInputTarget,
@@ -547,17 +548,28 @@ export default class extends GeocodeController {
     inputTargets.forEach((element) => { element.value = '' })
     this.ignorePlaceInput = false // turn string geolocation back on
 
-    if (this.marker) {
-      this.marker.setMap(null)
-      this.marker = null
-    }
-    if (this.rectangle) {
-      this.rectangle.setMap(null)
-      this.rectangle = null
-      // this.showBoxBtnTarget.disabled = false
-    }
+    this.clearMarker()
+    this.clearRectangle()
     this.dispatch("reenableBtns")
     this.sendPointChanged({ lat: null, lng: null })
+  }
+
+  clearMarker() {
+    if (!this.marker) return false
+
+    this.verbose("map:clearMarker")
+    this.marker.setMap(null)
+    this.marker = null
+  }
+
+  clearRectangle() {
+    if (!this.rectangle) return false
+
+    this.verbose("map:clearRectangle")
+    this.rectangle.setVisible(false)
+    this.rectangle.setMap(null)
+    this.rectangle = null
+    return true
   }
 
   //
