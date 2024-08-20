@@ -25,7 +25,7 @@ module AutocompleterHelper
     ac_args[:wrap_data] = { autocompleter_target: "wrap" }
     ac_args[:label_after] = autocompleter_label_after(args)
     ac_args[:label_end] = autocompleter_label_end(args)
-    ac_args[:append] = autocompleter_dropdown
+    ac_args[:append] = autocompleter_append(args)
 
     tag.div(id: args[:controller_id],
             data: autocompleter_controller_data(args)) do
@@ -61,8 +61,7 @@ module AutocompleterHelper
       [
         autocompleter_has_id_indicator,
         autocompleter_find_button(args),
-        autocompleter_keep_button(args),
-        autocompleter_hidden_field(**args)
+        autocompleter_keep_button(args)
       ].safe_join
     end
   end
@@ -148,6 +147,11 @@ module AutocompleterHelper
     else
       type
     end
+  end
+
+  def autocompleter_append(args)
+    [autocompleter_dropdown,
+     autocompleter_hidden_field(**args)].safe_join
   end
 
   def autocompleter_dropdown
