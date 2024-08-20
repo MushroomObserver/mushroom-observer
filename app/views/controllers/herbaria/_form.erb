@@ -65,8 +65,7 @@ end
 
   <!-- MAP -->
   <% append = capture do
-    tag.div(class: "mb-5",
-            data: { autocompleter_target: "mapWrap" }) do
+    tag.div(class: "mb-5", data: { autocompleter_target: "mapWrap" }) do
       render(partial: "shared/form_location_map",
              locals: { id: "herbarium_form_map", map_type: "location" })
     end
