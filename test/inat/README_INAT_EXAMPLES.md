@@ -23,7 +23,7 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | coprinus| [213450312](https://www.inaturalist.org/observations/213450312) | 1 | **obscured** | Needs ID |
 | distantes| [215996396](https://www.inaturalist.org/observations/215996396) | 1 | **obscured, includes confidential gps** | Needs ID, jdc Obs, taxon[:name]: "Distantes" rank:"section", rank_level:13|
 | donadina_PNW01| [212320801](https://www.inaturalist.org/observations/212320801) | 1 | public | **non-mo-style Provisional Species Name (PNW)**, **DNA** |
-| evernia| [216357655](https://www.inaturalist.org/observations/216357655) | 0 | public | Casual, lichen, no fields, place: Troutdale |
+| evernia| [216357655](https://www.inaturalist.org/observations/216357655) | 0 | public | user `jgerend` Casual, lichen, no fields, place: Troutdale |
 | fuligo_septica| [219783802](https://www.inaturalist.org/observations/219783802) | 1 | public | slime mold **Protozoa** Richmond, CA |
 | gyromitra_ancilis| [216745568](https://www.inaturalist.org/observations/216745568) | 3 | public | **cc-by license**, **many projects**, US 20, Linn Co.|
 | import_all|  |  | | all fungal obss (total of 5) of iNat user devin189, 2 per page (this user had few fungal observations) |

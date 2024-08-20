@@ -23,10 +23,13 @@ module Observations
     before_action :login_required
     before_action :pass_query_params
 
-    # constants for iNat authorization and authentication
-    #
     # Site for authorization and authentication requests
     SITE = "https://www.inaturalist.org"
+    # what iNat will call after user responds to authorization request
+    REDIRECT_URI =
+      "http://localhost:3000/observations/inat_imports/authenticate"
+    # iNat's id for the MO application; this is set in iNat
+    APP_ID = Rails.application.credentials.inat.id
 
     def new; end
 
@@ -105,9 +108,15 @@ module Observations
       auth_code = params[:code]
       return not_authorized if auth_code.blank?
 
+      @inat_import = InatImport.find_or_create_by(user: User.current)
+      @inat_import.update(state: "Authenticating")
+      access_token = obtain_access_token(auth_code)
+
+      @inat_import.update(token: access_token, state: "Importing")
+
       # InatImportJob.perform_later(
       InatImportJob.perform_now(
-        auth_code,
+        access_token,
         InatImport.find_or_create_by(user: User.current)
       )
 
@@ -121,6 +130,20 @@ module Observations
     def not_authorized
       flash_error(:inat_no_authorization.l)
       redirect_to(observations_path)
+    end
+
+    def obtain_access_token(auth_code)
+      # Use "code" received from iNat to obtain an oAuth `access_token`
+      # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
+      payload = {
+        client_id: APP_ID,
+        client_secret: Rails.application.credentials.inat.secret,
+        code: auth_code,
+        redirect_uri: REDIRECT_URI,
+        grant_type: "authorization_code"
+      }
+      oauth_response = RestClient.post("#{SITE}/oauth/token", payload)
+      JSON.parse(oauth_response.body)["access_token"]
     end
   end
 end
