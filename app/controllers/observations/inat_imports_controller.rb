@@ -30,7 +30,7 @@ module Observations
 
     # iNat goes here when iNat user authorizes MO access to user's data
     REDIRECT_URI =
-      "http://localhost:3000/observations/inat_imports/authenticate"
+      "http://localhost:3000/observations/inat_imports/authorization_response"
     # The iNat API
     API_BASE = "https://api.inaturalist.org/v1"
     # iNat's id for the MO application
@@ -111,7 +111,7 @@ module Observations
     public
 
     # iNat redirects here after user completes iNat authorization
-    def authenticate
+    def authorization_response
       auth_code = params[:code]
       return not_authorized if auth_code.blank?
 
