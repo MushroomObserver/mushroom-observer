@@ -119,7 +119,7 @@ module Observations
                              "denied the request." }
       login
 
-      get(:authenticate, params: inat_authorization_callback_params)
+      get(:authorization_response, params: inat_authorization_callback_params)
 
       assert_redirected_to(observations_path)
       assert_flash_error
@@ -136,7 +136,7 @@ module Observations
 
       stub_token_requests
       login(user.login)
-      get(:authenticate, params: inat_authorization_callback_params)
+      get(:authorization_response, params: inat_authorization_callback_params)
 
       assert_enqueued_jobs(1)
 
@@ -333,7 +333,7 @@ module Observations
       assert_no_difference(
         "Observation.count", "Should not import iNat Plant observations"
       ) do
-        post(:authenticate, params: params)
+        post(:authorization_response, params: params)
       end
 
       assert_flash_text(:inat_taxon_not_importable.l(id: inat_import_ids))
@@ -357,7 +357,7 @@ module Observations
         "Observation.count",
         "Should not import if there's no iNat obs with a matching id"
       ) do
-        post(:authenticate, params: params)
+        post(:authorization_response, params: params)
       end
     end
 
@@ -389,7 +389,7 @@ module Observations
       assert_difference(
         "Observation.count", 2, "Failed to create multiple observations"
       ) do
-        post(:authenticate, params: params)
+        post(:authorization_response, params: params)
       end
     end
 
@@ -417,7 +417,7 @@ module Observations
       assert_difference(
         "Observation.count", 2, "Failed to create multiple observations"
       ) do
-        post(:authenticate, params: params)
+        post(:authorization_response, params: params)
       end
     end
 
@@ -451,7 +451,7 @@ module Observations
       # Enables testing everything except Observation.images. jdc 2024-06-23
       InatPhotoImporter.stub(:new, mock_photo_importer(inat_obs)) do
         assert_difference("Observation.count", 1, "Failed to create Obs") do
-          post(:authenticate, params: params)
+          post(:authorization_response, params: params)
         end
       end
 

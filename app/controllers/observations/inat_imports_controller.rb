@@ -27,8 +27,10 @@ module Observations
     SITE = "https://www.inaturalist.org"
     # what iNat will call after user responds to authorization request
     REDIRECT_URI =
-      "http://localhost:3000/observations/inat_imports/authenticate"
-    # iNat's id for the MO application; this is set in iNat
+      "http://localhost:3000/observations/inat_imports/authorization_response"
+    # The iNat API
+    API_BASE = "https://api.inaturalist.org/v1"
+    # iNat's id for the MO application
     APP_ID = Rails.application.credentials.inat.id
 
     def new; end
@@ -104,7 +106,7 @@ module Observations
     public
 
     # iNat redirects here after user completes iNat authorization
-    def authenticate
+    def authorization_response
       auth_code = params[:code]
       return not_authorized if auth_code.blank?
 
