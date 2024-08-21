@@ -12,8 +12,6 @@ class MockImageAPI
 end
 
 class InatImportJobTest < ActiveJob::TestCase
-  include Rails.application.routes.url_helpers
-
   SITE = Observations::InatImportsController::SITE
   REDIRECT_URI = Observations::InatImportsController::REDIRECT_URI
   API_BASE = Observations::InatImportsController::API_BASE
@@ -21,7 +19,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
   ICONIC_TAXA = InatImportJob::ICONIC_TAXA
 
-  def test_import_simple_observation
+  def test_import_job_basic_obs
     # This obs has 1 identification, 0 photos, 0 observation_fields
     file_name = "calostoma_lutescens"
     user = users(:rolf)
@@ -39,7 +37,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     inat_import = InatImport.create(user: user, token: "MockCode",
                                     inat_ids: "195434438",
-                                    inat_username: "mycoprimuspublic")
+                                    inat_username: "mycoprimus")
     stub_token_requests
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     stub_inat_api_request(inat_import: inat_import,
@@ -48,7 +46,6 @@ class InatImportJobTest < ActiveJob::TestCase
     InatImportJob.perform_now(inat_import)
 
     obs = Observation.order(created_at: :asc).last
-
     assert_not_nil(obs.rss_log)
 
     assert_equal(name, obs.name)
@@ -72,31 +69,42 @@ class InatImportJobTest < ActiveJob::TestCase
            "Missing Initial Commment (#{:inat_data_comment.l})")
   end
 
-  def test_import_evernia
-    skip("under repair")
+  def test_import_job_obs_with_one_photo
+    skip("under_construction")
+    # This obs has 1 identification, 1 photo, 0 observation_fields
+    file_name = "evernia"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
     user = users(:rolf)
+    name = Name.create(
+      text_name: "Evernia", author: "Ach.", display_name: "Evernia",
+      rank: "Genus", user: user
+    )
     loc = Location.create(
       user: user,
       name: "Troutdale, Multnomah Co., Oregon, USA",
-      north: 45.5609,
-      south: 45.5064,
-      east: -122.367,
-      west: -122.431
+      north: 45.5609, south: 45.5064,
+      east: -122.367, west: -122.431
     )
-    evernia = Name.create(text_name: "Evernia",
-                          author: "Ach.",
-                          display_name: "Evernia",
-                          rank: "Genus",
-                          user: user)
+    inat_import = InatImport.create(
+      user: user, token: "MockCode",
+      inat_ids: JSON.parse(mock_inat_response)["results"].first["id"],
+      inat_username: JSON.
+        parse(mock_inat_response)["results"].first["user"]["login"]
+    )
 
-    obs = import_mock_observation("evernia")
+    stub_token_requests
+    stub_inat_api_request(inat_import: inat_import,
+                          mock_inat_response: mock_inat_response)
+    stub_inat_photo_requests(mock_inat_response)
 
+    InatImportJob.perform_now(inat_import)
+
+    obs = Observation.order(created_at: :asc).last
     assert_not_nil(obs.rss_log)
-    assert_redirected_to(observations_path)
 
-    assert_equal(evernia, obs.name)
+    assert_equal(name, obs.name)
     namings = obs.namings
-    naming = namings.find_by(name: evernia)
+    naming = namings.find_by(name: name_id)
     assert(naming.present?, "Missing Naming for MO consensus ID")
     assert_equal(user, naming.user,
                  "Naming with iNat ID should have user == MO User")
@@ -265,8 +273,6 @@ class InatImportJobTest < ActiveJob::TestCase
   def stub_inat_photo_requests(mock_inat_response)
     JSON.parse(mock_inat_response)["results"].each do |result|
       result["observation_photos"].each do |photo|
-        debugger
-
         stub_request(
           :get,
           "#{PHOTO_BASE}/#{photo["photo_id"]}/original.jpg"
