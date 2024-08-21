@@ -7,5 +7,9 @@ module CustomTurboStreamActions
     action(:close_modal, "#", id)
   end
 
+  def update_input(id, value)
+    action(:update_input, id, value)
+  end
+
   ::Turbo::Streams::TagBuilder.include(self)
 end

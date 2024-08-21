@@ -128,7 +128,7 @@ class HerbariaController < ApplicationController
   def render_modal_herbarium_form
     render(partial: "shared/modal_form",
            locals: { title: modal_title, action: modal_form_action,
-                     identifier: modal_identifier,
+                     identifier: modal_identifier, local: false,
                      form: "herbaria/form" }) and return
   end
 
@@ -380,7 +380,7 @@ class HerbariaController < ApplicationController
 
   def redirect_to_create_location_or_referrer_or_show_location
     redirect_to_create_location || redirect_to_referrer ||
-      redirect_with_query(herbarium_path(@herbarium))
+      show_modal_flash_or_show_herbarium
   end
 
   def redirect_to_create_location
@@ -401,11 +401,30 @@ class HerbariaController < ApplicationController
     ) and return true
   end
 
+  # What to do if the save succeeds
+  def show_modal_flash_or_show_herbarium
+    respond_to do |format|
+      format.html do
+        redirect_with_query(herbarium_path(@herbarium)) and return
+      end
+      format.turbo_stream do
+        # Context here is the obs form.
+        flash_notice(
+          :runtime_created_name.t(type: :herbarium, value: @herbarium.name)
+        )
+        flash_notice(
+          :runtime_added_to.t(type: :herbarium, name: :observation)
+        )
+        render(partial: "herbaria/update_observation") and return
+      end
+    end
+  end
+
   def herbarium_params
     return {} unless params[:herbarium]
 
     params.require(:herbarium).
-      permit(:name, :code, :email, :mailing_address, :description,
+      permit(:name, :code, :email, :mailing_address, :description, :location_id,
              :place_name, :personal, :personal_user_name)
   end
 end

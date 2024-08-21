@@ -18,6 +18,12 @@ Turbo.setFormMode("optin")
 Turbo.StreamActions.close_modal = function () {
   $("#" + this.templateContent.textContent).modal('hide')
 };
+// https://stackoverflow.com/a/76744968/3357635
+Turbo.StreamActions.update_input = function () {
+  this.targetElements.forEach((target) => {
+    target.value = this.templateContent.textContent
+  });
+};
 
 import "@rails/request.js"
 
