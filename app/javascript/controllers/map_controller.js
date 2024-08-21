@@ -509,10 +509,6 @@ export default class extends GeocodeController {
       this.closeMap()
     } else {
       this.openMap()
-      setTimeout(() => {
-        this.checkForMarker()
-        this.checkForBox() // regardless if point
-      }, 500) // wait for map to open
     }
   }
 
@@ -533,6 +529,11 @@ export default class extends GeocodeController {
     } else if (this.mapBounds) {
       this.map.fitBounds(this.mapBounds)
     }
+
+    setTimeout(() => {
+      this.checkForMarker()
+      this.checkForBox() // regardless if point
+    }, 500) // wait for map to open
   }
 
   makeMapClickable() {

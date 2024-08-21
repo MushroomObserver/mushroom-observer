@@ -143,7 +143,7 @@ export default class extends Controller {
     })
     this.verbose("geocode:sendPrimer")
     this.verbose(primer)
-    debugger
+
     // Call autocompleter#refreshGooglePrimer directly
     if (this.hasAutocompleterOutlet) {
       this.autocompleterOutlet.refreshGooglePrimer({ primer })
