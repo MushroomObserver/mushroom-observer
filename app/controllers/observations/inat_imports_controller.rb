@@ -125,9 +125,7 @@ module Observations
       @inat_import = InatImport.find_or_create_by(user: User.current)
       @inat_import.update(token: auth_code, state: "Authenticating")
 
-      # TODO: restore `perform_later`
-      # InatImportJob.perform_later(@inat_import)
-      InatImportJob.perform_now(@inat_import)
+      InatImportJob.perform_later(@inat_import)
 
       redirect_to(observations_path)
     end
