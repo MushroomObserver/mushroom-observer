@@ -22,11 +22,11 @@ class InatImportJob < ApplicationJob
     @inat_import.update(token: access_token)
 
     api_token = trade_access_token_for_jwt_api_token(@inat_import.token)
-    inat_import.update(token: api_token, state: "Importing")
+    @inat_import.update(token: api_token, state: "Importing")
 
     import_requested_observations
 
-    inat_import.update(state: "Done")
+    @inat_import.update(state: "Done")
   end
 
   private
@@ -130,6 +130,7 @@ class InatImportJob < ApplicationJob
     return not_importable(inat_obs) unless inat_obs.importable?
 
     @observation = Observation.create(
+      user: @inat_import.user,
       when: inat_obs.when,
       location: inat_obs.location,
       where: inat_obs.where,
@@ -226,7 +227,7 @@ class InatImportJob < ApplicationJob
       next if name_already_proposed?(inat_taxon.name)
 
       add_naming_with_vote(name: inat_taxon.name,
-                           user: naming_user(identification), value: 0)
+                           user: inat_manager, value: 0)
     end
   end
 
@@ -235,22 +236,9 @@ class InatImportJob < ApplicationJob
       map(&:name).include?(name)
   end
 
-  def naming_user(identification)
-    importer = @inat_import.user
-
-    if identification[:user][:login] == importer.login
-      importer
-    else
-      # iNat user who made this identification might not be an MO User
-      # So make inat_manager the user for the Proposed Name
-      inat_manager
-    end
-  end
-
   def add_naming_with_vote(name:, user: @inat_import.user, value: 0)
     naming = Naming.create(observation: @observation,
-                           user: user,
-                           name: name)
+                           user: user, name: name)
 
     Vote.create(naming: naming, observation: @observation,
                 user: user, value: value)
