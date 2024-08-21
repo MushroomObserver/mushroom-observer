@@ -491,6 +491,7 @@ export default class extends Controller {
     // this.debug("ourChange(" + this.inputTarget.value + ")");
     if (new_val.length == 0) {
       this.cssCollapseFields();
+      this.clearHiddenId();
       this.leaveCreate();
     } else {
       this.cssUncollapseFields();
