@@ -660,7 +660,7 @@ export default class extends GeocodeController {
   // }
 
   verbose(str) {
-    console.log(str);
+    // console.log(str);
     // document.getElementById("log").
     //   insertAdjacentText("beforeend", str + "<br/>");
   }

@@ -299,15 +299,15 @@ export default class extends Controller {
     }
 
     this.verbose("autocompleter:activateMapOutlet()");
-    // set the map type so box is editable
-    this.mapOutlet.map_type = "hybrid"; // only if location_google
-    // set the map to stop ignoring place input
-    this.mapOutlet.ignorePlaceInput = false;
     // open the map if not already open
     if (!this.mapOutlet.opened && this.mapOutlet.hasToggleMapBtnTarget) {
       this.verbose("autocompleter: open map");
       this.mapOutlet.toggleMapBtnTarget.click();
     }
+    // set the map type so box is editable
+    this.mapOutlet.map_type = "hybrid"; // only if location_google
+    // set the map to stop ignoring place input
+    this.mapOutlet.ignorePlaceInput = false;
 
     // Often, this swap to location_google is for geolocating place_names and
     // should pay attention to text only. But in some cases the swap (e.g., from
@@ -1614,7 +1614,7 @@ export default class extends Controller {
   }
 
   verbose(str) {
-    console.log(str);
+    // console.log(str);
     // document.getElementById("log").
     //   insertAdjacentText("beforeend", str + "<br/>");
   }
