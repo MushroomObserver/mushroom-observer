@@ -117,10 +117,6 @@ class InatImportJobTest < ActiveJob::TestCase
 
   ########## Utilities
 
-  def inat_manager
-    User.find_by(login: "MO Webmaster")
-  end
-
   def import_mock_observation(filename)
     user = users(:rolf)
     mock_search_result = File.read("test/inat/#{filename}.txt")
