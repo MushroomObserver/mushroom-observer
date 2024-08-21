@@ -299,15 +299,15 @@ export default class extends Controller {
     }
 
     this.verbose("autocompleter:activateMapOutlet()");
-    // open the map if not already open
-    if (!this.mapOutlet.opened && this.mapOutlet.hasToggleMapBtnTarget) {
-      this.verbose("autocompleter: open map");
-      this.mapOutlet.toggleMapBtnTarget.click();
-    }
     // set the map type so box is editable
     this.mapOutlet.map_type = "hybrid"; // only if location_google
     // set the map to stop ignoring place input
     this.mapOutlet.ignorePlaceInput = false;
+    // open the map if not already open
+    if (!this.mapOutlet.opened && this.mapOutlet.hasToggleMapBtnTarget) {
+      this.verbose("autocompleter: open map");
+      this.mapOutlet.openMap();
+    }
 
     // Often, this swap to location_google is for geolocating place_names and
     // should pay attention to text only. But in some cases the swap (e.g., from
@@ -600,10 +600,11 @@ export default class extends Controller {
       this.verbose(this.inputTarget.value);
       this.old_value = this.inputTarget.value;
       // async, anything after this executes immediately
+      // STORE AND COMPARE SEARCH STRING. Otherwise we're doing double lookups
       if (this.hasGeocodeOutlet) {
-        this.geocodeOutlet.geolocatePlaceName(this.inputTarget.value);
+        this.geocodeOutlet.tryToGeolocate(this.inputTarget.value);
       } else if (this.hasMapOutlet) {
-        this.mapOutlet.geolocatePlaceName(this.inputTarget.value);
+        this.mapOutlet.tryToGeolocate(this.inputTarget.value);
       }
       // still necessary if primer unchanged, as likely?
       // this.populateMatches();
@@ -1075,14 +1076,15 @@ export default class extends Controller {
       { north, south, east, west } = this.hiddenTarget.dataset,
       hidden_data = { id: hidden_id, north, south, east, west };
 
-    this.verbose("autocompleter:hidden_data: " + JSON.stringify(hidden_data));
     // comparing data, not just ids, because google locations have same -1 id
     if (JSON.stringify(hidden_data) == JSON.stringify(this.stored_data)) {
-      this.verbose("autocompleter: hidden data did not change");
+      this.verbose("autocompleter: hidden_data did not change");
     } else {
       clearTimeout(this.data_timer);
       this.data_timer = setTimeout(() => {
-        this.verbose("autocompleter: hidden data changed");
+        this.verbose("autocompleter: hidden_data changed");
+        this.verbose("autocompleter:hidden_data: ")
+        this.verbose(JSON.stringify(hidden_data));
         this.cssHasIdOrNo(hidden_id);
         if (this.hasKeepBtnTarget) {
           this.keepBtnTarget.classList.remove('active');

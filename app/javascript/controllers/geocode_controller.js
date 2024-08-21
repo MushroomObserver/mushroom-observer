@@ -45,6 +45,7 @@ export default class extends Controller {
   }
 
   tryToGeocode() {
+    this.verbose("geocode:tryToGeocode")
     const location = this.validateLatLngInputs(false)
 
     if (location &&
@@ -75,6 +76,7 @@ export default class extends Controller {
   }
 
   tryToGeolocate() {
+    this.verbose("geocode:tryToGeolocate")
     const address = this.placeInputTarget.value
 
     if (this.ignorePlaceInput === false &&
@@ -84,6 +86,8 @@ export default class extends Controller {
   }
 
   geolocatePlaceName(address) {
+    if (address == this.lastGeolocatedAddress) return false
+
     this.lastGeolocatedAddress = address
     this.verbose("geocode:geolocatePlaceName")
     this.verbose(address)
@@ -139,7 +143,7 @@ export default class extends Controller {
     })
     this.verbose("geocode:sendPrimer")
     this.verbose(primer)
-
+    debugger
     // Call autocompleter#refreshGooglePrimer directly
     if (this.hasAutocompleterOutlet) {
       this.autocompleterOutlet.refreshGooglePrimer({ primer })

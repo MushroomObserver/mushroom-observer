@@ -403,6 +403,7 @@ export default class extends GeocodeController {
     } else if (["location", "hybrid"].includes(this.map_type)) {
       // Only geocode lat/lng if we have no location_id and not ignoring place
       // ...and only geolocate placeName if we have no lat/lng
+      // Note: is this the right logic ?????????????
       if (this.ignorePlaceInput !== false) {
         this.tryToGeocode() // multiple possible results
       } else {
@@ -508,6 +509,10 @@ export default class extends GeocodeController {
       this.closeMap()
     } else {
       this.openMap()
+      setTimeout(() => {
+        this.checkForMarker()
+        this.checkForBox() // regardless if point
+      }, 500) // wait for map to open
     }
   }
 
@@ -528,11 +533,6 @@ export default class extends GeocodeController {
     } else if (this.mapBounds) {
       this.map.fitBounds(this.mapBounds)
     }
-
-    setTimeout(() => {
-      this.checkForMarker()
-      this.checkForBox() // regardless if point
-    }, 500) // wait for map to open
   }
 
   makeMapClickable() {
