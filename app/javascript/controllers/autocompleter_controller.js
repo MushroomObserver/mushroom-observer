@@ -306,7 +306,7 @@ export default class extends Controller {
     // open the map if not already open
     if (!this.mapOutlet.opened && this.mapOutlet.hasToggleMapBtnTarget) {
       this.verbose("autocompleter: open map");
-      this.mapOutlet.openMap();
+      this.mapOutlet.toggleMapBtnTarget.click();
     }
 
     // Often, this swap to location_google is for geolocating place_names and
@@ -1044,7 +1044,7 @@ export default class extends Controller {
       if (this.wrapTarget.classList.contains('create')) {
         this.mapWrapTarget.classList.remove('d-none');
       } else {
-        this.mapWrapTarget.classList.add('d-none');
+        // this.mapWrapTarget.classList.add('d-none');
       }
     }
   }
