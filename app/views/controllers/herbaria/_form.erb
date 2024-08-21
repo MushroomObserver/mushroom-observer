@@ -1,4 +1,4 @@
-<%# locals: (action:) -%>
+<%# locals: (action:, local:) -%>
 <%
 create = (action == :create)
 button_name = create ? :CREATE.l : :SAVE.l
@@ -20,16 +20,24 @@ if in_admin_mode? && !create
     end
   end
 end
-%>
 
-<%= form_with(
-  model: @herbarium, id: "herbarium_form",
+form_args = {
+  model: @herbarium,
+  id: "herbarium_form",
   data: {
     controller: "map", map_open: false,
-    map_autocompleter_outlet: "#herbarium_location_autocompleter",
-    # action: "autocompleter:hiddenIdDataChanged@window->map#showBox"
+    map_autocompleter_outlet: "#herbarium_location_autocompleter"
   }
-) do |f| %>
+}
+if local
+  form_args = form_args.merge({ local: true })
+else
+  form_args = form_args.deep_merge({ data: { turbo: true } })
+end
+
+%>
+
+<%= form_with(**form_args) do |f| %>
 
   <%= f.hidden_field(:back, value: @back) %>
   <%= f.hidden_field(:q, value: get_query_param) %>
@@ -65,9 +73,9 @@ end
 
   <!-- MAP -->
   <% append = capture do
-    tag.div(class: "mb-5", data: { autocompleter_target: "mapWrap" }) do
+    tag.div(class: "mb-5 d-none", data: { autocompleter_target: "mapWrap" }) do
       render(partial: "shared/form_location_map",
-             locals: { id: "herbarium_form_map", map_type: "location" })
+             locals: { id: "herbarium_form_map", map_type: "observation" })
     end
   end %>
   <!-- /MAP -->
