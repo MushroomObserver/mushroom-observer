@@ -26,7 +26,7 @@ end
   model: @herbarium, id: "herbarium_form",
   data: {
     controller: "map", map_open: false,
-    map_autocompleter_outlet: "herbarium_location_autocompleter",
+    map_autocompleter_outlet: "#herbarium_location_autocompleter",
     # action: "autocompleter:hiddenIdDataChanged@window->map#showBox"
   }
 ) do |f| %>
@@ -77,8 +77,8 @@ end
     label: [tag.span("#{:LOCATION.l}:", class: "unconstrained-label"),
             tag.span("#{:form_observations_create_locality.l}:",
                      class: "create-label")].safe_join(" "),
-    wrap_data: { map_target: "autocompleter" },
-    wrap_id: "herbarium_location_autocompleter",
+    controller_data: { map_target: "autocompleter" },
+    controller_id: "herbarium_location_autocompleter",
     between: :optional,
     append:,
     hidden_data: { map_target: "locationId" },
