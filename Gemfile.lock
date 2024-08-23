@@ -78,7 +78,7 @@ GEM
     bootstrap-sass (3.4.1)
       autoprefixer-rails (>= 5.2.1)
       sassc (>= 2.0.0)
-    brakeman (6.1.2)
+    brakeman (6.2.1)
       racc
     browser (6.0.0)
     builder (3.3.0)
