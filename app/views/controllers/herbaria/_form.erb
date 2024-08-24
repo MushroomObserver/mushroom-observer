@@ -1,4 +1,4 @@
-<%# locals: (action:, local:) -%>
+<%# locals: (action:, local: true) -%>
 <%
 create = (action == :create)
 button_name = create ? :CREATE.l : :SAVE.l
@@ -29,7 +29,7 @@ form_args = {
     map_autocompleter_outlet: "#herbarium_location_autocompleter"
   }
 }
-if local
+if local == true
   form_args = form_args.merge({ local: true })
 else
   form_args = form_args.deep_merge({ data: { turbo: true } })
