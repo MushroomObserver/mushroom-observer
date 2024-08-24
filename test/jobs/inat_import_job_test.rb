@@ -149,6 +149,180 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs.sequences.none?)
   end
 
+  def test_import_lycoperdon
+    # TODO: Move to InatImportJobTest
+    skip("To be moved to InatImportJobTest")
+    obs = import_mock_observation("lycoperdon")
+
+    assert(obs.images.any?, "Obs should have images")
+    assert(obs.sequences.one?, "Obs should have a sequence")
+  end
+
+  # Prove that Namings, Votes, Identification are correct
+  # When iNat obs has provisional name that's in MO
+  def test_import_arrhenia_sp_ny02_old_name
+    # TODO: Move to InatImportJobTest
+    skip("To be moved to InatImportJobTest")
+    name = Name.create(
+      text_name: 'Arrhenia "sp-NY02"',
+      author: "S.D. Russell crypt. temp.",
+      display_name: '**__Arrhenia "sp-NY02"__** S.D. Russell crypt. temp.',
+      rank: "Species",
+      user: rolf
+    )
+
+    obs = import_mock_observation("arrhenia_sp_NY02")
+
+    namings = obs.namings
+    naming = namings.find_by(name: name)
+    assert(naming.present?, "Missing Naming for provisional name")
+    assert_equal(inat_manager, naming.user,
+                 "Naming without iNat ID should have user: inat_manager")
+    vote = Vote.find_by(naming: naming, user: naming.user)
+    assert(vote.present?, "Naming is missing a Vote")
+    assert_equal(name, obs.name, "Consensus ID should be provisional name")
+    assert(vote.value.positive?, "Vote for MO consensus should be positive")
+  end
+
+  # Prove that Namings, Votes, Identification are correct
+  # when iNat obs has provisional name that wasn't in MO
+  def test_import_arrhenia_sp_ny02_new_name
+    # TODO: Move to InatImportJobTest
+    skip("To be moved to InatImportJobTest")
+    assert_nil(Name.find_by(text_name: 'Arrhenia "sp-NY02"'),
+               "Test requires that MO not yest have provisional name")
+
+    obs = import_mock_observation("arrhenia_sp_NY02")
+
+    name = Name.find_by(text_name: 'Arrhenia "sp-NY02"')
+    assert(name.rss_log_id.present?)
+
+    assert(name.present?, "Failed to create provisional name")
+    namings = obs.namings
+    naming = namings.find_by(name: name)
+    assert(naming.present?, "Missing Naming for provisional name")
+    assert_equal(inat_manager, naming.user,
+                 "Naming without iNat ID should have user: inat_manager")
+    vote = Vote.find_by(naming: naming, user: naming.user)
+    assert(vote.present?, "Naming is missing a Vote")
+    assert_equal(name, obs.name, "Consensus ID should be provisional name")
+    assert(vote.value.positive?, "Vote for MO consensus should be positive")
+  end
+
+  def test_import_plant
+    # TODO: Move to InatImportJobTest
+    skip("To be moved to InatImportJobTest")
+    user = rolf
+    filename = "ceanothus_cordulatus"
+    mock_search_result = File.read("test/inat/#{filename}.txt")
+    inat_import_ids = InatObs.new(
+      JSON.generate(JSON.parse(mock_search_result)["results"].first)
+    ).inat_id
+
+    simulate_all_inat_interactions(user: user,
+                                   inat_import_ids: inat_import_ids,
+                                   mock_inat_response: mock_search_result)
+
+    params = { inat_ids: inat_import_ids, code: "MockCode" }
+    login(user.login)
+
+    assert_no_difference(
+      "Observation.count", "Should not import iNat Plant observations"
+    ) do
+      post(:authorization_response, params: params)
+    end
+
+    assert_flash_text(:inat_taxon_not_importable.l(id: inat_import_ids))
+  end
+
+  def test_import_zero_results
+    # TODO: Move to InatImportJobTest
+    skip("To be moved to InatImportJobTest")
+    user = rolf
+    filename = "zero_results"
+    mock_search_result = File.read("test/inat/#{filename}.txt")
+    inat_import_ids = "123"
+
+    simulate_all_inat_interactions(
+      user: user, inat_import_ids: inat_import_ids,
+      mock_inat_response: mock_search_result
+    )
+
+    params = { inat_ids: inat_import_ids, code: "MockCode" }
+    login(user.login)
+
+    assert_no_difference(
+      "Observation.count",
+      "Should not import if there's no iNat obs with a matching id"
+    ) do
+      post(:authorization_response, params: params)
+    end
+  end
+
+  def test_import_multiple
+    # TODO: Move to InatImportJobTest
+    skip("To be moved to InatImportJobTest")
+    # NOTE: using obss without photos to avoid stubbing photo import
+    # amanita_flavorubens, calostoma lutescens
+    inat_obss = "231104466,195434438"
+    inat_import_ids = inat_obss
+    user = users(:rolf)
+    filename = "listed_ids"
+    mock_inat_response = File.read("test/inat/#{filename}.txt")
+    # prove that mock was constructed properly
+    json = JSON.parse(mock_inat_response)
+    assert_equal(2, json["total_results"])
+    assert_equal(1, json["page"])
+    assert_equal(30, json["per_page"])
+    # mock is sorted by id, asc
+    assert_equal(195_434_438, json["results"].first["id"])
+    assert_equal(231_104_466, json["results"].second["id"])
+
+    simulate_all_inat_interactions(
+      user: user, inat_import_ids: inat_import_ids,
+      mock_inat_response: mock_inat_response
+    )
+
+    params = { inat_ids: inat_import_ids, code: "MockCode" }
+    login(user.login)
+
+    assert_difference(
+      "Observation.count", 2, "Failed to create multiple observations"
+    ) do
+      post(:authorization_response, params: params)
+    end
+  end
+
+  def test_import_all
+    # TODO: Move to InatImportJobTest
+    skip("To be moved to InatImportJobTest")
+    user = users(:rolf)
+    login(user.login)
+
+    filename = "import_all"
+    mock_search_result = File.read("test/inat/#{filename}.txt")
+    # shorten it to one page to avoid stubbing multiple inat api requests
+    mock_search_result = limited_to_first_page(mock_search_result)
+    # delete the photos in order to avoid stubbing photo imports
+    mock_search_result = result_without_photos(mock_search_result)
+
+    inat_import_ids = ""
+
+    simulate_all_inat_interactions(
+      user: user, inat_import_ids: inat_import_ids,
+      mock_inat_response: mock_search_result,
+      import_all: true
+    )
+
+    params = { inat_ids: inat_import_ids, code: "MockCode" }
+
+    assert_difference(
+      "Observation.count", 2, "Failed to create multiple observations"
+    ) do
+      post(:authorization_response, params: params)
+    end
+  end
+
   ########## Utilities
 
   # The InatImport object which is created in InatImportController#create
