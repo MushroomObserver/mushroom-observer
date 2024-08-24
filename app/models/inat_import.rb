@@ -9,6 +9,7 @@
 #  token::  authenticity token supplied by iNat
 #  inat_ids:: string representing the iNat obss to be imported
 #  inat_username:: current user's iNat login
+#  import_all: whether to import all of user's relevant iNat observations
 #
 class InatImport < ApplicationRecord
   enum state:

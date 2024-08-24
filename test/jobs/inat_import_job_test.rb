@@ -33,7 +33,11 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_job_basic_obs
     # This obs has 1 identification, 0 photos, 0 observation_fields
     file_name = "calostoma_lutescens"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
     user = users(:rolf)
+    inat_import = create_inat_import(inat_response: mock_inat_response)
+
+    # Add objects which are not included in fixtures
     name = Name.create(
       text_name: "Calostoma lutescens",
       author: "(Schweinitz) Burnap",
@@ -46,15 +50,12 @@ class InatImportJobTest < ActiveJob::TestCase
                           north: 36.043571, south: 35.561849,
                           east: -83.253046, west: -83.794123)
 
-    inat_import = InatImport.create(user: user, token: "MockCode",
-                                    inat_ids: "195434438",
-                                    inat_username: "mycoprimus")
-    stub_token_requests
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    stub_inat_api_request(inat_import: inat_import,
-                          mock_inat_response: mock_inat_response)
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response)
 
-    InatImportJob.perform_now(inat_import)
+    InatPhotoImporter.stub(:new, stub_mo_photo_importer) do
+      InatImportJob.perform_now(inat_import)
+    end
 
     obs = Observation.order(created_at: :asc).last
     assert_not_nil(obs.rss_log)
@@ -85,6 +86,14 @@ class InatImportJobTest < ActiveJob::TestCase
     file_name = "evernia"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     user = users(:rolf)
+    inat_import = InatImport.create(
+      user: user, token: "MockCode",
+      inat_ids: JSON.parse(mock_inat_response)["results"].first["id"],
+      inat_username: JSON.
+        parse(mock_inat_response)["results"].first["user"]["login"]
+    )
+
+    # Add objects which are not included in fixtures
     name = Name.create(
       text_name: "Evernia", author: "Ach.", display_name: "Evernia",
       rank: "Genus", user: user
@@ -95,33 +104,11 @@ class InatImportJobTest < ActiveJob::TestCase
       north: 45.5609, south: 45.5064,
       east: -122.367, west: -122.431
     )
-    inat_import = InatImport.create(
-      user: user, token: "MockCode",
-      inat_ids: JSON.parse(mock_inat_response)["results"].first["id"],
-      inat_username: JSON.
-        parse(mock_inat_response)["results"].first["user"]["login"]
-    )
 
-    stub_token_requests
-    stub_inat_api_request(inat_import: inat_import,
-                          mock_inat_response: mock_inat_response)
-    stub_inat_photo_requests(mock_inat_response)
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response)
 
-    # Suggested by CoPilot:
-    # I wnat to stub InatPhotoImporter.new,
-    # but that class doesn’t have a stub method by default. Therefore:
-    # Create a mock photo importer
-    mock_photo_importer = Minitest::Mock.new
-    mock_photo_importer.expect(
-      :new, nil,
-      [{ api: MockImageAPI.new(errors: [], results: [Image.first]) }]
-    )
-    mock_photo_importer.expect(
-      :api, # nil,
-      MockImageAPI.new(errors: [], results: [Image.first])
-    )
-    # Stub the InatPhotoImporter class to return the mock_photo_importer
-    InatPhotoImporter.stub(:new, mock_photo_importer) do
+    InatPhotoImporter.stub(:new, stub_mo_photo_importer) do
       InatImportJob.perform_now(inat_import)
     end
 
@@ -171,6 +158,9 @@ class InatImportJobTest < ActiveJob::TestCase
     file_name = "tremella_mesenterica"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     user = users(:rolf)
+    inat_import = create_inat_import(inat_response: mock_inat_response)
+
+    # Add objects which are not included in fixtures
     # This iNat obs has two identifications:
     # Tremella mesenterica, which in is fixtures
     t_mesenterica = Name.find_by(text_name: "Tremella mesenterica")
@@ -188,34 +178,10 @@ class InatImportJobTest < ActiveJob::TestCase
                               user: user)
     name = tremellales
 
-    inat_import = InatImport.create(
-      user: user, token: "MockCode",
-      inat_ids: JSON.parse(mock_inat_response)["results"].first["id"],
-      inat_username: JSON.
-        parse(mock_inat_response)["results"].first["user"]["login"]
-    )
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response)
 
-    stub_token_requests
-    stub_inat_api_request(inat_import: inat_import,
-                          mock_inat_response: mock_inat_response)
-    stub_inat_photo_requests(mock_inat_response)
-
-    # Suggested by CoPilot:
-    # I wnat to stub InatPhotoImporter.new,
-    # but that class doesn’t have a stub method by default. Therefore:
-    # Create a mock photo importer
-    mock_photo_importer = Minitest::Mock.new
-    mock_photo_importer.expect(
-      :new, nil,
-      [{ api: MockImageAPI.new(errors: [], results: [Image.first]) }]
-    )
-    mock_photo_importer.expect(
-      :api, # nil,
-      MockImageAPI.new(errors: [], results: [Image.first])
-    )
-
-    # Stub the InatPhotoImporter class to return the mock_photo_importer
-    InatPhotoImporter.stub(:new, mock_photo_importer) do
+    InatPhotoImporter.stub(:new, stub_mo_photo_importer) do
       InatImportJob.perform_now(inat_import)
     end
 
@@ -278,94 +244,23 @@ class InatImportJobTest < ActiveJob::TestCase
 
   ########## Utilities
 
-  def import_mock_observation(filename)
-    user = users(:rolf)
-    mock_search_result = File.read("test/inat/#{filename}.txt")
-    inat_obs = InatObs.new(
-      JSON.generate(
-        JSON.parse(mock_search_result)["results"].first
-      )
+  def create_inat_import(user: users(:rolf), inat_response: mock_inat_response)
+    InatImport.create(
+      user: user, token: "MockCode",
+      inat_ids: JSON.parse(inat_response)["results"].first["id"],
+      inat_username: JSON.
+        parse(inat_response)["results"].first["user"]["login"]
     )
-    inat_import_ids = inat_obs.inat_id
-
-    simulate_all_inat_interactions(
-      user: user, inat_username: inat_obs.inat_user_login,
-      inat_import_ids: inat_import_ids,
-      mock_inat_response: mock_search_result
-    )
-
-    # params = { inat_ids: inat_import_ids, code: "MockCode" }
-    # login(user.login)
-
-    inat_import = InatImport.create(
-      user: user,
-      token: "MockCode",
-      state: 3, # "Authenticating"
-      inat_ids: inat_import_ids,
-      inat_username: inat_obs.inat_user_login
-    )
-
-    # NOTE: Stubs the importer's return value, but not its side-effect --
-    # i.e., doesn't add Image(s) to the MO Observation.
-    # Enables testing everything except Observation.images. jdc 2024-06-23
-    #
-    # InatPhotoImporter.stub(:new, mock_photo_importer(inat_obs, inat_import)) do
-    assert_difference("Observation.count", 1, "Failed to create Obs") do
-      InatImportJob.perform_now(inat_import)
-    end
-    # end
-
-    Observation.order(created_at: :asc).last
   end
 
-  def simulate_all_inat_interactions(
-    mock_inat_response:, user: users(:rolf), inat_username: nil,
-    inat_import_ids: "",
-    import_all: false, id_above: 0
-  )
-    simulate_inat_accredications(
-      user: user, inat_username: inat_username,
-      inat_import_ids: inat_import_ids, import_all: import_all
-    )
-    stub_inat_api_request(inat_import_ids, mock_inat_response,
-                          id_above: id_above,
-                          inat_user_login: inat_username)
-    # stub_inat_photo_requests(mock_inat_response)
-  end
+  # -------- Test doubles
 
-  def simulate_inat_accredications(
-    user: users(:rolf), inat_username: nil, inat_import_ids: "",
-    import_all: false
-  )
-    simulate_authorization(
-      user: user, inat_username: inat_username,
-      inat_import_ids: inat_import_ids, import_all: import_all
-    )
+  def stub_inat_interactions(inat_import:, mock_inat_response:, id_above: 0)
     stub_token_requests
-  end
-
-  def simulate_authorization(
-    user: users(:rolf), inat_username: nil, inat_import_ids: "",
-    import_all: false
-  )
-    inat_import = InatImport.find_or_create_by(user: user)
-    inat_import.import_all = import_all
-    # ignore list of ids if importing all a user's iNat obss
-    inat_import.inat_ids = import_all == true ? "" : inat_import_ids
-    inat_import.state = "Authorizing"
-    inat_import.inat_username = inat_username
-    inat_import.save
-    stub_request(:any, authorization_url)
-  end
-
-  # iNat url where user is sent in order to authorize MO access
-  # to iNat confidential data
-  # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
-  def authorization_url
-    "https://www.inaturalist.org/oauthenticate/authorize?" \
-    "client_id=#{Rails.application.credentials.inat.id}" \
-    "&redirect_uri=#{REDIRECT_URI}" \
-    "&response_type=code"
+    stub_inat_api_request(inat_import: inat_import,
+                          mock_inat_response: mock_inat_response,
+                          id_above: id_above)
+    stub_inat_photo_requests(mock_inat_response)
   end
 
   def stub_token_requests
@@ -446,32 +341,33 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
-  # TODO: add an image param
-  # for 1st draft return any old Image
-  def stub_mo_image_api
-    api = MockImageAPI.new(errors: [], results: [Image.first])
-    mock_photo_importer = MockPhotoImporter.new(api: api)
-    InatPhotoImporter.stub(:new, mock_photo_importer)
-  end
-
-  def old_mock_photo_importer(inat_obs, inat_import)
-    # TODO: probably delete this. It looks like a hodgepodge of nonsense
-    debugger
-    return
-
-    mock_inat_photo = inat_obs.inat_obs_photos.first
-    mock_image_api = MockImageAPI.new(
-      results: [
-        expected_mo_image(mock_inat_photo: mock_inat_photo,
-                          user: inat_import.user)
-      ]
-    )
+  def stub_mo_photo_importer
+    # Suggested by CoPilot:
+    # I wanted to directly stub InatPhotoImporter.new,
+    # but that class doesn’t have a stub method by default. Therefore:
+    # Create a mock photo importer
     mock_photo_importer = Minitest::Mock.new
-    inat_obs.inat_obs_photos.length.times do
-      mock_photo_importer.expect(:api, mock_image_api)
-    end
+    mock_photo_importer.expect(
+      :new, nil,
+      [{ api: MockImageAPI.new(errors: [], results: [Image.first]) }]
+    )
+    mock_photo_importer.expect(
+      :api, # nil,
+      MockImageAPI.new(errors: [], results: [Image.first])
+    )
     mock_photo_importer
   end
+
+  # -------- Other
+
+  def inat_manager
+    User.find_by(login: "MO Webmaster")
+  end
+
+  # ---------------------------------------------------------------------------
+  # Everything above here is live code.
+  # TODO: Remove this comment and everything below it.
+  # Everything below is potentially dead.
 
   def expected_mo_image(mock_inat_photo:, user:)
     Image.create(
@@ -492,24 +388,11 @@ class InatImportJobTest < ActiveJob::TestCase
       mo_license.id
   end
 
-  def result_without_photos(mock_search_result)
-    ms_hash = JSON.parse(mock_search_result)
-    ms_hash["results"].each do |result|
-      result["observation_photos"] = []
-      result["photos"] = []
-    end
-    JSON.generate(ms_hash)
-  end
-
   # Turn results with many pages into results with one page
   # By ignoring all pages but the first
   def limited_to_first_page(mock_search_result)
     ms_hash = JSON.parse(mock_search_result)
     ms_hash["total_results"] = ms_hash["results"].length
     JSON.generate(ms_hash)
-  end
-
-  def inat_manager
-    User.find_by(login: "MO Webmaster")
   end
 end
