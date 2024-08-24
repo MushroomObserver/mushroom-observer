@@ -81,7 +81,6 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def test_import_job_obs_with_one_photo
-    # skip("under_construction")
     # This obs has 1 identification, 1 photo, 0 observation_fields
     file_name = "evernia"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
@@ -128,10 +127,11 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.order(created_at: :asc).last
     assert_not_nil(obs.rss_log)
+    assert_equal("mo_inat_import", obs.source)
 
     assert_equal(name, obs.name)
-    namings = obs.namings
 
+    namings = obs.namings
     naming = namings.find_by(name: name)
     assert(naming.present?, "Missing Naming for MO consensus ID")
     assert_equal(inat_manager, naming.user,
@@ -140,8 +140,6 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(vote.present?, "Naming is missing a Vote")
     assert(vote.value.positive?, "Vote for MO consensus should be positive")
 
-    assert_equal("mo_inat_import", obs.source)
-    assert_equal(1, obs.images.length, "Obs should have 1 image")
     assert_equal(loc, obs.location)
     assert(obs.comments.any?, "Imported iNat should have >= 1 Comment")
     obs_comments =
@@ -149,6 +147,133 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs_comments.one?)
     assert(obs_comments.where(Comment[:summary] =~ /^iNat Data/).present?,
            "Missing Initial Commment (#{:inat_data_comment.l})")
+    assert_equal(
+      users(:webmaster), obs_comments.first.user,
+      "Comment user should be webmaster (vs user who imported iNat Obs)"
+    )
+    inat_data_comment = obs_comments.first.comment
+    [
+      :USER.l, :OBSERVED.l, :LAT_LON.l, :PLACE.l, :ID.l, :DQA.l,
+      :ANNOTATIONS.l, :PROJECTS.l, :SEQUENCES.l, :OBSERVATION_FIELDS.l,
+      :TAGS.l
+    ].each do |caption|
+      assert_match(
+        /#{caption}/, inat_data_comment,
+        "Initial Commment (#{:inat_data_comment.l}) is missing #{caption}"
+      )
+
+      assert_equal(1, obs.images.length, "Obs should have 1 image")
+      assert(obs.sequences.none?)
+    end
+  end
+
+  def test_import_job_obs_with_many_namings
+    file_name = "tremella_mesenterica"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    user = users(:rolf)
+    # This iNat obs has two identifications:
+    # Tremella mesenterica, which in is fixtures
+    t_mesenterica = Name.find_by(text_name: "Tremella mesenterica")
+    # "Naematelia aurantia, which is not
+    n_aurantia = Name.create(text_name: "Naematelia aurantia",
+                             author: "(Schwein.) Burt",
+                             display_name: "Naematelia aurantia",
+                             rank: "Species",
+                             user: user)
+    # and the iNat Community Taxon (not an identification for this iNat obs)
+    tremellales = Name.create(text_name: "Tremellales",
+                              author: "Fr.",
+                              display_name: "Tremellales",
+                              rank: "Order",
+                              user: user)
+    name = tremellales
+
+    inat_import = InatImport.create(
+      user: user, token: "MockCode",
+      inat_ids: JSON.parse(mock_inat_response)["results"].first["id"],
+      inat_username: JSON.
+        parse(mock_inat_response)["results"].first["user"]["login"]
+    )
+
+    stub_token_requests
+    stub_inat_api_request(inat_import: inat_import,
+                          mock_inat_response: mock_inat_response)
+    stub_inat_photo_requests(mock_inat_response)
+
+    # Suggested by CoPilot:
+    # I wnat to stub InatPhotoImporter.new,
+    # but that class doesn’t have a stub method by default. Therefore:
+    # Create a mock photo importer
+    mock_photo_importer = Minitest::Mock.new
+    mock_photo_importer.expect(
+      :new, nil,
+      [{ api: MockImageAPI.new(errors: [], results: [Image.first]) }]
+    )
+    mock_photo_importer.expect(
+      :api, # nil,
+      MockImageAPI.new(errors: [], results: [Image.first])
+    )
+
+    # Stub the InatPhotoImporter class to return the mock_photo_importer
+    InatPhotoImporter.stub(:new, mock_photo_importer) do
+      InatImportJob.perform_now(inat_import)
+    end
+
+    obs = Observation.order(created_at: :asc).last
+    assert_not_nil(obs.rss_log)
+
+    assert_equal(name, obs.name)
+
+    namings = obs.namings
+    naming = namings.find_by(name: name)
+    assert(naming.present?, "Missing Naming for MO consensus ID")
+    assert_equal(
+      inat_manager, naming.user,
+      "Naming without iNat ID should have `user: inat_manager`"
+    )
+    vote = Vote.find_by(naming: naming, user: naming.user)
+    assert(vote.present?, "Naming is missing a Vote")
+    assert(vote.value.positive?, "Vote for MO consensus should be positive")
+
+    naming = namings.find_by(name: t_mesenterica)
+    assert(naming.present?,
+           "Missing Naming for iNat identification by MO User")
+    assert_equal(inat_manager, naming.user, "Naming has wrong User")
+    vote = Vote.find_by(naming: naming, user: naming.user)
+    assert(vote.present?, "Naming is missing a Vote")
+    assert_equal(0, vote.value, "Vote for non-consensus name should be 0")
+
+    naming = namings.find_by(name: n_aurantia)
+    assert(naming.present?,
+           "Missing Naming for iNat identification by random iNat user")
+    assert_equal(inat_manager, naming.user, "Naming has wrong User")
+    vote = Vote.find_by(naming: naming, user: naming.user)
+    assert(vote.present?, "Naming is missing a Vote")
+    assert_equal(0, vote.value, "Vote for non-consensus name should be 0")
+
+    obs_comments =
+      Comment.where(target_type: "Observation", target_id: obs.id)
+    assert(obs_comments.one?)
+    assert(obs_comments.where(Comment[:summary] =~ /^iNat Data/).present?,
+           "Missing Initial Commment (#{:inat_data_comment.l})")
+    assert_equal(
+      users(:webmaster), obs_comments.first.user,
+      "Comment user should be webmaster (vs user who imported iNat Obs)"
+    )
+    inat_data_comment = obs_comments.first.comment
+    [
+      :USER.l, :OBSERVED.l, :LAT_LON.l, :PLACE.l, :ID.l, :DQA.l,
+      :ANNOTATIONS.l, :PROJECTS.l, :SEQUENCES.l, :OBSERVATION_FIELDS.l,
+      :TAGS.l
+    ].each do |caption|
+      assert_match(
+        /#{caption}/, inat_data_comment,
+        "Initial Commment (#{:inat_data_comment.l}) is missing #{caption}"
+      )
+    end
+
+    assert(obs.images.any?, "Obs should have images")
+    assert(obs.sequences.none?)
   end
 
   ########## Utilities
@@ -194,7 +319,8 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def simulate_all_inat_interactions(
-    mock_inat_response:, user: rolf, inat_username: nil, inat_import_ids: "",
+    mock_inat_response:, user: users(:rolf), inat_username: nil,
+    inat_import_ids: "",
     import_all: false, id_above: 0
   )
     simulate_inat_accredications(
@@ -208,7 +334,8 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def simulate_inat_accredications(
-    user: rolf, inat_username: nil, inat_import_ids: "", import_all: false
+    user: users(:rolf), inat_username: nil, inat_import_ids: "",
+    import_all: false
   )
     simulate_authorization(
       user: user, inat_username: inat_username,
@@ -218,7 +345,8 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def simulate_authorization(
-    user: rolf, inat_username: nil, inat_import_ids: "", import_all: false
+    user: users(:rolf), inat_username: nil, inat_import_ids: "",
+    import_all: false
   )
     inat_import = InatImport.find_or_create_by(user: user)
     inat_import.import_all = import_all
