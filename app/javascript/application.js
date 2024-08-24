@@ -13,7 +13,7 @@ import "@hotwired/turbo-rails"
 // form, or button like delete/patch: set data-turbo="true" to opt in
 // link_to with GET: set data-turbo-stream="true" to opt in
 Turbo.setFormMode("optin")
-// https://stackoverflow.com/questions/77421369/turbo-response-to-render-javascript-alert/77434363#77434363
+// https://stackoverflow.com/a/77434363/3357635
 // use: <%= turbo_stream.close_modal("modal_#{obs.id}_naming") %>
 Turbo.StreamActions.close_modal = function () {
   $("#" + this.templateContent.textContent).modal('hide')
@@ -24,6 +24,17 @@ Turbo.StreamActions.update_input = function () {
     target.value = this.templateContent.textContent
   });
 };
+// https://stackoverflow.com/a/77836101/3357635
+Turbo.StreamActions.add_class = function () {
+  this.targetElements.forEach((target) => {
+    target.classList.add(this.templateContent.textContent)
+  });
+}
+Turbo.StreamActions.remove_class = function () {
+  this.targetElements.forEach((target) => {
+    target.classList.remove(this.templateContent.textContent)
+  });
+}
 
 import "@rails/request.js"
 
