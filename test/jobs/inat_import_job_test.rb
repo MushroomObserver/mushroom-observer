@@ -107,18 +107,16 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_api_request(inat_import: inat_import,
                           mock_inat_response: mock_inat_response)
     stub_inat_photo_requests(mock_inat_response)
-    # stub_mo_image_api
 
-    # Suggested by CoPilot
+    # Suggested by CoPilot:
+    # I wnat to stub InatPhotoImporter.new,
+    # but that class doesn’t have a stub method by default. Therefore:
     # Create a mock photo importer
     mock_photo_importer = Minitest::Mock.new
-    # mock_photo_importer.expect(:new, nil,
-    #                            [{ api: instance_of(MockImageAPI) }])
     mock_photo_importer.expect(
       :new, nil,
       [{ api: MockImageAPI.new(errors: [], results: [Image.first]) }]
     )
-    # added by me
     mock_photo_importer.expect(
       :api, # nil,
       MockImageAPI.new(errors: [], results: [Image.first])
