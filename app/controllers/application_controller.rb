@@ -788,7 +788,12 @@ class ApplicationController < ActionController::Base
   def save_with_log(obj)
     type_sym = obj.class.to_s.underscore.to_sym
     if obj.save
-      flash_notice(:runtime_created_at.t(type: type_sym))
+      notice = if obj.respond_to?(:text_name) && (name = obj.text_name)
+                 :runtime_created_name.t(type: type_sym, value: name)
+               else
+                 :runtime_created_at.t(type: type_sym)
+               end
+      flash_notice(notice)
       true
     else
       flash_error(:runtime_no_save.t(type: type_sym))
