@@ -12,6 +12,15 @@
   }
 }
 
+.keep-btn {
+  display: none;
+}
+.create {
+  .keep-btn {
+    display: inline-block;
+  }
+}
+
 // initially we may not have id, but we also don't offer create
 // until they've typed something
 .create-button {

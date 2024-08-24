@@ -84,8 +84,9 @@ module AutocompleterHelper
 
     icon_link_to(
       args[:create_text], "#",
+      id: "create_#{args[:type]}_btn", class: "ml-3 create-button",
       icon: :plus, show_text: true, icon_class: "text-primary",
-      name: "create_#{args[:type]}", class: "ml-3 create-button",
+      name: "create_#{args[:type]}",
       data: { autocompleter_target: "createBtn",
               action: "autocompleter#swapCreate:prevent" }
     )
@@ -109,7 +110,7 @@ module AutocompleterHelper
     icon_link_to(
       args[:find_text], "#",
       icon: :find_on_map, show_text: false, icon_class: "text-primary",
-      name: "find_#{args[:type]}", class: "ml-3 d-none",
+      name: "find_#{args[:type]}", class: "ml-3 find-btn d-none",
       data: { map_target: "showBoxBtn",
               action: "map#showBox:prevent" }
     )
@@ -122,9 +123,9 @@ module AutocompleterHelper
       args[:keep_text], "#",
       icon: :apply, show_text: false, icon_class: "text-primary",
       active_icon: :edit, active_content: args[:edit_text],
-      name: "keep_#{args[:type]}", class: "ml-3 d-none",
+      name: "keep_#{args[:type]}", class: "ml-3 keep-btn d-none",
       data: { autocompleter_target: "keepBtn", map_target: "lockBoxBtn",
-              action: "map#toggleBoxLock:prevent" }
+              action: "map#toggleBoxLock:prevent form-exif#showFields" }
     )
   end
 
