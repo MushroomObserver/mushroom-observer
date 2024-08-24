@@ -69,7 +69,9 @@ map = @herbarium.location
   <% if map %>
     <div class="col-xs-12 col-sm-4 mt-3" style="max-width:320px">
       <%= tag.div(class: "mb-3") { make_map(objects: [@herbarium.location]) } %>
-      <%= tag.p("#{:LOCATION.l}: #{@herbarium.location.text_name}") %>
+      <%= tag.p(id: "herbarium_location") do
+        "#{:LOCATION.l}: #{@herbarium.location.text_name}"
+      end %>
     </div>
   <% end %>
 </div><!--.row-->

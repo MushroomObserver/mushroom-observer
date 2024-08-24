@@ -14,8 +14,6 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
     assert_selector("#herbarium_place_name")
     fill_in("herbarium_place_name", with: "genohlac gard france")
     assert_link(:form_observations_create_locality.l)
-    # be sure the map is loaded!
-    # assert_selector("#map_div div div")
     click_link(:form_observations_create_locality.l)
 
     assert_selector("#herbarium_place_name.geocoded")
@@ -29,5 +27,17 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
     assert_field("location_west", with: "3.9113", type: :hidden)
     assert_field("location_high", with: "1388.2098", type: :hidden)
     assert_field("location_low", with: "287.8201", type: :hidden)
+
+    within("#herbarium_form") do
+      fill_in("herbarium_name", with: "Herbarium des Cévennes")
+      fill_in("herbarium_code", with: "CEV")
+      click_commit
+    end
+
+    # assert_no_selector("#modal_herbarium")
+    assert_selector("body.herbaria__show")
+    assert_selector("h1", text: "Herbarium des Cévennes (CEV)")
+    assert_selector("#herbarium_location",
+                    text: "Génolhac, Gard, Occitanie, France")
   end
 end
