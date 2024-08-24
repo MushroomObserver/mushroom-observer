@@ -1,13 +1,24 @@
 require "test_helper"
 
-# a duck type of API2::ImageAPI with enough attributes
-# to preventInatsImportController from throwing an error
+# Some classes with enough attributes to stub calls to InatPhotoImporter
+#   (which wraps calls to the MO Image API)
+# and get an image back like this
+#  api = InatPhotoImporter.new(params).api
+#  image = Image.find(api.results.first.id)
 class MockImageAPI
   attr_reader :errors, :results
 
   def initialize(errors: [], results: [])
     @errors = errors
     @results = results
+  end
+end
+
+class MockPhotoImporter
+  attr_reader :api
+
+  def initialize(api:)
+    @api = api
   end
 end
 
@@ -70,7 +81,7 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def test_import_job_obs_with_one_photo
-    skip("under_construction")
+    # skip("under_construction")
     # This obs has 1 identification, 1 photo, 0 observation_fields
     file_name = "evernia"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
@@ -96,18 +107,37 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_api_request(inat_import: inat_import,
                           mock_inat_response: mock_inat_response)
     stub_inat_photo_requests(mock_inat_response)
+    # stub_mo_image_api
 
-    InatImportJob.perform_now(inat_import)
+    # Suggested by CoPilot
+    # Create a mock photo importer
+    mock_photo_importer = Minitest::Mock.new
+    # mock_photo_importer.expect(:new, nil,
+    #                            [{ api: instance_of(MockImageAPI) }])
+    mock_photo_importer.expect(
+      :new, nil,
+      [{ api: MockImageAPI.new(errors: [], results: [Image.first]) }]
+    )
+    # added by me
+    mock_photo_importer.expect(
+      :api, # nil,
+      MockImageAPI.new(errors: [], results: [Image.first])
+    )
+    # Stub the InatPhotoImporter class to return the mock_photo_importer
+    InatPhotoImporter.stub(:new, mock_photo_importer) do
+      InatImportJob.perform_now(inat_import)
+    end
 
     obs = Observation.order(created_at: :asc).last
     assert_not_nil(obs.rss_log)
 
     assert_equal(name, obs.name)
     namings = obs.namings
-    naming = namings.find_by(name: name_id)
+
+    naming = namings.find_by(name: name)
     assert(naming.present?, "Missing Naming for MO consensus ID")
-    assert_equal(user, naming.user,
-                 "Naming with iNat ID should have user == MO User")
+    assert_equal(inat_manager, naming.user,
+                 "Namings should belong to inat_manager")
     vote = Vote.find_by(naming: naming, user: naming.user)
     assert(vote.present?, "Naming is missing a Vote")
     assert(vote.value.positive?, "Vote for MO consensus should be positive")
@@ -290,7 +320,17 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
-  def mock_photo_importer(inat_obs, inat_import)
+  # TODO: add an image param
+  # for 1st draft return any old Image
+  def stub_mo_image_api
+    api = MockImageAPI.new(errors: [], results: [Image.first])
+    mock_photo_importer = MockPhotoImporter.new(api: api)
+    InatPhotoImporter.stub(:new, mock_photo_importer)
+  end
+
+  def old_mock_photo_importer(inat_obs, inat_import)
+    # TODO: probably delete this. It looks like a hodgepodge of nonsense
+    debugger
     return
 
     mock_inat_photo = inat_obs.inat_obs_photos.first

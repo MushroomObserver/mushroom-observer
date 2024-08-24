@@ -184,7 +184,6 @@ class InatImportJob < ApplicationJob
       }
 
       api = InatPhotoImporter.new(params).api
-      # User.current = @user # API call zaps User.current
       # TODO: Error handling? 2024-06-19 jdc.
 
       image = Image.find(api.results.first.id)
