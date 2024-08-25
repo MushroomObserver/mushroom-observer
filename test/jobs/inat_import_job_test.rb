@@ -280,15 +280,15 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def test_import_multiple
-    # TODO: Move to InatImportJobTest
-    skip("To be moved to InatImportJobTest")
     # NOTE: using obss without photos to avoid stubbing photo import
     # amanita_flavorubens, calostoma lutescens
-    inat_obss = "231104466,195434438"
-    inat_import_ids = inat_obss
-    user = users(:rolf)
-    filename = "listed_ids"
-    mock_inat_response = File.read("test/inat/#{filename}.txt")
+    file_name = "listed_ids"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    inat_import = InatImport.create(user: users(:rolf),
+                                    inat_ids: "231104466,195434438",
+                                    token: "MockCode",
+                                    inat_username: "anything")
+
     # prove that mock was constructed properly
     json = JSON.parse(mock_inat_response)
     assert_equal(2, json["total_results"])
@@ -298,18 +298,17 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(195_434_438, json["results"].first["id"])
     assert_equal(231_104_466, json["results"].second["id"])
 
-    simulate_all_inat_interactions(
-      user: user, inat_import_ids: inat_import_ids,
-      mock_inat_response: mock_inat_response
-    )
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response)
 
-    params = { inat_ids: inat_import_ids, code: "MockCode" }
-    login(user.login)
-
-    assert_difference(
-      "Observation.count", 2, "Failed to create multiple observations"
+    InatPhotoImporter.stub(
+      :new, stub_mo_photo_importer(mock_inat_response)
     ) do
-      post(:authorization_response, params: params)
+      assert_difference(
+        "Observation.count", 2, "Failed to create multiple observations"
+      ) do
+        InatImportJob.perform_now(inat_import)
+      end
     end
   end
 
