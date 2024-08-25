@@ -219,7 +219,6 @@ class InatImportJobTest < ActiveJob::TestCase
 
     file_name = "arrhenia_sp_NY02"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    user = users(:rolf)
     inat_import = create_inat_import(inat_response: mock_inat_response)
 
     stub_inat_interactions(inat_import: inat_import,
@@ -243,29 +242,22 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def test_import_plant
-    # TODO: Move to InatImportJobTest
-    skip("To be moved to InatImportJobTest")
-    user = rolf
-    filename = "ceanothus_cordulatus"
-    mock_search_result = File.read("test/inat/#{filename}.txt")
-    inat_import_ids = InatObs.new(
-      JSON.generate(JSON.parse(mock_search_result)["results"].first)
-    ).inat_id
+    file_name = "ceanothus_cordulatus"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    inat_import = create_inat_import(inat_response: mock_inat_response)
 
-    simulate_all_inat_interactions(user: user,
-                                   inat_import_ids: inat_import_ids,
-                                   mock_inat_response: mock_search_result)
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response)
 
-    params = { inat_ids: inat_import_ids, code: "MockCode" }
-    login(user.login)
-
-    assert_no_difference(
-      "Observation.count", "Should not import iNat Plant observations"
+    InatPhotoImporter.stub(
+      :new, stub_mo_photo_importer(mock_inat_response)
     ) do
-      post(:authorization_response, params: params)
+      assert_no_difference(
+        "Observation.count", "Should not import iNat Plant observations"
+      ) do
+        InatImportJob.perform_now(inat_import)
+      end
     end
-
-    assert_flash_text(:inat_taxon_not_importable.l(id: inat_import_ids))
   end
 
   def test_import_zero_results

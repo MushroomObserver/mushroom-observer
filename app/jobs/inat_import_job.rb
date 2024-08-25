@@ -127,7 +127,7 @@ class InatImportJob < ApplicationJob
 
   def import_one_result(result)
     inat_obs = InatObs.new(result)
-    return not_importable(inat_obs) unless inat_obs.importable?
+    return unless inat_obs.importable?
 
     prov_name = inat_obs.inat_prov_name
 
@@ -175,12 +175,6 @@ class InatImportJob < ApplicationJob
     # save_everything_else(params.dig(:naming, :reasons))
     # strip_images! if @observation.gps_hidden
     # update_field_slip(@observation, params[:field_code])
-  end
-
-  def not_importable(inat_obs)
-    return if inat_obs.taxon_importable?
-
-    flash_error(:inat_taxon_not_importable.t(id: inat_obs.inat_id))
   end
 
   def need_new_prov_name?(prov_name)

@@ -3009,7 +3009,6 @@
   inat_no_imports_designated: Imports missing. Complete [:inat_import_list], or select [:inat_import_all]
 
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
-  inat_taxon_not_importable: Cannot import iNat id `[id]`. (Can import only Fungi.)
 
   inat_data_comment: iNat Data
   inat_dqa_casual: Casual
