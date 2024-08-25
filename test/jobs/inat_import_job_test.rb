@@ -178,54 +178,68 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   # Prove that Namings, Votes, Identification are correct
-  # When iNat obs has provisional name that's in MO
-  def test_import_arrhenia_sp_ny02_old_name
-    # TODO: Move to InatImportJobTest
-    skip("To be moved to InatImportJobTest")
+  # When iNat obs has provisional name that's already in MO
+  # `johnplischke` NEMF, DNA, notes, 2 identifications with same id;
+  # 3 comments, everyone has MO account;
+  # obs fields(include("Voucher Number(s)", "Voucher Specimen Taken"))
+  def test_import_job_prov_name
+    file_name = "arrhenia_sp_NY02"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    user = users(:rolf)
+    inat_import = create_inat_import(inat_response: mock_inat_response)
     name = Name.create(
       text_name: 'Arrhenia "sp-NY02"',
       author: "S.D. Russell crypt. temp.",
       display_name: '**__Arrhenia "sp-NY02"__** S.D. Russell crypt. temp.',
       rank: "Species",
-      user: rolf
+      user: inat_manager
     )
 
-    obs = import_mock_observation("arrhenia_sp_NY02")
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response)
 
-    namings = obs.namings
-    naming = namings.find_by(name: name)
-    assert(naming.present?, "Missing Naming for provisional name")
-    assert_equal(inat_manager, naming.user,
-                 "Naming without iNat ID should have user: inat_manager")
-    vote = Vote.find_by(naming: naming, user: naming.user)
-    assert(vote.present?, "Naming is missing a Vote")
-    assert_equal(name, obs.name, "Consensus ID should be provisional name")
-    assert(vote.value.positive?, "Vote for MO consensus should be positive")
+    InatPhotoImporter.stub(:new,
+                           stub_mo_photo_importer(mock_inat_response)) do
+      InatImportJob.perform_now(inat_import)
+    end
+
+    obs = Observation.order(created_at: :asc).last
+    assert_standard_assertions(obs: obs, name: name)
+
+    assert(obs.images.any?, "Obs should have images")
+    assert(obs.sequences.one?, "Obs should have a sequence")
   end
 
   # Prove that Namings, Votes, Identification are correct
   # when iNat obs has provisional name that wasn't in MO
-  def test_import_arrhenia_sp_ny02_new_name
-    # TODO: Move to InatImportJobTest
-    skip("To be moved to InatImportJobTest")
+  # see test above for iNat obs details
+  def test_import_job_create_prov_name
     assert_nil(Name.find_by(text_name: 'Arrhenia "sp-NY02"'),
-               "Test requires that MO not yest have provisional name")
+               "Test requires that MO not yet have provisional name")
 
-    obs = import_mock_observation("arrhenia_sp_NY02")
+    file_name = "arrhenia_sp_NY02"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    user = users(:rolf)
+    inat_import = create_inat_import(inat_response: mock_inat_response)
 
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response)
+
+    InatPhotoImporter.stub(:new,
+                           stub_mo_photo_importer(mock_inat_response)) do
+      InatImportJob.perform_now(inat_import)
+    end
+
+    obs = Observation.order(created_at: :asc).last
     name = Name.find_by(text_name: 'Arrhenia "sp-NY02"')
-    assert(name.rss_log_id.present?)
-
     assert(name.present?, "Failed to create provisional name")
-    namings = obs.namings
-    naming = namings.find_by(name: name)
-    assert(naming.present?, "Missing Naming for provisional name")
-    assert_equal(inat_manager, naming.user,
-                 "Naming without iNat ID should have user: inat_manager")
-    vote = Vote.find_by(naming: naming, user: naming.user)
-    assert(vote.present?, "Naming is missing a Vote")
-    assert_equal(name, obs.name, "Consensus ID should be provisional name")
-    assert(vote.value.positive?, "Vote for MO consensus should be positive")
+    assert(name.rss_log_id.present?,
+           "Failed to log creation of provisional name")
+
+    assert_standard_assertions(obs: obs, name: Name.last)
+
+    assert(obs.images.any?, "Obs should have images")
+    assert(obs.sequences.one?, "Obs should have a sequence")
   end
 
   def test_import_plant

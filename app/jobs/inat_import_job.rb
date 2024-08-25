@@ -129,6 +129,28 @@ class InatImportJob < ApplicationJob
     inat_obs = InatObs.new(result)
     return not_importable(inat_obs) unless inat_obs.importable?
 
+    prov_name = inat_obs.inat_prov_name
+
+    # NOTE:
+    #  1. iNat users seem to add a prov name only if there's a sequence.
+    #  2. iNat cannot use a prov name as the iNat identication.
+    # So if iNat has a provisional name observation field, then
+    #   add an MO provisional name if none exists, and
+    #   treat the provisional name as the MO consensus.
+    if prov_name.present?
+      if need_new_prov_name?(prov_name)
+        add_provisional_name(prov_name)
+        name_id = Name.last.id
+        text_name = Name.last.text_name
+      else
+        name_id = best_mo_homonym(prov_name).id
+        text_name = prov_name
+      end
+    else
+      name_id = inat_obs.name_id
+      text_name = inat_obs.text_name
+    end
+
     @observation = Observation.create(
       user: @inat_import.user,
       when: inat_obs.when,
@@ -137,18 +159,14 @@ class InatImportJob < ApplicationJob
       lat: inat_obs.lat,
       lng: inat_obs.lng,
       gps_hidden: inat_obs.gps_hidden,
-      name_id: inat_obs.name_id,
-      text_name: inat_obs.text_name,
+      name_id: name_id,
+      text_name: text_name,
       notes: inat_obs.notes,
       source: "mo_inat_import",
       inat_id: inat_obs.inat_id
     )
     @observation.log(:log_observation_created)
 
-    # NOTE: 2024-06-19 jdc. I can't figure out how to properly stub
-    # adding an image from an external source.
-    # Skipping images when testing will allow some more controller testing.
-    # add_inat_images(inat_obs.inat_obs_photos) unless Rails.env.test?
     add_inat_images(inat_obs.inat_obs_photos)
     update_names_and_proposals(inat_obs)
     add_inat_sequences(inat_obs)
@@ -163,6 +181,25 @@ class InatImportJob < ApplicationJob
     return if inat_obs.taxon_importable?
 
     flash_error(:inat_taxon_not_importable.t(id: inat_obs.inat_id))
+  end
+
+  def need_new_prov_name?(prov_name)
+    prov_name.blank? ||
+      Name.where(text_name: prov_name).none?
+  end
+
+  def add_provisional_name(prov_name)
+    params = {
+      method: :post,
+      action: :name,
+      api_key: inat_manager_key.key,
+      name: "#{prov_name} crypt. temp.",
+      rank: "Species"
+    }
+    api = API2.execute(params)
+
+    new_name = api.results.first
+    new_name.log(:log_name_created)
   end
 
   def add_inat_images(inat_obs_photos)
@@ -216,7 +253,7 @@ class InatImportJob < ApplicationJob
 
   def update_names_and_proposals(inat_obs)
     add_namings_for_identifications(inat_obs)
-    add_provisional_name(inat_obs) # iNat provisional are not identifications
+    add_provisional_naming(inat_obs) # iNat provisionals are not identifications
     adjust_consensus_name_naming # also adds naming for provisionals
   end
 
@@ -235,7 +272,7 @@ class InatImportJob < ApplicationJob
       map(&:name).include?(name)
   end
 
-  def add_naming_with_vote(name:, user: @inat_import.user, value: 0)
+  def add_naming_with_vote(name:, user: inat_manager, value: 3)
     naming = Naming.create(observation: @observation,
                            user: user, name: name)
 
@@ -243,34 +280,22 @@ class InatImportJob < ApplicationJob
                 user: user, value: value)
   end
 
-  def add_provisional_name(inat_obs)
+  def add_provisional_naming(inat_obs)
     nom_prov = inat_obs.provisional_name
     return if nom_prov.blank?
 
-    mo_counterparts = Name.where(text_name: nom_prov)
-    # Don't try to resolve if many MO names have this text name
-    return if mo_counterparts.many?
+    # NOTE: There will be >= 1 match because of add_missing_provisional_name.
+    # If a provisional Name was added during import, use it;
+    # it's the most recently created, and won't be deprecated.
+    # Else grab another mathcing one.
+    name = best_mo_homonym(nom_prov)
+    add_naming_with_vote(name: name)
+  end
 
-    name = if mo_counterparts.one?
-             mo_counterparts.first
-           else
-             params = {
-               method: :post,
-               action: :name,
-               api_key: inat_manager_key.key,
-               name: "#{nom_prov} crypt. temp.",
-               rank: "Species"
-             }
-             api = API2.execute(params)
-             # User.current = @user # API call zaps User.current
-
-             new_name = api.results.first
-             new_name.log(:log_name_created)
-             new_name
-           end
-    # If iNat obs has a provisional name, treat it as the MO consensus;
-    # let the calling method (add_namings) add a Naming and Vote
-    @observation.update(name: name, text_name: nom_prov)
+  def best_mo_homonym(text_name)
+    Name.where(text_name: text_name).
+      order(deprecated: :asc, created_at: :desc).
+      first
   end
 
   def adjust_consensus_name_naming
