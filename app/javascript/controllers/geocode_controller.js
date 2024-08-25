@@ -152,7 +152,7 @@ export default class extends Controller {
 
   // Format the address components for MO style.
   formatMOPlaceName(result) {
-    const ignore_types = ["postal_code", "street_number"]
+    const ignore_types = ["postal_code", "postal_code_suffix", "street_number"]
 
     let name_components = [], usa_location = false
     result.address_components.forEach((component) => {
