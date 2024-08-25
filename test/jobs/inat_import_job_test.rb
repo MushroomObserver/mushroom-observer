@@ -30,8 +30,8 @@ class InatImportJobTest < ActiveJob::TestCase
 
   ICONIC_TAXA = InatImportJob::ICONIC_TAXA
 
+  # Had 1 identification, 0 photos, 0 observation_fields
   def test_import_job_basic_obs
-    # This obs has 1 identification, 0 photos, 0 observation_fields
     file_name = "calostoma_lutescens"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     user = users(:rolf)
@@ -53,7 +53,7 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    InatPhotoImporter.stub(:new, stub_mo_photo_importer) do
+    InatPhotoImporter.stub(:new, stub_mo_photo_importer(mock_inat_response)) do
       InatImportJob.perform_now(inat_import)
     end
 
@@ -62,8 +62,8 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(0, obs.images.length, "Obs should not have images")
   end
 
+  # Had 1 photo, 1 identification, 0 observation_fields
   def test_import_job_obs_with_one_photo
-    # This obs has 1 identification, 1 photo, 0 observation_fields
     file_name = "evernia"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     user = users(:rolf)
@@ -84,7 +84,7 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    InatPhotoImporter.stub(:new, stub_mo_photo_importer) do
+    InatPhotoImporter.stub(:new, stub_mo_photo_importer(mock_inat_response)) do
       InatImportJob.perform_now(inat_import)
     end
 
@@ -94,6 +94,7 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs.sequences.none?)
   end
 
+  # Had many identifications, 1 photo
   def test_import_job_obs_with_many_namings
     file_name = "tremella_mesenterica"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
@@ -121,7 +122,7 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    InatPhotoImporter.stub(:new, stub_mo_photo_importer) do
+    InatPhotoImporter.stub(:new, stub_mo_photo_importer(mock_inat_response)) do
       InatImportJob.perform_now(inat_import)
     end
 
@@ -149,10 +150,28 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs.sequences.none?)
   end
 
-  def test_import_lycoperdon
-    # TODO: Move to InatImportJobTest
-    skip("To be moved to InatImportJobTest")
-    obs = import_mock_observation("lycoperdon")
+  # Had 2 photos, 6 identifications of 3 taxa, a different taxon,
+  # 9 obs fields, including "DNA Barcode ITS", "Collection number", "Collector"
+  def test_import_job_obs_with_sequence
+    file_name = "lycoperdon"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    user = users(:rolf)
+    inat_import = create_inat_import(inat_response: mock_inat_response)
+
+    name = Name.create(
+      text_name: "Lycoperdon", author: "Pers.", rank: "Genus",
+      display_name: "**__Lycoperdon__** Pers.", user: user
+    )
+
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response)
+
+    InatPhotoImporter.stub(:new, stub_mo_photo_importer(mock_inat_response)) do
+      InatImportJob.perform_now(inat_import)
+    end
+
+    obs = Observation.order(created_at: :asc).last
+    assert_standard_assertions(obs: obs, name: name)
 
     assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.one?, "Obs should have a sequence")
@@ -425,7 +444,7 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
-  def stub_mo_photo_importer
+  def stub_mo_photo_importer(mock_inat_response)
     # Suggested by CoPilot:
     # I wanted to directly stub InatPhotoImporter.new,
     # but that class doesn’t have a stub method by default. Therefore:
@@ -435,10 +454,17 @@ class InatImportJobTest < ActiveJob::TestCase
       :new, nil,
       [{ api: MockImageAPI.new(errors: [], results: [Image.first]) }]
     )
-    mock_photo_importer.expect(
-      :api, # nil,
-      MockImageAPI.new(errors: [], results: [Image.first])
-    )
+    results = JSON.parse(mock_inat_response)["results"]
+    # NOTE: This simply insures that ImageAPI is called the right # of times.
+    # It does NOT attach the right # of photos or even the correct photo.
+    results.each do |observation|
+      observation["observation_photos"].each do |photo|
+        mock_photo_importer.expect(
+          :api, # nil,
+          MockImageAPI.new(errors: [], results: [Image.first])
+        )
+      end
+    end
     mock_photo_importer
   end
 
@@ -496,25 +522,6 @@ class InatImportJobTest < ActiveJob::TestCase
   # Everything above here is live code.
   # TODO: Remove this comment and everything below it.
   # Everything below is potentially dead.
-
-  def expected_mo_image(mock_inat_photo:, user:)
-    Image.create(
-      content_type: "image/jpeg",
-      user_id: user.id,
-      notes: "Imported from iNat " \
-             "#{DateTime.now.utc.strftime("%Y-%m-%d %H:%M:%S %z")}",
-      copyright_holder: mock_inat_photo[:photo][:attribution],
-      license_id: expected_mo_photo_license(mock_inat_photo),
-      width: 2048,
-      height: 1534,
-      original_name: "iNat photo uuid #{mock_inat_photo[:uuid]}"
-    )
-  end
-
-  def expected_mo_photo_license(mock_inat_photo)
-    InatLicense.new(mock_inat_photo[:photo][:license_code]).
-      mo_license.id
-  end
 
   # Turn results with many pages into results with one page
   # By ignoring all pages but the first
