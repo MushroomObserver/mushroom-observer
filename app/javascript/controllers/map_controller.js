@@ -12,7 +12,7 @@ export default class extends GeocodeController {
     "eastInput", "highInput", "lowInput", "placeInput", "locationId",
     "getElevation", "mapClearBtn", "controlWrap", "toggleMapBtn",
     "latInput", "lngInput", "altInput", "showBoxBtn", "lockBoxBtn",
-    "autocompleter"]
+    "editBoxBtn", "autocompleter"]
 
   connect() {
     this.element.dataset.stimulus = "map-connected"
@@ -95,19 +95,18 @@ export default class extends GeocodeController {
 
   // Lock rectangle so it's not editable, and show this state in the icon link
   toggleBoxLock(event) {
-    if (this.rectangle && this.hasLockBoxBtnTarget) {
+    if (this.rectangle && this.hasLockBoxBtnTarget &&
+      this.hasEditBoxBtnTarget) {
       if (this.rectangle.getEditable() === true) {
         this.rectangle.setEditable(false)
         this.rectangle.setOptions({ clickable: false })
-        this.lockBoxBtnTarget.classList.add("active")
-        const active_title = this.lockBoxBtnTarget.dataset?.activeTitle ?? ''
-        this.lockBoxBtnTarget.setAttribute("title", active_title)
+        this.lockBoxBtnTarget.classList.add("d-none")
+        this.editBoxBtnTarget.classList.remove("d-none")
       } else {
         this.rectangle.setEditable(true)
         this.rectangle.setOptions({ clickable: true })
-        this.lockBoxBtnTarget.classList.remove("active")
-        const title = this.lockBoxBtnTarget.dataset?.title ?? ''
-        this.lockBoxBtnTarget.setAttribute("title", title)
+        this.lockBoxBtnTarget.classList.remove("d-none")
+        this.editBoxBtnTarget.classList.add("d-none")
       }
     }
   }

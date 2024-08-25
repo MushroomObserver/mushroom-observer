@@ -149,7 +149,7 @@ export default class extends Controller {
   // The select target is not the <input> element, but a <select> that can
   // swap out the autocompleter type. The <input> element is its target.
   static targets = ["input", "select", "pulldown", "list", "hidden", "wrap",
-    "createBtn", "hasIdIndicator", "keepBtn", "mapWrap", "collapseFields"]
+    "createBtn", "hasIdIndicator", "keepBtn", "editBtn", "mapWrap", "collapseFields"]
   static outlets = ["map"]
 
   initialize() {
@@ -238,8 +238,8 @@ export default class extends Controller {
       this.last_fetch_params = '';
       this.prepareInputElement();
       this.prepareHiddenInput();
-      if (!this.hasKeepBtnTarget ||
-        !this.keepBtnTarget?.classList?.contains('active')) {
+      if (!this.hasEditBtnTarget ||
+        this.editBtnTarget?.classList?.contains('d-none')) {
         this.clearHiddenId();
       }
       this.constrainedSelectionUI(location);

@@ -61,7 +61,8 @@ module AutocompleterHelper
       [
         autocompleter_has_id_indicator,
         autocompleter_find_button(args),
-        autocompleter_keep_button(args)
+        autocompleter_keep_box_button(args),
+        autocompleter_edit_box_button(args)
       ].safe_join
     end
   end
@@ -116,15 +117,26 @@ module AutocompleterHelper
     )
   end
 
-  def autocompleter_keep_button(args)
+  def autocompleter_keep_box_button(args)
     return unless args[:keep_text]
 
     icon_link_to(
       args[:keep_text], "#",
       icon: :apply, show_text: false, icon_class: "text-primary",
-      active_icon: :edit, active_content: args[:edit_text],
       name: "keep_#{args[:type]}", class: "ml-3 keep-btn d-none",
       data: { autocompleter_target: "keepBtn", map_target: "lockBoxBtn",
+              action: "map#toggleBoxLock:prevent form-exif#showFields" }
+    )
+  end
+
+  def autocompleter_edit_box_button(args)
+    return unless args[:keep_text]
+
+    icon_link_to(
+      args[:edit_text], "#",
+      icon: :edit, show_text: false, icon_class: "text-primary",
+      name: "edit_#{args[:type]}", class: "ml-3 edit-btn d-none",
+      data: { autocompleter_target: "editBtn", map_target: "editBoxBtn",
               action: "map#toggleBoxLock:prevent form-exif#showFields" }
     )
   end
