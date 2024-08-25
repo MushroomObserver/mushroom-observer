@@ -245,7 +245,6 @@ class InatImportJobTest < ActiveJob::TestCase
     file_name = "ceanothus_cordulatus"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     inat_import = create_inat_import(inat_response: mock_inat_response)
-
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
@@ -261,26 +260,22 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def test_import_zero_results
-    # TODO: Move to InatImportJobTest
-    skip("To be moved to InatImportJobTest")
-    user = rolf
-    filename = "zero_results"
-    mock_search_result = File.read("test/inat/#{filename}.txt")
-    inat_import_ids = "123"
+    file_name = "zero_results"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    inat_import = InatImport.create(inat_ids: "123", token: "MockCode",
+                                    inat_username: "anything")
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response)
 
-    simulate_all_inat_interactions(
-      user: user, inat_import_ids: inat_import_ids,
-      mock_inat_response: mock_search_result
-    )
-
-    params = { inat_ids: inat_import_ids, code: "MockCode" }
-    login(user.login)
-
-    assert_no_difference(
-      "Observation.count",
-      "Should not import if there's no iNat obs with a matching id"
+    InatPhotoImporter.stub(
+      :new, stub_mo_photo_importer(mock_inat_response)
     ) do
-      post(:authorization_response, params: params)
+      assert_no_difference(
+        "Observation.count",
+        "Should import nothing if no iNat obss match the id's typed by the user"
+      ) do
+        InatImportJob.perform_now(inat_import)
+      end
     end
   end
 
