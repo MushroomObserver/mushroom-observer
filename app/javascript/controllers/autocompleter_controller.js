@@ -1020,6 +1020,8 @@ export default class extends Controller {
 
   // Respond to the state of the hidden input. Initially we may not have id, but
   // we also don't offer create until they've typed something.
+  // The `keepBtn` is for freezing the current box so people can pick a point.
+  // Otherwise you can't click a point inside the box.
   cssHasIdOrNo(hidden_id) {
     this.verbose("autocompleter:cssHasIdOrNo()");
 
