@@ -297,10 +297,10 @@ class InatImportJob < ApplicationJob
 
     if naming.nil?
       add_naming_with_vote(name: @observation.name,
-                           user: inat_manager, value: 1)
+                           user: inat_manager, value: Vote::MAXIMUM_VOTE)
     else
       vote = Vote.find_by(naming: naming, observation: @observation)
-      vote.update(value: 1)
+      vote.update(value: Vote::MAXIMUM_VOTE)
     end
   end
 

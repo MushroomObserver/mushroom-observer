@@ -484,7 +484,8 @@ class InatImportJobTest < ActiveJob::TestCase
                    "Namings should belong to inat_manager")
       vote = Vote.find_by(naming: naming, user: naming.user)
       assert(vote.present?, "Naming is missing a Vote")
-      assert(vote.value.positive?, "Vote for MO consensus should be positive")
+      assert_equal(Vote::MAXIMUM_VOTE, vote.value,
+                   "Vote for MO consensus should be highest possible vote")
     end
 
     assert(obs.comments.any?, "Imported iNat should have >= 1 Comment")
