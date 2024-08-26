@@ -959,6 +959,8 @@ export default class extends Controller {
   // Assign ID of any perfectly matching option, even if not expressly selected.
   // This guards against user selecting a match, then, say, deleting a letter
   // and retyping the letter. Without this, an exact match would lose its ID.
+  // NOTE: This does not fire if the user types out the exact match(!).
+  // It also doesn't handle multiple IDs when there is a separator.
   updateHiddenId() {
     this.verbose("autocompleter:updateHiddenId()");
     if (this.COLLAPSE > 0) return;
