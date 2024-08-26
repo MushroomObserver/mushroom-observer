@@ -199,22 +199,7 @@ class InatImportJob < ApplicationJob
   def add_inat_images(inat_obs_photos)
     inat_obs_photos.each do |obs_photo|
       photo = InatObsPhoto.new(obs_photo)
-      # ImageAPI#create params to consider adding to API params below
-      # projects: parse_array(:project, :projects, must_be_member: true) ||
-      #           [],
-      params = {
-        method: :post,
-        action: :image,
-        api_key: inat_manager_key.key,
-        upload_url: photo.url,
-
-        copyright_holder: photo.copyright_holder,
-        license: photo.license_id,
-        notes: photo.notes,
-        original_name: photo.original_name
-      }
-
-      api = InatPhotoImporter.new(params).api
+      api = InatPhotoImporter.new(photo_importer_params(photo)).api
       # TODO: Error handling? 2024-06-19 jdc.
 
       image = Image.find(api.results.first.id)
@@ -230,6 +215,20 @@ class InatImportJob < ApplicationJob
       )
       @observation.add_image(image)
     end
+  end
+
+  def photo_importer_params(photo)
+    {
+      method: :post,
+      action: :image,
+      api_key: inat_manager_key.key,
+      upload_url: photo.url,
+
+      copyright_holder: photo.copyright_holder,
+      license: photo.license_id,
+      notes: photo.notes,
+      original_name: photo.original_name
+    }
   end
 
   # Key for managing iNat imports; avoids requiring each user to have own key.
