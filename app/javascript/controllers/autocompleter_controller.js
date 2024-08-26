@@ -836,7 +836,8 @@ export default class extends Controller {
       this.updateRows(rows);
       this.highlightNewRow(rows);
       this.makePulldownVisible();
-      this.updateHiddenId();
+      // moving this to populateMatches()
+      // this.updateHiddenId();
     }
     // Make sure input focus stays on text field!
     this.inputTarget.focus();
@@ -959,11 +960,9 @@ export default class extends Controller {
   // Assign ID of any perfectly matching option, even if not expressly selected.
   // This guards against user selecting a match, then, say, deleting a letter
   // and retyping the letter. Without this, an exact match would lose its ID.
-  // NOTE: This does not fire if the user types out the exact match(!).
-  // It also doesn't handle multiple IDs when there is a separator.
+  // NOTE: This doesn't handle multiple IDs when there is a separator.
   updateHiddenId() {
     this.verbose("autocompleter:updateHiddenId()");
-    if (this.COLLAPSE > 0) return;
 
     const perfect_match =
       this.matches.find((m) => m['name'] === this.inputTarget.value.trim());
@@ -1168,6 +1167,8 @@ export default class extends Controller {
     this.updateCurrentRow(last);
     // Reset width each time we change the options.
     this.current_width = this.inputTarget.offsetWidth;
+    // Check for a perfect match, because we now have new matches.
+    this.updateHiddenId();
   }
 
   // When "acting like a select" make it display all options in the
@@ -1293,10 +1294,11 @@ export default class extends Controller {
           }
         }
       }
-      if (matches.length == 1 &&
-        (token == matches[0]['name'].toLowerCase() ||
-          token == matches[0]['name'].toLowerCase() + ' '))
-        matches.pop();
+      // This removes our ability to match an id! We need to keep single matches
+      // if (matches.length == 1 &&
+      //   (token.trim() == matches[0]['name'].toLowerCase())) {
+      //   matches.pop();
+      // }
     }
     this.matches = matches;
   }
