@@ -23,6 +23,8 @@
 #  gsub_html_special_chars:: auxiliary to html_to_ascii
 #  unescape_html::      Render special encoded characters as regular characters
 #  as_displayed::       Render everything humanly legible, for integration tests
+#  id_of_nested_field:: Rails generates `observation_notes` for the ID of a
+#                       nested field like `observation[notes]`
 #  ---
 #  break_name::         Break a taxon name at the author
 #  small_author::       Wrap the author in a <small> span
@@ -544,6 +546,12 @@ class String
   # i.e., the whole string as a human would encounter it in the browser
   def as_displayed
     strip_html.unescape_html.strip_squeeze
+  end
+
+  # Rails generates an id for a nested field like "foo[bar]" that's snake_case
+  # - no brackets. This gets you that string. (used in forms_helper)
+  def id_of_nested_field
+    gsub(/[\[\]]+/, "_").chop
   end
 
   # Insert a line break between the scientific name and the author

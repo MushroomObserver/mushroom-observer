@@ -6,7 +6,9 @@
       form: fhr, field: :herbarium_name, type: :herbarium,
       value: @herbarium_name, hidden_value: @herbarium_id,
       label: "#{:herbarium_record_herbarium_name.t}:",
-      help: :form_observations_herbarium_record_help.t
+      help: :form_observations_herbarium_record_help.t,
+      create_text: :create_herbarium.l, create: "herbarium",
+      create_path: new_herbarium_path
     ) %>
     <%= text_field_with_label(
       form: fhr, field: :accession_number, value: @accession_number,

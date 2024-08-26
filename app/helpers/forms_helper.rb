@@ -503,7 +503,11 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
       return args
     end
 
-    id = "#{args[:form].object_name}_#{args[:field]}_help"
+    id = [
+      args[:form].object_name.to_s.id_of_nested_field,
+      args[:field].to_s,
+      "help"
+    ].join("_")
     args[:between] = capture do
       concat(args[:between])
       concat(collapse_info_trigger(id))

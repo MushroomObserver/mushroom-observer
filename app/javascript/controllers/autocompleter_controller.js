@@ -149,7 +149,7 @@ export default class extends Controller {
   // The select target is not the <input> element, but a <select> that can
   // swap out the autocompleter type. The <input> element is its target.
   static targets = ["input", "select", "pulldown", "list", "hidden", "wrap",
-    "createBtn", "hasIdIndicator", "keepBtn", "mapWrap", "collapseFields"]
+    "createBtn", "hasIdIndicator", "keepBtn", "editBtn", "mapWrap", "collapseFields"]
   static outlets = ["map"]
 
   initialize() {
@@ -238,8 +238,8 @@ export default class extends Controller {
       this.last_fetch_params = '';
       this.prepareInputElement();
       this.prepareHiddenInput();
-      if (!this.hasKeepBtnTarget ||
-        !this.keepBtnTarget?.classList?.contains('active')) {
+      if (!this.hasEditBtnTarget ||
+        this.editBtnTarget?.classList?.contains('d-none')) {
         this.clearHiddenId();
       }
       this.constrainedSelectionUI(location);
@@ -491,6 +491,7 @@ export default class extends Controller {
     // this.debug("ourChange(" + this.inputTarget.value + ")");
     if (new_val.length == 0) {
       this.cssCollapseFields();
+      this.clearHiddenId();
       this.leaveCreate();
     } else {
       this.cssUncollapseFields();
@@ -600,10 +601,11 @@ export default class extends Controller {
       this.verbose(this.inputTarget.value);
       this.old_value = this.inputTarget.value;
       // async, anything after this executes immediately
+      // STORE AND COMPARE SEARCH STRING. Otherwise we're doing double lookups
       if (this.hasGeocodeOutlet) {
-        this.geocodeOutlet.geolocatePlaceName(this.inputTarget.value);
+        this.geocodeOutlet.tryToGeolocate(this.inputTarget.value);
       } else if (this.hasMapOutlet) {
-        this.mapOutlet.geolocatePlaceName(this.inputTarget.value);
+        this.mapOutlet.tryToGeolocate(this.inputTarget.value);
       }
       // still necessary if primer unchanged, as likely?
       // this.populateMatches();
@@ -1018,6 +1020,8 @@ export default class extends Controller {
 
   // Respond to the state of the hidden input. Initially we may not have id, but
   // we also don't offer create until they've typed something.
+  // The `keepBtn` is for freezing the current box so people can pick a point.
+  // Otherwise you can't click a point inside the box.
   cssHasIdOrNo(hidden_id) {
     this.verbose("autocompleter:cssHasIdOrNo()");
 
@@ -1043,7 +1047,7 @@ export default class extends Controller {
       if (this.wrapTarget.classList.contains('create')) {
         this.mapWrapTarget.classList.remove('d-none');
       } else {
-        this.mapWrapTarget.classList.add('d-none');
+        // this.mapWrapTarget.classList.add('d-none');
       }
     }
   }
@@ -1075,14 +1079,15 @@ export default class extends Controller {
       { north, south, east, west } = this.hiddenTarget.dataset,
       hidden_data = { id: hidden_id, north, south, east, west };
 
-    this.verbose("autocompleter:hidden_data: " + JSON.stringify(hidden_data));
     // comparing data, not just ids, because google locations have same -1 id
     if (JSON.stringify(hidden_data) == JSON.stringify(this.stored_data)) {
-      this.verbose("autocompleter: hidden data did not change");
+      this.verbose("autocompleter: hidden_data did not change");
     } else {
       clearTimeout(this.data_timer);
       this.data_timer = setTimeout(() => {
-        this.verbose("autocompleter: hidden data changed");
+        this.verbose("autocompleter: hidden_data changed");
+        this.verbose("autocompleter:hidden_data: ")
+        this.verbose(JSON.stringify(hidden_data));
         this.cssHasIdOrNo(hidden_id);
         if (this.hasKeepBtnTarget) {
           this.keepBtnTarget.classList.remove('active');

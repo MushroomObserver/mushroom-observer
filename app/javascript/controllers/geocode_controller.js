@@ -45,6 +45,7 @@ export default class extends Controller {
   }
 
   tryToGeocode() {
+    this.verbose("geocode:tryToGeocode")
     const location = this.validateLatLngInputs(false)
 
     if (location &&
@@ -75,6 +76,7 @@ export default class extends Controller {
   }
 
   tryToGeolocate() {
+    this.verbose("geocode:tryToGeolocate")
     const address = this.placeInputTarget.value
 
     if (this.ignorePlaceInput === false &&
@@ -84,6 +86,8 @@ export default class extends Controller {
   }
 
   geolocatePlaceName(address) {
+    if (address == this.lastGeolocatedAddress) return false
+
     this.lastGeolocatedAddress = address
     this.verbose("geocode:geolocatePlaceName")
     this.verbose(address)
@@ -148,6 +152,8 @@ export default class extends Controller {
 
   // Format the address components for MO style.
   formatMOPlaceName(result) {
+    const ignore_types = ["postal_code", "postal_code_suffix", "street_number"]
+
     let name_components = [], usa_location = false
     result.address_components.forEach((component) => {
       if (component.types.includes("country") && component.short_name == "US") {
@@ -158,7 +164,7 @@ export default class extends Controller {
         component.long_name.includes("County")) {
         // MO uses "Co." for County
         name_components.push(component.long_name.replace("County", "Co."))
-      } else if (component.types.includes("postal_code")) {
+      } else if (ignore_types.some((type) => component.types.includes(type))) {
         // skip it for all. non-US countries it's an important differentiator?
       } else {
         name_components.push(component.long_name)
