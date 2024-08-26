@@ -129,27 +129,19 @@ class InatImportJob < ApplicationJob
     inat_obs = InatObs.new(result)
     return unless inat_obs.importable?
 
-    prov_name = inat_obs.inat_prov_name
+    create_observation(inat_obs)
+    add_inat_images(inat_obs.inat_obs_photos)
+    update_names_and_proposals(inat_obs)
+    add_inat_sequences(inat_obs)
+    add_inat_summmary_data(inat_obs)
+    # TODO: Other things done by Observations#create
+    # save_everything_else(params.dig(:naming, :reasons))
+    # strip_images! if @observation.gps_hidden
+    # update_field_slip(@observation, params[:field_code])
+  end
 
-    # NOTE:
-    #  1. iNat users seem to add a prov name only if there's a sequence.
-    #  2. iNat cannot use a prov name as the iNat identication.
-    # So if iNat has a provisional name observation field, then
-    #   add an MO provisional name if none exists, and
-    #   treat the provisional name as the MO consensus.
-    if prov_name.present?
-      if need_new_prov_name?(prov_name)
-        add_provisional_name(prov_name)
-        name_id = Name.last.id
-        text_name = Name.last.text_name
-      else
-        name_id = best_mo_homonym(prov_name).id
-        text_name = prov_name
-      end
-    else
-      name_id = inat_obs.name_id
-      text_name = inat_obs.text_name
-    end
+  def create_observation(inat_obs)
+    name_id = adjust_for_provisional(inat_obs)
 
     @observation = Observation.create(
       user: @inat_import.user,
@@ -160,21 +152,12 @@ class InatImportJob < ApplicationJob
       lng: inat_obs.lng,
       gps_hidden: inat_obs.gps_hidden,
       name_id: name_id,
-      text_name: text_name,
+      text_name: Name.find(name_id).text_name,
       notes: inat_obs.notes,
       source: "mo_inat_import",
       inat_id: inat_obs.inat_id
     )
     @observation.log(:log_observation_created)
-
-    add_inat_images(inat_obs.inat_obs_photos)
-    update_names_and_proposals(inat_obs)
-    add_inat_sequences(inat_obs)
-    add_inat_summmary_data(inat_obs)
-    # TODO: Other things done by Observations#create
-    # save_everything_else(params.dig(:naming, :reasons))
-    # strip_images! if @observation.gps_hidden
-    # update_field_slip(@observation, params[:field_code])
   end
 
   def need_new_prov_name?(prov_name)
@@ -194,6 +177,23 @@ class InatImportJob < ApplicationJob
 
     new_name = api.results.first
     new_name.log(:log_name_created)
+  end
+
+  # NOTE: 1. iNat users seem to add a prov name only if there's a sequence.
+  #  2. iNat cannot use a prov name as the iNat identication.
+  # So if iNat has a provisional name observation field, then
+  #   add an MO provisional name if none exists, and
+  #   treat the provisional name as the MO consensus.
+  def adjust_for_provisional(inat_obs)
+    prov_name = inat_obs.inat_prov_name
+    return inat_obs.name_id if prov_name.blank?
+
+    if need_new_prov_name?(prov_name)
+      add_provisional_name(prov_name)
+      Name.last.id
+    else
+      best_mo_homonym(prov_name).id
+    end
   end
 
   def add_inat_images(inat_obs_photos)
