@@ -312,33 +312,31 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
+  # Prove that "Import all my iNat observations imports" multiple obsservations
+  # NOTE: It would be complicated to prove that it imports multiple pages.
   def test_import_all
-    # TODO: Move to InatImportJobTest
-    skip("To be moved to InatImportJobTest")
-    user = users(:rolf)
-    login(user.login)
+    file_name = "import_all"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    inat_import = InatImport.create(user: users(:rolf),
+                                    inat_ids: "",
+                                    import_all: true,
+                                    token: "MockCode",
+                                    inat_username: "anything")
+    # limit it to one page to avoid complications of stubbing multiple
+    # inat api requests with multiple files
+    mock_inat_response = limited_to_first_page(mock_inat_response)
 
-    filename = "import_all"
-    mock_search_result = File.read("test/inat/#{filename}.txt")
-    # shorten it to one page to avoid stubbing multiple inat api requests
-    mock_search_result = limited_to_first_page(mock_search_result)
-    # delete the photos in order to avoid stubbing photo imports
-    mock_search_result = result_without_photos(mock_search_result)
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response)
 
-    inat_import_ids = ""
-
-    simulate_all_inat_interactions(
-      user: user, inat_import_ids: inat_import_ids,
-      mock_inat_response: mock_search_result,
-      import_all: true
-    )
-
-    params = { inat_ids: inat_import_ids, code: "MockCode" }
-
-    assert_difference(
-      "Observation.count", 2, "Failed to create multiple observations"
+    InatPhotoImporter.stub(
+      :new, stub_mo_photo_importer(mock_inat_response)
     ) do
-      post(:authorization_response, params: params)
+      assert_difference(
+        "Observation.count", 2, "Failed to create multiple observations"
+      ) do
+        InatImportJob.perform_now(inat_import)
+      end
     end
   end
 
