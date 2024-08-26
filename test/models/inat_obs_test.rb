@@ -182,7 +182,7 @@ class InatObsTest < UnitTestCase
     assert_equal('Arrhenia "sp-NY02"', prov_name)
     assert_equal('Arrhenia "sp-NY02"', mock_inat_obs.provisional_name)
 
-    mock_inat_obs = mock_observation("donadina_PNW01")
+    mock_inat_obs = mock_observation("donadinia_PNW01")
     prov_name = mock_inat_obs.inat_prov_name
     assert(prov_name.present?)
     assert_equal("Donadinia PNW01", prov_name)
