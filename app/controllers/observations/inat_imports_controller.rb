@@ -126,7 +126,7 @@ module Observations
       @inat_import.update(token: auth_code, state: "Authenticating")
 
       InatImportJob.perform_later(@inat_import)
-      # InatImportJo.perform_now(@inat_import) # for testing
+      # InatImportJob.perform_now(@inat_import) # for manual testing
 
       redirect_to(observations_path)
     end
