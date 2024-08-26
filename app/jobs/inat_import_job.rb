@@ -160,6 +160,23 @@ class InatImportJob < ApplicationJob
     @observation.log(:log_observation_created)
   end
 
+  # NOTE: 1. iNat users seem to add a prov name only if there's a sequence.
+  #  2. iNat cannot use a prov name as the iNat identication.
+  # So if iNat has a provisional name observation field, then
+  #   add an MO provisional name if none exists, and
+  #   treat the provisional name as the MO consensus.
+  def adjust_for_provisional(inat_obs)
+    prov_name = inat_obs.provisional_name
+    return inat_obs.name_id if prov_name.blank?
+
+    if need_new_prov_name?(prov_name)
+      add_provisional_name(prov_name)
+      Name.last.id
+    else
+      best_mo_homonym(prov_name).id
+    end
+  end
+
   def need_new_prov_name?(prov_name)
     prov_name.blank? ||
       Name.where(text_name: prov_name).none?
@@ -177,23 +194,6 @@ class InatImportJob < ApplicationJob
 
     new_name = api.results.first
     new_name.log(:log_name_created)
-  end
-
-  # NOTE: 1. iNat users seem to add a prov name only if there's a sequence.
-  #  2. iNat cannot use a prov name as the iNat identication.
-  # So if iNat has a provisional name observation field, then
-  #   add an MO provisional name if none exists, and
-  #   treat the provisional name as the MO consensus.
-  def adjust_for_provisional(inat_obs)
-    prov_name = inat_obs.inat_prov_name
-    return inat_obs.name_id if prov_name.blank?
-
-    if need_new_prov_name?(prov_name)
-      add_provisional_name(prov_name)
-      Name.last.id
-    else
-      best_mo_homonym(prov_name).id
-    end
   end
 
   def add_inat_images(inat_obs_photos)
