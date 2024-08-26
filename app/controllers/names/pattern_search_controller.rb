@@ -35,9 +35,10 @@ module Names
     # The PatternSearch class then unpacks, validates and re-translates all
     # these params into the actual params used by the Query class. This may seem
     # odd: of course we do know the Query param names in advance, so we could
-    # theoretically just pass the values directly to the receiving controller.
-    # But we'd still have to be able to validate the input, and give messages
-    # for all the possible errors there. PatternSearch class handles all that.
+    # theoretically just pass the values directly into Query and render the
+    # index. But we'd still have to be able to validate the input, and give
+    # messages for all the possible errors there. PatternSearch class handles
+    # all that.
     def human_formatted_pattern_search_string
       query_string = permitted_search_params.compact_blank.to_query
       query_string.tr("=", ":").tr("&", " ").tr("%2C", "\\\\,")
