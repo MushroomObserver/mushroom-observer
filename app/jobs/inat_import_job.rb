@@ -323,8 +323,7 @@ class InatImportJob < ApplicationJob
       }
 
       # TODO: Error handling? 2024-06-19 jdc.
-      api = API2.execute(params)
-      # User.current = @user # API call zaps User.current
+      API2.execute(params)
     end
   end
 
