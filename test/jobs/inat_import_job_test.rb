@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 # Some classes with enough attributes to stub calls to InatPhotoImporter
@@ -26,7 +28,7 @@ class InatImportJobTest < ActiveJob::TestCase
   SITE = Observations::InatImportsController::SITE
   REDIRECT_URI = Observations::InatImportsController::REDIRECT_URI
   API_BASE = Observations::InatImportsController::API_BASE
-  PHOTO_BASE = "https://inaturalist-open-data.s3.amazonaws.com/photos".freeze
+  PHOTO_BASE = "https://inaturalist-open-data.s3.amazonaws.com/photos"
 
   ICONIC_TAXA = InatImportJob::ICONIC_TAXA
 
@@ -186,7 +188,6 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_job_prov_name
     file_name = "arrhenia_sp_NY02"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    user = users(:rolf)
     inat_import = create_inat_import(inat_response: mock_inat_response)
     name = Name.create(
       text_name: 'Arrhenia "sp-NY02"',
@@ -457,7 +458,7 @@ class InatImportJobTest < ActiveJob::TestCase
     # NOTE: This simply insures that ImageAPI is called the right # of times.
     # It does NOT attach the right # of photos or even the correct photo.
     results.each do |observation|
-      observation["observation_photos"].each do |photo|
+      observation["observation_photos"].each do
         mock_photo_importer.expect(
           :api, # nil,
           MockImageAPI.new(errors: [], results: [Image.first])
