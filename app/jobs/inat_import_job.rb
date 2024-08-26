@@ -133,7 +133,7 @@ class InatImportJob < ApplicationJob
     add_inat_images(inat_obs.inat_obs_photos)
     update_names_and_proposals(inat_obs)
     add_inat_sequences(inat_obs)
-    add_inat_summmary_data(inat_obs)
+    add_import_snapshot_comment(inat_obs)
     # TODO: Other things done by Observations#create
     # save_everything_else(params.dig(:naming, :reasons))
     # strip_images! if @observation.gps_hidden
@@ -333,7 +333,7 @@ class InatImportJob < ApplicationJob
     end.join("\n")
   end
 
-  def add_inat_summmary_data(inat_obs)
+  def add_import_snapshot_comment(inat_obs)
     params = {
       target: @observation,
       summary: "#{:inat_data_comment.t} #{@observation.created_at}",
