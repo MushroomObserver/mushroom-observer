@@ -255,8 +255,7 @@ class InatImportJob < ApplicationJob
       inat_taxon = ::InatTaxon.new(identification[:taxon])
       next if name_already_proposed?(inat_taxon.name)
 
-      add_naming_with_vote(name: inat_taxon.name,
-                           user: inat_manager, value: 0)
+      add_naming_with_vote(name: inat_taxon.name)
     end
   end
 
@@ -265,7 +264,7 @@ class InatImportJob < ApplicationJob
       map(&:name).include?(name)
   end
 
-  def add_naming_with_vote(name:, user: inat_manager, value: 3)
+  def add_naming_with_vote(name:, user: inat_manager, value: Vote::MAXIMUM_VOTE)
     naming = Naming.create(observation: @observation,
                            user: user, name: name)
 

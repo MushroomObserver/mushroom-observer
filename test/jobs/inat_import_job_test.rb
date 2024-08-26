@@ -136,15 +136,16 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(inat_manager, naming.user, "Naming has wrong User")
     vote = Vote.find_by(naming: naming, user: naming.user)
     assert(vote.present?, "Naming is missing a Vote")
-    assert_equal(0, vote.value, "Vote for non-consensus name should be 0")
+    assert_equal(Vote::MAXIMUM_VOTE, vote.value,
+                 "Vote for non-consensus name should be highest possible")
 
     naming = namings.find_by(name: n_aurantia)
     assert(naming.present?,
            "Missing Naming for iNat identification by random iNat user")
     assert_equal(inat_manager, naming.user, "Naming has wrong User")
     vote = Vote.find_by(naming: naming, user: naming.user)
-    assert(vote.present?, "Naming is missing a Vote")
-    assert_equal(0, vote.value, "Vote for non-consensus name should be 0")
+    assert_equal(Vote::MAXIMUM_VOTE, vote.value,
+                 "Vote for non-consensus name should be highest possible")
 
     assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.none?)
