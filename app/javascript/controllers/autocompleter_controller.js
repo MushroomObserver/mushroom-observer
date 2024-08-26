@@ -168,6 +168,9 @@ export default class extends Controller {
     this.hasMap = this.inputTarget.dataset.hasOwnProperty("mapTarget");
     this.hasGeocode = this.inputTarget.dataset.hasOwnProperty("geocodeTarget");
 
+    // Assign the separator for multiple-record autocompleters
+    this.SEPARATOR = this.element.dataset.separator;
+
     // Shared MO utilities, imported at the top:
     this.EVENT_KEYS = EVENT_KEYS;
     Object.assign(this, mo_form_utilities);
@@ -1360,6 +1363,7 @@ export default class extends Controller {
   getSearchToken() {
     const val = this.inputTarget.value;
     let token = val;
+    this.verbose("autocompleter:getSearchToken() before: " + token);
 
     // If we're only looking for whole words, don't make a request unless
     // trailing space or comma, indicating a user has finished typing a word.
@@ -1371,6 +1375,7 @@ export default class extends Controller {
       const extents = this.searchTokenExtents();
       token = val.substring(extents.start, extents.end);
     }
+    this.verbose("autocompleter:getSearchToken() after: " + token);
     return token;
   }
 
