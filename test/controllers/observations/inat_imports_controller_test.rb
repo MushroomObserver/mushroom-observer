@@ -87,7 +87,6 @@ module Observations
     end
 
     def test_create_authorization_request
-      skip("under revision")
       user = users(:rolf)
       inat_username = "rolf"
       inat_import = inat_imports(:rolf_inat_import)
