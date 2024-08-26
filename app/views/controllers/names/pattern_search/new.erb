@@ -1,0 +1,13 @@
+<%
+fields = PatternSearch::Name.params.keys
+%>
+
+<%= form_with(url: { action: :create }) do |f| %>
+
+  <% fields.each do |field| %>
+    <%= text_field_with_label(form: f, field:) %>
+  <% end %>
+
+  <%= submit_button(form: f, button: :SEARCH.l, center: true) %>
+
+<% end %>

@@ -567,6 +567,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                            as: "names_eol_preview")
   get("names/eol_expanded_review", to: "names/eol_data/expanded_review#show",
                                    as: "names_eol_expanded_review")
+  get("names/search/new", to: "names/pattern_search#new", as: "new_name_search")
+  post("names/search", to: "names/pattern_search#create", as: "name_search")
+
 
   # ----- Observations: standard actions  ----------------------------
   namespace :observations do
