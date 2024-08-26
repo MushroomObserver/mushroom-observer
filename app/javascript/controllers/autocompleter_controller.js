@@ -836,8 +836,6 @@ export default class extends Controller {
       this.updateRows(rows);
       this.highlightNewRow(rows);
       this.makePulldownVisible();
-      // moving this to populateMatches()
-      // this.updateHiddenId();
     }
     // Make sure input focus stays on text field!
     this.inputTarget.focus();
@@ -960,7 +958,7 @@ export default class extends Controller {
   // Assign ID of any perfectly matching option, even if not expressly selected.
   // This guards against user selecting a match, then, say, deleting a letter
   // and retyping the letter. Without this, an exact match would lose its ID.
-  // NOTE: This doesn't handle multiple IDs when there is a separator.
+  // NOTE: Needs to handle multiple IDs when there is a separator.
   updateHiddenId() {
     this.verbose("autocompleter:updateHiddenId()");
 
@@ -975,14 +973,6 @@ export default class extends Controller {
     } else if (!this.ignoringTextInput()) {
       this.clearHiddenId();
     }
-  }
-
-  // only clear if we're not in "ignorePlaceInput" mode
-  ignoringTextInput() {
-    if (!this.hasMapOutlet) return false;
-
-    this.verbose("autocompleter:ignoringTextInput()");
-    return this.mapOutlet.ignorePlaceInput;
   }
 
   // Assigns not only the ID, but also any data attributes of selected row.
@@ -1020,6 +1010,14 @@ export default class extends Controller {
     });
 
     this.hiddenIdChanged();
+  }
+
+  // only clear if we're not in "ignorePlaceInput" mode
+  ignoringTextInput() {
+    if (!this.hasMapOutlet) return false;
+
+    this.verbose("autocompleter:ignoringTextInput()");
+    return this.mapOutlet.ignorePlaceInput;
   }
 
   // Respond to the state of the hidden input. Initially we may not have id, but
