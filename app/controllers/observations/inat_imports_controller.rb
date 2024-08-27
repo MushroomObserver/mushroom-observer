@@ -128,6 +128,7 @@ module Observations
       InatImportJob.perform_later(@inat_import)
       # InatImportJob.perform_now(@inat_import) # for manual testing
 
+      flash_notice(:inat_import_started.t)
       redirect_to(observations_path)
     end
 

@@ -144,7 +144,7 @@ module Observations
               params: inat_authorization_callback_params)
         end
       end
-
+      assert_flash_success
       assert_redirected_to(observations_path)
     end
 
