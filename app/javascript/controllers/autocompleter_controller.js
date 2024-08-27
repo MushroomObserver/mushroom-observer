@@ -751,8 +751,8 @@ export default class extends Controller {
     if (this.matches.length === 0) return;
 
     if (idx instanceof Event) { idx = parseInt(idx.target.dataset.row); }
-    let new_data = this.matches[this.scroll_offset + idx],
-      new_val = new_data.name;
+    let new_match = this.matches[this.scroll_offset + idx],
+      new_val = new_match.name;
     // Close pulldown unless the value the user selected uncollapses into a set
     // of new options.  In that case schedule a refresh and leave it up.
     if (this.COLLAPSE > 0 &&
@@ -765,9 +765,8 @@ export default class extends Controller {
     }
     this.inputTarget.focus();
     this.focused = true;
-    this.inputTarget.value = new_val;
-    this.assignHiddenId(new_data);
-    this.setSearchToken(new_val);
+    this.assignHiddenId(new_match);
+    this.setSearchToken(new_val); // updates input field
     this.ourChange(false);
   }
 
@@ -1382,6 +1381,7 @@ export default class extends Controller {
   }
 
   // Change the token under or immediately in front of the cursor.
+  // (Updates the value of the input field, handles multiple values.)
   setSearchToken(new_val) {
     const old_str = this.inputTarget.value;
     if (this.SEPARATOR) {
@@ -1397,8 +1397,9 @@ export default class extends Controller {
       if (old_str != new_str) {
         var old_scroll = this.inputTarget.offsetTop;
         this.inputTarget.value = new_str;
-        this.setCursorPosition(this.inputTarget[0],
-          extents.start + new_val.length);
+        this.setCursorPosition(
+          this.inputTarget, extents.start + new_val.length
+        );
         this.inputTarget.offsetTop = old_scroll;
       }
     } else {
@@ -1604,6 +1605,7 @@ export default class extends Controller {
   }
 
   setCursorPosition(el, pos) {
+    debugger
     if (el.setSelectionRange) {
       el.setSelectionRange(pos, pos);
     } else if (el.createTextRange) {
