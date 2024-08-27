@@ -171,6 +171,8 @@ export default class extends Controller {
 
     // Assign the separator for multiple-record autocompleters
     this.SEPARATOR = this.element.dataset.separator;
+    if (this.SEPARATOR) // data will be an array of hashes
+      this.stored_data = [];
 
     // Shared MO utilities, imported at the top:
     this.EVENT_KEYS = EVENT_KEYS;
@@ -489,6 +491,7 @@ export default class extends Controller {
   }
 
   // Input field has changed.
+  // Needs to keep track of a data array, and update the hidden ids if the list of matches gets edited
   ourChange(do_refresh) {
     const old_val = this.old_value;
     const new_val = this.inputTarget.value;
@@ -613,15 +616,16 @@ export default class extends Controller {
     this.verbose("autocompleter:scheduleGoogleRefresh()");
     this.clearRefresh();
     this.refresh_timer = setTimeout((() => {
+      const current_input = this.inputTarget.value;
       this.verbose("autocompleter: doing google refresh");
-      this.verbose(this.inputTarget.value);
-      this.old_value = this.inputTarget.value;
+      this.verbose(current_input);
+      this.old_value = current_input;
       // async, anything after this executes immediately
       // STORE AND COMPARE SEARCH STRING. Otherwise we're doing double lookups
       if (this.hasGeocodeOutlet) {
-        this.geocodeOutlet.tryToGeolocate(this.inputTarget.value);
+        this.geocodeOutlet.tryToGeolocate(current_input);
       } else if (this.hasMapOutlet) {
-        this.mapOutlet.tryToGeolocate(this.inputTarget.value);
+        this.mapOutlet.tryToGeolocate(current_input);
       }
       // still necessary if primer unchanged, as likely?
       // this.populateMatches();
@@ -954,7 +958,7 @@ export default class extends Controller {
 
       // Only show pulldown if it is nontrivial, i.e., has an option other than
       // the value that's already in the text field.
-      if (matches.length > 1 || this.inputTarget.value != matches[0]['name']) {
+      if (matches.length > 1 || this.getSearchToken() != matches[0]['name']) {
         this.clearHide();
         this.wrapTarget?.classList?.add('open');
         this.menu_up = true;
@@ -975,7 +979,7 @@ export default class extends Controller {
     this.verbose("autocompleter:updateHiddenId()");
 
     const perfect_match =
-      this.matches.find((m) => m['name'] === this.inputTarget.value.trim());
+      this.matches.find((m) => m['name'] === this.getSearchToken().trim());
 
     if (perfect_match) {
       // only assign if it's not already assigned
@@ -1018,18 +1022,34 @@ export default class extends Controller {
   // The autocompleter stored attributes are for comparing to the last value.
   updateHiddenTargetValue(match) {
     if (this.SEPARATOR) {
-      // add the new id to the end of the array. Converts array back to string.
-      let new_array = this.stored_ids;
-      new_array.push(parseInt(match['id']));
-      this.hiddenTarget.value = new_array.join(",");
+      this.updateHiddenTargetValueMultiple(match);
     } else {
-      this.hiddenTarget.value = match['id'];
-      // assign the dataset of the selected row to the hidden input
-      Object.keys(match).forEach(key => {
-        if (!['id', 'name'].includes(key))
-          this.hiddenTarget.dataset[key] = match[key];
-      });
+      this.updateHiddenTargetValueSingle(match);
     }
+  }
+
+  updateHiddenTargetValueMultiple(match) {
+    // add the new id at the same index of the array as the search token.
+    // Converts array back to string.
+    let new_array = this.stored_ids,
+      idx = this.getSearchTokenIndex(),
+      { name, id } = match,
+      new_data = { name, id };
+
+    if (idx > -1) {
+      new_array[idx] = parseInt(match['id']);
+      this.hiddenTarget.value = new_array.join(",");
+      this.stored_data[idx] = new_data;
+    }
+  }
+
+  updateHiddenTargetValueSingle(match) {
+    this.hiddenTarget.value = match['id'];
+    // assign the dataset of the selected row to the hidden input
+    Object.keys(match).forEach(key => {
+      // if (!['id', 'name'].includes(key))
+      this.hiddenTarget.dataset[key] = match[key];
+    });
   }
 
   // Clears not only the ID, but also any data attributes of selected row.
@@ -1048,20 +1068,33 @@ export default class extends Controller {
   clearLastHiddenTargetValue() {
     this.verbose("autocompleter:clearLastHiddenTargetValue()");
     if (this.SEPARATOR) {
-      // not worried about integers here
-      let old_array = this.hiddenTarget.value.split(",")
-      if (old_array.length > 0) {
-        old_array.pop();
-        this.hiddenTarget.value = old_array.join(",");
-      }
+      this.clearLastHiddenTargetValueMultiple();
     } else {
-      this.hiddenTarget.value = '';
-      // clear the dataset also
-      Object.keys(this.hiddenTarget.dataset).forEach(key => {
-        if (!key.match(/Target/))
-          delete this.hiddenTarget.dataset[key];
-      });
+      this.clearLastHiddenTargetValueSingle();
     }
+  }
+
+  // We have to be careful here to delete only the id (of multiple) that is
+  // at the same index as the search token. Otherwise it keeps deleting.
+  clearLastHiddenTargetValueMultiple() {
+    // not worried about integers here
+    let old_array = this.hiddenTarget.value.split(","),
+      idx = this.getSearchTokenIndex();
+
+    if (idx > -1 && old_array.length > idx) {
+      old_array.slice(idx, 1);
+      this.hiddenTarget.value = old_array.join(",");
+      this.stored_data.slice(idx, 1);
+    }
+  }
+
+  clearLastHiddenTargetValueSingle() {
+    this.hiddenTarget.value = '';
+    // clear the dataset also
+    Object.keys(this.hiddenTarget.dataset).forEach(key => {
+      if (!key.match(/Target/))
+        delete this.hiddenTarget.dataset[key];
+    });
   }
 
   // only clear if we're not in "ignorePlaceInput" mode
@@ -1108,13 +1141,13 @@ export default class extends Controller {
 
   storeCurrentHiddenData() {
     if (this.SEPARATOR) {
-      this.storeCurrentHiddenIdsMultiple();
+      this.storeCurrentHiddenDataMultiple();
     } else {
       this.storeCurrentHiddenDataSingle();
     }
   }
 
-  storeCurrentHiddenIdsMultiple() {
+  storeCurrentHiddenDataMultiple() {
     this.verbose("autocompleter:storeCurrentHiddenDataMultiple()");
     this.stored_ids = this.hiddenIdsAsIntegerArray();
   }
@@ -1122,8 +1155,8 @@ export default class extends Controller {
   storeCurrentHiddenDataSingle() {
     this.verbose("autocompleter:storeCurrentHiddenDataSingle()");
     this.stored_id = parseInt(this.hiddenTarget.value); // value is a string
-    let { north, south, east, west } = this.hiddenTarget.dataset;
-    this.stored_data = { id: this.stored_id, north, south, east, west };
+    let { name, north, south, east, west } = this.hiddenTarget.dataset;
+    this.stored_data = { id: this.stored_id, name, north, south, east, west };
     this.verbose("stored_data: " + JSON.stringify(this.stored_data));
   }
 
@@ -1157,8 +1190,8 @@ export default class extends Controller {
   hiddenIdChangedSingle() {
     const hidden_id = parseInt(this.hiddenTarget.value || 0),
       // stored_id = parseInt(this.stored_id || 0),
-      { north, south, east, west } = this.hiddenTarget.dataset,
-      hidden_data = { id: hidden_id, north, south, east, west };
+      { name, north, south, east, west } = this.hiddenTarget.dataset,
+      hidden_data = { id: hidden_id, name, north, south, east, west };
 
     // comparing data, not just ids, because google locations have same -1 id
     if (JSON.stringify(hidden_data) == JSON.stringify(this.stored_data)) {
@@ -1485,7 +1518,7 @@ export default class extends Controller {
         this.setCursorPosition(
           this.inputTarget, extents.start + new_val.length
         );
-        this.inputTarget.offsetTop = old_scroll;
+        this.inputTarget.scrollTop = old_scroll;
       }
     } else {
       if (old_str != new_val)
@@ -1505,6 +1538,13 @@ export default class extends Controller {
       start += this.SEPARATOR.length;
 
     return { start, end };
+  }
+
+  getSearchTokenIndex() {
+    const val = this.inputTarget.value,
+      vals = val.split(this.SEPARATOR).map((v) => v.trim());
+
+    return vals.indexOf(this.getSearchToken());
   }
 
   // ------------------------------ Fetch matches ------------------------------
@@ -1690,7 +1730,6 @@ export default class extends Controller {
   }
 
   setCursorPosition(el, pos) {
-    debugger
     if (el.setSelectionRange) {
       el.setSelectionRange(pos, pos);
     } else if (el.createTextRange) {
