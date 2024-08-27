@@ -173,8 +173,8 @@ class InatImportJob < ApplicationJob
     return inat_obs.name_id if prov_name.blank?
 
     if need_new_prov_name?(prov_name)
-      add_provisional_name(prov_name)
-      Name.last.id
+      name = add_provisional_name(prov_name)
+      name.id
     else
       best_mo_homonym(prov_name).id
     end
@@ -197,6 +197,7 @@ class InatImportJob < ApplicationJob
 
     new_name = api.results.first
     new_name.log(:log_name_created)
+    new_name
   end
 
   def add_inat_images(inat_obs_photos)
