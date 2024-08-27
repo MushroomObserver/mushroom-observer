@@ -123,6 +123,7 @@ const INTERNAL_OPTS = {
   old_value: null,       // previous value of input field
   stored_id: 0,          // id of selected option
   stored_data: { id: 0 }, // data of selected option
+  stored_ids: [],        // ids of selected options (for multiple - no data)
   primer: [],            // a server-supplied list of many options
   matches: [],           // list of options currently showing
   current_row: -1,       // index of option currently highlighted (0 = none)
@@ -558,6 +559,18 @@ export default class extends Controller {
     return false;
   }
 
+  cssCollapseFields() {
+    if (!this.hasCollapseFieldsTarget) return;
+
+    $(this.collapseFieldsTarget).collapse('hide');
+  }
+
+  cssUncollapseFields() {
+    if (!this.hasCollapseFieldsTarget) return;
+
+    $(this.collapseFieldsTarget).collapse('show');
+  }
+
   // ------------------------------ Timers ------------------------------
 
   // Schedule matches to be recalculated from primer, or even primer refreshed,
@@ -967,11 +980,20 @@ export default class extends Controller {
 
     if (perfect_match) {
       // only assign if it's not already assigned
-      if (this.hiddenTarget.value != perfect_match['id']) {
+      if (this.lastHiddenTargetValue() != perfect_match['id']) {
         this.assignHiddenId(perfect_match);
       }
     } else if (!this.ignoringTextInput()) {
       this.clearHiddenId();
+    }
+  }
+
+  // Gets the most recent value in the hidden input, which may be an array.
+  lastHiddenTargetValue() {
+    if (this.SEPARATOR) {
+      return this.hiddenTarget.value.split(",").pop();
+    } else {
+      this.hiddenTarget.value
     }
   }
 
@@ -981,19 +1003,34 @@ export default class extends Controller {
     this.verbose("autocompleter:assignHiddenId()");
     this.verbose(match);
     if (!match) return;
-    // Before we change the hidden input, store the old value and data
+    // Before we change the hidden input, store the old value(s) and data
     this.storeCurrentHiddenData();
 
     // update the new value of the hidden input, which casts it as a string.
-    this.hiddenTarget.value = match['id']; // converts to string
-    // assign the dataset of the selected row to the hidden input
-    Object.keys(match).forEach(key => {
-      if (!['id', 'name'].includes(key))
-        this.hiddenTarget.dataset[key] = match[key];
-    });
-
+    // Also sets data attributes.
+    this.updateHiddenTargetValue(match); // converts to string
+    // The indicator only relates to the most recent match when multiple
     this.cssHasIdOrNo(parseInt(match['id']));
+    // This checks the hidden_data against the stored_data
     this.hiddenIdChanged();
+  }
+
+  // Note that we're making the hidden input the source of truth.
+  // The autocompleter stored attributes are for comparing to the last value.
+  updateHiddenTargetValue(match) {
+    if (this.SEPARATOR) {
+      // add the new id to the end of the array. Converts array back to string.
+      let new_array = this.stored_ids;
+      new_array.push(parseInt(match['id']));
+      this.hiddenTarget.value = new_array.join(",");
+    } else {
+      this.hiddenTarget.value = match['id'];
+      // assign the dataset of the selected row to the hidden input
+      Object.keys(match).forEach(key => {
+        if (!['id', 'name'].includes(key))
+          this.hiddenTarget.dataset[key] = match[key];
+      });
+    }
   }
 
   // Clears not only the ID, but also any data attributes of selected row.
@@ -1002,14 +1039,30 @@ export default class extends Controller {
     this.verbose("autocompleter:clearHiddenId()");
     // Before we change the hidden input, store the old value and data
     this.storeCurrentHiddenData();
-
-    this.hiddenTarget.value = '';
-    Object.keys(this.hiddenTarget.dataset).forEach(key => {
-      if (!key.match(/Target/))
-        delete this.hiddenTarget.dataset[key];
-    });
-
+    // Also clears data attributes.
+    this.clearLastHiddenTargetValue();
+    // This checks the hidden_data against the stored_data
     this.hiddenIdChanged();
+  }
+
+  // Removes the last id in the hidden input (array as csv string)
+  clearLastHiddenTargetValue() {
+    this.verbose("autocompleter:clearLastHiddenTargetValue()");
+    if (this.SEPARATOR) {
+      // not worried about integers here
+      let old_array = this.hiddenTarget.value.split(",")
+      if (old_array.length > 0) {
+        old_array.pop();
+        this.hiddenTarget.value = old_array.join(",");
+      }
+    } else {
+      this.hiddenTarget.value = '';
+      // clear the dataset also
+      Object.keys(this.hiddenTarget.dataset).forEach(key => {
+        if (!key.match(/Target/))
+          delete this.hiddenTarget.dataset[key];
+      });
+    }
   }
 
   // only clear if we're not in "ignorePlaceInput" mode
@@ -1054,20 +1107,21 @@ export default class extends Controller {
     }
   }
 
-  cssCollapseFields() {
-    if (!this.hasCollapseFieldsTarget) return;
-
-    $(this.collapseFieldsTarget).collapse('hide');
-  }
-
-  cssUncollapseFields() {
-    if (!this.hasCollapseFieldsTarget) return;
-
-    $(this.collapseFieldsTarget).collapse('show');
-  }
-
   storeCurrentHiddenData() {
-    this.verbose("autocompleter:storeCurrentHiddenData()");
+    if (this.SEPARATOR) {
+      this.storeCurrentHiddenIdsMultiple();
+    } else {
+      this.storeCurrentHiddenDataSingle();
+    }
+  }
+
+  storeCurrentHiddenIdsMultiple() {
+    this.verbose("autocompleter:storeCurrentHiddenDataMultiple()");
+    this.stored_ids = this.hiddenIdsAsIntegerArray();
+  }
+
+  storeCurrentHiddenDataSingle() {
+    this.verbose("autocompleter:storeCurrentHiddenDataSingle()");
     this.stored_id = parseInt(this.hiddenTarget.value); // value is a string
     let { north, south, east, west } = this.hiddenTarget.dataset;
     this.stored_data = { id: this.stored_id, north, south, east, west };
@@ -1075,7 +1129,33 @@ export default class extends Controller {
   }
 
   // called on assign and clear, also when mapOutlet is connected
+  // This only affects the UI reflecting the new data situation.
   hiddenIdChanged() {
+    if (this.SEPARATOR) {
+      this.hiddenIdsChangedMultiple();
+    } else {
+      this.hiddenIdChangedSingle();
+    }
+  }
+
+  hiddenIdsChangedMultiple() {
+    const hidden_ids = this.hiddenIdsAsIntegerArray();
+
+    if (JSON.stringify(hidden_ids) == JSON.stringify(this.stored_ids)) {
+      this.verbose("autocompleter: hidden_ids did not change");
+    } else {
+      clearTimeout(this.data_timer);
+      this.data_timer = setTimeout(() => {
+        this.verbose("autocompleter: hidden_ids changed");
+        this.verbose("autocompleter:hidden_ids: ")
+        this.verbose(JSON.stringify(hidden_ids));
+        this.cssHasIdOrNo(this.lastHiddenTargetValue());
+        this.inputTarget.focus();
+      }, 750)
+    }
+  }
+
+  hiddenIdChangedSingle() {
     const hidden_id = parseInt(this.hiddenTarget.value || 0),
       // stored_id = parseInt(this.stored_id || 0),
       { north, south, east, west } = this.hiddenTarget.dataset,
@@ -1100,6 +1180,11 @@ export default class extends Controller {
         }
       }, 750)
     }
+  }
+
+  hiddenIdsAsIntegerArray() {
+    return this.hiddenTarget.value.
+      split(",").map((e) => parseInt(e.trim())).filter(Number);
   }
 
   // Hide pulldown options.
