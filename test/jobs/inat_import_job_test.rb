@@ -193,6 +193,38 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs.sequences.one?, "Obs should have a sequence")
   end
 
+  def test_import_job_infra_specific_name
+    file_name = "i_obliquus_f_sterilis"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    inat_import = create_inat_import(inat_response: mock_inat_response)
+
+    # Add objects which are not included in fixtures
+    name = Name.create(
+      text_name: "Inonotus obliquus f. sterilis",
+      author: "(Vanin) Balandaykin & Zmitr",
+      display_name: "**__Inonotus obliquus__** f. **__sterilis__** " \
+                    "(Vanin) Balandaykin & Zmitr.",
+      rank: "Form",
+      user: users(:rolf)
+    )
+
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response)
+
+    InatPhotoImporter.stub(:new, stub_mo_photo_importer(mock_inat_response)) do
+      assert_difference("Observation.count", 1,
+                        "Failed to create observation") do
+        InatImportJob.perform_now(inat_import)
+      end
+    end
+
+    obs = Observation.order(created_at: :asc).last
+    debugger
+    assert_standard_assertions(obs: obs, name: name)
+    assert_equal(1, obs.images.length, "Obs should have 1 image")
+    assert(obs.sequences.none?)
+  end
+
   # Prove that Namings, Votes, Identification are correct
   # When iNat obs has provisional name that's already in MO
   # `johnplischke` NEMF, DNA, notes, 2 identifications with same id;

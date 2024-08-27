@@ -27,8 +27,8 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | fuligo_septica| [219783802](https://www.inaturalist.org/observations/219783802) | 1 | public | slime mold **Protozoa** Richmond, CA |
 | gyromitra_ancilis| [216745568](https://www.inaturalist.org/observations/216745568) | 3 | public | **cc-by license**, **many projects**, US 20, Linn Co.|
 | import_all |  |  | | all fungal obss (total of 5) of iNat user `devin189`, 2 per page (this user had few fungal observations) |
-| inocybe| [222904190](https://www.inaturalist.org/observations/222904190) | 5 | public | cc-by-nc, **2 tags∆∆** |
-| i_obliquus_f_sterilis | [232919689](https://www.inaturalist.org/observations/232919689) | 1 | public | cc-by-nc, **infraspecific name** |
+| inocybe| [222904190](https://www.inaturalist.org/observations/222904190) | 5 | public | cc-by-nc, **2 tags** |
+| i_obliquus_f_sterilis | [232919689](https://www.inaturalist.org/observations/232919689) | 1 | public | `taigamushrooms` cc-by-nc, **infraspecific name** |
 | lentinellus_ursinus| [220796026](https://inaturalist.org/observations/220796026) | 2 | obscured | **ID matches many MO Name fixtures** |
 | listed_ids| [231104466](https://www.inaturalist.org/observations/231104466) [195434438](https://www.inaturalist.org/observations/195434438) | na | na | response to request for 2 obs by number (amanita_flavorubens, evernia) |
 | lycoperdon| [24970904](https://www.inaturalist.org/observations/24970904) | 2 | public | user `dannymi` cc-by-nc, projects, Had 2 photos, 6 identifications of 3 taxa, a different taxon, 9 obs fields, including "DNA Barcode ITS", "Collection number", "Collector", place: E. side of Metolius River, Sisters Ranger District, Deschutes National Forest, Jefferson County, Oregon, US |
@@ -37,7 +37,7 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | somion_unicolor| [**202555552**](https://www.inaturalist.org/observations/202555552) | 5 | public |  `jdcohenesq` Research Grade, Notes, Activity, >1 ID, 1 field (Mushroom Observer URL), **mirrored from MO** |
 | trametes| [220370929](https://www.inaturalist.org/observations/220370929) | 2 | public | user `dannymi` different collector; Notes; **Observation Fields: Collector**, place: 25th Ave NE, Seattle, WA, US, with huge error |
 | tremella_mesenterica| [213508767](https://www.inaturalist.org/observations/213508767) | 1 | public | place: Lewisville, TX 75057, USA |
-| xeromphalina_campanella_complex| [215969102](https://www.inaturalist.org/observations/215969102) | 2 | public | **Complex** |
+| xeromphalina_campanella_complex| [215969102](https://www.inaturalist.org/observations/215969102) | 2 | public | `jdcohenesq` **Complex** |
 | zero_results| n.a. | | n.a. | response with total_results: 0, to expose and prevent reversion of bug |
 
 ## TODO
