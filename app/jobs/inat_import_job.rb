@@ -157,6 +157,9 @@ class InatImportJob < ApplicationJob
       source: "mo_inat_import",
       inat_id: inat_obs.inat_id
     )
+    # Ensure this Name wins consensus_calc ties
+    # by creating this naming and vote first
+    add_naming_with_vote(name: @observation.name)
     @observation.log(:log_observation_created)
   end
 
@@ -248,6 +251,8 @@ class InatImportJob < ApplicationJob
     add_identifications_with_namings(inat_obs)
     add_provisional_naming(inat_obs) # iNat provisionals are not identifications
     adjust_consensus_name_naming # also adds naming for provisionals
+
+    Observation::NamingConsensus.new(@observation).calc_consensus
   end
 
   def add_identifications_with_namings(inat_obs)
