@@ -224,6 +224,36 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs.sequences.none?)
   end
 
+  def test_import_job_complex
+    file_name = "xeromphalina_campanella_complex"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    inat_import = create_inat_import(inat_response: mock_inat_response)
+
+    # Add objects which are not included in fixtures
+    name = Name.create(
+      text_name: "Xeromphalina campanella group",
+      author: "",
+      display_name: "**__Xeromphalina campanella__** group",
+      rank: "Group",
+      user: users(:rolf)
+    )
+
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response)
+
+    InatPhotoImporter.stub(:new, stub_mo_photo_importer(mock_inat_response)) do
+      assert_difference("Observation.count", 1,
+                        "Failed to create observation") do
+        InatImportJob.perform_now(inat_import)
+      end
+    end
+
+    obs = Observation.order(created_at: :asc).last
+    assert_standard_assertions(obs: obs, name: name)
+    assert_equal(1, obs.images.length, "Obs should have 1 image")
+    assert(obs.sequences.none?)
+  end
+
   # Prove that Namings, Votes, Identification are correct
   # When iNat obs has provisional name that's already in MO
   # `johnplischke` NEMF, DNA, notes, 2 identifications with same id;
