@@ -63,7 +63,7 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.order(created_at: :asc).last
-    assert_standard_assertions(obs: obs, name: name, loc: loc)
+    standard_assertions(obs: obs, name: name, loc: loc)
     assert_equal(0, obs.images.length, "Obs should not have images")
   end
 
@@ -97,7 +97,7 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.order(created_at: :asc).last
-    assert_standard_assertions(obs: obs, name: name, loc: loc)
+    standard_assertions(obs: obs, name: name, loc: loc)
     assert_equal(1, obs.images.length, "Obs should have 1 image")
     assert(obs.sequences.none?)
   end
@@ -139,10 +139,9 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.order(created_at: :asc).last
-    assert_standard_assertions(obs: obs, name: name)
+    standard_assertions(obs: obs, name: name)
 
-    namings = obs.namings
-    naming = namings.find_by(name: t_mesenterica)
+    naming = obs.namings.find_by(name: t_mesenterica)
     assert(naming.present?,
            "Missing Naming for iNat identification by MO User")
     assert_equal(inat_manager, naming.user, "Naming has wrong User")
@@ -151,7 +150,7 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(Vote::MAXIMUM_VOTE, vote.value,
                  "Vote for non-consensus name should be highest possible")
 
-    naming = namings.find_by(name: n_aurantia)
+    naming = obs.namings.find_by(name: n_aurantia)
     assert(naming.present?,
            "Missing Naming for iNat identification by random iNat user")
     assert_equal(inat_manager, naming.user, "Naming has wrong User")
@@ -187,7 +186,7 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.order(created_at: :asc).last
-    assert_standard_assertions(obs: obs, name: name)
+    standard_assertions(obs: obs, name: name)
 
     assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.one?, "Obs should have a sequence")
@@ -219,7 +218,7 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.order(created_at: :asc).last
-    assert_standard_assertions(obs: obs, name: name)
+    standard_assertions(obs: obs, name: name)
     assert_equal(1, obs.images.length, "Obs should have 1 image")
     assert(obs.sequences.none?)
   end
@@ -249,7 +248,7 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.order(created_at: :asc).last
-    assert_standard_assertions(obs: obs, name: name)
+    standard_assertions(obs: obs, name: name)
     assert_equal(1, obs.images.length, "Obs should have 1 image")
     assert(obs.sequences.none?)
   end
@@ -282,7 +281,7 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.order(created_at: :asc).last
-    assert_standard_assertions(obs: obs, name: name)
+    standard_assertions(obs: obs, name: name)
 
     assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.one?, "Obs should have a sequence")
@@ -313,7 +312,7 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(name.rss_log_id.present?,
            "Failed to log creation of provisional name")
 
-    assert_standard_assertions(obs: obs, name: Name.last)
+    standard_assertions(obs: obs, name: Name.last)
 
     assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.one?, "Obs should have a sequence")
@@ -342,7 +341,7 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.order(created_at: :asc).last
-    assert_standard_assertions(obs: obs, name: name)
+    standard_assertions(obs: obs, name: name)
 
     assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.one?, "Obs should have a sequence")
@@ -561,10 +560,17 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # -------- Standard Test assertions
 
-  def assert_standard_assertions(obs:, name: nil, loc: nil)
+  def standard_assertions(obs:, name: nil, loc: nil)
     assert_not_nil(obs.rss_log, "Failed to log Observation")
     assert_equal("mo_inat_import", obs.source)
     assert_equal(loc, obs.location) if loc
+
+    obs.namings.each do |naming|
+      assert_not(
+        naming.vote_cache.zero?,
+        "VoteCache for Proposed Name '#{naming.name.text_name}' incorrect"
+      )
+    end
 
     if name
       assert_equal(name, obs.name, "Wrong consensus id")
