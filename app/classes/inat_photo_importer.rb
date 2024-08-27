@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Wrap API call that adds an Image an Observation from the Image url
-# Enables stubbing the API call's return value (but not its behavior)
+# Wraps API call that adds an Image an Observation from the Image url
+# This facilitates stubbing the call
 class InatPhotoImporter
   attr_reader :api
 

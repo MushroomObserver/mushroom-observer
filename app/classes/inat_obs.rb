@@ -27,6 +27,7 @@
 #  inat_quality_grade::    casual, needs id, research
 #  inat_tags::             array of tags
 #  inat_taxon_name::       scientific name
+#  inat_taxon_rank::       rank (can be secondary)
 #  inat_user_login
 #
 #  == MO attributes
@@ -166,6 +167,10 @@ class InatObs
     inat_taxon[:name]
   end
 
+  def inat_taxon_rank
+    inat_taxon[:rank]
+  end
+
   def inat_user_login
     @obs[:user][:login]
   end
@@ -181,18 +186,11 @@ class InatObs
   end
 
   def name_id
-    names =
-      Name.where(
-        # parse it to get MO's text_name rank abbreviation
-        # E.g. "sect." instead of "section"
-        text_name: Name.parse_name(full_name).text_name,
-        rank: inat_taxon[:rank].titleize,
-        correct_spelling_id: nil
-      ).
-      # iNat lacks taxa "sensu xxx", so ignore MO Names sensu xxx
-      where.not(Name[:author] =~ /^sensu /).
-      order(deprecated: :asc)
-
+    names = if complex?
+              matching_group_names
+            else
+              matching_names_at_regular_ranks
+            end
     best_mo_name(names)
   end
 
@@ -336,6 +334,9 @@ class InatObs
     elsif infraspecific?
       # iNat :name string omits the rank. Ex: "Inonotus obliquus sterilis"
       insert_rank_between_species_and_final_epithet
+    elsif complex?
+      # iNat doesn't include "complex" in the name, MO does
+      "#{inat_taxon[:name]} complex"
     else
       inat_taxon[:name]
     end
@@ -376,6 +377,35 @@ class InatObs
     identification[:taxon][:id] == inat_taxon[:id]
   end
 
+  def matching_group_names
+    # MO equivalent could be group, clade, or complex
+    # Tried AREL:
+    # Name.where(Name[:text_name] =~ /^#{inat_taxon_name}/).
+    # and got this:
+    # (rdbg) names
+    # #<ActiveRecord::StatementInvalid: Trilogy::ProtocolError: 3692:
+    #   Incorrect description of a {min,max} interval.> rescued
+    #   during inspection
+    Name.where(text_name: "#{inat_taxon_name} complex").
+      or(Name.where(text_name: "#{inat_taxon_name} group")).
+      or(Name.where(text_name: "#{inat_taxon_name} clade")).
+      where(rank: "Group", correct_spelling_id: nil).
+      order(deprecated: :asc)
+  end
+
+  def matching_names_at_regular_ranks
+    Name.where(
+      # parse it to get MO's text_name rank abbreviation
+      # E.g. "sect." instead of "section"
+      text_name: Name.parse_name(full_name).text_name,
+      rank: inat_taxon[:rank].titleize,
+      correct_spelling_id: nil
+    ).
+      # iNat lacks taxa "sensu xxx", so ignore MO Names sensu xxx
+      where.not(Name[:author] =~ /^sensu /).
+      order(deprecated: :asc)
+  end
+
   def best_mo_name(names)
     # It's simplest to pick the 1st one if there are any
     # (They've already been sorted)
@@ -391,13 +421,12 @@ class InatObs
 
   # ----- Other
 
-  def description
-    @obs[:description]
+  def complex?
+    inat_taxon_rank == "complex"
   end
 
-  def sequence_field?(field)
-    field[:datatype] == "dna" ||
-      field[:name] =~ /DNA/ && field[:value] =~ /^[ACTG]{,10}/
+  def description
+    @obs[:description]
   end
 
   def fungi?
@@ -410,6 +439,11 @@ class InatObs
   # https://forum.inaturalist.org/t/given-an-observation-id-get-a-list-of-project/53476?u=joecohen
   def inat_projects
     @obs[:project_observations]
+  end
+
+  def sequence_field?(field)
+    field[:datatype] == "dna" ||
+      field[:name] =~ /DNA/ && field[:value] =~ /^[ACTG]{,10}/
   end
 
   def slime_mold?

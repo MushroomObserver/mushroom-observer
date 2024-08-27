@@ -6,7 +6,7 @@ require("test_helper")
 class InatObsTest < UnitTestCase
   # disable cop to facilitate typing/reading id's
   # rubocop:disable Style/NumericLiterals
-  def test_complex_public_obs
+  def test_complicated_public_obs
     # import of iNat 202555552 which is a mirror of MO 547126)
     # For easier to to read version see test/inat/somion_unicolor.json
     mock_inat_obs = mock_observation("somion_unicolor")
@@ -182,7 +182,7 @@ class InatObsTest < UnitTestCase
     assert_equal('Arrhenia "sp-NY02"', prov_name)
     assert_equal('Arrhenia "sp-NY02"', mock_inat_obs.provisional_name)
 
-    mock_inat_obs = mock_observation("donadina_PNW01")
+    mock_inat_obs = mock_observation("donadinia_PNW01")
     prov_name = mock_inat_obs.inat_prov_name
     assert(prov_name.present?)
     assert_equal("Donadinia PNW01", prov_name)
@@ -197,6 +197,28 @@ class InatObsTest < UnitTestCase
       "inat_prov_name should be blank for obs with observation fields, " \
       "but no provisional name field"
     )
+  end
+
+  def test_complex_without_mo_match
+    mock_inat_obs = mock_observation("xeromphalina_campanella_complex")
+    assert_equal("Xeromphalina campanella", mock_inat_obs.inat_taxon_name)
+    assert_equal("complex", mock_inat_obs.inat_taxon_rank)
+    assert_equal(Name.unknown.text_name, mock_inat_obs.text_name,
+                 "iNat complex without MO name match should map to the Unknown name")
+  end
+
+  def test_complex_with_mo_match
+    name = Name.create(
+      text_name: "Xeromphalina campanella group",
+      author: "",
+      display_name: "**__Xeromphalina campanella__** group",
+      rank: "Group",
+      user: users(:rolf)
+    )
+    mock_inat_obs = mock_observation("xeromphalina_campanella_complex")
+    assert_equal("Xeromphalina campanella", mock_inat_obs.inat_taxon_name)
+    assert_equal("complex", mock_inat_obs.inat_taxon_rank)
+    assert_equal(name.text_name, mock_inat_obs.text_name)
   end
 
   def test_inat_tags
