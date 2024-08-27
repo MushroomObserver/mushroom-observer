@@ -186,11 +186,14 @@ class InatObs
   end
 
   def name_id
-    names = if complex?
-              matching_group_names
-            else
-              matching_names_at_regular_ranks
-            end
+    names =
+      # iNat "Complex" definition
+      # https://www.inaturalist.org/pages/curator+guide#complexes
+      if complex?
+        matching_group_names
+      else
+        matching_names_at_regular_ranks
+      end
     best_mo_name(names)
   end
 
@@ -378,17 +381,8 @@ class InatObs
   end
 
   def matching_group_names
-    # MO equivalent could be group, clade, or complex
-    # Tried AREL:
-    # Name.where(Name[:text_name] =~ /^#{inat_taxon_name}/).
-    # and got this:
-    # (rdbg) names
-    # #<ActiveRecord::StatementInvalid: Trilogy::ProtocolError: 3692:
-    #   Incorrect description of a {min,max} interval.> rescued
-    #   during inspection
-    Name.where(text_name: "#{inat_taxon_name} complex").
-      or(Name.where(text_name: "#{inat_taxon_name} group")).
-      or(Name.where(text_name: "#{inat_taxon_name} clade")).
+    # MO equivalent could be "group", "clade", or "complex"
+    Name.where(Name[:text_name] =~ /^#{inat_taxon_name}/).
       where(rank: "Group", correct_spelling_id: nil).
       order(deprecated: :asc)
   end
