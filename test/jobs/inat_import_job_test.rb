@@ -219,7 +219,6 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.order(created_at: :asc).last
-    debugger
     assert_standard_assertions(obs: obs, name: name)
     assert_equal(1, obs.images.length, "Obs should have 1 image")
     assert(obs.sequences.none?)
