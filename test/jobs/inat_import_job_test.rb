@@ -312,7 +312,7 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(name.rss_log_id.present?,
            "Failed to log creation of provisional name")
 
-    standard_assertions(obs: obs, name: Name.last)
+    standard_assertions(obs: obs, name: name)
 
     assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.one?, "Obs should have a sequence")
@@ -372,7 +372,7 @@ class InatImportJobTest < ActiveJob::TestCase
     InatPhotoImporter.stub(:new, stub_mo_photo_importer(mock_inat_response)) do
       assert_no_difference(
         "Observation.count",
-        "Should import nothing if no iNat obss match the id's typed by the user"
+        "Should import nothing if no iNat obss match the user's list of id's"
       ) do
         InatImportJob.perform_now(inat_import)
       end
