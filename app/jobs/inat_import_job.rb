@@ -245,12 +245,12 @@ class InatImportJob < ApplicationJob
   end
 
   def update_names_and_proposals(inat_obs)
-    add_namings_for_identifications(inat_obs)
+    add_identifications_with_namings(inat_obs)
     add_provisional_naming(inat_obs) # iNat provisionals are not identifications
     adjust_consensus_name_naming # also adds naming for provisionals
   end
 
-  def add_namings_for_identifications(inat_obs)
+  def add_identifications_with_namings(inat_obs)
     inat_obs.inat_identifications.each do |identification|
       inat_taxon = ::InatTaxon.new(identification[:taxon])
       next if name_already_proposed?(inat_taxon.name)
