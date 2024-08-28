@@ -1163,6 +1163,7 @@ export default class extends Controller {
     });
     // update the hidden input
     this.hiddenTarget.value = hidden_ids.join(",");
+    // ONLY DO THIS ONPASTE
     // check for names in the input that are missing from the keepers and ids
     this.checkForMissingKeepersAndIds(input_names);
   }
