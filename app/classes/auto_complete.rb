@@ -46,6 +46,15 @@ class AutoComplete
     matches
   end
 
+  # returns an array of ONE { name:, id: } object. Uses `exact_match` which
+  # is a similar query, but searches using whole string and returns first match.
+  def first_matching_record
+    self.matches = exact_match(string) || []
+    clean_matches
+
+    matches
+  end
+
   private
 
   def clean_matches

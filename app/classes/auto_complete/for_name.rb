@@ -6,7 +6,20 @@ class AutoComplete::ForName < AutoComplete::ByString
             select(:text_name, :id, :deprecated).distinct.
             where(Name[:text_name].matches("#{letter}%"))
 
-    # Turn the instances into hashes, and format the deprecated field
+    matches_array(names)
+  end
+
+  def exact_match(string)
+    name = Name.with_correct_spelling.
+           select(:text_name, :id, :deprecated).distinct.
+           where(Name[:text_name].eq(string)).first
+    return [] unless name
+
+    matches_array([name])
+  end
+
+  # Turn the instances into hashes, and format the deprecated field
+  def matches_array(names)
     matches = names.map do |name|
       name = name.attributes.symbolize_keys
       name[:deprecated] = name[:deprecated] || false

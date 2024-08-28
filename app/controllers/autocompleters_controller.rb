@@ -24,16 +24,23 @@ class AutocompletersController < ApplicationController
     if params[:string].blank? && params[:all].blank?
       render(json: ActiveSupport::JSON.encode([]))
     else
+      add_context_params
       render(json: ActiveSupport::JSON.encode(auto_complete_results))
     end
   end
 
   private
 
-  def auto_complete_results
-    # add useful params that the controller knows about
+  # add useful context params that the controller knows about, but not the class
+  def add_context_params
     params[:format] = @user&.location_format
     params[:user_id] = @user&.id
+  end
+
+  def auto_complete_results
+    if params[:exact].present?
+      return ::AutoComplete.subclass(@type).new(params).first_matching_record
+    end
 
     ::AutoComplete.subclass(@type).new(params).matching_records
   end
