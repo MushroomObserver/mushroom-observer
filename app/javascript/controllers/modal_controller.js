@@ -7,7 +7,7 @@ export default class extends Controller {
 
   connect() {
     // console.log("Hello Modal " + this.element.id);
-    this.element.dataset.stimulus = "connected";
+    this.element.dataset.stimulus = "modal-connected";
   }
 
   // Modal is only removed in the event that the page section updates.

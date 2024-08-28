@@ -16,7 +16,7 @@ export default class extends Controller {
 
   connect() {
     // Just a "sanity check" convention, so you can tell "is this thing on?"
-    this.element.dataset.stimulus = "connected";
+    this.element.dataset.stimulus = "field-slip-job-connected";
     this.status_id = this.element.dataset.status
 
     this.start_timer_sending_requests()

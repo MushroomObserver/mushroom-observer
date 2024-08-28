@@ -3,15 +3,17 @@ import { Loader } from "@googlemaps/js-api-loader"
 import { convert } from "geo-coordinates-parser"
 
 // Connects to data-controller="geocode"
-// The connected element should contain a location autocompleter and
-// bounding box/elevation inputs.
+// Sort of the "lite" version of the map controller: no map, no markers, but it
+// can geocode and get elevations. The connected element should contain a
+// location autocompleter and bounding box/elevation inputs.
 export default class extends Controller {
   static targets = ["southInput", "westInput", "northInput", "eastInput",
     "highInput", "lowInput", "placeInput", "locationId",
     "latInput", "lngInput", "altInput", "getElevation"]
+  static outlets = ["autocompleter"]
 
   connect() {
-    this.element.dataset.stimulus = "connected"
+    this.element.dataset.stimulus = "geocode-connected"
 
     // These private vars are for keeping track of user inputs to a form
     // that should update the form after a timeout.
@@ -42,12 +44,19 @@ export default class extends Controller {
       })
   }
 
+  tryToGeocode() {
+    this.verbose("geocode:tryToGeocode")
+    const location = this.validateLatLngInputs(false)
+
+    if (location &&
+      JSON.stringify(location) !== JSON.stringify(this.lastGeocodedLatLng)) {
+      this.geocodeLatLng(location)
+    }
+  }
+
   // Geocode a lat/lng location. If we have multiple results, we'll dispatch
   // Send the location from validateLatLngInputs(false) to avoid duplicate calls
   geocodeLatLng(location) {
-    if (JSON.stringify(location) == JSON.stringify(this.lastGeocodedLatLng))
-      return
-
     this.lastGeocodedLatLng = location
     this.verbose("geocode:geocodeLatLng")
     this.verbose(location)
@@ -57,7 +66,7 @@ export default class extends Controller {
         let { results } = result // destructure, results is part of the result
         results = this.siftResults(results)
         this.ignorePlaceInput = true
-        this.dispatchPrimer(results)
+        this.sendPrimer(results)
         this.respondToGeocode(results)
       })
       .catch((e) => {
@@ -66,9 +75,18 @@ export default class extends Controller {
       });
   }
 
-  geolocatePlaceName() {
-    let address = this.placeInputTarget.value
-    if (address === this.lastGeolocatedAddress) return
+  tryToGeolocate() {
+    this.verbose("geocode:tryToGeolocate")
+    const address = this.placeInputTarget.value
+
+    if (this.ignorePlaceInput === false &&
+      address !== "" && address !== this.lastGeolocatedAddress) {
+      this.geolocatePlaceName(address)
+    }
+  }
+
+  geolocatePlaceName(address) {
+    if (address == this.lastGeolocatedAddress) return false
 
     this.lastGeolocatedAddress = address
     this.verbose("geocode:geolocatePlaceName")
@@ -80,7 +98,7 @@ export default class extends Controller {
       .geocode({ address: address })
       .then((result) => {
         const { results } = result // destructure, results is part of the result
-        this.dispatchPrimer(results) // will be ignored by non-autocompleters
+        this.sendPrimer(results) // will be ignored by non-autocompleters
         this.respondToGeocode(results)
       })
       .catch((e) => {
@@ -90,7 +108,7 @@ export default class extends Controller {
   }
 
   // Remove certain types of results from the geocoder response:
-  // both too precise and too general, before dispatchPrimer
+  // both too precise and too general, before sendPrimer
   siftResults(results) {
     if (results.length == 0) return results
 
@@ -109,7 +127,7 @@ export default class extends Controller {
   }
 
   // Build a primer for the autocompleter with bounding box data, but -1 id
-  dispatchPrimer(results) {
+  sendPrimer(results) {
     let north, south, east, west, name, id = -1
     // Prefer geometry.bounds, but bounds do not exist for point locations.
     // MO locations must be boxes, so use viewport if bounds null.
@@ -123,14 +141,19 @@ export default class extends Controller {
       name = this.formatMOPlaceName(result)
       return { name, north, south, east, west, id }
     })
-    this.verbose("geocode:dispatchPrimer")
+    this.verbose("geocode:sendPrimer")
     this.verbose(primer)
 
-    this.dispatch("googlePrimer", { detail: { primer } })
+    // Call autocompleter#refreshGooglePrimer directly
+    if (this.hasAutocompleterOutlet) {
+      this.autocompleterOutlet.refreshGooglePrimer({ primer })
+    }
   }
 
   // Format the address components for MO style.
   formatMOPlaceName(result) {
+    const ignore_types = ["postal_code", "postal_code_suffix", "street_number"]
+
     let name_components = [], usa_location = false
     result.address_components.forEach((component) => {
       if (component.types.includes("country") && component.short_name == "US") {
@@ -141,7 +164,7 @@ export default class extends Controller {
         component.long_name.includes("County")) {
         // MO uses "Co." for County
         name_components.push(component.long_name.replace("County", "Co."))
-      } else if (component.types.includes("postal_code")) {
+      } else if (ignore_types.some((type) => component.types.includes(type))) {
         // skip it for all. non-US countries it's an important differentiator?
       } else {
         name_components.push(component.long_name)
@@ -166,10 +189,10 @@ export default class extends Controller {
     const extents = results[0].geometry.bounds?.toJSON() // may not exist
     const center = results[0].geometry.location.toJSON()
 
-    if (viewport)
-      this.map.fitBounds(viewport)
-    if (this.map)
-      this.placeClosestRectangle(viewport, extents)
+    if (this.map) {
+      if (viewport) this.map.fitBounds(viewport)
+      this.placeClosestRectangle(viewport, extents) // viewport is optional
+    }
     this.updateFields(viewport, extents, center)
     // For non-autocompleted place input in the location form
     this.updatePlaceInputTarget(results[0])
@@ -259,6 +282,14 @@ export default class extends Controller {
     ]
   }
 
+  // Computes the center of a Google Maps Rectangle's LatLngBoundsLiteral object
+  centerFromBounds(bounds) {
+    let lat = (bounds?.north + bounds?.south) / 2.0
+    let lng = (bounds?.east + bounds?.west) / 2.0
+    if (bounds?.west > bounds?.east) { lng += 180 }
+    return { lat: lat, lng: lng }
+  }
+
   // takes a LatLngBoundsLiteral object {south:, west:, north:, east:}
   updateBoundsInputs(bounds) {
     if (!this.hasSouthInputTarget) return false
@@ -291,6 +322,7 @@ export default class extends Controller {
 
   // Convert from human readable and do a rough check if they make sense
   validateLatLngInputs(update = false) {
+    this.verbose("geocode:validateLatLngInputs")
     if (!this.hasLatInputTarget || !this.hasLngInputTarget ||
       !this.latInputTarget.value || !this.lngInputTarget.value)
       return false
@@ -334,37 +366,36 @@ export default class extends Controller {
     this.lngInputTarget.value = this.roundOff(center.lng)
     // If we're here, we have a lat and a lng.
     if (this.ignorePlaceInput !== false)
-      this.dispatchPointChanged(center)
+      this.sendPointChanged(center)
   }
 
   // Call the swap event on the autocompleter and send the type we need
-  dispatchPointChanged({ lat, lng }) {
+  sendPointChanged({ lat, lng }) {
     this.clearAutocompleterSwapBuffer()
 
     if (lat && lng) {
       this.autocomplete_buffer = setTimeout(() => {
-        this.dispatch("pointChanged", {
-          detail: {
-            type: "location_containing",
-            request_params: { lat, lng },
-          }
-        })
-        // this.verbose("geocode:dispatchPointChanged")
+        if (this.hasAutocompleterOutlet) {
+          this.autocompleterOutlet.swap({
+            detail:
+              { type: "location_containing", request_params: { lat, lng } }
+          })
+        }
+        // this.verbose("geocode:sendPointChanged")
       }, 1000)
-
-      // if (this.placeInputTarget.value === '') {
-      //   this.geocoder.geocode({ location: center }, (results, status) => {
-      //     if (status === "OK") {
-      //       if (results[0]) {
-      //         this.placeInputTarget.value = results[0].formatted_address
-      //       }
-      //     }
-      //   })
-      // }
     } else {
       this.autocomplete_buffer = setTimeout(() => {
-        this.dispatch("pointChanged", { detail: { type: "location" } })
+        if (this.hasAutocompleterOutlet) {
+          this.autocompleterOutlet.swap({ detail: { type: "location" } })
+        }
       }, 1000)
+    }
+  }
+
+  clearAutocompleterSwapBuffer() {
+    if (this.autocomplete_buffer) {
+      clearTimeout(this.autocomplete_buffer)
+      this.autocomplete_buffer = 0
     }
   }
 
@@ -424,9 +455,9 @@ export default class extends Controller {
 
   // ------------------------------- DEBUGGING ------------------------------
 
-  helpDebug() {
-    debugger
-  }
+  // helpDebug() {
+  //   debugger
+  // }
 
   verbose(str) {
     // console.log(str);

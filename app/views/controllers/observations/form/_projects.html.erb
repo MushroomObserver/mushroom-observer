@@ -20,7 +20,7 @@ if @suspect_checked_projects.any?
 end
 %>
 
-<%= tag.div(id: "observation_projects") do %>
+<%# tag.div(id: "observation_projects") do %>
   <%= fields_for(:project) do |f_p| %>
 
     <% if error_messages.present? || suspect_messages.present? %>
@@ -50,15 +50,7 @@ end
       ) %>
     <% end %>
 
-    <%= tag.div do
-      [
-        tag.strong("#{:PROJECTS.l}:", class: "mr-3"),
-        collapse_info_trigger("project_help"),
-        collapse_help_block(nil, id: "project_help") do
-          :form_observations_project_help.t
-        end
-      ].safe_join
-    end %>
+    <%= tag.p(:form_observations_project_help.t) %>
 
     <%= tag.div(class: "overflow-scroll-checklist") do %>
       <% @projects.each do |project| %>
@@ -71,5 +63,5 @@ end
     <% end %>
 
   <% end %>
-<% end %>
+<%# end %>
 

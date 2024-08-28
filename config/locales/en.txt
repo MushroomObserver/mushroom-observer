@@ -710,6 +710,8 @@
   close: close
   CREATE: Create
   create: create
+  DEFINE: Define
+  define: define
   DELETE: Delete
   delete: delete
   # deprecate a name
@@ -783,16 +785,16 @@
   destroyed: destroyed
   FILTERED: Filtered
   filtered: filtered
+  IGNORING: Ignoring
+  ignoring: ignoring
   MODIFIED: Modified
   modified: modified
+  NEW: New
+  new: new
   OPTIONAL: Optional
   optional: optional
   REQUIRED: Required
   required: required
-  WATCHING: Watching
-  watching: watching
-  IGNORING: Ignoring
-  ignoring: ignoring
   TRACKING: Tracking
   tracking: tracking
   UPDATED: Updated
@@ -801,6 +803,8 @@
   updated_at: updated at
   VIEWED: Viewed
   viewed: viewed
+  WATCHING: Watching
+  watching: watching
 
   # Common adjectives describing species names. (Note: "approved" seems to be
   # interchangeable with "accepted" in our site -- both indicate that the
@@ -1683,10 +1687,10 @@
   form_observations_open_map: "[:SHOW] [:map]"
   form_observations_hide_map: "[:HIDE] [:map]"
   form_observations_clear_map: "[:CLEAR] [:location]"
-  form_observations_click_point: "Tip: select a locality to center the map, then click a point on the map to set a location."
+  form_observations_click_point: "Tip: select a locality to center the map, then click a point on the map to set a location. If you're defining a new locality, click \"Use these bounds\" so you can select a point within."
   form_observations_locality_contains: "[:LOCALITIES] containing this point"
-  form_observations_create_locality: "[:CREATE] [:locality]"
-  form_observations_use_locality: "[:USE] this [:locality]"
+  form_observations_create_locality: "[:NEW] [:locality]"
+  form_observations_use_locality: "Use these bounds and select a point within"
   form_observations_edit_locality: "[:EDIT] this [:locality]"
   form_observations_notes_help: Please include any additional information you can think of about this observation that isn't clear from the photographs, e.g., habitat, substrate or nearby trees; distinctive texture, scent, taste, staining or bruising; results of chemical or microscopic analyses, etc.
   form_observations_remove_image_confirm: Are you sure you want to remove this image?  This will only remove this image from this observation.  If it is attached to other observations, it will remain attached to them.
@@ -1755,6 +1759,7 @@
   image_exif_copied: Info copied
   image_use_exif: Use this info
   image_camera_info: Camera info
+  image_no_geolocation: No geolocation found
   image_file_name: File name
   image_file_size: File size
 
@@ -2620,8 +2625,8 @@
   show_herbarium_request_sent: Request has been sent to admins.  We'll get back to you as soon as possible.
 
   # herbaria/create
-  create_herbarium: Create New Fungarium
-  create_herbarium_title: Create New Fungarium
+  create_herbarium: New Fungarium
+  create_herbarium_title: New Fungarium
   create_herbarium_personal: Check this box if this is your personal fungarium
   create_herbarium_personal_help: Each user can have one personal fungarium that they have curator privileges for. By default it is called "[name]", but you can change that name to anything you like.
   create_herbarium_code: Standard Abbreviation
@@ -3123,7 +3128,7 @@
 
   # info/textile
   sandbox_enter: Enter Textile you wish to test here
-  sandbox_header: This page let's you play with the textile markup language.  Click 'Test' to see what your markup looks like.  You will need to copy the results from this page to where ever you want to use it.
+  sandbox_header: This page lets you play with the textile markup language.  Click 'Test' to see what your markup looks like.  You will need to copy the results from this page to wherever you want to use it.
   sandbox_link_hobix_textile_reference: hobix Textile Reference
   sandbox_link_hobix_textile_cheatsheet: hobix cheatsheet (Textile Quick Reference)
   sandbox_link_textile_language_website: Textile Language website

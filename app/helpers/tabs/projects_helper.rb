@@ -84,9 +84,8 @@ module Tabs
     def add_background_image(image)
       return unless image
 
-      presenter = ImagePresenter.new(image, size: :large)
       content_for(:background_image) do
-        image_tag(presenter.img_src, class: "image-title")
+        image_tag(image.large_url, class: "image-title")
       end
     end
   end

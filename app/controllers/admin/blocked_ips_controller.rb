@@ -4,7 +4,7 @@ module Admin
   class BlockedIpsController < AdminController
     # This page allows editing of blocked ips via params
     # params[:add_okay] and params[:add_bad]
-    # GETting this page with params[:report] will show info about a chosen IP
+    # Using params[:report] will show info about a chosen IP
     def edit
       @ip = params[:report] if validate_ip!(params[:report])
       @blocked_ips = sort_by_ip(IpStats.read_blocked_ips)
@@ -14,6 +14,7 @@ module Admin
 
     # Render the page after an update
     def update
+      strip_params!
       process_blocked_ips_commands
       @blocked_ips = sort_by_ip(IpStats.read_blocked_ips)
       @okay_ips = sort_by_ip(IpStats.read_okay_ips)
@@ -22,6 +23,12 @@ module Admin
     end
 
     private
+
+    def strip_params!
+      [:add_bad, :remove_bad, :add_okay, :remove_okay].each do |param|
+        params[param] = params[param].strip if params[param]
+      end
+    end
 
     def sort_by_ip(ips)
       ips.sort_by do |ip|

@@ -83,7 +83,7 @@ gem("blankslate")
 # Simple version models and tables for classes
 # Use our own fork, which stores enum attrs as integers in the db
 gem("mo_acts_as_versioned", ">= 0.6.6",
-    git: "https://github.com/MushroomObserver/acts_as_versioned/")
+    git: "https://github.com/MushroomObserver/acts_as_versioned")
 
 # Use ActiveModel has_secure_password
 gem("bcrypt")

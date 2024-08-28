@@ -5,8 +5,8 @@
 #  date_select_opts
 
 # helpers for form tags
-# rubocop:disable Metrics/ModuleLength
-module FormsHelper
+
+module FormsHelper # rubocop:disable Metrics/ModuleLength
   # Bootstrap submit button
   # <%= submit_button(form: f, button: button.t, center: true) %>
   def submit_button(**args)
@@ -92,14 +92,14 @@ module FormsHelper
     wrap_class = form_group_wrap_class(args, "checkbox")
 
     tag.div(class: wrap_class) do
-      args[:form].label(args[:field]) do
+      concat(args[:form].label(args[:field]) do
         concat(args[:form].check_box(args[:field], opts))
         concat(args[:label])
         if args[:between].present?
           concat(tag.div(class: "d-inline-block ml-3") { args[:between] })
         end
-        concat(args[:append]) if args[:append].present?
-      end
+      end)
+      concat(args[:append]) if args[:append].present?
     end
   end
 
@@ -126,14 +126,14 @@ module FormsHelper
     wrap_class = form_group_wrap_class(args, "radio")
 
     tag.div(class: wrap_class) do
-      args[:form].label("#{args[:field]}_#{args[:value]}") do
+      concat(args[:form].label("#{args[:field]}_#{args[:value]}") do
         concat(args[:form].radio_button(args[:field], args[:value], opts))
         concat(args[:label])
         if args[:between].present?
           concat(tag.div(class: "d-inline-block ml-3") { args[:between] })
         end
-        concat(args[:append]) if args[:append].present?
-      end
+      end)
+      concat(args[:append]) if args[:append].present?
     end
   end
 
@@ -165,17 +165,7 @@ module FormsHelper
     label_opts[:class] = class_names(label_opts[:class], args[:label_class])
 
     tag.div(class: wrap_class, data: wrap_data) do
-      # The label row is complicated, many potential buttons here. `between`
-      # comes right after the label on left, `between_end` is right justified
-      concat(tag.div(class: "d-flex justify-content-between") do
-        concat(tag.div do
-          concat(args[:form].label(args[:field], args[:label], label_opts))
-          concat(args[:between]) if args[:between].present?
-        end)
-        concat(tag.div do
-          concat(args[:between_end]) if args[:between_end].present?
-        end)
-      end)
+      concat(text_label_row(args, label_opts))
       if args[:addon].present? # text addon, not interactive
         concat(tag.div(class: "input-group") do
           concat(args[:form].text_field(args[:field], opts))
@@ -196,123 +186,6 @@ module FormsHelper
     end
   end
 
-  # MO's autocompleter_field is a text_field that fetches suggestions from the
-  # db for the requested model. (For a textarea, pass textarea: true.) The
-  # stimulus controller handles keyboard and mouse interactions, does the
-  # fetching, and draws the dropdown menu. `args` allow incoming data attributes
-  # to deep_merge with controller data. We attempt to disable browser
-  # autocomplete via `autocomplete="off"` — the W3C standard API, but it
-  # has never been honored by Chrome or Safari. Chrome seems to be in a race to
-  # defeat the evolving hacks by developers to disable inappropriate
-  # autocompletes, and Safari is not much better - you just can't turn their
-  # crap off. (documented on SO)
-  #
-  def autocompleter_field(**args)
-    ac_args = {
-      placeholder: :start_typing.l, autocomplete: "off",
-      data: { autocompleter_target: "input" }
-    }.deep_merge(args.except(:type, :separator, :textarea,
-                             :hidden, :hidden_data, :create_text,
-                             :keep_text, :edit_text))
-    ac_args[:class] = class_names("dropdown", args[:class])
-    ac_args[:wrap_data] = { controller: :autocompleter, type: args[:type],
-                            separator: args[:separator],
-                            autocompleter_map_outlet: args[:map_outlet],
-                            autocompleter_target: "wrap" }
-    ac_args[:between] = capture do
-      concat(args[:between])
-      concat(autocompleter_has_id_indicator)
-      concat(autocompleter_find_button(args)) if args[:find_text]
-      concat(autocompleter_keep_button(args)) if args[:keep_text]
-      concat(autocompleter_hidden_field(**args)) if args[:form]
-    end
-    ac_args[:between_end] = capture do
-      autocompleter_create_button(args) if args[:create_text]
-    end
-    ac_args[:append] = capture do
-      concat(autocompleter_dropdown)
-      concat(args[:append])
-    end
-
-    if args[:textarea] == true
-      text_area_with_label(**ac_args)
-    else
-      text_field_with_label(**ac_args)
-    end
-  end
-
-  def autocompleter_has_id_indicator
-    link_icon(:check, title: :autocompleter_has_id.l,
-                      class: "ml-3 px-2 text-success has-id-indicator",
-                      data: { autocompleter_target: "hasIdIndicator" })
-  end
-
-  def autocompleter_create_button(args)
-    icon_link_to(
-      args[:create_text], "#",
-      icon: :plus, show_text: true, icon_class: "text-primary",
-      name: "create_#{args[:type]}", class: "ml-3 create-button",
-      data: { autocompleter_target: "createBtn",
-              action: "autocompleter#swapCreate:prevent" }
-    )
-  end
-
-  def autocompleter_find_button(args)
-    icon_link_to(
-      args[:find_text], "#",
-      icon: :find_on_map, show_text: false, icon_class: "text-primary",
-      name: "find_#{args[:type]}", class: "ml-3 d-none",
-      data: { map_target: "showBoxBtn",
-              action: "map#showBox:prevent" }
-    )
-  end
-
-  def autocompleter_keep_button(args)
-    icon_link_to(
-      args[:keep_text], "#",
-      icon: :apply, show_text: false, icon_class: "text-primary",
-      active_icon: :edit, active_content: args[:edit_text],
-      name: "keep_#{args[:type]}", class: "ml-3 d-none",
-      data: { autocompleter_target: "keepBtn", map_target: "lockBoxBtn",
-              action: "map#toggleBoxLock:prevent" }
-    )
-  end
-
-  # minimum args :form, :type.
-  # Send :hidden to fill the id, :hidden_data to merge with hidden field data
-  def autocompleter_hidden_field(**args)
-    model = autocompleter_type_to_model(args[:type])
-    data = { autocompleter_target: "hidden" }.merge(args[:hidden_data] || {})
-    args[:form].hidden_field(:"#{model}_id", value: args[:hidden], data:)
-  end
-
-  def autocompleter_type_to_model(type)
-    case type
-    when :region
-      :location
-    when :clade
-      :name
-    else
-      type
-    end
-  end
-
-  def autocompleter_dropdown
-    tag.div(class: "auto_complete dropdown-menu",
-            data: { autocompleter_target: "pulldown",
-                    action: "scroll->autocompleter#scrollList:passive" }) do
-      tag.ul(class: "virtual_list", data: { autocompleter_target: "list" }) do
-        10.times do |i|
-          concat(tag.li(class: "dropdown-item") do
-            link_to("", "#", data: {
-                      row: i, action: "click->autocompleter#selectRow:prevent"
-                    })
-          end)
-        end
-      end
-    end
-  end
-
   # Bootstrap text_area
   def text_area_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
@@ -327,10 +200,25 @@ module FormsHelper
     label_opts = field_label_opts(args)
 
     tag.div(class: wrap_class, data: wrap_data) do
-      concat(args[:form].label(args[:field], args[:label], label_opts))
-      concat(args[:between]) if args[:between].present?
+      concat(text_label_row(args, label_opts))
       concat(args[:form].text_area(args[:field], opts))
       concat(args[:append]) if args[:append].present?
+    end
+  end
+
+  # The label row for autocompleters is potentially complicated, many buttons.
+  # Content for `between` and `label_after` come right after the label on left,
+  # content for `label_end` is at the end of the same line, right justified.
+  def text_label_row(args, label_opts)
+    tag.div(class: "d-flex justify-content-between") do
+      concat(tag.div do
+        concat(args[:form].label(args[:field], args[:label], label_opts))
+        concat(args[:between]) if args[:between].present?
+        concat(args[:label_after]) if args[:label_after].present?
+      end)
+      concat(tag.div do
+        concat(args[:label_end]) if args[:label_end].present?
+      end)
     end
   end
 
@@ -508,6 +396,7 @@ module FormsHelper
   end
 
   # Bootstrap file input field with client-side size validation.
+  # This could be redone as an input group with a "browse" button, in BS4.
   def file_field_with_label(**args)
     args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
@@ -536,23 +425,6 @@ module FormsHelper
       )
       concat(tag.span(:no_file_selected.t, data: { file_input_target: "name" }))
     end
-  end
-
-  # To be retired in favor of the above:
-  # Create stylable file input field with client-side size validation.
-  def custom_file_field(obj, attr, opts = {})
-    max_size = MO.image_upload_max_size
-    max_size_in_mb = (max_size.to_f / 1024 / 1024).round
-    file_field = file_field(
-      obj,
-      attr,
-      opts.merge(
-        max_upload_msg: :validate_image_file_too_big.l(max: max_size_in_mb),
-        max_upload_size: max_size
-      )
-    )
-    tag.span(:select_file.t + file_field, class: "file-field btn btn-default") +
-      tag.span(:no_file_selected.t)
   end
 
   # Unused
@@ -619,7 +491,7 @@ module FormsHelper
     keys = [:optional, :required].freeze
     positions.each do |pos|
       keys.each do |key|
-        args[pos] = help_note(:span, "(#{key.t})") if args[pos] == key
+        args[pos] = help_note(:span, "(#{key.l})") if args[pos] == key
       end
     end
     args
@@ -631,10 +503,14 @@ module FormsHelper
       return args
     end
 
-    id = "#{args[:form].object_name}_#{args[:field]}_help"
+    id = [
+      args[:form].object_name.to_s.id_of_nested_field,
+      args[:field].to_s,
+      "help"
+    ].join("_")
     args[:between] = capture do
-      concat(collapse_info_trigger(id))
       concat(args[:between])
+      concat(collapse_info_trigger(id))
     end
     args[:append] = capture do
       concat(args[:append])
@@ -650,12 +526,11 @@ module FormsHelper
   # be excluded separately (not here)
   def separate_field_options_from_args(args, extras = [])
     exceptions = [
-      :form, :field, :label, :class, :width, :inline, :between, :between_end,
-      :append, :help, :addon, :optional, :required, :monospace, :type,
-      :wrap_data, :button, :button_data
+      :form, :field, :label, :class, :width, :inline, :between, :label_after,
+      :label_end, :append, :help, :addon, :optional, :required, :monospace,
+      :type, :wrap_data, :wrap_id, :button, :button_data
     ] + extras
 
     args.clone.except(*exceptions)
   end
 end
-# rubocop:enable Metrics/ModuleLength

@@ -11,13 +11,14 @@ export default class extends GeocodeController {
   static targets = ["mapDiv", "southInput", "westInput", "northInput",
     "eastInput", "highInput", "lowInput", "placeInput", "locationId",
     "getElevation", "mapClearBtn", "controlWrap", "toggleMapBtn",
-    "latInput", "lngInput", "altInput", "showBoxBtn", "lockBoxBtn"]
+    "latInput", "lngInput", "altInput", "showBoxBtn", "lockBoxBtn",
+    "editBoxBtn", "autocompleter"]
 
   connect() {
-    this.element.dataset.stimulus = "connected"
+    this.element.dataset.stimulus = "map-connected"
     this.map_type = this.mapDivTarget.dataset.mapType
     this.editable = (this.mapDivTarget.dataset.editable === "true")
-    this.opened = this.map_type !== "observation"
+    this.opened = this.element.dataset.mapOpen === "true"
     this.marker = null // Only gets set if we're in edit mode
     this.rectangle = null // Only gets set if we're in edit mode
     this.location_format = this.mapDivTarget.dataset.locationFormat
@@ -94,19 +95,18 @@ export default class extends GeocodeController {
 
   // Lock rectangle so it's not editable, and show this state in the icon link
   toggleBoxLock(event) {
-    if (this.rectangle && this.hasLockBoxBtnTarget) {
+    if (this.rectangle && this.hasLockBoxBtnTarget &&
+      this.hasEditBoxBtnTarget) {
       if (this.rectangle.getEditable() === true) {
         this.rectangle.setEditable(false)
         this.rectangle.setOptions({ clickable: false })
-        this.lockBoxBtnTarget.classList.add("active")
-        const active_title = this.lockBoxBtnTarget.dataset?.activeTitle ?? ''
-        this.lockBoxBtnTarget.setAttribute("title", active_title)
+        this.lockBoxBtnTarget.classList.add("d-none")
+        this.editBoxBtnTarget.classList.remove("d-none")
       } else {
         this.rectangle.setEditable(true)
         this.rectangle.setOptions({ clickable: true })
-        this.lockBoxBtnTarget.classList.remove("active")
-        const title = this.lockBoxBtnTarget.dataset?.title ?? ''
-        this.lockBoxBtnTarget.setAttribute("title", title)
+        this.lockBoxBtnTarget.classList.remove("d-none")
+        this.editBoxBtnTarget.classList.add("d-none")
       }
     }
   }
@@ -115,6 +115,7 @@ export default class extends GeocodeController {
   // If we only have one marker, don't use fitBounds - it's too zoomed in.
   // Call setCenter, setZoom with marker position and desired zoom level.
   drawMap() {
+    this.verbose("map:drawMap")
     this.map = new google.maps.Map(this.mapDivTarget, this.mapOptions)
     if (this.mapBounds) {
       if (Object.keys(this.collection.sets).length == 1) {
@@ -138,6 +139,9 @@ export default class extends GeocodeController {
   // set.center is an array [lat, lng]
   // the `key` of each set is an array [x,y,w,h]
   buildOverlays() {
+    if (!this.collection) return
+
+    this.verbose("map:buildOverlays")
     for (const [_xywh, set] of Object.entries(this.collection.sets)) {
       // this.verbose({ set })
       // NOTE: according to the MapSet class, location sets are always is_box.
@@ -348,7 +352,7 @@ export default class extends GeocodeController {
       const center = this.validateLatLngInputs(false)
       if (!center) return
 
-      this.dispatchPointChanged(center)
+      this.sendPointChanged(center)
 
       if (this.latInputTarget.value === "" ||
         this.lngInputTarget.value === "" && this.marker) {
@@ -362,13 +366,6 @@ export default class extends GeocodeController {
     }
   }
 
-  clearAutocompleterSwapBuffer() {
-    if (this.autocomplete_buffer) {
-      clearTimeout(this.autocomplete_buffer)
-      this.autocomplete_buffer = 0
-    }
-  }
-
   clearMarkerDrawBuffer() {
     if (this.marker_draw_buffer) {
       clearTimeout(this.marker_draw_buffer)
@@ -378,10 +375,15 @@ export default class extends GeocodeController {
 
   // Action to map an MO location, or geocode a location from a place name.
   // Can be called directly from a button, so check for input values.
-  // Now fired from location id, including when it's zero
+  // Now fired when locationIdTarget changes, including when it's zero
   showBox() {
-    if (!this.opened ||
-      !this.hasPlaceInputTarget || !this.placeInputTarget.value)
+    if (!(this.opened && this.hasPlaceInputTarget &&
+      this.placeInputTarget.value))
+      return false
+
+    // Forms where location is optional: stay mum unless we're in create mode
+    if (this.hasAutocompleterTarget &&
+      !this.autocompleterTarget.classList.contains("create"))
       return false
 
     this.verbose("map:showBox")
@@ -394,28 +396,28 @@ export default class extends GeocodeController {
   checkForBox() {
     // this.showBoxBtnTarget.disabled = true
     this.verbose("map:checkForBox")
-    let id, location
+    let id
     if (this.hasLocationIdTarget && (id = this.locationIdTarget.value)) {
-      this.mapLocationBounds()
-      // Only geocode lat/lng if we have no location_id and not ignoring place
+      this.mapLocationIdData()
     } else if (["location", "hybrid"].includes(this.map_type)) {
-      if (location = this.validateLatLngInputs(false) &&
-        this.ignorePlaceInput !== false) {
-        this.geocodeLatLng(location) // multiple possible results
-        // ...and only geolocate placeName if we have no lat/lng
-      } else if (this.ignorePlaceInput === false) {
-        // ...and only geolocate placeName if we have no lat/lng
-        this.geolocatePlaceName() // 1 result
+      // Only geocode lat/lng if we have no location_id and not ignoring place
+      // ...and only geolocate placeName if we have no lat/lng
+      // Note: is this the right logic ?????????????
+      if (this.ignorePlaceInput !== false) {
+        this.tryToGeocode() // multiple possible results
+      } else {
+        this.tryToGeolocate()
       }
     }
     if (this.rectangle) this.rectangle.setVisible(true)
   }
 
   // The locationIdTarget should have the bounds in its dataset
-  mapLocationBounds() {
+  mapLocationIdData() {
     if (!this.hasLocationIdTarget || !this.locationIdTarget.dataset.north)
       return false
 
+    this.verbose("map:mapLocationIdData")
     const bounds = {
       north: parseFloat(this.locationIdTarget.dataset.north),
       south: parseFloat(this.locationIdTarget.dataset.south),
@@ -437,22 +439,22 @@ export default class extends GeocodeController {
     const east = parseFloat(this.eastInputTarget.value)
     const west = parseFloat(this.westInputTarget.value)
 
-    if (!(isNaN(north) || isNaN(south) || isNaN(east) || isNaN(west))) {
-      this.verbose("map:calculateRectangle")
-      const bounds = { north: north, south: south, east: east, west: west }
-      if (this.rectangle) {
-        this.rectangle.setBounds(bounds)
-      }
-      this.map.fitBounds(bounds)
+    if (isNaN(north) || isNaN(south) || isNaN(east) || isNaN(west)) return false
+
+    this.verbose("map:calculateRectangle")
+    const bounds = { north: north, south: south, east: east, west: west }
+    if (this.rectangle) {
+      this.rectangle.setBounds(bounds)
     }
+    this.map.fitBounds(bounds)
   }
 
   // Infers a rectangle from the google place, if found. (could be point/bounds)
   placeClosestRectangle(viewport, extents) {
+    this.verbose("map:placeClosestRectangle")
     // Prefer extents for rectangle, fallback to viewport
     let bounds = extents || viewport
     if (bounds != undefined && bounds?.north) {
-      this.verbose("map:placeClosestRectangle")
       this.placeRectangle(bounds)
     }
     // else if (center) {
@@ -467,6 +469,7 @@ export default class extends GeocodeController {
 
   // called by toggleMap
   checkForMarker() {
+    this.verbose("map:checkForMarker")
     let center
     if (center = this.validateLatLngInputs(false)) {
       this.calculateMarker({ detail: { request_params: center } })
@@ -479,11 +482,11 @@ export default class extends GeocodeController {
   // so, drops a pin on that location and center. Otherwise, checks if place
   // input has been prepopulated and uses that to focus map and drop a marker.
   calculateMarker(event) {
-    this.verbose("map:calculateMarker")
-    if (this.map == undefined ||
-      this.latInputTarget.value === '' || this.lngInputTarget.value === ''
-    ) return false
+    if (this.map == undefined || !this.hasLatInputTarget ||
+      this.latInputTarget.value === '' || this.lngInputTarget.value === '')
+      return false
 
+    this.verbose("map:calculateMarker")
     let location
     if (event?.detail?.request_params) {
       location = event.detail.request_params
@@ -500,30 +503,40 @@ export default class extends GeocodeController {
   // Action called by the "Open Map" button only.
   // open/close handled by BS collapse
   toggleMap() {
-    // this.verbose("map:toggleMap")
-
+    this.verbose("map:toggleMap")
     if (this.opened) {
-      this.opened = false
-      this.controlWrapTarget.classList.remove("map-open")
+      this.closeMap()
     } else {
-      this.opened = true
-      this.controlWrapTarget.classList.add("map-open")
-
-      if (this.map == undefined) {
-        this.drawMap()
-        this.makeMapClickable()
-      } else {
-        this.map.fitBounds(this.mapBounds)
-      }
-
-      setTimeout(() => {
-        this.checkForMarker()
-        this.checkForBox() // regardless if point
-      }, 500) // wait for map to open
+      this.openMap()
     }
   }
 
+  closeMap() {
+    this.verbose("map:closeMap")
+    this.opened = false
+    this.controlWrapTarget.classList.remove("map-open")
+  }
+
+  openMap() {
+    this.verbose("map:openMap")
+    this.opened = true
+    this.controlWrapTarget.classList.add("map-open")
+
+    if (this.map == undefined) {
+      this.drawMap()
+      this.makeMapClickable()
+    } else if (this.mapBounds) {
+      this.map.fitBounds(this.mapBounds)
+    }
+
+    setTimeout(() => {
+      this.checkForMarker()
+      this.checkForBox() // regardless if point
+    }, 500) // wait for map to open
+  }
+
   makeMapClickable() {
+    this.verbose("map:makeMapClickable")
     google.maps.event.addListener(this.map, 'click', (e) => {
       // this.map.addListener('click', (e) => {
       const location = e.latLng.toJSON()
@@ -537,26 +550,41 @@ export default class extends GeocodeController {
 
   // Action called from the "Clear Map" button
   clearMap() {
+    this.verbose("map:clearMap")
     const inputTargets = [
-      this.latInputTarget, this.lngInputTarget, this.altInputTarget,
       this.placeInputTarget, this.northInputTarget, this.southInputTarget,
       this.eastInputTarget, this.westInputTarget, this.highInputTarget,
       this.lowInputTarget
     ]
+    if (this.hasLatInputTarget) { inputTargets.push(this.latInputTarget) }
+    if (this.hasLngInputTarget) { inputTargets.push(this.lngInputTarget) }
+    if (this.hasAltInputTarget) { inputTargets.push(this.altInputTarget) }
+
     inputTargets.forEach((element) => { element.value = '' })
     this.ignorePlaceInput = false // turn string geolocation back on
 
-    if (this.marker) {
-      this.marker.setMap(null)
-      this.marker = null
-    }
-    if (this.rectangle) {
-      this.rectangle.setMap(null)
-      this.rectangle = null
-      // this.showBoxBtnTarget.disabled = false
-    }
+    this.clearMarker()
+    this.clearRectangle()
     this.dispatch("reenableBtns")
-    this.dispatchPointChanged({ lat: null, lng: null })
+    this.sendPointChanged({ lat: null, lng: null })
+  }
+
+  clearMarker() {
+    if (!this.marker) return false
+
+    this.verbose("map:clearMarker")
+    this.marker.setMap(null)
+    this.marker = null
+  }
+
+  clearRectangle() {
+    if (!this.rectangle) return false
+
+    this.verbose("map:clearRectangle")
+    this.rectangle.setVisible(false)
+    this.rectangle.setMap(null)
+    this.rectangle = null
+    return true
   }
 
   //
@@ -608,14 +636,6 @@ export default class extends GeocodeController {
     return corners
   }
 
-  // Computes the center of a Google Maps Rectangle's LatLngBoundsLiteral object
-  centerFromBounds(bounds) {
-    let lat = (bounds?.north + bounds?.south) / 2.0
-    let lng = (bounds?.east + bounds?.west) / 2.0
-    if (bounds?.west > bounds?.east) { lng += 180 }
-    return { lat: lat, lng: lng }
-  }
-
   //
   //  COORDINATES - ELEVATION
   //
@@ -634,9 +654,9 @@ export default class extends GeocodeController {
 
   // ------------------------------- DEBUGGING ------------------------------
 
-  helpDebug() {
-    debugger
-  }
+  // helpDebug() {
+  //   debugger
+  // }
 
   verbose(str) {
     // console.log(str);
