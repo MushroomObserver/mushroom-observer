@@ -384,7 +384,6 @@ export default class extends Controller {
     this.inputTarget.addEventListener("keyup", this);
     this.inputTarget.addEventListener("keypress", this);
     this.inputTarget.addEventListener("change", this);
-    this.inputTarget.addEventListener("paste", this);
     // Turbo: check this. May need to be turbo.before_render or before_visit
     window.addEventListener("beforeunload", this);
   }
@@ -413,9 +412,6 @@ export default class extends Controller {
         break;
       case "change":
         this.ourChange(event);
-        break;
-      case "paste":
-        this.ourPaste(event);
         break;
       case "beforeunload":
         this.ourUnload(event);
@@ -514,27 +510,6 @@ export default class extends Controller {
         }
       }
     }
-  }
-
-  // User pasted into text field.
-  // When matching multiple records, needs to keep track of "keepers", and
-  // update the hidden ids if the list of matches gets edited.
-  // Assess the pasted text and stop propagation (to change event).
-  ourPaste(event) {
-    // if (this.SEPARATOR) {
-    //   event.stopPropagation();
-    //   this.verbose("autocompleter:ourPaste()");
-    //   const pasted = event.clipboardData.getData('text'),
-    //     pasted_array = pasted.split(this.SEPARATOR).map(s => s.trim());
-    //   this.addMissingKeepersAndIds(pasted_array);
-    //   // this.ourChange(true);
-
-    //   // Handle the fact this could be pasted in the middle of the input,
-    //   // or in place of selected text
-    //   const { text, start, end } = this.getActiveInputSelection();
-    //   if (start !== null)
-    //     this.inputTarget.setRangeText(text, start, end);
-    // }
   }
 
   // User clicked into text field.
