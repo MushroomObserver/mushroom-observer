@@ -148,7 +148,7 @@ module AutocompleterHelper
 
     model = autocompleter_type_to_model(args[:type])
     data = { autocompleter_target: "hidden" }.merge(args[:hidden_data] || {})
-    args[:form].text_field(:"#{model}_id", value: args[:hidden_value], data:)
+    args[:form].hidden_field(:"#{model}_id", value: args[:hidden_value], data:)
   end
 
   def autocompleter_type_to_model(type)
