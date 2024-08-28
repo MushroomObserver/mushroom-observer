@@ -7,7 +7,19 @@ class AutoComplete::ForSpeciesList < AutoComplete::ByWord
               or(SpeciesList[:title].matches("% #{letter}%"))).
             order(title: :asc)
 
-    # Turn the instances into hashes, and alter title key
+    matches_array(lists)
+  end
+
+  def exact_match(string)
+    list = SpeciesList.select(:title, :id).distinct.
+           where(SpeciesList[:title].eq(string)).first
+    return [] unless list
+
+    matches_array([list])
+  end
+
+  # Turn the instances into hashes, and alter title key
+  def matches_array(lists)
     lists.map do |list|
       list = list.attributes.symbolize_keys
       { name: list[:title], id: list[:id] }
