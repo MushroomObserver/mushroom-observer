@@ -971,6 +971,35 @@ export default class extends Controller {
     }
   }
 
+  // Hide pulldown options.
+  hidePulldown() {
+    // this.verbose("hidePulldown()");
+    this.wrapTarget?.classList?.remove('open');
+    this.menu_up = false;
+  }
+
+  // Update width of pulldown.
+  updateWidth() {
+    // this.verbose("updateWidth()");
+    let w = this.listTarget.offsetWidth;
+    if (this.matches.length > this.PULLDOWN_SIZE)
+      w += this.SCROLLBAR_WIDTH;
+    if (this.current_width < w) {
+      this.current_width = w;
+      this.setWidth();
+    }
+  }
+
+  // Set width of pulldown.
+  setWidth() {
+    // this.verbose("setWidth()");
+    const w1 = this.current_width;
+    let w2 = w1;
+    if (this.matches.length > this.PULLDOWN_SIZE)
+      w2 -= this.SCROLLBAR_WIDTH;
+    this.listTarget.style.minWidth = w2 + 'px';
+  }
+
   // ------------------------------ Hidden IDs ------------------------------
 
   // Assign ID of any perfectly matching option, even if not expressly selected.
@@ -1134,6 +1163,63 @@ export default class extends Controller {
     });
     // update the hidden input
     this.hiddenTarget.value = hidden_ids.join(",");
+    // check for names in the input that are missing from the keepers and ids
+    this.checkForMissingKeepersAndIds(input_names);
+  }
+
+  // If the input names don't match the keepers, we need to add them back in.
+  checkForMissingKeepersAndIds(input_names) {
+    if (input_names.length == 0) return;
+
+    this.verbose("autocompleter:checkForMissingKeepers()");
+    // The fetch response assumes the input names are the same length and in the
+    // same order as the keepers and ids, so we can't just push them back in. We
+    // need to find the right position for each existing keeper and id.
+    // Prepare null values in the array where we need to add new keepers
+    if (this.keepers.length < input_names.length) {
+      const new_keepers = new Array(input_names.length).
+        fill({ name: null, id: null });
+      if (this.keepers.length > 0) {
+        // Put current keepers in the right positions in the new array
+        input_names.forEach((n, i) => {
+          const idx = this.keepers.map((d) => d.name).indexOf(n);
+          if (idx > -1) {
+            new_keepers[i] = this.keepers[idx];
+          }
+        });
+      }
+      this.keepers = new_keepers;
+    }
+    // Do the same for the hidden IDs. We have to check against keepers for ids.
+    const hidden_ids = this.hiddenIdsAsIntegerArray();
+    if (hidden_ids.length < input_names.length) {
+      const new_ids = new Array(input_names.length).fill(null);
+      if (hidden_ids.length > 0) {
+        // Put current ids in the right positions in the new array
+        this.keepers.forEach((n, i) => {
+          const idx = hidden_ids.indexOf(n.id);
+          if (idx > -1) {
+            new_ids[i] = hidden_ids[idx];
+          }
+        });
+      }
+      this.hiddenTarget.value = new_ids.join(",");
+    }
+    // Now try to fetch records for the missing input names
+    const missing = input_names.filter((n) => {
+      return !this.keepers.map((d) => d.name).includes(n);
+    });
+
+    if (missing.length > 0) {
+      this.verbose("autocompleter:missing: ")
+      this.verbose(JSON.stringify(missing));
+      // send these staggered so they don't cancel each other.
+      missing.forEach((token, i) => {
+        setTimeout(() => {
+          this.matchOneToken(token);
+        }, i * 300);
+      });
+    }
   }
 
   // only clear if we're not in "ignorePlaceInput" mode
@@ -1257,35 +1343,6 @@ export default class extends Controller {
   hiddenIdsAsIntegerArray() {
     return this.hiddenTarget.value.
       split(",").map((e) => parseInt(e.trim())).filter(Number);
-  }
-
-  // Hide pulldown options.
-  hidePulldown() {
-    // this.verbose("hidePulldown()");
-    this.wrapTarget?.classList?.remove('open');
-    this.menu_up = false;
-  }
-
-  // Update width of pulldown.
-  updateWidth() {
-    // this.verbose("updateWidth()");
-    let w = this.listTarget.offsetWidth;
-    if (this.matches.length > this.PULLDOWN_SIZE)
-      w += this.SCROLLBAR_WIDTH;
-    if (this.current_width < w) {
-      this.current_width = w;
-      this.setWidth();
-    }
-  }
-
-  // Set width of pulldown.
-  setWidth() {
-    // this.verbose("setWidth()");
-    const w1 = this.current_width;
-    let w2 = w1;
-    if (this.matches.length > this.PULLDOWN_SIZE)
-      w2 -= this.SCROLLBAR_WIDTH;
-    this.listTarget.style.minWidth = w2 + 'px';
   }
 
   // ------------------------------ Matches ------------------------------
@@ -1585,6 +1642,10 @@ export default class extends Controller {
     const token = this.getSearchToken();
     this.verbose("autocompleter:getSearchToken()");
     this.verbose(token);
+    return this.getInputIndexOf(token);
+  }
+
+  getInputIndexOf(token) {
     return this.getInputArray().indexOf(token);
   }
 
@@ -1667,7 +1728,7 @@ export default class extends Controller {
   }
 
   // Send fetch request for more matching strings.
-  async sendFetchRequest(query_params) {
+  async sendFetchRequest(query_params, single_match = false) {
     this.verbose("autocompleter:sendFetchRequest()");
     this.verbose(query_params);
 
@@ -1695,7 +1756,11 @@ export default class extends Controller {
       const json = await response.json
       if (json) {
         this.fetch_request = response
-        this.processFetchResponse(json)
+        if (single_match) {
+          this.processMatchFetchResponse(json)
+        } else {
+          this.processFetchResponse(json)
+        }
       }
     } else {
       this.fetch_request = null;
@@ -1778,15 +1843,50 @@ export default class extends Controller {
     }
   }
 
-  setCursorPosition(el, pos) {
-    if (el.setSelectionRange) {
-      el.setSelectionRange(pos, pos);
-    } else if (el.createTextRange) {
-      const range = el.createTextRange();
-      range.collapse(true);
-      range.moveEnd('character', pos);
-      range.moveStart('character', pos);
-      range.select();
+
+  // ------------------------------ SINGLE MATCH ------------------------------
+
+  // For multiple-value autocompleters, try to get a matching record for a
+  // single input value. This is for the case where the user pastes in an array
+  // of values, so it's skipping the single match process.
+  matchOneToken(token) {
+    const query_params = { string: token, ...this.request_params }
+    query_params["whole"] = true;
+
+    // Make request.
+    this.sendFetchRequest(query_params, true);
+  }
+
+  // If we get a match, add the record to the hidden input and keepers array.
+  processMatchFetchResponse(new_primer) {
+    this.verbose("autocompleter:processMatchFetchResponse()");
+    this.verbose("autocompleter:new_primer: ")
+    this.verbose(JSON.stringify(new_primer));
+
+    // Clear flag telling us request is pending.
+    this.fetch_request = null;
+
+    // If results, we're going to assume the first match is an exact match.
+    if (new_primer.length > 0) {
+      let exact_match = new_primer[0];
+      // The match may have extra data we don't need in the keepers.
+      // We only need the id and name.
+      exact_match = { id: exact_match['id'], name: exact_match['name'] };
+      // Order is important here. Figure out where the match is in the input.
+      const idx = this.getInputIndexOf(exact_match['name']);
+      if (idx == -1) { return; }
+
+      hidden_ids = this.hiddenIdsAsIntegerArray();
+      // if the exact match is not in the hidden ids, add it at the right index.
+      if (!hidden_ids.includes(exact_match['id'])) {
+        hidden_ids.splice(idx, 1, exact_match['id']);
+        this.hiddenTarget.value = hidden_ids.join(",");
+      }
+      // if it's not in keepers, add it at the right index. (Note extra data
+      // would block the match here.)
+      if (!this.keepers.includes(exact_match)) {
+        this.keepers.splice(idx, 1, exact_match);
+      }
     }
   }
 
@@ -1798,7 +1898,7 @@ export default class extends Controller {
   }
 
   verbose(str) {
-    // console.log(str);
+    console.log(str);
     // document.getElementById("log").
     //   insertAdjacentText("beforeend", str + "<br/>");
   }
