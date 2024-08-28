@@ -124,6 +124,7 @@ const INTERNAL_OPTS = {
   stored_id: 0,          // id of selected option
   stored_data: { id: 0 }, // data of selected option
   stored_ids: [],        // ids of selected options (for multiple - no data)
+  keepers: [],           // data of selected options (for multiple)
   primer: [],            // a server-supplied list of many options
   matches: [],           // list of options currently showing
   current_row: -1,       // index of option currently highlighted (0 = none)
@@ -171,8 +172,6 @@ export default class extends Controller {
 
     // Assign the separator for multiple-record autocompleters
     this.SEPARATOR = this.element.dataset.separator;
-    if (this.SEPARATOR) // data will be an array of hashes
-      this.stored_data = [];
 
     // Shared MO utilities, imported at the top:
     this.EVENT_KEYS = EVENT_KEYS;
@@ -241,6 +240,7 @@ export default class extends Controller {
       this.primer = [];
       this.matches = [];
       this.stored_data = { id: 0 };
+      this.keepers = [];
       this.last_fetch_params = '';
       this.prepareInputElement();
       this.prepareHiddenInput();
@@ -491,19 +491,19 @@ export default class extends Controller {
   }
 
   // Input field has changed.
-  // Needs to keep track of a data array, and update the hidden ids if the list of matches gets edited
+  // Needs to keep track of "keepers", and update the hidden ids if the list of matches gets edited
   ourChange(do_refresh) {
-    const old_val = this.old_value;
-    const new_val = this.inputTarget.value;
+    const old_value = this.old_value;
+    const new_value = this.inputTarget.value;
     // this.debug("ourChange(" + this.inputTarget.value + ")");
-    if (new_val.length == 0) {
+    if (new_value.length == 0) {
       this.cssCollapseFields();
       this.clearHiddenId();
       this.leaveCreate();
     } else {
       this.cssUncollapseFields();
-      if (new_val != old_val) {
-        this.old_value = new_val;
+      if (new_value != old_value) {
+        this.old_value = new_value;
         if (do_refresh) {
           this.verbose("autocompleter:ourChange()");
           this.scheduleRefresh();
@@ -971,13 +971,16 @@ export default class extends Controller {
     }
   }
 
+  // ------------------------------ Hidden IDs ------------------------------
+
   // Assign ID of any perfectly matching option, even if not expressly selected.
   // This guards against user selecting a match, then, say, deleting a letter
   // and retyping the letter. Without this, an exact match would lose its ID.
   // NOTE: Needs to handle multiple IDs when there is a separator.
   updateHiddenId() {
     this.verbose("autocompleter:updateHiddenId()");
-
+    this.verbose("autocompleter:getSearchToken().trim(): ");
+    this.verbose(this.getSearchToken().trim());
     const perfect_match =
       this.matches.find((m) => m['name'] === this.getSearchToken().trim());
 
@@ -989,6 +992,8 @@ export default class extends Controller {
     } else if (!this.ignoringTextInput()) {
       this.clearHiddenId();
     }
+    // Fires on every change!
+    if (this.SEPARATOR) { this.syncHiddenIds(); }
   }
 
   // Gets the most recent value in the hidden input, which may be an array.
@@ -1039,7 +1044,7 @@ export default class extends Controller {
     if (idx > -1) {
       new_array[idx] = parseInt(match['id']);
       this.hiddenTarget.value = new_array.join(",");
-      this.stored_data[idx] = new_data;
+      this.keepers[idx] = new_data;
     }
   }
 
@@ -1077,6 +1082,7 @@ export default class extends Controller {
   // We have to be careful here to delete only the id (of multiple) that is
   // at the same index as the search token. Otherwise it keeps deleting.
   clearLastHiddenTargetValueMultiple() {
+    this.verbose("autocompleter:clearLastHiddenTargetValueMultiple()");
     // not worried about integers here
     let old_array = this.hiddenTarget.value.split(","),
       idx = this.getSearchTokenIndex();
@@ -1084,7 +1090,9 @@ export default class extends Controller {
     if (idx > -1 && old_array.length > idx) {
       old_array.slice(idx, 1);
       this.hiddenTarget.value = old_array.join(",");
-      this.stored_data.slice(idx, 1);
+      // also clear the dataset
+      if (this.keepers.length > idx)
+        this.keepers.slice(idx, 1);
     }
   }
 
@@ -1095,6 +1103,37 @@ export default class extends Controller {
       if (!key.match(/Target/))
         delete this.hiddenTarget.dataset[key];
     });
+  }
+
+  // check if any names in `keepers` are not in the input values.
+  // if so, remove them from the keepers and the hidden input.
+  // This still can't deal with pasted-in values, but it's a start.
+  syncHiddenIds() {
+    if (!this.SEPARATOR || this.keepers == []) return;
+
+    this.verbose("autocompleter:syncHiddenIds()");
+    this.verbose("autocompleter:keepers: ")
+    this.verbose(JSON.stringify(this.keepers));
+
+    const input_names = this.getInputArray(),
+      hidden_ids = this.hiddenIdsAsIntegerArray();
+    this.verbose("autocompleter:input_names: ")
+    this.verbose(JSON.stringify(input_names));
+    this.verbose("autocompleter:hidden_ids: ")
+    this.verbose(JSON.stringify(hidden_ids));
+
+    this.keepers.filter((d) => !input_names.includes(d.name)).forEach((d) => {
+      const idx = hidden_ids.indexOf(d.id);
+      if (idx > -1) {
+        hidden_ids.splice(idx, 1);
+      }
+      const kidx = this.keepers.indexOf(d);
+      if (kidx > -1) {
+        this.keepers.splice(kidx, 1);
+      }
+    });
+    // update the hidden input
+    this.hiddenTarget.value = hidden_ids.join(",");
   }
 
   // only clear if we're not in "ignorePlaceInput" mode
@@ -1150,6 +1189,7 @@ export default class extends Controller {
   storeCurrentHiddenDataMultiple() {
     this.verbose("autocompleter:storeCurrentHiddenDataMultiple()");
     this.stored_ids = this.hiddenIdsAsIntegerArray();
+    this.verbose("stored_ids: " + JSON.stringify(this.stored_ids));
   }
 
   storeCurrentHiddenDataSingle() {
@@ -1482,7 +1522,7 @@ export default class extends Controller {
   getSearchToken() {
     const val = this.inputTarget.value;
     let token = val;
-    this.verbose("autocompleter:getSearchToken() before: " + token);
+    // this.verbose("autocompleter:getSearchToken() before: " + token);
 
     // If we're only looking for whole words, don't make a request unless
     // trailing space or comma, indicating a user has finished typing a word.
@@ -1494,7 +1534,7 @@ export default class extends Controller {
       const extents = this.searchTokenExtents();
       token = val.substring(extents.start, extents.end);
     }
-    this.verbose("autocompleter:getSearchToken() after: " + token);
+    // this.verbose("autocompleter:getSearchToken() after: " + token);
     return token;
   }
 
@@ -1540,11 +1580,20 @@ export default class extends Controller {
     return { start, end };
   }
 
+  // When there are multiple values separated by a separator.
   getSearchTokenIndex() {
-    const val = this.inputTarget.value,
-      vals = val.split(this.SEPARATOR).map((v) => v.trim());
+    const token = this.getSearchToken();
+    this.verbose("autocompleter:getSearchToken()");
+    this.verbose(token);
+    return this.getInputArray().indexOf(token);
+  }
 
-    return vals.indexOf(this.getSearchToken());
+  getInputArray() {
+    return this.inputTarget.value.split(this.SEPARATOR).map((v) => v.trim());
+  }
+
+  getInputCount() {
+    return this.getInputArray().length;
   }
 
   // ------------------------------ Fetch matches ------------------------------
