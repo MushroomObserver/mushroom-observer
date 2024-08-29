@@ -57,7 +57,7 @@ module Observations
       @inat_import.update(state: "Authorizing",
                           import_all: params[:all],
                           inat_ids: params[:inat_ids],
-                          inat_username: params[:inat_username])
+                          inat_username: params[:inat_username].strip)
 
       request_inat_user_authorization
     end
