@@ -19,13 +19,14 @@ class AutoComplete::ForRegion < AutoComplete::ByWord
     matches_array(regions)
   end
 
-  def exact_match(words)
-    words = Location.reverse_name(words) if reverse
-    region = Observation.in_region(words).select(:where, :location_id).first
-    return [] unless region
+  # Doesn't make sense to have an exact match for a region.
+  # def exact_match(words)
+  #   words = Location.reverse_name(words) if reverse
+  #   region = Observation.in_region(words).select(:where, :location_id).first
+  #   return [] unless region
 
-    matches_array([region])
-  end
+  #   matches_array([region])
+  # end
 
   # Turn the instances into hashes, and alter name order if requested
   # Also change the names of the hash keys.

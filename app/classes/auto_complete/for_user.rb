@@ -12,9 +12,10 @@ class AutoComplete::ForUser < AutoComplete::ByString
   end
 
   def exact_match(string)
-    user = User.select(:login, :name, :id).distinct.
-           where(User[:login].eq(string)).or(User[:name].eq(string)).
-           order(login: :asc).first
+    user = User.select(:login, :name, :id).
+           where(User[:login].eq(string)).
+           or(User.where(User[:name].eq(string))).
+           order(login: :asc).distinct.first
     return [] unless user
 
     matches_array([user])

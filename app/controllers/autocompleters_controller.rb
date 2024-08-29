@@ -38,6 +38,7 @@ class AutocompletersController < ApplicationController
   end
 
   def auto_complete_results
+    # Don't pass region or clade as the @type with `exact` here.
     if params[:exact].present?
       return ::AutoComplete.subclass(@type).new(params).first_matching_record
     end

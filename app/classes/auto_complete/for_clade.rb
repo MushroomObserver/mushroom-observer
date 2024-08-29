@@ -10,13 +10,14 @@ class AutoComplete::ForClade < AutoComplete::ByString
     matches_array(clades)
   end
 
-  def exact_match(string)
-    clade = Name.with_correct_spelling.with_rank_above_genus.
-            where(Name[:text_name].eq(string)).first
-    return [] unless clade
+  # Doesn't make sense to have exact match for clades
+  # def exact_match(string)
+  #   clade = Name.with_correct_spelling.with_rank_above_genus.
+  #           where(Name[:text_name].eq(string)).first
+  #   return [] unless clade
 
-    matches_array([clade])
-  end
+  #   matches_array([clade])
+  # end
 
   # Turn the instances into hashes
   def matches_array(clades)
