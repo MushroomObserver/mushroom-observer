@@ -2840,6 +2840,10 @@
   field_slip_index: "[:FIELD_SLIP] Index"
   field_slip_job_no_project: No Project with id=[ID]
   field_slip_job_no_tracker: No Field Slip Tracker found
+  field_slip_import_from_inat: Import iNat Observation
+  field_slip_inat_user_name: "iNat username of iNat observer"
+  field_slip_inat_id: "iNat observation #"
+  field_slip_import: Import
   field_slip_keep_obs: Save with Current Observation
   field_slip_last_obs: Switch to Last Observation
   field_slip_new: Record Field Slip

@@ -65,6 +65,26 @@
       <% end %>
     </div>
 
+    <div class="panel panel-default">
+        <div class="panel-heading">
+          <%= submit_button(form: form, button: :field_slip_import_from_inat.t,
+                            class: "mt-5") %>
+        </div>
+        <div class="panel-body">
+          <div>
+            <%= text_field_with_label(form: form, field: :inat_ids,
+                                      label: "#{:field_slip_inat_id.t}:") %>
+          </div>
+          <div>
+            <%= text_field_with_label(
+              form: form, field: :inat_username,
+              label: "#{:field_slip_inat_user_name.t} (#{:optional.t}):"
+            ) %>
+          </div>
+        <div>
+    </div>
+
+
     <%= submit_button(form: form, button: :field_slip_create_obs.t,
                       class: "my-5") if action == "edit" %>
 

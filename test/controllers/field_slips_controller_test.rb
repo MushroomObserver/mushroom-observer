@@ -17,6 +17,20 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_response :success
   end
 
+  test "should get new with inat import" do
+    project = projects(:bolete_project)
+    login(project.user.login)
+    code = "#{project.field_slip_prefix}-1234"
+
+    get(:new, params: { code: code })
+
+    assert_response :success
+    assert_select(
+      "input[value=?]", :field_slip_import_from_inat.l, true,
+      "Field Slip Record should have option to import iNat observation"
+    )
+  end
+
   test "should get new with right project if member" do
     project = projects(:bolete_project)
     login(project.user.login)
