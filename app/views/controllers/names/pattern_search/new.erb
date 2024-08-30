@@ -1,10 +1,36 @@
 <%
-fields = PatternSearch::Name.params.keys
+fields = {
+  created: :date_range,
+  modified: :date_range,
+
+  # quality
+  deprecated: :boolean,
+  has_author: :boolean,
+  author: :text,
+  has_citation: :boolean,
+  citation: :text,
+  has_observations: :yes,
+  # scope
+  has_synonyms: :boolean,
+  include_synonyms: :boolean,
+  include_subtaxa: :boolean,
+  include_misspellings: :yes_no_both,
+  rank: :rank_range,
+  lichen: :boolean,
+  # detail
+  has_classification: :boolean,
+  classification: :text,
+  has_notes: :boolean,
+  notes: :text,
+  has_comments: :yes,
+  comments: :text,
+  has_description: :boolean
+}
 %>
 
 <%= form_with(url: { action: :create }) do |f| %>
 
-  <% fields.each do |field| %>
+  <% fields.each do |field, type| %>
     <%= text_field_with_label(form: f, field:) %>
   <% end %>
 
