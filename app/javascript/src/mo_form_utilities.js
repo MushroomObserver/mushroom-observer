@@ -44,6 +44,31 @@ export const mo_form_utilities = {
 
     this.scrollbar_width = w1 - w2;
     // return scroll_bar_width;
+  },
+
+  setCursorPosition(el, pos) {
+    if (el.setSelectionRange) {
+      el.setSelectionRange(pos, pos);
+    } else if (el.createTextRange) {
+      const range = el.createTextRange();
+      range.collapse(true);
+      range.moveEnd('character', pos);
+      range.moveStart('character', pos);
+      range.select();
+    }
+  },
+
+  // https://stackoverflow.com/a/74602959/3357635
+  getActiveInputSelection() {
+    const el = document.activeElement,
+      selection = { start: null, end: null, text: '' };
+
+    if (typeof el != "undefined") {
+      selection.start = el.selectionStart;
+      selection.end = el.selectionEnd;
+      selection.text = el.value.substring(selection.start, selection.end);
+    }
+    return selection;
   }
 }
 

@@ -13,6 +13,18 @@ class AutoComplete::ForHerbarium < AutoComplete::ByWord
              else(Herbarium[:code]).asc, Herbarium[:name].asc
       )
 
+    matches_array(herbaria)
+  end
+
+  def exact_match(string)
+    herbarium = Herbarium.select(:code, :name, :id).distinct.
+                where(Herbarium[:name].eq(string)).first
+    return [] unless herbarium
+
+    matches_array([herbarium])
+  end
+
+  def matches_array(herbaria)
     # Turn the instances into hashes, and figure out what name to display
     matches = herbaria.map do |herbarium|
       herbarium = herbarium.attributes.symbolize_keys

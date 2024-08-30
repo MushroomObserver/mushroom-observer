@@ -7,7 +7,19 @@ class AutoComplete::ForProject < AutoComplete::ByWord
                  or(Project[:title].matches("% #{letter}%"))).
                order(title: :asc)
 
-    # Turn the instances into hashes, and alter title key
+    matches_array(projects)
+  end
+
+  def exact_match(string)
+    project = Project.select(:title, :id).distinct.
+              where(Project[:title].eq(string)).first
+    return [] unless project
+
+    matches_array([project])
+  end
+
+  # Turn the instances into hashes, and alter title key
+  def matches_array(projects)
     projects.map do |project|
       project = project.attributes.symbolize_keys
       { name: project[:title], id: project[:id] }
