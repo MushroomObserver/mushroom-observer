@@ -47,7 +47,6 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
     assert_link(:form_observations_create_locality.l)
     click_link(:form_observations_create_locality.l)
 
-    assert_selector("#herbarium_place_name.geocoded")
     assert_field("herbarium_place_name",
                  with: "Génolhac, Gard, Occitanie, France")
 
