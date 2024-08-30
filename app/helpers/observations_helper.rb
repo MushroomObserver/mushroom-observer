@@ -111,16 +111,19 @@ module ObservationsHelper
   def observation_details_inat(obs:)
     return nil if obs.inat_id.blank?
 
-    inat_link_desc = if obs.source == "mo_inat_import"
-                       :ORIGINAL.t
-                     else
-                       :COUNTERPART.t
-                     end
+    inat_link_desc =
+      if obs.source == "mo_inat_import"
+        :show_observation_details_inat_import.t(
+          date: obs.created_at.strftime("%Y-%m-%d")
+        )
+      else
+        :show_observation_details_inat_export.t
+      end
 
     tag.p(id: "inat_id") do
       [
-        "#{inat_link_desc}:",
-        link_to("#{:inaturalist.t} ##{obs.inat_id}",
+        "#{inat_link_desc} ",
+        link_to("#{:inat.t} ##{obs.inat_id}",
                 "https://inaturalist.org/observations/#{obs.inat_id}")
       ].safe_join(" ")
     end
