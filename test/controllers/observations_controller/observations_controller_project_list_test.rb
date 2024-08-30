@@ -173,7 +173,7 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
         }
       }
     )
-    assert_flash_success
+    assert_flash_warning
     assert_response(:redirect)
     assert_obj_arrays_equal([project], obs.reload.projects)
   end

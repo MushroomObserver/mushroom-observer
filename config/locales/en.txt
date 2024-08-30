@@ -863,6 +863,8 @@
   on_mo: On MO
   on_the_web: On the web
   on_site: On [site]
+  project_first_collection: "**First collection of \"[name]\" for \"[project]\". Consider vouchering!**"
+  project_count_collections: "[count] collections of \"[name]\" for \"[project]\"."
   show_on_map: Show on map
   many_times: "[num] times"
   one_time: once
