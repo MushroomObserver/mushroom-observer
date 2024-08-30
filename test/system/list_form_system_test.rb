@@ -37,4 +37,27 @@ class ListFormSystemTest < ApplicationSystemTestCase
     assert_field("list_name_id", with: "#{name2.id},#{name1.id},#{name3.id}",
                                  type: :hidden)
   end
+
+  def test_multi_autocompleter_paste
+    @browser = page.driver.browser
+    rolf = users("rolf")
+    login!(rolf)
+
+    visit("/species_lists/new")
+    assert_selector("body.species_lists__new")
+    assert_field("list_members")
+    assert_field("list_name_id", type: :hidden)
+
+    name1 = names("coprinus_comatus")
+    name2 = names("agaricus_campestris")
+    name3 = names("stereum_hirsutum")
+    fill_in(
+      "list_members",
+      with: "Agaricus campestris\nCoprinus comatus\nStereum hirsutum"
+    )
+    assert_field("list_members", with: /Agaricus campestris/)
+    sleep(1)
+    assert_field("list_name_id", with: "#{name2.id},#{name1.id},#{name3.id}",
+                                 type: :hidden)
+  end
 end
