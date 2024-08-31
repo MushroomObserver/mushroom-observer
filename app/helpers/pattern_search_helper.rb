@@ -4,17 +4,15 @@
 # args should provide form, field, label at a minimum.
 module PatternSearchHelper
   def pattern_search_field(**args)
-    field = args[:field]
-    klass = args[:klass]
-    args[:label] ||= :"search_#{field}".l
-    helper = pattern_search_helper_for_field(field, klass)
-    send(helper, **args)
+    args[:label] ||= :"search_term_#{args[:field]}".l.humanize
+    helper = pattern_search_helper_for_field(args[:field], args[:type])
+    send(helper, **args.except(:type)) if helper
   end
 
   # The subclasses say how they're going to parse their fields, so we can use
   # that to determine which helper to use.
-  def pattern_search_helper_for_field(field, klass)
-    type = klass.params[field][1]
+  def pattern_search_helper_for_field(field, type)
+    type = PatternSearch.const_get(type.capitalize).params[field][1]
     PATTERN_SEARCH_FIELD_HELPERS[type]
   end
 
@@ -33,21 +31,21 @@ module PatternSearchHelper
 
   def pattern_search_boolean_field(**args)
     options = [
-      ["", null],
+      ["", nil],
       ["yes", "yes"],
       ["no", "no"]
     ]
-    select_with_label(options:, **args)
+    select_with_label(options:, inline: true, **args)
   end
 
   def pattern_search_yes_no_both_field(**args)
     options = [
-      ["", null],
+      ["", nil],
       ["yes", "yes"],
       ["no", "no"],
       ["both", "either"]
     ]
-    select_with_label(options:, **args)
+    select_with_label(options:, inline: true, **args)
   end
 
   # The first field gets the label, the range field is optional
@@ -68,10 +66,10 @@ module PatternSearchHelper
   def pattern_search_rank_range_field(**args)
     tag.div(class: "row") do
       concat(tag.div(class: "col-xs-12 col-sm-6") do
-        select_with_label(options: Rank.all_ranks, **args)
+        select_with_label(options: Name.all_ranks, **args)
       end)
       concat(tag.div(class: "col-xs-12 col-sm-6") do
-        select_with_label(options: Rank.all_ranks, **args.merge(
+        select_with_label(options: Name.all_ranks, **args.merge(
           label: :TO.l, optional: true, field: "#{args[:field]}_range"
         ))
       end)

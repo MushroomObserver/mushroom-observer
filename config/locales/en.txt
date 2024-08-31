@@ -1167,6 +1167,10 @@
   search_term_south: south
   search_term_user: user
   search_term_west: west
+  search_term_group_date: [DATE]
+  search_term_group_quality: [QUALITY]
+  search_term_group_scope: Scope
+  search_term_group_detail: Detail
 
   # Words recognized in search bar.
   # e.g. "user:me"

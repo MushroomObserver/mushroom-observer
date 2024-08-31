@@ -20,7 +20,7 @@ fields_2 = {
         <% field_groups.each do |header, fields| %>
           <%= tag.h5(:"search_term_group_#{header}".l) %>
           <% fields.each do |field| %>
-            <%= pattern_search_field(form: f, field: field) %>
+            <%= pattern_search_field(form: f, field: field, type: :name) %>
           <% end %>
         <% end %>
       <% end %>
