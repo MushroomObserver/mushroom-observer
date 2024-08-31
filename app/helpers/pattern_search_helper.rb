@@ -26,41 +26,31 @@ module PatternSearchHelper
     select_with_label(options:, **args)
   end
 
+  # The first field gets the label, the range field is optional
   def pattern_search_date_range_field(**args)
-    concat(tag.div do
-      tag.strong(args[:label])
-    end)
-    concat(tag.div(class: "row") do
-      concat(tag.div(class: "col-12 col-sm-6") do
-        text_field_with_label(
-          **args.merge(label: :START.l, field: "#{args[:field]}_start")
-        )
+    tag.div(class: "row") do
+      concat(tag.div(class: "col-xs-12 col-sm-6") do
+        text_field_with_label(**args)
       end)
-      concat(tag.div(class: "col-12 col-sm-6") do
-        text_field_with_label(
-          **args.merge(label: :END.l, field: "#{args[:field]}_end")
-        )
+      concat(tag.div(class: "col-xs-12 col-sm-6") do
+        text_field_with_label(**args.merge(
+          label: :TO.l, optional: true, field: "#{args[:field]}_range"
+        ))
       end)
-    end)
+    end
   end
 
+  # The first field gets the label, the range field is optional
   def pattern_search_rank_range_field(**args)
-    concat(tag.div do
-      tag.strong(args[:label])
-    end)
-    concat(tag.div(class: "row") do
-      concat(tag.div do
-        select_with_label(
-          options: Rank.all_ranks,
-          **args.merge(label: :LOW.l, field: "#{args[:field]}_low")
-        )
+    tag.div(class: "row") do
+      concat(tag.div(class: "col-xs-12 col-sm-6") do
+        select_with_label(options: Rank.all_ranks, **args)
       end)
-      concat(tag.div do
-        select_with_label(
-          options: Rank.all_ranks,
-          **args.merge(label: :HIGH.l, field: "#{args[:field]}_high")
-        )
+      concat(tag.div(class: "col-xs-12 col-sm-6") do
+        select_with_label(options: Rank.all_ranks, **args.merge(
+          label: :TO.l, optional: true, field: "#{args[:field]}_range"
+        ))
       end)
-    end)
+    end
   end
 end
