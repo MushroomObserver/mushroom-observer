@@ -49,6 +49,8 @@ class FieldSlipsController < ApplicationController
 
   # POST /field_slips or /field_slips.json
   def create
+    return import_inat_obs if params[:commit] == :field_slip_import_from_inat.t
+
     respond_to do |format|
       @field_slip = FieldSlip.new(field_slip_params)
       check_project_membership
@@ -258,5 +260,16 @@ class FieldSlipsController < ApplicationController
     end
     @field_slip.observation = obs
     true
+  end
+
+  def import_inat_obs
+    inat_import_params = {
+      import_all: nil,
+      inat_ids: params[:inat_ids],
+      inat_username: params[:inat_username],
+      consent: 1 # consent is at least implied if user posseses field slip
+    }
+
+    redirect_to(observations_inat_imports_path, { params: inat_import_params })
   end
 end

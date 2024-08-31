@@ -44,6 +44,9 @@ module Observations
     APP_ID = Rails.application.credentials.inat.id
     # The iNat API. Not called here, but reference in tests and ActiveJob
     API_BASE = "https://api.inaturalist.org/v1"
+    INAT_AUTHORIZATION_URL =
+      "#{SITE}/oauth/authorize?client_id=#{APP_ID}" \
+      "&redirect_uri=#{REDIRECT_URI}&response_type=code".freeze
 
     def new; end
 
@@ -103,14 +106,7 @@ module Observations
     end
 
     def request_inat_user_authorization
-      redirect_to(inat_authorization_url, allow_other_host: true)
-    end
-
-    def inat_authorization_url
-      "#{SITE}/oauth/authorize" \
-      "?client_id=#{APP_ID}" \
-      "&redirect_uri=#{REDIRECT_URI}" \
-      "&response_type=code"
+      redirect_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
     end
 
     # ---------------------------------

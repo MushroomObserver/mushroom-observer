@@ -79,6 +79,23 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_equal(slip.observation, ObservationView.last(User.current))
   end
 
+  test "should create inat import" do
+    project = projects(:bolete_project)
+    login(project.user.login)
+    inat_id = "654321"
+    code = "Y#{@field_slip.code}"
+
+    post(:create, params: { commit: :field_slip_import_from_inat.l,
+                            inat_ids: inat_id,
+                            inat_username: "anything",
+                            field_slip: {
+                              code: code,
+                              project_id: project.id
+                            } })
+
+    assert_redirected_to(observations_inat_imports_path)
+  end
+
   test "should allow admin to create field_slip with constraint violation" do
     login("dick") # Admin of :falmouth_2023_09_project
     ObservationView.update_view_stats(@field_slip.observation_id,
