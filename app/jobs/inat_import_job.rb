@@ -158,8 +158,9 @@ class InatImportJob < ApplicationJob
       inat_id: inat_obs.inat_id
     )
     # Ensure this Name wins consensus_calc ties
-    # by creating this naming and vote first
+    # by creating its Naming and Vote prior to other Namings
     add_naming_with_vote(name: @observation.name)
+    add_project_and_field_slip
     @observation.log(:log_observation_created)
   end
 
@@ -198,6 +199,14 @@ class InatImportJob < ApplicationJob
     new_name = api.results.first
     new_name.log(:log_name_created)
     new_name
+  end
+
+  def add_project_and_field_slip
+    return if @inat_import.field_slip_code.blank?
+
+    field_slip = FieldSlip.find_by(code: @inat_import.field_slip_code)
+    project = field_slip.project
+    @observation.update(projects: [project], field_slips: [field_slip])
   end
 
   def add_inat_images(inat_obs_photos)

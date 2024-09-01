@@ -267,7 +267,8 @@ class FieldSlipsController < ApplicationController
       import_all: nil,
       inat_ids: params[:inat_ids],
       inat_username: params[:inat_username],
-      consent: 1 # consent is at least implied if user posseses field slip
+      consent: 1, # consent is at least implied if user posseses field slip
+      field_slip_code: params[:field_slip]
     }
 
     redirect_to(observations_inat_imports_path, { params: inat_import_params })

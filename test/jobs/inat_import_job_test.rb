@@ -432,6 +432,52 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
+  def test_import_job_field_slip
+    file_name = "calostoma_lutescens"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    inat_import = create_inat_import(inat_response: mock_inat_response)
+
+    field_slip = field_slips(:field_slip_no_obs)
+    project = field_slip.project
+    user = project.user
+
+    # Add objects which are not included in fixtures
+    name = Name.create(
+      text_name: "Calostoma lutescens",
+      author: "(Schweinitz) Burnap",
+      display_name: "**__Calostoma lutescens__** (Schweinitz) Burnap",
+      rank: "Species",
+      user: user
+    )
+    loc = Location.create(user: user,
+                          name: "Sevier Co., Tennessee, USA",
+                          north: 36.043571, south: 35.561849,
+                          east: -83.253046, west: -83.794123)
+
+    # simulate scanning the field slip
+    inat_import.update(field_slip_code: field_slip.code)
+
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response)
+
+    InatPhotoImporter.stub(:new, stub_mo_photo_importer(mock_inat_response)) do
+      assert_difference("Observation.count", 1,
+                        "Failed to create observation") do
+        InatImportJob.perform_now(inat_import)
+      end
+    end
+
+    obs = Observation.order(created_at: :asc).last
+    standard_assertions(obs: obs, name: name, loc: loc)
+    assert_equal(0, obs.images.length, "Obs should not have images")
+    assert_equal(project, obs.projects.first,
+                 "Failed to add Observation to Project")
+    assert(obs.projects.include?(project),
+           "Failed to add Project to Observation")
+    assert(obs.field_slips.include?(field_slip),
+           "Failed to add Field Slip to Observation")
+  end
+
   ########## Utilities
 
   # The InatImport object which is created in InatImportController#create
