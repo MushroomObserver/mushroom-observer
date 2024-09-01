@@ -497,6 +497,8 @@
   # deposit of Sequence Bases in an Archive
   DEPOSIT: Deposit
   deposit: deposit
+  DETAIL: Detail
+  detail: detail
   EDITOR: Editor
   editor: editor
   EDITORS: Editors
@@ -593,6 +595,8 @@
   reviewer: reviewer
   REVIEWERS: Reviewers
   reviewers: reviewers
+  SCOPE: Scope
+  scope: scope
   SECONDS: Seconds
   SIZE: Size
   size: size
@@ -1167,10 +1171,10 @@
   search_term_south: south
   search_term_user: user
   search_term_west: west
-  search_term_group_date: [DATE]
-  search_term_group_quality: [QUALITY]
-  search_term_group_scope: Scope
-  search_term_group_detail: Detail
+  search_term_group_date: "[:DATE]"
+  search_term_group_quality: "[:QUALITY]"
+  search_term_group_scope: "[:SCOPE]"
+  search_term_group_detail: "[:DETAIL]"
 
   # Words recognized in search bar.
   # e.g. "user:me"
@@ -2259,7 +2263,7 @@
   show_observation_site_id: Site ID
   show_observation_owner_id: Observer Preference
   show_observation_no_clear_preference: no clear preference
-  show_observation_details: Details
+  show_observation_details: "[:DETAIL]"
   show_observation_edit_observation: "[:edit_object(type=:observation)]"
   show_observation_propose_new_name: "[:show_namings_propose_new_name]"
   show_observation_debug_consensus: Debug Consensus

@@ -6,7 +6,8 @@ module PatternSearchHelper
   def pattern_search_field(**args)
     args[:label] ||= :"search_term_#{args[:field]}".l.humanize
     helper = pattern_search_helper_for_field(args[:field], args[:type])
-    send(helper, **args.except(:type)) if helper
+    args = prepare_args_for_pattern_search_field(args, helper)
+    send(helper, **args) if helper
   end
 
   # The subclasses say how they're going to parse their fields, so we can use
@@ -24,6 +25,13 @@ module PatternSearchHelper
     parse_rank_range: :pattern_search_rank_range_field,
     parse_string: :text_field_with_label
   }.freeze
+
+  # Bootstrap 3 can't do full-width inline label/field.
+  def prepare_args_for_pattern_search_field(args, helper)
+    # args[:inline] = true if helper == :text_field_with_label
+
+    args.except(:type)
+  end
 
   def pattern_search_yes_field(**args)
     check_box_with_label(value: "yes", **args)
@@ -48,31 +56,36 @@ module PatternSearchHelper
     select_with_label(options:, inline: true, **args)
   end
 
-  # The first field gets the label, the range field is optional
+  # RANGE FIELDS The first field gets the label, name and ID of the actual
+  # param; the end `_range` field is optional. The controller needs to check for
+  # the second & join them with a hyphen if it exists (in both cases here).
   def pattern_search_date_range_field(**args)
     tag.div(class: "row") do
-      concat(tag.div(class: "col-xs-12 col-sm-6") do
-        text_field_with_label(**args)
-      end)
-      concat(tag.div(class: "col-xs-12 col-sm-6") do
-        text_field_with_label(**args.merge(
-          label: :TO.l, optional: true, field: "#{args[:field]}_range"
-        ))
-      end)
+      [
+        tag.div(class: "col-xs-12 col-sm-6") do
+          text_field_with_label(**args)
+        end,
+        tag.div(class: "col-xs-12 col-sm-6") do
+          text_field_with_label(**args.merge(
+            { label: :TO.l, optional: true, field: "#{args[:field]}_range" }
+          ))
+        end
+      ].safe_join
     end
   end
 
-  # The first field gets the label, the range field is optional
   def pattern_search_rank_range_field(**args)
     tag.div(class: "row") do
-      concat(tag.div(class: "col-xs-12 col-sm-6") do
-        select_with_label(options: Name.all_ranks, **args)
-      end)
-      concat(tag.div(class: "col-xs-12 col-sm-6") do
-        select_with_label(options: Name.all_ranks, **args.merge(
-          label: :TO.l, optional: true, field: "#{args[:field]}_range"
-        ))
-      end)
+      [
+        tag.div(class: "col-xs-12 col-sm-6") do
+          select_with_label(options: Name.all_ranks, **args)
+        end,
+        tag.div(class: "col-xs-12 col-sm-6") do
+          select_with_label(options: Name.all_ranks, **args.merge(
+            { label: :TO.l, optional: true, field: "#{args[:field]}_range" }
+          ))
+        end
+      ].safe_join
     end
   end
 end
