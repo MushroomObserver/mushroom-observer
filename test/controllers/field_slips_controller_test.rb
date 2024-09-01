@@ -168,7 +168,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_redirected_to observation_url(obs.id)
   end
 
-  test "should create field_slip, try to create obs, and redirect to create obs" do
+  test "should try to create obs and redirect to create obs" do
     login(@field_slip.user.login)
     code = "Z#{@field_slip.code}"
     assert_difference("FieldSlip.count") do
