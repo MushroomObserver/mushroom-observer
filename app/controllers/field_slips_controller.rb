@@ -116,7 +116,9 @@ class FieldSlipsController < ApplicationController
   private
 
   def html_create
-    if params[:commit] == :field_slip_create_obs.t
+    if params[:commit] == :field_slip_quick_create_obs.t
+      quick_create_observation
+    elsif params[:commit] == :field_slip_create_obs.t
       redirect_to(new_observation_url(
                     field_code: @field_slip.code,
                     place_name: params[:field_slip][:location],
@@ -126,6 +128,26 @@ class FieldSlipsController < ApplicationController
       update_observation_fields
       redirect_to(field_slip_url(@field_slip),
                   notice: :field_slip_created.t)
+    end
+  end
+
+  def quick_create_observation
+    place_name = params[:field_slip][:location]
+    # Must have valid name and location
+    location = Location.place_name_to_location(place_name)
+    flash_error(:field_slip_quick_no_location.t) unless location
+    name = Name.find_by(text_name: params[:field_slip][:field_slip_id])
+    flash_error(:field_slip_quick_no_name.t) unless name
+    notes = field_slip_notes.compact_blank!
+
+    obs = Observation.build_observation(location, name, notes)
+    if obs
+      @field_slip.project&.add_observation(obs)
+      @field_slip.update!(observation: obs)
+      redirect_to(observation_url(obs.id))
+    else
+      redirect_to(new_observation_url(field_code: @field_slip.code,
+                                      place_name:, notes:))
     end
   end
 

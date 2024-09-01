@@ -468,6 +468,22 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     str.strip_squeeze.downcase
   end
 
+  # Cleans up a place_name (per Observation) and
+  # applies the current user's current_location_format
+  def self.normalize_place_name(place_name)
+    place_name = place_name&.strip_squeeze
+    if User.current_location_format == "scientific"
+      reverse_name(place_name)
+    else
+      place_name
+    end
+  end
+
+  # Returns any existing location that matches place_name
+  def self.place_name_to_location(place_name)
+    find_by_name(normalize_place_name(place_name))
+  end
+
   # Takes a location string splits on commas, reverses the order,
   # and joins it back together
   # E.g., "New York, USA" => "USA, New York"
