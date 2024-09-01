@@ -576,6 +576,28 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     )
   }
 
+  def self.build_observation(location, name, notes)
+    return nil unless location && name
+
+    now = Time.zone.now
+    user = User.current
+    obs = new({ created_at: now, updated_at: now, source: "mo_website",
+                user:, location:, name:, notes: })
+    return nil unless obs
+
+    obs.log(:log_observation_created)
+    naming = Naming.construct({ name: }, obs)
+    naming.save!
+    naming.votes.create!(
+      user:,
+      observation: obs,
+      value: Vote.maximum_vote,
+      favorite: true
+    )
+    Observation::NamingConsensus.new(obs).calc_consensus
+    obs
+  end
+
   def location?
     false
   end

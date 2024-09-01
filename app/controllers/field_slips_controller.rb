@@ -140,24 +140,15 @@ class FieldSlipsController < ApplicationController
     flash_error(:field_slip_quick_no_name.t) unless name
     notes = field_slip_notes.compact_blank!
 
-    if location && name
-      now = Time.zone.now
-      obs = Observation.new({ created_at: now,
-                              updated_at: now,
-                              user: @user,
-                              location: location,
-                              name: name,
-                              source: "mo_website",
-                              notes: notes })
-      if obs
-        @field_slip.project&.add_observation(obs)
-        @field_slip.update!(observation: obs)
-        redirect_to(observation_url(obs.id))
-        return
-      end
+    obs = Observation.build_observation(location, name, notes)
+    if obs
+      @field_slip.project&.add_observation(obs)
+      @field_slip.update!(observation: obs)
+      redirect_to(observation_url(obs.id))
+    else
+      redirect_to(new_observation_url(field_code: @field_slip.code,
+                                      place_name:, notes:))
     end
-    redirect_to(new_observation_url(field_code: @field_slip.code,
-                                    place_name:, notes:))
   end
 
   def update_observation_fields
