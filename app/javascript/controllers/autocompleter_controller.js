@@ -123,6 +123,8 @@ const INTERNAL_OPTS = {
   old_value: null,       // previous value of input field
   stored_id: 0,          // id of selected option
   stored_data: { id: 0 }, // data of selected option
+  stored_ids: [],        // ids of selected options (for multiple - no data)
+  keepers: [],           // data of selected options (for multiple)
   primer: [],            // a server-supplied list of many options
   matches: [],           // list of options currently showing
   current_row: -1,       // index of option currently highlighted (0 = none)
@@ -167,6 +169,9 @@ export default class extends Controller {
     // Does this autocompleter affect a map?
     this.hasMap = this.inputTarget.dataset.hasOwnProperty("mapTarget");
     this.hasGeocode = this.inputTarget.dataset.hasOwnProperty("geocodeTarget");
+
+    // Assign the separator for multiple-record autocompleters
+    this.SEPARATOR = this.element.dataset.separator;
 
     // Shared MO utilities, imported at the top:
     this.EVENT_KEYS = EVENT_KEYS;
@@ -235,6 +240,7 @@ export default class extends Controller {
       this.primer = [];
       this.matches = [];
       this.stored_data = { id: 0 };
+      this.keepers = [];
       this.last_fetch_params = '';
       this.prepareInputElement();
       this.prepareHiddenInput();
@@ -486,17 +492,18 @@ export default class extends Controller {
 
   // Input field has changed.
   ourChange(do_refresh) {
-    const old_val = this.old_value;
-    const new_val = this.inputTarget.value;
+    const old_value = this.old_value;
+    const new_value = this.inputTarget.value;
     // this.debug("ourChange(" + this.inputTarget.value + ")");
-    if (new_val.length == 0) {
+    if (new_value.length == 0) {
       this.cssCollapseFields();
       this.clearHiddenId();
       this.leaveCreate();
+      if (this.SEPARATOR) { this.removeUnusedKeepersAndIds(); }
     } else {
       this.cssUncollapseFields();
-      if (new_val != old_val) {
-        this.old_value = new_val;
+      if (new_value != old_value) {
+        this.old_value = new_value;
         if (do_refresh) {
           this.verbose("autocompleter:ourChange()");
           this.scheduleRefresh();
@@ -555,6 +562,18 @@ export default class extends Controller {
     return false;
   }
 
+  cssCollapseFields() {
+    if (!this.hasCollapseFieldsTarget) return;
+
+    $(this.collapseFieldsTarget).collapse('hide');
+  }
+
+  cssUncollapseFields() {
+    if (!this.hasCollapseFieldsTarget) return;
+
+    $(this.collapseFieldsTarget).collapse('show');
+  }
+
   // ------------------------------ Timers ------------------------------
 
   // Schedule matches to be recalculated from primer, or even primer refreshed,
@@ -597,15 +616,16 @@ export default class extends Controller {
     this.verbose("autocompleter:scheduleGoogleRefresh()");
     this.clearRefresh();
     this.refresh_timer = setTimeout((() => {
+      const current_input = this.inputTarget.value;
       this.verbose("autocompleter: doing google refresh");
-      this.verbose(this.inputTarget.value);
-      this.old_value = this.inputTarget.value;
+      this.verbose(current_input);
+      this.old_value = current_input;
       // async, anything after this executes immediately
       // STORE AND COMPARE SEARCH STRING. Otherwise we're doing double lookups
       if (this.hasGeocodeOutlet) {
-        this.geocodeOutlet.tryToGeolocate(this.inputTarget.value);
+        this.geocodeOutlet.tryToGeolocate(current_input);
       } else if (this.hasMapOutlet) {
-        this.mapOutlet.tryToGeolocate(this.inputTarget.value);
+        this.mapOutlet.tryToGeolocate(current_input);
       }
       // still necessary if primer unchanged, as likely?
       // this.populateMatches();
@@ -748,8 +768,8 @@ export default class extends Controller {
     if (this.matches.length === 0) return;
 
     if (idx instanceof Event) { idx = parseInt(idx.target.dataset.row); }
-    let new_data = this.matches[this.scroll_offset + idx],
-      new_val = new_data.name;
+    let new_match = this.matches[this.scroll_offset + idx],
+      new_val = new_match.name;
     // Close pulldown unless the value the user selected uncollapses into a set
     // of new options.  In that case schedule a refresh and leave it up.
     if (this.COLLAPSE > 0 &&
@@ -762,9 +782,8 @@ export default class extends Controller {
     }
     this.inputTarget.focus();
     this.focused = true;
-    this.inputTarget.value = new_val;
-    this.assignHiddenId(new_data);
-    this.setSearchToken(new_val);
+    this.assignHiddenId(new_match);
+    this.setSearchToken(new_val); // updates input field
     this.ourChange(false);
   }
 
@@ -833,7 +852,6 @@ export default class extends Controller {
       this.updateRows(rows);
       this.highlightNewRow(rows);
       this.makePulldownVisible();
-      this.updateHiddenId();
     }
     // Make sure input focus stays on text field!
     this.inputTarget.focus();
@@ -940,7 +958,7 @@ export default class extends Controller {
 
       // Only show pulldown if it is nontrivial, i.e., has an option other than
       // the value that's already in the text field.
-      if (matches.length > 1 || this.inputTarget.value != matches[0]['name']) {
+      if (matches.length > 1 || this.getSearchToken() != matches[0]['name']) {
         this.clearHide();
         this.wrapTarget?.classList?.add('open');
         this.menu_up = true;
@@ -953,19 +971,54 @@ export default class extends Controller {
     }
   }
 
+  // Hide pulldown options.
+  hidePulldown() {
+    // this.verbose("hidePulldown()");
+    this.wrapTarget?.classList?.remove('open');
+    this.menu_up = false;
+  }
+
+  // Update width of pulldown.
+  updateWidth() {
+    // this.verbose("updateWidth()");
+    let w = this.listTarget.offsetWidth;
+    if (this.matches.length > this.PULLDOWN_SIZE)
+      w += this.SCROLLBAR_WIDTH;
+    if (this.current_width < w) {
+      this.current_width = w;
+      this.setWidth();
+    }
+  }
+
+  // Set width of pulldown.
+  setWidth() {
+    // this.verbose("setWidth()");
+    const w1 = this.current_width;
+    let w2 = w1;
+    if (this.matches.length > this.PULLDOWN_SIZE)
+      w2 -= this.SCROLLBAR_WIDTH;
+    this.listTarget.style.minWidth = w2 + 'px';
+  }
+
+  // ------------------------------ Hidden IDs ------------------------------
+
   // Assign ID of any perfectly matching option, even if not expressly selected.
   // This guards against user selecting a match, then, say, deleting a letter
   // and retyping the letter. Without this, an exact match would lose its ID.
+  // NOTE: Needs to handle multiple IDs when there is a separator.
   updateHiddenId() {
     this.verbose("autocompleter:updateHiddenId()");
-    if (this.COLLAPSE > 0) return;
+    this.verbose("autocompleter:getSearchToken().trim(): ");
+    this.verbose(this.getSearchToken().trim());
+    // Fires on every change
+    if (this.SEPARATOR) { this.removeUnusedKeepersAndIds(); }
 
     const perfect_match =
-      this.matches.find((m) => m['name'] === this.inputTarget.value.trim());
+      this.matches.find((m) => m['name'] === this.getSearchToken().trim());
 
     if (perfect_match) {
       // only assign if it's not already assigned
-      if (this.hiddenTarget.value != perfect_match['id']) {
+      if (this.lastHiddenTargetValue() != perfect_match['id']) {
         this.assignHiddenId(perfect_match);
       }
     } else if (!this.ignoringTextInput()) {
@@ -973,12 +1026,13 @@ export default class extends Controller {
     }
   }
 
-  // only clear if we're not in "ignorePlaceInput" mode
-  ignoringTextInput() {
-    if (!this.hasMapOutlet) return false;
-
-    this.verbose("autocompleter:ignoringTextInput()");
-    return this.mapOutlet.ignorePlaceInput;
+  // Gets the most recent value in the hidden input, which may be an array.
+  lastHiddenTargetValue() {
+    if (this.SEPARATOR) {
+      return this.hiddenTarget.value.split(",").pop();
+    } else {
+      this.hiddenTarget.value
+    }
   }
 
   // Assigns not only the ID, but also any data attributes of selected row.
@@ -987,35 +1041,217 @@ export default class extends Controller {
     this.verbose("autocompleter:assignHiddenId()");
     this.verbose(match);
     if (!match) return;
-    // Before we change the hidden input, store the old value and data
+    // Before we change the hidden input, store the old value(s) and data
     this.storeCurrentHiddenData();
 
     // update the new value of the hidden input, which casts it as a string.
-    this.hiddenTarget.value = match['id']; // converts to string
-    // assign the dataset of the selected row to the hidden input
-    Object.keys(match).forEach(key => {
-      if (!['id', 'name'].includes(key))
-        this.hiddenTarget.dataset[key] = match[key];
-    });
-
+    // Also sets data attributes.
+    this.updateHiddenTargetValue(match); // converts to string
+    // The indicator only relates to the most recent match when multiple
     this.cssHasIdOrNo(parseInt(match['id']));
+    // This checks the hidden_data against the stored_data
     this.hiddenIdChanged();
   }
 
-  // Clears not only the ID, but also any data attributes of selected row.
-  // Don't remove target data-attributes.
+  // Note that we're making the hidden input the source of truth.
+  // The autocompleter stored attributes are for comparing to the last value.
+  updateHiddenTargetValue(match) {
+    if (this.SEPARATOR) {
+      this.updateHiddenTargetValueMultiple(match);
+    } else {
+      this.updateHiddenTargetValueSingle(match);
+    }
+  }
+
+  // add the new id at the same index of the array as the search token.
+  // Converts array back to string.
+  updateHiddenTargetValueMultiple(match) {
+    this.verbose("autocompleter:updateHiddenTargetValueMultiple()");
+    let new_array = this.stored_ids,
+      idx = this.getSearchTokenIndex(),
+      { name, id } = match,
+      new_data = { name, id };
+
+    if (idx > -1) {
+      new_array[idx] = parseInt(match['id']);
+      this.hiddenTarget.value = new_array.join(",");
+      this.keepers[idx] = new_data;
+    }
+  }
+
+  updateHiddenTargetValueSingle(match) {
+    this.verbose("autocompleter:updateHiddenTargetValueSingle()");
+    this.hiddenTarget.value = match['id'];
+    // assign the dataset of the selected row to the hidden input
+    Object.keys(match).forEach(key => {
+      // if (!['id', 'name'].includes(key))
+      this.hiddenTarget.dataset[key] = match[key];
+    });
+  }
+
+  // Clears not only the ID, but also any data attributes of selected row,
+  // and the most recent keeper.
   clearHiddenId() {
     this.verbose("autocompleter:clearHiddenId()");
     // Before we change the hidden input, store the old value and data
     this.storeCurrentHiddenData();
+    // Clears hidden_id and hidden field data attributes (except `target` atts).
+    this.clearLastHiddenTargetValue();
+    // This checks the hidden_data against the stored_data
+    this.hiddenIdChanged();
+  }
 
+  // Removes the last id in the hidden input (array as csv string)
+  clearLastHiddenTargetValue() {
+    this.verbose("autocompleter:clearLastHiddenTargetValue()");
+    if (this.SEPARATOR) {
+      this.clearLastHiddenIdAndKeeper();
+    } else {
+      this.clearHiddenIdAndData();
+    }
+  }
+
+  // Multiple: We have to be careful here to delete only the id that is
+  // at the same index as the search token. Otherwise it keeps deleting.
+  clearLastHiddenIdAndKeeper() {
+    this.verbose("autocompleter:clearLastHiddenIdAndKeeper()");
+    // not worried about integers here
+    let hidden_ids = this.hiddenIdsAsIntegerArray(),
+      idx = this.getSearchTokenIndex();
+
+    this.verbose("autocompleter:hidden_ids: ")
+    this.verbose(JSON.stringify(hidden_ids));
+    this.verbose("autocompleter:idx: ")
+    this.verbose(idx);
+
+    if (idx > -1 && hidden_ids.length > idx) {
+      hidden_ids.slice(idx, 1);
+      this.hiddenTarget.value = hidden_ids.join(",");
+      // also clear the dataset
+      if (this.keepers.length > idx)
+        this.verbose("autocompleter:keepers: ")
+      this.verbose(JSON.stringify(this.keepers));
+      this.keepers.slice(idx, 1);
+    }
+  }
+
+  clearHiddenIdAndData() {
     this.hiddenTarget.value = '';
+    // clear the dataset also
     Object.keys(this.hiddenTarget.dataset).forEach(key => {
       if (!key.match(/Target/))
         delete this.hiddenTarget.dataset[key];
     });
+  }
 
-    this.hiddenIdChanged();
+  // check if any names in `keepers` are not in the input values.
+  // if so, remove them from the keepers and the hidden input.
+  removeUnusedKeepersAndIds() {
+    if (!this.SEPARATOR || this.keepers == []) return;
+
+    this.verbose("autocompleter:removeUnusedKeepersAndIds()");
+    this.verbose("autocompleter:keepers: ")
+    this.verbose(JSON.stringify(this.keepers));
+
+    const input_names = this.getInputArray(),
+      hidden_ids = this.hiddenIdsAsIntegerArray();
+    this.verbose("autocompleter:input_names: ")
+    this.verbose(JSON.stringify(input_names));
+    this.verbose("autocompleter:hidden_ids: ")
+    this.verbose(JSON.stringify(hidden_ids));
+
+    this.keepers.filter((d) => !input_names.includes(d.name)).forEach((d) => {
+      const idx = hidden_ids.indexOf(d.id);
+      if (idx > -1) {
+        hidden_ids.splice(idx, 1);
+      }
+      const kidx = this.keepers.indexOf(d);
+      if (kidx > -1) {
+        this.keepers.splice(kidx, 1);
+      }
+    });
+    // update the hidden input
+    this.hiddenTarget.value = hidden_ids.join(",");
+    // also check for missing?
+    this.addMissingKeepersAndIds(input_names);
+  }
+
+  // If the input names don't match what's stored in our keepers or hidden ids,
+  // we need to add them in. NOTE: The fetch response that updates keepers and
+  // ids expects for the keepers and ids to be the same length and at the same
+  // index as the input names, so we can't just push things into arrays. We
+  // need to arrange them at the right index for each existing keeper and id.
+  // Account for pasting into an existing list.
+  addMissingKeepersAndIds(input_names) {
+    if (input_names.length == 0) return;
+
+    this.verbose("autocompleter:addMissingKeepersAndIds()");
+    // Prepare null values in the array where we need to add new keepers
+    this.addMissingKeepers(input_names);
+    // Do the same for the hidden IDs. Check these against the keeper ids.
+    this.addMissingHiddenIds(input_names);
+
+    // Now try to fetch records for the missing input names
+    const missing = input_names.filter((n) => {
+      return !this.keepers.map((d) => d.name).includes(n);
+    });
+
+    if (missing.length > 0) {
+      this.fetchMissingRecords(missing);
+    }
+  }
+
+  addMissingKeepers(input_names) {
+    if (!(this.keepers.length < input_names.length)) return;
+
+    const new_keepers = new Array(input_names.length).
+      fill({ name: null, id: null });
+    if (this.keepers.length > 0) {
+      // Put current keepers in the right positions in the new array
+      input_names.forEach((n, i) => {
+        const idx = this.keepers.map((d) => d.name).indexOf(n);
+        if (idx > -1) {
+          new_keepers[i] = this.keepers[idx];
+        }
+      });
+    }
+    this.keepers = new_keepers;
+  }
+
+  addMissingHiddenIds(input_names) {
+    const hidden_ids = this.hiddenIdsAsIntegerArray();
+    if (!(hidden_ids.length < input_names.length)) return;
+
+    const new_ids = new Array(input_names.length).fill(null);
+    if (hidden_ids.length > 0) {
+      // Put current ids in the right positions in the new array
+      this.keepers.forEach((n, i) => {
+        const idx = hidden_ids.indexOf(n.id);
+        if (idx > -1) {
+          new_ids[i] = hidden_ids[idx];
+        }
+      });
+    }
+    this.hiddenTarget.value = new_ids.join(",");
+  }
+
+  // Fetch records for the missing input names.
+  fetchMissingRecords(missing) {
+    this.verbose("autocompleter:fetchMissingRecords(missing): ")
+    this.verbose(JSON.stringify(missing));
+    // send these staggered so they don't cancel each other.
+    missing.forEach((token, i) => {
+      setTimeout(() => {
+        this.matchOneToken(token);
+      }, i * 450);
+    });
+  }
+  // only clear if we're not in "ignorePlaceInput" mode
+  ignoringTextInput() {
+    if (!this.hasMapOutlet) return false;
+
+    this.verbose("autocompleter:ignoringTextInput()");
+    return this.mapOutlet.ignorePlaceInput;
   }
 
   // Respond to the state of the hidden input. Initially we may not have id, but
@@ -1052,32 +1288,60 @@ export default class extends Controller {
     }
   }
 
-  cssCollapseFields() {
-    if (!this.hasCollapseFieldsTarget) return;
-
-    $(this.collapseFieldsTarget).collapse('hide');
-  }
-
-  cssUncollapseFields() {
-    if (!this.hasCollapseFieldsTarget) return;
-
-    $(this.collapseFieldsTarget).collapse('show');
-  }
-
   storeCurrentHiddenData() {
-    this.verbose("autocompleter:storeCurrentHiddenData()");
+    if (this.SEPARATOR) {
+      this.storeCurrentHiddenDataMultiple();
+    } else {
+      this.storeCurrentHiddenDataSingle();
+    }
+  }
+
+  storeCurrentHiddenDataMultiple() {
+    this.verbose("autocompleter:storeCurrentHiddenDataMultiple()");
+    this.stored_ids = this.hiddenIdsAsIntegerArray();
+    this.verbose("stored_ids: " + JSON.stringify(this.stored_ids));
+  }
+
+  storeCurrentHiddenDataSingle() {
+    this.verbose("autocompleter:storeCurrentHiddenDataSingle()");
     this.stored_id = parseInt(this.hiddenTarget.value); // value is a string
-    let { north, south, east, west } = this.hiddenTarget.dataset;
-    this.stored_data = { id: this.stored_id, north, south, east, west };
+    let { name, north, south, east, west } = this.hiddenTarget.dataset;
+    this.stored_data = { id: this.stored_id, name, north, south, east, west };
     this.verbose("stored_data: " + JSON.stringify(this.stored_data));
   }
 
   // called on assign and clear, also when mapOutlet is connected
+  // This only affects the UI reflecting the new data situation.
   hiddenIdChanged() {
+    if (this.SEPARATOR) {
+      this.hiddenIdsChangedMultiple();
+    } else {
+      this.hiddenIdChangedSingle();
+    }
+  }
+
+  hiddenIdsChangedMultiple() {
+    const hidden_ids = this.hiddenIdsAsIntegerArray();
+
+    if (JSON.stringify(hidden_ids) == JSON.stringify(this.stored_ids)) {
+      this.verbose("autocompleter: hidden_ids did not change");
+    } else {
+      clearTimeout(this.data_timer);
+      this.data_timer = setTimeout(() => {
+        this.verbose("autocompleter: hidden_ids changed");
+        this.verbose("autocompleter:hidden_ids: ")
+        this.verbose(JSON.stringify(hidden_ids));
+        this.cssHasIdOrNo(this.lastHiddenTargetValue());
+        this.inputTarget.focus();
+      }, 750)
+    }
+  }
+
+  hiddenIdChangedSingle() {
     const hidden_id = parseInt(this.hiddenTarget.value || 0),
       // stored_id = parseInt(this.stored_id || 0),
-      { north, south, east, west } = this.hiddenTarget.dataset,
-      hidden_data = { id: hidden_id, north, south, east, west };
+      { name, north, south, east, west } = this.hiddenTarget.dataset,
+      hidden_data = { id: hidden_id, name, north, south, east, west };
 
     // comparing data, not just ids, because google locations have same -1 id
     if (JSON.stringify(hidden_data) == JSON.stringify(this.stored_data)) {
@@ -1100,33 +1364,9 @@ export default class extends Controller {
     }
   }
 
-  // Hide pulldown options.
-  hidePulldown() {
-    // this.verbose("hidePulldown()");
-    this.wrapTarget?.classList?.remove('open');
-    this.menu_up = false;
-  }
-
-  // Update width of pulldown.
-  updateWidth() {
-    // this.verbose("updateWidth()");
-    let w = this.listTarget.offsetWidth;
-    if (this.matches.length > this.PULLDOWN_SIZE)
-      w += this.SCROLLBAR_WIDTH;
-    if (this.current_width < w) {
-      this.current_width = w;
-      this.setWidth();
-    }
-  }
-
-  // Set width of pulldown.
-  setWidth() {
-    // this.verbose("setWidth()");
-    const w1 = this.current_width;
-    let w2 = w1;
-    if (this.matches.length > this.PULLDOWN_SIZE)
-      w2 -= this.SCROLLBAR_WIDTH;
-    this.listTarget.style.minWidth = w2 + 'px';
+  hiddenIdsAsIntegerArray() {
+    return this.hiddenTarget.value.
+      split(",").map((e) => parseInt(e.trim())).filter(Number);
   }
 
   // ------------------------------ Matches ------------------------------
@@ -1163,6 +1403,8 @@ export default class extends Controller {
     this.updateCurrentRow(last);
     // Reset width each time we change the options.
     this.current_width = this.inputTarget.offsetWidth;
+    // Check for a perfect match, because we now have new matches.
+    this.updateHiddenId();
   }
 
   // When "acting like a select" make it display all options in the
@@ -1288,10 +1530,11 @@ export default class extends Controller {
           }
         }
       }
-      if (matches.length == 1 &&
-        (token == matches[0]['name'].toLowerCase() ||
-          token == matches[0]['name'].toLowerCase() + ' '))
-        matches.pop();
+      // This removes our ability to match an id! We need to keep single matches
+      // if (matches.length == 1 &&
+      //   (token.trim() == matches[0]['name'].toLowerCase())) {
+      //   matches.pop();
+      // }
     }
     this.matches = matches;
   }
@@ -1360,21 +1603,24 @@ export default class extends Controller {
   getSearchToken() {
     const val = this.inputTarget.value;
     let token = val;
+    // this.verbose("autocompleter:getSearchToken() before: " + token);
 
     // If we're only looking for whole words, don't make a request unless
     // trailing space or comma, indicating a user has finished typing a word.
-    if (this.WHOLE_WORDS_ONLY && token.charAt(token.length - 1) != ',' &&
-      token.charAt(token.length - 1) != ' ') {
+    if (this.WHOLE_WORDS_ONLY &&
+      ![',', ' '].includes(token.charAt(token.length - 1))) {
       return '';
     }
     if (this.SEPARATOR) {
       const extents = this.searchTokenExtents();
       token = val.substring(extents.start, extents.end);
     }
+    // this.verbose("autocompleter:getSearchToken() after: " + token);
     return token;
   }
 
   // Change the token under or immediately in front of the cursor.
+  // (Updates the value of the input field, handles multiple values.)
   setSearchToken(new_val) {
     const old_str = this.inputTarget.value;
     if (this.SEPARATOR) {
@@ -1390,9 +1636,10 @@ export default class extends Controller {
       if (old_str != new_str) {
         var old_scroll = this.inputTarget.offsetTop;
         this.inputTarget.value = new_str;
-        this.setCursorPosition(this.inputTarget[0],
-          extents.start + new_val.length);
-        this.inputTarget.offsetTop = old_scroll;
+        this.setCursorPosition(
+          this.inputTarget, extents.start + new_val.length
+        );
+        this.inputTarget.scrollTop = old_scroll;
       }
     } else {
       if (old_str != new_val)
@@ -1411,7 +1658,45 @@ export default class extends Controller {
     else
       start += this.SEPARATOR.length;
 
+    // this.verbose("autocompleter:searchTokenExtents() start: " + start);
+    // this.verbose("autocompleter:searchTokenExtents() end: " + end);
     return { start, end };
+  }
+
+  // When there are multiple values separated by a separator.
+  getSearchTokenIndex() {
+    this.verbose("autocompleter:getSearchTokenIndex()");
+    const token = this.getLastInput();
+    return this.getInputIndexOf(token);
+  }
+
+  getInputIndexOf(token) {
+    this.verbose("autocompleter:getInputIndexOf()");
+    const idx = this.getInputArray().indexOf(token);
+    this.verbose(idx);
+    return idx;
+  }
+
+  getLastInput() {
+    this.verbose("autocompleter:getLastInput()");
+    const token = this.getInputArray().pop();
+    this.verbose(token);
+    return token;
+  }
+
+  getInputArray() {
+    this.verbose("autocompleter:getInputArray()");
+    const input_array =
+      this.inputTarget.value.split(this.SEPARATOR).map((v) => v.trim());
+    this.verbose(input_array);
+    return input_array;
+  }
+
+  getInputCount() {
+    this.verbose("autocompleter:getInputCount()");
+    const count = this.getInputArray().length;
+    this.verbose(count);
+    return count;
   }
 
   // ------------------------------ Fetch matches ------------------------------
@@ -1485,7 +1770,7 @@ export default class extends Controller {
   }
 
   // Send fetch request for more matching strings.
-  async sendFetchRequest(query_params) {
+  async sendFetchRequest(query_params, single_match = false) {
     this.verbose("autocompleter:sendFetchRequest()");
     this.verbose(query_params);
 
@@ -1513,7 +1798,11 @@ export default class extends Controller {
       const json = await response.json
       if (json) {
         this.fetch_request = response
-        this.processFetchResponse(json)
+        if (single_match) {
+          this.processMatchFetchResponse(json)
+        } else {
+          this.processFetchResponse(json)
+        }
       }
     } else {
       this.fetch_request = null;
@@ -1596,15 +1885,52 @@ export default class extends Controller {
     }
   }
 
-  setCursorPosition(el, pos) {
-    if (el.setSelectionRange) {
-      el.setSelectionRange(pos, pos);
-    } else if (el.createTextRange) {
-      const range = el.createTextRange();
-      range.collapse(true);
-      range.moveEnd('character', pos);
-      range.moveStart('character', pos);
-      range.select();
+
+  // ------------------------------ SINGLE MATCH ------------------------------
+
+  // For multiple-value autocompleters, try to get a matching record for a
+  // single input value. This is for the case where the user pastes in an array
+  // of values, so it's skipping the single match process.
+  matchOneToken(token) {
+    const query_params = { string: token, ...this.request_params }
+    query_params["whole"] = true;
+    query_params["all"] = true;
+    query_params["exact"] = true;
+
+    // Make request.
+    this.sendFetchRequest(query_params, true);
+  }
+
+  // If we get a match, add the record to the hidden input and keepers array.
+  processMatchFetchResponse(new_primer) {
+    this.verbose("autocompleter:processMatchFetchResponse()");
+    this.verbose("autocompleter:new_primer: ")
+    this.verbose(JSON.stringify(new_primer));
+
+    // Clear flag telling us request is pending.
+    this.fetch_request = null;
+
+    // If results, we're going to assume the first match is an exact match.
+    if (new_primer.length > 0) {
+      let exact_match = new_primer[0];
+      // The match may have extra data we don't need in the keepers.
+      // We only need the id and name.
+      exact_match = { id: exact_match['id'], name: exact_match['name'] };
+      // Order is important here. Figure out where the match is in the input.
+      const idx = this.getInputIndexOf(exact_match['name']);
+      if (idx == -1) { return; }
+
+      let hidden_ids = this.hiddenIdsAsIntegerArray();
+      // if the exact match is not in the hidden ids, add it at the right index.
+      if (!hidden_ids.includes(exact_match['id'])) {
+        hidden_ids.splice(idx, 1, exact_match['id']);
+        this.hiddenTarget.value = hidden_ids.join(",");
+      }
+      // if it's not in keepers, add it at the right index. (Note extra data
+      // would block the match here.)
+      if (!this.keepers.includes(exact_match)) {
+        this.keepers.splice(idx, 1, exact_match);
+      }
     }
   }
 

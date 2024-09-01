@@ -149,6 +149,61 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_redirected_to new_observation_url(field_code: code)
   end
 
+  test "should create field_slip and obs and redirect to show obs" do
+    login(@field_slip.user.login)
+    code = "Z#{@field_slip.code}"
+    assert_difference("FieldSlip.count") do
+      post(:create,
+           params: {
+             commit: :field_slip_quick_create_obs.t,
+             field_slip: {
+               code: code,
+               location: locations(:albion).name,
+               field_slip_id: names(:coprinus_comatus).text_name,
+               project_id: projects(:eol_project).id
+             }
+           })
+    end
+    obs = Observation.last
+    assert_redirected_to observation_url(obs.id)
+  end
+
+  test "should try to create obs and redirect to create obs" do
+    login(@field_slip.user.login)
+    code = "Z#{@field_slip.code}"
+    assert_difference("FieldSlip.count") do
+      post(:create,
+           params: {
+             commit: :field_slip_quick_create_obs.t,
+             field_slip: {
+               code: code,
+               project_id: projects(:eol_project).id
+             }
+           })
+    end
+    assert_flash_error
+    assert_redirected_to new_observation_url(field_code: code)
+  end
+
+  test "should attempt quick field_slip and redirect to show obs" do
+    login(@field_slip.user.login)
+    code = "Z#{@field_slip.code}"
+    assert_difference("FieldSlip.count") do
+      post(:create,
+           params: {
+             commit: :field_slip_quick_create_obs.t,
+             field_slip: {
+               code: code,
+               location: locations(:albion).name,
+               field_slip_id: names(:coprinus_comatus).text_name,
+               project_id: projects(:eol_project).id
+             }
+           })
+    end
+    obs = Observation.last
+    assert_redirected_to observation_url(obs.id)
+  end
+
   test "should create field_slip in project from code" do
     login
     project = projects(:eol_project)
