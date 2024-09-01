@@ -40,11 +40,13 @@
     <%= text_field_with_label(form: form, field: :other_codes,
                               label: "#{:field_slip_other_codes.t} (#{:field_slip_other_example.t}):") %>
 
+    <% if action == "new" %>
+      <%= submit_button(form: form, button: :field_slip_quick_create_obs.t, class: "mt-5") %>
+      <%= submit_button(form: form, button: :field_slip_create_obs.t, class: "mt-5") %>
+    <% end %>
+
     <%= render(partial: "shared/notes_fields",
                locals: { form:, fields: field_slip.notes_fields }) %>
-
-    <%= submit_button(form: form, button: :field_slip_create_obs.t,
-                      class: "mt-5") if action == "new" %>
 
     <div class="row mt-5">
       <% if field_slip.observation %>
