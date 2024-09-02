@@ -4,21 +4,32 @@
 # args should provide form, field, label at a minimum.
 module PatternSearchHelper
   def pattern_search_field(**args)
-    args[:label] ||= :"search_term_#{args[:field]}".l.humanize
+    args[:label] ||= pattern_search_helper_for_label(args[:field])
     helper = pattern_search_helper_for_field(args[:field], args[:type])
     args = prepare_args_for_pattern_search_field(args, helper)
     send(helper, **args) if helper
   end
 
+  def pattern_search_helper_for_label(field)
+    if field == :pattern
+      :PATTERN.l
+    else
+      :"search_term_#{field}".l.humanize
+    end
+  end
+
   # The subclasses say how they're going to parse their fields, so we can use
   # that to determine which helper to use.
   def pattern_search_helper_for_field(field, type)
+    return :text_field_with_label if field == :pattern
+
     type = PatternSearch.const_get(type.capitalize).params[field][1]
     PATTERN_SEARCH_FIELD_HELPERS[type]
   end
 
   # Convenience for subclasses to access helper methods via PARAMS
   PATTERN_SEARCH_FIELD_HELPERS = {
+    parse_yes: :pattern_search_yes_field,
     parse_boolean: :pattern_search_boolean_field,
     parse_yes_no_both: :pattern_search_yes_no_both_field,
     parse_date_range: :pattern_search_date_range_field,
@@ -28,7 +39,9 @@ module PatternSearchHelper
 
   # Bootstrap 3 can't do full-width inline label/field.
   def prepare_args_for_pattern_search_field(args, helper)
-    args[:inline] = true if helper == :text_field_with_label
+    if helper == :text_field_with_label && args[:field] != :pattern
+      args[:inline] = true
+    end
 
     args.except(:type)
   end
@@ -63,11 +76,11 @@ module PatternSearchHelper
     tag.div(class: "row") do
       [
         tag.div(class: "col-xs-12 col-sm-6") do
-          text_field_with_label(**args)
+          text_field_with_label(**args.merge(between: "(YYYY-MM-DD)"))
         end,
         tag.div(class: "col-xs-12 col-sm-6") do
           text_field_with_label(**args.merge(
-            { label: :TO.l, optional: true, field: "#{args[:field]}_range" }
+            { label: :to.l, between: :optional, field: "#{args[:field]}_range" }
           ))
         end
       ].safe_join
@@ -82,7 +95,7 @@ module PatternSearchHelper
         end,
         tag.div(class: "col-xs-12 col-sm-6") do
           select_with_label(options: Name.all_ranks, **args.merge(
-            { label: :TO.l, optional: true, field: "#{args[:field]}_range" }
+            { label: :to.l, between: :optional, field: "#{args[:field]}_range" }
           ))
         end
       ].safe_join

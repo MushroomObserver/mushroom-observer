@@ -727,6 +727,8 @@
   OKAY: Okay
   okay: okay
   OPEN: Open
+  pattern: pattern
+  PATTERN: Pattern
   # reload a form
   RELOAD: Reload
   reload: reload
@@ -880,8 +882,8 @@
   "NO": "No"
   "yes": "yes"
   "no": "no"
-  "TO": "To"
-  "to": "to"
+  TO: To
+  to: to
 
   ##############################################################################
 
@@ -1171,6 +1173,7 @@
   search_term_south: south
   search_term_user: user
   search_term_west: west
+  search_term_group_search: "[:SEARCH]"
   search_term_group_date: "[:DATE]"
   search_term_group_quality: "[:QUALITY]"
   search_term_group_scope: "[:SCOPE]"
