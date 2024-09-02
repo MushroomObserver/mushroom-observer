@@ -2834,7 +2834,6 @@
   field_slip_created: Field slip was successfully created.
   field_slip_create_obs: Add Images or Other Data
   field_slip_quick_create_obs: Quick Create
-  field_slip_import_from_inat: Import from iNat
   field_slip_creator: Creator
   field_slip_destroy: Destroy this field slip
   field_slip_destroyed: Field slip was successfully destroyed.
@@ -2855,6 +2854,9 @@
   field_slip_project_success: Field Slip associated with the [TITLE] Project
   field_slip_quick_no_location: Quick create requires an existing location
   field_slip_quick_no_name: Quick create requires an existing name
+  field_slip_import_from_inat: Import from iNat
+  field_slip_import_use_other_codes: uses iNat ID from Other Codes (above)
+  field_slip_inat_user_name: iNat username (if known)
 
   field_slip_remove_observation: Removed [OBSERVATION] from [TITLE] Project
   field_slip_show: Show [:FIELD_SLIP]

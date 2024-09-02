@@ -44,9 +44,16 @@
       <%= submit_button(
         form: form, button: :field_slip_quick_create_obs.t, class: "mb-5"
       ) %>
+      <%= text_field_with_label(form: form, field: :inat_username,
+                                label: "#{:field_slip_inat_user_name.t}:") %>
+      <div class="mb-5">
       <%= submit_button(
-        form: form, button: :field_slip_import_from_inat.t, class: "mb-5"
-      ) %>
+        form: form, button: :field_slip_import_from_inat.t, class: "align-middle"
+      )
+      %>
+      <%= tag.span(:field_slip_import_use_other_codes.t,
+                            class: "font-weight-bold") %>
+      </div>
     <% end %>
 
     <%= render(partial: "shared/notes_fields",

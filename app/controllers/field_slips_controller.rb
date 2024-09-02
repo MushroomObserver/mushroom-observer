@@ -49,6 +49,9 @@ class FieldSlipsController < ApplicationController
 
   # POST /field_slips or /field_slips.json
   def create
+    return import_inat_obs if params[:commit] == :field_slip_import_from_inat.t
+
+    debugger
     respond_to do |format|
       @field_slip = FieldSlip.new(field_slip_params)
       check_project_membership
@@ -123,7 +126,7 @@ class FieldSlipsController < ApplicationController
                     field_code: @field_slip.code,
                     place_name: params[:field_slip][:location],
                     notes: field_slip_notes.compact_blank!
-                  ))
+                  )) and return
     else
       update_observation_fields
       redirect_to(field_slip_url(@field_slip),
@@ -224,6 +227,20 @@ class FieldSlipsController < ApplicationController
       return "_user #{user.login}_" if user
     end
     str
+  end
+
+  def import_inat_obs
+    inat_import = InatImport.find_or_create_by(user: User.current)
+    inat_import.update(
+      user: User.current,
+      state: "Authorizing",
+      import_all: nil,
+      inat_ids: params[:field_slip][:other_codes],
+      inat_username: params[:field_slip][:inat_username].strip
+    )
+
+    redirect_to(Observations::InatImportsController::INAT_AUTHORIZATION_URL,
+                allow_other_host: true)
   end
 
   # Use callbacks to share common setup or constraints between actions.

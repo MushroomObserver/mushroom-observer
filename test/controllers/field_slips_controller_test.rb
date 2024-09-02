@@ -58,6 +58,31 @@ class FieldSlipsControllerTest < FunctionalTestCase
     )
   end
 
+  test "should start inat import if inat import" do
+    inat_id = "654321"
+    inat_username = "anything"
+    field_slip = field_slips(:field_slip_no_obs)
+    field_slip_code = field_slip.code
+    project = field_slip.project
+    user = project.user
+
+    login(user.login)
+    post(:create, params: { commit: :field_slip_import_from_inat.l,
+                            field_slip: { code: field_slip_code,
+                                          other_codes: inat_id,
+                                          inat_username: inat_username } })
+
+    inat_import = InatImport.find_by(user: user)
+    assert(inat_import.present?, "Failed to create InatImport object")
+    assert_equal(user, inat_import.user)
+    assert_equal(inat_id, inat_import.inat_ids)
+    assert_equal(inat_username, inat_import.inat_username)
+
+    assert_redirected_to(
+      Observations::InatImportsController::INAT_AUTHORIZATION_URL
+    )
+  end
+
   test "should create field_slip with last viewed obs" do
     login(@field_slip.user.login)
     ObservationView.update_view_stats(@field_slip.observation_id,
