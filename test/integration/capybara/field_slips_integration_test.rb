@@ -51,7 +51,7 @@ class FieldSlipsIntegrationTest < CapybaraIntegrationTestCase
 
     login(user)
     visit("/qr/NFAL-0001")
-    click_on(:field_slip_create_obs.l)
+    click_on(:field_slip_add_images.l)
 
     project_checkbox = "project_id_#{project.id}"
     check(project_checkbox)
