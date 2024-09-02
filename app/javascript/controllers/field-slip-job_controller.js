@@ -52,9 +52,6 @@ export default class extends Controller {
         }
       }, 1000);
     } else {
-      if (this.intervalId != null) {
-        clearInterval(this.intervalId)
-      }
       // If the PDF is done, we can remove this Stimulus controller from the
       // element and stop the timer. (NOTE: there may be other controllers.)
       // console.log("field-slip-job is done")
