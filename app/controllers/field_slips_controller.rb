@@ -22,11 +22,7 @@ class FieldSlipsController < ApplicationController
       obs = @field_slip&.observation
     end
     if @field_slip
-      if foray_recorder?
-        redirect_to(edit_field_slip_url(id: @field_slip.id)) if obs
-      elsif obs
-        redirect_to(observation_url(id: obs.id))
-      end
+      field_slip_redirect(obs.id) if obs
     else
       redirect_to(new_field_slip_url(code: params[:id].upcase))
     end
@@ -118,6 +114,14 @@ class FieldSlipsController < ApplicationController
   end
 
   private
+
+  def field_slip_redirect(obs_id)
+    if foray_recorder?
+      redirect_to(edit_field_slip_url(id: @field_slip.id))
+    else
+      redirect_to(observation_url(id: obs_id))
+    end
+  end
 
   def foray_recorder?
     project = @field_slip&.project
