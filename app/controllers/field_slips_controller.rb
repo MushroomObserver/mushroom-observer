@@ -24,8 +24,8 @@ class FieldSlipsController < ApplicationController
     if @field_slip
       if foray_recorder?
         redirect_to(edit_field_slip_url(id: @field_slip.id)) if obs
-      else
-        redirect_to(observation_url(id: obs.id)) if obs
+      elsif obs
+        redirect_to(observation_url(id: obs.id))
       end
     else
       redirect_to(new_field_slip_url(code: params[:id].upcase))
@@ -123,7 +123,7 @@ class FieldSlipsController < ApplicationController
     project = @field_slip&.project
     return false unless project
 
-    return project.is_admin?(User.current) && project.happening?
+    project.is_admin?(User.current) && project.happening?
   end
 
   def html_create
