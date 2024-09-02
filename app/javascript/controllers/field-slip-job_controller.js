@@ -46,15 +46,15 @@ export default class extends Controller {
         const response = await get(this.endpoint_url,
           { responseKind: "turbo-stream" });
         if (response.ok) {
-          // turbo-stream prints the row in the page already
+          // Turbo replaces the row in the page already
         } else {
           console.log(`got a ${response.status}`);
         }
       }, 1000);
     } else {
-      // console.log("field-slip-job is done")
       // If the PDF is done, we can remove this Stimulus controller from the
-      // element and stop the timer. (There may be other controllers.)
+      // element and stop the timer. (NOTE: there may be other controllers.)
+      // console.log("field-slip-job is done")
       const controllers = this.element.dataset.controller.split(" ")
       if (controllers.includes("field-slip-job")) {
         const idx = controllers.indexOf("field-slip-job")
