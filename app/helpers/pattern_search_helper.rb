@@ -28,7 +28,7 @@ module PatternSearchHelper
 
   # Bootstrap 3 can't do full-width inline label/field.
   def prepare_args_for_pattern_search_field(args, helper)
-    # args[:inline] = true if helper == :text_field_with_label
+    args[:inline] = true if helper == :text_field_with_label
 
     args.except(:type)
   end
