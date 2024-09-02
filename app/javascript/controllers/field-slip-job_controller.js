@@ -24,6 +24,12 @@ export default class extends Controller {
 
   // Clear any intervals when the controller is disconnected
   disconnect() {
+    const stimulus = this.element.dataset.stimulus.split(" ")
+    if (stimulus.includes("field-slip-job-connected")) {
+      const idx = stimulus.indexOf("field-slip-job-connected")
+      stimulus.splice(idx, 1)
+      this.element.setAttribute("data-stimulus", stimulus.join(" "))
+    }
     if (this.intervalId != null) {
       clearInterval(this.intervalId)
     }
@@ -45,8 +51,16 @@ export default class extends Controller {
           console.log(`got a ${response.status}`);
         }
       }, 1000);
-    } else if (this.intervalId != null) {
-      clearInterval(this.intervalId)
+    } else {
+      // console.log("field-slip-job is done")
+      // If the PDF is done, we can remove this Stimulus controller from the
+      // element and stop the timer. (There may be other controllers.)
+      const controllers = this.element.dataset.controller.split(" ")
+      if (controllers.includes("field-slip-job")) {
+        const idx = controllers.indexOf("field-slip-job")
+        controllers.splice(idx, 1)
+        this.element.setAttribute("data-controller", controllers.join(" "))
+      }
     }
   }
 }
