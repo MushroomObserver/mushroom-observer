@@ -17,10 +17,13 @@ fields_2 = {
 
   <%= tag.div(class: "row") do %>
     <% [fields_1, fields_2].each do |field_groups| %>
+
       <%= tag.div(class: "col-xs-12 col-md-6") do %>
         <% field_groups.each do |heading, fields| %>
+
           <%= panel_block(heading: :"search_term_group_#{heading}".l) do %>
             <% fields.each do |field| %>
+
               <% if field.is_a?(Array) %>
                 <%= tag.div(class: "row") do %>
                   <% field.each do |subfield| %>
@@ -33,10 +36,13 @@ fields_2 = {
               <% else %>
                 <%= pattern_search_field(form: f, field: field, type: :name) %>
               <% end %>
+
             <% end %>
           <% end %>
+
         <% end %>
       <% end %>
+
     <% end %>
   <% end %>
 
