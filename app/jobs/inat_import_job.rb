@@ -133,7 +133,7 @@ class InatImportJob < ApplicationJob
     add_inat_images(inat_obs.inat_obs_photos)
     update_names_and_proposals(inat_obs)
     add_inat_sequences(inat_obs)
-    add_field_slip(inat_obs)
+    add_field_slip
     add_import_snapshot_comment(inat_obs)
     # TODO: Other things done by Observations#create
     # save_everything_else(params.dig(:naming, :reasons))
@@ -340,11 +340,11 @@ class InatImportJob < ApplicationJob
     end.join("\n")
   end
 
-  def add_field_slip(inat_obs)
+  def add_field_slip
     return if @inat_import.field_slip_code.blank?
 
     field_slip = FieldSlip.find_or_create_by(code: @inat_import.field_slip_code)
-    field_slip.update(observation_id: @observation.id)
+    field_slip.update(observation_id: @observation.id, user: @observation.user)
   end
 
   def add_import_snapshot_comment(inat_obs)

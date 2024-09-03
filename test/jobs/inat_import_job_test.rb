@@ -433,8 +433,6 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def test_import_job_via_field_slip
-    inat_id = "654321"
-    inat_username = "anything"
     field_slip = field_slips(:field_slip_no_obs)
     field_slip_code = "#{field_slip.code}999"
     project = field_slip.project
@@ -477,6 +475,7 @@ class InatImportJobTest < ActiveJob::TestCase
     field_slip = FieldSlip.find_by_code(field_slip_code)
     assert_equal(obs, field_slip.observation,
                  "Failed to associate Observation with Field Slip")
+    assert_equal(user, field_slip.user)
     # assert(obs.projects.include?(project),
     #        "Failed to add Project to Observation")
     # assert obs notes include fs stuff
