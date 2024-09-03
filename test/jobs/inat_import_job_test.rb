@@ -432,14 +432,66 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
+  def test_import_job_via_field_slip
+    inat_id = "654321"
+    inat_username = "anything"
+    field_slip = field_slips(:field_slip_no_obs)
+    field_slip_code = "#{field_slip.code}999"
+    project = field_slip.project
+    user = project.user
+
+    file_name = "calostoma_lutescens"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    inat_import = create_inat_import(inat_response: mock_inat_response,
+                                     field_slip_code: field_slip_code)
+    # Add objects which are not included in fixtures
+    name = Name.create(
+      text_name: "Calostoma lutescens",
+      author: "(Schweinitz) Burnap",
+      display_name: "**__Calostoma lutescens__** (Schweinitz) Burnap",
+      rank: "Species",
+      user: user
+    )
+    loc = Location.create(user: user,
+                          name: "Sevier Co., Tennessee, USA",
+                          north: 36.043571, south: 35.561849,
+                          east: -83.253046, west: -83.794123)
+
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response)
+
+    InatPhotoImporter.stub(:new, stub_mo_photo_importer(mock_inat_response)) do
+      assert_difference("Observation.count", 1,
+                        "Failed to create Observation") do
+        assert_difference("FieldSlip.count", 1,
+                          "Failed to create FieldSlip") do
+          InatImportJob.perform_now(inat_import)
+        end
+      end
+    end
+
+    obs = Observation.order(created_at: :asc).last
+    standard_assertions(obs: obs, name: name, loc: loc)
+    assert_equal(0, obs.images.length, "Obs should not have images")
+
+    field_slip = FieldSlip.find_by_code(field_slip_code)
+    assert_equal(obs, field_slip.observation,
+                 "Failed to associate Observation with Field Slip")
+    # assert(obs.projects.include?(project),
+    #        "Failed to add Project to Observation")
+    # assert obs notes include fs stuff
+  end
+
   ########## Utilities
 
   # The InatImport object which is created in InatImportController#create
   # and recovered in InatImportController#authorization_response
   def create_inat_import(user: users(:rolf),
+                         field_slip_code: nil,
                          inat_response: mock_inat_response)
     InatImport.create(
       user: user, token: "MockCode",
+      field_slip_code: field_slip_code,
       inat_ids: JSON.parse(inat_response)["results"].first["id"],
       inat_username: JSON.
         parse(inat_response)["results"].first["user"]["login"]
