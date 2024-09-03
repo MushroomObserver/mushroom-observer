@@ -4,13 +4,15 @@
 #
 # == Attributes
 #
-#  user::   user who initiated the iNat import
-#  state::  state of the import
-#  token::  authenticity token supplied by iNat
-#  inat_ids:: string representing the iNat obss to be imported
-#  inat_username:: current user's iNat login
-#  import_all: whether to import all of user's relevant iNat observations
-#
+#  user::             user who initiated the iNat import
+#  state::            state of the import
+#  token::            authenticity token supplied by iNat
+#  inat_ids::         string representing the iNat obss to be imported
+#  inat_username::    iNat login of iNat user whose obss are to be imported
+#  import_all:        import all a user's relevant iNat observations?
+#  field_slip_code::  field_slip_code (only if importing a single obs)
+#  project_id::       id of Project (overrides Field Slip's Project)
+#                     (only if importing a single obs)
 class InatImport < ApplicationRecord
   enum state:
   {

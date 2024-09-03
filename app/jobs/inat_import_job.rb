@@ -155,12 +155,29 @@ class InatImportJob < ApplicationJob
       text_name: Name.find(name_id).text_name,
       notes: @inat_obs.notes,
       source: "mo_inat_import",
-      inat_id: @inat_obs.inat_id
+      inat_id: @inat_obs.inat_id,
+      projects: projects
     )
     # Ensure this Name wins consensus_calc ties
     # by creating this naming and vote first
     add_naming_with_vote(name: @observation.name)
     @observation.log(:log_observation_created)
+  end
+
+  def projects
+    project =
+      if @inat_import.project_id.present?
+        Project.find(@inat_import.project_id)
+      elsif @inat_import.field_slip_code.present?
+        field_slip_code_prefix =
+          @inat_import.field_slip_code.match(/^(.*?)(?=-\d+$)/)[1]
+        Project.find_by(field_slip_prefix: field_slip_code_prefix)
+      end
+    if project
+      [project]
+    else
+      []
+    end
   end
 
   # NOTE: 1. iNat users seem to add a prov name only if there's a sequence.
@@ -343,7 +360,8 @@ class InatImportJob < ApplicationJob
     return if @inat_import.field_slip_code.blank?
 
     field_slip = FieldSlip.find_or_create_by(code: @inat_import.field_slip_code)
-    field_slip.update(observation_id: @observation.id, user: @observation.user)
+    field_slip.update(observation_id: @observation.id, user: @observation.user,
+                      project: @observation.projects.first)
   end
 
   def add_import_snapshot_comment

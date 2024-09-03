@@ -473,11 +473,9 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(0, obs.images.length, "Obs should not have images")
 
     field_slip = FieldSlip.find_by_code(field_slip_code)
-    assert_equal(obs, field_slip.observation,
-                 "Failed to associate Observation with Field Slip")
-    assert_equal(user, field_slip.user)
-    # assert(obs.projects.include?(project),
-    #        "Failed to add Project to Observation")
+    assert_equal(obs, field_slip.observation, "Field Slip is missing Obs")
+    assert_equal(user, field_slip.user, "Field Slip is missing User")
+    assert(obs.projects.include?(project), "Observation missing Project")
     # assert obs notes include fs stuff
   end
 
