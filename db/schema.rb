@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_03_143617) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_03_185201) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -201,6 +201,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_03_143617) do
     t.string "inat_username"
     t.boolean "import_all"
     t.string "field_slip_code"
+    t.integer "project_id"
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|
