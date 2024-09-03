@@ -98,6 +98,24 @@
   height: 18px;
 }
 
+// This is for the stateful icon_link_to helper
+.icon-link,
+.panel-collapse-trigger {
+  .active-icon, .active-label {
+    display: none;
+  }
+  &.active,
+  &.collapsed {
+    .link-icon:not(.active-icon),
+    .sr-only:not(.active-label) {
+      display: none;
+    }
+    .active-icon, .active-label {
+      display: inline-block;
+    }
+  }
+}
+
 .spinner-right {
   @extend .glyphicon, .glyphicon-repeat;
 

@@ -55,40 +55,6 @@ module LinkHelper
     link_to(*tab)
   end
 
-  # NOTE: Takes same args as link_to, e.g. *edit_description_tab(desc, type)
-  # icon_link_to(text, path, **args)
-  def icon_link_to(text = nil, path = nil, options = {}, &block)
-    return unless text
-
-    link = block ? text : path # because positional
-    content = block ? capture(&block) : text
-    opts = block ? path : options
-    icon_type = opts[:icon]
-    label_class = opts[:show_text] ? "pl-3" : "sr-only"
-    return link_to(link, opts) { content } if icon_type.blank?
-
-    opts = {
-      title: content,
-      data: { toggle: "tooltip" }
-    }.deep_merge(opts.except(:icon, :show_text))
-
-    link_to(link, **opts) do
-      concat(link_icon(icon_type))
-      concat(tag.span(content, class: label_class))
-    end
-  end
-
-  # NOTE: above re: MO tabs
-  def icon_link_with_query(text = nil, path = nil, options = {}, &block)
-    return unless text
-
-    link = block ? text : path # because positional
-    content = block ? capture(&block) : text
-    opts = block ? path : options
-
-    icon_link_to(add_query_param(link), opts) { content }
-  end
-
   # Link should be to a controller action that renders the form in the modal.
   # Stimulus modal-toggle controller fetches the form from the link as a .
   # turbo-stream response. It also checks if it needs to generate a modal, or
@@ -112,20 +78,76 @@ module LinkHelper
     end
   end
 
+  # Icon link with optional active state. (Tooltip title must be swapped in JS.)
+  # Now also accepts active state options: active_icon, active_content
+  # NOTE: Takes same args as link_to, e.g. *edit_description_tab(desc, type)
+  # icon_link_to(text, path, **args). Can also print a button_to.
+  def icon_link_to(text = nil, path = nil, options = {}, &block)
+    return unless text
+
+    link_path = block ? text : path # because positional
+    content = block ? capture(&block) : text
+    opts = block ? path : options # because positional
+    icon_type = opts[:icon]
+    return link_to(link, opts) { content } if icon_type.blank?
+
+    # method = opts[:button] ? :button_to : :link_to
+    active_icon = opts[:active_icon]
+    active_content = options[:active_content]
+    stateful = active_icon && active_content
+    icon_class = class_names(opts[:icon_class], "px-2")
+    icon_active_class = class_names(icon_class, "active-icon")
+    label_show_classes = "pl-2 d-none d-sm-inline font-weight-bold"
+    label_class = opts[:show_text] ? label_show_classes : "sr-only"
+    label_active_class = class_names(label_class, "active-label")
+
+    link_opts = {
+      role: "button", title: content, # title is what shows up in tooltip
+      class: class_names("icon-link", opts[:class]),
+      data: { toggle: "tooltip", title: content, # needed for swapping only
+              active_title: opts[:active_content] }
+    }.deep_merge(opts.except(:class, :icon, :icon_class, :show_text,
+                             :active_icon, :active_content, :button_to))
+
+    html = capture do
+      concat(link_icon(icon_type, class: icon_class))
+      concat(link_icon(active_icon, class: icon_active_class)) if stateful
+      concat(tag.span(content, class: label_class))
+      concat(tag.span(active_content, class: label_active_class)) if stateful
+    end
+    if opts[:button_to]
+      button_to(html, link_path, **link_opts)
+    else
+      link_to(html, link_path, **link_opts)
+    end
+  end
+
+  # NOTE: above re: MO tabs
+  def icon_link_with_query(text = nil, path = nil, options = {}, &block)
+    return unless text
+
+    link = block ? text : path # because positional
+    content = block ? capture(&block) : text
+    opts = block ? path : options
+
+    icon_link_to(add_query_param(link), opts) { content }
+  end
+
   # pass title if it's a plain button (say for collapse) but you want a tooltip
-  def link_icon(type, title: "", classes: "px-2")
+  def link_icon(type, **args)
     return "" unless (glyph = LINK_ICON_INDEX[type])
 
     text = ""
-    opts = { class: "glyphicon glyphicon-#{glyph} link-icon #{classes}" }
+    args[:class] = class_names("glyphicon glyphicon-#{glyph} link-icon",
+                               args[:class])
 
-    if title.present?
-      tooltip_opts = { data: { toggle: "tooltip", title: title } }
-      opts = opts.merge(tooltip_opts)
+    if args[:title].present?
+      title = args[:title]
+      args[:data] = { toggle: "tooltip" }.merge(args[:data] || {})
       text = tag.span(title, class: "sr-only")
     end
 
-    tag.span(text, **opts)
+    tag.span(text, **args)
   end
 
   # NOTE: Specific to glyphicons
@@ -140,7 +162,14 @@ module LinkHelper
     x: "remove",
     remove: "remove-circle",
     send: "send",
+    log_in: "log-in",
+    log_out: "log-out",
+    admin: "text-background",
+    inbox: "inbox",
+    interests: "bullhorn",
+    settings: "cog",
     ban: "ban-circle",
+    plus: "plus-sign",
     minus: "minus-sign",
     trash: "trash",
     cancel: "remove",
@@ -162,7 +191,13 @@ module LinkHelper
     manage_lists: "indent-left",
     observations: "tags",
     print: "print",
-    globe: "globe"
+    globe: "globe",
+    find_on_map: "screenshot",
+    apply: "check",
+    chevron_down: "chevron-down",
+    chevron_up: "chevron-up",
+    chevron_left: "chevron-left",
+    chevron_right: "chevron-right"
   }.freeze
 
   # button to destroy object

@@ -7,10 +7,11 @@ import { get } from "@rails/request.js"
 // For example, you can start entering a collection number, close the modal,
 // open a herbarium record form, close it and go back to the collection number
 // and find the form form as you left it, or vice versa, until you submit.
+// Connects to data-controller="modal-toggle"
 export default class extends Controller {
 
   connect() {
-    this.element.dataset.stimulus = "connected";
+    this.element.dataset.stimulus = "modal-toggle-connected";
     this.modalSelector = this.element.dataset.modal
     this.destination = this.element.getAttribute("href")
   }

@@ -44,15 +44,23 @@ class FieldSlipsIntegrationTest < CapybaraIntegrationTestCase
 
   def test_new_observation_violates_project_constraints
     project = projects(:falmouth_2023_09_project)
+    wrong_location = locations(:albion)
     user = users(:roy)
     assert(project.member?(user),
            "Test needs user who is member of #{project.title} Project")
 
     login(user)
     visit("/qr/NFAL-0001")
-    click_on(:field_slip_create_obs.l)
+    click_on(:field_slip_add_images.l)
 
-    fill_in(:WHERE.l, with: locations(:albion).name, visible: :any)
+    project_checkbox = "project_id_#{project.id}"
+    check(project_checkbox)
+    assert_selector("##{project_checkbox}[checked='checked']")
+    fill_in(:WHERE.l, with: wrong_location.name, visible: :any)
+    # this is what counts, would be handled by js
+    find_field(id: "observation_location_id",
+               type: :hidden).set(wrong_location.id)
+
     assert_no_difference(
       "Observation.count",
       "Observation shouldn't be created before confirming constraint violation"

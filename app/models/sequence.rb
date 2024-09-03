@@ -124,7 +124,7 @@ class Sequence < AbstractModel
 
   def self.blast_url_prefix
     "https://blast.ncbi.nlm.nih.gov/Blast.cgi?" \
-    "CMD=Put&DATABASE=nt&PROGRAM=blastn&QUERY="
+    "CMD=Post&DATABASE=nt&PROGRAM=blastn&QUERY="
   end
 
   # convenience wrapper around class method of same name

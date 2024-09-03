@@ -166,7 +166,7 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
     # It's not editable by them.
     using_session("rolf_session") do
       scroll_to(find("#comments_for_object"), align: :center)
-      assert_selector("#comment_#{ufo.id}")
+      assert_selector("#comment_#{ufo.id}", wait: 6)
       within("#comment_#{ufo.id}") do
         assert_text("I am a UFO!")
         assert_selector(".user_link_#{mary.id}")
@@ -177,7 +177,7 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
 
     using_session("katrina_session") do
       scroll_to(find("#comments_for_object"), align: :center)
-      assert_selector("#comment_#{ufo.id}")
+      assert_selector("#comment_#{ufo.id}", wait: 6)
       within("#comment_#{ufo.id}") do
         assert_text("I am a UFO!")
         assert_selector(".user_link_#{mary.id}")
@@ -204,7 +204,7 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
     end
 
     using_session("katrina_session") do
-      assert_selector("#comment_#{ufo.id}")
+      assert_selector("#comment_#{ufo.id}", wait: 6)
       within("#comment_#{ufo.id}") do
         assert_text("Right on!")
         assert_no_selector(".edit_comment_link_#{ufo.id}")

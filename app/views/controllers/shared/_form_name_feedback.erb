@@ -1,6 +1,8 @@
+<%# locals: (given_name:, button_name:, names:, valid_names:, suggest_corrections:, parent_deprecated:) -%>
+
 <%#
-Handling deprecated, new & multiple Names
-Used by Name and Naming create and edit pages
+Feedback if the user entered deprecated, new or multiple Names
+Used by Observation, Name and Naming create and edit pages
 Does two things:
   Describes the issue - Deprecated, Parent Deprecated, or Not Recognized
   Adds Help how to proceed - depends on issue and the button
@@ -12,18 +14,11 @@ names - Name(s) corresponding to given_name
 valid_names - Name(s) that are valid synonyms
 suggest_corrections - t/f whether to suggest correction(s)
 parent_deprecated - t/f
-
-TODO:
-Differentiate warning (valid_names) from error (!valid_names)
-A conditional to watch is `if @params[:given_name].present?`.
-Also, views/observations/namings/fields is doing too much work,
-the multiple local_assigns for this partial should be set upstream.
 %>
 
 <%=
+##### Warnings #####
 if valid_names
-  ##### Warnings #####
-
   tag.div(class: "alert alert-warning", id: "name_messages") do
     concat(tag.div do
       if suggest_corrections || names.blank?

@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { escapeHTML, getScrollBarWidth, EVENT_KEYS } from "src/mo_utilities"
+import { mo_form_utilities, EVENT_KEYS } from "src/mo_form_utilities"
 import { NL_GENERA, NL_SPECIES, NL_NAMES } from "src/name_list_data"
 
 // Connects to data-controller="name-list"
@@ -37,14 +37,13 @@ export default class extends Controller {
     this.SPECIES = NL_SPECIES
     this.NAMES = NL_NAMES
 
-    // Shared MO utilities imported from mo_utilities.js
-    this.escapeHTML = escapeHTML
-    this.getScrollBarWidth = getScrollBarWidth
+    // Shared MO utilities imported from mo_form_utilities.js
+    Object.assign(this, mo_form_utilities)
     this.EVENT_KEYS = EVENT_KEYS
   }
 
   connect() {
-    this.element.dataset.stimulus = "connected";
+    this.element.dataset.stimulus = "name-list-connected";
 
     // These are the div elements for each column.
     this.DIVS = {

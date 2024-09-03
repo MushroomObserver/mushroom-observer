@@ -61,6 +61,7 @@
 #
 #  == Class methods
 #
+#  recent_by_user::         Find last Observation by given User (+ eager-loads).
 #  define_a_location::      Update any observations using the old "where" name.
 #  touch_when_logging::     Override of AbstractModel's hook when updating log
 #  ---
@@ -367,6 +368,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   scope :by_user,
         ->(user) { where(user: user) }
+  # used for preloading values in the create obs form. call with `.last`
+  scope :recent_by_user,
+        lambda { |user|
+          includes(:location, :projects, :species_lists).
+            where(user_id: user.id).order(:created_at)
+        }
   scope :mappable,
         -> { where.not(location: nil).or(where.not(lat: nil)) }
   scope :unmappable,
@@ -569,6 +576,28 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     )
   }
 
+  def self.build_observation(location, name, notes)
+    return nil unless location && name
+
+    now = Time.zone.now
+    user = User.current
+    obs = new({ created_at: now, updated_at: now, source: "mo_website",
+                user:, location:, name:, notes: })
+    return nil unless obs
+
+    obs.log(:log_observation_created)
+    naming = Naming.construct({ name: }, obs)
+    naming.save!
+    naming.votes.create!(
+      user:,
+      observation: obs,
+      value: Vote.maximum_vote,
+      favorite: true
+    )
+    Observation::NamingConsensus.new(obs).calc_consensus
+    obs
+  end
+
   def location?
     false
   end
@@ -716,12 +745,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # the given +display_name+.  (Fills the other in with +nil+.)
   # Adjusts for the current user's location_format as well.
   def place_name=(place_name)
-    place_name = place_name&.strip_squeeze
-    where = if User.current_location_format == "scientific"
-              Location.reverse_name(place_name)
-            else
-              place_name
-            end
+    where = Location.normalize_place_name(place_name)
     loc = Location.find_by_name(where)
     if loc
       self.where = loc.name
@@ -1143,13 +1167,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   ##############################################################################
 
   # Which agent created this observation?
-  enum source:
-        {
-          mo_website: 1,
-          mo_android_app: 2,
-          mo_iphone_app: 3,
-          mo_api: 4
-        }
+  enum :source, {
+    mo_website: 1,
+    mo_android_app: 2,
+    mo_iphone_app: 3,
+    mo_api: 4
+  }
 
   # Message to use to credit the agent which created this observation.
   # Intended to be used with .tpl to render as HTML:

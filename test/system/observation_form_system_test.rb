@@ -12,28 +12,31 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     click_on("Create Observation")
 
     assert_selector("body.observations__new")
-    within("#observation_form") do
-      # MOAutocompleter replaces year select with text field
-      assert_field("observation_when_1i", with: Time.zone.today.year.to_s)
-      assert_select("observation_when_2i", text: Time.zone.today.strftime("%B"))
-      # %e is day of month, no leading zero
-      assert_select("observation_when_3i", text: Time.zone.today.strftime("%e"))
-      assert_selector("#where_help",
-                      text: "Albion, Mendocino Co., California", visible: :all)
-      fill_in("naming_name", with: "Elfin saddle")
-      # don't wait for the autocompleter - we know it's an elfin saddle!
-      browser.keyboard.type(:tab)
-      assert_field("naming_name", with: "Elfin saddle")
-      # start typing the location...
-      fill_in("observation_place_name", with: locations.first.name[0, 1])
-      # wait for the autocompleter...
-      assert_selector(".auto_complete", wait: 6)
-      browser.keyboard.type(:down, :tab) # cursor to first match + select row
-      assert_field("observation_place_name", with: locations.first.name)
-      click_commit
-    end
+    # MOAutocompleter replaces year select with text field
+    assert_field("observation_when_1i", with: Time.zone.today.year.to_s)
+    assert_select("observation_when_2i", text: Time.zone.today.strftime("%B"))
+    # %e is day of month, no leading zero
+    assert_select("observation_when_3i", text: Time.zone.today.strftime("%e"))
+    assert_selector("#observation_place_name_help",
+                    text: "Albion, Mendocino Co., California", visible: :all)
+    # start typing the location...
+    fill_in("observation_place_name", with: locations.first.name[0, 1])
+    # wait for the autocompleter...
+    assert_selector(".auto_complete", wait: 6)
+    browser.keyboard.type(:down, :tab) # cursor to first match + select row
+    assert_field("observation_place_name", with: locations.first.name)
 
-    assert_selector("#name_messages", text: "MO does not recognize the name")
+    # Move to the next step, Identification
+    naming = find("#observation_naming_specimen")
+    scroll_to(naming, align: :top)
+
+    fill_in("naming_name", with: "Elfin saddle")
+    # don't wait for the autocompleter - we know it's an elfin saddle!
+    browser.keyboard.type(:tab)
+    assert_field("naming_name", with: "Elfin saddle")
+
+    within("#observation_form") { click_commit }
+
     assert_flash_error(
       :form_observations_there_is_a_problem_with_name.t.html_to_ascii
     )
@@ -43,31 +46,77 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # click_button("map_location")
     # assert_selector("#observation_form_map > div > div > iframe")
 
-    within("#observation_form") do
-      fill_in("naming_name", with: "Coprinus com")
-      browser.keyboard.type(:tab)
-      # wait for the autocompleter!
-      assert_selector(".auto_complete")
-      browser.keyboard.type(:down, :tab) # cursor to first match + select row
-      browser.keyboard.type(:tab)
-      assert_field("naming_name", with: "Coprinus comatus")
-      # Place name should stay filled
-      browser.keyboard.type(:tab)
-      assert_field("observation_place_name", with: locations.first.name)
-      click_commit
-    end
+    assert_field("observation_place_name", with: locations.first.name)
+
+    # Move to the next step, Identification
+    naming = find("#observation_naming_specimen")
+    scroll_to(naming, align: :top)
+
+    assert_selector("#name_messages", text: "MO does not recognize the name")
+    fill_in("naming_name", with: "Coprinus com")
+    browser.keyboard.type(:tab)
+    # wait for the autocompleter!
+    assert_selector(".auto_complete")
+    browser.keyboard.type(:down, :tab) # cursor to first match + select row
+    browser.keyboard.type(:tab)
+    assert_field("naming_name", with: "Coprinus comatus")
+    # Place name should stay filled
+    browser.keyboard.type(:tab)
+
+    within("#observation_form") { click_commit }
 
     assert_selector("body.observations__show")
     assert_flash_success(/created observation/i)
   end
 
-  # The geotagged.jpg is from here.
-  UNIVERSITY_PARK_EXTENTS = {
-    north: 25.762050,
-    south: 25.733291,
-    east: -80.351868,
-    west: -80.385170
-  }.freeze
+  def test_trying_to_create_duplicate_location_just_uses_existing_location
+    setup_image_dirs # in general_extensions
+    login!(katrina)
+
+    # open_create_observation_form
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    # check new observation form defaults
+    assert_date_is_now
+    assert_geolocation_is_empty
+    last_obs = Observation.where(user_id: User.current.id).
+               order(:created_at).last
+    # This is currently "Falmouth, Massachusetts, USA"
+    existing_loc = Location.find(last_obs.location_id)
+    # We just need to check this is not the most recent location.
+    assert_not_equal(Location.last.id, existing_loc.id)
+    assert_field("observation_place_name", with: last_obs.where)
+    assert_field("observation_location_id", with: last_obs.location_id,
+                                            type: :hidden)
+
+    # autocompleter is unconstrained
+    assert_selector("[data-type='location']")
+    find(id: "observation_place_name").trigger("click")
+    # This should make the "create_locality" button appear.
+    # It works fine in headless mode.
+    assert_selector(".create-button span",
+                    text: /#{:form_observations_create_locality.l}/)
+    click_on(:form_observations_create_locality.l)
+    assert_selector("[data-type='location_google']")
+    assert_field("observation_place_name", with: last_obs.where)
+    assert_field("observation_location_id", with: "", type: :hidden)
+
+    # Move to the next step, Identification
+    naming = find("#observation_naming_specimen")
+    scroll_to(naming, align: :top)
+
+    within("#observation_form") { click_commit }
+
+    # Observation should have saved with the existing location_id for U.P.
+    assert_flash_success(/created observation/i)
+    assert_selector("body.observations__show")
+
+    obs = Observation.last
+    assert_equal(existing_loc.name, obs.where)
+    assert_equal(existing_loc.id, obs.location_id)
+    assert_not_equal(Location.last.id, obs.location_id)
+  end
 
   def test_autofill_location_from_geotagged_image_nothing_matches
     setup_image_dirs # in general_extensions
@@ -80,10 +129,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # check new observation form defaults
     assert_date_is_now
     assert_geolocation_is_empty
-    last_obs = Observation.where(user_id: User.current.id).
-               order(:created_at).last
+    last_obs = Observation.recent_by_user(User.current).last
     assert_selector("#observation_place_name", wait: 6)
     assert_selector("#observation_location_id", visible: :all)
+    sleep(0.5)
     assert_field("observation_place_name", with: last_obs.where)
     assert_field("observation_location_id", with: last_obs.location_id,
                                             type: :hidden)
@@ -92,15 +141,20 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     click_attach_file("geotagged.jpg")
     sleep(0.5)
 
-    # we should have the new type of location_containing autocompleter now
-    assert_selector("[data-type='location_containing']")
-    sleep(0.5)
     # GPS should have been copied to the obs fields
-    assert_equal("25.7582", find('[id$="observation_lat"]').value)
-    assert_equal("-80.3731", find('[id$="observation_lng"]').value)
-    assert_equal("4", find('[id$="observation_alt"]').value.to_i.to_s)
-    # Place name should not have been filled, because no locations match
-    assert_equal(last_obs.where, find('[id$="observation_place_name"]').value)
+    assert_image_gps_copied_to_obs(GEOTAGGED_EXIF)
+    # Date should have been copied to the obs fields
+    assert_image_date_copied_to_obs(GEOTAGGED_EXIF)
+    sleep(0.5)
+    # we should have the new type of location_google autocompleter now
+    assert_selector(
+      "[data-type='location_google'][data-stimulus='autocompleter-connected']"
+    )
+    # Place name should now have been filled by Google, no MO locations match
+    assert_field("observation_place_name", with: UNIVERSITY_PARK[:name],
+                                           wait: 6)
+    assert_field("observation_location_id", with: "-1", type: :hidden)
+
     # now check that the "use_exif" button is disabled
     assert_no_button(:image_use_exif.l)
   end
@@ -109,13 +163,14 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     setup_image_dirs # in general_extensions
     login!(katrina)
 
-    # now create the location and start again.
-    university_park = Location.new(
-      name: "University Park, Miami-Dade County, Florida, USA",
-      **UNIVERSITY_PARK_EXTENTS
-    )
+    # Make "University Park" available as a matching location.
+    university_park = Location.new(**UNIVERSITY_PARK)
+    # Sanity check the lat/lng. `contains?(lat, lng)` is a Mappable::BoxMethod
+    assert(university_park.contains?(GEOTAGGED_EXIF[:lat],
+                                     GEOTAGGED_EXIF[:lng]))
     university_park.save!
     sleep(0.5)
+
     # open_create_observation_form
     visit(new_observation_path)
     assert_selector("body.observations__new")
@@ -123,8 +178,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # check new observation form defaults
     assert_date_is_now
     assert_geolocation_is_empty
-    last_obs = Observation.where(user_id: User.current.id).
-               order(:created_at).last
+    last_obs = Observation.recent_by_user(User.current).last
+    # This is currently "Falmouth, Massachusetts, USA"
     assert_field("observation_place_name", with: last_obs.where)
     assert_field("observation_location_id", with: last_obs.location_id,
                                             type: :hidden)
@@ -138,27 +193,23 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # we should have a location_containing autocompleter now
     assert_selector("[data-type='location_containing']")
     # GPS should have been copied to the obs fields
-    assert_equal("25.7582", find('[id$="observation_lat"]').value)
-    assert_equal("-80.3731", find('[id$="observation_lng"]').value)
-    assert_equal("4", find('[id$="observation_alt"]').value.to_i.to_s)
-
+    assert_image_gps_copied_to_obs(GEOTAGGED_EXIF)
+    assert_image_date_copied_to_obs(GEOTAGGED_EXIF)
     # now check that the "use_exif" button is disabled
     assert_no_button(:image_use_exif.l)
 
-    # Place name should have been filled, but query may be in progress.
-    # Commenting this out for now, it's too flaky, and it's retested below.
-    # assert_selector(".auto_complete")
-    # assert_field("observation[place_name]", with: university_park.name,
-    #                                         wait: 6)
-    # assert_field("observation[location_id]", with: university_park.id,
-    #                                          type: :hidden)
+    # Place name should have been filled.
+    assert_field("observation[place_name]", with: university_park.name,
+                                            wait: 6)
+    assert_field("observation[location_id]", with: university_park.id,
+                                             type: :hidden)
 
-    # now clear a lat-lng-alt field, and the place name should clear too
-    click_button(:form_observations_clear_map.t.as_displayed)
-    fill_in("observation_lat", with: "")
-    # assert_field("observation_place_name", with: "")
-    # should have swapped autocompleter back to "location", but it doesn't
-    # assert_selector("[data-type='location']")
+    # now clear all location fields, and the place name should clear too
+    click_button(:form_observations_clear_map.l)
+    # fill_in("observation_lat", with: "")
+    assert_field("observation_place_name", with: "")
+    # should have swapped autocompleter back to "location"
+    assert_selector("[data-type='location']")
 
     # check that the "use_exif" button is re-enabled
     assert_button(:image_use_exif.l)
@@ -166,35 +217,17 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # wait for the form to update
     assert_selector("[data-type='location_containing']")
     # GPS should have been copied to the obs fields
-    assert_equal("25.7582", find('[id$="observation_lat"]').value)
-    assert_equal("-80.3731", find('[id$="observation_lng"]').value)
-    assert_equal("4", find('[id$="observation_alt"]').value.to_i.to_s)
+    assert_image_gps_copied_to_obs(GEOTAGGED_EXIF)
+    assert_image_date_copied_to_obs(GEOTAGGED_EXIF)
 
     # Finally, the query should have gone through and the place name filled
-    # assert_field("observation[place_name]", with: university_park.name,
-    #                                         wait: 6)
-    # assert_field("observation[location_id]", with: university_park.id,
-    #                                          type: :hidden)
+    assert_field("observation[place_name]", with: university_park.name,
+                                            wait: 6)
+    assert_field("observation[location_id]", with: university_park.id,
+                                             type: :hidden)
     # now check that the "use_exif" button is disabled
     assert_no_button(:image_use_exif.l)
   end
-
-  # Google seems to give accurate bounds to this place, but the
-  # geometry.location_type of "Pasadena, California" is "APPROXIMATE".
-  # Viewport and bounds are separate fields in the Geocoder response,
-  # and other places' bounds may be more precise. Viewport may be padded.
-  # On the right may be the accurate extents, they're hard to find.
-  PASADENA_EXTENTS = {
-    north: 34.251905,     # 34.1774839
-    south: 34.1170368,    # 34.1275634561
-    east: -118.0654789,   # -118.0989059
-    west: -118.1981391,   # -118.1828198
-    high: 1096.943603515625,
-    low: 141.5890350341797,
-    lat: 34.1477849,
-    lng: -118.1445155,
-    alt: 262.5840148925781
-  }.freeze
 
   def test_post_edit_and_destroy_with_details_and_location
     # browser = page.driver.browser
@@ -210,15 +243,22 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_date_is_now
     assert_geolocation_is_empty
 
-    last_obs = Observation.where(user_id: User.current.id).
-               order(:created_at).last
+    last_obs = Observation.recent_by_user(User.current).last
     assert_field("observation_place_name", with: last_obs.where)
+
+    # Move to the next step, Identification
+    naming = find("#observation_naming_specimen")
+    scroll_to(naming, align: :top)
 
     assert_field("naming_name", with: "")
     assert(last_obs.is_collection_location)
-    assert_checked_field("observation_is_collection_location")
-    assert_no_checked_field("observation_specimen")
-    assert_field(other_notes_id, with: "")
+    assert_checked_field("observation_is_collection_location", visible: :all)
+    assert_no_checked_field("observation_specimen", visible: :all)
+    assert_field(other_notes_id, with: "", visible: :all)
+
+    # Move to the previous step, Images/Details
+    images_details = find("#observation_images_details")
+    scroll_to(images_details, align: :top)
 
     # Add the images separately, so we can be sure of the order. Otherwise,
     # images appear in the order each upload finishes, which is unpredictable.
@@ -232,13 +272,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # assert_field('[id$="when_1i"]', with: "2006")
     # No idea why we have to do it like this, maybe value set by JS.
     within(first_image_wrapper) do
-      assert_equal("2006", find('[id$="when_1i"]', visible: :all).value)
-      assert_equal("11", find('[id$="when_2i"]', visible: :all).value)
-      assert_equal("20", find('[id$="when_3i"]', visible: :all).value)
+      assert_image_exif_available(COPRINUS_COMATUS_EXIF)
     end
 
     # Add a second image that's geotagged.
-    click_attach_file("geotagged.jpg")
+    click_attach_file("geotagged_s_pasadena.jpg")
     sleep(0.5)
     # Be sure we have two image wrappers. We have to wait for
     # the first one to be hidden before we can see the second one.
@@ -248,22 +286,14 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # The new one is prepended, so second is "first"
     second_image_wrapper = image_wrappers[0]
 
-    # Check that it's the right image: this is geotagged.jpg's date
+    # Check that it's the right image: this is geotagged_s_pasadena.jpg's date
     within(second_image_wrapper) do
-      assert_equal("2018", find('[id$="when_1i"]', visible: :all).value)
-      assert_equal("12", find('[id$="when_2i"]', visible: :all).value)
-      assert_equal("31", find('[id$="when_3i"]', visible: :all).value)
+      assert_image_exif_available(SO_PASA_EXIF)
     end
 
     # Date should have been copied to the obs fields
-    assert_equal("2018", find('[id$="observation_when_1i"]').value)
-    assert_equal("12", find('[id$="observation_when_2i"]').value)
-    assert_equal("31", find('[id$="observation_when_3i"]').value)
-
-    # GPS should have been copied to the obs fields
-    assert_equal("25.7582", find('[id$="observation_lat"]').value)
-    assert_equal("-80.3731", find('[id$="observation_lng"]').value)
-    assert_equal("4", find('[id$="observation_alt"]').value.to_i.to_s)
+    assert_image_gps_copied_to_obs(SO_PASA_EXIF)
+    assert_image_date_copied_to_obs(SO_PASA_EXIF)
 
     # Ok, enough. By now, the carousel image should be showing the second image.
     assert_selector(
@@ -273,27 +303,28 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Try removing the geotagged image
     scroll_to(second_image_wrapper, align: :center)
     within(second_image_wrapper) { find(".remove_image_button").click }
+    sleep(1)
 
+    # Be sure second image has been removed
+    assert_no_selector(".carousel-item[data-image-status='upload']",
+                       text: "geotagged_s_pasadena.jpg", wait: 9)
     # Be sure we have only one image wrapper now
-    image_wrappers = all(".carousel-item[data-image-status='upload']",
-                         visible: :all)
-    assert_equal(1, image_wrappers.length)
+    assert_selector(".carousel-item[data-image-status='upload']",
+                    visible: :all, count: 1)
 
-    # Add geotagged.jpg again
-    click_attach_file("geotagged.jpg")
+    # Add geotagged_s_pasadena.jpg again
+    click_attach_file("geotagged_s_pasadena.jpg")
     sleep(0.5)
 
     # Be sure we have two image wrappers
     second_image_wrapper = find(".carousel-item[data-image-status='upload']",
-                                text: "25.7582")
+                                text: SO_PASA_EXIF[:lat].to_s)
     image_wrappers = all(".carousel-item[data-image-status='upload']",
                          visible: :all)
     assert_equal(image_wrappers.length, 2)
 
     within(second_image_wrapper) do
-      assert_equal("2018", find('[id$="when_1i"]').value)
-      assert_equal("12", find('[id$="when_2i"]').value)
-      assert_equal("31", find('[id$="when_3i"]').value)
+      assert_image_exif_available(SO_PASA_EXIF)
     end
 
     # Set copyright holder and image notes on both
@@ -317,29 +348,44 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_no_text(:image_set_default.l)
     end
 
-    # Fill out some other stuff
+    # Override the dates from the geotagged image for this obs
     obs_when = find("#observation_when_1i")
     scroll_to(obs_when, align: :center)
     fill_in("observation_when_1i", with: "2010")
     select("August", from: "observation_when_2i")
     select("14", from: "observation_when_3i")
 
-    # intentional error: nonexistant place name
+    # intentional error: nonexistant place name. Also, katrina's preference is
+    # for postal format locations. Should not validate the country "Pasadena".
     location = find("#observation_place_name")
     scroll_to(location, align: :center)
     fill_in("observation_place_name", with: "USA, California, Pasadena")
     assert_field("observation_place_name", with: "USA, California, Pasadena")
-    uncheck("observation_is_collection_location")
-    check("observation_specimen")
+    uncheck("observation_is_collection_location", visible: :all)
 
-    assert_selector("#collection_number_number")
+    # Move to the next step, Identification
+    naming = find("#observation_naming_specimen")
+    scroll_to(naming, align: :top)
+    sleep(1)
+
+    specimen_section = find("#observation_specimen_section", visible: :all)
+    scroll_to(specimen_section, align: :center)
+    assert_field("observation_specimen")
+    check("observation_specimen")
+    assert_field("collection_number_number")
     fill_in("collection_number_number", with: "17-034a")
-    fill_in(other_notes_id, with: "Notes for observation")
+    fill_in(other_notes_id, with: "Notes for observation", visible: :all)
+
+    # Move to the next step, Projects/Lists
+    projects = find("#observation_projects")
+    scroll_to(projects, align: :top)
 
     # Inherited project constraints maybe messing with this observation - clear
-    all('[id^="project_id_"]').each do |project_checkbox|
-      project_checkbox.click if project_checkbox.checked?
+    all('[id^="project_id_"]', visible: :all).each do |project_checkbox|
+      project_checkbox.trigger("click") if project_checkbox.checked?
     end
+    naming = find("#observation_naming_specimen")
+    scroll_to(naming, align: :top)
 
     # submit_observation_form_with_errors
     within("#observation_form") { click_commit }
@@ -355,122 +401,76 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_select("observation_when_3i", text: "14")
 
     assert_field("observation_place_name", with: "USA, California, Pasadena")
-    assert_field("observation_lat", with: "25.7582")
-    assert_field("observation_lng", with: "-80.3731")
-    assert_field("observation_alt", with: "4")
-    # This geolocation is for Florida, and actually should disable
-    # autocompleting Pasadena
+    assert_image_gps_copied_to_obs(SO_PASA_EXIF)
+    # This geolocation is for Pasadena
 
-    assert_field("naming_name", with: "")
-    assert_no_checked_field("observation_is_collection_location")
-    assert_checked_field("observation_specimen")
-    assert_field("collection_number_number", with: "17-034a")
-    assert_field(other_notes_id, with: "Notes for observation")
+    assert_field("naming_name", with: "", visible: :all)
+    assert_no_checked_field("observation_is_collection_location", visible: :all)
+    assert_checked_field("observation_specimen", visible: :all)
+    assert_field("collection_number_number", with: "17-034a", visible: :all)
+    assert_field(other_notes_id, with: "Notes for observation", visible: :all)
 
-    # submit_observation_form_without_errors
-
-    # fill_in("observation_place_name", with: "Pasadena, Calif")
-    # browser.keyboard.type(:tab)
-    # sleep(1)
-    # assert_selector(".auto_complete")
-    # browser.keyboard.type(:down, :tab) # cursor down to match, select row
+    # Submit observation form without errors
     fill_in("observation_place_name", with: "Pasadena, California, USA")
     assert_field("observation_place_name", with: "Pasadena, California, USA")
-    # geo-coordinates-parser will reject internally-inconsistent notation.
-    fill_in("observation_lat", with: " 12deg 36.75min N ") # == 12.6125
-    fill_in("observation_lng", with: " 121deg 33.14min E ") # == 121.5523
-    fill_in("observation_alt", with: " 56 ft. ")
+    # Be sure this is still the South Pasadena box:
+    assert_image_gps_copied_to_obs(SO_PASA_EXIF)
 
-    # fill_in("naming_name", with: "Agaricus campe")
-    # assert_selector(".auto_complete")
-    # assert_selector(".auto_complete ul li", text: "Agaricus campestris")
-    # browser.keyboard.type(:down, :down, :tab) # down to second match + select
+    # Carousel items are re-output with image records this time.
+    all(".carousel-indicator").last.trigger("click")
+
+    assert_selector(".carousel-item", text: SO_PASA_EXIF[:lat].to_s,
+                                      visible: :all)
+    second_item = find(".carousel-item", text: SO_PASA_EXIF[:lat].to_s,
+                                         visible: :all)
+    items = all(".carousel-item", visible: :all)
+    assert_equal(items.length, 2)
+
+    within(second_item) do
+      assert_image_exif_available(SO_PASA_EXIF)
+    end
+
+    fill_in("observation_place_name", with: "south pas")
+    click_on(:form_observations_create_locality.l)
+    # lat/lng does not match Google's Pasadena, but does match South Pasadena
+    assert_selector("[data-type='location_google']")
+    find("#observation_place_name").trigger("focus")
+    # assert_selector(".auto_complete", wait: 6)
+    # assert_selector(".dropdown-item a[data-id='-1']",
+    #                 text: SOUTH_PASADENA[:name], visible: :all, wait: 6)
+    # There may be more than one of these, click the first
+    # find(".dropdown-item a[data-id='-1']",
+    #      text: SOUTH_PASADENA[:name], visible: :all).trigger("click")
+    assert_field("observation_place_name", with: SOUTH_PASADENA[:name])
+    sleep(1)
+    # debugger
+    # Check the hidden fields returned by Google
+    assert_hidden_location_fields_filled(SOUTH_PASADENA)
+
+    # Move to the next step, Identification
+    naming = find("#observation_naming_specimen")
+    scroll_to(naming, align: :top)
+
+    assert_selector(
+      "[data-type='name'][data-stimulus='autocompleter-connected']"
+    )
     fill_in("naming_name", with: "Agaricus campestris")
     assert_field("naming_name", with: "Agaricus campestris")
     select(Vote.confidence(Vote.next_best_vote), from: "naming_vote_value")
     assert_select("naming_vote_value",
                   selected: Vote.confidence(Vote.next_best_vote))
 
-    # Carousel items are re-output with image records this time.
-    all(".carousel-indicator").last.click
-
-    assert_selector(".carousel-item", text: "25.7582", visible: :all)
-    second_item = find(".carousel-item", text: "25.7582", visible: :all)
-    items = all(".carousel-item", visible: :all)
-    assert_equal(items.length, 2)
-
-    within(second_item) do
-      assert_equal("2018", find('[id$="when_1i"]').value)
-      assert_equal("12", find('[id$="when_2i"]').value)
-      assert_equal("31", find('[id$="when_3i"]').value)
-    end
-
-    # will have cleared the place_name field, lat/lng doesn't match Pasadena
-    fill_in("observation_place_name", with: "Pasadena, California, USA")
-
     within("#observation_form") { click_commit }
-
-    # It should take us to create a new location
-    assert_selector("body.locations__new")
-    # The observation shoulda been created OK.
-    assert_flash_for_create_observation
-    # Check the db values
-    assert_new_observation_is_correct(expected_values_after_create)
-
-    # check default values of location form
-    assert_field("location_display_name", with: "Pasadena, California, USA")
-    assert_button(text: :form_locations_find_on_map.t.as_displayed)
-    click_button(:form_locations_find_on_map.t.as_displayed)
-    sleep(1)
-    assert_equal(PASADENA_EXTENTS[:north].round(4),
-                 find("#location_north").value.to_f.round(4))
-    assert_equal(PASADENA_EXTENTS[:south].round(4),
-                 find("#location_south").value.to_f.round(4))
-    assert_equal(PASADENA_EXTENTS[:east].round(4),
-                 find("#location_east").value.to_f.round(4))
-    assert_equal(PASADENA_EXTENTS[:west].round(4),
-                 find("#location_west").value.to_f.round(4))
-    sleep(1) # wait for elevation service
-    assert_equal(PASADENA_EXTENTS[:high].round(4),
-                 find("#location_high").value.to_f.round(4))
-    assert_equal(PASADENA_EXTENTS[:low].round(4),
-                 find("#location_low").value.to_f.round(4))
-
-    # submit_location_form_with_errors
-    fill_in("location_display_name",
-            with: "Pasadena: Disneyland, Some Co., California, USA")
-    fill_in("location_notes", with: "oops")
-
-    within("#location_form") { click_commit }
-
-    assert_selector("body.locations__create")
-    assert_has_location_warning(/Contains unexpected character/)
-
-    assert_field("location_display_name",
-                 with: "Pasadena: Disneyland, Some Co., California, USA")
-    assert_field("location_notes", with: "oops")
-
-    # submit_location_form_without_errors
-    fill_in("location_display_name",
-            with: "Pasadena, Some Co., California, USA")
-    fill_in("location_notes", with: "Notes for location")
-
-    within("#location_form") { click_commit }
 
     assert_flash_for_create_location
     assert_selector("body.observations__show")
-
-    # https://gorails.com/episodes/rails-system-testing-file-uploads
-    #
-    # attach_file "user[avatar]", file_fixture("avatar.jpg")
-    # find(".dropzone").drop File.join(file_fixture_path, "avatar.jpg")
 
     assert_new_location_is_correct(expected_values_after_location)
     assert_new_observation_is_correct(expected_values_after_location)
     assert_show_observation_page_has_important_info
 
-    # open_edit_observation_form
-    # This is more robust in case the link becomes an icon:
+    # Open edit observation form
+    # class selector is more robust in case the link becomes an icon:
     new_obs = Observation.last
     first(class: "edit_observation_link_#{new_obs.id}").trigger("click")
     # click_link("Edit Observation")
@@ -480,18 +480,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_when_1i", with: "2010")
     assert_select("observation_when_2i", text: "August")
     assert_select("observation_when_3i", text: "14")
-    assert_field("observation_place_name",
-                 with: "Pasadena, Some Co., California, USA")
-    assert_field("observation_lat", with: "12.6125") # was 12.5927
-    assert_field("observation_lng", with: "121.5523") # was -121.5525
-    assert_field("observation_alt", with: "17")
+    assert_field("observation_place_name", with: SOUTH_PASADENA[:name])
+    assert_image_gps_copied_to_obs(SO_PASA_EXIF)
     assert_unchecked_field("observation_is_collection_location")
-    assert_checked_field("observation_specimen")
-    assert_field(other_notes_id, with: "Notes for observation")
+    assert_checked_field("observation_specimen", visible: :all)
+    assert_field(other_notes_id, with: "Notes for observation", visible: :all)
 
     imgs = Image.last(2)
     cci = imgs.find { |img| img[:original_name] == "Coprinus_comatus.jpg" }
-    geo = imgs.find { |img| img[:original_name] == "geotagged.jpg" }
+    geo = imgs.find { |img| img[:original_name] == "geotagged_s_pasadena.jpg" }
     img_ids = imgs.map(&:id)
     imgs.each do |img|
       assert_field("good_image_#{img.id}_when_1i",
@@ -508,20 +505,13 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_checked_field("thumb_image_id_#{cci.id}", visible: :all)
     assert_unchecked_field("thumb_image_id_#{geo.id}", visible: :all)
 
-    # submit_observation_form_with_changes
+    # Submit observation form with changes
     obs_when = find("#observation_when_1i")
     scroll_to(obs_when, align: :center)
     fill_in("observation_when_1i", with: "2011")
     select("April", from: "observation_when_2i")
     select("15", from: "observation_when_3i")
-    # this will reset the place_name field
-    fill_in("observation_lat", with: "23.4567")
-    fill_in("observation_lng", with: "-123.4567")
-    fill_in("observation_alt", with: "987m")
-    fill_in("observation_place_name",
-            with: "Pasadena, Some Co., California, USA")
     check("observation_is_collection_location")
-    fill_in(other_notes_id, with: "New notes for observation")
 
     img_ids.each do |img_id|
       find("#carousel_thumbnail_#{img_id}").click
@@ -536,8 +526,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     choose("thumb_image_id_#{geo.id}", visible: :all)
     sleep(1)
 
+    # Move to the next step, Identification
+    naming = find("#observation_naming_specimen")
+    scroll_to(naming, align: :top)
+    sleep(1)
+
     obs_notes = find("#observation_notes")
     scroll_to(obs_notes, align: :top)
+    fill_in(other_notes_id, with: "New notes for observation")
+
     within("#observation_form") { click_commit }
 
     assert_selector("body.observations__show")
@@ -545,12 +542,12 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_edit_observation_is_correct(expected_values_after_edit)
     assert_show_observation_page_has_important_info
 
-    # make_sure_observation_is_in_log_index
+    # Make sure observation is in log index
     obs = Observation.last
     visit(activity_logs_path)
     assert_link(href: %r{/#{obs.id}?})
 
-    # destroy_observation
+    # Destroy observation
     visit(observation_path(obs.id))
     new_obs = Observation.last
     assert_selector("body.observations__show")
@@ -560,11 +557,79 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_flash_for_destroy_observation
     assert_selector("body.observations__index")
 
-    # make_sure_observation_is_not_in_log_index
+    # Make sure observation is not in log index
     visit(activity_logs_path)
     assert_no_link(href: %r{/#{obs.id}/})
     assert_link(href: /activity_logs/, text: /Agaricus campestris/)
   end
+
+  ##############################################################################
+  #  Helper methods
+  #
+
+  # This image only has a date.
+  COPRINUS_COMATUS_EXIF = {
+    year: 2006,
+    month: 11,
+    day: 20
+  }.freeze
+
+  # The geotagged.jpg is from University Park, Florida.
+  UNIVERSITY_PARK = {
+    name: "University Park, Miami-Dade Co., Florida, USA",
+    north: 25.762050,
+    south: 25.733291,
+    east: -80.351868,
+    west: -80.385170
+  }.freeze
+
+  # The image geotagged.jpg has this data.
+  GEOTAGGED_EXIF = {
+    lat: 25.7582,
+    lng: -80.3731,
+    alt: 4,
+    year: 2018,
+    month: 12,
+    day: 31
+  }.freeze
+
+  # Google seems to give accurate bounds to this place, but the
+  # geometry.location_type of "Pasadena, California" is "APPROXIMATE".
+  # Viewport and bounds are separate fields in the Geocoder response,
+  # and other places' bounds may be more precise. Viewport may be padded.
+  # On the right may be the accurate extents, they're hard to find.
+  PASADENA_EXTENTS = {
+    north: 34.251905,     # 34.1774839
+    south: 34.1170368,    # 34.1275634561
+    east: -118.0654789,   # -118.0989059
+    west: -118.1981391,   # -118.1828198
+    high: 1096.943603515625,
+    low: 141.5890350341797,
+    lat: 34.1477849,
+    lng: -118.1445155,
+    alt: 262.5840148925781
+  }.freeze
+
+  # Current results from Google Maps API, formatted by our JS map_controller.
+  SOUTH_PASADENA = {
+    name: "South Pasadena, Los Angeles Co., California, USA",
+    north: 34.1257,
+    south: 34.0986,
+    east: -118.1345,
+    west: -118.178,
+    high: 235,
+    low: 159
+  }.freeze
+
+  # The image geotagged_s_pasadena.jpg has this data.
+  SO_PASA_EXIF = {
+    lat: 34.1231,
+    lng: -118.1489,
+    alt: 248,
+    year: 2020,
+    month: 6,
+    day: 30
+  }.freeze
 
   def assert_date_is_now
     local_now = Time.zone.now.in_time_zone
@@ -576,9 +641,54 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
 
   def assert_geolocation_is_empty
-    assert_field("observation_lat", with: "")
-    assert_field("observation_lng", with: "")
-    assert_field("observation_alt", with: "")
+    assert_field("observation_lat", with: "", visible: :all)
+    assert_field("observation_lng", with: "", visible: :all)
+    assert_field("observation_alt", with: "", visible: :all)
+  end
+
+  def assert_image_exif_available(image_data)
+    assert_selector('[id$="when_1i"]', visible: :all)
+    assert_selector('[id$="when_2i"]', visible: :all)
+    assert_selector('[id$="when_3i"]', visible: :all)
+    assert_equal(image_data[:year].to_s,
+                 find('[id$="when_1i"]', visible: :all).value)
+    assert_equal(image_data[:month].to_s,
+                 find('[id$="when_2i"]', visible: :all).value)
+    assert_equal(image_data[:day].to_s,
+                 find('[id$="when_3i"]', visible: :all).value)
+  end
+
+  def assert_image_gps_copied_to_obs(image_data)
+    assert_field("observation_lat", with: image_data[:lat].to_s)
+    assert_field("observation_lng", with: image_data[:lng].to_s)
+    # We look up the alt from lat/lng, so it's not copied from the image.
+    # assert_field("observation_alt", with: image_data[:alt].to_i.to_s)
+  end
+
+  def assert_image_date_copied_to_obs(image_data)
+    assert_equal(image_data[:year].to_s,
+                 find('[id$="observation_when_1i"]').value)
+    assert_equal(image_data[:month].to_s,
+                 find('[id$="observation_when_2i"]').value)
+    assert_equal(image_data[:day].to_s,
+                 find('[id$="observation_when_3i"]').value)
+  end
+
+  def assert_hidden_location_fields_filled(location_data)
+    assert_field("observation[location_id]", type: :hidden, with: "-1")
+    assert_field("location_north", type: :hidden,
+                                   with: location_data[:north].to_s)
+    assert_field("location_south", type: :hidden,
+                                   with: location_data[:south].to_s)
+    assert_field("location_west", type: :hidden,
+                                  with: location_data[:west].to_s)
+    assert_field("location_east", type: :hidden,
+                                  with: location_data[:east].to_s)
+    # Will be waiting on a call to the elevation service. Maybe ready later.
+    # assert_field("location_low", type: :hidden,
+    #                              with: location_data[:low].to_s)
+    # assert_field("location_high", type: :hidden,
+    #                               with: location_data[:high].to_s)
   end
 
   # Rename from new_observation to just observation ***
@@ -631,7 +741,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
     assert_gps_equal(expected_values[:lat], new_obs.lat.to_f)
     assert_gps_equal(expected_values[:lng], new_obs.lng.to_f)
-    assert_gps_equal(expected_values[:alt], new_obs.alt.to_f)
+    # We look up the alt from lat/lng, so it's not copied from the image.
+    # assert_gps_equal(expected_values[:alt], new_obs.alt.to_f)
   end
 
   def assert_observation_has_correct_name(expected_values)
@@ -724,11 +835,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     {
       user: katrina,
       when: Date.parse("2010-08-14"),
-      where: "Pasadena, California, USA",
+      where: SOUTH_PASADENA[:name],
       location: nil,
-      lat: 12.6125, # was 12.5760 values tweaked to move it to land
-      lng: 121.5523, # was -123.7519 was in the ocean
-      alt: 17,
+      lat: SO_PASA_EXIF[:lat],
+      lng: SO_PASA_EXIF[:lng],
+      alt: SO_PASA_EXIF[:alt],
       name: names(:agaricus_campestris),
       vote: Vote.next_best_vote,
       is_collection_location: false,
@@ -742,13 +853,13 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   def expected_values_after_location
     expected_values_after_create.merge(
       where: nil,
-      location: "Pasadena, Some Co., California, USA",
-      north: PASADENA_EXTENTS[:north],
-      south: PASADENA_EXTENTS[:south],
-      east: PASADENA_EXTENTS[:east],
-      west: PASADENA_EXTENTS[:west],
-      high: 5678,
-      low: 1234,
+      location: SOUTH_PASADENA[:name],
+      north: SOUTH_PASADENA[:north],
+      south: SOUTH_PASADENA[:south],
+      east: SOUTH_PASADENA[:east],
+      west: SOUTH_PASADENA[:west],
+      high: SOUTH_PASADENA[:high],
+      low: SOUTH_PASADENA[:low],
       location_notes: "Notes for location"
     )
   end
@@ -756,14 +867,16 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   def expected_values_after_edit
     expected_values_after_location.merge(
       when: Date.parse("2011-04-15"),
-      lat: 23.4567,
-      lng: -123.4567,
-      alt: 987,
+      # lat: 23.4567,
+      # lng: -123.4567,
+      # alt: 987,
       is_collection_location: true,
       specimen: false,
       notes: "New notes for observation", # displayed in observations/show
       image_notes: "New notes for image",
-      thumb_image_id: Image.find_by(original_name: "geotagged.jpg").id
+      thumb_image_id: Image.find_by(
+        original_name: "geotagged_s_pasadena.jpg"
+      ).id
     )
   end
 end

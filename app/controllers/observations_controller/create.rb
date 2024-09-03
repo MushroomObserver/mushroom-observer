@@ -3,6 +3,7 @@
 module ObservationsController::Create
   include ObservationsController::SharedFormMethods
   include ObservationsController::Validators
+  include ::Locationable
 
   # Form to create a new observation, naming, vote, and images.
   # Linked from: left panel
@@ -30,24 +31,35 @@ module ObservationsController::Create
   #
 
   def create
+    # Create a bare observation
     @observation = create_observation_object(params[:observation])
-    # set these again, in case they are not defined
+    # Set license/image defaults again, in case they are not defined
     init_license_var
     init_new_image_var(Time.zone.now)
 
     rough_cut
-    success = true
-    success = false unless validate_params
-    success = false unless validate_object(@observation)
-    success = false unless validate_projects
-    success = false if @name && !validate_object(@naming)
-    success = false if @name && !@vote.value.nil? && !validate_object(@vote)
-    success = false if @bad_images != []
-    success = false if success && !save_observation
-    return reload_new_form(params.dig(:naming, :reasons)) unless success
+    create_location_object_if_new(@observation) # may set @location
+
+    @any_errors = false
+    validate_name
+    validate_place_name
+    validate_observation
+    validate_projects
+    validate_naming if @name
+    validate_vote if @name
+    validate_images
+    try_to_save_location_if_new(@observation)
+    try_to_save_new_observation
+    return reload_new_form(params.dig(:naming, :reasons)) if @any_errors
 
     @observation.log(:log_observation_created)
-    save_everything_else(params.dig(:naming, :reasons))
+
+    update_naming(params.dig(:naming, :reasons))
+    attach_good_images
+    update_projects
+    update_species_lists
+    save_collection_number
+    save_herbarium_record
     strip_images! if @observation.gps_hidden
     update_field_slip
     flash_notice(:runtime_observation_success.t(id: @observation.id))
@@ -62,36 +74,16 @@ module ObservationsController::Create
   # once we're sure everything is correct.
   # INPUT: params[:observation] (and @user) (and various notes params)
   # OUTPUT: new observation
-  def create_observation_object(args)
-    now = Time.zone.now
-    observation = new_observation(args)
-    observation.created_at = now
-    observation.updated_at = now
-    observation.user       = @user
-    observation.name       = Name.unknown
-    observation.source     = "mo_website"
-    determine_observation_location(observation)
-  end
-
   # NOTE: Call `to_h` on the permitted params if problems with nested params.
-  # As of rails 5, params are an ActionController::Parameters object,
-  # not a hash.
-  def new_observation(args)
-    if args
-      Observation.new(args.permit(permitted_observation_args).to_h)
-    else
-      Observation.new
-    end
-  end
-
-  # We don't have an @observation yet.
-  def determine_observation_location(observation)
-    if Location.is_unknown?(observation.place_name) ||
-       (observation.lat && observation.lng && observation.place_name.blank?)
-      observation.location = Location.unknown
-      observation.where = nil
-    end
-    observation
+  # As of rails 5, params are ActionController::Parameters object, not hash.
+  def create_observation_object(args = {})
+    args = args&.permit(permitted_observation_args).to_h
+    now = Time.zone.now
+    Observation.new(args&.merge({ created_at: now,
+                                  updated_at: now,
+                                  user: @user,
+                                  name: Name.unknown,
+                                  source: "mo_website" }))
   end
 
   def rough_cut
@@ -103,13 +95,13 @@ module ObservationsController::Create
     create_image_objects_and_update_bad_images
   end
 
-  def save_everything_else(reason)
-    update_naming(reason)
-    attach_good_images
-    update_projects
-    update_species_lists
-    save_collection_number
-    save_herbarium_record
+  def try_to_save_new_observation
+    return false if @any_errors
+
+    return true if save_observation
+
+    @any_errors = true
+    false
   end
 
   def update_naming(reason)
@@ -246,7 +238,8 @@ module ObservationsController::Create
     @reasons         = @naming.init_reasons(reasons)
     @images          = @bad_images
     @new_image.when  = @observation.when
-    @field_code = params[:field_code]
+    @field_code      = params[:field_code]
+    init_location_var_for_reload
     init_specimen_vars_for_reload
     init_project_vars
     init_project_vars_for_reload
@@ -261,5 +254,15 @@ module ObservationsController::Create
 
     field_slip.observation = @observation
     field_slip.save
+  end
+
+  def init_location_var_for_reload
+    # keep location_id if it's -1 (new)
+    if @location || @observation.location_id.nil? ||
+       @observation.location_id.zero?
+      return
+    end
+
+    @location = @observation.location
   end
 end

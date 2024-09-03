@@ -42,7 +42,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-if [ $STASH_RESULT -ne 'No local changes to save' ]; then
+if [ "$STASH_RESULT" != 'No local changes to save' ]; then
     echo Reapply local changes... && git stash pop
     if [ $? -ne 0 ]; then
 	echo Applying the stashed changes failed.

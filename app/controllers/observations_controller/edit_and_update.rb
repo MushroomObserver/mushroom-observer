@@ -4,6 +4,7 @@
 module ObservationsController::EditAndUpdate
   include ObservationsController::SharedFormMethods
   include ObservationsController::Validators
+  include ::Locationable
 
   # Form to edit an existing observation.
   # Linked from: left panel
@@ -82,18 +83,23 @@ module ObservationsController::EditAndUpdate
     init_new_image_var(@observation.when)
     @any_errors = false
 
-    update_permitted_observation_attributes
+    update_permitted_observation_attributes # may set a new location_id
+    create_location_object_if_new(@observation)
     @observation.notes = notes_to_sym_and_compact
     warn_if_unchecking_specimen_with_records_present!
-    strip_images_if_observation_gps_hidden
-    validate_edit_place_name
+    strip_images! if @observation.gps_hidden
+
+    validate_place_name
+    validate_projects
     detach_removed_images
     try_to_upload_images
-    try_to_save_observation_if_there_are_changes
+    try_to_save_location_if_new(@observation)
+    try_to_update_observation_if_there_are_changes
 
     reload_edit_form and return if @any_errors
 
-    update_project_and_species_list_attachments
+    update_projects
+    update_species_lists
     redirect_to_observation_or_create_location
   end
 
@@ -110,16 +116,6 @@ module ObservationsController::EditAndUpdate
               @observation.sequences.empty?
 
     flash_warning(:edit_observation_turn_off_specimen_with_records_present.t)
-  end
-
-  def strip_images_if_observation_gps_hidden
-    strip_images! if @observation.gps_hidden
-  end
-
-  def validate_edit_place_name
-    return if validate_place_name && validate_projects
-
-    @any_errors = true
   end
 
   # As of 2024-06-01, users can remove images right on the edit obs form.
@@ -143,8 +139,8 @@ module ObservationsController::EditAndUpdate
     @any_errors = true if @bad_images.any?
   end
 
-  def try_to_save_observation_if_there_are_changes
-    return unless @dubious_where_reasons == [] && @observation.changed?
+  def try_to_update_observation_if_there_are_changes
+    return unless @dubious_where_reasons.blank? && @observation.changed?
 
     @observation.updated_at = Time.zone.now
     if save_observation
@@ -166,10 +162,7 @@ module ObservationsController::EditAndUpdate
     render(action: :edit)
   end
 
-  def update_project_and_species_list_attachments
-    update_projects
-    update_species_lists
-  end
+  ##############################################################################
 
   def redirect_to_observation_or_create_location
     if @observation.location_id.nil?

@@ -5,7 +5,7 @@
 # Any caching advantage in that? Then below, it'd be something like:
 #   Observation.rough_matches(letter).pluck_matches
 # Or would this scatter the code?
-# Thinking the scope could be useful for graphQL, or it could use this class.
+# Thinking the scope could be useful, or it could use this class.
 #
 class AutoComplete::ForLocation < AutoComplete::ByWord
   attr_accessor :reverse
@@ -22,7 +22,19 @@ class AutoComplete::ForLocation < AutoComplete::ByWord
       where(Location[:name].matches("#{letter}%").
         or(Location[:name].matches("% #{letter}%")))
 
-    # Turn the instances into hashes, and alter name order if requested
+    matches_array(locations)
+  end
+
+  def exact_match(string)
+    location = Location.select(:name, :id, :north, :south, :east, :west).
+               where(Location[:name].eq(string)).first
+    return [] unless location
+
+    matches_array([location])
+  end
+
+  # Turn the instances into hashes, and alter name order if requested
+  def matches_array(locations)
     matches = locations.map do |location|
       location = location.attributes.symbolize_keys
       location[:name] = Location.reverse_name(location[:name]) if reverse

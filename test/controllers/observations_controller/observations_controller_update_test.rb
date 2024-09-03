@@ -5,14 +5,10 @@ require("test_helper")
 class ObservationsControllerUpdateTest < FunctionalTestCase
   tests ObservationsController
 
-  ##############################################################################
-
   # ----------------------------------------------------------------
   #  Test :edit and :update (note :update uses method: :put)
   # ----------------------------------------------------------------
 
-  # (Sorry, these used to all be edit/update_observation, now they're
-  # confused because of the naming stuff.)
   def test_edit_observation_form
     obs = observations(:coprinus_comatus_obs)
     assert_equal("rolf", obs.user.login)
@@ -272,6 +268,162 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
 
     # Second pre-existing image has missing file, so stripping should fail.
     assert_false(old_img2.reload.gps_stripped)
+  end
+
+  ##############################################################################
+  #  Location name validation
+  def obs_for_user(user)
+    # We need an obs owned by each user to test editing (adding) locations.
+    # Roy doesn't have a simple one, but we need him for scientific_format.
+    case user.login
+    when "rolf"
+      observations(:agaricus_campestros_obs)
+    when "roy"
+      obs = observations(:agaricus_campestras_obs)
+      obs.user_id = user.id
+      obs.save
+      obs
+    end
+  end
+
+  def modified_obs_params(params, user)
+    obs = obs_for_user(user)
+    # params[:observation] = obs.attributes.merge(params[:observation] || {})
+    params[:username] = user.login
+    params[:id] = obs.id
+    params
+  end
+
+  def location_name_exists(params, user)
+    name = Location.user_format(user, params[:observation][:place_name])
+    Location.find_by(name:) || Location.is_unknown?(name)
+  end
+
+  # Test constructing observations in various ways (with minimal namings)
+  def generic_update_observation(params, l_num, user = rolf)
+    l_count = Location.count
+    params  = modified_obs_params(params, user)
+    put_requires_user(
+      :update,
+      [{ controller: "/observations", action: :show }],
+      params,
+      user.login
+    )
+
+    begin
+      if l_num.positive? || (location_name_exists(params, user) && l_num.zero?)
+        assert_redirected_to(action: :show)
+      else
+        assert_select("#dubious_location_messages")
+      end
+    rescue Minitest::Assertion => e
+      flash = get_last_flash.to_s.dup.sub!(/^(\d)/, "")
+      message = "#{e}\n" \
+      "Flash messages: (level #{Regexp.last_match(1)})\n" \
+      "< #{flash} >\n"
+      flunk(message)
+    end
+
+    assert_equal(l_count + l_num, Location.count, "Wrong Location count")
+  end
+
+  # The ones that should pass here now need to match fixtures, in order to
+  # generate a location_id, or they will be rejected.
+  def test_update_observation_dubious_place_names
+    # Location box necessary for new locations (these are all non-fixtures).
+    params = {
+      location: { north: 35, south: 34, east: -117, west: -118 }
+    }
+    # Test a reversed name with a scientific user
+    where = "USA, Massachusetts, Reversed"
+    generic_update_observation(
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      1, roy
+    )
+
+    # Test an existing name - should allow, but use existing location
+    where = locations(:salt_point).name
+    generic_update_observation(
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      0
+    )
+    assert_equal(locations(:salt_point).id,
+                 obs_for_user(rolf).reload.location_id)
+
+    # Test missing space.
+    where = "Reversible, Massachusetts,USA"
+    generic_update_observation(
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      0
+    )
+
+    # Test a bogus country name
+    where = "Bogus, Massachusetts, UAS"
+    generic_update_observation(
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      0
+    )
+    where = "UAS, Massachusetts, Bogus"
+    generic_update_observation(
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      0, roy
+    )
+
+    # Test a bad state name
+    where = "Bad State Name, USA"
+    generic_update_observation(
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      0
+    )
+    where = "USA, Bad State Name"
+    generic_update_observation(
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      0, roy
+    )
+
+    # Test mix of city and county
+    where = "Burbank, Los Angeles Co., California, USA"
+    generic_update_observation(
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      1
+    )
+    # Location should now already exist (because of the above).
+    where = "USA, California, Los Angeles Co., Burbank"
+    generic_update_observation(
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      0, roy
+    )
+
+    # Test mix of city and county
+    where = "USA, Massachusetts, Barnstable Co., Falmouth"
+    generic_update_observation(
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      1, roy
+    )
+
+    # Test some bad terms
+    where = "Some County, Ohio, USA"
+    generic_update_observation(
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      0
+    )
+    where = "Old Rd, Ohio, USA"
+    generic_update_observation(
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      0
+    )
+    where = "Old Rd., Ohio, USA"
+    generic_update_observation(
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      1
+    )
+
+    # Test some acceptable additions
+    where = "near Burbank, Southern California, USA"
+    generic_update_observation(
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      1
+    )
   end
 
   # --------------------------------------------------------------------

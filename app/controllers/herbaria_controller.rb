@@ -45,7 +45,10 @@
 # See https://tinyurl.com/ynapvpt7
 
 # View and modify Herbaria (displayed as "Fungaria")
+# rubocop:disable Metrics/ClassLength
 class HerbariaController < ApplicationController
+  include ::Locationable
+
   before_action :login_required
   # only: [:create, :destroy, :edit, :new, :update]
   before_action :store_location, only: [:create, :edit, :new, :show, :update]
@@ -99,16 +102,59 @@ class HerbariaController < ApplicationController
 
   def new
     @herbarium = Herbarium.new
+    respond_to do |format|
+      format.turbo_stream { render_modal_herbarium_form }
+      format.html
+    end
   end
 
   def edit
     @herbarium = find_or_goto_index(Herbarium, params[:id])
-    return unless @herbarium
-    return unless make_sure_can_edit!
+    return unless @herbarium && make_sure_can_edit!
 
+    set_up_herbarium_for_edit
+    respond_to do |format|
+      format.turbo_stream { render_modal_herbarium_form }
+      format.html
+    end
+  end
+
+  def set_up_herbarium_for_edit
     @herbarium.place_name         = @herbarium.location.try(&:name)
     @herbarium.personal           = @herbarium.personal_user_id.present?
     @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
+  end
+
+  def render_modal_herbarium_form
+    render(partial: "shared/modal_form",
+           locals: { title: modal_title, action: modal_form_action,
+                     identifier: modal_identifier, local: false,
+                     form: "herbaria/form" }) and return
+  end
+
+  def modal_identifier
+    case action_name
+    when "new", "create"
+      "herbarium"
+    when "edit", "update"
+      "herbarium_#{@herbarium.id}"
+    end
+  end
+
+  def modal_title
+    case action_name
+    when "new", "create"
+      :create_herbarium_title.l
+    when "edit", "update"
+      :edit_herbarium_title.l
+    end
+  end
+
+  def modal_form_action
+    case action_name
+    when "new", "create" then :create
+    when "edit", "update" then :update
+    end
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
@@ -116,7 +162,9 @@ class HerbariaController < ApplicationController
   def create
     @herbarium = Herbarium.new(herbarium_params)
     normalize_parameters
-    return render(:new) unless validate_herbarium!
+    create_location_object_if_new(@herbarium)
+    try_to_save_location_if_new(@herbarium)
+    return render(:new) unless validate_herbarium! && !@any_errors
 
     @herbarium.save
     @herbarium.add_curator(@user) if @herbarium.personal_user
@@ -130,7 +178,9 @@ class HerbariaController < ApplicationController
 
     @herbarium.attributes = herbarium_params
     normalize_parameters
-    return unless validate_herbarium!
+    create_location_object_if_new(@herbarium)
+    try_to_save_location_if_new(@herbarium)
+    return unless validate_herbarium! && !@any_errors
 
     @herbarium.save
     redirect_to_create_location_or_referrer_or_show_location
@@ -265,6 +315,10 @@ class HerbariaController < ApplicationController
     flash_notice(
       :edit_herbarium_successfully_made_personal.t(user: user.login)
     )
+    update_personal_herbarium(user)
+  end
+
+  def update_personal_herbarium(user)
     @herbarium.curators.clear
     @herbarium.add_curator(user)
     @herbarium.personal_user_id = user.id
@@ -326,7 +380,7 @@ class HerbariaController < ApplicationController
 
   def redirect_to_create_location_or_referrer_or_show_location
     redirect_to_create_location || redirect_to_referrer ||
-      redirect_with_query(herbarium_path(@herbarium))
+      show_modal_flash_or_show_herbarium
   end
 
   def redirect_to_create_location
@@ -339,11 +393,39 @@ class HerbariaController < ApplicationController
     true
   end
 
+  # this updates both the form and the flash
+  def reload_herbarium_modal_form_and_flash
+    render(
+      partial: "shared/modal_form_reload",
+      locals: { identifier: modal_identifier, form: "herbaria/form" }
+    ) and return true
+  end
+
+  # What to do if the save succeeds
+  def show_modal_flash_or_show_herbarium
+    respond_to do |format|
+      format.html do
+        redirect_with_query(herbarium_path(@herbarium)) and return
+      end
+      format.turbo_stream do
+        # Context here is the obs form.
+        flash_notice(
+          :runtime_created_name.t(type: :herbarium, value: @herbarium.name)
+        )
+        flash_notice(
+          :runtime_added_to.t(type: :herbarium, name: :observation)
+        )
+        render(partial: "herbaria/update_observation") and return
+      end
+    end
+  end
+
   def herbarium_params
     return {} unless params[:herbarium]
 
     params.require(:herbarium).
-      permit(:name, :code, :email, :mailing_address, :description,
+      permit(:name, :code, :email, :mailing_address, :description, :location_id,
              :place_name, :personal, :personal_user_name)
   end
 end
+# rubocop:enable Metrics/ClassLength

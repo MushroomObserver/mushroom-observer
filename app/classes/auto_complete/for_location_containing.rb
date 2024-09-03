@@ -25,7 +25,16 @@ class AutoComplete::ForLocationContaining < AutoComplete::ByWord
         location_box(loc).box_area
       end
 
-    # Turn the instances into hashes, and alter name order if requested
+    matches_array(locations)
+  end
+  # rubocop:enable Style/MultilineBlockChain
+
+  def exact_match(_string)
+    [rough_matches("").first]
+  end
+
+  # Turn the instances into hashes, and alter name order if requested
+  def matches_array(locations)
     matches = locations.map do |location|
       location = location.attributes.symbolize_keys
       location[:name] = Location.reverse_name(location[:name]) if reverse
@@ -35,7 +44,6 @@ class AutoComplete::ForLocationContaining < AutoComplete::ByWord
     matches.uniq { |loc| loc[:name] }
     # matches.append({ name: " ", id: 0 }) # in case we need a blank row?
   end
-  # rubocop:enable Style/MultilineBlockChain
 
   def location_box(loc)
     Mappable::Box.new(north: loc[:north], south: loc[:south],

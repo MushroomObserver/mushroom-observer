@@ -16,7 +16,7 @@ export default class extends Controller {
 
   connect() {
     // Just a "sanity check" convention, so you can tell "is this thing on?"
-    this.element.dataset.stimulus = "connected";
+    this.element.dataset.stimulus = "field-slip-job-connected";
     this.status_id = this.element.dataset.status
 
     this.start_timer_sending_requests()
@@ -24,6 +24,12 @@ export default class extends Controller {
 
   // Clear any intervals when the controller is disconnected
   disconnect() {
+    const stimulus = this.element.dataset.stimulus.split(" ")
+    if (stimulus.includes("field-slip-job-connected")) {
+      const idx = stimulus.indexOf("field-slip-job-connected")
+      stimulus.splice(idx, 1)
+      this.element.setAttribute("data-stimulus", stimulus.join(" "))
+    }
     if (this.intervalId != null) {
       clearInterval(this.intervalId)
     }
@@ -40,13 +46,21 @@ export default class extends Controller {
         const response = await get(this.endpoint_url,
           { responseKind: "turbo-stream" });
         if (response.ok) {
-          // turbo-stream prints the row in the page already
+          // Turbo replaces the row in the page already
         } else {
           console.log(`got a ${response.status}`);
         }
       }, 1000);
-    } else if (this.intervalId != null) {
-      clearInterval(this.intervalId)
+    } else {
+      // If the PDF is done, we can remove this Stimulus controller from the
+      // element and stop the timer. (NOTE: there may be other controllers.)
+      // console.log("field-slip-job is done")
+      const controllers = this.element.dataset.controller.split(" ")
+      if (controllers.includes("field-slip-job")) {
+        const idx = controllers.indexOf("field-slip-job")
+        controllers.splice(idx, 1)
+        this.element.setAttribute("data-controller", controllers.join(" "))
+      }
     }
   }
 }

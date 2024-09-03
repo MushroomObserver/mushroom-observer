@@ -32,9 +32,9 @@ module ObservationsController::SharedFormMethods
 
   # NOTE: potential gotcha... Any nested attributes must come last.
   def permitted_observation_args
-    [:place_name, :where, :lat, :lng, :alt, # :location_id,
-     :when, "when(1i)", "when(2i)", "when(3i)", :notes, :specimen,
-     :thumb_image_id, :is_collection_location, :gps_hidden]
+    [:lat, :lng, :alt, :gps_hidden, :place_name, :where, :location_id,
+     :is_collection_location, :when, "when(1i)", "when(2i)", "when(3i)",
+     :notes, :specimen, :thumb_image_id]
   end
 
   def update_permitted_observation_attributes
@@ -123,8 +123,6 @@ module ObservationsController::SharedFormMethods
     end
   end
 
-  ##############################################################################
-
   # Save observation now that everything is created successfully.
   def save_observation
     return true if @observation.save
@@ -133,6 +131,8 @@ module ObservationsController::SharedFormMethods
     flash_object_errors(@observation)
     false
   end
+
+  ##############################################################################
 
   # Attempt to upload any images.  We will attach them to the observation
   # later, assuming we can create it.  Problem is if anything goes wrong, we
@@ -263,13 +263,26 @@ module ObservationsController::SharedFormMethods
 
       if after
         project.add_observation(@observation)
-        flash_notice(:attached_to_project.t(object: :observation,
-                                            project: project.title))
+        name_flash_for_project(@observation.name, project)
       else
         project.remove_observation(@observation)
         flash_notice(:removed_from_project.t(object: :observation,
                                              project: project.title))
       end
+    end
+  end
+
+  def name_flash_for_project(name, project)
+    return unless name
+
+    count = project.count_collections(name)
+    if count == 1
+      flash_warning(:project_first_collection.t(name: name.text_name,
+                                                project: project.title))
+    else
+      flash_notice(:project_count_collections.t(count: count,
+                                                name: name.text_name,
+                                                project: project.title))
     end
   end
 

@@ -19,6 +19,7 @@ class QueuedEmail
       raise("Missing email address!") unless sender_email
       raise("Missing content!") unless content
 
+      content = prepend_logged_in_user(content)
       result = create(nil, nil)
       result.add_string(:sender_email, sender_email)
       result.add_string(:subject, subject) if subject
@@ -31,5 +32,16 @@ class QueuedEmail
       WebmasterMailer.build(sender_email: sender_email, content: content,
                             subject: subject).deliver_now
     end
+
+    ##########
+
+    def self.prepend_logged_in_user(content)
+      user = User.current
+      return content if user.blank?
+
+      "(from User ##{user.id} #{user.name}(#{user.login}))\n#{content}"
+    end
+
+    private_class_method :prepend_logged_in_user
   end
 end
