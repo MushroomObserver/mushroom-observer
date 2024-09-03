@@ -178,7 +178,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_difference("FieldSlip.count") do
       post(:create,
            params: {
-             commit: :field_slip_create_obs.t,
+             commit: :field_slip_add_images.t,
              field_slip: {
                code: code,
                project_id: projects(:eol_project).id
@@ -291,9 +291,16 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_response :success
   end
 
-  test "should show field_slip and allow owner to change" do
+  test "should take admin to edit" do
     login(@field_slip.user.login)
-    get(:show, params: { id: @field_slip.id })
+    get(:show, params: { id: @field_slip.code })
+    assert_redirected_to edit_field_slip_url(id: @field_slip.id)
+  end
+
+  test "should show field_slip and allow owner to change" do
+    field_slip = field_slips(:field_slip_no_trust)
+    login(field_slip.user.login)
+    get(:show, params: { id: field_slip.id })
     assert_response :success
     assert(response.body.include?(:field_slip_edit.t))
   end
