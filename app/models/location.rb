@@ -579,9 +579,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def self.location_name_cache
     Rails.cache.fetch(:location_names, expires_in: 15.minutes) do
-      (Location.pluck(:name) +
-       Observation.where.not(where: nil).pluck(:where) +
-       SpeciesList.where.not(where: nil).pluck(:where)).uniq
+      (Location.pluck(:name) + Observation.pluck(:where) +
+       SpeciesList.pluck(:where)).compact.uniq
     end
   end
 
