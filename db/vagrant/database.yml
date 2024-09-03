@@ -34,10 +34,18 @@ development:
 # Warning: The database defined as 'test' will be erased and
 # re-generated from your development database when you run 'rake'.
 # Do not set this db to the same as development or production.
+# https://github.com/rails/solid_cache/blob/main/README.md
+# For some reason alaises are not working in the YAML load
 test:
-  database: mo_test
-  username: mo
-  password: mo
+  primary:
+    database: mo_test
+    username: mo
+    password: mo
+  cache:
+    database: mo_test
+    username: mo
+    password: mo
+    host: 127.0.0.1
 
 production:
   database: mo_development
