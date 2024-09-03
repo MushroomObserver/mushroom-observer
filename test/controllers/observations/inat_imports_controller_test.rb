@@ -21,6 +21,8 @@ module Observations
     SITE = Observations::InatImportsController::SITE
     REDIRECT_URI = Observations::InatImportsController::REDIRECT_URI
     API_BASE = Observations::InatImportsController::API_BASE
+    INAT_AUTHORIZATION_URL =
+      Observations::InatImportsController::INAT_AUTHORIZATION_URL
 
     def test_new_inat_import
       login(users(:rolf).login)
@@ -93,7 +95,7 @@ module Observations
       assert_equal("Unstarted", inat_import.state,
                    "Need a Unstarted inat_import fixture")
 
-      stub_request(:any, authorization_url)
+      stub_request(:any, INAT_AUTHORIZATION_URL)
       login(user.login)
 
       assert_no_difference(
@@ -117,7 +119,7 @@ module Observations
       assert_equal("Unstarted", inat_import.state,
                    "Need a Unstarted inat_import fixture")
 
-      stub_request(:any, authorization_url)
+      stub_request(:any, INAT_AUTHORIZATION_URL)
       login(user.login)
 
       assert_no_difference(
@@ -177,7 +179,7 @@ module Observations
     # iNat url where user is sent in order to authorize MO access
     # to iNat confidential data
     # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
-    def authorization_url
+    def INAT_AUTHORIZATION_URL
       "https://www.inaturalist.org/oauthenticate/authorize?" \
       "client_id=#{Rails.application.credentials.inat.id}" \
       "&redirect_uri=#{REDIRECT_URI}" \
