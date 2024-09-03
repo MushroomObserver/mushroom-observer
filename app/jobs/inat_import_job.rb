@@ -138,7 +138,6 @@ class InatImportJob < ApplicationJob
     # TODO: Other things done by Observations#create
     # save_everything_else(params.dig(:naming, :reasons))
     # strip_images! if @observation.gps_hidden
-    # update_field_slip(@observation, params[:field_code])
   end
 
   def create_observation(inat_obs)
