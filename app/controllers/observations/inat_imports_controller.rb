@@ -53,7 +53,6 @@ module Observations
     def new; end
 
     def create
-      debugger
       return username_required if params[:inat_username].blank?
       return reload_form if bad_inat_ids_param?
       return designation_required unless imports_designated?
@@ -118,7 +117,6 @@ module Observations
 
     # iNat redirects here after user completes iNat authorization
     def authorization_response
-      debugger
       auth_code = params[:code]
       return not_authorized if auth_code.blank?
 

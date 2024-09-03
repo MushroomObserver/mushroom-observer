@@ -51,7 +51,6 @@ class FieldSlipsController < ApplicationController
   def create
     return import_inat_obs if params[:commit] == :field_slip_import_from_inat.t
 
-    debugger
     respond_to do |format|
       @field_slip = FieldSlip.new(field_slip_params)
       check_project_membership
