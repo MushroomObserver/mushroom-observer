@@ -70,7 +70,8 @@ class FieldSlipsControllerTest < FunctionalTestCase
     post(:create, params: { commit: :field_slip_import_from_inat.l,
                             field_slip: { code: field_slip_code,
                                           other_codes: inat_id,
-                                          inat_username: inat_username } })
+                                          inat_username: inat_username,
+                                          project_id: project.id } })
 
     inat_import = InatImport.find_by(user: user)
     assert(inat_import.present?, "Failed to create InatImport object")

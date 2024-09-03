@@ -250,7 +250,8 @@ class FieldSlipsController < ApplicationController
       state: "Authorizing",
       import_all: nil,
       inat_ids: params[:field_slip][:other_codes],
-      inat_username: params[:field_slip][:inat_username].strip
+      inat_username: params[:field_slip][:inat_username].strip,
+      project_id: params[:field_slip][:project_id]
     )
 
     redirect_to(Observations::InatImportsController::INAT_AUTHORIZATION_URL,
