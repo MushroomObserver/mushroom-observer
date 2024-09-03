@@ -126,36 +126,36 @@ class InatImportJob < ApplicationJob
   end
 
   def import_one_result(result)
-    inat_obs = InatObs.new(result)
-    return unless inat_obs.importable?
+    @inat_obs = InatObs.new(result)
+    return unless @inat_obs.importable?
 
-    create_observation(inat_obs)
-    add_inat_images(inat_obs.inat_obs_photos)
-    update_names_and_proposals(inat_obs)
-    add_inat_sequences(inat_obs)
+    create_observation
+    add_inat_images
+    update_names_and_proposals
+    add_inat_sequences
     add_field_slip
-    add_import_snapshot_comment(inat_obs)
+    add_import_snapshot_comment
     # TODO: Other things done by Observations#create
     # save_everything_else(params.dig(:naming, :reasons))
     # strip_images! if @observation.gps_hidden
   end
 
-  def create_observation(inat_obs)
-    name_id = adjust_for_provisional(inat_obs)
+  def create_observation
+    name_id = adjust_for_provisional
 
     @observation = Observation.create(
       user: @inat_import.user,
-      when: inat_obs.when,
-      location: inat_obs.location,
-      where: inat_obs.where,
-      lat: inat_obs.lat,
-      lng: inat_obs.lng,
-      gps_hidden: inat_obs.gps_hidden,
+      when: @inat_obs.when,
+      location: @inat_obs.location,
+      where: @inat_obs.where,
+      lat: @inat_obs.lat,
+      lng: @inat_obs.lng,
+      gps_hidden: @inat_obs.gps_hidden,
       name_id: name_id,
       text_name: Name.find(name_id).text_name,
-      notes: inat_obs.notes,
+      notes: @inat_obs.notes,
       source: "mo_inat_import",
-      inat_id: inat_obs.inat_id
+      inat_id: @inat_obs.inat_id
     )
     # Ensure this Name wins consensus_calc ties
     # by creating this naming and vote first
@@ -168,9 +168,9 @@ class InatImportJob < ApplicationJob
   # So if iNat has a provisional name observation field, then
   #   add an MO provisional name if none exists, and
   #   treat the provisional name as the MO consensus.
-  def adjust_for_provisional(inat_obs)
-    prov_name = inat_obs.provisional_name
-    return inat_obs.name_id if prov_name.blank?
+  def adjust_for_provisional
+    prov_name = @inat_obs.provisional_name
+    return @inat_obs.name_id if prov_name.blank?
 
     if need_new_prov_name?(prov_name)
       name = add_provisional_name(prov_name)
@@ -200,8 +200,8 @@ class InatImportJob < ApplicationJob
     new_name
   end
 
-  def add_inat_images(inat_obs_photos)
-    inat_obs_photos.each do |obs_photo|
+  def add_inat_images
+    @inat_obs.inat_obs_photos.each do |obs_photo|
       photo = InatObsPhoto.new(obs_photo)
       api = InatPhotoImporter.new(photo_importer_params(photo)).api
       # TODO: Error handling? 2024-06-19 jdc.
@@ -248,16 +248,16 @@ class InatImportJob < ApplicationJob
     User.find_by(login: "MO Webmaster")
   end
 
-  def update_names_and_proposals(inat_obs)
-    add_identifications_with_namings(inat_obs)
-    add_provisional_naming(inat_obs) # iNat provisionals are not identifications
+  def update_names_and_proposals
+    add_identifications_with_namings
+    add_provisional_naming # iNat provisionals are not identifications
     adjust_consensus_name_naming # also adds naming for provisionals
 
     Observation::NamingConsensus.new(@observation).calc_consensus
   end
 
-  def add_identifications_with_namings(inat_obs)
-    inat_obs.inat_identifications.each do |identification|
+  def add_identifications_with_namings
+    @inat_obs.inat_identifications.each do |identification|
       inat_taxon = ::InatTaxon.new(identification[:taxon])
       next if name_already_proposed?(inat_taxon.name)
 
@@ -278,8 +278,8 @@ class InatImportJob < ApplicationJob
                 user: user, value: value)
   end
 
-  def add_provisional_naming(inat_obs)
-    nom_prov = inat_obs.provisional_name
+  def add_provisional_naming
+    nom_prov = @inat_obs.provisional_name
     return if nom_prov.blank?
 
     # NOTE: There will be >= 1 match because of add_missing_provisional_name.
@@ -309,13 +309,13 @@ class InatImportJob < ApplicationJob
     end
   end
 
-  def lat_lon_accuracy(inat_obs)
-    "#{inat_obs.inat_location} " \
-    "+/-#{inat_obs.inat_public_positional_accuracy} m"
+  def lat_lon_accuracy
+    "#{@inat_obs.inat_location} " \
+    "+/-#{@inat_obs.inat_public_positional_accuracy} m"
   end
 
-  def add_inat_sequences(inat_obs)
-    inat_obs.sequences.each do |sequence|
+  def add_inat_sequences
+    @inat_obs.sequences.each do |sequence|
       params = {
         action: :sequence,
         method: :post,
@@ -346,32 +346,32 @@ class InatImportJob < ApplicationJob
     field_slip.update(observation_id: @observation.id, user: @observation.user)
   end
 
-  def add_import_snapshot_comment(inat_obs)
+  def add_import_snapshot_comment
     params = {
       target: @observation,
       summary: "#{:inat_data_comment.t} #{@observation.created_at}",
-      comment: comment(inat_obs),
+      comment: comment,
       user: inat_manager
     }
 
     Comment.create(params)
   end
 
-  def comment(inat_obs)
+  def comment
     <<~COMMENT.gsub(/^\s+/, "")
-      #{:USER.t}: #{inat_obs.inat_user_login}
-      #{:OBSERVED.t}: #{inat_obs.when}\n
-      #{:LAT_LON.t}: #{lat_lon_accuracy(inat_obs)}\n
-      #{:PLACE.t}: #{inat_obs.inat_place_guess}\n
-      #{:ID.t}: #{inat_obs.inat_taxon_name}\n
-      #{:DQA.t}: #{inat_obs.dqa}\n
+      #{:USER.t}: #{@inat_obs.inat_user_login}
+      #{:OBSERVED.t}: #{@inat_obs.when}\n
+      #{:LAT_LON.t}: #{lat_lon_accuracy}\n
+      #{:PLACE.t}: #{@inat_obs.inat_place_guess}\n
+      #{:ID.t}: #{@inat_obs.inat_taxon_name}\n
+      #{:DQA.t}: #{@inat_obs.dqa}\n
       #{:ANNOTATIONS.t}: #{:UNDER_DEVELOPMENT.t}\n
-      #{:PROJECTS.t}: #{inat_obs.inat_project_names}\n
+      #{:PROJECTS.t}: #{@inat_obs.inat_project_names}\n
       #{:SEQUENCES.t}: #{:UNDER_DEVELOPMENT.t}\n
       #{:OBSERVATION_FIELDS.t}: \n\
 
-      #{obs_fields(inat_obs.inat_obs_fields)}\n
-      #{:TAGS.t}: #{inat_obs.inat_tags.join(" ")}\n
+      #{obs_fields(@inat_obs.inat_obs_fields)}\n
+      #{:TAGS.t}: #{@inat_obs.inat_tags.join(" ")}\n
     COMMENT
   end
 end
