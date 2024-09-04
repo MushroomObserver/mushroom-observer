@@ -2,7 +2,7 @@
 
 [Puma-dev](https://github.com/puma/puma-dev) provides an SSL and domain name for the local environment, making it more like production.
 
-### Linux & MacOS instructions
+## Linux & MacOS instructions
 - Stop your local rails server, if it's running
 - Run `brew install puma/puma/puma-dev`
 - Check OS specific [further installation and setup](https://github.com/puma/puma-dev?tab=readme-ov-file#installation).
