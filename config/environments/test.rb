@@ -56,7 +56,7 @@ MushroomObserver::Application.configure do
   # config.action_controller.perform_caching = false
 
   # Use a different cache store in test.
-  config.cache_store = :memory_store
+  config.cache_store = :null_store
 
   # Render exception templates for rescuable exceptions and raise for other
   # exceptions.
