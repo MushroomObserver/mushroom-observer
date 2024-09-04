@@ -8,7 +8,7 @@ MushroomObserver::Application.configure do
   config.hosts = [
     IPAddr.new("0.0.0.0/0"),        # All IPv4 addresses.
     IPAddr.new("::/0"),             # All IPv6 addresses.
-    "localhost",                    # The localhost reserved domain.
+    "localhost"                     # The localhost reserved domain.
     # ENV.fetch("RAILS_DEVELOPMENT_HOSTS") # Additional comma-separated hosts.
   ]
   # Allow the default puma-dev host.
