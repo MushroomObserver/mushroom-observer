@@ -5,9 +5,10 @@
 module PatternSearchHelper
   def pattern_search_field(**args)
     args[:label] ||= pattern_search_helper_for_label(args[:field])
-    helper = pattern_search_helper_for_field(args[:field], args[:type])
-    args = prepare_args_for_pattern_search_field(args, helper)
-    send(helper, **args) if helper
+    field_type = pattern_search_field_type_from_parser(**args)
+    component = PATTERN_SEARCH_FIELD_HELPERS[field_type][:component]
+    args = prepare_args_for_pattern_search_field(args, field_type, component)
+    send(component, **args) if component
   end
 
   def pattern_search_helper_for_label(field)
@@ -18,34 +19,56 @@ module PatternSearchHelper
     end
   end
 
-  # The subclasses say how they're going to parse their fields, so we can use
-  # that to determine which helper to use.
-  def pattern_search_helper_for_field(field, type)
-    return :text_field_with_label if field == :pattern
+  # The PatternSearch subclasses define how they're going to parse their
+  # fields, so we can use that to assign a field helper.
+  #   example: :parse_yes -> :pattern_search_yes_field
+  # If the field is :pattern, there's no assigned parser.
+  def pattern_search_field_type_from_parser(**args)
+    return :pattern if args[:field] == :pattern
 
-    type = PatternSearch.const_get(type.capitalize).params[field][1]
-    PATTERN_SEARCH_FIELD_HELPERS[type]
+    subclass = PatternSearch.const_get(args[:type].capitalize)
+    parser = subclass.params[args[:field]][1]
+    parser.to_s.gsub(/^parse_/, "").to_sym
   end
 
   # Convenience for subclasses to access helper methods via PARAMS
   PATTERN_SEARCH_FIELD_HELPERS = {
-    parse_yes: :pattern_search_yes_field,
-    parse_boolean: :pattern_search_boolean_field,
-    parse_yes_no_both: :pattern_search_yes_no_both_field,
-    parse_date_range: :pattern_search_date_range_field,
-    parse_rank_range: :pattern_search_rank_range_field,
-    parse_string: :text_field_with_label
+    pattern: { component: :text_field_with_label, args: {} },
+    yes: { component: :pattern_search_yes_field, args: {} },
+    boolean: { component: :pattern_search_boolean_field, args: {} },
+    yes_no_both: { component: :pattern_search_yes_no_both_field, args: {} },
+    date_range: { component: :pattern_search_date_range_field, args: {} },
+    rank_range: { component: :pattern_search_rank_range_field, args: {} },
+    string: { component: :text_field_with_label, args: {} },
+    list_of_strings: { component: :text_field_with_label, args: {} },
+    list_of_herbaria: { component: :autocompleter_field,
+                        args: { type: :herbarium } },
+    list_of_locations: { component: :autocompleter_field,
+                         args: { type: :location } },
+    list_of_names: { component: :autocompleter_field, args: { type: :name } },
+    list_of_projects: { component: :autocompleter_field,
+                        args: { type: :project } },
+    list_of_species_lists: { component: :autocompleter_field,
+                             args: { type: :species_list } },
+    list_of_users: { component: :autocompleter_field, args: { type: :user } },
+    confidence: { component: :pattern_search_confidence_field, args: {} },
+    longitude: { component: :pattern_search_longitude_field, args: {} },
+    latitude: { component: :pattern_search_latitude_field, args: {} }
   }.freeze
 
-  # Bootstrap 3 can't do full-width inline label/field.
-  def prepare_args_for_pattern_search_field(args, helper)
-    if helper == :text_field_with_label && args[:field] != :pattern
+  # Prepares HTML args for the field helper. This is where we can make
+  # adjustments to the args hash before passing it to the field helper.
+  # NOTE: Bootstrap 3 can't do full-width inline label/field.
+  def prepare_args_for_pattern_search_field(args, field_type, component)
+    if component == :text_field_with_label && args[:field] != :pattern
       args[:inline] = true
     end
 
-    args.except(:type)
+    PATTERN_SEARCH_FIELD_HELPERS[field_type][:args].merge(args.except(:type))
   end
 
+  # FIELD HELPERS
+  #
   def pattern_search_yes_field(**args)
     check_box_with_label(value: "yes", **args)
   end
@@ -100,5 +123,17 @@ module PatternSearchHelper
         end
       ].safe_join
     end
+  end
+
+  def pattern_search_confidence_field(**args)
+    select_with_label(options: Vote.opinion_menu, **args)
+  end
+
+  def pattern_search_longitude_field(**args)
+    text_field_with_label(**args.merge(between: "(-180.0 to 180.0)"))
+  end
+
+  def pattern_search_latitude_field(**args)
+    text_field_with_label(**args.merge(between: "(-90.0 to 90.0)"))
   end
 end
