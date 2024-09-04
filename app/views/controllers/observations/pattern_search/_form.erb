@@ -1,16 +1,48 @@
 <%
 fields_1 = {
-  search: [:pattern],
-  date: [:date, :created, :modified],
-  quality: [[:has_observations, :deprecated], [:has_author, :author],
-            [:has_citation, :citation]]
-}
-fields_2 = {
-  scope: [[:has_synonyms, :include_synonyms], [:include_subtaxa,
-          :include_misspellings], :rank, :lichen],
-  detail: [[:has_classification, :classification], [:has_notes, :notes],
-           [:has_comments, :comments], :has_description]
-}
+  # date
+  date: [:date, :parse_date_range],
+  created: [:created_at, :parse_date_range],
+  modified: [:updated_at, :parse_date_range],
+
+  # names
+  has_name: [:with_name, :parse_boolean],
+  name: [:names, :parse_list_of_names],
+  confidence: [:confidence, :parse_confidence],
+  exclude_consensus: [:exclude_consensus, :parse_boolean], # of_look_alikes
+  include_subtaxa: [:include_subtaxa, :parse_boolean],
+  include_synonyms: [:include_synonyms, :parse_boolean],
+  include_all_name_proposals: [:include_all_name_proposals, :parse_boolean],
+  lichen: [:lichen, :parse_boolean],
+
+  # location
+  location: [:locations, :parse_list_of_locations],
+  region: [:region, :parse_list_of_strings],
+  has_public_lat_lng: [:with_public_lat_lng, :parse_boolean],
+  is_collection_location: [:is_collection_location, :parse_boolean],
+  east: [:east, :parse_longitude],
+  north: [:north, :parse_latitude],
+  south: [:south, :parse_latitude],
+  west: [:west, :parse_longitude],
+
+  # detail
+  has_images: [:with_images, :parse_boolean],
+  has_specimen: [:with_specimen, :parse_boolean],
+  has_sequence: [:with_sequences, :parse_yes],
+  has_notes: [:with_notes, :parse_boolean],
+  has_field: [:with_notes_fields, :parse_string],
+  notes: [:notes_has, :parse_string],
+  has_comments: [:with_comments, :parse_yes],
+  comments: [:comments_has, :parse_string],
+
+  # associated with
+  user: [:users, :parse_list_of_users],
+  herbarium: [:herbaria, :parse_list_of_herbaria],
+  list: [:species_lists, :parse_list_of_species_lists],
+  project: [:projects, :parse_list_of_projects],
+  project_lists: [:project_lists, :parse_list_of_projects],
+  field_slip: [:field_slips, :parse_list_of_strings],
+}.freeze
 %>
 
 <%= form_with(url: { action: :create }) do |f| %>
