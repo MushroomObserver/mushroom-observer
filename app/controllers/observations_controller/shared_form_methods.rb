@@ -263,13 +263,26 @@ module ObservationsController::SharedFormMethods
 
       if after
         project.add_observation(@observation)
-        flash_notice(:attached_to_project.t(object: :observation,
-                                            project: project.title))
+        name_flash_for_project(@observation.name, project)
       else
         project.remove_observation(@observation)
         flash_notice(:removed_from_project.t(object: :observation,
                                              project: project.title))
       end
+    end
+  end
+
+  def name_flash_for_project(name, project)
+    return unless name
+
+    count = project.count_collections(name)
+    if count == 1
+      flash_warning(:project_first_collection.t(name: name.text_name,
+                                                project: project.title))
+    else
+      flash_notice(:project_count_collections.t(count: count,
+                                                name: name.text_name,
+                                                project: project.title))
     end
   end
 

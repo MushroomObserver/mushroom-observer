@@ -399,6 +399,10 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     Checklist::ForProject.new(self).num_taxa
   end
 
+  def count_collections(name)
+    observations.where(name:).count
+  end
+
   def violations
     out_of_range_observations.to_a.union(out_of_area_observations)
   end
@@ -416,6 +420,14 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   #  :section: queries re related Observations
   #
   ##############################################################################
+
+  def happening?
+    now = Time.zone.now
+    return false if start_date.present? && now < start_date
+    return false if end_date.present? && now > end_date
+
+    true
+  end
 
   def out_of_range_observations
     if start_date.nil? && end_date.nil?
