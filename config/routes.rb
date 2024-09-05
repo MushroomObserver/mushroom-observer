@@ -483,6 +483,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("locations/map", to: "locations/maps#show", as: "map_locations")
 
   # ----- Names: a lot of actions  ----------------------------
+  namespace :names do
+    get("search/new", to: "pattern_search#new", as: "new_search")
+    post("search", to: "pattern_search#create", as: "search")
+  end
+
   resources :names, id: /\d+/, shallow: true do
     # These routes are for dealing with name attributes.
     # They're not `resources` because they don't have their own IDs.
@@ -567,15 +572,15 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                            as: "names_eol_preview")
   get("names/eol_expanded_review", to: "names/eol_data/expanded_review#show",
                                    as: "names_eol_expanded_review")
-  get("names/search/new", to: "names/pattern_search#new", as: "new_name_search")
-  post("names/search", to: "names/pattern_search#create", as: "name_search")
 
 
   # ----- Observations: standard actions  ----------------------------
   namespace :observations do
     resources :downloads, only: [:new, :create]
 
-    # Not under resources :observations because the obs doesn't have an id yet
+    get("search/new", to: "pattern_search#new", as: "new_search")
+    post("search", to: "pattern_search#create", as: "search")
+    # uploads are not under resources because the obs doesn't have an id yet
     get("images/uploads/new", to: "images/uploads#new",
                               as: "new_image_upload_for")
     post("images/uploads", to: "images/uploads#create",
