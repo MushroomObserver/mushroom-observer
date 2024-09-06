@@ -159,6 +159,7 @@ class FieldSlipsController < ApplicationController
     if obs
       @field_slip.project&.add_observation(obs)
       @field_slip.update!(observation: obs)
+      name_flash_for_project(name, @field_slip.project)
       redirect_to(observation_url(obs.id))
     else
       redirect_to(new_observation_url(field_code: @field_slip.code,
