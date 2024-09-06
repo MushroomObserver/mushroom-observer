@@ -2855,9 +2855,11 @@
   field_slip_project_success: Field Slip associated with the [TITLE] Project
   field_slip_quick_no_location: Quick create requires an existing location
   field_slip_quick_no_name: Quick create requires an existing name
-  field_slip_import_from_inat: Import from iNat
+  field_slip_import_from_inat: Import an iNat Observation
   field_slip_import_use_other_codes: uses iNat ID from Other Codes (above)
-  field_slip_inat_user_name: iNat username (if known)
+  field_slip_inat_id: "iNat observation #"
+  field_slip_inat_user_name: iNat username
+  field_slip_inat_import: Import
 
   field_slip_remove_observation: Removed [OBSERVATION] from [TITLE] Project
   field_slip_show: Show [:FIELD_SLIP]

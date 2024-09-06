@@ -49,7 +49,7 @@ class FieldSlipsController < ApplicationController
 
   # POST /field_slips or /field_slips.json
   def create
-    return import_inat_obs if params[:commit] == :field_slip_import_from_inat.t
+    return import_inat_obs if params[:commit] == :field_slip_inat_import.t
 
     respond_to do |format|
       @field_slip = FieldSlip.new(field_slip_params)
@@ -118,7 +118,7 @@ class FieldSlipsController < ApplicationController
   private
 
   def field_slip_redirect(obs_id)
-    if foray_recorder?
+    if helpers.foray_recorder?(@field_slip)
       redirect_to(edit_field_slip_url(id: @field_slip.id))
     else
       redirect_to(observation_url(id: obs_id))
@@ -244,16 +244,17 @@ class FieldSlipsController < ApplicationController
   end
 
   def import_inat_obs
+    inat_username = params[:field_slip][:inat_username]
+    inat_username.strip! if inat_username.present?
     inat_import = InatImport.find_or_create_by(user: User.current)
     inat_import.update(
       user: User.current,
       state: "Authorizing",
       import_all: nil,
-      inat_ids: params[:field_slip][:other_codes],
-      inat_username: params[:field_slip][:inat_username].strip,
+      inat_ids: params[:field_slip][:inat_id],
+      inat_username: inat_username,
       project_id: params[:field_slip][:project_id]
     )
-
     redirect_to(Observations::InatImportsController::INAT_AUTHORIZATION_URL,
                 allow_other_host: true)
   end

@@ -134,6 +134,7 @@ module Observations
 
     private
 
+    # FIXME: Background job cannot flash or redirect
     def not_authorized
       flash_error(:inat_no_authorization.l)
       redirect_to(observations_path)

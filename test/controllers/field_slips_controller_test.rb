@@ -52,32 +52,27 @@ class FieldSlipsControllerTest < FunctionalTestCase
     get(:new, params: { code: code })
 
     assert_response :success
-    assert_select(
-      "input[value=?]", :field_slip_import_from_inat.l, true,
-      "Field Slip Record should have option to import iNat observation"
-    )
+    assert_select("input[value=#{:IMPORT.l}]", true,
+                  "Field Slip Record missing option to import iNat observation")
   end
 
-  test "should start inat import if inat import" do
+  test "should start inat import if inat import by project admin" do
     inat_id = "654321"
-    inat_username = "anything"
     field_slip = field_slips(:field_slip_no_obs)
     field_slip_code = field_slip.code
     project = field_slip.project
     user = project.user
-
+    debugger
     login(user.login)
     post(:create, params: { commit: :field_slip_import_from_inat.l,
                             field_slip: { code: field_slip_code,
-                                          other_codes: inat_id,
-                                          inat_username: inat_username,
+                                          inat_id: inat_id,
                                           project_id: project.id } })
 
     inat_import = InatImport.find_by(user: user)
     assert(inat_import.present?, "Failed to create InatImport object")
     assert_equal(user, inat_import.user)
     assert_equal(inat_id, inat_import.inat_ids)
-    assert_equal(inat_username, inat_import.inat_username)
 
     assert_redirected_to(
       Observations::InatImportsController::INAT_AUTHORIZATION_URL

@@ -23,7 +23,6 @@ class InatImportJob < ApplicationJob
 
     api_token = trade_access_token_for_jwt_api_token(@inat_import.token)
     @inat_import.update(token: api_token, state: "Importing")
-
     import_requested_observations
 
     @inat_import.update(state: "Done")

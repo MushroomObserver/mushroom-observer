@@ -38,22 +38,30 @@
     <%= autocompleter_field(form: form, field: :field_slip_id_by,
                             label: :ID_BY.t + ":", type: :user) %>
     <%= text_field_with_label(form: form, field: :other_codes,
-                              label: "#{:field_slip_other_codes.t} (#{:field_slip_other_example.t}):") %>
+                              label: "#{:field_slip_other_codes.t}:") %>
 
     <% if action == "new" %>
       <%= submit_button(
         form: form, button: :field_slip_quick_create_obs.t, class: "mb-5"
       ) %>
-      <%= text_field_with_label(form: form, field: :inat_username,
-                                label: "#{:field_slip_inat_user_name.t}:") %>
-      <div class="mb-5">
-      <%= submit_button(
-        form: form, button: :field_slip_import_from_inat.t, class: "align-middle"
-      )
-      %>
-      <%= tag.span(:field_slip_import_use_other_codes.t,
-                            class: "font-weight-bold") %>
-      </div>
+
+      <%= panel_block(id: "inat_import",
+                      heading: :field_slip_import_from_inat.t,
+                      class: "name-section text-center") do %>
+        <%= text_field_with_label(form: form, field: :inat_id,
+                                  label: "#{:field_slip_inat_id.t}:") %>
+        <%# Foray recorder won't know the inat_username of the inat user.
+            Others should be importing their own obss, so they should know.%>
+        <% unless foray_recorder?(field_slip) %>
+          <%= text_field_with_label(
+            form: form, field: :inat_username,
+            label: "#{:field_slip_inat_user_name.t}:"
+          ) %>
+        <% end %>
+        <%= submit_button(
+          form: form, button: :IMPORT.t, class: "align-middle text-center"
+        ) %>
+      <% end %>
     <% end %>
 
     <%= render(partial: "shared/notes_fields",
