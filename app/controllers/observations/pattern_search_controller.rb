@@ -27,8 +27,13 @@ module Observations
       params.permit(observation_search_params)
     end
 
+    # need to add :pattern to the list of params, plus the hidden_id fields
+    # of the autocompleters.
     def observation_search_params
-      PatternSearch::Observation.params.keys + [:pattern]
+      PatternSearch::Observation.params.keys + [
+        :pattern, :name_id, :user_id, :location_id, :species_list_id,
+        :project_id, :herbarium_id
+      ]
     end
   end
 end
