@@ -48,7 +48,7 @@ class UsersController < ApplicationController
 
   private
 
-  # Display list of User's whose name, notes, etc. match a string pattern.
+  # Display list of Users whose name, notes, etc. match a string pattern.
   def user_search
     pattern = params[:pattern].to_s
     if (user = user_exact_match(pattern))
@@ -59,10 +59,11 @@ class UsersController < ApplicationController
     end
   end
 
+  # This doesn't return direct hits on the user login or name, in case fuzzy.
   def user_exact_match(pattern)
     if ((pattern.match?(/^\d+$/) && (user = User.safe_find(pattern))) ||
-       (user = User.find_by(login: pattern)) ||
-       (user = User.find_by(name: pattern)) ||
+      #  (user = User.find_by(login: pattern)) ||
+      #  (user = User.find_by(name: pattern)) ||
        (user = User.find_by(email: pattern))) && user.verified
       return user
     end
