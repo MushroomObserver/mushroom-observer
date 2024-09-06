@@ -593,25 +593,25 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     CountryCounter.new.countries_by_count
   end
 
-  @@location_cache = nil
+  def self.location_name_cache
+    Rails.cache.fetch(:location_names, expires_in: 15.minutes) do
+      (Location.pluck(:name) + Observation.pluck(:where) +
+       SpeciesList.pluck(:where)).compact.uniq
+    end
+  end
 
-  # Check if a given name (postal order) already exists as a defined
-  # or undefined location.
-  def self.location_exists(name)
+  # Check if a given place name (postal order) already exists,
+  # defined as a Location or undefined as a saved `where` string.
+  def self.location_name_exists(name)
     return false unless name
 
-    @@location_cache ||= (
-      Location.pluck(:name) +
-        Observation.where.not(where: nil).pluck(:where) +
-        SpeciesList.where.not(where: nil).pluck(:where)
-    ).uniq
-    @@location_cache.member?(name)
+    location_name_cache.member?(name)
   end
 
   # Decide if the given name is dubious for any reason
   def self.dubious_name?(name, provide_reasons = false, check_db = true)
     reasons = []
-    unless check_db && location_exists(name)
+    unless check_db && location_name_exists(name)
       reasons += check_for_empty_name(name)
       reasons += check_for_dubious_commas(name)
       reasons += check_for_bad_country_or_state(name)

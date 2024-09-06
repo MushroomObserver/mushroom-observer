@@ -299,12 +299,16 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     obj = args[:object] || args[:form]&.object
     start_year = args[:start_year] || 20.years.ago.year
     end_year = args[:end_year] || Time.zone.now.year
-    init_value = obj.try(&field).try(&:year)
-    if init_value && init_value < start_year && init_value > 1900
-      start_year = init_value
+    selected = Time.zone.today
+    # The field may not be an attribute of the object
+    if obj.present? && obj.respond_to?(field)
+      init_year = obj.try(&field).try(&:year)
+      selected = obj.try(&field) || Time.zone.today
     end
-    opts = { start_year: start_year, end_year: end_year,
-             selected: obj.try(&field) || Time.zone.today,
+    if init_year && init_year < start_year && init_year > 1900
+      start_year = init_year
+    end
+    opts = { start_year:, end_year:, selected:,
              order: args[:order] || [:day, :month, :year] }
     opts[:index] = args[:index] if args[:index].present?
     opts
