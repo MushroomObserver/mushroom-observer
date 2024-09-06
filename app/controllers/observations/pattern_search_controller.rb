@@ -17,7 +17,8 @@ module Observations
 
     def create
       @pattern = human_formatted_pattern_search_string
-      redirect_to(controller: "/names", action: :index, pattern: @pattern)
+      redirect_to(controller: "/observations", action: :index,
+                  pattern: @pattern)
     end
 
     private

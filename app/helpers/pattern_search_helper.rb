@@ -27,6 +27,10 @@ module PatternSearchHelper
     return :pattern if args[:field] == :pattern
 
     subclass = PatternSearch.const_get(args[:type].capitalize)
+    unless subclass.params[args[:field]]
+      raise "No parser defined for #{args[:field]} in #{subclass}"
+    end
+
     parser = subclass.params[args[:field]][1]
     parser.to_s.gsub(/^parse_/, "").to_sym
   end

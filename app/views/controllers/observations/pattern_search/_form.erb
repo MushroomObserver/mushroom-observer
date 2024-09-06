@@ -1,17 +1,17 @@
 <%
 fields_1 = {
   search: [:pattern],
-  date: [:date, :created, :modified],
-  taxon: [[:has_name, :name], [:lichen, :confidence],
-          [:include_subtaxa, :include_synonyms],
-          [:include_all_name_proposals, :exclude_consensus]],
-  location: [:location, :region, :has_public_lat_lng, :is_collection_location,
-             :east, :north, :south, :west],
+  name: [[:has_name, :lichen], :name, :confidence,
+         [:include_subtaxa, :include_synonyms],
+         [:include_all_name_proposals, :exclude_consensus]],
+  location: [:location, :region, [:has_public_lat_lng, :is_collection_location],
+             [:east, :west], [:north, :south]],
 }.freeze
 fields_2 = {
+  date: [:date, :created, :modified],
   detail: [[:has_specimen, :has_sequence], [:has_images, :has_notes],
            [:has_field, :notes], [:has_comments, :comments]],
-  associated: [:user, :herbarium, :list, :project, :project_lists, :field_slip],
+  connected: [:user, :herbarium, :list, :project, :project_lists, :field_slip],
 }.freeze
 %>
 
@@ -31,12 +31,13 @@ fields_2 = {
                   <% field.each do |subfield| %>
                     <%= tag.div(class: "col-xs-12 col-lg-6") do %>
                       <%= pattern_search_field(form: f, field: subfield,
-                                               type: :name) %>
+                                               type: :observation) %>
                     <% end %>
                   <% end %>
                 <% end %>
               <% else %>
-                <%= pattern_search_field(form: f, field: field, type: :name) %>
+                <%= pattern_search_field(form: f, field: field,
+                                         type: :observation) %>
               <% end %>
 
             <% end %>

@@ -477,6 +477,7 @@
   confidence_level: confidence level
   CONFIDENCE_LEVELS: Confidence Levels
   confidence_levels: confidence levels
+  CONNECTED_TO: Connected to
   CONSTRAINT_VIOLATIONS: Constraint Violations
   constraint_violations: constraint violations
   COORDINATES: Coordinates
@@ -1180,6 +1181,9 @@
   search_term_group_quality: "[:QUALITY]"
   search_term_group_scope: "[:SCOPE]"
   search_term_group_detail: "[:DETAIL]"
+  search_term_group_name: "[:NAME]"
+  search_term_group_location: "[:LOCATION]"
+  search_term_group_connected: "[:CONNECTED_TO]"
 
   # Words recognized in search bar.
   # e.g. "user:me"
@@ -2849,7 +2853,7 @@
   field_slip_other_codes: Other Codes
   field_slip_other_example: e.g., iNat ID
   field_slip_project_success: Field Slip associated with the [TITLE] Project
-  field_slip_quick_no_location: Quick create requires an existing location 
+  field_slip_quick_no_location: Quick create requires an existing location
   field_slip_quick_no_name: Quick create requires an existing name
 
   field_slip_remove_observation: Removed [OBSERVATION] from [TITLE] Project
