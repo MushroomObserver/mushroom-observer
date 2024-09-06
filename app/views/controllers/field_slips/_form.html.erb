@@ -21,12 +21,12 @@
           label: :Project.t + ":", options: field_slip.projects) %>
     <% end %>
 
-    <%= form.hidden_field(:code, value: field_slip.code) %>
-    <%= form.label(:date, "#{:DATE.t}: ") %>
-    <%= form.date_select(:date,
-                         { start_year: Date.today.year - 10,
-        end_year: Date.today.year + 10 }) %><br/>
-    <br/>
+    <%= date_select_with_label(form:, field: :date, label: "#{:DATE.t}:",
+                               object: field_slip, inline: true,
+                               order: [:year, :month, :day],
+                               start_year: Date.today.year - 10,
+                               end_year: Date.today.year + 10) %>
+
 
     <%= autocompleter_field(form: form, field: :collector,
                             label: :COLLECTOR.t + ":", type: :user) %>
