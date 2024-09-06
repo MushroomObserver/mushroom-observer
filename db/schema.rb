@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_06_043524) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_06_052015) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -696,6 +696,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_06_043524) do
     t.string "hostname"
     t.text "metadata"
     t.datetime "created_at", null: false
+    t.string "name"
     t.index ["last_heartbeat_at"], name: "index_solid_queue_processes_on_last_heartbeat_at"
     t.index ["supervisor_id"], name: "index_solid_queue_processes_on_supervisor_id"
   end
