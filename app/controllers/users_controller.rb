@@ -50,8 +50,12 @@ class UsersController < ApplicationController
 
   # Display list of User's whose name, notes, etc. match a string pattern.
   def user_search
+    debugger
     pattern = params[:pattern].to_s
-    if pattern.match?(/^\d+$/) && (user = User.safe_find(pattern))
+    if (pattern.match?(/^\d+$/) && (user = User.safe_find(pattern))) ||
+       (user = User.find_by(login: pattern)) ||
+       (user = User.find_by(name: pattern)) ||
+       (user = User.find_by(email: pattern))
       redirect_to(user_path(user.id))
     else
       query = create_query(:User, :pattern_search, pattern: pattern)
