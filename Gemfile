@@ -43,7 +43,7 @@ gem("solid_cache")
 # add locale to cache key
 gem("cache_with_locale")
 # solid_queue for jobs
-gem("solid_queue", "~>0.6.1")
+gem("solid_queue")
 
 # sprockets for asset compilation and versioning
 gem("sprockets-rails")
