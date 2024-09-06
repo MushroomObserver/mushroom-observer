@@ -297,7 +297,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     selected = Time.zone.today
     if obj.present? && obj.respond_to?(field)
       init_value = obj.try(&field).try(&:year)
-      selected = obj.try(&field)
+      selected = obj.try(&field) || Time.zone.today
     end
     if init_value && init_value < start_year && init_value > 1900
       start_year = init_value
