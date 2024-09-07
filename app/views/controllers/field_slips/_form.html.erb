@@ -22,12 +22,11 @@
     <% end %>
 
     <%= form.hidden_field(:code, value: field_slip.code) %>
-    <%= form.label(:date, "#{:DATE.t}: ") %>
-    <%= form.date_select(:date,
-                         { start_year: Date.today.year - 10,
-        end_year: Date.today.year + 10 }) %><br/>
-    <br/>
-
+    <%= date_select_with_label(form:, field: :date, label: "#{:DATE.t}:",
+                               object: field_slip, inline: true,
+                               order: [:year, :month, :day],
+                               start_year: Date.today.year - 10,
+                               end_year: Date.today.year + 10) %>
     <%= autocompleter_field(form: form, field: :collector,
                             label: :COLLECTOR.t + ":", type: :user) %>
     <%= autocompleter_field(form: form, field: :location,
@@ -45,7 +44,7 @@
     <%= render(partial: "shared/notes_fields",
                locals: { form:, fields: field_slip.notes_fields }) %>
 
-    <%= submit_button(form: form, button: :field_slip_create_obs.t, class: "mt-5") if action == "new" %>
+    <%= submit_button(form: form, button: :field_slip_add_images.t, class: "mt-5") if action == "new" %>
 
     <div class="row mt-5">
       <% if field_slip.observation %>

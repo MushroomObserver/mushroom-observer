@@ -269,6 +269,7 @@ export default class extends GeocodeController {
     this.verbose("map:drawRectangle()")
     this.verbose(set)
     const bounds = this.boundsOf(set),
+      clickable = this.map_type === "info",
       editable = this.editable && this.map_type !== "observation",
       rectangleOptions = {
         strokeColor: this.marker_color,
@@ -276,23 +277,22 @@ export default class extends GeocodeController {
         strokeWeight: 3,
         map: this.map,
         bounds: bounds,
-        clickable: editable,
+        clickable: clickable,
         draggable: false,
         editable: editable
-      };
-
-    this.rectangle = new google.maps.Rectangle(rectangleOptions)
+      },
+      rectangle = new google.maps.Rectangle(rectangleOptions)
 
     if (this.map_type === "observation") {
       // that's it. obs rectangles for MO locations are not clickable
-      // this.rectangle = rectangle
+      this.rectangle = rectangle
     } else if (!this.editable) {
       // there could be many, does not set this.rectangle
-      this.giveRectangleInfoWindow(set)
+      this.giveRectangleInfoWindow(rectangle, set)
     } else {
-      this.makeRectangleEditable()
+      this.rectangle = rectangle
       // this.map.fitBounds(bounds) // Only fit bounds if it's a location map
-      // this.rectangle = rectangle
+      this.makeRectangleEditable()
     }
   }
 
@@ -316,21 +316,21 @@ export default class extends GeocodeController {
     // }, 1000)
   }
 
-  // For rectangles: make a clickable info window
+  // For rectangles (there could be many on page): make a clickable info window
   // https://stackoverflow.com/questions/26171285/googlemaps-api-rectangle-and-infowindow-coupling-issue
-  giveRectangleInfoWindow(set) {
+  giveRectangleInfoWindow(rectangle, set) {
     this.verbose("map:giveRectangleInfoWindow")
-    const center = this.rectangle.getBounds().getCenter()
+    this.verbose(rectangle)
+
+    const center = rectangle.getBounds().getCenter()
     const info_window = new google.maps.InfoWindow({
       content: set.caption,
       position: center
     })
-
-    google.maps.event.addListener(this.rectangle, "click", () => {
-      info_window.open(this.map, this.rectangle)
+    google.maps.event.addListener(rectangle, "click", () => {
+      info_window.open(this.map, rectangle)
     })
   }
-
 
   //
   //  FORM INPUTS : Functions for altering the map from form inputs

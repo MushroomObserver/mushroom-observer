@@ -272,20 +272,6 @@ module ObservationsController::SharedFormMethods
     end
   end
 
-  def name_flash_for_project(name, project)
-    return unless name
-
-    count = project.count_collections(name)
-    if count == 1
-      flash_warning(:project_first_collection.t(name: name.text_name,
-                                                project: project.title))
-    else
-      flash_notice(:project_count_collections.t(count: count,
-                                                name: name.text_name,
-                                                project: project.title))
-    end
-  end
-
   def update_species_lists
     return unless (checks = params[:list])
 

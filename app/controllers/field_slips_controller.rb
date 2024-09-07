@@ -22,7 +22,7 @@ class FieldSlipsController < ApplicationController
       obs = @field_slip&.observation
     end
     if @field_slip
-      redirect_to(observation_url(id: obs.id)) if obs
+      field_slip_redirect(obs.id) if obs
     else
       redirect_to(new_field_slip_url(code: params[:id].upcase))
     end
@@ -115,10 +115,25 @@ class FieldSlipsController < ApplicationController
 
   private
 
+  def field_slip_redirect(obs_id)
+    if foray_recorder?
+      redirect_to(edit_field_slip_url(id: @field_slip.id))
+    else
+      redirect_to(observation_url(id: obs_id))
+    end
+  end
+
+  def foray_recorder?
+    project = @field_slip&.project
+    return false unless project
+
+    project.is_admin?(User.current) && project.happening?
+  end
+
   def html_create
     if params[:commit] == :field_slip_quick_create_obs.t
       quick_create_observation
-    elsif params[:commit] == :field_slip_create_obs.t
+    elsif params[:commit] == :field_slip_add_images.t
       redirect_to(new_observation_url(
                     field_code: @field_slip.code,
                     place_name: params[:field_slip][:location],
@@ -144,6 +159,7 @@ class FieldSlipsController < ApplicationController
     if obs
       @field_slip.project&.add_observation(obs)
       @field_slip.update!(observation: obs)
+      name_flash_for_project(name, @field_slip.project)
       redirect_to(observation_url(obs.id))
     else
       redirect_to(new_observation_url(field_code: @field_slip.code,
