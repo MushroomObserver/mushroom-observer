@@ -159,7 +159,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
              field_slip: {
                code: code,
                location: locations(:albion).name,
-               field_slip_id: names(:coprinus_comatus).text_name,
+               field_slip_idn: names(:coprinus_comatus).text_name,
                project_id: projects(:eol_project).id
              }
            })
@@ -195,7 +195,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
              field_slip: {
                code: code,
                location: locations(:albion).name,
-               field_slip_id: names(:coprinus_comatus).text_name,
+               field_slip_idn: names(:coprinus_comatus).text_name,
                project_id: projects(:eol_project).id
              }
            })
@@ -331,7 +331,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
                     field_slip: {
                       code: @field_slip.code,
                       observation_id: @field_slip.observation_id,
-                      field_slip_id: names(:coprinus_comatus).text_name,
+                      field_slip_idn: names(:coprinus_comatus).text_name,
                       field_slip_id_by: "#{user.login} <#{user.name}>",
                       project_id: @field_slip.project_id,
                       notes: { Other: notes }
