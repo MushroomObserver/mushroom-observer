@@ -12,15 +12,34 @@ module Names
     before_action :login_required
 
     def new
-      @fields = name_search_params
+      @field_columns = name_field_groups
     end
 
     def create
-      @pattern = human_formatted_pattern_search_string
+      @pattern = formatted_pattern_search_string
       redirect_to(controller: "/names", action: :index, pattern: @pattern)
     end
 
     private
+
+    # This is the list of fields that are displayed in the search form. In the
+    # template, each hash is interpreted as a column, and each key is a panel
+    # with an array of fields or field pairings.
+    def name_field_groups
+      [
+        { date: [:created, :modified],
+          quality: [[:has_observations, :deprecated],
+                    [:has_author, :author],
+                    [:has_citation, :citation]] },
+        { scope: [[:has_synonyms, :include_synonyms],
+                  [:include_subtaxa, :include_misspellings],
+                  :rank, :lichen],
+          detail: [[:has_classification, :classification],
+                   [:has_notes, :notes],
+                   [:has_comments, :comments],
+                   :has_description] }
+      ].freeze
+    end
 
     def permitted_search_params
       params.permit(name_search_params)

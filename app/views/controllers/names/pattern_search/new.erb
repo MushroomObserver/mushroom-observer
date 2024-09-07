@@ -3,4 +3,5 @@
 @container = :full
 %>
 
-<%= render(partial: "names/pattern_search/form", locals: { local: true } ) %>
+<%= render(partial: "shared/pattern_search_form",
+           locals: { local: true, field_columns: @field_columns } ) %>

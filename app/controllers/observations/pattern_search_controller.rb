@@ -12,16 +12,45 @@ module Observations
     before_action :login_required
 
     def new
-      @fields = observation_search_params
+      @field_columns = observation_field_groups
     end
 
     def create
-      @pattern = human_formatted_pattern_search_string
+      @field_columns = observation_field_groups
+      @pattern = formatted_pattern_search_string
+
       redirect_to(controller: "/observations", action: :index,
                   pattern: @pattern)
     end
 
     private
+
+    # This is the list of fields that are displayed in the search form. In the
+    # template, each hash is interpreted as a column, and each key is a panel
+    # with an array of fields or field pairings.
+    def observation_field_groups
+      [
+        { date: [:date, :created, :modified],
+          detail: [[:has_specimen, :has_sequence], [:has_images, :has_notes],
+                   [:has_field, :notes], [:has_comments, :comments]],
+          connected: [:user, :herbarium, :list, :project, :project_lists,
+                      :field_slip] },
+        { name: [[:has_name, :lichen], :name, :confidence,
+                 [:include_subtaxa, :include_synonyms],
+                 [:include_all_name_proposals, :exclude_consensus]],
+          location: [:location, :region,
+                     [:has_public_lat_lng, :is_collection_location],
+                     [:east, :west], [:north, :south]] }
+      ].freeze
+    end
+
+    def fields_with_range
+      [:date, :created, :modified, :rank]
+    end
+
+    def fields_with_ids
+      [:name, :location, :user, :herbarium, :list, :project]
+    end
 
     def permitted_search_params
       params.permit(observation_search_params)
@@ -31,8 +60,9 @@ module Observations
     # of the autocompleters.
     def observation_search_params
       PatternSearch::Observation.params.keys + [
-        :pattern, :name_id, :user_id, :location_id, :species_list_id,
-        :project_id, :herbarium_id
+        :name_id, :user_id, :location_id, :list_id,
+        :project_id, :project_lists_id, :herbarium_id,
+        :date_range, :created_range, :modified_range, :rank_range
       ]
     end
   end

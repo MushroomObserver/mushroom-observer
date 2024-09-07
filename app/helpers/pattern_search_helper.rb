@@ -28,7 +28,7 @@ module PatternSearchHelper
 
     subclass = PatternSearch.const_get(args[:type].capitalize)
     unless subclass.params[args[:field]]
-      raise "No parser defined for #{args[:field]} in #{subclass}"
+      raise("No parser defined for #{args[:field]} in #{subclass}")
     end
 
     parser = subclass.params[args[:field]][1]
@@ -46,15 +46,17 @@ module PatternSearchHelper
     string: { component: :text_field_with_label, args: {} },
     list_of_strings: { component: :text_field_with_label, args: {} },
     list_of_herbaria: { component: :autocompleter_field,
-                        args: { type: :herbarium } },
+                        args: { type: :herbarium, separator: ", " } },
     list_of_locations: { component: :autocompleter_field,
-                         args: { type: :location } },
-    list_of_names: { component: :autocompleter_field, args: { type: :name } },
+                         args: { type: :location, separator: ", " } },
+    list_of_names: { component: :autocompleter_field,
+                     args: { type: :name, separator: ", " } },
     list_of_projects: { component: :autocompleter_field,
-                        args: { type: :project } },
+                        args: { type: :project, separator: ", " } },
     list_of_species_lists: { component: :autocompleter_field,
-                             args: { type: :species_list } },
-    list_of_users: { component: :autocompleter_field, args: { type: :user } },
+                             args: { type: :species_list, separator: ", " } },
+    list_of_users: { component: :autocompleter_field,
+                     args: { type: :user, separator: ", " } },
     confidence: { component: :pattern_search_confidence_field, args: {} },
     longitude: { component: :pattern_search_longitude_field, args: {} },
     latitude: { component: :pattern_search_latitude_field, args: {} }
@@ -74,7 +76,8 @@ module PatternSearchHelper
   # FIELD HELPERS
   #
   def pattern_search_yes_field(**args)
-    check_box_with_label(value: "yes", **args)
+    check_box_with_label(checked_value: "yes", unchecked_value: "",
+                         include_hidden: false, **args)
   end
 
   def pattern_search_boolean_field(**args)

@@ -1,27 +1,10 @@
-<%
-fields_1 = {
-  search: [:pattern],
-  name: [[:has_name, :lichen], :name, :confidence,
-         [:include_subtaxa, :include_synonyms],
-         [:include_all_name_proposals, :exclude_consensus]],
-  location: [:location, :region, [:has_public_lat_lng, :is_collection_location],
-             [:east, :west], [:north, :south]],
-}.freeze
-fields_2 = {
-  date: [:date, :created, :modified],
-  detail: [[:has_specimen, :has_sequence], [:has_images, :has_notes],
-           [:has_field, :notes], [:has_comments, :comments]],
-  connected: [:user, :herbarium, :list, :project, :project_lists, :field_slip],
-}.freeze
-%>
-
 <%= form_with(url: { action: :create }) do |f| %>
 
   <%= tag.div(class: "row") do %>
-    <% [fields_1, fields_2].each do |field_groups| %>
+    <% field_columns.each do |panels| %>
 
       <%= tag.div(class: "col-xs-12 col-md-6") do %>
-        <% field_groups.each do |heading, fields| %>
+        <% panels.each do |heading, fields| %>
 
           <%= panel_block(heading: :"search_term_group_#{heading}".l) do %>
             <% fields.each do |field| %>

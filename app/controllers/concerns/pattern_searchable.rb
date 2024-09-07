@@ -3,7 +3,18 @@
 #
 #  = PatternSearchable Concern
 #
-#  This is a module of reusable methods that can be included by controllers that
+#  This is a module of reusable methods included by controllers that handle
+#  "faceted" pattern searches per model, with separate inputs for each keyword.
+#
+#  We're translating the params hash into the format that the user would have
+#  typed into the search box if they knew how to do that, because that's what
+#  the PatternSearch class expects to parse. The PatternSearch class then
+#  unpacks, validates and re-translates all these params into the actual params
+#  used by the Query class. This may seem roundabout: of course we do know the
+#  Query param names in advance, so we could theoretically just pass the values
+#  directly into Query and render the index. But we'd still have to be able to
+#  validate the input, and give messages for all the possible errors there.
+#  PatternSearch class handles all that.
 #
 ################################################################################
 
@@ -12,20 +23,79 @@ module PatternSearchable
 
   included do
 
-    # Roundabout: We're converting the params hash back into a normal query
-    # string to start with, and then we're translating the query string into the
-    # format that the user would have typed into the search box if they knew how
-    # to do that, because that's what the PatternSearch class expects to parse.
-    # The PatternSearch class then unpacks, validates and re-translates all
-    # these params into the actual params used by the Query class. This may seem
-    # odd: of course we do know the Query param names in advance, so we could
-    # theoretically just pass the values directly into Query and render the
-    # index. But we'd still have to be able to validate the input, and give
-    # messages for all the possible errors there. PatternSearch class handles
-    # all that.
-    def human_formatted_pattern_search_string
-      query_string = permitted_search_params.compact_blank.to_query
-      query_string.tr("=", ":").tr("&", " ").tr("%2C", "\\\\,")
+    def formatted_pattern_search_string
+      sift_and_restructure_pattern_params
+      keyword_strings = @sendable_params.map do |key, value|
+        "#{key}:#{value}"
+      end
+      keyword_strings.join(" ")
+    end
+
+    def sift_and_restructure_pattern_params
+      @keywords = permitted_search_params.to_h.compact_blank.reject do |_, v|
+        v == "0"
+      end
+      concatenate_range_fields
+      @sendable_params = substitute_ids_for_names(@keywords)
+      # @storable_params = storable_params(@keywords)
+    end
+
+    # Check for `fields_with_range`, and concatenate them if range val present,
+    # removing the range field.
+    def concatenate_range_fields
+      @keywords.each_key do |key|
+        next unless fields_with_range.include?(key.to_sym) &&
+                    @keywords[:"#{key}_range"].present?
+
+        @keywords[key] = [@keywords[key].strip,
+                          @keywords[:"#{key}_range"].strip].join("-")
+        @keywords.delete(:"#{key}_range")
+      end
+    end
+
+    # Controller declares `fields_with_ids` which autocompleter send ids.
+    # This method substitutes the ids for the names.
+    def substitute_ids_for_names(keywords)
+      keywords.each_key do |key|
+        next unless fields_with_ids.include?(key.to_sym) &&
+                    keywords[:"#{key}_id"].present?
+
+        keywords[key] = keywords[:"#{key}_id"]
+        keywords.delete(:"#{key}_id")
+      end
+      keywords
+    end
+
+    def storable_params(keywords)
+      keywords = escape_names_and_remove_ids(keywords)
+      escape_locations_and_remove_ids(keywords)
+    end
+
+    # Waiting to hear how this should be built.
+    def escape_names_and_remove_ids(keywords)
+      keywords.each_key do |key|
+        next unless fields_with_ids.include?(key.to_sym) &&
+                    keywords[:"#{key}_id"].present?
+
+        list = keywords[key].split(",").map(&:strip)
+        list = list.map { |name| "\"#{name}\"" }
+        keywords[key] = list.join(",")
+        keywords.delete(:"#{key}_id")
+      end
+      keywords
+    end
+
+    def escape_locations_and_remove_ids(keywords)
+      keywords.each_key do |key|
+        next unless [:location, :region].include?(key.to_sym) &&
+                    keywords[:"#{key}_id"].present?
+
+        list = keywords[key].split(",").map(&:strip)
+        list = list.map { |location| "\"#{location.tr(",", "\\,")}\"" }
+        keywords[key] = list.join(",")
+        keywords.delete(:"#{key}_id")
+      end
+      keywords
     end
   end
 end
