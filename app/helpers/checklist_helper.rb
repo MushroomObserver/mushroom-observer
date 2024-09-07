@@ -15,7 +15,7 @@ module ChecklistHelper
       observations_path(pattern: "user:#{user.id} name:#{name[1]}")
     elsif project
       observations_path(pattern: "project:#{project.id} name:#{name[1]}")
-    elsif species_list
+    elsif list
       observations_path(pattern: "list:#{list.id} name:#{name[1]}")
     else
       name_path(name[1])
