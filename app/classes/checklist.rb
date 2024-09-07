@@ -54,6 +54,8 @@ class Checklist
       raise("Expected Project instance, got #{project.inspect}.")
     end
 
+    def show_counts = true
+
     def query
       super(
         subquery_scope: Observation.joins(:project_observations).
@@ -82,8 +84,10 @@ class Checklist
   ##############################################################################
 
   def initialize
-    @genera = @species = @taxa = nil
+    @genera = @species = @taxa = @counts = nil
   end
+
+  def show_counts = false
 
   def num_genera
     calc_checklist unless @genera
@@ -113,6 +117,11 @@ class Checklist
   def taxa
     calc_checklist unless @taxa
     @taxa.values.sort
+  end
+
+  def counts
+    calc_counts unless @counts
+    @counts
   end
 
   def self.all_site_taxa_by_user
@@ -208,6 +217,12 @@ class Checklist
       @genera[g] = g
       @species[[g, s]] = ["#{g} #{s}", result[:id]]
     end
+  end
+
+  def calc_counts
+    calc_checklist unless @taxa
+
+    @counts = ProjectCounter.new(@project).counts
   end
 
   # This `query` returns concatenated strings with info about the names we want.
