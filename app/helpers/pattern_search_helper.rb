@@ -35,7 +35,9 @@ module PatternSearchHelper
     parser.to_s.gsub(/^parse_/, "").to_sym
   end
 
-  # Convenience for subclasses to access helper methods via PARAMS
+  PATTERN_SEARCH_SEPARATOR = ", "
+
+  # Convenience for subclasses to access helper methods via subclass.params
   PATTERN_SEARCH_FIELD_HELPERS = {
     pattern: { component: :text_field_with_label, args: {} },
     yes: { component: :pattern_search_yes_field, args: {} },
@@ -46,15 +48,20 @@ module PatternSearchHelper
     string: { component: :text_field_with_label, args: {} },
     list_of_strings: { component: :text_field_with_label, args: {} },
     list_of_herbaria: { component: :autocompleter_field,
-                        args: { type: :herbarium, separator: ", " } },
+                        args: { type: :herbarium,
+                                separator: PATTERN_SEARCH_SEPARATOR } },
     list_of_locations: { component: :autocompleter_field,
-                         args: { type: :location, separator: ", " } },
+                         args: { type: :location,
+                                 separator: PATTERN_SEARCH_SEPARATOR } },
     list_of_names: { component: :autocompleter_field,
-                     args: { type: :name, separator: ", " } },
+                     args: { type: :name,
+                             separator: PATTERN_SEARCH_SEPARATOR } },
     list_of_projects: { component: :autocompleter_field,
-                        args: { type: :project, separator: ", " } },
+                        args: { type: :project,
+                                separator: PATTERN_SEARCH_SEPARATOR } },
     list_of_species_lists: { component: :autocompleter_field,
-                             args: { type: :species_list, separator: ", " } },
+                             args: { type: :species_list,
+                                     separator: PATTERN_SEARCH_SEPARATOR } },
     list_of_users: { component: :autocompleter_field,
                      args: { type: :user, separator: ", " } },
     confidence: { component: :pattern_search_confidence_field, args: {} },
