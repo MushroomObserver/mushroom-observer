@@ -25,6 +25,22 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
                   count: 1)
   end
 
+  def test_collector_can_edit_observation
+    obs = observations(:newbie_obs)
+    login("foray_newbie")
+    params = { id: obs.id }
+    get(:edit, params: params)
+    assert_response(:success)
+  end
+
+  def test_can_edit_observation
+    obs = observations(:coprinus_comatus_obs)
+    login("foray_newbie")
+    params = { id: obs.id }
+    get(:edit, params: params)
+    assert_response(:redirect)
+  end
+
   def test_update_observation
     obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at
