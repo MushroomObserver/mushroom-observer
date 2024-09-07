@@ -49,7 +49,7 @@ module Observations
     end
 
     def fields_with_ids
-      [:name, :location, :user, :herbarium, :list, :project]
+      [:name, :location, :user, :herbarium, :list, :project, :project_lists]
     end
 
     def permitted_search_params
