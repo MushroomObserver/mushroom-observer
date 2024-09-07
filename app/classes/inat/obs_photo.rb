@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-# Describes one iNat observation photo (derived from an INat::Obs)
+# Describes one iNat observation photo (derived from an Inat::Obs)
 # mapping iNat key/values to MO Image attributes and associations
 # Example use:
-# INat::ObsPhoto.new(<imported_inat_obs>.observation_photos.first)
-class INat
+# Inat::ObsPhoto.new(<imported_inat_obs>.observation_photos.first)
+class Inat
   class ObsPhoto
     def initialize(inat_obs_photo_ary)
       @inat_obs_photo = inat_obs_photo_ary
@@ -20,7 +20,7 @@ class INat
     end
 
     def license
-      INat::License.new(photo[:license_code]).mo_license
+      Inat::License.new(photo[:license_code]).mo_license
     end
 
     delegate :id, to: :license, prefix: true

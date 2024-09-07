@@ -24,7 +24,6 @@ ActiveSupport::Inflector.inflections(:en) do |inflect|
   inflect.acronym("API2")
   inflect.acronym("GM")
   inflect.acronym("HTTP")
-  inflect.acronym("INat")
   inflect.acronym("URL")
   inflect.acronym("EXIF")
   inflect.acronym("CSV")

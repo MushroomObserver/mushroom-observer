@@ -4,13 +4,13 @@ require("test_helper")
 
 # test mapping iNat license_code to MO license_id
 # https://github.com/inaturalist/inaturalist/blob/main/app/models/shared/license_module.rb
-class INatLicenseTest < UnitTestCase
+class InatLicenseTest < UnitTestCase
   def test_inat_cc_license
-    assert_equal(licenses(:ccnc30), INat::License.new("cc-by-nc-sa").mo_license)
+    assert_equal(licenses(:ccnc30), Inat::License.new("cc-by-nc-sa").mo_license)
   end
 
   def test_inat_public_domain
-    assert_equal(licenses(:publicdomain), INat::License.new("cc0").mo_license)
+    assert_equal(licenses(:publicdomain), Inat::License.new("cc0").mo_license)
   end
 
   def test_inat_unlicensed
@@ -24,7 +24,7 @@ class INatLicenseTest < UnitTestCase
     )
 
     assert_equal(
-      ::License.narrowest_available, INat::License.new(nil).mo_license,
+      ::License.narrowest_available, Inat::License.new(nil).mo_license,
       "iNat All Rights Reserved should map to MO #{ccbyncnd[:display_name]}"
     )
   end

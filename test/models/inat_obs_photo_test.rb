@@ -32,13 +32,13 @@ require("test_helper")
 #  boolean "diagnostic", default: true, null: false
 
 # test mapping of iNat observation photo key/values to MO Image attributes
-class INatObsPhotoTest < UnitTestCase
+class InatObsPhotoTest < UnitTestCase
   def test_simple_photo
     mock_search = File.read("test/inat/tremella_mesenterica.txt")
-    inat_obs = INat::Obs.new(
+    inat_obs = Inat::Obs.new(
       JSON.generate(JSON.parse(mock_search)["results"].first)
     )
-    inat_obs_photo = INat::ObsPhoto.new(
+    inat_obs_photo = Inat::ObsPhoto.new(
       inat_obs.inat_obs_photos.first
     )
     expected_license =

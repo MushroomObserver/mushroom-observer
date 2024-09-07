@@ -2,7 +2,7 @@
 
 # Wraps API call that adds an Image an Observation from the Image url
 # This facilitates stubbing the call
-class INat
+class Inat
   class PhotoImporter
     attr_reader :api
 

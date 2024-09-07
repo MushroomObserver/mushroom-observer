@@ -9,7 +9,7 @@
 #
 #  name:: MO Name corresponding to the iNat taxon
 #
-class INat
+class Inat
   class Taxon
     def initialize(inat_taxon)
       @inat_taxon = inat_taxon

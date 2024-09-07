@@ -11,7 +11,7 @@
 # https://github.com/inaturalist/inaturalist/blob/main/app/models/shared/license_module.rb
 # https://creativecommons.org/share-your-work/cclicenses/
 #
-class INat
+class Inat
   class License
     def initialize(license_code = nil)
       @license_code = license_code

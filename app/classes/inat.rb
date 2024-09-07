@@ -5,7 +5,7 @@
 # in order to rate limit per iNat policy
 # (60 requests/minute, <10K requests/day)
 # https://api.inaturalist.org/v1/docs/
-class INat
+class Inat
   API_BASE = "https://api.inaturalist.org/v1"
 
   # TODO: Add a verb param so that this can be used for non-GET requests

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 #
-#  = INat::Obs Object
+#  = Inat::Obs Object
 #
 #  Represents the result of an iNat API search for one observation,
 #  mapping iNat key/values to MO Observation attributes
@@ -51,7 +51,7 @@
 #
 #  importable?::  Is it importable to MO?
 #
-class INat
+class Inat
   class Obs
     def initialize(imported_inat_obs_data)
       @obs = JSON.parse(imported_inat_obs_data, symbolize_names: true)
@@ -183,7 +183,7 @@ class INat
     end
 
     def license
-      INat::License.new(@obs[:license_code]).mo_license
+      Inat::License.new(@obs[:license_code]).mo_license
     end
 
     def name_id
