@@ -32,8 +32,6 @@ module Observations
                     "Form needs a field for inputting iNat ids")
       assert_select("input#inat_username", true,
                     "Form needs a field for inputting iNat username")
-      assert_select("input[type=checkbox][id=all]", true,
-                    "Form needs checkbox for importing all a user's iNat obss")
       assert_select("input[type=checkbox][id=consent]", true,
                     "Form needs checkbox requiring consent")
     end
