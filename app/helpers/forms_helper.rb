@@ -93,7 +93,9 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
 
     tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field]) do
-        concat(args[:form].check_box(args[:field], opts))
+        concat(args[:form].check_box(args[:field], opts,
+                                     args[:checked_value] || "1",
+                                     args[:unchecked_value] || "0"))
         concat(args[:label])
         if args[:between].present?
           concat(tag.div(class: "d-inline-block ml-3") { args[:between] })
@@ -532,7 +534,8 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     exceptions = [
       :form, :field, :label, :class, :width, :inline, :between, :label_after,
       :label_end, :append, :help, :addon, :optional, :required, :monospace,
-      :type, :wrap_data, :wrap_id, :button, :button_data
+      :type, :wrap_data, :wrap_id, :button, :button_data, :checked_value,
+      :unchecked_value
     ] + extras
 
     args.clone.except(*exceptions)
