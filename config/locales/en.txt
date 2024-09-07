@@ -1499,6 +1499,7 @@
 
   # observations/create_observation
   create_observation_title: "[:create_object(type=:observation)]"
+  create_observation_inat_import_link: Import from iNat
 
   # observations/download_observations
   download_observations_title: Download Observations
@@ -2853,7 +2854,7 @@
   field_slip_other_codes: Other Codes
   field_slip_other_example: e.g., iNat ID
   field_slip_project_success: Field Slip associated with the [TITLE] Project
-  field_slip_quick_no_location: Quick create requires an existing location 
+  field_slip_quick_no_location: Quick create requires an existing location
   field_slip_quick_no_name: Quick create requires an existing name
 
   field_slip_remove_observation: Removed [OBSERVATION] from [TITLE] Project
@@ -3011,8 +3012,7 @@
   list_merge_options_title: Location Matches for [where]
 
   # observation/inat_imports
-  create_inat_import_title: Import from iNat
-  import_observation_from_inat: Import from iNat
+  inat_import_create_title: Import from iNat
   inat_choose_observations: "Inat Observations to Import:"
   inat_import_list: "Comma separated list of observation #s"
   inat_import_all: Import all my iNat observations instead of a list
