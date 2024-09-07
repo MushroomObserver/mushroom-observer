@@ -141,29 +141,31 @@ module AutocompleterHelper
     )
   end
 
-  # minimum args :form, :type.
+  # minimum args :form, :field.
   # Send :hidden to fill the id, :hidden_data to merge with hidden field data
   def autocompleter_hidden_field(**args)
-    return unless args[:form].present? && args[:type].present?
+    return unless args[:form].present? && args[:field].present?
 
-    model = autocompleter_type_to_model(args[:type])
+    # model = autocompleter_type_to_model(args[:type])
     data = { autocompleter_target: "hidden" }.merge(args[:hidden_data] || {})
     args[:form].hidden_field(
-      :"#{model}_id",
+      :"#{args[:field]}_id",
       value: args[:hidden_value], data:, class: "form-control", readonly: true
     )
   end
 
-  def autocompleter_type_to_model(type)
-    case type
-    when :region
-      :location
-    when :clade
-      :name
-    else
-      type
-    end
-  end
+  # Hmm. On forms with both region and location autocompleters,
+  # these id fields would need to have different ids.
+  # def autocompleter_type_to_model(type)
+  #   case type
+  #   when :region
+  #     :location
+  #   when :clade
+  #     :name
+  #   else
+  #     type
+  #   end
+  # end
 
   def autocompleter_append(args)
     [autocompleter_dropdown,
