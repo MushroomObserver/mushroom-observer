@@ -79,8 +79,8 @@ class FieldSlip < AbstractModel
     "_user #{(user || User.current).login}_"
   end
 
-  def field_slip_id
-    observation&.field_slip_id || ""
+  def field_slip_name
+    observation&.field_slip_name || ""
   end
 
   def field_slip_id_by
