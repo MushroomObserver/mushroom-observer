@@ -44,7 +44,8 @@ class ChecklistsControllerTest < FunctionalTestCase
     get(:show, params: { project_id: project.id })
     assert_match(/Checklist for #{project.title}/, css_select("title").text,
                  "Wrong page")
-    assert_match(/(1)/, @response.body)
+    assert_match(/\(1\)/, @response.body)
+
     prove_checklist_content(expect)
   end
 
