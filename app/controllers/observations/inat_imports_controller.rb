@@ -10,7 +10,7 @@
 # Work flow:
 # 1. User calls `new`, fills out form
 # 2. create
-#      saves some user data in a iNatImport instance
+#      saves some user data in a INatImport instance
 #        attributes include: user, inat_ids, token, state
 #    passes things off (redirects) to iNat at the inat_authorization_url
 # 3. iNat
@@ -18,20 +18,20 @@
 #      if not, asks iNat user for authorization
 #    iNat calls the MO redirect_url (authorization_response) with a code param
 # 4. MO continues in the authorization_response action
-#    Reads the saved InatImport instance
-#    Updates the InatImport instance with the code received from iNat
-#    Enqueues an InatImportJob, passing in the InatImport instance
-# 5. The rest happens in the background. The InatImportJob:
+#    Reads the saved INatImport instance
+#    Updates the INatImport instance with the code received from iNat
+#    Enqueues an INatImportJob, passing in the INatImport instance
+# 5. The rest happens in the background. The INatImportJob:
 #      Uses the `code` to obtain an oauth access_token
 #      Trades the oauth token for a JWT api_token
 #      Makes an authenticated iNat API request for the desired observations
 #      For each iNat obs in the results,
-#         creates an InatObs
-#         adds an MO Observation, mapping InatObs details to the MO Observation
-#         adds Inat photos to the MO Observation via the MO API
+#         creates an INat::Obs
+#         adds an MO Observation, mapping INat::Obs details to the MO Observation
+#         adds INat photos to the MO Observation via the MO API
 #
 module Observations
-  class InatImportsController < ApplicationController
+  class INatImportsController < ApplicationController
     before_action :login_required
     before_action :pass_query_params
 
@@ -53,7 +53,7 @@ module Observations
       return designation_required unless imports_designated?
       return consent_required if params[:consent] == "0"
 
-      @inat_import = InatImport.find_or_create_by(user: User.current)
+      @inat_import = INatImport.find_or_create_by(user: User.current)
       @inat_import.update(state: "Authorizing",
                           import_all: params[:all],
                           inat_ids: params[:inat_ids],
@@ -122,11 +122,11 @@ module Observations
       auth_code = params[:code]
       return not_authorized if auth_code.blank?
 
-      @inat_import = InatImport.find_or_create_by(user: User.current)
+      @inat_import = INatImport.find_or_create_by(user: User.current)
       @inat_import.update(token: auth_code, state: "Authenticating")
 
-      InatImportJob.perform_later(@inat_import)
-      # InatImportJob.perform_now(@inat_import) # for manual testing
+      INatImportJob.perform_later(@inat_import)
+      # INatImportJob.perform_now(@inat_import) # for manual testing
 
       flash_notice(:inat_import_started.t)
       redirect_to(observations_path)

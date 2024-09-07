@@ -11,7 +11,7 @@
 #  inat_username:: current user's iNat login
 #  import_all: whether to import all of user's relevant iNat observations
 #
-class InatImport < ApplicationRecord
+class INatImport < ApplicationRecord
   enum state:
   {
     Unstarted: 0,

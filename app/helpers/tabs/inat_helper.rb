@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Tabs
-  module InatHelper
+  module INatHelper
     def new_inat_import_tab
       [:import_observation_from_inat.t,
        add_query_param(new_observations_inat_import_path),

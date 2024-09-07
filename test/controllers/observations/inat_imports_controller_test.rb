@@ -5,7 +5,7 @@ require "test_helper"
 # test importing iNaturalist Observations to Mushroom Observer
 module Observations
   # a duck type of API2::ImageAPI with enough attributes
-  # to preventInatsImportController from throwing an error
+  # to preventINatImportsController from throwing an error
   class MockImageAPI
     attr_reader :errors, :results
 
@@ -15,12 +15,12 @@ module Observations
     end
   end
 
-  class InatImportsControllerTest < FunctionalTestCase
+  class INatImportsControllerTest < FunctionalTestCase
     include ActiveJob::TestHelper
 
-    SITE = Observations::InatImportsController::SITE
-    REDIRECT_URI = Observations::InatImportsController::REDIRECT_URI
-    API_BASE = Observations::InatImportsController::API_BASE
+    SITE = Observations::INatImportsController::SITE
+    REDIRECT_URI = Observations::INatImportsController::REDIRECT_URI
+    API_BASE = Observations::INatImportsController::API_BASE
 
     def test_new_inat_import
       login(users(:rolf).login)
@@ -131,7 +131,7 @@ module Observations
       assert_equal("Authorizing", inat_import.reload.state,
                    "MO should be awaiting authorization from iNat")
       assert_equal(inat_username, inat_import.inat_username,
-                   "Failed to save InatImport.inat_username")
+                   "Failed to save INatImport.inat_username")
     end
 
     def test_authorization_response_denied
@@ -161,7 +161,7 @@ module Observations
       assert_difference(
         "enqueued_jobs.size", 1, "Failed to enqueue background job"
       ) do
-        assert_enqueued_with(job: InatImportJob) do
+        assert_enqueued_with(job: INatImportJob) do
           get(:authorization_response,
               params: inat_authorization_callback_params)
         end

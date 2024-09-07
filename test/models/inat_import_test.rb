@@ -1,6 +1,6 @@
 require "test_helper"
 
-class InatImportTest < ActiveSupport::TestCase
+class INatImportTest < ActiveSupport::TestCase
   # test "the truth" do
   #   assert true
   # end

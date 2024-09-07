@@ -2853,7 +2853,7 @@
   field_slip_other_codes: Other Codes
   field_slip_other_example: e.g., iNat ID
   field_slip_project_success: Field Slip associated with the [TITLE] Project
-  field_slip_quick_no_location: Quick create requires an existing location 
+  field_slip_quick_no_location: Quick create requires an existing location
   field_slip_quick_no_name: Quick create requires an existing name
 
   field_slip_remove_observation: Removed [OBSERVATION] from [TITLE] Project
@@ -3013,11 +3013,11 @@
   # observation/inat_imports
   create_inat_import_title: Import from iNat
   import_observation_from_inat: Import from iNat
-  inat_choose_observations: "Inat Observations to Import:"
+  inat_choose_observations: "INat Observations to Import:"
   inat_import_list: "Comma separated list of observation #s"
   inat_import_all: Import all my iNat observations instead of a list
   inat_import_consent: (Required) I consent to creating MushroomObserver Observation(s) based on my iNaturalist observations, including their photos.
-  inat_consent_required: Your consent is required to import Inat observations. Please check the checkbox to give your consent.
+  inat_consent_required: Your consent is required to import INat observations. Please check the checkbox to give your consent.
   inat_username: Your iNat Username (mandatory)
   runtime_illegal_inat_id: iNat observation number can contain only numbers, commas, and spaces
   inat_missing_username: Missing your iNat Username

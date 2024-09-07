@@ -3,7 +3,7 @@
 require("test_helper")
 
 # test encapsulated imported iNat observations
-class InatObsTest < UnitTestCase
+class INatObsTest < UnitTestCase
   # disable cop to facilitate typing/reading id's
   # rubocop:disable Style/NumericLiterals
   def test_complicated_public_obs
@@ -307,7 +307,7 @@ class InatObsTest < UnitTestCase
            "Obscured observation should have its gps hidden")
     assert_equal(
       blurred_location, mock_inat_obs.location,
-      "Location should be blurred by at least Inat public_position_accuracy"
+      "Location should be blurred by at least INat public_position_accuracy"
     )
   end
 
@@ -361,6 +361,6 @@ class InatObsTest < UnitTestCase
 
   def mock_observation(filename)
     mock_search = File.read("test/inat/#{filename}.txt")
-    InatObs.new(JSON.generate(JSON.parse(mock_search)["results"].first))
+    INat::Obs.new(JSON.generate(JSON.parse(mock_search)["results"].first))
   end
 end

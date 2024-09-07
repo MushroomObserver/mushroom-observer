@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
 module Observations
-  module InatImportsHelper
+  module INatImportsHelper
   end
 end
