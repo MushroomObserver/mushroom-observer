@@ -149,7 +149,7 @@ module AutocompleterHelper
     # model = autocompleter_type_to_model(args[:type])
     data = { autocompleter_target: "hidden" }.merge(args[:hidden_data] || {})
     args[:form].hidden_field(
-      :"#{args[:field]}_id",
+      :"#{nested_field_id(args)}_id",
       value: args[:hidden_value], data:, class: "form-control", readonly: true
     )
   end
