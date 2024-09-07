@@ -10,7 +10,7 @@ module ChecklistHelper
     tag.li { link_to(link) { content } }
   end
 
-  def checklist_name_link_path(name, project, list)
+  def checklist_name_link_path(name, user, project, list)
     if user
       observations_path(pattern: "user:#{user.id} name:#{name[1]}")
     elsif project
