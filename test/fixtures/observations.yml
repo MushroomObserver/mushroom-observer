@@ -258,7 +258,7 @@ trusted_hidden:
   when: 2023-11-05
   location: falmouth
   where: Falmouth, Massachusetts, USA
-  user: mary
+  user: ollie
   name: fungi
   text_name: Fungi
   gps_hidden: true
