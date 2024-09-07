@@ -12,7 +12,7 @@ class InatImportsTest < CapybaraIntegrationTestCase
     page.check("consent")
     click_on("Submit")
 
-    assert_flash_text(:inat_no_imports_designated.t)
-    assert_text(:inat_import_create_title.l)
+    assert_flash_text(:inat_no_imports_designated.l)
+    assert_selector("#title", text: :inat_import_create_title.l)
   end
 end
