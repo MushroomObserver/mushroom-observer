@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProjectCounter
+class Checklist::ProjectCounter
   def initialize(project)
     @project = project
     @names = Name.arel_table
