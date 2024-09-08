@@ -51,6 +51,7 @@ module Observations
       return username_required if params[:inat_username].blank?
       return reload_form if bad_inat_ids_param?
       return designation_required unless imports_designated?
+      return already_imported(previous_imports) if previous_imports.any?
       return consent_required if params[:consent] == "0"
 
       @inat_import = InatImport.find_or_create_by(user: User.current)
@@ -79,6 +80,20 @@ module Observations
 
     def imports_designated?
       params[:all] == "1" || params[:inat_ids].present?
+    end
+
+    def previous_imports
+      params[:inat_ids].split.map(&:to_i).each_with_object([]) do |id, ary|
+        ary << Observation.find_by(inat_id: id)
+      end
+    end
+
+    def already_imported(previous_imports)
+      previous_imports.each do |import|
+        flash_warning(:inat_previous_import.t(inat_id: import.inat_id,
+                                              mo_obs_id: import.id))
+      end
+      reload_form
     end
 
     def consent_required
