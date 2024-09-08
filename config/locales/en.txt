@@ -3021,7 +3021,7 @@
   inat_username: Your iNat Username (mandatory)
   runtime_illegal_inat_id: iNat observation number can contain only numbers, commas, and spaces
   inat_missing_username: Missing your iNat Username
-  inat_no_imports_designated: Imports missing. Complete [:inat_import_list], or select [:inat_import_all]
+  inat_no_imports_designated: You must list the iNat observation(s) to be imported
   inat_import_started: Your import has started. Refresh page to update results.
 
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
