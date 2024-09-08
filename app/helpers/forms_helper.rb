@@ -93,7 +93,9 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
 
     tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field]) do
-        concat(args[:form].check_box(args[:field], opts))
+        concat(args[:form].check_box(args[:field], opts,
+                                     args[:checked_value] || "1",
+                                     args[:unchecked_value] || "0"))
         concat(args[:label])
         if args[:between].present?
           concat(tag.div(class: "d-inline-block ml-3") { args[:between] })
@@ -294,12 +296,16 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     obj = args[:object] || args[:form]&.object
     start_year = args[:start_year] || 20.years.ago.year
     end_year = args[:end_year] || Time.zone.now.year
-    init_value = obj.try(&field).try(&:year)
-    if init_value && init_value < start_year && init_value > 1900
-      start_year = init_value
+    selected = Time.zone.today
+    # The field may not be an attribute of the object
+    if obj.present? && obj.respond_to?(field)
+      init_year = obj.try(&field).try(&:year)
+      selected = obj.try(&field) || Time.zone.today
     end
-    opts = { start_year: start_year, end_year: end_year,
-             selected: obj.try(&field) || Time.zone.today,
+    if init_year && init_year < start_year && init_year > 1900
+      start_year = init_year
+    end
+    opts = { start_year:, end_year:, selected:,
              order: args[:order] || [:day, :month, :year] }
     opts[:index] = args[:index] if args[:index].present?
     opts
@@ -504,8 +510,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     end
 
     id = [
-      args[:form].object_name.to_s.id_of_nested_field,
-      args[:field].to_s,
+      nested_field_id(args),
       "help"
     ].join("_")
     args[:between] = capture do
@@ -521,6 +526,11 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     args
   end
 
+  def nested_field_id(args)
+    [args[:form].object_name.to_s.id_of_nested_field,
+     args[:field].to_s].join("_")
+  end
+
   # These are args that should not be passed to the field
   # Note that :value is sometimes explicitly passed, so it must
   # be excluded separately (not here)
@@ -528,7 +538,8 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     exceptions = [
       :form, :field, :label, :class, :width, :inline, :between, :label_after,
       :label_end, :append, :help, :addon, :optional, :required, :monospace,
-      :type, :wrap_data, :wrap_id, :button, :button_data
+      :type, :wrap_data, :wrap_id, :button, :button_data, :checked_value,
+      :unchecked_value
     ] + extras
 
     args.clone.except(*exceptions)

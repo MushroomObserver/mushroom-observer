@@ -263,8 +263,7 @@ module ObservationsController::SharedFormMethods
 
       if after
         project.add_observation(@observation)
-        flash_notice(:attached_to_project.t(object: :observation,
-                                            project: project.title))
+        name_flash_for_project(@observation.name, project)
       else
         project.remove_observation(@observation)
         flash_notice(:removed_from_project.t(object: :observation,

@@ -550,8 +550,9 @@ class String
 
   # Rails generates an id for a nested field like "foo[bar]" that's snake_case
   # - no brackets. This gets you that string. (used in forms_helper)
+  # `chomp("_")` is to remove trailing underscores
   def id_of_nested_field
-    gsub(/[\[\]]+/, "_").chop
+    gsub(/[\[\]]+/, "_").chomp("_")
   end
 
   # Insert a line break between the scientific name and the author
