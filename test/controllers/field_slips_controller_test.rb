@@ -285,6 +285,30 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_response :success
   end
 
+  test "should show field slip location" do
+    login(@field_slip.user.login)
+    get(:edit, params: { id: @field_slip.id })
+    assert_match(@field_slip.location,
+                 @response.body)
+  end
+
+  test "should show previous field slip location" do
+    field_slip = field_slips(:field_slip_previous)
+    assert_not(field_slip.location == field_slip.project.location.display_name)
+    login(field_slip.user.login)
+    get(:new, params: { code: "#{field_slip.code}0" })
+    assert_match(field_slip.location,
+                 @response.body)
+  end
+
+  test "should show project location" do
+    login(@field_slip.user.login)
+    project = projects(:current_project)
+    get(:new, params: { code: "#{project.field_slip_prefix}-1234" })
+    assert_match(project.location.display_name,
+                 @response.body)
+  end
+
   test "admin should get edit" do
     login("rolf")
     get(:edit, params: { id: @field_slip.id })

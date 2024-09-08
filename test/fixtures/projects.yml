@@ -188,9 +188,11 @@ current_project:
   created_at: 2008-09-25 07:00:50
   updated_at: 2008-09-25 07:00:55
   observations: owner_accepts_general_questions, unknown_with_lat_lng
+  field_slip_prefix: CURR
   open_membership: true
   start_date: 2010-07-22 # date of earliest Observation
   end_date: <%= Time.zone.tomorrow %>
+  location: burbank
 
 current_closed_project:
   <<: *DEFAULTS
