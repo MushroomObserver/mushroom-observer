@@ -245,9 +245,8 @@ class InatObs
   end
 
   def where
-    # FIXME: Make it a real MO Location
-    # Maybe smallest existing MO Location containing:
-    #   inat.location +/- inat.positional accuracy
+    # NOTE: Make it the name of a real MO Location
+    # https://github.com/MushroomObserver/mushroom-observer/issues/2383
     inat_place_guess
   end
 

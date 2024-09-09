@@ -200,7 +200,8 @@ class InatImportJob < ApplicationJob
     inat_obs_photos.each do |obs_photo|
       photo = InatObsPhoto.new(obs_photo)
       api = InatPhotoImporter.new(photo_importer_params(photo)).api
-      # TODO: Error handling? 2024-06-19 jdc.
+      # NOTE: Error handling? 2024-06-19 jdc.
+      # https://github.com/MushroomObserver/mushroom-observer/issues/2382
 
       image = Image.find(api.results.first.id)
 
@@ -323,7 +324,8 @@ class InatImportJob < ApplicationJob
         notes: sequence[:notes]
       }
 
-      # TODO: Error handling? 2024-06-19 jdc.
+      # NOTE: Error handling? 2024-06-19 jdc.
+      # https://github.com/MushroomObserver/mushroom-observer/issues/2382
       API2.execute(params)
     end
   end
