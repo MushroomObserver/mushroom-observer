@@ -12,15 +12,17 @@ module FieldSlips
 
       return unless check_for_qr_code(params)
 
-      if @qr_code.start_with?("http")
+      # This should do a more careful test for an MO url?
+      debugger
+      if @qr_code.start_with?(MO.http_domain)
         redirect_to(@qr_code)
       else
-        @field_slip = FieldSlip.find_by(qr_code: qr_code)
+        @field_slip = FieldSlip.find_by(code: @qr_code)
         if @field_slip
           redirect_to(field_slip_path(@field_slip))
         else
           flash_error(:runtime_no_field_slip.t(id: @qr_code))
-          redirect_to(new_field_slips_qr_reader_path)
+          redirect_to(field_slips_qr_reader_new_path)
         end
       end
     end
