@@ -1097,7 +1097,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
     License.find_each do |license|
       display_names[license.id] = license.display_name
-      available_names_and_ids[license.id] = License.available_names_and_ids(license)
+      available_names_and_ids[license.id] =
+        License.available_names_and_ids(license)
     end
 
     Image.where(user: user).
