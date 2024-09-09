@@ -40,7 +40,6 @@ class InatObsTest < UnitTestCase
       specimen: false,
       # notes: { Other: "on Quercus\n\n&#8212;\n\nMirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/202555552\">observation 202555552</a> on March 15, 2024." }, # rubocop:disable Layout/LineLength
       notes: { Other: "on Quercus\n\n&#8212;\n\nOriginally posted to Mushroom Observer on Mar. 7, 2024." }, # rubocop:disable Layout/LineLength
-      # FIXME: add new source
       source: "mo_inat_import"
       # thumb_image_id: 1659475,
       # vote_cache: 2.51504,
