@@ -13,7 +13,6 @@ module FieldSlips
       return unless check_for_qr_code(params)
 
       # This should do a more careful test for an MO url?
-      debugger
       if @qr_code.start_with?(MO.http_domain)
         redirect_to(@qr_code)
       else
