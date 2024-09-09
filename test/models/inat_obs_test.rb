@@ -41,7 +41,7 @@ class InatObsTest < UnitTestCase
       # notes: { Other: "on Quercus\n\n&#8212;\n\nMirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/202555552\">observation 202555552</a> on March 15, 2024." }, # rubocop:disable Layout/LineLength
       notes: { Other: "on Quercus\n\n&#8212;\n\nOriginally posted to Mushroom Observer on Mar. 7, 2024." }, # rubocop:disable Layout/LineLength
       # FIXME: add new source
-      source: nil
+      source: "mo_inat_import"
       # thumb_image_id: 1659475,
       # vote_cache: 2.51504,
       # num_views: 78,
@@ -51,7 +51,7 @@ class InatObsTest < UnitTestCase
     )
 
     # mapping to MO Observation attributes
-    %w[gps_hidden lat lng name_id notes text_name when where].
+    %w[gps_hidden lat lng name_id notes source text_name when where].
       each do |attribute|
         assert_equal(expected_mapping.send(attribute),
                      mock_inat_obs.send(attribute))

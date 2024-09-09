@@ -236,6 +236,10 @@ class InatObs
     end
   end
 
+  def source
+    "mo_inat_import"
+  end
+
   def text_name
     Name.find(name_id).text_name
   end

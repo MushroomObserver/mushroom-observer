@@ -152,7 +152,7 @@ class InatImportJob < ApplicationJob
       name_id: name_id,
       text_name: Name.find(name_id).text_name,
       notes: inat_obs.notes,
-      source: "mo_inat_import",
+      source: inat_obs.source,
       inat_id: inat_obs.inat_id
     )
     # Ensure this Name wins consensus_calc ties
