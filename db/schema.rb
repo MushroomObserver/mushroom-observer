@@ -86,7 +86,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_06_052017) do
   end
 
   create_table "field_slip_job_trackers", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-  create_table "field_slip_job_trackers", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "start"
     t.integer "count"
     t.string "prefix"
