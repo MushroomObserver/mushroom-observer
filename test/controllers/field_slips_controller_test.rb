@@ -288,7 +288,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
   test "should show field slip location" do
     login(@field_slip.user.login)
     get(:edit, params: { id: @field_slip.id })
-    assert_match(@field_slip.location,
+    assert_match(@field_slip.location_name,
                  @response.body)
   end
 
@@ -297,7 +297,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_not(field_slip.location == field_slip.project.location.display_name)
     login(field_slip.user.login)
     get(:new, params: { code: "#{field_slip.code}0" })
-    assert_match(field_slip.location,
+    assert_match(field_slip.location_name,
                  @response.body)
   end
 
