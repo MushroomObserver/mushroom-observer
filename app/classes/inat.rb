@@ -10,6 +10,7 @@ class Inat
 
   def initialize(operation:, token: "")
     # This should eventually be replaced by class-wide limit
+    # https://github.com/MushroomObserver/mushroom-observer/issues/2320
     sleep(1.second)
     headers = { "Authorization" => "Bearer #{token}" }
     @inat = RestClient.get("#{API_BASE}#{operation}", headers)

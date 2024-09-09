@@ -134,6 +134,8 @@ class InatImportJob < ApplicationJob
     update_names_and_proposals(inat_obs)
     add_inat_sequences(inat_obs)
     add_import_snapshot_comment(inat_obs)
+    # NOTE: update field slip 2024-09-09 jdc
+    # https://github.com/MushroomObserver/mushroom-observer/issues/2380
   end
 
   def create_observation(inat_obs)
@@ -211,6 +213,8 @@ class InatImportJob < ApplicationJob
       # t.boolean "diagnostic", default: true, null: false
       image.update(
         user_id: @inat_import.user_id, # throws Error if done as API param above
+        # NOTE: 2024-09-09 get when from image EXIF instead of @observation.when
+        # https://github.com/MushroomObserver/mushroom-observer/issues/2379
         when: @observation.when # throws Error if done as API param above
       )
       @observation.add_image(image)

@@ -21,6 +21,8 @@ class InatTaxon
 
     # iNat name maps to multiple MO Names
     # So for the moment, just map it to Fungi
+    # For possible improvements, see
+    # https://github.com/MushroomObserver/mushroom-observer/issues/2381
     Name.unknown
   end
 

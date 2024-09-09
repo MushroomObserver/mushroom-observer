@@ -229,6 +229,7 @@ class InatObs
     obs_sequence_fields.each_with_object([]) do |field, ary|
       # NOTE: 2024-06-19 jdc. Need more investigation/test to handle
       # field[:value] blank or not a (pure) lists of bases
+      # https://github.com/MushroomObserver/mushroom-observer/issues/2232
       ary << { locus: field[:name], bases: field[:value],
                # NTOE: 2024-06-19 jdc. Can we figure out the following?
                archive: nil, accession: "", notes: "" }
@@ -426,6 +427,8 @@ class InatObs
     @obs.dig(:taxon, :iconic_taxon_name) == "Fungi"
   end
 
+  # NOTE: 2024-09-09 jdc. Can this be improved?
+  # https://github.com/MushroomObserver/mushroom-observer/issues/2245
   def inat_projects
     @obs[:project_observations]
   end
