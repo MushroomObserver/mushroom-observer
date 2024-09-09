@@ -202,8 +202,10 @@ class InatObsTest < UnitTestCase
     mock_inat_obs = mock_observation("xeromphalina_campanella_complex")
     assert_equal("Xeromphalina campanella", mock_inat_obs.inat_taxon_name)
     assert_equal("complex", mock_inat_obs.inat_taxon_rank)
-    assert_equal(Name.unknown.text_name, mock_inat_obs.text_name,
-                 "iNat complex without MO name match should map to the Unknown name")
+    assert_equal(
+      Name.unknown.text_name, mock_inat_obs.text_name,
+      "iNat complex without MO name match should map to the Unknown name"
+    )
   end
 
   def test_complex_with_mo_match
