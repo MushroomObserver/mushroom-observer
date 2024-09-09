@@ -134,10 +134,6 @@ class InatImportJob < ApplicationJob
     update_names_and_proposals(inat_obs)
     add_inat_sequences(inat_obs)
     add_import_snapshot_comment(inat_obs)
-    # TODO: Other things done by Observations#create
-    # save_everything_else(params.dig(:naming, :reasons))
-    # strip_images! if @observation.gps_hidden
-    # update_field_slip(@observation, params[:field_code])
   end
 
   def create_observation(inat_obs)
@@ -214,7 +210,6 @@ class InatImportJob < ApplicationJob
       # t.boolean "diagnostic", default: true, null: false
       image.update(
         user_id: @inat_import.user_id, # throws Error if done as API param above
-        # TODO: get date from EXIF; it could be > obs date
         when: @observation.when # throws Error if done as API param above
       )
       @observation.add_image(image)

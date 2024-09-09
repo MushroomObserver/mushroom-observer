@@ -227,7 +227,7 @@ class InatObs
   def sequences
     obs_sequence_fields = inat_obs_fields.select { |f| sequence_field?(f) }
     obs_sequence_fields.each_with_object([]) do |field, ary|
-      # TODO: 2024-06-19 jdc. Need more investigation/test to handle
+      # NOTE: 2024-06-19 jdc. Need more investigation/test to handle
       # field[:value] blank or not a (pure) lists of bases
       ary << { locus: field[:name], bases: field[:value],
                # NTOE: 2024-06-19 jdc. Can we figure out the following?
@@ -427,10 +427,6 @@ class InatObs
     @obs.dig(:taxon, :iconic_taxon_name) == "Fungi"
   end
 
-  # TODO: 2024-07-23 jdc. Improve this.
-  # (But the best possible is Traditional projects and
-  # non_traditional_projects with joined Collection/Umbrella projects )
-  # https://forum.inaturalist.org/t/given-an-observation-id-get-a-list-of-project/53476?u=joecohen
   def inat_projects
     @obs[:project_observations]
   end

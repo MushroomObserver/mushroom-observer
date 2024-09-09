@@ -8,12 +8,9 @@
 class Inat
   API_BASE = "https://api.inaturalist.org/v1"
 
-  # TODO: Add a verb param so that this can be used for non-GET requests
   def initialize(operation:, token: "")
-    # TODO: Use a class variable to track time of last request
-    # Then sleep for minimum time
-    sleep(1.second) # 60 requests/minute rate limit per iNat policy
-    # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
+    # This should eventually be replaced by class-wide limit
+    sleep(1.second)
     headers = { "Authorization" => "Bearer #{token}" }
     @inat = RestClient.get("#{API_BASE}#{operation}", headers)
   end

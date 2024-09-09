@@ -616,12 +616,7 @@ class InatImportJobTest < ActiveJob::TestCase
     User.find_by(login: "MO Webmaster")
   end
 
-  # ---------------------------------------------------------------------------
-  # Everything above here is live code.
-  # TODO: Remove this comment and everything below it.
-  # Everything below is potentially dead.
-
-  # Turn results with many pages into results with one page
+  # Hack to turn results with many pages into results with one page
   # By ignoring all pages but the first
   def limited_to_first_page(mock_search_result)
     ms_hash = JSON.parse(mock_search_result)

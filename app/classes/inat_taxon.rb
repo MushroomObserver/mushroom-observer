@@ -21,9 +21,6 @@ class InatTaxon
 
     # iNat name maps to multiple MO Names
     # So for the moment, just map it to Fungi
-    # TODO: refine this.
-    # Ideas: check iNat and MO authors, possibly prefer non-deprecated MO Name
-    # - might need a dictionary here
     Name.unknown
   end
 
