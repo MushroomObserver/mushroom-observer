@@ -86,6 +86,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_06_052017) do
   end
 
   create_table "field_slip_job_trackers", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "field_slip_job_trackers", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "start"
     t.integer "count"
     t.string "prefix"
@@ -525,7 +526,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_06_052017) do
     t.integer "source"
     t.datetime "log_updated_at", precision: nil
     t.boolean "needs_naming", default: false, null: false
-    t.integer "inat_id"
     t.index ["needs_naming"], name: "needs_naming_index"
   end
 
@@ -723,7 +723,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_06_052017) do
     t.index ["task_key", "run_at"], name: "index_solid_queue_recurring_executions_on_task_key_and_run_at", unique: true
   end
 
-  create_table "solid_queue_recurring_tasks", charset: "utf8mb3", force: :cascade do |t|
+  create_table "solid_queue_recurring_tasks", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "key", null: false
     t.string "schedule", null: false
     t.string "command", limit: 2048

@@ -1365,7 +1365,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     "_user #{user.login}_"
   end
 
-  def field_slip_id
+  def field_slip_name
     return notes[:Field_Slip_ID] if notes.include?(:Field_Slip_ID)
 
     "_name #{name.text_name}_"
