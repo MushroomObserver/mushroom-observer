@@ -115,6 +115,9 @@ plugins:
 # markdown style check
   markdownlint:
     enabled: true
+    line_length:
+      tables: false
+
 
 # style and quality checks for Ruby code
 # configuration details are in .rubocop.yml files, rather than here.
