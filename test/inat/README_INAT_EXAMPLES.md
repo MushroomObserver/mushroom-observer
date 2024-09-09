@@ -42,13 +42,10 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | zero_results| n.a. | | n.a. | response with total_results: 0, to expose and prevent reversion of bug |
 <!-- markdownlint-enable MD013 -->
 
-## TODO
-
-### Needed Observation Examples
+### Potential Additional Observation Examples
 
 iNat fungal Obss with these fields/licenses
 
-- Notes
 - Observation Fields
   - sequence (need a variety of these;
     there are many ways to add sequences to iNat Obss)
