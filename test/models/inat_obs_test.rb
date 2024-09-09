@@ -328,7 +328,6 @@ class InatObsTest < UnitTestCase
   end
 
   def test_taxon_importable
-    # TODO: 2024-06-19 jdc. Fix this after fixing `importable?`
     assert(mock_observation("somion_unicolor").taxon_importable?,
            "iNat Fungi observations should be importable")
 
