@@ -3023,6 +3023,7 @@
   inat_missing_username: Missing your iNat Username
   inat_no_imports_designated: You must list the iNat observation(s) to be imported
   inat_previous_import: iNat [inat_id] previously imported as MO Observation [mo_obs_id]
+  inat_previous_mirror: "iNat [inat_id] is a \"mirror\" of existing MO Observation [mo_obs_id]"
   inat_import_started: Your import has started. Refresh page to update results.
 
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
