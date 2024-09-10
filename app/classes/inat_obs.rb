@@ -13,6 +13,7 @@
 #  === iNat attributes & associations
 #
 #  obs::                 The iNat observation data
+#  inat_description::
 #  inat_id::
 #  inat_identifications    array of identifications, taxa need not be unique
 #  inat_location::         lat,lon
@@ -57,6 +58,10 @@ class InatObs
   end
 
   ########## iNat attributes
+
+  def inat_description
+    @obs[:inat_description]
+  end
 
   def inat_id
     @obs[:id]
@@ -198,9 +203,9 @@ class InatObs
   end
 
   def notes
-    return "" if description.empty?
+    return "" if inat_description.empty?
 
-    { Other: description.gsub(%r{</?p>}, "") }
+    { Other: inat_description.gsub(%r{</?p>}, "") }
   end
 
   # min bounding rectangle of iNat location blurred by public accuracy
@@ -421,10 +426,6 @@ class InatObs
 
   def complex?
     inat_taxon_rank == "complex"
-  end
-
-  def description
-    @obs[:description]
   end
 
   def fungi?

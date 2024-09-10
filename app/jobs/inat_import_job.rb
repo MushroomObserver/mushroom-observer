@@ -33,13 +33,11 @@ class InatImportJob < ApplicationJob
 
   # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
   def use_auth_code_to_obtain_oauth_access_token(auth_code)
-    payload = {
-      client_id: APP_ID,
-      client_secret: Rails.application.credentials.inat.secret,
-      code: auth_code,
-      redirect_uri: REDIRECT_URI,
-      grant_type: "authorization_code"
-    }
+    payload = { client_id: APP_ID,
+                client_secret: Rails.application.credentials.inat.secret,
+                code: auth_code,
+                redirect_uri: REDIRECT_URI,
+                grant_type: "authorization_code" }
     oauth_response = RestClient.post("#{SITE}/oauth/token", payload)
     JSON.parse(oauth_response.body)["access_token"]
   end
@@ -64,10 +62,8 @@ class InatImportJob < ApplicationJob
     loop do
       page_of_observations =
         # get a page of observations with id > id of last imported obs
-        next_page(
-          id: inat_ids, id_above: last_import_id,
-          user_login: @inat_import.inat_username
-        )
+        next_page(id: inat_ids, id_above: last_import_id,
+                  user_login: @inat_import.inat_username)
       parsed_page = JSON.parse(page_of_observations)
       break if page_empty?(parsed_page)
 
@@ -136,7 +132,7 @@ class InatImportJob < ApplicationJob
     add_import_snapshot_comment(inat_obs)
     # NOTE: update field slip 2024-09-09 jdc
     # https://github.com/MushroomObserver/mushroom-observer/issues/2380
-    update_inat_observation
+    update_inat_observation(inat_obs)
   end
 
   def create_observation(inat_obs)
@@ -180,18 +176,14 @@ class InatImportJob < ApplicationJob
   end
 
   def need_new_prov_name?(prov_name)
-    prov_name.blank? ||
-      Name.where(text_name: prov_name).none?
+    prov_name.blank? || Name.where(text_name: prov_name).none?
   end
 
   def add_provisional_name(prov_name)
-    params = {
-      method: :post,
-      action: :name,
-      api_key: inat_manager_key.key,
-      name: "#{prov_name} crypt. temp.",
-      rank: "Species"
-    }
+    params = { method: :post, action: :name,
+               api_key: inat_manager_key.key,
+               name: "#{prov_name} crypt. temp.",
+               rank: "Species" }
     api = API2.execute(params)
 
     new_name = api.results.first
@@ -223,17 +215,14 @@ class InatImportJob < ApplicationJob
   end
 
   def photo_importer_params(photo)
-    {
-      method: :post,
-      action: :image,
+    { method: :post, action: :image,
       api_key: inat_manager_key.key,
       upload_url: photo.url,
 
       copyright_holder: photo.copyright_holder,
       license: photo.license_id,
       notes: photo.notes,
-      original_name: photo.original_name
-    }
+      original_name: photo.original_name }
   end
 
   # Key for managing iNat imports; avoids requiring each user to have own key.
@@ -317,17 +306,14 @@ class InatImportJob < ApplicationJob
 
   def add_inat_sequences(inat_obs)
     inat_obs.sequences.each do |sequence|
-      params = {
-        action: :sequence,
-        method: :post,
-        api_key: inat_manager_key.key,
-        observation: @observation.id,
-        locus: sequence[:locus],
-        bases: sequence[:bases],
-        archive: sequence[:archive],
-        accession: sequence[:accession],
-        notes: sequence[:notes]
-      }
+      params = { action: :sequence, method: :post,
+                 api_key: inat_manager_key.key,
+                 observation: @observation.id,
+                 locus: sequence[:locus],
+                 bases: sequence[:bases],
+                 archive: sequence[:archive],
+                 accession: sequence[:accession],
+                 notes: sequence[:notes] }
 
       # NOTE: Error handling? 2024-06-19 jdc.
       # https://github.com/MushroomObserver/mushroom-observer/issues/2382
@@ -336,19 +322,14 @@ class InatImportJob < ApplicationJob
   end
 
   def obs_fields(fields)
-    fields.map do |field|
-      "&nbsp;&nbsp;#{field[:name]}: #{field[:value]}"
-    end.join("\n")
+    fields.map { |field| "&nbsp;&nbsp;#{field[:name]}: #{field[:value]}" }.
+      join("\n")
   end
 
   def add_import_snapshot_comment(inat_obs)
-    params = {
-      target: @observation,
-      summary: "#{:inat_data_comment.t} #{@observation.created_at}",
-      comment: comment(inat_obs),
-      user: inat_manager
-    }
-
+    params = { target: @observation, user: inat_manager,
+               summary: "#{:inat_data_comment.t} #{@observation.created_at}",
+               comment: comment(inat_obs) }
     Comment.create(params)
   end
 
@@ -370,32 +351,23 @@ class InatImportJob < ApplicationJob
     COMMENT
   end
 
-  def update_inat_observation
+  def update_inat_observation(inat_obs)
     update_mushroom_observer_url_field
-    update_description
+    update_description(inat_obs)
   end
 
   def update_mushroom_observer_url_field
-    update_inat_observation_field(
-      observation_id: @observation.inat_id,
-      field_id: 5005,
-      value: "https://mushroomobserver.org/#{@observation.id}"
-    )
+    update_inat_observation_field(observation_id: @observation.inat_id,
+                                  field_id: 5005,
+                                  value: "#{MO.http_domain}/#{@observation.id}")
   end
 
   def update_inat_observation_field(observation_id:, field_id:, value:)
-    payload = {
-      observation_field_value: {
-        observation_id: observation_id,
-        observation_field_id: field_id,
-        value: value
-      }
-    }
-    headers = {
-      authorization: "Bearer #{@inat_import.token}",
-      content_type: :json,
-      accept: :json
-    }
+    payload = { observation_field_value: { observation_id: observation_id,
+                                           observation_field_id: field_id,
+                                           value: value } }
+    headers = { authorization: "Bearer #{@inat_import.token}",
+                content_type: :json, accept: :json }
 
     response = RestClient.post("#{API_BASE}/observation_field_values",
                                payload.to_json, headers)
@@ -404,7 +376,21 @@ class InatImportJob < ApplicationJob
     e.response
   end
 
-  # placeholder for updating the iNat description
-  # https://github.com/MushroomObserver/mushroom-observer/issues/2246
-  def update_description; end
+  def update_description(inat_obs)
+    description = inat_obs.inat_description
+    updated_description =
+      "Imported to Mushroom Observer " \
+      "#{Time.zone.today.strftime(MO.web_date_format)}"
+    updated_description.prepend("#{description}\n\n") if description.present?
+
+    payload = { observation: { description: updated_description } }
+    headers = { authorization: "Bearer #{@inat_import.token}",
+                content_type: :json, accept: :json }
+
+    response = RestClient.put("#{API_BASE}/observations/#{inat_obs.inat_id}",
+                              payload.to_json, headers)
+    JSON.parse(response.body)
+  rescue RestClient::ExceptionWithResponse => e
+    e.response
+  end
 end

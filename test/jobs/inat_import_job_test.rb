@@ -454,7 +454,7 @@ class InatImportJobTest < ActiveJob::TestCase
                           mock_inat_response: mock_inat_response,
                           id_above: id_above)
     stub_inat_photo_requests(mock_inat_response)
-    stub_modify_inat_observations
+    stub_modify_inat_observations(mock_inat_response)
   end
 
   def stub_token_requests
@@ -559,14 +559,31 @@ class InatImportJobTest < ActiveJob::TestCase
     mock_photo_importer
   end
 
-  def stub_modify_inat_observations
-    stub_update_observation_fields
+  def stub_modify_inat_observations(mock_inat_response)
+    stub_add_observation_fields
+    stub_update_descriptions(mock_inat_response)
   end
 
-  def stub_update_observation_fields
+  def stub_add_observation_fields
     stub_request(:post, "#{API_BASE}/observation_field_values").
       to_return(status: 200, body: "".to_json,
                 headers: { "Content-Type" => "application/json" })
+  end
+
+  def stub_update_descriptions(mock_inat_response)
+    observations = JSON.parse(mock_inat_response)["results"]
+    observations.each do |obs|
+      date = Time.zone.today.strftime(MO.web_date_format)
+      body =
+        { observation: {
+          description: "Imported to Mushroom Observer #{date}"
+        } }
+      headers = { authorization: "Bearer",
+                  content_type: "application/json", accept: "application/json" }
+      stub_request(:put, "#{API_BASE}/observations/#{obs["id"]}").
+        with(body: body.to_json, headers: headers).
+        to_return(status: 200, body: "".to_json, headers: {})
+    end
   end
 
   # -------- Standard Test assertions
