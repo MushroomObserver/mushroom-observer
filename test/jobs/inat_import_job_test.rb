@@ -454,6 +454,7 @@ class InatImportJobTest < ActiveJob::TestCase
                           mock_inat_response: mock_inat_response,
                           id_above: id_above)
     stub_inat_photo_requests(mock_inat_response)
+    stub_modify_inat_observations
   end
 
   def stub_token_requests
@@ -556,6 +557,16 @@ class InatImportJobTest < ActiveJob::TestCase
       end
     end
     mock_photo_importer
+  end
+
+  def stub_modify_inat_observations
+    stub_update_observation_fields
+  end
+
+  def stub_update_observation_fields
+    stub_request(:post, "#{API_BASE}/observation_field_values").
+      to_return(status: 200, body: "".to_json,
+                headers: { "Content-Type" => "application/json" })
   end
 
   # -------- Standard Test assertions
