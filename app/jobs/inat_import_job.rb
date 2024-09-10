@@ -136,6 +136,7 @@ class InatImportJob < ApplicationJob
     add_import_snapshot_comment(inat_obs)
     # NOTE: update field slip 2024-09-09 jdc
     # https://github.com/MushroomObserver/mushroom-observer/issues/2380
+    update_inat_observation
   end
 
   def create_observation(inat_obs)
@@ -368,4 +369,42 @@ class InatImportJob < ApplicationJob
       #{:TAGS.t}: #{inat_obs.inat_tags.join(" ")}\n
     COMMENT
   end
+
+  def update_inat_observation
+    update_mushroom_observer_url_field
+    update_description
+  end
+
+  def update_mushroom_observer_url_field
+    update_inat_observation_field(
+      observation_id: @observation.inat_id,
+      field_id: 5005,
+      value: "https://mushroomobserver.org/#{@observation.id}"
+    )
+  end
+
+  def update_inat_observation_field(observation_id:, field_id:, value:)
+    payload = {
+      observation_field_value: {
+        observation_id: observation_id,
+        observation_field_id: field_id,
+        value: value
+      }
+    }
+    headers = {
+      authorization: "Bearer #{@inat_import.token}",
+      content_type: :json,
+      accept: :json
+    }
+
+    response = RestClient.post("#{API_BASE}/observation_field_values",
+                               payload.to_json, headers)
+    JSON.parse(response.body)
+  rescue RestClient::ExceptionWithResponse => e
+    e.response
+  end
+
+  # placeholder for updating the iNat description
+  # https://github.com/MushroomObserver/mushroom-observer/issues/2246
+  def update_description; end
 end
