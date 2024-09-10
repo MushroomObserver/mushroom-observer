@@ -571,13 +571,16 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def stub_update_descriptions(mock_inat_response)
+    date = Time.zone.today.strftime(MO.web_date_format)
     observations = JSON.parse(mock_inat_response)["results"]
     observations.each do |obs|
-      date = Time.zone.today.strftime(MO.web_date_format)
-      body =
-        { observation: {
-          description: "Imported to Mushroom Observer #{date}"
-        } }
+      updated_description =
+        "Imported to Mushroom Observer #{date}"
+      if obs["description"].present?
+        updated_description.prepend("#{obs["description"]}\n\n")
+      end
+
+      body = { observation: { description: updated_description } }
       headers = { authorization: "Bearer",
                   content_type: "application/json", accept: "application/json" }
       stub_request(:put, "#{API_BASE}/observations/#{obs["id"]}").

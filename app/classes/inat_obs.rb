@@ -60,7 +60,7 @@ class InatObs
   ########## iNat attributes
 
   def inat_description
-    @obs[:inat_description]
+    @obs[:description]
   end
 
   def inat_id
