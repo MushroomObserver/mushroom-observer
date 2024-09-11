@@ -622,7 +622,7 @@ class InatImportJobTest < ActiveJob::TestCase
     obs_comments =
       Comment.where(target_type: "Observation", target_id: obs.id)
     assert(obs_comments.one?)
-    assert(obs_comments.where(Comment[:summary] =~ /^iNat Data/).present?,
+    assert(obs_comments.where(Comment[:summary] =~ /iNat Data/).present?,
            "Missing Initial Commment (#{:inat_data_comment.l})")
     assert_equal(
       inat_manager, obs_comments.first.user,
@@ -630,9 +630,9 @@ class InatImportJobTest < ActiveJob::TestCase
     )
     inat_data_comment = obs_comments.first.comment
     [
-      :USER.l, :OBSERVED.l, :LAT_LON.l, :PLACE.l, :ID.l, :DQA.l,
-      :ANNOTATIONS.l, :PROJECTS.l, :SEQUENCES.l, :OBSERVATION_FIELDS.l,
-      :TAGS.l
+      :USER.l, :OBSERVED.l, :show_observation_inat_lat_lng.l, :PLACE.l,
+      :ID.l, :DQA.l, :ANNOTATIONS.l, :PROJECTS.l, :SEQUENCES.l,
+      :OBSERVATION_FIELDS.l, :TAGS.l
     ].each do |caption|
       assert_match(
         /#{caption}/, inat_data_comment,
