@@ -341,12 +341,12 @@ class InatImportJob < ApplicationJob
       #{:PLACE.t}: #{inat_obs.inat_place_guess}\n
       #{:ID.t}: #{inat_obs.inat_taxon_name}\n
       #{:DQA.t}: #{inat_obs.dqa}\n
-      #{:ANNOTATIONS.t}: #{:UNDER_DEVELOPMENT.t}\n
-      #{:PROJECTS.t}: #{inat_obs.inat_project_names}\n
       #{:SEQUENCES.t}: #{:UNDER_DEVELOPMENT.t}\n
       #{:OBSERVATION_FIELDS.t}: \n\
       #{obs_fields(inat_obs.inat_obs_fields)}\n
-      #{:TAGS.t}: #{inat_obs.inat_tags.join(" ")}\n
+      #{:PROJECTS.t}: #{:inat_not_imported.t}\n
+      #{:ANNOTATIONS.t}: #{:inat_not_imported.t}\n
+      #{:TAGS.t}: #{:inat_not_imported.t}}\n
     COMMENT
   end
 

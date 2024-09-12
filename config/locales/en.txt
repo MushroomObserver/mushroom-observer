@@ -3033,6 +3033,8 @@
   inat_dqa_casual: Casual
   inat_dqa_needs_id: Needs ID
   inat_dqa_research: Research Grade
+  inat_not_imported: Not Imported
+
   inat_details_heading: "Details/Caveats"
   inat_details_list: "- MO will list most iNat data and/or map it to analogous MO fields. \n - Coordinates are hidden from the public if iNat obscured them. \n - Location is a rectangle with an MO-style name, rather than the iNat Place name. \n"
 
