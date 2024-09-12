@@ -149,11 +149,14 @@ module Prawn
       box_size = 7.mm
       text_x = X_MAX - box_size * 2
       text_box("ID By:",
-               at: [text_x, NOTES_BOTTOM + FONT_SIZE], # Y_MIN + box_size + FONT_SIZE],
+               at: [text_x, NOTES_BOTTOM + FONT_SIZE],
                width: X_MAX - text_x)
-      rectangle([X_MAX - box_size * 3, Y_MIN + FIELD_HEIGHT], box_size, FIELD_HEIGHT)
-      rectangle([X_MAX - box_size * 2, Y_MIN + FIELD_HEIGHT], box_size, FIELD_HEIGHT)
-      rectangle([X_MAX - box_size, Y_MIN + FIELD_HEIGHT], box_size, FIELD_HEIGHT)
+      rectangle([X_MAX - box_size * 3, Y_MIN + FIELD_HEIGHT], box_size,
+                FIELD_HEIGHT)
+      rectangle([X_MAX - box_size * 2, Y_MIN + FIELD_HEIGHT], box_size,
+                FIELD_HEIGHT)
+      rectangle([X_MAX - box_size, Y_MIN + FIELD_HEIGHT], box_size,
+                FIELD_HEIGHT)
     end
 
     def notes
