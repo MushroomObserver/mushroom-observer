@@ -237,8 +237,8 @@ module Observations
     # to iNat confidential data
     # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
     def authorization_url
-      "https://www.inaturalist.org/oauthenticate/authorize?" \
-      "client_id=#{Rails.application.credentials.inat.id}" \
+      "#{SITE}/oauthenticate/authorize?client_id=" \
+        "#{Rails.application.credentials[Rails.env.to_sym][:inat][:id]}" \
       "&redirect_uri=#{REDIRECT_URI}" \
       "&response_type=code"
     end
