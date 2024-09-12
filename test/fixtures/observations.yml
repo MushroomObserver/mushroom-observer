@@ -258,7 +258,7 @@ trusted_hidden:
   when: 2023-11-05
   location: falmouth
   where: Falmouth, Massachusetts, USA
-  user: mary
+  user: ollie
   name: fungi
   text_name: Fungi
   gps_hidden: true
@@ -787,3 +787,8 @@ current_obs:
   user: katrina
   where: Salt Point State Park, Sonoma Co., California, USA
   location: salt_point
+
+newbie_obs:
+  <<: *DEFAULTS
+  notes:
+    :Collector: _user foray_newbie_
