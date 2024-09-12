@@ -76,10 +76,14 @@ module PatternSearchHelper
     if component == :text_field_with_label && args[:field] != :pattern
       args[:inline] = true
     end
+    args[:help] = pattern_search_help_text(args)
 
     PATTERN_SEARCH_FIELD_HELPERS[field_type][:args].merge(args.except(:type))
   end
 
+  def pattern_search_help_text(args)
+    :"#{args[:type]}_term_#{args[:field]}".l
+  end
   # FIELD HELPERS
   #
   def pattern_search_yes_field(**args)
@@ -117,7 +121,8 @@ module PatternSearchHelper
         end,
         tag.div(class: "col-xs-12 col-sm-6") do
           text_field_with_label(**args.merge(
-            { label: :to.l, between: :optional, field: "#{args[:field]}_range" }
+            { label: :to.l, between: :optional, help: nil,
+              field: "#{args[:field]}_range" }
           ))
         end
       ].safe_join
@@ -132,7 +137,8 @@ module PatternSearchHelper
         end,
         tag.div(class: "col-xs-12 col-sm-6") do
           select_with_label(options: Name.all_ranks, **args.merge(
-            { label: :to.l, between: :optional, field: "#{args[:field]}_range" }
+            { label: :to.l, between: :optional, help: nil,
+              field: "#{args[:field]}_range" }
           ))
         end
       ].safe_join

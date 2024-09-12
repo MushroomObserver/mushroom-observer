@@ -488,7 +488,8 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   end
 
   def field_label_opts(args)
-    label_opts = { class: "mr-3" }
+    label_opts = {}
+    label_opts[:class] = args[:help].present? ? "" : "mr-3"
     label_opts[:index] = args[:index] if args[:index].present?
     label_opts
   end
@@ -520,7 +521,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     ].join("_")
     args[:between] = capture do
       concat(args[:between])
-      concat(collapse_info_trigger(id))
+      concat(collapse_info_trigger(id, class: "mx-3"))
     end
     args[:append] = capture do
       concat(args[:append])

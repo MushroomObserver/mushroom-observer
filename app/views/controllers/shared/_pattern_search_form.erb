@@ -1,3 +1,5 @@
+<%# locals: (field_columns: [], search_type: nil, local: true) -%>
+
 <%= form_with(url: { action: :create }) do |f| %>
 
   <%= tag.div(class: "row") do %>
@@ -14,13 +16,13 @@
                   <% field.each do |subfield| %>
                     <%= tag.div(class: "col-xs-12 col-lg-6") do %>
                       <%= pattern_search_field(form: f, field: subfield,
-                                               type: :observation) %>
+                                               type: search_type) %>
                     <% end %>
                   <% end %>
                 <% end %>
               <% else %>
                 <%= pattern_search_field(form: f, field: field,
-                                         type: :observation) %>
+                                         type: search_type) %>
               <% end %>
 
             <% end %>

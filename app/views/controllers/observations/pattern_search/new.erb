@@ -4,4 +4,5 @@
 %>
 
 <%= render(partial: "shared/pattern_search_form",
-           locals: { local: true, field_columns: @field_columns } ) %>
+           locals: { local: true, search_type: :observation,
+                     field_columns: @field_columns } ) %>
