@@ -785,6 +785,5 @@ nybg_2023_09_obs:
 current_obs:
   <<: *DEFAULTS
   user: katrina
-  when: 2024-09-08
   where: Salt Point State Park, Sonoma Co., California, USA
   location: salt_point
