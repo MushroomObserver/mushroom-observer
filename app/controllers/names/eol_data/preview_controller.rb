@@ -49,7 +49,7 @@ module Names::EolData
                    where(name_id: name_ids).
                    where(Observation[:vote_cache] >= 2.4).
                    where(Image[:vote_cache] >= 2).
-                   where(Image[:ok_for_export] == true).
+                   where(Image[:ok_for_export].eq(true)).
                    order(Observation[:vote_cache]).
                    select(Observation[:name_id], ObservationImage[:image_id],
                           ObservationImage[:observation_id], Image[:user_id],
