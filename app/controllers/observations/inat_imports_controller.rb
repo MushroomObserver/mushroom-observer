@@ -41,8 +41,7 @@ module Observations
     REDIRECT_URI =
       "http://localhost:3000/observations/inat_imports/authorization_response"
     # iNat's id for the MO application
-    # APP_ID = Rails.application.credentials.inat.id
-    APP_ID = Rails.application.credentials[Rails.env.to_sym][:inat][:id]
+    APP_ID = Rails.application.credentials.inat.id
     # The iNat API. Not called here, but reference in tests and ActiveJob
     API_BASE = "https://api.inaturalist.org/v1"
 

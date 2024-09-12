@@ -33,12 +33,11 @@ class InatImportJob < ApplicationJob
 
   # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
   def use_auth_code_to_obtain_oauth_access_token(auth_code)
-    payload =
-      { client_id: APP_ID,
-        client_secret: Rails.application.credentials[Rails.env.to_sym][:inat][:secret], # rubocop:disable Layout/LineLength
-        code: auth_code,
-        redirect_uri: REDIRECT_URI,
-        grant_type: "authorization_code" }
+    payload = { client_id: APP_ID,
+                client_secret: Rails.application.credentials.inat.secret,
+                code: auth_code,
+                redirect_uri: REDIRECT_URI,
+                grant_type: "authorization_code" }
     oauth_response = RestClient.post("#{SITE}/oauth/token", payload)
     JSON.parse(oauth_response.body)["access_token"]
   end

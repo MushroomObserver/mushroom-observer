@@ -468,15 +468,11 @@ class InatImportJobTest < ActiveJob::TestCase
   def stub_oauth_token_request
     stub_request(:post, "#{SITE}/oauth/token").
       with(
-        body: {
-          "client_id" =>
-            Rails.application.credentials[Rails.env.to_sym][:inat][:id],
-          "client_secret" =>
-            Rails.application.credentials[Rails.env.to_sym][:inat][:secret],
-          "code" => "MockCode",
-          "grant_type" => "authorization_code",
-          "redirect_uri" => REDIRECT_URI
-        }
+        body: { "client_id" => Rails.application.credentials.inat.id,
+                "client_secret" => Rails.application.credentials.inat.secret,
+                "code" => "MockCode",
+                "grant_type" => "authorization_code",
+                "redirect_uri" => REDIRECT_URI }
       ).
       to_return(status: 200,
                 body: { access_token: "MockAccessToken" }.to_json,
