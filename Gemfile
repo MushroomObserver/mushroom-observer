@@ -147,6 +147,8 @@ gem("prawn-manual_builder")
 # https://stackoverflow.com/a/23125762/3357635
 gem("puma")
 
+gem("query_count")
+
 ########## Development, Testing, and Analysis ##################################
 group :test, :development do
   # https://github.com/ruby/debug
