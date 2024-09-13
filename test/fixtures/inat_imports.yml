@@ -2,4 +2,4 @@
 
 rolf_inat_import:
   user: rolf
-  state: 0
+  state: <%= InatImport.states[:Unstarted] %>
