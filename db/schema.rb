@@ -200,8 +200,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_06_052017) do
     t.string "token"
     t.string "inat_username"
     t.boolean "import_all"
-    t.string "field_slip_code"
-    t.integer "project_id"
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|
