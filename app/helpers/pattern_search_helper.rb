@@ -87,8 +87,11 @@ module PatternSearchHelper
   # FIELD HELPERS
   #
   def pattern_search_yes_field(**args)
-    check_box_with_label(checked_value: "yes", unchecked_value: "",
-                         include_hidden: false, **args)
+    options = [
+      ["", nil],
+      ["yes", "yes"]
+    ]
+    select_with_label(options:, inline: true, **args)
   end
 
   def pattern_search_boolean_field(**args)
