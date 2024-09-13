@@ -1,0 +1,2 @@
+class InatImportJobTrackersController < ApplicationController
+end

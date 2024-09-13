@@ -1,0 +1,2 @@
+class InatImportJobTracker < ApplicationRecord
+end

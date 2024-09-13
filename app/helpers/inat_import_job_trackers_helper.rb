@@ -1,0 +1,2 @@
+module InatImportJobTrackersHelper
+end
