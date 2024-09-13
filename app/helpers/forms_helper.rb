@@ -276,15 +276,14 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     wrap_class = form_group_wrap_class(args)
     selects_class = "form-inline date-selects"
     selects_class += " d-inline-block" if args[:inline] == true
-    identifier = [args[:form].object_name, args[:index], args[:field]].
-                 compact.join("_")
+    identifier = date_select_identifier(args)
     label_opts = { class: "mr-3" }
     label_opts[:index] = args[:index] if args[:index].present?
     tag.div(class: wrap_class) do
-      concat(args[:form].label(args[:field], args[:label], label_opts))
+      concat(args[:form].label(identifier, args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
       concat(tag.div(class: selects_class, id: identifier) do
-        concat(args[:form].date_select(args[:field], date_opts, opts))
+        concat(args[:form].date_select(identifier, date_opts, opts))
       end)
       concat(args[:append]) if args[:append].present?
     end
@@ -293,10 +292,10 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   # The index arg is for multiple date_selects in a form
   def date_select_opts(args = {})
     field = args[:field] || :when
-    obj = args[:object] || args[:form]&.object
+    obj = args[:object] || args[:form]&.object || nil
     start_year = args[:start_year] || 20.years.ago.year
     end_year = args[:end_year] || Time.zone.now.year
-    selected = Time.zone.today
+    selected = args[:selected] || Time.zone.today
     # The field may not be an attribute of the object
     if obj.present? && obj.respond_to?(field)
       init_year = obj.try(&field).try(&:year)
@@ -306,9 +305,19 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
       start_year = init_year
     end
     opts = { start_year:, end_year:, selected:,
+             include_blank: args[:include_blank], default: args[:default],
              order: args[:order] || [:day, :month, :year] }
     opts[:index] = args[:index] if args[:index].present?
     opts
+  end
+
+  def date_select_identifier(args)
+    if args[:form].object.present?
+      [args[:form]&.object_name, args[:index],
+       args[:field]].compact.join("_")
+    else
+      args[:field]
+    end
   end
 
   # Bootstrap number_field
