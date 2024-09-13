@@ -12,8 +12,7 @@
 #  import_all: whether to import all of user's relevant iNat observations
 #
 class InatImport < ApplicationRecord
-  enum state:
-  {
+  enum :state, {
     Unstarted: 0,
     # waiting for User to authorize MO to access iNat data
     Authorizing: 1,
