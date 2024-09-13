@@ -49,7 +49,7 @@ module Observations
     end
 
     def fields_with_ids
-      [:name, :location, :user, :herbarium, :list, :project, :project_lists]
+      [:name, :location, :user, :herbarium, :list, :project, :species_list]
     end
 
     def permitted_search_params
@@ -62,7 +62,13 @@ module Observations
       PatternSearch::Observation.params.keys + [
         :name_id, :user_id, :location_id, :list_id,
         :project_id, :project_lists_id, :herbarium_id,
-        :date_range, :created_range, :modified_range, :rank_range
+        :date_range, :created_range, :modified_range, :rank_range,
+        "[date(1i)]", "[date(2i)]", "[date(3i)]",
+        "[date_range(1i)]", "[date_range(2i)]", "[date_range(3i)]",
+        "[created(1i)]", "[created(2i)]", "[created(3i)]",
+        "[created_range(1i)]", "[created_range(2i)]", "[created_range(3i)]",
+        "[modified(1i)]", "[modified(2i)]", "[modified(3i)]",
+        "[modified_range(1i)]", "[modified_range(2i)]", "[modified_range(3i)]"
       ]
     end
   end

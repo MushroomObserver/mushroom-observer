@@ -43,6 +43,7 @@ module PatternSearchable
     # Check for `fields_with_range`, and concatenate them if range val present,
     # removing the range field.
     def concatenate_range_fields
+      debugger
       @keywords.each_key do |key|
         next unless fields_with_range.include?(key.to_sym) &&
                     @keywords[:"#{key}_range"].present?

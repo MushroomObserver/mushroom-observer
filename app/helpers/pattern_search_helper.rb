@@ -84,6 +84,7 @@ module PatternSearchHelper
   def pattern_search_help_text(args)
     :"#{args[:type]}_term_#{args[:field]}".l
   end
+
   # FIELD HELPERS
   #
   def pattern_search_yes_field(**args)
@@ -117,12 +118,17 @@ module PatternSearchHelper
     tag.div(class: "row") do
       [
         tag.div(class: "col-xs-12 col-sm-6") do
-          text_field_with_label(**args.merge(between: "(YYYY-MM-DD)"))
+          # text_field_with_label(**args.merge(between: "(YYYY-MM-DD)"))
+          date_select_with_label(**args.merge(
+            { between: "(YYYY-MM-DD)", include_blank: true,
+              selected: 0, order: [:year, :month, :day] }
+          ))
         end,
         tag.div(class: "col-xs-12 col-sm-6") do
-          text_field_with_label(**args.merge(
-            { label: :to.l, between: :optional, help: nil,
-              field: "#{args[:field]}_range" }
+          date_select_with_label(**args.merge(
+            { field: "#{args[:field]}_range", label: :to.l,
+              between: :optional, help: nil, include_blank: true,
+              selected: 0, order: [:year, :month, :day] }
           ))
         end
       ].safe_join
