@@ -280,10 +280,10 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     label_opts = { class: "mr-3" }
     label_opts[:index] = args[:index] if args[:index].present?
     tag.div(class: wrap_class) do
-      concat(args[:form].label(identifier, args[:label], label_opts))
+      concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
       concat(tag.div(class: selects_class, id: identifier) do
-        concat(args[:form].date_select(identifier, date_opts, opts))
+        concat(args[:form].date_select(args[:field], date_opts, opts))
       end)
       concat(args[:append]) if args[:append].present?
     end
