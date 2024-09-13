@@ -23,4 +23,5 @@ class InatImport < ApplicationRecord
   }
 
   belongs_to :user
+  has_one :inat_import_job_tracker, dependent: destroy
 end
