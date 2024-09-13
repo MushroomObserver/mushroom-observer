@@ -319,7 +319,8 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
       end)
     else
       concat(tag.div(class: selects_class, id: args[:field]) do
-        concat(select_date(args[:field], date_opts, opts))
+        concat(select_date(date_opts[:selected],
+                           date_opts.merge(prefix: args[:field]), opts))
       end)
     end
   end
