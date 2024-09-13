@@ -345,20 +345,6 @@ class InatObsTest < UnitTestCase
     assert(mock_observation("coprinus").inat_obs_photos.one?)
   end
 
-  # iNat API returns only some projects
-  # https://forum.inaturalist.org/t/given-an-observation-id-get-a-list-of-project/53476?u=joecohen
-  # https://help.inaturalist.org/en/support/solutions/articles/151000176472-understanding-projects-on-inaturalist
-  # comma separated string of project names
-  def test_inat_project_names
-    skip("Under Construction")
-    assert_equal("??", mock_observation("somion_unicolor").inat_project_names,
-                 "wrong project names for iNat obs which lacks projects")
-
-    assert_equal("Portland-Vancouver Regional Eco-Blitz, ??",
-                 mock_observation("evernia").inat_project_names,
-                 "wrong project names for iNat obs with 1 detectable project")
-  end
-
   def mock_observation(filename)
     mock_search = File.read("test/inat/#{filename}.txt")
     InatObs.new(JSON.generate(JSON.parse(mock_search)["results"].first))
