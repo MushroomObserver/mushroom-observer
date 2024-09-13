@@ -308,10 +308,10 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     opts
   end
 
-  # If there's no form object, we need a non-nested name and id for the fields.
+  # If there's no form object_name, we need a name and id for the fields.
   # Turns out you have to use a different Rails helper, select_date, for this.
   def date_select_div(args, date_opts, opts, selects_class)
-    if args[:form].object.present?
+    if args[:form].object_name.present?
       identifier = [args[:form]&.object_name, args[:index],
                     args[:field]].compact.join("_")
       concat(tag.div(class: selects_class, id: identifier) do
