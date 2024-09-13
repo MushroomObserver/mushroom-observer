@@ -276,15 +276,12 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     wrap_class = form_group_wrap_class(args)
     selects_class = "form-inline date-selects"
     selects_class += " d-inline-block" if args[:inline] == true
-    identifier = date_select_identifier(args)
     label_opts = { class: "mr-3" }
     label_opts[:index] = args[:index] if args[:index].present?
     tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
-      concat(tag.div(class: selects_class, id: identifier) do
-        concat(args[:form].date_select(args[:field], date_opts, opts))
-      end)
+      date_select_div(args, date_opts, opts, selects_class)
       concat(args[:append]) if args[:append].present?
     end
   end
@@ -311,12 +308,19 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     opts
   end
 
-  def date_select_identifier(args)
+  # If there's no form object, we need a non-nested name and id for the fields.
+  # Turns out you have to use a different Rails helper, select_date, for this.
+  def date_select_div(args, date_opts, opts, selects_class)
     if args[:form].object.present?
-      [args[:form]&.object_name, args[:index],
-       args[:field]].compact.join("_")
+      identifier = [args[:form]&.object_name, args[:index],
+                    args[:field]].compact.join("_")
+      concat(tag.div(class: selects_class, id: identifier) do
+        concat(args[:form].date_select(args[:field], date_opts, opts))
+      end)
     else
-      args[:field]
+      concat(tag.div(class: selects_class, id: args[:field]) do
+        concat(select_date(args[:field], date_opts, opts))
+      end)
     end
   end
 
