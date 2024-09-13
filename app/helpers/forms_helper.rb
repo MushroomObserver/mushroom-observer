@@ -526,7 +526,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     id = [
       nested_field_id(args),
       "help"
-    ].join("_")
+    ].compact_blank.join("_")
     args[:between] = capture do
       concat(args[:between])
       concat(collapse_info_trigger(id))
@@ -542,7 +542,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
 
   def nested_field_id(args)
     [args[:form].object_name.to_s.id_of_nested_field,
-     args[:field].to_s].join("_")
+     args[:field].to_s].compact_blank.join("_")
   end
 
   # These are args that should not be passed to the field
