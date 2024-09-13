@@ -228,7 +228,8 @@ module Observations
         end
       end
       assert_flash_success
-      assert_redirected_to(observations_path)
+      tracker = InatImportJobTracker.find_by(inat_import: inat_import)
+      assert_redirected_to(inat_import_job_tracker_path(tracker.id))
     end
 
     ########## Utilities
