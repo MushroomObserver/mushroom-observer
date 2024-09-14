@@ -3041,6 +3041,10 @@
   # /inat_import_job_tracker
   INAT_IMPORT_JOB_TRACKERS: iNat Import Trackers
   inat_import_tracker: iNat Import Tracker
+  inat_import_tracker_status: "[:STATUS]"
+  inat_import_tracker_started: Started
+  inat_import_tracker_importable_count: "Number of Importable Observations"
+  inat_import_tracker_imported_count: "Number Imported"
 
   # observer/list_notifications
   list_notifications_title: Email Alerts for [user]
