@@ -11,12 +11,13 @@ class InatImportJob < ApplicationJob
   API_BASE = Observations::InatImportsController::API_BASE
   # limit results iNat API requests, with Protozoa as a proxy for slime molds
   ICONIC_TAXA = "Fungi,Protozoa"
+  # This string + date is added to description of iNat observation
+  IMPORTED_BY_MO = "Imported by Mushroom Observer"
 
   queue_as :default
 
   def perform(inat_import)
     @inat_import = inat_import
-
     access_token =
       use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
     @inat_import.update(token: access_token)
@@ -65,6 +66,7 @@ class InatImportJob < ApplicationJob
         next_page(id: inat_ids, id_above: last_import_id,
                   user_login: @inat_import.inat_username)
       parsed_page = JSON.parse(page_of_observations)
+      @inat_import.update(imported_count: parsed_page["total_results"])
       break if page_empty?(parsed_page)
 
       import_page(page_of_observations)
@@ -378,8 +380,7 @@ class InatImportJob < ApplicationJob
   def update_description(inat_obs)
     description = inat_obs.inat_description
     updated_description =
-      "Imported to Mushroom Observer " \
-      "#{Time.zone.today.strftime(MO.web_date_format)}"
+      "#{IMPORTED_BY_MO} #{Time.zone.today.strftime(MO.web_date_format)}"
     updated_description.prepend("#{description}\n\n") if description.present?
 
     payload = { observation: { description: updated_description } }

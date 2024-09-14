@@ -31,6 +31,7 @@ class InatImportJobTest < ActiveJob::TestCase
   PHOTO_BASE = "https://inaturalist-open-data.s3.amazonaws.com/photos"
 
   ICONIC_TAXA = InatImportJob::ICONIC_TAXA
+  IMPORTED_BY_MO = InatImportJob::IMPORTED_BY_MO
 
   # Had 1 identification, 0 photos, 0 observation_fields
   def test_import_job_basic_obs
@@ -575,7 +576,7 @@ class InatImportJobTest < ActiveJob::TestCase
     observations = JSON.parse(mock_inat_response)["results"]
     observations.each do |obs|
       updated_description =
-        "Imported to Mushroom Observer #{date}"
+        "Imported by Mushroom Observer #{date}"
       if obs["description"].present?
         updated_description.prepend("#{obs["description"]}\n\n")
       end
