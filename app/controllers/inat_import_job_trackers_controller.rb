@@ -5,5 +5,6 @@ class InatImportJobTrackersController < ApplicationController
 
   def show
     @tracker = InatImportJobTracker.find(params[:id])
+    @inat_import = InatImport.find(@tracker.inat_import)
   end
 end

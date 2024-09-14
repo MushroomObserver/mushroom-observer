@@ -1,7 +1,1 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
-import_tracker_rolf_importing:
-  inat_import: <%= ActiveRecord::FixtureSet.identify(:rolf_inat_import_importing) %>
-
-import_tracker_rolf_done:
-  inat_import: <%= ActiveRecord::FixtureSet.identify(:rolf_inat_import_done) %>

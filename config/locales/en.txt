@@ -3039,7 +3039,8 @@
   inat_details_list: "- MO will list most iNat data and/or map it to analogous MO fields. \n - Coordinates are hidden from the public if iNat obscured them. \n - Location is a rectangle with an MO-style name, rather than the iNat Place name. \n"
 
   # /inat_import_job_tracker
-  INAT_IMPORT_JOB_TRACKERS: iNat Import
+  INAT_IMPORT_JOB_TRACKERS: iNat Import Trackers
+  inat_import_tracker: iNat Import Tracker
 
   # observer/list_notifications
   list_notifications_title: Email Alerts for [user]

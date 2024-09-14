@@ -4,7 +4,8 @@ require "test_helper"
 
 class InatImportJobTrackersControllerTest < FunctionalTestCase
   def test_show
-    tracker = inat_import_job_trackers(:import_tracker_rolf_importing)
+    import = inat_imports(:rolf_inat_import)
+    tracker = InatImportJobTracker.create(inat_import: import.id)
 
     login
     get(:show, params: { id: tracker.id })
