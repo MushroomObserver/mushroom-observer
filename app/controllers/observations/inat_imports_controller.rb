@@ -171,8 +171,8 @@ module Observations
 
       tracker = InatImportJobTracker.create(inat_import: @inat_import.id)
 
-      # InatImportJob.perform_later(@inat_import)
-      InatImportJob.perform_now(@inat_import) # for manual testing
+      InatImportJob.perform_later(@inat_import)
+      # InatImportJob.perform_now(@inat_import) # for manual testing
 
       flash_notice(:inat_import_started.t)
       redirect_to(inat_import_job_tracker_path(tracker.id))
