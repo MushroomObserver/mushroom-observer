@@ -44,6 +44,10 @@ module Observations
       ].freeze
     end
 
+    def fields_with_dates
+      [:date, :created, :modified]
+    end
+
     def fields_with_range
       [:date, :created, :modified, :rank]
     end
@@ -53,22 +57,23 @@ module Observations
     end
 
     def permitted_search_params
-      params.permit(observation_search_params)
+      params.permit(observation_search_params + [
+        { date: [:year, :month, :day] },
+        { date_range: [:year, :month, :day] },
+        { created: [:year, :month, :day] },
+        { created_range: [:year, :month, :day] },
+        { modified: [:year, :month, :day] },
+        { modified_range: [:year, :month, :day] }
+      ])
     end
 
     # need to add :pattern to the list of params, plus the hidden_id fields
     # of the autocompleters.
     def observation_search_params
       PatternSearch::Observation.params.keys + [
-        :name_id, :user_id, :location_id, :list_id,
-        :project_id, :project_lists_id, :herbarium_id,
-        :date_range, :created_range, :modified_range, :rank_range,
-        "[date(1i)]", "[date(2i)]", "[date(3i)]",
-        "[date_range(1i)]", "[date_range(2i)]", "[date_range(3i)]",
-        "[created(1i)]", "[created(2i)]", "[created(3i)]",
-        "[created_range(1i)]", "[created_range(2i)]", "[created_range(3i)]",
-        "[modified(1i)]", "[modified(2i)]", "[modified(3i)]",
-        "[modified_range(1i)]", "[modified_range(2i)]", "[modified_range(3i)]"
+        :name_id, :user_id, :location_id, :list_id, :project_id,
+        :project_lists_id, :herbarium_id, :species_list_id,
+        :rank_range
       ]
     end
   end
