@@ -24,7 +24,7 @@ module PatternSearchable
   included do
 
     def formatted_pattern_search_string
-      sift_and_restructure_pattern_params
+      sift_and_restructure_form_params
       keyword_strings = @sendable_params.map do |key, value|
         "#{key}:#{value}"
       end
@@ -32,7 +32,7 @@ module PatternSearchable
     end
 
     # One oddball is `confidence` - the string "0" should not count as a value.
-    def sift_and_restructure_pattern_params
+    def sift_and_restructure_form_params
       @keywords = permitted_search_params.to_h.compact_blank.reject do |_, v|
         v == "0" || incomplete_date?(v)
       end
@@ -78,6 +78,9 @@ module PatternSearchable
       end
     end
 
+    # SENDABLE_PARAMS
+    # These methods don't modify the original @keywords hash.
+    #
     # Controller declares `fields_with_ids` which autocompleter send ids.
     # This method substitutes the ids for the names.
     def substitute_ids_for_names(keywords)
@@ -91,12 +94,17 @@ module PatternSearchable
       keywords
     end
 
+    # STORABLE_PARAMS
+    # These methods don't modify the original @keywords hash.
+    #
+    # Store full strings for all values, including names and locations,
+    # so we can repopulate the form with the same values.
     def storable_params(keywords)
       keywords = escape_names_and_remove_ids(keywords)
       escape_locations_and_remove_ids(keywords)
     end
 
-    # Waiting to hear how this should be built.
+    # Escape-quote the names, the way the short form requires.
     def escape_names_and_remove_ids(keywords)
       keywords.each_key do |key|
         next unless fields_with_ids.include?(key.to_sym) &&
@@ -110,6 +118,7 @@ module PatternSearchable
       keywords
     end
 
+    # Escape-quote the locations and their commas.
     def escape_locations_and_remove_ids(keywords)
       keywords.each_key do |key|
         next unless [:location, :region].include?(key.to_sym) &&

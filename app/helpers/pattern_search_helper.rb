@@ -77,12 +77,25 @@ module PatternSearchHelper
       args[:inline] = true
     end
     args[:help] = pattern_search_help_text(args)
+    args[:hidden_name] = pattern_search_check_for_hidden_name(args)
 
     PATTERN_SEARCH_FIELD_HELPERS[field_type][:args].merge(args.except(:type))
   end
 
   def pattern_search_help_text(args)
     :"#{args[:type]}_term_#{args[:field]}".l
+  end
+
+  # Overrides for the assumed name of the id field for autocompleter.
+  def pattern_search_check_for_hidden_name(args)
+    case args[:field]
+    when :list
+      "list_id"
+    when :project_lists
+      "project_lists_id"
+    else
+      nil
+    end
   end
 
   # FIELD HELPERS

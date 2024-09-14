@@ -71,9 +71,8 @@ module Observations
     # of the autocompleters.
     def observation_search_params
       PatternSearch::Observation.params.keys + [
-        :name_id, :user_id, :location_id, :list_id, :project_id,
-        :project_lists_id, :herbarium_id, :species_list_id,
-        :rank_range
+        :name_id, :location_id, :user_id, :herbarium_id, :list_id, :project_id,
+        :project_lists_id, :rank_range
       ]
     end
   end
