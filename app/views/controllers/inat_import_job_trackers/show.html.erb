@@ -6,19 +6,19 @@ add_page_title(:inat_import_tracker.t)
 
 <p>
   <b><%= :inat_import_tracker_status.t %>: </b>
-  <%= @inat_import.state %>
+  <span id="state"><%= @inat_import.state %></span>
 </p>
 <p>
   <b><%= :inat_import_tracker_started.t %>: </b>
-  <%= @tracker.created_at %>
+  <span id="started"><%= @tracker.created_at %></span>
 </p>
 <p>
   <b><%= :inat_import_tracker_importable_count.t %>: </b>
-  <%= %>
+  <span id="importables_count"><%= @inat_import.importables%></span>
 </p>
 <p>
   <b><%= :inat_import_tracker_imported_count.t %>: </b>
-  <%= %>
+  <span id="imported_count"><%= %></span>
 </p>
 
 <%= show_object_footer(@tracker) %>
