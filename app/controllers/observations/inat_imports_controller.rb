@@ -59,7 +59,8 @@ module Observations
       @inat_import.update(state: "Authorizing",
                           import_all: params[:all],
                           inat_ids: params[:inat_ids],
-                          inat_username: params[:inat_username].strip)
+                          inat_username: params[:inat_username].strip,
+                          importables: 0, imported_count: 0)
 
       request_inat_user_authorization
     end
@@ -168,10 +169,10 @@ module Observations
       @inat_import = InatImport.find_or_create_by(user: User.current)
       @inat_import.update(token: auth_code, state: "Authenticating")
 
-      InatImportJob.perform_later(@inat_import)
-      # InatImportJob.perform_now(@inat_import) # for manual testing
-
       tracker = InatImportJobTracker.create(inat_import: @inat_import.id)
+
+      # InatImportJob.perform_later(@inat_import)
+      InatImportJob.perform_now(@inat_import) # for manual testing
 
       flash_notice(:inat_import_started.t)
       redirect_to(inat_import_job_tracker_path(tracker.id))

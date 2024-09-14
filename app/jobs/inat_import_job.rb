@@ -66,7 +66,7 @@ class InatImportJob < ApplicationJob
         next_page(id: inat_ids, id_above: last_import_id,
                   user_login: @inat_import.inat_username)
       parsed_page = JSON.parse(page_of_observations)
-      @inat_import.update(imported_count: parsed_page["total_results"])
+      @inat_import.update(importables: parsed_page["total_results"])
       break if page_empty?(parsed_page)
 
       import_page(page_of_observations)
