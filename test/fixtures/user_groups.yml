@@ -63,6 +63,9 @@ dick_only:
 katrina_only:
   name: user <%= ActiveRecord::FixtureSet.identify(:katrina) %>
 
+ollie_only:
+  name: user <%= ActiveRecord::FixtureSet.identify(:ollie) %>
+
 roy_only:
   name: user <%= ActiveRecord::FixtureSet.identify(:roy) %>
 

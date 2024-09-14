@@ -256,8 +256,15 @@ class FieldSlipsController < ApplicationController
     project = @field_slip&.project
     return unless project&.can_join?(User.current)
 
-    project.user_group.users << User.current
+    user = User.current
+    project.user_group.users << user
+    project_member = ProjectMember.find_by(project:, user:)
     flash_notice(:field_slip_welcome.t(title: project.title))
+    return if project_member
+
+    ProjectMember.create(project:, user:,
+                         trust_level: "hidden_gps")
+    flash_notice(:add_members_with_gps_trust.l)
   end
 
   def disconnect_observation(obs)

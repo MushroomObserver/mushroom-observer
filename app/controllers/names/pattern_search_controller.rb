@@ -41,12 +41,28 @@ module Names
       ].freeze
     end
 
+    def fields_with_dates
+      [:created, :modified]
+    end
+
+    def fields_with_range
+      [:created, :modified, :rank]
+    end
+
+    def fields_with_ids
+      []
+    end
+
     def permitted_search_params
-      params.permit(name_search_params)
+      params.permit(name_search_params + [
+        { created: {} }, { modified: {} }
+      ])
     end
 
     def name_search_params
-      PatternSearch::Name.params.keys + [:pattern]
+      PatternSearch::Name.params.keys + [
+        :created_range, :modified_range, :rank_range
+      ]
     end
   end
 end
