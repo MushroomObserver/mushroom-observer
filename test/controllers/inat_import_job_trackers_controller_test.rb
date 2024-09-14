@@ -13,5 +13,7 @@ class InatImportJobTrackersControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_select("span#importables_count", /^\d+$/,
                   "Importables count should be an integer")
+    assert_select("span#imported_count", /^\d+$/,
+                  "Imported count should be an integer")
   end
 end

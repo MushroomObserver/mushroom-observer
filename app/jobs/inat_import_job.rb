@@ -135,6 +135,7 @@ class InatImportJob < ApplicationJob
     # NOTE: update field slip 2024-09-09 jdc
     # https://github.com/MushroomObserver/mushroom-observer/issues/2380
     update_inat_observation(inat_obs)
+    increment_imported_count
   end
 
   def create_observation(inat_obs)
@@ -392,5 +393,9 @@ class InatImportJob < ApplicationJob
     JSON.parse(response.body)
   rescue RestClient::ExceptionWithResponse => e
     e.response
+  end
+
+  def increment_imported_count
+    @inat_import.increment!(:imported_count)
   end
 end
