@@ -3,3 +3,11 @@
 rolf_inat_import:
   user: rolf
   state: <%= InatImport.states[:Unstarted] %>
+
+rolf_inat_import_importing:
+  user: rolf
+  state: <%= InatImport.states[:Importing] %>
+
+rolf_inat_import_done:
+  user: rolf
+  state: <%= InatImport.states[:Done] %>

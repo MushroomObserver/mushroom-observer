@@ -5,5 +5,6 @@
 # == Attributes
 #
 #  inat_import::  the iNat import for the job
+#
 class InatImportJobTracker < ApplicationRecord
 end

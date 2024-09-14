@@ -1,5 +1,3 @@
-require "test_helper"
-
 class InatImportJobTrackerTest < ActiveSupport::TestCase
   # test "the truth" do
   #   assert true
