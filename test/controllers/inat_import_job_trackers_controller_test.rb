@@ -11,5 +11,7 @@ class InatImportJobTrackersControllerTest < FunctionalTestCase
     get(:show, params: { id: tracker.id })
 
     assert_response(:success)
+    assert_select("span#importables_count", /^\d+$/,
+                  "Importables count should be an integer")
   end
 end

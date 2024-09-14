@@ -14,11 +14,11 @@ add_page_title(:inat_import_tracker.t)
 </p>
 <p>
   <b><%= :inat_import_tracker_importable_count.t %>: </b>
-  <span id="importables_count"><%= @inat_import.importables%></span>
+  <span id="importables_count"><%= @inat_import.importables.to_s %></span>
 </p>
 <p>
   <b><%= :inat_import_tracker_imported_count.t %>: </b>
-  <span id="imported_count"><%= %></span>
+  <span id="imported_count"><%= @inat_import.importables.to_s %></span>
 </p>
 
 <%= show_object_footer(@tracker) %>
