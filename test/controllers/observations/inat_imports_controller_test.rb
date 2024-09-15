@@ -5,7 +5,7 @@ require "test_helper"
 # test importing iNaturalist Observations to Mushroom Observer
 module Observations
   # a duck type of API2::ImageAPI with enough attributes
-  # to preventInatsImportController from throwing an error
+  # to preventInatImportsController from throwing an error
   class MockImageAPI
     attr_reader :errors, :results
 

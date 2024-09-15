@@ -127,7 +127,7 @@ class InatImportJob < ApplicationJob
   end
 
   def import_one_result(result)
-    inat_obs = InatObs.new(result)
+    inat_obs = Inat::Obs.new(result)
     return unless inat_obs.importable?
 
     create_observation(inat_obs)
@@ -199,11 +199,11 @@ class InatImportJob < ApplicationJob
 
   def add_inat_images(inat_obs_photos)
     inat_obs_photos.each do |obs_photo|
-      photo = InatObsPhoto.new(obs_photo)
-      api = InatPhotoImporter.new(photo_importer_params(photo)).api
+      photo = Inat::ObsPhoto.new(obs_photo)
+      api = Inat::PhotoImporter.new(photo_importer_params(photo)).api
+
       # NOTE: Error handling? 2024-06-19 jdc.
       # https://github.com/MushroomObserver/mushroom-observer/issues/2382
-
       image = Image.find(api.results.first.id)
 
       # Imaage attributes to potentially update manually
@@ -254,7 +254,7 @@ class InatImportJob < ApplicationJob
 
   def add_identifications_with_namings(inat_obs)
     inat_obs.inat_identifications.each do |identification|
-      inat_taxon = ::InatTaxon.new(identification[:taxon])
+      inat_taxon = ::Inat::Taxon.new(identification[:taxon])
       next if name_already_proposed?(inat_taxon.name)
 
       add_naming_with_vote(name: inat_taxon.name)

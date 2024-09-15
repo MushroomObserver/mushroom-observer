@@ -10,7 +10,7 @@
 # Work flow:
 # 1. User calls `new`, fills out form
 # 2. create
-#      saves some user data in a iNatImport instance
+#      saves some user data in a InatImport instance
 #        attributes include: user, inat_ids, token, state
 #    passes things off (redirects) to iNat at the inat_authorization_url
 # 3. iNat
@@ -26,8 +26,8 @@
 #      Trades the oauth token for a JWT api_token
 #      Makes an authenticated iNat API request for the desired observations
 #      For each iNat obs in the results,
-#         creates an InatObs
-#         adds an MO Observation, mapping InatObs details to the MO Observation
+#         creates an Inat::Obs
+#         adds an MO Observation, mapping Inat::Obs details to the MO Observation
 #         adds Inat photos to the MO Observation via the MO API
 #
 module Observations

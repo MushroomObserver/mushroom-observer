@@ -35,10 +35,10 @@ require("test_helper")
 class InatObsPhotoTest < UnitTestCase
   def test_simple_photo
     mock_search = File.read("test/inat/tremella_mesenterica.txt")
-    inat_obs = InatObs.new(
+    inat_obs = Inat::Obs.new(
       JSON.generate(JSON.parse(mock_search)["results"].first)
     )
-    inat_obs_photo = InatObsPhoto.new(
+    inat_obs_photo = Inat::ObsPhoto.new(
       inat_obs.inat_obs_photos.first
     )
     expected_license =
