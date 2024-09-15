@@ -180,7 +180,8 @@ module Prawn
       text_box("Odor/taste:", at: [subnote_left, current_y])
       current_y -= NOTES_FONT_SIZE * 3
       text_box("Trees/Shrubs: Hardwood / Conifer / Mixed",
-               at: [subnote_left, current_y])
+               at: [subnote_left, current_y],
+               width: X_MAX - subnote_left)
       current_y -= NOTES_FONT_SIZE
       text_box("Species:",
                at: [subnote_indent, current_y])
