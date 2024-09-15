@@ -56,7 +56,8 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    Inat::PhotoImporter.stub(:new, stub_mo_photo_importer(mock_inat_response)) do
+    Inat::PhotoImporter.
+      stub(:new, stub_mo_photo_importer(mock_inat_response)) do
       assert_difference("Observation.count", 1,
                         "Failed to create observation") do
         InatImportJob.perform_now(inat_import)
@@ -66,6 +67,8 @@ class InatImportJobTest < ActiveJob::TestCase
     obs = Observation.order(created_at: :asc).last
     standard_assertions(obs: obs, name: name, loc: loc)
     assert_equal(0, obs.images.length, "Obs should not have images")
+    assert_match(/Observation Fields: none/, obs.comments.first.comment,
+                 "Missing 'none' for Observation Fields")
   end
 
   # Had 1 photo, 1 identification, 0 observation_fields
@@ -90,7 +93,8 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    Inat::PhotoImporter.stub(:new, stub_mo_photo_importer(mock_inat_response)) do
+    Inat::PhotoImporter.stub(:new,
+                             stub_mo_photo_importer(mock_inat_response)) do
       assert_difference("Observation.count", 1,
                         "Failed to create observation") do
         InatImportJob.perform_now(inat_import)
@@ -132,7 +136,7 @@ class InatImportJobTest < ActiveJob::TestCase
                            mock_inat_response: mock_inat_response)
 
     Inat::PhotoImporter.stub(:new,
-                           stub_mo_photo_importer(mock_inat_response)) do
+                             stub_mo_photo_importer(mock_inat_response)) do
       assert_difference("Observation.count", 1,
                         "Failed to create observation") do
         InatImportJob.perform_now(inat_import)
@@ -179,7 +183,8 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    Inat::PhotoImporter.stub(:new, stub_mo_photo_importer(mock_inat_response)) do
+    Inat::PhotoImporter.stub(:new,
+                             stub_mo_photo_importer(mock_inat_response)) do
       assert_difference("Observation.count", 1,
                         "Failed to create observation") do
         InatImportJob.perform_now(inat_import)
@@ -211,7 +216,8 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    Inat::PhotoImporter.stub(:new, stub_mo_photo_importer(mock_inat_response)) do
+    Inat::PhotoImporter.stub(:new,
+                             stub_mo_photo_importer(mock_inat_response)) do
       assert_difference("Observation.count", 1,
                         "Failed to create observation") do
         InatImportJob.perform_now(inat_import)
@@ -241,7 +247,8 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    Inat::PhotoImporter.stub(:new, stub_mo_photo_importer(mock_inat_response)) do
+    Inat::PhotoImporter.stub(:new,
+                             stub_mo_photo_importer(mock_inat_response)) do
       assert_difference("Observation.count", 1,
                         "Failed to create observation") do
         InatImportJob.perform_now(inat_import)
@@ -274,7 +281,8 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    Inat::PhotoImporter.stub(:new, stub_mo_photo_importer(mock_inat_response)) do
+    Inat::PhotoImporter.stub(:new,
+                             stub_mo_photo_importer(mock_inat_response)) do
       assert_difference("Observation.count", 1,
                         "Failed to create observation") do
         InatImportJob.perform_now(inat_import)
@@ -303,7 +311,7 @@ class InatImportJobTest < ActiveJob::TestCase
                            mock_inat_response: mock_inat_response)
 
     Inat::PhotoImporter.stub(:new,
-                           stub_mo_photo_importer(mock_inat_response)) do
+                             stub_mo_photo_importer(mock_inat_response)) do
       InatImportJob.perform_now(inat_import)
     end
 
@@ -334,7 +342,8 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    Inat::PhotoImporter.stub(:new, stub_mo_photo_importer(mock_inat_response)) do
+    Inat::PhotoImporter.stub(:new,
+                             stub_mo_photo_importer(mock_inat_response)) do
       assert_difference("Observation.count", 1,
                         "Failed to create observation") do
         InatImportJob.perform_now(inat_import)
@@ -355,7 +364,8 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    Inat::PhotoImporter.stub(:new, stub_mo_photo_importer(mock_inat_response)) do
+    Inat::PhotoImporter.stub(:new,
+                             stub_mo_photo_importer(mock_inat_response)) do
       assert_no_difference("Observation.count", "Should not import Plantae") do
         InatImportJob.perform_now(inat_import)
       end
@@ -370,7 +380,8 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    Inat::PhotoImporter.stub(:new, stub_mo_photo_importer(mock_inat_response)) do
+    Inat::PhotoImporter.stub(:new,
+                             stub_mo_photo_importer(mock_inat_response)) do
       assert_no_difference(
         "Observation.count",
         "Should import nothing if no iNat obss match the user's list of id's"
@@ -400,7 +411,8 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    Inat::PhotoImporter.stub(:new, stub_mo_photo_importer(mock_inat_response)) do
+    Inat::PhotoImporter.stub(:new,
+                             stub_mo_photo_importer(mock_inat_response)) do
       assert_difference("Observation.count", 2,
                         "Failed to create multiple observations") do
         InatImportJob.perform_now(inat_import)
@@ -425,7 +437,8 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    Inat::PhotoImporter.stub(:new, stub_mo_photo_importer(mock_inat_response)) do
+    Inat::PhotoImporter.stub(:new,
+                             stub_mo_photo_importer(mock_inat_response)) do
       assert_difference("Observation.count", 2,
                         "Failed to create multiple observations") do
         InatImportJob.perform_now(inat_import)

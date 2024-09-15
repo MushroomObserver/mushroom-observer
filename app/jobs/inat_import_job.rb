@@ -134,7 +134,7 @@ class InatImportJob < ApplicationJob
     add_inat_images(@inat_obs.inat_obs_photos)
     update_names_and_proposals
     add_inat_sequences
-    add_import_snapshot_comment
+    add_snapshot_of_import_comment
     # NOTE: update field slip 2024-09-09 jdc
     # https://github.com/MushroomObserver/mushroom-observer/issues/2380
     update_inat_observation
@@ -327,19 +327,14 @@ class InatImportJob < ApplicationJob
     end
   end
 
-  def obs_fields(fields)
-    fields.map { |field| "&nbsp;&nbsp;#{field[:name]}: #{field[:value]}" }.
-      join("\n")
-  end
-
-  def add_import_snapshot_comment
+  def add_snapshot_of_import_comment
     params = { target: @observation, user: inat_manager,
                summary: "#{:inat_data_comment.t} #{@observation.created_at}",
-               comment: snapshot }
+               comment: import_snapshot }
     Comment.create(params)
   end
 
-  def snapshot
+  def import_snapshot
     <<~COMMENT.gsub(/^\s+/, "")
       #{:USER.t}: #{@inat_obs.inat_user_login}
       #{:OBSERVED.t}: #{@inat_obs.when}\n
@@ -348,12 +343,22 @@ class InatImportJob < ApplicationJob
       #{:ID.t}: #{@inat_obs.inat_taxon_name}\n
       #{:DQA.t}: #{@inat_obs.dqa}\n
       #{:SEQUENCES.t}: #{:UNDER_DEVELOPMENT.t}\n
-      #{:OBSERVATION_FIELDS.t}: \n\
-      #{obs_fields(@inat_obs.inat_obs_fields)}\n
+      #{:OBSERVATION_FIELDS.t}: #{obs_fields(@inat_obs.inat_obs_fields)}\n
       #{:PROJECTS.t}: #{:inat_not_imported.t}\n
       #{:ANNOTATIONS.t}: #{:inat_not_imported.t}\n
       #{:TAGS.t}: #{:inat_not_imported.t}}\n
     COMMENT
+  end
+
+  def obs_fields(fields)
+    return "none" if fields.empty?
+
+    "\n#{one_line_per_field(fields)}"
+  end
+
+  def one_line_per_field(fields)
+    fields.map { |f| "&nbsp;&nbsp;#{f[:name]}: #{f[:value]}" }.
+      join("\n")
   end
 
   def update_inat_observation

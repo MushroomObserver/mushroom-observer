@@ -19,7 +19,7 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | ---- | -------- | ----- | -------- | ----- |
 | amanita_flavorubens| [231104466](https://www.inaturalist.org/observations/231104466) | **0** | public | Casual |
 | arrhenia_sp_NY02| [184219885](https://www.inaturalist.org/observations/184219885) | 1 | public | `johnplischke` mo-style Provisional Species Name, DNA, NEMF, notes, 2? identifications with same id, comments, everyone has MO account, many obs fields, including "Voucher Number(s)", "Voucher Specimen Taken" |
-| calostoma_lutescens| [195434438](https://www.inaturalist.org/observations/195434438) | **0** | user `mycoprimuspublic` | barebones. NO: photo, added ids, observation_fields |
+| calostoma_lutescens| [195434438](https://www.inaturalist.org/observations/195434438) | **0** | user `mycoprimuspublic` | barebones. NO: photo, added ids, or observation_fields |
 | ceanothus_cordulatus| [219631412](https://www.inaturalist.org/observations/219631412) | 1 | public | **Plant** |
 | coprinus| [213450312](https://www.inaturalist.org/observations/213450312) | 1 | **obscured** | Needs ID |
 | distantes| [215996396](https://www.inaturalist.org/observations/215996396) | 1 | `jdcohenesq` **obscured, includes confidential gps** | Needs ID, jdc Obs, taxon[:name]: "Distantes" rank:"section", rank_level:13|
