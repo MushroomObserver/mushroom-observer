@@ -197,7 +197,8 @@ module LinkHelper
     chevron_down: "chevron-down",
     chevron_up: "chevron-up",
     chevron_left: "chevron-left",
-    chevron_right: "chevron-right"
+    chevron_right: "chevron-right",
+    qrcode: "qrcode",
   }.freeze
 
   # button to destroy object

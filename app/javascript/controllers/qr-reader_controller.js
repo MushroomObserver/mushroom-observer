@@ -15,6 +15,5 @@ export default class extends Controller {
   handleInput(event) {
     // Submits the form to a rails controller action that receives the input,
     // figures out if it's a URL or just a text string, sanitizes and redirects.
-    this.inputTarget.closest("form").submit()
   }
 }
