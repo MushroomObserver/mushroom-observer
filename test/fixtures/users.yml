@@ -79,6 +79,12 @@ roy:
   location_format: <%= User.location_formats[:scientific] %>
   user_groups: all_users, burbank_admins, burbank_users, falmouth_2023_09_users
 
+# Ollie is an open project member
+ollie:
+  <<: *DEFAULTS
+  name: Ollie
+  user_groups: all_users, burbank_users, ollie_only
+
 spammer:
   <<: *DEFAULTS
   login: spamspamspam

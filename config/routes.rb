@@ -209,7 +209,7 @@ end
 
 # Disable cop until there's time to reexamine block length
 # Maybe we could define methods for logical chunks of this.
-MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
+MushroomObserver::Application.routes.draw do
   # Priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
@@ -429,6 +429,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     end
     put("/vote", to: "images/votes#update", as: "vote")
   end
+
+  resources :inat_import_job_trackers, only: [:show]
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")

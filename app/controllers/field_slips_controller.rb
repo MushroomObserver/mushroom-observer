@@ -151,7 +151,7 @@ class FieldSlipsController < ApplicationController
     # Must have valid name and location
     location = Location.place_name_to_location(place_name)
     flash_error(:field_slip_quick_no_location.t) unless location
-    name = Name.find_by(text_name: params[:field_slip][:field_slip_id])
+    name = Name.find_by(text_name: params[:field_slip][:field_slip_name])
     flash_error(:field_slip_quick_no_name.t) unless name
     notes = field_slip_notes.compact_blank!
 
@@ -179,7 +179,7 @@ class FieldSlipsController < ApplicationController
   end
 
   def check_name
-    id_str = params[:field_slip][:field_slip_id]
+    id_str = params[:field_slip][:field_slip_name]
     return unless id_str
 
     id_str.tr!("_", "")
@@ -228,7 +228,7 @@ class FieldSlipsController < ApplicationController
   end
 
   def field_slip_id
-    str = params[:field_slip][:field_slip_id]
+    str = params[:field_slip][:field_slip_name]
     return str if str.empty? || str.starts_with?("_")
 
     "_#{str}_"
@@ -256,8 +256,15 @@ class FieldSlipsController < ApplicationController
     project = @field_slip&.project
     return unless project&.can_join?(User.current)
 
-    project.user_group.users << User.current
+    user = User.current
+    project.user_group.users << user
+    project_member = ProjectMember.find_by(project:, user:)
     flash_notice(:field_slip_welcome.t(title: project.title))
+    return if project_member
+
+    ProjectMember.create(project:, user:,
+                         trust_level: "hidden_gps")
+    flash_notice(:add_members_with_gps_trust.l)
   end
 
   def disconnect_observation(obs)

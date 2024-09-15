@@ -11,12 +11,13 @@ class InatImportJob < ApplicationJob
   API_BASE = Observations::InatImportsController::API_BASE
   # limit results iNat API requests, with Protozoa as a proxy for slime molds
   ICONIC_TAXA = "Fungi,Protozoa"
+  # This string + date is added to description of iNat observation
+  IMPORTED_BY_MO = "Imported by Mushroom Observer"
 
   queue_as :default
 
   def perform(inat_import)
     @inat_import = inat_import
-
     access_token =
       use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
     @inat_import.update(token: access_token)
@@ -25,7 +26,6 @@ class InatImportJob < ApplicationJob
     @inat_import.update(token: api_token, state: "Importing")
 
     import_requested_observations
-
     @inat_import.update(state: "Done")
   end
 
@@ -33,13 +33,11 @@ class InatImportJob < ApplicationJob
 
   # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
   def use_auth_code_to_obtain_oauth_access_token(auth_code)
-    payload = {
-      client_id: APP_ID,
-      client_secret: Rails.application.credentials.inat.secret,
-      code: auth_code,
-      redirect_uri: REDIRECT_URI,
-      grant_type: "authorization_code"
-    }
+    payload = { client_id: APP_ID,
+                client_secret: Rails.application.credentials.inat.secret,
+                code: auth_code,
+                redirect_uri: REDIRECT_URI,
+                grant_type: "authorization_code" }
     oauth_response = RestClient.post("#{SITE}/oauth/token", payload)
     JSON.parse(oauth_response.body)["access_token"]
   end
@@ -64,11 +62,12 @@ class InatImportJob < ApplicationJob
     loop do
       page_of_observations =
         # get a page of observations with id > id of last imported obs
-        next_page(
-          id: inat_ids, id_above: last_import_id,
-          user_login: @inat_import.inat_username
-        )
+        next_page(id: inat_ids, id_above: last_import_id,
+                  user_login: @inat_import.inat_username)
+      return if JSON.parse(page_of_observations.body)["error"].present?
+
       parsed_page = JSON.parse(page_of_observations)
+      @inat_import.update(importables: parsed_page["total_results"])
       break if page_empty?(parsed_page)
 
       import_page(page_of_observations)
@@ -109,14 +108,16 @@ class InatImportJob < ApplicationJob
     }.merge(args)
 
     query = URI.encode_www_form(query_args)
-    # ::Inat.new(operation: query, token: @inat_import.token).body
 
+    # ::Inat.new(operation: query, token: @inat_import.token).body
     # Nimmo 2024-06-19 jdc. Moving the request from the inat class to here.
     # RestClient::Request.execute wasn't available in the class
     headers = { authorization: "Bearer #{@inat_import.token}", accept: :json }
     @inat = RestClient::Request.execute(
       method: :get, url: "#{API_BASE}/observations?#{query}", headers: headers
     )
+  rescue RestClient::ExceptionWithResponse => e
+    e.response
   end
 
   def import_page(page)
@@ -134,10 +135,10 @@ class InatImportJob < ApplicationJob
     update_names_and_proposals(inat_obs)
     add_inat_sequences(inat_obs)
     add_import_snapshot_comment(inat_obs)
-    # TODO: Other things done by Observations#create
-    # save_everything_else(params.dig(:naming, :reasons))
-    # strip_images! if @observation.gps_hidden
-    # update_field_slip(@observation, params[:field_code])
+    # NOTE: update field slip 2024-09-09 jdc
+    # https://github.com/MushroomObserver/mushroom-observer/issues/2380
+    update_inat_observation(inat_obs)
+    increment_imported_count
   end
 
   def create_observation(inat_obs)
@@ -154,7 +155,7 @@ class InatImportJob < ApplicationJob
       name_id: name_id,
       text_name: Name.find(name_id).text_name,
       notes: inat_obs.notes,
-      source: "mo_inat_import",
+      source: inat_obs.source,
       inat_id: inat_obs.inat_id
     )
     # Ensure this Name wins consensus_calc ties
@@ -181,18 +182,14 @@ class InatImportJob < ApplicationJob
   end
 
   def need_new_prov_name?(prov_name)
-    prov_name.blank? ||
-      Name.where(text_name: prov_name).none?
+    prov_name.blank? || Name.where(text_name: prov_name).none?
   end
 
   def add_provisional_name(prov_name)
-    params = {
-      method: :post,
-      action: :name,
-      api_key: inat_manager_key.key,
-      name: "#{prov_name} crypt. temp.",
-      rank: "Species"
-    }
+    params = { method: :post, action: :name,
+               api_key: inat_manager_key.key,
+               name: "#{prov_name} crypt. temp.",
+               rank: "Species" }
     api = API2.execute(params)
 
     new_name = api.results.first
@@ -204,8 +201,9 @@ class InatImportJob < ApplicationJob
     inat_obs_photos.each do |obs_photo|
       photo = Inat::ObsPhoto.new(obs_photo)
       api = Inat::PhotoImporter.new(photo_importer_params(photo)).api
-      # TODO: Error handling? 2024-06-19 jdc.
 
+      # NOTE: Error handling? 2024-06-19 jdc.
+      # https://github.com/MushroomObserver/mushroom-observer/issues/2382
       image = Image.find(api.results.first.id)
 
       # Imaage attributes to potentially update manually
@@ -214,7 +212,8 @@ class InatImportJob < ApplicationJob
       # t.boolean "diagnostic", default: true, null: false
       image.update(
         user_id: @inat_import.user_id, # throws Error if done as API param above
-        # TODO: get date from EXIF; it could be > obs date
+        # NOTE: 2024-09-09 get when from image EXIF instead of @observation.when
+        # https://github.com/MushroomObserver/mushroom-observer/issues/2379
         when: @observation.when # throws Error if done as API param above
       )
       @observation.add_image(image)
@@ -222,17 +221,14 @@ class InatImportJob < ApplicationJob
   end
 
   def photo_importer_params(photo)
-    {
-      method: :post,
-      action: :image,
+    { method: :post, action: :image,
       api_key: inat_manager_key.key,
       upload_url: photo.url,
 
       copyright_holder: photo.copyright_holder,
       license: photo.license_id,
       notes: photo.notes,
-      original_name: photo.original_name
-    }
+      original_name: photo.original_name }
   end
 
   # Key for managing iNat imports; avoids requiring each user to have own key.
@@ -316,37 +312,30 @@ class InatImportJob < ApplicationJob
 
   def add_inat_sequences(inat_obs)
     inat_obs.sequences.each do |sequence|
-      params = {
-        action: :sequence,
-        method: :post,
-        api_key: inat_manager_key.key,
-        observation: @observation.id,
-        locus: sequence[:locus],
-        bases: sequence[:bases],
-        archive: sequence[:archive],
-        accession: sequence[:accession],
-        notes: sequence[:notes]
-      }
+      params = { action: :sequence, method: :post,
+                 api_key: inat_manager_key.key,
+                 observation: @observation.id,
+                 locus: sequence[:locus],
+                 bases: sequence[:bases],
+                 archive: sequence[:archive],
+                 accession: sequence[:accession],
+                 notes: sequence[:notes] }
 
-      # TODO: Error handling? 2024-06-19 jdc.
+      # NOTE: Error handling? 2024-06-19 jdc.
+      # https://github.com/MushroomObserver/mushroom-observer/issues/2382
       API2.execute(params)
     end
   end
 
   def obs_fields(fields)
-    fields.map do |field|
-      "&nbsp;&nbsp;#{field[:name]}: #{field[:value]}"
-    end.join("\n")
+    fields.map { |field| "&nbsp;&nbsp;#{field[:name]}: #{field[:value]}" }.
+      join("\n")
   end
 
   def add_import_snapshot_comment(inat_obs)
-    params = {
-      target: @observation,
-      summary: "#{:inat_data_comment.t} #{@observation.created_at}",
-      comment: comment(inat_obs),
-      user: inat_manager
-    }
-
+    params = { target: @observation, user: inat_manager,
+               summary: "#{:inat_data_comment.t} #{@observation.created_at}",
+               comment: comment(inat_obs) }
     Comment.create(params)
   end
 
@@ -354,17 +343,62 @@ class InatImportJob < ApplicationJob
     <<~COMMENT.gsub(/^\s+/, "")
       #{:USER.t}: #{inat_obs.inat_user_login}
       #{:OBSERVED.t}: #{inat_obs.when}\n
-      #{:LAT_LON.t}: #{lat_lon_accuracy(inat_obs)}\n
+      #{:show_observation_inat_lat_lng.t}: #{lat_lon_accuracy(inat_obs)}\n
       #{:PLACE.t}: #{inat_obs.inat_place_guess}\n
       #{:ID.t}: #{inat_obs.inat_taxon_name}\n
       #{:DQA.t}: #{inat_obs.dqa}\n
-      #{:ANNOTATIONS.t}: #{:UNDER_DEVELOPMENT.t}\n
-      #{:PROJECTS.t}: #{inat_obs.inat_project_names}\n
       #{:SEQUENCES.t}: #{:UNDER_DEVELOPMENT.t}\n
       #{:OBSERVATION_FIELDS.t}: \n\
-
       #{obs_fields(inat_obs.inat_obs_fields)}\n
-      #{:TAGS.t}: #{inat_obs.inat_tags.join(" ")}\n
+      #{:PROJECTS.t}: #{:inat_not_imported.t}\n
+      #{:ANNOTATIONS.t}: #{:inat_not_imported.t}\n
+      #{:TAGS.t}: #{:inat_not_imported.t}}\n
     COMMENT
+  end
+
+  def update_inat_observation(inat_obs)
+    update_mushroom_observer_url_field
+    update_description(inat_obs)
+  end
+
+  def update_mushroom_observer_url_field
+    update_inat_observation_field(observation_id: @observation.inat_id,
+                                  field_id: 5005,
+                                  value: "#{MO.http_domain}/#{@observation.id}")
+  end
+
+  def update_inat_observation_field(observation_id:, field_id:, value:)
+    payload = { observation_field_value: { observation_id: observation_id,
+                                           observation_field_id: field_id,
+                                           value: value } }
+    headers = { authorization: "Bearer #{@inat_import.token}",
+                content_type: :json, accept: :json }
+
+    response = RestClient.post("#{API_BASE}/observation_field_values",
+                               payload.to_json, headers)
+    JSON.parse(response.body)
+  rescue RestClient::ExceptionWithResponse => e
+    e.response
+  end
+
+  def update_description(inat_obs)
+    description = inat_obs.inat_description
+    updated_description =
+      "#{IMPORTED_BY_MO} #{Time.zone.today.strftime(MO.web_date_format)}"
+    updated_description.prepend("#{description}\n\n") if description.present?
+
+    payload = { observation: { description: updated_description } }
+    headers = { authorization: "Bearer #{@inat_import.token}",
+                content_type: :json, accept: :json }
+
+    response = RestClient.put("#{API_BASE}/observations/#{inat_obs.inat_id}",
+                              payload.to_json, headers)
+    JSON.parse(response.body)
+  rescue RestClient::ExceptionWithResponse => e
+    e.response
+  end
+
+  def increment_imported_count
+    @inat_import.increment!(:imported_count)
   end
 end

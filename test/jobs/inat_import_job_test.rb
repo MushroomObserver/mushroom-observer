@@ -31,6 +31,7 @@ class InatImportJobTest < ActiveJob::TestCase
   PHOTO_BASE = "https://inaturalist-open-data.s3.amazonaws.com/photos"
 
   ICONIC_TAXA = InatImportJob::ICONIC_TAXA
+  IMPORTED_BY_MO = InatImportJob::IMPORTED_BY_MO
 
   # Had 1 identification, 0 photos, 0 observation_fields
   def test_import_job_basic_obs
@@ -454,6 +455,7 @@ class InatImportJobTest < ActiveJob::TestCase
                           mock_inat_response: mock_inat_response,
                           id_above: id_above)
     stub_inat_photo_requests(mock_inat_response)
+    stub_modify_inat_observations(mock_inat_response)
   end
 
   def stub_token_requests
@@ -558,6 +560,36 @@ class InatImportJobTest < ActiveJob::TestCase
     mock_photo_importer
   end
 
+  def stub_modify_inat_observations(mock_inat_response)
+    stub_add_observation_fields
+    stub_update_descriptions(mock_inat_response)
+  end
+
+  def stub_add_observation_fields
+    stub_request(:post, "#{API_BASE}/observation_field_values").
+      to_return(status: 200, body: "".to_json,
+                headers: { "Content-Type" => "application/json" })
+  end
+
+  def stub_update_descriptions(mock_inat_response)
+    date = Time.zone.today.strftime(MO.web_date_format)
+    observations = JSON.parse(mock_inat_response)["results"]
+    observations.each do |obs|
+      updated_description =
+        "Imported by Mushroom Observer #{date}"
+      if obs["description"].present?
+        updated_description.prepend("#{obs["description"]}\n\n")
+      end
+
+      body = { observation: { description: updated_description } }
+      headers = { authorization: "Bearer",
+                  content_type: "application/json", accept: "application/json" }
+      stub_request(:put, "#{API_BASE}/observations/#{obs["id"]}").
+        with(body: body.to_json, headers: headers).
+        to_return(status: 200, body: "".to_json, headers: {})
+    end
+  end
+
   # -------- Standard Test assertions
 
   def standard_assertions(obs:, name: nil, loc: nil)
@@ -591,7 +623,7 @@ class InatImportJobTest < ActiveJob::TestCase
     obs_comments =
       Comment.where(target_type: "Observation", target_id: obs.id)
     assert(obs_comments.one?)
-    assert(obs_comments.where(Comment[:summary] =~ /^iNat Data/).present?,
+    assert(obs_comments.where(Comment[:summary] =~ /iNat Data/).present?,
            "Missing Initial Commment (#{:inat_data_comment.l})")
     assert_equal(
       inat_manager, obs_comments.first.user,
@@ -599,9 +631,9 @@ class InatImportJobTest < ActiveJob::TestCase
     )
     inat_data_comment = obs_comments.first.comment
     [
-      :USER.l, :OBSERVED.l, :LAT_LON.l, :PLACE.l, :ID.l, :DQA.l,
-      :ANNOTATIONS.l, :PROJECTS.l, :SEQUENCES.l, :OBSERVATION_FIELDS.l,
-      :TAGS.l
+      :USER.l, :OBSERVED.l, :show_observation_inat_lat_lng.l, :PLACE.l,
+      :ID.l, :DQA.l, :ANNOTATIONS.l, :PROJECTS.l, :SEQUENCES.l,
+      :OBSERVATION_FIELDS.l, :TAGS.l
     ].each do |caption|
       assert_match(
         /#{caption}/, inat_data_comment,
@@ -616,12 +648,7 @@ class InatImportJobTest < ActiveJob::TestCase
     User.find_by(login: "MO Webmaster")
   end
 
-  # ---------------------------------------------------------------------------
-  # Everything above here is live code.
-  # TODO: Remove this comment and everything below it.
-  # Everything below is potentially dead.
-
-  # Turn results with many pages into results with one page
+  # Hack to turn results with many pages into results with one page
   # By ignoring all pages but the first
   def limited_to_first_page(mock_search_result)
     ms_hash = JSON.parse(mock_search_result)

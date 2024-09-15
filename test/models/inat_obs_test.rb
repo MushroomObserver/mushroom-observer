@@ -40,8 +40,7 @@ class InatObsTest < UnitTestCase
       specimen: false,
       # notes: { Other: "on Quercus\n\n&#8212;\n\nMirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/202555552\">observation 202555552</a> on March 15, 2024." }, # rubocop:disable Layout/LineLength
       notes: { Other: "on Quercus\n\n&#8212;\n\nOriginally posted to Mushroom Observer on Mar. 7, 2024." }, # rubocop:disable Layout/LineLength
-      # FIXME: add new source
-      source: nil
+      source: "mo_inat_import"
       # thumb_image_id: 1659475,
       # vote_cache: 2.51504,
       # num_views: 78,
@@ -51,7 +50,7 @@ class InatObsTest < UnitTestCase
     )
 
     # mapping to MO Observation attributes
-    %w[gps_hidden lat lng name_id notes text_name when where].
+    %w[gps_hidden lat lng name_id notes source text_name when where].
       each do |attribute|
         assert_equal(expected_mapping.send(attribute),
                      mock_inat_obs.send(attribute))
@@ -203,8 +202,10 @@ class InatObsTest < UnitTestCase
     mock_inat_obs = mock_observation("xeromphalina_campanella_complex")
     assert_equal("Xeromphalina campanella", mock_inat_obs.inat_taxon_name)
     assert_equal("complex", mock_inat_obs.inat_taxon_rank)
-    assert_equal(Name.unknown.text_name, mock_inat_obs.text_name,
-                 "iNat complex without MO name match should map to the Unknown name")
+    assert_equal(
+      Name.unknown.text_name, mock_inat_obs.text_name,
+      "iNat complex without MO name match should map to the Unknown name"
+    )
   end
 
   def test_complex_with_mo_match
@@ -329,7 +330,6 @@ class InatObsTest < UnitTestCase
   end
 
   def test_taxon_importable
-    # TODO: 2024-06-19 jdc. Fix this after fixing `importable?`
     assert(mock_observation("somion_unicolor").taxon_importable?,
            "iNat Fungi observations should be importable")
 
@@ -343,20 +343,6 @@ class InatObsTest < UnitTestCase
   def test_inat_obs_photos
     assert(mock_observation("amanita_flavorubens").inat_obs_photos.none?)
     assert(mock_observation("coprinus").inat_obs_photos.one?)
-  end
-
-  # iNat API returns only some projects
-  # https://forum.inaturalist.org/t/given-an-observation-id-get-a-list-of-project/53476?u=joecohen
-  # https://help.inaturalist.org/en/support/solutions/articles/151000176472-understanding-projects-on-inaturalist
-  # comma separated string of project names
-  def test_inat_project_names
-    skip("Under Construction")
-    assert_equal("??", mock_observation("somion_unicolor").inat_project_names,
-                 "wrong project names for iNat obs which lacks projects")
-
-    assert_equal("Portland-Vancouver Regional Eco-Blitz, ??",
-                 mock_observation("evernia").inat_project_names,
-                 "wrong project names for iNat obs with 1 detectable project")
   end
 
   def mock_observation(filename)

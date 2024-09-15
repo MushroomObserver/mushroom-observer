@@ -10,10 +10,10 @@
 #  inat_ids:: string representing the iNat obss to be imported
 #  inat_username:: current user's iNat login
 #  import_all: whether to import all of user's relevant iNat observations
-#
+#  importables: # of importable observations
+#  imported_count: running count of iNat obss imported in the associated job
 class InatImport < ApplicationRecord
-  enum state:
-  {
+  enum :state, {
     Unstarted: 0,
     # waiting for User to authorize MO to access iNat data
     Authorizing: 1,

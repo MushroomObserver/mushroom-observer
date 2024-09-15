@@ -527,7 +527,10 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def init_image_from_local_file(file)
     @file = file
-    raise("Weird: file.path is blank!") if file.path.blank?
+    if file.path.blank?
+      Rails.logger.info { "File: #{file}" }
+      raise("Weird: file.path is blank!")
+    end
 
     self.upload_temp_file = file.path
     self.upload_length    = file.size
@@ -1097,7 +1100,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
     License.find_each do |license|
       display_names[license.id] = license.display_name
-      available_names_and_ids[license.id] = License.available_names_and_ids(license)
+      available_names_and_ids[license.id] =
+        License.available_names_and_ids(license)
     end
 
     Image.where(user: user).

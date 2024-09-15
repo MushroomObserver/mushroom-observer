@@ -200,7 +200,7 @@ module Tabs
 
     def observation_form_new_tabs
       # [new_inat_import_tab, new_herbarium_tab]
-      []
+      [new_inat_import_tab]
     end
 
     def observation_form_edit_tabs(obs:)
@@ -210,6 +210,12 @@ module Tabs
     def observation_maps_tabs(query:)
       [coerced_observation_query_tab(query),
        coerced_location_query_tab(query)]
+    end
+
+    def new_inat_import_tab(query: nil)
+      [:create_observation_inat_import_link.l,
+       add_query_param(new_observations_inat_import_path, query),
+       { class: tab_id(__method__.to_s) }]
     end
 
     def naming_form_new_title(obs:)

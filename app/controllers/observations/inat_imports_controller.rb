@@ -51,13 +51,16 @@ module Observations
       return username_required if params[:inat_username].blank?
       return reload_form if bad_inat_ids_param?
       return designation_required unless imports_designated?
+      return already_imported(previous_imports) if previous_imports.any?
+      return already_mirrored(previously_mirrored) if previously_mirrored.any?
       return consent_required if params[:consent] == "0"
 
       @inat_import = InatImport.find_or_create_by(user: User.current)
       @inat_import.update(state: "Authorizing",
                           import_all: params[:all],
                           inat_ids: params[:inat_ids],
-                          inat_username: params[:inat_username].strip)
+                          inat_username: params[:inat_username].strip,
+                          importables: 0, imported_count: 0)
 
       request_inat_user_authorization
     end
@@ -79,6 +82,47 @@ module Observations
 
     def imports_designated?
       params[:all] == "1" || params[:inat_ids].present?
+    end
+
+    def previous_imports
+      inat_id_list.each_with_object([]) do |inat_id, ary|
+        ary << Observation.find_by(inat_id: inat_id)
+      end
+    end
+
+    def inat_id_list
+      params[:inat_ids].delete(" ").split(",").map(&:to_i)
+    end
+
+    def already_imported(previous_imports)
+      previous_imports.each do |import|
+        flash_warning(:inat_previous_import.t(inat_id: import.inat_id,
+                                              mo_obs_id: import.id))
+      end
+      reload_form
+    end
+
+    def previously_mirrored
+      inat_id_list.each_with_object([]) do |inat_id, ary|
+        ary << Observation.notes_include(
+          "Mirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/#{inat_id}\">"
+        ).first
+      end
+    end
+
+    def already_mirrored(previously_mirrored)
+      previously_mirrored.each do |obs|
+        flash_warning(:inat_previous_mirror.t(inat_id: mirrored_inat_id(obs),
+                                              mo_obs_id: obs.id))
+      end
+      reload_form
+    end
+
+    # When Pulk's `mirror`Python script copies an MO Obs to iNat,
+    # it adds a link to the iNat obs to the MO Observation notes
+    def mirrored_inat_id(obs)
+      match = %r{#{SITE}/observations/(?'inat_id'\d+)}o.match(obs.notes.to_s)
+      match[:inat_id]
     end
 
     def consent_required
@@ -125,11 +169,13 @@ module Observations
       @inat_import = InatImport.find_or_create_by(user: User.current)
       @inat_import.update(token: auth_code, state: "Authenticating")
 
-      InatImportJob.perform_later(@inat_import)
+      tracker = InatImportJobTracker.create(inat_import: @inat_import.id)
+
       # InatImportJob.perform_now(@inat_import) # for manual testing
+      InatImportJob.perform_later(@inat_import)
 
       flash_notice(:inat_import_started.t)
-      redirect_to(observations_path)
+      redirect_to(inat_import_job_tracker_path(tracker.id))
     end
 
     # ---------------------------------

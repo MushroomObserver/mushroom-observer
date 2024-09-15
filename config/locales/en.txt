@@ -501,7 +501,7 @@
   DEPOSIT: Deposit
   deposit: deposit
   # DQA is iNat-ese for Data Quality Assessment
-  DQA: DQA
+  DQA: Quality Grade
   EDITOR: Editor
   editor: editor
   EDITORS: Editors
@@ -1499,6 +1499,7 @@
 
   # observations/create_observation
   create_observation_title: "[:create_object(type=:observation)]"
+  create_observation_inat_import_link: Import from iNat
 
   # observations/download_observations
   download_observations_title: Download Observations
@@ -2273,6 +2274,7 @@
   show_observation_details: Details
   show_observation_details_inat_import: Imported [date] from
   show_observation_details_inat_export: Copied to iNaturalist as
+  show_observation_inat_lat_lng: Public lat/lng
   show_observation_edit_observation: "[:edit_object(type=:observation)]"
   show_observation_propose_new_name: "[:show_namings_propose_new_name]"
   show_observation_debug_consensus: Debug Consensus
@@ -3011,8 +3013,7 @@
   list_merge_options_title: Location Matches for [where]
 
   # observation/inat_imports
-  create_inat_import_title: Import from iNat
-  import_observation_from_inat: Import from iNat
+  inat_import_create_title: Import from iNat
   inat_choose_observations: "Inat Observations to Import:"
   inat_import_list: "Comma separated list of observation #s"
   inat_import_all: Import all my iNat observations instead of a list
@@ -3021,18 +3022,31 @@
   inat_username: Your iNat Username (mandatory)
   runtime_illegal_inat_id: iNat observation number can contain only numbers, commas, and spaces
   inat_missing_username: Missing your iNat Username
-  inat_no_imports_designated: Imports missing. Complete [:inat_import_list], or select [:inat_import_all]
+  inat_no_imports_designated: You must list the iNat observation(s) to be imported
+  inat_previous_import: iNat [inat_id] previously imported as MO Observation [mo_obs_id]
+  inat_previous_mirror: "iNat [inat_id] is a \"mirror\" of existing MO Observation [mo_obs_id]"
   inat_import_started: Your import has started. Refresh page to update results.
 
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
 
-  inat_data_comment: iNat Data
+  inat_data_comment: Snapshot of Imported iNat Data
   inat_dqa_casual: Casual
   inat_dqa_needs_id: Needs ID
   inat_dqa_research: Research Grade
-  inat_details_heading: "Details/Caveats"
-  inat_details_list: "- MO will list most iNat data and/or map it to analogous MO fields. \n - The MO Observation links to the iNat observation and vice versa. \n - MO Consensus ID is an analog of the iNat Community ID. \n  - Coordinates are hidden from the public if iNat hid/obscured them. \n - MO will use the iNat Provisional Species Name as the MO Consensus ID \n - Location is a rectangle with an MO-style name, rather than the iNat Place name. \n - iNat Projects are not included (iNat's API does not provide that data). \n"
+  inat_not_imported: Not Imported
 
+  inat_details_heading: "Details/Caveats"
+  inat_details_list: "- MO will list most iNat data and/or map it to analogous MO fields. \n - Coordinates are hidden from the public if iNat obscured them. \n - Location is a rectangle with an MO-style name, rather than the iNat Place name. \n"
+
+  # /inat_import_job_tracker
+  INAT_IMPORT_JOB_TRACKERS: iNat Import Trackers
+  inat_import_tracker: iNat Import Tracker
+  inat_import_tracker_status: "[:STATUS]"
+  inat_import_tracker_started: Started
+  inat_import_tracker_importable_count: "Number of Importable Observations"
+  inat_import_tracker_imported_count: "Number Imported"
+  inat_importables_explanation: "An ??importable?? observation is an iNaturalist observation: which you created, which does not exist in MO, and whose iNat identity is a fungus or slime mold."
+  inat_import_tracker_refresh: Update results
 
   # observer/list_notifications
   list_notifications_title: Email Alerts for [user]
@@ -3257,7 +3271,7 @@
   # ADMIN-TYPE PAGES
 
   # project/<id>/members/new
-  add_members_with_gps_trust: Hidden GPS data may be shared with project admins.
+  add_members_with_gps_trust: Hidden GPS data shared with project admins.
   add_members_change_status: Change Status
   add_members_denied: "Permission denied: only admins for a project can add new members."
   add_members_title: Add [:users] to [title]
