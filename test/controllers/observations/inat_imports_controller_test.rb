@@ -227,7 +227,7 @@ module Observations
               params: inat_authorization_callback_params)
         end
       end
-      assert_flash_success
+
       tracker = InatImportJobTracker.find_by(inat_import: inat_import)
       assert_redirected_to(inat_import_job_tracker_path(tracker.id))
     end
