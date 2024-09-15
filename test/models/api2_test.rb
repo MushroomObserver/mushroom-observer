@@ -2250,7 +2250,7 @@ class API2Test < UnitTestCase
 
     genus = Name.ranks[:Genus]
     group = Name.ranks[:Group]
-    names = Name.where((Name[:rank] <= genus).or(Name[:rank] == group))
+    names = Name.where((Name[:rank] <= genus).or(Name[:rank].eq(group)))
     with = Observation.where(name: names)
     without = Observation.where.not(name: names)
     assert(with.length > 1)
