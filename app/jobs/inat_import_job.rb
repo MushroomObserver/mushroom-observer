@@ -26,7 +26,6 @@ class InatImportJob < ApplicationJob
     @inat_import.update(token: api_token, state: "Importing")
 
     import_requested_observations
-
     @inat_import.update(state: "Done")
   end
 
@@ -65,6 +64,8 @@ class InatImportJob < ApplicationJob
         # get a page of observations with id > id of last imported obs
         next_page(id: inat_ids, id_above: last_import_id,
                   user_login: @inat_import.inat_username)
+      return if JSON.parse(page_of_observations.body)["error"].present?
+
       parsed_page = JSON.parse(page_of_observations)
       @inat_import.update(importables: parsed_page["total_results"])
       break if page_empty?(parsed_page)
@@ -107,14 +108,16 @@ class InatImportJob < ApplicationJob
     }.merge(args)
 
     query = URI.encode_www_form(query_args)
-    # ::Inat.new(operation: query, token: @inat_import.token).body
 
+    # ::Inat.new(operation: query, token: @inat_import.token).body
     # Nimmo 2024-06-19 jdc. Moving the request from the inat class to here.
     # RestClient::Request.execute wasn't available in the class
     headers = { authorization: "Bearer #{@inat_import.token}", accept: :json }
     @inat = RestClient::Request.execute(
       method: :get, url: "#{API_BASE}/observations?#{query}", headers: headers
     )
+  rescue RestClient::ExceptionWithResponse => e
+    e.response
   end
 
   def import_page(page)
