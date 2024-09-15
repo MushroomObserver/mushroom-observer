@@ -645,8 +645,7 @@ class InatImportJobTest < ActiveJob::TestCase
     inat_data_comment = obs_comments.first.comment
     [
       :USER.l, :OBSERVED.l, :show_observation_inat_lat_lng.l, :PLACE.l,
-      :ID.l, :DQA.l, :ANNOTATIONS.l, :PROJECTS.l, :SEQUENCES.l,
-      :OBSERVATION_FIELDS.l, :TAGS.l
+      :ID.l, :DQA.l, :ANNOTATIONS.l, :PROJECTS.l, :OBSERVATION_FIELDS.l, :TAGS.l
     ].each do |caption|
       assert_match(
         /#{caption}/, inat_data_comment,

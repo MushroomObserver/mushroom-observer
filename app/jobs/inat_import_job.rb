@@ -342,7 +342,6 @@ class InatImportJob < ApplicationJob
       #{:PLACE.t}: #{@inat_obs.inat_place_guess}\n
       #{:ID.t}: #{@inat_obs.inat_taxon_name}\n
       #{:DQA.t}: #{@inat_obs.dqa}\n
-      #{:SEQUENCES.t}: #{:UNDER_DEVELOPMENT.t}\n
       #{:OBSERVATION_FIELDS.t}: #{obs_fields(@inat_obs.inat_obs_fields)}\n
       #{:PROJECTS.t}: #{:inat_not_imported.t}\n
       #{:ANNOTATIONS.t}: #{:inat_not_imported.t}\n
@@ -351,7 +350,7 @@ class InatImportJob < ApplicationJob
   end
 
   def obs_fields(fields)
-    return "none" if fields.empty?
+    return :none.t if fields.empty?
 
     "\n#{one_line_per_field(fields)}"
   end
