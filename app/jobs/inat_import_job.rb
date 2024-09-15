@@ -280,8 +280,8 @@ class InatImportJob < ApplicationJob
 
     # NOTE: There will be >= 1 match because of add_missing_provisional_name.
     # If a provisional Name was added during import, use it;
-    # it's the most recently created, and won't be deprecated.
-    # Else grab another mathcing one.
+    # (It's the most recently created, and won't be deprecated.)
+    # else grab another matching one.
     name = best_mo_homonym(nom_prov)
     add_naming_with_vote(name: name)
   end
