@@ -22,9 +22,8 @@ class Inat
 
       # iNat name maps to multiple MO Names
       # So for the moment, just map it to Fungi
-      # TODO: refine this.
-      # Ideas: check iNat and MO authors, possibly prefer non-deprecated MO Name
-      # - might need a dictionary here
+      # For possible improvements, see
+      # https://github.com/MushroomObserver/mushroom-observer/issues/2381
       ::Name.unknown
     end
 

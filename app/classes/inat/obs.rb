@@ -13,6 +13,7 @@
 #  === iNat attributes & associations
 #
 #  obs::                 The iNat observation data
+#  inat_description::
 #  inat_id::
 #  inat_identifications    array of identifications, taxa need not be unique
 #  inat_location::         lat,lon
@@ -58,6 +59,10 @@ class Inat
     end
 
     ########## iNat attributes
+
+    def inat_description
+      @obs[:description]
+    end
 
     def inat_id
       @obs[:id]
@@ -199,9 +204,9 @@ class Inat
     end
 
     def notes
-      return "" if description.empty?
+      return "" if inat_description.empty?
 
-      { Other: description.gsub(%r{</?p>}, "") }
+      { Other: inat_description.gsub(%r{</?p>}, "") }
     end
 
     # min bounding rectangle of iNat location blurred by public accuracy
@@ -228,12 +233,17 @@ class Inat
     def sequences
       obs_sequence_fields = inat_obs_fields.select { |f| sequence_field?(f) }
       obs_sequence_fields.each_with_object([]) do |field, ary|
-        # TODO: 2024-06-19 jdc. Need more investigation/test to handle
+        # NOTE: 2024-06-19 jdc. Need more investigation/test to handle
         # field[:value] blank or not a (pure) lists of bases
+        # https://github.com/MushroomObserver/mushroom-observer/issues/2232
         ary << { locus: field[:name], bases: field[:value],
-                # NTOE: 2024-06-19 jdc. Can we figure out the following?
-                archive: nil, accession: "", notes: "" }
+                 # NTOE: 2024-06-19 jdc. Can we figure out the following?
+                 archive: nil, accession: "", notes: "" }
       end
+    end
+
+    def source
+      "mo_inat_import"
     end
 
     def text_name
@@ -246,9 +256,8 @@ class Inat
     end
 
     def where
-      # FIXME: Make it a real MO Location
-      # Maybe smallest existing MO Location containing:
-      #   inat.location +/- inat.positional accuracy
+      # NOTE: Make it the name of a real MO Location
+      # https://github.com/MushroomObserver/mushroom-observer/issues/2383
       inat_place_guess
     end
 
@@ -428,10 +437,8 @@ class Inat
       @obs.dig(:taxon, :iconic_taxon_name) == "Fungi"
     end
 
-    # TODO: 2024-07-23 jdc. Improve this.
-    # (But the best possible is Traditional projects and
-    # non_traditional_projects with joined Collection/Umbrella projects )
-    # https://forum.inaturalist.org/t/given-an-observation-id-get-a-list-of-project/53476?u=joecohen
+    # NOTE: 2024-09-09 jdc. Can this be improved?
+    # https://github.com/MushroomObserver/mushroom-observer/issues/2245
     def inat_projects
       @obs[:project_observations]
     end
