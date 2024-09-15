@@ -345,7 +345,7 @@ class InatImportJob < ApplicationJob
       #{:OBSERVATION_FIELDS.t}: #{obs_fields(@inat_obs.inat_obs_fields)}\n
       #{:PROJECTS.t}: #{:inat_not_imported.t}\n
       #{:ANNOTATIONS.t}: #{:inat_not_imported.t}\n
-      #{:TAGS.t}: #{:inat_not_imported.t}}\n
+      #{:TAGS.t}: #{:inat_not_imported.t}\n
     COMMENT
   end
 
