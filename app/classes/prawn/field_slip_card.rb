@@ -116,7 +116,7 @@ module Prawn
 
     def qr_code(code)
       title_width = 5.cm
-      svg(qr_svg("http://mushroomobserver.org/qr/#{code}"),
+      svg(qr_svg("https://mushroomobserver.org/qr/#{code}"),
           at: [QR_LEFT, QR_TOP],
           width: QR_SIZE)
       font("#{Prawn::ManualBuilder::DATADIR}/fonts/DejaVuSans.ttf") do
