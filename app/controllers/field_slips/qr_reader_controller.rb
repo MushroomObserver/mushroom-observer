@@ -22,7 +22,7 @@ module FieldSlips
     def check_for_qr_code(params)
       @qr_code = params[:qr_code]
       if @qr_code.start_with?("http")
-        if @qr_code.start_with?("https://mushroomobserver.org/qr/")
+        if @qr_code.start_with?("https://mushroomobserver.org/qr/", "http://mushroomobserver.org/qr/")
           @qr_code = @qr_code.split("/")[-1]
           return true
         end
