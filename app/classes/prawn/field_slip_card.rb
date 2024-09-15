@@ -116,7 +116,7 @@ module Prawn
 
     def qr_code(code)
       title_width = 5.cm
-      svg(qr_svg("http://mushroomobserver.org/qr/#{code}"),
+      svg(qr_svg("https://mushroomobserver.org/qr/#{code}"),
           at: [QR_LEFT, QR_TOP],
           width: QR_SIZE)
       font("#{Prawn::ManualBuilder::DATADIR}/fonts/DejaVuSans.ttf") do
@@ -180,7 +180,8 @@ module Prawn
       text_box("Odor/taste:", at: [subnote_left, current_y])
       current_y -= NOTES_FONT_SIZE * 3
       text_box("Trees/Shrubs: Hardwood / Conifer / Mixed",
-               at: [subnote_left, current_y])
+               at: [subnote_left, current_y],
+               width: X_MAX - subnote_left)
       current_y -= NOTES_FONT_SIZE
       text_box("Species:",
                at: [subnote_indent, current_y])
