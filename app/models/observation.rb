@@ -494,11 +494,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   }
   scope :for_project, lambda { |project|
     joins(:project_observations).
-      where(ProjectObservation[:project_id] == project.id).distinct
+      where(ProjectObservation[:project_id].eq(project.id)).distinct
   }
   scope :in_herbarium, lambda { |herbarium|
     joins(:herbarium_records).
-      where(HerbariumRecord[:herbarium_id] == herbarium.id).distinct
+      where(HerbariumRecord[:herbarium_id].eq(herbarium.id)).distinct
   }
   scope :herbarium_record_notes_include, lambda { |notes|
     joins(:herbarium_records).
@@ -506,12 +506,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   }
   scope :on_species_list, lambda { |species_list|
     joins(:species_list_observations).
-      where(SpeciesListObservation[:species_list_id] == species_list.id).
+      where(SpeciesListObservation[:species_list_id].eq(species_list.id)).
       distinct
   }
   scope :on_species_list_of_project, lambda { |project|
     joins(species_lists: :project_species_lists).
-      where(ProjectSpeciesList[:project_id] == project.id).distinct
+      where(ProjectSpeciesList[:project_id].eq(project.id)).distinct
   }
   scope :show_includes, lambda {
     strict_loading.includes(
@@ -607,7 +607,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def can_edit?(user = User.current)
-    Project.can_edit?(self, user)
+    Project.can_edit?(self, user) || is_collector?(user)
+  end
+
+  def is_collector?(user)
+    user && notes[:Collector] == "_user #{user.login}_"
   end
 
   def project_admin?(user = User.current)

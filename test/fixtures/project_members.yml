@@ -25,9 +25,9 @@ bolete_mary:
   user: mary
   trust_level: <%= ProjectMember.trust_levels[:editing] %>
 
-open_member_mary:
+open_member_ollie:
   project: open_membership_project
-  user: mary
+  user: ollie
   trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>
 
 open_member_katrina:

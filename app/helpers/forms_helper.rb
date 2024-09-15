@@ -276,16 +276,12 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     wrap_class = form_group_wrap_class(args)
     selects_class = "form-inline date-selects"
     selects_class += " d-inline-block" if args[:inline] == true
-    identifier = [args[:form].object_name, args[:index], args[:field]].
-                 compact.join("_")
     label_opts = { class: "mr-3" }
     label_opts[:index] = args[:index] if args[:index].present?
     tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
-      concat(tag.div(class: selects_class, id: identifier) do
-        concat(args[:form].date_select(args[:field], date_opts, opts))
-      end)
+      date_select_div(args, date_opts, opts, selects_class)
       concat(args[:append]) if args[:append].present?
     end
   end
@@ -293,10 +289,10 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   # The index arg is for multiple date_selects in a form
   def date_select_opts(args = {})
     field = args[:field] || :when
-    obj = args[:object] || args[:form]&.object
+    obj = args[:object] || args[:form]&.object || nil
     start_year = args[:start_year] || 20.years.ago.year
     end_year = args[:end_year] || Time.zone.now.year
-    selected = Time.zone.today
+    selected = args[:selected] || Time.zone.today
     # The field may not be an attribute of the object
     if obj.present? && obj.respond_to?(field)
       init_year = obj.try(&field).try(&:year)
@@ -306,9 +302,27 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
       start_year = init_year
     end
     opts = { start_year:, end_year:, selected:,
+             include_blank: args[:include_blank], default: args[:default],
              order: args[:order] || [:day, :month, :year] }
     opts[:index] = args[:index] if args[:index].present?
     opts
+  end
+
+  # If there's no form object_name, we need a name and id for the fields.
+  # Turns out you have to use a different Rails helper, select_date, for this.
+  def date_select_div(args, date_opts, opts, selects_class)
+    if args[:form].object_name.present?
+      identifier = [args[:form]&.object_name, args[:index],
+                    args[:field]].compact.join("_")
+      concat(tag.div(class: selects_class, id: identifier) do
+        concat(args[:form].date_select(args[:field], date_opts, opts))
+      end)
+    else
+      concat(tag.div(class: selects_class, id: args[:field]) do
+        concat(select_date(date_opts[:selected],
+                           date_opts.merge(prefix: args[:field]), opts))
+      end)
+    end
   end
 
   # Bootstrap number_field
@@ -512,7 +526,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     id = [
       nested_field_id(args),
       "help"
-    ].join("_")
+    ].compact_blank.join("_")
     args[:between] = capture do
       concat(args[:between])
       concat(collapse_info_trigger(id))
@@ -528,7 +542,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
 
   def nested_field_id(args)
     [args[:form].object_name.to_s.id_of_nested_field,
-     args[:field].to_s].join("_")
+     args[:field].to_s].compact_blank.join("_")
   end
 
   # These are args that should not be passed to the field
@@ -539,7 +553,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
       :form, :field, :label, :class, :width, :inline, :between, :label_after,
       :label_end, :append, :help, :addon, :optional, :required, :monospace,
       :type, :wrap_data, :wrap_id, :button, :button_data, :checked_value,
-      :unchecked_value
+      :unchecked_value, :hidden_name
     ] + extras
 
     args.clone.except(*exceptions)
