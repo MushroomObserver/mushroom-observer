@@ -335,11 +335,11 @@ class InatImportJob < ApplicationJob
   def add_import_snapshot_comment(inat_obs)
     params = { target: @observation, user: inat_manager,
                summary: "#{:inat_data_comment.t} #{@observation.created_at}",
-               comment: comment(inat_obs) }
+               comment: snapshot(inat_obs) }
     Comment.create(params)
   end
 
-  def comment(inat_obs)
+  def snapshot(inat_obs)
     <<~COMMENT.gsub(/^\s+/, "")
       #{:USER.t}: #{inat_obs.inat_user_login}
       #{:OBSERVED.t}: #{inat_obs.when}\n
