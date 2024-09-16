@@ -98,7 +98,7 @@ module PatternSearch
     # If it is a range, return the two dates.
     def check_for_date_range(term)
       dates = term.parse_date_range
-      dates.map do |date|
+      dates.map! do |date|
         next if date.blank?
 
         date.split("-").map(&:to_i)
