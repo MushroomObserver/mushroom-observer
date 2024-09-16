@@ -5,26 +5,5 @@ add_tab_set(glossary_term_form_new_tabs)
 %>
 
 <%= render("form", button_name: :edit_glossary_term_save) do |f| %>
-
-  <%= fields_for(:upload) do |f_u| %>
-    <%= file_field_with_label(form: f_u, field: :image,
-                              label: :Image.t + ":") %>
-
-    <%= text_field_with_label(form: f_u, field: :copyright_holder, inline: true,
-                              label: :glossary_term_copyright_holder.t + ":") %>
-
-    <%= select_with_label(form: f_u, field: :copyright_year,
-                          label: :WHEN.t + ":", inline: true,
-                          start_year: 1980, end_year: Time.zone.now.year,
-                          value: @copyright_year) %>
-
-    <%= select_with_label(form: f_u, field: :license_id, inline: true,
-                          label: :License.t + ":", options: @licenses,
-                          select_opts: { selected: @upload_license_id },
-                          append: help_block(:div,
-                                  ["(",
-                                    :glossary_term_copyright_warning.t,
-                                    ")"].safe_join)) %>
-  <% end %>
-
+  <%= render(partial: "shared/image_upload_fields") %>
 <% end %>

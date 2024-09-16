@@ -22,7 +22,7 @@
   <% mod_betw = help_note(:span, :advanced_search_result_type_help.t) %>
   <%= select_with_label(
     form: f, field: :model, label: :advanced_search_result_type.t + ":",
-    options: models, select_opts: {}, between: mod_betw,
+    options: models, between: mod_betw,
     data: { advanced_search_target: "searchModel",
             action: "advanced-search#disableUnusedFilters" }
   ) %>
