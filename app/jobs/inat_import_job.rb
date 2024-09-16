@@ -395,8 +395,8 @@ class InatImportJob < ApplicationJob
     headers = { authorization: "Bearer #{@inat_import.token}",
                 content_type: :json, accept: :json }
 
-    response = RestClient.put("#{API_BASE}/observations/#{@inat_obs.inat_id}",
-                              payload.to_json, headers)
+    response = RestClient.patch("#{API_BASE}/observations/#{@inat_obs.inat_id}",
+                                payload.to_json, headers)
     JSON.parse(response.body)
   rescue RestClient::ExceptionWithResponse => e
     e.response
