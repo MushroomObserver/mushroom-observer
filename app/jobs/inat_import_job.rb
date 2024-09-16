@@ -64,7 +64,7 @@ class InatImportJob < ApplicationJob
         # get a page of observations with id > id of last imported obs
         next_page(id: inat_ids, id_above: last_import_id,
                   user_login: @inat_import.inat_username)
-      return if JSON.parse(page_of_observations.body)["error"].present?
+      return if response_bad?(page_of_observations)
 
       parsed_page = JSON.parse(page_of_observations)
       @inat_import.update(importables: parsed_page["total_results"])
@@ -77,6 +77,13 @@ class InatImportJob < ApplicationJob
 
       break
     end
+  end
+
+  def response_bad?(response)
+    return false if response.code == 200
+
+    @inat_import.add_response_error(response)
+    true
   end
 
   def page_empty?(page)
@@ -92,10 +99,11 @@ class InatImportJob < ApplicationJob
     @inat_import.inat_ids.delete(" ")
   end
 
+  # Get one page of observations (up to 200)
   # This is where we actually hit the iNat API
   # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
   # https://stackoverflow.com/a/11251654/3357635
-  # Note that the `ids` parameter may be a comma-separated list of iNat obs
+  # NOTE: The `ids` parameter may be a comma-separated list of iNat obs
   # ids - that needs to be URL encoded to a string when passed as an arg here
   # because URI.encode_www_form deals with arrays by passing the same key
   # multiple times.

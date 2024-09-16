@@ -21,6 +21,18 @@ add_page_title(:inat_import_tracker.t)
   <span id="importables_count"><%= @inat_import.importables.to_s %></span>
 </p>
 <p><%= :inat_importables_explanation.t %></p>
+
+<% if @inat_import.response_errors.present? %>
+  <p>
+    <b><%= :ERRORS.t %>: </b>
+    <%= tag.span(id="errors") do %>
+      <% @inat_import.response_errors.each_line do |error| %>
+        <%= error %></br>
+      <% end %>
+    <% end %>
+  </p>
+<% end %>
+
 <p>
   <% if import_successful?(@inat_import) %>
     <b><%#= link_to("#{@project.observations.length} #{:OBSERVATIONS.l}",

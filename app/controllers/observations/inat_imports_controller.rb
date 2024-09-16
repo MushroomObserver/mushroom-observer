@@ -58,9 +58,10 @@ module Observations
       @inat_import = InatImport.find_or_create_by(user: User.current)
       @inat_import.update(state: "Authorizing",
                           import_all: params[:all],
+                          importables: 0, imported_count: 0,
                           inat_ids: params[:inat_ids],
                           inat_username: params[:inat_username].strip,
-                          importables: 0, imported_count: 0)
+                          response_errors: "", token: "")
 
       request_inat_user_authorization
     end
