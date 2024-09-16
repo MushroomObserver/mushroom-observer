@@ -19,7 +19,6 @@ menu = unless @vote&.value&.nonzero?
          Vote.confidence_menu
        end
 confidences = options_for_select(menu, @vote&.value)
-select_opts = { include_blank: create }
 %>
 
 <% if @given_name.present? %>
@@ -34,7 +33,7 @@ select_opts = { include_blank: create }
     [
       f_n.fields_for(:vote) do |f_v|
         select_with_label(form: f_v, field: :value,
-                          options: confidences, select_opts: select_opts,
+                          options: confidences, include_blank: create,
                           label: :form_naming_confidence.t + ":",
                           autofocus: focus_on_vote)
       end,

@@ -65,13 +65,13 @@
           <%= select_with_label(form: fu, field: :copyright_year,
                                 label: :WHEN.t + ":",
                                 start_year: 1980, end_year: Time.zone.now.year,
-                                value: @copyright_year) %>
+                                selected: @copyright_year) %>
         </div>
       </div>
 
       <%= select_with_label(form: fu, field: :license_id,
                             label: :License.t + ":", options: @licenses,
-                            select_opts: { selected: @upload_license_id },
+                            selected: @upload_license_id,
                             append: help_block(:div,
                                     ["(",
                                      :profile_copyright_warning.t,
