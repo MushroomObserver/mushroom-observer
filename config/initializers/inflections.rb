@@ -28,6 +28,7 @@ ActiveSupport::Inflector.inflections(:en) do |inflect|
   inflect.acronym("EXIF")
   inflect.acronym("CSV")
   inflect.acronym("TSV")
+  inflect.acronym("QR")
   inflect.irregular("bonus", "bonuses")
   inflect.irregular("info", "info")
   inflect.irregular("user_stats", "user_stats")
