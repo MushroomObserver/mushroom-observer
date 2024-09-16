@@ -6,8 +6,8 @@ class ObservationFilter < SearchFilter
   PatternSearch::Observation.params.map do |keyword, values|
     case values[1]
     when :parse_date_range
-      attribute(keyword, :date)
-      attribute(:"#{keyword}_range", :date)
+      attribute(keyword, :string)
+      attribute(:"#{keyword}_range", :string)
     when :parse_confidence
       attribute(keyword, :integer)
     when :parse_longitude, :parse_latitude

@@ -54,9 +54,7 @@ module Names
     end
 
     def permitted_search_params
-      params.permit(name_search_params + [
-        { created: {} }, { modified: {} }
-      ])
+      params.permit(name_search_params)
     end
 
     def name_search_params

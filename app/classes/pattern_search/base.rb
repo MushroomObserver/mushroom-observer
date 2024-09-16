@@ -97,15 +97,15 @@ module PatternSearch
     # like "2010-01-01-2010-01-31", or "2023-2024", or "08-10".
     # If it is a range, return the two dates.
     def check_for_date_range(term)
-      dates = term.parse_date_range
-      dates.map! do |date|
-        next if date.blank?
+      start, range = term.parse_date_range
+      # dates.map! do |date|
+      #   next if date.blank?
 
-        date.split("-").map(&:to_i)
-      end
+      #   date.split("-").map(&:to_i)
+      # end
 
-      start = Date.new(*dates[0]) if dates[0]
-      range = Date.new(*dates[1]) if dates[1]
+      # start = dates[0] if dates[0]
+      # range = dates[1] if dates[1]
 
       range = nil if start == range
 
