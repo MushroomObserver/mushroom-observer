@@ -383,6 +383,10 @@ MushroomObserver::Application.routes.draw do
   end
 
   # ----- Field Slip Records: standard actions --------------------------------
+  namespace :field_slips do
+    get("qr_reader/new", to: "qr_reader#new")
+    post("qr_reader", to: "qr_reader#create")
+  end
   resources :field_slips
   get("qr/:id", to: "field_slips#show", id: /.*[^\d.-].*/)
 
