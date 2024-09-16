@@ -96,29 +96,21 @@ module PatternSearch
     # The string could be a date string like "2010-01-01", or a range string
     # like "2010-01-01-2010-01-31", or "2023-2024", or "08-10".
     # If it is a range, return the two dates.
-    # rubocop:disable Metrics/AbcSize
-    # rubocop:disable Metrics/CyclomaticComplexity
     def check_for_date_range(term)
-      bits = term.vals[0].split("-")
+      dates = term.parse_date_range
+      dates.map do |date|
+        next if date.blank?
 
-      case bits.size
-      when 2
-        start = Date.new(*bits[0].map(&:to_i))
-        range = Date.new(*bits[1].map(&:to_i))
-        [start, range]
-      when 6
-        start = Date.new(*bits[0..2].map(&:to_i))
-        range = Date.new(*bits[3..5].map(&:to_i))
-        [start, range]
-      when 3
-        start = Date.new(*bits.map(&:to_i))
-        [start, nil]
-      else
-        [nil, nil]
+        date.split("-").map(&:to_i)
       end
+
+      start = Date.new(*dates[0]) if dates[0]
+      range = Date.new(*dates[1]) if dates[1]
+
+      range = nil if start == range
+
+      [start, range]
     end
-    # rubocop:enable Metrics/AbcSize
-    # rubocop:enable Metrics/CyclomaticComplexity
 
     def check_for_numeric_range(term)
       bits = term.vals[0].split("-")
