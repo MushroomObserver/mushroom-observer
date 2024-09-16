@@ -233,8 +233,8 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   # Works for select_year but not date_select, which generates multiple selects
   def select_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
-    args = select_generate_default_options(args)
-    select_opts = select_opts(args)
+    args = select_year_default_options(args)
+    select_opts = select_helper_opts(args)
     args = check_for_optional_or_required_note(args)
     args = check_for_help_block(args)
 
@@ -256,17 +256,18 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     end
   end
 
-  # default select_opts - also generate year options if start_year given
-  def select_generate_default_options(args)
+  # Generate `year` options if start_year given
+  def select_year_default_options(args)
     return args unless args[:start_year].present? && args[:end_year].present?
 
     args[:options] = args[:end_year].downto(args[:start_year])
     args
   end
 
-  def select_opts(args)
-    selected = args[:value] || args[:default] || ""
-    { selected:, include_blank: args[:include_blank] }
+  # Args specific to the Rails select helper.
+  # selected: nil could mean no selected value, or a selected value of nil.
+  def select_helper_opts(args)
+    { include_blank: args[:include_blank], selected: args[:selected] }
   end
 
   # MO mostly uses year-input_controller to switch the year selects to
