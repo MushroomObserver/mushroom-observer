@@ -14,6 +14,18 @@
 #  updated_at::  DateTime it was last updated.
 #  user::        User who last updated it.
 #
+#  == Methods
+#
+#  translations(locale)::  Get all translations for a given locale.
+#  update_localization::   Update the translation in the I18n backend.
+#  store_localization::    Store the translation in the I18n backend.
+#
+#  == Class Methods
+#
+#  banner_time::           Get age of official language's banner.
+#  store_localizations(locale, hash_of_tags_and_texts)::  Batch update.
+#  rename_tags(tags)::  Rename a hash of tags in the database.
+#
 #  == Versions
 #
 #  ActsAsVersioned tracks changes in +text+, +updated_at+, and +user+.

@@ -13,12 +13,20 @@ module Observations
 
     def new
       @field_columns = observation_field_groups
+      terms = PatternSearch::Observation.new(session[:pattern]).form_params
+
+      @filter = if session[:pattern]
+                  ObservationFilter.new(terms)
+                else
+                  ObservationFilter.new
+                end
     end
 
     def create
       @field_columns = observation_field_groups
       @pattern = formatted_pattern_search_string
 
+      # This will save the pattern in the session.
       redirect_to(controller: "/observations", action: :index,
                   pattern: @pattern)
     end
@@ -30,26 +38,26 @@ module Observations
     # with an array of fields or field pairings.
     def observation_field_groups
       [
-        { date: [:date, :created, :modified],
-          detail: [[:has_specimen, :has_sequence], [:has_images, :has_notes],
-                   [:has_field, :notes], [:has_comments, :comments]],
-          connected: [:user, :herbarium, :list, :project, :project_lists,
-                      :field_slip] },
-        { name: [[:has_name, :lichen], :name, :confidence,
+        { date: [:when, :created, :modified],
+          name: [:name, :confidence, [:has_name, :lichen],
                  [:include_subtaxa, :include_synonyms],
                  [:include_all_name_proposals, :exclude_consensus]],
           location: [:location, :region,
                      [:has_public_lat_lng, :is_collection_location],
-                     [:east, :west], [:north, :south]] }
+                     [:east, :west], [:north, :south]] },
+        { detail: [[:has_specimen, :has_sequence], [:has_images, :has_notes],
+                   [:has_field, :notes], [:has_comments, :comments]],
+          connected: [:user, :herbarium, :list, :project, :project_lists,
+                      :field_slip] }
       ].freeze
     end
 
     def fields_with_dates
-      [:date, :created, :modified]
+      [:when, :created, :modified]
     end
 
     def fields_with_range
-      [:date, :created, :modified, :rank]
+      [:when, :created, :modified, :rank]
     end
 
     def fields_with_ids
@@ -58,8 +66,8 @@ module Observations
 
     def permitted_search_params
       params.permit(observation_search_params + [
-        { date: [:year, :month, :day] },
-        { date_range: [:year, :month, :day] },
+        { when: [:year, :month, :day] },
+        { when_range: [:year, :month, :day] },
         { created: [:year, :month, :day] },
         { created_range: [:year, :month, :day] },
         { modified: [:year, :month, :day] },

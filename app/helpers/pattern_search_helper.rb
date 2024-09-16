@@ -76,26 +76,29 @@ module PatternSearchHelper
     if component == :text_field_with_label && args[:field] != :pattern
       args[:inline] = true
     end
-    args[:help] = pattern_search_help_text(args)
+    args[:help] = pattern_search_help_text(args, field_type)
     args[:hidden_name] = pattern_search_check_for_hidden_name(args)
 
     PATTERN_SEARCH_FIELD_HELPERS[field_type][:args].merge(args.except(:type))
   end
 
-  def pattern_search_help_text(args)
-    :"#{args[:type]}_term_#{args[:field]}".l
+  def pattern_search_help_text(args, field_type)
+    component = PATTERN_SEARCH_FIELD_HELPERS[field_type][:component]
+    multiple_note = if component == :autocompleter_field
+                      :pattern_search_terms_multiple.l
+                    end
+    [:"#{args[:type]}_term_#{args[:field]}".l, multiple_note].compact.join(" ")
   end
 
   # Overrides for the assumed name of the id field for autocompleter.
   def pattern_search_check_for_hidden_name(args)
     case args[:field]
     when :list
-      "list_id"
+      return "list_id"
     when :project_lists
-      "project_lists_id"
-    else
-      nil
+      return "project_lists_id"
     end
+    nil
   end
 
   # FIELD HELPERS
@@ -133,14 +136,14 @@ module PatternSearchHelper
   def pattern_search_date_range_field(**args)
     tag.div(class: "row") do
       [
-        tag.div(class: "col-xs-12 col-sm-6") do
+        tag.div(class: pattern_search_columns) do
           # text_field_with_label(**args.merge(between: "(YYYY-MM-DD)"))
           date_select_with_label(**args.merge(
             { between: "(YYYY-MM-DD)", include_blank: true,
               selected: 0, order: [:year, :month, :day] }
           ))
         end,
-        tag.div(class: "col-xs-12 col-sm-6") do
+        tag.div(class: pattern_search_columns) do
           date_select_with_label(**args.merge(
             { field: "#{args[:field]}_range", label: :to.l,
               between: :optional, help: nil, include_blank: true,
@@ -154,12 +157,15 @@ module PatternSearchHelper
   def pattern_search_rank_range_field(**args)
     tag.div(class: "row") do
       [
-        tag.div(class: "col-xs-12 col-sm-6") do
-          select_with_label(options: Name.all_ranks, **args)
+        tag.div(class: pattern_search_columns) do
+          select_with_label(**args.merge(
+            { options: Name.all_ranks, include_blank: true, selected: 0 }
+          ))
         end,
-        tag.div(class: "col-xs-12 col-sm-6") do
-          select_with_label(options: Name.all_ranks, **args.merge(
+        tag.div(class: pattern_search_columns) do
+          select_with_label(**args.merge(
             { label: :to.l, between: :optional, help: nil,
+              options: Name.all_ranks, include_blank: true, selected: 0,
               field: "#{args[:field]}_range" }
           ))
         end
@@ -177,5 +183,9 @@ module PatternSearchHelper
 
   def pattern_search_latitude_field(**args)
     text_field_with_label(**args.merge(between: "(-90.0 to 90.0)"))
+  end
+
+  def pattern_search_columns
+    "col-xs-12 col-sm-6 col-md-12 col-lg-6"
   end
 end

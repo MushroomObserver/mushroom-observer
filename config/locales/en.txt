@@ -1137,7 +1137,7 @@
   search_term_comments: comments
   search_term_confidence: confidence
   search_term_created: created
-  search_term_date: date
+  search_term_when: date
   search_term_deprecated: deprecated
   search_term_east: east
   search_term_exclude_consensus: exclude_consensus
@@ -3622,8 +3622,9 @@
 
   # Search bar help
   pattern_search_terms_help: "Your search string may contain terms of the form \"variable:value\", where value can be quoted, and in some cases can contain more than one value separated by commas.  Recognized variables include:"
+  pattern_search_terms_multiple: Separate multiple values with commas.
 
-  observation_term_date: Date mushroom was observed; YYYY-MM-DD, YYYY or MM; ranges okay.
+  observation_term_when: Date mushroom was observed; YYYY-MM-DD, YYYY or MM; ranges okay.
   observation_term_created: Date observation was first posted.
   observation_term_modified: Date observation was last modified.
   observation_term_name: Consensus name is one of these names.
