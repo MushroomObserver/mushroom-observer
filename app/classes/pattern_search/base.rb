@@ -118,7 +118,7 @@ module PatternSearch
       if bits.size == 2
         [bits[0].to_i, bits[1].to_i]
       else
-        [nil, nil]
+        [term.vals[0], nil]
       end
     end
 
