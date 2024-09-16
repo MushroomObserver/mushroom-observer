@@ -566,7 +566,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
       :form, :field, :label, :class, :width, :inline, :between, :label_after,
       :label_end, :append, :help, :addon, :optional, :required, :monospace,
       :type, :wrap_data, :wrap_id, :button, :button_data, :checked_value,
-      :unchecked_value
+      :unchecked_value, :hidden_name
     ] + extras
 
     args.clone.except(*exceptions)
