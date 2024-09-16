@@ -2062,8 +2062,8 @@
   profile_image_change: Upload new photo
   profile_image_remove: "(Remove photo.)"
   profile_image_reuse: "(Reuse another photo.)"
-  profile_copyright_holder: Copyright holder and license for this image
-  profile_copyright_warning: Please only upload an image that you created or which you own the copyright of.
+  image_copyright_holder: Copyright holder and license for this image
+  image_copyright_warning: Please only upload an image that you created or which you own the copyright of.
 
   # account/reverify
   reverify_welcome: Reverify Account
@@ -2514,8 +2514,6 @@
   glossary_term_updated_at: Updated At
   glossary_term_name: Name
   glossary_term_description: Description
-  glossary_term_copyright_holder: Copyright holder and license for this image
-  glossary_term_copyright_warning: Please upload only an image that you created or which you own the copyright of.
 
   # glossary_term#show
   show_glossary_term: Show Glossary Term
@@ -2836,7 +2834,7 @@
   field_slip_other_codes: Other Codes
   field_slip_other_example: e.g., iNat ID
   field_slip_project_success: Field Slip associated with the [TITLE] Project
-  field_slip_quick_no_location: Quick create requires an existing location 
+  field_slip_quick_no_location: Quick create requires an existing location
   field_slip_quick_no_name: Quick create requires an existing name
 
   field_slip_remove_observation: Removed [OBSERVATION] from [TITLE] Project
