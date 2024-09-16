@@ -229,6 +229,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   def select_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
     args = select_generate_default_options(args)
+    select_opts = select_opts(args)
     args = check_for_optional_or_required_note(args)
     args = check_for_help_block(args)
 
@@ -245,19 +246,22 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
       concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
       concat(args[:form].select(args[:field], args[:options],
-                                args[:select_opts], opts))
+                                select_opts, opts))
       concat(args[:append]) if args[:append].present?
     end
   end
 
   # default select_opts - also generate year options if start_year given
   def select_generate_default_options(args)
-    args[:select_opts] ||= (args[:value] ? { selected: args[:value] } : {})
-
     return args unless args[:start_year].present? && args[:end_year].present?
 
     args[:options] = args[:end_year].downto(args[:start_year])
     args
+  end
+
+  def select_opts(args)
+    selected = args[:value] || args[:default] || ""
+    { selected:, include_blank: args[:include_blank] }
   end
 
   # MO mostly uses year-input_controller to switch the year selects to
@@ -268,6 +272,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   # it identifies the wrapping div. (That's also valid HTML.)
   # https://stackoverflow.com/a/16426122/3357635
   def date_select_with_label(**args)
+    args = check_for_optional_or_required_note(args)
     args = check_for_help_block(args)
     opts = separate_field_options_from_args(args, [:object, :data])
     opts[:class] = "form-control"
@@ -295,8 +300,10 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     selected = args[:selected] || Time.zone.today
     # The field may not be an attribute of the object
     if obj.present? && obj.respond_to?(field)
-      init_year = obj.try(&field).try(&:year)
-      selected = obj.try(&field) || Time.zone.today
+      init_year = obj.try(&field.to_sym).try(&:year)
+      selected = obj.try(&field.to_sym)
+      # Keep blank fields blank on search filters
+      selected ||= Time.zone.today unless obj.is_a?(SearchFilter)
     end
     if init_year && init_year < start_year && init_year > 1900
       start_year = init_year
