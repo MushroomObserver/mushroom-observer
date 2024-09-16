@@ -11,9 +11,17 @@ class FieldSlipJob < ApplicationJob
 
     tracker.processing
     icon = "public/logo-120.png"
-    view = FieldSlipView.new(tracker, icon)
-    view.render
-    view.save_as(tracker.filepath)
+    packs = tracker.count / 30
+    tracker.count = 30
+    tracker.save
+    packs.times do
+      tracker.pages = 0
+      tracker.save
+      view = FieldSlipView.new(tracker, icon)
+      view.render
+      view.save_as(tracker.filepath)
+      tracker.start += 30
+    end
     tracker.done
     log("Done with FieldSlipJob.perform(#{tracker_id})")
     tracker.filepath

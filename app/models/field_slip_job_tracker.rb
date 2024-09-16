@@ -34,12 +34,12 @@ class FieldSlipJobTracker < AbstractModel
   end
 
   def filename
-    @filename ||= "#{prefix}-#{code_num(start)}-#{code_num(last)}-#{id}.pdf"
+    "#{prefix}-#{code_num(start)}-#{code_num(last)}-#{id}.pdf"
   end
 
   def filepath
     FileUtils.mkdir_p(PDF_DIR)
-    @filepath ||= "#{PDF_DIR}/#{filename}"
+    "#{PDF_DIR}/#{filename}"
   end
 
   def link
