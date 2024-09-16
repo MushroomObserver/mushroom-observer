@@ -1353,6 +1353,7 @@
   app_create_account: Create Account
   app_current_user: Current User
   app_comments_for_you: Comments for You
+  app_qrcode: Enter Field Slip Code
   app_your_observations: Your Observations
   app_your_lists: Your Lists
   app_your_interests: Your Interests
@@ -2834,6 +2835,7 @@
   field_slip_other_codes: Other Codes
   field_slip_other_example: e.g., iNat ID
   field_slip_project_success: Field Slip associated with the [TITLE] Project
+  field_slip_qr_intro: This page is primarily intended for scanning "MO Field Slips":https://mushroomobserver.org/articles/37 using a QR code scanner. It should work with QR codes that only contain the field slip code.  You can also enter the code by hand into the text box and hit return.
   field_slip_quick_no_location: Quick create requires an existing location
   field_slip_quick_no_name: Quick create requires an existing name
 
@@ -3907,6 +3909,7 @@
 
   # One-time-use messages.
   runtime_api_key_notes_cannot_be_blank: Notes field cannot be blank.
+  runtime_bad_qr_code: "Bad QR code: [code]."
   runtime_bad_use_of_imageless: The special name _Imageless_ was not intended for observations that were created as part of species lists or which have good documentation.  Please read the discussion under "_Imageless_":/names/31080.
   runtime_dates_must_be_same_format: If you give two dates, they must be the same format.
   runtime_description_added_admin: Gave admin permission to [name].
