@@ -25,7 +25,7 @@ add_page_title(:inat_import_tracker.t)
 <% if @inat_import.response_errors.present? %>
   <p>
     <b><%= :ERRORS.t %>: </b>
-    <%= tag.span(id="errors") do %>
+    <%= tag.span(id: "errors") do %>
       <% @inat_import.response_errors.each_line do |error| %>
         <%= error %></br>
       <% end %>
