@@ -597,7 +597,7 @@ class InatImportJobTest < ActiveJob::TestCase
       body = { observation: { description: updated_description } }
       headers = { authorization: "Bearer",
                   content_type: "application/json", accept: "application/json" }
-      stub_request(:put, "#{API_BASE}/observations/#{obs["id"]}").
+      stub_request(:patch, "#{API_BASE}/observations/#{obs["id"]}").
         with(body: body.to_json, headers: headers).
         to_return(status: 200, body: "".to_json, headers: {})
     end
