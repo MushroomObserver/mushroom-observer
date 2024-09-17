@@ -511,7 +511,8 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
 
   def field_label_opts(args)
     label_opts = {}
-    label_opts[:class] = args[:help].present? ? "" : "mr-3"
+    need_margin = args[:between].present?
+    label_opts[:class] = need_margin ? "mr-2" : ""
     label_opts[:index] = args[:index] if args[:index].present?
     label_opts
   end

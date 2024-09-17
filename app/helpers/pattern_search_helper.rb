@@ -138,7 +138,7 @@ module PatternSearchHelper
       [
         tag.div(class: pattern_search_columns) do
           text_field_with_label(**args.merge(
-            { between: "(YYYY-MM-DD)", label_class: "mr-2" }
+            { between: "(YYYY-MM-DD)" }
           ))
         end,
         tag.div(class: pattern_search_columns) do
