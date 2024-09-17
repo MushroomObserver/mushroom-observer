@@ -28,10 +28,15 @@ class InatImport < ApplicationRecord
   belongs_to :user
 
   def add_response_error(response)
-    parsed_response = JSON.parse(response)
-    return unless parsed_response["error"]
+    code = response.code
+    begin
+      doc = Nokogiri::HTML(response.body)
+      body_text = doc.at("body").text.strip
+    rescue StandardError
+      body_text == ""
+    end
 
-    response_errors << "#{parsed_response["error"]}\n"
+    response_errors << "#{code} #{body_text}\n"
     save
   end
 end

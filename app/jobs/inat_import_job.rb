@@ -80,10 +80,7 @@ class InatImportJob < ApplicationJob
   end
 
   def response_bad?(response)
-    return false if response.code == 200
-
-    @inat_import.add_response_error(response)
-    true
+    response.code != 200
   end
 
   def page_empty?(page)
@@ -125,6 +122,7 @@ class InatImportJob < ApplicationJob
       method: :get, url: "#{API_BASE}/observations?#{query}", headers: headers
     )
   rescue RestClient::ExceptionWithResponse => e
+    @inat_import.add_response_error(e.response)
     e.response
   end
 
@@ -385,12 +383,11 @@ class InatImportJob < ApplicationJob
                                            value: value } }
     headers = { authorization: "Bearer #{@inat_import.token}",
                 content_type: :json, accept: :json }
-
     response = RestClient.post("#{API_BASE}/observation_field_values",
                                payload.to_json, headers)
     JSON.parse(response.body)
   rescue RestClient::ExceptionWithResponse => e
-    e.response
+    @inat_import.add_response_error(e.response)
   end
 
   def update_description
@@ -402,12 +399,12 @@ class InatImportJob < ApplicationJob
     payload = { observation: { description: updated_description } }
     headers = { authorization: "Bearer #{@inat_import.token}",
                 content_type: :json, accept: :json }
-
     response = RestClient.patch("#{API_BASE}/observations/#{@inat_obs.inat_id}",
                                 payload.to_json, headers)
+
     JSON.parse(response.body)
   rescue RestClient::ExceptionWithResponse => e
-    e.response
+    @inat_import.add_response_error(e.response)
   end
 
   def increment_imported_count
