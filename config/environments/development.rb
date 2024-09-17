@@ -4,9 +4,19 @@ MushroomObserver::Application.configure do
   # Settings specified here will take precedence over those in
   # config/application.rb.
 
-  # ----------------------------
-  #  MO configuration.
-  # ----------------------------
+  # https://guides.rubyonrails.org/configuring.html#actiondispatch-hostauthorization
+  config.hosts = [
+    IPAddr.new("0.0.0.0/0"),        # All IPv4 addresses.
+    IPAddr.new("::/0"),             # All IPv6 addresses.
+    "localhost"                     # The localhost reserved domain.
+    # ENV.fetch("RAILS_DEVELOPMENT_HOSTS") # Additional comma-separated hosts.
+  ]
+  # Allow the default puma-dev host.
+  config.hosts << "mushroomobserver.test"
+
+  # ----------------------------------------------------
+  #  MO configuration. These values are used in MO code.
+  # ----------------------------------------------------
   config.domain      = "localhost"
   config.http_domain = "http://localhost:3000"
 

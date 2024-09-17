@@ -1,0 +1,13 @@
+<%# Close the modal, update the obs with the new herbarium, and flash %>
+<%= turbo_stream.close_modal("modal_herbarium") %>
+<%= turbo_stream.remove("modal_herbarium") %>
+
+<%= turbo_stream.update("page_flash") { flash_notices_html } %>
+
+<%= turbo_stream.update_input("herbarium_record_herbarium_name",
+                              @herbarium.name) %>
+
+<%= turbo_stream.update_input("herbarium_record_herbarium_id",
+                              @herbarium.id) %>
+
+<%= turbo_stream.remove("create_herbarium_btn") %>

@@ -13,10 +13,12 @@ const internalConfig = {
 // (formerly "observation_images" section of the form)
 // Connects to data-controller="form-exif"
 export default class extends Controller {
-  static targets = ["carousel", "item", "useExifBtn"]
+  static targets = ["carousel", "item", "useExifBtn",
+    "collapseFields", "collapseCheck"]
+  static outlets = ["autocompleter", "map"]
 
   connect() {
-    this.element.dataset.stimulus = "connected";
+    this.element.dataset.stimulus = "form-exif-connected";
 
     Object.assign(this, internalConfig);
     Object.assign(this.localized_text,
@@ -67,25 +69,32 @@ export default class extends Controller {
   }
 
   populateExifGPS(itemElement, exif_data) {
-    const _exif_lat = itemElement.querySelector(".exif_lat"),
+    const _exif_gps = itemElement.querySelector(".exif_gps"),
+      _exif_no_gps = itemElement.querySelector(".exif_no_gps"),
+      _exif_lat = itemElement.querySelector(".exif_lat"),
       _exif_lng = itemElement.querySelector(".exif_lng"),
       _exif_alt = itemElement.querySelector(".exif_alt"),
       _use_exif_button = itemElement.querySelector('.use_exif_btn');
 
     // Geocode Logic
     // check if there is geodata on the image
-    if (exif_data.GPSLatitude && exif_data.GPSLongitude) {
+    if (exif_data.GPSLatitude && exif_data.GPSLatitude.description &&
+      exif_data.GPSLongitude && exif_data.GPSLongitude.description) {
       const latLngAlt = this.getLatLngEXIF(exif_data),
         { lat, lng, alt } = latLngAlt;
 
       // Set item's data-geocode attribute so we can have a record
       itemElement.dataset.geocode = JSON.stringify(latLngAlt);
 
-      // These are not inputs, they're spans so we can't set the value
+      // These are spans, not inputs — set innerText, not value
       _exif_lat.innerText = lat == null ? lat : lat.toFixed(4);
       _exif_lng.innerText = lng == null ? lng : lng.toFixed(4);
       _exif_alt.innerText = alt == null ? alt : alt.toFixed(0);
       _use_exif_button.classList.remove('d-none');
+    } else {
+      // Show the "no GPS" message
+      _exif_gps.classList.add("d-none");
+      _exif_no_gps.classList.remove("d-none");
     }
   }
 
@@ -166,13 +175,17 @@ export default class extends Controller {
       _obs_lng.value = lng == null ? lng : lng.toFixed(4);
       _obs_alt.value = alt == null ? alt : alt.toFixed(0);
 
-      // should trigger change to update the map
-      this.dispatch("pointChanged", {
-        detail: {
-          type: "location_containing",
-          request_params: { lat, lng }
-        }
-      });
+      // should trigger change to update the autocompleter and the map
+      if (this.hasAutocompleterOutlet) {
+        this.autocompleterOutlet.swap({
+          detail: { type: "location_containing", request_params: { lat, lng } }
+        });
+      }
+      if (this.hasMapOutlet) {
+        this.mapOutlet.calculateMarker(
+          { detail: { request_params: { lat, lng } } }
+        );
+      }
     }
     if (_exif_data.exif_date) {
       const _exifSimpleDate = JSON.parse(_exif_data.exif_date);
@@ -180,6 +193,16 @@ export default class extends Controller {
     }
     // disables the button, even when called programmatically
     this.selectExifButton(element);
+    // show the geolocation fields
+    this.showFields();
+  }
+
+  // show the geolocation fields
+  showFields() {
+    if (this.hasCollapseFieldsTarget) {
+      $(this.collapseFieldsTarget).collapse('show');
+      this.collapseCheckTarget.checked = true
+    }
   }
 
   // Disables this button but enables others, kind of like a radio. Happens on

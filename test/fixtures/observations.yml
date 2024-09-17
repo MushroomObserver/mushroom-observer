@@ -258,7 +258,7 @@ trusted_hidden:
   when: 2023-11-05
   location: falmouth
   where: Falmouth, Massachusetts, USA
-  user: mary
+  user: ollie
   name: fungi
   text_name: Fungi
   gps_hidden: true
@@ -781,3 +781,14 @@ nybg_2023_09_obs:
   when: 2023-09-15
   where: The New York Botanical Garden, Bronx, New York, USA
   location: nybg_location # outside location of falmouth_2023_09_project
+
+current_obs:
+  <<: *DEFAULTS
+  user: katrina
+  where: Salt Point State Park, Sonoma Co., California, USA
+  location: salt_point
+
+newbie_obs:
+  <<: *DEFAULTS
+  notes:
+    :Collector: _user foray_newbie_

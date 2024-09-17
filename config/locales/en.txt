@@ -699,6 +699,8 @@
   close: close
   CREATE: Create
   create: create
+  DEFINE: Define
+  define: define
   DELETE: Delete
   delete: delete
   # deprecate a name
@@ -771,16 +773,16 @@
   destroyed: destroyed
   FILTERED: Filtered
   filtered: filtered
+  IGNORING: Ignoring
+  ignoring: ignoring
   MODIFIED: Modified
   modified: modified
+  NEW: New
+  new: new
   OPTIONAL: Optional
   optional: optional
   REQUIRED: Required
   required: required
-  WATCHING: Watching
-  watching: watching
-  IGNORING: Ignoring
-  ignoring: ignoring
   TRACKING: Tracking
   tracking: tracking
   UPDATED: Updated
@@ -789,6 +791,8 @@
   updated_at: updated at
   VIEWED: Viewed
   viewed: viewed
+  WATCHING: Watching
+  watching: watching
 
   # Common adjectives describing species names. (Note: "approved" seems to be
   # interchangeable with "accepted" in our site -- both indicate that the
@@ -859,6 +863,8 @@
   on_mo: On MO
   on_the_web: On the web
   on_site: On [site]
+  project_first_collection: "**First collection of \"[name]\" for \"[project]\". Consider vouchering!**"
+  project_count_collections: "[count] collections of \"[name]\" for \"[project]\"."
   show_on_map: Show on map
   many_times: "[num] times"
   one_time: once
@@ -1317,7 +1323,7 @@
   app_title: Mushroom Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: "Check out the \"Mushroom Observer Etsy store\":https://www.etsy.com/shop/MushroomObsMerch — T-shirts, bags and swag! <br>\nWe're working on MO. If you have trouble posting, try logging out and logging back in again.<br>\nPlease \"report a bug\":https://mushroomobserver.org/emails/ask_webmaster_question if you find one."
+  app_banner_box: "Check out the \"Mushroom Observer Etsy store\":https://www.etsy.com/shop/MushroomObsMerch — T-shirts, bags and swag! <br>\nWe're working on MO. If you have trouble posting, try logging out and logging back in again.<br>\nPlease \"report a bug\":admin/emails/webmaster_questions/new if you find one."
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
@@ -1347,6 +1353,7 @@
   app_create_account: Create Account
   app_current_user: Current User
   app_comments_for_you: Comments for You
+  app_qrcode: Enter Field Slip Code
   app_your_observations: Your Observations
   app_your_lists: Your Lists
   app_your_interests: Your Interests
@@ -1423,7 +1430,8 @@
   ask_webmaster_title: Email Question or Comment
   ask_webmaster_your_email: Your email address
   ask_webmaster_question: Question or Comment
-  ask_webmaster_note: "Thanks for your interest in the Mushroom Observer website.  This website was first launched in mid-2006.  The site is owned by the non-profit \"Mushroom Observer, Inc.\":/support/governance and administered by a group of volunteer developers and maintainers.  We welcome any questions you might have about using the site or comments on how the site might be improved.  You can vote and comment on all the various suggestions for future development there.  However, they are only rough guides, subject to bugs or others issues that may come up and, of course, the availability of our own time to work on the site.\n\nThe Mushroom Observer Team"
+  ask_webmaster_note: "Thanks for your interest in the Mushroom Observer website. This website was first launched in mid-2006. The site is owned by the non-profit \"Mushroom Observer, Inc.\":/support/governance and administered by volunteer developers and maintainers. We welcome questions about using the site or comments on how the site might be improved.\n\n[:ask_webmaster_bug]\n\nThe Mushroom Observer Team"
+  ask_webmaster_bug: "**Bug Reports**\nIf you are reporting a bug, please let us know what hardware, operating system, and browser you use, and exactly what you were doing. (Which page(s) you were viewing, what you typed, which link(s) you clicked.)"
 
   # comments/new
   comment_add_title: Add Comment to [name]
@@ -1587,7 +1595,7 @@
   form_locations_notes: "[:Notes]"
   form_locations_refs: "[:form_names_refs]"
   form_locations_refs_help: "[:form_names_refs_help]"
-  form_locations_help: "Here you can define the place where you observed mushrooms, if a matching place doesn't exist in Mushroom Observer already. Please try to define locations that will be reusable by yourself or others. If you have an idea of the location's name, you can start typing and Google will return its best guess of the place you typed, and draw a box of the approximate boundaries on the map. At this point, you can manually edit both the boundaries and the name of the place. <a href=\"/locations/help\" target=\"_new\">More about Locations on MO.</a>"
+  form_locations_help: Here you can define the place where you observed mushrooms, if a matching place doesn't exist in Mushroom Observer already. Please try to define locations that will be reusable by yourself or others. If you have an idea of the location's name, you can start typing and Google will return its best guess of the place you typed, and draw a box of the approximate boundaries on the map. At this point, you can manually edit both the boundaries and the name of the place. <a href="/locations/help" target="_new">More about Locations on MO.</a>
   form_locations_find_on_map: Find on Map
   form_locations_get_elevation: Get Elevations
   form_locations_lat_long_help: All values should be in decimal degrees.
@@ -1657,10 +1665,10 @@
   form_observations_specimen_available: Specimen Available
   form_observations_is_collection_location: Is this location where it was collected?
   form_observations_gps_hidden: Hide exact coordinates?
-  form_observations_upload_images: "Upload [:images]"
-  form_observations_uploading_images: "Uploading [:images]"
+  form_observations_upload_images: Upload [:images]
+  form_observations_uploading_images: Uploading [:images]
   form_observations_upload_another: Upload another...
-  form_observations_creating_observation: "Creating [:observation]"
+  form_observations_creating_observation: Creating [:observation]
   form_observations_edit_image: "[:EDIT] [:image]"
   form_observations_remove_image: "[:REMOVE] [:image]"
   form_observations_lat_long_help: "Optional GPS location within **[:WHERE]**. Latitude must be -90.0 to 90.0;  longitude must be -180.0 to 180.0. Elevation will be converted to meters. If you choose to provide this data please make it as accurate as possible. Examples: \"34.1164\" = \"34°6&apos;59&quot;N\", \"-118.1459\" = \"118 8.754 W\", \"239 m\" = \"784 ft.\""
@@ -1669,10 +1677,10 @@
   form_observations_open_map: "[:SHOW] [:map]"
   form_observations_hide_map: "[:HIDE] [:map]"
   form_observations_clear_map: "[:CLEAR] [:location]"
-  form_observations_click_point: "Tip: select a locality to center the map, then click a point on the map to set a location."
+  form_observations_click_point: "Tip: select a locality to center the map, then click a point on the map to set a location. If you're defining a new locality, click \"Use these bounds\" so you can select a point within."
   form_observations_locality_contains: "[:LOCALITIES] containing this point"
-  form_observations_create_locality: "[:CREATE] [:locality]"
-  form_observations_use_locality: "[:USE] this [:locality]"
+  form_observations_create_locality: "[:NEW] [:locality]"
+  form_observations_use_locality: "Use these bounds and select a point within"
   form_observations_edit_locality: "[:EDIT] this [:locality]"
   form_observations_notes_help: Please include any additional information you can think of about this observation that isn't clear from the photographs, e.g., habitat, substrate or nearby trees; distinctive texture, scent, taste, staining or bruising; results of chemical or microscopic analyses, etc.
   form_observations_remove_image_confirm: Are you sure you want to remove this image?  This will only remove this image from this observation.  If it is attached to other observations, it will remain attached to them.
@@ -1680,7 +1688,7 @@
   form_observations_upload_help: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation.
   form_observations_upload_help_multi_select: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation. In the file select dialog you can select multiple images at a time.  You can also continue to add additional images by clicking the button below.
   form_observations_where_help: "Place where the Observation was made. **In the US this should be at least as precise as the county.**\n&nbsp;\nInclude administrative divisons ordered from smallest to largest, ending with the full name of the country, except use 'USA' for the United States of America.\nExamples:\n&nbsp;&nbsp; [loc1]\n&nbsp;&nbsp; [loc2]"
-  form_observations_locate_on_map_help: "Use the **[:form_observations_open_map]** button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude."
+  form_observations_locate_on_map_help: Use the **[:form_observations_open_map]** button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude.
   form_observations_dubious_help: Click '[button]' to use this location name or edit the text below to correct any typo.
   form_observations_project_help: Check any projects you wish to attach this observation to.  All images you upload will also automatically be attached to these projects, too.
   form_observations_list_help: Check any species lists you would like to add this observation to.
@@ -1740,6 +1748,7 @@
   image_exif_copied: Info copied
   image_use_exif: Use this info
   image_camera_info: Camera info
+  image_no_geolocation: No geolocation found
   image_file_name: File name
   image_file_size: File size
 
@@ -2054,8 +2063,8 @@
   profile_image_change: Upload new photo
   profile_image_remove: "(Remove photo.)"
   profile_image_reuse: "(Reuse another photo.)"
-  profile_copyright_holder: Copyright holder and license for this image
-  profile_copyright_warning: Please only upload an image that you created or which you own the copyright of.
+  image_copyright_holder: Copyright holder and license for this image
+  image_copyright_warning: Please only upload an image that you created or which you own the copyright of.
 
   # account/reverify
   reverify_welcome: Reverify Account
@@ -2506,8 +2515,6 @@
   glossary_term_updated_at: Updated At
   glossary_term_name: Name
   glossary_term_description: Description
-  glossary_term_copyright_holder: Copyright holder and license for this image
-  glossary_term_copyright_warning: Please upload only an image that you created or which you own the copyright of.
 
   # glossary_term#show
   show_glossary_term: Show Glossary Term
@@ -2605,8 +2612,8 @@
   show_herbarium_request_sent: Request has been sent to admins.  We'll get back to you as soon as possible.
 
   # herbaria/create
-  create_herbarium: Create New Fungarium
-  create_herbarium_title: Create New Fungarium
+  create_herbarium: New Fungarium
+  create_herbarium_title: New Fungarium
   create_herbarium_personal: Check this box if this is your personal fungarium
   create_herbarium_personal_help: Each user can have one personal fungarium that they have curator privileges for. By default it is called "[name]", but you can change that name to anything you like.
   create_herbarium_code: Standard Abbreviation
@@ -2802,12 +2809,14 @@
   destroy_visual_model_success: "[:VISUAL_MODEL] [:destroyed]"
 
   # Field Slips
+  field_slip_add_images: Add Images or Other Data
   field_slip_cant_join_project: Either no Project was found or you are unable to join the associated Project
   field_slip_code: Code
   field_slip_code_format_error: code must have non-numeric characters other than period (.) and dash (-)
   field_slip_constraint_violation: The selected observation violates one or more project constraints
   field_slip_created: Field slip was successfully created.
   field_slip_create_obs: Create New Observation
+  field_slip_quick_create_obs: Quick Create
   field_slip_creator: Creator
   field_slip_destroy: Destroy this field slip
   field_slip_destroyed: Field slip was successfully destroyed.
@@ -2826,6 +2835,10 @@
   field_slip_other_codes: Other Codes
   field_slip_other_example: e.g., iNat ID
   field_slip_project_success: Field Slip associated with the [TITLE] Project
+  field_slip_qr_intro: This page is primarily intended for scanning "MO Field Slips":https://mushroomobserver.org/articles/37 using a QR code scanner. It should work with QR codes that only contain the field slip code.  You can also enter the code by hand into the text box and hit return.
+  field_slip_quick_no_location: Quick create requires an existing location
+  field_slip_quick_no_name: Quick create requires an existing name
+
   field_slip_remove_observation: Removed [OBSERVATION] from [TITLE] Project
   field_slip_show: Show [:FIELD_SLIP]
   field_slip_updated: Field slip was successfully updated.
@@ -3084,7 +3097,7 @@
 
   # info/textile
   sandbox_enter: Enter Textile you wish to test here
-  sandbox_header: This page let's you play with the textile markup language.  Click 'Test' to see what your markup looks like.  You will need to copy the results from this page to where ever you want to use it.
+  sandbox_header: This page lets you play with the textile markup language.  Click 'Test' to see what your markup looks like.  You will need to copy the results from this page to wherever you want to use it.
   sandbox_link_hobix_textile_reference: hobix Textile Reference
   sandbox_link_hobix_textile_cheatsheet: hobix cheatsheet (Textile Quick Reference)
   sandbox_link_textile_language_website: Textile Language website
@@ -3203,7 +3216,7 @@
   # ADMIN-TYPE PAGES
 
   # project/<id>/members/new
-  add_members_with_gps_trust: Hidden GPS data may be shared with project admins.
+  add_members_with_gps_trust: Hidden GPS data shared with project admins.
   add_members_change_status: Change Status
   add_members_denied: "Permission denied: only admins for a project can add new members."
   add_members_title: Add [:users] to [title]
@@ -3896,6 +3909,7 @@
 
   # One-time-use messages.
   runtime_api_key_notes_cannot_be_blank: Notes field cannot be blank.
+  runtime_bad_qr_code: "Bad QR code: [code]."
   runtime_bad_use_of_imageless: The special name _Imageless_ was not intended for observations that were created as part of species lists or which have good documentation.  Please read the discussion under "_Imageless_":/names/31080.
   runtime_dates_must_be_same_format: If you give two dates, they must be the same format.
   runtime_description_added_admin: Gave admin permission to [name].

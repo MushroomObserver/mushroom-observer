@@ -2,7 +2,7 @@
 
 class FieldSlipJobTracker < AbstractModel
   PUBLIC_DIR = "public/"
-  SUBDIR = "field_slips"
+  SUBDIR = "shared"
   PDF_DIR = PUBLIC_DIR + SUBDIR
 
   enum status:

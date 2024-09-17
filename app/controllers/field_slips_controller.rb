@@ -22,7 +22,7 @@ class FieldSlipsController < ApplicationController
       obs = @field_slip&.observation
     end
     if @field_slip
-      redirect_to(observation_url(id: obs.id)) if obs
+      field_slip_redirect(obs.id) if obs
     else
       redirect_to(new_field_slip_url(code: params[:id].upcase))
     end
@@ -115,8 +115,25 @@ class FieldSlipsController < ApplicationController
 
   private
 
+  def field_slip_redirect(obs_id)
+    if foray_recorder?
+      redirect_to(edit_field_slip_url(id: @field_slip.id))
+    else
+      redirect_to(observation_url(id: obs_id))
+    end
+  end
+
+  def foray_recorder?
+    project = @field_slip&.project
+    return false unless project
+
+    project.is_admin?(User.current) && project.happening?
+  end
+
   def html_create
-    if params[:commit] == :field_slip_create_obs.t
+    if params[:commit] == :field_slip_quick_create_obs.t
+      quick_create_observation
+    elsif params[:commit] == :field_slip_add_images.t
       redirect_to(new_observation_url(
                     field_code: @field_slip.code,
                     place_name: params[:field_slip][:location],
@@ -126,6 +143,27 @@ class FieldSlipsController < ApplicationController
       update_observation_fields
       redirect_to(field_slip_url(@field_slip),
                   notice: :field_slip_created.t)
+    end
+  end
+
+  def quick_create_observation
+    place_name = params[:field_slip][:location]
+    # Must have valid name and location
+    location = Location.place_name_to_location(place_name)
+    flash_error(:field_slip_quick_no_location.t) unless location
+    name = Name.find_by(text_name: params[:field_slip][:field_slip_name])
+    flash_error(:field_slip_quick_no_name.t) unless name
+    notes = field_slip_notes.compact_blank!
+
+    obs = Observation.build_observation(location, name, notes)
+    if obs
+      @field_slip.project&.add_observation(obs)
+      @field_slip.update!(observation: obs)
+      name_flash_for_project(name, @field_slip.project)
+      redirect_to(observation_url(obs.id))
+    else
+      redirect_to(new_observation_url(field_code: @field_slip.code,
+                                      place_name:, notes:))
     end
   end
 
@@ -141,7 +179,7 @@ class FieldSlipsController < ApplicationController
   end
 
   def check_name
-    id_str = params[:field_slip][:field_slip_id]
+    id_str = params[:field_slip][:field_slip_name]
     return unless id_str
 
     id_str.tr!("_", "")
@@ -190,7 +228,7 @@ class FieldSlipsController < ApplicationController
   end
 
   def field_slip_id
-    str = params[:field_slip][:field_slip_id]
+    str = params[:field_slip][:field_slip_name]
     return str if str.empty? || str.starts_with?("_")
 
     "_#{str}_"
@@ -218,8 +256,15 @@ class FieldSlipsController < ApplicationController
     project = @field_slip&.project
     return unless project&.can_join?(User.current)
 
-    project.user_group.users << User.current
+    user = User.current
+    project.user_group.users << user
+    project_member = ProjectMember.find_by(project:, user:)
     flash_notice(:field_slip_welcome.t(title: project.title))
+    return if project_member
+
+    ProjectMember.create(project:, user:,
+                         trust_level: "hidden_gps")
+    flash_notice(:add_members_with_gps_trust.l)
   end
 
   def disconnect_observation(obs)

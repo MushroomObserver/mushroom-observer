@@ -1,6 +1,7 @@
-<%# Notes section of any form %>
+<%# locals: (form:, fields:) -%>
 
 <%
+# Notes section of any form
 # Users may have custom notes "parts". This prints a single large textarea and
 # textile help block if there's only one notes part. Otherwise, it prints
 # smaller textareas and a general textile help link.
@@ -24,7 +25,7 @@ end
 indent = form.object_name == "observation" ? "" : "ml-5"
 %>
 <!-- NOTES -->
-<%= tag.div(id: "#{form.object_name}_notes") do %>
+<%= tag.div(id: "#{form.object_name}_notes_fields") do %>
   <%= general_help %>
   <%= tag.div(class: indent) do %>
     <%= form.fields_for(:notes) do |f_n| %>

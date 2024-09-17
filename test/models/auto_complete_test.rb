@@ -42,6 +42,39 @@ class AutoCompleteTest < UnitTestCase
     assert_equal("A", results.first[:name])
     assert(results.pluck(:name).include?("Agaricus"))
     assert(results.pluck(:name).include?("Agaricus campestris"))
+
+    auto = AutoComplete::ForUser.new(string: "Rolf Singer")
+    results = auto.matching_records
+    assert(results.pluck(:name).include?("rolf <Rolf Singer>"))
+  end
+
+  def test_typical_use_with_exact_match
+    auto = AutoComplete::ForName.new(string: "Agaricus campestris")
+    results = auto.first_matching_record
+    assert_equal("Agaricus campestris", results.first[:name])
+
+    auto = AutoComplete::ForLocation.new(string: "Gualala, California, USA")
+    results = auto.first_matching_record
+    assert_equal("Gualala, California, USA", results.first[:name])
+
+    auto = AutoComplete::ForSpeciesList.new(string: "Another Species List")
+    results = auto.first_matching_record
+    assert_equal("Another Species List", results.first[:name])
+
+    auto = AutoComplete::ForProject.new(string: "Bolete Project")
+    results = auto.first_matching_record
+    assert_equal("Bolete Project", results.first[:name])
+
+    # Result strings include the code for the herbarium.
+    auto = AutoComplete::ForHerbarium.new(
+      string: "The New York Botanical Garden"
+    )
+    results = auto.first_matching_record
+    assert_equal("NY - The New York Botanical Garden", results.first[:name])
+
+    auto = AutoComplete::ForUser.new(string: "Rolf Singer")
+    results = auto.first_matching_record
+    assert_equal("rolf <Rolf Singer>", results.first[:name])
   end
 
   def test_truncate
@@ -77,30 +110,8 @@ class AutoCompleteTest < UnitTestCase
 
   def test_refine_token_by_string
     pattern = "one two three"
-    @list = [
-      "one two three four", # 1
-      "one two threee",     # 2
-      "one two three",      # 3
-      "one two ten",        # 4
-      "one two four",       # 5
-      "one two-thirty",     # 6
-      "only this",          # 7
-      "o p q",              # 8
-      "o",                  # 9
-      "something",          # 10
-      "else"                # 11
-    ]
-    [
-      [10, 9, "o"],
-      [9, 9, "o"],
-      [8, 7, "on"],
-      [7, 7, "on"],
-      [6, 6, "one"],
-      [5, 5, "one two "],
-      [4, 4, "one two t"],
-      [3, 3, "one two th"],
-      [2, 3, "one two three"]
-    ].each do |limit, expected_matches, expected_string|
+    @list = string_list
+    string_examples.each do |limit, expected_matches, expected_string|
       auto = AutoCompleteMock.new(string: pattern)
       auto.matches = @list.sort_by { rand }.map { |str| { name: str, id: 0 } }
       auto.limit = limit
@@ -110,31 +121,8 @@ class AutoCompleteTest < UnitTestCase
 
   def test_refine_token_by_word
     pattern = "one two shree"
-    @list = [
-      "one two shree four",  # 1 "one two shree"
-      "shreee two one",      # 2 "one two shree"
-      "two-shirty-one",      # 3 "one two sh"
-      "one two four",        # 4 "one two "
-      "twooo one shree one", # 5 "one two"
-      "ten ten one twosies", # 6 "one two"
-      "this is only five",   # 7 "on"
-      "l m n o p q",         # 8 "o"
-      "o",                   # 9 "o"
-      "something",           # 10
-      "else"                 # 11
-    ]
-    [
-      [10, 9, "o"],
-      [9, 9, "o"],
-      [8, 7, "on"],
-      [7, 7, "on"],
-      [6, 6, "one"],
-      [5, 4, "one two "],
-      [4, 4, "one two "],
-      [3, 3, "one two s"],
-      [2, 2, "one two shr"],
-      [1, 2, "one two shree"]
-    ].each do |limit, expected_matches, expected_string|
+    @list = word_list
+    word_examples.each do |limit, expected_matches, expected_string|
       auto = AutoComplete::ForMock.new(string: pattern)
       auto.matches = @list.sort_by { rand }.map { |str| { name: str, id: 0 } }
       auto.limit = limit
@@ -169,5 +157,66 @@ class AutoCompleteTest < UnitTestCase
       result += "UNEXPECTED!! #{str.inspect}\n" unless got[str]
     end
     result
+  end
+
+  def string_list
+    [
+      "one two three four", # 1
+      "one two threee",     # 2
+      "one two three",      # 3
+      "one two ten",        # 4
+      "one two four",       # 5
+      "one two-thirty",     # 6
+      "only this",          # 7
+      "o p q",              # 8
+      "o",                  # 9
+      "something",          # 10
+      "else"                # 11
+    ].freeze
+  end
+
+  def string_examples
+    [
+      [10, 9, "o"],
+      [9, 9, "o"],
+      [8, 7, "on"],
+      [7, 7, "on"],
+      [6, 6, "one"],
+      [5, 5, "one two "],
+      [4, 4, "one two t"],
+      [3, 3, "one two th"],
+      [2, 3, "one two three"]
+    ].freeze
+  end
+
+  def word_list
+    [
+      "one two shree four",  # 1 "one two shree"
+      "shreee two one",      # 2 "one two shree"
+      "two-shirty-one",      # 3 "one two sh"
+      "one two four",        # 4 "one two "
+      "twooo one shree one", # 5 "one two"
+      "ten ten one twosies", # 6 "one two"
+      "this is only five",   # 7 "on"
+      "l m n o p q",         # 8 "o"
+      "o",                   # 9 "o"
+      "something",           # 10
+      "else"                 # 11
+    ].freeze
+  end
+
+  def word_examples
+    [
+      [10, 9, "o"],
+      [9, 9, "o"],
+      [8, 7, "on"],
+      [7, 7, "on"],
+      [6, 6, "one"],
+      [5, 4, "one two "],
+      [4, 4, "one two "],
+      [3, 3, "one two s"],
+      [2, 2, "one two shr"],
+      [1, 2, "one two shree"]
+    ].freeze
   end
 end

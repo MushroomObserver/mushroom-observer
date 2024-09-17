@@ -253,7 +253,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
                   and(Location[:north].gteq(shrunk_n)).
             # Location straddles 180
             #   Location 100% wrap; necessarily straddles w/e
-            and(Location[:west] == Location[:east] - 360).
+            and(Location[:west].eq(Location[:east] - 360)).
             #  Location < 100% wrap-around
             or(Location[:west].gt(Location[:east]).
               and(Location[:west] <= shrunk_w).
@@ -468,6 +468,22 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     str.strip_squeeze.downcase
   end
 
+  # Cleans up a place_name (per Observation) and
+  # applies the current user's current_location_format
+  def self.normalize_place_name(place_name)
+    place_name = place_name&.strip_squeeze
+    if User.current_location_format == "scientific"
+      reverse_name(place_name)
+    else
+      place_name
+    end
+  end
+
+  # Returns any existing location that matches place_name
+  def self.place_name_to_location(place_name)
+    find_by_name(normalize_place_name(place_name))
+  end
+
   # Takes a location string splits on commas, reverses the order,
   # and joins it back together
   # E.g., "New York, USA" => "USA, New York"
@@ -577,25 +593,25 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     CountryCounter.new.countries_by_count
   end
 
-  @@location_cache = nil
+  def self.location_name_cache
+    Rails.cache.fetch(:location_names, expires_in: 15.minutes) do
+      (Location.pluck(:name) + Observation.pluck(:where) +
+       SpeciesList.pluck(:where)).compact.uniq
+    end
+  end
 
-  # Check if a given name (postal order) already exists as a defined
-  # or undefined location.
-  def self.location_exists(name)
+  # Check if a given place name (postal order) already exists,
+  # defined as a Location or undefined as a saved `where` string.
+  def self.location_name_exists(name)
     return false unless name
 
-    @@location_cache ||= (
-      Location.pluck(:name) +
-        Observation.where.not(where: nil).pluck(:where) +
-        SpeciesList.where.not(where: nil).pluck(:where)
-    ).uniq
-    @@location_cache.member?(name)
+    location_name_cache.member?(name)
   end
 
   # Decide if the given name is dubious for any reason
   def self.dubious_name?(name, provide_reasons = false, check_db = true)
     reasons = []
-    unless check_db && location_exists(name)
+    unless check_db && location_name_exists(name)
       reasons += check_for_empty_name(name)
       reasons += check_for_dubious_commas(name)
       reasons += check_for_bad_country_or_state(name)

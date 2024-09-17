@@ -8,7 +8,21 @@ class AutoComplete::ForUser < AutoComplete::ByString
               or(User[:name].matches("% #{letter}%"))).
             order(login: :asc)
 
-    # Turn the instances into hashes, and figure out what name to display
+    matches_array(users)
+  end
+
+  def exact_match(string)
+    user = User.select(:login, :name, :id).
+           where(User[:login].eq(string)).
+           or(User.where(User[:name].eq(string))).
+           order(login: :asc).distinct.first
+    return [] unless user
+
+    matches_array([user])
+  end
+
+  # Turn the instances into hashes, and figure out what name to display
+  def matches_array(users)
     matches = users.map do |user|
       user = user.attributes.symbolize_keys
       user[:name] = if user[:name].empty?

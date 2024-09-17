@@ -1,8 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { delegate, abnegate } from 'jquery-events-to-dom-events'
 
-// Connects to data-controller="naming-reason"
-
 // https://github.com/leastbad/jquery-events-to-dom-events
 // We use a Stimulus action that listens to `$shown.bs.collapse` on the div
 // (note the `$`). This depends on using `delegate` from the imported library
@@ -11,11 +9,12 @@ import { delegate, abnegate } from 'jquery-events-to-dom-events'
 //
 // If moving to BS 5, can remove.
 
+// Connects to data-controller="naming-reason"
 export default class extends Controller {
   static targets = ['collapse', 'input']
 
   connect() {
-    this.element.dataset.stimulus = "connected";
+    this.element.dataset.stimulus = "naming-reason-connected";
     this.delegate = delegate('shown.bs.collapse')
   }
 

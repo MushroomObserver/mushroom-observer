@@ -70,7 +70,32 @@ class FieldSlip < AbstractModel
   end
 
   def location
-    observation&.place_name || ""
+    @location ||= calc_location
+  end
+
+  def location_name
+    location&.display_name
+  end
+
+  def location_id
+    location&.id
+  end
+
+  def calc_location
+    result = observation&.location || users_last_location
+    return result if result
+
+    project&.location
+  end
+
+  def users_last_location
+    user = User.current
+    return nil unless user
+
+    field_slip = user.field_slips.where(project:).
+                 order(updated_at: :desc).last
+    obs = field_slip&.observation
+    obs&.location
   end
 
   def collector
@@ -79,8 +104,8 @@ class FieldSlip < AbstractModel
     "_user #{(user || User.current).login}_"
   end
 
-  def field_slip_id
-    observation&.field_slip_id || ""
+  def field_slip_name
+    observation&.field_slip_name || ""
   end
 
   def field_slip_id_by

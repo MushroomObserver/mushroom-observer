@@ -84,6 +84,7 @@
 #
 #  ==== Other stuff
 #  observation_matrix_box_image_includes:: Hash of includes for eager-loading
+#  name_flash_for_project::      Flash message for adding obs to projects
 #  default_thumbnail_size::      Default thumbnail size: :thumbnail or :small.
 #  default_thumbnail_size_set::  Change default thumbnail size for current user.
 #  rubric::                      Label for what the controller deals with
@@ -788,7 +789,12 @@ class ApplicationController < ActionController::Base
   def save_with_log(obj)
     type_sym = obj.class.to_s.underscore.to_sym
     if obj.save
-      flash_notice(:runtime_created_at.t(type: type_sym))
+      notice = if obj.respond_to?(:text_name) && (name = obj.text_name)
+                 :runtime_created_name.t(type: type_sym, value: name)
+               else
+                 :runtime_created_at.t(type: type_sym)
+               end
+      flash_notice(notice)
       true
     else
       flash_error(:runtime_no_save.t(type: type_sym))
@@ -1698,6 +1704,20 @@ class ApplicationController < ActionController::Base
     { thumb_image: [:image_votes, :license, :projects, :user] }.freeze
     # for matrix_box_carousels:
     # { images: [:image_votes, :license, :projects, :user] }.freeze
+  end
+
+  def name_flash_for_project(name, project)
+    return unless name
+
+    count = project.count_collections(name)
+    if count == 1
+      flash_warning(:project_first_collection.t(name: name.text_name,
+                                                project: project.title))
+    else
+      flash_notice(:project_count_collections.t(count: count,
+                                                name: name.text_name,
+                                                project: project.title))
+    end
   end
 
   # Tell an object that someone has looked at it (unless a robot made the

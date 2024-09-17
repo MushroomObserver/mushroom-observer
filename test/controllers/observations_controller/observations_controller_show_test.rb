@@ -299,10 +299,6 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_select("a:match('href',?)", edit_observation_path(obs.id), count: 0)
     assert_select(".destroy_observation_link_#{obs.id}", count: 0)
     assert_select("a:match('href',?)",
-                  new_image_for_observation_path(obs.id), count: 0)
-    assert_select("a:match('href',?)",
-                  remove_images_from_observation_path(obs.id), count: 0)
-    assert_select("a:match('href',?)",
                   reuse_images_for_observation_path(obs.id), count: 0)
     get(:edit, params: { id: obs.id })
     assert_response(:redirect)
@@ -315,10 +311,6 @@ class ObservationsControllerShowTest < FunctionalTestCase
     # Destroy button is in a form, not a link_to
     assert_select(".destroy_observation_link_#{obs.id}", minimum: 1)
     assert_select("a[href=?]",
-                  new_image_for_observation_path(obs.id), minimum: 1)
-    assert_select("a[href=?]",
-                  remove_images_from_observation_path(obs.id), minimum: 1)
-    assert_select("a[href=?]",
                   reuse_images_for_observation_path(obs.id), minimum: 1)
     get(:edit, params: { id: obs.id })
     assert_response(:success)
@@ -328,10 +320,6 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_select("a[href=?]", edit_observation_path(obs.id), minimum: 1)
     # Destroy button is in a form, not a link_to
     assert_select(".destroy_observation_link_#{obs.id}", minimum: 1)
-    assert_select("a[href=?]",
-                  new_image_for_observation_path(obs.id), minimum: 1)
-    assert_select("a[href=?]",
-                  remove_images_from_observation_path(obs.id), minimum: 1)
     assert_select("a[href=?]",
                   reuse_images_for_observation_path(obs.id), minimum: 1)
     get(:edit, params: { id: obs.id })

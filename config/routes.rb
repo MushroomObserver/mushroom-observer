@@ -383,6 +383,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   end
 
   # ----- Field Slip Records: standard actions --------------------------------
+  namespace :field_slips do
+    get("qr_reader/new", to: "qr_reader#new")
+    post("qr_reader", to: "qr_reader#create")
+  end
   resources :field_slips
   get("qr/:id", to: "field_slips#show", id: /.*[^\d.-].*/)
 
@@ -598,18 +602,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                         as: "new_question_for")
       post("emails", to: "observations/emails#create",
                      as: "send_question_for")
-      get("images/new", to: "observations/images#new",
-                        as: "new_image_for")
-      post("images", to: "observations/images#create",
-                     as: "create_image_for")
       get("images/reuse", to: "observations/images#reuse",
                           as: "reuse_images_for")
       post("images/attach", to: "observations/images#attach",
                             as: "attach_image_to")
-      get("images/remove", to: "observations/images#remove",
-                           as: "remove_images_from")
-      put("images(/:image_id)/detach", to: "observations/images#detach",
-                                       as: "detach_images_from")
     end
 
     collection do
