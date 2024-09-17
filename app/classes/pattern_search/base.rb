@@ -96,16 +96,17 @@ module PatternSearch
     # The string could be a date string like "2010-01-01", or a range string
     # like "2010-01-01-2010-01-31", or "2023-2024", or "08-10".
     # If it is a range, return the two dates.
+    # Try for fidelity to the stored string, eg only years.
     def check_for_date_range(term)
-      start, range = term.parse_date_range
-      # dates.map! do |date|
-      #   next if date.blank?
-
-      #   date.split("-").map(&:to_i)
-      # end
-
-      # start = dates[0] if dates[0]
-      # range = dates[1] if dates[1]
+      bits = term.vals[0].split("-")
+      if bits.size == 2
+        start, range = bits
+      elsif bits.size == 4
+        start = "#{bits[0]}-#{bits[1]}"
+        range = "#{bits[2]}-#{bits[3]}"
+      else
+        start, range = term.parse_date_range
+      end
 
       range = nil if start == range
 

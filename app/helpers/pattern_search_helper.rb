@@ -137,21 +137,15 @@ module PatternSearchHelper
     tag.div(class: "row") do
       [
         tag.div(class: pattern_search_columns) do
-          text_field_with_label(**args.merge(between: "(YYYY-MM-DD)"))
-          # date_select_with_label(**args.merge(
-          #   { between: "(YYYY-MM-DD)", include_blank: true,
-          #     selected: 0, order: [:year, :month, :day] }
-          # ))
+          text_field_with_label(**args.merge(
+            { between: "(YYYY-MM-DD)", label_class: "mr-2" }
+          ))
         end,
         tag.div(class: pattern_search_columns) do
           text_field_with_label(**args.merge(
-            { label: :to.l, help: nil, between: :optional }
+            { field: "#{args[:field]}_range", label: :to.l,
+              help: nil, between: :optional }
           ))
-          # date_select_with_label(**args.merge(
-          #   { field: "#{args[:field]}_range", label: :to.l,
-          #     between: :optional, help: nil, include_blank: true,
-          #     selected: 0, order: [:year, :month, :day] }
-          # ))
         end
       ].safe_join
     end
