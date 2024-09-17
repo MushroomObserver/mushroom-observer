@@ -20,9 +20,19 @@ class InatImportJob < ApplicationJob
     @inat_import = inat_import
     access_token =
       use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
+    if response_bad?(access_token)
+      @inat_import.update(state: "Done")
+      return
+    end
+
     @inat_import.update(token: access_token)
 
     api_token = trade_access_token_for_jwt_api_token(@inat_import.token)
+    if response_bad?(api_token)
+      @inat_import.update(state: "Done")
+      return
+    end
+
     @inat_import.update(token: api_token, state: "Importing")
 
     import_requested_observations
@@ -40,6 +50,9 @@ class InatImportJob < ApplicationJob
                 grant_type: "authorization_code" }
     oauth_response = RestClient.post("#{SITE}/oauth/token", payload)
     JSON.parse(oauth_response.body)["access_token"]
+  rescue RestClient::ExceptionWithResponse => e
+    @inat_import.add_response_error(e.response)
+    e.response
   end
 
   # https://www.inaturalist.org/pages/api+recommended+practices
@@ -49,6 +62,9 @@ class InatImportJob < ApplicationJob
       headers: { authorization: "Bearer #{access_token}", accept: :json }
     )
     JSON.parse(jwt_response)["api_token"]
+  rescue RestClient::ExceptionWithResponse => e
+    @inat_import.add_response_error(e.response)
+    e.response
   end
 
   def import_requested_observations
@@ -80,7 +96,7 @@ class InatImportJob < ApplicationJob
   end
 
   def response_bad?(response)
-    response.code != 200
+    response.instance_of?(RestClient::Response) && response.code != 200
   end
 
   def page_empty?(page)
