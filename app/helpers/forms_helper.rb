@@ -543,8 +543,10 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
       "help"
     ].compact_blank.join("_")
     args[:between] = capture do
-      concat(args[:between])
-      concat(collapse_info_trigger(id, class: "mx-3"))
+      if args[:between].present?
+        concat(tag.span(class: "mr-2") { args[:between] })
+      end
+      concat(collapse_info_trigger(id, class: "ml-1 mr-3"))
     end
     args[:append] = capture do
       concat(args[:append])
