@@ -564,12 +564,12 @@ class API2Test < UnitTestCase
   def test_getting_collection_numbers
     params = { method: :get, action: :collection_number }
 
-    nums = CollectionNumber.where(CollectionNumber[:created_at].year == 2006)
+    nums = CollectionNumber.where(CollectionNumber[:created_at].year.eq(2006))
     assert_not_empty(nums)
     assert_api_pass(params.merge(created_at: "2006"))
     assert_api_results(nums)
 
-    nums = CollectionNumber.where(CollectionNumber[:updated_at].year == 2005)
+    nums = CollectionNumber.where(CollectionNumber[:updated_at].year.eq(2005))
     assert_not_empty(nums)
     assert_api_pass(params.merge(updated_at: "2005"))
     assert_api_results(nums)
@@ -997,12 +997,12 @@ class API2Test < UnitTestCase
   def test_getting_herbarium_records
     params = { method: :get, action: :herbarium_record }
 
-    recs = HerbariumRecord.where(HerbariumRecord[:created_at].year == 2012)
+    recs = HerbariumRecord.where(HerbariumRecord[:created_at].year.eq(2012))
     assert_not_empty(recs)
     assert_api_pass(params.merge(created_at: "2012"))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where(HerbariumRecord[:updated_at].year == 2017)
+    recs = HerbariumRecord.where(HerbariumRecord[:updated_at].year.eq(2017))
     assert_not_empty(recs)
     assert_api_pass(params.merge(updated_at: "2017"))
     assert_api_results(recs)
@@ -1210,14 +1210,14 @@ class API2Test < UnitTestCase
     assert_api_results([img])
 
     assert_api_pass(params.merge(created_at: "2006"))
-    assert_api_results(Image.where(Image[:created_at].year == 2006))
+    assert_api_results(Image.where(Image[:created_at].year.eq(2006)))
 
     assert_api_pass(params.merge(updated_at: "2006-05-22"))
     assert_api_results(Image.created_on("2006-05-22"))
 
     assert_api_pass(params.merge(date: "2007-03"))
     assert_api_results(
-      Image.where((Image[:when].year == 2007).and(Image[:when].month == 3))
+      Image.where((Image[:when].year.eq(2007)).and(Image[:when].month.eq(3)))
     )
 
     assert_api_pass(params.merge(user: "#{mary.id},#{katrina.id}"))
@@ -1536,7 +1536,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(id: loc.id))
     assert_api_results([loc])
 
-    locs = Location.where(Location[:created_at].year == 2008)
+    locs = Location.where(Location[:created_at].year.eq(2008))
     assert_not_empty(locs)
     assert_api_pass(params.merge(created_at: "2008"))
     assert_api_results(locs)
@@ -1730,7 +1730,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(id: name.id))
     assert_api_results([name])
 
-    names = Name.with_correct_spelling.where(Name[:created_at].year == 2008)
+    names = Name.with_correct_spelling.where(Name[:created_at].year.eq(2008))
     assert_not_empty(names)
     assert_api_pass(params.merge(created_at: "2008"))
     assert_api_results(names)
@@ -2147,7 +2147,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(id: obs.id))
     assert_api_results([obs])
 
-    obses = Observation.where(Observation[:created_at].year == 2010)
+    obses = Observation.where(Observation[:created_at].year.eq(2010))
     assert_not_empty(obses)
     assert_api_pass(params.merge(created_at: "2010"))
     assert_api_results(obses)
@@ -2681,7 +2681,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(id: proj.id))
     assert_api_results([proj])
 
-    projs = Project.where(Project[:created_at].year == 2008)
+    projs = Project.where(Project[:created_at].year.eq(2008))
     assert_not_empty(projs)
     assert_api_pass(params.merge(created_at: "2008"))
     assert_api_results(projs)
@@ -3216,7 +3216,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(created_at: "2012-07-06"))
     assert_api_results(spls)
 
-    spls = SpeciesList.where(SpeciesList[:updated_at].year == 2008)
+    spls = SpeciesList.where(SpeciesList[:updated_at].year.eq(2008))
     assert_not_empty(spls)
     assert_api_pass(params.merge(updated_at: "2008"))
     assert_api_results(spls)

@@ -31,8 +31,7 @@ end
 
   <%= select_with_label(form: ffi, field: :license_id, index: img_id,
                         label: :form_images_select_license.t.html_safe,
-                        options: licenses,
-                        select_opts: { selected: selected_license }) %>
+                        options: licenses, selected: selected_license) %>
 
   <%= unless upload
     text_field_with_label(form: ffi, field: :original_name, index: img_id,
