@@ -1217,7 +1217,7 @@ class API2Test < UnitTestCase
 
     assert_api_pass(params.merge(date: "2007-03"))
     assert_api_results(
-      Image.where((Image[:when].year == 2007).and(Image[:when].month.eq(3)))
+      Image.where((Image[:when].year.eq(2007)).and(Image[:when].month.eq(3)))
     )
 
     assert_api_pass(params.merge(user: "#{mary.id},#{katrina.id}"))
