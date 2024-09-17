@@ -12,13 +12,11 @@ module PatternSearch
     /x
 
     def initialize(string)
-      self.incoming_string = string
+      self.incoming_string = string || ""
       self.terms = parse_incoming_string
     end
 
     def clean_incoming_string
-      return "" unless incoming_string
-
       incoming_string.strip.gsub(/\s+/, " ")
     end
 
