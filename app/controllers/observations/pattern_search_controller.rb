@@ -57,7 +57,7 @@ module Observations
     end
 
     def fields_with_range
-      [:when, :created, :modified, :rank]
+      [:when, :created, :modified, :rank, :confidence]
     end
 
     def fields_with_ids
@@ -81,7 +81,7 @@ module Observations
       PatternSearch::Observation.params.keys + [
         :name_id, :location_id, :user_id, :herbarium_id, :list_id, :project_id,
         :project_lists_id, :when_range, :created_range, :modified_range,
-        :rank_range
+        :rank_range, :confidence_range
       ]
     end
   end

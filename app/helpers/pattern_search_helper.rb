@@ -64,7 +64,7 @@ module PatternSearchHelper
                                      separator: PATTERN_SEARCH_SEPARATOR } },
     list_of_users: { component: :autocompleter_field,
                      args: { type: :user, separator: ", " } },
-    confidence: { component: :pattern_search_confidence_field, args: {} },
+    confidence: { component: :pattern_search_confidence_range_field, args: {} },
     longitude: { component: :pattern_search_longitude_field, args: {} },
     latitude: { component: :pattern_search_latitude_field, args: {} }
   }.freeze
@@ -152,26 +152,40 @@ module PatternSearchHelper
   end
 
   def pattern_search_rank_range_field(**args)
-    tag.div(class: "row") do
-      [
-        tag.div(class: pattern_search_columns) do
-          select_with_label(**args.merge(
-            { options: Name.all_ranks, include_blank: true, selected: 0 }
-          ))
-        end,
-        tag.div(class: pattern_search_columns) do
-          select_with_label(**args.merge(
-            { label: :to.l, between: :optional, help: nil,
-              options: Name.all_ranks, include_blank: true, selected: 0,
-              field: "#{args[:field]}_range" }
-          ))
-        end
-      ].safe_join
-    end
+    [
+      tag.div(class: "d-inline-block mr-4") do
+        select_with_label(**args.merge(
+          { inline: true, options: Name.all_ranks,
+            include_blank: true, selected: nil }
+        ))
+      end,
+      tag.div(class: "d-inline-block") do
+        select_with_label(**args.merge(
+          { label: :to.l, between: :optional, help: nil, inline: true,
+            options: Name.all_ranks, include_blank: true, selected: nil,
+            field: "#{args[:field]}_range" }
+        ))
+      end
+    ].safe_join
   end
 
-  def pattern_search_confidence_field(**args)
-    select_with_label(options: Vote.opinion_menu, **args)
+  def pattern_search_confidence_range_field(**args)
+    confidences = Vote.opinion_menu.map { |k, v| [k, Vote.percent(v)] }
+    [
+      tag.div(class: "d-inline-block mr-4") do
+        select_with_label(**args.merge(
+          { inline: true, options: confidences,
+            include_blank: true, selected: nil }
+        ))
+      end,
+      tag.div(class: "d-inline-block") do
+        select_with_label(**args.merge(
+          { label: :to.l, between: :optional, help: nil, inline: true,
+            options: confidences, include_blank: true, selected: nil,
+            field: "#{args[:field]}_range" }
+        ))
+      end
+    ].safe_join
   end
 
   def pattern_search_longitude_field(**args)

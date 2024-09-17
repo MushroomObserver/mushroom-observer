@@ -33,37 +33,37 @@ module PatternSearchable
 
     # One oddball is `confidence` - the string "0" should not count as a value.
     def sift_and_restructure_form_params
-      @keywords = permitted_search_params.to_h.compact_blank.reject do |_, v|
-        v == "0" || incomplete_date?(v)
-      end
-      format_date_params_into_strings
+      @keywords = permitted_search_params.to_h.compact_blank #.reject do |_, v|
+        # v == "0" || incomplete_date?(v)
+      # end
+      # format_date_params_into_strings
       concatenate_range_fields
       @sendable_params = substitute_ids_for_names(@keywords)
       # @storable_params = storable_params(@keywords)
     end
 
-    def incomplete_date?(value)
-      value.is_a?(Hash) && value.values.any?(&:blank?)
-    end
+    # def incomplete_date?(value)
+    #   value.is_a?(Hash) && value.values.any?(&:blank?)
+    # end
 
     # Deal with date fields, which are stored as hashes with year, month, day.
     # Convert them to a single string. Can use `web_date` method on date fields.
-    def format_date_params_into_strings
-      @keywords.each_key do |key|
-        next unless fields_with_dates.include?(key.to_sym)
-        next if @keywords[key][:year].blank?
+    # def format_date_params_into_strings
+    #   @keywords.each_key do |key|
+    #     next unless fields_with_dates.include?(key.to_sym)
+    #     next if @keywords[key][:year].blank?
 
-        @keywords[key] = date_into_string(key)
-        if @keywords[:"#{key}_range"].present?
-          @keywords[:"#{key}_range"] = date_into_string(:"#{key}_range")
-        end
-      end
-    end
+    #     @keywords[key] = date_into_string(key)
+    #     if @keywords[:"#{key}_range"].present?
+    #       @keywords[:"#{key}_range"] = date_into_string(:"#{key}_range")
+    #     end
+    #   end
+    # end
 
     # date is a hash with year, month, day. Convert to string.
-    def date_into_string(key)
-      Date.new(*permitted_search_params.to_h[key].values.map(&:to_i)).web_date
-    end
+    # def date_into_string(key)
+    #   Date.new(*permitted_search_params.to_h[key].values.map(&:to_i)).web_date
+    # end
 
     # Check for `fields_with_range`, and concatenate them if range val present,
     # removing the range field.
