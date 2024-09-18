@@ -33,7 +33,7 @@ module PatternSearchable
 
     # One oddball is `confidence` - the string "0" should not count as a value.
     def sift_and_restructure_form_params
-      @keywords = permitted_search_params.to_h.compact_blank #.reject do |_, v|
+      @keywords = @filter.attributes.to_h.compact_blank #.reject do |_, v|
         # v == "0" || incomplete_date?(v)
       # end
       # format_date_params_into_strings

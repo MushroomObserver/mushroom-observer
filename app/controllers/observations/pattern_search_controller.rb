@@ -24,6 +24,9 @@ module Observations
 
     def create
       @field_columns = observation_field_groups
+      @filter = ObservationFilter.new(
+        permitted_search_params[:observation_filter]
+      )
       @pattern = formatted_pattern_search_string
 
       # This will save the pattern in the session.
@@ -78,11 +81,7 @@ module Observations
     # need to add :pattern to the list of params, plus the hidden_id fields
     # of the autocompleters.
     def observation_search_params
-      PatternSearch::Observation.params.keys + [
-        :name_id, :location_id, :user_id, :herbarium_id, :list_id, :project_id,
-        :project_lists_id, :when_range, :created_range, :modified_range,
-        :rank_range, :confidence_range
-      ]
+      [{ observation_filter: PatternSearch::Observation.fields }]
     end
   end
 end

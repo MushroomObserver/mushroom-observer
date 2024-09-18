@@ -53,6 +53,16 @@ module PatternSearch
       PARAMS
     end
 
+    # List of fields that are displayed in the search form.
+    # Autocompleters have id fields, and range fields are concatenated.
+    def self.fields
+      params.keys + [
+        :name_id, :location_id, :user_id, :herbarium_id, :list_id, :project_id,
+        :project_lists_id, :when_range, :created_range, :modified_range,
+        :rank_range, :confidence_range
+      ]
+    end
+
     def params
       self.class.params
     end

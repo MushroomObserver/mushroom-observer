@@ -10,8 +10,12 @@ class ObservationFilter < SearchFilter
       attribute(:"#{keyword}_range", :string)
     when :parse_confidence
       attribute(keyword, :integer)
+      attribute(:"#{keyword}_range", :integer)
     when :parse_longitude, :parse_latitude
       attribute(keyword, :float)
+    when /parse_list_of_/
+      attribute(keyword, :string)
+      attribute(:"#{keyword}_id", :string)
     else
       attribute(keyword, :string)
     end

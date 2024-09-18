@@ -8,10 +8,11 @@ class NameFilter < SearchFilter
       attribute(keyword, :date)
       attribute(:"#{keyword}_range", :date)
     when :parse_rank_range
-      attribute(keyword, :integer)
-      attribute(:"#{keyword}_range", :integer)
+      attribute(keyword, :string)
+      attribute(:"#{keyword}_range", :string)
     when :parse_confidence
       attribute(keyword, :integer)
+      attribute(:"#{keyword}_range", :integer)
     else
       attribute(keyword, :string)
     end

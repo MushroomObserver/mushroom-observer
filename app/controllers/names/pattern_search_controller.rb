@@ -17,6 +17,9 @@ module Names
 
     def create
       @pattern = formatted_pattern_search_string
+      @filter = ObservationFilter.new(
+        permitted_search_params[:name_filter]
+      )
       redirect_to(controller: "/names", action: :index, pattern: @pattern)
     end
 
@@ -58,9 +61,7 @@ module Names
     end
 
     def name_search_params
-      PatternSearch::Name.params.keys + [
-        :created_range, :modified_range, :rank_range
-      ]
+      [{ name_filter: PatternSearch::Name.fields }]
     end
   end
 end
