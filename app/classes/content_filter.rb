@@ -42,13 +42,13 @@ class ContentFilter
 
   # Array of all available filters.
   def self.all
-    @@filters ||= [
+    [
       WithImages.new,
       WithSpecimen.new,
       Lichen.new,
       Region.new,
       Clade.new
-    ]
+    ].freeze
   end
 
   # Lookup a filter by name (symbol).
