@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 #
-#  = PatternSearchable Concern
+#  = Filterable Concern
 #
 #  This is a module of reusable methods included by controllers that handle
 #  "faceted" pattern searches per model, with separate inputs for each keyword.
@@ -18,7 +18,7 @@
 #
 ################################################################################
 
-module PatternSearchable
+module Filterable
   extend ActiveSupport::Concern
 
   included do

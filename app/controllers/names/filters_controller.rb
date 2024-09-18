@@ -4,10 +4,10 @@
 #
 # Route: `new_name_search_path`
 # Only one action here. Call namespaced controller actions with a hash like
-# `{ controller: "/names/pattern_search", action: :create }`
+# `{ controller: "/names/filter", action: :create }`
 module Names
-  class PatternSearchController < ApplicationController
-    include ::PatternSearchable
+  class FiltersController < ApplicationController
+    include ::Filterable
 
     before_action :login_required
 

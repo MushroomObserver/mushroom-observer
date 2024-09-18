@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-# Names pattern search form.
+# Observations pattern search form.
 #
-# Route: `new_name_search_path`
+# Route: `new_observation_search_path`
 # Only one action here. Call namespaced controller actions with a hash like
-# `{ controller: "/names/pattern_search", action: :create }`
+# `{ controller: "/observations/filter", action: :create }`
 module Observations
-  class PatternSearchController < ApplicationController
-    include ::PatternSearchable
+  class FiltersController < ApplicationController
+    include ::Filterable
 
     before_action :login_required
 

@@ -488,8 +488,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Names: a lot of actions  ----------------------------
   namespace :names do
-    get("search/new", to: "pattern_search#new", as: "new_search")
-    post("search", to: "pattern_search#create", as: "search")
+    get("search/new", to: "filters#new", as: "new_search")
+    post("search", to: "filters#create", as: "search")
   end
 
   resources :names, id: /\d+/, shallow: true do
@@ -582,8 +582,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   namespace :observations do
     resources :downloads, only: [:new, :create]
 
-    get("search/new", to: "pattern_search#new", as: "new_search")
-    post("search", to: "pattern_search#create", as: "search")
+    get("search/new", to: "filters#new", as: "new_search")
+    post("search", to: "filters#create", as: "search")
     # uploads are not under resources because the obs doesn't have an id yet
     get("images/uploads/new", to: "images/uploads#new",
                               as: "new_image_upload_for")
