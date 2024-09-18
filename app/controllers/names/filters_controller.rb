@@ -16,6 +16,11 @@ module Names
     end
 
     def create
+      if params[:commit] == :CLEAR.l
+        session[:pattern] = ""
+        redirect_to(:new) and return
+      end
+
       @pattern = formatted_pattern_search_string
       @filter = ObservationFilter.new(
         permitted_search_params[:name_filter]

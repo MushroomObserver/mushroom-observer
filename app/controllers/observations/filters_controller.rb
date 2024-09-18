@@ -23,6 +23,11 @@ module Observations
     end
 
     def create
+      if params[:commit] == :CLEAR.l
+        session[:pattern] = ""
+        redirect_to(observations_new_search_path) and return
+      end
+
       @field_columns = observation_field_groups
       @filter = ObservationFilter.new(
         permitted_search_params[:observation_filter]

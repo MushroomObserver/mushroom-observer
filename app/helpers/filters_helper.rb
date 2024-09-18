@@ -2,16 +2,16 @@
 
 # helpers for pattern search forms. These call field helpers in forms_helper.
 # args should provide form, field, label at a minimum.
-module PatternSearchHelper
-  def pattern_search_field(**args)
-    args[:label] ||= pattern_search_helper_for_label(args[:field])
-    field_type = pattern_search_field_type_from_parser(**args)
-    component = PATTERN_SEARCH_FIELD_HELPERS[field_type][:component]
-    args = prepare_args_for_pattern_search_field(args, field_type, component)
+module FiltersHelper
+  def filter_field(**args)
+    args[:label] ||= filter_helper_for_label(args[:field])
+    field_type = filter_field_type_from_parser(**args)
+    component = FILTER_FIELD_HELPERS[field_type][:component]
+    args = prepare_args_for_filter_field(args, field_type, component)
     send(component, **args) if component
   end
 
-  def pattern_search_helper_for_label(field)
+  def filter_helper_for_label(field)
     if field == :pattern
       :PATTERN.l
     else
@@ -21,9 +21,9 @@ module PatternSearchHelper
 
   # The PatternSearch subclasses define how they're going to parse their
   # fields, so we can use that to assign a field helper.
-  #   example: :parse_yes -> :pattern_search_yes_field
+  #   example: :parse_yes -> :filter_yes_field
   # If the field is :pattern, there's no assigned parser.
-  def pattern_search_field_type_from_parser(**args)
+  def filter_field_type_from_parser(**args)
     return :pattern if args[:field] == :pattern
 
     subclass = PatternSearch.const_get(args[:type].capitalize)
@@ -35,63 +35,63 @@ module PatternSearchHelper
     parser.to_s.gsub(/^parse_/, "").to_sym
   end
 
-  PATTERN_SEARCH_SEPARATOR = ", "
+  FILTER_SEPARATOR = ", "
 
   # Convenience for subclasses to access helper methods via subclass.params
-  PATTERN_SEARCH_FIELD_HELPERS = {
+  FILTER_FIELD_HELPERS = {
     pattern: { component: :text_field_with_label, args: {} },
-    yes: { component: :pattern_search_yes_field, args: {} },
-    boolean: { component: :pattern_search_boolean_field, args: {} },
-    yes_no_both: { component: :pattern_search_yes_no_both_field, args: {} },
-    date_range: { component: :pattern_search_date_range_field, args: {} },
-    rank_range: { component: :pattern_search_rank_range_field, args: {} },
+    yes: { component: :filter_yes_field, args: {} },
+    boolean: { component: :filter_boolean_field, args: {} },
+    yes_no_both: { component: :filter_yes_no_both_field, args: {} },
+    date_range: { component: :filter_date_range_field, args: {} },
+    rank_range: { component: :filter_rank_range_field, args: {} },
     string: { component: :text_field_with_label, args: {} },
     list_of_strings: { component: :text_field_with_label, args: {} },
     list_of_herbaria: { component: :autocompleter_field,
                         args: { type: :herbarium,
-                                separator: PATTERN_SEARCH_SEPARATOR } },
+                                separator: FILTER_SEPARATOR } },
     list_of_locations: { component: :autocompleter_field,
                          args: { type: :location,
-                                 separator: PATTERN_SEARCH_SEPARATOR } },
+                                 separator: FILTER_SEPARATOR } },
     list_of_names: { component: :autocompleter_field,
                      args: { type: :name,
-                             separator: PATTERN_SEARCH_SEPARATOR } },
+                             separator: FILTER_SEPARATOR } },
     list_of_projects: { component: :autocompleter_field,
                         args: { type: :project,
-                                separator: PATTERN_SEARCH_SEPARATOR } },
+                                separator: FILTER_SEPARATOR } },
     list_of_species_lists: { component: :autocompleter_field,
                              args: { type: :species_list,
-                                     separator: PATTERN_SEARCH_SEPARATOR } },
+                                     separator: FILTER_SEPARATOR } },
     list_of_users: { component: :autocompleter_field,
                      args: { type: :user, separator: ", " } },
-    confidence: { component: :pattern_search_confidence_range_field, args: {} },
-    longitude: { component: :pattern_search_longitude_field, args: {} },
-    latitude: { component: :pattern_search_latitude_field, args: {} }
+    confidence: { component: :filter_confidence_range_field, args: {} },
+    longitude: { component: :filter_longitude_field, args: {} },
+    latitude: { component: :filter_latitude_field, args: {} }
   }.freeze
 
   # Prepares HTML args for the field helper. This is where we can make
   # adjustments to the args hash before passing it to the field helper.
   # NOTE: Bootstrap 3 can't do full-width inline label/field.
-  def prepare_args_for_pattern_search_field(args, field_type, component)
+  def prepare_args_for_filter_field(args, field_type, component)
     if component == :text_field_with_label && args[:field] != :pattern
       args[:inline] = true
     end
-    args[:help] = pattern_search_help_text(args, field_type)
-    args[:hidden_name] = pattern_search_check_for_hidden_name(args)
+    args[:help] = filter_help_text(args, field_type)
+    args[:hidden_name] = filter_check_for_hidden_name(args)
 
-    PATTERN_SEARCH_FIELD_HELPERS[field_type][:args].merge(args.except(:type))
+    FILTER_FIELD_HELPERS[field_type][:args].merge(args.except(:type))
   end
 
-  def pattern_search_help_text(args, field_type)
-    component = PATTERN_SEARCH_FIELD_HELPERS[field_type][:component]
+  def filter_help_text(args, field_type)
+    component = FILTER_FIELD_HELPERS[field_type][:component]
     multiple_note = if component == :autocompleter_field
-                      :pattern_search_terms_multiple.l
+                      :filter_terms_multiple.l
                     end
     [:"#{args[:type]}_term_#{args[:field]}".l, multiple_note].compact.join(" ")
   end
 
   # Overrides for the assumed name of the id field for autocompleter.
-  def pattern_search_check_for_hidden_name(args)
+  def filter_check_for_hidden_name(args)
     case args[:field]
     when :list
       return "list_id"
@@ -103,7 +103,7 @@ module PatternSearchHelper
 
   # FIELD HELPERS
   #
-  def pattern_search_yes_field(**args)
+  def filter_yes_field(**args)
     options = [
       ["", nil],
       ["yes", "yes"]
@@ -111,7 +111,7 @@ module PatternSearchHelper
     select_with_label(options:, inline: true, **args)
   end
 
-  def pattern_search_boolean_field(**args)
+  def filter_boolean_field(**args)
     options = [
       ["", nil],
       ["yes", "yes"],
@@ -120,7 +120,7 @@ module PatternSearchHelper
     select_with_label(options:, inline: true, **args)
   end
 
-  def pattern_search_yes_no_both_field(**args)
+  def filter_yes_no_both_field(**args)
     options = [
       ["", nil],
       ["yes", "yes"],
@@ -133,15 +133,15 @@ module PatternSearchHelper
   # RANGE FIELDS The first field gets the label, name and ID of the actual
   # param; the end `_range` field is optional. The controller needs to check for
   # the second & join them with a hyphen if it exists (in both cases here).
-  def pattern_search_date_range_field(**args)
+  def filter_date_range_field(**args)
     tag.div(class: "row") do
       [
-        tag.div(class: pattern_search_columns) do
+        tag.div(class: filter_columns) do
           text_field_with_label(**args.merge(
             { between: "(YYYY-MM-DD)" }
           ))
         end,
-        tag.div(class: pattern_search_columns) do
+        tag.div(class: filter_columns) do
           text_field_with_label(**args.merge(
             { field: "#{args[:field]}_range", label: :to.l,
               help: nil, between: :optional }
@@ -151,7 +151,7 @@ module PatternSearchHelper
     end
   end
 
-  def pattern_search_rank_range_field(**args)
+  def filter_rank_range_field(**args)
     [
       tag.div(class: "d-inline-block mr-4") do
         select_with_label(**args.merge(
@@ -169,7 +169,7 @@ module PatternSearchHelper
     ].safe_join
   end
 
-  def pattern_search_confidence_range_field(**args)
+  def filter_confidence_range_field(**args)
     confidences = Vote.opinion_menu.map { |k, v| [k, Vote.percent(v)] }
     [
       tag.div(class: "d-inline-block mr-4") do
@@ -188,15 +188,15 @@ module PatternSearchHelper
     ].safe_join
   end
 
-  def pattern_search_longitude_field(**args)
+  def filter_longitude_field(**args)
     text_field_with_label(**args.merge(between: "(-180.0 to 180.0)"))
   end
 
-  def pattern_search_latitude_field(**args)
+  def filter_latitude_field(**args)
     text_field_with_label(**args.merge(between: "(-90.0 to 90.0)"))
   end
 
-  def pattern_search_columns
+  def filter_columns
     "col-xs-12 col-sm-6 col-md-12 col-lg-6"
   end
 end

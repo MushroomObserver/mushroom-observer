@@ -14,15 +14,14 @@
               <% if field.is_a?(Array) %>
                 <%= tag.div(class: "row") do %>
                   <% field.each do |subfield| %>
-                    <%= tag.div(class: pattern_search_columns) do %>
-                      <%= pattern_search_field(form: f, field: subfield,
-                                               type: search_type) %>
+                    <%= tag.div(class: filter_columns) do %>
+                      <%= filter_field(form: f, field: subfield,
+                                       type: search_type) %>
                     <% end %>
                   <% end %>
                 <% end %>
               <% else %>
-                <%= pattern_search_field(form: f, field: field,
-                                         type: search_type) %>
+                <%= filter_field(form: f, field: field, type: search_type) %>
               <% end %>
 
             <% end %>
@@ -34,6 +33,12 @@
     <% end %>
   <% end %>
 
-  <%= submit_button(form: f, button: :SEARCH.l, center: true) %>
+  <%= tag.div(class: "text-center") do %>
+    <%= submit_button(form: f, button: :SEARCH.l,
+                      class: "d-inline-block mx-3") %>
+
+    <%= submit_button(form: f, button: :CLEAR.l,
+                      class: "d-inline-block mx-3") %>
+  <% end %>
 
 <% end %>
