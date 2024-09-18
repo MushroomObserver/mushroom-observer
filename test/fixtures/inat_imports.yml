@@ -1,7 +1,17 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-rolf_inat_import:
-  user: rolf
+DEFAULTS: &DEFAULTS
+  user: nil
   state: <%= InatImport.states[:Unstarted] %>
+  token: ""
+  inat_username: ""
+  inat_ids: ""
+  import_all: false
   importables: 0
   imported_count: 0
+  response_errors: ""
+
+rolf_inat_import:
+  <<: *DEFAULTS
+  user: rolf
+  inat_username: rolf_inat_username

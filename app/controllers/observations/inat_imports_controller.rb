@@ -169,11 +169,10 @@ module Observations
 
       @inat_import = InatImport.find_or_create_by(user: User.current)
       @inat_import.update(token: auth_code, state: "Authenticating")
-
       tracker = InatImportJobTracker.create(inat_import: @inat_import.id)
 
-      # InatImportJob.perform_now(@inat_import) # for manual testing
-      InatImportJob.perform_later(@inat_import)
+      InatImportJob.perform_now(@inat_import) # for manual testing
+      # InatImportJob.perform_later(@inat_import)
 
       redirect_to(inat_import_job_tracker_path(tracker.id))
     end

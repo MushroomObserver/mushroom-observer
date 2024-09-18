@@ -32,11 +32,12 @@ class InatImportJob < ApplicationJob
       @inat_import.update(state: "Done")
       return
     end
-
     @inat_import.update(token: api_token, state: "Importing")
 
     import_requested_observations
+
     @inat_import.update(state: "Done")
+    update_user_inat_username
   end
 
   private
@@ -76,8 +77,8 @@ class InatImportJob < ApplicationJob
     # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
     last_import_id = 0
     loop do
+      # get a page of observations with id > id of last imported obs
       page_of_observations =
-        # get a page of observations with id > id of last imported obs
         next_page(id: inat_ids, id_above: last_import_id,
                   user_login: @inat_import.inat_username)
       return if response_bad?(page_of_observations)
@@ -124,8 +125,9 @@ class InatImportJob < ApplicationJob
     query_args = {
       id: nil, id_above: nil, only_id: false, per_page: 200,
       order: "asc", order_by: "id",
-      # prevents user from importing others' obss
-      user_login: nil, iconic_taxa: ICONIC_TAXA
+      # obss of only the iNat user with iNat login @inat_import.inat_username
+      user_login: nil,
+      iconic_taxa: ICONIC_TAXA
     }.merge(args)
 
     query = URI.encode_www_form(query_args)
@@ -417,7 +419,6 @@ class InatImportJob < ApplicationJob
                 content_type: :json, accept: :json }
     response = RestClient.patch("#{API_BASE}/observations/#{@inat_obs.inat_id}",
                                 payload.to_json, headers)
-
     JSON.parse(response.body)
   rescue RestClient::ExceptionWithResponse => e
     @inat_import.add_response_error(e.response)
@@ -425,5 +426,13 @@ class InatImportJob < ApplicationJob
 
   def increment_imported_count
     @inat_import.increment!(:imported_count)
+  end
+
+  def update_user_inat_username
+    # Prevent MO users from setting their inat_username
+    # to a non-existent iNat login
+    return if @inat_import.response_errors.present?
+
+    @inat_import.user.update(inat_username: @inat_import.inat_username)
   end
 end

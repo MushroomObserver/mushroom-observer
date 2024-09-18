@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_16_224214) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_18_151140) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -905,6 +905,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_16_224214) do
     t.text "notes_template"
     t.boolean "blocked", default: false, null: false
     t.boolean "no_emails", default: false, null: false
+    t.string "inat_username"
     t.index ["login"], name: "login_index"
   end
 

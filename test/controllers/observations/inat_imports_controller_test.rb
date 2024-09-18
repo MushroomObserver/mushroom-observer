@@ -36,6 +36,20 @@ module Observations
                     "Form needs checkbox requiring consent")
     end
 
+    def test_new_inat_import_inat_username_prefilled
+      user = users(:mary)
+      assert(user.inat_username.present?,
+             "Test needs a user fixture with an inat_username")
+
+      login(mary.login)
+      get(:new)
+
+      assert_select(
+        "input[name=?][value=?]", "inat_username", user.inat_username, true,
+        "InatImport should pre-fill `inat_username` with user's inat_username"
+      )
+    end
+
     def test_create_missing_username
       user = users(:rolf)
       id = "123"
@@ -196,13 +210,9 @@ module Observations
     end
 
     def test_authorization_response_denied
-      inat_authorization_callback_params =
-        { error: "access_denied",
-          error_description: "The resource owner or authorization server " \
-                             "denied the request." }
       login
 
-      get(:authorization_response, params: inat_authorization_callback_params)
+      get(:authorization_response, params: authorization_denial_callback_params)
 
       assert_redirected_to(observations_path)
       assert_flash_error
@@ -210,6 +220,8 @@ module Observations
 
     def test_import_authorized
       user = users(:rolf)
+      assert_blank(user.inat_username,
+                   "Test needs user fixture without an iNat username")
       inat_import = inat_imports(:rolf_inat_import)
 
       # Blank id_list in order to prevent importing any observations
@@ -232,6 +244,28 @@ module Observations
       assert_redirected_to(inat_import_job_tracker_path(tracker.id))
     end
 
+    # TODO: test inat_username not saved/updated if authorization fails
+    def test_inat_username_unchanged_if_authorization_denied
+      user = users(:rolf)
+      assert_blank(user.inat_username,
+                   "Test needs user fixture without an iNat username")
+      inat_username = "inat_username"
+      inat_import = inat_imports(:rolf_inat_import)
+      inat_import.update(
+        inat_ids: "", # Blank id_list ito prevent importing any observations
+        inat_username: inat_username
+      )
+
+      login(user.login)
+      get(:authorization_response,
+          params: authorization_denial_callback_params)
+
+      assert_blank(
+        user.reload.inat_username,
+        "User inat_username shouldn't change if user denies authorization to MO"
+      )
+    end
+
     ########## Utilities
 
     # iNat url where user is sent in order to authorize MO access
@@ -242,6 +276,12 @@ module Observations
       "client_id=#{Rails.application.credentials.inat.id}" \
       "&redirect_uri=#{REDIRECT_URI}" \
       "&response_type=code"
+    end
+
+    def authorization_denial_callback_params
+      { error: "access_denied",
+        error_description:
+          "The resource owner or authorization server denied the request." }
     end
   end
 end

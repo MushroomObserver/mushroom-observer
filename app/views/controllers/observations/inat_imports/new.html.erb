@@ -5,8 +5,8 @@
 <div>
   <%= form_with url: observations_inat_imports_path, method: :post do |f| %>
     <%= f.label :inat_username, "#{:inat_username.l}: " %>
-    <%= f.text_field(:inat_username, size: 10, value: @inat_username,
-        class: "form-control") %>
+    <%= f.text_field(:inat_username, size: 10, class: "form-control",
+                     value: User.current.inat_username) %>
 
     <%= panel_block(id: "choose_observation",
                     heading: :inat_choose_observations.l,

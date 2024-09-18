@@ -375,8 +375,8 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_zero_results
     file_name = "zero_results"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    inat_import = InatImport.create(inat_ids: "123", token: "MockCode",
-                                    inat_username: "anything")
+    inat_import = inat_imports(:rolf_inat_import)
+    inat_import.update(inat_ids: "123", token: "MockCode")
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
@@ -389,6 +389,27 @@ class InatImportJobTest < ActiveJob::TestCase
         InatImportJob.perform_now(inat_import)
       end
     end
+  end
+
+  def test_import_update_inat_username_if_job_succeeds
+    user = users(:rolf)
+    assert_empty(user.inat_username,
+                 "Test needs user fixture without an iNat username")
+
+    file_name = "zero_results"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    inat_import = inat_imports(:rolf_inat_import)
+    inat_import.update(inat_ids: "123", token: "MockCode")
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response)
+
+    Inat::PhotoImporter.stub(:new,
+                             stub_mo_photo_importer(mock_inat_response)) do
+      InatImportJob.perform_now(inat_import)
+    end
+
+    assert_equal(inat_import.inat_username, user.reload.inat_username,
+                 "Failed to update user's inat_username")
   end
 
   def test_import_multiple
