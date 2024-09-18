@@ -56,26 +56,19 @@ module Observations
     end
 
     def fields_with_dates
-      [:when, :created, :modified]
+      PatternSearch::Observation.fields_with_dates
     end
 
     def fields_with_range
-      [:when, :created, :modified, :rank, :confidence]
+      PatternSearch::Observation.fields_with_range
     end
 
     def fields_with_ids
-      [:name, :location, :user, :herbarium, :list, :project, :species_list]
+      PatternSearch::Observation.fields_with_ids
     end
 
     def permitted_search_params
-      params.permit(observation_search_params) # + [
-        # { when: [:year, :month, :day] },
-        # { when_range: [:year, :month, :day] },
-        # { created: [:year, :month, :day] },
-        # { created_range: [:year, :month, :day] },
-        # { modified: [:year, :month, :day] },
-        # { modified_range: [:year, :month, :day] }
-      # ])
+      params.permit(observation_search_params)
     end
 
     # need to add :pattern to the list of params, plus the hidden_id fields

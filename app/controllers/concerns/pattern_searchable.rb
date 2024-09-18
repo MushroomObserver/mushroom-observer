@@ -33,13 +33,13 @@ module PatternSearchable
 
     # One oddball is `confidence` - the string "0" should not count as a value.
     def sift_and_restructure_form_params
-      @keywords = @filter.attributes.to_h.compact_blank #.reject do |_, v|
-        # v == "0" || incomplete_date?(v)
-      # end
-      # format_date_params_into_strings
+      @keywords = @filter.attributes.to_h.compact_blank.symbolize_keys
+
       concatenate_range_fields
-      @sendable_params = substitute_ids_for_names(@keywords)
-      # @storable_params = storable_params(@keywords)
+      @sendable_params = @keywords
+      substitute_ids_for_names
+      # @storable_params = @keywords
+      # set_storable_params
     end
 
     # def incomplete_date?(value)
@@ -83,15 +83,14 @@ module PatternSearchable
     #
     # Controller declares `fields_with_ids` which autocompleter send ids.
     # This method substitutes the ids for the names.
-    def substitute_ids_for_names(keywords)
-      keywords.each_key do |key|
+    def substitute_ids_for_names
+      @sendable_params.each_key do |key|
         next unless fields_with_ids.include?(key.to_sym) &&
-                    keywords[:"#{key}_id"].present?
+                    @sendable_params[:"#{key}_id"].present?
 
-        keywords[key] = keywords[:"#{key}_id"]
-        keywords.delete(:"#{key}_id")
+        @sendable_params[key] = @sendable_params[:"#{key}_id"]
+        @sendable_params.delete(:"#{key}_id")
       end
-      keywords
     end
 
     # STORABLE_PARAMS
@@ -99,37 +98,35 @@ module PatternSearchable
     #
     # Store full strings for all values, including names and locations,
     # so we can repopulate the form with the same values.
-    def storable_params(keywords)
-      keywords = escape_names_and_remove_ids(keywords)
-      escape_locations_and_remove_ids(keywords)
+    def set_storable_params
+      escape_names_and_remove_ids
+      escape_locations_and_remove_ids
     end
 
     # Escape-quote the names, the way the short form requires.
-    def escape_names_and_remove_ids(keywords)
-      keywords.each_key do |key|
+    def escape_names_and_remove_ids
+      @storable_params.each_key do |key|
         next unless fields_with_ids.include?(key.to_sym) &&
-                    keywords[:"#{key}_id"].present?
+                    @storable_params[:"#{key}_id"].present?
 
-        list = keywords[key].split(",").map(&:strip)
+        list = @storable_params[key].split(",").map(&:strip)
         list = list.map { |name| "\"#{name}\"" }
-        keywords[key] = list.join(",")
-        keywords.delete(:"#{key}_id")
+        @storable_params[key] = list.join(",")
+        @storable_params.delete(:"#{key}_id")
       end
-      keywords
     end
 
     # Escape-quote the locations and their commas.
-    def escape_locations_and_remove_ids(keywords)
-      keywords.each_key do |key|
+    def escape_locations_and_remove_ids
+      @storable_params.each_key do |key|
         next unless [:location, :region].include?(key.to_sym) &&
-                    keywords[:"#{key}_id"].present?
+                    @storable_params[:"#{key}_id"].present?
 
-        list = keywords[key].split(",").map(&:strip)
+        list = @storable_params[key].split(",").map(&:strip)
         list = list.map { |location| "\"#{location.tr(",", "\\,")}\"" }
-        keywords[key] = list.join(",")
-        keywords.delete(:"#{key}_id")
+        @storable_params[key] = list.join(",")
+        @storable_params.delete(:"#{key}_id")
       end
-      keywords
     end
   end
 end

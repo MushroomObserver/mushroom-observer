@@ -45,15 +45,15 @@ module Names
     end
 
     def fields_with_dates
-      [:created, :modified]
+      PatternSearch::Name.fields_with_dates
     end
 
     def fields_with_range
-      [:created, :modified, :rank]
+      PatternSearch::Name.fields_with_range
     end
 
     def fields_with_ids
-      []
+      PatternSearch::Name.fields_with_ids
     end
 
     def permitted_search_params

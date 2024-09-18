@@ -63,6 +63,18 @@ module PatternSearch
       ]
     end
 
+    def self.fields_with_dates
+      [:when, :created, :modified]
+    end
+
+    def self.fields_with_range
+      [:when, :created, :modified, :rank, :confidence]
+    end
+
+    def self.fields_with_ids
+      [:name, :location, :user, :herbarium, :list, :project, :species_list]
+    end
+
     def params
       self.class.params
     end
