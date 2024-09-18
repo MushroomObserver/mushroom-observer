@@ -615,10 +615,18 @@ class InatImportJobTest < ActiveJob::TestCase
         updated_description.prepend("#{obs["description"]}\n\n")
       end
 
-      body = { observation: { description: updated_description } }
+      body = {
+        observation: {
+          description: updated_description,
+          # This param needed in order to retain the photos
+          # https://forum.inaturalist.org/t/api-modify-observation-description/55665
+          # https://www.inaturalist.org/pages/api+reference#put-observations-id
+          ignore_photos: 1
+        }
+      }
       headers = { authorization: "Bearer",
                   content_type: "application/json", accept: "application/json" }
-      stub_request(:patch, "#{API_BASE}/observations/#{obs["id"]}").
+      stub_request(:put, "#{API_BASE}/observations/#{obs["id"]}").
         with(body: body.to_json, headers: headers).
         to_return(status: 200, body: "".to_json, headers: {})
     end

@@ -414,11 +414,12 @@ class InatImportJob < ApplicationJob
       "#{IMPORTED_BY_MO} #{Time.zone.today.strftime(MO.web_date_format)}"
     updated_description.prepend("#{description}\n\n") if description.present?
 
-    payload = { observation: { description: updated_description } }
+    payload = { observation: { description: updated_description,
+                               ignore_photos: 1 } }
     headers = { authorization: "Bearer #{@inat_import.token}",
                 content_type: :json, accept: :json }
-    response = RestClient.patch("#{API_BASE}/observations/#{@inat_obs.inat_id}",
-                                payload.to_json, headers)
+    response = RestClient.put("#{API_BASE}/observations/#{@inat_obs.inat_id}",
+                              payload.to_json, headers)
     JSON.parse(response.body)
   rescue RestClient::ExceptionWithResponse => e
     @inat_import.add_response_error(e.response)
