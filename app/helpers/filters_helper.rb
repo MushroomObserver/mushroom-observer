@@ -3,15 +3,58 @@
 # helpers for pattern search forms. These call field helpers in forms_helper.
 # args should provide form, field, label at a minimum.
 module FiltersHelper
+  # Filter panel for a search form. Sections are shown and collapsed.
+  # If sections[:collapsed] is present, part of the panel will be collapsed.
+  def filter_panel(form:, filter:, heading:, sections:, type:)
+    shown = filter_panel_body(form:, sections:, type:, section: :shown)
+    collapsed = filter_panel_body(form:, sections:, type:, section: :collapsed)
+    open = collapse = false
+    if sections[:collapsed].present?
+      collapse = heading
+      open = filter.attributes.keys.intersect?(sections[:collapsed])
+    end
+    panel_block(heading: :"search_term_group_#{heading}".l,
+                collapse:, open:, panel_bodies: [shown, collapsed])
+  end
+
+  # Content of each shown/collapsed section, composed of field rows.
+  def filter_panel_body(form:, sections:, type:, section:)
+    return unless sections[section]
+
+    capture do
+      sections[section].each do |field|
+        concat(filter_row(form:, field:, type:))
+      end
+    end
+  end
+
+  # Fields might be paired, so we need to check for that.
+  def filter_row(form:, field:, type:)
+    if field.is_a?(Array)
+      tag.div(class: "row") do
+        field.each do |subfield|
+          concat(tag.div(class: filter_columns) do
+            filter_field(form:, field: subfield, type:)
+          end)
+        end
+      end
+    else
+      filter_field(form:, field:, type:)
+    end
+  end
+
+  # Figure out what kind of field helper to call, based on definitions below.
+  # Some field types need args, so there is both the component and args hash.
   def filter_field(**args)
-    args[:label] ||= filter_helper_for_label(args[:field])
+    args[:label] ||= filter_label(args[:field])
     field_type = filter_field_type_from_parser(**args)
     component = FILTER_FIELD_HELPERS[field_type][:component]
     args = prepare_args_for_filter_field(args, field_type, component)
     send(component, **args) if component
   end
 
-  def filter_helper_for_label(field)
+  # The field's label.
+  def filter_label(field)
     if field == :pattern
       :PATTERN.l
     else

@@ -1,32 +1,13 @@
-<%# locals: (field_columns: [], search_type: nil, local: true) -%>
+<%# locals: (filter: {}, field_columns: [], type: nil, local: true) -%>
 
-<%= form_with(model: @filter, url: { action: :create }) do |f| %>
+<%= form_with(model: filter, url: { action: :create }) do |form| %>
 
   <%= tag.div(class: "row") do %>
     <% field_columns.each do |panels| %>
 
       <%= tag.div(class: "col-xs-12 col-md-6") do %>
-        <% panels.each do |heading, fields| %>
-
-          <%= panel_block(heading: :"search_term_group_#{heading}".l) do %>
-            <% fields.each do |field| %>
-
-              <% if field.is_a?(Array) %>
-                <%= tag.div(class: "row") do %>
-                  <% field.each do |subfield| %>
-                    <%= tag.div(class: filter_columns) do %>
-                      <%= filter_field(form: f, field: subfield,
-                                       type: search_type) %>
-                    <% end %>
-                  <% end %>
-                <% end %>
-              <% else %>
-                <%= filter_field(form: f, field: field, type: search_type) %>
-              <% end %>
-
-            <% end %>
-          <% end %>
-
+        <% panels.each do |heading, sections| %>
+          <%= filter_panel(form:, filter:, heading:, sections:, type:) %>
         <% end %>
       <% end %>
 
@@ -34,11 +15,8 @@
   <% end %>
 
   <%= tag.div(class: "text-center") do %>
-    <%= submit_button(form: f, button: :SEARCH.l,
-                      class: "d-inline-block mx-3") %>
-
-    <%= submit_button(form: f, button: :CLEAR.l,
-                      class: "d-inline-block mx-3") %>
+    <%= submit_button(form:, button: :SEARCH.l, class: "d-inline-block mx-3") %>
+    <%= submit_button(form:, button: :CLEAR.l, class: "d-inline-block mx-3") %>
   <% end %>
 
 <% end %>

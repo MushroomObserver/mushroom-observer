@@ -4,5 +4,5 @@
 %>
 
 <%= render(partial: "shared/filters_form",
-           locals: { local: true, search_type: :observation,
+           locals: { local: true, filter: @filter, type: :observation,
                      field_columns: @field_columns } ) %>

@@ -78,10 +78,14 @@ module PanelHelper
      link_icon(:chevron_up, title: :CLOSE.l)].safe_join
   end
 
-  # Some panels need multiple panel bodies.
+  # Some panels need multiple panel bodies. Potentially collapse the last one.
   def panel_bodies(args)
-    args[:panel_bodies].map do |body|
-      panel_body(args, body)
+    args[:panel_bodies].map.with_index do |body, idx|
+      if args[:collapse].present? && idx == args[:panel_bodies].length - 1
+        panel_collapse_body(args, body)
+      else
+        panel_body(args, body)
+      end
     end.safe_join
   end
 
