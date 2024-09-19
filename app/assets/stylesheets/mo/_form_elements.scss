@@ -180,3 +180,9 @@ form {
   max-height: 30rem;
   overflow-y: auto;
 }
+
+.panel-body {
+  .form-group:last-child {
+    margin-bottom: 0;
+  }
+}
