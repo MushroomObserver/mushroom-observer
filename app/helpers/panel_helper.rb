@@ -82,7 +82,7 @@ module PanelHelper
   def panel_bodies(args)
     args[:panel_bodies].map.with_index do |body, idx|
       if args[:collapse].present? && idx == args[:panel_bodies].length - 1
-        panel_collapse_body(args, body)
+        panel_collapse_body(args.merge(inner_class: "pt-0"), body)
       else
         panel_body(args, body)
       end

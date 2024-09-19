@@ -56,13 +56,15 @@ module FiltersHelper
   # Figure out what kind of field helper to call, based on definitions below.
   # Some field types need args, so there is both the component and args hash.
   def filter_field(form:, field:, model:, sections:)
-    args = { form: form, field: field }
+    args = { form:, field:, model: }
     args[:label] ||= filter_label(field)
     field_type = filter_field_type_from_parser(field:, model:)
     component = FILTER_FIELD_HELPERS[field_type][:component]
     return unless component
 
+    # Prepare args for the field helper. Requires but removes args[:model].
     args = prepare_args_for_filter_field(args, field_type, component)
+    # Re-add sections and model for conditional fields.
     if component == :filter_autocompleter_with_conditional_fields
       args = args.merge(sections:, model:)
     end
@@ -137,15 +139,15 @@ module FiltersHelper
     args[:help] = filter_help_text(args, field_type)
     args[:hidden_name] = filter_check_for_hidden_name(args)
 
-    FILTER_FIELD_HELPERS[field_type][:args].merge(args)
+    FILTER_FIELD_HELPERS[field_type][:args].merge(args.except(:model))
   end
 
   def filter_help_text(args, field_type)
     component = FILTER_FIELD_HELPERS[field_type][:component]
     multiple_note = if component == :autocompleter_field
-                      :filter_terms_multiple.l
+                      :pattern_search_terms_multiple.l
                     end
-    [:"#{args[:type]}_term_#{args[:field]}".l, multiple_note].compact.join(" ")
+    [:"#{args[:model]}_term_#{args[:field]}".l, multiple_note].compact.join(" ")
   end
 
   # Overrides for the assumed name of the id field for autocompleter.
