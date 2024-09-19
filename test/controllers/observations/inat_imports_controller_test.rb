@@ -224,7 +224,7 @@ module Observations
                    "Test needs user fixture without an iNat username")
       inat_import = inat_imports(:rolf_inat_import)
 
-      # Blank id_list in order to prevent importing any observations
+      # empty id_list to prevent importing any observations in this test
       inat_import.inat_ids = ""
       inat_import.save
       inat_authorization_callback_params = { code: "MockCode" }
