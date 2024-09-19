@@ -156,8 +156,9 @@ module PanelHelper
   end
 
   # make a help-note styled element, like a div, p, or span
-  def help_note(element = :span, string = "")
-    content_tag(element, string, class: "help-note mr-3")
+  def help_note(element = :span, string = "", **args)
+    args[:class] = class_names("help-note mr-3", args[:class])
+    content_tag(element, string, args)
   end
 
   # make a help-block styled element, like a div, p

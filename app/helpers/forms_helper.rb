@@ -97,9 +97,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
                                      args[:checked_value] || "1",
                                      args[:unchecked_value] || "0"))
         concat(args[:label])
-        if args[:between].present?
-          concat(tag.div(class: "d-inline-block ml-3") { args[:between] })
-        end
+        concat(args[:between]) if args[:between].present?
       end)
       concat(args[:append]) if args[:append].present?
     end
@@ -511,8 +509,6 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
 
   def field_label_opts(args)
     label_opts = {}
-    need_margin = args[:between].present?
-    label_opts[:class] = need_margin ? "mr-2" : ""
     label_opts[:index] = args[:index] if args[:index].present?
     label_opts
   end
@@ -526,7 +522,9 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     keys = [:optional, :required].freeze
     positions.each do |pos|
       keys.each do |key|
-        args[pos] = help_note(:span, "(#{key.l})") if args[pos] == key
+        if args[pos] == key
+          args[pos] = help_note(:span, "(#{key.l})", class: "ml-3")
+        end
       end
     end
     args
@@ -538,15 +536,20 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
       return args
     end
 
+    need_margin = args[:inline].present?
+    between_class = need_margin ? "mr-3" : ""
+
     id = [
       nested_field_id(args),
       "help"
     ].compact_blank.join("_")
     args[:between] = capture do
-      if args[:between].present?
-        concat(tag.span(class: "mr-2") { args[:between] })
+      tag.span(class: between_class) do
+        if args[:between].present?
+          concat(tag.span(class: "ml-3") { args[:between] })
+        end
+        concat(collapse_info_trigger(id, class: "ml-3"))
       end
-      concat(collapse_info_trigger(id, class: "ml-1 mr-3"))
     end
     args[:append] = capture do
       concat(args[:append])
