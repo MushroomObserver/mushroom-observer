@@ -70,9 +70,9 @@ module Observations
         { date: { shown: [:when], collapsed: [:created, :modified] },
           name: {
             shown: [:name],
-            collapsed: [:confidence, [:has_name, :lichen],
-                        [:include_subtaxa, :include_synonyms],
-                        [:include_all_name_proposals, :exclude_consensus]]
+            conditional: [[:include_subtaxa, :include_synonyms],
+                          [:include_all_name_proposals, :exclude_consensus]],
+            collapsed: [:confidence, [:has_name, :lichen]]
           },
           location: {
             shown: [:location, :region],

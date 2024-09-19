@@ -5,9 +5,9 @@
 module FiltersHelper
   # Filter panel for a search form. Sections are shown and collapsed.
   # If sections[:collapsed] is present, part of the panel will be collapsed.
-  def filter_panel(form:, filter:, heading:, sections:, type:)
-    shown = filter_panel_body(form:, sections:, type:, section: :shown)
-    collapsed = filter_panel_body(form:, sections:, type:, section: :collapsed)
+  def filter_panel(form:, filter:, heading:, sections:, model:)
+    shown = filter_panel_shown(form:, sections:, model:)
+    collapsed = filter_panel_collapsed(form:, sections:, model:)
     open = collapse = false
     if sections[:collapsed].present?
       collapse = heading
@@ -17,40 +17,56 @@ module FiltersHelper
                 collapse:, open:, panel_bodies: [shown, collapsed])
   end
 
-  # Content of each shown/collapsed section, composed of field rows.
-  def filter_panel_body(form:, sections:, type:, section:)
-    return unless sections[section]
+  def filter_panel_shown(form:, sections:, model:)
+    return unless sections.is_a?(Hash) && sections[:shown].present?
 
     capture do
-      sections[section].each do |field|
-        concat(filter_row(form:, field:, type:))
+      sections[:shown].each do |field|
+        concat(filter_row(form:, field:, model:, sections:))
+      end
+    end
+  end
+
+  # Content of collapsed section, composed of field rows.
+  def filter_panel_collapsed(form:, sections:, model:)
+    return unless sections.is_a?(Hash) && sections[:collapsed].present?
+
+    capture do
+      sections[:collapsed].each do |field|
+        concat(filter_row(form:, field:, model:, sections:))
       end
     end
   end
 
   # Fields might be paired, so we need to check for that.
-  def filter_row(form:, field:, type:)
+  def filter_row(form:, field:, model:, sections:)
     if field.is_a?(Array)
       tag.div(class: "row") do
         field.each do |subfield|
           concat(tag.div(class: filter_columns) do
-            filter_field(form:, field: subfield, type:)
+            filter_field(form:, field: subfield, model:, sections:)
           end)
         end
       end
     else
-      filter_field(form:, field:, type:)
+      filter_field(form:, field:, model:, sections:)
     end
   end
 
   # Figure out what kind of field helper to call, based on definitions below.
   # Some field types need args, so there is both the component and args hash.
-  def filter_field(**args)
-    args[:label] ||= filter_label(args[:field])
-    field_type = filter_field_type_from_parser(**args)
+  def filter_field(form:, field:, model:, sections:)
+    args = { form: form, field: field }
+    args[:label] ||= filter_label(field)
+    field_type = filter_field_type_from_parser(field:, model:)
     component = FILTER_FIELD_HELPERS[field_type][:component]
+    return unless component
+
     args = prepare_args_for_filter_field(args, field_type, component)
-    send(component, **args) if component
+    if component == :filter_autocompleter_with_conditional_fields
+      args = args.merge(sections:, model:)
+    end
+    send(component, **args)
   end
 
   # The field's label.
@@ -66,15 +82,15 @@ module FiltersHelper
   # fields, so we can use that to assign a field helper.
   #   example: :parse_yes -> :filter_yes_field
   # If the field is :pattern, there's no assigned parser.
-  def filter_field_type_from_parser(**args)
-    return :pattern if args[:field] == :pattern
+  def filter_field_type_from_parser(field:, model:)
+    return :pattern if field == :pattern
 
-    subclass = PatternSearch.const_get(args[:type].capitalize)
-    unless subclass.params[args[:field]]
-      raise("No parser defined for #{args[:field]} in #{subclass}")
+    subclass = PatternSearch.const_get(model.capitalize)
+    unless subclass.params[field]
+      raise("No parser defined for #{field} in #{subclass}")
     end
 
-    parser = subclass.params[args[:field]][1]
+    parser = subclass.params[field][1]
     parser.to_s.gsub(/^parse_/, "").to_sym
   end
 
@@ -96,9 +112,8 @@ module FiltersHelper
     list_of_locations: { component: :autocompleter_field,
                          args: { type: :location,
                                  separator: FILTER_SEPARATOR } },
-    list_of_names: { component: :autocompleter_field,
-                     args: { type: :name,
-                             separator: FILTER_SEPARATOR } },
+    list_of_names: { component: :filter_autocompleter_with_conditional_fields,
+                     args: { type: :name, separator: FILTER_SEPARATOR } },
     list_of_projects: { component: :autocompleter_field,
                         args: { type: :project,
                                 separator: FILTER_SEPARATOR } },
@@ -122,7 +137,7 @@ module FiltersHelper
     args[:help] = filter_help_text(args, field_type)
     args[:hidden_name] = filter_check_for_hidden_name(args)
 
-    FILTER_FIELD_HELPERS[field_type][:args].merge(args.except(:type))
+    FILTER_FIELD_HELPERS[field_type][:args].merge(args)
   end
 
   def filter_help_text(args, field_type)
@@ -144,8 +159,33 @@ module FiltersHelper
     nil
   end
 
+  ###############################################################
+  #
   # FIELD HELPERS
   #
+  # Complex mechanism: append collapsed fields to autocompleter that only appear
+  # when autocompleter has a value. Only on the name field
+  def filter_autocompleter_with_conditional_fields(**args)
+    return if args[:sections].blank?
+
+    append = filter_conditional_rows(sections: args[:sections],
+                                     form: args[:form], model: args[:model])
+    autocompleter_field(**args.except(:sections, :model).merge(append:))
+  end
+
+  # Rows that only uncollapse if an autocompleter field has a value.
+  # Note the data-autocompleter-target attribute.
+  def filter_conditional_rows(sections:, form:, model:)
+    capture do
+      tag.div(data: { autocompleter_target: "collapseFields" },
+              class: "collapse") do
+        sections[:conditional].each do |field|
+          concat(filter_row(form:, field:, model:, sections:))
+        end
+      end
+    end
+  end
+
   def filter_yes_field(**args)
     options = [
       ["", nil],
