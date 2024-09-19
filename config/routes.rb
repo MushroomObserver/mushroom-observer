@@ -577,7 +577,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("names/eol_expanded_review", to: "names/eol_data/expanded_review#show",
                                    as: "names_eol_expanded_review")
 
-
   # ----- Observations: standard actions  ----------------------------
   namespace :observations do
     resources :downloads, only: [:new, :create]

@@ -43,7 +43,7 @@ module FiltersHelper
     if field.is_a?(Array)
       tag.div(class: "row") do
         field.each do |subfield|
-          concat(tag.div(class: filter_columns) do
+          concat(tag.div(class: filter_column_classes) do
             filter_field(form:, field: subfield, model:, sections:)
           end)
         end
@@ -166,7 +166,7 @@ module FiltersHelper
   # FIELD HELPERS
   #
   # Complex mechanism: append collapsed fields to autocompleter that only appear
-  # when autocompleter has a value. Only on the name field
+  # when autocompleter has a value. Only on the name field.
   def filter_autocompleter_with_conditional_fields(**args)
     return if args[:sections].blank?
 
@@ -188,31 +188,31 @@ module FiltersHelper
     end
   end
 
-  def filter_yes_field(**args)
+  def filter_yes_field(**)
     options = [
       ["", nil],
       ["yes", "yes"]
     ]
-    select_with_label(options:, inline: true, **args)
+    select_with_label(options:, inline: true, **)
   end
 
-  def filter_boolean_field(**args)
+  def filter_boolean_field(**)
     options = [
       ["", nil],
       ["yes", "yes"],
       ["no", "no"]
     ]
-    select_with_label(options:, inline: true, **args)
+    select_with_label(options:, inline: true, **)
   end
 
-  def filter_yes_no_both_field(**args)
+  def filter_yes_no_both_field(**)
     options = [
       ["", nil],
       ["yes", "yes"],
       ["no", "no"],
       ["both", "either"]
     ]
-    select_with_label(options:, inline: true, **args)
+    select_with_label(options:, inline: true, **)
   end
 
   # RANGE FIELDS The first field gets the label, name and ID of the actual
@@ -221,12 +221,12 @@ module FiltersHelper
   def filter_date_range_field(**args)
     tag.div(class: "row") do
       [
-        tag.div(class: filter_columns) do
+        tag.div(class: filter_column_classes) do
           text_field_with_label(**args.merge(
             { between: "(YYYY-MM-DD)" }
           ))
         end,
-        tag.div(class: filter_columns) do
+        tag.div(class: filter_column_classes) do
           text_field_with_label(**args.merge(
             { field: "#{args[:field]}_range", label: :to.l,
               help: nil, between: :optional }
@@ -281,7 +281,7 @@ module FiltersHelper
     text_field_with_label(**args.merge(between: "(-90.0 to 90.0)"))
   end
 
-  def filter_columns
+  def filter_column_classes
     "col-xs-12 col-sm-6 col-md-12 col-lg-6"
   end
 end
