@@ -39,7 +39,7 @@ module Observations
     end
 
     def new_filter_instance_from_session
-      if session[:pattern] && session[:search_type] == :observations
+      if session[:pattern] && session[:search_type] == :observation
         terms = PatternSearch::Observation.new(session[:pattern]).form_params
         @filter = ObservationFilter.new(terms)
       else
@@ -58,7 +58,7 @@ module Observations
       @pattern = formatted_pattern_search_string
       # Save it so that we can keep it in the search bar in subsequent pages.
       session[:pattern] = @pattern
-      session[:search_type] = :observations
+      session[:search_type] = :observation
     end
 
     # This is the list of fields that are displayed in the search form. In the

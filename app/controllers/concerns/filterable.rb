@@ -72,8 +72,8 @@ module Filterable
         next unless fields_with_range.include?(key.to_sym) &&
                     @keywords[:"#{key}_range"].present?
 
-        @keywords[key] = [@keywords[key].strip,
-                          @keywords[:"#{key}_range"].strip].join("-")
+        @keywords[key] = [@keywords[key].to_s.strip,
+                          @keywords[:"#{key}_range"].to_s.strip].join("-")
         @keywords.delete(:"#{key}_range")
       end
     end

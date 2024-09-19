@@ -38,7 +38,7 @@ module Names
     end
 
     def new_filter_instance_from_session
-      if session[:pattern] && session[:search_type] == :names
+      if session[:pattern] && session[:search_type] == :name
         terms = PatternSearch::Name.new(session[:pattern]).form_params
         @filter = NameFilter.new(terms)
       else
@@ -55,7 +55,7 @@ module Names
       @pattern = formatted_pattern_search_string
       # Save it so that we can keep it in the search bar in subsequent pages.
       session[:pattern] = @pattern
-      session[:search_type] = :names
+      session[:search_type] = :name
     end
 
     # This is the list of fields that are displayed in the search form. In the

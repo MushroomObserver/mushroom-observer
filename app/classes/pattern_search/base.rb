@@ -65,9 +65,9 @@ module PatternSearch
     # rubocop:disable Metrics/AbcSize
     def make_terms_available_to_faceted_form
       parser.terms.each_with_object({}) do |term, hash|
+        # term is what the user typed in, not the parsed value.
         param = lookup_param_name(term.var)
         if fields_with_dates.include?(param)
-          # term is what the user typed in, not the parsed value.
           start, range = check_for_date_range(term)
           hash[param] = start
           hash[:"#{param}_range"] = range if range
@@ -117,7 +117,7 @@ module PatternSearch
       bits = term.vals[0].split("-")
 
       if bits.size == 2
-        [bits[0].to_i, bits[1].to_i]
+        bits.map(&:to_i)
       else
         [term.vals[0], nil]
       end
@@ -129,7 +129,7 @@ module PatternSearch
     end
 
     def fields_with_numeric_range
-      [:rank].freeze
+      [:confidence].freeze
     end
   end
 end
