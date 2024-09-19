@@ -1,4 +1,4 @@
-<%# locals: (filter: {}, field_columns: [], model: filter.class.to_s.underscore.split("_")[0], local: true) -%>
+<%# locals: (filter: {}, field_columns: [], model: filter.class.search_type, local: true) -%>
 
 <%= form_with(model: filter, url: { action: :create }) do |form| %>
 

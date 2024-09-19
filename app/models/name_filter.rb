@@ -2,6 +2,8 @@
 
 # Non-AR model for the faceted PatternSearch form.
 class NameFilter < SearchFilter
+  # Assign attributes from the PatternSearch::Observation.params hash,
+  # adjusting for range fields and autocompleters with hidden id fields.
   PatternSearch::Name.params.map do |keyword, values|
     case values[1]
     when :parse_date_range
@@ -10,9 +12,6 @@ class NameFilter < SearchFilter
     when :parse_rank_range
       attribute(keyword, :string)
       attribute(:"#{keyword}_range", :string)
-    when :parse_confidence
-      attribute(keyword, :integer)
-      attribute(:"#{keyword}_range", :integer)
     else
       attribute(keyword, :string)
     end

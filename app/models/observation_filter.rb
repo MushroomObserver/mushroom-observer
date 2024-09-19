@@ -2,7 +2,8 @@
 
 # Non-AR model for the faceted PatternSearch form.
 class ObservationFilter < SearchFilter
-  # Assign attributes from the PatternSearch::Observation.params hash
+  # Assign attributes from the PatternSearch::Observation.params hash,
+  # adjusting for range fields and autocompleters with hidden id fields.
   PatternSearch::Observation.params.map do |keyword, values|
     case values[1]
     when :parse_date_range

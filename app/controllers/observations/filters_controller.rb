@@ -91,18 +91,6 @@ module Observations
       ].freeze
     end
 
-    def fields_with_dates
-      PatternSearch::Observation.fields_with_dates
-    end
-
-    def fields_with_range
-      PatternSearch::Observation.fields_with_range
-    end
-
-    def fields_with_ids
-      PatternSearch::Observation.fields_with_ids
-    end
-
     def permitted_search_params
       params.permit(observation_search_params)
     end

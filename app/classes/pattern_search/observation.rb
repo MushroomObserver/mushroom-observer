@@ -9,7 +9,7 @@ module PatternSearch
       created: [:created_at, :parse_date_range],
       modified: [:updated_at, :parse_date_range],
 
-      # names
+      # names. note that the last four require the first one to be present
       name: [:names, :parse_list_of_names],
       exclude_consensus: [:exclude_consensus, :parse_boolean], # of_look_alikes
       include_subtaxa: [:include_subtaxa, :parse_boolean],
@@ -73,6 +73,11 @@ module PatternSearch
 
     def self.fields_with_ids
       [:name, :location, :user, :herbarium, :list, :project, :species_list]
+    end
+
+    def self.fields_with_requirements
+      [{ name: [:exclude_consensus, :include_subtaxa, :include_synonyms,
+                :include_all_name_proposals] }]
     end
 
     def params

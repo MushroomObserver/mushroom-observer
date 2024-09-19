@@ -83,18 +83,6 @@ module Names
       ].freeze
     end
 
-    def fields_with_dates
-      PatternSearch::Name.fields_with_dates
-    end
-
-    def fields_with_range
-      PatternSearch::Name.fields_with_range
-    end
-
-    def fields_with_ids
-      PatternSearch::Name.fields_with_ids
-    end
-
     def permitted_search_params
       params.permit(name_search_params)
     end

@@ -54,6 +54,10 @@ module PatternSearch
       []
     end
 
+    def self.fields_with_requirements
+      []
+    end
+
     def params
       self.class.params
     end
