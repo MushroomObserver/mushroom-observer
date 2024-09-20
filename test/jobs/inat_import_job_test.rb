@@ -467,6 +467,28 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
+  def test_user_name_mismatch
+    file_name = "calostoma_lutescens"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    inat_import = create_inat_import(inat_response: mock_inat_response)
+
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response,
+                           username_match: bad_response)
+
+    Inat::PhotoImporter.stub(:new,
+                             stub_mo_photo_importer(mock_inat_response)) do
+      assert_difference("Observation.count", 0,
+                        "It should not import another user's observation") do
+        InatImportJob.perform_now(inat_import)
+      end
+    end
+    assert_match(
+      "401 Unauthorized", inat_import.response_errors,
+      "There should be a 401 if a user tries to import another's iNat obs"
+    )
+  end
+
   ########## Utilities
 
   # The InatImport object which is created in InatImportController#create
@@ -477,19 +499,32 @@ class InatImportJobTest < ActiveJob::TestCase
       user: user, token: "MockCode",
       inat_ids: JSON.parse(inat_response)["results"].first["id"],
       inat_username: JSON.
-        parse(inat_response)["results"].first["user"]["login"]
+        parse(inat_response)["results"].first["user"]["login"],
+      response_errors: ""
     )
   end
 
   # -------- Test doubles
 
-  def stub_inat_interactions(inat_import:, mock_inat_response:, id_above: 0)
+  def stub_inat_interactions(
+    inat_import:, mock_inat_response:, id_above: 0,
+    username_match: good_response
+  )
     stub_token_requests
+    stub_check_username_mismatch(response: username_match)
     stub_inat_api_request(inat_import: inat_import,
                           mock_inat_response: mock_inat_response,
                           id_above: id_above)
     stub_inat_photo_requests(mock_inat_response)
     stub_modify_inat_observations(mock_inat_response)
+  end
+
+  def good_response
+    { status: 200, body: "\"\"", headers: {} }.freeze
+  end
+
+  def bad_response
+    { status: 401, body: "Unauthorized" }.freeze
   end
 
   def stub_token_requests
@@ -527,6 +562,21 @@ class InatImportJobTest < ActiveJob::TestCase
       to_return(status: 200,
                 body: { access_token: "MockJWT" }.to_json,
                 headers: {})
+  end
+
+  def stub_check_username_mismatch(response:)
+    stub_request(:get, "https://api.inaturalist.org/v1/users/me").
+      with(
+        headers: {
+          "Accept" => "application/json",
+          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Authorization" => "Bearer MockAccessToken",
+          "Content-Type" => "application/json",
+          "Host" => "api.inaturalist.org",
+          "User-Agent" => "rest-client/2.1.0 (darwin23 x86_64) ruby/3.3.0p0"
+        }
+      ).
+      to_return(response)
   end
 
   def stub_inat_api_request(inat_import:, mock_inat_response:, id_above: 0)

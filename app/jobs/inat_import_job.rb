@@ -28,15 +28,15 @@ class InatImportJob < ApplicationJob
     @inat_import.update(token: access_token)
 
     api_token = trade_access_token_for_jwt_api_token(@inat_import.token)
-    if response_bad?(api_token)
-      @inat_import.update(state: "Done")
-      return
-    end
-    @inat_import.update(token: api_token, state: "Importing")
+    return done if response_bad?(api_token)
 
+    authorized_username = check_username_mismatch
+    return done if response_bad?(authorized_username)
+
+    @inat_import.update(token: api_token, state: "Importing")
     import_requested_observations
 
-    @inat_import.update(state: "Done")
+    done
     update_user_inat_username
   end
 
@@ -56,6 +56,10 @@ class InatImportJob < ApplicationJob
     e.response
   end
 
+  def done
+    @inat_import.update(state: "Done")
+  end
+
   # https://www.inaturalist.org/pages/api+recommended+practices
   def trade_access_token_for_jwt_api_token(access_token)
     jwt_response = RestClient::Request.execute(
@@ -66,6 +70,17 @@ class InatImportJob < ApplicationJob
   rescue RestClient::ExceptionWithResponse => e
     @inat_import.add_response_error(e.response)
     e.response
+  end
+
+  def check_username_mismatch
+    headers = { authorization: "Bearer #{@inat_import.token}",
+                content_type: :json, accept: :json }
+    response = RestClient.get("#{API_BASE}/users/me", headers)
+
+    JSON.parse(response.body)
+  rescue RestClient::ExceptionWithResponse => e
+    @inat_import.add_response_error(e.response)
+    e
   end
 
   def import_requested_observations
@@ -97,7 +112,8 @@ class InatImportJob < ApplicationJob
   end
 
   def response_bad?(response)
-    response.instance_of?(RestClient::Response) && response.code != 200
+    response.is_a?(RestClient::RequestFailed) ||
+      response.instance_of?(RestClient::Response) && response.code != 200
   end
 
   def page_empty?(page)
