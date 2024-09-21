@@ -37,19 +37,17 @@ class InatImportJobTest < ActiveJob::TestCase
   # the same request (/users/me) needs diffferent responses
   def setup
     @stubs = []
-    WebMock.enable!
+  end
+
+  def add_stub(stub)
+    @stubs << stub
+    stub
   end
 
   def teardown
     @stubs.each do |stub|
       WebMock::StubRegistry.instance.remove_request_stub(stub)
     end
-    WebMock.disable!
-  end
-
-  def add_stub(stub)
-    @stubs << stub
-    stub
   end
 
   # Had 1 identification, 0 photos, 0 observation_fields
