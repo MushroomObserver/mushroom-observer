@@ -28,12 +28,20 @@ class InatImport < ApplicationRecord
   belongs_to :user
 
   def add_response_error(response)
-    code = response.code
-    begin
-      doc = Nokogiri::HTML(response.body)
-      body_text = doc.at("body").text.strip
-    rescue StandardError
-      body_text == ""
+    # internal non-Ruby messages. Ex: { status: 401, body: "error message" }
+    if response.is_a?(Hash)
+      # for internal messages to be displayed as erros in tracker show
+      # Ex: { status: 401, body: "error message" }
+      code = response[:status]
+      body_text = response[:body]
+    else
+      code = response.code
+      begin
+        doc = Nokogiri::HTML(response.body)
+        body_text = doc.at("body").text.strip
+      rescue StandardError
+        body_text == ""
+      end
     end
 
     response_errors << "#{code} #{body_text}\n"

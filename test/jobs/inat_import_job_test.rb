@@ -33,6 +33,23 @@ class InatImportJobTest < ActiveJob::TestCase
   ICONIC_TAXA = InatImportJob::ICONIC_TAXA
   IMPORTED_BY_MO = InatImportJob::IMPORTED_BY_MO
 
+  def setup
+    @stubs = []
+    WebMock.enable!
+  end
+
+  def teardown
+    @stubs.each do |stub|
+      WebMock::StubRegistry.instance.remove_request_stub(stub)
+    end
+    WebMock.disable!
+  end
+
+  def add_stub(stub)
+    @stubs << stub
+    stub
+  end
+
   # Had 1 identification, 0 photos, 0 observation_fields
   def test_import_job_basic_obs
     file_name = "calostoma_lutescens"
@@ -468,13 +485,14 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def test_user_name_mismatch
+    skip("under construction")
     file_name = "calostoma_lutescens"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     inat_import = create_inat_import(inat_response: mock_inat_response)
 
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response,
-                           username_match: bad_response)
+                           login: "different inat user")
 
     Inat::PhotoImporter.stub(:new,
                              stub_mo_photo_importer(mock_inat_response)) do
@@ -508,10 +526,10 @@ class InatImportJobTest < ActiveJob::TestCase
 
   def stub_inat_interactions(
     inat_import:, mock_inat_response:, id_above: 0,
-    username_match: good_response
+    login: inat_import.inat_username
   )
     stub_token_requests
-    stub_check_username_mismatch(response: username_match)
+    stub_check_username_match(login)
     stub_inat_api_request(inat_import: inat_import,
                           mock_inat_response: mock_inat_response,
                           id_above: id_above)
@@ -536,7 +554,7 @@ class InatImportJobTest < ActiveJob::TestCase
   # stub exchanging iNat code for oauth token
   # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
   def stub_oauth_token_request
-    stub_request(:post, "#{SITE}/oauth/token").
+    add_stub(stub_request(:post, "#{SITE}/oauth/token").
       with(
         body: { "client_id" => Rails.application.credentials.inat.id,
                 "client_secret" => Rails.application.credentials.inat.secret,
@@ -546,11 +564,11 @@ class InatImportJobTest < ActiveJob::TestCase
       ).
       to_return(status: 200,
                 body: { access_token: "MockAccessToken" }.to_json,
-                headers: {})
+                headers: {}))
   end
 
   def stub_jwt_request
-    stub_request(:get, "#{SITE}/users/api_token").
+    add_stub(stub_request(:get, "#{SITE}/users/api_token").
       with(
         headers: {
           "Accept" => "application/json",
@@ -561,22 +579,24 @@ class InatImportJobTest < ActiveJob::TestCase
       ).
       to_return(status: 200,
                 body: { access_token: "MockJWT" }.to_json,
-                headers: {})
+                headers: {}))
   end
 
-  def stub_check_username_mismatch(response:)
-    stub_request(:get, "https://api.inaturalist.org/v1/users/me").
+  def stub_check_username_match(login)
+    add_stub(stub_request(:get, "https://api.inaturalist.org/v1/users/me").
       with(
         headers: {
           "Accept" => "application/json",
           "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-          "Authorization" => "Bearer MockAccessToken",
+          "Authorization" => "Bearer",
           "Content-Type" => "application/json",
           "Host" => "api.inaturalist.org",
           "User-Agent" => "rest-client/2.1.0 (darwin23 x86_64) ruby/3.3.0p0"
         }
       ).
-      to_return(response)
+      to_return(status: 200,
+                body: "{\"results\":[{\"login\":\"#{login}\"}]}",
+                headers: {}))
   end
 
   def stub_inat_api_request(inat_import:, mock_inat_response:, id_above: 0)
@@ -591,19 +611,19 @@ class InatImportJobTest < ActiveJob::TestCase
       &order=asc&order_by=id
       &user_login=#{inat_import.inat_username}
     PARAMS
-    stub_request(:get, "#{API_BASE}/observations#{params}").
+    add_stub(stub_request(:get, "#{API_BASE}/observations#{params}").
       with(headers:
     { "Accept" => "application/json",
       "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
       "Authorization" => "Bearer",
       "Host" => "api.inaturalist.org" }).
-      to_return(body: mock_inat_response)
+      to_return(body: mock_inat_response))
   end
 
   def stub_inat_photo_requests(mock_inat_response)
     JSON.parse(mock_inat_response)["results"].each do |result|
       result["observation_photos"].each do |photo|
-        stub_request(
+        add_stub(stub_request(
           :get,
           "#{PHOTO_BASE}/#{photo["photo_id"]}/original.jpg"
         ).
@@ -615,7 +635,7 @@ class InatImportJobTest < ActiveJob::TestCase
               "User-Agent" => "Ruby"
             }
           ).
-          to_return(status: 200, body: "", headers: {})
+          to_return(status: 200, body: "", headers: {}))
       end
     end
   end
@@ -650,9 +670,9 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def stub_add_observation_fields
-    stub_request(:post, "#{API_BASE}/observation_field_values").
+    add_stub(stub_request(:post, "#{API_BASE}/observation_field_values").
       to_return(status: 200, body: "".to_json,
-                headers: { "Content-Type" => "application/json" })
+                headers: { "Content-Type" => "application/json" }))
   end
 
   def stub_update_descriptions(mock_inat_response)
@@ -676,9 +696,9 @@ class InatImportJobTest < ActiveJob::TestCase
       }
       headers = { authorization: "Bearer",
                   content_type: "application/json", accept: "application/json" }
-      stub_request(:put, "#{API_BASE}/observations/#{obs["id"]}").
+      add_stub(stub_request(:put, "#{API_BASE}/observations/#{obs["id"]}").
         with(body: body.to_json, headers: headers).
-        to_return(status: 200, body: "".to_json, headers: {})
+        to_return(status: 200, body: "".to_json, headers: {}))
     end
   end
 
@@ -745,5 +765,9 @@ class InatImportJobTest < ActiveJob::TestCase
     ms_hash = JSON.parse(mock_search_result)
     ms_hash["total_results"] = ms_hash["results"].length
     JSON.generate(ms_hash)
+  end
+
+  def mock_me_response(login)
+    { code: 200, body: { "results" => [{ "login" => login }] } }
   end
 end

@@ -3029,6 +3029,7 @@
   inat_import_started: Your import has started. Refresh page to update results.
 
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
+  inat_wrong_user: "You cannot import an iNat observation created by someone else. To import your own observation, make sure that noone else is logged into iNat on your device and that you entered the correct iNat username."
 
   inat_data_comment: Snapshot of Imported iNat Data
   inat_dqa_casual: Casual

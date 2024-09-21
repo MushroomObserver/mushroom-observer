@@ -30,7 +30,7 @@ class InatImportJob < ApplicationJob
     api_token = trade_access_token_for_jwt_api_token(@inat_import.token)
     return done if response_bad?(api_token)
 
-    authorized_username = check_username_mismatch
+    authorized_username = check_username_match(api_token)
     return done if response_bad?(authorized_username)
 
     @inat_import.update(token: api_token, state: "Importing")
@@ -72,15 +72,30 @@ class InatImportJob < ApplicationJob
     e.response
   end
 
-  def check_username_mismatch
-    headers = { authorization: "Bearer #{@inat_import.token}",
+  def check_username_match(api_token)
+    headers = { authorization: "Bearer #{api_token}",
                 content_type: :json, accept: :json }
     response = RestClient.get("#{API_BASE}/users/me", headers)
+    return response if right_user?(response)
 
-    JSON.parse(response.body)
+    error = { status: 401, body: :inat_wrong_user.t }
+    @inat_import.add_response_error(error)
+    error
   rescue RestClient::ExceptionWithResponse => e
     @inat_import.add_response_error(e.response)
     e
+  end
+
+  def right_user?(response)
+    inat_logged_in_user = JSON.parse(response.body)["results"].first["login"]
+    inat_logged_in_user == @inat_import.inat_username
+  end
+
+  def response_bad?(response)
+    response.is_a?(RestClient::RequestFailed) ||
+      response.instance_of?(RestClient::Response) && response.code != 200 ||
+      # RestClient was happy, but the user wasn't authorized
+      response.is_a?(Hash) && response[:status] == 401
   end
 
   def import_requested_observations
@@ -109,11 +124,6 @@ class InatImportJob < ApplicationJob
 
       break
     end
-  end
-
-  def response_bad?(response)
-    response.is_a?(RestClient::RequestFailed) ||
-      response.instance_of?(RestClient::Response) && response.code != 200
   end
 
   def page_empty?(page)
