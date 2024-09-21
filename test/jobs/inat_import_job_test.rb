@@ -583,15 +583,14 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def stub_check_username_match(login)
-    add_stub(stub_request(:get, "https://api.inaturalist.org/v1/users/me").
+    add_stub(stub_request(:get, "#{API_BASE}users/me").
       with(
         headers: {
           "Accept" => "application/json",
           "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
           "Authorization" => "Bearer",
           "Content-Type" => "application/json",
-          "Host" => "api.inaturalist.org",
-          "User-Agent" => "rest-client/2.1.0 (darwin23 x86_64) ruby/3.3.0p0"
+          "Host" => "api.inaturalist.org"
         }
       ).
       to_return(status: 200,
