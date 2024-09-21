@@ -8,6 +8,17 @@ add_page_title(:inat_import_tracker.t)
   <b><%= :inat_import_tracker_status.t %>: </b>
   <span id="state"><%= @inat_import.state %></span>
 </p>
+<% if @inat_import.response_errors.present? %>
+  <p>
+    <b><%= :ERRORS.t %>: </b>
+    <%= tag.span(id: "errors") do %>
+      <% @inat_import.response_errors.each_line do |error| %>
+        <%= error %></br>
+      <% end %>
+    <% end %>
+  </p>
+<% end %>
+
 <p>
   <b><%= :inat_import_tracker_started.t %>: </b>
   <span id="started"><%= @tracker.created_at %></span>
@@ -31,17 +42,6 @@ add_page_title(:inat_import_tracker.t)
   <span id="importables_count"><%= @inat_import.importables.to_s %></span>
 </p>
 <p><%= :inat_importables_explanation.t %></p>
-
-<% if @inat_import.response_errors.present? %>
-  <p>
-    <b><%= :ERRORS.t %>: </b>
-    <%= tag.span(id: "errors") do %>
-      <% @inat_import.response_errors.each_line do |error| %>
-        <%= error %></br>
-      <% end %>
-    <% end %>
-  </p>
-<% end %>
 
 <p>
   <% if import_done?(@inat_import) %>
