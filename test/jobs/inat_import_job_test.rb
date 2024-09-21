@@ -33,6 +33,8 @@ class InatImportJobTest < ActiveJob::TestCase
   ICONIC_TAXA = InatImportJob::ICONIC_TAXA
   IMPORTED_BY_MO = InatImportJob::IMPORTED_BY_MO
 
+  # Prevent stubs from persisting between test methods because
+  # the same request (/users/me) needs diffferent responses
   def setup
     @stubs = []
     WebMock.enable!
@@ -485,14 +487,14 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def test_user_name_mismatch
-    skip("under construction")
+    # skip("under construction")
     file_name = "calostoma_lutescens"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     inat_import = create_inat_import(inat_response: mock_inat_response)
 
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response,
-                           login: "different inat user")
+                           login: "another user")
 
     Inat::PhotoImporter.stub(:new,
                              stub_mo_photo_importer(mock_inat_response)) do
@@ -502,8 +504,8 @@ class InatImportJobTest < ActiveJob::TestCase
       end
     end
     assert_match(
-      "401 Unauthorized", inat_import.response_errors,
-      "There should be a 401 if a user tries to import another's iNat obs"
+      :inat_wrong_user.l, inat_import.response_errors,
+      "It should warn if a user tries to import another's iNat obs"
     )
   end
 
