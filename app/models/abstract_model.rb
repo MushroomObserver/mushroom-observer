@@ -107,7 +107,7 @@ class AbstractModel < ApplicationRecord
   ##############################################################################
 
   scope :created_on, lambda { |ymd_string|
-    where(arel_table[:created_at].format("%Y-%m-%d") == ymd_string)
+    where(arel_table[:created_at].format("%Y-%m-%d").eq(ymd_string))
   }
   scope :created_after, lambda { |ymd_string|
     where(arel_table[:created_at].format("%Y-%m-%d") >= ymd_string)
@@ -120,7 +120,7 @@ class AbstractModel < ApplicationRecord
       where(arel_table[:created_at].format("%Y-%m-%d") <= latest)
   }
   scope :updated_on, lambda { |ymd_string|
-    where(arel_table[:updated_at].format("%Y-%m-%d") == ymd_string)
+    where(arel_table[:updated_at].format("%Y-%m-%d").eq(ymd_string))
   }
   scope :updated_after, lambda { |ymd_string|
     where(arel_table[:updated_at].format("%Y-%m-%d") >= ymd_string)

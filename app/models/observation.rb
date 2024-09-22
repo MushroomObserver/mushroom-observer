@@ -227,7 +227,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
   # Extra timestamp scopes for when Observation found:
   scope :found_on, lambda { |ymd_string|
-    where(arel_table[:when].format("%Y-%m-%d") == ymd_string)
+    where(arel_table[:when].format("%Y-%m-%d").eq(ymd_string))
   }
   scope :found_after, lambda { |ymd_string|
     where(arel_table[:when].format("%Y-%m-%d") >= ymd_string)
