@@ -42,10 +42,9 @@ module Filterable
 
       remove_invalid_field_combinations
       concatenate_range_fields
-      @sendable_params = @keywords
-      substitute_ids_for_strings
-      # @storable_params = @keywords
-      # set_storable_params
+
+      @sendable_params = substitute_ids_with_strings(@keywords)
+      # @storable_params = configure_storable_params(@keywords)
     end
 
     # Passing some fields will raise an error if the required field is missing,
@@ -74,56 +73,63 @@ module Filterable
       end
     end
 
-    # SENDABLE_PARAMS - params sent to Query.
-    # These methods don't modify the original @keywords.
+    # SENDABLE_PARAMS - params with ids can be sent to index and query.
     #
-    # This method substitutes the ids for the strings typed in the form.
-    def substitute_ids_for_strings
+    # This method deletes the strings typed in the form and sends ids, saving a
+    # lookup at the receiver. However, we still want a legible string saved in
+    # the session, so we can repopulate the form with legible values - plus
+    # maybe in the url. Could send the id versions as separate `filter` param?
+    #
+    # Need to modify autocompleters to check for record id on load if prefilled.
+    def substitute_strings_with_ids(keywords)
       search_subclass.fields_with_ids.each do |key|
-        next if @sendable_params[:"#{key}_id"].blank?
+        next if keywords[:"#{key}_id"].blank?
 
-        @sendable_params[key] = @sendable_params[:"#{key}_id"]
-        @sendable_params.delete(:"#{key}_id")
+        keywords[key] = keywords[:"#{key}_id"]
+        keywords.delete(:"#{key}_id")
       end
+      keywords
     end
 
-    # STORABLE_PARAMS - params string in session.
+    # STORABLE_PARAMS - params for the pattern string in session.
     # These methods don't modify the original @keywords.
     #
     # Ideally we'd store full strings for all values, including names and
     # locations, so we can repopulate the form with the same values.
-    def set_storable_params
-      escape_strings_and_remove_ids
-      escape_locations_and_remove_ids
+    def substitute_ids_with_strings(keywords)
+      escape_strings_and_remove_ids(keywords)
+      escape_locations_and_remove_ids(keywords)
     end
 
     # Escape-quote the strings, the way the short form requires.
-    def escape_strings_and_remove_ids
+    def escape_strings_and_remove_ids(keywords)
       search_subclass.fields_with_ids.each do |key|
         # location handled separately
         next if key.to_sym == :location
-        next if @storable_params[:"#{key}_id"].blank?
+        next if keywords[:"#{key}_id"].blank?
 
-        list = @storable_params[key].split(",").map(&:strip)
+        list = keywords[key].split(",").map(&:strip)
         list = list.map { |name| "\"#{name}\"" }
-        @storable_params[key] = list.join(",")
-        @storable_params.delete(:"#{key}_id")
+        keywords[key] = list.join(",")
+        keywords.delete(:"#{key}_id")
       end
+      keywords
     end
 
     # Escape-quote the locations and their commas. We'd prefer to have legible
     # strings in the url, but we're not storing long location strings yet,
     # because the comma handling is difficult. Maybe switch to textarea with
     # `\n` separator.
-    def escape_locations_and_remove_ids
+    def escape_locations_and_remove_ids(keywords)
       [:location, :region].each do |key|
-        next if @storable_params[:"#{key}_id"].blank?
+        next if keywords[:"#{key}_id"].blank?
 
-        list = @storable_params[key].split("\n").map(&:strip)
+        list = keywords[key].split("\n").map(&:strip)
         list = list.map { |location| "\"#{location.tr(",", "\\,")}\"" }
-        @storable_params[key] = list.join(",")
-        @storable_params.delete(:"#{key}_id")
+        keywords[key] = list.join(",")
+        keywords.delete(:"#{key}_id")
       end
+      keywords
     end
   end
   # rubocop:enable Metrics/BlockLength
