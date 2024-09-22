@@ -61,8 +61,9 @@ class API2
       validate_create_params!(params)
       obj = before_create(params) ||
             model.create(params)
+      # This generally means so validation was hit.
+      # Check obj.errors
       raise(CreateFailed.new(obj)) if obj.new_record?
-
       after_create(obj)
       obj
     end
