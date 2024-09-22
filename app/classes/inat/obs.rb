@@ -289,18 +289,22 @@ class Inat
     end
 
     def snapshot
-      <<~COMMENT.gsub(/^\s+/, "")
-        #{:USER.t}: #{inat_user_login}\n
-        #{:OBSERVED.t}: #{self.when}\n
-        #{:show_observation_inat_lat_lng.t}: #{lat_lon_accuracy}\n
-        #{:PLACE.t}: #{inat_place_guess}\n
-        #{:ID.t}: #{inat_taxon_name}\n
-        #{:DQA.t}: #{dqa}\n
-        #{:OBSERVATION_FIELDS.t}: #{obs_fields(inat_obs_fields)}\n
-        #{:PROJECTS.t}: #{:inat_not_imported.t}\n
-        #{:ANNOTATIONS.t}: #{:inat_not_imported.t}\n
-        #{:TAGS.t}: #{:inat_not_imported.t}\n
-      COMMENT
+      result = ""
+      {
+        USER: inat_user_login,
+        OBSERVED: self.when,
+        show_observation_inat_lat_lng: lat_lon_accuracy,
+        PLACE: inat_place_guess,
+        ID: inat_taxon_name,
+        DQA: dqa,
+        OBSERVATION_FIELDS: obs_fields(inat_obs_fields),
+        PROJECTS: :inat_not_imported.t,
+        ANNOTATIONS: :inat_not_imported.t,
+        TAGS: :inat_not_imported.t
+      }.each do |label, value|
+        result += "#{label.to_sym.t}: #{value}\n"
+      end
+      result.gsub(/^\s+/, "")
     end
 
     def lat_lon_accuracy

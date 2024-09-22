@@ -56,6 +56,21 @@ class InatObsTest < UnitTestCase
                      mock_inat_obs.send(attribute))
       end
 
+    expected_snapshot =
+      <<~SNAPSHOT.gsub(/^\s+/, "")
+        #{:USER.t}: #{mock_inat_obs.inat_user_login}\n
+        #{:OBSERVED.t}: #{mock_inat_obs.when}\n
+        #{:show_observation_inat_lat_lng.t}: #{mock_inat_obs.lat_lon_accuracy}\n
+        #{:PLACE.t}: #{mock_inat_obs.inat_place_guess}\n
+        #{:ID.t}: #{mock_inat_obs.inat_taxon_name}\n
+        #{:DQA.t}: #{mock_inat_obs.dqa}\n
+        #{:OBSERVATION_FIELDS.t}: #{mock_inat_obs.obs_fields(mock_inat_obs.inat_obs_fields)}\n
+        #{:PROJECTS.t}: #{:inat_not_imported.t}\n
+        #{:ANNOTATIONS.t}: #{:inat_not_imported.t}\n
+        #{:TAGS.t}: #{:inat_not_imported.t}\n
+      SNAPSHOT
+    assert_equal(expected_snapshot, mock_inat_obs.snapshot)
+
     expect = License.where(License[:url] =~ "/by-nc/").
              where(deprecated: false).order(id: :asc).first
     assert_equal(expect, mock_inat_obs.license)
