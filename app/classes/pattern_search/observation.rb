@@ -75,9 +75,10 @@ module PatternSearch
       [:name, :location, :user, :herbarium, :list, :project, :species_list]
     end
 
+    # hash of required: fields
     def self.fields_with_requirements
-      [{ name: [:exclude_consensus, :include_subtaxa, :include_synonyms,
-                :include_all_name_proposals] }]
+      { name: [:exclude_consensus, :include_subtaxa, :include_synonyms,
+               :include_all_name_proposals] }
     end
 
     def params

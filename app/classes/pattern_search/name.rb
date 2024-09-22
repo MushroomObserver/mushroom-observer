@@ -54,8 +54,9 @@ module PatternSearch
       []
     end
 
+    # hash of required: fields
     def self.fields_with_requirements
-      []
+      {}
     end
 
     def params

@@ -54,6 +54,7 @@ module Filterable
       return unless search_subclass.respond_to?(:fields_with_requirements)
 
       search_subclass.fields_with_requirements.each do |req, fields|
+        debugger
         next if @keywords[req].present?
 
         fields.each { |field| @keywords.delete(field) }
