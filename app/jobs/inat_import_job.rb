@@ -192,10 +192,16 @@ class InatImportJob < ApplicationJob
   end
 
   def create_observation
-    name_id = adjust_for_provisional
+    @observation = Observation.create(new_obs_params)
+    # Ensure this Name wins consensus_calc ties
+    # by creating this naming and vote first
+    add_naming_with_vote(name: @observation.name)
+    @observation.log(:log_observation_created)
+  end
 
-    @observation = Observation.create(
-      user: @inat_import.user,
+  def new_obs_params
+    name_id = adjust_for_provisional
+    { user: @inat_import.user,
       when: @inat_obs.when,
       location: @inat_obs.location,
       where: @inat_obs.where,
@@ -206,12 +212,7 @@ class InatImportJob < ApplicationJob
       text_name: Name.find(name_id).text_name,
       notes: @inat_obs.notes,
       source: @inat_obs.source,
-      inat_id: @inat_obs.inat_id
-    )
-    # Ensure this Name wins consensus_calc ties
-    # by creating this naming and vote first
-    add_naming_with_vote(name: @observation.name)
-    @observation.log(:log_observation_created)
+      inat_id: @inat_obs.inat_id }
   end
 
   # NOTE: 1. iNat users seem to add a prov name only if there's a sequence.
