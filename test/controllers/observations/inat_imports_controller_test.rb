@@ -244,7 +244,6 @@ module Observations
       assert_redirected_to(inat_import_job_tracker_path(tracker.id))
     end
 
-    # TODO: test inat_username not saved/updated if authorization fails
     def test_inat_username_unchanged_if_authorization_denied
       user = users(:rolf)
       assert_blank(user.inat_username,

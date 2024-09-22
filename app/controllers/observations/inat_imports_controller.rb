@@ -24,11 +24,16 @@
 # 5. The rest happens in the background. The InatImportJob:
 #      Uses the `code` to obtain an oauth access_token
 #      Trades the oauth token for a JWT api_token
+#      Checks if the MO user is trying to import some else's obss
 #      Makes an authenticated iNat API request for the desired observations
 #      For each iNat obs in the results,
 #         creates an Inat::Obs
-#         adds an MO Observation, mapping Inat::Obs details to the MO Observation
+#         adds an MO Observation, mapping Inat::Obs details to the MO Obs
 #         adds Inat photos to the MO Observation via the MO API
+#         maps iNat sequences to MO Sequences
+#         adds an MO Comment with a snapshot of the imported data
+#         updates the iNat obs with a Mushroom Observer URL Observation Field
+#         updates the iNat obs Notes
 #
 module Observations
   class InatImportsController < ApplicationController
