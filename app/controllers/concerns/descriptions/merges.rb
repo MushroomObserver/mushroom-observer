@@ -133,7 +133,7 @@ module Descriptions::Merges
     def warn_and_render_edit_description_form
       flash_warning(:runtime_description_merge_conflict.t)
       @description = @dest
-      @licenses = License.current_names_and_ids
+      @licenses = License.available_names_and_ids
       merge_description_notes
       @merge = true
       @old_desc_id = @src.id

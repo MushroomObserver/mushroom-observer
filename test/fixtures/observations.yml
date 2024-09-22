@@ -792,3 +792,7 @@ newbie_obs:
   <<: *DEFAULTS
   notes:
     :Collector: _user foray_newbie_
+
+imported_inat_obs:
+  <<: *DEFAULTS
+  inat_id: 12345
