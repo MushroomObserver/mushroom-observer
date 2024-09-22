@@ -5,5 +5,11 @@ require("test_helper")
 # ------------------------------------------------------------
 #  Observation filters - test pattern search
 # ------------------------------------------------------------
-class ObservationFiltersControllerTest < FunctionalTestCase
+module Observations
+  class FiltersControllerTest < FunctionalTestCase
+    def test_existing_pattern
+      @request.session["pattern"] = "something"
+      @request.session["search_type"] = "observation"
+    end
+  end
 end
