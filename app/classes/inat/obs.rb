@@ -288,6 +288,37 @@ class Inat
       prov_sp_name.sub(/ (.*)/, ' "sp-\1"')
     end
 
+    def snapshot
+      <<~COMMENT.gsub(/^\s+/, "")
+        #{:USER.t}: #{inat_user_login}\n
+        #{:OBSERVED.t}: #{self.when}\n
+        #{:show_observation_inat_lat_lng.t}: #{lat_lon_accuracy}\n
+        #{:PLACE.t}: #{inat_place_guess}\n
+        #{:ID.t}: #{inat_taxon_name}\n
+        #{:DQA.t}: #{dqa}\n
+        #{:OBSERVATION_FIELDS.t}: #{obs_fields(inat_obs_fields)}\n
+        #{:PROJECTS.t}: #{:inat_not_imported.t}\n
+        #{:ANNOTATIONS.t}: #{:inat_not_imported.t}\n
+        #{:TAGS.t}: #{:inat_not_imported.t}\n
+      COMMENT
+    end
+
+    def lat_lon_accuracy
+      "#{inat_location} " \
+      "+/-#{inat_public_positional_accuracy} m"
+    end
+
+    def obs_fields(fields)
+      return :none.t if fields.empty?
+
+      "\n#{one_line_per_field(fields)}"
+    end
+
+    def one_line_per_field(fields)
+      fields.map { |f| "&nbsp;&nbsp;#{f[:name]}: #{f[:value]}" }.
+        join("\n")
+    end
+
     ########## Utilities
 
     def public_accuracy_in_degrees

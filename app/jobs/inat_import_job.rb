@@ -355,11 +355,6 @@ class InatImportJob < ApplicationJob
     end
   end
 
-  def lat_lon_accuracy
-    "#{@inat_obs.inat_location} " \
-    "+/-#{@inat_obs.inat_public_positional_accuracy} m"
-  end
-
   def add_inat_sequences
     @inat_obs.sequences.each do |sequence|
       params = { action: :sequence, method: :post,
@@ -380,34 +375,8 @@ class InatImportJob < ApplicationJob
   def add_snapshot_of_import_comment
     params = { target: @observation, user: inat_manager,
                summary: "#{:inat_data_comment.t} #{@observation.created_at}",
-               comment: import_snapshot }
+               comment: @inat_obs.snapshot }
     Comment.create(params)
-  end
-
-  def import_snapshot
-    <<~COMMENT.gsub(/^\s+/, "")
-      #{:USER.t}: #{@inat_obs.inat_user_login}
-      #{:OBSERVED.t}: #{@inat_obs.when}\n
-      #{:show_observation_inat_lat_lng.t}: #{lat_lon_accuracy}\n
-      #{:PLACE.t}: #{@inat_obs.inat_place_guess}\n
-      #{:ID.t}: #{@inat_obs.inat_taxon_name}\n
-      #{:DQA.t}: #{@inat_obs.dqa}\n
-      #{:OBSERVATION_FIELDS.t}: #{obs_fields(@inat_obs.inat_obs_fields)}\n
-      #{:PROJECTS.t}: #{:inat_not_imported.t}\n
-      #{:ANNOTATIONS.t}: #{:inat_not_imported.t}\n
-      #{:TAGS.t}: #{:inat_not_imported.t}\n
-    COMMENT
-  end
-
-  def obs_fields(fields)
-    return :none.t if fields.empty?
-
-    "\n#{one_line_per_field(fields)}"
-  end
-
-  def one_line_per_field(fields)
-    fields.map { |f| "&nbsp;&nbsp;#{f[:name]}: #{f[:value]}" }.
-      join("\n")
   end
 
   def update_inat_observation
