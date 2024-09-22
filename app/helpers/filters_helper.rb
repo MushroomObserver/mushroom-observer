@@ -14,7 +14,8 @@ module FiltersHelper
       open = filter.attributes.keys.intersect?(sections[:collapsed])
     end
     panel_block(heading: :"search_term_group_#{heading}".l,
-                collapse:, open:, panel_bodies: [shown, collapsed])
+                collapse:, open:, collapse_message: :MORE.l,
+                panel_bodies: [shown, collapsed])
   end
 
   def filter_panel_shown(form:, sections:, model:)

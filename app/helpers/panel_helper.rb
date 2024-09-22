@@ -16,21 +16,25 @@ module PanelHelper
       **args.except(*panel_inner_args)
     ) do
       concat(heading)
-      if args[:panel_bodies].present?
-        concat(panel_bodies(args))
-      elsif args[:collapse].present?
-        concat(panel_collapse_body(args, content))
-      else
-        concat(panel_body(args, content))
-      end
+      concat(panel_body_or_bodies(args, content))
       concat(footer)
+    end
+  end
+
+  def panel_body_or_bodies(args, content)
+    if args[:panel_bodies].present?
+      panel_bodies(args)
+    elsif args[:collapse].present?
+      panel_collapse_body(args, content)
+    else
+      panel_body(args, content)
     end
   end
 
   # Args passed to panel components that are not applied to the outer div.
   def panel_inner_args
     [:class, :inner_class, :inner_id, :heading, :heading_links, :panel_bodies,
-     :collapse, :open, :footer].freeze
+     :collapse, :collapse_message, :open, :footer].freeze
   end
 
   def panel_heading(args)
@@ -67,15 +71,19 @@ module PanelHelper
         aria: { expanded: args[:open], controls: args[:collapse] }
       ) do
         [args[:heading],
-         tag.span(panel_collapse_icons, class: "float-right")].safe_join
+         tag.span(panel_collapse_icons(args), class: "float-right")].safe_join
       end
     end
   end
 
   # The caret icon that indicates toggling the panel open/collapsed.
-  def panel_collapse_icons
-    [link_icon(:chevron_down, title: :OPEN.l, class: "active-icon"),
-     link_icon(:chevron_up, title: :CLOSE.l)].safe_join
+  def panel_collapse_icons(args)
+    if (message = args[:collapse_message]).present?
+      message = tag.span(message, class: "font-weight-normal mr-2")
+    end
+    [message,
+     link_icon(:chevron_down, title: :OPEN.l, class: "active-icon"),
+     link_icon(:chevron_up, title: :CLOSE.l)].compact_blank.safe_join
   end
 
   # Some panels need multiple panel bodies. Potentially collapse the last one.
