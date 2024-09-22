@@ -583,7 +583,7 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def stub_check_username_match(login)
-    add_stub(stub_request(:get, "#{API_BASE}users/me").
+    add_stub(stub_request(:get, "#{API_BASE}/users/me").
       with(
         headers: {
           "Accept" => "application/json",
