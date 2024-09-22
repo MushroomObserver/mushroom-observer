@@ -382,6 +382,7 @@ class InatImportJob < ApplicationJob
 
   def update_inat_observation
     update_mushroom_observer_url_field
+    sleep(1)
     update_description
   end
 
