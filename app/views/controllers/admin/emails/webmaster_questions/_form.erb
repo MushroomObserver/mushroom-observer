@@ -1,7 +1,7 @@
 <%= form_with(url: { action: :create }) do |f| %>
 
   <%= :ask_webmaster_note.tp %>
-
+  <br/>
   <%= fields_for(:user) do |f_u| %>
     <%= text_field_with_label(form: f_u, field: :email, value: @email, size: 60,
                               label: :ask_webmaster_your_email.t + ":",
