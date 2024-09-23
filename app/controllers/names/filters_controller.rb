@@ -38,7 +38,7 @@ module Names
     end
 
     def new_filter_instance_from_session
-      if session[:pattern] && session[:search_type] == :name
+      if session[:pattern].present? && session[:search_type] == :name
         terms = PatternSearch::Name.new(session[:pattern]).form_params
         @filter = NameFilter.new(terms)
       else

@@ -39,7 +39,7 @@ module Observations
     end
 
     def new_filter_instance_from_session
-      if session[:pattern] && session[:search_type] == :observation
+      if session[:pattern].present? && session[:search_type] == :observation
         terms = PatternSearch::Observation.new(session[:pattern]).form_params
         @filter = ObservationFilter.new(terms)
       else
