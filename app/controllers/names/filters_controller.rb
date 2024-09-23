@@ -63,12 +63,13 @@ module Names
     # with an array of fields or field pairings.
     def set_up_form_field_groupings
       @field_columns = [
-        { date: { shown: [:created, :modified], collapsed: [] },
+        { pattern: { shown: [:pattern], collapsed: [] },
           quality: {
             shown: [[:has_observations, :deprecated]],
             collapsed: [[:has_author, :author],
                         [:has_citation, :citation]]
-          } },
+          },
+          date: { shown: [:created, :modified], collapsed: [] } },
         { scope: {
             shown: [[:has_synonyms, :include_synonyms],
                     [:include_subtaxa, :include_misspellings]],

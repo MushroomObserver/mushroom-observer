@@ -79,7 +79,8 @@ module Observations
             collapsed: [[:has_public_lat_lng, :is_collection_location],
                         [:east, :west], [:north, :south]]
           } },
-        { detail: {
+        { pattern: { shown: [:pattern], collapsed: [] },
+          detail: {
             shown: [[:has_specimen, :has_sequence]],
             collapsed: [[:has_images, :has_notes],
                         [:has_field, :notes], [:has_comments, :comments]]
