@@ -6,58 +6,71 @@ module FiltersHelper
   # Filter panel for a search form. Sections are shown and collapsed.
   # If sections[:collapsed] is present, part of the panel will be collapsed.
   def filter_panel(form:, filter:, heading:, sections:, model:)
-    shown = filter_panel_shown(form:, sections:, model:)
-    collapsed = filter_panel_collapsed(form:, sections:, model:)
+    shown = filter_panel_shown(form:, filter:, sections:, model:)
+    collapsed = filter_panel_collapsed(form:, filter:, sections:, model:)
     open = collapse = false
     if sections[:collapsed].present?
       collapse = heading
-      open = filter.attributes.keys.intersect?(sections[:collapsed])
+      open = filter_panel_open?(filter:, sections:)
     end
     panel_block(heading: :"search_term_group_#{heading}".l,
                 collapse:, open:, collapse_message: :MORE.l,
                 panel_bodies: [shown, collapsed])
   end
 
-  def filter_panel_shown(form:, sections:, model:)
+  # This returns the current filter terms in the form of a hash.
+  def filter_params(filter:)
+    filter.attributes.compact_blank.transform_keys(&:to_sym)
+  end
+
+  def filter_panel_open?(filter:, sections:)
+    current = filter_params(filter:)&.keys || []
+    this_section = sections[:collapsed].flatten # could be pairs of fields
+    return true if current.intersect?(this_section)
+
+    false
+  end
+
+  def filter_panel_shown(form:, filter:, sections:, model:)
     return unless sections.is_a?(Hash) && sections[:shown].present?
 
     capture do
       sections[:shown].each do |field|
-        concat(filter_row(form:, field:, model:, sections:))
+        concat(filter_row(form:, filter:, field:, model:, sections:))
       end
     end
   end
 
   # Content of collapsed section, composed of field rows.
-  def filter_panel_collapsed(form:, sections:, model:)
+  def filter_panel_collapsed(form:, filter:, sections:, model:)
     return unless sections.is_a?(Hash) && sections[:collapsed].present?
 
     capture do
       sections[:collapsed].each do |field|
-        concat(filter_row(form:, field:, model:, sections:))
+        concat(filter_row(form:, filter:, field:, model:, sections:))
       end
     end
   end
 
   # Fields might be paired, so we need to check for that.
-  def filter_row(form:, field:, model:, sections:)
+  def filter_row(form:, filter:, field:, model:, sections:)
     if field.is_a?(Array)
       tag.div(class: "row") do
         field.each do |subfield|
           concat(tag.div(class: filter_column_classes) do
-            filter_field(form:, field: subfield, model:, sections:)
+            filter_field(form:, filter:, field: subfield, model:, sections:)
           end)
         end
       end
     else
-      filter_field(form:, field:, model:, sections:)
+      filter_field(form:, filter:, field:, model:, sections:)
     end
   end
 
   # Figure out what kind of field helper to call, based on definitions below.
   # Some field types need args, so there is both the component and args hash.
-  def filter_field(form:, field:, model:, sections:)
-    args = { form:, field:, model: }
+  def filter_field(form:, filter:, field:, model:, sections:)
+    args = { form:, filter:, field:, model: }
     args[:label] ||= filter_label(field)
     field_type = filter_field_type_from_parser(field:, model:)
     component = FILTER_FIELD_HELPERS[field_type][:component]
@@ -83,7 +96,7 @@ module FiltersHelper
 
   # The PatternSearch subclasses define how they're going to parse their
   # fields, so we can use that to assign a field helper.
-  #   example: :parse_yes -> :filter_yes_field
+  #   example: :parse_yes -> :yes, from which we deduce :filter_yes_field
   # If the field is :pattern, there's no assigned parser.
   def filter_field_type_from_parser(field:, model:)
     return :pattern if field == :pattern
@@ -130,6 +143,10 @@ module FiltersHelper
     latitude: { component: :filter_latitude_field, args: {} }
   }.freeze
 
+  FILTER_SELECT_TYPES = [
+    :yes, :boolean, :yes_no_both, :rank_range, :confidence
+  ].freeze
+
   # Prepares HTML args for the field helper. This is where we can make
   # adjustments to the args hash before passing it to the field helper.
   # NOTE: Bootstrap 3 can't do full-width inline label/field.
@@ -139,6 +156,7 @@ module FiltersHelper
     end
     args[:help] = filter_help_text(args, field_type)
     args[:hidden_name] = filter_check_for_hidden_name(args)
+    args = filter_prefill_or_select_values(args, field_type)
 
     FILTER_FIELD_HELPERS[field_type][:args].merge(args.except(:model))
   end
@@ -160,6 +178,15 @@ module FiltersHelper
       return "project_lists_id"
     end
     nil
+  end
+
+  def filter_prefill_or_select_values(args, field_type)
+    if FILTER_SELECT_TYPES.include?(field_type)
+      args[:selected] = args[:filter].send(args[:field]) || nil
+    else
+      args[:value] = args[:filter].send(args[:field]) || nil
+    end
+    args
   end
 
   ###############################################################
@@ -242,13 +269,13 @@ module FiltersHelper
       tag.div(class: "d-inline-block mr-4") do
         select_with_label(**args.merge(
           { inline: true, options: Name.all_ranks,
-            include_blank: true, selected: nil }
+            include_blank: true }
         ))
       end,
       tag.div(class: "d-inline-block") do
         select_with_label(**args.merge(
           { label: :to.l, between: :optional, help: nil, inline: true,
-            options: Name.all_ranks, include_blank: true, selected: nil,
+            options: Name.all_ranks, include_blank: true,
             field: "#{args[:field]}_range" }
         ))
       end
@@ -260,14 +287,13 @@ module FiltersHelper
     [
       tag.div(class: "d-inline-block mr-4") do
         select_with_label(**args.merge(
-          { inline: true, options: confidences,
-            include_blank: true, selected: nil }
+          { inline: true, options: confidences, include_blank: true }
         ))
       end,
       tag.div(class: "d-inline-block") do
         select_with_label(**args.merge(
           { label: :to.l, between: :optional, help: nil, inline: true,
-            options: confidences, include_blank: true, selected: nil,
+            options: confidences, include_blank: true,
             field: "#{args[:field]}_range" }
         ))
       end
