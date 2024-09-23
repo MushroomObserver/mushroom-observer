@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_06_052017) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_18_151140) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -189,6 +189,26 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_06_052017) do
     t.boolean "transferred", default: false, null: false
     t.boolean "gps_stripped", default: false, null: false
     t.boolean "diagnostic", default: true, null: false
+  end
+
+  create_table "inat_import_job_trackers", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "inat_import"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "inat_imports", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "state", default: 0
+    t.string "inat_ids"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "token"
+    t.string "inat_username"
+    t.boolean "import_all"
+    t.integer "importables"
+    t.integer "imported_count"
+    t.string "response_errors"
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -512,6 +532,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_06_052017) do
     t.integer "source"
     t.datetime "log_updated_at", precision: nil
     t.boolean "needs_naming", default: false, null: false
+    t.integer "inat_id"
     t.index ["needs_naming"], name: "needs_naming_index"
   end
 
@@ -884,6 +905,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_06_052017) do
     t.text "notes_template"
     t.boolean "blocked", default: false, null: false
     t.boolean "no_emails", default: false, null: false
+    t.string "inat_username"
     t.index ["login"], name: "login_index"
   end
 

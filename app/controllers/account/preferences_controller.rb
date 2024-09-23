@@ -67,7 +67,7 @@ module Account
     private
 
     def load_user_licenses
-      @licenses = License.current_names_and_ids(@user&.license)
+      @licenses = License.available_names_and_ids(@user&.license)
     end
 
     def update_password

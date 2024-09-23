@@ -13,7 +13,7 @@ module Prawn
     Y_MAX = 244
     Y_MIN = Y_MAX - RULER_HEIGHT
     RULER_SIZE = 0.5.cm
-    RULER_RIGHT = X_MIN + RULER_SIZE
+    RULER_LEFT = X_MIN + RULER_SIZE
     RULER_BOTTOM = Y_MAX - RULER_SIZE
 
     # Logo
@@ -56,7 +56,7 @@ module Prawn
           footer(code)
           frame
           field("Date",
-                RULER_RIGHT, QR_BOTTOM - QR_MARGIN,
+                RULER_LEFT, QR_BOTTOM - QR_MARGIN,
                 QR_RIGHT + QR_MARGIN, LOGO_BOTTOM - 2 * FIELD_HEIGHT)
           field("Collector",
                 QR_RIGHT + QR_MARGIN, LOGO_BOTTOM,
@@ -65,7 +65,7 @@ module Prawn
                 QR_RIGHT + QR_MARGIN, LOGO_BOTTOM - FIELD_HEIGHT,
                 X_MAX, LOGO_BOTTOM - 2 * FIELD_HEIGHT)
           field("ID",
-                RULER_RIGHT, Y_MIN + FIELD_HEIGHT,
+                RULER_LEFT, Y_MIN + FIELD_HEIGHT,
                 X_MAX, Y_MIN)
           id_by_boxes
           notes
@@ -76,23 +76,26 @@ module Prawn
     def frame
       horizontal_ruler
       vertical_ruler
-      rectangle([RULER_RIGHT, RULER_BOTTOM],
+      rectangle([RULER_LEFT, RULER_BOTTOM],
                 RULER_WIDTH - RULER_SIZE, RULER_HEIGHT - RULER_SIZE)
     end
 
     def horizontal_ruler
+      text_box("1 cm",
+               at: [RULER_LEFT + 1.mm, RULER_BOTTOM + FONT_SIZE + 1.mm])
+
       horizontal_line(X_MIN, X_MAX, at: RULER_BOTTOM)
-      ruler_ticks([RULER_RIGHT, RULER_BOTTOM], [X_MAX, RULER_BOTTOM],
+      ruler_ticks([RULER_LEFT, RULER_BOTTOM], [X_MAX, RULER_BOTTOM],
                   [0, 5.mm], [1.cm, 0])
-      ruler_ticks([RULER_RIGHT + 5.mm, RULER_BOTTOM], [X_MAX, RULER_BOTTOM],
+      ruler_ticks([RULER_LEFT + 1.5.cm, RULER_BOTTOM], [X_MAX, RULER_BOTTOM],
                   [0, 2.5.mm], [1.cm, 0])
     end
 
     def vertical_ruler
-      vertical_line(Y_MAX, Y_MIN, at: RULER_RIGHT)
-      ruler_ticks([RULER_RIGHT, Y_MIN], [RULER_RIGHT, RULER_BOTTOM],
+      vertical_line(Y_MAX, Y_MIN, at: RULER_LEFT)
+      ruler_ticks([RULER_LEFT, Y_MIN], [RULER_LEFT, RULER_BOTTOM],
                   [-5.mm, 0], [0, 1.cm])
-      ruler_ticks([RULER_RIGHT, Y_MIN + 5.mm], [RULER_RIGHT, RULER_BOTTOM],
+      ruler_ticks([RULER_LEFT, Y_MIN + 5.mm], [RULER_LEFT, RULER_BOTTOM],
                   [-2.5.mm, 0], [0, 1.cm])
     end
 
@@ -113,7 +116,7 @@ module Prawn
 
     def qr_code(code)
       title_width = 5.cm
-      svg(qr_svg("http://mushroomobserver.org/qr/#{code}"),
+      svg(qr_svg("https://mushroomobserver.org/qr/#{code}"),
           at: [QR_LEFT, QR_TOP],
           width: QR_SIZE)
       font("#{Prawn::ManualBuilder::DATADIR}/fonts/DejaVuSans.ttf") do
@@ -143,51 +146,52 @@ module Prawn
     end
 
     def id_by_boxes
-      box_size = 6.mm
+      box_size = 7.mm
       text_x = X_MAX - box_size * 2
       text_box("ID By:",
-               at: [text_x, Y_MIN + box_size + FONT_SIZE],
+               at: [text_x, NOTES_BOTTOM + FONT_SIZE],
                width: X_MAX - text_x)
-      rectangle([X_MAX - box_size * 3, Y_MIN + box_size], box_size, box_size)
-      rectangle([X_MAX - box_size * 2, Y_MIN + box_size], box_size, box_size)
-      rectangle([X_MAX - box_size, Y_MIN + box_size], box_size, box_size)
+      rectangle([X_MAX - box_size * 3, Y_MIN + FIELD_HEIGHT], box_size,
+                FIELD_HEIGHT)
+      rectangle([X_MAX - box_size * 2, Y_MIN + FIELD_HEIGHT], box_size,
+                FIELD_HEIGHT)
+      rectangle([X_MAX - box_size, Y_MIN + FIELD_HEIGHT], box_size,
+                FIELD_HEIGHT)
     end
 
     def notes
       field("Notes",
-            RULER_RIGHT, NOTES_TOP,
+            RULER_LEFT, NOTES_TOP,
             X_MAX, NOTES_BOTTOM)
       subnotes
       photo_bottom = NOTES_BOTTOM + 5.mm
-      rectangle([RULER_RIGHT + TEXT_OFFSET,
+      rectangle([RULER_LEFT + TEXT_OFFSET,
                  photo_bottom], PHOTO_BOX_SIZE, PHOTO_BOX_SIZE)
       text_box("Photo",
-               at: [RULER_RIGHT + PHOTO_BOX_SIZE + QR_MARGIN,
+               at: [RULER_LEFT + PHOTO_BOX_SIZE + QR_MARGIN,
                     NOTES_BOTTOM + PHOTO_BOX_SIZE])
     end
 
     def subnotes
-      subnote_left = 5.cm
+      subnote_left = 4.75.cm
       subnote_indent = subnote_left + NOTES_FONT_SIZE
       font_size(NOTES_FONT_SIZE)
       current_y = NOTES_TOP - NOTES_FONT_SIZE
       text_box("Odor/taste:", at: [subnote_left, current_y])
       current_y -= NOTES_FONT_SIZE * 3
-      text_box("Substrate: wood / soil / grass / dung",
+      text_box("Trees/Shrubs: Hardwood / Conifer / Mixed",
                at: [subnote_left, current_y],
                width: X_MAX - subnote_left)
       current_y -= NOTES_FONT_SIZE
-      text_box("Other:",
-               at: [subnote_indent, current_y])
-      current_y -= NOTES_FONT_SIZE * 3
-      text_box("Plants: Hardwood / Conifer",
-               at: [subnote_left, current_y])
-      current_y -= NOTES_FONT_SIZE
       text_box("Species:",
                at: [subnote_indent, current_y])
-      text_box("Habit: single / few / many",
-               at: [RULER_RIGHT + PHOTO_RIGHT,
-                    NOTES_BOTTOM + NOTES_FONT_SIZE * 1.5])
+      current_y -= NOTES_FONT_SIZE * 3
+      text_box("Substrate: wood / soil / grass / mushroom / dung",
+               at: [subnote_left, current_y],
+               width: X_MAX - subnote_left)
+      current_y -= NOTES_FONT_SIZE * 1.5
+      text_box("Habit: single / few / clustered / many",
+               at: [subnote_left, current_y])
       font_size(FONT_SIZE)
     end
 

@@ -350,25 +350,24 @@ class Name < AbstractModel
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
-  enum rank:
-        {
-          Form: 1,
-          Variety: 2,
-          Subspecies: 3,
-          Species: 4,
-          Stirps: 5,
-          Subsection: 6,
-          Section: 7,
-          Subgenus: 8,
-          Genus: 9,
-          Family: 10,
-          Order: 11,
-          Class: 12,
-          Phylum: 13,
-          Kingdom: 14,
-          Domain: 15,
-          Group: 16 # used for both "group" and "clade"
-        }
+  enum :rank, {
+    Form: 1,
+    Variety: 2,
+    Subspecies: 3,
+    Species: 4,
+    Stirps: 5,
+    Subsection: 6,
+    Section: 7,
+    Subgenus: 8,
+    Genus: 9,
+    Family: 10,
+    Order: 11,
+    Class: 12,
+    Phylum: 13,
+    Kingdom: 14,
+    Domain: 15,
+    Group: 16 # used for both "group" and "clade"
+  }
 
   belongs_to :correct_spelling, class_name: "Name"
   belongs_to :description, class_name: "NameDescription",
@@ -535,12 +534,12 @@ class Name < AbstractModel
   scope :with_rank_at_or_below_genus,
         lambda {
           where((Name[:rank] <= ranks[:Genus]).
-                or(Name[:rank] == ranks[:Group]))
+                or(Name[:rank].eq(ranks[:Group])))
         }
   scope :with_rank_above_genus,
         lambda {
           where(Name[:rank] > ranks[:Genus]).
-            where(Name[:rank] != ranks[:Group])
+            where(Name[:rank].not_eq(ranks[:Group]))
         }
   scope :subtaxa_of_genus_or_below,
         lambda { |text_name|

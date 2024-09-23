@@ -107,6 +107,7 @@ GEM
     crass (1.0.6)
     css_parser (1.19.0)
       addressable
+    csv (3.3.0)
     cuprite (0.15.1)
       capybara (~> 3.0)
       ferrum (~> 0.15.0)
@@ -125,35 +126,56 @@ GEM
       irb (~> 1.10)
       reline (>= 0.3.8)
     docile (1.4.1)
+    domain_name (0.6.20240107)
     drb (2.2.1)
     erubi (1.13.0)
     et-orbi (1.2.11)
       tzinfo
     execjs (2.9.1)
+    faraday (2.11.0)
+      faraday-net_http (>= 2.0, < 3.4)
+      logger
+    faraday-net_http (3.3.0)
+      net-http
     fastimage (2.3.1)
     ferrum (0.15)
       addressable (~> 2.5)
       concurrent-ruby (~> 1.1)
       webrick (~> 1.7)
       websocket-driver (~> 0.7)
+    ffi (1.17.0-aarch64-linux-gnu)
+    ffi (1.17.0-aarch64-linux-musl)
+    ffi (1.17.0-arm-linux-gnu)
+    ffi (1.17.0-arm-linux-musl)
     ffi (1.17.0-arm64-darwin)
+    ffi (1.17.0-x86-linux-gnu)
+    ffi (1.17.0-x86-linux-musl)
     ffi (1.17.0-x86_64-darwin)
     ffi (1.17.0-x86_64-linux-gnu)
+    ffi (1.17.0-x86_64-linux-musl)
     fugit (1.11.1)
       et-orbi (~> 1, >= 1.2.11)
       raabro (~> 1.4)
     globalid (1.2.1)
       activesupport (>= 6.1)
-    google-protobuf (4.28.0-arm64-darwin)
+    google-protobuf (4.28.2-arm64-darwin)
       bigdecimal
       rake (>= 13)
-    google-protobuf (4.28.0-x86_64-darwin)
+    google-protobuf (4.28.2-x86_64-darwin)
       bigdecimal
       rake (>= 13)
-    google-protobuf (4.28.0-x86_64-linux)
+    google-protobuf (4.28.2-x86_64-linux)
       bigdecimal
       rake (>= 13)
     hashdiff (1.1.1)
+    hashie (5.0.0)
+    http-accept (1.7.0)
+    http-cookie (1.0.7)
+      domain_name (~> 0.5)
+    httparty (0.22.0)
+      csv
+      mini_mime (>= 1.0.0)
+      multi_xml (>= 0.5.2)
     i18n (1.14.5)
       concurrent-ruby (~> 1.0)
     importmap-rails (2.0.1)
@@ -168,10 +190,17 @@ GEM
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
     json (2.7.2)
+    jwt (2.8.2)
+      base64
     language_server-protocol (3.17.0.3)
-    libv8-node (22.7.0.2-arm64-darwin)
-    libv8-node (22.7.0.2-x86_64-darwin)
-    libv8-node (22.7.0.2-x86_64-linux)
+    libv8-node (18.19.0.0)
+    libv8-node (18.19.0.0-aarch64-linux)
+    libv8-node (18.19.0.0-aarch64-linux-musl)
+    libv8-node (18.19.0.0-arm64-darwin)
+    libv8-node (18.19.0.0-x86_64-darwin)
+    libv8-node (18.19.0.0-x86_64-linux)
+    libv8-node (18.19.0.0-x86_64-linux-musl)
+    logger (1.6.1)
     loofah (2.22.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.12.0)
@@ -181,19 +210,26 @@ GEM
       net-pop
       net-smtp
     matrix (0.4.2)
+    mime-types (3.5.2)
+      mime-types-data (~> 3.2015)
+    mime-types-data (3.2024.0903)
     mimemagic (0.4.3)
       nokogiri (~> 1)
       rake
     mini_mime (1.1.5)
-    mini_racer (0.15.0)
-      libv8-node (~> 22.7.0.1)
+    mini_racer (0.16.0)
+      libv8-node (~> 18.19.0.0)
     minitest (5.25.1)
     minitest-reporters (1.7.1)
       ansi
       builder
       minitest (>= 5.0)
       ruby-progressbar
+    multi_xml (0.7.1)
+      bigdecimal (~> 3.1)
     mutex_m (0.2.0)
+    net-http (0.4.1)
+      uri
     net-imap (0.4.16)
       date
       net-protocol
@@ -203,14 +239,28 @@ GEM
       timeout
     net-smtp (0.5.0)
       net-protocol
+    netrc (0.11.0)
     newrelic_rpm (9.13.0)
     nio4r (2.7.3)
+    nokogiri (1.16.7-aarch64-linux)
+      racc (~> 1.4)
+    nokogiri (1.16.7-arm-linux)
+      racc (~> 1.4)
     nokogiri (1.16.7-arm64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.16.7-x86-linux)
       racc (~> 1.4)
     nokogiri (1.16.7-x86_64-darwin)
       racc (~> 1.4)
     nokogiri (1.16.7-x86_64-linux)
       racc (~> 1.4)
+    oauth2 (2.0.9)
+      faraday (>= 0.17.3, < 3.0)
+      jwt (>= 1.0, < 3.0)
+      multi_xml (~> 0.5)
+      rack (>= 1.2, < 4)
+      snaky_hash (~> 2.0)
+      version_gem (~> 1.1)
     parallel (1.26.3)
     parser (3.3.5.0)
       ast (~> 2.4.1)
@@ -273,6 +323,11 @@ GEM
       io-console (~> 0.5)
     requestjs-rails (0.0.12)
       railties (>= 6.1.0)
+    rest-client (2.1.0)
+      http-accept (>= 1.7.0, < 2.0)
+      http-cookie (>= 1.0.2, < 2.0)
+      mime-types (>= 1.16, < 4.0)
+      netrc (~> 0.8)
     rexml (3.3.7)
     rqrcode (2.2.0)
       chunky_png (~> 1.0)
@@ -294,7 +349,7 @@ GEM
     rubocop-performance (1.21.1)
       rubocop (>= 1.48.1, < 2.0)
       rubocop-ast (>= 1.31.1, < 2.0)
-    rubocop-rails (2.26.0)
+    rubocop-rails (2.26.1)
       activesupport (>= 4.2.0)
       rack (>= 1.1)
       rubocop (>= 1.52.0, < 2.0)
@@ -303,11 +358,25 @@ GEM
       rubocop (>= 0.90.0)
     ruby-progressbar (1.13.0)
     rubyzip (2.3.2)
+    sass-embedded (1.78.0-aarch64-linux-gnu)
+      google-protobuf (~> 4.27)
+    sass-embedded (1.78.0-aarch64-linux-musl)
+      google-protobuf (~> 4.27)
+    sass-embedded (1.78.0-arm-linux-gnueabihf)
+      google-protobuf (~> 4.27)
+    sass-embedded (1.78.0-arm-linux-musleabihf)
+      google-protobuf (~> 4.27)
     sass-embedded (1.78.0-arm64-darwin)
+      google-protobuf (~> 4.27)
+    sass-embedded (1.78.0-x86-linux-gnu)
+      google-protobuf (~> 4.27)
+    sass-embedded (1.78.0-x86-linux-musl)
       google-protobuf (~> 4.27)
     sass-embedded (1.78.0-x86_64-darwin)
       google-protobuf (~> 4.27)
     sass-embedded (1.78.0-x86_64-linux-gnu)
+      google-protobuf (~> 4.27)
+    sass-embedded (1.78.0-x86_64-linux-musl)
       google-protobuf (~> 4.27)
     sassc (2.4.0)
       ffi (~> 1.9)
@@ -321,11 +390,14 @@ GEM
     simplecov-html (0.12.3)
     simplecov-lcov (0.8.0)
     simplecov_json_formatter (0.1.4)
+    snaky_hash (2.0.1)
+      hashie
+      version_gem (~> 1.1, >= 1.1.1)
     solid_cache (0.7.0)
       activejob (>= 7)
       activerecord (>= 7)
       railties (>= 7)
-    solid_queue (0.8.1)
+    solid_queue (0.8.2)
       activejob (>= 7.1)
       activerecord (>= 7.1)
       concurrent-ruby (>= 1.3.1)
@@ -361,6 +433,8 @@ GEM
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.5.0)
     uniform_notifier (1.16.0)
+    uri (0.13.1)
+    version_gem (1.1.4)
     web-console (4.2.1)
       actionview (>= 6.0.0)
       activemodel (>= 6.0.0)
@@ -381,14 +455,22 @@ GEM
     zeitwerk (2.6.18)
 
 PLATFORMS
-  arm64-darwin-21
-  arm64-darwin-22
-  arm64-darwin-23
-  x86_64-darwin-20
-  x86_64-darwin-21
-  x86_64-darwin-22
-  x86_64-darwin-23
+  aarch64-linux
+  aarch64-linux-gnu
+  aarch64-linux-musl
+  arm-linux
+  arm-linux-gnu
+  arm-linux-gnueabihf
+  arm-linux-musl
+  arm-linux-musleabihf
+  arm64-darwin
+  x86-linux
+  x86-linux-gnu
+  x86-linux-musl
+  x86_64-darwin
   x86_64-linux
+  x86_64-linux-gnu
+  x86_64-linux-musl
 
 DEPENDENCIES
   RedCloth
@@ -416,6 +498,7 @@ DEPENDENCIES
   database_cleaner-active_record
   debug
   fastimage
+  httparty
   i18n
   importmap-rails
   jbuilder
@@ -425,6 +508,7 @@ DEPENDENCIES
   minitest-reporters
   mo_acts_as_versioned (>= 0.6.6)!
   newrelic_rpm
+  oauth2
   prawn
   prawn-manual_builder
   prawn-svg
@@ -433,6 +517,7 @@ DEPENDENCIES
   railties (~> 7.1.3)
   redis (~> 4.0)
   requestjs-rails
+  rest-client
   rqrcode
   rtf
   rubocop
@@ -459,4 +544,4 @@ RUBY VERSION
    ruby 3.3.0p0
 
 BUNDLED WITH
-   2.3.26
+   2.5.18

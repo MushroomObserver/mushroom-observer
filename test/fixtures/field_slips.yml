@@ -40,3 +40,9 @@ field_slip_nowhere_dup:
   project: open_membership_project
   code: OPEN-0003
   user: katrina
+
+field_slip_previous:
+  observation: current_obs
+  project: current_project
+  code: CURR-0001
+  user: katrina

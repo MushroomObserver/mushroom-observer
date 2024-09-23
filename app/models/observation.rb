@@ -54,6 +54,7 @@
 #  num_views::              Number of times it has been viewed.
 #  last_view::              Last time it was viewed.
 #  log_updated_at::         Cache of RssLogs.updated_at, for speedier index
+#  inat_id:                 iNaturalist id of corresponding Observation
 #
 #  ==== "Fake" attributes
 #  place_name::             Wrapper on top of +where+ and +location+.
@@ -227,7 +228,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
   # Extra timestamp scopes for when Observation found:
   scope :found_on, lambda { |ymd_string|
-    where(arel_table[:when].format("%Y-%m-%d") == ymd_string)
+    where(arel_table[:when].format("%Y-%m-%d").eq(ymd_string))
   }
   scope :found_after, lambda { |ymd_string|
     where(arel_table[:when].format("%Y-%m-%d") >= ymd_string)
@@ -494,11 +495,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   }
   scope :for_project, lambda { |project|
     joins(:project_observations).
-      where(ProjectObservation[:project_id] == project.id).distinct
+      where(ProjectObservation[:project_id].eq(project.id)).distinct
   }
   scope :in_herbarium, lambda { |herbarium|
     joins(:herbarium_records).
-      where(HerbariumRecord[:herbarium_id] == herbarium.id).distinct
+      where(HerbariumRecord[:herbarium_id].eq(herbarium.id)).distinct
   }
   scope :herbarium_record_notes_include, lambda { |notes|
     joins(:herbarium_records).
@@ -506,12 +507,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   }
   scope :on_species_list, lambda { |species_list|
     joins(:species_list_observations).
-      where(SpeciesListObservation[:species_list_id] == species_list.id).
+      where(SpeciesListObservation[:species_list_id].eq(species_list.id)).
       distinct
   }
   scope :on_species_list_of_project, lambda { |project|
     joins(species_lists: :project_species_lists).
-      where(ProjectSpeciesList[:project_id] == project.id).distinct
+      where(ProjectSpeciesList[:project_id].eq(project.id)).distinct
   }
   scope :show_includes, lambda {
     strict_loading.includes(
@@ -607,7 +608,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def can_edit?(user = User.current)
-    Project.can_edit?(self, user)
+    Project.can_edit?(self, user) || is_collector?(user)
+  end
+
+  def is_collector?(user)
+    user && notes[:Collector] == "_user #{user.login}_"
   end
 
   def project_admin?(user = User.current)
@@ -1167,12 +1172,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   ##############################################################################
 
   # Which agent created this observation?
-  enum :source, {
-    mo_website: 1,
-    mo_android_app: 2,
-    mo_iphone_app: 3,
-    mo_api: 4
-  }
+  enum source:
+        {
+          mo_website: 1,
+          mo_android_app: 2,
+          mo_iphone_app: 3,
+          mo_api: 4,
+          mo_inat_import: 5
+        }
 
   # Message to use to credit the agent which created this observation.
   # Intended to be used with .tpl to render as HTML:
