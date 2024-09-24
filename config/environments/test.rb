@@ -26,6 +26,11 @@ MushroomObserver::Application.configure do
   config.water_users = []
   config.oil_users   = []
 
+  # REDIRECT_URI (Callback URL)
+  # iNat calls this after iNat user authorizes MO to access their data.
+  config.redirect_uri =
+    "http://localhost:3000/observations/inat_imports/authorization_response"
+
   # ----------------------------
   #  Rails configuration.
   # ----------------------------

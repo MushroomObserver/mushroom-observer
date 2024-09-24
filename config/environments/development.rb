@@ -60,6 +60,11 @@ MushroomObserver::Application.configure do
 
   config.robots_dot_text_file = "#{config.root}/public/robots.txt"
 
+  # REDIRECT_URI (Callback URL)
+  # iNat calls this after iNat user authorizes MO to access their data.
+  config.redirect_uri =
+    "http://localhost:3000/observations/inat_imports/authorization_response"
+
   # ----------------------------
   #  Rails configuration.
   # ----------------------------

@@ -42,14 +42,11 @@ module Observations
 
     # Site for authorization and authentication requests
     SITE = "https://www.inaturalist.org"
-    # what iNat will call after user responds to authorization request
-
-    REDIRECT_URI =
-      "#{Rails.env.local? ? "http://localhost:3000/observations" : "https://mushroomobserver.org"}/inat_imports/authorization_response".freeze
-
+    # iNat calls this after iNat user authorizes MO to access their data.
+    REDIRECT_URI = Rails.configuration.redirect_uri
     # iNat's id for the MO application
     APP_ID = Rails.application.credentials.inat.id
-    # The iNat API. Not called here, but reference in tests and ActiveJob
+    # The iNat API. Not called here, but referenced in tests and ActiveJob
     API_BASE = "https://api.inaturalist.org/v1"
 
     def new; end
