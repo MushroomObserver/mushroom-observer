@@ -90,14 +90,10 @@ class Inat
     # https://help.inaturalist.org/en/support/solutions/articles/151000169941-what-are-tags-observation-fields-and-annotations-
     # https://www.inaturalist.org/pages/extra_fields_nz#:~:text=Observation%20fields%20are%20a%20way,who%20do%20it%20all%20themselves.)
     # a less cryptic method name than inat_ofvs
-    def inat_obs_fields
-      @obs[:ofvs]
-    end
+    def inat_obs_fields = @obs[:ofvs]
 
     # a shorter method name than inat_observation_photos
-    def inat_obs_photos
-      @obs[:observation_photos]
-    end
+    def inat_obs_photos = @obs[:observation_photos]
 
     # derive a provisional name from some specific Observation Fields
     # NOTE: iNat does not allow provisional names as Identifications
@@ -116,27 +112,15 @@ class Inat
       prov_name_field[:value]
     end
 
-    def inat_taxon_name
-      inat_taxon[:name]
-    end
-
-    def inat_taxon_rank
-      inat_taxon[:rank]
-    end
-
-    def inat_user_login
-      @obs[:user][:login]
-    end
+    def inat_taxon_name = inat_taxon[:name]
+    def inat_taxon_rank = inat_taxon[:rank]
+    def inat_user_login = @obs[:user][:login]
 
     ########## MO attributes
 
-    def gps_hidden
-      @obs[:geoprivacy].present?
-    end
+    def gps_hidden = @obs[:geoprivacy].present?
 
-    def license
-      Inat::License.new(@obs[:license_code]).mo_license
-    end
+    def license = Inat::License.new(@obs[:license_code]).mo_license
 
     def name_id
       names =
@@ -189,13 +173,8 @@ class Inat
       end
     end
 
-    def source
-      "mo_inat_import"
-    end
-
-    def text_name
-      ::Name.find(name_id).text_name
-    end
+    def source = "mo_inat_import"
+    def text_name = ::Name.find(name_id).text_name
 
     def when
       observed_on = @obs[:observed_on_details]
@@ -255,8 +234,7 @@ class Inat
     end
 
     def lat_lon_accuracy
-      "#{inat_location} " \
-      "+/-#{inat_public_positional_accuracy} m"
+      "#{inat_location} +/-#{inat_public_positional_accuracy} m"
     end
 
     def obs_fields(fields)
@@ -279,13 +257,8 @@ class Inat
         lng: accuracy_in_meters / 111_111 * Math.cos(to_rad(lat)) }
     end
 
-    def importable?
-      taxon_importable?
-    end
-
-    def taxon_importable?
-      fungi? || slime_mold?
-    end
+    def importable? = taxon_importable?
+    def taxon_importable? = fungi? || slime_mold?
 
     ##########
 
@@ -294,13 +267,8 @@ class Inat
     # ----- location-related
 
     # These give a good approximation of the iNat blurred bounding box
-    def blurred_north
-      [lat + public_accuracy_in_degrees[:lat] / 2, 90].min
-    end
-
-    def blurred_south
-      [lat - public_accuracy_in_degrees[:lat] / 2, -90].max
-    end
+    def blurred_north = [lat + public_accuracy_in_degrees[:lat] / 2, 90].min
+    def blurred_south = [lat - public_accuracy_in_degrees[:lat] / 2, -90].max
 
     def blurred_east
       ((lng + public_accuracy_in_degrees[:lng] / 2 + 180) % 360) - 180
@@ -310,9 +278,7 @@ class Inat
       ((lng - public_accuracy_in_degrees[:lng] / 2 + 180) % 360) - 180
     end
 
-    def to_rad(degrees)
-      degrees * Math::PI / 180.0
-    end
+    def to_rad(degrees) = degrees * Math::PI / 180.0
 
     # copied from AutoComplete::ForLocationContaining
     def location_box(loc)
@@ -407,17 +373,8 @@ class Inat
 
     # ----- Other
 
-    def complex?
-      inat_taxon_rank == "complex"
-    end
-
-    def description
-      @obs[:description]
-    end
-
-    def fungi?
-      @obs.dig(:taxon, :iconic_taxon_name) == "Fungi"
-    end
+    def complex? = inat_taxon_rank == "complex"
+    def fungi? = @obs.dig(:taxon, :iconic_taxon_name) == "Fungi"
 
     # NOTE: 2024-09-09 jdc. Can this be improved?
     # https://github.com/MushroomObserver/mushroom-observer/issues/2245
@@ -430,16 +387,14 @@ class Inat
         field[:name] =~ /DNA/ && field[:value] =~ /^[ACTG]{,10}/
     end
 
-    def slime_mold?
-      # NOTE: 2024-06-01 jdc
-      # slime molds are polypheletic https://en.wikipedia.org/wiki/Slime_mold
-      # Protoza is paraphyletic for slime molds,
-      # but it's how they are classified in MO and MB
-      # Can this be improved by checking multiple inat [:taxon][:ancestor_ids]?
-      # I.e., is there A combination (ANDs) of higher ranks (>= Class)
-      # that's monophyletic for slime molds?
-      # Another solution: use IF API to see if IF includes the name.
-      @obs.dig(:taxon, :iconic_taxon_name) == "Protozoa"
-    end
+    # NOTE: 2024-06-01 jdc
+    # slime molds are polypheletic https://en.wikipedia.org/wiki/Slime_mold
+    # Protoza is paraphyletic for slime molds,
+    # but it's how they are classified in MO and MB
+    # Can this be improved by checking multiple inat [:taxon][:ancestor_ids]?
+    # I.e., is there A combination (ANDs) of higher ranks (>= Class)
+    # that's monophyletic for slime molds?
+    # Another solution: use IF API to see if IF includes the name.
+    def slime_mold? = @obs.dig(:taxon, :iconic_taxon_name) == "Protozoa"
   end
 end
