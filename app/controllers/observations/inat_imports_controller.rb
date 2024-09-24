@@ -43,8 +43,10 @@ module Observations
     # Site for authorization and authentication requests
     SITE = "https://www.inaturalist.org"
     # what iNat will call after user responds to authorization request
+
     REDIRECT_URI =
-      "http://localhost:3000/observations/inat_imports/authorization_response"
+      "#{Rails.env.local? ? "http://localhost:3000/observations" : "https://mushroomobserver.org"}/inat_imports/authorization_response".freeze
+
     # iNat's id for the MO application
     APP_ID = Rails.application.credentials.inat.id
     # The iNat API. Not called here, but reference in tests and ActiveJob
@@ -190,5 +192,13 @@ module Observations
       flash_error(:inat_no_authorization.l)
       redirect_to(observations_path)
     end
+
+    REDIRECT_URL = if Rails.env.local?
+                     "http://localhost:3000/observations/inat_imports/authorization_response"
+                   else
+                     "https://mushroomobserver.org/observations/inat_imports/authorization_response"
+                   end
+
+    # rest of your controller code
   end
 end
