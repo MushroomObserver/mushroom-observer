@@ -44,6 +44,7 @@ mary:
   keep_filenames: <%= User.keep_filenames[:keep_and_show] %>
   user_groups: all_users, eol_users, eol_admins, mary_only, bolete_users
   mailing_address: 123 Some Pl., Pasadena, CA 91106
+  inat_username: marys_inat_username
 
 # Junk gets denied
 junk:
@@ -189,3 +190,8 @@ nonregional:
 foray_newbie:
   <<: *DEFAULTS
   user_groups: all_users, burbank_users, foray_newbie_only
+
+# manages iNat imports; name and login must mirror production
+webmaster:
+  <<: *DEFAULTS
+  login: "MO Webmaster"

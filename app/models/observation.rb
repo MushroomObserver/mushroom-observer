@@ -54,6 +54,7 @@
 #  num_views::              Number of times it has been viewed.
 #  last_view::              Last time it was viewed.
 #  log_updated_at::         Cache of RssLogs.updated_at, for speedier index
+#  inat_id:                 iNaturalist id of corresponding Observation
 #
 #  ==== "Fake" attributes
 #  place_name::             Wrapper on top of +where+ and +location+.
@@ -1171,12 +1172,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   ##############################################################################
 
   # Which agent created this observation?
-  enum :source, {
-    mo_website: 1,
-    mo_android_app: 2,
-    mo_iphone_app: 3,
-    mo_api: 4
-  }
+  enum source:
+        {
+          mo_website: 1,
+          mo_android_app: 2,
+          mo_iphone_app: 3,
+          mo_api: 4,
+          mo_inat_import: 5
+        }
 
   # Message to use to credit the agent which created this observation.
   # Intended to be used with .tpl to render as HTML:

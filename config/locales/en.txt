@@ -257,6 +257,7 @@
   DRAFTS: Drafts
   drafts: drafts
   error: error
+  ERRORS: Errors
   errors: errors
   EXTERNAL_LINK: External Link
   external_link: external link
@@ -358,6 +359,7 @@
   observation: observation
   OBSERVATIONS: Observations
   observations: observations
+  OBSERVATION_FIELDS: Observation Fields
   PAST_LOCATION: Location Change
   past_location: location change
   PAST_LOCATIONS: Location Changes
@@ -446,6 +448,7 @@
   admin_group: admin group
   ADMIN_GROUPS: Admin Groups
   admin_groups: admin groups
+  ANNOTATIONS: Annotations
   # ("Author" is person(s) who wrote a book, description, or news Article.)
   AUTHOR: Author
   author: author
@@ -478,6 +481,7 @@
   CONFIDENCE_LEVELS: Confidence Levels
   confidence_levels: confidence levels
   CONNECTED_TO: Connected to
+  CONSENSUS: Consensus
   CONSTRAINT_VIOLATIONS: Constraint Violations
   constraint_violations: constraint violations
   COORDINATES: Coordinates
@@ -490,7 +494,7 @@
   correct_spelling: correct spelling
   CORRECT_SPELLINGS: Correct Spellings
   correct_spellings: correct spellings
-  CONSENSUS: Consensus
+  COUNTERPART: Counterpart
   DATE: Date
   date: date
   DATES: Dates
@@ -500,6 +504,8 @@
   deposit: deposit
   DETAIL: Detail
   detail: detail
+  # DQA is iNat-ese for Data Quality Assessment
+  DQA: Quality Grade
   EDITOR: Editor
   editor: editor
   EDITORS: Editors
@@ -531,6 +537,8 @@
   IDENTIFIERS: Identifiers
   identifiers: identifiers
   ID_BY: ID By
+  inaturalist: iNaturalist
+  inat: iNat
   INDEX: Index
   index: index
   INDEXES: Indexes
@@ -540,6 +548,7 @@
   LATITUDES: Latitudes
   latitudes: latitudes
   LAT: Lat
+  LAT_LON: Lat/Lon
   LOCUS: Locus
   locus: locus
   LOGIN_NAME: Login Name
@@ -563,10 +572,12 @@
   note: note
   NOTES: Notes
   notes: notes
+  OBSERVED: Observed
   OBSERVER: Observer
   observer: observer
   OBSERVERS: Observers
   observers: observers
+  ORIGINAL: Original
   OWNER: Owner
   owner: owner
   OWNERS: Owners
@@ -576,6 +587,7 @@
   password: password
   PASSWORDS: Passwords
   passwords: passwords
+  PLACE: Place
   PREFERENCES: Preferences
   preferences: preferences
   PREFERRED_NAME: Preferred Name
@@ -626,6 +638,7 @@
   title: title
   TITLES: Titles
   titles: titles
+  UNDER_DEVELOPMENT: Under Development
   VERSION: Version
   version: version
   VERSIONS: Versions
@@ -722,6 +735,7 @@
   edit: edit
   ENABLE: Enable
   enable: enable
+  IMPORT: Import
   # merge one object into another
   MERGE: Merge
   merge: merge
@@ -1330,6 +1344,7 @@
   source_credit_mo_android_app: Created using the "Mushroom Observer Android app":https://mushroomobserver.org/articles/34.
   source_credit_mo_iphone_app: Created using the "Mushroom Observer iPhone app":https://mushroomobserver.org/articles/34.
   source_credit_mo_api: Created using the "Mushroom Observer API":https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md.
+  source_credit_mo_inat_import: Imported from "iNaturalist":https://www.inaturalist.org using the "Mushroom Observer website":https://mushroomobserver.org
 
   ##############################################################################
 
@@ -1447,8 +1462,9 @@
   ask_webmaster_title: Email Question or Comment
   ask_webmaster_your_email: Your email address
   ask_webmaster_question: Question or Comment
-  ask_webmaster_note: "Thanks for your interest in the Mushroom Observer website. This website was first launched in mid-2006. The site is owned by the non-profit \"Mushroom Observer, Inc.\":/support/governance and administered by volunteer developers and maintainers. We welcome questions about using the site or comments on how the site might be improved.\n\n[:ask_webmaster_bug]\n\nThe Mushroom Observer Team"
+  ask_webmaster_note: "Thanks for your interest in the Mushroom Observer website. This website was first launched in mid-2006. The site is owned by the non-profit \"Mushroom Observer, Inc.\":/support/governance and administered by volunteer developers and maintainers. We welcome questions about using the site or comments on how the site might be improved.\n\n[:ask_webmaster_bug]\n\n[:ask_webmaster_account_deletion]\n\nThe Mushroom Observer Team\n"
   ask_webmaster_bug: "**Bug Reports**\nIf you are reporting a bug, please let us know what hardware, operating system, and browser you use, and exactly what you were doing. (Which page(s) you were viewing, what you typed, which link(s) you clicked.)"
+  ask_webmaster_account_deletion: "**Account Deletion**\nIf you want your account deleted please submit a request asking for deletion including your account login (should be in the upper right corner of this page).  We will followup when an admin is available (remember that we are all volunteers here).  If you have no existing contributions, your account will be completely deleted.  If you have made regular contributions to the site including observations, images, namings, or comment, this data will be preserved and your account will be disabled.  Note that you can delete any of your information from your account if you so desired prior to your account being disabled. As part of disabling your account, your login, email address, name, and all personal profile data will all be deleted or anonymized.  You may also request that all data of a particular type be removed from the system, but this may take longer to complete."
 
   # comments/new
   comment_add_title: Add Comment to [name]
@@ -1503,6 +1519,7 @@
 
   # observations/create_observation
   create_observation_title: "[:create_object(type=:observation)]"
+  create_observation_inat_import_link: Import from iNat
 
   # observations/download_observations
   download_observations_title: Download Observations
@@ -1719,6 +1736,7 @@
   form_observations_upload_error: Something went wrong while uploading image. Skipping it for now. You can try uploading it again later after we've created the observation.
   form_observations_collection_number_help: Enter the collector's full name and their record identifier.  The identifier can be anything.  It's whatever you use to keep track of your specimens, and it is typically written on the specimen label.  This is most commonly a sequential number starting at 1 for your first specimen, and working up over your life time.  Another common format is a year or date along with a collection number for that date, e.g., "17-034".  But it can be anything you like, including letters and punctuation.
   form_observations_herbarium_record_help: If you've sent a specimen to a fungarium, you can enter that here, along with their accession number if you know it.  Otherwise let it default to your personal fungarium and leave the accession number blank.
+  form_observations_original_name: Original Name
 
   form_observations_there_is_a_problem_with_projects: This observation violates the constraints of one or more selected projects. "+[:SEE_MESSAGE_BELOW]+":#project_messages
   form_observations_projects_out_of_range: The observation date ([date]) or location ([place_name]) is outside the range of these checked project(s)
@@ -2274,6 +2292,9 @@
   show_observation_owner_id: Observer Preference
   show_observation_no_clear_preference: no clear preference
   show_observation_details: "[:DETAIL]"
+  show_observation_details_inat_import: Imported [date] from
+  show_observation_details_inat_export: Copied to iNaturalist as
+  show_observation_inat_lat_lng: Public lat/lng
   show_observation_edit_observation: "[:edit_object(type=:observation)]"
   show_observation_propose_new_name: "[:show_namings_propose_new_name]"
   show_observation_debug_consensus: Debug Consensus
@@ -3009,6 +3030,43 @@
   list_merge_options_near_matches: Near Matches
   list_merge_options_others: Other Available [:locations]
   list_merge_options_title: Location Matches for [where]
+
+  # observation/inat_imports
+  inat_import_create_title: Import from iNat
+  inat_choose_observations: "Inat Observations to Import:"
+  inat_import_list: "Comma separated list of observation #s"
+  inat_import_all: Import all my iNat observations instead of a list
+  inat_import_consent: (Required) I consent to creating MushroomObserver Observation(s) based on my iNaturalist observations, including their photos.
+  inat_consent_required: Your consent is required to import Inat observations. Please check the checkbox to give your consent.
+  inat_username: Your iNat Username (mandatory)
+  runtime_illegal_inat_id: iNat observation number can contain only numbers, commas, and spaces
+  inat_missing_username: Missing your iNat Username
+  inat_no_imports_designated: You must list the iNat observation(s) to be imported
+  inat_previous_import: iNat [inat_id] previously imported as MO Observation [mo_obs_id]
+  inat_previous_mirror: "iNat [inat_id] is a \"mirror\" of existing MO Observation [mo_obs_id]"
+  inat_import_started: Your import has started. Refresh page to update results.
+
+  inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
+  inat_wrong_user: "You cannot import an iNat observation created by someone else. To import your own observation, make sure that noone else is logged into iNat on your device and that you entered the correct iNat username."
+
+  inat_data_comment: Snapshot of Imported iNat Data
+  inat_dqa_casual: Casual
+  inat_dqa_needs_id: Needs ID
+  inat_dqa_research: Research Grade
+  inat_not_imported: Not Imported
+
+  inat_details_heading: "Details/Caveats"
+  inat_details_list: "- MO will list most iNat data and/or map it to analogous MO fields. \n - Coordinates are hidden from the public if iNat obscured them. \n - Location is a rectangle with an MO-style name, rather than the iNat Place name. \n"
+
+  # /inat_import_job_tracker
+  INAT_IMPORT_JOB_TRACKERS: iNat Import Trackers
+  inat_import_tracker: iNat Import Tracker
+  inat_import_tracker_status: "[:STATUS]"
+  inat_import_tracker_started: Started
+  inat_import_tracker_importable_count: "Number of Importable Observations"
+  inat_import_tracker_imported_count: "Number Imported"
+  inat_importables_explanation: "An ??importable?? observation is an iNaturalist observation: which you created, which does not exist in MO, and whose iNat identity is a fungus or slime mold."
+  inat_import_tracker_refresh: Update results
 
   # observer/list_notifications
   list_notifications_title: Email Alerts for [user]

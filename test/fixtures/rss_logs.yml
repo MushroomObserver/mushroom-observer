@@ -452,6 +452,10 @@ newbie_obs_rss_log:
   <<: *DEFAULTS
   observation: newbie_obs
 
+imported_inat_obs_rss_log:
+  <<: *DEFAULTS
+  observation: imported_inat_obs
+
 species_list_rss_log:
   species_list: first_species_list
   updated_at: 2006-03-02 21:14:02
