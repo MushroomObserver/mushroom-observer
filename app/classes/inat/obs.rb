@@ -58,68 +58,51 @@ class Inat
       @obs = JSON.parse(imported_inat_obs_data, symbolize_names: true)
     end
 
-    ########## iNat attributes
+    ########## iNat attributes & associations
 
-    def inat_description
-      @obs[:description]
+    ATTRIBUTES = [
+      :description,
+      :id,
+      :identifications,
+      # https://help.inaturalist.org/en/support/solutions/articles/151000169938-what-is-geoprivacy-what-does-it-mean-for-an-observation-to-be-obscured-
+      :location, # Cf. private_location
+      # https://help.inaturalist.org/en/support/solutions/articles/151000169938-what-is-geoprivacy-what-does-it-mean-for-an-observation-to-be-obscured-
+      :positional_accuracy, # Cf. public_positional_accuracy
+      :place_guess,
+      :private_location, # Cf. location
+      :public_positional_accuracy, # Cf. positional_accuracy
+      :quality_grade,
+      :tags,
+      :taxon
+    ].freeze
+
+    ATTRIBUTES.each do |attribute|
+      define_method(:"inat_#{attribute}") do
+        @obs[attribute]
+      end
+
+      define_method(:"inat_#{attribute}=") do |value|
+        @obs[attribute] = value
+      end
     end
 
-    def inat_id
-      @obs[:id]
-    end
-
-    def inat_identifications
-      @obs[:identifications]
-    end
-
-    # iNat fudges this for obscured observations. Cf. inat_private_location
-    # https://help.inaturalist.org/en/support/solutions/articles/151000169938-what-is-geoprivacy-what-does-it-mean-for-an-observation-to-be-obscured-
-    def inat_location
-      @obs[:location]
-    end
-
-    # for test purposes
-    def inat_location=(location)
-      @obs[:location] = location
-    end
-
+    # iNat Observation Fields
+    # https://help.inaturalist.org/en/support/solutions/articles/151000169941-what-are-tags-observation-fields-and-annotations-
+    # https://www.inaturalist.org/pages/extra_fields_nz#:~:text=Observation%20fields%20are%20a%20way,who%20do%20it%20all%20themselves.)
+    # a less cryptic method name than inat_ofvs
     def inat_obs_fields
       @obs[:ofvs]
     end
 
+    # a shorter method name than inat_observation_photos
     def inat_obs_photos
       @obs[:observation_photos]
     end
 
-    def inat_place_guess
-      @obs[:place_guess]
-    end
-
-    def inat_private_location
-      @obs[:private_location]
-    end
-
-    # comma-separated string of names of projects to which obs belongs
-    def inat_project_names
-      projects = inat_projects
-
-      # 2024-06-12 jdc
-      # 1. Stop inat_obs from returning the following when projects.empty
-      # # encoding: US-ASCII
-      # #    valid: true
-      # ""
-      #
-      # 2. Always include ?? because I cannot reliably find all the projects
-      # via the iNat API
-      return "??" if projects.empty?
-
-      # Extract the titles from each project observation
-      (projects.map { |proj| proj.dig(:project, :title) } << "??").
-        join(", ").delete_prefix(", ")
-    end
-
-    # NOTE: iNat allows only 1 obs field with a given :name per obs.
-    # I assume iNat users will add only 1 proviisonal name per obs
+    # derive a provisional name from some specific Observation Fields
+    # NOTE: iNat does not allow provisional names as Identifications
+    # Also, iNat allows only 1 obs field with a given :name per obs.
+    # I assume iNat users will add only 1 provisional name per obs
     def inat_prov_name
       obs_fields = inat_obs_fields
       return nil if obs_fields.blank?
@@ -131,42 +114,6 @@ class Inat
       return nil if prov_name_field.blank?
 
       prov_name_field[:value]
-    end
-
-    # unblurred accuracy. Cf. inat_public_positional_accuracy
-    # https://help.inaturalist.org/en/support/solutions/articles/151000169938-what-is-geoprivacy-what-does-it-mean-for-an-observation-to-be-obscured-
-    def inat_positional_accuracy
-      @obs[:public_positional_accuracy]
-    end
-
-    # For testing. It's often much easier to modify an existing mock obs
-    # than to create a new one.
-    def inat_positional_accuracy=(accuracy)
-      @obs[:positional_accuracy] = accuracy
-    end
-
-    # Blurred for obscured observations. Cf. inat_positional_accuracy
-    # https://help.inaturalist.org/en/support/solutions/articles/151000169938-what-is-geoprivacy-what-does-it-mean-for-an-observation-to-be-obscured-
-    def inat_public_positional_accuracy
-      @obs[:public_positional_accuracy]
-    end
-
-    # For testing. It's often much easier to modify an existing mock obs
-    # than to create a new one.
-    def inat_public_positional_accuracy=(accuracy)
-      @obs[:public_positional_accuracy] = accuracy
-    end
-
-    def inat_quality_grade
-      @obs[:quality_grade]
-    end
-
-    def inat_tags
-      @obs[:tags]
-    end
-
-    def inat_taxon
-      @obs[:taxon]
     end
 
     def inat_taxon_name
