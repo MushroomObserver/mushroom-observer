@@ -1,0 +1,78 @@
+// Bootstrap 3 toggle switch
+
+.checkbox.toggle {
+  padding-left: 0;
+}
+
+.checkbox.toggle label,
+.checkbox-inline.toggle {
+  display: inline-block;
+  position: relative;
+  padding-left: 0;
+
+  input {
+    display: none;
+
+    // FIXME: Need color variables for this to work on all themes.
+    &:checked {
+      + span {
+        background-color: rgb(180, 182, 183);
+        border-color: rgb(180, 182, 183);
+        box-shadow: rgb(180, 182, 183) 0px 0px 0px 8px inset;
+        transition: border 0.4s ease 0s, box-shadow 0.4s ease 0s, background-color 1.2s ease 0s;
+
+        &:before {
+          left: 17px;
+        }
+      }
+    }
+    &:checked:disabled {
+      + span {
+        background-color: rgb(220, 220, 220);
+        border-color: rgb(220, 220, 220);
+        box-shadow: rgb(220, 220, 220) 0px 0px 0px 8px inset;
+        transition: border 0.4s ease 0s, box-shadow 0.4s ease 0s, background-color 1.2s ease 0s;
+      }
+    }
+    &:disabled {
+      + span {
+        background-color: rgb(232,235,238);
+        border-color: rgb(255,255,255);
+
+        &:before {
+          background-color: rgb(248,249,250);
+          border-color: rgb(243, 243, 243);
+          box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+      }
+    }
+  }
+
+  span {
+    width: 35px;
+    border-radius: 20px;
+    height: 18px;
+    border: 1px solid #dbdbdb;
+    background-color: rgb(255, 255, 255);
+    border-color: rgb(223, 223, 223);
+    box-shadow: rgb(223, 223, 223) 0px 0px 0px 0px inset;
+    transition: border 0.4s ease 0s, box-shadow 0.4s ease 0s;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 5px;
+
+    &:before {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: rgb(255,255,255);
+      content: " ";
+      top: 0;
+      position: relative;
+      left: 0;
+      transition: all 0.3s ease;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    }
+  }
+}

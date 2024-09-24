@@ -155,7 +155,7 @@ module FiltersHelper
       args[:inline] = true
     end
     args[:help] = filter_help_text(args, field_type)
-    args[:hidden_name] = filter_check_for_hidden_name(args)
+    args[:hidden_name] = filter_hidden_field_name(args)
     args = filter_prefill_or_select_values(args, field_type)
 
     FILTER_FIELD_HELPERS[field_type][:args].merge(args.except(:model))
@@ -170,7 +170,7 @@ module FiltersHelper
   end
 
   # Overrides for the assumed name of the id field for autocompleter.
-  def filter_check_for_hidden_name(args)
+  def filter_hidden_field_name(args)
     case args[:field]
     when :list
       return "list_id"
@@ -178,6 +178,19 @@ module FiltersHelper
       return "project_lists_id"
     end
     nil
+  end
+
+  # Makes a JS toggle switch that is a checkbox in disguise.
+  def js_toggle_with_label(**args)
+    tag.div(class: "form-group") do
+      tag.div(class: "checkbox toggle") do
+        tag.label do
+          concat(check_box_tag(args[:field], args[:value], args[:checked]))
+          concat(tag.span)
+          concat(args[:label])
+        end
+      end
+    end
   end
 
   def filter_prefill_or_select_values(args, field_type)
