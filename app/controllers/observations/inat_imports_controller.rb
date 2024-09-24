@@ -189,13 +189,5 @@ module Observations
       flash_error(:inat_no_authorization.l)
       redirect_to(observations_path)
     end
-
-    REDIRECT_URL = if Rails.env.local?
-                     "http://localhost:3000/observations/inat_imports/authorization_response"
-                   else
-                     "https://mushroomobserver.org/observations/inat_imports/authorization_response"
-                   end
-
-    # rest of your controller code
   end
 end
