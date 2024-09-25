@@ -6,30 +6,29 @@
 #  Represents the result of an iNat API search for one observation,
 #  mapping iNat key/values to MO Observation attributes
 #
-#  == Class methods
-##
-#  == Instance methods
+#  == Instance methods and attribute keys
 #
 #  === iNat attributes & associations
 #
 #  obs::                 The iNat observation data
-#  inat_description::
-#  inat_id::
-#  inat_identifications    array of identifications, taxa need not be unique
-#  inat_location::         lat,lon
-#  inat_obs_fields::       array of fields, each field a hash
-#  inat_obs_photos::       array of observation_photos
-#  inat_place_guess::
-#  inat_private_location:: lat, lon
-#  inat_project_names::
+#  [:id]                 iNat observation id
+#  [:identifications]    array of identifications, taxa need not be unique
+#  [:location]           lat, lng Nat fudges this for obscured observations
+#                        Cf. [:private_location]
+#                        https://help.inaturalist.org/en/support/solutions/articles/151000169938-what-is-geoprivacy-what-does-it-mean-for-an-observation-to-be-obscured-
+#  inat_obs_fields::       array of fields, each field a hash. == [:ofvs]
+#  [:photos]               array of observation_photos
+#  [:place_guess]          iNat's best guess at the location
+#  [:private_location]     lat, lng. Cf. [:location]
 #  inat_prov_name::        provisional species name
-#  inat_positional_accuracy::  accuracy of inat_location in meters
-#  inat_public_positional_accuracy::  blurred accuracy
-#  inat_quality_grade::    casual, needs id, research
-#  inat_tags::             array of tags
+#  [:positional_accuracy]  unblurred accuracy of [:location] in meters.
+#  [:public_positional_accuracy] blurred for obscured observations
+#  [:quality_grade]        casual, needs id, research
+#  [:tags]                 array of tags
+#  [:taxon]                taxon hash
 #  inat_taxon_name::       scientific name
 #  inat_taxon_rank::       rank (can be secondary)
-#  inat_user_login
+#  [:user][:login]         username
 #
 #  == MO attributes
 #  gps_hidden
@@ -58,111 +57,20 @@ class Inat
       @obs = JSON.parse(imported_inat_obs_data, symbolize_names: true)
     end
 
+    # Allow hash-like access to the iNat observation data
+    def [](key)
+      @obs[key]
+    end
+
+    def []=(key, value)
+      @obs[key] = value
+    end
+
     ########## iNat attributes
 
-    def inat_description
-      @obs[:description]
-    end
-
-    def inat_id
-      @obs[:id]
-    end
-
-    def inat_identifications
-      @obs[:identifications]
-    end
-
-    # iNat fudges this for obscured observations. Cf. inat_private_location
-    # https://help.inaturalist.org/en/support/solutions/articles/151000169938-what-is-geoprivacy-what-does-it-mean-for-an-observation-to-be-obscured-
-    def inat_location
-      @obs[:location]
-    end
-
-    # for test purposes
-    def inat_location=(location)
-      @obs[:location] = location
-    end
-
+    # convenience method with descriptive, non-cryptic name
     def inat_obs_fields
       @obs[:ofvs]
-    end
-
-    def inat_obs_photos
-      @obs[:observation_photos]
-    end
-
-    def inat_place_guess
-      @obs[:place_guess]
-    end
-
-    def inat_private_location
-      @obs[:private_location]
-    end
-
-    # comma-separated string of names of projects to which obs belongs
-    def inat_project_names
-      projects = inat_projects
-
-      # 2024-06-12 jdc
-      # 1. Stop inat_obs from returning the following when projects.empty
-      # # encoding: US-ASCII
-      # #    valid: true
-      # ""
-      #
-      # 2. Always include ?? because I cannot reliably find all the projects
-      # via the iNat API
-      return "??" if projects.empty?
-
-      # Extract the titles from each project observation
-      (projects.map { |proj| proj.dig(:project, :title) } << "??").
-        join(", ").delete_prefix(", ")
-    end
-
-    # NOTE: iNat allows only 1 obs field with a given :name per obs.
-    # I assume iNat users will add only 1 proviisonal name per obs
-    def inat_prov_name
-      obs_fields = inat_obs_fields
-      return nil if obs_fields.blank?
-
-      prov_name_field =
-        inat_obs_fields.find do |field|
-          field[:name] =~ /^Provisional Species Name/
-        end
-      return nil if prov_name_field.blank?
-
-      prov_name_field[:value]
-    end
-
-    # unblurred accuracy. Cf. inat_public_positional_accuracy
-    # https://help.inaturalist.org/en/support/solutions/articles/151000169938-what-is-geoprivacy-what-does-it-mean-for-an-observation-to-be-obscured-
-    def inat_positional_accuracy
-      @obs[:public_positional_accuracy]
-    end
-
-    # For testing. It's often much easier to modify an existing mock obs
-    # than to create a new one.
-    def inat_positional_accuracy=(accuracy)
-      @obs[:positional_accuracy] = accuracy
-    end
-
-    # Blurred for obscured observations. Cf. inat_positional_accuracy
-    # https://help.inaturalist.org/en/support/solutions/articles/151000169938-what-is-geoprivacy-what-does-it-mean-for-an-observation-to-be-obscured-
-    def inat_public_positional_accuracy
-      @obs[:public_positional_accuracy]
-    end
-
-    # For testing. It's often much easier to modify an existing mock obs
-    # than to create a new one.
-    def inat_public_positional_accuracy=(accuracy)
-      @obs[:public_positional_accuracy] = accuracy
-    end
-
-    def inat_quality_grade
-      @obs[:quality_grade]
-    end
-
-    def inat_tags
-      @obs[:tags]
     end
 
     def inat_taxon
@@ -175,10 +83,6 @@ class Inat
 
     def inat_taxon_rank
       inat_taxon[:rank]
-    end
-
-    def inat_user_login
-      @obs[:user][:login]
     end
 
     ########## MO attributes
@@ -204,9 +108,9 @@ class Inat
     end
 
     def notes
-      return "" if inat_description.empty?
+      return "" if self[:description].empty?
 
-      { Other: inat_description.gsub(%r{</?p>}, "") }
+      { Other: self[:description].gsub(%r{</?p>}, "") }
     end
 
     # min bounding rectangle of iNat location blurred by public accuracy
@@ -221,12 +125,12 @@ class Inat
     # location seems simplest source for lat/lng
     # But :geojason might be possible.
     def lat
-      location = inat_private_location || inat_location
+      location = self[:private_location] || self[:location]
       location.split(",").first.to_f
     end
 
     def lng
-      location = inat_private_location || inat_location
+      location = self[:private_location] || self[:location]
       location.split(",").second.to_f
     end
 
@@ -258,13 +162,13 @@ class Inat
     def where
       # NOTE: Make it the name of a real MO Location
       # https://github.com/MushroomObserver/mushroom-observer/issues/2383
-      inat_place_guess
+      self[:place_guess]
     end
 
     ########## Other mappings used in MO Observations
 
     def dqa
-      case inat_quality_grade
+      case self[:quality_grade]
       when "research"
         :inat_dqa_research.l
       when "needs_id"
@@ -288,13 +192,30 @@ class Inat
       prov_sp_name.sub(/ (.*)/, ' "sp-\1"')
     end
 
+    # derive a provisional name from some specific Observation Fields
+    # NOTE: iNat does not allow provisional names as identifications.
+    # Also, iNat allows only 1 obs field with a given :name per obs.
+    # I assume iNat users will add only 1 provisional name per obs.
+    def inat_prov_name
+      obs_fields = inat_obs_fields
+      return nil if obs_fields.blank?
+
+      prov_name_field =
+        inat_obs_fields.find do |field|
+          field[:name] =~ /^Provisional Species Name/
+        end
+      return nil if prov_name_field.blank?
+
+      prov_name_field[:value]
+    end
+
     def snapshot
       result = ""
       {
-        USER: inat_user_login,
+        USER: self[:user][:login],
         OBSERVED: self.when,
         show_observation_inat_lat_lng: lat_lon_accuracy,
-        PLACE: inat_place_guess,
+        PLACE: self[:place_guess],
         ID: inat_taxon_name,
         DQA: dqa,
         OBSERVATION_FIELDS: obs_fields(inat_obs_fields),
@@ -308,8 +229,7 @@ class Inat
     end
 
     def lat_lon_accuracy
-      "#{inat_location} " \
-      "+/-#{inat_public_positional_accuracy} m"
+      "#{self[:location]} +/-#{self[:public_positional_accuracy]} m"
     end
 
     def obs_fields(fields)
@@ -326,7 +246,7 @@ class Inat
     ########## Utilities
 
     def public_accuracy_in_degrees
-      accuracy_in_meters = (inat_public_positional_accuracy || 0).to_f
+      accuracy_in_meters = (self[:public_positional_accuracy] || 0).to_f
 
       { lat: accuracy_in_meters / 111_111,
         lng: accuracy_in_meters / 111_111 * Math.cos(to_rad(lat)) }
@@ -398,7 +318,7 @@ class Inat
     def prepend_genus_and_rank
       # Search the identifications of this iNat observation
       # for an identification of the inat_taxon[:id]
-      inat_identifications.each do |identification|
+      self[:identifications].each do |identification|
         next unless identifies_this_obs?(identification)
 
         # search the identification's ancestors to find the genus

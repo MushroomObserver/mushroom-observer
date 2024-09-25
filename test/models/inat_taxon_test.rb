@@ -11,7 +11,7 @@ class InatTaxonTest < UnitTestCase
     assert_equal(inat_taxon.name, names(:somion_unicolor),
                  "Incorrect MO Name for iNat community id")
 
-    last_id = mock_inat_obs.inat_identifications.last
+    last_id = mock_inat_obs[:identifications].last
     inat_taxon = Inat::Taxon.new(last_id[:taxon])
 
     assert_equal(inat_taxon.name, names(:somion_unicolor),

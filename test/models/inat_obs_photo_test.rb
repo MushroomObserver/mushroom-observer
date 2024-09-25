@@ -39,7 +39,7 @@ class InatObsPhotoTest < UnitTestCase
       JSON.generate(JSON.parse(mock_search)["results"].first)
     )
     inat_obs_photo = Inat::ObsPhoto.new(
-      inat_obs.inat_obs_photos.first
+      inat_obs[:photos].first
     )
     expected_license =
       License.where(License[:url] =~ "/by-nc/").where(deprecated: false).

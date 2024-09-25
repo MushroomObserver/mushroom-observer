@@ -58,10 +58,10 @@ class InatObsTest < UnitTestCase
 
     expected_snapshot =
       <<~SNAPSHOT.gsub(/^\s+/, "")
-        #{:USER.t}: #{mock_inat_obs.inat_user_login}\n
+        #{:USER.t}: #{mock_inat_obs[:user][:login]}\n
         #{:OBSERVED.t}: #{mock_inat_obs.when}\n
         #{:show_observation_inat_lat_lng.t}: #{mock_inat_obs.lat_lon_accuracy}\n
-        #{:PLACE.t}: #{mock_inat_obs.inat_place_guess}\n
+        #{:PLACE.t}: #{mock_inat_obs[:place_guess]}\n
         #{:ID.t}: #{mock_inat_obs.inat_taxon_name}\n
         #{:DQA.t}: #{mock_inat_obs.dqa}\n
         #{:OBSERVATION_FIELDS.t}: #{mock_inat_obs.obs_fields(mock_inat_obs.inat_obs_fields)}\n
@@ -90,16 +90,16 @@ class InatObsTest < UnitTestCase
     # iNat attributes
     # NOTE: jdc 2024-06-13
     # Might seem circular, but need to insure it works with different iNat APIs
-    assert_equal(202555552, mock_inat_obs.inat_id)
-    assert_equal("31.8813,-109.244", mock_inat_obs.inat_location)
-    assert_equal("Cochise Co., Arizona, USA", mock_inat_obs.inat_place_guess)
-    assert_equal(20, mock_inat_obs.inat_public_positional_accuracy)
-    assert_equal("research", mock_inat_obs.inat_quality_grade)
+    assert_equal(202555552, mock_inat_obs[:id])
+    assert_equal("31.8813,-109.244", mock_inat_obs[:location])
+    assert_equal("Cochise Co., Arizona, USA", mock_inat_obs[:place_guess])
+    assert_equal(20, mock_inat_obs[:public_positional_accuracy])
+    assert_equal("research", mock_inat_obs[:quality_grade])
     assert_equal("Somion unicolor", mock_inat_obs.inat_taxon_name)
-    assert_equal("jdcohenesq", mock_inat_obs.inat_user_login)
+    assert_equal("jdcohenesq", mock_inat_obs[:user][:login])
     # Inocutis dryophila suggested once
     # then Somion unicolor suggested twice
-    assert_equal(3, mock_inat_obs.inat_identifications.size)
+    assert_equal(3, mock_inat_obs[:identifications].size)
   end
   # rubocop:enable Style/NumericLiterals
 
@@ -237,9 +237,9 @@ class InatObsTest < UnitTestCase
     assert_equal(name.text_name, mock_inat_obs.text_name)
   end
 
-  def test_inat_tags
-    assert(2, mock_observation("inocybe").inat_tags.length)
-    assert_empty(mock_observation("evernia").inat_tags)
+  def test_tags
+    assert(2, mock_observation("inocybe")[:tags].length)
+    assert_empty(mock_observation("evernia")[:tags])
   end
 
   def test_dqa
@@ -266,14 +266,14 @@ class InatObsTest < UnitTestCase
     mock_inat_obs = mock_observation("somion_unicolor")
     loc_center = "#{loc.south + ((loc.north - loc.south) / 2)}," \
           "#{loc.west + ((loc.east - loc.west) / 2)}"
-    mock_inat_obs.inat_location = loc_center
+    mock_inat_obs[:location] = loc_center
 
     assert_equal(loc, mock_inat_obs.location)
 
     # Simulate nil accuracy, which is the case for some iNat obss
     # e.g., https://www.inaturalist.org/observations/230672879
-    mock_inat_obs.inat_positional_accuracy = nil
-    mock_inat_obs.inat_public_positional_accuracy = nil
+    mock_inat_obs[:positional_accuracy] = nil
+    mock_inat_obs[:public_positional_accuracy] = nil
 
     assert_equal(loc, mock_inat_obs.location)
   end
@@ -356,8 +356,8 @@ class InatObsTest < UnitTestCase
   end
 
   def test_inat_obs_photos
-    assert(mock_observation("amanita_flavorubens").inat_obs_photos.none?)
-    assert(mock_observation("coprinus").inat_obs_photos.one?)
+    assert(mock_observation("amanita_flavorubens")[:photos].none?)
+    assert(mock_observation("coprinus")[:photos].one?)
   end
 
   def mock_observation(filename)

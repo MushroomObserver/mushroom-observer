@@ -6,12 +6,12 @@
 # Inat::ObsPhoto.new(<imported_inat_obs>.observation_photos.first)
 class Inat
   class ObsPhoto
-    def initialize(inat_obs_photo_ary)
-      @inat_obs_photo = inat_obs_photo_ary
+    def initialize(inat_obs_photo_data)
+      @photo = inat_obs_photo_data
     end
 
     def copyright_holder
-      photo[:attribution]
+      @photo[:attribution]
     end
 
     # https://www.iana.org/assignments/media-types/media-types.xhtml#image
@@ -20,7 +20,7 @@ class Inat
     end
 
     def license
-      Inat::License.new(photo[:license_code]).mo_license
+      Inat::License.new(@photo[:license_code]).mo_license
     end
 
     delegate :id, to: :license, prefix: true
@@ -34,19 +34,11 @@ class Inat
     # iNat doesn't preserve (or maybe reveal) user's original filename
     # so map it to an iNat uuid
     def original_name
-      "iNat photo uuid #{@inat_obs_photo[:uuid]}"
+      "iNat photo uuid #{@photo[:uuid]}"
     end
 
     def url
-      photo[:url].sub("/square.", "/original.")
-    end
-
-    ##########
-
-    private
-
-    def photo
-      @inat_obs_photo[:photo]
+      @photo[:url].sub("/square.", "/original.")
     end
   end
 end
