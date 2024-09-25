@@ -167,6 +167,27 @@ class FieldSlipsControllerTest < FunctionalTestCase
     obs = Observation.last
     assert_redirected_to observation_url(obs.id)
   end
+  test "should create obs with link to inat" do
+    login(@field_slip.user.login)
+    code = "Z#{@field_slip.code}"
+    assert_difference("Observation.count") do
+      post(:create,
+           params: {
+             commit: :field_slip_quick_create_obs.t,
+             field_slip: {
+               code: code,
+               location: locations(:albion).name,
+               field_slip_name: names(:coprinus_comatus).text_name,
+               project_id: projects(:eol_project).id,
+               other_codes: "12345",
+               inat: "1"
+             }
+           })
+    end
+    obs = Observation.last
+    assert_match("https://www.inaturalist.org/observations",
+                 obs.notes[:Other_Codes])
+  end
 
   test "should try to create obs and redirect to create obs" do
     login(@field_slip.user.login)
