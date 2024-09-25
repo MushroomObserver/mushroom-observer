@@ -132,6 +132,7 @@ class API2
       obs.log(:log_observation_created) if @log
       create_specimen_records(obs) if obs.specimen
       create_naming(obs)
+      add_field_slip_code(obs)
     end
 
     def validate_update_params!(params)
@@ -168,6 +169,19 @@ class API2
       naming.save!
       consensus = ::Observation::NamingConsensus.new(obs)
       consensus.change_vote(naming, @vote, user)
+    end
+
+    def add_field_slip_code(observation)
+      if @code
+        field_slip = FieldSlip.find_by(code: @code)
+        if field_slip
+          raise(FieldSlipInUse.new(observation)) if field_slip.observation
+
+          field_slip.update!(observation:)
+        else
+          FieldSlip.create!(observation:, code: @code)
+        end
+      end
     end
 
     def create_specimen_records(obs)
@@ -246,6 +260,7 @@ class API2
       @name    = parse(:name, :name, default: Name.unknown)
       @vote    = parse(:float, :vote, default: Vote.maximum_vote)
       @log     = parse(:boolean, :log, default: true, help: 1)
+      @code    = parse(:string, :code)
       @notes   = parse_notes_fields!
       @reasons = parse_naming_reasons!
       parse_herbarium_and_specimen!
