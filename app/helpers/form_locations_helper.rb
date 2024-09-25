@@ -41,7 +41,7 @@ module FormLocationsHelper
   def compass_input(form, obj, dir, col_classes)
     tag.div(class: col_classes) do
       text_field_with_label(
-        form:, field: dir, value: send(obj, dir),
+        form:, field: dir, value: obj[dir],
         label: "#{dir.upcase.to_sym.t}:", addon: "º",
         data: { map_target: "#{dir}Input", action: "map#bufferInputs" }
       )
@@ -94,7 +94,7 @@ module FormLocationsHelper
 
   def elevation_input(form, obj, dir)
     text_field_with_label(
-      form: form, field: dir, value: send(obj, dir),
+      form: form, field: dir, value: obj[dir],
       label: :"show_location_#{dir}est".t, addon: "m",
       data: { map_target: "#{dir}Input", action: "map#bufferInputs" }
     )
