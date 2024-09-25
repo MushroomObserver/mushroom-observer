@@ -73,16 +73,14 @@ class Inat
       @obs[:ofvs]
     end
 
-    def inat_taxon
-      @obs[:taxon]
-    end
-
+    # NOTE: Fixes the ABC count of `snapshot` because
+    # inat_taxon_name is one fewer Branch than self[:taxon][:name]
     def inat_taxon_name
-      inat_taxon[:name]
+      self[:taxon][:name]
     end
 
     def inat_taxon_rank
-      inat_taxon[:rank]
+      self[:taxon][:rank]
     end
 
     ########## MO attributes
@@ -304,15 +302,15 @@ class Inat
         insert_rank_between_species_and_final_epithet
       elsif complex?
         # iNat doesn't include "complex" in the name, MO does
-        "#{inat_taxon[:name]} complex"
+        "#{inat_taxon_name} complex"
       else
-        inat_taxon[:name]
+        inat_taxon_name
       end
     end
 
     def infrageneric?
       %w[subgenus section subsection stirps series subseries].
-        include?(inat_taxon[:rank])
+        include?(inat_taxon_rank)
     end
 
     def prepend_genus_and_rank
@@ -327,22 +325,22 @@ class Inat
 
           #  return a string comprising Genus rank epithet
           #  ex: "Morchella section Distantes"
-          return "#{ancestor[:name]} #{inat_taxon[:rank]} #{inat_taxon[:name]}"
+          return "#{ancestor[:name]} #{inat_taxon_rank} #{inat_taxon_name}"
         end
       end
     end
 
     def infraspecific?
-      %w[subspecies variety form].include?(inat_taxon[:rank])
+      %w[subspecies variety form].include?(inat_taxon_rank)
     end
 
     def insert_rank_between_species_and_final_epithet
-      words = inat_taxon[:name].split
-      "#{words[0..1].join(" ")} #{inat_taxon[:rank]} #{words[2]}"
+      words = inat_taxon_name.split
+      "#{words[0..1].join(" ")} #{inat_taxon_rank} #{words[2]}"
     end
 
     def identifies_this_obs?(identification)
-      identification[:taxon][:id] == inat_taxon[:id]
+      identification[:taxon][:id] == self[:taxon][:id]
     end
 
     def matching_group_names
@@ -357,7 +355,7 @@ class Inat
         # parse it to get MO's text_name rank abbreviation
         # E.g. "sect." instead of "section"
         text_name: ::Name.parse_name(full_name).text_name,
-        rank: inat_taxon[:rank].titleize,
+        rank: inat_taxon_rank.titleize,
         correct_spelling_id: nil
       ).
         # iNat lacks taxa "sensu xxx", so ignore MO Names sensu xxx

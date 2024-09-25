@@ -6,7 +6,7 @@ require("test_helper")
 class InatTaxonTest < UnitTestCase
   def test_name_basic
     mock_inat_obs = mock_observation("somion_unicolor")
-    inat_taxon = Inat::Taxon.new(mock_inat_obs.inat_taxon)
+    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
 
     assert_equal(inat_taxon.name, names(:somion_unicolor),
                  "Incorrect MO Name for iNat community id")
@@ -33,7 +33,7 @@ class InatTaxonTest < UnitTestCase
     x_campanella_group.save
 
     mock_inat_obs = mock_observation("xeromphalina_campanella_complex")
-    inat_taxon = Inat::Taxon.new(mock_inat_obs.inat_taxon)
+    inat_taxon = Inat::Taxon.new(mock_inat_obs[:taxon])
 
     assert_equal(x_campanella_group, inat_taxon.name,
                  "Incorrect MO Name for iNat community id")
