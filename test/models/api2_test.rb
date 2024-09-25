@@ -1217,7 +1217,7 @@ class API2Test < UnitTestCase
 
     assert_api_pass(params.merge(date: "2007-03"))
     assert_api_results(
-      Image.where((Image[:when].year.eq(2007)).and(Image[:when].month.eq(3)))
+      Image.where(Image[:when].year.eq(2007).and(Image[:when].month.eq(3)))
     )
 
     assert_api_pass(params.merge(user: "#{mary.id},#{katrina.id}"))
@@ -2452,6 +2452,30 @@ class API2Test < UnitTestCase
     assert_no_errors(api, "Errors while posting observation")
     obs = Observation.last
     assert_nil(obs.rss_log_id)
+  end
+
+  def test_post_observation_with_used_field_slip
+    params = {
+      method: :post,
+      action: :observation,
+      api_key: @api_key.key,
+      location: "Anywhere",
+      name: "Agaricus campestris",
+      code: field_slips(:field_slip_one).code
+    }
+    assert_api_fail(params)
+  end
+
+  def test_post_observation_with_free_field_slip
+    params = {
+      method: :post,
+      action: :observation,
+      api_key: @api_key.key,
+      location: "Anywhere",
+      name: "Agaricus campestris",
+      code: field_slips(:field_slip_no_obs).code
+    }
+    assert_api_pass(params)
   end
 
   def test_post_observation_scientific_location

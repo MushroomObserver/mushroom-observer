@@ -175,7 +175,7 @@ class API2
       if @code
         field_slip = FieldSlip.find_by(code: @code)
         if field_slip
-          raise(FieldSlipInUse.new(observation)) if field_slip.observation
+          raise(FieldSlipInUse.new(field_slip)) if field_slip.observation
 
           field_slip.update!(observation:)
         else

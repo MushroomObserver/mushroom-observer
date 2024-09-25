@@ -4236,6 +4236,7 @@
   api_destroy_failed: Failed to destroy [type] "[name]".
   api_dubious_location_name: "Location name is invalid: [reasons]"
   api_external_link_permission_denied: In order to create an external link, you must either have edit permissions for the observation, or you must be a member of the external site's project.
+  api_field_slip_in_use: Field Slip "[code]" is already in use.
   api_file_missing: File "[file]" is missing.
   api_help_message: "Usage: [help]"
   api_herbarium_record_already_exists: There is already a record for [number] at [herbarium].
