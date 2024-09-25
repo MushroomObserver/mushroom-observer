@@ -13,35 +13,36 @@ module FormLocationsHelper
 
   # This will generate a compass rose of inputs for given form object.
   # The inputs are for compass directions.
-  def form_compass_input_group(form:)
+  def form_compass_input_group(form:, obj:)
     compass_groups.each do |dir|
       if compass_north_south.include?(dir)
-        concat(compass_north_south_row(form, dir))
+        concat(compass_north_south_row(form, obj, dir))
       else
-        concat(compass_east_west_row(form, dir))
+        concat(compass_east_west_row(form, obj, dir))
       end
     end
   end
 
-  def compass_north_south_row(form, dir)
+  def compass_north_south_row(form, obj, dir)
     tag.div(class: compass_row_classes(dir)) do
-      compass_input(form, dir, compass_col_classes(dir))
+      compass_input(form, obj, dir, compass_col_classes(dir))
     end
   end
 
-  def compass_east_west_row(form, dir)
+  def compass_east_west_row(form, obj, dir)
     tag.div(class: compass_row_classes(dir)) do
-      [compass_input(form, dir[0], compass_col_classes(dir[0])),
+      [compass_input(form, obj, dir[0], compass_col_classes(dir[0])),
        compass_help,
-       compass_input(form, dir[1], compass_col_classes(dir[1]))].safe_join
+       compass_input(form, obj, dir[1], compass_col_classes(dir[1]))].safe_join
     end
   end
 
   # Note these inputs are Stimulus map controller targets
-  def compass_input(form, dir, col_classes)
+  def compass_input(form, obj, dir, col_classes)
     tag.div(class: col_classes) do
       text_field_with_label(
-        form:, field: dir, label: "#{dir.upcase.to_sym.t}:", addon: "º",
+        form:, field: dir, value: send(obj, dir),
+        label: "#{dir.upcase.to_sym.t}:", addon: "º",
         data: { map_target: "#{dir}Input", action: "map#bufferInputs" }
       )
     end
@@ -82,18 +83,19 @@ module FormLocationsHelper
   ##############################################################################
   # Elevation
   #
-  def form_elevation_input_group(form:)
+  def form_elevation_input_group(form:, obj:)
     tag.div(class: "text-center") do
       elevation_directions.each do |dir|
-        concat(elevation_input(form, dir))
+        concat(elevation_input(form, obj, dir))
       end
       concat(elevation_request_button)
     end
   end
 
-  def elevation_input(form, dir)
+  def elevation_input(form, obj, dir)
     text_field_with_label(
-      form: form, field: dir, label: :"show_location_#{dir}est".t, addon: "m",
+      form: form, field: dir, value: send(obj, dir),
+      label: :"show_location_#{dir}est".t, addon: "m",
       data: { map_target: "#{dir}Input", action: "map#bufferInputs" }
     )
   end
