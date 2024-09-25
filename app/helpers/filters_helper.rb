@@ -82,6 +82,8 @@ module FiltersHelper
     if component == :filter_autocompleter_with_conditional_fields
       args = args.merge(sections:, model:)
     end
+    return filter_region_with_compass_fields(**args) if field == :region
+
     send(component, **args)
   end
 
@@ -155,7 +157,7 @@ module FiltersHelper
       args[:inline] = true
     end
     args[:help] = filter_help_text(args, field_type)
-    args[:hidden_name] = filter_check_for_hidden_name(args)
+    args[:hidden_name] = filter_check_for_hidden_field_name(args)
     args = filter_prefill_or_select_values(args, field_type)
 
     FILTER_FIELD_HELPERS[field_type][:args].merge(args.except(:model))
@@ -170,7 +172,7 @@ module FiltersHelper
   end
 
   # Overrides for the assumed name of the id field for autocompleter.
-  def filter_check_for_hidden_name(args)
+  def filter_check_for_hidden_field_name(args)
     case args[:field]
     when :list
       return "list_id"
@@ -297,6 +299,15 @@ module FiltersHelper
             field: "#{args[:field]}_range" }
         ))
       end
+    ].safe_join
+  end
+
+  def filter_region_with_compass_fields(**args)
+    [
+      form_location_input_find_on_map(form: f, field: :region,
+                                      value: args[:filter].region,
+                                      label: "#{:WHERE.t}:"),
+      form_compass_input_group(form: f)
     ].safe_join
   end
 
