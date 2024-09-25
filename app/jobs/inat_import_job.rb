@@ -181,7 +181,7 @@ class InatImportJob < ApplicationJob
     return unless @inat_obs.importable?
 
     create_observation
-    add_inat_images(@inat_obs[:photos])
+    add_inat_images(@inat_obs[:observation_photos])
     update_names_and_proposals
     add_inat_sequences
     add_snapshot_of_import_comment

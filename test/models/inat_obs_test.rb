@@ -356,8 +356,8 @@ class InatObsTest < UnitTestCase
   end
 
   def test_inat_obs_photos
-    assert(mock_observation("amanita_flavorubens")[:photos].none?)
-    assert(mock_observation("coprinus")[:photos].one?)
+    assert(mock_observation("amanita_flavorubens")[:observation_photos].none?)
+    assert(mock_observation("coprinus")[:observation_photos].one?)
   end
 
   def mock_observation(filename)

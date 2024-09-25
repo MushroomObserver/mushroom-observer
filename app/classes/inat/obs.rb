@@ -17,7 +17,7 @@
 #                        Cf. [:private_location]
 #                        https://help.inaturalist.org/en/support/solutions/articles/151000169938-what-is-geoprivacy-what-does-it-mean-for-an-observation-to-be-obscured-
 #  inat_obs_fields::       array of fields, each field a hash. == [:ofvs]
-#  [:photos]               array of observation_photos
+#  [:observation_photos]   array of photos
 #  [:place_guess]          iNat's best guess at the location
 #  [:private_location]     lat, lng. Cf. [:location]
 #  inat_prov_name::        provisional species name
