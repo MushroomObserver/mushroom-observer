@@ -57,10 +57,8 @@ class Inat
       @obs = JSON.parse(imported_inat_obs_data, symbolize_names: true)
     end
 
-    # Allow hash-like access to the iNat observation data
-    def [](key)
-      @obs[key]
-    end
+    # Allow hash key access to the iNat observation data
+    def [](key) = @obs[key]
 
     def []=(key, value)
       @obs[key] = value
@@ -69,29 +67,19 @@ class Inat
     ########## iNat attributes
 
     # convenience method with descriptive, non-cryptic name
-    def inat_obs_fields
-      @obs[:ofvs]
-    end
+    def inat_obs_fields = @obs[:ofvs]
 
-    # NOTE: Fixes the ABC count of `snapshot` because
+    # NOTE: Fixes ABC count of `snapshot` because
     # inat_taxon_name is one fewer Branch than self[:taxon][:name]
-    def inat_taxon_name
-      self[:taxon][:name]
-    end
+    def inat_taxon_name = self[:taxon][:name]
 
-    def inat_taxon_rank
-      self[:taxon][:rank]
-    end
+    def inat_taxon_rank = self[:taxon][:rank]
 
     ########## MO attributes
 
-    def gps_hidden
-      @obs[:geoprivacy].present?
-    end
+    def gps_hidden = @obs[:geoprivacy].present?
 
-    def license
-      Inat::License.new(@obs[:license_code]).mo_license
-    end
+    def license = Inat::License.new(@obs[:license_code]).mo_license
 
     def name_id
       names =
@@ -144,24 +132,16 @@ class Inat
       end
     end
 
-    def source
-      "mo_inat_import"
-    end
+    def source = "mo_inat_import"
 
-    def text_name
-      ::Name.find(name_id).text_name
-    end
+    def text_name = ::Name.find(name_id).text_name
 
     def when
       observed_on = @obs[:observed_on_details]
       ::Date.new(observed_on[:year], observed_on[:month], observed_on[:day])
     end
 
-    def where
-      # NOTE: Make it the name of a real MO Location
-      # https://github.com/MushroomObserver/mushroom-observer/issues/2383
-      self[:place_guess]
-    end
+    def where = self[:place_guess]
 
     ########## Other mappings used in MO Observations
 
@@ -250,13 +230,9 @@ class Inat
         lng: accuracy_in_meters / 111_111 * Math.cos(to_rad(lat)) }
     end
 
-    def importable?
-      taxon_importable?
-    end
+    def importable? = taxon_importable?
 
-    def taxon_importable?
-      fungi? || slime_mold?
-    end
+    def taxon_importable? = fungi? || slime_mold?
 
     ##########
 
@@ -265,13 +241,9 @@ class Inat
     # ----- location-related
 
     # These give a good approximation of the iNat blurred bounding box
-    def blurred_north
-      [lat + public_accuracy_in_degrees[:lat] / 2, 90].min
-    end
+    def blurred_north = [lat + public_accuracy_in_degrees[:lat] / 2, 90].min
 
-    def blurred_south
-      [lat - public_accuracy_in_degrees[:lat] / 2, -90].max
-    end
+    def blurred_south = [lat - public_accuracy_in_degrees[:lat] / 2, -90].max
 
     def blurred_east
       ((lng + public_accuracy_in_degrees[:lng] / 2 + 180) % 360) - 180
@@ -281,9 +253,7 @@ class Inat
       ((lng - public_accuracy_in_degrees[:lng] / 2 + 180) % 360) - 180
     end
 
-    def to_rad(degrees)
-      degrees * Math::PI / 180.0
-    end
+    def to_rad(degrees) = degrees * Math::PI / 180.0
 
     # copied from AutoComplete::ForLocationContaining
     def location_box(loc)
@@ -330,9 +300,7 @@ class Inat
       end
     end
 
-    def infraspecific?
-      %w[subspecies variety form].include?(inat_taxon_rank)
-    end
+    def infraspecific? = %w[subspecies variety form].include?(inat_taxon_rank)
 
     def insert_rank_between_species_and_final_epithet
       words = inat_taxon_name.split
@@ -378,39 +346,23 @@ class Inat
 
     # ----- Other
 
-    def complex?
-      inat_taxon_rank == "complex"
-    end
+    def complex? = (inat_taxon_rank == "complex")
 
-    def description
-      @obs[:description]
-    end
-
-    def fungi?
-      @obs.dig(:taxon, :iconic_taxon_name) == "Fungi"
-    end
-
-    # NOTE: 2024-09-09 jdc. Can this be improved?
-    # https://github.com/MushroomObserver/mushroom-observer/issues/2245
-    def inat_projects
-      @obs[:project_observations]
-    end
+    def fungi? = (@obs.dig(:taxon, :iconic_taxon_name) == "Fungi")
 
     def sequence_field?(field)
       field[:datatype] == "dna" ||
         field[:name] =~ /DNA/ && field[:value] =~ /^[ACTG]{,10}/
     end
 
-    def slime_mold?
-      # NOTE: 2024-06-01 jdc
-      # slime molds are polypheletic https://en.wikipedia.org/wiki/Slime_mold
-      # Protoza is paraphyletic for slime molds,
-      # but it's how they are classified in MO and MB
-      # Can this be improved by checking multiple inat [:taxon][:ancestor_ids]?
-      # I.e., is there A combination (ANDs) of higher ranks (>= Class)
-      # that's monophyletic for slime molds?
-      # Another solution: use IF API to see if IF includes the name.
-      @obs.dig(:taxon, :iconic_taxon_name) == "Protozoa"
-    end
+    # NOTE: 2024-06-01 jdc
+    # slime molds are polypheletic https://en.wikipedia.org/wiki/Slime_mold
+    # Protoza is paraphyletic for slime molds,
+    # but it's how they are classified in MO and MB
+    # Can this be improved by checking multiple inat [:taxon][:ancestor_ids]?
+    # I.e., is there A combination (ANDs) of higher ranks (>= Class)
+    # that's monophyletic for slime molds?
+    # Another solution: use IF API to see if IF includes the name.
+    def slime_mold? = (@obs.dig(:taxon, :iconic_taxon_name) == "Protozoa")
   end
 end
