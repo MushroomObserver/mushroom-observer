@@ -172,15 +172,15 @@ class API2
     end
 
     def add_field_slip_code(observation)
-      if @code
-        field_slip = FieldSlip.find_by(code: @code)
-        if field_slip
-          raise(FieldSlipInUse.new(field_slip)) if field_slip.observation
+      return unless @code
 
-          field_slip.update!(observation:)
-        else
-          FieldSlip.create!(observation:, code: @code)
-        end
+      field_slip = FieldSlip.find_by(code: @code)
+      if field_slip
+        raise(FieldSlipInUse.new(field_slip)) if field_slip.observation
+
+        field_slip.update!(observation:)
+      else
+        FieldSlip.create!(observation:, code: @code)
       end
     end
 
