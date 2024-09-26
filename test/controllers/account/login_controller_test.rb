@@ -20,7 +20,7 @@ module Account
       assert_flash_text(:runtime_login_success.t)
       assert(@request.session[:user_id],
              "Didn't store user in session after successful login!")
-      assert_equal(rolf.id, @request.session[:user_id],
+      assert_equal(mary.id, @request.session[:user_id],
                    "Wrong user stored in session after successful login!")
     end
 
