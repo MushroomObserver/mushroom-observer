@@ -1,0 +1,13 @@
+# Solid Queue supports defining recurring tasks that run at specific times in
+# the future, on a regular basis like cron jobs. These are managed by the
+# scheduler process and are defined in their own configuration file.
+# https://github.com/rails/solid_queue/tree/main#recurring-tasks
+
+# production:
+#   a_periodic_job:
+#     class: MyJob
+#     args: [ 42, { status: "custom_status" } ]
+#     schedule: every second
+#   a_cleanup_task:
+#     command: "DeletedStuff.clear_all"
+#     schedule: every day at 9am
