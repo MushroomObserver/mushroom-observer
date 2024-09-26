@@ -14,11 +14,13 @@ module FormLocationsHelper
   # This will generate a compass rose of inputs for given form object.
   # The inputs are for compass directions.
   def form_compass_input_group(form:, obj:)
-    compass_groups.each do |dir|
-      if compass_north_south.include?(dir)
-        concat(compass_north_south_row(form, obj, dir))
-      else
-        concat(compass_east_west_row(form, obj, dir))
+    capture do
+      compass_groups.each do |dir|
+        if compass_north_south.include?(dir)
+          concat(compass_north_south_row(form, obj, dir))
+        else
+          concat(compass_east_west_row(form, obj, dir))
+        end
       end
     end
   end
@@ -41,7 +43,7 @@ module FormLocationsHelper
   def compass_input(form, obj, dir, col_classes)
     tag.div(class: col_classes) do
       text_field_with_label(
-        form:, field: dir, value: obj[dir],
+        form:, field: dir, value: obj.send(dir),
         label: "#{dir.upcase.to_sym.t}:", addon: "º",
         data: { map_target: "#{dir}Input", action: "map#bufferInputs" }
       )
@@ -94,7 +96,7 @@ module FormLocationsHelper
 
   def elevation_input(form, obj, dir)
     text_field_with_label(
-      form: form, field: dir, value: obj[dir],
+      form: form, field: dir, value: obj.send(dir),
       label: :"show_location_#{dir}est".t, addon: "m",
       data: { map_target: "#{dir}Input", action: "map#bufferInputs" }
     )
