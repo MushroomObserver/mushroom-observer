@@ -179,6 +179,7 @@ class API2ControllerTest < FunctionalTestCase
       images: "#{images(:in_situ_image).id}, #{images(:turned_over_image).id}",
       thumbnail: images(:turned_over_image).id.to_s,
       projects: "EOL Project",
+      code: "EOL-13579",
       species_lists: "Another Species List"
     }
     post(:observations, params: params)
