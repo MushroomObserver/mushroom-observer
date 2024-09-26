@@ -268,11 +268,39 @@ module FiltersHelper
   end
 
   def filter_region_with_compass_fields(**args)
-    capture do
-      concat(form_location_input_find_on_map(form: args[:form], field: :region,
-                                             value: args[:filter].region,
-                                             label: "#{:REGION.t}:"))
-      concat(form_compass_input_group(form: args[:form], obj: args[:filter]))
+    tag.div(data: { controller: "map", map_open: true }) do
+      [
+        form_location_input_find_on_map(form: args[:form], field: :region,
+                                        value: args[:filter].region,
+                                        label: "#{:REGION.t}:"),
+        filter_compass_and_map_row(form: args[:form], filter: args[:filter])
+      ].safe_join
+    end
+  end
+
+  def filter_compass_and_map_row(form:, filter:)
+    minimal_loc = filter_minimal_location(filter)
+    tag.div(class: "row") do
+      [
+        tag.div(class: filter_column_classes) do
+          form_compass_input_group(form:, obj: filter)
+        end,
+        tag.div(class: filter_column_classes) do
+          make_map(objects: [minimal_loc], editable: true, map_type: "location",
+                   controller: nil)
+        end
+      ].safe_join
+    end
+  end
+
+  def filter_minimal_location(filter)
+    if filter.north.present? && filter.south.present? &&
+       filter.east.present? && filter.west.present?
+      Mappable::MinimalLocation.new(
+        nil, nil, filter.north, filter.south, filter.east, filter.west
+      )
+    else
+      Mappable::MinimalLocation.new(nil, nil, 0, 0, 0, 0)
     end
   end
 
