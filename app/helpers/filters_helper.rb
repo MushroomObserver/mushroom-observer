@@ -2,6 +2,7 @@
 
 # helpers for pattern search forms. These call field helpers in forms_helper.
 # args should provide form, field, label at a minimum.
+# rubocop:disable Metrics/ModuleLength
 module FiltersHelper
   # Filter panel for a search form. Sections are shown and collapsed.
   # If sections[:collapsed] is present, part of the panel will be collapsed.
@@ -82,7 +83,10 @@ module FiltersHelper
     if component == :filter_autocompleter_with_conditional_fields
       args = args.merge(sections:, model:)
     end
-    return filter_region_with_compass_fields(**args) if field == :region
+    if field == :region
+      # debugger
+      return filter_region_with_compass_fields(**args)
+    end
 
     send(component, **args)
   end
@@ -111,43 +115,6 @@ module FiltersHelper
     parser = subclass.params[field][1]
     parser.to_s.gsub(/^parse_/, "").to_sym
   end
-
-  FILTER_SEPARATOR = ", "
-
-  # Convenience for subclasses to access helper methods via subclass.params
-  FILTER_FIELD_HELPERS = {
-    pattern: { component: :text_field_with_label, args: {} },
-    yes: { component: :filter_yes_field, args: {} },
-    boolean: { component: :filter_boolean_field, args: {} },
-    yes_no_both: { component: :filter_yes_no_both_field, args: {} },
-    date_range: { component: :filter_date_range_field, args: {} },
-    rank_range: { component: :filter_rank_range_field, args: {} },
-    string: { component: :text_field_with_label, args: {} },
-    list_of_strings: { component: :text_field_with_label, args: {} },
-    list_of_herbaria: { component: :autocompleter_field,
-                        args: { type: :herbarium,
-                                separator: FILTER_SEPARATOR } },
-    list_of_locations: { component: :autocompleter_field,
-                         args: { type: :location,
-                                 separator: FILTER_SEPARATOR } },
-    list_of_names: { component: :filter_autocompleter_with_conditional_fields,
-                     args: { type: :name, separator: FILTER_SEPARATOR } },
-    list_of_projects: { component: :autocompleter_field,
-                        args: { type: :project,
-                                separator: FILTER_SEPARATOR } },
-    list_of_species_lists: { component: :autocompleter_field,
-                             args: { type: :species_list,
-                                     separator: FILTER_SEPARATOR } },
-    list_of_users: { component: :autocompleter_field,
-                     args: { type: :user, separator: ", " } },
-    confidence: { component: :filter_confidence_range_field, args: {} },
-    longitude: { component: :filter_longitude_field, args: {} },
-    latitude: { component: :filter_latitude_field, args: {} }
-  }.freeze
-
-  FILTER_SELECT_TYPES = [
-    :yes, :boolean, :yes_no_both, :rank_range, :confidence
-  ].freeze
 
   # Prepares HTML args for the field helper. This is where we can make
   # adjustments to the args hash before passing it to the field helper.
@@ -200,19 +167,20 @@ module FiltersHelper
   def filter_autocompleter_with_conditional_fields(**args)
     return if args[:sections].blank?
 
-    append = filter_conditional_rows(sections: args[:sections],
-                                     form: args[:form], model: args[:model])
+    # rightward destructuring assignment ruby 3 feature
+    args => { form:, model:, filter:, sections: }
+    append = filter_conditional_rows(form:, model:, filter:, sections:)
     autocompleter_field(**args.except(:sections, :model).merge(append:))
   end
 
   # Rows that only uncollapse if an autocompleter field has a value.
   # Note the data-autocompleter-target attribute.
-  def filter_conditional_rows(sections:, form:, model:)
+  def filter_conditional_rows(form:, model:, filter:, sections:)
     capture do
       tag.div(data: { autocompleter_target: "collapseFields" },
               class: "collapse") do
         sections[:conditional].each do |field|
-          concat(filter_row(form:, field:, model:, sections:))
+          concat(filter_row(form:, field:, model:, filter:, sections:))
         end
       end
     end
@@ -303,12 +271,13 @@ module FiltersHelper
   end
 
   def filter_region_with_compass_fields(**args)
-    [
-      form_location_input_find_on_map(form: f, field: :region,
-                                      value: args[:filter].region,
-                                      label: "#{:WHERE.t}:"),
-      form_compass_input_group(form: f)
-    ].safe_join
+    capture do
+      concat(form_location_input_find_on_map(form: args[:form], field: :region,
+                                             value: args[:filter].region,
+                                             label: "#{:REGION.t}:"))
+      concat(form_compass_input_group(form: args[:form],
+                                      obj: args[:filter]))
+    end
   end
 
   def filter_longitude_field(**args)
@@ -322,4 +291,43 @@ module FiltersHelper
   def filter_column_classes
     "col-xs-12 col-sm-6 col-md-12 col-lg-6"
   end
+
+  # Separator for autocompleter fields.
+  FILTER_SEPARATOR = ", "
+
+  # Convenience for subclasses to access helper methods via subclass.params
+  FILTER_FIELD_HELPERS = {
+    pattern: { component: :text_field_with_label, args: {} },
+    yes: { component: :filter_yes_field, args: {} },
+    boolean: { component: :filter_boolean_field, args: {} },
+    yes_no_both: { component: :filter_yes_no_both_field, args: {} },
+    date_range: { component: :filter_date_range_field, args: {} },
+    rank_range: { component: :filter_rank_range_field, args: {} },
+    string: { component: :text_field_with_label, args: {} },
+    list_of_strings: { component: :text_field_with_label, args: {} },
+    list_of_herbaria: { component: :autocompleter_field,
+                        args: { type: :herbarium,
+                                separator: FILTER_SEPARATOR } },
+    list_of_locations: { component: :autocompleter_field,
+                         args: { type: :location, separator: "\n" } },
+    list_of_names: { component: :filter_autocompleter_with_conditional_fields,
+                     args: { type: :name, separator: FILTER_SEPARATOR } },
+    list_of_projects: { component: :autocompleter_field,
+                        args: { type: :project,
+                                separator: FILTER_SEPARATOR } },
+    list_of_species_lists: { component: :autocompleter_field,
+                             args: { type: :species_list,
+                                     separator: FILTER_SEPARATOR } },
+    list_of_users: { component: :autocompleter_field,
+                     args: { type: :user, separator: FILTER_SEPARATOR } },
+    confidence: { component: :filter_confidence_range_field, args: {} },
+    # handled in filter_region_with_compass_fields
+    longitude: { component: nil, args: {} },
+    latitude: { component: nil, args: {} }
+  }.freeze
+
+  FILTER_SELECT_TYPES = [
+    :yes, :boolean, :yes_no_both, :rank_range, :confidence
+  ].freeze
 end
+# rubocop:enable Metrics/ModuleLength
