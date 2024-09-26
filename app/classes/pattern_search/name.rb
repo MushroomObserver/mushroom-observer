@@ -38,7 +38,7 @@ module PatternSearch
     # Autocompleters have id fields, and range fields are concatenated.
     def self.fields
       params.keys + [
-        :created_range, :modified_range, :rank_range
+        :created_range, :modified_range, :rank_range, :pattern
       ]
     end
 
