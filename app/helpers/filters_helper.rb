@@ -83,10 +83,7 @@ module FiltersHelper
     if component == :filter_autocompleter_with_conditional_fields
       args = args.merge(sections:, model:)
     end
-    if field == :region
-      # debugger
-      return filter_region_with_compass_fields(**args)
-    end
+    return filter_region_with_compass_fields(**args) if field == :region
 
     send(component, **args)
   end
@@ -275,8 +272,7 @@ module FiltersHelper
       concat(form_location_input_find_on_map(form: args[:form], field: :region,
                                              value: args[:filter].region,
                                              label: "#{:REGION.t}:"))
-      concat(form_compass_input_group(form: args[:form],
-                                      obj: args[:filter]))
+      concat(form_compass_input_group(form: args[:form], obj: args[:filter]))
     end
   end
 
