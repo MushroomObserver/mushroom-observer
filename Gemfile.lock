@@ -5,6 +5,18 @@ GIT
     mo_acts_as_versioned (0.6.6)
       activerecord (>= 3.0.9)
 
+GIT
+  remote: https://github.com/jukra/dartsass-sprockets
+  revision: 287b82749c0e2135991309035ad7d2bb877cda48
+  branch: quiet_deps
+  specs:
+    dartsass-sprockets (3.1.0)
+      railties (>= 4.0.0)
+      sassc-embedded (~> 1.69)
+      sprockets (> 3.0)
+      sprockets-rails
+      tilt
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -111,12 +123,6 @@ GEM
     cuprite (0.15.1)
       capybara (~> 3.0)
       ferrum (~> 0.15.0)
-    dartsass-sprockets (3.1.0)
-      railties (>= 4.0.0)
-      sassc-embedded (~> 1.69)
-      sprockets (> 3.0)
-      sprockets-rails
-      tilt
     database_cleaner-active_record (2.2.0)
       activerecord (>= 5.a)
       database_cleaner-core (~> 2.0.0)
@@ -143,13 +149,7 @@ GEM
       concurrent-ruby (~> 1.1)
       webrick (~> 1.7)
       websocket-driver (~> 0.7)
-    ffi (1.17.0-aarch64-linux-gnu)
-    ffi (1.17.0-aarch64-linux-musl)
-    ffi (1.17.0-arm-linux-gnu)
-    ffi (1.17.0-arm-linux-musl)
     ffi (1.17.0-arm64-darwin)
-    ffi (1.17.0-x86-linux-gnu)
-    ffi (1.17.0-x86-linux-musl)
     ffi (1.17.0-x86_64-darwin)
     ffi (1.17.0-x86_64-linux-gnu)
     ffi (1.17.0-x86_64-linux-musl)
@@ -193,9 +193,6 @@ GEM
     jwt (2.8.2)
       base64
     language_server-protocol (3.17.0.3)
-    libv8-node (18.19.0.0)
-    libv8-node (18.19.0.0-aarch64-linux)
-    libv8-node (18.19.0.0-aarch64-linux-musl)
     libv8-node (18.19.0.0-arm64-darwin)
     libv8-node (18.19.0.0-x86_64-darwin)
     libv8-node (18.19.0.0-x86_64-linux)
@@ -242,13 +239,7 @@ GEM
     netrc (0.11.0)
     newrelic_rpm (9.13.0)
     nio4r (2.7.3)
-    nokogiri (1.16.7-aarch64-linux)
-      racc (~> 1.4)
-    nokogiri (1.16.7-arm-linux)
-      racc (~> 1.4)
     nokogiri (1.16.7-arm64-darwin)
-      racc (~> 1.4)
-    nokogiri (1.16.7-x86-linux)
       racc (~> 1.4)
     nokogiri (1.16.7-x86_64-darwin)
       racc (~> 1.4)
@@ -358,30 +349,18 @@ GEM
       rubocop (>= 0.90.0)
     ruby-progressbar (1.13.0)
     rubyzip (2.3.2)
-    sass-embedded (1.78.0-aarch64-linux-gnu)
+    sass-embedded (1.79.3-arm64-darwin)
       google-protobuf (~> 4.27)
-    sass-embedded (1.78.0-aarch64-linux-musl)
+    sass-embedded (1.79.3-x86_64-darwin)
       google-protobuf (~> 4.27)
-    sass-embedded (1.78.0-arm-linux-gnueabihf)
+    sass-embedded (1.79.3-x86_64-linux-gnu)
       google-protobuf (~> 4.27)
-    sass-embedded (1.78.0-arm-linux-musleabihf)
-      google-protobuf (~> 4.27)
-    sass-embedded (1.78.0-arm64-darwin)
-      google-protobuf (~> 4.27)
-    sass-embedded (1.78.0-x86-linux-gnu)
-      google-protobuf (~> 4.27)
-    sass-embedded (1.78.0-x86-linux-musl)
-      google-protobuf (~> 4.27)
-    sass-embedded (1.78.0-x86_64-darwin)
-      google-protobuf (~> 4.27)
-    sass-embedded (1.78.0-x86_64-linux-gnu)
-      google-protobuf (~> 4.27)
-    sass-embedded (1.78.0-x86_64-linux-musl)
+    sass-embedded (1.79.3-x86_64-linux-musl)
       google-protobuf (~> 4.27)
     sassc (2.4.0)
       ffi (~> 1.9)
-    sassc-embedded (1.78.0)
-      sass-embedded (~> 1.78)
+    sassc-embedded (1.79.0)
+      sass-embedded (~> 1.79)
     set (1.1.0)
     simplecov (0.22.0)
       docile (~> 1.1)
@@ -455,18 +434,7 @@ GEM
     zeitwerk (2.6.18)
 
 PLATFORMS
-  aarch64-linux
-  aarch64-linux-gnu
-  aarch64-linux-musl
-  arm-linux
-  arm-linux-gnu
-  arm-linux-gnueabihf
-  arm-linux-musl
-  arm-linux-musleabihf
   arm64-darwin
-  x86-linux
-  x86-linux-gnu
-  x86-linux-musl
   x86_64-darwin
   x86_64-linux
   x86_64-linux-gnu
@@ -494,7 +462,7 @@ DEPENDENCIES
   cache_with_locale
   capybara
   cuprite
-  dartsass-sprockets
+  dartsass-sprockets!
   database_cleaner-active_record
   debug
   fastimage
