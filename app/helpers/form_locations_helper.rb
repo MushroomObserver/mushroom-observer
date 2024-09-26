@@ -15,11 +15,13 @@ module FormLocationsHelper
   # inputs are for compass directions. The object can be a location or a filter,
   # that's what will prefill the values on load or reload.
   def form_compass_input_group(form:, obj:)
-    compass_groups.each do |dir|
-      if compass_north_south.include?(dir)
-        concat(compass_north_south_row(form, obj, dir))
-      else
-        concat(compass_east_west_row(form, obj, dir))
+    capture do
+      compass_groups.each do |dir|
+        if compass_north_south.include?(dir)
+          concat(compass_north_south_row(form, obj, dir))
+        else
+          concat(compass_east_west_row(form, obj, dir))
+        end
       end
     end
   end
