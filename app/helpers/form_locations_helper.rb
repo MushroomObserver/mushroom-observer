@@ -14,11 +14,13 @@ module FormLocationsHelper
   # This will generate a compass rose of inputs for given form object.
   # The inputs are for compass directions.
   def form_compass_input_group(form:, obj:)
-    compass_groups.each do |dir|
-      if compass_north_south.include?(dir)
-        concat(compass_north_south_row(form, obj, dir))
-      else
-        concat(compass_east_west_row(form, obj, dir))
+    capture do
+      compass_groups.each do |dir|
+        if compass_north_south.include?(dir)
+          concat(compass_north_south_row(form, obj, dir))
+        else
+          concat(compass_east_west_row(form, obj, dir))
+        end
       end
     end
   end
