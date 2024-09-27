@@ -99,9 +99,13 @@ module PatternSearch
     # Try for fidelity to the stored string, eg only years.
     def check_for_date_range(term)
       bits = term.vals[0].split("-")
-      if bits.size == 2
+      case bits.size
+      when 1
+        start = bits[0]
+        range = nil
+      when 2
         start, range = bits
-      elsif bits.size == 4
+      when 4
         start = "#{bits[0]}-#{bits[1]}"
         range = "#{bits[2]}-#{bits[3]}"
       else

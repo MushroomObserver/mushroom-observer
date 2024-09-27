@@ -43,7 +43,7 @@ module Filterable
       remove_invalid_field_combinations
       concatenate_range_fields
 
-      @sendable_params = substitute_ids_with_strings(@keywords)
+      @sendable_params = remove_ids_and_format_strings(@keywords)
       # @storable_params = configure_storable_params(@keywords)
     end
 
@@ -96,40 +96,54 @@ module Filterable
     #
     # Ideally we'd store full strings for all values, including names and
     # locations, so we can repopulate the form with the same values.
-    def substitute_ids_with_strings(keywords)
+    def remove_ids_and_format_strings(keywords)
       escape_strings_and_remove_ids(keywords)
       escape_locations_and_remove_ids(keywords)
     end
 
     # Escape-quote the strings, the way the short form requires.
+    # rubocop:disable Metrics/AbcSize
     def escape_strings_and_remove_ids(keywords)
       search_subclass.fields_with_ids.each do |key|
-        # location handled separately
-        next if key.to_sym == :location
-        next if keywords[:"#{key}_id"].blank?
+        # location, region handled separately
+        next if keywords[key].blank? || strings_with_commas.include?(key.to_sym)
 
         list = keywords[key].split(",").map(&:strip)
         list = list.map { |name| "\"#{name}\"" }
         keywords[key] = list.join(",")
+        next if keywords[:"#{key}_id"].blank?
+
         keywords.delete(:"#{key}_id")
       end
       keywords
     end
+    # rubocop:enable Metrics/AbcSize
 
     # Escape-quote the locations and their commas. We'd prefer to have legible
-    # strings in the url, but we're not storing long location strings yet,
-    # because the comma handling is difficult. Maybe switch to textarea with
-    # `\n` separator.
+    # strings in the url, but the comma handling is difficult.
     def escape_locations_and_remove_ids(keywords)
-      [:location, :region].each do |key|
-        next if keywords[:"#{key}_id"].blank?
-
-        list = keywords[key].split("\n").map(&:strip)
-        list = list.map { |location| "\"#{location.tr(",", "\\,")}\"" }
-        keywords[key] = list.join(",")
-        keywords.delete(:"#{key}_id")
+      if keywords[:location].present?
+        list = keywords[:location].split("\n").map(&:strip)
+        list = list.map { |location| escape_location_string(location) }
+        keywords[:location] = list.join(",")
       end
+      keywords.delete(:location_id) if keywords[:location_id].present?
+      escape_region_string(keywords)
+    end
+
+    def escape_region_string(keywords)
+      return keywords if keywords[:region].blank?
+
+      keywords[:region] = escape_location_string(keywords[:region].strip)
       keywords
+    end
+
+    def escape_location_string(location)
+      "\"#{location.tr(",", "\\,")}\""
+    end
+
+    def strings_with_commas
+      [:location, :region].freeze
     end
   end
   # rubocop:enable Metrics/BlockLength

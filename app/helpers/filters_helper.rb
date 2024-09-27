@@ -149,8 +149,6 @@ module FiltersHelper
   def filter_prefill_or_select_values(args, field_type)
     if FILTER_SELECT_TYPES.include?(field_type)
       args[:selected] = args[:filter].send(args[:field]) || nil
-    else
-      args[:value] = args[:filter].send(args[:field]) || nil
     end
     args
   end
@@ -167,7 +165,9 @@ module FiltersHelper
     # rightward destructuring assignment ruby 3 feature
     args => { form:, model:, filter:, sections: }
     append = filter_conditional_rows(form:, model:, filter:, sections:)
-    autocompleter_field(**args.except(:sections, :model).merge(append:))
+    autocompleter_field(
+      **args.except(:sections, :model, :filter).merge(append:)
+    )
   end
 
   # Rows that only uncollapse if an autocompleter field has a value.
@@ -217,54 +217,73 @@ module FiltersHelper
     tag.div(class: "row") do
       [
         tag.div(class: filter_column_classes) do
-          text_field_with_label(**args.merge(
-            { between: "(YYYY-MM-DD)" }
-          ))
+          text_field_with_label(**filter_date_args(args))
         end,
         tag.div(class: filter_column_classes) do
-          text_field_with_label(**args.merge(
-            { field: "#{args[:field]}_range", label: :to.l,
-              help: nil, between: :optional }
-          ))
+          text_field_with_label(**filter_date_range_args(args))
         end
       ].safe_join
     end
   end
 
+  def filter_date_args(args)
+    args.except(:filter).merge({ between: "(YYYY-MM-DD)" })
+  end
+
+  def filter_date_range_args(args)
+    args.except(:filter).merge(
+      { field: "#{args[:field]}_range", label: :to.l,
+        between: :optional, help: nil }
+    )
+  end
+
   def filter_rank_range_field(**args)
     [
       tag.div(class: "d-inline-block mr-4") do
-        select_with_label(**args.merge(
-          { inline: true, options: Name.all_ranks,
-            include_blank: true }
-        ))
+        select_with_label(**filter_rank_args(args))
       end,
       tag.div(class: "d-inline-block") do
-        select_with_label(**args.merge(
-          { label: :to.l, between: :optional, help: nil, inline: true,
-            options: Name.all_ranks, include_blank: true,
-            field: "#{args[:field]}_range" }
-        ))
+        select_with_label(**filter_rank_range_args(args))
       end
     ].safe_join
+  end
+
+  def filter_rank_args(args)
+    args.except(:filter).merge(
+      { options: Name.all_ranks, include_blank: true, inline: true }
+    )
+  end
+
+  def filter_rank_range_args(args)
+    args.except(:filter).merge(
+      { field: "#{args[:field]}_range", label: :to.l, options: Name.all_ranks,
+        include_blank: true, between: :optional, help: nil, inline: true }
+    )
   end
 
   def filter_confidence_range_field(**args)
     confidences = Vote.opinion_menu.map { |k, v| [k, Vote.percent(v)] }
     [
       tag.div(class: "d-inline-block mr-4") do
-        select_with_label(**args.merge(
-          { inline: true, options: confidences, include_blank: true }
-        ))
+        select_with_label(**filter_confidence_args(confidences, args))
       end,
       tag.div(class: "d-inline-block") do
-        select_with_label(**args.merge(
-          { label: :to.l, between: :optional, help: nil, inline: true,
-            options: confidences, include_blank: true,
-            field: "#{args[:field]}_range" }
-        ))
+        select_with_label(**filter_confidence_range_args(confidences, args))
       end
     ].safe_join
+  end
+
+  def filter_confidence_args(confidences, args)
+    args.except(:filter).merge(
+      { options: confidences, include_blank: true, inline: true }
+    )
+  end
+
+  def filter_confidence_range_args(confidences, args)
+    args.except(:filter).merge(
+      { field: "#{args[:field]}_range", label: :to.l, options: confidences,
+        include_blank: true, between: :optional, help: nil, inline: true }
+    )
   end
 
   def filter_region_with_compass_fields(**args)
@@ -273,26 +292,23 @@ module FiltersHelper
         form_location_input_find_on_map(form: args[:form], field: :region,
                                         value: args[:filter].region,
                                         label: "#{:REGION.t}:"),
-        filter_compass_and_map_row(form: args[:form], filter: args[:filter])
+        filter_compass_input_and_map(form: args[:form], filter: args[:filter])
       ].safe_join
     end
   end
 
-  def filter_compass_and_map_row(form:, filter:)
+  def filter_compass_input_and_map(form:, filter:)
     minimal_loc = filter_minimal_location(filter)
-    tag.div(class: "row") do
+    capture do
       [
-        tag.div(class: filter_column_classes) do
-          form_compass_input_group(form:, obj: filter)
-        end,
-        tag.div(class: filter_column_classes) do
-          make_map(objects: [minimal_loc], editable: true, map_type: "location",
-                   controller: nil)
-        end
+        form_compass_input_group(form:, obj: filter),
+        make_map(objects: [minimal_loc], editable: true, map_type: "location",
+                 map_open: false, controller: nil)
       ].safe_join
     end
   end
 
+  # To be mappable, we need to instantiate a minimal location from the filter.
   def filter_minimal_location(filter)
     if filter.north.present? && filter.south.present? &&
        filter.east.present? && filter.west.present?
@@ -305,11 +321,15 @@ module FiltersHelper
   end
 
   def filter_longitude_field(**args)
-    text_field_with_label(**args.merge(between: "(-180.0 to 180.0)"))
+    text_field_with_label(
+      **args.except(:filter).merge(between: "(-180.0 to 180.0)")
+    )
   end
 
   def filter_latitude_field(**args)
-    text_field_with_label(**args.merge(between: "(-90.0 to 90.0)"))
+    text_field_with_label(
+      **args.except(:filter).merge(between: "(-90.0 to 90.0)")
+    )
   end
 
   def filter_column_classes
