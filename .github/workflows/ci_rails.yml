@@ -66,9 +66,6 @@ jobs:
           bundle exec rake db:schema:load
           bundle exec rake db:fixtures:load
 
-      - name: Run migrations
-        run: bundle exec rake db:migrate
-
       - name: Update translation files
         run: bundle exec rake lang:update
 
