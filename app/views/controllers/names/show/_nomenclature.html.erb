@@ -76,6 +76,9 @@ synonym_links = [approve, deprecate].reject(&:nil?).safe_join(" | ")
           tag.p(link_to(*index_fungorum_name_search_tab(name))),
           tag.p(link_to(*mycobank_basic_search_tab))
         ].safe_join
+      elsif name.pnw_provisional?
+        tag.p(link_to("DDD (PNW DNA-based taxa)",
+                      "https://www.alpental.com/psms/ddd/index.htm"))
       end
     end)
 
