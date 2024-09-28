@@ -917,6 +917,19 @@ class ObservationTest < UnitTestCase
     assert_equal("pine", obs.notes_part_value("Nearby trees"))
   end
 
+  def test_notes_nil
+    User.current = mary
+    obs = Observation.create!(name_id: names(:fungi).id, when_str: "2020-07-05")
+
+    assert_nothing_raised do
+      obs.notes[:Collector]
+    rescue StandardError => e
+      flunk(
+        "It shouldn't throw \"#{e.message}\" when reading part of a nil Note"
+      )
+    end
+  end
+
   def test_make_sure_no_observations_are_misspelled
     good = names(:peltigera)
     bad  = names(:petigera)
