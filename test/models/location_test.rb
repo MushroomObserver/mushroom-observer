@@ -81,6 +81,8 @@ class LocationTest < UnitTestCase
     )
     assert_equal(mary.id, loc.user_id)
     assert_equal(mary.id, loc.versions.last.user_id)
+    # Make sure the box_area was calculated correctly
+    assert_equal(loc.box_area.round(6), loc.calculate_area.round(6))
 
     User.current = rolf
     loc.display_name = "Anywhere, USA"

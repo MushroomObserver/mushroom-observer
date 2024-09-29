@@ -457,6 +457,8 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(@new_pts + 10, rolf.reload.contribution)
     # Make sure it's the right Location
     assert_equal(display_name, loc.display_name)
+    # Make sure the box_area was calculated correctly
+    assert_equal(loc.box_area.round(6), loc.calculate_area.round(6))
 
     # find_by_name_or_reverse_name is an MO method, not a Rails finder.
     # We used to have to disable a cop for this, but that seems no longer
@@ -605,6 +607,9 @@ class LocationsControllerTest < FunctionalTestCase
     loc = Location.find(loc.id)
     new_params = update_params_from_loc(loc)
     assert_not_equal(new_params, old_params)
+
+    # Make sure the box_area was calculated correctly
+    assert_equal(loc.box_area.round(6), loc.calculate_area.round(6))
 
     # It and the RssLog should have been updated
     assert_not_equal(updated_at, loc.updated_at)
