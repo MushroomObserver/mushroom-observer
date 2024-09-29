@@ -66,6 +66,7 @@ class AccountController < ApplicationController
       UserStats.create({ user_id: @new_user.id })
     end
 
+    @user = @new_user
     redirect_back_or_default(account_welcome_path)
   end
 
