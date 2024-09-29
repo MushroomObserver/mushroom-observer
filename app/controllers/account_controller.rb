@@ -66,11 +66,10 @@ class AccountController < ApplicationController
       UserStats.create({ user_id: @new_user.id })
     end
 
-    @user = @new_user
-    redirect_back_or_default(account_welcome_path)
+    redirect_back_or_default("/")
   end
 
-  # This is the welcome page for new users who just created an account.
+  # This is the welcome page for new users who just verified an account.
   def welcome; end
 
   private #################################################
