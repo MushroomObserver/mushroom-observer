@@ -15,7 +15,7 @@
 #  north_south_distance:: Returns north - south.
 #  east_west_distance::   Returns east - west (adjusting if straddles dateline).
 #  straddles_180_deg?::   Returns true if box straddles 180 degrees.
-#  box_area::             Returns the area described by a box, in kmˆ2.
+#  calculate_area::       Returns the area described by a box, in kmˆ2.
 #  vague?::       Arbitrary test for whether a box covers too large an area to
 #                 be useful on a map.
 #  delta_lat::    Returns north_south_distance * DELTA.
@@ -118,7 +118,7 @@ module Mappable
     #   Formula for `the area of a patch of a sphere`:
     #     area = Rˆ2 * (long2 - long1) * (sin(lat2) - sin(lat1))
     #   where lat/lng in radians, R in km, Earth R rounded to 6372km
-    def box_area
+    def calculate_area
       6372 * 6372 * east_west_distance.to_radians *
         (Math.sin(north.to_radians) - Math.sin(south.to_radians)).abs
     end
@@ -126,7 +126,7 @@ module Mappable
     # Arbitrary test for whether a box covers too large an area to be useful on
     # a map with other boxes. Large boxes can obscure more precise locations.
     def vague?
-      box_area > 24_000 # kmˆ2
+      calculate_area > 24_000 # kmˆ2
     end
 
     # NOTE: DELTA = 0.20 is way too strict a limit for remote locations.
