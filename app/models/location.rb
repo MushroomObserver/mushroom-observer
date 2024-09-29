@@ -271,6 +271,13 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     self.box_area = calculate_area
   end
 
+  # Can be run after migration, or as part of a recurring job.
+  def self.update_box_area_column
+    all.each do |location|
+      location.update!(box_area: location.calculate_area)
+    end
+  end
+
   # Let attached observations update their cache if these fields changed.
   # Also touch updated_at to expire obs fragment caches
   def update_observation_cache
