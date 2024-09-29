@@ -7,6 +7,7 @@ class AddBoxAreaToLocations < ActiveRecord::Migration[7.1]
   end
 
   def down
+    remove_column :location_versions, :box_area
     remove_column :locations, :box_area
     remove_column :location_versions, :box_area
   end
