@@ -87,18 +87,22 @@ module Tabs
        { class: tab_id(__method__.to_s) }]
     end
 
-    def name_links_web(name:)
-      tabs = create_links_to(observation_web_name_tabs(name),
+    def name_links_web(observation:)
+      tabs = create_links_to(observation_web_name_tabs(observation),
                              { class: "d-block" })
       tabs.reject(&:empty?)
     end
 
-    def observation_web_name_tabs(name)
-      tabs = [mycoportal_name_tab(name),
-              mycobank_name_search_tab(name),
-              google_images_for_name_tab(name)]
-      tabs << ddd_link_tab if name.pnw_provisional?
+    def observation_web_name_tabs(observation)
+      tabs = [mycoportal_name_tab(observation.name),
+              mycobank_name_search_tab(observation.name),
+              google_images_for_name_tab(observation.name)]
+      tabs << ddd_link_tab if namings_pnw_provisional?(observation)
       tabs
+    end
+
+    def namings_pnw_provisional?(observation)
+      observation.namings.any? { |naming| naming.name.pnw_provisional? }
     end
 
     def observation_hide_thumbnail_map_tab(obs)

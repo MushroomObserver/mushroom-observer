@@ -289,6 +289,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
   end
 
   def test_observation_pnw_link_exists
+    obs = observations(:minimal_unknown_obs)
     name = Name.create(
       user_id: rolf.id,
       rank: "Species",
@@ -304,15 +305,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
        "Domain: _Eukarya_\r\nKingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Agaricomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Hygrophoraceae_", # rubocop:disable Layout/LineLength
       author: "S.D. Russell crypt. temp."
     )
-    obs = Observation.create(
-      name: name,
-      location: locations(:obs_default_location),
-      where: "MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA",
-      user: rolf,
-      is_collection_location: 1,
-      text_name: name.text_name,
-      classification: "name.classification"
-    )
+    Naming.create(observation: obs, name: name, vote_cache: 0, user: rolf)
 
     login
     get(:show, params: { id: obs.id })
