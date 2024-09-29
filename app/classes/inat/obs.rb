@@ -215,7 +215,7 @@ class Inat
                               s: blurred_south,
                               e: blurred_east,
                               w: blurred_west).
-        min_by { |loc| location_box(loc).box_area }
+        min_by { |loc| location_box(loc).calculate_area }
     end
 
     # location seems simplest source for lat/lng
