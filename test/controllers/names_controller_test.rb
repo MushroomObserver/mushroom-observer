@@ -624,6 +624,31 @@ class NamesControllerTest < FunctionalTestCase
     assert_external_link("Ascomycete.org", ascomycete_org_name_url(name))
   end
 
+  def test_show_name_pnw_cryptonym
+    name = Name.create(
+      user_id: rolf.id,
+      rank: "Species",
+      text_name: 'Hygrocybe "parvula-PNW01"',
+      search_name: "Hygrocybe \"parvula-PNW01\" S.D. Russell crypt. temp.",
+      display_name: '**__Hygrocybe "parvula-PNW01"__** S.D. Russell crypt. temp.',
+      sort_name: 'Hygrocybe "parvula-PNW01"  S.D. Russell crypt. temp.',
+      citation: "",
+      deprecated: false,
+      synonym_id: nil,
+      correct_spelling_id: nil,
+      classification:
+       "Domain: _Eukarya_\r\nKingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Agaricomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Hygrophoraceae_", # rubocop:disable Layout/LineLength
+      author: "S.D. Russell crypt. temp."
+    )
+
+    login
+    get(:show, params: { id: name.id })
+
+    assert_select("div#nomenclature a:match('href',?)",
+                  %r{https://www.alpental.com/psms/ddd/index.htm}, true,
+                  "Page is missing a link to PNW cryptonym page")
+  end
+
   def test_show_name_genus_with_icn_id
     # Name's icn_id is filled in
     name = names(:tubaria)

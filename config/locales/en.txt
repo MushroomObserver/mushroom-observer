@@ -2316,6 +2316,7 @@
   show_observation_more_like_this: More like this
   show_observation_look_alikes: Look-alikes
   show_observation_related_taxa: Related taxa
+  show_observation_ddd: "DDD (PNW DNA-based taxa)"
   map_observation_title: "Map of Observation #[ID]"
 
   # observations/suggestions
