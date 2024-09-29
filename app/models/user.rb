@@ -757,7 +757,9 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def self.cull_unverified_users(dry_run: false)
-    ids = User.where(verified: nil, created_at: ..1.month.ago).pluck(:id)
+    ids = User.where(verified: nil,
+                     created_at: ..1.month.ago,
+                     contribution: 0).pluck(:id)
     return [] if ids.blank?
 
     unless dry_run

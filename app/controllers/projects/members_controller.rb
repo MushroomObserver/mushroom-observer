@@ -18,7 +18,8 @@ module Projects
       @users = @project.user_group.users
     end
 
-    # View that lists all verified users with links to add each as a member.
+    # View that lists the 100 verified users who last logged in with links to
+    # add each as a member.
     # Linked from: show_project (for admins only)
     # Inputs:
     #   params[:project_id] (was :id)

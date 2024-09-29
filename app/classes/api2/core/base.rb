@@ -270,7 +270,7 @@ module API2::Base
     key = APIKey.find_by(key: key_str)
     raise(API2::BadAPIKey.new(key_str))        unless key
     raise(API2::APIKeyNotVerified.new(key))    unless key.verified
-    raise(API2::UserNotVerified.new(key.user)) unless key.user.verified
+    # raise(API2::UserNotVerified.new(key.user)) unless key.user.verified
 
     login_user(key)
   end
