@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_18_151140) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_29_033907) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -333,6 +333,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_18_151140) do
     t.string "scientific_name", limit: 1024
     t.boolean "locked", default: false, null: false
     t.boolean "hidden", default: false, null: false
+    t.decimal "box_area", precision: 21, scale: 10
   end
 
   create_table "name_description_admins", charset: "utf8mb3", force: :cascade do |t|
