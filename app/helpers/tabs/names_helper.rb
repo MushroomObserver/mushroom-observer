@@ -148,6 +148,11 @@ module Tabs
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
     end
 
+    def ddd_link_tab
+      [:show_observation_ddd.l, ddd_url,
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
     def ascomycete_org_name_tab(name)
       ["Ascomycete.org", ascomycete_org_name_url(name),
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]

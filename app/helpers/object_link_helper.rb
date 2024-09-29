@@ -67,6 +67,10 @@ module ObjectLinkHelper
     "https://ascomycete.org/Search-Results?search=#{name.sensu_stricto}"
   end
 
+  def ddd_url
+    "https://www.alpental.com/psms/ddd/index.htm"
+  end
+
   def gbif_name_search_url(name)
     # omit `group`, else there are no hits
     # omit quotes around the name in order to get synonyms and cf's

@@ -94,9 +94,11 @@ module Tabs
     end
 
     def observation_web_name_tabs(name)
-      [mycoportal_name_tab(name),
-       mycobank_name_search_tab(name),
-       google_images_for_name_tab(name)]
+      tabs = [mycoportal_name_tab(name),
+              mycobank_name_search_tab(name),
+              google_images_for_name_tab(name)]
+      tabs << ddd_link_tab if name.pnw_provisional?
+      tabs
     end
 
     def observation_hide_thumbnail_map_tab(obs)

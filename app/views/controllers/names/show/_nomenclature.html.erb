@@ -77,8 +77,7 @@ synonym_links = [approve, deprecate].reject(&:nil?).safe_join(" | ")
           tag.p(link_to(*mycobank_basic_search_tab))
         ].safe_join
       elsif name.pnw_provisional?
-        tag.p(link_to("DDD (PNW DNA-based taxa)",
-                      "https://www.alpental.com/psms/ddd/index.htm"))
+        tag.p(link_to(:show_observation_ddd.l, ddd_url))
       end
     end)
 

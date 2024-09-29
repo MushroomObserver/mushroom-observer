@@ -288,6 +288,40 @@ class ObservationsControllerShowTest < FunctionalTestCase
     end
   end
 
+  def test_observation_pnw_link_exists
+    name = Name.create(
+      user_id: rolf.id,
+      rank: "Species",
+      text_name: 'Hygrocybe "parvula-PNW01"',
+      search_name: "Hygrocybe \"parvula-PNW01\" S.D. Russell crypt. temp.",
+      display_name: '**__Hygrocybe "parvula-PNW01"__** S.D. Russell crypt. temp.',
+      sort_name: 'Hygrocybe "parvula-PNW01"  S.D. Russell crypt. temp.',
+      citation: "",
+      deprecated: false,
+      synonym_id: nil,
+      correct_spelling_id: nil,
+      classification:
+       "Domain: _Eukarya_\r\nKingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Agaricomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Hygrophoraceae_", # rubocop:disable Layout/LineLength
+      author: "S.D. Russell crypt. temp."
+    )
+    obs = Observation.create(
+      name: name,
+      location: locations(:obs_default_location),
+      where: "MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA",
+      user: rolf,
+      is_collection_location: 1,
+      text_name: name.text_name,
+      classification: "name.classification"
+    )
+
+    login
+    get(:show, params: { id: obs.id })
+
+    assert_select("a:match('href',?)",
+                  %r{https://www.alpental.com/psms/ddd/index.htm}, true,
+                  "Page is missing a link to PNW cryptonym page")
+  end
+
   def test_show_observation_edit_links
     obs = observations(:detailed_unknown_obs)
     proj = projects(:bolete_project)
