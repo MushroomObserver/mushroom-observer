@@ -384,8 +384,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :without_location,
         -> { where(location: nil) }
   scope :with_geolocation,
-        -> { where(gps_hidden: false).where.not(lat: nil) }
+        -> { where.not(lat: nil) }
   scope :without_geolocation,
+        -> { where(lat: nil) }
+  scope :with_public_geolocation,
+        -> { where(gps_hidden: false).where.not(lat: nil) }
+  scope :without_public_geolocation,
         -> { where(gps_hidden: true).or(where(lat: nil)) }
   scope :at_location,
         ->(location) { where(location: location) }

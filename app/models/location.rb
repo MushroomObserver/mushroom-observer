@@ -260,6 +260,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
               and(Location[:east] >= shrunk_e)))
           end
         }
+  scope :with_observations, -> { joins(:observations).distinct }
 
   # Let attached observations update their cache if these fields changed.
   # Also touch updated_at to expire obs fragment caches
