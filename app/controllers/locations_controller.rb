@@ -431,7 +431,6 @@ class LocationsController < ApplicationController
   def create_location_ivar_and_save(done, db_name)
     @location = Location.new(permitted_location_params)
     @location.display_name = @display_name # (strip_squozen)
-    @location.box_area = @location.calculate_area # (Mappable::BoxMethods)
 
     # Validate name.
     @dubious_where_reasons = []
@@ -513,7 +512,6 @@ class LocationsController < ApplicationController
     @location.west  = params[:location][:west]  if params[:location][:west]
     @location.high  = params[:location][:high]  if params[:location][:high]
     @location.low   = params[:location][:low]   if params[:location][:low]
-    @location.box_area = @location.calculate_area # (Mappable::BoxMethods)
     @location.display_name = @display_name
     return unless @display_name != params[:approved_where]
 

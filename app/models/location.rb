@@ -28,6 +28,7 @@
 #  low::          (V) Minimum elevation in meters, e.g. 0
 #  notes::        (V) Arbitrary extra notes supplied by User.
 #  hidden::       (V) Should observation with this location be hidden
+#  box_area::     (-) Area of the box in square kilometers.
 #
 #  ('V' indicates that this attribute is versioned in past_locations table.)
 #
@@ -118,6 +119,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
       high
       low
       notes
+      box_area
     ]
   )
   non_versioned_columns.push(
@@ -132,6 +134,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     "hidden"
   )
 
+  before_save :calculate_box_area
   before_update :update_observation_cache
   after_update :notify_users
 
@@ -261,6 +264,12 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
           end
         }
   scope :with_observations, -> { joins(:observations).distinct }
+
+  # On save, calculate the area of the box for the `box_area` column.
+  # This should cover API and web form updates.
+  def calculate_box_area
+    self.box_area = calculate_area
+  end
 
   # Let attached observations update their cache if these fields changed.
   # Also touch updated_at to expire obs fragment caches

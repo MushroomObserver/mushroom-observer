@@ -66,7 +66,9 @@ module Locationable
       end
 
       @location = Location.new(attributes)
-      @location.box_area = @location.calculate_area # (Mappable::BoxMethods)
+      # Calculate the area of the box in case we want to reject vague locations
+      # (method included via Mappable::BoxMethods)
+      @location.box_area = @location.calculate_area
       # With a Location instance, we can use the `display_name=` setter method,
       # which figures out scientific/postal format of user input and sets
       # location `name` and `scientific_name` accordingly.
