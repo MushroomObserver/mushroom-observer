@@ -4049,7 +4049,7 @@ class API2Test < UnitTestCase
   #  :section: Authentication
   # ---------------------------
 
-  def test_unverified_user_rejected
+  def test_unverified_user_allowed
     params = {
       method: :post,
       action: :observation,
@@ -4057,7 +4057,7 @@ class API2Test < UnitTestCase
       location: "Anywhere"
     }
     User.update(rolf.id, verified: nil)
-    assert_api_fail(params)
+    assert_api_pass(params)
     User.update(rolf.id, verified: Time.zone.now)
     assert_api_pass(params)
   end

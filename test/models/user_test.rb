@@ -587,10 +587,12 @@ class UserTest < UnitTestCase
 
   def test_culling_unverified_users
     unverified = users(:unverified)
+    contributor = users(:unverified_contributor)
     msgs = User.cull_unverified_users(dry_run: true)
     assert_equal("Deleted 1 unverified user(s).", msgs.first)
     msgs = User.cull_unverified_users(dry_run: false)
     assert_equal("Deleted 1 unverified user(s).", msgs.first)
     assert_nil(User.find_by(id: unverified.id))
+    assert(User.find_by(id: contributor.id))
   end
 end
