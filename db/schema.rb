@@ -310,6 +310,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_29_033907) do
     t.string "name", limit: 1024
     t.text "notes"
     t.string "scientific_name", limit: 1024
+    t.decimal "box_area", precision: 21, scale: 10
   end
 
   create_table "locations", id: :integer, charset: "utf8mb3", force: :cascade do |t|

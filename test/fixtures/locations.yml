@@ -7,8 +7,7 @@
 # Update LocationsControllerTest#test_update_location_admin_merge Location#merge
 # when adding a Class that has a `location` attribute
 
-DEFAULTS:
-  &DEFAULTS
+DEFAULTS: &DEFAULTS
   locked: false
   user: rolf
   version: 1
@@ -51,6 +50,7 @@ burbank:
   south: 34.15
   high: 294.0
   low: 148.0
+  box_area: 57.295344810673775 # result of calling loc.calculate_area
 
 mitrula_marsh:
   <<: *DEFAULTS
