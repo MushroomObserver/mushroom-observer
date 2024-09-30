@@ -178,7 +178,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
                code: code,
                location: locations(:albion).name,
                field_slip_name: names(:coprinus_comatus).text_name,
-               project_id: projects(:eol_project).id,
+               # project_id: projects(:eol_project).id,
                other_codes: "12345",
                inat: "1"
              }
