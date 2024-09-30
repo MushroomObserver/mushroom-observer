@@ -76,7 +76,7 @@ module Mappable
       nil
     end
 
-    # Return center as [lat, long].
+    # Return center as [lat, lng].
     def center
       [lat, lng]
     end

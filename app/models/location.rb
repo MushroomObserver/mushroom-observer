@@ -134,7 +134,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     "hidden"
   )
 
-  before_save :calculate_box_area
+  before_save :calculate_box_area_and_center
   before_update :update_observation_cache
   after_update :notify_users
 
@@ -267,14 +267,18 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # On save, calculate the area of the box for the `box_area` column.
   # This should cover API and web form updates.
-  def calculate_box_area
+  def calculate_box_area_and_center
     self.box_area = calculate_area
+    self.center_lat = lat
+    self.center_lng = lng
   end
 
   # Can be run after migration, or as part of a recurring job.
-  def self.update_box_area_column
+  def self.update_box_area_and_center_columns
     all.each do |location|
-      location.update!(box_area: location.calculate_area)
+      box_area = location.calculate_area
+      center_lat, center_lng = location.center
+      location.update!(box_area:, center_lat:, center_lng:)
     end
   end
 
