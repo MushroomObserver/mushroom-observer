@@ -181,7 +181,7 @@ class InatImportJob < ApplicationJob
     return unless @inat_obs.importable?
 
     create_observation
-    add_inat_images(@inat_obs.inat_obs_photos)
+    add_inat_images(@inat_obs[:observation_photos])
     update_names_and_proposals
     add_inat_sequences
     add_snapshot_of_import_comment
@@ -212,7 +212,7 @@ class InatImportJob < ApplicationJob
       text_name: Name.find(name_id).text_name,
       notes: @inat_obs.notes,
       source: @inat_obs.source,
-      inat_id: @inat_obs.inat_id }
+      inat_id: @inat_obs[:id] }
   end
 
   # NOTE: 1. iNat users seem to add a prov name only if there's a sequence.
@@ -304,7 +304,7 @@ class InatImportJob < ApplicationJob
   end
 
   def add_identifications_with_namings
-    @inat_obs.inat_identifications.each do |identification|
+    @inat_obs[:identifications].each do |identification|
       inat_taxon = ::Inat::Taxon.new(identification[:taxon])
       next if name_already_proposed?(inat_taxon.name)
 
@@ -406,7 +406,7 @@ class InatImportJob < ApplicationJob
   end
 
   def update_description
-    description = @inat_obs.inat_description
+    description = @inat_obs[:description]
     updated_description =
       "#{IMPORTED_BY_MO} #{Time.zone.today.strftime(MO.web_date_format)}"
     updated_description.prepend("#{description}\n\n") if description.present?
@@ -415,7 +415,7 @@ class InatImportJob < ApplicationJob
                                ignore_photos: 1 } }
     headers = { authorization: "Bearer #{@inat_import.token}",
                 content_type: :json, accept: :json }
-    response = RestClient.put("#{API_BASE}/observations/#{@inat_obs.inat_id}",
+    response = RestClient.put("#{API_BASE}/observations/#{@inat_obs[:id]}",
                               payload.to_json, headers)
     JSON.parse(response.body)
   rescue RestClient::ExceptionWithResponse => e
