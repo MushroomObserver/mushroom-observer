@@ -275,10 +275,21 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Can be run after migration, or as part of a recurring job.
   def self.update_box_area_and_center_columns
-    all.each do |location|
+    all.includes(:observations).find_each do |location|
       box_area = location.calculate_area
       center_lat, center_lng = location.center
       location.update!(box_area:, center_lat:, center_lng:)
+      # Cache or update the inferred_point of this location's observations
+      # if box_area < 10_000. (They could already have an inferred_point.)
+      # If the box_area is greater than 10_000, remove inferred_point.
+      if box_area <= 10_000
+        location.observations.where(lat: nil).or(
+          location.observations.where(inferred_point: true)
+        ).update_all(lat: center_lat, lng: center_lng, inferred_point: true)
+      else
+        location.observations.where(inferred_point: true).
+          update_all(lat: nil, lng: nil, inferred_point: false)
+      end
     end
   end
 
