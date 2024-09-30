@@ -271,6 +271,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     self.box_area = calculate_area
     self.center_lat = lat
     self.center_lng = lng
+    update_observation_center_columns
   end
 
   # Can be run after migration, or as part of a recurring job.
@@ -279,17 +280,19 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
       box_area = location.calculate_area
       center_lat, center_lng = location.center
       location.update!(box_area:, center_lat:, center_lng:)
-      # Cache or update the inferred_point of this location's observations
-      # if box_area < 10_000. (They could already have an inferred_point.)
-      # If the box_area is greater than 10_000, remove inferred_point.
-      if box_area <= 10_000
-        location.observations.where(lat: nil).or(
-          location.observations.where(inferred_point: true)
-        ).update_all(lat: center_lat, lng: center_lng, inferred_point: true)
-      else
-        location.observations.where(inferred_point: true).
-          update_all(lat: nil, lng: nil, inferred_point: false)
-      end
+      location.update_observation_center_columns
+    end
+  end
+
+  # Now that the box_area and center columns are set on this location,
+  # cache or update the center columns of this location's observations -
+  # only if box_area < 10_000. (They could already have a center point.)
+  # If the box_area is greater than 10_000, remove center point.
+  def update_observation_center_columns
+    if box_area <= 10_000
+      observations.update_all(center_lat:, center_lng:)
+    else
+      observations.update_all(center_lat: nil, center_lng: nil)
     end
   end
 
