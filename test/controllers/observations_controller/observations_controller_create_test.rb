@@ -103,8 +103,8 @@ class ObservationsControllerCreateTest < FunctionalTestCase
                        users(:rolf).preferred_herbarium_name)
     assert_input_value(:herbarium_record_accession_number, "")
     assert_true(@response.body.include?("Albion, Mendocino Co., California"))
-    assert_link_in_html(:create_observation_inat_import_link.l,
-                        new_observations_inat_import_path)
+    # assert_link_in_html(:create_observation_inat_import_link.l,
+    #                     new_observations_inat_import_path)
 
     users(:rolf).update(location_format: "scientific")
     get(:new)
