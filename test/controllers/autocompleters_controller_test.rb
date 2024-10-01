@@ -52,7 +52,10 @@ class AutocompletersControllerTest < FunctionalTestCase
     locs = Location.where(Location[:name].matches_regexp("\\bM")).
            select(:name, :id, :north, :south, :east, :west)
 
-    expect = locs.map { |loc| loc.attributes.symbolize_keys }
+    expect = locs.map do |loc|
+      hash = loc.attributes.symbolize_keys
+      hash.each { |k, v| hash[k] = v.to_s unless k == :id }
+    end
     expect.unshift({ name: "M", id: 0 })
     expect.sort_by! { |loc| [loc[:name], -loc[:id]] }
     expect.uniq! { |loc| loc[:name] }
@@ -60,10 +63,12 @@ class AutocompletersControllerTest < FunctionalTestCase
     assert_equivalent(expect, JSON.parse(@response.body))
 
     login("roy") # prefers location_format: :scientific
+    # Autocompleter's values for decimals parsed as json will be strings
     expect = locs.map do |loc|
-      loc = loc.attributes.symbolize_keys
-      loc[:name] = Location.reverse_name(loc[:name])
-      loc
+      hash = loc.attributes.symbolize_keys
+      hash.each { |k, v| hash[k] = v.to_s unless k == :id }
+      hash[:name] = Location.reverse_name(hash[:name])
+      hash
     end
     expect.unshift({ name: "M", id: 0 })
     expect.sort_by! { |loc| [loc[:name], -loc[:id]] }
@@ -80,8 +85,10 @@ class AutocompletersControllerTest < FunctionalTestCase
     point_in_albion = { lat: 39.253, lng: -123.8 }
     locs = Location.where(id: locations(:albion).id).
            select(:name, :id, :north, :south, :east, :west)
-    expect = locs.map { |loc| loc.attributes.symbolize_keys }
-
+    expect = locs.map do |loc|
+      hash = loc.attributes.symbolize_keys
+      hash.each { |k, v| hash[k] = v.to_s unless k == :id }
+    end
     good_autocompleter_request(type: :location_containing, string: "",
                                all: true, **point_in_albion)
     assert_equivalent(expect, JSON.parse(@response.body))
