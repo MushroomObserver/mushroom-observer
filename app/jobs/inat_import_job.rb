@@ -415,8 +415,12 @@ class InatImportJob < ApplicationJob
                                ignore_photos: 1 } }
     headers = { authorization: "Bearer #{@inat_import.token}",
                 content_type: :json, accept: :json }
-    response = RestClient.put("#{API_BASE}/observations/#{@inat_obs[:id]}",
-                              payload.to_json, headers)
+    # iNat API uses PUT + ignore_photos, not PATCH, to update an observation
+    # https://api.inaturalist.org/v1/docs/#!/Observations/put_observations_id
+    response = RestClient.put(
+      "#{API_BASE}/observations/#{@inat_obs[:id]}?ignore_photos=1",
+      payload.to_json, headers
+    )
     JSON.parse(response.body)
   rescue RestClient::ExceptionWithResponse => e
     @inat_import.add_response_error(e.response)
