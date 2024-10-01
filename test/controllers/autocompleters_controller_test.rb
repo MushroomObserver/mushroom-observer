@@ -63,6 +63,7 @@ class AutocompletersControllerTest < FunctionalTestCase
     assert_equivalent(expect, JSON.parse(@response.body))
 
     login("roy") # prefers location_format: :scientific
+    # Autocompleter's values for decimals parsed as json will be strings
     expect = locs.map do |loc|
       hash = loc.attributes.symbolize_keys
       hash.each { |k, v| hash[k] = v.to_s unless k == :id }
