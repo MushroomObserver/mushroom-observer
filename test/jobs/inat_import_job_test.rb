@@ -695,9 +695,13 @@ class InatImportJobTest < ActiveJob::TestCase
       }
       headers = { authorization: "Bearer",
                   content_type: "application/json", accept: "application/json" }
-      add_stub(stub_request(:put, "#{API_BASE}/observations/#{obs["id"]}").
+      add_stub(
+        stub_request(
+          :put, "#{API_BASE}/observations/#{obs["id"]}?ignore_photos=1"
+        ).
         with(body: body.to_json, headers: headers).
-        to_return(status: 200, body: "".to_json, headers: {}))
+        to_return(status: 200, body: "".to_json, headers: {})
+      )
     end
   end
 

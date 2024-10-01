@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_29_033907) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_01_191905) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -324,10 +324,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_29_033907) do
     t.integer "rss_log_id"
     t.integer "num_views", default: 0
     t.datetime "last_view", precision: nil
-    t.float "north"
-    t.float "south"
-    t.float "west"
-    t.float "east"
+    t.decimal "north", precision: 15, scale: 10, null: false
+    t.decimal "south", precision: 15, scale: 10, null: false
+    t.decimal "west", precision: 15, scale: 10, null: false
+    t.decimal "east", precision: 15, scale: 10, null: false
     t.float "high"
     t.float "low"
     t.boolean "ok_for_export", default: true, null: false

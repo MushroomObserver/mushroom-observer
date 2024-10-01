@@ -182,7 +182,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     end
 
     # Redirected to the Welcome page, but email not verified.
-    assert_selector("body.account__welcome")
+    assert_selector("body.observations__index")
 
     # At this point there should be an unverified account for Dumbledore.
     wizard = User.find_by(email: "webmaster@hogwarts.org")

@@ -68,7 +68,8 @@ module Account
     def resend_email
       return unless (user = find_or_goto_index(User, params[:id]))
 
-      QueuedEmail::VerifyAccount.create_email(user)
+      email = QueuedEmail::VerifyAccount.create_email(user)
+      email.destroy if email.send_email
       self.class.notify_root_of_verification_email(user)
       flash_notice(:runtime_reverify_sent.tp + :email_spam_notice.tp)
       redirect_back_or_default(account_welcome_path)
