@@ -270,8 +270,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
                   south_changed? || west_changed?
 
     self.box_area = calculate_area
-    self.center_lat = lat
-    self.center_lng = lng
+    self.center_lat = calculate_lat
+    self.center_lng = calculate_lng
     update_observation_center_columns
   end
 
