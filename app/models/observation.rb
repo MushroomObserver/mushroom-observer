@@ -475,6 +475,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
         }
   scope :in_box, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
+          debugger
           box = Mappable::Box.new(
             north: args[:n], south: args[:s], east: args[:e], west: args[:w]
           )
@@ -483,7 +484,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
           # resize box by epsilon to create leeway for Float rounding
           # Fixes a bug where Califoria fixture was not in a box
           # defined by the fixture's north, south, east, west
-          resized_box = box.expand(0.00001)
+          # resized_box = box.expand(0.00001)
 
           if box.straddles_180_deg?
             where(
@@ -492,12 +493,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
               and(Observation[:lng] >= box.west).
               or(Observation[:lng] <= box.east)
             ).or(Observation.
-            where(Observation[:lat].eq(nil).
-              and(Observation[:center_lat] >= box.south).
-              and(Observation[:center_lat] <= box.north).
-              and(Observation[:center_lng] >= box.west).
-              or(Observation[:center_lng] <= box.east)
-            ))
+              where(
+                Observation[:lat].eq(nil).
+                and(Observation[:center_lat] >= box.south).
+                and(Observation[:center_lat] <= box.north).
+                and(Observation[:center_lng] >= box.west).
+                or(Observation[:center_lng] <= box.east)
+              ))
           else
             where(
               (Observation[:lat] >= box.south).
@@ -505,13 +507,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
               and(Observation[:lng] >= box.west).
               and(Observation[:lng] <= box.east)
             ).or(Observation.
-            where(Observation[:lat].eq(nil).
-              and(Observation[:center_lat] >= box.south).
-              and(Observation[:center_lat] <= box.north).
-              and(Observation[:center_lng] <= box.east).
-              and(Observation[:center_lng] >= box.west)
-              # odd! will toss entire condition if above order is west, east
-            ))
+              where(
+                Observation[:lat].eq(nil).
+                and(Observation[:center_lat] >= box.south).
+                and(Observation[:center_lat] <= box.north).
+                and(Observation[:center_lng] <= box.east).
+                and(Observation[:center_lng] >= box.west)
+              )) # odd! will toss entire condition if above order is west, east
           end
         }
   scope :not_in_box, # Use named parameters (n, s, e, w), any order
