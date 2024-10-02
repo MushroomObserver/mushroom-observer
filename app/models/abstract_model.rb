@@ -765,7 +765,7 @@ class AbstractModel < ApplicationRecord
 
   # Add a note to the notes field with paragraph break between different notes.
   def add_note(note)
-    self.notes = notes.present? ? "\n\n#{note}" : note
+    self.notes = notes.present? ? "#{notes}\n\n#{note}" : note
     save
   end
 

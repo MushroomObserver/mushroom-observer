@@ -53,6 +53,7 @@ burbank:
   box_area: 57.295344810673775 # result of calling loc.calculate_area
   center_lat: 34.185 # result of calling loc.center
   center_lng: -118.33000000000001 # result of calling loc.center
+  notes: These should persist after another location is merged into this one.
 
 mitrula_marsh:
   <<: *DEFAULTS

@@ -736,6 +736,7 @@ class LocationsControllerTest < FunctionalTestCase
   def test_update_location_admin_merge
     to_go = locations(:albion)
     to_stay = locations(:burbank)
+    old_notes = to_stay.notes
     params = update_params_from_loc(to_go)
     params[:location][:display_name] = to_stay.display_name
 
@@ -763,6 +764,8 @@ class LocationsControllerTest < FunctionalTestCase
                  LocationDescription::Version.count)
     assert_equal(to_stay, herbarium.reload.location)
     assert_equal(to_stay, project.reload.location)
+    assert_match(old_notes, to_stay.reload.notes,
+                 "Location.notes should include pre-merger notes")
   end
 
   def test_post_edit_location_locked

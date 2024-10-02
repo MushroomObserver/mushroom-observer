@@ -40,6 +40,8 @@
                             label: :ID_BY.t + ":", type: :user) %>
     <%= text_field_with_label(form:, field: :other_codes,
                               label: "#{:field_slip_other_codes.t} (#{:field_slip_other_example.t}):") %>
+    <%= check_box_with_label(form:, field: :inat,
+                             label: :field_slip_other_inat.t ) %>
 
     <%= submit_button(form:, button: :field_slip_quick_create_obs.t, class: "mb-5") if action == "new" %>
 
