@@ -3640,7 +3640,7 @@ class NameTest < UnitTestCase
 
   def test_scope_in_box
     cal = locations(:california)
-    names_in_cal_box = Name.in_box(**cal.attributes.symbolize_keys)
+    names_in_cal_box = Name.in_box(**cal.bounding_box)
     # Grab a couple of Names that are unused in Observation fixtures
     names_without_observations =
       Name.where.not(id: Name.joins(:observations)).distinct.limit(2).to_a
