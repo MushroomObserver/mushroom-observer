@@ -627,7 +627,7 @@ class Name < AbstractModel
           end
         }
   # Names with Observations whose lat/lon are in a box
-  scope :in_box, # Use named parameters (n, s, e, w), any order
+  scope :in_box, # Use named parameters (north, south, east, west), any order
         lambda { |**args|
           joins(:observations).
             merge(Observation.in_box(**args)).
