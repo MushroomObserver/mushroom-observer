@@ -198,7 +198,7 @@
 #  comments_include(summary)
 #  on_species_list(species_list)
 #  at_location(location)
-#  in_box(n:, s:, e:, w:)
+#  in_box(north:, south:, east:, west:)
 #
 #  ==== Classification
 #  validate_classification:: Make sure +classification+ syntax is valid.
@@ -629,9 +629,7 @@ class Name < AbstractModel
   # Names with Observations whose lat/lon are in a box
   scope :in_box, # Use named parameters (north, south, east, west), any order
         lambda { |**args|
-          joins(:observations).
-            merge(Observation.in_box(**args)).
-            distinct
+          joins(:observations).merge(Observation.in_box(**args)).distinct
         }
 
   ### Specialized Scopes for Name::Create

@@ -399,11 +399,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
             where(Observation[:where].matches("%#{region}"))
           end
         }
-  scope :in_box, # Use named parameters (n, s, e, w), any order
+  scope :in_box, # Use named parameters (north, south, east, west), any order
         lambda { |**args|
-          box = Mappable::Box.new(
-            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
-          )
+          box = Mappable::Box.new(**args)
           return none unless box.valid?
 
           # resize box by epsilon to create leeway for Float rounding
@@ -427,11 +425,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
             )
           end
         }
-  scope :not_in_box, # Use named parameters (n, s, e, w), any order
+  scope :not_in_box, # Use named parameters (north, south, east, west)
         lambda { |**args|
-          box = Mappable::Box.new(
-            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
-          )
+          box = Mappable::Box.new(**args)
 
           return Observation.all unless box.valid?
 
