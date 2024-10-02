@@ -100,8 +100,8 @@
 #  without_location
 #  at_location(location)
 #  in_region(where)
-#  in_box(n,s,e,w) geoloc is in the box
-#  outside(n,s,e,w) geoloc is outside the box
+#  in_box(north:, south:, east:, west:) geoloc is in the box
+#  not_in_box(north:, south:, east:, west:) geoloc is outside the box
 #  is_collection_location
 #  not_collection_location
 #  with_images

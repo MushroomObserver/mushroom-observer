@@ -47,7 +47,7 @@
 #  updated_between(start, end)
 #  name_includes(place_name)
 #  in_region(place_name)
-#  in_box(n,s,e,w)
+#  in_box(north:, south:, east:, west:)
 #
 #  == Instance methods
 #

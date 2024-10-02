@@ -490,9 +490,9 @@ class LocationTest < UnitTestCase
   def test_lat_lng_close
     loc = locations(:east_lt_west_location)
     # The centrum of the location is provided by BoxMethods#center, lat, lng
-    assert_true(loc.lat_lng_close?(loc.lat, loc.lng),
+    assert_true(loc.lat_lng_close?(loc.calculate_lat, loc.calculate_lng),
                 "Location's centrum should be 'close' to Location.")
-    assert_false(loc.lat_lng_close?(loc.lat, loc.lng + 180),
+    assert_false(loc.lat_lng_close?(loc.calculate_lat, loc.calculate_lng + 180),
                  "Opposite side of globe should not be 'close' to Location.")
   end
 
@@ -648,9 +648,7 @@ class LocationTest < UnitTestCase
 
   def do_contains_box(loc:, external_loc: nil,
                       regions: [locations(:unknown_location)])
-    containers =
-      Location.contains_box(n: loc.north, s: loc.south,
-                            e: loc.east, w: loc.west)
+    containers = Location.contains_box(**loc.bounding_box)
 
     assert_includes(containers, loc,
                     "Location #{loc.name} should contain itself")
