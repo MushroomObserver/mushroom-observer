@@ -51,6 +51,7 @@ burbank:
   south: 34.15
   high: 294.0
   low: 148.0
+  notes: These should persist after another location is merged into this one.
 
 mitrula_marsh:
   <<: *DEFAULTS
