@@ -448,24 +448,19 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
           box = Mappable::Box.new(**args)
           return none unless box.valid?
 
-          # resize box by epsilon to create leeway for Float rounding
-          # Fixes a bug where Califoria fixture was not in a box
-          # defined by the fixture's north, south, east, west
-          resized_box = box.expand(0.00001)
-
           if box.straddles_180_deg?
             where(
-              (Observation[:lat] >= resized_box.south).
-              and(Observation[:lat] <= resized_box.north).
-              and(Observation[:lng] >= resized_box.west).
-              or(Observation[:lng] <= resized_box.east)
+              (Observation[:lat] >= box.south).
+              and(Observation[:lat] <= box.north).
+              and(Observation[:lng] >= box.west).
+              or(Observation[:lng] <= box.east)
             )
           else
             where(
-              (Observation[:lat] >= resized_box.south).
-              and(Observation[:lat] <= resized_box.north).
-              and(Observation[:lng] >= resized_box.west).
-              and(Observation[:lng] <= resized_box.east)
+              (Observation[:lat] >= box.south).
+              and(Observation[:lat] <= box.north).
+              and(Observation[:lng] >= box.west).
+              and(Observation[:lng] <= box.east)
             )
           end
         }
@@ -515,24 +510,21 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
           return Observation.all unless box.valid?
 
-          # resize box by epsilon to create leeway for Float rounding
-          resized_box = box.expand(-0.00001)
-
           if box.straddles_180_deg?
             where(
               Observation[:lat].eq(nil).or(Observation[:lng].eq(nil)).
-              or(Observation[:lat] < resized_box.south).
-              or(Observation[:lat] > resized_box.north).
-              or((Observation[:lng] < resized_box.west).
-                 and(Observation[:lng] > resized_box.east))
+              or(Observation[:lat] < box.south).
+              or(Observation[:lat] > box.north).
+              or((Observation[:lng] < box.west).
+                 and(Observation[:lng] > box.east))
             )
           else
             where(
               Observation[:lat].eq(nil).or(Observation[:lng].eq(nil)).
-              or(Observation[:lat] < resized_box.south).
-              or(Observation[:lat] > resized_box.north).
-              or(Observation[:lng] < resized_box.west).
-              or(Observation[:lng] > resized_box.east)
+              or(Observation[:lat] < box.south).
+              or(Observation[:lat] > box.north).
+              or(Observation[:lng] < box.west).
+              or(Observation[:lng] > box.east)
             )
           end
         }
