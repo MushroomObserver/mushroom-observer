@@ -150,8 +150,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
-  FLOAT_ERROR = 0.0005
-
   # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
   scope :name_includes,
         ->(place_name) { where(Location[:name].matches("%#{place_name}%")) }
@@ -162,27 +160,22 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
           box = Mappable::Box.new(**args)
           return none unless box.valid?
 
-          # expand box by epsilon to create leeway for Float rounding
-          # Fixes a bug where Califoria fixture was not in a box
-          # defined by the fixture's north, south, east, west
-          expanded_box = box.expand(0.00001)
-
           if box.straddles_180_deg?
             where(
-              (Location[:south] >= expanded_box.south).
-                and(Location[:north] <= expanded_box.north).
+              (Location[:south] >= box.south).
+                and(Location[:north] <= box.north).
               # Location[:west] between w & 180 OR between 180 and e
-              and((Location[:west] >= expanded_box.west).
-                or(Location[:west] <= expanded_box.east)).
-              and((Location[:east] >= expanded_box.west).
-                or(Location[:east] <= expanded_box.east))
+              and((Location[:west] >= box.west).
+                or(Location[:west] <= box.east)).
+              and((Location[:east] >= box.west).
+                or(Location[:east] <= box.east))
             )
           else
             where(
-              (Location[:south] >= expanded_box.south).
-                and(Location[:north] <= expanded_box.north).
-              and(Location[:west] >= expanded_box.west).
-                and(Location[:east] <= expanded_box.east).
+              (Location[:south] >= box.south).
+                and(Location[:north] <= box.north).
+              and(Location[:west] >= box.west).
+                and(Location[:east] <= box.east).
               and(Location[:west] <= Location[:east])
             )
           end
@@ -191,14 +184,11 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
         lambda { |**args|
           args => {lat:, lng:}
           where(
-            (Location[:south]).lteq(lat + FLOAT_ERROR).
-              and((Location[:north]).gteq(lat - FLOAT_ERROR)).
+            (Location[:south]).lteq(lat).and((Location[:north]).gteq(lat)).
             and(
-              Location[:west].lteq(lng + FLOAT_ERROR).
-                and(Location[:east].gteq(lng - FLOAT_ERROR)).
+              Location[:west].lteq(lng).and(Location[:east].gteq(lng)).
               or(
-                Location[:west].gteq(lng - FLOAT_ERROR).
-                  and(Location[:east].lteq(lng + FLOAT_ERROR))
+                Location[:west].gteq(lng).and(Location[:east].lteq(lng))
               )
             )
           )
@@ -220,12 +210,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
         lambda { |**args|
           args => { north:, south:, east:, west: }
 
-          # Correct for possible floating point rounding
-          shrunk_n = north - FLOAT_ERROR
-          shrunk_s = south + FLOAT_ERROR
-          shrunk_e = east - FLOAT_ERROR
-          shrunk_w = west + FLOAT_ERROR
-
           # w/e    | Location     | Location contains w/e
           # ______ | ____________ | ______________________
           # w <= e | west <= east | west <= w && e <= east
@@ -234,28 +218,29 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
           # w > e  | west > east  | west <= w && e <= east
 
           if west <= east # w / e don't straddle 180
-            where(Location[:south].lteq(shrunk_s).
-                    and(Location[:north].gteq(shrunk_n)).
-                  #   Location doesn't straddle 180
-                  and(Location[:west].lteq(Location[:east]).
-                      and(Location[:west] <= shrunk_w).
-                      and(Location[:east] >= shrunk_e).
-                    #  Location straddles 180
-                    or(Location[:west].gt(Location[:east]).
-                      #    need not check e, since w <= e
-                      and((Location[:west] <= shrunk_w).
-                        #  need not check w for same reason
-                        or(Location[:east] >= shrunk_e)))))
+            where(
+              Location[:south].lteq(south).and(Location[:north].gteq(north)).
+              # Location doesn't straddle 180
+              and(Location[:west].lteq(Location[:east]).
+              and(Location[:west] <= west).and(Location[:east] >= east).
+              # Location straddles 180
+              or(
+                Location[:west].gt(Location[:east]).
+                and((Location[:west] <= west).or(Location[:east] >= east))
+              ))
+            )
           else # w / e straddle 180
-            where(Location[:south].lteq(shrunk_s).
-                  and(Location[:north].gteq(shrunk_n)).
-            # Location straddles 180
-            #   Location 100% wrap; necessarily straddles w/e
-            and(Location[:west].eq(Location[:east] - 360)).
-            #  Location < 100% wrap-around
-            or(Location[:west].gt(Location[:east]).
-              and(Location[:west] <= shrunk_w).
-              and(Location[:east] >= shrunk_e)))
+            where(
+              Location[:south].lteq(south).and(Location[:north].gteq(north)).
+              # Location straddles 180
+              #   Location 100% wrap; necessarily straddles w/e
+              and(Location[:west].eq(Location[:east] - 360)).
+              #  Location < 100% wrap-around
+              or(
+                Location[:west].gt(Location[:east]).
+                and(Location[:west] <= west).and(Location[:east] >= east)
+              )
+            )
           end
         }
 
