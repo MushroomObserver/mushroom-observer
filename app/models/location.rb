@@ -47,7 +47,7 @@
 #  updated_between(start, end)
 #  name_includes(place_name)
 #  in_region(place_name)
-#  in_box(n,s,e,w)
+#  in_box(north:, south:, east:, west:)
 #
 #  == Instance methods
 #
@@ -157,11 +157,9 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
         ->(place_name) { where(Location[:name].matches("%#{place_name}%")) }
   scope :in_region,
         ->(place_name) { where(Location[:name].matches("%#{place_name}")) }
-  scope :in_box, # Use named parameters (n, s, e, w), any order
+  scope :in_box, # Use named parameters (north, south, east, west), any order
         lambda { |**args|
-          box = Mappable::Box.new(
-            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
-          )
+          box = Mappable::Box.new(**args)
           return none unless box.valid?
 
           # expand box by epsilon to create leeway for Float rounding
@@ -218,15 +216,15 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
           )
         }
 
-  scope :contains_box, # Use named parameters, n:, s:, e:, w:
+  scope :contains_box, # Use named parameters, north:, south:, east:, west:
         lambda { |**args|
-          args => {n:, s:, e:, w:}
+          args => { north:, south:, east:, west: }
 
           # Correct for possible floating point rounding
-          shrunk_n = n - FLOAT_ERROR
-          shrunk_s = s + FLOAT_ERROR
-          shrunk_e = e - FLOAT_ERROR
-          shrunk_w = w + FLOAT_ERROR
+          shrunk_n = north - FLOAT_ERROR
+          shrunk_s = south + FLOAT_ERROR
+          shrunk_e = east - FLOAT_ERROR
+          shrunk_w = west + FLOAT_ERROR
 
           # w/e    | Location     | Location contains w/e
           # ______ | ____________ | ______________________
@@ -235,7 +233,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
           # w > e  | west <= east | none
           # w > e  | west > east  | west <= w && e <= east
 
-          if w <= e # w / e don't straddle 180
+          if west <= east # w / e don't straddle 180
             where(Location[:south].lteq(shrunk_s).
                     and(Location[:north].gteq(shrunk_n)).
                   #   Location doesn't straddle 180
@@ -358,6 +356,11 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
     # contains? is now a method of Mappable::BoxMethods
     contains?(loc.north, loc.west) && contains?(loc.south, loc.east)
+  end
+
+  # Returns a hash representing the location's bounding box
+  def bounding_box
+    attributes.symbolize_keys.slice(:north, :south, :west, :east)
   end
 
   ##############################################################################

@@ -490,9 +490,9 @@ class LocationTest < UnitTestCase
   def test_lat_lng_close
     loc = locations(:east_lt_west_location)
     # The centrum of the location is provided by BoxMethods#center, lat, lng
-    assert_true(loc.lat_lng_close?(loc.lat, loc.lng),
+    assert_true(loc.lat_lng_close?(loc.calculate_lat, loc.calculate_lng),
                 "Location's centrum should be 'close' to Location.")
-    assert_false(loc.lat_lng_close?(loc.lat, loc.lng + 180),
+    assert_false(loc.lat_lng_close?(loc.calculate_lat, loc.calculate_lng + 180),
                  "Opposite side of globe should not be 'close' to Location.")
   end
 
@@ -540,30 +540,28 @@ class LocationTest < UnitTestCase
   # supplements API tests
   def test_scope_in_box
     cal = locations(:california)
-    locs_in_cal_box = Location.in_box(
-      n: cal.north, s: cal.south, e: cal.east, w: cal.west
-    )
+    locs_in_cal_box = Location.in_box(**cal.bounding_box)
     assert_includes(locs_in_cal_box, locations(:albion))
     assert_includes(locs_in_cal_box, cal)
 
     wrangel = locations(:east_lt_west_location)
-    locs_in_wrangel_box = Location.in_box(
-      n: wrangel.north, s: wrangel.south, e: wrangel.east, w: wrangel.west
-    )
+    locs_in_wrangel_box = Location.in_box(**wrangel.bounding_box)
     assert_includes(locs_in_wrangel_box, wrangel)
     assert_not_includes(locs_in_wrangel_box, cal)
 
     assert_empty(
-      Location.in_box(n: cal.north, s: cal.south, e: cal.east),
+      Location.in_box(north: cal.north, south: cal.south, east: cal.east),
       "`scope: in_box` should be empty if an argument is missing"
     )
     assert_empty(
-      Location.in_box(n: 91, s: cal.south, e: cal.east, w: cal.west),
+      Location.in_box(
+        north: 91, south: cal.south, east: cal.east, west: cal.west
+      ),
       "`scope: in_box` should be empty if an argument is out of bounds"
     )
     assert_empty(
       Location.in_box(
-        n: cal.south - 10, s: cal.south, e: cal.east, w: cal.west
+        north: cal.south - 10, south: cal.south, east: cal.east, west: cal.west
       ),
       "`scope: in_box` should be empty if N < S"
     )
@@ -650,9 +648,7 @@ class LocationTest < UnitTestCase
 
   def do_contains_box(loc:, external_loc: nil,
                       regions: [locations(:unknown_location)])
-    containers =
-      Location.contains_box(n: loc.north, s: loc.south,
-                            e: loc.east, w: loc.west)
+    containers = Location.contains_box(**loc.bounding_box)
 
     assert_includes(containers, loc,
                     "Location #{loc.name} should contain itself")
