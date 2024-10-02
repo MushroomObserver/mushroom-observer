@@ -539,6 +539,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_01_233907) do
     t.datetime "log_updated_at", precision: nil
     t.boolean "needs_naming", default: false, null: false
     t.integer "inat_id"
+    t.decimal "center_lat", precision: 15, scale: 10
+    t.decimal "center_lng", precision: 15, scale: 10
     t.index ["needs_naming"], name: "needs_naming_index"
   end
 

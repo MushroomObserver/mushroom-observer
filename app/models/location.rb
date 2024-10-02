@@ -266,18 +266,36 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   # On save, calculate the area of the box for the `box_area` column.
   # This should cover API and web form updates.
   def calculate_box_area_and_center
+    return unless north_changed? || east_changed? ||
+                  south_changed? || west_changed?
+
     self.box_area = calculate_area
     self.center_lat = calculate_lat
     self.center_lng = calculate_lng
+    update_observation_center_columns
+  end
+
+  # Now that the box_area and center columns are set on this location,
+  # cache or update the center columns of this location's observations -
+  # only if box_area < 10_000. (They could already have a center point.)
+  # If the box_area is greater than 10_000, remove center point.
+  def update_observation_center_columns
+    if box_area <= 10_000
+      observations.update_all(center_lat:, center_lng:)
+    else
+      observations.update_all(center_lat: nil, center_lng: nil)
+    end
   end
 
   # Can be run after migration, or as part of a recurring job.
   def self.update_box_area_and_center_columns
-    all.each do |location|
-      box_area = location.calculate_area
-      center_lat, center_lng = location.center
-      location.update!(box_area:, center_lat:, center_lng:)
-    end
+    # update the locations
+    update_all(update_center_and_area_sql)
+    # update the associated observations in batches
+    Observation.joins(:location).where(Location[:box_area].lt(10_000)).
+      group(:location_id).update_all(
+        center_lat: Location[:center_lat], center_lng: Location[:center_lng]
+      )
   end
 
   # Let attached observations update their cache if these fields changed.

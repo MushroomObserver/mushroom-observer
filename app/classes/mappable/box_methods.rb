@@ -28,6 +28,10 @@
 
 module Mappable
   module BoxMethods
+    def self.included(base)
+      base.extend(ClassMethods)
+    end
+
     def location?
       true
     end
@@ -149,6 +153,34 @@ module Mappable
       loc = Box.new(north: north, south: south, east: east, west: west)
       expanded = loc.expand(delta_lat, delta_lng)
       expanded.contains?(pt_lat, pt_lng)
+    end
+
+    # These (or Arel equivalents) are necessary for update_all to be efficient.
+    # as used in populating the columns or a cron job.
+    module ClassMethods
+      def update_center_and_area_sql
+        "center_lat = #{lat_sql}, center_lng = #{lng_sql}, " \
+        "box_area = #{area_sql}"
+      end
+
+      def lat_sql
+        "(north + south) / 2"
+      end
+
+      def lng_sql
+        "CASE WHEN ((west > east) AND (east + west < 0)) " \
+        "THEN (((east + west) / 2) + 180) " \
+        "WHEN ((west > east) AND (east + west > 0)) " \
+        "THEN (((east + west) / 2) - 180) " \
+        "ELSE ((east + west) / 2) END"
+      end
+
+      def area_sql
+        "6372 * 6372 * " \
+        "RADIANS(CASE WHEN (west <= east) THEN (east - west) " \
+        "ELSE (east - west + 360) END) * " \
+        "ABS(SIN(RADIANS(north)) - SIN(RADIANS(south)))"
+      end
     end
   end
 end
