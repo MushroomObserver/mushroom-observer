@@ -540,12 +540,12 @@ class LocationTest < UnitTestCase
   # supplements API tests
   def test_scope_in_box
     cal = locations(:california)
-    locs_in_cal_box = Location.in_box(**cal.attributes.symbolize_keys)
+    locs_in_cal_box = Location.in_box(**cal.bounding_box)
     assert_includes(locs_in_cal_box, locations(:albion))
     assert_includes(locs_in_cal_box, cal)
 
     wrangel = locations(:east_lt_west_location)
-    locs_in_wrangel_box = Location.in_box(**wrangel.attributes.symbolize_keys)
+    locs_in_wrangel_box = Location.in_box(**wrangel.bounding_box)
     assert_includes(locs_in_wrangel_box, wrangel)
     assert_not_includes(locs_in_wrangel_box, cal)
 

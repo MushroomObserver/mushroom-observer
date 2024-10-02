@@ -1265,9 +1265,9 @@ class ObservationTest < UnitTestCase
 
   def test_scope_in_box
     cal = locations(:california)
-    obss_in_cal_box = Observation.in_box(**cal.attributes.symbolize_keys)
+    obss_in_cal_box = Observation.in_box(**cal.bounding_box)
     nybg = locations(:nybg_location)
-    obss_in_nybg_box = Observation.in_box(**nybg.attributes.symbolize_keys)
+    obss_in_nybg_box = Observation.in_box(**nybg.bounding_box)
     obss_in_ecuador_box = Observation.in_box(**ecuador_box)
     quito_obs =
       Observation.create!(
@@ -1283,17 +1283,12 @@ class ObservationTest < UnitTestCase
         lat: (wrangel.north + wrangel.south) / 2,
         lng: (wrangel.east + wrangel.west) / 2 + wrangel.west
       )
-    obss_in_wrangel_box = Observation.in_box(
-      **wrangel.attributes.symbolize_keys
-    )
+    obss_in_wrangel_box = Observation.in_box(**wrangel.bounding_box)
 
     # boxes not straddling 180 deg
-    assert_includes(obss_in_cal_box,
-                    observations(:unknown_with_lat_lng))
-    assert_includes(obss_in_ecuador_box,
-                    quito_obs)
-    assert_not_includes(obss_in_nybg_box,
-                        observations(:unknown_with_lat_lng))
+    assert_includes(obss_in_cal_box, observations(:unknown_with_lat_lng))
+    assert_includes(obss_in_ecuador_box, quito_obs)
+    assert_not_includes(obss_in_nybg_box, observations(:unknown_with_lat_lng))
     assert_not_includes(obss_in_cal_box,
                         observations(:minimal_unknown_obs),
                         "Observation without lat/lon should not be in box")
@@ -1330,15 +1325,11 @@ class ObservationTest < UnitTestCase
 
   def test_scope_not_in_box
     cal = locations(:california)
-    obss_not_in_cal_box = Observation.not_in_box(
-      **cal.attributes.symbolize_keys
-    )
+    obss_not_in_cal_box = Observation.not_in_box(**cal.bounding_box)
     obs_with_burbank_geoloc = observations(:unknown_with_lat_lng)
 
     nybg = locations(:nybg_location)
-    obss_not_in_nybg_box = Observation.not_in_box(
-      **nybg.attributes.symbolize_keys
-    )
+    obss_not_in_nybg_box = Observation.not_in_box(**nybg.bounding_box)
 
     obss_not_in_ecuador_box = Observation.not_in_box(**ecuador_box)
     quito_obs =
@@ -1356,9 +1347,7 @@ class ObservationTest < UnitTestCase
         lat: (wrangel.north + wrangel.south) / 2,
         lng: (wrangel.east + wrangel.west) / 2 + wrangel.west
       )
-    obss_not_in_wrangel_box = Observation.not_in_box(
-      **wrangel.attributes.symbolize_keys
-    )
+    obss_not_in_wrangel_box = Observation.not_in_box(**wrangel.bounding_box)
 
     # boxes not straddling 180 deg
     assert_not_includes(obss_not_in_cal_box, obs_with_burbank_geoloc)

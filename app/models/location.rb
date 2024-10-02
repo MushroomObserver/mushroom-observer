@@ -358,6 +358,11 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     contains?(loc.north, loc.west) && contains?(loc.south, loc.east)
   end
 
+  # Returns a hash representing the location's bounding box
+  def bounding_box
+    attributes.symbolize_keys.slice(:north, :south, :west, :east)
+  end
+
   ##############################################################################
   #
   #  :section: Name Stuff
