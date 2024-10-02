@@ -267,8 +267,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   # This should cover API and web form updates.
   def calculate_box_area_and_center
     self.box_area = calculate_area
-    self.center_lat = lat
-    self.center_lng = lng
+    self.center_lat = calculate_lat
+    self.center_lng = calculate_lng
   end
 
   # Can be run after migration, or as part of a recurring job.
