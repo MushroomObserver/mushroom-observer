@@ -232,13 +232,12 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
                 and((Location[:west] <= west).or(Location[:east] >= east))
               ))
             )
-          else # w / e straddle 180
+          else # Location straddles 180
             where(
               Location[:south].lteq(south).and(Location[:north].gteq(north)).
-              # Location straddles 180
-              #   Location 100% wrap; necessarily straddles w/e
+              # Location 100% wrap; necessarily straddles w/e
               and(Location[:west].eq(Location[:east] - 360)).
-              #  Location < 100% wrap-around
+              # Location < 100% wrap-around
               or(
                 Location[:west].gt(Location[:east]).
                 and(Location[:west] <= west).and(Location[:east] >= east)
