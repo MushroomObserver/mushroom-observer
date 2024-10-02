@@ -100,8 +100,8 @@
 #  without_location
 #  at_location(location)
 #  in_region(where)
-#  in_box(n,s,e,w) geoloc is in the box
-#  outside(n,s,e,w) geoloc is outside the box
+#  in_box(north:, south:, east:, west:) geoloc is in the box
+#  not_in_box(north:, south:, east:, west:) geoloc is outside the box
 #  is_collection_location
 #  not_collection_location
 #  with_images
@@ -405,9 +405,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
         }
   scope :in_box_loc, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
-          box = Mappable::Box.new(
-            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
-          )
+          box = Mappable::Box.new(**args)
           return none unless box.valid?
 
           # resize box by epsilon to create leeway for Float rounding
@@ -447,9 +445,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
         }
   scope :in_box_strict, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
-          box = Mappable::Box.new(
-            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
-          )
+          box = Mappable::Box.new(**args)
           return none unless box.valid?
 
           # resize box by epsilon to create leeway for Float rounding
@@ -473,12 +469,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
             )
           end
         }
-  scope :in_box, # Use named parameters (n, s, e, w), any order
+  scope :in_box, # Use named parameters (north, south, east, west), any order
         lambda { |**args|
-          debugger
-          box = Mappable::Box.new(
-            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
-          )
+          box = Mappable::Box.new(**args)
           return none unless box.valid?
 
           # resize box by epsilon to create leeway for Float rounding
@@ -516,11 +509,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
               )) # odd! will toss entire condition if above order is west, east
           end
         }
-  scope :not_in_box, # Use named parameters (n, s, e, w), any order
+  scope :not_in_box, # Use named parameters (north, south, east, west)
         lambda { |**args|
-          box = Mappable::Box.new(
-            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
-          )
+          box = Mappable::Box.new(**args)
 
           return Observation.all unless box.valid?
 

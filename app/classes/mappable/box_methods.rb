@@ -61,14 +61,14 @@ module Mappable
     end
 
     # Return center latitude.
-    def lat
+    def calculate_lat
       (north + south) / 2.0
     rescue StandardError
       nil
     end
 
     # Return center longitude for MapSet. (Google Maps takes `lng`, not `long`)
-    def lng
+    def calculate_lng
       lng = (east + west) / 2.0
       if west > east && lng.negative?
         lng += 180
@@ -82,7 +82,7 @@ module Mappable
 
     # Return center as [lat, lng].
     def center
-      [lat, lng]
+      [calculate_lat, calculate_lng]
     end
 
     # Returns [north, south, east, west].

@@ -1707,7 +1707,7 @@ class ApplicationController < ActionController::Base
   end
 
   def name_flash_for_project(name, project)
-    return unless name
+    return unless name && project
 
     count = project.count_collections(name)
     if count == 1
