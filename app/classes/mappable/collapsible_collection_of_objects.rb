@@ -182,16 +182,18 @@ module Mappable
 
     # loc may be an observation, MinimalObservation or a set (with lng)
     def round_lat_lng_to_precision(loc, prec)
+      lat = loc.calculate_lat
+      lng = loc.calculate_lng
       if prec > MIN_PRECISION
-        return [round_number(loc.lat, prec), round_number(loc.lng, prec)]
+        return [round_number(lat, prec), round_number(lng, prec)]
       end
 
-      [if loc.lat >= 45
+      [if lat >= 45
          90
        else
-         loc.lat <= -45 ? -90 : 0
+         lat <= -45 ? -90 : 0
        end,
-       loc.lng >= 150 || loc.lng <= -150 ? 180 : round_number(loc.lng, prec)]
+       lng >= 150 || lng <= -150 ? 180 : round_number(lng, prec)]
     end
 
     def calc_extents
