@@ -147,11 +147,15 @@ class LocationTest < UnitTestCase
     # Test updating a location box, that the center and area are recalculated
     # and propagated to associated observations
     rey = locations(:point_reyes)
+    rey_area = rey.calculate_area.round(4)
     new_bounds = rey.bounding_box.merge(north: 38.2461)
-    rey.update!(**new_bounds)
     box = Mappable::Box.new(**new_bounds)
+    box_area = box.calculate_area.round(4)
+    assert_not_equal(rey_area, box_area)
+
+    rey.update!(**new_bounds)
     assert_equal(rey.center_lat, box.calculate_lat)
-    assert_equal(rey.box_area.round(4), box.calculate_area.round(4))
+    assert_equal(rey.box_area.round(4), box_area)
     rey.observations.each do |obs|
       assert_equal(obs.location_lat, rey.center_lat,
                    "Observation #{obs.name} should have had location_lat " \
