@@ -7,8 +7,7 @@
 # Update LocationsControllerTest#test_update_location_admin_merge Location#merge
 # when adding a Class that has a `location` attribute
 
-DEFAULTS:
-  &DEFAULTS
+DEFAULTS: &DEFAULTS
   locked: false
   user: rolf
   version: 1
@@ -36,6 +35,9 @@ albion:
   south: 39.21
   high: 100.0
   low: 0.0
+  box_area: 84.26693
+  center_lat: 39.265
+  center_lng: -123.78
   rss_log: albion_rss_log
   notes: some notes & stuff... to test "unsafe" html
 
@@ -51,6 +53,9 @@ burbank:
   south: 34.15
   high: 294.0
   low: 148.0
+  box_area: 57.295344810673775 # result of calling loc.calculate_area
+  center_lat: 34.185 # result of calling loc.center
+  center_lng: -118.33000000000001 # result of calling loc.center
   notes: These should persist after another location is merged into this one.
 
 mitrula_marsh:
@@ -63,6 +68,9 @@ mitrula_marsh:
   west: -120.687
   east: -120.487
   south: 39.5184
+  box_area: 381.092788
+  center_lat: 39.6184
+  center_lng: -120.587
   rss_log: location_rss_log
 
 salt_point:
@@ -77,6 +85,9 @@ salt_point:
   south: 38.5584
   high: 100.0
   low: 0.0
+  box_area: 19.667387
+  center_lat: 38.57535
+  center_lng: -123.313
   notes: It's legal to collect in Salt Point (at least in 2010). Let's hope it stays that way!
 
 gualala:
@@ -91,6 +102,9 @@ gualala:
   south: 38.7597
   high: 100.0
   low: 0.0
+  box_area: 9.92997
+  center_lat: 38.77325
+  center_lng: -123.538
 
 elgin_co:
   <<: *DEFAULTS
@@ -102,6 +116,9 @@ elgin_co:
   west: -81.8179
   east: -80.8044
   south: 42.4701
+  box_area: 3740.87719
+  center_lat: 42.67305
+  center_lng: -81.31115
 
 brett_woods:
   <<: *DEFAULTS
@@ -113,6 +130,9 @@ brett_woods:
   west: -73.3295
   east: -73.3215
   south: 41.1939
+  box_area: 1.384667
+  center_lat: 41.2032
+  center_lng: -73.3255
 
 point_reyes:
   <<: *DEFAULTS
@@ -125,6 +145,9 @@ point_reyes:
   east: -122.7092
   south: 37.9255
   notes: Is it legal to collect in Point Reyes without a permit?
+  box_area: 981.334675
+  center_lat: 38.0848
+  center_lng: -122.8674
 
 howarth_park:
   <<: *DEFAULTS
@@ -136,6 +159,9 @@ howarth_park:
   west: -122.6712
   east: -122.6632
   south: 38.4496
+  box_area: 0.666372
+  center_lat: 38.4539
+  center_lng: -122.6672
 
 unknown_location:
   <<: *DEFAULTS
@@ -160,6 +186,9 @@ nybg_location:
   west: -73.879
   east: -73.878
   south: 40.866
+  box_area: 0.009353
+  center_lat: 40.8665
+  center_lng: -73.8785
 
 # Do not use this location for any object
 unused_location:
@@ -213,6 +242,9 @@ obs_default_location:
   west: -70.763
   east: -70.761
   south: 41.645
+  box_area: 0.018485
+  center_lat: 41.6455
+  center_lng: -70.762
 
 falmouth:
   <<: *DEFAULTS
@@ -222,6 +254,9 @@ falmouth:
   west: -70.6975
   east: -70.4977
   south: 41.5133
+  box_area: 269.670718
+  center_lat: 41.58625
+  center_lng: -70.5976
 
 california:
   <<: *DEFAULTS
@@ -236,6 +271,9 @@ california:
   south: 32.54
   high: 4421
   low: -86
+  box_area: 957013.823381
+  center_lat: 37.27
+  center_lng: -119.275
 
 with_single_quotes_location:
   <<: *DEFAULTS
@@ -252,6 +290,9 @@ east_lt_west_location:
   west: 178.648
   east: -177.433
   south: 70.759
+  box_area: 12966.893615
+  center_lat: 71.1735
+  center_lng: -179.3925
 
 perkatkun:
   <<: *DEFAULTS
@@ -261,6 +302,9 @@ perkatkun:
   west: -179.809370
   south: 71.104900
   east: -179.613214
+  box_area: 39.156032
+  center_lat: 71.129851
+  center_lng: -179.711292
 
 loc_edited_by_katrina:
   <<: *DEFAULTS

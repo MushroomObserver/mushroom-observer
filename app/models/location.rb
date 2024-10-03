@@ -28,6 +28,7 @@
 #  low::          (V) Minimum elevation in meters, e.g. 0
 #  notes::        (V) Arbitrary extra notes supplied by User.
 #  hidden::       (V) Should observation with this location be hidden
+#  box_area::     (-) Area of the box in square kilometers.
 #
 #  ('V' indicates that this attribute is versioned in past_locations table.)
 #
@@ -118,6 +119,9 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
       high
       low
       notes
+      box_area
+      center_lat
+      center_lng
     ]
   )
   non_versioned_columns.push(
@@ -132,6 +136,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     "hidden"
   )
 
+  before_save :calculate_box_area_and_center
   before_update :update_observation_cache
   after_update :notify_users
 
@@ -155,31 +160,46 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
         ->(place_name) { where(Location[:name].matches("%#{place_name}%")) }
   scope :in_region,
         ->(place_name) { where(Location[:name].matches("%#{place_name}")) }
-  scope :in_box, # Use named parameters (north, south, east, west), any order
+  scope :in_box, # Pass kwargs (:north, :south, :east, :west), any order
         lambda { |**args|
           box = Mappable::Box.new(**args)
           return none unless box.valid?
 
           if box.straddles_180_deg?
-            where(
-              (Location[:south] >= box.south).
-                and(Location[:north] <= box.north).
-              # Location[:west] between w & 180 OR between 180 and e
-              and((Location[:west] >= box.west).
-                or(Location[:west] <= box.east)).
-              and((Location[:east] >= box.west).
-                or(Location[:east] <= box.east))
-            )
+            in_box_straddling_dateline(**args)
           else
-            where(
-              (Location[:south] >= box.south).
-                and(Location[:north] <= box.north).
-              and(Location[:west] >= box.west).
-                and(Location[:east] <= box.east).
-              and(Location[:west] <= Location[:east])
-            )
+            in_box_regular(**args)
           end
         }
+  scope :in_box_straddling_dateline, # mostly a helper for in_box
+        lambda { |**args|
+          box = Mappable::Box.new(**args)
+          return none unless box.valid?
+
+          where(
+            (Location[:south] >= box.south).
+              and(Location[:north] <= box.north).
+            # Location[:west] between w & 180 OR between 180 and e
+            and((Location[:west] >= box.west).
+              or(Location[:west] <= box.east)).
+            and((Location[:east] >= box.west).
+              or(Location[:east] <= box.east))
+          )
+        }
+  scope :in_box_regular, # mostly a helper for in_box
+        lambda { |**args|
+          box = Mappable::Box.new(**args)
+          return none unless box.valid?
+
+          where(
+            (Location[:south] >= box.south).
+              and(Location[:north] <= box.north).
+            and(Location[:west] >= box.west).
+              and(Location[:east] <= box.east).
+            and(Location[:west] <= Location[:east])
+          )
+        }
+
   scope :contains_point, # Use named parameters (lat:, lng:), any order
         lambda { |**args|
           args => {lat:, lng:}
@@ -229,13 +249,12 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
                 and((Location[:west] <= west).or(Location[:east] >= east))
               ))
             )
-          else # w / e straddle 180
+          else # Location straddles 180
             where(
               Location[:south].lteq(south).and(Location[:north].gteq(north)).
-              # Location straddles 180
-              #   Location 100% wrap; necessarily straddles w/e
+              # Location 100% wrap; necessarily straddles w/e
               and(Location[:west].eq(Location[:east] - 360)).
-              #  Location < 100% wrap-around
+              # Location < 100% wrap-around
               or(
                 Location[:west].gt(Location[:east]).
                 and(Location[:west] <= west).and(Location[:east] >= east)
@@ -243,6 +262,50 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
             )
           end
         }
+  scope :with_observations, -> { joins(:observations).distinct }
+
+  # On save, calculate bounding box area for the `box_area` column, plus the
+  # `center_lat` and `center_lng` values. If box_area is below a threshold, also
+  # copy the values to the observation `location_lat` `location_lng` columns, or
+  # null the obs values if not. This callback can handle API updates.
+  def calculate_box_area_and_center
+    return unless north_changed? || east_changed? ||
+                  south_changed? || west_changed?
+
+    self.box_area = calculate_area
+    self.center_lat = calculate_lat
+    self.center_lng = calculate_lng
+    update_observation_center_columns
+  end
+
+  # Now that the box_area and center columns are set on this location, cache or
+  # update the center columns of this location's observations.
+  def update_observation_center_columns
+    if box_area <= MO.obs_location_max_area
+      observations.update_all(location_lat: center_lat,
+                              location_lng: center_lng)
+    else
+      observations.update_all(location_lat: nil, location_lng: nil)
+    end
+  end
+
+  # Can populate columns after migration, or be run as part of a recurring job.
+  def self.update_box_area_and_center_columns
+    # update the locations
+    update_all(update_center_and_area_sql)
+    # give center points to associated observations in batches
+    Observation.joins(:location).
+      where(Location[:box_area].lteq(MO.obs_location_max_area)).
+      group(:location_id).update_all(
+        location_lat: Location[:center_lat], location_lng: Location[:center_lng]
+      )
+    # null center points where area is above the threshold
+    Observation.joins(:location).
+      where(Location[:box_area].gt(MO.obs_location_max_area)).
+      group(:location_id).update_all(
+        location_lat: nil, location_lng: nil
+      )
+  end
 
   # Let attached observations update their cache if these fields changed.
   # Also touch updated_at to expire obs fragment caches

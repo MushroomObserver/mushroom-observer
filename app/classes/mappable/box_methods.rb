@@ -28,6 +28,10 @@
 
 module Mappable
   module BoxMethods
+    def self.included(base)
+      base.extend(ClassMethods)
+    end
+
     def location?
       true
     end
@@ -126,7 +130,7 @@ module Mappable
     # Arbitrary test for whether a box covers too large an area to be useful on
     # a map with other boxes. Large boxes can obscure more precise locations.
     def vague?
-      calculate_area > 24_000 # kmˆ2
+      calculate_area > 24_000 # kmˆ2   or use MO.obs_location_max_area
     end
 
     # NOTE: DELTA = 0.20 is way too strict a limit for remote locations.
@@ -149,6 +153,34 @@ module Mappable
       loc = Box.new(north: north, south: south, east: east, west: west)
       expanded = loc.expand(delta_lat, delta_lng)
       expanded.contains?(pt_lat, pt_lng)
+    end
+
+    # These (or Arel equivalents) are necessary for update_all to be efficient.
+    # Used in update_box_area_and_center_columns to populate or restore columns.
+    module ClassMethods
+      def update_center_and_area_sql
+        "center_lat = #{lat_sql}, center_lng = #{lng_sql}, " \
+        "box_area = #{area_sql}"
+      end
+
+      def lat_sql
+        "(north + south) / 2"
+      end
+
+      def lng_sql
+        "CASE WHEN ((west > east) AND (east + west < 0)) " \
+        "THEN (((east + west) / 2) + 180) " \
+        "WHEN ((west > east) AND (east + west > 0)) " \
+        "THEN (((east + west) / 2) - 180) " \
+        "ELSE ((east + west) / 2) END"
+      end
+
+      def area_sql
+        "6372 * 6372 * " \
+        "RADIANS(CASE WHEN (west <= east) THEN (east - west) " \
+        "ELSE (east - west + 360) END) * " \
+        "ABS(SIN(RADIANS(north)) - SIN(RADIANS(south)))"
+      end
     end
   end
 end
