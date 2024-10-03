@@ -403,71 +403,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
             where(Observation[:where].matches("%#{region}"))
           end
         }
-  scope :in_box_loc, # Use named parameters (n, s, e, w), any order
-        lambda { |**args|
-          box = Mappable::Box.new(**args)
-          return none unless box.valid?
-
-          if box.straddles_180_deg?
-            joins(:location).where(
-              (Observation[:lat] >= box.south).
-              and(Observation[:lat] <= box.north).
-              and(Observation[:lng] >= box.west).
-              or(Observation[:lng] <= box.east)
-            ).or(joins(:location).
-            where(Observation[:lat].eq(nil).
-              and(Location[:box_area] < 10_000).
-              and(Location[:center_lat] >= box.south).
-              and(Location[:center_lat] <= box.north).
-              and(Location[:center_lng] >= box.west).
-              or(Location[:center_lng] <= box.east)
-            ))
-          else
-            joins(:location).where(
-              (Observation[:lat] >= box.south).
-              and(Observation[:lat] <= box.north).
-              and(Observation[:lng] >= box.west).
-              and(Observation[:lng] <= box.east)
-            ).or(joins(:location).
-            where(Observation[:lat].eq(nil).
-              and(Location[:box_area] < 10_000).
-              and(Location[:center_lat] >= box.south).
-              and(Location[:center_lat] <= box.north).
-              and(Location[:center_lng] <= box.east).
-              and(Location[:center_lng] >= box.west)
-            ))
-          end
-        }
-  scope :in_box_strict, # Use named parameters (n, s, e, w), any order
-        lambda { |**args|
-          box = Mappable::Box.new(**args)
-          return none unless box.valid?
-
-          if box.straddles_180_deg?
-            where(
-              (Observation[:lat] >= box.south).
-              and(Observation[:lat] <= box.north).
-              and(Observation[:lng] >= box.west).
-              or(Observation[:lng] <= box.east)
-            )
-          else
-            where(
-              (Observation[:lat] >= box.south).
-              and(Observation[:lat] <= box.north).
-              and(Observation[:lng] >= box.west).
-              and(Observation[:lng] <= box.east)
-            )
-          end
-        }
   scope :in_box, # Use named parameters (north, south, east, west), any order
         lambda { |**args|
           box = Mappable::Box.new(**args)
           return none unless box.valid?
-
-          # resize box by epsilon to create leeway for Float rounding
-          # Fixes a bug where Califoria fixture was not in a box
-          # defined by the fixture's north, south, east, west
-          # resized_box = box.expand(0.00001)
 
           if box.straddles_180_deg?
             where(
@@ -478,10 +417,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
             ).or(Observation.
               where(
                 Observation[:lat].eq(nil).
-                and(Observation[:center_lat] >= box.south).
-                and(Observation[:center_lat] <= box.north).
-                and(Observation[:center_lng] >= box.west).
-                or(Observation[:center_lng] <= box.east)
+                and(Observation[:location_lat] >= box.south).
+                and(Observation[:location_lat] <= box.north).
+                and(Observation[:location_lng] >= box.west).
+                or(Observation[:location_lng] <= box.east)
               ))
           else
             where(
@@ -492,10 +431,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
             ).or(Observation.
               where(
                 Observation[:lat].eq(nil).
-                and(Observation[:center_lat] >= box.south).
-                and(Observation[:center_lat] <= box.north).
-                and(Observation[:center_lng] <= box.east).
-                and(Observation[:center_lng] >= box.west)
+                and(Observation[:location_lat] >= box.south).
+                and(Observation[:location_lat] <= box.north).
+                and(Observation[:location_lng] <= box.east).
+                and(Observation[:location_lng] >= box.west)
               )) # odd! will toss entire condition if above order is west, east
           end
         }
@@ -507,20 +446,32 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
           if box.straddles_180_deg?
             where(
-              Observation[:lat].eq(nil).or(Observation[:lng].eq(nil)).
-              or(Observation[:lat] < box.south).
+              (Observation[:lat] < box.south).
               or(Observation[:lat] > box.north).
               or((Observation[:lng] < box.west).
                  and(Observation[:lng] > box.east))
-            )
+            ).or(Observation.
+              where(
+                Observation[:lat].eq(nil).
+                and((Observation[:location_lat] < box.south).
+                    or(Observation[:location_lat] > box.north).
+                    or((Observation[:location_lng] < box.west).
+                       and(Observation[:location_lng] > box.east)))
+              ))
           else
             where(
-              Observation[:lat].eq(nil).or(Observation[:lng].eq(nil)).
-              or(Observation[:lat] < box.south).
+              (Observation[:lat] < box.south).
               or(Observation[:lat] > box.north).
               or(Observation[:lng] < box.west).
               or(Observation[:lng] > box.east)
-            )
+            ).or(Observation.
+              where(
+                Observation[:lat].eq(nil).
+                and((Observation[:location_lat] < box.south).
+                    or(Observation[:location_lat] > box.north).
+                    or(Observation[:location_lng] < box.west).
+                    or(Observation[:location_lng] > box.east))
+              ))
           end
         }
 
