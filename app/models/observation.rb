@@ -403,9 +403,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
             where(Observation[:where].matches("%#{region}"))
           end
         }
-  scope :in_box, # Pass kwargs (:north, :south, :east, :west), any order
+  # Pass kwargs (:north, :south, :east, :west), any order
+  # Pass mappable: false to include all obs, including with vague locations.
+  scope :in_box,
         lambda { |**args|
-          box = Mappable::Box.new(**args)
+          args[:mappable] ||= false
+          box = Mappable::Box.new(**args.except(:mappable))
           return none unless box.valid?
 
           if box.straddles_180_deg?
@@ -416,7 +419,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
         }
   scope :in_box_straddling_dateline, # mostly a helper for in_box
         lambda { |**args|
-          box = Mappable::Box.new(**args)
+          args[:mappable] ||= true
+          box = Mappable::Box.new(**args.except(:mappable))
           return none unless box.valid?
 
           where(
@@ -424,18 +428,36 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
             and(Observation[:lat] <= box.north).
             and(Observation[:lng] >= box.west).
             or(Observation[:lng] <= box.east)
-          ).or(Observation.
+          ).or(Observation.location_straddling_dateline(**args))
+        }
+  scope :location_straddling_dateline,
+        lambda { |**args|
+          box = Mappable::Box.new(**args.except(:mappable))
+          return none unless box.valid?
+
+          if args[:mappable]
             where(
               Observation[:lat].eq(nil).
               and(Observation[:location_lat] >= box.south).
               and(Observation[:location_lat] <= box.north).
               and(Observation[:location_lng] >= box.west).
               or(Observation[:location_lng] <= box.east)
-            ))
+            )
+          else
+            joins(:location).
+              where(
+                Observation[:lat].eq(nil).
+                and(Location[:center_lat] >= box.south).
+                and(Location[:center_lat] <= box.north).
+                and(Location[:center_lng] <= box.east).
+                and(Location[:center_lng] >= box.west)
+              )
+          end
         }
   scope :in_box_regular, # mostly a helper for in_box
         lambda { |**args|
-          box = Mappable::Box.new(**args)
+          args[:mappable] ||= true
+          box = Mappable::Box.new(**args.except(:mappable))
           return none unless box.valid?
 
           where(
@@ -443,19 +465,38 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
             and(Observation[:lat] <= box.north).
             and(Observation[:lng] >= box.west).
             and(Observation[:lng] <= box.east)
-          ).or(Observation.
+          ).or(Observation.location_center_in_box(**args))
+        }
+  scope :location_center_in_box,
+        lambda { |**args|
+          box = Mappable::Box.new(**args.except(:mappable))
+          return none unless box.valid?
+
+          # odd! will toss entire condition if below order is west, east
+          if args[:mappable]
             where(
               Observation[:lat].eq(nil).
               and(Observation[:location_lat] >= box.south).
               and(Observation[:location_lat] <= box.north).
               and(Observation[:location_lng] <= box.east).
               and(Observation[:location_lng] >= box.west)
-            )) # odd! will toss entire condition if above order is west, east
+            )
+          else
+            joins(:location).
+              where(
+                Observation[:lat].eq(nil).
+                and(Location[:center_lat] >= box.south).
+                and(Location[:center_lat] <= box.north).
+                and(Location[:center_lng] <= box.east).
+                and(Location[:center_lng] >= box.west)
+              )
+          end
         }
 
   scope :not_in_box, # Pass kwargs (:north, :south, :east, :west), any order
         lambda { |**args|
-          box = Mappable::Box.new(**args)
+          args[:mappable] ||= false
+          box = Mappable::Box.new(**args.except(:mappable))
           return Observation.all unless box.valid?
 
           if box.straddles_180_deg?
@@ -466,7 +507,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
         }
   scope :not_in_box_straddling_dateline, # helper for not_in_box
         lambda { |**args|
-          box = Mappable::Box.new(**args)
+          args[:mappable] ||= false
+          box = Mappable::Box.new(**args.except(:mappable))
           return Observation.all unless box.valid?
 
           where(
@@ -486,7 +528,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
         }
   scope :not_in_box_regular, # helper for not_in_box
         lambda { |**args|
-          box = Mappable::Box.new(**args)
+          args[:mappable] ||= false
+          box = Mappable::Box.new(**args.except(:mappable))
           return Observation.all unless box.valid?
 
           where(
