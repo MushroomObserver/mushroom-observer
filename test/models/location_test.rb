@@ -144,6 +144,19 @@ class LocationTest < UnitTestCase
                  "Observation #{obs.name} should have had location_lat " \
                  "nil because #{big.name} is too large")
     end
+    # Test updating a location box, that the center and area are recalculated
+    # and propagated to associated observations
+    rey = locations(:point_reyes)
+    new_bounds = rey.bounding_box.merge(north: 38.2461)
+    rey.update!(**new_bounds)
+    box = Mappable::Box.new(**new_bounds)
+    assert_equal(rey.center_lat, box.calculate_lat)
+    assert_equal(rey.box_area.round(4), box.calculate_area.round(4))
+    rey.observations.each do |obs|
+      assert_equal(obs.location_lat, rey.center_lat,
+                   "Observation #{obs.name} should have had location_lat " \
+                   "copied from #{rey.name}")
+    end
   end
 
   # --------------------------------------
