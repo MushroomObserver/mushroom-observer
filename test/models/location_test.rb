@@ -115,21 +115,33 @@ class LocationTest < UnitTestCase
   end
 
   def test_update_box_area_and_center_columns
+    # Method should populate observation location_lat location_lng columns
     Location.update_box_area_and_center_columns
-    # This should populate observation location_lat location_lng columns
+
+    # Location does not have area or center already set in fixtures
+    not_set = locations(:sortable_observation_user_location)
+    assert_equal(not_set.center_lat, not_set.calculate_lat,
+                 "Location #{not_set.name} should have had center_lat " \
+                 "calculated by update_box_area_and_center_columns")
+    not_set.observations.each do |obs|
+      assert_equal(obs.location_lat, not_set.center_lat,
+                   "Observation #{obs.name} should have had location_lat " \
+                   "copied from #{not_set.name}")
+    end
+    # Location area / center are in fixtures, but center not set in observations
     locs = [locations(:burbank), locations(:albion)]
     locs.each do |loc|
       loc.observations.each do |obs|
         assert_equal(obs.location_lat, loc.center_lat,
-                     "Observation #{obs.name} should have location_lat " \
+                     "Observation #{obs.name} should have had location_lat " \
                      "copied from #{loc.name}")
       end
     end
-    loc = locations(:california)
-    loc.observations.each do |obs|
-      assert_equal(obs.location_lat, nil,
-                   "Observation #{obs.name} should have location_lat " \
-                   "nil because #{loc.name} is too large")
+    big = locations(:california)
+    big.observations.each do |obs|
+      assert_nil(obs.location_lat,
+                 "Observation #{obs.name} should have had location_lat " \
+                 "nil because #{big.name} is too large")
     end
   end
 
