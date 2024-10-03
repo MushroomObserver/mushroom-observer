@@ -446,7 +446,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
           if box.straddles_180_deg?
             where(
-              (Observation[:lat] < box.south).
+              Observation[:lat].eq(nil).or(Observation[:lng].eq(nil)).
+              or(Observation[:lat] < box.south).
               or(Observation[:lat] > box.north).
               or((Observation[:lng] < box.west).
                  and(Observation[:lng] > box.east))
@@ -460,7 +461,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
               ))
           else
             where(
-              (Observation[:lat] < box.south).
+              Observation[:lat].eq(nil).or(Observation[:lng].eq(nil)).
+              or(Observation[:lat] < box.south).
               or(Observation[:lat] > box.north).
               or(Observation[:lng] < box.west).
               or(Observation[:lng] > box.east)
