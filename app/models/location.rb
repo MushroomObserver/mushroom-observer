@@ -160,31 +160,46 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
         ->(place_name) { where(Location[:name].matches("%#{place_name}%")) }
   scope :in_region,
         ->(place_name) { where(Location[:name].matches("%#{place_name}")) }
-  scope :in_box, # Use named parameters (north, south, east, west), any order
+  scope :in_box, # Pass kwargs (:north, :south, :east, :west), any order
         lambda { |**args|
           box = Mappable::Box.new(**args)
           return none unless box.valid?
 
           if box.straddles_180_deg?
-            where(
-              (Location[:south] >= box.south).
-                and(Location[:north] <= box.north).
-              # Location[:west] between w & 180 OR between 180 and e
-              and((Location[:west] >= box.west).
-                or(Location[:west] <= box.east)).
-              and((Location[:east] >= box.west).
-                or(Location[:east] <= box.east))
-            )
+            in_box_straddling_dateline(**args)
           else
-            where(
-              (Location[:south] >= box.south).
-                and(Location[:north] <= box.north).
-              and(Location[:west] >= box.west).
-                and(Location[:east] <= box.east).
-              and(Location[:west] <= Location[:east])
-            )
+            in_box_regular(**args)
           end
         }
+  scope :in_box_straddling_dateline, # mostly a helper for in_box
+        lambda { |**args|
+          box = Mappable::Box.new(**args)
+          return none unless box.valid?
+
+          where(
+            (Location[:south] >= box.south).
+              and(Location[:north] <= box.north).
+            # Location[:west] between w & 180 OR between 180 and e
+            and((Location[:west] >= box.west).
+              or(Location[:west] <= box.east)).
+            and((Location[:east] >= box.west).
+              or(Location[:east] <= box.east))
+          )
+        }
+  scope :in_box_regular, # mostly a helper for in_box
+        lambda { |**args|
+          box = Mappable::Box.new(**args)
+          return none unless box.valid?
+
+          where(
+            (Location[:south] >= box.south).
+              and(Location[:north] <= box.north).
+            and(Location[:west] >= box.west).
+              and(Location[:east] <= box.east).
+            and(Location[:west] <= Location[:east])
+          )
+        }
+
   scope :contains_point, # Use named parameters (lat:, lng:), any order
         lambda { |**args|
           args => {lat:, lng:}

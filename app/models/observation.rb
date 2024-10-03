@@ -403,79 +403,108 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
             where(Observation[:where].matches("%#{region}"))
           end
         }
-  scope :in_box, # Use named parameters (north, south, east, west), any order
+  scope :in_box, # Pass kwargs (:north, :south, :east, :west), any order
         lambda { |**args|
           box = Mappable::Box.new(**args)
           return none unless box.valid?
 
           if box.straddles_180_deg?
-            where(
-              (Observation[:lat] >= box.south).
-              and(Observation[:lat] <= box.north).
-              and(Observation[:lng] >= box.west).
-              or(Observation[:lng] <= box.east)
-            ).or(Observation.
-              where(
-                Observation[:lat].eq(nil).
-                and(Observation[:location_lat] >= box.south).
-                and(Observation[:location_lat] <= box.north).
-                and(Observation[:location_lng] >= box.west).
-                or(Observation[:location_lng] <= box.east)
-              ))
+            in_box_straddling_dateline(**args)
           else
-            where(
-              (Observation[:lat] >= box.south).
-              and(Observation[:lat] <= box.north).
-              and(Observation[:lng] >= box.west).
-              and(Observation[:lng] <= box.east)
-            ).or(Observation.
-              where(
-                Observation[:lat].eq(nil).
-                and(Observation[:location_lat] >= box.south).
-                and(Observation[:location_lat] <= box.north).
-                and(Observation[:location_lng] <= box.east).
-                and(Observation[:location_lng] >= box.west)
-              )) # odd! will toss entire condition if above order is west, east
+            in_box_regular(**args)
           end
         }
-  scope :not_in_box, # Use named parameters (north, south, east, west)
+  scope :in_box_straddling_dateline, # mostly a helper for in_box
         lambda { |**args|
           box = Mappable::Box.new(**args)
+          return none unless box.valid?
 
+          where(
+            (Observation[:lat] >= box.south).
+            and(Observation[:lat] <= box.north).
+            and(Observation[:lng] >= box.west).
+            or(Observation[:lng] <= box.east)
+          ).or(Observation.
+            where(
+              Observation[:lat].eq(nil).
+              and(Observation[:location_lat] >= box.south).
+              and(Observation[:location_lat] <= box.north).
+              and(Observation[:location_lng] >= box.west).
+              or(Observation[:location_lng] <= box.east)
+            ))
+        }
+  scope :in_box_regular, # mostly a helper for in_box
+        lambda { |**args|
+          box = Mappable::Box.new(**args)
+          return none unless box.valid?
+
+          where(
+            (Observation[:lat] >= box.south).
+            and(Observation[:lat] <= box.north).
+            and(Observation[:lng] >= box.west).
+            and(Observation[:lng] <= box.east)
+          ).or(Observation.
+            where(
+              Observation[:lat].eq(nil).
+              and(Observation[:location_lat] >= box.south).
+              and(Observation[:location_lat] <= box.north).
+              and(Observation[:location_lng] <= box.east).
+              and(Observation[:location_lng] >= box.west)
+            )) # odd! will toss entire condition if above order is west, east
+        }
+
+  scope :not_in_box, # Pass kwargs (:north, :south, :east, :west), any order
+        lambda { |**args|
+          box = Mappable::Box.new(**args)
           return Observation.all unless box.valid?
 
           if box.straddles_180_deg?
-            where(
-              Observation[:lat].eq(nil).or(Observation[:lng].eq(nil)).
-              or(Observation[:lat] < box.south).
-              or(Observation[:lat] > box.north).
-              or((Observation[:lng] < box.west).
-                 and(Observation[:lng] > box.east))
-            ).or(Observation.
-              where(
-                Observation[:lat].eq(nil).
-                and((Observation[:location_lat] < box.south).
-                    or(Observation[:location_lat] > box.north).
-                    or((Observation[:location_lng] < box.west).
-                       and(Observation[:location_lng] > box.east)))
-              ))
+            not_in_box_straddling_dateline(**args)
           else
-            where(
-              Observation[:lat].eq(nil).or(Observation[:lng].eq(nil)).
-              or(Observation[:lat] < box.south).
-              or(Observation[:lat] > box.north).
-              or(Observation[:lng] < box.west).
-              or(Observation[:lng] > box.east)
-            ).or(Observation.
-              where(
-                Observation[:lat].eq(nil).
-                and((Observation[:location_lat] < box.south).
-                    or(Observation[:location_lat] > box.north).
-                    or(Observation[:location_lng] < box.west).
-                    or(Observation[:location_lng] > box.east))
-              ))
+            not_in_box_regular(**args)
           end
         }
+  scope :not_in_box_straddling_dateline, # helper for not_in_box
+        lambda { |**args|
+          box = Mappable::Box.new(**args)
+          return Observation.all unless box.valid?
+
+          where(
+            Observation[:lat].eq(nil).or(Observation[:lng].eq(nil)).
+            or(Observation[:lat] < box.south).
+            or(Observation[:lat] > box.north).
+            or((Observation[:lng] < box.west).
+                and(Observation[:lng] > box.east))
+          ).or(Observation.
+            where(
+              Observation[:lat].eq(nil).
+              and((Observation[:location_lat] < box.south).
+                  or(Observation[:location_lat] > box.north).
+                  or((Observation[:location_lng] < box.west).
+                      and(Observation[:location_lng] > box.east)))
+            ))
+        }
+  scope :not_in_box_regular, # helper for not_in_box
+        lambda { |**args|
+          box = Mappable::Box.new(**args)
+          return Observation.all unless box.valid?
+
+          where(
+            Observation[:lat].eq(nil).or(Observation[:lng].eq(nil)).
+            or(Observation[:lat] < box.south).
+            or(Observation[:lat] > box.north).
+            or(Observation[:lng] < box.west).
+            or(Observation[:lng] > box.east)
+          ).or(Observation.
+            where(
+              Observation[:lat].eq(nil).
+              and((Observation[:location_lat] < box.south).
+                  or(Observation[:location_lat] > box.north).
+                  or(Observation[:location_lng] < box.west).
+                  or(Observation[:location_lng] > box.east))
+            ))
+        }
+
 
   scope :is_collection_location,
         -> { where(is_collection_location: true) }

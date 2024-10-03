@@ -156,7 +156,7 @@ module Mappable
     end
 
     # These (or Arel equivalents) are necessary for update_all to be efficient.
-    # as used in populating the columns or a cron job.
+    # Used in update_box_area_and_center_columns to populate or restore columns.
     module ClassMethods
       def update_center_and_area_sql
         "center_lat = #{lat_sql}, center_lng = #{lng_sql}, " \

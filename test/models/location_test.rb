@@ -114,6 +114,25 @@ class LocationTest < UnitTestCase
     assert_equal(dick.id, desc.versions.first.user_id)
   end
 
+  def test_update_box_area_and_center_columns
+    Location.update_box_area_and_center_columns
+    # This should populate observation location_lat location_lng columns
+    locs = [locations(:burbank), locations(:albion)]
+    locs.each do |loc|
+      loc.observations.each do |obs|
+        assert_equal(obs.location_lat, loc.center_lat,
+                     "Observation #{obs.name} should have location_lat " \
+                     "copied from #{loc.name}")
+      end
+    end
+    loc = locations(:california)
+    loc.observations.each do |obs|
+      assert_equal(obs.location_lat, nil,
+                   "Observation #{obs.name} should have location_lat " \
+                   "nil because #{loc.name} is too large")
+    end
+  end
+
   # --------------------------------------
   #  Test email notification heuristics.
   # --------------------------------------
