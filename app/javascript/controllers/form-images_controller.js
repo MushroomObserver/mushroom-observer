@@ -409,7 +409,8 @@ export default class extends Controller {
   removeAttachedItem(event) {
     const _good_images = this.goodImageIdsTarget.value,
       _good_image_vals = _good_images.split(" "),
-      _image_id = event.target.dataset.imageId,
+      // event.target may be a nested span without data, so get data directly
+      _image_id = this.removeImgTarget.dataset.imageId,
       _thumb_id = this.thumbImageIdTarget.value;
 
     const _new = _good_image_vals.filter(item => item !== _image_id).join(" ");

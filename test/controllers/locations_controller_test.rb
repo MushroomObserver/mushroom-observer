@@ -184,12 +184,13 @@ class LocationsControllerTest < FunctionalTestCase
   end
 
   def test_index_with_non_default_sort
-    sort_order = "num_views"
-
     login
-    get(:index, params: { by: sort_order })
 
-    assert_displayed_title("Locations by Popularity")
+    sort_orders = %w[num_views box_area]
+    sort_orders.each do |order|
+      get(:index, params: { by: order })
+      assert_displayed_title("Locations by #{:"sort_by_#{order}".l}")
+    end
   end
 
   def test_index_bounding_box
@@ -457,6 +458,12 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(@new_pts + 10, rolf.reload.contribution)
     # Make sure it's the right Location
     assert_equal(display_name, loc.display_name)
+    # Make sure the box_area was calculated correctly
+    assert_equal(loc.box_area.round(6), loc.calculate_area.round(6))
+    # Make sure the center_lat and center_lng were calculated correctly
+    center_lat, center_lng = loc.center
+    assert_equal(loc.center_lat, center_lat)
+    assert_equal(loc.center_lng, center_lng)
 
     # find_by_name_or_reverse_name is an MO method, not a Rails finder.
     # We used to have to disable a cop for this, but that seems no longer
@@ -606,6 +613,13 @@ class LocationsControllerTest < FunctionalTestCase
     new_params = update_params_from_loc(loc)
     assert_not_equal(new_params, old_params)
 
+    # Make sure the box_area was calculated correctly
+    assert_equal(loc.box_area.round(6), loc.calculate_area.round(6))
+    # Make sure the center_lat and center_lng were calculated correctly
+    center_lat, center_lng = loc.center
+    assert_equal(loc.center_lat, center_lat)
+    assert_equal(loc.center_lng, center_lng)
+
     # It and the RssLog should have been updated
     assert_not_equal(updated_at, loc.updated_at)
     assert_not_equal(log_updated_at, loc.rss_log.updated_at)
@@ -723,6 +737,7 @@ class LocationsControllerTest < FunctionalTestCase
   def test_update_location_admin_merge
     to_go = locations(:albion)
     to_stay = locations(:burbank)
+    old_notes = to_stay.notes
     params = update_params_from_loc(to_go)
     params[:location][:display_name] = to_stay.display_name
 
@@ -750,6 +765,8 @@ class LocationsControllerTest < FunctionalTestCase
                  LocationDescription::Version.count)
     assert_equal(to_stay, herbarium.reload.location)
     assert_equal(to_stay, project.reload.location)
+    assert_match(old_notes, to_stay.reload.notes,
+                 "Location.notes should include pre-merger notes")
   end
 
   def test_post_edit_location_locked

@@ -28,6 +28,7 @@
 #  low::          (V) Minimum elevation in meters, e.g. 0
 #  notes::        (V) Arbitrary extra notes supplied by User.
 #  hidden::       (V) Should observation with this location be hidden
+#  box_area::     (-) Area of the box in square kilometers.
 #
 #  ('V' indicates that this attribute is versioned in past_locations table.)
 #
@@ -47,7 +48,7 @@
 #  updated_between(start, end)
 #  name_includes(place_name)
 #  in_region(place_name)
-#  in_box(n,s,e,w)
+#  in_box(north:, south:, east:, west:)
 #
 #  == Instance methods
 #
@@ -118,6 +119,9 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
       high
       low
       notes
+      box_area
+      center_lat
+      center_lng
     ]
   )
   non_versioned_columns.push(
@@ -132,6 +136,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     "hidden"
   )
 
+  before_save :calculate_box_area_and_center
   before_update :update_observation_cache
   after_update :notify_users
 
@@ -150,57 +155,60 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
-  FLOAT_ERROR = 0.0005
-
   # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
   scope :name_includes,
         ->(place_name) { where(Location[:name].matches("%#{place_name}%")) }
   scope :in_region,
         ->(place_name) { where(Location[:name].matches("%#{place_name}")) }
-  scope :in_box, # Use named parameters (n, s, e, w), any order
+  scope :in_box, # Pass kwargs (:north, :south, :east, :west), any order
         lambda { |**args|
-          box = Mappable::Box.new(
-            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
-          )
+          box = Mappable::Box.new(**args)
           return none unless box.valid?
 
-          # expand box by epsilon to create leeway for Float rounding
-          # Fixes a bug where Califoria fixture was not in a box
-          # defined by the fixture's north, south, east, west
-          expanded_box = box.expand(0.00001)
-
           if box.straddles_180_deg?
-            where(
-              (Location[:south] >= expanded_box.south).
-                and(Location[:north] <= expanded_box.north).
-              # Location[:west] between w & 180 OR between 180 and e
-              and((Location[:west] >= expanded_box.west).
-                or(Location[:west] <= expanded_box.east)).
-              and((Location[:east] >= expanded_box.west).
-                or(Location[:east] <= expanded_box.east))
-            )
+            in_box_straddling_dateline(**args)
           else
-            where(
-              (Location[:south] >= expanded_box.south).
-                and(Location[:north] <= expanded_box.north).
-              and(Location[:west] >= expanded_box.west).
-                and(Location[:east] <= expanded_box.east).
-              and(Location[:west] <= Location[:east])
-            )
+            in_box_regular(**args)
           end
         }
+  scope :in_box_straddling_dateline, # mostly a helper for in_box
+        lambda { |**args|
+          box = Mappable::Box.new(**args)
+          return none unless box.valid?
+
+          where(
+            (Location[:south] >= box.south).
+              and(Location[:north] <= box.north).
+            # Location[:west] between w & 180 OR between 180 and e
+            and((Location[:west] >= box.west).
+              or(Location[:west] <= box.east)).
+            and((Location[:east] >= box.west).
+              or(Location[:east] <= box.east))
+          )
+        }
+  scope :in_box_regular, # mostly a helper for in_box
+        lambda { |**args|
+          box = Mappable::Box.new(**args)
+          return none unless box.valid?
+
+          where(
+            (Location[:south] >= box.south).
+              and(Location[:north] <= box.north).
+            and(Location[:west] >= box.west).
+              and(Location[:east] <= box.east).
+            and(Location[:west] <= Location[:east])
+          )
+        }
+
   scope :contains_point, # Use named parameters (lat:, lng:), any order
         lambda { |**args|
           args => {lat:, lng:}
           where(
-            (Location[:south]).lteq(lat + FLOAT_ERROR).
-              and((Location[:north]).gteq(lat - FLOAT_ERROR)).
+            (Location[:south]).lteq(lat).and((Location[:north]).gteq(lat)).
             and(
-              Location[:west].lteq(lng + FLOAT_ERROR).
-                and(Location[:east].gteq(lng - FLOAT_ERROR)).
+              Location[:west].lteq(lng).and(Location[:east].gteq(lng)).
               or(
-                Location[:west].gteq(lng - FLOAT_ERROR).
-                  and(Location[:east].lteq(lng + FLOAT_ERROR))
+                Location[:west].gteq(lng).and(Location[:east].lteq(lng))
               )
             )
           )
@@ -218,15 +226,9 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
           )
         }
 
-  scope :contains_box, # Use named parameters, n:, s:, e:, w:
+  scope :contains_box, # Use named parameters, north:, south:, east:, west:
         lambda { |**args|
-          args => {n:, s:, e:, w:}
-
-          # Correct for possible floating point rounding
-          shrunk_n = n - FLOAT_ERROR
-          shrunk_s = s + FLOAT_ERROR
-          shrunk_e = e - FLOAT_ERROR
-          shrunk_w = w + FLOAT_ERROR
+          args => { north:, south:, east:, west: }
 
           # w/e    | Location     | Location contains w/e
           # ______ | ____________ | ______________________
@@ -235,31 +237,75 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
           # w > e  | west <= east | none
           # w > e  | west > east  | west <= w && e <= east
 
-          if w <= e # w / e don't straddle 180
-            where(Location[:south].lteq(shrunk_s).
-                    and(Location[:north].gteq(shrunk_n)).
-                  #   Location doesn't straddle 180
-                  and(Location[:west].lteq(Location[:east]).
-                      and(Location[:west] <= shrunk_w).
-                      and(Location[:east] >= shrunk_e).
-                    #  Location straddles 180
-                    or(Location[:west].gt(Location[:east]).
-                      #    need not check e, since w <= e
-                      and((Location[:west] <= shrunk_w).
-                        #  need not check w for same reason
-                        or(Location[:east] >= shrunk_e)))))
-          else # w / e straddle 180
-            where(Location[:south].lteq(shrunk_s).
-                  and(Location[:north].gteq(shrunk_n)).
-            # Location straddles 180
-            #   Location 100% wrap; necessarily straddles w/e
-            and(Location[:west].eq(Location[:east] - 360)).
-            #  Location < 100% wrap-around
-            or(Location[:west].gt(Location[:east]).
-              and(Location[:west] <= shrunk_w).
-              and(Location[:east] >= shrunk_e)))
+          if west <= east # w / e don't straddle 180
+            where(
+              Location[:south].lteq(south).and(Location[:north].gteq(north)).
+              # Location doesn't straddle 180
+              and(Location[:west].lteq(Location[:east]).
+              and(Location[:west] <= west).and(Location[:east] >= east).
+              # Location straddles 180
+              or(
+                Location[:west].gt(Location[:east]).
+                and((Location[:west] <= west).or(Location[:east] >= east))
+              ))
+            )
+          else # Location straddles 180
+            where(
+              Location[:south].lteq(south).and(Location[:north].gteq(north)).
+              # Location 100% wrap; necessarily straddles w/e
+              and(Location[:west].eq(Location[:east] - 360)).
+              # Location < 100% wrap-around
+              or(
+                Location[:west].gt(Location[:east]).
+                and(Location[:west] <= west).and(Location[:east] >= east)
+              )
+            )
           end
         }
+  scope :with_observations, -> { joins(:observations).distinct }
+
+  # On save, calculate bounding box area for the `box_area` column, plus the
+  # `center_lat` and `center_lng` values. If box_area is below a threshold, also
+  # copy the values to the observation `location_lat` `location_lng` columns, or
+  # null the obs values if not. This callback can handle API updates.
+  def calculate_box_area_and_center
+    return unless north_changed? || east_changed? ||
+                  south_changed? || west_changed?
+
+    self.box_area = calculate_area
+    self.center_lat = calculate_lat
+    self.center_lng = calculate_lng
+    update_observation_center_columns
+  end
+
+  # Now that the box_area and center columns are set on this location, cache or
+  # update the center columns of this location's observations.
+  def update_observation_center_columns
+    if box_area <= MO.obs_location_max_area
+      observations.update_all(location_lat: center_lat,
+                              location_lng: center_lng)
+    else
+      observations.update_all(location_lat: nil, location_lng: nil)
+    end
+  end
+
+  # Can populate columns after migration, or be run as part of a recurring job.
+  def self.update_box_area_and_center_columns
+    # update the locations
+    update_all(update_center_and_area_sql)
+    # give center points to associated observations in batches
+    Observation.joins(:location).
+      where(Location[:box_area].lteq(MO.obs_location_max_area)).
+      group(:location_id).update_all(
+        location_lat: Location[:center_lat], location_lng: Location[:center_lng]
+      )
+    # null center points where area is above the threshold
+    Observation.joins(:location).
+      where(Location[:box_area].gt(MO.obs_location_max_area)).
+      group(:location_id).update_all(
+        location_lat: nil, location_lng: nil
+      )
+  end
 
   # Let attached observations update their cache if these fields changed.
   # Also touch updated_at to expire obs fragment caches
@@ -358,6 +404,11 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
     # contains? is now a method of Mappable::BoxMethods
     contains?(loc.north, loc.west) && contains?(loc.south, loc.east)
+  end
+
+  # Returns a hash representing the location's bounding box
+  def bounding_box
+    attributes.symbolize_keys.slice(:north, :south, :west, :east)
   end
 
   ##############################################################################

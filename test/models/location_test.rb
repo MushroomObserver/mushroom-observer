@@ -81,6 +81,12 @@ class LocationTest < UnitTestCase
     )
     assert_equal(mary.id, loc.user_id)
     assert_equal(mary.id, loc.versions.last.user_id)
+    # Make sure the box_area was calculated correctly
+    assert_equal(loc.box_area.round(6), loc.calculate_area.round(6))
+    # Make sure the center_lat and center_lng were calculated correctly
+    center_lat, center_lng = loc.center
+    assert_equal(loc.center_lat, center_lat)
+    assert_equal(loc.center_lng, center_lng)
 
     User.current = rolf
     loc.display_name = "Anywhere, USA"
@@ -106,6 +112,55 @@ class LocationTest < UnitTestCase
     assert_equal(dick.id, desc.user_id)
     assert_equal(rolf.id, desc.versions.last.user_id)
     assert_equal(dick.id, desc.versions.first.user_id)
+  end
+
+  # Method should populate location box_area, center_lat, center_lng
+  # and observation location_lat location_lng columns
+  def test_update_box_area_and_center_columns
+    Location.update_box_area_and_center_columns
+
+    # this Location does not have area or center already set in fixtures
+    not_set = locations(:sortable_observation_user_location)
+    assert_equal(not_set.center_lat, not_set.calculate_lat,
+                 "Location #{not_set.name} should have had center_lat " \
+                 "calculated by update_box_area_and_center_columns")
+    not_set.observations.each do |obs|
+      assert_equal(obs.location_lat, not_set.center_lat,
+                   "Observation #{obs.name} should have had location_lat " \
+                   "copied from #{not_set.name}")
+    end
+    # Location area / center are in fixtures, but center not set in obs fixtures
+    locs = [locations(:burbank), locations(:albion)]
+    locs.each do |loc|
+      loc.observations.each do |obs|
+        assert_equal(obs.location_lat, loc.center_lat,
+                     "Observation #{obs.name} should have had location_lat " \
+                     "copied from #{loc.name}")
+      end
+    end
+    big = locations(:california)
+    big.observations.each do |obs|
+      assert_nil(obs.location_lat,
+                 "Observation #{obs.name} should have had location_lat " \
+                 "nil because #{big.name} is too large")
+    end
+    # Test updating a location box, that the center and area are recalculated
+    # and propagated to associated observations
+    rey = locations(:point_reyes)
+    rey_area = rey.calculate_area.round(4)
+    new_bounds = rey.bounding_box.merge(north: 38.2461)
+    box = Mappable::Box.new(**new_bounds)
+    box_area = box.calculate_area.round(4)
+    assert_not_equal(rey_area, box_area)
+
+    rey.update!(**new_bounds)
+    assert_equal(rey.center_lat, box.calculate_lat)
+    assert_equal(rey.box_area.round(4), box_area)
+    rey.observations.each do |obs|
+      assert_equal(obs.location_lat, rey.center_lat,
+                   "Observation #{obs.name} should have had location_lat " \
+                   "copied from #{rey.name}")
+    end
   end
 
   # --------------------------------------
@@ -490,9 +545,9 @@ class LocationTest < UnitTestCase
   def test_lat_lng_close
     loc = locations(:east_lt_west_location)
     # The centrum of the location is provided by BoxMethods#center, lat, lng
-    assert_true(loc.lat_lng_close?(loc.lat, loc.lng),
+    assert_true(loc.lat_lng_close?(loc.calculate_lat, loc.calculate_lng),
                 "Location's centrum should be 'close' to Location.")
-    assert_false(loc.lat_lng_close?(loc.lat, loc.lng + 180),
+    assert_false(loc.lat_lng_close?(loc.calculate_lat, loc.calculate_lng + 180),
                  "Opposite side of globe should not be 'close' to Location.")
   end
 
@@ -540,30 +595,28 @@ class LocationTest < UnitTestCase
   # supplements API tests
   def test_scope_in_box
     cal = locations(:california)
-    locs_in_cal_box = Location.in_box(
-      n: cal.north, s: cal.south, e: cal.east, w: cal.west
-    )
+    locs_in_cal_box = Location.in_box(**cal.bounding_box)
     assert_includes(locs_in_cal_box, locations(:albion))
     assert_includes(locs_in_cal_box, cal)
 
     wrangel = locations(:east_lt_west_location)
-    locs_in_wrangel_box = Location.in_box(
-      n: wrangel.north, s: wrangel.south, e: wrangel.east, w: wrangel.west
-    )
+    locs_in_wrangel_box = Location.in_box(**wrangel.bounding_box)
     assert_includes(locs_in_wrangel_box, wrangel)
     assert_not_includes(locs_in_wrangel_box, cal)
 
     assert_empty(
-      Location.in_box(n: cal.north, s: cal.south, e: cal.east),
+      Location.in_box(north: cal.north, south: cal.south, east: cal.east),
       "`scope: in_box` should be empty if an argument is missing"
     )
     assert_empty(
-      Location.in_box(n: 91, s: cal.south, e: cal.east, w: cal.west),
+      Location.in_box(
+        north: 91, south: cal.south, east: cal.east, west: cal.west
+      ),
       "`scope: in_box` should be empty if an argument is out of bounds"
     )
     assert_empty(
       Location.in_box(
-        n: cal.south - 10, s: cal.south, e: cal.east, w: cal.west
+        north: cal.south - 10, south: cal.south, east: cal.east, west: cal.west
       ),
       "`scope: in_box` should be empty if N < S"
     )
@@ -650,9 +703,7 @@ class LocationTest < UnitTestCase
 
   def do_contains_box(loc:, external_loc: nil,
                       regions: [locations(:unknown_location)])
-    containers =
-      Location.contains_box(n: loc.north, s: loc.south,
-                            e: loc.east, w: loc.west)
+    containers = Location.contains_box(**loc.bounding_box)
 
     assert_includes(containers, loc,
                     "Location #{loc.name} should contain itself")
