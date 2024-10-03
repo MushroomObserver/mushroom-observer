@@ -276,13 +276,13 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   def self.update_box_area_and_center_columns
     # update the locations
     update_all(update_center_and_area_sql)
-    # update the associated observations in batches
+    # give center points to associated observations in batches
     Observation.joins(:location).
       where(Location[:box_area].lteq(MO.obs_location_max_area)).
       group(:location_id).update_all(
         location_lat: Location[:center_lat], location_lng: Location[:center_lng]
       )
-    # clean up the ones above the threshold
+    # null center points where area is above the threshold
     Observation.joins(:location).
       where(Location[:box_area].gt(MO.obs_location_max_area)).
       group(:location_id).update_all(
