@@ -184,12 +184,13 @@ class LocationsControllerTest < FunctionalTestCase
   end
 
   def test_index_with_non_default_sort
-    sort_order = "num_views"
-
     login
-    get(:index, params: { by: sort_order })
 
-    assert_displayed_title("Locations by Popularity")
+    sort_orders = %w[num_views box_area]
+    sort_orders.each do |order|
+      get(:index, params: { by: order })
+      assert_displayed_title("Locations by #{:"sort_by_#{order}".l}")
+    end
   end
 
   def test_index_bounding_box

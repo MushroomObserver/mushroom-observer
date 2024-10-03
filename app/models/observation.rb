@@ -505,7 +505,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
             ))
         }
 
-
   scope :is_collection_location,
         -> { where(is_collection_location: true) }
   scope :not_collection_location,

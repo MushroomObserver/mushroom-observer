@@ -114,11 +114,12 @@ class LocationTest < UnitTestCase
     assert_equal(dick.id, desc.versions.first.user_id)
   end
 
+  # Method should populate location box_area, center_lat, center_lng
+  # and observation location_lat location_lng columns
   def test_update_box_area_and_center_columns
-    # Method should populate observation location_lat location_lng columns
     Location.update_box_area_and_center_columns
 
-    # Location does not have area or center already set in fixtures
+    # this Location does not have area or center already set in fixtures
     not_set = locations(:sortable_observation_user_location)
     assert_equal(not_set.center_lat, not_set.calculate_lat,
                  "Location #{not_set.name} should have had center_lat " \
@@ -128,7 +129,7 @@ class LocationTest < UnitTestCase
                    "Observation #{obs.name} should have had location_lat " \
                    "copied from #{not_set.name}")
     end
-    # Location area / center are in fixtures, but center not set in observations
+    # Location area / center are in fixtures, but center not set in obs fixtures
     locs = [locations(:burbank), locations(:albion)]
     locs.each do |loc|
       loc.observations.each do |obs|
