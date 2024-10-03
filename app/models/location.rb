@@ -120,6 +120,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
       low
       notes
       box_area
+      center_lat
+      center_lng
     ]
   )
   non_versioned_columns.push(
