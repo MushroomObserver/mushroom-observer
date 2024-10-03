@@ -264,10 +264,11 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   # only if box_area < 10_000. (They could already have a center point.)
   # If the box_area is greater than 10_000, remove center point.
   def update_observation_center_columns
-    if box_area <= 10_000
-      observations.update_all(center_lat:, center_lng:)
+    if box_area <= MO.obs_location_max_area
+      observations.update_all(location_lat: center_lat,
+                              location_lng: center_lng)
     else
-      observations.update_all(center_lat: nil, center_lng: nil)
+      observations.update_all(location_lat: nil, location_lng: nil)
     end
   end
 
@@ -276,9 +277,16 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     # update the locations
     update_all(update_center_and_area_sql)
     # update the associated observations in batches
-    Observation.joins(:location).where(Location[:box_area].lt(10_000)).
+    Observation.joins(:location).
+      where(Location[:box_area].lteq(MO.obs_location_max_area)).
       group(:location_id).update_all(
-        center_lat: Location[:center_lat], center_lng: Location[:center_lng]
+        location_lat: Location[:center_lat], location_lng: Location[:center_lng]
+      )
+    # clean up the ones above the threshold
+    Observation.joins(:location).
+      where(Location[:box_area].gt(MO.obs_location_max_area)).
+      group(:location_id).update_all(
+        location_lat: nil, location_lng: nil
       )
   end
 
