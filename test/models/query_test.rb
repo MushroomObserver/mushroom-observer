@@ -1361,8 +1361,8 @@ class QueryTest < UnitTestCase
   def test_collection_number_for_observation
     obs = observations(:detailed_unknown_obs)
     expect = obs.collection_numbers.sort_by(&:format_name)
-    assert_query(expect, :CollectionNumber, :for_observation,
-                 observation: obs.id)
+    assert_query(expect, :CollectionNumber, :all,
+                 observations: obs.id)
   end
 
   def test_collection_number_pattern_search
@@ -1531,8 +1531,7 @@ class QueryTest < UnitTestCase
   def test_herbarium_record_for_observation
     obs = observations(:coprinus_comatus_obs)
     expect = obs.herbarium_records.sort_by(&:herbarium_label)
-    assert_query(expect, :HerbariumRecord, :for_observation,
-                 observation: obs.id)
+    assert_query(expect, :HerbariumRecord, :all, observations: obs.id)
   end
 
   def test_herbarium_record_in_herbarium

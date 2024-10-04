@@ -168,8 +168,8 @@ class HerbariumRecordsController < ApplicationController
   def observation_id
     @observation = Observation.find(params[:observation_id])
     store_location
-    query = create_query(:HerbariumRecord, :for_observation,
-                         observation: params[:observation_id].to_s,
+    query = create_query(:HerbariumRecord, :all,
+                         observations: params[:observation_id].to_s,
                          by: :herbarium_label)
     show_selected_herbarium_records(query, always_index: true)
   end

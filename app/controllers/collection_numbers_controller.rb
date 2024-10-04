@@ -136,8 +136,8 @@ class CollectionNumbersController < ApplicationController
   def observation_id
     @observation = Observation.find(params[:observation_id])
     store_location
-    query = create_query(:CollectionNumber, :for_observation,
-                         observation: params[:observation_id].to_s)
+    query = create_query(:CollectionNumber, :all,
+                         observations: params[:observation_id].to_s)
     show_selected_collection_numbers(query, always_index: true)
   end
 
