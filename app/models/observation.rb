@@ -499,7 +499,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
           box = Mappable::Box.new(**args.except(:mappable))
           return Observation.all unless box.valid?
 
-          # should be .in_box(**args).invert_where
+          # should be in_box(**args).invert_where
           if box.straddles_180_deg?
             not_in_box_straddling_dateline(**args)
           else
