@@ -1361,8 +1361,7 @@ class QueryTest < UnitTestCase
   def test_collection_number_for_observation
     obs = observations(:detailed_unknown_obs)
     expect = obs.collection_numbers.sort_by(&:format_name)
-    assert_query(expect, :CollectionNumber, :all,
-                 observations: obs.id)
+    assert_query(expect, :CollectionNumber, :all, observation: obs.id)
   end
 
   def test_collection_number_pattern_search
@@ -1370,13 +1369,13 @@ class QueryTest < UnitTestCase
              where(CollectionNumber[:name].matches("%Singer%").
                    or(CollectionNumber[:number].matches("%Singer%"))).
              sort_by(&:format_name)
-    assert_query(expect, :CollectionNumber, :pattern_search, pattern: "Singer")
+    assert_query(expect, :CollectionNumber, :all, pattern: "Singer")
 
     expect = CollectionNumber.
              where(CollectionNumber[:name].matches("%123a%").
                    or(CollectionNumber[:number].matches("%123a%"))).
              sort_by(&:format_name)
-    assert_query(expect, :CollectionNumber, :pattern_search, pattern: "123a")
+    assert_query(expect, :CollectionNumber, :all, pattern: "123a")
   end
 
   def test_comment_all
@@ -1531,13 +1530,34 @@ class QueryTest < UnitTestCase
   def test_herbarium_record_for_observation
     obs = observations(:coprinus_comatus_obs)
     expect = obs.herbarium_records.sort_by(&:herbarium_label)
-    assert_query(expect, :HerbariumRecord, :all, observations: obs.id)
+    assert_query(expect, :HerbariumRecord, :all, observation: obs.id)
   end
 
   def test_herbarium_record_in_herbarium
     nybg = herbaria(:nybg_herbarium)
     expect = nybg.herbarium_records.sort_by(&:herbarium_label)
-    assert_query(expect, :HerbariumRecord, :in_herbarium, herbarium: nybg.id)
+    assert_query(expect, :HerbariumRecord, :all, herbarium: nybg.id)
+  end
+
+  def test_herbarium_record_pattern_search
+    expect = [herbarium_records(:interesting_unknown)]
+    assert_query(expect, :HerbariumRecord, :all, pattern: "dried")
+
+    assert_query([], :HerbariumRecord, :all,
+                 pattern: "no herbarium record has this")
+    assert_query(
+      HerbariumRecord.where(
+        HerbariumRecord[:initial_det].matches("%Agaricus%")
+      ),
+      :HerbariumRecord, :all, pattern: "Agaricus"
+    )
+    assert_query(
+      HerbariumRecord.where(HerbariumRecord[:notes].matches("%rare%")),
+      :HerbariumRecord, :all, pattern: "rare"
+    )
+    assert_query(
+      HerbariumRecord.all, :HerbariumRecord, :all, pattern: ""
+    )
   end
 
   def test_image_all
@@ -3037,17 +3057,17 @@ class QueryTest < UnitTestCase
   def test_sequence_in_set
     list_set_ids = [sequences(:fasta_formatted_sequence).id,
                     sequences(:bare_formatted_sequence).id]
-    assert_query(list_set_ids, :Sequence, :in_set, ids: list_set_ids)
+    assert_query(list_set_ids, :Sequence, :all, ids: list_set_ids)
   end
 
   def test_sequence_pattern_search
-    assert_query([], :Sequence, :pattern_search, pattern: "nonexistent")
+    assert_query([], :Sequence, :all, pattern: "nonexistent")
     assert_query(Sequence.where(Sequence[:locus].matches("ITS%")),
-                 :Sequence, :pattern_search, pattern: "ITS")
+                 :Sequence, :all, pattern: "ITS")
     assert_query([sequences(:alternate_archive)],
-                 :Sequence, :pattern_search, pattern: "UNITE")
+                 :Sequence, :all, pattern: "UNITE")
     assert_query([sequences(:deposited_sequence)],
-                 :Sequence, :pattern_search, pattern: "deposited_sequence")
+                 :Sequence, :all, pattern: "deposited_sequence")
   end
 
   def test_species_list_all
@@ -3126,24 +3146,6 @@ class QueryTest < UnitTestCase
 
     assert_query(SpeciesList.all,
                  :SpeciesList, :pattern_search, pattern: "")
-  end
-
-  def test_herbarium_record_pattern_search
-    assert_query([], :HerbariumRecord, :pattern_search,
-                 pattern: "no herbarium record has this")
-    assert_query(
-      HerbariumRecord.where(
-        HerbariumRecord[:initial_det].matches("%Agaricus%")
-      ),
-      :HerbariumRecord, :pattern_search, pattern: "Agaricus"
-    )
-    assert_query(
-      HerbariumRecord.where(HerbariumRecord[:notes].matches("%rare%")),
-      :HerbariumRecord, :pattern_search, pattern: "rare"
-    )
-    assert_query(
-      HerbariumRecord.all, :HerbariumRecord, :pattern_search, pattern: ""
-    )
   end
 
   def test_user_all

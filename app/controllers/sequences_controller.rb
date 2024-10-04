@@ -43,6 +43,7 @@ class SequencesController < ApplicationController
   #  https://mushroomobserver.org/sequences?flavor=all
   #    => displays a list of all sequences in MO
   #
+  # FIXME: this does not handle params[:pattern] or params[:ids]
   def index
     case params[:flavor]
     when "all"

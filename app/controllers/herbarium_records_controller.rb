@@ -152,14 +152,14 @@ class HerbariumRecordsController < ApplicationController
        (herbarium_record = HerbariumRecord.safe_find(pattern))
       redirect_to(herbarium_record_path(herbarium_record.id))
     else
-      query = create_query(:HerbariumRecord, :pattern_search, pattern: pattern)
+      query = create_query(:HerbariumRecord, :all, pattern: pattern)
       show_selected_herbarium_records(query)
     end
   end
 
   def herbarium_id
     store_location
-    query = create_query(:HerbariumRecord, :in_herbarium,
+    query = create_query(:HerbariumRecord, :all,
                          herbarium: params[:herbarium_id].to_s,
                          by: :herbarium_label)
     show_selected_herbarium_records(query, always_index: true)
@@ -169,7 +169,7 @@ class HerbariumRecordsController < ApplicationController
     @observation = Observation.find(params[:observation_id])
     store_location
     query = create_query(:HerbariumRecord, :all,
-                         observations: params[:observation_id].to_s,
+                         observation: params[:observation_id].to_s,
                          by: :herbarium_label)
     show_selected_herbarium_records(query, always_index: true)
   end
