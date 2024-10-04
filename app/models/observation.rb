@@ -554,28 +554,50 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
           box = Mappable::Box.new(**args.except(:mappable))
           return Observation.all unless box.valid?
 
-          where(
-            Observation[:lat].eq(nil).
-            and(Observation[:location_lat].not_eq(nil)).
-            and((Observation[:location_lat] < box.south).
-                or(Observation[:location_lat] > box.north).
-                or((Observation[:location_lng] < box.west).
-                    and(Observation[:location_lng] > box.east)))
-          )
+          if args[:mappable]
+            where(
+              Observation[:lat].eq(nil).
+              and(Observation[:location_lat].not_eq(nil)).
+              and((Observation[:location_lat] < box.south).
+                  or(Observation[:location_lat] > box.north).
+                  or((Observation[:location_lng] < box.west).
+                      and(Observation[:location_lng] > box.east)))
+            )
+          else
+            joins(:location).
+              where(
+                Observation[:lat].eq(nil).
+                and((Location[:center_lat] < box.south).
+                    or(Location[:center_lat] > box.north).
+                    or((Location[:center_lng] < box.west).
+                        and(Location[:center_lng] > box.east)))
+              )
+          end
         }
   scope :location_center_not_in_box_regular,
         lambda { |**args|
           box = Mappable::Box.new(**args.except(:mappable))
           return Observation.all unless box.valid?
 
-          where(
-            Observation[:lat].eq(nil).
-            and(Observation[:location_lat].not_eq(nil)).
-            and((Observation[:location_lat] < box.south).
-                or(Observation[:location_lat] > box.north).
-                or(Observation[:location_lng] < box.west).
-                or(Observation[:location_lng] > box.east))
-          )
+          if args[:mappable]
+            where(
+              Observation[:lat].eq(nil).
+              and(Observation[:location_lat].not_eq(nil)).
+              and((Observation[:location_lat] < box.south).
+                  or(Observation[:location_lat] > box.north).
+                  or(Observation[:location_lng] < box.west).
+                  or(Observation[:location_lng] > box.east))
+            )
+          else
+            joins(:location).
+              where(
+                Observation[:lat].eq(nil).
+                and((Location[:center_lat] < box.south).
+                    or(Location[:center_lat] > box.north).
+                    or(Location[:center_lng] < box.west).
+                    or(Location[:center_lng] > box.east))
+              )
+          end
         }
   scope :is_collection_location,
         -> { where(is_collection_location: true) }
