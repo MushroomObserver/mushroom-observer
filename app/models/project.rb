@@ -498,10 +498,6 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def obs_without_geoloc_location_not_contained_in_location
-    observations.where(lat: nil).joins(:location).
-      merge(
-        # invert_where is safe (doesn't invert observations.where(lat: nil))
-        Location.in_box(**location.bounding_box).invert_where
-      )
+    observations.location_center_not_in_box(**location.bounding_box)
   end
 end

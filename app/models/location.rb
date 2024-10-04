@@ -199,7 +199,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
             and(Location[:west] <= Location[:east])
           )
         }
-
   scope :contains_point, # Use named parameters (lat:, lng:), any order
         lambda { |**args|
           args => {lat:, lng:}
@@ -213,19 +212,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
             )
           )
         }
-  scope :show_includes,
-        lambda {
-          strict_loading.includes(
-            { comments: :user },
-            { description: { comments: :user } },
-            { descriptions: [:authors, :editors] },
-            :interests,
-            :observations,
-            :rss_log,
-            :versions
-          )
-        }
-
   scope :contains_box, # Use named parameters, north:, south:, east:, west:
         lambda { |**args|
           args => { north:, south:, east:, west: }
@@ -263,6 +249,19 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
           end
         }
   scope :with_observations, -> { joins(:observations).distinct }
+
+  scope :show_includes,
+        lambda {
+          strict_loading.includes(
+            { comments: :user },
+            { description: { comments: :user } },
+            { descriptions: [:authors, :editors] },
+            :interests,
+            :observations,
+            :rss_log,
+            :versions
+          )
+        }
 
   # On save, calculate bounding box area for the `box_area` column, plus the
   # `center_lat` and `center_lng` values. If box_area is below a threshold, also
