@@ -462,9 +462,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   def out_of_area_observations
     return [] if location.nil?
 
-    obs_geoloc_outside_project_location.to_a.union(
+    obs_geoloc_outside_project_location +
       obs_without_geoloc_location_not_contained_in_location
-    )
   end
 
   def violates_constraints?(observation)
