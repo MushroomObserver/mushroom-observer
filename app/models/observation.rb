@@ -499,10 +499,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
           box = Mappable::Box.new(**args.except(:mappable))
           return Observation.all unless box.valid?
 
+          # + is the arel_extensions gem's way of doing UNION. These must use
+          # unions because ORs will dump any prior conditions in the scope chain
           if box.straddles_180_deg?
-            not_in_box_straddling_dateline(**args)
+            not_in_box_straddling_dateline(**args) +
+              location_center_not_in_box_straddling_dateline(**args)
           else
-            not_in_box_regular(**args)
+            not_in_box_regular(**args) +
+              location_center_not_in_box_regular(**args)
           end
         }
   scope :not_in_box_straddling_dateline, # helper for not_in_box
