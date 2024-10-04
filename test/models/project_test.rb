@@ -215,7 +215,7 @@ class ProjectTest < UnitTestCase
       "whose Loc is not contained in Proj location"
     )
     assert_not_includes(
-      location_violations, geoloc_in_bubank,
+      location_violations, geoloc_in_burbank,
       "Noncompliant Obss wrongly includes Obs with geoloc inside Proj location"
     )
     assert_not_includes(
