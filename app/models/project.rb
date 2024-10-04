@@ -462,8 +462,9 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   def out_of_area_observations
     return [] if location.nil?
 
-    observations.
-      where.not(observations: { lat: nil }).not_in_box(**location.bounding_box)
+    obs_geoloc_outside_project_location.to_a.union(
+      obs_without_geoloc_location_not_contained_in_location
+    )
   end
 
   def violates_constraints?(observation)
@@ -487,5 +488,20 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def can_add_field_slip(user)
     member?(user) || can_join?(user)
+  end
+
+  private ###############################
+
+  def obs_geoloc_outside_project_location
+    observations.
+      where.not(observations: { lat: nil }).not_in_box(**location.bounding_box)
+  end
+
+  def obs_without_geoloc_location_not_contained_in_location
+    observations.where(lat: nil).joins(:location).
+      merge(
+        # invert_where is safe (doesn't invert observations.where(lat: nil))
+        Location.not_in_box(**location.bounding_box)
+      )
   end
 end

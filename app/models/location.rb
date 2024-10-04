@@ -160,7 +160,9 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
         ->(place_name) { where(Location[:name].matches("%#{place_name}%")) }
   scope :in_region,
         ->(place_name) { where(Location[:name].matches("%#{place_name}")) }
-  scope :in_box, # Pass kwargs (:north, :south, :east, :west), any order
+  # This returns locations whose bounding box is entirely within the given box.
+  # Pass kwargs (:north, :south, :east, :west), any order
+  scope :in_box,
         lambda { |**args|
           box = Mappable::Box.new(**args)
           return none unless box.valid?
@@ -198,6 +200,13 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
               and(Location[:east] <= box.east).
             and(Location[:west] <= Location[:east])
           )
+        }
+  scope :not_in_box, # Pass kwargs (:north, :south, :east, :west), any order
+        lambda { |**args|
+          box = Mappable::Box.new(**args)
+          return none unless box.valid?
+
+          in_box(**args).invert_where
         }
   scope :contains_point, # Use named parameters (lat:, lng:), any order
         lambda { |**args|
