@@ -48,10 +48,7 @@ module Observations::InatImportsControllerValidators
   end
 
   def fresh_import?
-    previous_imports =
-      inat_id_list.each_with_object([]) do |inat_id, ary|
-        ary << Observation.find_by(inat_id: inat_id)
-      end
+    previous_imports = Observation.where(inat_id: inat_id_list)
     return true if previous_imports.none?
 
     previous_imports.each do |import|
@@ -66,13 +63,10 @@ module Observations::InatImportsControllerValidators
   end
 
   def unmirrored?
-    previously_mirrored =
-      inat_id_list.each_with_object([]) do |inat_id, ary|
-        mirrored = Observation.notes_include(
-          "Mirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/#{inat_id}\">"
-        ).first
-        ary << mirrored if mirrored
-      end
+    conditions = inat_id_list.map do |inat_id|
+      Observation[:notes].matches("%Mirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/#{inat_id}\">%")
+    end
+    previously_mirrored = Observation.where(conditions.inject(:or)).to_a
     return true if previously_mirrored.blank?
 
     previously_mirrored.each do |obs|
