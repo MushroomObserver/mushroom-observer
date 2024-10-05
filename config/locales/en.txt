@@ -3020,7 +3020,7 @@
   # observation/inat_imports
   inat_import_create_title: Import from iNat
   inat_choose_observations: "Inat Observations to Import:"
-  inat_import_list: "Comma separated list of observation #s"
+  inat_import_list: "Comma separated list of up to 10 observation #s"
   inat_import_all: Import all my iNat observations instead of a list
   inat_import_consent: (Required) I consent to creating MushroomObserver Observation(s) based on my iNaturalist observations, including their photos.
   inat_consent_required: Your consent is required to import Inat observations. Please check the checkbox to give your consent.
@@ -3030,6 +3030,7 @@
   inat_no_imports_designated: You must list the iNat observation(s) to be imported
   inat_previous_import: iNat [inat_id] previously imported as MO Observation [mo_obs_id]
   inat_previous_mirror: "iNat [inat_id] is a \"mirror\" of existing MO Observation [mo_obs_id]"
+  inat_too_many_ids_listed: "Too many ids listed"
   inat_import_started: Your import has started. Refresh page to update results.
 
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
