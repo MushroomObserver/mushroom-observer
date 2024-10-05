@@ -189,6 +189,7 @@ class ProjectTest < UnitTestCase
       title: "With Location Violations",
       open_membership: true
     )
+    Location.update_box_area_and_center_columns
     geoloc_in_burbank = observations(:unknown_with_lat_lng)
     geoloc_outside_burbank =
       observations(:trusted_hidden) # lat/lon in Falmouth
@@ -204,7 +205,7 @@ class ProjectTest < UnitTestCase
     ]
 
     location_violations = proj.out_of_area_observations
-
+    debugger
     assert_includes(
       location_violations, geoloc_outside_burbank,
       "Noncompliant Obss missing Obs with geoloc outside Proj location"
