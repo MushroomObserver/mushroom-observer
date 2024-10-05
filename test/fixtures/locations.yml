@@ -17,8 +17,6 @@ DEFAULTS: &DEFAULTS
   west: -1
   east: 1
   south: -1
-  high: 1
-  low: 0
   box_area: 49470.2621318808
   center_lat: 0
   center_lng: 0
