@@ -20,6 +20,7 @@ class Query::CollectionNumberBase < Query::Base
     )
   end
 
+  # rubocop:disable Metrics/AbcSize
   def initialize_flavor
     add_owner_and_time_stamp_conditions("collection_numbers")
     add_for_observation_condition
@@ -32,6 +33,7 @@ class Query::CollectionNumberBase < Query::Base
     add_search_condition("collection_numbers.number", params[:number_has])
     super
   end
+  # rubocop:enable Metrics/AbcSize
 
   def add_for_observation_condition
     return if params[:observation].blank?
