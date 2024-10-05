@@ -9,6 +9,7 @@ module Observations::InatImportsControllerValidators
     username_present? &&
       valid_inat_ids_param? &&
       imports_designated? &&
+      list_within_size_limits? &&
       fresh_import? &&
       unmirrored? &&
       consented?
@@ -36,6 +37,13 @@ module Observations::InatImportsControllerValidators
     return true if params[:all] == "1" || params[:inat_ids].present?
 
     flash_warning(:inat_no_imports_designated.t)
+    false
+  end
+
+  def list_within_size_limits?
+    return true if params[:inat_ids].length <= 255
+
+    flash_warning(:inat_too_many_ids_listed.t)
     false
   end
 
