@@ -500,12 +500,23 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
           return Observation.all unless box.valid?
 
           # should be
-          merge(Observation.in_box(**args).invert_where)
-          # if box.straddles_180_deg?
-          #   not_in_box_straddling_dateline(**args)
-          # else
-          #   not_in_box_regular(**args)
-          # end
+          # merge(Observation.in_box(**args).invert_where.
+          # or(Observation.where(lat: nil, location_lat: nil)))
+          if box.straddles_180_deg?
+            not_in_box_straddling_dateline(**args).
+            # merge(
+              joins(:location).
+              where(Location.contains_box(**args.except(:mappable)).
+              invert_where)
+            # )
+          else
+            not_in_box_regular(**args).
+            # merge(
+              joins(:location).
+              where(Location.contains_box(**args.except(:mappable)).
+              invert_where)
+            # )
+          end
         }
   scope :not_in_box_straddling_dateline, # helper for not_in_box
         lambda { |**args|
