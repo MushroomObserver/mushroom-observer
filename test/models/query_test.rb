@@ -1385,26 +1385,25 @@ class QueryTest < UnitTestCase
 
   def test_comment_by_user
     expect = Comment.where(user_id: mary.id).reverse
-    assert_query(expect, :Comment, :by_user, user: mary)
+    assert_query(expect, :Comment, :all, by_user: mary)
   end
 
   def test_comment_for_target
     obs = observations(:minimal_unknown_obs)
     expect = Comment.where(target_id: obs.id)
-    assert_query(expect, :Comment, :for_target, target: obs,
-                                                type: "Observation")
+    assert_query(expect, :Comment, :all, target: obs, type: "Observation")
   end
 
   def test_comment_for_user
     expect = Comment.all.select { |c| c.target.user == mary }
-    assert_query(expect, :Comment, :for_user, user: mary)
-    assert_query([], :Comment, :for_user, user: rolf)
+    assert_query(expect, :Comment, :all, for_user: mary)
+    assert_query([], :Comment, :all, for_user: rolf)
   end
 
   def test_comment_in_set
     assert_query([comments(:detailed_unknown_obs_comment).id,
                   comments(:minimal_unknown_obs_comment_1).id],
-                 :Comment, :in_set,
+                 :Comment, :all,
                  ids: [comments(:detailed_unknown_obs_comment).id,
                        comments(:minimal_unknown_obs_comment_1).id])
   end
@@ -1414,7 +1413,7 @@ class QueryTest < UnitTestCase
       comments(:minimal_unknown_obs_comment_1),
       comments(:detailed_unknown_obs_comment)
     ]
-    assert_query(expect, :Comment, :pattern_search, pattern: "unknown")
+    assert_query(expect, :Comment, :all, pattern: "unknown")
   end
 
   def test_external_link_all

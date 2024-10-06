@@ -63,7 +63,7 @@ module Query
       # some sequences because of this.
       add_owner_and_time_stamp_conditions("sequences")
       add_pattern_condition
-      add_in_set_condition
+      initialize_ids_parameter
       initialize_association_parameters
       initialize_name_parameters(:observations)
       initialize_observation_parameters
@@ -91,12 +91,6 @@ module Query
         "COALESCE(sequences.accession,'')," \
         "COALESCE(sequences.notes,'')" \
         ")"
-    end
-
-    def add_in_set_condition
-      return if params[:ids].blank?
-
-      initialize_in_set_flavor
     end
 
     def initialize_association_parameters

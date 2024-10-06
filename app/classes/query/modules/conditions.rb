@@ -12,6 +12,15 @@ module Query
                          lookup_users_by_name(params[:users]))
       end
 
+      def add_by_user_condition(table)
+        return if params[:by_user].blank?
+
+        user = find_cached_parameter_instance(User, :by_user)
+        @title_tag = :query_title_by_user
+        @title_args[:user] = user.legal_name
+        where << "#{table}.user_id = '#{user.id}'"
+      end
+
       def add_boolean_condition(true_cond, false_cond, val, *)
         return if val.nil?
 
@@ -70,6 +79,13 @@ module Query
         add_joins(*)
       end
 
+      def initialize_ids_parameter
+        return if params[:ids].blank?
+
+        initialize_in_set_flavor
+      end
+
+      # move this above when all in_set flavors converted
       def initialize_in_set_flavor(table = model.table_name)
         set = clean_id_set(params[:ids])
         @where << "#{table}.id IN (#{set})"
