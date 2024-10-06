@@ -213,7 +213,7 @@ class HerbariaController < ApplicationController
       redirect_to(herbarium_path(herbarium.id))
     else
       show_selected_herbaria(
-        create_query(:Herbarium, :pattern_search, pattern: pattern)
+        create_query(:Herbarium, :all, pattern: pattern)
       )
     end
   end

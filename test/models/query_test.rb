@@ -1349,7 +1349,7 @@ class QueryTest < UnitTestCase
 
   def test_article_in_set
     assert_query([articles(:premier_article).id], :Article,
-                 :in_set, ids: [articles(:premier_article).id])
+                 :all, ids: [articles(:premier_article).id])
     assert_query([], :Article, :all, ids: [])
   end
 
@@ -1442,8 +1442,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_glossary_term_pattern_search
-    assert_query([], :GlossaryTerm, :pattern_search,
-                 pattern: "no glossary term has this")
+    assert_query([], :GlossaryTerm, :all, pattern: "no glossary term has this")
     # name
     assert_query(
       GlossaryTerm.
@@ -1490,7 +1489,7 @@ class QueryTest < UnitTestCase
 
   def test_herbarium_pattern_search
     expect = [herbaria(:nybg_herbarium)]
-    assert_query(expect, :Herbarium, :pattern_search, pattern: "awesome")
+    assert_query(expect, :Herbarium, :all, pattern: "awesome")
   end
 
   def test_image_advanced_search
@@ -1611,24 +1610,24 @@ class QueryTest < UnitTestCase
 
   def test_image_pattern_search
     assert_query([images(:agaricus_campestris_image).id],
-                 :Image, :pattern_search, pattern: "agaricus") # name
+                 :Image, :all, pattern: "agaricus") # name
     assert_query([images(:agaricus_campestris_image).id,
                   images(:connected_coprinus_comatus_image).id,
                   images(:turned_over_image).id,
                   images(:in_situ_image).id],
-                 :Image, :pattern_search, pattern: "bob dob") # copyright holder
+                 :Image, :all, pattern: "bob dob") # copyright holder
     assert_query(
       [images(:in_situ_image).id],
-      :Image, :pattern_search, pattern: "looked gorilla OR original" # notes
+      :Image, :all, pattern: "looked gorilla OR original" # notes
     )
     assert_query([images(:agaricus_campestris_image).id,
                   images(:connected_coprinus_comatus_image).id],
-                 :Image, :pattern_search, pattern: "notes some") # notes
+                 :Image, :all, pattern: "notes some") # notes
     assert_query(
       [images(:turned_over_image).id, images(:in_situ_image).id],
-      :Image, :pattern_search, pattern: "dobbs -notes" # (c), not notes
+      :Image, :all, pattern: "dobbs -notes" # (c), not notes
     )
-    assert_query([images(:in_situ_image).id], :Image, :pattern_search,
+    assert_query([images(:in_situ_image).id], :Image, :all,
                  pattern: "DSCN8835") # original filename
   end
 
