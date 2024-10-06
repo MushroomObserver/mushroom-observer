@@ -86,7 +86,7 @@ module Query
         add_joins(*)
       end
 
-      def initialize_ids_parameter
+      def add_ids_condition
         return if params[:ids].blank?
 
         initialize_in_set_flavor

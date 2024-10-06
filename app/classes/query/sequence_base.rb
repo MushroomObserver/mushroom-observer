@@ -63,7 +63,7 @@ module Query
       # some sequences because of this.
       add_owner_and_time_stamp_conditions("sequences")
       add_pattern_condition
-      initialize_ids_parameter
+      add_ids_condition
       initialize_association_parameters
       initialize_name_parameters(:observations)
       initialize_observation_parameters

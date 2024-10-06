@@ -27,7 +27,7 @@ module Query
     def initialize_flavor
       add_owner_and_time_stamp_conditions("comments")
       add_by_user_condition("comments")
-      initialize_ids_parameter
+      add_ids_condition
       add_for_user_condition
       add_for_target_condition
       add_pattern_condition
