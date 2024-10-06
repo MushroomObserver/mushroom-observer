@@ -86,18 +86,19 @@ class QueryTest < UnitTestCase
                  Query.lookup(:Image, :by_user, user: rolf.id.to_s).
                  params[:user])
 
-    # assert_raises(RuntimeError) { Query.lookup(:User, :all) }
     # Oops, :in_set query is generic,
     # doesn't know to require Name instances here.
-    # assert_raises(RuntimeError) { Query.lookup(:Name, :all, ids: rolf) }
-    assert_raises(RuntimeError) { Query.lookup(:Name, :all, ids: "one") }
-    assert_raises(RuntimeError) { Query.lookup(:Name, :all, ids: "1,2,3") }
+    # assert_raises(RuntimeError) { Query.lookup(:Name, :in_set, ids: rolf) }
+    assert_raises(RuntimeError) { Query.lookup(:Name, :in_set, ids: "one") }
+    assert_raises(RuntimeError) { Query.lookup(:Name, :in_set, ids: "1,2,3") }
+    assert_equal([names(:fungi).id],
+                 Query.lookup(:Name, :in_set,
+                              ids: names(:fungi).id.to_s).params[:ids])
+
+    # assert_raises(RuntimeError) { Query.lookup(:User, :all) }
     assert_equal([], Query.lookup(:User, :all, ids: []).params[:ids])
     assert_equal([rolf.id], Query.lookup(:User, :all,
                                          ids: rolf.id).params[:ids])
-    assert_equal([names(:fungi).id],
-                 Query.lookup(:Name, :all,
-                              ids: names(:fungi).id.to_s).params[:ids])
     assert_equal([rolf.id, mary.id],
                  Query.lookup(:User, :all,
                               ids: [rolf.id, mary.id]).params[:ids])
@@ -3086,10 +3087,10 @@ class QueryTest < UnitTestCase
   def test_species_list_by_user
     assert_query([species_lists(:first_species_list).id,
                   species_lists(:another_species_list).id],
-                 :SpeciesList, :all, user: rolf, by: :id)
+                 :SpeciesList, :all, by_user: rolf, by: :id)
     assert_query(SpeciesList.where(user: mary),
-                 :SpeciesList, :all, user: mary)
-    assert_query([], :SpeciesList, :all, user: dick)
+                 :SpeciesList, :all, by_user: mary)
+    assert_query([], :SpeciesList, :all, by_user: dick)
   end
 
   def test_species_list_for_project
