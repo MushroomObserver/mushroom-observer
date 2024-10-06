@@ -506,8 +506,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
             not_in_box_straddling_dateline(**args).
             # merge(
               joins(:location).
-              where(Location.contains_box(**args.except(:mappable)).
-              invert_where)
+              where.not(
+                Location[:id] = Location.contains_box(**args.except(:mappable))
+              )
             # )
           else
             not_in_box_regular(**args).
