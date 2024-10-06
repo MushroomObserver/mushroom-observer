@@ -2719,7 +2719,7 @@ class QueryTest < UnitTestCase
     expect = Observation.where(user_id: rolf.id).to_a
     assert_query(expect, :Observation, :advanced_search, user: "rolf", by: :id)
     assert_query([observations(:coprinus_comatus_obs).id], # notes
-                 :Observation,:advanced_search, content: "second fruiting")
+                 :Observation, :advanced_search, content: "second fruiting")
     assert_query([observations(:minimal_unknown_obs).id],
                  :Observation, :advanced_search, content: "agaricus") # comment
   end
@@ -3086,20 +3086,20 @@ class QueryTest < UnitTestCase
   def test_species_list_by_user
     assert_query([species_lists(:first_species_list).id,
                   species_lists(:another_species_list).id],
-                 :SpeciesList, :by_user, user: rolf, by: :id)
+                 :SpeciesList, :all, user: rolf, by: :id)
     assert_query(SpeciesList.where(user: mary),
-                 :SpeciesList, :by_user, user: mary)
-    assert_query([], :SpeciesList, :by_user, user: dick)
+                 :SpeciesList, :all, user: mary)
+    assert_query([], :SpeciesList, :all, user: dick)
   end
 
   def test_species_list_for_project
     assert_query([],
-                 :SpeciesList, :for_project, project: projects(:empty_project))
+                 :SpeciesList, :all, project: projects(:empty_project))
     assert_query(projects(:bolete_project).species_lists,
-                 :SpeciesList, :for_project, project: projects(:bolete_project))
+                 :SpeciesList, :all, project: projects(:bolete_project))
     assert_query(
       projects(:two_list_project).species_lists,
-      :SpeciesList, :for_project, project: projects(:two_list_project)
+      :SpeciesList, :all, project: projects(:two_list_project)
     )
   end
 
@@ -3111,26 +3111,26 @@ class QueryTest < UnitTestCase
 
   def test_species_list_pattern_search
     assert_query([],
-                 :SpeciesList, :pattern_search, pattern: "nonexistent pattern")
+                 :SpeciesList, :all, pattern: "nonexistent pattern")
     # in title
     assert_query(SpeciesList.where(title: "query_first_list"),
-                 :SpeciesList, :pattern_search, pattern: "query_first_list")
+                 :SpeciesList, :all, pattern: "query_first_list")
     # in notes
     pattern = species_lists(:query_notes_list).notes
     assert_query(SpeciesList.where(notes: pattern),
-                 :SpeciesList, :pattern_search, pattern: pattern)
+                 :SpeciesList, :all, pattern: pattern)
     # in location
     assert_query(
       SpeciesList.where(location: locations(:burbank)),
-      :SpeciesList, :pattern_search, pattern: locations(:burbank).name
+      :SpeciesList, :all, pattern: locations(:burbank).name
     )
     # in where
     pattern = species_lists(:where_list).where
     assert_query(SpeciesList.where(where: pattern),
-                 :SpeciesList, :pattern_search, pattern: pattern)
+                 :SpeciesList, :all, pattern: pattern)
 
     assert_query(SpeciesList.all,
-                 :SpeciesList, :pattern_search, pattern: "")
+                 :SpeciesList, :all, pattern: "")
   end
 
   def test_user_all
