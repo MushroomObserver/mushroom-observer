@@ -182,7 +182,9 @@ class LocationsController < ApplicationController
   def coerce_query_for_undefined_locations(query)
     model  = :Observation
     flavor = query.flavor
-    args   = query.params.dup
+    # params used by :Location :all, but not yet :Observation :all
+    exceptions = [:regexp, :pattern]
+    args   = query.params.dup.except(*exceptions)
     result = nil
 
     # Select only observations with undefined location.

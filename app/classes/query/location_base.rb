@@ -36,7 +36,6 @@ class Query::LocationBase < Query::Base
   def add_pattern_condition
     return if params[:pattern].blank?
 
-    add_search_condition(search_fields, params[:pattern])
     add_join(:"location_descriptions.default!")
     super
   end
