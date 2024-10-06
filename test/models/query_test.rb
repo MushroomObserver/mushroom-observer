@@ -1315,10 +1315,10 @@ class QueryTest < UnitTestCase
     assert_equal("Observation", q4.model.to_s)
     assert_equal("SpeciesList", q5.model.to_s)
 
-    assert_equal(:by_rss_log, q2.flavor)
-    assert_equal(:by_rss_log, q3.flavor)
-    assert_equal(:by_rss_log, q4.flavor)
-    assert_equal(:by_rss_log, q5.flavor)
+    assert_equal(:rss_log, q2.params[:by])
+    assert_equal(:rss_log, q3.params[:by])
+    assert_equal(:rss_log, q4.params[:by])
+    assert_equal(:rss_log, q5.params[:by])
 
     assert_equal({}, q2.params)
     assert_equal({}, q3.params)
@@ -1343,7 +1343,7 @@ class QueryTest < UnitTestCase
 
   def test_article_by_rss_log
     assert_query(Article.joins(:rss_log).distinct,
-                 :Article, :by_rss_log)
+                 :Article, :all, by: :rss_log)
   end
 
   def test_article_in_set
@@ -1930,7 +1930,7 @@ class QueryTest < UnitTestCase
 
   def test_location_by_rss_log
     assert_query(Location.joins(:rss_log).distinct,
-                 :Location, :by_rss_log)
+                 :Location, :all, by: :rss_log)
   end
 
   def test_location_in_set
@@ -2371,7 +2371,7 @@ class QueryTest < UnitTestCase
 
   def test_name_by_rss_log
     assert_query(Name.joins(:rss_log).order("rss_logs.updated_at"),
-                 :Name, :by_rss_log)
+                 :Name, :all, by: :rss_log)
   end
 
   def test_name_in_set
@@ -2749,7 +2749,7 @@ class QueryTest < UnitTestCase
 
   def test_observation_by_rss_log
     expect = Observation.where.not(rss_log: nil)
-    assert_query(expect, :Observation, :by_rss_log)
+    assert_query(expect, :Observation, :all, by: :rss_log)
   end
 
   def test_observation_by_user
@@ -2949,7 +2949,7 @@ class QueryTest < UnitTestCase
 
   def test_project_by_rss_log
     assert_query(Project.joins(:rss_log).distinct,
-                 :Project, :by_rss_log)
+                 :Project, :all, by: :rss_log)
   end
 
   def test_project_in_set
@@ -3080,7 +3080,7 @@ class QueryTest < UnitTestCase
 
   def test_species_list_by_rss_log
     assert_query([species_lists(:first_species_list).id],
-                 :SpeciesList, :by_rss_log)
+                 :SpeciesList, :all, by: :rss_log)
   end
 
   def test_species_list_by_user

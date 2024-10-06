@@ -17,8 +17,8 @@
 #  Each model has a default search flavor (:default), which is used by the prev
 #  and next actions when the specified query no longer exists.  For example, if
 #  you click on an observation from the main index, prev and next travserse the
-#  results of an :Observation :by_rss_log query.  If the user comes back a day
-#  later, this query will have been culled by the garbage collector (see
+#  results of an :Observation :all by: :rss_log query.  If the user comes back
+#  a day later, this query will have been culled by the garbage collector (see
 #  below), so prev and next need to be able to create a default query on the
 #  fly.  In this case it may be :Observation :all (see default_flavors array
 #  below).
