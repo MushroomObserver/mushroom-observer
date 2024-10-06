@@ -16,7 +16,7 @@ module Query
         updated_at?: [:time],
         date?: [:date],
         users?: [User],
-        ids: [SpeciesList],
+        ids?: [SpeciesList],
         locations?: [:string],
         projects?: [:string],
         title_has?: :string,

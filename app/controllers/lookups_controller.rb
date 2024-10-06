@@ -252,7 +252,8 @@ class LookupsController < ApplicationController
     model:, id:, matches:, suggestions:
   )
     obj = matches.first || suggestions.first
-    query = Query.lookup(model, :in_set, ids: matches + suggestions)
+    flavor = [Image, Location, Name].include?(model) ? :in_set : :all
+    query = Query.lookup(model, flavor, ids: matches + suggestions)
     if suggestions.any?
       flash_warning(
         :runtime_suggest_multiple_alternates.t(match: id, type: model.type_tag)

@@ -126,7 +126,7 @@ class CommentsController < ApplicationController
       args[:letters] = "users.login"
     end
 
-    @full_detail = (query.flavor == :for_target)
+    @full_detail = query.params[:for_target].present?
 
     show_index_of_objects(query, args)
   end

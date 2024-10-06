@@ -87,7 +87,7 @@ module Query
       end
 
       def add_ids_condition(table = model.table_name)
-        return if params[:ids].blank?
+        return if params[:ids].nil? # [] is valid
 
         initialize_in_set_flavor(table)
       end

@@ -11,7 +11,7 @@ class Query::RssLogBase < Query::Base
     super.merge(
       updated_at?: [:time],
       type?: :string,
-      ids: [RssLog]
+      ids?: [RssLog]
     ).merge(content_filter_parameter_declarations(Observation)).
       merge(content_filter_parameter_declarations(Location))
   end
@@ -19,6 +19,7 @@ class Query::RssLogBase < Query::Base
   def initialize_flavor
     add_time_condition("rss_logs.updated_at", params[:updated_at])
     initialize_type_parameter
+    add_ids_condition
     initialize_content_filters_for_rss_log(Observation)
     initialize_content_filters_for_rss_log(Location)
     super
