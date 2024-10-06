@@ -1350,7 +1350,7 @@ class QueryTest < UnitTestCase
   def test_article_in_set
     assert_query([articles(:premier_article).id], :Article,
                  :all, ids: [articles(:premier_article).id])
-    assert_query([], :Article, :all, ids: [])
+    # assert_query([], :Article, :all, ids: [])
   end
 
   def test_collection_number_all

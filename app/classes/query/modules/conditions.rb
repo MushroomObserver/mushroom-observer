@@ -86,10 +86,10 @@ module Query
         add_joins(*)
       end
 
-      def add_ids_condition
+      def add_ids_condition(table = model.table_name)
         return if params[:ids].blank?
 
-        initialize_in_set_flavor
+        initialize_in_set_flavor(table)
       end
 
       # move this above when all in_set flavors converted
