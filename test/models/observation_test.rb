@@ -1344,11 +1344,8 @@ class ObservationTest < UnitTestCase
 
     obss_not_in_cal_box = Observation.not_in_box(**cal.bounding_box)
     obs_with_burbank_geoloc = observations(:unknown_with_lat_lng)
-
     obss_not_in_nybg_box = Observation.not_in_box(**nybg.bounding_box)
-
     obss_not_in_ecuador_box = Observation.not_in_box(**ecuador_box)
-
     obss_not_in_wrangel_box = Observation.not_in_box(**wrangel.bounding_box)
 
     # boxes not straddling 180 deg
