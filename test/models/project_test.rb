@@ -205,7 +205,6 @@ class ProjectTest < UnitTestCase
     ]
 
     location_violations = proj.out_of_area_observations
-    debugger
     assert_includes(
       location_violations, geoloc_outside_burbank,
       "Noncompliant Obss missing Obs with geoloc outside Proj location"

@@ -1352,8 +1352,9 @@ class ObservationTest < UnitTestCase
     assert_not_includes(obss_not_in_cal_box, obs_with_burbank_geoloc)
     assert_not_includes(obss_not_in_ecuador_box, quito_obs)
     assert_includes(obss_not_in_nybg_box, obs_with_burbank_geoloc)
-    # assert_includes(obss_not_in_cal_box, observations(:minimal_unknown_obs),
-    #                 "Observation without lat/lon should not be in box")
+    assert_not_includes(obss_not_in_cal_box, observations(:minimal_unknown_obs),
+                        "Observation without lat/lon but has location_lat " \
+                        "in box should be in box")
 
     # box straddling 180 deg
     assert_not_includes(obss_not_in_wrangel_box, wrangel_obs)
