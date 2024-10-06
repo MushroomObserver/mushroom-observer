@@ -75,7 +75,7 @@ class HerbariaController < ApplicationController
     when "nonpersonal" # List institutional Herbaria
       store_location
       show_selected_herbaria(
-        create_query(:Herbarium, :nonpersonal, by: :code_then_name),
+        create_query(:Herbarium, :all, nonpersonal: true, by: :code_then_name),
         always_index: true
       )
     else # default List herbaria resulting from query

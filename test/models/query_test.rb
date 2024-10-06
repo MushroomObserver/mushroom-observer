@@ -1350,7 +1350,7 @@ class QueryTest < UnitTestCase
   def test_article_in_set
     assert_query([articles(:premier_article).id], :Article,
                  :in_set, ids: [articles(:premier_article).id])
-    assert_query([], :Article, :in_set, ids: [])
+    assert_query([], :Article, :all, ids: [])
   end
 
   def test_collection_number_all
@@ -1485,7 +1485,7 @@ class QueryTest < UnitTestCase
       herbaria(:dick_herbarium),
       herbaria(:nybg_herbarium)
     ]
-    assert_query(expect, :Herbarium, :in_set, ids: expect)
+    assert_query(expect, :Herbarium, :all, ids: expect)
   end
 
   def test_herbarium_pattern_search
