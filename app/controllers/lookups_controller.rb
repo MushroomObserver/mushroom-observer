@@ -252,7 +252,9 @@ class LookupsController < ApplicationController
     model:, id:, matches:, suggestions:
   )
     obj = matches.first || suggestions.first
-    flavor = [Image, Location, Name].include?(model) ? :in_set : :all
+    unconverted = [Image, Location, Name, Observation]
+    flavor = unconverted.include?(model) ? :in_set : :all
+
     query = Query.lookup(model, flavor, ids: matches + suggestions)
     if suggestions.any?
       flash_warning(
