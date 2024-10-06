@@ -191,13 +191,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_01_233907) do
     t.boolean "diagnostic", default: true, null: false
   end
 
-  create_table "inat_import_job_trackers", charset: "utf8mb3", force: :cascade do |t|
+  create_table "inat_import_job_trackers", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "inat_import"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "inat_imports", charset: "utf8mb3", force: :cascade do |t|
+  create_table "inat_imports", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "user_id"
     t.integer "state", default: 0
     t.string "inat_ids"
