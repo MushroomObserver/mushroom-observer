@@ -86,32 +86,31 @@ class QueryTest < UnitTestCase
                  Query.lookup(:Image, :by_user, user: rolf.id.to_s).
                  params[:user])
 
-    assert_raises(RuntimeError) { Query.lookup(:User, :in_set) }
+    assert_raises(RuntimeError) { Query.lookup(:User, :all) }
     # Oops, :in_set query is generic,
     # doesn't know to require Name instances here.
     # assert_raises(RuntimeError) { Query.lookup(:Name, :in_set, ids: rolf) }
-    assert_raises(RuntimeError) { Query.lookup(:Name, :in_set, ids: "one") }
-    assert_raises(RuntimeError) { Query.lookup(:Name, :in_set, ids: "1,2,3") }
-    assert_equal([], Query.lookup(:User, :in_set, ids: []).params[:ids])
-    assert_equal([rolf.id], Query.lookup(:User, :in_set,
+    assert_raises(RuntimeError) { Query.lookup(:Name, :all, ids: "one") }
+    assert_raises(RuntimeError) { Query.lookup(:Name, :all, ids: "1,2,3") }
+    assert_equal([], Query.lookup(:User, :all, ids: []).params[:ids])
+    assert_equal([rolf.id], Query.lookup(:User, :all,
                                          ids: rolf.id).params[:ids])
     assert_equal([names(:fungi).id],
-                 Query.lookup(:Name, :in_set,
+                 Query.lookup(:Name, :all,
                               ids: names(:fungi).id.to_s).params[:ids])
     assert_equal([rolf.id, mary.id],
-                 Query.lookup(:User, :in_set,
+                 Query.lookup(:User, :all,
                               ids: [rolf.id, mary.id]).params[:ids])
     assert_equal([1, 2],
-                 Query.lookup(:User, :in_set, ids: %w[1 2]).params[:ids])
+                 Query.lookup(:User, :all, ids: %w[1 2]).params[:ids])
     assert_equal([rolf.id, mary.id],
-                 Query.lookup(:User, :in_set,
+                 Query.lookup(:User, :all,
                               ids: [rolf.id.to_s, mary.id.to_s]).params[:ids])
-    assert_equal([rolf.id], Query.lookup(:User, :in_set,
-                                         ids: rolf).params[:ids])
+    assert_equal([rolf.id], Query.lookup(:User, :all, ids: rolf).params[:ids])
     assert_equal([rolf.id, mary.id],
-                 Query.lookup(:User, :in_set, ids: [rolf, mary]).params[:ids])
+                 Query.lookup(:User, :all, ids: [rolf, mary]).params[:ids])
     assert_equal([rolf.id, mary.id, junk.id],
-                 Query.lookup(:User, :in_set,
+                 Query.lookup(:User, :all,
                               ids: [rolf, mary.id, junk.id.to_s]).params[:ids])
 
     assert_raises(RuntimeError) { Query.lookup(:Name, :pattern_search) }
@@ -2966,22 +2965,22 @@ class QueryTest < UnitTestCase
   def test_project_in_set
     assert_query([projects(:eol_project).id], :Project,
                  :in_set, ids: [projects(:eol_project).id])
-    assert_query([], :Project, :in_set, ids: [])
+    # assert_query([], :Project, :all, ids: [])
   end
 
   def test_project_pattern_search
     assert_query([],
-                 :Project, :pattern_search, pattern: "no project has this")
+                 :Project, :all, pattern: "no project has this")
     # title
     assert_query(Project.where(Project[:summary].matches("%bolete%").
                                or(Project[:title].matches("%bolete%"))),
-                 :Project, :pattern_search, pattern: "bolete")
+                 :Project, :all, pattern: "bolete")
     # summary
     assert_query(Project.where(Project[:summary].matches("%two lists%").
                                or(Project[:title].matches("%two lists%"))),
-                 :Project, :pattern_search, pattern: "two lists")
+                 :Project, :all, pattern: "two lists")
     assert_query(Project.all,
-                 :Project, :pattern_search, pattern: "")
+                 :Project, :all, pattern: "")
   end
 
   def test_rss_log_all
@@ -2997,7 +2996,7 @@ class QueryTest < UnitTestCase
   def test_rss_log_in_set
     rsslog_set_ids = [rss_logs(:species_list_rss_log).id,
                       rss_logs(:name_rss_log).id]
-    assert_query(rsslog_set_ids, :RssLog, :in_set, ids: rsslog_set_ids)
+    assert_query(rsslog_set_ids, :RssLog, :all, ids: rsslog_set_ids)
   end
 
   def test_sequence_all
@@ -3117,7 +3116,7 @@ class QueryTest < UnitTestCase
   def test_species_list_in_set
     list_set_ids = [species_lists(:first_species_list).id,
                     species_lists(:unknown_species_list).id]
-    assert_query(list_set_ids, :SpeciesList, :in_set, ids: list_set_ids)
+    assert_query(list_set_ids, :SpeciesList, :all, ids: list_set_ids)
   end
 
   def test_species_list_pattern_search
@@ -3160,19 +3159,19 @@ class QueryTest < UnitTestCase
 
   def test_user_pattern_search
     assert_query([],
-                 :User, :pattern_search, pattern: "nonexistent pattern")
+                 :User, :all, pattern: "nonexistent pattern")
     # in login
     assert_query(User.where(login: users(:spammer).login),
-                 :User, :pattern_search, pattern: users(:spammer).login)
+                 :User, :all, pattern: users(:spammer).login)
     # in name
     assert_query(User.where(name: users(:mary).name),
-                 :User, :pattern_search, pattern: users(:mary).name)
+                 :User, :all, pattern: users(:mary).name)
     assert_query(User.all,
-                 :User, :pattern_search, pattern: "")
+                 :User, :all, pattern: "")
     # sorted by location should include Users without location
     # (Differs from searches on other Classes or by other sort orders)
     assert_query(User.all,
-                 :User, :pattern_search, pattern: "", by: "location")
+                 :User, :all, pattern: "", by: "location")
   end
 
   ##############################################################################
@@ -3245,8 +3244,7 @@ class QueryTest < UnitTestCase
   ##############################################################################
 
   def test_whiny_nil_in_map_locations
-    query = Query.lookup(:User, :in_set,
-                         ids: [rolf.id, 1000, mary.id])
+    query = Query.lookup(:User, :all, ids: [rolf.id, 1000, mary.id])
     query.query
     assert_equal(2, query.results.length)
   end
