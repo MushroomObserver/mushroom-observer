@@ -21,6 +21,13 @@ module Query
         where << "#{table}.user_id = '#{user.id}'"
       end
 
+      def add_pattern_condition
+        return if params[:pattern].blank?
+
+        @title_tag = :query_title_pattern_search
+        add_search_condition(search_fields, params[:pattern])
+      end
+
       def add_boolean_condition(true_cond, false_cond, val, *)
         return if val.nil?
 

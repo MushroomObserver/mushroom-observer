@@ -74,13 +74,6 @@ module Query
       super
     end
 
-    def add_pattern_condition
-      return if params[:pattern].blank?
-
-      @title_tag = :query_title_pattern_search
-      add_search_condition(search_fields, params[:pattern])
-    end
-
     def search_fields
       # I'm leaving out bases because it would be misleading.  Some formats
       # allow spaces and other delimiting "garbage" which could break up

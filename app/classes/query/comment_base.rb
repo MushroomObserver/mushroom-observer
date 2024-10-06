@@ -30,7 +30,7 @@ module Query
       initialize_ids_parameter
       add_for_user_condition
       add_for_target_condition
-      add_pattern_parameter
+      add_pattern_condition
       add_string_enum_condition("comments.target_type", params[:types],
                                 Comment.all_type_tags)
       add_search_condition("comments.summary", params[:summary_has])
@@ -64,13 +64,6 @@ module Query
       end
 
       find_cached_parameter_instance(type, :target)
-    end
-
-    def add_pattern_parameter
-      return if params[:pattern].blank?
-
-      @title_tag = :query_title_pattern_search
-      add_search_condition(search_fields, params[:pattern])
     end
 
     def search_fields

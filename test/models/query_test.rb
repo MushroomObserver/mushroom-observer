@@ -1449,7 +1449,7 @@ class QueryTest < UnitTestCase
       GlossaryTerm.
         where(GlossaryTerm[:name].matches("%conic_glossary_term%").
         or(GlossaryTerm[:description].matches("%conic_glossary_term%"))),
-      :GlossaryTerm, :pattern_search, pattern: "conic_glossary_term"
+      :GlossaryTerm, :all, pattern: "conic_glossary_term"
     )
     # description
     expect =
@@ -1461,10 +1461,8 @@ class QueryTest < UnitTestCase
         where(GlossaryTerm[:description].matches("%of%")).
         where(GlossaryTerm[:description].matches("%Term%"))
       )
-    assert_query(expect,
-                 :GlossaryTerm, :pattern_search, pattern: "Description of Term")
-    assert_query(GlossaryTerm.all,
-                 :GlossaryTerm, :pattern_search, pattern: "")
+    assert_query(expect, :GlossaryTerm, :all, pattern: "Description of Term")
+    assert_query(GlossaryTerm.all, :GlossaryTerm, :all, pattern: "")
   end
 
   def test_herbarium_all
