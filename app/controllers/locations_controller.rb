@@ -89,8 +89,7 @@ class LocationsController < ApplicationController
       redirect_to(location_path(loc.id))
     else
       query = create_query(
-        :Location, :pattern_search,
-        pattern: Location.user_format(@user, pattern)
+        :Location, :all, pattern: Location.user_format(@user, pattern)
       )
       show_selected_locations(query, link_all_sorts: true)
     end
@@ -99,7 +98,7 @@ class LocationsController < ApplicationController
   # Displays a list of all locations whose country matches the id param.
   def country
     query = create_query(
-      :Location, :regexp_search, regexp: "#{params[:country]}$"
+      :Location, :all, regexp: "#{params[:country]}$"
     )
     show_selected_locations(query, link_all_sorts: true)
   end
