@@ -31,7 +31,7 @@ class Query::RssLogAll < Query::RssLogBase
   end
 
   def do_coerce(new_model)
-    Query.lookup(new_model, :all, { by: :rss_log }.merge(params_minus_type))
+    Query.lookup(new_model, :all, params_minus_type.merge(by: :rss_log))
   end
 
   def params_minus_type
