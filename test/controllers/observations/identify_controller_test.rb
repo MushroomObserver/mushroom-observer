@@ -16,6 +16,7 @@ module Observations
 
       query = Query.lookup_and_save(:Observation, :needs_naming)
       assert_equal(query.num_results, obs_count)
+
       get(:index)
       assert_no_flash
       assert_select(".matrix-box", obs_count)

@@ -134,8 +134,6 @@ module Tabs
     end
 
     # Add some alternate sorting criteria.
-    # false positive
-    # rubocop:disable Layout/SpaceAroundOperators
     def location_index_sorts(query:)
       rss_log = query&.params&.dig(:by) == :rss_log ||
                 query&.flavor == :rss_log
@@ -147,7 +145,6 @@ module Tabs
         ["box_area", :sort_by_box_area.t]
       ]
     end
-    # rubocop:enable Layout/SpaceAroundOperators
 
     # link attribute arrays
     def location_form_new_tabs(location:)
