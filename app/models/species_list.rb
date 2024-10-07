@@ -341,7 +341,7 @@ class SpeciesList < AbstractModel
     args[:user] ||= User.current
     args[:when] ||= self.when
     args[:vote] ||= Vote.maximum_vote
-    args[:notes] ||= ""
+    args[:notes] ||= {}
     args[:projects] ||= projects
     if !args[:where] && !args[:location]
       args[:where]    = location ? location.name : where

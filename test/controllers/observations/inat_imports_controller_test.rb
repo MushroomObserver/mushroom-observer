@@ -98,6 +98,20 @@ module Observations
       assert_flash_text(:inat_consent_required.l)
     end
 
+    def test_create_too_many_ids_listed
+      # generate an id list that's barely too long
+      id_list = ""
+      id = 1_234_567_890
+      id_list += "#{id += 1}," until id_list.length > 255
+      params = { inat_username: "anything", inat_ids: id_list, consent: 1 }
+
+      login
+      post(:create, params: params)
+
+      assert_form_action(action: :create)
+      assert_flash_text(:inat_too_many_ids_listed.l)
+    end
+
     def test_create_previously_imported
       user = users(:rolf)
       inat_id = "1123456"

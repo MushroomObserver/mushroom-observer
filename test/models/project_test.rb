@@ -189,7 +189,7 @@ class ProjectTest < UnitTestCase
       title: "With Location Violations",
       open_membership: true
     )
-    geoloc_in_bubank = observations(:unknown_with_lat_lng)
+    geoloc_in_burbank = observations(:unknown_with_lat_lng)
     geoloc_outside_burbank =
       observations(:trusted_hidden) # lat/lon in Falmouth
     geoloc_nil_burbank_contains_loc =
@@ -197,7 +197,7 @@ class ProjectTest < UnitTestCase
     geoloc_nil_outside_burbank = observations(:reused_observation)
 
     proj.observations = [
-      geoloc_in_bubank,
+      geoloc_in_burbank,
       geoloc_nil_burbank_contains_loc,
       geoloc_outside_burbank,
       geoloc_nil_outside_burbank
@@ -215,7 +215,7 @@ class ProjectTest < UnitTestCase
       "whose Loc is not contained in Proj location"
     )
     assert_not_includes(
-      location_violations, geoloc_in_bubank,
+      location_violations, geoloc_in_burbank,
       "Noncompliant Obss wrongly includes Obs with geoloc inside Proj location"
     )
     assert_not_includes(
