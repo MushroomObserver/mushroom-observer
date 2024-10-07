@@ -237,6 +237,18 @@ class InatObsTest < UnitTestCase
     assert_not(mock_observation("somion_unicolor").specimen?)
   end
 
+  def test_collector
+    assert_equal(
+      "Jasmine Silver & Jesse Burton",
+      mock_observation("lycoperdon").collector,
+      "Notes Collector should be iNat Collector field if that field present"
+    )
+    assert_equal(
+      "johnplischke", mock_observation("arrhenia_sp_NY02").collector,
+      "Notes Collector should be iNat user if no iNat Collector field"
+    )
+  end
+
   def test_complex_without_mo_match
     mock_inat_obs = mock_observation("xeromphalina_campanella_complex")
     assert_equal("Xeromphalina campanella", mock_inat_obs.inat_taxon_name)

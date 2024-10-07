@@ -156,6 +156,15 @@ class Inat
 
     ########## Other mappings used in MO Observations
 
+    # This will get put into MO Observation's Notes Collector:
+    def collector
+      if inat_obs_field("Collector").present?
+        inat_obs_field("Collector")[:value]
+      else
+        self[:user][:login]
+      end
+    end
+
     def dqa
       case self[:quality_grade]
       when "research"
