@@ -5,7 +5,7 @@ module PatternSearch
   class Observation < Base
     PARAMS = {
       # dates / times
-      date: [:date, :parse_date_range],
+      when: [:date, :parse_date_range],
       created: [:created_at, :parse_date_range],
       modified: [:updated_at, :parse_date_range],
 

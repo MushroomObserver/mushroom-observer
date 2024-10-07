@@ -50,6 +50,10 @@ module Query
         "#{model.table_name}.accession_number ASC"
       end
 
+      def sort_by_box_area(_model)
+        "locations.box_area DESC"
+      end
+
       def sort_by_code(_model)
         where << "herbaria.code != ''"
         "herbaria.code ASC"

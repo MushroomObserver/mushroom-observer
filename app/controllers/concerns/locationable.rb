@@ -66,6 +66,9 @@ module Locationable
       end
 
       @location = Location.new(attributes)
+      # Calculate the area of the box in case we want to reject vague locations
+      # (method included via Mappable::BoxMethods)
+      @location.box_area = @location.calculate_area
       # With a Location instance, we can use the `display_name=` setter method,
       # which figures out scientific/postal format of user input and sets
       # location `name` and `scientific_name` accordingly.
@@ -79,6 +82,7 @@ module Locationable
     # was trying to create a new Location with the existing name, use the
     # existing location and flash that we did that, returning `true` so we can
     # bail on creating a "new" location, but go ahead with the observation save.
+    # rubocop:disable Metrics/CyclomaticComplexity
     def place_name_exists?(object)
       name = Location.user_format(@user, object.place_name)
       location = Location.find_by(name: name)
@@ -93,6 +97,7 @@ module Locationable
 
       false
     end
+    # rubocop:enable Metrics/CyclomaticComplexity
 
     def try_to_save_location_if_new(object)
       return if @any_errors || !@location&.new_record? || save_location(object)

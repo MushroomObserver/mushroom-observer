@@ -6,30 +6,29 @@
 #  Represents the result of an iNat API search for one observation,
 #  mapping iNat key/values to MO Observation attributes
 #
-#  == Class methods
-##
-#  == Instance methods
+#  == Instance methods and attribute keys
 #
 #  === iNat attributes & associations
 #
 #  obs::                 The iNat observation data
-#  inat_description::
-#  inat_id::
-#  inat_identifications    array of identifications, taxa need not be unique
-#  inat_location::         lat,lon
-#  inat_obs_fields::       array of fields, each field a hash
-#  inat_obs_photos::       array of observation_photos
-#  inat_place_guess::
-#  inat_private_location:: lat, lon
-#  inat_project_names::
+#  [:id]                 iNat observation id
+#  [:identifications]    array of identifications, taxa need not be unique
+#  [:location]           lat, lng Nat fudges this for obscured observations
+#                        Cf. [:private_location]
+#                        https://help.inaturalist.org/en/support/solutions/articles/151000169938-what-is-geoprivacy-what-does-it-mean-for-an-observation-to-be-obscured-
+#  inat_obs_fields::       array of fields, each field a hash. == [:ofvs]
+#  [:observation_photos]   array of photos
+#  [:place_guess]          iNat's best guess at the location
+#  [:private_location]     lat, lng. Cf. [:location]
 #  inat_prov_name::        provisional species name
-#  inat_positional_accuracy::  accuracy of inat_location in meters
-#  inat_public_positional_accuracy::  blurred accuracy
-#  inat_quality_grade::    casual, needs id, research
-#  inat_tags::             array of tags
+#  [:positional_accuracy]  unblurred accuracy of [:location] in meters.
+#  [:public_positional_accuracy] blurred for obscured observations
+#  [:quality_grade]        casual, needs id, research
+#  [:tags]                 array of tags
+#  [:taxon]                taxon hash
 #  inat_taxon_name::       scientific name
 #  inat_taxon_rank::       rank (can be secondary)
-#  inat_user_login
+#  [:user][:login]         username
 #
 #  == MO attributes
 #  gps_hidden
@@ -58,138 +57,29 @@ class Inat
       @obs = JSON.parse(imported_inat_obs_data, symbolize_names: true)
     end
 
+    # Allow hash key access to the iNat observation data
+    def [](key) = @obs[key]
+
+    def []=(key, value)
+      @obs[key] = value
+    end
+
     ########## iNat attributes
 
-    def inat_description
-      @obs[:description]
-    end
+    # convenience method with descriptive, non-cryptic name
+    def inat_obs_fields = @obs[:ofvs]
 
-    def inat_id
-      @obs[:id]
-    end
+    # NOTE: Fixes ABC count of `snapshot` because
+    # inat_taxon_name is one fewer Branch than self[:taxon][:name]
+    def inat_taxon_name = self[:taxon][:name]
 
-    def inat_identifications
-      @obs[:identifications]
-    end
-
-    # iNat fudges this for obscured observations. Cf. inat_private_location
-    # https://help.inaturalist.org/en/support/solutions/articles/151000169938-what-is-geoprivacy-what-does-it-mean-for-an-observation-to-be-obscured-
-    def inat_location
-      @obs[:location]
-    end
-
-    # for test purposes
-    def inat_location=(location)
-      @obs[:location] = location
-    end
-
-    def inat_obs_fields
-      @obs[:ofvs]
-    end
-
-    def inat_obs_photos
-      @obs[:observation_photos]
-    end
-
-    def inat_place_guess
-      @obs[:place_guess]
-    end
-
-    def inat_private_location
-      @obs[:private_location]
-    end
-
-    # comma-separated string of names of projects to which obs belongs
-    def inat_project_names
-      projects = inat_projects
-
-      # 2024-06-12 jdc
-      # 1. Stop inat_obs from returning the following when projects.empty
-      # # encoding: US-ASCII
-      # #    valid: true
-      # ""
-      #
-      # 2. Always include ?? because I cannot reliably find all the projects
-      # via the iNat API
-      return "??" if projects.empty?
-
-      # Extract the titles from each project observation
-      (projects.map { |proj| proj.dig(:project, :title) } << "??").
-        join(", ").delete_prefix(", ")
-    end
-
-    # NOTE: iNat allows only 1 obs field with a given :name per obs.
-    # I assume iNat users will add only 1 proviisonal name per obs
-    def inat_prov_name
-      obs_fields = inat_obs_fields
-      return nil if obs_fields.blank?
-
-      prov_name_field =
-        inat_obs_fields.find do |field|
-          field[:name] =~ /^Provisional Species Name/
-        end
-      return nil if prov_name_field.blank?
-
-      prov_name_field[:value]
-    end
-
-    # unblurred accuracy. Cf. inat_public_positional_accuracy
-    # https://help.inaturalist.org/en/support/solutions/articles/151000169938-what-is-geoprivacy-what-does-it-mean-for-an-observation-to-be-obscured-
-    def inat_positional_accuracy
-      @obs[:public_positional_accuracy]
-    end
-
-    # For testing. It's often much easier to modify an existing mock obs
-    # than to create a new one.
-    def inat_positional_accuracy=(accuracy)
-      @obs[:positional_accuracy] = accuracy
-    end
-
-    # Blurred for obscured observations. Cf. inat_positional_accuracy
-    # https://help.inaturalist.org/en/support/solutions/articles/151000169938-what-is-geoprivacy-what-does-it-mean-for-an-observation-to-be-obscured-
-    def inat_public_positional_accuracy
-      @obs[:public_positional_accuracy]
-    end
-
-    # For testing. It's often much easier to modify an existing mock obs
-    # than to create a new one.
-    def inat_public_positional_accuracy=(accuracy)
-      @obs[:public_positional_accuracy] = accuracy
-    end
-
-    def inat_quality_grade
-      @obs[:quality_grade]
-    end
-
-    def inat_tags
-      @obs[:tags]
-    end
-
-    def inat_taxon
-      @obs[:taxon]
-    end
-
-    def inat_taxon_name
-      inat_taxon[:name]
-    end
-
-    def inat_taxon_rank
-      inat_taxon[:rank]
-    end
-
-    def inat_user_login
-      @obs[:user][:login]
-    end
+    def inat_taxon_rank = self[:taxon][:rank]
 
     ########## MO attributes
 
-    def gps_hidden
-      @obs[:geoprivacy].present?
-    end
+    def gps_hidden = @obs[:geoprivacy].present?
 
-    def license
-      Inat::License.new(@obs[:license_code]).mo_license
-    end
+    def license = Inat::License.new(@obs[:license_code]).mo_license
 
     def name_id
       names =
@@ -204,29 +94,29 @@ class Inat
     end
 
     def notes
-      return "" if inat_description.empty?
+      return {} if self[:description].empty?
 
-      { Other: inat_description.gsub(%r{</?p>}, "") }
+      { Other: self[:description].gsub(%r{</?p>}, "") }
     end
 
     # min bounding rectangle of iNat location blurred by public accuracy
     def location
-      ::Location.contains_box(n: blurred_north,
-                              s: blurred_south,
-                              e: blurred_east,
-                              w: blurred_west).
-        min_by { |loc| location_box(loc).box_area }
+      ::Location.contains_box(north: blurred_north,
+                              south: blurred_south,
+                              east: blurred_east,
+                              west: blurred_west).
+        min_by { |loc| location_box(loc).calculate_area }
     end
 
     # location seems simplest source for lat/lng
     # But :geojason might be possible.
     def lat
-      location = inat_private_location || inat_location
+      location = self[:private_location] || self[:location]
       location.split(",").first.to_f
     end
 
     def lng
-      location = inat_private_location || inat_location
+      location = self[:private_location] || self[:location]
       location.split(",").second.to_f
     end
 
@@ -242,29 +132,21 @@ class Inat
       end
     end
 
-    def source
-      "mo_inat_import"
-    end
+    def source = "mo_inat_import"
 
-    def text_name
-      ::Name.find(name_id).text_name
-    end
+    def text_name = ::Name.find(name_id).text_name
 
     def when
       observed_on = @obs[:observed_on_details]
       ::Date.new(observed_on[:year], observed_on[:month], observed_on[:day])
     end
 
-    def where
-      # NOTE: Make it the name of a real MO Location
-      # https://github.com/MushroomObserver/mushroom-observer/issues/2383
-      inat_place_guess
-    end
+    def where = self[:place_guess]
 
     ########## Other mappings used in MO Observations
 
     def dqa
-      case inat_quality_grade
+      case self[:quality_grade]
       when "research"
         :inat_dqa_research.l
       when "needs_id"
@@ -288,13 +170,30 @@ class Inat
       prov_sp_name.sub(/ (.*)/, ' "sp-\1"')
     end
 
+    # derive a provisional name from some specific Observation Fields
+    # NOTE: iNat does not allow provisional names as identifications.
+    # Also, iNat allows only 1 obs field with a given :name per obs.
+    # I assume iNat users will add only 1 provisional name per obs.
+    def inat_prov_name
+      obs_fields = inat_obs_fields
+      return nil if obs_fields.blank?
+
+      prov_name_field =
+        inat_obs_fields.find do |field|
+          field[:name] =~ /^Provisional Species Name/
+        end
+      return nil if prov_name_field.blank?
+
+      prov_name_field[:value]
+    end
+
     def snapshot
       result = ""
       {
-        USER: inat_user_login,
+        USER: self[:user][:login],
         OBSERVED: self.when,
         show_observation_inat_lat_lng: lat_lon_accuracy,
-        PLACE: inat_place_guess,
+        PLACE: self[:place_guess],
         ID: inat_taxon_name,
         DQA: dqa,
         OBSERVATION_FIELDS: obs_fields(inat_obs_fields),
@@ -308,8 +207,7 @@ class Inat
     end
 
     def lat_lon_accuracy
-      "#{inat_location} " \
-      "+/-#{inat_public_positional_accuracy} m"
+      "#{self[:location]} +/-#{self[:public_positional_accuracy]} m"
     end
 
     def obs_fields(fields)
@@ -326,19 +224,15 @@ class Inat
     ########## Utilities
 
     def public_accuracy_in_degrees
-      accuracy_in_meters = (inat_public_positional_accuracy || 0).to_f
+      accuracy_in_meters = (self[:public_positional_accuracy] || 0).to_f
 
       { lat: accuracy_in_meters / 111_111,
         lng: accuracy_in_meters / 111_111 * Math.cos(to_rad(lat)) }
     end
 
-    def importable?
-      taxon_importable?
-    end
+    def importable? = taxon_importable?
 
-    def taxon_importable?
-      fungi? || slime_mold?
-    end
+    def taxon_importable? = fungi? || slime_mold?
 
     ##########
 
@@ -347,13 +241,9 @@ class Inat
     # ----- location-related
 
     # These give a good approximation of the iNat blurred bounding box
-    def blurred_north
-      [lat + public_accuracy_in_degrees[:lat] / 2, 90].min
-    end
+    def blurred_north = [lat + public_accuracy_in_degrees[:lat] / 2, 90].min
 
-    def blurred_south
-      [lat - public_accuracy_in_degrees[:lat] / 2, -90].max
-    end
+    def blurred_south = [lat - public_accuracy_in_degrees[:lat] / 2, -90].max
 
     def blurred_east
       ((lng + public_accuracy_in_degrees[:lng] / 2 + 180) % 360) - 180
@@ -363,9 +253,7 @@ class Inat
       ((lng - public_accuracy_in_degrees[:lng] / 2 + 180) % 360) - 180
     end
 
-    def to_rad(degrees)
-      degrees * Math::PI / 180.0
-    end
+    def to_rad(degrees) = degrees * Math::PI / 180.0
 
     # copied from AutoComplete::ForLocationContaining
     def location_box(loc)
@@ -384,21 +272,21 @@ class Inat
         insert_rank_between_species_and_final_epithet
       elsif complex?
         # iNat doesn't include "complex" in the name, MO does
-        "#{inat_taxon[:name]} complex"
+        "#{inat_taxon_name} complex"
       else
-        inat_taxon[:name]
+        inat_taxon_name
       end
     end
 
     def infrageneric?
       %w[subgenus section subsection stirps series subseries].
-        include?(inat_taxon[:rank])
+        include?(inat_taxon_rank)
     end
 
     def prepend_genus_and_rank
       # Search the identifications of this iNat observation
       # for an identification of the inat_taxon[:id]
-      inat_identifications.each do |identification|
+      self[:identifications].each do |identification|
         next unless identifies_this_obs?(identification)
 
         # search the identification's ancestors to find the genus
@@ -407,22 +295,20 @@ class Inat
 
           #  return a string comprising Genus rank epithet
           #  ex: "Morchella section Distantes"
-          return "#{ancestor[:name]} #{inat_taxon[:rank]} #{inat_taxon[:name]}"
+          return "#{ancestor[:name]} #{inat_taxon_rank} #{inat_taxon_name}"
         end
       end
     end
 
-    def infraspecific?
-      %w[subspecies variety form].include?(inat_taxon[:rank])
-    end
+    def infraspecific? = %w[subspecies variety form].include?(inat_taxon_rank)
 
     def insert_rank_between_species_and_final_epithet
-      words = inat_taxon[:name].split
-      "#{words[0..1].join(" ")} #{inat_taxon[:rank]} #{words[2]}"
+      words = inat_taxon_name.split
+      "#{words[0..1].join(" ")} #{inat_taxon_rank} #{words[2]}"
     end
 
     def identifies_this_obs?(identification)
-      identification[:taxon][:id] == inat_taxon[:id]
+      identification[:taxon][:id] == self[:taxon][:id]
     end
 
     def matching_group_names
@@ -437,7 +323,7 @@ class Inat
         # parse it to get MO's text_name rank abbreviation
         # E.g. "sect." instead of "section"
         text_name: ::Name.parse_name(full_name).text_name,
-        rank: inat_taxon[:rank].titleize,
+        rank: inat_taxon_rank.titleize,
         correct_spelling_id: nil
       ).
         # iNat lacks taxa "sensu xxx", so ignore MO Names sensu xxx
@@ -460,39 +346,23 @@ class Inat
 
     # ----- Other
 
-    def complex?
-      inat_taxon_rank == "complex"
-    end
+    def complex? = (inat_taxon_rank == "complex")
 
-    def description
-      @obs[:description]
-    end
-
-    def fungi?
-      @obs.dig(:taxon, :iconic_taxon_name) == "Fungi"
-    end
-
-    # NOTE: 2024-09-09 jdc. Can this be improved?
-    # https://github.com/MushroomObserver/mushroom-observer/issues/2245
-    def inat_projects
-      @obs[:project_observations]
-    end
+    def fungi? = (@obs.dig(:taxon, :iconic_taxon_name) == "Fungi")
 
     def sequence_field?(field)
       field[:datatype] == "dna" ||
         field[:name] =~ /DNA/ && field[:value] =~ /^[ACTG]{,10}/
     end
 
-    def slime_mold?
-      # NOTE: 2024-06-01 jdc
-      # slime molds are polypheletic https://en.wikipedia.org/wiki/Slime_mold
-      # Protoza is paraphyletic for slime molds,
-      # but it's how they are classified in MO and MB
-      # Can this be improved by checking multiple inat [:taxon][:ancestor_ids]?
-      # I.e., is there A combination (ANDs) of higher ranks (>= Class)
-      # that's monophyletic for slime molds?
-      # Another solution: use IF API to see if IF includes the name.
-      @obs.dig(:taxon, :iconic_taxon_name) == "Protozoa"
-    end
+    # NOTE: 2024-06-01 jdc
+    # slime molds are polypheletic https://en.wikipedia.org/wiki/Slime_mold
+    # Protoza is paraphyletic for slime molds,
+    # but it's how they are classified in MO and MB
+    # Can this be improved by checking multiple inat [:taxon][:ancestor_ids]?
+    # I.e., is there A combination (ANDs) of higher ranks (>= Class)
+    # that's monophyletic for slime molds?
+    # Another solution: use IF API to see if IF includes the name.
+    def slime_mold? = (@obs.dig(:taxon, :iconic_taxon_name) == "Protozoa")
   end
 end

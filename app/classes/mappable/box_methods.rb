@@ -15,7 +15,7 @@
 #  north_south_distance:: Returns north - south.
 #  east_west_distance::   Returns east - west (adjusting if straddles dateline).
 #  straddles_180_deg?::   Returns true if box straddles 180 degrees.
-#  box_area::             Returns the area described by a box, in kmˆ2.
+#  calculate_area::       Returns the area described by a box, in kmˆ2.
 #  vague?::       Arbitrary test for whether a box covers too large an area to
 #                 be useful on a map.
 #  delta_lat::    Returns north_south_distance * DELTA.
@@ -28,6 +28,10 @@
 
 module Mappable
   module BoxMethods
+    def self.included(base)
+      base.extend(ClassMethods)
+    end
+
     def location?
       true
     end
@@ -57,14 +61,14 @@ module Mappable
     end
 
     # Return center latitude.
-    def lat
+    def calculate_lat
       (north + south) / 2.0
     rescue StandardError
       nil
     end
 
     # Return center longitude for MapSet. (Google Maps takes `lng`, not `long`)
-    def lng
+    def calculate_lng
       lng = (east + west) / 2.0
       if west > east && lng.negative?
         lng += 180
@@ -76,9 +80,9 @@ module Mappable
       nil
     end
 
-    # Return center as [lat, long].
+    # Return center as [lat, lng].
     def center
-      [lat, lng]
+      [calculate_lat, calculate_lng]
     end
 
     # Returns [north, south, east, west].
@@ -118,7 +122,7 @@ module Mappable
     #   Formula for `the area of a patch of a sphere`:
     #     area = Rˆ2 * (long2 - long1) * (sin(lat2) - sin(lat1))
     #   where lat/lng in radians, R in km, Earth R rounded to 6372km
-    def box_area
+    def calculate_area
       6372 * 6372 * east_west_distance.to_radians *
         (Math.sin(north.to_radians) - Math.sin(south.to_radians)).abs
     end
@@ -126,7 +130,7 @@ module Mappable
     # Arbitrary test for whether a box covers too large an area to be useful on
     # a map with other boxes. Large boxes can obscure more precise locations.
     def vague?
-      box_area > 24_000 # kmˆ2
+      calculate_area > 24_000 # kmˆ2   or use MO.obs_location_max_area
     end
 
     # NOTE: DELTA = 0.20 is way too strict a limit for remote locations.
@@ -149,6 +153,34 @@ module Mappable
       loc = Box.new(north: north, south: south, east: east, west: west)
       expanded = loc.expand(delta_lat, delta_lng)
       expanded.contains?(pt_lat, pt_lng)
+    end
+
+    # These (or Arel equivalents) are necessary for update_all to be efficient.
+    # Used in update_box_area_and_center_columns to populate or restore columns.
+    module ClassMethods
+      def update_center_and_area_sql
+        "center_lat = #{lat_sql}, center_lng = #{lng_sql}, " \
+        "box_area = #{area_sql}"
+      end
+
+      def lat_sql
+        "(north + south) / 2"
+      end
+
+      def lng_sql
+        "CASE WHEN ((west > east) AND (east + west < 0)) " \
+        "THEN (((east + west) / 2) + 180) " \
+        "WHEN ((west > east) AND (east + west > 0)) " \
+        "THEN (((east + west) / 2) - 180) " \
+        "ELSE ((east + west) / 2) END"
+      end
+
+      def area_sql
+        "6372 * 6372 * " \
+        "RADIANS(CASE WHEN (west <= east) THEN (east - west) " \
+        "ELSE (east - west + 360) END) * " \
+        "ABS(SIN(RADIANS(north)) - SIN(RADIANS(south)))"
+      end
     end
   end
 end
