@@ -50,11 +50,21 @@ class InatObsTest < UnitTestCase
     )
 
     # mapping to MO Observation attributes
-    %w[gps_hidden lat lng name_id notes source text_name when where].
+    %w[gps_hidden lat lng name_id source text_name when where].
       each do |attribute|
         assert_equal(expected_mapping.send(attribute),
                      mock_inat_obs.send(attribute))
       end
+
+    expected_notes =
+      { Collector: "jdcohenesq",
+        Other: "on Quercus\n\n&#8212;\n\nOriginally posted " \
+               "to Mushroom Observer on Mar. 7, 2024." }
+
+    assert_equal(
+      expected_notes, mock_inat_obs.notes,
+      "MO notes should include: iNat Collector || login, iNat Description"
+    )
 
     expected_snapshot =
       <<~SNAPSHOT.gsub(/^\s+/, "")
@@ -115,12 +125,6 @@ class InatObsTest < UnitTestCase
 
     assert_equal(names(:coprinus).id, mock_inat_obs.name_id)
     assert_equal(names(:coprinus).text_name, mock_inat_obs.text_name)
-  end
-
-  def test_blank_notes
-    mock_inat_obs = mock_observation("coprinus")
-
-    assert_equal({}, mock_inat_obs.notes)
   end
 
   def test_infrageneric_name
@@ -362,11 +366,14 @@ class InatObsTest < UnitTestCase
   end
 
   def test_notes
+    assert_equal({ Collector: "tyler_irvin" },
+                 mock_observation("coprinus").notes,
+                 "MO Notes should always include Collector:")
     assert_equal(
-      { Other: "Collection by Heidi Randall. \nSmells like T. suaveolens. " },
-      mock_observation("trametes").notes
+      "Collection by Heidi Randall. \nSmells like T. suaveolens. ",
+      mock_observation("trametes").notes[:Other],
+      "iNat Description should be mapped to MO Notes Other"
     )
-    assert_empty(mock_observation("tremella_mesenterica").notes)
   end
 
   def test_sequences

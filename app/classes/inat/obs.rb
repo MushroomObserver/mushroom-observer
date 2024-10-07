@@ -99,9 +99,9 @@ class Inat
     end
 
     def notes
-      return {} if self[:description].empty?
+      return { Collector: collector } if self[:description].empty?
 
-      { Other: self[:description].gsub(%r{</?p>}, "") }
+      { Collector: collector, Other: self[:description].gsub(%r{</?p>}, "") }
     end
 
     # min bounding rectangle of iNat location blurred by public accuracy
