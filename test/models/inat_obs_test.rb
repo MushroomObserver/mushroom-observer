@@ -195,6 +195,19 @@ class InatObsTest < UnitTestCase
     assert(mock_observation("evernia").inat_obs_fields.none?)
   end
 
+  def test_inat_observation_field
+    assert(
+      mock_observation("arrhenia_sp_NY02").
+      inat_obs_field("Voucher Specimen Taken").present?,
+      "Failed to find iNat observation field"
+    )
+    assert(
+      mock_observation("somion_unicolor").
+      inat_obs_field("Voucher Specimen Taken").nil?,
+      "iNat obs should not have a Voucher Specimen Taken observation field"
+    )
+  end
+
   def test_provisional_name
     mock_inat_obs = mock_observation("arrhenia_sp_NY02")
     prov_name = mock_inat_obs.inat_prov_name

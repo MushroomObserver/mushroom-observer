@@ -69,6 +69,11 @@ class Inat
     # convenience method with descriptive, non-cryptic name
     def inat_obs_fields = @obs[:ofvs]
 
+    # The field hash for a given field name
+    def inat_obs_field(name)
+      inat_obs_fields.find { |field| field[:name] == name }
+    end
+
     # NOTE: Fixes ABC count of `snapshot` because
     # inat_taxon_name is one fewer Branch than self[:taxon][:name]
     def inat_taxon_name = self[:taxon][:name]
