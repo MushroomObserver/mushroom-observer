@@ -232,6 +232,11 @@ class InatObsTest < UnitTestCase
     )
   end
 
+  def test_specimen
+    assert(mock_observation("arrhenia_sp_NY02").specimen?)
+    assert_not(mock_observation("somion_unicolor").specimen?)
+  end
+
   def test_complex_without_mo_match
     mock_inat_obs = mock_observation("xeromphalina_campanella_complex")
     assert_equal("Xeromphalina campanella", mock_inat_obs.inat_taxon_name)

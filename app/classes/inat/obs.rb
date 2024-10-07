@@ -137,6 +137,12 @@ class Inat
       end
     end
 
+    def specimen?
+      # used by iNat NEMF projects and some others
+      field = inat_obs_field("Voucher Specimen Taken")
+      field.present? && field[:value] == "Yes"
+    end
+
     def source = "mo_inat_import"
 
     def text_name = ::Name.find(name_id).text_name
