@@ -1227,8 +1227,8 @@
   log_object_created_by_user: "[Type] created by [user]."
   log_object_created_by_user_with_name: "[Type] created by [user]: [name]"
   log_naming_proposed_by_user: "Name proposed by [user]: [name]"
-  log_object_destroyed_by_user: "[Type] destroyed by [user]."
-  log_object_destroyed_by_user_with_name: "[Type] destroyed by [user]: [name]"
+  log_object_destroyed_by_user: "[Type] deleted by [user]."
+  log_object_destroyed_by_user_with_name: "[Type] deleted by [user]: [name]"
   log_naming_destroyed_by_user: "Proposed name deleted by [user]: [name]"
   log_object_merged_by_user: "[Type] merged into [that] by [user]."
   log_object_moved_by_user: "[Type] moved to [to] by [user]."
@@ -1447,7 +1447,7 @@
   ask_webmaster_title: Email Question or Comment
   ask_webmaster_your_email: Your email address
   ask_webmaster_question: Question or Comment
-  ask_webmaster_note: "Thanks for your interest in the Mushroom Observer website. This website was first launched in mid-2006. The site is owned by the non-profit \"Mushroom Observer, Inc.\":/support/governance and administered by volunteer developers and maintainers. We welcome questions about using the site or comments on how the site might be improved.\n\n[:ask_webmaster_bug]\n\n[:ask_webmaster_account_deletion]\n\nThe Mushroom Observer Team\n"
+  ask_webmaster_note: "Thanks for your interest in the Mushroom Observer website. This website was first launched in mid-2006. The site is owned by the non-profit \"Mushroom Observer, Inc.\":/support/governance and administered by volunteer developers and maintainers. We welcome questions about using the site or comments on how the site might be improved.\n\n[:ask_webmaster_bug]\n\n[:ask_webmaster_account_deletion]\n\nThe Mushroom Observer Team"
   ask_webmaster_bug: "**Bug Reports**\nIf you are reporting a bug, please let us know what hardware, operating system, and browser you use, and exactly what you were doing. (Which page(s) you were viewing, what you typed, which link(s) you clicked.)"
   ask_webmaster_account_deletion: "**Account Deletion**\nIf you want your account deleted please submit a request asking for deletion including your account login (should be in the upper right corner of this page).  We will followup when an admin is available (remember that we are all volunteers here).  If you have no existing contributions, your account will be completely deleted.  If you have made regular contributions to the site including observations, images, namings, or comment, this data will be preserved and your account will be disabled.  Note that you can delete any of your information from your account if you so desired prior to your account being disabled. As part of disabling your account, your login, email address, name, and all personal profile data will all be deleted or anonymized.  You may also request that all data of a particular type be removed from the system, but this may take longer to complete."
 
@@ -1699,7 +1699,7 @@
   form_observations_click_point: "Tip: select a locality to center the map, then click a point on the map to set a location. If you're defining a new locality, click \"Use these bounds\" so you can select a point within."
   form_observations_locality_contains: "[:LOCALITIES] containing this point"
   form_observations_create_locality: "[:NEW] [:locality]"
-  form_observations_use_locality: "Use these bounds and select a point within"
+  form_observations_use_locality: Use these bounds and select a point within
   form_observations_edit_locality: "[:EDIT] this [:locality]"
   form_observations_notes_help: Please include any additional information you can think of about this observation that isn't clear from the photographs, e.g., habitat, substrate or nearby trees; distinctive texture, scent, taste, staining or bruising; results of chemical or microscopic analyses, etc.
   form_observations_remove_image_confirm: Are you sure you want to remove this image?  This will only remove this image from this observation.  If it is attached to other observations, it will remain attached to them.
@@ -3020,20 +3020,21 @@
   # observation/inat_imports
   inat_import_create_title: Import from iNat
   inat_choose_observations: "Inat Observations to Import:"
-  inat_import_list: "Comma separated list of observation #s"
+  inat_import_list: "Comma separated list of up to 10 observation #s"
   inat_import_all: Import all my iNat observations instead of a list
-  inat_import_consent: (Required) I consent to creating MushroomObserver Observation(s) based on my iNaturalist observations, including their photos.
+  inat_import_consent: "(Required) I consent to creating MushroomObserver Observation(s) based on my iNaturalist observations, including their photos."
   inat_consent_required: Your consent is required to import Inat observations. Please check the checkbox to give your consent.
   inat_username: Your iNat Username (mandatory)
   runtime_illegal_inat_id: iNat observation number can contain only numbers, commas, and spaces
   inat_missing_username: Missing your iNat Username
   inat_no_imports_designated: You must list the iNat observation(s) to be imported
   inat_previous_import: iNat [inat_id] previously imported as MO Observation [mo_obs_id]
-  inat_previous_mirror: "iNat [inat_id] is a \"mirror\" of existing MO Observation [mo_obs_id]"
+  inat_previous_mirror: iNat [inat_id] is a "mirror" of existing MO Observation [mo_obs_id]
+  inat_too_many_ids_listed: "Too many ids listed"
   inat_import_started: Your import has started. Refresh page to update results.
 
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
-  inat_wrong_user: "You cannot import an iNat observation created by someone else. To import your own observation, make sure that noone else is logged into iNat on your device and that you entered the correct iNat username."
+  inat_wrong_user: You cannot import an iNat observation created by someone else. To import your own observation, make sure that noone else is logged into iNat on your device and that you entered the correct iNat username.
 
   inat_data_comment: Snapshot of Imported iNat Data
   inat_dqa_casual: Casual
@@ -3041,16 +3042,16 @@
   inat_dqa_research: Research Grade
   inat_not_imported: Not Imported
 
-  inat_details_heading: "Details/Caveats"
-  inat_details_list: "- MO will list most iNat data and/or map it to analogous MO fields. \n - Coordinates are hidden from the public if iNat obscured them. \n - Location is a rectangle with an MO-style name, rather than the iNat Place name. \n"
+  inat_details_heading: Details/Caveats
+  inat_details_list: "- MO will list most iNat data and/or map it to analogous MO fields.\n- Coordinates are hidden from the public if iNat obscured them.\n- Location is a rectangle with an MO-style name, rather than the iNat Place name."
 
   # /inat_import_job_tracker
   INAT_IMPORT_JOB_TRACKERS: iNat Import Trackers
   inat_import_tracker: iNat Import Tracker
   inat_import_tracker_status: "[:STATUS]"
   inat_import_tracker_started: Started
-  inat_import_tracker_importable_count: "Number of Importable Observations"
-  inat_import_tracker_imported_count: "Number Imported"
+  inat_import_tracker_importable_count: Number of Importable Observations
+  inat_import_tracker_imported_count: Number Imported
   inat_importables_explanation: "An ??importable?? observation is an iNaturalist observation: which you created, which does not exist in MO, and whose iNat identity is a fungus or slime mold."
   inat_import_tracker_refresh: Update results
 
