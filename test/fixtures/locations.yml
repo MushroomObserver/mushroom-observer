@@ -206,39 +206,39 @@ no_mushrooms_location:
   user_id: 0
   name: No Mushrooms
   scientific_name: No Mushrooms
-  north: .0001
-  west: 0
-  east: .0001
-  south: .00007
+  north: 0.0001
+  west: 3
+  east: 3.0001
+  south: 0.00007
   box_area: 3.710458035376616e-05
   center_lat: 0.000085
-  center_lng: 0.00005
+  center_lng: 3.00005
 
 collection_location:
   <<: *DEFAULTS
   user_id: 0
   name: Collection Location
   scientific_name: Collection Location
-  north: .0001
-  west: 3
-  east: 3.0001
-  south: .00007
+  north: 0.0001
+  west: 6
+  east: 6.0001
+  south: 0.00007
   box_area: 3.710458035376616e-05
   center_lat: 0.000085
-  center_lng: 3.00005
+  center_lng: 6.00005
 
 display_location:
   <<: *DEFAULTS
   user_id: 0
   name: Display Location
   scientific_name: Display Location
-  north: .0001
-  west: 6
-  east: 6.0001
-  south: .00007
+  north: 0.0001
+  west: 9
+  east: 9.0001
+  south: 0.00007
   box_area: 3.710458035376616e-05
   center_lat: 0.000085
-  center_lng: 6.00005
+  center_lng: 9.00005
 
 sortable_observation_user_location:
   <<: *DEFAULTS
