@@ -963,7 +963,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def notes
-    self[:notes] || {}
+    return self[:notes] if self[:notes].is_a?(Hash)
+
+    Observation.no_notes
   end
 
   # no_notes persisted in the db
