@@ -94,7 +94,7 @@ class Inat
     end
 
     def notes
-      return "" if self[:description].empty?
+      return {} if self[:description].empty?
 
       { Other: self[:description].gsub(%r{</?p>}, "") }
     end

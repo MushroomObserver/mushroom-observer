@@ -117,6 +117,12 @@ class InatObsTest < UnitTestCase
     assert_equal(names(:coprinus).text_name, mock_inat_obs.text_name)
   end
 
+  def test_blank_notes
+    mock_inat_obs = mock_observation("coprinus")
+
+    assert_equal({}, mock_inat_obs.notes)
+  end
+
   def test_infrageneric_name
     name = Name.create(
       user: rolf,
