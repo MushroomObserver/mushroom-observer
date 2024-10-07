@@ -134,16 +134,19 @@ module Tabs
     end
 
     # Add some alternate sorting criteria.
+    # false positive
+    # rubocop:disable Layout/SpaceAroundOperators
     def location_index_sorts(query:)
       [
         ["name", :sort_by_name.t],
         ["created_at", :sort_by_created_at.t],
-        [(query.params[:by] == :rss_log ? "rss_log" : "updated_at"),
+        [(query&.params&[:by] == :rss_log ? "rss_log" : "updated_at"),
          :sort_by_updated_at.t],
         ["num_views", :sort_by_num_views.t],
         ["box_area", :sort_by_box_area.t]
       ]
     end
+    # rubocop:enable Layout/SpaceAroundOperators
 
     # link attribute arrays
     def location_form_new_tabs(location:)

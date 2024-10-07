@@ -273,15 +273,18 @@ module Tabs
        { class: tab_id(__method__.to_s) }]
     end
 
+    # false positive
+    # rubocop:disable Layout/SpaceAroundOperators
     def names_index_sorts(query:)
       [
         ["name", :sort_by_name.t],
         ["created_at", :sort_by_created_at.t],
-        [(query.params[:by] == :rss_log ? "rss_log" : "updated_at"),
+        [(query&.params&[:by] == :rss_log ? "rss_log" : "updated_at"),
          :sort_by_updated_at.t],
         ["num_views", :sort_by_num_views.t]
       ]
     end
+    # rubocop:enable Layout/SpaceAroundOperators
 
     ### Forms
     def name_form_new_tabs
