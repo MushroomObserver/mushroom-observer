@@ -93,6 +93,8 @@ class API2
       key.verified = nil
       key.save
       user.reload
+      email = QueuedEmail::VerifyAccount.create_email(user)
+      email.destroy if email.send_email
     end
 
     def build_deleter

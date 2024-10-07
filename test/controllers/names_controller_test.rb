@@ -956,9 +956,16 @@ class NamesControllerTest < FunctionalTestCase
   #  Create name.
   # ----------------------------
 
-  def test_create_name_get
+  def test_new_name
     requires_login(:new)
+
     assert_form_action(action: :create)
+    assert_select("select#name_rank") do
+      assert_select("option[selected]", text: "Species")
+    end
+    assert_select("select#name_deprecated") do
+      assert_select("option[selected]", text: :ACCEPTED.l)
+    end
     assert_select("form #name_icn_id", { count: 1 },
                   "Form is missing field for icn_id")
   end
@@ -1340,11 +1347,36 @@ class NamesControllerTest < FunctionalTestCase
   #  Edit name -- without merge
   # ----------------------------
 
-  def test_edit_name_get
+  def test_edit_name_get_accepted_species
     name = names(:coprinus_comatus)
     params = { id: name.id.to_s }
+
     requires_login(:edit, params)
+
     assert_form_action(action: :update, id: name.id.to_s)
+    assert_select("select#name_rank") do
+      assert_select("option[selected]", text: "Species")
+    end
+    assert_select("select#name_deprecated") do
+      assert_select("option[selected]", text: :ACCEPTED.l)
+    end
+    assert_select("form #name_icn_id", { count: 1 },
+                  "Form is missing field for icn_id")
+  end
+
+  def test_edit_name_get_deprecated_genus
+    name = names(:petigera)
+    params = { id: name.id.to_s }
+
+    requires_login(:edit, params)
+
+    assert_form_action(action: :update, id: name.id.to_s)
+    assert_select("select#name_rank") do
+      assert_select("option[selected]", text: "Genus")
+    end
+    assert_select("select#name_deprecated") do
+      assert_select("option[selected]", text: :DEPRECATED.l)
+    end
     assert_select("form #name_icn_id", { count: 1 },
                   "Form is missing field for icn_id")
   end

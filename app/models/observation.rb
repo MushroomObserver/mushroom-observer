@@ -100,8 +100,8 @@
 #  without_location
 #  at_location(location)
 #  in_region(where)
-#  in_box(n,s,e,w) geoloc is in the box
-#  outside(n,s,e,w) geoloc is outside the box
+#  in_box(north:, south:, east:, west:) geoloc is in the box
+#  not_in_box(north:, south:, east:, west:) geoloc is outside the box
 #  is_collection_location
 #  not_collection_location
 #  with_images
@@ -384,8 +384,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :without_location,
         -> { where(location: nil) }
   scope :with_geolocation,
-        -> { where(gps_hidden: false).where.not(lat: nil) }
+        -> { where.not(lat: nil) }
   scope :without_geolocation,
+        -> { where(lat: nil) }
+  scope :with_public_geolocation,
+        -> { where(gps_hidden: false).where.not(lat: nil) }
+  scope :without_public_geolocation,
         -> { where(gps_hidden: true).or(where(lat: nil)) }
   scope :at_location,
         ->(location) { where(location: location) }
@@ -399,62 +403,136 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
             where(Observation[:where].matches("%#{region}"))
           end
         }
-  scope :in_box, # Use named parameters (n, s, e, w), any order
+  # Pass kwargs (:north, :south, :east, :west), any order
+  # Pass mappable: false to include all obs, including with vague locations.
+  scope :in_box,
         lambda { |**args|
-          box = Mappable::Box.new(
-            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
-          )
+          args[:mappable] ||= false
+          box = Mappable::Box.new(**args.except(:mappable))
           return none unless box.valid?
 
-          # resize box by epsilon to create leeway for Float rounding
-          # Fixes a bug where Califoria fixture was not in a box
-          # defined by the fixture's north, south, east, west
-          resized_box = box.expand(0.00001)
-
           if box.straddles_180_deg?
-            where(
-              (Observation[:lat] >= resized_box.south).
-              and(Observation[:lat] <= resized_box.north).
-              and(Observation[:lng] >= resized_box.west).
-              or(Observation[:lng] <= resized_box.east)
-            )
+            in_box_straddling_dateline(**args)
           else
-            where(
-              (Observation[:lat] >= resized_box.south).
-              and(Observation[:lat] <= resized_box.north).
-              and(Observation[:lng] >= resized_box.west).
-              and(Observation[:lng] <= resized_box.east)
-            )
+            in_box_regular(**args)
           end
         }
-  scope :not_in_box, # Use named parameters (n, s, e, w), any order
+  scope :in_box_straddling_dateline, # mostly a helper for in_box
         lambda { |**args|
-          box = Mappable::Box.new(
-            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
-          )
+          args[:mappable] ||= true
+          box = Mappable::Box.new(**args.except(:mappable))
+          return none unless box.valid?
 
-          return Observation.all unless box.valid?
+          where(
+            (Observation[:lat] >= box.south).
+            and(Observation[:lat] <= box.north).
+            and(Observation[:lng] >= box.west).
+            or(Observation[:lng] <= box.east)
+          ).or(Observation.location_straddling_dateline(**args))
+        }
+  scope :location_straddling_dateline,
+        lambda { |**args|
+          box = Mappable::Box.new(**args.except(:mappable))
+          return none unless box.valid?
 
-          # resize box by epsilon to create leeway for Float rounding
-          resized_box = box.expand(-0.00001)
-
-          if box.straddles_180_deg?
+          if args[:mappable]
             where(
-              Observation[:lat].eq(nil).or(Observation[:lng].eq(nil)).
-              or(Observation[:lat] < resized_box.south).
-              or(Observation[:lat] > resized_box.north).
-              or((Observation[:lng] < resized_box.west).
-                 and(Observation[:lng] > resized_box.east))
+              Observation[:lat].eq(nil).
+              and(Observation[:location_lat] >= box.south).
+              and(Observation[:location_lat] <= box.north).
+              and(Observation[:location_lng] >= box.west).
+              or(Observation[:location_lng] <= box.east)
             )
           else
-            where(
-              Observation[:lat].eq(nil).or(Observation[:lng].eq(nil)).
-              or(Observation[:lat] < resized_box.south).
-              or(Observation[:lat] > resized_box.north).
-              or(Observation[:lng] < resized_box.west).
-              or(Observation[:lng] > resized_box.east)
-            )
+            joins(:location).
+              where(
+                Observation[:lat].eq(nil).
+                and(Location[:center_lat] >= box.south).
+                and(Location[:center_lat] <= box.north).
+                and(Location[:center_lng] <= box.east).
+                and(Location[:center_lng] >= box.west)
+              )
           end
+        }
+  scope :in_box_regular, # mostly a helper for in_box
+        lambda { |**args|
+          args[:mappable] ||= true
+          box = Mappable::Box.new(**args.except(:mappable))
+          return none unless box.valid?
+
+          where(
+            (Observation[:lat] >= box.south).
+            and(Observation[:lat] <= box.north).
+            and(Observation[:lng] >= box.west).
+            and(Observation[:lng] <= box.east)
+          ).or(Observation.location_center_in_box(**args))
+        }
+  scope :location_center_in_box,
+        lambda { |**args|
+          box = Mappable::Box.new(**args.except(:mappable))
+          return none unless box.valid?
+
+          # odd! will toss entire condition if below order is west, east
+          if args[:mappable]
+            where(
+              Observation[:lat].eq(nil).
+              and(Observation[:location_lat] >= box.south).
+              and(Observation[:location_lat] <= box.north).
+              and(Observation[:location_lng] <= box.east).
+              and(Observation[:location_lng] >= box.west)
+            )
+          else
+            joins(:location).
+              where(
+                Observation[:lat].eq(nil).
+                and(Location[:center_lat] >= box.south).
+                and(Location[:center_lat] <= box.north).
+                and(Location[:center_lng] <= box.east).
+                and(Location[:center_lng] >= box.west)
+              )
+          end
+        }
+
+  scope :not_in_box, # Pass kwargs (:north, :south, :east, :west), any order
+        lambda { |**args|
+          args[:mappable] ||= false
+          box = Mappable::Box.new(**args.except(:mappable))
+          return Observation.all unless box.valid?
+
+          # should be in_box(**args).invert_where
+          if box.straddles_180_deg?
+            not_in_box_straddling_dateline(**args)
+          else
+            not_in_box_regular(**args)
+          end
+        }
+  scope :not_in_box_straddling_dateline, # helper for not_in_box
+        lambda { |**args|
+          args[:mappable] ||= false
+          box = Mappable::Box.new(**args.except(:mappable))
+          return Observation.all unless box.valid?
+
+          where(
+            Observation[:lat].eq(nil).
+            or(Observation[:lat] < box.south).
+            or(Observation[:lat] > box.north).
+            or((Observation[:lng] < box.west).
+                and(Observation[:lng] > box.east))
+          )
+        }
+  scope :not_in_box_regular, # helper for not_in_box
+        lambda { |**args|
+          args[:mappable] ||= false
+          box = Mappable::Box.new(**args.except(:mappable))
+          return Observation.all unless box.valid?
+
+          where(
+            Observation[:lat].eq(nil).
+            or(Observation[:lat] < box.south).
+            or(Observation[:lat] > box.north).
+            or(Observation[:lng] < box.west).
+            or(Observation[:lng] > box.east)
+          )
         }
 
   scope :is_collection_location,
@@ -916,7 +994,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def notes
-    self[:notes] || {}
+    return self[:notes] if self[:notes].is_a?(Hash)
+
+    Observation.no_notes
   end
 
   # no_notes persisted in the db
