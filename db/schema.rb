@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_08_214055) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_08_225112) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -629,11 +629,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_08_214055) do
     t.integer "to_user_id"
   end
 
-  create_table "rss_logs", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+  create_table "rss_logs", id: :integer, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "observation_id"
     t.integer "species_list_id"
     t.datetime "updated_at", precision: nil
-    t.text "notes"
+    t.text "notes", size: :medium
     t.integer "name_id"
     t.integer "location_id"
     t.integer "project_id"
