@@ -739,7 +739,6 @@ reused_observation:
   location: obs_default_location
   where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
   species_lists: reused_list
-  rss_log:
 
 # did not have rss_log
 deprecated_name_obs:
@@ -753,7 +752,6 @@ deprecated_name_obs:
   name: petigera
   text_name: Petigera
   lifeform: " lichen "
-  rss_log:
 
 # meets constraints of falmouth_2023_09_project
 falmouth_2023_09_obs:
