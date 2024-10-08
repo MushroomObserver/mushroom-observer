@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_01_233907) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_08_214055) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -38,11 +38,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_01_233907) do
     t.string "number"
   end
 
-  create_table "comments", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+  create_table "comments", id: :integer, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.integer "user_id"
     t.string "summary", limit: 100
-    t.text "comment"
+    t.text "comment", size: :medium
     t.string "target_type", limit: 30
     t.integer "target_id"
     t.datetime "updated_at", precision: nil
