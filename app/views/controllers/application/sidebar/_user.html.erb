@@ -9,6 +9,16 @@ end %>
               { class: class_names("btn", "btn-link", classes[:indent],
                                    classes[:mobile_only]),
                 id: "nav_user_logout_link" }) %>
+
+<%= active_link_to(:app_qrcode.t,
+                   field_slips_qr_reader_new_path,
+                   class: class_names(classes[:indent], classes[:mobile_only]),
+                   id: "nav_mobile_qr_reader") %>
+<%= active_link_to(:app_mobile.t,
+                   article_path(34),
+                   class: class_names(classes[:indent], classes[:mobile_only]),
+                   id: "nav_mobile_mobile_link") %>
+
 <%= active_link_to(:app_comments_for_you.t,
                    comments_path(for_user: @user.id),
                    class: class_names(classes[:indent], classes[:mobile_only]),
