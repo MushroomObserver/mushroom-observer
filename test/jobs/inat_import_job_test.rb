@@ -83,6 +83,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.order(created_at: :asc).last
     standard_assertions(obs: obs, name: name, loc: loc)
+    assert_not(obs.specimen, "Obs should not have a specimen")
     assert_equal(0, obs.images.length, "Obs should not have images")
     assert_match(/Observation Fields: none/, obs.comments.first.comment,
                  "Missing 'none' for Observation Fields")
@@ -283,7 +284,7 @@ class InatImportJobTest < ActiveJob::TestCase
   # `johnplischke` NEMF, DNA, notes, 2 identifications with same id;
   # 3 comments, everyone has MO account;
   # obs fields(include("Voucher Number(s)", "Voucher Specimen Taken"))
-  def test_import_job_prov_name
+  def test_import_job_nemf_plischke
     file_name = "arrhenia_sp_NY02"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     inat_import = create_inat_import(inat_response: mock_inat_response)
@@ -297,7 +298,6 @@ class InatImportJobTest < ActiveJob::TestCase
 
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
-
     Inat::PhotoImporter.stub(:new,
                              stub_mo_photo_importer(mock_inat_response)) do
       assert_difference("Observation.count", 1,
@@ -309,8 +309,9 @@ class InatImportJobTest < ActiveJob::TestCase
     obs = Observation.order(created_at: :asc).last
     standard_assertions(obs: obs, name: name)
 
-    assert(obs.images.any?, "Obs should have images")
-    assert(obs.sequences.one?, "Obs should have a sequence")
+    assert(obs.images.any?, "Obs should have Images")
+    assert(obs.sequences.one?, "Obs should have a Sequence")
+    assert(obs.specimen, "Obs should show that a Specimen is available")
   end
 
   # Prove that Namings, Votes, Identification are correct
