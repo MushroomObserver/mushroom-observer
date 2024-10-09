@@ -14,7 +14,9 @@ module Query
         created_at?: [:time],
         updated_at?: [:time],
         date?: [:date],
+        # by_user?: User,
         users?: [User],
+        # ids?: [Image],
         locations?: [:string],
         observations?: [Observation],
         projects?: [:string],
@@ -29,7 +31,8 @@ module Query
         with_votes?: :boolean,
         quality?: [:float],
         confidence?: [:float],
-        ok_for_export?: :boolean
+        ok_for_export?: :boolean,
+        pattern?: :string
       ).merge(names_parameter_declarations)
     end
 
@@ -41,6 +44,9 @@ module Query
         add_join(:observation_images) if params[:with_observation]
         initialize_notes_parameters
       end
+      # add_by_user_condition("images")
+      # add_ids_condition
+      add_pattern_condition
       initialize_association_parameters
       initialize_name_parameters(:observation_images, :observations)
       initialize_image_parameters
@@ -89,6 +95,26 @@ module Query
       add_range_condition("images.vote_cache", params[:quality])
       add_range_condition("observations.vote_cache", params[:confidence],
                           :observation_images, :observations)
+    end
+
+    def add_pattern_condition
+      return if params[:pattern].blank?
+
+      add_search_condition(search_fields, params[:pattern])
+      add_join(:observation_images, :observations)
+      add_join(:observations, :locations!)
+      add_join(:observations, :names)
+      super
+    end
+
+    def search_fields
+      "CONCAT(" \
+        "names.search_name," \
+        "COALESCE(images.original_name,'')," \
+        "COALESCE(images.copyright_holder,'')," \
+        "COALESCE(images.notes,'')," \
+        "observations.where" \
+        ")"
     end
 
     def self.default_order

@@ -108,7 +108,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index
     set = [nybg, herbaria(:rolf_herbarium)]
-    query = Query.lookup_and_save(:Herbarium, :in_set, by: :name, ids: set)
+    query = Query.lookup_and_save(:Herbarium, :all, by: :name, ids: set)
     login("zero") # Does not own any herbarium in set
     get(:index, params: { q: query.record.id.alphabetize })
 

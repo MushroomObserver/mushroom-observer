@@ -206,7 +206,7 @@ class ProjectsController < ApplicationController
       set_ivars_for_show
       render("show", location: project_path(@project.id))
     else
-      query = create_query(:Project, :pattern_search, pattern: pattern)
+      query = create_query(:Project, :all, pattern: pattern)
       show_selected_projects(query)
     end
   end

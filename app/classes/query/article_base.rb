@@ -10,6 +10,7 @@ class Query::ArticleBase < Query::Base
       created_at?: [:time],
       updated_at?: [:time],
       users?: [User],
+      ids?: [Article],
       title_has?: :string,
       body_has?: :string
     )
@@ -17,6 +18,7 @@ class Query::ArticleBase < Query::Base
 
   def initialize_flavor
     add_owner_and_time_stamp_conditions("articles")
+    add_ids_condition
     add_search_condition("articles.title", params[:title_has])
     add_search_condition("articles.body", params[:body_has])
     super

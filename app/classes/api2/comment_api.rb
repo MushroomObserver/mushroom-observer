@@ -59,7 +59,7 @@ class API2
     end
 
     def query_flavor
-      @target ? :for_target : :all
+      :all
     end
 
     def validate_create_params!(params)

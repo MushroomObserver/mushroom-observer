@@ -28,6 +28,7 @@ module Query
         species_lists?: [:string],
         users?: [User],
         field_slips?: [:string],
+        # pattern?: :string,
 
         # numeric
         confidence?: [:float],
@@ -51,6 +52,7 @@ module Query
     def initialize_flavor
       add_owner_and_time_stamp_conditions("observations")
       add_date_condition("observations.when", params[:date])
+      # add_pattern_condition
       initialize_name_parameters
       initialize_association_parameters
       initialize_boolean_parameters

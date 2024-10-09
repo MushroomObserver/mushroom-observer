@@ -66,7 +66,7 @@ class CommentsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Comment, :by_user, user: user)
+    query = create_query(:Comment, :all, by_user: user)
     show_selected_comments(query)
   end
 
@@ -79,7 +79,7 @@ class CommentsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Comment, :for_user, user: user)
+    query = create_query(:Comment, :all, for_user: user)
     show_selected_comments(query)
   end
 
@@ -89,8 +89,8 @@ class CommentsController < ApplicationController
     return no_model unless (model = Comment.safe_model_from_name(params[:type]))
     return unless (target = find_or_goto_index(model, params[:target].to_s))
 
-    query = create_query(:Comment, :for_target, target: target.id,
-                                                type: target.class.name)
+    query = create_query(:Comment, :all, target: target.id,
+                                         type: target.class.name)
     show_selected_comments(query)
   end
 
@@ -105,7 +105,7 @@ class CommentsController < ApplicationController
     if pattern.match?(/^\d+$/) && (comment = Comment.safe_find(pattern))
       redirect_to(action: :show, id: comment.id)
     else
-      query = create_query(:Comment, :pattern_search, pattern: pattern)
+      query = create_query(:Comment, :all, pattern: pattern)
       show_selected_comments(query)
     end
   end
@@ -126,7 +126,7 @@ class CommentsController < ApplicationController
       args[:letters] = "users.login"
     end
 
-    @full_detail = (query.flavor == :for_target)
+    @full_detail = query.params[:for_target].present?
 
     show_index_of_objects(query, args)
   end

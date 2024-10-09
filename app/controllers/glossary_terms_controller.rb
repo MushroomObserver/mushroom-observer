@@ -93,7 +93,7 @@ class GlossaryTermsController < ApplicationController
                     location: glossary_term_path(glossary_term.id)) and return
     else
       show_selected_glossary_terms(
-        create_query(:GlossaryTerm, :pattern_search, pattern: pattern)
+        create_query(:GlossaryTerm, :all, pattern: pattern)
       )
     end
   end
