@@ -1316,15 +1316,10 @@ class QueryTest < UnitTestCase
     assert_equal("Observation", q4.model.to_s)
     assert_equal("SpeciesList", q5.model.to_s)
 
-    assert_equal(:rss_log, q2.params[:by])
-    assert_equal(:rss_log, q3.params[:by])
-    assert_equal(:rss_log, q4.params[:by])
-    assert_equal(:rss_log, q5.params[:by])
-
-    assert_equal({}, q2.params)
-    assert_equal({}, q3.params)
-    assert_equal({}, q4.params)
-    assert_equal({}, q5.params)
+    assert_equal(:rss_log, q2.params[:by].to_sym)
+    assert_equal(:rss_log, q3.params[:by].to_sym)
+    assert_equal(:rss_log, q4.params[:by].to_sym)
+    assert_equal(:rss_log, q5.params[:by].to_sym)
   end
 
   def test_coercable
