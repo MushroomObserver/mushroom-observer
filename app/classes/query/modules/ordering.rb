@@ -200,7 +200,6 @@ module Query
         # use cached column if exists, and don't join
         # calling index method should include rss_logs
         if model.column_names.include?("log_updated_at")
-          where << "#{model.table_name}.rss_log_id IS NOT NULL"
           "#{model.table_name}.log_updated_at DESC"
         else
           add_join(:rss_logs)
