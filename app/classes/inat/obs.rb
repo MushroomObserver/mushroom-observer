@@ -69,6 +69,11 @@ class Inat
     # convenience method with descriptive, non-cryptic name
     def inat_obs_fields = @obs[:ofvs]
 
+    # The field hash for a given field name
+    def inat_obs_field(name)
+      inat_obs_fields.find { |field| field[:name] == name }
+    end
+
     # NOTE: Fixes ABC count of `snapshot` because
     # inat_taxon_name is one fewer Branch than self[:taxon][:name]
     def inat_taxon_name = self[:taxon][:name]
@@ -94,9 +99,9 @@ class Inat
     end
 
     def notes
-      return {} if self[:description].empty?
+      return { Collector: collector } if self[:description].empty?
 
-      { Other: self[:description].gsub(%r{</?p>}, "") }
+      { Collector: collector, Other: self[:description].gsub(%r{</?p>}, "") }
     end
 
     # min bounding rectangle of iNat location blurred by public accuracy
@@ -132,6 +137,12 @@ class Inat
       end
     end
 
+    def specimen?
+      # used by iNat NEMF projects and some others
+      field = inat_obs_field("Voucher Specimen Taken")
+      field.present? && field[:value] == "Yes"
+    end
+
     def source = "mo_inat_import"
 
     def text_name = ::Name.find(name_id).text_name
@@ -144,6 +155,15 @@ class Inat
     def where = self[:place_guess]
 
     ########## Other mappings used in MO Observations
+
+    # This will get put into MO Observation's Notes Collector:
+    def collector
+      if inat_obs_field("Collector").present?
+        inat_obs_field("Collector")[:value]
+      else
+        self[:user][:login]
+      end
+    end
 
     def dqa
       case self[:quality_grade]
