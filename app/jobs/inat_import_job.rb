@@ -209,6 +209,7 @@ class InatImportJob < ApplicationJob
       lng: @inat_obs.lng,
       gps_hidden: @inat_obs.gps_hidden,
       name_id: name_id,
+      specimen: @inat_obs.specimen?,
       text_name: Name.find(name_id).text_name,
       notes: @inat_obs.notes,
       source: @inat_obs.source,
