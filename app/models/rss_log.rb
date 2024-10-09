@@ -59,13 +59,6 @@
 #
 #       <%= show_object_footer(@object) %>
 #
-#  6) Add +by_rss_log+ flavor to Query for your model:
-#
-#       self.allowed_model_flavors = {
-#         :Model => [
-#           :by_rss_log, # Models with RSS logs, in RSS order.
-#         ]
-#       }
 #
 #  == Usage
 #
