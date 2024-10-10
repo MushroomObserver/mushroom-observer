@@ -714,10 +714,22 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(loc, obs.location) if loc
 
     obs.namings.each do |naming|
+      assert_equal(inat_manager, naming.user,
+                   "Namings should belong to inat_manager")
       assert_not(
         naming.vote_cache.zero?,
         "VoteCache for Proposed Name '#{naming.name.text_name}' incorrect"
       )
+
+      used_references = naming.reasons["2"]
+      assert(used_references && used_references[:check] == "1",
+             "Naming reason should be '#{:naming_reason_label_2.l}'") # rubocop:disable Naming/VariableNumber
+      assert(used_references[:notes].present?,
+             "Naming reason should have notes")
+      # TODO: jdc 2024-10-10. Revise test per this comment https://github.com/MushroomObserver/mushroom-observer/issues/2386#issuecomment-2406225099
+      assert_match(/iNat.*\d{4}-\d{2}-\d{2}/,
+                   used_references[:notes],
+                   "Naming notes should mention iNat")
     end
 
     if name
@@ -727,8 +739,7 @@ class InatImportJobTest < ActiveJob::TestCase
       namings = obs.namings
       naming = namings.find_by(name: name)
       assert(naming.present?, "Missing Naming for MO consensus ID")
-      assert_equal(inat_manager, naming.user,
-                   "Namings should belong to inat_manager")
+
       vote = Vote.find_by(naming: naming, user: naming.user)
       assert(vote.present?, "Naming is missing a Vote")
       assert_equal(Vote::MAXIMUM_VOTE, vote.value,
