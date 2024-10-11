@@ -68,7 +68,7 @@ module Admin
     end
 
     def valid_ip_num(num)
-      num.to_i >= 0 && num.to_i < 256
+      (0..255).cover?(num.to_i)
     end
   end
 end
