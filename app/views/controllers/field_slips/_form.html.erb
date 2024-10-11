@@ -18,7 +18,7 @@
   <%= form_with(model: field_slip) do |form| %>
     <% if field_slip.projects %>
       <%= select_with_label(form:, field: :project_id, inline: true,
-                            selected: field_slip.project.id,
+                            selected: field_slip.project&.id,
                             label: :Project.t + ":",
                             options: field_slip.projects) %>
     <% end %>
