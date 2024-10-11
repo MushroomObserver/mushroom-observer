@@ -99,6 +99,7 @@ class InatImportJob < ApplicationJob
   end
 
   def import_requested_observations
+    @inat_manager = User.find_by(login: "MO Webmaster")
     inat_ids = inat_id_list
     return if @inat_import[:import_all].blank? && inat_ids.blank?
 
@@ -289,11 +290,7 @@ class InatImportJob < ApplicationJob
   # User with login: MO Webmaster, API_key with `notes: "inat import"`
   # 2024-06-18 jdc
   def inat_manager_key
-    APIKey.where(user: inat_manager, notes: "inat import").first
-  end
-
-  def inat_manager
-    User.find_by(login: "MO Webmaster")
+    APIKey.where(user: @inat_manager, notes: "inat import").first
   end
 
   def update_names_and_proposals
@@ -318,12 +315,16 @@ class InatImportJob < ApplicationJob
       map(&:name).include?(name)
   end
 
-  def add_naming_with_vote(name:, user: inat_manager, value: Vote::MAXIMUM_VOTE)
+  def add_naming_with_vote(name:, user: @inat_manager,
+                           value: Vote::MAXIMUM_VOTE)
     naming = Naming.create(observation: @observation,
                            user: user, name: name)
 
-    Vote.create(naming: naming, observation: @observation,
-                user: user, value: value)
+    vote = Vote.create(naming: naming, observation: @observation,
+                       user: user, value: value)
+    # We need an ObservationView, but noone has actually viewed this Obs.
+    ObservationView.create!(observation: @observation, user: user,
+                            last_view: vote.updated_at, reviewed: 1)
   end
 
   def add_provisional_naming
@@ -350,7 +351,7 @@ class InatImportJob < ApplicationJob
 
     if naming.nil?
       add_naming_with_vote(name: @observation.name,
-                           user: inat_manager, value: Vote::MAXIMUM_VOTE)
+                           user: @inat_manager, value: Vote::MAXIMUM_VOTE)
     else
       vote = Vote.find_by(naming: naming, observation: @observation)
       vote.update(value: Vote::MAXIMUM_VOTE)
@@ -375,7 +376,7 @@ class InatImportJob < ApplicationJob
   end
 
   def add_snapshot_of_import_comment
-    params = { target: @observation, user: inat_manager,
+    params = { target: @observation, user: @inat_manager,
                summary: "#{:inat_data_comment.t} #{@observation.created_at}",
                comment: @inat_obs.snapshot }
     Comment.create(params)
