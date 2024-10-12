@@ -577,6 +577,14 @@ class LocationTest < UnitTestCase
     assert_empty(Location.in_region(ARBITRARY_SHA))
   end
 
+  def test_contains_edges
+    loc = albion
+    assert(loc.contains_lat?(loc.north), "Location should contain its N edge")
+    assert(loc.contains_lat?(loc.south), "Location should contain its S edge")
+    assert(loc.contains_lng?(loc.west), "Location should contain its W edge")
+    assert(loc.contains_lng?(loc.east), "Location should contain its E edge")
+  end
+
   def test_scope_contains_point
     [
       locations(:albion),
