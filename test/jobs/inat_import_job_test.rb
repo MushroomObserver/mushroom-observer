@@ -735,6 +735,10 @@ class InatImportJobTest < ActiveJob::TestCase
                    "Vote for MO consensus should be highest possible vote")
     end
 
+    view = ObservationView.
+           find_by(observation_id: obs.id, user_id: inat_manager.id)
+    assert(view.present?, "Failed to create ObservationView")
+
     assert(obs.comments.any?, "Imported iNat should have >= 1 Comment")
     obs_comments =
       Comment.where(target_type: "Observation", target_id: obs.id)
