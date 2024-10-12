@@ -263,6 +263,9 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     assert_field("observation_location_id",
                  type: :hidden, with: last_location.id)
     assert_field("observation_place_name", with: last_location.display_name)
+    assert_field("observation_when_1i", with: Time.zone.today.year)
+    assert_field("observation_when_2i", with: Time.zone.today.month)
+    assert_field("observation_when_3i", with: Time.zone.today.day)
     check(proj_checkbox)
     assert_selector("##{proj_checkbox}[checked='checked']")
     assert_no_difference("Observation.count",
@@ -274,9 +277,10 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
       "#flash_notices",
       text: :form_observations_there_is_a_problem_with_projects.t.strip_html
     )
+
     within("#project_messages") do # out-of-range warning message
       assert(has_text?(:form_observations_projects_out_of_range.l(
-                         date: last_obs.when,
+                         date: Time.zone.today.web_date,
                          place_name: last_location.display_name
                        )),
              "Missing out-of-range warning with observation date")
