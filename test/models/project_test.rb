@@ -189,6 +189,7 @@ class ProjectTest < UnitTestCase
       title: "With Location Violations",
       open_membership: true
     )
+    Location.update_box_area_and_center_columns
     geoloc_in_burbank = observations(:unknown_with_lat_lng)
     geoloc_outside_burbank =
       observations(:trusted_hidden) # lat/lon in Falmouth
@@ -204,7 +205,6 @@ class ProjectTest < UnitTestCase
     ]
 
     location_violations = proj.out_of_area_observations
-
     assert_includes(
       location_violations, geoloc_outside_burbank,
       "Noncompliant Obss missing Obs with geoloc outside Proj location"
@@ -222,6 +222,46 @@ class ProjectTest < UnitTestCase
       location_violations, geoloc_nil_burbank_contains_loc,
       "Noncompliant Obss wrongly includes Obs w/o geoloc " \
       "whose Loc is contained in Proj location"
+    )
+  end
+
+  def test_location_violations_with_box_overlap
+    proj = Project.create(
+      location: locations(:california),
+      title: "With Location Violations",
+      open_membership: true
+    )
+    # Slightly outside the box of California, but small enough to count!
+    mesquite = Location.create!(
+      name: "Mesquite, Clark Co., Nevada, USA",
+      north: 36.8433951,
+      south: 36.73912,
+      east: -114.0499929,
+      west: -114.198545,
+      center_lat: 36.791258,
+      center_lng: -114.124269,
+      user: users(:rolf)
+    )
+    obs_in_mesquite = Observation.create!(
+      location_id: mesquite.id,
+      when: Time.zone.now,
+      location_lat: 36.791258,
+      location_lng: -114.124269,
+      user: users(:rolf)
+    )
+    Location.update_box_area_and_center_columns
+
+    obs_in_burbank = observations(:unknown_with_lat_lng)
+    proj.observations = [obs_in_mesquite, obs_in_burbank]
+    location_violations = proj.out_of_area_observations
+
+    assert_includes(
+      location_violations, obs_in_mesquite,
+      "Noncompliant Obss missing Obs with geoloc outside Proj location"
+    )
+    assert_not_includes(
+      location_violations, obs_in_burbank,
+      "Noncompliant Obss wrongly includes Obs with geoloc inside Proj location"
     )
   end
 end
