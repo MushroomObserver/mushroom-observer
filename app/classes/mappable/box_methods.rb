@@ -113,7 +113,7 @@ module Mappable
     end
 
     def contains_lng?(lng)
-      return (west...east).cover?(lng) unless straddles_180_deg?
+      return (west..east).cover?(lng) unless straddles_180_deg?
 
       (lng >= west) || (lng <= east)
     end
