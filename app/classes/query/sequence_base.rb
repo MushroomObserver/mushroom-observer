@@ -26,7 +26,9 @@ module Query
         accession?: [:string],
         locus_has?: :string,
         accession_has?: :string,
-        notes_has?: :string
+        notes_has?: :string,
+        pattern?: :string,
+        ids?: [Sequence]
       }
     end
 
@@ -60,6 +62,8 @@ module Query
       # for.  Users would probably not understand why the search fails to find
       # some sequences because of this.
       add_owner_and_time_stamp_conditions("sequences")
+      add_pattern_condition
+      add_ids_condition
       initialize_association_parameters
       initialize_name_parameters(:observations)
       initialize_observation_parameters
@@ -68,6 +72,18 @@ module Query
       initialize_search_parameters
       add_bounding_box_conditions_for_observations
       super
+    end
+
+    def search_fields
+      # I'm leaving out bases because it would be misleading.  Some formats
+      # allow spaces and other delimiting "garbage" which could break up
+      # the subsequence the user is searching for.
+      "CONCAT(" \
+        "COALESCE(sequences.locus,'')," \
+        "COALESCE(sequences.archive,'')," \
+        "COALESCE(sequences.accession,'')," \
+        "COALESCE(sequences.notes,'')" \
+        ")"
     end
 
     def initialize_association_parameters

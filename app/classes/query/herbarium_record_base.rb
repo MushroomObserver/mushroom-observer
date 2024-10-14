@@ -11,7 +11,10 @@ class Query::HerbariumRecordBase < Query::Base
       updated_at?: [:time],
       users?: [User],
       herbaria?: [:string],
+      herbarium?: Herbarium,
+      observation?: Observation,
       observations?: [:string],
+      pattern?: :string,
       with_notes?: :boolean,
       initial_det?: [:string],
       accession_number?: [:string],
@@ -23,11 +26,41 @@ class Query::HerbariumRecordBase < Query::Base
 
   def initialize_flavor
     add_owner_and_time_stamp_conditions("herbarium_records")
+    add_for_observation_condition
+    add_in_herbarium_condition
+    add_pattern_condition
     initialize_association_parameters
     initialize_boolean_parameters
     initialize_exact_match_parameters
     initialize_search_parameters
     super
+  end
+
+  def add_for_observation_condition
+    return if params[:observation].blank?
+
+    obs = find_cached_parameter_instance(Observation, :observation)
+    @title_tag = :query_title_for_observation
+    @title_args[:observation] = obs.unique_format_name
+    where << "observation_herbarium_records.observation_id = '#{obs.id}'"
+    add_join(:observation_herbarium_records)
+  end
+
+  def add_in_herbarium_condition
+    return if params[:herbarium].blank?
+
+    herbarium = find_cached_parameter_instance(Herbarium, :herbarium)
+    @title_tag = :query_title_in_herbarium
+    @title_args[:herbarium] = herbarium.name
+    where << "herbarium_records.herbarium_id = '#{herbarium.id}'"
+  end
+
+  def search_fields
+    "CONCAT(" \
+      "herbarium_records.initial_det," \
+      "herbarium_records.accession_number," \
+      "COALESCE(herbarium_records.notes,'')" \
+      ")"
   end
 
   def initialize_association_parameters
