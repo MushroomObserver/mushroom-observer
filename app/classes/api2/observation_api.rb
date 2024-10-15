@@ -188,6 +188,15 @@ class API2
     def update_project(project, observation)
       return unless project && !project.violates_constraints?(observation)
 
+      user = observation.user
+      if project.can_join?(observation.user)
+        ProjectMember.create!(project:, user:,
+                              trust_level: "hidden_gps")
+        group = project.user_group
+        group.users << user unless group.users.member?(user)
+      end
+      return unless project.member?(user)
+
       project.add_observation(observation)
     end
 

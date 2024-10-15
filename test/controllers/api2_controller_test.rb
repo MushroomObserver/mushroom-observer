@@ -172,6 +172,16 @@ class API2ControllerTest < FunctionalTestCase
     assert(obs.field_slips[0].project.observations.include?(obs))
   end
 
+  def test_post_observation_joins_project
+    params = { api_key: api_keys(:rolfs_api_key).key, location: "Earth",
+               code: "OPEN-135" }
+    post(:observations, params: params)
+    assert_no_api_errors
+    obs = Observation.last
+    project = Project.find_by(field_slip_prefix: "OPEN")
+    assert(project.member?(obs.user))
+  end
+
   def test_post_maximal_observation
     params = {
       api_key: api_keys(:rolfs_api_key).key,
