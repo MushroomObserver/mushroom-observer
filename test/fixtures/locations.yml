@@ -17,6 +17,9 @@ DEFAULTS: &DEFAULTS
   west: -1
   east: 1
   south: -1
+  box_area: 49470.2621318808
+  center_lat: 0
+  center_lng: 0
 
 # AVOID albion as the location for other fixtures because
 # it may break API2Test#test_patching_locations.
@@ -174,6 +177,9 @@ unknown_location:
   west: -180
   east: 180
   south: -90
+  box_area: 510224605.17052704
+  center_lat: 0
+  center_lng: 0
   locked: true
 
 nybg_location:
@@ -186,7 +192,7 @@ nybg_location:
   west: -73.879
   east: -73.878
   south: 40.866
-  box_area: 0.009353
+  box_area: 3367.1696783725793
   center_lat: 40.8665
   center_lng: -73.8785
 
@@ -200,30 +206,39 @@ no_mushrooms_location:
   user_id: 0
   name: No Mushrooms
   scientific_name: No Mushrooms
-  north: 90
-  west: -180
-  east: 180
-  south: -90
+  north: 0.0001
+  west: 9
+  east: 9.0001
+  south: 0.00007
+  box_area: 3.710458035376616e-05
+  center_lat: 0.000085
+  center_lng: 9.00005
 
 collection_location:
   <<: *DEFAULTS
   user_id: 0
   name: Collection Location
   scientific_name: Collection Location
-  north: 90
-  west: -180
-  east: 180
-  south: -90
+  north: 0.0001
+  west: 10.5
+  east: 10.5001
+  south: 0.00007
+  box_area: 3.710458035376616e-05
+  center_lat: 0.000085
+  center_lng: 10.50005
 
 display_location:
   <<: *DEFAULTS
   user_id: 0
   name: Display Location
   scientific_name: Display Location
-  north: 90
-  west: -180
-  east: 180
-  south: -90
+  north: 0.0001
+  west: 12
+  east: 12.0001
+  south: 0.00007
+  box_area: 3.710458035376616e-05
+  center_lat: 0.000085
+  center_lng: 12.00005
 
 sortable_observation_user_location:
   <<: *DEFAULTS
@@ -233,6 +248,9 @@ sortable_observation_user_location:
   west: -73.879
   east: -73.878
   south: 40.866
+  box_area: 0.009353
+  center_lat: 40.8665
+  center_lng: -73.8785
 
 obs_default_location:
   <<: *DEFAULTS
@@ -282,6 +300,9 @@ with_single_quotes_location:
   west: -120.500
   east: -120.500
   south: 44.000
+  box_area: 0.0
+  center_lat: 44.000
+  center_lng: -120.500
 
 east_lt_west_location:
   <<: *DEFAULTS

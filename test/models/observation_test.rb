@@ -917,15 +917,32 @@ class ObservationTest < UnitTestCase
     assert_equal("pine", obs.notes_part_value("Nearby trees"))
   end
 
+  # nil notes were seen in the wild
   def test_notes_nil
     User.current = mary
-    obs = Observation.create!(name_id: names(:fungi).id, when_str: "2020-07-05")
+    obs = Observation.create!(name_id: names(:fungi).id, when_str: "2020-07-05",
+                              notes: nil)
 
     assert_nothing_raised do
       obs.notes[:Collector]
     rescue StandardError => e
       flunk(
         "It shouldn't throw \"#{e.message}\" when reading part of a nil Note"
+      )
+    end
+  end
+
+  # empty string notes were seen in the wild
+  def test_notes_empty_string
+    User.current = mary
+    obs = Observation.create!(name_id: names(:fungi).id,
+                              when_str: "2020-07-05", notes: "")
+    assert_nothing_raised do
+      obs.notes[:Collector]
+    rescue StandardError => e
+      flunk(
+        "It shouldn't throw \"#{e.message}\" when reading part of " \
+        "a Note that's an empty string"
       )
     end
   end
