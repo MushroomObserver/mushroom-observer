@@ -180,8 +180,15 @@ class API2
 
         field_slip.update!(observation:)
       else
-        FieldSlip.create!(observation:, code: @code)
+        field_slip = FieldSlip.create!(observation:, code: @code)
       end
+      update_project(field_slip.project, observation)
+    end
+
+    def update_project(project, observation)
+      return unless project && !project.violates_constraints?(observation)
+
+      project.add_observation(observation)
     end
 
     def create_specimen_records(obs)

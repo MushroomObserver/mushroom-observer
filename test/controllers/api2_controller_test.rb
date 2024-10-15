@@ -163,6 +163,15 @@ class API2ControllerTest < FunctionalTestCase
     assert_obj_arrays_equal([], obs.species_lists)
   end
 
+  def test_post_observation_with_code
+    params = { api_key: api_keys(:rolfs_api_key).key, location: "Earth",
+               code: "EOL-135" }
+    post(:observations, params: params)
+    assert_no_api_errors
+    obs = Observation.last
+    assert(obs.field_slips[0].project.observations.include?(obs))
+  end
+
   def test_post_maximal_observation
     params = {
       api_key: api_keys(:rolfs_api_key).key,
