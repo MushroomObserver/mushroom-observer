@@ -189,12 +189,7 @@ class API2
       return unless project && !project.violates_constraints?(observation)
 
       user = observation.user
-      if project.can_join?(observation.user)
-        ProjectMember.create!(project:, user:,
-                              trust_level: "hidden_gps")
-        group = project.user_group
-        group.users << user unless group.users.member?(user)
-      end
+      project.join(user)
       return unless project.member?(user)
 
       project.add_observation(observation)
