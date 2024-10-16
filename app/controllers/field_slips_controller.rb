@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class FieldSlipsController < ApplicationController
+  include Show
+
   before_action :set_field_slip, only: [:edit, :update, :destroy]
   before_action :login_required, except: [:show]
 
@@ -20,12 +22,9 @@ class FieldSlipsController < ApplicationController
     else
       @field_slip = FieldSlip.find_by(code: params[:id].upcase)
       obs = @field_slip&.observation
-    end
-    if @field_slip
       field_slip_redirect(obs.id) if obs
-    else
-      redirect_to(new_field_slip_url(code: params[:id].upcase))
     end
+    redirect_to(new_field_slip_url(code: params[:id].upcase)) unless @field_slip
   end
 
   # GET /field_slips/new
@@ -115,21 +114,7 @@ class FieldSlipsController < ApplicationController
 
   private
 
-  def field_slip_redirect(obs_id)
-    if foray_recorder?
-      redirect_to(edit_field_slip_url(id: @field_slip.id))
-    else
-      redirect_to(observation_url(id: obs_id))
-    end
-  end
-
-  def foray_recorder?
-    project = @field_slip&.project
-    return false unless project
-
-    project.is_admin?(User.current) && project.happening?
-  end
-
+  # create
   def html_create
     if params[:commit] == :field_slip_quick_create_obs.t
       quick_create_observation
@@ -146,16 +131,23 @@ class FieldSlipsController < ApplicationController
     end
   end
 
+  # create
   def quick_create_observation
-    place_name = params[:field_slip][:location]
+    fs_params = params[:field_slip]
+    place_name = fs_params[:location]
     # Must have valid name and location
     location = Location.place_name_to_location(place_name)
     flash_error(:field_slip_quick_no_location.t) unless location
-    name = Name.find_by(text_name: params[:field_slip][:field_slip_name])
+    name = Name.find_by(text_name: fs_params[:field_slip_name])
     flash_error(:field_slip_quick_no_name.t) unless name
     notes = field_slip_notes.compact_blank!
-
-    obs = Observation.build_observation(location, name, notes)
+    date = nil
+    if fs_params["date(1i)"]
+      date = Date.new(fs_params["date(1i)"].to_i,
+                      fs_params["date(2i)"].to_i,
+                      fs_params["date(3i)"].to_i)
+    end
+    obs = Observation.build_observation(location, name, notes, date)
     if obs
       @field_slip.project&.add_observation(obs)
       @field_slip.update!(observation: obs)
@@ -167,6 +159,7 @@ class FieldSlipsController < ApplicationController
     end
   end
 
+  # create / update
   def update_observation_fields
     observation = @field_slip.observation
     return unless observation
@@ -178,6 +171,7 @@ class FieldSlipsController < ApplicationController
     observation.save!
   end
 
+  # create / update
   def check_name
     id_str = params[:field_slip][:field_slip_name]
     return unless id_str
@@ -200,6 +194,7 @@ class FieldSlipsController < ApplicationController
     Observation::NamingConsensus.new(@field_slip.observation).calc_consensus
   end
 
+  # create / update
   def field_slip_notes
     notes = {}
     notes[:Collector] = collector
@@ -210,6 +205,7 @@ class FieldSlipsController < ApplicationController
     notes
   end
 
+  # create / update
   def other_codes
     codes = params[:field_slip][:other_codes]
     return codes unless params[:field_slip][:inat] == "1"
@@ -217,6 +213,7 @@ class FieldSlipsController < ApplicationController
     "\"iNat ##{codes}\":https://www.inaturalist.org/observations/#{codes}"
   end
 
+  # create / update
   def update_notes_fields(notes)
     new_notes = params[:field_slip][:notes]
     return unless new_notes
@@ -226,10 +223,13 @@ class FieldSlipsController < ApplicationController
     end
   end
 
+  # create / update
   def collector = user_str(params[:field_slip][:collector])
 
+  # create / update
   def field_slip_id_by = user_str(params[:field_slip][:field_slip_id_by])
 
+  # create / update
   def field_slip_id
     str = params[:field_slip][:field_slip_name]
     return str if str.empty? || str.starts_with?("_")
@@ -237,6 +237,7 @@ class FieldSlipsController < ApplicationController
     "_#{str}_"
   end
 
+  # create / update
   def user_str(str)
     if str.to_s.match?(/ <.*>$/)
       user = User.find_by(login: str.to_s.sub(/ <.*>$/, ""))
@@ -245,16 +246,13 @@ class FieldSlipsController < ApplicationController
     str
   end
 
-  # Use callbacks to share common setup or constraints between actions.
-  def set_field_slip
-    @field_slip = FieldSlip.find(params[:id])
-  end
-
   # Only allow a list of trusted parameters through.
+  # create / update
   def field_slip_params
     params.require(:field_slip).permit(:observation_id, :project_id, :code)
   end
 
+  # create
   def check_project_membership
     project = @field_slip&.project
     return unless project&.can_join?(User.current)
@@ -269,6 +267,7 @@ class FieldSlipsController < ApplicationController
     flash_notice(:add_members_with_gps_trust.l)
   end
 
+  # update
   def disconnect_observation(obs)
     return if params[:commit] == :field_slip_keep_obs.t
 
@@ -283,6 +282,7 @@ class FieldSlipsController < ApplicationController
     proj.remove_observation(obs)
   end
 
+  # create / update
   def check_last_obs
     return true unless params[:commit] == :field_slip_last_obs.t
 
