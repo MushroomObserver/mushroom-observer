@@ -104,6 +104,10 @@ class FieldSlip < AbstractModel
     "_user #{(user || User.current).login}_"
   end
 
+  def date
+    observation&.when || created_at
+  end
+
   def field_slip_name
     observation&.field_slip_name || ""
   end
