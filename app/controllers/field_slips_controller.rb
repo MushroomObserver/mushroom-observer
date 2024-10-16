@@ -3,8 +3,11 @@
 class FieldSlipsController < ApplicationController
   include Show
 
+  # Disable cop: all these methods are defined in files included above.
+  # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :set_field_slip, only: [:edit, :update, :destroy]
   before_action :login_required, except: [:show]
+  # rubocop:enable Rails/LexicallyScopedActionFilter
 
   # GET /field_slips or /field_slips.json
   def index
@@ -12,19 +15,6 @@ class FieldSlipsController < ApplicationController
       [{ observation: [:location, :name, :namings, :rss_log, :user] },
        :project, :user]
     )
-  end
-
-  # GET /field_slips/1 or /field_slips/1.json or /qr/XYZ-123
-  def show
-    obs = nil
-    if params[:id].match?(/^\d+$/)
-      set_field_slip
-    else
-      @field_slip = FieldSlip.find_by(code: params[:id].upcase)
-      obs = @field_slip&.observation
-      field_slip_redirect(obs.id) if obs
-    end
-    redirect_to(new_field_slip_url(code: params[:id].upcase)) unless @field_slip
   end
 
   # GET /field_slips/new
@@ -114,7 +104,10 @@ class FieldSlipsController < ApplicationController
 
   private
 
-  # create
+  def set_field_slip
+    @field_slip = FieldSlip.find(params[:id])
+  end
+
   def html_create
     if params[:commit] == :field_slip_quick_create_obs.t
       quick_create_observation
@@ -131,7 +124,6 @@ class FieldSlipsController < ApplicationController
     end
   end
 
-  # create
   def quick_create_observation
     fs_params = params[:field_slip]
     place_name = fs_params[:location]
@@ -159,7 +151,6 @@ class FieldSlipsController < ApplicationController
     end
   end
 
-  # create / update
   def update_observation_fields
     observation = @field_slip.observation
     return unless observation
@@ -171,7 +162,6 @@ class FieldSlipsController < ApplicationController
     observation.save!
   end
 
-  # create / update
   def check_name
     id_str = params[:field_slip][:field_slip_name]
     return unless id_str
@@ -194,7 +184,6 @@ class FieldSlipsController < ApplicationController
     Observation::NamingConsensus.new(@field_slip.observation).calc_consensus
   end
 
-  # create / update
   def field_slip_notes
     notes = {}
     notes[:Collector] = collector
@@ -205,7 +194,6 @@ class FieldSlipsController < ApplicationController
     notes
   end
 
-  # create / update
   def other_codes
     codes = params[:field_slip][:other_codes]
     return codes unless params[:field_slip][:inat] == "1"
@@ -213,7 +201,6 @@ class FieldSlipsController < ApplicationController
     "\"iNat ##{codes}\":https://www.inaturalist.org/observations/#{codes}"
   end
 
-  # create / update
   def update_notes_fields(notes)
     new_notes = params[:field_slip][:notes]
     return unless new_notes
@@ -223,13 +210,10 @@ class FieldSlipsController < ApplicationController
     end
   end
 
-  # create / update
   def collector = user_str(params[:field_slip][:collector])
 
-  # create / update
   def field_slip_id_by = user_str(params[:field_slip][:field_slip_id_by])
 
-  # create / update
   def field_slip_id
     str = params[:field_slip][:field_slip_name]
     return str if str.empty? || str.starts_with?("_")
@@ -237,7 +221,6 @@ class FieldSlipsController < ApplicationController
     "_#{str}_"
   end
 
-  # create / update
   def user_str(str)
     if str.to_s.match?(/ <.*>$/)
       user = User.find_by(login: str.to_s.sub(/ <.*>$/, ""))
@@ -247,12 +230,10 @@ class FieldSlipsController < ApplicationController
   end
 
   # Only allow a list of trusted parameters through.
-  # create / update
   def field_slip_params
     params.require(:field_slip).permit(:observation_id, :project_id, :code)
   end
 
-  # create
   def check_project_membership
     project = @field_slip&.project
     return unless project&.can_join?(User.current)
@@ -267,7 +248,6 @@ class FieldSlipsController < ApplicationController
     flash_notice(:add_members_with_gps_trust.l)
   end
 
-  # update
   def disconnect_observation(obs)
     return if params[:commit] == :field_slip_keep_obs.t
 
@@ -282,7 +262,6 @@ class FieldSlipsController < ApplicationController
     proj.remove_observation(obs)
   end
 
-  # create / update
   def check_last_obs
     return true unless params[:commit] == :field_slip_last_obs.t
 
