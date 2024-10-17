@@ -25,10 +25,7 @@ class InatImportJob < ApplicationJob
       @inat_import.update(token: access_token)
 
       api_token = trade_access_token_for_jwt_api_token(@inat_import.token)
-
-      authorized_username = check_username_match(api_token)
-      return done if response_bad?(authorized_username)
-
+      ensure_importing_own_observations(api_token)
       @inat_import.update(token: api_token, state: "Importing")
       import_requested_observations
     rescue StandardError => e
@@ -75,18 +72,23 @@ class InatImportJob < ApplicationJob
     JSON.parse(jwt_response)["api_token"]
   end
 
-  def check_username_match(api_token)
+  # Ensure that MO users importing only their own iNat observations.
+  # iNat allows MO user A to import iNat obs of iNat user B
+  # if B authorized MO to access B's iNat data.  We don't want that.
+  # Therefore check that the iNat login provided in the import form
+  # is that of the user currently logged-in to iNat.
+  def ensure_importing_own_observations(api_token)
     headers = { authorization: "Bearer #{api_token}",
                 content_type: :json, accept: :json }
-    response = RestClient.get("#{API_BASE}/users/me", headers)
-    return response if right_user?(response)
+    begin
+      # fetch the logged-in iNat user
+      # https://api.inaturalist.org/v1/docs/#!/Users/get_users_me
+      response = RestClient.get("#{API_BASE}/users/me", headers)
+    rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
+      raise("iNat API user requst failed: #{e.message}")
+    end
 
-    error = { status: 401, body: :inat_wrong_user.t }
-    @inat_import.add_response_error(error)
-    error
-  rescue RestClient::ExceptionWithResponse => e
-    @inat_import.add_response_error(e.response)
-    e
+    raise(:inat_wrong_user.t) unless right_user?(response)
   end
 
   def right_user?(response)

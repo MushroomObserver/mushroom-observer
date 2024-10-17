@@ -485,29 +485,6 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
-  def test_user_name_mismatch
-    # skip("under construction")
-    file_name = "calostoma_lutescens"
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    inat_import = create_inat_import(inat_response: mock_inat_response)
-
-    stub_inat_interactions(inat_import: inat_import,
-                           mock_inat_response: mock_inat_response,
-                           login: "another user")
-
-    Inat::PhotoImporter.stub(:new,
-                             stub_mo_photo_importer(mock_inat_response)) do
-      assert_difference("Observation.count", 0,
-                        "It should not import another user's observation") do
-        InatImportJob.perform_now(inat_import)
-      end
-    end
-    assert_match(
-      :inat_wrong_user.l, inat_import.response_errors,
-      "It should warn if a user tries to import another's iNat obs"
-    )
-  end
-
   def test_oauth_failure
     file_name = "calostoma_lutescens"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
@@ -537,6 +514,28 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert_match(/401 Unauthorized/, inat_import.response_errors,
                  "Failed to report OAuth failure")
+  end
+
+  def test_import_another_users_observation
+    file_name = "calostoma_lutescens"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    inat_import = create_inat_import(inat_response: mock_inat_response)
+
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response,
+                           login: "another user")
+
+    Inat::PhotoImporter.stub(:new,
+                             stub_mo_photo_importer(mock_inat_response)) do
+      assert_difference("Observation.count", 0,
+                        "It should not import another user's observation") do
+        InatImportJob.perform_now(inat_import)
+      end
+    end
+    assert_match(
+      :inat_wrong_user.l, inat_import.response_errors,
+      "It should warn if a user tries to import another's iNat obs"
+    )
   end
 
   ########## Utilities
