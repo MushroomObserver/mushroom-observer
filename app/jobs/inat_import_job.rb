@@ -18,24 +18,22 @@ class InatImportJob < ApplicationJob
 
   def perform(inat_import)
     @inat_import = inat_import
+
     begin
       access_token =
         use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
+      @inat_import.update(token: access_token)
+
+      api_token = trade_access_token_for_jwt_api_token(@inat_import.token)
+
+      authorized_username = check_username_match(api_token)
+      return done if response_bad?(authorized_username)
+
+      @inat_import.update(token: api_token, state: "Importing")
+      import_requested_observations
     rescue StandardError => e
       @inat_import.add_response_error(e)
-      return done
     end
-
-    @inat_import.update(token: access_token)
-
-    api_token = trade_access_token_for_jwt_api_token(@inat_import.token)
-    return done if response_bad?(api_token)
-
-    authorized_username = check_username_match(api_token)
-    return done if response_bad?(authorized_username)
-
-    @inat_import.update(token: api_token, state: "Importing")
-    import_requested_observations
 
     done
     update_user_inat_username
@@ -66,14 +64,15 @@ class InatImportJob < ApplicationJob
 
   # https://www.inaturalist.org/pages/api+recommended+practices
   def trade_access_token_for_jwt_api_token(access_token)
-    jwt_response = RestClient::Request.execute(
-      method: :get, url: "#{SITE}/users/api_token",
-      headers: { authorization: "Bearer #{access_token}", accept: :json }
-    )
+    begin
+      jwt_response = RestClient::Request.execute(
+        method: :get, url: "#{SITE}/users/api_token",
+        headers: { authorization: "Bearer #{access_token}", accept: :json }
+      )
+    rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
+      raise("JWT request failed: #{e.message}")
+    end
     JSON.parse(jwt_response)["api_token"]
-  rescue RestClient::ExceptionWithResponse => e
-    @inat_import.add_response_error(e.response)
-    e.response
   end
 
   def check_username_match(api_token)
