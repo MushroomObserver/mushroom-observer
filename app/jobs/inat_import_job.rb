@@ -18,23 +18,19 @@ class InatImportJob < ApplicationJob
 
   def perform(inat_import)
     @inat_import = inat_import
-    access_token =
-      use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
-    if response_bad?(access_token)
-      @inat_import.update(state: "Done")
-      return
+
+    begin
+      access_token =
+        use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
+      @inat_import.update(token: access_token)
+
+      api_token = trade_access_token_for_jwt_api_token(@inat_import.token)
+      ensure_importing_own_observations(api_token)
+      @inat_import.update(token: api_token, state: "Importing")
+      import_requested_observations
+    rescue StandardError => e
+      @inat_import.add_response_error(e)
     end
-
-    @inat_import.update(token: access_token)
-
-    api_token = trade_access_token_for_jwt_api_token(@inat_import.token)
-    return done if response_bad?(api_token)
-
-    authorized_username = check_username_match(api_token)
-    return done if response_bad?(authorized_username)
-
-    @inat_import.update(token: api_token, state: "Importing")
-    import_requested_observations
 
     done
     update_user_inat_username
@@ -49,11 +45,14 @@ class InatImportJob < ApplicationJob
                 code: auth_code,
                 redirect_uri: REDIRECT_URI,
                 grant_type: "authorization_code" }
-    oauth_response = RestClient.post("#{SITE}/oauth/token", payload)
+
+    begin
+      oauth_response = RestClient.post("#{SITE}/oauth/token", payload)
+    rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
+      raise("OAuth token request failed: #{e.message}")
+    end
+
     JSON.parse(oauth_response.body)["access_token"]
-  rescue RestClient::ExceptionWithResponse => e
-    @inat_import.add_response_error(e.response)
-    e.response
   end
 
   def done
@@ -62,28 +61,34 @@ class InatImportJob < ApplicationJob
 
   # https://www.inaturalist.org/pages/api+recommended+practices
   def trade_access_token_for_jwt_api_token(access_token)
-    jwt_response = RestClient::Request.execute(
-      method: :get, url: "#{SITE}/users/api_token",
-      headers: { authorization: "Bearer #{access_token}", accept: :json }
-    )
+    begin
+      jwt_response = RestClient::Request.execute(
+        method: :get, url: "#{SITE}/users/api_token",
+        headers: { authorization: "Bearer #{access_token}", accept: :json }
+      )
+    rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
+      raise("JWT request failed: #{e.message}")
+    end
     JSON.parse(jwt_response)["api_token"]
-  rescue RestClient::ExceptionWithResponse => e
-    @inat_import.add_response_error(e.response)
-    e.response
   end
 
-  def check_username_match(api_token)
+  # Ensure that MO users importing only their own iNat observations.
+  # iNat allows MO user A to import iNat obs of iNat user B
+  # if B authorized MO to access B's iNat data.  We don't want that.
+  # Therefore check that the iNat login provided in the import form
+  # is that of the user currently logged-in to iNat.
+  def ensure_importing_own_observations(api_token)
     headers = { authorization: "Bearer #{api_token}",
                 content_type: :json, accept: :json }
-    response = RestClient.get("#{API_BASE}/users/me", headers)
-    return response if right_user?(response)
+    begin
+      # fetch the logged-in iNat user
+      # https://api.inaturalist.org/v1/docs/#!/Users/get_users_me
+      response = RestClient.get("#{API_BASE}/users/me", headers)
+    rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
+      raise("iNat API user requst failed: #{e.message}")
+    end
 
-    error = { status: 401, body: :inat_wrong_user.t }
-    @inat_import.add_response_error(error)
-    error
-  rescue RestClient::ExceptionWithResponse => e
-    @inat_import.add_response_error(e.response)
-    e
+    raise(:inat_wrong_user.t) unless right_user?(response)
   end
 
   def right_user?(response)
@@ -440,8 +445,9 @@ class InatImportJob < ApplicationJob
     @inat_import.user.update(inat_username: @inat_import.inat_username)
   end
 
-  # job was successful enough to justify updating the MO user's iNat user_name
+  # job successful enough to justify updating the MO user's iNat user_name
   def job_successful_enough?
-    @inat_import.response_errors.empty? || @inat_import.imported_count.positive?
+    @inat_import.response_errors.empty? ||
+      @inat_import.imported_count&.positive?
   end
 end
