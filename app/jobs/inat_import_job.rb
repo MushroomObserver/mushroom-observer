@@ -443,8 +443,9 @@ class InatImportJob < ApplicationJob
     @inat_import.user.update(inat_username: @inat_import.inat_username)
   end
 
-  # job was successful enough to justify updating the MO user's iNat user_name
+  # job successful enough to justify updating the MO user's iNat user_name
   def job_successful_enough?
-    @inat_import.response_errors.empty? || @inat_import.imported_count.positive?
+    @inat_import.response_errors.empty? ||
+      @inat_import.imported_count&.positive?
   end
 end
