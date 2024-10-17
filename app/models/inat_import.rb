@@ -28,8 +28,10 @@ class InatImport < ApplicationRecord
   belongs_to :user
 
   def add_response_error(response)
-    # internal non-Ruby messages. Ex: { status: 401, body: "error message" }
-    if response.is_a?(Hash)
+    if response.is_a?(RuntimeError)
+      code = nil
+      body_text = response.message
+    elsif response.is_a?(Hash)
       # for internal messages to be displayed as erros in tracker show
       # Ex: { status: 401, body: "error message" }
       code = response[:status]

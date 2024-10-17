@@ -18,11 +18,12 @@ class InatImportJob < ApplicationJob
 
   def perform(inat_import)
     @inat_import = inat_import
-    access_token =
-      use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
-    if response_bad?(access_token)
-      @inat_import.update(state: "Done")
-      return
+    begin
+      access_token =
+        use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
+    rescue StandardError => e
+      @inat_import.add_response_error(e)
+      return done
     end
 
     @inat_import.update(token: access_token)
@@ -49,11 +50,14 @@ class InatImportJob < ApplicationJob
                 code: auth_code,
                 redirect_uri: REDIRECT_URI,
                 grant_type: "authorization_code" }
-    oauth_response = RestClient.post("#{SITE}/oauth/token", payload)
+
+    begin
+      oauth_response = RestClient.post("#{SITE}/oauth/token", payload)
+    rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
+      raise("OAuth token request failed: #{e.message}")
+    end
+
     JSON.parse(oauth_response.body)["access_token"]
-  rescue RestClient::ExceptionWithResponse => e
-    @inat_import.add_response_error(e.response)
-    e.response
   end
 
   def done

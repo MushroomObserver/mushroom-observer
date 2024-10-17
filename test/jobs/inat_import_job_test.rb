@@ -508,6 +508,21 @@ class InatImportJobTest < ActiveJob::TestCase
     )
   end
 
+  def test_oauth_failure
+    file_name = "calostoma_lutescens"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    inat_import = create_inat_import(inat_response: mock_inat_response)
+
+    oauth_return = { status: 401, body: "Unauthorized",
+                     headers: { "Content-Type" => "application/json" } }
+    stub_oauth_token_request(oauth_return)
+
+    InatImportJob.perform_now(inat_import)
+
+    assert_match(/401 Unauthorized/, inat_import.response_errors,
+                 "Failed to report OAuth failure")
+  end
+
   ########## Utilities
 
   # The InatImport object which is created in InatImportController#create
@@ -547,14 +562,17 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def stub_token_requests
-    stub_oauth_token_request
+    oauth_return = { status: 200,
+                     body: { access_token: "MockAccessToken" }.to_json,
+                     headers: {} }
+    stub_oauth_token_request(oauth_return)
     # must trade oauth access token for a JWT in order to use iNat API v1
     stub_jwt_request
   end
 
   # stub exchanging iNat code for oauth token
   # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
-  def stub_oauth_token_request
+  def stub_oauth_token_request(oauth_return)
     add_stub(stub_request(:post, "#{SITE}/oauth/token").
       with(
         body: { "client_id" => Rails.application.credentials.inat.id,
@@ -563,9 +581,7 @@ class InatImportJobTest < ActiveJob::TestCase
                 "grant_type" => "authorization_code",
                 "redirect_uri" => REDIRECT_URI }
       ).
-      to_return(status: 200,
-                body: { access_token: "MockAccessToken" }.to_json,
-                headers: {}))
+      to_return(oauth_return))
   end
 
   def stub_jwt_request
