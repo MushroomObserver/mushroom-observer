@@ -96,13 +96,6 @@ class InatImportJob < ApplicationJob
     inat_logged_in_user == @inat_import.inat_username
   end
 
-  def response_bad?(response)
-    response.is_a?(RestClient::RequestFailed) ||
-      response.instance_of?(RestClient::Response) && response.code != 200 ||
-      # RestClient was happy, but the user wasn't authorized
-      response.is_a?(Hash) && response[:status] == 401
-  end
-
   def import_requested_observations
     @inat_manager = User.find_by(login: "MO Webmaster")
     inat_ids = inat_id_list
@@ -130,19 +123,6 @@ class InatImportJob < ApplicationJob
 
       break
     end
-  end
-
-  def page_empty?(page)
-    page["total_results"].zero?
-  end
-
-  def last_page?(parsed_page)
-    parsed_page["total_results"] <=
-      parsed_page["page"] * parsed_page["per_page"]
-  end
-
-  def inat_id_list
-    @inat_import.inat_ids.delete(" ")
   end
 
   # Get one page of observations (up to 200)
@@ -174,6 +154,26 @@ class InatImportJob < ApplicationJob
   rescue RestClient::ExceptionWithResponse => e
     @inat_import.add_response_error(e.response)
     e.response
+  end
+
+  def response_bad?(response)
+    response.is_a?(RestClient::RequestFailed) ||
+      response.instance_of?(RestClient::Response) && response.code != 200 ||
+      # RestClient was happy, but the user wasn't authorized
+      response.is_a?(Hash) && response[:status] == 401
+  end
+
+  def page_empty?(page)
+    page["total_results"].zero?
+  end
+
+  def last_page?(parsed_page)
+    parsed_page["total_results"] <=
+      parsed_page["page"] * parsed_page["per_page"]
+  end
+
+  def inat_id_list
+    @inat_import.inat_ids.delete(" ")
   end
 
   def import_page(page)
