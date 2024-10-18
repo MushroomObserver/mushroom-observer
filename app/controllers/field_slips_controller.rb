@@ -131,7 +131,6 @@ class FieldSlipsController < ApplicationController
     location = Location.place_name_to_location(place_name)
     flash_error(:field_slip_quick_no_location.t) unless location
     name = Name.find_by(text_name: fs_params[:field_slip_name])
-    # flash_error(:field_slip_quick_no_name.t) unless name
     notes = field_slip_notes.compact_blank!
     date = nil
     if fs_params["date(1i)"]
