@@ -167,6 +167,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     obs = Observation.last
     assert_redirected_to observation_url(obs.id)
   end
+
   test "should create obs with link to inat" do
     login(@field_slip.user.login)
     code = "Z#{@field_slip.code}"
@@ -204,6 +205,25 @@ class FieldSlipsControllerTest < FunctionalTestCase
     end
     assert_flash_error
     assert_redirected_to new_observation_url(field_code: code)
+  end
+
+  test "should create fungi obs" do
+    login(@field_slip.user.login)
+    code = "Z#{@field_slip.code}"
+    assert_difference("FieldSlip.count") do
+      post(:create,
+           params: {
+             commit: :field_slip_quick_create_obs.t,
+             field_slip: {
+               location: locations(:albion).name,
+               code: code,
+               project_id: projects(:eol_project).id
+             }
+           })
+    end
+    obs = Observation.last
+    assert_redirected_to observation_url(obs.id)
+    assert_equal(obs.text_name, "Fungi")
   end
 
   test "should attempt quick field_slip and redirect to show obs" do

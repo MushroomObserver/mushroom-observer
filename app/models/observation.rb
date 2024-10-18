@@ -656,8 +656,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   }
 
   def self.build_observation(location, name, notes, date)
-    return nil unless location && name
+    return nil unless location
 
+    name ||= Name.find_by(text_name: "Fungi")
     now = Time.zone.now
     user = User.current
     obs = new({ created_at: now, updated_at: now, source: "mo_website",
