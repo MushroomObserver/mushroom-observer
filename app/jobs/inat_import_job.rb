@@ -110,7 +110,6 @@ class InatImportJob < ApplicationJob
       page_of_observations =
         next_page(id: inat_ids, id_above: last_import_id,
                   user_login: @inat_import.inat_username)
-      return if response_bad?(page_of_observations)
 
       parsed_page = JSON.parse(page_of_observations)
       @inat_import.update(importables: parsed_page["total_results"])
@@ -151,13 +150,16 @@ class InatImportJob < ApplicationJob
     @inat = RestClient::Request.execute(
       method: :get, url: "#{API_BASE}/observations?#{query}", headers: headers
     )
+    raise(:inat_page_of_obs_failed.t) if failed_to_get_next_page?
+
+    @inat
   end
 
-  def response_bad?(response)
-    response.is_a?(RestClient::RequestFailed) ||
-      response.instance_of?(RestClient::Response) && response.code != 200 ||
+  def failed_to_get_next_page?
+    @inat.is_a?(RestClient::RequestFailed) ||
+      @inat.instance_of?(RestClient::Response) && @inat.code != 200 ||
       # RestClient was happy, but the user wasn't authorized
-      response.is_a?(Hash) && response[:status] == 401
+      @inat.is_a?(Hash) && @inat[:status] == 401
   end
 
   def page_empty?(page)
