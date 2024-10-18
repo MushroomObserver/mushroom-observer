@@ -466,6 +466,10 @@ newbie_obs_rss_log:
   <<: *DEFAULTS
   observation: newbie_obs
 
+recorder_obs_rss_log:
+  <<: *DEFAULTS
+  observation: recorder_obs
+
 imported_inat_obs_rss_log:
   <<: *DEFAULTS
   observation: imported_inat_obs

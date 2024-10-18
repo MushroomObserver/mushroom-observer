@@ -803,6 +803,11 @@ newbie_obs:
   notes:
     :Collector: _user foray_newbie_
 
+recorder_obs:
+  <<: *DEFAULTS
+  notes:
+    :Collector: Foray Collector
+
 imported_inat_obs:
   <<: *DEFAULTS
   inat_id: 12345
