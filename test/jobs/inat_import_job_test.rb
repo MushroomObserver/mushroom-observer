@@ -516,7 +516,7 @@ class InatImportJobTest < ActiveJob::TestCase
                  "Failed to report OAuth failure")
   end
 
-  def test_import_another_users_observation
+  def test_import_anothers_observation
     file_name = "calostoma_lutescens"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     inat_import = create_inat_import(inat_response: mock_inat_response)
@@ -536,6 +536,29 @@ class InatImportJobTest < ActiveJob::TestCase
       :inat_wrong_user.l, inat_import.response_errors,
       "It should warn if a user tries to import another's iNat obs"
     )
+  end
+
+  def test_super_importer_anothers_observation
+    file_name = "calostoma_lutescens"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    user = users(:rolf)
+
+    InatImport.super_importers << user.id
+    inat_import = create_inat_import(user: user,
+                                     inat_response: mock_inat_response)
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response)
+
+    Inat::PhotoImporter.stub(:new,
+                             stub_mo_photo_importer(mock_inat_response)) do
+      assert_difference(
+        "Observation.count", 1,
+        "'super_importer' failed to import another user's observation"
+      ) do
+        InatImportJob.perform_now(inat_import)
+      end
+    end
+    assert_empty(inat_import.response_errors, "There should be no errors")
   end
 
   ########## Utilities
