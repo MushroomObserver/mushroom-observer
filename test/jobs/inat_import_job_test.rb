@@ -485,8 +485,38 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
-  def test_user_name_mismatch
-    # skip("under construction")
+  def test_oauth_failure
+    file_name = "calostoma_lutescens"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    inat_import = create_inat_import(inat_response: mock_inat_response)
+
+    oauth_return = { status: 401, body: "Unauthorized",
+                     headers: { "Content-Type" => "application/json" } }
+    stub_oauth_token_request(oauth_return: oauth_return)
+
+    InatImportJob.perform_now(inat_import)
+
+    assert_match(/401 Unauthorized/, inat_import.response_errors,
+                 "Failed to report OAuth failure")
+  end
+
+  def test_jwt_failure
+    file_name = "calostoma_lutescens"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    inat_import = create_inat_import(inat_response: mock_inat_response)
+
+    stub_oauth_token_request
+    jwt_return = { status: 401, body: "Unauthorized",
+                   headers: { "Content-Type" => "application/json" } }
+    stub_jwt_request(jwt_return: jwt_return)
+
+    InatImportJob.perform_now(inat_import)
+
+    assert_match(/401 Unauthorized/, inat_import.response_errors,
+                 "Failed to report OAuth failure")
+  end
+
+  def test_import_another_users_observation
     file_name = "calostoma_lutescens"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     inat_import = create_inat_import(inat_response: mock_inat_response)
@@ -554,7 +584,11 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # stub exchanging iNat code for oauth token
   # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
-  def stub_oauth_token_request
+  def stub_oauth_token_request(oauth_return: {
+    status: 200,
+    body: { access_token: "MockAccessToken" }.to_json,
+    headers: {}
+  })
     add_stub(stub_request(:post, "#{SITE}/oauth/token").
       with(
         body: { "client_id" => Rails.application.credentials.inat.id,
@@ -563,12 +597,13 @@ class InatImportJobTest < ActiveJob::TestCase
                 "grant_type" => "authorization_code",
                 "redirect_uri" => REDIRECT_URI }
       ).
-      to_return(status: 200,
-                body: { access_token: "MockAccessToken" }.to_json,
-                headers: {}))
+      to_return(oauth_return))
   end
 
-  def stub_jwt_request
+  def stub_jwt_request(jwt_return:
+    { status: 200,
+      body: { access_token: "MockJWT" }.to_json,
+      headers: {} })
     add_stub(stub_request(:get, "#{SITE}/users/api_token").
       with(
         headers: {
@@ -578,9 +613,7 @@ class InatImportJobTest < ActiveJob::TestCase
           "Host" => "www.inaturalist.org"
         }
       ).
-      to_return(status: 200,
-                body: { access_token: "MockJWT" }.to_json,
-                headers: {}))
+      to_return(jwt_return))
   end
 
   def stub_check_username_match(login)

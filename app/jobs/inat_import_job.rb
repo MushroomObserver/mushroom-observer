@@ -18,26 +18,23 @@ class InatImportJob < ApplicationJob
 
   def perform(inat_import)
     @inat_import = inat_import
-    access_token =
-      use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
-    if response_bad?(access_token)
-      @inat_import.update(state: "Done")
-      return
+
+    begin
+      access_token =
+        use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
+      @inat_import.update(token: access_token)
+
+      api_token = trade_access_token_for_jwt_api_token(@inat_import.token)
+      ensure_importing_own_observations(api_token)
+      @inat_import.update(token: api_token, state: "Importing")
+      import_requested_observations
+    rescue StandardError => e
+      @inat_import.add_response_error(e)
+    ensure
+      done
     end
 
-    @inat_import.update(token: access_token)
-
-    api_token = trade_access_token_for_jwt_api_token(@inat_import.token)
-    return done if response_bad?(api_token)
-
-    authorized_username = check_username_match(api_token)
-    return done if response_bad?(authorized_username)
-
-    @inat_import.update(token: api_token, state: "Importing")
-    import_requested_observations
-
     done
-    update_user_inat_username
   end
 
   private
@@ -49,53 +46,56 @@ class InatImportJob < ApplicationJob
                 code: auth_code,
                 redirect_uri: REDIRECT_URI,
                 grant_type: "authorization_code" }
-    oauth_response = RestClient.post("#{SITE}/oauth/token", payload)
+
+    begin
+      oauth_response = RestClient.post("#{SITE}/oauth/token", payload)
+    rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
+      raise("OAuth token request failed: #{e.message}")
+    end
+
     JSON.parse(oauth_response.body)["access_token"]
-  rescue RestClient::ExceptionWithResponse => e
-    @inat_import.add_response_error(e.response)
-    e.response
   end
 
   def done
     @inat_import.update(state: "Done")
+    update_user_inat_username
   end
 
   # https://www.inaturalist.org/pages/api+recommended+practices
   def trade_access_token_for_jwt_api_token(access_token)
-    jwt_response = RestClient::Request.execute(
-      method: :get, url: "#{SITE}/users/api_token",
-      headers: { authorization: "Bearer #{access_token}", accept: :json }
-    )
+    begin
+      jwt_response = RestClient::Request.execute(
+        method: :get, url: "#{SITE}/users/api_token",
+        headers: { authorization: "Bearer #{access_token}", accept: :json }
+      )
+    rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
+      raise("JWT request failed: #{e.message}")
+    end
     JSON.parse(jwt_response)["api_token"]
-  rescue RestClient::ExceptionWithResponse => e
-    @inat_import.add_response_error(e.response)
-    e.response
   end
 
-  def check_username_match(api_token)
+  # Ensure that MO users importing only their own iNat observations.
+  # iNat allows MO user A to import iNat obs of iNat user B
+  # if B authorized MO to access B's iNat data.  We don't want that.
+  # Therefore check that the iNat login provided in the import form
+  # is that of the user currently logged-in to iNat.
+  def ensure_importing_own_observations(api_token)
     headers = { authorization: "Bearer #{api_token}",
                 content_type: :json, accept: :json }
-    response = RestClient.get("#{API_BASE}/users/me", headers)
-    return response if right_user?(response)
+    begin
+      # fetch the logged-in iNat user
+      # https://api.inaturalist.org/v1/docs/#!/Users/get_users_me
+      response = RestClient.get("#{API_BASE}/users/me", headers)
+    rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
+      raise("iNat API user requst failed: #{e.message}")
+    end
 
-    error = { status: 401, body: :inat_wrong_user.t }
-    @inat_import.add_response_error(error)
-    error
-  rescue RestClient::ExceptionWithResponse => e
-    @inat_import.add_response_error(e.response)
-    e
+    raise(:inat_wrong_user.t) unless right_user?(response)
   end
 
   def right_user?(response)
     inat_logged_in_user = JSON.parse(response.body)["results"].first["login"]
     inat_logged_in_user == @inat_import.inat_username
-  end
-
-  def response_bad?(response)
-    response.is_a?(RestClient::RequestFailed) ||
-      response.instance_of?(RestClient::Response) && response.code != 200 ||
-      # RestClient was happy, but the user wasn't authorized
-      response.is_a?(Hash) && response[:status] == 401
   end
 
   def import_requested_observations
@@ -112,7 +112,6 @@ class InatImportJob < ApplicationJob
       page_of_observations =
         next_page(id: inat_ids, id_above: last_import_id,
                   user_login: @inat_import.inat_username)
-      return if response_bad?(page_of_observations)
 
       parsed_page = JSON.parse(page_of_observations)
       @inat_import.update(importables: parsed_page["total_results"])
@@ -125,19 +124,6 @@ class InatImportJob < ApplicationJob
 
       break
     end
-  end
-
-  def page_empty?(page)
-    page["total_results"].zero?
-  end
-
-  def last_page?(parsed_page)
-    parsed_page["total_results"] <=
-      parsed_page["page"] * parsed_page["per_page"]
-  end
-
-  def inat_id_list
-    @inat_import.inat_ids.delete(" ")
   end
 
   # Get one page of observations (up to 200)
@@ -166,9 +152,29 @@ class InatImportJob < ApplicationJob
     @inat = RestClient::Request.execute(
       method: :get, url: "#{API_BASE}/observations?#{query}", headers: headers
     )
-  rescue RestClient::ExceptionWithResponse => e
-    @inat_import.add_response_error(e.response)
-    e.response
+    raise(:inat_page_of_obs_failed.t) if failed_to_get_next_page?
+
+    @inat
+  end
+
+  def failed_to_get_next_page?
+    @inat.is_a?(RestClient::RequestFailed) ||
+      @inat.instance_of?(RestClient::Response) && @inat.code != 200 ||
+      # RestClient was happy, but the user wasn't authorized
+      @inat.is_a?(Hash) && @inat[:status] == 401
+  end
+
+  def page_empty?(page)
+    page["total_results"].zero?
+  end
+
+  def last_page?(parsed_page)
+    parsed_page["total_results"] <=
+      parsed_page["page"] * parsed_page["per_page"]
+  end
+
+  def inat_id_list
+    @inat_import.inat_ids.delete(" ")
   end
 
   def import_page(page)
@@ -403,8 +409,6 @@ class InatImportJob < ApplicationJob
     response = RestClient.post("#{API_BASE}/observation_field_values",
                                payload.to_json, headers)
     JSON.parse(response.body)
-  rescue RestClient::ExceptionWithResponse => e
-    @inat_import.add_response_error(e.response)
   end
 
   def update_description
@@ -424,8 +428,6 @@ class InatImportJob < ApplicationJob
       payload.to_json, headers
     )
     JSON.parse(response.body)
-  rescue RestClient::ExceptionWithResponse => e
-    @inat_import.add_response_error(e.response)
   end
 
   def increment_imported_count
@@ -440,8 +442,9 @@ class InatImportJob < ApplicationJob
     @inat_import.user.update(inat_username: @inat_import.inat_username)
   end
 
-  # job was successful enough to justify updating the MO user's iNat user_name
+  # job successful enough to justify updating the MO user's iNat user_name
   def job_successful_enough?
-    @inat_import.response_errors.empty? || @inat_import.imported_count.positive?
+    @inat_import.response_errors.empty? ||
+      @inat_import.imported_count&.positive?
   end
 end
