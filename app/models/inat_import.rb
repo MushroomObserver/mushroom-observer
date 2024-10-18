@@ -27,26 +27,8 @@ class InatImport < ApplicationRecord
 
   belongs_to :user
 
-  def add_response_error(response)
-    if response.is_a?(RuntimeError)
-      code = nil
-      body_text = response.message
-    elsif response.is_a?(Hash)
-      # for internal messages to be displayed as erros in tracker show
-      # Ex: { status: 401, body: "error message" }
-      code = response[:status]
-      body_text = response[:body]
-    else
-      code = response.code
-      begin
-        doc = Nokogiri::HTML(response.body)
-        body_text = doc.at("body").text.strip
-      rescue StandardError
-        body_text == ""
-      end
-    end
-
-    response_errors << "#{code} #{body_text}\n"
+  def add_response_error(error)
+    response_errors << "#{error.class.name}: #{error.message}\n"
     save
   end
 end

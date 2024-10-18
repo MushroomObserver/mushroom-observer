@@ -30,10 +30,11 @@ class InatImportJob < ApplicationJob
       import_requested_observations
     rescue StandardError => e
       @inat_import.add_response_error(e)
+    ensure
+      done
     end
 
     done
-    update_user_inat_username
   end
 
   private
@@ -57,6 +58,7 @@ class InatImportJob < ApplicationJob
 
   def done
     @inat_import.update(state: "Done")
+    update_user_inat_username
   end
 
   # https://www.inaturalist.org/pages/api+recommended+practices
