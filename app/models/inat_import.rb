@@ -31,4 +31,8 @@ class InatImport < ApplicationRecord
     response_errors << "#{error.class.name}: #{error.message}\n"
     save
   end
+
+  def self.super_importers
+    [1, 4468, 38_275]
+  end
 end

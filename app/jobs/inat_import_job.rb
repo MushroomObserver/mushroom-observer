@@ -80,6 +80,8 @@ class InatImportJob < ApplicationJob
   # Therefore check that the iNat login provided in the import form
   # is that of the user currently logged-in to iNat.
   def ensure_importing_own_observations(api_token)
+    return if super_importer?
+
     headers = { authorization: "Bearer #{api_token}",
                 content_type: :json, accept: :json }
     begin
@@ -91,6 +93,10 @@ class InatImportJob < ApplicationJob
     end
 
     raise(:inat_wrong_user.t) unless right_user?(response)
+  end
+
+  def super_importer?
+    InatImport.super_importers.include?(@inat_import.user_id)
   end
 
   def right_user?(response)
@@ -111,7 +117,7 @@ class InatImportJob < ApplicationJob
       # get a page of observations with id > id of last imported obs
       page_of_observations =
         next_page(id: inat_ids, id_above: last_import_id,
-                  user_login: @inat_import.inat_username)
+                  user_login: restricted_user_login)
 
       parsed_page = JSON.parse(page_of_observations)
       @inat_import.update(importables: parsed_page["total_results"])
@@ -123,6 +129,15 @@ class InatImportJob < ApplicationJob
       next unless last_page?(parsed_page)
 
       break
+    end
+  end
+
+  # limit iNat API search to observations by iNat user with this login
+  def restricted_user_login
+    if super_importer?
+      nil
+    else
+      @inat_import.inat_username
     end
   end
 
@@ -412,6 +427,8 @@ class InatImportJob < ApplicationJob
   end
 
   def update_description
+    return if super_importer? && importing_someone_elses_obs?
+
     description = @inat_obs[:description]
     updated_description =
       "#{IMPORTED_BY_MO} #{Time.zone.today.strftime(MO.web_date_format)}"
@@ -423,11 +440,12 @@ class InatImportJob < ApplicationJob
                 content_type: :json, accept: :json }
     # iNat API uses PUT + ignore_photos, not PATCH, to update an observation
     # https://api.inaturalist.org/v1/docs/#!/Observations/put_observations_id
-    response = RestClient.put(
-      "#{API_BASE}/observations/#{@inat_obs[:id]}?ignore_photos=1",
-      payload.to_json, headers
-    )
-    JSON.parse(response.body)
+    RestClient.put("#{API_BASE}/observations/#{@inat_obs[:id]}?ignore_photos=1",
+                   payload.to_json, headers)
+  end
+
+  def importing_someone_elses_obs?
+    @inat_obs[:user][:login] != @inat_import.inat_username
   end
 
   def increment_imported_count
