@@ -46,3 +46,9 @@ field_slip_previous:
   project: current_project
   code: CURR-0001
   user: katrina
+
+field_slip_by_recorder:
+  observation: recorder_obs
+  project: current_project
+  code: CURR-0002
+  user: rolf

@@ -313,6 +313,14 @@ class FieldSlipsControllerTest < FunctionalTestCase
                  @response.body)
   end
 
+  test "should show text collector" do
+    field_slip = field_slips(:field_slip_by_recorder)
+    login(field_slip.user.login)
+    get(:edit, params: { id: field_slip.id })
+    assert_match(field_slip.observation.collector,
+                 @response.body)
+  end
+
   test "should show previous field slip location" do
     field_slip = field_slips(:field_slip_previous)
     assert_not(field_slip.location == field_slip.project.location.display_name)
