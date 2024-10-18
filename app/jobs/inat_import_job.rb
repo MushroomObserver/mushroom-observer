@@ -151,9 +151,6 @@ class InatImportJob < ApplicationJob
     @inat = RestClient::Request.execute(
       method: :get, url: "#{API_BASE}/observations?#{query}", headers: headers
     )
-  rescue RestClient::ExceptionWithResponse => e
-    @inat_import.add_response_error(e.response)
-    e.response
   end
 
   def response_bad?(response)
@@ -408,8 +405,6 @@ class InatImportJob < ApplicationJob
     response = RestClient.post("#{API_BASE}/observation_field_values",
                                payload.to_json, headers)
     JSON.parse(response.body)
-  rescue RestClient::ExceptionWithResponse => e
-    @inat_import.add_response_error(e.response)
   end
 
   def update_description
@@ -429,8 +424,6 @@ class InatImportJob < ApplicationJob
       payload.to_json, headers
     )
     JSON.parse(response.body)
-  rescue RestClient::ExceptionWithResponse => e
-    @inat_import.add_response_error(e.response)
   end
 
   def increment_imported_count
