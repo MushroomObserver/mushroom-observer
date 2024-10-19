@@ -95,6 +95,10 @@ module Name::Taxonomy
       /\bcrypt temp\b/i =~ author&.delete(".")
   end
 
+  def pnw_provisional?
+    text_name.match?(/".*pnw/i) || author.match(/pnw/i)
+  end
+
   ################
 
   private
