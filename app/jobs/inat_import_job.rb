@@ -18,6 +18,8 @@ class InatImportJob < ApplicationJob
 
   def perform(inat_import)
     @inat_import = inat_import
+    @super_importers = InatImport.super_importers
+    @user = @inat_import.user
 
     begin
       access_token =
@@ -96,7 +98,7 @@ class InatImportJob < ApplicationJob
   end
 
   def super_importer?
-    InatImport.super_importers.include?(@inat_import.user_id)
+    @super_importers.include?(@user)
   end
 
   def right_user?(response)
@@ -223,7 +225,7 @@ class InatImportJob < ApplicationJob
 
   def new_obs_params
     name_id = adjust_for_provisional
-    { user: @inat_import.user,
+    { user: @user,
       when: @inat_obs.when,
       location: @inat_obs.location,
       where: @inat_obs.where,
@@ -285,7 +287,7 @@ class InatImportJob < ApplicationJob
       # t.boolean "gps_stripped", default: false, null: false
       # t.boolean "diagnostic", default: true, null: false
       image.update(
-        user_id: @inat_import.user_id, # throws Error if done as API param above
+        user_id: @user.id, # throws Error if done as API param above
         # NOTE: 2024-09-09 get when from image EXIF instead of @observation.when
         # https://github.com/MushroomObserver/mushroom-observer/issues/2379
         when: @observation.when # throws Error if done as API param above

@@ -33,6 +33,6 @@ class InatImport < ApplicationRecord
   end
 
   def self.super_importers
-    [1, 4468, 38_275]
+    Project.find_by(title: "SuperImporters").user_group.users
   end
 end

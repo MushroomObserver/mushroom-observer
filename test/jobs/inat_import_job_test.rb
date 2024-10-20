@@ -541,13 +541,15 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_super_importer_anothers_observation
     file_name = "calostoma_lutescens"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    user = users(:rolf)
+    user = users(:dick)
+    assert(InatImport.super_importers.include?(user),
+           "Test needs User fixture that's SuperImporter")
 
-    InatImport.super_importers << user.id
     inat_import = create_inat_import(user: user,
                                      inat_response: mock_inat_response)
     stub_inat_interactions(inat_import: inat_import,
-                           mock_inat_response: mock_inat_response)
+                           mock_inat_response: mock_inat_response,
+                           superimporter: true)
 
     Inat::PhotoImporter.stub(:new,
                              stub_mo_photo_importer(mock_inat_response)) do
@@ -580,13 +582,14 @@ class InatImportJobTest < ActiveJob::TestCase
 
   def stub_inat_interactions(
     inat_import:, mock_inat_response:, id_above: 0,
-    login: inat_import.inat_username
+    login: inat_import.inat_username, superimporter: false
   )
     stub_token_requests
     stub_check_username_match(login)
     stub_inat_api_request(inat_import: inat_import,
                           mock_inat_response: mock_inat_response,
-                          id_above: id_above)
+                          id_above: id_above,
+                          superimporter: superimporter)
     stub_inat_photo_requests(mock_inat_response)
     stub_modify_inat_observations(mock_inat_response)
   end
@@ -655,8 +658,10 @@ class InatImportJobTest < ActiveJob::TestCase
                 headers: {}))
   end
 
-  def stub_inat_api_request(inat_import:, mock_inat_response:, id_above: 0)
-    # params must be in same order as in the controller
+  def stub_inat_api_request(inat_import:, mock_inat_response:, id_above: 0,
+                            superimporter: false)
+    # Params must be in same order as in the controller
+    # Limit search to observations by the user, unless superimporter
     # omit trailing "=" since the controller omits it (via `merge`)
     params = <<~PARAMS.delete("\n").chomp("=")
       ?iconic_taxa=#{ICONIC_TAXA}
@@ -665,7 +670,7 @@ class InatImportJobTest < ActiveJob::TestCase
       &per_page=200
       &only_id=false
       &order=asc&order_by=id
-      &user_login=#{inat_import.inat_username}
+      &user_login=#{inat_import.inat_username unless superimporter}
     PARAMS
     add_stub(stub_request(:get, "#{API_BASE}/observations#{params}").
       with(headers:
