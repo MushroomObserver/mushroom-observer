@@ -20,6 +20,7 @@ class InatImportJob < ApplicationJob
     @inat_import = inat_import
     @super_importers = InatImport.super_importers
     @user = @inat_import.user
+    log("Starting")
 
     begin
       access_token =
@@ -43,6 +44,7 @@ class InatImportJob < ApplicationJob
 
   # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
   def use_auth_code_to_obtain_oauth_access_token(auth_code)
+    log("Obtaining oauth access token")
     payload = { client_id: APP_ID,
                 client_secret: Rails.application.credentials.inat.secret,
                 code: auth_code,
@@ -65,6 +67,7 @@ class InatImportJob < ApplicationJob
 
   # https://www.inaturalist.org/pages/api+recommended+practices
   def trade_access_token_for_jwt_api_token(access_token)
+    log("Obtaining jwt")
     begin
       jwt_response = RestClient::Request.execute(
         method: :get, url: "#{SITE}/users/api_token",
@@ -82,8 +85,13 @@ class InatImportJob < ApplicationJob
   # Therefore check that the iNat login provided in the import form
   # is that of the user currently logged-in to iNat.
   def ensure_importing_own_observations(api_token)
-    return if super_importer?
+    log("Starting own-obs check")
+    if super_importer?
+      log("Aborting own-obs check (SuperImporter)")
+      return
+    end
 
+    log("Continuing own-obs check")
     headers = { authorization: "Bearer #{api_token}",
                 content_type: :json, accept: :json }
     begin
@@ -91,10 +99,12 @@ class InatImportJob < ApplicationJob
       # https://api.inaturalist.org/v1/docs/#!/Users/get_users_me
       response = RestClient.get("#{API_BASE}/users/me", headers)
     rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
-      raise("iNat API user requst failed: #{e.message}")
+      raise("iNat API user request failed: #{e.message}")
     end
 
     raise(:inat_wrong_user.t) unless right_user?(response)
+
+    log("Finished own-obs check")
   end
 
   def super_importer?
@@ -466,5 +476,13 @@ class InatImportJob < ApplicationJob
   def job_successful_enough?
     @inat_import.response_errors.empty? ||
       @inat_import.imported_count&.positive?
+  end
+
+  def log(str)
+    time = Time.zone.now.to_s
+    log_entry = "#{time}: InatImportJob #{@inat_import.id} #{str}\n"
+    open("log/job.log", "a") do |f|
+      f.write(log_entry)
+    end
   end
 end
