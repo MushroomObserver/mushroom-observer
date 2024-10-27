@@ -21,11 +21,14 @@ module FieldSlipsController::Show
   end
 
   def field_slip_redirect(obs_id)
-    if foray_recorder?
-      redirect_to(edit_field_slip_url(id: @field_slip.id))
-    else
-      redirect_to(observation_url(id: obs_id))
-    end
+    redirect_to(observation_url(id: obs_id))
+    # Didn't turn out to be a big win and it's confusing for
+    # it to behave differently for recorders and regular users.
+    # if foray_recorder?
+    #   redirect_to(edit_field_slip_url(id: @field_slip.id))
+    # else
+    #   redirect_to(observation_url(id: obs_id))
+    # end
   end
 
   def foray_recorder?
