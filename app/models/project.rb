@@ -429,14 +429,6 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   #
   ##############################################################################
 
-  def happening?
-    now = Time.zone.now
-    return false if start_date.present? && now < start_date
-    return false if end_date.present? && now > end_date
-
-    true
-  end
-
   def out_of_range_observations
     if start_date.nil? && end_date.nil?
       # performant query that returns empty ActiveRecord_Relation

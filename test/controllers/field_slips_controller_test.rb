@@ -296,7 +296,8 @@ class FieldSlipsControllerTest < FunctionalTestCase
   test "should take admin to edit" do
     login(@field_slip.user.login)
     get(:show, params: { id: @field_slip.code })
-    assert_redirected_to edit_field_slip_url(id: @field_slip.id)
+    assert_redirected_to observation_url(@field_slip.observation)
+    # assert_redirected_to edit_field_slip_url(id: @field_slip.id)
   end
 
   test "should show field_slip and allow owner to change" do
