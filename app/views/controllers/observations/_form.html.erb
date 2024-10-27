@@ -61,6 +61,8 @@ form_element_data = {
     <%= hidden_field_tag(:field_code, @field_code) %>
   <% end %>
 
+  <%= submit_button(form: f, button: button_name, center: true) %>
+
   <%= panel_block(
     heading: "#{:IMAGES.l} + #{:show_observation_details.l}",
     id: "observation_images_details", formatted_content: true,
@@ -87,8 +89,6 @@ form_element_data = {
       end)
     end
   end %>
-
-  <%= submit_button(form: f, button: button_name, center: true) %>
 
   <%= panel_block(
     heading: :NOTES.l, id: "observation_notes",

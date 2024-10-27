@@ -118,7 +118,7 @@ class ImagesController < ApplicationController
        (image = Image.safe_find(pattern))
       redirect_to(action: "show", id: image.id)
     else
-      query = create_query(:Image, :pattern_search, pattern: pattern)
+      query = create_query(:Image, :all, pattern: pattern)
       show_selected_images(query)
     end
   end

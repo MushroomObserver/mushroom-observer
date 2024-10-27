@@ -25,6 +25,9 @@ DEFAULTS: &DEFAULTS
   where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
   user: dick
   vote_cache: 0.0
+  created_at: 2023-09-15 04:05:03
+  updated_at: 2023-09-15 04:05:03
+  log_updated_at: 2023-09-15 04:05:03
   when: <%= Time.now.strftime("%Y-%m-%d") %> # yyyy-mm-dd
   is_collection_location: 1
   lifeform: " "
@@ -726,19 +729,21 @@ wolf_fart:
   images: lone_wolf_image
   # images: lone_wolf_image, lone_wolf_image2
 
+# did not have rss_log
 reused_observation:
   <<: *DEFAULTS
   user: rolf
+  created_at: 2023-11-19 04:05:03
+  log_updated_at: 2023-11-19 04:05:03
   when: 2023-11-19
   location: obs_default_location
   where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
   species_lists: reused_list
-  rss_log:
 
+# did not have rss_log
 deprecated_name_obs:
   <<: *DEFAULTS
   created_at: 2014-04-04 04:05:03
-  updated_at: 2014-04-04 04:05:03
   log_updated_at: 2014-04-04 04:05:03
   when: 2012-06-07
   user: vouchered_only_user
@@ -747,17 +752,20 @@ deprecated_name_obs:
   name: petigera
   text_name: Petigera
   lifeform: " lichen "
-  rss_log:
 
 # meets constraints of falmouth_2023_09_project
 falmouth_2023_09_obs:
   <<: *DEFAULTS
+  created_at: 2023-09-16 04:05:03
+  log_updated_at: 2023-09-16 04:05:03
   when: 2023-09-15
   where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
   location: falmouth
 
 brett_woods_2023_09_obs:
   <<: *DEFAULTS
+  created_at: 2023-09-16 04:05:03
+  log_updated_at: 2023-09-16 04:05:03
   when: 2023-09-16
   where: Brett Woods, Fairfield Co., Connecticut, USA
   lat: 41.2039
@@ -767,6 +775,8 @@ brett_woods_2023_09_obs:
 
 falmouth_2022_obs:
   <<: *DEFAULTS
+  created_at: 2022-09-15 04:05:03
+  log_updated_at: 2022-09-15 04:05:03
   when: 2022-09-15 # outside of dates of falmouth_2023_09_project
   where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
   location: falmouth
@@ -793,6 +803,18 @@ newbie_obs:
   notes:
     :Collector: _user foray_newbie_
 
+recorder_obs:
+  <<: *DEFAULTS
+  notes:
+    :Collector: Foray Collector
+
 imported_inat_obs:
   <<: *DEFAULTS
   inat_id: 12345
+#
+#
+# IMPORTANT - AVOID CREATING FUTURE TEST ERRORS
+# - When creating a new observation fixture, you MUST also create a
+#   corresponding rss_log, since the observation index now sorts by rss_log.
+# - Observation fixtures require `created_at` and `log_updated_at` values.
+#   If you want to be able to find them in integration tests, give unique dates!

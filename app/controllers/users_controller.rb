@@ -54,7 +54,7 @@ class UsersController < ApplicationController
     if (user = user_exact_match(pattern))
       redirect_to(user_path(user.id))
     else
-      query = create_query(:User, :pattern_search, pattern: pattern)
+      query = create_query(:User, :all, pattern: pattern)
       show_selected_users(query)
     end
   end

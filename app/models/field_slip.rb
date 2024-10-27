@@ -99,9 +99,13 @@ class FieldSlip < AbstractModel
   end
 
   def collector
-    observation.collector if observation&.collector
+    return observation.collector if observation&.collector
 
     "_user #{(user || User.current).login}_"
+  end
+
+  def date
+    observation&.when || created_at
   end
 
   def field_slip_name

@@ -22,6 +22,13 @@ admin_mode_args = in_admin_mode? ? { turn_off: true } : { turn_on: true }
   </li>
   <li>
     <%= icon_link_to(
+          :app_mobile.l, article_path(34),
+          { icon: :mobile, id: "user_nav_mobile_link",
+            data: { placement: "bottom" } }
+        ) %>
+  </li>
+  <li>
+    <%= icon_link_to(
           :app_comments_for_you.l, comments_path(for_user: @user.id),
           { icon: :inbox, id: "user_nav_inbox_link",
             data: { placement: "bottom" } }

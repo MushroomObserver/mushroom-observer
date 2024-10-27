@@ -83,6 +83,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.order(created_at: :asc).last
     standard_assertions(obs: obs, name: name, loc: loc)
+    assert_not(obs.specimen, "Obs should not have a specimen")
     assert_equal(0, obs.images.length, "Obs should not have images")
     assert_match(/Observation Fields: none/, obs.comments.first.comment,
                  "Missing 'none' for Observation Fields")
@@ -283,7 +284,7 @@ class InatImportJobTest < ActiveJob::TestCase
   # `johnplischke` NEMF, DNA, notes, 2 identifications with same id;
   # 3 comments, everyone has MO account;
   # obs fields(include("Voucher Number(s)", "Voucher Specimen Taken"))
-  def test_import_job_prov_name
+  def test_import_job_nemf_plischke
     file_name = "arrhenia_sp_NY02"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     inat_import = create_inat_import(inat_response: mock_inat_response)
@@ -297,7 +298,6 @@ class InatImportJobTest < ActiveJob::TestCase
 
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
-
     Inat::PhotoImporter.stub(:new,
                              stub_mo_photo_importer(mock_inat_response)) do
       assert_difference("Observation.count", 1,
@@ -309,8 +309,9 @@ class InatImportJobTest < ActiveJob::TestCase
     obs = Observation.order(created_at: :asc).last
     standard_assertions(obs: obs, name: name)
 
-    assert(obs.images.any?, "Obs should have images")
-    assert(obs.sequences.one?, "Obs should have a sequence")
+    assert(obs.images.any?, "Obs should have Images")
+    assert(obs.sequences.one?, "Obs should have a Sequence")
+    assert(obs.specimen, "Obs should show that a Specimen is available")
   end
 
   # Prove that Namings, Votes, Identification are correct
@@ -484,8 +485,38 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
-  def test_user_name_mismatch
-    # skip("under construction")
+  def test_oauth_failure
+    file_name = "calostoma_lutescens"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    inat_import = create_inat_import(inat_response: mock_inat_response)
+
+    oauth_return = { status: 401, body: "Unauthorized",
+                     headers: { "Content-Type" => "application/json" } }
+    stub_oauth_token_request(oauth_return: oauth_return)
+
+    InatImportJob.perform_now(inat_import)
+
+    assert_match(/401 Unauthorized/, inat_import.response_errors,
+                 "Failed to report OAuth failure")
+  end
+
+  def test_jwt_failure
+    file_name = "calostoma_lutescens"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    inat_import = create_inat_import(inat_response: mock_inat_response)
+
+    stub_oauth_token_request
+    jwt_return = { status: 401, body: "Unauthorized",
+                   headers: { "Content-Type" => "application/json" } }
+    stub_jwt_request(jwt_return: jwt_return)
+
+    InatImportJob.perform_now(inat_import)
+
+    assert_match(/401 Unauthorized/, inat_import.response_errors,
+                 "Failed to report OAuth failure")
+  end
+
+  def test_import_anothers_observation
     file_name = "calostoma_lutescens"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     inat_import = create_inat_import(inat_response: mock_inat_response)
@@ -507,6 +538,31 @@ class InatImportJobTest < ActiveJob::TestCase
     )
   end
 
+  def test_super_importer_anothers_observation
+    file_name = "calostoma_lutescens"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    user = users(:dick)
+    assert(InatImport.super_importers.include?(user),
+           "Test needs User fixture that's SuperImporter")
+
+    inat_import = create_inat_import(user: user,
+                                     inat_response: mock_inat_response)
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response,
+                           superimporter: true)
+
+    Inat::PhotoImporter.stub(:new,
+                             stub_mo_photo_importer(mock_inat_response)) do
+      assert_difference(
+        "Observation.count", 1,
+        "'super_importer' failed to import another user's observation"
+      ) do
+        InatImportJob.perform_now(inat_import)
+      end
+    end
+    assert_empty(inat_import.response_errors, "There should be no errors")
+  end
+
   ########## Utilities
 
   # The InatImport object which is created in InatImportController#create
@@ -526,13 +582,14 @@ class InatImportJobTest < ActiveJob::TestCase
 
   def stub_inat_interactions(
     inat_import:, mock_inat_response:, id_above: 0,
-    login: inat_import.inat_username
+    login: inat_import.inat_username, superimporter: false
   )
     stub_token_requests
     stub_check_username_match(login)
     stub_inat_api_request(inat_import: inat_import,
                           mock_inat_response: mock_inat_response,
-                          id_above: id_above)
+                          id_above: id_above,
+                          superimporter: superimporter)
     stub_inat_photo_requests(mock_inat_response)
     stub_modify_inat_observations(mock_inat_response)
   end
@@ -553,7 +610,11 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # stub exchanging iNat code for oauth token
   # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
-  def stub_oauth_token_request
+  def stub_oauth_token_request(oauth_return: {
+    status: 200,
+    body: { access_token: "MockAccessToken" }.to_json,
+    headers: {}
+  })
     add_stub(stub_request(:post, "#{SITE}/oauth/token").
       with(
         body: { "client_id" => Rails.application.credentials.inat.id,
@@ -562,12 +623,13 @@ class InatImportJobTest < ActiveJob::TestCase
                 "grant_type" => "authorization_code",
                 "redirect_uri" => REDIRECT_URI }
       ).
-      to_return(status: 200,
-                body: { access_token: "MockAccessToken" }.to_json,
-                headers: {}))
+      to_return(oauth_return))
   end
 
-  def stub_jwt_request
+  def stub_jwt_request(jwt_return:
+    { status: 200,
+      body: { access_token: "MockJWT" }.to_json,
+      headers: {} })
     add_stub(stub_request(:get, "#{SITE}/users/api_token").
       with(
         headers: {
@@ -577,9 +639,7 @@ class InatImportJobTest < ActiveJob::TestCase
           "Host" => "www.inaturalist.org"
         }
       ).
-      to_return(status: 200,
-                body: { access_token: "MockJWT" }.to_json,
-                headers: {}))
+      to_return(jwt_return))
   end
 
   def stub_check_username_match(login)
@@ -598,8 +658,10 @@ class InatImportJobTest < ActiveJob::TestCase
                 headers: {}))
   end
 
-  def stub_inat_api_request(inat_import:, mock_inat_response:, id_above: 0)
-    # params must be in same order as in the controller
+  def stub_inat_api_request(inat_import:, mock_inat_response:, id_above: 0,
+                            superimporter: false)
+    # Params must be in same order as in the controller
+    # Limit search to observations by the user, unless superimporter
     # omit trailing "=" since the controller omits it (via `merge`)
     params = <<~PARAMS.delete("\n").chomp("=")
       ?iconic_taxa=#{ICONIC_TAXA}
@@ -608,7 +670,7 @@ class InatImportJobTest < ActiveJob::TestCase
       &per_page=200
       &only_id=false
       &order=asc&order_by=id
-      &user_login=#{inat_import.inat_username}
+      &user_login=#{inat_import.inat_username unless superimporter}
     PARAMS
     add_stub(stub_request(:get, "#{API_BASE}/observations#{params}").
       with(headers:
@@ -733,6 +795,10 @@ class InatImportJobTest < ActiveJob::TestCase
       assert_equal(Vote::MAXIMUM_VOTE, vote.value,
                    "Vote for MO consensus should be highest possible vote")
     end
+
+    view = ObservationView.
+           find_by(observation_id: obs.id, user_id: inat_manager.id)
+    assert(view.present?, "Failed to create ObservationView")
 
     assert(obs.comments.any?, "Imported iNat should have >= 1 Comment")
     obs_comments =

@@ -167,6 +167,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     obs = Observation.last
     assert_redirected_to observation_url(obs.id)
   end
+
   test "should create obs with link to inat" do
     login(@field_slip.user.login)
     code = "Z#{@field_slip.code}"
@@ -204,6 +205,25 @@ class FieldSlipsControllerTest < FunctionalTestCase
     end
     assert_flash_error
     assert_redirected_to new_observation_url(field_code: code)
+  end
+
+  test "should create fungi obs" do
+    login(@field_slip.user.login)
+    code = "Z#{@field_slip.code}"
+    assert_difference("FieldSlip.count") do
+      post(:create,
+           params: {
+             commit: :field_slip_quick_create_obs.t,
+             field_slip: {
+               location: locations(:albion).name,
+               code: code,
+               project_id: projects(:eol_project).id
+             }
+           })
+    end
+    obs = Observation.last
+    assert_redirected_to observation_url(obs.id)
+    assert_equal(obs.text_name, "Fungi")
   end
 
   test "should attempt quick field_slip and redirect to show obs" do
@@ -276,7 +296,8 @@ class FieldSlipsControllerTest < FunctionalTestCase
   test "should take admin to edit" do
     login(@field_slip.user.login)
     get(:show, params: { id: @field_slip.code })
-    assert_redirected_to edit_field_slip_url(id: @field_slip.id)
+    assert_redirected_to observation_url(@field_slip.observation)
+    # assert_redirected_to edit_field_slip_url(id: @field_slip.id)
   end
 
   test "should show field_slip and allow owner to change" do
@@ -310,6 +331,14 @@ class FieldSlipsControllerTest < FunctionalTestCase
     login(@field_slip.user.login)
     get(:edit, params: { id: @field_slip.id })
     assert_match(@field_slip.location_name,
+                 @response.body)
+  end
+
+  test "should show text collector" do
+    field_slip = field_slips(:field_slip_by_recorder)
+    login(field_slip.user.login)
+    get(:edit, params: { id: field_slip.id })
+    assert_match(field_slip.observation.collector,
                  @response.body)
   end
 

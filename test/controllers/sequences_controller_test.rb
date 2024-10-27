@@ -23,7 +23,7 @@ class SequencesControllerTest < FunctionalTestCase
   def test_index
     login
     obs = observations(:genbanked_obs)
-    query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
+    query = Query.lookup_and_save(:Sequence, :all, observations: obs)
     results = query.results
     assert_operator(results.count, :>, 3)
     q = query.id.alphabetize
@@ -360,7 +360,7 @@ class SequencesControllerTest < FunctionalTestCase
     obs      = observations(:genbanked_obs)
     sequence = obs.sequences[2]
     assert_operator(obs.sequences.count, :>, 3)
-    query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
+    query = Query.lookup_and_save(:Sequence, :all, observations: obs)
     q     = query.id.alphabetize
     params = { id: sequence.id,
                sequence: { locus: sequence.locus,
@@ -574,7 +574,7 @@ class SequencesControllerTest < FunctionalTestCase
     obs = observations(:genbanked_obs)
     assert_operator(obs.sequences.count, :>, 3)
     sequence = obs.sequences[2]
-    query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
+    query = Query.lookup_and_save(:Sequence, :all, observations: obs)
     q     = query.id.alphabetize
     params = { id: sequence.id,
                sequence: { locus: sequence.locus,
@@ -591,7 +591,7 @@ class SequencesControllerTest < FunctionalTestCase
     obs = observations(:genbanked_obs)
     assert_operator(obs.sequences.count, :>, 3)
     sequence = obs.sequences[2]
-    query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
+    query = Query.lookup_and_save(:Sequence, :all, observations: obs)
     q     = query.id.alphabetize
     params = { id: sequence.id,
                sequence: { locus: sequence.locus,
@@ -672,7 +672,7 @@ class SequencesControllerTest < FunctionalTestCase
   def test_destroy_redirect_to_observation_with_query
     obs   = observations(:genbanked_obs)
     seqs  = obs.sequences
-    query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
+    query = Query.lookup_and_save(:Sequence, :all, observations: obs)
     q     = query.id.alphabetize
 
     # Prove that it keeps query param intact when returning to observation.
@@ -684,7 +684,7 @@ class SequencesControllerTest < FunctionalTestCase
   def test_destroy_redirect_to_index_with_query
     obs   = observations(:genbanked_obs)
     seqs  = obs.sequences
-    query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
+    query = Query.lookup_and_save(:Sequence, :all, observations: obs)
     q     = query.id.alphabetize
 
     # Prove that it can return to index, too, with query intact.

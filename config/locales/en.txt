@@ -1370,6 +1370,7 @@
   app_create_account: Create Account
   app_current_user: Current User
   app_comments_for_you: Comments for You
+  app_mobile: Get Mobile App
   app_qrcode: Enter Field Slip Code
   app_your_observations: Your Observations
   app_your_lists: Your Lists
@@ -3035,6 +3036,7 @@
 
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
   inat_wrong_user: You cannot import an iNat observation created by someone else. To import your own observation, make sure that noone else is logged into iNat on your device and that you entered the correct iNat username.
+  inat_page_of_obs_failed: Failed to get page of observations from iNat API
 
   inat_data_comment: Snapshot of Imported iNat Data
   inat_dqa_casual: Casual

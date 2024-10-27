@@ -10,6 +10,7 @@ class Query::ProjectBase < Query::Base
       created_at?: [:time],
       updated_at?: [:time],
       users?: [User],
+      ids?: [Project],
       with_images?: { boolean: [true] },
       with_observations?: { boolean: [true] },
       with_species_lists?: { boolean: [true] },
@@ -19,7 +20,8 @@ class Query::ProjectBase < Query::Base
       summary_has?: :string,
       field_slip_prefix_has?: :string,
       comments_has?: :string,
-      member?: User
+      member?: User,
+      pattern?: :string
     )
   end
 
@@ -28,6 +30,8 @@ class Query::ProjectBase < Query::Base
     initialize_association_parameters
     initialize_boolean_parameters
     initialize_search_parameters
+    add_ids_condition
+    add_pattern_condition
     super
   end
 
@@ -69,6 +73,14 @@ class Query::ProjectBase < Query::Base
       params[:comments_has],
       :comments
     )
+  end
+
+  def search_fields
+    "CONCAT(" \
+      "projects.title," \
+      "COALESCE(projects.summary,'')," \
+      "COALESCE(projects.field_slip_prefix,'')" \
+      ")"
   end
 
   def self.default_order

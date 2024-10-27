@@ -149,6 +149,14 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     open_membership && !member?(user)
   end
 
+  def join(user)
+    return unless can_join?(user)
+
+    ProjectMember.create!(project: self, user:,
+                          trust_level: "hidden_gps")
+    user_group.users << user unless user_group.users.member?(user)
+  end
+
   def can_leave?(user)
     user && user_group.users.member?(user) && user.id != user_id
   end
@@ -420,14 +428,6 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   #  :section: queries re related Observations
   #
   ##############################################################################
-
-  def happening?
-    now = Time.zone.now
-    return false if start_date.present? && now < start_date
-    return false if end_date.present? && now > end_date
-
-    true
-  end
 
   def out_of_range_observations
     if start_date.nil? && end_date.nil?
