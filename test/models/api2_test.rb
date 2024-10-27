@@ -463,6 +463,25 @@ class API2Test < UnitTestCase
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
   end
 
+  def test_posting_api_key_with_email
+    email_count = ActionMailer::Base.deliveries.size
+    @for_user = rolf.email
+    @app = "  Mushroom  Mapper  "
+    @verified = true
+    params = {
+      method: :post,
+      action: :api_key,
+      api_key: @api_key.key,
+      app: @app
+    }
+    api = API2.execute(params)
+    assert_no_errors(api, "Errors while posting api key")
+    assert_obj_arrays_equal([APIKey.last], api.results)
+    assert_api_fail(params.except(:api_key))
+    assert_api_fail(params.except(:app))
+    assert_equal(email_count, ActionMailer::Base.deliveries.size)
+  end
+
   def test_posting_api_key_for_another_user_without_password
     email_count = ActionMailer::Base.deliveries.size
     @for_user = katrina
@@ -4011,6 +4030,7 @@ class API2Test < UnitTestCase
     assert_parse(:user, API2::ObjectNotFoundById, "12345")
     assert_parse(:user, rolf, rolf.login)
     assert_parse(:user, rolf, rolf.name)
+    assert_parse(:user, rolf, rolf.email)
   end
 
   def test_parse_object
