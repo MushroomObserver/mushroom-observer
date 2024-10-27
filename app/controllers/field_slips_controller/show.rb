@@ -22,19 +22,5 @@ module FieldSlipsController::Show
 
   def field_slip_redirect(obs_id)
     redirect_to(observation_url(id: obs_id))
-    # Didn't turn out to be a big win and it's confusing for
-    # it to behave differently for recorders and regular users.
-    # if foray_recorder?
-    #   redirect_to(edit_field_slip_url(id: @field_slip.id))
-    # else
-    #   redirect_to(observation_url(id: obs_id))
-    # end
-  end
-
-  def foray_recorder?
-    project = @field_slip&.project
-    return false unless project
-
-    project.is_admin?(User.current) && project.happening?
   end
 end
