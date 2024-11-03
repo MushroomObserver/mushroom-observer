@@ -221,6 +221,11 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
             )
           )
         }
+  scope :with_minimum_bounding_rectangle_containing_point,
+        lambda { |**args|
+          args => {lat:, lng:}
+          contains_point(lat: lat, lng: lng).min_by(&:box_area)
+        }
   scope :contains_box, # Use named parameters, north:, south:, east:, west:
         lambda { |**args|
           args => { north:, south:, east:, west: }
@@ -313,10 +318,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
       group(:location_id).update_all(
         location_lat: nil, location_lng: nil
       )
-  end
-
-  def self.with_minimum_bounding_rectangle(lat, lng)
-    contains_point(lat: lat, lng: lng).min_by(&:box_area)
   end
 
   # Let attached observations update their cache if these fields changed.

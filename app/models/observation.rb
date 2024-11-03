@@ -1568,6 +1568,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     return unless location && Location.is_unknown?(location.name) &&
                   lat.present? && lng.present?
 
-    self.location = Location.with_minimum_bounding_rectangle(lat, lng)
+    self.location = Location.with_minimum_bounding_rectangle_containing_point(
+      lat: lat, lng: lng
+    )
   end
 end
