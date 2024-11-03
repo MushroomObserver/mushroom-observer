@@ -315,6 +315,10 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
       )
   end
 
+  def self.with_minimum_bounding_rectangle(lat, lng)
+    contains_point(lat: lat, lng: lng).min_by(&:box_area)
+  end
+
   # Let attached observations update their cache if these fields changed.
   # Also touch updated_at to expire obs fragment caches
   def update_observation_cache

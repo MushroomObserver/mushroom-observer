@@ -216,6 +216,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # else Rubocop says: "before_save is supposed to appear before before_destroy"
   # because a before_destroy must precede the has_many's
   before_save :cache_content_filter_data
+  before_save :avoid_unknown_location
+
   # rubocop:enable Rails/ActiveRecordCallbacksOrder
   after_update :notify_users_after_change
   before_destroy :destroy_orphaned_collection_numbers
@@ -1558,5 +1560,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def check_when
     self.when ||= Time.zone.now
     validate_when(self.when, errors)
+  end
+
+  private
+
+  def avoid_unknown_location
+    return unless location && Location.is_unknown?(location.name) &&
+                  lat.present? && lng.present?
+
+    self.location = Location.with_minimum_bounding_rectangle(lat, lng)
   end
 end

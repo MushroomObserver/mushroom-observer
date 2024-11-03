@@ -551,6 +551,17 @@ class LocationTest < UnitTestCase
                  "Opposite side of globe should not be 'close' to Location.")
   end
 
+  def test_with_minimum_bounding_rectangle
+    falmouth = locations(:falmouth)
+    assert_equal(
+      falmouth, Location.with_minimum_bounding_rectangle(falmouth.center_lat,
+                                                         falmouth.center_lng)
+    )
+
+    assert_equal(locations(:unknown_location),
+                 Location.with_minimum_bounding_rectangle(-89, 0))
+  end
+
   # ----------------------------------------------------
   #  Scopes
   #    Explicit tests of some scopes to improve coverage

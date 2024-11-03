@@ -493,7 +493,30 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     QueuedEmail.queue = false
   end
 
-  def test_create_observation_with_decimal_geolocation_and_unknown_name
+  def test_create_observation_with_unknown_decimal_geolocation_and_unknown_name
+    # cannot use 0,0 because that's inside loc_edited_by_katrina
+    lat = 3.0
+    lng = 0.0
+    earth = Location.unknown
+    locs = Location.contains_point(lat: lat, lng: lng)
+    assert_equal(1, locs.length,
+                 "Test needs lat/lng outside all locations except Earth")
+    assert_equal(earth, locs.first)
+
+    generic_construct_observation(
+      { observation: { place_name: "", lat: lat, lng: lng },
+        naming: { name: "Unknown" } },
+      1, 0, 0, 0
+    )
+    obs = assigns(:observation)
+
+    assert_equal(lat.to_s, obs.lat.to_s)
+    assert_equal(lng.to_s, obs.lng.to_s)
+    assert_objs_equal(earth, obs.location)
+    assert_not_nil(obs.rss_log)
+  end
+
+  def test_create_observation_with_known_decimal_geolocation_and_unknown_name
     lat = 34.1622
     lng = -118.3521
     generic_construct_observation(
@@ -505,7 +528,11 @@ class ObservationsControllerCreateTest < FunctionalTestCase
 
     assert_equal(lat.to_s, obs.lat.to_s)
     assert_equal(lng.to_s, obs.lng.to_s)
-    assert_objs_equal(Location.unknown, obs.location)
+    assert_objs_equal(
+      locations(:burbank), obs.location,
+      "It should use smallest Location containing lat/lng " \
+      "even if user leaves Where blank or uses the unknown Location"
+    )
     assert_not_nil(obs.rss_log)
   end
 
@@ -521,7 +548,11 @@ class ObservationsControllerCreateTest < FunctionalTestCase
 
     assert_equal("34.1622", obs.lat.to_s)
     assert_equal("-118.3521", obs.lng.to_s)
-    assert_objs_equal(Location.unknown, obs.location)
+    assert_objs_equal(
+      locations(:burbank), obs.location,
+      "It should use smallest Location containing lat/lng " \
+      "even if user leaves Where blank or uses the unknown Location"
+    )
     assert_not_nil(obs.rss_log)
   end
 
