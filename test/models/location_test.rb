@@ -693,14 +693,14 @@ class LocationTest < UnitTestCase
     falmouth = locations(:falmouth)
     assert_equal(
       falmouth,
-      Location.with_minimum_bounding_rectangle_containing_point(
+      Location.with_minimum_bounding_box_containing_point(
         lat: falmouth.center_lat, lng: falmouth.center_lng
       )
     )
 
     assert_equal(
       locations(:unknown_location),
-      Location.with_minimum_bounding_rectangle_containing_point(
+      Location.with_minimum_bounding_box_containing_point(
         lat: -89, lng: 0
       )
     )

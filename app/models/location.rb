@@ -221,7 +221,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
             )
           )
         }
-  scope :with_minimum_bounding_rectangle_containing_point,
+  scope :with_minimum_bounding_box_containing_point,
         lambda { |**args|
           args => {lat:, lng:}
           contains_point(lat: lat, lng: lng).min_by(&:box_area)
