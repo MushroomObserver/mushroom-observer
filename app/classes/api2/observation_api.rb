@@ -372,6 +372,16 @@ class API2
       @latitude  = parse(:latitude, :latitude)
       @longitude = parse(:longitude, :longitude)
       @altitude  = parse(:altitude, :altitude)
+      prefer_minimum_bounding_rectangle_to_earth!
+    end
+
+    def prefer_minimum_bounding_rectangle_to_earth!
+      return unless Location.is_unknown?(@location) &&
+                    @latitude.present? && @longitude.present?
+
+      @location = Location.with_minimum_bounding_rectangle_containing_point(
+        lat: @latitude, lng: @longitude
+      ).name
     end
 
     def parse_herbarium_and_specimen!

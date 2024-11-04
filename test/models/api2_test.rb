@@ -2374,6 +2374,39 @@ class API2Test < UnitTestCase
     assert_api_fail(params.except(:location))
   end
 
+  def test_post_observation_with_geoloc_and_earth
+    burbank = locations(:burbank)
+    @user = rolf
+    @name = Name.unknown
+    @loc = burbank
+    @img1 = nil
+    @img2 = nil
+    @spl = nil
+    @proj = nil
+    @date = Time.zone.today
+    @notes = Observation.no_notes
+    @vote = Vote.maximum_vote
+    @specimen = false
+    @is_col_loc = true
+    @lat = burbank.center_lat
+    @long = burbank.center_lng
+    @alt = nil
+    params = {
+      method: :post,
+      action: :observation,
+      api_key: @api_key.key,
+      latitude: @lat,
+      longitude: @long,
+      location: "Earth"
+    }
+    api = API2.execute(params)
+    assert_no_errors(api, "Errors while posting observation")
+    assert_obj_arrays_equal([Observation.last], api.results)
+    assert_last_observation_correct
+    assert_equal("mo_api", Observation.last.source)
+    assert_api_fail(params.except(:location))
+  end
+
   def test_post_maximal_observation
     @user = rolf
     @name = names(:coprinus_comatus)
