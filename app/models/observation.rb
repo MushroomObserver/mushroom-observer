@@ -1568,8 +1568,15 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     return unless location && Location.is_unknown?(location.name) &&
                   lat.present? && lng.present?
 
-    self.location = Location.with_minimum_bounding_box_containing_point(
-      lat: lat, lng: lng
-    )
+    Location.
+      with_minimum_bounding_box_containing_point(lat: lat, lng: lng).
+      # Use the unknown location if there's no minimum bounding box.
+      # NOTE: jdc As of 20241105, that's possible because the live db unknown
+      # location does not contain the entire globe. Its boundaries:
+      #             north: 89,
+      #  west: -179,          east: 179,
+      #            south: -89,
+      # Also see ObservationAPI#prefer_minimum_bounding_box_to_earth!
+      presence || Location.unknown
   end
 end

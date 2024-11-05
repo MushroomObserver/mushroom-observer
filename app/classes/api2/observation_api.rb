@@ -379,9 +379,13 @@ class API2
       return unless Location.is_unknown?(@location) &&
                     @latitude.present? && @longitude.present?
 
-      @location = Location.with_minimum_bounding_box_containing_point(
-        lat: @latitude, lng: @longitude
-      ).name
+      mbb =
+        Location.with_minimum_bounding_box_containing_point(
+          lat: @latitude, lng: @longitude
+        ).
+        # See comment at Observation#prefer_minimum_bounding_box_to_earth
+        presence || Location.unknown
+      @location = mbb.name
     end
 
     def parse_herbarium_and_specimen!
