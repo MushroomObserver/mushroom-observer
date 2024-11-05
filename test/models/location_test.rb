@@ -689,7 +689,7 @@ class LocationTest < UnitTestCase
     do_contains_box(loc: california, regions: [earth])
   end
 
-  def test_with_minimum_bounding_rectangle
+  def test_scope_with_minimum_bounding_box_containing_point
     falmouth = locations(:falmouth)
     assert_equal(
       falmouth,
@@ -698,10 +698,10 @@ class LocationTest < UnitTestCase
       )
     )
 
-    assert_equal(
-      locations(:unknown_location),
-      Location.with_minimum_bounding_box_containing_point(
-        lat: -89, lng: 0
+    california_locations = Location.where(Location[:name] =~ /California, USA$/)
+    assert_empty(
+      california_locations.with_minimum_bounding_box_containing_point(
+        lat: falmouth.center_lat, lng: falmouth.center_lng
       )
     )
   end
