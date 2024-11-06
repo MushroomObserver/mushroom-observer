@@ -517,15 +517,17 @@ class ObservationsControllerCreateTest < FunctionalTestCase
   end
 
   def test_create_observation_with_known_decimal_geolocation_and_unknown_name
-    lat = 34.1622
-    lng = -118.3521
+    burbank = locations(:burbank)
+    lat = burbank.center_lat
+    lng = burbank.center_lng
+
     generic_construct_observation(
       { observation: { place_name: "", lat: lat, lng: lng },
         naming: { name: "Unknown" } },
       1, 0, 0, 0
     )
-    obs = assigns(:observation)
 
+    obs = assigns(:observation)
     assert_equal(lat.to_s, obs.lat.to_s)
     assert_equal(lng.to_s, obs.lng.to_s)
     assert_objs_equal(
