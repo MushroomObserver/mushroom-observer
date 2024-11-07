@@ -20,21 +20,27 @@ class InatImportJob < ApplicationJob
     @inat_import = inat_import
     @super_importers = InatImport.super_importers
     @user = @inat_import.user
-    log("Starting")
+    log("Job started with inat_import ID: #{inat_import.id}")
 
     begin
       access_token =
         use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
+      log("Obtained OAuth access token")
       @inat_import.update(token: access_token)
 
       api_token = trade_access_token_for_jwt_api_token(@inat_import.token)
+      log("Obtained JWT API token")
       ensure_importing_own_observations(api_token)
+      log("Checked importing own observations")
       @inat_import.update(token: api_token, state: "Importing")
       import_requested_observations
+      log("Imported requested observations")
     rescue StandardError => e
+      log("Error occurred: #{e.message}")
       @inat_import.add_response_error(e)
     ensure
       done
+      log("Job done")
     end
 
     done
@@ -61,8 +67,10 @@ class InatImportJob < ApplicationJob
   end
 
   def done
+    log("Updating inat_import state to Done")
     @inat_import.update(state: "Done")
     update_user_inat_username
+    log("Updated user inat_username")
   end
 
   # https://www.inaturalist.org/pages/api+recommended+practices
@@ -480,9 +488,9 @@ class InatImportJob < ApplicationJob
 
   def log(str)
     time = Time.zone.now.to_s
-    log_entry = "#{time}: InatImportJob #{@inat_import.id} #{str}\n"
-    open("log/job.log", "a") do |f|
-      f.write(log_entry)
-    end
+    log_entry = "#{time}: InatImportJob #{@inat_import.id} #{str}"
+    @inat_import.log ||= []
+    @inat_import.log << log_entry
+    @inat_import.save
   end
 end
