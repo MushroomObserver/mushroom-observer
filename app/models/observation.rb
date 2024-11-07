@@ -216,6 +216,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # else Rubocop says: "before_save is supposed to appear before before_destroy"
   # because a before_destroy must precede the has_many's
   before_save :cache_content_filter_data
+  before_save :prefer_minimum_bounding_box_to_earth
+
   # rubocop:enable Rails/ActiveRecordCallbacksOrder
   after_update :notify_users_after_change
   before_destroy :destroy_orphaned_collection_numbers
@@ -1558,5 +1560,24 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def check_when
     self.when ||= Time.zone.now
     validate_when(self.when, errors)
+  end
+
+  private
+
+  def prefer_minimum_bounding_box_to_earth
+    return unless location && Location.is_unknown?(location.name) &&
+                  lat.present? && lng.present?
+
+    self.location =
+      Location.
+      with_minimum_bounding_box_containing_point(lat: lat, lng: lng).
+      # Use the unknown location if there's no minimum bounding box.
+      # NOTE: jdc As of 20241105, that's possible because the live db unknown
+      # location does not contain the entire globe. Its boundaries:
+      #             north: 89,
+      #  west: -179,          east: 179,
+      #            south: -89,
+      # Also see ObservationAPI#prefer_minimum_bounding_box_to_earth!
+      presence || Location.unknown
   end
 end

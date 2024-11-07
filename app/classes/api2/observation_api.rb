@@ -372,6 +372,20 @@ class API2
       @latitude  = parse(:latitude, :latitude)
       @longitude = parse(:longitude, :longitude)
       @altitude  = parse(:altitude, :altitude)
+      prefer_minimum_bounding_box_to_earth!
+    end
+
+    def prefer_minimum_bounding_box_to_earth!
+      return unless Location.is_unknown?(@location) &&
+                    @latitude.present? && @longitude.present?
+
+      mbb =
+        Location.with_minimum_bounding_box_containing_point(
+          lat: @latitude, lng: @longitude
+        ).
+        # See comment at Observation#prefer_minimum_bounding_box_to_earth
+        presence || Location.unknown
+      @location = mbb.name
     end
 
     def parse_herbarium_and_specimen!

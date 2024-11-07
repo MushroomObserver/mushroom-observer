@@ -221,6 +221,15 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
             )
           )
         }
+  scope :with_minimum_bounding_box_containing_point,
+        lambda { |**args|
+          args => {lat:, lng:}
+          containers = contains_point(lat: lat, lng: lng)
+          # prevents returning all containers if contaimers empty
+          return none if containers.empty?
+
+          containers.min_by(&:box_area)
+        }
   scope :contains_box, # Use named parameters, north:, south:, east:, west:
         lambda { |**args|
           args => { north:, south:, east:, west: }
