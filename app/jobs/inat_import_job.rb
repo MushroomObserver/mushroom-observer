@@ -25,25 +25,16 @@ class InatImportJob < ApplicationJob
     begin
       access_token =
         use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
-      log("Obtained OAuth access token")
-      @inat_import.update(token: access_token)
-
-      api_token = trade_access_token_for_jwt_api_token(@inat_import.token)
-      log("Obtained JWT API token")
+      api_token = trade_access_token_for_jwt_api_token(access_token)
       ensure_importing_own_observations(api_token)
-      log("Checked importing own observations")
       @inat_import.update(token: api_token, state: "Importing")
       import_requested_observations
-      log("Imported requested observations")
     rescue StandardError => e
       log("Error occurred: #{e.message}")
       @inat_import.add_response_error(e)
     ensure
       done
-      log("Job done")
     end
-
-    done
   end
 
   private
@@ -59,18 +50,21 @@ class InatImportJob < ApplicationJob
 
     begin
       oauth_response = RestClient.post("#{SITE}/oauth/token", payload)
+      log("oauth access token response.body: #{oauth_response.body}")
     rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
       raise("OAuth token request failed: #{e.message}")
     end
 
-    JSON.parse(oauth_response.body)["access_token"]
+    token = JSON.parse(oauth_response.body)["access_token"]
+    @inat_import.update(token: token)
+    log("Obtained OAuth access token: #{token}")
+    token
   end
 
   def done
     log("Updating inat_import state to Done")
     @inat_import.update(state: "Done")
     update_user_inat_username
-    log("Updated user inat_username")
   end
 
   # https://www.inaturalist.org/pages/api+recommended+practices
@@ -84,7 +78,9 @@ class InatImportJob < ApplicationJob
     rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
       raise("JWT request failed: #{e.message}")
     end
-    JSON.parse(jwt_response)["api_token"]
+    api_token = JSON.parse(jwt_response)["api_token"]
+    log("Obtained JWT API token: #{api_token}")
+    api_token
   end
 
   # Ensure that MO users importing only their own iNat observations.
@@ -94,18 +90,16 @@ class InatImportJob < ApplicationJob
   # is that of the user currently logged-in to iNat.
   def ensure_importing_own_observations(api_token)
     log("Starting own-obs check")
-    if super_importer?
-      log("Aborting own-obs check (SuperImporter)")
-      return
-    end
+    return log("Aborting own-obs check (SuperImporter)") if super_importer?
 
-    log("Continuing own-obs check")
     headers = { authorization: "Bearer #{api_token}",
                 content_type: :json, accept: :json }
     begin
+      log("Fetching logged-iNat user")
       # fetch the logged-in iNat user
       # https://api.inaturalist.org/v1/docs/#!/Users/get_users_me
       response = RestClient.get("#{API_BASE}/users/me", headers)
+      log("logged-iNat user response.body: #{response}")
     rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
       raise("iNat API user request failed: #{e.message}")
     end
@@ -121,13 +115,16 @@ class InatImportJob < ApplicationJob
 
   def right_user?(response)
     inat_logged_in_user = JSON.parse(response.body)["results"].first["login"]
+    log("inat_logged_in_user: #{inat_logged_in_user}")
     inat_logged_in_user == @inat_import.inat_username
   end
 
   def import_requested_observations
     @inat_manager = User.find_by(login: "MO Webmaster")
     inat_ids = inat_id_list
-    return if @inat_import[:import_all].blank? && inat_ids.blank?
+
+    return log("Imported requested observations") if @inat_import[:import_all].
+                                                     blank? && inat_ids.blank?
 
     # Search for one page of results at a time, until done with all pages
     # To get one page, use iNats `per_page` & `id_above` params.
@@ -150,6 +147,7 @@ class InatImportJob < ApplicationJob
 
       break
     end
+    log("Imported requested observations")
   end
 
   # limit iNat API search to observations by iNat user with this login
@@ -478,6 +476,7 @@ class InatImportJob < ApplicationJob
     return unless job_successful_enough?
 
     @inat_import.user.update(inat_username: @inat_import.inat_username)
+    log("Updated user inat_username")
   end
 
   # job successful enough to justify updating the MO user's iNat user_name
