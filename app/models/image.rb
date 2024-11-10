@@ -448,6 +448,14 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     [w, h]
   end
 
+  def cached_original_file_path
+    "#{MO.local_original_image_cache_path}/#{id}.jpg"
+  end
+
+  def cached_original_url
+    "#{MO.local_original_image_cache_url}/#{id}.jpg"
+  end
+
   ##############################################################################
   #
   #  :section: Image Upload

@@ -127,6 +127,23 @@ MushroomObserver::Application.configure do
   config.keep_these_image_sizes_local =
     IMAGE_CONFIG_DATA.config["keep_these_image_sizes_local"]
 
+  # We transfer originals to cloud archive storage right away, but we keep
+  # them on the image server for as long as we can, deleting them in batches.
+  # All images with `id >= next_image_id_to_go_to_cloud` are still being served
+  # from the image server. NOTE: this number must be kept in sync with the
+  # nginx configuration!
+  config.next_image_id_to_go_to_cloud = 0
+
+  # This is where original images from cloud storage are temporarily cached.
+  config.local_original_image_cache_path = "#{config.root}/public/orig_cache"
+  config.local_original_image_cache_url = "/orig_cache"
+
+  # Maximum number of original images per day a user is allowed to download.
+  config.original_image_quota = 1000
+
+  # Cloud storage bucket name.
+  config.image_bucket_name = "mo-image-archive-bucket"
+
   # Location of script used to process and transfer images.
   # (Set to nil to have it do nothing.)
   config.process_image_command =
