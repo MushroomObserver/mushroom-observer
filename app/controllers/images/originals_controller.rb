@@ -19,10 +19,12 @@ module Images
         render(json: { status: "ready", url: @image.original_url })
       elsif already_cached?
         render(json: { status: "ready", url: @image.cached_original_url })
-      elsif maxed_out?
+      elsif already_loading?
+        render(json: { status: "loading" })
+      elsif user_maxed_out? || site_maxed_out?
         render(json: { status: "maxed_out" })
       else
-        ImageLoaderJob.perform_later(@image.id)
+        ImageLoaderJob.perform_later(@image.id, User.current_id)
         render(json: { status: "loading" })
       end
     end
@@ -35,9 +37,16 @@ module Images
       File.exist?(@image.cached_original_file_path)
     end
 
-    def maxed_out?
-      User.current.increment!(:original_image_quota)
-      User.current.original_image_quota > MO.original_image_quota
+    def already_loading?
+      File.exist?("#{@image.cached_original_file_path}.status")
+    end
+
+    def user_maxed_out?
+      User.current.original_image_quota >= MO.original_image_user_quota
+    end
+
+    def site_maxed_out?
+      User.admin.original_image_quota >= MO.original_image_site_quota
     end
   end
 end

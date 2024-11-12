@@ -139,7 +139,8 @@ MushroomObserver::Application.configure do
   config.local_original_image_cache_url = "/orig_cache"
 
   # Maximum number of original images per day a user is allowed to download.
-  config.original_image_quota = 1000
+  config.original_image_user_quota = 100
+  config.original_image_site_quota = 10_000
 
   # Cloud storage bucket name.
   config.image_bucket_name = "mo-image-archive-bucket"
