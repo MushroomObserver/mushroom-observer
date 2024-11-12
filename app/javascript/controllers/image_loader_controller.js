@@ -8,6 +8,7 @@ export default class extends Controller {
     this.isPolling = false
     this.originalText = null
     this.loadingText = this.element.dataset.loadingText
+    this.maxedOutText = this.element.dataset.maxedOutText
     this.errorText = this.element.dataset.errorText
   }
 

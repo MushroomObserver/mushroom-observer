@@ -130,8 +130,9 @@ module ImagesHelper
           controller: "image-loader",
           action: "click->image-loader#load",
           "image-loader-target": "link",
-          loading_text: :image_show_original_loading.t,
-          error_text: :image_show_original_error.t
+          "loading-text": :image_show_original_loading.t,
+          "maxed-out-text": :image_show_original_maxed_out.t,
+          "error-text": :image_show_original_error.t
         }
       }
     )
