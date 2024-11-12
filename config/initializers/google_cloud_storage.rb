@@ -1,7 +1,10 @@
 require "google/cloud/storage"
+require "json"
 
-# TODO: store in secrets?
 Google::Cloud::Storage.configure do |config|
-  config.project_id  = ENV["GOOGLE_CLOUD_PROJECT"]
-  config.credentials = ENV["GOOGLE_CLOUD_CREDENTIALS"]
+  config.project_id  = "mo-image-archive"
+  config.credentials = JSON.load(
+    File.new(Rails.root.join("config", "credentials",
+                             "mo-image-archive-service-account.json"))
+  )
 end

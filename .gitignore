@@ -39,6 +39,8 @@ coverage
 /config/master.key
 /config/newrelic.yml
 /config/credentials/production.key
+/config/credentials/test.key
+/config/credentials/mo-image-archive-service-account.json
 
 # This is created by a cronjob, not checked in.
 public/name_list_data.js
@@ -49,4 +51,3 @@ public/field_slips
 checkpoint*
 db/checkpoint*
 
-/config/credentials/test.key
