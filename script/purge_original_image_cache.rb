@@ -18,11 +18,10 @@ NUM_DAYS_TO_KEEP = 1
 
 dir = MO.local_original_image_cache_path
 Dir["#{dir}/*"].each do |file|
-  path = "#{dir}/#{file}"
-  next unless File.file?(path) &&
-              (Time.current - File.stat(path).mtime) > 86_400 * NUM_DAYS_TO_KEEP
+  age = (Time.current - File.stat(file).mtime).to_i
+  next unless File.file?(file) && age > 86_400 * NUM_DAYS_TO_KEEP
 
-  File.delete(path)
+  File.delete(file)
 end
 
 exit 0
