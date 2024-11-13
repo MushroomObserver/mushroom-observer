@@ -63,7 +63,7 @@ class InatImportJob < ApplicationJob
 
     token = JSON.parse(oauth_response.body)["access_token"]
     @inat_import.update(token: token)
-    log("Obtained OAuth access token")
+    log("Obtained OAuth access token: #{masked_token(token)}")
     token
   end
 
@@ -85,7 +85,7 @@ class InatImportJob < ApplicationJob
       raise("JWT request failed: #{e.message}")
     end
     api_token = JSON.parse(jwt_response)["api_token"]
-    log("Obtained JWT API token")
+    log("Obtained JWT API token: #{masked_token(api_token)}")
     api_token
   end
 
@@ -489,6 +489,21 @@ class InatImportJob < ApplicationJob
   def job_successful_enough?
     @inat_import.response_errors.empty? ||
       @inat_import.imported_count&.positive?
+  end
+
+  def masked_token(str)
+    # Return the string as is if its length is less than or equal to 6
+    return str if str.length <= 6
+
+    # Extract the first 3 and last 3 characters
+    first_part = str[0, 3]
+    last_part = str[-3, 3]
+
+    # Calculate the number of asterisks needed
+    asterisks = "*" * (str.length - 6)
+
+    # Combine the parts
+    "#{first_part}#{asterisks}#{last_part}"
   end
 
   def log(str)
