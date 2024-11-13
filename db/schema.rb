@@ -209,6 +209,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_01_233907) do
     t.integer "importables"
     t.integer "imported_count"
     t.string "response_errors"
+    t.text "log"
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|
