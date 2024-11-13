@@ -1,12 +1,6 @@
 # frozen_string_literal: true
 
 class InatImportJob < ApplicationJob
-  attr_accessor :job_log
-
-  def initialize
-    @job_log = []
-  end
-
   # iNat's id for the MO application
   APP_ID = Observations::InatImportsController::APP_ID
   # site for authorization, authentication
@@ -100,8 +94,10 @@ class InatImportJob < ApplicationJob
 
     headers = { authorization: "Bearer #{api_token}",
                 content_type: :json, accept: :json }
+
     begin
       log("Fetching logged-iNat user")
+
       # fetch the logged-in iNat user
       # https://api.inaturalist.org/v1/docs/#!/Users/get_users_me
       response = RestClient.get("#{API_BASE}/users/me", headers)
