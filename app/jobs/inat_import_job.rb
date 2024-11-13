@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
 class InatImportJob < ApplicationJob
+  attr_accessor :job_log
+
+  def initialize
+    @job_log = []
+  end
+
   # iNat's id for the MO application
   APP_ID = Observations::InatImportsController::APP_ID
   # site for authorization, authentication
@@ -488,8 +494,15 @@ class InatImportJob < ApplicationJob
   def log(str)
     time = Time.zone.now.to_s
     log_entry = "#{time}: InatImportJob #{@inat_import.id} #{str}"
+
+    # Add log entry to @inat_import.log
     @inat_import.log ||= []
     @inat_import.log << log_entry
     @inat_import.save
+
+    # Add log entry to job_log
+    open("log/job.log", "a") do |f|
+      f.write(log_entry)
+    end
   end
 end
