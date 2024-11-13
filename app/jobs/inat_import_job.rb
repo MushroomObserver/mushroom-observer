@@ -50,7 +50,6 @@ class InatImportJob < ApplicationJob
 
     begin
       oauth_response = RestClient.post("#{SITE}/oauth/token", payload)
-      log("oauth access token response.body: #{oauth_response.body}")
     rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
       raise("OAuth token request failed: #{e.message}")
     end
