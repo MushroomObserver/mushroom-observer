@@ -18,23 +18,24 @@ class InatImportJob < ApplicationJob
 
   def perform(inat_import)
     @inat_import = inat_import
+    log("InatImportJob #{@inat_import.id} started, " \
+        "user #{@inat_import.user_id}")
+    log("Getting SuperImporters")
     @super_importers = InatImport.super_importers
+    log("Got SuperImporters: #{@super_importers.map(&:login)}")
     @user = @inat_import.user
-    log("Job started with inat_import ID: #{inat_import.id}")
 
-    begin
-      access_token =
-        use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
-      api_token = trade_access_token_for_jwt_api_token(access_token)
-      ensure_importing_own_observations(api_token)
-      @inat_import.update(token: api_token, state: "Importing")
-      import_requested_observations
-    rescue StandardError => e
-      log("Error occurred: #{e.message}")
-      @inat_import.add_response_error(e)
-    ensure
-      done
-    end
+    access_token =
+      use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
+    api_token = trade_access_token_for_jwt_api_token(access_token)
+    ensure_importing_own_observations(api_token)
+    @inat_import.update(token: api_token, state: "Importing")
+    import_requested_observations
+  rescue StandardError => e
+    log("Error occurred: #{e.message}")
+    @inat_import.add_response_error(e)
+  ensure
+    done
   end
 
   private
@@ -88,9 +89,9 @@ class InatImportJob < ApplicationJob
   # Therefore check that the iNat login provided in the import form
   # is that of the user currently logged-in to iNat.
   def ensure_importing_own_observations(api_token)
-    log("Starting own-obs check")
-    return log("Aborting own-obs check (SuperImporter)") if super_importer?
+    return log("Skipping own-obs check (SuperImporter)") if super_importer?
 
+    log("Starting own-obs check")
     headers = { authorization: "Bearer #{api_token}",
                 content_type: :json, accept: :json }
 
@@ -100,12 +101,13 @@ class InatImportJob < ApplicationJob
       # fetch the logged-in iNat user
       # https://api.inaturalist.org/v1/docs/#!/Users/get_users_me
       response = RestClient.get("#{API_BASE}/users/me", headers)
-      log("logged-iNat user response.body: #{response}")
+      @inat_logged_in_user = JSON.parse(response.body)["results"].first["login"]
+      log("inat_logged_in_user: #{@inat_logged_in_user}")
     rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
       raise("iNat API user request failed: #{e.message}")
     end
 
-    raise(:inat_wrong_user.t) unless right_user?(response)
+    raise(:inat_wrong_user.t) unless right_user?(@inat_logged_in_user)
 
     log("Finished own-obs check")
   end
@@ -114,9 +116,7 @@ class InatImportJob < ApplicationJob
     @super_importers.include?(@user)
   end
 
-  def right_user?(response)
-    inat_logged_in_user = JSON.parse(response.body)["results"].first["login"]
-    log("inat_logged_in_user: #{inat_logged_in_user}")
+  def right_user?(inat_logged_in_user)
     inat_logged_in_user == @inat_import.inat_username
   end
 
@@ -505,14 +505,14 @@ class InatImportJob < ApplicationJob
     time = Time.zone.now.to_s
     log_entry = "#{time}: InatImportJob #{@inat_import.id} #{str}"
 
+    # Add log entry to job_log
+    open("log/job.log", "a") do |f|
+      f.write("#{log_entry}\n")
+    end
+
     # Add log entry to @inat_import.log
     @inat_import.log ||= []
     @inat_import.log << log_entry
     @inat_import.save
-
-    # Add log entry to job_log
-    open("log/job.log", "a") do |f|
-      f.write(log_entry)
-    end
   end
 end
