@@ -504,7 +504,6 @@ class InatImportJob < ApplicationJob
 
   def log(str)
     time = Time.now.utc.to_s
-    debugger
     log_entry = "#{time}: InatImportJob #{@inat_import.id} #{str}"
 
     # Add log entry to job_log
