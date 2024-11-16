@@ -628,7 +628,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
   def stub_jwt_request(jwt_return:
     { status: 200,
-      body: { access_token: "MockJWT" }.to_json,
+      body: { api_token: "MockJWT" }.to_json,
       headers: {} })
     add_stub(stub_request(:get, "#{SITE}/users/api_token").
       with(
@@ -648,7 +648,7 @@ class InatImportJobTest < ActiveJob::TestCase
         headers: {
           "Accept" => "application/json",
           "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-          "Authorization" => "Bearer",
+          "Authorization" => "Bearer MockJWT",
           "Content-Type" => "application/json",
           "Host" => "api.inaturalist.org"
         }
@@ -676,7 +676,7 @@ class InatImportJobTest < ActiveJob::TestCase
       with(headers:
     { "Accept" => "application/json",
       "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-      "Authorization" => "Bearer",
+      "Authorization" => "Bearer MockJWT",
       "Host" => "api.inaturalist.org" }).
       to_return(body: mock_inat_response))
   end
@@ -755,7 +755,7 @@ class InatImportJobTest < ActiveJob::TestCase
           ignore_photos: 1
         }
       }
-      headers = { authorization: "Bearer",
+      headers = { authorization: "Bearer MockJWT",
                   content_type: "application/json", accept: "application/json" }
       add_stub(
         stub_request(

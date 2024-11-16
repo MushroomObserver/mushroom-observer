@@ -62,7 +62,7 @@ module Observations
                           importables: 0, imported_count: 0,
                           inat_ids: params[:inat_ids],
                           inat_username: params[:inat_username].strip,
-                          response_errors: "", token: "")
+                          response_errors: "", token: "", log: [])
 
       request_inat_user_authorization
     end
