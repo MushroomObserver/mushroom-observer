@@ -687,6 +687,7 @@ template_and_orphaned_notes_scrambled_obs:
     :orphaned_caption_1: orphaned notes 1
     :Other: other notes, +photo
     :orphaned_caption_2: orphaned notes 2
+    :Collector: _user rolf_
     :Cap: red
   user: notes_templater
 

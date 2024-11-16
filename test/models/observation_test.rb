@@ -905,7 +905,7 @@ class ObservationTest < UnitTestCase
     # with order scrambled in the Observation
     obs   = observations(:template_and_orphaned_notes_scrambled_obs)
     parts = ["Cap", "Nearby trees", "odor", "orphaned caption 1",
-             "orphaned caption 2", "Other"]
+             "orphaned caption 2", "Collector", "Other"]
     assert_equal(parts, obs.form_notes_parts(obs.user))
   end
 

@@ -34,6 +34,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     obs = observations(:template_and_orphaned_notes_scrambled_obs)
     get(:show, params: { id: obs.id })
     assert_match("+photo", @response.body)
+    assert_match("/lookups/lookup_user/rolf", @response.body)
   end
 
   def test_show_project_observation
