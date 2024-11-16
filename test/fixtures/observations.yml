@@ -685,7 +685,7 @@ template_and_orphaned_notes_scrambled_obs:
   notes:
     :Nearby_trees: pine
     :orphaned_caption_1: orphaned notes 1
-    :Other: other notes
+    :Other: other notes, +photo
     :orphaned_caption_2: orphaned notes 2
     :Cap: red
   user: notes_templater
