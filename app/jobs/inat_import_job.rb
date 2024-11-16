@@ -503,7 +503,7 @@ class InatImportJob < ApplicationJob
   end
 
   def log(str)
-    time = Time.zone.now.to_s
+    time = Time.now.utc.to_s
     log_entry = "#{time}: InatImportJob #{@inat_import.id} #{str}"
 
     # Add log entry to job_log
