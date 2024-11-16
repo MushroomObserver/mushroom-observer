@@ -510,10 +510,5 @@ class InatImportJob < ApplicationJob
     open("log/job.log", "a") do |f|
       f.write("#{log_entry}\n")
     end
-
-    # Add log entry to @inat_import.log
-    @inat_import.log ||= []
-    @inat_import.log << log_entry
-    @inat_import.save
   end
 end
