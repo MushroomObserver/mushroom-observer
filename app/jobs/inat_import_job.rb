@@ -17,9 +17,10 @@ class InatImportJob < ApplicationJob
   queue_as :default
 
   def perform(inat_import)
+    log("InatImportJob #{inat_import.id} started, " \
+    "user #{inat_import.user_id}")
     @inat_import = inat_import
-    log("InatImportJob #{@inat_import.id} started, " \
-        "user #{@inat_import.user_id}")
+
     log("Getting SuperImporters")
     @super_importers = InatImport.super_importers
     log("Got SuperImporters: #{@super_importers.map(&:login)}")
