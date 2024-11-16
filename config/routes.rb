@@ -928,4 +928,8 @@ MushroomObserver::Application.routes.draw do
 
   # routes for actions that Rails automatically creates from view templates
   MO.themes.each { |scheme| get "/theme/#{scheme}" }
+
+  # Make Mission Control Job's UI available to MO app
+  # https://github.com/rails/mission_control-jobs?tab=readme-ov-file#basic-configuration
+  mount MissionControl::Jobs::Engine, at: "/jobs"
 end
