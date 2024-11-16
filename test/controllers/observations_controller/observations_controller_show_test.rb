@@ -30,6 +30,12 @@ class ObservationsControllerShowTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
   end
 
+  def test_show_observation_with_structured_notes
+    obs = observations(:template_and_orphaned_notes_scrambled_obs)
+    get(:show, params: { id: obs.id })
+    assert_match('+photo', @response.body)
+  end
+
   def test_show_project_observation
     login
     obs = observations(:owner_accepts_general_questions)
