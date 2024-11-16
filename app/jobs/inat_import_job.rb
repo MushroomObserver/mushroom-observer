@@ -17,9 +17,9 @@ class InatImportJob < ApplicationJob
   queue_as :default
 
   def perform(inat_import)
+    @inat_import = inat_import
     log("InatImportJob #{inat_import.id} started, " \
     "user #{inat_import.user_id}")
-    @inat_import = inat_import
 
     log("Getting SuperImporters")
     @super_importers = InatImport.super_importers
@@ -504,6 +504,7 @@ class InatImportJob < ApplicationJob
 
   def log(str)
     time = Time.now.utc.to_s
+    debugger
     log_entry = "#{time}: InatImportJob #{@inat_import.id} #{str}"
 
     # Add log entry to job_log
