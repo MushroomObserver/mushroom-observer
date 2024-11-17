@@ -2,6 +2,10 @@
 tag.div("#{:app_admin.t}:", class: classes[:heading])
 %>
 <%=
+active_link_to(:app_jobs.t, "/jobs",
+               class: classes[:admin], id: "nav_admin_jobs_link")
+%>
+<%=
 active_link_to(:app_blocked_ips.t, edit_admin_blocked_ips_path,
                class: classes[:admin], id: "nav_admin_blocked_ips_link")
 %>
