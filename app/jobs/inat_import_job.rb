@@ -18,8 +18,9 @@ class InatImportJob < ApplicationJob
 
   def perform(inat_import)
     @inat_import = inat_import
-    log("InatImportJob #{@inat_import.id} started, " \
-        "user #{@inat_import.user_id}")
+    log("InatImportJob #{inat_import.id} started, " \
+    "user #{inat_import.user_id}")
+
     log("Getting SuperImporters")
     @super_importers = InatImport.super_importers
     log("Got SuperImporters: #{@super_importers.map(&:login)}")
@@ -502,17 +503,12 @@ class InatImportJob < ApplicationJob
   end
 
   def log(str)
-    time = Time.zone.now.to_s
+    time = Time.now.utc.to_s
     log_entry = "#{time}: InatImportJob #{@inat_import.id} #{str}"
 
     # Add log entry to job_log
     open("log/job.log", "a") do |f|
       f.write("#{log_entry}\n")
     end
-
-    # Add log entry to @inat_import.log
-    @inat_import.log ||= []
-    @inat_import.log << log_entry
-    @inat_import.save
   end
 end

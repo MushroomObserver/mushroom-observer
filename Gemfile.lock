@@ -222,6 +222,16 @@ GEM
       builder
       minitest (>= 5.0)
       ruby-progressbar
+    mission_control-jobs (0.6.0)
+      actioncable (>= 7.1)
+      actionpack (>= 7.1)
+      activejob (>= 7.1)
+      activerecord (>= 7.1)
+      importmap-rails (>= 1.2.1)
+      irb (~> 1.13)
+      railties (>= 7.1)
+      stimulus-rails
+      turbo-rails
     multi_xml (0.7.1)
       bigdecimal (~> 3.1)
     mutex_m (0.2.0)
@@ -473,6 +483,7 @@ DEPENDENCIES
   mini_racer
   minitest
   minitest-reporters
+  mission_control-jobs
   mo_acts_as_versioned (>= 0.6.6)!
   newrelic_rpm
   oauth2
