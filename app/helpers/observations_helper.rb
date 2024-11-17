@@ -239,7 +239,7 @@ module ObservationsHelper
   def observation_details_notes(obs:)
     notes = obs.notes
     return "" unless notes
-    return notes[:Other] if notes.keys == [:Other]
+    return "#{:NOTES.t}:\n#{notes[:Other]}".tpl if notes.keys == [:Other]
 
     # This used to use
     #
