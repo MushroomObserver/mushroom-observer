@@ -37,6 +37,12 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_match("/lookups/lookup_user/rolf", @response.body)
   end
 
+  def test_show_observation_with_simple_notes
+    obs = observations(:coprinus_comatus_obs)
+    get(:show, params: { id: obs.id })
+    assert_match("<p>Notes:<br />", @response.body)
+  end
+
   def test_show_project_observation
     login
     obs = observations(:owner_accepts_general_questions)
