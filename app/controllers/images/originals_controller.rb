@@ -3,10 +3,16 @@
 # Images::OriginalsController
 module Images
   class OriginalsController < ApplicationController
-    before_action :login_required
+    # This is an AJAX request so we can keep overhead low.
+    disable_filters
 
     def show
-      @image = Image.find(params[:id])
+      # Because this is only called from stimulus within valid pages, we
+      # can assume the user is already logged in and the image is correct...
+      # unless a malicious actor is calling this directly, in which case we
+      # don't really care if errors are handled gracefully.
+      @user = User.current = session_user or raise("login required")
+      @image = Image.safe_find(params[:id]) or raise("image not found")
 
       respond_to do |format|
         format.html { redirect_to(@image.cached_original_url) }
@@ -24,7 +30,8 @@ module Images
       elsif user_maxed_out? || site_maxed_out?
         render(json: { status: "maxed_out" })
       else
-        ImageLoaderJob.perform_later(@image.id, User.current_id)
+        # Save job for tester.
+        @job = ImageLoaderJob.perform_later(@image.id, User.current_id)
         render(json: { status: "loading" })
       end
     end

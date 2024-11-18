@@ -123,6 +123,8 @@ MushroomObserver::Application.configure do
 
   config.bot_enabled = true
 
+  config.active_job.queue_adapter = :test
+
   # ----------------------------
   #  Bullet configuration.
   # ----------------------------

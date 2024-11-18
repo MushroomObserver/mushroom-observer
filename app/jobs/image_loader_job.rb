@@ -7,26 +7,27 @@ class ImageLoaderJob < ApplicationJob
   before_perform { write_status(:working) }
   after_perform  { write_status(:completed) }
 
-  rescue_from(Exception) do |e|
-    write_status(:failed)
-    raise e
-  end
-
   def perform(image_id, user_id)
-    image = Image.find(image_id)
-    return if image.id >= MO.next_image_id_to_go_to_cloud   # on image server?
-    return if File.exist?(image.cached_original_file_path)  # already cached?
+    file = Image.cached_original_file_path(image_id)
+    return if File.exist?(file) # already cached?
 
-    load_image(image)
+    load_image(image_id)
     update_quotas(user_id)
+  rescue StandardError => e
+    write_status(:failed)
+    log(e.message)
+    if Rails.env.test? && e.message != "test"
+      warn("Caught error in ImageLoaderJob: #{e.message}\n" +
+           e.backtrace.join("\n"))
+    end
   end
 
   private
 
-  def load_image(image)
-    file = image.cached_original_file_path
+  def load_image(image_id)
+    file = Image.cached_original_file_path(image_id)
     bucket = Google::Cloud::Storage.new.bucket(MO.image_bucket_name)
-    blob = bucket.file("orig/#{image.id}.jpg")
+    blob = bucket.file("orig/#{image_id}.jpg")
     blob.download("#{file}.#{Process.pid}")
     FileUtils.move("#{file}.#{Process.pid}", file)
   end

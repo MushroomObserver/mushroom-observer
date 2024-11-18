@@ -477,12 +477,4 @@ class InatImportJob < ApplicationJob
     @inat_import.response_errors.empty? ||
       @inat_import.imported_count&.positive?
   end
-
-  def log(str)
-    time = Time.zone.now.to_s
-    log_entry = "#{time}: InatImportJob #{@inat_import.id} #{str}\n"
-    open("log/job.log", "a") do |f|
-      f.write(log_entry)
-    end
-  end
 end
