@@ -110,7 +110,8 @@ class LocationsController < ApplicationController
   def project
     query = create_query(
       :Location, :with_observations_for_project,
-      project: Project.find(params[:project]))
+      project: Project.find(params[:project])
+    )
     show_selected_locations(query, link_all_sorts: true)
   end
 

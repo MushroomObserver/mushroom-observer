@@ -274,6 +274,16 @@ class LocationsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_index_project
+    project = projects(:open_membership_project)
+
+    login
+    get(:index, params: { project: project.id })
+
+    location = project.observations[0].location
+    assert_match(location.display_name, @response.body)
+  end
+
   def test_index_country_includes_state_named_after_other_country
     country = "USA"
     new_mexico = create_new_mexico_location
