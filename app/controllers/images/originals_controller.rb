@@ -13,11 +13,19 @@ module Images
       # don't really care if errors are handled gracefully.
       @user = User.current = session_user or raise("login required")
       @image = Image.safe_find(params[:id]) or raise("image not found")
+      log_request(@user, @image)
 
       respond_to do |format|
         format.html { redirect_to(@image.cached_original_url) }
         format.json { cache_original_image }
       end
+    end
+
+    def log_request(user, image)
+      OriginalImageRequest.create!(
+        user_id: user.id,
+        image_id: image.id
+      )
     end
 
     def cache_original_image

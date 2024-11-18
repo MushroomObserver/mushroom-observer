@@ -64,8 +64,10 @@ module Images
     def test_normal_html_request
       login("rolf")
       with_stubs do
+        count = OriginalImageRequest.count
         get(:show, params: { id: @test_image.id })
         assert_redirected_to(@test_image.cached_original_url)
+        assert_equal(count + 1, OriginalImageRequest.count)
       end
     end
 
@@ -73,20 +75,24 @@ module Images
       login("rolf")
       assert_false(File.exist?(@test_file))
       with_stubs do
+        count = OriginalImageRequest.count
         get(:show, format: :json, params: { id: @test_image.id })
         json = @response.parsed_body
         assert_equal("loading", json["status"])
         assert_not_nil(assigns(:job))
         assigns(:job).perform_now
         assert_true(File.exist?(@test_file))
+        assert_equal(count + 1, OriginalImageRequest.count)
       end
     end
 
     def test_not_logged_in
       with_stubs do
+        count = OriginalImageRequest.count
         assert_raises(RuntimeError) do
           get(:show, format: :json, params: { id: @test_image.id })
         end
+        assert_equal(count, OriginalImageRequest.count)
       end
     end
 
@@ -94,9 +100,11 @@ module Images
       login("rolf")
       @test_image.destroy
       with_stubs do
+        count = OriginalImageRequest.count
         assert_raises(RuntimeError) do
           get(:show, format: :json, params: { id: @test_image.id })
         end
+        assert_equal(count, OriginalImageRequest.count)
       end
     end
 
@@ -105,11 +113,13 @@ module Images
       assert_false(File.exist?(@test_file))
       @id_cutoff = 0
       with_stubs do
+        count = OriginalImageRequest.count
         get(:show, format: :json, params: { id: @test_image.id })
         json = @response.parsed_body
         assert_equal("ready", json["status"])
         assert_equal(@test_image.original_url, json["url"])
         assert_nil(assigns(:job))
+        assert_equal(count + 1, OriginalImageRequest.count)
       end
     end
 
