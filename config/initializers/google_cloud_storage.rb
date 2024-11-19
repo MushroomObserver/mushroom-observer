@@ -10,6 +10,6 @@ file = Rails.root.join("config/credentials",
 if File.exist?(file) && !Rails.env.test?
   Google::Cloud::Storage.configure do |config|
     config.project_id  = "mo-image-archive"
-    config.credentials = JSON.parse(File.new(file))
+    config.credentials = JSON.parse(File.read(file))
   end
 end

@@ -107,16 +107,13 @@ class ApplicationController < ActionController::Base
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
 
-  # These are lightweight filters that must run for all requests.
   around_action :catch_errors_and_log_request_stats
   before_action :kick_out_excessive_traffic
   before_action :kick_out_robots
-  before_action :set_locale
-
-  # These filters are not always needed.
   before_action :verify_authenticity_token
   before_action :fix_bad_domains
   before_action :autologin
+  before_action :set_locale
   before_action :set_timezone
   before_action :track_translations
 
