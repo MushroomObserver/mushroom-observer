@@ -3,8 +3,9 @@
 require "google/cloud/storage"
 require "json"
 
-file = Rails.root.join("config/credentials",
-                       "mo-image-archive-service-account.json")
+file = Rails.root.join(
+  "config/credentials/mo-image-archive-service-account.json"
+)
 # For some reason the autotester on github will still try to load this file
 # even though it should presumably be in test mode.
 if File.exist?(file) && !Rails.env.test?
