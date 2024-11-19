@@ -223,5 +223,5 @@ end
 group :production do
   # New Relic for application and other monitoring
   # https://newrelic.com/
-  # bugem("newrelic_rpm")
+  # gem("newrelic_rpm")
 end
