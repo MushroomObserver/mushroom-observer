@@ -62,7 +62,7 @@ module Observations
                           importables: 0, imported_count: 0,
                           inat_ids: params[:inat_ids],
                           inat_username: params[:inat_username].strip,
-                          response_errors: "", token: "")
+                          response_errors: "", token: "", log: [])
 
       request_inat_user_authorization
     end
@@ -101,6 +101,9 @@ module Observations
       @inat_import.update(token: auth_code, state: "Authenticating")
       tracker = InatImportJobTracker.create(inat_import: @inat_import.id)
 
+      Rails.logger.info(
+        "Enqueuing InatImportJob for InatImport id: #{@inat_import.id}"
+      )
       # InatImportJob.perform_now(@inat_import) # for manual testing
       InatImportJob.perform_later(@inat_import)
 

@@ -44,6 +44,9 @@ gem("solid_cache")
 gem("cache_with_locale")
 # solid_queue for jobs
 gem("solid_queue")
+# https://github.com/rails/mission_control-jobs
+# Rails-based frontend to Active Job adapters for monitoring jobs
+gem("mission_control-jobs")
 
 # sprockets for asset compilation and versioning
 gem("sprockets-rails")

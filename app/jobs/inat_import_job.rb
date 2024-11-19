@@ -18,25 +18,24 @@ class InatImportJob < ApplicationJob
 
   def perform(inat_import)
     @inat_import = inat_import
+    log("InatImportJob #{inat_import.id} started, " \
+    "user #{inat_import.user_id}")
+
+    log("Getting SuperImporters")
     @super_importers = InatImport.super_importers
+    log("Got SuperImporters: #{@super_importers.map(&:login)}")
     @user = @inat_import.user
-    log("Starting")
 
-    begin
-      access_token =
-        use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
-      @inat_import.update(token: access_token)
-
-      api_token = trade_access_token_for_jwt_api_token(@inat_import.token)
-      ensure_importing_own_observations(api_token)
-      @inat_import.update(token: api_token, state: "Importing")
-      import_requested_observations
-    rescue StandardError => e
-      @inat_import.add_response_error(e)
-    ensure
-      done
-    end
-
+    access_token =
+      use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
+    api_token = trade_access_token_for_jwt_api_token(access_token)
+    ensure_importing_own_observations(api_token)
+    @inat_import.update(token: api_token, state: "Importing")
+    import_requested_observations
+  rescue StandardError => e
+    log("Error occurred: #{e.message}")
+    @inat_import.add_response_error(e)
+  ensure
     done
   end
 
@@ -44,7 +43,7 @@ class InatImportJob < ApplicationJob
 
   # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
   def use_auth_code_to_obtain_oauth_access_token(auth_code)
-    log("Obtaining oauth access token")
+    log("Obtaining OAuth access token")
     payload = { client_id: APP_ID,
                 client_secret: Rails.application.credentials.inat.secret,
                 code: auth_code,
@@ -57,10 +56,14 @@ class InatImportJob < ApplicationJob
       raise("OAuth token request failed: #{e.message}")
     end
 
-    JSON.parse(oauth_response.body)["access_token"]
+    token = JSON.parse(oauth_response.body)["access_token"]
+    @inat_import.update(token: token)
+    log("Obtained OAuth access token: #{masked_token(token)}")
+    token
   end
 
   def done
+    log("Updating inat_import state to Done")
     @inat_import.update(state: "Done")
     update_user_inat_username
   end
@@ -76,7 +79,9 @@ class InatImportJob < ApplicationJob
     rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
       raise("JWT request failed: #{e.message}")
     end
-    JSON.parse(jwt_response)["api_token"]
+    api_token = JSON.parse(jwt_response)["api_token"]
+    log("Obtained JWT API token: #{masked_token(api_token)}")
+    api_token
   end
 
   # Ensure that MO users importing only their own iNat observations.
@@ -85,24 +90,25 @@ class InatImportJob < ApplicationJob
   # Therefore check that the iNat login provided in the import form
   # is that of the user currently logged-in to iNat.
   def ensure_importing_own_observations(api_token)
-    log("Starting own-obs check")
-    if super_importer?
-      log("Aborting own-obs check (SuperImporter)")
-      return
-    end
+    return log("Skipping own-obs check (SuperImporter)") if super_importer?
 
-    log("Continuing own-obs check")
+    log("Starting own-obs check")
     headers = { authorization: "Bearer #{api_token}",
                 content_type: :json, accept: :json }
+
     begin
+      log("Fetching logged-iNat user")
+
       # fetch the logged-in iNat user
       # https://api.inaturalist.org/v1/docs/#!/Users/get_users_me
       response = RestClient.get("#{API_BASE}/users/me", headers)
+      @inat_logged_in_user = JSON.parse(response.body)["results"].first["login"]
+      log("inat_logged_in_user: #{@inat_logged_in_user}")
     rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
       raise("iNat API user request failed: #{e.message}")
     end
 
-    raise(:inat_wrong_user.t) unless right_user?(response)
+    raise(:inat_wrong_user.t) unless right_user?(@inat_logged_in_user)
 
     log("Finished own-obs check")
   end
@@ -111,15 +117,16 @@ class InatImportJob < ApplicationJob
     @super_importers.include?(@user)
   end
 
-  def right_user?(response)
-    inat_logged_in_user = JSON.parse(response.body)["results"].first["login"]
+  def right_user?(inat_logged_in_user)
     inat_logged_in_user == @inat_import.inat_username
   end
 
   def import_requested_observations
     @inat_manager = User.find_by(login: "MO Webmaster")
     inat_ids = inat_id_list
-    return if @inat_import[:import_all].blank? && inat_ids.blank?
+
+    return log("Imported requested observations") if @inat_import[:import_all].
+                                                     blank? && inat_ids.blank?
 
     # Search for one page of results at a time, until done with all pages
     # To get one page, use iNats `per_page` & `id_above` params.
@@ -142,6 +149,7 @@ class InatImportJob < ApplicationJob
 
       break
     end
+    log("Imported requested observations")
   end
 
   # limit iNat API search to observations by iNat user with this login
@@ -470,11 +478,27 @@ class InatImportJob < ApplicationJob
     return unless job_successful_enough?
 
     @inat_import.user.update(inat_username: @inat_import.inat_username)
+    log("Updated user inat_username")
   end
 
   # job successful enough to justify updating the MO user's iNat user_name
   def job_successful_enough?
     @inat_import.response_errors.empty? ||
       @inat_import.imported_count&.positive?
+  end
+
+  def masked_token(str)
+    # Return the string as is if its length is less than or equal to 6
+    return str if str.length <= 6
+
+    # Extract the first 3 and last 3 characters
+    first_part = str[0, 3]
+    last_part = str[-3, 3]
+
+    # Calculate the number of asterisks needed
+    asterisks = "*" * (str.length - 6)
+
+    # Combine the parts
+    "#{first_part}#{asterisks}#{last_part}"
   end
 end

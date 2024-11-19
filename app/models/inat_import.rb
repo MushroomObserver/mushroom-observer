@@ -13,6 +13,7 @@
 #  importables::     # of importable observations
 #  imported_count::  running count of iNat obss imported in the associated job
 #  response_errors:: string of newline-separated error messages
+#  log::             serialized log of inat import job
 #
 class InatImport < ApplicationRecord
   enum :state, {
@@ -27,6 +28,7 @@ class InatImport < ApplicationRecord
 
   belongs_to :user
 
+  serialize :log, type: Array
   def add_response_error(error)
     response_errors << "#{error.class.name}: #{error.message}\n"
     save
