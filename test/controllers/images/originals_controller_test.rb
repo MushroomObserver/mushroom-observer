@@ -44,15 +44,13 @@ module Images
       FileUtils.rm_rf(DIR)
     end
 
-    def with_stubs
+    def with_stubs(&block)
       stub_request(:post, "https://oauth2.googleapis.com/token").
         to_return(status: 200, body: "", headers: {})
 
       Google::Cloud::Storage.stub(:new, @mock_storage) do
         MO.stub(:local_original_image_cache_path, DIR) do
-          MO.stub(:next_image_id_to_go_to_cloud, @id_cutoff) do
-            yield
-          end
+          MO.stub(:next_image_id_to_go_to_cloud, @id_cutoff, &block)
         end
       end
     end

@@ -41,11 +41,9 @@ class ImageLoaderJobTest < ActiveJob::TestCase
     FileUtils.rm_rf(DIR)
   end
 
-  def with_stubs
+  def with_stubs(&block)
     Google::Cloud::Storage.stub(:new, @mock_storage) do
-      MO.stub(:local_original_image_cache_path, DIR) do
-        yield
-      end
+      MO.stub(:local_original_image_cache_path, DIR, &block)
     end
   end
 
