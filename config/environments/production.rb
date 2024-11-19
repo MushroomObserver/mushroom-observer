@@ -178,6 +178,11 @@ MushroomObserver::Application.configure do
   config.action_cable.allowed_request_origins = [%r{http://*}, %r{https://*/}]
 
   config.active_job.queue_adapter = :solid_queue
+
+  # Fixes SolidQueue intermittent NameError uninitialized constant
+  # https://github.com/rails/solid_queue/issues/276
+  # https://github.com/MushroomObserver/mushroom-observer/issues/2534
+  config.rake_eager_load = true
 end
 
 file = File.expand_path("../consts-site.rb", __dir__)
