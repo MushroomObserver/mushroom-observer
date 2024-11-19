@@ -178,7 +178,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_17_211300) do
     t.date "when"
     t.text "notes"
     t.string "copyright_holder", limit: 100
-    t.integer "license_id", default: 1, null: false
+    t.integer "license_id", default: 10, null: false
     t.integer "num_views", default: 0, null: false
     t.datetime "last_view", precision: nil
     t.integer "width"
@@ -958,6 +958,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_17_211300) do
     t.index ["observation_id"], name: "observation_index"
   end
 
+  add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
+  add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
+  add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
