@@ -1815,6 +1815,9 @@
   image_show_huge: Huge
   image_show_full_size: Full Size
   image_show_original: Show Original Image
+  image_show_original_loading: Loading
+  image_show_original_maxed_out: Sorry, you've maxed out the number of original images you can download in one day.
+  image_show_original_error: Sorry, failed
   image_show_exif: Show EXIF Header
   image_show_original_name: Original File Name
   image_show_make_default: Make this the default size

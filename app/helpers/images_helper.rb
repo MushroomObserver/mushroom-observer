@@ -114,13 +114,28 @@ module ImagesHelper
 
   # pass an image instance if possible, to ensure access to fallback image.url
   def original_image_link(image_or_image_id, classes)
-    url = if image_or_image_id.is_a?(Image)
-            image_or_image_id.url(:original)
-          else
-            Image.url(:original, image_or_image_id)
-          end
-    link_to(:image_show_original.t, url,
-            { class: classes, target: "_blank", rel: "noopener" })
+    id = if image_or_image_id.is_a?(Image)
+           image_or_image_id.id
+         else
+           image_or_image_id
+         end
+    link_to(
+      :image_show_original.t,
+      "/images/#{id}/original",
+      {
+        class: classes,
+        target: "_blank",
+        rel: "noopener",
+        data: {
+          controller: "image-loader",
+          action: "click->image-loader#load",
+          "image-loader-target": "link",
+          "loading-text": :image_show_original_loading.t,
+          "maxed-out-text": :image_show_original_maxed_out.t,
+          "error-text": :image_show_original_error.t
+        }
+      }
+    )
   end
 
   def image_exif_link(image_or_image_id, classes)

@@ -7,6 +7,8 @@ MAILTO=webmaster@mushroomobserver.org
 */6 * * * * /var/web/mo/bin/run script/retransfer_images
 */4 * * * * /var/web/mo/bin/run script/parse_log
 1   * * * * /var/web/mo/bin/run script/check_for_orphaned_thumbnails
+03  3 * * * /var/web/mo/bin/run script/script/purge_original_image_cache.rb
+08  3 * * * /var/web/mo/bin/run script/script/reset_user_original_image_quotas.rb
 13  3 * * * /var/web/mo/bin/run script/backup_blocked_ips.sh
 33  3 * * * /var/web/mo/bin/run script/refresh_name_lister_cache
 53  3 * * * /var/web/mo/bin/run script/check_rss_logs

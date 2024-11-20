@@ -39,14 +39,19 @@ coverage
 /config/master.key
 /config/newrelic.yml
 /config/credentials/production.key
+/config/credentials/test.key
+/config/credentials/mo-image-archive-service-account.json
 
 # This is created by a cronjob, not checked in.
 public/name_list_data.js
+
 # Local field slip jobs
 public/field_slips
+
+# Original image cache
+public/orig_cache
 
 # DB snapshots are often lying about, don't want them accidentally checked in.
 checkpoint*
 db/checkpoint*
 
-/config/credentials/test.key
