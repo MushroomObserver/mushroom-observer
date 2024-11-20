@@ -430,9 +430,13 @@ MushroomObserver::Application.routes.draw do
                         as: "new_commercial_inquiry_for")
       post("emails", to: "images/emails#create",
                      as: "send_commercial_inquiry_for")
-      get("original", to: "images/originals#show")
     end
     put("/vote", to: "images/votes#update", as: "vote")
+  end
+  resources :images, only: [:show] do
+    member do
+      get("original", to: "images/originals#show")
+    end
   end
 
   resources :inat_import_job_trackers, only: [:show]

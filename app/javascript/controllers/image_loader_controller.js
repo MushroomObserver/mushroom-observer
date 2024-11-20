@@ -16,10 +16,10 @@ export default class extends Controller {
     event.preventDefault()
 
     if (this.isPolling) return
+    this.isPolling = true
 
     const url = this.linkTarget.href
     this.originalText ||= this.linkTarget.textContent
-    this.isPolling = true
 
     this.startLoadingAnimation()
     this.pollForImage(url)
