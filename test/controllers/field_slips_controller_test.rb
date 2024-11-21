@@ -152,12 +152,14 @@ class FieldSlipsControllerTest < FunctionalTestCase
   test "should create field_slip and obs and redirect to show obs" do
     login(@field_slip.user.login)
     code = "Z#{@field_slip.code}"
+    date = "2000-01-01"
     assert_difference("FieldSlip.count") do
       post(:create,
            params: {
              commit: :field_slip_quick_create_obs.t,
              field_slip: {
                code: code,
+               date:,
                location: locations(:albion).name,
                field_slip_name: names(:coprinus_comatus).text_name,
                project_id: projects(:eol_project).id
@@ -165,6 +167,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
            })
     end
     obs = Observation.last
+    assert_equal(date, obs.when)
     assert_redirected_to observation_url(obs.id)
   end
 
