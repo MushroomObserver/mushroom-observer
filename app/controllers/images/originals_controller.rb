@@ -8,11 +8,11 @@ module Images
 
     def show
       # Because this is only called from stimulus within valid pages, we
-      # can assume the user is already logged in and the image is correct...
-      # unless a malicious actor is calling this directly, in which case we
-      # don't really care if errors are handled gracefully.
-      @user = User.current = session_user or raise("login required")
+      # can assume the image is correct... unless a malicious actor is calling
+      # this directly, in which case we don't really care if errors are handled
+      # gracefully.
       @image = Image.safe_find(params[:id]) or raise("image not found")
+      @user = User.current = session_user
       log_request(@user, @image)
 
       respond_to do |format|
@@ -23,7 +23,7 @@ module Images
 
     def log_request(user, image)
       OriginalImageRequest.create!(
-        user_id: user.id,
+        user_id: user&.id,
         image_id: image.id
       )
     end
@@ -33,6 +33,8 @@ module Images
         render(json: { status: "ready", url: @image.original_url })
       elsif already_cached?
         render(json: { status: "ready", url: @image.cached_original_url })
+      elsif !@user
+        render(json: { status: "ready", url: @image.url(:huge) })
       elsif already_loading?
         render(json: { status: "loading" })
       elsif user_maxed_out? || site_maxed_out?

@@ -87,10 +87,12 @@ module Images
     def test_not_logged_in
       with_stubs do
         count = OriginalImageRequest.count
-        assert_raises(RuntimeError) do
-          get(:show, format: :json, params: { id: @test_image.id })
-        end
-        assert_equal(count, OriginalImageRequest.count)
+        get(:show, format: :json, params: { id: @test_image.id })
+        json = @response.parsed_body
+        assert_equal("ready", json["status"])
+        assert_equal(@test_image.url(:huge), json["url"])
+        assert_nil(assigns(:job))
+        assert_equal(count + 1, OriginalImageRequest.count)
       end
     end
 
