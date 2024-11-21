@@ -155,7 +155,7 @@ mo> echo blahblahblah > config/master.key
 # (You will have to add the new IP address to the database server!)
 database_server_root> mysql -u root -p
   # For each remote user:
-  create user 'mo'@'$WEB_SERVER' identified by '$DB_PASSWORD';
+  create user 'mo'@'$WEB_SERVER' identified with mysql_native_password by '$DB_PASSWORD';
   grant all privileges on mo_production.* to 'mo'@'$WEB_SERVER' with grant option;
   GRANT PROCESS, SELECT, LOCK TABLES ON *.* TO 'mo'@'$WEB_SERVER';
 database_server_root> service mysql restart
