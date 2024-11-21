@@ -152,14 +152,16 @@ class FieldSlipsControllerTest < FunctionalTestCase
   test "should create field_slip and obs and redirect to show obs" do
     login(@field_slip.user.login)
     code = "Z#{@field_slip.code}"
-    date = "2000-01-01"
+    date = Date.new(2000, 1, 2)
     assert_difference("FieldSlip.count") do
       post(:create,
            params: {
              commit: :field_slip_quick_create_obs.t,
              field_slip: {
                code: code,
-               date:,
+               "date(1i)" => date.year.to_s,
+               "date(2i)" => date.month.to_s,
+               "date(3i)" => date.day.to_s,
                location: locations(:albion).name,
                field_slip_name: names(:coprinus_comatus).text_name,
                project_id: projects(:eol_project).id
@@ -385,16 +387,21 @@ class FieldSlipsControllerTest < FunctionalTestCase
     login
     initial = @field_slip.observation_id
     notes = "Some notes"
+    date = Date.new(2000, 1, 2)
     patch(:update,
           params: { id: @field_slip.id,
                     commit: :field_slip_keep_obs.t,
                     field_slip: { code: @field_slip.code,
+                                  "date(1i)" => date.year.to_s,
+                                  "date(2i)" => date.month.to_s,
+                                  "date(3i)" => date.day.to_s,
                                   observation_id: @field_slip.observation_id,
                                   project_id: @field_slip.project_id,
                                   notes: { Other: notes } } })
     assert_redirected_to field_slip_url(@field_slip)
     assert_equal(@field_slip.observation_id, initial)
     assert_equal(@field_slip.observation.notes[:Other], notes)
+    assert_equal(date, @field_slip.observation.when)
   end
 
   test "should update field_slip with new name" do
