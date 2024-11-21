@@ -250,16 +250,16 @@ class SequenceTest < UnitTestCase
 
   def test_blast_url
     assert_equal(
-      %(#{Sequence.blast_url_prefix}ACGT),
+      %(#{Sequence.blast_url_prefix}&QUERY=ACGT),
       sequences(:local_sequence).blast_url
     )
     assert_equal(
-      %(#{Sequence.blast_url_prefix}KT968605),
+      %(#{Sequence.blast_url_prefix}&QUERY=KT968605),
       sequences(:deposited_sequence).blast_url
     )
     # Prove that BLAST url for UNITE sequence uses Bases instead of Accession.
     assert_equal(
-      %(#{Sequence.blast_url_prefix}ACGT),
+      %(#{Sequence.blast_url_prefix}&QUERY=ACGT),
       sequences(:alternate_archive).blast_url
     )
     # Prove that BLAST url for FASTA formatted sequence
@@ -277,7 +277,7 @@ class SequenceTest < UnitTestCase
     "GTGGGG"
 
     assert_equal(
-      %(#{Sequence.blast_url_prefix}#{expected_query}),
+      %(#{Sequence.blast_url_prefix}&QUERY=#{expected_query}),
       sequences(:fasta_formatted_sequence).blast_url
     )
 
@@ -297,7 +297,7 @@ class SequenceTest < UnitTestCase
     "aaacctttctcctagttgacctcgaatcaggtggggB"
 
     assert_equal(
-      %(#{Sequence.blast_url_prefix}#{expected_query}),
+      %(#{Sequence.blast_url_prefix}&QUERY=#{expected_query}),
       sequences(:bare_with_numbers_sequence).blast_url
     )
   end
