@@ -28,6 +28,8 @@ module Images
       )
     end
 
+    # I'm sorry, but breaking this up would make the method less readable.
+    # rubocop:disable Metrics/AbcSize
     def cache_original_image
       if on_image_server?
         render(json: { status: "ready", url: @image.original_url })
@@ -45,6 +47,7 @@ module Images
         render(json: { status: "loading" })
       end
     end
+    # rubocop:enable Metrics/AbcSize
 
     def on_image_server?
       @image.id >= MO.next_image_id_to_go_to_cloud
