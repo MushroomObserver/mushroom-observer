@@ -1,0 +1,79 @@
+OVERVIEW::
+
+We store the original images on google cloud storage at "archive" class.
+First the images are copied to the image server, then cronjobs verify that
+the transfer happened correctly. Then periodically a cronjob on the image
+server uses rclone to copy new original images to the cloud. Finally, when
+we run out of disk space on the image server we delete 100,000 original
+images at a time from the image server to make room *by hand*. Each time
+we do that, we need also to update the nginx configuration and
+config.next_image_id_to_go_to_cloud on the webserver.
+
+--------------------------------------------------------------------------------
+
+GOOGLE::
+
+Login to webmaster@mushroomobserver.org google account, then go to
+https://cloud.google.com and then click on "Console" in upper right.
+Then "Dashboard", then "Storage", then "Buckets", then "..." for bucket,
+then "Edit Access". It is currently set to uniform access control, and only
+the project and owner has access(?)
+
+--------------------------------------------------------------------------------
+
+RCLONE::
+
+On the web server, configuration is in the private file:
+
+  /var/web/mo/config/credentials/mo-image-archive-service-account.json
+
+DO NOT CHECK THIS FILE IN to github! Also, make sure the permissions stay 0600.
+
+On the image server, configuration is done interactively:
+
+  mo> rclone config
+  rclone> e     # edit existing remote
+  rclone> 1     # google
+  rclone>       # client_id
+  rclone>       # client_secret
+  rclone>       # project_number
+  rclone> /home/mo/mo-image-archive-service-account.json
+                # service_account_file
+  rclone> false # anonymous
+  rclone> 1     # object_acl = authenticatedRead  ????
+  rclone> 1     # bucket_acl = authenticatedRead  ????
+  rclone> true  # bucket_policy_only
+  rclone> 1     # location = US
+  rclone> 6     # storage_class = archive
+  rclone> n     # advanced config?
+  rclone> y     # keep this config?
+  rclone> q     # quit
+
+--------------------------------------------------------------------------------
+
+FREEING SPACE ON THE IMAGE SERVER::
+
+First, update the webserver configuration.
+
+root> vi /etc/nginx/nginx.conf
+  # serve old originals from google object store
+  rewrite "^/images/orig/((\d{1,6}|1[0123]\d\d\d\d\d)\.\w+)$" https://storage.googleapis.com/mo-image-archive-bucket/orig/$1?;
+                                   ^^^^^^^
+root> service nginx reload
+mo> vi config/consts-site.rb
+  config.next_image_id_to_go_to_cloud = 1400000
+                                        ^^^^^^^
+mo> sudo service puma restart
+mo> sudo service solidqueue restart
+
+In the example above, you want to change the nginx regexp to "1[01234]",
+and the next_image_id_to_go_to_cloud constant to 1500000.
+
+Then login to the image server and delete the images.
+
+mo> cd /data/images/mo/orig
+mo> ls | egrep '^14[0-9]{5}\.' | head
+mo> ls | egrep '^14[0-9]{5}\.' | tail
+  # MAKE SURE IT'S THE RIGHT FILES!!!
+mo> ls | egrep '^14[0-9]{5}\.' | xargs rm
+
