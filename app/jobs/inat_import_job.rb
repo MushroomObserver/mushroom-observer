@@ -89,13 +89,9 @@ class InatImportJob < ApplicationJob
   def ensure_importing_own_observations(api_token)
     return log("Skipping own-obs check (SuperImporter)") if super_importer?
 
-    log("Starting own-obs check")
     headers = { authorization: "Bearer #{api_token}",
                 content_type: :json, accept: :json }
-
     begin
-      log("Fetching logged-iNat user")
-
       # fetch the logged-in iNat user
       # https://api.inaturalist.org/v1/docs/#!/Users/get_users_me
       response = RestClient.get("#{API_BASE}/users/me", headers)
@@ -106,8 +102,6 @@ class InatImportJob < ApplicationJob
     end
 
     raise(:inat_wrong_user.t) unless right_user?(@inat_logged_in_user)
-
-    log("Finished own-obs check")
   end
 
   def super_importer?
