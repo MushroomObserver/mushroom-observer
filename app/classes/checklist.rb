@@ -254,8 +254,13 @@ class Checklist
     Name.where(id: subquery_scope.select(:name_id)).
       select(
         (Name[:deprecated].cast('char') + "," + Name[:text_name] + "," +
-         Name[:id].cast('char') + "," + Name[:rank].cast('char')).minimum.
-         as("cnc")
-      ).group("IF(synonym_id, synonym_id, -id)")
+         Name[:id].cast('char') + "," + Name[:rank].cast('char')).
+          as("cnc")
+      )
+      # select(
+      #   (Name[:deprecated].cast('char') + "," + Name[:text_name] + "," +
+      #    Name[:id].cast('char') + "," + Name[:rank].cast('char')).minimum.
+      #     as("cnc")
+      # ).group("IF(synonym_id, synonym_id, -id)")
   end
 end
