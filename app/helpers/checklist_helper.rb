@@ -11,14 +11,16 @@ module ChecklistHelper
   end
 
   def checklist_name_link_path(name, user, project, list)
-    if user
-      observations_path(pattern: "user:#{user.id} name:#{name[1]}")
-    elsif project
-      observations_path(pattern: "project:#{project.id} name:#{name[1]}")
-    elsif list
-      observations_path(pattern: "list:#{list.id} name:#{name[1]}")
-    else
-      name_path(name[1])
-    end
+    prefix = if user
+               "user:#{user.id}"
+             elsif project
+               "project:#{project.id}"
+             elsif list
+               "list:#{list.id}"
+             end
+    return name_path(name[1]) unless prefix
+
+    observations_path(pattern: "#{prefix} name:#{name[1]} " \
+                      "include_synonyms:false include_subtaxa:false")
   end
 end
