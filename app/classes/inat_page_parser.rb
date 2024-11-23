@@ -8,10 +8,11 @@ class InatPageParser
   # limit results iNat API requests, with Protozoa as a proxy for slime molds
   ICONIC_TAXA = "Fungi,Protozoa"
 
-  def initialize(importer, ids)
+  def initialize(importer, ids, restricted_user_login)
     @importer = importer
     @last_import_id = 0
     @ids = ids
+    @restricted_user_login = restricted_user_login
   end
 
   # Get one page of observations (up to 200)
@@ -23,7 +24,8 @@ class InatPageParser
   # because URI.encode_www_form deals with arrays by passing the same key
   # multiple times.
   def next_page
-    result = next_request
+    result = next_request(id: @ids, id_above: @last_import_id,
+                          user_login: @restricted_user_login)
     return nil if response_bad?(result)
 
     JSON.parse(result)
@@ -38,15 +40,14 @@ class InatPageParser
       response.is_a?(Hash) && response[:status] == 401
   end
 
-  def next_request
+  def next_request(**args)
     query_args = {
-      id: @ids, id_above: @last_import_id, only_id: false, per_page: 200,
+      id: nil, id_above: nil, only_id: false, per_page: 200,
       order: "asc", order_by: "id",
-      # obss of only the iNat user with iNat login @importer.inat_username
-      user_login: @importer.inat_username,
+      # obss of only the iNat user with iNat login @inat_import.inat_username
+      user_login: nil,
       iconic_taxa: ICONIC_TAXA
-    }
-
+    }.merge(args)
     query = URI.encode_www_form(query_args)
 
     # ::Inat.new(operation: query, token: @inat_import.token).body

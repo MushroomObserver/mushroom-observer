@@ -81,7 +81,7 @@ class InatImportJob < ApplicationJob
     api_token
   end
 
-  # Ensure that MO users importing only their own iNat observations.
+  # Ensure that normal MO users import only their own iNat observations.
   # iNat allows MO user A to import iNat obs of iNat user B
   # if B authorized MO to access B's iNat data.  We don't want that.
   # Therefore check that the iNat login provided in the import form
@@ -115,15 +115,18 @@ class InatImportJob < ApplicationJob
   def import_requested_observations
     @inat_manager = User.find_by(login: "MO Webmaster")
     inat_ids = inat_id_list
-
     return log("No observations requested") if @inat_import[:import_all].
                                                blank? && inat_ids.blank?
 
     # Search for one page of results at a time, until done with all pages
     # To get one page, use iNats `per_page` & `id_above` params.
     # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
-    parser = InatPageParser.new(@inat_import, inat_ids)
+    parser = InatPageParser.new(@inat_import, inat_ids, restricted_user_login)
     while parsing(parser); end
+  end
+
+  def inat_id_list
+    @inat_import.inat_ids.delete(" ")
   end
 
   def parsing(parser)
@@ -141,6 +144,15 @@ class InatImportJob < ApplicationJob
 
     log("Imported requested observations")
     true
+  end
+
+  def page_empty?(page)
+    page["total_results"].zero?
+  end
+
+  def last_page?(parsed_page)
+    parsed_page["total_results"] <=
+      parsed_page["page"] * parsed_page["per_page"]
   end
 
   # limit iNat API search to observations by iNat user with this login
