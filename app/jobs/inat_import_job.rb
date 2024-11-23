@@ -116,8 +116,8 @@ class InatImportJob < ApplicationJob
     @inat_manager = User.find_by(login: "MO Webmaster")
     inat_ids = inat_id_list
 
-    return log("Imported requested observations") if @inat_import[:import_all].
-                                                     blank? && inat_ids.blank?
+    return log("No observations requested") if @inat_import[:import_all].
+                                               blank? && inat_ids.blank?
 
     # Search for one page of results at a time, until done with all pages
     # To get one page, use iNats `per_page` & `id_above` params.
