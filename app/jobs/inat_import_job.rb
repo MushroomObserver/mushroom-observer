@@ -122,25 +122,25 @@ class InatImportJob < ApplicationJob
     # Search for one page of results at a time, until done with all pages
     # To get one page, use iNats `per_page` & `id_above` params.
     # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
-    last_import_id = 0
-    loop do
-      # get a page of observations with id > id of last imported obs
-      page_of_observations =
-        next_page(id: inat_ids, id_above: last_import_id,
-                  user_login: restricted_user_login)
+    parser = InatPageParser.new(@inat_import, inat_ids)
+    while parsing(parser); end
+  end
 
-      parsed_page = JSON.parse(page_of_observations)
-      @inat_import.update(importables: parsed_page["total_results"])
-      break if page_empty?(parsed_page)
+  def parsing(parser)
+    # get a page of observations with id > id of last imported obs
+    parsed_page = parser.next_page
+    return false if parsed_page.nil?
 
-      import_page(page_of_observations)
+    @inat_import.update(importables: parsed_page["total_results"])
+    return false if page_empty?(parsed_page)
 
-      last_import_id = parsed_page["results"].last["id"]
-      next unless last_page?(parsed_page)
+    import_page(parsed_page)
 
-      break
-    end
+    parser.last_import_id = parsed_page["results"].last["id"]
+    return false if last_page?(parsed_page)
+
     log("Imported requested observations")
+    true
   end
 
   # limit iNat API search to observations by iNat user with this login
@@ -152,59 +152,8 @@ class InatImportJob < ApplicationJob
     end
   end
 
-  # Get one page of observations (up to 200)
-  # This is where we actually hit the iNat API
-  # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
-  # https://stackoverflow.com/a/11251654/3357635
-  # NOTE: The `ids` parameter may be a comma-separated list of iNat obs
-  # ids - that needs to be URL encoded to a string when passed as an arg here
-  # because URI.encode_www_form deals with arrays by passing the same key
-  # multiple times.
-  def next_page(**args)
-    query_args = {
-      id: nil, id_above: nil, only_id: false, per_page: 200,
-      order: "asc", order_by: "id",
-      # obss of only the iNat user with iNat login @inat_import.inat_username
-      user_login: nil,
-      iconic_taxa: ICONIC_TAXA
-    }.merge(args)
-
-    query = URI.encode_www_form(query_args)
-
-    # ::Inat.new(operation: query, token: @inat_import.token).body
-    # Nimmo 2024-06-19 jdc. Moving the request from the inat class to here.
-    # RestClient::Request.execute wasn't available in the class
-    headers = { authorization: "Bearer #{@inat_import.token}", accept: :json }
-    @inat = RestClient::Request.execute(
-      method: :get, url: "#{API_BASE}/observations?#{query}", headers: headers
-    )
-    raise(:inat_page_of_obs_failed.t) if failed_to_get_next_page?
-
-    @inat
-  end
-
-  def failed_to_get_next_page?
-    @inat.is_a?(RestClient::RequestFailed) ||
-      @inat.instance_of?(RestClient::Response) && @inat.code != 200 ||
-      # RestClient was happy, but the user wasn't authorized
-      @inat.is_a?(Hash) && @inat[:status] == 401
-  end
-
-  def page_empty?(page)
-    page["total_results"].zero?
-  end
-
-  def last_page?(parsed_page)
-    parsed_page["total_results"] <=
-      parsed_page["page"] * parsed_page["per_page"]
-  end
-
-  def inat_id_list
-    @inat_import.inat_ids.delete(" ")
-  end
-
   def import_page(page)
-    JSON.parse(page)["results"].each do |result|
+    page["results"].each do |result|
       import_one_result(JSON.generate(result))
     end
   end
