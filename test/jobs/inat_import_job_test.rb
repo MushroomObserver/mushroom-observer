@@ -132,23 +132,11 @@ class InatImportJobTest < ActiveJob::TestCase
     user = users(:rolf)
     inat_import = create_inat_import(inat_response: mock_inat_response)
 
-    # Add objects which are not included in fixtures
-    # This iNat obs has two identifications:
-    # Tremella mesenterica, which in is fixtures
-    t_mesenterica = Name.find_by(text_name: "Tremella mesenterica")
-    # "Naematelia aurantia, which is not
-    n_aurantia = Name.create(text_name: "Naematelia aurantia",
-                             author: "(Schwein.) Burt",
-                             display_name: "Naematelia aurantia",
-                             rank: "Species",
-                             user: user)
-    # and the iNat Community Taxon (not an identification for this iNat obs)
-    tremellales = Name.create(text_name: "Tremellales",
-                              author: "Fr.",
-                              display_name: "Tremellales",
-                              rank: "Order",
-                              user: user)
-    name = tremellales
+    name = Name.find_or_create_by(text_name: "Tremellales",
+                                  author: "Fr.",
+                                  display_name: "Tremellales",
+                                  rank: "Order",
+                                  user: user)
 
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
@@ -163,24 +151,6 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.order(created_at: :asc).last
     standard_assertions(obs: obs, name: name)
-
-    naming = obs.namings.find_by(name: t_mesenterica)
-    assert(naming.present?,
-           "Missing Naming for iNat identification by MO User")
-    assert_equal(inat_manager, naming.user, "Naming has wrong User")
-    vote = Vote.find_by(naming: naming, user: naming.user)
-    assert(vote.present?, "Naming is missing a Vote")
-    assert_equal(Vote::MAXIMUM_VOTE, vote.value,
-                 "Vote for non-consensus name should be highest possible")
-
-    naming = obs.namings.find_by(name: n_aurantia)
-    assert(naming.present?,
-           "Missing Naming for iNat identification by random iNat user")
-    assert_equal(inat_manager, naming.user, "Naming has wrong User")
-    vote = Vote.find_by(naming: naming, user: naming.user)
-    assert_equal(Vote::MAXIMUM_VOTE, vote.value,
-                 "Vote for non-consensus name should be highest possible")
-
     assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.none?)
   end
@@ -774,6 +744,8 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal("mo_inat_import", obs.source)
     assert_equal(loc, obs.location) if loc
 
+    assert_equal(1, obs.namings.length,
+                 "iNatImport should create exactly one Naming")
     obs.namings.each do |naming|
       assert_not(
         naming.vote_cache.zero?,
