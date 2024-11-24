@@ -124,7 +124,12 @@ class Checklist
 
   def taxa
     calc_checklist unless @taxa
-    @taxa.values.sort
+    @taxa
+  end
+
+  def duplicate_synonyms
+    calc_checklist unless @duplicate_synonyms
+    @duplicate_synonyms
   end
 
   def any_deprecated?
@@ -194,11 +199,8 @@ class Checklist
   def count_taxa_genera_and_species(results)
     return if results.empty?
 
-    @taxa = results.to_h do |result|
-      [result[:text_name],
-       [result[:text_name], result[:id], result[:deprecated]]]
-    end
-
+    @taxa = calc_taxa(results).sort
+    @duplicate_synonyms = calc_duplicate_synonyms(results)
     @any_deprecated = results.any? { |result| result[:deprecated] }
 
     # For Genus results, we're taking everything above Species up to Genus
@@ -223,6 +225,19 @@ class Checklist
       @genera[g] = g
       @species[[g, s]] = ["#{g} #{s}", result[:id]]
     end
+  end
+
+  def calc_taxa(results)
+    results.to_h do |result|
+      [result[:text_name],
+       [result[:text_name], result[:id],
+        result[:deprecated], result[:synonym_id]]]
+    end.values
+  end
+
+  def calc_duplicate_synonyms(results)
+    values = results.pluck(:synonym_id)
+    values.tally.select { |value, count| value.present? && count > 1 }.keys
   end
 
   def calc_counts
