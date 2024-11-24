@@ -127,6 +127,11 @@ class Checklist
     @taxa.values.sort
   end
 
+  def any_deprecated?
+    calc_checklist unless @any_deprecated
+    @any_deprecated
+  end
+
   def counts
     calc_counts unless @counts
     @counts
@@ -193,6 +198,8 @@ class Checklist
       [result[:text_name],
        [result[:text_name], result[:id], result[:deprecated]]]
     end
+
+    @any_deprecated = results.any? { |result| result[:deprecated] }
 
     # For Genus results, we're taking everything above Species up to Genus
     g_results = results.select do |result|
