@@ -6,6 +6,7 @@ module ChecklistHelper
     link = checklist_name_link_path(name, user, project, list)
     content = tag.i(name[0])
     content += " (#{counts[name[0]]})" if counts
+    content += " *" if name[2]
 
     tag.li { link_to(link) { content } }
   end

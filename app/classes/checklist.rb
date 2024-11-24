@@ -181,6 +181,7 @@ class Checklist
     @taxa = {}
     @genera = {}
     @species = {}
+    @annotations = {}
     count_taxa_genera_and_species(query)
   end
 
@@ -189,7 +190,8 @@ class Checklist
     return if results.empty?
 
     @taxa = results.to_h do |result|
-      [result[:text_name], [result[:text_name], result[:id]]]
+      [result[:text_name],
+       [result[:text_name], result[:id], result[:deprecated]]]
     end
 
     # For Genus results, we're taking everything above Species up to Genus

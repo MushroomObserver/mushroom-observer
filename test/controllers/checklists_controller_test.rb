@@ -14,8 +14,15 @@ class ChecklistsControllerTest < FunctionalTestCase
     get(:show, params: { user_id: user.id })
     assert_match(/Checklist for #{user.name}/, css_select("title").text,
                  "Wrong page")
-
     prove_checklist_content(expect)
+  end
+
+  def test_checklist_marks_deprecated
+    login
+    observation = Observation.joins(:name).find_by(name: { deprecated: true })
+    user = observation.user
+    get(:show, params: { user_id: user.id })
+    assert_match(") *</a>", @response.body)
   end
 
   # Prove that Species List checklist goes to correct page with correct content
