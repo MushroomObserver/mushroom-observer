@@ -26,5 +26,5 @@ add_tab_set(checklist_show_tabs(user: @show_user,
 
 <div>
   <%= tag.p(:checklist_any_deprecated.l) if @data.any_deprecated? %>
-  <%= tag.p(:checklist_duplicate_synonyms.l) if @data.duplicate_synonyms %>
+  <%= tag.p(:checklist_duplicate_synonyms.l) if @data.duplicate_synonyms.present? %>
 </div>
