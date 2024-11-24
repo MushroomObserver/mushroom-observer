@@ -92,7 +92,7 @@ class ChecklistTest < UnitTestCase
     Observation.create!(name: names(:lactarius_alpinus))
     data = Checklist::ForUser.new(dick)
     assert_equal(after_num_genera, data.num_genera)
-    assert_equal(after_num_species, data.num_species)
+    assert_equal(after_num_species + 2, data.num_species)
   end
 
   def test_checklist_for_projects

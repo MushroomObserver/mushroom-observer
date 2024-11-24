@@ -29,14 +29,20 @@
 class Checklist
   # Build list of species observed by entire site.
   class ForSite < Checklist
+    def initialize
+      @observations = Observation.all
+    end
   end
 
   # Build list of species observed by one User.
   class ForUser < Checklist
     def initialize(user)
-      return (@user = user) if user.is_a?(User)
+      unless user.is_a?(User)
+        raise("Expected User instance, got #{user.inspect}.")
+      end
 
-      raise("Expected User instance, got #{user.inspect}.")
+      @user = user
+      @observations = user.observations
     end
 
     def query
@@ -49,12 +55,13 @@ class Checklist
   # Build list of species observed by one Project.
   class ForProject < Checklist
     def initialize(project)
-      return (@project = project) if project.is_a?(Project)
+      unless project.is_a?(Project)
+        raise("Expected Project instance, got #{project.inspect}.")
+      end
 
-      raise("Expected Project instance, got #{project.inspect}.")
+      @project = project
+      @observations = project.observations
     end
-
-    def show_counts = true
 
     def query
       super(
@@ -67,9 +74,12 @@ class Checklist
   # Build list of species observed by one SpeciesList.
   class ForSpeciesList < Checklist
     def initialize(list)
-      return (@list = list) if list.is_a?(SpeciesList)
+      unless list.is_a?(SpeciesList)
+        raise("Expected SpeciesList instance, got #{list.inspect}.")
+      end
 
-      raise("Expected SpeciesList instance, got #{list.inspect}.")
+      @list = list
+      @observations = list.observations
     end
 
     def query
@@ -86,8 +96,6 @@ class Checklist
   def initialize
     @genera = @species = @taxa = @counts = nil
   end
-
-  def show_counts = false
 
   def num_genera
     calc_checklist unless @genera
@@ -173,19 +181,7 @@ class Checklist
     @taxa = {}
     @genera = {}
     @species = {}
-    results = query_results_as_objects
-
-    count_taxa_genera_and_species(results)
-  end
-
-  def query_results_as_objects
-    query.map do |row|
-      columns = row.cnc.split(",")
-      { deprecated: columns[0].to_i,
-        text_name: columns[1],
-        id: columns[2].to_i,
-        rank: columns[3].to_i }
-    end
+    count_taxa_genera_and_species(query)
   end
 
   # These can't be hashes since they get sorted
@@ -198,11 +194,12 @@ class Checklist
 
     # For Genus results, we're taking everything above Species up to Genus
     g_results = results.select do |result|
-      [(Name.ranks[:Species] + 1)..Name.ranks[:Genus]].include?(result[:rank])
+      rank = Name.ranks[result[:rank]]
+      [(Name.ranks[:Species] + 1)..Name.ranks[:Genus]].include?(rank)
     end
 
     s_results = results.select do |result|
-      result[:rank] <= Name.ranks[:Species]
+      Name.ranks[result[:rank]] <= Name.ranks[:Species]
     end
 
     # This could include groups etc, so we just want to store the genus names.
@@ -221,46 +218,25 @@ class Checklist
 
   def calc_counts
     calc_checklist unless @taxa
-
-    @counts = ProjectCounter.new(@project).counts
+    @counts = @observations.
+              joins(:name).
+              group('names.text_name').
+              count
   end
 
-  # This `query` returns concatenated strings with info about the names we want.
-  # The `minimum` here ensures one name per /group by synonym_id/.
-  # The returned strings have to be unpacked (split on ",") to be used.
-  #
-  # (There's a way to have SQL return a JSON_OBJECT for the first name of each
-  # sorted group via a window function, but it's much harder to write.)
-  #
-  # It should produce this SQL:
-  # %(
-  #   SELECT MIN(CONCAT(n.deprecated, ',', n.text_name, ',', n.id, ',', n.rank))
-  #   FROM names n
-  #   WHERE id IN (SELECT name_id FROM #{subquery})
-  #   GROUP BY IF(synonym_id, synonym_id, -id);
-  # )
+  # This `query` returns info about the names we want.
   #
   # The subquery_scope that we select name_ids from can be anything:
   #
   # observations;
   # observations WHERE user_id = 252;
   # observations JOIN project_observations ON blah blah...
-  # Oddly it doesn't make a difference whether the subquery is DISTINCT or
-  # not. (because of the MIN)
   #
   def query(args = {})
     subquery_scope = args[:subquery_scope] || Observation
 
     Name.where(id: subquery_scope.select(:name_id)).
-      select(
-        (Name[:deprecated].cast('char') + "," + Name[:text_name] + "," +
-         Name[:id].cast('char') + "," + Name[:rank].cast('char')).
-          as("cnc")
-      )
-      # select(
-      #   (Name[:deprecated].cast('char') + "," + Name[:text_name] + "," +
-      #    Name[:id].cast('char') + "," + Name[:rank].cast('char')).minimum.
-      #     as("cnc")
-      # ).group("IF(synonym_id, synonym_id, -id)")
+      select(Name[:deprecated], Name[:text_name],
+             Name[:id], Name[:rank], Name[:synonym_id])
   end
 end
