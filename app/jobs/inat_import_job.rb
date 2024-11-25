@@ -357,9 +357,11 @@ class InatImportJob < ApplicationJob
   def add_naming_with_vote(name:, user: @inat_manager,
                            value: Vote::MAXIMUM_VOTE)
     used_references = 2
+    explanation = used_references_explanation(name)
     naming = Naming.create(
       observation: @observation,
-      user: user, name: name, reasons: { used_references => "" }
+      user: user, name: name,
+      reasons: { used_references => explanation }
     )
 
     vote = Vote.create(naming: naming, observation: @observation,
@@ -367,6 +369,33 @@ class InatImportJob < ApplicationJob
     # We need an ObservationView, but noone has actually viewed this Obs.
     ObservationView.create!(observation: @observation, user: user,
                             last_view: vote.updated_at, reviewed: 1)
+  end
+
+  def used_references_explanation(name)
+    # If iNat has a provisional name, it's the id of the MO observation.
+    if @inat_obs.provisional_name.present?
+      # TODO: 2024-11-25 jdc. Use title of iNat obs field + added by inat user
+      "iNat Provisional Species Name"
+    elsif suggested?(name)
+      suggester_with_date(name)
+    else
+      "iNat `Community ID` #{Time.time_zone.today.strftime("%Y-%m-%d")}"
+    end
+  end
+
+  def suggested?(name)
+    inat_ids = @inat_obs[:identifications].map { |id| id[:taxon][:name] }
+    inat_ids.include?(name.text_name)
+  end
+
+  def suggester_with_date(name)
+    # The iNat user who suggested the name
+    suggestion =
+      @inat_obs[:identifications].
+      find { |id| id[:taxon][:name] == name.text_name }
+    suggester = suggestion[:user][:login]
+    "#{:naming_reason_suggested_on_inat.l(user: suggester)} " \
+      "{suggestion[:created_at]}"
   end
 
   def add_provisional_naming

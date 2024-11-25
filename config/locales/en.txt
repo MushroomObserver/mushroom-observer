@@ -939,6 +939,9 @@
   naming_reason_label_3: Based on microscopic features
   naming_reason_label_4: Based on chemical features
 
+  # Naming reasons notes
+  naming_reason_suggested_on_inat: Suggested on iNat by [user]
+
   # Name/location description types.  These are used as page title and in index
   # results -- must include both the type of description and the title of the
   # object ([object]) they're describing.

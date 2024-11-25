@@ -90,9 +90,17 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(inat_manager, proposed_name.user,
                  "Name should be proposed by #{inat_manager.login}")
     used_references = 2
-    assert(proposed_name.reasons.key?(used_references),
-           "Proposed Name reason should be `Used references`")
-    # TODO: assert reason.key includes date and iNat username
+    assert(
+      proposed_name.reasons.key?(used_references),
+      "Proposed Name reason should be #{:naming_reason_label_2.l}" # rubocop:disable Naming/VariableNumber
+    )
+    proposed_name_notes = proposed_name[:reasons][used_references]
+    suggesting_inat_user = JSON.parse(mock_inat_response)["results"].
+                           first["identifications"].
+                           first["user"]["login"]
+    assert_match(:naming_reason_suggested_on_inat.l(user: suggesting_inat_user),
+                 proposed_name_notes)
+    # TODO: assert reason.key includes date of suggestion
 
     assert_not(obs.specimen, "Obs should not have a specimen")
     assert_equal(0, obs.images.length, "Obs should not have images")
