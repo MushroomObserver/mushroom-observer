@@ -37,10 +37,6 @@ class Checklist
   # Build list of species observed by one User.
   class ForUser < Checklist
     def initialize(user)
-      unless user.is_a?(User)
-        raise("Expected User instance, got #{user.inspect}.")
-      end
-
       @user = user
       @observations = user.observations
     end
@@ -55,10 +51,6 @@ class Checklist
   # Build list of species observed by one Project.
   class ForProject < Checklist
     def initialize(project)
-      unless project.is_a?(Project)
-        raise("Expected Project instance, got #{project.inspect}.")
-      end
-
       @project = project
       @observations = project.observations
     end
@@ -74,10 +66,6 @@ class Checklist
   # Build list of species observed by one SpeciesList.
   class ForSpeciesList < Checklist
     def initialize(list)
-      unless list.is_a?(SpeciesList)
-        raise("Expected SpeciesList instance, got #{list.inspect}.")
-      end
-
       @list = list
       @observations = list.observations
     end
@@ -92,10 +80,6 @@ class Checklist
   end
 
   ##############################################################################
-
-  def initialize
-    @genera = @species = @taxa = @counts = nil
-  end
 
   def num_genera
     calc_checklist unless @genera
@@ -204,9 +188,10 @@ class Checklist
     @any_deprecated = results.any? { |result| result[:deprecated] }
 
     # For Genus results, we're taking everything above Species up to Genus
+    relevant_ranks = ((Name.ranks[:Species] + 1)..Name.ranks[:Genus]).to_a
     g_results = results.select do |result|
       rank = Name.ranks[result[:rank]]
-      [(Name.ranks[:Species] + 1)..Name.ranks[:Genus]].include?(rank)
+      relevant_ranks.include?(rank)
     end
 
     s_results = results.select do |result|
@@ -216,7 +201,7 @@ class Checklist
     # This could include groups etc, so we just want to store the genus names.
     # Doubles and parent/children will just overwrite each other, no IDs stored.
     @genera = g_results.to_h do |result|
-      genus_name = result[:text_name].split(" ", 2)
+      genus_name = result[:text_name].split(" ", 2)[0]
       [genus_name, genus_name]
     end
 

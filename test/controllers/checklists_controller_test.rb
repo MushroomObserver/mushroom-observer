@@ -27,7 +27,7 @@ class ChecklistsControllerTest < FunctionalTestCase
 
   # Prove that Species List checklist goes to correct page with correct content
   def test_checklist_for_species_list
-    login
+    login("mary")
     list = species_lists(:one_genus_three_species_list)
     expect = Name.joins(observations: :species_list_observations).
              where({ species_list_observations: { species_list_id: list.id } }).
