@@ -242,7 +242,7 @@ class InatImportJob < ApplicationJob
   end
 
   def new_obs_params
-    name_id = id_of_provisional_or_species_name
+    name_id = id_or_provisional_or_species_name
     { user: @user,
       when: @inat_obs.when,
       location: @inat_obs.location,
