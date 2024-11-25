@@ -263,7 +263,7 @@ class InatImportJob < ApplicationJob
   # So if iNat has a provisional name observation field, then
   #   add an MO provisional name if none exists, and
   #   treat the provisional name as the MO consensus.
-  def id_of_provisional_or_species_name
+  def id_or_provisional_or_species_name
     prov_name = @inat_obs.provisional_name
     return @inat_obs.name_id if prov_name.blank?
 
@@ -335,11 +335,6 @@ class InatImportJob < ApplicationJob
   end
 
   def update_names_and_proposals
-    # 2024-11-24 jdc.
-    # These lines commented out when Proposed Names limited to one.
-    #
-    # add_identifications_with_namings
-    # add_provisional_naming # iNat provisionals are not identifications
     adjust_consensus_name_naming # also adds naming for provisionals
 
     Observation::NamingConsensus.new(@observation).calc_consensus
