@@ -656,6 +656,8 @@ MushroomObserver::Application.routes.draw do
                                controller: "projects/admin_requests"
     resources :field_slips, only: [:new, :create],
                             controller: "projects/field_slips"
+    resources :locations, only: [:index],
+                          controller: "projects/locations"
     resources :members, only: [:new, :create, :edit, :update, :index],
                         controller: "projects/members", param: :candidate
     resources :violations, only: [:index], controller: "projects/violations"

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-#  ==== Manage Project Memberss
+#  ==== Manage Project Members
 #  new::
 #  create:: (add member)
 #  edit::

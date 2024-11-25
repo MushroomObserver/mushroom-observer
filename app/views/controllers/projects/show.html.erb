@@ -55,7 +55,7 @@ violations_button_class =
                     checklist_path(project_id: @project.id),
                     { class: "btn btn-default btn-lg" }) %></b>
       <b><%= link_to("#{@project.location_count} #{:LOCATIONS.l}",
-                    locations_path(project: @project.id),
+                    project_locations_path(project_id: @project.id),
                     { class: "btn btn-default btn-lg" }) %></b>
     <% end %>
     <b><%= link_to("#{@project.user_group.users.count} #{:MEMBERS.l}",
