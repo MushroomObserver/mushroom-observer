@@ -14,13 +14,20 @@ class ChecklistsControllerTest < FunctionalTestCase
     get(:show, params: { user_id: user.id })
     assert_match(/Checklist for #{user.name}/, css_select("title").text,
                  "Wrong page")
-
     prove_checklist_content(expect)
+  end
+
+  def test_checklist_marks_deprecated
+    login
+    observation = Observation.joins(:name).find_by(name: { deprecated: true })
+    user = observation.user
+    get(:show, params: { user_id: user.id })
+    assert_match(") *</a>", @response.body)
   end
 
   # Prove that Species List checklist goes to correct page with correct content
   def test_checklist_for_species_list
-    login
+    login("mary")
     list = species_lists(:one_genus_three_species_list)
     expect = Name.joins(observations: :species_list_observations).
              where({ species_list_observations: { species_list_id: list.id } }).
@@ -52,7 +59,7 @@ class ChecklistsControllerTest < FunctionalTestCase
   # Prove that Site checklist goes to correct page with correct content
   def test_checklist_for_site
     login
-    expect = Name.with_correct_spelling.joins(:observations).distinct
+    expect = Name.joins(:observations).distinct
 
     get(:show)
     assert_match(/Checklist for #{:app_title.l}/, css_select("title").text,

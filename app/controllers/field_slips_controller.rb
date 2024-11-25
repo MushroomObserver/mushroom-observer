@@ -66,6 +66,7 @@ class FieldSlipsController < ApplicationController
             redirect_to(new_observation_url(
                           field_code: @field_slip.code,
                           place_name: params[:field_slip][:location],
+                          date: extract_date,
                           notes: field_slip_notes.compact_blank!
                         ))
           else
@@ -115,6 +116,7 @@ class FieldSlipsController < ApplicationController
       redirect_to(new_observation_url(
                     field_code: @field_slip.code,
                     place_name: params[:field_slip][:location],
+                    date: extract_date,
                     notes: field_slip_notes.compact_blank!
                   ))
     else
@@ -132,12 +134,7 @@ class FieldSlipsController < ApplicationController
     flash_error(:field_slip_quick_no_location.t) unless location
     name = Name.find_by(text_name: fs_params[:field_slip_name])
     notes = field_slip_notes.compact_blank!
-    date = nil
-    if fs_params["date(1i)"]
-      date = Date.new(fs_params["date(1i)"].to_i,
-                      fs_params["date(2i)"].to_i,
-                      fs_params["date(3i)"].to_i)
-    end
+    date = extract_date
     obs = Observation.build_observation(location, name, notes, date)
     if obs
       @field_slip.project&.add_observation(obs)
@@ -146,8 +143,19 @@ class FieldSlipsController < ApplicationController
       redirect_to(observation_url(obs.id))
     else
       redirect_to(new_observation_url(field_code: @field_slip.code,
-                                      place_name:, notes:))
+                                      place_name:, date:, notes:))
     end
+  end
+
+  def extract_date
+    fs_params = params[:field_slip]
+    date = nil
+    if fs_params["date(1i)"]
+      date = Date.new(fs_params["date(1i)"].to_i,
+                      fs_params["date(2i)"].to_i,
+                      fs_params["date(3i)"].to_i)
+    end
+    date
   end
 
   def update_observation_fields
@@ -155,6 +163,7 @@ class FieldSlipsController < ApplicationController
     return unless observation
 
     check_name
+    observation.when = extract_date
     observation.place_name = params[:field_slip][:location]
     observation.notes.merge!(field_slip_notes)
     observation.notes.compact_blank!

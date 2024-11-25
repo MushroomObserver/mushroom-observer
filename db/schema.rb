@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_11_16_222241) do
+ActiveRecord::Schema[7.1].define(version: 2024_11_17_211300) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -544,6 +544,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_16_222241) do
     t.index ["needs_naming"], name: "needs_naming_index"
   end
 
+  create_table "original_image_requests", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "image_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "project_images", charset: "utf8mb3", force: :cascade do |t|
     t.integer "image_id", null: false
     t.integer "project_id", null: false
@@ -914,6 +921,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_16_222241) do
     t.boolean "blocked", default: false, null: false
     t.boolean "no_emails", default: false, null: false
     t.string "inat_username"
+    t.integer "original_image_quota", default: 0
     t.index ["login"], name: "login_index"
   end
 

@@ -1815,6 +1815,9 @@
   image_show_huge: Huge
   image_show_full_size: Full Size
   image_show_original: Show Original Image
+  image_show_original_loading: Loading
+  image_show_original_maxed_out: Sorry, you've maxed out the number of original images you can download in one day.
+  image_show_original_error: Sorry, failed
   image_show_exif: Show EXIF Header
   image_show_original_name: Original File Name
   image_show_make_default: Make this the default size
@@ -2944,11 +2947,13 @@
   bulk_license_link: Bulk License Updater
 
   # checklists
+  checklist_any_deprecated: "* This name is not considered current on MO"
+  checklist_duplicate_synonyms: "+ This name has a synonym in this checklist"
   checklist_for_site_title: Checklist for Mushroom Observer
   checklist_for_user_title: Checklist for [user]
   checklist_for_project_title: Checklist for [project]
   checklist_for_species_list_title: Checklist for [list]
-  checklist_summary: "Summary: [names] names including [species] species in [genera] genera"
+  checklist_summary: "Summary: [names] names including [species] species and [genera] genera"
 
   # theme/color_themes
   color_themes_text: "**General Concept:** The [:app_title] website provides a number of color themes, some based on different groups of mushrooms.  By default the simple clean \"Black on White\" theme is used.  However, a [:user] can choose to use a particular theme throughout the site by selecting the theme on the [:user] preference page.\n\nThe idea of using mushrooms for color follows in the tradition of using mushrooms to dye fabrics.  Each color in a mushroom theme was pulled from a photograph included in the site from the given group.  The colors attempt to express the characteristic colors of the group.  In a few cases, the [:images] were adjusted using an automatic color balance operation in order to get a more characteristic color.\n\nThe following links describe each of the available themes including links to the [:images] the colors were extracted from:"

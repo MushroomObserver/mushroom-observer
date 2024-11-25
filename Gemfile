@@ -122,6 +122,9 @@ gem("httparty")
 gem("oauth2")
 gem("rest-client")
 
+# Read original images from google cloud storage
+gem "google-cloud-storage"
+
 # for creating zip files
 # RubyZip 3.0 is coming!
 # **********************
@@ -223,5 +226,5 @@ end
 group :production do
   # New Relic for application and other monitoring
   # https://newrelic.com/
-  gem("newrelic_rpm")
+  # gem("newrelic_rpm")
 end

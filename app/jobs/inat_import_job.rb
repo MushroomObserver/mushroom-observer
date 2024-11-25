@@ -501,14 +501,4 @@ class InatImportJob < ApplicationJob
     # Combine the parts
     "#{first_part}#{asterisks}#{last_part}"
   end
-
-  def log(str)
-    time = Time.now.utc.to_s
-    log_entry = "#{time}: InatImportJob #{@inat_import.id} #{str}"
-
-    # Add log entry to job_log
-    open("log/job.log", "a") do |f|
-      f.write("#{log_entry}\n")
-    end
-  end
 end

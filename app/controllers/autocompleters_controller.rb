@@ -6,6 +6,8 @@ class AutocompletersController < ApplicationController
   # Requiring login here would mean "advanced search" must also require login.
   around_action :catch_ajax_errors
 
+  # Reduce overhead for these requests.
+  disable_filters
   layout false
 
   # The AutoComplete class returns "primers": 1000 records starting with the
