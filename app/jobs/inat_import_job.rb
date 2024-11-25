@@ -379,7 +379,7 @@ class InatImportJob < ApplicationJob
     elsif suggested?(name)
       suggester_with_date(name)
     else
-      "iNat `Community ID` #{Time.time_zone.today.strftime("%Y-%m-%d")}"
+      "iNat `Community ID` #{Time.zone.today.strftime("%Y-%m-%d")}"
     end
   end
 
