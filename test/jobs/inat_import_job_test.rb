@@ -52,7 +52,6 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # Had 1 identification, 0 photos, 0 observation_fields
   def test_import_job_basic_obs
-    skip("Constructing assertionns and fixes for Proposed Name")
     file_name = "calostoma_lutescens"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     user = users(:rolf)

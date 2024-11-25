@@ -356,8 +356,11 @@ class InatImportJob < ApplicationJob
 
   def add_naming_with_vote(name:, user: @inat_manager,
                            value: Vote::MAXIMUM_VOTE)
-    naming = Naming.create(observation: @observation,
-                           user: user, name: name)
+    used_references = 2
+    naming = Naming.create(
+      observation: @observation,
+      user: user, name: name, reasons: { used_references => "" }
+    )
 
     vote = Vote.create(naming: naming, observation: @observation,
                        user: user, value: value)
