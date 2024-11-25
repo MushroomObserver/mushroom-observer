@@ -38,13 +38,13 @@ class ChecklistTest < UnitTestCase
   def test_checklist_for_site
     data = Checklist::ForSite.new
     obs_with_genus = Observation.joins(:name).
-                       where("names.`rank` <= #{Name.ranks[:Genus]}")
+                     where("names.`rank` <= #{Name.ranks[:Genus]}")
     names = obs_with_genus.map { |obs| obs.name.text_name }.uniq.sort
     all_genera = genera(names).uniq
     assert_equal(all_genera, data.genera)
 
     species_obs = Observation.joins(:name).
-                    where("names.`rank` = #{Name.ranks[:Species]}")
+                  where("names.`rank` = #{Name.ranks[:Species]}")
     species_names = species_obs.map { |obs| obs.name.text_name }.uniq.sort
     assert_equal(species_names, just_names(data.species))
   end
