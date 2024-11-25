@@ -2951,6 +2951,7 @@
   checklist_duplicate_synonyms: "+ This name has a synonym in this checklist"
   checklist_for_site_title: Checklist for Mushroom Observer
   checklist_for_user_title: Checklist for [user]
+  checklist_for_project_location_title: Checklist for [project] at [location]
   checklist_for_project_title: Checklist for [project]
   checklist_for_species_list_title: Checklist for [list]
   checklist_summary: "Summary: [names] names including [species] species and [genera] genera"
