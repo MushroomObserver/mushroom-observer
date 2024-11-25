@@ -395,7 +395,7 @@ class InatImportJob < ApplicationJob
       find { |id| id[:taxon][:name] == name.text_name }
     suggester = suggestion[:user][:login]
     "#{:naming_reason_suggested_on_inat.l(user: suggester)} " \
-      "{suggestion[:created_at]}"
+      "#{suggestion[:created_at]}"
   end
 
   def add_provisional_naming

@@ -100,7 +100,10 @@ class InatImportJobTest < ActiveJob::TestCase
                            first["user"]["login"]
     assert_match(:naming_reason_suggested_on_inat.l(user: suggesting_inat_user),
                  proposed_name_notes)
-    # TODO: assert reason.key includes date of suggestion
+    suggestion_date = JSON.parse(mock_inat_response)["results"].
+                      first["identifications"].
+                      first["created_at"]
+    assert_match(suggestion_date, proposed_name_notes)
 
     assert_not(obs.specimen, "Obs should not have a specimen")
     assert_equal(0, obs.images.length, "Obs should not have images")
