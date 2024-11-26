@@ -114,7 +114,9 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_job_suggestion_by_mo_user
     file_name = "calostoma_lutescens"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    user = users(:rolf)
+    user = users(:mary)
+    assert(user.inat_username.present?,
+           "Test needs user fixture with an inat_username")
     # tweak mock response to make rolf the person who made the 1st iNat id
     parsed_response = JSON.parse(mock_inat_response)
     parsed_response["results"].first["identifications"].first["user"]["login"] =
