@@ -111,6 +111,62 @@ class InatImportJobTest < ActiveJob::TestCase
                  "Missing 'none' for Observation Fields")
   end
 
+  def test_import_job_suggestion_by_mo_user
+    file_name = "calostoma_lutescens"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    user = users(:rolf)
+    # tweak mock response to make rolf the person who made the 1st iNat id
+    parsed_response = JSON.parse(mock_inat_response)
+    parsed_response["results"].first["identifications"].first["user"]["login"] =
+      user.inat_username
+    mock_inat_response = JSON.generate(parsed_response)
+    inat_import = create_inat_import(inat_response: mock_inat_response)
+
+    # Add objects which are not included in fixtures
+    Name.create(
+      text_name: "Calostoma lutescens",
+      author: "(Schweinitz) Burnap",
+      display_name: "**__Calostoma lutescens__** (Schweinitz) Burnap",
+      rank: "Species",
+      user: user
+    )
+    Location.create(user: user,
+                    name: "Sevier Co., Tennessee, USA",
+                    north: 36.043571, south: 35.561849,
+                    east: -83.253046, west: -83.794123)
+
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response)
+
+    Inat::PhotoImporter.stub(:new,
+                             stub_mo_photo_importer(mock_inat_response)) do
+      assert_difference("Observation.count", 1,
+                        "Failed to create observation") do
+        InatImportJob.perform_now(inat_import)
+      end
+    end
+
+    obs = Observation.order(created_at: :asc).last
+    proposed_name = obs.namings.first
+    assert_equal(user, proposed_name.user,
+                 "Name should be proposed by #{user.login}")
+    used_references = 2
+    assert(
+      proposed_name.reasons.key?(used_references),
+      "Proposed Name reason should be #{:naming_reason_label_2.l}" # rubocop:disable Naming/VariableNumber
+    )
+    proposed_name_notes = proposed_name[:reasons][used_references]
+    suggesting_inat_user = JSON.parse(mock_inat_response)["results"].
+                           first["identifications"].
+                           first["user"]["login"]
+    assert_match(:naming_reason_suggested_on_inat.l(user: suggesting_inat_user),
+                 proposed_name_notes)
+    suggestion_date = JSON.parse(mock_inat_response)["results"].
+                      first["identifications"].
+                      first["created_at"]
+    assert_match(suggestion_date, proposed_name_notes)
+  end
+
   # Had 1 photo, 1 identification, 0 observation_fields
   def test_import_job_obs_with_one_photo
     file_name = "evernia"

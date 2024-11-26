@@ -237,7 +237,15 @@ class InatImportJob < ApplicationJob
     @observation = Observation.create(new_obs_params)
     # Ensure this Name wins consensus_calc ties
     # by creating this naming and vote first
-    add_naming_with_vote(name: @observation.name)
+    name = @observation.name
+    user =
+      if suggested?(name) &&
+         (suggester = User.find_by(inat_username: suggester(suggestion(name))))
+        suggester
+      else
+        @inat_manager
+      end
+    add_naming_with_vote(name: @observation.name, user: user)
     @observation.log(:log_observation_created)
   end
 
@@ -390,12 +398,18 @@ class InatImportJob < ApplicationJob
 
   def suggester_with_date(name)
     # The iNat user who suggested the name
-    suggestion =
-      @inat_obs[:identifications].
-      find { |id| id[:taxon][:name] == name.text_name }
-    suggester = suggestion[:user][:login]
-    "#{:naming_reason_suggested_on_inat.l(user: suggester)} " \
+    suggestion = suggestion(name)
+    "#{:naming_reason_suggested_on_inat.l(user: suggester(suggestion))} " \
       "#{suggestion[:created_at]}"
+  end
+
+  def suggestion(name)
+    @inat_obs[:identifications].
+      find { |id| id[:taxon][:name] == name.text_name }
+  end
+
+  def suggester(suggestion)
+    suggestion[:user][:login]
   end
 
   def add_provisional_naming
