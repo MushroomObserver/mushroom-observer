@@ -17,6 +17,7 @@
 #                        Cf. [:private_location]
 #                        https://help.inaturalist.org/en/support/solutions/articles/151000169938-what-is-geoprivacy-what-does-it-mean-for-an-observation-to-be-obscured-
 #  inat_obs_fields::       array of fields, each field a hash. == [:ofvs]
+#  inat_prov_name_field::  (first) Provisional Species Name field
 #  [:observation_photos]   array of photos
 #  [:place_guess]          iNat's best guess at the location
 #  [:private_location]     lat, lng. Cf. [:location]
@@ -195,16 +196,18 @@ class Inat
     # Also, iNat allows only 1 obs field with a given :name per obs.
     # I assume iNat users will add only 1 provisional name per obs.
     def inat_prov_name
-      obs_fields = inat_obs_fields
-      return nil if obs_fields.blank?
-
-      prov_name_field =
-        inat_obs_fields.find do |field|
-          field[:name] =~ /^Provisional Species Name/
-        end
+      prov_name_field = inat_prov_name_field
       return nil if prov_name_field.blank?
 
       prov_name_field[:value]
+    end
+
+    def inat_prov_name_field
+      obs_fields = inat_obs_fields
+      return nil if obs_fields.blank?
+
+      inat_obs_fields.
+        find { |field| field[:name] =~ /^Provisional Species Name/ }
     end
 
     def snapshot
