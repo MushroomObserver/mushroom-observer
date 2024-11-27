@@ -941,6 +941,7 @@
 
   # Naming reasons notes
   naming_reason_suggested_on_inat: Suggested on iNat by [user]
+  naming_inat_provisional: "Added on iNat by [user]"
 
   # Name/location description types.  These are used as page title and in index
   # results -- must include both the type of description and the title of the

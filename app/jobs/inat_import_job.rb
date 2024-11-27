@@ -382,8 +382,10 @@ class InatImportJob < ApplicationJob
   def used_references_explanation(name)
     # If iNat has a provisional name, it's the id of the MO observation.
     if @inat_obs.provisional_name.present?
-      # TODO: 2024-11-25 jdc. Use title of iNat obs field + added by inat user
-      "iNat Provisional Species Name"
+      nom_prov_adder = @inat_obs.inat_prov_name_field[:user][:login]
+      # force it to be a String instead of an ActiveSupport::SafeBuffer
+      # SafeBuffer causes an errors later on. Idk why. jdc 20241126
+      :naming_inat_provisional.l(user: nom_prov_adder).to_str
     elsif suggested?(name)
       suggester_with_date(name)
     else

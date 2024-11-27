@@ -391,6 +391,23 @@ class InatImportJobTest < ActiveJob::TestCase
 
     standard_assertions(obs: obs, name: name)
 
+    proposed_name = obs.namings.first
+    inat_manager = User.find_by(login: "MO Webmaster")
+    assert_equal(inat_manager, proposed_name.user,
+                 "Name should be proposed by #{inat_manager.login}")
+    used_references = 2
+    assert(
+      proposed_name.reasons.key?(used_references),
+      "Proposed Name reason should be #{:naming_reason_label_2.l}" # rubocop:disable Naming/VariableNumber
+    )
+    proposed_name_notes = proposed_name[:reasons][used_references]
+    provisional_field =
+      JSON.parse(mock_inat_response)["results"].first["ofvs"].
+      find { |field| field["name"] == "Provisional Species Name" }
+    adding_inat_user = provisional_field["user"]["login"]
+    assert_match(:naming_inat_provisional.l(user: adding_inat_user),
+                 proposed_name_notes)
+
     assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.one?, "Obs should have a sequence")
   end
