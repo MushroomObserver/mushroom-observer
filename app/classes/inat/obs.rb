@@ -47,6 +47,7 @@
 #
 #  dqa::                  data quality grade
 #  provisional_name::     MO text_name corresponding to inat_prov_name
+#  snapshot::             summary of state of Inat observation
 #  suggested_id_names::   suggested id taxon names
 #
 # == Utilities
@@ -212,6 +213,10 @@ class Inat
     end
 
     def snapshot
+      snapshop_raw_str.gsub(/^\s+/, "")
+    end
+
+    def snapshop_raw_str
       result = ""
       {
         USER: self[:user][:login],
@@ -228,7 +233,7 @@ class Inat
       }.each do |label, value|
         result += "#{label.to_sym.t}: #{value}\n"
       end
-      result.gsub(/^\s+/, "")
+      result
     end
 
     def suggested_id_names
