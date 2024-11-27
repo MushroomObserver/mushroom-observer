@@ -237,7 +237,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # Had 2 photos, 6 identifications of 3 taxa, a different taxon,
   # 9 obs fields, including "DNA Barcode ITS", "Collection number", "Collector"
-  def test_import_job_obs_with_sequence
+  def test_import_job_obs_with_sequence_and_multiple_ids
     file_name = "lycoperdon"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     user = users(:rolf)
@@ -264,6 +264,15 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.one?, "Obs should have a sequence")
+
+    ids = JSON.parse(mock_inat_response)["results"].first["identifications"]
+    unique_suggested_taxon_names = ids.each_with_object([]) do |id, ary|
+      ary << id["taxon"]["name"]
+    end.uniq
+    unique_suggested_taxon_names.each do |taxon_name|
+      assert_match(taxon_name, obs.comments.first.comment,
+                   "Snapshot comment missing suggested name #{taxon_name}")
+    end
   end
 
   def test_import_job_infra_specific_name
@@ -882,7 +891,9 @@ class InatImportJobTest < ActiveJob::TestCase
     inat_data_comment = obs_comments.first.comment
     [
       :USER.l, :OBSERVED.l, :show_observation_inat_lat_lng.l, :PLACE.l,
-      :ID.l, :DQA.l, :ANNOTATIONS.l, :PROJECTS.l, :OBSERVATION_FIELDS.l, :TAGS.l
+      :ID.l, :DQA.l, :show_observation_inat_suggested_ids.l,
+      :OBSERVATION_FIELDS.l,
+      :ANNOTATIONS.l, :PROJECTS.l, :TAGS.l
     ].each do |caption|
       assert_match(
         /#{caption}/, inat_data_comment,

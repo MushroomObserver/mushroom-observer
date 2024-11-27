@@ -2289,6 +2289,7 @@
   show_observation_details_inat_import: Imported [date] from
   show_observation_details_inat_export: Copied to iNaturalist as
   show_observation_inat_lat_lng: Public lat/lng
+  show_observation_inat_suggested_ids: Suggested IDs
   show_observation_edit_observation: "[:edit_object(type=:observation)]"
   show_observation_propose_new_name: "[:show_namings_propose_new_name]"
   show_observation_debug_consensus: Debug Consensus

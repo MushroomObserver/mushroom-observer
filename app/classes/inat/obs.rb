@@ -45,8 +45,9 @@
 #
 # == Other mappings used in MO Observations
 #
-#  dqa::               data quality grade
-#  provisional_name::  MO text_name corresponding to inat_prov_name
+#  dqa::                  data quality grade
+#  provisional_name::     MO text_name corresponding to inat_prov_name
+#  unique_suggested_ids:: unique suggested id taxon names
 #
 # == Utilities
 #
@@ -219,6 +220,7 @@ class Inat
         PLACE: self[:place_guess],
         ID: inat_taxon_name,
         DQA: dqa,
+        show_observation_inat_suggested_ids: unique_suggested_ids,
         OBSERVATION_FIELDS: obs_fields(inat_obs_fields),
         PROJECTS: :inat_not_imported.t,
         ANNOTATIONS: :inat_not_imported.t,
@@ -227,6 +229,15 @@ class Inat
         result += "#{label.to_sym.t}: #{value}\n"
       end
       result.gsub(/^\s+/, "")
+    end
+
+    def unique_suggested_ids
+      # Get unique suggested taxon ids
+      # (iNat allows multiple suggestions for a single observation)
+      self[:identifications].each_with_object([]) do |id, ary|
+        ary << "_#{id[:taxon][:name]}_ by #{id[:user][:login]} " \
+        "#{id[:created_at_details][:date]}"
+      end.uniq.join("\n")
     end
 
     def lat_lon_accuracy
