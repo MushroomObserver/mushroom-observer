@@ -40,26 +40,17 @@ class Checklist
       @user = user
       @observations = user.observations
     end
-
-    def query
-      super(
-        subquery_scope: Observation.where(user_id: @user.id)
-      )
-    end
   end
 
   # Build list of species observed by one Project.
   class ForProject < Checklist
-    def initialize(project)
+    def initialize(project, location = nil)
       @project = project
-      @observations = project.observations
-    end
-
-    def query
-      super(
-        subquery_scope: Observation.joins(:project_observations).
-          where(ProjectObservation.arel_table[:project_id].eq(@project.id))
-      )
+      @observations = if location.present?
+                        project.observations.where(location: location)
+                      else
+                        project.observations
+                      end
     end
   end
 
@@ -68,14 +59,6 @@ class Checklist
     def initialize(list)
       @list = list
       @observations = list.observations
-    end
-
-    def query
-      super(
-        subquery_scope: Observation.joins(:species_list_observations).
-          where(SpeciesListObservation.arel_table[:species_list_id].
-                eq(@list.id))
-      )
     end
   end
 
@@ -233,18 +216,8 @@ class Checklist
               count
   end
 
-  # This `query` returns info about the names we want.
-  #
-  # The subquery_scope that we select name_ids from can be anything:
-  #
-  # observations;
-  # observations WHERE user_id = 252;
-  # observations JOIN project_observations ON blah blah...
-  #
-  def query(args = {})
-    subquery_scope = args[:subquery_scope] || Observation
-
-    Name.where(id: subquery_scope.select(:name_id)).
+  def query(_args = {})
+    Name.where(id: @observations.select(:name_id)).
       select(Name[:deprecated], Name[:text_name],
              Name[:id], Name[:rank], Name[:synonym_id])
   end

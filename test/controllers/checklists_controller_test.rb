@@ -56,6 +56,27 @@ class ChecklistsControllerTest < FunctionalTestCase
     prove_checklist_content(expect)
   end
 
+  def test_checklist_for_project_location
+    login
+    project = projects(:one_genus_two_species_project)
+    location = locations(:burbank)
+    expect = Name.joins(observations: :project_observations).
+             where({ observations:
+                         { project_observations: { project_id: project.id },
+                           location: location } }).distinct
+
+    get(:show, params: { project_id: project.id, location_id: location.id })
+    title = :checklist_for_project_location_title.t(
+      project: project.title,
+      location: location.display_name
+    )
+    assert_match(/#{title}/, css_select("title").text,
+                 "Wrong page")
+    assert_match(/\(1\)/, @response.body)
+
+    prove_checklist_content(expect)
+  end
+
   # Prove that Site checklist goes to correct page with correct content
   def test_checklist_for_site
     login

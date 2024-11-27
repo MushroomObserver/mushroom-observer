@@ -115,6 +115,15 @@ class ChecklistTest < UnitTestCase
     assert_equal([["Coprinus comatus", obs.name_id]], data.species)
   end
 
+  def test_checklist_for_project_locations
+    proj = projects(:bolete_project)
+    proj.observations << observations(:trusted_hidden)
+    obs = observations(:minimal_unknown_obs)
+    proj.observations << obs
+    data = Checklist::ForProject.new(proj, obs.location)
+    assert_equal(1, data.num_taxa)
+  end
+
   def test_checklist_for_species_lists
     list = species_lists(:unknown_species_list)
     data = Checklist::ForSpeciesList.new(list)

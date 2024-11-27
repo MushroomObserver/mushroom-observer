@@ -5,6 +5,7 @@
 #   advanced_search:
 #   pattern:
 #   country:
+#   project:
 #   by_user:
 #   by_editor:
 #  :show,
@@ -33,6 +34,7 @@ class LocationsController < ApplicationController
     :advanced_search,
     :pattern,
     :country,
+    :project,
     :by_user,
     :by_editor,
     :by,
@@ -100,6 +102,15 @@ class LocationsController < ApplicationController
   def country
     query = create_query(
       :Location, :regexp_search, regexp: "#{params[:country]}$"
+    )
+    show_selected_locations(query, link_all_sorts: true)
+  end
+
+  # Displays a list of all locations whose country matches the id param.
+  def project
+    query = create_query(
+      :Location, :with_observations_for_project,
+      project: Project.find(params[:project])
     )
     show_selected_locations(query, link_all_sorts: true)
   end

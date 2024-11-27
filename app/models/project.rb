@@ -76,6 +76,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   has_many :project_observations, dependent: :destroy
   has_many :observations, through: :project_observations
+  has_many :locations, through: :observations
 
   has_many :project_species_lists, dependent: :destroy
   has_many :species_lists, through: :project_species_lists
@@ -405,6 +406,10 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def name_count
     Checklist::ForProject.new(self).num_taxa
+  end
+
+  def location_count
+    locations.distinct.count
   end
 
   def count_collections(name)
