@@ -18,12 +18,9 @@ class InatImportJob < ApplicationJob
 
   def perform(inat_import)
     @inat_import = inat_import
-    log("InatImportJob #{inat_import.id} started, " \
-    "user #{inat_import.user_id}")
-
-    log("Getting SuperImporters")
-    @super_importers = InatImport.super_importers
-    log("Got SuperImporters: #{@super_importers.map(&:login)}")
+    log(
+      "InatImportJob #{inat_import.id} started, user: #{inat_import.user_id}"
+    )
     @user = @inat_import.user
 
     access_token =
@@ -84,7 +81,7 @@ class InatImportJob < ApplicationJob
     api_token
   end
 
-  # Ensure that MO users importing only their own iNat observations.
+  # Ensure that normal MO users import only their own iNat observations.
   # iNat allows MO user A to import iNat obs of iNat user B
   # if B authorized MO to access B's iNat data.  We don't want that.
   # Therefore check that the iNat login provided in the import form
@@ -92,13 +89,9 @@ class InatImportJob < ApplicationJob
   def ensure_importing_own_observations(api_token)
     return log("Skipping own-obs check (SuperImporter)") if super_importer?
 
-    log("Starting own-obs check")
     headers = { authorization: "Bearer #{api_token}",
                 content_type: :json, accept: :json }
-
     begin
-      log("Fetching logged-iNat user")
-
       # fetch the logged-in iNat user
       # https://api.inaturalist.org/v1/docs/#!/Users/get_users_me
       response = RestClient.get("#{API_BASE}/users/me", headers)
@@ -109,12 +102,10 @@ class InatImportJob < ApplicationJob
     end
 
     raise(:inat_wrong_user.t) unless right_user?(@inat_logged_in_user)
-
-    log("Finished own-obs check")
   end
 
   def super_importer?
-    @super_importers.include?(@user)
+    InatImport.super_importers.include?(@user)
   end
 
   def right_user?(inat_logged_in_user)
@@ -124,79 +115,35 @@ class InatImportJob < ApplicationJob
   def import_requested_observations
     @inat_manager = User.find_by(login: "MO Webmaster")
     inat_ids = inat_id_list
-
-    return log("Imported requested observations") if @inat_import[:import_all].
-                                                     blank? && inat_ids.blank?
+    return log("No observations requested") if @inat_import[:import_all].
+                                               blank? && inat_ids.blank?
 
     # Search for one page of results at a time, until done with all pages
     # To get one page, use iNats `per_page` & `id_above` params.
     # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
-    last_import_id = 0
-    loop do
-      # get a page of observations with id > id of last imported obs
-      page_of_observations =
-        next_page(id: inat_ids, id_above: last_import_id,
-                  user_login: restricted_user_login)
+    parser = InatPageParser.new(@inat_import, inat_ids, restricted_user_login)
+    while parsing(parser); end
+  end
 
-      parsed_page = JSON.parse(page_of_observations)
-      @inat_import.update(importables: parsed_page["total_results"])
-      break if page_empty?(parsed_page)
+  def inat_id_list
+    @inat_import.inat_ids.delete(" ")
+  end
 
-      import_page(page_of_observations)
+  def parsing(parser)
+    # get a page of observations with id > id of last imported obs
+    parsed_page = parser.next_page
+    return false if parsed_page.nil?
 
-      last_import_id = parsed_page["results"].last["id"]
-      next unless last_page?(parsed_page)
+    @inat_import.update(importables: parsed_page["total_results"])
+    return false if page_empty?(parsed_page)
 
-      break
-    end
+    import_page(parsed_page)
+
+    parser.last_import_id = parsed_page["results"].last["id"]
+    return false if last_page?(parsed_page)
+
     log("Imported requested observations")
-  end
-
-  # limit iNat API search to observations by iNat user with this login
-  def restricted_user_login
-    if super_importer?
-      nil
-    else
-      @inat_import.inat_username
-    end
-  end
-
-  # Get one page of observations (up to 200)
-  # This is where we actually hit the iNat API
-  # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
-  # https://stackoverflow.com/a/11251654/3357635
-  # NOTE: The `ids` parameter may be a comma-separated list of iNat obs
-  # ids - that needs to be URL encoded to a string when passed as an arg here
-  # because URI.encode_www_form deals with arrays by passing the same key
-  # multiple times.
-  def next_page(**args)
-    query_args = {
-      id: nil, id_above: nil, only_id: false, per_page: 200,
-      order: "asc", order_by: "id",
-      # obss of only the iNat user with iNat login @inat_import.inat_username
-      user_login: nil,
-      iconic_taxa: ICONIC_TAXA
-    }.merge(args)
-
-    query = URI.encode_www_form(query_args)
-
-    # ::Inat.new(operation: query, token: @inat_import.token).body
-    # Nimmo 2024-06-19 jdc. Moving the request from the inat class to here.
-    # RestClient::Request.execute wasn't available in the class
-    headers = { authorization: "Bearer #{@inat_import.token}", accept: :json }
-    @inat = RestClient::Request.execute(
-      method: :get, url: "#{API_BASE}/observations?#{query}", headers: headers
-    )
-    raise(:inat_page_of_obs_failed.t) if failed_to_get_next_page?
-
-    @inat
-  end
-
-  def failed_to_get_next_page?
-    @inat.is_a?(RestClient::RequestFailed) ||
-      @inat.instance_of?(RestClient::Response) && @inat.code != 200 ||
-      # RestClient was happy, but the user wasn't authorized
-      @inat.is_a?(Hash) && @inat[:status] == 401
+    true
   end
 
   def page_empty?(page)
@@ -208,12 +155,17 @@ class InatImportJob < ApplicationJob
       parsed_page["page"] * parsed_page["per_page"]
   end
 
-  def inat_id_list
-    @inat_import.inat_ids.delete(" ")
+  # limit iNat API search to observations by iNat user with this login
+  def restricted_user_login
+    if super_importer?
+      nil
+    else
+      @inat_import.inat_username
+    end
   end
 
   def import_page(page)
-    JSON.parse(page)["results"].each do |result|
+    page["results"].each do |result|
       import_one_result(JSON.generate(result))
     end
   end
