@@ -268,7 +268,7 @@ class InatImportJobTest < ActiveJob::TestCase
     ids = JSON.parse(mock_inat_response)["results"].first["identifications"]
     unique_suggested_taxon_names = ids.each_with_object([]) do |id, ary|
       ary << id["taxon"]["name"]
-    end.uniq
+    end
     unique_suggested_taxon_names.each do |taxon_name|
       assert_match(taxon_name, obs.comments.first.comment,
                    "Snapshot comment missing suggested name #{taxon_name}")
