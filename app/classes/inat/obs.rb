@@ -239,10 +239,12 @@ class Inat
     def suggested_id_names
       # Get unique suggested taxon ids
       # (iNat allows multiple suggestions for a single observation)
-      self[:identifications].each_with_object([]) do |id, ary|
-        ary << "_#{id[:taxon][:name]}_ by #{id[:user][:login]} " \
-        "#{id[:created_at_details][:date]}"
-      end.join("\n")
+      "\n#{
+        self[:identifications].each_with_object([]) do |id, ary|
+          ary << "&nbsp;&nbsp;_#{id[:taxon][:name]}_ by #{id[:user][:login]} " \
+          "#{id[:created_at_details][:date]}"
+        end.join("\n")
+      }"
     end
 
     def lat_lon_accuracy
