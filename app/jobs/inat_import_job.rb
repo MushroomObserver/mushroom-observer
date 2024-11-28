@@ -21,7 +21,6 @@ class InatImportJob < ApplicationJob
     log(
       "InatImportJob #{inat_import.id} started, user: #{inat_import.user_id}"
     )
-
     @user = @inat_import.user
 
     access_token =
