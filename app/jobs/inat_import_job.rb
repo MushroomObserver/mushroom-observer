@@ -300,11 +300,6 @@ class InatImportJob < ApplicationJob
     Observation::NamingConsensus.new(@observation).calc_consensus
   end
 
-  def name_already_proposed?(name)
-    Naming.where(observation_id: @observation.id).
-      map(&:name).include?(name)
-  end
-
   def add_naming_with_vote(name:, user: @inat_manager,
                            value: Vote::MAXIMUM_VOTE)
     used_references = 2
