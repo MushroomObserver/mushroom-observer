@@ -18,8 +18,9 @@ class InatImportJob < ApplicationJob
 
   def perform(inat_import)
     @inat_import = inat_import
-    log("InatImportJob #{inat_import.id} started, " \
-    "user #{inat_import.user_id}")
+    log(
+      "InatImportJob #{inat_import.id} started, user: #{inat_import.user_id}"
+    )
 
     @user = @inat_import.user
 
