@@ -348,15 +348,6 @@ class InatImportJob < ApplicationJob
     Observation::NamingConsensus.new(@observation).calc_consensus
   end
 
-  def add_identifications_with_namings
-    @inat_obs[:identifications].each do |identification|
-      inat_taxon = ::Inat::Taxon.new(identification[:taxon])
-      next if name_already_proposed?(inat_taxon.name)
-
-      add_naming_with_vote(name: inat_taxon.name)
-    end
-  end
-
   def name_already_proposed?(name)
     Naming.where(observation_id: @observation.id).
       map(&:name).include?(name)
@@ -412,18 +403,6 @@ class InatImportJob < ApplicationJob
 
   def suggester(suggestion)
     suggestion[:user][:login]
-  end
-
-  def add_provisional_naming
-    nom_prov = @inat_obs.provisional_name
-    return if nom_prov.blank?
-
-    # NOTE: There will be >= 1 match because of add_missing_provisional_name.
-    # If a provisional Name was added during import, use it;
-    # (It's the most recently created, and won't be deprecated.)
-    # else grab another matching one.
-    name = best_mo_homonym(nom_prov)
-    add_naming_with_vote(name: name)
   end
 
   def best_mo_homonym(text_name)
