@@ -21,9 +21,6 @@ class InatImportJob < ApplicationJob
     log("InatImportJob #{inat_import.id} started, " \
     "user #{inat_import.user_id}")
 
-    log("Getting SuperImporters")
-    @super_importers = InatImport.super_importers
-    log("Got SuperImporters: #{@super_importers.map(&:login)}")
     @user = @inat_import.user
 
     access_token =
@@ -110,7 +107,7 @@ class InatImportJob < ApplicationJob
   end
 
   def super_importer?
-    @super_importers.include?(@user)
+    InatImport.super_importers.include?(@user)
   end
 
   def right_user?(inat_logged_in_user)
