@@ -90,15 +90,11 @@ class InatImportJob < ApplicationJob
   # Therefore check that the iNat login provided in the import form
   # is that of the user currently logged-in to iNat.
   def ensure_importing_own_observations(api_token)
-    return log("Skipping own-obs check (SuperImporter)") if super_importer?
+    return log("Skipped own-obs check (SuperImporter)") if super_importer?
 
-    log("Starting own-obs check")
     headers = { authorization: "Bearer #{api_token}",
                 content_type: :json, accept: :json }
-
     begin
-      log("Fetching logged-iNat user")
-
       # fetch the logged-in iNat user
       # https://api.inaturalist.org/v1/docs/#!/Users/get_users_me
       response = RestClient.get("#{API_BASE}/users/me", headers)
