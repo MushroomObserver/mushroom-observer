@@ -32,6 +32,7 @@
 #  curator?(user)::         Check if a User is a curator.
 #  add_curator(user)::      Add User as a curator unless already is one.
 #  delete_curator(user)::   Remove User from curators.
+#  mcp_searchable?          Is this herbarium searchable via MyCoPortal?
 #  sort_name::              Stripped-down version of name for sorting.
 #  merge(other_herbarium):: merge other_herbarium into this one
 #
@@ -306,5 +307,9 @@ class Herbarium < AbstractModel
 
   def self.find_by_name_with_wildcards(str)
     find_using_wildcards("name", str)
+  end
+
+  def mcp_searchable?
+    MCP_COLLECTIONS.include?(code)
   end
 end
