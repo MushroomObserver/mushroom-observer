@@ -82,11 +82,91 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.order(created_at: :asc).last
+
     standard_assertions(obs: obs, name: name, loc: loc)
+
+    proposed_name = obs.namings.first
+    inat_manager = User.find_by(login: "MO Webmaster")
+    assert_equal(inat_manager, proposed_name.user,
+                 "Name should be proposed by #{inat_manager.login}")
+    used_references = 2
+    assert(
+      proposed_name.reasons.key?(used_references),
+      "Proposed Name reason should be #{:naming_reason_label_2.l}" # rubocop:disable Naming/VariableNumber
+    )
+    proposed_name_notes = proposed_name[:reasons][used_references]
+    suggesting_inat_user = JSON.parse(mock_inat_response)["results"].
+                           first["identifications"].
+                           first["user"]["login"]
+    assert_match(:naming_reason_suggested_on_inat.l(user: suggesting_inat_user),
+                 proposed_name_notes)
+    suggestion_date = JSON.parse(mock_inat_response)["results"].
+                      first["identifications"].
+                      first["created_at"]
+    assert_match(suggestion_date, proposed_name_notes)
+
     assert_not(obs.specimen, "Obs should not have a specimen")
     assert_equal(0, obs.images.length, "Obs should not have images")
     assert_match(/Observation Fields: none/, obs.comments.first.comment,
                  "Missing 'none' for Observation Fields")
+  end
+
+  def test_import_job_suggestion_by_mo_user
+    file_name = "calostoma_lutescens"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    user = users(:mary)
+    assert(user.inat_username.present?,
+           "Test needs user fixture with an inat_username")
+    # tweak mock response to make rolf the person who made the 1st iNat id
+    parsed_response = JSON.parse(mock_inat_response)
+    parsed_response["results"].first["identifications"].first["user"]["login"] =
+      user.inat_username
+    mock_inat_response = JSON.generate(parsed_response)
+    inat_import = create_inat_import(inat_response: mock_inat_response)
+
+    # Add objects which are not included in fixtures
+    Name.create(
+      text_name: "Calostoma lutescens",
+      author: "(Schweinitz) Burnap",
+      display_name: "**__Calostoma lutescens__** (Schweinitz) Burnap",
+      rank: "Species",
+      user: user
+    )
+    Location.create(user: user,
+                    name: "Sevier Co., Tennessee, USA",
+                    north: 36.043571, south: 35.561849,
+                    east: -83.253046, west: -83.794123)
+
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response)
+
+    Inat::PhotoImporter.stub(:new,
+                             stub_mo_photo_importer(mock_inat_response)) do
+      assert_difference("Observation.count", 1,
+                        "Failed to create observation") do
+        InatImportJob.perform_now(inat_import)
+      end
+    end
+
+    obs = Observation.order(created_at: :asc).last
+    proposed_name = obs.namings.first
+    assert_equal(user, proposed_name.user,
+                 "Name should be proposed by #{user.login}")
+    used_references = 2
+    assert(
+      proposed_name.reasons.key?(used_references),
+      "Proposed Name reason should be #{:naming_reason_label_2.l}" # rubocop:disable Naming/VariableNumber
+    )
+    proposed_name_notes = proposed_name[:reasons][used_references]
+    suggesting_inat_user = JSON.parse(mock_inat_response)["results"].
+                           first["identifications"].
+                           first["user"]["login"]
+    assert_match(:naming_reason_suggested_on_inat.l(user: suggesting_inat_user),
+                 proposed_name_notes)
+    suggestion_date = JSON.parse(mock_inat_response)["results"].
+                      first["identifications"].
+                      first["created_at"]
+    assert_match(suggestion_date, proposed_name_notes)
   end
 
   # Had 1 photo, 1 identification, 0 observation_fields
@@ -132,23 +212,11 @@ class InatImportJobTest < ActiveJob::TestCase
     user = users(:rolf)
     inat_import = create_inat_import(inat_response: mock_inat_response)
 
-    # Add objects which are not included in fixtures
-    # This iNat obs has two identifications:
-    # Tremella mesenterica, which in is fixtures
-    t_mesenterica = Name.find_by(text_name: "Tremella mesenterica")
-    # "Naematelia aurantia, which is not
-    n_aurantia = Name.create(text_name: "Naematelia aurantia",
-                             author: "(Schwein.) Burt",
-                             display_name: "Naematelia aurantia",
-                             rank: "Species",
-                             user: user)
-    # and the iNat Community Taxon (not an identification for this iNat obs)
-    tremellales = Name.create(text_name: "Tremellales",
-                              author: "Fr.",
-                              display_name: "Tremellales",
-                              rank: "Order",
-                              user: user)
-    name = tremellales
+    name = Name.find_or_create_by(text_name: "Tremellales",
+                                  author: "Fr.",
+                                  display_name: "Tremellales",
+                                  rank: "Order",
+                                  user: user)
 
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
@@ -163,31 +231,13 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.order(created_at: :asc).last
     standard_assertions(obs: obs, name: name)
-
-    naming = obs.namings.find_by(name: t_mesenterica)
-    assert(naming.present?,
-           "Missing Naming for iNat identification by MO User")
-    assert_equal(inat_manager, naming.user, "Naming has wrong User")
-    vote = Vote.find_by(naming: naming, user: naming.user)
-    assert(vote.present?, "Naming is missing a Vote")
-    assert_equal(Vote::MAXIMUM_VOTE, vote.value,
-                 "Vote for non-consensus name should be highest possible")
-
-    naming = obs.namings.find_by(name: n_aurantia)
-    assert(naming.present?,
-           "Missing Naming for iNat identification by random iNat user")
-    assert_equal(inat_manager, naming.user, "Naming has wrong User")
-    vote = Vote.find_by(naming: naming, user: naming.user)
-    assert_equal(Vote::MAXIMUM_VOTE, vote.value,
-                 "Vote for non-consensus name should be highest possible")
-
     assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.none?)
   end
 
   # Had 2 photos, 6 identifications of 3 taxa, a different taxon,
   # 9 obs fields, including "DNA Barcode ITS", "Collection number", "Collector"
-  def test_import_job_obs_with_sequence
+  def test_import_job_obs_with_sequence_and_multiple_ids
     file_name = "lycoperdon"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     user = users(:rolf)
@@ -214,6 +264,15 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.one?, "Obs should have a sequence")
+
+    ids = JSON.parse(mock_inat_response)["results"].first["identifications"]
+    unique_suggested_taxon_names = ids.each_with_object([]) do |id, ary|
+      ary << id["taxon"]["name"]
+    end
+    unique_suggested_taxon_names.each do |taxon_name|
+      assert_match(taxon_name, obs.comments.first.comment,
+                   "Snapshot comment missing suggested name #{taxon_name}")
+    end
   end
 
   def test_import_job_infra_specific_name
@@ -340,6 +399,23 @@ class InatImportJobTest < ActiveJob::TestCase
            "Failed to log creation of provisional name")
 
     standard_assertions(obs: obs, name: name)
+
+    proposed_name = obs.namings.first
+    inat_manager = User.find_by(login: "MO Webmaster")
+    assert_equal(inat_manager, proposed_name.user,
+                 "Name should be proposed by #{inat_manager.login}")
+    used_references = 2
+    assert(
+      proposed_name.reasons.key?(used_references),
+      "Proposed Name reason should be #{:naming_reason_label_2.l}" # rubocop:disable Naming/VariableNumber
+    )
+    proposed_name_notes = proposed_name[:reasons][used_references]
+    provisional_field =
+      JSON.parse(mock_inat_response)["results"].first["ofvs"].
+      find { |field| field["name"] == "Provisional Species Name" }
+    adding_inat_user = provisional_field["user"]["login"]
+    assert_match(:naming_inat_provisional.l(user: adding_inat_user),
+                 proposed_name_notes)
 
     assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.one?, "Obs should have a sequence")
@@ -774,6 +850,8 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal("mo_inat_import", obs.source)
     assert_equal(loc, obs.location) if loc
 
+    assert_equal(1, obs.namings.length,
+                 "iNatImport should create exactly one Naming")
     obs.namings.each do |naming|
       assert_not(
         naming.vote_cache.zero?,
@@ -813,7 +891,9 @@ class InatImportJobTest < ActiveJob::TestCase
     inat_data_comment = obs_comments.first.comment
     [
       :USER.l, :OBSERVED.l, :show_observation_inat_lat_lng.l, :PLACE.l,
-      :ID.l, :DQA.l, :ANNOTATIONS.l, :PROJECTS.l, :OBSERVATION_FIELDS.l, :TAGS.l
+      :ID.l, :DQA.l, :show_observation_inat_suggested_ids.l,
+      :OBSERVATION_FIELDS.l,
+      :ANNOTATIONS.l, :PROJECTS.l, :TAGS.l
     ].each do |caption|
       assert_match(
         /#{caption}/, inat_data_comment,

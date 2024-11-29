@@ -87,7 +87,7 @@ class InatImportJob < ApplicationJob
   # Therefore check that the iNat login provided in the import form
   # is that of the user currently logged-in to iNat.
   def ensure_importing_own_observations(api_token)
-    return log("Skipping own-obs check (SuperImporter)") if super_importer?
+    return log("Skipped own-obs check (SuperImporter)") if super_importer?
 
     headers = { authorization: "Bearer #{api_token}",
                 content_type: :json, accept: :json }
@@ -189,12 +189,20 @@ class InatImportJob < ApplicationJob
     @observation = Observation.create(new_obs_params)
     # Ensure this Name wins consensus_calc ties
     # by creating this naming and vote first
-    add_naming_with_vote(name: @observation.name)
+    name = @observation.name
+    user =
+      if suggested?(name) &&
+         (suggester = User.find_by(inat_username: suggester(suggestion(name))))
+        suggester
+      else
+        @inat_manager
+      end
+    add_naming_with_vote(name: @observation.name, user: user)
     @observation.log(:log_observation_created)
   end
 
   def new_obs_params
-    name_id = adjust_for_provisional
+    name_id = id_or_provisional_or_species_name
     { user: @user,
       when: @inat_obs.when,
       location: @inat_obs.location,
@@ -215,7 +223,7 @@ class InatImportJob < ApplicationJob
   # So if iNat has a provisional name observation field, then
   #   add an MO provisional name if none exists, and
   #   treat the provisional name as the MO consensus.
-  def adjust_for_provisional
+  def id_or_provisional_or_species_name
     prov_name = @inat_obs.provisional_name
     return @inat_obs.name_id if prov_name.blank?
 
@@ -287,31 +295,20 @@ class InatImportJob < ApplicationJob
   end
 
   def update_names_and_proposals
-    add_identifications_with_namings
-    add_provisional_naming # iNat provisionals are not identifications
     adjust_consensus_name_naming # also adds naming for provisionals
 
     Observation::NamingConsensus.new(@observation).calc_consensus
   end
 
-  def add_identifications_with_namings
-    @inat_obs[:identifications].each do |identification|
-      inat_taxon = ::Inat::Taxon.new(identification[:taxon])
-      next if name_already_proposed?(inat_taxon.name)
-
-      add_naming_with_vote(name: inat_taxon.name)
-    end
-  end
-
-  def name_already_proposed?(name)
-    Naming.where(observation_id: @observation.id).
-      map(&:name).include?(name)
-  end
-
   def add_naming_with_vote(name:, user: @inat_manager,
                            value: Vote::MAXIMUM_VOTE)
-    naming = Naming.create(observation: @observation,
-                           user: user, name: name)
+    used_references = 2
+    explanation = used_references_explanation(name)
+    naming = Naming.create(
+      observation: @observation,
+      user: user, name: name,
+      reasons: { used_references => explanation }
+    )
 
     vote = Vote.create(naming: naming, observation: @observation,
                        user: user, value: value)
@@ -320,16 +317,39 @@ class InatImportJob < ApplicationJob
                             last_view: vote.updated_at, reviewed: 1)
   end
 
-  def add_provisional_naming
-    nom_prov = @inat_obs.provisional_name
-    return if nom_prov.blank?
+  def used_references_explanation(name)
+    # If iNat has a provisional name, it's the id of the MO observation.
+    if @inat_obs.provisional_name.present?
+      nom_prov_adder = @inat_obs.inat_prov_name_field[:user][:login]
+      # force it to be a String instead of an ActiveSupport::SafeBuffer
+      # SafeBuffer causes an errors later on. Idk why. jdc 20241126
+      :naming_inat_provisional.l(user: nom_prov_adder).to_str
+    elsif suggested?(name)
+      suggester_with_date(name)
+    else
+      "iNat `Community ID` #{Time.zone.today.strftime("%Y-%m-%d")}"
+    end
+  end
 
-    # NOTE: There will be >= 1 match because of add_missing_provisional_name.
-    # If a provisional Name was added during import, use it;
-    # (It's the most recently created, and won't be deprecated.)
-    # else grab another matching one.
-    name = best_mo_homonym(nom_prov)
-    add_naming_with_vote(name: name)
+  def suggested?(name)
+    inat_ids = @inat_obs[:identifications].map { |id| id[:taxon][:name] }
+    inat_ids.include?(name.text_name)
+  end
+
+  def suggester_with_date(name)
+    # The iNat user who suggested the name
+    suggestion = suggestion(name)
+    "#{:naming_reason_suggested_on_inat.l(user: suggester(suggestion))} " \
+      "#{suggestion[:created_at]}"
+  end
+
+  def suggestion(name)
+    @inat_obs[:identifications].
+      find { |id| id[:taxon][:name] == name.text_name }
+  end
+
+  def suggester(suggestion)
+    suggestion[:user][:login]
   end
 
   def best_mo_homonym(text_name)
