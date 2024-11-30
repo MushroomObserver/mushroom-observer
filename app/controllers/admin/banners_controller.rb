@@ -9,10 +9,10 @@ class Admin::BannersController < AdminController
     @banner = Banner.new(banner_params)
 
     if @banner.save
-      flash[:success] = :banner_update_success.t
+      flash_notice(:banner_update_success.t)
       redirect_to(admin_banners_path)
     else
-      flash[:error] = :banner_update_failure.t
+      flash_error(:banner_update_failure.t)
       render(:index)
     end
   end
