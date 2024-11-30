@@ -2688,7 +2688,7 @@
   herbarium_record_user: Record Creator
   herbarium_record_notes: Fungarium Record Notes
 
-  herbarium_record_collection: Collection
+  herbarium_record_collection: Collection Record
 
   # herbarium_record/create_herbarium_record
   create_herbarium_record: Add Fungarium Record

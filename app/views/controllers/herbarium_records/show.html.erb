@@ -15,7 +15,7 @@ herbarium = @herbarium_record.herbarium
     <%= :herbarium_record_accession_number.t %>: <%= @herbarium_record.accession_number %><br/>
     <%= :herbarium_record_user.t %>: <%= user_link(@herbarium_record.user) %><br/>
     <% if herbarium.mcp_searchable? %>
-      <%= link_to("#{herbarium.name} #{:herbarium_record_collection.t}",
+      <%= link_to("#{herbarium.code} #{:herbarium_record_collection.t}",
           herbarium.mcp_url(@herbarium_record.accession_number)) %><br/>
     <% end %>
   </p>
