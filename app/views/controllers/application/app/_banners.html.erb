@@ -12,9 +12,14 @@
   <% end %>
 
   <% if (current_banner = Banner.current) && cookies[:dismissed_banner_version] != current_banner.version.to_s %>
-    <div id="banner" data-controller="banner" data-banner-target="banner">
-      <p><%= current_banner.message %></p>
-      <button id="dismiss-banner" data-banner-target="dismissButton" data-version="<%= current_banner.version %>">Dismiss</button>
+    <div id="banner" class="alert alert-success message-banner" data-controller="banner" data-banner-target="banner">
+      <button
+	class="close"
+	id="dismiss-banner"
+	data-banner-target="dismissButton"
+	aria-label="Close"
+	data-version="<%= current_banner.version %>"><span aria-hidden="true">&times;</span></button>
+      <p><%= current_banner.message.t %></p>
     </div>
   <% end %>
 </div>
