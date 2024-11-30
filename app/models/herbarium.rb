@@ -42,6 +42,7 @@
 #                     HerbariumRecord to an Herbarium.  Called after create.
 #
 ################################################################################
+
 class Herbarium < AbstractModel
   has_many :herbarium_records, dependent: :destroy
   belongs_to :location
@@ -59,143 +60,143 @@ class Herbarium < AbstractModel
   # Herbaria whose collections are searchable via MyCoPortal.
   # https://www.mycoportal.org/portal/collections/index.php
   # rubocop:disable Layout/LineLength
-  MCP_COLLECTIONS = [
-    "PH", # Academy of Natural Sciences of Drexel University
-    "ACAD", # Acadia University, E. C. Smith Herbarium
-    "CHSC", # Ahart Herbarium, CSU Chico - Mycological Collection
-    "N/A", # Atlas of Living Australia specimen-based fungal data
-    "BMSC", # Bamfield Marine Science Centre
-    "BISH", # Bishop Museum, Herbarium Pacificum
-    "BRIT", # Botanical Research Institute of Texas
-    "BDWR", # Bridgewater College Herbarium
-    "BRU", # Brown University Herbarium
-    "HSC-F", # Cal Poly Humboldt Fungarium
-    "CDA-Fungi", # California Department of Food and Agriculture - Fungi
-    "HAY", # California State University East Bay Fungarium
-    "AAFC-DAOM", # Canadian National Mycological Herbarium
-    "WSP", # Charles Gardner Shaw Mycological Herbarium, Washington State University
-    "CHRB", # Chrysler Herbarium - Mycological Collection
-    "CLEMS", # Clemson University Herbarium
-    "HCOA", # College of the Atlantic, Acadia National Park Herbarium
-    "CUP", # Cornell University Plant Pathology Herbarium
-    "CBBG", # Crested Butte Botanic Gardens
-    "DEWV", # Davis & Elkins College Herbarium
-    "DBG-DBG", # Denver Botanic Gardens, Sam Mitchel Herbarium of Fungi
-    "DUKE", # Duke University Herbarium Fungal Collection
-    "EIU", # Eastern Illinois University
-    "EWU", # Eastern Washington University
-    "QCAM", # Ecuador Fungi data from FungiWebEcuador
-    "TAM", # Estonian Museum of Natural History
-    "BAFC-H", # Facultad de Ciencias Exactas y Naturales
-    "F", # Field Museum of Natural History
-    "FNL", # Foray Newfoundland and Labrador Fungarium
-    "FLD", # Fort Lewis College Herbarium
-    "GLM", # Fungal Collection at the Senckenberg Museum für Naturkunde Görlitz
-    "M", # Fungal Collections at the Botanische Staatssammlung München
-    "KR", # Fungus Collections at Staatliches Museum für Naturkunde Karlsruhe
-    "FH", # Harvard University, Farlow Herbarium
-    "FR", # Herbarium Senckenbergianum
-    "IND", # Indiana University
-    "TAAM", # Institute of Agricultural and Environmental Sciences of the Estonian University of Life Sciences (TAAM)
-    "EAA", # Estonian University of Life Sciences (EAA)
-    "INEP-F", # Institute of the Industrial Ecology Problems of the North of Kola Science Center of the Russian Academy of Sciences.
-    "PACA", # Instituto Anchietano de Pesquisas/UNISINOS
-    "USU-UTC", # Intermountain Herbarium (fungi, not lichens), Utah State University
-    "ICMP", # International Collection of Microorganisms from Plants
-    "ISC", # Iowa State University, Ada Hayden Herbarium
-    "SUCO", # Jewell and Arline Moss Settle Herbarium at SUNY Oneonta
-    "LSUM-Fungi", # Louisiana State University, Bernard Lowy Mycological Herbarium
-    "MUHW", # Marshall University Herbarium - Fungi
-    "BR", # Meise Botanic Garden Herbarium
-    "MU", # Miami University, Willard Sherman Turrell Herbarium
-    "MSC", # Michigan State University Herbarium non-lichenized fungi
-    "MOR", # Morton Arboretum
-    "CORD", # Museo Botánico Córdoba Fungarium
-    "CR", # Museo Nacional de Costa Rica, specimen-based
-    "PC", # Muséum National d'Histoire Naturelle
-    "MNA", # Museum of Northern Arizona
-    "IBUNAM-MEXU:FU", # National Herbarium of Mexico Fungal Collection (Hongos del Herbario Nacional de México)
-    "TNS-F", # National Museum of Nature and Science - Japan
-    "NMC-FUNGI", # National Mushroom Centre
-    "UT-M", # Natural History Museum of Utah Fungarium
-    "L", # Naturalis Biodiversity Center
-    "NBM", # New Brunswick Museum
-    "NY", # New York Botanical Garden
-    "NYS", # New York State Museum Mycology Collection
-    "PDD", # New Zealand Fungarium
-    "NCSLG", # North Carolina State University, Larry F. Grand Mycological Herbarium
-    "OSC", # Oregon State University Herbarium
-    "OSC-Lichens", # Oregon State University Herbarium - Lichens
-    "USFWS-PRR", # Patuxent Research Refuge - Maryland
-    "PUR", # Purdue University, Arthur Fungarium
-    "PUL", # Purdue University, Kriebel Herbarium
-    "QFB", # René Pomerleau Herbarium
-    "E", # Royal Botanic Garden Edinburgh
-    "TRTC", # Royal Ontario Museum Fungarium
-    "TAES", # S.M. Tracy Herbarium Texas A&M University
-    "SFSU", # San Francisco State University, Harry D. Thiers Herbarium
-    "SBBG", # Santa Barbara Botanic Garden
-    "LJF", # Slovenian Fungal Database (Mikoteka in herbarij Gozdarskega inštituta Slovenije), specimen-based
-    "CORT", # State University of New York College at Cortland
-    "SYRF", # State University of New York, SUNY College of Environmental Science and Forestry Herbarium
-    "SWAT", # Swat University Fungarium
-    "S", # Swedish Museum of Natural History
-    "TALL", # Tallinn Botanic Garden
-    "IBUG", # Universidad de Guadalajara
-    "CMMF", # Université de Montréal, Cercle des Mycologues de Montréal Fungarium
-    "UACCC", # University of Alabama Chytrid Culture Collection
-    "ARIZ", # University of Arizona, Gilbertson Mycological Herbarium, specimen-based
-    "UARK", # University of Arkansas Fungarium
-    "UBC", # University of British Columbia Herbarium
-    "UC", # University of California Berkeley, University Herbarium
-    "UCSC", # University of California Santa Cruz Fungal Herbarium
-    "IRVC", # University of California, Irvine Fungarium
-    "LA", # University of California, Los Angeles
-    "FTU", # University of Central Florida
-    "CSU", # University of Central Oklahoma Herbarium
-    "CINC", # University of Cincinnati, Margaret H. Fulford Herbarium - Fungi
-    "C", # University of Copenhagen
-    "FLAS", # University of Florida Herbarium
-    "GAM", # University of Georgia, Julian H. Miller Mycological Herbarium
-    "GB", # University of Gothenburg
-    "HAW-F", # University of Hawaii, Joseph F. Rock Herbarium
-    "ILL", # University of Illinois Herbarium
-    "ILLS", # University of Illinois, Illinois Natural History Survey Fungarium
-    "KANU-KU-F", # University of Kansas, R. L. McGregor Herbarium
-    "MAINE", # University of Maine, Richard Homola Mycological Herbarium
-    "WIN", # University of Manitoba
-    "MICH", # University of Michigan Herbarium
-    "MIN", # University of Minnesota, Bell Museum of Natural History Herbarium Fungal Collection
-    "MISS", # University of Mississippi
-    "MONTU", # University of Montana Herbarium
-    "NEB", # University of Nebraska State Museum, C.E. Bessey Herbarium - Fungi
-    "UNM-Fungi", # University of New Mexico Herbarium Mycological Collection
-    "UNCA-UNCA", # University of North Carolina Asheville
-    "NCU-Fungi", # University of North Carolina at Chapel Hill Herbarium: Fungi
-    "O", # University of Oslo, Natural History Museum Fungarium
-    "URV", # University of Richmond
-    "USAM", # University of South Alabama Herbarium
-    "USCH-Fungi", # University of South Carolina, A. C. Moore Herbarium Fungal Collection
-    "USF", # University of South Florida Herbarium - Fungi including lichens
-    "TU", # University of Tartu Natural History Museum
-    "TENN-F", # University of Tennessee Fungal Herbarium
-    "UCHT-F", # University of Tennessee, Chattanooga
-    "TEX", # University of Texas Herbarium
-    "VT", # University of Vermont, Pringle Herbarium, Macrofungi
-    "WTU", # University of Washington Herbarium
-    "UWAL", # University of West Alabama Fungarium
-    "WIS", # University of Wisconsin-Madison Herbarium
-    "UWSP", # University of Wisconsin-Stevens Point Herbarium
-    "RMS", # University of Wyoming, Wilhelm G. Solheim Mycological Herbarium
-    "UPS-BOT", # Uppsala University, Museum of Evolution
-    "USAC-USCG Hongos", # Usac, Cecon, Herbario USCG Hongos
-    "CFMR", # USDA Forest Service, Center for Forest Mycology Research
-    "FPF", # USDA Forest Service, Rocky Mountain Research Station
-    "BPI", # USDA United States National Fungus Collections
-    "VSC", # Valdosta State University Herbarium
-    "VPI", # Virginia Tech University, Massey Herbarium - Fungi
-    "YSU-F" # Yugra State University Fungarium, specimen-based
-  ].freeze
+  MCP_COLLECTIONS = {
+    "PH" => nil, # Academy of Natural Sciences of Drexel University
+    "ACAD" => nil, # Acadia University, E. C. Smith Herbarium
+    "CHSC" => nil, # Ahart Herbarium, CSU Chico - Mycological Collection
+    "N/A" => nil, # Atlas of Living Australia specimen-based fungal data
+    "BMSC" => nil, # Bamfield Marine Science Centre
+    "BISH" => nil, # Bishop Museum, Herbarium Pacificum
+    "BRIT" => nil, # Botanical Research Institute of Texas
+    "BDWR" => nil, # Bridgewater College Herbarium
+    "BRU" => nil, # Brown University Herbarium
+    "HSC-F" => nil, # Cal Poly Humboldt Fungarium
+    "CDA-Fungi" => nil, # California Department of Food and Agriculture - Fungi
+    "HAY" => nil, # California State University East Bay Fungarium
+    "AAFC-DAOM" => nil, # Canadian National Mycological Herbarium
+    "WSP" => nil, # Charles Gardner Shaw Mycological Herbarium, Washington State University
+    "CHRB" => nil, # Chrysler Herbarium - Mycological Collection
+    "CLEMS" => nil, # Clemson University Herbarium
+    "HCOA" => nil, # College of the Atlantic, Acadia National Park Herbarium
+    "CUP" => nil, # Cornell University Plant Pathology Herbarium
+    "CBBG" => nil, # Crested Butte Botanic Gardens
+    "DEWV" => nil, # Davis & Elkins College Herbarium
+    "DBG-DBG" => nil, # Denver Botanic Gardens, Sam Mitchel Herbarium of Fungi
+    "DUKE" => nil, # Duke University Herbarium Fungal Collection
+    "EIU" => nil, # Eastern Illinois University
+    "EWU" => nil, # Eastern Washington University
+    "QCAM" => nil, # Ecuador Fungi data from FungiWebEcuador
+    "TAM" => nil, # Estonian Museum of Natural History
+    "BAFC-H" => nil, # Facultad de Ciencias Exactas y Naturales
+    "F" => nil, # Field Museum of Natural History
+    "FNL" => nil, # Foray Newfoundland and Labrador Fungarium
+    "FLD" => nil, # Fort Lewis College Herbarium
+    "GLM" => nil, # Fungal Collection at the Senckenberg Museum für Naturkunde Görlitz
+    "M" => nil, # Fungal Collections at the Botanische Staatssammlung München
+    "KR" => nil, # Fungus Collections at Staatliches Museum für Naturkunde Karlsruhe
+    "FH" => nil, # Harvard University, Farlow Herbarium
+    "FR" => nil, # Herbarium Senckenbergianum
+    "IND" => nil, # Indiana University
+    "TAAM" => nil, # Institute of Agricultural and Environmental Sciences of the Estonian University of Life Sciences (TAAM)
+    "EAA" => nil, # Estonian University of Life Sciences (EAA)
+    "INEP-F" => nil, # Institute of the Industrial Ecology Problems of the North of Kola Science Center of the Russian Academy of Sciences.
+    "PACA" => nil, # Instituto Anchietano de Pesquisas/UNISINOS
+    "USU-UTC" => nil, # Intermountain Herbarium (fungi, not lichens), Utah State University
+    "ICMP" => nil, # International Collection of Microorganisms from Plants
+    "ISC" => nil, # Iowa State University, Ada Hayden Herbarium
+    "SUCO" => nil, # Jewell and Arline Moss Settle Herbarium at SUNY Oneonta
+    "LSUM-Fungi" => nil, # Louisiana State University, Bernard Lowy Mycological Herbarium
+    "MUHW" => nil, # Marshall University Herbarium - Fungi
+    "BR" => nil, # Meise Botanic Garden Herbarium
+    "MU" => nil, # Miami University, Willard Sherman Turrell Herbarium
+    "MSC" => nil, # Michigan State University Herbarium non-lichenized fungi
+    "MOR" => nil, # Morton Arboretum
+    "CORD" => nil, # Museo Botánico Córdoba Fungarium
+    "CR" => nil, # Museo Nacional de Costa Rica, specimen-based
+    "PC" => nil, # Muséum National d'Histoire Naturelle
+    "MNA" => nil, # Museum of Northern Arizona
+    "IBUNAM-MEXU:FU" => nil, # National Herbarium of Mexico Fungal Collection (Hongos del Herbario Nacional de México)
+    "TNS-F" => nil, # National Museum of Nature and Science - Japan
+    "NMC-FUNGI" => nil, # National Mushroom Centre
+    "UT-M" => nil, # Natural History Museum of Utah Fungarium
+    "L" => nil, # Naturalis Biodiversity Center
+    "NBM" => nil, # New Brunswick Museum
+    "NY" => nil, # New York Botanical Garden
+    "NYS" => nil, # New York State Museum Mycology Collection
+    "PDD" => nil, # New Zealand Fungarium
+    "NCSLG" => nil, # North Carolina State University, Larry F. Grand Mycological Herbarium
+    "OSC" => nil, # Oregon State University Herbarium
+    "OSC-Lichens" => nil, # Oregon State University Herbarium - Lichens
+    "USFWS-PRR" => nil, # Patuxent Research Refuge - Maryland
+    "PUR" => nil, # Purdue University, Arthur Fungarium
+    "PUL" => nil, # Purdue University, Kriebel Herbarium
+    "QFB" => nil, # René Pomerleau Herbarium
+    "E" => nil, # Royal Botanic Garden Edinburgh
+    "TRTC" => nil, # Royal Ontario Museum Fungarium
+    "TAES" => nil, # S.M. Tracy Herbarium Texas A&M University
+    "SFSU" => nil, # San Francisco State University, Harry D. Thiers Herbarium
+    "SBBG" => nil, # Santa Barbara Botanic Garden
+    "LJF" => nil, # Slovenian Fungal Database (Mikoteka in herbarij Gozdarskega inštituta Slovenije), specimen-based
+    "CORT" => nil, # State University of New York College at Cortland
+    "SYRF" => nil, # State University of New York, SUNY College of Environmental Science and Forestry Herbarium
+    "SWAT" => nil, # Swat University Fungarium
+    "S" => nil, # Swedish Museum of Natural History
+    "TALL" => nil, # Tallinn Botanic Garden
+    "IBUG" => nil, # Universidad de Guadalajara
+    "CMMF" => nil, # Université de Montréal, Cercle des Mycologues de Montréal Fungarium
+    "UACCC" => nil, # University of Alabama Chytrid Culture Collection
+    "ARIZ" => nil, # University of Arizona, Gilbertson Mycological Herbarium, specimen-based
+    "UARK" => nil, # University of Arkansas Fungarium
+    "UBC" => nil, # University of British Columbia Herbarium
+    "UC" => nil, # University of California Berkeley, University Herbarium
+    "UCSC" => nil, # University of California Santa Cruz Fungal Herbarium
+    "IRVC" => nil, # University of California, Irvine Fungarium
+    "LA" => nil, # University of California, Los Angeles
+    "FTU" => nil, # University of Central Florida
+    "CSU" => nil, # University of Central Oklahoma Herbarium
+    "CINC" => nil, # University of Cincinnati, Margaret H. Fulford Herbarium - Fungi
+    "C" => nil, # University of Copenhagen
+    "FLAS" => nil, # University of Florida Herbarium
+    "GAM" => nil, # University of Georgia, Julian H. Miller Mycological Herbarium
+    "GB" => nil, # University of Gothenburg
+    "HAW-F" => nil, # University of Hawaii, Joseph F. Rock Herbarium
+    "ILL" => nil, # University of Illinois Herbarium
+    "ILLS" => nil, # University of Illinois, Illinois Natural History Survey Fungarium
+    "KANU-KU-F" => nil, # University of Kansas, R. L. McGregor Herbarium
+    "MAINE" => nil, # University of Maine, Richard Homola Mycological Herbarium
+    "WIN" => nil, # University of Manitoba
+    "MICH" => nil, # University of Michigan Herbarium
+    "MIN" => nil, # University of Minnesota, Bell Museum of Natural History Herbarium Fungal Collection
+    "MISS" => nil, # University of Mississippi
+    "MONTU" => nil, # University of Montana Herbarium
+    "NEB" => nil, # University of Nebraska State Museum, C.E. Bessey Herbarium - Fungi
+    "UNM-Fungi" => nil, # University of New Mexico Herbarium Mycological Collection
+    "UNCA-UNCA" => nil, # University of North Carolina Asheville
+    "NCU-Fungi" => nil, # University of North Carolina at Chapel Hill Herbarium: Fungi
+    "O" => nil, # University of Oslo, Natural History Museum Fungarium
+    "URV" => nil, # University of Richmond
+    "USAM" => nil, # University of South Alabama Herbarium
+    "USCH-Fungi" => nil, # University of South Carolina, A. C. Moore Herbarium Fungal Collection
+    "USF" => nil, # University of South Florida Herbarium - Fungi including lichens
+    "TU" => nil, # University of Tartu Natural History Museum
+    "TENN-F" => nil, # University of Tennessee Fungal Herbarium
+    "UCHT-F" => nil, # University of Tennessee, Chattanooga
+    "TEX" => nil, # University of Texas Herbarium
+    "VT" => nil, # University of Vermont, Pringle Herbarium, Macrofungi
+    "WTU" => nil, # University of Washington Herbarium
+    "UWAL" => nil, # University of West Alabama Fungarium
+    "WIS" => nil, # University of Wisconsin-Madison Herbarium
+    "UWSP" => nil, # University of Wisconsin-Stevens Point Herbarium
+    "RMS" => nil, # University of Wyoming, Wilhelm G. Solheim Mycological Herbarium
+    "UPS-BOT" => nil, # Uppsala University, Museum of Evolution
+    "USAC-USCG Hongos" => nil, # Usac, Cecon, Herbario USCG Hongos
+    "CFMR" => nil, # USDA Forest Service, Center for Forest Mycology Research
+    "FPF" => nil, # USDA Forest Service, Rocky Mountain Research Station
+    "BPI" => nil, # USDA United States National Fungus Collections
+    "VSC" => nil, # Valdosta State University Herbarium
+    "VPI" => nil, # Virginia Tech University, Massey Herbarium - Fungi
+    "YSU-F" => nil # Yugra State University Fungarium, specimen-based
+  }.freeze
   # rubocop:enable Layout/LineLength
 
   def can_edit?(user = User.current)
@@ -310,6 +311,21 @@ class Herbarium < AbstractModel
   end
 
   def mcp_searchable?
-    MCP_COLLECTIONS.include?(code)
+    MCP_COLLECTIONS.key?(code)
+  end
+
+  def mcp_url(accession)
+    base_url = "https://www.mycoportal.org/portal/collections/list.php?"
+    search_params =
+      { catnum: strip_leading_code(accession), db: MCP_COLLECTIONS[code],
+        includeothercatnum: 1 }
+
+    "#{base_url}?#{search_params.to_query}"
+  end
+
+  private
+
+  def strip_leading_code(accession)
+    accession.gsub(/"^#{code} "/, "")
   end
 end

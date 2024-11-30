@@ -134,7 +134,9 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     herbarium_record = herbarium_records(:coprinus_comatus_nybg_spec)
     assert(herbarium_record)
     login
+
     get(:show, params: { id: herbarium_record.id })
+
     assert_template(:show)
     assert_template("shared/_matrix_box")
   end
@@ -146,6 +148,21 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     get(:show, params: { id: herbarium_record.id })
     assert_template(:show)
     assert_template("shared/_matrix_box")
+  end
+
+  def test_show_herbarium_record_mcp_searchable
+    herbarium_record = herbarium_records(:agaricus_campestris_spec)
+    assert(
+      herbarium_record&.herbarium&.mcp_searchable?,
+      "Test needs HerbariumRecord fixture that's searchable via MyCoPortal"
+    )
+
+    login
+    get(:show, params: { id: herbarium_record.id })
+
+    herbarium_collection_url = herbarium_record.mcp_url
+    assert_select("a[href=?]", herbarium_collection_url,
+                  "Missing link to herbarium collection via MyCoPortal")
   end
 
   def test_next_and_prev_herbarium_record
