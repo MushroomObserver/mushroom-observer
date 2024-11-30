@@ -1345,6 +1345,8 @@
 
   # This goes in a box at the top of the page.
   app_banner_box: "Check out the \"Mushroom Observer Etsy store\":https://www.etsy.com/shop/MushroomObsMerch — T-shirts, bags and swag! <br>\nWe're working on MO. If you have trouble posting, try logging out and logging back in again.<br>\nPlease \"report a bug\":admin/emails/webmaster_questions/new if you find one."
+  banner_update_failure: Failed to update banner.
+  banner_update_success: Banner updated successfully.
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction

@@ -318,6 +318,7 @@ MushroomObserver::Application.routes.draw do
     resource :donations, only: [:new, :create, :edit, :update, :destroy]
     get("review_donations", to: "donations#edit") # alternate path
     resource :banner, only: [:edit, :update], controller: "banner"
+    resources :banners, only: [:index, :create]
     resource :blocked_ips, only: [:edit, :update]
     resource :add_user_to_group, only: [:new, :create],
                                  controller: "add_user_to_group"

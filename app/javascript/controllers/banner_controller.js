@@ -1,20 +1,15 @@
-import { Controller } from "@hotwired/stimulus"
+import { Controller } from "@hotwired/stimulus";
 
-// Connects to data-controller="banner"
 export default class extends Controller {
+  static targets = ["banner", "dismissButton"]
+
   connect() {
-    this.element.dataset.stimulus = "banner-connected";
+    this.dismissButtonTarget.addEventListener('click', this.dismiss.bind(this));
   }
 
-  setCookie({ params: { time } }) {
-    const date = new Date(),
-      expiresInDays = 30,
-      cookie_name = "hideBanner2=" + time + "; ";
-
-    date.setTime(date.getTime() + (expiresInDays * 24 * 60 * 60 * 1000));
-    const expiresText = "expires=" + date.toUTCString() + "; ";
-
-    document.cookie =
-      cookie_name + expiresText + "samesite=lax;path=/";
+  dismiss() {
+    const version = this.dismissButtonTarget.dataset.version;
+    document.cookie = `dismissed_banner_version=${version}; path=/; max-age=31536000`; // 1 year
+    this.bannerTarget.style.display = 'none';
   }
 }
