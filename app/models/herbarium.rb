@@ -315,7 +315,7 @@ class Herbarium < AbstractModel
   end
 
   def mcp_url(accession)
-    base_url = "https://www.mycoportal.org/portal/collections/list.php?"
+    base_url = "https://www.mycoportal.org/portal/collections/list.php"
     search_params =
       { catnum: strip_leading_code(accession), db: MCP_COLLECTIONS[code],
         includeothercatnum: 1 }
