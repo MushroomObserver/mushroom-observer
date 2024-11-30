@@ -5,13 +5,12 @@ require "test_helper"
 class Admin::BannersControllerTest < FunctionalTestCase
   setup do
     make_admin("admin")
-    @banner = Banner.create!(message: "Test Banner", version: 1)
   end
 
   test "should get index" do
     get(:index)
     assert_response :success
-    assert_select "textarea", @banner.message
+    assert_select "textarea", banners(:one).message
   end
 
   test "should create banner" do
