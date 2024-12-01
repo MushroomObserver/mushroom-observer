@@ -53,15 +53,12 @@
   color: green;          /* Default color of the chevron */
   cursor: pointer;
   display: block;
-  transform-origin: right center;
 
   &:hover {
     color: darkgreen;      /* Change color on hover */
-    transform: scale(1.2); /* Slightly enlarge the icon */
-    transition: transform 0.3s, color 0.3s; /* Smooth transition */
   }
 
-  .glyphicon-chevron-up {
+  .glyphicon-chevron-down {
      display: block;
    }
 }
