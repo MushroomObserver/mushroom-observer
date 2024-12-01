@@ -245,10 +245,12 @@ class HerbariaController < ApplicationController
   end
 
   def normalize_parameters
-    [:name, :code, :email, :place_name, :mailing_address].each do |arg|
-      val = @herbarium.send(arg).to_s.strip_html.strip_squeeze
-      @herbarium.send(:"#{arg}=", val)
-    end
+    [:name, :code, :mycoportal_db, :email, :place_name,
+     :mailing_address].
+      each do |arg|
+        val = @herbarium.send(arg).to_s.strip_html.strip_squeeze
+        @herbarium.send(:"#{arg}=", val)
+      end
     @herbarium.description = @herbarium.description.to_s.strip
     @herbarium.code = "" if @herbarium.personal_user_id
   end
@@ -424,7 +426,8 @@ class HerbariaController < ApplicationController
     return {} unless params[:herbarium]
 
     params.require(:herbarium).
-      permit(:name, :code, :email, :mailing_address, :description, :location_id,
+      permit(:name, :code, :mycoportal_db, :email, :mailing_address,
+             :description, :location_id,
              :place_name, :personal, :personal_user_name)
   end
 end
