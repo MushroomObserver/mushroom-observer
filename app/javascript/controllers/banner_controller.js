@@ -51,6 +51,7 @@ export default class extends Controller {
   }
 
   showShowButton() {
-    document.getElementById("show-banner-container").style.display = "block";
+    this.containerTarget.classList.remove('d-none');
+    this.containerTarget.classList.add('d-block');
   }
 }
