@@ -46,7 +46,8 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
               end
               concat(tag.br)
               concat(
-                link_to(
+                link_to_if(
+                  record.herbarium.web_searchable?,
                   "#{record.herbarium.code} #{:herbarium_record_collection.t}",
                      record.herbarium.mcp_url(record.accession_number),
                      target: "_blank"
@@ -68,7 +69,8 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
               concat(link_to(*herbarium_record_tab(record, obs)))
               concat(tag.br)
               concat(
-                link_to(
+                link_to_if(
+                  record.herbarium.web_searchable?,
                   "#{record.herbarium.code} #{:herbarium_record_collection.t}",
                      record.herbarium.mcp_url(record.accession_number),
                      target: "_blank"

@@ -177,6 +177,27 @@ class ObservationsControllerShowTest < FunctionalTestCase
                   "Missing link to MyCoPortal record")
   end
 
+  def test_show_observation_unsearchable_coded_herbarium
+    obs = observations(:agaricus_campestris_obs)
+    herbarium_record = herbarium_records(:agaricus_campestris_spec)
+    herbarium = herbarium_record&.herbarium
+    herbarium.update(code: "notInMcp", mycoportal_db: nil)
+
+    user = users(:dick)
+    assert(user.curated_herbaria.any?,
+           "Test needs User who's a Herbarium curator")
+
+    login(user.login)
+    get(:show, params: { id: obs.id })
+
+    assert_match(:herbarium_record_collection.l, @response.body)
+    assert_select(
+      "a[href=?]", herbarium_record.mcp_url, false,
+      "Obs shouldn't link to MyCoPortal for Herbarium Record in a Herbarium " \
+      "that's not in the MCP network"
+    )
+  end
+
   ##############################################################################
 
   # ------ Show ----------------------------------------------- #
