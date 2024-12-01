@@ -35,6 +35,42 @@
   }
 }
 
+
+/* Container for the chevron icon */
+#show-banner-container {
+  width: 100%;          /* Full width */
+  position: relative;   /* Keep it in document flow */
+  background-color: #f8f9fa; /* Optional background for visibility */
+  padding: 5px 0;      /* Add padding to give space */
+  text-align: right;   /* Center the chevron horizontally */
+  z-index: 1;           /* Ensure it's above content if needed */
+  display: none;        /* Initially hidden */
+}
+
+/* Chevron icon */
+#show-banner-icon {
+  font-size: 1em;        /* Size of the chevron icon */
+  color: green;          /* Default color of the chevron */
+  cursor: pointer;
+  display: block;
+  transform-origin: right center;
+
+  &:hover {
+    color: darkgreen;      /* Change color on hover */
+    transform: scale(1.2); /* Slightly enlarge the icon */
+    transition: transform 0.3s, color 0.3s; /* Smooth transition */
+  }
+
+  .glyphicon-chevron-up {
+     display: block;
+   }
+}
+
+#show-banner-icon.bottom {
+  top: auto;    /* Reset top position */
+  bottom: 20px; /* Place the chevron back at the bottom */
+}
+
 button:not(:disabled) {
   .when-disabled {
     display: none;

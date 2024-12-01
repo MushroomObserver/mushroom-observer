@@ -11,16 +11,24 @@
     </div>
   <% end %>
 
-  <% if (current_banner = Banner.current) && cookies[:dismissed_banner_version] != current_banner.version.to_s %>
-    <div id="banner" class="alert alert-success message-banner" data-controller="banner" data-banner-target="banner">
+  <div data-controller="banner">
+    <div id="banner" class="alert alert-success message-banner" data-banner-target="banner">
       <button
 	class="close"
 	id="dismiss-banner"
 	data-banner-target="dismissButton"
 	aria-label="Close"
-	data-version="<%= current_banner.version %>"><span aria-hidden="true">&times;</span></button>
-      <p><%= current_banner.message.t %></p>
+	data-version="<%= Banner.current.version %>">
+	<span aria-hidden="true">&times;</span>
+      </button>
+      <p><%= Banner.current.message.t %></p>
     </div>
-  <% end %>
+
+    <div id="show-banner-container">
+      <div data-banner-target="showButton" id="show-banner-icon" style="display: block;">
+        <span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span>
+      </div>
+    </div>
+  </div>
 </div>
 <!--/CALLOUT_BANNERS-->
