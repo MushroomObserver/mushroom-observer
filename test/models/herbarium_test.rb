@@ -63,6 +63,16 @@ class HerbariumTest < UnitTestCase
     assert_obj_arrays_equal(herbarium_records, result.herbarium_records)
   end
 
+  def test_web_searchable?
+    nybg = herbaria(:nybg_herbarium)
+    assert(nybg.web_searchable?)
+
+    nybg.update(code: "notInMCP")
+    assert(nybg.web_searchable?)
+
+    assert_not(herbaria(:rolf_herbarium).web_searchable?)
+  end
+
   def test_mcp_searchable
     assert(herbaria(:nybg_herbarium).mcp_searchable?)
     assert_not(herbaria(:rolf_herbarium).mcp_searchable?)
