@@ -37,7 +37,8 @@ export default class extends Controller {
   }
 
   hideBanner() {
-    this.bannerTarget.style.display = "none";
+    this.bannerTarget.classList.remove('d-block');
+    this.bannerTarget.classList.add('d-none');
   }
 
   showBanner() {
