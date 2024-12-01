@@ -47,7 +47,8 @@ export default class extends Controller {
   }
 
   hideShowButton() {
-    document.getElementById("show-banner-container").style.display = "none";
+    this.containerTarget.classList.remove('d-block');
+    this.containerTarget.classList.add('d-none');
   }
 
   showShowButton() {
