@@ -7,6 +7,11 @@
   <p class="alert alert-success"><%= notice %></p>
 <% end %>
 
+<!-- Pagination Navigation -->
+<div class="pagination">
+  <%= paginate @field_slips %>
+</div>
+
 <div id="field_slips">
   <% @field_slips.each do |field_slip| %>
     <strong><%= :field_slip_code.t %>:</strong>
@@ -15,4 +20,9 @@
     <%= render field_slip %>
     <hr/>
   <% end %>
+</div>
+
+<!-- Pagination Navigation -->
+<div class="pagination">
+  <%= paginate @field_slips %>
 </div>
