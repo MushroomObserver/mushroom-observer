@@ -61,6 +61,43 @@ class HerbariaControllerTest < FunctionalTestCase
     )
   end
 
+  def test_show_mcp_db
+    herbarium = nybg
+    assert(herbarium.mycoportal_db.present?,
+           "Test needs herbarium with mycoportal_db")
+
+    login("mary")
+    get(:show, params: { id: herbarium.id })
+
+    assert_select(
+      "#mcp_number",
+      { text: /#{:herbarium_mcp_db.l}:\s+#{herbarium.mycoportal_db}/ }
+    )
+  end
+
+  def test_show_mcp_db_missing
+    herbarium = field_museum
+    assert(herbarium.mycoportal_db.nil?,
+           "Test needs mcp searchable herbarium whose mycoportal_db is nil")
+
+    login("mary")
+    get(:show, params: { id: herbarium.id })
+
+    assert_select(
+      "#mcp_number",
+      { text: /#{:herbarium_mcp_db.l}:\s+#{:show_herbarium_mcp_db_missing.l}/ }
+    )
+  end
+
+  def test_show_no_mcp_db
+    herbarium = dicks_personal
+
+    login("mary")
+    get(:show, params: { id: herbarium.id })
+
+    assert_select("#mcp_number", false)
+  end
+
   def test_show_destroy_buttons_presence
     herbarium = nybg
     assert(herbarium.curator?(roy))

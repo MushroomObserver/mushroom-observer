@@ -36,7 +36,7 @@ field_museum:
   name: The Field Museum
   mailing_address: 1400 S. Lake Shore Drive, Chicago, IL, 60605-2496, USA
   code: F
-  mycoportal_db: 11
+  mycoportal_db: nil # missing for test purposes
   curators: rolf, thorsten
 
 curatorless_herbarium:

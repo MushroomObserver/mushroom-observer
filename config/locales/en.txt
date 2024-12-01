@@ -2634,10 +2634,12 @@
   herbarium_curators: Curators
   herbarium_mailing_address: Mailing Address
   herbarium_code: Code
+  herbarium_mcp_db: 'MyCoPortal Collection #'
   user_personal_herbarium: "[name]: Personal Fungarium"
 
   # herbaria/show
   show_herbarium_herbarium_record_count: This fungarium contains [count] fungarium record(s).
+  show_herbarium_mcp_db_missing: Missing
   show_herbarium_add_curator: Add Curator
   show_herbarium_no_user: Unable to find the user '[login]'.
   show_herbarium_curator_request: Request to be a Curator

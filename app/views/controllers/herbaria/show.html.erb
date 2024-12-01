@@ -8,6 +8,17 @@ map = @herbarium.location
 @container = :wide
 %>
 
+<% if @herbarium.mcp_searchable? %>
+  <div id="mcp_number" class="mt-3">
+    <span class="font-weight-bold"><%= :herbarium_mcp_db.t %></span>:
+    <% if @herbarium.mycoportal_db.present? %>
+      <%= @herbarium.mycoportal_db.to_s %>
+    <% else %>
+      <%= :show_herbarium_mcp_db_missing.t %>
+    <% end %>
+  </div>
+<% end %>
+
 <div class="row">
   <div class="col-xs-12 col-sm-<%= map ? 8 : 12 %>">
     <div class="mt-3">
@@ -76,7 +87,7 @@ map = @herbarium.location
   <% end %>
 </div><!--.row-->
 
-<div class="mt-3 text-center" style="max-width:<%= map ? 930 : 600 %>px">
+<div class="mt-3" style="max-width:<%= map ? 930 : 600 %>px">
   <%= :CREATED_AT.t %>: <%= @herbarium.created_at.web_date %><br/>
   <%= :UPDATED_AT.t %>: <%= @herbarium.updated_at.web_date %><br/>
-</div><!-- .text-center -->
+</div>
