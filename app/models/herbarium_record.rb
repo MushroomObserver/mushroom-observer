@@ -36,6 +36,7 @@
 #  herbarium_label::  Initial determination + accession number.
 #  format_name::      Same as herbarium_label.
 #  accession_at_herbarium:: Format as "spec #nnnn @ Herbarium".
+#  mcp_url::          URL for corresponding MycoPortal record
 #
 #  == Callbacks
 #
@@ -70,6 +71,10 @@ class HerbariumRecord < AbstractModel
 
   def accession_at_herbarium
     "__#{accession_number}__ @ #{herbarium.try(&:format_name)}"
+  end
+
+  def mcp_url
+    herbarium.mcp_url(accession_number)
   end
 
   # Can a given user edit this HerbariumRecord?

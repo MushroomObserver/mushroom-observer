@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_11_17_211300) do
+ActiveRecord::Schema[7.1].define(version: 2024_11_30_174126) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -144,6 +144,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_17_211300) do
     t.datetime "updated_at", precision: nil
     t.string "code", limit: 8, default: "", null: false
     t.integer "personal_user_id"
+    t.integer "mycoportal_db"
   end
 
   create_table "herbarium_curators", charset: "utf8mb3", force: :cascade do |t|
