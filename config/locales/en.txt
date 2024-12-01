@@ -2634,7 +2634,7 @@
   herbarium_curators: Curators
   herbarium_mailing_address: Mailing Address
   herbarium_code: Code
-  herbarium_mcp_db: 'MyCoPortal Collection #'
+  herbarium_mcp_db: 'MyCoPortal Collection ID'
   user_personal_herbarium: "[name]: Personal Fungarium"
 
   # herbaria/show
@@ -2652,7 +2652,11 @@
   create_herbarium_personal: Check this box if this is your personal fungarium
   create_herbarium_personal_help: Each user can have one personal fungarium that they have curator privileges for. By default it is called "[name]", but you can change that name to anything you like.
   create_herbarium_code: Standard Abbreviation
+  create_herbarium_code_recommended: recommended for Index Herbariorum-listed Fungaria
   create_herbarium_code_help: Look up the standard abbreviation for a fungarium at "Index Herbariorum":https://sweetgum.nybg.org/science/ih/.
+  create_herbarium_mcp_db: "[:herbarium_mcp_db]"
+  create_herbarium_mcp_db_recommended: recommended for MyCoPortal-searchable Fungaria
+  create_herbarium_mcp_db_help: At "MyCoPortal":https://www.mycoportal.org/portal/collections/index.php click the 'more info' link next to your Fungarium. In the browser address bar for the resulting page, the integer to the right of 'collid=' is the Collection ID.
   create_herbarium_email: Email Address
   create_herbarium_mailing_address: Mailing Address
   create_herbarium_duplicate_name: Fungarium called '[name]' already exists.
