@@ -11,7 +11,13 @@ class FieldSlipsController < ApplicationController
 
   # GET /field_slips or /field_slips.json
   def index
-    @field_slips = FieldSlip.page(params[:page]).per(10).includes(
+    field_slips = FieldSlip.all
+    if params.include?(:project_id)
+      project_id = params[:project_id]
+      project = Project.safe_find(project_id)
+      field_slips = FieldSlip.where(project_id:) if project
+    end
+    @field_slips = field_slips.page(params[:page]).per(10).includes(
       [{ observation: [:location, :name, :namings, :rss_log, :user] },
        :project, :user]
     )
