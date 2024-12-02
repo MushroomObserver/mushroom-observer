@@ -11,10 +11,7 @@ class FieldSlipsController < ApplicationController
 
   # GET /field_slips or /field_slips.json
   def index
-    @field_slips = FieldSlip.includes(
-      [{ observation: [:location, :name, :namings, :rss_log, :user] },
-       :project, :user]
-    )
+    filter_index? ? index_filtered : index_full
   end
 
   # GET /field_slips/new
@@ -104,6 +101,46 @@ class FieldSlipsController < ApplicationController
   end
 
   private
+
+  # should index be filtered?
+  def filter_index?
+    params[:q] || params[:by]
+  end
+
+  def index_filtered
+    query = find_or_create_query(:FieldSlip, by: params[:by])
+    show_selected_field_slips(
+      query,
+      id: params[:id].to_s,
+      always_index: true
+    )
+  end
+
+  def index_full
+    query = create_query(
+      :FieldSlip,
+      :all,
+      by: :created_at
+    )
+    show_selected_field_slips(query)
+  end
+
+  # Show selected list of field_slips.
+  def show_selected_field_slips(query, args = {})
+    args = {
+      action: :index,
+      num_per_page: 50,
+      include: field_slip_includes
+    }.merge(args)
+
+    show_index_of_objects(query, args)
+  end
+
+  # Used on index, but could be used on show, edit? update? as well.
+  def field_slip_includes
+    [{ observation: [:location, :name, :namings, :rss_log, :user] },
+     :project, :user]
+  end
 
   def set_field_slip
     @field_slip = FieldSlip.find(params[:id])
