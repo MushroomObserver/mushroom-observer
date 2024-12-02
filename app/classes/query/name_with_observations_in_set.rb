@@ -5,7 +5,7 @@ class Query::NameWithObservationsInSet < Query::NameWithObservations
 
   def parameter_declarations
     super.merge(
-      ids: [Observation],
+      # ids: [Observation],
       old_title?: :string
     )
   end
@@ -18,6 +18,6 @@ class Query::NameWithObservationsInSet < Query::NameWithObservations
   end
 
   def coerce_into_observation_query
-    Query.lookup(:Observation, :in_set, params_with_old_by_restored)
+    Query.lookup(:Observation, :all, params_with_old_by_restored)
   end
 end

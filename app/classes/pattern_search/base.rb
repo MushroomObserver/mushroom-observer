@@ -19,7 +19,9 @@ module PatternSearch
       self.args   = {}
       parser.terms.each do |term|
         if term.var == :pattern
-          self.flavor = :pattern_search
+          unconverted = [Image, Location, Name] # Observation
+          self.flavor = unconverted.include?(model) ? :pattern_search : :all
+          # self.flavor = :pattern_search
           args[:pattern] = term.parse_pattern
         elsif (param = lookup_param(term.var))
           query_param, parse_method = param

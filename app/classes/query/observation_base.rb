@@ -27,8 +27,9 @@ module Query
         project_lists?: [:string],
         species_lists?: [:string],
         users?: [User],
+        ids?: [Observation],
         field_slips?: [:string],
-        # pattern?: :string,
+        pattern?: :string,
 
         # numeric
         confidence?: [:float],
@@ -52,7 +53,8 @@ module Query
     def initialize_flavor
       add_owner_and_time_stamp_conditions("observations")
       add_date_condition("observations.when", params[:date])
-      # add_pattern_condition
+      add_ids_condition
+      add_pattern_condition
       initialize_name_parameters
       initialize_association_parameters
       initialize_boolean_parameters
@@ -60,6 +62,14 @@ module Query
       add_range_condition("observations.vote_cache", params[:confidence])
       add_bounding_box_conditions_for_observations
       initialize_content_filters(Observation)
+      super
+    end
+
+    def add_pattern_condition
+      return if params[:pattern].blank?
+
+      add_search_condition(search_fields, params[:pattern])
+      add_join(:names)
       super
     end
 
@@ -182,6 +192,48 @@ module Query
 
     def add_join_to_locations!
       add_join(:locations!)
+    end
+
+    def search_fields
+      "CONCAT(" \
+        "names.search_name," \
+        "observations.where" \
+        ")"
+    end
+
+    def model_responds_to_coercion?(model)
+      flavor_class = "Query::#{model}WithObservations#{flavor.to_s.classify}"
+      base_class = "Query::#{model}Base".constantize.new
+      unless Object.const_defined?(flavor_class) ||
+             (base_class.takes_parameter?(:with_observations) &&
+              base_class.takes_parameter?(flavor))
+        return false
+      end
+
+      true
+    end
+
+    def coerce_into_image_query
+      return unless model_responds_to_coercion?(:Image)
+
+      do_coerce(:Image)
+    end
+
+    def coerce_into_location_query
+      return unless model_responds_to_coercion?(:Location)
+
+      do_coerce(:Location)
+    end
+
+    def coerce_into_name_query
+      return unless model_responds_to_coercion?(:Name)
+
+      do_coerce(:Name)
+    end
+
+    def do_coerce(new_model)
+      Query.lookup(new_model, :with_observations_in_set,
+                   add_old_title(add_old_by(ids: result_ids)))
     end
 
     def self.default_order

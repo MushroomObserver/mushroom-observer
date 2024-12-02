@@ -5,6 +5,7 @@ module Query
   class ImageWithObservations < Query::ImageBase
     include Query::Initializers::ContentFilters
     include Query::Initializers::Names
+    include Query::Initializers::Observations
     include Query::Initializers::ObservationQueryDescriptions
 
     def parameter_declarations
@@ -23,7 +24,8 @@ module Query
         east?: :float,
         west?: :float
       ).merge(content_filter_parameter_declarations(Observation)).
-        merge(consensus_parameter_declarations)
+        merge(consensus_parameter_declarations).
+        merge(observations_parameter_declarations)
     end
 
     def initialize_flavor

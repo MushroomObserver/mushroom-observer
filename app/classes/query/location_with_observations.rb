@@ -5,6 +5,7 @@ module Query
   class LocationWithObservations < Query::LocationBase
     include Query::Initializers::ContentFilters
     include Query::Initializers::Names
+    include Query::Initializers::Observations
     include Query::Initializers::ObservationQueryDescriptions
 
     def parameter_declarations
@@ -27,7 +28,8 @@ module Query
         comments_has?: :string
       ).merge(content_filter_parameter_declarations(Observation)).
         merge(names_parameter_declarations).
-        merge(consensus_parameter_declarations)
+        merge(consensus_parameter_declarations).
+        merge(observations_parameter_declarations)
     end
 
     def initialize_flavor

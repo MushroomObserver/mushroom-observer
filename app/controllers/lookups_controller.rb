@@ -252,7 +252,7 @@ class LookupsController < ApplicationController
     model:, id:, matches:, suggestions:
   )
     obj = matches.first || suggestions.first
-    unconverted = [Image, Location, Name, Observation]
+    unconverted = [Image, Location, Name] # Observation
     flavor = unconverted.include?(model) ? :in_set : :all
 
     query = Query.lookup(model, flavor, ids: matches + suggestions)

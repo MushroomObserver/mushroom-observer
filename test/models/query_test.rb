@@ -241,7 +241,7 @@ class QueryTest < UnitTestCase
     q1 = Query.lookup_and_save(:Observation)
     assert_equal(1, QueryRecord.count)
 
-    Query.lookup_and_save(:Observation, :pattern_search, pattern: "blah")
+    Query.lookup_and_save(:Observation, :all, pattern: "blah")
     assert_equal(2, QueryRecord.count)
 
     # New because params are different from q1.
@@ -259,16 +259,16 @@ class QueryTest < UnitTestCase
     assert_equal(q3, q5, QueryRecord.count)
 
     # New pattern is new query.
-    Query.lookup_and_save(:Observation, :pattern_search, pattern: "new blah")
+    Query.lookup_and_save(:Observation, :all, pattern: "new blah")
     assert_equal(4, QueryRecord.count)
 
     # Old pattern but new order.
     Query.lookup_and_save(:Observation,
-                          :pattern_search, pattern: "blah", by: :date)
+                          :all, pattern: "blah", by: :date)
     assert_equal(5, QueryRecord.count)
 
     # Identical, even though :by is explicitly set in one.
-    Query.lookup_and_save(:Observation, :pattern_search, pattern: "blah")
+    Query.lookup_and_save(:Observation, :all, pattern: "blah")
     assert_equal(5, QueryRecord.count)
 
     # Identical query, but new query because order given explicitly.  Order is
@@ -902,7 +902,7 @@ class QueryTest < UnitTestCase
   def test_basic_coerce
     assert_equal(0, QueryRecord.count)
 
-    q1 = Query.lookup_and_save(:Observation, :pattern_search, pattern: "search")
+    q1 = Query.lookup_and_save(:Observation, :all, pattern: "search")
     assert_equal(1, QueryRecord.count)
 
     # Trvial coercion: any flavor from a model to the same model.
@@ -924,14 +924,14 @@ class QueryTest < UnitTestCase
       :Observation, :in_species_list,
       species_list: species_lists(:first_species_list).id
     )
-    q5a = Query.lookup_and_save(:Observation, :in_set,
+    q5a = Query.lookup_and_save(:Observation, :all,
                                 ids: [
                                   observations(:detailed_unknown_obs).id,
                                   observations(:agaricus_campestris_obs).id,
                                   observations(:agaricus_campestras_obs).id
                                 ])
     # removed q6a which searched for "somewhere else" in the notes
-    # q6a = Query.lookup_and_save(:Observation, :pattern_search,
+    # q6a = Query.lookup_and_save(:Observation, :all,
     #                             pattern: '"somewhere else"')
     q7a = Query.lookup_and_save(:Observation, :advanced_search,
                                 location: "glendale")
@@ -982,7 +982,7 @@ class QueryTest < UnitTestCase
     assert_equal(:with_observations, q1b.flavor)
     assert_equal(:with_observations_by_user, q2b.flavor)
     assert_equal(:with_observations_in_species_list, q3b.flavor)
-    assert_equal(:with_observations_in_set, q5b.flavor)
+    assert_equal(:with_observations, q5b.flavor)
     # assert_equal(:with_observations_in_set, q6b.flavor)
     assert_equal(:with_observations_in_set, q7b.flavor)
     assert_equal(:with_observations_at_location, q8b.flavor)
@@ -1024,12 +1024,12 @@ class QueryTest < UnitTestCase
       :Observation, :in_species_list,
       species_list: species_lists(:first_species_list).id
     )
-    q5a = Query.lookup_and_save(:Observation, :in_set,
+    q5a = Query.lookup_and_save(:Observation, :all,
                                 ids:
                                   [observations(:detailed_unknown_obs).id,
                                    observations(:agaricus_campestris_obs).id,
                                    observations(:agaricus_campestras_obs).id])
-    # q6a = Query.lookup_and_save(:Observation, :pattern_search,
+    # q6a = Query.lookup_and_save(:Observation, :all,
     #                             pattern: '"somewhere else"')
     q7a = Query.lookup_and_save(:Observation, :advanced_search,
                                 location: "glendale")
@@ -1077,7 +1077,7 @@ class QueryTest < UnitTestCase
     assert_equal(:with_observations, q1b.flavor)
     assert_equal(:with_observations_by_user, q2b.flavor)
     assert_equal(:with_observations_in_species_list, q3b.flavor)
-    assert_equal(:with_observations_in_set, q5b.flavor)
+    assert_equal(:with_observations, q5b.flavor)
     # assert_equal(:with_observations_in_set, q6b.flavor)
     assert_equal(:with_observations_in_set, q7b.flavor)
     assert_equal(:in_set, q8b.flavor)
@@ -1136,13 +1136,13 @@ class QueryTest < UnitTestCase
       :Observation, :in_species_list,
       species_list: species_lists(:first_species_list).id
     )
-    q5a = Query.lookup_and_save(:Observation, :in_set,
+    q5a = Query.lookup_and_save(:Observation, :all,
                                 ids: [
                                   observations(:detailed_unknown_obs).id,
                                   observations(:agaricus_campestris_obs).id,
                                   observations(:agaricus_campestras_obs).id
                                 ])
-    # q6a = Query.lookup_and_save(:Observation, :pattern_search,
+    # q6a = Query.lookup_and_save(:Observation, :all,
     #                             pattern: '"somewhere else"')
     q7a = Query.lookup_and_save(:Observation, :advanced_search,
                                 location: "glendale")
@@ -1193,7 +1193,7 @@ class QueryTest < UnitTestCase
     assert_equal(:with_observations, q1b.flavor)
     assert_equal(:with_observations_by_user, q2b.flavor)
     assert_equal(:with_observations_in_species_list, q3b.flavor)
-    assert_equal(:with_observations_in_set, q5b.flavor)
+    assert_equal(:with_observations, q5b.flavor)
     # assert_equal(:with_observations_in_set, q6b.flavor)
     assert_equal(:with_observations_in_set, q7b.flavor)
     assert_equal(:with_observations_at_location, q8b.flavor)
@@ -2775,7 +2775,7 @@ class QueryTest < UnitTestCase
                    observations(:agaricus_campestras_obs).id,
                    observations(:agaricus_campestris_obs).id,
                    observations(:agaricus_campestrus_obs).id]
-    assert_query(obs_set_ids, :Observation, :in_set, ids: obs_set_ids)
+    assert_query(obs_set_ids, :Observation, :all, ids: obs_set_ids)
   end
 
   def test_observation_in_species_list
@@ -2919,24 +2919,24 @@ class QueryTest < UnitTestCase
     #               observations(:agaricus_campestros_obs).id,
     #               observations(:agaricus_campestrus_obs).id,
     #               observations(:strobilurus_diminutivus_obs).id],
-    #              :Observation, :pattern_search, pattern: '"somewhere else"')
+    #              :Observation, :all, pattern: '"somewhere else"')
     # where
     assert_query([observations(:strobilurus_diminutivus_obs).id],
-                 :Observation, :pattern_search, pattern: "pipi valley")
+                 :Observation, :all, pattern: "pipi valley")
     # location
     expect = Observation.where(location_id: locations(:burbank)).
              joins(:name).order(
                [Name[:text_name], Name[:author], Observation[:id].desc]
              ).to_a
     assert_query(expect,
-                 :Observation, :pattern_search, pattern: "burbank", by: :name)
+                 :Observation, :all, pattern: "burbank", by: :name)
 
     # name
     expect = Observation.
              where(Name[:text_name].matches("agaricus%")).joins(:name).
              order([Name[:text_name], Name[:author], Observation[:id].desc])
     assert_query(expect.map(&:id),
-                 :Observation, :pattern_search, pattern: "agaricus", by: :name)
+                 :Observation, :all, pattern: "agaricus", by: :name)
   end
 
   def test_project_all
@@ -3254,12 +3254,12 @@ class QueryTest < UnitTestCase
 
     User.current = rolf
     assert_equal("postal", User.current_location_format)
-    assert_query([obs1, obs2], :Observation, :in_set,
+    assert_query([obs1, obs2], :Observation, :all,
                  ids: [obs1.id, obs2.id], by: :location)
 
     User.current = roy
     assert_equal("scientific", User.current_location_format)
-    assert_query([obs2, obs1], :Observation, :in_set,
+    assert_query([obs2, obs1], :Observation, :all,
                  ids: [obs1.id, obs2.id], by: :location)
   end
 

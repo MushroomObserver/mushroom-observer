@@ -5,8 +5,11 @@ class Query::LocationWithObservationsInSet < Query::LocationWithObservations
 
   def parameter_declarations
     super.merge(
-      ids: [Observation],
+      # ids: [Observation],
       old_title?: :string
+      # Where to put other obs params that are gonna get passed in here?
+      # Like pattern, user, project, species_list etc.
+      # should they go in content filter? wtf is that? A new initializer?
     )
   end
 
@@ -19,6 +22,6 @@ class Query::LocationWithObservationsInSet < Query::LocationWithObservations
   end
 
   def coerce_into_observation_query
-    Query.lookup(:Observation, :in_set, params_with_old_by_restored)
+    Query.lookup(:Observation, :all, params_with_old_by_restored)
   end
 end
