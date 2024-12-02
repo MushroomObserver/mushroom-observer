@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-  static targets = ["banner", "dismissButton", "showButton"];
+  static targets = ["banner", "container", "dismissButton", "showButton"];
 
   connect() {
     this.dismissButtonTarget.addEventListener("click", this.dismiss.bind(this));
