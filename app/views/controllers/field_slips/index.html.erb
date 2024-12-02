@@ -4,15 +4,11 @@
 %>
 
 <% if notice %>
-  <p class="alert alert-success"><%= notice %></p>
+<%= tag.p(notice, class: "alert alert-success") %>
 <% end %>
 
-<div id="field_slips">
-  <% @field_slips.each do |field_slip| %>
-    <strong><%= :field_slip_code.t %>:</strong>
-    <%= link_to(field_slip.code, field_slip,
-                class: "field_slip_link_#{field_slip.id}") %>
-    <%= render field_slip %>
-    <hr/>
-  <% end %>
+<%= paginate_block(@pages) do %>
+<div class="list-group">
+  <%= render(partial: "field_slips/object", collection: @objects) %>
 </div>
+<% end %>
