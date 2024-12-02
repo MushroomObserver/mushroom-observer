@@ -135,6 +135,16 @@ class LanguageExporterTest < UnitTestCase
     end
   end
 
+  def test_update_export_file
+    template = Rails.root.join("test/templates/export_round_trip.yml")
+    use_test_locales do
+      file = @official.export_file
+      FileUtils.copy(template, file)
+      data = File.open(file, "r:utf-8") { |fh| YAML.safe_load(fh) }
+      assert(data, "File read failed for #{file}")
+    end
+  end
+
   def test_check_export_file_for_duplicates
     export_data = [
       "  tag1: val1\n",
