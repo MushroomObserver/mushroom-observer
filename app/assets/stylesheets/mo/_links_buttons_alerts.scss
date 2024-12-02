@@ -36,23 +36,9 @@
 }
 
 
-/* Container for the chevron icon */
-#show-banner-container {
-  width: 100%;          /* Full width */
-  position: relative;   /* Keep it in document flow */
-  background-color: #f8f9fa; /* Optional background for visibility */
-  padding: 5px 0;      /* Add padding to give space */
-  text-align: right;   /* Center the chevron horizontally */
-  z-index: 1;           /* Ensure it's above content if needed */
-  display: none;        /* Initially hidden */
-}
-
 /* Chevron icon */
-#show-banner-icon {
-  font-size: 1em;        /* Size of the chevron icon */
+.show_banner_icon {
   color: green;          /* Default color of the chevron */
-  cursor: pointer;
-  display: block;
 
   &:hover {
     color: darkgreen;      /* Change color on hover */
@@ -61,11 +47,6 @@
   .glyphicon-chevron-down {
      display: block;
    }
-}
-
-#show-banner-icon.bottom {
-  top: auto;    /* Reset top position */
-  bottom: 20px; /* Place the chevron back at the bottom */
 }
 
 button:not(:disabled) {
