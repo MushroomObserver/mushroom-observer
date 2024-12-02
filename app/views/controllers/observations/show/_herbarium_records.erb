@@ -44,6 +44,15 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
                   ].safe_join(" ")
                 )
               end
+              concat(tag.br)
+              concat(
+                link_to_if(
+                  record.herbarium.web_searchable?,
+                  "#{record.herbarium.code} #{:herbarium_record_collection.t}",
+                     record.herbarium.mcp_url(record.accession_number),
+                     target: "_blank"
+                )
+              )
             end
           end.safe_join
         end
@@ -52,12 +61,22 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
     elsif records.any? && !can_add
       [
         tag.div do
-          records.length > 1 ? "#{:Herbarium_records.t}:" :
-                               "#{:Herbarium_record.t}:"
+          records.one? ? "#{:Herbarium_record.t}:" : "#{:Herbarium_record.t}:"
         end,
         tag.ul(class: "tight-list") do
           records.map do |record|
-            tag.li { link_to(*herbarium_record_tab(record, obs)) }
+            tag.li(id: "herbarium_record_#{record.id}") do
+              concat(link_to(*herbarium_record_tab(record, obs)))
+              concat(tag.br)
+              concat(
+                link_to_if(
+                  record.herbarium.web_searchable?,
+                  "#{record.herbarium.code} #{:herbarium_record_collection.t}",
+                     record.herbarium.mcp_url(record.accession_number),
+                     target: "_blank"
+                )
+              )
+            end
           end.safe_join
         end
       ].safe_join(" ")
@@ -74,4 +93,3 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
   end
 end
 %>
-

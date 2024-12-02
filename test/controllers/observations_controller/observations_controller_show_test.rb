@@ -137,6 +137,67 @@ class ObservationsControllerShowTest < FunctionalTestCase
     end
   end
 
+  def test_show_observation_curator_with_mcp_link
+    obs = observations(:agaricus_campestris_obs)
+    herbarium_record = herbarium_records(:agaricus_campestris_spec)
+    assert(
+      herbarium_record&.herbarium&.mcp_searchable?,
+      "Test needs Obs fixture with HerbariumRecord " \
+      "that's searchable via MyCoPortal"
+    )
+    user = users(:dick)
+    assert(user.curated_herbaria.any?,
+           "Test needs User who's a Herbarium curator")
+
+    login(user.login)
+    get(:show, params: { id: obs.id })
+
+    assert_match(:herbarium_record_collection.l, @response.body)
+    assert_select("a[href=?]", herbarium_record.mcp_url, true,
+                  "Missing link to MyCoPortal record")
+  end
+
+  def test_show_observation_non_curator_with_mcp_link
+    obs = observations(:agaricus_campestris_obs)
+    herbarium_record = herbarium_records(:agaricus_campestris_spec)
+    assert(
+      herbarium_record&.herbarium&.mcp_searchable?,
+      "Test needs Obs fixture with HerbariumRecord " \
+      "that's searchable via MyCoPortal"
+    )
+    user = users(:zero_user)
+    assert(user.curated_herbaria.none?,
+           "Test needs User who's not a Herbarium curator")
+
+    login(user.login)
+    get(:show, params: { id: obs.id })
+
+    assert_match(:herbarium_record_collection.l, @response.body)
+    assert_select("a[href=?]", herbarium_record.mcp_url, true,
+                  "Missing link to MyCoPortal record")
+  end
+
+  def test_show_observation_unsearchable_coded_herbarium
+    obs = observations(:agaricus_campestris_obs)
+    herbarium_record = herbarium_records(:agaricus_campestris_spec)
+    herbarium = herbarium_record&.herbarium
+    herbarium.update(code: "notInMcp", mycoportal_db: nil)
+
+    user = users(:dick)
+    assert(user.curated_herbaria.any?,
+           "Test needs User who's a Herbarium curator")
+
+    login(user.login)
+    get(:show, params: { id: obs.id })
+
+    assert_match(:herbarium_record_collection.l, @response.body)
+    assert_select(
+      "a[href=?]", herbarium_record.mcp_url, false,
+      "Obs shouldn't link to MyCoPortal for Herbarium Record in a Herbarium " \
+      "that's not in the MCP network"
+    )
+  end
+
   ##############################################################################
 
   # ------ Show ----------------------------------------------- #
