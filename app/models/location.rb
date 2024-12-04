@@ -201,7 +201,10 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
             and(Location[:west] <= Location[:east])
           )
         }
-  scope :not_in_box, # Pass kwargs (:north, :south, :east, :west), any order
+  # Returns locations whose bounding box is not entirely within the given box.
+  # Some locations may overlap with the box, even mostly.
+  # Pass kwargs (:north, :south, :east, :west), any order
+  scope :not_in_box,
         lambda { |**args|
           box = Mappable::Box.new(**args)
           return none unless box.valid?
