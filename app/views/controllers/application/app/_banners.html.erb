@@ -11,24 +11,25 @@
     </div>
   <% end %>
 
-  <div data-controller="banner">
-    <div id="banner" class="alert alert-success message-banner" data-banner-target="banner">
-      <button
-	class="close"
-	id="dismiss-banner"
-	data-banner-target="dismissButton"
-	aria-label="Close"
-	data-version="<%= Banner.current.version %>">
-        <span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span>
-      </button>
-      <p><%= Banner.current.message.t %></p>
-    </div>
-
-    <div class="show_banner_container position-relative d-block w-100 py-2 text-right" data-banner-target="container">
-      <div data-banner-target="showButton" class="show_banner_icon text-green d-block">
-        <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>
+  <% if Banner.current %>
+    <div data-controller="banner">
+      <div id="banner" class="alert alert-success message-banner" data-banner-target="banner">
+        <button
+        class="close"
+        id="dismiss-banner"
+        data-banner-target="dismissButton"
+        aria-label="Close"
+        data-version="<%= Banner.current.version %>">
+          <span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span>
+        </button>
+        <p><%= Banner.current.message.t %></p>
+      </div>
+      <div class="show_banner_container position-relative d-block w-100 py-2 text-right" data-banner-target="container">
+        <div data-banner-target="showButton" class="show_banner_icon text-green d-block">
+          <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>
+        </div>
       </div>
     </div>
-  </div>
+  <% end %>
 </div>
 <!--/CALLOUT_BANNERS-->
