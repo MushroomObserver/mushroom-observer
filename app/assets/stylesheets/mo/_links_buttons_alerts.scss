@@ -35,6 +35,20 @@
   }
 }
 
+
+/* Chevron icon */
+.show_banner_icon {
+  color: green;          /* Default color of the chevron */
+
+  &:hover {
+    color: darkgreen;      /* Change color on hover */
+  }
+
+  .glyphicon-chevron-down {
+     display: block;
+   }
+}
+
 button:not(:disabled) {
   .when-disabled {
     display: none;

@@ -30,6 +30,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_30_174126) do
     t.datetime "updated_at", precision: nil, null: false
   end
 
+  create_table "banners", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.text "message"
+    t.integer "version"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "collection_numbers", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "updated_at", precision: nil

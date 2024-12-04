@@ -3,10 +3,6 @@
 require("test_helper")
 
 class TranslationStringTest < UnitTestCase
-  def test_banner_time
-    assert_not_nil(TranslationString.banner_time)
-  end
-
   def test_rename_tags_upcase
     str = TranslationString.create(
       { tag: "JOHN", text: "Harding",

@@ -633,7 +633,6 @@ Rails/FilePath:
 # AllowedMethods: order, limit, select, lock
 Rails/FindEach:
   Exclude:
-    - 'app/controllers/admin/banner_controller.rb'
     - 'app/controllers/application_controller.rb'
     - 'app/controllers/species_lists/shared_private_methods.rb'
     - 'lib/tasks/cache.rake'
@@ -643,7 +642,6 @@ Rails/FindEach:
     - 'script/bulk_name_change'
     - 'script/check_enum_values'
     - 'script/refresh_sitemap'
-    - 'test/controllers/admin/banner_controller_test.rb'
     - 'test/controllers/herbaria_controller_test.rb'
     - 'test/models/localization_files_test.rb'
 
