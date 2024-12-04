@@ -48,6 +48,11 @@ MushroomObserver::Application.configure do
   config.redirect_uri =
     "https://mushroomobserver.org/observations/inat_imports/authorization_response"
 
+  # Disable Mission Control default HTTP Basic Authentication because
+  # we specify AdminController as the base class for Mission Control
+  # https://github.com/rails/mission_control-jobs?tab=readme-ov-file#authentication
+  config.mission_control.jobs.http_basic_auth_enabled = false
+
   # ----------------------------
   #  Rails configuration.
   #  The production environment is meant for finished, "live" apps.
