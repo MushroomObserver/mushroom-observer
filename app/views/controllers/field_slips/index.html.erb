@@ -2,6 +2,7 @@
 add_index_title(@query, no_hits: :FIELD_SLIPS.t)
 add_tab_set(field_slips_index_tabs)
 @container = :wide
+project_title = @query.params_cache[:project][:title] || ""
 %>
 
 <% if notice %>
@@ -11,6 +12,7 @@ add_tab_set(field_slips_index_tabs)
 <%= form_with(method: :get, url: field_slips_path) do |form| %>
 <%= autocompleter_field(form:, field: :project_name, type: :project,
                         hidden_name: :project, inline: true,
+                        value: project_title,
                         label: "Filter by #{:project.l}:") %>
 <%= submit_button(form:, button: "Filter") %>
 <% end %>
