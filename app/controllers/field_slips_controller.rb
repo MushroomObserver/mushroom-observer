@@ -2,6 +2,7 @@
 
 class FieldSlipsController < ApplicationController
   include Show
+  include Index
 
   # Disable cop: all these methods are defined in files included above.
   # rubocop:disable Rails/LexicallyScopedActionFilter
@@ -12,13 +13,19 @@ class FieldSlipsController < ApplicationController
   # NOTE: Must be an ivar of FieldSlipsController
   # Defining them in an index.rb does not work
   @index_subaction_param_keys = [
-    # :user,
-    # :observation,
+    :user,
+    :observation,
     :project,
     :by,
     :q,
     :id
   ].freeze
+
+  @index_subaction_dispatch_table = {
+    by: :index_query_results,
+    q: :index_query_results,
+    id: :index_query_results
+  }.freeze
 
   # GET /field_slips or /field_slips.json
   #
@@ -111,56 +118,6 @@ class FieldSlipsController < ApplicationController
   end
 
   private
-
-  # index subactions:
-  # methods called by #index via a dispatch table in ObservationController
-
-  # checked by ApplicationController#index
-  def default_index_subaction
-    index_full
-  end
-
-  def index_full
-    query = create_query(:FieldSlip, :all, by: :created_at)
-    show_selected_field_slips(query)
-  end
-
-  # Display list of FieldSlips attached to a given project.
-  def project
-    return unless (
-      project = find_or_goto_index(Project, params[:project].to_s)
-    )
-
-    query = create_query(:FieldSlip, :all, project: project)
-    show_selected_field_slips(query, always_index: 1)
-  end
-
-  # Displays matrix of User's FieldSlips, by date.
-  def user
-    return unless (
-      user = find_or_goto_index(User, params[:user])
-    )
-
-    query = create_query(:FieldSlip, :all, user: user)
-    show_selected_field_slips(query)
-  end
-
-  # Show selected list of field_slips.
-  def show_selected_field_slips(query, args = {})
-    args = {
-      action: :index,
-      num_per_page: 50,
-      include: field_slip_includes
-    }.merge(args)
-
-    show_index_of_objects(query, args)
-  end
-
-  # Used on index, but could be used on show, edit? update? as well.
-  def field_slip_includes
-    [{ observation: [:location, :name, :namings, :rss_log, :user] },
-     :project, :user]
-  end
 
   def set_field_slip
     @field_slip = FieldSlip.find(params[:id])
