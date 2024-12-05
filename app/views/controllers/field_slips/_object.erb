@@ -1,5 +1,5 @@
 <%
-# add the code at the beginning of the field slip, for index view
+# for the index view: add field slip code at the beginning of the entry
 prepend = capture do
   tag.h4 do
     concat(tag.strong("#{:field_slip_code.l}: "))
