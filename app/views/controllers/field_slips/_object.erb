@@ -1,4 +1,12 @@
-<%= tag.strong("#{:field_slip_code.l}:") %>
-<%= link_to(object.code, object, class: "field_slip_link_#{object.id}") %>
-<%= render(partial: "field_slips/field_slip", locals: { field_slip: object }) %>
-<%= tag.hr %>
+<%
+# add the code at the beginning of the field slip, for index view
+prepend = capture do
+  concat(tag.strong("#{:field_slip_code.l}: "))
+  concat(link_to(object.code, object, class: "field_slip_link_#{object.id}"))
+  concat(tag.br)
+end %>
+
+<div class="list-group-item">
+  <%= render(partial: "field_slips/field_slip",
+             locals: { field_slip: object, prepend: }) %>
+</div>
