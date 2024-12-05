@@ -9,10 +9,20 @@ class FieldSlipsController < ApplicationController
   before_action :login_required, except: [:show]
   # rubocop:enable Rails/LexicallyScopedActionFilter
 
+  # NOTE: Must be an ivar of FieldSlipsController
+  # Defining them in an index.rb does not work
+  @index_subaction_param_keys = [
+    # :user,
+    # :observation,
+    :project,
+    :by,
+    :q,
+    :id
+  ].freeze
+
   # GET /field_slips or /field_slips.json
-  def index
-    filter_index? ? index_filtered : index_full
-  end
+  #
+  # #index - defined in Application Controller
 
   # GET /field_slips/new
   def new
@@ -102,26 +112,36 @@ class FieldSlipsController < ApplicationController
 
   private
 
-  # should index be filtered?
-  def filter_index?
-    params[:q] || params[:by]
-  end
+  # index subactions:
+  # methods called by #index via a dispatch table in ObservationController
 
-  def index_filtered
-    query = find_or_create_query(:FieldSlip, by: params[:by])
-    show_selected_field_slips(
-      query,
-      id: params[:id].to_s,
-      always_index: true
-    )
+  # checked by ApplicationController#index
+  def default_index_subaction
+    index_full
   end
 
   def index_full
-    query = create_query(
-      :FieldSlip,
-      :all,
-      by: :created_at
+    query = create_query(:FieldSlip, :all, by: :created_at)
+    show_selected_field_slips(query)
+  end
+
+  # Display list of FieldSlips attached to a given project.
+  def project
+    return unless (
+      project = find_or_goto_index(Project, params[:project].to_s)
     )
+
+    query = create_query(:FieldSlip, :all, project: project)
+    show_selected_field_slips(query, always_index: 1)
+  end
+
+  # Displays matrix of User's FieldSlips, by date.
+  def user
+    return unless (
+      user = find_or_goto_index(User, params[:user])
+    )
+
+    query = create_query(:FieldSlip, :all, user: user)
     show_selected_field_slips(query)
   end
 

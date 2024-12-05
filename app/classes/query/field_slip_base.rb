@@ -10,17 +10,18 @@ module Query
       super.merge(
         created_at?: [:time],
         updated_at?: [:time],
-        users?: [User],
+        by_user?: [User],
         code?: :string,
         observation?: Observation,
-        projects?: [:string]
+        project?: Project
       )
     end
 
     def initialize_flavor
       add_owner_and_time_stamp_conditions("field_slips")
+      add_by_user_condition("field_slips")
       add_for_observation_condition
-      initialize_projects_parameter
+      add_for_project_condition
       initialize_code_match_parameter
       super
     end
@@ -34,14 +35,13 @@ module Query
       where << "field_slips.observation_id = '#{obs.id}'"
     end
 
-    def initialize_projects_parameter
-      return if params[:projects].blank?
+    def add_for_project_condition
+      return if params[:project].blank?
 
-      add_id_condition(
-        "field_slips.project_id",
-        lookup_projects_by_name(params[:projects]),
-        :projects
-      )
+      project = find_cached_parameter_instance(Project, :project)
+      @title_tag = :query_title_for_project
+      @title_args[:project] = project.title
+      where << "field_slips.project_id = '#{project.id}'"
     end
 
     def initialize_code_match_parameter
@@ -51,7 +51,7 @@ module Query
     end
 
     def self.default_order
-      "code"
+      "date"
     end
   end
 end
