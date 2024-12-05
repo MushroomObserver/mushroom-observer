@@ -155,6 +155,9 @@ module Observations
     end
 
     def test_download_too_many_observations
+      (DownloadsController::MAX_DOWNLOADS - Observation.count + 1).times do
+        Observation.create(user: rolf)
+      end
       query = Query.lookup_and_save(:Observation, :all)
 
       login("mary")
@@ -162,6 +165,32 @@ module Observations
 
       assert_redirected_to(observations_path)
       assert_flash_error
+    end
+
+    def test_download_too_many_observations_reasonable_query
+      (DownloadsController::MAX_DOWNLOADS - Observation.count + 1).times do
+        Observation.create(user: rolf)
+      end
+      query = Query.lookup_and_save(:Observation, :at_location,
+                                    location: locations(:albion))
+
+      login("mary")
+      get(:new, params: { q: query.id.alphabetize })
+
+      assert_response(:success)
+    end
+
+    def test_download_too_many_observations_admin
+      (DownloadsController::MAX_DOWNLOADS - Observation.count + 1).times do
+        Observation.create(user: rolf)
+      end
+      query = Query.lookup_and_save(:Observation, :all)
+
+      login("mary")
+      make_admin("mary")
+      get(:new, params: { q: query.id.alphabetize })
+
+      assert_response(:success)
     end
 
     def test_print_labels
