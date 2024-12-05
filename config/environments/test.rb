@@ -31,6 +31,9 @@ MushroomObserver::Application.configure do
   config.redirect_uri =
     "http://localhost:3000/observations/inat_imports/authorization_response"
 
+  # Maximum number of Observations that can be downloaded in a single request
+  config.max_downloads = 120
+
   # ----------------------------
   #  Rails configuration.
   # ----------------------------

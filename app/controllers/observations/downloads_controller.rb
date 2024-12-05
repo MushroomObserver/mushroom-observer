@@ -4,8 +4,6 @@ module Observations
   class DownloadsController < ApplicationController
     before_action :login_required
 
-    MAX_DOWNLOADS = 120
-
     def new
       @query = find_or_create_query(:Observation, by: params[:by])
       return too_many_results if too_many_results?
@@ -41,7 +39,7 @@ module Observations
     end
 
     def too_many_results?
-      !in_admin_mode? && @query.num_results > MAX_DOWNLOADS
+      !in_admin_mode? && @query.num_results > MO.max_downloads
     end
 
     def download_observations_switch
