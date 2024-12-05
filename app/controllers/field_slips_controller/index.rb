@@ -45,13 +45,13 @@ module FieldSlipsController::Index
     show_selected_field_slips(query, always_index: 1)
   end
 
-  # Displays matrix of User's FieldSlips, by date.
+  # Displays list of User's FieldSlips, by date.
   def user
     return unless (
       user = find_or_goto_index(User, params[:user])
     )
 
-    query = create_query(:FieldSlip, :all, user: user)
+    query = create_query(:FieldSlip, :all, by_user: user)
     show_selected_field_slips(query)
   end
 

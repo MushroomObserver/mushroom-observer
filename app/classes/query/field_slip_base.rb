@@ -10,7 +10,7 @@ module Query
       super.merge(
         created_at?: [:time],
         updated_at?: [:time],
-        by_user?: [User],
+        by_user?: User,
         code?: :string,
         observation?: Observation,
         project?: Project
