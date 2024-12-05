@@ -1,9 +1,11 @@
 <%
 # add the code at the beginning of the field slip, for index view
 prepend = capture do
-  concat(tag.strong("#{:field_slip_code.l}: "))
-  concat(link_to(object.code, object, class: "field_slip_link_#{object.id}"))
-  concat(tag.br)
+  tag.h4 do
+    concat(tag.strong("#{:field_slip_code.l}: "))
+    concat(link_to(object.code, object, class: "field_slip_link_#{object.id}"))
+    concat(tag.br)
+  end
 end %>
 
 <div class="list-group-item">
