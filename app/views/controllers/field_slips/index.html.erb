@@ -2,7 +2,7 @@
 add_index_title(@query, no_hits: :FIELD_SLIPS.t)
 add_tab_set(field_slips_index_tabs)
 @container = :wide
-project_title = @query.params_cache[:project][:title] || ""
+project_title = @query&.params_cache&[:project]&[:title] || ""
 %>
 
 <% if notice %>
