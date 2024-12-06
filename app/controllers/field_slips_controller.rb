@@ -14,7 +14,6 @@ class FieldSlipsController < ApplicationController
   # Defining them in an index.rb does not work
   @index_subaction_param_keys = [
     :user,
-    :observation,
     :project,
     :by,
     :q,
