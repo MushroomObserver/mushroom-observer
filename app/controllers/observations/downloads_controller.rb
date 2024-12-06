@@ -39,7 +39,7 @@ module Observations
     end
 
     def too_many_results?
-      @query.flavor == :all
+      !in_admin_mode? && @query.num_results > MO.max_downloads
     end
 
     def download_observations_switch
