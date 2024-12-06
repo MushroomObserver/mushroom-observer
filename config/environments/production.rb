@@ -53,9 +53,6 @@ MushroomObserver::Application.configure do
   # https://github.com/rails/mission_control-jobs?tab=readme-ov-file#authentication
   config.mission_control.jobs.http_basic_auth_enabled = false
 
-  # Maximum number of Observations that can be downloaded in a single request
-  config.max_downloads = 120
-
   # ----------------------------
   #  Rails configuration.
   #  The production environment is meant for finished, "live" apps.
