@@ -17,29 +17,14 @@ module FieldSlipsController::Index
     show_selected_field_slips(query)
   end
 
-  # This does not appear to get used by any of the new functionality
-  # so I think this is dead code.
-  #
-  # # Displays matrix of selected FieldSlips (based on current Query).
-  # def index_query_results
-  #   query = find_or_create_query(:FieldSlip, by: params[:by])
-  #   show_selected_field_slips(
-  #     query, id: params[:id].to_s, always_index: true
-  #   )
-  # end
-
-  # I see no reason why you would want to do this with the index page.
-  # The observation show page already show the set of associated field slips.
-  #
-  # # Display FieldSlip attached to a given observation.
-  # def observation
-  #   return unless (
-  #     observation = find_or_goto_index(Observation, params[:observation].to_s)
-  #   )
-
-  #   query = create_query(:FieldSlip, :all, observation: observation)
-  #   show_selected_field_slips(query, always_index: 1)
-  # end
+  # Displays index at the page containing the last field slip viewed.
+  # (can be used by the "Back" button on the show page.)
+  def index_query_results
+    query = find_or_create_query(:FieldSlip, by: params[:by])
+    show_selected_field_slips(
+      query, id: params[:id].to_s, always_index: true
+    )
+  end
 
   # Display list of FieldSlips attached to a given project.
   def project
