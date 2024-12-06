@@ -2,6 +2,7 @@
 
 class FieldSlipsController < ApplicationController
   include Show
+  include Index
 
   # Disable cop: all these methods are defined in files included above.
   # rubocop:disable Rails/LexicallyScopedActionFilter
@@ -9,13 +10,26 @@ class FieldSlipsController < ApplicationController
   before_action :login_required, except: [:show]
   # rubocop:enable Rails/LexicallyScopedActionFilter
 
+  # NOTE: Must be an ivar of FieldSlipsController
+  # Defining them in an index.rb does not work
+  @index_subaction_param_keys = [
+    :user,
+    :observation,
+    :project,
+    :by,
+    :q,
+    :id
+  ].freeze
+
+  @index_subaction_dispatch_table = {
+    by: :index_query_results,
+    q: :index_query_results,
+    id: :index_query_results
+  }.freeze
+
   # GET /field_slips or /field_slips.json
-  def index
-    @field_slips = FieldSlip.includes(
-      [{ observation: [:location, :name, :namings, :rss_log, :user] },
-       :project, :user]
-    )
-  end
+  #
+  # #index - defined in Application Controller
 
   # GET /field_slips/new
   def new

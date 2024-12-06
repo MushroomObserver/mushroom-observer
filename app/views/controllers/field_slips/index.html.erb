@@ -1,18 +1,24 @@
 <%
-  add_page_title(:FIELD_SLIPS.t)
-  add_tab_set(field_slips_index_tabs)
+add_index_title(@query, no_hits: :FIELD_SLIPS.t)
+add_tab_set(field_slips_index_tabs)
+@container = :wide
+project_title = @query&.params_cache&.dig(:project)&.title || ""
 %>
 
 <% if notice %>
-  <p class="alert alert-success"><%= notice %></p>
+<%= tag.p(notice, class: "alert alert-success") %>
 <% end %>
 
-<div id="field_slips">
-  <% @field_slips.each do |field_slip| %>
-    <strong><%= :field_slip_code.t %>:</strong>
-    <%= link_to(field_slip.code, field_slip,
-                class: "field_slip_link_#{field_slip.id}") %>
-    <%= render field_slip %>
-    <hr/>
-  <% end %>
+<%= form_with(method: :get, url: field_slips_path) do |form| %>
+<%= autocompleter_field(form:, field: :project_name, type: :project,
+                        hidden_name: :project, inline: true,
+                        value: project_title,
+                        label: "Filter by #{:project.l}:") %>
+<%= submit_button(form:, button: "Filter") %>
+<% end %>
+
+<%= paginate_block(@pages) do %>
+<div class="list-group">
+  <%= render(partial: "field_slips/object", collection: @objects) %>
 </div>
+<% end %>
