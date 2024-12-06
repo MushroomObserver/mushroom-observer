@@ -164,6 +164,11 @@ MushroomObserver::Application.configure do
 
   config.active_job.queue_adapter = :solid_queue
 
+  # Disable Mission Control default HTTP Basic Authentication because
+  # we specify AdminController as the base class for Mission Control
+  # https://github.com/rails/mission_control-jobs?tab=readme-ov-file#authentication
+  config.mission_control.jobs.http_basic_auth_enabled = false
+
   # Set up ActionCable to use a standalone server at port 28080
   # config.action_cable.mount_path = nil
   # config.action_cable.url = "ws://localhost:28080" # use :wss in production

@@ -941,7 +941,7 @@
 
   # Naming reasons notes
   naming_reason_suggested_on_inat: Suggested on iNat by [user]
-  naming_inat_provisional: "Added on iNat by [user]"
+  naming_inat_provisional: Added on iNat by [user]
 
   # Name/location description types.  These are used as page title and in index
   # results -- must include both the type of description and the title of the
@@ -1344,7 +1344,9 @@
   app_title: Mushroom Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: "Check out the \"Mushroom Observer Etsy store\":https://www.etsy.com/shop/MushroomObsMerch — T-shirts, bags and swag! <br>\nWe're working on MO. If you have trouble posting, try logging out and logging back in again.<br>\nPlease \"report a bug\":admin/emails/webmaster_questions/new if you find one."
+  banner_update: Update Banner
+  banner_update_failure: Failed to update banner.
+  banner_update_success: Banner updated successfully.
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
@@ -3051,7 +3053,7 @@
   inat_no_imports_designated: You must list the iNat observation(s) to be imported
   inat_previous_import: iNat [inat_id] previously imported as MO Observation [mo_obs_id]
   inat_previous_mirror: iNat [inat_id] is a "mirror" of existing MO Observation [mo_obs_id]
-  inat_too_many_ids_listed: "Too many ids listed"
+  inat_too_many_ids_listed: Too many ids listed
   inat_import_started: Your import has started. Refresh page to update results.
 
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
