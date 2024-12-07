@@ -28,7 +28,7 @@ module ApplicationController::NameValidation
   #   Valid name Author = Deprecated name Author
   #   blah blah [comment]
   #
-  def construct_approved_names(name_list, approved_names, deprecate = false)
+  def construct_approved_names(name_list, approved_names, deprecate: false)
     return unless approved_names
 
     if approved_names.is_a?(String)

@@ -97,7 +97,7 @@ module ApplicationController::Indexes
   def apply_content_filters(query)
     filters = users_content_filters || {}
     @any_content_filters_applied = false
-    ContentFilter.all.each do |fltr|
+    ContentFilter.find_each do |fltr|
       apply_one_content_filter(fltr, query, filters[fltr.sym])
     end
   end
@@ -172,22 +172,27 @@ module ApplicationController::Indexes
   # (The other place is from the template to the `matrix_box` helper, which
   # actually caches the HTML.)
   def find_objects(query, args)
-    caching = args[:cache] || false
-    include = args[:include] || nil
     logger.warn("QUERY starting: #{query.query.inspect}")
     @timer_start = Time.current
 
     # Instantiate correct subset, with or without includes.
-    @objects = if caching
-                 objects_with_only_needed_eager_loads(query, include)
-               else
-                 query.paginate(@pages, include: include)
-               end
+    @objects = instantiated_object_subset(query, args)
 
     @timer_end = Time.current
     logger.warn("QUERY finished: model=#{query.model}, " \
                 "flavor=#{query.flavor}, params=#{query.params.inspect}, " \
                 "time=#{(@timer_end - @timer_start).to_f}")
+  end
+
+  def instantiated_object_subset(query, args)
+    caching = args[:cache] || false
+    include = args[:include] || nil
+
+    if caching
+      objects_with_only_needed_eager_loads(query, include)
+    else
+      query.paginate(@pages, include: include)
+    end
   end
 
   # If caching, only uncached objects need to eager_load the includes

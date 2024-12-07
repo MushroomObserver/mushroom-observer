@@ -100,7 +100,7 @@ module ApplicationController::Internationalization
   def sorted_locales_from_request_header
     accepted_locales = request.env["HTTP_ACCEPT_LANGUAGE"]
     logger.debug("[globalite] HTTP header = #{accepted_locales.inspect}")
-    return [] unless accepted_locales.present?
+    return [] if accepted_locales.blank?
 
     locale_weights = map_locales_to_weights(accepted_locales)
     # Sort by decreasing weights.

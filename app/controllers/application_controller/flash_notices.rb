@@ -87,8 +87,8 @@ module ApplicationController::FlashNotices
 
   # Report a warning message that will be displayed (in yellow) at the top of
   # the next page the User sees.
-  def flash_warning(*strs)
-    flash_notice(*strs)
+  def flash_warning(*)
+    flash_notice(*)
     session[:notice][0, 1] = "1" if session[:notice][0, 1] == "0"
     false
   end
@@ -96,8 +96,8 @@ module ApplicationController::FlashNotices
 
   # Report an error message that will be displayed (in red) at the top of the
   # next page the User sees.
-  def flash_error(*strs)
-    flash_notice(*strs)
+  def flash_error(*)
+    flash_notice(*)
     session[:notice][0, 1] = "2" if session[:notice][0, 1] != "2"
     false
   end

@@ -55,7 +55,7 @@ module ApplicationController::Queries
   end
   # helper_method :passed_query
 
-  # TODO: If we're going to cache user stuff that depends on their present q,
+  # NOTE: If we're going to cache user stuff that depends on their present q,
   # we'll need a helper to make the current QueryRecord (not just the id)
   # available to templates as an ApplicationController ivar. Something like:
   #
