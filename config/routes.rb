@@ -494,6 +494,11 @@ MushroomObserver::Application.routes.draw do
   get("locations/map", to: "locations/maps#show", as: "map_locations")
 
   # ----- Names: a lot of actions  ----------------------------
+  namespace :names do
+    get("search/new", to: "filters#new", as: "new_search")
+    post("search", to: "filters#create", as: "search")
+  end
+
   resources :names, id: /\d+/, shallow: true do
     # These routes are for dealing with name attributes.
     # They're not `resources` because they don't have their own IDs.
@@ -587,7 +592,9 @@ MushroomObserver::Application.routes.draw do
         to: "inat_imports#authorization_response",
         as: "inat_import_authorization_response")
 
-    # Not under resources :observations because the obs doesn't have an id yet
+    get("search/new", to: "filters#new", as: "new_search")
+    post("search", to: "filters#create", as: "search")
+    # uploads are not under resources because the obs doesn't have an id yet
     get("images/uploads/new", to: "images/uploads#new",
                               as: "new_image_upload_for")
     post("images/uploads", to: "images/uploads#create",
