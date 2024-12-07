@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see application_controller.rb
-module ApplicationController::ErrorHandling
+module ApplicationController::FlashNotices
   def self.included(base)
     base.helper_method(
       :flash_notices?, :flash_get_notices, :flash_notice_level,

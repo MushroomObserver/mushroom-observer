@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see application_controller.rb
-module ApplicationController::Searching
+module ApplicationController::Queries
   def self.included(base)
     base.helper_method(
       :query_from_session, :passed_query, :query_params, :add_query_param,
@@ -10,7 +10,7 @@ module ApplicationController::Searching
   end
   ##############################################################################
   #
-  #  :section: Searching
+  #  :section: Queries
   #
   #  The general idea is that the user executes a search or requests an index,
   #  then clicks on a result.  This takes the user to a show_object page.  This

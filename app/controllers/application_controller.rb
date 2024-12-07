@@ -39,7 +39,7 @@
 #  valid_locale_from_request_header::
 #                           (choose locale that best matches request header)
 #
-#  ==== Error handling
+#  ==== Flash notices
 #  flash_notices?::         Are there any errors pending?
 #  flash_get_notices::      Get list of errors.
 #  flash_notice_level::     Get current notice level.
@@ -53,7 +53,7 @@
 #  construct_approved_names:: Creates a list of names if they've been approved.
 #  construct_approved_name::  (helper)
 #
-#  ==== Searching
+#  ==== Queries
 #  clear_query_in_session:: Clears out Query stored in session below.
 #  store_query_in_session:: Stores Query in session for use by
 #                           create_species_list.
@@ -100,9 +100,9 @@ class ApplicationController < ActionController::Base
   include LoginSystem
   include Authentication
   include Internationalization
-  include ErrorHandling
+  include FlashNotices
   include NameValidation
-  include Searching
+  include Queries
   include Indexes
 
   # Allow folder organization in the app/views folder
