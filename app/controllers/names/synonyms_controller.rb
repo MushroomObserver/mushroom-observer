@@ -52,7 +52,8 @@ module Names
       @deprecate_all = (params[:deprecate_all] == "1")
 
       # Create any new names that have been approved.
-      construct_approved_names(list, params[:approved_names], @deprecate_all)
+      construct_approved_names(list, params[:approved_names],
+                               deprecate: @deprecate_all)
 
       # Parse the write-in list of names.
       sorter = NameSorter.new
