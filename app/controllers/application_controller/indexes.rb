@@ -94,16 +94,14 @@ module ApplicationController::Indexes
     set_index_view_ivars(query, args)
   end
 
-  # rubocop:disable Rails/FindEach
   def apply_content_filters(query)
     filters = users_content_filters || {}
     @any_content_filters_applied = false
-    ContentFilter.all.each do |fltr|
+    # disable cop because ContentFilter is not an ActiveRecord model
+    ContentFilter.all.each do |fltr| # rubocop:disable Rails/FindEach
       apply_one_content_filter(fltr, query, filters[fltr.sym])
     end
   end
-  # rubocop:enable Rails/FindEach
-
   def apply_one_content_filter(fltr, query, user_filter)
     key = fltr.sym
     return unless query.takes_parameter?(key)
