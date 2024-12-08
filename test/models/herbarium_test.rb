@@ -68,7 +68,7 @@ class HerbariumTest < UnitTestCase
     assert(nybg.web_searchable?)
 
     nybg.update(code: "notInMCP")
-    assert(nybg.web_searchable?)
+    assert_not(nybg.web_searchable?)
 
     assert_not(herbaria(:rolf_herbarium).web_searchable?)
   end

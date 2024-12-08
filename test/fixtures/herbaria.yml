@@ -15,7 +15,6 @@ nybg_herbarium:
   email: nybg@collectivesource.com
   description: An awesome & world famous herbarium.
   code: NY
-  mycoportal_db: 3
   curators: rolf, roy
 
 rolf_herbarium:
