@@ -18,11 +18,11 @@ if object.notes.present?
   notes_fields = object.notes.except(Observation.other_notes_key)
   other_notes  = object.notes_part_value(Observation.other_notes_key)
   notes_fields.each do |key, val|
-    val.replace(val.to_s.tpl_nodiv)
+    val.replace(val.to_s.tl_for_api)
     notes_fields.delete_key(key) if val.blank?
   end
   json.notes_fields(notes_fields) if notes_fields.any?
-  json.notes(other_notes.to_s.tpl_nodiv) if other_notes.present?
+  json.notes(other_notes.to_s.tl_for_api) if other_notes.present?
 end
 if detail
   json.owner(json_user(object.user))
