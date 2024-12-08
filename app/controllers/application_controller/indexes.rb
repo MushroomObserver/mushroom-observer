@@ -102,6 +102,7 @@ module ApplicationController::Indexes
       apply_one_content_filter(fltr, query, filters[fltr.sym])
     end
   end
+
   def apply_one_content_filter(fltr, query, user_filter)
     key = fltr.sym
     return unless query.takes_parameter?(key)
