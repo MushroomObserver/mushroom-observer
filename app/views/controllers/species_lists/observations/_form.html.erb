@@ -8,9 +8,10 @@ action = { controller: "/species_lists/observations", action: :update,
 
   <%= tag.p(:species_list_add_remove_body.tp(num: @query.num_results)) %>
 
-  <%= autocompleter_field(form: f, field: :species_list, value: @id,
-                          label: :species_list_add_remove_label.t + ":",
-                          autocomplete: :species_list) %>
+  <%= autocompleter_field(
+    form: f, field: :species_list, type: :species_list, value: @id,
+    label: :species_list_add_remove_label.t + ":"
+  ) %>
 
   <div class="form-group center-block">
     <%= submit_button(form: f, button: :ADD.l) %>

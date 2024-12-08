@@ -3,18 +3,33 @@
 class API2
   # API for HerbariumRecord
   class HerbariumRecordAPI < ModelAPI
-    self.model = HerbariumRecord
+    def model
+      HerbariumRecord
+    end
 
-    self.high_detail_page_length = 100
-    self.low_detail_page_length  = 1000
-    self.put_page_length         = 1000
-    self.delete_page_length      = 1000
+    def high_detail_page_length
+      100
+    end
 
-    self.high_detail_includes = [
-      :observations,
-      :herbarium,
-      :user
-    ]
+    def low_detail_page_length
+      1000
+    end
+
+    def put_page_length
+      1000
+    end
+
+    def delete_page_length
+      1000
+    end
+
+    def high_detail_includes
+      [
+        :observations,
+        :herbarium,
+        :user
+      ]
+    end
 
     def query_params
       {
@@ -24,7 +39,7 @@ class API2
         users: parse_array(:user, :user, help: :creator),
         herbaria: parse_array(:herbarium, :herbarium, as: :id),
         observations: parse_array(:observation, :observation, as: :id),
-        has_notes: parse(:boolean, :has_notes),
+        with_notes: parse(:boolean, :has_notes),
         initial_det: parse(:string, :initial_det, help: 1),
         accession_number: parse(:string, :accession_number, help: 1),
         notes_has: parse(:string, :notes_has, help: 1),

@@ -47,25 +47,32 @@ module Tabs
 
     def edit_name_synonym_tab(name)
       [:show_name_change_synonyms.l,
-       add_query_param(edit_name_synonyms_path(name.id)),
+       add_query_param(edit_synonyms_of_name_path(name.id)),
        { class: tab_id(__method__.to_s), icon: :synonyms }]
     end
 
     # Note that the "deprecate" icon appears on approved names, so it's a
     # "check" to indicate at a glance that they're approved.
     def deprecate_name_tab(name)
-      [:DEPRECATE.l, add_query_param(deprecate_name_synonym_form_path(name.id)),
+      [:DEPRECATE.l,
+       add_query_param(form_to_deprecate_synonym_of_name_path(name.id)),
        { class: tab_id(__method__.to_s), icon: :deprecate }]
     end
 
     # Likewise, the "approve" icon appears on deprecated names, so it's a "!"
     def approve_name_synonym_tab(name)
-      [:APPROVE.l, add_query_param(approve_name_synonym_form_path(name.id)),
+      [:APPROVE.l,
+       add_query_param(form_to_approve_synonym_of_name_path(name.id)),
        { class: tab_id(__method__.to_s), icon: :approve }]
     end
 
     # Show name panels:
     # Nomenclature tabs
+    def index_fungorum_search_page_tab
+      [:index_fungorum_search.l, index_fungorum_search_page_url,
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
     def index_fungorum_record_tab(name)
       ["[##{name.icn_id}]", index_fungorum_record_url(name.icn_id),
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
@@ -86,11 +93,6 @@ module Tabs
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
     end
 
-    def index_fungorum_basic_search_tab
-      [:index_fungorum_search.l, index_fungorum_basic_search_url,
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
-    end
-
     def mycobank_name_search_tab(name)
       [:mycobank_search.l, mycobank_name_search_url(name),
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
@@ -103,7 +105,7 @@ module Tabs
 
     # lifeform tabs:
     def edit_name_lifeform_tab(name)
-      [:EDIT.l, add_query_param(edit_name_lifeform_path(name.id)),
+      [:EDIT.l, add_query_param(edit_lifeform_of_name_path(name.id)),
        { class: tab_id(__method__.to_s), icon: :edit }]
     end
 
@@ -131,14 +133,8 @@ module Tabs
 
     # classification tabs:
     def name_edit_classification_tab(name)
-      [:EDIT.l, edit_name_classification_path(name.id),
+      [:EDIT.l, edit_classification_of_name_path(name.id),
        { class: tab_id(__method__.to_s), icon: :edit }]
-    end
-
-    # Show name, obs menu. Also on Obs show, name section
-    def mycoportal_name_tab(name)
-      ["MyCoPortal", mycoportal_url(name),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
     end
 
     def eol_name_tab(name)
@@ -149,6 +145,51 @@ module Tabs
     def google_images_for_name_tab(name)
       [:google_images.t,
        format("https://images.google.com/images?q=%s", name.real_text_name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def ascomycete_org_name_tab(name)
+      ["Ascomycete.org", ascomycete_org_name_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def gbif_name_tab(name)
+      ["GBIF", gbif_name_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def google_name_tab(name)
+      [:google_name_search.l, google_name_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def inat_name_tab(name)
+      ["iNaturalist", inat_name_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def index_fungorum_name_search_tab(name)
+      [:index_fungorum_web_search.l, index_fungorum_name_web_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def ncbi_nucleotide_term_tab(name)
+      ["NCBI Nucleotide", ncbi_nucleotide_term_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def mushroomexpert_name_tab(name)
+      ["MushroomExpert", mushroomexpert_name_web_search_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def mycoportal_name_tab(name)
+      ["MyCoPortal", mycoportal_url(name),
+       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+    end
+
+    def wikipedia_term_tab(name)
+      ["Wikipedia", wikipedia_term_search_url(name),
        { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
     end
 
@@ -179,13 +220,13 @@ module Tabs
 
     def edit_name_tracker_tab(name)
       [:show_name_email_tracking.t,
-       add_query_param(edit_name_tracker_path(name.id)),
+       add_query_param(edit_tracker_of_name_path(name.id)),
        { class: tab_id(__method__.to_s), icon: :tracking }]
     end
 
     def new_name_tracker_tab(name)
       [:show_name_email_tracking.t,
-       add_query_param(new_name_tracker_path(name.id)),
+       add_query_param(new_tracker_of_name_path(name.id)),
        { class: tab_id(__method__.to_s), icon: :tracking }]
     end
 
@@ -213,7 +254,7 @@ module Tabs
       return unless query&.coercable?(:NameDescription)
 
       [:show_objects.t(type: :description),
-       add_query_param(name_descriptions_path),
+       add_query_param(name_descriptions_index_path),
        { class: tab_id(__method__.to_s) }]
     end
 
@@ -233,11 +274,12 @@ module Tabs
     end
 
     def names_index_sorts(query:)
+      rss_log = query&.params&.dig(:by) == :rss_log ||
+                query&.flavor == :rss_log
       [
         ["name", :sort_by_name.t],
         ["created_at", :sort_by_created_at.t],
-        [(query&.flavor == :by_rss_log ? "rss_log" : "updated_at"),
-         :sort_by_updated_at.t],
+        [(rss_log ? "rss_log" : "updated_at"), :sort_by_updated_at.t],
         ["num_views", :sort_by_num_views.t]
       ]
     end

@@ -87,9 +87,19 @@ ul.tight-list {
   .table-responsive {
     border-color: transparent;
   }
+  .panel-body.border-top {
+    border-top: 1px solid #ddd;
+  }
+  .panel-body.border-bottom {
+    border-bottom: 1px solid #ddd;
+  }
 }
 
 .panel-title {
   font-size: 13px;
   font-weight: bold;
+}
+
+.btn-constraint-warning {
+  color: black;
 }

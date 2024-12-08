@@ -94,11 +94,9 @@ module Tabs
     end
 
     def observation_web_name_tabs(name)
-      [
-        mycoportal_name_tab(name),
-        mycobank_name_search_tab(name),
-        google_images_for_name_tab(name)
-      ]
+      [mycoportal_name_tab(name),
+       mycobank_name_search_tab(name),
+       google_images_for_name_tab(name)]
     end
 
     def observation_hide_thumbnail_map_tab(obs)
@@ -107,22 +105,10 @@ module Tabs
        { class: tab_id(__method__.to_s), icon: :hide }]
     end
 
-    def new_image_for_observation_tab(obs)
-      [:show_observation_add_images.l,
-       new_image_for_observation_path(obs.id),
-       { class: tab_id(__method__.to_s), icon: :add }]
-    end
-
     def reuse_images_for_observation_tab(obs)
       [:show_observation_reuse_image.l,
        reuse_images_for_observation_path(obs.id),
        { class: tab_id(__method__.to_s), icon: :reuse }]
-    end
-
-    def remove_images_from_observation_tab(obs)
-      [:show_observation_remove_images.l,
-       remove_images_from_observation_path(obs.id),
-       { class: tab_id(__method__.to_s), icon: :remove }]
     end
 
     ############################################
@@ -151,26 +137,37 @@ module Tabs
       # undefined location.
       return [] unless query.flavor == :at_where
 
-      [
-        define_location_tab(query),
-        merge_locations_tab(query),
-        locations_index_tab
-      ]
+      [define_location_tab(query),
+       assign_undefined_location_tab(query),
+       locations_index_tab]
+    end
+
+    # these are from the observations form
+    def define_location_tab(query)
+      [:list_observations_location_define.l,
+       add_query_param(new_location_path(where: query.params[:user_where])),
+       { class: tab_id(__method__.to_s) }]
+    end
+
+    def assign_undefined_location_tab(query)
+      [:list_observations_location_merge.l,
+       add_query_param(matching_locations_for_observations_path(
+                         where: query.params[:user_where]
+                       )),
+       { class: tab_id(__method__.to_s) }]
     end
 
     def observations_index_sorts
-      [
-        ["rss_log", :sort_by_activity.l],
-        ["date", :sort_by_date.l],
-        ["created_at", :sort_by_posted.l],
-        # kind of redundant to sort by rss_logs, though not strictly ===
-        # ["updated_at", :sort_by_updated_at.l],
-        ["name", :sort_by_name.l],
-        ["user", :sort_by_user.l],
-        ["confidence", :sort_by_confidence.l],
-        ["thumbnail_quality", :sort_by_thumbnail_quality.l],
-        ["num_views", :sort_by_num_views.l]
-      ].freeze
+      [["rss_log", :sort_by_activity.l],
+       ["date", :sort_by_date.l],
+       ["created_at", :sort_by_posted.l],
+       # kind of redundant to sort by rss_logs, though not strictly ===
+       # ["updated_at", :sort_by_updated_at.l],
+       ["name", :sort_by_name.l],
+       ["user", :sort_by_user.l],
+       ["confidence", :sort_by_confidence.l],
+       ["thumbnail_quality", :sort_by_thumbnail_quality.l],
+       ["num_views", :sort_by_num_views.l]].freeze
     end
 
     def map_observations_tab(query)
@@ -181,11 +178,9 @@ module Tabs
 
     # NOTE: coerced_query_tab returns an array
     def observations_coerced_query_tabs(query)
-      [
-        coerced_location_query_tab(query),
-        coerced_name_query_tab(query),
-        coerced_image_query_tab(query)
-      ]
+      [coerced_location_query_tab(query),
+       coerced_name_query_tab(query),
+       coerced_image_query_tab(query)]
     end
 
     def observations_add_to_list_tab(query)
@@ -204,7 +199,8 @@ module Tabs
     # FORMS
 
     def observation_form_new_tabs
-      [new_herbarium_tab]
+      # [new_inat_import_tab, new_herbarium_tab]
+      [new_inat_import_tab]
     end
 
     def observation_form_edit_tabs(obs:)
@@ -212,10 +208,14 @@ module Tabs
     end
 
     def observation_maps_tabs(query:)
-      [
-        coerced_observation_query_tab(query),
-        coerced_location_query_tab(query)
-      ]
+      [coerced_observation_query_tab(query),
+       coerced_location_query_tab(query)]
+    end
+
+    def new_inat_import_tab(query: nil)
+      [:create_observation_inat_import_link.l,
+       add_query_param(new_observations_inat_import_path, query),
+       { class: tab_id(__method__.to_s) }]
     end
 
     def naming_form_new_title(obs:)
@@ -246,26 +246,9 @@ module Tabs
       [object_return_tab(image)]
     end
 
-    def observation_images_new_tabs(obs:)
-      [
-        object_return_tab(obs),
-        edit_observation_tab(obs)
-      ]
-    end
-
-    # Note this takes `obj:` not `obs:`
-    def observation_images_remove_tabs(obj:)
-      [
-        object_return_tab(obj),
-        edit_observation_tab(obj)
-      ]
-    end
-
     def observation_images_reuse_tabs(obs:)
-      [
-        object_return_tab(obs),
-        edit_observation_tab(obs)
-      ]
+      [object_return_tab(obs),
+       edit_observation_tab(obs)]
     end
 
     def observation_download_tabs
@@ -281,20 +264,20 @@ module Tabs
     def obs_change_tabs(obs)
       return unless check_permission(obs)
 
-      [
-        edit_observation_tab(obs),
-        destroy_observation_tab(obs)
-      ]
+      [edit_observation_tab(obs),
+       destroy_observation_tab(obs)]
+    end
+
+    def obs_details_links(obs)
+      print_labels_button(obs)
     end
 
     # Buttons in "Details" panel header
     def obs_change_links(obs)
       return unless check_permission(obs)
 
-      [
-        edit_button(target: obs, icon: :edit),
-        destroy_button(target: obs, icon: :delete)
-      ].safe_join(" | ")
+      [edit_button(target: obs, icon: :edit),
+       destroy_button(target: obs, icon: :delete)].safe_join(" | ")
     end
 
     def edit_observation_tab(obs)
@@ -305,6 +288,17 @@ module Tabs
 
     def destroy_observation_tab(obs)
       [nil, obs, { button: :destroy }]
+    end
+
+    # for show_obs - query is for a single obs label
+    def print_labels_button(obs)
+      name = :download_observations_print_labels.l
+      query = Query.lookup(Observation, :in_set, ids: [obs.id])
+      path = add_query_param(observations_downloads_path(commit: name), query)
+
+      post_button(name: name, path: path, icon: :print,
+                  class: "print_label_observation_#{obs.id}",
+                  form: { data: { turbo: false } })
     end
   end
 end

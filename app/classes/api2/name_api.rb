@@ -3,17 +3,32 @@
 class API2
   # API for Name
   class NameAPI < ModelAPI
-    self.model = Name
+    def model
+      Name
+    end
 
-    self.high_detail_page_length = 100
-    self.low_detail_page_length  = 1000
-    self.put_page_length         = 1000
-    self.delete_page_length      = 1000
+    def high_detail_page_length
+      100
+    end
 
-    self.high_detail_includes = [
-      { comments: :user },
-      { synonym: :names }
-    ]
+    def low_detail_page_length
+      1000
+    end
+
+    def put_page_length
+      1000
+    end
+
+    def delete_page_length
+      1000
+    end
+
+    def high_detail_includes
+      [
+        { comments: :user },
+        { synonym: :names }
+      ]
+    end
 
     def query_params
       {
@@ -24,16 +39,16 @@ class API2
         names: parse_array(:name, :name, as: :id),
         is_deprecated: parse(:boolean, :is_deprecated),
         misspellings: parse_misspellings,
-        has_synonyms: parse(:boolean, :has_synonyms),
+        with_synonyms: parse(:boolean, :has_synonyms),
         locations: parse_array(:string, :location),
         species_lists: parse_array(:string, :species_list),
         rank: parse(:enum, :rank, limit: Name.all_ranks),
-        has_author: parse(:boolean, :has_author),
-        has_citation: parse(:boolean, :has_citation),
-        has_classification: parse(:boolean, :has_classification),
-        has_notes: parse(:boolean, :has_notes),
-        has_comments: parse(:boolean, :has_comments, limit: true),
-        has_default_desc: parse(:boolean, :has_description),
+        with_author: parse(:boolean, :has_author),
+        with_citation: parse(:boolean, :has_citation),
+        with_classification: parse(:boolean, :has_classification),
+        with_notes: parse(:boolean, :has_notes),
+        with_comments: parse(:boolean, :has_comments, limit: true),
+        with_default_desc: parse(:boolean, :has_description),
         text_name_has: parse(:string, :text_name_has, help: 1),
         author_has: parse(:string, :author_has, help: 1),
         citation_has: parse(:string, :citation_has, help: 1),

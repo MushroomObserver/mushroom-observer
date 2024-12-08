@@ -2,11 +2,18 @@
 
 module Tabs
   module ChecklistsHelper
-    def checklist_show_title(user:, project:, list:)
+    def checklist_show_title(user:, project:, location:, list:)
       if user
         :checklist_for_user_title.t(user: user.legal_name)
       elsif project
-        :checklist_for_project_title.t(project: project.title)
+        if location
+          :checklist_for_project_location_title.t(
+            project: project.title,
+            location: location.display_name
+          )
+        else
+          :checklist_for_project_title.t(project: project.title)
+        end
       elsif list
         :checklist_for_species_list_title.t(list: list.title)
       else

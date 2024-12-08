@@ -53,9 +53,11 @@ add_tab_set(species_list_show_tabs(list: @species_list, query: @query))
             <div class="row">
               <div class="col-sm-4 col-md-3">
                 <%= if observation.thumb_image_id
-                  interactive_image(observation.thumb_image,
-                            image_link: observation_path(id: observation.id),
-                            votes: true)
+                  interactive_image(
+                    observation.thumb_image,
+                    image_link: observation_path(id: observation.id),
+                    votes: true
+                  )
                 end %>
               </div>
               <div class="col-sm-8 col-md-9">

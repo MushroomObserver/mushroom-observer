@@ -90,17 +90,12 @@ module Observations::Namings
             render(partial: "observations/namings/update_matrix_box",
                    locals: { obs: @observation })
           else
-            obs = Observation.naming_includes.find(@observation.id)
-            owner_name = @consensus.owner_preference
-
-            render(partial: "observations/namings/update_observation",
-                   locals: { obs: obs, consensus: @consensus,
-                             owner_name: owner_name })
+            redirect_with_query(@observation.show_link_args)
           end
           return
         end
         format.html do
-          redirect_with_query(observation_path(id: @observation.id))
+          redirect_with_query(@observation.show_link_args)
         end
       end
     end

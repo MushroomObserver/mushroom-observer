@@ -1,7 +1,37 @@
 # frozen_string_literal: true
 
+#  == Instance methods
+#
+#  location?::    Returns true.
+#  observation?:: Returns false.
+#  north_west::   Returns [north, west].
+#  north_east::   Returns [north, east].
+#  south_west::   Returns [south, west].
+#  south_east::   Returns [south, east].
+#  lat::          Returns center latitude.
+#  lng::          Returns center longitude for MapSet.
+#  center::       Returns center as [lat, long].
+#  edges::        Returns [north, south, east, west].
+#  north_south_distance:: Returns north - south.
+#  east_west_distance::   Returns east - west (adjusting if straddles dateline).
+#  straddles_180_deg?::   Returns true if box straddles 180 degrees.
+#  calculate_area::       Returns the area described by a box, in kmˆ2.
+#  vague?::       Arbitrary test for whether a box covers too large an area to
+#                 be useful on a map.
+#  delta_lat::    Returns north_south_distance * DELTA.
+#  delta_lng::    Returns east_west_distance * DELTA.
+#  lat_lng_close?::  Determines if a given lat/long coordinate is within,
+#                     or close to, a bounding box.
+#  contains?(lat, lng)::  Does box contain the given latititude and longitude
+#  contains_lat?
+#  contains_lng?
+
 module Mappable
   module BoxMethods
+    def self.included(base)
+      base.extend(ClassMethods)
+    end
+
     def location?
       true
     end
@@ -31,24 +61,28 @@ module Mappable
     end
 
     # Return center latitude.
-    def lat
+    def calculate_lat
       (north + south) / 2.0
     rescue StandardError
       nil
     end
 
     # Return center longitude for MapSet. (Google Maps takes `lng`, not `long`)
-    def lng
+    def calculate_lng
       lng = (east + west) / 2.0
-      lng += 180 if west > east
+      if west > east && lng.negative?
+        lng += 180
+      elsif west > east && lng.positive?
+        lng -= 180
+      end
       lng
     rescue StandardError
       nil
     end
 
-    # Return center as [lat, long].
+    # Return center as [lat, lng].
     def center
-      [lat, lng]
+      [calculate_lat, calculate_lng]
     end
 
     # Returns [north, south, east, west].
@@ -66,20 +100,87 @@ module Mappable
       west <= east ? east - west : east - west + 360
     end
 
-    # Is a given lat/long coordinate within or close to the bounding box?
-    def lat_long_close?(lat, long)
-      delta_lat = north_south_distance * 0.20
-      delta_long = east_west_distance * 0.20
-      return false if lat > north + delta_lat
-      return false if lat < south - delta_lat
+    def straddles_180_deg?
+      west > east
+    end
 
-      if west <= east
-        return false if long > east + delta_long
-        return false if long < west - delta_long
-      elsif long < west + delta_long && long > east - delta_long
-        return false
+    def contains?(lat, lng)
+      contains_lat?(lat) && contains_lng?(lng)
+    end
+
+    def contains_lat?(lat)
+      (south..north).cover?(lat)
+    end
+
+    def contains_lng?(lng)
+      return (west..east).cover?(lng) unless straddles_180_deg?
+
+      (lng >= west) || (lng <= east)
+    end
+
+    # Returns the area described by a box, in kmˆ2.
+    #   Formula for `the area of a patch of a sphere`:
+    #     area = Rˆ2 * (long2 - long1) * (sin(lat2) - sin(lat1))
+    #   where lat/lng in radians, R in km, Earth R rounded to 6372km
+    def calculate_area
+      6372 * 6372 * east_west_distance.to_radians *
+        (Math.sin(north.to_radians) - Math.sin(south.to_radians)).abs
+    end
+
+    # Arbitrary test for whether a box covers too large an area to be useful on
+    # a map with other boxes. Large boxes can obscure more precise locations.
+    def vague?
+      calculate_area > 24_000 # kmˆ2   or use MO.obs_location_max_area
+    end
+
+    # NOTE: DELTA = 0.20 is way too strict a limit for remote locations.
+    # Larger delta makes more sense in remote areas, where the common-sense
+    # postal address may be quite far from the observed GPS location.
+    DELTA = 2.0
+
+    def delta_lat
+      north_south_distance * DELTA
+    end
+
+    def delta_lng
+      east_west_distance * DELTA
+    end
+
+    # Determines if a given lat/long coordinate is within, or close to, a
+    # bounding box. Method is used to decide if an obs lat/lng is "dubious"
+    # with respect to the observation's assigned Location.
+    def lat_lng_close?(pt_lat, pt_lng)
+      loc = Box.new(north: north, south: south, east: east, west: west)
+      expanded = loc.expand(delta_lat, delta_lng)
+      expanded.contains?(pt_lat, pt_lng)
+    end
+
+    # These (or Arel equivalents) are necessary for update_all to be efficient.
+    # Used in update_box_area_and_center_columns to populate or restore columns.
+    module ClassMethods
+      def update_center_and_area_sql
+        "center_lat = #{lat_sql}, center_lng = #{lng_sql}, " \
+        "box_area = #{area_sql}"
       end
-      true
+
+      def lat_sql
+        "(north + south) / 2"
+      end
+
+      def lng_sql
+        "CASE WHEN ((west > east) AND (east + west < 0)) " \
+        "THEN (((east + west) / 2) + 180) " \
+        "WHEN ((west > east) AND (east + west > 0)) " \
+        "THEN (((east + west) / 2) - 180) " \
+        "ELSE ((east + west) / 2) END"
+      end
+
+      def area_sql
+        "6372 * 6372 * " \
+        "RADIANS(CASE WHEN (west <= east) THEN (east - west) " \
+        "ELSE (east - west + 360) END) * " \
+        "ABS(SIN(RADIANS(north)) - SIN(RADIANS(south)))"
+      end
     end
   end
 end

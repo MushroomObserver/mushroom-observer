@@ -3,7 +3,8 @@
 class ObservationsController < ApplicationController
   include Index
   include Show
-  include NewAndCreate
+  include New
+  include Create
   include EditAndUpdate
   include Destroy
 

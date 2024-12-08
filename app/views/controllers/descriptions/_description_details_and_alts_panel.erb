@@ -1,0 +1,23 @@
+<%# Top panel for any description, the basic details and alternatives %>
+<% review ||= false %>
+
+<%=
+panel_block(
+  id: "description_details_and_alts",
+  heading: :show_observation_details.l,
+  heading_links: description_change_links(@description),
+  footer: review ? show_description_export_and_review(@description) : nil
+) do
+  tag.div(class: "row") do
+    [
+      tag.div(class: "col-xs-12 col-md-6") do
+        show_description_details(@description, @versions)
+      end,
+      tag.div(class: "col-xs-12 col-md-6") do
+        show_alt_descriptions(object: @description.parent, projects: @projects,
+                              current: @description)
+      end
+    ].safe_join
+  end
+end
+%>

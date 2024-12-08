@@ -17,7 +17,7 @@ module Names::Classification
       login("rolf")
       # put(:update)
       put(:update, params: { id: 666 })
-      put(:update, params: { id: "bogus" })
+      # put(:update, params: { id: "bogus" }) # Does not work, Rails enforces id
       put(:update, params: { id: child.id })
       put(:update, params: { id: names(:ascomycota).id })
       assert_equal(val, genus.reload.classification)

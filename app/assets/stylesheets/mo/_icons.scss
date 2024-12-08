@@ -6,6 +6,7 @@
 .has-search .form-control-feedback {
   right: initial;
   left: 0;
+  background-color: transparent;
 }
 
 .has-search .form-control {
@@ -95,6 +96,24 @@
 .lang-flag {
   width: 27px;
   height: 18px;
+}
+
+// This is for the stateful icon_link_to helper
+.icon-link,
+.panel-collapse-trigger {
+  .active-icon, .active-label {
+    display: none;
+  }
+  &.active,
+  &.collapsed {
+    .link-icon:not(.active-icon),
+    .sr-only:not(.active-label) {
+      display: none;
+    }
+    .active-icon, .active-label {
+      display: inline-block;
+    }
+  }
 }
 
 .spinner-right {

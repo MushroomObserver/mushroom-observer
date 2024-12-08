@@ -37,29 +37,32 @@ class ChecklistTest < UnitTestCase
 
   def test_checklist_for_site
     data = Checklist::ForSite.new
-    obss_of_species = Observation.joins(:name).
-                      where("names.`rank` = #{Name.ranks[:Species]}")
-    all_species = obss_of_species.map { |obs| obs.name.text_name }.uniq.sort
-    all_genera = genera(all_species).uniq
+    obs_with_genus = Observation.joins(:name).
+                     where("names.`rank` <= #{Name.ranks[:Genus]}")
+    names = obs_with_genus.map { |obs| obs.name.text_name }.uniq.sort
+    all_genera = genera(names).uniq
     assert_equal(all_genera, data.genera)
-    assert_equal(all_species, just_names(data.species))
+
+    species_obs = Observation.joins(:name).
+                  where("names.`rank` = #{Name.ranks[:Species]}")
+    species_names = species_obs.map { |obs| obs.name.text_name }.uniq.sort
+    assert_equal(species_names, just_names(data.species))
   end
 
   def test_checklist_for_users
     data = Checklist::ForUser.new(mary)
-    assert_equal(0, data.num_genera)
+    assert(data.num_genera >= 1)
     assert_equal(0, data.num_species)
-    assert_equal([], data.genera)
     assert_equal([], data.species)
 
     data = Checklist::ForUser.new(katrina)
-    assert_equal(1, data.num_genera)
-    assert_equal(1, data.num_species)
-    assert_equal(genera(katrinas_species), data.genera)
-    assert_equal(katrinas_species, just_names(data.species))
+    assert(data.num_genera >= 1)
+    assert(data.num_species >= 1)
+    assert(genera(katrinas_species) - data.genera == [])
+    assert(katrinas_species - just_names(data.species) == [])
 
     data = Checklist::ForUser.new(rolf)
-    assert_equal(6, data.num_genera)
+    assert_equal(7, data.num_genera)
 
     expect = Name.joins(observations: :user).
              where("observations.user_id = #{users(:rolf).id}
@@ -67,7 +70,7 @@ class ChecklistTest < UnitTestCase
              distinct.size
     assert_equal(expect, data.num_species)
 
-    assert_equal(genera(rolfs_species), data.genera)
+    assert(genera(rolfs_species) - data.genera == [])
     assert_equal(rolfs_species, just_names(data.species))
 
     User.current = dick
@@ -86,13 +89,13 @@ class ChecklistTest < UnitTestCase
     after_num_genera = data.num_genera
     after_num_species = data.num_species
 
-    assert_equal(before_num_genera + 1, after_num_genera)
+    assert_equal(before_num_genera + 2, after_num_genera)
     assert_equal(before_num_species + 1, after_num_species)
     Observation.create!(name: names(:lactarius_subalpinus))
     Observation.create!(name: names(:lactarius_alpinus))
     data = Checklist::ForUser.new(dick)
     assert_equal(after_num_genera, data.num_genera)
-    assert_equal(after_num_species, data.num_species)
+    assert_equal(after_num_species + 2, data.num_species)
   end
 
   def test_checklist_for_projects
@@ -110,6 +113,15 @@ class ChecklistTest < UnitTestCase
     assert_equal(1, data.num_species)
     assert_equal(["Coprinus"], data.genera)
     assert_equal([["Coprinus comatus", obs.name_id]], data.species)
+  end
+
+  def test_checklist_for_project_locations
+    proj = projects(:bolete_project)
+    proj.observations << observations(:trusted_hidden)
+    obs = observations(:minimal_unknown_obs)
+    proj.observations << obs
+    data = Checklist::ForProject.new(proj, obs.location)
+    assert_equal(1, data.num_taxa)
   end
 
   def test_checklist_for_species_lists

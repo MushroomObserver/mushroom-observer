@@ -2654,6 +2654,22 @@ class NameTest < UnitTestCase
     assert_equal("__#{name.text_name}__ #{name.author}", name.display_name)
   end
 
+  def test_sensu_stricto
+    %w[group gr gr. gp gp. clade complex].each do |str|
+      assert_equal(Name.new(text_name: "Boletus #{str}").sensu_stricto,
+                   "Boletus",
+                   "Name s.s. should not include `#{str}`")
+      assert_equal(Name.new(text_name: "Boletus#{str}").sensu_stricto,
+                   "Boletus#{str}",
+                   "Name ss should include `#{str}` if it's part of the genus")
+    end
+
+    # start of the epithet matches a `group` abbreviation ("gr")
+    name = Name.new(text_name: "Leptonia gracilipes")
+
+    assert_equal(name.text_name, name.sensu_stricto)
+  end
+
   # --------------------------------------
 
   # Just make sure mysql is collating accents and case correctly.
@@ -3243,10 +3259,10 @@ class NameTest < UnitTestCase
     names(:lichen).merge(old_name)
 
     assert_equal(
-      old_contribution - SiteData::FIELD_WEIGHTS[:names_versions],
+      old_contribution - UserStats::ALL_FIELDS[:name_versions][:weight],
       user.reload.contribution,
       "Merging a Name edited by a user should reduce user's contribution " \
-      "by #{SiteData::FIELD_WEIGHTS[:names_versions]}"
+      "by #{UserStats::ALL_FIELDS[:name_versions][:weight]}"
     )
   end
 
@@ -3624,8 +3640,7 @@ class NameTest < UnitTestCase
 
   def test_scope_in_box
     cal = locations(:california)
-    names_in_cal_box =
-      Name.in_box(n: cal.north, s: cal.south, e: cal.east, w: cal.west)
+    names_in_cal_box = Name.in_box(**cal.bounding_box)
     # Grab a couple of Names that are unused in Observation fixtures
     names_without_observations =
       Name.where.not(id: Name.joins(:observations)).distinct.limit(2).to_a
@@ -3633,22 +3648,22 @@ class NameTest < UnitTestCase
       Observation.create!(name: names_without_observations.first,
                           location: nil,
                           lat: cal.north,
-                          long: cal.east,
+                          lng: cal.east,
                           user: rolf)
-    obs_in_cal_without_lat_long =
+    obs_in_cal_without_lat_lng =
       Observation.create!(name: names_without_observations.second,
                           location: locations(:burbank),
                           lat: nil,
-                          long: nil,
+                          lng: nil,
                           user: rolf)
 
     assert_includes(names_in_cal_box, obs_on_cal_border.name)
     assert_not_includes(
       names_in_cal_box,
-      obs_in_cal_without_lat_long.name,
+      obs_in_cal_without_lat_lng.name,
       "Name.in_box should exclude Names whose only Observations lack lat/long"
     )
-    assert_empty(Name.in_box(n: 0.0001, s: 0, e: 0.0001, w: 0))
+    assert_empty(Name.in_box(north: 0.0001, south: 0, east: 0.0001, west: 0))
   end
 
   def test_more_brief_authors

@@ -5,8 +5,6 @@ module Report
   class BaseTable < Base
     attr_accessor :query
 
-    class_attribute :separator
-
     def initialize(args)
       super(args)
       self.query = args[:query]
@@ -59,8 +57,8 @@ module Report
       [
         "observations.id",
         "observations.when",
-        public_latlong_spec(:lat),
-        public_latlong_spec(:long),
+        public_latlng_spec(:lat),
+        public_latlng_spec(:lng),
         "observations.alt",
         "observations.specimen",
         "observations.is_collection_location",
@@ -90,8 +88,8 @@ module Report
       [
         "observations.id",
         "observations.when",
-        public_latlong_spec(:lat),
-        public_latlong_spec(:long),
+        public_latlng_spec(:lat),
+        public_latlng_spec(:lng),
         "observations.alt",
         "observations.specimen",
         "observations.is_collection_location",
@@ -117,7 +115,7 @@ module Report
       ]
     end
 
-    def public_latlong_spec(col)
+    def public_latlng_spec(col)
       "IF(observations.gps_hidden AND " \
         "observations.user_id != #{User.current_id || -1}, " \
         "NULL, observations.#{col})"

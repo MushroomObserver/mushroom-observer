@@ -4,9 +4,19 @@ MushroomObserver::Application.configure do
   # Settings specified here will take precedence over those in
   # config/application.rb.
 
-  # ----------------------------
-  #  MO configuration.
-  # ----------------------------
+  # https://guides.rubyonrails.org/configuring.html#actiondispatch-hostauthorization
+  config.hosts = [
+    IPAddr.new("0.0.0.0/0"),        # All IPv4 addresses.
+    IPAddr.new("::/0"),             # All IPv6 addresses.
+    "localhost"                     # The localhost reserved domain.
+    # ENV.fetch("RAILS_DEVELOPMENT_HOSTS") # Additional comma-separated hosts.
+  ]
+  # Allow the default puma-dev host.
+  config.hosts << "mushroomobserver.test"
+
+  # ----------------------------------------------------
+  #  MO configuration. These values are used in MO code.
+  # ----------------------------------------------------
   config.domain      = "localhost"
   config.http_domain = "http://localhost:3000"
 
@@ -49,6 +59,11 @@ MushroomObserver::Application.configure do
   config.image_fallback_source = :mycolab
 
   config.robots_dot_text_file = "#{config.root}/public/robots.txt"
+
+  # REDIRECT_URI (Callback URL)
+  # iNat calls this after iNat user authorizes MO to access their data.
+  config.redirect_uri =
+    "http://localhost:3000/observations/inat_imports/authorization_response"
 
   # ----------------------------
   #  Rails configuration.
@@ -133,7 +148,7 @@ MushroomObserver::Application.configure do
   config.assets.logger = false
 
   # Suppress logger output for asset requests.
-  config.assets.quiet = true
+  config.assets.quiet = false
 
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true
@@ -146,6 +161,17 @@ MushroomObserver::Application.configure do
   config.web_console.allowed_ips = "10.0.2.2"
 
   config.bot_enabled = true
+
+  config.active_job.queue_adapter = :solid_queue
+
+  # Disable Mission Control default HTTP Basic Authentication because
+  # we specify AdminController as the base class for Mission Control
+  # https://github.com/rails/mission_control-jobs?tab=readme-ov-file#authentication
+  config.mission_control.jobs.http_basic_auth_enabled = false
+
+  # Set up ActionCable to use a standalone server at port 28080
+  # config.action_cable.mount_path = nil
+  # config.action_cable.url = "ws://localhost:28080" # use :wss in production
 end
 
 file = File.expand_path("../consts-site.rb", __dir__)

@@ -98,33 +98,54 @@ module ObservationsHelper
     end
   end
 
-  def link_to_display_name_brief_authors(name, **args)
+  def link_to_display_name_brief_authors(name, **)
     link_to(name.display_name_brief_authors.t,
-            name_path(id: name.id), **args)
+            name_path(id: name.id), **)
   end
 
-  def link_to_display_name_without_authors(name, **args)
+  def link_to_display_name_without_authors(name, **)
     link_to(name.display_name_without_authors.t,
-            name_path(id: name.id), **args)
+            name_path(id: name.id), **)
+  end
+
+  def observation_details_inat(obs:)
+    return nil if obs.inat_id.blank?
+
+    inat_link_desc =
+      if obs.source == "mo_inat_import"
+        :show_observation_details_inat_import.t(
+          date: obs.created_at.strftime("%Y-%m-%d")
+        )
+      else
+        :show_observation_details_inat_export.t
+      end
+
+    tag.p(id: "inat_id") do
+      [
+        "#{inat_link_desc} ",
+        link_to("#{:inat.t} ##{obs.inat_id}",
+                "https://inaturalist.org/observations/#{obs.inat_id}")
+      ].safe_join(" ")
+    end
   end
 
   def observation_map_coordinates(obs:)
     if obs.location
       loc = obs.location
-      n = ((90.0 - loc.north) / 1.80).round(6)
-      s = ((90.0 - loc.south) / 1.80).round(6)
-      e = ((180.0 + loc.east) / 3.60).round(6)
-      w = ((180.0 + loc.west) / 3.60).round(6)
+      n = ((90.0 - loc.north) / 1.80).round(4)
+      s = ((90.0 - loc.south) / 1.80).round(4)
+      e = ((180.0 + loc.east) / 3.60).round(4)
+      w = ((180.0 + loc.west) / 3.60).round(4)
     end
 
-    lat, long = if obs.lat && obs.long
-                  [obs.public_lat, obs.public_long]
+    lat, long = if obs.lat && obs.lng
+                  [obs.public_lat, obs.public_lng]
                 elsif obs.location
                   obs.location.center
                 end
     if lat && long
-      x = ((180.0 + long) / 3.60).round(6)
-      y = ((90.0 - lat) / 1.80).round(6)
+      x = ((180.0 + long) / 3.60).round(4)
+      y = ((90.0 - lat) / 1.80).round(4)
     end
 
     [n, s, e, w, lat, long, x, y]
@@ -133,11 +154,7 @@ module ObservationsHelper
   def observation_show_image_links(obs:)
     return "" unless check_permission(obs)
 
-    [
-      icon_link_with_query(*new_image_for_observation_tab(obs)),
-      icon_link_with_query(*reuse_images_for_observation_tab(obs)),
-      icon_link_with_query(*remove_images_from_observation_tab(obs))
-    ].safe_join(" | ")
+    icon_link_with_query(*reuse_images_for_observation_tab(obs))
   end
 
   # The following sections of the observation_details partial are also needed as
@@ -166,15 +183,26 @@ module ObservationsHelper
            else
              :show_observation_seen_at.t
            end}:",
-        location_link(obs.where, obs.location, nil, true)
+        location_link(obs.where, obs.location, nil, true),
+        observation_where_vague_notice(obs: obs)
       ].safe_join(" ")
     end
+  end
+
+  def observation_where_vague_notice(obs:)
+    return "" unless obs.location&.vague?
+
+    title = :show_observation_vague_location.l
+    if User.current == obs.user
+      title += " #{:show_observation_improve_location.l}"
+    end
+    tag.p(class: "ml-3") { tag.em(title) }
   end
 
   def observation_details_where_gps(obs:)
     return "" unless obs.lat
 
-    gps_display_link = link_to([obs.display_lat_long.t,
+    gps_display_link = link_to([obs.display_lat_lng.t,
                                 obs.display_alt.t,
                                 "[#{:click_for_map.t}]"].safe_join(" "),
                                map_observation_path(id: obs.id))
@@ -209,14 +237,38 @@ module ObservationsHelper
   end
 
   def observation_details_notes(obs:)
-    return "" unless obs.notes?
+    notes = obs.notes
+    return "" unless notes
+    return "#{:NOTES.t}:\n#{notes[:Other]}".tpl if notes.keys == [:Other]
 
-    notes = obs.notes_show_formatted.sub(/^\A/, "#{:NOTES.t}:\n").tpl
-
-    tag.div(class: "obs-notes", id: "observation_notes") do
+    # This used to use
+    #
+    # notes = obs.notes_show_preformatted.sub(/^/, "#{:NOTES.t}:\n").tpl
+    #
+    # However, this fails if one of the values has a '+' sign, e.g., "+photo"
+    # because the textile interpretation ends up affecting multiple lines.
+    # This approach passes each note independently to textile.
+    tag.div(class: "obs-notes textile", id: "observation_notes") do
       Textile.clear_textile_cache
       Textile.register_name(obs.name)
-      tag.div(notes)
+      concat("<p>#{:NOTES.t}:<br>".t)
+      notes.each_with_object(+"") do |(key, value), _str|
+        concat("+#{key}+: #{value}<br>".tl)
+      end
+      concat("</p>".t)
     end
+  end
+
+  def observation_location_help
+    loc1 = "Albion, Mendocino Co., California, USA"
+    loc2 = "Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil"
+    if User.current_location_format == "scientific"
+      loc1 = Location.reverse_name(loc1)
+      loc2 = Location.reverse_name(loc2)
+    end
+
+    [tag.div(:form_observations_where_help.t(loc1: loc1, loc2: loc2),
+             class: "mb-3"),
+     tag.div(:form_observations_locate_on_map_help.t)].safe_join
   end
 end

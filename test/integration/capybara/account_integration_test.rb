@@ -51,10 +51,11 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
     # This should only be accessible if logged in.
     first(:link, text: "Preferences").click
+
     assert_selector("body.preferences__edit")
 
     # Log out and try again.
-    first(:link, text: "Logout").click
+    first(:button, text: :app_logout.l).click
     assert_selector("body.login__logout")
     assert_no_link(text: "Preferences")
     visit("/account/preferences/edit")
@@ -113,7 +114,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     visit("/")
     assert_selector("#user_drop_down")
     links = find_all("#user_drop_down a")
-    assert_equal(8, links.length)
+    assert_equal(7, links.length)
   end
 
   # ----------------------------
@@ -181,7 +182,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     end
 
     # Redirected to the Welcome page, but email not verified.
-    assert_selector("body.account__welcome")
+    assert_selector("body.observations__index")
 
     # At this point there should be an unverified account for Dumbledore.
     wizard = User.find_by(email: "webmaster@hogwarts.org")
@@ -223,9 +224,9 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("body.verifications__new")
 
     # They should be logged in now.
-    assert_link(:app_logout.t)
+    assert_button(:app_logout.t)
     # Log out. (must use id, there are multiple links)
-    click_link(id: "nav_user_logout_link")
+    click_button(id: "nav_user_logout_link")
     assert_no_link(:app_logout.t)
 
     # Try to use that verification code again. No can do
@@ -238,8 +239,10 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       fill_in("user_password", with: "Hagrid_24!")
       click_commit
     end
-    # They should still be able to log in ok.
-    assert_link(:app_logout.t)
+
+    # They should still be able to login (with a button, not a link)
+    assert_button(:app_logout.l)
+    assert_no_link(:app_logout.l)
   end
 
   def test_correct_invalid_preferences
@@ -367,9 +370,9 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
     # Content filters
     within("#account_preferences_form") do
-      check("user_has_images")
-      check("user_has_specimen")
-      select("Show only lichens", from: "user_lichen")
+      check("user_with_images")
+      check("user_with_specimen")
+      select(:prefs_filters_lichen_yes.l, from: "user_lichen")
       click_commit
     end
     assert_flash_success

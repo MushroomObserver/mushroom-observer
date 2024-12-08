@@ -25,8 +25,8 @@ xml.tag!(
   xml_url(xml, :original_url, object.original_url)
   if detail
     xml_detailed_object(xml, :owner, object.user)
-    xml.files(number: Image.all_sizes.length + 1) do
-      (Image.all_sizes + [:original]).each do |size|
+    xml.files(number: Image::ALL_SIZES.length + 1) do
+      (Image::ALL_SIZES + [:original]).each do |size|
         xml_image_file(xml, object, size)
       end
     end

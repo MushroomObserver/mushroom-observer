@@ -150,7 +150,7 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal(1, obs.namings.length)
     assert_equal(1, obs.votes.length)
     assert_nil(obs.lat)
-    assert_nil(obs.long)
+    assert_nil(obs.lng)
     assert_nil(obs.alt)
     assert_equal(false, obs.specimen)
     assert_equal(true, obs.is_collection_location)
@@ -161,6 +161,25 @@ class API2ControllerTest < FunctionalTestCase
     assert_nil(obs.thumb_image)
     assert_obj_arrays_equal([], obs.projects)
     assert_obj_arrays_equal([], obs.species_lists)
+  end
+
+  def test_post_observation_with_code
+    params = { api_key: api_keys(:rolfs_api_key).key, location: "Earth",
+               code: "EOL-135" }
+    post(:observations, params: params)
+    assert_no_api_errors
+    obs = Observation.last
+    assert(obs.field_slips[0].project.observations.include?(obs))
+  end
+
+  def test_post_observation_joins_project
+    params = { api_key: api_keys(:rolfs_api_key).key, location: "Earth",
+               code: "OPEN-135" }
+    post(:observations, params: params)
+    assert_no_api_errors
+    obs = Observation.last
+    project = Project.find_by(field_slip_prefix: "OPEN")
+    assert(project.member?(obs.user))
   end
 
   def test_post_maximal_observation
@@ -179,6 +198,7 @@ class API2ControllerTest < FunctionalTestCase
       images: "#{images(:in_situ_image).id}, #{images(:turned_over_image).id}",
       thumbnail: images(:turned_over_image).id.to_s,
       projects: "EOL Project",
+      code: "EOL-13579",
       species_lists: "Another Species List"
     }
     post(:observations, params: params)
@@ -193,7 +213,7 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal(1, obs.votes.length)
     assert_equal(2.0, obs.votes.first.value)
     assert_equal(34.5678, obs.lat)
-    assert_equal(-123.4567, obs.long)
+    assert_equal(-123.4567, obs.lng)
     assert_equal(376, obs.alt)
     assert_equal(true, obs.specimen)
     assert_equal(true, obs.is_collection_location)
@@ -416,7 +436,7 @@ class API2ControllerTest < FunctionalTestCase
   end
 
   def test_get_observation_with_gps_hidden
-    obs = observations(:unknown_with_lat_long)
+    obs = observations(:unknown_with_lat_lng)
     get(:observations, params: { id: obs.id, detail: :high, format: :json })
     assert_match(/34.1622|118.3521/, @response.body)
     get(:observations, params: { id: obs.id, detail: :high, format: :xml })

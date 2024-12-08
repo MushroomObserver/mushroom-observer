@@ -3,11 +3,12 @@
 module ImagesHelper
   # Draw an image with all the fixin's. Takes either an Image instance or an id.
   #
-  # Note: this is NOT rendering a partial because nested partials have been
-  # demonstrated to be VERY slow in loops or collections.
+  # TODO: Make this a component. This should probably not be a partial: using
+  # nested partials has been demonstrated to be VERY slow in loops or
+  # collections. (Caching helps though).
   #
   # Uses ImagePresenter to assemble data.
-  #
+
   #   link::             Hash of { controller: xxx, action: xxx, etc. }
   #   size::             Size to show, default is thumbnail.
   #   votes::            Show vote buttons?
@@ -16,19 +17,15 @@ module ImagesHelper
   #   html_options::     Additional HTML attributes to add to <img> tag.
   #   notes::            Show image notes??
   #
-  # USE: interactive_image(
-  #   image,
-  #   args = {
-  #     notes: "",
-  #     extra_classes: ""
-  #   }
-  # )
+  # USE: interactive_image( image, args = { notes: "", extra_classes: "" } )
   def interactive_image(image, **args)
+    # Caption needs object for copyright info
     presenter = ImagePresenter.new(image, args)
     set_width = presenter.width.present? ? "width: #{presenter.width}px;" : ""
 
     [
-      tag.div(class: "image-sizer position-relative mx-auto",
+      tag.div(id: presenter.html_id,
+              class: "image-sizer position-relative mx-auto",
               style: set_width.to_s) do
         [
           tag.div(class: "image-lazy-sizer overflow-hidden",
@@ -48,6 +45,15 @@ module ImagesHelper
       end,
       image_owner_original_name(presenter.image, presenter.original)
     ].safe_join
+  end
+
+  # Args for the interactive image on Images#show (particular to that context)
+  def image_show_presenter_args
+    { size: :huge,
+      image_link: "#",
+      img_class: "huge-image",
+      theater_on_click: true,
+      votes: false }
   end
 
   # Needs object for copyright info
@@ -87,7 +93,7 @@ module ImagesHelper
              else
                image.copyright_holder.to_s.t
              end
-    tag.div(image.license.copyright_text(image.year, holder),
+    tag.div(image.license&.copyright_text(image.year, holder),
             class: "small")
   end
 
@@ -108,13 +114,28 @@ module ImagesHelper
 
   # pass an image instance if possible, to ensure access to fallback image.url
   def original_image_link(image_or_image_id, classes)
-    url = if image_or_image_id.is_a?(Image)
-            image_or_image_id.url(:original)
-          else
-            Image.url(:original, image_or_image_id)
-          end
-    link_to(:image_show_original.t, url,
-            { class: classes, target: "_blank", rel: "noopener" })
+    id = if image_or_image_id.is_a?(Image)
+           image_or_image_id.id
+         else
+           image_or_image_id
+         end
+    link_to(
+      :image_show_original.t,
+      "/images/#{id}/original",
+      {
+        class: classes,
+        target: "_blank",
+        rel: "noopener",
+        data: {
+          controller: "image-loader",
+          action: "click->image-loader#load",
+          "image-loader-target": "link",
+          "loading-text": :image_show_original_loading.t,
+          "maxed-out-text": :image_show_original_maxed_out.t,
+          "error-text": :image_show_original_error.t
+        }
+      }
+    )
   end
 
   def image_exif_link(image_or_image_id, classes)

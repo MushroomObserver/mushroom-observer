@@ -8,7 +8,6 @@ module MatrixBoxHelper
     cached = args[:cached] || false
     objects = args[:objects] || []
     locals = args.except(:objects, :as, :partial, :cached)
-
     [
       tag.ul(
         class: "row list-unstyled mt-3",
@@ -33,10 +32,10 @@ module MatrixBoxHelper
     # matrix box has one version except langs.
     # css hides image vote ui when body.no-user
     objects.each do |object|
-      # cache(object) do
+      cache(object) do
         concat(render(partial: "shared/matrix_box",
                       locals: { object: object }.merge(locals)))
-      # end
+      end
     end
   end
 
@@ -54,6 +53,7 @@ module MatrixBoxHelper
     end
   end
 
+  # rubocop:disable Style/ArgumentsForwarding
   def matrix_box_image(image = nil, **args)
     return unless image
 
@@ -61,41 +61,42 @@ module MatrixBoxHelper
       interactive_image(image, **args)
     end
   end
+  # rubocop:enable Style/ArgumentsForwarding
 
   # for matrix_box_carousels:
   # def matrix_box_images(presenter)
-  #   presenter.image_data includes context: :matrix_box where appropriate
+  #   presenter.image_data includes full_width: true where appropriate
   #   images = presenter.image_data[:images]
   #   image_args = local_assigns.
   #                except(:columns, :object, :object_counter,
   #                       :object_iteration).
   #                merge(presenter.image_data.except(:images) || {})
-  #   top_img = presenter.image_data[:thumb_image] || images.first
+  #   carousel_locals = { object:, images:, thumbnails: true, **image_args }
   #
   #   tag.div(class: "thumbnail-container") do
-  #     carousel_html(object: object, images: images, top_img: top_img,
-  #                   thumbnails: false, **image_args)
+  #     # don't use a partial though, too slow. wait til we are using components
+  #     render(partial: "shared/carousel", locals: carousel_locals)
   #   end
   # end
 
   # NOTE: object_id may be "no_ID" for logs of deleted records
-  def matrix_box_details(presenter, object, object_id, identify)
+  def matrix_box_details(presenter, object_id, identify)
     tag.div(class: "panel-body rss-box-details") do
       [
-        matrix_box_what(presenter, object, object_id, identify),
+        matrix_box_what(presenter, object_id, identify),
         matrix_box_where(presenter),
         matrix_box_when_who(presenter)
       ].safe_join
     end
   end
 
-  def matrix_box_what(presenter, object, object_id, identify)
+  def matrix_box_what(presenter, object_id, identify)
     # heading style: bigger if no image.
     # TODO: make box layouts specific to object type
     h_style = presenter.image_data ? "h5" : "h3"
-    what = presenter.what
+    what = presenter.what # for an obs or rss_log, it's the obs
     consensus = presenter.consensus || nil
-    identify_ui = matrix_box_vote_or_propose_ui(identify, object, consensus)
+    identify_ui = matrix_box_vote_or_propose_ui(identify, what, consensus)
 
     tag.div(class: "rss-what") do
       [
@@ -135,7 +136,8 @@ module MatrixBoxHelper
     else
       propose_naming_link(
         object.id, btn_class: "btn btn-default d-inline-block mb-3",
-                   context: "matrix_box")
+                   context: "matrix_box"
+      )
     end
   end
 

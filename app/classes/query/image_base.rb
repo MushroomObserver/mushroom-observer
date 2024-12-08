@@ -14,22 +14,25 @@ module Query
         created_at?: [:time],
         updated_at?: [:time],
         date?: [:date],
+        # by_user?: User,
         users?: [User],
+        # ids?: [Image],
         locations?: [:string],
         observations?: [Observation],
         projects?: [:string],
         species_lists?: [:string],
-        has_observation?: { boolean: [true] },
-        size?: { string: Image.all_sizes - [:full_size] },
-        content_types?: [{ string: Image.all_extensions }],
-        has_notes?: :boolean,
+        with_observation?: { boolean: [true] },
+        size?: { string: Image::ALL_SIZES - [:full_size] },
+        content_types?: [{ string: Image::ALL_EXTENSIONS }],
+        with_notes?: :boolean,
         notes_has?: :string,
         copyright_holder_has?: :string,
         license?: [License],
-        has_votes?: :boolean,
+        with_votes?: :boolean,
         quality?: [:float],
         confidence?: [:float],
-        ok_for_export?: :boolean
+        ok_for_export?: :boolean,
+        pattern?: :string
       ).merge(names_parameter_declarations)
     end
 
@@ -38,9 +41,12 @@ module Query
       unless is_a?(Query::ImageWithObservations)
         add_owner_and_time_stamp_conditions("images")
         add_date_condition("images.when", params[:date])
-        add_join(:observation_images) if params[:has_observation]
+        add_join(:observation_images) if params[:with_observation]
         initialize_notes_parameters
       end
+      # add_by_user_condition("images")
+      # add_ids_condition
+      add_pattern_condition
       initialize_association_parameters
       initialize_name_parameters(:observation_images, :observations)
       initialize_image_parameters
@@ -50,7 +56,7 @@ module Query
     def initialize_notes_parameters
       add_boolean_condition("LENGTH(COALESCE(images.notes,'')) > 0",
                             "LENGTH(COALESCE(images.notes,'')) = 0",
-                            params[:has_notes])
+                            params[:with_notes])
       add_search_condition("images.notes", params[:notes_has])
     end
 
@@ -85,10 +91,30 @@ module Query
     def initialize_vote_parameters
       add_boolean_condition("images.vote_cache IS NOT NULL",
                             "images.vote_cache IS NULL",
-                            params[:has_votes])
+                            params[:with_votes])
       add_range_condition("images.vote_cache", params[:quality])
       add_range_condition("observations.vote_cache", params[:confidence],
                           :observation_images, :observations)
+    end
+
+    def add_pattern_condition
+      return if params[:pattern].blank?
+
+      add_search_condition(search_fields, params[:pattern])
+      add_join(:observation_images, :observations)
+      add_join(:observations, :locations!)
+      add_join(:observations, :names)
+      super
+    end
+
+    def search_fields
+      "CONCAT(" \
+        "names.search_name," \
+        "COALESCE(images.original_name,'')," \
+        "COALESCE(images.copyright_holder,'')," \
+        "COALESCE(images.notes,'')," \
+        "observations.where" \
+        ")"
     end
 
     def self.default_order

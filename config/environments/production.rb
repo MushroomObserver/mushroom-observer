@@ -43,6 +43,16 @@ MushroomObserver::Application.configure do
 
   config.robots_dot_text_file = "#{config.root}/public/robots.txt"
 
+  # REDIRECT_URI (Callback URL)
+  # iNat calls this after iNat user authorizes MO to access their data.
+  config.redirect_uri =
+    "https://mushroomobserver.org/observations/inat_imports/authorization_response"
+
+  # Disable Mission Control default HTTP Basic Authentication because
+  # we specify AdminController as the base class for Mission Control
+  # https://github.com/rails/mission_control-jobs?tab=readme-ov-file#authentication
+  config.mission_control.jobs.http_basic_auth_enabled = false
+
   # ----------------------------
   #  Rails configuration.
   #  The production environment is meant for finished, "live" apps.
@@ -95,6 +105,10 @@ MushroomObserver::Application.configure do
   # Generate digests for assets URLs
   config.assets.digest = true
 
+  # Combine files using the "require" directives at the top of included files
+  # See http://guides.rubyonrails.org/asset_pipeline.html#turning-debugging-off
+  config.assets.debug = false
+
   # Version of your assets, change this if you want to expire all your assets.
   config.assets.version = "1.0"
 
@@ -134,7 +148,7 @@ MushroomObserver::Application.configure do
   # personally identifiable information (PII). If you want to log everything,
   # set the level to "debug".
   # config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
-  config.log_level = :debug
+  config.log_level = :info
 
   # Disable automatic flushing of the log to improve performance.
   # config.autoflush_log = false
@@ -160,11 +174,20 @@ MushroomObserver::Application.configure do
   # Don't log any deprecations.
   # config.active_support.report_deprecations = false
 
-  # Combine files using the "require" directives at the top of included files
-  # See http://guides.rubyonrails.org/asset_pipeline.html#turning-debugging-off
-  config.assets.debug = false
-
   config.bot_enabled = true
+
+  # Use default cable setup
+  # config.action_cable.mount_path = "/cable" # or nil
+  # Or set up ActionCable to use a standalone server at port 28080
+  # config.action_cable.url = "wss://localhost:28080" # use :wss in production
+  config.action_cable.allowed_request_origins = [%r{http://*}, %r{https://*/}]
+
+  config.active_job.queue_adapter = :solid_queue
+
+  # Fixes SolidQueue intermittent NameError uninitialized constant
+  # https://github.com/rails/solid_queue/issues/276
+  # https://github.com/MushroomObserver/mushroom-observer/issues/2534
+  config.rake_eager_load = true
 end
 
 file = File.expand_path("../consts-site.rb", __dir__)

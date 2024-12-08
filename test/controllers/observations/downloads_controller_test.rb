@@ -178,6 +178,42 @@ module Observations
       assert_response(:success)
     end
 
+    def test_download_too_many_observations
+      query = Query.lookup_and_save(:Observation, :all)
+      login("mary")
+
+      MO.stub(:max_downloads, Observation.count - 1) do
+        get(:new, params: { q: query.id.alphabetize })
+      end
+
+      assert_redirected_to(observations_path)
+      assert_flash_error
+    end
+
+    def test_download_too_many_observations_reasonable_query
+      query = Query.lookup_and_save(:Observation, :at_location,
+                                    location: locations(:albion))
+      login("mary")
+
+      MO.stub(:max_downloads, Observation.count - 1) do
+        get(:new, params: { q: query.id.alphabetize })
+      end
+
+      assert_response(:success)
+    end
+
+    def test_download_too_many_observations_admin
+      query = Query.lookup_and_save(:Observation, :all)
+      login("mary")
+      make_admin("mary")
+
+      MO.stub(:max_downloads, Observation.count - 1) do
+        get(:new, params: { q: query.id.alphabetize })
+      end
+
+      assert_response(:success)
+    end
+
     def test_print_labels
       login
       query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)

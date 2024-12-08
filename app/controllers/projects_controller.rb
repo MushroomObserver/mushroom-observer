@@ -22,7 +22,6 @@ class ProjectsController < ApplicationController
     return unless find_project_and_where!
 
     set_ivars_for_show
-    check_constraint_violations
   end
 
   ##############################################################################
@@ -102,6 +101,7 @@ class ProjectsController < ApplicationController
 
     upload_image_if_present
     @summary = params[:project][:summary]
+    @field_slip_prefix = params[:project][:field_slip_prefix]
     if valid_title && valid_where && valid_dates
       if @project.update(project_create_params)
         override_fixed_dates
@@ -141,7 +141,7 @@ class ProjectsController < ApplicationController
   private ############################################################
 
   def image_ivars
-    @licenses = License.current_names_and_ids(@user.license)
+    @licenses = License.available_names_and_ids(@user.license)
 
     (@copyright_holder, @copyright_year, @upload_license_id) =
       if @project&.image
@@ -204,10 +204,9 @@ class ProjectsController < ApplicationController
     if pattern.match(/^\d+$/) &&
        (@project = Project.safe_find(pattern))
       set_ivars_for_show
-      check_constraint_violations
       render("show", location: project_path(@project.id))
     else
-      query = create_query(:Project, :pattern_search, pattern: pattern)
+      query = create_query(:Project, :all, pattern: pattern)
       show_selected_projects(query)
     end
   end
@@ -244,7 +243,7 @@ class ProjectsController < ApplicationController
 
   def project_create_params
     params.require(:project).
-      permit(:title, :summary, :open_membership,
+      permit(:title, :summary, :open_membership, :field_slip_prefix,
              "start_date(1i)", "start_date(2i)", "start_date(3i)",
              "end_date(1i)", "end_date(2i)", "end_date(3i)")
   end

@@ -81,6 +81,12 @@ class LocationTest < UnitTestCase
     )
     assert_equal(mary.id, loc.user_id)
     assert_equal(mary.id, loc.versions.last.user_id)
+    # Make sure the box_area was calculated correctly
+    assert_equal(loc.box_area.round(6), loc.calculate_area.round(6))
+    # Make sure the center_lat and center_lng were calculated correctly
+    center_lat, center_lng = loc.center
+    assert_equal(loc.center_lat, center_lat)
+    assert_equal(loc.center_lng, center_lng)
 
     User.current = rolf
     loc.display_name = "Anywhere, USA"
@@ -106,6 +112,55 @@ class LocationTest < UnitTestCase
     assert_equal(dick.id, desc.user_id)
     assert_equal(rolf.id, desc.versions.last.user_id)
     assert_equal(dick.id, desc.versions.first.user_id)
+  end
+
+  # Method should populate location box_area, center_lat, center_lng
+  # and observation location_lat location_lng columns
+  def test_update_box_area_and_center_columns
+    Location.update_box_area_and_center_columns
+
+    # this Location does not have area or center already set in fixtures
+    not_set = locations(:sortable_observation_user_location)
+    assert_equal(not_set.center_lat, not_set.calculate_lat,
+                 "Location #{not_set.name} should have had center_lat " \
+                 "calculated by update_box_area_and_center_columns")
+    not_set.observations.each do |obs|
+      assert_equal(obs.location_lat, not_set.center_lat,
+                   "Observation #{obs.name} should have had location_lat " \
+                   "copied from #{not_set.name}")
+    end
+    # Location area / center are in fixtures, but center not set in obs fixtures
+    locs = [locations(:burbank), locations(:albion)]
+    locs.each do |loc|
+      loc.observations.each do |obs|
+        assert_equal(obs.location_lat, loc.center_lat,
+                     "Observation #{obs.name} should have had location_lat " \
+                     "copied from #{loc.name}")
+      end
+    end
+    big = locations(:california)
+    big.observations.each do |obs|
+      assert_nil(obs.location_lat,
+                 "Observation #{obs.name} should have had location_lat " \
+                 "nil because #{big.name} is too large")
+    end
+    # Test updating a location box, that the center and area are recalculated
+    # and propagated to associated observations
+    rey = locations(:point_reyes)
+    rey_area = rey.calculate_area.round(4)
+    new_bounds = rey.bounding_box.merge(north: 38.2461)
+    box = Mappable::Box.new(**new_bounds)
+    box_area = box.calculate_area.round(4)
+    assert_not_equal(rey_area, box_area)
+
+    rey.update!(**new_bounds)
+    assert_equal(rey.center_lat, box.calculate_lat)
+    assert_equal(rey.box_area.round(4), box_area)
+    rey.observations.each do |obs|
+      assert_equal(obs.location_lat, rey.center_lat,
+                   "Observation #{obs.name} should have had location_lat " \
+                   "copied from #{rey.name}")
+    end
   end
 
   # --------------------------------------
@@ -426,7 +481,7 @@ class LocationTest < UnitTestCase
     assert_equal("Un, Deux, Trois", loc.scientific_name)
   end
 
-  def test_force_valid_lat_longs
+  def test_force_valid_lat_lngs
     loc = locations(:albion)
 
     # Make sure a good location is unchanged.
@@ -434,7 +489,7 @@ class LocationTest < UnitTestCase
     loc.south = 6
     loc.east = 4
     loc.west = 2
-    loc.force_valid_lat_longs!
+    loc.force_valid_lat_lngs!
     assert_equal([8, 6, 4, 2], [loc.north, loc.south, loc.east, loc.west])
 
     # Make sure north/south reversed is fixed.
@@ -442,7 +497,7 @@ class LocationTest < UnitTestCase
     loc.south = 6
     loc.east = 4
     loc.west = 2
-    loc.force_valid_lat_longs!
+    loc.force_valid_lat_lngs!
     assert_equal([-0.9999, -1.0001, 3.0001, 2.9999],
                  [loc.north, loc.south, loc.east, loc.west])
 
@@ -451,7 +506,7 @@ class LocationTest < UnitTestCase
     loc.south = 6
     loc.east = 4
     loc.west = 4
-    loc.force_valid_lat_longs!
+    loc.force_valid_lat_lngs!
     assert_equal([6.0001, 5.9999, 4.0001, 3.9999],
                  [loc.north, loc.south, loc.east, loc.west])
 
@@ -460,7 +515,7 @@ class LocationTest < UnitTestCase
     loc.south = 6
     loc.east = -170
     loc.west = 170
-    loc.force_valid_lat_longs!
+    loc.force_valid_lat_lngs!
     assert_equal([8, 6, -170, 170], [loc.north, loc.south, loc.east, loc.west])
   end
 
@@ -486,14 +541,13 @@ class LocationTest < UnitTestCase
     assert_equal(:log_location_merged, log1.parse_log[1][0])
   end
 
-  # test BoxMethods module `lat_long_close?` method
-  def test_lat_long_close
+  # test BoxMethods module `lat_lng_close?` method
+  def test_lat_lng_close
     loc = locations(:east_lt_west_location)
-    centrum = { lat: loc.south + loc.north_south_distance / 2,
-                lon: loc.east - loc.east_west_distance / 2 }
-    assert_true(loc.lat_long_close?(centrum[:lat], centrum[:lon]),
+    # The centrum of the location is provided by BoxMethods#center, lat, lng
+    assert_true(loc.lat_lng_close?(loc.calculate_lat, loc.calculate_lng),
                 "Location's centrum should be 'close' to Location.")
-    assert_false(loc.lat_long_close?(centrum[:lat], centrum[:lon] + 180),
+    assert_false(loc.lat_lng_close?(loc.calculate_lat, loc.calculate_lng + 180),
                  "Opposite side of globe should not be 'close' to Location.")
   end
 
@@ -523,35 +577,190 @@ class LocationTest < UnitTestCase
     assert_empty(Location.in_region(ARBITRARY_SHA))
   end
 
+  def test_contains_edges
+    loc = albion
+    assert(loc.contains_lat?(loc.north), "Location should contain its N edge")
+    assert(loc.contains_lat?(loc.south), "Location should contain its S edge")
+    assert(loc.contains_lng?(loc.west), "Location should contain its W edge")
+    assert(loc.contains_lng?(loc.east), "Location should contain its E edge")
+  end
+
+  def test_scope_contains_point
+    [
+      locations(:albion),
+      locations(:perkatkun),
+      locations(:east_lt_west_location)
+    ].each { |loc| contains_corners(loc) }
+  end
+
+  def contains_corners(loc)
+    assert(Location.contains_point(lat: loc.north, lng: loc.east).
+      include?(loc), "#{loc.name} should contain its NE corner")
+    assert(Location.contains_point(lat: loc.south, lng: loc.west).
+      include?(loc), "#{loc.name} should contain its SW corner")
+  end
+
   # supplements API tests
   def test_scope_in_box
     cal = locations(:california)
-    locs_in_cal_box = Location.in_box(
-      n: cal.north, s: cal.south, e: cal.east, w: cal.west
-    )
+    locs_in_cal_box = Location.in_box(**cal.bounding_box)
     assert_includes(locs_in_cal_box, locations(:albion))
     assert_includes(locs_in_cal_box, cal)
 
     wrangel = locations(:east_lt_west_location)
-    locs_in_wrangel_box = Location.in_box(
-      n: wrangel.north, s: wrangel.south, e: wrangel.east, w: wrangel.west
-    )
+    locs_in_wrangel_box = Location.in_box(**wrangel.bounding_box)
     assert_includes(locs_in_wrangel_box, wrangel)
     assert_not_includes(locs_in_wrangel_box, cal)
 
     assert_empty(
-      Location.in_box(n: cal.north, s: cal.south, e: cal.east),
+      Location.in_box(north: cal.north, south: cal.south, east: cal.east),
       "`scope: in_box` should be empty if an argument is missing"
     )
     assert_empty(
-      Location.in_box(n: 91, s: cal.south, e: cal.east, w: cal.west),
+      Location.in_box(
+        north: 91, south: cal.south, east: cal.east, west: cal.west
+      ),
       "`scope: in_box` should be empty if an argument is out of bounds"
     )
     assert_empty(
       Location.in_box(
-        n: cal.south - 10, s: cal.south, e: cal.east, w: cal.west
+        north: cal.south - 10, south: cal.south, east: cal.east, west: cal.west
       ),
       "`scope: in_box` should be empty if N < S"
     )
+  end
+
+  def test_scope_contains_box
+    # loc doesn't straddle 180
+    #   potential br (bounding rectangle, external_loc) to "left" of loc
+    do_contains_box(loc: albion, external_loc: perkatkun,
+                    regions: [california, earth])
+
+    #   potential br overlaps only "left" side of loc
+    overlaps_albion_west =
+      Location.create(
+        name: "overlaps_albion_west", user: users(:rolf),
+        north: albion.north, south: albion.south, east: albion.east - 0.05,
+        west: albion.west - 0.05
+      )
+    do_contains_box(loc: albion, external_loc: overlaps_albion_west)
+
+    #   potential br overlaps only "right" side of loc
+    overlaps_albion_east =
+      Location.create(
+        name: "overlaps_albion_east", user: users(:rolf),
+        north: albion.north, south: albion.south, west: albion.west + 0.05,
+        east: albion.east + 0.05
+      )
+    do_contains_box(loc: albion, external_loc: overlaps_albion_east)
+
+    #   potential br (bounding rectangle) entirely to "right" of loc
+    nybg = locations(:nybg_location)
+    do_contains_box(loc: albion, external_loc: nybg)
+
+    # loc straddles 180
+    #   potential br entirely outside of loc
+    russia = Location.create(
+      name: "russia", user: users(:rolf),
+      north: 86.217, south: 38.083, west: 27.370116, east: -168.995128
+    )
+    do_contains_box(loc: wrangel, external_loc: albion,
+                    regions: [russia, earth])
+    #   potential br overlaps only "left" side of loc
+    overlaps_wrangel_west =
+      Location.create(
+        name: "overlaps_wrangel_west", user: users(:rolf),
+        north: wrangel.north, south: wrangel.south, east: wrangel.east - 0.05,
+        west: wrangel.west - 0.05
+      )
+    do_contains_box(loc: wrangel, external_loc: overlaps_wrangel_west)
+
+    #   potential br overlaps only "right" side of loc
+    overlaps_wrangel_east =
+      Location.create(
+        name: "overlaps_wrangel_east", user: users(:rolf),
+        north: wrangel.north, south: wrangel.south, east: wrangel.east + 0.05,
+        west: wrangel.west + 0.05
+      )
+    do_contains_box(loc: wrangel, external_loc: overlaps_wrangel_east)
+
+    # These failed depending on the rounding correction used by `contains_box`
+    do_contains_box(loc: perkatkun, regions: [wrangel, earth])
+    do_contains_box(loc: california, regions: [earth])
+  end
+
+  def test_scope_with_minimum_bounding_box_containing_point
+    falmouth = locations(:falmouth)
+    assert_equal(
+      falmouth,
+      Location.with_minimum_bounding_box_containing_point(
+        lat: falmouth.center_lat, lng: falmouth.center_lng
+      )
+    )
+
+    california_locations = Location.where(Location[:name] =~ /California, USA$/)
+    assert_empty(
+      california_locations.with_minimum_bounding_box_containing_point(
+        lat: falmouth.center_lat, lng: falmouth.center_lng
+      )
+    )
+  end
+
+  def albion
+    locations(:albion)
+  end
+
+  def california
+    locations(:california)
+  end
+
+  def earth
+    locations(:unknown_location)
+  end
+
+  def perkatkun
+    locations(:perkatkun)
+  end
+
+  def wrangel
+    locations(:east_lt_west_location)
+  end
+
+  def do_contains_box(loc:, external_loc: nil,
+                      regions: [locations(:unknown_location)])
+    containers = Location.contains_box(**loc.bounding_box)
+
+    assert_includes(containers, loc,
+                    "Location #{loc.name} should contain itself")
+    regions.each do |region|
+      assert_includes(
+        containers, region,
+        "#{region.name} should contain #{loc.name}"
+      )
+    end
+    return if external_loc.blank?
+
+    assert_not_includes(
+      containers, external_loc,
+      "#{external_loc.name} shouldn't contain #{loc.name}"
+    )
+  end
+
+  def test_hidden
+    User.current = mary
+    high = 60.234
+    low = 60.123
+    loc = Location.create!(
+      hidden: true,
+      name: "Somewhere Hidden",
+      north: high,
+      south: low,
+      east: high,
+      west: low
+    )
+    assert_equal(loc.north, high.ceil(1))
+    assert_equal(loc.south, low.floor(1))
+    assert_equal(loc.east, high.ceil(1))
+    assert_equal(loc.west, low.floor(1))
   end
 end

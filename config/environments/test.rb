@@ -26,6 +26,11 @@ MushroomObserver::Application.configure do
   config.water_users = []
   config.oil_users   = []
 
+  # REDIRECT_URI (Callback URL)
+  # iNat calls this after iNat user authorizes MO to access their data.
+  config.redirect_uri =
+    "http://localhost:3000/observations/inat_imports/authorization_response"
+
   # ----------------------------
   #  Rails configuration.
   # ----------------------------
@@ -53,7 +58,10 @@ MushroomObserver::Application.configure do
 
   # Show full error reports and disable caching.
   config.consider_all_requests_local = true
-  config.action_controller.perform_caching = false
+  # config.action_controller.perform_caching = false
+
+  # Use a different cache store in test.
+  config.cache_store = :null_store
 
   # Render exception templates for rescuable exceptions and raise for other
   # exceptions.
@@ -77,6 +85,9 @@ MushroomObserver::Application.configure do
   # Allow YAML deserializer to deserialize symbols
   # https://groups.google.com/g/rubyonrails-security/c/MmFO3LYQE8U?pli=1
   config.active_record.yaml_column_permitted_classes = [Symbol]
+  # If test server is running puma for action cable,
+  # ensure that test database is shared between threads
+  # config.active_record.shared_connection = true
 
   # Debugging strict loading - either :log, or :error out the page
   # config.active_record.action_on_strict_loading_violation = :error
@@ -111,6 +122,8 @@ MushroomObserver::Application.configure do
   config.active_support.test_order = :random
 
   config.bot_enabled = true
+
+  config.active_job.queue_adapter = :test
 
   # ----------------------------
   #  Bullet configuration.

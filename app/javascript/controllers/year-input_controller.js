@@ -3,12 +3,13 @@ import { Controller } from "@hotwired/stimulus"
 // Connects to data-controller="year-input"
 export default class extends Controller {
   connect() {
-    this.element.dataset.stimulus = "connected";
+    this.element.dataset.stimulus = "year-input-connected";
 
     this.id = this.element.getAttribute("id");
     // console.log(this.id)
 
-    if (this.id && this.id.indexOf("_1i") > 0) {
+    if (this.id && (
+      this.id.indexOf("_1i") > 0 || this.id.indexOf("_year") > 0)) {
       // copy the attributes
       this.name = this.element.getAttribute("name");
       this.classList = this.element.classList || "";

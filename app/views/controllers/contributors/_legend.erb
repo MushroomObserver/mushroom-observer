@@ -1,0 +1,67 @@
+<%
+heading = tag.strong(:users_by_contribution_legend.l)
+links = tag.button(
+  class: "btn btn-xs btn-link",
+  data: { toggle: "collapse", target: "#contribution_legend" },
+  aria: { expanded: "false", controls: "contribution_legend" }
+) do
+  tag.span("", class: "glyphicon glyphicon-info-sign")
+end
+
+example_weights = [
+  { weight: UserStats::ALL_FIELDS[:images][:weight],
+    number: 3, text: :users_by_contribution_2a.t },
+  { weight: UserStats::ALL_FIELDS[:name_description_editors][:weight],
+    number: 1, text: :users_by_contribution_2b.t },
+  { weight: UserStats::ALL_FIELDS[:observations][:weight],
+    number: 1, text: :users_by_contribution_2c.t },
+  { weight: UserStats::ALL_FIELDS[:namings][:weight],
+    number: 1, text: :users_by_contribution_2d.t },
+  { weight: UserStats::ALL_FIELDS[:votes][:weight],
+    number: 1, text: :users_by_contribution_2e.t }
+]
+counter = 0
+total = 0
+%>
+
+<%= panel_block(heading: heading, heading_links: links,
+                inner_class: "collapse", inner_id: "contribution_legend") do %>
+
+  <%= tag.div(:users_by_contribution_1.tp, class: "mb-3") %>
+
+  <table class="table text-center bg-none mx-lg-5">
+    <% UserStats.fields_with_weight.keys.each do |field| %>
+      <tr>
+        <td><%= "user_stats_#{field}".to_sym.t %></td>
+        <td><%= UserStats::ALL_FIELDS[field][:weight] %></td>
+        <td></td>
+      </tr><!--.row-->
+    <% end %>
+  </table>
+
+  <%= tag.p(:users_by_contribution_2.t, class: "pt-3") %>
+
+  <table class="table table-condensed bg-none w-auto mx-auto">
+    <% example_weights.each do |example|
+      add = (counter == 0) ? tag.span("", class: "ml-4") : "+"
+      counter += 1
+      total += example[:number] * example[:weight]
+      example_math = [
+        add, example[:number], "*", example[:weight]
+      ].safe_join(" ") %>
+      <%= tag.tr do
+        concat(tag.td(example_math))
+        concat(tag.td(["(", example[:text], ")"].safe_join))
+        concat(tag.td)
+      end %>
+    <% end %>
+    <%= tag.tr do
+      concat(tag.td { tag.span(total.to_s, class: "ml-4") })
+      concat(tag.td(:users_by_contribution_2f.t))
+      concat(tag.td)
+    end %>
+  </table>
+
+  <%= :users_by_contribution_3.tp %>
+
+<% end %>

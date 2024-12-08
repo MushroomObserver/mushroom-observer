@@ -58,7 +58,7 @@ module Report
         row.county,
         row.locality,
         row.obs_lat,
-        row.obs_long,
+        row.obs_lng,
         row.obs_alt,
         row.loc_north,
         row.loc_south,

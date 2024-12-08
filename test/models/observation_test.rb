@@ -166,19 +166,19 @@ class ObservationTest < UnitTestCase
   def test_minimal_map_observation
     obs = observations(:minimal_unknown_obs)
 
-    min_map = Mappable::MinimalObservation.new(obs.id, obs.lat, obs.long,
+    min_map = Mappable::MinimalObservation.new(obs.id, obs.lat, obs.lng,
                                                obs.location.id)
     assert_objs_equal(locations(:burbank), min_map.location)
     assert_equal(locations(:burbank).id, min_map.location_id)
 
-    min_map = Mappable::MinimalObservation.new(obs.id, obs.lat, obs.long,
+    min_map = Mappable::MinimalObservation.new(obs.id, obs.lat, obs.lng,
                                                obs.location)
     assert_objs_equal(locations(:burbank), min_map.location)
     assert_equal(locations(:burbank).id, min_map.location_id)
 
     assert(min_map.observation?)
     assert_not(min_map.location?)
-    assert_not(min_map.lat_long_dubious?)
+    assert_not(min_map.lat_lng_dubious?)
 
     min_map.location = locations(:albion)
     assert_objs_equal(locations(:albion), min_map.location)
@@ -883,7 +883,7 @@ class ObservationTest < UnitTestCase
 
     # template and orphaned notes
     obs   = observations(:templater_orphaned_notes_obs)
-    parts = ["Cap", "Nearby trees", "odor", "orphaned_caption", "Other"]
+    parts = ["Cap", "Nearby trees", "odor", "orphaned caption", "Other"]
     assert_equal(parts, obs.form_notes_parts(obs.user))
 
     # template and notes for a template part
@@ -898,14 +898,14 @@ class ObservationTest < UnitTestCase
 
     # template and notes for a template part and orphaned part
     obs   = observations(:template_and_orphaned_notes_obs)
-    parts = ["Cap", "Nearby trees", "odor", "orphaned_caption", "Other"]
+    parts = ["Cap", "Nearby trees", "odor", "orphaned caption", "Other"]
     assert_equal(parts, obs.form_notes_parts(obs.user))
 
     # template and notes for a template part, orphaned part, Other,
     # with order scrambled in the Observation
     obs   = observations(:template_and_orphaned_notes_scrambled_obs)
-    parts = ["Cap", "Nearby trees", "odor", "orphaned_caption_1",
-             "orphaned_caption_2", "Other"]
+    parts = ["Cap", "Nearby trees", "odor", "orphaned caption 1",
+             "orphaned caption 2", "Collector", "Other"]
     assert_equal(parts, obs.form_notes_parts(obs.user))
   end
 
@@ -915,6 +915,36 @@ class ObservationTest < UnitTestCase
     obs = observations(:template_and_orphaned_notes_scrambled_obs)
     assert_equal("red", obs.notes_part_value("Cap"))
     assert_equal("pine", obs.notes_part_value("Nearby trees"))
+  end
+
+  # nil notes were seen in the wild
+  def test_notes_nil
+    User.current = mary
+    obs = Observation.create!(name_id: names(:fungi).id, when_str: "2020-07-05",
+                              notes: nil)
+
+    assert_nothing_raised do
+      obs.notes[:Collector]
+    rescue StandardError => e
+      flunk(
+        "It shouldn't throw \"#{e.message}\" when reading part of a nil Note"
+      )
+    end
+  end
+
+  # empty string notes were seen in the wild
+  def test_notes_empty_string
+    User.current = mary
+    obs = Observation.create!(name_id: names(:fungi).id,
+                              when_str: "2020-07-05", notes: "")
+    assert_nothing_raised do
+      obs.notes[:Collector]
+    rescue StandardError => e
+      flunk(
+        "It shouldn't throw \"#{e.message}\" when reading part of " \
+        "a Note that's an empty string"
+      )
+    end
   end
 
   def test_make_sure_no_observations_are_misspelled
@@ -933,18 +963,18 @@ class ObservationTest < UnitTestCase
   end
 
   def test_gps_hidden
-    obs = observations(:unknown_with_lat_long)
+    obs = observations(:unknown_with_lat_lng)
     assert_equal(34.1622, obs.lat)
-    assert_equal(-118.3521, obs.long)
+    assert_equal(-118.3521, obs.lng)
     assert_equal(34.1622, obs.public_lat)
-    assert_equal(-118.3521, obs.public_long)
+    assert_equal(-118.3521, obs.public_lng)
 
     obs.update_attribute(:gps_hidden, true)
     assert_nil(obs.public_lat)
-    assert_nil(obs.public_long)
+    assert_nil(obs.public_lng)
     User.current = mary
     assert_equal(34.1622, obs.public_lat)
-    assert_equal(-118.3521, obs.public_long)
+    assert_equal(-118.3521, obs.public_lng)
   end
 
   def test_place_name_and_coordinates_with_values
@@ -1007,7 +1037,7 @@ class ObservationTest < UnitTestCase
     User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
-      Observation.create!(name_id: fungi.id, long: 90.0)
+      Observation.create!(name_id: fungi.id, lng: 90.0)
     end
     assert_match(:runtime_lat_long_error.t, exception.message)
   end
@@ -1242,23 +1272,25 @@ class ObservationTest < UnitTestCase
     )
   end
 
+  def ecuador_box
+    { north: 1.49397, south: -5.06906, east: -75.1904, west: -92.6038 }
+  end
+
+  def tiny_box
+    { north: 0.0001, south: 0.0001, east: 0.0001, west: 0 }
+  end
+
   def test_scope_in_box
     cal = locations(:california)
-    obss_in_cal_box = Observation.in_box(
-      n: cal.north, s: cal.south, e: cal.east, w: cal.west
-    )
+    obss_in_cal_box = Observation.in_box(**cal.bounding_box)
     nybg = locations(:nybg_location)
-    obss_in_nybg_box = Observation.in_box(
-      n: nybg.north, s: nybg.south, e: nybg.east, w: nybg.west
-    )
-    obss_in_ecuador_box = Observation.in_box(
-      n: 1.49397, s: -5.06906, e: -75.1904, w: -92.6038
-    )
+    obss_in_nybg_box = Observation.in_box(**nybg.bounding_box)
+    obss_in_ecuador_box = Observation.in_box(**ecuador_box)
     quito_obs =
       Observation.create!(
         user: users(:rolf),
         lat: -0.1865944,
-        long: -78.4305382,
+        lng: -78.4305382,
         where: "Quito, Ecuador"
       )
     wrangel = locations(:east_lt_west_location)
@@ -1266,19 +1298,14 @@ class ObservationTest < UnitTestCase
       Observation.create!(
         user: users(:rolf),
         lat: (wrangel.north + wrangel.south) / 2,
-        long: (wrangel.east + wrangel.west) / 2 + wrangel.west
+        lng: (wrangel.east + wrangel.west) / 2 + wrangel.west
       )
-    obss_in_wrangel_box = Observation.in_box(
-      n: wrangel.north, s: wrangel.south, e: wrangel.east, w: wrangel.west
-    )
+    obss_in_wrangel_box = Observation.in_box(**wrangel.bounding_box)
 
     # boxes not straddling 180 deg
-    assert_includes(obss_in_cal_box,
-                    observations(:unknown_with_lat_long))
-    assert_includes(obss_in_ecuador_box,
-                    quito_obs)
-    assert_not_includes(obss_in_nybg_box,
-                        observations(:unknown_with_lat_long))
+    assert_includes(obss_in_cal_box, observations(:unknown_with_lat_lng))
+    assert_includes(obss_in_ecuador_box, quito_obs)
+    assert_not_includes(obss_in_nybg_box, observations(:unknown_with_lat_lng))
     assert_not_includes(obss_in_cal_box,
                         observations(:minimal_unknown_obs),
                         "Observation without lat/lon should not be in box")
@@ -1286,49 +1313,47 @@ class ObservationTest < UnitTestCase
     # box straddling 180 deg
     assert_includes(obss_in_wrangel_box, wrangel_obs)
     assert_not_includes(obss_in_wrangel_box,
-                        observations(:unknown_with_lat_long))
+                        observations(:unknown_with_lat_lng))
 
     assert_empty(Observation.where(lat: 0.001), "Test needs different fixture")
-    assert_empty(Observation.in_box(n: 0.0001, s: 0.0001, e: 0.0001, w: 0),
-                 "Observation.in_box should be empty if " \
-                 "there are no Observations in the box")
+    assert_empty(
+      Observation.in_box(**tiny_box),
+      "Observation.in_box should be empty if " \
+      "there are no Observations in the box"
+    )
 
     # invalid arguments
     assert_empty(
-      Observation.in_box(n: cal.north, s: cal.south, e: cal.east),
+      Observation.in_box(north: cal.north, south: cal.south, east: cal.east),
       "`Observation.in_box` should be empty if an argument is missing"
     )
     assert_empty(
-      Observation.in_box(n: 91, s: cal.south, e: cal.east, w: cal.west),
+      Observation.in_box(
+        north: 91, south: cal.south, east: cal.east, west: cal.west
+      ),
       "`Observation.in_box` should be empty if an argument is out of bounds"
     )
     assert_empty(
-      Observation.in_box(n: cal.south - 10,
-                         s: cal.south, e: cal.east, w: cal.west),
+      Observation.in_box(north: cal.south - 10,
+                         south: cal.south, east: cal.east, west: cal.west),
       "`Observation.in_box` should be empty if N < S"
     )
   end
 
   def test_scope_not_in_box
     cal = locations(:california)
-    obss_not_in_cal_box = Observation.not_in_box(
-      n: cal.north, s: cal.south, e: cal.east, w: cal.west
-    )
-    obs_with_burbank_geoloc = observations(:unknown_with_lat_long)
+    obss_not_in_cal_box = Observation.not_in_box(**cal.bounding_box)
+    obs_with_burbank_geoloc = observations(:unknown_with_lat_lng)
 
     nybg = locations(:nybg_location)
-    obss_not_in_nybg_box = Observation.not_in_box(
-      n: nybg.north, s: nybg.south, e: nybg.east, w: nybg.west
-    )
+    obss_not_in_nybg_box = Observation.not_in_box(**nybg.bounding_box)
 
-    obss_not_in_ecuador_box = Observation.not_in_box(
-      n: 1.49397, s: -5.06906, e: -75.1904, w: -92.6038
-    )
+    obss_not_in_ecuador_box = Observation.not_in_box(**ecuador_box)
     quito_obs =
       Observation.create!(
         user: users(:rolf),
         lat: -0.1865944,
-        long: -78.4305382,
+        lng: -78.4305382,
         where: "Quito, Ecuador"
       )
 
@@ -1337,11 +1362,9 @@ class ObservationTest < UnitTestCase
       Observation.create!(
         user: users(:rolf),
         lat: (wrangel.north + wrangel.south) / 2,
-        long: (wrangel.east + wrangel.west) / 2 + wrangel.west
+        lng: (wrangel.east + wrangel.west) / 2 + wrangel.west
       )
-    obss_not_in_wrangel_box = Observation.not_in_box(
-      n: wrangel.north, s: wrangel.south, e: wrangel.east, w: wrangel.west
-    )
+    obss_not_in_wrangel_box = Observation.not_in_box(**wrangel.bounding_box)
 
     # boxes not straddling 180 deg
     assert_not_includes(obss_not_in_cal_box, obs_with_burbank_geoloc)
@@ -1356,7 +1379,7 @@ class ObservationTest < UnitTestCase
 
     assert_equal(
       Observation.count,
-      Observation.not_in_box(n: 0.0001, s: 0.0001, e: 0.0001, w: 0).count,
+      Observation.not_in_box(**tiny_box).count,
       "All Observations should be excluded from a tiny box in middle of nowhere"
     )
 
@@ -1364,19 +1387,23 @@ class ObservationTest < UnitTestCase
     all_observations_count = Observation.count
     assert_equal(
       all_observations_count,
-      Observation.not_in_box(n: cal.north, s: cal.south, e: cal.east).count,
+      Observation.not_in_box(
+        north: cal.north, south: cal.south, east: cal.east
+      ).count,
       "All Observations should be excluded from a box with missing boundary"
     )
     assert_equal(
       all_observations_count,
-      Observation.not_in_box(n: 91, s: cal.south,
-                             e: cal.east, w: cal.west).count,
+      Observation.not_in_box(
+        north: 91, south: cal.south, east: cal.east, west: cal.west
+      ).count,
       "All Observations should be excluded from a box with an out-of-bounds arg"
     )
     assert_equal(
       all_observations_count,
-      Observation.not_in_box(n: cal.south - 10, s: cal.south,
-                             e: cal.east, w: cal.west).count,
+      Observation.not_in_box(
+        north: cal.south - 10, south: cal.south, east: cal.east, west: cal.west
+      ).count,
       "All Observations should be excluded from box whose N < S"
     )
   end
@@ -1388,21 +1415,28 @@ class ObservationTest < UnitTestCase
                         observations(:displayed_at_obs))
   end
 
-  def test_scope_has_notes_field
-    assert_includes(Observation.has_notes_field("substrate"),
+  def test_scope_with_notes_field
+    assert_includes(Observation.with_notes_field("substrate"),
                     observations(:substrate_notes_obs))
     obs_substrate_in_plain_text =
       Observation.create!(notes: "The substrate is wood",
                           user: users(:rolf))
-    assert_not_includes(Observation.has_notes_field("substrate"),
+    assert_not_includes(Observation.with_notes_field("substrate"),
                         obs_substrate_in_plain_text)
-    assert_empty(Observation.has_notes_field(ARBITRARY_SHA))
+    assert_empty(Observation.with_notes_field(ARBITRARY_SHA))
   end
 
-  def test_scope_without_sequence
-    assert_includes(Observation.without_sequence,
+  def test_scope_with_sequences
+    assert_includes(Observation.with_sequences,
+                    observations(:genbanked_obs))
+    assert_not_includes(Observation.with_sequences,
+                        observations(:minimal_unknown_obs))
+  end
+
+  def test_scope_without_sequences
+    assert_includes(Observation.without_sequences,
                     observations(:minimal_unknown_obs))
-    assert_not_includes(Observation.without_sequence,
+    assert_not_includes(Observation.without_sequences,
                         observations(:genbanked_obs))
   end
 
@@ -1450,5 +1484,14 @@ class ObservationTest < UnitTestCase
     obs = observations(:amateur_obs)
     assert_equal("mo_iphone_app", obs.source)
     assert_equal(:source_credit_mo_iphone_app, obs.source_credit)
+  end
+
+  def test_hidden_location
+    create_new_objects
+    assert_false(@cc_obs.gps_hidden)
+    @cc_obs.location = locations(:loc_hidden)
+    @cc_obs.save
+    @cc_obs.reload
+    assert(@cc_obs.gps_hidden)
   end
 end

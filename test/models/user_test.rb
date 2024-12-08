@@ -256,8 +256,8 @@ class UserTest < UnitTestCase
     num_publications = Publication.count
 
     # Find one of Katrina's observations.
-    assert_equal(2, user.observations.length)
-    observation = user.observations.find_by(gps_hidden: false)
+    obs_count = user.observations.length
+    observation = observations(:amateur_obs)
     observation_id = observation.id
 
     # Attach her image to the observation.
@@ -290,7 +290,7 @@ class UserTest < UnitTestCase
     User.erase_user(user.id)
 
     # Should have deleted one of each type of object.
-    assert_equal(num_observations - 2, Observation.count)
+    assert_equal(num_observations - obs_count, Observation.count)
     assert_equal(num_namings - 1, Naming.count)
     assert_equal(num_votes - 1, Vote.count)
     assert_equal(num_images - 1, Image.count)
@@ -583,5 +583,14 @@ class UserTest < UnitTestCase
     assert_operator(0, "<", spam.publications.count)
     spam.publications.first.destroy
     assert_true(spam.reload.no_references_left?)
+  end
+
+  def test_culling_unverified_users
+    unverified = users(:unverified)
+    msgs = User.cull_unverified_users(dry_run: true)
+    assert_equal("Deleted 1 unverified user(s).", msgs.first)
+    msgs = User.cull_unverified_users(dry_run: false)
+    assert_equal("Deleted 1 unverified user(s).", msgs.first)
+    assert_nil(User.find_by(id: unverified.id))
   end
 end

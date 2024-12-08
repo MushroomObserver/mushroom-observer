@@ -4,11 +4,11 @@ when "new", "create"
   url_params = add_query_param(
     { action: :create, observation_id: @observation.id }
   )
-  button = :ADD.t
+  button = :ADD.l
 when "edit", "update"
   url_params = add_query_param({ action: :update })
   url_params = url_params.merge({ back: @back }) if @back.present?
-  button = :UPDATE.t
+  button = :UPDATE.l
 end
 form_args = {
   model: @sequence, url: url_params, id: "sequence_form"
@@ -50,8 +50,7 @@ end
       ) %>
 
   <%= select_with_label(form: f, field: :archive, label: :ARCHIVE.t + ":",
-                        options: sequence_archive_options,
-                        select_opts: { include_blank: true },
+                        options: sequence_archive_options, include_blank: true,
                         inline: true, class: "ml-5") %>
 
   <%= text_field_with_label(form: f, field: :accession,

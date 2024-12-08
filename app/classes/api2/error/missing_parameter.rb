@@ -2,7 +2,7 @@
 
 class API2
   # Missing required parameter.
-  class MissingParameter < Error
+  class MissingParameter < FatalError
     def initialize(arg)
       super()
       args.merge!(arg: arg.to_s)

@@ -1,0 +1,13 @@
+<%
+add_project_banner(@project)
+
+@container = :wide
+%>
+
+<div class="list-group">
+  <% @locations.each do |loc| %>
+    <div class="list-group-item">
+	  <%= link_to(loc.display_name, checklist_path(project_id: @project.id, location_id: loc.id)) %>
+    </div>
+  <% end %>
+</div>

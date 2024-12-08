@@ -2,7 +2,7 @@
 
 class API2
   # Parameter has bad syntax.
-  class BadParameterValue < Error
+  class BadParameterValue < FatalError
     def initialize(str, type)
       super()
       args.merge!(val: str.to_s, type: type)

@@ -3,18 +3,33 @@
 class API2
   # API for User
   class UserAPI < ModelAPI
-    self.model = User
+    def model
+      User
+    end
 
-    self.high_detail_page_length = 100
-    self.low_detail_page_length  = 1000
-    self.put_page_length         = 1000
-    self.delete_page_length      = 1000
+    def high_detail_page_length
+      100
+    end
 
-    self.high_detail_includes = [
-      :api_keys,
-      :location,
-      { image: [:license, :user] }
-    ]
+    def low_detail_page_length
+      1000
+    end
+
+    def put_page_length
+      1000
+    end
+
+    def delete_page_length
+      1000
+    end
+
+    def high_detail_includes
+      [
+        :api_keys,
+        :location,
+        { image: [:license, :user] }
+      ]
+    end
 
     def query_params
       {
@@ -78,6 +93,8 @@ class API2
       key.verified = nil
       key.save
       user.reload
+      email = QueuedEmail::VerifyAccount.create_email(user)
+      email.destroy if email.send_email
     end
 
     def build_deleter

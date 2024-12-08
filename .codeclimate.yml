@@ -68,7 +68,7 @@ plugins:
     # because Github actions linter is broken
     # See .github/workflows/ci_rails.yml
     # JDC 2023-06-04
-    channel: beta
+    channel: brakeman-6-0-1
     enabled: true
 
 # helps find security vulnerabilities in Ruby dependencies

@@ -79,7 +79,7 @@ class MatrixBoxPresenter < BasePresenter
       # for matrix_box_carousels:
       # images: [image],
       image_link: image.show_link_args,
-      context: :matrix_box
+      full_width: true
     }
   end
 
@@ -112,7 +112,7 @@ class MatrixBoxPresenter < BasePresenter
       # thumb_image: thumb_image,
       image_link: observation.show_link_args, # false for thumb thru images
       obs: observation,
-      context: :matrix_box
+      full_width: true
     }
   end
 
@@ -140,7 +140,7 @@ class MatrixBoxPresenter < BasePresenter
       # images: [user.image_id],
       image_link: user.show_link_args,
       votes: false,
-      context: :matrix_box
+      full_width: true
     }
   end
 
@@ -164,7 +164,7 @@ class MatrixBoxPresenter < BasePresenter
       # images: images,
       # image_link: target.show_link_args,
       obs: obs_data(target),
-      context: :matrix_box
+      full_width: true
     }
   end
 

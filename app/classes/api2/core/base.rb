@@ -172,7 +172,7 @@
 #
 #    class SizeParser < EnumParser
 #      def initialize(api, key, args)
-#        args[:limit] = Image.all_sizes
+#        args[:limit] = Image::ALL_SIZES
 #        super
 #      end
 #    end
@@ -249,7 +249,8 @@ module API2::Base
     self.params = params
     self.action = params[:action]
     self.errors = []
-    initializers.each { |x| instance_exec(&x) }
+    initialize_parameters
+    initialize_results
   end
 
   def handle_version

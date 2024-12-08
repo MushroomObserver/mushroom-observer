@@ -4,26 +4,41 @@ class API2
   # API for Observation
   # rubocop:disable Metrics/ClassLength
   class ObservationAPI < ModelAPI
-    self.model = Observation
+    def model
+      Observation
+    end
 
-    self.high_detail_page_length = 100
-    self.low_detail_page_length  = 1000
-    self.put_page_length         = 1000
-    self.delete_page_length      = 1000
+    def high_detail_page_length
+      100
+    end
 
-    self.high_detail_includes = [
-      :collection_numbers,
-      { comments: :user },
-      :external_links,
-      { herbarium_records: :herbarium },
-      { images: [:license, :user] },
-      :location,
-      :name,
-      { namings: [:name, :user] },
-      :sequences,
-      :user,
-      { votes: :user }
-    ]
+    def low_detail_page_length
+      1000
+    end
+
+    def put_page_length
+      1000
+    end
+
+    def delete_page_length
+      1000
+    end
+
+    def high_detail_includes
+      [
+        :collection_numbers,
+        { comments: :user },
+        :external_links,
+        { herbarium_records: :herbarium },
+        { images: [:license, :user] },
+        :location,
+        :name,
+        { namings: [:name, :user] },
+        :sequences,
+        :user,
+        { votes: :user }
+      ]
+    end
 
     # rubocop:disable Metrics/MethodLength
     def query_params
@@ -45,13 +60,13 @@ class API2
         is_collection_location: parse(:boolean, :is_collection_location,
                                       help: 1),
         gps_hidden: parse(:boolean, :gps_hidden, help: 1),
-        has_images: parse(:boolean, :has_images),
-        has_location: parse(:boolean, :has_location),
-        has_name: parse(:boolean, :has_name, help: :min_rank),
-        has_comments: parse(:boolean, :has_comments, limit: true),
-        has_specimen: parse(:boolean, :has_specimen),
-        has_notes: parse(:boolean, :has_notes),
-        has_notes_fields: parse_array(:string, :has_notes_field, help: 1),
+        with_images: parse(:boolean, :has_images),
+        with_public_lat_lng: parse(:boolean, :has_public_lat_lng),
+        with_name: parse(:boolean, :has_name, help: :min_rank),
+        with_comments: parse(:boolean, :has_comments, limit: true),
+        with_specimen: parse(:boolean, :has_specimen),
+        with_notes: parse(:boolean, :has_notes),
+        with_notes_fields: parse_array(:string, :has_notes_field, help: 1),
         notes_has: parse(:string, :notes_has, help: 1),
         comments_has: parse(:string, :comments_has, help: 1),
         north: n,
@@ -69,7 +84,7 @@ class API2
         when: parse(:date, :date) || Time.zone.today,
         place_name: @location,
         lat: @latitude,
-        long: @longitude,
+        lng: @longitude,
         alt: @altitude,
         specimen: @has_specimen,
         is_collection_location: parse(:boolean, :is_collection_location,
@@ -96,7 +111,7 @@ class API2
         place_name: parse(:place_name, :set_location, limit: 1024,
                                                       not_blank: true),
         lat: @latitude,
-        long: @longitude,
+        lng: @longitude,
         alt: @altitude,
         specimen: parse(:boolean, :set_has_specimen),
         is_collection_location: parse(:boolean, :set_is_collection_location,
@@ -117,6 +132,7 @@ class API2
       obs.log(:log_observation_created) if @log
       create_specimen_records(obs) if obs.specimen
       create_naming(obs)
+      add_field_slip_code(obs)
     end
 
     def validate_update_params!(params)
@@ -153,6 +169,30 @@ class API2
       naming.save!
       consensus = ::Observation::NamingConsensus.new(obs)
       consensus.change_vote(naming, @vote, user)
+    end
+
+    def add_field_slip_code(observation)
+      return unless @code
+
+      field_slip = FieldSlip.find_by(code: @code)
+      if field_slip
+        raise(FieldSlipInUse.new(field_slip)) if field_slip.observation
+
+        field_slip.update!(observation:)
+      else
+        field_slip = FieldSlip.create!(observation:, code: @code)
+      end
+      update_project(field_slip.project, observation)
+    end
+
+    def update_project(project, observation)
+      return unless project && !project.violates_constraints?(observation)
+
+      user = observation.user
+      project.join(user)
+      return unless project.member?(user)
+
+      project.add_observation(observation)
     end
 
     def create_specimen_records(obs)
@@ -231,6 +271,7 @@ class API2
       @name    = parse(:name, :name, default: Name.unknown)
       @vote    = parse(:float, :vote, default: Vote.maximum_vote)
       @log     = parse(:boolean, :log, default: true, help: 1)
+      @code    = parse(:string, :code)
       @notes   = parse_notes_fields!
       @reasons = parse_naming_reasons!
       parse_herbarium_and_specimen!
@@ -331,6 +372,20 @@ class API2
       @latitude  = parse(:latitude, :latitude)
       @longitude = parse(:longitude, :longitude)
       @altitude  = parse(:altitude, :altitude)
+      prefer_minimum_bounding_box_to_earth!
+    end
+
+    def prefer_minimum_bounding_box_to_earth!
+      return unless Location.is_unknown?(@location) &&
+                    @latitude.present? && @longitude.present?
+
+      mbb =
+        Location.with_minimum_bounding_box_containing_point(
+          lat: @latitude, lng: @longitude
+        ).
+        # See comment at Observation#prefer_minimum_bounding_box_to_earth
+        presence || Location.unknown
+      @location = mbb.name
     end
 
     def parse_herbarium_and_specimen!

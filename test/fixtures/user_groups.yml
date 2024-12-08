@@ -30,6 +30,12 @@ lone_wolf_users:
 lone_wolf_admins:
   name: Lone Wolf Project.admin
 
+falmouth_2023_09_users:
+  name: falmouth_2023_09 Project
+
+falmouth_2023_09_admins:
+  name: falmouth_2023_09 Project.admin
+
 burbank_users:
   name: Burbank Project
 
@@ -57,6 +63,9 @@ dick_only:
 katrina_only:
   name: user <%= ActiveRecord::FixtureSet.identify(:katrina) %>
 
+ollie_only:
+  name: user <%= ActiveRecord::FixtureSet.identify(:ollie) %>
+
 roy_only:
   name: user <%= ActiveRecord::FixtureSet.identify(:roy) %>
 
@@ -68,3 +77,12 @@ article_writers:
 
 thorsten_only:
   name: user <%= ActiveRecord::FixtureSet.identify(:thorsten) %>
+
+webmaster_only:
+  name: user <%= ActiveRecord::FixtureSet.identify(:webmaster) %>
+
+super_importers_users:
+  name: SuperImporters Project
+
+super_importers_admin:
+  name: SuperImporters Project.admin

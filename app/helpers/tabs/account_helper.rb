@@ -47,7 +47,7 @@ module Tabs
     end
 
     def account_bulk_license_updater_tab
-      [:bulk_license_link.t, images_license_updater_path,
+      [:bulk_license_link.t, images_edit_licenses_path,
        { class: tab_id(__method__.to_s) }]
     end
 

@@ -18,7 +18,7 @@ module Query
         updated_at?: [:time],
 
         comments_has?: :string,
-        has_notes_fields?: [:string],
+        with_notes_fields?: [:string],
         herbaria?: [:string],
         herbarium_records?: [:string],
         locations?: [:string],
@@ -27,6 +27,8 @@ module Query
         project_lists?: [:string],
         species_lists?: [:string],
         users?: [User],
+        field_slips?: [:string],
+        # pattern?: :string,
 
         # numeric
         confidence?: [:float],
@@ -36,11 +38,11 @@ module Query
         west?: :float,
 
         # boolean
-        has_comments?: { boolean: [true] },
-        has_location?: :boolean,
-        has_name?: :boolean,
-        has_notes?: :boolean,
-        has_sequences?: { boolean: [true] },
+        with_comments?: { boolean: [true] },
+        with_public_lat_lng?: :boolean,
+        with_name?: :boolean,
+        with_notes?: :boolean,
+        with_sequences?: { boolean: [true] },
         is_collection_location?: :boolean
       ).merge(content_filter_parameter_declarations(Observation)).
         merge(names_parameter_declarations).
@@ -50,6 +52,7 @@ module Query
     def initialize_flavor
       add_owner_and_time_stamp_conditions("observations")
       add_date_condition("observations.when", params[:date])
+      # add_pattern_condition
       initialize_name_parameters
       initialize_association_parameters
       initialize_boolean_parameters
@@ -67,6 +70,7 @@ module Query
       initialize_projects_parameter
       initialize_project_lists_parameter
       initialize_species_lists_parameter
+      initialize_field_slips_parameter
     end
 
     def initialize_herbaria_parameter
@@ -109,14 +113,24 @@ module Query
       )
     end
 
+    def initialize_field_slips_parameter
+      return unless params[:field_slips]
+
+      add_join(:field_slips)
+      add_exact_match_condition(
+        "field_slips.code",
+        params[:field_slips]
+      )
+    end
+
     def initialize_boolean_parameters
       initialize_is_collection_location_parameter
-      initialize_has_location_parameter
-      initialize_has_name_parameter
-      initialize_has_notes_parameter
-      add_has_notes_fields_condition(params[:has_notes_fields])
-      add_join(:comments) if params[:has_comments]
-      add_join(:sequences) if params[:has_sequences]
+      initialize_with_public_lat_lng_parameter
+      initialize_with_name_parameter
+      initialize_with_notes_parameter
+      add_with_notes_fields_condition(params[:with_notes_fields])
+      add_join(:comments) if params[:with_comments]
+      add_join(:sequences) if params[:with_sequences]
     end
 
     def initialize_is_collection_location_parameter
@@ -127,30 +141,30 @@ module Query
       )
     end
 
-    def initialize_has_location_parameter
+    def initialize_with_public_lat_lng_parameter
       add_boolean_condition(
-        "observations.location_id IS NOT NULL",
-        "observations.location_id IS NULL",
-        params[:has_location]
+        "observations.lat IS NOT NULL AND observations.gps_hidden IS FALSE",
+        "observations.lat IS NULL OR observations.gps_hidden IS TRUE",
+        params[:with_public_lat_lng]
       )
     end
 
-    def initialize_has_name_parameter
+    def initialize_with_name_parameter
       genus = Name.ranks[:Genus]
       group = Name.ranks[:Group]
       add_boolean_condition(
         "names.`rank` <= #{genus} or names.`rank` = #{group}",
         "names.`rank` > #{genus} and names.`rank` < #{group}",
-        params[:has_name],
+        params[:with_name],
         :names
       )
     end
 
-    def initialize_has_notes_parameter
+    def initialize_with_notes_parameter
       add_boolean_condition(
         "observations.notes != #{escape(Observation.no_notes_persisted)}",
         "observations.notes  = #{escape(Observation.no_notes_persisted)}",
-        params[:has_notes]
+        params[:with_notes]
       )
     end
 

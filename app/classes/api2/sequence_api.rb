@@ -3,16 +3,29 @@
 class API2
   # API for Sequence
   class SequenceAPI < ModelAPI
-    self.model = Sequence
+    def model
+      Sequence
+    end
 
-    self.high_detail_page_length = 100
-    self.low_detail_page_length  = 1000
-    self.put_page_length         = 1000
-    self.delete_page_length      = 1000
+    def high_detail_page_length
+      100
+    end
 
-    self.high_detail_includes = [
-      :user
-    ]
+    def low_detail_page_length
+      1000
+    end
+
+    def put_page_length
+      1000
+    end
+
+    def delete_page_length
+      1000
+    end
+
+    def high_detail_includes
+      [:user]
+    end
 
     # rubocop:disable Metrics/MethodLength
     def query_params
@@ -44,11 +57,11 @@ class API2
         west: w,
         is_collection_location: parse(:boolean, :is_collection_location,
                                       help: 1),
-        has_images: parse(:boolean, :has_images),
-        has_name: parse(:boolean, :has_name, help: :min_rank),
-        has_specimen: parse(:boolean, :has_specimen),
-        has_obs_notes: parse(:boolean, :has_obs_notes, help: 1),
-        has_notes_fields: parse(:string, :has_notes_field, help: 1),
+        with_images: parse(:boolean, :has_images),
+        with_name: parse(:boolean, :has_name, help: :min_rank),
+        with_specimen: parse(:boolean, :has_specimen),
+        with_obs_notes: parse(:boolean, :has_obs_notes, help: 1),
+        with_notes_fields: parse(:string, :has_notes_field, help: 1),
         obs_notes_has: parse(:string, :obs_notes_has, help: 1)
       }.merge(parse_names_parameters)
     end

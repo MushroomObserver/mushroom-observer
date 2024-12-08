@@ -42,10 +42,10 @@
 #  where::                  Where it was seen (just a String).
 #  location::               Where it was seen (Location).
 #  lat::                    Exact latitude of location.
-#  long::                   Exact longitude of location.
+#  lng::                    Exact longitude of location.
 #  alt::                    Exact altitude of location. (meters)
 #  is_collection_location:: Is this where it was growing?
-#  gps_hidden::             Hide exact lat/long?
+#  gps_hidden::             Hide exact lat/lng?
 #  name::                   Consensus Name (never deprecated, never nil).
 #  vote_cache::             Cache Vote score for the winning Name.
 #  thumb_image::            Image to use as thumbnail (if any).
@@ -54,6 +54,7 @@
 #  num_views::              Number of times it has been viewed.
 #  last_view::              Last time it was viewed.
 #  log_updated_at::         Cache of RssLogs.updated_at, for speedier index
+#  inat_id:                 iNaturalist id of corresponding Observation
 #
 #  ==== "Fake" attributes
 #  place_name::             Wrapper on top of +where+ and +location+.
@@ -61,6 +62,7 @@
 #
 #  == Class methods
 #
+#  recent_by_user::         Find last Observation by given User (+ eager-loads).
 #  define_a_location::      Update any observations using the old "where" name.
 #  touch_when_logging::     Override of AbstractModel's hook when updating log
 #  ---
@@ -98,20 +100,20 @@
 #  without_location
 #  at_location(location)
 #  in_region(where)
-#  in_box(n,s,e,w) geoloc is in the box
-#  outside(n,s,e,w) geoloc is outside the box
+#  in_box(north:, south:, east:, west:) geoloc is in the box
+#  not_in_box(north:, south:, east:, west:) geoloc is outside the box
 #  is_collection_location
 #  not_collection_location
-#  with_image
-#  without_image
+#  with_images
+#  without_images
 #  with_notes
 #  without_notes
 #  has_notes_field(field)
 #  notes_include(note)
 #  with_specimen
 #  without_specimen
-#  with_sequence
-#  without_sequence
+#  with_sequences
+#  without_sequences
 #  confidence (min %, max %)
 #  with_comments
 #  without_comments
@@ -125,6 +127,7 @@
 #  == Instance methods
 #
 #  comments::               List of Comment's attached to this Observation.
+#  images_sorted::          List of Images attached, sorted thumb_img first.
 #  interests::              List of Interest's attached to this Observation.
 #  sequences::              List of Sequences which belong to this Observation.
 #  species_lists::          List of SpeciesList's that contain this Observation.
@@ -199,6 +202,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   has_many :observation_collection_numbers, dependent: :destroy
   has_many :collection_numbers, through: :observation_collection_numbers
+  has_many :field_slips, dependent: :destroy
 
   has_many :observation_herbarium_records, dependent: :destroy
   has_many :herbarium_records, through: :observation_herbarium_records
@@ -212,6 +216,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # else Rubocop says: "before_save is supposed to appear before before_destroy"
   # because a before_destroy must precede the has_many's
   before_save :cache_content_filter_data
+  before_save :prefer_minimum_bounding_box_to_earth
+
   # rubocop:enable Rails/ActiveRecordCallbacksOrder
   after_update :notify_users_after_change
   before_destroy :destroy_orphaned_collection_numbers
@@ -224,7 +230,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
   # Extra timestamp scopes for when Observation found:
   scope :found_on, lambda { |ymd_string|
-    where(arel_table[:when].format("%Y-%m-%d") == ymd_string)
+    where(arel_table[:when].format("%Y-%m-%d").eq(ymd_string))
   }
   scope :found_after, lambda { |ymd_string|
     where(arel_table[:when].format("%Y-%m-%d") >= ymd_string)
@@ -365,6 +371,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   scope :by_user,
         ->(user) { where(user: user) }
+  # used for preloading values in the create obs form. call with `.last`
+  scope :recent_by_user,
+        lambda { |user|
+          includes(:location, :projects, :species_lists).
+            where(user_id: user.id).order(:created_at)
+        }
   scope :mappable,
         -> { where.not(location: nil).or(where.not(lat: nil)) }
   scope :unmappable,
@@ -373,6 +385,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
         -> { where.not(location: nil) }
   scope :without_location,
         -> { where(location: nil) }
+  scope :with_geolocation,
+        -> { where.not(lat: nil) }
+  scope :without_geolocation,
+        -> { where(lat: nil) }
+  scope :with_public_geolocation,
+        -> { where(gps_hidden: false).where.not(lat: nil) }
+  scope :without_public_geolocation,
+        -> { where(gps_hidden: true).or(where(lat: nil)) }
   scope :at_location,
         ->(location) { where(location: location) }
   scope :in_region,
@@ -385,77 +405,151 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
             where(Observation[:where].matches("%#{region}"))
           end
         }
-  scope :in_box, # Use named parameters (n, s, e, w), any order
+  # Pass kwargs (:north, :south, :east, :west), any order
+  # Pass mappable: false to include all obs, including with vague locations.
+  scope :in_box,
         lambda { |**args|
-          box = Mappable::Box.new(
-            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
-          )
+          args[:mappable] ||= false
+          box = Mappable::Box.new(**args.except(:mappable))
           return none unless box.valid?
 
-          # resize box by epsilon to create leeway for Float rounding
-          # Fixes a bug where Califoria fixture was not in a box
-          # defined by the fixture's north, south, east, west
-          resized_box = box.expand(0.00001)
-
           if box.straddles_180_deg?
-            where(
-              (Observation[:lat] >= resized_box.south).
-              and(Observation[:lat] <= resized_box.north).
-              and(Observation[:long] >= resized_box.west).
-              or(Observation[:long] <= resized_box.east)
-            )
+            in_box_straddling_dateline(**args)
           else
-            where(
-              (Observation[:lat] >= resized_box.south).
-              and(Observation[:lat] <= resized_box.north).
-              and(Observation[:long] >= resized_box.west).
-              and(Observation[:long] <= resized_box.east)
-            )
+            in_box_regular(**args)
           end
         }
-  scope :not_in_box, # Use named parameters (n, s, e, w), any order
+  scope :in_box_straddling_dateline, # mostly a helper for in_box
         lambda { |**args|
-          box = Mappable::Box.new(
-            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
-          )
+          args[:mappable] ||= true
+          box = Mappable::Box.new(**args.except(:mappable))
+          return none unless box.valid?
 
-          return Observation.all unless box.valid?
+          where(
+            (Observation[:lat] >= box.south).
+            and(Observation[:lat] <= box.north).
+            and(Observation[:lng] >= box.west).
+            or(Observation[:lng] <= box.east)
+          ).or(Observation.location_straddling_dateline(**args))
+        }
+  scope :location_straddling_dateline,
+        lambda { |**args|
+          box = Mappable::Box.new(**args.except(:mappable))
+          return none unless box.valid?
 
-          # resize box by epsilon to create leeway for Float rounding
-          resized_box = box.expand(-0.00001)
-
-          if box.straddles_180_deg?
+          if args[:mappable]
             where(
-              Observation[:lat].eq(nil).or(Observation[:long].eq(nil)).
-              or(Observation[:lat] < resized_box.south).
-              or(Observation[:lat] > resized_box.north).
-              or((Observation[:long] < resized_box.west).
-                 and(Observation[:long] > resized_box.east))
+              Observation[:lat].eq(nil).
+              and(Observation[:location_lat] >= box.south).
+              and(Observation[:location_lat] <= box.north).
+              and(Observation[:location_lng] >= box.west).
+              or(Observation[:location_lng] <= box.east)
             )
           else
-            where(
-              Observation[:lat].eq(nil).or(Observation[:long].eq(nil)).
-              or(Observation[:lat] < resized_box.south).
-              or(Observation[:lat] > resized_box.north).
-              or(Observation[:long] < resized_box.west).
-              or(Observation[:long] > resized_box.east)
-            )
+            joins(:location).
+              where(
+                Observation[:lat].eq(nil).
+                and(Location[:center_lat] >= box.south).
+                and(Location[:center_lat] <= box.north).
+                and(Location[:center_lng] <= box.east).
+                and(Location[:center_lng] >= box.west)
+              )
           end
+        }
+  scope :in_box_regular, # mostly a helper for in_box
+        lambda { |**args|
+          args[:mappable] ||= true
+          box = Mappable::Box.new(**args.except(:mappable))
+          return none unless box.valid?
+
+          where(
+            (Observation[:lat] >= box.south).
+            and(Observation[:lat] <= box.north).
+            and(Observation[:lng] >= box.west).
+            and(Observation[:lng] <= box.east)
+          ).or(Observation.location_center_in_box(**args))
+        }
+  scope :location_center_in_box,
+        lambda { |**args|
+          box = Mappable::Box.new(**args.except(:mappable))
+          return none unless box.valid?
+
+          # odd! will toss entire condition if below order is west, east
+          if args[:mappable]
+            where(
+              Observation[:lat].eq(nil).
+              and(Observation[:location_lat] >= box.south).
+              and(Observation[:location_lat] <= box.north).
+              and(Observation[:location_lng] <= box.east).
+              and(Observation[:location_lng] >= box.west)
+            )
+          else
+            joins(:location).
+              where(
+                Observation[:lat].eq(nil).
+                and(Location[:center_lat] >= box.south).
+                and(Location[:center_lat] <= box.north).
+                and(Location[:center_lng] <= box.east).
+                and(Location[:center_lng] >= box.west)
+              )
+          end
+        }
+
+  scope :not_in_box, # Pass kwargs (:north, :south, :east, :west), any order
+        lambda { |**args|
+          args[:mappable] ||= false
+          box = Mappable::Box.new(**args.except(:mappable))
+          return Observation.all unless box.valid?
+
+          # should be in_box(**args).invert_where
+          if box.straddles_180_deg?
+            not_in_box_straddling_dateline(**args)
+          else
+            not_in_box_regular(**args)
+          end
+        }
+  scope :not_in_box_straddling_dateline, # helper for not_in_box
+        lambda { |**args|
+          args[:mappable] ||= false
+          box = Mappable::Box.new(**args.except(:mappable))
+          return Observation.all unless box.valid?
+
+          where(
+            Observation[:lat].eq(nil).
+            or(Observation[:lat] < box.south).
+            or(Observation[:lat] > box.north).
+            or((Observation[:lng] < box.west).
+                and(Observation[:lng] > box.east))
+          )
+        }
+  scope :not_in_box_regular, # helper for not_in_box
+        lambda { |**args|
+          args[:mappable] ||= false
+          box = Mappable::Box.new(**args.except(:mappable))
+          return Observation.all unless box.valid?
+
+          where(
+            Observation[:lat].eq(nil).
+            or(Observation[:lat] < box.south).
+            or(Observation[:lat] > box.north).
+            or(Observation[:lng] < box.west).
+            or(Observation[:lng] > box.east)
+          )
         }
 
   scope :is_collection_location,
         -> { where(is_collection_location: true) }
   scope :not_collection_location,
         -> { where(is_collection_location: false) }
-  scope :with_image,
+  scope :with_images,
         -> { where.not(thumb_image: nil) }
-  scope :without_image,
+  scope :without_images,
         -> { where(thumb_image: nil) }
   scope :with_notes,
         -> { where.not(notes: no_notes) }
   scope :without_notes,
         -> { where(notes: no_notes) }
-  scope :has_notes_field,
+  scope :with_notes_field,
         ->(field) { where(Observation[:notes].matches("%:#{field}:%")) }
   scope :notes_include,
         ->(notes) { where(Observation[:notes].matches("%#{notes}%")) }
@@ -463,11 +557,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
         -> { where(specimen: true) }
   scope :without_specimen,
         -> { where(specimen: false) }
-  scope :with_sequence,
+  scope :with_sequences,
         -> { joins(:sequences).distinct }
-  scope :without_sequence, lambda {
+  scope :without_sequences, lambda {
     # much faster than `missing(:sequences)` which uses left outer join.
-    where.not(id: with_sequence)
+    where.not(id: with_sequences)
   }
   scope :confidence, lambda { |min, max = min| # confidence between min & max %
     where(vote_cache: (min.to_f / (100 / 3))..(max.to_f / (100 / 3)))
@@ -481,11 +575,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   }
   scope :for_project, lambda { |project|
     joins(:project_observations).
-      where(ProjectObservation[:project_id] == project.id).distinct
+      where(ProjectObservation[:project_id].eq(project.id)).distinct
   }
   scope :in_herbarium, lambda { |herbarium|
     joins(:herbarium_records).
-      where(HerbariumRecord[:herbarium_id] == herbarium.id).distinct
+      where(HerbariumRecord[:herbarium_id].eq(herbarium.id)).distinct
   }
   scope :herbarium_record_notes_include, lambda { |notes|
     joins(:herbarium_records).
@@ -493,16 +587,17 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   }
   scope :on_species_list, lambda { |species_list|
     joins(:species_list_observations).
-      where(SpeciesListObservation[:species_list_id] == species_list.id).
+      where(SpeciesListObservation[:species_list_id].eq(species_list.id)).
       distinct
   }
   scope :on_species_list_of_project, lambda { |project|
     joins(species_lists: :project_species_lists).
-      where(ProjectSpeciesList[:project_id] == project.id).distinct
+      where(ProjectSpeciesList[:project_id].eq(project.id)).distinct
   }
   scope :show_includes, lambda {
     strict_loading.includes(
       :collection_numbers,
+      :field_slips,
       { comments: :user },
       { external_links: { external_site: { project: :user_group } } },
       { herbarium_records: [{ herbarium: :curators }, :user] },
@@ -543,6 +638,48 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       :user
     )
   }
+  scope :edit_includes, lambda {
+    strict_loading.includes(
+      :collection_numbers,
+      :field_slips,
+      { external_links: { external_site: { project: :user_group } } },
+      { herbarium_records: [{ herbarium: :curators }, :user] },
+      { images: [:image_votes, :license, :projects, :user] },
+      { interests: :user },
+      :location,
+      { name: { synonym: :names } },
+      { projects: :admin_group },
+      :rss_log,
+      :sequences,
+      { species_lists: [:projects, :user] },
+      :thumb_image,
+      :user
+    )
+  }
+
+  def self.build_observation(location, name, notes, date)
+    return nil unless location
+
+    name ||= Name.find_by(text_name: "Fungi")
+    now = Time.zone.now
+    user = User.current
+    obs = new({ created_at: now, updated_at: now, source: "mo_website",
+                when: date,
+                user:, location:, name:, notes: })
+    return nil unless obs
+
+    obs.log(:log_observation_created)
+    naming = Naming.construct({ name: }, obs)
+    naming.save!
+    naming.votes.create!(
+      user:,
+      observation: obs,
+      value: Vote.maximum_vote,
+      favorite: true
+    )
+    Observation::NamingConsensus.new(obs).calc_consensus
+    obs
+  end
 
   def location?
     false
@@ -553,7 +690,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def can_edit?(user = User.current)
-    Project.can_edit?(self, user)
+    Project.can_edit?(self, user) || is_collector?(user)
+  end
+
+  def is_collector?(user)
+    user && notes[:Collector] == "_user #{user.login}_"
   end
 
   def project_admin?(user = User.current)
@@ -608,12 +749,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       )
     end
     msgs
-  end
-
-  # Used by Name and Location to update the observation cache when a cached
-  # field value is changed.
-  def self.update_cache(type, field, id, val)
-    Observation.where("#{type}_id": id).update_all("#{field}": val)
   end
 
   # Check for any observations whose consensus is a misspelled name.  This can
@@ -697,12 +832,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # the given +display_name+.  (Fills the other in with +nil+.)
   # Adjusts for the current user's location_format as well.
   def place_name=(place_name)
-    place_name = place_name.strip_squeeze
-    where = if User.current_location_format == "scientific"
-              Location.reverse_name(place_name)
-            else
-              place_name
-            end
+    where = Location.normalize_place_name(place_name)
     loc = Location.find_by_name(where)
     if loc
       self.where = loc.name
@@ -739,10 +869,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     self[:lat] = lat
   end
 
-  def long=(val)
-    long = Location.parse_longitude(val)
-    long = val if long.nil? && val.present?
-    self[:long] = long
+  def lng=(val)
+    lng = Location.parse_longitude(val)
+    lng = val if lng.nil? && val.present?
+    self[:lng] = lng
   end
 
   def alt=(val)
@@ -751,23 +881,16 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     self[:alt] = alt
   end
 
-  # Is lat/long more than 10% outside of location extents?
-  def lat_long_dubious?
-    lat && location && !location.lat_long_close?(lat, long)
-  end
-
-  # Alias for access by Mappable::CollapsibleCollectionOfObjects
-  # which must provide `lng` for Google Maps from an obs OR a MapSet
-  # Makes related methods so much simpler: parallel data types.
-  def lng
-    long
+  # Is lat/lng more than 10% outside of location extents?
+  def lat_lng_dubious?
+    lat && location && !location.lat_lng_close?(lat, lng)
   end
 
   def place_name_and_coordinates
-    if lat.present? && long.present?
+    if lat.present? && lng.present?
       lat_string = format_coordinate(lat, "N", "S")
-      long_string = format_coordinate(long, "E", "W")
-      "#{place_name} (#{lat_string} #{long_string})"
+      lng_string = format_coordinate(lng, "E", "W")
+      "#{place_name} (#{lat_string} #{lng_string})"
     else
       place_name
     end
@@ -787,19 +910,19 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     gps_hidden && user_id != User.current_id ? nil : lat
   end
 
-  def public_long
-    gps_hidden && user_id != User.current_id ? nil : long
+  def public_lng
+    gps_hidden && user_id != User.current_id ? nil : lng
   end
 
   def reveal_location?
     !gps_hidden || can_edit? || project_admin?
   end
 
-  def display_lat_long
+  def display_lat_lng
     return "" unless lat
 
     "#{lat.abs}°#{lat.negative? ? "S" : "N"} " \
-      "#{long.abs}°#{long.negative? ? "W" : "E"}"
+      "#{lng.abs}°#{lng.negative? ? "W" : "E"}"
   end
 
   def display_alt
@@ -872,6 +995,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # value of observation.notes if there are no notes
   def self.no_notes
     {}
+  end
+
+  def notes
+    return self[:notes] if self[:notes].is_a?(Hash)
+
+    Observation.no_notes
   end
 
   # no_notes persisted in the db
@@ -957,15 +1086,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Array of notes parts (Strings) which are
   # neither in the notes_template nor the caption for other notes
+  # Note that underscores (_) get translated to spaces ( ) here.
   def notes_orphaned_parts(user)
     return [] if notes.blank?
 
-    # Change spaces to underscores in order to subtract template parts from
-    # stringified keys because keys have underscores instead of spaces
-    template_parts_underscored = user.notes_template_parts.each do |part|
-      part.tr!(" ", "_")
+    notes_keys = notes.keys.map(&:to_s).each do |key|
+      key.tr!("_", " ")
     end
-    notes.keys.map(&:to_s) - template_parts_underscored - [other_notes_part]
+    notes_keys - user.notes_template_parts - [other_notes_part]
   end
 
   # notes as a String, captions (keys) without added formstting,
@@ -1076,14 +1204,23 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     img
   end
 
+  # List of images attached to this Observation, sorted
+  # for the show/edit pages with the thumb_image first
+  def images_sorted
+    images.sort_by do |img|
+      img.id == thumb_image_id ? -1 : img.id
+    end
+  end
+
   # Removes an Image from this Observation.  If it's the thumbnail, changes
   # thumbnail to next available Image.  Saves change to thumbnail, might save
   # change to Image.  Returns Image.
   def remove_image(img)
     if images.include?(img) || thumb_image_id == img.id
       images.delete(img)
-      update(thumb_image: images.empty? ? nil : images.first) \
-        if thumb_image_id == img.id
+      if thumb_image_id == img.id
+        update(thumb_image: images.empty? ? nil : images.first)
+      end
       notify_users(:removed_image)
     end
     img
@@ -1111,16 +1248,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     return unless collection_numbers.empty?
     return unless herbarium_records.empty?
     return unless sequences.empty?
+    return unless field_slips.empty?
 
     update(specimen: false)
-  end
-
-  # Return primary collector and their number if available, else just return
-  # the observer's name.
-  def collector_and_number
-    return user.legal_name if collection_numbers.empty?
-
-    collection_numbers.first.format_name
   end
 
   ##############################################################################
@@ -1130,13 +1260,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   ##############################################################################
 
   # Which agent created this observation?
-  enum source:
-        {
-          mo_website: 1,
-          mo_android_app: 2,
-          mo_iphone_app: 3,
-          mo_api: 4
-        }
+  enum :source, {
+    mo_website: 1,
+    mo_android_app: 2,
+    mo_iphone_app: 3,
+    mo_api: 4,
+    mo_inat_import: 5
+  }
 
   # Message to use to credit the agent which created this observation.
   # Intended to be used with .tpl to render as HTML:
@@ -1159,13 +1289,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Callback that updates a User's contribution after adding an Observation to
   # a SpeciesList.
   def add_spl_callback(_obs)
-    SiteData.update_contribution(:add, :species_list_entries, user_id)
+    UserStats.update_contribution(:add, :species_list_entries, user_id)
   end
 
   # Callback that updates a User's contribution after removing an Observation
   # from a SpeciesList.
   def remove_spl_callback(_obs)
-    SiteData.update_contribution(:del, :species_list_entries, user_id)
+    UserStats.update_contribution(:del, :species_list_entries, user_id)
   end
 
   # Callback that logs an Observation's destruction on all of its
@@ -1311,6 +1441,43 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   ##############################################################################
+  #
+  #  :section: Field Slips
+  #
+  ##############################################################################
+
+  def collector
+    return notes[:Collector] if notes.include?(:Collector)
+    return notes[:collector] if notes.include?(:collector)
+    return notes[:"Collector's_Name"] if notes.include?(:"Collector's_Name")
+    return notes[:"Collector's_name"] if notes.include?(:"Collector's_name")
+    return notes[:"Collector(s)"] if notes.include?(:"Collector(s)")
+
+    "_user #{user.login}_"
+  end
+
+  def field_slip_name
+    return notes[:Field_Slip_ID] if notes.include?(:Field_Slip_ID)
+
+    "_name #{name.text_name}_"
+  end
+
+  def field_slip_id_by
+    return notes[:Field_Slip_ID_By] if notes.include?(:Field_Slip_ID_By)
+
+    naming = namings.find_by(name:)
+    return "_user #{naming.user.login}_" if naming
+
+    ""
+  end
+
+  def other_codes
+    return notes[:Other_Codes] if notes.include?(:Other_Codes)
+
+    ""
+  end
+
+  ##############################################################################
 
   protected
 
@@ -1322,6 +1489,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     check_where
     check_user
     check_coordinates
+    check_hidden
 
     return unless @when_str
 
@@ -1362,16 +1530,16 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def check_latitude
-    if lat.blank? && long.present? ||
+    if lat.blank? && lng.present? ||
        lat.present? && !Location.parse_latitude(lat)
       errors.add(:lat, :runtime_lat_long_error.t)
     end
   end
 
   def check_longitude
-    if lat.present? && long.blank? ||
-       long.present? && !Location.parse_longitude(long)
-      errors.add(:long, :runtime_lat_long_error.t)
+    if lat.present? && lng.blank? ||
+       lng.present? && !Location.parse_longitude(lng)
+      errors.add(:lng, :runtime_lat_long_error.t)
     end
   end
 
@@ -1383,8 +1551,33 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     errors.add(:alt, :runtime_altitude_error.t)
   end
 
+  def check_hidden
+    return unless location&.hidden
+
+    self.gps_hidden = true
+  end
+
   def check_when
     self.when ||= Time.zone.now
     validate_when(self.when, errors)
+  end
+
+  private
+
+  def prefer_minimum_bounding_box_to_earth
+    return unless location && Location.is_unknown?(location.name) &&
+                  lat.present? && lng.present?
+
+    self.location =
+      Location.
+      with_minimum_bounding_box_containing_point(lat: lat, lng: lng).
+      # Use the unknown location if there's no minimum bounding box.
+      # NOTE: jdc As of 20241105, that's possible because the live db unknown
+      # location does not contain the entire globe. Its boundaries:
+      #             north: 89,
+      #  west: -179,          east: 179,
+      #            south: -89,
+      # Also see ObservationAPI#prefer_minimum_bounding_box_to_earth!
+      presence || Location.unknown
   end
 end

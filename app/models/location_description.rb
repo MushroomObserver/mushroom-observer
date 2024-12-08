@@ -5,7 +5,7 @@
 #
 #  == Version
 #
-#  Changes are kept in the "location_descriptions_versions" table using
+#  Changes are kept in the "location_description_versions" table using
 #  ActiveRecord::Acts::Versioned.
 #
 #  == Attributes
@@ -29,7 +29,7 @@
 #  refs::             (V) References
 #
 #  ('V' indicates that this attribute is versioned in
-#  location_descriptions_versions table.)
+#  location_description_versions table.)
 #
 #  == Class Methods
 #
@@ -105,7 +105,6 @@ class LocationDescription < Description
   ALL_NOTE_FIELDS = [:gen_desc, :ecology, :species, :notes, :refs].freeze
 
   acts_as_versioned(
-    table_name: "location_descriptions_versions",
     if_changed: ALL_NOTE_FIELDS,
     association_options: { dependent: :nullify }
   )

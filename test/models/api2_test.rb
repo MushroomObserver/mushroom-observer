@@ -249,7 +249,7 @@ class API2Test < UnitTestCase
     assert_nil(obs.last_view)
     assert_not_nil(obs.rss_log)
     assert(@lat == obs.lat)
-    assert(@long == obs.long)
+    assert(@long == obs.lng)
     assert(@alt == obs.alt)
     assert_obj_arrays_equal([@proj].compact, obs.projects)
     assert_obj_arrays_equal([@spl].compact, obs.species_lists)
@@ -463,6 +463,25 @@ class API2Test < UnitTestCase
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
   end
 
+  def test_posting_api_key_with_email
+    email_count = ActionMailer::Base.deliveries.size
+    @for_user = rolf.email
+    @app = "  Mushroom  Mapper  "
+    @verified = true
+    params = {
+      method: :post,
+      action: :api_key,
+      api_key: @api_key.key,
+      app: @app
+    }
+    api = API2.execute(params)
+    assert_no_errors(api, "Errors while posting api key")
+    assert_obj_arrays_equal([APIKey.last], api.results)
+    assert_api_fail(params.except(:api_key))
+    assert_api_fail(params.except(:app))
+    assert_equal(email_count, ActionMailer::Base.deliveries.size)
+  end
+
   def test_posting_api_key_for_another_user_without_password
     email_count = ActionMailer::Base.deliveries.size
     @for_user = katrina
@@ -564,12 +583,12 @@ class API2Test < UnitTestCase
   def test_getting_collection_numbers
     params = { method: :get, action: :collection_number }
 
-    nums = CollectionNumber.where(CollectionNumber[:created_at].year == 2006)
+    nums = CollectionNumber.where(CollectionNumber[:created_at].year.eq(2006))
     assert_not_empty(nums)
     assert_api_pass(params.merge(created_at: "2006"))
     assert_api_results(nums)
 
-    nums = CollectionNumber.where(CollectionNumber[:updated_at].year == 2005)
+    nums = CollectionNumber.where(CollectionNumber[:updated_at].year.eq(2005))
     assert_not_empty(nums)
     assert_api_pass(params.merge(updated_at: "2005"))
     assert_api_results(nums)
@@ -997,12 +1016,12 @@ class API2Test < UnitTestCase
   def test_getting_herbarium_records
     params = { method: :get, action: :herbarium_record }
 
-    recs = HerbariumRecord.where(HerbariumRecord[:created_at].year == 2012)
+    recs = HerbariumRecord.where(HerbariumRecord[:created_at].year.eq(2012))
     assert_not_empty(recs)
     assert_api_pass(params.merge(created_at: "2012"))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where(HerbariumRecord[:updated_at].year == 2017)
+    recs = HerbariumRecord.where(HerbariumRecord[:updated_at].year.eq(2017))
     assert_not_empty(recs)
     assert_api_pass(params.merge(updated_at: "2017"))
     assert_api_results(recs)
@@ -1210,14 +1229,14 @@ class API2Test < UnitTestCase
     assert_api_results([img])
 
     assert_api_pass(params.merge(created_at: "2006"))
-    assert_api_results(Image.where(Image[:created_at].year == 2006))
+    assert_api_results(Image.where(Image[:created_at].year.eq(2006)))
 
     assert_api_pass(params.merge(updated_at: "2006-05-22"))
     assert_api_results(Image.created_on("2006-05-22"))
 
     assert_api_pass(params.merge(date: "2007-03"))
     assert_api_results(
-      Image.where((Image[:when].year == 2007).and(Image[:when].month == 3))
+      Image.where(Image[:when].year.eq(2007).and(Image[:when].month.eq(3)))
     )
 
     assert_api_pass(params.merge(user: "#{mary.id},#{katrina.id}"))
@@ -1464,7 +1483,7 @@ class API2Test < UnitTestCase
       assert_no_errors(api, "Errors while posting image")
       img = Image.last
       assert_obj_arrays_equal([img], api.results)
-      actual = File.read(img.local_file_name(:full_size))
+      actual = File.read(img.full_filepath(:full_size))
       expect = Rails.root.join("test/images/test_image.jpg").read
       assert_equal(expect, actual, "Uploaded image differs from original!")
     end
@@ -1536,7 +1555,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(id: loc.id))
     assert_api_results([loc])
 
-    locs = Location.where(Location[:created_at].year == 2008)
+    locs = Location.where(Location[:created_at].year.eq(2008))
     assert_not_empty(locs)
     assert_api_pass(params.merge(created_at: "2008"))
     assert_api_results(locs)
@@ -1551,7 +1570,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(user: "rolf"))
     assert_api_results(locs)
 
-    locs = Location.in_box(n: 40, s: 39, e: -123, w: -124)
+    locs = Location.in_box(north: 40, south: 39, east: -123, west: -124)
 
     assert_not_empty(locs)
     assert_api_fail(params.merge(south: 39, east: -123, west: -124))
@@ -1730,7 +1749,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(id: name.id))
     assert_api_results([name])
 
-    names = Name.with_correct_spelling.where(Name[:created_at].year == 2008)
+    names = Name.with_correct_spelling.where(Name[:created_at].year.eq(2008))
     assert_not_empty(names)
     assert_api_pass(params.merge(created_at: "2008"))
     assert_api_results(names)
@@ -2147,7 +2166,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(id: obs.id))
     assert_api_results([obs])
 
-    obses = Observation.where(Observation[:created_at].year == 2010)
+    obses = Observation.where(Observation[:created_at].year.eq(2010))
     assert_not_empty(obses)
     assert_api_pass(params.merge(created_at: "2010"))
     assert_api_results(obses)
@@ -2239,8 +2258,8 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(is_collection_location: "no"))
     assert_api_results(obses)
 
-    with    = Observation.with_image
-    without = Observation.without_image
+    with    = Observation.with_images
+    without = Observation.without_images
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_images: "yes"))
@@ -2248,18 +2267,9 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(has_images: "no"))
     assert_api_results(without)
 
-    with    = Observation.with_location
-    without = Observation.without_location
-    assert(with.length > 1)
-    assert(without.length > 1)
-    assert_api_pass(params.merge(has_location: "yes"))
-    assert_api_results(with)
-    assert_api_pass(params.merge(has_location: "no"))
-    assert_api_results(without)
-
     genus = Name.ranks[:Genus]
     group = Name.ranks[:Group]
-    names = Name.where((Name[:rank] <= genus).or(Name[:rank] == group))
+    names = Name.where((Name[:rank] <= genus).or(Name[:rank].eq(group)))
     with = Observation.where(name: names)
     without = Observation.where.not(name: names)
     assert(with.length > 1)
@@ -2316,8 +2326,8 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(comments_has: "let's"))
     assert_api_results(obses)
 
-    obses = Observation.where(lat: [34..35], long: [-119..-118])
-    locs = Location.in_box(n: 35, s: 34, e: -118, w: -119)
+    obses = Observation.where(lat: [34..35], lng: [-119..-118])
+    locs = Location.in_box(north: 35, south: 34, east: -118, west: -119)
 
     obses = (obses + locs.map(&:observations)).flatten.uniq.sort_by(&:id)
     assert_not_empty(obses)
@@ -2355,6 +2365,39 @@ class API2Test < UnitTestCase
       action: :observation,
       api_key: @api_key.key,
       location: "Anywhere"
+    }
+    api = API2.execute(params)
+    assert_no_errors(api, "Errors while posting observation")
+    assert_obj_arrays_equal([Observation.last], api.results)
+    assert_last_observation_correct
+    assert_equal("mo_api", Observation.last.source)
+    assert_api_fail(params.except(:location))
+  end
+
+  def test_post_observation_with_geoloc_and_earth
+    burbank = locations(:burbank)
+    @user = rolf
+    @name = Name.unknown
+    @loc = burbank
+    @img1 = nil
+    @img2 = nil
+    @spl = nil
+    @proj = nil
+    @date = Time.zone.today
+    @notes = Observation.no_notes
+    @vote = Vote.maximum_vote
+    @specimen = false
+    @is_col_loc = true
+    @lat = burbank.center_lat
+    @long = burbank.center_lng
+    @alt = nil
+    params = {
+      method: :post,
+      action: :observation,
+      api_key: @api_key.key,
+      latitude: @lat,
+      longitude: @long,
+      location: "Earth"
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting observation")
@@ -2461,6 +2504,30 @@ class API2Test < UnitTestCase
     assert_no_errors(api, "Errors while posting observation")
     obs = Observation.last
     assert_nil(obs.rss_log_id)
+  end
+
+  def test_post_observation_with_used_field_slip
+    params = {
+      method: :post,
+      action: :observation,
+      api_key: @api_key.key,
+      location: "Anywhere",
+      name: "Agaricus campestris",
+      code: field_slips(:field_slip_one).code
+    }
+    assert_api_fail(params)
+  end
+
+  def test_post_observation_with_free_field_slip
+    params = {
+      method: :post,
+      action: :observation,
+      api_key: @api_key.key,
+      location: "Anywhere",
+      name: "Agaricus campestris",
+      code: field_slips(:field_slip_no_obs).code
+    }
+    assert_api_pass(params)
   end
 
   def test_post_observation_scientific_location
@@ -2582,7 +2649,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params)
     rolfs_obs.reload
     assert_in_delta(12.34, rolfs_obs.lat, 0.0001)
-    assert_in_delta(-56.78, rolfs_obs.long, 0.0001)
+    assert_in_delta(-56.78, rolfs_obs.lng, 0.0001)
     assert_in_delta(901, rolfs_obs.alt, 0.0001)
 
     params = {
@@ -2690,7 +2757,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(id: proj.id))
     assert_api_results([proj])
 
-    projs = Project.where(Project[:created_at].year == 2008)
+    projs = Project.where(Project[:created_at].year.eq(2008))
     assert_not_empty(projs)
     assert_api_pass(params.merge(created_at: "2008"))
     assert_api_results(projs)
@@ -3023,8 +3090,8 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(confidence: "3.0"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
-    obses = Observation.where(lat: [34..35], long: [-119..-118])
-    locs = Location.in_box(n: 35, s: 34, e: -118, w: -119)
+    obses = Observation.where(lat: [34..35], lng: [-119..-118])
+    locs = Location.in_box(north: 35, south: 34, east: -118, west: -119)
 
     obses = (obses + locs.map(&:observations)).flatten.uniq.sort_by(&:id)
     assert_not_empty(obses)
@@ -3040,8 +3107,8 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(is_collection_location: "no"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
-    with    = Observation.with_image
-    without = Observation.without_image
+    with    = Observation.with_images
+    without = Observation.without_images
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_images: "yes"))
@@ -3225,7 +3292,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(created_at: "2012-07-06"))
     assert_api_results(spls)
 
-    spls = SpeciesList.where(SpeciesList[:updated_at].year == 2008)
+    spls = SpeciesList.where(SpeciesList[:updated_at].year.eq(2008))
     assert_not_empty(spls)
     assert_api_pass(params.merge(updated_at: "2008"))
     assert_api_results(spls)
@@ -3940,7 +4007,7 @@ class API2Test < UnitTestCase
 
   def test_parse_observation
     a_campestrus_obs = observations(:agaricus_campestrus_obs)
-    unknown_lat_lon_obs = observations(:unknown_with_lat_long)
+    unknown_lat_lon_obs = observations(:unknown_with_lat_lng)
     assert_parse(:observation, nil, nil)
     assert_parse(:observation, a_campestrus_obs, nil, default: a_campestrus_obs)
     assert_parse(:observation, a_campestrus_obs, a_campestrus_obs.id)
@@ -3996,11 +4063,12 @@ class API2Test < UnitTestCase
     assert_parse(:user, API2::ObjectNotFoundById, "12345")
     assert_parse(:user, rolf, rolf.login)
     assert_parse(:user, rolf, rolf.name)
+    assert_parse(:user, rolf, rolf.email)
   end
 
   def test_parse_object
     limit = [Name, Observation, SpeciesList]
-    obs = observations(:unknown_with_lat_long)
+    obs = observations(:unknown_with_lat_lng)
     nam = names(:agaricus_campestras)
     list = species_lists(:another_species_list)
     assert_parse(:object, nil, nil, limit: limit)

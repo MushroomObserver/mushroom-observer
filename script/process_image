@@ -118,6 +118,7 @@ fi
 
 if (( !$development && !$errors && $transferred_any )); then
   log_mysql "UPDATE images SET transferred=TRUE WHERE id=$id"
+  log_mysql "UPDATE observations, observation_images SET observations.updated_at = NOW() WHERE observation_images.image_id = $id AND observation_images.observation_id = observations.id"
 fi
 
 if (( !$development && $errors )); then

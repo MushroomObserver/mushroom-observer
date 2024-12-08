@@ -2,14 +2,12 @@
 
 module Mappable
   class MinimalObservation
-    attr_accessor :id, :lat, :lng, :location_id # , :long
+    attr_accessor :id, :lat, :lng, :location_id
 
-    # The observation has the attr `long`, but the MapSet needs to provide `lng`
-    def initialize(id, lat, long, location_or_id)
+    def initialize(id, lat, lng, location_or_id)
       @id = id
       @lat = lat
-      @lng = long
-      # @long = long # Not sure if anyone needs `long`
+      @lng = lng
       case location_or_id
       when Integer, String
         @location_id = location_or_id.to_i
@@ -41,8 +39,8 @@ module Mappable
       true
     end
 
-    def lat_long_dubious?
-      lat && location && !location.lat_long_close?(lat, lng)
+    def lat_lng_dubious?
+      lat && location && !location.lat_lng_close?(lat, lng)
     end
   end
 end

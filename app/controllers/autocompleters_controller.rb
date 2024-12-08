@@ -3,9 +3,11 @@
 class AutocompletersController < ApplicationController
   require "cgi"
 
-  before_action :login_required
+  # Requiring login here would mean "advanced search" must also require login.
   around_action :catch_ajax_errors
 
+  # Reduce overhead for these requests.
+  disable_filters
   layout false
 
   # The AutoComplete class returns "primers": 1000 records starting with the
@@ -16,32 +18,37 @@ class AutocompletersController < ApplicationController
   # could add record ids. The first line of the returned results is the actual
   # (minimal) string used to match the records. If it had to truncate the list
   # of results, the last string is "...".
-  # type:: Type of string.
-  # id::   String user has entered.
+  # type::              Type of string.
+  # params[:string]::   String user has entered.
   def new
     @user = User.current = session_user
 
-    string = CGI.unescape(@id).strip_squeeze
-    if string.blank?
+    if params[:string].blank? && params[:all].blank?
       render(json: ActiveSupport::JSON.encode([]))
     else
-      render(json: ActiveSupport::JSON.encode(auto_complete_results(string)))
+      add_context_params
+      render(json: ActiveSupport::JSON.encode(auto_complete_results))
     end
   end
 
   private
 
-  def auto_complete_results(string)
-    case @type
-    when "location"
-      params[:format] = @user&.location_format
-    when "herbarium"
-      params[:user_id] = @user&.id
-    end
-
-    ::AutoComplete.subclass(@type).new(string, params).matching_strings
+  # add useful context params that the controller knows about, but not the class
+  def add_context_params
+    params[:format] = @user&.location_format
+    params[:user_id] = @user&.id
   end
 
+  def auto_complete_results
+    # Don't pass region or clade as the @type with `exact` here.
+    if params[:exact].present?
+      return ::AutoComplete.subclass(@type).new(params).first_matching_record
+    end
+
+    ::AutoComplete.subclass(@type).new(params).matching_records
+  end
+
+  # callback on `around_action`
   def catch_ajax_errors
     prepare_parameters
     yield
@@ -53,8 +60,6 @@ class AutocompletersController < ApplicationController
 
   def prepare_parameters
     @type  = params[:type].to_s
-    @id    = params[:id].to_s
-    @value = params[:value].to_s
   end
 
   def backtrace(exception)

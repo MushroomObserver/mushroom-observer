@@ -44,6 +44,7 @@ module Observations
       assert_empty(nam.votes)
       login(nam.user.login)
       get(:edit, params: { observation_id: nam.observation_id, id: nam.id })
+      assert_select("#naming_vote_value", text: /#{:vote_no_opinion.l}/)
     end
 
     def test_update_observation_new_name
@@ -89,8 +90,10 @@ module Observations
       assert_equal(new_name, nam.text_name)
       assert_not_equal(old_name, nam.text_name)
       assert_not(nam.name.deprecated)
-      assert_equal(old_contribution + (SiteData::FIELD_WEIGHTS[:names] * 2) + 2,
-                   rolf.reload.contribution)
+      assert_equal(
+        old_contribution + (UserStats::ALL_FIELDS[:names][:weight] * 2) + 2,
+        rolf.reload.contribution
+      )
     end
 
     def test_update_observation_multiple_match
@@ -533,7 +536,7 @@ module Observations
       login("dick")
       post(:create, params: params)
       assert_response(:success) # really means failed
-      what = @controller.instance_variable_get(:@what)
+      what = @controller.instance_variable_get(:@given_name)
       assert_equal("Agaricus campestris L.", what)
     end
 

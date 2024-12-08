@@ -61,6 +61,43 @@ class HerbariaControllerTest < FunctionalTestCase
     )
   end
 
+  def test_show_mcp_db
+    herbarium = nybg
+    assert(herbarium.mycoportal_db.present?,
+           "Test needs herbarium with mycoportal_db")
+
+    login("mary")
+    get(:show, params: { id: herbarium.id })
+
+    assert_select(
+      "#mcp_number",
+      { text: /#{:herbarium_mcp_db.l}:\s+#{herbarium.mycoportal_db}/ }
+    )
+  end
+
+  def test_show_mcp_db_missing
+    herbarium = field_museum
+    assert(herbarium.mycoportal_db.nil?,
+           "Test needs mcp searchable herbarium whose mycoportal_db is nil")
+
+    login("mary")
+    get(:show, params: { id: herbarium.id })
+
+    assert_select(
+      "#mcp_number",
+      { text: /#{:herbarium_mcp_db.l}:\s+#{:show_herbarium_mcp_db_missing.l}/ }
+    )
+  end
+
+  def test_show_no_mcp_db
+    herbarium = dicks_personal
+
+    login("mary")
+    get(:show, params: { id: herbarium.id })
+
+    assert_select("#mcp_number", false)
+  end
+
   def test_show_destroy_buttons_presence
     herbarium = nybg
     assert(herbarium.curator?(roy))
@@ -108,7 +145,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index
     set = [nybg, herbaria(:rolf_herbarium)]
-    query = Query.lookup_and_save(:Herbarium, :in_set, by: :name, ids: set)
+    query = Query.lookup_and_save(:Herbarium, :all, by: :name, ids: set)
     login("zero") # Does not own any herbarium in set
     get(:index, params: { q: query.record.id.alphabetize })
 
@@ -623,7 +660,7 @@ class HerbariaControllerTest < FunctionalTestCase
     patch(:update, params: { herbarium: params, id: nybg.id })
 
     assert_equal(last_update, nybg.reload.updated_at)
-    assert_redirected_to(emails_merge_request_path(
+    assert_redirected_to(new_admin_emails_merge_requests_path(
                            type: :Herbarium, old_id: nybg.id, new_id: other.id
                          ))
   end

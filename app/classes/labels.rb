@@ -146,15 +146,15 @@ class Labels
     return unless @obs.lat.present? || @obs.alt.present?
 
     label("Coordinates")
-    @para << format_lat_long
+    @para << format_lat_lng
     @para << format_alt
     @para.line_break
   end
 
-  def format_lat_long
+  def format_lat_lng
     loc = @obs.location
     if @obs.lat.present?
-      "#{format_lat(@obs.lat)} #{format_long(@obs.long)}"
+      "#{format_lat(@obs.lat)} #{format_lng(@obs.lng)}"
     elsif loc.present?
       n = format_lat(loc.north)
       s = format_lat(loc.south)
@@ -182,7 +182,7 @@ class Labels
     val.negative? ? "#{-val}°S" : "#{val}°N"
   end
 
-  def format_long(val)
+  def format_lng(val)
     val = val.round(1) unless coordinates_visible?
     val.negative? ? "#{-val}°W" : "#{val}°E"
   end

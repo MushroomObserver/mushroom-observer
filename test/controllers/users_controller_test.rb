@@ -85,10 +85,10 @@ class UsersControllerTest < FunctionalTestCase
 
     assert_template(:show)
     assert_select(
-      "a[href = '#{location_descriptions_path}?by_author=#{user.id}']"
+      "a[href = '#{location_descriptions_index_path}?by_author=#{user.id}']"
     )
     assert_select(
-      "a[href = '#{name_descriptions_path}?by_author=#{user.id}']"
+      "a[href = '#{name_descriptions_index_path}?by_author=#{user.id}']"
     )
     assert_select(
       "a:match('href', ?)",
@@ -102,6 +102,12 @@ class UsersControllerTest < FunctionalTestCase
       false,
       "Links should not use the same value for id and another param"
     )
+  end
+
+  def test_show_nonexistent_user
+    login
+    get(:show, params: { id: "123456789" })
+    assert_redirected_to({ action: :index })
   end
 
   #   ---------------

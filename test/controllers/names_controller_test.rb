@@ -569,20 +569,59 @@ class NamesControllerTest < FunctionalTestCase
   def test_show_name_species_with_icn_id
     # Name's icn_id is filled in
     name = names(:coprinus_comatus)
+    icn_id = name.icn_id
+    assert_instance_of(Integer, icn_id,
+                       "Test needs Name fixture with icn_id (Registration #)")
+    assert_not(name.classification =~ /Ascomycete/,
+               "Test needs a Name fixture which isn't an Ascomycete")
+
     login
     get(:show, params: { id: name.id })
+
+    ##### External research links
+    [
+      ["GBIF", gbif_name_search_url(name)],
+      ["Google Search", google_name_search_url(name)],
+      ["iNat", inat_name_search_url(name)],
+      ["MushroomExpert", mushroomexpert_name_web_search_url(name)],
+      ["MyCoPortal", mycoportal_url(name)],
+      ["NCBI", ncbi_nucleotide_term_search_url(name)],
+      ["Wikipedia", wikipedia_term_search_url(name)]
+    ].each do |site, link|
+      assert_external_link(site, link)
+    end
+
     assert_select(
-      "body a[href='#{index_fungorum_record_url(name.icn_id)}']", true,
-      "Page is missing a link to IF record"
+      "body a[href='#{ascomycete_org_name_url(name)}']", false,
+      "Page should not have a link to Ascomycete.org"
     )
+
+    ##### External nomenclature links
+    [
+      ["IF record", index_fungorum_record_url(name.icn_id)],
+      ["MB record", mycobank_record_url(name.icn_id)],
+      ["GSD Synonymy record", species_fungorum_gsd_synonymy(name.icn_id)]
+    ].each do |site, link|
+      assert_external_link(site, link)
+    end
+  end
+
+  def assert_external_link(site, link)
     assert_select(
-      "body a[href='#{mycobank_record_url(name.icn_id)}']", true,
-      "Page is missing a link to MB record"
+      "body a[href='#{link}']", true,
+      "Page is missing a link to #{site}"
     )
-    assert_select(
-      "body a[href='#{species_fungorum_gsd_synonymy(name.icn_id)}']", true,
-      "Page is missing a link to GSD Synonymy record"
-    )
+  end
+
+  def test_show_name_ascomycete
+    name = names(:peltigera)
+    assert(name.classification =~ /Ascomycete/,
+           "Test needs a Name fixture that's an Ascomycete")
+
+    login
+    get(:show, params: { id: name.id })
+
+    assert_external_link("Ascomycete.org", ascomycete_org_name_url(name))
   end
 
   def test_show_name_genus_with_icn_id
@@ -600,6 +639,7 @@ class NamesControllerTest < FunctionalTestCase
     # Name is registrable, but icn_id is not filled in
     name = names(:coprinus)
     label = :ICN_ID.l.to_s
+
     login
     get(:show, params: { id: name.id })
 
@@ -610,9 +650,14 @@ class NamesControllerTest < FunctionalTestCase
     )
     assert_select(
       "#nomenclature a:match('href',?)",
-      /#{index_fungorum_basic_search_url}/,
+      /#{index_fungorum_search_page_url}/,
       { count: 1 },
-      "Nomenclature section should have link to IF search"
+      "Nomenclature section is missing a link to IF search page"
+    )
+    assert_select(
+      "#nomenclature a[href='#{index_fungorum_name_web_search_url(name)}']",
+      true,
+      "Nomenclature section is missing a link to Index Fungorum web search"
     )
     assert_select(
       "#nomenclature a:match('href',?)", /#{mycobank_name_search_url(name)}/,
@@ -642,9 +687,14 @@ class NamesControllerTest < FunctionalTestCase
     # but it makes sense to link to search pages in fungal registries
     assert_select(
       "#nomenclature a:match('href',?)",
-      /#{index_fungorum_basic_search_url}/,
+      /#{index_fungorum_search_page_url}/,
       { count: 1 },
-      "Nomenclature section should have link to IF search"
+      "Nomenclature section should have link to IF search page"
+    )
+    assert_select(
+      "#nomenclature a[href='#{index_fungorum_name_web_search_url(name)}']",
+      true,
+      "Nomenclature section is missing a link to Index Fungorum web search"
     )
     assert_select(
       "#nomenclature a:match('href',?)", /#{mycobank_basic_search_url}/,
@@ -807,11 +857,11 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def assert_synonym_links(name, approve, deprecate, edit)
-    assert_select("a[href*=?]", approve_name_synonym_form_path(name.id),
+    assert_select("a[href*=?]", form_to_approve_synonym_of_name_path(name.id),
                   count: approve)
-    assert_select("a[href*=?]", deprecate_name_synonym_form_path(name.id),
+    assert_select("a[href*=?]", form_to_deprecate_synonym_of_name_path(name.id),
                   count: deprecate)
-    assert_select("a[href*=?]", edit_name_synonyms_path(name.id),
+    assert_select("a[href*=?]", edit_synonyms_of_name_path(name.id),
                   count: edit)
   end
 
@@ -906,9 +956,16 @@ class NamesControllerTest < FunctionalTestCase
   #  Create name.
   # ----------------------------
 
-  def test_create_name_get
+  def test_new_name
     requires_login(:new)
+
     assert_form_action(action: :create)
+    assert_select("select#name_rank") do
+      assert_select("option[selected]", text: "Species")
+    end
+    assert_select("select#name_deprecated") do
+      assert_select("option[selected]", text: :ACCEPTED.l)
+    end
     assert_select("form #name_icn_id", { count: 1 },
                   "Form is missing field for icn_id")
   end
@@ -1086,7 +1143,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_flash_success
     assert_redirected_to(name_path(authored_name.id))
     assert(Name.exists?(name.id))
-    assert_equal(old_contribution + SiteData::FIELD_WEIGHTS[:names],
+    assert_equal(old_contribution + UserStats::ALL_FIELDS[:names][:weight],
                  rolf.reload.contribution)
   end
 
@@ -1290,11 +1347,36 @@ class NamesControllerTest < FunctionalTestCase
   #  Edit name -- without merge
   # ----------------------------
 
-  def test_edit_name_get
+  def test_edit_name_get_accepted_species
     name = names(:coprinus_comatus)
     params = { id: name.id.to_s }
+
     requires_login(:edit, params)
+
     assert_form_action(action: :update, id: name.id.to_s)
+    assert_select("select#name_rank") do
+      assert_select("option[selected]", text: "Species")
+    end
+    assert_select("select#name_deprecated") do
+      assert_select("option[selected]", text: :ACCEPTED.l)
+    end
+    assert_select("form #name_icn_id", { count: 1 },
+                  "Form is missing field for icn_id")
+  end
+
+  def test_edit_name_get_deprecated_genus
+    name = names(:petigera)
+    params = { id: name.id.to_s }
+
+    requires_login(:edit, params)
+
+    assert_form_action(action: :update, id: name.id.to_s)
+    assert_select("select#name_rank") do
+      assert_select("option[selected]", text: "Genus")
+    end
+    assert_select("select#name_deprecated") do
+      assert_select("option[selected]", text: :DEPRECATED.l)
+    end
     assert_select("form #name_icn_id", { count: 1 },
                   "Form is missing field for icn_id")
   end
@@ -1402,7 +1484,7 @@ class NamesControllerTest < FunctionalTestCase
     }
     login(name.user.login)
     put(:update, params: params)
-    # This does not generate a emails_name_change_request_path email,
+    # This does not generate a new_admin_emails_name_change_requests_path email,
     # both because this name has no dependents,
     # and because the email form requires a POST.
     assert(@@emails.one?)
@@ -1667,7 +1749,7 @@ class NamesControllerTest < FunctionalTestCase
     params[:name][:deprecated] = "false"
     put(:update, params: params)
     assert_no_flash
-    assert_redirected_to(approve_name_synonym_form_path(name.id))
+    assert_redirected_to(form_to_approve_synonym_of_name_path(name.id))
 
     # Change to deprecated: go to deprecate_name, no flash.
     name.change_deprecated(false)
@@ -1675,7 +1757,7 @@ class NamesControllerTest < FunctionalTestCase
     params[:name][:deprecated] = "true"
     put(:update, params: params)
     assert_no_flash
-    assert_redirected_to(deprecate_name_synonym_form_path(name.id))
+    assert_redirected_to(form_to_deprecate_synonym_of_name_path(name.id))
   end
 
   def test_edit_name_with_umlaut
@@ -1915,7 +1997,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_equal("Bar", name.author)
     assert_equal("Genus", name.rank)
     assert_false(name.locked)
-    assert_redirected_to(deprecate_name_synonym_form_path(name.id))
+    assert_redirected_to(form_to_deprecate_synonym_of_name_path(name.id))
   end
 
   def test_edit_misspelled_name
@@ -1940,8 +2022,9 @@ class NamesControllerTest < FunctionalTestCase
     put(:update, params: params)
 
     assert_redirected_to(
-      emails_name_change_request_path(name_id: name.id,
-                                      new_name_with_icn_id: "Superboletus [#]"),
+      new_admin_emails_name_change_requests_path(
+        name_id: name.id, new_name_with_icn_id: "Superboletus [#]"
+      ),
       "User should be unable to change text_name of Name with dependents"
     )
   end
@@ -2004,7 +2087,7 @@ class NamesControllerTest < FunctionalTestCase
     put(:update, params: params)
 
     assert_redirected_to(
-      /#{emails_name_change_request_path}/,
+      /#{new_admin_emails_name_change_requests_path}/,
       "User should be unable to change an approved synonym of a Naming"
     )
   end
@@ -2091,7 +2174,7 @@ class NamesControllerTest < FunctionalTestCase
 
     put(:update, params: params)
     assert_redirected_to(
-      emails_name_change_request_path(
+      new_admin_emails_name_change_requests_path(
         name_id: name.id,
         new_name_with_icn_id: "#{name.search_name} [##{name.icn_id + 1}]"
       ),
@@ -2190,7 +2273,7 @@ class NamesControllerTest < FunctionalTestCase
 
     # Fails because Rolf isn't in admin mode.
     put(:update, params: params)
-    assert_redirected_to(emails_merge_request_path(
+    assert_redirected_to(new_admin_emails_merge_requests_path(
                            type: :Name, old_id: old_name.id, new_id: new_name.id
                          ))
     assert(Name.find(old_name.id))
@@ -2311,7 +2394,7 @@ class NamesControllerTest < FunctionalTestCase
 
     login("rolf")
     put(:update, params: params)
-    assert_redirected_to(emails_merge_request_path(
+    assert_redirected_to(new_admin_emails_merge_requests_path(
                            type: :Name, old_id: old_name.id, new_id: new_name.id
                          ))
 
@@ -2696,7 +2779,7 @@ class NamesControllerTest < FunctionalTestCase
     # Fails normally.
     login("rolf")
     put(:update, params: params)
-    assert_redirected_to(emails_merge_request_path(
+    assert_redirected_to(new_admin_emails_merge_requests_path(
                            type: :Name, old_id: old_name.id, new_id: new_name.id
                          ))
     assert(old_name.reload)

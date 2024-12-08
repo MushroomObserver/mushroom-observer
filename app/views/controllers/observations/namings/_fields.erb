@@ -1,67 +1,52 @@
+<%# locals: (create:, button_name:, show_reasons: false, unfocused: false, name_help: :form_naming_name_help.t, context: "blank" ) -%>
+
 <%
 # This is included by obs form, naming new/edit form + lightbox identifier
-
-unfocused ||= false
-focus_on_name = !unfocused && (button_name != :CREATE.l || @what.empty?)
-focus_on_vote = !unfocused && (button_name == :CREATE.l && @what.present?)
+focus_on_name = !unfocused && (!create || @given_name.empty?)
+focus_on_vote = !unfocused && (create && @given_name.present?)
 
 feedback_locals = {
-  f: f,
   button_name: button_name,
-  what: @what,
+  given_name: @given_name,
+  names: @names,
   valid_names: @valid_names,
   suggest_corrections: @suggest_corrections,
-  parent_deprecated: @parent_deprecated,
-  names: @names
+  parent_deprecated: @parent_deprecated
 }
-confidences = options_for_select(Vote.confidence_menu, @vote&.value)
-select_opts = { include_blank: ["new", "create"].include?(action_name) }
-context ||= "blank"
-name_help ||= :form_naming_name_help.t
+menu = unless @vote&.value&.nonzero?
+         Vote.opinion_menu
+       else
+         Vote.confidence_menu
+       end
+confidences = options_for_select(menu, @vote&.value)
 %>
 
-<%=
-[
-  tag.div(class: "row") do
-    tag.div(class: "col-xs-12") do
-      render(partial: "shared/form_name_feedback",
-             locals: feedback_locals) if @what.present?
-    end
-  end,
-  fields_for(:naming) do |f_n|
+<% if @given_name.present? %>
+  <%= tag.div do
+        render(partial: "shared/form_name_feedback", locals: feedback_locals)
+      end %>
+<% end %>
+
+<%= fields_for(:naming) do |f_n| %>
+  <% vote_reasons = tag.div(data: { autocompleter_target: "collapseFields" },
+                            class: ("collapse" if context == "blank")) do
     [
-      tag.div(class: "row mt-3") do
-        [
-          tag.div(class: "col-xs-12 col-sm-6") do
-            autocompleter_field(
-              form: f_n, field: :name, label: :WHAT.t + ":", value: @what,
-              autofocus: focus_on_name, autocomplete: :name
-            )
-          end,
-          tag.div(class: "col-xs-12 col-sm-6") do
-            help_block_with_arrow("left", id: "naming_name_help") do
-              tag.p(name_help)
-            end
-          end
-        ].safe_join
+      f_n.fields_for(:vote) do |f_v|
+        select_with_label(form: f_v, field: :value,
+                          options: confidences, include_blank: create,
+                          label: :form_naming_confidence.t + ":",
+                          autofocus: focus_on_vote)
       end,
-      tag.div(class: "row mt-3") do
-        tag.div(class: "col-xs-12 col-sm-6") do
-          [
-            f_n.fields_for(:vote) do |f_v|
-              select_with_label(form: f_v, field: :value,
-                                options: confidences, select_opts: select_opts,
-                                label: :form_naming_confidence.t + ":",
-                                autofocus: focus_on_vote)
-            end,
-            f_n.fields_for(:reasons) do |f_r|
-              naming_form_reasons_fields(f_r, @reasons)
-            end
-          ].safe_join
-        end
+      f_n.fields_for(:reasons) do |f_r|
+        naming_form_reasons_fields(f_r, @reasons)
       end
     ].safe_join
-  end,
-  hidden_field_tag(:context, context)
-].safe_join
-%>
+  end %>
+  <%= autocompleter_field(
+    form: f_n, field: :name, type: :name, label: "#{:WHAT.t}:",
+    value: @given_name, autofocus: focus_on_name, help: name_help,
+    append: vote_reasons
+  ) %>
+<% end %>
+
+<%= hidden_field_tag(:context, context) %>

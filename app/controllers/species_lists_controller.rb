@@ -162,7 +162,7 @@ class SpeciesListsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:SpeciesList, :by_user, user: user)
+    query = create_query(:SpeciesList, :all, by_user: user)
     show_selected_species_lists(query)
   end
 
@@ -171,7 +171,7 @@ class SpeciesListsController < ApplicationController
     project = find_or_goto_index(Project, params[:for_project].to_s)
     return unless project
 
-    query = create_query(:SpeciesList, :for_project, project: project)
+    query = create_query(:SpeciesList, :all, project: project)
     show_selected_species_lists(query, always_index: 1)
   end
 
@@ -183,7 +183,7 @@ class SpeciesListsController < ApplicationController
     if spl
       redirect_to(action: :show, id: spl.id)
     else
-      query = create_query(:SpeciesList, :pattern_search, pattern: pattern)
+      query = create_query(:SpeciesList, :all, pattern: pattern)
       show_selected_species_lists(query)
     end
   end

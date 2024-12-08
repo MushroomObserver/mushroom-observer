@@ -115,7 +115,7 @@ class ProjectTest < UnitTestCase
 
   def test_date_strings
     proj = projects(:pinned_date_range_project)
-    assert_equal("#{proj.start_date} - #{proj.end_date}",
+    assert_equal("#{proj.start_date} to #{proj.end_date}",
                  proj.date_range, "Wrong date range string")
 
     assert_equal(:form_projects_any.l, projects(:unlimited_project).date_range,
@@ -125,6 +125,9 @@ class ProjectTest < UnitTestCase
   def test_out_of_range_observations
     assert_out_of_range_observations(projects(:current_project), expect: 0)
     assert_out_of_range_observations(projects(:unlimited_project), expect: 0)
+    assert_out_of_range_observations(projects(:no_start_date_project),
+                                     expect: 0)
+    assert_out_of_range_observations(projects(:no_end_date_project))
     assert_out_of_range_observations(projects(:future_project))
     assert_out_of_range_observations(projects(:pinned_date_range_project))
   end
@@ -132,6 +135,8 @@ class ProjectTest < UnitTestCase
   def test_in_range_observations
     assert_in_range_observations(projects(:current_project))
     assert_in_range_observations(projects(:unlimited_project))
+    assert_in_range_observations(projects(:no_start_date_project))
+    assert_in_range_observations(projects(:no_end_date_project), expect: 0)
     assert_in_range_observations(projects(:future_project), expect: 0)
     assert_in_range_observations(projects(:pinned_date_range_project),
                                  expect: 0)
@@ -153,6 +158,13 @@ class ProjectTest < UnitTestCase
       "Test needs fixture with some Observations; #{project.title} has none"
     )
     assert_equal(expect, project.in_range_observations.count)
+  end
+
+  def test_out_of_area_observations
+    project = projects(:falmouth_2023_09_project)
+    assert_equal(2, project.out_of_area_observations.size)
+
+    assert_empty(projects(:unlimited_project).out_of_area_observations)
   end
 
   def test_place_name
@@ -177,7 +189,7 @@ class ProjectTest < UnitTestCase
       title: "With Location Violations",
       open_membership: true
     )
-    geoloc_in_bubank = observations(:unknown_with_lat_long)
+    geoloc_in_burbank = observations(:unknown_with_lat_lng)
     geoloc_outside_burbank =
       observations(:trusted_hidden) # lat/lon in Falmouth
     geoloc_nil_burbank_contains_loc =
@@ -185,7 +197,7 @@ class ProjectTest < UnitTestCase
     geoloc_nil_outside_burbank = observations(:reused_observation)
 
     proj.observations = [
-      geoloc_in_bubank,
+      geoloc_in_burbank,
       geoloc_nil_burbank_contains_loc,
       geoloc_outside_burbank,
       geoloc_nil_outside_burbank
@@ -203,7 +215,7 @@ class ProjectTest < UnitTestCase
       "whose Loc is not contained in Proj location"
     )
     assert_not_includes(
-      location_violations, geoloc_in_bubank,
+      location_violations, geoloc_in_burbank,
       "Noncompliant Obss wrongly includes Obs with geoloc inside Proj location"
     )
     assert_not_includes(

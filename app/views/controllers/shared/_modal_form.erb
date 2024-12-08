@@ -52,7 +52,7 @@ tag.div(
         end,
         tag.div(class: "modal-body", id: "modal_#{identifier}_body") do
           [
-            tag.turbo_frame("", id: "modal_#{identifier}_flash"), # turbo
+            tag.div("", id: "modal_#{identifier}_flash"), # turbo
             render(partial: form, locals: form_locals) # turbo
           ].safe_join
         end

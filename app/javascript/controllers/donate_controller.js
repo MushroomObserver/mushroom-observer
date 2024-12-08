@@ -5,7 +5,7 @@ export default class extends Controller {
   static targets = ['otherCheck', 'otherAmount']
 
   connect() {
-    this.element.dataset.stimulus = "connected";
+    this.element.dataset.stimulus = "donate-connected";
   }
 
   checkOther() {

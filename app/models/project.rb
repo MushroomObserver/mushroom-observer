@@ -10,15 +10,20 @@
 #
 #  == Attributes
 #
-#  id::             Locally unique numerical id, starting at 1.
-#  created_at::     Date/time it was first created.
-#  updated_at::     Date/time it was last updated.
-#  user::           User that created it.
-#  admin_group::    UserGroup of admins.
-#  user_group::     UserGroup of members.
-#  title::          Title string.
-#  summary::        Summary of purpose.
+#  id::                Locally unique numerical id, starting at 1.
+#  created_at::        Date/time it was first created.
+#  updated_at::        Date/time it was last updated.
+#  user::              User that created it.
+#  admin_group::       UserGroup of admins.
+#  user_group::        UserGroup of members.
+#  title::             Title string.
+#  summary::           Summary of purpose.
+#  field_slip_prefix:: Prefix for associated field slip codes
 #  open_membership  Enable users to add themselves, disable shared editing
+#  location::
+#  image::
+#  start_date::     start date or nil
+#  end_date::       end date or nil
 #
 #  == Methods
 #
@@ -29,8 +34,9 @@
 #  current?::       Project (based on dates) has started and hasn't ended
 #  user_can_add_observation?:: Can user add observation to this Project
 #  violates_constraints?:: Does a given obs violate the Project constraints
-#  text_name::      Alias for +title+ for debugging.
-#  Proj.can_edit?:: Check if User has permission to edit an Obs/Image/etc.
+#  count_violations    # of project Observations which violate constraints
+#  text_name::         Alias for +title+ for debugging.
+#  Proj.can_edit?::    Check if User has permission to edit an Obs/Image/etc.
 #  Proj.admin_power?:: Check for admin for a project of this Obs
 #
 #  ==== Logging
@@ -61,7 +67,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :project_members, dependent: :destroy
   has_many :members, through: :project_members, source: :users
 
-  has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
+  has_many :comments, as: :target, dependent: :destroy, inverse_of: :target
+  has_many :field_slips, dependent: :nullify
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
 
   has_many :project_images, dependent: :destroy
@@ -69,11 +76,17 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   has_many :project_observations, dependent: :destroy
   has_many :observations, through: :project_observations
+  has_many :locations, through: :observations
 
   has_many :project_species_lists, dependent: :destroy
   has_many :species_lists, through: :project_species_lists
 
   before_destroy :orphan_drafts
+  validates :field_slip_prefix, uniqueness: true, allow_blank: true
+  validates :field_slip_prefix,
+            allow_blank: true,
+            format: { with: /\A[A-Z0-9][A-Z0-9-]*\z/,
+                      message: proc { :alphanumerics_only.t } }
 
   scope :show_includes, lambda {
     strict_loading.includes(
@@ -89,6 +102,14 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # returns +title+.
   def text_name
     title.to_s
+  end
+
+  # Ensure that field_slip_prefix is uppercase and at most 255
+  # characters.
+  def field_slip_prefix=(val)
+    self[:field_slip_prefix] = if val && val.strip != ""
+                                 val.strip.upcase[0, 255]
+                               end
   end
 
   # Same as +text_name+ but with id tacked on to make unique.
@@ -127,6 +148,14 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def can_join?(user)
     open_membership && !member?(user)
+  end
+
+  def join(user)
+    return unless can_join?(user)
+
+    ProjectMember.create!(project: self, user:,
+                          trust_level: "hidden_gps")
+    user_group.users << user unless user_group.users.member?(user)
   end
 
   def can_leave?(user)
@@ -376,7 +405,27 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def name_count
-    Checklist::ForProject.new(self).num_names
+    Checklist::ForProject.new(self).num_taxa
+  end
+
+  def location_count
+    locations.distinct.count
+  end
+
+  def count_collections(name)
+    observations.where(name:).count
+  end
+
+  def violations
+    out_of_range_observations.to_a.union(out_of_area_observations)
+  end
+
+  # Is at least one violation removable by the current user?
+  def violations_removable_by_current_user?
+    user_ids = violations.map(&:user_id)
+    return false unless user_ids.any?
+
+    admin_group_user_ids.union(user_ids).include?(User.current_id)
   end
 
   ##############################################################################
@@ -416,33 +465,15 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # Obs lat/lon is outside Project.location exor
   # Obs location is not a subset of Project.location
   def out_of_area_observations
-    obs_geoloc_outside_project_location.to_a.union(
+    return [] if location.nil?
+
+    obs_geoloc_outside_project_location +
       obs_without_geoloc_location_not_contained_in_location
-    )
   end
 
   def violates_constraints?(observation)
     violates_location?(observation) ||
       violates_date_range?(observation)
-  end
-
-  private ###############################
-
-  def obs_geoloc_outside_project_location
-    observations.
-      where.not(observations: { lat: nil }).
-      not_in_box(n: location.north, s: location.south,
-                 e: location.east, w: location.west)
-  end
-
-  def obs_without_geoloc_location_not_contained_in_location
-    observations.where(lat: nil).joins(:location).
-      merge(
-        Location.in_box(n: location.north, s: location.south,
-                        e: location.east, w: location.west).
-                 # This is safe (doesn't invert observations.where(lat: nil))
-                 invert_where
-      )
   end
 
   def violates_location?(observation)
@@ -452,23 +483,29 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def violates_date_range?(observation)
-    excluded_from_date_range?(observation)
+    !(start_date..end_date).cover?(observation.when)
   end
 
-  def excluded_from_date_range?(observation)
-    !included_in_date_range?(observation)
+  def trackers
+    FieldSlipJobTracker.where(prefix: field_slip_prefix)
   end
 
-  def included_in_date_range?(observation)
-    starts_no_later_than?(observation) &&
-      ends_no_earlier_than?(observation)
+  def can_add_field_slip(user)
+    member?(user) || can_join?(user)
   end
 
-  def starts_no_later_than?(observation)
-    !start_date&.after?(observation.when)
+  private ###############################
+
+  def obs_geoloc_outside_project_location
+    observations.
+      where.not(observations: { lat: nil }).not_in_box(**location.bounding_box)
   end
 
-  def ends_no_earlier_than?(observation)
-    !end_date&.before?(observation.when)
+  def obs_without_geoloc_location_not_contained_in_location
+    observations.where(lat: nil).joins(:location).
+      merge(
+        # invert_where is safe (doesn't invert observations.where(lat: nil))
+        Location.not_in_box(**location.bounding_box)
+      )
   end
 end

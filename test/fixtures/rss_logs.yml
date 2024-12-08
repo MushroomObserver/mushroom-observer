@@ -70,6 +70,20 @@ wolf_fart_rss_log:
   # updated_at: 2023-11-15 12:00:01
   # created_at: 2023-11-15 12:00:00
 
+reused_observation_rss_log:
+  <<: *DEFAULTS
+  observation: reused_observation
+  created_at: 2023-11-19 04:05:03
+  updated_at: 2023-11-19 04:05:03
+  # notes: " log_observation_created user \n"
+
+deprecated_name_obs_rss_log:
+  <<: *DEFAULTS
+  observation: deprecated_name_obs
+  created_at: 2014-04-04 04:05:03
+  updated_at: 2014-04-04 04:05:03
+  # notes: " log_observation_created user \n"
+
 strobilurus_diminutivus_obs_rss_log:
   <<: *DEFAULTS
   observation: strobilurus_diminutivus_obs
@@ -112,9 +126,9 @@ unknown_with_no_naming_rss_log:
   created_at: 2008-09-23 09:00:00
   notes: "20080923090300 log_observation_created user mary\n"
 
-unknown_with_lat_long_rss_log:
+unknown_with_lat_lng_rss_log:
   <<: *DEFAULTS
-  observation: unknown_with_lat_long
+  observation: unknown_with_lat_lng
   updated_at: 2010-07-22 09:21:00
   created_at: 2010-07-22 09:20:00
   notes: "20100722092100 log_observation_created user mary\n"
@@ -428,7 +442,37 @@ perkatkun_obs_rss_log:
   <<: *DEFAULTS
   observation: perkatkun_obs
 
+falmouth_2022_obs_rss_log:
+  <<: *DEFAULTS
+  observation: falmouth_2022_obs
 
+falmouth_2023_09_obs_rss_log:
+  <<: *DEFAULTS
+  observation: falmouth_2023_09_obs
+
+brett_woods_2023_09_obs_rss_log:
+  <<: *DEFAULTS
+  observation: brett_woods_2023_09_obs
+
+nybg_2023_09_obs_rss_log:
+  <<: *DEFAULTS
+  observation: nybg_2023_09_obs
+
+current_obs_rss_log:
+  <<: *DEFAULTS
+  observation: current_obs
+
+newbie_obs_rss_log:
+  <<: *DEFAULTS
+  observation: newbie_obs
+
+recorder_obs_rss_log:
+  <<: *DEFAULTS
+  observation: recorder_obs
+
+imported_inat_obs_rss_log:
+  <<: *DEFAULTS
+  observation: imported_inat_obs
 
 species_list_rss_log:
   species_list: first_species_list

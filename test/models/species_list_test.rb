@@ -71,9 +71,9 @@ class SpeciesListTest < UnitTestCase
     assert_equal(spl.when, o.when)
     assert_equal(spl.where, o.where)
     assert_equal(spl.location, o.location)
-    assert_equal("", o.notes)
+    assert_equal({}, o.notes)
     assert_nil(o.alt)
-    assert_nil(o.long)
+    assert_nil(o.lng)
     assert_nil(o.alt)
     assert_true(o.is_collection_location)
     assert_false(o.specimen)
@@ -96,9 +96,9 @@ class SpeciesListTest < UnitTestCase
       projects: [],
       when: "2012-01-13",
       where: "Undefined Location",
-      notes: "notes",
+      notes: { Other: "notes" },
       lat: " 12deg 34min N ",
-      long: " 123 45 W ",
+      lng: " 123 45 W ",
       alt: " 123.45 ft ",
       is_collection_location: false,
       specimen: true,
@@ -113,9 +113,9 @@ class SpeciesListTest < UnitTestCase
     assert_equal("2012-01-13", o.when.web_date)
     assert_equal("Undefined Location", o.where)
     assert_nil(o.location)
-    assert_equal("notes", o.notes)
+    assert_equal({ Other: "notes" }, o.notes)
     assert_equal(12.5667, o.lat.round(4))
-    assert_equal(-123.75, o.long.round(4))
+    assert_equal(-123.75, o.lng.round(4))
     assert_equal(38, o.alt.round(4))
     assert_false(o.is_collection_location)
     assert_true(o.specimen)

@@ -5,6 +5,7 @@
 #   advanced_search:
 #   pattern:
 #   country:
+#   project:
 #   by_user:
 #   by_editor:
 #  :show,
@@ -33,6 +34,7 @@ class LocationsController < ApplicationController
     :advanced_search,
     :pattern,
     :country,
+    :project,
     :by_user,
     :by_editor,
     :by,
@@ -100,6 +102,15 @@ class LocationsController < ApplicationController
   def country
     query = create_query(
       :Location, :regexp_search, regexp: "#{params[:country]}$"
+    )
+    show_selected_locations(query, link_all_sorts: true)
+  end
+
+  # Displays a list of all locations whose country matches the id param.
+  def project
+    query = create_query(
+      :Location, :with_observations_for_project,
+      project: Project.find(params[:project])
     )
     show_selected_locations(query, link_all_sorts: true)
   end
@@ -290,6 +301,11 @@ class LocationsController < ApplicationController
       @dubious_where_reasons = Location.dubious_name?(user_format, true)
     end
     @location = Location.new
+
+    respond_to do |format|
+      format.turbo_stream { render_modal_location_form }
+      format.html
+    end
   end
 
   def create
@@ -311,7 +327,7 @@ class LocationsController < ApplicationController
 
     # Need to create location.
     else
-      done = create_location_ivar(done, db_name)
+      done = create_location_ivar_and_save(done, db_name)
     end
 
     # If done, update any observations at @display_name,
@@ -331,7 +347,11 @@ class LocationsController < ApplicationController
 
     params[:location] ||= {}
     @display_name = @location.display_name
-    update if request.method == "POST"
+
+    respond_to do |format|
+      format.turbo_stream { render_modal_location_form }
+      format.html
+    end
   end
 
   def update
@@ -419,7 +439,7 @@ class LocationsController < ApplicationController
     @set_herbarium    = params[:set_herbarium]
   end
 
-  def create_location_ivar(done, db_name)
+  def create_location_ivar_and_save(done, db_name)
     @location = Location.new(permitted_location_params)
     @location.display_name = @display_name # (strip_squozen)
 
@@ -478,7 +498,7 @@ class LocationsController < ApplicationController
                                                      that: new_name))
       redirect_to(@location.show_link_args)
     else
-      redirect_with_query(emails_merge_request_path(
+      redirect_with_query(new_admin_emails_merge_requests_path(
                             type: :Location, old_id: @location.id,
                             new_id: merge.id
                           ))
@@ -549,11 +569,37 @@ class LocationsController < ApplicationController
     )
   end
 
+  def render_modal_location_form
+    render(partial: "shared/modal_form",
+           locals: { title: modal_title, identifier: modal_identifier,
+                     form: "locations/form" }) and return
+  end
+
+  def modal_identifier
+    case action_name
+    when "new", "create"
+      "location"
+    when "edit", "update"
+      "location_#{@location.id}"
+    end
+  end
+
+  def modal_title
+    case action_name
+    when "new", "create"
+      :create_location_title.t
+    when "edit", "update"
+      :edit_location_title.t(name: @location.display_name)
+    end
+  end
+
   ##############################################################################
 
   def permitted_location_params
     params.require(:location).
-      permit(:display_name, :north, :west, :east, :south, :high, :low, :notes)
+      permit(:display_name,
+             :north, :west, :east, :south, :high, :low,
+             :notes, :hidden)
   end
 end
 # rubocop:enable Metrics/ClassLength

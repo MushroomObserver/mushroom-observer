@@ -52,7 +52,7 @@ module Report
         row.state,
         row.country,
         row.best_lat(4),
-        row.best_long(4),
+        row.best_lng(4),
         radius(row),
         row.best_low,
         row.best_high,

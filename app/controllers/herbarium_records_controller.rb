@@ -152,14 +152,14 @@ class HerbariumRecordsController < ApplicationController
        (herbarium_record = HerbariumRecord.safe_find(pattern))
       redirect_to(herbarium_record_path(herbarium_record.id))
     else
-      query = create_query(:HerbariumRecord, :pattern_search, pattern: pattern)
+      query = create_query(:HerbariumRecord, :all, pattern: pattern)
       show_selected_herbarium_records(query)
     end
   end
 
   def herbarium_id
     store_location
-    query = create_query(:HerbariumRecord, :in_herbarium,
+    query = create_query(:HerbariumRecord, :all,
                          herbarium: params[:herbarium_id].to_s,
                          by: :herbarium_label)
     show_selected_herbarium_records(query, always_index: true)
@@ -168,7 +168,7 @@ class HerbariumRecordsController < ApplicationController
   def observation_id
     @observation = Observation.find(params[:observation_id])
     store_location
-    query = create_query(:HerbariumRecord, :for_observation,
+    query = create_query(:HerbariumRecord, :all,
                          observation: params[:observation_id].to_s,
                          by: :herbarium_label)
     show_selected_herbarium_records(query, always_index: true)
@@ -194,7 +194,9 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def default_accession_number
-    if @observation.collection_numbers.length == 1
+    if @observation.field_slips.length == 1
+      @observation.field_slips.first.code
+    elsif @observation.collection_numbers.length == 1
       @observation.collection_numbers.first.format_name
     else
       "MO #{@observation.id}"
@@ -356,7 +358,7 @@ class HerbariumRecordsController < ApplicationController
     if name.blank?
       flash_error(:create_herbarium_record_missing_herbarium_name.t)
       false
-    elsif !@herbarium_record.herbarium.nil?
+    elsif !@herbarium_record.herbarium_id.nil?
       true
     elsif name != @user.personal_herbarium_name || @user.personal_herbarium
       flash_warning(:create_herbarium_separately.t)
@@ -451,8 +453,7 @@ class HerbariumRecordsController < ApplicationController
   def reload_herbarium_record_modal_form_and_flash
     render(
       partial: "shared/modal_form_reload",
-      locals: { identifier: "herbarium_record",
-                form: "herbarium_records/form" }
+      locals: { identifier: modal_identifier, form: "herbarium_records/form" }
     ) and return true
   end
 end

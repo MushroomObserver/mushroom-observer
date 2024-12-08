@@ -64,7 +64,7 @@ module Tabs
     end
 
     def add_project_banner(project)
-      add_page_title(project.title)
+      add_page_title(link_to_object(project))
 
       if project.location
         content_for(:location) do
@@ -84,9 +84,8 @@ module Tabs
     def add_background_image(image)
       return unless image
 
-      presenter = ImagePresenter.new(image, size: :large)
       content_for(:background_image) do
-        image_tag(presenter.img_src, class: "image-title")
+        image_tag(image.large_url, class: "image-title")
       end
     end
   end

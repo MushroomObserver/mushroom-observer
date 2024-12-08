@@ -127,7 +127,7 @@ class CollectionNumbersController < ApplicationController
        (collection_number = CollectionNumber.safe_find(pat))
       redirect_to(action: :show, id: collection_number.id)
     else
-      query = create_query(:CollectionNumber, :pattern_search, pattern: pat)
+      query = create_query(:CollectionNumber, :all, pattern: pat)
       show_selected_collection_numbers(query)
     end
   end
@@ -136,7 +136,7 @@ class CollectionNumbersController < ApplicationController
   def observation_id
     @observation = Observation.find(params[:observation_id])
     store_location
-    query = create_query(:CollectionNumber, :for_observation,
+    query = create_query(:CollectionNumber, :all,
                          observation: params[:observation_id].to_s)
     show_selected_collection_numbers(query, always_index: true)
   end

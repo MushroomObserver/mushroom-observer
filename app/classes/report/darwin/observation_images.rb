@@ -6,7 +6,9 @@ module Report
     class ObservationImages < Report::CSV
       attr_accessor :observations, :query
 
-      self.separator = "\t"
+      def self.separator
+        "\t"
+      end
 
       def initialize(args)
         super(args)

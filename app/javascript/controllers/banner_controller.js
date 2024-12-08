@@ -1,20 +1,58 @@
-import { Controller } from "@hotwired/stimulus"
+import { Controller } from "@hotwired/stimulus";
 
-// Connects to data-controller="banner"
 export default class extends Controller {
+  static targets = ["banner", "container", "dismissButton", "showButton"];
+
   connect() {
-    this.element.dataset.stimulus = "connected";
+    this.dismissButtonTarget.addEventListener("click", this.dismiss.bind(this));
+    this.showButtonTarget.addEventListener("click", this.show.bind(this));
+
+    if (this.isBannerDismissed()) {
+      this.hideBanner();
+      this.showShowButton(true); // Show the chevron
+    } else {
+      this.showBanner();
+      this.hideShowButton();
+    }
   }
 
-  setCookie({ params: { time } }) {
-    const date = new Date(),
-      expiresInDays = 30,
-      cookie_name = "hideBanner2=" + time + "; ";
+  dismiss() {
+    const version = this.dismissButtonTarget.dataset.version;
+    document.cookie = `dismissed_banner_version=${version}; path=/; max-age=31536000`; // 1 year
+    this.hideBanner();
+    this.showShowButton();
+  }
 
-    date.setTime(date.getTime() + (expiresInDays * 24 * 60 * 60 * 1000));
-    const expiresText = "expires=" + date.toUTCString() + "; ";
+  show() {
+    document.cookie = `dismissed_banner_version=; path=/; max-age=0`; // Clear the cookie
+    this.showBanner();
+    this.hideShowButton();
+  }
 
-    document.cookie =
-      cookie_name + expiresText + "samesite=lax;path=/";
+  isBannerDismissed() {
+    const version = this.dismissButtonTarget.dataset.version;
+    return document.cookie
+      .split("; ")
+      .some((cookie) => cookie === `dismissed_banner_version=${version}`);
+  }
+
+  hideBanner() {
+    this.bannerTarget.classList.remove('d-block');
+    this.bannerTarget.classList.add('d-none');
+  }
+
+  showBanner() {
+    this.bannerTarget.classList.remove('d-none');
+    this.bannerTarget.classList.add('d-block');
+  }
+
+  hideShowButton() {
+    this.containerTarget.classList.remove('d-block');
+    this.containerTarget.classList.add('d-none');
+  }
+
+  showShowButton() {
+    this.containerTarget.classList.remove('d-none');
+    this.containerTarget.classList.add('d-block');
   }
 }

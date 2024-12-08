@@ -10,8 +10,10 @@
 #   where: somewhere
 #   location:
 
-# IMPORTANT: When creating a new observation fixture, you need to also create a
-# corresponding rss_log, since the observation index now sorts by rss_log.
+# IMPORTANT:
+# - When creating a new observation fixture, you need to also create a
+#   corresponding rss_log, since the observation index now sorts by rss_log.
+# - DO NOT USE albion as a location; it breaks API2Test#test_patching_locations
 
 # Instead of writing simple one-off fixtures for new tests, consider creating
 # records on the fly within the test. This will generate both obs and rss_log.
@@ -23,6 +25,9 @@ DEFAULTS: &DEFAULTS
   where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
   user: dick
   vote_cache: 0.0
+  created_at: 2023-09-15 04:05:03
+  updated_at: 2023-09-15 04:05:03
+  log_updated_at: 2023-09-15 04:05:03
   when: <%= Time.now.strftime("%Y-%m-%d") %> # yyyy-mm-dd
   is_collection_location: 1
   lifeform: " "
@@ -231,7 +236,7 @@ unknown_with_no_naming:
   name: fungi
   text_name: Fungi
 
-unknown_with_lat_long:
+unknown_with_lat_lng:
   <<: *DEFAULTS
   created_at: 2010-07-22 09:20:00
   updated_at: 2010-07-22 09:21:00
@@ -243,10 +248,10 @@ unknown_with_lat_long:
   name: fungi
   text_name: Fungi
   lat: 34.1622
-  long: -118.3521
+  lng: -118.3521
   alt: 123
   notes:
-    :Other: "unknown_with_lat_long"
+    :Other: "unknown_with_lat_lng"
 
 trusted_hidden:
   <<: *DEFAULTS
@@ -256,12 +261,12 @@ trusted_hidden:
   when: 2023-11-05
   location: falmouth
   where: Falmouth, Massachusetts, USA
-  user: mary
+  user: ollie
   name: fungi
   text_name: Fungi
   gps_hidden: true
   lat: 41.6022
-  long: -70.5021
+  lng: -70.5021
   alt: 123
 
 untrusted_hidden:
@@ -277,7 +282,7 @@ untrusted_hidden:
   text_name: Fungi
   gps_hidden: true
   lat: 41.6055
-  long: -70.5055
+  lng: -70.5055
   alt: 123
 
 amateur_obs:
@@ -295,7 +300,7 @@ amateur_obs:
   notes:
     :Other: "A friend showed me this."
   lat: 34.1622
-  long: -118.3521
+  lng: -118.3521
   source: <%= Observation.sources[:mo_iphone_app] %>
 
 peltigera_obs:
@@ -680,8 +685,9 @@ template_and_orphaned_notes_scrambled_obs:
   notes:
     :Nearby_trees: pine
     :orphaned_caption_1: orphaned notes 1
-    :Other: other notes
+    :Other: other notes, +photo
     :orphaned_caption_2: orphaned notes 2
+    :Collector: _user rolf_
     :Cap: red
   user: notes_templater
 
@@ -724,17 +730,21 @@ wolf_fart:
   images: lone_wolf_image
   # images: lone_wolf_image, lone_wolf_image2
 
+# did not have rss_log
 reused_observation:
   <<: *DEFAULTS
   user: rolf
+  created_at: 2023-11-19 04:05:03
+  log_updated_at: 2023-11-19 04:05:03
   when: 2023-11-19
+  location: obs_default_location
+  where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
   species_lists: reused_list
-  rss_log:
 
+# did not have rss_log
 deprecated_name_obs:
   <<: *DEFAULTS
   created_at: 2014-04-04 04:05:03
-  updated_at: 2014-04-04 04:05:03
   log_updated_at: 2014-04-04 04:05:03
   when: 2012-06-07
   user: vouchered_only_user
@@ -743,4 +753,69 @@ deprecated_name_obs:
   name: petigera
   text_name: Petigera
   lifeform: " lichen "
-  rss_log:
+
+# meets constraints of falmouth_2023_09_project
+falmouth_2023_09_obs:
+  <<: *DEFAULTS
+  created_at: 2023-09-16 04:05:03
+  log_updated_at: 2023-09-16 04:05:03
+  when: 2023-09-15
+  where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
+  location: falmouth
+
+brett_woods_2023_09_obs:
+  <<: *DEFAULTS
+  created_at: 2023-09-16 04:05:03
+  log_updated_at: 2023-09-16 04:05:03
+  when: 2023-09-16
+  where: Brett Woods, Fairfield Co., Connecticut, USA
+  lat: 41.2039
+  lng: -73.3245
+  gps_hidden: true
+  location: brett_woods
+
+falmouth_2022_obs:
+  <<: *DEFAULTS
+  created_at: 2022-09-15 04:05:03
+  log_updated_at: 2022-09-15 04:05:03
+  when: 2022-09-15 # outside of dates of falmouth_2023_09_project
+  where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
+  location: falmouth
+  lat: 41.5862
+  lng: -70.5976
+  notes:
+    :Other: Some notes
+
+nybg_2023_09_obs:
+  <<: *DEFAULTS
+  user: roy # not an admin of falmouth_2023_09_project
+  when: 2023-09-15
+  where: The New York Botanical Garden, Bronx, New York, USA
+  location: nybg_location # outside location of falmouth_2023_09_project
+
+current_obs:
+  <<: *DEFAULTS
+  user: katrina
+  where: Salt Point State Park, Sonoma Co., California, USA
+  location: salt_point
+
+newbie_obs:
+  <<: *DEFAULTS
+  notes:
+    :Collector: _user foray_newbie_
+
+recorder_obs:
+  <<: *DEFAULTS
+  notes:
+    :Collector: Foray Collector
+
+imported_inat_obs:
+  <<: *DEFAULTS
+  inat_id: 12345
+#
+#
+# IMPORTANT - AVOID CREATING FUTURE TEST ERRORS
+# - When creating a new observation fixture, you MUST also create a
+#   corresponding rss_log, since the observation index now sorts by rss_log.
+# - Observation fixtures require `created_at` and `log_updated_at` values.
+#   If you want to be able to find them in integration tests, give unique dates!

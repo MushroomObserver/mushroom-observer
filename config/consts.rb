@@ -101,6 +101,7 @@ MushroomObserver::Application.configure do
   config.location_prefixes_file  = "#{location_path}prefixes.yml"
   config.location_bad_terms_file = "#{location_path}bad_terms.yml"
   config.unknown_location_name = "Earth"
+  config.obs_location_max_area = 4_000
 
   # Limit the number of objects we draw on a google map.
   config.max_map_objects = 100
@@ -125,6 +126,24 @@ MushroomObserver::Application.configure do
   # Array of sizes to be kept on the web server, e.g., :thumbnail, :small, etc.
   config.keep_these_image_sizes_local =
     IMAGE_CONFIG_DATA.config["keep_these_image_sizes_local"]
+
+  # We transfer originals to cloud archive storage right away, but we keep
+  # them on the image server for as long as we can, deleting them in batches.
+  # All images with `id >= next_image_id_to_go_to_cloud` are still being served
+  # from the image server. NOTE: this number must be kept in sync with the
+  # nginx configuration!
+  config.next_image_id_to_go_to_cloud = 0
+
+  # This is where original images from cloud storage are temporarily cached.
+  config.local_original_image_cache_path = "#{config.root}/public/orig_cache"
+  config.local_original_image_cache_url = "/orig_cache"
+
+  # Maximum number of original images per day a user is allowed to download.
+  config.original_image_user_quota = 100
+  config.original_image_site_quota = 10_000
+
+  # Cloud storage bucket name.
+  config.image_bucket_name = "mo-image-archive-bucket"
 
   # Location of script used to process and transfer images.
   # (Set to nil to have it do nothing.)
@@ -169,6 +188,9 @@ MushroomObserver::Application.configure do
 
   # Filter(s) to apply to all Querys
   config.default_content_filter = nil
+
+  # Maximum number of Observations that can be downloaded in a single request
+  config.max_downloads = 120
 
   # List of User ids of users that can see the image recognition
   # "Suggest Names" button on the observation page.

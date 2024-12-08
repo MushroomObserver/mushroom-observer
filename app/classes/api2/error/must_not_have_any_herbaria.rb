@@ -2,6 +2,6 @@
 
 class API2
   # Cannot update locations if there is an herbarium there.
-  class MustNotHaveAnyHerbaria < Error
+  class MustNotHaveAnyHerbaria < FatalError
   end
 end

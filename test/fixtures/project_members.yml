@@ -25,9 +25,9 @@ bolete_mary:
   user: mary
   trust_level: <%= ProjectMember.trust_levels[:editing] %>
 
-open_member_mary:
+open_member_ollie:
   project: open_membership_project
-  user: mary
+  user: ollie
   trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>
 
 open_member_katrina:
@@ -83,4 +83,9 @@ wrangel_island_dick:
 lone_wolf_trust:
   project: lone_wolf_project
   user: lone_wolf
+  trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>
+
+falmouth_2023_09_roy:
+  project: falmouth_2023_09_project
+  user: roy
   trust_level: <%= ProjectMember.trust_levels[:hidden_gps] %>

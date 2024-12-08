@@ -1,54 +1,67 @@
+<%# locals: (button_name:) -%>
 <%# Projects section of create_observation form %>
-<% if @suspect_checked_projects.any? %>
-  <% flash_warning(:form_observations_there_is_a_problem_with_projects.t) %>
 
-  <div class="alert alert-warning"
-       id="project_messages">
-    <%= tag.p(
-      "#{:form_observations_projects_out_of_range.t(
-         date: @observation.when,
-         place_name: @observation.place_name
-      )}:"
-    ) %>
-    <ul>
-      <% @suspect_checked_projects.each do |proj| %>
-        <%= tag.li("#{proj.title} (#{proj.constraints})") %>
+<%
+error_messages = suspect_messages = nil
+if @error_checked_projects.any?
+  error_messages = {
+    level: "danger",
+    list: @error_checked_projects,
+    help: :form_observations_projects_out_of_range_help.t
+  }
+end
+if @suspect_checked_projects.any?
+  suspect_messages = {
+    level: "warning",
+    list: @suspect_checked_projects,
+    help: :form_observations_projects_out_of_range_help.t +
+          :form_observations_projects_out_of_range_admin_help.t(button_name:)
+  }
+end
+%>
+
+<%# tag.div(id: "observation_projects") do %>
+  <%= fields_for(:project) do |f_p| %>
+
+    <% if error_messages.present? || suspect_messages.present? %>
+      <%= tag.div(id: "project_messages") do %>
+        <% [error_messages, suspect_messages].compact.each do |messages| %>
+          <%= tag.div(class: "alert alert-#{messages[:level]}") do
+            [
+              tag.div(
+                "#{:form_observations_projects_out_of_range.t(
+                  date: @observation.when,
+                  place_name: @observation.place_name
+                )}:"
+              ),
+              tag.ul do
+                messages[:list].each do |proj|
+                  concat(tag.li("#{proj.title} (#{proj.constraints})"))
+                end
+              end,
+              tag.p(messages[:help])
+            ].safe_join
+          end %>
+        <% end %>
       <% end %>
-    </ul>
-    <%= tag.p(
-      :form_observations_projects_out_of_range_help.
-        t(button_name: button_name)
-    )%>
-  </div>
-<% end %>
-
-<%= fields_for(:project) do |f_p| %>
-  <% if @suspect_checked_projects.any? %>
-    <div class="mt-3 row" id="observation_projects">
       <%= check_box_with_label(
         form: f_p, field: :ignore_proj_conflicts,
-        label: :form_observations_projects_ignore_project_constraints.t,
-        class: "alert alert-warning"
+        label: :form_observations_projects_ignore_project_constraints.t
       ) %>
-    </div>
-  <% end %>
+    <% end %>
 
-  <div class="mt-3 row" id="observation_projects">
-    <div class="col-xs-12 col-sm-6 col-sm-push-6">
-      <%= help_block_with_arrow("left", id: "project_help") do %>
-        <%= :form_observations_project_help.t %>
-      <% end %>
-    </div><!--.col-->
+    <%= tag.p(:form_observations_project_help.t) %>
 
-    <div class="col-xs-12 col-sm-6 col-sm-pull-6">
-      <strong><%= :PROJECTS.t %>:</strong>
+    <%= tag.div(class: "overflow-scroll-checklist") do %>
       <% @projects.each do |project| %>
-        <%= check_box_with_label(form: f_p, field: :"id_#{project.id}",
-                                 checked: @project_checks[project.id],
-                                 disabled: !project.user_can_add_observation?(@observation, @user),
-                                 label: project.title) %>
+        <%= check_box_with_label(
+          form: f_p, field: :"id_#{project.id}", label: project.title,
+          checked: @project_checks[project.id],
+          disabled: !project.user_can_add_observation?(@observation, @user)
+        ) %>
       <% end %>
-    </div><!--.col-->
-  </div><!--.row-->
-<% end %>
+    <% end %>
+
+  <% end %>
+<%# end %>
 

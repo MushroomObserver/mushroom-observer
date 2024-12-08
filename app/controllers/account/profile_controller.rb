@@ -5,7 +5,7 @@ module Account
     before_action :login_required
 
     def edit
-      @licenses = License.current_names_and_ids(@user.license)
+      @licenses = License.available_names_and_ids(@user.license)
       @place_name = @user.location ? @user.location.display_name : ""
       if @user.image
         @copyright_holder  = @user.image.copyright_holder
@@ -19,7 +19,7 @@ module Account
     end
 
     def update
-      @licenses = License.current_names_and_ids(@user.license)
+      @licenses = License.available_names_and_ids(@user.license)
 
       [:name, :notes, :mailing_address].each do |arg|
         val = params[:user][arg].to_s
@@ -63,8 +63,6 @@ module Account
     end
 
     def deal_with_possible_profile_changes
-      # compute legal name change now because @user.save will overwrite it
-      legal_name_change = @user.legal_name_change
       if !@user.changed
         flash_notice(:runtime_no_changes.t)
         redirect_to(user_path(@user.id))
@@ -72,22 +70,14 @@ module Account
         flash_object_errors(@user)
         render(:edit) and return
       else
-        update_copyright_holder(legal_name_change)
         maybe_update_location_and_finish
       end
-    end
-
-    def update_copyright_holder(legal_name_change = nil)
-      return unless legal_name_change
-
-      Image.update_copyright_holder(*legal_name_change, @user)
     end
 
     def maybe_update_location_and_finish
       if @need_location
         flash_notice(:runtime_profile_must_define.t)
-        redirect_to(location_create_location_path,
-                    where: @place_name, set_user: @user.id)
+        redirect_to(new_location_path(where: @place_name, set_user: @user.id))
       else
         flash_notice(:runtime_profile_success.t)
         redirect_to(user_path(@user.id))

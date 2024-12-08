@@ -5,10 +5,11 @@ module Report
   class Base
     attr_accessor :encoding
 
-    class_attribute :default_encoding
-    class_attribute :mime_type
-    class_attribute :extension
-    class_attribute :header
+    # These used to be class attributes, now are just regular instance methods:
+    #  default_encoding
+    #  mime_type
+    #  extension
+    #  header
 
     def initialize(args)
       self.encoding = args[:encoding] || default_encoding

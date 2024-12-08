@@ -52,7 +52,8 @@ module Names
       @deprecate_all = (params[:deprecate_all] == "1")
 
       # Create any new names that have been approved.
-      construct_approved_names(list, params[:approved_names], @deprecate_all)
+      construct_approved_names(list, params[:approved_names],
+                               deprecate: @deprecate_all)
 
       # Parse the write-in list of names.
       sorter = NameSorter.new
@@ -122,7 +123,7 @@ module Names
       @proposed_synonyms = @synonym_name_ids.filter_map do |id|
         Name.safe_find(id)
       end
-      render(:edit, location: edit_name_synonyms_path(@name.id))
+      render(:edit, location: edit_synonyms_of_name_path(@name.id))
     end
 
     # Helper used by change_synonyms.  Deprecates a single name.  Returns true
