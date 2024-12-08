@@ -2656,9 +2656,6 @@
   create_herbarium_code: Standard Abbreviation
   create_herbarium_code_recommended: recommended for Index Herbariorum-listed Fungaria
   create_herbarium_code_help: Look up the standard abbreviation for a fungarium at "Index Herbariorum":https://sweetgum.nybg.org/science/ih/.
-  create_herbarium_mcp_db: "[:herbarium_mcp_db]"
-  create_herbarium_mcp_db_recommended: recommended for MyCoPortal-searchable Fungaria
-  create_herbarium_mcp_db_help: At "MyCoPortal":https://www.mycoportal.org/portal/collections/index.php click the 'more info' link next to your Fungarium. In the browser address bar for the resulting page, the integer to the right of 'collid=' is the Collection ID.
   create_herbarium_email: Email Address
   create_herbarium_mailing_address: Mailing Address
   create_herbarium_duplicate_name: Fungarium called '[name]' already exists.
