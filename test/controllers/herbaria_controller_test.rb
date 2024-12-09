@@ -63,29 +63,15 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_show_mcp_db
     herbarium = nybg
-    assert(herbarium.mycoportal_db.present?,
-           "Test needs herbarium with mycoportal_db")
+    assert(herbarium.mcp_searchable?,
+           "Test needs a herbarium serachble via MyCoPortal")
 
     login("mary")
     get(:show, params: { id: herbarium.id })
 
     assert_select(
       "#mcp_number",
-      { text: /#{:herbarium_mcp_db.l}:\s+#{herbarium.mycoportal_db}/ }
-    )
-  end
-
-  def test_show_mcp_db_missing
-    herbarium = field_museum
-    assert(herbarium.mycoportal_db.nil?,
-           "Test needs mcp searchable herbarium whose mycoportal_db is nil")
-
-    login("mary")
-    get(:show, params: { id: herbarium.id })
-
-    assert_select(
-      "#mcp_number",
-      { text: /#{:herbarium_mcp_db.l}:\s+#{:show_herbarium_mcp_db_missing.l}/ }
+      { text: /#{:herbarium_mcp_db.l}:\s+#{herbarium.mcp_collid}/ }
     )
   end
 
@@ -295,14 +281,14 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:index, params: { flavor: :nonpersonal })
 
     assert_displayed_title(:query_title_nonpersonal.l)
-    Herbarium.where(personal_user_id: nil).each do |herbarium|
+    Herbarium.where(personal_user_id: nil).find_each do |herbarium|
       assert_select(
         "a[href ^= '#{herbarium_path(herbarium)}']", true,
         "List of Institutional Fungaria is missing a link to " \
         "#{herbarium.format_name})"
       )
     end
-    Herbarium.where.not(personal_user_id: nil).each do |herbarium|
+    Herbarium.where.not(personal_user_id: nil).find_each do |herbarium|
       assert_select(
         "a[href ^= '#{herbarium_path(herbarium)}']", false,
         "List of Institutional Fungaria should not have a link to " \
@@ -320,14 +306,14 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_select("#title").text.start_with?(
       :query_title_pattern_search.l(types: :HERBARIA.l, pattern: pattern)
     )
-    Herbarium.where.not(personal_user_id: nil).each do |herbarium|
+    Herbarium.where.not(personal_user_id: nil).find_each do |herbarium|
       assert_select(
         "a[href ^= '#{herbarium_path(herbarium)}']", true,
         "Search for #{pattern} is missing a link to " \
         "#{herbarium.format_name})"
       )
     end
-    Herbarium.where(personal_user_id: nil).each do |herbarium|
+    Herbarium.where(personal_user_id: nil).find_each do |herbarium|
       assert_select(
         "a[href ^= '#{herbarium_path(herbarium)}']", false,
         "Search for #{pattern} should not have a link to " \
