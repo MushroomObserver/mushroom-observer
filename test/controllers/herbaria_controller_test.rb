@@ -281,14 +281,14 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:index, params: { flavor: :nonpersonal })
 
     assert_displayed_title(:query_title_nonpersonal.l)
-    Herbarium.where(personal_user_id: nil).each do |herbarium|
+    Herbarium.where(personal_user_id: nil).find_each do |herbarium|
       assert_select(
         "a[href ^= '#{herbarium_path(herbarium)}']", true,
         "List of Institutional Fungaria is missing a link to " \
         "#{herbarium.format_name})"
       )
     end
-    Herbarium.where.not(personal_user_id: nil).each do |herbarium|
+    Herbarium.where.not(personal_user_id: nil).find_each do |herbarium|
       assert_select(
         "a[href ^= '#{herbarium_path(herbarium)}']", false,
         "List of Institutional Fungaria should not have a link to " \
@@ -306,14 +306,14 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_select("#title").text.start_with?(
       :query_title_pattern_search.l(types: :HERBARIA.l, pattern: pattern)
     )
-    Herbarium.where.not(personal_user_id: nil).each do |herbarium|
+    Herbarium.where.not(personal_user_id: nil).find_each do |herbarium|
       assert_select(
         "a[href ^= '#{herbarium_path(herbarium)}']", true,
         "Search for #{pattern} is missing a link to " \
         "#{herbarium.format_name})"
       )
     end
-    Herbarium.where(personal_user_id: nil).each do |herbarium|
+    Herbarium.where(personal_user_id: nil).find_each do |herbarium|
       assert_select(
         "a[href ^= '#{herbarium_path(herbarium)}']", false,
         "Search for #{pattern} should not have a link to " \
