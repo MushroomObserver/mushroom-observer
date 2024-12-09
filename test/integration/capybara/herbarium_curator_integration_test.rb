@@ -106,7 +106,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     rec = obs.herbarium_records.find { |r| r.can_edit?(mary) }
     visit(herbarium_path(rec.herbarium.id))
     assert_selector(
-      "a[href*='#{herbarium_records_path(herbarium_id: rec.herbarium.id)}']"
+      "a[href*='#{herbarium_records_path(herbarium: rec.herbarium.id)}']"
     )
     first(class: "herbarium_records_for_herbarium_link").click
 
