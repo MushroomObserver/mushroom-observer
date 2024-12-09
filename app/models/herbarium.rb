@@ -195,7 +195,12 @@ class Herbarium < AbstractModel
   end
 
   def mcp_collid
-    row = self.class.mcp_collections.find { |r| r["coll acryonym"] == code }
+    row = self.class.mcp_collections.find do |r|
+      # Some MCP collection acryonyms comprise a standard herbarium code plus
+      # a dash and other characters. Ex: "TENN-F".
+      # We want to match only the standard code.
+      r["coll acryonym"].split("-").first == code
+    end
     row ? row["collid"] : nil
   end
 
