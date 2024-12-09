@@ -50,3 +50,16 @@ add_page_title(:inat_import_tracker.t)
                 { class: "btn btn-default" } ) %>
   <% end %>
 </p>
+
+<%=
+  tag.tr(id: dom_id(tracker),
+        data: { controller: "inat-import-job",
+                status: InatImportJobTracker.statuses[tracker.status],
+                endpoint: inat_import_job_tracker_path(tracker.id) }) do
+    [
+      tag.td(class: "text-right", data: { inat_import_job_target: "status" }) do
+        tracker.status
+      end
+    ].safe_join
+  end
+%>
