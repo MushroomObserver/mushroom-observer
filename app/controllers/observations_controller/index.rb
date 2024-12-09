@@ -30,6 +30,15 @@ class ObservationsController
       )
     end
 
+    # Displays matrix of Observations with the given text_name (or search_name).
+    def name
+      query = create_query(:Observation, :all,
+                           names: [params[:name]],
+                           include_synonyms: true,
+                           by: :confidence)
+      show_selected_observations(query)
+    end
+
     # Displays matrix of Observations with the given name proposed but not
     # actually that name.
     def look_alikes
@@ -38,15 +47,6 @@ class ObservationsController
                            include_synonyms: true,
                            include_all_name_proposals: true,
                            exclude_consensus: true,
-                           by: :confidence)
-      show_selected_observations(query)
-    end
-
-    # Displays matrix of Observations with the given text_name (or search_name).
-    def name
-      query = create_query(:Observation, :all,
-                           names: [params[:name]],
-                           include_synonyms: true,
                            by: :confidence)
       show_selected_observations(query)
     end
@@ -67,6 +67,7 @@ class ObservationsController
       names.map { |name| name.approved_name.parents }.flatten.map(&:id).uniq
     end
 
+    # TODO: rename `by_user`, check callers
     # Displays matrix of User's Observations, by date.
     def user
       return unless (
@@ -197,6 +198,7 @@ class ObservationsController
                matrix: true, cache: true,
                include: observation_index_includes }.merge(args)
 
+      # TODO: deal with the by param separately
       # Paginate by letter if sorting by user.
       case query.params[:by]
       when "user", "reverse_user"

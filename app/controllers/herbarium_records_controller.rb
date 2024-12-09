@@ -157,6 +157,7 @@ class HerbariumRecordsController < ApplicationController
     end
   end
 
+  # TODO: change to herbarium. check callers!
   def herbarium_id
     store_location
     query = create_query(:HerbariumRecord, :all,
@@ -165,6 +166,7 @@ class HerbariumRecordsController < ApplicationController
     show_selected_herbarium_records(query, always_index: true)
   end
 
+  # TODO: change to observation. check callers!
   def observation_id
     @observation = Observation.find(params[:observation_id])
     store_location

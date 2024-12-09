@@ -7,11 +7,70 @@ class GlossaryTermsController < ApplicationController
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
-  def index
-    return patterned_index if params[:pattern].present?
+  # Used by ApplicationController to dispatch #index to a private method
+  @index_subaction_param_keys = [
+    :pattern, :by, :q, :id
+  ].freeze
 
-    index_full
+  @index_subaction_dispatch_table = {
+    by: :index_query_results,
+    q: :index_query_results,
+    id: :index_query_results
+  }.freeze
+
+  ##############################################################################
+
+  private
+
+  def default_index_subaction
+    list_all
   end
+
+  def list_all
+    query = create_query(:GlossaryTerm, :all, by: :name)
+    show_selected(query)
+  end
+
+  # Show selected list, based on current Query.
+  # (Linked from show template, next to "prev" and "next"... or will be.)
+  def index_query_results
+    sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
+    query = find_or_create_query(:GlossaryTerm, :all, by: sorted_by)
+    at_id_args = { id: params[:id].to_s, always_index: true }
+    show_selected(query, at_id_args)
+  end
+
+  # TODO: check if id match can be generalized
+  def pattern
+    pattern = params[:pattern].to_s
+    # If it matches the term ID
+    if pattern.match?(/^\d+$/) &&
+       (glossary_term = GlossaryTerm.safe_find(pattern))
+      render(:show, params: { id: glossary_term.id },
+                    location: glossary_term_path(glossary_term.id)) and return
+    else
+      query = create_query(:GlossaryTerm, :all, pattern: pattern)
+      show_selected(query)
+    end
+  end
+
+  # Show selected list of glossary_terms.
+  def show_selected(query, args = {})
+    show_index_of_objects(query, index_display_args(args, query))
+  end
+
+  def index_display_args(args, _query)
+    {
+      action: :index,
+      letters: "glossary_terms.name",
+      num_per_page: 50,
+      include: { thumb_image: :image_votes }
+    }.merge(args)
+  end
+
+  public
+
+  ##############################################################################
 
   def show
     return unless find_glossary_term!
@@ -78,44 +137,7 @@ class GlossaryTermsController < ApplicationController
     end
   end
 
-  ##############################################################################
-
   private
-
-  # --------- index private methods
-
-  def patterned_index
-    pattern = params[:pattern].to_s
-    # If it matches the term ID
-    if pattern.match?(/^\d+$/) &&
-       (glossary_term = GlossaryTerm.safe_find(pattern))
-      render(:show, params: { id: glossary_term.id },
-                    location: glossary_term_path(glossary_term.id)) and return
-    else
-      show_selected_glossary_terms(
-        create_query(:GlossaryTerm, :all, pattern: pattern)
-      )
-    end
-  end
-
-  def index_full
-    query = create_query(:GlossaryTerm, :all, by: :name)
-    show_selected_glossary_terms(query)
-  end
-
-  # Show selected list of glossary_terms.
-  def show_selected_glossary_terms(query, args = {})
-    includes = { thumb_image: :image_votes }
-    args = {
-      action: :index,
-      letters: "glossary_terms.name",
-      num_per_page: 50,
-      include: includes
-    }.merge(args)
-
-    show_index_of_objects(query, args)
-  end
-
   # --------- show, create, edit private methods
 
   def find_glossary_term!

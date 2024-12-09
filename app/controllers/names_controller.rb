@@ -68,6 +68,7 @@ class NamesController < ApplicationController
     redirect_to(search_advanced_path)
   end
 
+  # TODO: check if id matching should be generalized for the pattern method
   # Display list of names that match a string.
   def pattern
     pattern = params[:pattern].to_s
@@ -79,6 +80,7 @@ class NamesController < ApplicationController
     end
   end
 
+  # TODO: rename pattern_non_id
   def show_non_id_pattern_results(pattern)
     search = PatternSearch::Name.new(pattern)
     if search.errors.any?

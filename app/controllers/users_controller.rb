@@ -7,10 +7,15 @@ class UsersController < ApplicationController
 
   before_action :login_required
 
-  # User index
+  # Users index
+  # TODO: Use dispatcher to provide q, id, and by params to index_query_results
+  # NOTE: Only admins can get the full user index.
+  # if there's a `list_all` it should check admin mode.
+  # Other users get here via search.
   def index
     return user_search if params[:pattern].present?
 
+    # This is a list_all action basically
     if in_admin_mode? || find_query(:User)
       query = find_or_create_query(:User, by: params[:by])
       show_selected_users(query, id: params[:id].to_s, always_index: true)
@@ -25,29 +30,9 @@ class UsersController < ApplicationController
   # since there is a view with this name, it crashes each time.
   alias list_users index
 
-  # show.rhtml
-  def show
-    store_location
-    id = params[:id].to_s
-    return unless find_user!
-
-    case params[:flow]
-    when "next"
-      redirect_to_next_object(:next, User, id) and return
-    when "prev"
-      redirect_to_next_object(:prev, User, id) and return
-    end
-
-    @life_list = Checklist::ForUser.new(@show_user)
-    define_instance_vars_for_summary!
-  end
-
-  alias show_user show
-
-  #############################################################################
-
   private
 
+  # TODO: rename `pattern`, check callers
   # Display list of Users whose name, notes, etc. match a string pattern.
   def user_search
     pattern = params[:pattern].to_s
@@ -90,6 +75,32 @@ class UsersController < ApplicationController
 
     show_index_of_objects(query, args)
   end
+
+  public
+
+  #############################################################################
+
+  def show
+    store_location
+    id = params[:id].to_s
+    return unless find_user!
+
+    case params[:flow]
+    when "next"
+      redirect_to_next_object(:next, User, id) and return
+    when "prev"
+      redirect_to_next_object(:prev, User, id) and return
+    end
+
+    @life_list = Checklist::ForUser.new(@show_user)
+    define_instance_vars_for_summary!
+  end
+
+  alias show_user show
+
+  #############################################################################
+
+  private
 
   # Note that the full user index is unavailable except to admins.
   # The index above will just redirect again, to "/"

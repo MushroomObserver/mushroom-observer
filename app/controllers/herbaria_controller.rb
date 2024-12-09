@@ -64,9 +64,13 @@ class HerbariaController < ApplicationController
   #   [:flavor] == "all" - all Herbaria, regardless of query
   #   [:flavor] == "nonpersonal" - all nonpersonal (institutional) Herbaria
   #   default - Herbaria based on current Query (Sort links land on this action)
+  # TODO: use the dispatcher, and make `nonpersonal` an action.
+  # Add @index_subaction_param_keys and @index_subaction_dispatch_table
   def index
     return patterned_index if params[:pattern].present?
 
+    # TODO: use the dispatcher, and make `nonpersonal` an action.
+    # change `flavor` param to `nonpersonal`
     case params[:flavor]
     when "all" # List all herbaria
       show_selected_herbaria(
@@ -82,6 +86,40 @@ class HerbariaController < ApplicationController
       show_selected_herbaria(find_or_create_query(:Herbarium, by: params[:by]),
                              id: params[:id].to_s, always_index: true)
     end
+  end
+
+  # ---------- Index -----------------------------------------------------------
+
+  # TODO: New action `nonpersonal`
+  # TODO: rename `pattern`
+  def patterned_index
+    pattern = params[:pattern].to_s
+    if pattern.match?(/^\d+$/) && (herbarium = Herbarium.safe_find(pattern))
+      redirect_to(herbarium_path(herbarium.id))
+    else
+      show_selected_herbaria(
+        create_query(:Herbarium, :all, pattern: pattern)
+      )
+    end
+  end
+
+  # use the dispatcher, and make merge an action
+  def show_selected_herbaria(query, args = {})
+    args = show_index_args(args)
+
+    # If user clicks "merge" on an herbarium, it reloads the page and asks
+    # them to click on the destination herbarium to merge it with.
+    @merge = Herbarium.safe_find(params[:merge])
+
+    show_index_of_objects(query, args)
+  end
+
+  def show_index_args(args)
+    { # default args
+      letters: "herbaria.name",
+      num_per_page: 100,
+      include: [:curators, :herbarium_records, :personal_user]
+    }.merge(args)
   end
 
   # Display a single herbarium, based on :flow params
@@ -204,37 +242,6 @@ class HerbariaController < ApplicationController
   private
 
   include Herbaria::SharedPrivateMethods
-
-  # ---------- Index -----------------------------------------------------------
-
-  def patterned_index
-    pattern = params[:pattern].to_s
-    if pattern.match?(/^\d+$/) && (herbarium = Herbarium.safe_find(pattern))
-      redirect_to(herbarium_path(herbarium.id))
-    else
-      show_selected_herbaria(
-        create_query(:Herbarium, :all, pattern: pattern)
-      )
-    end
-  end
-
-  def show_selected_herbaria(query, args = {})
-    args = show_index_args(args)
-
-    # If user clicks "merge" on an herbarium, it reloads the page and asks
-    # them to click on the destination herbarium to merge it with.
-    @merge = Herbarium.safe_find(params[:merge])
-
-    show_index_of_objects(query, args)
-  end
-
-  def show_index_args(args)
-    { # default args
-      letters: "herbaria.name",
-      num_per_page: 100,
-      include: [:curators, :herbarium_records, :personal_user]
-    }.merge(args)
-  end
 
   def make_sure_can_edit!
     return true if in_admin_mode? || @herbarium.can_edit?

@@ -35,6 +35,108 @@ class SpeciesListsController < ApplicationController
     by: :by_title_or_selected_by_query
   }.freeze
 
+  ##############################################################################
+  # Index
+
+  private
+
+  def default_index_subaction
+    list_all
+  end
+
+  # Display list of all species_lists, sorted by date.
+  def list_all
+    query = create_query(:SpeciesList, :all, by: sorted_by_default_or_date)
+    show_selected_species_lists(query, id: params[:id].to_s, by: params[:by])
+  end
+
+  def sorted_by_default_or_date
+    params[:by] == default_sort_order ? default_sort_order.to_sym : :date
+  end
+
+  def default_sort_order
+    ::Query::SpeciesListBase.default_order
+  end
+
+  # TODO: move this letters thing to the above handler for `by` param?
+  # Show selected list of species_lists.
+  def show_selected_species_lists(query, args = {})
+    args = {
+      action: :index,
+      num_per_page: 20,
+      include: [:location, :user],
+      letters: "species_lists.title"
+    }.merge(args)
+
+    # Paginate by letter if sorting by user.
+    args[:letters] =
+      if [query.params[:by]].intersect?(%w[user reverse_user])
+        "users.login"
+      else
+        # Can always paginate by title letter.
+        args[:letters] = "species_lists.title"
+      end
+
+    show_index_of_objects(query, args)
+  end
+
+  # choose another subaction when params[:by].present?
+  def by_title_or_selected_by_query
+    params[:by] == "title" ? species_lists_by_title : index_query_results
+  end
+
+  # Display list of all species_lists, sorted by title.
+  def species_lists_by_title
+    query = create_query(:SpeciesList, :all, by: :title)
+    show_selected_species_lists(query)
+  end
+
+  # Display list of selected species_lists, based on current Query.
+  # (Linked from show_species_list, next to "prev" and "next".)
+  def index_query_results
+    query = find_or_create_query(:SpeciesList, by: params[:by])
+    show_selected_species_lists(query, id: params[:id].to_s, always_index: true)
+  end
+
+  # Display list of user's species_lists, sorted by date.
+  def by_user
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:by_user].to_s,
+      index_path: species_lists_path
+    )
+    return unless user
+
+    query = create_query(:SpeciesList, :all, by_user: user)
+    show_selected_species_lists(query)
+  end
+
+  # TODO: rename project, check callers
+  # Display list of SpeciesList's attached to a given project.
+  def for_project
+    project = find_or_goto_index(Project, params[:for_project].to_s)
+    return unless project
+
+    query = create_query(:SpeciesList, :all, project: project)
+    show_selected_species_lists(query, always_index: 1)
+  end
+
+  # Display list of SpeciesList's whose title, notes, etc. matches a string
+  # pattern.
+  def pattern
+    pattern = params[:pattern].to_s
+    spl = SpeciesList.safe_find(pattern) if /^\d+$/.match?(pattern)
+    if spl
+      redirect_to(action: :show, id: spl.id)
+    else
+      query = create_query(:SpeciesList, :all, pattern: pattern)
+      show_selected_species_lists(query)
+    end
+  end
+
+  public
+
+  ##############################################################################
+
   def show
     store_location
     clear_query_in_session
@@ -110,103 +212,6 @@ class SpeciesListsController < ApplicationController
     else
       redirect_to(species_list_path(@species_list))
     end
-  end
-
-  ##############################################################################
-
-  private
-
-  #  :section: Index
-
-  def default_index_subaction
-    list_all
-  end
-
-  # Display list of all species_lists, sorted by date.
-  def list_all
-    query = create_query(:SpeciesList, :all, by: sorted_by_default_or_date)
-    show_selected_species_lists(query, id: params[:id].to_s, by: params[:by])
-  end
-
-  def sorted_by_default_or_date
-    params[:by] == default_sort_order ? default_sort_order.to_sym : :date
-  end
-
-  def default_sort_order
-    ::Query::SpeciesListBase.default_order
-  end
-
-  # choose another subaction when params[:by].present?
-  def by_title_or_selected_by_query
-    params[:by] == "title" ? species_lists_by_title : index_query_results
-  end
-
-  # Display list of all species_lists, sorted by title.
-  def species_lists_by_title
-    query = create_query(:SpeciesList, :all, by: :title)
-    show_selected_species_lists(query)
-  end
-
-  # Display list of selected species_lists, based on current Query.
-  # (Linked from show_species_list, next to "prev" and "next".)
-  def index_query_results
-    query = find_or_create_query(:SpeciesList, by: params[:by])
-    show_selected_species_lists(query, id: params[:id].to_s, always_index: true)
-  end
-
-  # Display list of user's species_lists, sorted by date.
-  def by_user
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_user].to_s,
-      index_path: species_lists_path
-    )
-    return unless user
-
-    query = create_query(:SpeciesList, :all, by_user: user)
-    show_selected_species_lists(query)
-  end
-
-  # Display list of SpeciesList's attached to a given project.
-  def for_project
-    project = find_or_goto_index(Project, params[:for_project].to_s)
-    return unless project
-
-    query = create_query(:SpeciesList, :all, project: project)
-    show_selected_species_lists(query, always_index: 1)
-  end
-
-  # Display list of SpeciesList's whose title, notes, etc. matches a string
-  # pattern.
-  def pattern
-    pattern = params[:pattern].to_s
-    spl = SpeciesList.safe_find(pattern) if /^\d+$/.match?(pattern)
-    if spl
-      redirect_to(action: :show, id: spl.id)
-    else
-      query = create_query(:SpeciesList, :all, pattern: pattern)
-      show_selected_species_lists(query)
-    end
-  end
-
-  # Show selected list of species_lists.
-  def show_selected_species_lists(query, args = {})
-    args = {
-      action: :index,
-      num_per_page: 20,
-      include: [:location, :user],
-      letters: "species_lists.title"
-    }.merge(args)
-
-    # Paginate by letter if sorting by user.
-    args[:letters] =
-      if [query.params[:by]].intersect?(%w[user reverse_user])
-        "users.login"
-      else
-        # Can always paginate by title letter.
-        args[:letters] = "species_lists.title"
-      end
-
-    show_index_of_objects(query, args)
   end
 
   ##############################################################################

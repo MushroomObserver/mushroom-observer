@@ -37,6 +37,7 @@ module FieldSlipsController::Index
   end
 
   # Displays list of User's FieldSlips, by date.
+  # TODO: rename `by_user`, check callers (none yet)
   def user
     return unless (
       user = find_or_goto_index(User, params[:user])

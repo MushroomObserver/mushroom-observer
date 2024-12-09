@@ -22,10 +22,6 @@ class ArticlesController < ApplicationController
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
-  def index
-    filter_index? ? index_filtered : index_full
-  end
-
   def show
     return false unless (@article = find_or_goto_index(Article, params[:id]))
 
@@ -74,13 +70,53 @@ class ArticlesController < ApplicationController
     redirect_to(articles_path)
   end
 
-  # ---------- Public methods (unrouted) ---------------------------------------
-
-  ##############################################################################
-
   private
 
-  # --------- Filters
+  ##############################################################################
+  # INDEX
+  #
+  # Used by ApplicationController to dispatch #index to a private method
+  @index_subaction_param_keys = [
+    :by, :q, :id
+  ].freeze
+
+  @index_subaction_dispatch_table = {
+    by: :index_query_results,
+    q: :index_query_results,
+    id: :index_query_results
+  }.freeze
+
+  def default_index_subaction
+    list_all
+  end
+
+  def list_all
+    query = create_query(:Article, :all, by: :created_at)
+    show_selected(query)
+  end
+
+  # TODO: Check if this can be folded into main show_selected_articles
+  def index_query_results
+    query = find_or_create_query(:Article, by: params[:by])
+    at_id_args = { id: params[:id].to_s, always_index: true }
+    show_selected(query, at_id_args)
+  end
+
+  # Show selected list of articles.
+  def show_selected(query, args = {})
+    show_index_of_objects(query, index_display_args(args, query))
+  end
+
+  def index_display_args(args, _query)
+    {
+      action: :index,
+      letters: "articles.title",
+      num_per_page: 50,
+      include: :user
+    }.merge(args)
+  end
+
+  ##############################################################################
 
   # Filter: Unless user permitted to perform request, just index
   def ignore_request_unless_permitted
@@ -88,43 +124,6 @@ class ArticlesController < ApplicationController
 
     flash_notice(:permission_denied.t)
     redirect_to(articles_path)
-  end
-
-  # --------- Other private methods
-
-  # should index be filtered?
-  def filter_index?
-    params[:q] || params[:by]
-  end
-
-  def index_filtered
-    query = find_or_create_query(:Article, by: params[:by])
-    show_selected_articles(
-      query,
-      id: params[:id].to_s,
-      always_index: true
-    )
-  end
-
-  def index_full
-    query = create_query(
-      :Article,
-      :all,
-      by: :created_at
-    )
-    show_selected_articles(query)
-  end
-
-  # Show selected list of articles.
-  def show_selected_articles(query, args = {})
-    args = {
-      action: :index,
-      letters: "articles.title",
-      num_per_page: 50,
-      include: :user
-    }.merge(args)
-
-    show_index_of_objects(query, args)
   end
 
   # add flash message if title missing

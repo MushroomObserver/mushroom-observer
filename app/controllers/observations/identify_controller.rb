@@ -5,6 +5,8 @@ module Observations
     before_action :login_required
     before_action :pass_query_params
 
+    # TODO: use dispatcher, add `filter` param and refactor to flat params
+    # `filter` and `term`
     def index
       @layout = calc_layout_params
       # first deal with filters, or clear filter
@@ -27,6 +29,7 @@ module Observations
       { by: :rss_log }
     end
 
+    # TODO: rename as `list_all`
     def unfiltered_index
       query = create_query(*q_args, q_kwargs)
 

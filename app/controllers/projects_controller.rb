@@ -12,11 +12,71 @@ class ProjectsController < ApplicationController
 
   @index_subaction_dispatch_table = { by: :index_query_results }.freeze
 
+  private
+
+  def default_index_subaction
+    list_all
+  end
+
+  # Show list of latest projects.  (Linked from left panel.)
+  def list_all
+    query = create_query(:Project, :all, by: default_sort_order)
+    show_selected_projects(query)
+  end
+
+  def default_sort_order
+    ::Query::ProjectBase.default_order
+  end
+
+  # Show list of selected projects, based on current Query.
+  def index_query_results
+    query = find_or_create_query(:Project, by: params[:by])
+    show_selected_projects(query, id: params[:id].to_s, always_index: true)
+  end
+
+  # Display list of Project's whose title or notes match a string pattern.
+  def pattern
+    pattern = params[:pattern].to_s
+    if pattern.match(/^\d+$/) &&
+       (@project = Project.safe_find(pattern))
+      set_ivars_for_show
+      render("show", location: project_path(@project.id))
+    else
+      query = create_query(:Project, :all, pattern: pattern)
+      show_selected_projects(query)
+    end
+  end
+
+  # Display list of projects with a given member, sorted by date.
+  def member
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:member].to_s,
+      index_path: projects_path
+    )
+    return unless user
+
+    query = create_query(:Project, :all, member: user)
+    show_selected_projects(query)
+  end
+
+  # Show selected list of projects.
+  def show_selected_projects(query, args = {})
+    args = {
+      action: :index,
+      letters: "projects.title",
+      num_per_page: 50,
+      include: :user
+    }.merge(args)
+
+    show_index_of_objects(query, args)
+  end
+
+  public ####################################################################
+
   # Display project by itself.
   # Linked from: observations/show, list_projects
   # Inputs: params[:id] (project)
   # Outputs: @project
-  # def show_project
   def show
     store_location
     return unless find_project_and_where!
@@ -175,64 +235,6 @@ class ProjectsController < ApplicationController
     return unless image
 
     @project.image = image
-  end
-
-  ############ Index private methods
-  def default_index_subaction
-    list_all
-  end
-
-  # Show list of latest projects.  (Linked from left panel.)
-  def list_all
-    query = create_query(:Project, :all, by: default_sort_order)
-    show_selected_projects(query)
-  end
-
-  def default_sort_order
-    ::Query::ProjectBase.default_order
-  end
-
-  # Show list of selected projects, based on current Query.
-  def index_query_results
-    query = find_or_create_query(:Project, by: params[:by])
-    show_selected_projects(query, id: params[:id].to_s, always_index: true)
-  end
-
-  # Display list of Project's whose title or notes match a string pattern.
-  def pattern
-    pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) &&
-       (@project = Project.safe_find(pattern))
-      set_ivars_for_show
-      render("show", location: project_path(@project.id))
-    else
-      query = create_query(:Project, :all, pattern: pattern)
-      show_selected_projects(query)
-    end
-  end
-
-  # Display list of projects with a given member, sorted by date.
-  def member
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:member].to_s,
-      index_path: projects_path
-    )
-    return unless user
-
-    query = create_query(:Project, :all, member: user)
-    show_selected_projects(query)
-  end
-
-  # Show selected list of projects.
-  def show_selected_projects(query, args = {})
-    args = {
-      action: :index,
-      letters: "projects.title",
-      num_per_page: 50,
-      include: :user
-    }.merge(args)
-
-    show_index_of_objects(query, args)
   end
 
   ##############################################################################

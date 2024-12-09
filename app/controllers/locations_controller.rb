@@ -56,6 +56,7 @@ class LocationsController < ApplicationController
     list_locations
   end
 
+  # TODO: rename list_all
   # Displays a list of all locations.
   def list_locations
     query = create_query(:Location, :all, by: default_sort_order)

@@ -103,6 +103,7 @@ class ImagesController < ApplicationController
   end
 
   # Display matrix of Image's attached to a given project.
+  # TODO: rename project
   def for_project
     project = find_or_goto_index(Project, params[:for_project].to_s)
     return unless project
@@ -149,6 +150,7 @@ class ImagesController < ApplicationController
                 :projects, :thumb_glossary_terms, :glossary_terms, :image_votes]
     }.merge(args)
 
+    # TODO: Pull this out to a method
     # Paginate by letter if sorting by user.
     case query.params[:by]
     when "user", "reverse_user"

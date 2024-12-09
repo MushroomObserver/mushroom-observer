@@ -7,6 +7,7 @@ module ApplicationController::Indexes
     base.extend(ClassMethods)
   end
 
+  # TODO: make these methods of the classes. No need for ivars.
   module ClassMethods
     def index_subaction_param_keys
       @index_subaction_param_keys ||= []
@@ -14,6 +15,11 @@ module ApplicationController::Indexes
 
     def index_subaction_dispatch_table
       @index_subaction_dispatch_table ||= {}
+    end
+
+    # Could provide defaults here ?
+    def index_display_args
+      @index_display_args ||= {}
     end
   end
 

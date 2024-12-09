@@ -11,21 +11,6 @@ class CollectionNumbersController < ApplicationController
     :show, :new, :create, :edit, :update
   ]
 
-  # Used by ApplicationController to dispatch #index to a private method
-  @index_subaction_param_keys = [
-    :pattern,
-    :observation_id,
-    :by,
-    :q,
-    :id
-  ].freeze
-
-  @index_subaction_dispatch_table = {
-    by: :index_query_results,
-    q: :index_query_results,
-    id: :index_query_results
-  }.freeze
-
   def show
     case params[:flow]
     when "next"
@@ -99,6 +84,22 @@ class CollectionNumbersController < ApplicationController
   end
 
   ##############################################################################
+  # INDEX
+
+  # Used by ApplicationController to dispatch #index to a private method
+  @index_subaction_param_keys = [
+    :pattern,
+    :observation_id,
+    :by,
+    :q,
+    :id
+  ].freeze
+
+  @index_subaction_dispatch_table = {
+    by: :index_query_results,
+    q: :index_query_results,
+    id: :index_query_results
+  }.freeze
 
   private
 
@@ -132,6 +133,7 @@ class CollectionNumbersController < ApplicationController
     end
   end
 
+  # TODO: rename as `observation`, check callers
   # Display list of CollectionNumbers for an Observation
   def observation_id
     @observation = Observation.find(params[:observation_id])
@@ -142,13 +144,15 @@ class CollectionNumbersController < ApplicationController
   end
 
   def show_selected_collection_numbers(query, args = {})
-    args = {
+    show_index_of_objects(query, index_display_args(args, query))
+  end
+
+  def index_display_args(args, _query)
+    {
       action: :index,
       letters: "collection_numbers.name",
       num_per_page: 100
     }.merge(args)
-
-    show_index_of_objects(query, args)
   end
 
   def set_ivars_for_new
