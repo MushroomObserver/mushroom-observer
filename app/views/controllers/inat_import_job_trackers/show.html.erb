@@ -1,7 +1,8 @@
 <%
-@container = :wide
-add_page_title(:inat_import_tracker.t)
-# add_tab_set(article_show_tabs(article: @article, user: @user))
+  @container = :wide
+  add_page_title(:inat_import_tracker.t)
+  tracker = InatImportJobTracker.find_by_inat_import(@inat_import.id)
+  # add_tab_set(article_show_tabs(article: @article, user: @user))
 %>
 
 <p>
@@ -54,11 +55,11 @@ add_page_title(:inat_import_tracker.t)
 <%=
   tag.tr(id: dom_id(tracker),
         data: { controller: "inat-import-job",
-                status: InatImportJobTracker.statuses[tracker.status],
+                status: @inat_import.state,
                 endpoint: inat_import_job_tracker_path(tracker.id) }) do
     [
       tag.td(class: "text-right", data: { inat_import_job_target: "status" }) do
-        tracker.status
+        @inat_import.state
       end
     ].safe_join
   end
