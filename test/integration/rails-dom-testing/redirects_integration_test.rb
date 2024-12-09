@@ -119,7 +119,7 @@ class RedirectsIntegrationTest < IntegrationTestCase
   def test_herbarium
     login
     assert_old_url_redirects_to_new_path(
-      :get, "/herbarium", herbaria_path(flavor: :nonpersonal)
+      :get, "/herbarium", herbaria_path(nonpersonal: true)
     )
   end
 

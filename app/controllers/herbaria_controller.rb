@@ -61,67 +61,93 @@ class HerbariaController < ApplicationController
 
   # Display list of selected herbaria, based on params
   #   params[:pattern].present? - Herbaria based on Pattern Search
-  #   [:flavor] == "all" - all Herbaria, regardless of query
-  #   [:flavor] == "nonpersonal" - all nonpersonal (institutional) Herbaria
+  #   [:nonpersonal].blank? - all Herbaria, regardless of query
+  #   [:nonpersonal].present? - all nonpersonal (institutional) Herbaria
   #   default - Herbaria based on current Query (Sort links land on this action)
-  # TODO: use the dispatcher, and make `nonpersonal` an action.
-  # Add @index_subaction_param_keys and @index_subaction_dispatch_table
-  def index
-    return patterned_index if params[:pattern].present?
 
-    # TODO: use the dispatcher, and make `nonpersonal` an action.
-    # change `flavor` param to `nonpersonal`
-    case params[:flavor]
-    when "all" # List all herbaria
-      show_selected_herbaria(
-        create_query(:Herbarium, :all, by: :name), always_index: true
-      )
-    when "nonpersonal" # List institutional Herbaria
-      store_location
-      show_selected_herbaria(
-        create_query(:Herbarium, :all, nonpersonal: true, by: :code_then_name),
-        always_index: true
-      )
-    else # default List herbaria resulting from query
-      show_selected_herbaria(find_or_create_query(:Herbarium, by: params[:by]),
-                             id: params[:id].to_s, always_index: true)
-    end
+  # Used by ApplicationController to dispatch #index to a private method
+  @index_subaction_param_keys = [
+    :pattern, :nonpersonal, :by, :q, :id
+  ].freeze
+
+  @index_subaction_dispatch_table = {
+    by: :index_query_results,
+    q: :index_query_results,
+    id: :index_query_results
+  }.freeze
+
+  ##############################################################################
+
+  private
+
+  def default_index_subaction
+    list_all
   end
 
-  # ---------- Index -----------------------------------------------------------
+  def default_sort_order
+    :name
+  end
 
-  # TODO: New action `nonpersonal`
-  # TODO: rename `pattern`
-  def patterned_index
+  def list_all
+    query = create_query(:Herbarium, :all, by: :name)
+    show_selected(query, always_index)
+  end
+
+  # Show selected list, based on current Query.
+  # (Linked from show template, next to "prev" and "next"... or will be.)
+  def index_query_results
+    sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
+    query = find_or_create_query(:Herbarium, by: sorted_by)
+    at_id_args = { id: params[:id].to_s, always_index: true }
+    show_selected(query, at_id_args)
+  end
+
+  def nonpersonal
+    store_location
+    query = create_query(:Herbarium, :all, nonpersonal: true,
+                                           by: :code_then_name)
+    show_selected(query, always_index)
+  end
+
+  def pattern
     pattern = params[:pattern].to_s
     if pattern.match?(/^\d+$/) && (herbarium = Herbarium.safe_find(pattern))
       redirect_to(herbarium_path(herbarium.id))
     else
-      show_selected_herbaria(
-        create_query(:Herbarium, :all, pattern: pattern)
-      )
+      query = create_query(:Herbarium, :all, pattern: pattern)
+      show_selected(query)
     end
   end
 
-  # use the dispatcher, and make merge an action
-  def show_selected_herbaria(query, args = {})
-    args = show_index_args(args)
-
-    # If user clicks "merge" on an herbarium, it reloads the page and asks
-    # them to click on the destination herbarium to merge it with.
-    @merge = Herbarium.safe_find(params[:merge])
-
-    show_index_of_objects(query, args)
+  # TODO: Generalize `set_extra_index_ivars`
+  # NOTE: make `merge` an action when this is a param builder.
+  def show_selected(query, args = {})
+    set_extra_index_ivars
+    show_index_of_objects(query, default_index_args(args, query))
   end
 
-  def show_index_args(args)
-    { # default args
+  # If user clicks "merge" on an herbarium, it reloads the page and asks
+  # them to click on the destination herbarium to merge it with.
+  def set_extra_index_ivars
+    @merge = Herbarium.safe_find(params[:merge])
+  end
+
+  def default_index_args(args, _query)
+    {
       letters: "herbaria.name",
       num_per_page: 100,
       include: [:curators, :herbarium_records, :personal_user]
     }.merge(args)
   end
 
+  def always_index
+    { always_index: true }
+  end
+
+  public
+
+  ##############################################################################
+  #
   # Display a single herbarium, based on :flow params
   # :flow is added in _prev_next_page partial, ApplicationHelper#link_next
   def show

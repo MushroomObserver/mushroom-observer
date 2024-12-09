@@ -35,7 +35,7 @@ class GlossaryTermsController < ApplicationController
   # (Linked from show template, next to "prev" and "next"... or will be.)
   def index_query_results
     sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
-    query = find_or_create_query(:GlossaryTerm, :all, by: sorted_by)
+    query = find_or_create_query(:GlossaryTerm, by: sorted_by)
     at_id_args = { id: params[:id].to_s, always_index: true }
     show_selected(query, at_id_args)
   end

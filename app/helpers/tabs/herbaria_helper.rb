@@ -101,13 +101,13 @@ module Tabs
 
     def nonpersonal_herbaria_index_tab
       [:herbarium_index.t,
-       add_query_param(herbaria_path(flavor: :nonpersonal)),
+       add_query_param(herbaria_path(nonpersonal: true)),
        { class: tab_id(__method__.to_s) }]
     end
 
     def labeled_nonpersonal_herbaria_index_tab
       [:herbarium_index_nonpersonal_herbaria.l,
-       herbaria_path(flavor: :nonpersonal),
+       herbaria_path(nonpersonal: true),
        { class: "nonpersonal_herbaria_index_link" }]
     end
   end
