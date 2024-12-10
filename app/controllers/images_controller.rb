@@ -33,7 +33,7 @@ class ImagesController < ApplicationController
     :advanced_search,
     :pattern,
     :by_user,
-    :for_project,
+    :project,
     :by,
     :q,
     :id
@@ -56,10 +56,9 @@ class ImagesController < ApplicationController
   # Display matrix of images, most recent first.
   def list_all
     return render_too_many_results if too_many_results
-    return index_query_results if params.include?(:by)
 
     query = create_query(:Image, :all, by: default_sort_order)
-    show_selected_images(query)
+    show_selected(query)
   end
 
   def too_many_results
@@ -87,7 +86,7 @@ class ImagesController < ApplicationController
   # Display matrix of selected images, based on current Query.
   def index_query_results
     query = find_or_create_query(:Image, by: params[:by])
-    show_selected_images(query, id: params[:id].to_s, always_index: true)
+    show_selected(query, id: params[:id].to_s, always_index: true)
   end
 
   # Display matrix of images by a given user.
@@ -99,17 +98,16 @@ class ImagesController < ApplicationController
     return unless user
 
     query = create_query(:Image, :by_user, user: user)
-    show_selected_images(query)
+    show_selected(query)
   end
 
   # Display matrix of Image's attached to a given project.
-  # TODO: rename project
-  def for_project
-    project = find_or_goto_index(Project, params[:for_project].to_s)
+  def project
+    project = find_or_goto_index(Project, params[:project].to_s)
     return unless project
 
     query = create_query(:Image, :for_project, project: project)
-    show_selected_images(query, always_index: 1)
+    show_selected(query, always_index: 1)
   end
 
   # Display matrix of images whose notes, names, etc. match a string pattern.
@@ -120,7 +118,7 @@ class ImagesController < ApplicationController
       redirect_to(action: "show", id: image.id)
     else
       query = create_query(:Image, :all, pattern: pattern)
-      show_selected_images(query)
+      show_selected(query)
     end
   end
 
@@ -129,20 +127,23 @@ class ImagesController < ApplicationController
     return if handle_advanced_search_invalid_q_param?
 
     query = find_query(:Image)
-    show_selected_images(query)
+    show_selected(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
   end
 
   # Show selected search results as a matrix with "list_images" template.
-  def show_selected_images(query, args = {})
+  def show_selected(query, args = {})
     store_query_in_session(query)
+    show_index_of_objects(query, default_index_args(args, query))
+  end
 
-    # I can't figure out why ActiveRecord is not eager-loading all the names.
-    # When I do an explicit test (load the first 100 images) it eager-loads
-    # about 90%, but for some reason misses 10%, and always the same 10%, but
-    # apparently with no rhyme or reason. -JPH 20100204
+  # I can't figure out why ActiveRecord is not eager-loading all the names.
+  # When I do an explicit test (load the first 100 images) it eager-loads
+  # about 90%, but for some reason misses 10%, and always the same 10%, but
+  # apparently with no rhyme or reason. -JPH 20100204
+  def default_index_args(args, query)
     args = {
       action: "index",
       matrix: true,
@@ -155,15 +156,12 @@ class ImagesController < ApplicationController
     case query.params[:by]
     when "user", "reverse_user"
       args[:letters] = "users.login"
-    # Paginate by letter if sorting by copyright holder.
-    # when "copyright_holder", "reverse_copyright_holder"
-    #   args[:letters] = "images.copyright_holder"
     # Paginate by letter if sorting by name.
     when "name", "reverse_name"
       args[:letters] = "names.sort_name"
     end
 
-    show_index_of_objects(query, args)
+    args
   end
 
   public

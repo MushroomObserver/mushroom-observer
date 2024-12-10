@@ -201,8 +201,7 @@ class ImagesControllerTest < FunctionalTestCase
   def test_index_for_project
     project = projects(:bolete_project).id
     login
-    get(:index,
-        params: { for_project: project })
+    get(:index, params: { project: project })
 
     assert_template("index", partial: "_image")
   end
