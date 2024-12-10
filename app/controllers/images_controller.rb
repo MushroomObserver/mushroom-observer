@@ -152,7 +152,6 @@ class ImagesController < ApplicationController
                 :projects, :thumb_glossary_terms, :glossary_terms, :image_votes]
     }.merge(args)
 
-    # TODO: Pull this out to a method
     # Paginate by letter if sorting by user.
     case query.params[:by]
     when "user", "reverse_user"

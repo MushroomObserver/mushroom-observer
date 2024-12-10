@@ -137,7 +137,7 @@ class ImagesControllerTest < FunctionalTestCase
                                   location: "Eastern Oklahoma")
     login
 
-    @controller.stub(:show_selected_images, -> { raise(StandardError) }) do
+    @controller.stub(:show_selected, -> { raise(StandardError) }) do
       get(:index,
           params: @controller.query_params(query).
           merge({ advanced_search: "1" }))
