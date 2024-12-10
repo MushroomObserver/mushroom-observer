@@ -9,21 +9,19 @@ class UsersController < ApplicationController
 
   # Users index
   # TODO: Use dispatcher to provide q, id, and by params to index_query_results
-  # NOTE: Only admins can get the full user index.
-  # if there's a `list_all` it should check admin mode.
-  # Other users get here via search.
-  def index
-    return user_search if params[:pattern].present?
+  ##############################################################################
+  # INDEX
+  #
+  # Used by ApplicationController to dispatch #index to a private method
+  @index_subaction_param_keys = [
+    :pattern, :by, :q, :id
+  ].freeze
 
-    # This is a list_all action basically
-    if in_admin_mode? || find_query(:User)
-      query = find_or_create_query(:User, by: params[:by])
-      show_selected_users(query, id: params[:id].to_s, always_index: true)
-    else
-      flash_error(:runtime_search_has_expired.t)
-      redirect_to("/")
-    end
-  end
+  @index_subaction_dispatch_table = {
+    by: :index_query_results,
+    q: :index_query_results,
+    id: :index_query_results
+  }.freeze
 
   alias index_user index
   # People guess this page name frequently for whatever reason, and
@@ -32,15 +30,47 @@ class UsersController < ApplicationController
 
   private
 
-  # TODO: rename `pattern`, check callers
+  def default_index_subaction
+    list_all
+  end
+
+  # NOTE: Only admins can get the full user index.
+  # Others get here via search, so they shouldn't hit list_all
+  def list_all
+    return unless index_query_authorized?
+
+    query = create_query(:User, :all, by: default_sort_order)
+    show_selected(query)
+  end
+
+  def default_sort_order
+    :name
+  end
+
+  def index_query_results
+    return unless index_query_authorized?
+
+    query = find_or_create_query(:User, by: params[:by])
+    at_id_args = { id: params[:id].to_s, always_index: true }
+    show_selected(query, at_id_args)
+  end
+
+  def index_query_authorized?
+    return true if in_admin_mode? || find_query(:User)
+
+    flash_error(:runtime_search_has_expired.t)
+    redirect_to("/")
+    false
+  end
+
   # Display list of Users whose name, notes, etc. match a string pattern.
-  def user_search
+  def pattern
     pattern = params[:pattern].to_s
     if (user = user_exact_match(pattern))
       redirect_to(user_path(user.id))
     else
       query = create_query(:User, :all, pattern: pattern)
-      show_selected_users(query)
+      show_selected(query)
     end
   end
 
@@ -56,9 +86,12 @@ class UsersController < ApplicationController
     false
   end
 
-  def show_selected_users(query, args = {})
+  def show_selected(query, args = {})
     store_query_in_session(query)
-    @links ||= []
+    show_index_of_objects(query, default_index_args(args, query))
+  end
+
+  def default_index_args(args, query)
     args = {
       action: "index",
       include: :user_groups,
@@ -73,7 +106,7 @@ class UsersController < ApplicationController
                        "users.name"
                      end
 
-    show_index_of_objects(query, args)
+    args
   end
 
   public
