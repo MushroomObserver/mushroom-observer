@@ -32,7 +32,7 @@ class SpeciesListsController < ApplicationController
   ].freeze
 
   @index_subaction_dispatch_table = {
-    by: :by_title_or_selected_by_query
+    by: :index_query_results
   }.freeze
 
   ##############################################################################
@@ -44,11 +44,9 @@ class SpeciesListsController < ApplicationController
     list_all
   end
 
-  # Display list of all species_lists, sorted by date.
-  # TODO: This should not take the at_id_args. Check callers.
+  # Display list of all species_lists, sorted by title.
   def list_all
-    query = create_query(:SpeciesList, :all, by: sorted_by_default_or_date)
-    # at_id_args = { id: params[:id].to_s, always_index: true }
+    query = create_query(:SpeciesList, :all)
     show_selected(query)
   end
 
@@ -56,26 +54,17 @@ class SpeciesListsController < ApplicationController
     params[:by] == default_sort_order ? default_sort_order.to_sym : :date
   end
 
+  # Is :title.
   def default_sort_order
     ::Query::SpeciesListBase.default_order
-  end
-
-  # choose another subaction when params[:by].present?
-  def by_title_or_selected_by_query
-    params[:by] == "title" ? species_lists_by_title : index_query_results
-  end
-
-  # Display list of all species_lists, sorted by title.
-  def species_lists_by_title
-    query = create_query(:SpeciesList, :all, by: :title)
-    show_selected(query)
   end
 
   # Display list of selected species_lists, based on current Query.
   # (Linked from show_species_list, next to "prev" and "next".)
   def index_query_results
     query = find_or_create_query(:SpeciesList, by: params[:by])
-    show_selected(query, id: params[:id].to_s, always_index: true)
+    at_id_args = { id: params[:id].to_s, always_index: true }
+    show_selected(query, at_id_args)
   end
 
   # Display list of user's species_lists, sorted by date.
@@ -86,7 +75,7 @@ class SpeciesListsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:SpeciesList, :all, by_user: user)
+    query = create_query(:SpeciesList, :all, by_user: user, by: :date)
     show_selected(query)
   end
 
