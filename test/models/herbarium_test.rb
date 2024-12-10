@@ -66,15 +66,16 @@ class HerbariumTest < UnitTestCase
   def test_mcp_collid
     fungarium = herbaria(:nybg_herbarium)
     # Sorry for the magic numbers, but they are the values in MCP
-    assert_equal("3", fungarium.mcp_collid)
+    assert_equal(3, fungarium.mcp_collid)
 
     fungarium.update(code: "TENN") # make it the U of Tenn herbarium
     assert_equal(
-      "7", fungarium.mcp_collid,
-      "Standard herbarium code should match hyphenated MyCoPortal `acryonym`"
+      7, fungarium.mcp_collid,
+      "Index Herborarium code should match " \
+      "hyphenated MyCoPortal InstitutionCode"
     )
 
-    fungarium.update(code: "notInMCP") # make not an MCP collection
+    fungarium.update(code: "notInMCP") # make it not an MCP collection
     assert_nil(fungarium.mcp_collid)
 
     assert_nil(herbaria(:rolf_herbarium).mcp_collid)

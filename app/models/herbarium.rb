@@ -38,6 +38,7 @@
 #  delete_curator(user)::   Remove User from curators.
 #  web_searchable?::        Are its digital records searchable via the internet?
 #  mcp_searchable?          Are its digital records searchable via MyCoPortal?
+#  mcp_collid::             MyCoPortal collection ID for this herbarium.
 #  sort_name::              Stripped-down version of name for sorting.
 #  merge(other_herbarium):: merge other_herbarium into this one
 #
@@ -47,8 +48,6 @@
 #                     HerbariumRecord to an Herbarium.  Called after create.
 #
 ################################################################################
-
-require "csv"
 
 class Herbarium < AbstractModel
   has_many :herbarium_records, dependent: :destroy
@@ -67,12 +66,22 @@ class Herbarium < AbstractModel
   def self.mcp_collections
     @mcp_collections ||=
       begin
-        csv_path = Rails.public_path.join("mycoportal-collections.csv")
-        CSV.foreach(csv_path,
-                    headers: true).each_with_object([]) do |row, collections|
-          collections << row.to_h
+        collections_source =
+          Rails.public_path.join("mycoportal_collections.json")
+        collections = JSON.parse(File.read(collections_source))["results"]
+        # Extract InstitutionCode and CollID
+        collections.map do |collection|
+          {
+            InstitutionCode: collection["InstitutionCode"],
+            CollID: collection["CollID"]
+          }
         end
       end
+  end
+
+  # wrap the class method
+  def mcp_collections
+    self.class.mcp_collections
   end
 
   def can_edit?(user = User.current)
@@ -195,13 +204,13 @@ class Herbarium < AbstractModel
   end
 
   def mcp_collid
-    row = self.class.mcp_collections.find do |r|
+    collection = mcp_collections.find do |c|
       # Some MCP collection acryonyms comprise a standard herbarium code plus
       # a dash and other characters. Ex: "TENN-F".
       # We want to match only the standard code.
-      r["coll acryonym"].split("-").first == code
+      c[:InstitutionCode].split("-").first == code
     end
-    row ? row["collid"] : nil
+    collection ? collection[:CollID] : nil
   end
 
   def mcp_url(accession)
