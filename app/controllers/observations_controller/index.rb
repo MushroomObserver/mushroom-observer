@@ -198,7 +198,6 @@ class ObservationsController
                matrix: true, cache: true,
                include: observation_index_includes }.merge(args)
 
-      # TODO: deal with the by param separately
       # Paginate by letter if sorting by user.
       case query.params[:by]
       when "user", "reverse_user"
