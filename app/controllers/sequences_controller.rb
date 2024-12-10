@@ -67,7 +67,7 @@ class SequencesController < ApplicationController
   end
 
   def show_selected(query, args = {})
-    show_index_of_objects(query, default_index_args(args, _query))
+    show_index_of_objects(query, default_index_args(args, query))
   end
 
   def default_index_args(args, _query)
