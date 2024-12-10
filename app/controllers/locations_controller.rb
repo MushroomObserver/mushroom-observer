@@ -53,14 +53,13 @@ class LocationsController < ApplicationController
   private # private methods used by #index
 
   def default_index_subaction
-    list_locations
+    list_all
   end
 
-  # TODO: rename list_all
   # Displays a list of all locations.
-  def list_locations
+  def list_all
     query = create_query(:Location, :all, by: default_sort_order)
-    show_selected_locations(query, link_all_sorts: true)
+    show_selected(query, link_all_sorts: true)
   end
 
   def default_sort_order
@@ -70,7 +69,8 @@ class LocationsController < ApplicationController
   # Displays a list of selected locations, based on current Query.
   def index_query_results
     query = find_or_create_query(:Location, by: params[:by])
-    show_selected_locations(query, id: params[:id].to_s, always_index: true)
+    at_id_args = { id: params[:id].to_s, always_index: true }
+    show_selected(query, at_id_args)
   end
 
   # Displays matrix of advanced search results.
@@ -78,7 +78,7 @@ class LocationsController < ApplicationController
     return if handle_advanced_search_invalid_q_param?
 
     query = find_query(:Location)
-    show_selected_locations(query, link_all_sorts: true)
+    show_selected(query, link_all_sorts: true)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
@@ -95,7 +95,7 @@ class LocationsController < ApplicationController
         :Location, :pattern_search,
         pattern: Location.user_format(@user, pattern)
       )
-      show_selected_locations(query, link_all_sorts: true)
+      show_selected(query, link_all_sorts: true)
     end
   end
 
@@ -104,7 +104,7 @@ class LocationsController < ApplicationController
     query = create_query(
       :Location, :regexp_search, regexp: "#{params[:country]}$"
     )
-    show_selected_locations(query, link_all_sorts: true)
+    show_selected(query, link_all_sorts: true)
   end
 
   # Displays a list of all locations whose country matches the id param.
@@ -113,7 +113,7 @@ class LocationsController < ApplicationController
       :Location, :with_observations_for_project,
       project: Project.find(params[:project])
     )
-    show_selected_locations(query, link_all_sorts: true)
+    show_selected(query, link_all_sorts: true)
   end
 
   # Display list of locations that a given user created.
@@ -125,7 +125,7 @@ class LocationsController < ApplicationController
     return unless user
 
     query = create_query(:Location, :by_user, user: user)
-    show_selected_locations(query, link_all_sorts: true)
+    show_selected(query, link_all_sorts: true)
   end
 
   # Display list of locations that a given user is editor on.
@@ -137,11 +137,11 @@ class LocationsController < ApplicationController
     return unless user
 
     query = create_query(:Location, :by_editor, user: user)
-    show_selected_locations(query)
+    show_selected(query)
   end
 
-  # Show selected search results as a list with 'list_locations' template.
-  def show_selected_locations(query, args = {})
+  # Show selected search results as a list with 'index' template.
+  def show_selected(query, args = {})
     # Restrict to subset within a geographical region (used by map
     # if it needed to stuff multiple locations into a single marker).
     query = restrict_query_to_box(query)
@@ -149,10 +149,15 @@ class LocationsController < ApplicationController
     # Get matching *undefined* locations.
     get_matching_undefined_locations(query, args)
 
+    show_index_of_objects(query, default_index_args(args, query))
+  end
+
+  def default_index_args(args, _query)
     # Paginate the defined locations using the usual helper.
-    args[:always_index] = @undef_pages&.num_total&.positive?
-    args[:action] = args[:action] || :index
-    show_index_of_objects(query, args)
+    {
+      always_index: @undef_pages&.num_total&.positive?,
+      action: :index
+    }.merge(args)
   end
 
   def get_matching_undefined_locations(query, args)
