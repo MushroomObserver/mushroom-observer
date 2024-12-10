@@ -21,7 +21,7 @@ class ProjectsController < ApplicationController
   # Show list of latest projects.  (Linked from left panel.)
   def list_all
     query = create_query(:Project, :all, by: default_sort_order)
-    show_selected_projects(query)
+    show_selected(query)
   end
 
   def default_sort_order
@@ -31,7 +31,8 @@ class ProjectsController < ApplicationController
   # Show list of selected projects, based on current Query.
   def index_query_results
     query = find_or_create_query(:Project, by: params[:by])
-    show_selected_projects(query, id: params[:id].to_s, always_index: true)
+    at_id_args = { id: params[:id].to_s, always_index: true }
+    show_selected(query, at_id_args)
   end
 
   # Display list of Project's whose title or notes match a string pattern.
@@ -43,7 +44,7 @@ class ProjectsController < ApplicationController
       render("show", location: project_path(@project.id))
     else
       query = create_query(:Project, :all, pattern: pattern)
-      show_selected_projects(query)
+      show_selected(query)
     end
   end
 
@@ -56,19 +57,21 @@ class ProjectsController < ApplicationController
     return unless user
 
     query = create_query(:Project, :all, member: user)
-    show_selected_projects(query)
+    show_selected(query)
   end
 
   # Show selected list of projects.
-  def show_selected_projects(query, args = {})
-    args = {
+  def show_selected(query, args = {})
+    show_index_of_objects(query, default_index_args(args, query))
+  end
+
+  def default_index_args(args, _query)
+    {
       action: :index,
       letters: "projects.title",
       num_per_page: 50,
       include: :user
     }.merge(args)
-
-    show_index_of_objects(query, args)
   end
 
   public ####################################################################
