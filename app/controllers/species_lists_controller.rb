@@ -27,7 +27,7 @@ class SpeciesListsController < ApplicationController
   @index_subaction_param_keys = [
     :pattern,
     :by_user,
-    :for_project,
+    :project,
     :by
   ].freeze
 
