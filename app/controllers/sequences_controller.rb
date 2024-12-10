@@ -50,27 +50,32 @@ class SequencesController < ApplicationController
   def index
     case params[:flavor]
     when "all"
-      index_all
+      list_all
     else
       query = find_or_create_query(:Sequence, by: params[:by])
-      show_selected_sequences(query, id: params[:id].to_s, always_index: true)
+      at_id_args = { id: params[:id].to_s, always_index: true }
+      show_selected(query, at_id_args)
     end
   end
 
   private
 
-  # TODO: change to list_all
-  def index_all
+  def list_all
     store_location
     query = create_query(:Sequence, :all)
-    show_selected_sequences(query)
+    show_selected(query)
   end
 
-  def show_selected_sequences(query, args = {})
-    args = { include: [{ observation: :name }, :user],
-             letters: "sequences.locus",
-             num_per_page: 50 }.merge(args)
-    show_index_of_objects(query, args)
+  def show_selected(query, args = {})
+    show_index_of_objects(query, default_index_args(args, _query))
+  end
+
+  def default_index_args(args, _query)
+    {
+      include: [{ observation: :name }, :user],
+      letters: "sequences.locus",
+      num_per_page: 50
+    }.merge(args)
   end
 
   public ####################################################################
