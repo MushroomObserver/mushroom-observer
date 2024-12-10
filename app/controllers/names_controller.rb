@@ -44,7 +44,7 @@ class NamesController < ApplicationController
   # Display list of all (correctly-spelled) names in the database.
   def list_all
     query = create_query(:Name, :all, by: default_sort_order)
-    show_selected_names(query)
+    show_selected(query)
   end
 
   def default_sort_order
@@ -54,7 +54,8 @@ class NamesController < ApplicationController
   # Display list of names in last index/search query.
   def index_query_results
     query = find_or_create_query(:Name, by: params[:by])
-    show_selected_names(query, id: params[:id].to_s, always_index: true)
+    at_id_args = { id: params[:id].to_s, always_index: true }
+    show_selected(query, at_id_args)
   end
 
   # Displays list of advanced search results.
@@ -62,7 +63,7 @@ class NamesController < ApplicationController
     return if handle_advanced_search_invalid_q_param?
 
     query = find_query(:Name)
-    show_selected_names(query)
+    show_selected(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
@@ -90,20 +91,20 @@ class NamesController < ApplicationController
       render("names/index")
     else
       @suggest_alternate_spellings = search.query.params[:pattern]
-      show_selected_names(search.query)
+      show_selected(search.query)
     end
   end
 
   # Display list of names that have observations.
   def with_observations
     query = create_query(:Name, :with_observations)
-    show_selected_names(query)
+    show_selected(query)
   end
 
   # Display list of names with descriptions that have authors.
   def with_descriptions
     query = create_query(:Name, :with_descriptions)
-    show_selected_names(query)
+    show_selected(query)
   end
 
   # Display list of the most popular 100 names that don't have descriptions.
@@ -111,7 +112,7 @@ class NamesController < ApplicationController
   def need_descriptions
     @help = :needed_descriptions_help
     query = Name.descriptions_needed
-    show_selected_names(query, num_per_page: 100)
+    show_selected(query, num_per_page: 100)
   end
 
   # Display list of names that a given user is author on.
@@ -123,7 +124,7 @@ class NamesController < ApplicationController
     return unless user
 
     query = create_query(:Name, :by_user, user: user)
-    show_selected_names(query)
+    show_selected(query)
   end
 
   # Display list of names that a given user is editor on.
@@ -135,13 +136,13 @@ class NamesController < ApplicationController
     return unless user
 
     query = create_query(:Name, :by_editor, user: user)
-    show_selected_names(query)
+    show_selected(query)
   end
 
   # Show selected search results as a list with 'index' template.
-  def show_selected_names(query, args = {})
+  def show_selected(query, args = {})
     store_query_in_session(query)
-    args = add_default_index_args(query, args)
+    args = default_index_args(args, query)
 
     # Add some extra fields to the index for authored_names.
     if query.flavor == :with_descriptions
@@ -161,7 +162,7 @@ class NamesController < ApplicationController
     end
   end
 
-  def add_default_index_args(_query, args)
+  def default_index_args(args, _query)
     {
       controller: "/names",
       action: "index",
