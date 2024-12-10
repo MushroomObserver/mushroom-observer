@@ -5,8 +5,8 @@ module Observations
     before_action :login_required
     before_action :pass_query_params
 
-    # TODO: use dispatcher, add `filter` param and refactor to flat params
-    # `filter` and `term`
+    # TODO: use dispatcher, add q, id (order is not adjustable)
+    # refactor to flat params `clade` and `region`
     def index
       @layout = calc_layout_params
       # first deal with filters, or clear filter
