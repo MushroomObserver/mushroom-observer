@@ -16,7 +16,7 @@ module Observations
         return filtered_index(type.to_sym)
       end
 
-      unfiltered_index
+      list_all
     end
 
     private
@@ -29,11 +29,10 @@ module Observations
       { by: :rss_log }
     end
 
-    # TODO: rename as `list_all`
-    def unfiltered_index
+    def list_all
       query = create_query(*q_args, q_kwargs)
 
-      show_selected_results(query)
+      show_selected(query)
     end
 
     # need both a :type and a :term
@@ -57,28 +56,31 @@ module Observations
 
       query = create_query(*q_args, q_kwargs.merge({ in_clade: term }))
 
-      show_selected_results(query)
+      show_selected(query)
     end
 
     def region_filter(term)
       query = create_query(*q_args, q_kwargs.merge({ in_region: term }))
 
-      show_selected_results(query)
+      show_selected(query)
     end
 
     # def user_filter(term)
     #   query = create_query(*q_args, q_kwargs.merge({ by_user: term }))
 
-    #   show_selected_results(query)
+    #   show_selected(query)
     # end
 
-    def show_selected_results(query)
-      args = {
-        matrix: true, cache: true,
-        include: observation_identify_index_includes
-      }
+    def show_selected(query, args = {})
+      show_index_of_objects(query, default_index_args(args, query))
+    end
 
-      show_index_of_objects(query, args)
+    def default_index_args(args, _query)
+      {
+        matrix: true,
+        cache: true,
+        include: observation_identify_index_includes
+      }.merge(args)
     end
 
     def observation_identify_index_includes
