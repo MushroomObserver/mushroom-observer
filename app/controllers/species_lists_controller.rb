@@ -45,9 +45,11 @@ class SpeciesListsController < ApplicationController
   end
 
   # Display list of all species_lists, sorted by date.
+  # TODO: This should not take the at_id_args. Check callers.
   def list_all
     query = create_query(:SpeciesList, :all, by: sorted_by_default_or_date)
-    show_selected_species_lists(query, id: params[:id].to_s, by: params[:by])
+    # at_id_args = { id: params[:id].to_s, always_index: true }
+    show_selected(query)
   end
 
   def sorted_by_default_or_date
@@ -58,9 +60,64 @@ class SpeciesListsController < ApplicationController
     ::Query::SpeciesListBase.default_order
   end
 
-  # TODO: move this letters thing to the above handler for `by` param?
+  # choose another subaction when params[:by].present?
+  def by_title_or_selected_by_query
+    params[:by] == "title" ? species_lists_by_title : index_query_results
+  end
+
+  # Display list of all species_lists, sorted by title.
+  def species_lists_by_title
+    query = create_query(:SpeciesList, :all, by: :title)
+    show_selected(query)
+  end
+
+  # Display list of selected species_lists, based on current Query.
+  # (Linked from show_species_list, next to "prev" and "next".)
+  def index_query_results
+    query = find_or_create_query(:SpeciesList, by: params[:by])
+    show_selected(query, id: params[:id].to_s, always_index: true)
+  end
+
+  # Display list of user's species_lists, sorted by date.
+  def by_user
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:by_user].to_s,
+      index_path: species_lists_path
+    )
+    return unless user
+
+    query = create_query(:SpeciesList, :all, by_user: user)
+    show_selected(query)
+  end
+
+  # Display list of SpeciesList's attached to a given project.
+  def project
+    project = find_or_goto_index(Project, params[:for_project].to_s)
+    return unless project
+
+    query = create_query(:SpeciesList, :all, project: project)
+    show_selected(query, always_index: 1)
+  end
+
+  # Display list of SpeciesList's whose title, notes, etc. matches a string
+  # pattern.
+  def pattern
+    pattern = params[:pattern].to_s
+    spl = SpeciesList.safe_find(pattern) if /^\d+$/.match?(pattern)
+    if spl
+      redirect_to(action: :show, id: spl.id)
+    else
+      query = create_query(:SpeciesList, :all, pattern: pattern)
+      show_selected(query)
+    end
+  end
+
   # Show selected list of species_lists.
-  def show_selected_species_lists(query, args = {})
+  def show_selected(query, args = {})
+    show_index_of_objects(query, default_index_args(args, query))
+  end
+
+  def default_index_args(args, query)
     args = {
       action: :index,
       num_per_page: 20,
@@ -77,60 +134,7 @@ class SpeciesListsController < ApplicationController
         args[:letters] = "species_lists.title"
       end
 
-    show_index_of_objects(query, args)
-  end
-
-  # choose another subaction when params[:by].present?
-  def by_title_or_selected_by_query
-    params[:by] == "title" ? species_lists_by_title : index_query_results
-  end
-
-  # Display list of all species_lists, sorted by title.
-  def species_lists_by_title
-    query = create_query(:SpeciesList, :all, by: :title)
-    show_selected_species_lists(query)
-  end
-
-  # Display list of selected species_lists, based on current Query.
-  # (Linked from show_species_list, next to "prev" and "next".)
-  def index_query_results
-    query = find_or_create_query(:SpeciesList, by: params[:by])
-    show_selected_species_lists(query, id: params[:id].to_s, always_index: true)
-  end
-
-  # Display list of user's species_lists, sorted by date.
-  def by_user
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_user].to_s,
-      index_path: species_lists_path
-    )
-    return unless user
-
-    query = create_query(:SpeciesList, :all, by_user: user)
-    show_selected_species_lists(query)
-  end
-
-  # TODO: rename project, check callers
-  # Display list of SpeciesList's attached to a given project.
-  def for_project
-    project = find_or_goto_index(Project, params[:for_project].to_s)
-    return unless project
-
-    query = create_query(:SpeciesList, :all, project: project)
-    show_selected_species_lists(query, always_index: 1)
-  end
-
-  # Display list of SpeciesList's whose title, notes, etc. matches a string
-  # pattern.
-  def pattern
-    pattern = params[:pattern].to_s
-    spl = SpeciesList.safe_find(pattern) if /^\d+$/.match?(pattern)
-    if spl
-      redirect_to(action: :show, id: spl.id)
-    else
-      query = create_query(:SpeciesList, :all, pattern: pattern)
-      show_selected_species_lists(query)
-    end
+    args
   end
 
   public
