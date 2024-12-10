@@ -30,21 +30,15 @@ class RssLogsController < ApplicationController
       query = create_query(:RssLog, :all,
                            type: @user ? @user.default_rss_type : "all")
     end
-    show_selected_rss_logs(query, id: params[:id].to_s, always_index: true)
+    show_selected(query, id: params[:id].to_s, always_index: true)
   end
 
   private
 
   # Show selected search results as a matrix with "index" template.
-  def show_selected_rss_logs(query, args = {})
+  def show_selected(query, args = {})
     store_query_in_session(query)
     query_params_set(query)
-
-    args = {
-      action: :index,
-      matrix: true, cache: true,
-      include: rss_log_includes
-    }.merge(args)
 
     @types = query.params[:type].to_s.split.sort
 
@@ -54,7 +48,15 @@ class RssLogsController < ApplicationController
       @user.save_without_our_callbacks
     end
 
-    show_index_of_objects(query, args)
+    show_index_of_objects(query, default_index_args(args, query))
+  end
+
+  def default_index_args(args, _query)
+    {
+      action: :index,
+      matrix: true, cache: true,
+      include: rss_log_includes
+    }.merge(args)
   end
 
   # Get the types whose value == "1"
