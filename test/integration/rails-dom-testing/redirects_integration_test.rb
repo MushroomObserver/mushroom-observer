@@ -96,7 +96,7 @@ class RedirectsIntegrationTest < IntegrationTestCase
   # edit_herbarium (get)              edit (get)
   # edit_herbarium (post)             update (patch)
   # herbarium_search (get)            index (get, pattern: present)
-  # index (get)                       index (get, flavor: nonpersonal)
+  # index (get)                       index (get, nonpersonal: true)
   # index_herbarium (get)             index (get) - query results
   # list_herbaria (get)               index (get, flavor: all) - all herbaria
   # *merge_herbaria (get)             Herbaria::Merges#create (post)

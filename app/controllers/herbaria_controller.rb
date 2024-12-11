@@ -7,8 +7,8 @@
 # edit (get)
 # index (get)                      (default) list query results
 # index (get, pattern: present)    list Herbaria matching a string pattern
-# index (get, flavor: nonpersonal) list institutional Herbaria registered in IH
-# index (get, flavor: all)         list all Herbaria
+# index (get, nonpersonal: true)   list institutional Herbaria registered in IH
+# index (get)                       list all Herbaria
 # new (get)
 # show (get)                       show one herbarium
 # show { flow: :prev } (get)       show next herbarium in search results
@@ -31,7 +31,7 @@
 # edit_herbarium (get)              edit (get)
 # edit_herbarium (post)             update (patch)
 # herbarium_search (get)            index (get, pattern: present)
-# index (get)                       index (get, flavor: nonpersonal)
+# index (get)                       index (get, nonpersonal: true)
 # index_herbarium (get)             index (get) - lists query results
 # list_herbaria (get)               index (get, flavor: all) - all herbaria
 # *merge_herbaria (get)             Herbaria::Merges#create (post)
