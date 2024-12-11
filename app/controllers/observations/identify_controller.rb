@@ -5,16 +5,18 @@ module Observations
     before_action :login_required
     before_action :pass_query_params
 
+    # TODO: use dispatcher, add q, id (order is not adjustable)
+    # refactor to flat params `clade` and `region`
     def index
       @layout = calc_layout_params
       # first deal with filters, or clear filter
-      return unfiltered_index if params[:commit] == :CLEAR.l
+      return list_all if params[:commit] == :CLEAR.l
 
       if (type = params.dig(:filter, :type))
         return filtered_index(type.to_sym)
       end
 
-      unfiltered_index
+      list_all
     end
 
     private
@@ -27,10 +29,10 @@ module Observations
       { by: :rss_log }
     end
 
-    def unfiltered_index
+    def list_all
       query = create_query(*q_args, q_kwargs)
 
-      show_selected_results(query)
+      show_selected(query)
     end
 
     # need both a :type and a :term
@@ -54,28 +56,31 @@ module Observations
 
       query = create_query(*q_args, q_kwargs.merge({ in_clade: term }))
 
-      show_selected_results(query)
+      show_selected(query)
     end
 
     def region_filter(term)
       query = create_query(*q_args, q_kwargs.merge({ in_region: term }))
 
-      show_selected_results(query)
+      show_selected(query)
     end
 
     # def user_filter(term)
     #   query = create_query(*q_args, q_kwargs.merge({ by_user: term }))
 
-    #   show_selected_results(query)
+    #   show_selected(query)
     # end
 
-    def show_selected_results(query)
-      args = {
-        matrix: true, cache: true,
-        include: observation_identify_index_includes
-      }
+    def show_selected(query, args = {})
+      show_index_of_objects(query, index_display_args(args, query))
+    end
 
-      show_index_of_objects(query, args)
+    def index_display_args(args, _query)
+      {
+        matrix: true,
+        cache: true,
+        include: observation_identify_index_includes
+      }.merge(args)
     end
 
     def observation_identify_index_includes

@@ -292,7 +292,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index_nonpersonal
     login
-    get(:index, params: { flavor: :nonpersonal })
+    get(:index, params: { nonpersonal: true })
 
     assert_displayed_title(:query_title_nonpersonal.l)
     Herbarium.where(personal_user_id: nil).each do |herbarium|

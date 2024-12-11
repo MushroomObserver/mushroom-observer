@@ -13,7 +13,7 @@ class FieldSlipsController < ApplicationController
   # NOTE: Must be an ivar of FieldSlipsController
   # Defining them in an index.rb does not work
   @index_subaction_param_keys = [
-    :user,
+    :by_user,
     :project,
     :by,
     :q,

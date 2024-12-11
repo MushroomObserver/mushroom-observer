@@ -33,6 +33,8 @@ module TitleAndTabsetHelper
   end
 
   # contents of the <title> in html <head>
+  # TODO: CRUD actions will no longer have distinctive names,
+  # so we should delete the second and third conditions
   def title_tag_contents(title, action: controller.action_name)
     if title.present?
       title.strip_html.unescape_html # removes tags and special chars

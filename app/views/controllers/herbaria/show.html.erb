@@ -9,14 +9,14 @@ map = @herbarium.location
 %>
 
 <% if @herbarium.mcp_searchable? %>
-  <div id="mcp_number" class="mt-3">
-    <span class="font-weight-bold"><%= :herbarium_mcp_db.t %></span>:
-    <% if @herbarium.mycoportal_db.present? %>
-      <%= @herbarium.mycoportal_db.to_s %>
-    <% else %>
-      <%= :show_herbarium_mcp_db_missing.t %>
-    <% end %>
-  </div>
+<div id="mcp_number" class="mt-3">
+  <span class="font-weight-bold"><%= :herbarium_mcp_db.t %></span>:
+  <% if @herbarium.mycoportal_db.present? %>
+  <%= @herbarium.mycoportal_db.to_s %>
+  <% else %>
+  <%= :show_herbarium_mcp_db_missing.t %>
+  <% end %>
+</div>
 <% end %>
 
 <div class="row">
@@ -25,35 +25,35 @@ map = @herbarium.location
       <%= link_to(:show_herbarium_herbarium_record_count.t(
                     count: @herbarium.herbarium_records.length
                   ),
-                  herbarium_records_path(herbarium_id: @herbarium.id),
+                  herbarium_records_path(herbarium: @herbarium.id),
                   class: "herbarium_records_for_herbarium_link") %>
     </div>
 
     <div class="mt-3">
 
       <% if @herbarium.curators.present? %>
-        <%= render(partial: "herbaria/curator_table",
+      <%= render(partial: "herbaria/curator_table",
                   locals: { herbarium: @herbarium }) %>
       <% end %>
 
       <% if @herbarium.curator?(@user) || in_admin_mode? %>
 
-        <%= form_with(url: herbaria_curators_path(id: @herbarium,
+      <%= form_with(url: herbaria_curators_path(id: @herbarium,
                                                   q: get_query_param),
                       id: "herbarium_curators_form") do |f| %>
-          <div class="form-inline mt-3">
-            <%= autocompleter_field(form: f, field: :add_curator,
+      <div class="form-inline mt-3">
+        <%= autocompleter_field(form: f, field: :add_curator,
                                     type: :user) %>
-            <label for="add_curator">
-              <%= submit_button(form: f,
+        <label for="add_curator">
+          <%= submit_button(form: f,
                                 button: :show_herbarium_add_curator.t) %>
-            </label>
-          </div>
-        <% end %>
+        </label>
+      </div>
+      <% end %>
 
       <% else %>
 
-        <%= link_with_query(
+      <%= link_with_query(
               :show_herbarium_curator_request.t,
               new_herbaria_curator_request_path(id: @herbarium.id),
               class: "new_herbaria_curator_request_link"
@@ -63,31 +63,32 @@ map = @herbarium.location
     </div>
 
     <% if @herbarium.description.present? %>
-      <div class="mt-3">
-        <div class="font-weight-bold"><%= :NOTES.t %>:</div>
-        <%= @herbarium.description.tpl %>
-      </div>
+    <div class="mt-3">
+      <div class="font-weight-bold"><%= :NOTES.t %>:</div>
+      <%= @herbarium.description.tpl %>
+    </div>
     <% end %>
 
     <% if @herbarium.mailing_address.present? %>
-      <div class="mt-3">
-        <div class="font-weight-bold"><%= :herbarium_mailing_address.t %>:</div>
-        <%= @herbarium.mailing_address.tp %>
-      </div>
+    <div class="mt-3">
+      <div class="font-weight-bold"><%= :herbarium_mailing_address.t %>:</div>
+      <%= @herbarium.mailing_address.tp %>
+    </div>
     <% end %>
   </div>
 
   <% if map %>
-    <div class="col-xs-12 col-sm-4 mt-3" style="max-width:320px">
-      <%= tag.div(class: "mb-3") { make_map(objects: [@herbarium.location]) } %>
-      <%= tag.p(id: "herbarium_location") do
+  <div class="col-xs-12 col-sm-4 mt-3" style="max-width:320px">
+    <%= tag.div(class: "mb-3") { make_map(objects: [@herbarium.location]) } %>
+    <%= tag.p(id: "herbarium_location") do
         "#{:LOCATION.l}: #{@herbarium.location.text_name}"
       end %>
-    </div>
+  </div>
   <% end %>
-</div><!--.row-->
+</div>
+<!--.row-->
 
 <div class="mt-3" style="max-width:<%= map ? 930 : 600 %>px">
-  <%= :CREATED_AT.t %>: <%= @herbarium.created_at.web_date %><br/>
-  <%= :UPDATED_AT.t %>: <%= @herbarium.updated_at.web_date %><br/>
+  <%= :CREATED_AT.t %>: <%= @herbarium.created_at.web_date %><br />
+  <%= :UPDATED_AT.t %>: <%= @herbarium.updated_at.web_date %><br />
 </div>

@@ -13,6 +13,7 @@ class RssLogsController < ApplicationController
   # Default page.  Just displays latest happenings.  The actual action is
   # buried way down toward the end of this file.
   # Displays matrix of selected RssLog's (based on current Query, if exists).
+  # TODO: use dispatcher, split off `type` action
   def index
     # POST requests with param `type` potentially show an array of types
     # of objects. The array comes from the checkboxes in tabset
@@ -29,10 +30,34 @@ class RssLogsController < ApplicationController
       query = create_query(:RssLog, :all,
                            type: @user ? @user.default_rss_type : "all")
     end
-    show_selected_rss_logs(query, id: params[:id].to_s, always_index: true)
+    show_selected(query, id: params[:id].to_s, always_index: true)
   end
 
   private
+
+  # Show selected search results as a matrix with "index" template.
+  def show_selected(query, args = {})
+    store_query_in_session(query)
+    query_params_set(query)
+
+    @types = query.params[:type].to_s.split.sort
+
+    # Let the user make this their default and fine tune.
+    if @user && params[:make_default] == "1"
+      @user.default_rss_type = @types.join(" ")
+      @user.save_without_our_callbacks
+    end
+
+    show_index_of_objects(query, index_display_args(args, query))
+  end
+
+  def index_display_args(args, _query)
+    {
+      action: :index,
+      matrix: true, cache: true,
+      include: rss_log_includes
+    }.merge(args)
+  end
 
   # Get the types whose value == "1"
   def types_query_string_from_params
@@ -72,28 +97,6 @@ class RssLogsController < ApplicationController
             limit(100)
 
     render_xml(layout: false)
-  end
-
-  # Show selected search results as a matrix with "index" template.
-  def show_selected_rss_logs(query, args = {})
-    store_query_in_session(query)
-    query_params_set(query)
-
-    args = {
-      action: :index,
-      matrix: true, cache: true,
-      include: rss_log_includes
-    }.merge(args)
-
-    @types = query.params[:type].to_s.split.sort
-
-    # Let the user make this their default and fine tune.
-    if @user && params[:make_default] == "1"
-      @user.default_rss_type = @types.join(" ")
-      @user.save_without_our_callbacks
-    end
-
-    show_index_of_objects(query, args)
   end
 
   # rss_logs now requires a logged in user

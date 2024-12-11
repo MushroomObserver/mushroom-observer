@@ -43,7 +43,7 @@ class CommentsController < ApplicationController
   # Show list of latest comments. (Linked from left panel.)
   def list_all
     query = create_query(:Comment, :all, by: default_sort_order)
-    show_selected_comments(query)
+    show_selected(query)
   end
 
   def default_sort_order
@@ -55,7 +55,8 @@ class CommentsController < ApplicationController
   def index_query_results
     sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
     query = find_or_create_query(:Comment, by: sorted_by)
-    show_selected_comments(query, id: params[:id].to_s, always_index: true)
+    at_id_args = { id: params[:id].to_s, always_index: true }
+    show_selected(query, at_id_args)
   end
 
   # Shows comments by a given user, most recent first. (Linked from show_user.)
@@ -67,7 +68,7 @@ class CommentsController < ApplicationController
     return unless user
 
     query = create_query(:Comment, :all, by_user: user)
-    show_selected_comments(query)
+    show_selected(query)
   end
 
   # Shows comments for a given user's Observations, most recent first.
@@ -80,7 +81,7 @@ class CommentsController < ApplicationController
     return unless user
 
     query = create_query(:Comment, :all, for_user: user)
-    show_selected_comments(query)
+    show_selected(query)
   end
 
   # Shows comments for a given object, most recent first. (Linked from the
@@ -91,7 +92,7 @@ class CommentsController < ApplicationController
 
     query = create_query(:Comment, :all, target: target.id,
                                          type: target.class.name)
-    show_selected_comments(query)
+    show_selected(query)
   end
 
   def no_model
@@ -106,29 +107,32 @@ class CommentsController < ApplicationController
       redirect_to(action: :show, id: comment.id)
     else
       query = create_query(:Comment, :all, pattern: pattern)
-      show_selected_comments(query)
+      show_selected(query)
     end
   end
 
   # Show selected list of comments.
-  def show_selected_comments(query, args = {})
-    # (Eager-loading of names might fail when comments start to apply to
-    # objects other than observations.)
+  def show_selected(query, args = {})
+    show_index_of_objects(query, index_display_args(args, query))
+  end
+
+  def index_display_args(args, query)
     args = {
       action: :index,
       num_per_page: 25,
+      # (Eager-loading of names might fail when comments start to apply to
+      # objects other than observations.)
       include: [:target, :user]
     }.merge(args)
 
     # Paginate by letter if sorting by user.
-    if (query.params[:by] == "user") ||
-       (query.params[:by] == "reverse_user")
+    if (query.params[:by] == "user") || (query.params[:by] == "reverse_user")
       args[:letters] = "users.login"
     end
 
     @full_detail = query.params[:for_target].present?
 
-    show_index_of_objects(query, args)
+    args
   end
 
   public

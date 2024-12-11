@@ -243,7 +243,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     project = projects(:bolete_project)
 
     login
-    get(:index, params: { for_project: project.id })
+    get(:index, params: { project: project.id })
 
     assert_displayed_title("Species Lists for #{project.title}")
   end
@@ -252,7 +252,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     project = projects(:empty_project)
 
     login
-    get(:index, params: { for_project: project.id })
+    get(:index, params: { project: project.id })
 
     assert_response(:success)
     assert_displayed_title("")
@@ -263,7 +263,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     project = observations(:minimal_unknown_obs)
 
     login
-    get(:index, params: { for_project: project.id })
+    get(:index, params: { project: project.id })
 
     assert_response(:redirect)
     assert_redirected_to(projects_path)

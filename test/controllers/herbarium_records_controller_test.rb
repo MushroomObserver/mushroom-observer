@@ -83,7 +83,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     herbarium = herbaria(:nybg_herbarium)
 
     login
-    get(:index, params: { herbarium_id: herbarium.id })
+    get(:index, params: { herbarium: herbarium.id })
 
     assert_displayed_title(
       :query_title_in_herbarium.l(types: :HERBARIUM_RECORDS.l,
@@ -98,7 +98,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     herbarium = herbaria(:dick_herbarium)
 
     login
-    get(:index, params: { herbarium_id: herbarium.id })
+    get(:index, params: { herbarium: herbarium.id })
 
     assert_displayed_title(:list_objects.l(type: :HERBARIUM_RECORDS.l))
     assert_flash_text(:runtime_no_matches.l(type: :herbarium_records.l))
@@ -108,7 +108,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     obs = observations(:coprinus_comatus_obs)
 
     login
-    get(:index, params: { observation_id: obs.id })
+    get(:index, params: { observation: obs.id })
 
     assert_displayed_title(
       :query_title_for_observation.l(types: :HERBARIUM_RECORDS.l,
@@ -122,7 +122,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login
 
     obs = observations(:strobilurus_diminutivus_obs)
-    get(:index, params: { observation_id: obs.id })
+    get(:index, params: { observation: obs.id })
 
     assert_displayed_title(:list_objects.l(type: :HERBARIUM_RECORDS.l))
     assert_flash_text(:runtime_no_matches.l(type: :herbarium_records.l))

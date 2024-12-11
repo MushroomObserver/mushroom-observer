@@ -137,7 +137,7 @@ class ImagesControllerTest < FunctionalTestCase
                                   location: "Eastern Oklahoma")
     login
 
-    @controller.stub(:show_selected_images, -> { raise(StandardError) }) do
+    @controller.stub(:show_selected, -> { raise(StandardError) }) do
       get(:index,
           params: @controller.query_params(query).
           merge({ advanced_search: "1" }))
@@ -201,8 +201,7 @@ class ImagesControllerTest < FunctionalTestCase
   def test_index_for_project
     project = projects(:bolete_project).id
     login
-    get(:index,
-        params: { for_project: project })
+    get(:index, params: { project: project })
 
     assert_template("index", partial: "_image")
   end

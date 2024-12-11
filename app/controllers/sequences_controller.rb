@@ -46,15 +46,39 @@ class SequencesController < ApplicationController
   # NOTE: #index does not handle params[:pattern] or params[:ids] because
   # we don't offer sequence pattern search. However, the Query::SequenceBase
   # class can handle a pattern param.
+  # TODO: use dispatcher, rename `flavor` to `all`. check callers!
   def index
     case params[:flavor]
     when "all"
-      index_all
+      list_all
     else
       query = find_or_create_query(:Sequence, by: params[:by])
-      show_selected_sequences(query, id: params[:id].to_s, always_index: true)
+      at_id_args = { id: params[:id].to_s, always_index: true }
+      show_selected(query, at_id_args)
     end
   end
+
+  private
+
+  def list_all
+    store_location
+    query = create_query(:Sequence, :all)
+    show_selected(query)
+  end
+
+  def show_selected(query, args = {})
+    show_index_of_objects(query, index_display_args(args, query))
+  end
+
+  def index_display_args(args, _query)
+    {
+      include: [{ observation: :name }, :user],
+      letters: "sequences.locus",
+      num_per_page: 50
+    }.merge(args)
+  end
+
+  public ####################################################################
 
   def show
     case params[:flow]
@@ -158,21 +182,6 @@ class SequencesController < ApplicationController
   def figure_out_where_to_go_back_to
     @back = params[:back]
     @back_object = @back == "show" ? @sequence : @sequence.observation
-  end
-
-  # ---------- Index -----------------------------------------------------------
-
-  def index_all
-    store_location
-    query = create_query(:Sequence, :all)
-    show_selected_sequences(query)
-  end
-
-  def show_selected_sequences(query, args = {})
-    args = { include: [{ observation: :name }, :user],
-             letters: "sequences.locus",
-             num_per_page: 50 }.merge(args)
-    show_index_of_objects(query, args)
   end
 
   # ---------- Create, Edit ----------------------------------------------------
