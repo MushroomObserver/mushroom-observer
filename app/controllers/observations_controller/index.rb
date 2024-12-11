@@ -18,16 +18,18 @@ class ObservationsController
     # Note all other filters of the obs index are sorted by date.
     def list_all
       query = create_query(:Observation, :all, by: :rss_log)
-      show_selected_observations(query)
+      show_selected(query)
+    end
+
+    def default_sort_order
+      ::Query::ObserationBase.default_order
     end
 
     # Displays matrix of selected Observations (based on current Query).
-    # NOTE: Why are all the :id params converted .to_s below?
     def index_query_results
       query = find_or_create_query(:Observation, by: params[:by])
-      show_selected_observations(
-        query, id: params[:id].to_s, always_index: true
-      )
+      at_id_args = { id: params[:id].to_s, always_index: true }
+      show_selected(query, at_id_args)
     end
 
     # Displays matrix of Observations with the given text_name (or search_name).
@@ -36,7 +38,7 @@ class ObservationsController
                            names: [params[:name]],
                            include_synonyms: true,
                            by: :confidence)
-      show_selected_observations(query)
+      show_selected(query)
     end
 
     # Displays matrix of Observations with the given name proposed but not
@@ -48,7 +50,7 @@ class ObservationsController
                            include_all_name_proposals: true,
                            exclude_consensus: true,
                            by: :confidence)
-      show_selected_observations(query)
+      show_selected(query)
     end
 
     # Displays matrix of Observations of subtaxa of the parent of given name.
@@ -57,7 +59,7 @@ class ObservationsController
                            names: parents(params[:name]),
                            include_subtaxa: true,
                            by: :confidence)
-      show_selected_observations(query)
+      show_selected(query)
     end
 
     def parents(name_str)
@@ -75,7 +77,7 @@ class ObservationsController
       )
 
       query = create_query(:Observation, :by_user, user: user)
-      show_selected_observations(query)
+      show_selected(query)
     end
 
     # Displays matrix of Observations at a Location, by date.
@@ -85,7 +87,7 @@ class ObservationsController
       )
 
       query = create_query(:Observation, :at_location, location: location)
-      show_selected_observations(query)
+      show_selected(query)
     end
 
     # Display matrix of Observations whose "where" matches a string.
@@ -95,7 +97,7 @@ class ObservationsController
       query = create_query(:Observation, :at_where,
                            user_where: where,
                            location: Location.user_format(@user, where))
-      show_selected_observations(query, always_index: 1)
+      show_selected(query, always_index: true)
     end
 
     # Display matrix of Observations attached to a given project.
@@ -105,7 +107,7 @@ class ObservationsController
       )
 
       query = create_query(:Observation, :for_project, project: project)
-      show_selected_observations(query, always_index: 1)
+      show_selected(query, always_index: true)
     end
 
     # Display matrix of Observations whose notes, etc. match a string pattern.
@@ -129,7 +131,7 @@ class ObservationsController
           identify_observations_path(q: get_query_param(search.query))
         )
       else
-        show_selected_observations(search.query)
+        show_selected(search.query)
       end
     end
 
@@ -147,7 +149,7 @@ class ObservationsController
       query = advanced_search_query
       return unless query
 
-      show_selected_observations(query)
+      show_selected(query)
     rescue StandardError => e
       flash_error(e.to_s) if e.present?
       redirect_to(search_advanced_path)
@@ -178,19 +180,16 @@ class ObservationsController
     end
 
     # Show selected search results as a matrix with "index" template.
-    def show_selected_observations(query, args = {})
+    def show_selected(query, args = {})
       store_query_in_session(query)
-
-      args = define_index_args(query, args)
-
+      args = index_display_args(args, query)
       # Restrict to subset within a geographical region (used by map
       # if it needed to stuff multiple locations into a single marker).
       query = restrict_query_to_box(query)
-
       show_index_of_objects(query, args)
     end
 
-    def define_index_args(query, args)
+    def index_display_args(args, query)
       # We always want cached matrix boxes for observations if possible.
       # cache: true  will batch load the includes only for fragments not cached.
       args = { controller: "/observations",
@@ -206,6 +205,7 @@ class ObservationsController
       when "name", "reverse_name"
         args[:letters] = "names.sort_name"
       end
+
       args
     end
 
