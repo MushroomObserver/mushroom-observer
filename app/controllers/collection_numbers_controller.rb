@@ -39,13 +39,13 @@ class CollectionNumbersController < ApplicationController
   def list_all
     store_location
     query = create_query(:CollectionNumber, :all)
-    show_selected_collection_numbers(query)
+    show_selected(query)
   end
 
   # Displays matrix of selected CollectionNumber's (based on current Query).
   def index_query_results
     query = find_or_create_query(:CollectionNumber, by: params[:by])
-    show_selected_collection_numbers(query, id: params[:id].to_s,
+    show_selected(query, id: params[:id].to_s,
                                             always_index: true)
   end
 
@@ -57,7 +57,7 @@ class CollectionNumbersController < ApplicationController
       redirect_to(action: :show, id: collection_number.id)
     else
       query = create_query(:CollectionNumber, :all, pattern: pat)
-      show_selected_collection_numbers(query)
+      show_selected(query)
     end
   end
 
@@ -67,10 +67,10 @@ class CollectionNumbersController < ApplicationController
     store_location
     query = create_query(:CollectionNumber, :all,
                          observation: params[:observation].to_s)
-    show_selected_collection_numbers(query, always_index: true)
+    show_selected(query, always_index: true)
   end
 
-  def show_selected_collection_numbers(query, args = {})
+  def show_selected(query, args = {})
     show_index_of_objects(query, index_display_args(args, query))
   end
 
