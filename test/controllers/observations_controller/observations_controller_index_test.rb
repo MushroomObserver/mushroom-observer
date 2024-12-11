@@ -248,7 +248,7 @@ class ObservationsControllerShowIndexTest < FunctionalTestCase
     query = Query.lookup_and_save(:Observation, :advanced_search, name: "Fungi")
 
     login
-    @controller.stub(:show_selected_observations, -> { raise(RuntimeError) }) do
+    @controller.stub(:show_selected, -> { raise(RuntimeError) }) do
       get(:index,
           params: @controller.query_params(query).merge(
             { advanced_search: "1" }
