@@ -69,11 +69,10 @@ class ObservationsController
       names.map { |name| name.approved_name.parents }.flatten.map(&:id).uniq
     end
 
-    # TODO: rename `by_user`, check callers
     # Displays matrix of User's Observations, by date.
-    def user
+    def by_user
       return unless (
-        user = find_or_goto_index(User, params[:user])
+        user = find_or_goto_index(User, params[:by_user])
       )
 
       query = create_query(:Observation, :by_user, user: user)
