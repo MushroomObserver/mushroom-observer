@@ -17,7 +17,7 @@ class CollectionNumbersController < ApplicationController
   # Used by ApplicationController to dispatch #index to a private method
   @index_subaction_param_keys = [
     :pattern,
-    :observation_id,
+    :observation,
     :by,
     :q,
     :id

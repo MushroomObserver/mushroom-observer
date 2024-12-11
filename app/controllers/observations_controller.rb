@@ -38,7 +38,7 @@ class ObservationsController < ApplicationController
     :look_alikes,
     :related_taxa,
     :name,
-    :user,
+    :by_user,
     :location,
     :where,
     :project,
