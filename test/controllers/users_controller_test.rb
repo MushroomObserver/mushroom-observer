@@ -146,7 +146,7 @@ class UsersControllerTest < FunctionalTestCase
   end
 
   #   ---------------------
-  #    show_selected_users
+  #    show_selected users
   #   ---------------------
 
   # The unfiltered user :index is admin-only, but selected/searched users
