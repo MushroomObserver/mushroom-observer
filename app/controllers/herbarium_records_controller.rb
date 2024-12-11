@@ -32,12 +32,8 @@ class HerbariumRecordsController < ApplicationController
 
   private
 
-  def default_index_subaction
-    list_all
-  end
-
   # Show list of herbarium_records.
-  def list_all
+  def unfiltered_index
     store_location
     query = create_query(:HerbariumRecord, :all, by: default_sort_order)
     show_selected(query)

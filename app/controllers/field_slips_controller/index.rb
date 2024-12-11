@@ -8,12 +8,7 @@ module FieldSlipsController::Index
 
   private
 
-  # checked by ApplicationController#index
-  def default_index_subaction
-    list_all
-  end
-
-  def list_all
+  def unfiltered_index
     query = create_query(:FieldSlip, :all)
     show_selected(query)
   end

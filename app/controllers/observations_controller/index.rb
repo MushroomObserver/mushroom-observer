@@ -12,13 +12,9 @@ class ObservationsController
     # index subactions:
     # methods called by #index via a dispatch table in ObservationsController
 
-    def default_index_subaction
-      list_all
-    end
-
     # Displays home matrix of all Observation's, sorted by :rss_log
     # Note all other filters of the obs index are sorted by date.
-    def list_all
+    def unfiltered_index
       query = create_query(:Observation, :all, by: :rss_log)
       show_selected(query)
     end

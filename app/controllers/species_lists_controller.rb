@@ -46,12 +46,8 @@ class SpeciesListsController < ApplicationController
 
   private
 
-  def default_index_subaction
-    list_all
-  end
-
   # Display list of all species_lists, sorted by title.
-  def list_all
+  def unfiltered_index
     query = create_query(:SpeciesList, :all, by: :date)
     show_selected(query)
   end

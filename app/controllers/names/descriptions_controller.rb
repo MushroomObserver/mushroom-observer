@@ -46,14 +46,10 @@ module Names
       id: :index_query_results
     }.freeze
 
-    private # private methods used by #index
-
-    def default_index_subaction
-      list_all
-    end
+    private
 
     # Display list of all (correctly-spelled) name_descriptions in the database.
-    def list_all
+    def unfiltered_index
       query = create_query(:NameDescription, :all, by: default_sort_order)
       show_selected(query)
     end

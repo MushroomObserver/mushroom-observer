@@ -37,12 +37,8 @@ class NamesController < ApplicationController
 
   private # private methods used by #index
 
-  def default_index_subaction
-    list_all
-  end
-
   # Display list of all (correctly-spelled) names in the database.
-  def list_all
+  def unfiltered_index
     query = create_query(:Name, :all, by: default_sort_order)
     show_selected(query)
   end

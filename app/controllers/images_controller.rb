@@ -47,12 +47,8 @@ class ImagesController < ApplicationController
 
   private # private methods used by #index
 
-  def default_index_subaction
-    list_all
-  end
-
   # Display matrix of images, most recent first.
-  def list_all
+  def unfiltered_index
     return render_too_many_results if too_many_results
 
     query = create_query(:Image, :all, by: default_sort_order)

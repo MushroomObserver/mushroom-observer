@@ -25,11 +25,7 @@ class GlossaryTermsController < ApplicationController
 
   private
 
-  def default_index_subaction
-    list_all
-  end
-
-  def list_all
+  def unfiltered_index
     query = create_query(:GlossaryTerm, :all, by: :name)
     show_selected(query)
   end

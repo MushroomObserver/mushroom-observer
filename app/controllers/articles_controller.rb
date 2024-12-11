@@ -42,11 +42,7 @@ class ArticlesController < ApplicationController
 
   private
 
-  def default_index_subaction
-    list_all
-  end
-
-  def list_all
+  def unfiltered_index
     query = create_query(:Article, :all, by: :created_at)
     show_selected(query)
   end

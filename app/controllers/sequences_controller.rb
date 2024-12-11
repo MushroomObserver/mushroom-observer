@@ -50,7 +50,7 @@ class SequencesController < ApplicationController
   def index
     case params[:flavor]
     when "all"
-      list_all
+      unfiltered_index
     else
       query = find_or_create_query(:Sequence, by: params[:by])
       at_id_args = { id: params[:id].to_s, always_index: true }
@@ -60,7 +60,7 @@ class SequencesController < ApplicationController
 
   private
 
-  def list_all
+  def unfiltered_index
     store_location
     query = create_query(:Sequence, :all)
     show_selected(query)

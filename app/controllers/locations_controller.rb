@@ -50,12 +50,8 @@ class LocationsController < ApplicationController
 
   private # private methods used by #index
 
-  def default_index_subaction
-    list_all
-  end
-
   # Displays a list of all locations.
-  def list_all
+  def unfiltered_index
     query = create_query(:Location, :all, by: default_sort_order)
     show_selected(query, link_all_sorts: true)
   end

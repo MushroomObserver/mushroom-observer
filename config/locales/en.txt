@@ -2680,7 +2680,7 @@
 
   # herbaria/index
   herbarium_index: Fungarium Index
-  herbarium_index_list_all_herbaria: List All Fungaria
+  herbarium_index_unfiltered_index_herbaria: List All Fungaria
   herbarium_index_nonpersonal_herbaria: List Institutional Fungaria
   herbarium_index_records: Records
   herbarium_index_merge_help: Click on the fungarium below that you would like to merge "[name]" into.  This will cause "[name]" to be deleted and all of its records and curators to be transferred into the new fungarium.  If you do not have permission to perform the merge, it will send a request to the admins.  ("+Cancel merge.+":[url])
@@ -4506,7 +4506,7 @@
   query_help_project_pattern_search: projects matching a search string
   query_help_rss_log_all: all recent activity logs
   query_help_rss_log_in_set: activity logs in a given set
-  query_help_species_list_all: all species lists
+  query_help_species_unfiltered_index: all species lists
   query_help_species_list_at_location: species lists at a defined location
   query_help_species_list_at_where: species lists at an undefined location
   query_help_species_list_by_rss_log: species lists with recent activity

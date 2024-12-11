@@ -39,7 +39,7 @@ module ApplicationController::Indexes
         )
       end
     end
-    default_index_subaction
+    unfiltered_index
   end
 
   # Render an index or set of search results as a list or matrix. Arguments:

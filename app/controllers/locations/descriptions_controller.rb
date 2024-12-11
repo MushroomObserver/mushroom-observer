@@ -34,14 +34,10 @@ module Locations
       id: :index_query_results
     }.freeze
 
-    private # private methods used by #index  ##################################
-
-    def default_index_subaction
-      list_all
-    end
+    private
 
     # Displays a list of all location_descriptions.
-    def list_all
+    def unfiltered_index
       query = create_query(:LocationDescription, :all, by: default_sort_order)
       show_selected(query)
     end

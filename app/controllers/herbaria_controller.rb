@@ -83,15 +83,11 @@ class HerbariaController < ApplicationController
 
   private
 
-  def default_index_subaction
-    list_all
-  end
-
   def default_sort_order
     :name
   end
 
-  def list_all
+  def unfiltered_index
     query = create_query(:Herbarium, :all, by: :name)
     show_selected(query, always_index)
   end

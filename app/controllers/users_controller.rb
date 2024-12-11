@@ -32,13 +32,9 @@ class UsersController < ApplicationController
 
   private
 
-  def default_index_subaction
-    list_all
-  end
-
   # NOTE: Only admins can get the full user index.
-  # Others get here via search, so they shouldn't hit list_all
-  def list_all
+  # Others get here via search, so they shouldn't hit unfiltered_index
+  def unfiltered_index
     return unless index_query_authorized?
 
     query = create_query(:User, :all, by: default_sort_order)

@@ -35,12 +35,8 @@ class CollectionNumbersController < ApplicationController
 
   private
 
-  def default_index_subaction
-    list_all
-  end
-
   # Show list of collection_numbers.
-  def list_all
+  def unfiltered_index
     store_location
     query = create_query(:CollectionNumber, :all)
     show_selected(query)

@@ -10,13 +10,13 @@ module Observations
     def index
       @layout = calc_layout_params
       # first deal with filters, or clear filter
-      return list_all if params[:commit] == :CLEAR.l
+      return unfiltered_index if params[:commit] == :CLEAR.l
 
       if (type = params.dig(:filter, :type))
         return filtered_index(type.to_sym)
       end
 
-      list_all
+      unfiltered_index
     end
 
     private
@@ -29,7 +29,7 @@ module Observations
       { by: :rss_log }
     end
 
-    def list_all
+    def unfiltered_index
       query = create_query(*q_args, q_kwargs)
 
       show_selected(query)

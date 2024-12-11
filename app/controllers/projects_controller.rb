@@ -20,12 +20,8 @@ class ProjectsController < ApplicationController
 
   private
 
-  def default_index_subaction
-    list_all
-  end
-
   # Show list of latest projects.  (Linked from left panel.)
-  def list_all
+  def unfiltered_index
     query = create_query(:Project, :all, by: default_sort_order)
     show_selected(query)
   end

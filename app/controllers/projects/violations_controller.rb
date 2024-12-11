@@ -35,11 +35,7 @@ module Projects
 
     private
 
-    def default_index_subaction
-      list_all
-    end
-
-    def list_all
+    def unfiltered_index
       return unless find_project!
 
       @violations = @project.violations

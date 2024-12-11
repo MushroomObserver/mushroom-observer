@@ -24,15 +24,11 @@ class ContributorsController < ApplicationController
 
   private
 
-  def default_index_subaction
-    list_all
-  end
-
   def default_sort_order
     :contribution
   end
 
-  def list_all
+  def unfiltered_index
     query = create_query(:User, :all, with_contribution: true,
                                       by: :contribution)
     show_selected(query)
