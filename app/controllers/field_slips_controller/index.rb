@@ -2,14 +2,11 @@
 
 # see field_slips_controller.rb
 module FieldSlipsController::Index
-  private
-
-  ##############################################################################
-  # INDEX
-  #
   def index
     build_index_with_query
   end
+
+  private
 
   # checked by ApplicationController#index
   def default_index_subaction
