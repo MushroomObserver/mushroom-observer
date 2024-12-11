@@ -642,7 +642,6 @@ Rails/FindEach:
     - 'script/bulk_name_change'
     - 'script/check_enum_values'
     - 'script/refresh_sitemap'
-    - 'test/controllers/herbaria_controller_test.rb'
     - 'test/models/localization_files_test.rb'
 
 # Offense count: 45
