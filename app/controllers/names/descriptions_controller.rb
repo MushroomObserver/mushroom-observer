@@ -57,16 +57,17 @@ module Names
     # Display list of all (correctly-spelled) name_descriptions in the database.
     def list_all
       query = create_query(:NameDescription, :all, by: default_sort_order)
-      show_selected_name_descriptions(query)
+      show_selected(query)
     end
 
     # Display list of name descriptions in last index/search query.
     def index_query_results
       query = find_or_create_query(:NameDescription, by: params[:by])
-      show_selected_name_descriptions(query, id: params[:id].to_s,
-                                             always_index: true)
+      at_id_args = { id: params[:id].to_s, always_index: true }
+      show_selected(query, at_id_args)
     end
 
+    # Is :name.
     def default_sort_order
       ::Query::NameDescriptionBase.default_order
     end
@@ -80,7 +81,7 @@ module Names
       return unless user
 
       query = create_query(:NameDescription, :by_author, user: user)
-      show_selected_name_descriptions(query)
+      show_selected(query)
     end
 
     # Display list of name_descriptions that a given user is editor on.
@@ -92,21 +93,22 @@ module Names
       return unless user
 
       query = create_query(:NameDescription, :by_editor, user: user)
-      show_selected_name_descriptions(query)
+      show_selected(query)
     end
 
     # Show selected search results as a list with ???
     #              'names/descriptions/index' template ???
-    def show_selected_name_descriptions(query, args = {})
+    def show_selected(query, args = {})
       store_query_in_session(query)
+      show_index_of_objects(query, default_index_args(args, query))
+    end
 
-      args = {
+    def default_index_args(args, _query)
+      {
         controller: "/names/descriptions",
         action: :index,
         num_per_page: 50
       }.merge(args)
-
-      show_index_of_objects(query, args)
     end
 
     public
