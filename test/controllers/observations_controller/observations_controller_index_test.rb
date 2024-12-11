@@ -464,7 +464,7 @@ class ObservationsControllerShowIndexTest < FunctionalTestCase
     test_show_owner_id_noone_logged_in
 
     login(user.login)
-    get(:index, params: { user: user.id })
+    get(:index, params: { by_user: user.id })
 
     assert_displayed_title("Observations created by #{user.name}")
     assert_select(
@@ -493,7 +493,7 @@ class ObservationsControllerShowIndexTest < FunctionalTestCase
     user = observations(:minimal_unknown_obs)
 
     login
-    get(:index, params: { user: user })
+    get(:index, params: { by_user: user })
 
     assert_equal(users_url, redirect_to_url, "Wrong page")
     assert_flash_text(:runtime_object_not_found.l(type: :user.l, id: user.id))

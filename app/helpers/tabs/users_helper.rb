@@ -55,7 +55,7 @@ module Tabs
 
     def user_observations_tab(user, text = nil)
       text ||= :show_user_observations_by.t(name: user.text_name)
-      [text, observations_path(user: user.id),
+      [text, observations_path(by_user: user.id),
        { class: tab_id(__method__.to_s) }]
     end
 

@@ -70,7 +70,7 @@ module UserStatsHelper
        name_descriptions_index_path(by_editor: user.id)],
       [:names, names_path(by_user: user.id)],
       [:name_versions, names_path(by_editor: user.id)],
-      [:observations, observations_path(user: user.id)],
+      [:observations, observations_path(by_user: user.id)],
       [:species_lists, species_lists_path(by_user: user.id)],
       [:life_list, checklist_path(id: user.id)]
     ]
