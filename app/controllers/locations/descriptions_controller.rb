@@ -43,9 +43,10 @@ module Locations
     # Displays a list of all location_descriptions.
     def list_all
       query = create_query(:LocationDescription, :all, by: default_sort_order)
-      show_selected_location_descriptions(query)
+      show_selected(query)
     end
 
+    # Is :name
     def default_sort_order
       ::Query::LocationDescriptionBase.default_order
     end
@@ -53,8 +54,8 @@ module Locations
     # Displays a list of selected locations, based on current Query.
     def index_query_results
       query = find_or_create_query(:LocationDescription, by: params[:by])
-      show_selected_location_descriptions(query, id: params[:id].to_s,
-                                                 always_index: true)
+      at_id_args = { id: params[:id].to_s, always_index: true }
+      show_selected(query, at_id_args)
     end
 
     # Display list of location_descriptions that a given user is author on.
@@ -66,7 +67,7 @@ module Locations
       return unless user
 
       query = create_query(:LocationDescription, :by_author, user: user)
-      show_selected_location_descriptions(query)
+      show_selected(query)
     end
 
     # Display list of location_descriptions that a given user is editor on.
@@ -78,20 +79,21 @@ module Locations
       return unless user
 
       query = create_query(:LocationDescription, :by_editor, user: user)
-      show_selected_location_descriptions(query)
+      show_selected(query)
     end
 
     # Show selected search results as a list with 'list_locations' template.
-    def show_selected_location_descriptions(query, args = {})
+    def show_selected(query, args = {})
       store_query_in_session(query)
+      show_index_of_objects(query, default_index_args(args, query))
+    end
 
-      args = {
+    def default_index_args(args, _query)
+      {
         controller: "/locations/descriptions",
         action: :index,
         num_per_page: 50
       }.merge(args)
-
-      show_index_of_objects(query, args)
     end
 
     ############################################################################
