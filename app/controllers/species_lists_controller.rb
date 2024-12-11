@@ -50,23 +50,20 @@ class SpeciesListsController < ApplicationController
 
   # Display list of all species_lists, sorted by title.
   def list_all
-    query = create_query(:SpeciesList, :all)
+    query = create_query(:SpeciesList, :all, by: :date)
     show_selected(query)
   end
 
-  def sorted_by_default_or_date
-    params[:by] == default_sort_order ? default_sort_order.to_sym : :date
-  end
-
-  # Is :title.
+  # unused now. should be :date, i think - AN
   def default_sort_order
-    ::Query::SpeciesListBase.default_order
+    ::Query::SpeciesListBase.default_order # :title
   end
 
   # Display list of selected species_lists, based on current Query.
   # (Linked from show_species_list, next to "prev" and "next".)
   def index_query_results
-    query = find_or_create_query(:SpeciesList, by: params[:by])
+    by_param = params[:by] || :date # needs a value to affect title
+    query = find_or_create_query(:SpeciesList, by: by_param)
     at_id_args = { id: params[:id].to_s, always_index: true }
     show_selected(query, at_id_args)
   end
@@ -85,11 +82,11 @@ class SpeciesListsController < ApplicationController
 
   # Display list of SpeciesList's attached to a given project.
   def project
-    project = find_or_goto_index(Project, params[:for_project].to_s)
+    project = find_or_goto_index(Project, params[:project].to_s)
     return unless project
 
     query = create_query(:SpeciesList, :all, project: project)
-    show_selected(query, always_index: 1)
+    show_selected(query, always_index: true)
   end
 
   # Display list of SpeciesList's whose title, notes, etc. matches a string
