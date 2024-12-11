@@ -104,10 +104,10 @@ class SpeciesListsController < ApplicationController
 
   # Show selected list of species_lists.
   def show_selected(query, args = {})
-    show_index_of_objects(query, default_index_args(args, query))
+    show_index_of_objects(query, index_display_args(args, query))
   end
 
-  def default_index_args(args, query)
+  def index_display_args(args, query)
     args = {
       action: :index,
       num_per_page: 20,

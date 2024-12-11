@@ -149,11 +149,11 @@ class LocationsController < ApplicationController
     # Get matching *undefined* locations.
     get_matching_undefined_locations(query, args)
 
-    show_index_of_objects(query, default_index_args(args, query))
+    show_index_of_objects(query, index_display_args(args, query))
   end
 
-  def default_index_args(args, _query)
-    # Paginate the defined locations using the usual helper.
+  # Paginate the defined locations using the usual helper.
+  def index_display_args(args, _query)
     {
       always_index: @undef_pages&.num_total&.positive?,
       action: :index

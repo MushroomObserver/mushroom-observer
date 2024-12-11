@@ -100,10 +100,10 @@ module Names
     #              'names/descriptions/index' template ???
     def show_selected(query, args = {})
       store_query_in_session(query)
-      show_index_of_objects(query, default_index_args(args, query))
+      show_index_of_objects(query, index_display_args(args, query))
     end
 
-    def default_index_args(args, _query)
+    def index_display_args(args, _query)
       {
         controller: "/names/descriptions",
         action: :index,

@@ -69,7 +69,6 @@ class NamesController < ApplicationController
     redirect_to(search_advanced_path)
   end
 
-  # TODO: check if id matching should be generalized for the pattern method
   # Display list of names that match a string.
   def pattern
     pattern = params[:pattern].to_s
@@ -81,7 +80,6 @@ class NamesController < ApplicationController
     end
   end
 
-  # TODO: rename pattern_non_id
   def show_non_id_pattern_results(pattern)
     search = PatternSearch::Name.new(pattern)
     if search.errors.any?
@@ -142,7 +140,7 @@ class NamesController < ApplicationController
   # Show selected search results as a list with 'index' template.
   def show_selected(query, args = {})
     store_query_in_session(query)
-    args = default_index_args(args, query)
+    args = index_display_args(args, query)
 
     # Add some extra fields to the index for authored_names.
     if query.flavor == :with_descriptions
@@ -156,13 +154,13 @@ class NamesController < ApplicationController
         end
       end
     else
-      # NOTE: if show_selected_name is called with a block
+      # NOTE: if show_selected is called with a block
       # it will *not* get passed to show_index_of_objects.
       show_index_of_objects(query, args)
     end
   end
 
-  def default_index_args(args, _query)
+  def index_display_args(args, _query)
     {
       controller: "/names",
       action: "index",

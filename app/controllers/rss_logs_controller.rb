@@ -48,10 +48,10 @@ class RssLogsController < ApplicationController
       @user.save_without_our_callbacks
     end
 
-    show_index_of_objects(query, default_index_args(args, query))
+    show_index_of_objects(query, index_display_args(args, query))
   end
 
-  def default_index_args(args, _query)
+  def index_display_args(args, _query)
     {
       action: :index,
       matrix: true, cache: true,

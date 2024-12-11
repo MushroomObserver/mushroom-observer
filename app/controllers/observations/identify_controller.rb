@@ -72,10 +72,10 @@ module Observations
     # end
 
     def show_selected(query, args = {})
-      show_index_of_objects(query, default_index_args(args, query))
+      show_index_of_objects(query, index_display_args(args, query))
     end
 
-    def default_index_args(args, _query)
+    def index_display_args(args, _query)
       {
         matrix: true,
         cache: true,

@@ -123,7 +123,7 @@ class HerbariaController < ApplicationController
   # NOTE: make `merge` an action when this is a param builder.
   def show_selected(query, args = {})
     set_extra_index_ivars
-    show_index_of_objects(query, default_index_args(args, query))
+    show_index_of_objects(query, index_display_args(args, query))
   end
 
   # If user clicks "merge" on an herbarium, it reloads the page and asks
@@ -132,7 +132,7 @@ class HerbariaController < ApplicationController
     @merge = Herbarium.safe_find(params[:merge])
   end
 
-  def default_index_args(args, _query)
+  def index_display_args(args, _query)
     {
       letters: "herbaria.name",
       num_per_page: 100,

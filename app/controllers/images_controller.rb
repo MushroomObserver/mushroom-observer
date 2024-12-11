@@ -137,14 +137,14 @@ class ImagesController < ApplicationController
   # Show selected search results as a matrix with "list_images" template.
   def show_selected(query, args = {})
     store_query_in_session(query)
-    show_index_of_objects(query, default_index_args(args, query))
+    show_index_of_objects(query, index_display_args(args, query))
   end
 
   # I can't figure out why ActiveRecord is not eager-loading all the names.
   # When I do an explicit test (load the first 100 images) it eager-loads
   # about 90%, but for some reason misses 10%, and always the same 10%, but
   # apparently with no rhyme or reason. -JPH 20100204
-  def default_index_args(args, query)
+  def index_display_args(args, query)
     args = {
       action: "index",
       matrix: true,
