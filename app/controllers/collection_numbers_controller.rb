@@ -11,6 +11,81 @@ class CollectionNumbersController < ApplicationController
     :show, :new, :create, :edit, :update
   ]
 
+  ##############################################################################
+  # INDEX
+
+  # Used by ApplicationController to dispatch #index to a private method
+  @index_subaction_param_keys = [
+    :pattern,
+    :observation_id,
+    :by,
+    :q,
+    :id
+  ].freeze
+
+  @index_subaction_dispatch_table = {
+    by: :index_query_results,
+    q: :index_query_results,
+    id: :index_query_results
+  }.freeze
+
+  private
+
+  def default_index_subaction
+    list_all
+  end
+
+  # Show list of collection_numbers.
+  def list_all
+    store_location
+    query = create_query(:CollectionNumber, :all)
+    show_selected_collection_numbers(query)
+  end
+
+  # Displays matrix of selected CollectionNumber's (based on current Query).
+  def index_query_results
+    query = find_or_create_query(:CollectionNumber, by: params[:by])
+    show_selected_collection_numbers(query, id: params[:id].to_s,
+                                            always_index: true)
+  end
+
+  # Display list of CollectionNumbers whose text matches a string pattern.
+  def pattern
+    pat = params[:pattern].to_s
+    if pat.match?(/^\d+$/) &&
+       (collection_number = CollectionNumber.safe_find(pat))
+      redirect_to(action: :show, id: collection_number.id)
+    else
+      query = create_query(:CollectionNumber, :all, pattern: pat)
+      show_selected_collection_numbers(query)
+    end
+  end
+
+  # Display list of CollectionNumbers for an Observation
+  def observation
+    @observation = Observation.find(params[:observation])
+    store_location
+    query = create_query(:CollectionNumber, :all,
+                         observation: params[:observation].to_s)
+    show_selected_collection_numbers(query, always_index: true)
+  end
+
+  def show_selected_collection_numbers(query, args = {})
+    show_index_of_objects(query, index_display_args(args, query))
+  end
+
+  def index_display_args(args, _query)
+    {
+      action: :index,
+      letters: "collection_numbers.name",
+      num_per_page: 100
+    }.merge(args)
+  end
+
+  public
+
+  ##############################################################################
+
   def show
     case params[:flow]
     when "next"
@@ -83,77 +158,7 @@ class CollectionNumbersController < ApplicationController
     end
   end
 
-  ##############################################################################
-  # INDEX
-
-  # Used by ApplicationController to dispatch #index to a private method
-  @index_subaction_param_keys = [
-    :pattern,
-    :observation_id,
-    :by,
-    :q,
-    :id
-  ].freeze
-
-  @index_subaction_dispatch_table = {
-    by: :index_query_results,
-    q: :index_query_results,
-    id: :index_query_results
-  }.freeze
-
   private
-
-  def default_index_subaction
-    list_all
-  end
-
-  # Show list of collection_numbers.
-  def list_all
-    store_location
-    query = create_query(:CollectionNumber, :all)
-    show_selected_collection_numbers(query)
-  end
-
-  # Displays matrix of selected CollectionNumber's (based on current Query).
-  def index_query_results
-    query = find_or_create_query(:CollectionNumber, by: params[:by])
-    show_selected_collection_numbers(query, id: params[:id].to_s,
-                                            always_index: true)
-  end
-
-  # Display list of CollectionNumbers whose text matches a string pattern.
-  def pattern
-    pat = params[:pattern].to_s
-    if pat.match?(/^\d+$/) &&
-       (collection_number = CollectionNumber.safe_find(pat))
-      redirect_to(action: :show, id: collection_number.id)
-    else
-      query = create_query(:CollectionNumber, :all, pattern: pat)
-      show_selected_collection_numbers(query)
-    end
-  end
-
-  # TODO: rename as `observation`, check callers
-  # Display list of CollectionNumbers for an Observation
-  def observation_id
-    @observation = Observation.find(params[:observation_id])
-    store_location
-    query = create_query(:CollectionNumber, :all,
-                         observation: params[:observation_id].to_s)
-    show_selected_collection_numbers(query, always_index: true)
-  end
-
-  def show_selected_collection_numbers(query, args = {})
-    show_index_of_objects(query, index_display_args(args, query))
-  end
-
-  def index_display_args(args, _query)
-    {
-      action: :index,
-      letters: "collection_numbers.name",
-      num_per_page: 100
-    }.merge(args)
-  end
 
   def set_ivars_for_new
     @layout = calc_layout_params
